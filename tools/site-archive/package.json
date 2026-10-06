@@ -1,0 +1,14 @@
+{
+  "name": "omc-site-archive",
+  "private": true,
+  "type": "module",
+  "description": "Read-only archiver for the old Organized Mom Collective WordPress sites",
+  "scripts": {
+    "archive": "node archive.mjs",
+    "login": "node archive.mjs --login"
+  },
+  "dependencies": {
+    "playwright": "1.56.1",
+    "turndown": "^7.2.4"
+  }
+}
