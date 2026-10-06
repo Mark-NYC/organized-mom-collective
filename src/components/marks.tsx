@@ -6,6 +6,7 @@
  *               (or a month numeral) bottom-right
  *   TimeMark  – the boxed "15 MIN" stamp
  *   CalendarEdge – the four-color band from the printed calendar
+ *   Wordmark  – the OMC badge (public/brand/) + spaced-caps name
  *
  * These render to plain HTML, so .astro pages can use them without hydration.
  */
@@ -84,10 +85,12 @@ export function CalendarEdge({ className = 'h-1' }: { className?: string }) {
   );
 }
 
-export function Wordmark() {
+/** The Organized Mom Collective badge with the spaced-caps wordmark beside it. */
+export function Wordmark({ badge = 'size-10' }: { badge?: string | false }) {
   return (
-    <span className="text-[0.78rem] font-semibold tracking-[0.28em] whitespace-nowrap uppercase">
-      Organized Mom
+    <span className="flex items-center gap-3">
+      {badge && <img src="/brand/omc-badge-160.png" alt="" width={160} height={160} className={`${badge} shrink-0`} />}
+      <span className="text-[0.78rem] font-semibold tracking-[0.28em] whitespace-nowrap uppercase">Organized Mom</span>
     </span>
   );
 }

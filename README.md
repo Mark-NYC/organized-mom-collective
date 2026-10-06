@@ -24,6 +24,7 @@ npm test          # unit tests (schedule + storage logic)
 | --- | --- |
 | **Cleaning tasks** (daily essentials, Mon–Thu focus, weekend copy, 12-month rotation) | `src/data/cleaning.ts` |
 | **Reorder URL** | `src/config.ts` → `REORDER_URL` |
+| Logo (badge, favicon, app icons) | `public/brand/`, `public/favicon.ico`, `public/icons/` (original in `design/logo/`) |
 | Zone icons (daily, Mon–Thu rooms, weekend) | `public/icons/zones/*.png` (originals in `design/zone-icons/`), assigned in `src/data/cleaning.ts` |
 | **Month colors** (canonical, from the printed calendar) | `src/theme.ts` |
 | Weekday colors, paper/ink, fonts | `src/styles/global.css` (`@theme`) |

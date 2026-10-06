@@ -34,7 +34,7 @@ export default function Onboarding({ onDone }: Props) {
       <CalendarEdge />
       <div className="mx-auto flex min-h-[calc(100dvh-0.25rem)] max-w-md flex-col px-6 pt-[env(safe-area-inset-top)] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
         <div className="flex h-14 items-center justify-between border-b border-rule">
-          <Wordmark />
+          <Wordmark badge={false} />
           {step < last && (
             <button
               type="button"
@@ -55,6 +55,13 @@ export default function Onboarding({ onDone }: Props) {
 
           {step === 0 && (
             <>
+              <img
+                src="/brand/omc-badge.png"
+                alt="Organized Mom Collective"
+                width={512}
+                height={512}
+                className="mt-8 size-28"
+              />
               {heading('Welcome to your Organized Mom cleaning system.')}
               <p className="mt-8 border-l-[3px] border-blush pl-4 font-serif text-[1.45rem] leading-snug italic">
                 You don’t need to clean the whole house every day.
