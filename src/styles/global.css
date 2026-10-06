@@ -1,26 +1,28 @@
-@import '@fontsource/cormorant-garamond/500.css';
-@import '@fontsource/cormorant-garamond/600.css';
-@import '@fontsource/cormorant-garamond/500-italic.css';
-@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/montserrat';
 @import 'tailwindcss';
 
+/*
+ * Display face: Georgia Pro (Black / Italic), as on the printed calendar.
+ * Georgia Pro is a licensed Monotype font and is not bundled. Devices that
+ * have it use it; everything else falls back to Georgia (on all iOS, macOS
+ * and Windows). If a web license is purchased, add an @font-face here
+ * pointing at the .woff2 files in /public/fonts/.
+ */
+
 @theme {
-  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Montserrat Variable', Montserrat, ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Georgia Pro Black', 'Georgia Pro', Georgia, serif;
 
-  /* Paper + ink */
-  --color-paper: #faf7f1;
-  --color-ink: #26302e;
-  --color-muted: #59635f;
-  --color-faint: #848c88;
-  --color-rule: #ddd6ca;
-  --color-sage: #3f5f59;
+  /* Print palette */
+  --color-paper: #ffffff;
+  --color-ink: #545454;
+  --color-rule-strong: #727272;
+  --color-rule: #c8c8c8;
+  --color-band: #f5f5f5;
+  --color-muted: #727272;
 
-  /* Calendar palette — used as system colors (days, months), not decoration */
-  --color-blue: #c7dce0;
-  --color-blush: #ebcbd1;
-  --color-green: #b7e2d0;
-  --color-apricot: #f9cc87;
+  /* Current month's color — set on <html> at load from src/theme.ts */
+  --color-month: var(--month, #c8c8c8);
 }
 
 @layer base {
@@ -32,7 +34,7 @@
     @apply bg-paper font-sans text-ink antialiased;
   }
   :focus-visible {
-    outline: 2px solid var(--color-sage);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
   /* Hide the app chrome until onboarding is done, to avoid a flash on first visit. */
@@ -42,22 +44,44 @@
 }
 
 @layer components {
-  /* Small planner label: spaced capitals. */
+  /* Spaced capitals, as on the printed calendar. */
   .label {
-    @apply text-[0.7rem] font-semibold tracking-[0.2em] text-ink uppercase;
+    @apply text-[0.7rem] font-semibold tracking-[0.2em] uppercase;
   }
-  /* Label followed by a hairline that runs to the margin. */
-  .rule-label {
-    @apply flex items-center gap-3 text-[0.7rem] font-semibold tracking-[0.2em] uppercase after:h-px after:flex-1 after:bg-rule;
+  /* Major section label, centered like SELF-CARE HABITS / MEAL PLAN. */
+  .section-label {
+    @apply text-center text-[0.8rem] font-semibold tracking-[0.24em] uppercase;
+  }
+  /* Page and screen titles: Montserrat bold. (The display face is for month/year only.) */
+  .page-title {
+    @apply text-[1.85rem] leading-[1.15] font-bold tracking-[-0.01em] sm:text-[2.4rem];
+  }
+  /* Monthly project names: spaced caps, like the printed section labels. */
+  .project-title {
+    @apply text-[1.02rem] leading-snug font-bold tracking-[0.14em] uppercase;
+  }
+  /* The printed month title — the ONLY use of the display face: white letters, charcoal outline and offset shadow. */
+  .month-title {
+    @apply font-display font-black italic;
+    color: #fff;
+    -webkit-text-stroke: 3px var(--color-ink);
+    paint-order: stroke fill;
+    text-shadow: 2px 2px 0 var(--color-rule);
+    letter-spacing: 0.07em;
+  }
+  /* Tidy week: today's row is the current state, filled with the month color. */
+  .is-today .zone-tag {
+    background-color: var(--color-month);
+    border-color: transparent;
   }
   .btn-primary {
-    @apply inline-flex min-h-12 items-center justify-center rounded-[2px] bg-ink px-7 text-[0.78rem] font-semibold tracking-[0.18em] text-paper uppercase transition-colors hover:bg-sage;
+    @apply inline-flex min-h-12 items-center justify-center rounded-[3px] bg-ink px-7 text-[0.75rem] font-semibold tracking-[0.18em] text-white uppercase transition-colors hover:bg-[#3f3f3f];
   }
   .btn-secondary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-[2px] border border-ink px-4 text-[0.72rem] font-semibold tracking-[0.16em] text-ink uppercase transition-colors hover:bg-ink hover:text-paper;
+    @apply inline-flex min-h-11 items-center justify-center rounded-[3px] border border-ink px-4 text-[0.7rem] font-semibold tracking-[0.16em] text-ink uppercase transition-colors hover:bg-ink hover:text-white;
   }
   .text-link {
-    @apply text-[0.72rem] font-semibold tracking-[0.16em] text-ink uppercase underline decoration-rule decoration-1 underline-offset-[6px] hover:decoration-ink;
+    @apply text-[0.7rem] font-semibold tracking-[0.16em] text-ink uppercase underline decoration-rule decoration-1 underline-offset-[6px] hover:decoration-ink;
   }
 }
 

@@ -10,8 +10,6 @@
  * Zone icons live in public/icons/zones/ (source artwork in design/zone-icons/).
  */
 
-export type Accent = 'blue' | 'blush' | 'green' | 'apricot';
-
 export interface Task {
   id: string;
   label: string;
@@ -30,13 +28,11 @@ export interface WeekdayFocus {
   day: 1 | 2 | 3 | 4;
   dayLabel: string;
   shortLabel: string;
-  title: string;
-  /** Short name used in the weekly overview */
+  /** Cleaning tag label — matches the printed calendar exactly */
   zone: string;
   icon: string;
   minutes: string;
   description: string;
-  accent: Accent;
   tasks: Task[];
 }
 
@@ -68,12 +64,10 @@ export const weeklySchedule: WeekdayFocus[] = [
     day: 1,
     dayLabel: 'Monday',
     shortLabel: 'Mon',
-    title: 'Living Room Reset',
     zone: 'Living Room',
     icon: '/icons/zones/living-room.png',
     minutes: '10 minutes',
     description: 'Start the week with a calm main space.',
-    accent: 'blue',
     tasks: [
       { id: 'mon-items', label: 'Put items back where they belong' },
       { id: 'mon-surfaces', label: 'Clear surfaces' },
@@ -86,12 +80,10 @@ export const weeklySchedule: WeekdayFocus[] = [
     day: 2,
     dayLabel: 'Tuesday',
     shortLabel: 'Tue',
-    title: 'Bedroom Reset',
     zone: 'Bedrooms',
     icon: '/icons/zones/bedroom.png',
     minutes: '10 minutes',
     description: 'A peaceful room to end the day in.',
-    accent: 'blush',
     tasks: [
       { id: 'tue-clothes', label: 'Clear clothes from floor and chairs' },
       { id: 'tue-loose', label: 'Put away loose items' },
@@ -104,12 +96,10 @@ export const weeklySchedule: WeekdayFocus[] = [
     day: 3,
     dayLabel: 'Wednesday',
     shortLabel: 'Wed',
-    title: 'Entry + Bathrooms',
-    zone: 'Entry + Bathrooms',
+    zone: 'Entry/Bathroom',
     icon: '/icons/zones/bathroom.png',
     minutes: '10–15 minutes',
     description: 'A midweek refresh for the busiest spots.',
-    accent: 'green',
     tasks: [
       { id: 'wed-entry', label: 'Clear entry clutter' },
       { id: 'wed-shoes', label: 'Put shoes, coats and bags away' },
@@ -125,12 +115,10 @@ export const weeklySchedule: WeekdayFocus[] = [
     day: 4,
     dayLabel: 'Thursday',
     shortLabel: 'Thu',
-    title: 'Kitchen Blitz',
-    zone: 'Kitchen',
+    zone: 'Kitchen Reset',
     icon: '/icons/zones/kitchen.png',
     minutes: '15 minutes',
     description: 'Reset the heart of the home before the weekend.',
-    accent: 'apricot',
     tasks: [
       { id: 'thu-clear', label: 'Clear counters' },
       { id: 'thu-wipe', label: 'Wipe counters' },
@@ -143,14 +131,25 @@ export const weeklySchedule: WeekdayFocus[] = [
   },
 ];
 
-/** Friday–Sunday: one optional, flexible project. */
+export interface WeekendDay {
+  /** 5 = Friday, 6 = Saturday, 0 = Sunday (JS Date#getDay numbering) */
+  day: 5 | 6 | 0;
+  dayLabel: string;
+  shortLabel: string;
+  /** Cleaning tag label — matches the printed calendar exactly */
+  zone: string;
+}
+
+/** Friday–Sunday: flexible days built around the month's deep-clean project. */
 export const weekend = {
-  title: 'Deep Clean / Catch Up',
-  shortLabel: 'Fri–Sun',
-  zone: 'Deep clean, seasonal project or catch up',
   icon: '/icons/zones/deep-clean.png',
+  days: [
+    { day: 5, dayLabel: 'Friday', shortLabel: 'Fri', zone: 'Deep Cleaning' },
+    { day: 6, dayLabel: 'Saturday', shortLabel: 'Sat', zone: 'Home Project' },
+    { day: 0, dayLabel: 'Sunday', shortLabel: 'Sun', zone: 'Catch-Up / Reset' },
+  ] as WeekendDay[],
   description:
-    'Friday through Sunday are flexible. Pick one thing from this month’s project, or simply catch up on anything you missed. Some weekends, rest is the plan.',
+    'Use the weekend for one deep-cleaning task, a seasonal project, or catching up on the week. All optional.',
   catchUp: { id: 'catch-up', label: 'Catch up on this week’s cleaning instead' } as Task,
 };
 

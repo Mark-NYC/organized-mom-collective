@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { monthlyDeepClean } from '../data/cleaning';
 import { monthColor } from '../theme';
-import { DayMark } from './marks';
+import { MonthBand } from './marks';
 
 export default function MonthBrowser() {
   const current = new Date().getMonth();
@@ -10,25 +10,20 @@ export default function MonthBrowser() {
   const count = monthlyDeepClean.length;
   const prev = monthlyDeepClean[(index - 1 + count) % count];
   const next = monthlyDeepClean[(index + 1) % count];
-  const color = monthColor(month.month);
 
   return (
-    <div className="border-t-[3px] pt-4" style={{ borderTopColor: color }}>
-      <div className="flex items-start gap-4" aria-live="polite">
-        <DayMark label={month.name.slice(0, 3)} number={month.month + 1} color={color} />
-        <div className="min-w-0 flex-1">
-          <p className="label">
-            {month.name}
-            {index === current && <span className="text-muted"> · This month</span>}
-          </p>
-          <h3 className="mt-2 font-serif text-[1.85rem] leading-[1.05] font-semibold">{month.title}</h3>
-        </div>
+    <div aria-live="polite">
+      <MonthBand month={month.name} color={monthColor(month.month)} size="sm" className="px-4 pt-5 pb-3">
+        {index === current && <span className="label pb-1">This month</span>}
+      </MonthBand>
+      <div className="pt-5 text-center">
+        <h3 className="project-title">{month.title}</h3>
+        <p className="mt-1.5 text-[0.9rem] text-muted">{month.description}</p>
       </div>
-      <p className="mt-3 font-serif text-[1.08rem] leading-snug text-muted italic">{month.description}</p>
-      <ol className="mt-4 border-t border-rule">
+      <ol className="mt-5 border-t border-rule-strong">
         {month.tasks.map((t, i) => (
-          <li key={t.id} className="flex min-h-12 items-center gap-4 border-b border-rule py-3 leading-snug">
-            <span className="w-5 shrink-0 text-[0.7rem] font-semibold tracking-[0.1em] text-faint tabular-nums">
+          <li key={t.id} className="flex min-h-12 items-center gap-4 border-b border-rule py-3 text-[0.95rem] leading-snug">
+            <span className="w-5 shrink-0 text-[0.68rem] font-semibold tracking-[0.1em] text-muted tabular-nums">
               {String(i + 1).padStart(2, '0')}
             </span>
             {t.label}
@@ -40,16 +35,12 @@ export default function MonthBrowser() {
           type="button"
           onClick={() => setIndex((index - 1 + count) % count)}
           aria-label={`Previous month: ${prev.name}`}
-          className="min-h-11 text-[0.7rem] font-semibold tracking-[0.18em] text-muted uppercase hover:text-ink"
+          className="min-h-11 text-[0.68rem] font-semibold tracking-[0.18em] text-muted uppercase hover:text-ink"
         >
           ← {prev.name.slice(0, 3)}
         </button>
         {index !== current && (
-          <button
-            type="button"
-            onClick={() => setIndex(current)}
-            className="min-h-11 text-[0.7rem] font-semibold tracking-[0.18em] text-ink uppercase underline decoration-rule underline-offset-[6px]"
-          >
+          <button type="button" onClick={() => setIndex(current)} className="text-link min-h-11">
             This month
           </button>
         )}
@@ -57,7 +48,7 @@ export default function MonthBrowser() {
           type="button"
           onClick={() => setIndex((index + 1) % count)}
           aria-label={`Next month: ${next.name}`}
-          className="min-h-11 text-[0.7rem] font-semibold tracking-[0.18em] text-muted uppercase hover:text-ink"
+          className="min-h-11 text-[0.68rem] font-semibold tracking-[0.18em] text-muted uppercase hover:text-ink"
         >
           {next.name.slice(0, 3)} →
         </button>

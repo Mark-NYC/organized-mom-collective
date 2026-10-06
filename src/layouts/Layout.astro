@@ -2,6 +2,9 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import { SITE_NAME } from '../config';
+import { monthColors } from '../theme';
+
+const monthHexes = monthColors.map((m) => m.hex);
 
 interface Props {
   title?: string;
@@ -25,7 +28,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content="/icons/icon-512.png" />
-    <meta name="theme-color" content="#faf7f1" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -34,6 +37,10 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script is:inline define:vars={{ monthHexes }}>
+      // The current month's color (from src/theme.ts) is the app's accent.
+      document.documentElement.style.setProperty('--month', monthHexes[new Date().getMonth()]);
+    </script>
     <script is:inline>
       // First visit to Today: hide app chrome until the onboarding screen renders.
       try {

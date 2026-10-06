@@ -27,7 +27,7 @@ export default function SettingsApp() {
 
   return (
     <>
-      <ul className="border-t-[3px] border-ink">
+      <ul className="border-t border-rule-strong">
         <Row
           title="Replay the introduction"
           detail="See the three welcome screens again."
@@ -57,7 +57,7 @@ export default function SettingsApp() {
         />
       </ul>
 
-      <p role="status" className="mt-4 min-h-6 text-sm text-sage">
+      <p role="status" className="mt-4 min-h-6 text-sm font-medium">
         {status}
       </p>
 
@@ -77,7 +77,7 @@ function Row({ title, detail, action }: { title: string; detail: string; action:
   return (
     <li className="flex items-center justify-between gap-4 border-b border-rule py-5">
       <div>
-        <p className="font-serif text-[1.3rem] leading-tight font-semibold">{title}</p>
+        <p className="text-[0.95rem] font-semibold">{title}</p>
         <p className="mt-1 text-sm leading-snug text-muted">{detail}</p>
       </div>
       <div className="shrink-0">{action}</div>

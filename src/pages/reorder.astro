@@ -1,39 +1,53 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { CalendarEdge } from '../components/marks';
 import { BRAND_NAME, REORDER_URL } from '../config';
+import { monthColors } from '../theme';
+
+const months = monthColors.map((m) => ({ short: m.name.slice(0, 3), hex: m.hex }));
 ---
 
 <Layout title="Reorder" description={`Order your next six-month ${BRAND_NAME} family calendar.`}>
   <div class="max-w-xl">
-    <p class="rule-label text-muted">Reorder</p>
-    <h1 class="mt-4 font-serif text-[2.9rem] leading-[0.98] font-medium tracking-[-0.01em] sm:text-[3.75rem]">
-      Ready for your next calendar?
-    </h1>
-    <p class="mt-5 text-[1.02rem] leading-relaxed text-muted">
+    <p class="label text-muted">Reorder</p>
+    <h1 class="page-title mt-3">Ready for your next calendar?</h1>
+    <p class="mt-4 text-[0.98rem] leading-relaxed">
       Keep your family planning system going with your next six-month {BRAND_NAME} calendar.
     </p>
 
-    <div class="mt-10">
-      <CalendarEdge className="h-2" />
-      <div class="grid grid-cols-6 border-b border-rule" aria-hidden="true">
-        {Array.from({ length: 6 }, (_, i) => (
-          <span class="border-r border-rule px-1.5 pt-1.5 pb-7 text-[0.6rem] font-semibold tracking-[0.12em] text-faint last:border-r-0 tabular-nums">
-            {String(i + 1).padStart(2, '0')}
-          </span>
-        ))}
+    <!-- The next six months, in their printed colors -->
+    <div class="mt-10 border border-rule-strong" aria-hidden="true">
+      <div id="next-six" class="grid grid-cols-6">
+        {
+          months.slice(0, 6).map((m) => (
+            <span class="border-r border-rule last:border-r-0">
+              <span class="block h-7" style={`background-color:${m.hex}`} />
+              <span class="block px-1 pt-1.5 pb-6 text-center text-[0.6rem] font-semibold tracking-[0.14em] uppercase">{m.short}</span>
+            </span>
+          ))
+        }
       </div>
-      <p class="mt-2 label text-muted">Six months · one wall</p>
     </div>
+    <p class="label mt-2.5 text-center text-muted">Six months · one wall</p>
 
     <a href={REORDER_URL} class="btn-primary mt-10 w-full sm:w-auto" rel="noopener">Order My Next Calendar</a>
 
-    <section aria-labelledby="when-h" class="mt-14 border-t border-ink pt-5">
-      <h2 id="when-h" class="font-serif text-[1.6rem] leading-tight font-semibold">When to reorder</h2>
-      <p class="mt-2 leading-relaxed text-muted">
+    <section aria-labelledby="when-h" class="mt-14 border-t border-rule-strong pt-5">
+      <h2 id="when-h" class="label">When to reorder</h2>
+      <p class="mt-2 text-[0.95rem] leading-relaxed">
         About a month before your last page, so the new one arrives before the old one runs out. Your cleaning checklist
         here keeps working either way.
       </p>
     </section>
   </div>
+
+  <script is:inline define:vars={{ months }}>
+    // Start the strip at next month.
+    const start = new Date().getMonth() + 1;
+    const cells = document.querySelectorAll('#next-six > span');
+    cells.forEach((cell, i) => {
+      const m = months[(start + i) % 12];
+      cell.children[0].style.backgroundColor = m.hex;
+      cell.children[1].textContent = m.short;
+    });
+  </script>
 </Layout>

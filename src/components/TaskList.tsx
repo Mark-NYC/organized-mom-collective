@@ -9,8 +9,8 @@ interface TaskCheckboxProps {
 }
 
 /**
- * One ruled planner line: a square printed box, and a pen tick that
- * overshoots it when checked.
+ * One ruled line with the printed calendar's rounded-square box, plus a pen
+ * tick that overshoots it when checked.
  */
 export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxProps) {
   const inputId = `${scope}-${task.id}`;
@@ -26,11 +26,11 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
         />
         <span
           aria-hidden="true"
-          className="relative size-[1.15rem] shrink-0 border-[1.5px] border-ink transition-colors group-hover:bg-ink/5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-sage"
+          className="relative size-[1.3rem] shrink-0 rounded-[5px] border-[1.5px] border-ink transition-colors group-hover:bg-band peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-ink"
         >
           <svg
             viewBox="0 0 28 28"
-            className={`absolute -top-[0.7rem] -right-[0.55rem] size-[1.75rem] overflow-visible text-sage transition-opacity ${
+            className={`absolute -top-[0.7rem] -right-[0.6rem] size-[1.85rem] overflow-visible text-ink transition-opacity ${
               checked ? 'opacity-100' : 'opacity-0'
             }`}
             fill="none"
@@ -43,8 +43,8 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
           </svg>
         </span>
         <span
-          className={`text-[1rem] leading-snug transition-colors ${
-            checked ? 'text-faint line-through decoration-faint/70 decoration-1' : 'text-ink'
+          className={`text-[0.95rem] leading-snug transition-colors ${
+            checked ? 'text-muted line-through decoration-muted/70 decoration-1' : 'text-ink'
           }`}
         >
           {task.label}
@@ -75,8 +75,8 @@ export function TaskList({ tasks, checked, onToggle, scope, label }: TaskListPro
 /** Quiet tally, "2 / 5" — not a score. */
 export function Tally({ done, total }: { done: number; total: number }) {
   return (
-    <p className="text-[0.7rem] font-medium tracking-[0.16em] text-muted uppercase tabular-nums" aria-live="polite">
+    <span className="text-[0.66rem] font-semibold tracking-[0.16em] text-muted uppercase tabular-nums" aria-live="polite">
       {done === total && total > 0 ? 'Done' : `${done} / ${total}`}
-    </p>
+    </span>
   );
 }

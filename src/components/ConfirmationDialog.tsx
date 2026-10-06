@@ -28,9 +28,9 @@ export default function ConfirmationDialog({ open, title, message, confirmLabel,
         onCancel();
       }}
       aria-labelledby="confirm-title"
-      className="m-auto w-[calc(100%-2.5rem)] max-w-sm border-t-[3px] border-ink bg-paper p-6 text-ink backdrop:bg-ink/40"
+      className="m-auto w-[calc(100%-2.5rem)] max-w-sm rounded-[3px] border-t-[3px] border-month bg-paper p-6 text-ink backdrop:bg-ink/40"
     >
-      <h2 id="confirm-title" className="font-serif text-[1.85rem] leading-tight font-semibold">
+      <h2 id="confirm-title" className="text-[1.3rem] leading-tight font-bold">
         {title}
       </h2>
       <p className="mt-2 leading-relaxed text-muted">{message}</p>

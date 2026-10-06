@@ -1,12 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import MonthBrowser from '../components/MonthBrowser';
-import { DayMark, TimeMark, shortTime } from '../components/marks';
+import { TimeMark, ZoneTag, shortTime } from '../components/marks';
 import { dailyEssentials, weekend, weeklySchedule } from '../data/cleaning';
+
+const week = [
+  ...weeklySchedule.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: d.icon, time: shortTime(d.minutes) })),
+  ...weekend.days.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: weekend.icon, time: 'Optional' })),
+];
 
 const principles = [
   {
-    title: 'Your daily reset',
+    title: 'Daily reset',
     body: `About ${dailyEssentials.minutes}. Beds, dishes, counters, a quick pickup and any obvious spills. It starts fresh every morning.`,
   },
   {
@@ -14,8 +19,8 @@ const principles = [
     body: 'One room each weekday, 10–15 minutes. By Thursday the whole house has had a quick reset.',
   },
   {
-    title: 'Weekend deep clean / catch up',
-    body: 'Friday to Sunday are flexible. Do one task from the monthly project, or catch up on something you missed.',
+    title: 'Fri–Sun',
+    body: 'Deep cleaning, a home project, or catch-up and reset. Use the weekend for one deep-cleaning task, a seasonal project, or catching up. All optional.',
   },
   {
     title: 'Monthly focus',
@@ -26,49 +31,50 @@ const principles = [
 
 <Layout title="How Tidy Works" description="The Organized Mom cleaning system: a daily reset, a Mon–Thu room rhythm, flexible weekends and one monthly focus.">
   <header class="max-w-2xl">
-    <p class="rule-label text-muted">Tidy · The system</p>
-    <h1 class="mt-4 font-serif text-[2.9rem] leading-[0.98] font-medium tracking-[-0.01em] sm:text-[3.75rem]">
-      One small reset.<br />One room a day.
-    </h1>
-    <p class="mt-5 text-[1.02rem] leading-relaxed text-muted">
+    <p class="label text-muted">Tidy · The system</p>
+    <h1 class="page-title mt-3">One small reset.<br />One room a day.</h1>
+    <p class="mt-4 text-[0.98rem] leading-relaxed">
       You don’t need to clean the whole house every day. A short reset plus one area keeps everything in rhythm.
     </p>
   </header>
 
-  <section aria-labelledby="week-heading" class="mt-12">
-    <h2 id="week-heading" class="label">The week</h2>
-    <ol class="mt-3 border-t-[3px] border-ink sm:grid sm:grid-cols-5 sm:border-b sm:border-b-rule">
+  <section aria-labelledby="week-heading" class="mt-12 max-w-2xl border-t border-rule-strong pt-6">
+    <h2 id="week-heading" class="section-label">The week</h2>
+    <ol class="mt-5 border-t border-rule-strong">
       {
-        weeklySchedule.map((d) => (
-          <li class="flex items-center gap-4 border-b border-rule py-3 sm:flex-col sm:items-start sm:gap-3 sm:border-r sm:border-b-0 sm:p-4 sm:first:pl-0">
-            <DayMark label={d.shortLabel} icon={d.icon} accent={d.accent} size="sm" />
-            <span class="flex-1 text-[0.78rem] font-semibold tracking-[0.16em] uppercase sm:min-h-10"><span class="sr-only">{d.dayLabel}: </span>{d.zone}</span>
-            <TimeMark>{shortTime(d.minutes)}</TimeMark>
+        week.map((d) => (
+          <li data-day={d.num} class="flex items-center gap-3 border-b border-rule py-2.5">
+            <span class="w-11 shrink-0 text-[0.78rem] font-bold tracking-[0.16em] uppercase">
+              <span aria-hidden="true">{d.short}</span>
+              <span class="sr-only">{d.day}:</span>
+            </span>
+            <span class="min-w-0 flex-1">
+              <ZoneTag icon={d.icon} label={d.zone} size="sm" filled={false} />
+            </span>
+            <TimeMark>{d.time}</TimeMark>
           </li>
         ))
       }
-      <li class="flex items-center gap-4 border-b border-rule py-3 sm:flex-col sm:items-start sm:gap-3 sm:border-b-0 sm:p-4 sm:pr-0">
-        <DayMark label={weekend.shortLabel} icon={weekend.icon} size="sm" />
-        <span class="flex-1 text-[0.78rem] font-semibold tracking-[0.16em] uppercase sm:min-h-10"><span class="sr-only">Friday to Sunday: </span>Deep clean / catch up</span>
-        <TimeMark>Optional</TimeMark>
-      </li>
     </ol>
-    <p class="mt-3 font-serif text-[1.08rem] text-muted italic">Plus the daily reset, every day.</p>
+    <p class="mt-3 text-center text-[0.85rem] text-muted">Plus the daily reset, every day.</p>
+    <script is:inline>
+      document.querySelector('[data-day="' + new Date().getDay() + '"]')?.classList.add('is-today');
+    </script>
   </section>
 
-  <div class="mt-14 grid gap-x-14 sm:grid-cols-2">
+  <div class="mt-12 grid gap-x-12 sm:grid-cols-2">
     {
       principles.map((p) => (
-        <section class="border-t border-ink py-5">
-          <h2 class="font-serif text-[1.6rem] leading-tight font-semibold">{p.title}</h2>
-          <p class="mt-2 leading-relaxed text-muted">{p.body}</p>
+        <section class="border-t border-rule-strong py-5">
+          <h2 class="label">{p.title}</h2>
+          <p class="mt-2 text-[0.95rem] leading-relaxed">{p.body}</p>
         </section>
       ))
     }
   </div>
 
-  <section aria-labelledby="month-heading" class="mt-12 max-w-2xl">
-    <h2 id="month-heading" class="label mb-3">Monthly focus</h2>
+  <section aria-labelledby="month-heading" class="mt-10 max-w-2xl border-t border-rule-strong pt-6">
+    <h2 id="month-heading" class="section-label mb-5">Monthly focus</h2>
     <MonthBrowser client:only="react">
       <div slot="fallback" class="h-96"></div>
     </MonthBrowser>

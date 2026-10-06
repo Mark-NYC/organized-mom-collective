@@ -27,7 +27,7 @@ npm test          # unit tests (schedule + storage logic)
 | Logo (badge, favicon, app icons) | `public/brand/`, `public/favicon.ico`, `public/icons/` (original in `design/logo/`) |
 | Zone icons (daily, Mon–Thu rooms, weekend) | `public/icons/zones/*.png` (originals in `design/zone-icons/`), assigned in `src/data/cleaning.ts` |
 | **Month colors** (canonical, from the printed calendar) | `src/theme.ts` |
-| Weekday colors, paper/ink, fonts | `src/styles/global.css` (`@theme`) |
+| Print palette (white, charcoal, rules) and fonts | `src/styles/global.css` (`@theme`) |
 | Pages (`/`, `/tidy`, `/reorder`, `/settings`) | `src/pages/` |
 | UI components | `src/components/` |
 | Date / schedule / storage logic | `src/lib/` |
@@ -45,3 +45,9 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 - Monthly deep-clean tasks → keyed by month, so progress carries across that month's weekends.
 - "Catch up instead" → keyed by that weekend's Friday.
 - Day-scoped entries older than 60 days are pruned automatically.
+
+## Brand notes
+
+- **Fonts:** Montserrat for everything; Georgia Pro (Black Italic) only for the month name and year, as on the printed calendar. Georgia Pro is a licensed Monotype font and isn't bundled — devices that have it use it, everything else falls back to Georgia. If you buy a web license, add an `@font-face` in `src/styles/global.css`.
+- **Color:** the app is white / `#545454` charcoal / ruled lines. The current month's color (from `src/theme.ts`) is the only accent: month header, today's cleaning tag, selected states.
+- **Zone labels** match the printed calendar exactly: Living Room, Bedrooms, Entry/Bathroom, Kitchen Reset; Friday Deep Cleaning, Saturday Home Project, Sunday Catch-Up / Reset.

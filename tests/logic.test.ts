@@ -22,12 +22,17 @@ beforeEach(() => {
 describe('schedule', () => {
   it('maps Mon–Thu to room focus and Fri–Sun to the monthly project', () => {
     // 2026-10-05 is a Monday
-    expect(planFor(new Date(2026, 9, 5))).toMatchObject({ kind: 'weekday', focus: { title: 'Living Room Reset' } });
-    expect(planFor(new Date(2026, 9, 6))).toMatchObject({ kind: 'weekday', focus: { title: 'Bedroom Reset' } });
-    expect(planFor(new Date(2026, 9, 7))).toMatchObject({ kind: 'weekday', focus: { title: 'Entry + Bathrooms' } });
-    expect(planFor(new Date(2026, 9, 8))).toMatchObject({ kind: 'weekday', focus: { title: 'Kitchen Blitz' } });
-    for (const day of [9, 10, 11]) {
-      expect(planFor(new Date(2026, 9, day))).toMatchObject({ kind: 'weekend', month: { title: 'Closet Cleanout' } });
+    expect(planFor(new Date(2026, 9, 5))).toMatchObject({ kind: 'weekday', focus: { zone: 'Living Room' } });
+    expect(planFor(new Date(2026, 9, 6))).toMatchObject({ kind: 'weekday', focus: { zone: 'Bedrooms' } });
+    expect(planFor(new Date(2026, 9, 7))).toMatchObject({ kind: 'weekday', focus: { zone: 'Entry/Bathroom' } });
+    expect(planFor(new Date(2026, 9, 8))).toMatchObject({ kind: 'weekday', focus: { zone: 'Kitchen Reset' } });
+    const weekendZones = { 9: 'Deep Cleaning', 10: 'Home Project', 11: 'Catch-Up / Reset' } as const;
+    for (const [day, zone] of Object.entries(weekendZones)) {
+      expect(planFor(new Date(2026, 9, Number(day)))).toMatchObject({
+        kind: 'weekend',
+        day: { zone },
+        month: { title: 'Closet Cleanout' },
+      });
     }
   });
 

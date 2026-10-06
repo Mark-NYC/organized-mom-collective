@@ -1,5 +1,5 @@
 ---
-import { CalendarEdge, Wordmark } from './marks';
+import { Wordmark } from './marks';
 
 const items = [
   { href: '/', label: 'Today' },
@@ -12,9 +12,8 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
 const settingsActive = path.startsWith('/settings');
 ---
 
-<header data-chrome>
-  <CalendarEdge />
-  <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:h-16 sm:px-8">
+<header data-chrome class="border-b border-rule">
+  <div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
     <a href="/" aria-label="Organized Mom — Today"><Wordmark /></a>
     <nav aria-label="Main" class="hidden sm:block">
       <ul class="flex items-center gap-8">
@@ -25,11 +24,12 @@ const settingsActive = path.startsWith('/settings');
                 href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
                 class:list={[
-                  'inline-flex min-h-11 items-center border-b-2 text-[0.72rem] font-semibold tracking-[0.18em] uppercase transition-colors',
-                  isActive(item.href) ? 'border-ink text-ink' : 'border-transparent text-faint hover:text-ink',
+                  'relative inline-flex min-h-11 items-center text-[0.7rem] font-semibold tracking-[0.18em] uppercase transition-colors',
+                  isActive(item.href) ? 'text-ink' : 'text-muted hover:text-ink',
                 ]}
               >
                 {item.label}
+                {isActive(item.href) && <span aria-hidden="true" class="absolute inset-x-0 bottom-1 h-[3px] bg-month" />}
               </a>
             </li>
           ))
@@ -40,14 +40,13 @@ const settingsActive = path.startsWith('/settings');
       href="/settings"
       aria-current={settingsActive ? 'page' : undefined}
       class:list={[
-        '-mr-2 inline-flex min-h-11 items-center px-2 text-[0.66rem] font-semibold tracking-[0.18em] uppercase transition-colors',
-        settingsActive ? 'text-ink' : 'text-faint hover:text-ink',
+        '-mr-2 inline-flex min-h-11 items-center px-2 text-[0.64rem] font-semibold tracking-[0.18em] uppercase transition-colors',
+        settingsActive ? 'text-ink' : 'text-muted hover:text-ink',
       ]}
     >
       Settings
     </a>
   </div>
-  <div class="mx-auto max-w-5xl px-5 sm:px-8"><div class="h-px bg-rule"></div></div>
 </header>
 
 <!-- Phone: thin ruled bottom navigation -->
@@ -64,11 +63,11 @@ const settingsActive = path.startsWith('/settings');
             href={item.href}
             aria-current={isActive(item.href) ? 'page' : undefined}
             class:list={[
-              'relative flex h-14 items-center justify-center text-[0.7rem] font-semibold tracking-[0.2em] uppercase transition-colors',
-              isActive(item.href) ? 'text-ink' : 'text-faint',
+              'relative flex h-14 items-center justify-center text-[0.68rem] font-semibold tracking-[0.2em] uppercase transition-colors',
+              isActive(item.href) ? 'text-ink' : 'text-muted',
             ]}
           >
-            {isActive(item.href) && <span aria-hidden="true" class="absolute inset-x-6 -top-px h-0.5 bg-ink" />}
+            {isActive(item.href) && <span aria-hidden="true" class="absolute inset-x-6 -top-px h-[3px] bg-month" />}
             {item.label}
           </a>
         </li>
