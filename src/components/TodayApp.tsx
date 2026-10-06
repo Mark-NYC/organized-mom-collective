@@ -141,7 +141,7 @@ function WeekendCard({ month, today }: { month: MonthlyFocus; today: Date }) {
       <div className="px-5 pt-4 pb-3 sm:px-7">
         <div className="rounded-xl bg-paper px-4 py-3 text-[0.92rem] leading-relaxed text-muted">
           <strong className="font-semibold text-ink">This weekend, choose one.</strong> This list is for the whole
-          month — you don’t need to finish it now. Rest counts too.
+          month — you don’t need to finish it now.
         </div>
 
         <div className="mt-3 flex items-baseline justify-between">

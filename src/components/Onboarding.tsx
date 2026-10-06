@@ -52,7 +52,7 @@ export default function Onboarding({ onDone }: Props) {
                 </p>
               </div>
               <p className="mt-6 text-[1.05rem] leading-relaxed text-muted">
-                We’ll give you a small daily reset, plus one area to focus on. That’s it.
+                Your calendar helps you plan the week. This companion tells you which part of the house to tackle today: a small daily reset, plus one area to focus on.
               </p>
             </>
           )}
