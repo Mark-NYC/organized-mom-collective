@@ -23,8 +23,8 @@ export default function Onboarding({ onDone }: Props) {
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="onboarding-heading" className="fixed inset-0 z-50 overflow-y-auto bg-paper">
-      <div className="h-2 bg-month" aria-hidden="true" />
-      <div className="mx-auto flex min-h-[calc(100dvh-0.5rem)] max-w-md flex-col px-6 pt-[env(safe-area-inset-top)] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+      <div className="h-1 bg-month" aria-hidden="true" />
+      <div className="mx-auto flex min-h-[calc(100dvh-0.25rem)] max-w-md flex-col px-6 pt-[env(safe-area-inset-top)] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
         <div className="flex h-14 items-center justify-between border-b border-rule">
           <Wordmark badge={false} />
           {step < last && (
@@ -48,7 +48,7 @@ export default function Onboarding({ onDone }: Props) {
               <p className="mt-7 border-l-[3px] border-month pl-4 text-[1.1rem] leading-snug font-semibold">
                 You don’t need to clean the whole house every day.
               </p>
-              <p className="mt-5 text-[0.98rem] leading-relaxed">
+              <p className="mt-5 text-[1.0625rem] leading-relaxed">
                 Your calendar helps you plan the week. This companion tells you which part of the house to tackle today:
                 a small daily reset, plus one area to focus on.
               </p>
@@ -79,7 +79,7 @@ export default function Onboarding({ onDone }: Props) {
           {step === 2 && (
             <>
               {heading('Open this each day. We’ll show you what to do.')}
-              <p className="mt-7 text-[0.98rem] leading-relaxed">
+              <p className="mt-7 text-[1.0625rem] leading-relaxed">
                 Check things off as you go. Your progress stays on this phone — no account, no sign-up.
               </p>
               <p className="mt-6 border-l-[3px] border-month pl-4 text-[1.1rem] leading-snug font-semibold">
@@ -115,7 +115,7 @@ function RhythmRow({ icons, when, what, time }: { icons: string[]; when: string;
         <TimeMark>{time}</TimeMark>
       </div>
       <div className="mt-2.5 flex items-center gap-3">
-        <span className="flex shrink-0 items-center rounded-full bg-month px-1.5 py-0.5" aria-hidden="true">
+        <span className="flex shrink-0 items-center rounded-full bg-month/35 px-1 py-0.5" aria-hidden="true">
           {icons.map((src) => (
             <img key={src} src={src} alt="" width={192} height={192} className="size-7" />
           ))}

@@ -16,7 +16,7 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
   const inputId = `${scope}-${task.id}`;
   return (
     <li className="border-b border-rule">
-      <label htmlFor={inputId} className="group flex min-h-[3.25rem] cursor-pointer items-center gap-4 py-3 select-none">
+      <label htmlFor={inputId} className="group flex min-h-14 cursor-pointer items-center gap-3.5 py-2.5 select-none">
         <input
           id={inputId}
           type="checkbox"
@@ -26,11 +26,11 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
         />
         <span
           aria-hidden="true"
-          className="relative size-[1.3rem] shrink-0 rounded-[5px] border-[1.5px] border-ink transition-colors group-hover:bg-band peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-ink"
+          className="relative size-7 shrink-0 rounded-[6px] border-[1.5px] border-ink transition-colors group-hover:bg-band group-active:bg-band peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-ink"
         >
           <svg
             viewBox="0 0 28 28"
-            className={`absolute -top-[0.7rem] -right-[0.6rem] size-[1.85rem] overflow-visible text-ink transition-opacity ${
+            className={`absolute -top-[0.7rem] -right-[0.55rem] size-[2.1rem] overflow-visible text-ink transition-opacity ${
               checked ? 'opacity-100' : 'opacity-0'
             }`}
             fill="none"
@@ -43,7 +43,7 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
           </svg>
         </span>
         <span
-          className={`text-[0.95rem] leading-snug transition-colors ${
+          className={`text-[1.0625rem] leading-snug transition-colors sm:text-[1rem] ${
             checked ? 'text-muted line-through decoration-muted/70 decoration-1' : 'text-ink'
           }`}
         >

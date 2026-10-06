@@ -60,19 +60,18 @@
   .project-title {
     @apply text-[1.02rem] leading-snug font-bold tracking-[0.14em] uppercase;
   }
-  /* The printed month title — the ONLY use of the display face: white letters, charcoal outline and offset shadow. */
+  /* Month name / year — the ONLY use of the display face. Solid charcoal: the printed
+     outline effect turns heavy at app sizes, so the digital version stays plain. */
   .month-title {
     @apply font-display font-black italic;
-    color: #fff;
-    -webkit-text-stroke: 3px var(--color-ink);
-    paint-order: stroke fill;
-    text-shadow: 2px 2px 0 var(--color-rule);
-    letter-spacing: 0.07em;
+    letter-spacing: 0.03em;
   }
-  /* Tidy week: today's row is the current state, filled with the month color. */
+  /* Tidy week: today's row is the current state — darker outline, no fill. */
   .is-today .zone-tag {
-    background-color: var(--color-month);
-    border-color: transparent;
+    border-color: var(--color-ink);
+  }
+  .is-today .day-label > span:first-child {
+    box-shadow: inset 0 -3px var(--color-month);
   }
   .btn-primary {
     @apply inline-flex min-h-12 items-center justify-center rounded-[3px] bg-ink px-7 text-[0.75rem] font-semibold tracking-[0.18em] text-white uppercase transition-colors hover:bg-[#3f3f3f];

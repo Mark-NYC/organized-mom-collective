@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { monthlyDeepClean } from '../data/cleaning';
 import { monthColor } from '../theme';
-import { MonthBand } from './marks';
+import { MonthHeading } from './marks';
 
 export default function MonthBrowser() {
   const current = new Date().getMonth();
@@ -13,16 +13,14 @@ export default function MonthBrowser() {
 
   return (
     <div aria-live="polite">
-      <MonthBand month={month.name} color={monthColor(month.month)} size="sm" className="px-4 pt-5 pb-3">
-        {index === current && <span className="label pb-1">This month</span>}
-      </MonthBand>
-      <div className="pt-5 text-center">
-        <h3 className="project-title">{month.title}</h3>
-        <p className="mt-1.5 text-[0.9rem] text-muted">{month.description}</p>
-      </div>
-      <ol className="mt-5 border-t border-rule-strong">
+      <MonthHeading month={month.name} color={monthColor(month.month)}>
+        {index === current && <span className="label text-muted">This month</span>}
+      </MonthHeading>
+      <h3 className="project-title mt-3">{month.title}</h3>
+      <p className="mt-1 text-[1rem] leading-snug text-muted">{month.description}</p>
+      <ol className="mt-3 border-t border-rule-strong">
         {month.tasks.map((t, i) => (
-          <li key={t.id} className="flex min-h-12 items-center gap-4 border-b border-rule py-3 text-[0.95rem] leading-snug">
+          <li key={t.id} className="flex min-h-12 items-center gap-4 border-b border-rule py-2.5 text-[1.0625rem] leading-snug sm:text-[1rem]">
             <span className="w-5 shrink-0 text-[0.68rem] font-semibold tracking-[0.1em] text-muted tabular-nums">
               {String(i + 1).padStart(2, '0')}
             </span>

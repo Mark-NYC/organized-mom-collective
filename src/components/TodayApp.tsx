@@ -6,7 +6,7 @@ import { dateKey, monthKey, weekendStart } from '../lib/dates';
 import { useCheckedSet, useToday } from '../lib/hooks';
 import { planFor } from '../lib/schedule';
 import { isOnboarded, keys, pruneOld, setOnboarded } from '../lib/storage';
-import { MonthBand, TimeMark, ZoneTag, shortTime } from './marks';
+import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
 import { Tally, TaskList } from './TaskList';
 
@@ -34,32 +34,32 @@ function Today() {
   const [daily, toggleDaily] = useCheckedSet(keys.daily(date));
   const dailyDone = dailyEssentials.tasks.filter((t) => daily.has(t.id)).length;
 
-  const month = today.toLocaleDateString('en-US', { month: 'long' });
   const weekday = today.toLocaleDateString('en-US', { weekday: 'long' });
   const dayNum = String(today.getDate()).padStart(2, '0');
+  const monthYear = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <div>
-      <header>
-        <MonthBand month={month} year={today.getFullYear()} className="-mx-5 -mt-8 px-5 pt-7 pb-4 sm:mx-0 sm:mt-0 sm:px-7" />
-        <h1
-          className="mt-5 flex items-baseline justify-between gap-4"
-          aria-label={`Today, ${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`}
-        >
-          <span className="text-[1.45rem] font-bold tracking-[0.16em] uppercase sm:text-[1.7rem]">
+      <header className="border-l-[3px] border-month pl-3.5">
+        <h1 aria-label={`Today, ${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`}>
+          <span className="block text-[1.5rem] leading-tight font-bold tracking-[0.12em] uppercase sm:text-[1.75rem]">
             {weekday} {dayNum}
           </span>
-          <span className="label text-muted">Today</span>
+          <span className="month-title mt-1 block text-[1.15rem] leading-none">{monthYear}</span>
         </h1>
       </header>
 
-      <div className="mt-8 grid gap-12 md:grid-cols-2 md:gap-x-12">
+      <div className="mt-7 grid gap-7 md:mt-10 md:grid-cols-2 md:gap-x-12">
         <Section
           id="daily"
-          heading={<h2 id="daily-heading" className="section-label">{dailyEssentials.title}</h2>}
+          first
+          heading={
+            <h2 id="daily-heading" className="text-[1rem] font-bold tracking-[0.18em] uppercase">
+              {dailyEssentials.title}
+            </h2>
+          }
           meta={
             <>
-              <span>Every day</span>
               <TimeMark>{shortTime(dailyEssentials.minutes)}</TimeMark>
               <Tally done={dailyDone} total={dailyEssentials.tasks.length} />
             </>
@@ -75,7 +75,7 @@ function Today() {
         )}
       </div>
 
-      <nav aria-label="More" className="mt-14 border-t border-rule-strong">
+      <nav aria-label="More" className="mt-12 border-t border-rule-strong">
         <a href="/tidy" className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
           How the system works <span aria-hidden="true">→</span>
         </a>
@@ -92,17 +92,21 @@ interface SectionProps {
   heading: ReactNode;
   meta: ReactNode;
   note?: ReactNode;
+  /** The first block sits directly under the date, without a separating rule. */
+  first?: boolean;
   children: ReactNode;
 }
 
-/** A calendar-style block: major rule, centered heading, small centered meta line, then ruled tasks. */
-function Section({ id, heading, meta, note, children }: SectionProps) {
+/** One block of the day: a single heading line (title left, time + tally right), optional note, then ruled tasks. */
+function Section({ id, heading, meta, note, first, children }: SectionProps) {
   return (
-    <section aria-labelledby={`${id}-heading`} className="border-t border-rule-strong pt-6">
-      <div className="flex flex-col items-center gap-3 text-center">{heading}</div>
-      <div className="label mt-3 flex items-center justify-center gap-3 text-muted">{meta}</div>
-      {note && <div className="mt-4 text-center text-[0.9rem] leading-relaxed text-muted">{note}</div>}
-      <div className="mt-5 border-t border-rule-strong">{children}</div>
+    <section aria-labelledby={`${id}-heading`} className={first ? '' : 'border-t border-rule-strong pt-5 md:border-t-0 md:pt-0'}>
+      <div className="flex min-h-9 items-center justify-between gap-3">
+        <div className="min-w-0">{heading}</div>
+        <div className="flex shrink-0 items-center gap-3">{meta}</div>
+      </div>
+      {note && <p className="mt-2 text-[1rem] leading-snug text-muted">{note}</p>}
+      <div className="mt-3 border-t border-rule-strong">{children}</div>
     </section>
   );
 }
@@ -122,7 +126,6 @@ function FocusSection({ focus, date }: { focus: WeekdayFocus; date: string }) {
       }
       meta={
         <>
-          <span>{focus.dayLabel}</span>
           <TimeMark>{shortTime(focus.minutes)}</TimeMark>
           <Tally done={done} total={focus.tasks.length} />
         </>
@@ -148,23 +151,18 @@ function WeekendSection({ day, month, today }: { day: WeekendDay; month: Monthly
           <ZoneTag icon={weekend.icon} label={day.zone} />
         </h2>
       }
-      meta={
-        <>
-          <span>{day.dayLabel}</span>
-          <TimeMark>Optional</TimeMark>
-        </>
-      }
+      meta={<TimeMark>Optional</TimeMark>}
       note={weekend.description}
     >
-      <div className="border-b border-rule bg-band px-4 py-4 text-center">
+      <div className="border-b border-rule bg-band px-4 py-3.5">
         <p className="label text-muted">{month.name} project</p>
-        <h3 className="project-title mt-2">{month.title}</h3>
-        <p className="mt-2 text-[0.88rem] leading-relaxed">
+        <h3 className="project-title mt-1">{month.title}</h3>
+        <p className="mt-1.5 text-[1rem] leading-snug">
           <strong className="font-semibold">Choose one.</strong> The list is for the whole month — you don’t need to finish it
           now.
         </p>
       </div>
-      <div className="flex items-center justify-between pt-4 pb-1">
+      <div className="flex items-center justify-between pt-3.5 pb-0.5">
         <span className="label text-muted">This month</span>
         <Tally done={done} total={month.tasks.length} />
       </div>
@@ -175,7 +173,7 @@ function WeekendSection({ day, month, today }: { day: WeekendDay; month: Monthly
         scope="monthly"
         label={`${month.title} tasks for ${month.name}`}
       />
-      <p className="label pt-5 pb-1 text-center text-muted" aria-hidden="true">
+      <p className="label pt-4 pb-0.5 text-muted" aria-hidden="true">
         Or
       </p>
       <TaskList tasks={[weekend.catchUp]} checked={weekendChecks} onToggle={toggleWeekend} scope="weekend" label="Catch up instead" />
