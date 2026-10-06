@@ -1,0 +1,4 @@
+node_modules/
+# Logged-in WordPress cookies — never commit.
+.session.json
+**/.session.json

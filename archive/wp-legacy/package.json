@@ -1,0 +1,12 @@
+{
+  "name": "omc-wp-legacy-archive",
+  "private": true,
+  "type": "module",
+  "description": "Read-only visual archive of the legacy WordPress members site.",
+  "scripts": {
+    "capture": "node capture.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}
