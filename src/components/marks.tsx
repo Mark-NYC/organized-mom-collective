@@ -19,12 +19,14 @@ interface DayMarkProps {
   /** Zone icon (cleaning days). Months show a numeral instead. */
   icon?: string;
   number?: number;
-  /** Omit for an outlined, uncolored cell */
+  /** Weekday color. Omit both accent and color for an outlined cell. */
   accent?: Accent;
+  /** Month color hex from src/theme.ts */
+  color?: string;
   size?: 'sm' | 'md';
 }
 
-export function DayMark({ label, icon, number, accent, size = 'md' }: DayMarkProps) {
+export function DayMark({ label, icon, number, accent, color, size = 'md' }: DayMarkProps) {
   const md = size === 'md';
   const dims = icon
     ? md ? 'size-[4.5rem] p-1.5' : 'size-[3.25rem] p-1'
@@ -33,7 +35,10 @@ export function DayMark({ label, icon, number, accent, size = 'md' }: DayMarkPro
   return (
     <span
       aria-hidden="true"
-      className={`relative flex shrink-0 flex-col justify-between ${dims} ${accent ? accentClasses[accent].fill : 'border-[1.5px] border-ink'}`}
+      className={`relative flex shrink-0 flex-col justify-between ${dims} ${
+        accent ? accentClasses[accent].fill : color ? '' : 'border-[1.5px] border-ink'
+      }`}
+      style={color ? { backgroundColor: color } : undefined}
     >
       <span className={`text-[0.56rem] leading-none font-semibold ${tracking} whitespace-nowrap uppercase`}>{label}</span>
       {icon ? (

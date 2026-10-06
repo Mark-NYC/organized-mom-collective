@@ -99,3 +99,15 @@ describe('storage', () => {
     expect(readList(keys.daily('2026-10-06'))).toEqual([]);
   });
 });
+
+describe('theme', () => {
+  it('uses the canonical printed-calendar month colors', async () => {
+    const { monthColors, monthColor } = await import('../src/theme');
+    expect(monthColors.map((m) => m.hex)).toEqual([
+      '#CDDDE1', '#E8D2D6', '#C7DED3', '#DDD8E8', '#D4DFC4', '#F1D8A8',
+      '#ECCBC2', '#DCCFAE', '#CDD2BC', '#D8B79F', '#D5C5B8', '#BBCBC4',
+    ]);
+    expect(monthColor(9)).toBe('#D8B79F');
+    expect(monthColors.map((m) => m.name)).toEqual(monthlyDeepClean.map((m) => m.name));
+  });
+});

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { monthlyDeepClean } from '../data/cleaning';
-import { accentClasses } from './accent';
+import { monthColor } from '../theme';
 import { DayMark } from './marks';
 
 export default function MonthBrowser() {
@@ -10,11 +10,12 @@ export default function MonthBrowser() {
   const count = monthlyDeepClean.length;
   const prev = monthlyDeepClean[(index - 1 + count) % count];
   const next = monthlyDeepClean[(index + 1) % count];
+  const color = monthColor(month.month);
 
   return (
-    <div className={`border-t-[3px] ${accentClasses[month.accent].rule} pt-4`}>
+    <div className="border-t-[3px] pt-4" style={{ borderTopColor: color }}>
       <div className="flex items-start gap-4" aria-live="polite">
-        <DayMark label={month.name.slice(0, 3)} number={month.month + 1} accent={month.accent} />
+        <DayMark label={month.name.slice(0, 3)} number={month.month + 1} color={color} />
         <div className="min-w-0 flex-1">
           <p className="label">
             {month.name}

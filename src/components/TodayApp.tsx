@@ -6,6 +6,7 @@ import { dateKey, monthKey, weekendStart } from '../lib/dates';
 import { useCheckedSet, useToday } from '../lib/hooks';
 import { planFor } from '../lib/schedule';
 import { isOnboarded, keys, pruneOld, setOnboarded } from '../lib/storage';
+import { monthColor } from '../theme';
 import { accentClasses } from './accent';
 import { DayMark, TimeMark, shortTime } from './marks';
 import Onboarding from './Onboarding';
@@ -46,7 +47,10 @@ function Today() {
           <span className="block font-serif text-[3.4rem] leading-[0.95] font-medium tracking-[-0.01em] sm:text-[4.25rem]">
             {weekday}
           </span>
-          <span className="mt-2.5 block text-[0.82rem] font-semibold tracking-[0.3em] uppercase">{monthDay}</span>
+          <span className="mt-3 flex items-center gap-2.5 text-[0.82rem] font-semibold tracking-[0.3em] uppercase">
+            <span aria-hidden="true" className="size-3 shrink-0" style={{ backgroundColor: monthColor(today.getMonth()) }} />
+            {monthDay}
+          </span>
         </h1>
       </header>
 
@@ -90,8 +94,10 @@ function Today() {
 
 interface PlannerSectionProps {
   id: string;
-  /** Color of the heavy rule that opens the section */
-  rule: string;
+  /** Class for the heavy rule that opens the section */
+  rule?: string;
+  /** Or an exact color (month colors) */
+  ruleColor?: string;
   mark?: ReactNode;
   kicker: string;
   title: string;
@@ -102,9 +108,13 @@ interface PlannerSectionProps {
 }
 
 /** A section of the planner page: heavy rule, heading block, then ruled lines. */
-function PlannerSection({ id, rule, mark, kicker, title, note, time, tally, children }: PlannerSectionProps) {
+function PlannerSection({ id, rule = '', ruleColor, mark, kicker, title, note, time, tally, children }: PlannerSectionProps) {
   return (
-    <section aria-labelledby={`${id}-heading`} className={`border-t-[3px] ${rule} pt-4`}>
+    <section
+      aria-labelledby={`${id}-heading`}
+      className={`border-t-[3px] ${rule} pt-4`}
+      style={ruleColor ? { borderTopColor: ruleColor } : undefined}
+    >
       <div className="flex items-start gap-4">
         {mark}
         <div className="min-w-0 flex-1">
@@ -154,8 +164,8 @@ function WeekendSection({ month, today }: { month: MonthlyFocus; today: Date }) 
   return (
     <PlannerSection
       id="weekend"
-      rule={accentClasses[month.accent].rule}
-      mark={<DayMark label={weekend.shortLabel} icon={weekend.icon} accent={month.accent} />}
+      ruleColor={monthColor(month.month)}
+      mark={<DayMark label={weekend.shortLabel} icon={weekend.icon} color={monthColor(month.month)} />}
       kicker={weekend.title}
       title={month.title}
       time="Optional"

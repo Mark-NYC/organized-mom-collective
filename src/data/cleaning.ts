@@ -6,6 +6,7 @@
  * in the browser. If you reword a task, keep its id; if you replace a task
  * with something different, give it a new id.
  *
+ * Month colors live in src/theme.ts.
  * Zone icons live in public/icons/zones/ (source artwork in design/zone-icons/).
  */
 
@@ -45,7 +46,6 @@ export interface MonthlyFocus {
   name: string;
   title: string;
   description: string;
-  accent: Accent;
   tasks: Task[];
 }
 
@@ -160,7 +160,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'January',
     title: 'Kitchen Reset',
     description: 'A fresh start for the room you use most.',
-    accent: 'blue',
     tasks: [
       { id: 'jan-pantry', label: 'Clear out expired pantry items' },
       { id: 'jan-fridge', label: 'Empty and wipe down the fridge' },
@@ -174,7 +173,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'February',
     title: 'Bedrooms + Closets',
     description: 'Quieter rooms for the middle of winter.',
-    accent: 'blush',
     tasks: [
       { id: 'feb-mattress', label: 'Rotate or vacuum mattresses' },
       { id: 'feb-pillows', label: 'Wash pillows and duvets' },
@@ -188,7 +186,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'March',
     title: 'Spring Prep',
     description: 'Let a little more light in.',
-    accent: 'green',
     tasks: [
       { id: 'mar-baseboards', label: 'Wipe baseboards in main rooms' },
       { id: 'mar-vents', label: 'Dust vents and ceiling fans' },
@@ -202,7 +199,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'April',
     title: 'Windows + Entry',
     description: 'A welcoming way in and clearer views out.',
-    accent: 'apricot',
     tasks: [
       { id: 'apr-windows', label: 'Wash inside windows' },
       { id: 'apr-sills', label: 'Wipe window sills and tracks' },
@@ -216,7 +212,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'May',
     title: 'Living Areas',
     description: 'Comfortable spaces for longer evenings.',
-    accent: 'blue',
     tasks: [
       { id: 'may-cushions', label: 'Vacuum under sofa cushions' },
       { id: 'may-shelves', label: 'Declutter one bookshelf or shelf' },
@@ -230,7 +225,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'June',
     title: 'Outdoor / Summer Prep',
     description: 'Get ready to spend more time outside.',
-    accent: 'green',
     tasks: [
       { id: 'jun-furniture', label: 'Wipe down outdoor furniture' },
       { id: 'jun-porch', label: 'Sweep porch or patio' },
@@ -244,7 +238,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'July',
     title: 'Kitchen Deep Clean',
     description: 'The midyear kitchen refresh.',
-    accent: 'apricot',
     tasks: [
       { id: 'jul-oven', label: 'Clean the oven' },
       { id: 'jul-range-hood', label: 'Degrease the range hood and filter' },
@@ -258,7 +251,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'August',
     title: 'Bedrooms + Back-to-School',
     description: 'Set the kids up for a calmer fall.',
-    accent: 'blush',
     tasks: [
       { id: 'aug-outgrown', label: 'Pull outgrown clothes' },
       { id: 'aug-desk', label: 'Set up a homework spot' },
@@ -272,7 +264,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'September',
     title: 'Entry + Storage',
     description: 'Make the everyday comings and goings easier.',
-    accent: 'green',
     tasks: [
       { id: 'sep-hooks', label: 'Clear and reorganize entry hooks' },
       { id: 'sep-bins', label: 'Label or reset storage bins' },
@@ -286,7 +277,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'October',
     title: 'Closet Cleanout',
     description: 'Make room before the cold-weather swap.',
-    accent: 'apricot',
     tasks: [
       { id: 'oct-unworn', label: 'Remove clothes you no longer wear' },
       { id: 'oct-shelf', label: 'Organize one closet shelf' },
@@ -300,7 +290,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'November',
     title: 'Kitchen + Hosting Prep',
     description: 'Get ready to gather.',
-    accent: 'blush',
     tasks: [
       { id: 'nov-fridge', label: 'Clear space in the fridge and freezer' },
       { id: 'nov-serving', label: 'Find and wash serving dishes' },
@@ -314,7 +303,6 @@ export const monthlyDeepClean: MonthlyFocus[] = [
     name: 'December',
     title: 'Holiday Reset + Declutter',
     description: 'Make room for what matters.',
-    accent: 'blue',
     tasks: [
       { id: 'dec-toys', label: 'Clear old toys before new ones arrive' },
       { id: 'dec-decor', label: 'Sort holiday decor — keep what you love' },

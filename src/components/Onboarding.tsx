@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { dailyEssentials, weekend, weeklySchedule } from '../data/cleaning';
+import { monthColor } from '../theme';
 import { accentClasses } from './accent';
 import { DayMark, CalendarEdge, TimeMark, Wordmark, shortTime } from './marks';
 
@@ -88,7 +89,7 @@ export default function Onboarding({ onDone }: Props) {
                   time="10–15 min"
                 />
                 <RhythmRow
-                  mark={<DayMark label={weekend.shortLabel} icon={weekend.icon} accent="apricot" size="sm" />}
+                  mark={<DayMark label={weekend.shortLabel} icon={weekend.icon} color={monthColor(new Date().getMonth())} size="sm" />}
                   when="Fri–Sun"
                   what="A deep-clean project, seasonal project, or catch-up"
                   time="Optional"
