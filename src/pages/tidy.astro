@@ -41,14 +41,14 @@ const principles = [
       {
         weeklySchedule.map((d) => (
           <li class="flex items-center gap-4 border-b border-rule py-3 sm:flex-col sm:items-start sm:gap-3 sm:border-r sm:border-b-0 sm:p-4 sm:first:pl-0">
-            <DayMark label={d.shortLabel} number={d.day} accent={d.accent} size="sm" />
+            <DayMark label={d.shortLabel} icon={d.icon} accent={d.accent} size="sm" />
             <span class="flex-1 text-[0.78rem] font-semibold tracking-[0.16em] uppercase sm:min-h-10"><span class="sr-only">{d.dayLabel}: </span>{d.zone}</span>
             <TimeMark>{shortTime(d.minutes)}</TimeMark>
           </li>
         ))
       }
       <li class="flex items-center gap-4 border-b border-rule py-3 sm:flex-col sm:items-start sm:gap-3 sm:border-b-0 sm:p-4 sm:pr-0">
-        <DayMark label={weekend.shortLabel} number={5} size="sm" />
+        <DayMark label={weekend.shortLabel} icon={weekend.icon} size="sm" />
         <span class="flex-1 text-[0.78rem] font-semibold tracking-[0.16em] uppercase sm:min-h-10"><span class="sr-only">Friday to Sunday: </span>Deep clean / catch up</span>
         <TimeMark>Optional</TimeMark>
       </li>

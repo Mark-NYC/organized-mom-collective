@@ -1,0 +1,6 @@
+<!-- Redrawn placeholder of the "daily tidy" sparkles icon. Replace public/icons/zones/daily.png with the original artwork when available. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none" stroke="#26302e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M76 78 Q81 113 116 118 Q81 123 76 158 Q71 123 36 118 Q71 113 76 78 Z"/>
+  <path d="M130 34 Q133 57 156 60 Q133 63 130 86 Q127 63 104 60 Q127 57 130 34 Z"/>
+  <path d="M82 108 q4 -1 5 -5" stroke-width="6"/>
+</svg>

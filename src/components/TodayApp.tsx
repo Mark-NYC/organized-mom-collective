@@ -54,6 +54,7 @@ function Today() {
         <PlannerSection
           id="daily"
           rule="border-ink"
+          mark={<DayMark label="Daily" icon={dailyEssentials.icon} />}
           kicker="Every day"
           title={dailyEssentials.title}
           time={shortTime(dailyEssentials.minutes)}
@@ -133,7 +134,7 @@ function FocusSection({ focus, date }: { focus: WeekdayFocus; date: string }) {
     <PlannerSection
       id="focus"
       rule={accentClasses[focus.accent].rule}
-      mark={<DayMark label={focus.shortLabel} number={focus.day} accent={focus.accent} />}
+      mark={<DayMark label={focus.shortLabel} icon={focus.icon} accent={focus.accent} />}
       kicker={`${focus.dayLabel} / ${focus.zone}`}
       title={focus.title}
       note={focus.description}
@@ -154,7 +155,7 @@ function WeekendSection({ month, today }: { month: MonthlyFocus; today: Date }) 
     <PlannerSection
       id="weekend"
       rule={accentClasses[month.accent].rule}
-      mark={<DayMark label={weekend.shortLabel} number={5} accent={month.accent} />}
+      mark={<DayMark label={weekend.shortLabel} icon={weekend.icon} accent={month.accent} />}
       kicker={weekend.title}
       title={month.title}
       time="Optional"

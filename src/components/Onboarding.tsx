@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { dailyEssentials, weeklySchedule } from '../data/cleaning';
+import { dailyEssentials, weekend, weeklySchedule } from '../data/cleaning';
 import { accentClasses } from './accent';
 import { DayMark, CalendarEdge, TimeMark, Wordmark, shortTime } from './marks';
 
@@ -70,14 +70,14 @@ export default function Onboarding({ onDone }: Props) {
               {heading('A simple weekly rhythm.')}
               <ol className="mt-8 border-t-[3px] border-ink">
                 <RhythmRow
-                  mark={<span aria-hidden="true" className="flex h-12 w-12 shrink-0 bg-ink p-1 text-[0.56rem] leading-none font-semibold tracking-[0.14em] text-paper uppercase">Daily</span>}
+                  mark={<DayMark label="Daily" icon={dailyEssentials.icon} size="sm" />}
                   when="Every day"
                   what="A few essential reset tasks"
                   time={shortTime(dailyEssentials.minutes)}
                 />
                 <RhythmRow
                   mark={
-                    <span className="grid h-12 w-12 shrink-0 grid-cols-2 grid-rows-2" aria-hidden="true">
+                    <span className="grid size-[3.25rem] shrink-0 grid-cols-2 grid-rows-2" aria-hidden="true">
                       {weeklySchedule.map((d) => (
                         <span key={d.day} className={accentClasses[d.accent].fill} />
                       ))}
@@ -88,7 +88,7 @@ export default function Onboarding({ onDone }: Props) {
                   time="10–15 min"
                 />
                 <RhythmRow
-                  mark={<DayMark label="Fri–Sun" number={5} accent="apricot" size="sm" />}
+                  mark={<DayMark label={weekend.shortLabel} icon={weekend.icon} accent="apricot" size="sm" />}
                   when="Fri–Sun"
                   what="A deep-clean project, seasonal project, or catch-up"
                   time="Optional"

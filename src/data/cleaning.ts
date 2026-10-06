@@ -5,6 +5,8 @@
  * from this file. Each task has a stable `id` used to remember checkbox state
  * in the browser. If you reword a task, keep its id; if you replace a task
  * with something different, give it a new id.
+ *
+ * Zone icons live in public/icons/zones/ (source artwork in design/zone-icons/).
  */
 
 export type Accent = 'blue' | 'blush' | 'green' | 'apricot';
@@ -16,6 +18,7 @@ export interface Task {
 
 export interface DailyEssentials {
   title: string;
+  icon: string;
   minutes: string;
   description: string;
   tasks: Task[];
@@ -29,6 +32,7 @@ export interface WeekdayFocus {
   title: string;
   /** Short name used in the weekly overview */
   zone: string;
+  icon: string;
   minutes: string;
   description: string;
   accent: Accent;
@@ -47,6 +51,7 @@ export interface MonthlyFocus {
 
 export const dailyEssentials: DailyEssentials = {
   title: 'Daily Reset',
+  icon: '/icons/zones/daily.png',
   minutes: '15 minutes',
   description: 'A few small things that keep the house from getting away from you.',
   tasks: [
@@ -65,6 +70,7 @@ export const weeklySchedule: WeekdayFocus[] = [
     shortLabel: 'Mon',
     title: 'Living Room Reset',
     zone: 'Living Room',
+    icon: '/icons/zones/living-room.png',
     minutes: '10 minutes',
     description: 'Start the week with a calm main space.',
     accent: 'blue',
@@ -82,6 +88,7 @@ export const weeklySchedule: WeekdayFocus[] = [
     shortLabel: 'Tue',
     title: 'Bedroom Reset',
     zone: 'Bedrooms',
+    icon: '/icons/zones/bedroom.png',
     minutes: '10 minutes',
     description: 'A peaceful room to end the day in.',
     accent: 'blush',
@@ -99,6 +106,7 @@ export const weeklySchedule: WeekdayFocus[] = [
     shortLabel: 'Wed',
     title: 'Entry + Bathrooms',
     zone: 'Entry + Bathrooms',
+    icon: '/icons/zones/bathroom.png',
     minutes: '10–15 minutes',
     description: 'A midweek refresh for the busiest spots.',
     accent: 'green',
@@ -119,6 +127,7 @@ export const weeklySchedule: WeekdayFocus[] = [
     shortLabel: 'Thu',
     title: 'Kitchen Blitz',
     zone: 'Kitchen',
+    icon: '/icons/zones/kitchen.png',
     minutes: '15 minutes',
     description: 'Reset the heart of the home before the weekend.',
     accent: 'apricot',
@@ -139,6 +148,7 @@ export const weekend = {
   title: 'Deep Clean / Catch Up',
   shortLabel: 'Fri–Sun',
   zone: 'Deep clean, seasonal project or catch up',
+  icon: '/icons/zones/deep-clean.png',
   description:
     'Friday through Sunday are flexible. Pick one thing from this month’s project, or simply catch up on anything you missed. Some weekends, rest is the plan.',
   catchUp: { id: 'catch-up', label: 'Catch up on this week’s cleaning instead' } as Task,

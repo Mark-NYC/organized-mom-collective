@@ -24,6 +24,7 @@ npm test          # unit tests (schedule + storage logic)
 | --- | --- |
 | **Cleaning tasks** (daily essentials, Mon–Thu focus, weekend copy, 12-month rotation) | `src/data/cleaning.ts` |
 | **Reorder URL** | `src/config.ts` → `REORDER_URL` |
+| Zone icons (daily, Mon–Thu rooms, weekend) | `public/icons/zones/*.png` (originals in `design/zone-icons/`), assigned in `src/data/cleaning.ts` |
 | Colors and fonts | `src/styles/global.css` (`@theme`) |
 | Pages (`/`, `/tidy`, `/reorder`, `/settings`) | `src/pages/` |
 | UI components | `src/components/` |
