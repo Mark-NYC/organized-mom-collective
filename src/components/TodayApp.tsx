@@ -49,7 +49,7 @@ function Today() {
         </h1>
       </header>
 
-      <div className="mt-7 grid gap-7 md:mt-10 md:grid-cols-2 md:gap-x-12">
+      <div className="mt-7 grid gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12">
         <Section
           id="daily"
           first
@@ -100,13 +100,13 @@ interface SectionProps {
 /** One block of the day: a single heading line (title left, time + tally right), optional note, then ruled tasks. */
 function Section({ id, heading, meta, note, first, children }: SectionProps) {
   return (
-    <section aria-labelledby={`${id}-heading`} className={first ? '' : 'border-t border-rule-strong pt-5 md:border-t-0 md:pt-0'}>
+    <section aria-labelledby={`${id}-heading`} className={first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}>
       <div className="flex min-h-9 items-center justify-between gap-3">
         <div className="min-w-0">{heading}</div>
         <div className="flex shrink-0 items-center gap-3">{meta}</div>
       </div>
-      {note && <p className="mt-2 text-[1rem] leading-snug text-muted">{note}</p>}
-      <div className="mt-3 border-t border-rule-strong">{children}</div>
+      {note && <p className="mt-1 text-[1rem] leading-snug text-muted">{note}</p>}
+      <div className="mt-2.5 border-t border-rule-strong">{children}</div>
     </section>
   );
 }

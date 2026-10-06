@@ -29,6 +29,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+    /* Keep keyboard-focused rows clear of the fixed bottom nav on phones. */
+    scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
   body {
     @apply bg-paper font-sans text-ink antialiased;
