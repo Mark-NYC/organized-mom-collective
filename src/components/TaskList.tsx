@@ -8,14 +8,15 @@ interface TaskCheckboxProps {
   scope: string;
 }
 
+/**
+ * One ruled planner line: a square printed box, and a pen tick that
+ * overshoots it when checked.
+ */
 export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxProps) {
   const inputId = `${scope}-${task.id}`;
   return (
-    <li>
-      <label
-        htmlFor={inputId}
-        className="group flex min-h-12 cursor-pointer items-center gap-3.5 rounded-xl py-2.5 pr-2 select-none"
-      >
+    <li className="border-b border-rule">
+      <label htmlFor={inputId} className="group flex min-h-[3.25rem] cursor-pointer items-center gap-4 py-3 select-none">
         <input
           id={inputId}
           type="checkbox"
@@ -25,23 +26,25 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
         />
         <span
           aria-hidden="true"
-          className="grid size-6 shrink-0 place-items-center rounded-md border-[1.5px] border-faint bg-card transition-colors group-hover:border-sage peer-checked:border-sage peer-checked:bg-sage peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-sage"
+          className="relative size-[1.15rem] shrink-0 border-[1.5px] border-ink transition-colors group-hover:bg-ink/5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-sage"
         >
           <svg
-            viewBox="0 0 16 16"
-            className={`size-3.5 text-white transition-opacity ${checked ? 'opacity-100' : 'opacity-0'}`}
+            viewBox="0 0 28 28"
+            className={`absolute -top-[0.7rem] -right-[0.55rem] size-[1.75rem] overflow-visible text-sage transition-opacity ${
+              checked ? 'opacity-100' : 'opacity-0'
+            }`}
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.2"
+            strokeWidth="2.6"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M3.5 8.5l3 3 6-7" />
+            <path d="M4 15.5c2 1.6 3.7 3.6 5.3 6.2C13 13.6 18 7.4 25 2.5" />
           </svg>
         </span>
         <span
-          className={`text-[0.98rem] leading-snug transition-colors ${
-            checked ? 'text-faint line-through decoration-faint/60' : 'text-ink'
+          className={`text-[1rem] leading-snug transition-colors ${
+            checked ? 'text-faint line-through decoration-faint/70 decoration-1' : 'text-ink'
           }`}
         >
           {task.label}
@@ -61,7 +64,7 @@ interface TaskListProps {
 
 export function TaskList({ tasks, checked, onToggle, scope, label }: TaskListProps) {
   return (
-    <ul aria-label={label} className="divide-y divide-line/70">
+    <ul aria-label={label}>
       {tasks.map((task) => (
         <TaskCheckbox key={task.id} task={task} checked={checked.has(task.id)} onToggle={onToggle} scope={scope} />
       ))}
@@ -69,11 +72,11 @@ export function TaskList({ tasks, checked, onToggle, scope, label }: TaskListPro
   );
 }
 
-/** "2 of 5" — quiet progress, not a score. */
-export function Progress({ done, total }: { done: number; total: number }) {
+/** Quiet tally, "2 / 5" — not a score. */
+export function Tally({ done, total }: { done: number; total: number }) {
   return (
-    <p className="text-sm text-muted tabular-nums" aria-live="polite">
-      {done === total && total > 0 ? 'All done' : `${done} of ${total}`}
+    <p className="text-[0.7rem] font-medium tracking-[0.16em] text-muted uppercase tabular-nums" aria-live="polite">
+      {done === total && total > 0 ? 'Done' : `${done} / ${total}`}
     </p>
   );
 }

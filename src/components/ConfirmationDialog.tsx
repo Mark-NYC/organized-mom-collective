@@ -28,20 +28,20 @@ export default function ConfirmationDialog({ open, title, message, confirmLabel,
         onCancel();
       }}
       aria-labelledby="confirm-title"
-      className="m-auto w-[calc(100%-2.5rem)] max-w-sm rounded-2xl border border-line bg-card p-6 text-ink shadow-soft backdrop:bg-ink/30"
+      className="m-auto w-[calc(100%-2.5rem)] max-w-sm border-t-[3px] border-ink bg-paper p-6 text-ink backdrop:bg-ink/40"
     >
-      <h2 id="confirm-title" className="font-serif text-2xl font-semibold">
+      <h2 id="confirm-title" className="font-serif text-[1.85rem] leading-tight font-semibold">
         {title}
       </h2>
       <p className="mt-2 leading-relaxed text-muted">{message}</p>
-      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t border-rule pt-5 sm:flex-row sm:justify-end">
         <button type="button" onClick={onCancel} className="btn-secondary" autoFocus>
           Cancel
         </button>
         <button
           type="button"
           onClick={onConfirm}
-          className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#8c3b3b] px-5 text-[0.9rem] font-medium text-white hover:bg-[#743030]"
+          className="inline-flex min-h-11 items-center justify-center rounded-[2px] bg-[#8c3b3b] px-5 text-[0.72rem] font-semibold tracking-[0.16em] text-white uppercase hover:bg-[#743030]"
         >
           {confirmLabel}
         </button>

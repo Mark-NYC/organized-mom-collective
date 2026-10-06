@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { dailyEssentials } from '../data/cleaning';
+import type { ReactNode } from 'react';
+import { dailyEssentials, weeklySchedule } from '../data/cleaning';
+import { accentClasses } from './accent';
+import { DayMark, CalendarEdge, TimeMark, Wordmark, shortTime } from './marks';
 
 interface Props {
   onDone: () => void;
 }
-
-const rhythm = [
-  { when: 'Every day', what: 'A few essential reset tasks', time: dailyEssentials.minutes.replace('minutes', 'min'), dot: 'bg-green' },
-  { when: 'Mon–Thu', what: 'Quick room-focused cleaning', time: '10–15 min', dot: 'bg-blue' },
-  { when: 'Fri–Sun', what: 'A deep-clean project, seasonal project, or catch-up', time: 'Optional', dot: 'bg-apricot' },
-];
 
 export default function Onboarding({ onDone }: Props) {
   const [step, setStep] = useState(0);
@@ -20,107 +17,132 @@ export default function Onboarding({ onDone }: Props) {
     headingRef.current?.focus();
   }, [step]);
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="onboarding-heading"
-      className="fixed inset-0 z-50 overflow-y-auto bg-paper"
+  const heading = (text: string) => (
+    <h1
+      id="onboarding-heading"
+      ref={headingRef}
+      tabIndex={-1}
+      className="mt-5 font-serif text-[2.6rem] leading-[1.02] font-medium tracking-[-0.01em] outline-none"
     >
-      <div className="mx-auto flex min-h-dvh max-w-md flex-col px-6 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
-        <div className="flex h-11 items-center justify-between">
-          <p className="font-serif text-[1.35rem] font-semibold">
-            Organized <span className="font-medium italic">Mom</span>
-          </p>
+      {text}
+    </h1>
+  );
+
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="onboarding-heading" className="fixed inset-0 z-50 overflow-y-auto bg-paper">
+      <CalendarEdge />
+      <div className="mx-auto flex min-h-[calc(100dvh-0.25rem)] max-w-md flex-col px-6 pt-[env(safe-area-inset-top)] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <div className="flex h-14 items-center justify-between border-b border-rule">
+          <Wordmark />
           {step < last && (
-            <button type="button" onClick={onDone} className="-mr-3 min-h-11 px-3 text-sm text-muted hover:text-ink">
+            <button
+              type="button"
+              onClick={onDone}
+              className="-mr-2 min-h-11 px-2 text-[0.66rem] font-semibold tracking-[0.18em] text-faint uppercase hover:text-ink"
+            >
               Skip
             </button>
           )}
         </div>
 
-        <div className="flex flex-1 flex-col justify-center py-10">
+        <div className="flex-1 pt-10 pb-10">
+          <p className="rule-label text-muted">
+            <span className="tabular-nums">
+              {String(step + 1).padStart(2, '0')} / 03
+            </span>
+          </p>
+
           {step === 0 && (
             <>
-              <p className="eyebrow">Welcome</p>
-              <h1 id="onboarding-heading" ref={headingRef} tabIndex={-1} className="mt-4 font-serif text-[2.4rem] leading-[1.08] font-medium outline-none">
-                Welcome to your Organized Mom cleaning system.
-              </h1>
-              <div className="mt-8 border-l-2 border-blush pl-5">
-                <p className="font-serif text-[1.45rem] leading-snug italic">
-                  You don’t need to clean the whole house every day.
-                </p>
-              </div>
-              <p className="mt-6 text-[1.05rem] leading-relaxed text-muted">
-                Your calendar helps you plan the week. This companion tells you which part of the house to tackle today: a small daily reset, plus one area to focus on.
+              {heading('Welcome to your Organized Mom cleaning system.')}
+              <p className="mt-8 border-l-[3px] border-blush pl-4 font-serif text-[1.45rem] leading-snug italic">
+                You don’t need to clean the whole house every day.
+              </p>
+              <p className="mt-6 text-[1.02rem] leading-relaxed text-muted">
+                Your calendar helps you plan the week. This companion tells you which part of the house to tackle today:
+                a small daily reset, plus one area to focus on.
               </p>
             </>
           )}
 
           {step === 1 && (
             <>
-              <p className="eyebrow">How it works</p>
-              <h1 id="onboarding-heading" ref={headingRef} tabIndex={-1} className="mt-4 font-serif text-[2.4rem] leading-[1.08] font-medium outline-none">
-                A simple weekly rhythm.
-              </h1>
-              <ul className="mt-8 space-y-3">
-                {rhythm.map((r) => (
-                  <li key={r.when} className="card flex gap-4 p-5">
-                    <span aria-hidden="true" className={`mt-1.5 size-2.5 shrink-0 rounded-full ${r.dot}`} />
-                    <div className="flex-1">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <p className="text-sm font-semibold tracking-[0.12em] uppercase">{r.when}</p>
-                        <p className="text-xs text-muted">{r.time}</p>
-                      </div>
-                      <p className="mt-1 leading-snug text-muted">{r.what}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {heading('A simple weekly rhythm.')}
+              <ol className="mt-8 border-t-[3px] border-ink">
+                <RhythmRow
+                  mark={<span aria-hidden="true" className="flex h-12 w-12 shrink-0 bg-ink p-1 text-[0.56rem] leading-none font-semibold tracking-[0.14em] text-paper uppercase">Daily</span>}
+                  when="Every day"
+                  what="A few essential reset tasks"
+                  time={shortTime(dailyEssentials.minutes)}
+                />
+                <RhythmRow
+                  mark={
+                    <span className="grid h-12 w-12 shrink-0 grid-cols-2 grid-rows-2" aria-hidden="true">
+                      {weeklySchedule.map((d) => (
+                        <span key={d.day} className={accentClasses[d.accent].fill} />
+                      ))}
+                    </span>
+                  }
+                  when="Mon–Thu"
+                  what="One room, quick and focused"
+                  time="10–15 min"
+                />
+                <RhythmRow
+                  mark={<DayMark label="Fri–Sun" number={5} accent="apricot" size="sm" />}
+                  when="Fri–Sun"
+                  what="A deep-clean project, seasonal project, or catch-up"
+                  time="Optional"
+                />
+              </ol>
             </>
           )}
 
           {step === 2 && (
             <>
-              <p className="eyebrow">You’re set</p>
-              <h1 id="onboarding-heading" ref={headingRef} tabIndex={-1} className="mt-4 font-serif text-[2.4rem] leading-[1.08] font-medium outline-none">
-                Open this each day. We’ll show you what to do.
-              </h1>
-              <p className="mt-6 text-[1.05rem] leading-relaxed text-muted">
+              {heading('Open this each day. We’ll show you what to do.')}
+              <p className="mt-8 text-[1.02rem] leading-relaxed text-muted">
                 Check things off as you go. Your progress stays on this phone — no account, no sign-up.
               </p>
-              <p className="mt-4 text-[1.05rem] leading-relaxed text-muted">
+              <p className="mt-6 border-l-[3px] border-green pl-4 font-serif text-[1.3rem] leading-snug italic">
                 Missed a day? Nothing piles up. Tomorrow starts fresh.
               </p>
             </>
           )}
         </div>
 
-        <div>
-          <div className="mb-6 flex justify-center gap-2" aria-hidden="true">
-            {[0, 1, 2].map((i) => (
-              <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? 'w-6 bg-ink' : 'w-1.5 bg-line'}`} />
-            ))}
-          </div>
-          <p className="sr-only" aria-live="polite">
-            Step {step + 1} of 3
-          </p>
-          <div className="flex items-center gap-3">
-            {step > 0 && (
-              <button type="button" onClick={() => setStep(step - 1)} className="btn-secondary">
-                Back
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => (step === last ? onDone() : setStep(step + 1))}
-              className="btn-primary flex-1"
-            >
-              {step === last ? 'Start My Week' : 'Next'}
+        <p className="sr-only" aria-live="polite">
+          Step {step + 1} of 3
+        </p>
+        <div className="flex items-center gap-5 border-t border-rule pt-5">
+          {step > 0 && (
+            <button type="button" onClick={() => setStep(step - 1)} className="text-link min-h-11">
+              Back
             </button>
-          </div>
+          )}
+          <button
+            type="button"
+            onClick={() => (step === last ? onDone() : setStep(step + 1))}
+            className="btn-primary flex-1"
+          >
+            {step === last ? 'Start My Week' : 'Next'}
+          </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function RhythmRow({ mark, when, what, time }: { mark: ReactNode; when: string; what: string; time: string }) {
+  return (
+    <li className="flex items-center gap-4 border-b border-rule py-4">
+      {mark}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-3">
+          <p className="label">{when}</p>
+          <TimeMark>{time}</TimeMark>
+        </div>
+        <p className="mt-1.5 leading-snug text-muted">{what}</p>
+      </div>
+    </li>
   );
 }

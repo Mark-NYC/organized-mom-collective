@@ -22,7 +22,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#fbf8f3" />
+    <meta name="theme-color" content="#faf7f1" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -42,11 +42,11 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
   <body class="min-h-dvh">
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-card focus:px-4 focus:py-2"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-paper focus:border focus:border-ink focus:px-4 focus:py-2"
       >Skip to content</a
     >
     <Nav />
-    <main id="main" class="mx-auto max-w-3xl px-5 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:pt-10 sm:pb-16">
+    <main id="main" class="mx-auto max-w-5xl px-5 pt-8 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-14 sm:pb-20">
       <slot />
     </main>
     <script is:inline>

@@ -1,9 +1,9 @@
 import type { Accent } from '../data/cleaning';
 
 /** Tailwind classes per calendar color. Full class names so Tailwind can see them. */
-export const accentClasses: Record<Accent, { tint: string; dot: string; border: string }> = {
-  blue: { tint: 'bg-blue-tint', dot: 'bg-blue', border: 'border-blue' },
-  blush: { tint: 'bg-blush-tint', dot: 'bg-blush', border: 'border-blush' },
-  green: { tint: 'bg-green-tint', dot: 'bg-green', border: 'border-green' },
-  apricot: { tint: 'bg-apricot-tint', dot: 'bg-apricot', border: 'border-apricot' },
+export const accentClasses: Record<Accent, { fill: string; rule: string }> = {
+  blue: { fill: 'bg-blue', rule: 'border-blue' },
+  blush: { fill: 'bg-blush', rule: 'border-blush' },
+  green: { fill: 'bg-green', rule: 'border-green' },
+  apricot: { fill: 'bg-apricot', rule: 'border-apricot' },
 };

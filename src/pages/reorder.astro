@@ -1,28 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { CalendarEdge } from '../components/marks';
 import { BRAND_NAME, REORDER_URL } from '../config';
 ---
 
 <Layout title="Reorder" description={`Order your next six-month ${BRAND_NAME} family calendar.`}>
-  <div class="mx-auto max-w-xl">
-    <div class="card overflow-hidden">
-      <div class="grid grid-cols-4" aria-hidden="true">
-        <span class="h-2 bg-blue"></span><span class="h-2 bg-blush"></span><span class="h-2 bg-green"></span><span class="h-2 bg-apricot"></span>
+  <div class="max-w-xl">
+    <p class="rule-label text-muted">Reorder</p>
+    <h1 class="mt-4 font-serif text-[2.9rem] leading-[0.98] font-medium tracking-[-0.01em] sm:text-[3.75rem]">
+      Ready for your next calendar?
+    </h1>
+    <p class="mt-5 text-[1.02rem] leading-relaxed text-muted">
+      Keep your family planning system going with your next six-month {BRAND_NAME} calendar.
+    </p>
+
+    <div class="mt-10">
+      <CalendarEdge className="h-2" />
+      <div class="grid grid-cols-6 border-b border-rule" aria-hidden="true">
+        {Array.from({ length: 6 }, (_, i) => (
+          <span class="border-r border-rule px-1.5 pt-1.5 pb-7 text-[0.6rem] font-semibold tracking-[0.12em] text-faint last:border-r-0 tabular-nums">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+        ))}
       </div>
-      <div class="px-6 pt-8 pb-8 text-center sm:px-10 sm:pt-12 sm:pb-10">
-        <p class="eyebrow">Reorder</p>
-        <h1 class="mt-3 font-serif text-[2.35rem] leading-tight font-medium sm:text-5xl">Ready for your next calendar?</h1>
-        <p class="mx-auto mt-4 max-w-sm text-[1.02rem] leading-relaxed text-muted">
-          Keep your family planning system going with your next six-month {BRAND_NAME} calendar.
-        </p>
-        <a href={REORDER_URL} class="btn-primary mt-8 w-full sm:w-auto" rel="noopener">Order My Next Calendar</a>
-        <p class="mt-4 text-xs text-faint">Opens our shop.</p>
-      </div>
+      <p class="mt-2 label text-muted">Six months · one wall</p>
     </div>
 
-    <section aria-labelledby="when-h" class="mt-6 px-1">
-      <h2 id="when-h" class="font-serif text-xl font-semibold">When to reorder</h2>
-      <p class="mt-1.5 leading-relaxed text-muted">
+    <a href={REORDER_URL} class="btn-primary mt-10 w-full sm:w-auto" rel="noopener">Order My Next Calendar</a>
+
+    <section aria-labelledby="when-h" class="mt-14 border-t border-ink pt-5">
+      <h2 id="when-h" class="font-serif text-[1.6rem] leading-tight font-semibold">When to reorder</h2>
+      <p class="mt-2 leading-relaxed text-muted">
         About a month before your last page, so the new one arrives before the old one runs out. Your cleaning checklist
         here keeps working either way.
       </p>

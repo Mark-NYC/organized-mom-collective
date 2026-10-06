@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus } from '../data/cleaning';
-import { dateKey, formatLongDate, monthKey, weekendStart } from '../lib/dates';
+import { dateKey, monthKey, weekendStart } from '../lib/dates';
 import { useCheckedSet, useToday } from '../lib/hooks';
 import { planFor } from '../lib/schedule';
 import { isOnboarded, keys, pruneOld, setOnboarded } from '../lib/storage';
 import { accentClasses } from './accent';
+import { DayMark, TimeMark, shortTime } from './marks';
 import Onboarding from './Onboarding';
-import { Progress, TaskList } from './TaskList';
+import { Tally, TaskList } from './TaskList';
 
 export default function TodayApp() {
   const [onboarded, setOnboardedState] = useState(isOnboarded);
@@ -33,34 +35,30 @@ function Today() {
   const [daily, toggleDaily] = useCheckedSet(keys.daily(date));
   const dailyDone = dailyEssentials.tasks.filter((t) => daily.has(t.id)).length;
 
-  const focusLabel = plan.kind === 'weekday' ? plan.focus.zone : 'Weekend project';
-  const focusTime = plan.kind === 'weekday' ? plan.focus.minutes.replace('minutes', 'min') : 'optional';
+  const weekday = today.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthDay = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
   return (
-    <div className="space-y-5">
-      <header className="pb-1">
-        <p className="eyebrow">Today</p>
-        <h1 className="mt-1.5 font-serif text-[2.35rem] leading-tight font-medium sm:text-5xl">{formatLongDate(today)}</h1>
-        <p className="mt-2 text-[0.95rem] text-muted">
-          Daily reset <span className="text-faint">·</span> {dailyEssentials.minutes.replace('minutes', 'min')}
-          <span className="mx-2 text-line" aria-hidden="true">|</span>
-          {focusLabel} <span className="text-faint">·</span> {focusTime}
-        </p>
+    <div>
+      <header>
+        <p className="rule-label text-muted">Today</p>
+        <h1 className="mt-4">
+          <span className="block font-serif text-[3.4rem] leading-[0.95] font-medium tracking-[-0.01em] sm:text-[4.25rem]">
+            {weekday}
+          </span>
+          <span className="mt-2.5 block text-[0.82rem] font-semibold tracking-[0.3em] uppercase">{monthDay}</span>
+        </h1>
       </header>
 
-      <section aria-labelledby="daily-heading" className="card px-5 pt-5 pb-3 sm:px-7 sm:pt-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="eyebrow">Every day · {dailyEssentials.minutes}</p>
-            <h2 id="daily-heading" className="mt-1 font-serif text-[1.7rem] leading-tight font-semibold">
-              Today’s reset
-            </h2>
-          </div>
-          <div className="pt-1">
-            <Progress done={dailyDone} total={dailyEssentials.tasks.length} />
-          </div>
-        </div>
-        <div className="mt-2">
+      <div className="mt-10 grid gap-12 md:mt-12 md:grid-cols-2 md:gap-x-14">
+        <PlannerSection
+          id="daily"
+          rule="border-ink"
+          kicker="Every day"
+          title={dailyEssentials.title}
+          time={shortTime(dailyEssentials.minutes)}
+          tally={<Tally done={dailyDone} total={dailyEssentials.tasks.length} />}
+        >
           <TaskList
             tasks={dailyEssentials.tasks}
             checked={daily}
@@ -68,109 +66,126 @@ function Today() {
             scope="daily"
             label="Daily reset tasks"
           />
-        </div>
-      </section>
+        </PlannerSection>
 
-      {plan.kind === 'weekday' ? (
-        <FocusCard focus={plan.focus} date={date} />
-      ) : (
-        <WeekendCard month={plan.month} today={today} />
-      )}
+        {plan.kind === 'weekday' ? (
+          <FocusSection focus={plan.focus} date={date} />
+        ) : (
+          <WeekendSection month={plan.month} today={today} />
+        )}
+      </div>
 
-      <footer className="space-y-3 pt-4 text-center text-sm text-muted">
-        <p>
-          New here? <a href="/tidy" className="text-ink underline decoration-line underline-offset-4 hover:decoration-ink">See how the system works</a>
-        </p>
-        <p className="text-faint">
-          Nearing the end of your calendar?{' '}
-          <a href="/reorder" className="underline decoration-line underline-offset-4 hover:text-ink">Order the next one</a>
-        </p>
-      </footer>
+      <nav aria-label="More" className="mt-14 border-t border-rule">
+        <a href="/tidy" className="flex min-h-12 items-center justify-between border-b border-rule text-[0.72rem] font-semibold tracking-[0.16em] uppercase">
+          How the system works <span aria-hidden="true">→</span>
+        </a>
+        <a href="/reorder" className="flex min-h-12 items-center justify-between border-b border-rule text-[0.72rem] font-semibold tracking-[0.16em] text-muted uppercase">
+          Reorder your calendar <span aria-hidden="true">→</span>
+        </a>
+      </nav>
     </div>
   );
 }
 
-function FocusCard({ focus, date }: { focus: WeekdayFocus; date: string }) {
-  const [checked, toggle] = useCheckedSet(keys.focus(date));
-  const done = focus.tasks.filter((t) => checked.has(t.id)).length;
-  const a = accentClasses[focus.accent];
+interface PlannerSectionProps {
+  id: string;
+  /** Color of the heavy rule that opens the section */
+  rule: string;
+  mark?: ReactNode;
+  kicker: string;
+  title: string;
+  note?: string;
+  time: string;
+  tally?: ReactNode;
+  children: ReactNode;
+}
 
+/** A section of the planner page: heavy rule, heading block, then ruled lines. */
+function PlannerSection({ id, rule, mark, kicker, title, note, time, tally, children }: PlannerSectionProps) {
   return (
-    <section aria-labelledby="focus-heading" className="card overflow-hidden">
-      <div className={`${a.tint} border-b ${a.border} px-5 pt-5 pb-4 sm:px-7`}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="eyebrow">
-              {focus.dayLabel} focus · {focus.minutes}
-            </p>
-            <h2 id="focus-heading" className="mt-1 font-serif text-[1.7rem] leading-tight font-semibold">
-              {focus.title}
-            </h2>
+    <section aria-labelledby={`${id}-heading`} className={`border-t-[3px] ${rule} pt-4`}>
+      <div className="flex items-start gap-4">
+        {mark}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3">
+            <p className="label">{kicker}</p>
+            <TimeMark>{time}</TimeMark>
           </div>
-          <div className="pt-1">
-            <Progress done={done} total={focus.tasks.length} />
+          <div className="mt-2 flex items-end justify-between gap-3">
+            <h2 id={`${id}-heading`} className="font-serif text-[1.85rem] leading-[1.05] font-semibold">
+              {title}
+            </h2>
+            <div className="pb-1">{tally}</div>
           </div>
         </div>
-        <p className="mt-1 text-[0.95rem] text-muted">{focus.description}</p>
       </div>
-      <div className="px-5 pt-2 pb-3 sm:px-7">
-        <TaskList tasks={focus.tasks} checked={checked} onToggle={toggle} scope="focus" label={`${focus.title} tasks`} />
-      </div>
+      {note && <p className="mt-3 font-serif text-[1.08rem] leading-snug text-muted italic">{note}</p>}
+      <div className="mt-4 border-t border-rule">{children}</div>
     </section>
   );
 }
 
-function WeekendCard({ month, today }: { month: MonthlyFocus; today: Date }) {
+function FocusSection({ focus, date }: { focus: WeekdayFocus; date: string }) {
+  const [checked, toggle] = useCheckedSet(keys.focus(date));
+  const done = focus.tasks.filter((t) => checked.has(t.id)).length;
+
+  return (
+    <PlannerSection
+      id="focus"
+      rule={accentClasses[focus.accent].rule}
+      mark={<DayMark label={focus.shortLabel} number={focus.day} accent={focus.accent} />}
+      kicker={`${focus.dayLabel} / ${focus.zone}`}
+      title={focus.title}
+      note={focus.description}
+      time={shortTime(focus.minutes)}
+      tally={<Tally done={done} total={focus.tasks.length} />}
+    >
+      <TaskList tasks={focus.tasks} checked={checked} onToggle={toggle} scope="focus" label={`${focus.title} tasks`} />
+    </PlannerSection>
+  );
+}
+
+function WeekendSection({ month, today }: { month: MonthlyFocus; today: Date }) {
   const [monthly, toggleMonthly] = useCheckedSet(keys.monthly(monthKey(today)));
   const [weekendChecks, toggleWeekend] = useCheckedSet(keys.weekend(dateKey(weekendStart(today))));
   const done = month.tasks.filter((t) => monthly.has(t.id)).length;
-  const a = accentClasses[month.accent];
 
   return (
-    <section aria-labelledby="weekend-heading" className="card overflow-hidden">
-      <div className={`${a.tint} border-b ${a.border} px-5 pt-5 pb-4 sm:px-7`}>
-        <p className="eyebrow">
-          {weekend.title} · {month.name}
+    <PlannerSection
+      id="weekend"
+      rule={accentClasses[month.accent].rule}
+      mark={<DayMark label={weekend.shortLabel} number={5} accent={month.accent} />}
+      kicker={weekend.title}
+      title={month.title}
+      time="Optional"
+    >
+      <div className="border-b border-rule py-4">
+        <p className="label text-muted">{month.name} project</p>
+        <p className="mt-2 font-serif text-[1.15rem] leading-snug">
+          <em>This weekend, choose one.</em> The list is for the whole month — you don’t need to finish it now.
         </p>
-        <h2 id="weekend-heading" className="mt-1 font-serif text-[1.7rem] leading-tight font-semibold">
-          {month.title}
-        </h2>
-        <p className="mt-1 text-[0.95rem] text-muted">{month.description}</p>
       </div>
-
-      <div className="px-5 pt-4 pb-3 sm:px-7">
-        <div className="rounded-xl bg-paper px-4 py-3 text-[0.92rem] leading-relaxed text-muted">
-          <strong className="font-semibold text-ink">This weekend, choose one.</strong> This list is for the whole
-          month — you don’t need to finish it now.
-        </div>
-
-        <div className="mt-3 flex items-baseline justify-between">
-          <h3 className="eyebrow">This month’s project</h3>
-          <p className="text-sm text-muted tabular-nums" aria-live="polite">
-            {done} of {month.tasks.length} this month
-          </p>
-        </div>
-        <TaskList
-          tasks={month.tasks}
-          checked={monthly}
-          onToggle={toggleMonthly}
-          scope="monthly"
-          label={`${month.title} tasks for ${month.name}`}
-        />
-
-        <div className="my-1 flex items-center gap-3 text-xs tracking-[0.16em] text-faint uppercase" aria-hidden="true">
-          <span className="h-px flex-1 bg-line" />
-          or
-          <span className="h-px flex-1 bg-line" />
-        </div>
-        <TaskList
-          tasks={[weekend.catchUp]}
-          checked={weekendChecks}
-          onToggle={toggleWeekend}
-          scope="weekend"
-          label="Catch up instead"
-        />
+      <div className="flex items-center justify-between pt-4 pb-1">
+        <h3 className="label text-muted">This month</h3>
+        <Tally done={done} total={month.tasks.length} />
       </div>
-    </section>
+      <TaskList
+        tasks={month.tasks}
+        checked={monthly}
+        onToggle={toggleMonthly}
+        scope="monthly"
+        label={`${month.title} tasks for ${month.name}`}
+      />
+      <p className="pt-5 pb-1 label text-muted" aria-hidden="true">
+        Or
+      </p>
+      <TaskList
+        tasks={[weekend.catchUp]}
+        checked={weekendChecks}
+        onToggle={toggleWeekend}
+        scope="weekend"
+        label="Catch up instead"
+      />
+    </PlannerSection>
   );
 }

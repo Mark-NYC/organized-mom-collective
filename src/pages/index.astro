@@ -5,10 +5,10 @@ import TodayApp from '../components/TodayApp';
 
 <Layout description="What to clean today: a small daily reset plus one area to focus on.">
   <TodayApp client:only="react">
-    <div slot="fallback" class="space-y-5" aria-busy="true">
-      <div class="h-24"></div>
-      <div class="card h-80"></div>
-      <div class="card h-80"></div>
+    <div slot="fallback" aria-busy="true">
+      <div class="h-40"></div>
+      <div class="h-80"></div>
+      <div class="h-80"></div>
     </div>
   </TodayApp>
 </Layout>

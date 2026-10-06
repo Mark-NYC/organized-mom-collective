@@ -4,13 +4,14 @@ import SettingsApp from '../components/SettingsApp';
 ---
 
 <Layout title="Settings">
-  <div class="mx-auto max-w-xl">
-    <header class="mb-6">
-      <h1 class="font-serif text-[2.35rem] leading-tight font-medium">Settings</h1>
-      <p class="mt-2 text-muted">Your progress is saved on this device only.</p>
-    </header>
-    <SettingsApp client:only="react">
-      <div slot="fallback" class="card h-60"></div>
-    </SettingsApp>
+  <div class="max-w-xl">
+    <p class="rule-label text-muted">Settings</p>
+    <h1 class="mt-4 font-serif text-[2.9rem] leading-[0.98] font-medium tracking-[-0.01em]">Settings</h1>
+    <p class="mt-4 text-muted">Your progress is saved on this device only.</p>
+    <div class="mt-10">
+      <SettingsApp client:only="react">
+        <div slot="fallback" class="h-60"></div>
+      </SettingsApp>
+    </div>
   </div>
 </Layout>

@@ -27,7 +27,7 @@ export default function SettingsApp() {
 
   return (
     <>
-      <ul className="card divide-y divide-line">
+      <ul className="border-t-[3px] border-ink">
         <Row
           title="Replay the introduction"
           detail="See the three welcome screens again."
@@ -50,14 +50,14 @@ export default function SettingsApp() {
           title="Reset all progress"
           detail="Clear every checkmark, including monthly projects."
           action={
-            <button type="button" onClick={() => setConfirmAll(true)} className="btn-secondary text-[#8c3b3b]">
+            <button type="button" onClick={() => setConfirmAll(true)} className="btn-secondary border-[#8c3b3b] text-[#8c3b3b] hover:bg-[#8c3b3b]">
               Reset all
             </button>
           }
         />
       </ul>
 
-      <p role="status" className="mt-4 min-h-6 text-center text-sm text-sage">
+      <p role="status" className="mt-4 min-h-6 text-sm text-sage">
         {status}
       </p>
 
@@ -75,10 +75,10 @@ export default function SettingsApp() {
 
 function Row({ title, detail, action }: { title: string; detail: string; action: ReactNode }) {
   return (
-    <li className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
+    <li className="flex items-center justify-between gap-4 border-b border-rule py-5">
       <div>
-        <p className="font-medium">{title}</p>
-        <p className="mt-0.5 text-sm leading-snug text-muted">{detail}</p>
+        <p className="font-serif text-[1.3rem] leading-tight font-semibold">{title}</p>
+        <p className="mt-1 text-sm leading-snug text-muted">{detail}</p>
       </div>
       <div className="shrink-0">{action}</div>
     </li>

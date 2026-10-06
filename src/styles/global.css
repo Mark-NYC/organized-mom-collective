@@ -9,28 +9,18 @@
   --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Paper + ink */
-  --color-paper: #fbf8f3;
-  --color-card: #fffefb;
-  --color-ink: #2b3533;
-  --color-muted: #5b6662;
-  --color-faint: #8a928f;
-  --color-line: #e8e2d8;
-  --color-sage: #46645f;
-  --color-sage-dark: #36504c;
+  --color-paper: #faf7f1;
+  --color-ink: #26302e;
+  --color-muted: #59635f;
+  --color-faint: #848c88;
+  --color-rule: #ddd6ca;
+  --color-sage: #3f5f59;
 
-  /* Calendar palette */
+  /* Calendar palette — used as system colors (days, months), not decoration */
   --color-blue: #c7dce0;
   --color-blush: #ebcbd1;
   --color-green: #b7e2d0;
   --color-apricot: #f9cc87;
-
-  /* Very soft tints for card backgrounds */
-  --color-blue-tint: #f1f7f8;
-  --color-blush-tint: #fbf2f3;
-  --color-green-tint: #eff9f4;
-  --color-apricot-tint: #fef6e8;
-
-  --shadow-soft: 0 1px 2px rgb(43 53 51 / 0.04), 0 4px 16px rgb(43 53 51 / 0.05);
 }
 
 @layer base {
@@ -44,7 +34,6 @@
   :focus-visible {
     outline: 2px solid var(--color-sage);
     outline-offset: 2px;
-    border-radius: 6px;
   }
   /* Hide the app chrome until onboarding is done, to avoid a flash on first visit. */
   html.needs-onboarding [data-chrome] {
@@ -53,17 +42,22 @@
 }
 
 @layer components {
-  .eyebrow {
-    @apply text-[0.72rem] font-medium tracking-[0.16em] text-muted uppercase;
+  /* Small planner label: spaced capitals. */
+  .label {
+    @apply text-[0.7rem] font-semibold tracking-[0.2em] text-ink uppercase;
   }
-  .card {
-    @apply rounded-2xl border border-line bg-card shadow-soft;
+  /* Label followed by a hairline that runs to the margin. */
+  .rule-label {
+    @apply flex items-center gap-3 text-[0.7rem] font-semibold tracking-[0.2em] uppercase after:h-px after:flex-1 after:bg-rule;
   }
   .btn-primary {
-    @apply inline-flex min-h-12 items-center justify-center rounded-full bg-sage px-7 text-[0.95rem] font-medium text-white transition-colors hover:bg-sage-dark;
+    @apply inline-flex min-h-12 items-center justify-center rounded-[2px] bg-ink px-7 text-[0.78rem] font-semibold tracking-[0.18em] text-paper uppercase transition-colors hover:bg-sage;
   }
   .btn-secondary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-card px-5 text-[0.9rem] font-medium text-ink transition-colors hover:border-faint;
+    @apply inline-flex min-h-11 items-center justify-center rounded-[2px] border border-ink px-4 text-[0.72rem] font-semibold tracking-[0.16em] text-ink uppercase transition-colors hover:bg-ink hover:text-paper;
+  }
+  .text-link {
+    @apply text-[0.72rem] font-semibold tracking-[0.16em] text-ink uppercase underline decoration-rule decoration-1 underline-offset-[6px] hover:decoration-ink;
   }
 }
 
