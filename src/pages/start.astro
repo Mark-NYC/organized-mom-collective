@@ -1,0 +1,30 @@
+---
+/**
+ * /start — the PERMANENT entry point printed as a QR code on every calendar:
+ *   https://organizedmomcollective.com/start
+ * Never remove or rename this page. To send calendar owners somewhere else,
+ * change START_DESTINATION in src/config.ts.
+ *
+ * Redirects instantly with location.replace (so Back doesn't bounce through
+ * /start), with a meta refresh and a plain link as fallbacks. If the host later
+ * supports server redirects, a 302 from /start to the same destination is equivalent.
+ */
+import { START_DESTINATION } from '../config';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, follow" />
+    <title>Organized Mom</title>
+    <script is:inline define:vars={{ START_DESTINATION }}>
+      location.replace(START_DESTINATION);
+    </script>
+    <meta http-equiv="refresh" content={`0;url=${START_DESTINATION}`} />
+  </head>
+  <body style="font-family: system-ui, sans-serif; color: #545454; padding: 2rem;">
+    <a href={START_DESTINATION}>Open your Organized Mom companion</a>
+  </body>
+</html>

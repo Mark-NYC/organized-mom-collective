@@ -5,13 +5,23 @@ import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
 import { dateForWeekday, dateKey, monthKey, parseDayParam, weekendStart } from '../lib/dates';
 import { useCheckedSet, useToday } from '../lib/hooks';
 import { monthFocusFor, planFor } from '../lib/schedule';
-import { isOnboarded, keys, pruneOld, setOnboarded } from '../lib/storage';
+import { takeSourceParam } from '../lib/entry';
+import { isOnboarded, keys, pruneOld, setEntrySource, setOnboarded } from '../lib/storage';
+import { routes } from '../routes';
 import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
 import { Tally, TaskList } from './TaskList';
 
 export default function TodayApp() {
   const [onboarded, setOnboardedState] = useState(isOnboarded);
+
+  // Note how this visit arrived (e.g. ?source=calendar from /start), then tidy the URL.
+  useEffect(() => {
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    const { source, cleaned } = takeSourceParam(here);
+    if (source) setEntrySource(source);
+    if (cleaned !== here) window.history.replaceState(window.history.state, '', cleaned);
+  }, []);
 
   const finish = () => {
     setOnboarded(true);
@@ -56,7 +66,7 @@ function Today() {
               {today.toLocaleDateString('en-US', { weekday: 'long' })}
             </p>
           </div>
-          <a href="/" className="text-link inline-flex min-h-11 shrink-0 items-center">
+          <a href={routes.today} className="text-link inline-flex min-h-11 shrink-0 items-center">
             Back to today
           </a>
         </div>
@@ -102,10 +112,10 @@ function Today() {
       <MonthlyTeaser month={monthFocusFor(shown)} />
 
       <nav aria-label="More" className="mt-8 border-t border-rule-strong">
-        <a href="/tidy" className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
+        <a href={routes.tidy} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
           How the system works <span aria-hidden="true">→</span>
         </a>
-        <a href="/reorder" className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
+        <a href={routes.reorder} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
           Reorder your calendar <span aria-hidden="true">→</span>
         </a>
       </nav>
@@ -120,7 +130,7 @@ function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
       <h2 id="monthly-teaser-heading" className="label text-muted">
         Monthly focus
       </h2>
-      <a href="/tidy#monthly-focus" className="group mt-2.5 block border-l-[3px] border-month pl-3.5">
+      <a href={routes.monthlyFocus} className="group mt-2.5 block border-l-[3px] border-month pl-3.5">
         <span className="month-title block text-[1.05rem] leading-none">{month.name}</span>
         <span className="project-title mt-1.5 block">{month.title}</span>
         <span className="mt-1 block text-[1rem] leading-snug text-muted">{month.description}</span>

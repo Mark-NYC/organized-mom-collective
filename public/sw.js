@@ -1,6 +1,7 @@
-// Minimal service worker: network-first, falling back to cache when offline.
-// Keeps the app openable without signal while always preferring fresh content.
-const CACHE = 'omc-v1';
+// Minimal service worker for the companion app (registered with scope /app):
+// network-first, falling back to cache when offline. Always prefers fresh content.
+const CACHE = 'omc-v2';
+const OFFLINE_FALLBACK = '/app';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => {
@@ -24,6 +25,6 @@ self.addEventListener('fetch', (event) => {
         }
         return res;
       })
-      .catch(() => caches.match(req).then((hit) => hit || caches.match('/'))),
+      .catch(() => caches.match(req, { ignoreSearch: req.mode === 'navigate' }).then((hit) => hit || caches.match(OFFLINE_FALLBACK))),
   );
 });

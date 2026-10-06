@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { BRAND_NAME, REORDER_URL } from '../config';
-import { monthColors } from '../theme';
+import Layout from '../../layouts/AppLayout.astro';
+import { BRAND_NAME, REORDER_URL } from '../../config';
+import { monthColors } from '../../theme';
 
 const months = monthColors.map((m) => ({ short: m.name.slice(0, 3), hex: m.hex }));
 ---

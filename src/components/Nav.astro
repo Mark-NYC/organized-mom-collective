@@ -1,20 +1,21 @@
 ---
 import { Wordmark } from './marks';
+import { routes } from '../routes';
 
 const items = [
-  { href: '/', label: 'Today' },
-  { href: '/tidy', label: 'Tidy' },
-  { href: '/reorder', label: 'Reorder' },
+  { href: routes.today, label: 'Today' },
+  { href: routes.tidy, label: 'Tidy' },
+  { href: routes.reorder, label: 'Reorder' },
 ];
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
-const settingsActive = path.startsWith('/settings');
+const isActive = (href: string) => (href === routes.today ? path === routes.today : path.startsWith(href));
+const settingsActive = path.startsWith(routes.settings);
 ---
 
 <header data-chrome class="border-b border-rule">
   <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:h-16 sm:px-8">
-    <a href="/" aria-label="Organized Mom — Today"><Wordmark /></a>
+    <a href={routes.today} aria-label="Organized Mom — Today"><Wordmark /></a>
     <nav aria-label="Main" class="hidden sm:block">
       <ul class="flex items-center gap-8">
         {
@@ -37,7 +38,7 @@ const settingsActive = path.startsWith('/settings');
       </ul>
     </nav>
     <a
-      href="/settings"
+      href={routes.settings}
       aria-current={settingsActive ? 'page' : undefined}
       class:list={[
         '-mr-2 inline-flex min-h-11 items-center px-2 text-[0.64rem] font-semibold tracking-[0.18em] uppercase transition-colors',

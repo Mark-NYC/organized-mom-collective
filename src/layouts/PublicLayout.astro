@@ -1,0 +1,22 @@
+---
+/** Public, indexable pages (/, and later /calendar, /cleaning, /blog/…). */
+import BaseLayout from './BaseLayout.astro';
+import { BRAND_NAME } from '../config';
+
+interface Props {
+  title?: string;
+  description: string;
+  /** Set false for utility pages like the 404 (noindex, no canonical). */
+  indexable?: boolean;
+}
+
+const { title, description, indexable = true } = Astro.props;
+const fullTitle = title ? `${title} · ${BRAND_NAME}` : BRAND_NAME;
+const canonical = indexable && Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+---
+
+<BaseLayout title={fullTitle} description={description} robots={indexable ? 'index' : 'noindex'} canonical={canonical}>
+  <main id="main" class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-20">
+    <slot />
+  </main>
+</BaseLayout>

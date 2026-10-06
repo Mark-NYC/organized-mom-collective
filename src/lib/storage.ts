@@ -1,16 +1,24 @@
 /**
- * Small localStorage layer. All keys live under one prefix so we can
- * reset or migrate cleanly later.
+ * Persistence for the app. The UI only talks to this module (directly or via
+ * hooks.ts) — never to localStorage — so the backend can change later
+ * (e.g. syncing to a signed-in account) without touching components.
+ *
+ * Data is anonymous and keyed by stable task ids and dates, so it can be
+ * uploaded into an account later instead of discarded. Keys:
  *
  *   omc:v1:onboarded              "1" once onboarding is finished
  *   omc:v1:daily:YYYY-MM-DD       checked daily essentials for that day
  *   omc:v1:focus:YYYY-MM-DD       checked Mon–Thu focus tasks for that day
  *   omc:v1:weekend:YYYY-MM-DD     weekend-only choices, keyed by that weekend's Friday
  *   omc:v1:monthly:YYYY-MM        checked monthly deep-clean tasks for that month
+ *
+ * Per-session (sessionStorage), not progress:
+ *   omc:v1:entry-source           how this visit arrived, e.g. "calendar" (the printed QR)
  */
 
 export const PREFIX = 'omc:v1:';
-const ONBOARDED = `${PREFIX}onboarded`;
+export const ONBOARDED_KEY = `${PREFIX}onboarded`;
+const ENTRY_SOURCE_KEY = `${PREFIX}entry-source`;
 
 export const keys = {
   daily: (date: string) => `${PREFIX}daily:${date}`,
@@ -22,17 +30,66 @@ export const keys = {
 /** Day-scoped entries older than this are pruned so storage doesn't grow forever. */
 const KEEP_DAYS = 60;
 
-function store(): Storage | null {
-  try {
-    return typeof window !== 'undefined' ? window.localStorage : null;
-  } catch {
-    return null; // private mode / blocked storage
-  }
+/**
+ * The storage backend. Today: the browser's localStorage. A future synced
+ * backend only needs to provide these four operations.
+ */
+interface Backend {
+  get(key: string): string | null;
+  set(key: string, value: string): void;
+  remove(key: string): void;
+  keys(): string[];
 }
+
+function webStorage(pick: () => Storage): Backend {
+  const s = (): Storage | null => {
+    try {
+      return typeof window !== 'undefined' ? pick() : null;
+    } catch {
+      return null; // private mode / blocked storage
+    }
+  };
+  return {
+    get: (k) => {
+      try {
+        return s()?.getItem(k) ?? null;
+      } catch {
+        return null;
+      }
+    },
+    set: (k, v) => {
+      try {
+        s()?.setItem(k, v);
+      } catch {
+        /* storage full or blocked — progress just won't persist */
+      }
+    },
+    remove: (k) => {
+      try {
+        s()?.removeItem(k);
+      } catch {
+        /* ignore */
+      }
+    },
+    keys: () => {
+      const store = s();
+      if (!store) return [];
+      const out: string[] = [];
+      for (let i = 0; i < store.length; i++) {
+        const k = store.key(i);
+        if (k) out.push(k);
+      }
+      return out;
+    },
+  };
+}
+
+const backend: Backend = webStorage(() => window.localStorage);
+const session: Backend = webStorage(() => window.sessionStorage);
 
 export function readList(key: string): string[] {
   try {
-    const raw = store()?.getItem(key);
+    const raw = backend.get(key);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
   } catch {
@@ -41,42 +98,21 @@ export function readList(key: string): string[] {
 }
 
 export function writeList(key: string, ids: string[]): void {
-  try {
-    const s = store();
-    if (!s) return;
-    if (ids.length === 0) s.removeItem(key);
-    else s.setItem(key, JSON.stringify(ids));
-  } catch {
-    /* storage full or blocked — progress just won't persist */
-  }
+  if (ids.length === 0) backend.remove(key);
+  else backend.set(key, JSON.stringify(ids));
 }
 
 export function isOnboarded(): boolean {
-  try {
-    return store()?.getItem(ONBOARDED) === '1';
-  } catch {
-    return false;
-  }
+  return backend.get(ONBOARDED_KEY) === '1';
 }
 
 export function setOnboarded(done: boolean): void {
-  try {
-    if (done) store()?.setItem(ONBOARDED, '1');
-    else store()?.removeItem(ONBOARDED);
-  } catch {
-    /* ignore */
-  }
+  if (done) backend.set(ONBOARDED_KEY, '1');
+  else backend.remove(ONBOARDED_KEY);
 }
 
 function progressKeys(): string[] {
-  const s = store();
-  if (!s) return [];
-  const out: string[] = [];
-  for (let i = 0; i < s.length; i++) {
-    const k = s.key(i);
-    if (k && k.startsWith(PREFIX) && k !== ONBOARDED) out.push(k);
-  }
-  return out;
+  return backend.keys().filter((k) => k.startsWith(PREFIX) && k !== ONBOARDED_KEY);
 }
 
 export function resetDay(date: string, weekendFriday?: string): void {
@@ -87,21 +123,27 @@ export function resetDay(date: string, weekendFriday?: string): void {
 
 /** Clears every checkbox everywhere. Keeps the onboarding flag. */
 export function resetAllProgress(): void {
-  const s = store();
-  if (!s) return;
-  for (const k of progressKeys()) s.removeItem(k);
+  for (const k of progressKeys()) backend.remove(k);
 }
 
 /** Removes old day-scoped entries. Monthly entries are kept. */
 export function pruneOld(today: Date): void {
-  const s = store();
-  if (!s) return;
   const cutoff = new Date(today.getFullYear(), today.getMonth(), today.getDate() - KEEP_DAYS);
   const pattern = /^omc:v1:(daily|focus|weekend):(\d{4})-(\d{2})-(\d{2})$/;
   for (const k of progressKeys()) {
     const m = pattern.exec(k);
     if (!m) continue;
     const d = new Date(Number(m[2]), Number(m[3]) - 1, Number(m[4]));
-    if (d < cutoff) s.removeItem(k);
+    if (d < cutoff) backend.remove(k);
   }
+}
+
+/** Remembers how this visit arrived (e.g. "calendar" from the printed QR) for later analytics. */
+export function setEntrySource(source: string): void {
+  session.set(ENTRY_SOURCE_KEY, source);
+}
+
+/** How this browser session arrived, or null if unknown. */
+export function getEntrySource(): string | null {
+  return session.get(ENTRY_SOURCE_KEY);
 }

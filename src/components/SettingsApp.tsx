@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { dateKey, isWeekend, weekendStart } from '../lib/dates';
 import { resetAllProgress, resetDay, setOnboarded } from '../lib/storage';
 import ConfirmationDialog from './ConfirmationDialog';
+import { routes } from '../routes';
 
 export default function SettingsApp() {
   const [confirmAll, setConfirmAll] = useState(false);
@@ -10,7 +11,7 @@ export default function SettingsApp() {
 
   const replay = () => {
     setOnboarded(false);
-    window.location.href = '/';
+    window.location.href = routes.today;
   };
 
   const resetToday = () => {

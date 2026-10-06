@@ -136,3 +136,27 @@ describe('theme', () => {
     expect(monthColors.map((m) => m.name)).toEqual(monthlyDeepClean.map((m) => m.name));
   });
 });
+
+describe('routing', () => {
+  it('splits ?source= from the app URL and keeps other params', async () => {
+    const { takeSourceParam } = await import('../src/lib/entry');
+    expect(takeSourceParam('/app?source=calendar')).toEqual({ source: 'calendar', cleaned: '/app' });
+    expect(takeSourceParam('/app?source=calendar&day=monday')).toEqual({ source: 'calendar', cleaned: '/app?day=monday' });
+    expect(takeSourceParam('/app?day=monday')).toEqual({ source: null, cleaned: '/app?day=monday' });
+    expect(takeSourceParam('/app?source=<script>')).toEqual({ source: null, cleaned: '/app' });
+  });
+
+  it('keeps the QR entry point and app routes stable', async () => {
+    const { routes, isAppPath } = await import('../src/routes');
+    const { START_DESTINATION } = await import('../src/config');
+    expect(routes.start).toBe('/start');
+    expect(START_DESTINATION).toBe('/app?source=calendar');
+    expect([routes.today, routes.tidy, routes.reorder, routes.settings]).toEqual(['/app', '/app/tidy', '/app/reorder', '/app/settings']);
+    expect(routes.monthlyFocus).toBe('/app/tidy#monthly-focus');
+    expect(routes.day(1)).toBe('/app?day=monday');
+    expect(isAppPath('/app')).toBe(true);
+    expect(isAppPath('/app/tidy')).toBe(true);
+    expect(isAppPath('/apple')).toBe(false);
+    expect(isAppPath('/')).toBe(false);
+  });
+});

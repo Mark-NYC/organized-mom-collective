@@ -1,0 +1,49 @@
+---
+/**
+ * The document shell shared by every page. Indexing is decided by the layout
+ * that wraps this one:
+ *   PublicLayout → indexable, canonical URL (future marketing / SEO pages)
+ *   AppLayout    → noindex, follow (the companion app is a customer utility)
+ */
+import '../styles/global.css';
+import { monthColors } from '../theme';
+
+interface Props {
+  title: string;
+  description: string;
+  /** 'index' for public pages; 'noindex' for the app and the QR redirect */
+  robots: 'index' | 'noindex';
+  /** Absolute canonical URL (public pages only) */
+  canonical?: string;
+}
+
+const { title, description, robots, canonical } = Astro.props;
+const monthHexes = monthColors.map((m) => m.hex);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {robots === 'noindex' && <meta name="robots" content="noindex, follow" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <script is:inline define:vars={{ monthHexes }}>
+      // The current month's color (from src/theme.ts) is the accent.
+      document.documentElement.style.setProperty('--month', monthHexes[new Date().getMonth()]);
+    </script>
+    <slot name="head" />
+  </head>
+  <body class="min-h-dvh">
+    <slot />
+  </body>
+</html>

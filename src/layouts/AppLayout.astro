@@ -1,0 +1,51 @@
+---
+/** Companion app pages (/app/…): noindex, installable, app navigation. */
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import { SITE_NAME } from '../config';
+import { ONBOARDED_KEY } from '../lib/storage';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Your Organized Mom Collective companion: a small daily reset, one area to focus on, and a simple monthly rhythm.',
+} = Astro.props;
+const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
+---
+
+<BaseLayout title={fullTitle} description={description} robots="noindex">
+  <Fragment slot="head">
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script is:inline define:vars={{ ONBOARDED_KEY }}>
+      // First visit to Today: hide app chrome until the onboarding screen renders.
+      try {
+        if (/^\/app\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
+          document.documentElement.classList.add('needs-onboarding');
+        }
+      } catch (e) {}
+    </script>
+  </Fragment>
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2"
+    >Skip to content</a
+  >
+  <Nav />
+  <main id="main" class="mx-auto max-w-5xl px-5 pt-6 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-12 sm:pb-20">
+    <slot />
+  </main>
+  <script is:inline>
+    // Offline support for the app only; the future public site stays SW-free.
+    if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', { scope: '/app' }).catch(() => {}));
+    }
+  </script>
+</BaseLayout>

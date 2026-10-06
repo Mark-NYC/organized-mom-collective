@@ -1,12 +1,14 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
 ---
 
-<Layout title="Not found">
-  <div class="max-w-xl">
-    <p class="label text-muted">404</p>
-    <h1 class="page-title mt-3">This page isn’t here.</h1>
-    <p class="mt-4">Let’s get you back to today.</p>
-    <a href="/" class="btn-primary mt-10">Go to today</a>
-  </div>
-</Layout>
+<PublicLayout title="Not found" description="This page could not be found." indexable={false}>
+  <p class="label text-muted">404</p>
+  <h1 class="page-title mt-3">This page isn’t here.</h1>
+  <p class="mt-4 text-[1.0625rem]">Using the cleaning companion? Head back to today.</p>
+  <p class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+    <a href={routes.today} class="btn-primary">Go to today</a>
+    <a href={routes.home} class="text-link">Organized Mom Collective</a>
+  </p>
+</PublicLayout>
