@@ -1,0 +1,54 @@
+---
+/** A handful of thin line icons. Kept intentionally small. */
+interface Props {
+  name: 'today' | 'tidy' | 'reorder' | 'settings';
+  class?: string;
+}
+const { name, class: className = 'size-5' } = Astro.props;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {
+    name === 'today' && (
+      <>
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+        <path d="M3.5 9.5h17M8 3v4M16 3v4" />
+        <path d="M9 14.5l2 2 4-4" />
+      </>
+    )
+  }
+  {
+    name === 'tidy' && (
+      <>
+        <path d="M12 3.5l1.6 4.4 4.4 1.6-4.4 1.6L12 15.5l-1.6-4.4L6 9.5l4.4-1.6z" />
+        <path d="M18.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
+      </>
+    )
+  }
+  {
+    name === 'reorder' && (
+      <>
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+        <path d="M3.5 9.5h17M8 3v4M16 3v4M12 12.5v5M9.5 15h5" />
+      </>
+    )
+  }
+  {
+    name === 'settings' && (
+      <>
+        <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+        <circle cx="16" cy="7" r="2" />
+        <circle cx="10" cy="17" r="2" />
+      </>
+    )
+  }
+</svg>

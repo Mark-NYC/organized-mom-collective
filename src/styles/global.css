@@ -1,0 +1,77 @@
+@import '@fontsource/cormorant-garamond/500.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/500-italic.css';
+@import '@fontsource-variable/dm-sans';
+@import 'tailwindcss';
+
+@theme {
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Paper + ink */
+  --color-paper: #fbf8f3;
+  --color-card: #fffefb;
+  --color-ink: #2b3533;
+  --color-muted: #5b6662;
+  --color-faint: #8a928f;
+  --color-line: #e8e2d8;
+  --color-sage: #46645f;
+  --color-sage-dark: #36504c;
+
+  /* Calendar palette */
+  --color-blue: #c7dce0;
+  --color-blush: #ebcbd1;
+  --color-green: #b7e2d0;
+  --color-apricot: #f9cc87;
+
+  /* Very soft tints for card backgrounds */
+  --color-blue-tint: #f1f7f8;
+  --color-blush-tint: #fbf2f3;
+  --color-green-tint: #eff9f4;
+  --color-apricot-tint: #fef6e8;
+
+  --shadow-soft: 0 1px 2px rgb(43 53 51 / 0.04), 0 4px 16px rgb(43 53 51 / 0.05);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-sage);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  /* Hide the app chrome until onboarding is done, to avoid a flash on first visit. */
+  html.needs-onboarding [data-chrome] {
+    visibility: hidden;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-[0.72rem] font-medium tracking-[0.16em] text-muted uppercase;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-card shadow-soft;
+  }
+  .btn-primary {
+    @apply inline-flex min-h-12 items-center justify-center rounded-full bg-sage px-7 text-[0.95rem] font-medium text-white transition-colors hover:bg-sage-dark;
+  }
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-card px-5 text-[0.9rem] font-medium text-ink transition-colors hover:border-faint;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

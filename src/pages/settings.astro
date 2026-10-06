@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SettingsApp from '../components/SettingsApp';
+---
+
+<Layout title="Settings">
+  <div class="mx-auto max-w-xl">
+    <header class="mb-6">
+      <h1 class="font-serif text-[2.35rem] leading-tight font-medium">Settings</h1>
+      <p class="mt-2 text-muted">Your progress is saved on this device only.</p>
+    </header>
+    <SettingsApp client:only="react">
+      <div slot="fallback" class="card h-60"></div>
+    </SettingsApp>
+  </div>
+</Layout>

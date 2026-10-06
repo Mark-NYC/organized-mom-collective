@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TodayApp from '../components/TodayApp';
+---
+
+<Layout description="What to clean today: a small daily reset plus one area to focus on.">
+  <TodayApp client:only="react">
+    <div slot="fallback" class="space-y-5" aria-busy="true">
+      <div class="h-24"></div>
+      <div class="card h-80"></div>
+      <div class="card h-80"></div>
+    </div>
+  </TodayApp>
+</Layout>
