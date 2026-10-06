@@ -45,6 +45,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 - Monthly deep-clean tasks → keyed by month, so progress carries across that month's weekends.
 - "Catch up instead" → keyed by that weekend's Friday.
 - Day-scoped entries older than 60 days are pruned automatically.
+- `/?day=monday` (linked from the Tidy week) shows that weekday of the current Mon–Sun week. Its checkmarks save under that day's own date, so today's progress is never touched.
 
 ## Brand notes
 

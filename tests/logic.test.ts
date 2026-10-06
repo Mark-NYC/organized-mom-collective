@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { dailyEssentials, monthlyDeepClean, weeklySchedule } from '../src/data/cleaning';
-import { dateKey, isWeekend, monthKey, weekendStart } from '../src/lib/dates';
+import { dateForWeekday, dateKey, isWeekend, monthKey, parseDayParam, weekendStart } from '../src/lib/dates';
 import { planFor } from '../src/lib/schedule';
 import { isOnboarded, keys, pruneOld, readList, resetAllProgress, resetDay, setOnboarded, writeList } from '../src/lib/storage';
 
@@ -47,6 +47,26 @@ describe('schedule', () => {
   it('formats local keys', () => {
     expect(dateKey(new Date(2026, 0, 3))).toBe('2026-01-03');
     expect(monthKey(new Date(2026, 11, 31))).toBe('2026-12');
+  });
+});
+
+describe('selected weekday', () => {
+  it('maps ?day= to that weekday in the current Monday–Sunday week', () => {
+    const tue = new Date(2026, 9, 6);
+    expect(dateKey(dateForWeekday(tue, 1))).toBe('2026-10-05'); // Monday, earlier
+    expect(dateKey(dateForWeekday(tue, 4))).toBe('2026-10-08'); // Thursday, later
+    expect(dateKey(dateForWeekday(tue, 0))).toBe('2026-10-11'); // Sunday ends the week
+    const sun = new Date(2026, 9, 11);
+    expect(dateKey(dateForWeekday(sun, 1))).toBe('2026-10-05');
+    // across a month boundary
+    expect(dateKey(dateForWeekday(new Date(2026, 9, 1), 1))).toBe('2026-09-28');
+  });
+
+  it('parses day params leniently and rejects junk', () => {
+    expect(parseDayParam('Monday')).toBe(1);
+    expect(parseDayParam('sunday')).toBe(0);
+    expect(parseDayParam('funday')).toBeNull();
+    expect(parseDayParam(null)).toBeNull();
   });
 });
 

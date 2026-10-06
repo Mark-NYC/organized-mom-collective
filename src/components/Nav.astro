@@ -53,7 +53,7 @@ const settingsActive = path.startsWith('/settings');
 <nav
   data-chrome
   aria-label="Main"
-  class="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-paper pb-[env(safe-area-inset-bottom)] sm:hidden"
+  class="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-band pb-[env(safe-area-inset-bottom)] sm:hidden"
 >
   <ul class="grid grid-cols-3">
     {
@@ -63,8 +63,8 @@ const settingsActive = path.startsWith('/settings');
             href={item.href}
             aria-current={isActive(item.href) ? 'page' : undefined}
             class:list={[
-              'relative flex h-14 items-center justify-center text-[0.68rem] font-semibold tracking-[0.2em] uppercase transition-colors',
-              isActive(item.href) ? 'text-ink' : 'text-muted',
+              'relative flex h-14 items-center justify-center text-[0.74rem] tracking-[0.2em] uppercase transition-colors',
+              isActive(item.href) ? 'font-bold text-ink' : 'font-semibold text-muted',
             ]}
           >
             {isActive(item.href) && <span aria-hidden="true" class="absolute inset-x-6 -top-px h-[3px] bg-month" />}
