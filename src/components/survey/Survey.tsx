@@ -156,10 +156,10 @@ export default function Survey() {
   const question = typeof screen === 'number' && screen > 0 ? surveyQuestions[screen - 1] : null;
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div className="h-1 bg-month" aria-hidden="true" />
+    <div className="flex min-h-dvh flex-col bg-cream text-warm-ink">
+      <div className="h-[3px] bg-rose" aria-hidden="true" />
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-5 pt-[env(safe-area-inset-top)] sm:px-6">
-        <header className="flex h-14 shrink-0 items-center border-b border-rule">
+        <header className="flex h-14 shrink-0 items-center border-b border-warm-rule">
           <Wordmark badge="size-8" />
         </header>
 
@@ -168,18 +168,18 @@ export default function Survey() {
         {question && (
           <section className="flex flex-1 flex-col" aria-labelledby="survey-q">
             <div className="flex items-center justify-between pt-3">
-              <button type="button" onClick={back} className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-[3px] px-2 text-[0.95rem] font-semibold">
+              <button type="button" onClick={back} className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-[8px] px-2 text-[0.9rem] font-semibold">
                 <span aria-hidden="true">←</span> Back
               </button>
-              <p className="label text-soft">
+              <p className="label text-warm-soft">
                 Question {screen} of {TOTAL}
               </p>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-band" aria-hidden="true">
-              <div className="h-full rounded-full bg-ink" style={{ width: `${((screen as number) / TOTAL) * 100}%` }} />
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-warm-rule" aria-hidden="true">
+              <div className="h-full rounded-full bg-rose" style={{ width: `${((screen as number) / TOTAL) * 100}%` }} />
             </div>
 
-            <h1 id="survey-q" ref={headingRef} tabIndex={-1} className="mt-6 text-[1.4rem] leading-[1.25] font-bold text-balance outline-none min-[390px]:text-[1.5rem]">
+            <h1 id="survey-q" ref={headingRef} tabIndex={-1} className="mt-5 font-serif text-[1.2rem] leading-[1.3] font-normal tracking-[-0.005em] text-balance outline-none min-[390px]:text-[1.28rem]">
               {question.prompt}
             </h1>
 
@@ -224,19 +224,24 @@ function Intro({ headingRef, onStart }: { headingRef: React.RefObject<HTMLHeadin
   return (
     <section className="flex flex-1 flex-col">
       <div className="flex-1 pt-10 pb-8">
-        <p className="label text-soft">A quick question or seven</p>
-        <h1 ref={headingRef} tabIndex={-1} className="page-title mt-3 text-balance outline-none">
+        <p className="label text-warm-soft">A quick question or seven</p>
+        <h1 ref={headingRef} tabIndex={-1} className="mt-4 font-serif text-[2rem] leading-[1.15] font-normal tracking-[-0.01em] text-balance outline-none min-[390px]:text-[2.2rem]">
           Help us make family life a little easier.
         </h1>
-        <p className="lede mt-5">We’re building tools to help moms manage schedules, cleaning, and everything in between.</p>
-        <p className="lede mt-4">Tell us what actually happens in your home. No perfect answers needed.</p>
-        <p className="mt-6 inline-flex items-center gap-2 border-l-[3px] border-month pl-3 text-[0.95rem] font-semibold">Takes about 2 minutes.</p>
+        <div className="mt-5 h-px w-12 bg-rose" aria-hidden="true" />
+        <p className="mt-5 text-[1rem] leading-relaxed">
+          We’re creating simple tools to help moms stay on top of schedules, cleaning, and everyday family life.
+        </p>
+        <p className="mt-3.5 text-[1rem] leading-relaxed">Tell us what works, what doesn’t, and what you wish were easier.</p>
+        <p className="mt-7 inline-flex items-center gap-2.5 text-[0.88rem] font-medium text-warm-soft">
+          <span className="size-1.5 rounded-full bg-sage" aria-hidden="true" />
+          Takes 2 minutes. No email needed.
+        </p>
       </div>
       <BottomBar>
-        <button type="button" onClick={onStart} className="btn-primary min-h-14 w-full text-[0.8rem]">
+        <button type="button" onClick={onStart} className="btn-primary min-h-14 w-full rounded-[14px] bg-warm-button text-[0.78rem] hover:bg-[#3b3231] disabled:bg-[#d6ccc6] disabled:text-white">
           Let’s do it
         </button>
-        <p className="mt-2 text-center text-[0.8rem] text-soft">No account. No email needed.</p>
       </BottomBar>
     </section>
   );
@@ -268,10 +273,10 @@ function Choices({ question, value, otherText, onOtherText, onSingle, onMulti, o
 
   return (
     <>
-      <p id={hintId} className="mt-2 text-[0.95rem] text-soft">
+      <p id={hintId} className="mt-1.5 text-[0.88rem] text-warm-soft">
         {multi ? 'Choose all that apply.' : 'Choose one.'}
       </p>
-      <div role="group" aria-labelledby="survey-q" aria-describedby={hintId} className="mt-5 flex-1 space-y-2.5 pb-6">
+      <div role="group" aria-labelledby="survey-q" aria-describedby={hintId} className="mt-4 flex-1 space-y-2 pb-6">
         {question.options.map((o) => {
           const on = selected.includes(o.id);
           return (
@@ -281,21 +286,21 @@ function Choices({ question, value, otherText, onOtherText, onSingle, onMulti, o
                 role={multi ? 'checkbox' : 'radio'}
                 aria-checked={on}
                 onClick={() => (multi ? onMulti(toggleMulti(question, selected, o.id)) : onSingle(o.id))}
-                className={`flex min-h-15 w-full items-center gap-3.5 rounded-[10px] border-[1.5px] px-4 py-3 text-left text-[1.0625rem] leading-snug ${
-                  on ? 'border-ink bg-month/20 font-semibold' : 'border-rule-strong/60 bg-paper hover:border-ink active:bg-band'
+                className={`flex min-h-[3.25rem] w-full items-center gap-3 rounded-[14px] border px-4 py-2.5 text-left text-[0.96rem] leading-snug transition-colors ${
+                  on ? 'border-rose bg-rose-wash font-semibold' : 'border-warm-rule bg-ivory hover:border-rose active:bg-rose-wash'
                 }`}
               >
                 <span
                   aria-hidden="true"
-                  className={`grid size-6 shrink-0 place-items-center border-[1.5px] border-ink ${multi ? 'rounded-[6px]' : 'rounded-full'} ${on ? 'bg-ink' : 'bg-paper'}`}
+                  className={`grid size-[1.3rem] shrink-0 place-items-center border-[1.5px] ${multi ? 'rounded-[6px]' : 'rounded-full'} ${on ? 'border-rose-deep bg-rose-deep' : 'border-warm-soft bg-ivory'}`}
                 >
                   {on &&
                     (multi ? (
-                      <svg viewBox="0 0 16 16" className="size-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                      <svg viewBox="0 0 16 16" className="size-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 8.5l3.2 3L13 4.5" />
                       </svg>
                     ) : (
-                      <span className="size-2.5 rounded-full bg-white" />
+                      <span className="size-2 rounded-full bg-white" />
                     ))}
                 </span>
                 <span className="min-w-0 flex-1">{o.label}</span>
@@ -317,7 +322,7 @@ function Choices({ question, value, otherText, onOtherText, onSingle, onMulti, o
                   autoComplete="off"
                   aria-label="Something else: what is it? (optional)"
                   placeholder="What is it? (optional)"
-                  className="mt-2 block min-h-12 w-full rounded-[10px] border-[1.5px] border-rule-strong/60 bg-paper px-4 text-[1.0625rem] placeholder:text-soft focus:border-ink focus:outline-none"
+                  className="mt-1.5 block min-h-12 w-full rounded-[14px] border border-rose bg-ivory px-4 text-[1rem] placeholder:text-warm-soft focus:border-rose-deep focus:outline-none"
                 />
               )}
             </div>
@@ -326,11 +331,11 @@ function Choices({ question, value, otherText, onOtherText, onSingle, onMulti, o
       </div>
       {showContinue && (
         <BottomBar>
-          <button type="button" onClick={onContinue} disabled={selected.length === 0} className="btn-primary min-h-14 w-full text-[0.8rem] disabled:bg-rule-strong/50 disabled:text-white">
+          <button type="button" onClick={onContinue} disabled={selected.length === 0} className="btn-primary min-h-14 w-full rounded-[14px] bg-warm-button text-[0.78rem] hover:bg-[#3b3231] disabled:bg-[#d6ccc6] disabled:text-white">
             Continue
           </button>
           {multi && (
-            <p className="mt-2 text-center text-[0.8rem] text-soft" aria-live="polite">
+            <p className="mt-2 text-center text-[0.8rem] text-warm-soft" aria-live="polite">
               {selected.length === 0 ? 'Pick at least one.' : `${selected.length} selected`}
             </p>
           )}
@@ -355,10 +360,10 @@ function OpenText({ question, value, onChange, onSend, onSkip, sending, error, h
   const left = question.maxLength - value.length;
   return (
     <>
-      <p id="q7-hint" className="mt-2 text-[0.95rem] text-soft">
+      <p id="q7-hint" className="mt-1.5 text-[0.88rem] text-warm-soft">
         Optional. Skip it if nothing comes to mind.
       </p>
-      <div className="flex-1 pt-5 pb-6">
+      <div className="flex-1 pt-4 pb-6">
         <label htmlFor="q7" className="sr-only">
           Your answer (optional)
         </label>
@@ -370,25 +375,25 @@ function OpenText({ question, value, onChange, onSend, onSkip, sending, error, h
           rows={5}
           aria-describedby="q7-hint"
           placeholder={question.placeholder}
-          className="block w-full rounded-[10px] border-[1.5px] border-rule-strong/60 bg-paper px-4 py-3 text-[1.0625rem] leading-relaxed placeholder:text-soft focus:border-ink focus:outline-none"
+          className="block w-full rounded-[14px] border border-warm-rule bg-ivory px-4 py-3 text-[1rem] leading-relaxed placeholder:text-warm-soft focus:border-rose focus:outline-none"
         />
-        {left < 150 && <p className="mt-1.5 text-right text-[0.8rem] text-soft tabular-nums">{left} characters left</p>}
+        {left < 150 && <p className="mt-1.5 text-right text-[0.8rem] text-warm-soft tabular-nums">{left} characters left</p>}
         {/* Hidden from people; bots that fill every field give themselves away. */}
         <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
           <label htmlFor="website">Website</label>
           <input ref={honeypot} id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
         </div>
         {error && (
-          <p role="alert" className="mt-4 border-l-[3px] border-ink bg-band px-3.5 py-2.5 text-[0.95rem] font-semibold">
+          <p role="alert" className="mt-4 rounded-[10px] border-l-[3px] border-rose-deep bg-rose-wash px-3.5 py-2.5 text-[0.92rem] font-semibold">
             {error}
           </p>
         )}
       </div>
       <BottomBar>
-        <button type="button" onClick={onSend} disabled={sending || !value.trim()} className="btn-primary min-h-14 w-full text-[0.8rem] disabled:bg-rule-strong/50 disabled:text-white">
+        <button type="button" onClick={onSend} disabled={sending || !value.trim()} className="btn-primary min-h-14 w-full rounded-[14px] bg-warm-button text-[0.78rem] hover:bg-[#3b3231] disabled:bg-[#d6ccc6] disabled:text-white">
           {sending ? 'Sending…' : 'Send my answers'}
         </button>
-        <button type="button" onClick={onSkip} disabled={sending} className="mt-1 min-h-12 w-full text-[0.95rem] font-semibold underline decoration-rule underline-offset-4">
+        <button type="button" onClick={onSkip} disabled={sending} className="mt-1 min-h-12 w-full text-[0.92rem] font-semibold underline decoration-rose underline-offset-4">
           Skip and finish
         </button>
       </BottomBar>
@@ -399,16 +404,17 @@ function OpenText({ question, value, onChange, onSend, onSkip, sending, error, h
 function Done({ headingRef, already }: { headingRef: React.RefObject<HTMLHeadingElement | null>; already: boolean }) {
   return (
     <section className="flex-1 pt-12 pb-12">
-      <p className="label text-soft">{already ? 'Already received' : 'All done'}</p>
-      <h1 ref={headingRef} tabIndex={-1} className="page-title mt-3 text-balance outline-none">
+      <p className="label text-warm-soft">{already ? 'Already received' : 'All done'}</p>
+      <h1 ref={headingRef} tabIndex={-1} className="mt-4 font-serif text-[1.85rem] leading-[1.18] font-normal tracking-[-0.01em] text-balance outline-none min-[390px]:text-[2rem]">
         Thank you! You just helped us make something better for real families.
       </h1>
-      <p className="lede mt-5">Your answers will help shape what we build next.</p>
+      <div className="mt-5 h-px w-12 bg-rose" aria-hidden="true" />
+      <p className="mt-5 text-[1rem] leading-relaxed">Your answers will help shape what we build next.</p>
       <p className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-5">
-        <a href={routes.home} className="text-link">
+        <a href={routes.home} className="text-link text-warm-ink decoration-rose">
           Back to the homepage
         </a>
-        <a href={routes.calendar} className="text-link">
+        <a href={routes.calendar} className="text-link text-warm-ink decoration-rose">
           Explore the calendar
         </a>
       </p>
@@ -418,7 +424,7 @@ function Done({ headingRef, already }: { headingRef: React.RefObject<HTMLHeading
 
 function BottomBar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="sticky bottom-0 -mx-5 shrink-0 border-t border-rule bg-paper px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:-mx-6 sm:px-6">
+    <div className="sticky bottom-0 -mx-5 shrink-0 border-t border-warm-rule bg-cream px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:-mx-6 sm:px-6">
       {children}
     </div>
   );

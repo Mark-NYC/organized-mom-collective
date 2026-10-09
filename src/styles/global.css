@@ -28,6 +28,20 @@
   --color-blush-wash: #f9f0ef;
   --color-soft: #666666;
 
+  /* Survey (/survey) only: a warmer stationery take on the print palette.
+     Contrast checked: text-warm-ink 8.7:1 and text-warm-soft 5.4:1 on cream;
+     white on warm-button 10:1; rose-deep marks 4.2:1 on the selected card. */
+  --font-serif: 'Georgia Pro', Georgia, 'Times New Roman', serif;
+  --color-ivory: #fffdfa;
+  --color-warm-ink: #4d4544;
+  --color-warm-soft: #6e6461;
+  --color-warm-rule: #e7ddd4;
+  --color-warm-button: #4a3f3e;
+  --color-rose: #b88a8c;
+  --color-rose-deep: #96666b;
+  --color-rose-wash: #f8eeec;
+  --color-sage: #9aab8f;
+
   /* Current month's color — set on <html> at load from src/theme.ts */
   --color-month: var(--month, #c8c8c8);
 }
