@@ -25,3 +25,22 @@ export function savingsVersus(big: { price: number; weeks: number }, small: { pr
   const save = (big.weeks / small.weeks) * small.price - big.price;
   return save > 0 ? Math.round(save * 100) / 100 : 0;
 }
+
+const parseDay = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+};
+
+/** Whole days from `start` to `end`, inclusive. */
+export function daysCovered(start: string, end: string): number {
+  return Math.round((parseDay(end).getTime() - parseDay(start).getTime()) / 86_400_000) + 1;
+}
+
+/** "Dec 28, 2026 – Jun 27, 2027"; the first year is dropped when both dates share it. */
+export function formatSpan(start: string, end: string): string {
+  const a = parseDay(start);
+  const b = parseDay(end);
+  const fmt = (d: Date, withYear: boolean) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: withYear ? 'numeric' : undefined, timeZone: 'UTC' });
+  return `${fmt(a, a.getUTCFullYear() !== b.getUTCFullYear())} – ${fmt(b, true)}`;
+}
