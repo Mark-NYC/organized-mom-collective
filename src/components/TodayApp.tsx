@@ -52,6 +52,23 @@ function Today({ justStarted }: { justStarted: boolean }) {
 
   const [daily, toggleDaily] = useCheckedSet(keys.daily(todayKey));
   const dailyDone = dailyEssentials.tasks.filter((t) => daily.has(t.id)).length;
+  // Weekend zone checks live in WeekendSection; this key is only used Mon–Thu.
+  const [zone, toggleZone] = useCheckedSet(keys.focus(dateKey(shown)));
+  const zoneTasks = plan.kind === 'weekday' ? plan.focus.tasks : [];
+  const zoneDone = zoneTasks.filter((t) => zone.has(t.id)).length;
+
+  const zoneLabel = plan.kind === 'weekday' ? plan.focus.zone : plan.day.zone;
+  const zoneIcon = plan.kind === 'weekday' ? plan.focus.icon : weekend.icon;
+
+  // Today's routine = Daily Reset + a weekday zone. Weekend projects are optional, so they aren't counted.
+  const routine = viewing ? zoneTasks.length : dailyEssentials.tasks.length + zoneTasks.length;
+  const routineDone = viewing ? zoneDone : dailyDone + zoneDone;
+  // The one task to point at: the first unchecked one, Daily Reset first, then the zone.
+  const next = viewing
+    ? zoneTasks.find((t) => !zone.has(t.id))?.id
+    : dailyEssentials.tasks.find((t) => !daily.has(t.id))?.id ?? zoneTasks.find((t) => !zone.has(t.id))?.id;
+  const nextDaily = !viewing && dailyEssentials.tasks.some((t) => t.id === next) ? next : undefined;
+  const nextZone = zoneTasks.some((t) => t.id === next) ? next : undefined;
 
   const weekday = shown.toLocaleDateString('en-US', { weekday: 'long' });
   const dayNum = String(shown.getDate()).padStart(2, '0');
@@ -82,6 +99,25 @@ function Today({ justStarted }: { justStarted: boolean }) {
           </span>
           <span className="month-title mt-1 block text-[1.15rem] leading-none">{monthYear}</span>
         </h1>
+        {!viewing && (
+          <a
+            href={plan.kind === 'weekday' ? '#focus' : '#weekend'}
+            aria-label={`Today’s zone: ${zoneLabel}. Jump to its tasks`}
+            className="mt-3 flex min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1"
+          >
+            <span className="label text-muted">Today’s zone</span>
+            <ZoneTag icon={zoneIcon} label={zoneLabel} size="sm" />
+          </a>
+        )}
+        {routine > 0 && (
+          <p className="mt-1.5 text-[0.95rem] leading-snug text-muted tabular-nums">
+            {routineDone === routine
+              ? viewing
+                ? 'All done for this day.'
+                : 'All done for today. Anything else is a bonus.'
+              : `${routineDone} of ${routine} done${viewing ? '' : ' today'}`}
+          </p>
+        )}
       </header>
 
       <div className="mt-7 grid gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12">
@@ -89,6 +125,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
           <Section
             id="daily"
             first
+            eyebrow="Every day"
             heading={
               <h2 id="daily-heading" className="text-[1rem] font-bold tracking-[0.18em] uppercase">
                 {dailyEssentials.title}
@@ -106,18 +143,18 @@ function Today({ justStarted }: { justStarted: boolean }) {
                 <strong className="font-semibold">You’re set.</strong> Start here — tap a task when it’s done.
               </p>
             )}
-            <TaskList tasks={dailyEssentials.tasks} checked={daily} onToggle={toggleDaily} scope="daily" label="Daily reset tasks" />
+            <TaskList tasks={dailyEssentials.tasks} checked={daily} onToggle={toggleDaily} scope="daily" label="Daily reset tasks" next={nextDaily} />
           </Section>
         )}
 
         {plan.kind === 'weekday' ? (
-          <FocusSection focus={plan.focus} date={dateKey(shown)} first={!!viewing} />
+          <FocusSection focus={plan.focus} checked={zone} onToggle={toggleZone} next={nextZone} first={!!viewing} today={!viewing} />
         ) : (
-          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} />
+          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} today={!viewing} />
         )}
       </div>
 
-      <MonthlyTeaser month={monthFocusFor(shown)} />
+      {plan.kind === 'weekday' && <MonthlyTeaser month={monthFocusFor(shown)} />}
 
       <nav aria-label="More" className="mt-8 border-t border-rule-strong">
         <a href={routes.tidy} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
@@ -152,6 +189,8 @@ function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
 
 interface SectionProps {
   id: string;
+  /** Small label above the heading: "Every day" vs "Today's zone". */
+  eyebrow: string;
   heading: ReactNode;
   meta: ReactNode;
   note?: ReactNode;
@@ -161,9 +200,12 @@ interface SectionProps {
 }
 
 /** One block of the day: a single heading line (title left, time + tally right), optional note, then ruled tasks. */
-function Section({ id, heading, meta, note, first, children }: SectionProps) {
+function Section({ id, eyebrow, heading, meta, note, first, children }: SectionProps) {
   return (
-    <section aria-labelledby={`${id}-heading`} className={first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}>
+    <section id={id} aria-labelledby={`${id}-heading`} className={`scroll-mt-4 ${first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}`}>
+      <p className="label mb-1.5 text-muted" aria-hidden="true">
+        {eyebrow}
+      </p>
       <div className="flex min-h-9 items-center justify-between gap-3">
         <div className="min-w-0">{heading}</div>
         <div className="flex shrink-0 items-center gap-3">{meta}</div>
@@ -174,13 +216,23 @@ function Section({ id, heading, meta, note, first, children }: SectionProps) {
   );
 }
 
-function FocusSection({ focus, date, first }: { focus: WeekdayFocus; date: string; first?: boolean }) {
-  const [checked, toggle] = useCheckedSet(keys.focus(date));
+interface FocusSectionProps {
+  focus: WeekdayFocus;
+  checked: Set<string>;
+  onToggle: (id: string) => void;
+  next?: string;
+  first?: boolean;
+  /** Showing today (vs another day picked from the Tidy week). */
+  today: boolean;
+}
+
+function FocusSection({ focus, checked, onToggle: toggle, next, first, today }: FocusSectionProps) {
   const done = focus.tasks.filter((t) => checked.has(t.id)).length;
 
   return (
     <Section
       id="focus"
+      eyebrow={today ? 'Today’s zone' : `${focus.dayLabel}’s zone`}
       first={first}
       heading={
         <h2 id="focus-heading">
@@ -196,12 +248,20 @@ function FocusSection({ focus, date, first }: { focus: WeekdayFocus; date: strin
       }
       note={focus.description}
     >
-      <TaskList tasks={focus.tasks} checked={checked} onToggle={toggle} scope="focus" label={`${focus.zone} tasks`} />
+      <TaskList tasks={focus.tasks} checked={checked} onToggle={toggle} scope="focus" label={`${focus.zone} tasks`} next={next} />
     </Section>
   );
 }
 
-function WeekendSection({ day, month, date, first }: { day: WeekendDay; month: MonthlyFocus; date: Date; first?: boolean }) {
+interface WeekendSectionProps {
+  day: WeekendDay;
+  month: MonthlyFocus;
+  date: Date;
+  first?: boolean;
+  today: boolean;
+}
+
+function WeekendSection({ day, month, date, first, today }: WeekendSectionProps) {
   const [monthly, toggleMonthly] = useCheckedSet(keys.monthly(monthKey(date)));
   const [weekendChecks, toggleWeekend] = useCheckedSet(keys.weekend(dateKey(weekendStart(date))));
   const done = month.tasks.filter((t) => monthly.has(t.id)).length;
@@ -209,6 +269,7 @@ function WeekendSection({ day, month, date, first }: { day: WeekendDay; month: M
   return (
     <Section
       id="weekend"
+      eyebrow={today ? 'Today’s zone' : `${day.dayLabel}’s zone`}
       first={first}
       heading={
         <h2 id="weekend-heading">

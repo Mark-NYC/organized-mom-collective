@@ -6,13 +6,15 @@ interface TaskCheckboxProps {
   onToggle: (id: string) => void;
   /** Namespaces the input id so the same task can appear twice on a page. */
   scope: string;
+  /** Marks the one task to do next. */
+  next?: boolean;
 }
 
 /**
  * One ruled line with the printed calendar's rounded-square box, plus a pen
  * tick that overshoots it when checked.
  */
-export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxProps) {
+export function TaskCheckbox({ task, checked, onToggle, scope, next }: TaskCheckboxProps) {
   const inputId = `${scope}-${task.id}`;
   return (
     <li className="border-b border-rule">
@@ -26,11 +28,11 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
         />
         <span
           aria-hidden="true"
-          className="relative size-7 shrink-0 rounded-[6px] border-[1.5px] border-ink transition-colors group-hover:bg-band group-active:bg-band peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-ink"
+          className={`relative size-8 shrink-0 rounded-[7px] border-[1.5px] transition-colors ${checked ? 'border-rule-strong/60' : 'border-ink'} group-hover:bg-band group-active:bg-band peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-ink`}
         >
           <svg
             viewBox="0 0 28 28"
-            className={`absolute -top-[0.7rem] -right-[0.55rem] size-[2.1rem] overflow-visible text-ink transition-opacity ${
+            className={`absolute -top-[0.7rem] -right-[0.55rem] size-[2.3rem] overflow-visible text-ink transition-opacity ${
               checked ? 'opacity-100' : 'opacity-0'
             }`}
             fill="none"
@@ -43,12 +45,17 @@ export function TaskCheckbox({ task, checked, onToggle, scope }: TaskCheckboxPro
           </svg>
         </span>
         <span
-          className={`text-[1.0625rem] leading-snug transition-colors sm:text-[1rem] ${
+          className={`min-w-0 flex-1 text-[1.0625rem] leading-snug transition-colors sm:text-[1rem] ${
             checked ? 'text-muted line-through decoration-muted/70 decoration-1' : 'text-ink'
           }`}
         >
           {task.label}
         </span>
+        {next && (
+          <span className="shrink-0 border-b-[3px] border-month text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase">
+            Next
+          </span>
+        )}
       </label>
     </li>
   );
@@ -60,13 +67,14 @@ interface TaskListProps {
   onToggle: (id: string) => void;
   scope: string;
   label: string;
+  next?: string;
 }
 
-export function TaskList({ tasks, checked, onToggle, scope, label }: TaskListProps) {
+export function TaskList({ tasks, checked, onToggle, scope, label, next }: TaskListProps) {
   return (
     <ul aria-label={label}>
       {tasks.map((task) => (
-        <TaskCheckbox key={task.id} task={task} checked={checked.has(task.id)} onToggle={onToggle} scope={scope} />
+        <TaskCheckbox key={task.id} task={task} checked={checked.has(task.id)} onToggle={onToggle} scope={scope} next={task.id === next} />
       ))}
     </ul>
   );
