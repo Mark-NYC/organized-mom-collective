@@ -9,6 +9,8 @@ import { takeSourceParam } from '../lib/entry';
 import { isOnboarded, keys, markActive, pruneOld, setEntrySource, setOnboarded } from '../lib/storage';
 import { progressLine, weekActivity } from '../lib/progress';
 import { ProgressRing, WeekDots } from './Progress';
+import InstallInvite from './InstallInvite';
+import { currentPlatform, isStandalone, restoreHandoff, saveHandoff, shouldOfferInstall } from '../lib/install';
 import { routes } from '../routes';
 import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
@@ -17,6 +19,22 @@ import { monthColor } from '../theme';
 
 export default function TodayApp() {
   const [onboarded, setOnboardedState] = useState(isOnboarded);
+  // iPhone Home Screen app, first launch: it has its own empty storage, so first pick up
+  // the progress Safari left behind (see lib/install.ts) before deciding to show onboarding.
+  const [ready, setReady] = useState(() => onboarded || !isStandalone());
+  useEffect(() => {
+    if (ready) return;
+    const done = () => {
+      setOnboardedState(isOnboarded());
+      setReady(true);
+      if (isOnboarded()) document.documentElement.classList.remove('needs-onboarding');
+    };
+    const timeout = window.setTimeout(done, 1500);
+    restoreHandoff().finally(() => {
+      window.clearTimeout(timeout);
+      done();
+    });
+  }, [ready]);
   // True only right after finishing the welcome screen, to point at the first task.
   const [justStarted, setJustStarted] = useState(false);
 
@@ -36,6 +54,7 @@ export default function TodayApp() {
     window.scrollTo(0, 0);
   };
 
+  if (!ready) return null;
   if (!onboarded) return <Onboarding onDone={finish} />;
   return <Today justStarted={justStarted} />;
 }
@@ -59,9 +78,26 @@ function Today({ justStarted }: { justStarted: boolean }) {
 
   // Any new checkmark lights today in the week view (even from another day or a weekend project).
   const [, setActivity] = useState(0);
+  const saving = useSaving();
+  // After a checkmark (never during onboarding or before her first task), offer Add to Home Screen once.
+  const [invite, setInvite] = useState(false);
   const noteChecked = useCallback(() => {
     markActive(dateKey(new Date()));
     setActivity((n) => n + 1);
+    if (shouldOfferInstall(currentPlatform(), isStandalone(), saving)) {
+      // Let the tick land first.
+      window.setTimeout(() => setInvite(true), 900);
+    }
+  }, [saving]);
+
+  // iPhone Safari: keep a copy of progress where the Home Screen app can pick it up.
+  useEffect(() => {
+    if (!currentPlatform().startsWith('ios') || isStandalone()) return;
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') void saveHandoff();
+    };
+    document.addEventListener('visibilitychange', onHide);
+    return () => document.removeEventListener('visibilitychange', onHide);
   }, []);
   const withActivity = (checked: Set<string>, toggle: (id: string) => void) => (id: string) => {
     if (!checked.has(id)) noteChecked();
@@ -94,7 +130,6 @@ function Today({ justStarted }: { justStarted: boolean }) {
   const dayNum = String(shown.getDate()).padStart(2, '0');
   const monthYear = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const longDate = shown.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const saving = useSaving();
 
   const week = weekActivity(today);
   const line = progressLine({
@@ -216,6 +251,14 @@ function Today({ justStarted }: { justStarted: boolean }) {
           Reorder your calendar <span aria-hidden="true">→</span>
         </a>
       </nav>
+
+      {invite && (
+        <>
+          {/* Room to scroll the last rows above the card. */}
+          <div aria-hidden="true" className="h-36" />
+          <InstallInvite onClose={() => setInvite(false)} />
+        </>
+      )}
     </div>
   );
 }

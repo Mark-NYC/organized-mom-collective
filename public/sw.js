@@ -43,7 +43,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((names) => Promise.all(names.filter((n) => n !== CACHE).map((n) => caches.delete(n))))
+      // Remove older app copies. 'omc-handoff' carries progress to the iPhone Home Screen app; keep it.
+      .then((names) => Promise.all(names.filter((n) => n !== CACHE && n !== 'omc-handoff').map((n) => caches.delete(n))))
       .then(() => self.clients.claim()),
   );
 });
