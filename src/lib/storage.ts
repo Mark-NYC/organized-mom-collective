@@ -12,6 +12,7 @@
  *   omc:v1:weekend:YYYY-MM-DD     weekend-only choices, keyed by that weekend's Friday
  *   omc:v1:monthly:YYYY-MM        checked monthly home project tasks for that month
  *   omc:v1:active:YYYY-MM-DD      "1" if anything was checked that day (lights that day in the week view)
+ *   omc:v1:install-invite         "dismissed" once the Add to Home Screen invitation is closed
  *
  * Per-session (sessionStorage), not progress:
  *   omc:v1:entry-source           how this visit arrived, e.g. "calendar" (the printed QR)
@@ -193,7 +194,9 @@ export function setOnboarded(done: boolean): void {
 }
 
 function progressKeys(): string[] {
-  return backend.keys().filter((k) => k.startsWith(PREFIX) && k !== ONBOARDED_KEY && k !== PROBE_KEY);
+  return backend
+    .keys()
+    .filter((k) => k.startsWith(PREFIX) && k !== ONBOARDED_KEY && k !== PROBE_KEY && k !== `${PREFIX}install-invite`);
 }
 
 export function resetDay(date: string, weekendFriday?: string): void {
@@ -231,6 +234,41 @@ export function markActive(date: string): void {
  */
 export function wasActive(date: string): boolean {
   return backend.get(keys.active(date)) === '1' || readList(keys.daily(date)).length > 0 || readList(keys.focus(date)).length > 0;
+}
+
+/** Small named settings, e.g. whether the install invitation was dismissed. */
+export function readFlag(name: string): string | null {
+  return backend.get(`${PREFIX}${name}`);
+}
+
+export function writeFlag(name: string, value: string): void {
+  backend.set(`${PREFIX}${name}`, value);
+}
+
+/** True if anything at all has been saved here (onboarding, checkmarks, settings). */
+export function hasAnyProgress(): boolean {
+  return backend.keys().some((k) => k.startsWith(PREFIX) && k !== PROBE_KEY);
+}
+
+/** Everything this app has saved, for moving into the iPhone Home Screen app. */
+export function exportProgress(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of backend.keys()) {
+    if (!k.startsWith(PREFIX) || k === PROBE_KEY) continue;
+    const v = backend.get(k);
+    if (v !== null) out[k] = v;
+  }
+  return out;
+}
+
+/** Adds saved entries that don't exist here yet. Never overwrites. Returns how many were added. */
+export function importMissing(data: Record<string, unknown>): number {
+  let added = 0;
+  for (const [k, v] of Object.entries(data)) {
+    if (!k.startsWith(PREFIX) || k === PROBE_KEY || typeof v !== 'string' || backend.get(k) !== null) continue;
+    if (backend.set(k, v)) added++;
+  }
+  return added;
 }
 
 /** Remembers how this visit arrived (e.g. "calendar" from the printed QR) for later analytics. */

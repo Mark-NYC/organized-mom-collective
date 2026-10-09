@@ -3,11 +3,16 @@ import type { ReactNode } from 'react';
 import { dateKey, isWeekend, weekendStart } from '../lib/dates';
 import { resetAllProgress, resetDay, setOnboarded } from '../lib/storage';
 import ConfirmationDialog from './ConfirmationDialog';
+import { InstallSteps } from './InstallInvite';
+import { currentPlatform, isStandalone, saveHandoff } from '../lib/install';
 import { routes } from '../routes';
 
 export default function SettingsApp() {
   const [confirmAll, setConfirmAll] = useState(false);
   const [status, setStatus] = useState('');
+  const [platform] = useState(currentPlatform);
+  const [standalone] = useState(isStandalone);
+  const [howOpen, setHowOpen] = useState(false);
 
   const replay = () => {
     setOnboarded(false);
@@ -29,6 +34,34 @@ export default function SettingsApp() {
   return (
     <>
       <ul className="border-t border-rule-strong">
+        <Row
+          title="Add to Home Screen"
+          detail={
+            standalone
+              ? 'You’re using the Home Screen app. Your checkmarks are kept on this phone.'
+              : 'Open it with one tap, like an app. Works without signal once loaded.'
+          }
+          action={
+            standalone ? null : (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!howOpen && platform.startsWith('ios')) void saveHandoff();
+                  setHowOpen(!howOpen);
+                }}
+                aria-expanded={howOpen}
+                className="btn-secondary"
+              >
+                {howOpen ? 'Hide' : 'How'}
+              </button>
+            )
+          }
+        />
+        {howOpen && (
+          <li className="border-b border-rule pb-5">
+            <InstallSteps platform={platform} />
+          </li>
+        )}
         <Row
           title="See the welcome screen again"
           detail="How the app works with your calendar. Your checkmarks are kept."

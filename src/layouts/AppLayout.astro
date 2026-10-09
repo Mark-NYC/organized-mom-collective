@@ -24,6 +24,15 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script is:inline>
+      // Android browsers offer their own install dialog once; keep it for the "Install" button.
+      window.__omcInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.__omcInstallPrompt = e;
+        window.dispatchEvent(new Event('omc:installable'));
+      });
+    </script>
     <script is:inline define:vars={{ ONBOARDED_KEY }}>
       // First visit to Today: hide app chrome until the onboarding screen renders.
       try {

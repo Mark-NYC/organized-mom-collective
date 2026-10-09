@@ -341,3 +341,74 @@ describe('week view', () => {
     expect(s.wasActive('2027-10-04')).toBe(false);
   });
 });
+
+describe('add to home screen', () => {
+  const UA = {
+    iphoneSafari: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1',
+    iphoneChrome: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/138.0.7204.156 Mobile/15E148 Safari/604.1',
+    iphoneInstagram: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 390.0.0.0',
+    ipadOS: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15',
+    androidChrome: 'Mozilla/5.0 (Linux; Android 15; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36',
+    samsung: 'Mozilla/5.0 (Linux; Android 14; SM-S921U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/27.0 Chrome/125.0.0.0 Mobile Safari/537.36',
+    mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15',
+  };
+
+  it('picks the right instructions for each phone and browser', async () => {
+    const { detectPlatform } = await import('../src/lib/install');
+    expect(detectPlatform(UA.iphoneSafari)).toBe('ios-safari');
+    expect(detectPlatform(UA.iphoneChrome)).toBe('ios-other');
+    expect(detectPlatform(UA.iphoneInstagram)).toBe('ios-other');
+    expect(detectPlatform(UA.ipadOS, 5)).toBe('ios-safari');
+    expect(detectPlatform(UA.mac, 0)).toBe('other');
+    expect(detectPlatform(UA.androidChrome)).toBe('android');
+    expect(detectPlatform(UA.samsung)).toBe('android');
+  });
+
+  it('instructions are short, name the real buttons, and promise nothing permanent', async () => {
+    const { installGuide } = await import('../src/lib/install');
+    expect(installGuide('ios-safari').steps.join(' ')).toMatch(/Share.*Add to Home Screen.*Add/);
+    expect(installGuide('ios-other').note).toMatch(/Safari/);
+    expect(installGuide('android').steps.join(' ')).toMatch(/Install app or Add to home screen/);
+    for (const p of ['ios-safari', 'ios-other', 'android', 'other'] as const) {
+      const g = installGuide(p);
+      expect(g.steps.length).toBeLessThanOrEqual(3);
+      expect(JSON.stringify(g)).not.toMatch(/forever|never lose|always saved|backed up/i);
+    }
+  });
+
+  it('invites only on phones, in the browser, with working storage, until dismissed', async () => {
+    vi.resetModules();
+    const { shouldOfferInstall, dismissInvite } = await import('../src/lib/install');
+    expect(shouldOfferInstall('ios-safari', false, true)).toBe(true);
+    expect(shouldOfferInstall('android', false, true)).toBe(true);
+    expect(shouldOfferInstall('other', false, true)).toBe(false); // desktop
+    expect(shouldOfferInstall('ios-safari', true, true)).toBe(false); // already installed
+    expect(shouldOfferInstall('ios-safari', false, false)).toBe(false); // private browsing: installing wouldn't help
+    dismissInvite();
+    expect(shouldOfferInstall('ios-safari', false, true)).toBe(false);
+    const s = await import('../src/lib/storage');
+    s.resetAllProgress();
+    expect(shouldOfferInstall('ios-safari', false, true)).toBe(false); // resetting progress doesn't bring it back
+  });
+
+  it('handoff copies progress into an empty install and never overwrites', async () => {
+    vi.resetModules();
+    const s = await import('../src/lib/storage');
+    s.setOnboarded(true);
+    s.writeList(s.keys.daily('2027-10-06'), ['beds', 'counters']);
+    s.markActive('2027-10-06');
+    const snapshot = s.exportProgress();
+    expect(Object.keys(snapshot).sort()).toEqual(['omc:v1:active:2027-10-06', 'omc:v1:daily:2027-10-06', 'omc:v1:onboarded']);
+
+    // A fresh Home Screen app on the same phone
+    (globalThis as unknown as { window: { localStorage: MemStorage } }).window = { localStorage: new MemStorage() };
+    vi.resetModules();
+    const fresh = await import('../src/lib/storage');
+    expect(fresh.hasAnyProgress()).toBe(false);
+    fresh.writeList(fresh.keys.daily('2027-10-06'), ['beds']); // already did something here
+    expect(fresh.importMissing({ ...snapshot, 'other:key': 'x', 'omc:v1:bad': 5 })).toBe(2);
+    expect(fresh.isOnboarded()).toBe(true);
+    expect(fresh.readList(fresh.keys.daily('2027-10-06'))).toEqual(['beds']); // not overwritten
+    expect(window.localStorage.getItem('other:key')).toBeNull();
+  });
+});
