@@ -1,0 +1,192 @@
+---
+/**
+ * /companion — the public explanation of the cleaning companion (the app at /app).
+ * "Get Started" in the site header and "See How It Works" on the homepage land here.
+ * Everything about the routine is read from src/data/cleaning.ts, never retyped.
+ * Calendar owners open the app from here; the QR entry (/start) stays for the printed code only.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import PhoneShot from '../components/site/PhoneShot.astro';
+import ShopButton from '../components/site/ShopButton.astro';
+import { ZoneTag, TimeMark, shortTime } from '../components/marks';
+import { dailyEssentials, monthlyDeepClean, weekend, weeklySchedule } from '../data/cleaning';
+import { monthColors } from '../theme';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const week = [
+  ...weeklySchedule.map((d) => ({ day: d.dayLabel, zone: d.zone, icon: d.icon, time: shortTime(d.minutes) })),
+  ...weekend.days.map((d) => ({ day: d.dayLabel, zone: d.zone, icon: weekend.icon, time: 'Optional' })),
+];
+/** "15 minutes" → "15-minute" */
+const resetLength = dailyEssentials.minutes.replace(/ minutes?$/, '-minute');
+const projects = monthlyDeepClean.map((m) => ({ month: m.name, title: m.title, color: monthColors[m.month].hex }));
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Cleaning Companion', item: new URL(routes.companion, site).href },
+    ],
+  },
+];
+
+const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
+---
+
+<PublicLayout
+  fullTitle="Simple Daily Cleaning Routine Companion · Organized Mom"
+  description={`How the free cleaning companion works with the family wall calendar: a ${resetLength} Daily Reset, one zone a day, and a monthly home project.`}
+  width="full"
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section aria-labelledby="hero-h" class="bg-cream">
+    <div class:list={[wrap, 'grid items-center gap-10 py-10 sm:py-14 md:grid-cols-[1.3fr_1fr] md:py-16']}>
+      <div>
+        <p class="label text-muted">The cleaning companion</p>
+        <h1 id="hero-h" class="page-title mt-3 text-balance sm:text-[2.7rem]">A little help keeping the house moving.</h1>
+        <p class="lede mt-4 max-w-xl">
+          The cleaning companion works alongside your printed calendar. It tells you what to clean today, keeps it small, and lets the rest
+          wait. It comes free with every {BRAND_NAME} calendar: no subscription, no account, nothing to install.
+        </p>
+        <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+          <a href="#get-started" class="btn-primary w-full sm:w-auto">Get Started</a>
+          <a href="#how-it-works" class="text-link self-center sm:self-auto">How it works</a>
+        </div>
+      </div>
+      <PhoneShot
+        name="today"
+        alt="The companion's Today screen: Wednesday's zone, Entry/Bathroom, with the Daily Reset checklist partly ticked off."
+      />
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" aria-labelledby="how-h" class:list={[wrap, 'scroll-mt-4 py-14 sm:py-20']}>
+    <div class="max-w-2xl">
+      <h2 id="how-h" class="section-title">Small steps, on a steady rhythm.</h2>
+      <p class="lede mt-4">Three layers, and none of them asks for more than a few minutes at a time.</p>
+    </div>
+
+    <div class="mt-10 grid gap-12 md:grid-cols-3 md:gap-10">
+      <div class="border-t-2 border-ink pt-4">
+        <p class="label text-muted">Every day</p>
+        <h3 class="mt-2 text-[1.3rem] leading-snug font-bold">{dailyEssentials.title}</h3>
+        <p class="mt-2 text-[1rem] leading-relaxed text-soft">
+          The same {dailyEssentials.tasks.length} quick tasks every day, about {dailyEssentials.minutes}. It starts fresh each morning, so
+          yesterday never carries over.
+        </p>
+        <ul class="mt-4 space-y-1.5 text-[0.97rem]">
+          {
+            dailyEssentials.tasks.map((t) => (
+              <li class="flex gap-2">
+                <span aria-hidden="true" class="mt-[0.35rem] size-3 shrink-0 rounded-[2px] border border-ink" />
+                {t.label}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="border-t-2 border-ink pt-4">
+        <p class="label text-muted">Every week</p>
+        <h3 class="mt-2 text-[1.3rem] leading-snug font-bold">One zone a day</h3>
+        <p class="mt-2 text-[1rem] leading-relaxed text-soft">
+          The same zones printed on your calendar. Monday to Thursday each take 10–15 minutes, so by Thursday the whole house has had a turn.
+          Friday to Sunday are optional.
+        </p>
+        <ul class="mt-4 space-y-2">
+          {
+            week.map((d) => (
+              <li class="flex items-center justify-between gap-3">
+                <span class="flex min-w-0 items-center gap-3">
+                  <span class="w-9 shrink-0 text-[0.7rem] font-bold tracking-[0.14em] uppercase">{d.day.slice(0, 3)}</span>
+                  <ZoneTag icon={d.icon} label={d.zone} size="sm" />
+                </span>
+                <TimeMark>{d.time}</TimeMark>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="border-t-2 border-ink pt-4">
+        <p class="label text-muted">Every month</p>
+        <h3 class="mt-2 text-[1.3rem] leading-snug font-bold">One home project</h3>
+        <p class="mt-2 text-[1rem] leading-relaxed text-soft">
+          A deeper project each month, split into a few small tasks. Do one on a weekend when you can. There’s no need to finish.
+        </p>
+        <ul class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[0.92rem]">
+          {
+            projects.map((p) => (
+              <li class="border-t-[3px] pt-1.5" style={`border-top-color: ${p.color}`}>
+                <span class="block text-[0.62rem] font-semibold tracking-[0.16em] text-muted uppercase">{p.month}</span>
+                <span class="leading-snug font-semibold">{p.title}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progress -->
+  <section aria-labelledby="progress-h" class="bg-sage-wash">
+    <div class:list={[wrap, 'grid items-center gap-10 py-14 sm:py-20 md:grid-cols-[1fr_1.2fr]']}>
+      <PhoneShot
+        name="week"
+        alt="The companion's Week screen: each day's cleaning zone from Monday's Living Room to Sunday's Catch-Up / Reset, with progress for the days so far."
+        class="md:order-first"
+      />
+      <div>
+        <h2 id="progress-h" class="section-title">See your week at a glance.</h2>
+        <p class="lede mt-4">
+          Tick tasks off as you go. The Week view shows every day’s zone and how far you’ve gotten, and a missed day is simply a missed day.
+          Nothing piles up.
+        </p>
+        <ul class="mt-6 border-t border-rule-strong/40">
+          <li class="border-b border-rule-strong/30 py-3 text-[1rem] leading-snug">
+            <strong class="font-bold">Saved on your phone.</strong> Progress stays in your phone’s browser. No account, no sign-in.
+          </li>
+          <li class="border-b border-rule-strong/30 py-3 text-[1rem] leading-snug">
+            <strong class="font-bold">Works on a weak signal.</strong> After your first visit it opens even when you’re offline.
+          </li>
+          <li class="border-b border-rule-strong/30 py-3 text-[1rem] leading-snug">
+            <strong class="font-bold">One tap away.</strong> Add it to your Home Screen and it opens like an app.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Get started -->
+  <section id="get-started" aria-labelledby="start-h" class:list={[wrap, 'scroll-mt-4 py-14 sm:py-20']}>
+    <h2 id="start-h" class="section-title">Get started.</h2>
+    <div class="mt-8 grid gap-6 md:grid-cols-2">
+      <div class="flex flex-col rounded-[4px] border-2 border-ink p-6">
+        <h3 class="text-[1.25rem] font-bold">Have the calendar?</h3>
+        <p class="mt-2 text-[1rem] leading-relaxed text-soft">
+          Scan the QR code printed on your calendar with your phone’s camera. The companion opens on today, ready to go.
+        </p>
+        <div class="mt-auto pt-6">
+          <a href={routes.today} class="btn-primary w-full sm:w-auto">Open the Companion</a>
+        </div>
+      </div>
+      <div class="flex flex-col rounded-[4px] border border-rule-strong bg-cream p-6">
+        <h3 class="text-[1.25rem] font-bold">Don’t have it yet?</h3>
+        <p class="mt-2 text-[1rem] leading-relaxed text-soft">
+          The companion comes free with the 2027 Family Wall Calendar &amp; Organizer, a weekly wall calendar with every day’s cleaning zone
+          printed on it.
+        </p>
+        <div class="mt-auto flex flex-col gap-3 pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+          <ShopButton label="Shop the Calendar" toProductPage class="w-full sm:w-auto" />
+          <a href={routes.resources} class="text-link self-center sm:self-auto">Free cleaning resources</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

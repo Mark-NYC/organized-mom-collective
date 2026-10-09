@@ -94,6 +94,19 @@
 }
 
 /*
+ * Public pages (/, /calendar, /companion): section headings and intro text.
+ * Same Montserrat hierarchy as .page-title, a step down.
+ */
+@layer components {
+  .section-title {
+    @apply text-[1.65rem] leading-[1.15] font-bold tracking-[-0.01em] text-balance sm:text-[2.15rem];
+  }
+  .lede {
+    @apply text-[1.0625rem] leading-relaxed sm:text-[1.125rem];
+  }
+}
+
+/*
  * Resource articles: long-form Markdown, styled to match the print palette.
  * Plain Markdown lists use `:not([class])` so component lists keep their own styles.
  */
