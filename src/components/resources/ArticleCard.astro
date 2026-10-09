@@ -1,6 +1,14 @@
 ---
+/**
+ * An article teaser for the hub, pillar pages and "Read next". Shows the article's
+ * hero photo as a 3:2 thumbnail when it has one; articles without a photo get a
+ * text-only card (a ruled top edge), so older articles still look intentional.
+ *
+ * layout: 'stack' (photo above text) or 'feature' (photo beside text on wide screens).
+ */
 import type { Article } from '../../lib/articles';
 import { getPillar } from '../../data/pillars';
+import { imageAttrs } from '../../data/images';
 import { routes } from '../../routes';
 
 interface Props {
@@ -8,19 +16,56 @@ interface Props {
   /** Heading level for the card title, to keep the page outline correct. */
   as?: 'h2' | 'h3';
   showPillar?: boolean;
-  /** 'lg' for a single featured article. */
+  /** 'lg' for a featured article. */
   size?: 'md' | 'lg';
+  layout?: 'stack' | 'feature';
+  /** Load the thumbnail immediately (the first card on a page). */
+  priority?: boolean;
 }
-const { article, as: Tag = 'h3', showPillar = true, size = 'md' } = Astro.props;
-const { title, summary, pillar } = article.data;
+const { article, as: Tag = 'h3', showPillar = true, size = 'md', layout = 'stack', priority = false } = Astro.props;
+const { title, summary, pillar, hero } = article.data;
+const thumb = hero ? imageAttrs(hero.image) : undefined;
+const feature = layout === 'feature';
+const sizes = feature ? '(min-width: 768px) 560px, 100vw' : '(min-width: 768px) 320px, 100vw';
 ---
 
-<article class="group relative flex h-full flex-col border-t-2 border-ink pt-4">
-  {showPillar && <p class="label text-muted">{getPillar(pillar).name}</p>}
-  <Tag class:list={['mt-2 leading-snug font-bold text-balance', size === 'lg' ? 'text-[1.45rem] sm:text-[1.7rem]' : 'text-[1.2rem]']}>
-    <a href={routes.article(article.id)} class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-month group-hover:decoration-[3px] group-hover:underline-offset-4">
-      {title}
-    </a>
-  </Tag>
-  <p class:list={['mt-2 leading-relaxed text-soft', size === 'lg' ? 'text-[1.05rem]' : 'text-[0.97rem]']}>{summary}</p>
+<article
+  class:list={[
+    'group relative flex h-full flex-col',
+    feature && thumb && 'md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center md:gap-10',
+    !thumb && 'border-t-2 border-ink pt-4',
+  ]}
+>
+  {
+    thumb && (
+      <div class:list={['overflow-hidden rounded-[6px] bg-band', !feature && 'mb-4']}>
+        <img
+          {...thumb}
+          sizes={sizes}
+          alt=""
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          class="block aspect-[3/2] h-auto w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+        />
+      </div>
+    )
+  }
+  <div class:list={[feature && thumb && 'mt-5 md:mt-0']}>
+    {showPillar && <p class="label text-muted">{getPillar(pillar).name}</p>}
+    <Tag
+      class:list={['mt-2 leading-[1.2] font-bold text-balance', size === 'lg' ? 'text-[1.6rem] sm:text-[2.1rem]' : 'text-[1.25rem]']}
+      style="font-family: var(--font-editorial)"
+    >
+      <a
+        href={routes.article(article.id)}
+        class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-month group-hover:decoration-[3px] group-hover:underline-offset-4"
+      >
+        {title}
+      </a>
+    </Tag>
+    <p class:list={['mt-2.5 leading-relaxed', size === 'lg' ? 'text-[1.05rem] sm:text-[1.1rem]' : 'text-[0.97rem]']} style="color: var(--color-prose-soft)">
+      {summary}
+    </p>
+    {size === 'lg' && <p class="text-link mt-5 inline-block">Read the guide</p>}
+  </div>
 </article>

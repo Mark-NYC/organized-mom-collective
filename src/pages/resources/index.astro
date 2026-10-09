@@ -1,23 +1,29 @@
 ---
 /**
- * The resource library hub: each pillar with its articles, pillar guides first.
- * Until the first article is published it shows the three topics, is noindex,
- * and is left out of the sitemap, so search engines never see an empty page.
+ * The resource library hub, laid out like a small publication: one featured
+ * article, the latest guides as a card grid, the three topics, and a quiet route
+ * to the wall calendar. Until the first article is published it shows the
+ * topics only, is noindex, and is left out of the sitemap.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ArticleCard from '../../components/resources/ArticleCard.astro';
-import { getPillarArticles } from '../../lib/articles';
+import { getArticles, getPillarArticles } from '../../lib/articles';
 import { pillars } from '../../data/pillars';
+import { imageAttrs } from '../../data/images';
 import { routes } from '../../routes';
 import { BRAND_NAME } from '../../config';
 
+const all = await getArticles();
 const sections = await Promise.all(pillars.map(async (pillar) => ({ pillar, articles: await getPillarArticles(pillar.id) })));
-const all = sections.flatMap((s) => s.articles);
-const guides = all.filter((a) => a.data.pillarGuide);
+
+// Featured: the newest article with a photo, else the newest pillar guide, else the newest article.
+const featured = all.find((a) => a.data.hero) ?? all.find((a) => a.data.pillarGuide) ?? all[0];
+const latest = all.filter((a) => a !== featured).slice(0, 6);
+const calendarPhoto = imageAttrs('hc-01-wall-calendar');
 
 const site = Astro.site!;
 const description =
-  'Simple systems for busy moms: family schedules, cleaning routines and meal planning that cut down the decisions you make every day.';
+  'Simple systems for busy families: weekly planning, realistic cleaning routines and shared responsibilities that lighten the mental load of running a home.';
 const jsonLd = all.length
   ? [
       {
@@ -33,104 +39,101 @@ const jsonLd = all.length
 ---
 
 <PublicLayout
-  title="Home Organization Resources for Busy Moms"
+  title="Home Organization Resources for Busy Families"
   description={description}
   indexable={all.length > 0}
   chrome
   width="wide"
   jsonLd={jsonLd}
 >
-  <header class="max-w-2xl">
+  <header class="article-shell max-w-2xl">
     <p class="label text-muted">The Real-Life Reset</p>
-    <h1 class="page-title mt-3 text-balance">Simple systems for a busy home</h1>
-    <p class="mt-4 text-[1.15rem] leading-relaxed">
-      You don’t need more things to remember. You need a few simple systems that make the everyday decisions for you. Each guide answers
-      one real question, gives you a routine you can start today, and a plan for the weeks that don’t go to plan.
+    <h1 class="article-title mt-3">Simple systems for a busy home</h1>
+    <p class="article-deck mt-4">
+      Plan the week, keep the house manageable, and share the load. Every guide answers one real question, gives you a routine you can start
+      today, and a plan for the weeks that don’t go to plan.
     </p>
   </header>
 
   {
-    guides.length > 0 && (
-      <section aria-labelledby="start-h" class="-mx-5 mt-10 bg-cream px-5 py-8 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10">
-        <h2 id="start-h" class="section-label">Start here</h2>
-        {guides.length === 1 ? (
-          <div class="mx-auto mt-6 max-w-2xl">
-            <ArticleCard article={guides[0]} size="lg" />
-          </div>
-        ) : (
-          <ul class="mt-6 grid gap-8 md:grid-cols-3">
-            {guides.map((a) => (
-              <li>
-                <ArticleCard article={a} />
-              </li>
-            ))}
-          </ul>
-        )}
+    featured && (
+      <section aria-label="Featured" class="mt-12 border-t border-rule pt-10">
+        <ArticleCard article={featured} as="h2" size="lg" layout="feature" priority />
       </section>
     )
   }
 
   {
-    all.length > 0 && (
-      <section aria-labelledby="topics-h" class="mt-14">
-        <h2 id="topics-h" class="section-label">The guide, by topic</h2>
-        {sections.map(({ pillar, articles }) => {
-          // Pillar guides are already under Start here.
-          const rest = articles.filter((a) => !a.data.pillarGuide);
-          return (
-            <section aria-labelledby={`${pillar.id}-h`} class="mt-10">
-              <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b border-rule pb-3">
-                <div class="max-w-2xl">
-                  <h3 id={`${pillar.id}-h`} class="text-[1.4rem] leading-tight font-bold">
-                    {articles.length > 0 ? (
-                      <a href={routes.pillar(pillar.id)} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
-                        {pillar.name}
-                      </a>
-                    ) : (
-                      pillar.name
-                    )}
-                  </h3>
-                  <p class="mt-1 text-[0.97rem] text-soft">{pillar.summary}</p>
-                </div>
-                {articles.length > 3 && (
-                  <a href={routes.pillar(pillar.id)} class="text-link">
-                    All {articles.length} guides
-                  </a>
-                )}
-              </div>
-              {rest.length > 0 ? (
-                <ul class="mt-6 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
-                  {rest.slice(0, 3).map((a) => (
-                    <li>
-                      <ArticleCard article={a} showPillar={false} />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p class="mt-4 text-[0.95rem] text-muted">
-                  {articles.length > 0 ? 'More guides in this topic are on the way.' : 'The first guides in this topic are on the way.'}
-                </p>
-              )}
-            </section>
-          );
-        })}
-      </section>
-    )
-  }
-
-  {
-    all.length === 0 && (
-      <section aria-labelledby="soon-h" class="mt-12">
-        <h2 id="soon-h" class="section-label">The first guides are on the way</h2>
-        <ul class="mt-6 grid gap-8 md:grid-cols-3">
-          {pillars.map((p) => (
-            <li class="border-t-2 border-ink pt-4">
-              <p class="text-[1.2rem] leading-snug font-bold">{p.name}</p>
-              <p class="mt-2 text-[0.97rem] leading-relaxed text-soft">{p.summary}</p>
+    latest.length > 0 && (
+      <section aria-labelledby="latest-h" class="mt-16">
+        <h2 id="latest-h" class="section-label">Latest guides</h2>
+        <ul class="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 md:grid-cols-3">
+          {latest.map((a) => (
+            <li>
+              <ArticleCard article={a} />
             </li>
           ))}
         </ul>
       </section>
     )
   }
+
+  <section aria-labelledby="topics-h" class="mt-16 border-t border-rule pt-12">
+    <h2 id="topics-h" class="section-label">Browse by topic</h2>
+    <ul class="mt-8 grid gap-8 md:grid-cols-3">
+      {
+        sections.map(({ pillar, articles }) => (
+          <li class="border-t-2 border-ink pt-4">
+            <h3 class="text-[1.3rem] leading-tight font-bold" style="font-family: var(--font-editorial)">
+              {articles.length > 0 ? (
+                <a href={routes.pillar(pillar.id)} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
+                  {pillar.name}
+                </a>
+              ) : (
+                pillar.name
+              )}
+            </h3>
+            <p class="mt-2 text-[0.97rem] leading-relaxed" style="color: var(--color-prose-soft)">
+              {pillar.summary}
+            </p>
+            {articles.length > 0 ? (
+              <ul class="mt-4 space-y-2 text-[0.95rem]">
+                {articles.slice(0, 4).map((a) => (
+                  <li>
+                    <a href={routes.article(a.id)} class="font-semibold underline decoration-rule underline-offset-4 hover:decoration-ink">
+                      {a.data.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="mt-4 text-[0.9rem] text-muted">The first guides in this topic are on the way.</p>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <aside aria-label="The wall calendar" class="mt-16 overflow-hidden rounded-[8px] bg-cream md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:items-center">
+    <img
+      {...calendarPhoto}
+      sizes="(min-width: 768px) 420px, 100vw"
+      alt="The Organized Mom Collective weekly wall calendar hanging on a wall in soft daylight, with a column for each day and sections for meals, groceries and to-dos."
+      loading="lazy"
+      decoding="async"
+      class="block aspect-[5/4] h-auto w-full object-cover"
+    />
+    <div class="px-6 py-8 sm:px-10">
+      <p class="label text-soft">The wall calendar</p>
+      <p class="mt-2 text-[1.5rem] leading-[1.2] font-bold text-balance sm:text-[1.8rem]" style="font-family: var(--font-editorial)">
+        One shared place for the family’s week.
+      </p>
+      <p class="mt-3 text-[1rem] leading-relaxed sm:text-[1.0625rem]" style="color: var(--color-prose-soft)">
+        An 11 × 17 weekly wall calendar with room for schedules, meals, groceries, cleaning zones and priorities, plus a companion website
+        for the daily cleaning checklist.
+      </p>
+      <a href={routes.calendar} class="btn-primary mt-6 w-full sm:w-auto">See the Wall Calendar</a>
+    </div>
+  </aside>
 </PublicLayout>

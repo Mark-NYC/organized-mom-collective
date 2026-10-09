@@ -124,44 +124,48 @@ Every article needs at least one thing she could screenshot.
 
 | Element | Use for | How |
 | --- | --- | --- |
-| `<Checklist title time items />` | Any routine with discrete tasks | `<Checklist title="Weekly check" time="15 min" items={['…', '…']} />`. Renders empty boxes on ruled lines, like the printed calendar. Keep to 4–8 items. |
+| `<Checklist title time icon items />` | Any routine with discrete tasks | `<Checklist title="Weekly check" time="15 min" items={['…', '…']} />`. A softly outlined card with empty boxes on ruled lines, like the printed calendar; `icon` takes a zone icon. Keep to 4–8 items. |
+| `<ChecklistGrid>` | Several checklists | Wrap 2–4 `<Checklist>` cards to show them side by side (a breakout row) on wider screens. |
+| `<Figure image alt caption size />` | Photographs | `image` is a name from `src/data/images.ts`; `size="wide"` breaks out of the reading column. See [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). |
+| `<Tip title label>` | One practical aside | Lightly tinted (sage). At most one or two per article. |
+| `<ProductCTA title image alt>` | The article's one product callout | Real product photo, a heading, one or two sentences, and the "See the Wall Calendar" button to `/calendar`. See "Product notes" below. |
 | `<CleaningWeek />` | Cleaning articles | The real cleaning week (Daily Reset, Mon–Thu zones, weekend) as a planner page, read from `src/data/cleaning.ts`. Never retype the schedule by hand. `<CleaningWeek print />` adds a "Print the schedule" button that prints only this figure plus any `<RealLifeVersion print>` (two pages: the week, then the checklists). Used in HC-01. |
 | `<Versions title items />` | "Sizes" of a routine for different weeks | `items={[{ name: 'Normal week', when?: '…', body: '…', time: '25–30 min' }, …]}`. Ruled rows with a time stamp; use instead of a three-column table, which is cramped on phones. Used in HC-01's When Life Happens. |
-| Data-driven checklists | Zone task lists | `import { weeklySchedule } from '../../data/cleaning';` then map to `<Checklist>`, so articles match the app. |
+| Data-driven checklists | Zone task lists | `import { weeklySchedule } from '../../data/cleaning';` then map to `<Checklist>`, so articles match the companion website. |
 | Markdown table | Comparisons, example weeks, on/off lists | Keep to 2–4 columns so it fits a phone. |
 | Entry formula | A pattern to copy | A blockquote: `> 3:30 · Soccer · Sam, Dad drives · cleats, water` |
 | Worked example | Showing the method applied | A table or short list, followed by one line on what to notice. |
 
-Images: none are required. If one is added, it must show something real (a product photo from `public/images/`, or a diagram), with descriptive alt text (see SEO_STRATEGY.md). No stock photos of smiling families.
+Photos: aim for 2–4 relevant ones when suitable imagery exists (a `hero` in frontmatter, `<Figure>` in the body, the product photo in `<ProductCTA>`). Every image must show something real and relevant, with descriptive alt text. Direction, how to add one, and the shot list: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). Articles without photos still render cleanly.
 
 ## Visual hierarchy
 
-How an article reads on the page, top to bottom (all styling comes from the existing print palette in `src/styles/global.css`):
+How an article reads on the page, top to bottom (template: `src/pages/resources/[slug].astro`; styles: `.article-*` in `src/styles/global.css`). Design rules: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#design-rules).
 
-1. Breadcrumbs (spaced caps, muted) → **H1** (Montserrat bold, `page-title`) → summary (large, soft) → date and reading time, ruled underneath.
-2. "In this article" list, collapsed by default (so the answer stays near the top on phones), when there are four or more sections.
-3. Body copy (`.article-body`): 17px Montserrat, generous line height, H2s bold.
-4. **The Shift**: between two heavy charcoal rules, with a short month-color bar by the label. The visual "aha".
-5. **The Real-Life Version**: cream panel, the most prominent block. The part she comes back for.
-6. **When Life Happens**: a month-color rule down the left; quieter than the routine.
-7. **Product note**: thin rules and the small badge; deliberately the lowest-contrast block.
-8. **Your Next Small Win**: a charcoal outline box, the article's full stop.
-9. "Read next" card, then up to three related cards (minus the next article), then the pillar link.
+1. Category eyebrow (breadcrumbs) → **H1** in Georgia (`.article-title`) → the `summary` as a deck → byline, date and reading time.
+2. Optional **hero photo** (3:2, slightly wider than the text), then the collapsed "In this article" list.
+3. Body (`.article-body`): a ~700px column of 17–18px Montserrat in warm charcoal, Georgia H2s, generous spacing; `.breakout` elements (photos, checklist grids, the product callout) widen to ~960px.
+4. **The Shift**: a pull quote between a month-color rule and a thin rule. The visual "aha".
+5. **The Real-Life Version** and **When Life Happens**: unboxed sections with a small labelled eyebrow; their checklists and week sizes carry the structure.
+6. **Tip**: one lightly tinted aside.
+7. **Product callout** (`<ProductCTA>`): a cream panel with the real product photo; the only promotional block.
+8. **Your Next Small Win**: a soft blush panel, the article's full stop.
+9. "Read next" as a feature card, related cards, then the pillar link.
 
-The month color (current month, from `src/theme.ts`) is the only accent, exactly as in the app.
+The month color (current month, from `src/theme.ts`) is the only accent, exactly as on the companion website.
 
 ## Product notes
 
-`<ProductNote product="calendar">` or `<ProductNote product="app">`, at most once per article, after the routine. One or two sentences, specific to the article, describing what the product does that's relevant here. The component adds the link.
+One product callout per article, after the routine, where the article naturally leads to it. Use `<ProductCTA>` (photo, heading, one or two sentences, "See the Wall Calendar" button to the calendar page `/calendar`). Articles without a calendar callout get the template's small `CalendarBridge` link at the end automatically. The older, smaller `<ProductNote product="calendar">` / `<ProductNote product="companion">` still works for a quieter mention. Copy is specific to the article and describes only what the product actually does. Call the companion a *website* (or "the cleaning companion"), never an app, and don't promise features that don't exist.
 
 **Verified features only.** Describe nothing that isn't in these sources:
 
 - **Wall calendar** (11 × 17 portrait, one week per page): the labeled sections in `design/etsy-listing/02.webp`: daily schedule (a column per day), each day's cleaning zone, self-care habits, word of the week, family and friends, grateful for (prayer and gratitude), meal plan, grocery list, to-do list, notes. Editions and prices: `src/config.ts`.
-- **Companion cleaning app** (included with every calendar): `src/data/cleaning.ts` and `src/pages/app/`. The 15-minute Daily Reset; Monday–Thursday zones (Living Room, Bedrooms, Entry/Bathroom, Kitchen Reset); Friday–Sunday optional (Deep Cleaning, Home Project, Catch-Up / Reset); a home project for each month; a "catch up instead" option; progress saved in the browser, no account.
+- **Companion cleaning website** (included with every calendar; always call it a website or "the cleaning companion", never an app): `src/data/cleaning.ts` and `src/pages/app/`. The 15-minute Daily Reset; Monday–Thursday zones (Living Room, Bedrooms, Entry/Bathroom, Kitchen Reset); Friday–Sunday optional (Deep Cleaning, Home Project, Catch-Up / Reset); a home project for each month; a "catch up instead" option; progress saved in the browser, no account.
 
-If a feature isn't listed here, check the app and the listing images before mentioning it, and add it here once verified.
+If a feature isn't listed here, check the companion website and the listing images before mentioning it, and add it here once verified.
 
-`cta` in frontmatter records which product the note mentions (`none` if there's no note).
+`cta` in frontmatter records which product the callout points to: `calendar`, `companion` or `none`.
 
 ## Example sections
 
@@ -173,7 +177,7 @@ was sick, and by the weekend the schedule felt like a list of things you'd faile
 
 That isn't a discipline problem. Most schedules are built for a week that never happens.
 
-## The weekly cleaning schedule at a glance
+## The weekly cleaning schedule
 
 <CleaningWeek />
 

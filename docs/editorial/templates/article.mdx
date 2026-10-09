@@ -13,6 +13,11 @@ primaryKeyword: the one search query this article answers
 related:
   - an-existing-article-slug
 next: the-next-step-article-slug
+# Optional lead photo (name from src/data/images.ts). Delete the block if there's no suitable photo.
+hero:
+  image: hc-01-hero
+  alt: What the photo shows, for someone who can't see it.
+# calendar | companion | none: which product the callout points to.
 cta: none
 draft: true
 ---
@@ -34,6 +39,8 @@ The common assumption. Why it fails in a real week. **The better frame, in bold.
 ## Why it works
 
 Optional. Only the reasoning she needs to trust and adapt the routine.
+
+<Figure image="hc-01-counter" alt="What the photo shows." caption="Optional caption that adds something." />
 
 <RealLifeVersion title="A descriptive name for the routine">
 
@@ -60,11 +67,11 @@ Optional. Only the reasoning she needs to trust and adapt the routine.
 
 {/* Optional: one sentence bridging to another cluster, with a contextual link. */}
 
-<ProductNote product="calendar">
+<ProductCTA title="A short, useful heading." image="hc-01-wall-calendar" alt="What the product photo shows.">
 
-Optional, at most one. One or two sentences on a verified feature that fits this article (see ARTICLE_FORMAT.md#product-notes). Set `cta` to match.
+Optional, at most one. One or two sentences on a verified feature that fits this article (see ARTICLE_FORMAT.md#product-notes). The companion is a website, never an app. Set `cta` to match.
 
-</ProductNote>
+</ProductCTA>
 
 <NextSmallWin>
 
