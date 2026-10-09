@@ -1,7 +1,9 @@
 ---
+import PhoneFrame from './PhoneFrame.astro';
+
 /**
  * A real screenshot of the companion app (public/images/site/app-*.webp, captured
- * from the built app at 390 × 844) in a simple, drawn phone frame. Not a mockup of
+ * from the built app at 390 × 844) in a simple, drawn phone frame (PhoneFrame). Not a mockup of
  * features: retake the screenshots when the app's screens change.
  */
 interface Props {
@@ -14,18 +16,16 @@ interface Props {
 const { name, alt, class: className, loading = 'lazy' } = Astro.props;
 ---
 
-<div class:list={['mx-auto w-full max-w-[17rem] rounded-[2.4rem] bg-[#2f2f2f] p-[0.55rem] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.45)]', className]}>
-  <div class="overflow-hidden rounded-[1.9rem] bg-paper">
-    <img
-      src={`/images/site/app-${name}-390.webp`}
-      srcset={`/images/site/app-${name}-390.webp 390w, /images/site/app-${name}-780.webp 780w`}
-      sizes="272px"
-      width="390"
-      height="844"
-      {loading}
-      decoding="async"
-      alt={alt}
-      class="block h-auto w-full"
-    />
-  </div>
-</div>
+<PhoneFrame class={className}>
+  <img
+    src={`/images/site/app-${name}-390.webp`}
+    srcset={`/images/site/app-${name}-390.webp 390w, /images/site/app-${name}-780.webp 780w`}
+    sizes="248px"
+    width="390"
+    height="844"
+    {loading}
+    decoding="async"
+    alt={alt}
+    class="block h-auto w-full"
+  />
+</PhoneFrame>

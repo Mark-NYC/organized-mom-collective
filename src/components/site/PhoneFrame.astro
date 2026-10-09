@@ -1,0 +1,36 @@
+---
+/**
+ * The drawn phone around app screenshots (PhoneShot, LiveTodayPhone). The 390 × 844
+ * screenshot sits inset from the screen's edges, with a status-bar strip and camera pill
+ * above it and a home-indicator strip below, so nothing crowds the rounded corners.
+ * The margins are white down to the app's bottom nav (93.2% of the shot) and nav gray below,
+ * so they read as part of the app.
+ */
+interface Props {
+  class?: string;
+  /** Extra attributes on the outer frame, e.g. data-live-today. */
+  [key: `data-${string}`]: unknown;
+}
+const { class: className, ...rest } = Astro.props;
+
+const SIDE = 0.045; // of screen width
+const TOP = 0.14;
+const BOTTOM = 0.07;
+const SHOT = 844 / 390;
+const NAV = 0.932;
+const height = TOP + BOTTOM + (1 - 2 * SIDE) * SHOT;
+const navStop = (((TOP + (1 - 2 * SIDE) * SHOT * NAV) / height) * 100).toFixed(2);
+const pct = (n: number) => `${(n * 100).toFixed(2)}%`;
+const screen = `padding:${pct(TOP)} ${pct(SIDE)} ${pct(BOTTOM)};background:linear-gradient(#fff ${navStop}%, #f6f6f6 ${navStop}%)`;
+---
+
+<div
+  {...rest}
+  class:list={['mx-auto w-full max-w-[17rem] rounded-[2.4rem] bg-[#2f2f2f] p-[0.55rem] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.45)]', className]}
+>
+  <div class="relative overflow-hidden rounded-[1.9rem] [container-type:inline-size]" style={screen}>
+    <span aria-hidden="true" class="absolute top-[2.8cqw] left-1/2 h-[8cqw] w-[30cqw] -translate-x-1/2 rounded-full bg-[#1d1d1d]"></span>
+    <slot />
+    <span aria-hidden="true" class="absolute bottom-[2.6cqw] left-1/2 h-[1.3cqw] w-[34cqw] -translate-x-1/2 rounded-full bg-[#2f2f2f]/70"></span>
+  </div>
+</div>
