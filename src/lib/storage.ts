@@ -11,6 +11,7 @@
  *   omc:v1:focus:YYYY-MM-DD       checked Mon–Thu focus tasks for that day
  *   omc:v1:weekend:YYYY-MM-DD     weekend-only choices, keyed by that weekend's Friday
  *   omc:v1:monthly:YYYY-MM        checked monthly home project tasks for that month
+ *   omc:v1:active:YYYY-MM-DD      "1" if anything was checked that day (lights that day in the week view)
  *
  * Per-session (sessionStorage), not progress:
  *   omc:v1:entry-source           how this visit arrived, e.g. "calendar" (the printed QR)
@@ -25,6 +26,7 @@ export const keys = {
   focus: (date: string) => `${PREFIX}focus:${date}`,
   weekend: (friday: string) => `${PREFIX}weekend:${friday}`,
   monthly: (month: string) => `${PREFIX}monthly:${month}`,
+  active: (date: string) => `${PREFIX}active:${date}`,
 };
 
 /**
@@ -197,6 +199,7 @@ function progressKeys(): string[] {
 export function resetDay(date: string, weekendFriday?: string): void {
   writeList(keys.daily(date), []);
   writeList(keys.focus(date), []);
+  backend.remove(keys.active(date));
   if (weekendFriday) writeList(keys.weekend(weekendFriday), []);
 }
 
@@ -208,13 +211,26 @@ export function resetAllProgress(): void {
 /** Removes old day-scoped entries. Monthly entries are kept. */
 export function pruneOld(today: Date): void {
   const cutoff = new Date(today.getFullYear(), today.getMonth(), today.getDate() - KEEP_DAYS);
-  const pattern = /^omc:v1:(daily|focus|weekend):(\d{4})-(\d{2})-(\d{2})$/;
+  const pattern = /^omc:v1:(daily|focus|weekend|active):(\d{4})-(\d{2})-(\d{2})$/;
   for (const k of progressKeys()) {
     const m = pattern.exec(k);
     if (!m) continue;
     const d = new Date(Number(m[2]), Number(m[3]) - 1, Number(m[4]));
     if (d < cutoff) backend.remove(k);
   }
+}
+
+/** Notes that she did something on this date (any checkmark, including weekend projects). */
+export function markActive(date: string): void {
+  backend.set(keys.active(date), '1');
+}
+
+/**
+ * Did she check anything off on this date? Uses the day's own task lists too,
+ * so days from before the activity key existed still count.
+ */
+export function wasActive(date: string): boolean {
+  return backend.get(keys.active(date)) === '1' || readList(keys.daily(date)).length > 0 || readList(keys.focus(date)).length > 0;
 }
 
 /** Remembers how this visit arrived (e.g. "calendar" from the printed QR) for later analytics. */

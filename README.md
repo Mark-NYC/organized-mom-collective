@@ -48,6 +48,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 - Daily essentials and Mon–Thu focus → keyed by date, so they start fresh every day.
 - Monthly deep-clean tasks → keyed by month, so progress carries across that month's weekends.
 - "Catch up instead" → keyed by that weekend's Friday.
+- `active:YYYY-MM-DD` → "1" when anything was checked that day; lights that day's dot in the week view on Today. Days from before this key existed still count via their daily/zone lists.
 - Day-scoped entries are kept for about a year (`KEEP_DAYS` = 366, the life of a 52-week calendar; ~90 KB at most), then pruned. Monthly entries are never pruned.
 - If the browser won't save (private browsing, storage full or blocked), checkmarks are kept in memory for that visit and Today shows a short note that they won't be remembered. Nothing crashes and nothing claims to be saved.
 - `/app?day=monday` (linked from the Tidy week) shows that weekday of the current Mon–Sun week. Its checkmarks save under that day's own date, so today's progress is never touched.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
@@ -6,7 +6,9 @@ import { dateForWeekday, dateKey, monthKey, parseDayParam, weekendStart } from '
 import { useCheckedSet, useSaving, useToday } from '../lib/hooks';
 import { monthFocusFor, planFor } from '../lib/schedule';
 import { takeSourceParam } from '../lib/entry';
-import { isOnboarded, keys, pruneOld, setEntrySource, setOnboarded } from '../lib/storage';
+import { isOnboarded, keys, markActive, pruneOld, setEntrySource, setOnboarded } from '../lib/storage';
+import { progressLine, weekActivity } from '../lib/progress';
+import { ProgressRing, WeekDots } from './Progress';
 import { routes } from '../routes';
 import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
@@ -55,10 +57,23 @@ function Today({ justStarted }: { justStarted: boolean }) {
     document.documentElement.style.setProperty('--month', monthColor(today.getMonth()));
   }, [today]);
 
-  const [daily, toggleDaily] = useCheckedSet(keys.daily(todayKey));
+  // Any new checkmark lights today in the week view (even from another day or a weekend project).
+  const [, setActivity] = useState(0);
+  const noteChecked = useCallback(() => {
+    markActive(dateKey(new Date()));
+    setActivity((n) => n + 1);
+  }, []);
+  const withActivity = (checked: Set<string>, toggle: (id: string) => void) => (id: string) => {
+    if (!checked.has(id)) noteChecked();
+    toggle(id);
+  };
+
+  const [daily, toggleDailyRaw] = useCheckedSet(keys.daily(todayKey));
+  const toggleDaily = withActivity(daily, toggleDailyRaw);
   const dailyDone = dailyEssentials.tasks.filter((t) => daily.has(t.id)).length;
   // Weekend zone checks live in WeekendSection; this key is only used Mon–Thu.
-  const [zone, toggleZone] = useCheckedSet(keys.focus(dateKey(shown)));
+  const [zone, toggleZoneRaw] = useCheckedSet(keys.focus(dateKey(shown)));
+  const toggleZone = withActivity(zone, toggleZoneRaw);
   const zoneTasks = plan.kind === 'weekday' ? plan.focus.tasks : [];
   const zoneDone = zoneTasks.filter((t) => zone.has(t.id)).length;
 
@@ -80,6 +95,26 @@ function Today({ justStarted }: { justStarted: boolean }) {
   const monthYear = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const longDate = shown.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const saving = useSaving();
+
+  const week = weekActivity(today);
+  const line = progressLine({
+    done: routineDone,
+    total: routine,
+    dailyDone,
+    dailyTotal: dailyEssentials.tasks.length,
+    daysThisWeek: week.filter((d) => d.state === 'done').length,
+    viewing: !!viewing,
+    date: shown,
+  });
+
+  // Finishing the routine in this visit plays the ring's bloom once. Opening an already-finished day doesn't.
+  const complete = routine > 0 && routineDone === routine;
+  const wasComplete = useRef(complete);
+  const [bloom, setBloom] = useState(0);
+  useEffect(() => {
+    if (complete && !wasComplete.current) setBloom((n) => n + 1);
+    wasComplete.current = complete;
+  }, [complete]);
 
   return (
     <div>
@@ -105,12 +140,20 @@ function Today({ justStarted }: { justStarted: boolean }) {
       )}
 
       <header className="border-l-[3px] border-month pl-3.5">
-        <h1 aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`}>
-          <span className="block text-[1.5rem] leading-tight font-bold tracking-[0.12em] uppercase sm:text-[1.75rem]">
-            {weekday} {dayNum}
-          </span>
-          <span className="month-title mt-1 block text-[1.15rem] leading-none">{monthYear}</span>
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="min-w-0">
+            <span className="block text-[1.5rem] leading-tight font-bold tracking-[0.09em] whitespace-nowrap uppercase min-[400px]:tracking-[0.12em] sm:text-[1.75rem]">
+              {weekday} {dayNum}
+            </span>
+            <span className="month-title mt-1 block text-[1.15rem] leading-none">{monthYear}</span>
+          </h1>
+          {routine > 0 && (
+            <div className="-mt-0.5 flex shrink-0 flex-col items-center gap-2">
+              <ProgressRing done={routineDone} total={routine} bloom={bloom} />
+              <WeekDots days={week} />
+            </div>
+          )}
+        </div>
         {!viewing && (
           <a
             href={plan.kind === 'weekday' ? '#focus' : '#weekend'}
@@ -121,18 +164,14 @@ function Today({ justStarted }: { justStarted: boolean }) {
             <ZoneTag icon={zoneIcon} label={zoneLabel} size="sm" />
           </a>
         )}
-        {routine > 0 && (
-          <p className="mt-1.5 text-[0.95rem] leading-snug text-muted tabular-nums">
-            {routineDone === routine
-              ? viewing
-                ? 'All done for this day.'
-                : 'All done for today. Anything else is a bonus.'
-              : `${routineDone} of ${routine} done${viewing ? '' : ' today'}`}
-          </p>
-        )}
+        <p aria-live="polite" className="mt-1.5 min-h-[1.4em] text-[0.95rem] leading-snug tabular-nums">
+          <span key={line} className={`line-in block ${complete && !viewing ? 'font-semibold text-ink' : 'text-muted'}`}>
+            {line}
+          </span>
+        </p>
       </header>
 
-      <div className="mt-7 grid gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12">
+      <div className="mt-7 grid grid-cols-[minmax(0,1fr)] gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12">
         {!viewing && (
           <Section
             id="daily"
@@ -163,7 +202,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
         {plan.kind === 'weekday' ? (
           <FocusSection focus={plan.focus} checked={zone} onToggle={toggleZone} next={nextZone} first={!!viewing} today={!viewing} />
         ) : (
-          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} today={!viewing} />
+          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} today={!viewing} onChecked={noteChecked} />
         )}
       </div>
 
@@ -219,7 +258,7 @@ function Section({ id, eyebrow, heading, meta, note, first, children }: SectionP
       <p className="label mb-1.5 text-muted" aria-hidden="true">
         {eyebrow}
       </p>
-      <div className="flex min-h-9 items-center justify-between gap-3">
+      <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
         <div className="min-w-0">{heading}</div>
         <div className="flex shrink-0 items-center gap-3">{meta}</div>
       </div>
@@ -272,11 +311,21 @@ interface WeekendSectionProps {
   date: Date;
   first?: boolean;
   today: boolean;
+  /** Called when something is checked (not unchecked), to light today in the week view. */
+  onChecked: () => void;
 }
 
-function WeekendSection({ day, month, date, first, today }: WeekendSectionProps) {
-  const [monthly, toggleMonthly] = useCheckedSet(keys.monthly(monthKey(date)));
-  const [weekendChecks, toggleWeekend] = useCheckedSet(keys.weekend(dateKey(weekendStart(date))));
+function WeekendSection({ day, month, date, first, today, onChecked }: WeekendSectionProps) {
+  const [monthly, toggleMonthlyRaw] = useCheckedSet(keys.monthly(monthKey(date)));
+  const [weekendChecks, toggleWeekendRaw] = useCheckedSet(keys.weekend(dateKey(weekendStart(date))));
+  const toggleMonthly = (id: string) => {
+    if (!monthly.has(id)) onChecked();
+    toggleMonthlyRaw(id);
+  };
+  const toggleWeekend = (id: string) => {
+    if (!weekendChecks.has(id)) onChecked();
+    toggleWeekendRaw(id);
+  };
   const [showAll, setShowAll] = useState(false);
   const done = month.tasks.filter((t) => monthly.has(t.id)).length;
   const allDone = done === month.tasks.length;
