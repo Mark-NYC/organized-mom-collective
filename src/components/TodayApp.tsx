@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
-import { dateForWeekday, dateKey, monthKey, parseDayParam, weekendStart } from '../lib/dates';
+import { dateForWeekday, dateKey, monthKey, parseDayParam } from '../lib/dates';
 import { useCheckedSet, useSaving, useToday } from '../lib/hooks';
 import { monthFocusFor, planFor } from '../lib/schedule';
 import { takeSourceParam } from '../lib/entry';
-import { isOnboarded, keys, markActive, pruneOld, setEntrySource, setOnboarded } from '../lib/storage';
+import { creditMonthly, isOnboarded, keys, pruneOld, setEntrySource, setOnboarded, uncreditMonthly } from '../lib/storage';
 import { progressLine, weekActivity } from '../lib/progress';
 import { ProgressRing, WeekDots } from './Progress';
 import InstallInvite from './InstallInvite';
@@ -76,15 +76,15 @@ function Today({ justStarted }: { justStarted: boolean }) {
     document.documentElement.style.setProperty('--month', monthColor(today.getMonth()));
   }, [today]);
 
-  // Any new checkmark lights today in the week view (even from another day or a weekend project).
+  // Activity is read from the saved lists (see wasActive in lib/storage.ts); this just redraws
+  // the week dots when a weekend or monthly check, which lives in WeekendSection, changes.
   const [, setActivity] = useState(0);
   const saving = useSaving();
   // After a checkmark (never during onboarding or before her first task), offer Add to Home Screen once.
   const [invite, setInvite] = useState(false);
-  const noteChecked = useCallback(() => {
-    markActive(dateKey(new Date()));
+  const noteChange = useCallback((checked: boolean) => {
     setActivity((n) => n + 1);
-    if (shouldOfferInstall(currentPlatform(), isStandalone(), saving)) {
+    if (checked && shouldOfferInstall(currentPlatform(), isStandalone(), saving)) {
       // Let the tick land first.
       window.setTimeout(() => setInvite(true), 900);
     }
@@ -100,7 +100,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
     return () => document.removeEventListener('visibilitychange', onHide);
   }, []);
   const withActivity = (checked: Set<string>, toggle: (id: string) => void) => (id: string) => {
-    if (!checked.has(id)) noteChecked();
+    noteChange(!checked.has(id));
     toggle(id);
   };
 
@@ -237,7 +237,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
         {plan.kind === 'weekday' ? (
           <FocusSection focus={plan.focus} checked={zone} onToggle={toggleZone} next={nextZone} first={!!viewing} today={!viewing} />
         ) : (
-          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} today={!viewing} onChecked={noteChecked} />
+          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} today={!viewing} onChange={noteChange} />
         )}
       </div>
 
@@ -354,20 +354,27 @@ interface WeekendSectionProps {
   date: Date;
   first?: boolean;
   today: boolean;
-  /** Called when something is checked (not unchecked), to light today in the week view. */
-  onChecked: () => void;
+  /** Called after a check (true) or uncheck (false), to redraw the week dots. */
+  onChange: (checked: boolean) => void;
 }
 
-function WeekendSection({ day, month, date, first, today, onChecked }: WeekendSectionProps) {
-  const [monthly, toggleMonthlyRaw] = useCheckedSet(keys.monthly(monthKey(date)));
-  const [weekendChecks, toggleWeekendRaw] = useCheckedSet(keys.weekend(dateKey(weekendStart(date))));
+function WeekendSection({ day, month, date, first, today, onChange }: WeekendSectionProps) {
+  // The project is shared by the whole month; each tick counts as activity on the day it's made.
+  const projectMonth = monthKey(date);
+  const [monthly, toggleMonthlyRaw] = useCheckedSet(keys.monthly(projectMonth));
+  // "Catch up instead" belongs to this day only, like a weekday zone.
+  const [weekendChecks, toggleWeekendRaw] = useCheckedSet(keys.weekend(dateKey(date)));
   const toggleMonthly = (id: string) => {
-    if (!monthly.has(id)) onChecked();
+    const checking = !monthly.has(id);
+    if (checking) creditMonthly(dateKey(new Date()), projectMonth, id);
+    else uncreditMonthly(projectMonth, id);
     toggleMonthlyRaw(id);
+    onChange(checking);
   };
   const toggleWeekend = (id: string) => {
-    if (!weekendChecks.has(id)) onChecked();
+    const checking = !weekendChecks.has(id);
     toggleWeekendRaw(id);
+    onChange(checking);
   };
   const [showAll, setShowAll] = useState(false);
   const done = month.tasks.filter((t) => monthly.has(t.id)).length;

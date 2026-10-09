@@ -138,7 +138,7 @@ describe('storage', () => {
     writeList(keys.focus('2026-10-09'), ['x']);
     writeList(keys.weekend('2026-10-09'), ['catch-up']);
     writeList(keys.monthly('2026-10'), ['oct-shoes']);
-    resetDay('2026-10-09', '2026-10-09');
+    resetDay('2026-10-09');
     expect(readList(keys.daily('2026-10-09'))).toEqual([]);
     expect(readList(keys.weekend('2026-10-09'))).toEqual([]);
     expect(readList(keys.monthly('2026-10'))).toEqual(['oct-shoes']);
@@ -311,7 +311,7 @@ describe('week view', () => {
     const s = await import('../src/lib/storage');
     const { weekActivity } = await import('../src/lib/progress');
     s.writeList(s.keys.daily('2027-10-04'), ['beds']); // Mon: old-style data, no active key
-    s.markActive('2027-10-06'); // Wed: e.g. only a weekend/monthly check
+    s.creditMonthly('2027-10-06', '2027-10', 'oct-shoes'); // Wed: only a monthly project task
     s.writeList(s.keys.daily('2027-10-03'), ['beds']); // previous Sunday: not this week
     const week = weekActivity(new Date(2027, 9, 7, 20)); // Thursday evening
     expect(week.map((d) => d.state)).toEqual(['done', 'past', 'done', 'today', 'future', 'future', 'future']);
@@ -323,7 +323,7 @@ describe('week view', () => {
     vi.resetModules();
     const s = await import('../src/lib/storage');
     const { weekActivity } = await import('../src/lib/progress');
-    s.markActive('2027-12-31'); // Friday
+    s.creditMonthly('2027-12-31', '2027-12', 'dec-linens'); // Friday
     const fri = weekActivity(new Date(2028, 0, 2)); // Sunday Jan 2 2028: same Mon–Sun week
     expect(fri[4].state).toBe('done');
     const mon = weekActivity(new Date(2028, 0, 3)); // next Monday
@@ -333,8 +333,8 @@ describe('week view', () => {
   it('activity keys are pruned with other day records and cleared by reset today', async () => {
     vi.resetModules();
     const s = await import('../src/lib/storage');
-    s.markActive('2025-01-01');
-    s.markActive('2027-10-04');
+    window.localStorage.setItem('omc:v1:active:2025-01-01', '1'); // legacy flag
+    s.creditMonthly('2027-10-04', '2027-10', 'oct-shoes');
     s.pruneOld(new Date(2027, 9, 4));
     expect(window.localStorage.getItem('omc:v1:active:2025-01-01')).toBeNull();
     expect(s.wasActive('2027-10-04')).toBe(true);
@@ -397,7 +397,7 @@ describe('add to home screen', () => {
     const s = await import('../src/lib/storage');
     s.setOnboarded(true);
     s.writeList(s.keys.daily('2027-10-06'), ['beds', 'counters']);
-    s.markActive('2027-10-06');
+    s.creditMonthly('2027-10-06', '2027-10', 'oct-shoes');
     const snapshot = s.exportProgress();
     expect(Object.keys(snapshot).sort()).toEqual(['omc:v1:active:2027-10-06', 'omc:v1:daily:2027-10-06', 'omc:v1:onboarded']);
 

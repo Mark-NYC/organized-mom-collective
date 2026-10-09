@@ -75,7 +75,7 @@ export interface WeekPlanDay {
   /** Mon–Thu zone tasks checked / in the zone. 0 / 0 on Fri–Sun (optional, not counted). */
   zoneDone: number;
   zoneTotal: number;
-  /** Anything checked off that day (same signal as the week dots on Today). */
+  /** Anything checked off that day, under that day's own lists (same signal as the week dots on Today). */
   active: boolean;
 }
 
@@ -97,7 +97,7 @@ export function weekPlan(today: Date): WeekPlanDay[] {
 }
 
 export interface WeekRowStatus {
-  kind: 'done' | 'count' | 'checked';
+  kind: 'done' | 'count' | 'active';
   text: string;
   /** Spoken after the day and zone, e.g. "3 of 6 tasks done". */
   label: string;
@@ -105,15 +105,14 @@ export interface WeekRowStatus {
 
 /**
  * What a Week row shows instead of its time stamp, or null to keep the time.
- * Weekend checkmarks can't be told apart by zone, so those days only say she showed up.
+ * "Done" only ever means that day's Mon–Thu zone is finished. Any other work that day
+ * (the Daily Reset, catching up, a monthly project task) shows as "Active": she did
+ * something that day, without claiming the zone was done.
  */
 export function weekRowStatus(d: WeekPlanDay): WeekRowStatus | null {
-  if (d.zoneTotal > 0) {
-    if (d.zoneDone === d.zoneTotal) return { kind: 'done', text: 'Done', label: 'zone done' };
-    if (d.zoneDone > 0) return { kind: 'count', text: `${d.zoneDone}/${d.zoneTotal}`, label: `${d.zoneDone} of ${d.zoneTotal} tasks done` };
-    return null;
-  }
-  return d.active ? { kind: 'checked', text: '✓', label: 'you checked things off' } : null;
+  if (d.zoneTotal > 0 && d.zoneDone === d.zoneTotal) return { kind: 'done', text: 'Done', label: 'zone done' };
+  if (d.zoneDone > 0) return { kind: 'count', text: `${d.zoneDone}/${d.zoneTotal}`, label: `${d.zoneDone} of ${d.zoneTotal} zone tasks done` };
+  return d.active ? { kind: 'active', text: 'Active', label: 'active this day' } : null;
 }
 
 /** The one line above the week. Counts what she did, never what's left. */

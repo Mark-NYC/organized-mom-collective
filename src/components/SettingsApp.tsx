@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { dateKey, isWeekend, weekendStart } from '../lib/dates';
+import { dateKey } from '../lib/dates';
 import { resetAllProgress, resetDay, setOnboarded } from '../lib/storage';
 import ConfirmationDialog from './ConfirmationDialog';
 import { InstallSteps } from './InstallInvite';
@@ -21,7 +21,7 @@ export default function SettingsApp() {
 
   const resetToday = () => {
     const now = new Date();
-    resetDay(dateKey(now), isWeekend(now) ? dateKey(weekendStart(now)) : undefined);
+    resetDay(dateKey(now));
     setStatus('Today’s checklist has been cleared.');
   };
 
