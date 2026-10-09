@@ -5,6 +5,8 @@
  * src/config.ts, src/data/cleaning.ts or the Etsy listing images in design/etsy-listing/
  * (02 sections, 07 size and format, 08 two 26-week sets, 12 the damaged/misprinted promise).
  * Don't add shipping times, guarantees or features that aren't in those sources.
+ * The Etsy review by #buy (src/data/reviews.ts) is of a previous calendar edition and
+ * carries REVIEWS_DISCLAIMER; ratings stay out of the Product JSON-LD.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import CalendarOptions from '../components/site/CalendarOptions.astro';
@@ -15,6 +17,7 @@ import { calendarOptions, formatPrice } from '../lib/reorder';
 import { dailyEssentials } from '../data/cleaning';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
+import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats } from '../data/reviews';
 
 const PRODUCT = '2027 Family Wall Calendar & Organizer';
 const options = calendarOptions();
@@ -151,6 +154,8 @@ const jsonLd: object[] = [
     mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   },
 ];
+
+const quality = review('quality');
 
 const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
 ---
@@ -335,6 +340,25 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Secure checkout on Etsy</li>
         <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Arrives damaged or misprinted? We’ll make it right.</li>
       </ul>
+      <figure class="mx-auto mt-10 max-w-xl border-t border-rule pt-8 text-center">
+        <blockquote cite={ETSY_REVIEWS_URL} class="font-serif text-[1.3rem] leading-snug italic sm:text-[1.45rem]">
+          <p>“{quality.quote}”</p>
+        </blockquote>
+        <figcaption class="mt-4 text-[0.9rem] leading-snug text-balance text-soft">
+          <span class="font-semibold text-ink">{quality.name}</span>, <time datetime={quality.date}>{reviewDate(quality.date)}</time> ·{' '}
+          <a href={ETSY_REVIEWS_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-rule underline-offset-[3px] hover:decoration-ink"
+            >Read the review on Etsy<span class="sr-only"> (opens Etsy)</span></a
+          >
+          <span class="mt-1.5 block">
+            <span aria-hidden="true">★</span>{' '}
+            {shopStats.rating}/5 from {shopStats.reviews} reviews on{' '}
+            <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-rule underline-offset-[3px] hover:decoration-ink"
+              >our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
+            >.
+          </span>
+          <span class="mt-1.5 block">{REVIEWS_DISCLAIMER}</span>
+        </figcaption>
+      </figure>
     </div>
   </section>
 
