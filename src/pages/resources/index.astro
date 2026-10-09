@@ -13,7 +13,6 @@ import { BRAND_NAME } from '../../config';
 
 const sections = await Promise.all(pillars.map(async (pillar) => ({ pillar, articles: await getPillarArticles(pillar.id) })));
 const all = sections.flatMap((s) => s.articles);
-const live = sections.filter((s) => s.articles.length > 0);
 const guides = all.filter((a) => a.data.pillarGuide);
 
 const site = Astro.site!;
@@ -54,44 +53,69 @@ const jsonLd = all.length
     guides.length > 0 && (
       <section aria-labelledby="start-h" class="-mx-5 mt-10 bg-cream px-5 py-8 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10">
         <h2 id="start-h" class="section-label">Start here</h2>
-        <ul class="mt-6 grid gap-8 md:grid-cols-3">
-          {guides.map((a) => (
-            <li>
-              <ArticleCard article={a} />
-            </li>
-          ))}
-        </ul>
+        {guides.length === 1 ? (
+          <div class="mx-auto mt-6 max-w-2xl">
+            <ArticleCard article={guides[0]} size="lg" />
+          </div>
+        ) : (
+          <ul class="mt-6 grid gap-8 md:grid-cols-3">
+            {guides.map((a) => (
+              <li>
+                <ArticleCard article={a} />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     )
   }
 
   {
-    live.map(({ pillar, articles }) => (
-      <section aria-labelledby={`${pillar.id}-h`} class="mt-14">
-        <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b border-rule pb-3">
-          <div class="max-w-2xl">
-            <h2 id={`${pillar.id}-h`} class="text-[1.5rem] leading-tight font-bold">
-              <a href={routes.pillar(pillar.id)} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
-                {pillar.name}
-              </a>
-            </h2>
-            <p class="mt-1 text-[0.97rem] text-soft">{pillar.summary}</p>
-          </div>
-          {articles.length > 3 && (
-            <a href={routes.pillar(pillar.id)} class="text-link">
-              All {articles.length} guides
-            </a>
-          )}
-        </div>
-        <ul class="mt-6 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
-          {articles.slice(0, 3).map((a) => (
-            <li>
-              <ArticleCard article={a} showPillar={false} />
-            </li>
-          ))}
-        </ul>
+    all.length > 0 && (
+      <section aria-labelledby="topics-h" class="mt-14">
+        <h2 id="topics-h" class="section-label">The guide, by topic</h2>
+        {sections.map(({ pillar, articles }) => {
+          // Pillar guides are already under Start here.
+          const rest = articles.filter((a) => !a.data.pillarGuide);
+          return (
+            <section aria-labelledby={`${pillar.id}-h`} class="mt-10">
+              <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b border-rule pb-3">
+                <div class="max-w-2xl">
+                  <h3 id={`${pillar.id}-h`} class="text-[1.4rem] leading-tight font-bold">
+                    {articles.length > 0 ? (
+                      <a href={routes.pillar(pillar.id)} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
+                        {pillar.name}
+                      </a>
+                    ) : (
+                      pillar.name
+                    )}
+                  </h3>
+                  <p class="mt-1 text-[0.97rem] text-soft">{pillar.summary}</p>
+                </div>
+                {articles.length > 3 && (
+                  <a href={routes.pillar(pillar.id)} class="text-link">
+                    All {articles.length} guides
+                  </a>
+                )}
+              </div>
+              {rest.length > 0 ? (
+                <ul class="mt-6 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+                  {rest.slice(0, 3).map((a) => (
+                    <li>
+                      <ArticleCard article={a} showPillar={false} />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="mt-4 text-[0.95rem] text-muted">
+                  {articles.length > 0 ? 'More guides in this topic are on the way.' : 'The first guides in this topic are on the way.'}
+                </p>
+              )}
+            </section>
+          );
+        })}
       </section>
-    ))
+    )
   }
 
   {

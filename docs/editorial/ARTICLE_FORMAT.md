@@ -125,7 +125,8 @@ Every article needs at least one thing she could screenshot.
 | Element | Use for | How |
 | --- | --- | --- |
 | `<Checklist title time items />` | Any routine with discrete tasks | `<Checklist title="Weekly check" time="15 min" items={['…', '…']} />`. Renders empty boxes on ruled lines, like the printed calendar. Keep to 4–8 items. |
-| `<CleaningWeek />` | Cleaning articles | The real cleaning week (Daily Reset, Mon–Thu zones, weekend), read from `src/data/cleaning.ts`. Never retype the schedule by hand. |
+| `<CleaningWeek />` | Cleaning articles | The real cleaning week (Daily Reset, Mon–Thu zones, weekend) as a planner page, read from `src/data/cleaning.ts`. Never retype the schedule by hand. `<CleaningWeek print />` adds a "Print the schedule" button that prints only this figure plus any `<RealLifeVersion print>` (two pages: the week, then the checklists). Used in HC-01. |
+| `<Versions title items />` | "Sizes" of a routine for different weeks | `items={[{ name: 'Normal week', when?: '…', body: '…', time: '25–30 min' }, …]}`. Ruled rows with a time stamp; use instead of a three-column table, which is cramped on phones. Used in HC-01's When Life Happens. |
 | Data-driven checklists | Zone task lists | `import { weeklySchedule } from '../../data/cleaning';` then map to `<Checklist>`, so articles match the app. |
 | Markdown table | Comparisons, example weeks, on/off lists | Keep to 2–4 columns so it fits a phone. |
 | Entry formula | A pattern to copy | A blockquote: `> 3:30 · Soccer · Sam, Dad drives · cleats, water` |
@@ -138,7 +139,7 @@ Images: none are required. If one is added, it must show something real (a produ
 How an article reads on the page, top to bottom (all styling comes from the existing print palette in `src/styles/global.css`):
 
 1. Breadcrumbs (spaced caps, muted) → **H1** (Montserrat bold, `page-title`) → summary (large, soft) → date and reading time, ruled underneath.
-2. "In this article" list, when there are four or more sections.
+2. "In this article" list, collapsed by default (so the answer stays near the top on phones), when there are four or more sections.
 3. Body copy (`.article-body`): 17px Montserrat, generous line height, H2s bold.
 4. **The Shift**: between two heavy charcoal rules, with a short month-color bar by the label. The visual "aha".
 5. **The Real-Life Version**: cream panel, the most prominent block. The part she comes back for.
@@ -164,7 +165,7 @@ If a feature isn't listed here, check the app and the listing images before ment
 
 ## Example sections
 
-A compact example of sections 2–4 and 12, for tone and rhythm (from the planned HC-01):
+A compact example of sections 2–4 and 12, for tone and rhythm. **HC-01 (`src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx`) is the reference article**: read it before writing a new one.
 
 ```mdx
 You've probably printed a cleaning schedule before. It looked great on Monday. By Wednesday a kid

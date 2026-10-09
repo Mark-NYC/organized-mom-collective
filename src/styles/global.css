@@ -123,6 +123,9 @@
   .article-body :where(p, ul:not([class]), ol:not([class]), table) {
     @apply mt-4;
   }
+  .article-callout > h3 {
+    @apply mt-8 text-[1.1rem] leading-snug font-bold;
+  }
   .article-callout > :first-child {
     @apply mt-0;
   }
@@ -152,6 +155,61 @@
   }
   .article-body :where(td) {
     @apply border-b border-rule py-2.5 pr-3 align-top;
+  }
+}
+
+/*
+ * Printing resource pages. A normal print drops the site chrome and keeps the
+ * article. "Print the schedule" (CleaningWeek) adds html.print-schedule, which
+ * keeps only the blocks marked data-print-schedule.
+ */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html {
+    font-size: 13px;
+  }
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  body > header,
+  body > footer,
+  body > a[href='#main'],
+  main > section,
+  main > p {
+    display: none !important;
+  }
+  .article-body section,
+  .article-body figure,
+  .article-body li {
+    break-inside: avoid;
+  }
+  html.print-schedule main > article > :not(.article-body),
+  html.print-schedule .article-body > :not([data-print-schedule]) {
+    display: none !important;
+  }
+  html.print-schedule [data-print-schedule] {
+    margin-top: 0;
+  }
+  html.print-schedule .article-body > section[data-print-schedule] {
+    break-before: page;
+    background: transparent;
+    padding: 0;
+  }
+  .checklist-block {
+    break-inside: avoid;
+  }
+  /* The zone checklists fit one page in two columns. */
+  html.print-schedule section[data-print-schedule] .article-callout {
+    columns: 2;
+    column-gap: 10mm;
+  }
+  /* The week at a glance already covers the weekend, so its prose stays on screen only. */
+  html.print-schedule section[data-print-schedule] .article-callout > h3,
+  html.print-schedule section[data-print-schedule] .article-callout > h3 ~ * {
+    display: none;
   }
 }
 

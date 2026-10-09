@@ -37,7 +37,8 @@ Non-negotiables (details in the docs above):
 | Frontmatter schema | `src/content.config.ts` |
 | Pillars (ids, tracker prefixes, page copy) | `src/data/pillars.ts` |
 | Article template, hub, pillar pages | `src/pages/resources/[slug].astro`, `src/pages/resources/index.astro`, `src/pages/resources/topics/[pillar].astro` |
-| Branded MDX components (Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Checklist, ProductNote, CleaningWeek) | `src/components/resources/` |
+| Branded MDX components (Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Checklist, Versions, ProductNote, CleaningWeek) | `src/components/resources/` |
+| Reference article (the quality bar for new articles) | `src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01) |
 | Article helpers / table of contents | `src/lib/articles.ts`, `src/lib/toc.ts` |
 | Public layout (header, footer, canonical, Open Graph, JSON-LD) | `src/layouts/PublicLayout.astro`, `src/layouts/BaseLayout.astro` |
 | Calendar link at the end of every article without a calendar ProductNote | `src/components/resources/CalendarBridge.astro` |
