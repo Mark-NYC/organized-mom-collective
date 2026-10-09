@@ -48,7 +48,9 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 - Daily essentials and Mon–Thu focus → keyed by date, so they start fresh every day.
 - Monthly deep-clean tasks → keyed by month, so progress carries across that month's weekends.
 - "Catch up instead" → keyed by that weekend's Friday.
-- Day-scoped entries older than 60 days are pruned automatically.
+- `active:YYYY-MM-DD` → "1" when anything was checked that day; lights that day's dot in the week view on Today. Days from before this key existed still count via their daily/zone lists.
+- Day-scoped entries are kept for about a year (`KEEP_DAYS` = 366, the life of a 52-week calendar; ~90 KB at most), then pruned. Monthly entries are never pruned.
+- If the browser won't save (private browsing, storage full or blocked), checkmarks are kept in memory for that visit and Today shows a short note that they won't be remembered. Nothing crashes and nothing claims to be saved.
 - `/app?day=monday` (linked from the Tidy week) shows that weekday of the current Mon–Sun week. Its checkmarks save under that day's own date, so today's progress is never touched.
 
 ## Brand notes
@@ -68,5 +70,6 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 
 - **`/start` never changes.** It redirects instantly (no history entry) to `START_DESTINATION` (currently `/app?source=calendar`). If your host supports server redirects, a 302 from `/start` to the same destination is equivalent.
 - **QR traffic:** `?source=calendar` is recorded for the browser session (`getEntrySource()` in `src/lib/storage.ts`) and removed from the address bar. Hook analytics in there later.
+- **Offline:** on its first install the service worker saves every app page, script, font and icon, so the app opens and works offline after one visit. The file list and cache version are written into `dist/sw.js` at build time by `offline-precache.mjs`; each deploy gets a fresh cache and the old one is removed. Pages are network-first (falling back to the saved copy after 4 s on a weak signal); hashed `/_astro/` files and icons come from the saved copy.
 - **PWA:** the manifest's `start_url` and `scope` are `/app`, and the service worker is registered only from app pages with scope `/app`, so the installed app always opens the companion — never the marketing site.
 - **Future accounts / paid features:** the UI reads and writes progress only through `src/lib/storage.ts`, which sits on a small backend interface (localStorage today). Progress is anonymous and keyed by stable task ids and dates, so it can be uploaded into an account later. No user, entitlement or premium logic exists yet — add it as its own layer when needed rather than inside components.

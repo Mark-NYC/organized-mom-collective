@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dailyEssentials, monthlyDeepClean, weeklySchedule } from '../src/data/cleaning';
 import { dateForWeekday, dateKey, isWeekend, monthKey, parseDayParam, weekendStart } from '../src/lib/dates';
 import { monthFocusFor, planFor } from '../src/lib/schedule';
-import { isOnboarded, keys, pruneOld, readList, resetAllProgress, resetDay, setOnboarded, writeList } from '../src/lib/storage';
+import { KEEP_DAYS, isOnboarded, keys, pruneOld, readList, resetAllProgress, resetDay, setOnboarded, writeList } from '../src/lib/storage';
 
 // Minimal in-memory localStorage
 class MemStorage {
@@ -155,14 +155,27 @@ describe('storage', () => {
     expect(isOnboarded()).toBe(true);
   });
 
-  it('prunes old day entries only', () => {
-    writeList(keys.daily('2026-01-01'), ['beds']);
-    writeList(keys.daily('2026-10-01'), ['beds']);
-    writeList(keys.monthly('2026-01'), ['jan-pantry']);
+  it('keeps about a year of day entries, and monthly entries always', () => {
+    writeList(keys.daily('2025-10-01'), ['beds']); // > 1 year old
+    writeList(keys.daily('2026-01-01'), ['beds']); // 9 months old
+    writeList(keys.weekend('2025-10-03'), ['catch-up']);
+    writeList(keys.focus('2025-10-07'), ['tue-bedding']); // exactly 364 days
+    writeList(keys.monthly('2024-01'), ['jan-pantry']);
     pruneOld(new Date(2026, 9, 6));
-    expect(readList(keys.daily('2026-01-01'))).toEqual([]);
-    expect(readList(keys.daily('2026-10-01'))).toEqual(['beds']);
-    expect(readList(keys.monthly('2026-01'))).toEqual(['jan-pantry']);
+    expect(readList(keys.daily('2025-10-01'))).toEqual([]);
+    expect(readList(keys.weekend('2025-10-03'))).toEqual([]);
+    expect(readList(keys.daily('2026-01-01'))).toEqual(['beds']);
+    expect(readList(keys.focus('2025-10-07'))).toEqual(['tue-bedding']);
+    expect(readList(keys.monthly('2024-01'))).toEqual(['jan-pantry']);
+  });
+
+  it('a full year of daily data fits easily', () => {
+    let bytes = 0;
+    for (let i = 0; i < KEEP_DAYS; i++) {
+      const day = dateKey(new Date(2026, 0, 1 + i));
+      for (const k of [keys.daily(day), keys.focus(day), keys.weekend(day)]) bytes += k.length + 120;
+    }
+    expect(bytes).toBeLessThan(200_000); // browsers allow ~5 MB
   });
 
   it('survives corrupt storage values', () => {
@@ -204,5 +217,127 @@ describe('routing', () => {
     expect(isAppPath('/app/tidy')).toBe(true);
     expect(isAppPath('/apple')).toBe(false);
     expect(isAppPath('/')).toBe(false);
+  });
+});
+
+describe('when the browser won\'t save', () => {
+  class FullStorage extends MemStorage {
+    setItem(): void {
+      throw new DOMException('quota', 'QuotaExceededError');
+    }
+  }
+
+  it('keeps checkmarks for this visit, reports not saving, and never throws', async () => {
+    vi.resetModules();
+    (globalThis as unknown as { window: { localStorage: MemStorage } }).window = { localStorage: new FullStorage() };
+    const s = await import('../src/lib/storage');
+    let notified = 0;
+    s.onSavingChange(() => notified++);
+    expect(s.isSaving()).toBe(false); // the probe write noticed
+    expect(s.writeList(s.keys.daily('2026-10-06'), ['beds'])).toBe(false);
+    expect(s.writeList(s.keys.daily('2026-10-06'), ['beds', 'counters'])).toBe(false);
+    expect(s.readList(s.keys.daily('2026-10-06'))).toEqual(['beds', 'counters']);
+    s.setOnboarded(true);
+    expect(s.isOnboarded()).toBe(true);
+    expect(notified).toBeLessThanOrEqual(1);
+  });
+
+  it('works with no storage at all', async () => {
+    vi.resetModules();
+    (globalThis as unknown as { window: object }).window = {
+      get localStorage(): Storage {
+        throw new DOMException('denied', 'SecurityError');
+      },
+    };
+    const s = await import('../src/lib/storage');
+    expect(s.isSaving()).toBe(false);
+    expect(() => s.writeList(s.keys.focus('2026-10-06'), ['mon-dust'])).not.toThrow();
+    expect(s.readList(s.keys.focus('2026-10-06'))).toEqual(['mon-dust']);
+    expect(() => s.pruneOld(new Date())).not.toThrow();
+  });
+
+  it('a healthy browser reports saving', async () => {
+    vi.resetModules();
+    const s = await import('../src/lib/storage');
+    expect(s.isSaving()).toBe(true);
+    expect(s.writeList(s.keys.daily('2026-10-06'), ['beds'])).toBe(true);
+    expect(window.localStorage.getItem('omc:v1:daily:2026-10-06')).toBe('["beds"]');
+    expect(window.localStorage.getItem('omc:v1:probe')).toBeNull();
+  });
+});
+
+describe('encouragement', () => {
+  const base = { done: 0, total: 10, dailyDone: 0, dailyTotal: 5, daysThisWeek: 0, viewing: false, date: new Date(2027, 9, 4) };
+
+  it('counts what she did, never what is left', async () => {
+    const { progressLine, COMPLETE_LINES } = await import('../src/lib/progress');
+    const lines = [
+      progressLine(base),
+      progressLine({ ...base, daysThisWeek: 1 }),
+      progressLine({ ...base, daysThisWeek: 3 }),
+      progressLine({ ...base, done: 1, dailyDone: 1 }),
+      progressLine({ ...base, done: 4, dailyDone: 4 }),
+      progressLine({ ...base, done: 5, dailyDone: 5 }),
+      progressLine({ ...base, done: 6, dailyDone: 5 }),
+      progressLine({ ...base, done: 10, dailyDone: 5 }),
+      progressLine({ ...base, total: 5, done: 5, dailyDone: 5 }), // weekend: routine is the Daily Reset
+    ];
+    expect(lines).toEqual([
+      'One small task is a great start.',
+      'You’ve shown up 1 day this week.',
+      'You’ve shown up 3 days this week.',
+      'One done. It counts.',
+      '4 done today',
+      'Daily Reset done. A little lighter already.',
+      '6 done today',
+      expect.stringMatching(new RegExp(COMPLETE_LINES.map((l) => l.replace('.', '\\.')).join('|'))),
+      expect.stringMatching(new RegExp(COMPLETE_LINES.map((l) => l.replace('.', '\\.')).join('|'))),
+    ]);
+    for (const l of lines) expect(l).not.toMatch(/miss|behind|only|left|remaining|streak|%|of 10/i);
+  });
+
+  it('the finishing line is steady for a day and varies across days', async () => {
+    const { completeLine, COMPLETE_LINES } = await import('../src/lib/progress');
+    expect(completeLine(new Date(2027, 9, 4, 7))).toBe(completeLine(new Date(2027, 9, 4, 22)));
+    const seen = new Set(Array.from({ length: 5 }, (_, i) => completeLine(new Date(2027, 9, 4 + i))));
+    expect(seen.size).toBe(COMPLETE_LINES.length);
+  });
+});
+
+describe('week view', () => {
+  it('lights days with any checkmark, Mon–Sun, and leaves other days plain', async () => {
+    vi.resetModules();
+    const s = await import('../src/lib/storage');
+    const { weekActivity } = await import('../src/lib/progress');
+    s.writeList(s.keys.daily('2027-10-04'), ['beds']); // Mon: old-style data, no active key
+    s.markActive('2027-10-06'); // Wed: e.g. only a weekend/monthly check
+    s.writeList(s.keys.daily('2027-10-03'), ['beds']); // previous Sunday: not this week
+    const week = weekActivity(new Date(2027, 9, 7, 20)); // Thursday evening
+    expect(week.map((d) => d.state)).toEqual(['done', 'past', 'done', 'today', 'future', 'future', 'future']);
+    expect(week[0].name).toBe('Monday');
+    expect(week[6].name).toBe('Sunday');
+  });
+
+  it('a week spanning a year starts fresh on Monday', async () => {
+    vi.resetModules();
+    const s = await import('../src/lib/storage');
+    const { weekActivity } = await import('../src/lib/progress');
+    s.markActive('2027-12-31'); // Friday
+    const fri = weekActivity(new Date(2028, 0, 2)); // Sunday Jan 2 2028: same Mon–Sun week
+    expect(fri[4].state).toBe('done');
+    const mon = weekActivity(new Date(2028, 0, 3)); // next Monday
+    expect(mon.every((d) => d.state !== 'done')).toBe(true);
+  });
+
+  it('activity keys are pruned with other day records and cleared by reset today', async () => {
+    vi.resetModules();
+    const s = await import('../src/lib/storage');
+    s.markActive('2025-01-01');
+    s.markActive('2027-10-04');
+    s.pruneOld(new Date(2027, 9, 4));
+    expect(window.localStorage.getItem('omc:v1:active:2025-01-01')).toBeNull();
+    expect(s.wasActive('2027-10-04')).toBe(true);
+    s.resetDay('2027-10-04');
+    expect(s.wasActive('2027-10-04')).toBe(false);
   });
 });

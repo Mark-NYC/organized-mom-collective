@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { dateKey } from './dates';
-import { readList, writeList } from './storage';
+import { isSaving, onSavingChange, readList, writeList } from './storage';
 
 /**
  * The current local date. Re-checks when the app regains focus and once a
@@ -59,4 +59,9 @@ export function useCheckedSet(key: string): [Set<string>, (id: string) => void] 
   );
 
   return [new Set(ids), toggle];
+}
+
+/** False when this browser isn't saving progress (private mode, storage full or blocked). */
+export function useSaving(): boolean {
+  return useSyncExternalStore(onSavingChange, isSaving, () => true);
 }
