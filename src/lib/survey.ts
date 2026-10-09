@@ -8,6 +8,7 @@
  * The anon key can only call survey_track and survey_submit; everything else
  * is locked down in supabase/migrations/*_customer_survey.sql.
  */
+import { toCsv } from './csv';
 import { cleanAnswers, otherKey, surveyQuestions, type SurveyAnswers, type SurveySource } from '../data/survey';
 
 const URL_ = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
@@ -217,12 +218,6 @@ export function answerCounts(responses: ResponseRow[]) {
   });
 }
 
-const csvCell = (v: string) => {
-  // Neutralize spreadsheet formulas from free text, then quote.
-  const safe = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
-  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
-};
-
 export function responsesCsv(responses: ResponseRow[]): string {
   // Each question, followed by its "Something else" text where it has that option.
   const hasOther = (q: (typeof surveyQuestions)[number]) => q.kind !== 'text' && q.options.some((o) => o.id === 'other');
@@ -246,5 +241,5 @@ export function responsesCsv(responses: ResponseRow[]): string {
     }),
     r.duration_seconds == null ? '' : String(r.duration_seconds),
   ]);
-  return [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
+  return toCsv([header, ...rows]);
 }

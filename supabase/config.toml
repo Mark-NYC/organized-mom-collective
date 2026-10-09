@@ -1,0 +1,16 @@
+# Supabase CLI settings for the shop's Edge Functions (supabase/SHOP.md).
+# The gateway's JWT check is off for all three: Stripe calls the webhook without a
+# Supabase JWT, checkout runs for guests, and browsers send CORS preflights without one.
+# Each function checks its own callers instead: the Stripe signature (stripe-webhook),
+# rate limits and the checkout switch (shop-checkout), and the admin's access token
+# against Supabase Auth plus shop_admins (shop-admin).
+project_id = "organized-mom-collective"
+
+[functions.shop-checkout]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.shop-admin]
+verify_jwt = false
