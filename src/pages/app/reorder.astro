@@ -6,22 +6,28 @@ import { etsyListingUrl, formatPrice, formatSpan, savingsVersus } from '../../li
 const smallest = CALENDAR_OPTIONS.reduce((a, b) => (b.weeks < a.weeks ? b : a));
 const options = CALENDAR_OPTIONS.map((o) => {
   const sets = o.weeks / smallest.weeks;
+  const bestValue = o.id === BEST_VALUE_ID;
   return {
     ...o,
     url: etsyListingUrl(o.etsyUrl),
     shortName: o.name.replace(/ Calendar$/, ''),
     priceLabel: formatPrice(o.price),
-    bestValue: o.id === BEST_VALUE_ID,
+    bestValue,
+    span: sets === 2 ? 'Full year of planning' : `${o.weeks} weeks`,
     save: o.id === smallest.id || sets !== 2 ? 0 : savingsVersus(o, smallest),
     setsWeeks: sets === 2 ? smallest.weeks : 0,
-    editions: o.editions.map((e) => ({ label: e.label, span: formatSpan(e.start, e.end) })),
+    // Exact dates appear only once confirmed in src/config.ts.
+    editions: o.editions.map((e) => ({ label: e.label, dates: e.start && e.end ? formatSpan(e.start, e.end) : '' })),
   };
   // Recommended option first, so on phones it's the first one she sees.
 }).sort((a, b) => Number(b.bestValue) - Number(a.bestValue));
 
-// Flag missing listings in the build output so they don't go unnoticed.
+// Flag anything missing in the build output so it doesn't go unnoticed.
 for (const o of options) {
   if (!o.url) console.warn(`[reorder] No valid Etsy listing URL for "${o.name}" — its button is disabled. Set etsyUrl in src/config.ts.`);
+}
+if (options.some((o) => o.editions.some((e) => !e.dates))) {
+  console.warn('[reorder] Edition dates not confirmed — showing edition names only. See editions in src/config.ts.');
 }
 
 /** Etsy listing photos, resized to 640/960/1280 (originals in design/etsy-listing/). */
@@ -29,21 +35,19 @@ const photo = (name: string) => ({
   src: `/images/reorder/${name}-960.webp`,
   srcset: [640, 960, 1280].map((w) => `/images/reorder/${name}-${w}.webp ${w}w`).join(', '),
 });
-const half = '(min-width: 768px) 464px, calc(100vw - 2.5rem)';
+const half = '(min-width: 768px) 440px, calc(100vw - 2.5rem)';
 
 const benefits = [
-  { title: 'Everyone’s schedule in one place.', body: 'School runs, practices and plans on one wall the whole family can see.' },
-  { title: 'Meals and groceries, planned together.', body: 'Write the week’s dinners and the grocery list sits right beside them.' },
-  { title: 'Cleaning that’s easier to keep up with.', body: 'One small zone printed on each day, so the house never gets away from you.' },
-  { title: 'Room for what matters most.', body: 'Space every week for family priorities, prayer and gratitude.' },
+  { title: 'Everyone’s schedule in one place.', body: 'School runs, practices and plans on one wall everyone sees.' },
+  { title: 'Meals and groceries, planned together.', body: 'The week’s dinners, with the grocery list right beside them.' },
+  { title: 'Cleaning you can keep up with.', body: 'One small zone a day keeps the whole house in check.' },
+  { title: 'Room for what matters most.', body: 'Weekly space for family priorities, prayer and gratitude.' },
 ];
 
-const reassurance = [
-  'A physical 11 × 17-inch wall calendar',
-  'Digital cleaning companion included',
-  'Secure checkout through Etsy',
-  'Your cleaning progress stays in the app',
-];
+const reassurance = ['11 × 17-inch wall calendar', 'Cleaning companion included', 'Secure checkout on Etsy'];
+
+/** Full-bleed tinted band on phones, a soft rounded panel from md up. */
+const band = '-mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10';
 ---
 
 <Layout title="Reorder" description={`Get your next ${BRAND_NAME} family wall calendar on Etsy.`}>
@@ -66,7 +70,7 @@ const reassurance = [
     <figure class="-mx-5 mt-7 aspect-square overflow-hidden bg-band sm:mx-0 sm:border sm:border-rule md:mt-0">
       <img
         {...photo('calendar-in-use')}
-        sizes="(min-width: 768px) 464px, 100vw"
+        sizes="(min-width: 768px) 440px, 100vw"
         width="2000"
         height="2000"
         fetchpriority="high"
@@ -77,16 +81,89 @@ const reassurance = [
     </figure>
   </section>
 
-  <!-- 2. The product -->
-  <section aria-labelledby="week-h" class="mt-14 border-t border-rule-strong pt-8 md:grid md:grid-cols-2 md:gap-12">
+  <!-- 2. Buy, right under the hero -->
+  <section id="buy" aria-labelledby="buy-h" class:list={[band, 'scroll-mt-4 bg-cream pt-9 pb-8 md:mt-12']}>
+    <h2 id="buy-h" class="text-[1.6rem] leading-tight font-bold sm:text-center sm:text-[1.9rem]">Keep the good rhythm going.</h2>
+    <p class="mt-2 text-[1rem] text-soft sm:text-center">Same calendar, same system. Pick how far ahead you want to plan.</p>
+
+    <ul class="mx-auto mt-6 grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-6">
+      {
+        options.map((o) => (
+          <li
+            class:list={[
+              'flex flex-col rounded-[4px] p-5',
+              o.bestValue ? 'border-2 border-ink bg-sage-wash' : 'border border-rule-strong bg-paper',
+            ]}
+          >
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-[1.15rem] leading-tight font-bold">{o.name}</h3>
+              {o.bestValue && (
+                <span class="shrink-0 bg-month px-2 py-1.5 text-[0.6rem] leading-none font-bold tracking-[0.18em] uppercase">Best value</span>
+              )}
+            </div>
+            <p class="mt-3 text-[2.25rem] leading-none font-bold tracking-[-0.01em]">{o.priceLabel}</p>
+            <p class="mt-2 text-[1rem] font-semibold">{o.span}</p>
+            {o.save > 0 && (
+              <p class="mt-2 text-[0.95rem] leading-snug">Save {formatPrice(o.save)} compared with purchasing two half-year calendars.</p>
+            )}
+            <ul class="mt-4 space-y-1.5 border-t border-rule pt-3.5">
+              {o.editions.map((e) => (
+                <li>
+                  <p class="text-[0.95rem] font-semibold">{e.label}</p>
+                  {e.dates && <p class="text-[0.9rem] text-soft">{e.dates}</p>}
+                </li>
+              ))}
+            </ul>
+            {o.setsWeeks > 0 && <p class="mt-1.5 text-[0.9rem] text-soft">Ships as two {o.setsWeeks}-week sets.</p>}
+            <div class="mt-auto pt-5">
+              {o.url ? (
+                <a
+                  href={o.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Buy the ${o.name} on Etsy, ${o.priceLabel} (opens Etsy)`}
+                  class:list={['btn-primary w-full gap-2', o.bestValue && 'min-h-14 text-[0.8rem] font-bold']}
+                >
+                  Buy on Etsy <span aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.66rem] font-semibold tracking-[0.16em] text-soft uppercase">
+                  {o.shortName} coming soon to Etsy
+                </p>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mx-auto mt-6 max-w-3xl">
+      <ul class="flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-[0.9rem]" aria-label="What you get">
+        {
+          reassurance.map((r) => (
+            <li class="flex gap-2">
+              <span aria-hidden="true" class="font-bold">✓</span>
+              {r}
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-4 text-center text-[0.9rem] leading-relaxed text-soft">
+        Already using the app? A new calendar doesn’t reset your checkmarks or progress.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3. The product -->
+  <section aria-labelledby="week-h" class="mt-12 md:grid md:grid-cols-2 md:items-center md:gap-12">
     <div>
       <h2 id="week-h" class="text-[1.6rem] leading-tight font-bold sm:text-[1.9rem]">Your week, all in one place.</h2>
       <ul class="mt-5 border-t border-rule">
         {
           benefits.map((b) => (
-            <li class="border-b border-rule py-3.5">
+            <li class="border-b border-rule py-3">
               <p class="text-[1.0625rem] leading-snug font-bold">{b.title}</p>
-              <p class="mt-1 text-[1rem] leading-snug">{b.body}</p>
+              <p class="mt-0.5 text-[1rem] leading-snug">{b.body}</p>
             </li>
           ))
         }
@@ -106,27 +183,27 @@ const reassurance = [
     </figure>
   </section>
 
-  <!-- 3. Wall + pocket -->
-  <section aria-labelledby="pocket-h" class="mt-14 border-t border-rule-strong pt-8 md:grid md:grid-cols-2 md:items-center md:gap-12">
+  <!-- 4. Wall + pocket -->
+  <section aria-labelledby="pocket-h" class:list={[band, 'mt-12 bg-sage-wash py-9 md:grid md:grid-cols-2 md:items-center md:gap-12']}>
     <div>
       <h2 id="pocket-h" class="text-[1.6rem] leading-tight font-bold text-balance sm:text-[1.9rem]">
         A plan on your wall. A little help in your pocket.
       </h2>
-      <dl class="mt-5 grid grid-cols-2 gap-x-4 border-t border-rule pt-4">
+      <dl class="mt-5 grid grid-cols-2 gap-x-4 border-t border-rule-strong/40 pt-4">
         <div>
           <dt class="label">On the wall</dt>
-          <dd class="mt-1.5 text-[1rem] leading-snug">Your weekly plan, with a cleaning zone printed on every day.</dd>
+          <dd class="mt-1.5 text-[1rem] leading-snug">Plan your whole week. Each day shows its cleaning zone.</dd>
         </div>
-        <div class="border-l border-rule pl-4">
+        <div class="border-l border-rule-strong/40 pl-4">
           <dt class="label">In your pocket</dt>
-          <dd class="mt-1.5 text-[1rem] leading-snug">That zone as a short checklist. Tap each task as you go.</dd>
+          <dd class="mt-1.5 text-[1rem] leading-snug">That zone as a short checklist. Tap tasks off as you go.</dd>
         </div>
       </dl>
-      <p class="mt-5 border-l-[3px] border-month py-1 pl-3.5 text-[1rem] leading-relaxed">
+      <p class="mt-5 text-[1rem] leading-relaxed">
         <strong class="font-semibold">Included with every calendar, at no extra cost.</strong> It’s this app, the one you’re using now.
       </p>
     </div>
-    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-band md:mt-0">
+    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-paper md:mt-0">
       <img
         {...photo('calendar-and-app')}
         sizes={half}
@@ -140,102 +217,12 @@ const reassurance = [
     </figure>
   </section>
 
-  <!-- 4. Buy -->
-  <section id="buy" aria-labelledby="buy-h" class="mt-14 scroll-mt-4 border-t border-rule-strong pt-8">
-    <h2 id="buy-h" class="text-[1.6rem] leading-tight font-bold sm:text-center sm:text-[1.9rem]">Keep the good rhythm going.</h2>
-    <p class="mt-2 text-[1rem] text-muted sm:text-center">Same calendar, same system. Pick how far ahead you want to plan.</p>
-
-    <ul class="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-6">
-      {
-        options.map((o) => (
-          <li
-            class:list={[
-              'flex flex-col rounded-[3px] bg-paper p-5',
-              o.bestValue ? 'border-2 border-ink' : 'border border-rule-strong',
-            ]}
-          >
-            <div class="flex items-start justify-between gap-3">
-              <h3 class="text-[1.15rem] leading-tight font-bold">{o.name}</h3>
-              {o.bestValue && (
-                <span class="shrink-0 bg-month px-2 py-1.5 text-[0.6rem] leading-none font-bold tracking-[0.18em] uppercase">Best value</span>
-              )}
-            </div>
-            <p class="mt-3 flex items-baseline gap-2.5">
-              <span class="text-[2.25rem] leading-none font-bold tracking-[-0.01em]">{o.priceLabel}</span>
-              <span class="text-[1rem] font-semibold text-muted">{o.weeks} weeks</span>
-            </p>
-            {o.save > 0 && (
-              <p class="mt-2.5 text-[0.95rem] leading-snug font-semibold">
-                Save {formatPrice(o.save)} compared with buying two half-year calendars.
-              </p>
-            )}
-            <ul class="mt-4 space-y-2 border-t border-rule pt-3.5">
-              {o.editions.map((e) => (
-                <li>
-                  <p class="text-[0.95rem] font-semibold">{e.label}</p>
-                  <p class="text-[0.9rem] text-muted">{e.span}</p>
-                </li>
-              ))}
-            </ul>
-            {o.setsWeeks > 0 && <p class="mt-2.5 text-[0.9rem] text-muted">Ships as two {o.setsWeeks}-week sets.</p>}
-            <div class="mt-auto pt-5">
-              {o.url ? (
-                <a
-                  href={o.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Buy the ${o.name} on Etsy, ${o.priceLabel} (opens Etsy)`}
-                  class:list={['w-full gap-2', o.bestValue ? 'btn-primary' : 'btn-secondary min-h-12 text-[0.75rem] tracking-[0.18em]']}
-                >
-                  Buy on Etsy <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.66rem] font-semibold tracking-[0.16em] text-muted uppercase">
-                  {o.shortName} coming soon to Etsy
-                </p>
-              )}
-            </div>
-          </li>
-        ))
-      }
-    </ul>
-
-    <!-- 5. Reassurance. The guarantee matches the Etsy listing wording; the shop honors it. -->
-    <p class="mt-5 border-l-[3px] border-month py-1 pl-3.5 text-[1rem] leading-relaxed">
-      <strong class="font-semibold">Arrives damaged or misprinted?</strong> We’ll make it right.
-    </p>
-    <ul class="mt-5 grid gap-x-6 gap-y-2.5 text-[0.95rem] leading-snug sm:grid-cols-2" aria-label="What you get">
-      {
-        reassurance.map((r) => (
-          <li class="flex gap-2.5">
-            <span aria-hidden="true" class="font-bold text-muted">✓</span>
-            {r}
-          </li>
-        ))
-      }
-    </ul>
-    <p class="mt-4 text-[0.85rem] leading-relaxed text-muted">
-      A new calendar doesn’t reset anything here. Your checkmarks and settings stay saved on this phone.
-    </p>
-  </section>
-
-  <!-- 6. Closing -->
-  <section aria-labelledby="close-h" class="mt-14 border-t border-rule-strong pt-8 md:grid md:grid-cols-2 md:items-center md:gap-12">
-    <figure class="aspect-square overflow-hidden border border-rule bg-band">
-      <img
-        {...photo('baking-with-calendar')}
-        sizes={half}
-        width="2000"
-        height="2000"
-        loading="lazy"
-        decoding="async"
-        alt="A mother and daughter baking chocolate chip cookies, with the family calendar on the counter beside them."
-        class="block h-full w-full"
-      />
-    </figure>
-    <div class="mt-7 md:mt-0">
-      <h2 id="close-h" class="text-[1.6rem] leading-tight font-bold text-balance sm:text-[1.9rem]">A little more order. A lot more room for life.</h2>
-      <a href="#buy" class="btn-primary mt-6 w-full sm:w-auto">Choose Your Calendar</a>
-    </div>
+  <!-- 5. Close -->
+  <section aria-labelledby="close-h" class:list={[band, 'mt-12 bg-blush-wash py-12 text-center']}>
+    <h2 id="close-h" class="mx-auto max-w-md text-[1.6rem] leading-tight font-bold text-balance sm:text-[1.9rem]">
+      A little more order. A lot more room for life.
+    </h2>
+    <a href="#buy" class="btn-primary mt-6 w-full sm:w-auto">Choose Your Calendar</a>
+    <p class="mt-5 text-[0.9rem] text-soft">Arrives damaged or misprinted? We’ll make it right.</p>
   </section>
 </Layout>

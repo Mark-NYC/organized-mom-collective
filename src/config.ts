@@ -2,6 +2,13 @@
  * App-wide settings you're likely to change.
  */
 
+/** A printed edition. Dates are optional until confirmed against the print files. */
+export interface Edition {
+  label: string;
+  start?: string;
+  end?: string;
+}
+
 /**
  * The two calendars offered on Reorder (/app/reorder). All purchases happen on Etsy.
  *
@@ -9,11 +16,15 @@
  * Until it's a real listing URL (null or a placeholder), that option's button stays
  * disabled and shows "Coming soon to Etsy". Prices are in whole US dollars.
  *
- * `editions`: the Monday–Sunday span each printed edition covers (inclusive, YYYY-MM-DD).
- * Taken from the 2027 print shown in the Etsy listing images (design/etsy-listing/):
- * first page = week of Mon Dec 28 2026, last page = week of Mon Dec 20 2027, two
- * 26-week sets. tests/reorder.test.ts checks each edition is exactly `weeks` long.
- * Update these when the next year's calendar goes on sale.
+ * `editions`: what each printed edition covers. Exact dates are shown on the page only
+ * when both `start` and `end` are set (Monday and Sunday, YYYY-MM-DD, inclusive), and
+ * tests/reorder.test.ts then checks each span is exactly `weeks` long.
+ *
+ * ⚠️ DATES NOT CONFIRMED. Verified from the Etsy listing images (design/etsy-listing/):
+ * the 2027 calendar's first page is the week of Mon Dec 28 2026. Not verifiable here
+ * (no print files in this repo): the last page of each edition. Note: Dec 28 2026 through
+ * Sun Jan 2 2028 is 53 weeks, which doesn't match 52 weeks / two 26-week sets. Confirm the
+ * first and last page of each printed edition, then fill in start/end below.
  */
 export const CALENDAR_OPTIONS = [
   {
@@ -21,10 +32,7 @@ export const CALENDAR_OPTIONS = [
     name: 'Half-Year Calendar',
     price: 34,
     weeks: 26,
-    editions: [
-      { label: 'January–June 2027', start: '2026-12-28', end: '2027-06-27' },
-      { label: 'July–December 2027', start: '2027-06-28', end: '2027-12-26' },
-    ],
+    editions: [{ label: 'January–June 2027' }, { label: 'July–December 2027' }] as Edition[],
     etsyUrl: null as string | null, // PLACEHOLDER: half-year Etsy listing URL
   },
   {
@@ -32,7 +40,7 @@ export const CALENDAR_OPTIONS = [
     name: 'Full-Year Calendar',
     price: 54,
     weeks: 52,
-    editions: [{ label: 'All of 2027', start: '2026-12-28', end: '2027-12-26' }],
+    editions: [{ label: 'All of 2027' }] as Edition[],
     etsyUrl: null as string | null, // PLACEHOLDER: full-year Etsy listing URL
   },
 ] as const;
