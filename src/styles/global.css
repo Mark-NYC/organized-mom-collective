@@ -45,8 +45,8 @@
   /* Resource articles (the public publication): Georgia headings and warm charcoal
      text. The app keeps Montserrat and #545454; see docs/editorial/BLOG_EDITORIAL_STYLE.md. */
   --font-editorial: var(--font-serif);
-  --color-prose: #47423e;
-  --color-prose-soft: #6a635d;
+  --color-prose: #3d3834;
+  --color-prose-soft: #5c5550;
 
   /* Current month's color — set on <html> at load from src/theme.ts */
   --color-month: var(--month, #c8c8c8);
@@ -150,9 +150,10 @@
 /*
  * Resource articles: the editorial template.
  *
- * .article-body is a three-track grid: everything sits in a ~700px reading
+ * .article-body is a three-track grid: everything sits in a ~720px reading
  * column ("content"); add .breakout for a wider track (~960px) and .full-bleed
- * for edge to edge. Plain Markdown lists use :not([class]) so component lists
+ * for edge to edge. Type scale: H1 36→58px, H2 28→38px (Georgia), H3 20→23px
+ * (Georgia), body 17→18px Montserrat; major sections get extra space above. Plain Markdown lists use :not([class]) so component lists
  * keep their own styles.
  */
 @layer components {
@@ -161,14 +162,14 @@
   }
   .article-title {
     font-family: var(--font-editorial);
-    @apply text-[2.15rem] leading-[1.12] font-bold tracking-[-0.012em] text-balance sm:text-[2.9rem] lg:text-[3.25rem];
+    @apply text-[2.25rem] leading-[1.08] font-bold tracking-[-0.018em] text-balance sm:text-[3rem] lg:text-[3.6rem];
   }
   .article-deck {
-    @apply text-[1.15rem] leading-relaxed sm:text-[1.3rem];
+    @apply text-[1.15rem] leading-[1.6] sm:text-[1.3rem];
     color: var(--color-prose-soft);
   }
   .article-body {
-    --content: min(43.5rem, 100%);
+    --content: min(45rem, 100%);
     --wide: min(60rem, 100%);
     display: grid;
     grid-template-columns:
@@ -203,19 +204,22 @@
     grid-column: wide;
   }
   .article-section > h2 + p {
-    @apply mt-3;
+    @apply mt-4;
   }
-  .article-section > h3 {
-    @apply mt-9 text-[1.1rem] leading-snug font-bold sm:text-[1.15rem];
-  }
+  /* H2: the scroll landmark. Big serif, generous space above, tight to its first paragraph. */
   .article-body > h2,
   .article-heading {
     font-family: var(--font-editorial);
-    @apply mt-14 scroll-mt-6 text-[1.65rem] leading-[1.2] font-bold text-balance sm:text-[2rem];
+    @apply mt-16 scroll-mt-6 text-[1.75rem] leading-[1.15] font-bold tracking-[-0.012em] text-balance sm:mt-24 sm:text-[2.15rem] lg:text-[2.4rem];
   }
-  .article-body > h3,
-  .article-callout > h3 {
-    @apply mt-9 scroll-mt-6 text-[1.1rem] leading-snug font-bold sm:text-[1.15rem];
+  /* After a ruled pull quote (The Shift) the rule already separates sections. */
+  .article-body > aside + h2 {
+    @apply mt-14 sm:mt-16;
+  }
+  /* H3: a clear step down, still serif so it reads as a heading, not bold body text. */
+  :is(.article-body, .article-section, .article-callout) > h3 {
+    font-family: var(--font-editorial);
+    @apply mt-12 scroll-mt-6 text-[1.25rem] leading-snug font-bold sm:text-[1.45rem];
   }
   /* Prose spacing applies to Markdown at the body, section and callout level only,
      never to paragraphs inside components. */
@@ -223,8 +227,8 @@
     @apply mt-5;
   }
   .article-body > h2 + p,
-  .article-body > h3 + p {
-    @apply mt-3;
+  :is(.article-body, .article-section) > h3 + p {
+    @apply mt-4;
   }
   .article-callout > :first-child {
     @apply mt-0;
@@ -336,6 +340,22 @@
   }
   html.print-schedule .article-body > .checklist-block {
     margin-top: 5mm;
+  }
+  /* Compact print versions, so the week and the Daily Reset share page 1. */
+  html.print-schedule .cleaning-week {
+    margin: 0;
+  }
+  html.print-schedule .cleaning-week > div,
+  html.print-schedule .checklist-block {
+    box-shadow: none;
+  }
+  html.print-schedule .cleaning-week-days > li {
+    padding-top: 2mm;
+    padding-bottom: 2mm;
+  }
+  html.print-schedule .checklist-block li {
+    padding-top: 1.6mm;
+    padding-bottom: 1.6mm;
   }
   /* The week at a glance already covers the weekend, so its prose stays on screen only. */
   html.print-schedule section[data-print-schedule] > h3,

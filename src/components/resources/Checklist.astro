@@ -1,12 +1,15 @@
 ---
 /**
- * A short checklist drawn like the printed calendar: empty boxes on ruled lines,
- * on a softly outlined card. Static on purpose; it's for reading, printing or
- * copying onto paper. Put several in a <ChecklistGrid> to show them side by side.
+ * A checklist drawn like a page of the printed planner: a small spaced-caps kicker
+ * (e.g. the day), a serif title, a charcoal rule, then empty boxes on dotted
+ * ruled lines. Static on purpose; it's for reading, printing or copying onto paper.
+ * Put several in a <ChecklistGrid> to show them side by side.
  */
 interface Props {
   items: string[];
   title?: string;
+  /** Small line above the title, e.g. "Monday" or "Every day". */
+  kicker?: string;
   /** Optional time stamp, e.g. "15 min". */
   time?: string;
   /** Optional zone icon, e.g. from src/data/cleaning.ts. */
@@ -14,23 +17,31 @@ interface Props {
   /** Include this card in CleaningWeek's "Print the schedule". */
   print?: boolean;
 }
-const { items, title, time, icon, print = false } = Astro.props;
+const { items, title, kicker, time, icon, print = false } = Astro.props;
 ---
 
-<div class="checklist-block my-6 rounded-[6px] border border-rule bg-paper px-4 pt-3.5 pb-2 sm:px-5" data-print-schedule={print || undefined}>
+<div
+  class="checklist-block my-8 rounded-[3px] border border-[#d6d0c9] bg-paper px-5 pt-4 pb-3 shadow-[0_14px_30px_-24px_rgba(61,56,52,0.55)] sm:px-6 sm:pt-5"
+  data-print-schedule={print || undefined}
+>
   {
-    (title || time) && (
-      <div class="flex items-center justify-between gap-3 border-b border-ink pb-2.5">
-        <p class="flex min-w-0 items-center gap-2.5">
-          {icon && (
-            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-month/35">
-              <img src={icon} alt="" width="192" height="192" class="size-7" />
+    (title || time || kicker) && (
+      <div class="flex items-center gap-3 border-b-2 border-ink pb-3">
+        {icon && (
+          <span class="grid size-10 shrink-0 place-items-center rounded-full bg-month/40">
+            <img src={icon} alt="" width="192" height="192" class="size-8" />
+          </span>
+        )}
+        <div class="min-w-0 flex-1">
+          {kicker && <span class="label block leading-snug text-soft">{kicker}</span>}
+          {title && (
+            <span class="mt-0.5 block text-[1.2rem] leading-tight font-bold [overflow-wrap:anywhere]" style="font-family: var(--font-editorial)">
+              {title}
             </span>
           )}
-          {title && <span class="label min-w-0 leading-snug [overflow-wrap:anywhere]">{title}</span>}
-        </p>
+        </div>
         {time && (
-          <span class="inline-flex shrink-0 items-center border border-ink px-1.5 py-[3px] text-[0.64rem] leading-none font-semibold tracking-[0.16em] whitespace-nowrap uppercase">
+          <span class="inline-flex shrink-0 items-center self-start border border-ink px-1.5 py-[3px] text-[0.64rem] leading-none font-semibold tracking-[0.16em] whitespace-nowrap uppercase">
             {time}
           </span>
         )}
@@ -40,8 +51,8 @@ const { items, title, time, icon, print = false } = Astro.props;
   <ul class="checklist">
     {
       items.map((item) => (
-        <li class="flex items-start gap-3 border-b border-rule py-2.5 text-[0.98rem] leading-snug last:border-b-0">
-          <span aria-hidden="true" class="mt-[1px] size-[1.05rem] shrink-0 rounded-[3px] border-[1.5px] border-ink bg-paper" />
+        <li class="flex items-start gap-3.5 border-b border-dotted border-[#b9b2aa] py-3 text-[1rem] leading-snug last:border-b-0">
+          <span aria-hidden="true" class="mt-[1px] size-[1.15rem] shrink-0 rounded-[2px] border-[1.5px] border-ink bg-paper" />
           <span>{item}</span>
         </li>
       ))

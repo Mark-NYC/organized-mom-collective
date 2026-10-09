@@ -34,14 +34,15 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 
 `src/pages/resources/[slug].astro` gives every article the same editorial frame:
 
-- **Header:** category eyebrow (breadcrumbs), Georgia H1, the `summary` as a deck, byline, date, reading time.
-- **Hero photo** (optional `hero` in frontmatter), then a collapsed "In this article" list.
-- **Body:** a ~700px reading column (`.article-body`) with Georgia H2s, 17–18px Montserrat text in warm charcoal, and room for wider `.breakout` elements (~960px).
+- **Header:** category eyebrow (breadcrumbs), Georgia H1, the `summary` as a deck, byline, date, reading time; centered from tablet up so the article opens like a magazine page.
+- **Hero photo** (optional `hero` in frontmatter) at ~960px wide, then a collapsed "In this article" list.
+- **Body:** a ~720px reading column (`.article-body`), 17–18px Montserrat in warm charcoal (#3d3834), with wider `.breakout` elements (~960px: the cleaning-week diagram, checklist grids, the product callout).
+- **Type scale:** H1 36→58px, H2 28→38px and H3 20→23px, all Georgia bold; H2s get extra space above (64→96px) and sit close to their first paragraph, so sections read as groups.
 - **End of article:** Read next (as a feature card) and related cards.
 
 Articles without a hero or components still render cleanly: text-only header, text-only cards on the hub.
 
-Typography: Georgia (the brand's existing serif, used on the printed calendar's month names) for article titles and section headings; Montserrat for body, labels and UI. Warm charcoal `--color-prose` (#47423e) for article text. The companion website keeps its own Montserrat / #545454 styling.
+Typography: Georgia (the brand's existing serif, used on the printed calendar's month names) for article titles and all headings; Montserrat for body, labels and UI. Warm charcoal `--color-prose` (#3d3834) for article text. The companion website keeps its own Montserrat / #545454 styling.
 
 ### Components for the editorial rhythm
 
@@ -51,7 +52,7 @@ All are available in any article without imports (full reference: [ARTICLE_FORMA
 | --- | --- |
 | Photo with caption | `<Figure image="name" alt="…" caption="…" size="content \| wide" />` |
 | Practical aside, lightly tinted | `<Tip title="…">…</Tip>` |
-| Checklist card / side-by-side cards | `<Checklist title time icon items />`, `<ChecklistGrid>…</ChecklistGrid>` |
+| Checklist card / side-by-side cards | `<Checklist kicker title time icon items />` (a printed planner sheet: kicker such as the day, serif title), `<ChecklistGrid>…</ChecklistGrid>` |
 | The product callout | `<ProductCTA title="…" image="name" alt="…">copy</ProductCTA>` (button: "See the Wall Calendar" → `/calendar`) |
 | Pull-quote insight | `<Shift title="…">…</Shift>` |
 | Routine / fallback sections | `<RealLifeVersion>`, `<WhenLifeHappens>` |
@@ -85,15 +86,14 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 | Name | Shows | Used in |
 | --- | --- | --- |
 | `hc-01-hero` | A hand writing in the calendar on a kitchen counter | HC-01 hero, hub feature |
-| `hc-01-counter` | Mother and child baking at the counter, calendar beside them | HC-01, daily reset |
 | `hc-01-zone-tags` | Close-up of the printed cleaning zone tags | HC-01, zone checklist |
 | `hc-01-wall-calendar` | The calendar hanging on a wall in daylight | HC-01 product callout, hub calendar band |
 
-All four are product listing photos. The library needs lifestyle photography that isn't a product shot.
+All three are product listing photos. The library needs lifestyle photography that isn't a product shot. (A baking photo from the listing set was used in HC-01's daily reset section and removed: it didn't show cleaning.)
 
 ### Shot list (in priority order)
 
-1. **An evening kitchen reset:** counter being wiped, dishwasher open, hands only, warm evening light. *For HC-01 "Why a short daily reset works" (to replace the baking photo) and HC-02.*
+1. **An evening kitchen reset:** counter being wiped, dishwasher open, a dish towel, hands only, warm evening light, an ordinary lived-in kitchen. *Needed now: HC-01 "Why a short daily reset works" has no photo since the baking shot was removed. Add it with `<Figure>` after the Daily Reset checklist. Also for HC-02.*
 2. **The calendar on a real family wall:** next to the fridge or in an entry, with school bags, a lunchbox, keys. Lived-in, not staged. *For "Put the routine where everyone can see it", the hub calendar band and FP-02 / FP-03.*
 3. **A real screenshot of the companion website's Today checklist** on a phone, beside the calendar. *The listing image with a phone shows an outdated menu (“Tidy”), so it isn't used.*
 4. **An entryway being tidied:** shoes paired, coats hung, a bag on a hook. *HC-01 Wednesday zone, HC-03.*

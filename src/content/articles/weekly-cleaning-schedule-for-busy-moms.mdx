@@ -42,13 +42,7 @@ Some mess grows every day: dishes, crumbs, shoes by the door, clothes on the bed
 
 The Daily Reset is fifteen minutes that stops that pile from stacking up. It’s the same five things every day, so there’s nothing to decide:
 
-<Checklist title={dailyEssentials.title} time="15 min" icon={dailyEssentials.icon} items={dailyEssentials.tasks.map((t) => t.label)} print />
-
-<Figure
-  image="hc-01-counter"
-  alt="A mother and her young daughter scooping cookie dough onto a baking sheet on a marble kitchen counter, with cookies cooling on a rack and the weekly wall calendar lying beside them."
-  caption="Real counters fill up on an ordinary afternoon. The reset is what clears them again by bedtime."
-/>
+<Checklist kicker="Every day" title={dailyEssentials.title} time="15 min" icon={dailyEssentials.icon} items={dailyEssentials.tasks.map((t) => t.label)} print />
 
 Everything else can wait a week without becoming a problem: dusty shelves, the bathroom sink, the fridge shelf with the mystery container. That’s what the zones are for.
 
@@ -58,7 +52,7 @@ Each weekday has one area, always the same one, so you never stand in the hallwa
 
 <ChecklistGrid>
   {weeklySchedule.map((d) => (
-    <Checklist title={`${d.dayLabel} · ${d.zone}`} time={d.minutes.replace(/\s*minutes?/, ' min')} icon={d.icon} items={d.tasks.map((t) => t.label)} />
+    <Checklist kicker={d.dayLabel} title={d.zone} time={d.minutes.replace(/\s*minutes?/, ' min')} icon={d.icon} items={d.tasks.map((t) => t.label)} />
   ))}
 </ChecklistGrid>
 
@@ -107,7 +101,8 @@ You don’t need new supplies or a free weekend to start. You need three small d
 2. **Move the zones to fit your week.** If Wednesday is your longest day, give it the smallest zone. The days can change; one zone a day stays.
 3. **Set a timer and stop when it goes off.** Stopping on time is what makes tomorrow feel possible.
 
-Then shape it around the people in your house:
+### Shape it around the people in your house
+
 
 - **Working full-time:** split the reset. Beds and the dishwasher in the morning, counters and the pickup after dinner, then the zone while you’re already moving.
 - **Babies and toddlers:** do the zone in two five-minute bursts, or bring them along. A toddler can carry pillows back to the couch. It’s slower, and it still counts.

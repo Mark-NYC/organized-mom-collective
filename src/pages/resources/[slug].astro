@@ -102,11 +102,13 @@ const components = {
 
 <PublicLayout fullTitle={data.seoTitle} description={data.description} chrome width="wide" ogType="article" ogImage={ogImage} jsonLd={jsonLd}>
   <article class="article-shell">
-    <header class="mx-auto max-w-[43.5rem]">
-      <Breadcrumbs items={[{ label: 'Resources', href: routes.resources }, { label: pillar.name, href: routes.pillar(pillar.id) }]} />
+    <header class="mx-auto max-w-[45rem] md:max-w-[52rem] md:text-center lg:max-w-[60rem]">
+      <div class="md:[&_ol]:justify-center">
+        <Breadcrumbs items={[{ label: 'Resources', href: routes.resources }, { label: pillar.name, href: routes.pillar(pillar.id) }]} />
+      </div>
       <h1 class="article-title mt-5">{data.title}</h1>
-      <p class="article-deck mt-5">{data.summary}</p>
-      <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[0.85rem] text-muted">
+      <p class="article-deck mx-auto mt-5 max-w-[42rem] lg:max-w-[46rem]">{data.summary}</p>
+      <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[0.85rem] text-muted md:justify-center">
         <span>By {BRAND_NAME}</span>
         <span aria-hidden="true">·</span>
         <span>{data.updated ? 'Updated' : 'Published'} <time datetime={isoDate(updated)}>{formatDate(updated)}</time></span>
@@ -117,7 +119,7 @@ const components = {
 
     {
       hero && (
-        <figure class="mx-auto mt-9 max-w-[60rem]">
+        <figure class="mx-auto mt-8 max-w-[60rem] sm:mt-10">
           <img
             src={hero.src}
             srcset={hero.srcset}
@@ -129,14 +131,14 @@ const components = {
             decoding="async"
             class="article-photo aspect-[3/2]"
           />
-          {hero.caption && <figcaption class="article-caption mx-auto max-w-[43.5rem]">{hero.caption}</figcaption>}
+          {hero.caption && <figcaption class="article-caption mx-auto max-w-[45rem]">{hero.caption}</figcaption>}
         </figure>
       )
     }
 
     {
       toc.length >= 4 && (
-        <nav aria-label="In this article" class:list={['mx-auto max-w-[43.5rem] border-y border-rule py-1 print:hidden', hero ? 'mt-8' : 'mt-6']}>
+        <nav aria-label="In this article" class:list={['mx-auto max-w-[45rem] border-y border-rule py-1 print:hidden', hero ? 'mt-10' : 'mt-8']}>
           {/* Collapsed, so the answer stays near the top on phones. */}
           <details class="group">
             <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
