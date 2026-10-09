@@ -23,8 +23,8 @@ npm test          # unit tests (schedule + storage logic)
 | What | Where |
 | --- | --- |
 | **Cleaning tasks** (daily essentials, Mon–Thu focus, weekend copy, 12-month rotation) | `src/data/cleaning.ts` |
-| **Reorder: prices + Etsy listing URLs** | `src/config.ts` → `CALENDAR_OPTIONS` (a button stays disabled until its `etsyUrl` is a real `etsy.com/listing/…` URL) |
-| Reorder photo | `public/images/reorder/` (resized from `design/etsy-listing/11.webp`; all 12 Etsy listing images are in `design/etsy-listing/`) |
+| **Reorder: prices, edition dates, Etsy listing URLs** | `src/config.ts` → `CALENDAR_OPTIONS` (a button stays disabled until its `etsyUrl` is a real `etsy.com/listing/…` URL; update `editions` each new calendar year) |
+| Reorder photos | `public/images/reorder/`, resized 640/960/1280 from `design/etsy-listing/` 11 (hero), 02 (features), 05 (calendar + app), 03 (closing). All 12 Etsy listing images live in `design/etsy-listing/`. Not precached, so the offline install stays small. |
 | Logo (badge, favicon, app icons) | `public/brand/`, `public/favicon.ico`, `public/icons/` (original in `design/logo/`) |
 | Zone icons (daily, Mon–Thu rooms, weekend) | `public/icons/zones/*.png` (originals in `design/zone-icons/`), assigned in `src/data/cleaning.ts` |
 | **Month colors** (canonical, from the printed calendar) | `src/theme.ts` |

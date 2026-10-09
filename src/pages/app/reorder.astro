@@ -1,148 +1,238 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
 import { BEST_VALUE_ID, BRAND_NAME, CALENDAR_OPTIONS } from '../../config';
-import { etsyListingUrl, formatPrice, savingsVersus } from '../../lib/reorder';
+import { etsyListingUrl, formatPrice, formatSpan, savingsVersus } from '../../lib/reorder';
 
 const smallest = CALENDAR_OPTIONS.reduce((a, b) => (b.weeks < a.weeks ? b : a));
 const options = CALENDAR_OPTIONS.map((o) => {
-  const url = etsyListingUrl(o.etsyUrl);
-  const save = o.id === smallest.id ? 0 : savingsVersus(o, smallest);
   const sets = o.weeks / smallest.weeks;
   return {
     ...o,
-    url,
+    url: etsyListingUrl(o.etsyUrl),
+    shortName: o.name.replace(/ Calendar$/, ''),
     priceLabel: formatPrice(o.price),
     bestValue: o.id === BEST_VALUE_ID,
-    months: Math.round((o.weeks * 12) / 52),
-    saveLine: save > 0 && sets === 2 ? `Save ${formatPrice(save)} vs. two half-years` : '',
+    save: o.id === smallest.id || sets !== 2 ? 0 : savingsVersus(o, smallest),
     setsWeeks: sets === 2 ? smallest.weeks : 0,
+    editions: o.editions.map((e) => ({ label: e.label, span: formatSpan(e.start, e.end) })),
   };
-});
+  // Recommended option first, so on phones it's the first one she sees.
+}).sort((a, b) => Number(b.bestValue) - Number(a.bestValue));
 
 // Flag missing listings in the build output so they don't go unnoticed.
 for (const o of options) {
   if (!o.url) console.warn(`[reorder] No valid Etsy listing URL for "${o.name}" — its button is disabled. Set etsyUrl in src/config.ts.`);
 }
 
-const includes = ['11 × 17-inch portrait format', 'The same weekly layout and cleaning zones', 'Your digital cleaning companion'];
+/** Etsy listing photos, resized to 640/960/1280 (originals in design/etsy-listing/). */
+const photo = (name: string) => ({
+  src: `/images/reorder/${name}-960.webp`,
+  srcset: [640, 960, 1280].map((w) => `/images/reorder/${name}-${w}.webp ${w}w`).join(', '),
+});
+const half = '(min-width: 768px) 464px, calc(100vw - 2.5rem)';
+
 const benefits = [
-  'Keep your family’s schedule and priorities together.',
-  'Plan meals, groceries, and household routines.',
-  'Keep using your digital cleaning companion.',
+  { title: 'Everyone’s schedule in one place.', body: 'School runs, practices and plans on one wall the whole family can see.' },
+  { title: 'Meals and groceries, planned together.', body: 'Write the week’s dinners and the grocery list sits right beside them.' },
+  { title: 'Cleaning that’s easier to keep up with.', body: 'One small zone printed on each day, so the house never gets away from you.' },
+  { title: 'Room for what matters most.', body: 'Space every week for family priorities, prayer and gratitude.' },
 ];
-const hero = '/images/reorder/calendar-in-use';
+
+const reassurance = [
+  'A physical 11 × 17-inch wall calendar',
+  'Digital cleaning companion included',
+  'Secure checkout through Etsy',
+  'Your cleaning progress stays in the app',
+];
 ---
 
-<Layout title="Reorder" description={`Order your next ${BRAND_NAME} family calendar on Etsy.`}>
-  <div class="max-w-2xl">
-    <header>
-      <p class="label text-muted">Reorder</p>
-      <h1 class="page-title mt-3">Keep your home moving.</h1>
-      <p class="mt-3 text-[1.0625rem] leading-relaxed">Loving your calendar? Keep the rhythm going with your next one.</p>
-    </header>
+<Layout title="Reorder" description={`Get your next ${BRAND_NAME} family wall calendar on Etsy.`}>
+  <style is:global>
+    @media (prefers-reduced-motion: no-preference) {
+      html:has(#buy) {
+        scroll-behavior: smooth;
+      }
+    }
+  </style>
 
-    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-band">
+  <!-- 1. Hero -->
+  <section aria-labelledby="hero-h" class="md:grid md:grid-cols-2 md:items-center md:gap-12">
+    <div>
+      <p class="label text-muted">Your next calendar</p>
+      <h1 id="hero-h" class="page-title mt-3 text-balance">One less thing to keep in your head.</h1>
+      <p class="mt-3 text-[1.0625rem] leading-relaxed">Keep your family’s schedules, meals, cleaning, and priorities together in one place.</p>
+      <a href="#buy" class="btn-primary mt-6 w-full sm:w-auto">Get Your Next Calendar</a>
+    </div>
+    <figure class="-mx-5 mt-7 aspect-square overflow-hidden bg-band sm:mx-0 sm:border sm:border-rule md:mt-0">
       <img
-        src={`${hero}-960.webp`}
-        srcset={`${hero}-640.webp 640w, ${hero}-960.webp 960w, ${hero}-1280.webp 1280w`}
-        sizes="(min-width: 704px) 672px, calc(100vw - 2.5rem)"
+        {...photo('calendar-in-use')}
+        sizes="(min-width: 768px) 464px, 100vw"
         width="2000"
         height="2000"
         fetchpriority="high"
         decoding="async"
-        alt={`A hand writing in the ${BRAND_NAME} wall calendar on a kitchen counter: a full week of school runs, a meal plan, a grocery list and to-dos.`}
+        alt={`A hand writing in the ${BRAND_NAME} wall calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos.`}
         class="block h-full w-full"
       />
     </figure>
+  </section>
 
-    <section aria-labelledby="choose-h" class="mt-10">
-      <h2 id="choose-h" class="section-label">Choose your calendar</h2>
-      <ul class="mt-5 grid grid-cols-2 gap-3 sm:gap-6">
+  <!-- 2. The product -->
+  <section aria-labelledby="week-h" class="mt-14 border-t border-rule-strong pt-8 md:grid md:grid-cols-2 md:gap-12">
+    <div>
+      <h2 id="week-h" class="text-[1.6rem] leading-tight font-bold sm:text-[1.9rem]">Your week, all in one place.</h2>
+      <ul class="mt-5 border-t border-rule">
         {
-          options.map((o) => (
-            <li
-              class:list={[
-                'flex flex-col rounded-[3px] border px-3.5 pt-3.5 pb-4 sm:px-5 sm:pt-5',
-                o.bestValue ? 'border-ink' : 'border-rule-strong',
-              ]}
-            >
-              <p class="h-6">
-                {o.bestValue && (
-                  <span class="inline-block bg-month px-2 py-1 text-[0.6rem] leading-none font-bold tracking-[0.18em] uppercase">Best value</span>
-                )}
-              </p>
-              <h3 class="mt-2 text-[0.95rem] leading-tight font-bold sm:text-[1.05rem]">{o.name}</h3>
-              <p class="mt-2 text-[2rem] leading-none font-bold tracking-[-0.01em]">{o.priceLabel}</p>
-              <p class="mt-2.5 text-[0.95rem] font-semibold">{o.weeks} weeks</p>
-              <p class="text-[0.85rem] text-muted">{o.months} months</p>
-              {o.setsWeeks > 0 && (
-                <p class="mt-1.5 text-[0.85rem] leading-snug text-muted">
-                  Ships as two <span class="whitespace-nowrap">{o.setsWeeks}-week sets</span>
-                </p>
-              )}
-              {o.saveLine && <p class="mt-1.5 text-[0.85rem] leading-snug font-semibold">{o.saveLine}</p>}
-              <div class="mt-auto pt-5">
-                {o.url ? (
-                  <a
-                    href={o.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Buy the ${o.name} on Etsy, ${o.priceLabel} (opens Etsy)`}
-                    class="btn-primary w-full gap-1 px-2 text-[0.68rem] tracking-[0.1em] whitespace-nowrap sm:text-[0.75rem] sm:tracking-[0.18em]"
-                  >
-                    Buy on Etsy <span aria-hidden="true">↗</span>
-                  </a>
-                ) : (
-                  <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.62rem] leading-snug font-semibold tracking-[0.14em] text-muted uppercase">
-                    Coming soon to Etsy
-                  </p>
-                )}
-              </div>
+          benefits.map((b) => (
+            <li class="border-b border-rule py-3.5">
+              <p class="text-[1.0625rem] leading-snug font-bold">{b.title}</p>
+              <p class="mt-1 text-[1rem] leading-snug">{b.body}</p>
             </li>
           ))
         }
       </ul>
+    </div>
+    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-band md:order-first md:mt-0">
+      <img
+        {...photo('calendar-features')}
+        sizes={half}
+        width="2000"
+        height="2000"
+        loading="lazy"
+        decoding="async"
+        alt="A filled-in week on the calendar with its sections labeled: daily schedule, daily cleaning zone, self-care, word of the week, family and friends, prayer and gratitude, meal plan, grocery list and to-do list."
+        class="block h-full w-full"
+      />
+    </figure>
+  </section>
 
-      <div class="mt-6 border-t border-rule-strong pt-4">
-        <h3 class="label">Both include</h3>
-        <ul class="mt-2.5 space-y-1.5 text-[1rem]">
-          {
-            includes.map((item) => (
-              <li class="flex gap-2.5">
-                <span aria-hidden="true" class="text-muted">✓</span>
-                {item}
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-
-      <p class="mt-6 border-l-[3px] border-month py-1 pl-3.5 text-[1rem] leading-relaxed">
-        <strong class="font-semibold">Already set up here? Keep going.</strong> A new calendar doesn’t reset anything in this app. Your
-        checkmarks, progress and settings stay right where they are.
+  <!-- 3. Wall + pocket -->
+  <section aria-labelledby="pocket-h" class="mt-14 border-t border-rule-strong pt-8 md:grid md:grid-cols-2 md:items-center md:gap-12">
+    <div>
+      <h2 id="pocket-h" class="text-[1.6rem] leading-tight font-bold text-balance sm:text-[1.9rem]">
+        A plan on your wall. A little help in your pocket.
+      </h2>
+      <dl class="mt-5 grid grid-cols-2 gap-x-4 border-t border-rule pt-4">
+        <div>
+          <dt class="label">On the wall</dt>
+          <dd class="mt-1.5 text-[1rem] leading-snug">Your weekly plan, with a cleaning zone printed on every day.</dd>
+        </div>
+        <div class="border-l border-rule pl-4">
+          <dt class="label">In your pocket</dt>
+          <dd class="mt-1.5 text-[1rem] leading-snug">That zone as a short checklist. Tap each task as you go.</dd>
+        </div>
+      </dl>
+      <p class="mt-5 border-l-[3px] border-month py-1 pl-3.5 text-[1rem] leading-relaxed">
+        <strong class="font-semibold">Included with every calendar, at no extra cost.</strong> It’s this app, the one you’re using now.
       </p>
-      <p class="mt-4 text-[0.85rem] text-muted">Checkout happens on Etsy. Prices in US dollars.</p>
-    </section>
+    </div>
+    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-band md:mt-0">
+      <img
+        {...photo('calendar-and-app')}
+        sizes={half}
+        width="2000"
+        height="2000"
+        loading="lazy"
+        decoding="async"
+        alt="The Entry/Bathroom zone printed on the calendar, linked to the same zone on a phone as a checklist: clear entry clutter, wipe counters, wipe sink, clean toilet and more."
+        class="block h-full w-full"
+      />
+    </figure>
+  </section>
 
-    <section aria-labelledby="why-h" class="mt-12 border-t border-rule-strong pt-5">
-      <h2 id="why-h" class="label">Why it stays on the wall</h2>
-      <ol class="mt-3">
-        {
-          benefits.map((b, i) => (
-            <li class="flex gap-3.5 border-b border-rule py-3 text-[1.0625rem] leading-snug">
-              <span aria-hidden="true" class="w-4 shrink-0 font-bold text-muted">{i + 1}</span>
-              {b}
-            </li>
-          ))
-        }
-      </ol>
-    </section>
+  <!-- 4. Buy -->
+  <section id="buy" aria-labelledby="buy-h" class="mt-14 scroll-mt-4 border-t border-rule-strong pt-8">
+    <h2 id="buy-h" class="text-[1.6rem] leading-tight font-bold sm:text-center sm:text-[1.9rem]">Keep the good rhythm going.</h2>
+    <p class="mt-2 text-[1rem] text-muted sm:text-center">Same calendar, same system. Pick how far ahead you want to plan.</p>
 
-    <section aria-labelledby="when-h" class="mt-12 border-t border-rule-strong pt-5">
-      <h2 id="when-h" class="label">When to reorder</h2>
-      <p class="mt-2 text-[1.0625rem] leading-relaxed">
-        About a month before your last page, so the new one arrives before the old one runs out.
-      </p>
-    </section>
-  </div>
+    <ul class="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-6">
+      {
+        options.map((o) => (
+          <li
+            class:list={[
+              'flex flex-col rounded-[3px] bg-paper p-5',
+              o.bestValue ? 'border-2 border-ink' : 'border border-rule-strong',
+            ]}
+          >
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-[1.15rem] leading-tight font-bold">{o.name}</h3>
+              {o.bestValue && (
+                <span class="shrink-0 bg-month px-2 py-1.5 text-[0.6rem] leading-none font-bold tracking-[0.18em] uppercase">Best value</span>
+              )}
+            </div>
+            <p class="mt-3 flex items-baseline gap-2.5">
+              <span class="text-[2.25rem] leading-none font-bold tracking-[-0.01em]">{o.priceLabel}</span>
+              <span class="text-[1rem] font-semibold text-muted">{o.weeks} weeks</span>
+            </p>
+            {o.save > 0 && (
+              <p class="mt-2.5 text-[0.95rem] leading-snug font-semibold">
+                Save {formatPrice(o.save)} compared with buying two half-year calendars.
+              </p>
+            )}
+            <ul class="mt-4 space-y-2 border-t border-rule pt-3.5">
+              {o.editions.map((e) => (
+                <li>
+                  <p class="text-[0.95rem] font-semibold">{e.label}</p>
+                  <p class="text-[0.9rem] text-muted">{e.span}</p>
+                </li>
+              ))}
+            </ul>
+            {o.setsWeeks > 0 && <p class="mt-2.5 text-[0.9rem] text-muted">Ships as two {o.setsWeeks}-week sets.</p>}
+            <div class="mt-auto pt-5">
+              {o.url ? (
+                <a
+                  href={o.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Buy the ${o.name} on Etsy, ${o.priceLabel} (opens Etsy)`}
+                  class:list={['w-full gap-2', o.bestValue ? 'btn-primary' : 'btn-secondary min-h-12 text-[0.75rem] tracking-[0.18em]']}
+                >
+                  Buy on Etsy <span aria-hidden="true">↗</span>
+                </a>
+              ) : (
+                <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.66rem] font-semibold tracking-[0.16em] text-muted uppercase">
+                  {o.shortName} coming soon to Etsy
+                </p>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- 5. Reassurance -->
+    <ul class="mt-6 grid gap-x-6 gap-y-2.5 text-[0.95rem] leading-snug sm:grid-cols-2" aria-label="What you get">
+      {
+        reassurance.map((r) => (
+          <li class="flex gap-2.5">
+            <span aria-hidden="true" class="font-bold text-muted">✓</span>
+            {r}
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-4 text-[0.85rem] leading-relaxed text-muted">
+      A new calendar doesn’t reset anything here. Your checkmarks and settings stay saved on this phone.
+    </p>
+  </section>
+
+  <!-- 6. Closing -->
+  <section aria-labelledby="close-h" class="mt-14 border-t border-rule-strong pt-8 md:grid md:grid-cols-2 md:items-center md:gap-12">
+    <figure class="aspect-square overflow-hidden border border-rule bg-band">
+      <img
+        {...photo('baking-with-calendar')}
+        sizes={half}
+        width="2000"
+        height="2000"
+        loading="lazy"
+        decoding="async"
+        alt="A mother and daughter baking chocolate chip cookies, with the family calendar on the counter beside them."
+        class="block h-full w-full"
+      />
+    </figure>
+    <div class="mt-7 md:mt-0">
+      <h2 id="close-h" class="text-[1.6rem] leading-tight font-bold text-balance sm:text-[1.9rem]">A little more order. A lot more room for life.</h2>
+      <a href="#buy" class="btn-primary mt-6 w-full sm:w-auto">Choose Your Calendar</a>
+    </div>
+  </section>
 </Layout>
