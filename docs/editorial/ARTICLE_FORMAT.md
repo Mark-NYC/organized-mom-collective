@@ -124,7 +124,7 @@ Every article needs at least one thing she could screenshot.
 
 | Element | Use for | How |
 | --- | --- | --- |
-| `<Checklist title time icon items />` | Any routine with discrete tasks | `<Checklist title="Weekly check" time="15 min" items={['…', '…']} />`. A softly outlined card with empty boxes on ruled lines, like the printed calendar; `icon` takes a zone icon. Keep to 4–8 items. |
+| `<Checklist kicker title time icon items />` | Any routine with discrete tasks | `<Checklist kicker="Monday" title="Living Room" time="10 min" items={['…', '…']} />`. Drawn like a printed planner sheet: small spaced-caps kicker, serif title, charcoal rule, empty boxes on dotted lines; `icon` takes a zone icon. Keep to 4–8 items. |
 | `<ChecklistGrid>` | Several checklists | Wrap 2–4 `<Checklist>` cards to show them side by side (a breakout row) on wider screens. |
 | `<Figure image alt caption size />` | Photographs | `image` is a name from `src/data/images.ts`; `size="wide"` breaks out of the reading column. See [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). |
 | `<Tip title label>` | One practical aside | Lightly tinted (sage). At most one or two per article. |
@@ -142,9 +142,9 @@ Photos: aim for 2–4 relevant ones when suitable imagery exists (a `hero` in fr
 
 How an article reads on the page, top to bottom (template: `src/pages/resources/[slug].astro`; styles: `.article-*` in `src/styles/global.css`). Design rules: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#design-rules).
 
-1. Category eyebrow (breadcrumbs) → **H1** in Georgia (`.article-title`) → the `summary` as a deck → byline, date and reading time.
+1. Category eyebrow (breadcrumbs) → **H1** in Georgia (`.article-title`) → the `summary` as a deck → byline, date and reading time, centered from tablet up.
 2. Optional **hero photo** (3:2, slightly wider than the text), then the collapsed "In this article" list.
-3. Body (`.article-body`): a ~700px column of 17–18px Montserrat in warm charcoal, Georgia H2s, generous spacing; `.breakout` elements (photos, checklist grids, the product callout) widen to ~960px.
+3. Body (`.article-body`): a ~720px column of 17–18px Montserrat in warm charcoal, Georgia H2s and H3s with extra space before each H2; `.breakout` elements (the cleaning-week diagram, checklist grids, the product callout) widen to ~960px.
 4. **The Shift**: a pull quote between a month-color rule and a thin rule. The visual "aha".
 5. **The Real-Life Version** and **When Life Happens**: unboxed sections with a small labelled eyebrow; their checklists and week sizes carry the structure.
 6. **Tip**: one lightly tinted aside.

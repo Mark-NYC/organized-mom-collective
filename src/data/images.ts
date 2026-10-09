@@ -16,7 +16,6 @@ export interface ArticleImage {
 
 export const articleImages = {
   'hc-01-hero': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/etsy-listing/11.webp (cropped)' },
-  'hc-01-counter': { widths: [640, 960, 1440], width: 1440, height: 1152, source: 'design/etsy-listing/03.webp (text overlay cropped out)' },
   'hc-01-zone-tags': { widths: [640, 960, 1440], width: 1440, height: 720, source: 'design/etsy-listing/10.webp (text overlay cropped out)' },
   'hc-01-wall-calendar': { widths: [640, 960, 1402], width: 1402, height: 1122, source: 'design/etsy-listing/01.webp' },
 } as const satisfies Record<string, ArticleImage>;

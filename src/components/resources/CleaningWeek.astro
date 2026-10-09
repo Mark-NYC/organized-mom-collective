@@ -37,29 +37,30 @@ const rows = [
 ];
 ---
 
-<figure class="cleaning-week my-8" data-print-schedule>
-  <div class="overflow-hidden rounded-[4px] border border-rule-strong bg-paper">
-    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b-[3px] border-month bg-band px-4 py-3 sm:px-5">
-      <p class="label">The cleaning week</p>
-      <p class="text-[0.8rem] whitespace-nowrap text-soft">25–30 min a day · Mon–Thu</p>
+<figure class="cleaning-week breakout my-10" data-print-schedule>
+  <div class="overflow-hidden rounded-[3px] border border-[#cfc8c0] bg-paper shadow-[0_22px_44px_-30px_rgba(61,56,52,0.5)]">
+    <!-- Header band in the month color, like the top of a printed calendar page. -->
+    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-month/45 px-4 py-3.5 sm:px-6 sm:py-4">
+      <p class="text-[1.35rem] leading-tight font-bold italic sm:text-[1.6rem]" style="font-family: var(--font-editorial)">The cleaning week</p>
+      <p class="text-[0.85rem] font-semibold whitespace-nowrap">25–30 min a day · Mon–Thu</p>
     </div>
 
-    <div class="flex items-start gap-3 border-b border-ink px-4 py-4 sm:gap-4 sm:px-5">
+    <div class="flex items-start gap-3 border-b-2 border-ink px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
       <img src={dailyEssentials.icon} alt="" width="192" height="192" class="mt-0.5 size-10 shrink-0 rounded-full bg-month/35 p-1" />
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <p class="font-bold">Every day: {dailyEssentials.title}</p>
+          <p class="text-[1.05rem] font-bold">Every day: {dailyEssentials.title}</p>
           <TimeMark>{shortTime(dailyEssentials.minutes)}</TimeMark>
         </div>
-        <p class="mt-1 text-[0.92rem] leading-snug text-soft">{dailyEssentials.tasks.map((t) => lower(t.label)).join(' · ')}</p>
+        <p class="mt-1 text-[0.95rem] leading-snug" style="color: var(--color-prose)">{dailyEssentials.tasks.map((t) => lower(t.label)).join(' · ')}</p>
       </div>
     </div>
 
     <ol class="cleaning-week-days">
       {
         rows.map((r) => (
-          <li class="grid grid-cols-[3.25rem_1fr] gap-x-3 border-b border-rule px-4 py-3.5 last:border-b-0 sm:grid-cols-[6.5rem_1fr_auto] sm:items-center sm:gap-x-4 sm:px-5">
-            <p class="pt-1.5 text-[0.68rem] font-semibold tracking-[0.18em] uppercase sm:pt-0">
+          <li class="grid grid-cols-[3.25rem_1fr] gap-x-3 border-b border-[#d6d0c9] px-4 py-4 last:border-b-0 sm:grid-cols-[8rem_1fr_auto] sm:items-center sm:gap-x-5 sm:px-6">
+            <p class="pt-1.5 text-[0.72rem] font-bold tracking-[0.18em] uppercase sm:pt-0">
               <span class="sm:hidden">{r.short}</span>
               <span class="hidden sm:inline">{r.day}</span>
             </p>
@@ -69,7 +70,7 @@ const rows = [
                   <ZoneTag icon={t.icon} label={t.label} size="sm" />
                 ))}
               </div>
-              <p class="mt-1.5 text-[0.88rem] leading-snug text-soft">{r.note}</p>
+              <p class="mt-1.5 text-[0.95rem] leading-snug" style="color: var(--color-prose)">{r.note}</p>
               <p class="mt-2 sm:hidden">
                 <TimeMark>{r.time}</TimeMark>
               </p>
@@ -87,14 +88,13 @@ const rows = [
   </figcaption>
   {
     print && (
-      <div class="mt-5 flex flex-col gap-4 rounded-[6px] border border-dashed border-rule-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
+      <div class="mt-6 flex flex-col gap-5 rounded-[4px] bg-cream px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 print:hidden">
         <div>
-          <p class="label text-soft">Printable</p>
-          <p class="mt-1 text-[0.98rem] leading-snug">
-            <strong class="font-semibold">The weekly cleaning schedule.</strong> Two pages: the week at a glance and every zone checklist, for the fridge.
-          </p>
+          <p class="label text-soft">Printable · 2 pages</p>
+          <p class="mt-1.5 text-[1.2rem] leading-snug font-bold" style="font-family: var(--font-editorial)">Print the weekly cleaning schedule</p>
+          <p class="mt-1 text-[0.95rem] leading-snug" style="color: var(--color-prose-soft)">The week at a glance, then every zone checklist. Made for the fridge.</p>
         </div>
-        <button type="button" data-print-button class="btn-secondary shrink-0">
+        <button type="button" data-print-button class="btn-primary w-full shrink-0 sm:w-auto">
           Print the schedule
         </button>
       </div>

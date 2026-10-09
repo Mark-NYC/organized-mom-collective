@@ -11,7 +11,7 @@ const { title = 'When life happens', id = 'when-life-happens' } = Astro.props;
 ---
 
 <section id={id} class="article-section scroll-mt-6" aria-labelledby={`${id}-h`}>
-  <p class="label mt-12 flex items-center gap-2 text-soft"><span aria-hidden="true" class="inline-block h-[3px] w-6 bg-month"></span>When Life Happens</p>
+  <p class="label mt-16 flex items-center gap-2 text-soft sm:mt-24"><span aria-hidden="true" class="inline-block h-[3px] w-6 bg-month"></span>When Life Happens</p>
   <h2 id={`${id}-h`} class="article-heading mt-2">{title}</h2>
   <slot />
 </section>
