@@ -3,7 +3,7 @@
  * Strategy and the planned articles: docs/editorial/CONTENT_CLUSTERS.md.
  *
  * Each article names one `pillar` in its frontmatter (src/content/articles/*.mdx)
- * and a tracker id starting with that pillar's `prefix` (e.g. CR-01).
+ * and a tracker id starting with that pillar's `prefix` (e.g. HC-01).
  * The hub (/resources) and each pillar page (/resources/topics/<id>) group
  * articles by this list, in this order. An `id` is part of a public URL, so
  * never rename one; add a new pillar instead.
@@ -11,7 +11,7 @@
 
 export interface Pillar {
   id: string;
-  /** Tracker id prefix, e.g. 'FS' → FS-01 … */
+  /** Tracker id prefix, e.g. 'HC' → HC-01 … */
   prefix: string;
   name: string;
   /** One line for cards and the pillar page intro. */
@@ -22,25 +22,25 @@ export interface Pillar {
 
 export const pillars = [
   {
-    id: 'family-schedules',
-    prefix: 'FS',
-    name: 'Family Schedules & Routines',
-    summary: 'One place for who goes where, a short weekly reset, and daily routines that run on habit instead of reminders.',
-    description: 'How to organize your family’s week: one calendar everyone uses, a short weekly reset, and simple routines that share the mental load.',
+    id: 'family-planning',
+    prefix: 'FP',
+    name: 'Family Planning & Routines',
+    summary: 'One place for the family’s week: the calendar, a short weekly reset, the home command center, and dinners planned with the grocery list beside them.',
+    description: 'How to plan your family’s week: a calendar everyone uses, a home command center, a weekly reset, and meal planning with a grocery list that writes itself.',
   },
   {
-    id: 'cleaning-routines',
-    prefix: 'CR',
-    name: 'Cleaning Routines',
-    summary: 'A short daily reset, one zone a day, and a monthly project, so the house never needs a whole Saturday.',
-    description: 'Simple cleaning routines for busy families: a daily reset, weekly zones, a monthly home project, and chores the whole family can share.',
+    id: 'home-cleaning',
+    prefix: 'HC',
+    name: 'Simple Home Cleaning',
+    summary: 'A short daily reset, one zone a day, one monthly project, and a realistic way to catch up when the week got away from you.',
+    description: 'Simple home cleaning routines for busy families: a 15-minute daily reset, weekly zones, a monthly project, and a realistic catch-up plan.',
   },
   {
-    id: 'meal-planning',
-    prefix: 'MP',
-    name: 'Meal Planning',
-    summary: 'Dinners decided once a week, with the grocery list written right beside them and a backup for chaotic nights.',
-    description: 'Weekly meal planning for busy families: fewer dinner decisions, a grocery list built from the plan, and backups for the nights that go sideways.',
+    id: 'intentional-family-life',
+    prefix: 'IF',
+    name: 'Intentional Family Life',
+    summary: 'Room in a busy week for what matters: family priorities, gratitude, prayer, your own well-being, and work that’s shared fairly.',
+    description: 'Simple habits for an intentional family life: weekly priorities, gratitude, prayer, realistic self-care, and sharing the work of running a home.',
   },
 ] as const satisfies readonly Pillar[];
 

@@ -164,7 +164,7 @@ If a feature isn't listed here, check the app and the listing images before ment
 
 ## Example sections
 
-A compact example of sections 2–4 and 12, for tone and rhythm (from the planned CR-01):
+A compact example of sections 2–4 and 12, for tone and rhythm (from the planned HC-01):
 
 ```mdx
 You've probably printed a cleaning schedule before. It looked great on Monday. By Wednesday a kid

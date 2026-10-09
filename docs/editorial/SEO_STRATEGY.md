@@ -97,5 +97,6 @@ An article is ready to publish only if all of these are true:
 - [ ] Every factual claim is either common knowledge or linked to a reputable source. No invented statistics, studies, quotes, testimonials or first-person stories.
 - [ ] Every product mention is verified (see [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes)) and secondary to the advice.
 - [ ] Internal links follow [INTERNAL_LINKING.md](INTERNAL_LINKING.md).
+- [ ] Its Pinterest plan is complete at `docs/editorial/pinterest/{ID}.md` (see [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md)); Pinterest keywords were researched separately from Google.
 - [ ] `npm run verify` passes.
 - [ ] Read on a phone-width screen: no horizontal scrolling, tables fit, nothing feels like filler.

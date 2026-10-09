@@ -8,6 +8,7 @@ How articles link to each other and to the products, so every page leads somewhe
 - Every cluster article links to its **pillar guide** once in the body, in the first half, where the broader system is relevant ("This is one part of [a simple weekly cleaning schedule](/resources/weekly-cleaning-schedule-for-busy-moms)").
 - The template also adds breadcrumbs (Resources › Pillar) and an "All … articles" link to the pillar page. These don't replace the contextual link.
 - A pillar guide's own parent is its pillar page; breadcrumbs cover it.
+- Hub articles: inside Family Planning & Routines, FP-05 (weekly meal planning) is the hub for the meal-planning articles. FP-06 and FP-07 link up to FP-05 as well as to FP-01, and FP-05 links down to them. [CONTENT_CLUSTERS.md](CONTENT_CLUSTERS.md) names any other hubs.
 
 ### 2. Child links (down from the pillar guide)
 - A pillar guide links to **every published article in its cluster**, each in the section it expands on.

@@ -17,7 +17,7 @@ const articles = defineCollection({
   loader: glob({ pattern: '*.mdx', base: './src/content/articles' }),
   schema: z
     .object({
-      /** Tracker id from CONTENT_TRACKER.md, e.g. CR-01. Prefix must match the pillar. */
+      /** Tracker id from CONTENT_TRACKER.md, e.g. HC-01. Prefix must match the pillar. */
       trackerId: z.string().regex(/^[A-Z]{2}-\d{2}$/),
       /** The on-page H1. Written for the reader. */
       title: z.string(),

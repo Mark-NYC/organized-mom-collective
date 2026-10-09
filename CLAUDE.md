@@ -13,14 +13,18 @@ Architecture, commands, routes, storage and brand notes for the app are in [READ
 | [BRAND_VOICE.md](docs/editorial/BRAND_VOICE.md) | Audience, positioning, tone, convictions, what we never write |
 | [ARTICLE_FORMAT.md](docs/editorial/ARTICLE_FORMAT.md) | The Real-Life Reset structure, curiosity loops, components, verified product features |
 | [SEO_STRATEGY.md](docs/editorial/SEO_STRATEGY.md) | Intent research, keywords, headings, metadata, structured data, quality bar |
-| [CONTENT_CLUSTERS.md](docs/editorial/CONTENT_CLUSTERS.md) | The three pillars, 18 planned articles, relationships, overlap boundaries |
+| [CONTENT_CLUSTERS.md](docs/editorial/CONTENT_CLUSTERS.md) | The three pillars (Family Planning & Routines, Simple Home Cleaning, Intentional Family Life), 18 planned articles, relationships, overlap boundaries, backlog |
 | [INTERNAL_LINKING.md](docs/editorial/INTERNAL_LINKING.md) | Parent, sibling, next-step, bridge and product links; incoming-link maintenance |
-| [ARTICLE_WORKFLOW.md](docs/editorial/ARTICLE_WORKFLOW.md) | The step-by-step process, one article at a time |
-| [CONTENT_TRACKER.md](docs/editorial/CONTENT_TRACKER.md) | IDs, slugs, status, target links, publication dates |
+| [PINTEREST_STRATEGY.md](docs/editorial/PINTEREST_STRATEGY.md) | The three pins per article, Pinterest keyword research, visual identity, image rules, pin copy, boards |
+| [ARTICLE_WORKFLOW.md](docs/editorial/ARTICLE_WORKFLOW.md) | The eight-step process, one article at a time, including the Pinterest plan |
+| [CONTENT_TRACKER.md](docs/editorial/CONTENT_TRACKER.md) | IDs, slugs, status, target links, publication dates, Pinterest plan and pin status |
 
 Non-negotiables (details in the docs above):
 
 - Work through the tracker **one article at a time**, and write a brief (`docs/editorial/briefs/`) with an overlap check before drafting.
+- **Every article requires a Pinterest plan.** Follow PINTEREST_STRATEGY.md and save a complete plan at `docs/editorial/pinterest/{ARTICLE_ID}.md` (from `docs/editorial/templates/pinterest-plan.md`) with three distinct pins: search-driven, curiosity-driven, save-worthy. Write the concepts from the finished article, not the outline, and keep the tracker's Pinterest columns in sync. An article isn't done until its plan is.
+- Research Google and Pinterest search intent separately; never invent search volume, engagement or trend data.
+- Never generate fake product images, alter the real calendar artwork, or misrepresent how the cleaning companion works.
 - Never invent statistics, studies, expertise, testimonials or first-person experiences.
 - Never describe a product feature that isn't verified (see ARTICLE_FORMAT.md → Product notes). Product mentions stay secondary.
 - Run `npm run verify` after every article and fix everything it reports. Commit the regenerated `docs/editorial/content-inventory.md` with the article.
@@ -39,6 +43,7 @@ Non-negotiables (details in the docs above):
 | Article body styles | `src/styles/global.css` (`.article-body`) |
 | Sitemap | `src/pages/sitemap.xml.ts` |
 | Post-build checks + content inventory | `scripts/check-site.mjs` (`npm run check:site`) |
-| Copy-ready templates | `docs/editorial/templates/` |
+| Copy-ready templates (article, brief, Pinterest plan) | `docs/editorial/templates/` |
+| Pinterest plans (one per article) / pin exports | `docs/editorial/pinterest/{ID}.md` / `design/pinterest/{ID}/` |
 
 Conventions: reuse the existing print palette, `.label` / `.page-title` / `.text-link` classes and `marks.tsx` components; internal URLs come from `src/routes.ts` and have no trailing slash; cleaning content is read from `src/data/cleaning.ts`, never retyped.

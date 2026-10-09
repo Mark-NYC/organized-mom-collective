@@ -1,80 +1,115 @@
 # Content clusters
 
-The three pillars, the 18 initial articles, what each one targets, and how they connect. Status and dates live in [CONTENT_TRACKER.md](CONTENT_TRACKER.md); linking rules in [INTERNAL_LINKING.md](INTERNAL_LINKING.md).
+The three pillars, the 18 initial articles, what each one targets, and how they connect. Status and dates live in [CONTENT_TRACKER.md](CONTENT_TRACKER.md); linking rules in [INTERNAL_LINKING.md](INTERNAL_LINKING.md); Pinterest planning per article in [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md).
 
 Pillars are defined in code in `src/data/pillars.ts` (id, tracker prefix, name, page copy). URLs: `/resources/topics/<pillar-id>` for the pillar page, `/resources/<slug>` for every article.
+
+| Pillar | Code id | Prefix | Covers | Product anchor |
+| --- | --- | --- | --- | --- |
+| **Family Planning & Routines** | `family-planning` | FP | Family schedules, the family calendar, home command centers, the weekly reset, meal planning, grocery planning | Wall calendar: daily schedule columns, meal plan, grocery list and to-do list on one weekly page |
+| **Simple Home Cleaning** | `home-cleaning` | HC | Daily, weekly and monthly cleaning routines, and realistic catch-up | Companion cleaning app: Daily Reset, weekday zones, weekend options, monthly home projects |
+| **Intentional Family Life** | `intentional-family-life` | IF | Family relationships, priorities, prayer, gratitude, personal well-being, shared responsibilities | Wall calendar: self-care habits, word of the week, family and friends, grateful for (prayer and gratitude) |
 
 ## How a cluster works
 
 Each pillar has:
 
 - **One pillar guide** (★, `pillarGuide: true`): the broadest article in the cluster. It answers the head query, summarizes the system, and links down to every published article in the cluster.
-- **Five cluster articles**: each owns a narrower intent, goes deeper on one part of the system, and links up to the pillar guide.
+- **Cluster articles**: each owns a narrower intent, goes deeper on one part of the system, and links up to the pillar guide.
 - **A product anchor**: the product the cluster naturally connects to. Mentioned at most once per article.
 
-The three clusters connect where real life connects them: the weekly reset (Family) includes planning dinners (Meals) and seeing the cleaning zones (Cleaning); the kitchen reset (Cleaning) includes the fridge check before planning (Meals); chores (Cleaning) are shared work (Family).
+The clusters connect where real life connects them:
 
 ```
-          Family Schedules & Routines (FS)
-            ★ FS-01  How to organize your family's week
-               │  weekly reset ⇄ meal planning
-               │  shared work  ⇄ chores
-   ┌───────────┴────────────┐
-Cleaning Routines (CR)   Meal Planning (MP)
-★ CR-01 weekly schedule  ★ MP-01 weekly meal planning
-         └── kitchen reset → fridge check ──┘
+             Family Planning & Routines (FP)
+             ★ FP-01  How to organize your family's week
+                │
+   weekly reset ┼── kitchen reset → fridge check before meal planning
+   (FP-04)      │   zones written on the calendar / command center
+                │
+   ┌────────────┴─────────────┐
+Simple Home Cleaning (HC)   Intentional Family Life (IF)
+★ HC-01 weekly schedule     ★ IF-01 making room for what matters
+        └── chores and the daily reset are shared work (IF-02, IF-03) ──┘
+   FP-04 weekly reset → the week's priorities, gratitude and prayer (IF-01)
 ```
 
 ## Priority
 
-- **P1**: publish first. The three pillar guides plus the two cluster articles with the strongest search demand and product fit.
+- **P1**: publish first. The three pillar guides plus the articles with the strongest search demand and product fit.
 - **P2**: the core of each cluster.
-- **P3**: rounds out the cluster; more competitive or seasonal.
+- **P3**: rounds out the cluster; more competitive, seasonal, or more personal topics that benefit from the rest of the library existing first.
 
-Recommended order: CR-01, MP-01, FS-02, FS-01, CR-02, then P2 by cluster, alternating clusters so each grows evenly.
+Recommended order: HC-01, FP-05, FP-02, FP-01, HC-02, IF-01, then P2 alternating clusters, then P3.
 
-## Family Schedules & Routines (FS)
+## Family Planning & Routines (FP)
 
-`family-schedules` · Product anchor: **wall calendar** (daily schedule columns, to-do list, meal plan and grocery list on one weekly page).
-Cluster promise: one place for the plan, one weekly habit that keeps it true, and routines that run without reminders.
+`family-planning` · Cluster promise: one place for the family's week, one short habit that keeps it true, and dinners decided before 5 pm.
 
-| ID | Article | Primary intent | Pri. | Relationships | Overlap boundary |
-| --- | --- | --- | --- | --- | --- |
-| FS-01 ★ | How to Organize Your Family's Week: A Simple System That Sticks | "how to organize family schedule" · broad how-to | P1 | Links down to FS-02…06. Bridges to CR-01, MP-01. Next → FS-02 | The overview. Summarizes calendar, weekly reset and routines in a section each; the depth lives in the cluster articles. |
-| FS-02 | How to Organize a Family Calendar Everyone Actually Uses | "how to organize a family calendar" · how-to | P1 | Parent FS-01. Siblings FS-03. Bridge MP-01 (crunch nights → easy dinners), CR-01 (zones on the calendar). Next → FS-03 | Owns calendar format, what goes on it, entry format. Mentions the weekly check briefly and links to FS-03 for the full routine. |
-| FS-03 | The Weekly Family Reset: 15 Minutes to Plan the Week | "sunday reset routine", "weekly planning routine" · routine/template | P2 | Parent FS-01. Siblings FS-02, FS-04. Bridge MP-01, CR-01. Next → MP-01 | Owns the weekly planning session (calendar + meals + cleaning + family). Links out for each part instead of repeating it. |
-| FS-04 | How to Share the Mental Load at Home | "how to share the mental load" · problem-solving | P2 | Parent FS-01. Siblings FS-02, FS-03. Bridge CR-06. Next → CR-06 | Practical handoffs (ownership of whole tasks, visible systems). No unsourced statistics or gender claims. |
-| FS-05 | An Evening Routine That Makes Mornings Easier | "evening routine for moms" · routine | P3 | Parent FS-01. Sibling FS-06. Bridge CR-02 (Daily Reset can live in the evening). Next → FS-06 | Owns tomorrow-prep (bags, clothes, lunches, calendar glance). Cleaning is linked to CR-02, not repeated. |
-| FS-06 | A School Morning Routine That Runs Without Nagging | "school morning routine for kids" · routine | P3 | Parent FS-01. Sibling FS-05. Bridge MP-06. Next → MP-06 | Mornings only; the night-before prep is FS-05. Seasonal boost July–September. |
-
-## Cleaning Routines (CR)
-
-`cleaning-routines` · Product anchor: **companion cleaning app** (Daily Reset, weekday zones, weekend options, monthly home projects).
-Cluster promise: a house that stays manageable in short daily blocks, with a plan for the missed days.
+FP-05 (weekly meal planning) is the hub for the meal-planning articles inside this cluster: FP-06 and FP-07 link up to it as well as to FP-01.
 
 | ID | Article | Primary intent | Pri. | Relationships | Overlap boundary |
 | --- | --- | --- | --- | --- | --- |
-| CR-01 ★ | A Weekly Cleaning Schedule for Busy Moms (That Survives a Bad Week) | "weekly cleaning schedule for busy moms" · template/how-to | P1 | Links down to CR-02…06. Bridges to FS-02, MP-01. Next → CR-02 | The whole week at a glance (`<CleaningWeek />`) and the skip-don't-stack rule. Each part gets depth elsewhere. |
-| CR-02 | The 15-Minute Daily Reset | "daily cleaning routine", "15 minute cleaning routine" · routine | P1 | Parent CR-01. Siblings CR-03, CR-05. Bridge FS-05. Next → FS-05 | Owns the reset: order, timing, doing it with kids, morning vs evening split. |
-| CR-03 | Zone Cleaning: One Area a Day, Without the Overwhelm | "zone cleaning schedule" · how-to | P2 | Parent CR-01. Siblings CR-02, CR-04. Next → CR-04 | Owns the method: how to choose and size zones for your home. CR-01 shows our zones; this teaches building your own. |
-| CR-04 | A Monthly Deep Cleaning Plan: One Project a Month | "monthly deep cleaning checklist" · template | P2 | Parent CR-01. Siblings CR-03, CR-05. Next → CR-05 | Built on the 12-month rotation in `src/data/cleaning.ts`; one task per weekend, not a deep-clean marathon. |
-| CR-05 | How to Catch Up on Housework When You're Behind | "how to catch up on housework" · problem-solving | P2 | Parent CR-01. Siblings CR-02, CR-04. Next → CR-01 | Recovery, not routine: triage order, the minimum version, then back to the schedule. CR-01's When Life Happens links here. |
-| CR-06 | Age-Appropriate Chores for Kids (and How to Hand Them Over) | "chores for kids by age" · list + how-to | P3 | Parent CR-01. Sibling CR-02. Bridge FS-04. Next → FS-04 | Competitive list query; differentiate with how to hand a chore over so it sticks. Tie chores to the existing zones. |
+| FP-01 ★ | How to Organize Your Family's Week: A Simple System That Sticks | "how to organize family schedule" · broad how-to | P1 | Links down to FP-02…07. Bridges HC-01, IF-01. Next → FP-02 | The overview: calendar, command center, weekly reset and meals, a section each. Depth lives in the cluster articles. |
+| FP-02 | How to Organize a Family Calendar Everyone Actually Uses | "how to organize a family calendar" · how-to | P1 | Parent FP-01. Siblings FP-03, FP-04. Bridges FP-05 (crunch nights → easy dinners), HC-01 (zones on the calendar). Next → FP-03 | Owns calendar format, what goes on it, entry format. Mentions the weekly check and links to FP-04 for the routine. |
+| FP-03 | How to Set Up a Home Command Center That Actually Gets Used | "family command center ideas" · how-to / ideas | P2 | Parent FP-01. Siblings FP-02, FP-04. Bridge HC-01. Next → FP-04 | Owns the physical spot: where, what goes there (calendar, papers in/out, keys, lists), and what to leave off. Not a décor roundup. The calendar itself is FP-02. |
+| FP-04 | The Weekly Family Reset: 15 Minutes to Plan the Week | "sunday reset routine", "weekly planning routine" · routine | P2 | Parent FP-01. Siblings FP-02, FP-05. Bridges HC-01, IF-01. Next → FP-05 | Owns the weekly planning session (calendar, meals, cleaning, priorities). Links out to each part instead of repeating it. |
+| FP-05 | Weekly Meal Planning for Families: Stop Deciding Dinner Every Night | "weekly meal planning for families" · how-to | P1 | Parent FP-01. Links down to FP-06, FP-07. Bridge HC-01 (Thursday fridge check). Next → FP-07 | The 20-minute method and full / short / zero nights. Mentions default dinners and the grocery list briefly; links to FP-07 and FP-06. |
+| FP-06 | How to Make a Grocery List From Your Meal Plan | "how to make a grocery list" · how-to | P2 | Parents FP-05, FP-01. Sibling FP-07. Next → FP-04 | Owns the list: staples, store sections, shopping the kitchen first. |
+| FP-07 | How to Build a Dinner Rotation Your Family Will Eat | "dinner rotation", "meal rotation ideas" · how-to | P3 | Parents FP-05, FP-01. Sibling FP-06. Next → FP-06 | The system for choosing (default list, theme nights), not a recipe roundup. |
 
-## Meal Planning (MP)
+## Simple Home Cleaning (HC)
 
-`meal-planning` · Product anchor: **wall calendar** (meal plan and grocery list on the same weekly page as the schedule).
-Cluster promise: dinner decided once a week, a list that writes itself, and a backup for the night it all goes sideways.
+`home-cleaning` · Cluster promise: a house that stays manageable in short daily blocks, with a realistic plan for the missed days.
 
 | ID | Article | Primary intent | Pri. | Relationships | Overlap boundary |
 | --- | --- | --- | --- | --- | --- |
-| MP-01 ★ | Weekly Meal Planning for Families: Stop Deciding Dinner Every Night | "weekly meal planning for families" · how-to | P1 | Links down to MP-02…06. Bridges to FS-02, CR-01 (Thursday fridge check). Next → MP-03 | The 20-minute method and full / short / zero nights. Mentions default dinners, the grocery list and backups briefly; links to MP-03, MP-02, MP-04. |
-| MP-02 | How to Make a Grocery List From Your Meal Plan | "how to make a grocery list" · how-to | P2 | Parent MP-01. Siblings MP-05. Next → MP-05 | Owns the list: staples, store sections, shopping the kitchen first. |
-| MP-03 | How to Build a Dinner Rotation Your Family Will Eat | "dinner rotation", "meal rotation ideas" · how-to | P2 | Parent MP-01. Siblings MP-04. Next → MP-04 | The system for choosing (default list, theme nights), not a recipe roundup. |
-| MP-04 | Backup Dinners for Chaotic Nights | "easy dinners for busy nights", "pantry meals" · list + how-to | P3 | Parent MP-01. Siblings MP-03. Bridge FS-02 (crunch nights). Next → MP-01 | What to keep on hand and when to use it. Ideas are categories and examples, not recipes. Food-safety claims must link a reputable source. |
-| MP-05 | Meal Planning on a Budget for Families | "budget meal planning for family" · how-to | P3 | Parent MP-01. Siblings MP-02. Next → MP-04 | Planning habits that save money (shop the kitchen, plan around sales, pantry night). No invented savings figures. |
-| MP-06 | How to Plan School Lunches for the Week | "school lunch planning", "how to plan school lunches" · how-to | P3 | Parent MP-01. Bridge FS-06. Next → FS-05 | Rotation and prep for lunches only; dinners belong to MP-01. Seasonal boost August–September. |
+| HC-01 ★ | A Weekly Cleaning Schedule for Busy Moms (That Survives a Bad Week) | "weekly cleaning schedule for busy moms" · template / how-to | P1 | Links down to HC-02…05. Bridges FP-02, FP-05. Next → HC-02 | The whole week at a glance (`<CleaningWeek />`) and the skip-don't-stack rule. Each part gets depth elsewhere. |
+| HC-02 | The 15-Minute Daily Reset | "daily cleaning routine", "15 minute cleaning routine" · routine | P1 | Parent HC-01. Siblings HC-03, HC-05. Bridge IF-03. Next → HC-03 | Owns the reset: order, timing, doing it with kids, morning vs evening split. |
+| HC-03 | Zone Cleaning: One Area a Day, Without the Overwhelm | "zone cleaning schedule" · how-to | P2 | Parent HC-01. Siblings HC-02, HC-04. Next → HC-04 | Owns the method: choosing and sizing zones for your home. HC-01 shows our zones; this teaches building your own. |
+| HC-04 | A Monthly Deep Cleaning Plan: One Project a Month | "monthly deep cleaning checklist" · template | P2 | Parent HC-01. Siblings HC-03, HC-05. Next → HC-05 | Built on the 12-month rotation in `src/data/cleaning.ts`; one task per weekend, not a deep-clean marathon. |
+| HC-05 | How to Catch Up on Housework When You're Behind | "how to catch up on housework" · problem-solving | P2 | Parent HC-01. Siblings HC-02, HC-04. Next → HC-01 | Recovery, not routine: triage order, the minimum version, then back to the schedule. HC-01's When Life Happens links here. |
+
+## Intentional Family Life (IF)
+
+`intentional-family-life` · Cluster promise: room in a busy week for the people and things that matter, without adding another system to keep up with.
+
+Tone note: prayer and faith are part of the calendar and of many readers' lives. Write about them warmly and practically, without assuming one tradition or preaching. Well-being articles give practical habits, never medical or mental-health advice; link a reputable source or leave the claim out.
+
+| ID | Article | Primary intent | Pri. | Relationships | Overlap boundary |
+| --- | --- | --- | --- | --- | --- |
+| IF-01 ★ | Intentional Family Life: Making Room for What Matters in a Busy Week | "intentional family living", "how to be intentional with family" · broad how-to | P1 | Links down to IF-02…06. Bridge FP-04. Next → IF-02 | The overview: weekly priorities, time with family and friends, gratitude, prayer, your own well-being, shared work. A section each; depth in the cluster. |
+| IF-02 | How to Share the Mental Load at Home | "how to share the mental load" · problem-solving | P2 | Parent IF-01. Sibling IF-03. Bridge FP-03 (visible systems). Next → IF-03 | Practical handoffs: owning whole tasks, visible systems. No unsourced statistics or generalizations about partners. |
+| IF-03 | Age-Appropriate Chores for Kids (and How to Hand Them Over) | "chores for kids by age" · list + how-to | P2 | Parent IF-01. Sibling IF-02. Bridge HC-02. Next → HC-02 | Competitive list query; differentiate with how to hand a chore over so it sticks, tied to the existing zones. |
+| IF-04 | A Simple Family Gratitude Habit That Fits a Busy Week | "gratitude practices for families", "family gratitude ideas" · ideas + routine | P3 | Parent IF-01. Siblings IF-05, IF-06. Next → IF-05 | One small, repeatable habit, not a list of 50 activities. No claims about the benefits of gratitude without a linked source. |
+| IF-05 | How to Make Time for Prayer as a Busy Mom | "how to make time for prayer as a mom" · how-to | P3 | Parent IF-01. Siblings IF-04, IF-06. Next → IF-06 | Practical: finding a consistent moment, keeping intentions visible. Respectful of different traditions; not theology. |
+| IF-06 | Realistic Self-Care for Busy Moms: Small Habits That Fit | "self-care for busy moms" · ideas + how-to | P3 | Parent IF-01. Siblings IF-04, IF-05. Bridge HC-02 ("stop on time"). Next → IF-04 | Small habits tracked weekly. Not medical or mental-health advice. |
+
+## Pillar review (October 2026)
+
+The pillars were changed from *Family Schedules & Routines / Cleaning Routines / Meal Planning* to the three intended pillars above, before any article was published. Nothing was published, so no URLs changed.
+
+| Intended pillar | What the previous plan had | Change |
+| --- | --- | --- |
+| Family Planning & Routines | Family schedules (FS) and meal planning (MP) as two separate pillars; no command center | Merged into one pillar. Added the home command center (FP-03). Meal planning keeps its own hub article (FP-05). |
+| Simple Home Cleaning | Cleaning Routines (CR), including chores for kids | Kept the daily / weekly / monthly / catch-up articles. Chores moved to shared responsibilities (IF-03). |
+| Intentional Family Life | Only the mental-load article (inside Family Schedules) | New pillar. Mental load and chores moved here; added the pillar guide, gratitude, prayer and self-care. Relationships and priorities are covered in IF-01. |
+
+ID mapping (old → new): FS-01 → FP-01 · FS-02 → FP-02 · FS-03 → FP-04 · MP-01 → FP-05 (no longer a pillar guide) · MP-02 → FP-06 · MP-03 → FP-07 · CR-01…05 → HC-01…05 · FS-04 → IF-02 · CR-06 → IF-03. New: FP-03, IF-01, IF-04, IF-05, IF-06.
+
+## Backlog
+
+Planned before the review and still worth writing, but outside the initial 18. They keep their research notes from the earlier plan and get an ID in the right pillar when promoted (add a row here and in the tracker).
+
+| Working title | Primary intent | Would go in | Note |
+| --- | --- | --- | --- |
+| An Evening Routine That Makes Mornings Easier | evening routine for moms | FP | Tomorrow-prep; cleaning parts link to HC-02. |
+| A School Morning Routine That Runs Without Nagging | school morning routine for kids | FP | Seasonal: publish July–August. |
+| Backup Dinners for Chaotic Nights | easy dinners for busy nights / pantry meals | FP | Food-safety claims need a linked source. |
+| Meal Planning on a Budget for Families | budget meal planning for family | FP | No invented savings figures. |
+| How to Plan School Lunches for the Week | how to plan school lunches | FP | Seasonal: August–September. |
+| Staying Close to Family and Friends in a Busy Season | staying connected with friends as a busy mom | IF | Uses the calendar's family and friends section. |
 
 ## Adding to a cluster later
 
-New topics go to the end of the relevant table with the next ID (e.g. CR-07), a primary intent that doesn't overlap any existing row, and an overlap boundary. Add the row to [CONTENT_TRACKER.md](CONTENT_TRACKER.md) at the same time. A fourth pillar needs a new entry in `src/data/pillars.ts` (and its prefix) plus a section here.
+New topics go to the end of the relevant table with the next ID (e.g. HC-06), a primary intent that doesn't overlap any existing row, and an overlap boundary. Add the row to [CONTENT_TRACKER.md](CONTENT_TRACKER.md) at the same time. A fourth pillar needs a new entry in `src/data/pillars.ts` (and its prefix) plus a section here.

@@ -10,6 +10,9 @@
  *   - article pages with missing or invalid JSON-LD, or fewer than two contextual links to other articles
  *   - sitemap URLs that weren't built
  *   - articles that don't match their row in docs/editorial/CONTENT_TRACKER.md (id, slug, status, date)
+ *   - published articles without a complete Pinterest plan (docs/editorial/pinterest/{ID}.md: three
+ *     pins, valid statuses and filenames, no leftover placeholders), or a tracker row whose Pinterest
+ *     columns don't match the plan. Rules: docs/editorial/PINTEREST_STRATEGY.md.
  * Warns on articles that no other article links to yet.
  *
  * Writes docs/editorial/content-inventory.md (actual links, generated) from the
@@ -25,6 +28,9 @@ const SITE = 'https://organizedmomcollective.com';
 const ARTICLES_DIR = join(root, 'src/content/articles');
 const INVENTORY = join(root, 'docs/editorial/content-inventory.md');
 const TRACKER = join(root, 'docs/editorial/CONTENT_TRACKER.md');
+const PINTEREST_DIR = join(root, 'docs/editorial/pinterest');
+const PIN_TYPES = ['search', 'curiosity', 'save'];
+const PIN_STATUSES = ['planned', 'generated', 'reviewed', 'published'];
 
 if (!existsSync(dist)) {
   console.error('dist/ not found. Run `npm run build` first.');
@@ -176,13 +182,14 @@ for (const a of articles) {
 }
 
 // ---- Tracker ----
-// Rows look like: | CR-01 | Title | `slug` | Cluster | Status | Intent | Target links | Published |
+// Rows look like:
+// | HC-01 | Title | `slug` | Cluster | Status | Intent | Target links | Published | Pinterest plan | Pins (search / curiosity / save) |
 const trackerRows = existsSync(TRACKER)
   ? readFileSync(TRACKER, 'utf8')
       .split('\n')
       .map((l) => l.split('|').map((c) => c.trim()))
       .filter((c) => /^[A-Z]{2}-\d{2}$/.test(c[1] ?? ''))
-      .map((c) => ({ id: c[1], slug: c[3].replace(/`/g, ''), status: c[5], published: c[8] }))
+      .map((c) => ({ id: c[1], slug: c[3].replace(/`/g, ''), status: c[5], published: c[8], plan: c[9], pins: c[10] }))
   : [];
 if (!trackerRows.length) fail('docs/editorial/CONTENT_TRACKER.md', 'missing or has no article rows');
 for (const a of articles) {
@@ -200,6 +207,58 @@ for (const r of trackerRows) {
   if (r.status === 'Published' && !articles.some((a) => a.trackerId === r.id)) {
     fail('docs/editorial/CONTENT_TRACKER.md', `${r.id} is marked Published but no article has that trackerId`);
   }
+}
+
+// ---- Pinterest plans ----
+/** Reads and validates docs/editorial/pinterest/{id}.md. Returns undefined if there is no plan. */
+function readPlan(id, slug) {
+  const file = join(PINTEREST_DIR, `${id}.md`);
+  if (!existsSync(file)) return undefined;
+  const rel = relative(root, file);
+  const text = readFileSync(file, 'utf8');
+  const field = (label) => [...text.matchAll(new RegExp(`\\*\\*${label}:\\*\\*[ \\t]*(.+)`, 'g'))].map((m) => m[1].trim());
+  const placeholders = text.replace(/<!--[\s\S]*?-->/g, '').match(/<[^<>\n]{1,120}>/g);
+  if (placeholders) fail(rel, `leftover placeholder(s): ${[...new Set(placeholders)].slice(0, 3).join(', ')}`);
+  if (field('Article ID')[0] !== id) fail(rel, `Article ID is "${field('Article ID')[0] ?? 'missing'}", expected ${id}`);
+  const url = `${SITE}/resources/${slug}`;
+  if (field('Final article URL')[0] !== url) fail(rel, `Final article URL is "${field('Final article URL')[0] ?? 'missing'}", expected ${url}`);
+  for (const label of ['Primary Pinterest keyword', 'Secondary search terms', 'Target audience', 'Search intent', 'Save intent']) {
+    if (!field(label)[0]) fail(rel, `missing "${label}"`);
+  }
+  const statuses = field('Production status');
+  const assets = field('Asset filename');
+  if (statuses.length !== 3) fail(rel, `expected exactly 3 pins (Production status lines), found ${statuses.length}`);
+  for (const label of ['Text overlay', 'Image-generation prompt', 'Pinterest title', 'Pinterest description', 'Alt text', 'Recommended board']) {
+    const n = text.split(`**${label}:**`).length - 1;
+    if (n !== 3) fail(rel, `expected "${label}" for each of the 3 pins, found ${n}`);
+  }
+  statuses.forEach((s, i) => {
+    if (!PIN_STATUSES.includes(s)) fail(rel, `pin ${i + 1} status "${s}" is not one of ${PIN_STATUSES.join(', ')}`);
+  });
+  PIN_TYPES.forEach((type, i) => {
+    if (!new RegExp(`^${id}-${type}-1000x1500\\.(png|jpg)$`).test(assets[i] ?? '')) {
+      fail(rel, `pin ${i + 1} asset filename should be ${id}-${type}-1000x1500.png (or .jpg), found "${assets[i] ?? 'missing'}"`);
+    }
+  });
+  return { statuses };
+}
+
+const plans = new Map();
+for (const r of trackerRows) {
+  const plan = readPlan(r.id, r.slug);
+  plans.set(r.id, plan);
+  const expectedPlan = plan ? 'Yes' : '—';
+  const expectedPins = plan ? plan.statuses.join(' / ') : '—';
+  if (r.plan !== expectedPlan) fail('docs/editorial/CONTENT_TRACKER.md', `${r.id} Pinterest plan column is "${r.plan ?? 'missing'}", expected "${expectedPlan}"`);
+  if (r.pins !== expectedPins) fail('docs/editorial/CONTENT_TRACKER.md', `${r.id} Pins column is "${r.pins ?? 'missing'}", expected "${expectedPins}"`);
+}
+if (existsSync(PINTEREST_DIR)) {
+  for (const f of readdirSync(PINTEREST_DIR).filter((f) => f.endsWith('.md'))) {
+    if (!trackerRows.some((r) => `${r.id}.md` === f)) fail(`docs/editorial/pinterest/${f}`, 'file name is not a tracker ID (e.g. HC-01.md)');
+  }
+}
+for (const a of articles) {
+  if (!plans.get(a.trackerId)) fail(`src/content/articles/${a.slug}.mdx`, `no Pinterest plan: create docs/editorial/pinterest/${a.trackerId}.md from templates/pinterest-plan.md`);
 }
 
 // ---- Sitemap ----
@@ -228,11 +287,11 @@ const inventory = [
   '',
   '"Outgoing" and "incoming" count contextual links in the article body only (not the Read next / related cards).',
   '',
-  '| ID | Article | Pillar | Related (frontmatter) | Next | Outgoing links | Incoming links | Product CTA |',
-  '| --- | --- | --- | --- | --- | --- | --- | --- |',
+  '| ID | Article | Pillar | Related (frontmatter) | Next | Outgoing links | Incoming links | Product CTA | Pins (search / curiosity / save) |',
+  '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
   ...sorted.map(
     (a) =>
-      `| ${a.trackerId} | [${a.title}](/resources/${a.slug})<br>\`${a.slug}\` | ${pillarNames[a.pillar] ?? a.pillar}${a.pillarGuide === 'true' ? ' ★' : ''} | ${list(a.related ?? [])} | ${a.next ? `\`${a.next}\`` : '—'} | ${list(bodyLinks.get(a.slug) ?? [])} | ${list(incoming.get(a.slug) ?? [])} | ${ctaLabel[a.cta] ?? a.cta} |`,
+      `| ${a.trackerId} | [${a.title}](/resources/${a.slug})<br>\`${a.slug}\` | ${pillarNames[a.pillar] ?? a.pillar}${a.pillarGuide === 'true' ? ' ★' : ''} | ${list(a.related ?? [])} | ${a.next ? `\`${a.next}\`` : '—'} | ${list(bodyLinks.get(a.slug) ?? [])} | ${list(incoming.get(a.slug) ?? [])} | ${ctaLabel[a.cta] ?? a.cta} | ${plans.get(a.trackerId)?.statuses.join(' / ') ?? '—'} |`,
   ),
   '',
   `${articles.length} published article(s). ★ = pillar guide.`,
