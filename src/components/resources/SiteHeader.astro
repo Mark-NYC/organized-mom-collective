@@ -1,6 +1,5 @@
 ---
 /** Header for public resource pages. Matches the app header's ruled, spaced-caps style. */
-import { Wordmark } from '../marks';
 import { routes } from '../../routes';
 
 const path = Astro.url.pathname;
@@ -14,7 +13,11 @@ const inResources = path.startsWith(routes.resources);
 >
 <header class="border-b border-rule">
   <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-5 sm:h-16 sm:px-8">
-    <a href={routes.home} aria-label="Organized Mom Collective home"><Wordmark badge="size-8 sm:size-9" /></a>
+    <a href={routes.home} aria-label="Organized Mom Collective home" class="flex items-center gap-2.5">
+      <img src="/brand/omc-badge-160.png" alt="" width="160" height="160" class="size-8 shrink-0 sm:size-9" />
+      <!-- Same spaced caps as the app's Wordmark; hidden on the narrowest phones so the nav fits. -->
+      <span class="hidden text-[0.7rem] font-semibold tracking-[0.24em] whitespace-nowrap uppercase min-[380px]:inline">Organized Mom</span>
+    </a>
     <nav aria-label="Site">
       <ul class="flex items-center gap-4 sm:gap-8">
         <li>

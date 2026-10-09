@@ -8,17 +8,19 @@ interface Props {
   /** Heading level for the card title, to keep the page outline correct. */
   as?: 'h2' | 'h3';
   showPillar?: boolean;
+  /** 'lg' for a single featured article. */
+  size?: 'md' | 'lg';
 }
-const { article, as: Tag = 'h3', showPillar = true } = Astro.props;
+const { article, as: Tag = 'h3', showPillar = true, size = 'md' } = Astro.props;
 const { title, summary, pillar } = article.data;
 ---
 
 <article class="group relative flex h-full flex-col border-t-2 border-ink pt-4">
   {showPillar && <p class="label text-muted">{getPillar(pillar).name}</p>}
-  <Tag class="mt-2 text-[1.2rem] leading-snug font-bold text-balance">
+  <Tag class:list={['mt-2 leading-snug font-bold text-balance', size === 'lg' ? 'text-[1.45rem] sm:text-[1.7rem]' : 'text-[1.2rem]']}>
     <a href={routes.article(article.id)} class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-month group-hover:decoration-[3px] group-hover:underline-offset-4">
       {title}
     </a>
   </Tag>
-  <p class="mt-2 text-[0.97rem] leading-relaxed text-soft">{summary}</p>
+  <p class:list={['mt-2 leading-relaxed text-soft', size === 'lg' ? 'text-[1.05rem]' : 'text-[0.97rem]']}>{summary}</p>
 </article>

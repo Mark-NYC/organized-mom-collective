@@ -307,4 +307,4 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(`✓ ${htmlFiles.length} pages checked: links, anchors, alt text, metadata, structured data, sitemap.`);
-console.log(`✓ Inventory written: ${relative(root, INVENTORY)} (${articles.length} articles).`);
+console.log(`✓ Inventory written: ${relative(root, INVENTORY)} (${articles.length} article${articles.length === 1 ? "" : "s"}).`);

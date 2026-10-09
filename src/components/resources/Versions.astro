@@ -1,0 +1,36 @@
+---
+/**
+ * Versions of the same routine for different kinds of weeks (normal / busy / hard),
+ * as ruled rows with a time stamp. Phone-friendly replacement for a three-column table.
+ */
+import { TimeMark } from '../marks';
+
+interface Props {
+  items: { name: string; when?: string; body: string; time: string }[];
+  /** Short label above the rows. */
+  title?: string;
+}
+const { items, title } = Astro.props;
+---
+
+<div class="my-6">
+  {title && <p class="label border-b border-ink pb-2">{title}</p>}
+  <ol class="versions">
+    {
+      items.map((v) => (
+        <li class="grid grid-cols-[1fr_auto] items-start gap-x-4 border-b border-rule py-3.5">
+          <div class="min-w-0">
+            <p class="flex flex-wrap items-baseline gap-x-2">
+              <span class="font-bold">{v.name}</span>
+              {v.when && <span class="text-[0.88rem] text-soft">{v.when}</span>}
+            </p>
+            <p class="mt-1 text-[0.97rem] leading-snug">{v.body}</p>
+          </div>
+          <span class="mt-0.5">
+            <TimeMark>{v.time}</TimeMark>
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+</div>

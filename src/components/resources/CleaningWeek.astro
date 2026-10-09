@@ -1,62 +1,109 @@
 ---
 /**
- * The cleaning week at a glance, read straight from src/data/cleaning.ts so the
- * article always matches the calendar and the companion app.
+ * The cleaning week at a glance, drawn like a page of the printed calendar and
+ * read straight from src/data/cleaning.ts, so the article always matches the
+ * calendar and the companion app.
+ *
+ * `print`: show a "Print the schedule" button. It prints only the blocks marked
+ * data-print-schedule (this figure, and a RealLifeVersion with `print`); see
+ * global.css → print styles.
  */
 import { dailyEssentials, weeklySchedule, weekend } from '../../data/cleaning';
 import { TimeMark, ZoneTag, shortTime } from '../marks';
 
-const weekdays = weeklySchedule.map((d) => ({
-  day: d.dayLabel,
-  zone: d.zone,
-  icon: d.icon,
-  time: shortTime(d.minutes),
-  note: d.tasks
-    .slice(0, 3)
-    .map((t) => t.label.toLowerCase())
-    .join(', '),
-}));
+interface Props {
+  print?: boolean;
+}
+const { print = false } = Astro.props;
+
+const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+const preview = (labels: string[]) => labels.slice(0, 3).map(lower).join(' · ');
+
+const rows = [
+  ...weeklySchedule.map((d) => ({
+    day: d.dayLabel,
+    short: d.shortLabel,
+    tags: [{ icon: d.icon, label: d.zone }],
+    note: preview(d.tasks.map((t) => t.label)),
+    time: shortTime(d.minutes),
+  })),
+  {
+    day: 'Friday to Sunday',
+    short: 'Fri–Sun',
+    tags: weekend.days.map((d) => ({ icon: weekend.icon, label: d.zone })),
+    note: 'One task from this month’s home project, catch up on one zone, or skip it.',
+    time: 'Optional',
+  },
+];
 ---
 
-<figure class="my-8">
-  <div class="border-t-2 border-ink">
-    <div class="flex items-center justify-between gap-3 border-b border-rule py-3">
-      <div>
-        <p class="font-bold">Every day</p>
-        <p class="text-[0.9rem] text-soft">{dailyEssentials.title}: {dailyEssentials.tasks.map((t) => t.label.toLowerCase()).join(', ')}</p>
-      </div>
-      <TimeMark>{shortTime(dailyEssentials.minutes)}</TimeMark>
+<figure class="cleaning-week my-8" data-print-schedule>
+  <div class="overflow-hidden rounded-[4px] border border-rule-strong bg-paper">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b-[3px] border-month bg-band px-4 py-3 sm:px-5">
+      <p class="label">The cleaning week</p>
+      <p class="text-[0.8rem] whitespace-nowrap text-soft">25–30 min a day · Mon–Thu</p>
     </div>
-    <ul class="cleaning-week">
+
+    <div class="flex items-start gap-3 border-b border-ink px-4 py-4 sm:gap-4 sm:px-5">
+      <img src={dailyEssentials.icon} alt="" width="192" height="192" class="mt-0.5 size-10 shrink-0 rounded-full bg-month/35 p-1" />
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <p class="font-bold">Every day: {dailyEssentials.title}</p>
+          <TimeMark>{shortTime(dailyEssentials.minutes)}</TimeMark>
+        </div>
+        <p class="mt-1 text-[0.92rem] leading-snug text-soft">{dailyEssentials.tasks.map((t) => lower(t.label)).join(' · ')}</p>
+      </div>
+    </div>
+
+    <ol class="cleaning-week-days">
       {
-        weekdays.map((d) => (
-          <li class="grid grid-cols-[5.5rem_1fr] items-start gap-3 border-b border-rule py-3 sm:grid-cols-[7rem_1fr_auto] sm:items-center">
-            <span class="pt-1.5 text-[0.7rem] font-semibold tracking-[0.18em] uppercase sm:pt-0">{d.day}</span>
-            <span class="min-w-0">
-              <ZoneTag icon={d.icon} label={d.zone} size="sm" />
-              <span class="mt-1 block text-[0.88rem] leading-snug text-soft">{d.note}…</span>
-            </span>
-            <span class="col-start-2 sm:col-start-auto">
-              <TimeMark>{d.time}</TimeMark>
-            </span>
+        rows.map((r) => (
+          <li class="grid grid-cols-[3.25rem_1fr] gap-x-3 border-b border-rule px-4 py-3.5 last:border-b-0 sm:grid-cols-[6.5rem_1fr_auto] sm:items-center sm:gap-x-4 sm:px-5">
+            <p class="pt-1.5 text-[0.68rem] font-semibold tracking-[0.18em] uppercase sm:pt-0">
+              <span class="sm:hidden">{r.short}</span>
+              <span class="hidden sm:inline">{r.day}</span>
+            </p>
+            <div class="min-w-0">
+              <div class="flex flex-wrap gap-1.5">
+                {r.tags.map((t) => (
+                  <ZoneTag icon={t.icon} label={t.label} size="sm" />
+                ))}
+              </div>
+              <p class="mt-1.5 text-[0.88rem] leading-snug text-soft">{r.note}</p>
+              <p class="mt-2 sm:hidden">
+                <TimeMark>{r.time}</TimeMark>
+              </p>
+            </div>
+            <p class="hidden sm:block">
+              <TimeMark>{r.time}</TimeMark>
+            </p>
           </li>
         ))
       }
-      <li class="grid grid-cols-[5.5rem_1fr] items-start gap-3 border-b border-rule py-3 sm:grid-cols-[7rem_1fr_auto] sm:items-center">
-        <span class="pt-1.5 text-[0.7rem] font-semibold tracking-[0.18em] uppercase sm:pt-0">Fri – Sun</span>
-        <span class="min-w-0">
-          <span class="flex flex-wrap gap-1.5">
-            {weekend.days.map((d) => <ZoneTag icon={weekend.icon} label={d.zone} size="sm" />)}
-          </span>
-          <span class="mt-1 block text-[0.88rem] leading-snug text-soft">Optional. One task from the monthly project, catch up, or skip it.</span>
-        </span>
-        <span class="col-start-2 sm:col-start-auto">
-          <TimeMark>Optional</TimeMark>
-        </span>
-      </li>
-    </ul>
+    </ol>
   </div>
-  <figcaption class="mt-3 text-[0.85rem] text-soft">
-    The cleaning week used on the Organized Mom Collective calendar: one short reset every day, one zone Monday to Thursday, and a flexible weekend.
+  <figcaption class="mt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 text-[0.85rem] text-soft">
+    <span>The same week printed on the Organized Mom Collective calendar and used in its cleaning companion.</span>
+    {
+      print && (
+        <button type="button" data-print-button class="text-link print:hidden">
+          Print the schedule
+        </button>
+      )
+    }
   </figcaption>
+  {
+    print && (
+      <script>
+        // Print only the schedule blocks (see global.css), then restore the page.
+        document.querySelectorAll<HTMLButtonElement>('[data-print-button]').forEach((button) => {
+          button.addEventListener('click', () => {
+            document.documentElement.classList.add('print-schedule');
+            window.print();
+          });
+        });
+        window.addEventListener('afterprint', () => document.documentElement.classList.remove('print-schedule'));
+      </script>
+    )
+  }
 </figure>
