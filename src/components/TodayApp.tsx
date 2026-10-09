@@ -14,6 +14,8 @@ import { Tally, TaskList } from './TaskList';
 
 export default function TodayApp() {
   const [onboarded, setOnboardedState] = useState(isOnboarded);
+  // True only right after finishing the welcome screen, to point at the first task.
+  const [justStarted, setJustStarted] = useState(false);
 
   // Note how this visit arrived (e.g. ?source=calendar from /start), then tidy the URL.
   useEffect(() => {
@@ -26,15 +28,16 @@ export default function TodayApp() {
   const finish = () => {
     setOnboarded(true);
     setOnboardedState(true);
+    setJustStarted(true);
     document.documentElement.classList.remove('needs-onboarding');
     window.scrollTo(0, 0);
   };
 
   if (!onboarded) return <Onboarding onDone={finish} />;
-  return <Today />;
+  return <Today justStarted={justStarted} />;
 }
 
-function Today() {
+function Today({ justStarted }: { justStarted: boolean }) {
   const today = useToday();
   const todayKey = dateKey(today);
 
@@ -98,6 +101,11 @@ function Today() {
               </>
             }
           >
+            {justStarted && dailyDone === 0 && (
+              <p role="status" className="mt-2.5 bg-band px-3.5 py-2.5 text-[1rem] leading-snug">
+                <strong className="font-semibold">You’re set.</strong> Start here — tap a task when it’s done.
+              </p>
+            )}
             <TaskList tasks={dailyEssentials.tasks} checked={daily} onToggle={toggleDaily} scope="daily" label="Daily reset tasks" />
           </Section>
         )}
@@ -128,7 +136,7 @@ function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
   return (
     <section aria-labelledby="monthly-teaser-heading" className="mt-9 border-t border-rule-strong pt-3.5">
       <h2 id="monthly-teaser-heading" className="label text-muted">
-        Monthly focus
+        Monthly home project
       </h2>
       <a href={routes.monthlyFocus} className="group mt-2.5 block border-l-[3px] border-month pl-3.5">
         <span className="month-title block text-[1.05rem] leading-none">{month.name}</span>

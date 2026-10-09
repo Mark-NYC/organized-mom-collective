@@ -30,11 +30,11 @@ export default function SettingsApp() {
     <>
       <ul className="border-t border-rule-strong">
         <Row
-          title="Replay the introduction"
-          detail="See the three welcome screens again."
+          title="See the welcome screen again"
+          detail="How the app works with your calendar. Your checkmarks are kept."
           action={
             <button type="button" onClick={replay} className="btn-secondary">
-              Replay
+              Show
             </button>
           }
         />
