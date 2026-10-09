@@ -28,9 +28,23 @@
   --color-blush-wash: #f9f0ef;
   --color-soft: #666666;
 
+  /* Survey (/survey) only: a warmer stationery take on the print palette.
+     Contrast checked: text-warm-ink 8.7:1 and text-warm-soft 5.4:1 on cream;
+     white on warm-button 10:1; rose-deep marks 4.2:1 on the selected card. */
+  --font-serif: 'Georgia Pro', Georgia, 'Times New Roman', serif;
+  --color-ivory: #fffdfa;
+  --color-warm-ink: #4d4544;
+  --color-warm-soft: #6e6461;
+  --color-warm-rule: #e7ddd4;
+  --color-warm-button: #4a3f3e;
+  --color-rose: #b88a8c;
+  --color-rose-deep: #96666b;
+  --color-rose-wash: #f8eeec;
+  --color-sage: #9aab8f;
+
   /* Resource articles (the public publication): Georgia headings and warm charcoal
      text. The app keeps Montserrat and #545454; see docs/editorial/BLOG_EDITORIAL_STYLE.md. */
-  --font-editorial: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --font-editorial: var(--font-serif);
   --color-prose: #47423e;
   --color-prose-soft: #6a635d;
 
@@ -96,6 +110,40 @@
   }
   .text-link {
     @apply text-[0.7rem] font-semibold tracking-[0.16em] text-ink uppercase underline decoration-rule decoration-1 underline-offset-[6px] hover:decoration-ink;
+  }
+}
+
+/*
+ * Public pages (/, /calendar, /companion): section headings and intro text.
+ * Same Montserrat hierarchy as .page-title, a step down.
+ */
+@layer components {
+  .section-title {
+    @apply text-[1.65rem] leading-[1.15] font-bold tracking-[-0.01em] text-balance sm:text-[2.15rem];
+  }
+  .lede {
+    @apply text-[1.0625rem] leading-relaxed sm:text-[1.125rem];
+  }
+  /* Homepage headlines: the serif from the survey palette, regular weight, warm charcoal. */
+  .serif-hero {
+    @apply font-serif text-[2.35rem] leading-[1.06] font-normal tracking-[-0.02em] text-balance text-warm-ink sm:text-[3.1rem] lg:text-[3.6rem];
+  }
+  .serif-title {
+    @apply font-serif text-[1.85rem] leading-[1.12] font-normal tracking-[-0.015em] text-balance text-warm-ink sm:text-[2.5rem];
+  }
+  /* Availability tag: what exists today vs. what's planned. Never omit it from a planned feature. */
+  .status {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.62rem] leading-tight font-semibold tracking-[0.14em] uppercase;
+  }
+  .status::before {
+    content: '';
+    @apply size-1.5 shrink-0 rounded-full bg-current;
+  }
+  .status-now {
+    @apply bg-sage-wash text-[#55684b];
+  }
+  .status-soon {
+    @apply border border-dashed border-rule-strong text-soft;
   }
 }
 

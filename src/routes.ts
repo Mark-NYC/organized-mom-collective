@@ -1,24 +1,40 @@
 /**
  * Every internal URL in one place.
  *
- *   PUBLIC  /                  (future marketing site; temporary placeholder now)
+ *   PUBLIC  /                  brand homepage
+ *           /calendar          the Family Wall Calendar product page (buy on Etsy)
+ *           /companion         how the cleaning companion works (public explainer)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
+ *           /survey            customer discovery survey (noindex, shared by link)
+ *           /survey/admin      survey results, admins only (noindex)
+ *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED, not linked yet)
+ *           /checkout/complete  confirmation after Stripe (noindex)
+ *           /admin/orders       order, inventory and shipping dashboard, shop admins only (noindex)
  *   QR      /start             permanent entry point printed on calendars → APP
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
  *           /app/tidy → /app/week (old name, kept so earlier links still work)
  *
- * Future areas (not built): /calendar, /cleaning, and auth/account
- * routes such as /login and /account.
+ * Future areas (not built): auth/account routes such as /login and /account.
  */
 import { DAY_PARAMS } from './lib/dates';
 
 export const routes = {
   home: '/',
+  calendar: '/calendar',
+  /** The calendar page's options and Etsy buttons. */
+  buy: '/calendar#buy',
+  companion: '/companion',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
+  survey: '/survey',
+  surveyAdmin: '/survey/admin',
+  /** Direct website checkout. Nothing links here until launch is approved: buy buttons still go to Etsy. */
+  checkout: '/checkout',
+  checkoutComplete: '/checkout/complete',
+  adminOrders: '/admin/orders',
   start: '/start',
   today: '/app',
   week: '/app/week',

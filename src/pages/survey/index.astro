@@ -1,0 +1,26 @@
+---
+/**
+ * Customer discovery survey. Public but not indexed or in the sitemap: it's
+ * shared by link, not found by search. No site header or footer, so nothing
+ * pulls her away mid-question; the thank-you screen links home.
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import Survey from '../../components/survey/Survey';
+---
+
+<PublicLayout
+  title="Quick survey"
+  description="Help us make family life a little easier. Seven quick questions about how your family keeps track of schedules and cleaning."
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <Survey client:load />
+</PublicLayout>
+
+<style is:global>
+  /* Warm off-white behind the survey, including iOS overscroll. */
+  body {
+    background: var(--color-cream);
+  }
+</style>

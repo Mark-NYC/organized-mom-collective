@@ -277,7 +277,7 @@ const pillarNames = Object.fromEntries(
     (m) => [m[1], m[2]],
   ),
 );
-const ctaLabel = { calendar: 'Wall calendar (/app/reorder)', companion: 'Companion website (/app)', none: 'None' };
+const ctaLabel = { calendar: 'Wall calendar (/calendar)', companion: 'Companion explainer (/companion)', none: 'None' };
 const list = (xs) => (xs.length ? xs.map((s) => `\`${s}\``).join('<br>') : '—');
 const sorted = [...articles].sort((a, b) => String(a.trackerId).localeCompare(String(b.trackerId)));
 const inventory = [

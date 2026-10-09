@@ -18,6 +18,7 @@ import Figure from '../../components/resources/Figure.astro';
 import Tip from '../../components/resources/Tip.astro';
 import ChecklistGrid from '../../components/resources/ChecklistGrid.astro';
 import CleaningWeek from '../../components/resources/CleaningWeek.astro';
+import CalendarBridge from '../../components/resources/CalendarBridge.astro';
 import Versions from '../../components/resources/Versions.astro';
 import { formatDate, getArticles, getNext, getRelated, isoDate, type Article } from '../../lib/articles';
 import { tableOfContents } from '../../lib/toc';
@@ -49,8 +50,8 @@ const updated = data.updated ?? data.published;
 
 const site = Astro.site!;
 const url = new URL(routes.article(article.id), site).href;
-// The hero photo when there is one; otherwise the calendar in use.
-const ogImage = data.hero ? largestImage(data.hero.image) : '/images/reorder/calendar-in-use-1280.webp';
+// The hero photo when there is one; otherwise the calendar share image.
+const ogImage = data.hero ? largestImage(data.hero.image) : '/images/site/og-calendar.jpg';
 const hero = data.hero ? { ...imageAttrs(data.hero.image), alt: data.hero.alt, caption: data.hero.caption } : undefined;
 const organization = {
   '@type': 'Organization',
@@ -187,6 +188,9 @@ const components = {
       </div>
     )
   }
+
+  {/* Every article leads to the calendar; skipped when its own ProductNote already does. */}
+  {data.cta !== 'calendar' && <CalendarBridge />}
 
   <p class="mt-14 text-center">
     <a href={routes.pillar(pillar.id)} class="text-link">All {pillar.name.toLowerCase()} articles</a>

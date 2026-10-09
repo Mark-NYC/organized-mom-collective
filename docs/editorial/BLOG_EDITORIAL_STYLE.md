@@ -52,7 +52,7 @@ All are available in any article without imports (full reference: [ARTICLE_FORMA
 | Photo with caption | `<Figure image="name" alt="…" caption="…" size="content \| wide" />` |
 | Practical aside, lightly tinted | `<Tip title="…">…</Tip>` |
 | Checklist card / side-by-side cards | `<Checklist title time icon items />`, `<ChecklistGrid>…</ChecklistGrid>` |
-| The product callout | `<ProductCTA title="…" image="name" alt="…">copy</ProductCTA>` (button: "See the Wall Calendar" → `/app/reorder`) |
+| The product callout | `<ProductCTA title="…" image="name" alt="…">copy</ProductCTA>` (button: "See the Wall Calendar" → `/calendar`) |
 | Pull-quote insight | `<Shift title="…">…</Shift>` |
 | Routine / fallback sections | `<RealLifeVersion>`, `<WhenLifeHappens>` |
 | Week sizes | `<Versions items />` |

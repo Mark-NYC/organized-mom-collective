@@ -11,7 +11,8 @@
     "test": "vitest run",
     "astro": "astro",
     "check:site": "node scripts/check-site.mjs",
-    "verify": "npm run build && npm run check:site && npm test"
+    "verify": "npm run build && npm run check:site && npm test",
+    "test:shop": "bash scripts/test-shop.sh"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.3",

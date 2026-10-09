@@ -1,5 +1,10 @@
 ---
-/** Footer for public resource pages: every pillar, so any page leads into the library. */
+/**
+ * Footer for every public page. Links only to pages that exist: the calendar, the
+ * companion explainer, the library and each topic that has articles.
+ * No contact or privacy page exists yet; add them here once they're real.
+ */
+import { Wordmark } from '../marks';
 import { pillars } from '../../data/pillars';
 import { routes } from '../../routes';
 import { BRAND_NAME } from '../../config';
@@ -8,27 +13,55 @@ import { getArticles } from '../../lib/articles';
 // Only topics that have articles get a page, so only those are linked.
 const used = new Set((await getArticles()).map((a) => a.data.pillar));
 const live = pillars.filter((p) => used.has(p.id));
+
+const site = [
+  { href: routes.calendar, label: 'Family Wall Calendar' },
+  { href: routes.resources, label: 'Free Resources' },
+  { href: routes.companion, label: 'Cleaning Companion' },
+];
+const link = 'text-[0.95rem] underline decoration-rule underline-offset-4 hover:decoration-ink';
 ---
 
-<footer class="mt-16 border-t border-rule bg-band">
-  <div class="mx-auto max-w-5xl px-5 py-10 sm:px-8">
-    <p class="label text-muted">Home organization guide</p>
-    <ul class="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-3">
-      {
-        live.map((p) => (
-          <li>
-            <a href={routes.pillar(p.id)} class="text-[0.95rem] font-semibold underline decoration-rule underline-offset-4 hover:decoration-ink">
-              {p.name}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-    <p class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[0.85rem] text-muted">
-      <a href={routes.resources} class="hover:text-ink">All resources</a>
-      <a href={routes.reorder} class="hover:text-ink">The family wall calendar</a>
-      <a href={routes.today} class="hover:text-ink">Cleaning companion website</a>
-    </p>
-    <p class="mt-6 text-[0.8rem] text-muted">© {new Date().getFullYear()} {BRAND_NAME}</p>
+<footer class="border-t border-rule bg-band">
+  <div class="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 md:grid-cols-[1.3fr_1fr_1fr]">
+    <div>
+      <a href={routes.home} aria-label="Organized Mom Collective home" class="inline-block"><Wordmark /></a>
+      <p class="mt-4 max-w-xs text-[0.95rem] leading-relaxed text-soft">Your whole family. One simple system.</p>
+    </div>
+    <nav aria-labelledby="footer-site-h">
+      <h2 id="footer-site-h" class="label text-muted">Organized Mom Collective</h2>
+      <ul class="mt-4 space-y-2.5">
+        {
+          site.map((l) => (
+            <li>
+              <a href={l.href} class={link}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    {
+      live.length > 0 && (
+        <nav aria-labelledby="footer-topics-h">
+          <h2 id="footer-topics-h" class="label text-muted">
+            Home organization guide
+          </h2>
+          <ul class="mt-4 space-y-2.5">
+            {live.map((p) => (
+              <li>
+                <a href={routes.pillar(p.id)} class={link}>
+                  {p.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+  </div>
+  <div class="mx-auto max-w-6xl border-t border-rule px-5 py-5 sm:px-8">
+    <p class="text-[0.8rem] text-muted">© {new Date().getFullYear()} {BRAND_NAME}</p>
   </div>
 </footer>

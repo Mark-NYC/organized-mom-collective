@@ -128,7 +128,7 @@ Every article needs at least one thing she could screenshot.
 | `<ChecklistGrid>` | Several checklists | Wrap 2–4 `<Checklist>` cards to show them side by side (a breakout row) on wider screens. |
 | `<Figure image alt caption size />` | Photographs | `image` is a name from `src/data/images.ts`; `size="wide"` breaks out of the reading column. See [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). |
 | `<Tip title label>` | One practical aside | Lightly tinted (sage). At most one or two per article. |
-| `<ProductCTA title image alt>` | The article's one product callout | Real product photo, a heading, one or two sentences, and the "See the Wall Calendar" button to `/app/reorder`. See "Product notes" below. |
+| `<ProductCTA title image alt>` | The article's one product callout | Real product photo, a heading, one or two sentences, and the "See the Wall Calendar" button to `/calendar`. See "Product notes" below. |
 | `<CleaningWeek />` | Cleaning articles | The real cleaning week (Daily Reset, Mon–Thu zones, weekend) as a planner page, read from `src/data/cleaning.ts`. Never retype the schedule by hand. `<CleaningWeek print />` adds a "Print the schedule" button that prints only this figure plus any `<RealLifeVersion print>` (two pages: the week, then the checklists). Used in HC-01. |
 | `<Versions title items />` | "Sizes" of a routine for different weeks | `items={[{ name: 'Normal week', when?: '…', body: '…', time: '25–30 min' }, …]}`. Ruled rows with a time stamp; use instead of a three-column table, which is cramped on phones. Used in HC-01's When Life Happens. |
 | Data-driven checklists | Zone task lists | `import { weeklySchedule } from '../../data/cleaning';` then map to `<Checklist>`, so articles match the companion website. |
@@ -156,7 +156,7 @@ The month color (current month, from `src/theme.ts`) is the only accent, exactly
 
 ## Product notes
 
-One product callout per article, after the routine, where the article naturally leads to it. Use `<ProductCTA>` (photo, heading, one or two sentences, "See the Wall Calendar" button to the existing calendar page `/app/reorder`). The older, smaller `<ProductNote product="calendar">` / `<ProductNote product="companion">` still works for a quieter mention. Copy is specific to the article and describes only what the product actually does. Call the companion a *website* (or "the cleaning companion"), never an app, and don't promise features that don't exist.
+One product callout per article, after the routine, where the article naturally leads to it. Use `<ProductCTA>` (photo, heading, one or two sentences, "See the Wall Calendar" button to the calendar page `/calendar`). Articles without a calendar callout get the template's small `CalendarBridge` link at the end automatically. The older, smaller `<ProductNote product="calendar">` / `<ProductNote product="companion">` still works for a quieter mention. Copy is specific to the article and describes only what the product actually does. Call the companion a *website* (or "the cleaning companion"), never an app, and don't promise features that don't exist.
 
 **Verified features only.** Describe nothing that isn't in these sources:
 

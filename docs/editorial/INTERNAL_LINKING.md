@@ -27,7 +27,7 @@ How articles link to each other and to the products, so every page leads somewhe
 - Usually a one-sentence bridge just before the product note.
 
 ### 6. Product links
-- Only through the article's one product callout (`<ProductCTA>`, or the older `<ProductNote>`), never before the Real-Life Version. The component supplies the link: `/app/reorder` (the existing calendar page with its Etsy buttons) for the calendar, `/app` for the companion website.
+- Only through the article's one product callout (`<ProductCTA>`, or the older, quieter `<ProductNote>`), never before the Real-Life Version. The component supplies the link: `/calendar` (the calendar page with its Etsy buttons) for the calendar, `/companion` (the companion explainer) for the companion website. Articles without a calendar callout (`cta` other than `calendar`) also end with a short, fixed calendar link from the template (`CalendarBridge`), after the related cards; don't add another.
 - No product links in headings, the short answer, The Shift or Your Next Small Win.
 - Set `cta` in frontmatter to the product mentioned (`none` if there's no note).
 

@@ -1,6 +1,7 @@
 /**
- * Sitemap of the public, indexable pages. The companion app (/app/…) and the
- * QR redirect (/start) are noindex and left out on purpose.
+ * Sitemap of the public, indexable pages. The companion app (/app/…), the
+ * QR redirect (/start) and the 404 are noindex and left out on purpose, as are
+ * draft articles (getArticles() drops them in production).
  */
 import type { APIRoute } from 'astro';
 import { getArticles, isoDate } from '../lib/articles';
@@ -14,6 +15,8 @@ export const GET: APIRoute = async ({ site }) => {
 
   const entries: { path: string; lastmod?: string }[] = [
     { path: routes.home },
+    { path: routes.calendar },
+    { path: routes.companion },
     // The hub is noindex until it has articles.
     ...(articles.length ? [{ path: routes.resources, lastmod: latest }] : []),
     ...pillars.filter((p) => used.has(p.id)).map((p) => ({ path: routes.pillar(p.id) })),

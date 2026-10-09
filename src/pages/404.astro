@@ -6,9 +6,10 @@ import { routes } from '../routes';
 <PublicLayout title="Not found" description="This page could not be found." indexable={false}>
   <p class="label text-muted">404</p>
   <h1 class="page-title mt-3">This page isn’t here.</h1>
-  <p class="mt-4 text-[1.0625rem]">Using the cleaning companion? Head back to today.</p>
+  <p class="mt-4 text-[1.0625rem]">Using the cleaning companion? Head back to today. Otherwise, start from the homepage.</p>
   <p class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
     <a href={routes.today} class="btn-primary">Go to today</a>
     <a href={routes.home} class="text-link">Organized Mom Collective</a>
+    <a href={routes.calendar} class="text-link">The family calendar</a>
   </p>
 </PublicLayout>

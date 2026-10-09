@@ -1,26 +1,9 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
-import { BEST_VALUE_ID, BRAND_NAME, CALENDAR_OPTIONS } from '../../config';
-import { etsyListingUrl, formatPrice, formatSpan, savingsVersus } from '../../lib/reorder';
+import { BRAND_NAME } from '../../config';
+import { calendarOptions, formatPrice } from '../../lib/reorder';
 
-const smallest = CALENDAR_OPTIONS.reduce((a, b) => (b.weeks < a.weeks ? b : a));
-const options = CALENDAR_OPTIONS.map((o) => {
-  const sets = o.weeks / smallest.weeks;
-  const bestValue = o.id === BEST_VALUE_ID;
-  return {
-    ...o,
-    url: etsyListingUrl(o.etsyUrl),
-    shortName: o.name.replace(/ Calendar$/, ''),
-    priceLabel: formatPrice(o.price),
-    bestValue,
-    span: sets === 2 ? 'Full year of planning' : `${o.weeks} weeks`,
-    save: o.id === smallest.id || sets !== 2 ? 0 : savingsVersus(o, smallest),
-    setsWeeks: sets === 2 ? smallest.weeks : 0,
-    // Exact dates appear only once confirmed in src/config.ts.
-    editions: o.editions.map((e) => ({ label: e.label, dates: e.start && e.end ? formatSpan(e.start, e.end) : '' })),
-  };
-  // Recommended option first, so on phones it's the first one she sees.
-}).sort((a, b) => Number(b.bestValue) - Number(a.bestValue));
+const options = calendarOptions();
 
 // Flag anything missing in the build output so it doesn't go unnoticed.
 for (const o of options) {
@@ -169,7 +152,7 @@ const band = '-mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10';
         }
       </ul>
     </div>
-    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-band md:order-first md:mt-0">
+    <figure class="mt-7 aspect-square md:order-first md:mt-0">
       <img
         {...photo('calendar-features')}
         sizes={half}

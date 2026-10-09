@@ -1,0 +1,31 @@
+---
+import PhoneFrame from './PhoneFrame.astro';
+
+/**
+ * A real screenshot of the companion app (public/images/site/app-*.webp, captured
+ * from the built app at 390 × 844) in a simple, drawn phone frame (PhoneFrame). Not a mockup of
+ * features: retake the screenshots when the app's screens change.
+ */
+interface Props {
+  name: 'today' | 'week';
+  alt: string;
+  class?: string;
+  /** 'eager' when the phone is above the fold, e.g. in a hero. */
+  loading?: 'lazy' | 'eager';
+}
+const { name, alt, class: className, loading = 'lazy' } = Astro.props;
+---
+
+<PhoneFrame class={className}>
+  <img
+    src={`/images/site/app-${name}-390.webp`}
+    srcset={`/images/site/app-${name}-390.webp 390w, /images/site/app-${name}-780.webp 780w`}
+    sizes="248px"
+    width="390"
+    height="844"
+    {loading}
+    decoding="async"
+    alt={alt}
+    class="block h-auto w-full"
+  />
+</PhoneFrame>

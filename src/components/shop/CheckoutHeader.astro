@@ -1,0 +1,21 @@
+---
+/**
+ * Slim header for /checkout and /checkout/complete: the brand and a way home, nothing
+ * else to pull her away mid-payment (the full site header would).
+ */
+import { Wordmark } from '../marks';
+import { routes } from '../../routes';
+---
+
+<header class="border-b border-rule bg-paper">
+  <div class="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-5 sm:px-8">
+    <a href={routes.home} aria-label="Organized Mom Collective home" class="-my-1 py-1"><Wordmark badge="size-9 sm:size-10" /></a>
+    <p class="label flex items-center gap-2 text-soft">
+      <svg aria-hidden="true" viewBox="0 0 16 16" class="size-3.5" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="7" width="10" height="7" rx="1.5"></rect>
+        <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path>
+      </svg>
+      Secure checkout
+    </p>
+  </div>
+</header>

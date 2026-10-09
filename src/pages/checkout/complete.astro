@@ -1,0 +1,31 @@
+---
+/**
+ * /checkout/complete?session_id=…: where Stripe returns her after paying. Shows the
+ * order as confirmed only once the webhook has marked it paid (see CheckoutComplete).
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import CheckoutHeader from '../../components/shop/CheckoutHeader.astro';
+import CheckoutComplete from '../../components/shop/CheckoutComplete';
+import { shopConfigured, shopEnabled } from '../../lib/shop';
+import { routes } from '../../routes';
+
+const live = shopEnabled() && shopConfigured();
+---
+
+<PublicLayout title="Order confirmation" description="Your Organized Mom Collective order." indexable={false} chrome={false} width="full">
+  <CheckoutHeader />
+  <div class="mx-auto max-w-2xl px-5 py-8 sm:px-8 sm:py-14">
+    {
+      live ? (
+        <CheckoutComplete client:only="react" />
+      ) : (
+        <div class="py-6">
+          <h1 class="page-title">Online checkout isn’t open yet</h1>
+          <a href={routes.buy} class="btn-primary mt-8">
+            See the calendar
+          </a>
+        </div>
+      )
+    }
+  </div>
+</PublicLayout>

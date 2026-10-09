@@ -1,0 +1,27 @@
+---
+/**
+ * The fixed, low-key path from any article to the calendar, shown by the article
+ * template when the article has no calendar <ProductNote>. Verified features only
+ * (see docs/editorial/ARTICLE_FORMAT.md → Product notes).
+ */
+import { routes } from '../../routes';
+---
+
+<aside aria-labelledby="bridge-h" class="mt-14 grid items-center gap-5 bg-cream p-5 sm:grid-cols-[9rem_1fr] sm:p-6">
+  <img
+    src="/images/site/calendar-on-wall-640.webp"
+    alt="The Organized Mom Collective weekly wall calendar hanging on a wall."
+    width="640"
+    height="512"
+    loading="lazy"
+    decoding="async"
+    class="hidden w-36 sm:block"
+  />
+  <div>
+    <h2 id="bridge-h" class="text-[1.15rem] leading-snug font-bold">Want the whole week in one place?</h2>
+    <p class="mt-1.5 text-[0.97rem] leading-relaxed text-soft">
+      Our 11 × 17 family wall calendar gives each week its own page: schedules, meals, groceries, to-dos and a daily cleaning zone.
+    </p>
+    <a href={routes.calendar} class="text-link mt-3 inline-block">See the family calendar</a>
+  </div>
+</aside>
