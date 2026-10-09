@@ -1,53 +1,148 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
-import { BRAND_NAME, REORDER_URL } from '../../config';
-import { monthColors } from '../../theme';
+import { BEST_VALUE_ID, BRAND_NAME, CALENDAR_OPTIONS } from '../../config';
+import { etsyListingUrl, formatPrice, savingsVersus } from '../../lib/reorder';
 
-const months = monthColors.map((m) => ({ short: m.name.slice(0, 3), hex: m.hex }));
+const smallest = CALENDAR_OPTIONS.reduce((a, b) => (b.weeks < a.weeks ? b : a));
+const options = CALENDAR_OPTIONS.map((o) => {
+  const url = etsyListingUrl(o.etsyUrl);
+  const save = o.id === smallest.id ? 0 : savingsVersus(o, smallest);
+  const sets = o.weeks / smallest.weeks;
+  return {
+    ...o,
+    url,
+    priceLabel: formatPrice(o.price),
+    bestValue: o.id === BEST_VALUE_ID,
+    months: Math.round((o.weeks * 12) / 52),
+    saveLine: save > 0 && sets === 2 ? `Save ${formatPrice(save)} vs. two half-years` : '',
+    setsWeeks: sets === 2 ? smallest.weeks : 0,
+  };
+});
+
+// Flag missing listings in the build output so they don't go unnoticed.
+for (const o of options) {
+  if (!o.url) console.warn(`[reorder] No valid Etsy listing URL for "${o.name}" — its button is disabled. Set etsyUrl in src/config.ts.`);
+}
+
+const includes = ['11 × 17-inch portrait format', 'The same weekly layout and cleaning zones', 'Your digital cleaning companion'];
+const benefits = [
+  'Keep your family’s schedule and priorities together.',
+  'Plan meals, groceries, and household routines.',
+  'Keep using your digital cleaning companion.',
+];
+const hero = '/images/reorder/calendar-in-use';
 ---
 
-<Layout title="Reorder" description={`Order your next six-month ${BRAND_NAME} family calendar.`}>
-  <div class="max-w-xl">
-    <p class="label text-muted">Reorder</p>
-    <h1 class="page-title mt-3">Ready for your next calendar?</h1>
-    <p class="mt-3 text-[1.0625rem] leading-relaxed">
-      Keep your family planning system going with your next six-month {BRAND_NAME} calendar.
-    </p>
+<Layout title="Reorder" description={`Order your next ${BRAND_NAME} family calendar on Etsy.`}>
+  <div class="max-w-2xl">
+    <header>
+      <p class="label text-muted">Reorder</p>
+      <h1 class="page-title mt-3">Keep your home moving.</h1>
+      <p class="mt-3 text-[1.0625rem] leading-relaxed">Loving your calendar? Keep the rhythm going with your next one.</p>
+    </header>
 
-    <!-- The next six months, in their printed colors -->
-    <div class="mt-10 border border-rule-strong" aria-hidden="true">
-      <div id="next-six" class="grid grid-cols-6">
+    <figure class="mt-7 aspect-square overflow-hidden border border-rule bg-band">
+      <img
+        src={`${hero}-960.webp`}
+        srcset={`${hero}-640.webp 640w, ${hero}-960.webp 960w, ${hero}-1280.webp 1280w`}
+        sizes="(min-width: 704px) 672px, calc(100vw - 2.5rem)"
+        width="2000"
+        height="2000"
+        fetchpriority="high"
+        decoding="async"
+        alt={`A hand writing in the ${BRAND_NAME} wall calendar on a kitchen counter: a full week of school runs, a meal plan, a grocery list and to-dos.`}
+        class="block h-full w-full"
+      />
+    </figure>
+
+    <section aria-labelledby="choose-h" class="mt-10">
+      <h2 id="choose-h" class="section-label">Choose your calendar</h2>
+      <ul class="mt-5 grid grid-cols-2 gap-3 sm:gap-6">
         {
-          months.slice(0, 6).map((m) => (
-            <span class="border-r border-rule last:border-r-0">
-              <span class="block h-7" style={`background-color:${m.hex}`} />
-              <span class="block px-1 pt-1.5 pb-6 text-center text-[0.6rem] font-semibold tracking-[0.14em] uppercase">{m.short}</span>
-            </span>
+          options.map((o) => (
+            <li
+              class:list={[
+                'flex flex-col rounded-[3px] border px-3.5 pt-3.5 pb-4 sm:px-5 sm:pt-5',
+                o.bestValue ? 'border-ink' : 'border-rule-strong',
+              ]}
+            >
+              <p class="h-6">
+                {o.bestValue && (
+                  <span class="inline-block bg-month px-2 py-1 text-[0.6rem] leading-none font-bold tracking-[0.18em] uppercase">Best value</span>
+                )}
+              </p>
+              <h3 class="mt-2 text-[0.95rem] leading-tight font-bold sm:text-[1.05rem]">{o.name}</h3>
+              <p class="mt-2 text-[2rem] leading-none font-bold tracking-[-0.01em]">{o.priceLabel}</p>
+              <p class="mt-2.5 text-[0.95rem] font-semibold">{o.weeks} weeks</p>
+              <p class="text-[0.85rem] text-muted">{o.months} months</p>
+              {o.setsWeeks > 0 && (
+                <p class="mt-1.5 text-[0.85rem] leading-snug text-muted">
+                  Ships as two <span class="whitespace-nowrap">{o.setsWeeks}-week sets</span>
+                </p>
+              )}
+              {o.saveLine && <p class="mt-1.5 text-[0.85rem] leading-snug font-semibold">{o.saveLine}</p>}
+              <div class="mt-auto pt-5">
+                {o.url ? (
+                  <a
+                    href={o.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Buy the ${o.name} on Etsy, ${o.priceLabel} (opens Etsy)`}
+                    class="btn-primary w-full gap-1 px-2 text-[0.68rem] tracking-[0.1em] whitespace-nowrap sm:text-[0.75rem] sm:tracking-[0.18em]"
+                  >
+                    Buy on Etsy <span aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.62rem] leading-snug font-semibold tracking-[0.14em] text-muted uppercase">
+                    Coming soon to Etsy
+                  </p>
+                )}
+              </div>
+            </li>
           ))
         }
+      </ul>
+
+      <div class="mt-6 border-t border-rule-strong pt-4">
+        <h3 class="label">Both include</h3>
+        <ul class="mt-2.5 space-y-1.5 text-[1rem]">
+          {
+            includes.map((item) => (
+              <li class="flex gap-2.5">
+                <span aria-hidden="true" class="text-muted">✓</span>
+                {item}
+              </li>
+            ))
+          }
+        </ul>
       </div>
-    </div>
-    <p class="label mt-2.5 text-center text-muted">Six months · one wall</p>
 
-    <a href={REORDER_URL} class="btn-primary mt-10 w-full sm:w-auto" rel="noopener">Order My Next Calendar</a>
+      <p class="mt-6 border-l-[3px] border-month py-1 pl-3.5 text-[1rem] leading-relaxed">
+        <strong class="font-semibold">Already set up here? Keep going.</strong> A new calendar doesn’t reset anything in this app. Your
+        checkmarks, progress and settings stay right where they are.
+      </p>
+      <p class="mt-4 text-[0.85rem] text-muted">Checkout happens on Etsy. Prices in US dollars.</p>
+    </section>
 
-    <section aria-labelledby="when-h" class="mt-14 border-t border-rule-strong pt-5">
+    <section aria-labelledby="why-h" class="mt-12 border-t border-rule-strong pt-5">
+      <h2 id="why-h" class="label">Why it stays on the wall</h2>
+      <ol class="mt-3">
+        {
+          benefits.map((b, i) => (
+            <li class="flex gap-3.5 border-b border-rule py-3 text-[1.0625rem] leading-snug">
+              <span aria-hidden="true" class="w-4 shrink-0 font-bold text-muted">{i + 1}</span>
+              {b}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section aria-labelledby="when-h" class="mt-12 border-t border-rule-strong pt-5">
       <h2 id="when-h" class="label">When to reorder</h2>
       <p class="mt-2 text-[1.0625rem] leading-relaxed">
-        About a month before your last page, so the new one arrives before the old one runs out. Your cleaning checklist
-        here keeps working either way.
+        About a month before your last page, so the new one arrives before the old one runs out.
       </p>
     </section>
   </div>
-
-  <script is:inline define:vars={{ months }}>
-    // Start the strip at next month.
-    const start = new Date().getMonth() + 1;
-    const cells = document.querySelectorAll('#next-six > span');
-    cells.forEach((cell, i) => {
-      const m = months[(start + i) % 12];
-      cell.children[0].style.backgroundColor = m.hex;
-      cell.children[1].textContent = m.short;
-    });
-  </script>
 </Layout>
