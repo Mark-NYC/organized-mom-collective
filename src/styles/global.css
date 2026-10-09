@@ -21,6 +21,13 @@
   --color-band: #f5f5f5;
   --color-muted: #727272;
 
+  /* Warm washes for the Reorder page, softened from the printed month colors
+     (cream; May/September sage; February blush). Use text-soft, not text-muted, on them. */
+  --color-cream: #fbf7f1;
+  --color-sage-wash: #f1f4ec;
+  --color-blush-wash: #f9f0ef;
+  --color-soft: #666666;
+
   /* Current month's color — set on <html> at load from src/theme.ts */
   --color-month: var(--month, #c8c8c8);
 }

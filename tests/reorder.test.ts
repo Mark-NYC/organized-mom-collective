@@ -31,6 +31,7 @@ describe('reorder', () => {
   it('each edition runs Monday to Sunday for exactly its number of weeks', () => {
     for (const o of CALENDAR_OPTIONS) {
       for (const e of o.editions) {
+        if (!e.start || !e.end) continue; // dates not confirmed yet; nothing shown on the page
         expect(new Date(e.start + 'T12:00:00Z').getUTCDay()).toBe(1);
         expect(new Date(e.end + 'T12:00:00Z').getUTCDay()).toBe(0);
         expect(daysCovered(e.start, e.end)).toBe(o.weeks * 7);
