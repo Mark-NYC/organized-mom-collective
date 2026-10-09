@@ -11,9 +11,12 @@ import { routes } from '../routes';
 import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
 import { Tally, TaskList } from './TaskList';
+import { monthColor } from '../theme';
 
 export default function TodayApp() {
   const [onboarded, setOnboardedState] = useState(isOnboarded);
+  // True only right after finishing the welcome screen, to point at the first task.
+  const [justStarted, setJustStarted] = useState(false);
 
   // Note how this visit arrived (e.g. ?source=calendar from /start), then tidy the URL.
   useEffect(() => {
@@ -26,15 +29,16 @@ export default function TodayApp() {
   const finish = () => {
     setOnboarded(true);
     setOnboardedState(true);
+    setJustStarted(true);
     document.documentElement.classList.remove('needs-onboarding');
     window.scrollTo(0, 0);
   };
 
   if (!onboarded) return <Onboarding onDone={finish} />;
-  return <Today />;
+  return <Today justStarted={justStarted} />;
 }
 
-function Today() {
+function Today({ justStarted }: { justStarted: boolean }) {
   const today = useToday();
   const todayKey = dateKey(today);
 
@@ -46,9 +50,30 @@ function Today() {
   const plan = planFor(shown);
 
   useEffect(() => pruneOld(today), [today]);
+  // Left open across a month change: switch the accent to the new month's printed color.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--month', monthColor(today.getMonth()));
+  }, [today]);
 
   const [daily, toggleDaily] = useCheckedSet(keys.daily(todayKey));
   const dailyDone = dailyEssentials.tasks.filter((t) => daily.has(t.id)).length;
+  // Weekend zone checks live in WeekendSection; this key is only used Mon–Thu.
+  const [zone, toggleZone] = useCheckedSet(keys.focus(dateKey(shown)));
+  const zoneTasks = plan.kind === 'weekday' ? plan.focus.tasks : [];
+  const zoneDone = zoneTasks.filter((t) => zone.has(t.id)).length;
+
+  const zoneLabel = plan.kind === 'weekday' ? plan.focus.zone : plan.day.zone;
+  const zoneIcon = plan.kind === 'weekday' ? plan.focus.icon : weekend.icon;
+
+  // Today's routine = Daily Reset + a weekday zone. Weekend projects are optional, so they aren't counted.
+  const routine = viewing ? zoneTasks.length : dailyEssentials.tasks.length + zoneTasks.length;
+  const routineDone = viewing ? zoneDone : dailyDone + zoneDone;
+  // The one task to point at: the first unchecked one, Daily Reset first, then the zone.
+  const next = viewing
+    ? zoneTasks.find((t) => !zone.has(t.id))?.id
+    : dailyEssentials.tasks.find((t) => !daily.has(t.id))?.id ?? zoneTasks.find((t) => !zone.has(t.id))?.id;
+  const nextDaily = !viewing && dailyEssentials.tasks.some((t) => t.id === next) ? next : undefined;
+  const nextZone = zoneTasks.some((t) => t.id === next) ? next : undefined;
 
   const weekday = shown.toLocaleDateString('en-US', { weekday: 'long' });
   const dayNum = String(shown.getDate()).padStart(2, '0');
@@ -79,6 +104,25 @@ function Today() {
           </span>
           <span className="month-title mt-1 block text-[1.15rem] leading-none">{monthYear}</span>
         </h1>
+        {!viewing && (
+          <a
+            href={plan.kind === 'weekday' ? '#focus' : '#weekend'}
+            aria-label={`Today’s zone: ${zoneLabel}. Jump to its tasks`}
+            className="mt-3 flex min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1"
+          >
+            <span className="label text-muted">Today’s zone</span>
+            <ZoneTag icon={zoneIcon} label={zoneLabel} size="sm" />
+          </a>
+        )}
+        {routine > 0 && (
+          <p className="mt-1.5 text-[0.95rem] leading-snug text-muted tabular-nums">
+            {routineDone === routine
+              ? viewing
+                ? 'All done for this day.'
+                : 'All done for today. Anything else is a bonus.'
+              : `${routineDone} of ${routine} done${viewing ? '' : ' today'}`}
+          </p>
+        )}
       </header>
 
       <div className="mt-7 grid gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12">
@@ -86,6 +130,8 @@ function Today() {
           <Section
             id="daily"
             first
+            eyebrow="Every day"
+            note="The same five tasks, every day."
             heading={
               <h2 id="daily-heading" className="text-[1rem] font-bold tracking-[0.18em] uppercase">
                 {dailyEssentials.title}
@@ -98,18 +144,23 @@ function Today() {
               </>
             }
           >
-            <TaskList tasks={dailyEssentials.tasks} checked={daily} onToggle={toggleDaily} scope="daily" label="Daily reset tasks" />
+            {justStarted && dailyDone === 0 && (
+              <p role="status" className="mt-2.5 bg-band px-3.5 py-2.5 text-[1rem] leading-snug">
+                <strong className="font-semibold">You’re set.</strong> Start here — tap a task when it’s done.
+              </p>
+            )}
+            <TaskList tasks={dailyEssentials.tasks} checked={daily} onToggle={toggleDaily} scope="daily" label="Daily reset tasks" next={nextDaily} />
           </Section>
         )}
 
         {plan.kind === 'weekday' ? (
-          <FocusSection focus={plan.focus} date={dateKey(shown)} first={!!viewing} />
+          <FocusSection focus={plan.focus} checked={zone} onToggle={toggleZone} next={nextZone} first={!!viewing} today={!viewing} />
         ) : (
-          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} />
+          <WeekendSection day={plan.day} month={plan.month} date={shown} first={!!viewing} today={!viewing} />
         )}
       </div>
 
-      <MonthlyTeaser month={monthFocusFor(shown)} />
+      {plan.kind === 'weekday' && <MonthlyTeaser month={monthFocusFor(shown)} />}
 
       <nav aria-label="More" className="mt-8 border-t border-rule-strong">
         <a href={routes.tidy} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
@@ -128,7 +179,7 @@ function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
   return (
     <section aria-labelledby="monthly-teaser-heading" className="mt-9 border-t border-rule-strong pt-3.5">
       <h2 id="monthly-teaser-heading" className="label text-muted">
-        Monthly focus
+        Monthly home project
       </h2>
       <a href={routes.monthlyFocus} className="group mt-2.5 block border-l-[3px] border-month pl-3.5">
         <span className="month-title block text-[1.05rem] leading-none">{month.name}</span>
@@ -144,6 +195,8 @@ function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
 
 interface SectionProps {
   id: string;
+  /** Small label above the heading: "Every day" vs "Today's zone". */
+  eyebrow: string;
   heading: ReactNode;
   meta: ReactNode;
   note?: ReactNode;
@@ -153,9 +206,12 @@ interface SectionProps {
 }
 
 /** One block of the day: a single heading line (title left, time + tally right), optional note, then ruled tasks. */
-function Section({ id, heading, meta, note, first, children }: SectionProps) {
+function Section({ id, eyebrow, heading, meta, note, first, children }: SectionProps) {
   return (
-    <section aria-labelledby={`${id}-heading`} className={first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}>
+    <section id={id} aria-labelledby={`${id}-heading`} className={`scroll-mt-4 ${first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}`}>
+      <p className="label mb-1.5 text-muted" aria-hidden="true">
+        {eyebrow}
+      </p>
       <div className="flex min-h-9 items-center justify-between gap-3">
         <div className="min-w-0">{heading}</div>
         <div className="flex shrink-0 items-center gap-3">{meta}</div>
@@ -166,13 +222,23 @@ function Section({ id, heading, meta, note, first, children }: SectionProps) {
   );
 }
 
-function FocusSection({ focus, date, first }: { focus: WeekdayFocus; date: string; first?: boolean }) {
-  const [checked, toggle] = useCheckedSet(keys.focus(date));
+interface FocusSectionProps {
+  focus: WeekdayFocus;
+  checked: Set<string>;
+  onToggle: (id: string) => void;
+  next?: string;
+  first?: boolean;
+  /** Showing today (vs another day picked from the Tidy week). */
+  today: boolean;
+}
+
+function FocusSection({ focus, checked, onToggle: toggle, next, first, today }: FocusSectionProps) {
   const done = focus.tasks.filter((t) => checked.has(t.id)).length;
 
   return (
     <Section
       id="focus"
+      eyebrow={`${today ? 'Today’s' : `${focus.dayLabel}’s`} zone · from your calendar`}
       first={first}
       heading={
         <h2 id="focus-heading">
@@ -188,19 +254,72 @@ function FocusSection({ focus, date, first }: { focus: WeekdayFocus; date: strin
       }
       note={focus.description}
     >
-      <TaskList tasks={focus.tasks} checked={checked} onToggle={toggle} scope="focus" label={`${focus.zone} tasks`} />
+      <TaskList tasks={focus.tasks} checked={checked} onToggle={toggle} scope="focus" label={`${focus.zone} tasks`} next={next} />
     </Section>
   );
 }
 
-function WeekendSection({ day, month, date, first }: { day: WeekendDay; month: MonthlyFocus; date: Date; first?: boolean }) {
+interface WeekendSectionProps {
+  day: WeekendDay;
+  month: MonthlyFocus;
+  date: Date;
+  first?: boolean;
+  today: boolean;
+}
+
+function WeekendSection({ day, month, date, first, today }: WeekendSectionProps) {
   const [monthly, toggleMonthly] = useCheckedSet(keys.monthly(monthKey(date)));
   const [weekendChecks, toggleWeekend] = useCheckedSet(keys.weekend(dateKey(weekendStart(date))));
+  const [showAll, setShowAll] = useState(false);
   const done = month.tasks.filter((t) => monthly.has(t.id)).length;
+  const allDone = done === month.tasks.length;
+  // One suggestion keeps the weekend light; the whole month's list is one tap away.
+  const suggested = month.tasks.find((t) => !monthly.has(t.id));
+  const shown = showAll || !suggested ? month.tasks : [suggested];
+  // Sunday is "Catch-Up / Reset" on the calendar, so catching up comes first.
+  const catchUpFirst = day.day === 0;
+
+  const catchUp = (
+    <TaskList tasks={[weekend.catchUp]} checked={weekendChecks} onToggle={toggleWeekend} scope="weekend" label="Catch up instead" />
+  );
+  const project = (
+    <div>
+      <div className="border-b border-rule bg-band px-4 py-3.5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="label text-muted">
+            Monthly home project<span className="sr-only"> for {month.name}</span>
+          </p>
+          <Tally done={done} total={month.tasks.length} />
+        </div>
+        <h3 className="project-title mt-1">{month.title}</h3>
+        <p className="mt-1.5 text-[1rem] leading-snug">
+          {allDone ? 'Done for this month.' : 'One small task is plenty. The rest can wait for another weekend.'}
+        </p>
+      </div>
+      {!(allDone && !showAll) && (
+        <TaskList
+          tasks={shown}
+          checked={monthly}
+          onToggle={toggleMonthly}
+          scope="monthly"
+          label={`${month.title} tasks for ${month.name}`}
+        />
+      )}
+      <button
+        type="button"
+        aria-expanded={showAll}
+        onClick={() => setShowAll(!showAll)}
+        className="text-link mt-1 inline-flex min-h-11 items-center"
+      >
+        {showAll ? 'Show less' : `See all ${month.tasks.length} project tasks`}
+      </button>
+    </div>
+  );
 
   return (
     <Section
       id="weekend"
+      eyebrow={`${today ? 'Today’s' : `${day.dayLabel}’s`} zone · from your calendar`}
       first={first}
       heading={
         <h2 id="weekend-heading">
@@ -211,29 +330,11 @@ function WeekendSection({ day, month, date, first }: { day: WeekendDay; month: M
       meta={<TimeMark>Optional</TimeMark>}
       note={weekend.description}
     >
-      <div className="border-b border-rule bg-band px-4 py-3.5">
-        <p className="label text-muted">{month.name} project</p>
-        <h3 className="project-title mt-1">{month.title}</h3>
-        <p className="mt-1.5 text-[1rem] leading-snug">
-          <strong className="font-semibold">Choose one.</strong> The list is for the whole month — you don’t need to finish it
-          now.
-        </p>
-      </div>
-      <div className="flex items-center justify-between pt-3.5 pb-0.5">
-        <span className="label text-muted">This month</span>
-        <Tally done={done} total={month.tasks.length} />
-      </div>
-      <TaskList
-        tasks={month.tasks}
-        checked={monthly}
-        onToggle={toggleMonthly}
-        scope="monthly"
-        label={`${month.title} tasks for ${month.name}`}
-      />
+      {catchUpFirst ? catchUp : project}
       <p className="label pt-4 pb-0.5 text-muted" aria-hidden="true">
         Or
       </p>
-      <TaskList tasks={[weekend.catchUp]} checked={weekendChecks} onToggle={toggleWeekend} scope="weekend" label="Catch up instead" />
+      {catchUpFirst ? project : catchUp}
     </Section>
   );
 }

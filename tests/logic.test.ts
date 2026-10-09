@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { dailyEssentials, monthlyDeepClean, weeklySchedule } from '../src/data/cleaning';
 import { dateForWeekday, dateKey, isWeekend, monthKey, parseDayParam, weekendStart } from '../src/lib/dates';
-import { planFor } from '../src/lib/schedule';
+import { monthFocusFor, planFor } from '../src/lib/schedule';
 import { isOnboarded, keys, pruneOld, readList, resetAllProgress, resetDay, setOnboarded, writeList } from '../src/lib/storage';
 
 // Minimal in-memory localStorage
@@ -47,6 +47,52 @@ describe('schedule', () => {
   it('formats local keys', () => {
     expect(dateKey(new Date(2026, 0, 3))).toBe('2026-01-03');
     expect(monthKey(new Date(2026, 11, 31))).toBe('2026-12');
+  });
+});
+
+describe('2027 calendar', () => {
+  // The printed calendar's zones, by Date#getDay (0 = Sunday).
+  const PRINTED = ['Catch-Up / Reset', 'Living Room', 'Bedrooms', 'Entry/Bathroom', 'Kitchen Reset', 'Deep Cleaning', 'Home Project'];
+  const zoneOf = (d: Date) => {
+    const p = planFor(d);
+    return p.kind === 'weekday' ? p.focus.zone : p.day.zone;
+  };
+
+  it('every day of 2027 gets the zone printed for its weekday', () => {
+    for (let d = new Date(2027, 0, 1); d.getFullYear() === 2027; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+      expect(zoneOf(d), dateKey(d)).toBe(PRINTED[d.getDay()]);
+    }
+  });
+
+  it('Jan 1 2027 is a Friday: Deep Cleaning with the January project', () => {
+    const jan1 = new Date(2027, 0, 1);
+    expect(jan1.getDay()).toBe(5);
+    expect(planFor(jan1)).toMatchObject({ kind: 'weekend', day: { zone: 'Deep Cleaning' }, month: { name: 'January' } });
+  });
+
+  it('each month shows its own monthly home project', () => {
+    for (let m = 0; m < 12; m++) expect(monthFocusFor(new Date(2027, m, 15)).month).toBe(m);
+    expect(monthFocusFor(new Date(2026, 11, 31)).name).toBe('December');
+    expect(monthFocusFor(new Date(2027, 0, 1)).name).toBe('January');
+  });
+
+  it('weekends that span a month or year keep one catch-up key, monthly progress follows the month', () => {
+    // Fri Dec 31 2027, Sat Jan 1 2028, Sun Jan 2 2028
+    const fri = new Date(2027, 11, 31);
+    expect(fri.getDay()).toBe(5);
+    expect(dateKey(weekendStart(new Date(2028, 0, 2)))).toBe('2027-12-31');
+    expect(monthKey(fri)).toBe('2027-12');
+    expect(monthKey(new Date(2028, 0, 1))).toBe('2028-01');
+    // Fri Apr 30, Sat May 1, Sun May 2 2027
+    expect(dateKey(weekendStart(new Date(2027, 4, 2)))).toBe('2027-04-30');
+    expect(planFor(new Date(2027, 4, 1))).toMatchObject({ month: { name: 'May' } });
+  });
+
+  it('day keys stay local across DST changes', () => {
+    // US DST starts Mar 14 2027 and ends Nov 7 2027 (both Sundays)
+    expect(dateKey(new Date(2027, 2, 14, 23, 30))).toBe('2027-03-14');
+    expect(dateKey(new Date(2027, 10, 7, 0, 30))).toBe('2027-11-07');
+    expect(zoneOf(new Date(2027, 2, 15))).toBe('Living Room');
   });
 });
 

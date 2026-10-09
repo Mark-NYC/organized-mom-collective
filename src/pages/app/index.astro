@@ -3,7 +3,7 @@ import Layout from '../../layouts/AppLayout.astro';
 import TodayApp from '../../components/TodayApp';
 ---
 
-<Layout description="What to clean today: a small daily reset plus one area to focus on.">
+<Layout description="What to clean today: the Daily Reset plus today’s zone from your calendar.">
   <TodayApp client:only="react">
     <div slot="fallback" aria-busy="true">
       <div class="h-40"></div>

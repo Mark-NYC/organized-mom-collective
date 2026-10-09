@@ -30,11 +30,11 @@ export default function SettingsApp() {
     <>
       <ul className="border-t border-rule-strong">
         <Row
-          title="Replay the introduction"
-          detail="See the three welcome screens again."
+          title="See the welcome screen again"
+          detail="How the app works with your calendar. Your checkmarks are kept."
           action={
             <button type="button" onClick={replay} className="btn-secondary">
-              Replay
+              Show
             </button>
           }
         />
@@ -49,7 +49,7 @@ export default function SettingsApp() {
         />
         <Row
           title="Reset all progress"
-          detail="Clear every checkmark, including monthly projects."
+          detail="Clear every checkmark, including monthly home projects."
           action={
             <button type="button" onClick={() => setConfirmAll(true)} className="btn-secondary border-[#8c3b3b] text-[#8c3b3b] hover:bg-[#8c3b3b]">
               Reset all

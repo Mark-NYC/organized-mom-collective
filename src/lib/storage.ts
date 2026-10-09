@@ -10,7 +10,7 @@
  *   omc:v1:daily:YYYY-MM-DD       checked daily essentials for that day
  *   omc:v1:focus:YYYY-MM-DD       checked Mon–Thu focus tasks for that day
  *   omc:v1:weekend:YYYY-MM-DD     weekend-only choices, keyed by that weekend's Friday
- *   omc:v1:monthly:YYYY-MM        checked monthly deep-clean tasks for that month
+ *   omc:v1:monthly:YYYY-MM        checked monthly home project tasks for that month
  *
  * Per-session (sessionStorage), not progress:
  *   omc:v1:entry-source           how this visit arrived, e.g. "calendar" (the printed QR)

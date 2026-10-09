@@ -140,7 +140,7 @@ export interface WeekendDay {
   zone: string;
 }
 
-/** Friday–Sunday: flexible days built around the month's deep-clean project. */
+/** Friday–Sunday: flexible, optional days built around the monthly home project. */
 export const weekend = {
   icon: '/icons/zones/deep-clean.png',
   days: [
@@ -149,7 +149,7 @@ export const weekend = {
     { day: 0, dayLabel: 'Sunday', shortLabel: 'Sun', zone: 'Catch-Up / Reset' },
   ] as WeekendDay[],
   description:
-    'Use the weekend for one deep-cleaning task, a seasonal project, or catching up on the week. All optional.',
+    'Do one task from the monthly home project, catch up on the week, or skip it.',
   catchUp: { id: 'catch-up', label: 'Catch up on this week’s cleaning instead' } as Task,
 };
 
