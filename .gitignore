@@ -11,6 +11,7 @@ npm-debug.log*
 # environment
 .env
 .env.*
+!.env.example
 
 # editors / OS
 .vscode/*

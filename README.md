@@ -2,7 +2,7 @@
 
 Companion web app for the Organized Mom Collective family wall calendar. People scan the QR code on the calendar (`/start`) and land in the app on **Today**: a small daily reset plus one area to focus on.
 
-Astro + TypeScript + Tailwind CSS v4, with React islands only where there's state. No backend, no accounts — progress is saved in the browser's `localStorage`.
+Astro + TypeScript + Tailwind CSS v4, with React islands only where there's state. No backend, no accounts — progress is saved in the browser's `localStorage`. The one exception is the customer survey (`/survey`), which sends answers to Supabase (see `supabase/README.md`).
 
 ## Install / run / build
 
@@ -39,6 +39,7 @@ npm run verify    # build + check:site + tests
 | Public header / footer (never shown in the app) | `src/components/resources/SiteHeader.astro`, `SiteFooter.astro` |
 | Public-page pieces: calendar options, Shop button, phone frame | `src/components/site/` |
 | "Shop" buttons | `ShopButton` goes straight to the Etsy listing (best value first) once an `etsyUrl` is set; until then to `/calendar#buy` |
+| **Customer survey** (`/survey`, noindex) and results (`/survey/admin`, admins only) | Questions and answer ids: `src/data/survey.ts`. UI: `src/components/survey/`. Supabase calls, stats, CSV: `src/lib/survey.ts`. Database, security and setup: `supabase/README.md`. Needs `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_ANON_KEY` at build time (`.env.example`). |
 | **Resource library** (`/resources`: hub, pillar pages, articles) | `src/pages/resources/`, articles in `src/content/articles/`. Editorial system and code map: `CLAUDE.md` and `docs/editorial/` |
 | Layouts: public (indexable) vs app (noindex) | `src/layouts/PublicLayout.astro`, `src/layouts/AppLayout.astro` |
 | UI components | `src/components/` |
@@ -73,6 +74,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 | Area | Routes | Indexing |
 | --- | --- | --- |
 | Public site | `/` (homepage), `/calendar` (product page, buy on Etsy), `/companion` (how the cleaning companion works; "Get Started" in the header), `/resources`, `/resources/<slug>`, `/resources/topics/<pillar>`, `/sitemap.xml` | indexable, canonical URLs (no trailing slash); the hub stays noindex until it has articles; the 404 is noindex |
+| Survey | `/survey` (shared by link), `/survey/admin` (results, sign-in required) | noindex, not in the sitemap |
 | QR entry | `/start` — **permanent**, printed on every calendar as `https://organizedmomcollective.com/start` | noindex |
 | Companion app | `/app` (Today), `/app/week`, `/app/reorder`, `/app/settings`. `/app/tidy` is the old name for Week and redirects there, keeping `#monthly-focus` | `noindex, follow` |
 | Accounts (not built) | e.g. `/login`, `/account` | — |

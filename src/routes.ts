@@ -7,6 +7,8 @@
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
+ *           /survey            customer discovery survey (noindex, shared by link)
+ *           /survey/admin      survey results, admins only (noindex)
  *   QR      /start             permanent entry point printed on calendars → APP
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
  *           /app/tidy → /app/week (old name, kept so earlier links still work)
@@ -24,6 +26,8 @@ export const routes = {
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
+  survey: '/survey',
+  surveyAdmin: '/survey/admin',
   start: '/start',
   today: '/app',
   week: '/app/week',
