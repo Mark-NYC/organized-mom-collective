@@ -22,7 +22,7 @@ What she wants from us: a clear answer, one routine she can start today, and per
 
 Our signature format, **The Real-Life Reset**, is how that shows up on the page: answer, insight, routine, fallback, one small win. See [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md).
 
-The products follow the same idea: a weekly paper wall calendar (schedule, meals, groceries, to-dos, prayer and gratitude on one page) and a companion app that turns each day's cleaning zone into a short checklist. Articles stand on their own; the products are one way to put the advice into practice. See "Product mentions" in [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes).
+The products follow the same idea: a weekly paper wall calendar (schedule, meals, groceries, to-dos, prayer and gratitude on one page) and a companion website that turns each day's cleaning zone into a short checklist. (Call it a website or "the cleaning companion", never an app, and never promise features it doesn't have.) Articles stand on their own; the products are one way to put the advice into practice. See "Product mentions" in [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes).
 
 ## Convictions
 

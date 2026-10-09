@@ -60,7 +60,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 
 ## Brand notes
 
-- **Fonts:** Montserrat for everything; Georgia Pro (Black Italic) only for the month name and year, as on the printed calendar. Georgia Pro is a licensed Monotype font and isn't bundled — devices that have it use it, everything else falls back to Georgia. If you buy a web license, add an `@font-face` in `src/styles/global.css`.
+- **Fonts:** Montserrat for everything in the companion website; Georgia Pro (Black Italic) only for the month name and year, as on the printed calendar. The public resource library (`/resources`) also uses Georgia for article titles and section headings (see `docs/editorial/BLOG_EDITORIAL_STYLE.md`). Georgia Pro is a licensed Monotype font and isn't bundled — devices that have it use it, everything else falls back to Georgia. If you buy a web license, add an `@font-face` in `src/styles/global.css`.
 - **Color:** the app is white / `#545454` charcoal / ruled lines. The current month's color (from `src/theme.ts`) is the only accent: month header, today's cleaning tag, selected states.
 - **Zone labels** match the printed calendar exactly: Living Room, Bedrooms, Entry/Bathroom, Kitchen Reset; Friday Deep Cleaning, Saturday Home Project, Sunday Catch-Up / Reset.
 

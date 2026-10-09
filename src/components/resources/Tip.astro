@@ -1,0 +1,17 @@
+---
+/**
+ * A practical tip or aside, lightly tinted. Use sparingly: one or two per article,
+ * for something useful that sits beside the main thread.
+ */
+interface Props {
+  title?: string;
+  label?: string;
+}
+const { title, label = 'Good to know' } = Astro.props;
+---
+
+<aside class="my-10 rounded-[6px] bg-sage-wash px-5 py-6 sm:px-7" aria-label={title ?? label}>
+  <p class="label text-soft">{label}</p>
+  {title && <p class="mt-2 text-[1.15rem] leading-snug font-bold">{title}</p>}
+  <div class="article-callout mt-3 text-[1rem] leading-relaxed sm:text-[1.0625rem]"><slot /></div>
+</aside>

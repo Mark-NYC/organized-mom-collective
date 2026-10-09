@@ -13,6 +13,10 @@ import WhenLifeHappens from '../../components/resources/WhenLifeHappens.astro';
 import NextSmallWin from '../../components/resources/NextSmallWin.astro';
 import Checklist from '../../components/resources/Checklist.astro';
 import ProductNote from '../../components/resources/ProductNote.astro';
+import ProductCTA from '../../components/resources/ProductCTA.astro';
+import Figure from '../../components/resources/Figure.astro';
+import Tip from '../../components/resources/Tip.astro';
+import ChecklistGrid from '../../components/resources/ChecklistGrid.astro';
 import CleaningWeek from '../../components/resources/CleaningWeek.astro';
 import Versions from '../../components/resources/Versions.astro';
 import { formatDate, getArticles, getNext, getRelated, isoDate, type Article } from '../../lib/articles';
@@ -20,6 +24,7 @@ import { tableOfContents } from '../../lib/toc';
 import { getPillar } from '../../data/pillars';
 import { routes } from '../../routes';
 import { BRAND_NAME } from '../../config';
+import { imageAttrs, largestImage } from '../../data/images';
 
 export async function getStaticPaths() {
   const articles = await getArticles();
@@ -44,7 +49,9 @@ const updated = data.updated ?? data.published;
 
 const site = Astro.site!;
 const url = new URL(routes.article(article.id), site).href;
-const ogImage = '/images/reorder/calendar-in-use-1280.webp';
+// The hero photo when there is one; otherwise the calendar in use.
+const ogImage = data.hero ? largestImage(data.hero.image) : '/images/reorder/calendar-in-use-1280.webp';
+const hero = data.hero ? { ...imageAttrs(data.hero.image), alt: data.hero.alt, caption: data.hero.caption } : undefined;
 const organization = {
   '@type': 'Organization',
   name: BRAND_NAME,
@@ -76,16 +83,31 @@ const jsonLd = [
   },
 ];
 
-const components = { Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Checklist, ProductNote, CleaningWeek, Versions };
+const components = {
+  Shift,
+  RealLifeVersion,
+  WhenLifeHappens,
+  NextSmallWin,
+  Checklist,
+  ChecklistGrid,
+  ProductNote,
+  ProductCTA,
+  CleaningWeek,
+  Versions,
+  Figure,
+  Tip,
+};
 ---
 
-<PublicLayout fullTitle={data.seoTitle} description={data.description} chrome ogType="article" ogImage={ogImage} jsonLd={jsonLd}>
-  <article>
-    <header>
+<PublicLayout fullTitle={data.seoTitle} description={data.description} chrome width="wide" ogType="article" ogImage={ogImage} jsonLd={jsonLd}>
+  <article class="article-shell">
+    <header class="mx-auto max-w-[43.5rem]">
       <Breadcrumbs items={[{ label: 'Resources', href: routes.resources }, { label: pillar.name, href: routes.pillar(pillar.id) }]} />
-      <h1 class="page-title mt-5 text-balance">{data.title}</h1>
-      <p class="mt-4 text-[1.15rem] leading-relaxed text-soft">{data.summary}</p>
-      <p class:list={['mt-5 flex flex-wrap gap-x-4 gap-y-1 text-[0.85rem] text-muted', toc.length < 4 && 'border-b border-rule pb-5']}>
+      <h1 class="article-title mt-5">{data.title}</h1>
+      <p class="article-deck mt-5">{data.summary}</p>
+      <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[0.85rem] text-muted">
+        <span>By {BRAND_NAME}</span>
+        <span aria-hidden="true">·</span>
         <span>{data.updated ? 'Updated' : 'Published'} <time datetime={isoDate(updated)}>{formatDate(updated)}</time></span>
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
@@ -93,15 +115,34 @@ const components = { Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Chec
     </header>
 
     {
+      hero && (
+        <figure class="mx-auto mt-9 max-w-[60rem]">
+          <img
+            src={hero.src}
+            srcset={hero.srcset}
+            width={hero.width}
+            height={hero.height}
+            sizes="(min-width: 1024px) 960px, 100vw"
+            alt={hero.alt}
+            fetchpriority="high"
+            decoding="async"
+            class="article-photo aspect-[3/2]"
+          />
+          {hero.caption && <figcaption class="article-caption mx-auto max-w-[43.5rem]">{hero.caption}</figcaption>}
+        </figure>
+      )
+    }
+
+    {
       toc.length >= 4 && (
-        <nav aria-label="In this article" class="mt-4 border-y border-rule py-1 print:hidden">
+        <nav aria-label="In this article" class:list={['mx-auto max-w-[43.5rem] border-y border-rule py-1 print:hidden', hero ? 'mt-8' : 'mt-6']}>
           {/* Collapsed, so the answer stays near the top on phones. */}
           <details class="group">
             <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
               <span class="label text-muted">In this article · {toc.length} sections</span>
               <span aria-hidden="true" class="text-[1.1rem] leading-none text-muted transition-transform group-open:rotate-45">+</span>
             </summary>
-            <ol class="mt-2 space-y-1.5 text-[0.95rem]">
+            <ol class="mt-2 mb-2 space-y-1.5 text-[0.95rem]">
               {toc.map((h) => (
                 <li>
                   <a href={`#${h.slug}`} class="underline decoration-rule underline-offset-4 hover:decoration-ink">
@@ -115,34 +156,35 @@ const components = { Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Chec
       )
     }
 
-    <div class="article-body mt-8">
+    <div class="article-body mt-8 sm:mt-10">
       <Content components={components} />
     </div>
   </article>
 
   {
-    next && (
-      <section aria-labelledby="next-h" class="mt-14">
-        <h2 id="next-h" class="section-label">Read next</h2>
-        <div class="mt-5">
-          <ArticleCard article={next} />
-        </div>
-      </section>
-    )
-  }
-
-  {
-    related.length > 0 && (
-      <section aria-labelledby="related-h" class="mt-14">
-        <h2 id="related-h" class="section-label">More from the guide</h2>
-        <ul class="mt-5 grid gap-8 sm:grid-cols-2">
-          {related.map((a) => (
-            <li>
-              <ArticleCard article={a} />
-            </li>
-          ))}
-        </ul>
-      </section>
+    (next || related.length > 0) && (
+      <div class="mx-auto mt-16 max-w-[60rem] border-t border-rule pt-12">
+        {next && (
+          <section aria-labelledby="next-h">
+            <h2 id="next-h" class="section-label">Read next</h2>
+            <div class="mt-6">
+              <ArticleCard article={next} layout="feature" size="lg" />
+            </div>
+          </section>
+        )}
+        {related.length > 0 && (
+          <section aria-labelledby="related-h" class:list={[next && 'mt-14']}>
+            <h2 id="related-h" class="section-label">More from the guide</h2>
+            <ul class="mt-6 grid gap-10 sm:grid-cols-2 md:grid-cols-3">
+              {related.map((a) => (
+                <li>
+                  <ArticleCard article={a} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
     )
   }
 

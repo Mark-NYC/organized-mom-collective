@@ -27,7 +27,7 @@ How articles link to each other and to the products, so every page leads somewhe
 - Usually a one-sentence bridge just before the product note.
 
 ### 6. Product links
-- Only through `<ProductNote>`, at most once per article, never before the Real-Life Version. The component supplies the link: `/app/reorder` for the calendar, `/app` for the companion app.
+- Only through the article's one product callout (`<ProductCTA>`, or the older `<ProductNote>`), never before the Real-Life Version. The component supplies the link: `/app/reorder` (the existing calendar page with its Etsy buttons) for the calendar, `/app` for the companion website.
 - No product links in headings, the short answer, The Shift or Your Next Small Win.
 - Set `cta` in frontmatter to the product mentioned (`none` if there's no note).
 

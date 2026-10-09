@@ -10,6 +10,7 @@ import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { pillarIds, pillars } from './data/pillars';
+import { articleImageNames } from './data/images';
 
 const prefixOf: Record<string, string> = Object.fromEntries(pillars.map((p) => [p.id, p.prefix]));
 
@@ -39,8 +40,17 @@ const articles = defineCollection({
       related: z.array(reference('articles')).max(3).default([]),
       /** The next-step article, shown after Your Next Small Win. */
       next: reference('articles').optional(),
-      /** Which product the article mentions in its <ProductNote>, if any. */
-      cta: z.enum(['calendar', 'app', 'none']),
+      /** Optional lead photograph, shown under the header and on cards. Name from src/data/images.ts. */
+      hero: z
+        .object({
+          image: z.enum(articleImageNames),
+          /** What the photo shows, for someone who can't see it. */
+          alt: z.string().min(15),
+          caption: z.string().optional(),
+        })
+        .optional(),
+      /** Which product the article's product callout points to, if any: the wall calendar or the companion website. */
+      cta: z.enum(['calendar', 'companion', 'none']),
       /** Drafts render in `astro dev` only. */
       draft: z.boolean().default(false),
     })

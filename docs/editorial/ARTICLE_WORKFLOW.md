@@ -22,7 +22,7 @@ Never record search volumes, engagement figures or trends a tool didn't show.
 Also:
 
 - **Overlap check:** read the frontmatter and headings of every published article in `src/content/articles/` and the overlap boundaries in CONTENT_CLUSTERS.md. If this article would answer a query another one already answers, resolve it (sharpen, merge, or move the boundary) before writing.
-- **Product check:** if the article will mention a product, confirm each feature against the verified list in [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes) (and the app or listing images if it isn't listed).
+- **Product check:** if the article will mention a product, confirm each feature against the verified list in [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes) (and the companion website or listing images if it isn't listed).
 
 ## 2. Develop the editorial brief
 

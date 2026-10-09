@@ -1,5 +1,8 @@
 ---
-/** The Real-Life Version: the routine or checklist itself, set apart so it's easy to find again. */
+/**
+ * The Real-Life Version: the routine or checklist itself. Not boxed: a label and a
+ * heading, then the content, which can include breakout rows (e.g. <ChecklistGrid>).
+ */
 interface Props {
   title: string;
   /** Anchor id, so the table of contents and other articles can link straight to it. */
@@ -10,8 +13,8 @@ interface Props {
 const { title, id = 'the-real-life-version', print = false } = Astro.props;
 ---
 
-<section id={id} class="my-10 scroll-mt-6 rounded-[4px] bg-cream px-5 py-7 sm:px-8" aria-labelledby={`${id}-h`} data-print-schedule={print || undefined}>
-  <p class="label text-soft">The Real-Life Version</p>
-  <h2 id={`${id}-h`} class="mt-2 text-[1.5rem] leading-tight font-bold text-balance">{title}</h2>
-  <div class="article-callout mt-4"><slot /></div>
+<section id={id} class="article-section scroll-mt-6" aria-labelledby={`${id}-h`} data-print-schedule={print || undefined}>
+  <p class="label mt-12 flex items-center gap-2 text-soft"><span aria-hidden="true" class="inline-block h-[3px] w-6 bg-month"></span>The Real-Life Version</p>
+  <h2 id={`${id}-h`} class="article-heading mt-2">{title}</h2>
+  <slot />
 </section>

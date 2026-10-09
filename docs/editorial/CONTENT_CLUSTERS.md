@@ -7,7 +7,7 @@ Pillars are defined in code in `src/data/pillars.ts` (id, tracker prefix, name, 
 | Pillar | Code id | Prefix | Covers | Product anchor |
 | --- | --- | --- | --- | --- |
 | **Family Planning & Routines** | `family-planning` | FP | Family schedules, the family calendar, home command centers, the weekly reset, meal planning, grocery planning | Wall calendar: daily schedule columns, meal plan, grocery list and to-do list on one weekly page |
-| **Simple Home Cleaning** | `home-cleaning` | HC | Daily, weekly and monthly cleaning routines, and realistic catch-up | Companion cleaning app: Daily Reset, weekday zones, weekend options, monthly home projects |
+| **Simple Home Cleaning** | `home-cleaning` | HC | Daily, weekly and monthly cleaning routines, and realistic catch-up | Companion cleaning website: Daily Reset, weekday zones, weekend options, monthly home projects |
 | **Intentional Family Life** | `intentional-family-life` | IF | Family relationships, priorities, prayer, gratitude, personal well-being, shared responsibilities | Wall calendar: self-care habits, word of the week, family and friends, grateful for (prayer and gratitude) |
 
 ## How a cluster works

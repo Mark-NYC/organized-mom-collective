@@ -58,7 +58,7 @@ Automatic (from the template, `src/pages/resources/[slug].astro` and `src/layout
 
 - **Canonical URL**: `https://organizedmomcollective.com/resources/<slug>`, no trailing slash (matching internal links).
 - **Open Graph**: title, description, type `article`, URL, image.
-- **Sitemap**: `/sitemap.xml` lists the home page, the hub (once it has articles), pillar pages with articles, and every published article with `lastmod`. `robots.txt` points to it. The companion app and `/start` are noindex and excluded.
+- **Sitemap**: `/sitemap.xml` lists the home page, the hub (once it has articles), pillar pages with articles, and every published article with `lastmod`. `robots.txt` points to it. The companion website (`/app/…`) and `/start` are noindex and excluded.
 
 ## Structured data
 
@@ -81,7 +81,7 @@ Not used, on purpose: `FAQPage` (FAQ rich results are limited to authoritative g
 
 ## Indexing rules
 
-- Article, pillar and hub pages are indexable; the companion app (`/app/…`) and `/start` stay `noindex`.
+- Article, pillar and hub pages are indexable; the companion website (`/app/…`) and `/start` stay `noindex`.
 - Pillar pages are built only when the pillar has at least one published article.
 - The hub is `noindex` and out of the sitemap until the first article is published, so search engines never see an empty library.
 - Drafts (`draft: true`) render in `npm run dev` only and are never built for production.

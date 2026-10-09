@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Organized Mom Collective: a static Astro site with two parts. The companion cleaning app (`/app`, noindex) for owners of the printed family wall calendar, and a public resource library (`/resources`) of articles in the brand's Real-Life Reset format.
+Organized Mom Collective: a static Astro site with two parts. The companion cleaning website (`/app`, noindex; in all copy call it a website or "the cleaning companion", never an app) for owners of the printed family wall calendar, and a public resource library (`/resources`) of articles in the brand's Real-Life Reset format.
 
 Architecture, commands, routes, storage and brand notes for the app are in [README.md](README.md). Don't duplicate them here; update the README when they change.
 
@@ -12,6 +12,7 @@ Architecture, commands, routes, storage and brand notes for the app are in [READ
 | --- | --- |
 | [BRAND_VOICE.md](docs/editorial/BRAND_VOICE.md) | Audience, positioning, tone, convictions, what we never write |
 | [ARTICLE_FORMAT.md](docs/editorial/ARTICLE_FORMAT.md) | The Real-Life Reset structure, curiosity loops, components, verified product features |
+| [BLOG_EDITORIAL_STYLE.md](docs/editorial/BLOG_EDITORIAL_STYLE.md) | How articles read and look: writing and design rules, photography direction and shot list, quality checklist |
 | [SEO_STRATEGY.md](docs/editorial/SEO_STRATEGY.md) | Intent research, keywords, headings, metadata, structured data, quality bar |
 | [CONTENT_CLUSTERS.md](docs/editorial/CONTENT_CLUSTERS.md) | The three pillars (Family Planning & Routines, Simple Home Cleaning, Intentional Family Life), 18 planned articles, relationships, overlap boundaries, backlog |
 | [INTERNAL_LINKING.md](docs/editorial/INTERNAL_LINKING.md) | Parent, sibling, next-step, bridge and product links; incoming-link maintenance |
@@ -37,11 +38,12 @@ Non-negotiables (details in the docs above):
 | Frontmatter schema | `src/content.config.ts` |
 | Pillars (ids, tracker prefixes, page copy) | `src/data/pillars.ts` |
 | Article template, hub, pillar pages | `src/pages/resources/[slug].astro`, `src/pages/resources/index.astro`, `src/pages/resources/topics/[pillar].astro` |
-| Branded MDX components (Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Checklist, Versions, ProductNote, CleaningWeek) | `src/components/resources/` |
+| MDX components (Figure, Tip, Checklist, ChecklistGrid, ProductCTA, Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Versions, CleaningWeek; legacy ProductNote) | `src/components/resources/` |
+| Article photography registry / image tool | `src/data/images.ts` / `scripts/article-image.py` (files in `public/images/resources/`) |
 | Reference article (the quality bar for new articles) | `src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01) |
 | Article helpers / table of contents | `src/lib/articles.ts`, `src/lib/toc.ts` |
 | Public layout (header, footer, canonical, JSON-LD) | `src/layouts/PublicLayout.astro`, `src/layouts/BaseLayout.astro` |
-| Article body styles | `src/styles/global.css` (`.article-body`) |
+| Article typography and layout (`.article-title`, `.article-body` grid, `.breakout`) | `src/styles/global.css` |
 | Sitemap | `src/pages/sitemap.xml.ts` |
 | Post-build checks + content inventory | `scripts/check-site.mjs` (`npm run check:site`) |
 | Copy-ready templates (article, brief, Pinterest plan) | `docs/editorial/templates/` |

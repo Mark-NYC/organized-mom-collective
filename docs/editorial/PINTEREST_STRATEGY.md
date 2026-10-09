@@ -71,7 +71,7 @@ Every article gets exactly three pins, each with a different job. They must be v
 
 ## Visual identity
 
-Pins use the same identity as the site, the app and the printed calendar. They should feel warm, helpful, approachable and premium: like a page from a well-made planner, not a generic marketing template or an obviously AI-generated image.
+Pins use the same identity as the site, the companion website and the printed calendar. They should feel warm, helpful, approachable and premium: like a page from a well-made planner, not a generic marketing template or an obviously AI-generated image.
 
 ### Format
 
@@ -135,14 +135,14 @@ Starting layouts (adapt freely):
 | --- | --- | --- |
 | A. Photo + headline panel | Search-driven | Top 55%: calm real-life photo. Bottom: cream panel with eyebrow, headline, supporting line, brand. |
 | B. Big type on color | Curiosity-driven | Solid wash background, oversized two-line headline with one Georgia italic accent word, a thin month-color rule, brand at bottom. |
-| C. Planner page | Save-worthy | Paper-white page with ruled lines, eyebrow + title, 4–7 checklist items with empty boxes, a time stamp ("15 MIN") in a thin box like the app's, brand at bottom. |
+| C. Planner page | Save-worthy | Paper-white page with ruled lines, eyebrow + title, 4–7 checklist items with empty boxes, a time stamp ("15 MIN") in a thin box like the companion website's, brand at bottom. |
 
 ## Image generation and production
 
 AI image generation is allowed for **backgrounds and scenes only**: a kitchen counter in soft morning light, a tidy entryway, paper textures, a cup of coffee beside a notebook. The plan's prompt for each pin is complete (dimensions, composition, colors, lighting, typography, constraints), but:
 
 - **Text is set in a design tool, not by the image model.** Generate the image with an empty area where text will go, then add the exact overlay text in Figma or Canva with the brand fonts. Image models misspell and distort text; the overlay must match the plan word for word.
-- **Never generate the calendar, the app, a phone screen showing the app, or any packaging.** No fake product images, no imitation of the calendar's layout as if it were the real thing.
+- **Never generate the calendar, the companion website, a phone screen showing it, or any packaging.** No fake product images, no imitation of the calendar's layout as if it were the real thing.
 - **No generated people's faces as the subject.** Hands, a back view, or no people at all. Nothing that looks like a testimonial or a "real customer".
 - **Style constraints for every prompt:** natural soft daylight, muted warm palette matching the brand colors, uncluttered, real-looking homes (lived-in, not staged showrooms), no glossy CGI look, no oversaturation, no surreal details, no text, letters, logos or watermarks in the generated image.
 - Review generated images at full size for artifacts (warped objects, extra fingers, impossible shadows) before using them. Discard anything that looks generated.

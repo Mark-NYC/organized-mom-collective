@@ -1,0 +1,30 @@
+---
+/**
+ * The article's one product callout: a real product photo, a short useful line,
+ * and a link to the existing purchase route. Describe only verified features
+ * (docs/editorial/ARTICLE_FORMAT.md → Product notes). Call the companion a
+ * website, never an app, and don't promise features that don't exist.
+ */
+import { imageAttrs, type ArticleImageName } from '../../data/images';
+import { routes } from '../../routes';
+
+interface Props {
+  title: string;
+  image: ArticleImageName;
+  alt: string;
+  /** Button text. */
+  cta?: string;
+}
+const { title, image, alt, cta = 'See the Wall Calendar' } = Astro.props;
+const attrs = imageAttrs(image);
+---
+
+<aside class="breakout my-12 overflow-hidden rounded-[8px] bg-cream md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center" aria-label="The Organized Mom Collective wall calendar">
+  <img {...attrs} sizes="(min-width: 768px) 456px, 100vw" alt={alt} loading="lazy" decoding="async" class="block aspect-[5/4] h-auto w-full object-cover" />
+  <div class="px-6 py-7 sm:px-9 sm:py-9">
+    <p class="label text-soft">From Organized Mom Collective</p>
+    <p class="mt-2 text-[1.5rem] leading-[1.2] font-bold text-balance sm:text-[1.75rem]" style="font-family: var(--font-editorial)">{title}</p>
+    <div class="article-callout mt-3 text-[1rem] leading-relaxed sm:text-[1.0625rem]"><slot /></div>
+    <a href={routes.reorder} class="btn-primary mt-6 w-full sm:w-auto">{cta}</a>
+  </div>
+</aside>

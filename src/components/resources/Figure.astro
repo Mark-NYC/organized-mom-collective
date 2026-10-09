@@ -1,0 +1,35 @@
+---
+/**
+ * A photograph in an article, with an optional caption. Images come from the
+ * registry in src/data/images.ts (responsive sizes, no layout shift).
+ *
+ * size: 'content' (reading column), 'wide' (breakout, ~960px).
+ */
+import { imageAttrs, type ArticleImageName } from '../../data/images';
+
+interface Props {
+  image: ArticleImageName;
+  /** What the photo shows, for someone who can't see it. */
+  alt: string;
+  caption?: string;
+  size?: 'content' | 'wide';
+  /** Load immediately (for a photo near the top of the page). */
+  priority?: boolean;
+}
+const { image, alt, caption, size = 'content', priority = false } = Astro.props;
+const attrs = imageAttrs(image);
+const sizes = size === 'wide' ? '(min-width: 1024px) 960px, 100vw' : '(min-width: 768px) 696px, 100vw';
+---
+
+<figure class:list={['my-10', size === 'wide' && 'breakout']}>
+  <img
+    {...attrs}
+    sizes={sizes}
+    alt={alt}
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding="async"
+    class="article-photo"
+  />
+  {caption && <figcaption class="article-caption">{caption}</figcaption>}
+</figure>
