@@ -8,7 +8,7 @@
  * The anon key can only call survey_track and survey_submit; everything else
  * is locked down in supabase/migrations/*_customer_survey.sql.
  */
-import { surveyQuestions, type SurveyAnswers } from '../data/survey';
+import { cleanAnswers, otherKey, surveyQuestions, type SurveyAnswers, type SurveySource } from '../data/survey';
 
 const URL_ = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
 const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
@@ -53,22 +53,22 @@ function rpc(name: string, body: object, keepalive = false) {
   });
 }
 
-/** Progress beacon (0 = saw the intro, n = reached question n). Fire-and-forget. */
-export function trackStep(session: string, step: number) {
+/** Progress beacon (0 = saw the intro, n = reached question n). Fire-and-forget. The source is kept from the first beacon. */
+export function trackStep(session: string, step: number, source: SurveySource) {
   if (!surveyConfigured()) return;
-  rpc('survey_track', { p_session: session, p_step: step }, true).catch(() => {
+  rpc('survey_track', { p_session: session, p_step: step, p_source: source }, true).catch(() => {
     /* analytics never gets in her way */
   });
 }
 
 export type SubmitResult = 'ok' | 'rate_limited' | 'invalid' | 'error';
 
-export async function submitSurvey(session: string, answers: SurveyAnswers, website: string): Promise<SubmitResult> {
+export async function submitSurvey(session: string, answers: SurveyAnswers, website: string, source: SurveySource): Promise<SubmitResult> {
   if (!surveyConfigured()) return 'error';
-  const payload = { ...answers, q7: answers.q7?.trim() || undefined };
+  const payload = cleanAnswers(answers);
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const res = await rpc('survey_submit', { p_session: session, p_answers: payload, p_website: website });
+      const res = await rpc('survey_submit', { p_session: session, p_answers: payload, p_website: website, p_source: source });
       if (res.ok) {
         const result = (await res.json()) as SubmitResult;
         return result === 'ok' || result === 'rate_limited' || result === 'invalid' ? result : 'error';
@@ -106,6 +106,7 @@ export interface SessionRow {
   created_at: string;
   furthest_step: number;
   completed_at: string | null;
+  source: SurveySource;
 }
 
 export interface ResponseRow {
@@ -118,6 +119,12 @@ export interface ResponseRow {
   q5: string;
   q6: string;
   q7: string | null;
+  q1_other: string | null;
+  q2_other: string | null;
+  q3_other: string | null;
+  q5_other: string | null;
+  q6_other: string | null;
+  source: SurveySource;
   duration_seconds: number | null;
 }
 
@@ -144,8 +151,8 @@ async function selectAll<T>(token: string, table: string, columns: string, from?
 
 export async function loadSurveyData(token: string, from?: string, to?: string) {
   const [sessions, responses] = await Promise.all([
-    selectAll<SessionRow>(token, 'survey_sessions', 'id,created_at,furthest_step,completed_at', from, to),
-    selectAll<ResponseRow>(token, 'survey_responses', 'session_id,created_at,q1,q2,q3,q4,q5,q6,q7,duration_seconds', from, to),
+    selectAll<SessionRow>(token, 'survey_sessions', 'id,created_at,furthest_step,completed_at,source', from, to),
+    selectAll<ResponseRow>(token, 'survey_responses', 'session_id,created_at,q1,q2,q3,q4,q5,q6,q7,q1_other,q2_other,q3_other,q5_other,q6_other,source,duration_seconds', from, to),
   ]);
   return { sessions, responses };
 }
@@ -193,6 +200,12 @@ export interface OptionCount {
 export function answerCounts(responses: ResponseRow[]) {
   return surveyQuestions.flatMap((q) => {
     if (q.kind === 'text') return [];
+    const key = otherKey(q.id) as keyof ResponseRow;
+    /** What "Something else" meant, newest first. */
+    const otherTexts = responses
+      .map((r) => ({ text: r[key] as string | null | undefined, at: r.created_at }))
+      .filter((x): x is { text: string; at: string } => Boolean(x.text))
+      .reverse();
     const counts: OptionCount[] = q.options.map((o) => {
       const count = responses.filter((r) => {
         const a = r[q.id];
@@ -200,7 +213,7 @@ export function answerCounts(responses: ResponseRow[]) {
       }).length;
       return { id: o.id, label: o.label, count, share: responses.length ? count / responses.length : 0 };
     });
-    return [{ question: q, counts }];
+    return [{ question: q, counts, otherTexts }];
   });
 }
 
@@ -211,15 +224,25 @@ const csvCell = (v: string) => {
 };
 
 export function responsesCsv(responses: ResponseRow[]): string {
-  const header = ['submitted_at', 'response_id', ...surveyQuestions.map((q) => `${q.id} ${q.short}`), 'seconds_to_complete'];
+  // Each question, followed by its "Something else" text where it has that option.
+  const hasOther = (q: (typeof surveyQuestions)[number]) => q.kind !== 'text' && q.options.some((o) => o.id === 'other');
+  const header = [
+    'submitted_at',
+    'response_id',
+    'source',
+    ...surveyQuestions.flatMap((q) => [`${q.id} ${q.short}`, ...(hasOther(q) ? [`${q.id} something else`] : [])]),
+    'seconds_to_complete',
+  ];
   const rows = responses.map((r) => [
     r.created_at,
     r.session_id,
-    ...surveyQuestions.map((q) => {
+    r.source ?? '',
+    ...surveyQuestions.flatMap((q) => {
       const a = r[q.id];
-      if (q.kind === 'text') return (a as string | null) ?? '';
+      if (q.kind === 'text') return [(a as string | null) ?? ''];
       const ids = Array.isArray(a) ? a : [a];
-      return ids.map((id) => q.options.find((o) => o.id === id)?.label ?? id).join('; ');
+      const labels = ids.map((id) => q.options.find((o) => o.id === id)?.label ?? id).join('; ');
+      return hasOther(q) ? [labels, (r[otherKey(q.id) as keyof ResponseRow] as string | null) ?? ''] : [labels];
     }),
     r.duration_seconds == null ? '' : String(r.duration_seconds),
   ]);

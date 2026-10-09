@@ -27,8 +27,23 @@ Spam and duplicates, all enforced in the database: a hidden honeypot field, subm
 
 Then open `/survey` on your phone, finish it, and check `/survey/admin`.
 
+## Sharing links (`?source=`)
+
+Use a different link per channel so the admin view can compare them:
+
+| Where | Link |
+| --- | --- |
+| Website | `https://organizedmomcollective.com/survey?source=website` |
+| Instagram | `https://organizedmomcollective.com/survey?source=instagram` |
+| Card in the calendar box | `https://organizedmomcollective.com/survey?source=customer-insert` |
+| No source | `https://organizedmomcollective.com/survey` → recorded as `direct` |
+
+Case and spaces are ignored. Anything else (a typo, a made-up value) is stored as `other`, so a broken link shows up in the admin view instead of vanishing. The source is fixed at the first visit and saved on both the session and the response.
+
 ## Data
 
 - `survey_sessions`: one row per visit to `/survey`. `furthest_step`: 0 = saw the intro, 1–7 = reached question n, 8 = sent. Drop-off = sessions that stopped at a step.
-- `survey_responses`: one row per finished survey, answers stored as option ids from `src/data/survey.ts` (labels are applied in the admin view and CSV). No names, emails or IPs.
-- Adding or renaming an option: keep the id, or add the new id to both `src/data/survey.ts` and `survey_allowed()` in a new migration. `tests/survey.test.ts` fails if they drift.
+- `survey_responses`: one row per finished survey, answers stored as option ids from `src/data/survey.ts` (labels are applied in the admin view and CSV), plus `source`. No names, emails or IPs.
+- `q1_other`, `q2_other`, `q3_other`, `q5_other`, `q6_other`: the optional text typed after "Something else" (200 characters max). The database keeps it only when "Something else" was actually picked for that question.
+- Adding or renaming an option: keep the id, or add the new id to both `src/data/survey.ts` and `survey_allowed()` in a new migration. Same for sources (`SURVEY_SOURCES` / `survey_source()` and the two `check` constraints). `tests/survey.test.ts` fails if they drift.
+- Once the migration has been run against the live project, change it only through new migration files.

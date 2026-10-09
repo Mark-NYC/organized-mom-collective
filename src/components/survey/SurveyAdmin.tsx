@@ -11,6 +11,7 @@ import {
   type ResponseRow,
   type SessionRow,
 } from '../../lib/survey';
+import { SURVEY_SOURCES } from '../../data/survey';
 
 const TOKEN_KEY = 'omc:v1:survey-admin';
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -127,7 +128,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => void }) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [data, setData] = useState<{ sessions: SessionRow[]; responses: ResponseRow[] } | null>(null);
+  const [source, setSource] = useState('');
+  const [all, setAll] = useState<{ sessions: SessionRow[]; responses: ResponseRow[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -136,7 +138,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
     setLoading(true);
     setError('');
     loadSurveyData(auth.access_token, from || undefined, to || undefined)
-      .then((d) => live && setData(d))
+      .then((d) => live && setAll(d))
       .catch((err: Error) => {
         if (!live) return;
         if (err.message === 'expired') onSignOut();
@@ -148,6 +150,19 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
     };
   }, [auth.access_token, from, to]);
 
+  // The source filter is applied here, so the per-source table can still compare every source.
+  const data = useMemo(
+    () =>
+      all && source
+        ? { sessions: all.sessions.filter((x) => x.source === source), responses: all.responses.filter((x) => x.source === source) }
+        : all,
+    [all, source],
+  );
+  const bySource = useMemo(
+    () =>
+      SURVEY_SOURCES.map((src) => ({ src, ...funnel((all?.sessions ?? []).filter((x) => x.source === src)) })).filter((r) => r.views > 0),
+    [all],
+  );
   const stats = useMemo(() => (data ? funnel(data.sessions) : null), [data]);
   const counts = useMemo(() => (data ? answerCounts(data.responses) : []), [data]);
   const stories = useMemo(() => (data ? data.responses.filter((r) => r.q7).reverse() : []), [data]);
@@ -161,7 +176,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
     const blob = new Blob([responsesCsv(data.responses)], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `survey-responses-${from || 'start'}-to-${to || isoDay(new Date())}.csv`;
+    a.download = `survey-responses-${source ? `${source}-` : ''}${from || 'start'}-to-${to || isoDay(new Date())}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   };
@@ -187,6 +202,16 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
         </Field>
         <Field label="To">
           <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className={inputClass} />
+        </Field>
+        <Field label="Source">
+          <select value={source} onChange={(e) => setSource(e.target.value)} className={inputClass}>
+            <option value="">All sources</option>
+            {SURVEY_SOURCES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
         </Field>
         <div className="flex flex-wrap gap-2">
           <button type="button" className="btn-secondary" onClick={() => preset(7)}>
@@ -219,6 +244,42 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
             <Stat label="Started" value={String(stats.starts)} note={stats.views ? `${pct(stats.starts / stats.views)} of ${stats.views} visits` : undefined} />
             <Stat label="Median time" value={medianSeconds == null ? '—' : `${Math.floor(medianSeconds / 60)}:${String(medianSeconds % 60).padStart(2, '0')}`} note="min:sec" />
           </dl>
+
+          <h2 className="section-title mt-14 text-[1.4rem] sm:text-[1.6rem]">By source</h2>
+          <p className="mt-2 text-[0.95rem] text-soft">
+            From the link’s <code>?source=</code>. No source = direct; an unrecognized one = other. Ignores the source filter above.
+          </p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[28rem] border-collapse text-left text-[0.95rem]">
+              <thead>
+                <tr className="border-b-2 border-ink">
+                  <Th>Source</Th>
+                  <Th right>Visits</Th>
+                  <Th right>Started</Th>
+                  <Th right>Completed</Th>
+                  <Th right>Completion rate</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {bySource.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-2.5">
+                      No visits for these dates.
+                    </td>
+                  </tr>
+                )}
+                {bySource.map((r) => (
+                  <tr key={r.src} className={`border-b border-rule ${r.src === source ? 'font-semibold' : ''}`}>
+                    <td className="py-2.5 pr-3">{r.src}</td>
+                    <td className="py-2.5 pr-3 text-right tabular-nums">{r.views}</td>
+                    <td className="py-2.5 pr-3 text-right tabular-nums">{r.starts}</td>
+                    <td className="py-2.5 pr-3 text-right tabular-nums">{r.completions}</td>
+                    <td className="py-2.5 text-right tabular-nums">{r.starts ? pct(r.completionRate) : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <h2 className="section-title mt-14 text-[1.4rem] sm:text-[1.6rem]">Where people stop</h2>
           <p className="mt-2 text-[0.95rem] text-soft">“Left here” = reached this question and never sent the survey. Shares are of everyone who started.</p>
@@ -257,7 +318,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
           <p className="mt-2 text-[0.95rem] text-soft">
             {data.responses.length} completed responses. Q1 and Q3 allow several answers, so their shares add up to more than 100%.
           </p>
-          {counts.map(({ question, counts: rows }) => (
+          {counts.map(({ question, counts: rows, otherTexts }) => (
             <section key={question.id} className="mt-8">
               <h3 className="text-[1.05rem] leading-snug font-bold">
                 <span className="text-soft">{question.id.toUpperCase()}</span> {question.prompt}
@@ -279,10 +340,22 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
                     </li>
                   ))}
               </ul>
+              {otherTexts.length > 0 && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-[0.9rem] font-semibold">“Something else” answers ({otherTexts.length})</summary>
+                  <ul className="mt-2 space-y-1.5 border-l-[3px] border-month pl-3.5">
+                    {otherTexts.map((t, i) => (
+                      <li key={i} className="text-[0.95rem] leading-snug">
+                        {t.text} <span className="text-[0.8rem] text-soft">· {new Date(t.at).toLocaleDateString()}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </section>
           ))}
 
-          <h2 className="section-title mt-14 text-[1.4rem] sm:text-[1.6rem]">What slipped through the cracks</h2>
+          <h2 className="section-title mt-14 text-[1.4rem] sm:text-[1.6rem]">A hard week, in their words</h2>
           <p className="mt-2 text-[0.95rem] text-soft">
             {stories.length} of {data.responses.length} answered the open question. Newest first.
           </p>

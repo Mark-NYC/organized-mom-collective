@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
-import { surveyQuestions, toggleMulti, type ChoiceQuestion, type SurveyAnswers, type TextQuestion } from '../../data/survey';
+import {
+  normalizeSource,
+  OTHER,
+  OTHER_MAX,
+  otherKey,
+  surveyQuestions,
+  toggleMulti,
+  type ChoiceQuestion,
+  type SurveyAnswers,
+  type SurveySource,
+  type TextQuestion,
+} from '../../data/survey';
 import { markSurveyDone, newSessionId, submitSurvey, surveyDone, trackStep } from '../../lib/survey';
 import { routes } from '../../routes';
 import { Wordmark } from '../marks';
@@ -12,6 +23,7 @@ interface Saved {
   session: string;
   screen: number;
   answers: SurveyAnswers;
+  source: SurveySource;
 }
 
 const DRAFT_KEY = 'omc:v1:survey:draft';
@@ -50,6 +62,7 @@ export default function Survey() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const session = useRef('');
+  const source = useRef<SurveySource>('direct');
   const tracked = useRef(-1);
   const honeypot = useRef<HTMLInputElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -67,6 +80,7 @@ export default function Survey() {
     }
     const draft = readDraft();
     session.current = draft?.session ?? newSessionId();
+    source.current = draft?.source ?? normalizeSource(new URLSearchParams(location.search).get('source'));
     if (draft) {
       tracked.current = draft.screen;
       setAnswers(draft.answers);
@@ -88,9 +102,9 @@ export default function Survey() {
     if (screen === 'done' || !session.current) return;
     if (screen > tracked.current) {
       tracked.current = screen;
-      trackStep(session.current, screen);
+      trackStep(session.current, screen, source.current);
     }
-    writeDraft({ session: session.current, screen, answers });
+    writeDraft({ session: session.current, screen, answers, source: source.current });
   }, [screen, answers]);
 
   useEffect(() => {
@@ -127,7 +141,7 @@ export default function Survey() {
     setSending(true);
     setError('');
     const final = withText ? answers : { ...answers, q7: undefined };
-    const result = await submitSurvey(session.current, final, honeypot.current?.value ?? '');
+    const result = await submitSurvey(session.current, final, honeypot.current?.value ?? '', source.current);
     setSending(false);
     if (result === 'ok' || result === 'rate_limited') {
       markSurveyDone();
@@ -185,10 +199,13 @@ export default function Survey() {
                 key={question.id}
                 question={question}
                 value={answers[question.id]}
+                otherText={answers[otherKey(question.id)] ?? ''}
+                onOtherText={(v) => setAnswers((a) => ({ ...a, [otherKey(question.id)]: v }))}
                 onSingle={(id) => {
                   setAnswers((a) => ({ ...a, [question.id]: id }));
                   window.clearTimeout(advanceTimer.current);
-                  advanceTimer.current = window.setTimeout(() => go((screen as number) + 1), ADVANCE_MS);
+                  // "Something else" waits, so there's a moment to say what (optional).
+                  if (id !== OTHER) advanceTimer.current = window.setTimeout(() => go((screen as number) + 1), ADVANCE_MS);
                 }}
                 onMulti={(ids) => setAnswers((a) => ({ ...a, [question.id]: ids }))}
                 onContinue={() => go((screen as number) + 1)}
@@ -228,15 +245,26 @@ function Intro({ headingRef, onStart }: { headingRef: React.RefObject<HTMLHeadin
 interface ChoicesProps {
   question: ChoiceQuestion;
   value: string | string[] | undefined;
+  otherText: string;
+  onOtherText: (v: string) => void;
   onSingle: (id: string) => void;
   onMulti: (ids: string[]) => void;
   onContinue: () => void;
 }
 
-function Choices({ question, value, onSingle, onMulti, onContinue }: ChoicesProps) {
+function Choices({ question, value, otherText, onOtherText, onSingle, onMulti, onContinue }: ChoicesProps) {
   const multi = question.kind === 'multi';
   const selected = Array.isArray(value) ? value : value ? [value] : [];
   const hintId = `${question.id}-hint`;
+  // Single choice moves on by itself, except after "Something else" (it shows its text field and waits).
+  const showContinue = multi || selected.includes(OTHER);
+  // Bring the field into view above the Continue bar when it appears, without opening the keyboard.
+  const revealOther = (el: HTMLInputElement | null) => {
+    if (el && !el.dataset.shown) {
+      el.dataset.shown = '1';
+      el.scrollIntoView({ block: 'center' });
+    }
+  };
 
   return (
     <>
@@ -247,42 +275,65 @@ function Choices({ question, value, onSingle, onMulti, onContinue }: ChoicesProp
         {question.options.map((o) => {
           const on = selected.includes(o.id);
           return (
-            <button
-              key={o.id}
-              type="button"
-              role={multi ? 'checkbox' : 'radio'}
-              aria-checked={on}
-              onClick={() => (multi ? onMulti(toggleMulti(question, selected, o.id)) : onSingle(o.id))}
-              className={`flex min-h-15 w-full items-center gap-3.5 rounded-[10px] border-[1.5px] px-4 py-3 text-left text-[1.0625rem] leading-snug ${
-                on ? 'border-ink bg-month/20 font-semibold' : 'border-rule-strong/60 bg-paper hover:border-ink active:bg-band'
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className={`grid size-6 shrink-0 place-items-center border-[1.5px] border-ink ${multi ? 'rounded-[6px]' : 'rounded-full'} ${on ? 'bg-ink' : 'bg-paper'}`}
+            <div key={o.id}>
+              <button
+                type="button"
+                role={multi ? 'checkbox' : 'radio'}
+                aria-checked={on}
+                onClick={() => (multi ? onMulti(toggleMulti(question, selected, o.id)) : onSingle(o.id))}
+                className={`flex min-h-15 w-full items-center gap-3.5 rounded-[10px] border-[1.5px] px-4 py-3 text-left text-[1.0625rem] leading-snug ${
+                  on ? 'border-ink bg-month/20 font-semibold' : 'border-rule-strong/60 bg-paper hover:border-ink active:bg-band'
+                }`}
               >
-                {on &&
-                  (multi ? (
-                    <svg viewBox="0 0 16 16" className="size-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 8.5l3.2 3L13 4.5" />
-                    </svg>
-                  ) : (
-                    <span className="size-2.5 rounded-full bg-white" />
-                  ))}
-              </span>
-              <span className="min-w-0 flex-1">{o.label}</span>
-            </button>
+                <span
+                  aria-hidden="true"
+                  className={`grid size-6 shrink-0 place-items-center border-[1.5px] border-ink ${multi ? 'rounded-[6px]' : 'rounded-full'} ${on ? 'bg-ink' : 'bg-paper'}`}
+                >
+                  {on &&
+                    (multi ? (
+                      <svg viewBox="0 0 16 16" className="size-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 8.5l3.2 3L13 4.5" />
+                      </svg>
+                    ) : (
+                      <span className="size-2.5 rounded-full bg-white" />
+                    ))}
+                </span>
+                <span className="min-w-0 flex-1">{o.label}</span>
+              </button>
+              {o.id === OTHER && on && (
+                <input
+                  ref={revealOther}
+                  type="text"
+                  value={otherText}
+                  onChange={(e) => onOtherText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      onContinue();
+                    }
+                  }}
+                  maxLength={OTHER_MAX}
+                  enterKeyHint="next"
+                  autoComplete="off"
+                  aria-label="Something else: what is it? (optional)"
+                  placeholder="What is it? (optional)"
+                  className="mt-2 block min-h-12 w-full rounded-[10px] border-[1.5px] border-rule-strong/60 bg-paper px-4 text-[1.0625rem] placeholder:text-soft focus:border-ink focus:outline-none"
+                />
+              )}
+            </div>
           );
         })}
       </div>
-      {multi && (
+      {showContinue && (
         <BottomBar>
           <button type="button" onClick={onContinue} disabled={selected.length === 0} className="btn-primary min-h-14 w-full text-[0.8rem] disabled:bg-rule-strong/50 disabled:text-white">
             Continue
           </button>
-          <p className="mt-2 text-center text-[0.8rem] text-soft" aria-live="polite">
-            {selected.length === 0 ? 'Pick at least one.' : `${selected.length} selected`}
-          </p>
+          {multi && (
+            <p className="mt-2 text-center text-[0.8rem] text-soft" aria-live="polite">
+              {selected.length === 0 ? 'Pick at least one.' : `${selected.length} selected`}
+            </p>
+          )}
         </BottomBar>
       )}
     </>

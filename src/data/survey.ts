@@ -109,27 +109,68 @@ export const surveyQuestions: SurveyQuestion[] = [
   {
     id: 'q6',
     kind: 'single',
-    short: 'Would make the week easier',
-    prompt: 'Which ONE would make your week easier?',
+    short: 'Most mental energy',
+    prompt: 'Which part of managing your home or family takes the most mental energy?',
     options: [
-      { id: 'one_place', label: 'Seeing all family events in one place' },
-      { id: 'organize_emails', label: 'Automatically organizing school and activity emails' },
-      { id: 'daily_cleaning', label: 'Having a simple daily cleaning plan' },
-      { id: 'plan_reminders', label: 'Getting reminders to plan my week' },
-      { id: 'paper_digital_sync', label: 'Keeping my paper and digital calendars coordinated' },
+      { id: 'tracking', label: 'Keeping track of appointments and activities' },
+      { id: 'messages', label: 'Sorting through school and activity messages' },
+      { id: 'cleaning', label: 'Keeping up with cleaning and household tasks' },
+      { id: 'planning', label: 'Planning the week and keeping everyone informed' },
+      { id: 'last_minute', label: 'Managing last-minute schedule changes' },
+      { id: 'other', label: 'Something else' },
     ],
   },
   {
     id: 'q7',
     kind: 'text',
-    short: 'Slipped through the cracks',
-    prompt: 'Tell us about the last time something important slipped through the cracks. What happened?',
+    short: 'A hard week',
+    prompt: 'Think of a recent week that felt hard to manage. What made it difficult?',
     placeholder: 'A sentence or two is plenty.',
     maxLength: 1000,
   },
 ];
 
-export type SurveyAnswers = Partial<Record<'q1' | 'q3', string[]> & Record<'q2' | 'q4' | 'q5' | 'q6' | 'q7', string>>;
+/** The "Something else" option id. Picking it reveals a short optional text field. */
+export const OTHER = 'other';
+export const OTHER_MAX = 200;
+
+/** Questions that offer "Something else", and the answer key its text is stored under. */
+export const otherKey = (id: ChoiceQuestion['id']) => `${id}_other` as const;
+export type OtherKey = ReturnType<typeof otherKey>;
+
+export type SurveyAnswers = Partial<
+  Record<'q1' | 'q3', string[]> & Record<'q2' | 'q4' | 'q5' | 'q6' | 'q7', string> & Record<OtherKey, string>
+>;
+
+/**
+ * Where the survey link was shared (?source=…). Missing → direct; anything not
+ * listed → other, so a mistyped link shows up instead of disappearing.
+ */
+export const SURVEY_SOURCES = ['website', 'instagram', 'customer-insert', 'direct', 'other'] as const;
+export type SurveySource = (typeof SURVEY_SOURCES)[number];
+
+export function normalizeSource(raw: string | null | undefined): SurveySource {
+  const v = (raw ?? '').trim().toLowerCase();
+  if (!v) return 'direct';
+  return (SURVEY_SOURCES as readonly string[]).includes(v) ? (v as SurveySource) : 'other';
+}
+
+/** Drops "Something else" text for questions where it's no longer selected; trims the rest. */
+export function cleanAnswers(answers: SurveyAnswers): SurveyAnswers {
+  const out: SurveyAnswers = { ...answers };
+  for (const q of surveyQuestions) {
+    if (q.kind === 'text') continue;
+    const key = otherKey(q.id);
+    const picked = q.kind === 'multi' ? (answers[q.id] as string[] | undefined)?.includes(OTHER) : answers[q.id] === OTHER;
+    const text = answers[key]?.trim().slice(0, OTHER_MAX);
+    if (picked && text) out[key] = text;
+    else delete out[key];
+  }
+  const q7 = answers.q7?.trim();
+  if (q7) out.q7 = q7;
+  else delete out.q7;
+  return out;
+}
 
 /** Toggle a multi-select option, keeping "exclusive" options on their own. */
 export function toggleMulti(question: ChoiceQuestion, current: string[], id: string): string[] {
