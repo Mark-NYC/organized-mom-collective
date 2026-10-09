@@ -9,7 +9,7 @@ const row = (over: Partial<ResponseRow> = {}): ResponseRow => ({
   session_id: 's1',
   created_at: '2026-10-09T12:00:00Z',
   q1: ['paper', 'in_my_head'],
-  q2: 'scattered',
+  q2: 'paper_calendar',
   q3: ['email'],
   q4: 'every_week',
   q5: 'routine',
@@ -54,7 +54,18 @@ describe('survey questions', () => {
     expect(sql).toContain(`array[${SURVEY_SOURCES.map((x) => `'${x}'`).join(',')}]`);
   });
 
-  it('measures pain, not feature interest, in Q6, and asks Q7 about a hard week', () => {
+  it('asks Q2 about behavior, Q6 about pain, and Q7 about a hard week', () => {
+    const q2 = surveyQuestions.find((q) => q.id === 'q2') as ChoiceQuestion;
+    expect(q2.kind).toBe('single');
+    expect(q2.prompt).toBe('When you get an email or message about a school event, appointment, or activity, what do you usually do?');
+    expect(q2.options.map((o) => o.label)).toEqual([
+      'Add it to my phone’s calendar',
+      'Write it on our paper calendar',
+      'Save or flag the message for later',
+      'Tell myself I’ll remember it',
+      'Share it with my spouse or family',
+      'Something else',
+    ]);
     const q6 = surveyQuestions.find((q) => q.id === 'q6') as ChoiceQuestion;
     expect(q6.prompt).toBe('Which part of managing your home or family takes the most mental energy?');
     expect(q6.options.map((o) => o.label)).toEqual([
@@ -89,7 +100,7 @@ describe('survey questions', () => {
     const out = cleanAnswers({
       q1: ['paper', 'other'],
       q1_other: '  Fridge whiteboard  ',
-      q2: 'scattered',
+      q2: 'remember',
       q2_other: 'typed, then changed answer',
       q3: ['other'],
       q3_other: '   ',
@@ -147,7 +158,7 @@ describe('survey stats', () => {
   it('exports CSV with labels, quoting and formula-safe free text', () => {
     const csv = responsesCsv([row({ q7: '=HYPERLINK("x")\nthen, "oops"', q1: ['other'], q1_other: 'Fridge whiteboard', source: 'instagram' })]);
     const lines = csv.split('\r\n');
-    expect(lines[0]).toContain('source,q1 Schedule tools,q1 something else,q2 Biggest frustration,q2 something else');
+    expect(lines[0]).toContain('source,q1 Schedule tools,q1 something else,q2 What she does with a new message,q2 something else');
     expect(lines[0]).toContain('q4 Weekly planning,q5 Cleaning approach');
     expect(lines[1]).toContain('instagram,Something else,Fridge whiteboard,');
     const csv2 = responsesCsv([row()]);

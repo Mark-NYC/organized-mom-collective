@@ -132,7 +132,7 @@ create function public.survey_allowed(q text) returns text[]
 language sql immutable set search_path = '' as $$
   select case q
     when 'q1' then array['paper','digital_calendar','school_sports_apps','phone_notes','in_my_head','other']
-    when 'q2' then array['scattered','forgetting','last_minute','cleaning','everyone_knows','other']
+    when 'q2' then array['phone_calendar','paper_calendar','save_flag','remember','share','other']
     when 'q3' then array['email','text','school_apps','team_apps','paper','other','na']
     when 'q4' then array['every_week','most_weeks','occasionally','rarely']
     when 'q5' then array['routine','app','as_noticed','weekends','someone_else','other']
