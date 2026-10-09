@@ -43,13 +43,13 @@ export default function Onboarding({ onDone }: Props) {
           </h1>
 
           <ul className="mt-5 border-t border-rule-strong">
-            <Row when="Today" note="The same zone printed on your calendar." time={todayZone.time}>
+            <Row when="Today’s zone" note="The same zone printed on your calendar." time={todayZone.time}>
               <ZoneTag icon={todayZone.icon} label={todayZone.zone} size="sm" />
             </Row>
-            <Row when="Every day" note="A quick home reset: beds, dishes, counters." time={shortTime(dailyEssentials.minutes)}>
+            <Row when="Every day" note="The same five tasks every day: beds, dishes, counters." time={shortTime(dailyEssentials.minutes)}>
               <ZoneTag icon={dailyEssentials.icon} label={dailyEssentials.title} size="sm" />
             </Row>
-            <Row when={`${month.name} project`} note="One deeper job for the month. Weekends, if you have time.">
+            <Row when="Monthly home project" note={`${month.name}’s deeper job. Weekends, if you have time.`}>
               <span className="project-title block text-[0.8rem]">{month.title}</span>
             </Row>
           </ul>

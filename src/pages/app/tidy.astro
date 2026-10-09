@@ -12,33 +12,33 @@ const week = [
 
 const principles = [
   {
-    title: 'Daily reset',
-    body: `About ${dailyEssentials.minutes}: beds, dishes, counters and a quick pickup. Starts fresh every morning.`,
+    title: 'Daily Reset',
+    body: `The same five tasks every day, about ${dailyEssentials.minutes}: beds, dishes, counters and a quick pickup. Starts fresh every morning.`,
   },
   {
-    title: 'Mon–Thu rhythm',
-    body: 'One room each weekday, 10–15 minutes. By Thursday the whole house is reset.',
+    title: 'Mon–Thu zones',
+    body: 'The zone printed on your calendar for that day, 10–15 minutes. By Thursday the whole house is reset.',
   },
   {
-    title: 'Fri–Sun',
-    body: 'One deep-cleaning task, a home project, or catching up. All optional.',
+    title: 'Fri–Sun zones',
+    body: 'Deep Cleaning, Home Project, Catch-Up / Reset. One task from the monthly home project, catching up, or nothing at all. All optional.',
   },
   {
     title: 'Monthly home project',
-    body: 'One deeper project a month, in a few small tasks. Spread them across the weekends.',
+    body: 'One deeper project a month, in five small tasks. Do one on a weekend when you can. No need to finish.',
   },
 ];
 ---
 
-<Layout title="How Tidy Works" description="The Organized Mom cleaning system: a daily reset, a Mon–Thu room rhythm, flexible weekends and one monthly focus.">
+<Layout title="How Tidy Works" description="The Organized Mom cleaning system: the Daily Reset, the zone printed on your calendar for each day, and one monthly home project.">
   <header class="max-w-2xl">
     <p class="label text-muted">Tidy · The system</p>
-    <h1 class="page-title mt-3">One small reset.<br />One room a day.</h1>
-    <p class="mt-3 text-[1.0625rem] leading-relaxed">You don’t need to clean the whole house every day.</p>
+    <h1 class="page-title mt-3">One small reset.<br />One zone a day.</h1>
+    <p class="mt-3 text-[1.0625rem] leading-relaxed">Your calendar gives each day a zone. This app holds the steps for it, plus the Daily Reset — five small tasks that repeat every day.</p>
   </header>
 
   <section aria-labelledby="week-heading" class="mt-9 max-w-2xl border-t border-rule-strong pt-5">
-    <h2 id="week-heading" class="section-label">The week</h2>
+    <h2 id="week-heading" class="section-label">Zones on your calendar</h2>
     <ol class="mt-4 border-t border-rule-strong">
       {
         week.map((d) => (
@@ -61,7 +61,7 @@ const principles = [
         ))
       }
     </ol>
-    <p class="mt-3 text-center text-[1rem] text-muted">Plus the daily reset, every day. Tap a day to see its tasks.</p>
+    <p class="mt-3 text-center text-[1rem] text-muted">Plus the Daily Reset, every day. Tap a day to see its tasks.</p>
     <script is:inline>
       document.querySelector('[data-day="' + new Date().getDay() + '"]')?.classList.add('is-today');
     </script>

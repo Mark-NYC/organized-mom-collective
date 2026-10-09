@@ -83,7 +83,7 @@ export function TaskList({ tasks, checked, onToggle, scope, label, next }: TaskL
 /** Quiet tally, "2 / 5" — not a score. */
 export function Tally({ done, total }: { done: number; total: number }) {
   return (
-    <span className="text-[0.66rem] font-semibold tracking-[0.16em] text-muted uppercase tabular-nums" aria-live="polite">
+    <span className="shrink-0 text-[0.66rem] font-semibold tracking-[0.16em] whitespace-nowrap text-muted uppercase tabular-nums" aria-live="polite">
       {done === total && total > 0 ? 'Done' : `${done} / ${total}`}
     </span>
   );

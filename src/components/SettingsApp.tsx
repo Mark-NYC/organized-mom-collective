@@ -49,7 +49,7 @@ export default function SettingsApp() {
         />
         <Row
           title="Reset all progress"
-          detail="Clear every checkmark, including monthly projects."
+          detail="Clear every checkmark, including monthly home projects."
           action={
             <button type="button" onClick={() => setConfirmAll(true)} className="btn-secondary border-[#8c3b3b] text-[#8c3b3b] hover:bg-[#8c3b3b]">
               Reset all
