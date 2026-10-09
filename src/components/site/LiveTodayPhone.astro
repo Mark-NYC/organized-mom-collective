@@ -1,0 +1,71 @@
+---
+/**
+ * The companion's Today screen showing the visitor's actual day: a real screenshot for
+ * each weekday (so the cleaning zone is the right one for today) with the date line
+ * written over the blank the capture left. Without JavaScript it shows the build day.
+ * Screens and layout come from scripts/capture-app-today.mjs; retake them when Today changes.
+ * Same drawn frame as PhoneShot.
+ */
+import shot from '../../data/app-today-shot.json';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+
+const DOWS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const now = new Date();
+const dow = DOWS[now.getDay()];
+const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+const dayNum = String(now.getDate()).padStart(2, '0');
+const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+const src = (d: string) => ({
+  src: `/images/site/app-today-${d}-390.webp`,
+  srcset: `/images/site/app-today-${d}-390.webp 390w, /images/site/app-today-${d}-780.webp 780w`,
+});
+const alt = (day: string) =>
+  `The cleaning companion app's Today screen for ${day}: today's cleaning zone from the calendar and the 15-minute Daily Reset, three of five tasks checked off.`;
+
+const pct = (n: number) => `${(n * 100).toFixed(3)}%`;
+const line = (l: typeof shot.weekdayLine) =>
+  `left:${pct(l.left)};top:${pct(l.top)};font-size:${(l.fontSize * 100).toFixed(3)}cqw;letter-spacing:${l.letterSpacing.toFixed(3)}em;line-height:${l.lineHeight}`;
+---
+
+<div
+  data-live-today
+  class:list={['mx-auto w-full max-w-[17rem] rounded-[2.4rem] bg-[#2f2f2f] p-[0.55rem] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.45)]', className]}
+>
+  <div class="relative overflow-hidden rounded-[1.9rem] bg-paper [container-type:inline-size]">
+    <img
+      {...src(dow)}
+      sizes="272px"
+      width={shot.width}
+      height={shot.height}
+      fetchpriority="high"
+      decoding="async"
+      alt={alt(weekday)}
+      class="block h-auto w-full"
+    />
+    <span aria-hidden="true" data-weekday class="absolute font-bold whitespace-nowrap text-ink uppercase" style={line(shot.weekdayLine)}
+      >{weekday} {dayNum}</span
+    >
+    <span aria-hidden="true" data-month class="month-title absolute whitespace-nowrap text-ink" style={line(shot.monthLine)}>{monthYear}</span>
+  </div>
+</div>
+
+<script is:inline>
+  // Swap to the visitor's own day before the screenshot paints. Same formats as the app's Today header.
+  (function () {
+    var el = document.currentScript && document.currentScript.previousElementSibling;
+    if (!el || !el.hasAttribute('data-live-today')) return;
+    var now = new Date();
+    var d = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()];
+    var weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+    var img = el.querySelector('img');
+    img.srcset = '/images/site/app-today-' + d + '-390.webp 390w, /images/site/app-today-' + d + '-780.webp 780w';
+    img.src = '/images/site/app-today-' + d + '-390.webp';
+    img.alt = img.alt.replace(/for \w+:/, 'for ' + weekday + ':');
+    el.querySelector('[data-weekday]').textContent = weekday + ' ' + String(now.getDate()).padStart(2, '0');
+    el.querySelector('[data-month]').textContent = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  })();
+</script>
