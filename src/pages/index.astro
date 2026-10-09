@@ -8,6 +8,8 @@
  * planned, so every planned feature carries a "Coming soon" tag (`.status-soon`) and
  * every CTA goes to the calendar, the only thing for sale. Photos and the phone
  * screenshot are real (see README → Where things live); no mockups of unbuilt screens.
+ * Etsy ratings and quotes come from src/data/reviews.ts and are always labeled as
+ * feedback on earlier calendar editions, never on the 2027 calendar or the companion.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import PhoneShot from '../components/site/PhoneShot.astro';
@@ -15,6 +17,7 @@ import LiveTodayPhone from '../components/site/LiveTodayPhone.astro';
 import ShopButton from '../components/site/ShopButton.astro';
 import { photo } from '../lib/images';
 import { BRAND_NAME } from '../config';
+import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, listingStats, reviewDate, reviews, shopStats } from '../data/reviews';
 
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
@@ -156,7 +159,15 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         </p>
         <div class="mt-8">
           <ShopButton label="Get Your Family Organized" toProductPage class="min-h-14 w-full px-8 sm:w-auto" />
-          <p class="mt-4 max-w-md text-[0.88rem] leading-snug text-soft">{availability}</p>
+          <p class="mt-5 max-w-md text-[0.92rem] leading-snug text-warm-ink">
+            <span aria-hidden="true" class="mr-1 tracking-[0.08em] text-rose-deep">★</span>{' '}
+            <strong class="font-semibold">{shopStats.rating}/5</strong> from {shopStats.reviews} reviews · {shopStats.sales} sales on{' '}
+            <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-warm-rule underline-offset-[3px] hover:decoration-warm-ink"
+              >our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
+            >
+            <span class="block text-[0.85rem] text-warm-soft">Earned by our earlier calendars, before the 2027 redesign.</span>
+          </p>
+          <p class="mt-3 max-w-md text-[0.88rem] leading-snug text-soft">{availability}</p>
         </div>
       </div>
 
@@ -408,6 +419,71 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         messes, and real interruptions.
       </p>
       <p class="mt-7 font-serif text-[1.35rem] leading-snug text-warm-ink italic sm:text-[1.55rem]">A system the whole family can actually use.</p>
+    </div>
+  </section>
+
+  <!-- Etsy reviews of earlier calendar editions (src/data/reviews.ts) -->
+  <section aria-labelledby="reviews-h" class="bg-cream">
+    <div class:list={[wrap, 'py-16 sm:py-24']}>
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="label text-warm-soft">From our Etsy shop</p>
+        <h2 id="reviews-h" class="serif-title mt-3">What Families Said About Our Earlier Calendars.</h2>
+      </div>
+
+      <dl class="mx-auto mt-10 grid max-w-3xl grid-cols-3 divide-x divide-warm-rule border-y border-warm-rule text-center">
+        <div class="flex flex-col-reverse gap-1 px-2 py-5 sm:py-6">
+          <dt class="text-[0.78rem] leading-snug text-warm-soft sm:text-[0.85rem]">Etsy shop rating</dt>
+          <dd class="font-serif text-[1.75rem] leading-none text-warm-ink sm:text-[2.3rem]">
+            {shopStats.rating}<span class="text-[0.55em] text-warm-soft">/5</span>
+          </dd>
+        </div>
+        <div class="flex flex-col-reverse gap-1 px-2 py-5 sm:py-6">
+          <dt class="text-[0.78rem] leading-snug text-warm-soft sm:text-[0.85rem]">Shop reviews</dt>
+          <dd class="font-serif text-[1.75rem] leading-none text-warm-ink sm:text-[2.3rem]">{shopStats.reviews}</dd>
+        </div>
+        <div class="flex flex-col-reverse gap-1 px-2 py-5 sm:py-6">
+          <dt class="text-[0.78rem] leading-snug text-warm-soft sm:text-[0.85rem]">Shop sales</dt>
+          <dd class="font-serif text-[1.75rem] leading-none text-warm-ink sm:text-[2.3rem]">{shopStats.sales}</dd>
+        </div>
+      </dl>
+
+      <ul class="mt-10 grid gap-4 sm:mt-12 md:grid-cols-3 md:gap-6">
+        {
+          reviews.map((r) => (
+            <li class="flex">
+              <figure class="flex w-full flex-col rounded-[8px] bg-paper p-6 shadow-[0_14px_30px_-26px_rgba(77,69,68,0.6)] sm:p-7">
+                <span aria-hidden="true" class="font-serif text-[3rem] leading-[0.6] text-rose">“</span>
+                <blockquote cite={ETSY_REVIEWS_URL} class="mt-3 flex-1 font-serif text-[1.2rem] leading-snug text-warm-ink italic sm:text-[1.3rem]">
+                  <p>{r.quote}</p>
+                </blockquote>
+                <figcaption class="mt-6 border-t border-warm-rule pt-4 text-[0.9rem] leading-snug">
+                  <span class="block font-semibold text-warm-ink">{r.name}</span>
+                  <span class="block text-warm-soft">
+                    <time datetime={r.date}>{reviewDate(r.date)}</time>
+                    {r.excerpt && ' · Excerpt'}
+                  </span>
+                  <a
+                    href={ETSY_REVIEWS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-3 inline-block text-[0.8rem] text-warm-soft underline decoration-warm-rule underline-offset-[3px] hover:text-warm-ink hover:decoration-warm-ink"
+                  >
+                    Review of an earlier family calendar on Etsy <span aria-hidden="true">↗</span><span class="sr-only"> (opens Etsy)</span>
+                  </a>
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="mx-auto mt-8 max-w-2xl text-center text-[0.88rem] leading-relaxed text-soft">
+        These reviews are for earlier editions of our family wall calendar (that listing: {listingStats.rating}/5 from {listingStats.reviews} reviews).
+        The 2027 calendar is a new design, and the cleaning companion website is new, so neither has reviews yet.{' '}
+        <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-warm-rule underline-offset-[3px] hover:decoration-warm-ink"
+          >Visit our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
+        >
+      </p>
     </div>
   </section>
 
