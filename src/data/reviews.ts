@@ -14,8 +14,9 @@ export const ETSY_REVIEWS_URL = 'https://www.etsy.com/listing/1075914661/family-
 
 /** The whole Etsy shop, all items. */
 export const shopStats = { rating: '4.9', reviews: 112, sales: '1,000+' };
-/** The older family calendar listing on its own. */
-export const listingStats = { rating: '4.6', reviews: 13 };
+
+/** The one disclaimer, shown wherever a rating or quote appears. Use it word for word. */
+export const REVIEWS_DISCLAIMER = 'Reviews and ratings reflect previous calendar editions sold through our Etsy shop.';
 
 export interface Review {
   id: string;
@@ -27,6 +28,7 @@ export interface Review {
   excerpt?: boolean;
 }
 
+/** Order matters: the first review (product quality) is the featured one. */
 export const reviews: Review[] = [
   { id: 'quality', quote: 'Great calendar! I love the size of it. Quality printing and paper.', name: 'Chelsea H.', date: '2022-04-15' },
   { id: 'as-described', quote: 'Exactly as described - fast shipping - we love our calendar!', name: 'Etsy buyer', date: '2022-12-28' },
