@@ -1,92 +1,32 @@
 ---
-import Layout from '../../layouts/AppLayout.astro';
-import MonthBrowser from '../../components/MonthBrowser';
-import { TimeMark, ZoneTag, shortTime } from '../../components/marks';
-import { dailyEssentials, weekend, weeklySchedule } from '../../data/cleaning';
+/**
+ * /app/tidy — the Week page's old address. Kept so earlier links, bookmarks and
+ * Home Screen shortcuts still work; it forwards to /app/week, keeping any
+ * ?query and #hash (e.g. #monthly-focus).
+ *
+ * Same pattern as /start: location.replace (so Back doesn't bounce through here),
+ * with a meta refresh and a plain link as fallbacks. It sits under /app, so the
+ * service worker saves it too and the redirect works offline.
+ */
 import { routes } from '../../routes';
 
-const week = [
-  ...weeklySchedule.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: d.icon, time: shortTime(d.minutes) })),
-  ...weekend.days.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: weekend.icon, time: 'Optional' })),
-];
-
-const principles = [
-  {
-    title: 'Daily Reset',
-    body: `The same five tasks every day, about ${dailyEssentials.minutes}: beds, dishes, counters and a quick pickup. Starts fresh every morning.`,
-  },
-  {
-    title: 'Mon–Thu zones',
-    body: 'The zone printed on your calendar for that day, 10–15 minutes. By Thursday the whole house is reset.',
-  },
-  {
-    title: 'Fri–Sun zones',
-    body: 'Deep Cleaning, Home Project, Catch-Up / Reset. One task from the monthly home project, catching up, or nothing at all. All optional.',
-  },
-  {
-    title: 'Monthly home project',
-    body: 'One deeper project a month, in five small tasks. Do one on a weekend when you can. No need to finish.',
-  },
-];
+const WEEK = routes.week;
 ---
 
-<Layout title="How Tidy Works" description="The Organized Mom cleaning system: the Daily Reset, the zone printed on your calendar for each day, and one monthly home project.">
-  <header class="max-w-2xl">
-    <p class="label text-muted">Tidy · The system</p>
-    <h1 class="page-title mt-3">One small reset.<br />One zone a day.</h1>
-    <p class="mt-3 text-[1.0625rem] leading-relaxed">Your calendar gives each day a zone. This app holds the steps for it, plus the Daily Reset — five small tasks that repeat every day.</p>
-  </header>
-
-  <section aria-labelledby="week-heading" class="mt-9 max-w-2xl border-t border-rule-strong pt-5">
-    <h2 id="week-heading" class="section-label">Zones on your calendar</h2>
-    <ol class="mt-4 border-t border-rule-strong">
-      {
-        week.map((d) => (
-          <li data-day={d.num} class="border-b border-rule">
-            <a
-              href={routes.day(d.num)}
-              aria-label={`${d.day}: ${d.zone}. View tasks`}
-              class="group flex min-h-14 items-center gap-3 py-2 transition-colors hover:bg-band focus-visible:bg-band"
-            >
-              <span class="day-label w-11 shrink-0 text-[0.78rem] font-bold tracking-[0.16em] uppercase">
-                <span>{d.short}</span>
-              </span>
-              <span class="min-w-0 flex-1">
-                <ZoneTag icon={d.icon} label={d.zone} size="sm" />
-              </span>
-              <TimeMark>{d.time}</TimeMark>
-              <span aria-hidden="true" class="w-3 shrink-0 text-muted transition-colors group-hover:text-ink">›</span>
-            </a>
-          </li>
-        ))
-      }
-    </ol>
-    <p class="mt-3 text-center text-[1rem] text-muted">Plus the Daily Reset, every day. Tap a day to see its tasks.</p>
-    <script is:inline>
-      document.querySelector('[data-day="' + new Date().getDay() + '"]')?.classList.add('is-today');
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, follow" />
+    <title>Week · Organized Mom</title>
+    <link rel="canonical" href={WEEK} />
+    <script is:inline define:vars={{ WEEK }}>
+      location.replace(WEEK + location.search + location.hash);
     </script>
-  </section>
-
-  <div class="mt-9 grid gap-x-12 sm:grid-cols-2">
-    {
-      principles.map((p) => (
-        <section class="border-t border-rule-strong py-4">
-          <h2 class="label">{p.title}</h2>
-          <p class="mt-1.5 text-[1.0625rem] leading-relaxed sm:text-[1rem]">{p.body}</p>
-        </section>
-      ))
-    }
-  </div>
-
-  <section id="monthly-focus" aria-labelledby="month-heading" class="mt-8 max-w-2xl scroll-mt-4 border-t border-rule-strong pt-5">
-    <h2 id="month-heading" class="section-label mb-4">Monthly home project</h2>
-    <MonthBrowser client:only="react">
-      <div slot="fallback" class="h-96"></div>
-    </MonthBrowser>
-  </section>
-
-  <div class="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-rule pt-6">
-    <a href={routes.today} class="btn-primary">Go to today</a>
-    <a href={routes.reorder} class="text-link">Order your next calendar</a>
-  </div>
-</Layout>
+    <meta http-equiv="refresh" content={`0;url=${WEEK}`} />
+  </head>
+  <body style="font-family: system-ui, sans-serif; color: #545454; padding: 2rem;">
+    <a href={WEEK}>Open your week</a>
+  </body>
+</html>

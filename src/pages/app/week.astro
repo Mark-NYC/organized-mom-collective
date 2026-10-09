@@ -1,0 +1,154 @@
+---
+import Layout from '../../layouts/AppLayout.astro';
+import MonthBrowser from '../../components/MonthBrowser';
+import { TimeMark, ZoneTag, shortTime } from '../../components/marks';
+import { dailyEssentials, weekend, weeklySchedule } from '../../data/cleaning';
+import { routes } from '../../routes';
+
+const week = [
+  ...weeklySchedule.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: d.icon, time: shortTime(d.minutes) })),
+  ...weekend.days.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: weekend.icon, time: 'Optional' })),
+];
+
+const principles = [
+  {
+    title: 'Daily Reset',
+    body: `The same five tasks every day, about ${dailyEssentials.minutes}: beds, dishes, counters and a quick pickup. Starts fresh every morning.`,
+  },
+  {
+    title: 'Mon–Thu zones',
+    body: 'The zone printed on your calendar for that day, 10–15 minutes. By Thursday the whole house is reset.',
+  },
+  {
+    title: 'Fri–Sun zones',
+    body: 'Deep Cleaning, Home Project, Catch-Up / Reset. One task from the monthly home project, catching up, or nothing at all. All optional.',
+  },
+  {
+    title: 'Monthly home project',
+    body: 'One deeper project a month, in five small tasks. Do one on a weekend when you can. No need to finish.',
+  },
+];
+---
+
+<Layout title="Week" description="Your week of cleaning at a glance: each day's zone from your calendar, how far you've gotten, and this month's home project.">
+  <header class="max-w-2xl">
+    <p class="label text-muted">This week <span id="week-range"></span></p>
+    <h1 class="page-title mt-3">Your week at a glance.</h1>
+    <p class="mt-3 text-[1.0625rem] leading-relaxed">
+      Every day’s zone from your calendar, and how far you’ve gotten. Tap a day to open its tasks.
+    </p>
+  </header>
+
+  <section aria-labelledby="week-heading" class="mt-8 max-w-2xl border-t border-rule-strong pt-5">
+    <h2 id="week-heading" class="section-label">Zones this week</h2>
+    <p id="week-summary" class="mt-3 min-h-[1.5em] text-center text-[1rem] leading-snug"></p>
+    <ol class="mt-3 border-t border-rule-strong">
+      {
+        week.map((d) => (
+          <li data-day={d.num} class="border-b border-rule">
+            <a
+              href={routes.day(d.num)}
+              data-label={`${d.day}: ${d.zone}`}
+              aria-label={`${d.day}: ${d.zone}. Open tasks`}
+              class="group flex min-h-14 items-center gap-2 py-2 transition-colors hover:bg-band focus-visible:bg-band min-[400px]:gap-3"
+            >
+              <span class="day-label w-10 shrink-0 min-[400px]:w-11 text-[0.78rem] font-bold tracking-[0.16em] uppercase">
+                <span>{d.short}</span>
+                <span class="mt-1 hidden text-[0.56rem] font-semibold tracking-[0.14em] text-muted in-[.is-today]:block">Today</span>
+              </span>
+              <span class="min-w-0 flex-1">
+                <ZoneTag icon={d.icon} label={d.zone} size="sm" />
+              </span>
+              <span data-time class="contents">
+                <TimeMark>{d.time}</TimeMark>
+              </span>
+              <span data-status hidden />
+              <span aria-hidden="true" class="w-3 shrink-0 text-muted transition-colors group-hover:text-ink">›</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-3 text-center text-[1rem] text-muted">
+      Plus the Daily Reset every day, on <a href={routes.today} class="underline decoration-rule underline-offset-4 hover:decoration-ink">Today</a>.
+    </p>
+    <script is:inline>
+      // Mark today's row before paint; progress fills in below.
+      document.querySelector('[data-day="' + new Date().getDay() + '"]')?.classList.add('is-today');
+    </script>
+  </section>
+
+  <section id="monthly-focus" aria-labelledby="month-heading" class="mt-10 max-w-2xl scroll-mt-4 border-t border-rule-strong pt-5">
+    <h2 id="month-heading" class="section-label mb-4">Monthly home project</h2>
+    <MonthBrowser client:only="react">
+      <div slot="fallback" class="h-96"></div>
+    </MonthBrowser>
+  </section>
+
+  <details class="group mt-10 max-w-2xl border-t border-rule-strong">
+    <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between text-[0.7rem] font-semibold tracking-[0.16em] uppercase [&::-webkit-details-marker]:hidden">
+      How the week works
+      <span aria-hidden="true" class="text-muted transition-transform group-open:rotate-90">›</span>
+    </summary>
+    <div class="grid gap-x-12 pb-2 sm:grid-cols-2">
+      {
+        principles.map((p) => (
+          <section class="border-t border-rule py-4">
+            <h3 class="label">{p.title}</h3>
+            <p class="mt-1.5 text-[1.0625rem] leading-relaxed sm:text-[1rem]">{p.body}</p>
+          </section>
+        ))
+      }
+    </div>
+  </details>
+
+  <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-rule pt-6">
+    <a href={routes.today} class="btn-primary">Go to today</a>
+    <a href={routes.reorder} class="text-link">Order your next calendar</a>
+  </div>
+</Layout>
+
+<script>
+  import { weekPlan, weekRowStatus, weekSummary } from '../../lib/progress';
+  import { dateForWeekday } from '../../lib/dates';
+
+  // The boxed stamp on each row, styled like the time it replaces. "Done" fills with the month color.
+  const STAMP =
+    'inline-flex shrink-0 items-center gap-1 border border-ink px-1.5 py-[3px] text-[0.64rem] leading-none font-semibold tracking-[0.16em] whitespace-nowrap uppercase tabular-nums';
+  const DONE = 'bg-month font-bold';
+
+  function render() {
+    const today = new Date();
+    const days = weekPlan(today);
+
+    const mon = dateForWeekday(today, 1);
+    const sun = dateForWeekday(today, 0);
+    const fmt = (d: Date, withMonth: boolean) => d.toLocaleDateString('en-US', withMonth ? { month: 'short', day: 'numeric' } : { day: 'numeric' });
+    const range = document.getElementById('week-range');
+    if (range) range.textContent = `· ${fmt(mon, true)} – ${fmt(sun, sun.getMonth() !== mon.getMonth())}`;
+
+    const summary = document.getElementById('week-summary');
+    if (summary) summary.textContent = weekSummary(days);
+
+    for (const d of days) {
+      const row = document.querySelector<HTMLElement>(`[data-day="${d.dow}"]`);
+      const link = row?.querySelector<HTMLAnchorElement>('a');
+      const time = row?.querySelector<HTMLElement>('[data-time]');
+      const slot = row?.querySelector<HTMLElement>('[data-status]');
+      if (!row || !link || !time || !slot) continue;
+      row.classList.toggle('is-today', d.when === 'today');
+      const status = weekRowStatus(d);
+      time.hidden = !!status;
+      time.className = status ? 'hidden' : 'contents';
+      slot.hidden = !status;
+      slot.className = status ? `${STAMP} ${status.kind === 'done' ? DONE : ''}` : '';
+      slot.textContent = status ? (status.kind === 'done' ? '✓ Done' : status.text) : '';
+      const base = link.dataset.label ?? '';
+      link.setAttribute('aria-label', `${base}${d.when === 'today' ? ' (today)' : ''}${status ? `, ${status.label}` : ''}. Open tasks`);
+    }
+  }
+
+  render();
+  // Coming back from a day's tasks with the Back button: show the new checkmarks.
+  window.addEventListener('pageshow', (e) => e.persisted && render());
+</script>

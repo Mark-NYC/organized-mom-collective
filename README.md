@@ -31,7 +31,7 @@ npm test          # unit tests (schedule + storage logic)
 | Print palette (white, charcoal, rules) and fonts | `src/styles/global.css` (`@theme`) |
 | All internal URLs | `src/routes.ts` |
 | Where `/start` (the QR) sends people | `src/config.ts` → `START_DESTINATION` |
-| App pages (`/app`, `/app/tidy`, `/app/reorder`, `/app/settings`) | `src/pages/app/` |
+| App pages (`/app`, `/app/week`, `/app/reorder`, `/app/settings`; `/app/tidy` redirects to `/app/week`) | `src/pages/app/` |
 | Public pages (`/` — temporary placeholder) | `src/pages/index.astro` |
 | Layouts: public (indexable) vs app (noindex) | `src/layouts/PublicLayout.astro`, `src/layouts/AppLayout.astro` |
 | UI components | `src/components/` |
@@ -52,7 +52,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 - `active:YYYY-MM-DD` → "1" when anything was checked that day; lights that day's dot in the week view on Today. Days from before this key existed still count via their daily/zone lists.
 - Day-scoped entries are kept for about a year (`KEEP_DAYS` = 366, the life of a 52-week calendar; ~90 KB at most), then pruned. Monthly entries are never pruned.
 - If the browser won't save (private browsing, storage full or blocked), checkmarks are kept in memory for that visit and Today shows a short note that they won't be remembered. Nothing crashes and nothing claims to be saved.
-- `/app?day=monday` (linked from the Tidy week) shows that weekday of the current Mon–Sun week. Its checkmarks save under that day's own date, so today's progress is never touched.
+- `/app?day=monday` (linked from the Week page) shows that weekday of the current Mon–Sun week. Its checkmarks save under that day's own date, so today's progress is never touched.
 
 ## Brand notes
 
@@ -66,7 +66,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 | --- | --- | --- |
 | Public site | `/` (temporary placeholder). Later: `/calendar`, `/cleaning`, `/blog/…` | indexable, canonical URLs |
 | QR entry | `/start` — **permanent**, printed on every calendar as `https://organizedmomcollective.com/start` | noindex |
-| Companion app | `/app`, `/app/tidy`, `/app/reorder`, `/app/settings` | `noindex, follow` |
+| Companion app | `/app` (Today), `/app/week`, `/app/reorder`, `/app/settings`. `/app/tidy` is the old name for Week and redirects there, keeping `#monthly-focus` | `noindex, follow` |
 | Accounts (not built) | e.g. `/login`, `/account` | — |
 
 - **`/start` never changes.** It redirects instantly (no history entry) to `START_DESTINATION` (currently `/app?source=calendar`). If your host supports server redirects, a 302 from `/start` to the same destination is equivalent.

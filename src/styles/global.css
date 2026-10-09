@@ -75,7 +75,7 @@
     @apply font-display font-black italic;
     letter-spacing: 0.03em;
   }
-  /* Tidy week: today's row is the current state — darker outline, no fill. */
+  /* Week page: today's row is the current state — darker outline, no fill. */
   .is-today .zone-tag {
     border-color: var(--color-ink);
   }
