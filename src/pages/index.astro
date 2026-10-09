@@ -15,7 +15,6 @@ import ShopButton from '../components/site/ShopButton.astro';
 import { photo } from '../lib/images';
 import { BRAND_NAME } from '../config';
 
-const wall = photo('calendar-on-wall');
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
 
@@ -160,22 +159,20 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         </div>
       </div>
 
-      <!-- The wall calendar with the real companion app in front of it -->
-      <div class="relative pb-10 sm:pb-12 md:pb-0">
-        <figure class="overflow-hidden rounded-[6px] bg-band shadow-[0_30px_60px_-36px_rgba(77,69,68,0.55)]">
-          <img
-            src={wall.src}
-            srcset={wall.srcset}
-            sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, calc(100vw - 2.5rem)"
-            width="1280"
-            height="1024"
-            fetchpriority="high"
-            decoding="async"
-            alt="The Organized Mom Collective weekly wall calendar hanging on a sunlit wall, with a column for each day, a meal plan, a grocery list and a to-do list."
-            class="block aspect-[5/4] h-auto w-full object-cover"
-          />
-        </figure>
-        <div class="absolute right-2 -bottom-2 w-[38%] max-w-[12.5rem] sm:right-6 md:-right-4 md:-bottom-10 lg:-right-8">
+      <!-- The printed calendar and the real companion app, cut out and set straight on the background -->
+      <div class="relative mx-auto w-full max-w-[30rem] pr-[22%] pb-6 md:max-w-none md:pr-[20%] md:pb-0 lg:pr-[22%]">
+        <img
+          src="/images/site/calendar-cutout-720.webp"
+          srcset="/images/site/calendar-cutout-480.webp 480w, /images/site/calendar-cutout-720.webp 720w, /images/site/calendar-cutout-960.webp 960w"
+          sizes="(min-width: 1152px) 400px, (min-width: 768px) 36vw, 76vw"
+          width="960"
+          height="1410"
+          fetchpriority="high"
+          decoding="async"
+          alt="A page of the Organized Mom Collective weekly wall calendar: a column for each day with its cleaning zone, Self-Care Habits, Word of the Week, Family and Friends, Grateful For, a meal plan, a grocery list, a to-do list and notes."
+          class="block h-auto w-full"
+        />
+        <div class="absolute right-0 bottom-0 w-[40%] max-w-[13rem] md:-bottom-6 lg:max-w-[14rem]">
           <PhoneShot
             name="today"
             loading="eager"
