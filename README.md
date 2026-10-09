@@ -14,6 +14,8 @@ npm run dev       # http://localhost:4321
 npm run build     # type-check + static build into dist/
 npm run preview   # serve the production build
 npm test          # unit tests (schedule + storage logic)
+npm run check:site  # after a build: links, SEO metadata, tracker sync; regenerates the content inventory
+npm run verify    # build + check:site + tests
 ```
 
 `dist/` is a fully static site — deploy it to Netlify, Vercel, Cloudflare Pages, GitHub Pages, etc.
@@ -33,6 +35,7 @@ npm test          # unit tests (schedule + storage logic)
 | Where `/start` (the QR) sends people | `src/config.ts` → `START_DESTINATION` |
 | App pages (`/app`, `/app/week`, `/app/reorder`, `/app/settings`; `/app/tidy` redirects to `/app/week`) | `src/pages/app/` |
 | Public pages (`/` — temporary placeholder) | `src/pages/index.astro` |
+| **Resource library** (`/resources`: hub, pillar pages, articles) | `src/pages/resources/`, articles in `src/content/articles/`. Editorial system and code map: `CLAUDE.md` and `docs/editorial/` |
 | Layouts: public (indexable) vs app (noindex) | `src/layouts/PublicLayout.astro`, `src/layouts/AppLayout.astro` |
 | UI components | `src/components/` |
 | Date / schedule / storage logic | `src/lib/` |
@@ -65,7 +68,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 
 | Area | Routes | Indexing |
 | --- | --- | --- |
-| Public site | `/` (temporary placeholder). Later: `/calendar`, `/cleaning`, `/blog/…` | indexable, canonical URLs |
+| Public site | `/` (temporary placeholder), `/resources`, `/resources/<slug>`, `/resources/topics/<pillar>`, `/sitemap.xml`. Later: `/calendar`, `/cleaning` | indexable, canonical URLs (no trailing slash); the hub stays noindex until it has articles |
 | QR entry | `/start` — **permanent**, printed on every calendar as `https://organizedmomcollective.com/start` | noindex |
 | Companion app | `/app` (Today), `/app/week`, `/app/reorder`, `/app/settings`. `/app/tidy` is the old name for Week and redirects there, keeping `#monthly-focus` | `noindex, follow` |
 | Accounts (not built) | e.g. `/login`, `/account` | — |

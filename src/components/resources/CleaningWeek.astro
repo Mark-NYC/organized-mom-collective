@@ -1,0 +1,62 @@
+---
+/**
+ * The cleaning week at a glance, read straight from src/data/cleaning.ts so the
+ * article always matches the calendar and the companion app.
+ */
+import { dailyEssentials, weeklySchedule, weekend } from '../../data/cleaning';
+import { TimeMark, ZoneTag, shortTime } from '../marks';
+
+const weekdays = weeklySchedule.map((d) => ({
+  day: d.dayLabel,
+  zone: d.zone,
+  icon: d.icon,
+  time: shortTime(d.minutes),
+  note: d.tasks
+    .slice(0, 3)
+    .map((t) => t.label.toLowerCase())
+    .join(', '),
+}));
+---
+
+<figure class="my-8">
+  <div class="border-t-2 border-ink">
+    <div class="flex items-center justify-between gap-3 border-b border-rule py-3">
+      <div>
+        <p class="font-bold">Every day</p>
+        <p class="text-[0.9rem] text-soft">{dailyEssentials.title}: {dailyEssentials.tasks.map((t) => t.label.toLowerCase()).join(', ')}</p>
+      </div>
+      <TimeMark>{shortTime(dailyEssentials.minutes)}</TimeMark>
+    </div>
+    <ul class="cleaning-week">
+      {
+        weekdays.map((d) => (
+          <li class="grid grid-cols-[5.5rem_1fr] items-start gap-3 border-b border-rule py-3 sm:grid-cols-[7rem_1fr_auto] sm:items-center">
+            <span class="pt-1.5 text-[0.7rem] font-semibold tracking-[0.18em] uppercase sm:pt-0">{d.day}</span>
+            <span class="min-w-0">
+              <ZoneTag icon={d.icon} label={d.zone} size="sm" />
+              <span class="mt-1 block text-[0.88rem] leading-snug text-soft">{d.note}…</span>
+            </span>
+            <span class="col-start-2 sm:col-start-auto">
+              <TimeMark>{d.time}</TimeMark>
+            </span>
+          </li>
+        ))
+      }
+      <li class="grid grid-cols-[5.5rem_1fr] items-start gap-3 border-b border-rule py-3 sm:grid-cols-[7rem_1fr_auto] sm:items-center">
+        <span class="pt-1.5 text-[0.7rem] font-semibold tracking-[0.18em] uppercase sm:pt-0">Fri – Sun</span>
+        <span class="min-w-0">
+          <span class="flex flex-wrap gap-1.5">
+            {weekend.days.map((d) => <ZoneTag icon={weekend.icon} label={d.zone} size="sm" />)}
+          </span>
+          <span class="mt-1 block text-[0.88rem] leading-snug text-soft">Optional. One task from the monthly project, catch up, or skip it.</span>
+        </span>
+        <span class="col-start-2 sm:col-start-auto">
+          <TimeMark>Optional</TimeMark>
+        </span>
+      </li>
+    </ul>
+  </div>
+  <figcaption class="mt-3 text-[0.85rem] text-soft">
+    The cleaning week used on the Organized Mom Collective calendar: one short reset every day, one zone Monday to Thursday, and a flexible weekend.
+  </figcaption>
+</figure>

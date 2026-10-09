@@ -1,0 +1,44 @@
+---
+/** Header for public resource pages. Matches the app header's ruled, spaced-caps style. */
+import { Wordmark } from '../marks';
+import { routes } from '../../routes';
+
+const path = Astro.url.pathname;
+const inResources = path.startsWith(routes.resources);
+---
+
+<a
+  href="#main"
+  class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2"
+  >Skip to content</a
+>
+<header class="border-b border-rule">
+  <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-5 sm:h-16 sm:px-8">
+    <a href={routes.home} aria-label="Organized Mom Collective home"><Wordmark badge="size-8 sm:size-9" /></a>
+    <nav aria-label="Site">
+      <ul class="flex items-center gap-4 sm:gap-8">
+        <li>
+          <a
+            href={routes.resources}
+            aria-current={inResources ? 'page' : undefined}
+            class:list={[
+              'relative inline-flex min-h-11 items-center text-[0.66rem] font-semibold tracking-[0.14em] sm:tracking-[0.18em] uppercase transition-colors sm:text-[0.7rem]',
+              inResources ? 'text-ink' : 'text-muted hover:text-ink',
+            ]}
+          >
+            Resources
+            {inResources && <span aria-hidden="true" class="absolute inset-x-0 bottom-1 h-[3px] bg-month" />}
+          </a>
+        </li>
+        <li>
+          <a
+            href={routes.reorder}
+            class="inline-flex min-h-11 items-center text-[0.66rem] font-semibold tracking-[0.14em] sm:tracking-[0.18em] text-muted uppercase transition-colors hover:text-ink sm:text-[0.7rem]"
+          >
+            Calendar
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

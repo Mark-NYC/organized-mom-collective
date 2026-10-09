@@ -1,0 +1,38 @@
+---
+/**
+ * A short checklist drawn like the printed calendar: empty boxes on ruled lines.
+ * Static on purpose; it's for reading, screenshotting or copying onto paper.
+ */
+interface Props {
+  items: string[];
+  title?: string;
+  /** Optional time stamp, e.g. "15 min". */
+  time?: string;
+}
+const { items, title, time } = Astro.props;
+---
+
+<div class="my-6">
+  {
+    (title || time) && (
+      <div class="flex items-center justify-between gap-3 border-b border-ink pb-2">
+        {title && <p class="label">{title}</p>}
+        {time && (
+          <span class="inline-flex shrink-0 items-center border border-ink px-1.5 py-[3px] text-[0.64rem] leading-none font-semibold tracking-[0.16em] whitespace-nowrap uppercase">
+            {time}
+          </span>
+        )}
+      </div>
+    )
+  }
+  <ul class="checklist">
+    {
+      items.map((item) => (
+        <li class="flex items-start gap-3 border-b border-rule py-2.5 text-[1rem] leading-snug">
+          <span aria-hidden="true" class="mt-[1px] size-[1.1rem] shrink-0 rounded-[3px] border-[1.5px] border-ink bg-paper" />
+          <span>{item}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>

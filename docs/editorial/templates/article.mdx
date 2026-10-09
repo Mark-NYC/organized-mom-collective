@@ -1,0 +1,73 @@
+---
+# Copy to src/content/articles/<slug>.mdx. The file name is the permanent URL slug.
+# Every field is explained in src/content.config.ts and docs/editorial/SEO_STRATEGY.md.
+trackerId: XX-00
+title: The H1, written for the reader
+seoTitle: 'The <title>, 60 characters max'
+description: The meta description. Answer the search in one or two sentences, 70 to 160 characters.
+summary: One-line promise shown under the H1 and on article cards.
+pillar: cleaning-routines
+pillarGuide: false
+published: 2026-01-01
+primaryKeyword: the one search query this article answers
+related:
+  - an-existing-article-slug
+next: the-next-step-article-slug
+cta: none
+draft: true
+---
+
+{/* 2. Tension: two to four sentences. The real moment the problem bites. No invented anecdote. */}
+
+Opening tension.
+
+{/* 3. The short answer, before anything else. Or an H2 "… at a glance" with a visual. */}
+
+Here's the short answer: **the answer in one bold sentence.** One more line on how the rest of the article helps.
+
+<Shift title="The better frame, in one line.">
+
+The common assumption. Why it fails in a real week. **The better frame, in bold.**
+
+</Shift>
+
+## Why it works
+
+Optional. Only the reasoning she needs to trust and adapt the routine.
+
+<RealLifeVersion title="A descriptive name for the routine">
+
+1. **First step as an imperative.** Detail, with times or quantities.
+2. **Second step.** Detail.
+
+<Checklist title="Routine name" time="15 min" items={['First task', 'Second task', 'Third task']} />
+
+</RealLifeVersion>
+
+## Adapting it to your household
+
+- **Working full-time.** …
+- **Little kids.** …
+- **A partner who helps.** …
+
+<WhenLifeHappens title="When you miss a day (or a whole week)">
+
+**The rule for a missed day.** …
+
+**The minimum version for a bad week.** …
+
+</WhenLifeHappens>
+
+{/* Optional: one sentence bridging to another cluster, with a contextual link. */}
+
+<ProductNote product="calendar">
+
+Optional, at most one. One or two sentences on a verified feature that fits this article (see ARTICLE_FORMAT.md#product-notes). Set `cta` to match.
+
+</ProductNote>
+
+<NextSmallWin>
+
+One action she can do in the next few minutes.
+
+</NextSmallWin>

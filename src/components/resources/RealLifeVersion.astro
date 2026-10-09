@@ -1,0 +1,15 @@
+---
+/** The Real-Life Version: the routine or checklist itself, set apart so it's easy to find again. */
+interface Props {
+  title: string;
+  /** Anchor id, so the table of contents and other articles can link straight to it. */
+  id?: string;
+}
+const { title, id = 'the-real-life-version' } = Astro.props;
+---
+
+<section id={id} class="my-10 scroll-mt-6 rounded-[4px] bg-cream px-5 py-7 sm:px-8" aria-labelledby={`${id}-h`}>
+  <p class="label text-soft">The Real-Life Version</p>
+  <h2 id={`${id}-h`} class="mt-2 text-[1.5rem] leading-tight font-bold text-balance">{title}</h2>
+  <div class="article-callout mt-4"><slot /></div>
+</section>
