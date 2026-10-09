@@ -118,6 +118,27 @@
   .lede {
     @apply text-[1.0625rem] leading-relaxed sm:text-[1.125rem];
   }
+  /* Homepage headlines: the serif from the survey palette, regular weight, warm charcoal. */
+  .serif-hero {
+    @apply font-serif text-[2.35rem] leading-[1.06] font-normal tracking-[-0.02em] text-balance text-warm-ink sm:text-[3.1rem] lg:text-[3.6rem];
+  }
+  .serif-title {
+    @apply font-serif text-[1.85rem] leading-[1.12] font-normal tracking-[-0.015em] text-balance text-warm-ink sm:text-[2.5rem];
+  }
+  /* Availability tag: what exists today vs. what's planned. Never omit it from a planned feature. */
+  .status {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.62rem] leading-tight font-semibold tracking-[0.14em] uppercase;
+  }
+  .status::before {
+    content: '';
+    @apply size-1.5 shrink-0 rounded-full bg-current;
+  }
+  .status-now {
+    @apply bg-sage-wash text-[#55684b];
+  }
+  .status-soon {
+    @apply border border-dashed border-rule-strong text-soft;
+  }
 }
 
 /*
