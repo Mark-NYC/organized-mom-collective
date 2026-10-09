@@ -94,6 +94,55 @@
 }
 
 /*
+ * Resource articles: long-form Markdown, styled to match the print palette.
+ * Plain Markdown lists use `:not([class])` so component lists keep their own styles.
+ */
+@layer components {
+  .article-body {
+    @apply text-[1.0625rem] leading-[1.75];
+  }
+  .article-body > h2 {
+    @apply mt-12 scroll-mt-6 text-[1.5rem] leading-tight font-bold text-balance sm:text-[1.65rem];
+  }
+  .article-body > h3 {
+    @apply mt-8 scroll-mt-6 text-[1.15rem] leading-snug font-bold;
+  }
+  .article-body :where(p, ul:not([class]), ol:not([class]), table) {
+    @apply mt-4;
+  }
+  .article-callout > :first-child {
+    @apply mt-0;
+  }
+  .article-body :where(ul:not([class])) {
+    @apply list-disc space-y-1.5 pl-5 marker:text-rule-strong;
+  }
+  .article-body :where(ol:not([class])) {
+    @apply list-decimal space-y-2 pl-5 marker:font-semibold;
+  }
+  .article-body :where(strong) {
+    @apply font-semibold;
+  }
+  .article-body :where(a:not([class])) {
+    @apply font-semibold underline decoration-month decoration-2 underline-offset-[3px] hover:decoration-ink;
+  }
+  .article-body :where(blockquote) {
+    @apply mt-4 border-l-[3px] border-month bg-band px-4 py-3 font-semibold;
+  }
+  .article-body :where(blockquote > p) {
+    @apply mt-0;
+  }
+  .article-body :where(table) {
+    @apply w-full border-collapse text-left text-[0.95rem] leading-snug;
+  }
+  .article-body :where(th) {
+    @apply border-b-2 border-ink py-2 pr-3 text-[0.68rem] font-semibold tracking-[0.16em] uppercase;
+  }
+  .article-body :where(td) {
+    @apply border-b border-rule py-2.5 pr-3 align-top;
+  }
+}
+
+/*
  * Small rewards. Transform/opacity/stroke only, so they stay smooth on older phones.
  * All of them collapse to instant under prefers-reduced-motion (below).
  */

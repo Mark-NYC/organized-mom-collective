@@ -15,9 +15,16 @@ interface Props {
   robots: 'index' | 'noindex';
   /** Absolute canonical URL (public pages only) */
   canonical?: string;
+  /** Open Graph type: 'website' by default, 'article' for resource articles. */
+  ogType?: 'website' | 'article';
+  /** Share image, site-relative or absolute. */
+  ogImage?: string;
+  /** Structured data (schema.org JSON-LD) objects for this page. */
+  jsonLd?: object[];
 }
 
-const { title, description, robots, canonical } = Astro.props;
+const { title, description, robots, canonical, ogType = 'website', ogImage = '/icons/icon-512.png', jsonLd = [] } = Astro.props;
+const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).href : ogImage;
 const monthHexes = monthColors.map((m) => m.hex);
 ---
 
@@ -32,7 +39,10 @@ const monthHexes = monthColors.map((m) => m.hex);
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta property="og:type" content={ogType} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImageUrl} />
+    {jsonLd.map((data) => <script type="application/ld+json" is:inline set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />)}
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />

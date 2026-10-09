@@ -1,0 +1,54 @@
+---
+/** A pillar page: the pillar guide first, then every article in the cluster. Built only for pillars with articles. */
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import Breadcrumbs from '../../../components/resources/Breadcrumbs.astro';
+import ArticleCard from '../../../components/resources/ArticleCard.astro';
+import { getPillarArticles, type Article } from '../../../lib/articles';
+import { pillars, type Pillar } from '../../../data/pillars';
+import { routes } from '../../../routes';
+
+export async function getStaticPaths() {
+  const paths = await Promise.all(pillars.map(async (pillar) => ({ pillar, list: await getPillarArticles(pillar.id) })));
+  return paths.filter(({ list }) => list.length > 0).map(({ pillar, list }) => ({ params: { pillar: pillar.id }, props: { pillar, list } }));
+}
+
+interface Props {
+  pillar: Pillar;
+  list: Article[];
+}
+
+const { pillar, list } = Astro.props;
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Resources', item: new URL(routes.resources, site).href },
+      { '@type': 'ListItem', position: 2, name: pillar.name, item: new URL(routes.pillar(pillar.id), site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout title={`${pillar.name} for Busy Families`} description={pillar.description} chrome width="wide" jsonLd={jsonLd}>
+  <header class="max-w-2xl">
+    <Breadcrumbs items={[{ label: 'Resources', href: routes.resources }]} />
+    <h1 class="page-title mt-5 text-balance">{pillar.name}</h1>
+    <p class="mt-4 text-[1.15rem] leading-relaxed">{pillar.summary}</p>
+  </header>
+
+  <ul class="mt-10 grid gap-10 sm:grid-cols-2 md:grid-cols-3">
+    {
+      list.map((a) => (
+        <li>
+          <ArticleCard article={a} as="h2" showPillar={false} />
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mt-16 text-center">
+    <a href={routes.resources} class="text-link">Browse all resources</a>
+  </p>
+</PublicLayout>

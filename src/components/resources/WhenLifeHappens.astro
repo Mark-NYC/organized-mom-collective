@@ -1,0 +1,14 @@
+---
+/** When Life Happens: the realistic fallback for a week that doesn't go to plan. */
+interface Props {
+  title?: string;
+  id?: string;
+}
+const { title = 'When life happens', id = 'when-life-happens' } = Astro.props;
+---
+
+<section id={id} class="my-10 scroll-mt-6 border-l-[3px] border-month pl-5 sm:pl-6" aria-labelledby={`${id}-h`}>
+  <p class="label text-soft">When Life Happens</p>
+  <h2 id={`${id}-h`} class="mt-2 text-[1.5rem] leading-tight font-bold text-balance">{title}</h2>
+  <div class="article-callout mt-4"><slot /></div>
+</section>

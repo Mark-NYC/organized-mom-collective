@@ -1,0 +1,112 @@
+---
+/**
+ * The resource library hub: each pillar with its articles, pillar guides first.
+ * Until the first article is published it shows the three topics, is noindex,
+ * and is left out of the sitemap, so search engines never see an empty page.
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ArticleCard from '../../components/resources/ArticleCard.astro';
+import { getPillarArticles } from '../../lib/articles';
+import { pillars } from '../../data/pillars';
+import { routes } from '../../routes';
+import { BRAND_NAME } from '../../config';
+
+const sections = await Promise.all(pillars.map(async (pillar) => ({ pillar, articles: await getPillarArticles(pillar.id) })));
+const all = sections.flatMap((s) => s.articles);
+const live = sections.filter((s) => s.articles.length > 0);
+const guides = all.filter((a) => a.data.pillarGuide);
+
+const site = Astro.site!;
+const description =
+  'Simple systems for busy moms: family schedules, cleaning routines and meal planning that cut down the decisions you make every day.';
+const jsonLd = all.length
+  ? [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: `Resources · ${BRAND_NAME}`,
+        description,
+        url: new URL(routes.resources, site).href,
+        hasPart: all.map((a) => ({ '@type': 'Article', headline: a.data.title, url: new URL(routes.article(a.id), site).href })),
+      },
+    ]
+  : [];
+---
+
+<PublicLayout
+  title="Home Organization Resources for Busy Moms"
+  description={description}
+  indexable={all.length > 0}
+  chrome
+  width="wide"
+  jsonLd={jsonLd}
+>
+  <header class="max-w-2xl">
+    <p class="label text-muted">The Real-Life Reset</p>
+    <h1 class="page-title mt-3 text-balance">Simple systems for a busy home</h1>
+    <p class="mt-4 text-[1.15rem] leading-relaxed">
+      You don’t need more things to remember. You need a few simple systems that make the everyday decisions for you. Each guide answers
+      one real question, gives you a routine you can start today, and a plan for the weeks that don’t go to plan.
+    </p>
+  </header>
+
+  {
+    guides.length > 0 && (
+      <section aria-labelledby="start-h" class="-mx-5 mt-10 bg-cream px-5 py-8 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10">
+        <h2 id="start-h" class="section-label">Start here</h2>
+        <ul class="mt-6 grid gap-8 md:grid-cols-3">
+          {guides.map((a) => (
+            <li>
+              <ArticleCard article={a} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    live.map(({ pillar, articles }) => (
+      <section aria-labelledby={`${pillar.id}-h`} class="mt-14">
+        <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b border-rule pb-3">
+          <div class="max-w-2xl">
+            <h2 id={`${pillar.id}-h`} class="text-[1.5rem] leading-tight font-bold">
+              <a href={routes.pillar(pillar.id)} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
+                {pillar.name}
+              </a>
+            </h2>
+            <p class="mt-1 text-[0.97rem] text-soft">{pillar.summary}</p>
+          </div>
+          {articles.length > 3 && (
+            <a href={routes.pillar(pillar.id)} class="text-link">
+              All {articles.length} guides
+            </a>
+          )}
+        </div>
+        <ul class="mt-6 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+          {articles.slice(0, 3).map((a) => (
+            <li>
+              <ArticleCard article={a} showPillar={false} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  {
+    all.length === 0 && (
+      <section aria-labelledby="soon-h" class="mt-12">
+        <h2 id="soon-h" class="section-label">The first guides are on the way</h2>
+        <ul class="mt-6 grid gap-8 md:grid-cols-3">
+          {pillars.map((p) => (
+            <li class="border-t-2 border-ink pt-4">
+              <p class="text-[1.2rem] leading-snug font-bold">{p.name}</p>
+              <p class="mt-2 text-[0.97rem] leading-relaxed text-soft">{p.summary}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</PublicLayout>

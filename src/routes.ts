@@ -2,17 +2,23 @@
  * Every internal URL in one place.
  *
  *   PUBLIC  /                  (future marketing site; temporary placeholder now)
+ *           /resources                         resource library hub
+ *           /resources/<article-slug>          articles (src/content/articles/)
+ *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
  *   QR      /start             permanent entry point printed on calendars → APP
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
  *           /app/tidy → /app/week (old name, kept so earlier links still work)
  *
- * Future areas (not built): /calendar, /cleaning, /blog/…, and auth/account
+ * Future areas (not built): /calendar, /cleaning, and auth/account
  * routes such as /login and /account.
  */
 import { DAY_PARAMS } from './lib/dates';
 
 export const routes = {
   home: '/',
+  resources: '/resources',
+  article: (slug: string) => `/resources/${slug}`,
+  pillar: (id: string) => `/resources/topics/${id}`,
   start: '/start',
   today: '/app',
   week: '/app/week',

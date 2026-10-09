@@ -1,0 +1,145 @@
+---
+/**
+ * The Real-Life Reset article template. Every article in src/content/articles/
+ * renders through this page; the branded sections are MDX components passed in below.
+ */
+import { render } from 'astro:content';
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import Breadcrumbs from '../../components/resources/Breadcrumbs.astro';
+import ArticleCard from '../../components/resources/ArticleCard.astro';
+import Shift from '../../components/resources/Shift.astro';
+import RealLifeVersion from '../../components/resources/RealLifeVersion.astro';
+import WhenLifeHappens from '../../components/resources/WhenLifeHappens.astro';
+import NextSmallWin from '../../components/resources/NextSmallWin.astro';
+import Checklist from '../../components/resources/Checklist.astro';
+import ProductNote from '../../components/resources/ProductNote.astro';
+import CleaningWeek from '../../components/resources/CleaningWeek.astro';
+import { formatDate, getArticles, getNext, getRelated, isoDate, type Article } from '../../lib/articles';
+import { tableOfContents } from '../../lib/toc';
+import { getPillar } from '../../data/pillars';
+import { routes } from '../../routes';
+import { BRAND_NAME } from '../../config';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }));
+}
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { data } = article;
+const { Content, headings } = await render(article);
+const pillar = getPillar(data.pillar);
+const next = await getNext(article);
+const related = (await getRelated(article)).filter((a) => a.id !== next?.id).slice(0, 3);
+
+const toc = tableOfContents(article.body ?? '', headings);
+const words = (article.body ?? '').replace(/<[^>]+>|[#*_>`[\]()]/g, ' ').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 230));
+const updated = data.updated ?? data.published;
+
+const site = Astro.site!;
+const url = new URL(routes.article(article.id), site).href;
+const ogImage = '/images/reorder/calendar-in-use-1280.webp';
+const organization = {
+  '@type': 'Organization',
+  name: BRAND_NAME,
+  url: site.href,
+  logo: new URL('/brand/omc-badge.png', site).href,
+};
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: data.title,
+    description: data.description,
+    datePublished: isoDate(data.published),
+    dateModified: isoDate(updated),
+    mainEntityOfPage: url,
+    image: new URL(ogImage, site).href,
+    articleSection: pillar.name,
+    author: organization,
+    publisher: organization,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Resources', item: new URL(routes.resources, site).href },
+      { '@type': 'ListItem', position: 2, name: pillar.name, item: new URL(routes.pillar(pillar.id), site).href },
+      { '@type': 'ListItem', position: 3, name: data.title, item: url },
+    ],
+  },
+];
+
+const components = { Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Checklist, ProductNote, CleaningWeek };
+---
+
+<PublicLayout fullTitle={data.seoTitle} description={data.description} chrome ogType="article" ogImage={ogImage} jsonLd={jsonLd}>
+  <article>
+    <header>
+      <Breadcrumbs items={[{ label: 'Resources', href: routes.resources }, { label: pillar.name, href: routes.pillar(pillar.id) }]} />
+      <h1 class="page-title mt-5 text-balance">{data.title}</h1>
+      <p class="mt-4 text-[1.15rem] leading-relaxed text-soft">{data.summary}</p>
+      <p class="mt-5 flex flex-wrap gap-x-4 gap-y-1 border-b border-rule pb-5 text-[0.85rem] text-muted">
+        <span>{data.updated ? 'Updated' : 'Published'} <time datetime={isoDate(updated)}>{formatDate(updated)}</time></span>
+        <span aria-hidden="true">·</span>
+        <span>{minutes} min read</span>
+      </p>
+    </header>
+
+    {
+      toc.length >= 4 && (
+        <nav aria-labelledby="toc-h" class="mt-6">
+          <h2 id="toc-h" class="label text-muted">In this article</h2>
+          <ol class="mt-3 space-y-1.5 text-[0.95rem]">
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`} class="underline decoration-rule underline-offset-4 hover:decoration-ink">
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+
+    <div class="article-body mt-8">
+      <Content components={components} />
+    </div>
+  </article>
+
+  {
+    next && (
+      <section aria-labelledby="next-h" class="mt-14">
+        <h2 id="next-h" class="section-label">Read next</h2>
+        <div class="mt-5">
+          <ArticleCard article={next} />
+        </div>
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section aria-labelledby="related-h" class="mt-14">
+        <h2 id="related-h" class="section-label">More from the guide</h2>
+        <ul class="mt-5 grid gap-8 sm:grid-cols-2">
+          {related.map((a) => (
+            <li>
+              <ArticleCard article={a} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <p class="mt-14 text-center">
+    <a href={routes.pillar(pillar.id)} class="text-link">All {pillar.name.toLowerCase()} articles</a>
+  </p>
+</PublicLayout>

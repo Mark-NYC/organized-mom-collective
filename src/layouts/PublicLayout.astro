@@ -1,22 +1,48 @@
 ---
-/** Public, indexable pages (/, and later /calendar, /cleaning, /blog/…). */
+/** Public, indexable pages (/, /resources/…, and later /calendar, /cleaning). */
 import BaseLayout from './BaseLayout.astro';
+import SiteHeader from '../components/resources/SiteHeader.astro';
+import SiteFooter from '../components/resources/SiteFooter.astro';
 import { BRAND_NAME } from '../config';
 
 interface Props {
   title?: string;
+  /** Exact <title>, used as-is (articles set their own SEO title). */
+  fullTitle?: string;
   description: string;
   /** Set false for utility pages like the 404 (noindex, no canonical). */
   indexable?: boolean;
+  /** Show the resource-library header and footer. */
+  chrome?: boolean;
+  /** Content width: 'text' for reading pages, 'wide' for the hub. */
+  width?: 'text' | 'wide';
+  ogType?: 'website' | 'article';
+  ogImage?: string;
+  jsonLd?: object[];
 }
 
-const { title, description, indexable = true } = Astro.props;
-const fullTitle = title ? `${title} · ${BRAND_NAME}` : BRAND_NAME;
-const canonical = indexable && Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const { title, description, indexable = true, chrome = false, width = 'text', ogType, ogImage, jsonLd } = Astro.props;
+const fullTitle = Astro.props.fullTitle ?? (title ? `${title} · ${BRAND_NAME}` : BRAND_NAME);
+// Internal links never use a trailing slash (see src/routes.ts), so canonicals don't either.
+const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
+const canonical = indexable && Astro.site ? new URL(path, Astro.site).href : undefined;
 ---
 
-<BaseLayout title={fullTitle} description={description} robots={indexable ? 'index' : 'noindex'} canonical={canonical}>
-  <main id="main" class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-20">
+<BaseLayout
+  title={fullTitle}
+  description={description}
+  robots={indexable ? 'index' : 'noindex'}
+  canonical={canonical}
+  ogType={ogType}
+  ogImage={ogImage}
+  jsonLd={jsonLd}
+>
+  {chrome && <SiteHeader />}
+  <main
+    id="main"
+    class:list={['mx-auto px-5 sm:px-8', width === 'wide' ? 'max-w-5xl' : 'max-w-3xl', chrome ? 'py-8 sm:py-14' : 'py-12 sm:py-20']}
+  >
     <slot />
   </main>
+  {chrome && <SiteFooter />}
 </BaseLayout>

@@ -1,0 +1,24 @@
+---
+import type { Article } from '../../lib/articles';
+import { getPillar } from '../../data/pillars';
+import { routes } from '../../routes';
+
+interface Props {
+  article: Article;
+  /** Heading level for the card title, to keep the page outline correct. */
+  as?: 'h2' | 'h3';
+  showPillar?: boolean;
+}
+const { article, as: Tag = 'h3', showPillar = true } = Astro.props;
+const { title, summary, pillar } = article.data;
+---
+
+<article class="group relative flex h-full flex-col border-t-2 border-ink pt-4">
+  {showPillar && <p class="label text-muted">{getPillar(pillar).name}</p>}
+  <Tag class="mt-2 text-[1.2rem] leading-snug font-bold text-balance">
+    <a href={routes.article(article.id)} class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-month group-hover:decoration-[3px] group-hover:underline-offset-4">
+      {title}
+    </a>
+  </Tag>
+  <p class="mt-2 text-[0.97rem] leading-relaxed text-soft">{summary}</p>
+</article>
