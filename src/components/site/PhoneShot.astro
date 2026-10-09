@@ -8,8 +8,10 @@ interface Props {
   name: 'today' | 'week';
   alt: string;
   class?: string;
+  /** 'eager' when the phone is above the fold, e.g. in a hero. */
+  loading?: 'lazy' | 'eager';
 }
-const { name, alt, class: className } = Astro.props;
+const { name, alt, class: className, loading = 'lazy' } = Astro.props;
 ---
 
 <div class:list={['mx-auto w-full max-w-[17rem] rounded-[2.4rem] bg-[#2f2f2f] p-[0.55rem] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.45)]', className]}>
@@ -20,7 +22,7 @@ const { name, alt, class: className } = Astro.props;
       sizes="272px"
       width="390"
       height="844"
-      loading="lazy"
+      {loading}
       decoding="async"
       alt={alt}
       class="block h-auto w-full"

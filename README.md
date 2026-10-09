@@ -36,6 +36,7 @@ npm run verify    # build + check:site + tests
 | Where `/start` (the QR) sends people | `src/config.ts` → `START_DESTINATION` |
 | App pages (`/app`, `/app/week`, `/app/reorder`, `/app/settings`; `/app/tidy` redirects to `/app/week`) | `src/pages/app/` |
 | Public pages: homepage, calendar product page, companion explainer, 404 | `src/pages/index.astro`, `src/pages/calendar.astro`, `src/pages/companion.astro`, `src/pages/404.astro` |
+| **Homepage** (`/`): "Family System" positioning, copy supplied word for word | `src/pages/index.astro`. Only the calendar and the cleaning companion exist today, so every planned app feature (shared calendar, Sunday Setup, meals, to-dos) carries a `.status-soon` "Coming soon" tag (`.status` in `global.css`) and every CTA goes to `/calendar`. Remove a tag only when that feature ships. |
 | Public header / footer (never shown in the app) | `src/components/resources/SiteHeader.astro`, `SiteFooter.astro` |
 | Public-page pieces: calendar options, Shop button, phone frame | `src/components/site/` |
 | "Shop" buttons | `ShopButton` goes straight to the Etsy listing (best value first) once an `etsyUrl` is set; until then to `/calendar#buy` |
