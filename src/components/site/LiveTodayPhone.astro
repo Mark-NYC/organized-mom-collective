@@ -4,9 +4,10 @@
  * each weekday (so the cleaning zone is the right one for today) with the date line
  * written over the blank the capture left. Without JavaScript it shows the build day.
  * Screens and layout come from scripts/capture-app-today.mjs; retake them when Today changes.
- * Same drawn frame as PhoneShot.
+ * Same drawn frame as PhoneShot (PhoneFrame).
  */
 import shot from '../../data/app-today-shot.json';
+import PhoneFrame from './PhoneFrame.astro';
 
 interface Props {
   class?: string;
@@ -31,14 +32,11 @@ const line = (l: typeof shot.weekdayLine) =>
   `left:${pct(l.left)};top:${pct(l.top)};font-size:${(l.fontSize * 100).toFixed(3)}cqw;letter-spacing:${l.letterSpacing.toFixed(3)}em;line-height:${l.lineHeight}`;
 ---
 
-<div
-  data-live-today
-  class:list={['mx-auto w-full max-w-[17rem] rounded-[2.4rem] bg-[#2f2f2f] p-[0.55rem] shadow-[0_24px_48px_-24px_rgba(0,0,0,0.45)]', className]}
->
-  <div class="relative overflow-hidden rounded-[1.9rem] bg-paper [container-type:inline-size]">
+<PhoneFrame data-live-today class={className}>
+  <div class="relative [container-type:inline-size]">
     <img
       {...src(dow)}
-      sizes="272px"
+      sizes="248px"
       width={shot.width}
       height={shot.height}
       fetchpriority="high"
@@ -51,7 +49,7 @@ const line = (l: typeof shot.weekdayLine) =>
     >
     <span aria-hidden="true" data-month class="month-title absolute whitespace-nowrap text-ink" style={line(shot.monthLine)}>{monthYear}</span>
   </div>
-</div>
+</PhoneFrame>
 
 <script is:inline>
   // Swap to the visitor's own day before the screenshot paints. Same formats as the app's Today header.
