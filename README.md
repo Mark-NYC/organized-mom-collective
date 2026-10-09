@@ -26,7 +26,7 @@ npm run verify    # build + check:site + tests
 | --- | --- |
 | **Cleaning tasks** (daily essentials, Mon–Thu focus, weekend copy, 12-month rotation) | `src/data/cleaning.ts` |
 | **Reorder: prices, editions (dates once confirmed), Etsy listing URLs** | `src/config.ts` → `CALENDAR_OPTIONS` (a button stays disabled until its `etsyUrl` is a real `etsy.com/listing/…` URL; update `editions` each new calendar year) |
-| Reorder photos | `public/images/reorder/`, resized 640/960/1280 from `design/etsy-listing/` 11 (hero), 02 (features), 05 (calendar + app). All 12 Etsy listing images live in `design/etsy-listing/`. Not precached, so the offline install stays small. |
+| Reorder photos | `public/images/reorder/`, resized 640/960/1280 from `design/etsy-listing/` 11 (hero), 02-transparent (features; transparent background, so its frame has no fill or border), 05 (calendar + app). All 12 Etsy listing images live in `design/etsy-listing/`. Not precached, so the offline install stays small. |
 | Public site photos | `public/images/site/`: `family-kitchen` (listing 03, cropped above its caption), `calendar-on-wall` (01), `calendar-specs` (07), `calendar-sets` (08), each 640/960/1280; `og-calendar.jpg` (11, cropped to 1200 × 630, the default share image). `app-today` / `app-week` (390/780) are real screenshots of the built app at 390 × 844 with sample checkmarks — retake them when those screens change. Public pages also reuse `public/images/reorder/`. |
 | Logo (badge, favicon, app icons) | `public/brand/`, `public/favicon.ico`, `public/icons/` (original in `design/logo/`) |
 | Zone icons (daily, Mon–Thu rooms, weekend) | `public/icons/zones/*.png` (originals in `design/zone-icons/`), assigned in `src/data/cleaning.ts` |
