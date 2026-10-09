@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dailyEssentials, monthlyDeepClean, weeklySchedule } from '../src/data/cleaning';
 import { dateForWeekday, dateKey, isWeekend, monthKey, parseDayParam, weekendStart } from '../src/lib/dates';
 import { monthFocusFor, planFor } from '../src/lib/schedule';
-import { isOnboarded, keys, pruneOld, readList, resetAllProgress, resetDay, setOnboarded, writeList } from '../src/lib/storage';
+import { KEEP_DAYS, isOnboarded, keys, pruneOld, readList, resetAllProgress, resetDay, setOnboarded, writeList } from '../src/lib/storage';
 
 // Minimal in-memory localStorage
 class MemStorage {
@@ -155,14 +155,27 @@ describe('storage', () => {
     expect(isOnboarded()).toBe(true);
   });
 
-  it('prunes old day entries only', () => {
-    writeList(keys.daily('2026-01-01'), ['beds']);
-    writeList(keys.daily('2026-10-01'), ['beds']);
-    writeList(keys.monthly('2026-01'), ['jan-pantry']);
+  it('keeps about a year of day entries, and monthly entries always', () => {
+    writeList(keys.daily('2025-10-01'), ['beds']); // > 1 year old
+    writeList(keys.daily('2026-01-01'), ['beds']); // 9 months old
+    writeList(keys.weekend('2025-10-03'), ['catch-up']);
+    writeList(keys.focus('2025-10-07'), ['tue-bedding']); // exactly 364 days
+    writeList(keys.monthly('2024-01'), ['jan-pantry']);
     pruneOld(new Date(2026, 9, 6));
-    expect(readList(keys.daily('2026-01-01'))).toEqual([]);
-    expect(readList(keys.daily('2026-10-01'))).toEqual(['beds']);
-    expect(readList(keys.monthly('2026-01'))).toEqual(['jan-pantry']);
+    expect(readList(keys.daily('2025-10-01'))).toEqual([]);
+    expect(readList(keys.weekend('2025-10-03'))).toEqual([]);
+    expect(readList(keys.daily('2026-01-01'))).toEqual(['beds']);
+    expect(readList(keys.focus('2025-10-07'))).toEqual(['tue-bedding']);
+    expect(readList(keys.monthly('2024-01'))).toEqual(['jan-pantry']);
+  });
+
+  it('a full year of daily data fits easily', () => {
+    let bytes = 0;
+    for (let i = 0; i < KEEP_DAYS; i++) {
+      const day = dateKey(new Date(2026, 0, 1 + i));
+      for (const k of [keys.daily(day), keys.focus(day), keys.weekend(day)]) bytes += k.length + 120;
+    }
+    expect(bytes).toBeLessThan(200_000); // browsers allow ~5 MB
   });
 
   it('survives corrupt storage values', () => {
@@ -204,5 +217,51 @@ describe('routing', () => {
     expect(isAppPath('/app/tidy')).toBe(true);
     expect(isAppPath('/apple')).toBe(false);
     expect(isAppPath('/')).toBe(false);
+  });
+});
+
+describe('when the browser won\'t save', () => {
+  class FullStorage extends MemStorage {
+    setItem(): void {
+      throw new DOMException('quota', 'QuotaExceededError');
+    }
+  }
+
+  it('keeps checkmarks for this visit, reports not saving, and never throws', async () => {
+    vi.resetModules();
+    (globalThis as unknown as { window: { localStorage: MemStorage } }).window = { localStorage: new FullStorage() };
+    const s = await import('../src/lib/storage');
+    let notified = 0;
+    s.onSavingChange(() => notified++);
+    expect(s.isSaving()).toBe(false); // the probe write noticed
+    expect(s.writeList(s.keys.daily('2026-10-06'), ['beds'])).toBe(false);
+    expect(s.writeList(s.keys.daily('2026-10-06'), ['beds', 'counters'])).toBe(false);
+    expect(s.readList(s.keys.daily('2026-10-06'))).toEqual(['beds', 'counters']);
+    s.setOnboarded(true);
+    expect(s.isOnboarded()).toBe(true);
+    expect(notified).toBeLessThanOrEqual(1);
+  });
+
+  it('works with no storage at all', async () => {
+    vi.resetModules();
+    (globalThis as unknown as { window: object }).window = {
+      get localStorage(): Storage {
+        throw new DOMException('denied', 'SecurityError');
+      },
+    };
+    const s = await import('../src/lib/storage');
+    expect(s.isSaving()).toBe(false);
+    expect(() => s.writeList(s.keys.focus('2026-10-06'), ['mon-dust'])).not.toThrow();
+    expect(s.readList(s.keys.focus('2026-10-06'))).toEqual(['mon-dust']);
+    expect(() => s.pruneOld(new Date())).not.toThrow();
+  });
+
+  it('a healthy browser reports saving', async () => {
+    vi.resetModules();
+    const s = await import('../src/lib/storage');
+    expect(s.isSaving()).toBe(true);
+    expect(s.writeList(s.keys.daily('2026-10-06'), ['beds'])).toBe(true);
+    expect(window.localStorage.getItem('omc:v1:daily:2026-10-06')).toBe('["beds"]');
+    expect(window.localStorage.getItem('omc:v1:probe')).toBeNull();
   });
 });

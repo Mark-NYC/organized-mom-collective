@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
 import { dateForWeekday, dateKey, monthKey, parseDayParam, weekendStart } from '../lib/dates';
-import { useCheckedSet, useToday } from '../lib/hooks';
+import { useCheckedSet, useSaving, useToday } from '../lib/hooks';
 import { monthFocusFor, planFor } from '../lib/schedule';
 import { takeSourceParam } from '../lib/entry';
 import { isOnboarded, keys, pruneOld, setEntrySource, setOnboarded } from '../lib/storage';
@@ -79,9 +79,16 @@ function Today({ justStarted }: { justStarted: boolean }) {
   const dayNum = String(shown.getDate()).padStart(2, '0');
   const monthYear = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const longDate = shown.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const saving = useSaving();
 
   return (
     <div>
+      {!saving && (
+        <p role="status" className="mb-5 border-l-[3px] border-month bg-band px-3.5 py-2.5 text-[0.95rem] leading-snug">
+          <strong className="font-semibold">This browser isn’t saving checkmarks right now.</strong> You can still check things
+          off — they just won’t be remembered after you close it. This usually means private browsing or a full phone.
+        </p>
+      )}
       {viewing && (
         <div className="mb-5 flex items-center justify-between gap-3 bg-band px-3.5 py-2.5">
           <div className="min-w-0">
