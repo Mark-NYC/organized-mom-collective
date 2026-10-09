@@ -12,7 +12,8 @@
     "astro": "astro",
     "check:site": "node scripts/check-site.mjs",
     "verify": "npm run build && npm run check:site && npm test",
-    "test:shop": "bash scripts/test-shop.sh"
+    "test:shop": "bash scripts/test-shop.sh",
+    "build:functions": "node scripts/build-dashboard-functions.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.3",

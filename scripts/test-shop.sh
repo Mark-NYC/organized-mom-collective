@@ -3,7 +3,8 @@
 #
 # Needs: a local PostgreSQL 15+ you can connect to as a superuser, `psql`, and the
 # PostgREST binary (https://github.com/PostgREST/postgrest/releases) on PATH or in $POSTGREST.
-# Optional: `deno` on PATH (or $DENO) to type-check the Edge Function entry points.
+# Optional: `deno` on PATH (or $DENO) to type-check the Edge Function entry points and to
+# smoke-test the paste-ready dashboard files (supabase/dashboard/).
 #
 #   PGHOST=/tmp PGPORT=5432 PGUSER=postgres npm run test:shop
 #
@@ -61,7 +62,15 @@ for _ in $(seq 1 50); do
   sleep 0.2
 done
 
-SHOP_E2E_REST="http://127.0.0.1:${REST_PORT}" \
-SHOP_E2E_JWT_SECRET="$JWT_SECRET" \
-SHOP_E2E_PSQL="postgresql:///${DB}?host=${PGHOST}&port=${PGPORT}&user=${PGUSER}" \
-  npx vitest run tests/shop-e2e.test.ts "$@"
+export SHOP_E2E_REST="http://127.0.0.1:${REST_PORT}"
+export SHOP_E2E_JWT_SECRET="$JWT_SECRET"
+export SHOP_E2E_PSQL="postgresql:///${DB}?host=${PGHOST}&port=${PGPORT}&user=${PGUSER}"
+npx vitest run tests/shop-e2e.test.ts "$@"
+
+# The paste-ready dashboard files (supabase/dashboard/), run under Deno as Supabase would.
+if command -v "${DENO:-deno}" >/dev/null 2>&1; then
+  echo "→ dashboard function files (Deno)"
+  "${DENO:-deno}" run --allow-all tests/shop/dashboard-smoke.ts
+else
+  echo "! deno not found: skipped the dashboard function files smoke test" >&2
+fi
