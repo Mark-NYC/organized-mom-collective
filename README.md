@@ -2,7 +2,7 @@
 
 Companion web app for the Organized Mom Collective family wall calendar. People scan the QR code on the calendar (`/start`) and land in the app on **Today**: a small daily reset plus one area to focus on.
 
-Astro + TypeScript + Tailwind CSS v4, with React islands only where there's state. No backend, no accounts — progress is saved in the browser's `localStorage`. The one exception is the customer survey (`/survey`), which sends answers to Supabase (see `supabase/README.md`).
+Astro + TypeScript + Tailwind CSS v4, with React islands only where there's state. No backend, no accounts — progress is saved in the browser's `localStorage`. The exceptions use Supabase: the customer survey (`/survey`, see `supabase/README.md`) and the direct website shop (`/checkout`, `/admin/orders`, built but switched off; see `supabase/SHOP.md`).
 
 ## Install / run / build
 
@@ -16,6 +16,7 @@ npm run preview   # serve the production build
 npm test          # unit tests (schedule + storage logic)
 npm run check:site  # after a build: links, SEO metadata, tracker sync; regenerates the content inventory
 npm run verify    # build + check:site + tests
+npm run test:shop # shop end-to-end tests on a throwaway local Postgres + PostgREST (see supabase/SHOP.md)
 ```
 
 `dist/` is a fully static site — deploy it to Netlify, Vercel, Cloudflare Pages, GitHub Pages, etc.
@@ -42,6 +43,7 @@ npm run verify    # build + check:site + tests
 | "Shop" buttons | `ShopButton` goes straight to the Etsy listing (best value first) once an `etsyUrl` is set; until then to `/calendar#buy` |
 | **Customer survey** (`/survey`, noindex) and results (`/survey/admin`, admins only) | Questions and answer ids: `src/data/survey.ts`. UI: `src/components/survey/`. Supabase calls, stats, CSV: `src/lib/survey.ts`. Database, security and setup: `supabase/README.md`. Needs `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_ANON_KEY` at build time (`.env.example`). |
 | **Resource library** (`/resources`: hub, pillar pages, articles) | `src/pages/resources/`, articles in `src/content/articles/`. Editorial system and code map: `CLAUDE.md` and `docs/editorial/` |
+| **Direct shop** (`/checkout`, `/checkout/complete`, `/admin/orders`; off until launch) | UI: `src/components/shop/`, `src/pages/checkout/`, `src/pages/admin/`. Browser logic: `src/lib/shop.ts`. Server: `supabase/functions/` (Edge Functions), `supabase/migrations/*_shop.sql`. Setup, testing, launch steps: `supabase/SHOP.md`. Build vars `PUBLIC_SHOP_ENABLED`, `PUBLIC_STRIPE_PUBLISHABLE_KEY` (`.env.example`). Buy buttons still go to Etsy. |
 | Layouts: public (indexable) vs app (noindex) | `src/layouts/PublicLayout.astro`, `src/layouts/AppLayout.astro` |
 | UI components | `src/components/` |
 | Date / schedule / storage logic | `src/lib/` |
@@ -76,6 +78,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 | --- | --- | --- |
 | Public site | `/` (homepage), `/calendar` (product page, buy on Etsy), `/companion` (how the cleaning companion works; "Get Started" in the header), `/resources`, `/resources/<slug>`, `/resources/topics/<pillar>`, `/sitemap.xml` | indexable, canonical URLs (no trailing slash); the hub stays noindex until it has articles; the 404 is noindex |
 | Survey | `/survey` (shared by link), `/survey/admin` (results, sign-in required) | noindex, not in the sitemap |
+| Shop (off until launch) | `/checkout`, `/checkout/complete`, `/admin/orders` (sign-in required) | noindex, not in the sitemap, not linked |
 | QR entry | `/start` — **permanent**, printed on every calendar as `https://organizedmomcollective.com/start` | noindex |
 | Companion app | `/app` (Today), `/app/week`, `/app/reorder`, `/app/settings`. `/app/tidy` is the old name for Week and redirects there, keeping `#monthly-focus` | `noindex, follow` |
 | Accounts (not built) | e.g. `/login`, `/account` | — |

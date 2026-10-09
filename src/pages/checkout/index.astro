@@ -1,0 +1,37 @@
+---
+/**
+ * /checkout: buy the calendar directly on the website (Stripe embedded checkout).
+ * Built only as a placeholder unless PUBLIC_SHOP_ENABLED=true, and never linked from
+ * the site until launch is approved: every public buy button still goes to Etsy.
+ * Server side and launch switches: supabase/SHOP.md.
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import CheckoutHeader from '../../components/shop/CheckoutHeader.astro';
+import Checkout from '../../components/shop/Checkout';
+import { shopConfigured, shopEnabled } from '../../lib/shop';
+import { routes } from '../../routes';
+
+const live = shopEnabled() && shopConfigured();
+---
+
+<PublicLayout title="Checkout" description="Buy the Organized Mom Collective family wall calendar." indexable={false} chrome={false} width="full">
+  <CheckoutHeader />
+  <div class="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
+    <h1 class="page-title">Checkout</h1>
+    <div class="mt-6 sm:mt-8">
+      {
+        live ? (
+          <Checkout client:only="react" />
+        ) : (
+          <div class="mx-auto max-w-md py-10 text-center">
+            <h2 class="text-[1.3rem] leading-tight font-bold">Online checkout isn’t open yet</h2>
+            <p class="mt-3 leading-relaxed">For now, the calendar is available on Etsy.</p>
+            <a href={routes.buy} class="btn-primary mt-6">
+              See the calendar
+            </a>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</PublicLayout>

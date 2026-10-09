@@ -1,5 +1,7 @@
 # Supabase: customer survey
 
+The direct website shop (orders, inventory, Stripe) has its own guide: [SHOP.md](SHOP.md).
+
 The site is static, so the survey talks to Supabase directly from the browser with the
 **anon / publishable key** only. The migration locks everything down:
 
