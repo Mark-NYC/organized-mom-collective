@@ -65,14 +65,23 @@ Dashboard (/admin/orders)
 
 Work top to bottom. Nothing here enables real payments until the **Launch** section.
 
-### Supabase
-- [ ] SQL editor: run `supabase/migrations/20261010000000_shop.sql` (or `npx supabase db push`).
+### Supabase (all in the web dashboard; no CLI needed)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261010000000_shop.sql` (on GitHub: open the file → *Raw* → select all → copy) → **Run**, once. It only creates new `shop_*` objects; survey data is untouched. Running it a second time stops at the first statement and changes nothing.
 - [ ] Add your admin (create the user first under Authentication → Users if needed):
   `insert into public.shop_admins (user_id) select id from auth.users where email = 'you@example.com';`
 - [ ] Authentication → Sign In / Providers: turn off "Allow new users to sign up".
-- [ ] Authentication → turn on multi-factor (TOTP) for your admin account.
-- [ ] Deploy the functions (from the repo): `npx supabase login`, `npx supabase link --project-ref <ref>`, then `npx supabase functions deploy shop-checkout`, `… stripe-webhook`, `… shop-admin`.
+- [ ] Give the admin account a long, unique password (a password manager's). The dashboard signs in with email + password only; Supabase MFA would need sign-in support added to `/admin/orders` first, so enabling it in Supabase alone doesn't protect this page.
+- [ ] **Edge Functions → Deploy a new function → Via Editor**, three times. Each function is ONE paste-ready file in `supabase/dashboard/` (generated from `supabase/functions/` by `npm run build:functions`; never edit them by hand):
+
+  | Function name (exact) | Paste this file |
+  | --- | --- |
+  | `shop-checkout` | `supabase/dashboard/shop-checkout.ts` |
+  | `stripe-webhook` | `supabase/dashboard/stripe-webhook.ts` |
+  | `shop-admin` | `supabase/dashboard/shop-admin.ts` |
+
+  Replace everything in the editor with the file, deploy, then in the function's **Details/Settings** turn **off** "Verify JWT" (Enforce JWT verification) for all three. Each function checks its own callers instead.
 - [ ] Edge Functions → Secrets: `STRIPE_SECRET_KEY` (sk_**test**_…), `STRIPE_WEBHOOK_SECRET`, `SHOP_PREVIEW_TOKEN` (long random string), `SHOP_SITE_URL=https://organizedmomcollective.com`, `SHOP_ALLOWED_ORIGINS` (site URL plus your Vercel preview URL, comma-separated), `RESEND_API_KEY`, `SHOP_EMAIL_REPLY_TO`. **Do not set `SHOP_LIVE_CHECKOUT`.**
+- (With the Supabase CLI instead: `supabase db push` and `supabase functions deploy <name>` from `supabase/functions/`; `supabase/config.toml` already turns JWT verification off.)
 
 ### Stripe (test mode)
 - [ ] Developers → API keys: copy `sk_test_…` (to Supabase) and `pk_test_…` (to Vercel).
@@ -116,8 +125,8 @@ Only after you approve it. Each step is reversible: Settings → **Off** stops n
 
 ## Tests
 
-- `npm test`: session building, signatures, emails, dashboard math and CSV, launch guards (seed values, flags, no public links to `/checkout`).
-- `npm run test:shop`: 51 end-to-end tests on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
+- `npm test`: session building, signatures, emails, dashboard math and CSV, launch guards (seed values, flags, no public links to `/checkout`), and that the paste-ready files in `supabase/dashboard/` are self-contained and up to date.
+- `npm run test:shop`: 51 end-to-end tests, then a Deno smoke test of the three paste-ready files in `supabase/dashboard/` (each loaded on its own: checkout, signed webhook, admin, shipping, refund, emails) on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
 
 **Not verified against the real services** (Stripe's API isn't reachable from the build sandbox): the real Stripe API and embedded iframe, Apple Pay / Google Pay sheets, Stripe Tax calculations, the exact shape of Stripe's webhook payloads for your account's API version (the code reads both old and new shapes and re-fetches sessions with a pinned API version, `2025-03-31.basil`), Supabase's hosted gateway (CORS, `x-forwarded-for`, the new `sb_secret_` keys), Supabase Auth's `/user` endpoint, Resend delivery and your DNS. The test checklist above covers these.
 

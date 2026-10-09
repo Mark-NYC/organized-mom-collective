@@ -227,6 +227,8 @@ export function routerFetch(opts: {
   inbox: FakeInbox;
   users: Map<string, { id: string; email: string }>;
 }): typeof fetch {
+  // Captured now, so this still reaches PostgREST if the global fetch is replaced later.
+  const realFetch = globalThis.fetch;
   return (async (input: RequestInfo | URL, init: RequestInit = {}) => {
     const url = new URL(typeof input === 'string' || input instanceof URL ? input.toString() : input.url);
     const method = (init.method ?? 'GET').toUpperCase();
@@ -240,7 +242,7 @@ export function routerFetch(opts: {
       return user ? new Response(JSON.stringify(user), { status: 200 }) : new Response(JSON.stringify({ msg: 'invalid JWT' }), { status: 401 });
     }
     if (url.href.startsWith(`${opts.supabaseUrl}/rest/v1/`)) {
-      return fetch(url.href.replace(`${opts.supabaseUrl}/rest/v1`, opts.restUrl), init);
+      return realFetch(url.href.replace(`${opts.supabaseUrl}/rest/v1`, opts.restUrl), init);
     }
     throw new Error(`Unexpected fetch in test: ${method} ${url.href}`);
   }) as typeof fetch;

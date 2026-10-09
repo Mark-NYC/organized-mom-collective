@@ -13,6 +13,7 @@ import { describeEvent, filterOrders, heldUnits, money, ordersCsv, salesTotals, 
 import { routes } from '../src/routes';
 
 import envExample from '../.env.example?raw';
+import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
 
 // Source files as text, keyed like '../src/pages/x.astro'.
 const files = {
@@ -337,5 +338,27 @@ describe('launch guards', () => {
       expect(read(page), page).toContain('indexable={false}');
     }
     expect(read('src/pages/sitemap.xml.ts')).not.toMatch(/checkout|admin/);
+  });
+});
+
+describe('paste-ready dashboard function files', () => {
+  const committed = import.meta.glob<string>('../supabase/dashboard/*.ts', { query: '?raw', import: 'default', eager: true });
+
+  it('exist for all three functions and are up to date with the sources (run `npm run build:functions`)', async () => {
+    for (const fn of DASHBOARD_FUNCTIONS as { name: string }[]) {
+      const file = committed[`../supabase/dashboard/${fn.name}.ts`];
+      expect(file, `${fn.name}.ts missing`).toBeDefined();
+      expect(file === (await bundle(fn)), `${fn.name}.ts is out of date`).toBe(true);
+    }
+    expect(Object.keys(committed)).toHaveLength(3);
+  });
+
+  it('are self-contained: no imports to resolve, no secrets baked in', () => {
+    for (const [path, code] of Object.entries(committed)) {
+      expect(code, path).not.toMatch(/^\s*import\s|^\s*export\s.*\sfrom\s|\bimport\(/m);
+      expect(code, path).not.toMatch(/sk_(live|test)_[A-Za-z0-9]|whsec_[A-Za-z0-9]|re_[A-Za-z0-9]{8}/);
+      expect(code, path).toMatch(/Deno\.serve\(/);
+      expect(code, path).toContain('Deno.env.get(key)');
+    }
   });
 });

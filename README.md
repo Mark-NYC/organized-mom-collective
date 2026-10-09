@@ -17,6 +17,7 @@ npm test          # unit tests (schedule + storage logic)
 npm run check:site  # after a build: links, SEO metadata, tracker sync; regenerates the content inventory
 npm run verify    # build + check:site + tests
 npm run test:shop # shop end-to-end tests on a throwaway local Postgres + PostgREST (see supabase/SHOP.md)
+npm run build:functions # rebuild the paste-ready Edge Function files in supabase/dashboard/ after editing supabase/functions/
 ```
 
 `dist/` is a fully static site — deploy it to Netlify, Vercel, Cloudflare Pages, GitHub Pages, etc.
