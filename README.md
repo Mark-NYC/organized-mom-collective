@@ -48,8 +48,9 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 
 - Daily essentials and Mon–Thu focus → keyed by date, so they start fresh every day.
 - Monthly deep-clean tasks → keyed by month, so progress carries across that month's weekends.
-- "Catch up instead" → keyed by that weekend's Friday.
-- `active:YYYY-MM-DD` → "1" when anything was checked that day; lights that day's dot in the week view on Today. Days from before this key existed still count via their daily/zone lists.
+- "Catch up instead" → keyed by its own date, like a weekday zone. (Before Oct 2026 it was keyed by the weekend's Friday; those entries now show on Friday only.)
+- `active:YYYY-MM-DD` → the monthly project ticks made that date (e.g. `["monthly:2026-10:oct-shoes"]`), so the shared project counts as activity on the day it was done and nowhere else. Unticking removes it. The old value `"1"` still counts.
+- A day is active (its dot on Today, its row on Week) when anything is checked under that day's own keys: Daily Reset, zone, catch-up, or a monthly tick credited to it. Week shows "✓ Done" only for a finished Mon–Thu zone; any other work that day shows "Active".
 - Day-scoped entries are kept for about a year (`KEEP_DAYS` = 366, the life of a 52-week calendar; ~90 KB at most), then pruned. Monthly entries are never pruned.
 - If the browser won't save (private browsing, storage full or blocked), checkmarks are kept in memory for that visit and Today shows a short note that they won't be remembered. Nothing crashes and nothing claims to be saved.
 - `/app?day=monday` (linked from the Week page) shows that weekday of the current Mon–Sun week. Its checkmarks save under that day's own date, so today's progress is never touched.

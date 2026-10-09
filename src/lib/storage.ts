@@ -9,9 +9,15 @@
  *   omc:v1:onboarded              "1" once onboarding is finished
  *   omc:v1:daily:YYYY-MM-DD       checked daily essentials for that day
  *   omc:v1:focus:YYYY-MM-DD       checked Mon–Thu focus tasks for that day
- *   omc:v1:weekend:YYYY-MM-DD     weekend-only choices, keyed by that weekend's Friday
- *   omc:v1:monthly:YYYY-MM        checked monthly home project tasks for that month
- *   omc:v1:active:YYYY-MM-DD      "1" if anything was checked that day (lights that day in the week view)
+ *   omc:v1:weekend:YYYY-MM-DD     "Catch up instead" on that Fri/Sat/Sun. Before Oct 2026 this was
+ *                                 keyed by the weekend's Friday; those entries now show on Friday only.
+ *   omc:v1:monthly:YYYY-MM        checked monthly home project tasks for that month (shared all month)
+ *   omc:v1:active:YYYY-MM-DD      monthly project ticks made on that date, e.g. ["monthly:2026-10:oct-shoes"],
+ *                                 so the project counts as activity on the day it was done, and only that day.
+ *                                 Legacy value "1" (any checkmark that day, never cleared) still counts.
+ *
+ * A day is "active" (its week dot, its Week row) if anything is checked under that day's own
+ * keys: daily, focus, weekend, or a monthly tick credited to it. Unchecking undoes it.
  *   omc:v1:install-invite         "dismissed" once the Add to Home Screen invitation is closed
  *
  * Per-session (sessionStorage), not progress:
@@ -25,7 +31,7 @@ const ENTRY_SOURCE_KEY = `${PREFIX}entry-source`;
 export const keys = {
   daily: (date: string) => `${PREFIX}daily:${date}`,
   focus: (date: string) => `${PREFIX}focus:${date}`,
-  weekend: (friday: string) => `${PREFIX}weekend:${friday}`,
+  weekend: (date: string) => `${PREFIX}weekend:${date}`,
   monthly: (month: string) => `${PREFIX}monthly:${month}`,
   active: (date: string) => `${PREFIX}active:${date}`,
 };
@@ -199,11 +205,12 @@ function progressKeys(): string[] {
     .filter((k) => k.startsWith(PREFIX) && k !== ONBOARDED_KEY && k !== PROBE_KEY && k !== `${PREFIX}install-invite`);
 }
 
-export function resetDay(date: string, weekendFriday?: string): void {
+/** Clears that day's own checklist (Daily Reset, zone, catch-up) and its activity. Monthly project ticks stay. */
+export function resetDay(date: string): void {
   writeList(keys.daily(date), []);
   writeList(keys.focus(date), []);
+  writeList(keys.weekend(date), []);
   backend.remove(keys.active(date));
-  if (weekendFriday) writeList(keys.weekend(weekendFriday), []);
 }
 
 /** Clears every checkbox everywhere. Keeps the onboarding flag. */
@@ -223,17 +230,42 @@ export function pruneOld(today: Date): void {
   }
 }
 
-/** Notes that she did something on this date (any checkmark, including weekend projects). */
-export function markActive(date: string): void {
-  backend.set(keys.active(date), '1');
+/** Monthly project ticks credited to this date. The legacy "1" flag reads as one entry. */
+function activityRefs(date: string): string[] {
+  return backend.get(keys.active(date)) === '1' ? ['legacy'] : readList(keys.active(date));
+}
+
+const monthlyRef = (month: string, id: string) => `monthly:${month}:${id}`;
+
+/** A monthly project task was checked: count it as activity on `date`, the day it was actually done. */
+export function creditMonthly(date: string, month: string, id: string): void {
+  const refs = activityRefs(date);
+  const ref = monthlyRef(month, id);
+  if (!refs.includes(ref)) writeList(keys.active(date), [...refs, ref]);
+}
+
+/** A monthly project task was unchecked: take the credit back from whichever day it was given to. */
+export function uncreditMonthly(month: string, id: string): void {
+  const ref = monthlyRef(month, id);
+  for (const k of progressKeys()) {
+    if (!k.startsWith(`${PREFIX}active:`)) continue;
+    const date = k.slice(`${PREFIX}active:`.length);
+    const refs = activityRefs(date);
+    if (refs.includes(ref)) writeList(k, refs.filter((r) => r !== ref));
+  }
 }
 
 /**
- * Did she check anything off on this date? Uses the day's own task lists too,
- * so days from before the activity key existed still count.
+ * Did she check anything off on this date? Only that day's own lists and the monthly
+ * ticks made that day count, so one day's work never lights another day.
  */
 export function wasActive(date: string): boolean {
-  return backend.get(keys.active(date)) === '1' || readList(keys.daily(date)).length > 0 || readList(keys.focus(date)).length > 0;
+  return (
+    activityRefs(date).length > 0 ||
+    readList(keys.daily(date)).length > 0 ||
+    readList(keys.focus(date)).length > 0 ||
+    readList(keys.weekend(date)).length > 0
+  );
 }
 
 /** Small named settings, e.g. whether the install invitation was dismissed. */

@@ -151,4 +151,6 @@ const principles = [
   render();
   // Coming back from a day's tasks with the Back button: show the new checkmarks.
   window.addEventListener('pageshow', (e) => e.persisted && render());
+  // Left open overnight or switched back to: redraw for the current day and week.
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && render());
 </script>
