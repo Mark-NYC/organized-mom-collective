@@ -98,7 +98,8 @@ export default function Checkout() {
     refresh();
   };
 
-  const shipping = catalog.shipping_rates;
+  // Placeholder (test-only) rates are never offered with a live key, so don't advertise them.
+  const shipping = catalog.shipping_rates.filter((r) => stripeTestMode() || !r.test_only);
   const shippingNote =
     shipping.length === 0
       ? ''
@@ -280,6 +281,7 @@ function errorText(code: CheckoutError, p: ShopProduct): string {
     case 'unavailable':
       return 'That calendar isn’t available on the website right now.';
     case 'checkout_closed':
+    case 'shipping_not_configured':
       return 'Online checkout isn’t open right now.';
     case 'rate_limited':
       return 'Too many checkout attempts from this connection. Please wait a few minutes and try again.';

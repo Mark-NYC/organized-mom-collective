@@ -143,6 +143,12 @@ ${all.map((b) => b.html).join('\n')}
 }
 
 export function renderEmail(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; replyTo: boolean; refundCents?: number }): EmailMessage {
+  const msg = renderBody(kind, o, opts);
+  // Test-mode orders are never mistaken for real ones.
+  return o.livemode === false ? { ...msg, subject: `[Test] ${msg.subject}` } : msg;
+}
+
+function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; replyTo: boolean; refundCents?: number }): EmailMessage {
   const n = orderLabel(o);
   const hi = firstName(o);
   const ship = addressLines(o.shipping_name, o.shipping_address);

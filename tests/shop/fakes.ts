@@ -41,6 +41,7 @@ export interface FakeSession {
   payment_intent: string | null;
   amount_subtotal: number;
   amount_total: number | null;
+  currency: string;
   expires_at: number;
   params: Record<string, unknown>;
   customer_details: { email: string; name: string; phone: string | null } | null;
@@ -58,6 +59,8 @@ export class FakeStripe {
   private idem = new Map<string, unknown>();
   /** Make the next session create fail (Stripe outage). */
   failNextCreate = false;
+  /** The key on the current request is a live key. */
+  private live = false;
 
   async handle(method: string, url: URL, body: string, headers: Headers): Promise<Response> {
     const params = parseForm(method === 'GET' ? url.search.slice(1) : body);
@@ -65,6 +68,7 @@ export class FakeStripe {
     this.requests.push({ method, path: url.pathname, body: params, idempotencyKey });
     if (!headers.get('authorization')?.startsWith('Bearer sk_')) return this.error(401, 'Invalid API key');
     if (idempotencyKey && this.idem.has(`${url.pathname}:${idempotencyKey}`)) return this.ok(this.idem.get(`${url.pathname}:${idempotencyKey}`));
+    this.live = headers.get('authorization')!.startsWith('Bearer sk_live_');
     const result = this.route(method, url.pathname, params);
     if (result instanceof Response) return result;
     if (idempotencyKey) this.idem.set(`${url.pathname}:${idempotencyKey}`, result);
@@ -111,12 +115,13 @@ export class FakeStripe {
       client_secret: `${id}_secret_${rand(8)}`,
       status: 'open',
       payment_status: 'unpaid',
-      livemode: false,
+      livemode: this.live,
       metadata: (p.metadata as Record<string, string>) ?? {},
       client_reference_id: String(p.client_reference_id),
       payment_intent: null,
       amount_subtotal: subtotal,
       amount_total: null,
+      currency: 'usd',
       expires_at: Number(p.expires_at),
       params: p,
       customer_details: null,

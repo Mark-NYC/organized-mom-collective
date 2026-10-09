@@ -1,15 +1,42 @@
 # Direct website shop
 
-Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and every buy button on the site still goes to Etsy.
+Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and the site's buy buttons are unchanged.
 
-**Status: built and tested in Stripe test mode, switched off.** Nothing is public until you flip the switches in [Launch](#launch).
+**Status: built, tested against fakes and a real local database, switched off.** Nothing is public and no real money can move until you complete [Launch](#launch).
+
+## The launch gate
+
+Real payments need **all four**. Each is checked on the server; the database (`shop_create_order`) makes the final call.
+
+| # | Switch | Where | Ships as |
+| --- | --- | --- | --- |
+| 1 | Live Stripe secret key (`sk_live_…`) | Supabase function secret `STRIPE_SECRET_KEY` | not set |
+| 2 | **Deployment flag** `SHOP_LIVE_CHECKOUT=enabled` | Supabase function secret | not set |
+| 3 | **Store setting** checkout = Open | Dashboard → Settings | Off |
+| 4 | At least one real (not test-only) shipping rate | Dashboard → Settings | none (only a test placeholder) |
+
+What each combination does:
+
+| Store setting | Deployment flag | Stripe key | Result |
+| --- | --- | --- | --- |
+| Off | any | any | Closed |
+| Preview | any | test | Only with `/checkout?preview=TOKEN`; test cards, no real money |
+| Preview | any | live | **Closed.** Preview never takes real money |
+| Open | off | test | Closed |
+| Open | off | live | Closed: functions refuse a live key without the flag (also refunds and webhooks) |
+| Open | on | test | Public **test** checkout (no real charges) |
+| Open | on | live | Real payments, if a real shipping rate exists; otherwise closed |
+
+Dashboard → Settings → **Launch readiness** shows which switches are on (no secret values). `PUBLIC_SHOP_ENABLED` (Vercel) only decides whether the `/checkout` page renders; it is not a security control.
+
+Placeholder shipping: the seeded "$6 Standard shipping (test placeholder)" is marked **test only**. It is never offered with a live key, and a live checkout refuses to open until you add a real rate.
 
 ## How it works
 
 ```
 Browser (/checkout)                    Supabase Edge Functions                 Postgres (shop_* tables)
-  pick calendar + qty ───────────────▶ shop-checkout ── shop_create_order ──▶ takes units out of stock (atomic)
-  Stripe embedded form ◀── client_secret ◀── Stripe Checkout Session          pending order, held for 30 min
+  pick calendar + qty ───────────────▶ shop-checkout ── shop_create_order ──▶ launch gate, then takes units out
+  Stripe embedded form ◀── client_secret ◀── Stripe Checkout Session          of stock (atomic); 30-min hold
   pays (card / Apple Pay / Google Pay)
                           Stripe ─────▶ stripe-webhook ── signature check ──▶ shop_mark_paid (once per event)
                                            re-fetches session from Stripe     order number, entitlement
@@ -20,104 +47,87 @@ Dashboard (/admin/orders)
   writes ──────────────▶ shop-admin ── verifies admin token ── Stripe refunds / shop_* functions / emails
 ```
 
-- **The site stays static.** No server added to the Astro build; all server logic is in three Supabase Edge Functions (`supabase/functions/`) and SQL functions (`migrations/20261010000000_shop.sql`). No new npm dependencies, no Stripe SDK (plain `fetch`), no paid services beyond Stripe's per-transaction fees (and Resend's free tier).
-- **Paid means the webhook said so.** The success page only polls the database. The webhook verifies Stripe's signature, records each event id once, and re-reads the Checkout Session from Stripe before marking anything paid.
-- **No overselling.** Starting checkout takes units out of stock in one conditional `UPDATE … WHERE stock >= qty`, so two buyers can't take the last unit (tested with 40 simultaneous checkouts for 25 units). Units come back when the checkout expires (Stripe's `checkout.session.expired`, or a 40-minute timeout if that webhook is missed), fails, or the customer taps *Change order*.
-- **Prices, stock, discounts are server-side.** The browser sends only a product slug and a quantity. Discount codes are Stripe promotion codes, validated by Stripe.
-- **Card data never touches us.** It stays inside Stripe's iframe.
-- **Entitlements.** Each paid order records a `companion` entitlement by email in `shop_entitlements` (revoked on full refund). Nothing is gated on it: the companion stays open to everyone, no account needed. It has a nullable `user_id` for future accounts.
+- **The site stays static.** All server logic lives in three Supabase Edge Functions (`supabase/functions/`) and SQL functions (`migrations/20261010000000_shop.sql`). No new npm dependencies, no Stripe SDK.
+- **Paid means the webhook said so.** Signature-verified (5-minute tolerance), each event id processed once, the session re-read from Stripe, amount/currency/mode cross-checked (mismatches flag the order).
+- **No overselling.** One conditional `UPDATE … WHERE stock >= qty`, so two buyers can't take the last unit (tested: 40 simultaneous checkouts for 25 units). Units come back on expiry, failure or *Change order*. If a payment lands after its hold expired and the stock is gone, the order is flagged *oversold*.
+- **Server-side prices.** The browser sends only a slug and a quantity. Discount codes are Stripe promotion codes.
+- **Refunds** use Stripe idempotency keys; a retry after a failed request can't refund twice. State always comes from Stripe's own refunded total.
+- **Customer data.** The only public endpoints are `shop_catalog()` (products, no stock counts) and `shop_order_status(session_id)` (status, number, items, totals, masked email; no name, address or phone; 30 days only; needs the unguessable Checkout Session id). Everything else needs a signed-in user listed in `shop_admins`. The end-to-end tests check the database grants directly.
+- **Entitlements.** Paid orders record a `companion` entitlement by email (revoked on full refund). Nothing is gated on it.
 
-## Routes
+## Products
 
-| Route | What | Indexing |
-| --- | --- | --- |
-| `/checkout` | Product, quantity, Stripe embedded checkout. `?product=calendar-52-week` preselects; `?preview=TOKEN` for preview mode | noindex, not linked, not in sitemap |
-| `/checkout/complete?session_id=…` | Confirmation (polls until the webhook confirms) | noindex |
-| `/admin/orders` | Orders, inventory, settings (shop admins only) | noindex |
-| `…/functions/v1/shop-checkout` | Create / cancel checkout | Edge Function |
-| `…/functions/v1/stripe-webhook` | Stripe events | Edge Function |
-| `…/functions/v1/shop-admin` | Every dashboard write | Edge Function |
+- **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
+- **52-Week Family Wall Calendar.** $54, hidden, 0 units.
+- A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
 
-## Set up (test mode)
+## Manual checklist
 
-You need: the Supabase project the survey already uses, a Stripe account (test mode), and optionally a Resend account. Use the Supabase CLI (`npx supabase`) or the dashboard.
+Work top to bottom. Nothing here enables real payments until the **Launch** section.
 
-1. **Database.** Run `migrations/20261010000000_shop.sql` (SQL editor, or `supabase db push`). It creates the tables, seeds the two calendars (26-week: $34, 25 units, active; 52-week: $54, 0 units, hidden) and one **placeholder** shipping rate ($6 "Standard shipping"). Checkout starts **off**.
-2. **Your admin login.** Use the same Supabase Auth user as the survey, or add one (Authentication → Users → Add user). Then:
-   ```sql
-   insert into public.shop_admins (user_id) select id from auth.users where email = 'you@example.com';
-   ```
-3. **Stripe (test mode).** Dashboard → Developers → API keys: copy the test **secret** key (`sk_test_…`) and **publishable** key (`pk_test_…`).
-4. **Deploy the functions.** `supabase/config.toml` turns the gateway JWT check off for all three (each checks its own callers).
-   ```sh
-   npx supabase login
-   npx supabase link --project-ref <your-project-ref>
-   npx supabase functions deploy shop-checkout
-   npx supabase functions deploy stripe-webhook
-   npx supabase functions deploy shop-admin
-   ```
-5. **Stripe webhook.** Stripe → Developers → Webhooks → Add endpoint (test mode): `https://<project-ref>.supabase.co/functions/v1/stripe-webhook`, events:
-   `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `payment_intent.payment_failed`, `charge.refunded`, `refund.failed`, `charge.dispute.created`. Copy its signing secret (`whsec_…`).
-6. **Function secrets** (Supabase → Edge Functions → Secrets, or `npx supabase secrets set KEY=value`). `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_ANON_KEY` are provided automatically.
+### Supabase
+- [ ] SQL editor: run `supabase/migrations/20261010000000_shop.sql` (or `npx supabase db push`).
+- [ ] Add your admin (create the user first under Authentication → Users if needed):
+  `insert into public.shop_admins (user_id) select id from auth.users where email = 'you@example.com';`
+- [ ] Authentication → Sign In / Providers: turn off "Allow new users to sign up".
+- [ ] Authentication → turn on multi-factor (TOTP) for your admin account.
+- [ ] Deploy the functions (from the repo): `npx supabase login`, `npx supabase link --project-ref <ref>`, then `npx supabase functions deploy shop-checkout`, `… stripe-webhook`, `… shop-admin`.
+- [ ] Edge Functions → Secrets: `STRIPE_SECRET_KEY` (sk_**test**_…), `STRIPE_WEBHOOK_SECRET`, `SHOP_PREVIEW_TOKEN` (long random string), `SHOP_SITE_URL=https://organizedmomcollective.com`, `SHOP_ALLOWED_ORIGINS` (site URL plus your Vercel preview URL, comma-separated), `RESEND_API_KEY`, `SHOP_EMAIL_REPLY_TO`. **Do not set `SHOP_LIVE_CHECKOUT`.**
 
-   | Secret | Value |
-   | --- | --- |
-   | `STRIPE_SECRET_KEY` | `sk_test_…` (a live key is refused unless `SHOP_LIVE_PAYMENTS=enabled`) |
-   | `STRIPE_WEBHOOK_SECRET` | `whsec_…` from step 5 |
-   | `SHOP_SITE_URL` | `https://organizedmomcollective.com` (default) |
-   | `SHOP_ALLOWED_ORIGINS` | Browser origins allowed to call the functions, comma-separated. Default: the site URL. Add a preview deploy URL or `http://localhost:4321` to test there |
-   | `SHOP_PREVIEW_TOKEN` | Any long random string; unlocks checkout in preview mode via `/checkout?preview=…` |
-   | `RESEND_API_KEY` | Optional. Without it, emails are logged as "skipped" and checkout still works |
-   | `SHOP_EMAIL_FROM` | Default `Organized Mom Collective <orders@organizedmomcollective.com>` (domain must be verified in Resend) |
-   | `SHOP_EMAIL_REPLY_TO` | An inbox you read. When set, emails say "Questions? Just reply" |
-   | `SHOP_LIVE_PAYMENTS` | Leave unset. `enabled` only when live payments are approved |
-7. **Site build variables** (host settings and `.env`; see `.env.example`): `PUBLIC_SHOP_ENABLED=true` and `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…`, plus the existing Supabase two. Set these on a **preview deployment** first; production can stay `false`.
-8. **Email (Resend).** Free tier: create an account, verify `organizedmomcollective.com` (DNS records), create an API key → `RESEND_API_KEY`. Emails: order confirmation/receipt (with companion instructions), shipping with tracking, refund/cancellation, and companion instructions on demand from the dashboard.
+### Stripe (test mode)
+- [ ] Developers → API keys: copy `sk_test_…` (to Supabase) and `pk_test_…` (to Vercel).
+- [ ] Developers → Webhooks → Add endpoint `https://<ref>.supabase.co/functions/v1/stripe-webhook` with events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `payment_intent.payment_failed`, `charge.refunded`, `refund.failed`, `charge.dispute.created`. Copy the signing secret to Supabase.
+- [ ] Settings → Payment method domains: add `organizedmomcollective.com` (and the preview domain) for Apple Pay.
+- [ ] Optional: Products → Coupons → create a coupon and promotion code to test discounts.
 
-## Test a purchase
+### Resend
+- [ ] Create an account; Domains → add `organizedmomcollective.com` and add its DNS records where the domain's DNS lives; wait for "Verified".
+- [ ] API Keys → create a "sending access" key → Supabase secret `RESEND_API_KEY`.
+- [ ] The default sender is `orders@organizedmomcollective.com`; set `SHOP_EMAIL_FROM` to change it. Make sure `SHOP_EMAIL_REPLY_TO` is an inbox you read.
 
-1. `/admin/orders` → Settings → Website checkout → **Preview**.
-2. Open `/checkout?preview=<SHOP_PREVIEW_TOKEN>` (on your phone too).
-3. Continue to payment. Card `4242 4242 4242 4242`, any future date, any CVC, any US address. Declines: `4000 0000 0000 0002`. 3D Secure: `4000 0025 0000 3155`. A discount: create a coupon + promotion code in Stripe (test mode) and enter it.
-4. You land on `/checkout/complete`: "Confirming…" then "confirmed" once the webhook arrives. The email arrives if Resend is set up.
-5. Abandoned checkout: start one and close the tab. Its units show under Inventory → *In checkout* until Stripe expires the session (30 minutes), then return.
+### Vercel
+- [ ] **Preview** environment only: `PUBLIC_SHOP_ENABLED=true`, `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…` (plus the existing `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`).
+- [ ] **Production**: leave `PUBLIC_SHOP_ENABLED` unset/false for now.
 
-## Manage an order
+### Test (preview deployment, test mode)
+- [ ] Dashboard → Settings → **Preview**.
+- [ ] On your phone, open `<preview-url>/checkout?preview=<SHOP_PREVIEW_TOKEN>` and pay with `4242 4242 4242 4242` (any future date, any CVC, any US address). Also try the decline `4000 0000 0000 0002`, 3D Secure `4000 0025 0000 3155`, a promotion code, Apple Pay (Safari) and Google Pay (Chrome).
+- [ ] Confirm: the page goes "Confirming…" then "confirmed"; a "[Test]" receipt email arrives; the order is in the dashboard.
+- [ ] Mark it shipped with a tracking number (shipping email arrives), then refund it (refund email arrives).
+- [ ] Start a checkout and abandon it: its units show *In checkout* and return after about 30 minutes (Stripe's `checkout.session.expired`).
+- [ ] Stripe → Webhooks → your endpoint shows 200 responses.
 
-1. `/admin/orders` → Orders (paid orders by default; filter, search, date range, **Export CSV**).
-2. Open an order: customer, address (*Copy address*), items, totals, timeline, emails.
-3. **Packing** while you pack. **Mark shipped** with carrier + tracking number (USPS/UPS/FedEx links are built automatically); the customer gets the shipping email if the box is ticked. **Delivered** when it arrives.
-4. **Refund**: full or partial, through Stripe, emails the customer. Tick *put units back in stock* only if they're physically back. A full refund before shipping cancels the order. Refunds made in the Stripe dashboard also land here via the webhook.
-5. **Inventory**: add/remove or set the count (with a reason; logged). If you sell a calendar on Etsy from the same shelf, take it out here. *Show/Hide in checkout* and *Edit details* (price, edition, description, photos).
-6. **Settings**: checkout Off / Preview / Open, sales tax mode, shipping rates.
-
-## Decisions before launch (yours)
-
-- **Sales tax.** Find out where you must collect (your home state at least; other states once you pass their economic-nexus thresholds) and register. Then pick a mode in Settings: *Stripe Tax* (accurate local rates; add your registrations in Stripe; per-transaction fee) or *manual* (one rate per state in `shop_tax_rates`; state rate only, shipping not taxed). Default is **off**: no tax collected.
-- **Shipping rates.** The $6 rate is a placeholder. Set real rates (and whether multiples cost more: rates are flat per order). Add delivery estimates only if you'll keep them.
-- **Which edition ships.** The 26-week calendar comes in January–June and July–December 2027. The listing has no edition set. Either set *Edition* on the product, or add a second product for the other half (new row in `shop_products`).
-- **Per-order limit** (5) and **stock** (25 for website sales; your Etsy stock is separate and not synced).
-- **Return/refund policy** and a contact address for order questions (`SHOP_EMAIL_REPLY_TO`).
-- **Apple Pay.** Register `organizedmomcollective.com` under Stripe → Settings → Payment method domains (for both test and live). Google Pay works without it.
+### Decisions you owe before launch
+- [ ] **Sales tax.** Where you're registered to collect. Then choose Settings → Sales tax: *Stripe Tax* (add registrations in Stripe; per-transaction fee) or *manual* (rows in `shop_tax_rates`; state rate only, shipping not taxed).
+- [ ] **Shipping prices.** Add the real rate(s) in Settings, then turn off the test placeholder.
+- [ ] Per-order limit (5) and website stock (25; separate from Etsy, not synced).
+- [ ] Refund/return policy.
 
 ## Launch
 
-Each step needs your explicit go-ahead.
+Only after you approve it. Each step is reversible: Settings → **Off** stops new checkouts instantly.
 
-1. Stripe live mode: activate the account, create the live webhook (same URL and events) and use its secret.
-2. Functions: `STRIPE_SECRET_KEY=sk_live_…`, `STRIPE_WEBHOOK_SECRET=<live whsec>`, `SHOP_LIVE_PAYMENTS=enabled`.
-3. Site: `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_…`, `PUBLIC_SHOP_ENABLED=true`, redeploy.
-4. Dashboard → Settings → **Open**.
-5. Switch the buy buttons (a code change: `ShopButton`, `CalendarOptions`, `/app/reorder`, plus `tests/shop.test.ts` → *launch guards*, which fails while anything public links to `/checkout`).
-
-To pause at any point: Settings → **Off** (instant; paid orders unaffected).
+1. Stripe live mode: activate the account; add the **live** webhook endpoint (same URL, same events); disable the test endpoint (it would otherwise fail signature checks against the live secret and Stripe will email you).
+2. Supabase secrets: `STRIPE_SECRET_KEY=sk_live_…`, `STRIPE_WEBHOOK_SECRET=<live whsec>`, `SHOP_LIVE_CHECKOUT=enabled`.
+3. Vercel production: `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_…`, `PUBLIC_SHOP_ENABLED=true`; redeploy.
+4. Dashboard → Settings → Launch readiness: all ★ items ticked → **Open**.
+5. Optional real-money smoke test: buy one with a 100%-minus-$1 promotion code, then refund it.
+6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public links to `/checkout`, so it must be updated deliberately.
 
 ## Tests
 
-- `npm test`: checkout/session logic, signatures, emails, dashboard math and CSV, launch guards.
-- `npm run test:shop`: 45 end-to-end tests on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Auth faked): payment, duplicate and forged webhooks, declines, abandoned/expired/canceled checkouts, 40-way overselling race, late payments, refunds, emails, admin auth, row-level security. Needs PostgreSQL and PostgREST locally (header of `scripts/test-shop.sh`).
-- Not testable here: the real Stripe iframe, Apple/Google Pay sheets and real email delivery. Do the test purchase above on a phone before launch.
+- `npm test`: session building, signatures, emails, dashboard math and CSV, launch guards (seed values, flags, no public links to `/checkout`).
+- `npm run test:shop`: 51 end-to-end tests on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
+
+**Not verified against the real services** (Stripe's API isn't reachable from the build sandbox): the real Stripe API and embedded iframe, Apple Pay / Google Pay sheets, Stripe Tax calculations, the exact shape of Stripe's webhook payloads for your account's API version (the code reads both old and new shapes and re-fetches sessions with a pinned API version, `2025-03-31.basil`), Supabase's hosted gateway (CORS, `x-forwarded-for`, the new `sb_secret_` keys), Supabase Auth's `/user` endpoint, Resend delivery and your DNS. The test checklist above covers these.
+
+## Known limits
+
+- **Stock hoarding.** Anyone can hold up to 5 units for 30 minutes per checkout. Rate limiting is 12 checkouts/hour per connection, keyed on the IP Supabase forwards; if that header can be spoofed upstream, the limit can be bypassed. Worst case: stock looks sold out until the holds expire. Watch *In checkout*; set checkout Off if abused.
+- **Stale holds** are released by Stripe's expiry webhook, or on the next checkout if that webhook is missed. Until then the dashboard's *In checkout* may show them.
+- **Etsy and website stock aren't connected.** If they share a shelf, take Etsy sales out here by hand.
+- Admin sessions last one hour (Supabase access token) and live in the tab's sessionStorage.
 
 ## Later: shipping labels
 
-Fulfillment is manual on purpose. A label provider (Pirate Ship has no public API; Shippo/EasyPost do) would plug into the `fulfillment` action in `supabase/functions/_shared/handlers/admin.ts`: buy the label, then call `shop_set_fulfillment` with the carrier and tracking number it returns. Same email, same timeline.
+Fulfillment is manual on purpose. A label provider (Pirate Ship has no public API; Shippo/EasyPost do) would plug into the `fulfillment` action in `supabase/functions/_shared/handlers/admin.ts`: buy the label, then call `shop_set_fulfillment` with the carrier and tracking number it returns.

@@ -30,6 +30,7 @@ import {
   type ProductRow,
   type SettingsRow,
   type ShippingRateRow,
+  type ShopStatus,
 } from '../../lib/shop';
 
 const TOKEN_KEY = 'omc:v1:shop-admin';
@@ -241,7 +242,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
               <OrdersList orders={data.orders} onOpen={setOpenId} />
             ))}
           {tab === 'inventory' && <Inventory data={data} token={auth.access_token} act={act} />}
-          {tab === 'settings' && data.settings && <Settings settings={data.settings} rates={data.rates} act={act} />}
+          {tab === 'settings' && data.settings && <Settings settings={data.settings} rates={data.rates} act={act} token={auth.access_token} />}
         </div>
       )}
     </div>
@@ -410,6 +411,8 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
   }, [o.id, o.updated_at, token]);
 
   useEffect(() => setRefundDollars((remaining / 100).toFixed(2)), [remaining]);
+  // A different amount is a different refund: new idempotency key.
+  useEffect(() => setRequestId(crypto.randomUUID()), [refundDollars, restock]);
 
   const paid = isPaid(o);
   const canShip = o.payment_status === 'paid' || o.payment_status === 'partially_refunded';
@@ -421,8 +424,9 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
 
   const run = async (body: Record<string, unknown>, success: string) => {
     setBusy(true);
-    await act(body, success);
+    const r = await act(body, success);
     setBusy(false);
+    return r;
   };
 
   const setStatus = (status: OrderRow['fulfillment_status']) =>
@@ -597,12 +601,16 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
             onCancel={() => setConfirmRefund(false)}
             onConfirm={async () => {
               setConfirmRefund(false);
-              await run(
+              const done = await run(
                 { action: 'refund', order_id: o.id, amount_cents: refundCents, restock: restock && unitsOut > 0, request_id: requestId },
                 `Refunded ${money(refundCents)}. The customer has been emailed.`,
               );
-              setRequestId(crypto.randomUUID());
-              setRestock(false);
+              // Keep the same request id after a failure: retrying then can't refund twice
+              // (Stripe idempotency). A new id only for a new refund.
+              if (done) {
+                setRequestId(crypto.randomUUID());
+                setRestock(false);
+              }
             }}
           />
         </Panel>
@@ -872,12 +880,48 @@ function ProductEditor({ product: p, act, onDone }: { product: ProductRow; act: 
 
 // ------------------------------------------------------------------ settings
 
-function Settings({ settings: s, rates, act }: { settings: SettingsRow; rates: ShippingRateRow[]; act: Act }) {
+function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; rates: ShippingRateRow[]; act: Act; token: string }) {
   const [confirm, setConfirm] = useState<SettingsRow['checkout_mode'] | null>(null);
   const [tax, setTax] = useState(s.tax_mode);
+  const [status, setStatus] = useState<ShopStatus | null>(null);
+  const [statusError, setStatusError] = useState('');
+
+  useEffect(() => {
+    adminAction<ShopStatus>(token, { action: 'status' })
+      .then(setStatus)
+      .catch((err: Error) => setStatusError(err.message));
+  }, [token, s, rates]);
 
   return (
     <div className="mt-6 space-y-6">
+      <Panel title="Launch readiness">
+        {statusError && <p className="font-semibold">{statusError}</p>}
+        {!status && !statusError && <p className="text-soft">Checking…</p>}
+        {status && (
+          <>
+            <p className="text-[1.05rem] font-bold">
+              {status.real_payments_possible
+                ? 'Real payments are ON: anyone on /checkout can pay.'
+                : status.public_checkout_open
+                  ? 'Public checkout is open in Stripe TEST mode (no real charges).'
+                  : 'Real payments are OFF.'}
+            </p>
+            <p className="mt-1 text-[0.9rem] text-soft">Real payments need every item marked ★. Preview mode never takes real money.</p>
+            <ul className="mt-3 space-y-1.5 text-[0.95rem]">
+              <Check ok={status.stripe_mode === 'live'} star label={`Stripe key: ${status.stripe_mode ?? 'not set'}`} />
+              <Check ok={status.live_checkout_flag} star label="Deployment flag SHOP_LIVE_CHECKOUT=enabled (Supabase function secret)" />
+              <Check ok={status.checkout_mode === 'live'} star label={`Store setting: ${status.checkout_mode === 'live' ? 'Open' : (status.checkout_mode ?? '—')} (below)`} />
+              <Check ok={status.live_shipping_rates > 0} star label={`Real shipping rates: ${status.live_shipping_rates} (test placeholders: ${status.test_shipping_rates})`} />
+              <Check ok={status.webhook_secret_set} label="Stripe webhook signing secret" />
+              <Check ok={status.email_configured} label="Email provider (Resend)" />
+              <Check ok={status.reply_to_set} label="Reply-to address for customer questions" />
+              <Check ok={status.tax_mode !== 'off'} label={`Sales tax: ${status.tax_mode ?? '—'} (decide before launch; 'off' collects none)`} />
+              <Check ok={status.preview_token_set} label="Preview token (for testing)" />
+            </ul>
+          </>
+        )}
+      </Panel>
+
       <Panel title="Website checkout">
         <p>
           Now: <strong>{s.checkout_mode === 'off' ? 'Off' : s.checkout_mode === 'preview' ? 'Preview (test link only)' : 'Open'}</strong>
@@ -888,10 +932,12 @@ function Settings({ settings: s, rates, act }: { settings: SettingsRow; rates: S
             <strong className="text-ink">Off</strong>: nobody can check out on the website.
           </li>
           <li>
-            <strong className="text-ink">Preview</strong>: only someone who opens /checkout?preview=… with the preview token (set on the server) can check out.
+            <strong className="text-ink">Preview</strong>: only someone who opens /checkout?preview=… with the preview token, and only while Stripe is in test mode. Never
+            real money.
           </li>
           <li>
-            <strong className="text-ink">Open</strong>: anyone who reaches /checkout. The site’s buy buttons still go to Etsy until they’re switched in the code.
+            <strong className="text-ink">Open</strong>: anyone who reaches /checkout, but only once the deployment flag SHOP_LIVE_CHECKOUT=enabled is also set. The
+            site’s buy buttons still go to Etsy until they’re switched in the code.
           </li>
         </ul>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -906,7 +952,7 @@ function Settings({ settings: s, rates, act }: { settings: SettingsRow; rates: S
           title={confirm === 'live' ? 'Open website checkout?' : `Switch checkout to ${confirm}?`}
           message={
             confirm === 'live'
-              ? 'Anyone who reaches /checkout will be able to pay. Make sure shipping, tax and emails are set up first.'
+              ? 'If the deployment flag SHOP_LIVE_CHECKOUT is enabled, anyone who reaches /checkout will be able to pay. Check Launch readiness first.'
               : confirm === 'off'
                 ? 'Nobody will be able to start a website checkout. Orders already paid aren’t affected.'
                 : 'Only people with the preview link will be able to check out.'
@@ -930,7 +976,7 @@ function Settings({ settings: s, rates, act }: { settings: SettingsRow; rates: S
               <option value="manual">My state rates (manual)</option>
             </select>
           </Field>
-          <button type="button" className="btn-secondary" disabled={tax === s.tax_mode} onClick={() => act({ action: 'settings', fields: { tax_mode: tax } }, 'Tax setting saved.')}>
+          <button type="button" className="btn-secondary sm:justify-self-start" disabled={tax === s.tax_mode} onClick={() => act({ action: 'settings', fields: { tax_mode: tax } }, 'Tax setting saved.')}>
             Save
           </button>
         </div>
@@ -947,7 +993,10 @@ function Settings({ settings: s, rates, act }: { settings: SettingsRow; rates: S
           ))}
           <RateRow rate={null} act={act} />
         </ul>
-        <p className="mt-3 text-[0.9rem] text-soft">Customers pick one in checkout (Stripe shows up to 5). Flat rate per order.</p>
+        <p className="mt-3 text-[0.9rem] text-soft">
+          Customers pick one in checkout (Stripe shows up to 5). Flat rate per order. Rates marked “test only” are placeholders, offered only in Stripe test mode; a live
+          checkout won’t open until at least one real rate is on.
+        </p>
       </Panel>
     </div>
   );
@@ -973,7 +1022,7 @@ function RateRow({ rate, act }: { rate: ShippingRateRow | null; act: Act }) {
 
   return (
     <li className="grid gap-3 sm:grid-cols-[1fr_8rem_auto_auto] sm:items-end">
-      <Field label={rate ? 'Name' : 'Add a rate'}>
+      <Field label={rate ? (rate.test_only ? 'Name (test only)' : rate.active ? 'Name' : 'Name (off)') : 'Add a real rate'}>
         <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={100} placeholder="Standard shipping" className={inputClass} />
       </Field>
       <Field label="Price ($)">
@@ -989,6 +1038,21 @@ function RateRow({ rate, act }: { rate: ShippingRateRow | null; act: Act }) {
       ) : (
         <span />
       )}
+    </li>
+  );
+}
+
+function Check({ ok, label, star }: { ok: boolean; label: string; star?: boolean }) {
+  return (
+    <li className="flex gap-2.5">
+      <span aria-hidden="true" className={`w-4 shrink-0 font-bold ${ok ? 'text-[#55684b]' : 'text-soft'}`}>
+        {ok ? '✓' : '✗'}
+      </span>
+      <span>
+        <span className="sr-only">{ok ? 'Done: ' : 'Not yet: '}</span>
+        {label}
+        {star && <span className="text-soft"> ★</span>}
+      </span>
     </li>
   );
 }

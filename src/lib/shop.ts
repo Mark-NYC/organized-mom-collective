@@ -49,7 +49,8 @@ export interface Catalog {
   checkout_mode: 'off' | 'preview' | 'live';
   tax_mode: 'off' | 'automatic' | 'manual';
   products: ShopProduct[];
-  shipping_rates: { label: string; amount_cents: number }[];
+  /** test_only rates are placeholders, offered only with a Stripe test key. */
+  shipping_rates: { label: string; amount_cents: number; test_only: boolean }[];
 }
 
 async function rpc<T>(name: string, body: object): Promise<T> {
@@ -82,7 +83,16 @@ export function previewToken(): string {
   }
 }
 
-export type CheckoutError = 'checkout_closed' | 'rate_limited' | 'sold_out' | 'unavailable' | 'too_many' | 'invalid_cart' | 'payment_unavailable' | 'network';
+export type CheckoutError =
+  | 'checkout_closed'
+  | 'rate_limited'
+  | 'sold_out'
+  | 'unavailable'
+  | 'too_many'
+  | 'invalid_cart'
+  | 'shipping_not_configured'
+  | 'payment_unavailable'
+  | 'network';
 
 async function callCheckout(body: object): Promise<Response> {
   const preview = previewToken();
@@ -98,7 +108,7 @@ export async function startCheckout(items: { slug: string; quantity: number }[])
     const res = await callCheckout({ action: 'create', items });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.client_secret) return data;
-    const known: CheckoutError[] = ['checkout_closed', 'rate_limited', 'sold_out', 'unavailable', 'too_many', 'invalid_cart'];
+    const known: CheckoutError[] = ['checkout_closed', 'rate_limited', 'sold_out', 'unavailable', 'too_many', 'invalid_cart', 'shipping_not_configured'];
     return { error: known.includes(data.error) ? data.error : 'payment_unavailable' };
   } catch {
     return { error: 'network' };
@@ -246,6 +256,7 @@ export interface ShippingRateRow {
   min_days: number | null;
   max_days: number | null;
   active: boolean;
+  test_only: boolean;
   sort: number;
 }
 
@@ -334,7 +345,7 @@ const ADMIN_ERRORS: Record<string, string> = {
   stock_negative: 'That would take stock below zero.',
   reason_required: 'Add a reason for the change.',
   stripe_not_configured: 'Stripe isn’t configured on the server yet.',
-  live_payments_disabled: 'A live Stripe key is set but live payments aren’t enabled.',
+  live_checkout_disabled: 'A live Stripe key is set but the deployment flag SHOP_LIVE_CHECKOUT isn’t enabled.',
   not_shipped: 'This order hasn’t shipped yet.',
   not_refunded: 'This order hasn’t been refunded.',
   not_paid: 'This order isn’t paid.',
@@ -564,4 +575,21 @@ export const FLAG_LABELS: Record<string, string> = {
   amount_mismatch: 'Amount didn’t match the reserved order; check it in Stripe',
   disputed: 'Payment disputed',
   refund_failed: 'A refund failed',
+  mode_mismatch: 'Paid in a different Stripe mode (test/live) than the checkout was opened in; check it in Stripe',
 };
+
+/** What shop-admin's "status" action reports: which launch switches and settings are in place. */
+export interface ShopStatus {
+  stripe_mode: 'test' | 'live' | null;
+  live_checkout_flag: boolean;
+  webhook_secret_set: boolean;
+  preview_token_set: boolean;
+  email_configured: boolean;
+  reply_to_set: boolean;
+  checkout_mode: SettingsRow['checkout_mode'] | null;
+  tax_mode: SettingsRow['tax_mode'] | null;
+  live_shipping_rates: number;
+  test_shipping_rates: number;
+  public_checkout_open: boolean;
+  real_payments_possible: boolean;
+}

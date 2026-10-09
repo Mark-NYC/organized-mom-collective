@@ -13,9 +13,12 @@ export interface ShopEnv {
   stripeSecretKey: string;
   /** whsec_… from the Stripe webhook endpoint. */
   stripeWebhookSecret: string;
-  stripeApiBase: string;
-  /** Live keys are refused unless this is exactly "enabled". */
-  livePaymentsEnabled: boolean;
+  /**
+   * Deployment-level live-checkout flag: SHOP_LIVE_CHECKOUT=enabled. Without it, live Stripe
+   * keys are refused outright and public checkout stays shut even if the admin store setting
+   * says "live". Preview mode never needs it (and never takes real money).
+   */
+  liveCheckoutEnabled: boolean;
   /** Public site origin, for return URLs, images and emails. */
   siteUrl: string;
   /** Browser origins allowed to call shop-checkout and shop-admin. */
@@ -39,8 +42,7 @@ export function readEnv(get: (key: string) => string | undefined): ShopEnv {
     anonKey: v('SUPABASE_ANON_KEY'),
     stripeSecretKey: v('STRIPE_SECRET_KEY'),
     stripeWebhookSecret: v('STRIPE_WEBHOOK_SECRET'),
-    stripeApiBase: v('STRIPE_API_BASE', 'https://api.stripe.com').replace(/\/$/, ''),
-    livePaymentsEnabled: v('SHOP_LIVE_PAYMENTS') === 'enabled',
+    liveCheckoutEnabled: v('SHOP_LIVE_CHECKOUT') === 'enabled',
     siteUrl,
     allowedOrigins: origins ? origins.split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean) : [siteUrl],
     previewToken: v('SHOP_PREVIEW_TOKEN'),

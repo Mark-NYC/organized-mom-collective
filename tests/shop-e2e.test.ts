@@ -59,6 +59,8 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
     SHOP_ALLOWED_ORIGINS: `${SITE},http://localhost:4321`,
     SHOP_PREVIEW_TOKEN: PREVIEW,
     RESEND_API_KEY: 're_test_key',
+    // Public (non-preview) checkout needs the deployment flag; most tests run it with a test key.
+    SHOP_LIVE_CHECKOUT: 'enabled',
     SHOP_EMAIL_REPLY_TO: 'hello@organizedmomcollective.com',
     ...over,
   });
@@ -163,15 +165,78 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect((await create(undefined, { 'x-shop-preview': PREVIEW })).status).toBe(200);
     });
 
-    it('refuses a live Stripe key unless live payments are enabled', async () => {
-      const live = createCheckoutHandler(build({ STRIPE_SECRET_KEY: 'sk_live_fake' }));
+    it('refuses a live Stripe key without the deployment flag, whatever the store setting', async () => {
+      const live = createCheckoutHandler(build({ STRIPE_SECRET_KEY: 'sk_live_fake', SHOP_LIVE_CHECKOUT: '' }));
       const res = await post(live, { action: 'create', items: [{ slug: 'calendar-26-week', quantity: 1 }] });
       expect(res.status).toBe(503);
-      expect(await res.json()).toEqual({ error: 'live_payments_disabled' });
-      const hook = createWebhookHandler(build({ STRIPE_SECRET_KEY: 'sk_live_fake' }));
+      expect(await res.json()).toEqual({ error: 'live_checkout_disabled' });
+      const hook = createWebhookHandler(build({ STRIPE_SECRET_KEY: 'sk_live_fake', SHOP_LIVE_CHECKOUT: '' }));
       const payload = JSON.stringify({ id: 'evt_live', type: 'checkout.session.completed', livemode: true, data: { object: {} } });
       const r = await hook(new Request('https://fn.test/', { method: 'POST', headers: { 'stripe-signature': await signStripePayload(payload, WHSEC) }, body: payload }));
       expect(r.status).toBe(503);
+    });
+
+    it('public checkout needs BOTH the deployment flag and the store setting', async () => {
+      // Store setting open, deployment flag off → closed (test key or not).
+      const noFlag = createCheckoutHandler(build({ SHOP_LIVE_CHECKOUT: '' }));
+      expect((await post(noFlag, { action: 'create', items: [{ slug: 'calendar-26-week', quantity: 1 }] })).status).toBe(403);
+      // Deployment flag on, store setting off or preview → closed for the public.
+      setMode('off');
+      expect((await create()).body).toEqual({ error: 'checkout_closed' });
+      setMode('preview');
+      expect((await create()).body).toEqual({ error: 'checkout_closed' });
+      expect(stock()).toBe(25);
+      expect(stripe.requests).toHaveLength(0);
+    });
+
+    it('preview mode never takes real money, even with the token and the deployment flag', async () => {
+      setMode('preview');
+      run(`insert into shop_shipping_rates (label, amount_cents) values ('Real rate', 800)`);
+      const live = createCheckoutHandler(build({ STRIPE_SECRET_KEY: 'sk_live_fake' }));
+      const res = await post(live, { action: 'create', items: [{ slug: 'calendar-26-week', quantity: 1 }] }, { 'x-shop-preview': PREVIEW });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: 'checkout_closed' });
+      expect(stripe.requests).toHaveLength(0);
+      run(`delete from shop_shipping_rates where label = 'Real rate'`);
+    });
+
+    it('live checkout never offers the test placeholder rate, and stays shut until a real rate exists', async () => {
+      const liveDeps = build({ STRIPE_SECRET_KEY: 'sk_live_fake' });
+      const live = createCheckoutHandler(liveDeps);
+      const go = () => post(live, { action: 'create', items: [{ slug: 'calendar-26-week', quantity: 1 }] });
+      const shut = await go();
+      expect(shut.status).toBe(503);
+      expect(await shut.json()).toEqual({ error: 'shipping_not_configured' });
+      expect(stock()).toBe(25);
+      expect(stripe.requests).toHaveLength(0);
+
+      run(`insert into shop_shipping_rates (label, amount_cents, sort) values ('USPS Ground Advantage', 750, 2)`);
+      const ok = await go();
+      expect(ok.status).toBe(200);
+      const { session_id } = await ok.json();
+      const p = stripe.sessions.get(session_id)!;
+      expect(p.livemode).toBe(true);
+      expect((p.params.shipping_options as any[]).map((o) => o.shipping_rate_data.display_name)).toEqual(['USPS Ground Advantage']);
+      // The same rates in test mode include the placeholder.
+      const t = stripe.sessions.get((await create()).body.session_id)!;
+      expect((t.params.shipping_options as any[]).map((o) => o.shipping_rate_data.display_name)).toEqual(['Standard shipping (test placeholder)', 'USPS Ground Advantage']);
+      run(`delete from shop_shipping_rates where label = 'USPS Ground Advantage'`);
+    });
+
+    it('the readiness report shows what is and isn’t switched on, without secrets', async () => {
+      const r = await adminCall({ action: 'status' });
+      expect(r.body).toMatchObject({
+        stripe_mode: 'test',
+        live_checkout_flag: true,
+        webhook_secret_set: true,
+        checkout_mode: 'live',
+        live_shipping_rates: 0,
+        test_shipping_rates: 1,
+        public_checkout_open: true,
+        real_payments_possible: false,
+      });
+      expect(JSON.stringify(r.body)).not.toMatch(/sk_|whsec|re_test|preview-token/);
+      expect((await adminCall({ action: 'status' }, userToken)).status).toBe(403);
     });
 
     it('returns 503 when Stripe is not configured', async () => {
@@ -243,7 +308,8 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
         payment_method_types: ['card'],
         automatic_tax: { enabled: 'false' },
       });
-      expect(p.shipping_options[0].shipping_rate_data).toMatchObject({ display_name: 'Standard shipping', fixed_amount: { amount: '600', currency: 'usd' } });
+      expect(p.shipping_options[0].shipping_rate_data).toMatchObject({ display_name: 'Standard shipping (test placeholder)', fixed_amount: { amount: '600', currency: 'usd' } });
+      expect(p.line_items[0].price_data.product_data.name).toBe('26-Week Family Wall Calendar (January–June 2027)');
       expect(p.line_items[0].price_data.product_data.images[0]).toBe(`${SITE}/images/reorder/calendar-in-use-1280.webp`);
       expect(Number(p.expires_at) - before).toBeGreaterThanOrEqual(1800);
       expect(Number(p.expires_at) - before).toBeLessThan(1810);
@@ -305,7 +371,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
         shipping_cents: 600,
         total_cents: 6720,
         promotion_code: 'WELCOME10',
-        shipping_method: 'Standard shipping',
+        shipping_method: 'Standard shipping (test placeholder)',
         flags: [],
       });
       expect(o.order_number).toBeGreaterThanOrEqual(1001);
@@ -316,7 +382,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
 
       const mail = inbox.to('Jamie@Example.com');
       expect(mail).toHaveLength(1);
-      expect(mail[0].subject).toBe(`Your Organized Mom Collective order #${o.order_number}`);
+      expect(mail[0].subject).toBe(`[Test] Your Organized Mom Collective order #${o.order_number}`);
       expect(mail[0].text).toContain('Total paid: $67.20');
       expect(mail[0].text).toContain('Discount: −$6.80');
       expect(mail[0].text).toContain(`${SITE}/app`);
@@ -537,7 +603,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(stripe.refunds).toHaveLength(1);
       // Stripe's own charge.refunded webhook for the same refund: no change, no second email.
       await sendEvent('charge.refunded', { id: stripe.chargeFor(o.stripe_payment_intent_id).id, payment_intent: o.stripe_payment_intent_id, amount_refunded: 1000 });
-      expect(inbox.sent.map((m) => m.subject)).toEqual([`Your Organized Mom Collective order #${o.order_number}`, `Refund for order #${o.order_number}`]);
+      expect(inbox.sent.map((m) => m.subject)).toEqual([`[Test] Your Organized Mom Collective order #${o.order_number}`, `[Test] Refund for order #${o.order_number}`]);
 
       expect((await adminCall({ action: 'refund', order_id: o.id, amount_cents: 99999, request_id: 'req-too-much' })).status).toBe(400);
 
@@ -551,7 +617,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(stock()).toBe(25);
       expect(one<{ revoked: boolean }>(`select revoked_at is not null revoked from shop_entitlements where order_id = '${o.id}'`).revoked).toBe(true);
       const last = inbox.sent.at(-1)!;
-      expect(last.subject).toBe(`Order #${o.order_number} canceled and refunded`);
+      expect(last.subject).toBe(`[Test] Order #${o.order_number} canceled and refunded`);
       expect(last.text).toContain('$74.00');
       // Restock can't happen twice.
       expect((await adminCall({ action: 'restock', order_id: o.id })).body).toEqual({ ok: true, restocked: 0 });
@@ -571,7 +637,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS', tracking_number: '9400 1000 0000 0000 0000 00' });
       await adminCall({ action: 'refund', order_id: o.id, request_id: 'req-shipped-1' });
       expect(one(`select payment_status, fulfillment_status from shop_orders where id = '${o.id}'`)).toEqual({ payment_status: 'refunded', fulfillment_status: 'shipped' });
-      expect(inbox.sent.at(-1)!.subject).toBe(`Refund for order #${o.order_number}`);
+      expect(inbox.sent.at(-1)!.subject).toBe(`[Test] Refund for order #${o.order_number}`);
     });
 
     it('failed refunds and disputes flag the order', async () => {
@@ -592,7 +658,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       const r = await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS', tracking_number: '9400111899223344556677', notify: true });
       expect(r.body).toEqual({ ok: true, email: 'sent' });
       const mail = inbox.to('ship@example.com').at(-1)!;
-      expect(mail.subject).toBe(`Your order #${o.order_number} has shipped`);
+      expect(mail.subject).toBe(`[Test] Your order #${o.order_number} has shipped`);
       expect(mail.text).toContain('Tracking number: 9400111899223344556677');
       expect(mail.text).toContain('https://tools.usps.com/go/TrackConfirmAction?tLabels=9400111899223344556677');
       // Saving again with the same tracking number doesn't email twice.
@@ -623,7 +689,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(inbox.to('outage@example.com')).toHaveLength(1);
       const a = await adminCall({ action: 'resend_email', order_id: o.id, kind: 'access' });
       expect(a.body).toEqual({ ok: true, email: 'sent' });
-      expect(inbox.to('outage@example.com')[1].subject).toBe('Your cleaning companion: how to get started');
+      expect(inbox.to('outage@example.com')[1].subject).toBe('[Test] Your cleaning companion: how to get started');
       expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'shipped' })).status).toBe(409);
     });
 
@@ -680,7 +746,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
 
     it('the internal functions aren’t callable with the anon key or a user token', async () => {
       const calls: [string, unknown][] = [
-        ['shop_create_order', { p_items: [{ slug: 'calendar-26-week', quantity: 1 }], p_client: 'x', p_preview: true }],
+        ['shop_create_order', { p_items: [{ slug: 'calendar-26-week', quantity: 1 }], p_client: 'x', p_preview: true, p_livemode: false, p_public_allowed: true }],
         ['shop_mark_paid', { p_session: 'cs_test_x', p: {} }],
         ['shop_adjust_stock', { p_product: '00000000-0000-0000-0000-000000000000', p_delta: 5, p_set: null, p_reason: 'x', p_actor: 'x' }],
         ['shop_apply_refund', { p_payment_intent: 'pi_x', p_refunded_cents: 1, p_actor: 'x' }],
@@ -690,10 +756,52 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       for (const [fn, args] of calls) {
         for (const [role, sub] of [['anon', undefined], ['authenticated', ADMIN_ID]] as const) {
           const res = await rest(`/rpc/${fn}`, role, sub, { method: 'POST', body: JSON.stringify(args) });
-          expect([401, 403, 404], `${fn} as ${role}`).toContain(res.status);
+          // 401/403 = permission denied (a 404 would mean a wrong signature, i.e. a broken test).
+          expect([401, 403], `${fn} as ${role}`).toContain(res.status);
         }
       }
       expect(stock()).toBe(25);
+    });
+
+    it('the database grants the browser roles nothing beyond the intended entry points', () => {
+      // Every public function anon can execute: the four intended ones, nothing else.
+      expect(
+        all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+              where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
+      ).toEqual(['shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track']);
+      expect(
+        all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+              where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
+      ).toEqual(['is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track']);
+      // anon has no table privileges at all on shop tables.
+      expect(
+        all(`select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+              where n.nspname = 'public' and c.relkind = 'r' and c.relname like 'shop%'
+                and has_table_privilege('anon', c.oid, 'select,insert,update,delete,truncate,references,trigger')`),
+      ).toEqual([]);
+      // authenticated: SELECT only (row-level security limits it to shop admins), never writes,
+      // and never the admin list, Stripe events, throttle or salt.
+      expect(
+        all(`select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+              where n.nspname = 'public' and c.relkind = 'r' and c.relname like 'shop%'
+                and has_table_privilege('authenticated', c.oid, 'insert,update,delete,truncate')`),
+      ).toEqual([]);
+      const readable = all<{ relname: string; rls: boolean }>(`select c.relname, c.relrowsecurity rls from pg_class c join pg_namespace n on n.oid = c.relnamespace
+              where n.nspname = 'public' and c.relkind = 'r' and c.relname like 'shop%' and has_table_privilege('authenticated', c.oid, 'select') order by 1`);
+      expect(readable.every((t) => t.rls)).toBe(true);
+      expect(readable.map((t) => t.relname)).not.toContain('shop_admins');
+      expect(readable.map((t) => t.relname)).not.toContain('shop_stripe_events');
+      expect(readable.map((t) => t.relname)).not.toContain('shop_secret');
+      // Every shop table has row-level security on.
+      expect(all(`select relname from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r' and relname like 'shop%' and not relrowsecurity`)).toEqual([]);
+    });
+
+    it('a signed-in non-admin reads zero rows from every shop table', async () => {
+      await buy(1);
+      for (const t of ['shop_orders', 'shop_order_items', 'shop_order_events', 'shop_entitlements', 'shop_email_log', 'shop_products', 'shop_settings', 'shop_inventory_log']) {
+        const res = await rest(`/${t}?select=*`, 'authenticated', USER_ID);
+        expect(await res.json(), t).toEqual([]);
+      }
     });
 
     it('order status needs the exact session id and reveals no address', async () => {
@@ -702,8 +810,11 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(await look('cs_test_%')).toBeNull();
       expect(await look(o.stripe_session_id.slice(0, -2))).toBeNull();
       const full = await look(o.stripe_session_id);
-      expect(JSON.stringify(full)).not.toContain('Maple');
-      expect(JSON.stringify(full)).not.toContain('jamie@example.com');
+      expect(full.payment_status).toBe('paid');
+      for (const secret of ['Maple', 'Springfield', 'jamie@example.com', 'Jamie', 'pi_', o.id]) expect(JSON.stringify(full)).not.toContain(secret);
+      // Only for 30 days.
+      run(`update shop_orders set created_at = now() - interval '31 days' where id = '${o.id}'`);
+      expect(await look(o.stripe_session_id)).toBeNull();
     });
   });
 
@@ -719,7 +830,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       const rate = await adminCall({ action: 'shipping_rate', rate: { label: 'Priority', amount_cents: 1200, sort: 2 } });
       expect(rate.status).toBe(200);
       const p = stripe.sessions.get((await create()).body.session_id)!.params as any;
-      expect(p.shipping_options.map((o: any) => o.shipping_rate_data.display_name)).toEqual(['Standard shipping', 'Priority']);
+      expect(p.shipping_options.map((o: any) => o.shipping_rate_data.display_name)).toEqual(['Standard shipping (test placeholder)', 'Priority']);
       await adminCall({ action: 'shipping_rate', rate: { id: rate.body.id, active: false } });
       expect((await adminCall({ action: 'settings', fields: { checkout_mode: 'sideways' } })).status).toBe(400);
       expect((await adminCall({ action: 'settings', fields: { checkout_mode: 'off' } })).status).toBe(200);

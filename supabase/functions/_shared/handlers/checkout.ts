@@ -43,7 +43,15 @@ export function createCheckoutHandler(deps: ShopDeps): Handler {
 async function create(deps: ShopDeps, cart: { slug: string; quantity: number }[], ip: string, preview: boolean) {
   let order: ReservedOrder;
   try {
-    order = await deps.db.rpc<ReservedOrder>('shop_create_order', { p_items: cart, p_client: ip, p_preview: preview });
+    // The database makes the final call (shop_create_order): preview only with a test key,
+    // public checkout only with the deployment flag AND the admin setting.
+    order = await deps.db.rpc<ReservedOrder>('shop_create_order', {
+      p_items: cart,
+      p_client: ip,
+      p_preview: preview,
+      p_livemode: deps.stripe.mode === 'live',
+      p_public_allowed: deps.env.liveCheckoutEnabled,
+    });
   } catch (err) {
     if (err instanceof DbError) {
       const e = checkoutError(err.message);

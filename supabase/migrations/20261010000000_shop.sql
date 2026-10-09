@@ -26,9 +26,13 @@ create table public.shop_admins (
   created_at timestamptz not null default now()
 );
 
--- One row. checkout_mode: off (nobody can pay), preview (only with the preview token),
--- live (anyone who reaches /checkout). Live *payments* also need a live Stripe key and
--- SHOP_LIVE_PAYMENTS=enabled on the functions (see supabase/SHOP.md).
+-- One row. checkout_mode is the admin store switch:
+--   off      nobody can check out.
+--   preview  only with the preview token, and only with a Stripe TEST key (never real money).
+--   live     anyone who reaches /checkout, but only if the deployment flag
+--            SHOP_LIVE_CHECKOUT=enabled is also set on the Edge Functions.
+-- Real payments therefore need all three: a live Stripe key, SHOP_LIVE_CHECKOUT=enabled,
+-- and checkout_mode = 'live' (supabase/SHOP.md → Launch). shop_create_order enforces it.
 create table public.shop_settings (
   id boolean primary key default true check (id),
   checkout_mode text not null default 'off' check (checkout_mode in ('off', 'preview', 'live')),
@@ -76,6 +80,8 @@ create table public.shop_shipping_rates (
   min_days int check (min_days between 1 and 60),
   max_days int check (max_days between 1 and 60),
   active boolean not null default true,
+  -- Test-mode only: never offered in a live (real-money) checkout. For placeholders.
+  test_only boolean not null default false,
   sort int not null default 0,
   check (min_days is null or max_days is null or min_days <= max_days)
 );
@@ -339,9 +345,12 @@ end $$;
 
 -- Validates the cart against the database (price, active, stock, per-order limit), takes the
 -- units out of stock and creates a pending order. p_items: [{ "slug": "…", "quantity": 1 }].
+--   p_preview         the caller presented the preview token
+--   p_livemode        the functions hold a LIVE Stripe key (real money)
+--   p_public_allowed  the deployment flag SHOP_LIVE_CHECKOUT=enabled is set
 -- Errors (raised, message = code): checkout_closed, rate_limited, invalid_cart,
--- unavailable:<slug>, too_many:<slug>, sold_out:<slug>.
-create function public.shop_create_order(p_items jsonb, p_client text, p_preview boolean default false)
+-- shipping_not_configured, unavailable:<slug>, too_many:<slug>, sold_out:<slug>.
+create function public.shop_create_order(p_items jsonb, p_client text, p_preview boolean, p_livemode boolean, p_public_allowed boolean)
 returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -353,10 +362,22 @@ declare
   subtotal int := 0;
   items jsonb := '[]';
   client_key text;
+  rates jsonb;
 begin
   select * into s from public.shop_settings;
-  if s.checkout_mode = 'off' or (s.checkout_mode = 'preview' and not coalesce(p_preview, false)) then
+  -- The launch gate. Preview never takes real money; public checkout needs both switches.
+  if s.checkout_mode = 'off'
+     or (s.checkout_mode = 'preview' and (not coalesce(p_preview, false) or coalesce(p_livemode, true)))
+     or (s.checkout_mode = 'live' and not coalesce(p_public_allowed, false)) then
     raise exception 'checkout_closed';
+  end if;
+
+  -- Placeholder (test-only) rates never reach a real-money checkout; with none left, it stays shut.
+  select coalesce(jsonb_agg(to_jsonb(r) order by r.sort, r.amount_cents), '[]') into rates
+    from public.shop_shipping_rates r
+   where r.active and (not r.test_only or not coalesce(p_livemode, true));
+  if jsonb_array_length(rates) = 0 then
+    raise exception 'shipping_not_configured';
   end if;
 
   if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) not between 1 and 10 then
@@ -422,8 +443,7 @@ begin
     'tax_mode', s.tax_mode,
     'product_tax_code', s.product_tax_code,
     'items', items,
-    'shipping_rates', coalesce((select jsonb_agg(to_jsonb(r) order by r.sort, r.amount_cents)
-                                  from public.shop_shipping_rates r where r.active), '[]'),
+    'shipping_rates', rates,
     'tax_rates', coalesce((select jsonb_agg(to_jsonb(t) order by t.state)
                              from public.shop_tax_rates t where t.active and s.tax_mode = 'manual'), '[]')
   );
@@ -489,8 +509,13 @@ begin
     return jsonb_build_object('found', true, 'transitioned', false, 'order_id', o.id, 'payment_status', o.payment_status);
   end if;
 
-  if p ->> 'order_id' is distinct from o.id::text or (p ->> 'subtotal_cents')::int is distinct from o.subtotal_cents then
+  if p ->> 'order_id' is distinct from o.id::text
+     or (p ->> 'subtotal_cents')::int is distinct from o.subtotal_cents
+     or lower(p ->> 'currency') is distinct from o.currency then
     new_flags := array_append(new_flags, 'amount_mismatch');
+  end if;
+  if (p ->> 'livemode')::boolean is distinct from o.livemode then
+    new_flags := array_append(new_flags, 'mode_mismatch');
   end if;
 
   if o.reservation = 'held' then
@@ -746,9 +771,9 @@ declare
   rid uuid := nullif(p ->> 'id', '')::uuid;
 begin
   if rid is null then
-    insert into public.shop_shipping_rates (label, amount_cents, min_days, max_days, active, sort)
+    insert into public.shop_shipping_rates (label, amount_cents, min_days, max_days, active, test_only, sort)
     values (p ->> 'label', (p ->> 'amount_cents')::int, (p ->> 'min_days')::int, (p ->> 'max_days')::int,
-            coalesce((p ->> 'active')::boolean, true), coalesce((p ->> 'sort')::int, 0))
+            coalesce((p ->> 'active')::boolean, true), coalesce((p ->> 'test_only')::boolean, false), coalesce((p ->> 'sort')::int, 0))
     returning id into rid;
   else
     update public.shop_shipping_rates set
@@ -757,6 +782,7 @@ begin
       min_days = case when p ? 'min_days' then (p ->> 'min_days')::int else min_days end,
       max_days = case when p ? 'max_days' then (p ->> 'max_days')::int else max_days end,
       active = coalesce((p ->> 'active')::boolean, active),
+      test_only = coalesce((p ->> 'test_only')::boolean, test_only),
       sort = coalesce((p ->> 'sort')::int, sort)
     where id = rid;
     if not found then
@@ -831,13 +857,14 @@ language sql stable security definer set search_path = '' as $$
       ) order by p.sort, p.price_cents)
       from public.shop_products p where p.active), '[]'),
     'shipping_rates', coalesce((
-      select jsonb_agg(jsonb_build_object('label', r.label, 'amount_cents', r.amount_cents) order by r.sort, r.amount_cents)
+      select jsonb_agg(jsonb_build_object('label', r.label, 'amount_cents', r.amount_cents, 'test_only', r.test_only) order by r.sort, r.amount_cents)
       from public.shop_shipping_rates r where r.active), '[]')
   );
 $$;
 
 -- The confirmation page polls this. Knowing the Checkout Session id (only the buyer's browser
--- has it) shows the order's status, number, items and totals; email is masked, no address.
+-- has it) shows the order's status, number, items and totals: no name, no address, no phone,
+-- email masked, and only for 30 days after the order was started.
 create function public.shop_order_status(p_session text) returns jsonb
 language sql stable security definer set search_path = '' as $$
   select case when o.id is null then null else jsonb_build_object(
@@ -855,7 +882,9 @@ language sql stable security definer set search_path = '' as $$
                 from public.shop_order_items i where i.order_id = o.id)
   ) end
   from (select 1) one
-  left join public.shop_orders o on o.stripe_session_id = p_session and p_session ~ '^cs_(test|live)_[A-Za-z0-9]{10,200}$';
+  left join public.shop_orders o on o.stripe_session_id = p_session
+        and p_session ~ '^cs_(test|live)_[A-Za-z0-9]{10,200}$'
+        and o.created_at > now() - interval '30 days';
 $$;
 
 -- ---------------------------------------------------------------- function privileges
@@ -887,12 +916,16 @@ grant select, insert, update, delete on public.shop_admins, public.shop_settings
 -- ---------------------------------------------------------------- catalog
 
 -- Facts from src/config.ts and the Etsy listing images (design/etsy-listing/ 07, 08).
-insert into public.shop_products (slug, name, description, details, price_cents, weeks, images, active, stock, max_per_order, sort)
+-- The 26-week listing is the January–June 2027 edition only. A July–December edition is NOT
+-- listed: add it as its own product (its own stock) only once it's confirmed in hand.
+-- The 52-week calendar is configured for later and stays hidden with no stock.
+insert into public.shop_products (slug, name, edition, description, details, price_cents, weeks, images, active, stock, max_per_order, sort)
 values
   ('calendar-26-week',
    '26-Week Family Wall Calendar',
-   'The 2027 Family Wall Calendar & Organizer: one week per page, with room for the daily schedule, meal plan, grocery list, to-dos and each day’s cleaning zone. Comes with the free cleaning companion website.',
-   array['26 weeks, double-sided weekly pages', '11 × 17 inches, portrait', 'Wire-O top binding with a built-in hanging hole',
+   'January–June 2027',
+   'The 2027 Family Wall Calendar & Organizer for January–June 2027: one week per page, with room for the daily schedule, meal plan, grocery list, to-dos and each day’s cleaning zone. Comes with the free cleaning companion website.',
+   array['January–June 2027 edition', '26 weeks, double-sided weekly pages', '11 × 17 inches, portrait', 'Wire-O top binding with a built-in hanging hole',
          'Premium uncoated writing paper', 'Includes the free cleaning companion website (no account, no subscription)'],
    3400, 26,
    '[{"src":"/images/reorder/calendar-in-use-1280.webp","alt":"The family wall calendar filled in for the week."},
@@ -901,6 +934,7 @@ values
    true, 25, 5, 1),
   ('calendar-52-week',
    '52-Week Family Wall Calendar',
+   null,
    'A full year of the 2027 Family Wall Calendar & Organizer, shipped as two 26-week sets. Comes with the free cleaning companion website.',
    array['52 weeks, shipped as two 26-week sets', '11 × 17 inches, portrait', 'Wire-O top binding with a built-in hanging hole',
          'Premium uncoated writing paper', 'Includes the free cleaning companion website (no account, no subscription)'],
@@ -908,5 +942,6 @@ values
    '[{"src":"/images/site/calendar-sets-1280.webp","alt":"A full year as two 26-week sets, January to June and July to December, each month in its own soft color."}]',
    false, 0, 5, 2);
 
--- PLACEHOLDER rate so checkout can be tested. Confirm (or replace) before launch.
-insert into public.shop_shipping_rates (label, amount_cents, sort) values ('Standard shipping', 600, 1);
+-- Test-only PLACEHOLDER so checkout can be tried in Stripe test mode. It is never offered in a
+-- live checkout, and live checkout refuses to open until a real (non-test) rate exists.
+insert into public.shop_shipping_rates (label, amount_cents, test_only, sort) values ('Standard shipping (test placeholder)', 600, true, 1);

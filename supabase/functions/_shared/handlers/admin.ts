@@ -13,6 +13,7 @@
  *   product       { product_id, fields }
  *   settings      { fields }
  *   shipping_rate { rate }
+ *   status        → launch readiness (which switches and settings are in place; no secret values)
  */
 import { DbError, loadOrder } from '../db.ts';
 import { emailDeps, stripeBlockedReason, type ShopDeps } from '../deps.ts';
@@ -77,6 +78,29 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
   switch (b.action) {
     case 'whoami':
       return { email: admin.email };
+
+    case 'status': {
+      const [settings] = await deps.db.select<{ checkout_mode: string; tax_mode: string }>('shop_settings', 'select=checkout_mode,tax_mode');
+      const rates = await deps.db.select<{ test_only: boolean }>('shop_shipping_rates', 'select=test_only&active=is.true');
+      const mode = deps.stripe.mode;
+      const liveRates = rates.filter((r) => !r.test_only).length;
+      const flag = deps.env.liveCheckoutEnabled;
+      return {
+        stripe_mode: deps.env.stripeSecretKey ? mode : null,
+        live_checkout_flag: flag,
+        webhook_secret_set: Boolean(deps.env.stripeWebhookSecret),
+        preview_token_set: Boolean(deps.env.previewToken),
+        email_configured: deps.mailer.configured,
+        reply_to_set: Boolean(deps.env.emailReplyTo),
+        checkout_mode: settings?.checkout_mode ?? null,
+        tax_mode: settings?.tax_mode ?? null,
+        live_shipping_rates: liveRates,
+        test_shipping_rates: rates.length - liveRates,
+        // What would happen right now for someone on /checkout without the preview token.
+        public_checkout_open: settings?.checkout_mode === 'live' && flag && stripeBlockedReason(deps) === null && (mode === 'test' || liveRates > 0),
+        real_payments_possible: mode === 'live' && flag && settings?.checkout_mode === 'live' && liveRates > 0,
+      };
+    }
 
     case 'fulfillment': {
       const id = uuid(b.order_id);
@@ -178,7 +202,7 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
           imgs.length <= 8 &&
           imgs.every(
             (i) =>
-              i && typeof i === 'object' && typeof i.src === 'string' && /^(\/[A-Za-z0-9/_.-]+|https:\/\/\S+)$/.test(i.src) && typeof i.alt === 'string' && i.alt.trim(),
+              i && typeof i === 'object' && typeof i.src === 'string' && /^(\/(?!\/)[A-Za-z0-9/_.-]+|https:\/\/[^\s"'<>]+)$/.test(i.src) && typeof i.alt === 'string' && i.alt.trim(),
           );
         if (!okImgs) throw new HttpError(400, 'invalid_images');
       }
@@ -198,7 +222,7 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
 
     case 'shipping_rate': {
       const r = (b.rate ?? {}) as Record<string, unknown>;
-      const allowed = ['id', 'label', 'amount_cents', 'min_days', 'max_days', 'active', 'sort'];
+      const allowed = ['id', 'label', 'amount_cents', 'min_days', 'max_days', 'active', 'test_only', 'sort'];
       return { ok: true, id: await deps.db.rpc('shop_save_shipping_rate', { p: Object.fromEntries(Object.entries(r).filter(([k]) => allowed.includes(k))) }) };
     }
 

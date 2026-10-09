@@ -19,17 +19,18 @@ export function depsFromEnv(get: (key: string) => string | undefined, fetchFn: t
   return {
     env,
     db: createDb(env.supabaseUrl, env.serviceRoleKey, fetchFn),
-    stripe: createStripe({ secretKey: env.stripeSecretKey, apiVersion: STRIPE_API_VERSION, apiBase: env.stripeApiBase, fetch: fetchFn }),
+    stripe: createStripe({ secretKey: env.stripeSecretKey, apiVersion: STRIPE_API_VERSION, fetch: fetchFn }),
     mailer: createResendMailer({ apiKey: env.resendApiKey, from: env.emailFrom, replyTo: env.emailReplyTo, fetch: fetchFn }),
     fetch: fetchFn,
     now: () => Math.floor(Date.now() / 1000),
   };
 }
 
-/** Live keys only work once live payments are explicitly enabled. */
+/** Live keys only work once the deployment flag is on (SHOP_LIVE_CHECKOUT=enabled). */
 export function stripeBlockedReason(deps: ShopDeps): string | null {
   if (!deps.env.stripeSecretKey) return 'stripe_not_configured';
-  if (deps.stripe.mode === 'live' && !deps.env.livePaymentsEnabled) return 'live_payments_disabled';
+  if (!/^(sk|rk)_(test|live)_/.test(deps.env.stripeSecretKey)) return 'stripe_not_configured';
+  if (deps.stripe.mode === 'live' && !deps.env.liveCheckoutEnabled) return 'live_checkout_disabled';
   return null;
 }
 

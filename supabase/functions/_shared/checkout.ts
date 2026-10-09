@@ -140,6 +140,7 @@ export function paidOrderData(s: StripeSession) {
     shipping_address: ship?.address ?? null,
     shipping_method: rate && typeof rate === 'object' ? (rate.display_name ?? null) : null,
     promotion_code: promotionLabel(s),
+    currency: s.currency ?? null,
     subtotal_cents: s.amount_subtotal ?? null,
     discount_cents: t.amount_discount ?? 0,
     shipping_cents: t.amount_shipping ?? s.shipping_cost?.amount_total ?? 0,
@@ -168,6 +169,8 @@ export function checkoutError(message: string): { status: number; code: string; 
   switch (code) {
     case 'checkout_closed':
       return { status: 403, code };
+    case 'shipping_not_configured':
+      return { status: 503, code };
     case 'rate_limited':
       return { status: 429, code };
     case 'sold_out':

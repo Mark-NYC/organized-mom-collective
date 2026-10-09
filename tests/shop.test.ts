@@ -123,6 +123,7 @@ describe('checkout logic', () => {
     expect(checkoutError('sold_out:calendar-26-week')).toEqual({ status: 409, code: 'sold_out', slug: 'calendar-26-week' });
     expect(checkoutError('checkout_closed').status).toBe(403);
     expect(checkoutError('rate_limited').status).toBe(429);
+    expect(checkoutError('shipping_not_configured')).toEqual({ status: 503, code: 'shipping_not_configured' });
     expect(checkoutError('something else')).toEqual({ status: 500, code: 'server_error' });
   });
 
@@ -130,8 +131,10 @@ describe('checkout logic', () => {
     const env = readEnv(() => undefined);
     expect(env.siteUrl).toBe('https://organizedmomcollective.com');
     expect(env.allowedOrigins).toEqual(['https://organizedmomcollective.com']);
-    expect(env.livePaymentsEnabled).toBe(false);
-    expect(readEnv((k) => (k === 'SHOP_LIVE_PAYMENTS' ? 'true' : undefined)).livePaymentsEnabled).toBe(false);
+    expect(env.liveCheckoutEnabled).toBe(false);
+    // Only the exact value turns it on.
+    expect(readEnv((k) => (k === 'SHOP_LIVE_CHECKOUT' ? 'true' : undefined)).liveCheckoutEnabled).toBe(false);
+    expect(readEnv((k) => (k === 'SHOP_LIVE_CHECKOUT' ? 'enabled' : undefined)).liveCheckoutEnabled).toBe(true);
   });
 });
 
@@ -187,10 +190,16 @@ describe('emails', () => {
   });
 
   it('says canceled for a full refund before shipping, refund otherwise', () => {
-    expect(renderEmail('refund', { ...order, payment_status: 'refunded', fulfillment_status: 'canceled', refunded_cents: 4000 }, opts).subject).toBe(
+    const live = { ...order, livemode: true };
+    expect(renderEmail('refund', { ...live, payment_status: 'refunded', fulfillment_status: 'canceled', refunded_cents: 4000 }, opts).subject).toBe(
       'Order #1001 canceled and refunded',
     );
-    expect(renderEmail('refund', { ...order, payment_status: 'partially_refunded', refunded_cents: 500 }, { ...opts, refundCents: 500 }).subject).toBe('Refund for order #1001');
+    expect(renderEmail('refund', { ...live, payment_status: 'partially_refunded', refunded_cents: 500 }, { ...opts, refundCents: 500 }).subject).toBe('Refund for order #1001');
+  });
+
+  it('marks test-mode emails as tests', () => {
+    expect(renderEmail('confirmation', order, opts).subject).toBe('[Test] Your Organized Mom Collective order #1001');
+    expect(renderEmail('confirmation', { ...order, livemode: true }, opts).subject).toBe('Your Organized Mom Collective order #1001');
   });
 });
 
@@ -308,13 +317,19 @@ describe('launch guards', () => {
     const sql = read('supabase/migrations/20261010000000_shop.sql');
     expect(sql).toMatch(/checkout_mode text not null default 'off'/);
     expect(sql).toMatch(/tax_mode text not null default 'off'/);
+    // The only seeded shipping rate is a test-only placeholder.
+    expect(sql).toMatch(/insert into public\.shop_shipping_rates \(label, amount_cents, test_only, sort\) values \('[^']*placeholder\)', 600, true, 1\);/);
+    expect(sql.match(/^insert into public\.shop_shipping_rates/gm)).toHaveLength(1);
   });
 
   it('seeds the catalog as specified', () => {
     const sql = read('supabase/migrations/20261010000000_shop.sql');
     const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
-    expect(seed).toMatch(/'calendar-26-week',\s*'26-Week Family Wall Calendar'[\s\S]*?3400, 26,[\s\S]*?true, 25, 5, 1\)/);
-    expect(seed).toMatch(/'calendar-52-week',\s*'52-Week Family Wall Calendar'[\s\S]*?5400, 52,[\s\S]*?false, 0, 5, 2\)/);
+    expect(seed).toMatch(/'calendar-26-week',\s*'26-Week Family Wall Calendar',\s*'January–June 2027',[\s\S]*?3400, 26,[\s\S]*?true, 25, 5, 1\)/);
+    expect(seed).toMatch(/'calendar-52-week',\s*'52-Week Family Wall Calendar',\s*null,[\s\S]*?5400, 52,[\s\S]*?false, 0, 5, 2\)/);
+    // Only the January–June edition is listed; July–December isn't assumed to exist.
+    expect(seed).not.toMatch(/July–December 2027'/);
+    expect((seed.match(/^\s*\('calendar-/gm) ?? []).length).toBe(2);
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {
