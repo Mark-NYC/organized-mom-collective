@@ -63,7 +63,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
   const today = useToday();
   const todayKey = dateKey(today);
 
-  // ?day=monday (from the Tidy week) shows that weekday of the current week.
+  // ?day=monday (from the Week page) shows that weekday of the current week.
   // Progress for it is saved under that day's own date, never today's.
   const [selectedDow] = useState(() => parseDayParam(new URLSearchParams(window.location.search).get('day')));
   const viewing = selectedDow !== null && selectedDow !== today.getDay() ? dateForWeekday(today, selectedDow) : null;
@@ -244,8 +244,8 @@ function Today({ justStarted }: { justStarted: boolean }) {
       {plan.kind === 'weekday' && <MonthlyTeaser month={monthFocusFor(shown)} />}
 
       <nav aria-label="More" className="mt-8 border-t border-rule-strong">
-        <a href={routes.tidy} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
-          How the system works <span aria-hidden="true">→</span>
+        <a href={routes.week} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
+          See your whole week <span aria-hidden="true">→</span>
         </a>
         <a href={routes.reorder} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
           Reorder your calendar <span aria-hidden="true">→</span>
@@ -263,7 +263,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
   );
 }
 
-/** A quiet reminder that the month's deeper project exists. Links to it on Tidy. */
+/** A quiet reminder that the month's deeper project exists. Links to it on the Week page. */
 function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
   return (
     <section aria-labelledby="monthly-teaser-heading" className="mt-9 border-t border-rule-strong pt-3.5">
@@ -317,7 +317,7 @@ interface FocusSectionProps {
   onToggle: (id: string) => void;
   next?: string;
   first?: boolean;
-  /** Showing today (vs another day picked from the Tidy week). */
+  /** Showing today (vs another day picked from the Week page). */
   today: boolean;
 }
 

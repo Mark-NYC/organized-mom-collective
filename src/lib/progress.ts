@@ -3,7 +3,8 @@
  * count what she did, never what's left; missed days are just empty, never mentioned.
  */
 import { dateForWeekday, dateKey } from './dates';
-import { wasActive } from './storage';
+import { weeklySchedule } from '../data/cleaning';
+import { keys, readList, wasActive } from './storage';
 
 /** Shown when the day's routine is complete. One per day, so it doesn't change on refresh. */
 export const COMPLETE_LINES = [
@@ -26,7 +27,7 @@ export interface DayProgress {
   dailyTotal: number;
   /** Days this week with any checkmark, including today. */
   daysThisWeek: number;
-  /** Looking at another day from the Tidy week, not today. */
+  /** Looking at another day picked from the Week page, not today. */
   viewing: boolean;
   date: Date;
 }
@@ -63,4 +64,64 @@ export function weekActivity(today: Date): WeekDay[] {
     const state: WeekDayState = key > todayKey ? 'future' : wasActive(key) ? 'done' : key === todayKey ? 'today' : 'past';
     return { date, name: date.toLocaleDateString('en-US', { weekday: 'long' }), state };
   });
+}
+
+/** One row of the Week page: a day of the current Mon–Sun week and how far she got. */
+export interface WeekPlanDay {
+  /** Date#getDay index (1 = Monday … 0 = Sunday). */
+  dow: number;
+  key: string;
+  when: 'past' | 'today' | 'future';
+  /** Mon–Thu zone tasks checked / in the zone. 0 / 0 on Fri–Sun (optional, not counted). */
+  zoneDone: number;
+  zoneTotal: number;
+  /** Anything checked off that day (same signal as the week dots on Today). */
+  active: boolean;
+}
+
+export function weekPlan(today: Date): WeekPlanDay[] {
+  const todayKey = dateKey(today);
+  return [1, 2, 3, 4, 5, 6, 0].map((dow) => {
+    const key = dateKey(dateForWeekday(today, dow));
+    const focus = weeklySchedule.find((w) => w.day === dow);
+    const checked = new Set(focus ? readList(keys.focus(key)) : []);
+    return {
+      dow,
+      key,
+      when: key === todayKey ? 'today' : key < todayKey ? 'past' : 'future',
+      zoneDone: focus ? focus.tasks.filter((t) => checked.has(t.id)).length : 0,
+      zoneTotal: focus?.tasks.length ?? 0,
+      active: key <= todayKey && wasActive(key),
+    };
+  });
+}
+
+export interface WeekRowStatus {
+  kind: 'done' | 'count' | 'checked';
+  text: string;
+  /** Spoken after the day and zone, e.g. "3 of 6 tasks done". */
+  label: string;
+}
+
+/**
+ * What a Week row shows instead of its time stamp, or null to keep the time.
+ * Weekend checkmarks can't be told apart by zone, so those days only say she showed up.
+ */
+export function weekRowStatus(d: WeekPlanDay): WeekRowStatus | null {
+  if (d.zoneTotal > 0) {
+    if (d.zoneDone === d.zoneTotal) return { kind: 'done', text: 'Done', label: 'zone done' };
+    if (d.zoneDone > 0) return { kind: 'count', text: `${d.zoneDone}/${d.zoneTotal}`, label: `${d.zoneDone} of ${d.zoneTotal} tasks done` };
+    return null;
+  }
+  return d.active ? { kind: 'checked', text: '✓', label: 'you checked things off' } : null;
+}
+
+/** The one line above the week. Counts what she did, never what's left. */
+export function weekSummary(days: WeekPlanDay[]): string {
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  const zones = days.filter((d) => d.zoneTotal > 0 && d.zoneDone === d.zoneTotal).length;
+  const shown = days.filter((d) => d.active).length;
+  if (shown === 0 && zones === 0) return 'A fresh week. Today’s zone is a good place to start.';
+  const showedUp = shown > 0 ? `You’ve shown up ${plural(shown, 'day')} this week.` : '';
+  return zones > 0 ? `${plural(zones, 'zone')} finished. ${showedUp}`.trim() : showedUp;
 }

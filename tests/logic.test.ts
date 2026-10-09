@@ -210,8 +210,9 @@ describe('routing', () => {
     const { START_DESTINATION } = await import('../src/config');
     expect(routes.start).toBe('/start');
     expect(START_DESTINATION).toBe('/app?source=calendar');
-    expect([routes.today, routes.tidy, routes.reorder, routes.settings]).toEqual(['/app', '/app/tidy', '/app/reorder', '/app/settings']);
-    expect(routes.monthlyFocus).toBe('/app/tidy#monthly-focus');
+    expect([routes.today, routes.week, routes.reorder, routes.settings]).toEqual(['/app', '/app/week', '/app/reorder', '/app/settings']);
+    expect(routes.tidy).toBe('/app/tidy'); // old name, redirects to /app/week
+    expect(routes.monthlyFocus).toBe('/app/week#monthly-focus');
     expect(routes.day(1)).toBe('/app?day=monday');
     expect(isAppPath('/app')).toBe(true);
     expect(isAppPath('/app/tidy')).toBe(true);

@@ -3,7 +3,8 @@
  *
  *   PUBLIC  /                  (future marketing site; temporary placeholder now)
  *   QR      /start             permanent entry point printed on calendars → APP
- *   APP     /app, /app/tidy, /app/reorder, /app/settings   (noindex)
+ *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
+ *           /app/tidy → /app/week (old name, kept so earlier links still work)
  *
  * Future areas (not built): /calendar, /cleaning, /blog/…, and auth/account
  * routes such as /login and /account.
@@ -14,10 +15,12 @@ export const routes = {
   home: '/',
   start: '/start',
   today: '/app',
+  week: '/app/week',
+  /** Old name for the Week page; redirects to `week`. */
   tidy: '/app/tidy',
   reorder: '/app/reorder',
   settings: '/app/settings',
-  monthlyFocus: '/app/tidy#monthly-focus',
+  monthlyFocus: '/app/week#monthly-focus',
   /** A specific weekday of the current week, e.g. /app?day=monday */
   day: (dow: number) => `/app?day=${DAY_PARAMS[dow]}`,
 } as const;
