@@ -27,7 +27,7 @@ How articles link to each other and to the products, so every page leads somewhe
 - Usually a one-sentence bridge just before the product note.
 
 ### 6. Product links
-- Only through `<ProductNote>`, at most once per article, never before the Real-Life Version. The component supplies the link: `/app/reorder` for the calendar, `/app` for the companion app.
+- Only through `<ProductNote>`, at most once per article, never before the Real-Life Version. The component supplies the link: `/calendar` for the calendar, `/companion` for the companion app. Articles without a calendar note also end with a short, fixed calendar link from the template (`CalendarBridge`), after the related cards; don't add another.
 - No product links in headings, the short answer, The Shift or Your Next Small Win.
 - Set `cta` in frontmatter to the product mentioned (`none` if there's no note).
 

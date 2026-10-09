@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Organized Mom Collective: a static Astro site with two parts. The companion cleaning app (`/app`, noindex) for owners of the printed family wall calendar, and a public resource library (`/resources`) of articles in the brand's Real-Life Reset format.
+Organized Mom Collective: a static Astro site with two parts. The companion cleaning app (`/app`, noindex) for owners of the printed family wall calendar, and the public website: homepage (`/`), calendar product page (`/calendar`), companion explainer (`/companion`) and a resource library (`/resources`) of articles in the brand's Real-Life Reset format. Keep the two separate: public pages use `PublicLayout`, the app uses `AppLayout`; never put site navigation or sales elements in the app, or the manifest/service worker on public pages.
 
 Architecture, commands, routes, storage and brand notes for the app are in [README.md](README.md). Don't duplicate them here; update the README when they change.
 
@@ -40,7 +40,8 @@ Non-negotiables (details in the docs above):
 | Branded MDX components (Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Checklist, Versions, ProductNote, CleaningWeek) | `src/components/resources/` |
 | Reference article (the quality bar for new articles) | `src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01) |
 | Article helpers / table of contents | `src/lib/articles.ts`, `src/lib/toc.ts` |
-| Public layout (header, footer, canonical, JSON-LD) | `src/layouts/PublicLayout.astro`, `src/layouts/BaseLayout.astro` |
+| Public layout (header, footer, canonical, Open Graph, JSON-LD) | `src/layouts/PublicLayout.astro`, `src/layouts/BaseLayout.astro` |
+| Calendar link at the end of every article without a calendar ProductNote | `src/components/resources/CalendarBridge.astro` |
 | Article body styles | `src/styles/global.css` (`.article-body`) |
 | Sitemap | `src/pages/sitemap.xml.ts` |
 | Post-build checks + content inventory | `scripts/check-site.mjs` (`npm run check:site`) |

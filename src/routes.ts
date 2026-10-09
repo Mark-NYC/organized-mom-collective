@@ -1,7 +1,9 @@
 /**
  * Every internal URL in one place.
  *
- *   PUBLIC  /                  (future marketing site; temporary placeholder now)
+ *   PUBLIC  /                  brand homepage
+ *           /calendar          the Family Wall Calendar product page (buy on Etsy)
+ *           /companion         how the cleaning companion works (public explainer)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -9,13 +11,16 @@
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
  *           /app/tidy → /app/week (old name, kept so earlier links still work)
  *
- * Future areas (not built): /calendar, /cleaning, and auth/account
- * routes such as /login and /account.
+ * Future areas (not built): auth/account routes such as /login and /account.
  */
 import { DAY_PARAMS } from './lib/dates';
 
 export const routes = {
   home: '/',
+  calendar: '/calendar',
+  /** The calendar page's options and Etsy buttons. */
+  buy: '/calendar#buy',
+  companion: '/companion',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,

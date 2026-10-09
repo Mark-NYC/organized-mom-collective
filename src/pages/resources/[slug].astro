@@ -14,6 +14,7 @@ import NextSmallWin from '../../components/resources/NextSmallWin.astro';
 import Checklist from '../../components/resources/Checklist.astro';
 import ProductNote from '../../components/resources/ProductNote.astro';
 import CleaningWeek from '../../components/resources/CleaningWeek.astro';
+import CalendarBridge from '../../components/resources/CalendarBridge.astro';
 import Versions from '../../components/resources/Versions.astro';
 import { formatDate, getArticles, getNext, getRelated, isoDate, type Article } from '../../lib/articles';
 import { tableOfContents } from '../../lib/toc';
@@ -44,7 +45,7 @@ const updated = data.updated ?? data.published;
 
 const site = Astro.site!;
 const url = new URL(routes.article(article.id), site).href;
-const ogImage = '/images/reorder/calendar-in-use-1280.webp';
+const ogImage = '/images/site/og-calendar.jpg';
 const organization = {
   '@type': 'Organization',
   name: BRAND_NAME,
@@ -145,6 +146,9 @@ const components = { Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Chec
       </section>
     )
   }
+
+  {/* Every article leads to the calendar; skipped when its own ProductNote already does. */}
+  {data.cta !== 'calendar' && <CalendarBridge />}
 
   <p class="mt-14 text-center">
     <a href={routes.pillar(pillar.id)} class="text-link">All {pillar.name.toLowerCase()} articles</a>

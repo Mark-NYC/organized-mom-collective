@@ -1,5 +1,9 @@
 ---
-/** Public, indexable pages (/, /resources/…, and later /calendar, /cleaning). */
+/**
+ * Public pages (/, /calendar, /companion, /resources/…): the site header and footer,
+ * canonical URL, social sharing tags and structured data. Indexable unless
+ * `indexable={false}`. The companion app never uses this layout (see AppLayout).
+ */
 import BaseLayout from './BaseLayout.astro';
 import SiteHeader from '../components/resources/SiteHeader.astro';
 import SiteFooter from '../components/resources/SiteFooter.astro';
@@ -10,22 +14,37 @@ interface Props {
   /** Exact <title>, used as-is (articles set their own SEO title). */
   fullTitle?: string;
   description: string;
-  /** Set false for utility pages like the 404 (noindex, no canonical). */
+  /** Set false for utility pages like the 404, or an empty hub (noindex, no canonical). */
   indexable?: boolean;
-  /** Show the resource-library header and footer. */
+  /** Show the site header and footer. */
   chrome?: boolean;
-  /** Content width: 'text' for reading pages, 'wide' for the hub. */
-  width?: 'text' | 'wide';
+  /** Content width: 'text' for reading pages, 'wide' for the hub, 'full' when sections set their own width. */
+  width?: 'text' | 'wide' | 'full';
   ogType?: 'website' | 'article';
+  /** Share image (site-relative). Defaults to the calendar photo, sized 1200 × 630. */
   ogImage?: string;
+  ogImageAlt?: string;
   jsonLd?: object[];
 }
 
-const { title, description, indexable = true, chrome = false, width = 'text', ogType, ogImage, jsonLd } = Astro.props;
+const DEFAULT_OG = '/images/site/og-calendar.jpg';
+const {
+  title,
+  description,
+  indexable = true,
+  chrome = true,
+  width = 'text',
+  ogType,
+  ogImage = DEFAULT_OG,
+  ogImageAlt = `The ${BRAND_NAME} family wall calendar, filled in for the week, on a kitchen counter.`,
+  jsonLd,
+} = Astro.props;
 const fullTitle = Astro.props.fullTitle ?? (title ? `${title} · ${BRAND_NAME}` : BRAND_NAME);
 // Internal links never use a trailing slash (see src/routes.ts), so canonicals don't either.
 const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
 const canonical = indexable && Astro.site ? new URL(path, Astro.site).href : undefined;
+const mainClass =
+  width === 'full' ? '' : ['mx-auto px-5 sm:px-8', width === 'wide' ? 'max-w-5xl' : 'max-w-3xl', chrome ? 'py-8 sm:py-14' : 'py-12 sm:py-20'].join(' ');
 ---
 
 <BaseLayout
@@ -37,11 +56,17 @@ const canonical = indexable && Astro.site ? new URL(path, Astro.site).href : und
   ogImage={ogImage}
   jsonLd={jsonLd}
 >
+  <Fragment slot="head">
+    <meta property="og:site_name" content={BRAND_NAME} />
+    <meta property="og:locale" content="en_US" />
+    {ogImage === DEFAULT_OG && <meta property="og:image:width" content="1200" />}
+    {ogImage === DEFAULT_OG && <meta property="og:image:height" content="630" />}
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
+  </Fragment>
   {chrome && <SiteHeader />}
-  <main
-    id="main"
-    class:list={['mx-auto px-5 sm:px-8', width === 'wide' ? 'max-w-5xl' : 'max-w-3xl', chrome ? 'py-8 sm:py-14' : 'py-12 sm:py-20']}
-  >
+  <main id="main" class={mainClass || undefined}>
     <slot />
   </main>
   {chrome && <SiteFooter />}

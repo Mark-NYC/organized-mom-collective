@@ -1,0 +1,30 @@
+---
+/**
+ * "Shop" call to action. Goes straight to the Etsy listing once one is set in
+ * src/config.ts (CALENDAR_OPTIONS → etsyUrl); until then it goes to the options on
+ * /calendar, where each option shows "coming soon to Etsy". Never a dead link.
+ */
+import { shopUrl } from '../../lib/reorder';
+import { routes } from '../../routes';
+
+interface Props {
+  label: string;
+  /** Link to /calendar (the product page) instead of Etsy, e.g. from the homepage hero. */
+  toProductPage?: boolean;
+  class?: string;
+}
+const { label, toProductPage = false, class: className } = Astro.props;
+const etsy = toProductPage ? null : shopUrl();
+---
+
+{
+  etsy ? (
+    <a href={etsy} target="_blank" rel="noopener noreferrer" class:list={['btn-primary gap-2', className]} aria-label={`${label} on Etsy (opens Etsy)`}>
+      {label} <span aria-hidden="true">↗</span>
+    </a>
+  ) : (
+    <a href={toProductPage ? routes.calendar : routes.buy} class:list={['btn-primary', className]}>
+      {label}
+    </a>
+  )
+}

@@ -12,8 +12,8 @@ interface Props {
 const { product } = Astro.props;
 const link =
   product === 'calendar'
-    ? { href: routes.reorder, label: 'See the weekly family calendar' }
-    : { href: routes.today, label: 'Open the cleaning companion' };
+    ? { href: routes.calendar, label: 'See the weekly family calendar' }
+    : { href: routes.companion, label: 'See how the cleaning companion works' };
 ---
 
 <aside class="my-8 flex gap-4 border-t border-b border-rule py-5" aria-label="From Organized Mom Collective">

@@ -1,0 +1,53 @@
+---
+/**
+ * The two calendar options with their Etsy buttons, best value first. Data and
+ * pricing: src/config.ts via calendarOptions(). A button stays a quiet "coming soon"
+ * note until its option has a real Etsy listing URL. (The app's Reorder page has its
+ * own copy of this layout, written for people who already own a calendar.)
+ */
+import { calendarOptions, formatPrice } from '../../lib/reorder';
+
+const options = calendarOptions();
+---
+
+<ul class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-6">
+  {
+    options.map((o) => (
+      <li class:list={['flex flex-col rounded-[4px] p-5 sm:p-6', o.bestValue ? 'border-2 border-ink bg-paper' : 'border border-rule-strong bg-paper']}>
+        <div class="flex items-start justify-between gap-3">
+          <h3 class="text-[1.15rem] leading-tight font-bold">{o.name}</h3>
+          {o.bestValue && <span class="shrink-0 bg-month px-2 py-1.5 text-[0.6rem] leading-none font-bold tracking-[0.18em] uppercase">Best value</span>}
+        </div>
+        <p class="mt-3 text-[2.25rem] leading-none font-bold tracking-[-0.01em]">{o.priceLabel}</p>
+        <p class="mt-2 text-[1rem] font-semibold">{o.bestValue ? `${o.weeks} weeks · the whole year` : `${o.weeks} weeks · half a year`}</p>
+        {o.save > 0 && <p class="mt-2 text-[0.95rem] leading-snug">Save {formatPrice(o.save)} compared with buying two half-year calendars.</p>}
+        <ul class="mt-4 space-y-1.5 border-t border-rule pt-3.5">
+          {o.editions.map((e) => (
+            <li>
+              <p class="text-[0.95rem] font-semibold">{o.editions.length > 1 ? `Choose ${e.label}` : e.label}</p>
+              {e.dates && <p class="text-[0.9rem] text-soft">{e.dates}</p>}
+            </li>
+          ))}
+        </ul>
+        {o.setsWeeks > 0 && <p class="mt-1.5 text-[0.9rem] text-soft">Ships as two {o.setsWeeks}-week sets.</p>}
+        <div class="mt-auto pt-5">
+          {o.url ? (
+            <a
+              href={o.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Buy the ${o.name} on Etsy, ${o.priceLabel} (opens Etsy)`}
+              class:list={['btn-primary w-full gap-2', o.bestValue && 'min-h-14 text-[0.8rem] font-bold']}
+            >
+              Buy on Etsy <span aria-hidden="true">↗</span>
+            </a>
+          ) : (
+            <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.66rem] font-semibold tracking-[0.16em] text-soft uppercase">
+              {o.shortName} coming soon to Etsy
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ul>

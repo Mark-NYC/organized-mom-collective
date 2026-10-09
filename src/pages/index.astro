@@ -1,20 +1,266 @@
 ---
 /**
- * TEMPORARY public homepage. Reserves "/" for the future marketing site.
- * Indexable. Replace this page when the real homepage is built.
+ * The brand homepage. Journeys it serves: new visitor → /calendar → Etsy, and
+ * a way into the free resource library. Product facts come from src/config.ts and
+ * the Etsy listing images (design/etsy-listing/); nothing here is invented.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
+import ArticleCard from '../components/resources/ArticleCard.astro';
+import PhoneShot from '../components/site/PhoneShot.astro';
+import ShopButton from '../components/site/ShopButton.astro';
+import { getArticles, guideFirst } from '../lib/articles';
+import { photo } from '../lib/images';
+import { calendarOptions } from '../lib/reorder';
+import { pillars } from '../data/pillars';
 import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+// Three articles, one per topic where possible, pillar guides first.
+const articles = (await getArticles()).sort(guideFirst);
+const featured = [...pillars.map((p) => articles.find((a) => a.data.pillar === p.id)), ...articles].filter(
+  (a, i, list): a is (typeof articles)[number] => !!a && list.indexOf(a) === i,
+).slice(0, 3);
+
+const options = calendarOptions();
+const prices = [...options].sort((a, b) => a.weeks - b.weeks).map((o) => `${o.shortName} ${o.priceLabel}`).join(' · ');
+
+const hero = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
+const kitchen = photo('family-kitchen');
+const features = photo('calendar-features', [640, 960, 1280], '/images/reorder');
+
+const calendarFeatures = [
+  { title: 'Weekly planning layout', body: 'One week per page, with a column for every weekday and room for Saturday and Sunday.' },
+  { title: 'Family schedules', body: 'Appointments, practices and pickups where everyone can see them.' },
+  { title: 'Meal plan and grocery list', body: 'Plan the week’s dinners with the grocery list right beside them.' },
+  { title: 'Household to-dos', body: 'A to-do list and notes space for everything else on your mind.' },
+  { title: 'Prayer, gratitude and self-care', body: 'Grateful For, Self-Care Habits, Family and Friends and a Word of the Week.' },
+  { title: 'Daily cleaning zones', body: 'Each day is printed with one small area of the house to reset.' },
+];
+
+const companionPoints = [
+  { title: 'Daily guidance', body: 'A 15-minute Daily Reset, plus the cleaning zone printed on your calendar for today.' },
+  { title: 'A weekly rhythm', body: 'Living room, bedrooms, entry and bathroom, kitchen. By Thursday the whole house has had a turn.' },
+  { title: 'Monthly home projects', body: 'One deeper project a month, broken into small tasks for the weekend.' },
+  { title: 'Simple progress', body: 'Tick tasks off as you go and see at a glance how your week is going.' },
+  { title: 'Right on your phone', body: 'Scan the QR code on your calendar. No account, no download, no extra cost.' },
+];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: BRAND_NAME,
+    url: site.href,
+    logo: new URL('/brand/omc-badge.png', site).href,
+  },
+  { '@context': 'https://schema.org', '@type': 'WebSite', name: BRAND_NAME, url: site.href },
+];
+
+const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
 ---
 
-<PublicLayout description="Organized Mom Collective: family wall calendars and a simple home cleaning system. A calmer way to organize home and family.">
-  <div class="flex min-h-[60dvh] flex-col justify-center">
-    <img src="/brand/omc-badge.png" alt="" width="512" height="512" class="size-24" />
-    <h1 class="page-title mt-8">Organized Mom Collective</h1>
-    <p class="mt-3 text-[1.0625rem] leading-relaxed">A calmer way to organize home and family.</p>
-    <p class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-      <a href={routes.today} class="btn-primary">Open Companion App</a>
-      <a href={routes.resources} class="text-link">Read the guides</a>
-    </p>
-  </div>
+<PublicLayout
+  fullTitle={`${BRAND_NAME}: Family Calendar & Home Routines`}
+  description="Family schedules, meals, cleaning and everything in between: a weekly family wall calendar, a free cleaning companion and simple ideas for a calmer home."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <!-- 1. Hero -->
+  <section aria-labelledby="hero-h" class="bg-cream">
+    <div class:list={[wrap, 'grid items-center gap-8 py-10 sm:py-14 md:grid-cols-2 md:gap-12 md:py-20']}>
+      <div class="order-last">
+        <figure class="-mx-5 aspect-square overflow-hidden bg-band sm:mx-0 md:rounded-[4px]">
+          <img
+            src={hero.src}
+            srcset={hero.srcset}
+            sizes="(min-width: 1152px) 528px, (min-width: 768px) 50vw, 100vw"
+            width="2000"
+            height="2000"
+            fetchpriority="high"
+            decoding="async"
+            alt="A hand writing in the Organized Mom Collective wall calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos."
+            class="block h-full w-full object-cover"
+          />
+        </figure>
+      </div>
+      <div>
+        <p class="label text-muted">{BRAND_NAME}</p>
+        <h1 id="hero-h" class="mt-4 text-[2.2rem] leading-[1.08] font-bold tracking-[-0.015em] text-balance sm:text-[3rem] lg:text-[3.4rem]">
+          Less chaos. More room for what matters.
+        </h1>
+        <p class="lede mt-5 max-w-lg">
+          Family schedules, meals, cleaning, and everything in between. Bring it all together with simple tools that help your home run a little
+          smoother.
+        </p>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+          <ShopButton label="Shop the Family Calendar" toProductPage class="w-full sm:w-auto" />
+          <a href={routes.resources} class="text-link self-center sm:self-auto">Explore Free Resources</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. The problem -->
+  <section aria-labelledby="problem-h" class:list={[wrap, 'grid items-center gap-8 py-14 sm:py-20 md:grid-cols-[1fr_1.1fr] md:gap-14']}>
+    <div>
+      <h2 id="problem-h" class="section-title">Your home doesn’t need another complicated system.</h2>
+      <p class="lede mt-5">
+        Appointments. School activities. What’s for dinner, what’s on the grocery list, whose turn it is to clean what. And the things that
+        matter most, squeezed in around the edges.
+      </p>
+      <p class="lede mt-4">
+        You’re not short on effort. It’s just that everything lives in a different place: a list on the fridge, three apps, and a dozen
+        reminders in your head. Bring it together, and the week gets a lot lighter to carry.
+      </p>
+    </div>
+    <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 md:rounded-[4px]">
+      <img
+        src={kitchen.src}
+        srcset={kitchen.srcset}
+        sizes="(min-width: 1152px) 560px, (min-width: 768px) 52vw, 100vw"
+        width="2000"
+        height="1600"
+        loading="lazy"
+        decoding="async"
+        alt="A mom and her young daughter scooping cookie dough at the kitchen counter, with the family's filled-in weekly calendar beside them."
+        class="block h-auto w-full"
+      />
+    </figure>
+  </section>
+
+  <!-- 3. Meet the calendar -->
+  <section aria-labelledby="calendar-h" class="bg-sage-wash">
+    <div class:list={[wrap, 'py-14 sm:py-20']}>
+      <div class="max-w-2xl">
+        <p class="label text-muted">The 2027 Family Wall Calendar &amp; Organizer</p>
+        <h2 id="calendar-h" class="section-title mt-3">One place for your family’s everyday life.</h2>
+        <p class="lede mt-4">
+          An 11 × 17-inch portrait wall calendar with a full week on every page, so the whole family can see what’s coming and you can stop
+          holding it all in your head.
+        </p>
+      </div>
+      <div class="mt-10 grid items-start gap-10 md:grid-cols-2 md:gap-14">
+        <figure class="overflow-hidden border border-rule bg-paper">
+          <img
+            src={features.src}
+            srcset={features.srcset}
+            sizes="(min-width: 1152px) 528px, (min-width: 768px) 50vw, calc(100vw - 2.5rem)"
+            width="2000"
+            height="2000"
+            loading="lazy"
+            decoding="async"
+            alt="A filled-in week on the calendar with its sections labeled: daily schedule, daily cleaning zone, self-care, word of the week, family and friends, prayer and gratitude, meal plan, grocery list and to-do list."
+            class="block h-auto w-full"
+          />
+        </figure>
+        <div>
+          <ul class="border-t border-rule-strong/50">
+            {
+              calendarFeatures.map((f) => (
+                <li class="border-b border-rule-strong/30 py-3.5">
+                  <h3 class="text-[1.0625rem] leading-snug font-bold">{f.title}</h3>
+                  <p class="mt-0.5 text-[1rem] leading-snug text-soft">{f.body}</p>
+                </li>
+              ))
+            }
+            <li class="border-b border-rule-strong/30 py-3.5">
+              <h3 class="text-[1.0625rem] leading-snug font-bold">Monthly projects and a cleaning companion</h3>
+              <p class="mt-0.5 text-[1rem] leading-snug text-soft">
+                A free companion app for your phone, with a home project for every month. <a
+                  href="#companion-h"
+                  class="underline decoration-rule underline-offset-4 hover:decoration-ink">More below</a
+                >.
+              </p>
+            </li>
+          </ul>
+          <p class="mt-6 text-[0.95rem] font-semibold">{prices}</p>
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+            <ShopButton label="Shop on Etsy" class="w-full sm:w-auto" />
+            <a href={routes.calendar} class="text-link self-center sm:self-auto">See the calendar up close</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. The digital cleaning companion -->
+  <section aria-labelledby="companion-h" class:list={[wrap, 'grid items-center gap-10 py-14 sm:py-20 md:grid-cols-[1.2fr_1fr] md:gap-14']}>
+    <div>
+      <p class="label text-muted">Included with every calendar</p>
+      <h2 id="companion-h" class="section-title mt-3 scroll-mt-6">A little help keeping the house moving, too.</h2>
+      <p class="lede mt-4">
+        Every day on the calendar is printed with a cleaning zone. Scan the QR code and the companion turns it into a short checklist on your
+        phone, so you always know what to do today and what can wait.
+      </p>
+      <ul class="mt-6 border-t border-rule">
+        {
+          companionPoints.map((p) => (
+            <li class="border-b border-rule py-3">
+              <h3 class="text-[1.0625rem] leading-snug font-bold">{p.title}</h3>
+              <p class="mt-0.5 text-[1rem] leading-snug text-soft">{p.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <a href={routes.companion} class="btn-secondary mt-7 w-full sm:w-auto">See How It Works</a>
+    </div>
+    <PhoneShot
+      name="today"
+      alt="The companion app's Today screen: Wednesday's zone, Entry/Bathroom, and the 15-minute Daily Reset with three of five tasks checked off."
+    />
+  </section>
+
+  <!-- 5. Helpful resources -->
+  <section aria-labelledby="resources-h" class="bg-band">
+    <div class:list={[wrap, 'py-14 sm:py-20']}>
+      <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+        <div class="max-w-2xl">
+          <p class="label text-muted">Free resources</p>
+          <h2 id="resources-h" class="section-title mt-3">Simple ideas for a more organized home.</h2>
+        </div>
+        {featured.length > 0 && <a href={routes.resources} class="text-link">Browse all resources</a>}
+      </div>
+      {
+        featured.length > 0 ? (
+          <ul class="mt-10 grid gap-10 sm:grid-cols-2 md:grid-cols-3">
+            {featured.map((a) => (
+              <li>
+                <ArticleCard article={a} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <>
+            <p class="lede mt-4 max-w-2xl">
+              Practical guides on family planning, simple cleaning routines and making room for what matters. The first ones are on the way.
+            </p>
+            <ul class="mt-10 grid gap-8 md:grid-cols-3">
+              {pillars.map((p) => (
+                <li class="border-t-2 border-ink pt-4">
+                  <h3 class="text-[1.2rem] leading-snug font-bold">{p.name}</h3>
+                  <p class="mt-2 text-[0.97rem] leading-relaxed text-soft">{p.summary}</p>
+                </li>
+              ))}
+            </ul>
+            <a href={routes.resources} class="btn-secondary mt-10 w-full sm:w-auto">
+              Visit the resource library
+            </a>
+          </>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- 6. Final CTA -->
+  <section aria-labelledby="close-h" class="bg-blush-wash">
+    <div class="mx-auto max-w-2xl px-5 py-16 text-center sm:px-8 sm:py-24">
+      <h2 id="close-h" class="section-title">Make room for what matters most.</h2>
+      <p class="lede mx-auto mt-4 max-w-lg">
+        Spend less energy keeping track of the everyday details, and more of it on the people you’re doing it all for.
+      </p>
+      <ShopButton label="Shop the 2027 Family Calendar" class="mt-8 w-full sm:w-auto" />
+      <p class="mt-5 text-[0.9rem] text-soft">The cleaning companion comes with every calendar.</p>
+    </div>
+  </section>
 </PublicLayout>

@@ -1,0 +1,372 @@
+---
+/**
+ * /calendar — the public product page for the family wall calendar. All purchases
+ * happen on Etsy (no checkout here). Every fact on this page is verified against
+ * src/config.ts, src/data/cleaning.ts or the Etsy listing images in design/etsy-listing/
+ * (02 sections, 07 size and format, 08 two 26-week sets, 12 the damaged/misprinted promise).
+ * Don't add shipping times, guarantees or features that aren't in those sources.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import CalendarOptions from '../components/site/CalendarOptions.astro';
+import PhoneShot from '../components/site/PhoneShot.astro';
+import ShopButton from '../components/site/ShopButton.astro';
+import { photo } from '../lib/images';
+import { calendarOptions, formatPrice } from '../lib/reorder';
+import { dailyEssentials } from '../data/cleaning';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const PRODUCT = '2027 Family Wall Calendar & Organizer';
+const options = calendarOptions();
+const byWeeks = [...options].sort((a, b) => a.weeks - b.weeks);
+const half = byWeeks[0];
+const full = byWeeks[byWeeks.length - 1];
+
+const hero = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
+const gallery = [
+  {
+    ...photo('calendar-on-wall'),
+    width: 1402,
+    height: 1122,
+    alt: 'The calendar hanging on a wall from its spiral binding, open to the first week of January 2027, before anything is written in.',
+  },
+  {
+    ...photo('calendar-features', [640, 960, 1280], '/images/reorder'),
+    width: 2000,
+    height: 2000,
+    alt: 'A filled-in week with its sections labeled: daily schedule, daily cleaning zone, self-care, word of the week, family and friends, prayer and gratitude, meal plan, grocery list and to-do list.',
+  },
+  {
+    ...photo('calendar-specs'),
+    width: 2000,
+    height: 2000,
+    alt: 'The blank calendar page, 11 by 17 inches, beside its details: premium uncoated writing paper, Wire-O binding, built-in hanging hole, double-sided weekly pages, 26 weeks.',
+  },
+  {
+    ...photo('calendar-sets'),
+    width: 2000,
+    height: 2000,
+    alt: 'A full year as two 26-week sets, January to June and July to December, each month in its own soft color.',
+  },
+];
+
+const sections = [
+  { title: 'Daily schedule', body: 'A tall column for every weekday and room for Saturday and Sunday, for school runs, practices and appointments.' },
+  { title: 'Meal plan', body: 'Dinner for every night of the week, Monday through Sunday.' },
+  { title: 'Grocery list', body: 'Right beside the meal plan, so the list writes itself as you plan.' },
+  { title: 'To-do list and notes', body: 'For the household tasks and reminders that don’t belong to one day.' },
+  { title: 'Grateful For', body: 'A small space for prayer and gratitude each week.' },
+  { title: 'Self-care, family and friends', body: 'Self-Care Habits, Family and Friends, and a Word of the Week to set the tone.' },
+  { title: 'Daily cleaning zone', body: 'Each day is printed with one area of the house, with a box to tick when it’s done.' },
+];
+
+const specs = [
+  { term: 'Size', value: '11 × 17 inches, portrait' },
+  { term: 'Layout', value: 'One week per page, Monday through Sunday' },
+  { term: 'Pages', value: 'Double-sided weekly pages' },
+  { term: 'Paper', value: 'Premium uncoated writing paper' },
+  { term: 'Binding', value: 'Wire-O, with a built-in hanging hole' },
+  { term: 'Color', value: 'A soft new color each month' },
+  { term: 'Length', value: `${half.weeks} weeks per calendar; the full year comes as two ${half.weeks}-week sets` },
+];
+
+const steps = [
+  { title: 'Plan the week on the wall', body: 'Schedules, dinners, groceries and to-dos, where the whole family can see them.' },
+  { title: 'Glance at today’s zone', body: 'Every day on the calendar is printed with a cleaning zone: Living Room on Monday, Bedrooms on Tuesday, and so on.' },
+  { title: 'Scan the QR code once', body: 'The companion opens on your phone with today’s zone as a short checklist, plus a daily reset and a monthly project.' },
+  { title: 'Tick it off and move on', body: 'Small, manageable steps. Weekends are optional, and a missed day doesn’t put you behind.' },
+];
+
+const faqs = [
+  {
+    q: 'How big is the calendar?',
+    a: '11 × 17 inches in portrait, with one week across each page. It hangs from its Wire-O binding with a built-in hanging hole.',
+  },
+  {
+    q: 'What’s the difference between the half-year and full-year calendar?',
+    a: `The ${half.name} (${half.priceLabel}) covers ${half.weeks} weeks, and comes as ${half.editions.map((e) => e.label).join(' or ')}. The ${full.name} (${full.priceLabel}) covers the whole year and ships as two ${half.weeks}-week sets, so it costs ${formatPrice(full.save)} less than buying two half-year calendars.`,
+  },
+  {
+    q: 'When does the 2027 calendar start?',
+    a: 'The first page of the January–June calendar is the week of Monday, December 28, 2026, so you can start right after Christmas.',
+  },
+  {
+    q: 'Is the cleaning companion a separate subscription?',
+    a: 'No. The cleaning companion is included with every calendar at no extra cost. There’s no account to create and nothing to subscribe to.',
+  },
+  {
+    q: 'How do I open the cleaning companion?',
+    a: 'Scan the QR code printed on your calendar. It opens in your phone’s browser, and you can add it to your Home Screen so it opens like an app.',
+  },
+  {
+    q: 'Where is my cleaning progress saved?',
+    a: 'On your own phone, in its browser. Starting a new calendar doesn’t reset your checkmarks or progress.',
+  },
+  {
+    q: 'Where do I buy it?',
+    a: 'On Etsy. Checkout, payment, shipping options and delivery details are all handled there, on the listing.',
+  },
+  {
+    q: 'What if my calendar arrives damaged or misprinted?',
+    a: 'We’ll make it right. Reach out to us through Etsy with your order.',
+  },
+];
+
+const site = Astro.site!;
+const url = new URL(routes.calendar, site).href;
+const live = options.filter((o) => o.url);
+const jsonLd: object[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: PRODUCT,
+    description: `An 11 × 17-inch weekly family wall calendar for 2027 with a daily schedule, meal plan, grocery list, to-do list and a daily cleaning zone, plus a free cleaning companion app.`,
+    brand: { '@type': 'Brand', name: BRAND_NAME },
+    url,
+    image: [hero.largest, ...gallery.map((g) => g.largest)].map((p) => new URL(p, site).href),
+    // Offers only once a real Etsy listing exists, so nothing claims to be for sale before it is.
+    ...(live.length
+      ? {
+          offers: live.map((o) => ({
+            '@type': 'Offer',
+            name: o.name,
+            price: o.price.toFixed(2),
+            priceCurrency: 'USD',
+            url: o.url,
+          })),
+        }
+      : {}),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Family Wall Calendar', item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+
+const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
+---
+
+<PublicLayout
+  fullTitle="2027 Family Wall Calendar & Weekly Organizer · Organized Mom"
+  description={`An 11 × 17 weekly family wall calendar for 2027: schedules, meal plan, grocery list, to-dos and a daily cleaning zone, with a free cleaning app. From ${half.priceLabel}.`}
+  width="full"
+  jsonLd={jsonLd}
+>
+  <style is:global>
+    @media (prefers-reduced-motion: no-preference) {
+      html:has(#buy) {
+        scroll-behavior: smooth;
+      }
+    }
+  </style>
+
+  <!-- Hero -->
+  <section aria-labelledby="hero-h" class="bg-cream">
+    <div class:list={[wrap, 'grid items-center gap-8 py-10 sm:py-14 md:grid-cols-2 md:gap-12 md:py-16']}>
+      <figure class="-mx-5 aspect-square overflow-hidden bg-band sm:mx-0 order-last md:rounded-[4px]">
+        <img
+          src={hero.src}
+          srcset={hero.srcset}
+          sizes="(min-width: 1152px) 528px, (min-width: 768px) 50vw, 100vw"
+          width="2000"
+          height="2000"
+          fetchpriority="high"
+          decoding="async"
+          alt="A hand writing in the 2027 family wall calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos."
+          class="block h-full w-full object-cover"
+        />
+      </figure>
+      <div>
+        <p class="label text-muted">Weekly wall calendar · 11 × 17 in</p>
+        <h1 id="hero-h" class="page-title mt-3 text-balance sm:text-[2.7rem]">{PRODUCT}</h1>
+        <p class="lede mt-4 max-w-lg">
+          Your family’s schedules, meals, groceries, to-dos and cleaning, together on one page a week. Plus a free cleaning companion for your
+          phone.
+        </p>
+        <p class="mt-5 text-[1rem]">
+          <span class="font-bold">{half.name.replace(/ Calendar$/, '')} {half.priceLabel}</span>
+          <span class="text-soft" aria-hidden="true"> · </span>
+          <span class="font-bold">{full.name.replace(/ Calendar$/, '')} {full.priceLabel}</span>
+          <span class="text-soft"> (best value)</span>
+        </p>
+        <a href="#buy" class="btn-primary mt-6 w-full sm:w-auto">Choose Your Calendar</a>
+        <ul class="mt-6 space-y-1.5 text-[0.95rem]" aria-label="At a glance">
+          <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> One week per page, Monday through Sunday</li>
+          <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Cleaning companion included, no subscription</li>
+          <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Secure checkout on Etsy</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- What's on every page -->
+  <section aria-labelledby="page-h" class:list={[wrap, 'py-14 sm:py-20']}>
+    <div class="max-w-2xl">
+      <h2 id="page-h" class="section-title">Everything your week needs, on one page.</h2>
+      <p class="lede mt-4">
+        No more juggling a planner, a meal app, a grocery list on the fridge and reminders in your head. Each weekly page gives every part of
+        family life its own spot.
+      </p>
+    </div>
+    <div class="mt-10 grid items-start gap-10 md:grid-cols-2 md:gap-14">
+      <ul class="grid gap-x-8 border-t border-rule sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+        {
+          sections.map((s) => (
+            <li class="border-b border-rule py-3.5">
+              <h3 class="text-[1.0625rem] leading-snug font-bold">{s.title}</h3>
+              <p class="mt-0.5 text-[1rem] leading-snug text-soft">{s.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <ul class="grid grid-cols-2 gap-3 sm:gap-4" aria-label="Calendar photos">
+        {
+          gallery.map((g, i) => (
+            <li class:list={['overflow-hidden border border-rule bg-band', (i === 0 || i === gallery.length - 1) && 'col-span-2']}>
+              <a href={g.largest} class="block" aria-label={`Open larger photo: ${g.alt}`}>
+                <img
+                  src={g.src}
+                  srcset={g.srcset}
+                  sizes={i === 0 || i === gallery.length - 1 ? '(min-width: 1152px) 528px, (min-width: 768px) 50vw, calc(100vw - 2.5rem)' : '(min-width: 1152px) 260px, (min-width: 768px) 25vw, 50vw'}
+                  width={g.width}
+                  height={g.height}
+                  loading="lazy"
+                  decoding="async"
+                  alt={g.alt}
+                  class="block h-auto w-full"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Size and format -->
+  <section aria-labelledby="format-h" class="bg-band">
+    <div class:list={[wrap, 'grid gap-8 py-14 sm:py-20 md:grid-cols-[1fr_1.4fr] md:gap-14']}>
+      <div>
+        <h2 id="format-h" class="section-title">Big enough to actually use.</h2>
+        <p class="lede mt-4">
+          Real writing space for a real week, on paper that takes a pen nicely. Hang it in the kitchen, by the back door, or wherever your
+          family actually looks.
+        </p>
+      </div>
+      <dl class="border-t border-rule-strong">
+        {
+          specs.map((s) => (
+            <div class="grid grid-cols-[6.5rem_1fr] gap-4 border-b border-rule py-3 sm:grid-cols-[8rem_1fr]">
+              <dt class="label pt-1 text-muted">{s.term}</dt>
+              <dd class="text-[1rem] leading-snug">{s.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- The companion -->
+  <section aria-labelledby="companion-h" class:list={[wrap, 'py-14 sm:py-20']}>
+    <div class="max-w-2xl">
+      <p class="label text-muted">Included with every calendar</p>
+      <h2 id="companion-h" class="section-title mt-3">A plan on your wall. A little help in your pocket.</h2>
+      <p class="lede mt-4">
+        The cleaning companion is a simple web app that works alongside the printed calendar. It turns each day’s cleaning zone into a short
+        checklist, adds a {dailyEssentials.minutes.replace(/ minutes?$/, '-minute')} Daily Reset, and gives you one home project a month. No subscription, no account, nothing to
+        install.
+      </p>
+    </div>
+    <div class="mt-10 grid items-center gap-12 md:grid-cols-[1fr_1.1fr]">
+      <div class="grid grid-cols-2 gap-4 sm:gap-6">
+        <PhoneShot
+          name="today"
+          alt="The companion's Today screen: Wednesday's zone, Entry/Bathroom, with the Daily Reset checklist partly ticked off."
+        />
+        <PhoneShot
+          name="week"
+          alt="The companion's Week screen: each day's cleaning zone from Monday's Living Room to Sunday's Catch-Up / Reset, with progress for the days so far."
+          class="mt-10"
+        />
+      </div>
+      <div>
+        <h3 class="label text-muted">How they work together</h3>
+        <ol class="mt-4 border-t border-rule">
+          {
+            steps.map((s, i) => (
+              <li class="flex gap-4 border-b border-rule py-4">
+                <span aria-hidden="true" class="grid size-8 shrink-0 place-items-center rounded-full bg-month/50 text-[0.85rem] font-bold">
+                  {i + 1}
+                </span>
+                <div>
+                  <p class="text-[1.0625rem] leading-snug font-bold">{s.title}</p>
+                  <p class="mt-0.5 text-[1rem] leading-snug text-soft">{s.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        <a href={routes.companion} class="text-link mt-6 inline-block">More about the cleaning companion</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Options -->
+  <section id="buy" aria-labelledby="buy-h" class="scroll-mt-4 bg-sage-wash">
+    <div class:list={[wrap, 'py-14 sm:py-20']}>
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 id="buy-h" class="section-title">Choose your calendar.</h2>
+        <p class="lede mt-3">Same calendar, same system. Pick how far ahead you want to plan.</p>
+      </div>
+      <div class="mt-9">
+        <CalendarOptions />
+      </div>
+      <ul class="mx-auto mt-7 flex max-w-3xl flex-wrap justify-center gap-x-5 gap-y-1.5 text-[0.9rem]" aria-label="With every calendar">
+        <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Cleaning companion included</li>
+        <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Secure checkout on Etsy</li>
+        <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Arrives damaged or misprinted? We’ll make it right.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section aria-labelledby="faq-h" class="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20">
+    <h2 id="faq-h" class="section-title">Questions, answered.</h2>
+    <div class="mt-8 border-t border-rule-strong">
+      {
+        faqs.map((f) => (
+          <details class="group border-b border-rule">
+            <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-[1.0625rem] leading-snug font-bold [&::-webkit-details-marker]:hidden">
+              {f.q}
+              <span aria-hidden="true" class="shrink-0 text-[1.25rem] font-normal text-muted transition-transform group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <p class="pb-5 text-[1rem] leading-relaxed text-soft">{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Close -->
+  <section aria-labelledby="close-h" class="bg-blush-wash">
+    <div class="mx-auto max-w-2xl px-5 py-16 text-center sm:px-8 sm:py-20">
+      <h2 id="close-h" class="section-title">A little more order. A lot more room for life.</h2>
+      <p class="lede mx-auto mt-4 max-w-lg">Get the week out of your head and onto the wall, where everyone can see it.</p>
+      <ShopButton label="Shop the 2027 Family Calendar" class="mt-8 w-full sm:w-auto" />
+      <p class="mt-6">
+        <a href={routes.resources} class="text-link">Or browse free resources</a>
+      </p>
+    </div>
+  </section>
+</PublicLayout>
