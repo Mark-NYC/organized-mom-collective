@@ -76,3 +76,7 @@ Published articles reviewed: HC-01 (headings: The weekly cleaning schedule; Why 
 ## Pinterest research notes
 
 Moved into the plan: `docs/editorial/pinterest/HC-02.md`.
+
+## Revision (2026-10-10)
+
+Cut to about 350 words on review: the first draft read long for a routine query. Kept the short answer, Shift, step list, hard-night fallback, companion note and Next Small Win; dropped "Why these five tasks", the morning-vs-evening section, household adaptations, the kids section (now one line), the Tip and the three-sizes table.
