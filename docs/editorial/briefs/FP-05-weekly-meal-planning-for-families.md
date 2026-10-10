@@ -74,3 +74,7 @@ Planned articles at risk: FP-07 (dinner rotation) owns how to build the default 
 ## Pinterest research notes
 
 Moved into the plan: `docs/editorial/pinterest/FP-05.md`.
+
+## Revision (2026-10-10)
+
+Cut on review to about 200 words of prose with more photos: dropped the example-week table, the bridge paragraph (its HC-01 and HC-02 links moved into step 4 and When Life Happens), the missed-planning-day line and the Versions “when” labels. Added real listing photos: `fp-05-hero` (a filled-in week with dinners written into the days, from `design/etsy-listing/04.webp`) and `fp-05-meal-plan` (meal plan and grocery list close-up, from `11.webp`).
