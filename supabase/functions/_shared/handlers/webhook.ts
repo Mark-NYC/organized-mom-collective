@@ -139,15 +139,26 @@ async function handleEvent(deps: ShopDeps, event: StripeEvent) {
   }
 }
 
-/** Records Stripe's refunded total and emails the customer once per new total. Shared with shop-admin. */
+/**
+ * Records Stripe's refunded total and emails the customer once per new total. Shared with
+ * shop-admin. `email` is what happened to the refund email: this call's outcome, or, when an
+ * earlier call (e.g. Stripe's own webhook) already recorded this total, that email's logged status.
+ */
 export async function applyRefund(deps: ShopDeps, paymentIntent: string, refundedTotal: number, actor: string) {
   const r = await deps.db.rpc<{ found: boolean; transitioned?: boolean; order_id?: string; amount_cents?: number }>('shop_apply_refund', {
     p_payment_intent: paymentIntent,
     p_refunded_cents: refundedTotal,
     p_actor: actor,
   });
-  if (r.found && r.transitioned && r.order_id) {
-    await deliverEmail(emailDeps(deps), r.order_id, 'refund', `refund:${r.order_id}:${refundedTotal}`, { refundCents: r.amount_cents });
+  let email: string | null = null;
+  if (r.found && r.order_id) {
+    const key = `refund:${r.order_id}:${refundedTotal}`;
+    if (r.transitioned) {
+      email = await deliverEmail(emailDeps(deps), r.order_id, 'refund', key, { refundCents: r.amount_cents });
+    } else {
+      const [row] = await deps.db.select<{ status: string }>('shop_email_log', `dedupe_key=eq.${encodeURIComponent(key)}&select=status`);
+      email = row?.status ?? null;
+    }
   }
-  return r;
+  return { ...r, email };
 }

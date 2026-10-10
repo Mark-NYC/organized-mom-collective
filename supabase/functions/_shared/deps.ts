@@ -38,5 +38,5 @@ export const emailDeps = (deps: ShopDeps) => ({
   db: deps.db,
   mailer: deps.mailer,
   siteUrl: deps.env.siteUrl,
-  replyTo: Boolean(deps.env.emailReplyTo),
+  supportEmail: deps.env.emailReplyTo,
 });

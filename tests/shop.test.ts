@@ -9,7 +9,7 @@ import type { OrderRow as ServerOrder } from '../supabase/functions/_shared/db.t
 import { renderEmail, trackingLink } from '../supabase/functions/_shared/email.ts';
 import { readEnv } from '../supabase/functions/_shared/env.ts';
 import { formEncode, signStripePayload, stripeMode, verifyStripeSignature } from '../supabase/functions/_shared/stripe.ts';
-import { describeEvent, filterOrders, heldUnits, money, ordersCsv, salesTotals, soldUnits, type OrderRow } from '../src/lib/shop';
+import { describeEvent, emailOutcomeText, filterOrders, heldUnits, money, ordersCsv, salesTotals, shippingQuote, soldUnits, type OrderRow, type ShippingRule } from '../src/lib/shop';
 import { routes } from '../src/routes';
 
 import envExample from '../.env.example?raw';
@@ -167,7 +167,7 @@ describe('emails', () => {
     flags: [],
     shop_order_items: [{ id: 'i', product_id: 'p', product_slug: 's', product_name: '26-Week Family Wall Calendar', unit_price_cents: 3400, quantity: 1, restocked: 0 }],
   };
-  const opts = { siteUrl: 'https://organizedmomcollective.com', replyTo: true };
+  const opts = { siteUrl: 'https://organizedmomcollective.com', supportEmail: 'hello@organizedmomcollective.com' };
 
   it('never promises accounts, sync, future features or delivery dates', () => {
     for (const kind of ['confirmation', 'shipped', 'refund', 'access'] as const) {
@@ -295,6 +295,36 @@ describe('dashboard logic', () => {
     expect(money(123400)).toBe('$1,234');
     expect(describeEvent({ kind: 'refunded', detail: { amount_cents: 1000, refunded_total_cents: 1000 } })).toBe('Refunded $10 (total $10)');
     expect(describeEvent({ kind: 'payment_failed', detail: { decline_code: 'insufficient_funds' } })).toBe('Card attempt declined (insufficient funds)');
+    expect(describeEvent({ kind: 'fulfillment', detail: { from: 'packing', to: 'shipped', carrier: 'USPS', tracking_number: '9400' } })).toBe('Marked Shipped · USPS 9400');
+    expect(describeEvent({ kind: 'fulfillment', detail: { from: 'shipped', to: 'shipped', carrier: 'USPS', tracking_number: '9401', previous_tracking_number: '9400' } })).toBe(
+      'Tracking updated from 9400 · USPS 9401',
+    );
+  });
+
+  it('describes what really happened to an email; only "sent" says sent', () => {
+    expect(emailOutcomeText('shipped', 'sent')).toBe('Shipping email sent to the customer.');
+    for (const outcome of ['skipped', 'failed', 'duplicate', 'no_email', 'pending', null]) {
+      expect(emailOutcomeText('confirmation', outcome)).not.toMatch(/\bsent to the customer/);
+    }
+    expect(emailOutcomeText('confirmation', 'skipped')).toContain('NOT sent');
+    expect(emailOutcomeText('refund', 'failed')).toContain('FAILED');
+  });
+});
+
+describe('shipping quote (mirrors shop_shipping_quote)', () => {
+  const rule = (r: Partial<ShippingRule>): ShippingRule => ({
+    label: 'Standard', amount_cents: 700, test_only: false, per_extra_unit_cents: 0, min_units: 1, max_units: null, free_over_cents: null, ...r,
+  });
+  it('prices the first unit plus each extra unit, within each rate’s units range', () => {
+    const rules = [rule({ label: 'One', max_units: 1 }), rule({ label: 'More', amount_cents: 900, per_extra_unit_cents: 150, min_units: 2 })];
+    expect(shippingQuote(rules, 1, 3400, false)).toEqual([{ label: 'One', amount_cents: 700 }]);
+    expect(shippingQuote(rules, 3, 10200, false)).toEqual([{ label: 'More', amount_cents: 1200 }]);
+  });
+  it('is free at or over the threshold, and hides test-only rates outside test mode', () => {
+    const rules = [rule({ free_over_cents: 10000 }), rule({ label: 'Placeholder', amount_cents: 600, test_only: true })];
+    expect(shippingQuote(rules, 2, 9999, false)).toEqual([{ label: 'Standard', amount_cents: 700 }]);
+    expect(shippingQuote(rules, 3, 10000, false)).toEqual([{ label: 'Standard', amount_cents: 0 }]);
+    expect(shippingQuote(rules, 1, 3400, true).map((r) => r.label)).toEqual(['Standard', 'Placeholder']);
   });
 });
 

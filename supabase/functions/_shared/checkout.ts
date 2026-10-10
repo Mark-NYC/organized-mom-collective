@@ -21,6 +21,7 @@ export interface ReservedOrder {
     quantity: number;
     image: string | null;
   }[];
+  /** Already priced for this cart by shop_shipping_quote (first unit + extra units, free-shipping threshold). */
   shipping_rates: { id: string; label: string; amount_cents: number; min_days: number | null; max_days: number | null }[];
   tax_rates: { state: string; percentage: number; label: string; stripe_ids: Record<string, string> }[];
 }
@@ -170,7 +171,10 @@ export function checkoutError(message: string): { status: number; code: string; 
     case 'checkout_closed':
       return { status: 403, code };
     case 'shipping_not_configured':
+    case 'tax_not_configured':
       return { status: 503, code };
+    case 'shipping_unavailable':
+      return { status: 409, code };
     case 'rate_limited':
       return { status: 429, code };
     case 'sold_out':

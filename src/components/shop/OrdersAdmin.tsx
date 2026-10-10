@@ -3,12 +3,14 @@ import type React from 'react';
 import ConfirmationDialog from '../ConfirmationDialog';
 import { adminSignIn, type AdminSession } from '../../lib/survey';
 import {
+  EMAIL_STATUS_LABELS,
   FLAG_LABELS,
   FULFILLMENT_LABELS,
   PAYMENT_LABELS,
   addressLines,
   adminAction,
   describeEvent,
+  emailOutcomeText,
   filterOrders,
   heldUnits,
   isPaid,
@@ -23,6 +25,7 @@ import {
   stripeTestMode,
   supabaseConfigured,
   type EmailLogRow,
+  type EmailOutcome,
   type InventoryLogRow,
   type OrderEvent,
   type OrderFilter,
@@ -161,12 +164,12 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
     reload();
   }, [auth.access_token]);
 
-  /** Runs a dashboard action, shows the outcome, reloads. Returns the result or null. */
-  const act = async <T,>(body: Record<string, unknown>, success: string): Promise<T | null> => {
+  /** Runs a dashboard action, shows the outcome (built from the server's answer), reloads. Returns the result or null. */
+  const act = async <T,>(body: Record<string, unknown>, success: string | ((r: T) => string)): Promise<T | null> => {
     setNotice('');
     try {
       const r = await adminAction<T>(auth.access_token, body);
-      setNotice(success);
+      setNotice(typeof success === 'function' ? success(r) : success);
       await reload();
       return r;
     } catch (err) {
@@ -386,7 +389,20 @@ function Stat({ label, value, note }: { label: string; value: string; note?: str
 
 // ------------------------------------------------------------------ order detail
 
-type Act = <T>(body: Record<string, unknown>, success: string) => Promise<T | null>;
+type Act = <T>(body: Record<string, unknown>, success: string | ((r: T) => string)) => Promise<T | null>;
+
+interface FulfillmentResult {
+  changed: boolean;
+  status_changed: boolean;
+  tracking_changed: boolean;
+  email: EmailOutcome | null;
+}
+interface RefundResult {
+  refund_status: string;
+  restocked: number;
+  email: EmailOutcome | 'pending' | null;
+}
+const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow; emails: EmailLogRow[]; token: string; act: Act; onBack: () => void }) {
   const [events, setEvents] = useState<OrderEvent[]>([]);
@@ -402,6 +418,8 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
   const [restock, setRestock] = useState(false);
   const [confirmRefund, setConfirmRefund] = useState(false);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
+  // One id per deliberate resend: a double-submitted click sends once (see shop-admin resend_email).
+  const [emailRequestId, setEmailRequestId] = useState(() => crypto.randomUUID());
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -418,21 +436,40 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
   const canShip = o.payment_status === 'paid' || o.payment_status === 'partially_refunded';
   const refundCents = Math.round(Number(refundDollars) * 100);
   const refundValid = Number.isFinite(refundCents) && refundCents >= 1 && refundCents <= remaining;
+  const fullRefund = refundValid && refundCents === remaining;
   const unitsOut = o.shop_order_items.reduce((n, i) => n + i.quantity - i.restocked, 0);
+  const unitsRestocked = o.shop_order_items.reduce((n, i) => n + i.restocked, 0);
+  const refunded = o.refunded_cents > 0;
+  const neverShipped = o.fulfillment_status === 'canceled' || o.fulfillment_status === 'unfulfilled' || o.fulfillment_status === 'packing';
+
+  // Units only go back to stock together with a full refund.
+  useEffect(() => {
+    if (!fullRefund) setRestock(false);
+  }, [fullRefund]);
   const carrierValue = carrier === 'Other' ? otherCarrier.trim() : carrier;
   const stripeUrl = o.stripe_payment_intent_id ? `https://dashboard.stripe.com/${o.livemode ? '' : 'test/'}payments/${o.stripe_payment_intent_id}` : null;
 
-  const run = async (body: Record<string, unknown>, success: string) => {
+  const run = async <T,>(body: Record<string, unknown>, success: string | ((r: T) => string)) => {
     setBusy(true);
-    const r = await act(body, success);
+    const r = await act<T>(body, success);
     setBusy(false);
     return r;
   };
 
   const setStatus = (status: OrderRow['fulfillment_status']) =>
-    run(
+    run<FulfillmentResult>(
       { action: 'fulfillment', order_id: o.id, status, carrier: carrierValue, tracking_number: tracking, tracking_url: trackingUrl, notify: status === 'shipped' && notify },
-      status === 'shipped' && notify ? 'Marked shipped. Shipping email sent to the customer.' : `Marked ${FULFILLMENT_LABELS[status].toLowerCase()}.`,
+      (r) => {
+        if (!r.changed) return 'Nothing changed: same status and tracking. Nothing saved, no email sent.';
+        const what = r.status_changed ? `Marked ${FULFILLMENT_LABELS[status].toLowerCase()}.` : 'Tracking updated.';
+        if (status !== 'shipped') return what;
+        return `${what} ${r.email ? emailOutcomeText('shipped', r.email) : 'No email sent (the box was unticked).'}`;
+      },
+    );
+
+  const resend = (kind: string) =>
+    run<{ email: EmailOutcome }>({ action: 'resend_email', order_id: o.id, kind, request_id: emailRequestId }, (r) => emailOutcomeText(kind, r.email)).finally(() =>
+      setEmailRequestId(crypto.randomUUID()),
     );
 
   return (
@@ -460,6 +497,17 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
             <li key={f}>⚠ {FLAG_LABELS[f] ?? f}</li>
           ))}
         </ul>
+      )}
+
+      {refunded && unitsOut > 0 && (
+        <p className="mt-4 border-l-[3px] border-month bg-band px-4 py-3 text-[0.95rem]">
+          <strong>
+            Refunded; {plural(unitsOut, 'unit')} not returned to stock.
+          </strong>{' '}
+          {neverShipped
+            ? 'This order never shipped, so the calendars are probably still on your shelf. Return them to stock below if they are.'
+            : 'Refunds don’t change inventory. Return units to stock below only once they’re back on your shelf and sellable.'}
+        </p>
       )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -496,7 +544,7 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
       <Panel title="Items" className="mt-6">
         <dl>
           {o.shop_order_items.map((i) => (
-            <Line key={i.id} label={`${i.product_name} × ${i.quantity}${i.restocked ? ` (${i.restocked} returned to stock)` : ''}`} value={money(i.unit_price_cents * i.quantity)} />
+            <Line key={i.id} label={`${i.product_name} × ${i.quantity}`} value={money(i.unit_price_cents * i.quantity)} />
           ))}
           <Line label="Subtotal" value={money(o.subtotal_cents)} />
           {o.discount_cents > 0 && <Line label={`Discount${o.promotion_code ? ` (${o.promotion_code})` : ''}`} value={`−${money(o.discount_cents)}`} />}
@@ -544,7 +592,7 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
           <p className="mt-2 text-[0.85rem] text-soft">USPS, UPS and FedEx tracking links are filled in automatically from the number.</p>
           <label className="mt-4 flex items-center gap-2.5">
             <input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} className="size-4 accent-[#545454]" />
-            Email the customer when I mark it shipped
+            Email the customer when it ships or the tracking changes (saving the same details again sends nothing)
           </label>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" className="btn-secondary" disabled={busy || o.fulfillment_status === 'packing'} onClick={() => setStatus('packing')}>
@@ -573,37 +621,40 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
                 <Field label={`Amount (up to ${money(remaining)})`}>
                   <input inputMode="decimal" value={refundDollars} onChange={(e) => setRefundDollars(e.target.value.replace(/[^0-9.]/g, ''))} className={inputClass} />
                 </Field>
-                {unitsOut > 0 && (
+                {unitsOut > 0 && fullRefund && (
                   <label className="flex min-h-11 items-center gap-2.5">
                     <input type="checkbox" checked={restock} onChange={(e) => setRestock(e.target.checked)} className="size-4 accent-[#545454]" />
-                    Also put {unitsOut} unit{unitsOut === 1 ? '' : 's'} back in stock (only if {unitsOut === 1 ? 'it’s' : 'they’re'} back on your shelf)
+                    Also put {plural(unitsOut, 'unit')} back in stock (only if {unitsOut === 1 ? 'it’s' : 'they’re'} on your shelf and sellable)
                   </label>
                 )}
               </div>
               <button type="button" className="btn-secondary mt-4" disabled={busy || !refundValid} onClick={() => setConfirmRefund(true)}>
                 Refund {refundValid ? money(refundCents) : ''}
               </button>
-              <p className="mt-2 text-[0.85rem] text-soft">The refund goes back to the original payment method through Stripe, and the customer gets an email.</p>
+              <p className="mt-2 text-[0.85rem] text-soft">
+                The refund goes back to the original payment method through Stripe, and the customer is emailed. A refund does <strong>not</strong> change
+                inventory: units go back to stock only when you say so.
+              </p>
             </>
           ) : (
             <p className="text-soft">{o.stripe_payment_intent_id ? 'Fully refunded.' : 'Nothing was charged for this order.'}</p>
           )}
-          {o.refunded_cents > 0 && unitsOut > 0 && (
-            <button type="button" className="text-link mt-4" disabled={busy} onClick={() => run({ action: 'restock', order_id: o.id }, 'Units returned to stock.')}>
-              Return {unitsOut} unit{unitsOut === 1 ? '' : 's'} to stock
-            </button>
-          )}
           <ConfirmationDialog
             open={confirmRefund}
             title={`Refund ${money(refundCents)}?`}
-            message={`This sends ${money(refundCents)} back to the customer through Stripe${restock && unitsOut ? ` and puts ${unitsOut} unit${unitsOut === 1 ? '' : 's'} back in stock` : ''}. It can’t be undone.`}
+            message={`This sends ${money(refundCents)} back to the customer through Stripe. ${
+              restock && unitsOut ? `It also puts ${plural(unitsOut, 'unit')} back in stock.` : 'Stock stays as it is.'
+            } It can’t be undone.`}
             confirmLabel="Refund"
             onCancel={() => setConfirmRefund(false)}
             onConfirm={async () => {
               setConfirmRefund(false);
-              const done = await run(
+              const done = await run<RefundResult>(
                 { action: 'refund', order_id: o.id, amount_cents: refundCents, restock: restock && unitsOut > 0, request_id: requestId },
-                `Refunded ${money(refundCents)}. The customer has been emailed.`,
+                (r) =>
+                  `Refunded ${money(refundCents)}${r.refund_status === 'pending' ? ' (pending at Stripe)' : ''}. ${emailOutcomeText('refund', r.email)} ${
+                    r.restocked ? `${plural(r.restocked, 'unit')} returned to stock.` : 'Stock not changed.'
+                  }`,
               );
               // Keep the same request id after a failure: retrying then can't refund twice
               // (Stripe idempotency). A new id only for a new refund.
@@ -617,27 +668,53 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
       )}
 
       {paid && (
+        <Panel title="Stock" className="mt-6">
+          <ul className="space-y-3 text-[0.95rem]">
+            {o.shop_order_items.map((i) => (
+              <RestockLine key={i.id} item={i} canRestock={refunded} busy={busy} onRestock={(units) =>
+                run<{ restocked: number }>({ action: 'restock', order_id: o.id, item_id: i.id, units }, (r) =>
+                  r.restocked ? `${plural(r.restocked, 'unit')} returned to stock.` : 'Nothing returned: those units were already back in stock.',
+                )
+              } />
+            ))}
+          </ul>
+          <p className="mt-3 text-[0.85rem] text-soft">
+            {refunded
+              ? `${plural(unitsRestocked, 'unit')} of this order ${unitsRestocked === 1 ? 'is' : 'are'} back in stock. Each unit can only be returned once.`
+              : 'Sold units stay out of stock. After a refund, return the ones that come back to your shelf.'}
+          </p>
+        </Panel>
+      )}
+
+      {paid && (
         <Panel title="Emails" className="mt-6">
           {emails.length === 0 ? (
             <p className="text-soft">None yet.</p>
           ) : (
-            <ul className="space-y-1 text-[0.95rem]">
+            <ul className="space-y-1.5 text-[0.95rem]">
               {emails.map((e) => (
                 <li key={e.id}>
-                  <span className="font-semibold capitalize">{e.kind}</span> to {e.to_email}: {e.status}
-                  {e.error && <span className="text-soft"> ({e.error})</span>}
+                  <span className="font-semibold">{emailKindLabel(e.kind)}</span> to {e.to_email}:{' '}
+                  <span className={e.status === 'sent' ? '' : 'font-semibold'}>{EMAIL_STATUS_LABELS[e.status]}</span>
+                  <span className="text-soft">
+                    {' '}
+                    · {new Date(e.updated_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                    {e.attempts > 1 && ` · ${e.attempts} attempts`}
+                    {e.error && e.status !== 'sent' && ` · ${e.error}`}
+                  </span>
                 </li>
               ))}
             </ul>
           )}
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
-            <EmailButton label="Resend receipt" onClick={() => run({ action: 'resend_email', order_id: o.id, kind: 'confirmation' }, 'Receipt sent.')} busy={busy} />
-            <EmailButton label="Send companion instructions" onClick={() => run({ action: 'resend_email', order_id: o.id, kind: 'access' }, 'Companion instructions sent.')} busy={busy} />
+            <EmailButton label={retryLabel(emails, 'confirmation', 'Resend receipt')} onClick={() => resend('confirmation')} busy={busy} />
+            <EmailButton label={retryLabel(emails, 'access', 'Send companion instructions')} onClick={() => resend('access')} busy={busy} />
             {(o.fulfillment_status === 'shipped' || o.fulfillment_status === 'delivered') && (
-              <EmailButton label="Resend shipping email" onClick={() => run({ action: 'resend_email', order_id: o.id, kind: 'shipped' }, 'Shipping email sent.')} busy={busy} />
+              <EmailButton label={retryLabel(emails, 'shipped', 'Resend shipping email')} onClick={() => resend('shipped')} busy={busy} />
             )}
-            {o.refunded_cents > 0 && <EmailButton label="Resend refund email" onClick={() => run({ action: 'resend_email', order_id: o.id, kind: 'refund' }, 'Refund email sent.')} busy={busy} />}
+            {o.refunded_cents > 0 && <EmailButton label={retryLabel(emails, 'refund', 'Resend refund email')} onClick={() => resend('refund')} busy={busy} />}
           </div>
+          <p className="mt-2 text-[0.85rem] text-soft">A failed or unsent email is retried as the same email, so the customer never gets two copies of it.</p>
         </Panel>
       )}
 
@@ -662,6 +739,45 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
         </ol>
       </Panel>
     </div>
+  );
+}
+
+const emailKindLabel = (kind: string) => ({ confirmation: 'Receipt', shipped: 'Shipping', refund: 'Refund', access: 'Companion instructions' })[kind] ?? kind;
+
+/** "Retry …" when the latest email of that kind didn't go out. */
+function retryLabel(emails: EmailLogRow[], kind: string, label: string) {
+  const latest = emails.filter((e) => e.kind === kind).at(-1);
+  return latest && (latest.status === 'failed' || latest.status === 'skipped') ? `Retry ${emailKindLabel(kind).toLowerCase()} email` : label;
+}
+
+function RestockLine({ item: i, canRestock, busy, onRestock }: { item: OrderRow['shop_order_items'][number]; canRestock: boolean; busy: boolean; onRestock: (units: number) => void }) {
+  const out = i.quantity - i.restocked;
+  const [units, setUnits] = useState(String(out));
+  useEffect(() => setUnits(String(out)), [out]);
+  const n = Number(units);
+  const valid = Number.isInteger(n) && n >= 1 && n <= out;
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-3">
+      <span>
+        <span className="font-semibold">{i.product_name}</span>: {i.quantity} sold
+        {i.restocked > 0 ? `, ${i.restocked} returned to stock` : ''}
+        {canRestock && out > 0 ? `, ${out} not returned` : ''}
+      </span>
+      {canRestock && out > 0 && (
+        <span className="flex items-center gap-2">
+          <input
+            inputMode="numeric"
+            aria-label={`Units of ${i.product_name} to return to stock`}
+            value={units}
+            onChange={(e) => setUnits(e.target.value.replace(/\D/g, ''))}
+            className={`${inputClass} mt-0 w-16`}
+          />
+          <button type="button" className="btn-secondary" disabled={busy || !valid} onClick={() => onRestock(n)}>
+            Return to stock
+          </button>
+        </span>
+      )}
+    </li>
   );
 }
 
@@ -696,6 +812,15 @@ function Line({ label, value, strong }: { label: string; value: string; strong?:
 function Inventory({ data, token, act }: { data: Data; token: string; act: Act }) {
   const held = useMemo(() => heldUnits(data.orders), [data.orders]);
   const sold = useMemo(() => soldUnits(data.orders), [data.orders]);
+  // Units of refunded orders that haven't been returned to stock (refunds never restock on their own).
+  const refundedOut = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const o of data.orders) {
+      if (o.refunded_cents === 0) continue;
+      for (const i of o.shop_order_items) m.set(i.product_id, (m.get(i.product_id) ?? 0) + i.quantity - i.restocked);
+    }
+    return m;
+  }, [data.orders]);
   const [log, setLog] = useState<InventoryLogRow[]>([]);
 
   useEffect(() => {
@@ -710,7 +835,7 @@ function Inventory({ data, token, act }: { data: Data; token: string; act: Act }
         Stock for website sales only. Etsy stock is separate: if a calendar sells on Etsy from the same shelf, take it out here too.
       </p>
       {data.products.map((p) => (
-        <ProductCard key={p.id} product={p} held={held.get(p.id) ?? 0} sold={sold.get(p.id) ?? 0} act={act} />
+        <ProductCard key={p.id} product={p} held={held.get(p.id) ?? 0} sold={sold.get(p.id) ?? 0} refundedOut={refundedOut.get(p.id) ?? 0} act={act} />
       ))}
       <Panel title="Stock changes">
         {log.length === 0 ? (
@@ -733,7 +858,7 @@ function Inventory({ data, token, act }: { data: Data; token: string; act: Act }
   );
 }
 
-function ProductCard({ product: p, held, sold, act }: { product: ProductRow; held: number; sold: number; act: Act }) {
+function ProductCard({ product: p, held, sold, refundedOut, act }: { product: ProductRow; held: number; sold: number; refundedOut: number; act: Act }) {
   const [mode, setMode] = useState<'delta' | 'set'>('delta');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
@@ -765,8 +890,14 @@ function ProductCard({ product: p, held, sold, act }: { product: ProductRow; hel
       <dl className="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[6px] border border-rule bg-rule">
         <Stat label="Available" value={String(p.stock)} note={p.stock === 0 ? 'sold out' : undefined} />
         <Stat label="In checkout" value={String(held)} note="held while paying" />
-        <Stat label="Sold here" value={String(sold)} />
+        <Stat label="Sold here" value={String(sold)} note={refundedOut ? `incl. ${refundedOut} refunded, not back in stock` : 'not returned to stock'} />
       </dl>
+      {refundedOut > 0 && (
+        <p className="mt-2 text-[0.85rem] text-soft">
+          {plural(refundedOut, 'refunded unit')} {refundedOut === 1 ? 'hasn’t' : 'haven’t'} been returned to stock. Open the order to return {refundedOut === 1 ? 'it' : 'them'} once
+          {refundedOut === 1 ? ' it’s' : ' they’re'} back on your shelf.
+        </p>
+      )}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-[9rem_7rem_1fr_auto] sm:items-end">
         <Field label="Change">
@@ -809,6 +940,7 @@ function ProductEditor({ product: p, act, onDone }: { product: ProductRow; act: 
   const [edition, setEdition] = useState(p.edition ?? '');
   const [price, setPrice] = useState((p.price_cents / 100).toFixed(2));
   const [maxPer, setMaxPer] = useState(String(p.max_per_order));
+  const [shipUnits, setShipUnits] = useState(String(p.ship_units));
   const [description, setDescription] = useState(p.description);
   const [details, setDetails] = useState(p.details.join('\n'));
   const [images, setImages] = useState(p.images.map((i) => `${i.src} | ${i.alt}`).join('\n'));
@@ -825,6 +957,7 @@ function ProductEditor({ product: p, act, onDone }: { product: ProductRow; act: 
           edition,
           price_cents: Math.round(Number(price) * 100),
           max_per_order: Number(maxPer),
+          ship_units: Number(shipUnits),
           description: description.trim(),
           details: details.split('\n').map((d) => d.trim()).filter(Boolean),
           images: images
@@ -857,6 +990,10 @@ function ProductEditor({ product: p, act, onDone }: { product: ProductRow; act: 
       <Field label="Most per order">
         <input inputMode="numeric" value={maxPer} onChange={(e) => setMaxPer(e.target.value.replace(/\D/g, ''))} className={inputClass} />
       </Field>
+      <Field label="Shipping units per calendar">
+        <input inputMode="numeric" value={shipUnits} onChange={(e) => setShipUnits(e.target.value.replace(/\D/g, ''))} className={inputClass} />
+      </Field>
+      <p className="self-end text-[0.85rem] text-soft">How much shipping one of these takes, in “calendars”: 1 for the 26-week, 2 for the 52-week (two sets).</p>
       <Field label="Description" className="sm:col-span-2">
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={2000} className={`${inputClass} py-2`} />
       </Field>
@@ -883,6 +1020,7 @@ function ProductEditor({ product: p, act, onDone }: { product: ProductRow; act: 
 function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; rates: ShippingRateRow[]; act: Act; token: string }) {
   const [confirm, setConfirm] = useState<SettingsRow['checkout_mode'] | null>(null);
   const [tax, setTax] = useState(s.tax_mode);
+  const [confirmTax, setConfirmTax] = useState(false);
   const [status, setStatus] = useState<ShopStatus | null>(null);
   const [statusError, setStatusError] = useState('');
 
@@ -912,10 +1050,20 @@ function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; r
               <Check ok={status.live_checkout_flag} star label="Deployment flag SHOP_LIVE_CHECKOUT=enabled (Supabase function secret)" />
               <Check ok={status.checkout_mode === 'live'} star label={`Store setting: ${status.checkout_mode === 'live' ? 'Open' : (status.checkout_mode ?? '—')} (below)`} />
               <Check ok={status.live_shipping_rates > 0} star label={`Real shipping rates: ${status.live_shipping_rates} (test placeholders: ${status.test_shipping_rates})`} />
+              <Check
+                ok={status.tax_reviewed}
+                star
+                label={`Sales tax decided and saved below: ${status.tax_reviewed ? (status.tax_mode === 'automatic' ? 'Stripe Tax' : 'not collecting') : 'not yet'}`}
+              />
+              {status.stripe_tax && (
+                <Check
+                  ok={status.stripe_tax.status === 'active' && status.stripe_tax.registrations.length > 0}
+                  label={`Stripe Tax: ${status.stripe_tax.status}; collecting in ${status.stripe_tax.registrations.length ? status.stripe_tax.registrations.join(', ') : 'no registrations (no tax will be charged anywhere)'}`}
+                />
+              )}
               <Check ok={status.webhook_secret_set} label="Stripe webhook signing secret" />
-              <Check ok={status.email_configured} label="Email provider (Resend)" />
-              <Check ok={status.reply_to_set} label="Reply-to address for customer questions" />
-              <Check ok={status.tax_mode !== 'off'} label={`Sales tax: ${status.tax_mode ?? '—'} (decide before launch; 'off' collects none)`} />
+              <Check ok={status.email_configured} label="Email provider (Resend): without it, no customer emails go out" />
+              <Check ok={status.reply_to_set} label="Support address (SHOP_EMAIL_REPLY_TO): shown in every customer email" />
               <Check ok={status.preview_token_set} label="Preview token (for testing)" />
             </ul>
           </>
@@ -973,17 +1121,38 @@ function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; r
             <select value={tax} onChange={(e) => setTax(e.target.value as SettingsRow['tax_mode'])} className={inputClass}>
               <option value="off">Don’t collect tax</option>
               <option value="automatic">Stripe Tax (automatic)</option>
-              <option value="manual">My state rates (manual)</option>
+              {s.tax_mode === 'manual' && <option value="manual">Manual state rates (switched off)</option>}
             </select>
           </Field>
-          <button type="button" className="btn-secondary sm:justify-self-start" disabled={tax === s.tax_mode} onClick={() => act({ action: 'settings', fields: { tax_mode: tax } }, 'Tax setting saved.')}>
-            Save
+          <button
+            type="button"
+            className="btn-secondary sm:justify-self-start"
+            disabled={tax === 'manual' || (tax === s.tax_mode && s.tax_reviewed)}
+            onClick={() => setConfirmTax(true)}
+          >
+            {s.tax_reviewed ? 'Save' : 'Confirm and save'}
           </button>
         </div>
         <p className="mt-3 text-[0.9rem] text-soft">
-          Stripe Tax needs your tax registrations added in the Stripe dashboard and charges a fee per transaction. Manual rates live in the shop_tax_rates table, one row
-          per state you’re registered in. Decide with your accountant before opening checkout.
+          {s.tax_reviewed ? 'Decided.' : 'Not decided yet: real-money checkout stays closed until this is saved.'} Stripe Tax charges tax only where you’ve added a
+          registration in Stripe (Tax → Registrations), on the item and on shipping wherever that state taxes shipping, after any discount. It has a per-transaction
+          fee. Decide with your accountant.
         </p>
+        <ConfirmationDialog
+          open={confirmTax}
+          title={tax === 'automatic' ? 'Use Stripe Tax?' : 'Don’t collect sales tax?'}
+          message={
+            tax === 'automatic'
+              ? 'Tax will be charged only in the states registered in your Stripe dashboard. Check Tax → Registrations there first.'
+              : 'Customers won’t be charged any sales tax on website orders. Only choose this if your accountant has confirmed you don’t need to collect it.'
+          }
+          confirmLabel="Save"
+          onCancel={() => setConfirmTax(false)}
+          onConfirm={async () => {
+            setConfirmTax(false);
+            await act({ action: 'settings', fields: { tax_mode: tax } }, 'Tax setting saved.');
+          }}
+        />
       </Panel>
 
       <Panel title="Shipping rates (US)">
@@ -994,8 +1163,9 @@ function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; r
           <RateRow rate={null} act={act} />
         </ul>
         <p className="mt-3 text-[0.9rem] text-soft">
-          Customers pick one in checkout (Stripe shows up to 5). Flat rate per order. Rates marked “test only” are placeholders, offered only in Stripe test mode; a live
-          checkout won’t open until at least one real rate is on.
+          Customers pick one in checkout (Stripe shows up to 5). Each rate costs its price for the first calendar plus the “each extra” price per additional calendar
+          (a 52-week calendar counts as two). Limit a rate to a number of calendars with From/To, and make it free at or over a subtotal (before discount codes). US
+          addresses only. Rates marked “test only” are placeholders, offered only in Stripe test mode; a live checkout won’t open until at least one real rate is on.
         </p>
       </Panel>
     </div>
@@ -1003,41 +1173,87 @@ function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; r
 }
 
 function RateRow({ rate, act }: { rate: ShippingRateRow | null; act: Act }) {
+  const dollars = (c: number | null | undefined) => (c == null ? '' : (c / 100).toFixed(2));
   const [label, setLabel] = useState(rate?.label ?? '');
-  const [amount, setAmount] = useState(rate ? (rate.amount_cents / 100).toFixed(2) : '');
+  const [amount, setAmount] = useState(dollars(rate?.amount_cents));
+  const [extra, setExtra] = useState(dollars(rate?.per_extra_unit_cents ?? 0));
+  const [minUnits, setMinUnits] = useState(String(rate?.min_units ?? 1));
+  const [maxUnits, setMaxUnits] = useState(rate?.max_units == null ? '' : String(rate.max_units));
+  const [freeOver, setFreeOver] = useState(dollars(rate?.free_over_cents));
   const [busy, setBusy] = useState(false);
-  const cents = Math.round(Number(amount) * 100);
-  const valid = label.trim() !== '' && amount !== '' && Number.isFinite(cents) && cents >= 0;
-  const changed = !rate || label !== rate.label || cents !== rate.amount_cents;
+  const cents = (v: string) => (v.trim() === '' ? null : Math.round(Number(v) * 100));
+  const fields = {
+    label: label.trim(),
+    amount_cents: cents(amount),
+    per_extra_unit_cents: cents(extra) ?? 0,
+    min_units: Number(minUnits || 1),
+    max_units: maxUnits === '' ? null : Number(maxUnits),
+    free_over_cents: cents(freeOver),
+  };
+  const valid =
+    fields.label !== '' &&
+    fields.amount_cents != null &&
+    Number.isFinite(fields.amount_cents) &&
+    fields.amount_cents >= 0 &&
+    Number.isFinite(fields.per_extra_unit_cents) &&
+    fields.min_units >= 1 &&
+    (fields.max_units == null || fields.max_units >= fields.min_units) &&
+    (fields.free_over_cents == null || (Number.isFinite(fields.free_over_cents) && fields.free_over_cents > 0));
+  const changed =
+    !rate ||
+    fields.label !== rate.label ||
+    fields.amount_cents !== rate.amount_cents ||
+    fields.per_extra_unit_cents !== rate.per_extra_unit_cents ||
+    fields.min_units !== rate.min_units ||
+    fields.max_units !== rate.max_units ||
+    fields.free_over_cents !== rate.free_over_cents;
 
-  const save = async (extra: Record<string, unknown> = {}) => {
+  const save = async (more: Record<string, unknown> = {}) => {
     setBusy(true);
-    const r = await act({ action: 'shipping_rate', rate: { ...(rate ? { id: rate.id } : {}), label: label.trim(), amount_cents: cents, ...extra } }, 'Shipping rate saved.');
+    const r = await act({ action: 'shipping_rate', rate: { ...(rate ? { id: rate.id } : {}), ...fields, ...more } }, 'Shipping rate saved.');
     setBusy(false);
     if (r && !rate) {
       setLabel('');
       setAmount('');
+      setExtra('0.00');
+      setMinUnits('1');
+      setMaxUnits('');
+      setFreeOver('');
     }
   };
+  const money$ = (set: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => set(e.target.value.replace(/[^0-9.]/g, ''));
+  const count = (set: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => set(e.target.value.replace(/\D/g, ''));
 
   return (
-    <li className="grid gap-3 sm:grid-cols-[1fr_8rem_auto_auto] sm:items-end">
+    <li className="grid gap-3 border-b border-rule pb-4 last:border-b-0 sm:grid-cols-[1fr_6.5rem_6.5rem_4.5rem_4.5rem_7rem] sm:items-end">
       <Field label={rate ? (rate.test_only ? 'Name (test only)' : rate.active ? 'Name' : 'Name (off)') : 'Add a real rate'}>
         <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={100} placeholder="Standard shipping" className={inputClass} />
       </Field>
-      <Field label="Price ($)">
-        <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} className={inputClass} />
+      <Field label="First ($)">
+        <input inputMode="decimal" value={amount} onChange={money$(setAmount)} className={inputClass} />
       </Field>
-      <button type="button" className="btn-secondary" disabled={busy || !valid || !changed} onClick={() => save()}>
-        {rate ? 'Save' : 'Add'}
-      </button>
-      {rate ? (
-        <button type="button" className="text-link min-h-11" disabled={busy} onClick={() => save({ active: !rate.active })}>
-          {rate.active ? 'Turn off' : 'Turn on'}
+      <Field label="Each extra ($)">
+        <input inputMode="decimal" value={extra} onChange={money$(setExtra)} className={inputClass} />
+      </Field>
+      <Field label="From">
+        <input inputMode="numeric" value={minUnits} onChange={count(setMinUnits)} className={inputClass} />
+      </Field>
+      <Field label="To">
+        <input inputMode="numeric" value={maxUnits} onChange={count(setMaxUnits)} placeholder="any" className={inputClass} />
+      </Field>
+      <Field label="Free over ($)">
+        <input inputMode="decimal" value={freeOver} onChange={money$(setFreeOver)} placeholder="never" className={inputClass} />
+      </Field>
+      <div className="flex flex-wrap gap-x-5 gap-y-2 sm:col-span-6">
+        <button type="button" className="btn-secondary" disabled={busy || !valid || !changed} onClick={() => save()}>
+          {rate ? 'Save' : 'Add'}
         </button>
-      ) : (
-        <span />
-      )}
+        {rate && (
+          <button type="button" className="text-link min-h-11" disabled={busy} onClick={() => save({ active: !rate.active })}>
+            {rate.active ? 'Turn off' : 'Turn on'}
+          </button>
+        )}
+      </div>
     </li>
   );
 }

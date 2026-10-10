@@ -49,10 +49,14 @@ function createResendMailer(opts) {
   const fetchFn = opts.fetch ?? fetch;
   return {
     configured: Boolean(opts.apiKey),
-    async send(to, msg) {
+    async send(to, msg, idempotencyKey) {
       const res = await fetchFn("https://api.resend.com/emails", {
         method: "POST",
-        headers: { Authorization: `Bearer ${opts.apiKey}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${opts.apiKey}`,
+          "Content-Type": "application/json",
+          ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
+        },
         body: JSON.stringify({ from: opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
       });
       const data = await res.json().catch(() => ({}));
@@ -126,8 +130,8 @@ function companionBlocks(siteUrl) {
     link("Open the cleaning companion", `${siteUrl}/app`)
   ];
 }
-function layout(siteUrl, title, blocks, replyTo) {
-  const all = [...blocks, ...replyTo ? [p("Questions about your order? Just reply to this email.")] : []];
+function layout(siteUrl, title, blocks, supportEmail) {
+  const all = [...blocks, ...supportEmail ? [p(`Questions about your order? Reply to this email or write to ${supportEmail}.`)] : []];
   const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:Montserrat,Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#545454">
@@ -161,7 +165,7 @@ function renderBody(kind, o, opts) {
           p("We pack each order by hand. When yours ships, we’ll email you the tracking number."),
           ...companionBlocks(opts.siteUrl)
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: `Your Organized Mom Collective order ${n}` };
     }
@@ -177,7 +181,7 @@ function renderBody(kind, o, opts) {
           ...ship.length ? [heading("Shipping to"), lines(ship)] : [],
           ...companionBlocks(opts.siteUrl)
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: `Your order ${n} has shipped` };
     }
@@ -194,7 +198,7 @@ function renderBody(kind, o, opts) {
           ),
           p("Refunds usually take 5–10 business days to appear, depending on your bank.")
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: canceled ? `Order ${n} canceled and refunded` : `Refund for order ${n}` };
     }
@@ -209,11 +213,15 @@ function renderBody(kind, o, opts) {
           p("It’s free with your calendar. No account, no subscription, nothing to install. Your checkmarks are saved in your phone’s browser, and you can add it to your Home Screen from Settings."),
           link("See how it works", `${opts.siteUrl}/companion`)
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: "Your cleaning companion: how to get started" };
     }
   }
+}
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 async function deliverEmail(deps, orderId, kind, key, extra = {}) {
   try {
@@ -226,7 +234,11 @@ async function deliverEmail(deps, orderId, kind, key, extra = {}) {
       return "skipped";
     }
     try {
-      const { id } = await deps.mailer.send(order.email, renderEmail(kind, order, { siteUrl: deps.siteUrl, replyTo: deps.replyTo, ...extra }));
+      const msg = renderEmail(kind, order, { siteUrl: deps.siteUrl, supportEmail: deps.supportEmail, ...extra });
+      const idem = `${key}/${(await sha256Hex(`${order.email}
+${msg.subject}
+${msg.text}`)).slice(0, 24)}`;
+      const { id } = await deps.mailer.send(order.email, msg, idem.slice(0, 256));
       await deps.db.rpc("shop_email_result", { p_id: claim, p_status: "sent", p_provider_id: id, p_error: null });
       return "sent";
     } catch (err) {
@@ -364,7 +376,7 @@ var emailDeps = (deps) => ({
   db: deps.db,
   mailer: deps.mailer,
   siteUrl: deps.env.siteUrl,
-  replyTo: Boolean(deps.env.emailReplyTo)
+  supportEmail: deps.env.emailReplyTo
 });
 
 // supabase/functions/_shared/checkout.ts
@@ -507,10 +519,17 @@ async function applyRefund(deps, paymentIntent, refundedTotal, actor) {
     p_refunded_cents: refundedTotal,
     p_actor: actor
   });
-  if (r.found && r.transitioned && r.order_id) {
-    await deliverEmail(emailDeps(deps), r.order_id, "refund", `refund:${r.order_id}:${refundedTotal}`, { refundCents: r.amount_cents });
+  let email = null;
+  if (r.found && r.order_id) {
+    const key = `refund:${r.order_id}:${refundedTotal}`;
+    if (r.transitioned) {
+      email = await deliverEmail(emailDeps(deps), r.order_id, "refund", key, { refundCents: r.amount_cents });
+    } else {
+      const [row] = await deps.db.select("shop_email_log", `dedupe_key=eq.${encodeURIComponent(key)}&select=status`);
+      email = row?.status ?? null;
+    }
   }
-  return r;
+  return { ...r, email };
 }
 
 // supabase/stripe-webhook/index.ts

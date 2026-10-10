@@ -49,10 +49,14 @@ function createResendMailer(opts) {
   const fetchFn = opts.fetch ?? fetch;
   return {
     configured: Boolean(opts.apiKey),
-    async send(to, msg) {
+    async send(to, msg, idempotencyKey) {
       const res = await fetchFn("https://api.resend.com/emails", {
         method: "POST",
-        headers: { Authorization: `Bearer ${opts.apiKey}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${opts.apiKey}`,
+          "Content-Type": "application/json",
+          ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
+        },
         body: JSON.stringify({ from: opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
       });
       const data = await res.json().catch(() => ({}));
@@ -126,8 +130,8 @@ function companionBlocks(siteUrl) {
     link("Open the cleaning companion", `${siteUrl}/app`)
   ];
 }
-function layout(siteUrl, title, blocks, replyTo) {
-  const all = [...blocks, ...replyTo ? [p("Questions about your order? Just reply to this email.")] : []];
+function layout(siteUrl, title, blocks, supportEmail) {
+  const all = [...blocks, ...supportEmail ? [p(`Questions about your order? Reply to this email or write to ${supportEmail}.`)] : []];
   const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:Montserrat,Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#545454">
@@ -161,7 +165,7 @@ function renderBody(kind, o, opts) {
           p("We pack each order by hand. When yours ships, we’ll email you the tracking number."),
           ...companionBlocks(opts.siteUrl)
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: `Your Organized Mom Collective order ${n}` };
     }
@@ -177,7 +181,7 @@ function renderBody(kind, o, opts) {
           ...ship.length ? [heading("Shipping to"), lines(ship)] : [],
           ...companionBlocks(opts.siteUrl)
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: `Your order ${n} has shipped` };
     }
@@ -194,7 +198,7 @@ function renderBody(kind, o, opts) {
           ),
           p("Refunds usually take 5–10 business days to appear, depending on your bank.")
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: canceled ? `Order ${n} canceled and refunded` : `Refund for order ${n}` };
     }
@@ -209,11 +213,15 @@ function renderBody(kind, o, opts) {
           p("It’s free with your calendar. No account, no subscription, nothing to install. Your checkmarks are saved in your phone’s browser, and you can add it to your Home Screen from Settings."),
           link("See how it works", `${opts.siteUrl}/companion`)
         ],
-        opts.replyTo
+        opts.supportEmail
       );
       return { ...m, subject: "Your cleaning companion: how to get started" };
     }
   }
+}
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 async function deliverEmail(deps, orderId, kind, key, extra = {}) {
   try {
@@ -226,7 +234,11 @@ async function deliverEmail(deps, orderId, kind, key, extra = {}) {
       return "skipped";
     }
     try {
-      const { id } = await deps.mailer.send(order.email, renderEmail(kind, order, { siteUrl: deps.siteUrl, replyTo: deps.replyTo, ...extra }));
+      const msg = renderEmail(kind, order, { siteUrl: deps.siteUrl, supportEmail: deps.supportEmail, ...extra });
+      const idem = `${key}/${(await sha256Hex(`${order.email}
+${msg.subject}
+${msg.text}`)).slice(0, 24)}`;
+      const { id } = await deps.mailer.send(order.email, msg, idem.slice(0, 256));
       await deps.db.rpc("shop_email_result", { p_id: claim, p_status: "sent", p_provider_id: id, p_error: null });
       return "sent";
     } catch (err) {
@@ -361,7 +373,7 @@ var emailDeps = (deps) => ({
   db: deps.db,
   mailer: deps.mailer,
   siteUrl: deps.env.siteUrl,
-  replyTo: Boolean(deps.env.emailReplyTo)
+  supportEmail: deps.env.emailReplyTo
 });
 
 // supabase/functions/_shared/handlers/webhook.ts
@@ -371,10 +383,17 @@ async function applyRefund(deps, paymentIntent, refundedTotal, actor) {
     p_refunded_cents: refundedTotal,
     p_actor: actor
   });
-  if (r.found && r.transitioned && r.order_id) {
-    await deliverEmail(emailDeps(deps), r.order_id, "refund", `refund:${r.order_id}:${refundedTotal}`, { refundCents: r.amount_cents });
+  let email = null;
+  if (r.found && r.order_id) {
+    const key = `refund:${r.order_id}:${refundedTotal}`;
+    if (r.transitioned) {
+      email = await deliverEmail(emailDeps(deps), r.order_id, "refund", key, { refundCents: r.amount_cents });
+    } else {
+      const [row] = await deps.db.select("shop_email_log", `dedupe_key=eq.${encodeURIComponent(key)}&select=status`);
+      email = row?.status ?? null;
+    }
   }
-  return r;
+  return { ...r, email };
 }
 
 // supabase/functions/_shared/handlers/admin.ts
@@ -404,6 +423,22 @@ async function authenticate(deps, req) {
   if (!ok) throw new HttpError(403, "forbidden");
   return { id: user.id, email: user.email ?? user.id };
 }
+async function stripeTaxStatus(deps) {
+  try {
+    const settings = await deps.stripe.request("GET", "/v1/tax/settings");
+    const regs = await deps.stripe.request(
+      "GET",
+      "/v1/tax/registrations",
+      { status: "active", limit: 100 }
+    );
+    return {
+      status: settings.status ?? "unknown",
+      registrations: (regs.data ?? []).map((r) => r.country === "US" && r.country_options?.us?.state ? `US-${r.country_options.us.state}` : r.country ?? "?")
+    };
+  } catch (err) {
+    return { status: "unavailable", registrations: [], error: err.message.slice(0, 200) };
+  }
+}
 function createAdminHandler(deps) {
   return async (req) => {
     const cors = corsHeaders(req, deps.env.allowedOrigins);
@@ -428,11 +463,15 @@ async function run(deps, admin, b) {
     case "whoami":
       return { email: admin.email };
     case "status": {
-      const [settings] = await deps.db.select("shop_settings", "select=checkout_mode,tax_mode");
+      const [settings] = await deps.db.select(
+        "shop_settings",
+        "select=checkout_mode,tax_mode,tax_reviewed"
+      );
       const rates = await deps.db.select("shop_shipping_rates", "select=test_only&active=is.true");
       const mode = deps.stripe.mode;
       const liveRates = rates.filter((r) => !r.test_only).length;
       const flag = deps.env.liveCheckoutEnabled;
+      const taxReady = Boolean(settings?.tax_reviewed) && settings?.tax_mode !== "manual";
       return {
         stripe_mode: deps.env.stripeSecretKey ? mode : null,
         live_checkout_flag: flag,
@@ -442,17 +481,19 @@ async function run(deps, admin, b) {
         reply_to_set: Boolean(deps.env.emailReplyTo),
         checkout_mode: settings?.checkout_mode ?? null,
         tax_mode: settings?.tax_mode ?? null,
+        tax_reviewed: taxReady,
+        stripe_tax: settings?.tax_mode === "automatic" && stripeBlockedReason(deps) === null ? await stripeTaxStatus(deps) : null,
         live_shipping_rates: liveRates,
         test_shipping_rates: rates.length - liveRates,
         // What would happen right now for someone on /checkout without the preview token.
         public_checkout_open: settings?.checkout_mode === "live" && flag && stripeBlockedReason(deps) === null && (mode === "test" || liveRates > 0),
-        real_payments_possible: mode === "live" && flag && settings?.checkout_mode === "live" && liveRates > 0
+        real_payments_possible: mode === "live" && flag && settings?.checkout_mode === "live" && liveRates > 0 && taxReady
       };
     }
     case "fulfillment": {
       const id = uuid(b.order_id);
       const status = str(b.status, 20);
-      await deps.db.rpc("shop_set_fulfillment", {
+      const r = await deps.db.rpc("shop_set_fulfillment", {
         p_order: id,
         p_status: status,
         p_carrier: str(b.carrier, 60),
@@ -461,11 +502,11 @@ async function run(deps, admin, b) {
         p_actor: actor
       });
       let email = null;
-      if (status === "shipped" && b.notify === true) {
+      if (status === "shipped" && b.notify === true && r.changed) {
         const o = await loadOrder(deps.db, id);
-        email = await deliverEmail(emailDeps(deps), id, "shipped", `shipped:${id}:${o?.tracking_number ?? "none"}`);
+        email = await deliverEmail(emailDeps(deps), id, "shipped", `shipped:${id}:${o?.carrier ?? ""}:${o?.tracking_number ?? "none"}`);
       }
-      return { ok: true, email };
+      return { ok: true, changed: r.changed, status_changed: r.status_changed, tracking_changed: r.tracking_changed, email };
     }
     case "refund": {
       const blocked = stripeBlockedReason(deps);
@@ -480,6 +521,7 @@ async function run(deps, admin, b) {
       const remaining = (o.total_cents ?? 0) - o.refunded_cents;
       const amount = b.amount_cents == null ? remaining : Number(b.amount_cents);
       if (!Number.isInteger(amount) || amount < 1 || amount > remaining) throw new HttpError(400, "invalid_amount");
+      if (b.restock === true && amount !== remaining) throw new HttpError(400, "restock_needs_full_refund");
       const refund = await deps.stripe.request(
         "POST",
         "/v1/refunds",
@@ -489,15 +531,22 @@ async function run(deps, admin, b) {
       if (refund.status === "failed" || refund.status === "canceled") throw new HttpError(502, "refund_failed");
       const chargeId = typeof refund.charge === "string" ? refund.charge : refund.charge.id;
       const charge = await deps.stripe.request("GET", `/v1/charges/${chargeId}`);
-      await applyRefund(deps, o.stripe_payment_intent_id, charge.amount_refunded, actor);
+      const applied = await applyRefund(deps, o.stripe_payment_intent_id, charge.amount_refunded, actor);
       const restocked = b.restock === true ? await deps.db.rpc("shop_restock_order", { p_order: id, p_actor: actor }) : 0;
-      return { ok: true, refund_id: refund.id, refund_status: refund.status, restocked };
+      return { ok: true, refund_id: refund.id, refund_status: refund.status, restocked, email: applied.email };
     }
     case "restock": {
       const id = uuid(b.order_id);
       const o = await loadOrder(deps.db, id);
       if (!o) throw new HttpError(404, "not_found");
       if (o.payment_status !== "refunded" && o.payment_status !== "partially_refunded") throw new HttpError(409, "refund_first");
+      if (b.item_id != null) {
+        const itemId = uuid(b.item_id);
+        if (!o.shop_order_items.some((i) => i.id === itemId)) throw new HttpError(404, "not_found");
+        const units = Number(b.units);
+        if (!Number.isInteger(units) || units < 1) throw new HttpError(400, "invalid_amount");
+        return { ok: true, restocked: await deps.db.rpc("shop_restock_units", { p_item: itemId, p_units: units, p_actor: actor }) };
+      }
       return { ok: true, restocked: await deps.db.rpc("shop_restock_order", { p_order: id, p_actor: actor }) };
     }
     case "resend_email": {
@@ -511,8 +560,19 @@ async function run(deps, admin, b) {
       }
       if (kind === "shipped" && o.fulfillment_status !== "shipped" && o.fulfillment_status !== "delivered") throw new HttpError(409, "not_shipped");
       if (kind === "refund" && o.refunded_cents === 0) throw new HttpError(409, "not_refunded");
-      const email = await deliverEmail(emailDeps(deps), id, kind, `${kind}:${id}:resend:${Date.now()}`);
-      return { ok: email === "sent" || email === "skipped", email };
+      const [latest] = await deps.db.select(
+        "shop_email_log",
+        `order_id=eq.${id}&kind=eq.${kind}&select=dedupe_key,status&order=id.desc&limit=1`
+      );
+      let key;
+      if (latest && latest.status !== "sent") key = latest.dedupe_key;
+      else {
+        const requestId = str(b.request_id, 64);
+        if (!requestId || !/^[A-Za-z0-9-]{8,64}$/.test(requestId)) throw new HttpError(400, "request_id_required");
+        key = `${kind}:${id}:resend:${requestId}`;
+      }
+      const email = await deliverEmail(emailDeps(deps), id, kind, key);
+      return { ok: email === "sent", email };
     }
     case "note":
       await deps.db.rpc("shop_set_note", { p_order: uuid(b.order_id), p_note: str(b.note, 4e3) ?? "", p_actor: actor });
@@ -533,7 +593,7 @@ async function run(deps, admin, b) {
     }
     case "product": {
       const f = b.fields ?? {};
-      const allowed = ["name", "edition", "description", "details", "price_cents", "images", "active", "max_per_order", "sort"];
+      const allowed = ["name", "edition", "description", "details", "price_cents", "images", "active", "max_per_order", "ship_units", "sort"];
       const fields = Object.fromEntries(Object.entries(f).filter(([k]) => allowed.includes(k)));
       if ("images" in fields) {
         const imgs = fields.images;
@@ -556,7 +616,20 @@ async function run(deps, admin, b) {
     }
     case "shipping_rate": {
       const r = b.rate ?? {};
-      const allowed = ["id", "label", "amount_cents", "min_days", "max_days", "active", "test_only", "sort"];
+      const allowed = [
+        "id",
+        "label",
+        "amount_cents",
+        "min_days",
+        "max_days",
+        "active",
+        "test_only",
+        "sort",
+        "per_extra_unit_cents",
+        "min_units",
+        "max_units",
+        "free_over_cents"
+      ];
       return { ok: true, id: await deps.db.rpc("shop_save_shipping_rate", { p: Object.fromEntries(Object.entries(r).filter(([k]) => allowed.includes(k))) }) };
     }
     default:
