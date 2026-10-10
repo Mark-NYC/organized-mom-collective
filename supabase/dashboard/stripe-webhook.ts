@@ -94,129 +94,212 @@ function trackingLink(carrier, tracking, explicit) {
       return null;
   }
 }
-var p = (text) => ({ html: `<p style="margin:0 0 16px">${esc(text)}</p>`, text });
+var C = {
+  page: "#fbf7f1",
+  // cream
+  card: "#ffffff",
+  ink: "#3d3834",
+  // warm charcoal (articles)
+  soft: "#5c5550",
+  muted: "#6e6461",
+  rule: "#e7ddd4",
+  accent: "#96666b",
+  // rose-deep
+  sage: "#f1f4ec",
+  sageRule: "#dde4d3",
+  rose: "#f8eeec",
+  button: "#4a3f3e"
+};
+var SANS = "Montserrat,'Helvetica Neue',Helvetica,Arial,sans-serif";
+var SERIF = "Georgia,'Times New Roman',serif";
+var p = (text, style = "") => ({ html: `<p style="margin:0 0 16px;${style}">${esc(text)}</p>`, text });
+var small = (text) => p(text, `font-size:13px;line-height:1.55;color:${C.muted}`);
+var eyebrowStyle = `margin:0 0 10px;font-family:${SANS};font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:${C.accent}`;
 var heading = (text) => ({
-  html: `<p style="margin:28px 0 8px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase">${esc(text)}</p>`,
+  html: `<p style="${eyebrowStyle};margin-top:28px;color:${C.muted}">${esc(text)}</p>`,
   text: `
 ${text.toUpperCase()}`
 });
-var link = (label, href) => ({
-  html: `<p style="margin:0 0 16px"><a href="${esc(href)}" style="color:#545454;font-weight:600">${esc(label)}</a></p>`,
+var lines = (ls) => ({ html: `<p style="margin:0 0 16px">${ls.map(esc).join("<br>")}</p>`, text: ls.join("\n") });
+var textLink = (label, href) => ({
+  html: `<p style="margin:0 0 16px"><a href="${esc(href)}" style="color:${C.accent};font-weight:600;text-decoration:underline">${esc(label)}</a></p>`,
   text: `${label}: ${href}`
 });
-var lines = (ls) => ({ html: `<p style="margin:0 0 16px">${ls.map(esc).join("<br>")}</p>`, text: ls.join("\n") });
-function summary(o) {
-  const rows = o.shop_order_items.map((i) => [`${i.product_name} × ${i.quantity}`, money(i.unit_price_cents * i.quantity)]);
-  rows.push(["Subtotal", money(o.subtotal_cents)]);
-  if (o.discount_cents) rows.push(["Discount", `−${money(o.discount_cents)}`]);
-  rows.push([o.shipping_method ? `Shipping (${o.shipping_method})` : "Shipping", money(o.shipping_cents)]);
-  if (o.tax_cents) rows.push(["Tax", money(o.tax_cents)]);
-  rows.push(["Total paid", money(o.total_cents)]);
-  const last = rows.length - 1;
+var button = (label, href) => ({
+  html: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 18px"><tr><td bgcolor="${C.button}" style="border-radius:6px;background:${C.button}"><a href="${esc(href)}" style="display:inline-block;padding:13px 24px;font-family:${SANS};font-size:15px;font-weight:600;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:6px">${esc(label)}</a></td></tr></table>`,
+  text: `${label}: ${href}`
+});
+var panel = (bg, border, blocks) => ({
+  html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px;border-collapse:separate"><tr><td bgcolor="${bg}" style="background:${bg};border:1px solid ${border};border-radius:8px;padding:20px 20px 6px">${blocks.map((b) => b.html).join("")}</td></tr></table>`,
+  text: blocks.map((b) => b.text).join("\n")
+});
+var panelTitle = (text) => ({
+  html: `<p style="margin:0 0 8px;font-family:${SERIF};font-size:19px;line-height:1.3;color:${C.ink}">${esc(text)}</p>`,
+  text: `
+${text}`
+});
+function splitName(name) {
+  const m = name.match(/^(.*) \(([^()]+)\)$/);
+  return m ? [m[1], m[2]] : [name, null];
+}
+var THUMBS = /* @__PURE__ */ new Set(["calendar-26-week", "calendar-52-week"]);
+var thumb = (slug, siteUrl) => `${siteUrl}/email/${THUMBS.has(slug) ? slug : "calendar-26-week"}.jpg`;
+function itemRows(o, siteUrl, withPrices) {
+  const html = o.shop_order_items.map((i) => {
+    const [name, edition] = splitName(i.product_name);
+    return `<tr><td width="64" valign="top" style="padding:14px 14px 14px 0;border-bottom:1px solid ${C.rule}"><img src="${esc(thumb(i.product_slug, siteUrl))}" width="56" alt="" style="display:block;width:56px;height:auto;border:1px solid ${C.rule};border-radius:4px"></td><td valign="top" style="padding:14px 0;border-bottom:1px solid ${C.rule}"><p style="margin:0;font-weight:600;color:${C.ink}">${esc(name)}</p>` + (edition ? `<p style="margin:2px 0 0;font-size:14px;color:${C.soft}">${esc(edition)}</p>` : "") + `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ""} · includes the cleaning companion website</p></td>` + (withPrices ? `<td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid ${C.rule};white-space:nowrap;color:${C.ink}">${money(i.unit_price_cents * i.quantity)}</td>` : "") + `</tr>`;
+  }).join("");
   return {
-    html: '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 0 16px">' + rows.map(
-      ([a, b], i) => `<tr><td style="padding:8px 0;border-bottom:1px solid #c8c8c8${i === last ? ";font-weight:700" : ""}">${esc(a)}</td><td align="right" style="padding:8px 0;border-bottom:1px solid #c8c8c8${i === last ? ";font-weight:700" : ""}">${esc(b)}</td></tr>`
-    ).join("") + "</table>",
+    html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${C.rule}">${html}</table>`,
+    text: o.shop_order_items.map((i) => `${i.product_name} × ${i.quantity}${withPrices ? `: ${money(i.unit_price_cents * i.quantity)}` : ""}`).join("\n")
+  };
+}
+function totals(o) {
+  const rows = [["Subtotal", money(o.subtotal_cents)]];
+  if (o.discount_cents) rows.push([o.promotion_code ? `Discount (${o.promotion_code})` : "Discount", `−${money(o.discount_cents)}`]);
+  rows.push([o.shipping_method || "Shipping", o.shipping_cents ? money(o.shipping_cents) : "Free"]);
+  if (o.tax_cents) rows.push(["Sales tax", money(o.tax_cents)]);
+  rows.push(["Total paid", money(o.total_cents), true]);
+  return {
+    html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:6px 0 20px">` + rows.map(
+      ([a, b, strong]) => strong ? `<tr><td style="padding:12px 0 0;border-top:2px solid ${C.ink};font-family:${SERIF};font-size:18px;color:${C.ink}">${esc(a)}</td><td align="right" style="padding:12px 0 0;border-top:2px solid ${C.ink};font-family:${SERIF};font-size:18px;font-weight:700;color:${C.ink};white-space:nowrap">${esc(b)}</td></tr>` : `<tr><td style="padding:5px 0;font-size:14px;color:${C.soft}">${esc(a)}</td><td align="right" style="padding:5px 0;font-size:14px;color:${C.soft};white-space:nowrap">${esc(b)}</td></tr>`
+    ).join("") + `</table>`,
     text: rows.map(([a, b]) => `${a}: ${b}`).join("\n")
   };
 }
-function companionBlocks(siteUrl) {
-  return [
-    heading("Your cleaning companion"),
-    p(
-      "Your calendar comes with the free cleaning companion website. It shows today’s small Daily Reset and the one area of the house to focus on, matching the cleaning zone printed on your calendar."
-    ),
-    p("Scan the QR code printed on your calendar with your phone’s camera, or open it here. No account, no subscription, nothing to install."),
-    link("Open the cleaning companion", `${siteUrl}/app`)
-  ];
+function companionPanel(siteUrl) {
+  return panel(C.sage, C.sageRule, [
+    panelTitle("Your cleaning companion"),
+    p("Your calendar comes with the free cleaning companion website. Each day it shows a small Daily Reset and one area of the house to focus on, matching the cleaning zone printed on your calendar.", "font-size:15px"),
+    button("Open the cleaning companion", `${siteUrl}/app`),
+    small("Or scan the QR code printed on your calendar with your phone’s camera. No account, no subscription, nothing to install.")
+  ]);
 }
-function layout(siteUrl, title, blocks, supportEmail) {
-  const all = [...blocks, ...supportEmail ? [p(`Questions about your order? Reply to this email or write to ${supportEmail}.`)] : []];
-  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:Montserrat,Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#545454">
-<tr><td style="padding:0 0 24px;border-bottom:2px solid #545454"><img src="${esc(siteUrl)}/brand/omc-badge-160.png" width="64" height="64" alt="Organized Mom Collective"></td></tr>
-<tr><td style="padding:24px 0 0"><h1 style="margin:0 0 20px;font-size:24px;line-height:1.2;color:#545454">${esc(title)}</h1>
-${all.map((b) => b.html).join("\n")}
+function layout(b, o, opts) {
+  const test = o.livemode === false;
+  const site = opts.siteUrl;
+  const testBanner = test ? `<tr><td style="padding:0 0 14px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.rose}" style="background:${C.rose};border:1px dashed ${C.accent};border-radius:8px;padding:12px 16px;font-family:${SANS};font-size:13px;line-height:1.5;color:${C.ink}"><strong style="letter-spacing:0.12em;text-transform:uppercase">Test order</strong> · Stripe test mode. No real payment was taken.</td></tr></table></td></tr>` : "";
+  const support = opts.supportEmail ? `Questions about your order? Reply to this email or write to <a href="mailto:${esc(opts.supportEmail)}" style="color:${C.accent}">${esc(opts.supportEmail)}</a>.` : "Questions about your order? Reply to this email.";
+  const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(b.subject)}</title></head>
+<body style="margin:0;padding:0;background:${C.page};-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">${esc(b.preheader)}&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.page}" style="background:${C.page}"><tr><td align="center" style="padding:24px 12px 36px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
+<tr><td align="center" style="padding:4px 0 20px"><a href="${esc(site)}"><img src="${esc(site)}/email/omc-badge-144.png" width="72" height="72" alt="Organized Mom Collective" style="display:block;width:72px;height:72px;border:0"></a></td></tr>
+${testBanner}
+<tr><td bgcolor="${C.card}" style="background:${C.card};border:1px solid ${C.rule};border-radius:10px;padding:32px 24px 16px;font-family:${SANS};font-size:16px;line-height:1.6;color:${C.ink}">
+<p style="${eyebrowStyle}">${esc(b.eyebrow)}</p>
+<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:700;color:${C.ink}">${esc(b.title)}</h1>
+${b.blocks.map((x) => x.html).join("\n")}
 </td></tr>
-<tr><td style="padding:24px 0 0;border-top:1px solid #c8c8c8;font-size:12px;color:#666666">Organized Mom Collective · <a href="${esc(siteUrl)}" style="color:#666666">organizedmomcollective.com</a></td></tr>
+<tr><td align="center" style="padding:24px 12px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">
+<p style="margin:0 0 10px">${support}</p>
+<p style="margin:0">Organized Mom Collective · <a href="${esc(site)}" style="color:${C.muted}">organizedmomcollective.com</a></p>
+${test ? `<p style="margin:10px 0 0">This is a test email from a test-mode order.</p>` : ""}
+</td></tr>
 </table></td></tr></table></body></html>`;
-  const text = [title, "", ...all.map((b) => b.text), "", `Organized Mom Collective · ${siteUrl}`].join("\n");
-  return { html, text };
+  const text = [
+    ...test ? ["[TEST ORDER: Stripe test mode. No real payment was taken.]", ""] : [],
+    b.eyebrow.toUpperCase(),
+    b.title,
+    "",
+    ...b.blocks.map((x) => x.text),
+    "",
+    opts.supportEmail ? `Questions about your order? Reply to this email or write to ${opts.supportEmail}.` : "Questions about your order? Reply to this email.",
+    `Organized Mom Collective · ${site}`
+  ].join("\n");
+  return { subject: test ? `[Test] ${b.subject}` : b.subject, html, text };
 }
 function renderEmail(kind, o, opts) {
-  const msg = renderBody(kind, o, opts);
-  return o.livemode === false ? { ...msg, subject: `[Test] ${msg.subject}` } : msg;
+  return layout(renderBody(kind, o, opts), o, opts);
 }
 function renderBody(kind, o, opts) {
   const n = orderLabel(o);
   const hi = firstName(o);
   const ship = addressLines(o.shipping_name, o.shipping_address);
+  const shipTo = ship.length ? [heading("Shipping to"), lines(ship)] : [];
   switch (kind) {
-    case "confirmation": {
-      const m = layout(
-        opts.siteUrl,
-        hi ? `Thank you, ${hi}. Your order is confirmed.` : "Thank you. Your order is confirmed.",
-        [
-          p(`Order ${n} · paid ${money(o.total_cents)}. This email is your receipt.`),
-          summary(o),
-          ...ship.length ? [heading("Shipping to"), lines(ship)] : [],
-          heading("What happens next"),
-          p("We pack each order by hand. When yours ships, we’ll email you the tracking number."),
-          ...companionBlocks(opts.siteUrl)
-        ],
-        opts.supportEmail
-      );
-      return { ...m, subject: `Your Organized Mom Collective order ${n}` };
-    }
+    case "confirmation":
+      return {
+        subject: `Your Organized Mom Collective order ${n}`,
+        preheader: `Order ${n} · ${money(o.total_cents)} paid. We’ll email your tracking number when it ships.`,
+        eyebrow: `Order ${n} confirmed`,
+        title: hi ? `Thank you, ${hi}.` : "Thank you for your order.",
+        blocks: [
+          p("Your order is confirmed, and this email is your receipt. We pack each order by hand and will email you the tracking number as soon as it ships."),
+          heading("Your order"),
+          itemRows(o, opts.siteUrl, true),
+          totals(o),
+          ...shipTo,
+          companionPanel(opts.siteUrl)
+        ]
+      };
     case "shipped": {
       const url = trackingLink(o.carrier, o.tracking_number, o.tracking_url);
-      const m = layout(
-        opts.siteUrl,
-        `Your order ${n} is on its way`,
-        [
+      return {
+        subject: `Your order ${n} has shipped`,
+        preheader: `${o.carrier ?? "Your package"}${o.tracking_number ? ` · tracking ${o.tracking_number}` : ""}`,
+        eyebrow: `Order ${n} shipped`,
+        title: "Your order is on its way",
+        blocks: [
           p(hi ? `Good news, ${hi}: your calendar has shipped.` : "Good news: your calendar has shipped."),
-          lines([o.carrier ? `Carrier: ${o.carrier}` : "", o.tracking_number ? `Tracking number: ${o.tracking_number}` : ""].filter(Boolean)),
-          ...url ? [link("Track your package", url)] : [],
-          ...ship.length ? [heading("Shipping to"), lines(ship)] : [],
-          ...companionBlocks(opts.siteUrl)
-        ],
-        opts.supportEmail
-      );
-      return { ...m, subject: `Your order ${n} has shipped` };
+          panel(C.page, C.rule, [
+            ...o.carrier ? [p(`Carrier: ${o.carrier}`, "margin:0 0 4px;font-size:15px")] : [],
+            ...o.tracking_number ? [p(`Tracking number: ${o.tracking_number}`, "margin:0 0 14px;font-size:15px;font-weight:600;word-break:break-all")] : [],
+            ...url ? [button("Track your package", url)] : [small("Use the tracking number on the carrier’s website.")]
+          ]),
+          small("It can take a day for the first tracking update to appear."),
+          ...shipTo,
+          heading("In this package"),
+          itemRows(o, opts.siteUrl, false),
+          p(""),
+          companionPanel(opts.siteUrl)
+        ]
+      };
     }
     case "refund": {
       const full = o.payment_status === "refunded";
       const canceled = full && o.fulfillment_status === "canceled";
       const amount = opts.refundCents ?? o.refunded_cents;
-      const m = layout(
-        opts.siteUrl,
-        canceled ? `Your order ${n} has been canceled` : `We’ve refunded ${money(amount)} for order ${n}`,
-        [
-          p(
-            canceled ? `Your order has been canceled and refunded in full: ${money(o.refunded_cents)} back to your original payment method.` : `${money(amount)} is on its way back to your original payment method.${full ? "" : ` Total refunded so far: ${money(o.refunded_cents)}.`}`
-          ),
+      return {
+        subject: canceled ? `Order ${n} canceled and refunded` : `Refund for order ${n}`,
+        preheader: `${money(canceled ? o.refunded_cents : amount)} is on its way back to your original payment method.`,
+        eyebrow: canceled ? `Order ${n} canceled` : `Order ${n} refund`,
+        title: canceled ? "Your order has been canceled" : "Your refund is on its way",
+        blocks: [
+          ...canceled ? [p("Your order has been canceled and won’t be shipped. You’ve been refunded in full.")] : [],
+          panel(C.page, C.rule, [
+            p("Refunded", `margin:0;font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:${C.muted}`),
+            p(money(canceled ? o.refunded_cents : amount), `margin:2px 0 6px;font-family:${SERIF};font-size:30px;line-height:1.2;color:${C.ink}`),
+            p(
+              `To your original payment method.${!canceled && o.refunded_cents !== amount ? ` Total refunded on this order: ${money(o.refunded_cents)} of ${money(o.total_cents)}.` : ""}`,
+              `font-size:14px;color:${C.soft}`
+            )
+          ]),
           p("Refunds usually take 5–10 business days to appear, depending on your bank.")
-        ],
-        opts.supportEmail
-      );
-      return { ...m, subject: canceled ? `Order ${n} canceled and refunded` : `Refund for order ${n}` };
+        ]
+      };
     }
-    case "access": {
-      const m = layout(
-        opts.siteUrl,
-        "How to use your cleaning companion",
-        [
-          p(hi ? `Hi ${hi}, here’s how to open the cleaning companion that comes with your calendar.` : "Here’s how to open the cleaning companion that comes with your calendar."),
-          link("Open the cleaning companion", `${opts.siteUrl}/app`),
-          p("Or scan the QR code printed on your calendar with your phone’s camera. It opens on Today: a small Daily Reset and one area of the house to focus on."),
-          p("It’s free with your calendar. No account, no subscription, nothing to install. Your checkmarks are saved in your phone’s browser, and you can add it to your Home Screen from Settings."),
-          link("See how it works", `${opts.siteUrl}/companion`)
-        ],
-        opts.supportEmail
-      );
-      return { ...m, subject: "Your cleaning companion: how to get started" };
-    }
+    case "access":
+      return {
+        subject: "Your cleaning companion: how to get started",
+        preheader: "Open it from this email or scan the QR code on your calendar. No account, no subscription.",
+        eyebrow: "Your cleaning companion",
+        title: "How to use your cleaning companion",
+        blocks: [
+          p(hi ? `Hi ${hi}, here’s how to open the cleaning companion website that comes with your calendar.` : "Here’s how to open the cleaning companion website that comes with your calendar."),
+          button("Open the cleaning companion", `${opts.siteUrl}/app`),
+          lines([
+            "1. Open it with the button above, or scan the QR code printed on your calendar with your phone’s camera.",
+            "2. It opens on Today: a small Daily Reset and one area of the house to focus on.",
+            "3. Check things off as you go. Your checkmarks are saved in your phone’s browser.",
+            "4. To keep it handy, add it to your Home Screen from Settings."
+          ]),
+          p("It’s free with your calendar. No account, no subscription, nothing to install."),
+          textLink("See how it works", `${opts.siteUrl}/companion`)
+        ]
+      };
   }
 }
 async function sha256Hex(text) {

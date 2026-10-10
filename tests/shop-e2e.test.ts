@@ -450,7 +450,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(mail).toHaveLength(1);
       expect(mail[0].subject).toBe(`[Test] Your Organized Mom Collective order #${o.order_number}`);
       expect(mail[0].text).toContain('Total paid: $67.20');
-      expect(mail[0].text).toContain('Discount: −$6.80');
+      expect(mail[0].text).toContain('Discount (WELCOME10): −$6.80');
       expect(mail[0].text).toContain(`${SITE}/app`);
       expect(mail[0].text).toContain('No account, no subscription');
       expect(mail[0].reply_to).toBe('hello@organizedmomcollective.com');
