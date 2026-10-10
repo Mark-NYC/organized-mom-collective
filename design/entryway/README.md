@@ -1,8 +1,19 @@
-# Entryway scene: photos needed
+# Entryway scene
 
-The homepage scene (`src/components/site/EntrywayScene.astro`, section "Life gets busy. Stay centered.") is built and tested but stays hidden until these real photos exist. No stand-ins: no illustrations, no AI-generated images, no mock calendar.
+The homepage scene (`src/components/site/EntrywayScene.astro`, section "Life gets busy. Stay centered.") stays hidden unless `background` and every item in `src/data/entryway-scene.ts` exist.
 
-## What to shoot
+## Current layers (October 2026)
+
+Made by `prep.py` from two supplied entryway renders in `source/` (`empty.png`, `full.png`), not a photo shoot:
+
+- The calendar in both renders was a re-drawn imitation (garbled text, wrong header and hole), so `background.png` is `source/empty.png` with that calendar painted out and **the real artwork** (`public/images/site/calendar-cutout-960.webp`) placed in its spot, only scaled, lit to the wall and given a shadow and nail.
+- The two renders aren't the same frame (calendar, lamp, table and basket shift), so each item is cut out of `source/full.png` and placed on the empty frame with a soft contact shadow, not cross-faded.
+- The water bottle from `full.png` is left out (murky cutout, would sit into the lamp). The lunchbox is partly hidden behind the papers in `full.png`, so it fades in with them.
+- 1254 px source, so the scene is built at 720 and 1080 px (enough for the 544 px desktop size at 2×).
+
+Replacing them with a real locked-off shoot (below) is still the better version.
+
+## Reshooting for real: what to shoot
 
 One locked-off camera (tripod, fixed focal length, manual exposure and white balance, no movement between frames), one entryway, natural warm light.
 
@@ -26,7 +37,7 @@ Shoot each prop in place on the same set without moving the camera, then mask it
 | `items/ballet-bag.png` | Ballet / dance bag | Tabletop, left end | 4–6 s |
 | `items/ballet-shoes.png` | Pair of ballet shoes | Floor or tabletop, near the bag | 4–6 s |
 | `items/work-tools.png` | Work things (laptop bag, badge, tool pouch: whatever fits the family) | Tabletop, right end | 6–8 s |
-| `items/lunchbox.png` | Lunchbox | Tabletop, left of center | 6–8 s |
+| `items/lunchbox.png` | Lunchbox | Tabletop, left of center, behind the papers | 8–10 s |
 | `items/keys.png` | House / car keys | Tabletop, center front | 6–8 s |
 | `items/grocery-bag.png` | Reusable grocery bag with a few groceries | Floor, far right | 8–10 s |
 | `items/school-papers.png` | A small stack of school papers / permission slip | Tabletop, center | 8–10 s |
@@ -36,6 +47,7 @@ Ids, order and timing are in `src/data/entryway-scene.ts`; rename a file there i
 ## Then
 
 ```sh
+# drop the files in this folder (prep.py is only for the current render-based layers)
 python3 scripts/entryway-scene.py    # writes public/images/site/entryway/*.webp + src/data/entryway-scene.json
 npm run verify
 ```

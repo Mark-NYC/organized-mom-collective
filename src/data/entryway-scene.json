@@ -1,4 +1,62 @@
 {
-  "widths": [],
-  "items": {}
+  "widths": [
+    720,
+    1080
+  ],
+  "items": {
+    "backpack": {
+      "left": 0.18501,
+      "top": 0.69378,
+      "width": 0.19059,
+      "height": 0.26794
+    },
+    "ballet-bag": {
+      "left": 0.31978,
+      "top": 0.73365,
+      "width": 0.21292,
+      "height": 0.21053
+    },
+    "ballet-shoes": {
+      "left": 0.26396,
+      "top": 0.8453,
+      "width": 0.20335,
+      "height": 0.12041
+    },
+    "grocery-bag": {
+      "left": 0.82217,
+      "top": 0.69617,
+      "width": 0.16826,
+      "height": 0.26156
+    },
+    "keys": {
+      "left": 0.35486,
+      "top": 0.57018,
+      "width": 0.08533,
+      "height": 0.06061
+    },
+    "lunchbox": {
+      "left": 0.55981,
+      "top": 0.49362,
+      "width": 0.10845,
+      "height": 0.11483
+    },
+    "school-papers": {
+      "left": 0.39713,
+      "top": 0.54785,
+      "width": 0.24322,
+      "height": 0.08692
+    },
+    "soccer-ball": {
+      "left": 0.50638,
+      "top": 0.80223,
+      "width": 0.11882,
+      "height": 0.126
+    },
+    "work-tools": {
+      "left": 0.6882,
+      "top": 0.80542,
+      "width": 0.20494,
+      "height": 0.16826
+    }
+  }
 }
