@@ -41,8 +41,35 @@ export interface ShopProduct {
   weeks: number | null;
   images: { src: string; alt: string }[];
   includes_companion: boolean;
+  /** Shipping units per calendar (the 52-week, two sets, is 2). */
+  ship_units: number;
   available: boolean;
   max_quantity: number;
+}
+
+/** A shipping rate's pricing rules, as the catalog shows them. */
+export interface ShippingRule {
+  label: string;
+  amount_cents: number;
+  test_only: boolean;
+  per_extra_unit_cents: number;
+  min_units: number;
+  max_units: number | null;
+  free_over_cents: number | null;
+}
+
+/**
+ * The rates offered for a cart, priced: the first unit's price plus each extra unit, only rates
+ * whose units range covers the cart, free at or over the threshold (subtotal before discount
+ * codes). Mirrors shop_shipping_quote in the database, which decides what's actually charged.
+ */
+export function shippingQuote(rules: ShippingRule[], units: number, subtotalCents: number, testMode: boolean): { label: string; amount_cents: number }[] {
+  return rules
+    .filter((r) => (testMode || !r.test_only) && units >= (r.min_units ?? 1) && (r.max_units == null || units <= r.max_units))
+    .map((r) => ({
+      label: r.label,
+      amount_cents: r.free_over_cents != null && subtotalCents >= r.free_over_cents ? 0 : r.amount_cents + (r.per_extra_unit_cents ?? 0) * Math.max(units - 1, 0),
+    }));
 }
 
 export interface Catalog {
@@ -50,7 +77,7 @@ export interface Catalog {
   tax_mode: 'off' | 'automatic' | 'manual';
   products: ShopProduct[];
   /** test_only rates are placeholders, offered only with a Stripe test key. */
-  shipping_rates: { label: string; amount_cents: number; test_only: boolean }[];
+  shipping_rates: ShippingRule[];
 }
 
 async function rpc<T>(name: string, body: object): Promise<T> {
@@ -91,6 +118,8 @@ export type CheckoutError =
   | 'too_many'
   | 'invalid_cart'
   | 'shipping_not_configured'
+  | 'shipping_unavailable'
+  | 'tax_not_configured'
   | 'payment_unavailable'
   | 'network';
 
@@ -108,7 +137,9 @@ export async function startCheckout(items: { slug: string; quantity: number }[])
     const res = await callCheckout({ action: 'create', items });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.client_secret) return data;
-    const known: CheckoutError[] = ['checkout_closed', 'rate_limited', 'sold_out', 'unavailable', 'too_many', 'invalid_cart', 'shipping_not_configured'];
+    const known: CheckoutError[] = [
+      'checkout_closed', 'rate_limited', 'sold_out', 'unavailable', 'too_many', 'invalid_cart', 'shipping_not_configured', 'shipping_unavailable', 'tax_not_configured',
+    ];
     return { error: known.includes(data.error) ? data.error : 'payment_unavailable' };
   } catch {
     return { error: 'network' };
@@ -238,12 +269,15 @@ export interface ProductRow {
   active: boolean;
   stock: number;
   max_per_order: number;
+  ship_units: number;
   sort: number;
 }
 
 export interface SettingsRow {
   checkout_mode: 'off' | 'preview' | 'live';
   tax_mode: 'off' | 'automatic' | 'manual';
+  /** The tax setting has been saved on purpose (real-money checkout needs it). */
+  tax_reviewed: boolean;
   product_tax_code: string;
   checkout_minutes: number;
   max_checkouts_per_hour: number;
@@ -258,6 +292,10 @@ export interface ShippingRateRow {
   active: boolean;
   test_only: boolean;
   sort: number;
+  per_extra_unit_cents: number;
+  min_units: number;
+  max_units: number | null;
+  free_over_cents: number | null;
 }
 
 export interface OrderEvent {
@@ -275,8 +313,44 @@ export interface EmailLogRow {
   kind: string;
   to_email: string;
   status: 'pending' | 'sent' | 'failed' | 'skipped';
+  provider_id: string | null;
   error: string | null;
+  attempts: number;
   updated_at: string;
+}
+
+/** What each logged email status means. Only "sent" means the provider accepted it. */
+export const EMAIL_STATUS_LABELS: Record<EmailLogRow['status'], string> = {
+  sent: 'Sent',
+  skipped: 'Not sent: no email provider configured',
+  failed: 'Failed: not sent',
+  pending: 'Sending (or stuck; it can be retried after 10 minutes)',
+};
+
+/** What shop-admin reports for one email attempt. */
+export type EmailOutcome = 'sent' | 'skipped' | 'failed' | 'duplicate' | 'no_email';
+
+const EMAIL_KIND_LABELS: Record<string, string> = { confirmation: 'Receipt', shipped: 'Shipping email', refund: 'Refund email', access: 'Companion instructions' };
+
+/** One sentence on what really happened to an email, from the provider's answer. */
+export function emailOutcomeText(kind: string, outcome: EmailOutcome | string | null | undefined): string {
+  const what = EMAIL_KIND_LABELS[kind] ?? 'Email';
+  switch (outcome) {
+    case 'sent':
+      return `${what} sent to the customer.`;
+    case 'skipped':
+      return `${what} NOT sent: no email provider is configured (RESEND_API_KEY).`;
+    case 'failed':
+      return `${what} FAILED to send. Check Emails below and retry.`;
+    case 'duplicate':
+      return `${what} not sent again: it was already sent or is being sent.`;
+    case 'pending':
+      return `${what} is still sending.`;
+    case 'no_email':
+      return `${what} not sent: the order has no customer email.`;
+    default:
+      return `${what}: no email sent.`;
+  }
 }
 
 export interface InventoryLogRow {
@@ -310,7 +384,7 @@ export async function loadShopData(token: string) {
     select<ProductRow>(token, 'shop_products', 'select=*&order=sort.asc'),
     select<SettingsRow>(token, 'shop_settings', 'select=*'),
     select<ShippingRateRow>(token, 'shop_shipping_rates', 'select=*&order=sort.asc,amount_cents.asc'),
-    select<EmailLogRow>(token, 'shop_email_log', 'select=id,order_id,kind,to_email,status,error,updated_at&order=id.asc'),
+    select<EmailLogRow>(token, 'shop_email_log', 'select=id,order_id,kind,to_email,status,provider_id,error,attempts,updated_at&order=id.asc'),
   ]);
   return { orders, products, settings: settings[0] ?? null, rates, emails };
 }
@@ -350,6 +424,10 @@ const ADMIN_ERRORS: Record<string, string> = {
   not_refunded: 'This order hasn’t been refunded.',
   not_paid: 'This order isn’t paid.',
   refund_first: 'Refund the order before returning its units to stock.',
+  restock_needs_full_refund: 'Units can go back to stock with a full refund only. For a partial refund, refund first, then return the units that are back on your shelf.',
+  manual_tax_disabled: 'Manual state rates are switched off: they can’t handle local rates or tax on shipping. Use Stripe Tax, or don’t collect tax.',
+  request_id_required: 'Reload the page and try again.',
+  invalid_status: 'Pick a shipping status.',
 };
 const adminErrorText = (code: string) => ADMIN_ERRORS[code] ?? `Something went wrong (${code}).`;
 
@@ -550,9 +628,15 @@ export function describeEvent(e: Pick<OrderEvent, 'kind' | 'detail'>): string {
     case 'refunded':
       return `Refunded ${money(Number(d.amount_cents ?? 0))} (total ${money(Number(d.refunded_total_cents ?? 0))})`;
     case 'restocked':
-      return `${s('units')} unit(s) returned to stock`;
-    case 'fulfillment':
-      return `Marked ${FULFILLMENT_LABELS[s('to') as OrderRow['fulfillment_status']] ?? s('to')}${s('to') === 'shipped' && s('tracking_number') ? ` · ${s('carrier')} ${s('tracking_number')}` : ''}`;
+      return `${s('units')} unit(s) returned to stock${s('item') ? ` (${s('item')})` : ''}`;
+    case 'fulfillment': {
+      const to = FULFILLMENT_LABELS[s('to') as OrderRow['fulfillment_status']] ?? s('to');
+      const tracking = s('tracking_number') ? ` · ${s('carrier')} ${s('tracking_number')}` : '';
+      if (s('from') === s('to')) {
+        return `Tracking updated${s('previous_tracking_number') ? ` from ${s('previous_tracking_number')}` : ''}${tracking}`;
+      }
+      return `Marked ${to}${(s('to') === 'shipped' || s('tracking_changed') === 'true') && tracking ? tracking : ''}`;
+    }
     case 'email_sent':
       return `Email sent: ${s('kind')}`;
     case 'email_failed':
@@ -588,6 +672,9 @@ export interface ShopStatus {
   reply_to_set: boolean;
   checkout_mode: SettingsRow['checkout_mode'] | null;
   tax_mode: SettingsRow['tax_mode'] | null;
+  tax_reviewed: boolean;
+  /** Stripe Tax as Stripe reports it (only while Stripe Tax is the setting). */
+  stripe_tax: { status: string; registrations: string[]; error?: string } | null;
   live_shipping_rates: number;
   test_shipping_rates: number;
   public_checkout_open: boolean;

@@ -44,10 +44,14 @@ function createResendMailer(opts) {
   const fetchFn = opts.fetch ?? fetch;
   return {
     configured: Boolean(opts.apiKey),
-    async send(to, msg) {
+    async send(to, msg, idempotencyKey) {
       const res = await fetchFn("https://api.resend.com/emails", {
         method: "POST",
-        headers: { Authorization: `Bearer ${opts.apiKey}`, "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${opts.apiKey}`,
+          "Content-Type": "application/json",
+          ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
+        },
         body: JSON.stringify({ from: opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
       });
       const data = await res.json().catch(() => ({}));
@@ -257,7 +261,10 @@ function checkoutError(message) {
     case "checkout_closed":
       return { status: 403, code };
     case "shipping_not_configured":
+    case "tax_not_configured":
       return { status: 503, code };
+    case "shipping_unavailable":
+      return { status: 409, code };
     case "rate_limited":
       return { status: 429, code };
     case "sold_out":

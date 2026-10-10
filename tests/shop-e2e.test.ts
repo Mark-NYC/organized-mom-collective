@@ -138,7 +138,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
     clock = null;
     run(`update shop_products set stock = 25, active = true, max_per_order = 5 where slug = 'calendar-26-week';
          update shop_products set stock = 0, active = false where slug = 'calendar-52-week';
-         update shop_settings set checkout_mode = 'live', tax_mode = 'off', checkout_minutes = 30, max_checkouts_per_hour = 1000;
+         update shop_settings set checkout_mode = 'live', tax_mode = 'off', tax_reviewed = false, checkout_minutes = 30, max_checkouts_per_hour = 1000;
          update shop_orders set reservation = 'released' where reservation = 'held';
          delete from shop_throttle;`);
   });
@@ -204,6 +204,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       const liveDeps = build({ STRIPE_SECRET_KEY: 'sk_live_fake' });
       const live = createCheckoutHandler(liveDeps);
       const go = () => post(live, { action: 'create', items: [{ slug: 'calendar-26-week', quantity: 1 }] });
+      run(`update shop_settings set tax_reviewed = true`);
       const shut = await go();
       expect(shut.status).toBe(503);
       expect(await shut.json()).toEqual({ error: 'shipping_not_configured' });
@@ -223,6 +224,38 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       run(`delete from shop_shipping_rates where label = 'USPS Ground Advantage'`);
     });
 
+    it('real money needs a deliberate tax decision, and never runs with manual state rates', async () => {
+      run(`insert into shop_shipping_rates (label, amount_cents, sort) values ('Real rate', 800, 2)`);
+      const live = createCheckoutHandler(build({ STRIPE_SECRET_KEY: 'sk_live_fake' }));
+      const go = () => post(live, { action: 'create', items: [{ slug: 'calendar-26-week', quantity: 1 }] });
+      // Never saved: closed, nothing held, Stripe never called.
+      const r = await go();
+      expect(r.status).toBe(503);
+      expect(await r.json()).toEqual({ error: 'tax_not_configured' });
+      expect(stock()).toBe(25);
+      expect(stripe.requests).toHaveLength(0);
+      // Saving the setting (even "off") in the dashboard is the deliberate decision.
+      expect((await adminCall({ action: 'settings', fields: { tax_mode: 'manual' } })).body).toEqual({ error: 'manual_tax_disabled' });
+      expect((await adminCall({ action: 'settings', fields: { tax_mode: 'off' } })).status).toBe(200);
+      expect(one(`select tax_reviewed from shop_settings`)).toEqual({ tax_reviewed: true });
+      expect((await go()).status).toBe(200);
+      // Manual mode set behind the dashboard's back still can't take real money.
+      run(`update shop_settings set tax_mode = 'manual'`);
+      expect((await go()).status).toBe(503);
+      // Test mode is unaffected by the tax gate.
+      run(`update shop_settings set tax_mode = 'off', tax_reviewed = false`);
+      expect((await create()).status).toBe(200);
+      run(`delete from shop_shipping_rates where label = 'Real rate'`);
+    });
+
+    it('reports Stripe Tax setup and registrations when Stripe Tax is on', async () => {
+      run(`update shop_settings set tax_mode = 'automatic', tax_reviewed = true`);
+      stripe.taxStatus = 'active';
+      stripe.taxRegistrations = ['NY'];
+      const r = await adminCall({ action: 'status' });
+      expect(r.body).toMatchObject({ tax_mode: 'automatic', tax_reviewed: true, stripe_tax: { status: 'active', registrations: ['US-NY'] } });
+    });
+
     it('the readiness report shows what is and isn’t switched on, without secrets', async () => {
       const r = await adminCall({ action: 'status' });
       expect(r.body).toMatchObject({
@@ -232,6 +265,8 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
         checkout_mode: 'live',
         live_shipping_rates: 0,
         test_shipping_rates: 1,
+        tax_reviewed: false,
+        stripe_tax: null,
         public_checkout_open: true,
         real_payments_possible: false,
       });
@@ -315,6 +350,37 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(Number(p.expires_at) - before).toBeLessThan(1810);
       expect(stripe.requests[0].idempotencyKey).toMatch(/^checkout:/);
       expect(r.body.client_secret).toMatch(/_secret_/);
+    });
+
+    it('shipping is quoted for the cart: per extra unit, units ranges, the 52-week counts as two, free over a threshold', async () => {
+      run(`update shop_shipping_rates set active = false where test_only;
+           insert into shop_shipping_rates (label, amount_cents, per_extra_unit_cents, min_units, max_units, sort)
+             values ('One calendar', 700, 0, 1, 1, 1), ('Two or more', 900, 150, 2, null, 2);
+           update shop_products set active = true, stock = 10 where slug = 'calendar-52-week'`);
+      const quote = async (items: { slug: string; quantity: number }[]) => {
+        const r = await create(items);
+        if (r.status !== 200) return r.body;
+        return (stripe.sessions.get(r.body.session_id)!.params.shipping_options as any[]).map((o) => [o.shipping_rate_data.display_name, Number(o.shipping_rate_data.fixed_amount.amount)]);
+      };
+      expect(await quote([{ slug: 'calendar-26-week', quantity: 1 }])).toEqual([['One calendar', 700]]);
+      expect(await quote([{ slug: 'calendar-26-week', quantity: 3 }])).toEqual([['Two or more', 900 + 150 * 2]]);
+      // One 52-week calendar ships as two sets: two shipping units.
+      expect(await quote([{ slug: 'calendar-52-week', quantity: 1 }])).toEqual([['Two or more', 1050]]);
+      expect(await quote([{ slug: 'calendar-26-week', quantity: 1 }, { slug: 'calendar-52-week', quantity: 1 }])).toEqual([['Two or more', 1200]]);
+      // The catalog carries the same rules for the page's estimate.
+      const cat = await (await rest('/rpc/shop_catalog', 'anon', undefined, { method: 'POST', body: '{}' })).json();
+      expect(cat.products.find((p: any) => p.slug === 'calendar-52-week').ship_units).toBe(2);
+      expect(cat.shipping_rates.find((r: any) => r.label === 'Two or more')).toMatchObject({ amount_cents: 900, per_extra_unit_cents: 150, min_units: 2, max_units: null });
+      // Free shipping at or above the subtotal threshold (before discount codes).
+      run(`update shop_shipping_rates set free_over_cents = 10000 where label = 'Two or more'`);
+      expect(await quote([{ slug: 'calendar-26-week', quantity: 2 }])).toEqual([['Two or more', 1050]]); // $68
+      expect(await quote([{ slug: 'calendar-26-week', quantity: 3 }])).toEqual([['Two or more', 0]]); // $102
+      // No rate covers the cart: refused, and nothing stays held.
+      run(`update shop_shipping_rates set max_units = 2 where label = 'Two or more'`);
+      const before = stock();
+      expect(await quote([{ slug: 'calendar-26-week', quantity: 3 }])).toEqual({ error: 'shipping_unavailable' });
+      expect(stock()).toBe(before);
+      run(`delete from shop_shipping_rates where not test_only; update shop_shipping_rates set active = true where test_only`);
     });
 
     it('rate-limits checkouts per connection', async () => {
@@ -625,6 +691,40 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect((await adminCall({ action: 'refund', order_id: o.id, request_id: 'req-again-3' })).status).toBe(409);
     });
 
+    it('refunding never touches stock unless asked; a chosen number of units can be returned, once', async () => {
+      const o = await buy(3);
+      expect(stock()).toBe(22);
+      const r = await adminCall({ action: 'refund', order_id: o.id, amount_cents: 3400, request_id: 'req-one-unit' });
+      expect(r.body).toMatchObject({ ok: true, restocked: 0, email: 'sent' });
+      expect(stock()).toBe(22);
+      // Restocking together with the refund needs a full refund.
+      expect((await adminCall({ action: 'refund', order_id: o.id, amount_cents: 100, restock: true, request_id: 'req-bad-restock' })).body).toEqual({
+        error: 'restock_needs_full_refund',
+      });
+      expect(stripe.refunds).toHaveLength(1);
+      const item = one<{ id: string }>(`select id from shop_order_items where order_id = '${o.id}'`).id;
+      expect((await adminCall({ action: 'restock', order_id: o.id, item_id: item, units: 1 })).body).toEqual({ ok: true, restocked: 1 });
+      expect(stock()).toBe(23);
+      // Asking for more than are left only returns what's left; then nothing.
+      expect((await adminCall({ action: 'restock', order_id: o.id, item_id: item, units: 5 })).body).toEqual({ ok: true, restocked: 2 });
+      expect((await adminCall({ action: 'restock', order_id: o.id, item_id: item, units: 1 })).body).toEqual({ ok: true, restocked: 0 });
+      expect((await adminCall({ action: 'restock', order_id: o.id })).body).toEqual({ ok: true, restocked: 0 });
+      expect(stock()).toBe(25);
+      expect(one(`select restocked from shop_order_items where id = '${item}'`)).toEqual({ restocked: 3 });
+      expect(all(`select delta from shop_inventory_log where order_id = '${o.id}' order by id`)).toEqual([{ delta: 1 }, { delta: 2 }]);
+      // Concurrent restocks of the same units move them once.
+      const o2 = await buy(2);
+      await adminCall({ action: 'refund', order_id: o2.id, request_id: 'req-full-o2' });
+      const item2 = one<{ id: string }>(`select id from shop_order_items where order_id = '${o2.id}'`).id;
+      const both = await Promise.all([1, 2, 3].map(() => adminCall({ action: 'restock', order_id: o2.id, item_id: item2, units: 2 })));
+      expect(both.reduce((n, x) => n + Number(x.body.restocked), 0)).toBe(2);
+      expect(stock()).toBe(25);
+      // A paid order that wasn't refunded can't be restocked.
+      const o3 = await buy(1);
+      const item3 = one<{ id: string }>(`select id from shop_order_items where order_id = '${o3.id}'`).id;
+      expect((await adminCall({ action: 'restock', order_id: o3.id, item_id: item3, units: 1 })).body).toEqual({ error: 'refund_first' });
+    });
+
     it('a refund made in the Stripe dashboard arrives by webhook', async () => {
       const o = await buy(1);
       await sendEvent('charge.refunded', { id: 'ch_x', payment_intent: o.stripe_payment_intent_id, amount_refunded: o.total_cents });
@@ -656,14 +756,11 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect((await adminCall({ action: 'fulfillment', order_id: o.id, status: 'packing' })).status).toBe(200);
       expect((await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped' })).body).toEqual({ error: 'carrier_required' });
       const r = await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS', tracking_number: '9400111899223344556677', notify: true });
-      expect(r.body).toEqual({ ok: true, email: 'sent' });
+      expect(r.body).toEqual({ ok: true, changed: true, status_changed: true, tracking_changed: true, email: 'sent' });
       const mail = inbox.to('ship@example.com').at(-1)!;
       expect(mail.subject).toBe(`[Test] Your order #${o.order_number} has shipped`);
       expect(mail.text).toContain('Tracking number: 9400111899223344556677');
       expect(mail.text).toContain('https://tools.usps.com/go/TrackConfirmAction?tLabels=9400111899223344556677');
-      // Saving again with the same tracking number doesn't email twice.
-      await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS', tracking_number: '9400111899223344556677', notify: true });
-      expect(inbox.to('ship@example.com')).toHaveLength(2);
       await adminCall({ action: 'fulfillment', order_id: o.id, status: 'delivered' });
       expect(one(`select fulfillment_status, shipped_at is not null shipped, delivered_at is not null delivered from shop_orders where id = '${o.id}'`)).toEqual({
         fulfillment_status: 'delivered',
@@ -671,6 +768,32 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
         delivered: true,
       });
       expect((await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', tracking_url: 'javascript:alert(1)' })).status).toBe(400);
+      expect((await adminCall({ action: 'fulfillment', order_id: o.id })).body).toEqual({ error: 'invalid_status' });
+    });
+
+    it('saving the same shipment again changes nothing: no timeline entry, no email', async () => {
+      const o = await buy(1, { email: 'repeat@example.com' });
+      const ship = (tracking: string) => adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS', tracking_number: tracking, notify: true });
+      const fulfillmentEvents = () =>
+        all<{ detail: Record<string, unknown> }>(`select detail from shop_order_events where order_id = '${o.id}' and kind = 'fulfillment' order by id`);
+      expect((await ship('9400100000000000000001')).body).toMatchObject({ changed: true, email: 'sent' });
+      for (let i = 0; i < 3; i++) {
+        expect((await ship('9400100000000000000001')).body).toEqual({ ok: true, changed: false, status_changed: false, tracking_changed: false, email: null });
+      }
+      expect(fulfillmentEvents()).toHaveLength(1);
+      expect(inbox.to('repeat@example.com')).toHaveLength(2); // receipt + one shipping email
+
+      // A corrected tracking number is a change: recorded with the old number, and emailed.
+      expect((await ship('9400100000000000000002')).body).toMatchObject({ changed: true, status_changed: false, tracking_changed: true, email: 'sent' });
+      expect(fulfillmentEvents()).toHaveLength(2);
+      expect(fulfillmentEvents()[1].detail).toMatchObject({ tracking_number: '9400100000000000000002', previous_tracking_number: '9400100000000000000001' });
+      expect(inbox.to('repeat@example.com').at(-1)!.text).toContain('9400100000000000000002');
+      expect(inbox.to('repeat@example.com')).toHaveLength(3);
+
+      // The deliberate resend still works, once per click.
+      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'shipped', request_id: 'resend-ship-1' })).body).toEqual({ ok: true, email: 'sent' });
+      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'shipped', request_id: 'resend-ship-1' })).body).toEqual({ ok: false, email: 'duplicate' });
+      expect(inbox.to('repeat@example.com')).toHaveLength(4);
     });
 
     it('unpaid orders can’t be fulfilled', async () => {
@@ -684,22 +807,50 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       const o = await buy(1, { email: 'outage@example.com' });
       expect(one(`select status, error from shop_email_log where order_id = '${o.id}'`)).toEqual({ status: 'failed', error: 'Service unavailable' });
       expect(o.payment_status).toBe('paid'); // the payment isn't affected
+      // Retrying a failed email retries that same email (no request id needed).
       const r = await adminCall({ action: 'resend_email', order_id: o.id, kind: 'confirmation' });
       expect(r.body).toEqual({ ok: true, email: 'sent' });
       expect(inbox.to('outage@example.com')).toHaveLength(1);
-      const a = await adminCall({ action: 'resend_email', order_id: o.id, kind: 'access' });
+      expect(all(`select status from shop_email_log where order_id = '${o.id}'`)).toEqual([{ status: 'sent' }]);
+      // Resending one that was sent is a new email and needs the dashboard's request id.
+      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'confirmation' })).body).toEqual({ error: 'request_id_required' });
+      const a = await adminCall({ action: 'resend_email', order_id: o.id, kind: 'access', request_id: 'access-req-1' });
       expect(a.body).toEqual({ ok: true, email: 'sent' });
       expect(inbox.to('outage@example.com')[1].subject).toBe('[Test] Your cleaning companion: how to get started');
-      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'shipped' })).status).toBe(409);
+      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'shipped', request_id: 'ship-req-1' })).status).toBe(409);
     });
 
-    it('without an email provider, emails are logged as skipped and checkout still works', async () => {
+    it('a send that timed out but actually went out is not sent twice on retry', async () => {
+      inbox.loseNextResponse = true;
+      const o = await buy(1, { email: 'timeout@example.com' });
+      expect(one(`select status from shop_email_log where order_id = '${o.id}'`)).toEqual({ status: 'failed' });
+      expect(inbox.to('timeout@example.com')).toHaveLength(1); // it did go out
+      const r = await adminCall({ action: 'resend_email', order_id: o.id, kind: 'confirmation' });
+      expect(r.body).toEqual({ ok: true, email: 'sent' });
+      expect(inbox.to('timeout@example.com')).toHaveLength(1); // Resend's idempotency key: no second copy
+    });
+
+    it('a retry while the same email is mid-send does nothing', async () => {
+      const o = await buy(1, { email: 'midsend@example.com' });
+      run(`update shop_email_log set status = 'pending', updated_at = now() where order_id = '${o.id}'`);
+      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'confirmation', request_id: 'mid-req-1' })).body).toEqual({ ok: false, email: 'duplicate' });
+      expect(inbox.to('midsend@example.com')).toHaveLength(1);
+    });
+
+    it('without an email provider, emails are logged as skipped and the dashboard is told so', async () => {
       deps = build({ RESEND_API_KEY: '' });
       webhook = createWebhookHandler(deps);
+      admin = createAdminHandler(deps);
       const o = await buy(1);
       expect(o.payment_status).toBe('paid');
       expect(inbox.sent).toHaveLength(0);
       expect(one(`select status from shop_email_log where order_id = '${o.id}'`)).toEqual({ status: 'skipped' });
+      const ship = await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS', tracking_number: '9400', notify: true });
+      expect(ship.body).toMatchObject({ changed: true, email: 'skipped' });
+      expect((await adminCall({ action: 'resend_email', order_id: o.id, kind: 'confirmation' })).body).toEqual({ ok: false, email: 'skipped' });
+      const refund = await adminCall({ action: 'refund', order_id: o.id, amount_cents: 100, request_id: 'skip-refund-1' });
+      expect(refund.body).toMatchObject({ ok: true, email: 'skipped', restocked: 0 });
+      expect(inbox.sent).toHaveLength(0);
     });
 
     it('escapes customer-supplied text in emails', async () => {
@@ -831,6 +982,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(rate.status).toBe(200);
       const p = stripe.sessions.get((await create()).body.session_id)!.params as any;
       expect(p.shipping_options.map((o: any) => o.shipping_rate_data.display_name)).toEqual(['Standard shipping (test placeholder)', 'Priority']);
+      expect((await adminCall({ action: 'settings', fields: { tax_mode: 'manual' } })).status).toBe(400);
       await adminCall({ action: 'shipping_rate', rate: { id: rate.body.id, active: false } });
       expect((await adminCall({ action: 'settings', fields: { checkout_mode: 'sideways' } })).status).toBe(400);
       expect((await adminCall({ action: 'settings', fields: { checkout_mode: 'off' } })).status).toBe(200);

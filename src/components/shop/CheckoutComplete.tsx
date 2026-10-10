@@ -120,6 +120,8 @@ export default function CheckoutComplete() {
           </a>
         </div>
       </section>
+
+      <p className="mt-8 text-[0.95rem] text-soft">Questions about your order? Reply to your receipt email.</p>
     </div>
   );
 }

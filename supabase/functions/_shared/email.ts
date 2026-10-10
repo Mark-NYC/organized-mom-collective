@@ -20,17 +20,22 @@ export interface EmailMessage {
 
 export interface Mailer {
   configured: boolean;
-  send(to: string, msg: EmailMessage): Promise<{ id: string }>;
+  /** `idempotencyKey`: Resend sends at most one email per key (24 hours), so a retry after a timeout can't send a second copy. */
+  send(to: string, msg: EmailMessage, idempotencyKey?: string): Promise<{ id: string }>;
 }
 
 export function createResendMailer(opts: { apiKey: string; from: string; replyTo?: string; fetch?: typeof fetch }): Mailer {
   const fetchFn = opts.fetch ?? fetch;
   return {
     configured: Boolean(opts.apiKey),
-    async send(to, msg) {
+    async send(to, msg, idempotencyKey) {
       const res = await fetchFn('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${opts.apiKey}`, 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${opts.apiKey}`,
+          'Content-Type': 'application/json',
+          ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+        },
         body: JSON.stringify({ from: opts.from, to: [to], reply_to: opts.replyTo || undefined, subject: msg.subject, html: msg.html, text: msg.text }),
       });
       const data = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
@@ -127,8 +132,8 @@ function companionBlocks(siteUrl: string): Block[] {
   ];
 }
 
-function layout(siteUrl: string, title: string, blocks: Block[], replyTo: boolean): Omit<EmailMessage, 'subject'> {
-  const all = [...blocks, ...(replyTo ? [p('Questions about your order? Just reply to this email.')] : [])];
+function layout(siteUrl: string, title: string, blocks: Block[], supportEmail: string): Omit<EmailMessage, 'subject'> {
+  const all = [...blocks, ...(supportEmail ? [p(`Questions about your order? Reply to this email or write to ${supportEmail}.`)] : [])];
   const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:Montserrat,Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#545454">
@@ -142,13 +147,13 @@ ${all.map((b) => b.html).join('\n')}
   return { html, text };
 }
 
-export function renderEmail(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; replyTo: boolean; refundCents?: number }): EmailMessage {
+export function renderEmail(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; supportEmail: string; refundCents?: number }): EmailMessage {
   const msg = renderBody(kind, o, opts);
   // Test-mode orders are never mistaken for real ones.
   return o.livemode === false ? { ...msg, subject: `[Test] ${msg.subject}` } : msg;
 }
 
-function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; replyTo: boolean; refundCents?: number }): EmailMessage {
+function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; supportEmail: string; refundCents?: number }): EmailMessage {
   const n = orderLabel(o);
   const hi = firstName(o);
   const ship = addressLines(o.shipping_name, o.shipping_address);
@@ -165,7 +170,7 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; reply
           p('We pack each order by hand. When yours ships, we’ll email you the tracking number.'),
           ...companionBlocks(opts.siteUrl),
         ],
-        opts.replyTo,
+        opts.supportEmail,
       );
       return { ...m, subject: `Your Organized Mom Collective order ${n}` };
     }
@@ -181,7 +186,7 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; reply
           ...(ship.length ? [heading('Shipping to'), lines(ship)] : []),
           ...companionBlocks(opts.siteUrl),
         ],
-        opts.replyTo,
+        opts.supportEmail,
       );
       return { ...m, subject: `Your order ${n} has shipped` };
     }
@@ -200,7 +205,7 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; reply
           ),
           p('Refunds usually take 5–10 business days to appear, depending on your bank.'),
         ],
-        opts.replyTo,
+        opts.supportEmail,
       );
       return { ...m, subject: canceled ? `Order ${n} canceled and refunded` : `Refund for order ${n}` };
     }
@@ -215,7 +220,7 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; reply
           p('It’s free with your calendar. No account, no subscription, nothing to install. Your checkmarks are saved in your phone’s browser, and you can add it to your Home Screen from Settings.'),
           link('See how it works', `${opts.siteUrl}/companion`),
         ],
-        opts.replyTo,
+        opts.supportEmail,
       );
       return { ...m, subject: 'Your cleaning companion: how to get started' };
     }
@@ -224,17 +229,34 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: { siteUrl: string; reply
 
 // ------------------------------------------------------------------ delivery
 
+/** What happened to one email. Only "sent" means the provider accepted it. */
+export type EmailOutcome =
+  | 'sent' // Resend accepted it
+  | 'skipped' // no email provider configured: nothing went out
+  | 'failed' // the provider refused it or couldn't be reached: nothing went out (or we can't tell)
+  | 'duplicate' // that email is already sent or being sent: not sent again
+  | 'no_email'; // the order has no customer email
+
+async function sha256Hex(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 /**
  * Sends one email for an order at most once per `key` (shop_email_claim). Never throws:
- * failures are logged on the order, where the dashboard offers a resend.
+ * failures are logged on the order, where the dashboard offers a retry.
+ *
+ * A retry of a failed or skipped email reuses its key (the same log row), and the provider
+ * gets an idempotency key made from that key and the message itself: if a "failed" attempt
+ * actually reached Resend (a timeout), the retry returns the original instead of a second copy.
  */
 export async function deliverEmail(
-  deps: { db: Db; mailer: Mailer; siteUrl: string; replyTo: boolean },
+  deps: { db: Db; mailer: Mailer; siteUrl: string; supportEmail: string },
   orderId: string,
   kind: EmailKind,
   key: string,
   extra: { refundCents?: number } = {},
-): Promise<'sent' | 'skipped' | 'failed' | 'duplicate' | 'no_email'> {
+): Promise<EmailOutcome> {
   try {
     const order = await loadOrder(deps.db, orderId);
     if (!order?.email) return 'no_email';
@@ -245,7 +267,9 @@ export async function deliverEmail(
       return 'skipped';
     }
     try {
-      const { id } = await deps.mailer.send(order.email, renderEmail(kind, order, { siteUrl: deps.siteUrl, replyTo: deps.replyTo, ...extra }));
+      const msg = renderEmail(kind, order, { siteUrl: deps.siteUrl, supportEmail: deps.supportEmail, ...extra });
+      const idem = `${key}/${(await sha256Hex(`${order.email}\n${msg.subject}\n${msg.text}`)).slice(0, 24)}`;
+      const { id } = await deps.mailer.send(order.email, msg, idem.slice(0, 256));
       await deps.db.rpc('shop_email_result', { p_id: claim, p_status: 'sent', p_provider_id: id, p_error: null });
       return 'sent';
     } catch (err) {

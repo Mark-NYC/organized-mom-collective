@@ -4,6 +4,7 @@
  * rules), a Resend inbox, Supabase Auth's /user endpoint, and a fetch router that sends
  * everything else to the real local PostgREST.
  */
+import { Buffer } from 'node:buffer';
 import { createHmac, randomBytes } from 'node:crypto';
 
 const rand = (n = 14) => randomBytes(n).toString('hex').slice(0, n * 2);
@@ -57,6 +58,9 @@ export class FakeStripe {
   taxRates: Record<string, unknown>[] = [];
   requests: { method: string; path: string; body: Record<string, unknown>; idempotencyKey: string | null }[] = [];
   private idem = new Map<string, unknown>();
+  /** Stripe Tax as the dashboard has it set up. */
+  taxStatus: 'active' | 'pending' = 'pending';
+  taxRegistrations: string[] = [];
   /** Make the next session create fail (Stripe outage). */
   failNextCreate = false;
   /** The key on the current request is a live key. */
@@ -90,6 +94,10 @@ export class FakeStripe {
     }
     if (method === 'POST' && path === '/v1/refunds') return this.createRefund(p);
     if (method === 'GET' && (m = path.match(/^\/v1\/charges\/([^/]+)$/))) return this.charges.get(m[1]) ?? this.error(404, 'No such charge');
+    if (method === 'GET' && path === '/v1/tax/settings') return { object: 'tax.settings', status: this.taxStatus };
+    if (method === 'GET' && path === '/v1/tax/registrations') {
+      return { object: 'list', data: this.taxRegistrations.map((state) => ({ country: 'US', country_options: { us: { state, type: 'state_sales_tax' } }, status: 'active' })) };
+    }
     if (method === 'POST' && path === '/v1/tax_rates') {
       const r = { id: `txr_${rand(8)}`, ...p };
       this.taxRates.push(r);
@@ -195,14 +203,30 @@ export class FakeInbox {
   sent: { to: string[]; subject: string; html: string; text: string; from: string; reply_to?: string }[] = [];
   /** Make the next send fail (provider outage). */
   failNext = false;
-  handle(body: string): Response {
+  /** Make the next send reach Resend and go out, but the response is lost (a timeout). */
+  loseNextResponse = false;
+  /** Like Resend: one email per idempotency key; a repeat returns the original response. */
+  private idem = new Map<string, { id: string; body: string }>();
+  handle(body: string, headers: Headers = new Headers()): Response {
     if (this.failNext) {
       this.failNext = false;
       return new Response(JSON.stringify({ message: 'Service unavailable' }), { status: 503 });
     }
+    const key = headers.get('idempotency-key');
+    const seen = key ? this.idem.get(key) : undefined;
+    if (seen) {
+      if (seen.body !== body) return new Response(JSON.stringify({ message: 'invalid_idempotent_request' }), { status: 409 });
+      return new Response(JSON.stringify({ id: seen.id }), { status: 200 });
+    }
     const msg = JSON.parse(body);
     this.sent.push(msg);
-    return new Response(JSON.stringify({ id: `email_${this.sent.length}` }), { status: 200 });
+    const id = `email_${this.sent.length}`;
+    if (key) this.idem.set(key, { id, body });
+    if (this.loseNextResponse) {
+      this.loseNextResponse = false;
+      return new Response(JSON.stringify({ message: 'Gateway timeout' }), { status: 504 });
+    }
+    return new Response(JSON.stringify({ id }), { status: 200 });
   }
   to(email: string) {
     return this.sent.filter((m) => m.to.includes(email));
@@ -235,7 +259,7 @@ export function routerFetch(opts: {
     const headers = new Headers(init.headers);
     const body = typeof init.body === 'string' ? init.body : '';
     if (url.origin === 'https://api.stripe.com') return opts.stripe.handle(method, url, body, headers);
-    if (url.href === 'https://api.resend.com/emails') return opts.inbox.handle(body);
+    if (url.href === 'https://api.resend.com/emails') return opts.inbox.handle(body, headers);
     if (url.href.startsWith(`${opts.supabaseUrl}/auth/v1/user`)) {
       const token = headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
       const user = opts.users.get(token);

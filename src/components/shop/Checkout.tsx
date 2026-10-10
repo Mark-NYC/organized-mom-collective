@@ -5,6 +5,7 @@ import {
   loadStripe,
   money,
   previewToken,
+  shippingQuote,
   startCheckout,
   stripeTestMode,
   type Catalog,
@@ -98,16 +99,16 @@ export default function Checkout() {
     refresh();
   };
 
-  // Placeholder (test-only) rates are never offered with a live key, so don't advertise them.
-  const shipping = catalog.shipping_rates.filter((r) => stripeTestMode() || !r.test_only);
+  // The same rules the server charges by, for this calendar and quantity. Placeholder (test-only)
+  // rates are never offered with a live key, so they're not advertised then.
+  const shipping = product ? shippingQuote(catalog.shipping_rates, product.ship_units * qty, product.price_cents * qty, stripeTestMode()) : [];
+  const cheapest = shipping.length ? Math.min(...shipping.map((s) => s.amount_cents)) : 0;
   const shippingNote =
     shipping.length === 0
       ? ''
-      : shipping.length === 1
-        ? shipping[0].amount_cents === 0
-          ? 'Free shipping'
-          : `Shipping: ${money(shipping[0].amount_cents)}`
-        : `Shipping from ${money(Math.min(...shipping.map((s) => s.amount_cents)))}`;
+      : cheapest === 0
+        ? 'Free shipping (US)'
+        : `${shipping.length === 1 ? 'US shipping' : 'US shipping from'} ${money(cheapest)}`;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-12">
@@ -220,7 +221,8 @@ export default function Checkout() {
                       )}
                     </dl>
                     <p className="mt-3 text-[0.9rem] leading-snug text-soft">
-                      {catalog.tax_mode === 'off' ? '' : 'Sales tax, where it applies, is added at the next step. '}Have a discount code? You can add it at the next step.
+                      {catalog.tax_mode === 'automatic' ? 'Sales tax, where it applies, is calculated from your shipping address at the next step. ' : ''}Ships to
+                      US addresses only. Have a discount code? You can add it at the next step.
                     </p>
 
                     {error && (
@@ -282,7 +284,10 @@ function errorText(code: CheckoutError, p: ShopProduct): string {
       return 'That calendar isn’t available on the website right now.';
     case 'checkout_closed':
     case 'shipping_not_configured':
+    case 'tax_not_configured':
       return 'Online checkout isn’t open right now.';
+    case 'shipping_unavailable':
+      return 'We can’t ship that many in one online order. Try a smaller quantity.';
     case 'rate_limited':
       return 'Too many checkout attempts from this connection. Please wait a few minutes and try again.';
     default:

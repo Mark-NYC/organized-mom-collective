@@ -6,7 +6,7 @@ Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run or
 
 ## The launch gate
 
-Real payments need **all four**. Each is checked on the server; the database (`shop_create_order`) makes the final call.
+Real payments need **all five**. Each is checked on the server; the database (`shop_create_order`) makes the final call.
 
 | # | Switch | Where | Ships as |
 | --- | --- | --- | --- |
@@ -14,6 +14,7 @@ Real payments need **all four**. Each is checked on the server; the database (`s
 | 2 | **Deployment flag** `SHOP_LIVE_CHECKOUT=enabled` | Supabase function secret | not set |
 | 3 | **Store setting** checkout = Open | Dashboard → Settings | Off |
 | 4 | At least one real (not test-only) shipping rate | Dashboard → Settings | none (only a test placeholder) |
+| 5 | Sales tax decided and saved (Stripe Tax, or deliberately not collecting) | Dashboard → Settings → Sales tax | not decided |
 
 What each combination does:
 
@@ -25,7 +26,7 @@ What each combination does:
 | Open | off | test | Closed |
 | Open | off | live | Closed: functions refuse a live key without the flag (also refunds and webhooks) |
 | Open | on | test | Public **test** checkout (no real charges) |
-| Open | on | live | Real payments, if a real shipping rate exists; otherwise closed |
+| Open | on | live | Real payments, if a real shipping rate exists and the tax setting was saved; otherwise closed |
 
 Dashboard → Settings → **Launch readiness** shows which switches are on (no secret values). `PUBLIC_SHOP_ENABLED` (Vercel) only decides whether the `/checkout` page renders; it is not a security control.
 
@@ -50,8 +51,11 @@ Dashboard (/admin/orders)
 - **The site stays static.** All server logic lives in three Supabase Edge Functions (`supabase/functions/`) and SQL functions (`migrations/20261010000000_shop.sql`). No new npm dependencies, no Stripe SDK.
 - **Paid means the webhook said so.** Signature-verified (5-minute tolerance), each event id processed once, the session re-read from Stripe, amount/currency/mode cross-checked (mismatches flag the order).
 - **No overselling.** One conditional `UPDATE … WHERE stock >= qty`, so two buyers can't take the last unit (tested: 40 simultaneous checkouts for 25 units). Units come back on expiry, failure or *Change order*. If a payment lands after its hold expired and the stock is gone, the order is flagged *oversold*.
+- **Shipping is quoted in the database** for the exact cart (see [Shipping](#shipping)); the page's estimate uses the same rules.
 - **Server-side prices.** The browser sends only a slug and a quantity. Discount codes are Stripe promotion codes.
-- **Refunds** use Stripe idempotency keys; a retry after a failed request can't refund twice. State always comes from Stripe's own refunded total.
+- **Refunds** use Stripe idempotency keys; a retry after a failed request can't refund twice. State always comes from Stripe's own refunded total. **A refund never changes inventory.** Units go back to stock only when you return them (with a full refund, or afterwards a chosen number per order line); each unit can be returned once. The order page says how many are back in stock, and flags refunded units that aren't.
+- **Emails** report what actually happened: *sent* (Resend accepted it), *not sent: no provider configured* (skipped), *failed*, or *sending*. Dashboard messages are built from that answer, never assumed. A failed or skipped email is retried as the same email (same log row), and Resend gets an idempotency key, so a retry after a timeout that actually went out can't deliver a second copy. A deliberate resend of an email that was sent is a new email, once per click.
+- **Fulfillment** saves only real changes. Saving the same status and tracking again records nothing and emails nobody; a new status or corrected tracking number is logged (with the old number) and, if the box is ticked, emailed. *Resend shipping email* is the deliberate way to send it again.
 - **Customer data.** The only public endpoints are `shop_catalog()` (products, no stock counts) and `shop_order_status(session_id)` (status, number, items, totals, masked email; no name, address or phone; 30 days only; needs the unguessable Checkout Session id). Everything else needs a signed-in user listed in `shop_admins`. The end-to-end tests check the database grants directly.
 - **Entitlements.** Paid orders record a `companion` entitlement by email (revoked on full refund). Nothing is gated on it.
 
@@ -106,11 +110,16 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] Start a checkout and abandon it: its units show *In checkout* and return after about 30 minutes (Stripe's `checkout.session.expired`).
 - [ ] Stripe → Webhooks → your endpoint shows 200 responses.
 
+### Database update: launch preparation (once, after the first migration)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261011000000_shop_launch_prep.sql` → **Run**, once. It adds columns and replaces some `shop_*` functions; existing orders, stock, emails, survey data and admins are untouched. A second run stops at the first statement and changes nothing.
+- [ ] Then redeploy **all three** functions from `supabase/dashboard/` (same steps as above: open the function → Code → replace everything → Deploy). Keep "Verify JWT" off.
+
 ### Decisions you owe before launch
-- [ ] **Sales tax.** Where you're registered to collect. Then choose Settings → Sales tax: *Stripe Tax* (add registrations in Stripe; per-transaction fee) or *manual* (rows in `shop_tax_rates`; state rate only, shipping not taxed).
-- [ ] **Shipping prices.** Add the real rate(s) in Settings, then turn off the test placeholder.
+- [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
+- [ ] **Shipping prices** ([Shipping](#shipping)). Add the real rate(s) in Settings, then turn off the test placeholder.
 - [ ] Per-order limit (5) and website stock (25; separate from Etsy, not synced).
-- [ ] Refund/return policy.
+- [ ] Refund/return policy: draft in [REFUND_POLICY_DRAFT.md](REFUND_POLICY_DRAFT.md). Not published.
+- [ ] Support inbox: `SHOP_EMAIL_REPLY_TO` is printed in every customer email as the contact address.
 
 ## Launch
 
@@ -123,10 +132,38 @@ Only after you approve it. Each step is reversible: Settings → **Off** stops n
 5. Optional real-money smoke test: buy one with a 100%-minus-$1 promotion code, then refund it.
 6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public links to `/checkout`, so it must be updated deliberately.
 
+## Shipping
+
+US addresses only (Stripe collects the address; no other countries are offered). Fulfillment stays manual: you buy the label (USPS, Pirate Ship, …) and enter the carrier and tracking number on the order.
+
+Each rate in Settings has:
+
+| Field | Meaning |
+| --- | --- |
+| First | Price for the first calendar |
+| Each extra | Added per additional calendar (0 = flat per order) |
+| From / To | Offer this rate only for carts of that many calendars (To empty = no limit) |
+| Free over | Free at or above this subtotal, before discount codes (empty = never) |
+
+"Calendars" here are shipping units: the 26-week counts 1, the 52-week counts 2 (two 26-week sets), editable per product (Inventory → Edit details → Shipping units). The database prices the cart (`shop_shipping_quote`); the checkout page shows the same estimate. If no rate covers a cart (e.g. every rate stops at 2 and someone orders 3), checkout refuses it and holds nothing.
+
+The seeded "$6 Standard shipping (test placeholder)" is **test only**: never offered with a live key, and a live checkout won't open until a real rate exists.
+
+## Sales tax
+
+Two choices, both deliberate (Settings → Sales tax → Confirm and save):
+
+- **Stripe Tax (automatic).** Stripe calculates tax from the shipping address, only in states where you've added an active registration in Stripe (Tax → Registrations), including tax on shipping where that state taxes it (shipping is sent with Stripe's shipping tax code `txcd_92010001`, the calendar with `txcd_99999999`, general tangible goods), after any discount. Prices are tax-exclusive; Stripe's checkout shows the tax line, and receipts, the confirmation page and the dashboard show it. Launch readiness shows Stripe Tax's status and your active registrations. Stripe charges a fee per transaction.
+- **Don't collect tax.** Only if your accountant confirms you don't need to.
+
+The old "manual state rates" mode is switched off: one rate per state can't express local rates (New York City's combined rate differs from the state rate) or tax on shipping. It can no longer be chosen, and a real-money checkout refuses to run in it.
+
+In Stripe (you, in the dashboard, before choosing Stripe Tax): Settings → Tax → origin/head-office address (your NYC address); the product tax code default; Tax → Registrations → add each state where you're registered (New York first, if your accountant confirms). Stripe also monitors thresholds in other states (Tax → Registrations → Monitoring); adding a registration there is your decision.
+
 ## Tests
 
 - `npm test`: session building, signatures, emails, dashboard math and CSV, launch guards (seed values, flags, no public links to `/checkout`), and that the paste-ready files in `supabase/dashboard/` are self-contained and up to date.
-- `npm run test:shop`: 51 end-to-end tests, then a Deno smoke test of the three paste-ready files in `supabase/dashboard/` (each loaded on its own: checkout, signed webhook, admin, shipping, refund, emails) on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
+- `npm run test:shop`: 58 end-to-end tests, then a Deno smoke test of the three paste-ready files in `supabase/dashboard/` (each loaded on its own: checkout, signed webhook, admin, shipping, refund, emails) on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
 
 **Not verified against the real services** (Stripe's API isn't reachable from the build sandbox): the real Stripe API and embedded iframe, Apple Pay / Google Pay sheets, Stripe Tax calculations, the exact shape of Stripe's webhook payloads for your account's API version (the code reads both old and new shapes and re-fetches sessions with a pinned API version, `2025-03-31.basil`), Supabase's hosted gateway (CORS, `x-forwarded-for`, the new `sb_secret_` keys), Supabase Auth's `/user` endpoint, Resend delivery and your DNS. The test checklist above covers these.
 
