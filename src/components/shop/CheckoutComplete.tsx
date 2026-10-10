@@ -86,8 +86,16 @@ export default function CheckoutComplete() {
     );
   }
 
+  // Test-mode Checkout Sessions have ids starting cs_test_: say so, so a test is never mistaken for a real order.
+  const test = new URLSearchParams(location.search).get('session_id')?.startsWith('cs_test_') ?? false;
+
   return (
     <div className="py-6">
+      {test && (
+        <p className="mb-6 rounded-[3px] border border-dashed border-rule-strong bg-band px-4 py-3 text-[0.9rem] leading-snug">
+          <span className="font-semibold">Test order.</span> Stripe test mode: no real payment was taken.
+        </p>
+      )}
       <p className="label text-soft">Order {status.order_number ? `#${status.order_number}` : ''}</p>
       <h1 className="page-title mt-3">Thank you. Your order is confirmed.</h1>
       <p className="lede mt-4">

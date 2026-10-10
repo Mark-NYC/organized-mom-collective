@@ -9,6 +9,7 @@ import {
   PAYMENT_LABELS,
   addressLines,
   adminAction,
+  defaultOrderMode,
   describeEvent,
   emailOutcomeText,
   filterOrders,
@@ -255,7 +256,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
 // ------------------------------------------------------------------ orders list
 
 function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: string) => void }) {
-  const [filter, setFilter] = useState<OrderFilter>({ payment: 'any_paid', fulfillment: '', q: '', from: '', to: '' });
+  const [filter, setFilter] = useState<OrderFilter>(() => ({ payment: 'any_paid', fulfillment: '', q: '', from: '', to: '', mode: defaultOrderMode(orders) }));
   const set = (f: Partial<OrderFilter>) => setFilter((x) => ({ ...x, ...f }));
   const shown = useMemo(() => filterOrders(orders, filter), [orders, filter]);
   // Totals follow the date range and search, but always count paid orders only.
@@ -272,6 +273,11 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
 
   return (
     <>
+      {filter.mode !== 'live' && orders.some((o) => o.livemode === false) && (
+        <p className="mt-6 text-[0.9rem] text-soft">
+          {filter.mode === 'test' ? 'Showing test orders only' : 'These numbers include test-mode orders'} (Stripe test mode, no real money).
+        </p>
+      )}
       <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[6px] border border-rule bg-rule sm:grid-cols-4">
         <Stat label="Orders" value={String(totals.orders)} note={`${totals.units} calendar${totals.units === 1 ? '' : 's'}`} />
         <Stat label="Net sales" value={money(totals.net_cents)} note={totals.refunded_cents ? `${money(totals.gross_cents)} − ${money(totals.refunded_cents)} refunded` : 'after refunds'} />
@@ -279,7 +285,7 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
         <Stat label="To ship" value={String(totals.to_ship)} note="paid, not shipped" />
       </dl>
 
-      <div className="mt-6 grid gap-3 border-y border-rule py-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] lg:items-end">
+      <div className="mt-6 grid gap-3 border-y border-rule py-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] lg:items-end">
         <Field label="Search">
           <input
             type="search"
@@ -301,6 +307,13 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
             <option value="expired">Abandoned</option>
             <option value="failed">Payment failed</option>
             <option value="all">Everything</option>
+          </select>
+        </Field>
+        <Field label="Orders">
+          <select value={filter.mode} onChange={(e) => set({ mode: e.target.value as OrderFilter['mode'] })} className={inputClass}>
+            <option value="all">Real and test</option>
+            <option value="live">Real only</option>
+            <option value="test">Test only</option>
           </select>
         </Field>
         <Field label="Shipping">
@@ -353,6 +366,7 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
                 <span className="font-semibold tabular-nums">{money(o.total_cents ?? o.subtotal_cents)}</span>
                 <Badge kind="payment" status={o.payment_status} />
                 {isPaid(o) && <Badge kind="fulfillment" status={o.fulfillment_status} />}
+                {o.livemode === false && <span className="status status-soon">Test</span>}
               </span>
             </button>
           </li>
@@ -1021,6 +1035,7 @@ function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; r
   const [confirm, setConfirm] = useState<SettingsRow['checkout_mode'] | null>(null);
   const [tax, setTax] = useState(s.tax_mode);
   const [confirmTax, setConfirmTax] = useState(false);
+  const [taxCode, setTaxCode] = useState(s.product_tax_code);
   const [status, setStatus] = useState<ShopStatus | null>(null);
   const [statusError, setStatusError] = useState('');
 
@@ -1137,6 +1152,23 @@ function Settings({ settings: s, rates, act, token }: { settings: SettingsRow; r
           {s.tax_reviewed ? 'Decided.' : 'Not decided yet: real-money checkout stays closed until this is saved.'} Stripe Tax charges tax only where you’ve added a
           registration in Stripe (Tax → Registrations), on the item and on shipping wherever that state taxes shipping, after any discount. It has a per-transaction
           fee. Decide with your accountant.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-[16rem_auto] sm:items-end">
+          <Field label="Calendar tax code (Stripe Tax)">
+            <input value={taxCode} onChange={(e) => setTaxCode(e.target.value.trim())} maxLength={13} className={`${inputClass} font-mono`} />
+          </Field>
+          <button
+            type="button"
+            className="btn-secondary sm:justify-self-start"
+            disabled={taxCode === s.product_tax_code || !/^txcd_\d{8}$/.test(taxCode)}
+            onClick={() => act({ action: 'settings', fields: { product_tax_code: taxCode } }, 'Tax code saved.')}
+          >
+            Save code
+          </button>
+        </div>
+        <p className="mt-2 text-[0.85rem] text-soft">
+          txcd_99999999 is Stripe’s “General - Tangible Goods”. Change it only if your accountant points you to a more specific code in Stripe’s tax code list.
+          Shipping always uses Stripe’s shipping code (txcd_92010001).
         </p>
         <ConfirmationDialog
           open={confirmTax}

@@ -60,6 +60,24 @@ function createResendMailer(opts) {
     }
   };
 }
+var C = {
+  page: "#fbf7f1",
+  // cream
+  card: "#ffffff",
+  ink: "#3d3834",
+  // warm charcoal (articles)
+  soft: "#5c5550",
+  muted: "#6e6461",
+  rule: "#e7ddd4",
+  accent: "#96666b",
+  // rose-deep
+  sage: "#f1f4ec",
+  sageRule: "#dde4d3",
+  rose: "#f8eeec",
+  button: "#4a3f3e"
+};
+var SANS = "Montserrat,'Helvetica Neue',Helvetica,Arial,sans-serif";
+var eyebrowStyle = `margin:0 0 10px;font-family:${SANS};font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:${C.accent}`;
 
 // supabase/functions/_shared/env.ts
 var STRIPE_API_VERSION = "2025-03-31.basil";

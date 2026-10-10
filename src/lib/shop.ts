@@ -428,6 +428,7 @@ const ADMIN_ERRORS: Record<string, string> = {
   manual_tax_disabled: 'Manual state rates are switched off: they can’t handle local rates or tax on shipping. Use Stripe Tax, or don’t collect tax.',
   request_id_required: 'Reload the page and try again.',
   invalid_status: 'Pick a shipping status.',
+  invalid_tax_code: 'A Stripe tax code looks like txcd_99999999 (txcd_ and 8 digits).',
 };
 const adminErrorText = (code: string) => ADMIN_ERRORS[code] ?? `Something went wrong (${code}).`;
 
@@ -459,9 +460,14 @@ export interface OrderFilter {
   /** 'any_paid' (default) = paid, partly refunded or refunded; 'all' adds abandoned and in-progress checkouts. */
   payment?: 'any_paid' | 'all' | OrderRow['payment_status'];
   fulfillment?: '' | OrderRow['fulfillment_status'] | 'to_ship';
+  /** Real (Stripe live mode) orders, test-mode orders, or both. Default: both. */
+  mode?: 'all' | 'live' | 'test';
   from?: string;
   to?: string;
 }
+
+/** Once a real order exists, the dashboard shows real orders by default, so test orders never count in sales. */
+export const defaultOrderMode = (orders: Pick<OrderRow, 'livemode'>[]): NonNullable<OrderFilter['mode']> => (orders.some((o) => o.livemode === true) ? 'live' : 'all');
 
 const dayStart = (d: string) => new Date(`${d}T00:00:00`).getTime();
 
@@ -470,6 +476,8 @@ export function filterOrders(orders: OrderRow[], f: OrderFilter): OrderRow[] {
   return orders.filter((o) => {
     const payment = f.payment ?? 'any_paid';
     if (payment === 'any_paid' ? !isPaid(o) : payment !== 'all' && o.payment_status !== payment) return false;
+    if (f.mode === 'live' && o.livemode !== true) return false;
+    if (f.mode === 'test' && o.livemode === true) return false;
     if (f.fulfillment === 'to_ship') {
       if (!(isPaid(o) && o.payment_status !== 'refunded' && (o.fulfillment_status === 'unfulfilled' || o.fulfillment_status === 'packing'))) return false;
     } else if (f.fulfillment && o.fulfillment_status !== f.fulfillment) return false;

@@ -132,6 +132,27 @@ Only after you approve it. Each step is reversible: Settings → **Off** stops n
 5. Optional real-money smoke test: buy one with a 100%-minus-$1 promotion code, then refund it.
 6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public links to `/checkout`, so it must be updated deliberately.
 
+## Order emails
+
+Four emails, all sent by `stripe-webhook` or `shop-admin` through Resend: receipt (on payment), shipping (when marked shipped with tracking), refund/cancellation, and companion instructions (sent by hand from an order). Templates: `renderEmail` in `supabase/functions/_shared/email.ts`.
+
+- Design: the site's warm palette (cream page, white card, Georgia headings, rose accent, sage companion panel), the round OMC badge, one fluid 560px column that reads on a phone without media queries, inline styles and tables only (Gmail drops some `<style>` blocks), a button for tracking and for the companion, and a footer with the support address (`SHOP_EMAIL_REPLY_TO`). Under 10 KB each; Gmail clips at ~102 KB.
+- Images load from the live site: `public/email/omc-badge-144.png`, `calendar-26-week.jpg`, `calendar-52-week.jpg` (real product photos resized to JPEG; WebP isn't safe in every mail client). They appear only once Vercel deploys them.
+- Test-mode orders carry `[Test]` in the subject, a dashed "Test order" band at the top and a footer note. Real orders have none of these.
+- Preview the four emails locally: `tests/shop.test.ts` renders them; or run `renderEmail` with a sample order.
+
+### The sender's picture (avatar) in Gmail
+
+Gmail's circle next to the sender comes from one of these, and **none is guaranteed**:
+
+| Option | Cost | What it takes | Notes |
+| --- | --- | --- | --- |
+| **BIMI** (official brand logo) | Paid certificate | DMARC at enforcement (`p=quarantine` or `p=reject`) on organizedmomcollective.com, a square SVG Tiny PS logo, a `default._bimi` DNS record, and for Gmail a VMC or CMC certificate from a certificate authority | Gmail shows BIMI logos only with that certificate (an annual fee), so it's out of scope for now. The DMARC part is free and worth doing anyway. |
+| **Google profile photo for the sending address** | Free | Create a Google Account using `orders@organizedmomcollective.com` (Google lets you sign up with an existing non-Gmail address), verify it, and set the OMC badge as its profile picture | Gmail sometimes shows this to recipients. Not documented as a guarantee. The address must be able to receive Google's verification email, so it needs a working inbox or forwarding. |
+| Nothing | Free | | Gmail shows the first letter of the sender name ("O") on a colored circle. |
+
+Recommended now: send from `Organized Mom Collective <orders@organizedmomcollective.com>` (the default `SHOP_EMAIL_FROM`), set up DMARC with your DNS provider (start at `p=none` with reports, then `p=quarantine` once Resend's SPF/DKIM pass), and try the free Google-profile route. Revisit BIMI only if the brand logo in the inbox is worth an annual certificate.
+
 ## Shipping
 
 US addresses only (Stripe collects the address; no other countries are offered). Fulfillment stays manual: you buy the label (USPS, Pirate Ship, …) and enter the carrier and tracking number on the order.
@@ -159,6 +180,16 @@ Two choices, both deliberate (Settings → Sales tax → Confirm and save):
 The old "manual state rates" mode is switched off: one rate per state can't express local rates (New York City's combined rate differs from the state rate) or tax on shipping. It can no longer be chosen, and a real-money checkout refuses to run in it.
 
 In Stripe (you, in the dashboard, before choosing Stripe Tax): Settings → Tax → origin/head-office address (your NYC address); the product tax code default; Tax → Registrations → add each state where you're registered (New York first, if your accountant confirms). Stripe also monitors thresholds in other states (Tax → Registrations → Monitoring); adding a registration there is your decision.
+
+## Checking what's deployed
+
+Nothing here deploys itself: a merged PR changes GitHub only. Vercel deploys the site from GitHub (check its dashboard); Supabase SQL and Edge Functions are pasted by hand.
+
+| Piece | How to tell it's current |
+| --- | --- |
+| Database (launch-prep migration) | SQL Editor: `select column_name from information_schema.columns where table_name = 'shop_settings' and column_name = 'tax_reviewed';` returns one row |
+| Edge Functions | Each function → Code: search for `Idempotency-Key` (launch prep) and `omc-badge-144` (email redesign). Both should be present in all three. |
+| Site (Vercel) | Deployments → Production: the commit matches the latest merge on GitHub. Dashboard → Orders has an "Orders: Real and test" filter. |
 
 ## Tests
 

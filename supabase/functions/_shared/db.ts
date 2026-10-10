@@ -71,6 +71,7 @@ export interface OrderRow {
   shipping_name: string | null;
   shipping_address: Address | null;
   shipping_method: string | null;
+  promotion_code?: string | null;
   subtotal_cents: number;
   discount_cents: number;
   shipping_cents: number;

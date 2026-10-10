@@ -9,11 +9,14 @@ import type { OrderRow as ServerOrder } from '../supabase/functions/_shared/db.t
 import { renderEmail, trackingLink } from '../supabase/functions/_shared/email.ts';
 import { readEnv } from '../supabase/functions/_shared/env.ts';
 import { formEncode, signStripePayload, stripeMode, verifyStripeSignature } from '../supabase/functions/_shared/stripe.ts';
-import { describeEvent, emailOutcomeText, filterOrders, heldUnits, money, ordersCsv, salesTotals, shippingQuote, soldUnits, type OrderRow, type ShippingRule } from '../src/lib/shop';
+import { defaultOrderMode, describeEvent, emailOutcomeText, filterOrders, heldUnits, money, ordersCsv, salesTotals, shippingQuote, soldUnits, type OrderRow, type ShippingRule } from '../src/lib/shop';
 import { routes } from '../src/routes';
 
 import envExample from '../.env.example?raw';
 import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
+
+// Files the emails reference (served from the site).
+const emailAssets = Object.keys(import.meta.glob('../public/email/*', { query: '?url', import: 'default' }));
 
 // Source files as text, keyed like '../src/pages/x.astro'.
 const files = {
@@ -177,7 +180,7 @@ describe('emails', () => {
       for (const banned of ['create an account', 'log in', 'login', 'sign up', 'family system', 'coming soon', 'sync', 'arrives by', 'business days to arrive', 'premium']) {
         expect(all, `${kind}: "${banned}"`).not.toContain(banned);
       }
-      expect(html).toContain('omc-badge-160.png');
+      expect(html).toContain('/email/omc-badge-144.png');
     }
     expect(renderEmail('confirmation', order, opts).text).toContain('No account, no subscription');
   });
@@ -198,9 +201,38 @@ describe('emails', () => {
     expect(renderEmail('refund', { ...live, payment_status: 'partially_refunded', refunded_cents: 500 }, { ...opts, refundCents: 500 }).subject).toBe('Refund for order #1001');
   });
 
+  it('is email-safe: inline styles only, no WebP, real images that exist, small enough for Gmail not to clip', () => {
+    for (const kind of ['confirmation', 'shipped', 'refund', 'access'] as const) {
+      const { html } = renderEmail(kind, order, opts);
+      expect(html).not.toMatch(/<style|<link|class="|<script/i);
+      expect(html).not.toMatch(/\.webp/);
+      expect(new TextEncoder().encode(html).length).toBeLessThan(60_000); // Gmail clips at ~102 KB
+      for (const [, src] of html.matchAll(/<img[^>]+src="([^"]+)"/g)) {
+        expect(src.startsWith('https://organizedmomcollective.com/')).toBe(true);
+        expect(emailAssets, src).toContain(`../public${new URL(src).pathname}`);
+      }
+      for (const img of html.match(/<img[^>]*>/g) ?? []) expect(img).toMatch(/width="\d+"/);
+      expect(html).toContain('mailto:hello@organizedmomcollective.com');
+    }
+  });
+
+  it('shows the order, shipping and tracking details customers need', () => {
+    const c = renderEmail('confirmation', { ...order, promotion_code: 'WELCOME10', discount_cents: 340, tax_cents: 271, total_cents: 3931 }, opts).text;
+    for (const s of ['26-Week Family Wall Calendar', 'Subtotal: $34.00', 'Discount (WELCOME10): −$3.40', 'Standard shipping: $6.00', 'Sales tax: $2.71', 'Total paid: $39.31', '12 Maple St']) {
+      expect(c).toContain(s);
+    }
+    const sh = renderEmail('shipped', { ...order, fulfillment_status: 'shipped' }, opts);
+    expect(sh.text).toContain('Tracking number: 9400 1118');
+    expect(sh.html).toContain('https://tools.usps.com/go/TrackConfirmAction?tLabels=94001118');
+    expect(renderEmail('access', order, opts).text).toContain('https://organizedmomcollective.com/app');
+  });
+
   it('marks test-mode emails as tests', () => {
     expect(renderEmail('confirmation', order, opts).subject).toBe('[Test] Your Organized Mom Collective order #1001');
     expect(renderEmail('confirmation', { ...order, livemode: true }, opts).subject).toBe('Your Organized Mom Collective order #1001');
+    expect(renderEmail('confirmation', order, opts).html).toContain('Test order');
+    expect(renderEmail('confirmation', order, opts).text).toMatch(/^\[TEST ORDER/);
+    expect(renderEmail('confirmation', { ...order, livemode: true }, opts).html).not.toMatch(/test/i);
   });
 });
 
@@ -272,6 +304,15 @@ describe('dashboard logic', () => {
     expect(filterOrders(orders, { q: 'bea' }).map((x) => x.order_number)).toEqual([1002]);
     expect(filterOrders(orders, { q: '9400xyz' }).map((x) => x.order_number)).toEqual([1002]);
     expect(filterOrders(orders, { from: '2026-10-11' })).toHaveLength(0);
+  });
+
+  it('keeps test orders out of the numbers once real orders exist', () => {
+    const real = { ...orders[0], id: 'real', livemode: true };
+    const test = { ...orders[0], id: 'test', livemode: false };
+    expect(defaultOrderMode([test])).toBe('all');
+    expect(defaultOrderMode([test, real])).toBe('live');
+    expect(filterOrders([test, real], { mode: 'live' }).map((o) => o.id)).toEqual(['real']);
+    expect(filterOrders([test, real], { mode: 'test' }).map((o) => o.id)).toEqual(['test']);
   });
 
   it('counts units held in open checkouts and units sold', () => {

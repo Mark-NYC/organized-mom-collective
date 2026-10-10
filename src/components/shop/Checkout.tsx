@@ -30,6 +30,8 @@ export default function Checkout() {
   const [preview, setPreview] = useState('');
   const session = useRef<{ id: string; mount: (el: HTMLElement) => void; destroy: () => void } | null>(null);
   const mountRef = useRef<HTMLDivElement>(null);
+  // Guards a fast double tap before the button re-renders as disabled: one tap, one checkout.
+  const opening = useRef(false);
 
   const refresh = () =>
     loadCatalog()
@@ -67,10 +69,13 @@ export default function Checkout() {
   }
 
   const pay = async () => {
-    if (!product) return;
+    if (!product || opening.current) return;
+    opening.current = true;
     setError('');
     setPhase('opening');
-    const res = await startCheckout([{ slug: product.slug, quantity: qty }]);
+    const res = await startCheckout([{ slug: product.slug, quantity: qty }]).finally(() => {
+      opening.current = false;
+    });
     if ('error' in res) {
       setPhase('choose');
       setError(errorText(res.error, product));

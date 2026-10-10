@@ -273,6 +273,10 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
     case 'settings': {
       const f = (b.fields ?? {}) as Record<string, unknown>;
       const allowed = ['checkout_mode', 'tax_mode', 'product_tax_code', 'checkout_minutes', 'max_checkouts_per_hour'];
+      // A malformed code would make every Stripe Tax checkout fail to open.
+      if ('product_tax_code' in f && (typeof f.product_tax_code !== 'string' || !/^txcd_\d{8}$/.test(f.product_tax_code))) {
+        throw new HttpError(400, 'invalid_tax_code');
+      }
       await deps.db.rpc('shop_update_settings', { p: Object.fromEntries(Object.entries(f).filter(([k]) => allowed.includes(k))) });
       return { ok: true };
     }
