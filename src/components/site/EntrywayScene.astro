@@ -1,0 +1,160 @@
+---
+/**
+ * Homepage entryway scene: one still photo of the real calendar above a console table, and the
+ * family's things (real photos, trimmed transparent layers) fading in beat by beat over a
+ * 12-second loop, then clearing back to the empty table. The calendar itself never moves or changes.
+ *
+ * - One square box; every layer is absolutely positioned inside it, so nothing shifts the page.
+ * - CSS animation only. It waits, paused on the empty table, until the scene is on screen and its
+ *   photos are decoded, and pauses again when scrolled away. No JavaScript: it just plays.
+ * - prefers-reduced-motion: no animation; the full table is shown still.
+ * - Renders nothing until scripts/entryway-scene.py has produced the background and every item in
+ *   src/data/entryway-scene.ts (spec: design/entryway/README.md), so the page never shows a
+ *   half-built or stand-in scene.
+ */
+import built from '../../data/entryway-scene.json';
+import { SCENE_ALT, SCENE_ITEMS } from '../../data/entryway-scene';
+
+const DIR = '/images/site/entryway';
+const boxes: Record<string, { left: number; top: number; width: number; height: number }> = built.items;
+const widths: number[] = built.widths;
+// The script writes the photos and this file together: widths means the background exists, a box means that item does.
+const missing = [...(widths.length ? [] : ['background']), ...SCENE_ITEMS.map((i) => i.id).filter((id) => !boxes[id])];
+if (missing.length) console.warn(`[EntrywayScene] hidden until these photos exist (design/entryway/README.md): ${missing.join(', ')}`);
+
+const mid = widths[Math.floor((widths.length - 1) / 2)];
+const srcset = (name: string) => widths.map((w) => `${DIR}/${name}-${w}.webp ${w}w`).join(', ');
+// Rendered width of the scene: capped at 34rem beside the copy, full width (less the gutter) on phones.
+const scene = [
+  ['(min-width: 1152px) ', '544px'],
+  ['(min-width: 768px) ', '45vw'],
+  ['', '(100vw - 2.5rem)'],
+];
+const sizes = (f = 1) => scene.map(([media, w]) => media + (f === 1 ? w.replace(/^\((.*)\)$/, 'calc($1)') : `calc(${w} * ${f})`)).join(', ');
+const pct = (n: number) => `${(n * 100).toFixed(3)}%`;
+---
+
+{
+  missing.length === 0 && (
+    <section aria-labelledby="centered-h" class="bg-paper">
+      <div class="mx-auto grid max-w-6xl items-center gap-8 px-5 pt-16 pb-4 sm:px-8 sm:pt-24 md:grid-cols-[1fr_1.1fr] md:gap-12 md:pb-8">
+        <div>
+          <h2 id="centered-h" class="serif-title">Life gets busy. Stay centered.</h2>
+          <p class="lede mt-4 max-w-md">One simple system for your family’s plans, meals, routines, and everything in between.</p>
+        </div>
+        <figure data-entryway class="entryway relative mx-auto aspect-square w-full max-w-[34rem] overflow-hidden rounded-[8px] bg-band">
+          <img
+            src={`${DIR}/background-${mid}.webp`}
+            srcset={srcset('background')}
+            sizes={sizes()}
+            width={mid}
+            height={mid}
+            loading="lazy"
+            decoding="async"
+            alt={SCENE_ALT}
+            class="absolute inset-0 block size-full"
+          />
+          {SCENE_ITEMS.map((item) => {
+            const b = boxes[item.id];
+            return (
+              <img
+                src={`${DIR}/${item.id}-${mid}.webp`}
+                srcset={srcset(item.id)}
+                sizes={sizes(b.width)}
+                width={Math.round(b.width * mid)}
+                height={Math.round(b.height * mid)}
+                loading="lazy"
+                decoding="async"
+                alt=""
+                aria-hidden="true"
+                class={`entryway-item beat-${item.beat} absolute block h-auto`}
+                style={`left:${pct(b.left)};top:${pct(b.top)};width:${pct(b.width)};animation-delay:${item.stagger}s`}
+              />
+            );
+          })}
+        </figure>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  /*
+   * 12 s loop, 1 s = 8.333%. Each beat fades in over 1.2 s from its start (2, 4, 6, 8 s),
+   * holds, and every item fades out together from 10 s to 11.2 s. Items add at most 0.6 s of
+   * stagger, so the last one is clear by 11.8 s and the loop restarts on the empty table.
+   */
+  .entryway {
+    container-type: inline-size;
+  }
+  .entryway-item {
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  .beat-0 {
+    animation: entryway-beat-0 12s linear infinite both;
+  }
+  .beat-1 {
+    animation: entryway-beat-1 12s linear infinite both;
+  }
+  .beat-2 {
+    animation: entryway-beat-2 12s linear infinite both;
+  }
+  .beat-3 {
+    animation: entryway-beat-3 12s linear infinite both;
+  }
+  .entryway[data-paused] .entryway-item {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .entryway-item {
+      animation: none;
+      opacity: 1;
+      will-change: auto;
+    }
+  }
+
+  @keyframes entryway-beat-0 {
+    0%, 16.667% { opacity: 0; transform: translateY(-1.2cqw); animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+    26.667%, 83.333% { opacity: 1; transform: none; animation-timing-function: ease-in-out; }
+    93.333%, 100% { opacity: 0; transform: none; }
+  }
+  @keyframes entryway-beat-1 {
+    0%, 33.333% { opacity: 0; transform: translateY(-1.2cqw); animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+    43.333%, 83.333% { opacity: 1; transform: none; animation-timing-function: ease-in-out; }
+    93.333%, 100% { opacity: 0; transform: none; }
+  }
+  @keyframes entryway-beat-2 {
+    0%, 50% { opacity: 0; transform: translateY(-1.2cqw); animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+    60%, 83.333% { opacity: 1; transform: none; animation-timing-function: ease-in-out; }
+    93.333%, 100% { opacity: 0; transform: none; }
+  }
+  @keyframes entryway-beat-3 {
+    0%, 66.667% { opacity: 0; transform: translateY(-1.2cqw); animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+    76.667%, 83.333% { opacity: 1; transform: none; animation-timing-function: ease-in-out; }
+    93.333%, 100% { opacity: 0; transform: none; }
+  }
+</style>
+
+<script>
+  // Hold on the empty table until the scene is on screen with its photos decoded; pause when it's off screen.
+  for (const scene of document.querySelectorAll<HTMLElement>('[data-entryway]')) {
+    scene.dataset.paused = '';
+    let visible = false;
+    let ready: Promise<unknown> | null = null;
+    new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (!visible) {
+          scene.dataset.paused = '';
+          return;
+        }
+        ready ??= Promise.all([...scene.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
+        ready.then(() => {
+          if (visible) delete scene.dataset.paused;
+        });
+      },
+      { threshold: 0.4 },
+    ).observe(scene);
+  }
+</script>
