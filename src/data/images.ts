@@ -1,6 +1,7 @@
 /**
  * Article photography in public/images/resources/, made with scripts/article-image.py
- * from originals that are never edited (product photos: design/etsy-listing/).
+ * from originals that are never edited (product photos: design/etsy-listing/; lifestyle
+ * scenes, some generated: design/photography/).
  *
  * Each entry lists the widths on disk ({name}-{width}.webp) and the largest
  * file's size, so pages reserve the right space (no layout shift).
@@ -18,6 +19,8 @@ export const articleImages = {
   'hc-01-hero': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/etsy-listing/11.webp (cropped)' },
   'hc-01-zone-tags': { widths: [640, 960, 1440], width: 1440, height: 720, source: 'design/etsy-listing/10.webp (text overlay cropped out)' },
   'hc-01-wall-calendar': { widths: [640, 960, 1402], width: 1402, height: 1122, source: 'design/etsy-listing/01.webp' },
+  'hc-02-hero': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-counter-wipe-dishwasher.png (generated lifestyle scene)' },
+  'hc-02-caddy': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-cleaning-caddy.png (generated lifestyle scene)' },
 } as const satisfies Record<string, ArticleImage>;
 
 export type ArticleImageName = keyof typeof articleImages;

@@ -23,7 +23,7 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 
 ## Design rules
 
-- **Photos only when they're real and relevant.** None is fine. Never add a photo to fill space or hit a count. Every image must show something the text is talking about.
+- **Photos only when they're relevant.** None is fine. Never add a photo to fill space or hit a count. Every image must show something the text is talking about.
 - **Instructional diagrams and printable examples** where they add real value (the cleaning week, checklists). Prefer data-driven components over screenshots of text.
 - **No long walls of text.** Break them with a heading, a checklist, a photo or a pull quote, not with decoration.
 - **Not everything in a box.** Most of the article is plain text on white. Use at most: one Shift (pull quote), one Tip, one product callout, one Next Small Win. Checklists are cards because they're objects to use.
@@ -72,7 +72,9 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 - Natural daylight; soft, muted, seasonal color (the month colors in `src/theme.ts` are a good guide).
 - Real family homes: kitchens, dining tables, living rooms, entryways, laundry spaces. Lived-in, slightly imperfect.
 - Candid moments: hands at work, a child helping, a counter mid-reset. Paper calendars, pens, handwritten lists, ordinary household objects.
-- **Avoid:** sterile stock, luxury show homes, obvious AI-generated people, staged smiles, excessive beige, decorative images that don't help the article.
+- **Avoid:** sterile stock, empty show homes, generated faces or anything that looks generated, staged smiles, excessive beige, decorative images that don't help the article.
+- **Look: bright, white and warm, with consistent props** (the plain glass spray bottle, sage and cream cloths, wooden brush, cream caddy in the `design/photography/` set). Reusing the same props and kitchen across articles is what makes the library feel like one brand. Polished is fine; sterile and empty isn't.
+- **Generated lifestyle scenes are allowed** for article photos and pins: hands and arms only, no faces, no product (calendar, companion website, phone screens, packaging), plain unbranded supplies. Keep the original in `design/photography/`, note "generated" as its `source` in `src/data/images.ts`, review at full size for artifacts (hands, fingers, reflections, warped objects), and never caption or describe one as a real home or a reader's home.
 - **Product photos are real or absent.** Use the real calendar photos (`design/etsy-listing/`) or real screenshots of the companion website. Never generate or alter product imagery.
 
 ### Adding a photo
@@ -89,12 +91,16 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 | `hc-01-hero` | A hand writing in the calendar on a kitchen counter | HC-01 hero, hub feature |
 | `hc-01-zone-tags` | Close-up of the printed cleaning zone tags | HC-01, zone checklist |
 | `hc-01-wall-calendar` | The calendar hanging on a wall in daylight | HC-01 product callout, hub calendar band |
+| `hc-02-hero` | Hand wiping a white counter, spray bottle and brush, dishwasher open (generated) | HC-02 hero, hub feature |
+| `hc-02-caddy` | Cream caddy with spray bottle, cloths and brush on a counter (generated) | HC-02 supplies line; reuse for HC-03 |
 
-All three are product listing photos. The library needs lifestyle photography that isn't a product shot. (A baking photo from the listing set was used in HC-01's daily reset section and removed: it didn't show cleaning.)
+Not on the site: `design/photography/kitchen-counter-wipe-vertical.png` (2:3, generated), the background for HC-02's search pin.
+
+The `hc-01-*` photos are product listing photos; the `hc-02-*` scenes are generated and set the prop and light style for the rest of the library. (A baking photo from the listing set was used in HC-01's daily reset section and removed: it didn't show cleaning.)
 
 ### Shot list (in priority order)
 
-1. **An evening kitchen reset:** counter being wiped, dishwasher open, a dish towel, hands only, warm evening light, an ordinary lived-in kitchen. *For HC-02 and HC-01’s Daily Reset section, only if a real photo exists.*
+1. **An evening kitchen reset:** counter being wiped, dishwasher open, a dish towel, hands only, warm evening light, an ordinary lived-in kitchen. *Done for daylight (`hc-02-hero`). Still wanted: an evening version, same props, for the after-dinner half.*
 2. **The calendar on a real family wall:** next to the fridge or in an entry, with school bags, a lunchbox, keys. Lived-in, not staged. *For the hub calendar band and FP-02 / FP-03.*
 3. **A real screenshot of the companion website's Today checklist** on a phone, beside the calendar. *The listing image with a phone shows an outdated menu (“Tidy”), so it isn't used.*
 4. **An entryway being tidied:** shoes paired, coats hung, a bag on a hook. *HC-01 Wednesday zone, HC-03.*

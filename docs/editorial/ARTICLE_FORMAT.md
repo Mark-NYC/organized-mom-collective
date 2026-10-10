@@ -147,7 +147,7 @@ Every article needs at least one thing she could screenshot.
 | Entry formula | A pattern to copy | A blockquote: `> 3:30 · Soccer · Sam, Dad drives · cleats, water` |
 | Worked example | Showing the method applied | A table or short list, followed by one line on what to notice. |
 
-Photos: only real, relevant ones. Zero is fine; never add a photo to fill space. When suitable imagery exists (a `hero` in frontmatter, `<Figure>` in the body, the product photo in `<ProductCTA>`). Every image must show something real and relevant, with descriptive alt text. Direction, how to add one, and the shot list: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). Articles without photos still render cleanly.
+Photos: only relevant ones. Zero is fine; never add a photo to fill space. Product photos are always real; lifestyle scenes may be generated within the rules in [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). When suitable imagery exists (a `hero` in frontmatter, `<Figure>` in the body, the product photo in `<ProductCTA>`). Every image must be relevant and honest (no generated product, no claim that a scene is a real reader's home), with descriptive alt text. Direction, how to add one, and the shot list: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). Articles without photos still render cleanly.
 
 ## Visual hierarchy
 
