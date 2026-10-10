@@ -40,7 +40,7 @@ Set the tracker status to `Briefed`.
 2. Fill in the frontmatter from the brief (`trackerId`, titles, description, pillar, keyword, related, next, cta).
 3. Write the body following the brief, [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md) and [BRAND_VOICE.md](BRAND_VOICE.md).
 4. Preview with `npm run dev` at `http://localhost:4321/resources/<slug>` (drafts render in dev only). Check it at phone width.
-5. Self-edit against the "Never" list in BRAND_VOICE.md: cut filler, hype, invented claims, generic advice. Read it out loud.
+5. Self-edit against the "Never" list in BRAND_VOICE.md: cut filler, hype, invented claims, generic advice. Then do a length pass against [ARTICLE_FORMAT.md → Short by default](ARTICLE_FORMAT.md#short-by-default): drop optional sections that don't earn their place and anything said twice. Read it out loud.
 6. Set `draft: false` and `published` to the publication date (YYYY-MM-DD). Run `npm run build` and review the built page (`npm run preview`) at phone and desktop width.
 
 Set the tracker status to `Drafted` while writing; it becomes `Published` in step 6.

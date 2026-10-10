@@ -9,7 +9,7 @@ Related: [CONTENT_CLUSTERS.md](CONTENT_CLUSTERS.md) (what we target) · [INTERNA
 - **Intent first.** Each article exists to satisfy one search intent completely. Rankings follow usefulness, not keyword counts.
 - **Answer early.** A reader who gets her answer in the first screen and then keeps reading is the outcome we want.
 - **Clusters, not posts.** Every article belongs to one of three pillars, links to its pillar guide, and is linked from it. Topical depth beats volume.
-- **No arbitrary word counts.** An article is as long as the intent needs. Cut anything that doesn't help her act.
+- **Short by default.** No minimum word counts; an article is as long as the intent needs, which for a routine is usually 300–600 words. Cut anything that doesn't help her act. Length is not a ranking strategy here: answering fast is.
 - **Trust through specificity, not claims.** Concrete routines and honest limits instead of invented credentials, statistics or testimonials.
 
 ## Search intent research

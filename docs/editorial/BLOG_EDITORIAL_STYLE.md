@@ -1,6 +1,6 @@
 # Blog editorial style
 
-How a resource article should read and look. The short version of the standard; details live in the docs it links to. **HC-01 (`src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx`) is the reference article.**
+How a resource article should read and look. The short version of the standard; details live in the docs it links to. **HC-02 (`src/content/articles/daily-cleaning-routine.mdx`) is the reference for length and tone; HC-01 for a pillar guide.**
 
 Goal: Organized Mom Collective reads like a warm, practical home and family publication: real-life photography, generous whitespace, editorial headings, and advice a busy parent can use tonight. Not a cleaning blog, not documentation, not a sales page.
 
@@ -8,12 +8,13 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 
 ## Writing rules
 
+- **Keep it short.** 300–600 words of prose for most articles (see [ARTICLE_FORMAT.md → Short by default](ARTICLE_FORMAT.md#short-by-default)). She's reading in the pickup line. If a section doesn't change what she does tonight, cut it.
 - **Start with a real problem.** Open in the moment it bites (Wednesday night, 5 pm, the pickup line), in two to four short sentences.
 - **Deliver the useful answer quickly.** The core answer is in the first screen or two on a phone, in bold.
 - **Write like a knowledgeable friend.** Warm, direct, calm. "You", never an invented "I". No lecturing, no gushing.
 - **Prefer concrete examples.** "Fifteen minutes after dinner" beats "a little time each day". Name the room, the task, the time.
 - **Use short paragraphs.** One idea each; one to three sentences on a phone. Use transitions that answer the reader's next question.
-- **Keep useful details.** Checklists, times, and the "what if" cases are the point. Cut repetition, not substance.
+- **Keep useful details, cut everything else.** Checklists, times, and the "what if" cases are the point. Explanations, adaptations for every household, and restated ideas are not.
 - **Don't pad.** No generic advice ("consistency is key"), no filler intros, no word-count targets.
 - **Write for busy parents, not only search engines.** Keywords appear where they read naturally.
 - **Show the bigger benefit.** Where it's true, say how the routine lightens the mental load: fewer decisions, less to remember, work others can pick up.
@@ -22,7 +23,7 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 
 ## Design rules
 
-- **2–4 relevant photographs** per standard-length article when suitable imagery exists: usually a hero, one or two in the body, and the product photo in the callout. Every image must show something the text is talking about.
+- **Photos only when they're real and relevant.** None is fine. Never add a photo to fill space or hit a count. Every image must show something the text is talking about.
 - **Instructional diagrams and printable examples** where they add real value (the cleaning week, checklists). Prefer data-driven components over screenshots of text.
 - **No long walls of text.** Break them with a heading, a checklist, a photo or a pull quote, not with decoration.
 - **Not everything in a box.** Most of the article is plain text on white. Use at most: one Shift (pull quote), one Tip, one product callout, one Next Small Win. Checklists are cards because they're objects to use.
@@ -93,15 +94,15 @@ All three are product listing photos. The library needs lifestyle photography th
 
 ### Shot list (in priority order)
 
-1. **An evening kitchen reset:** counter being wiped, dishwasher open, a dish towel, hands only, warm evening light, an ordinary lived-in kitchen. *Needed now: HC-01 "Why a short daily reset works" has no photo since the baking shot was removed. Add it with `<Figure>` after the Daily Reset checklist. Also for HC-02.*
-2. **The calendar on a real family wall:** next to the fridge or in an entry, with school bags, a lunchbox, keys. Lived-in, not staged. *For "Put the routine where everyone can see it", the hub calendar band and FP-02 / FP-03.*
+1. **An evening kitchen reset:** counter being wiped, dishwasher open, a dish towel, hands only, warm evening light, an ordinary lived-in kitchen. *For HC-02 and HC-01’s Daily Reset section, only if a real photo exists.*
+2. **The calendar on a real family wall:** next to the fridge or in an entry, with school bags, a lunchbox, keys. Lived-in, not staged. *For the hub calendar band and FP-02 / FP-03.*
 3. **A real screenshot of the companion website's Today checklist** on a phone, beside the calendar. *The listing image with a phone shows an outdated menu (“Tidy”), so it isn't used.*
 4. **An entryway being tidied:** shoes paired, coats hung, a bag on a hook. *HC-01 Wednesday zone, HC-03.*
-5. **A child helping:** small hands carrying pillows or putting shoes away. *HC-01 adaptations, IF-03 chores.*
+5. **A child helping:** small hands carrying pillows or putting shoes away. *IF-03 chores.*
 6. **The living room five-minute pickup:** throw folded, toys going into a basket. *HC-03, HC-05.*
 7. **A Sunday planning moment:** calendar, pens and a coffee on a dining table. *FP-01, FP-04 weekly reset.*
 8. **Meal plan and grocery list being written,** fridge door open nearby. *FP-05, FP-06.*
-9. **A laundry basket on a made bed.** *HC-01 "What's not on the list" Tip.*
+9. **A laundry basket on a made bed.** *A future laundry article.*
 10. **One photo per pillar** for hub cards and pillar pages: a planning table (FP), a calm, lived-in kitchen (HC), a family dinner table or hands holding mugs (IF).
 
 Spec: landscape 3:2 as the default (portrait 4:5 for secondary photos), at least 1,600px wide, natural light, people shown from behind or as hands where possible, model releases for anyone identifiable.
@@ -119,6 +120,7 @@ Spec: landscape 3:2 as the default (portrait 4:5 for secondary photos), at least
 
 Before publishing, every article should answer yes to:
 
+- [ ] Is it short? Roughly 300–600 words of prose, no section that repeats another, no section she could skip without missing an action.
 - [ ] Does the opening connect to a real family problem?
 - [ ] Can the reader find the practical answer quickly?
 - [ ] Is the article visually appealing on a phone and on desktop?

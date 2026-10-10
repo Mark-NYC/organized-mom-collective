@@ -13,7 +13,7 @@ primaryKeyword: the one search query this article answers
 related:
   - an-existing-article-slug
 next: the-next-step-article-slug
-# Optional lead photo (name from src/data/images.ts). Delete the block if there's no suitable photo.
+# Optional lead photo (name from src/data/images.ts). Only a real, relevant photo; delete the block otherwise.
 hero:
   image: hc-01-hero
   alt: What the photo shows, for someone who can't see it.
@@ -22,56 +22,45 @@ cta: none
 draft: true
 ---
 
-{/* 2. Tension: two to four sentences. The real moment the problem bites. No invented anecdote. */}
+{/* Short by default: 300–600 words of prose. Core sections only; see ARTICLE_FORMAT.md#short-by-default.
+    Reference for length: src/content/articles/daily-cleaning-routine.mdx (HC-02). */}
+
+{/* Tension: two or three sentences. The real moment the problem bites. No invented anecdote. */}
 
 Opening tension.
 
-{/* 3. The short answer, before anything else. Or an H2 "… at a glance" with a visual. */}
+Here's the short answer: **the answer in one bold sentence.**
 
-Here's the short answer: **the answer in one bold sentence.** One more line on how the rest of the article helps.
+{/* Optional: the one checklist or visual for the answer. */}
+<Checklist title="Routine name" time="15 min" items={['First task', 'Second task', 'Third task']} />
 
 <Shift title="The better frame, in one line.">
 
-The common assumption. Why it fails in a real week. **The better frame, in bold.**
+The common assumption and why it fails. **The better frame, in bold.** 30–60 words.
 
 </Shift>
 
-## Why it works
-
-Optional. Only the reasoning she needs to trust and adapt the routine.
-
-<Figure image="hc-01-zone-tags" alt="What the photo shows." caption="Optional caption that adds something." />
-
 <RealLifeVersion title="A descriptive name for the routine">
 
-1. **First step as an imperative.** Detail, with times or quantities.
-2. **Second step.** Detail.
+1. **First step as an imperative.** One line: the reason or the limit.
+2. **Second step.** One line.
 
-<Checklist title="Routine name" time="15 min" items={['First task', 'Second task', 'Third task']} />
+{/* Adaptations (kids, partner, working full-time): one line here, not a section. */}
 
 </RealLifeVersion>
 
-## Adapting it to your household
+<WhenLifeHappens title="When you miss a day">
 
-- **Working full-time.** …
-- **Little kids.** …
-- **A partner who helps.** …
+**The rule for a missed day.** One or two sentences.
 
-<WhenLifeHappens title="When you miss a day (or a whole week)">
-
-**The rule for a missed day.** …
-
-**The minimum version for a bad week.** …
+**The minimum version for a bad night.** One or two sentences.
 
 </WhenLifeHappens>
 
-{/* Optional: one sentence bridging to another cluster, with a contextual link. */}
-
-<ProductCTA title="A short, useful heading." image="hc-01-wall-calendar" alt="What the product photo shows.">
-
-Optional, at most one. One or two sentences on a verified feature that fits this article (see ARTICLE_FORMAT.md#product-notes). The companion is a website, never an app. Set `cta` to match.
-
-</ProductCTA>
+{/* Optional, at most one product mention, after the routine. Verified features only (ARTICLE_FORMAT.md#product-notes).
+    Quiet: <ProductNote product="companion">One sentence.</ProductNote>
+    With the real product photo: <ProductCTA title="…" image="hc-01-wall-calendar" alt="…">One or two sentences.</ProductCTA>
+    Set `cta` to match. */}
 
 <NextSmallWin>
 

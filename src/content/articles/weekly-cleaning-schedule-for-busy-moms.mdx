@@ -19,41 +19,33 @@ cta: calendar
 
 import { dailyEssentials, weeklySchedule, monthlyDeepClean } from '../../data/cleaning';
 
-It’s Wednesday night. The counters are covered, there’s a permission slip to sign, and the cleaning schedule on the fridge says “bathrooms.” You haven’t done Tuesday’s yet.
+It’s Wednesday night. The counters are covered, the schedule on the fridge says “bathrooms,” and you haven’t done Tuesday’s yet.
 
-Most cleaning schedules fall apart right about here. Not because you didn’t try, but because they were written for a week where nothing goes wrong.
-
-This one is built for the other kind of week: **a 15-minute reset every day, one small zone Monday to Thursday, and a weekend you can use or skip.** When a day goes sideways, you already know what to drop.
+Most cleaning schedules fall apart right here, because they were written for a week where nothing goes wrong. This one is built for the other kind: **a 15-minute reset every day, one small zone Monday to Thursday, and a weekend you can use or skip.**
 
 ## The weekly cleaning schedule
 
-Here’s the whole week. Monday to Thursday takes 25 or 30 minutes, in two short blocks. Nothing on it needs a free afternoon.
+Monday to Thursday takes 25 or 30 minutes, in two short blocks.
 
 <CleaningWeek print />
 
 <Shift title="A schedule’s real job is to tell you what to skip.">
 
-Most schedules assume you’ll do every task, every day. So one missed day leaves you two days behind, and by the third the printout is in the recycling.
-
-A schedule that works makes two decisions for you: **what to clean today, and what to let go when today doesn’t cooperate.** Plan for the missed day from the start, and missing one stops being a reason to quit.
+Most schedules assume every task gets done every day, so one missed day leaves you two behind. A schedule that works decides two things for you: **what to clean today, and what to let go when today doesn’t cooperate.**
 
 </Shift>
 
-## Why a short daily reset works
+## The Daily Reset
 
-Some mess grows every day: dishes, crumbs, shoes by the door, clothes on the bedroom floor. Leave it one evening and tomorrow starts behind.
-
-The Daily Reset is fifteen minutes that stops that pile from stacking up. It’s the same five things every day, so there’s nothing to decide:
+Some mess grows overnight: dishes, crumbs, shoes, clothes on the floor. Fifteen minutes a day stops it stacking up. Same five things, nothing to decide:
 
 <Checklist kicker="Every day" title={dailyEssentials.title} time="15 min" icon={dailyEssentials.icon} items={dailyEssentials.tasks.map((t) => t.label)} print />
 
-If you want the order to do it in, how to split it between morning and evening, and the five-minute version for hard nights, here’s [the 15-minute Daily Reset, step by step](/resources/daily-cleaning-routine).
-
-Everything else can wait a week without becoming a problem: dusty shelves, the bathroom sink, the fridge shelf with the mystery container. That’s what the zones are for.
+Here’s [the 15-minute Daily Reset, step by step](/resources/daily-cleaning-routine), with the order and a five-minute version for hard nights.
 
 <RealLifeVersion title="Your room-by-room zone checklist" print>
 
-Each weekday has one area, always the same one, so you never stand in the hallway wondering where to start. Do the day’s list and stop. When you reach the bottom, or the timer goes off, you’re done.
+One area per weekday, always the same one. Do the list, or set a timer, and stop when either runs out. If Wednesday is your longest day, swap it for a smaller zone.
 
 <ChecklistGrid>
   {weeklySchedule.map((d) => (
@@ -67,65 +59,26 @@ Each weekday has one area, always the same one, so you never stand in the hallwa
   caption="On the printed calendar, each day’s zone sits at the bottom of its column, with a box to tick."
 />
 
-### Friday to Sunday: optional on purpose
-
-Friday is for deep cleaning, Saturday for a home project, Sunday for catching up. Each month has one bigger project, broken into a few small tasks: “{monthlyDeepClean[9].title}” in October, “{monthlyDeepClean[3].title}” in April. One task on one weekend day is plenty.
-
-If you need the weekend off, take it. The schedule still works on Monday.
+**Friday to Sunday are optional.** Do one task from the month’s project (“{monthlyDeepClean[9].title}” in October), catch up on one missed zone, or take the weekend off.
 
 </RealLifeVersion>
 
 <WhenLifeHappens title="What happens when you miss a day">
 
-Nothing, if you follow one rule: **skip it, don’t stack it.**
-
-If Tuesday’s bedrooms didn’t happen, Wednesday is still Entry/Bathroom. Don’t try to do both. Two zones in one evening is how a ten-minute routine turns into an hour you don’t have, and the reason most schedules get abandoned.
-
-Some weeks are just harder than others, so the schedule comes in three sizes. Pick the one that matches the week you’re actually having:
+One rule: **skip it, don’t stack it.** If Tuesday’s bedrooms didn’t happen, Wednesday is still Entry/Bathroom. Two zones in one night is how ten minutes becomes an hour.
 
 <Versions
   title="Three sizes of the same week"
   items={[
-    { name: 'Normal week', body: 'The Daily Reset, plus the day’s zone Monday to Thursday. The weekend is optional.', time: '25–30 min' },
-    { name: 'Busy week', body: 'The Daily Reset every day. Zones only on the days you can; skip the rest.', time: '15 min' },
+    { name: 'Normal week', body: 'The Daily Reset, plus the day’s zone Monday to Thursday.', time: '25–30 min' },
+    { name: 'Busy week', body: 'The Daily Reset every day. Zones only when you can.', time: '15 min' },
     { name: 'Hard week', when: 'sick kids, travel, a new baby', body: 'Dishes and kitchen counters. Nothing else.', time: 'A few min' },
   ]}
 />
 
-**Missed zones can wait for Sunday.** Pick the one that bothers you most and do just that one.
-
-**Coming back after a long gap?** Skip the big catch-up clean. Start with tomorrow’s zone as if nothing happened. Within a week, every room has had its turn again.
+**Coming back after a long gap?** Start with tomorrow’s zone as if nothing happened. Within a week, every room has had its turn.
 
 </WhenLifeHappens>
-
-## Making the routine work for your household
-
-You don’t need new supplies or a free weekend to start. You need three small decisions, made once:
-
-1. **Attach the reset to something that already happens.** After breakfast, after school drop-off, or while dinner is in the oven. The best time is the one you never skip.
-2. **Move the zones to fit your week.** If Wednesday is your longest day, give it the smallest zone. The days can change; one zone a day stays.
-3. **Set a timer and stop when it goes off.** Stopping on time is what makes tomorrow feel possible.
-
-### Shape it around the people in your house
-
-
-- **Working full-time:** split the reset. Beds and the dishwasher in the morning, counters and the pickup after dinner, then the zone while you’re already moving.
-- **Babies and toddlers:** do the zone in two five-minute bursts, or bring them along. A toddler can carry pillows back to the couch. It’s slower, and it still counts.
-- **A partner who helps:** split by day, not by task. “You have Tuesdays and Thursdays” is clearer than “can you help with the kitchen?”
-- **Kids old enough to help:** give each child one line on the checklist, the same line every week, until it’s simply theirs.
-- **A bigger home:** make each zone one floor or one wing, and keep the same time limit.
-
-<Tip title="What’s not on the list, and where it goes">
-
-**Laundry** runs on its own rhythm: a load a day, or two or three set laundry days. **Big scrubbing jobs** like mopping every floor or cleaning the oven belong to Friday’s optional deep clean or the monthly project, not a Tuesday night. **Bedding** gets its own regular wash day. Leaving them off the zones keeps the daily part small enough to actually happen.
-
-</Tip>
-
-## Put the routine where everyone can see it
-
-A schedule in a drawer, or in your head, doesn’t get done. And as long as it only lives with you, you’re the one everyone asks: what are we cleaning today, where does this go, is it Tuesday?
-
-Write each day’s zone where the whole family already looks, next to school runs, practices and dinner. When the plan is visible, anyone can pick up a task without asking, and you stop carrying the list around in your head.
 
 <ProductCTA
   title="Make the weekly plan visible."
@@ -133,16 +86,12 @@ Write each day’s zone where the whole family already looks, next to school run
   alt="The Organized Mom Collective weekly wall calendar hanging on a wall in soft daylight, with a column for each day, its cleaning zone at the bottom, and sections for meals, groceries and to-dos."
 >
 
-The Organized Mom Collective wall calendar gives your family one shared place for schedules, meals, cleaning routines and priorities. Each day’s zone is printed on the page, and the companion website turns it into a short checklist on your phone.
+The Organized Mom Collective wall calendar prints each day’s zone on the page, next to school runs and dinner, and the companion website turns it into a short checklist on your phone.
 
 </ProductCTA>
 
-## Progress, not a perfect week
-
-You won’t hit every zone every week, and you don’t need to. A house that gets fifteen minutes most days and a zone most weekdays stays manageable, even through the weeks that go sideways.
-
 <NextSmallWin>
 
-Tonight, set a 15-minute timer and do the Daily Reset: beds, dishwasher, counters, a quick pickup, obvious spills. When the timer goes off, stop, even if you’re not finished. Then write tomorrow’s zone somewhere you’ll see it in the morning.
+Tonight, set a 15-minute timer and do the Daily Reset. When it goes off, stop. Then write tomorrow’s zone somewhere you’ll see it in the morning.
 
 </NextSmallWin>

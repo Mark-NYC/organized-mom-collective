@@ -52,7 +52,7 @@ Read the draft out loud. It should sound like a capable friend explaining what s
 ## Style rules
 
 - Write to one reader: "you". The brand is "we" only when talking about the products.
-- Short paragraphs (1–3 sentences on a phone screen). One idea per paragraph.
+- Short articles, short paragraphs (1–3 sentences on a phone screen). One idea per paragraph, said once.
 - Concrete beats abstract: "15 minutes after dinner" beats "a little time each day".
 - Numbers are numerals with units: 15 minutes, 3:30, 11 × 17.
 - Bold the one phrase in a section that she'd remember if she skimmed. Not more.

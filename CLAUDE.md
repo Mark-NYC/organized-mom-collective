@@ -28,6 +28,7 @@ Non-negotiables (details in the docs above):
 - Never generate fake product images, alter the real calendar artwork, or misrepresent how the cleaning companion works.
 - Never invent statistics, studies, expertise, testimonials or first-person experiences.
 - Never describe a product feature that isn't verified (see ARTICLE_FORMAT.md → Product notes). Product mentions stay secondary.
+- Keep articles short: 300–600 words of prose, core sections only (ARTICLE_FORMAT.md → Short by default). Don't force photos.
 - Run `npm run verify` after every article and fix everything it reports. Commit the regenerated `docs/editorial/content-inventory.md` with the article.
 
 ## Code map for the library
@@ -40,7 +41,7 @@ Non-negotiables (details in the docs above):
 | Article template, hub, pillar pages | `src/pages/resources/[slug].astro`, `src/pages/resources/index.astro`, `src/pages/resources/topics/[pillar].astro` |
 | MDX components (Figure, Tip, Checklist, ChecklistGrid, ProductCTA, Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Versions, CleaningWeek; legacy ProductNote) | `src/components/resources/` |
 | Article photography registry / image tool | `src/data/images.ts` / `scripts/article-image.py` (files in `public/images/resources/`) |
-| Reference article (the quality bar for new articles) | `src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01) |
+| Reference articles (the quality bar for new articles) | `src/content/articles/daily-cleaning-routine.mdx` (HC-02, length and tone) · `weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01, pillar guide) |
 | Article helpers / table of contents | `src/lib/articles.ts`, `src/lib/toc.ts` |
 | Public layout (header, footer, canonical, Open Graph, JSON-LD) | `src/layouts/PublicLayout.astro`, `src/layouts/BaseLayout.astro` |
 | Calendar link at the end of every article without a calendar product callout | `src/components/resources/CalendarBridge.astro` |

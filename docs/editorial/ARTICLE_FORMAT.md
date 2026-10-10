@@ -4,6 +4,17 @@ The structure every resource article follows, the components that build it, and 
 
 Related: [BRAND_VOICE.md](BRAND_VOICE.md) (how it sounds) · [SEO_STRATEGY.md](SEO_STRATEGY.md) (metadata, headings) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) (links).
 
+## Short by default
+
+Articles are short. Most land between **300 and 600 words of prose**; a pillar guide can run a little longer because it carries checklists. Past about 800 words, cut. The model is a simple home blog post: the answer, the routine, a printable-feeling checklist, a fallback, done. HC-02 (`daily-cleaning-routine.mdx`) is the length to aim for.
+
+- **Core sections only**, unless the topic genuinely needs more: tension, short answer, Shift, Real-Life Version, When Life Happens, Next Small Win. Everything marked *optional* in the table below has to earn its place.
+- **One idea per section, said once.** If the Shift explains it, the next section doesn't explain it again.
+- **Steps are one or two lines.** The bold imperative does the work; the sentence after it gives the reason or the limit, not a paragraph.
+- **Don't show the same list twice.** One checklist per set of tasks.
+- **Shift: 30–60 words. When Life Happens: two or three bold-led lines.** Use `<Versions>` only when the sizes say something the lines don't.
+- **Adaptations, kids, partners, tips:** one line inside the routine, not their own section, unless the article is about that.
+
 ## The seven requirements
 
 Every article must:
@@ -23,11 +34,11 @@ Every article must:
 | 1 | H1 + summary | `title`, `summary` (frontmatter) | Rendered by the template, with breadcrumbs, date and reading time. |
 | 2 | Tension | 2–4 sentences of body copy | First lines of the MDX body. |
 | 3 | The short answer | One paragraph, often starting "Here's the short answer:" with the answer in bold | Or the visual itself (e.g. `<CleaningWeek />` under an H2 "… at a glance"). Must appear before The Shift. |
-| 4 | The Shift | `<Shift title="…">` | One per article. The assumption, why it fails, the better frame. |
-| 5 | Why it works | H2, optional | Short. Only if the reasoning helps her trust and adapt the routine. |
+| 4 | The Shift | `<Shift title="…">` | One per article. The assumption, why it fails, the better frame. 30–60 words. |
+| 5 | Why it works | H2, *optional* | Usually cut. Only if the routine looks wrong without the reason. |
 | 6 | The Real-Life Version | `<RealLifeVersion title="…">` | The routine: numbered steps and/or `<Checklist>`. The centre of the article. |
 | 7 | Example / visual | Table, `<Checklist>`, worked example | Inside or right after the Real-Life Version. |
-| 8 | Adapting it | H2 "Adapting it to your …" | Bulleted by situation: working full-time, little kids, partner, older kids, budget, bigger home. |
+| 8 | Adapting it | *Optional*, usually one line in the routine | A full H2 only when the article's intent is about adapting. |
 | 9 | When Life Happens | `<WhenLifeHappens title="…">` | Bold-led paragraphs: missed day, bad week, starting over. |
 | 10 | Bridge link | One sentence | Optional: a natural cross-cluster link (see INTERNAL_LINKING.md). |
 | 11 | Product note | `<ProductNote product="…">` | Optional, at most one, never before section 6. |
@@ -74,7 +85,7 @@ Most schedules quietly assume you'll do every task, every day…
 </Shift>
 ```
 
-Shape: the common assumption → why it fails in a real week → the better frame, in bold. 60–120 words.
+Shape: the common assumption → why it fails in a real week → the better frame, in bold. 30–60 words.
 
 ### The Real-Life Version
 The practical routine. Renders an H2 with the anchor `#the-real-life-version` (override with `id` if an article needs two).
@@ -136,7 +147,7 @@ Every article needs at least one thing she could screenshot.
 | Entry formula | A pattern to copy | A blockquote: `> 3:30 · Soccer · Sam, Dad drives · cleats, water` |
 | Worked example | Showing the method applied | A table or short list, followed by one line on what to notice. |
 
-Photos: aim for 2–4 relevant ones when suitable imagery exists (a `hero` in frontmatter, `<Figure>` in the body, the product photo in `<ProductCTA>`). Every image must show something real and relevant, with descriptive alt text. Direction, how to add one, and the shot list: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). Articles without photos still render cleanly.
+Photos: only real, relevant ones. Zero is fine; never add a photo to fill space. When suitable imagery exists (a `hero` in frontmatter, `<Figure>` in the body, the product photo in `<ProductCTA>`). Every image must show something real and relevant, with descriptive alt text. Direction, how to add one, and the shot list: [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). Articles without photos still render cleanly.
 
 ## Visual hierarchy
 
@@ -169,7 +180,7 @@ If a feature isn't listed here, check the companion website and the listing imag
 
 ## Example sections
 
-A compact example of sections 2–4 and 12, for tone and rhythm. **HC-01 (`src/content/articles/weekly-cleaning-schedule-for-busy-moms.mdx`) is the reference article**: read it before writing a new one.
+A compact example of sections 2–4 and 12, for tone and rhythm. **HC-02 (`src/content/articles/daily-cleaning-routine.mdx`) is the reference for length; HC-01 (`weekly-cleaning-schedule-for-busy-moms.mdx`) for a pillar guide with data-driven checklists.** Read them before writing a new one.
 
 ```mdx
 You've probably printed a cleaning schedule before. It looked great on Monday. By Wednesday a kid
