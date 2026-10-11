@@ -163,7 +163,13 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         <p class="label text-warm-soft">
           <span class="text-balance md:hidden">2027 Family Wall Calendar + <span class="whitespace-nowrap">Cleaning Companion</span></span><span class="hidden md:inline">Your week, a little lighter</span>
         </p>
-        <h1 id="hero-h" class="serif-hero mt-3 sm:mt-4">Less to Remember. More Room to Breathe.</h1>
+        <!-- Two lines at every width: sized so "More Room to Breathe." (about 9.95 × the font size wide in Georgia) fits the column. -->
+        <h1
+          id="hero-h"
+          class="serif-hero mt-3 text-[length:min(2.35rem,calc((100vw_-_40px)/10.1))] sm:mt-4 sm:text-[3.1rem] md:text-[length:min(3.25rem,4.3vw)]"
+        >
+          Less to Remember.<br /> More Room to Breathe.
+        </h1>
       </div>
 
       <!-- The feeling: one complete, unedited photo. Phones: 16:9 anchored to the top, so the whole wall calendar
