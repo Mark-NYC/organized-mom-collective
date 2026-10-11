@@ -84,7 +84,7 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 3. Register it in `src/data/images.ts` (widths and size are printed by the script).
 4. Use it via `hero` in frontmatter, `<Figure>` or `<ProductCTA>`. Write alt text that says what the photo shows.
 
-### Photos we have (all from the real Etsy listing set)
+### Photos we have
 
 | Name | Shows | Used in |
 | --- | --- | --- |
@@ -93,6 +93,12 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 | `hc-01-wall-calendar` | The calendar hanging on a wall in daylight | HC-01 product callout, hub calendar band |
 | `hc-02-hero` | Hand wiping a white counter, spray bottle and brush, dishwasher open (generated) | HC-02 hero, hub feature |
 | `hc-02-caddy` | Cream caddy with spray bottle, cloths and brush on a counter (generated) | HC-02 supplies line; reuse for HC-03 |
+| `fp-05-week` | A filled-in week on the calendar beside a coffee mug and pen, dinners written into the days (listing photo 04, overlay and phone cropped out) | FP-05 step 1 |
+| `fp-05-open-fridge` | Hand opening a stocked fridge, backpack on a stool behind (generated) | FP-05 hero |
+| `fp-05-taco-skillet` | Hand stirring taco meat in a cast-iron skillet, tortillas and cheese beside (generated) | FP-05 short night |
+| `fp-05-grocery-list-writing` | Hand writing a list on a notepad, coffee, open pantry behind (generated; writing blurred) | FP-05 step 4; FP-06 |
+| `fp-05-leftovers-table` | Hands setting glass containers of leftovers on a dining table (generated) | FP-05 zero night |
+| `fp-05-meal-plan` | Close-up of the calendar's meal plan and grocery list (listing photo 11) | FP-05 method |
 
 Not on the site: `design/photography/kitchen-counter-wipe-vertical.png` (2:3, generated), the background for HC-02's search pin.
 

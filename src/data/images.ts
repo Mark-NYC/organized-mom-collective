@@ -20,6 +20,12 @@ export const articleImages = {
   'hc-01-zone-tags': { widths: [640, 960, 1440], width: 1440, height: 720, source: 'design/etsy-listing/10.webp (text overlay cropped out)' },
   'hc-01-wall-calendar': { widths: [640, 960, 1402], width: 1402, height: 1122, source: 'design/etsy-listing/01.webp' },
   'hc-02-hero': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-counter-wipe-dishwasher.png (generated lifestyle scene)' },
+  'fp-05-week': { widths: [640, 960, 1440], width: 1440, height: 966, source: 'design/etsy-listing/04.webp (cropped: text overlay and phone removed)' },
+  'fp-05-meal-plan': { widths: [640, 960, 1040], width: 1040, height: 540, source: 'design/etsy-listing/11.webp (cropped to the meal plan and grocery list)' },
+  'fp-05-open-fridge': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-open-fridge.png (generated lifestyle scene)' },
+  'fp-05-taco-skillet': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-taco-skillet.png (generated lifestyle scene)' },
+  'fp-05-grocery-list-writing': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-grocery-list-writing.png (generated lifestyle scene)' },
+  'fp-05-leftovers-table': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-leftovers-table.png (generated lifestyle scene)' },
   'hc-02-caddy': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-cleaning-caddy.png (generated lifestyle scene)' },
 } as const satisfies Record<string, ArticleImage>;
 
