@@ -27,43 +27,58 @@ const byWeeks = [...options].sort((a, b) => a.weeks - b.weeks);
 const half = byWeeks[0];
 const full = byWeeks[byWeeks.length - 1];
 
-/** The filled-in calendar photo: no longer shown here (the hero is the cutout + phone), still a Product image. */
+/** The filled-in calendar photo, shown in the photo slider. */
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
+/**
+ * The photo slider under "Everything your week needs": each real listing photo with the
+ * features you can see in it. Every page section appears once; copy matches the listing images.
+ */
 const gallery = [
   {
     ...photo('calendar-on-wall'),
     width: 1402,
     height: 1122,
     alt: 'The calendar hanging on a wall from its spiral binding, open to the first week of January 2027, before anything is written in.',
+    title: 'The whole week at a glance',
+    body: 'One week to a page, Monday through Sunday. A tall column for every weekday and room for Saturday and Sunday, hung where the whole family looks.',
+    points: ['Daily schedule', 'One week per page'],
+  },
+  {
+    ...inUse,
+    width: 1280,
+    height: 1280,
+    alt: 'A hand writing in the calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos.',
+    title: 'Dinner planned, list written',
+    body: 'Plan dinner for every night, with the grocery list right beside it. A to-do list and notes hold whatever doesn’t belong to one day.',
+    points: ['Meal plan', 'Grocery list', 'To-dos and notes'],
   },
   {
     ...photo('calendar-features', [640, 960, 1280], '/images/reorder'),
     width: 2000,
     height: 2000,
     alt: 'A filled-in week with its sections labeled: daily schedule, daily cleaning zone, self-care, word of the week, family and friends, prayer and gratitude, meal plan, grocery list and to-do list.',
+    title: 'Cleaning, and the things that matter',
+    body: 'Each day is printed with one area of the house and a box to tick. Self-Care Habits, Family and Friends, Grateful For and a Word of the Week round out the page.',
+    points: ['Daily cleaning zone', 'Self-care', 'Grateful For'],
   },
   {
     ...photo('calendar-specs'),
     width: 2000,
     height: 2000,
     alt: 'The blank calendar page, 11 by 17 inches, beside its details: premium uncoated writing paper, Wire-O binding, built-in hanging hole, double-sided weekly pages, 26 weeks.',
+    title: 'Paper that takes a pen',
+    body: '11 × 17 inches on premium uncoated paper that takes a pen nicely. Double-sided weekly pages, Wire-O binding and a built-in hanging hole.',
+    points: ['11 × 17 in', 'Wire-O binding'],
   },
   {
     ...photo('calendar-sets'),
     width: 2000,
     height: 2000,
     alt: 'A full year as two 26-week sets, January to June and July to December, each month in its own soft color.',
+    title: 'Half a year or the whole year',
+    body: `Each calendar covers ${half.weeks} weeks, and each month has its own soft color. The full year comes as two ${half.weeks}-week sets.`,
+    points: [`${half.weeks} weeks`, 'A color for each month'],
   },
-];
-
-const sections = [
-  { title: 'Daily schedule', body: 'A tall column for every weekday and room for Saturday and Sunday, for school runs, practices and appointments.' },
-  { title: 'Meal plan', body: 'Dinner for every night of the week, Monday through Sunday.' },
-  { title: 'Grocery list', body: 'Right beside the meal plan, so the list writes itself as you plan.' },
-  { title: 'To-do list and notes', body: 'For the household tasks and reminders that don’t belong to one day.' },
-  { title: 'Grateful For', body: 'A small space for prayer and gratitude each week.' },
-  { title: 'Self-care, family and friends', body: 'Self-Care Habits, Family and Friends, and a Word of the Week to set the tone.' },
-  { title: 'Daily cleaning zone', body: 'Each day is printed with one area of the house, with a box to tick when it’s done.' },
 ];
 
 const specs = [
@@ -129,7 +144,7 @@ const jsonLd: object[] = [
     description: `An 11 × 17-inch weekly family wall calendar for 2027 with a daily schedule, meal plan, grocery list, to-do list and a daily cleaning zone, plus a free cleaning companion app.`,
     brand: { '@type': 'Brand', name: BRAND_NAME },
     url,
-    image: [inUse.largest, ...gallery.map((g) => g.largest)].map((p) => new URL(p, site).href),
+    image: gallery.map((g) => g.largest).map((p) => new URL(p, site).href),
     // Offers only once a real Etsy listing exists, so nothing claims to be for sale before it is.
     ...(live.length
       ? {
@@ -229,28 +244,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         family life its own spot.
       </p>
     </div>
-    <CardSlider items={sections} label="What’s on every page" class="mt-10" />
-    <ul class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4" aria-label="Calendar photos">
-      {
-        gallery.map((g) => (
-          <li class="overflow-hidden border border-rule bg-band">
-            <a href={g.largest} class="block" aria-label={`Open larger photo: ${g.alt}`}>
-              <img
-                src={g.src}
-                srcset={g.srcset}
-                sizes="(min-width: 1152px) 260px, (min-width: 768px) 23vw, 50vw"
-                width={g.width}
-                height={g.height}
-                loading="lazy"
-                decoding="async"
-                alt={g.alt}
-                class="block aspect-square h-auto w-full object-cover"
-              />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    <CardSlider items={gallery} label="Calendar photos and what’s on every page" class="mt-10" />
   </section>
 
   <!-- Size and format -->
