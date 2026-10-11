@@ -1,7 +1,7 @@
 /**
- * Captures the companion app's Today screen once per weekday for the homepage hero
+ * Captures the companion app's Today screen once per weekday for the /calendar hero
  * (public/images/site/app-today-<dow>-<390|780>.webp), with the date line blanked out.
- * The homepage writes the visitor's real date over that blank (src/components/site/LiveTodayPhone.astro),
+ * The /calendar hero writes the visitor's real date over that blank (src/components/site/LiveTodayPhone.astro),
  * so the phone always shows today with today's real cleaning zone.
  *
  * Also writes src/data/app-today-shot.json: where the blanked date lines sit and how they're set.
