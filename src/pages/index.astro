@@ -166,7 +166,9 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         <h1 id="hero-h" class="serif-hero mt-3 sm:mt-4">Less to Remember. More Room to Breathe.</h1>
       </div>
 
-      <!-- The feeling: one complete, unedited photo. 16:9 on phones, 4:3 from 768px; both keep all three faces. -->
+      <!-- The feeling: one complete, unedited photo. Phones: 16:9 anchored to the top, so the whole wall calendar
+           (it starts at the photo's top edge) and all three faces stay in frame; only table foreground is cropped.
+           4:3 from 768px. -->
       <figure class="-mx-5 overflow-hidden bg-band [grid-area:img] sm:mx-0 sm:rounded-[10px]">
         <img
           src={family.src}
@@ -177,7 +179,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           fetchpriority="high"
           decoding="async"
           alt="A mom laughing with her son and daughter over breakfast at the kitchen table, a filled-in wall calendar hanging in the background."
-          class="block aspect-[16/9] h-auto w-full object-cover object-[50%_45%] md:aspect-[4/3] md:object-[60%_50%]"
+          class="block aspect-[16/9] h-auto w-full object-cover object-[50%_0%] md:aspect-[4/3] md:object-[60%_50%]"
         />
       </figure>
 
