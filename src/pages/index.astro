@@ -17,6 +17,7 @@
  * - Photos and phone screenshots are real (see README → Where things live).
  * - Etsy ratings and quotes come from src/data/reviews.ts and always carry its
  *   REVIEWS_DISCLAIMER (previous calendar editions); never in structured data.
+ *   The one customer testimonial (Camille S.) also lives there, quoted word for word.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import PhoneShot from '../components/site/PhoneShot.astro';
@@ -27,7 +28,7 @@ import { photo } from '../lib/images';
 import { calendarOptions, formatPrice } from '../lib/reorder';
 import { dailyEssentials } from '../data/cleaning';
 import { BRAND_NAME } from '../config';
-import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, reviewDate, reviews, shopStats } from '../data/reviews';
+import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, reviewDate, reviews, shopStats, testimonial } from '../data/reviews';
 
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
@@ -39,6 +40,7 @@ const half = byWeeks[0];
 const anyLive = options.some((o) => o.url);
 
 const SHOP = 'Shop the Family Calendar';
+const [quoteBefore, quoteAfter] = testimonial.quote.split(testimonial.highlight);
 /** "15 minutes" → "15-minute" */
 const resetLength = dailyEssentials.minutes.replace(/ minutes?$/, '-minute');
 
@@ -308,6 +310,20 @@ const check = 'M4 10.5l4 4 8-9';
       <p class="mx-auto mt-8 max-w-2xl text-center text-[0.95rem] leading-relaxed text-warm-soft">
         The cleaning zones are printed on the calendar, and the companion follows the same ones. Nothing to sync, nothing to set up.
       </p>
+
+      <!-- Customer testimonial (src/data/reviews.ts) -->
+      <figure class="mx-auto mt-12 max-w-2xl rounded-[10px] bg-paper px-6 py-9 text-center shadow-[0_24px_50px_-40px_rgba(77,69,68,0.6)] sm:mt-14 sm:px-12 sm:py-12">
+        <span aria-hidden="true" class="block font-serif text-[3.25rem] leading-[0.6] text-rose">“</span>
+        <p class="label mt-5 text-warm-soft">{testimonial.title}</p>
+        <blockquote class="mt-4 font-serif text-[1.3rem] leading-[1.45] text-balance text-warm-ink italic sm:text-[1.55rem]">
+          <p>
+            {quoteBefore}<span class="box-decoration-clone bg-[linear-gradient(transparent_60%,color-mix(in_srgb,var(--color-rose)_24%,transparent)_60%,color-mix(in_srgb,var(--color-rose)_24%,transparent)_92%,transparent_92%)] px-0.5">{testimonial.highlight}</span>{quoteAfter}
+          </p>
+        </blockquote>
+        <figcaption class="mx-auto mt-7 w-fit border-t border-warm-rule px-6 pt-4 text-[0.95rem] font-semibold tracking-[0.02em] text-warm-ink">
+          {testimonial.name}
+        </figcaption>
+      </figure>
       <div class="mt-8 text-center">
         <ShopButton label={SHOP} to="product" cta="home-system" class="min-h-14 w-full px-8 sm:w-auto" />
       </div>
