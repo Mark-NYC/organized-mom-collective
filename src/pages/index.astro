@@ -149,21 +149,26 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   width="full"
   jsonLd={jsonLd}
 >
-  <!-- 1. Hero. Phones: headline, product photo, CTA. Desktop: copy left, photo right. -->
+  <!-- 1. Hero. Phones (under 768px): descriptor, headline, copy, CTA, photo, price line, so the CTA
+       is on the first screen. Desktop: copy left, photo right. Phone-only copy is in md:hidden spans. -->
   <section aria-labelledby="hero-h" class="overflow-hidden bg-cream">
     <div
       class:list={[
         wrap,
-        'grid items-center gap-x-12 gap-y-6 pt-7 pb-12 sm:pt-12 md:grid-cols-[1.05fr_1fr] md:gap-y-0 md:py-20 lg:gap-x-16',
-        "[grid-template-areas:'head'_'img'_'body'] md:[grid-template-areas:'head_img'_'body_img']",
+        'grid items-center gap-x-12 gap-y-5 pt-5 pb-8 sm:pt-8 md:grid-cols-[1.05fr_1fr] md:gap-y-0 md:py-20 lg:gap-x-16',
+        "[grid-template-areas:'head'_'body'_'img'_'note'] md:[grid-template-areas:'head_img'_'body_img']",
       ]}
     >
       <div class="[grid-area:head] md:self-end">
-        <p class="label text-warm-soft">Your week, a little lighter</p>
+        <p class="label text-warm-soft">
+          <span class="text-balance md:hidden">2027 Family Wall Calendar + <span class="whitespace-nowrap">Cleaning Companion</span></span><span class="hidden md:inline">Your week, a little lighter</span>
+        </p>
         <h1 id="hero-h" class="serif-hero mt-3 sm:mt-4">Less to Remember. More Room to Breathe.</h1>
       </div>
 
-      <!-- The feeling: one complete, unedited photo, 4:3 so all three faces stay in frame. -->
+      <!-- The feeling: one complete, unedited photo. Phones: 16:9 anchored to the top, so the whole wall calendar
+           (it starts at the photo's top edge) and all three faces stay in frame; only table foreground is cropped.
+           4:3 from 768px. -->
       <figure class="-mx-5 overflow-hidden bg-band [grid-area:img] sm:mx-0 sm:rounded-[10px]">
         <img
           src={family.src}
@@ -174,22 +179,29 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           fetchpriority="high"
           decoding="async"
           alt="A mom laughing with her son and daughter over breakfast at the kitchen table, a filled-in wall calendar hanging in the background."
-          class="block aspect-[4/3] h-auto w-full object-cover object-[60%_50%]"
+          class="block aspect-[16/9] h-auto w-full object-cover object-[50%_0%] md:aspect-[4/3] md:object-[60%_50%]"
         />
       </figure>
 
       <div class="[grid-area:body] md:self-start md:pt-6">
         <p class="lede max-w-xl text-warm-ink">
-          One simple wall calendar and cleaning companion to plan your week, keep the house moving, and clear some of the mental load.
+          <span class="md:hidden">Plan your week, simplify daily cleaning, and get some of the mental load out of your head.</span><span class="hidden md:inline"
+            >One simple wall calendar and cleaning companion to plan your week, keep the house moving, and clear some of the mental load.</span
+          >
         </p>
-        <div class="mt-6 sm:mt-7">
+        <div class="mt-5 sm:mt-7">
           <ShopButton label="See the Calendar" to="product" cta="home-hero" class={cta} />
         </div>
-        <p class="mt-4 text-[0.95rem] leading-snug text-warm-soft">
+        <p class="mt-4 hidden text-[0.95rem] leading-snug text-warm-soft md:block">
           <span class="whitespace-nowrap">2027 Family Wall Calendar</span> · <strong class="font-semibold whitespace-nowrap text-warm-ink">Starting at {half.priceLabel}</strong> ·{' '}
           <span class="whitespace-nowrap">Cleaning Companion Included</span>
         </p>
       </div>
+
+      <p class="-mt-1 text-center text-[0.95rem] leading-snug text-warm-soft [grid-area:note] md:hidden">
+        <strong class="font-semibold whitespace-nowrap text-warm-ink">Starting at {half.priceLabel}</strong> ·{' '}
+        <span class="whitespace-nowrap">Cleaning Companion Included</span>
+      </p>
     </div>
   </section>
 
