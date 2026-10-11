@@ -56,6 +56,8 @@ const full = byWeeks[byWeeks.length - 1];
 /** The first print run's main offer first, then the rest. */
 const primary = options.find((o) => o.id === PRIMARY_OPTION_ID) ?? half;
 const others = options.filter((o) => o.id !== primary.id);
+/** Whether any option can be bought yet (a real Etsy listing in src/config.ts). */
+const anyLive = options.some((o) => o.url);
 
 /** The one call to action, everywhere on the page. */
 const GET = 'Get the Calendar';
@@ -78,26 +80,26 @@ const icons = {
 const rhythms: { icon: keyof typeof icons; title: string; body: string; on: string }[] = [
   {
     icon: 'calendar',
-    title: 'Plan the week',
-    body: 'Schedules, meals, appointments, and family priorities in one visible place.',
+    title: 'Plan the Week',
+    body: 'Put meals, appointments, and priorities where everyone can see them.',
     on: 'Daily schedule · Meal plan · Grocery list · To-do',
   },
   {
     icon: 'family',
-    title: 'Get everyone on the same page',
-    body: 'When the plan is on the wall, Mom isn’t the only one who knows what’s happening.',
+    title: 'Get Everyone on the Same Page',
+    body: 'Give your family one shared place to see what’s coming.',
     on: 'One page a week, where everyone walks past',
   },
   {
     icon: 'cleaning',
-    title: 'Keep the house moving',
-    body: 'A small cleaning zone each day and one home project a month, instead of waiting until it’s all too much.',
+    title: 'Keep the House Moving',
+    body: 'Follow simple cleaning rhythms without starting over each day.',
     on: 'Daily cleaning zone · Cleaning companion',
   },
   {
     icon: 'heart',
-    title: 'Make room for what matters',
-    body: 'A little space each week for family time, friends, gratitude, and taking care of yourself.',
+    title: 'Make Room for What Matters',
+    body: 'Spend less energy managing the details.',
     on: 'Family & friends · Self-care · Grateful for',
   },
 ];
@@ -181,7 +183,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           <ShopButton label={GET} to="product" cta="home-hero" class={cta} />
         </div>
         <p class="mt-4 text-center text-[0.95rem] leading-snug text-warm-soft sm:text-left">
-          <strong class="font-semibold whitespace-nowrap text-warm-ink">Starting at {half.priceLabel}</strong> ·{' '}
+          <strong class="block font-semibold whitespace-nowrap text-warm-ink sm:inline">Starting at {half.priceLabel}</strong><span aria-hidden="true" class="hidden sm:inline"> · </span>
           <span class="whitespace-nowrap">Cleaning companion included</span>
         </p>
       </div>
@@ -211,7 +213,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   <section aria-labelledby="load-h" class="bg-paper">
     <div class:list={[wrap, pad, 'grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16']}>
       <div>
-        <h2 id="load-h" class="serif-title">Does Everything Seem to <span class="hand-highlight">Run Through You?</span></h2>
+        <h2 id="load-h" class="serif-title">Does Everything Seem to <span class="hand-highlight whitespace-nowrap">Run Through You?</span></h2>
         <ul class="mt-7 border-t border-warm-rule">
           {
             loadLines.map((line) => (
@@ -351,10 +353,14 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </figcaption>
       </figure>
 
-      <div class="mx-auto mt-12 max-w-3xl border-t border-rose/30 pt-8">
-        <h3 class="label text-center text-warm-ink">From our Etsy shop: earlier calendar editions</h3>
-        <p class="mx-auto mt-2 max-w-xl text-center text-[0.9rem] leading-relaxed text-balance text-warm-soft">
-          These reviews are of the family calendars we sold before the 2027 redesign. They aren’t reviews of the 2027 calendar or the cleaning companion.
+      <!-- Compact trust row: the verified Etsy shop figures (whole shop, earlier editions), labeled as such right here. -->
+      <div class="mx-auto mt-12 max-w-3xl border-t border-rose/30 pt-8 text-center">
+        <h3 class="label text-warm-ink">From our Etsy shop: earlier calendar editions</h3>
+        <p class="mt-3 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 text-warm-ink">
+          <span class="whitespace-nowrap"><span aria-hidden="true" class="text-rose-deep">★</span> <strong class="font-serif text-[1.6rem] font-normal">{shopStats.rating}</strong><span class="text-[0.95rem] text-warm-soft">/5</span></span>
+          <span class="text-[0.95rem] whitespace-nowrap">{shopStats.reviews} Etsy reviews</span>
+          <span aria-hidden="true" class="text-warm-soft">·</span>
+          <span class="text-[0.95rem] whitespace-nowrap">{shopStats.sales} sales</span>
         </p>
       </div>
       <ul class="mx-auto mt-5 grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-5">
@@ -375,7 +381,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         }
       </ul>
       <p class="mx-auto mt-6 max-w-2xl text-center text-[0.85rem] leading-relaxed text-balance text-warm-soft">
-        Etsy shop: {shopStats.rating}/5 from {shopStats.reviews} reviews, {shopStats.sales} sales, all items. {REVIEWS_DISCLAIMER}{' '}
+        Rating, review count and sales cover all items in the shop. {REVIEWS_DISCLAIMER} They aren’t reviews of the 2027 calendar or the cleaning
+        companion.{' '}
         <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-warm-rule underline-offset-[3px] hover:text-warm-ink hover:decoration-warm-ink"
           >Visit our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
         >
@@ -422,7 +429,11 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </div>
       </div>
 
-      <ul class="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-[1.15fr_1fr] sm:items-center sm:gap-6 md:mt-14">
+      <div class="mx-auto mt-12 max-w-2xl text-center md:mt-16">
+        <h3 class="serif-title">Ready for a Little More Breathing Room?</h3>
+        {!anyLive && <p class="mt-3 text-[0.95rem] leading-snug text-warm-soft">Not on sale yet: both calendars are coming soon to Etsy.</p>}
+      </div>
+      <ul class="mx-auto mt-7 grid max-w-3xl gap-4 sm:grid-cols-[1.15fr_1fr] sm:items-center sm:gap-6">
         {
           [primary, ...others].map((o) => {
             const main = o.id === primary.id;
@@ -522,11 +533,12 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </div>
       </div>
       <div class="text-center md:text-left">
-        <h2 id="close-h" class="serif-title">A Little More Organized.<br /> A Lot More <span class="hand-highlight hand-highlight-apricot">Breathing Room.</span></h2>
+        <h2 id="close-h" class="serif-title">A Little More Organized.<br /> A Lot More <span class="hand-highlight hand-highlight-apricot whitespace-nowrap">Breathing Room.</span></h2>
         <p class="lede mt-5 text-warm-ink">Bring your family’s plans, everyday routines, and priorities together in one simple system.</p>
         <ShopButton label={GET} to="product" cta="home-close" class={`mt-8 ${cta}`} />
         <p class="mt-4 text-[0.9rem] text-warm-soft">
-          Starting at <strong class="font-semibold text-warm-ink">{half.priceLabel}</strong> · Cleaning companion included
+          <span class="block sm:inline">Starting at <strong class="font-semibold text-warm-ink">{half.priceLabel}</strong></span><span aria-hidden="true" class="hidden sm:inline"> · </span>
+          <span class="whitespace-nowrap">Cleaning companion included</span>
         </p>
       </div>
     </div>
