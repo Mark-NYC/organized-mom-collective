@@ -18,9 +18,10 @@
  * - Calendar facts match /calendar and the Etsy listing images in design/etsy-listing/.
  *   Shipping and checkout are Etsy's: don't add shipping origins, times or guarantees.
  * - Photos and phone screenshots are real (see README → Where things live). The hero's
- *   family photo is licensed stock, not a customer: never caption it as one. The calendar
- *   set over it is the real page (calendar-cutout), unaltered. No founder story until there's
- *   authentic founder information and a real photo.
+ *   breakfast photo (family-breakfast) sells the feeling: it's not a customer, and the calendar
+ *   in its background is not a reference for the printed layout. The product section below
+ *   shows the real calendar and companion. No founder story until there's authentic founder
+ *   information and a real photo.
  * - Etsy ratings and quotes come from src/data/reviews.ts and always carry its
  *   REVIEWS_DISCLAIMER (previous calendar editions); never in structured data.
  *   The one customer testimonial (Camille S.) also lives there, quoted word for word, and is
@@ -36,7 +37,7 @@ import { calendarOptions, formatPrice } from '../lib/reorder';
 import { BRAND_NAME, PRIMARY_OPTION_ID } from '../config';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
 
-const family = photo('family-hero', [640, 960, 1280, 1600]);
+const family = photo('family-breakfast', [640, 960, 1280, 1536]);
 const held = photo('calendar-held', [640, 960, 1254]);
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
@@ -158,41 +159,28 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
       ]}
     >
       <div class="[grid-area:head] md:self-end">
-        <p class="label text-warm-soft">A simpler way to run your home</p>
+        <p class="label text-warm-soft">Your week, a little lighter</p>
         <h1 id="hero-h" class="serif-hero mt-3 sm:mt-4">Less to Remember. More Room to Breathe.</h1>
       </div>
 
-      <!-- The feeling (licensed lifestyle photo, not a customer) plus the product: the real calendar page, unaltered -->
-      <div class="relative -mx-5 [grid-area:img] sm:mx-0 md:pb-10">
-        <figure class="overflow-hidden bg-band sm:rounded-[10px]">
-          <img
-            src={family.src}
-            srcset={family.srcset}
-            sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
-            width="2000"
-            height="1334"
-            fetchpriority="high"
-            decoding="async"
-            alt="A smiling mom sitting on a bed with her son and daughter, all three laughing at something on her phone."
-            class="block aspect-[3/2] h-auto w-full object-cover object-[60%_50%] md:aspect-[5/4]"
-          />
-        </figure>
+      <!-- The feeling: one complete, unedited photo, 4:3 so all three faces stay in frame. -->
+      <figure class="-mx-5 overflow-hidden bg-band [grid-area:img] sm:mx-0 sm:rounded-[10px]">
         <img
-          src="/images/site/calendar-cutout-480.webp"
-          srcset="/images/site/calendar-cutout-480.webp 480w, /images/site/calendar-cutout-720.webp 720w"
-          sizes="(min-width: 1024px) 180px, 136px"
-          width="480"
-          height="705"
+          src={family.src}
+          srcset={family.srcset}
+          sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
+          width="1536"
+          height="1024"
+          fetchpriority="high"
           decoding="async"
-          alt="A page of the 2027 Family Wall Calendar: a column for each weekday, the weekend, a meal plan, a grocery list and a to-do list."
-          class="absolute bottom-[-1.75rem] left-4 w-[6.5rem] drop-shadow-[0_12px_18px_rgba(77,69,68,0.28)] sm:left-[-1.25rem] sm:w-[8rem] md:bottom-0 md:left-[-2rem] md:w-[8.5rem] lg:w-[11.25rem]"
+          alt="A mom laughing with her son and daughter over breakfast at the kitchen table, a filled-in wall calendar hanging in the background."
+          class="block aspect-[4/3] h-auto w-full object-cover object-[60%_50%]"
         />
-      </div>
+      </figure>
 
-      <div class="mt-4 [grid-area:body] md:mt-0 md:self-start md:pt-6">
+      <div class="[grid-area:body] md:self-start md:pt-6">
         <p class="lede max-w-xl text-warm-ink">
-          One simple wall calendar and daily cleaning companion to help you plan the week, keep the house moving, and get some of the mental
-          load out of your head.
+          One simple wall calendar and cleaning companion to plan your week, keep the house moving, and clear some of the mental load.
         </p>
         <div class="mt-6 sm:mt-7">
           <ShopButton label="See the Calendar" to="product" cta="home-hero" class={cta} />
