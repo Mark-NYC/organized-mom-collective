@@ -9,6 +9,7 @@
  * carries REVIEWS_DISCLAIMER; ratings stay out of the Product JSON-LD.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
+import CardSlider from '../components/site/CardSlider.astro';
 import CalendarOptions from '../components/site/CalendarOptions.astro';
 import LiveTodayPhone from '../components/site/LiveTodayPhone.astro';
 import PhoneShot from '../components/site/PhoneShot.astro';
@@ -228,39 +229,28 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         family life its own spot.
       </p>
     </div>
-    <div class="mt-10 grid items-start gap-10 md:grid-cols-2 md:gap-14">
-      <ul class="grid gap-x-8 border-t border-rule sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
-        {
-          sections.map((s) => (
-            <li class="border-b border-rule py-3.5">
-              <h3 class="text-[1.0625rem] leading-snug font-bold">{s.title}</h3>
-              <p class="mt-0.5 text-[1rem] leading-snug text-soft">{s.body}</p>
-            </li>
-          ))
-        }
-      </ul>
-      <ul class="grid grid-cols-2 gap-3 sm:gap-4" aria-label="Calendar photos">
-        {
-          gallery.map((g, i) => (
-            <li class:list={['overflow-hidden border border-rule bg-band', (i === 0 || i === gallery.length - 1) && 'col-span-2']}>
-              <a href={g.largest} class="block" aria-label={`Open larger photo: ${g.alt}`}>
-                <img
-                  src={g.src}
-                  srcset={g.srcset}
-                  sizes={i === 0 || i === gallery.length - 1 ? '(min-width: 1152px) 528px, (min-width: 768px) 50vw, calc(100vw - 2.5rem)' : '(min-width: 1152px) 260px, (min-width: 768px) 25vw, 50vw'}
-                  width={g.width}
-                  height={g.height}
-                  loading="lazy"
-                  decoding="async"
-                  alt={g.alt}
-                  class="block h-auto w-full"
-                />
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
+    <CardSlider items={sections} label="What’s on every page" class="mt-10" />
+    <ul class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4" aria-label="Calendar photos">
+      {
+        gallery.map((g) => (
+          <li class="overflow-hidden border border-rule bg-band">
+            <a href={g.largest} class="block" aria-label={`Open larger photo: ${g.alt}`}>
+              <img
+                src={g.src}
+                srcset={g.srcset}
+                sizes="(min-width: 1152px) 260px, (min-width: 768px) 23vw, 50vw"
+                width={g.width}
+                height={g.height}
+                loading="lazy"
+                decoding="async"
+                alt={g.alt}
+                class="block aspect-square h-auto w-full object-cover"
+              />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <!-- Size and format -->
