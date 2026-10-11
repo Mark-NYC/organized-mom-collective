@@ -2,10 +2,13 @@
 /**
  * Header for every public page (/, /calendar, /companion, /resources/…). Never used in the
  * companion app, which keeps its own Nav. Matches the app header's ruled, spaced-caps style.
- * The phone menu is a <details> disclosure, so it works without JavaScript.
+ * The phone and tablet menu is a <details> disclosure, so it works without JavaScript; the full
+ * nav shows from 1024px (it wraps below that). The shop button says "Shop" only once an Etsy
+ * listing is live (src/config.ts), and carries data-cta for click tracking.
  */
 import { Wordmark } from '../marks';
 import { routes } from '../../routes';
+import { shopUrl } from '../../lib/reorder';
 
 const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
 const items = [
@@ -13,6 +16,7 @@ const items = [
   { href: routes.resources, label: 'Free Resources' },
   { href: routes.companion, label: 'Get Started' },
 ];
+const shopLabel = shopUrl() ? 'Shop the Calendar' : 'See the Calendar';
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
@@ -25,7 +29,7 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
   <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
     <a href={routes.home} aria-label="Organized Mom Collective home" class="-my-1 py-1"><Wordmark badge="size-9 sm:size-10" /></a>
 
-    <nav aria-label="Site" class="hidden items-center gap-8 md:flex">
+    <nav aria-label="Site" class="hidden items-center gap-8 lg:flex">
       <ul class="flex items-center gap-7">
         {
           items.map((item) => (
@@ -34,7 +38,7 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
                 href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
                 class:list={[
-                  'relative inline-flex min-h-11 items-center text-[0.7rem] font-semibold tracking-[0.18em] uppercase transition-colors',
+                  'relative inline-flex min-h-11 items-center whitespace-nowrap text-[0.7rem] font-semibold tracking-[0.18em] uppercase transition-colors',
                   isActive(item.href) ? 'text-ink' : 'text-muted hover:text-ink',
                 ]}
               >
@@ -45,10 +49,13 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
           ))
         }
       </ul>
-      <a href={routes.buy} class="btn-primary min-h-11 px-5 text-[0.68rem]">Shop the Calendar</a>
+      <a href={routes.buy} data-cta="header" class="btn-primary min-h-11 px-5 text-[0.68rem] whitespace-nowrap">{shopLabel}</a>
     </nav>
 
-    <details class="site-menu md:hidden">
+    <div class="flex items-center gap-4 lg:hidden">
+      <a href={routes.buy} data-cta="header" class="btn-primary hidden min-h-11 px-5 text-[0.68rem] whitespace-nowrap sm:inline-flex">{shopLabel}</a>
+
+    <details class="site-menu">
       <summary
         class="-mr-2 flex min-h-11 cursor-pointer list-none items-center gap-2 px-2 text-[0.7rem] font-semibold tracking-[0.18em] uppercase [&::-webkit-details-marker]:hidden"
       >
@@ -75,9 +82,10 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
             ))
           }
         </ul>
-        <a href={routes.buy} class="btn-primary mt-5 w-full">Shop the Calendar</a>
+        <a href={routes.buy} data-cta="header-menu" class="btn-primary mt-5 w-full">{shopLabel}</a>
       </nav>
     </details>
+    </div>
   </div>
 </header>
 

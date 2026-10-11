@@ -3,7 +3,7 @@
  * The brand homepage, built as a sales page for what exists today: the printed 2027
  * Family Wall Calendar plus its included cleaning companion website (/app).
  * Hero → Mental load → Product (wall + phone) → Benefits → Testimonial → How it works
- * → Story → Pricing → FAQ → Final CTA.
+ * → Pricing → FAQ → Final CTA.
  *
  * Honesty rules:
  * - Sell only what exists. No planned features (shared calendar, accounts, syncing,
@@ -12,14 +12,19 @@
  *   and the companion's real behavior (no setup, no account, saved on the phone).
  * - Prices, weeks and editions come from src/config.ts via calendarOptions(). Every
  *   shop button goes to /calendar (or its options, #buy), never straight to Etsy.
- *   While no option has a live Etsy listing, the offer says so.
+ *   Nothing reads as buyable until its Etsy listing is live: until then buttons say "See",
+ *   and the pricing cards say "Coming soon to Etsy". The 26-week calendar is the first
+ *   print run's main offer (PRIMARY_OPTION_ID); the full year is the secondary option.
  * - Calendar facts match /calendar and the Etsy listing images in design/etsy-listing/.
  *   Shipping and checkout are Etsy's: don't add shipping origins, times or guarantees.
- * - Photos and phone screenshots are real (see README → Where things live). There is no
- *   founder photo yet: the story section shows the brand badge until a real one exists.
+ * - Photos and phone screenshots are real (see README → Where things live). The hero's
+ *   family photo is licensed stock, not a customer: never caption it as one. The calendar
+ *   set over it is the real page (calendar-cutout), unaltered. No founder story until there's
+ *   authentic founder information and a real photo.
  * - Etsy ratings and quotes come from src/data/reviews.ts and always carry its
  *   REVIEWS_DISCLAIMER (previous calendar editions); never in structured data.
- *   The one customer testimonial (Camille S.) also lives there, quoted word for word.
+ *   The one customer testimonial (Camille S.) also lives there, quoted word for word, and is
+ *   never labeled as a review of the 2027 edition. Every CTA carries data-cta (src/lib/analytics.ts).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import PhoneShot from '../components/site/PhoneShot.astro';
@@ -28,9 +33,10 @@ import EntrywayScene from '../components/site/EntrywayScene.astro';
 import { photo } from '../lib/images';
 import { routes } from '../routes';
 import { calendarOptions, formatPrice } from '../lib/reorder';
-import { BRAND_NAME } from '../config';
+import { BRAND_NAME, PRIMARY_OPTION_ID } from '../config';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
 
+const family = photo('family-hero', [640, 960, 1280, 1600]);
 const held = photo('calendar-held', [640, 960, 1254]);
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
@@ -40,6 +46,11 @@ const byWeeks = [...options].sort((a, b) => a.weeks - b.weeks);
 const half = byWeeks[0];
 const full = byWeeks[byWeeks.length - 1];
 const anyLive = options.some((o) => o.url);
+/** The first print run's main offer first, then the rest. */
+const primary = options.find((o) => o.id === PRIMARY_OPTION_ID) ?? half;
+const others = options.filter((o) => o.id !== primary.id);
+/** "Shop" only once something can actually be bought. */
+const SHOP_CLOSE = anyLive ? 'Shop the 2027 Calendar' : 'See the 2027 Calendar';
 
 const [quoteBefore, quoteAfter] = testimonial.quote.split(testimonial.highlight);
 /** Two Etsy reviews that add something Camille's quote doesn't: print quality and service. */
@@ -72,16 +83,19 @@ const benefits: { icon: keyof typeof icons; title: string; body: string }[] = [
   },
 ];
 
+/** Mechanics only: the outcomes are in `benefits`, so the steps don't repeat them. */
 const steps = [
-  { title: 'Hang Your Calendar', body: 'Give your family’s schedule and weekly plans one visible home.' },
-  { title: 'Plan Your Week', body: 'Add appointments, dinners, groceries, and whatever matters most.' },
-  { title: 'Follow Your Daily Routine', body: 'Open the cleaning companion on your phone to see today’s tasks and keep moving.' },
+  { title: 'Hang your calendar', body: 'Somewhere the whole family walks past every day.' },
+  { title: 'Plan your week', body: 'A few minutes with a pen. Fill in what matters and skip the rest.' },
+  { title: 'Scan the QR code once', body: 'The cleaning companion opens on your phone with today’s tasks. No app, no account.' },
 ];
 
 const priceCopy: Record<string, { cta: string; note: string }> = {
   [half.id]: { cta: 'Choose Half-Year', note: 'A great way to get started.' },
   [full.id]: { cta: 'Choose Full-Year', note: `Twice the planning for just ${formatPrice(full.price - half.price)} more.` },
 };
+/** Where an option's button goes: its live Etsy listing, else the options on /calendar. */
+const optionHref = (o: (typeof options)[number]) => o.url ?? routes.buy;
 
 const faqs = [
   {
@@ -148,22 +162,34 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         <h1 id="hero-h" class="serif-hero mt-3 sm:mt-4">Less to Remember. More Room to Breathe.</h1>
       </div>
 
-      <!-- The real 2027 calendar in someone's hands -->
-      <figure class="-mx-5 overflow-hidden bg-band [grid-area:img] sm:mx-0 sm:rounded-[10px]">
+      <!-- The feeling (licensed lifestyle photo, not a customer) plus the product: the real calendar page, unaltered -->
+      <div class="relative -mx-5 [grid-area:img] sm:mx-0 md:pb-10">
+        <figure class="overflow-hidden bg-band sm:rounded-[10px]">
+          <img
+            src={family.src}
+            srcset={family.srcset}
+            sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
+            width="2000"
+            height="1334"
+            fetchpriority="high"
+            decoding="async"
+            alt="A smiling mom sitting on a bed with her son and daughter, all three laughing at something on her phone."
+            class="block aspect-[3/2] h-auto w-full object-cover object-[60%_50%] md:aspect-[5/4]"
+          />
+        </figure>
         <img
-          src={held.src}
-          srcset={held.srcset}
-          sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
-          width="1254"
-          height="1254"
-          fetchpriority="high"
+          src="/images/site/calendar-cutout-480.webp"
+          srcset="/images/site/calendar-cutout-480.webp 480w, /images/site/calendar-cutout-720.webp 720w"
+          sizes="(min-width: 1024px) 180px, 136px"
+          width="480"
+          height="705"
           decoding="async"
-          alt="A smiling woman holding up the 2027 Family Wall Calendar, open to the week of January 4: a column for each weekday, the weekend, self-care habits, a meal plan, a grocery list, a to-do list and notes."
-          class="block aspect-[3/2] h-auto w-full object-cover object-[50%_55%] sm:aspect-[4/3] md:aspect-square"
+          alt="A page of the 2027 Family Wall Calendar: a column for each weekday, the weekend, a meal plan, a grocery list and a to-do list."
+          class="absolute bottom-[-1.75rem] left-4 w-[6.5rem] drop-shadow-[0_12px_18px_rgba(77,69,68,0.28)] sm:left-[-1.25rem] sm:w-[8rem] md:bottom-0 md:left-[-2rem] md:w-[8.5rem] lg:w-[11.25rem]"
         />
-      </figure>
+      </div>
 
-      <div class="[grid-area:body] md:self-start md:pt-6">
+      <div class="mt-4 [grid-area:body] md:mt-0 md:self-start md:pt-6">
         <p class="lede max-w-xl text-warm-ink">
           One simple wall calendar and daily cleaning companion to help you plan the week, keep the house moving, and get some of the mental
           load out of your head.
@@ -233,21 +259,21 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         <article class:list={[card, 'flex flex-col overflow-hidden']}>
           <div class="aspect-[4/3] overflow-hidden bg-band">
             <img
-              src={inUse.src}
-              srcset={inUse.srcset}
+              src={held.src}
+              srcset={held.srcset}
               sizes="(min-width: 1152px) 540px, (min-width: 768px) 46vw, calc(100vw - 2.5rem)"
-              width="1280"
-              height="1280"
+              width="1254"
+              height="1254"
               loading="lazy"
               decoding="async"
-              alt="A hand writing in the wall calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos."
-              class="block h-full w-full object-cover object-[50%_40%]"
+              alt="A smiling woman holding up the 2027 Family Wall Calendar, open to the week of January 4, to show its 11 × 17-inch size."
+              class="block h-full w-full object-cover object-[50%_55%]"
             />
           </div>
           <div class="p-6 sm:p-8">
             <p class="label text-warm-soft">The printed calendar</p>
             <h3 class="mt-2 font-serif text-[1.6rem] leading-snug text-warm-ink">On Your Wall</h3>
-            <p class="mt-2 text-[1.02rem] leading-relaxed">See the family’s schedule, meals, groceries, and priorities together.</p>
+            <p class="mt-2 text-[1.02rem] leading-relaxed">See the family’s schedule, meals, groceries, and priorities together. 11 × 17 inches, one week to a page.</p>
           </div>
         </article>
 
@@ -274,21 +300,21 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
-  <!-- 4. Three core benefits -->
+  <!-- 4. Three core benefits: open columns with rules, so they read differently from the product cards -->
   <section aria-labelledby="benefits-h" class="bg-cream">
     <div class:list={[wrap, pad]}>
       <h2 id="benefits-h" class="serif-title mx-auto max-w-2xl text-center">What Gets Easier This Week</h2>
-      <ul class="mt-9 grid gap-4 md:mt-12 md:grid-cols-3 md:gap-6">
+      <ul class="mt-8 grid border-t border-warm-rule md:mt-12 md:grid-cols-3 md:border-t-0">
         {
           benefits.map((b) => (
-            <li class:list={[card, 'flex gap-4 p-6 md:flex-col md:gap-0 md:p-8']}>
+            <li class="flex gap-4 border-b border-warm-rule py-6 md:flex-col md:gap-4 md:border-b-0 md:border-l md:px-8 md:py-2 md:first:border-l-0 md:first:pl-0 md:last:pr-0">
               <span aria-hidden="true" class="grid size-11 shrink-0 place-items-center rounded-full bg-rose-wash text-rose-deep">
                 <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d={icons[b.icon]} />
                 </svg>
               </span>
-              <div class="md:mt-5">
-                <h3 class="font-serif text-[1.35rem] leading-snug text-warm-ink">{b.title}</h3>
+              <div>
+                <h3 class="font-serif text-[1.35rem] leading-snug text-warm-ink sm:text-[1.5rem]">{b.title}</h3>
                 <p class="mt-1.5 text-[1rem] leading-relaxed">{b.body}</p>
               </div>
             </li>
@@ -315,7 +341,13 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </figcaption>
       </figure>
 
-      <ul class="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-5">
+      <div class="mx-auto mt-12 max-w-3xl border-t border-rose/30 pt-8">
+        <h3 class="label text-center text-warm-ink">From our Etsy shop: earlier calendar editions</h3>
+        <p class="mx-auto mt-2 max-w-xl text-center text-[0.9rem] leading-relaxed text-balance text-warm-soft">
+          These reviews are of the family calendars we sold before the 2027 redesign. They aren’t reviews of the 2027 calendar or the cleaning companion.
+        </p>
+      </div>
+      <ul class="mx-auto mt-5 grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-5">
         {
           supporting.map((r) => (
             <li class="flex">
@@ -324,7 +356,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
                   <p>“{r.quote}”</p>
                 </blockquote>
                 <figcaption class="mt-4 text-[0.88rem] leading-snug text-warm-soft">
-                  <span class="font-semibold text-warm-ink">{r.name}</span> · Etsy, <time datetime={r.date}>{reviewDate(r.date)}</time>
+                  <span class="font-semibold text-warm-ink">{r.name}</span> · Etsy review, <time datetime={r.date}>{reviewDate(r.date)}</time>
                   {r.excerpt && ' · Excerpt'}
                 </figcaption>
               </figure>
@@ -333,7 +365,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         }
       </ul>
       <p class="mx-auto mt-6 max-w-2xl text-center text-[0.85rem] leading-relaxed text-balance text-warm-soft">
-        Etsy shop: {shopStats.rating}/5 from {shopStats.reviews} reviews, {shopStats.sales} sales. {REVIEWS_DISCLAIMER}{' '}
+        Etsy shop: {shopStats.rating}/5 from {shopStats.reviews} reviews, {shopStats.sales} sales, all items. {REVIEWS_DISCLAIMER}{' '}
         <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-warm-rule underline-offset-[3px] hover:text-warm-ink hover:decoration-warm-ink"
           >Visit our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
         >
@@ -341,57 +373,56 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
-  <!-- 6. How it works -->
+  <!-- 6. How it works: the filled-in calendar beside three short steps (mechanics, not benefits) -->
   <section aria-labelledby="steps-h" class="bg-paper">
-    <div class:list={[wrap, pad]}>
-      <div class="mx-auto max-w-2xl text-center">
+    <div class:list={[wrap, pad, 'grid items-center gap-9 md:grid-cols-[1fr_1.05fr] md:gap-16']}>
+      <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
+        <img
+          src={inUse.src}
+          srcset={inUse.srcset}
+          sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
+          width="1280"
+          height="1280"
+          loading="lazy"
+          decoding="async"
+          alt="A hand writing in the wall calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos."
+          class="block aspect-[4/3] h-auto w-full object-cover object-[50%_40%] md:aspect-square"
+        />
+      </figure>
+      <div>
         <h2 id="steps-h" class="serif-title">A Calmer Week Starts Here.</h2>
         <p class="lede mt-4">Three simple steps to give your week a little more structure.</p>
-      </div>
-      <ol class="mx-auto mt-9 grid max-w-5xl gap-3 md:mt-12 md:grid-cols-3 md:gap-6">
-        {
-          steps.map((s, i) => (
-            <li class="flex gap-5 rounded-[8px] bg-cream p-5 md:flex-col md:gap-3 md:p-7">
-              <span aria-hidden="true" class="font-serif text-[2.4rem] leading-none text-rose">
-                {i + 1}
-              </span>
-              <div>
-                <h3 class="text-[1.08rem] leading-snug font-bold text-warm-ink">
-                  <span class="sr-only">{i + 1}. </span>
-                  {s.title}
-                </h3>
-                <p class="mt-1.5 text-[1rem] leading-relaxed">{s.body}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-      <p class="mx-auto mt-8 max-w-xl text-center font-serif text-[1.15rem] leading-snug text-balance text-warm-ink italic sm:text-[1.25rem]">
-        Start with what helps. You don’t need a perfect routine or every box filled in.
-      </p>
-      <div class="mt-7 text-center">
-        <ShopButton label="See How It Works" to="product" cta="home-steps" class={cta} />
-      </div>
-    </div>
-  </section>
-
-  <!-- 7. Story. No founder photo exists yet: the brand badge stands in, never a stock face. -->
-  <section aria-labelledby="story-h" class="bg-cream">
-    <div class:list={[wrap, pad, 'grid max-w-4xl items-center gap-8 md:grid-cols-[auto_1fr] md:gap-14']}>
-      <div class="mx-auto grid size-36 place-items-center rounded-full bg-paper shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] sm:size-44">
-        <img src="/brand/omc-badge-160.png" width="160" height="160" loading="lazy" decoding="async" alt={`${BRAND_NAME} logo`} class="size-28 sm:size-32" />
-      </div>
-      <div class="text-center md:text-left">
-        <h2 id="story-h" class="serif-title">Made for Real Family Life.</h2>
-        <p class="lede mt-4">
-          {BRAND_NAME} was created to make everyday home management feel simpler. Not with another complicated system, but with practical tools
-          that help families plan ahead, share what’s coming, and make room for what matters.
+        <ol class="mt-7 border-t border-warm-rule">
+          {
+            steps.map((st, i) => (
+              <li class="flex gap-5 border-b border-warm-rule py-4">
+                <span aria-hidden="true" class="w-6 shrink-0 font-serif text-[2rem] leading-none text-rose">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 class="text-[1.05rem] leading-snug font-bold text-warm-ink">
+                    <span class="sr-only">{i + 1}. </span>
+                    {st.title}
+                  </h3>
+                  <p class="mt-1 text-[1rem] leading-relaxed">{st.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="mt-6 font-serif text-[1.15rem] leading-snug text-warm-ink italic sm:text-[1.25rem]">
+          Start with what helps. You don’t need a perfect routine or every box filled in.
         </p>
+        <div class="mt-6">
+          <ShopButton label="See How It Works" to="product" cta="home-steps" class={cta} />
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 8. Pricing. Buttons go to the options on /calendar (#buy), which link to Etsy. -->
+  <!-- 8. Pricing. The 26-week calendar leads (first print run); the full year is the secondary option.
+       A button says "Choose" and goes to Etsy only once that option's listing is live; until then
+       the card says "Coming soon to Etsy" and links to the details on /calendar#buy. -->
   <section id="offer" aria-labelledby="offer-h" class="bg-sage-wash">
     <div class:list={[wrap, pad]}>
       <div class="mx-auto max-w-2xl text-center">
@@ -399,48 +430,61 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         <p class="lede mt-4">Same calendar. Same companion. Just choose how many weeks you want.</p>
       </div>
 
-      <ul class="mx-auto mt-9 grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-6 md:mt-12">
+      <ul class="mx-auto mt-9 grid max-w-3xl gap-4 sm:grid-cols-[1.15fr_1fr] sm:items-center sm:gap-6 md:mt-12">
         {
-          byWeeks.map((o) => (
-            <li
-              class:list={[
-                'flex flex-col rounded-[10px] p-6 sm:p-8',
-                o.bestValue ? 'border-2 border-warm-button bg-paper shadow-[0_24px_50px_-36px_rgba(77,69,68,0.7)]' : 'border border-warm-rule bg-ivory',
-              ]}
-            >
-              <div class="flex min-h-6 items-start justify-between gap-3">
-                <h3 class="text-[1.1rem] leading-tight font-bold text-warm-ink">{o.name}</h3>
-                {o.bestValue && (
-                  <span class="shrink-0 rounded-full bg-rose-wash px-2.5 py-1 text-[0.62rem] leading-none font-bold tracking-[0.14em] text-warm-ink uppercase">
-                    Best value
-                  </span>
-                )}
-              </div>
-              <p class="mt-4 font-serif text-[2.9rem] leading-none text-warm-ink">{o.priceLabel}</p>
-              <p class="mt-2 text-[1rem] font-semibold text-warm-ink">{o.weeks} weeks</p>
-              <p class="mt-1 text-[0.9rem] leading-snug text-warm-soft">
-                {o.setsWeeks > 0 ? `All of 2027, as two ${o.setsWeeks}-week sets` : o.editions.map((e) => e.label).join(' or ')}
-              </p>
-              <p class="mt-4 mb-6 text-[1rem] leading-snug text-warm-ink">{priceCopy[o.id].note}</p>
-              <a
-                href={routes.buy}
-                data-cta={`home-price-${o.id}`}
+          [primary, ...others].map((o) => {
+            const main = o.id === primary.id;
+            return (
+              <li
                 class:list={[
-                  'mt-auto min-h-14 w-full px-4',
-                  o.bestValue ? 'btn-primary' : 'btn-secondary min-h-14 border-warm-button text-[0.75rem] text-warm-ink hover:bg-warm-button',
+                  'flex flex-col rounded-[10px]',
+                  main ? 'border-2 border-warm-button bg-paper p-6 shadow-[0_24px_50px_-36px_rgba(77,69,68,0.7)] sm:p-8' : 'border border-warm-rule bg-ivory p-6 sm:p-7',
                 ]}
               >
-                {priceCopy[o.id].cta}
-              </a>
-            </li>
-          ))
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <h3 class="text-[1.1rem] leading-tight font-bold text-warm-ink">{o.name}</h3>
+                  {main && (
+                    <span class="rounded-full bg-rose-wash px-2.5 py-1 text-[0.62rem] leading-none font-bold tracking-[0.14em] text-warm-ink uppercase">
+                      Start here
+                    </span>
+                  )}
+                </div>
+                <p class:list={['mt-4 font-serif leading-none text-warm-ink', main ? 'text-[3.1rem]' : 'text-[2.5rem]']}>{o.priceLabel}</p>
+                <p class="mt-2 text-[1rem] font-semibold text-warm-ink">{o.weeks} weeks</p>
+                <p class="mt-1 text-[0.9rem] leading-snug text-warm-soft">
+                  {o.setsWeeks > 0 ? `All of 2027, as two ${o.setsWeeks}-week sets` : o.editions.map((e) => e.label).join(' or ')}
+                </p>
+                <p class="mt-4 mb-6 text-[1rem] leading-snug text-warm-ink">{priceCopy[o.id].note}</p>
+                {o.url ? (
+                  <a
+                    href={optionHref(o)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cta={`home-price-${o.id}`}
+                    class:list={['mt-auto min-h-14 w-full gap-2 px-4', main ? 'btn-primary' : 'btn-secondary border-warm-button text-[0.75rem] text-warm-ink hover:bg-warm-button']}
+                  >
+                    {priceCopy[o.id].cta} on Etsy <span aria-hidden="true">↗</span>
+                    <span class="sr-only"> (opens Etsy)</span>
+                  </a>
+                ) : (
+                  <div class="mt-auto">
+                    <p class="flex min-h-14 items-center justify-center rounded-[3px] border border-dashed border-warm-rule px-4 text-center text-[0.75rem] font-semibold tracking-[0.16em] text-warm-soft uppercase">
+                      Coming soon to Etsy
+                    </p>
+                    <a href={optionHref(o)} data-cta={`home-price-${o.id}`} class="text-link mt-4 inline-block text-warm-ink">
+                      See the details
+                    </a>
+                  </div>
+                )}
+              </li>
+            );
+          })
         }
       </ul>
 
       <ul class="mx-auto mt-7 max-w-2xl space-y-1.5 text-center text-[0.95rem] leading-snug text-warm-soft">
         <li class="font-semibold text-warm-ink">Both options include access to the cleaning companion website.</li>
         <li>Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.</li>
-        {!anyLive && <li>The 2027 Etsy listings are coming soon.</li>}
       </ul>
     </div>
   </section>
@@ -472,7 +516,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     <div class="mx-auto max-w-2xl px-5 py-14 text-center sm:px-8 sm:py-20">
       <h2 id="close-h" class="serif-title">Your Home Doesn’t Have to Run on Your Memory.</h2>
       <p class="lede mt-5 text-warm-ink">Give your family’s plans a place to live, and yourself a little more breathing room.</p>
-      <ShopButton label="Shop the 2027 Calendar" to="product" cta="home-close" class={`mt-8 ${cta}`} />
+      <ShopButton label={SHOP_CLOSE} to="product" cta="home-close" class={`mt-8 ${cta}`} />
       <p class="mt-4 text-[0.9rem] text-warm-soft">
         Starting at <strong class="font-semibold text-warm-ink">{half.priceLabel}</strong> · Cleaning companion included
       </p>
