@@ -19,10 +19,11 @@
  *   main offer (PRIMARY_OPTION_ID); the full year is the secondary option.
  * - Calendar facts match /calendar and the Etsy listing images in design/etsy-listing/.
  *   Shipping and checkout are Etsy's: don't add shipping origins, times or guarantees.
- * - Photos and phone screenshots are real (see README → Where things live). The hero
- *   (calendar-mom-son) shows the real 2027 page held up in a kitchen: a lifestyle photo, not a
- *   customer, so never beside a testimonial. No founder story until there's authentic founder
- *   information and a real photo.
+ * - Photos and phone screenshots are real (see README → Where things live). The hero's
+ *   breakfast photo (family-breakfast) sells the feeling, the life the product supports: it's not
+ *   a customer, and the calendar in its background is not a reference for the printed layout.
+ *   The sections below show the real calendar and companion. No founder story until there's
+ *   authentic founder information and a real photo.
  * - Etsy ratings and quotes come from src/data/reviews.ts and always carry its
  *   REVIEWS_DISCLAIMER (previous calendar editions); never in structured data.
  *   The one customer testimonial (Camille S.) also lives there, quoted word for word, with no
@@ -39,7 +40,7 @@ import { calendarOptions, formatPrice } from '../lib/reorder';
 import { BRAND_NAME, PRIMARY_OPTION_ID } from '../config';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
 
-const momSon = photo('calendar-mom-son', [640, 960, 1254]);
+const family = photo('family-breakfast', [640, 960, 1280, 1536]);
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
 const features = photo('calendar-features', [640, 960, 1280], '/images/reorder');
@@ -154,8 +155,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   width="full"
   jsonLd={jsonLd}
 >
-  <!-- 1. Hero. The real 2027 calendar is the focal point. Phones (under 768px): label, headline, copy, CTA,
-       then the photo, so the CTA is on the first screen. Desktop: copy left, photo right. -->
+  <!-- 1. Hero. Phones (under 768px): label, headline, copy, CTA, then the photo, so the CTA is on the
+       first screen. Desktop: copy left, photo right. -->
   <section aria-labelledby="hero-h" class="overflow-hidden bg-cream">
     <div class:list={[wrap, 'grid items-center gap-x-12 gap-y-6 pt-6 pb-8 sm:pt-8 md:grid-cols-[1.05fr_1fr] md:py-20 lg:gap-x-16']}>
       <div>
@@ -181,18 +182,19 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </p>
       </div>
 
-      <!-- The real 2027 page, held up in a kitchen. Square, uncropped. -->
+      <!-- The feeling: one complete, unedited photo at its own 3:2 ratio at every width, so nothing is
+           cropped: the wall calendar on the right, all three faces and the breakfast table. -->
       <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
         <img
-          src={momSon.src}
-          srcset={momSon.srcset}
+          src={family.src}
+          srcset={family.srcset}
           sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
-          width="1254"
-          height="1254"
+          width="1536"
+          height="1024"
           fetchpriority="high"
           decoding="async"
-          alt="A smiling mom and her wide-eyed son in their kitchen, holding up the 2027 Family Wall Calendar open to the week of January 4."
-          class="block aspect-square h-auto w-full object-cover"
+          alt="A mom laughing with her son and daughter over breakfast at the kitchen table, a filled-in wall calendar hanging in the background."
+          class="block aspect-[3/2] h-auto w-full object-cover"
         />
       </figure>
     </div>
