@@ -38,7 +38,7 @@ import { BRAND_NAME, PRIMARY_OPTION_ID } from '../config';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
 
 const family = photo('family-breakfast', [640, 960, 1280, 1536]);
-const held = photo('calendar-held', [640, 960, 1254]);
+const momSon = photo('calendar-mom-son', [640, 960, 1254]);
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
 
@@ -249,41 +249,56 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
-  <!-- 3. Product reveal: the wall and the phone, side by side (they don't sync) -->
+  <!-- 3. Product reveal. Intro: a mom and son holding the real 2027 calendar (a lifestyle photo, not a customer:
+       never pair it with a testimonial). Then the two parts: the exact printed page and the real companion screenshot.
+       The wall and the phone don't sync. -->
   <section aria-labelledby="product-h" class="bg-sage-wash">
     <div class:list={[wrap, pad]}>
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 id="product-h" class="serif-title">One Place for the Plans.<br class="hidden sm:inline" /> A Little Help for Everything Else.</h2>
-        <p class="lede mt-4">
-          The {BRAND_NAME} combines a large weekly wall calendar with a simple cleaning companion website. So your family’s plans have a place
-          to live, and you have a little help staying on top of the house.
-        </p>
+      <div class="grid items-center gap-7 md:grid-cols-[0.9fr_1.1fr] md:gap-12 lg:gap-16">
+        <figure class="overflow-hidden rounded-[10px] bg-band">
+          <img
+            src={momSon.src}
+            srcset={momSon.srcset}
+            sizes="(min-width: 1152px) 470px, (min-width: 768px) 42vw, calc(100vw - 2.5rem)"
+            width="1254"
+            height="1254"
+            loading="lazy"
+            decoding="async"
+            alt="A smiling mom and her wide-eyed son in their kitchen, holding up the 2027 Family Wall Calendar open to the week of January 4."
+            class="block aspect-square h-auto w-full"
+          />
+        </figure>
+        <div>
+          <h2 id="product-h" class="serif-title">Meet the Calendar That Helps Carry the Load</h2>
+          <p class="lede mt-4">A place for your family’s plans, meals, cleaning, and priorities. Right where everyone can see them.</p>
+          <p class="mt-5 text-[1rem] leading-relaxed text-warm-soft">It comes in two parts that work side by side.</p>
+        </div>
       </div>
 
-      <div class="mt-9 grid gap-5 md:mt-12 md:grid-cols-2 md:gap-8">
+      <div class="mt-8 grid gap-5 md:mt-12 md:grid-cols-2 md:gap-8">
         <article class:list={[card, 'flex flex-col overflow-hidden']}>
-          <div class="aspect-[4/3] overflow-hidden bg-band">
+          <div class="flex aspect-[4/3] items-center justify-center overflow-hidden bg-cream p-5 md:aspect-[16/10]">
             <img
-              src={held.src}
-              srcset={held.srcset}
-              sizes="(min-width: 1152px) 540px, (min-width: 768px) 46vw, calc(100vw - 2.5rem)"
-              width="1254"
-              height="1254"
+              src="/images/site/calendar-cutout-720.webp"
+              srcset="/images/site/calendar-cutout-480.webp 480w, /images/site/calendar-cutout-720.webp 720w"
+              sizes="(min-width: 768px) 220px, 170px"
+              width="960"
+              height="1410"
               loading="lazy"
               decoding="async"
-              alt="A smiling woman holding up the 2027 Family Wall Calendar, open to the week of January 4, to show its 11 × 17-inch size."
-              class="block h-full w-full object-cover object-[50%_55%]"
+              alt="The printed 2027 weekly page: a column for each weekday with its cleaning zone, the weekend, self-care habits, word of the week, family and friends, grateful for, a meal plan, a grocery list, a to-do list and notes."
+              class="block h-full w-auto"
             />
           </div>
           <div class="p-6 sm:p-8">
             <p class="label text-warm-soft">The printed calendar</p>
             <h3 class="mt-2 font-serif text-[1.6rem] leading-snug text-warm-ink">On Your Wall</h3>
-            <p class="mt-2 text-[1.02rem] leading-relaxed">See the family’s schedule, meals, groceries, and priorities together. 11 × 17 inches, one week to a page.</p>
+            <p class="mt-2 text-[1.02rem] leading-relaxed">11 × 17 inches, one week to a page, Monday through Sunday. Hangs from its Wire-O binding.</p>
           </div>
         </article>
 
         <article class:list={[card, 'flex flex-col overflow-hidden']}>
-          <div class="flex aspect-[4/3] items-start justify-center overflow-hidden bg-cream px-6 pt-7">
+          <div class="flex aspect-[4/3] items-start justify-center overflow-hidden bg-cream px-6 pt-7 md:aspect-[16/10]">
             <div class="w-[11.5rem] sm:w-[13.5rem]">
               <PhoneShot name="today" alt="The cleaning companion's Today screen: today's cleaning zone as a short checklist, with some tasks checked off." />
             </div>
