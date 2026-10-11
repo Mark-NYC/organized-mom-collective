@@ -2,30 +2,33 @@
 /**
  * The brand homepage, built as a sales page for what exists today: the printed 2027
  * Family Wall Calendar plus its included cleaning companion website (/app).
- * Hero → Mental load → Product (wall + phone) → Benefits → Testimonial → How it works
- * → Pricing → FAQ → Final CTA.
+ * Hero → The problem → Product (wall + phone) → The Organized Mom Method (four rhythms)
+ * → Testimonial → What's included + pricing → FAQ → Final CTA.
+ * One action throughout: "Get the Calendar", always to /calendar.
  *
  * Honesty rules:
  * - Sell only what exists. No planned features (shared calendar, accounts, syncing,
  *   meal or to-do tools in the companion); the wall and the phone are separate, and
  *   the copy never implies they sync. Companion facts come from src/data/cleaning.ts
  *   and the companion's real behavior (no setup, no account, saved on the phone).
+ *   Each rhythm names the real calendar sections that deliver it.
  * - Prices, weeks and editions come from src/config.ts via calendarOptions(). Every
  *   shop button goes to /calendar (or its options, #buy), never straight to Etsy.
- *   Nothing reads as buyable until its Etsy listing is live: until then buttons say "See",
- *   and the pricing cards say "Coming soon to Etsy". The 26-week calendar is the first
- *   print run's main offer (PRIMARY_OPTION_ID); the full year is the secondary option.
+ *   The pricing cards only say "Choose" once that option's Etsy listing is live; until
+ *   then they say "Coming soon to Etsy". The 26-week calendar is the first print run's
+ *   main offer (PRIMARY_OPTION_ID); the full year is the secondary option.
  * - Calendar facts match /calendar and the Etsy listing images in design/etsy-listing/.
  *   Shipping and checkout are Etsy's: don't add shipping origins, times or guarantees.
  * - Photos and phone screenshots are real (see README → Where things live). The hero's
- *   breakfast photo (family-breakfast) sells the feeling: it's not a customer, and the calendar
- *   in its background is not a reference for the printed layout. The product section below
- *   shows the real calendar and companion. No founder story until there's authentic founder
- *   information and a real photo.
+ *   breakfast photo (family-breakfast) sells the feeling, the life the product supports: it's not
+ *   a customer, and the calendar in its background is not a reference for the printed layout.
+ *   The sections below show the real calendar and companion. No founder story until there's
+ *   authentic founder information and a real photo.
  * - Etsy ratings and quotes come from src/data/reviews.ts and always carry its
  *   REVIEWS_DISCLAIMER (previous calendar editions); never in structured data.
- *   The one customer testimonial (Camille S.) also lives there, quoted word for word, and is
- *   never labeled as a review of the 2027 edition. Every CTA carries data-cta (src/lib/analytics.ts).
+ *   The one customer testimonial (Camille S.) also lives there, quoted word for word, with no
+ *   photo, and is never labeled as a review of the 2027 edition. Every CTA carries data-cta
+ *   (src/lib/analytics.ts).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import PhoneShot from '../components/site/PhoneShot.astro';
@@ -38,57 +41,68 @@ import { BRAND_NAME, PRIMARY_OPTION_ID } from '../config';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
 
 const family = photo('family-breakfast', [640, 960, 1280, 1536]);
-const momSon = photo('calendar-mom-son', [640, 960, 1254]);
 const kitchen = photo('family-kitchen');
 const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
+const features = photo('calendar-features', [640, 960, 1280], '/images/reorder');
 
 const options = calendarOptions();
 const byWeeks = [...options].sort((a, b) => a.weeks - b.weeks);
 const half = byWeeks[0];
 const full = byWeeks[byWeeks.length - 1];
-const anyLive = options.some((o) => o.url);
 /** The first print run's main offer first, then the rest. */
 const primary = options.find((o) => o.id === PRIMARY_OPTION_ID) ?? half;
 const others = options.filter((o) => o.id !== primary.id);
-/** "Shop" only once something can actually be bought. */
-const SHOP_CLOSE = anyLive ? 'Shop the 2027 Calendar' : 'See the 2027 Calendar';
+
+/** The one call to action, everywhere on the page. */
+const GET = 'Get the Calendar';
 
 const [quoteBefore, quoteAfter] = testimonial.quote.split(testimonial.highlight);
 /** Two Etsy reviews that add something Camille's quote doesn't: print quality and service. */
 const supporting = [review('quality'), review('service')];
 
-const loadLines = ['What’s for dinner?', 'Who needs to be where?', 'When was the bathroom last cleaned?', 'What’s coming up this weekend?'];
+const loadLines = ['The appointments.', 'The groceries and the meals.', 'The cleaning.', 'Remembering what’s coming next.'];
 
 // Simple 24px line icons, one stroke weight, drawn for this page.
 const icons = {
   calendar: 'M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-11ZM4 10.5h16M8.5 4v3.5M15.5 4v3.5M8 14h2M11 14h2M14 14h2M8 17h2',
-  meals: 'M4 12.5h16a8 8 0 0 1-16 0ZM9 9c0-1.2 1-1.6 1-2.8S9 4.5 9 4.5M13 9c0-1.2 1-1.6 1-2.8s-1-1.7-1-1.7M9 20.5h6',
+  family: 'M8 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM16.5 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM3.5 19c.4-3.2 2.2-5.5 4.5-5.5s4.1 2.3 4.5 5.5M13.5 15.2c.8-1.1 1.8-1.7 3-1.7 2 0 3.6 2 4 5.5',
   cleaning: 'M14.5 3.5 9 13M6.5 13h7l1 7.5h-9l1-7.5ZM9 16.5v4M12 16.5v4M18 6.5l.6 1.4L20 8.5l-1.4.6L18 10.5l-.6-1.4L16 8.5l1.4-.6L18 6.5Z',
+  heart: 'M12 19.5s-7.5-4.4-7.5-9.6A4 4 0 0 1 12 7.6a4 4 0 0 1 7.5 2.3c0 5.2-7.5 9.6-7.5 9.6Z',
 };
 
-const benefits: { icon: keyof typeof icons; title: string; body: string }[] = [
+/** The Organized Mom Method. `on` names the real calendar sections (or the companion) that deliver each rhythm. */
+const rhythms: { icon: keyof typeof icons; title: string; body: string; on: string }[] = [
   {
     icon: 'calendar',
-    title: 'Know What’s Coming',
-    body: 'Appointments, activities, meals, and priorities all have a place. Less scrambling to remember what’s next.',
+    title: 'Plan the week',
+    body: 'Schedules, meals, appointments, and family priorities in one visible place.',
+    on: 'Daily schedule · Meal plan · Grocery list · To-do',
   },
   {
-    icon: 'meals',
-    title: 'Make Fewer Decisions',
-    body: 'Plan dinners and groceries before the week gets busy. Give yourself fewer things to figure out at 5 PM.',
+    icon: 'family',
+    title: 'Get everyone on the same page',
+    body: 'When the plan is on the wall, Mom isn’t the only one who knows what’s happening.',
+    on: 'One page a week, where everyone walks past',
   },
   {
     icon: 'cleaning',
-    title: 'Keep the House Moving',
-    body: 'A simple daily cleaning routine helps you know what needs attention without starting from scratch every morning.',
+    title: 'Keep the house moving',
+    body: 'A small cleaning zone each day and one home project a month, instead of waiting until it’s all too much.',
+    on: 'Daily cleaning zone · Cleaning companion',
+  },
+  {
+    icon: 'heart',
+    title: 'Make room for what matters',
+    body: 'A little space each week for family time, friends, gratitude, and taking care of yourself.',
+    on: 'Family & friends · Self-care · Grateful for',
   },
 ];
 
-/** Mechanics only: the outcomes are in `benefits`, so the steps don't repeat them. */
-const steps = [
-  { title: 'Hang your calendar', body: 'Somewhere the whole family walks past every day.' },
-  { title: 'Plan your week', body: 'A few minutes with a pen. Fill in what matters and skip the rest.' },
-  { title: 'Scan the QR code once', body: 'The cleaning companion opens on your phone with today’s tasks. No app, no account.' },
+const included = [
+  `The printed 11 × 17-inch family wall calendar, one week to a page`,
+  'Room for the schedule, meals, groceries, priorities, and to-dos',
+  'A daily cleaning zone and a monthly home project',
+  'The cleaning companion website for simple daily routines, at no extra cost',
 ];
 
 const priceCopy: Record<string, { cta: string; note: string }> = {
@@ -100,20 +114,12 @@ const optionHref = (o: (typeof options)[number]) => o.url ?? routes.buy;
 
 const faqs = [
   {
-    q: 'What exactly comes with the calendar?',
-    a: `A printed 11 × 17-inch weekly wall calendar (${half.weeks} weeks, or the full year as two ${half.weeks}-week sets) with room for the family schedule, meals, groceries, to-dos, priorities and a daily cleaning zone. Access to the cleaning companion website is included.`,
-  },
-  {
-    q: 'Is the cleaning companion included?',
-    a: 'Yes, with every calendar, at no extra cost. Scan the QR code printed on the calendar and it opens in your phone’s browser. No subscription, no account, nothing to download.',
+    q: 'Is the cleaning companion an app?',
+    a: 'No. It’s a website included with every calendar. Scan the QR code printed on the calendar and it opens in your phone’s browser. No subscription, no account, nothing to download.',
   },
   {
     q: 'Do I have to use every section?',
     a: 'No. Start with what helps, like the schedule and dinners, and leave the rest blank. In the companion, a missed day doesn’t put you behind.',
-  },
-  {
-    q: 'How big is the calendar?',
-    a: '11 × 17 inches in portrait, one week to a page, Monday through Sunday. It hangs from its Wire-O binding with a built-in hanging hole.',
   },
   {
     q: 'When does the 2027 calendar start?',
@@ -145,36 +151,40 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
 
 <PublicLayout
   fullTitle={`${BRAND_NAME}: 2027 Family Wall Calendar + Cleaning Companion`}
-  description={`Less to remember, more room to breathe. A 2027 weekly family wall calendar for schedules, meals and groceries, plus an included cleaning companion website. From ${half.priceLabel} for ${half.weeks} weeks.`}
+  description={`Less chaos, more room for what matters. A 2027 weekly family wall calendar for schedules, meals and groceries, plus an included cleaning companion website. From ${half.priceLabel} for ${half.weeks} weeks.`}
   width="full"
   jsonLd={jsonLd}
 >
-  <!-- 1. Hero. Phones (under 768px): descriptor, headline, copy, CTA, photo, price line, so the CTA
-       is on the first screen. Desktop: copy left, photo right. Phone-only copy is in md:hidden spans. -->
+  <!-- 1. Hero. Phones (under 768px): label, headline, copy, CTA, then the photo, so the CTA is on the
+       first screen. Desktop: copy left, photo right. -->
   <section aria-labelledby="hero-h" class="overflow-hidden bg-cream">
-    <div
-      class:list={[
-        wrap,
-        'grid items-center gap-x-12 gap-y-5 pt-5 pb-8 sm:pt-8 md:grid-cols-[1.05fr_1fr] md:gap-y-0 md:py-20 lg:gap-x-16',
-        "[grid-template-areas:'head'_'body'_'img'_'note'] md:[grid-template-areas:'head_img'_'body_img']",
-      ]}
-    >
-      <div class="[grid-area:head] md:self-end">
+    <div class:list={[wrap, 'grid items-center gap-x-12 gap-y-6 pt-6 pb-8 sm:pt-8 md:grid-cols-[1.05fr_1fr] md:py-20 lg:gap-x-16']}>
+      <div>
         <p class="label text-warm-soft">
-          <span class="text-balance md:hidden">2027 Family Wall Calendar + <span class="whitespace-nowrap">Cleaning Companion</span></span><span class="hidden md:inline">Your week, a little lighter</span>
+          <span class="text-balance">2027 Family Wall Calendar + <span class="whitespace-nowrap">Cleaning Companion</span></span>
         </p>
-        <!-- Two lines at every width: sized so "More Room to Breathe." (about 9.95 × the font size wide in Georgia) fits the column. -->
+        <!-- Three lines at every width ("What Matters." never splits); sized so "More Room for" (about 6.6 × the font size wide in Georgia) fits a phone. -->
         <h1
           id="hero-h"
-          class="serif-hero mt-3 text-[length:min(2.35rem,calc((100vw_-_40px)/10.1))] sm:mt-4 sm:text-[3.1rem] md:text-[length:min(3.25rem,4.3vw)]"
+          class="serif-hero mt-3 text-[length:min(2.6rem,calc((100vw_-_40px)/7.4))] sm:mt-4 sm:text-[3.1rem] md:text-[length:min(3.4rem,4.4vw)]"
         >
-          Less to Remember.<br /> More Room to Breathe.
+          Less Chaos.<br /> More Room for <span class="whitespace-nowrap">What Matters.</span>
         </h1>
+        <p class="lede mt-4 max-w-xl text-warm-ink sm:mt-5">
+          A simple wall calendar and companion website to help you plan your week, keep up with the house, and get the whole family on the same page.
+        </p>
+        <div class="mt-5 sm:mt-7">
+          <ShopButton label={GET} to="product" cta="home-hero" class={cta} />
+        </div>
+        <p class="mt-4 text-center text-[0.95rem] leading-snug text-warm-soft sm:text-left">
+          <strong class="font-semibold whitespace-nowrap text-warm-ink">Starting at {half.priceLabel}</strong> ·{' '}
+          <span class="whitespace-nowrap">Cleaning companion included</span>
+        </p>
       </div>
 
-      <!-- The feeling: one complete, unedited photo. Phones: 3:2, the photo's own ratio, so nothing is cropped:
-           the whole wall calendar, all three faces and the breakfast table. 4:3 from 768px. -->
-      <figure class="-mx-5 overflow-hidden bg-band [grid-area:img] sm:mx-0 sm:rounded-[10px]">
+      <!-- The feeling: one complete, unedited photo at its own 3:2 ratio at every width, so nothing is
+           cropped: the wall calendar on the right, all three faces and the breakfast table. -->
+      <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
         <img
           src={family.src}
           srcset={family.srcset}
@@ -184,40 +194,20 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           fetchpriority="high"
           decoding="async"
           alt="A mom laughing with her son and daughter over breakfast at the kitchen table, a filled-in wall calendar hanging in the background."
-          class="block aspect-[3/2] h-auto w-full object-cover md:aspect-[4/3] md:object-[60%_50%]"
+          class="block aspect-[3/2] h-auto w-full object-cover"
         />
       </figure>
-
-      <div class="[grid-area:body] md:self-start md:pt-6">
-        <p class="lede max-w-xl text-warm-ink">
-          <span class="md:hidden">Plan your week, simplify daily cleaning, and get some of the mental load out of your head.</span><span class="hidden md:inline"
-            >One simple wall calendar and cleaning companion to plan your week, keep the house moving, and clear some of the mental load.</span
-          >
-        </p>
-        <div class="mt-5 sm:mt-7">
-          <ShopButton label="See the Calendar" to="product" cta="home-hero" class={cta} />
-        </div>
-        <p class="mt-4 hidden text-[0.95rem] leading-snug text-warm-soft md:block">
-          <span class="whitespace-nowrap">2027 Family Wall Calendar</span> · <strong class="font-semibold whitespace-nowrap text-warm-ink">Starting at {half.priceLabel}</strong> ·{' '}
-          <span class="whitespace-nowrap">Cleaning Companion Included</span>
-        </p>
-      </div>
-
-      <p class="-mt-1 text-center text-[0.95rem] leading-snug text-warm-soft [grid-area:note] md:hidden">
-        <strong class="font-semibold whitespace-nowrap text-warm-ink">Starting at {half.priceLabel}</strong> ·{' '}
-        <span class="whitespace-nowrap">Cleaning Companion Included</span>
-      </p>
     </div>
   </section>
 
   <!-- Entryway scene: shown once its real photos exist (design/entryway/README.md) -->
   <EntrywayScene />
 
-  <!-- 2. The mental load -->
+  <!-- 2. The problem: recognition before the solution -->
   <section aria-labelledby="load-h" class="bg-paper">
     <div class:list={[wrap, pad, 'grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16']}>
       <div>
-        <h2 id="load-h" class="serif-title">You’re Carrying Enough in Your Head Already.</h2>
+        <h2 id="load-h" class="serif-title">Does Everything Seem to Run Through You?</h2>
         <ul class="mt-7 border-t border-warm-rule">
           {
             loadLines.map((line) => (
@@ -228,9 +218,9 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
             ))
           }
         </ul>
-        <p class="lede mt-6">It’s a lot to keep track of. And somehow, most of it ends up in your head.</p>
+        <p class="lede mt-6">When everything lives in your head, even the little things start to feel like a lot.</p>
         <p class="mt-5 font-serif text-[1.3rem] leading-snug text-warm-ink italic sm:text-[1.45rem]">
-          Your home needs a plan that doesn’t depend on you remembering everything.
+          What if there were one simple place to bring it all together?
         </p>
       </div>
       <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
@@ -249,37 +239,36 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
-  <!-- 3. Product reveal: the wall and the phone, side by side (they don't sync). The wall card's photo (mom and son
-       holding the real 2027 page) is a lifestyle photo, not a customer: never pair it with a testimonial. -->
+  <!-- 3. The product: the wall and the phone, side by side (they don't sync) -->
   <section aria-labelledby="product-h" class="bg-sage-wash">
     <div class:list={[wrap, pad]}>
       <div class="mx-auto max-w-2xl text-center">
-        <h2 id="product-h" class="serif-title">One Place for the Plans.<br class="hidden sm:inline" /> A Little Help for Everything Else.</h2>
-        <p class="lede mt-4">
-          The {BRAND_NAME} combines a large weekly wall calendar with a simple cleaning companion website. So your family’s plans have a place
-          to live, and you have a little help staying on top of the house.
-        </p>
+        <h2 id="product-h" class="serif-title">One Place for the Whole Family to See the Plan.</h2>
+        <p class="lede mt-4">Two simple parts: a big weekly calendar for the whole family, and a little help with the house.</p>
       </div>
 
       <div class="mt-9 grid gap-5 md:mt-12 md:grid-cols-2 md:gap-8">
         <article class:list={[card, 'flex flex-col overflow-hidden']}>
-          <div class="aspect-square overflow-hidden bg-band">
+          <div class="aspect-[4/3] overflow-hidden bg-band md:aspect-square">
             <img
-              src={momSon.src}
-              srcset={momSon.srcset}
+              src={inUse.src}
+              srcset={inUse.srcset}
               sizes="(min-width: 1152px) 540px, (min-width: 768px) 46vw, calc(100vw - 2.5rem)"
-              width="1254"
-              height="1254"
+              width="1280"
+              height="1280"
               loading="lazy"
               decoding="async"
-              alt="A smiling mom and her wide-eyed son in their kitchen, holding up the 2027 Family Wall Calendar open to the week of January 4."
-              class="block h-full w-full object-cover"
+              alt="A hand writing in the 2027 wall calendar, its week filled with school runs, a meal plan, a grocery list and to-dos."
+              class="block h-full w-full object-cover object-[50%_30%]"
             />
           </div>
           <div class="p-6 sm:p-8">
             <p class="label text-warm-soft">The printed calendar</p>
             <h3 class="mt-2 font-serif text-[1.6rem] leading-snug text-warm-ink">On Your Wall</h3>
-            <p class="mt-2 text-[1.02rem] leading-relaxed">See the family’s schedule, meals, groceries, and priorities together. <span class="whitespace-nowrap">11 × 17 inches</span>, one week to a page.</p>
+            <p class="mt-2 text-[1.02rem] leading-relaxed">
+              Schedules, meals, priorities, and household plans, all where everyone can see them. <span class="whitespace-nowrap">11 × 17 inches</span>, one week to
+              a page.
+            </p>
           </div>
         </article>
 
@@ -292,7 +281,9 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           <div class="p-6 sm:p-8">
             <p class="label text-warm-soft">The cleaning companion website</p>
             <h3 class="mt-2 font-serif text-[1.6rem] leading-snug text-warm-ink">On Your Phone</h3>
-            <p class="mt-2 text-[1.02rem] leading-relaxed">See today’s cleaning tasks, check off what’s done, and keep track of your progress.</p>
+            <p class="mt-2 text-[1.02rem] leading-relaxed">
+              Today’s cleaning tasks as a short checklist. Scan the QR code on the calendar and it opens in your browser. No app, no account.
+            </p>
           </div>
         </article>
       </div>
@@ -300,37 +291,46 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
       <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-relaxed text-balance text-warm-soft">
         The cleaning zones are printed on the calendar, and the companion follows the same ones. Nothing to sync, nothing to set up.
       </p>
-      <div class="mt-7 text-center">
-        <ShopButton label="Explore the Calendar" to="product" cta="home-product" class={cta} />
-      </div>
     </div>
   </section>
 
-  <!-- 4. Three core benefits: open columns with rules, so they read differently from the product cards -->
-  <section aria-labelledby="benefits-h" class="bg-cream">
+  <!-- 4. The Organized Mom Method: four rhythms, readable in ten seconds. Open columns with rules, not cards. -->
+  <section aria-labelledby="method-h" class="bg-cream">
     <div class:list={[wrap, pad]}>
-      <h2 id="benefits-h" class="serif-title mx-auto max-w-2xl text-center">What Gets Easier This Week</h2>
-      <ul class="mt-8 grid border-t border-warm-rule md:mt-12 md:grid-cols-3 md:border-t-0">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="label text-warm-soft">The Organized Mom Method</p>
+        <h2 id="method-h" class="serif-title mt-3">One Family. One Plan.<br class="hidden sm:inline" /> Four Simple Rhythms.</h2>
+        <p class="lede mt-4">
+          You don’t need another complicated system. Just a simple way to plan the week, keep the house moving, and make more room for the people who matter most.
+        </p>
+      </div>
+      <ol class="mt-8 grid border-t border-warm-rule md:mt-12 md:grid-cols-2 md:border-t-0 lg:grid-cols-4">
         {
-          benefits.map((b) => (
-            <li class="flex gap-4 border-b border-warm-rule py-6 md:flex-col md:gap-4 md:border-b-0 md:border-l md:px-8 md:py-2 md:first:border-l-0 md:first:pl-0 md:last:pr-0">
+          rhythms.map((r, i) => (
+            <li class="flex gap-4 border-b border-warm-rule py-5 md:flex-col md:gap-4 md:border-b-0 md:py-6 md:pr-8 lg:border-l lg:px-7 lg:py-2 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
               <span aria-hidden="true" class="grid size-11 shrink-0 place-items-center rounded-full bg-rose-wash text-rose-deep">
                 <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d={icons[b.icon]} />
+                  <path d={icons[r.icon]} />
                 </svg>
               </span>
               <div>
-                <h3 class="font-serif text-[1.35rem] leading-snug text-warm-ink sm:text-[1.5rem]">{b.title}</h3>
-                <p class="mt-1.5 text-[1rem] leading-relaxed">{b.body}</p>
+                <h3 class="font-serif text-[1.3rem] leading-snug text-warm-ink sm:text-[1.4rem]">
+                  <span class="text-rose-deep">{i + 1}.</span> {r.title}
+                </h3>
+                <p class="mt-1.5 text-[1rem] leading-relaxed">{r.body}</p>
+                <p class="mt-2 text-[0.85rem] leading-snug text-warm-soft">{r.on}</p>
               </div>
             </li>
           ))
         }
-      </ul>
+      </ol>
+      <p class="mx-auto mt-8 max-w-xl text-center font-serif text-[1.15rem] leading-snug text-warm-ink italic sm:text-[1.25rem]">
+        Start with what helps. You don’t need a perfect routine or every box filled in.
+      </p>
     </div>
   </section>
 
-  <!-- 5. Featured testimonial (Camille S.), then Etsy reviews of previous editions (src/data/reviews.ts) -->
+  <!-- 5. Featured testimonial (Camille S., no photo), then Etsy reviews of previous editions (src/data/reviews.ts) -->
   <section aria-labelledby="reviews-h" class="bg-blush-wash">
     <div class:list={[wrap, pad]}>
       <h2 id="reviews-h" class="serif-title mx-auto max-w-2xl text-center">A Little More Calm in Real Homes.</h2>
@@ -379,64 +379,46 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
-  <!-- 6. How it works: the filled-in calendar beside three short steps (mechanics, not benefits) -->
-  <section aria-labelledby="steps-h" class="bg-paper">
-    <div class:list={[wrap, pad, 'grid items-center gap-9 md:grid-cols-[1fr_1.05fr] md:gap-16']}>
-      <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
-        <img
-          src={inUse.src}
-          srcset={inUse.srcset}
-          sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
-          width="1280"
-          height="1280"
-          loading="lazy"
-          decoding="async"
-          alt="A hand writing in the wall calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos."
-          class="block aspect-[4/3] h-auto w-full object-cover object-[50%_40%] md:aspect-square"
-        />
-      </figure>
-      <div>
-        <h2 id="steps-h" class="serif-title">A Calmer Week Starts Here.</h2>
-        <p class="lede mt-4">Three simple steps to give your week a little more structure.</p>
-        <ol class="mt-7 border-t border-warm-rule">
-          {
-            steps.map((st, i) => (
-              <li class="flex gap-5 border-b border-warm-rule py-4">
-                <span aria-hidden="true" class="w-6 shrink-0 font-serif text-[2rem] leading-none text-rose">
-                  {i + 1}
-                </span>
-                <div>
-                  <h3 class="text-[1.05rem] leading-snug font-bold text-warm-ink">
-                    <span class="sr-only">{i + 1}. </span>
-                    {st.title}
-                  </h3>
-                  <p class="mt-1 text-[1rem] leading-relaxed">{st.body}</p>
-                </div>
-              </li>
-            ))
-          }
-        </ol>
-        <p class="mt-6 font-serif text-[1.15rem] leading-snug text-warm-ink italic sm:text-[1.25rem]">
-          Start with what helps. You don’t need a perfect routine or every box filled in.
-        </p>
-        <div class="mt-6">
-          <ShopButton label="See How It Works" to="product" cta="home-steps" class={cta} />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 8. Pricing. The 26-week calendar leads (first print run); the full year is the secondary option.
-       A button says "Choose" and goes to Etsy only once that option's listing is live; until then
-       the card says "Coming soon to Etsy" and links to the details on /calendar#buy. -->
+  <!-- 6. What's included + pricing. The labeled listing image shows every section; the list says what's in the box.
+       The 26-week calendar leads (first print run). A pricing button says "Choose" and goes to Etsy only once that
+       option's listing is live; until then the card says "Coming soon to Etsy" and links to /calendar#buy. -->
   <section id="offer" aria-labelledby="offer-h" class="bg-sage-wash">
     <div class:list={[wrap, pad]}>
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 id="offer-h" class="serif-title">Choose How Far Ahead You Want to Plan.</h2>
-        <p class="lede mt-4">Same calendar. Same companion. Just choose how many weeks you want.</p>
+      <div class="grid items-center gap-9 md:grid-cols-[1fr_1.05fr] md:gap-16">
+        <figure class="-mx-5 overflow-hidden bg-paper sm:mx-0 sm:rounded-[10px]">
+          <img
+            src={features.src}
+            srcset={features.srcset}
+            sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
+            width="1280"
+            height="1280"
+            loading="lazy"
+            decoding="async"
+            alt="A filled-in week of the 2027 calendar with its sections labeled: Daily Schedule, Daily Cleaning Zone, Word of the Week, Self-Care, Family + Friends, Prayer + Gratitude, Meal Plan, Grocery List and To-Do List."
+            class="block h-auto w-full"
+          />
+        </figure>
+        <div>
+          <h2 id="offer-h" class="serif-title">What You Get</h2>
+          <ul class="mt-6 border-t border-warm-rule">
+            {
+              included.map((item) => (
+                <li class="flex gap-4 border-b border-warm-rule py-3.5 text-[1.0625rem] leading-snug text-warm-ink">
+                  <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-[0.1rem] size-5 shrink-0 text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4.5 10.5 8 14l7.5-8" />
+                  </svg>
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <p class="mt-5 text-[0.95rem] leading-relaxed text-warm-soft">
+            The January–June 2027 calendar starts the week of December 28, 2026, so you can hang it right after Christmas.
+          </p>
+        </div>
       </div>
 
-      <ul class="mx-auto mt-9 grid max-w-3xl gap-4 sm:grid-cols-[1.15fr_1fr] sm:items-center sm:gap-6 md:mt-12">
+      <ul class="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-[1.15fr_1fr] sm:items-center sm:gap-6 md:mt-14">
         {
           [primary, ...others].map((o) => {
             const main = o.id === primary.id;
@@ -488,14 +470,13 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         }
       </ul>
 
-      <ul class="mx-auto mt-7 max-w-2xl space-y-1.5 text-center text-[0.95rem] leading-snug text-warm-soft">
-        <li class="font-semibold text-warm-ink">Both options include access to the cleaning companion website.</li>
-        <li>Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.</li>
-      </ul>
+      <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
+        Both include the cleaning companion. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.
+      </p>
     </div>
   </section>
 
-  <!-- 9. FAQ -->
+  <!-- 7. FAQ: only the questions the page above doesn't already answer -->
   <section aria-labelledby="faq-h" class="bg-paper">
     <div class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-20">
       <h2 id="faq-h" class="serif-title text-center">Questions Before You Buy?</h2>
@@ -517,15 +498,33 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
-  <!-- 10. Final CTA -->
-  <section aria-labelledby="close-h" class="bg-blush-wash">
-    <div class="mx-auto max-w-2xl px-5 py-14 text-center sm:px-8 sm:py-20">
-      <h2 id="close-h" class="serif-title">Your Home Doesn’t Have to Run on Your Memory.</h2>
-      <p class="lede mt-5 text-warm-ink">Give your family’s plans a place to live, and yourself a little more breathing room.</p>
-      <ShopButton label={SHOP_CLOSE} to="product" cta="home-close" class={`mt-8 ${cta}`} />
-      <p class="mt-4 text-[0.9rem] text-warm-soft">
-        Starting at <strong class="font-semibold text-warm-ink">{half.priceLabel}</strong> · Cleaning companion included
-      </p>
+  <!-- 8. Final CTA, with the product beside it: the flat 2027 page and the companion's Today screen -->
+  <section aria-labelledby="close-h" class="overflow-hidden bg-blush-wash">
+    <div class:list={[wrap, 'grid items-center gap-10 py-14 sm:py-20 md:grid-cols-[1fr_1.1fr] md:gap-16']}>
+      <div class="relative mx-auto w-full max-w-[19rem] pr-[22%] pb-4 sm:max-w-[22rem] md:order-last md:max-w-[24rem]">
+        <img
+          src="/images/site/calendar-cutout-480.webp"
+          srcset="/images/site/calendar-cutout-480.webp 480w, /images/site/calendar-cutout-720.webp 720w"
+          sizes="(min-width: 768px) 300px, 60vw"
+          width="960"
+          height="1410"
+          loading="lazy"
+          decoding="async"
+          alt="A page of the 2027 weekly wall calendar."
+          class="block h-auto w-full"
+        />
+        <div class="absolute right-0 bottom-0 w-[38%]">
+          <PhoneShot name="today" alt="The cleaning companion's Today screen." />
+        </div>
+      </div>
+      <div class="text-center md:text-left">
+        <h2 id="close-h" class="serif-title">A Little More Organized.<br /> A Lot More Breathing Room.</h2>
+        <p class="lede mt-5 text-warm-ink">Bring your family’s plans, everyday routines, and priorities together in one simple system.</p>
+        <ShopButton label={GET} to="product" cta="home-close" class={`mt-8 ${cta}`} />
+        <p class="mt-4 text-[0.9rem] text-warm-soft">
+          Starting at <strong class="font-semibold text-warm-ink">{half.priceLabel}</strong> · Cleaning companion included
+        </p>
+      </div>
     </div>
   </section>
 </PublicLayout>

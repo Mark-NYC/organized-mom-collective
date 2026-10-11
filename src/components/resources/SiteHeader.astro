@@ -3,12 +3,11 @@
  * Header for every public page (/, /calendar, /companion, /resources/…). Never used in the
  * companion app, which keeps its own Nav. Matches the app header's ruled, spaced-caps style.
  * The phone and tablet menu is a <details> disclosure, so it works without JavaScript; the full
- * nav shows from 1024px (it wraps below that). The shop button says "Shop" only once an Etsy
- * listing is live (src/config.ts), and carries data-cta for click tracking.
+ * nav shows from 1024px (it wraps below that). The shop button says "Get the Calendar", the same
+ * words as the homepage CTA, goes to /calendar#buy and carries data-cta for click tracking.
  */
 import { Wordmark } from '../marks';
 import { routes } from '../../routes';
-import { shopUrl } from '../../lib/reorder';
 
 const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
 const items = [
@@ -16,7 +15,8 @@ const items = [
   { href: routes.resources, label: 'Free Resources' },
   { href: routes.companion, label: 'Get Started' },
 ];
-const shopLabel = shopUrl() ? 'Shop the Calendar' : 'See the Calendar';
+/** Same words as the homepage's one call to action. */
+const shopLabel = 'Get the Calendar';
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
