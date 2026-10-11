@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { testimonial } from '../src/data/reviews';
 import { BEST_VALUE_ID, CALENDAR_OPTIONS } from '../src/config';
 import { calendarOptions, shopUrl } from '../src/lib/reorder';
 import { isAppPath, routes } from '../src/routes';
@@ -32,5 +33,11 @@ describe('public routes', () => {
       expect(path.startsWith('/app')).toBe(false);
     }
     expect(routes.buy.startsWith(`${routes.calendar}#`)).toBe(true);
+  });
+});
+
+describe('homepage testimonial', () => {
+  it('highlights an exact phrase from the quote, once', () => {
+    expect(testimonial.quote.split(testimonial.highlight)).toHaveLength(2);
   });
 });

@@ -40,3 +40,17 @@ export const review = (id: string) => reviews.find((r) => r.id === id)!;
 /** "April 15, 2022" */
 export const reviewDate = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
+/**
+ * A customer testimonial supplied by the shop owner, shown on the homepage beside the
+ * calendar + companion section. It's not an Etsy review: show it without the Etsy link,
+ * rating or REVIEWS_DISCLAIMER, and keep it word for word. `highlight` must be an exact
+ * substring of `quote`. No photo, stars or extra details about the customer.
+ */
+export const testimonial = {
+  title: 'Brought structure to the chaos',
+  quote:
+    'This system brought structure and calm to our chaos. It felt like having a personal coach keeping me on track. And to my surprise, the kids actually enjoyed it!',
+  highlight: 'the kids actually enjoyed it',
+  name: 'Camille S.',
+};
