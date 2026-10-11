@@ -1,0 +1,21 @@
+---
+/**
+ * A hand-drawn pen underline under a short phrase, like a mark made on the printed calendar.
+ * The phrase never wraps, and the stroke is absolutely positioned in em, so it scales with
+ * the type and causes no layout shift. Decorative only: hidden from screen readers.
+ * Homepage only, at most a couple per page (see the comment in src/pages/index.astro).
+ */
+interface Props {
+  /** Lighter and thinner, for a secondary heading. */
+  light?: boolean;
+}
+const { light = false } = Astro.props;
+---
+
+<span class:list={['hand-underline', light && 'hand-underline-light']}
+  ><slot /><svg aria-hidden="true" focusable="false" viewBox="0 0 300 12" preserveAspectRatio="none"
+    ><path
+      d="M2.5 9.4C62 6.9 151 5.8 297.6 4.3c.9.6.6 1.6-.6 1.8C182 7.6 92 9.3 4.6 11.2c-2.2.3-3.3-1.2-2.1-1.8Z"
+    /></svg
+  ></span
+>
