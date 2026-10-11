@@ -42,18 +42,12 @@ const byWeeks = [...options].sort((a, b) => a.weeks - b.weeks);
 const half = byWeeks[0];
 const anyLive = options.some((o) => o.url);
 
-const SHOP = 'Shop the Family Calendar';
+const SHOP = 'Get Your Calendar';
 const [quoteBefore, quoteAfter] = testimonial.quote.split(testimonial.highlight);
 /** "15 minutes" → "15-minute" */
 const resetLength = dailyEssentials.minutes.replace(/ minutes?$/, '-minute');
 
-const problemLines = [
-  'The dentist on Tuesday and the field trip form due Thursday.',
-  'What’s for dinner tonight, and what’s missing from the fridge.',
-  'Which room hasn’t been cleaned in two weeks.',
-  'Practice times, school events and who’s driving.',
-  'The little things nobody else remembers until you do.',
-];
+const problemLines = ['What’s for dinner?', 'When’s that appointment?', 'Did anyone clean the bathroom?', 'What needs to get done before Friday?'];
 
 // Simple 24px line icons, one stroke weight, drawn for this page.
 const icons = {
@@ -108,15 +102,16 @@ const features: { icon: keyof typeof icons; title: string; body: string; where: 
 ];
 
 const productFacts = [
-  'A tall column for every day, with that day’s cleaning zone printed at the bottom',
+  '11 × 17 inches, one week to a page, with a tall column for every day',
+  'A daily cleaning zone printed on every day, the same one the companion opens',
   'Meal plan, grocery list, to-dos and notes on every page',
   'Wire-O binding with a built-in hanging hole',
 ];
 
 const steps = [
-  { title: 'Hang your calendar.', body: 'Put the week somewhere everyone can see it, and fill in what’s coming.' },
-  { title: 'Scan the QR code once.', body: 'The companion website opens on today’s cleaning zone. Nothing to set up, no account.' },
-  { title: 'Keep the week moving.', body: 'Plan on the wall. Tick off today’s cleaning on your phone.' },
+  { title: 'Plan it.', body: 'Get your week out of your head and onto the calendar.' },
+  { title: 'Keep it moving.', body: 'Follow simple daily cleaning routines with your companion website. Scan the calendar’s QR code once; no account.' },
+  { title: 'Enjoy what matters.', body: 'Less scrambling. More time and attention for the people you love.' },
 ];
 
 const included = [
@@ -172,8 +167,8 @@ const check = 'M4 10.5l4 4 8-9';
 ---
 
 <PublicLayout
-  fullTitle={`${BRAND_NAME}: Your Whole Family. One Simple System.`}
-  description={`A 2027 weekly family wall calendar everyone can see, plus an included companion website for daily cleaning routines. From ${half.priceLabel} for ${half.weeks} weeks.`}
+  fullTitle={`${BRAND_NAME}: 2027 Family Wall Calendar + Cleaning Companion`}
+  description={`Less to remember, more room for what matters. A 2027 weekly family wall calendar everyone can see, plus an included companion website for daily cleaning routines. From ${half.priceLabel} for ${half.weeks} weeks.`}
   width="full"
   jsonLd={jsonLd}
 >
@@ -182,10 +177,10 @@ const check = 'M4 10.5l4 4 8-9';
     <div class:list={[wrap, 'grid items-center gap-10 pt-9 pb-14 sm:pt-14 md:grid-cols-[1.05fr_1fr] md:gap-12 md:py-20 lg:gap-16']}>
       <div>
         <p class="label text-warm-soft">2027 Family Wall Calendar + companion website</p>
-        <h1 id="hero-h" class="serif-hero mt-4">Your Whole Family. One Simple System.</h1>
+        <h1 id="hero-h" class="serif-hero mt-4">Finally Feel in Control of Your Home Again</h1>
         <p class="lede mt-5 max-w-xl text-warm-ink">
-          A wall calendar everyone can see. A companion website for daily cleaning and home routines. One simpler way to keep family life
-          moving.
+          Plan your week, keep the house moving, and make more room for what matters. One simple wall calendar, with a companion website to
+          help you stay on track.
         </p>
         <p class="mt-5 text-[1rem] leading-snug text-warm-ink">
           <strong class="font-semibold">From {half.priceLabel}</strong> for {half.weeks} weeks
@@ -248,7 +243,7 @@ const check = 'M4 10.5l4 4 8-9';
   <section aria-labelledby="problem-h" class="bg-paper">
     <div class:list={[wrap, 'grid items-center gap-10 py-16 sm:py-24 md:grid-cols-[1.1fr_1fr] md:gap-16']}>
       <div>
-        <h2 id="problem-h" class="serif-title">You’re Not Just Managing a Calendar. You’re Managing Everyone’s Life.</h2>
+        <h2 id="problem-h" class="serif-title">You’re Carrying Enough in Your Head Already.</h2>
         <ul class="mt-8 border-t border-warm-rule">
           {
             problemLines.map((line) => (
@@ -260,11 +255,9 @@ const check = 'M4 10.5l4 4 8-9';
           }
         </ul>
         <p class="mt-7 font-serif text-[1.3rem] leading-snug text-warm-ink italic sm:text-[1.45rem]">
-          And somehow, everyone still asks you what’s going on.
+          Somehow, you’re expected to remember it all.
         </p>
-        <p class="lede mt-4">
-          You don’t need to try harder. You need the plan out of your head and somewhere the whole family can see it.
-        </p>
+        <p class="lede mt-4">But running your home shouldn’t mean constantly playing catch-up.</p>
       </div>
       <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[8px]">
         <img
@@ -300,8 +293,11 @@ const check = 'M4 10.5l4 4 8-9';
       </figure>
       <div>
         <p class="label text-warm-soft">The 2027 Family Wall Calendar</p>
-        <h2 id="product-h" class="serif-title mt-3">The Whole Week, Where Everyone Can See It.</h2>
-        <p class="lede mt-4">An 11 × 17-inch weekly wall calendar, one week to a page, Monday to Sunday. Write it once and the whole family can read it.</p>
+        <h2 id="product-h" class="serif-title mt-3">One Place for the Plans. A Little More Peace for Everyone.</h2>
+        <p class="lede mt-4">
+          Your calendar brings meals, schedules, cleaning and family priorities together where everyone can see them. The companion website helps you
+          keep your daily routines moving.
+        </p>
         <ul class="mt-7 border-t border-warm-rule">
           {
             productFacts.map((item) => (
@@ -323,7 +319,7 @@ const check = 'M4 10.5l4 4 8-9';
   <section aria-labelledby="solution-h" class="bg-sage-wash">
     <div class:list={[wrap, 'py-16 sm:py-24']}>
       <div class="mx-auto max-w-2xl text-center">
-        <h2 id="solution-h" class="serif-title">One System. Two Places.</h2>
+        <h2 id="solution-h" class="serif-title">A Calmer Week Starts Here</h2>
         <p class="lede mt-4">The family plan lives on the wall. Today’s cleaning lives on your phone.</p>
       </div>
 
@@ -430,7 +426,7 @@ const check = 'M4 10.5l4 4 8-9';
   <!-- Proof: Camille's testimonial, then Etsy reviews of previous calendar editions (src/data/reviews.ts) -->
   <section aria-labelledby="reviews-h" class="bg-paper">
     <div class:list={[wrap, 'py-16 sm:py-24']}>
-      <h2 id="reviews-h" class="serif-title mx-auto max-w-2xl text-center">What Families Say.</h2>
+      <h2 id="reviews-h" class="serif-title mx-auto max-w-2xl text-center">Real Families. A Little More Breathing Room.</h2>
 
       <figure class="mx-auto mt-10 max-w-2xl rounded-[10px] bg-blush-wash px-6 py-9 text-center sm:mt-12 sm:px-12 sm:py-12">
         <span aria-hidden="true" class="block font-serif text-[3.25rem] leading-[0.6] text-rose">“</span>
@@ -575,12 +571,12 @@ const check = 'M4 10.5l4 4 8-9';
   <section aria-labelledby="close-h" class="bg-warm-button text-white">
     <div class="mx-auto max-w-2xl px-5 py-16 text-center sm:px-8 sm:py-20">
       <h2 id="close-h" class="font-serif text-[1.95rem] leading-[1.12] tracking-[-0.015em] text-balance sm:text-[2.6rem]">
-        Less Managing Everything. More Enjoying Your Family.
+        Your Home Doesn’t Have to Run on Your Memory.
       </h2>
-      <p class="lede mt-5 text-white/85">Get the week out of your head and onto the wall, where everyone can see it.</p>
-      <ShopButton label={`Get the ${half.weeks}-Week Calendar`} to="options" cta="home-close" class="mt-8 min-h-14 w-full bg-paper px-8 text-warm-ink hover:bg-cream sm:w-auto" />
+      <p class="lede mt-5 text-white/85">Give your plans a place to live, your routines a little structure, and yourself some breathing room.</p>
+      <ShopButton label={SHOP} to="options" cta="home-close" class="mt-8 min-h-14 w-full bg-paper px-8 text-warm-ink hover:bg-cream sm:w-auto" />
       <p class="mt-4 text-[0.9rem] text-white/75">
-        <strong class="font-semibold text-white">{half.priceLabel}</strong> · {half.editions.map((e) => e.label).join(' or ')} · companion website included
+        {half.weeks} weeks of planning · Companion website included · <strong class="font-semibold text-white">{half.priceLabel}</strong>
       </p>
     </div>
   </section>
