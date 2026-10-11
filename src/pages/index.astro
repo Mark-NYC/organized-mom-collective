@@ -46,7 +46,7 @@ import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate
 
 const family = photo('family-breakfast', [640, 960, 1280, 1536]);
 const kitchen = photo('family-kitchen');
-const inUse = photo('calendar-in-use', [640, 960, 1280], '/images/reorder');
+const filledIn = photo('calendar-filled-in', [640, 960, 1254]);
 const features = photo('calendar-features', [640, 960, 1280], '/images/reorder');
 
 const options = calendarOptions();
@@ -253,17 +253,17 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
 
       <div class="mt-9 grid gap-5 md:mt-12 md:grid-cols-2 md:gap-8">
         <article class:list={[card, 'flex flex-col overflow-hidden']}>
-          <div class="aspect-[4/3] overflow-hidden bg-band md:aspect-square">
+          <div class="aspect-square overflow-hidden bg-band">
             <img
-              src={inUse.src}
-              srcset={inUse.srcset}
+              src={filledIn.src}
+              srcset={filledIn.srcset}
               sizes="(min-width: 1152px) 540px, (min-width: 768px) 46vw, calc(100vw - 2.5rem)"
-              width="1280"
-              height="1280"
+              width="1254"
+              height="1254"
               loading="lazy"
               decoding="async"
-              alt="A hand writing in the 2027 wall calendar, its week filled with school runs, a meal plan, a grocery list and to-dos."
-              class="block h-full w-full object-cover object-[50%_30%]"
+              alt="A hand writing in the 2027 wall calendar on a marble counter, its January week filled with school runs, dinners, a meal plan, a grocery list and to-dos."
+              class="block h-full w-full object-cover"
             />
           </div>
           <div class="p-6 sm:p-8">
