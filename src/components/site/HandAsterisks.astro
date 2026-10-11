@@ -1,0 +1,31 @@
+---
+/**
+ * A hand-drawn divider: three pen asterisks, each a little different, like marks made on the
+ * printed calendar. Use it inside a section where the content turns (never between colored
+ * bands, which already divide), at most a couple per page. Decorative only.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div aria-hidden="true" class:list={['flex justify-center text-rose', className]}>
+  <svg viewBox="0 0 108 28" width="108" height="28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+    <g transform="rotate(-10 15 14)">
+      <path d="M15.6 5.4c-.6 2.4-.4 5.2-.9 8.4-.3 2.2-.2 4.4-.6 6.6" />
+      <path d="M8 9.6c2.2.6 4.6 2.2 7.2 3.4 2 1 4 2.6 6.4 3.2" />
+      <path d="M21.4 8.8c-1.8 1.8-4.4 3.2-6.4 4.8-2 1.4-3.8 2.6-6.2 3.8" />
+    </g>
+    <g transform="rotate(4 54 14)">
+      <path d="M53.4 3.8c.6 2.8.4 6 .9 9.4.4 2.8.2 6 .8 9.2" />
+      <path d="M45.2 8.6c2.6 1.4 5.6 2.6 8.4 4.4 2.4 1.4 5.2 2.8 8 4.8" />
+      <path d="M62.2 8.2c-2.4 1.4-5 3.4-7.8 5-2.8 1.8-5.6 3.2-8.6 5.2" />
+    </g>
+    <g transform="rotate(16 92 14)">
+      <path d="M91.6 6.2c.4 2 .2 4.6.6 7.2.2 2 .4 4.2.2 6.2" />
+      <path d="M85.4 10c2 .8 4 2 6.4 3.2 1.8.8 3.4 1.8 5.4 2.6" />
+      <path d="M97.6 9.4c-1.6 1.2-3.6 2.8-5.6 4-2 1.4-3.8 2.2-5.8 3.6" />
+    </g>
+  </svg>
+</div>

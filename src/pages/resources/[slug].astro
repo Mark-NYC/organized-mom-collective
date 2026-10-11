@@ -19,6 +19,7 @@ import Tip from '../../components/resources/Tip.astro';
 import ChecklistGrid from '../../components/resources/ChecklistGrid.astro';
 import CleaningWeek from '../../components/resources/CleaningWeek.astro';
 import CalendarBridge from '../../components/resources/CalendarBridge.astro';
+import HandAsterisks from '../../components/site/HandAsterisks.astro';
 import Versions from '../../components/resources/Versions.astro';
 import { formatDate, getArticles, getNext, getRelated, isoDate, type Article } from '../../lib/articles';
 import { tableOfContents } from '../../lib/toc';
@@ -166,7 +167,8 @@ const components = {
 
   {
     (next || related.length > 0) && (
-      <div class="mx-auto mt-16 max-w-[60rem] border-t border-rule pt-12">
+      <div class="mx-auto mt-16 max-w-[60rem]">
+        <HandAsterisks class="mb-12" />
         {next && (
           <section aria-labelledby="next-h">
             <h2 id="next-h" class="section-label">Read next</h2>

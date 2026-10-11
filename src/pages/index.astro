@@ -7,7 +7,8 @@
  * One action throughout: "Get the Calendar", always to /calendar.
  * Hand-drawn accents (global.css → .hand-underline / .hand-highlight): four, no more. Hero
  * underline, problem highlighter, method underline (light), final CTA highlighter. None on the
- * product images, pricing or navigation.
+ * product images, pricing or navigation. Plus two HandAsterisks dividers, where a section turns:
+ * before the method's closing line, and between the testimonial and the Etsy reviews.
  *
  * Honesty rules:
  * - Sell only what exists. No planned features (shared calendar, accounts, syncing,
@@ -37,6 +38,7 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 import PhoneShot from '../components/site/PhoneShot.astro';
 import ShopButton from '../components/site/ShopButton.astro';
 import HandUnderline from '../components/site/HandUnderline.astro';
+import HandAsterisks from '../components/site/HandAsterisks.astro';
 import EntrywayScene from '../components/site/EntrywayScene.astro';
 import { photo } from '../lib/images';
 import { routes } from '../routes';
@@ -321,7 +323,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           ))
         }
       </ol>
-      <p class="mx-auto mt-8 max-w-xl text-center font-serif text-[1.15rem] leading-snug text-warm-ink italic sm:text-[1.25rem]">
+      <HandAsterisks class="mt-10" />
+      <p class="mx-auto mt-4 max-w-xl text-center font-serif text-[1.15rem] leading-snug text-warm-ink italic sm:text-[1.25rem]">
         Start with what helps. You don’t need a perfect routine or every box filled in.
       </p>
     </div>
@@ -344,7 +347,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </figcaption>
       </figure>
 
-      <div class="mx-auto mt-12 max-w-3xl border-t border-rose/30 pt-8">
+      <HandAsterisks class="mt-10" />
+      <div class="mx-auto mt-6 max-w-3xl">
         <h3 class="label text-center text-warm-ink">From our Etsy shop: earlier calendar editions</h3>
         <p class="mx-auto mt-2 max-w-xl text-center text-[0.9rem] leading-relaxed text-balance text-warm-soft">
           These reviews are of the family calendars we sold before the 2027 redesign. They aren’t reviews of the 2027 calendar or the cleaning companion.
