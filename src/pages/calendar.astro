@@ -141,7 +141,7 @@ const jsonLd: object[] = [
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: PRODUCT,
-    description: `An 11 × 17-inch weekly family wall calendar for 2027 with a daily schedule, meal plan, grocery list, to-do list and a daily cleaning zone, plus a free cleaning companion app.`,
+    description: `An 11 × 17-inch weekly family wall calendar for 2027 with a daily schedule, meal plan, grocery list, to-do list and a daily cleaning zone, plus the cleaning companion website, included.`,
     brand: { '@type': 'Brand', name: BRAND_NAME },
     url,
     image: gallery.map((g) => g.largest).map((p) => new URL(p, site).href),
@@ -174,13 +174,14 @@ const jsonLd: object[] = [
 ];
 
 const quality = review('quality');
+const check = 'M4.5 10.5 8 14l7.5-8';
 
 const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
 ---
 
 <PublicLayout
   fullTitle="2027 Family Wall Calendar & Weekly Organizer · Organized Mom"
-  description={`An 11 × 17 weekly family wall calendar for 2027: schedules, meal plan, grocery list, to-dos and a daily cleaning zone, with a free cleaning app. From ${half.priceLabel}.`}
+  description={`An 11 × 17 weekly family wall calendar for 2027: schedules, meal plan, grocery list, to-dos and a daily cleaning zone, with the cleaning companion website included. From ${half.priceLabel}.`}
   width="full"
   jsonLd={jsonLd}
 >
@@ -213,23 +214,30 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         </div>
       </div>
       <div>
-        <p class="label text-muted">Weekly wall calendar · 11 × 17 in</p>
-        <h1 id="hero-h" class="page-title mt-3 text-balance sm:text-[2.7rem]">{PRODUCT}</h1>
-        <p class="lede mt-4 max-w-lg">
-          Your family’s schedules, meals, groceries, to-dos and cleaning, together on one page a week. Plus a free cleaning companion for your
-          phone.
+        <p class="label text-warm-soft">Weekly wall calendar · 11 × 17 in</p>
+        <h1 id="hero-h" class="serif-hero mt-3 sm:text-[2.9rem] lg:text-[3.2rem]">{PRODUCT}</h1>
+        <p class="lede mt-4 max-w-lg text-warm-ink">
+          The family’s schedules, meals, groceries and cleaning on one page a week, so you don’t have to keep it all in your head. Plus the
+          cleaning companion website for your phone.
         </p>
-        <p class="mt-5 text-[1rem]">
-          <span class="font-bold">{half.name.replace(/ Calendar$/, '')} {half.priceLabel}</span>
-          <span class="text-soft" aria-hidden="true"> · </span>
-          <span class="font-bold">{full.name.replace(/ Calendar$/, '')} {full.priceLabel}</span>
-          <span class="text-soft"> (best value)</span>
+        <p class="mt-5 text-[1rem] text-warm-ink">
+          <span class="font-semibold">{half.name.replace(/ Calendar$/, '')} {half.priceLabel}</span>
+          <span class="text-warm-soft" aria-hidden="true"> · </span>
+          <span class="font-semibold">{full.name.replace(/ Calendar$/, '')} {full.priceLabel}</span>
+          <span class="text-warm-soft"> (best value)</span>
         </p>
-        <a href="#buy" class="btn-primary mt-6 w-full sm:w-auto">Choose Your Calendar</a>
-        <ul class="mt-6 space-y-1.5 text-[0.95rem]" aria-label="At a glance">
-          <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> One week per page, Monday through Sunday</li>
-          <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Cleaning companion included, no subscription</li>
-          <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Secure checkout on Etsy</li>
+        <a href="#buy" data-cta="calendar-hero" class="btn-primary mt-6 min-h-14 w-full px-8 sm:w-auto">Get the Calendar</a>
+        <ul class="mt-6 space-y-1.5 text-[0.95rem] text-warm-ink" aria-label="At a glance">
+          {
+            ['One week per page, Monday through Sunday', 'Cleaning companion included, no subscription', 'Secure checkout on Etsy'].map((t) => (
+              <li class="flex gap-2.5">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-[0.1rem] size-[1.1rem] shrink-0 text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={check} />
+                </svg>
+                {t}
+              </li>
+            ))
+          }
         </ul>
       </div>
     </div>
@@ -238,7 +246,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <!-- What's on every page -->
   <section aria-labelledby="page-h" class:list={[wrap, 'py-14 sm:py-20']}>
     <div class="max-w-2xl">
-      <h2 id="page-h" class="section-title">Everything your week needs, on one page.</h2>
+      <h2 id="page-h" class="serif-title">Everything Your Week Needs, on One Page.</h2>
       <p class="lede mt-4">
         No more juggling a planner, a meal app, a grocery list on the fridge and reminders in your head. Each weekly page gives every part of
         family life its own spot.
@@ -248,21 +256,21 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   </section>
 
   <!-- Size and format -->
-  <section aria-labelledby="format-h" class="bg-band">
+  <section aria-labelledby="format-h" class="bg-cream">
     <div class:list={[wrap, 'grid gap-8 py-14 sm:py-20 md:grid-cols-[1fr_1.4fr] md:gap-14']}>
       <div>
-        <h2 id="format-h" class="section-title">Big enough to actually use.</h2>
+        <h2 id="format-h" class="serif-title">Big Enough to Actually Use.</h2>
         <p class="lede mt-4">
           Real writing space for a real week, on paper that takes a pen nicely. Hang it in the kitchen, by the back door, or wherever your
           family actually looks.
         </p>
       </div>
-      <dl class="border-t border-rule-strong">
+      <dl class="border-t border-warm-rule">
         {
           specs.map((s) => (
-            <div class="grid grid-cols-[6.5rem_1fr] gap-4 border-b border-rule py-3 sm:grid-cols-[8rem_1fr]">
-              <dt class="label pt-1 text-muted">{s.term}</dt>
-              <dd class="text-[1rem] leading-snug">{s.value}</dd>
+            <div class="grid grid-cols-[6.5rem_1fr] gap-4 border-b border-warm-rule py-3 sm:grid-cols-[8rem_1fr]">
+              <dt class="label pt-1 text-warm-soft">{s.term}</dt>
+              <dd class="text-[1rem] leading-snug text-warm-ink">{s.value}</dd>
             </div>
           ))
         }
@@ -273,10 +281,10 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <!-- The companion -->
   <section aria-labelledby="companion-h" class:list={[wrap, 'py-14 sm:py-20']}>
     <div class="max-w-2xl">
-      <p class="label text-muted">Included with every calendar</p>
-      <h2 id="companion-h" class="section-title mt-3">A plan on your wall. A little help in your pocket.</h2>
+      <p class="label text-warm-soft">Included with every calendar</p>
+      <h2 id="companion-h" class="serif-title mt-3">A Plan on Your Wall. A Little Help on Your Phone.</h2>
       <p class="lede mt-4">
-        The cleaning companion is a simple web app that works alongside the printed calendar. It turns each day’s cleaning zone into a short
+        The cleaning companion is a simple website that works alongside the printed calendar. It turns each day’s cleaning zone into a short
         checklist, adds a {dailyEssentials.minutes.replace(/ minutes?$/, '-minute')} Daily Reset, and gives you one home project a month. No subscription, no account, nothing to
         install.
       </p>
@@ -294,17 +302,17 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         />
       </div>
       <div>
-        <h3 class="label text-muted">How they work together</h3>
-        <ol class="mt-4 border-t border-rule">
+        <h3 class="label text-warm-soft">How they work together</h3>
+        <ol class="mt-4 border-t border-warm-rule">
           {
             steps.map((s, i) => (
-              <li class="flex gap-4 border-b border-rule py-4">
-                <span aria-hidden="true" class="grid size-8 shrink-0 place-items-center rounded-full bg-month/50 text-[0.85rem] font-bold">
+              <li class="flex gap-5 border-b border-warm-rule py-4">
+                <span aria-hidden="true" class="w-6 shrink-0 font-serif text-[2rem] leading-none text-rose">
                   {i + 1}
                 </span>
                 <div>
-                  <p class="text-[1.0625rem] leading-snug font-bold">{s.title}</p>
-                  <p class="mt-0.5 text-[1rem] leading-snug text-soft">{s.body}</p>
+                  <p class="text-[1.05rem] leading-snug font-bold text-warm-ink">{s.title}</p>
+                  <p class="mt-1 text-[1rem] leading-relaxed text-warm-soft">{s.body}</p>
                 </div>
               </li>
             ))
@@ -319,22 +327,20 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <section id="buy" aria-labelledby="buy-h" class="scroll-mt-4 bg-sage-wash">
     <div class:list={[wrap, 'py-14 sm:py-20']}>
       <div class="mx-auto max-w-2xl text-center">
-        <h2 id="buy-h" class="section-title">Choose your calendar.</h2>
-        <p class="lede mt-3">Same calendar, same system. Pick how far ahead you want to plan.</p>
+        <h2 id="buy-h" class="serif-title">Choose How Far Ahead You Want to Plan.</h2>
+        <p class="lede mt-4">Same calendar. Same companion. Just choose how many weeks you want.</p>
       </div>
       <div class="mt-9">
         <CalendarOptions />
       </div>
-      <ul class="mx-auto mt-7 flex max-w-3xl flex-wrap justify-center gap-x-5 gap-y-1.5 text-[0.9rem]" aria-label="With every calendar">
-        <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Cleaning companion included</li>
-        <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Secure checkout on Etsy</li>
-        <li class="flex gap-2"><span aria-hidden="true" class="font-bold">✓</span> Arrives damaged or misprinted? We’ll make it right.</li>
-      </ul>
+      <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
+        Both include the cleaning companion. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.
+      </p>
       <figure class="mx-auto mt-10 max-w-xl border-t border-rule pt-8 text-center">
         <blockquote cite={ETSY_REVIEWS_URL} class="font-serif text-[1.3rem] leading-snug italic sm:text-[1.45rem]">
           <p>“{quality.quote}”</p>
         </blockquote>
-        <figcaption class="mt-4 text-[0.9rem] leading-snug text-balance text-soft">
+        <figcaption class="mt-4 text-[0.9rem] leading-snug text-balance text-warm-soft">
           <span class="font-semibold text-ink">{quality.name}</span>, <time datetime={quality.date}>{reviewDate(quality.date)}</time> ·{' '}
           <a href={ETSY_REVIEWS_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-rule underline-offset-[3px] hover:decoration-ink"
             >Read the review on Etsy<span class="sr-only"> (opens Etsy)</span></a
@@ -354,18 +360,18 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
 
   <!-- FAQ -->
   <section aria-labelledby="faq-h" class="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20">
-    <h2 id="faq-h" class="section-title">Questions, answered.</h2>
-    <div class="mt-8 border-t border-rule-strong">
+    <h2 id="faq-h" class="serif-title text-center">Questions Before You Buy?</h2>
+    <div class="mt-8 border-t border-warm-rule">
       {
         faqs.map((f) => (
-          <details class="group border-b border-rule">
-            <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-[1.0625rem] leading-snug font-bold [&::-webkit-details-marker]:hidden">
+          <details class="group border-b border-warm-rule">
+            <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-[1.05rem] leading-snug font-semibold text-warm-ink [&::-webkit-details-marker]:hidden">
               {f.q}
-              <span aria-hidden="true" class="shrink-0 text-[1.25rem] font-normal text-muted transition-transform group-open:rotate-45">
+              <span aria-hidden="true" class="shrink-0 text-[1.25rem] font-normal text-warm-soft transition-transform group-open:rotate-45">
                 +
               </span>
             </summary>
-            <p class="pb-5 text-[1rem] leading-relaxed text-soft">{f.a}</p>
+            <p class="pb-5 text-[1rem] leading-relaxed text-warm-soft">{f.a}</p>
           </details>
         ))
       }
@@ -375,12 +381,9 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <!-- Close -->
   <section aria-labelledby="close-h" class="bg-blush-wash">
     <div class="mx-auto max-w-2xl px-5 py-16 text-center sm:px-8 sm:py-20">
-      <h2 id="close-h" class="section-title">A little more order. A lot more room for life.</h2>
-      <p class="lede mx-auto mt-4 max-w-lg">Get the week out of your head and onto the wall, where everyone can see it.</p>
-      <ShopButton label="Shop the 2027 Family Calendar" class="mt-8 w-full sm:w-auto" />
-      <p class="mt-6">
-        <a href={routes.resources} class="text-link">Or browse free resources</a>
-      </p>
+      <h2 id="close-h" class="serif-title">A Little More Order.<br /> A Lot More <span class="hand-highlight hand-highlight-apricot">Room for Life.</span></h2>
+      <p class="lede mx-auto mt-5 max-w-lg text-warm-ink">Get the week out of your head and onto the wall, where everyone can see it.</p>
+      <ShopButton label="Get the Calendar" cta="calendar-close" class="mt-8 min-h-14 w-full px-8 sm:w-auto" />
     </div>
   </section>
 </PublicLayout>
