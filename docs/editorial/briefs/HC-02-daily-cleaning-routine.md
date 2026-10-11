@@ -80,3 +80,7 @@ Moved into the plan: `docs/editorial/pinterest/HC-02.md`.
 ## Revision (2026-10-10)
 
 Cut to about 350 words on review: the first draft read long for a routine query. Kept the short answer, Shift, step list, hard-night fallback, companion note and Next Small Win; dropped "Why these five tasks", the morning-vs-evening section, household adaptations, the kids section (now one line), the Tip and the three-sizes table.
+
+## Revision (2026-10-11)
+
+Dropped the morning/evening split. The companion shows the Daily Reset as one 15-minute list (beds first), and it stays that way, so the article now matches it: one block, the list's order, mornings suggested as the best fit. H1 changed to “The 15-Minute Daily Reset: A Simple Daily Cleaning Routine” (slug unchanged).
