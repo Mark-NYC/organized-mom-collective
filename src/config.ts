@@ -48,6 +48,9 @@ export const CALENDAR_OPTIONS = [
 /** Which option carries the "Best value" tag. */
 export const BEST_VALUE_ID = 'full-year';
 
+/** The main offer on the homepage for the first 2027 print run: the 26-week calendar. */
+export const PRIMARY_OPTION_ID = 'half-year';
+
 export const SITE_NAME = 'Organized Mom';
 export const BRAND_NAME = 'Organized Mom Collective';
 
