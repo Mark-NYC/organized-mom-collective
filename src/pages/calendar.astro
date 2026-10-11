@@ -81,14 +81,13 @@ const gallery = [
   },
 ];
 
-const specs = [
-  { term: 'Size', value: '11 × 17 inches, portrait' },
-  { term: 'Layout', value: 'One week per page, Monday through Sunday' },
-  { term: 'Pages', value: 'Double-sided weekly pages' },
-  { term: 'Paper', value: 'Premium uncoated writing paper' },
-  { term: 'Binding', value: 'Wire-O, with a built-in hanging hole' },
-  { term: 'Color', value: 'A soft new color each month' },
-  { term: 'Length', value: `${half.weeks} weeks per calendar; the full year comes as two ${half.weeks}-week sets` },
+/** `icon` names a line icon in public/images/site/icons/. */
+const specs: { term: string; icon: string; value: string }[] = [
+  { term: 'Layout', icon: 'layout', value: '11 × 17 inches, portrait. One week per page, Monday through Sunday' },
+  { term: 'Pages', icon: 'pages', value: 'Double-sided weekly pages, a soft new color each month' },
+  { term: 'Paper', icon: 'paper', value: 'Premium uncoated writing paper' },
+  { term: 'Binding', icon: 'binding', value: 'Wire-O, with a built-in hanging hole' },
+  { term: 'Length', icon: 'length', value: `${half.weeks} weeks per calendar; the full year comes as two ${half.weeks}-week sets` },
 ];
 
 const steps = [
@@ -268,8 +267,13 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
       <dl class="border-t border-warm-rule">
         {
           specs.map((s) => (
-            <div class="grid grid-cols-[6.5rem_1fr] gap-4 border-b border-warm-rule py-3 sm:grid-cols-[8rem_1fr]">
-              <dt class="label pt-1 text-warm-soft">{s.term}</dt>
+            <div class="grid grid-cols-[9.5rem_1fr] items-center gap-4 border-b border-warm-rule py-3 sm:grid-cols-[11rem_1fr]">
+              <dt class="label flex items-center gap-3 text-warm-soft">
+                <span aria-hidden="true" class="grid size-10 shrink-0 place-items-center rounded-full bg-white shadow-[0_3px_10px_rgba(60,40,30,0.14)]">
+                  <img src={`/images/site/icons/${s.icon}.png`} alt="" width="24" height="24" class="size-6" loading="lazy" />
+                </span>
+                {s.term}
+              </dt>
               <dd class="text-[1rem] leading-snug text-warm-ink">{s.value}</dd>
             </div>
           ))
