@@ -131,6 +131,41 @@
   .serif-title {
     @apply font-serif text-[1.85rem] leading-[1.12] font-normal tracking-[-0.015em] text-balance text-warm-ink sm:text-[2.5rem];
   }
+  /* Hand-drawn accents (homepage only, four at most): marks like the ones a mom makes on the printed
+     calendar. Colors are the palette's sage and the printed month colors (February blush, June apricot).
+     Purely decorative: no layout shift, no animation, and the text stays fully readable. */
+  .hand-underline {
+    position: relative;
+    white-space: nowrap;
+  }
+  .hand-underline > svg {
+    position: absolute;
+    left: -0.03em;
+    bottom: -0.1em;
+    width: calc(100% + 0.06em);
+    height: 0.26em;
+    overflow: visible;
+    fill: var(--color-sage);
+    pointer-events: none;
+  }
+  .hand-underline-light > svg {
+    bottom: -0.08em;
+    height: 0.17em;
+    opacity: 0.75;
+  }
+  /* Highlighter: an irregular translucent band over the lower part of the letters. Inline, so it
+     follows the phrase across a line break (each line gets its own stroke). */
+  .hand-highlight {
+    padding-inline: 0.1em;
+    margin-inline: -0.1em;
+    background: no-repeat 0 52% / 100% 0.6em
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 24' preserveAspectRatio='none'%3E%3Cpath fill='%23E8D2D6' fill-opacity='.7' d='M3 6c37-1.5 87-.5 137-1.8s50 .6 57 1.4c2.5 2.4 2 9.4 0 12.8-47 1.4-97 .2-137 1.2S12 19.4 3.5 18.2C1 14 1.2 9 3 6Z'/%3E%3C/svg%3E");
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .hand-highlight-apricot {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 24' preserveAspectRatio='none'%3E%3Cpath fill='%23F1D8A8' fill-opacity='.6' d='M3 6c37-1.5 87-.5 137-1.8s50 .6 57 1.4c2.5 2.4 2 9.4 0 12.8-47 1.4-97 .2-137 1.2S12 19.4 3.5 18.2C1 14 1.2 9 3 6Z'/%3E%3C/svg%3E");
+  }
   /* Availability tag: what exists today vs. what's planned. Never omit it from a planned feature. */
   .status {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.62rem] leading-tight font-semibold tracking-[0.14em] uppercase;
