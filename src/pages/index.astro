@@ -66,16 +66,11 @@ const supporting = [review('quality'), review('service')];
 
 const loadLines = ['The appointments.', 'The groceries and the meals.', 'The cleaning.', 'Remembering what’s coming next.'];
 
-// Simple 24px line icons, one stroke weight, drawn for this page.
-const icons = {
-  calendar: 'M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-11ZM4 10.5h16M8.5 4v3.5M15.5 4v3.5M8 14h2M11 14h2M14 14h2M8 17h2',
-  family: 'M8 10.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM16.5 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM3.5 19c.4-3.2 2.2-5.5 4.5-5.5s4.1 2.3 4.5 5.5M13.5 15.2c.8-1.1 1.8-1.7 3-1.7 2 0 3.6 2 4 5.5',
-  cleaning: 'M14.5 3.5 9 13M6.5 13h7l1 7.5h-9l1-7.5ZM9 16.5v4M12 16.5v4M18 6.5l.6 1.4L20 8.5l-1.4.6L18 10.5l-.6-1.4L16 8.5l1.4-.6L18 6.5Z',
-  heart: 'M12 19.5s-7.5-4.4-7.5-9.6A4 4 0 0 1 12 7.6a4 4 0 0 1 7.5 2.3c0 5.2-7.5 9.6-7.5 9.6Z',
-};
+// Line icons, one per rhythm (public/images/site/icons/).
+const icons = ['calendar', 'family', 'cleaning', 'heart'] as const;
 
 /** The Organized Mom Method. `on` names the real calendar sections (or the companion) that deliver each rhythm. */
-const rhythms: { icon: keyof typeof icons; title: string; body: string; on: string }[] = [
+const rhythms: { icon: (typeof icons)[number]; title: string; body: string; on: string }[] = [
   {
     icon: 'calendar',
     title: 'Plan the week',
@@ -312,10 +307,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         {
           rhythms.map((r, i) => (
             <li class="flex gap-4 border-b border-warm-rule py-5 md:flex-col md:gap-4 md:border-b-0 md:py-6 md:pr-8 lg:border-l lg:px-7 lg:py-2 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0">
-              <span aria-hidden="true" class="grid size-11 shrink-0 place-items-center rounded-full bg-rose-wash text-rose-deep">
-                <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d={icons[r.icon]} />
-                </svg>
+              <span aria-hidden="true" class="grid size-14 shrink-0 place-items-center rounded-full bg-white shadow-[0_3px_10px_rgba(60,40,30,0.14)]">
+                <img src={`/images/site/icons/${r.icon}.png`} alt="" width="32" height="32" class="size-8" loading="lazy" />
               </span>
               <div>
                 <h3 class="font-serif text-[1.3rem] leading-snug text-warm-ink sm:text-[1.4rem]">
