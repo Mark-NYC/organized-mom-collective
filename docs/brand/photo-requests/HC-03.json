@@ -8,5 +8,9 @@
     "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
     "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa"
   ],
-  "max_photos": 40
+  "max_photos": 80,
+  "id_range": [
+    32278,
+    32310
+  ]
 }
