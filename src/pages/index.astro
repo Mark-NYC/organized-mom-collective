@@ -158,24 +158,23 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   width="full"
   jsonLd={jsonLd}
 >
-  <!-- 1. Hero. Phones (under 768px): label, headline, copy, CTA, then the photo, so the CTA is on the
+  <!-- 1. Hero. Phones (under 768px): one-line label, headline, two-line copy, CTA, then the photo, so the CTA is on the
        first screen. Desktop: copy left, photo right. -->
   <section aria-labelledby="hero-h" class="overflow-hidden bg-cream">
     <div class:list={[wrap, 'grid items-center gap-x-12 gap-y-6 pt-6 pb-8 sm:pt-8 md:grid-cols-[1.05fr_1fr] md:py-20 lg:gap-x-16']}>
       <div>
         <p class="label text-warm-soft">
-          <span class="text-balance">2027 Family Wall Calendar + <span class="whitespace-nowrap">Cleaning Companion</span></span>
+          <span class="text-balance">2027 Family Wall Calendar<span class="hidden sm:inline"> + <span class="whitespace-nowrap">Cleaning Companion</span></span></span>
         </p>
-        <!-- Two lines at every width, broken after "More Room"; each line is nowrap, so the size is set so line 1 (about 9.5 × the font size wide in Georgia) fits a phone. -->
+        <!-- Three lines at every width ("What Matters." never splits); sized so "More Room for" (about 6.6 × the font size wide in Georgia) fits a phone. -->
         <h1
           id="hero-h"
-          class="serif-hero mt-3 text-[length:min(2.6rem,calc((100vw_-_40px)/9.8))] sm:mt-4 sm:text-[3.1rem] md:text-[length:min(3.4rem,4.4vw)]"
+          class="serif-hero mt-3 text-[length:min(2.6rem,calc((100vw_-_40px)/7.4))] sm:mt-4 sm:text-[3.1rem] md:text-[length:min(3.4rem,4.4vw)]"
         >
-          <span class="whitespace-nowrap">Less Chaos. More Room</span><br />
-          <span class="whitespace-nowrap">for <HandUnderline>What Matters.</HandUnderline></span>
+          Less Chaos.<br /> More Room for <HandUnderline>What Matters.</HandUnderline>
         </h1>
         <p class="lede mt-4 max-w-xl text-warm-ink sm:mt-5">
-          A simple wall calendar and companion website to help you plan your week, keep up with the house, and get the whole family on the same page.
+          Plan the week, keep up with the house, and get the family on the same page.
         </p>
         <div class="mt-5 sm:mt-7">
           <ShopButton label={GET} to="product" cta="home-hero" class={cta} />
