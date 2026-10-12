@@ -602,7 +602,8 @@ values
    900,
    '[{"src":"/images/weekly-reset/bundle.webp","alt":"The Weekly Reset System: the Weekly Command Center planner page, the 30-Minute Daily Tidy System guide, and the coaching audio playing on a phone."}]',
    true, 0, 1, false, 1, 'digital',
-   '[{"path":"weekly-reset/weekly-command-center.pdf","label":"The Weekly Command Center (PDF)"},
+   '[{"path":"weekly-reset/weekly-command-center.pdf","label":"The Weekly Command Center (printable PDF)"},
+     {"path":"weekly-reset/weekly-command-center-editable.pdf","label":"The Weekly Command Center (fillable PDF: type in it on your computer)"},
      {"path":"weekly-reset/30-minute-daily-tidy-system.pdf","label":"The 30-Minute Daily Tidy System (PDF)"},
      {"path":"weekly-reset/weekly-reset-coaching-audio.mp3","label":"Personal Coaching Audio (MP3)"}]',
    'txcd_10000000', 10);

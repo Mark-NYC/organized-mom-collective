@@ -486,7 +486,7 @@ describe('launch guards', () => {
     const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
     expect(seed).toMatch(new RegExp(`\\('${WEEKLY_RESET_SLUG}',\\s*'${weeklyReset.name}',[\\s\\S]*?\\n\\s*${weeklyReset.price * 100},`));
     expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
-    for (const f of ['weekly-command-center.pdf', '30-minute-daily-tidy-system.pdf', 'weekly-reset-coaching-audio.mp3']) expect(seed).toContain(`"path":"weekly-reset/${f}"`);
+    for (const f of ['weekly-command-center.pdf', 'weekly-command-center-editable.pdf', '30-minute-daily-tidy-system.pdf', 'weekly-reset-coaching-audio.mp3']) expect(seed).toContain(`"path":"weekly-reset/${f}"`);
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {

@@ -999,7 +999,12 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
 
   describe('digital products (downloads)', () => {
     const SLUG = 'weekly-reset-system';
-    const FILES = ['weekly-reset/weekly-command-center.pdf', 'weekly-reset/30-minute-daily-tidy-system.pdf', 'weekly-reset/weekly-reset-coaching-audio.mp3'];
+    const FILES = [
+      'weekly-reset/weekly-command-center.pdf',
+      'weekly-reset/weekly-command-center-editable.pdf',
+      'weekly-reset/30-minute-daily-tidy-system.pdf',
+      'weekly-reset/weekly-reset-coaching-audio.mp3',
+    ];
     const entitlement = (orderId: string) =>
       one<{ kind: string; token: string; expires_at: string; revoked_at: string | null; downloads: number }>(
         `select kind, token, expires_at, revoked_at, downloads from shop_entitlements where order_id = '${orderId}' and kind = 'download'`,
@@ -1068,7 +1073,8 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       const r = await fetchFiles(e.token);
       expect(r.status).toBe(200);
       expect(r.body.files.map((f: any) => f.label)).toEqual([
-        'The Weekly Command Center (PDF)',
+        'The Weekly Command Center (printable PDF)',
+        'The Weekly Command Center (fillable PDF: type in it on your computer)',
         'The 30-Minute Daily Tidy System (PDF)',
         'Personal Coaching Audio (MP3)',
       ]);
@@ -1096,7 +1102,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       storage.files.delete(FILES[2]);
       const r = await fetchFiles(entitlement(o.id).token);
       expect(r.status).toBe(200);
-      expect(r.body.files.map((f: any) => Boolean(f.url))).toEqual([true, true, false]);
+      expect(r.body.files.map((f: any) => Boolean(f.url))).toEqual([true, true, false, true]);
     });
 
     it('rejects unknown, malformed and expired links', async () => {
