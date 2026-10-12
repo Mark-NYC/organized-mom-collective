@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "created": "2026-10-12",
-  "status": "research_for_visual_approval",
+  "status": "user_visual_feedback_recorded",
   "style_reference": "Kaboompics selections K01 K02 K03 K05 K06; soft warm natural household look",
-  "note": "These are specific free-source photo pages, not downloaded assets. Commercial model releases and AI provenance unverified. No demographic or US location inferred from appearance, and no public use authorized.",
+  "note": "User-approved VISUAL directions only. All rights/provenance/model releases remain unverified. No publishing, downloads or deployment authorized.",
   "photos": [
     {
       "id": "F01",
@@ -12,9 +12,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/cheerful-mother-and-daughter-having-breakfast-together-at-home-4149007/",
       "category": "kitchen",
-      "tier": "Priority",
+      "tier": "Excluded",
       "note": "Natural family exchange; bright kitchen; may need warmth reduction",
-      "visual_review": "pending",
+      "visual_review": "rejected_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -26,9 +26,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/mother-and-daughter-in-a-kitchen-5888356/",
       "category": "kitchen",
-      "tier": "Priority",
+      "tier": "Excluded",
       "note": "Cozy home scene; check contrast and styling",
-      "visual_review": "pending",
+      "visual_review": "rejected_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -40,9 +40,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/happy-mother-with-children-sitting-at-home-4017409/",
       "category": "living room",
-      "tier": "Priority",
+      "tier": "Owner liked",
       "note": "Useful family expression with more than one child",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -54,9 +54,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/little-girl-studying-at-table-near-mother-in-living-room-4173334/",
       "category": "study",
-      "tier": "Priority",
+      "tier": "Owner liked",
       "note": "Strong school-age routine; less posed",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -68,9 +68,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/mother-and-daughter-bonding-3985033/",
       "category": "study",
-      "tier": "Alternate",
+      "tier": "Owner liked",
       "note": "Potentially consistent with F04",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -82,9 +82,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/mother-with-children-sitting-on-couch-8770586/",
       "category": "reading",
-      "tier": "Priority",
+      "tier": "Excluded",
       "note": "Appropriate family downtime",
-      "visual_review": "pending",
+      "visual_review": "rejected_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -96,9 +96,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/mother-mishandling-with-children-at-home-4017420/",
       "category": "living room",
-      "tier": "Backup",
+      "tier": "Owner liked",
       "note": "Relevant overwhelm but may feel exaggerated",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -110,9 +110,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/photo-of-girl-hugging-her-mom-while-sitting-on-kitchen-counter-4149029/",
       "category": "kitchen",
-      "tier": "Alternate",
+      "tier": "Owner liked",
       "note": "Personable, but inspect styling",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -124,9 +124,9 @@
       "source": "Pexels",
       "url": "https://www.pexels.com/photo/a-woman-and-young-girls-preparing-food-in-the-kitchen-8770568/",
       "category": "kitchen",
-      "tier": "Alternate",
+      "tier": "Owner liked",
       "note": "More faces; baking focus",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -138,9 +138,9 @@
       "source": "Unsplash",
       "url": "https://unsplash.com/photos/mother-and-daughter-prepare-food-together-in-the-kitchen-R1-K5Sn2HBk",
       "category": "kitchen",
-      "tier": "Backup",
+      "tier": "Owner liked",
       "note": "Coherent series but comparatively vivid blue styling",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -152,9 +152,9 @@
       "source": "Unsplash",
       "url": "https://unsplash.com/photos/mother-and-daughter-reading-a-book-together-on-couch-Ok4b3oDvcvM",
       "category": "reading",
-      "tier": "Backup",
+      "tier": "Owner liked",
       "note": "Family warmth; inspect purple/green clothing against Kaboompics",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
@@ -166,12 +166,32 @@
       "source": "Unsplash",
       "url": "https://unsplash.com/photos/mother-and-son-reading-a-book-together-on-sofa-yMQ004iUSZI",
       "category": "reading",
-      "tier": "Backup",
+      "tier": "Owner liked",
       "note": "Alternative to F11, similar photographer look",
-      "visual_review": "pending",
+      "visual_review": "liked_by_owner",
       "release_status": "unknown",
       "human_photo_provenance": "unverified",
       "use_approved": false
     }
-  ]
+  ],
+  "feedback_recorded_at": "2026-10-12",
+  "feedback_summary": {
+    "liked": [
+      "F03",
+      "F04",
+      "F05",
+      "F07",
+      "F08",
+      "F09",
+      "F10",
+      "F11",
+      "F12"
+    ],
+    "rejected": [
+      "F01",
+      "F02",
+      "F06"
+    ],
+    "undecided": []
+  }
 }
