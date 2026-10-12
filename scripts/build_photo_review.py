@@ -97,5 +97,7 @@ kab=[
 kab_ok, kab_total = render([{"id":i,"title":title,"creator":"Karolina Grabowska","source":"Kaboompics","url":url} for i,title,url in kab],"kaboompics-style-reference.jpg")
 (OUT/"README.txt").write_text("VISUAL RESEARCH ONLY. No downloaded image is legally cleared for publication.\n")
 print(f"Successful previews: {faces_ok}/{faces_total} faces; {kab_ok}/{kab_total} Kaboompics")
-if faces_ok != faces_total or kab_ok != kab_total:
-    raise SystemExit("Incomplete preview downloads. See status.json reports in uploaded artifact.")
+if kab_ok != kab_total or faces_ok < 6:
+    raise SystemExit("Required comparison photos missing; inspect artifact status reports.")
+if faces_ok != faces_total:
+    print(f"PARTIAL REVIEW: {faces_total-faces_ok} selected faces not downloaded (Unsplash HTTP 401). Not publishing cleared; see status reports.")
