@@ -1,0 +1,47 @@
+---
+/**
+ * A photo that switches on by itself: the image once its file exists in public/, otherwise a
+ * labeled placeholder saying what to supply. For landing pages still waiting on their assets.
+ */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import type { Asset } from '../../data/weekly-reset';
+
+interface Props {
+  asset: Asset;
+  sizes: string;
+  eager?: boolean;
+  class?: string;
+}
+const { asset, sizes, eager, class: className } = Astro.props;
+const ready = existsSync(join(process.cwd(), 'public', asset.src));
+---
+
+{
+  ready ? (
+    <img
+      src={asset.src}
+      sizes={sizes}
+      width={asset.width}
+      height={asset.height}
+      alt={asset.alt}
+      loading={eager ? undefined : 'lazy'}
+      fetchpriority={eager ? 'high' : undefined}
+      decoding="async"
+      class:list={['block h-auto w-full', className]}
+    />
+  ) : (
+    <div
+      role="img"
+      aria-label={asset.alt}
+      style={`aspect-ratio: ${asset.width} / ${asset.height}`}
+      class:list={['grid w-full place-items-center rounded-[10px] border border-dashed border-warm-rule bg-paper/60 p-6 text-center', className]}
+    >
+      <p class="max-w-xs text-[0.85rem] leading-snug text-warm-soft">
+        <span class="label block text-warm-ink">Photo coming</span>
+        <span class="mt-2 block">{asset.spec}</span>
+        <code class="mt-2 block text-[0.75rem]">public{asset.src}</code>
+      </p>
+    </div>
+  )
+}
