@@ -17,6 +17,16 @@
 | F11 | [Open original](https://unsplash.com/photos/mother-and-daughter-reading-a-book-together-on-couch-Ok4b3oDvcvM) | Mother daughter storytime | Backup | Family warmth; inspect purple/green clothing against Kaboompics |
 | F12 | [Open original](https://unsplash.com/photos/mother-and-son-reading-a-book-together-on-sofa-yMQ004iUSZI) | Mother and son storytime | Backup | Alternative to F11, similar photographer look |
 
+## Owner review recorded October 12, 2026
+
+**Liked (visual direction only):** F03, F04, F05, F07, F08, F09, F10, F11, F12.
+
+**Rejected:** F01, F02, F06. Do not source these again for the active library.
+
+**Undecided:** None in this batch.
+
+Match selected people photos to the approved Kaboompics K01/K02/K03/K05/K06 house style. Prioritize the liked shots for future visual comparison, gentle individualized color normalization and rights review. These selections are **not approved for deployment**: human-shot provenance and releases are still unverified. Keep the website unchanged.
+
 ## Direction
 
-Favor F01–F06 for the next visual cut. F07–F12 are alternatives. Reject faces with overly staged expressions or strong blue/purple color casts. Compare to Kaboompics K01/K02/K03/K05/K06 in [batch 01](photo-approval-batch-01.md). Try a mix of one face photo after two or three home-details. Do not present real families as calendar customers, or deploy before rights review.
+The owner's selected favorites are F03, F04, F05, F07, F08, F09, F10, F11 and F12. F01, F02 and F06 are rejected. Reject faces with overly staged expressions or strong blue/purple color casts. Compare to Kaboompics K01/K02/K03/K05/K06 in [batch 01](photo-approval-batch-01.md). Try a mix of one face photo after two or three home-details. Do not present real families as calendar customers, or deploy before rights review.
