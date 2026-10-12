@@ -19,6 +19,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.calendar },
     { path: routes.companion },
     { path: routes.planner },
+    { path: routes.pantry },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     // The hub is noindex until it has articles.

@@ -544,75 +544,25 @@ const jsonLd = [
 </style>
 
 <script>
-  const KEY = 'omc:planner:v1';
-  const planner = document.getElementById('planner')!;
-  const container = planner.closest<HTMLElement>('.weekly-planner-container')!;
-  const fields = () => Array.from(planner.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-field]'));
+  import { autosave, clearFields, downloadPng } from '../lib/printable';
 
-  // Autosave: one JSON object of field → value (checkboxes store true/false).
-  function load() {
-    let saved: Record<string, string | boolean> = {};
-    try {
-      saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-    } catch {
-      return;
-    }
-    for (const el of fields()) {
-      const v = saved[el.dataset.field!];
-      if (v === undefined) continue;
-      if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = v === true;
-      else el.value = String(v);
-    }
-  }
-  function save() {
-    const data: Record<string, string | boolean> = {};
-    for (const el of fields()) {
-      data[el.dataset.field!] = el instanceof HTMLInputElement && el.type === 'checkbox' ? el.checked : el.value;
-    }
-    try {
-      localStorage.setItem(KEY, JSON.stringify(data));
-    } catch {
-      // Private browsing or storage blocked: the planner still works, it just isn't remembered.
-    }
-  }
-  load();
-  planner.addEventListener('input', save);
-  planner.addEventListener('change', save);
+  const planner = document.getElementById('planner')!;
+  const save = autosave(planner, 'omc:planner:v1');
 
   document.querySelector('[data-planner-clear]')!.addEventListener('click', () => {
     if (!confirm('Clear everything on this planner?')) return;
-    for (const el of fields()) {
-      if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
-      else el.value = '';
-    }
+    clearFields(planner);
     save();
   });
 
   const button = document.querySelector<HTMLButtonElement>('[data-planner-download]')!;
-  button.addEventListener('click', async () => {
-    button.disabled = true;
-    const label = button.textContent;
-    button.textContent = 'Preparing…';
-    // Lay the live planner out at desktop width for the capture, then put it back.
-    container.classList.add('wp-exporting');
-    planner.style.width = planner.style.minWidth = planner.style.maxWidth = '1200px';
-    try {
-      // The image is drawn from a copy of the page, which keeps typed text but not ticks: mirror them as attributes.
-      for (const el of fields()) if (el instanceof HTMLInputElement && el.type === 'checkbox') el.toggleAttribute('checked', el.checked);
-      const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(planner, { pixelRatio: 2, backgroundColor: '#ffffff', width: 1200, height: planner.offsetHeight });
-      const link = document.createElement('a');
-      link.download = 'weekly-planner.png';
-      link.href = dataUrl;
-      link.click();
-    } catch (error) {
-      console.error('Planner PNG export failed', error);
-      alert('Sorry, the download didn’t work. Please try again.');
-    } finally {
-      container.classList.remove('wp-exporting');
-      planner.style.width = planner.style.minWidth = planner.style.maxWidth = '';
-      button.disabled = false;
-      button.textContent = label;
-    }
-  });
+  button.addEventListener('click', () =>
+    downloadPng(planner, {
+      filename: 'weekly-planner.png',
+      width: 1200,
+      layoutHost: planner.closest<HTMLElement>('.weekly-planner-container')!,
+      exportClass: 'wp-exporting',
+      button,
+    }),
+  );
 </script>
