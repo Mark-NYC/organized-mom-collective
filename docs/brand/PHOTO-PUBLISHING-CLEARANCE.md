@@ -11,11 +11,11 @@ For a particular image, confirm (1) the photo-page license type and allowed comm
 |---|---|---|---|
 | K01 | Confirmed, page states free for personal and commercial use | Inspect cleaning-product branding/identifiable hands and approved crop | Cleaning and weekly reset |
 | K02 | Confirmed, page states free for personal and commercial use | Inspect packaging and logos and approved crop | Cleaning and tidy |
-| K03 | Unverified in current source-page check | Reopen source-page license, then inspect visible products/artwork | Planning and organization |
+| K03 | Confirmed via indexed source-page license text on 2026-10-12 | Inspect visible laptop branding, floral artwork and crop | Planning and organization |
 | K05 | Page states free to use under Kaboompics license | Inspect food packaging/trademarks and approved crop | Morning and pantry |
 | K06 | Source page states free for commercial use | Inspect branded grocery packaging or artwork and approved crop | Meal planning / groceries |
 
-All are still **publishing blocked**; source-license labels are not a substitute for rights review of the actual final image.
+**All five Kaboompics source pages display a commercial-use license label** as of October 12, 2026. All remain **publishing blocked** until their actual final images are checked for branding, art, recognizable subjects and context. Source-license labels are not a substitute for final image review.
 
 ## Pexels: liked face photographs
 
