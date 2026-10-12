@@ -18,6 +18,13 @@ import type { Asset } from './weekly-reset';
  */
 export const ESSENTIAL_ROUTINES_SLUG = 'essential-routines';
 
+/**
+ * "Why Routines Work", the bundle's cheat sheet, is a page on the site, not a file: unlisted (noindex,
+ * out of the sitemap), linked only from an Essential Routines buyer's download page. Unlisted, not
+ * locked: anyone with the link can read it. Change the path to retire a shared link.
+ */
+export const WHY_ROUTINES_PATH = '/why-routines-work/k4p8n2';
+
 export const essentialRoutines = {
   name: 'Essential Routines Bundle',
   price: 12,
@@ -25,15 +32,15 @@ export const essentialRoutines = {
 };
 
 /**
- * Customer quotes from the original page. Shown only when `verified` is true: set it once you've
- * confirmed each is a real customer's words, used with permission. Never invent or edit a quote.
+ * Customer quotes from the original page, confirmed by the shop owner as real customers' words,
+ * used with permission. Shown only when `verified` is true. Never invent or edit a quote.
  */
 export const routinesTestimonials: { quote: string; name: string; verified: boolean }[] = [
-  { quote: 'The morning routine alone was worth way more than $12. My kids actually get ready without me nagging!', name: 'Sarah M.', verified: false },
+  { quote: 'The morning routine alone was worth way more than $12. My kids actually get ready without me nagging!', name: 'Sarah M.', verified: true },
   {
     quote: 'I thought routines would feel restrictive, but they actually gave me so much freedom. Now I know exactly what to do instead of winging it every day.',
     name: 'Jessica K.',
-    verified: false,
+    verified: true,
   },
 ];
 

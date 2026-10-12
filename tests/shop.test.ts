@@ -507,8 +507,10 @@ describe('launch guards', () => {
     const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
     expect(seed).toMatch(new RegExp(`\\('${ESSENTIAL_ROUTINES_SLUG}',\\s*'${essentialRoutines.name}',[\\s\\S]*?\\n\\s*${essentialRoutines.price * 100},`));
     expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
-    const paths = seed.match(/"path":"[a-z0-9\/-]+\.(mp3|pdf)"/g) ?? [];
-    expect(paths).toHaveLength(6);
+    const paths = seed.match(/"path":"[a-z0-9\/-]+\.(m4a|pdf)"/g) ?? [];
+    expect(paths).toHaveLength(5);
+    // The cheat sheet is a page on the site, linked from the download page, not a file.
+    expect(seed).not.toContain('why-routines-work.pdf');
     // The routines are the same files Take Back Control delivers.
     const tbc = read('supabase/migrations/20261013000000_shop_take_back_control.sql');
     for (const r of ['morning-routine', 'after-school-routine', 'bedtime-routine', 'weekend-prep-routine']) {

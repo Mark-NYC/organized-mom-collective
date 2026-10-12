@@ -148,8 +148,8 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 ### Database update: Essential Routines (once, after Take Back Control)
 - [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261014000000_shop_essential_routines.sql` → **Run**, once. It only adds the product.
 - [ ] Redeploy `stripe-webhook` and `shop-admin` (receipt emails now use `public/email/<slug>.jpg` for every product, so later products need only that file).
-- [ ] **Storage → shop-downloads**: the 4 routine PDFs are already there (Take Back Control's). Upload the two bonuses to folder `essential-routines`, named exactly `quick-setup-audio.mp3` and `why-routines-work.pdf`.
-- [ ] Buy it once in preview (test card): all six files should download.
+- [ ] **Storage → shop-downloads**: the 4 routine PDFs are already there (Take Back Control's). Upload the Quick Setup Audio to folder `essential-routines` as `quick-setup-audio.m4a`. The "Why Routines Work" cheat sheet is a page on the site (`WHY_ROUTINES_PATH`), linked from the buyer's download page, not a file.
+- [ ] Buy it once in preview (test card): all five files should download, and the download page should link to "Why Routines Work".
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.

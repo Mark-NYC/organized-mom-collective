@@ -2,8 +2,18 @@ import { useEffect, useState } from 'react';
 import { requestDownload, type DownloadError, type DownloadFiles as Files } from '../../lib/shop';
 import { weeklyReset } from '../../data/weekly-reset';
 import { TAKE_BACK_CONTROL_SLUG } from '../../data/take-back-control';
+import { ESSENTIAL_ROUTINES_SLUG, WHY_ROUTINES_PATH } from '../../data/essential-routines';
 import { PLANNER_PLUS_PATH } from '../../data/planner';
 import { routes } from '../../routes';
+
+/** Website pages that come with a product (not files): shown as buttons for that product's buyers. */
+const WEB_TOOLS: Record<string, { label: string; href: string }[]> = {
+  [TAKE_BACK_CONTROL_SLUG]: [
+    { label: 'Open the Weekly Planner Generator', href: PLANNER_PLUS_PATH },
+    { label: 'Open the Pantry Inventory', href: routes.pantry },
+  ],
+  [ESSENTIAL_ROUTINES_SLUG]: [{ label: 'Read “Why Routines Work”', href: WHY_ROUTINES_PATH }],
+};
 
 /**
  * /download?t=TOKEN — the link in a digital order's emails. Trades the token for short-lived
@@ -43,6 +53,7 @@ export default function DownloadFiles() {
 
   const until = new Date(state.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const missing = state.files.some((f) => !f.url);
+  const tools = [...new Set(state.files.map((f) => f.product))].flatMap((slug) => WEB_TOOLS[slug] ?? []);
 
   return (
     <div className="py-6">
@@ -70,7 +81,7 @@ export default function DownloadFiles() {
         ))}
       </ul>
 
-      {state.files.some((f) => f.product === TAKE_BACK_CONTROL_SLUG) && (
+      {tools.length > 0 && (
         <section aria-labelledby="tools-h" className="mt-10 rounded-[3px] bg-band px-5 py-5">
           <h2 id="tools-h" className="text-[1.15rem] font-bold">
             Your Website Tools
@@ -79,12 +90,11 @@ export default function DownloadFiles() {
             These live on our website, not in a file. <strong>Bookmark them now</strong>: this download page stops working after {until}, but the tools don’t.
           </p>
           <p className="mt-4 flex flex-wrap gap-3">
-            <a href={PLANNER_PLUS_PATH} className="btn-primary min-h-12 px-6">
-              Open the Weekly Planner Generator
-            </a>
-            <a href={routes.pantry} className="btn-primary min-h-12 px-6">
-              Open the Pantry Inventory
-            </a>
+            {tools.map((t) => (
+              <a key={t.href} href={t.href} className="btn-primary min-h-12 px-6">
+                {t.label}
+              </a>
+            ))}
           </p>
         </section>
       )}

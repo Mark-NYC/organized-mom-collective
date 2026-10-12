@@ -1,0 +1,105 @@
+---
+/**
+ * "Why Routines Work": the Essential Routines Bundle's cheat sheet, as a page. Exclusive to buyers:
+ * unlisted (noindex, out of the sitemap), linked only from an Essential Routines buyer's download
+ * page. Its address is WHY_ROUTINES_PATH in src/data/essential-routines.ts.
+ *
+ * Structure follows the original cheat sheet (the laptop screen in the bundle mockup), written to
+ * docs/editorial/BRAND_VOICE.md: plain-spoken, no statistics or studies, a fallback for the missed day.
+ * "Print this page" prints just the article (the site's print styles drop everything else).
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { WHY_ROUTINES_PATH } from '../../data/essential-routines';
+import { BRAND_NAME } from '../../config';
+
+export function getStaticPaths() {
+  return [{ params: { access: WHY_ROUTINES_PATH.split('/').pop() } }];
+}
+
+const h2 = 'mt-12 border-b border-sage/60 pb-2 text-[0.8rem] font-semibold tracking-[0.18em] text-[#55684b] uppercase';
+const h3 = 'mt-7 font-serif text-[1.3rem] leading-snug text-warm-ink';
+const note = 'mt-4 rounded-[8px] bg-sage-wash px-4 py-3 text-[0.98rem] leading-relaxed text-warm-ink';
+---
+
+<PublicLayout title="Why Routines Work" description="Why simple family routines make busy days easier, for kids and for you." indexable={false} chrome={false} width="full">
+  <article class="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-16">
+    <a href="/" class="inline-block print:hidden"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="48" height="48" class="size-12" /></a>
+
+    <header class="mt-6 rounded-[10px] bg-sage-wash px-6 py-8 text-center">
+      <p class="label text-warm-soft">Essential Routines Bundle · Cheat Sheet</p>
+      <h1 class="serif-title mt-3">Why Routines Work</h1>
+      <p class="mt-2 font-serif text-[1.1rem] text-warm-soft italic">Why these simple changes make such a difference</p>
+    </header>
+
+    <p class="lede mt-8 text-warm-ink">
+      A routine is a decision you make once, so nobody has to make it again every morning. That’s the whole idea behind the four routines in your bundle. Here’s
+      why it works, for your kids and for you.
+    </p>
+
+    <h2 class={h2}>The thinking behind routines</h2>
+
+    <h3 class={h3}>Your brain on autopilot</h3>
+    <p class="mt-3 leading-relaxed">
+      <strong class="font-semibold">Routines save mental energy.</strong> When the steps are set, you stop deciding what comes next. Breakfast, teeth, shoes,
+      backpack: the order is already chosen, so your attention is free for the things that actually need you.
+    </p>
+    <p class={note}><strong class="font-semibold">Result:</strong> fewer small decisions, and more patience left for the moments nobody planned.</p>
+
+    <h2 class={h2}>Why kids need routines (even when they fight them)</h2>
+
+    <h3 class={h3}>Security through predictability</h3>
+    <p class="mt-3 leading-relaxed">
+      Kids feel safer when they know what comes next. A predictable day gives them something steady to stand on, which makes the occasional change easier to
+      take.
+    </p>
+    <p class={note}>
+      <strong class="font-semibold">Translation:</strong> a child who knows the normal bedtime routine can handle “tonight we’re reading two books instead of one”
+      much better than a child who never knows what to expect.
+    </p>
+
+    <h3 class={h3}>Building competence</h3>
+    <p class="mt-3 leading-relaxed">
+      Routines teach kids to be capable. When they know the steps, they can do them on their own instead of asking you what to do next at every turn.
+    </p>
+    <p class={note}>
+      <strong class="font-semibold">Mom win:</strong> “Get ready for school” becomes something they can actually do, instead of you managing every single step.
+    </p>
+
+    <h2 class={h2}>Why routines work for moms</h2>
+
+    <h3 class={h3}>They lighten the mental load</h3>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div class="rounded-[8px] bg-blush-wash px-4 py-3">
+        <p class="text-[0.8rem] font-semibold tracking-[0.12em] text-rose-deep uppercase">Before routines</p>
+        <p class="mt-1 leading-relaxed">Your brain is constantly tracking and managing everyone’s needs.</p>
+      </div>
+      <div class="rounded-[8px] bg-sage-wash px-4 py-3">
+        <p class="text-[0.8rem] font-semibold tracking-[0.12em] text-[#55684b] uppercase">After routines</p>
+        <p class="mt-1 leading-relaxed">The routine handles the basics, so your mind is free for bigger things.</p>
+      </div>
+    </div>
+
+    <h3 class={h3}>Anyone can follow them</h3>
+    <p class="mt-3 leading-relaxed">
+      A routine on the wall works without you in the room. A partner, a grandparent or a sitter can run bedtime from the same sheet, and the kids already know the
+      steps.
+    </p>
+
+    <h2 class={h2}>Making your routines stick</h2>
+    <ol class="mt-5 list-decimal space-y-3 pl-5 leading-relaxed marker:font-semibold marker:text-rose-deep">
+      <li><strong class="font-semibold">Start with one.</strong> Pick the transition that’s hardest right now, morning, after school or bedtime, and run only that one for a week.</li>
+      <li><strong class="font-semibold">Make it yours.</strong> The times are editable. Set them to your real day, not an ideal one.</li>
+      <li><strong class="font-semibold">Put it where the kids can see it.</strong> At their eye level, by the door or the bathroom, not in a drawer.</li>
+      <li><strong class="font-semibold">Let the sheet do the reminding.</strong> Instead of repeating the next step, ask “What’s next on your list?”</li>
+      <li><strong class="font-semibold">Plan for the off day.</strong> Sick kid, late practice? Do the two steps that matter most and call it done. Tomorrow starts fresh.</li>
+    </ol>
+
+    <p class="mt-10 rounded-[10px] bg-cream px-5 py-5 text-center leading-relaxed text-warm-ink">
+      For a walk-through of setting up each routine for your family, listen to your <strong class="font-semibold">Quick Setup Audio</strong>.
+    </p>
+
+    <p class="mt-8 text-center print:hidden">
+      <button type="button" onclick="window.print()" class="btn-secondary">Print this page</button>
+    </p>
+  </article>
+</PublicLayout>
