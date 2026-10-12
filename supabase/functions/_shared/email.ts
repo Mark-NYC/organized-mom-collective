@@ -152,7 +152,7 @@ function splitName(name: string): [string, string | null] {
 }
 
 /** Real product photos, resized to JPEG for email (WebP isn't safe everywhere): public/email/. */
-const THUMBS = new Set(['calendar-26-week', 'calendar-52-week', 'weekly-reset-system']);
+const THUMBS = new Set(['calendar-26-week', 'calendar-52-week', 'weekly-reset-system', 'take-back-control']);
 const thumb = (slug: string, siteUrl: string) => `${siteUrl}/email/${THUMBS.has(slug) ? slug : 'calendar-26-week'}.jpg`;
 
 function itemRows(o: OrderRow, siteUrl: string, withPrices: boolean): Block {
