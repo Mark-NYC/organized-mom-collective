@@ -1,0 +1,236 @@
+---
+/**
+ * The "Take Back Control" upsell: a $29 one-time offer (4-week audio course + 6 advanced
+ * implementation tools) shown after someone buys the Weekly Reset System. Recreated from the
+ * original WordPress offer page with the same copy, in the public page style (serif Title Case
+ * headlines, warm ink, cream / sage washes). Sections that hold a product mockup are white,
+ * like the mockups' own backgrounds. Standalone: no site header or footer, one action throughout.
+ *
+ * Wait! → Offer headline → The rest of your week + overview → What you get → Why this changes
+ * everything → Here's the truth → Close.
+ *
+ * Settings, course episodes and photos: src/data/take-back-control.ts. Always noindex.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import AssetSlot from '../components/site/AssetSlot.astro';
+import ControlButton from '../components/site/ControlButton.astro';
+import { courseEpisodes, takeBackControl, takeBackControlAssets as assets } from '../data/take-back-control';
+import { BRAND_NAME } from '../config';
+
+const { price } = takeBackControl;
+
+const tools = [
+  { name: 'Weekly Planner Generator – UPGRADED', kind: 'Digital Tool', body: 'The core system with advanced templates and customization options' },
+  { name: 'The 4 Routine Printables', kind: 'Editable Templates', routines: true },
+  { name: 'Family Chore Chart System', kind: 'Guide + Cards', body: 'Get everyone contributing with age-appropriate chores that build capable kids' },
+  { name: 'Pantry Organization Printable', kind: 'Ready-to-Use', body: 'Finally know what you have and what you need' },
+  { name: '7-Day Decluttering Sprint', kind: 'Daily Challenge Guide', body: 'Transform your most overwhelming spaces in just 15 minutes a day' },
+];
+
+const routines = [
+  { name: 'Morning Routine', body: 'Gets the day started right' },
+  { name: 'After School Routine', body: 'Handles the chaos transition' },
+  { name: 'Bedtime Routine', body: 'Ends the day peacefully' },
+  { name: 'Weekend Prep', body: 'Sets up Sunday success' },
+];
+
+// Icon paths, 24 × 24, stroked.
+const reasons = [
+  { icon: 'M7 7h4v4c0 2.5-1.5 4-4 5M14 7h4v4c0 2.5-1.5 4-4 5', text: 'Listen while you fold laundry, drive carpool, or prep dinner' },
+  { icon: 'M13 2 5 14h6l-1 8 8-12h-6l1-8Z', text: 'Short, actionable episodes (5-7 minutes each)' },
+  { icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z', text: 'Build one habit at a time—no overwhelm' },
+  { icon: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-6 9c0-3.3 2.7-6 6-6s6 2.7 6 6M17 11a2.5 2.5 0 1 0 0-5M18 14c2 .6 3.5 2.8 3.5 5.5', text: 'Get the whole family involved with age-appropriate systems' },
+  { icon: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z', text: 'See why our members say this approach “changed everything”' },
+];
+
+const weeks = [
+  'Set up your unique family rhythm',
+  'Master mornings that flow',
+  'Make planning effortless',
+  'Clear the mental clutter for good',
+];
+
+const bonuses = [
+  'Transform your spaces with the 7-Day Decluttering Sprint',
+  'Master every transition with the 4 Routine Printables',
+  'Get everyone helping with the Family Chore Chart System',
+];
+
+const pad = 'py-12 sm:py-20 md:py-24';
+const check = 'M4.5 10.5 8 14l7.5-8';
+---
+
+<PublicLayout
+  fullTitle={`Take Back Control: 4-Week Audio Course + 6 Tools · ${BRAND_NAME}`}
+  description={`Add the Take Back Control audio course and six advanced implementation tools to your Weekly Reset for $${price}.`}
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <!-- 1. Wait! (white) -->
+  <section aria-labelledby="wait-h" class="bg-paper">
+    <div class="mx-auto max-w-2xl px-5 pt-10 pb-8 text-center sm:px-8 sm:pt-14">
+      <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
+      <p id="wait-h" class="serif-title mt-5 text-rose-deep">Wait!</p>
+      <p class="mt-2 font-serif text-[1.1rem] text-warm-soft italic">Get the Complete Control System</p>
+    </div>
+  </section>
+
+  <!-- 2. The offer (sage wash, like the original's mint band) -->
+  <section aria-labelledby="hero-h" class="bg-linear-to-br from-sage-wash via-sage-wash to-paper">
+    <div class:list={['mx-auto max-w-3xl px-5 text-center sm:px-8', pad]}>
+      <h1 id="hero-h" class="serif-hero text-[2.1rem] sm:text-[2.7rem] lg:text-[3.1rem]">
+        Add the “Take Back Control” Course + Advanced Tools for <span class="whitespace-nowrap text-rose-deep">Just ${price}</span>
+      </h1>
+      <p class="lede mt-6 text-warm-ink"><strong class="font-semibold">Congratulations!</strong> Your Weekly Reset Starter Kit is ready for download. But before you go…</p>
+      <p class="lede mt-4 text-warm-ink">
+        What if you could extend that “in control” feeling to <strong class="font-semibold">every area</strong> of your mom life—and discover what thousands of moms are raving about in our monthly membership?
+      </p>
+      <div class="mt-8"><ControlButton cta="control-hero" /></div>
+    </div>
+  </section>
+
+  <!-- 3. The rest of your week + full bundle mockup (white, like the mockup) -->
+  <section aria-labelledby="week-h" class="bg-paper">
+    <div class:list={['mx-auto max-w-6xl px-5 sm:px-8', pad]}>
+      <div class="mx-auto max-w-3xl text-center">
+        <h2 id="week-h" class="label text-[0.8rem] leading-relaxed text-rose-deep sm:text-[0.85rem]">You Just Got Sunday Planning Mastered. Now Master the Rest of Your Week.</h2>
+        <p class="lede mt-5 text-warm-ink">
+          Your Weekly Reset Starter Kit gives you control over your weekly planning. But what about the other 6 days? What about daily routines, home maintenance, and getting the whole family involved?
+        </p>
+        <p class="mt-6 text-[1.05rem] font-semibold text-warm-ink">Get the complete system that transforms your entire household:</p>
+        <p class="mt-4 font-serif text-[1.4rem] leading-snug text-warm-ink italic sm:text-[1.7rem]">
+          4-Week Audio Course + 6 Advanced Implementation Tools – <span class="text-rose-deep">${price}</span>
+        </p>
+      </div>
+      <figure class="mx-auto mt-10 max-w-5xl">
+        <AssetSlot asset={assets.overview} sizes="(min-width: 1152px) 1024px, 100vw" />
+      </figure>
+    </div>
+  </section>
+
+  <!-- 4. What you get (white: the course phone and routine printables sit on white) -->
+  <section aria-labelledby="get-h" class="bg-paper">
+    <div class="mx-auto max-w-3xl px-5 pb-12 sm:px-8 sm:pb-20 md:pb-24">
+      <h2 id="get-h" class="serif-title text-center">What You Get…</h2>
+
+      <!-- The course -->
+      <div class="mt-10 rounded-[10px] p-6 shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-warm-rule/70 sm:p-10">
+        <div class="text-center">
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="mx-auto size-10 text-warm-ink" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M3 15h3v6H4a1 1 0 0 1-1-1v-5Zm18 0h-3v6h2a1 1 0 0 0 1-1v-5Z" />
+          </svg>
+          <p class="label mt-3 text-[0.8rem] text-warm-ink">4 Week Complete Course</p>
+        </div>
+        <div class="mt-8 grid items-center gap-8 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
+          <figure class="mx-auto w-full max-w-[220px]">
+            <AssetSlot asset={assets.course} sizes="220px" />
+          </figure>
+          <div>
+            <h3 class="font-serif text-[1.5rem] leading-snug text-warm-ink">Take Back Control Course</h3>
+            <ol class="mt-4 border-t border-warm-rule">
+              {
+                courseEpisodes.map((e) => (
+                  <li class="flex items-center gap-3 border-b border-warm-rule py-3">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" class="size-6 shrink-0 text-warm-ink">
+                      <circle cx="12" cy="12" r="11" fill="currentColor" />
+                      <path d="M10 8v8l6-4-6-4Z" fill="#fff" />
+                    </svg>
+                    <span class="flex-1 text-[0.95rem] font-semibold text-warm-ink">
+                      {e.title}
+                      {e.bonus && <span class="ml-1.5 rounded-[3px] bg-rose-wash px-1.5 py-0.5 text-[0.65rem] tracking-[0.12em] text-rose-deep uppercase">Bonus</span>}
+                    </span>
+                    <span class="text-[0.85rem] text-warm-soft tabular-nums">{e.time}</span>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- The tools -->
+      <h3 class="label mt-14 text-center text-[0.8rem] text-rose-deep sm:text-[0.85rem]">+ 6 Advanced Implementation Tools:</h3>
+      <ul class="mt-8 space-y-7">
+        {
+          tools.map((t) => (
+            <li>
+              <p class="text-[1.02rem] text-warm-ink">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="mr-1.5 inline size-5 -translate-y-px align-middle text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={check} />
+                </svg>
+                <strong class="font-semibold">{t.name}</strong> <span class="text-warm-soft italic">({t.kind})</span>
+              </p>
+              {t.body && <p class="mt-1 pl-7 font-serif text-[1rem] text-warm-soft italic">{t.body}</p>}
+              {t.routines && (
+                <>
+                  <ul class="mt-3 space-y-1.5 pl-7">
+                    {routines.map((r) => (
+                      <li class="text-[0.98rem]">
+                        <span aria-hidden="true" class="mr-2 text-rose">•</span>
+                        <strong class="font-semibold text-warm-ink">{r.name}</strong> – <span class="text-warm-soft italic">{r.body}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <figure class="mx-auto mt-8 max-w-md">
+                    <AssetSlot asset={assets.routines} sizes="(min-width: 480px) 448px, 100vw" />
+                  </figure>
+                </>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Why this changes everything -->
+  <section aria-labelledby="why-h" class="bg-cream">
+    <div class:list={['mx-auto max-w-6xl px-5 sm:px-8', pad]}>
+      <h2 id="why-h" class="label text-center text-[0.8rem] text-warm-ink sm:text-[0.85rem]">Why This Changes Everything:</h2>
+      <ul class="mt-10 grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 lg:grid-cols-5">
+        {
+          reasons.map((r) => (
+            <li class="text-center last:col-span-2 sm:last:col-span-1">
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="mx-auto size-8 text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d={r.icon} />
+              </svg>
+              <p class="mx-auto mt-3 max-w-[14rem] text-[0.95rem] leading-snug text-warm-ink">{r.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. Here's the truth -->
+  <section aria-labelledby="truth-h" class="bg-paper">
+    <div class:list={['mx-auto max-w-3xl px-5 sm:px-8', pad]}>
+      <div class="rounded-[10px] bg-sage-wash p-6 sm:p-10">
+        <h2 id="truth-h" class="label text-[0.8rem] text-warm-ink sm:text-[0.85rem]">Here’s the Truth:</h2>
+        <p class="lede mt-4 text-warm-ink">
+          You’ve already proven you can master Sunday planning with your Weekly Reset Starter Kit. The problem is making the <strong class="font-semibold">other 6 days</strong> flow just as smoothly.
+        </p>
+        <ul class="mt-6 space-y-1.5 text-[1rem] text-warm-ink">
+          {weeks.map((w, i) => <li><strong class="font-semibold">Week {i + 1}:</strong> {w}</li>)}
+        </ul>
+        <ul class="mt-6 space-y-1.5 text-[1rem] text-warm-ink">
+          {bonuses.map((b) => <li><strong class="font-semibold text-rose-deep italic">BONUS:</strong> {b}</li>)}
+        </ul>
+      </div>
+      <p class="mt-8 text-center font-serif text-[1.15rem] text-warm-ink italic">This Offer <strong class="font-semibold">Expires in 10 Minutes</strong></p>
+    </div>
+  </section>
+
+  <!-- 7. Close -->
+  <section aria-labelledby="close-h" class="bg-linear-to-b from-sage-wash to-cream">
+    <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
+      <img src="/brand/omc-badge.png" alt="" width="88" height="88" class="mx-auto size-22" />
+      <h2 id="close-h" class="mt-6 font-serif text-[1.3rem] text-warm-ink italic">Get your personal coach + 6 advanced implementation tools</h2>
+      <div class="mt-8"><ControlButton cta="control-close" /></div>
+      <p class="mt-6 text-[0.95rem] text-warm-ink">
+        <span aria-hidden="true">🔥</span> <strong class="font-semibold">One-time offer: ${price}</strong> (Most moms pay $19/month for ongoing systems like this—you’re getting it all at once!)
+      </p>
+    </div>
+  </section>
+</PublicLayout>
