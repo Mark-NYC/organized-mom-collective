@@ -1,6 +1,6 @@
 ---
 /**
- * The "Take Back Control" upsell: a $29 one-time offer (4-week audio course + 6 advanced
+ * The "Take Back Control" upsell: a $29 one-time offer (4-week audio course + 5 advanced
  * implementation tools) shown after someone buys the Weekly Reset System. Recreated from the
  * original WordPress offer page with the same copy, in the public page style (serif Title Case
  * headlines, warm ink, cream / sage washes). Sections that hold a product mockup are white,
@@ -10,11 +10,15 @@
  * everything → Here's the truth → Close.
  *
  * Settings and photos: src/data/take-back-control.ts. Always noindex.
+ *
+ * Honesty rules: no deadlines without a real timer, no unsourced numbers or member quotes,
+ * and the tool count matches the list (5). The guarantee mirrors the Weekly Reset System's.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import AssetSlot from '../components/site/AssetSlot.astro';
 import ControlButton from '../components/site/ControlButton.astro';
 import { takeBackControl, takeBackControlAssets as assets } from '../data/take-back-control';
+import { weeklyReset } from '../data/weekly-reset';
 import { BRAND_NAME } from '../config';
 
 const { price } = takeBackControl;
@@ -40,7 +44,7 @@ const reasons = [
   { icon: 'M13 2 5 14h6l-1 8 8-12h-6l1-8Z', text: 'Short, actionable episodes (5-7 minutes each)' },
   { icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z', text: 'Build one habit at a time—no overwhelm' },
   { icon: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-6 9c0-3.3 2.7-6 6-6s6 2.7 6 6M17 11a2.5 2.5 0 1 0 0-5M18 14c2 .6 3.5 2.8 3.5 5.5', text: 'Get the whole family involved with age-appropriate systems' },
-  { icon: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z', text: 'See why our members say this approach “changed everything”' },
+  { icon: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z', text: 'One payment, yours to keep—replay and reprint anytime' },
 ];
 
 const weeks = [
@@ -61,8 +65,8 @@ const check = 'M4.5 10.5 8 14l7.5-8';
 ---
 
 <PublicLayout
-  fullTitle={`Take Back Control: 4-Week Audio Course + 6 Tools · ${BRAND_NAME}`}
-  description={`Add the Take Back Control audio course and six advanced implementation tools to your Weekly Reset for $${price}.`}
+  fullTitle={`Take Back Control: 4-Week Audio Course + 5 Tools · ${BRAND_NAME}`}
+  description={`Add the Take Back Control audio course and five advanced implementation tools to your Weekly Reset for $${price}.`}
   indexable={false}
   chrome={false}
   width="full"
@@ -82,9 +86,9 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       <h1 id="hero-h" class="serif-hero text-[2.1rem] sm:text-[2.7rem] lg:text-[3.1rem]">
         Add the “Take Back Control” Course + Advanced Tools for <span class="whitespace-nowrap text-rose-deep">Just ${price}</span>
       </h1>
-      <p class="lede mt-6 text-warm-ink"><strong class="font-semibold">Congratulations!</strong> Your Weekly Reset Starter Kit is ready for download. But before you go…</p>
+      <p class="lede mt-6 text-warm-ink"><strong class="font-semibold">Congratulations!</strong> Your Weekly Reset System is ready for download. But before you go…</p>
       <p class="lede mt-4 text-warm-ink">
-        What if you could extend that “in control” feeling to <strong class="font-semibold">every area</strong> of your mom life—and discover what thousands of moms are raving about in our monthly membership?
+        What if you could extend that “in control” feeling to <strong class="font-semibold">every area</strong> of your mom life?
       </p>
       <div class="mt-8"><ControlButton cta="control-hero" /></div>
     </div>
@@ -96,11 +100,11 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       <div class="mx-auto max-w-3xl text-center">
         <h2 id="week-h" class="label text-[0.8rem] leading-relaxed text-rose-deep sm:text-[0.85rem]">You Just Got Sunday Planning Mastered. Now Master the Rest of Your Week.</h2>
         <p class="lede mt-5 text-warm-ink">
-          Your Weekly Reset Starter Kit gives you control over your weekly planning. But what about the other 6 days? What about daily routines, home maintenance, and getting the whole family involved?
+          Your Weekly Reset System gives you control over your weekly planning. But what about the other 6 days? What about daily routines, home maintenance, and getting the whole family involved?
         </p>
         <p class="mt-6 text-[1.05rem] font-semibold text-warm-ink">Get the complete system that transforms your entire household:</p>
         <p class="mt-4 font-serif text-[1.4rem] leading-snug text-warm-ink italic sm:text-[1.7rem]">
-          4-Week Audio Course + 6 Advanced Implementation Tools – <span class="text-rose-deep">${price}</span>
+          4-Week Audio Course + 5 Advanced Implementation Tools – <span class="text-rose-deep">${price}</span>
         </p>
       </div>
       <figure class="mx-auto mt-10 max-w-5xl">
@@ -120,7 +124,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       </figure>
 
       <!-- The tools -->
-      <h3 class="label mt-14 text-center text-[0.8rem] text-rose-deep sm:text-[0.85rem]">+ 6 Advanced Implementation Tools:</h3>
+      <h3 class="label mt-14 text-center text-[0.8rem] text-rose-deep sm:text-[0.85rem]">+ 5 Advanced Implementation Tools:</h3>
       <ul class="mt-8 space-y-7">
         {
           tools.map((t) => (
@@ -179,7 +183,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       <div class="rounded-[10px] bg-sage-wash p-6 sm:p-10">
         <h2 id="truth-h" class="label text-[0.8rem] text-warm-ink sm:text-[0.85rem]">Here’s the Truth:</h2>
         <p class="lede mt-4 text-warm-ink">
-          You’ve already proven you can master Sunday planning with your Weekly Reset Starter Kit. The problem is making the <strong class="font-semibold">other 6 days</strong> flow just as smoothly.
+          You’ve already proven you can master Sunday planning with your Weekly Reset System. The problem is making the <strong class="font-semibold">other 6 days</strong> flow just as smoothly.
         </p>
         <ul class="mt-6 space-y-1.5 text-[1rem] text-warm-ink">
           {weeks.map((w, i) => <li><strong class="font-semibold">Week {i + 1}:</strong> {w}</li>)}
@@ -188,7 +192,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
           {bonuses.map((b) => <li><strong class="font-semibold text-rose-deep italic">BONUS:</strong> {b}</li>)}
         </ul>
       </div>
-      <p class="mt-8 text-center font-serif text-[1.15rem] text-warm-ink italic">This Offer <strong class="font-semibold">Expires in 10 Minutes</strong></p>
+      <p class="mt-8 text-center font-serif text-[1.15rem] text-warm-ink italic">This price is <strong class="font-semibold">only on this page</strong></p>
     </div>
   </section>
 
@@ -196,10 +200,17 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <section aria-labelledby="close-h" class="bg-linear-to-b from-sage-wash to-cream">
     <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
       <img src="/brand/omc-badge.png" alt="" width="88" height="88" class="mx-auto size-22" />
-      <h2 id="close-h" class="mt-6 font-serif text-[1.3rem] text-warm-ink italic">Get your personal coach + 6 advanced implementation tools</h2>
+      <h2 id="close-h" class="mt-6 font-serif text-[1.3rem] text-warm-ink italic">Get your personal coach + 5 advanced implementation tools</h2>
+      <div class="mx-auto mt-8 max-w-xl rounded-[10px] bg-paper p-6 sm:p-8">
+        <p class="label text-[0.75rem] text-rose-deep">30-Day Money-Back Guarantee</p>
+        <p class="mt-3 text-[1rem] leading-relaxed text-warm-ink">
+          Use the course and tools for 30 days. If you don’t feel more in control of the rest of your week, email us at
+          <a href={`mailto:${weeklyReset.contactEmail}`} class="underline underline-offset-2">{weeklyReset.contactEmail}</a> and we’ll refund every penny — no questions asked.
+        </p>
+      </div>
       <div class="mt-8"><ControlButton cta="control-close" /></div>
       <p class="mt-6 text-[0.95rem] text-warm-ink">
-        <span aria-hidden="true">🔥</span> <strong class="font-semibold">One-time offer: ${price}</strong> (Most moms pay $19/month for ongoing systems like this—you’re getting it all at once!)
+        <span aria-hidden="true">🔥</span> <strong class="font-semibold">One-time offer: ${price}</strong> (One payment, no subscription—you’re getting it all at once!)
       </p>
     </div>
   </section>

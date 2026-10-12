@@ -2,7 +2,7 @@ import type { Asset } from './weekly-reset';
 
 /**
  * The "Take Back Control" upsell page (/take-back-control): a $29 one-time offer shown after
- * someone buys the Weekly Reset System (4-week audio course + 6 implementation tools).
+ * someone buys the Weekly Reset System (4-week audio course + 5 implementation tools).
  * Copy lives in the page; the things that change live here.
  *
  * Not sold anywhere yet: there's no shop product for it. Until buyUrl is set the buttons say
