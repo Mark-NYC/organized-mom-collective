@@ -1,0 +1,257 @@
+{
+  "schema_version": "0.1.0",
+  "created_utc": "2026-10-12",
+  "status": "candidate_shortlist_only",
+  "notes": "Source pages independently located; no binaries downloaded, provenance not verified, model releases not confirmed. Nothing cleared for publishing. Visual selection pending.",
+  "license_reference": {
+    "name": "Pexels License",
+    "url": "https://www.pexels.com/license/",
+    "review_date": "2026-10-12",
+    "attribution_required": false
+  },
+  "photos": [
+    {
+      "id": "pexels-4867365",
+      "title": "Mother and children eating breakfast",
+      "photographer": "KATRIN BOLOVTSOVA",
+      "source_url": "https://www.pexels.com/photo/mother-and-children-eating-4867365/",
+      "category": "family-routines",
+      "keywords": [
+        "family breakfast",
+        "kitchen"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-4867901",
+      "title": "Mother preparing cereal with two children",
+      "photographer": "KATRIN BOLOVTSOVA",
+      "source_url": "https://www.pexels.com/photo/mother-eating-with-children-4867901/",
+      "category": "family-routines",
+      "keywords": [
+        "breakfast",
+        "cereal"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-4867369",
+      "title": "Mother and two children sharing breakfast",
+      "photographer": "KATRIN BOLOVTSOVA",
+      "source_url": "https://www.pexels.com/photo/mother-and-children-eating-4867369/",
+      "category": "family-routines",
+      "keywords": [
+        "family breakfast"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-4867363",
+      "title": "Mother preparing breakfast for children",
+      "photographer": "KATRIN BOLOVTSOVA",
+      "source_url": "https://www.pexels.com/photo/mom-preparing-breakfast-for-her-kids-4867363/",
+      "category": "family-routines",
+      "keywords": [
+        "morning kitchen"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-8657212",
+      "title": "Mother and children breakfast",
+      "photographer": "Ron Lach",
+      "source_url": "https://www.pexels.com/photo/photo-of-a-mother-s-children-eating-breakfast-8657212/",
+      "category": "family-routines",
+      "keywords": [
+        "family breakfast"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-8657214",
+      "title": "Mother and children eating at home",
+      "photographer": "Ron Lach",
+      "source_url": "https://www.pexels.com/photo/mother-with-his-children-eating-8657214/",
+      "category": "family-routines",
+      "keywords": [
+        "kitchen meal"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-6212559",
+      "title": "Mother making breakfast with two children",
+      "photographer": "Jep Gambardella",
+      "source_url": "https://www.pexels.com/photo/mother-and-kids-at-breakfast-in-kitchen-6212559/",
+      "category": "family-routines",
+      "keywords": [
+        "meal preparation"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-6223613",
+      "title": "Parent holding child while preparing breakfast",
+      "photographer": "Jep Gambardella",
+      "source_url": "https://www.pexels.com/photo/mother-carrying-one-of-her-sons-in-the-kitchen-during-breakfast-6223613/",
+      "category": "family-routines",
+      "keywords": [
+        "busy family kitchen"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-5082871",
+      "title": "Family preparing food together",
+      "photographer": "Vanessa Loring",
+      "source_url": "https://www.pexels.com/photo/mother-and-children-preparing-food-in-the-kitchen-5082871/",
+      "category": "family-routines",
+      "keywords": [
+        "cooking"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    },
+    {
+      "id": "pexels-8054795",
+      "title": "Mother and daughter at breakfast",
+      "photographer": "Annushka Ahuja",
+      "source_url": "https://www.pexels.com/photo/mother-and-daughter-during-breakfast-at-home-8054795/",
+      "category": "family-routines",
+      "keywords": [
+        "kitchen",
+        "home"
+      ],
+      "source": "Pexels",
+      "license_url": "https://www.pexels.com/license/",
+      "license_checked_on": "2026-10-12",
+      "release_status": "unknown",
+      "human_photographed_status": "unverified",
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null,
+      "review_status": "candidate_only"
+    }
+  ]
+}
