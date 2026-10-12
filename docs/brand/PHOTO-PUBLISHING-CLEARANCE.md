@@ -17,6 +17,22 @@ For a particular image, confirm (1) the photo-page license type and allowed comm
 
 **All five Kaboompics source pages display a commercial-use license label** as of October 12, 2026. All remain **publishing blocked** until their actual final images are checked for branding, art, recognizable subjects and context. Source-license labels are not a substitute for final image review.
 
+## Actual-image visual inspection (October 12, 2026)
+
+Reviewed the real 5-image Kaboompics contact sheet downloaded from GitHub Actions artifact `11770035828`. This is a thumbnail-level review, **not full-resolution inspection**.
+
+| ID | Visual decision | What was actually visible | Next blocker |
+|---|---|---|---|
+| K01 | Provisionally suitable | Cleaning basket and cropped adult arms; no obvious logo or identifiable face in thumbnail | Inspect full-size supplies, final crop |
+| K02 | Provisionally suitable | Home-care items and hands on sofa; no obvious logo in thumbnail | Inspect full-size packaging, final crop |
+| K03 | **Hold** | Decorative floral notebook (possibly protected artwork) and laptop | Verify notebook artwork/brand permissions or use another shot |
+| K05 | Provisionally suitable | Pantry containers and cropped hand; no obvious brand in thumbnail | Inspect jar/box labels at 100%, final crop |
+| K06 | **First priority for final clearance** | Bread in reusable mesh bag, no visible people or brand in thumbnail | Full-resolution inspection and final WebP |
+
+All five still have `publishing_clearance: false`. **No model releases have been confirmed**, but for shots without identifiable people, model releases may not be relevant. Never claim a specific person endorses OMC.
+
+[Contact-sheet artifact](https://github.com/Mark-NYC/organized-mom-collective/actions/runs/38298329340/artifacts/11770035828)
+
 ## Pexels: liked face photographs
 
 F03, F04, F05, F07, F08, and F09 have been fetched into *review artifacts*. They may be used for website storytelling only after checking exact per-photo source page and actual visual contents for recognizable people, brand identity or trademark issues, unsuitable usage context and nonendorsement. Avoid presenting them as purchasers or testimonials.
