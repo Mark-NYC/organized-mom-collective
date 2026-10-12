@@ -1,6 +1,13 @@
 name: Build OMC photo comparison sheets
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - photo-library-pilot-2026-10
+    paths:
+      - '.github/workflows/lifestyle-photo-review.yml'
+      - 'scripts/build_photo_review.py'
+      - 'docs/brand/faces-approval-batch-02.json'
 permissions:
   contents: read
 jobs:
