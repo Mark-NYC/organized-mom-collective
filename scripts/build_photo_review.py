@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Create side-by-side research contact sheets. Never deploy or mark rights cleared."""
-import io, json, pathlib, re, html, urllib.request
+import io, json, pathlib, re, html, urllib.request, urllib.parse
+from html.parser import HTMLParser
 from PIL import Image, ImageDraw, ImageOps
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "photo-library-review"
 OUT.mkdir(exist_ok=True)
+EXPORTS = OUT / 'optimized-preview-only'
+EXPORTS.mkdir(exist_ok=True)
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; OMCResearch/1.0)"}
 
 def get(url):
@@ -19,17 +22,45 @@ def image_for(url, source):
         n = match.group(1)
         return get(f"https://images.pexels.com/photos/{n}/pexels-photo-{n}.jpeg?w=1000")
     page = get(url).decode("utf-8", errors="replace")
-    m = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',page,re.I)
-    if not m:
-        m = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image',page,re.I)
-    if not m: raise RuntimeError("Cannot find og:image on source page")
-    imgurl = html.unescape(m.group(1))
-    if not imgurl.startswith("https://"): raise ValueError("Unexpected image URL")
+    # Unsplash's OG preview may be gated; prefer the direct images.unsplash.com
+    # photography CDN URL embedded in its public page.
+    if source == "Unsplash":
+        candidates = re.findall(r'https?://images[.]unsplash[.]com/[^"\s<>]+', html.unescape(page))
+        for candidate in candidates:
+            clean = html.unescape(candidate).replace("\\\\u0026", "&")
+            if "\\\\u" in clean:
+                continue
+            try:
+                return get(clean.split("&amp;")[0])
+            except Exception:
+                continue
+        raise RuntimeError("Unsplash image CDN unavailable; source page remains valid")
+    class OGImageParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.image = None
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if tag == "meta" and values.get("property") in ("og:image", "og:image:url"):
+                self.image = values.get("content")
+    parser = OGImageParser()
+    parser.feed(page)
+    if not parser.image: raise RuntimeError("Cannot find og:image on source page")
+    imgurl = urllib.parse.urljoin(url, html.unescape(parser.image))
+    if urllib.parse.urlparse(imgurl).scheme != "https":
+        raise ValueError("Unexpected image URL scheme")
     return get(imgurl)
 
 def make_tile(photo, i):
     raw=image_for(photo["url"],photo["source"])
     im=Image.open(io.BytesIO(raw)).convert("RGB")
+    # Internal previews only; never publish or commit as site assets.
+    for width in (800, 1440):
+        preview = im.copy()
+        preview.thumbnail((width, 2000), Image.Resampling.LANCZOS)
+        preview.save(EXPORTS / (photo["id"].lower() + "-" + str(width) + ".webp"),
+                     "WEBP", quality=82, method=6)
+
     frame=Image.new("RGB",(430,370),"#f8f7f3")
     cropped=ImageOps.contain(im,(410,288))
     frame.paste(cropped,((430-cropped.width)//2,8+(288-cropped.height)//2))
@@ -54,7 +85,7 @@ def render(photos,name):
             d.text((12,40),p["id"]+" - preview unavailable",fill="#553333")
             d.text((12,70),str(e)[:55],fill="#553333")
             tiles.append(blank)
-    if not tiles:return
+    if not tiles:return (0,0)
     cols=3;rows=(len(tiles)+cols-1)//cols
     sheet=Image.new("RGB",(cols*430,rows*370),"white")
     for i,tile in enumerate(tiles):sheet.paste(tile,((i%cols)*430,(i//cols)*370))
@@ -74,6 +105,31 @@ kab=[
 ]
 kab_ok, kab_total = render([{"id":i,"title":title,"creator":"Karolina Grabowska","source":"Kaboompics","url":url} for i,title,url in kab],"kaboompics-style-reference.jpg")
 (OUT/"README.txt").write_text("VISUAL RESEARCH ONLY. No downloaded image is legally cleared for publication.\n")
-\nprint(f"Successful previews: {faces_ok}/{faces_total} faces; {kab_ok}/{kab_total} Kaboompics")
-if faces_ok != faces_total or kab_ok != kab_total:
-    raise SystemExit("Incomplete preview downloads. See status.json reports in uploaded artifact.")
+print(f"Successful previews: {faces_ok}/{faces_total} faces; {kab_ok}/{kab_total} Kaboompics")
+if kab_ok != kab_total or faces_ok < 6:
+    raise SystemExit("Required comparison photos missing; inspect artifact status reports.")
+if faces_ok != faces_total:
+    print(f"PARTIAL REVIEW: {faces_total-faces_ok} selected faces not downloaded (Unsplash HTTP 401). Not publishing cleared; see status reports.")
+
+# Output manifest is a review artifact, never a production asset registry.
+catalog = [{"id":i,"title":title,"creator":"Karolina Grabowska",
+            "source":"Kaboompics","url":url,"visual_review":"house_style_reference"}
+           for i,title,url in kab] + favorites
+manifest = []
+for p in catalog:
+    preview_files = []
+    for width in (800,1440):
+        name = p["id"].lower() + "-" + str(width) + ".webp"
+        if (EXPORTS/name).exists():
+            preview_files.append("optimized-preview-only/" + name)
+    manifest.append({"id":p["id"],"title":p["title"],"source":p["source"],
+                     "creator":p["creator"],"source_url":p["url"],
+                     "owner_visual_status":p["visual_review"],
+                     "preview_files":preview_files,
+                     "license_review":"pending_per_image",
+                     "model_release_review":"pending",
+                     "usage_approval":False,"public_asset_path":None,
+                     "notes":"Internal evaluation only; no implied customer endorsement"})
+(OUT/"photo-manifest.preview.json").write_text(json.dumps({
+    "status":"internal_review_only","deployable":False,
+    "version":"pilot-2026-10","photos":manifest},indent=2)+"\n")

@@ -1,0 +1,331 @@
+{
+  "schema_version": "1.0",
+  "library": "Organized Mom Collective lifestyle photography",
+  "branch": "photo-library-pilot-2026-10",
+  "status": "pilot_owner_visual_approved_not_cleared_for_publication",
+  "style": "Kaboompics-led warm neutral natural-light home details interspersed with family faces (starting guideline 70/30)",
+  "distribution_rules": [
+    "Never serve photos from this manifest in live customer-facing pages until publishing_clearance is true.",
+    "Never imply that pictured people are OMC customers or endorse OMC.",
+    "Retain original photo source URL and attribution metadata.",
+    "Preview exports exist only in GitHub Actions artifacts until individually cleared and intentionally moved into site assets."
+  ],
+  "license_links": {
+    "Kaboompics": "https://kaboompics.com/page/license-and-faq",
+    "Pexels": "https://www.pexels.com/license/",
+    "Unsplash": "https://unsplash.com/license"
+  },
+  "assets": [
+    {
+      "id": "K01",
+      "title": "cleaning basket",
+      "role": "cleaning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
+      "owner_visual_status": "approved_as_style_reference",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "needs_individual_scene_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "K02",
+      "title": "home care basket",
+      "role": "cleaning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa",
+      "owner_visual_status": "approved_as_style_reference",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "needs_individual_scene_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "K03",
+      "title": "floral notebook and coffee",
+      "role": "planning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/18171/floral-notebook-coffee-and-laptop-for-creative-work-from-home",
+      "owner_visual_status": "approved_as_style_reference",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "needs_individual_scene_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "K05",
+      "title": "cereal cupboard",
+      "role": "morning routine",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/6669/containers-of-cereals-in-kitchen-cupboard",
+      "owner_visual_status": "approved_as_style_reference",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "needs_individual_scene_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "K06",
+      "title": "bread and groceries",
+      "role": "meals",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette",
+      "owner_visual_status": "approved_as_style_reference",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "needs_individual_scene_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F01",
+      "title": "Breakfast connection",
+      "role": "kitchen",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/cheerful-mother-and-daughter-having-breakfast-together-at-home-4149007/",
+      "owner_visual_status": "rejected_by_owner",
+      "fetch_status": "excluded",
+      "usage_candidates": [],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F02",
+      "title": "Cooking together",
+      "role": "kitchen",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/mother-and-daughter-in-a-kitchen-5888356/",
+      "owner_visual_status": "rejected_by_owner",
+      "fetch_status": "excluded",
+      "usage_candidates": [],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F03",
+      "title": "Mom with children on couch",
+      "role": "living room",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/happy-mother-with-children-sitting-at-home-4017409/",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F04",
+      "title": "School homework",
+      "role": "study",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/little-girl-studying-at-table-near-mother-in-living-room-4173334/",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F05",
+      "title": "Mom and daughter homework",
+      "role": "study",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/mother-and-daughter-bonding-3985033/",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F06",
+      "title": "Mother and children reading",
+      "role": "reading",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/mother-with-children-sitting-on-couch-8770586/",
+      "owner_visual_status": "rejected_by_owner",
+      "fetch_status": "excluded",
+      "usage_candidates": [],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F07",
+      "title": "Busy mother with kids",
+      "role": "living room",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/mother-mishandling-with-children-at-home-4017420/",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F08",
+      "title": "Mother daughter kitchen hug",
+      "role": "kitchen",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/photo-of-girl-hugging-her-mom-while-sitting-on-kitchen-counter-4149029/",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F09",
+      "title": "Cooking with two girls",
+      "role": "kitchen",
+      "source": "Pexels",
+      "creator": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/a-woman-and-young-girls-preparing-food-in-the-kitchen-8770568/",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "downloaded_in_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F10",
+      "title": "Mom and daughter preparing vegetables",
+      "role": "kitchen",
+      "source": "Unsplash",
+      "creator": "Vitaly Gariev",
+      "source_url": "https://unsplash.com/photos/mother-and-daughter-prepare-food-together-in-the-kitchen-R1-K5Sn2HBk",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "blocked_http_401_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F11",
+      "title": "Mother daughter storytime",
+      "role": "reading",
+      "source": "Unsplash",
+      "creator": "Vitaly Gariev",
+      "source_url": "https://unsplash.com/photos/mother-and-daughter-reading-a-book-together-on-couch-Ok4b3oDvcvM",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "blocked_http_401_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    },
+    {
+      "id": "F12",
+      "title": "Mother and son storytime",
+      "role": "reading",
+      "source": "Unsplash",
+      "creator": "Vitaly Gariev",
+      "source_url": "https://unsplash.com/photos/mother-and-son-reading-a-book-together-on-sofa-yMQ004iUSZI",
+      "owner_visual_status": "liked_by_owner",
+      "fetch_status": "blocked_http_401_run_38298329340",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "model_release_review": "recognizable_person_requires_scene_context_review",
+      "publishing_clearance": false,
+      "public_path": null
+    }
+  ]
+}
