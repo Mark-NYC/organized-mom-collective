@@ -8,6 +8,8 @@ import type { Address } from './db.ts';
 /** What shop_create_order returns. */
 export interface ReservedOrder {
   order_id: string;
+  /** Every item is a download: no shipping, no address. */
+  digital: boolean;
   subtotal_cents: number;
   checkout_minutes: number;
   tax_mode: 'off' | 'automatic' | 'manual';
@@ -20,6 +22,9 @@ export interface ReservedOrder {
     unit_price_cents: number;
     quantity: number;
     image: string | null;
+    kind: 'physical' | 'digital';
+    /** The product's Stripe Tax code, or the store default. */
+    tax_code: string;
   }[];
   /** Already priced for this cart by shop_shipping_quote (first unit + extra units, free-shipping threshold). */
   shipping_rates: { id: string; label: string; amount_cents: number; min_days: number | null; max_days: number | null }[];
@@ -33,6 +38,32 @@ const absolute = (src: string, siteUrl: string) => (/^https:\/\//.test(src) ? sr
 
 export function sessionParams(order: ReservedOrder, opts: { siteUrl: string; nowSeconds: number; taxRateIds: string[] }) {
   const automatic = order.tax_mode === 'automatic';
+  // Downloads: no shipping address or options. Stripe Tax then needs the billing address.
+  const shipping = order.digital
+    ? {
+        billing_address_collection: automatic ? 'required' : 'auto',
+        custom_text: { submit: { message: 'Your download link arrives by email right after payment.' } },
+      }
+    : {
+        shipping_address_collection: { allowed_countries: ['US'] },
+        shipping_options: order.shipping_rates.slice(0, 5).map((r) => ({
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            display_name: r.label,
+            fixed_amount: { amount: r.amount_cents, currency: 'usd' },
+            tax_behavior: 'exclusive',
+            tax_code: automatic ? SHIPPING_TAX_CODE : undefined,
+            delivery_estimate:
+              r.min_days || r.max_days
+                ? {
+                    minimum: r.min_days ? { unit: 'business_day', value: r.min_days } : undefined,
+                    maximum: r.max_days ? { unit: 'business_day', value: r.max_days } : undefined,
+                  }
+                : undefined,
+          },
+        })),
+        billing_address_collection: 'auto',
+      };
   return {
     mode: 'payment',
     ui_mode: 'embedded',
@@ -51,32 +82,15 @@ export function sessionParams(order: ReservedOrder, opts: { siteUrl: string; now
         product_data: {
           name: i.edition ? `${i.name} (${i.edition})` : i.name,
           images: i.image ? [absolute(i.image, opts.siteUrl)] : undefined,
-          tax_code: automatic ? order.product_tax_code : undefined,
+          tax_code: automatic ? (i.tax_code ?? order.product_tax_code) : undefined,
           metadata: { slug: i.slug },
         },
       },
       dynamic_tax_rates: opts.taxRateIds.length ? opts.taxRateIds : undefined,
     })),
-    shipping_address_collection: { allowed_countries: ['US'] },
-    shipping_options: order.shipping_rates.slice(0, 5).map((r) => ({
-      shipping_rate_data: {
-        type: 'fixed_amount',
-        display_name: r.label,
-        fixed_amount: { amount: r.amount_cents, currency: 'usd' },
-        tax_behavior: 'exclusive',
-        tax_code: automatic ? SHIPPING_TAX_CODE : undefined,
-        delivery_estimate:
-          r.min_days || r.max_days
-            ? {
-                minimum: r.min_days ? { unit: 'business_day', value: r.min_days } : undefined,
-                maximum: r.max_days ? { unit: 'business_day', value: r.max_days } : undefined,
-              }
-            : undefined,
-      },
-    })),
+    ...shipping,
     automatic_tax: { enabled: automatic },
     allow_promotion_codes: true,
-    billing_address_collection: 'auto',
     customer_creation: 'if_required',
     submit_type: 'pay',
     expires_at: opts.nowSeconds + order.checkout_minutes * 60,
@@ -182,6 +196,7 @@ export function checkoutError(message: string): { status: number; code: string; 
     case 'too_many':
       return { status: 409, code, slug };
     case 'invalid_cart':
+    case 'mixed_cart':
       return { status: 400, code };
     default:
       return { status: 500, code: 'server_error' };

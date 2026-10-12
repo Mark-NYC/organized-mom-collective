@@ -79,7 +79,7 @@ export default function CheckoutComplete() {
         <p className="lede mt-4">
           {status.payment_status === 'failed' ? 'The payment wasn’t completed' : 'This checkout expired before it was paid'}, so you haven’t been charged.
         </p>
-        <a href={routes.checkout} className="btn-primary mt-8">
+        <a href={status.digital ? routes.weeklyReset : routes.checkout} className="btn-primary mt-8">
           Start again
         </a>
       </div>
@@ -98,36 +98,45 @@ export default function CheckoutComplete() {
       )}
       <p className="label text-soft">Order {status.order_number ? `#${status.order_number}` : ''}</p>
       <h1 className="page-title mt-3">Thank you. Your order is confirmed.</h1>
-      <p className="lede mt-4">
-        {status.email_hint ? `We’ve emailed your receipt to ${status.email_hint}.` : 'Your receipt is on its way to your email.'} We pack each order by hand
-        and email you the tracking number when it ships.
-      </p>
+      {status.digital ? (
+        <p className="lede mt-4">
+          {status.email_hint ? `We’ve emailed your download link to ${status.email_hint}.` : 'Your download link is on its way to your email.'} It arrives with
+          your receipt in a minute or two. Check your spam folder if you don’t see it.
+        </p>
+      ) : (
+        <p className="lede mt-4">
+          {status.email_hint ? `We’ve emailed your receipt to ${status.email_hint}.` : 'Your receipt is on its way to your email.'} We pack each order by hand
+          and email you the tracking number when it ships.
+        </p>
+      )}
 
       <dl className="mt-8 border-t-2 border-ink">
         {status.items.map((i) => (
           <Row key={i.name} label={`${i.name} × ${i.quantity}`} value={money(i.unit_price_cents * i.quantity)} />
         ))}
         {status.discount_cents > 0 && <Row label="Discount" value={`−${money(status.discount_cents)}`} />}
-        <Row label="Shipping" value={money(status.shipping_cents)} />
+        {!status.digital && <Row label="Shipping" value={money(status.shipping_cents)} />}
         {status.tax_cents > 0 && <Row label="Tax" value={money(status.tax_cents)} />}
         <Row label="Total paid" value={money(status.total_cents)} strong />
       </dl>
 
-      <section className="mt-10 border-l-[3px] border-month bg-band px-5 py-5">
-        <h2 className="text-[1.15rem] leading-snug font-bold">Your cleaning companion</h2>
-        <p className="mt-2 leading-relaxed">
-          Your calendar comes with the free cleaning companion. Open it now, or scan the QR code printed on your calendar when it arrives. No account, no
-          subscription.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
-          <a href={routes.today} className="btn-primary">
-            Open the companion
-          </a>
-          <a href={routes.companion} className="text-link self-center">
-            How it works
-          </a>
-        </div>
-      </section>
+      {!status.digital && (
+        <section className="mt-10 border-l-[3px] border-month bg-band px-5 py-5">
+          <h2 className="text-[1.15rem] leading-snug font-bold">Your cleaning companion</h2>
+          <p className="mt-2 leading-relaxed">
+            Your calendar comes with the free cleaning companion. Open it now, or scan the QR code printed on your calendar when it arrives. No account, no
+            subscription.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
+            <a href={routes.today} className="btn-primary">
+              Open the companion
+            </a>
+            <a href={routes.companion} className="text-link self-center">
+              How it works
+            </a>
+          </div>
+        </section>
+      )}
 
       <p className="mt-8 text-[0.95rem] text-soft">Questions about your order? Reply to your receipt email.</p>
     </div>

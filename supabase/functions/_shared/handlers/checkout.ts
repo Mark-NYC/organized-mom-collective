@@ -4,7 +4,8 @@
  *   { action: "cancel", session_id }                  → { canceled: boolean }
  *
  * "create" reserves stock in the database first (shop_create_order), then opens an
- * embedded Stripe Checkout Session for exactly those server-side prices. If Stripe
+ * embedded Stripe Checkout Session for exactly those server-side prices. A download
+ * (digital) order takes no stock and collects no shipping address. If Stripe
  * fails, the reservation is released at once.
  */
 import { checkoutError, parseCart, sessionParams, type ReservedOrder } from '../checkout.ts';
@@ -61,7 +62,7 @@ async function create(deps: ShopDeps, cart: { slug: string; quantity: number }[]
   }
 
   try {
-    if (order.shipping_rates.length === 0) throw new Error('no_shipping_rates');
+    if (!order.digital && order.shipping_rates.length === 0) throw new Error('no_shipping_rates');
     const taxRateIds = order.tax_mode === 'manual' ? await stripeTaxRates(deps, order) : [];
     const session = await deps.stripe.request<{ id: string; client_secret: string; livemode: boolean }>(
       'POST',

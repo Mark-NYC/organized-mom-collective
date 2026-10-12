@@ -447,11 +447,13 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
   useEffect(() => setRequestId(crypto.randomUUID()), [refundDollars, restock]);
 
   const paid = isPaid(o);
-  const canShip = o.payment_status === 'paid' || o.payment_status === 'partially_refunded';
+  // A download order: delivered by its emailed link at payment; nothing ships or goes back in stock.
+  const digital = Boolean(o.digital);
+  const canShip = !digital && (o.payment_status === 'paid' || o.payment_status === 'partially_refunded');
   const refundCents = Math.round(Number(refundDollars) * 100);
   const refundValid = Number.isFinite(refundCents) && refundCents >= 1 && refundCents <= remaining;
   const fullRefund = refundValid && refundCents === remaining;
-  const unitsOut = o.shop_order_items.reduce((n, i) => n + i.quantity - i.restocked, 0);
+  const unitsOut = digital ? 0 : o.shop_order_items.reduce((n, i) => n + i.quantity - i.restocked, 0);
   const unitsRestocked = o.shop_order_items.reduce((n, i) => n + i.restocked, 0);
   const refunded = o.refunded_cents > 0;
   const neverShipped = o.fulfillment_status === 'canceled' || o.fulfillment_status === 'unfulfilled' || o.fulfillment_status === 'packing';
@@ -479,6 +481,12 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
         if (status !== 'shipped') return what;
         return `${what} ${r.email ? emailOutcomeText('shipped', r.email) : 'No email sent (the box was unticked).'}`;
       },
+    );
+
+  const newDownloadLink = () =>
+    run<{ email: EmailOutcome; expires_at: string }>(
+      { action: 'download_link', order_id: o.id },
+      (r) => `New download link created (the old one stopped working), good until ${new Date(r.expires_at).toLocaleDateString()}. ${emailOutcomeText('download', r.email)}`,
     );
 
   const resend = (kind: string) =>
@@ -536,23 +544,30 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
           )}
           {o.phone && <p>{o.phone}</p>}
         </Panel>
-        <Panel title="Ship to">
-          {o.shipping_address ? (
-            <>
-              <p className="whitespace-pre-line">{addressLines(o.shipping_name, o.shipping_address).join('\n')}</p>
-              <button
-                type="button"
-                className="text-link mt-3"
-                onClick={() => navigator.clipboard?.writeText(addressLines(o.shipping_name, o.shipping_address).join('\n'))}
-              >
-                Copy address
-              </button>
-            </>
-          ) : (
-            <p className="text-soft">Not collected yet.</p>
-          )}
-          {o.shipping_method && <p className="mt-2 text-[0.9rem] text-soft">Chosen: {o.shipping_method}</p>}
-        </Panel>
+        {digital ? (
+          <Panel title="Delivery">
+            <p>Download. The link to the files is in the receipt email and works for 7 days; nothing ships.</p>
+            {o.payment_status === 'refunded' && <p className="mt-2 text-soft">Fully refunded: the download link no longer works.</p>}
+          </Panel>
+        ) : (
+          <Panel title="Ship to">
+            {o.shipping_address ? (
+              <>
+                <p className="whitespace-pre-line">{addressLines(o.shipping_name, o.shipping_address).join('\n')}</p>
+                <button
+                  type="button"
+                  className="text-link mt-3"
+                  onClick={() => navigator.clipboard?.writeText(addressLines(o.shipping_name, o.shipping_address).join('\n'))}
+                >
+                  Copy address
+                </button>
+              </>
+            ) : (
+              <p className="text-soft">Not collected yet.</p>
+            )}
+            {o.shipping_method && <p className="mt-2 text-[0.9rem] text-soft">Chosen: {o.shipping_method}</p>}
+          </Panel>
+        )}
       </div>
 
       <Panel title="Items" className="mt-6">
@@ -562,7 +577,7 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
           ))}
           <Line label="Subtotal" value={money(o.subtotal_cents)} />
           {o.discount_cents > 0 && <Line label={`Discount${o.promotion_code ? ` (${o.promotion_code})` : ''}`} value={`−${money(o.discount_cents)}`} />}
-          <Line label="Shipping" value={money(o.shipping_cents)} />
+          {!digital && <Line label="Shipping" value={money(o.shipping_cents)} />}
           <Line label="Tax" value={money(o.tax_cents)} />
           <Line label="Total" value={money(o.total_cents)} strong />
           {o.refunded_cents > 0 && <Line label="Refunded" value={`−${money(o.refunded_cents)}`} />}
@@ -657,7 +672,13 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
             open={confirmRefund}
             title={`Refund ${money(refundCents)}?`}
             message={`This sends ${money(refundCents)} back to the customer through Stripe. ${
-              restock && unitsOut ? `It also puts ${plural(unitsOut, 'unit')} back in stock.` : 'Stock stays as it is.'
+              digital
+                ? refundCents === remaining
+                  ? 'Their download link stops working.'
+                  : 'Their download link keeps working.'
+                : restock && unitsOut
+                  ? `It also puts ${plural(unitsOut, 'unit')} back in stock.`
+                  : 'Stock stays as it is.'
             } It can’t be undone.`}
             confirmLabel="Refund"
             onCancel={() => setConfirmRefund(false)}
@@ -681,7 +702,7 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
         </Panel>
       )}
 
-      {paid && (
+      {paid && !digital && (
         <Panel title="Stock" className="mt-6">
           <ul className="space-y-3 text-[0.95rem]">
             {o.shop_order_items.map((i) => (
@@ -722,8 +743,14 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
           )}
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
             <EmailButton label={retryLabel(emails, 'confirmation', 'Resend receipt')} onClick={() => resend('confirmation')} busy={busy} />
-            <EmailButton label={retryLabel(emails, 'access', 'Send companion instructions')} onClick={() => resend('access')} busy={busy} />
-            {(o.fulfillment_status === 'shipped' || o.fulfillment_status === 'delivered') && (
+            {digital ? (
+              (o.payment_status === 'paid' || o.payment_status === 'partially_refunded') && (
+                <EmailButton label="Send a new download link" onClick={newDownloadLink} busy={busy} />
+              )
+            ) : (
+              <EmailButton label={retryLabel(emails, 'access', 'Send companion instructions')} onClick={() => resend('access')} busy={busy} />
+            )}
+            {!digital && (o.fulfillment_status === 'shipped' || o.fulfillment_status === 'delivered') && (
               <EmailButton label={retryLabel(emails, 'shipped', 'Resend shipping email')} onClick={() => resend('shipped')} busy={busy} />
             )}
             {o.refunded_cents > 0 && <EmailButton label={retryLabel(emails, 'refund', 'Resend refund email')} onClick={() => resend('refund')} busy={busy} />}
@@ -756,7 +783,8 @@ function OrderDetail({ order: o, emails, token, act, onBack }: { order: OrderRow
   );
 }
 
-const emailKindLabel = (kind: string) => ({ confirmation: 'Receipt', shipped: 'Shipping', refund: 'Refund', access: 'Companion instructions' })[kind] ?? kind;
+const emailKindLabel = (kind: string) =>
+  ({ confirmation: 'Receipt', shipped: 'Shipping', refund: 'Refund', access: 'Companion instructions', download: 'Download link' })[kind] ?? kind;
 
 /** "Retry …" when the latest email of that kind didn't go out. */
 function retryLabel(emails: EmailLogRow[], kind: string, label: string) {
@@ -901,35 +929,53 @@ function ProductCard({ product: p, held, sold, refundedOut, act }: { product: Pr
         </h3>
         <span className="font-semibold tabular-nums">{money(p.price_cents)}</span>
       </div>
-      <dl className="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[6px] border border-rule bg-rule">
-        <Stat label="Available" value={String(p.stock)} note={p.stock === 0 ? 'sold out' : undefined} />
-        <Stat label="In checkout" value={String(held)} note="held while paying" />
-        <Stat label="Sold here" value={String(sold)} note={refundedOut ? `incl. ${refundedOut} refunded, not back in stock` : 'not returned to stock'} />
-      </dl>
-      {refundedOut > 0 && (
-        <p className="mt-2 text-[0.85rem] text-soft">
-          {plural(refundedOut, 'refunded unit')} {refundedOut === 1 ? 'hasn’t' : 'haven’t'} been returned to stock. Open the order to return {refundedOut === 1 ? 'it' : 'them'} once
-          {refundedOut === 1 ? ' it’s' : ' they’re'} back on your shelf.
-        </p>
-      )}
+      {p.kind === 'digital' ? (
+        <>
+          <p className="mt-3 text-[0.95rem]">
+            Download: no stock, no shipping. Sold here: <strong>{sold}</strong>.
+          </p>
+          <ul className="mt-2 space-y-0.5 text-[0.9rem] text-soft">
+            {(p.files ?? []).map((f) => (
+              <li key={f.path}>
+                {f.label} · <code>shop-downloads/{f.path}</code>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[0.85rem] text-soft">Upload these files to the private shop-downloads bucket in Supabase Storage, at exactly these paths.</p>
+        </>
+      ) : (
+        <>
+          <dl className="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[6px] border border-rule bg-rule">
+            <Stat label="Available" value={String(p.stock)} note={p.stock === 0 ? 'sold out' : undefined} />
+            <Stat label="In checkout" value={String(held)} note="held while paying" />
+            <Stat label="Sold here" value={String(sold)} note={refundedOut ? `incl. ${refundedOut} refunded, not back in stock` : 'not returned to stock'} />
+          </dl>
+          {refundedOut > 0 && (
+            <p className="mt-2 text-[0.85rem] text-soft">
+              {plural(refundedOut, 'refunded unit')} {refundedOut === 1 ? 'hasn’t' : 'haven’t'} been returned to stock. Open the order to return {refundedOut === 1 ? 'it' : 'them'} once
+              {refundedOut === 1 ? ' it’s' : ' they’re'} back on your shelf.
+            </p>
+          )}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-[9rem_7rem_1fr_auto] sm:items-end">
-        <Field label="Change">
-          <select value={mode} onChange={(e) => setMode(e.target.value as 'delta' | 'set')} className={inputClass}>
-            <option value="delta">Add / remove</option>
-            <option value="set">Set count to</option>
-          </select>
-        </Field>
-        <Field label={mode === 'set' ? 'Count' : 'Units (+/−)'}>
-          <input inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9-]/g, ''))} placeholder={mode === 'set' ? '25' : '-1'} className={inputClass} />
-        </Field>
-        <Field label="Reason">
-          <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} placeholder="New print run, damaged, sold on Etsy…" className={inputClass} />
-        </Field>
-        <button type="button" className="btn-primary" disabled={busy || !valid} onClick={save}>
-          Save
-        </button>
-      </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-[9rem_7rem_1fr_auto] sm:items-end">
+            <Field label="Change">
+              <select value={mode} onChange={(e) => setMode(e.target.value as 'delta' | 'set')} className={inputClass}>
+                <option value="delta">Add / remove</option>
+                <option value="set">Set count to</option>
+              </select>
+            </Field>
+            <Field label={mode === 'set' ? 'Count' : 'Units (+/−)'}>
+              <input inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9-]/g, ''))} placeholder={mode === 'set' ? '25' : '-1'} className={inputClass} />
+            </Field>
+            <Field label="Reason">
+              <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} placeholder="New print run, damaged, sold on Etsy…" className={inputClass} />
+            </Field>
+            <button type="button" className="btn-primary" disabled={busy || !valid} onClick={save}>
+              Save
+            </button>
+          </div>
+        </>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
         <button

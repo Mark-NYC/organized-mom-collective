@@ -240,9 +240,25 @@ export function jwt(payload: Record<string, unknown>, secret: string): string {
   return `${head}.${createHmac('sha256', secret).update(head).digest('base64url')}`;
 }
 
+/** Supabase Storage's signed-URL endpoint, for the private shop-downloads bucket. */
+export class FakeStorage {
+  /** Paths (inside the bucket) that exist. */
+  files = new Set<string>();
+  signed: { path: string; expiresIn: number }[] = [];
+  handle(url: URL, body: string, headers: Headers): Response {
+    const m = url.pathname.match(/^\/storage\/v1\/object\/sign\/shop-downloads\/(.+)$/);
+    if (!m || !headers.get('apikey')) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    const path = m[1].split('/').map(decodeURIComponent).join('/');
+    if (!this.files.has(path)) return new Response(JSON.stringify({ statusCode: '404', error: 'not_found', message: 'Object not found' }), { status: 400 });
+    const { expiresIn } = JSON.parse(body) as { expiresIn: number };
+    this.signed.push({ path, expiresIn });
+    return new Response(JSON.stringify({ signedURL: `/object/sign/shop-downloads/${m[1]}?token=signed-${rand(6)}` }), { status: 200 });
+  }
+}
+
 /**
  * fetch for the functions under test: Stripe → FakeStripe, Resend → FakeInbox,
- * Supabase Auth /user → `users` (token → user), /rest/v1 → the real PostgREST.
+ * Supabase Auth /user → `users` (token → user), Storage → FakeStorage, /rest/v1 → the real PostgREST.
  */
 export function routerFetch(opts: {
   supabaseUrl: string;
@@ -250,6 +266,7 @@ export function routerFetch(opts: {
   stripe: FakeStripe;
   inbox: FakeInbox;
   users: Map<string, { id: string; email: string }>;
+  storage?: FakeStorage;
 }): typeof fetch {
   // Captured now, so this still reaches PostgREST if the global fetch is replaced later.
   const realFetch = globalThis.fetch;
@@ -265,6 +282,7 @@ export function routerFetch(opts: {
       const user = opts.users.get(token);
       return user ? new Response(JSON.stringify(user), { status: 200 }) : new Response(JSON.stringify({ msg: 'invalid JWT' }), { status: 401 });
     }
+    if (opts.storage && url.href.startsWith(`${opts.supabaseUrl}/storage/v1/`)) return opts.storage.handle(url, body, headers);
     if (url.href.startsWith(`${opts.supabaseUrl}/rest/v1/`)) {
       return realFetch(url.href.replace(`${opts.supabaseUrl}/rest/v1`, opts.restUrl), init);
     }

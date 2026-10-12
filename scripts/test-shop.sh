@@ -33,7 +33,7 @@ done
 
 if command -v "${DENO:-deno}" >/dev/null 2>&1; then
   echo "→ deno check (Edge Function entry points)"
-  (cd supabase/functions && "${DENO:-deno}" check shop-checkout/index.ts stripe-webhook/index.ts shop-admin/index.ts)
+  (cd supabase/functions && "${DENO:-deno}" check shop-checkout/index.ts stripe-webhook/index.ts shop-admin/index.ts shop-download/index.ts)
 fi
 
 CONF=$(mktemp)

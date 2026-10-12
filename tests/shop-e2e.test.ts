@@ -12,9 +12,10 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { depsFromEnv, type ShopDeps } from '../supabase/functions/_shared/deps.ts';
 import { createAdminHandler } from '../supabase/functions/_shared/handlers/admin.ts';
 import { createCheckoutHandler } from '../supabase/functions/_shared/handlers/checkout.ts';
+import { createDownloadHandler } from '../supabase/functions/_shared/handlers/download.ts';
 import { createWebhookHandler } from '../supabase/functions/_shared/handlers/webhook.ts';
 import { signStripePayload } from '../supabase/functions/_shared/stripe.ts';
-import { FakeInbox, FakeStripe, jwt, routerFetch } from './shop/fakes.ts';
+import { FakeInbox, FakeStorage, FakeStripe, jwt, routerFetch } from './shop/fakes.ts';
 
 const REST = process.env.SHOP_E2E_REST ?? '';
 const SECRET = process.env.SHOP_E2E_JWT_SECRET ?? '';
@@ -43,6 +44,8 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
   let checkout: (req: Request) => Promise<Response>;
   let webhook: (req: Request) => Promise<Response>;
   let admin: (req: Request) => Promise<Response>;
+  let download: (req: Request) => Promise<Response>;
+  let storage: FakeStorage;
   const users = new Map<string, { id: string; email: string }>();
   const adminToken = 'admin-access-token';
   const userToken = 'regular-user-token';
@@ -67,7 +70,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
 
   const build = (over: Record<string, string> = {}) => {
     const e = env(over);
-    const d = depsFromEnv((k) => (e as Record<string, string>)[k], routerFetch({ supabaseUrl: SUPABASE_URL, restUrl: REST, stripe, inbox, users }));
+    const d = depsFromEnv((k) => (e as Record<string, string>)[k], routerFetch({ supabaseUrl: SUPABASE_URL, restUrl: REST, stripe, inbox, users, storage }));
     d.now = () => clock ?? Math.floor(Date.now() / 1000);
     return d;
   };
@@ -131,13 +134,16 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
   beforeEach(() => {
     stripe = new FakeStripe();
     inbox = new FakeInbox();
+    storage = new FakeStorage();
     deps = build();
     checkout = createCheckoutHandler(deps);
     webhook = createWebhookHandler(deps);
     admin = createAdminHandler(deps);
+    download = createDownloadHandler(deps);
     clock = null;
     run(`update shop_products set stock = 25, active = true, max_per_order = 5 where slug = 'calendar-26-week';
          update shop_products set stock = 0, active = false where slug = 'calendar-52-week';
+         update shop_products set active = true, max_per_order = 1, price_cents = 900 where slug = 'weekly-reset-system';
          update shop_settings set checkout_mode = 'live', tax_mode = 'off', tax_reviewed = false, checkout_minutes = 30, max_checkouts_per_hour = 1000;
          update shop_orders set reservation = 'released' where reservation = 'held';
          delete from shop_throttle;`);
@@ -293,7 +299,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
     it('shows only active products, with availability but not the stock count', async () => {
       const res = await rest('/rpc/shop_catalog', 'anon', undefined, { method: 'POST', body: '{}' });
       const cat = await res.json();
-      expect(cat.products.map((p: { slug: string }) => p.slug)).toEqual(['calendar-26-week']);
+      expect(cat.products.map((p: { slug: string }) => p.slug)).toEqual(['calendar-26-week', 'weekly-reset-system']);
       expect(cat.products[0]).toMatchObject({ price_cents: 3400, available: true, max_quantity: 5 });
       expect(cat.products[0]).not.toHaveProperty('stock');
     });
@@ -987,6 +993,196 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect((await adminCall({ action: 'settings', fields: { checkout_mode: 'sideways' } })).status).toBe(400);
       expect((await adminCall({ action: 'settings', fields: { checkout_mode: 'off' } })).status).toBe(200);
       expect((await create()).status).toBe(403);
+    });
+  });
+  // ---------------------------------------------------------------- digital products
+
+  describe('digital products (downloads)', () => {
+    const SLUG = 'weekly-reset-system';
+    const FILES = ['weekly-reset/weekly-command-center.pdf', 'weekly-reset/30-minute-daily-tidy-system.pdf', 'weekly-reset/weekly-reset-coaching-audio.mp3'];
+    const entitlement = (orderId: string) =>
+      one<{ kind: string; token: string; expires_at: string; revoked_at: string | null; downloads: number }>(
+        `select kind, token, expires_at, revoked_at, downloads from shop_entitlements where order_id = '${orderId}' and kind = 'download'`,
+      );
+    const fetchFiles = async (token: unknown) => {
+      const res = await post(download, { token });
+      return { status: res.status, body: (await res.json()) as Record<string, any> };
+    };
+    /** A paid download order, through the full flow. */
+    const buyDownload = async (opts: Parameters<FakeStripe['complete']>[1] = {}) => {
+      const c = await create([{ slug: SLUG, quantity: 1 }]);
+      expect(c.status).toBe(200);
+      stripe.complete(c.body.session_id, opts);
+      expect((await sendEvent('checkout.session.completed', { id: c.body.session_id, object: 'checkout.session' })).status).toBe(200);
+      return order(c.body.session_id);
+    };
+
+    beforeEach(() => FILES.forEach((f) => storage.files.add(f)));
+
+    it('is always available, one per order, and its checkout takes no stock and asks for no address', async () => {
+      const cat = await (await rest('/rpc/shop_catalog', 'anon', undefined, { method: 'POST', body: '{}' })).json();
+      expect(cat.products.find((p: { slug: string }) => p.slug === SLUG)).toMatchObject({ kind: 'digital', available: true, max_quantity: 1, price_cents: 900 });
+      const before = stock(SLUG);
+      const c = await create([{ slug: SLUG, quantity: 1 }]);
+      expect(c.status).toBe(200);
+      const params = stripe.sessions.get(c.body.session_id)!.params as any;
+      expect(params).not.toHaveProperty('shipping_address_collection');
+      expect(params).not.toHaveProperty('shipping_options');
+      expect(params.line_items[0].price_data.unit_amount).toBe('900');
+      expect(stock(SLUG)).toBe(before);
+      expect(order(c.body.session_id)).toMatchObject({ digital: true, subtotal_cents: 900 });
+      expect((await create([{ slug: SLUG, quantity: 2 }])).body).toMatchObject({ error: 'too_many' });
+    });
+
+    it('needs no shipping rate, but never mixes with a calendar in one checkout', async () => {
+      run(`update shop_shipping_rates set active = false`);
+      try {
+        expect((await create([{ slug: SLUG, quantity: 1 }])).status).toBe(200);
+        expect((await create()).body).toMatchObject({ error: 'shipping_not_configured' });
+      } finally {
+        run(`update shop_shipping_rates set active = true where test_only`);
+      }
+      const before = stock();
+      const mixed = await create([{ slug: SLUG, quantity: 1 }, { slug: 'calendar-26-week', quantity: 1 }]);
+      expect(mixed).toMatchObject({ status: 400, body: { error: 'mixed_cart' } });
+      expect(stock()).toBe(before);
+    });
+
+    it('payment delivers it: a download token for 7 days, the link in the receipt, and signed links to every file', async () => {
+      const o = await buyDownload();
+      expect(o).toMatchObject({ payment_status: 'paid', fulfillment_status: 'delivered', shipping_address: null, shipping_name: null, shipping_method: null });
+      expect(o.delivered_at).not.toBeNull();
+      const e = entitlement(o.id);
+      expect(e.token).toMatch(/^[0-9a-f]{48}$/);
+      const days = (new Date(e.expires_at).getTime() - Date.now()) / 86_400_000;
+      expect(days).toBeGreaterThan(6.9);
+      expect(days).toBeLessThan(7.1);
+      // No companion entitlement: that comes with the calendar.
+      expect(all(`select kind from shop_entitlements where order_id = '${o.id}'`)).toEqual([{ kind: 'download' }]);
+
+      const [receipt] = inbox.to('jamie@example.com');
+      expect(receipt.subject).toBe(`[Test] Your Organized Mom Collective order #${o.order_number}: your download is ready`);
+      expect(receipt.html).toContain(`${SITE}/download?t=${e.token}`);
+      expect(receipt.text).not.toMatch(/shipping|cleaning companion/i);
+
+      const r = await fetchFiles(e.token);
+      expect(r.status).toBe(200);
+      expect(r.body.files.map((f: any) => f.label)).toEqual([
+        'The Weekly Command Center (PDF)',
+        'The 30-Minute Daily Tidy System (PDF)',
+        'Personal Coaching Audio (MP3)',
+      ]);
+      for (const f of r.body.files) {
+        expect(f.url).toMatch(new RegExp(`^${SUPABASE_URL}/storage/v1/object/sign/shop-downloads/weekly-reset/[a-z0-9-]+\\.(pdf|mp3)\\?token=signed-[0-9a-f]+&download=`));
+      }
+      expect(storage.signed.map((x) => x.path)).toEqual(FILES);
+      expect(storage.signed.every((x) => x.expiresIn === 600)).toBe(true);
+      expect(r.body).toMatchObject({ order_number: o.order_number, test: true });
+      expect(entitlement(o.id).downloads).toBe(1);
+      expect(all(`select kind from shop_order_events where order_id = '${o.id}' and kind = 'downloaded'`)).toHaveLength(1);
+      // A second visit works too (fresh signed links), and logs no second "downloaded".
+      expect((await fetchFiles(e.token)).status).toBe(200);
+      expect(all(`select kind from shop_order_events where order_id = '${o.id}' and kind = 'downloaded'`)).toHaveLength(1);
+    });
+
+    it('downloads keep working after the store closes checkout', async () => {
+      const o = await buyDownload();
+      setMode('off');
+      expect((await fetchFiles(entitlement(o.id).token)).status).toBe(200);
+    });
+
+    it('a file missing from storage comes back without a link; the others still work', async () => {
+      const o = await buyDownload();
+      storage.files.delete(FILES[2]);
+      const r = await fetchFiles(entitlement(o.id).token);
+      expect(r.status).toBe(200);
+      expect(r.body.files.map((f: any) => Boolean(f.url))).toEqual([true, true, false]);
+    });
+
+    it('rejects unknown, malformed and expired links', async () => {
+      const o = await buyDownload();
+      expect(await fetchFiles('f'.repeat(48))).toMatchObject({ status: 404, body: { error: 'invalid_link' } });
+      for (const bad of ['', 'abc', "' or 1=1 --", 'F'.repeat(48), 42, null]) expect((await fetchFiles(bad)).status).toBe(404);
+      run(`update shop_entitlements set expires_at = now() - interval '1 minute' where order_id = '${o.id}'`);
+      expect(await fetchFiles(entitlement(o.id).token)).toMatchObject({ status: 410, body: { error: 'link_expired' } });
+      expect(storage.signed).toEqual([]);
+    });
+
+    it('an unpaid checkout has no download link', async () => {
+      const c = await create([{ slug: SLUG, quantity: 1 }]);
+      expect(all(`select * from shop_entitlements where order_id = '${order(c.body.session_id).id}'`)).toEqual([]);
+    });
+
+    it('a new link from the dashboard replaces the old one and is emailed', async () => {
+      const o = await buyDownload();
+      const old = entitlement(o.id);
+      run(`update shop_entitlements set expires_at = now() - interval '1 day' where order_id = '${o.id}'`);
+      const r = await adminCall({ action: 'download_link', order_id: o.id });
+      expect(r).toMatchObject({ status: 200, body: { ok: true, email: 'sent' } });
+      const now = entitlement(o.id);
+      expect(now.token).not.toBe(old.token);
+      expect(new Date(now.expires_at).getTime()).toBeGreaterThan(Date.now() + 6.9 * 86_400_000);
+      expect((await fetchFiles(old.token)).status).toBe(404);
+      expect((await fetchFiles(now.token)).status).toBe(200);
+      const mail = inbox.to('jamie@example.com').at(-1)!;
+      expect(mail.subject).toBe(`[Test] Your download link for order #${o.order_number}`);
+      expect(mail.html).toContain(`/download?t=${now.token}`);
+      expect(mail.html).not.toContain(old.token);
+      // Each click is a new link and a new email.
+      await adminCall({ action: 'download_link', order_id: o.id });
+      expect(inbox.to('jamie@example.com').filter((m) => m.subject.includes('Your download link'))).toHaveLength(2);
+      // Not for calendar orders.
+      const cal = await buy(1);
+      expect((await adminCall({ action: 'download_link', order_id: cal.id })).body).toMatchObject({ error: 'not_digital' });
+    });
+
+    it('a full refund turns the link off and says so; a partial refund leaves it working', async () => {
+      const o = await buyDownload();
+      const token = entitlement(o.id).token;
+      expect((await adminCall({ action: 'refund', order_id: o.id, amount_cents: 300, request_id: 'refund-partial-1' })).status).toBe(200);
+      expect((await fetchFiles(token)).status).toBe(200);
+      expect((await adminCall({ action: 'refund', order_id: o.id, request_id: 'refund-full-0001' })).status).toBe(200);
+      expect(order(o.stripe_session_id)).toMatchObject({ payment_status: 'refunded', fulfillment_status: 'delivered' });
+      expect(await fetchFiles(token)).toMatchObject({ status: 410, body: { error: 'access_revoked' } });
+      expect(inbox.to('jamie@example.com').at(-1)!.text).toContain('download link no longer works');
+      expect((await adminCall({ action: 'download_link', order_id: o.id })).body).toMatchObject({ error: 'not_payable_state' });
+    });
+
+    it('can’t be shipped, and never touches stock on refund or restock', async () => {
+      const o = await buyDownload();
+      expect((await adminCall({ action: 'fulfillment', order_id: o.id, status: 'shipped', carrier: 'USPS' })).body).toMatchObject({ error: 'digital_order' });
+      const before = stock(SLUG);
+      expect((await adminCall({ action: 'refund', order_id: o.id, restock: true, request_id: 'refund-restock-01' })).body).toMatchObject({ restocked: 0 });
+      const item = one<{ id: string }>(`select id from shop_order_items where order_id = '${o.id}'`).id;
+      expect((await adminCall({ action: 'restock', order_id: o.id, item_id: item, units: 1 })).body).toMatchObject({ restocked: 0 });
+      expect(stock(SLUG)).toBe(before);
+    });
+
+    it('a late payment after its checkout expired still delivers, and is never flagged oversold', async () => {
+      const c = await create([{ slug: SLUG, quantity: 1 }]);
+      await sendEvent('checkout.session.expired', { id: c.body.session_id, object: 'checkout.session' });
+      stripe.complete(c.body.session_id);
+      await sendEvent('checkout.session.completed', { id: c.body.session_id, object: 'checkout.session' });
+      const o = order(c.body.session_id);
+      expect(o).toMatchObject({ payment_status: 'paid', fulfillment_status: 'delivered', flags: [] });
+      expect(entitlement(o.id).token).toMatch(/^[0-9a-f]{48}$/);
+    });
+
+    it('order status tells the confirmation page it was a download', async () => {
+      const o = await buyDownload();
+      const s = await (await rest('/rpc/shop_order_status', 'anon', undefined, { method: 'POST', body: JSON.stringify({ p_session: o.stripe_session_id }) })).json();
+      expect(s).toMatchObject({ digital: true, payment_status: 'paid' });
+      expect(JSON.stringify(s)).not.toContain(entitlement(o.id).token);
+    });
+
+    it('the download token is never readable from the browser, except by a signed-in admin', async () => {
+      const o = await buyDownload();
+      expect(await (await rest(`/shop_entitlements?select=token`, 'anon')).json()).not.toContainEqual(expect.objectContaining({ token: expect.any(String) }));
+      expect(await (await rest(`/shop_entitlements?select=token`, 'authenticated', USER_ID)).json()).toEqual([]);
+      for (const role of [['anon', undefined], ['authenticated', USER_ID]] as const) {
+        const res = await rest('/rpc/shop_download', role[0], role[1], { method: 'POST', body: JSON.stringify({ p_token: entitlement(o.id).token, p_client: 'x' }) });
+        expect([401, 403]).toContain(res.status);
+      }
     });
   });
 });

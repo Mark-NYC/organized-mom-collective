@@ -19,11 +19,16 @@ import { routes } from '../../routes';
  * (cards, Apple Pay, Google Pay; email, US shipping address, shipping option, tax and
  * discount codes are all collected by Stripe). Prices and stock are checked on the
  * server; this page only sends a product and a quantity.
+ *
+ * /checkout?product=<a digital product> (e.g. the Weekly Reset System) shows only the
+ * downloads: no quantity, no shipping, and the link is emailed after payment. Calendars and
+ * downloads are never in one checkout.
  */
 export default function Checkout() {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [slug, setSlug] = useState('');
+  const [kind, setKind] = useState<ShopProduct['kind']>('physical');
   const [qty, setQty] = useState(1);
   const [phase, setPhase] = useState<'choose' | 'opening' | 'paying'>('choose');
   const [error, setError] = useState('');
@@ -39,8 +44,12 @@ export default function Checkout() {
         setCatalog(c);
         const params = new URLSearchParams(location.search);
         const wanted = params.get('product');
-        const pick = c.products.find((p) => p.slug === wanted && p.available) ?? c.products.find((p) => p.available) ?? c.products[0];
-        setSlug((s) => (s && c.products.some((p) => p.slug === s && p.available) ? s : (pick?.slug ?? '')));
+        // A link to a download opens the downloads; anything else opens the calendars.
+        const k = c.products.find((p) => p.slug === wanted)?.kind === 'digital' ? 'digital' : 'physical';
+        const list = c.products.filter((p) => (p.kind ?? 'physical') === k);
+        setKind(k);
+        const pick = list.find((p) => p.slug === wanted && p.available) ?? list.find((p) => p.available) ?? list[0];
+        setSlug((s) => (s && list.some((p) => p.slug === s && p.available) ? s : (pick?.slug ?? '')));
       })
       .catch(() => setLoadError(true));
 
@@ -56,7 +65,9 @@ export default function Checkout() {
     mountRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [phase]);
 
-  const product = catalog?.products.find((p) => p.slug === slug) ?? null;
+  const products = catalog?.products.filter((p) => (p.kind ?? 'physical') === kind) ?? [];
+  const digital = kind === 'digital';
+  const product = products.find((p) => p.slug === slug) ?? null;
   const max = product ? Math.max(1, product.max_quantity) : 1;
   useEffect(() => setQty((q) => Math.min(q, max)), [max]);
 
@@ -64,8 +75,12 @@ export default function Checkout() {
   if (!catalog) return <p className="py-10 text-center text-soft">Loading…</p>;
 
   const open = catalog.checkout_mode === 'live' || (catalog.checkout_mode === 'preview' && preview);
-  if (!open || catalog.products.length === 0) {
-    return <Notice title="Online checkout isn’t open yet" body="For now, the calendar is available on Etsy." etsy />;
+  if (!open || products.length === 0) {
+    return digital ? (
+      <Notice title="Online checkout isn’t open yet" body="Please check back soon." />
+    ) : (
+      <Notice title="Online checkout isn’t open yet" body="For now, the calendar is available on Etsy." etsy />
+    );
   }
 
   const pay = async () => {
@@ -106,7 +121,7 @@ export default function Checkout() {
 
   // The same rules the server charges by, for this calendar and quantity. Placeholder (test-only)
   // rates are never offered with a live key, so they're not advertised then.
-  const shipping = product ? shippingQuote(catalog.shipping_rates, product.ship_units * qty, product.price_cents * qty, stripeTestMode()) : [];
+  const shipping = product && !digital ? shippingQuote(catalog.shipping_rates, product.ship_units * qty, product.price_cents * qty, stripeTestMode()) : [];
   const cheapest = shipping.length ? Math.min(...shipping.map((s) => s.amount_cents)) : 0;
   const shippingNote =
     shipping.length === 0
@@ -144,11 +159,11 @@ export default function Checkout() {
           </div>
         ) : (
           <>
-            {catalog.products.length > 1 && (
+            {products.length > 1 && (
               <fieldset className="mt-4">
                 <legend className="sr-only">Choose a calendar</legend>
                 <div className="grid gap-3">
-                  {catalog.products.map((p) => (
+                  {products.map((p) => (
                     <label
                       key={p.slug}
                       className={`flex cursor-pointer items-center justify-between gap-3 rounded-[3px] border px-4 py-3 ${
@@ -195,23 +210,37 @@ export default function Checkout() {
 
                 {product.available ? (
                   <>
-                    <div className="mt-6 flex items-center justify-between gap-4 border-t border-rule pt-5">
-                      <span className="label" id="qty-label">
-                        Quantity
-                      </span>
-                      <div className="flex items-center" role="group" aria-labelledby="qty-label">
-                        <button type="button" className="btn-secondary min-w-11 px-0 text-[1rem]" aria-label="One fewer" disabled={qty <= 1} onClick={() => setQty(qty - 1)}>
-                          −
-                        </button>
-                        <output aria-live="polite" className="w-12 text-center text-[1.1rem] font-semibold tabular-nums">
-                          {qty}
-                        </output>
-                        <button type="button" className="btn-secondary min-w-11 px-0 text-[1rem]" aria-label="One more" disabled={qty >= max} onClick={() => setQty(qty + 1)}>
-                          +
-                        </button>
+                    {!digital && (
+                      <div className="mt-6 flex items-center justify-between gap-4 border-t border-rule pt-5">
+                        <span className="label" id="qty-label">
+                          Quantity
+                        </span>
+                        <div className="flex items-center" role="group" aria-labelledby="qty-label">
+                          <button
+                            type="button"
+                            className="btn-secondary min-w-11 px-0 text-[1rem]"
+                            aria-label="One fewer"
+                            disabled={qty <= 1}
+                            onClick={() => setQty(qty - 1)}
+                          >
+                            −
+                          </button>
+                          <output aria-live="polite" className="w-12 text-center text-[1.1rem] font-semibold tabular-nums">
+                            {qty}
+                          </output>
+                          <button
+                            type="button"
+                            className="btn-secondary min-w-11 px-0 text-[1rem]"
+                            aria-label="One more"
+                            disabled={qty >= max}
+                            onClick={() => setQty(qty + 1)}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    {qty >= max && max < 5 && <p className="mt-2 text-right text-[0.85rem] text-soft">Only {max} available right now.</p>}
+                    )}
+                    {!digital && qty >= max && max < 5 && <p className="mt-2 text-right text-[0.85rem] text-soft">Only {max} available right now.</p>}
 
                     <dl className="mt-5 space-y-1.5 border-t border-rule pt-4">
                       <div className="flex justify-between text-[1.05rem] font-bold">
@@ -225,10 +254,18 @@ export default function Checkout() {
                         </div>
                       )}
                     </dl>
-                    <p className="mt-3 text-[0.9rem] leading-snug text-soft">
-                      {catalog.tax_mode === 'automatic' ? 'Sales tax, where it applies, is calculated from your shipping address at the next step. ' : ''}Ships to
-                      US addresses only. Have a discount code? You can add it at the next step.
-                    </p>
+                    {digital ? (
+                      <p className="mt-3 text-[0.9rem] leading-snug text-soft">
+                        Instant download: your link arrives by email right after payment.
+                        {catalog.tax_mode === 'automatic' ? ' Sales tax, where it applies, is calculated from your billing address at the next step.' : ''} Have
+                        a discount code? You can add it at the next step.
+                      </p>
+                    ) : (
+                      <p className="mt-3 text-[0.9rem] leading-snug text-soft">
+                        {catalog.tax_mode === 'automatic' ? 'Sales tax, where it applies, is calculated from your shipping address at the next step. ' : ''}
+                        Ships to US addresses only. Have a discount code? You can add it at the next step.
+                      </p>
+                    )}
 
                     {error && (
                       <p role="alert" className="mt-4 border-l-[3px] border-month bg-band px-4 py-3 font-semibold">
@@ -263,7 +300,9 @@ export default function Checkout() {
         ) : (
           <div className="hidden h-full min-h-[20rem] flex-col items-center justify-center rounded-[3px] border border-dashed border-rule px-8 text-center text-soft lg:flex">
             <LockIcon />
-            <p className="mt-3 max-w-xs text-[0.95rem] leading-snug">Your email, shipping address and payment details go here, in Stripe’s secure checkout.</p>
+            <p className="mt-3 max-w-xs text-[0.95rem] leading-snug">
+              Your email{digital ? '' : ', shipping address'} and payment details go here, in Stripe’s secure checkout.
+            </p>
           </div>
         )}
       </section>
@@ -286,7 +325,9 @@ function errorText(code: CheckoutError, p: ShopProduct): string {
     case 'too_many':
       return `You can order up to ${p.max_quantity} at a time.`;
     case 'unavailable':
-      return 'That calendar isn’t available on the website right now.';
+      return `${p.kind === 'digital' ? 'That download' : 'That calendar'} isn’t available on the website right now.`;
+    case 'mixed_cart':
+      return 'Downloads and calendars are checked out separately.';
     case 'checkout_closed':
     case 'shipping_not_configured':
     case 'tax_not_configured':

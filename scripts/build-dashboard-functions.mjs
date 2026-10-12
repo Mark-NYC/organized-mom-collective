@@ -19,6 +19,7 @@ export const DASHBOARD_FUNCTIONS = [
   { name: 'shop-checkout', handler: 'createCheckoutHandler', module: 'checkout' },
   { name: 'stripe-webhook', handler: 'createWebhookHandler', module: 'webhook' },
   { name: 'shop-admin', handler: 'createAdminHandler', module: 'admin' },
+  { name: 'shop-download', handler: 'createDownloadHandler', module: 'download' },
 ];
 
 const header = (name) => `// Supabase Edge Function "${name}" — ONE FILE, ready to paste into the dashboard editor.

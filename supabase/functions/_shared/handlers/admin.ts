@@ -9,6 +9,8 @@
  *   refund        { order_id, amount_cents?, restock?, request_id }  (restock only with a full refund)
  *                 → { refund_id, refund_status, restocked, email }
  *   restock       { order_id, item_id?, units? }  (item + units: that many; otherwise every unit)
+ *   download_link { order_id }  (digital orders) a new download link: the old one stops working
+ *                 → { ok, email, expires_at }
  *   resend_email  { order_id, kind, request_id }
  *                 → { ok, email }: email is the real outcome (sent | skipped | failed | duplicate | no_email)
  *   note          { order_id, note }
@@ -199,6 +201,14 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
       return { ok: true, restocked: await deps.db.rpc<number>('shop_restock_order', { p_order: id, p_actor: actor }) };
     }
 
+    case 'download_link': {
+      // A fresh token each time, so the email key is new too: one click, one new link, one email.
+      const id = uuid(b.order_id);
+      const r = await deps.db.rpc<{ token: string; expires_at: string }>('shop_renew_download', { p_order: id, p_actor: actor });
+      const email = await deliverEmail(emailDeps(deps), id, 'download', `download:${id}:${r.token.slice(0, 12)}`);
+      return { ok: email === 'sent', email, expires_at: r.expires_at };
+    }
+
     case 'resend_email': {
       const id = uuid(b.order_id);
       const kind = b.kind as EmailKind;
@@ -208,7 +218,7 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
       if (o.payment_status === 'pending' || o.payment_status === 'expired' || o.payment_status === 'canceled' || o.payment_status === 'failed') {
         throw new HttpError(409, 'not_paid');
       }
-      if (kind === 'shipped' && o.fulfillment_status !== 'shipped' && o.fulfillment_status !== 'delivered') throw new HttpError(409, 'not_shipped');
+      if (kind === 'shipped' && (o.digital || (o.fulfillment_status !== 'shipped' && o.fulfillment_status !== 'delivered'))) throw new HttpError(409, 'not_shipped');
       if (kind === 'refund' && o.refunded_cents === 0) throw new HttpError(409, 'not_refunded');
       // The latest email of this kind decides: one that failed, was skipped or is mid-send is
       // retried as itself (same log row, so two clicks can't both send). Only after a successful
@@ -250,8 +260,23 @@ async function run(deps: ShopDeps, admin: Admin, b: Record<string, unknown>): Pr
 
     case 'product': {
       const f = (b.fields ?? {}) as Record<string, unknown>;
-      const allowed = ['name', 'edition', 'description', 'details', 'price_cents', 'images', 'active', 'max_per_order', 'ship_units', 'sort'];
+      const allowed = ['name', 'edition', 'description', 'details', 'price_cents', 'images', 'active', 'max_per_order', 'ship_units', 'files', 'tax_code', 'sort'];
       const fields = Object.fromEntries(Object.entries(f).filter(([k]) => allowed.includes(k)));
+      if ('files' in fields) {
+        const fl = fields.files;
+        const okFiles =
+          Array.isArray(fl) &&
+          fl.length <= 20 &&
+          fl.every(
+            (x) =>
+              x && typeof x === 'object' && typeof x.path === 'string' && /^[A-Za-z0-9][A-Za-z0-9/_.-]{0,200}$/.test(x.path) && !x.path.includes('..') &&
+              typeof x.label === 'string' && x.label.trim() && x.label.length <= 120,
+          );
+        if (!okFiles) throw new HttpError(400, 'invalid_files');
+      }
+      if ('tax_code' in fields && fields.tax_code !== null && fields.tax_code !== '' && !(typeof fields.tax_code === 'string' && /^txcd_\d{8}$/.test(fields.tax_code))) {
+        throw new HttpError(400, 'invalid_tax_code');
+      }
       if ('images' in fields) {
         const imgs = fields.images;
         const okImgs =
