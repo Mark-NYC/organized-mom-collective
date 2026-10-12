@@ -2,6 +2,14 @@
 
 Created October 12, 2026. **Pilot in progress. Nothing in the candidate catalog is cleared for publication.**
 
+## Locked visual direction (approved by owner, 2026-10-12)
+
+**Kaboompics is the primary visual anchor** for Organized Mom Collective. Its warm, natural, tidy-but-lived-in domestic detail photos establish the color, contrast, lighting, props, and framing standard. K01, K02, K03, K05, K06 from photo-approval-batch-01 are approved as **visual references**, subject to individual license/rights and final asset verification. K04 contains a visibly dated planner and is not a preferred reference.
+
+**Intersperse human faces** to add emotional connection, rather than filling every section with posed families. Aim initially for around **70% Kaboompics/home details and 30% people/faces** as a layout guideline, adjustable by page, not a quota. Prefer candid moms interacting with school-age children in ordinary American homes. Family photography must match Kaboompics' soft natural light, gentle contrast, muted palette, and realistic atmosphere. Faces must never imply endorsement or a fake customer story. Confirm suitability and likeness rights before commercial use.
+
+Do not apply a strong global filter to force mismatched pictures into the system. Reject jarring photos first; apply modest per-image white-balance, highlight, shadow and saturation correction to accepted photos only. No live-site changes until image selection and rights review.
+
 ## Family casting preference
 Prioritize photographs depicting white families for this brand's lifestyle image collection. Select natural, recognizable everyday family scenes without assuming ethnicity from filenames or captions. Confirm the visual match during human review rather than automatically classifying people's identities. Maintain the same commercial-use, provenance, and release safeguards for every photograph.
 
