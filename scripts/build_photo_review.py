@@ -56,7 +56,7 @@ def image_for(url, source):
 def make_tile(photo, i):
     raw=image_for(photo["url"],photo["source"])
     im=Image.open(io.BytesIO(raw)).convert("RGB")
-    (SOURCES / (photo["id"].lower() + "-source" + (".jpg" if im.format in ("JPEG",None) else ".png"))).write_bytes(raw)
+    (SOURCES / (photo["id"].lower() + "-source.bin")).write_bytes(raw)
     source_width, source_height = im.size
     (OUT / (photo["id"].lower() + "-inspection.json")).write_text(json.dumps({
         "id":photo["id"],"source_url":photo["url"],
