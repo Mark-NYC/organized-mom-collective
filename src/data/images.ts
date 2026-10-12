@@ -26,6 +26,8 @@ export const articleImages = {
   'fp-05-taco-skillet': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-taco-skillet.png (generated lifestyle scene)' },
   'fp-05-grocery-list-writing': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-grocery-list-writing.png (generated lifestyle scene)' },
   'fp-05-leftovers-table': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/meal-plan-leftovers-table.png (generated lifestyle scene)' },
+  'fp-02-hero': { widths: [640, 960, 1254], width: 1254, height: 836, source: 'design/photography/calendar-filled-in-original.webp (cropped to 3:2; the printed calendar, real product photo)' },
+  'fp-02-week-entries': { widths: [640, 960, 1440], width: 1440, height: 888, source: 'design/etsy-listing/06.webp (cropped to Monday–Friday: text overlay removed)' },
   'hc-02-caddy': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-cleaning-caddy.png (generated lifestyle scene)' },
 } as const satisfies Record<string, ArticleImage>;
 
