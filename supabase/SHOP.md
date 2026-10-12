@@ -125,7 +125,7 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 ### Database update: Take Back Control (once, after digital products)
 - [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261013000000_shop_take_back_control.sql` → **Run**, once. It only adds the product; a second run stops at the insert.
 - [ ] Redeploy `stripe-webhook` and `shop-admin` from `supabase/dashboard/` (the receipt email now has this product's picture).
-- [ ] **Storage → shop-downloads**: upload the ten files to folder `take-back-control`, renamed to exactly:
+- [ ] **Storage → shop-downloads**: upload the eleven files to folder `take-back-control`, renamed to exactly:
 
   | Your file | Upload as |
   | --- | --- |
@@ -137,11 +137,12 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
   | Morning Routine.pdf | `morning-routine.pdf` |
   | After-School Routine.pdf | `after-school-routine.pdf` |
   | Bedtime Routine.pdf | `bedtime-routine.pdf` |
+  | Weekend Prep Routine.pdf | `weekend-prep-routine.pdf` |
   | Chore Chart by Age.pdf | `chore-chart-by-age.pdf` |
   | 7-Day Declutter Dash.pdf | `7-day-declutter-dash.pdf` |
 
-  Still missing from the files (the page promises them): the Weekly Planner Generator, the Pantry Organization Printable and the Weekend Prep routine. Add each to the product's `files` once you have it.
-- [ ] Buy it once in preview (test card): all ten files should download.
+  The Weekly Planner Generator (`/planner`) and the Pantry Inventory are website tools, not files; they're being built. Don't open the checkout until both are live.
+- [ ] Buy it once in preview (test card): all eleven files should download.
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.

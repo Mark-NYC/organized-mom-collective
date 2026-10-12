@@ -496,7 +496,7 @@ describe('launch guards', () => {
     const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
     expect(seed).toMatch(new RegExp(`\\('${TAKE_BACK_CONTROL_SLUG}',\\s*'${takeBackControl.name}',[\\s\\S]*?\\n\\s*${takeBackControl.price * 100},`));
     expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
-    expect(seed.match(/"path":"take-back-control\/[a-z0-9-]+\.(mp3|m4a|pdf)"/g)).toHaveLength(10);
+    expect(seed.match(/"path":"take-back-control\/[a-z0-9-]+\.(mp3|m4a|pdf)"/g)).toHaveLength(11);
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {
