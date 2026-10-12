@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "created_utc": "2026-10-12",
   "status": "candidate_shortlist_only",
-  "notes": "Source pages independently located; no binaries downloaded, provenance not verified, model releases not confirmed. Nothing cleared for publishing. Visual selection pending.",
+  "notes": "All 10 primary Pexels photo pages and the current Pexels license page were reachable during research on 2026-10-12. Photos have NOT been visually curated from originals, downloaded, authenticated as human-shot, or model-release cleared. None approved for publication. Runtime image download blocked by network/DNS.",
   "license_reference": {
     "name": "Pexels License",
     "url": "https://www.pexels.com/license/",
@@ -33,7 +33,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-4867901",
@@ -58,7 +60,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-4867369",
@@ -82,7 +86,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-4867363",
@@ -106,7 +112,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-8657212",
@@ -130,7 +138,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-8657214",
@@ -154,7 +164,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-6212559",
@@ -178,7 +190,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-6223613",
@@ -202,7 +216,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-5082871",
@@ -226,7 +242,9 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     },
     {
       "id": "pexels-8054795",
@@ -251,7 +269,16 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "candidate_only"
+      "review_status": "source_verified_visual_review_pending",
+      "source_page_checked_on": "2026-10-12",
+      "source_page_status": "confirmed_live"
     }
-  ]
+  ],
+  "pipeline": {
+    "source_pages_confirmed": 10,
+    "assets_downloaded": 0,
+    "images_visually_approved": 0,
+    "images_cleared_for_publication": 0,
+    "blocker": "No outbound file download from this environment; original images/WebP/contact sheet not yet created."
+  }
 }
