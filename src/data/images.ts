@@ -16,6 +16,7 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'fp-03-school-bag': { widths: [640, 960, 1312], width: 1312, height: 828, source: 'Kaboompics 22548, Karolina Grabowska (faceless crop; original archived on codex/command-center-hero-photo in design/photography/kaboompics/FP-03-hero-detail/22548-2400.jpg)' },
   'hc-01-hero': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/etsy-listing/11.webp (cropped)' },
   'hc-01-zone-tags': { widths: [640, 960, 1440], width: 1440, height: 720, source: 'design/etsy-listing/10.webp (text overlay cropped out)' },
   'hc-01-wall-calendar': { widths: [640, 960, 1402], width: 1402, height: 1122, source: 'design/etsy-listing/01.webp' },

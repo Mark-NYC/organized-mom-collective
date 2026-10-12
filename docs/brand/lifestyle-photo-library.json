@@ -541,8 +541,7 @@
         "edits": "Resize and WebP export only; no grade or crop."
       },
       "used_in": [
-        "IF-01 /resources/intentional-family-life",
-        "FP-03 /resources/home-command-center (hero)"
+        "IF-01 /resources/intentional-family-life"
       ]
     },
     {
@@ -590,6 +589,39 @@
       },
       "used_in": [
         "IF-01 /resources/intentional-family-life"
+      ]
+    },
+    {
+      "id": "K11",
+      "title": "school notebooks going into a bag",
+      "role": "family planning and school paper handoff",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/22548/teenager-checking-contents-of-a-black-school-backpack",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-03-school-bag-{640,960,1312}.webp",
+      "license_review": "source page marks free for commercial use; no editorial-only marker, 2026-10-12",
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "2400px original and final 960px crop inspected",
+        "observations": "Final crop shows hands, plain notebooks/folders, black bag and wooden ruler. Face and bag brand patch excluded. No readable third-party logo or protected artwork in final crop. Generic small paper mark only.",
+        "visual_status": "pass"
+      },
+      "clearance_record": {
+        "approval": "Standing owner approval in PHOTO-DISCOVERY.md, 2026-10-12",
+        "date": "2026-10-12",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "original": "design/photography/kaboompics/FP-03-hero-detail/22548-2400.jpg on codex/command-center-hero-photo; original lawful download and license evidence in adjacent manifest.json",
+        "context": "Neutral illustration of packing school materials; no customer, endorsement or negative claim. No AI training or generation.",
+        "edits": "Crop fractions 0.16,0.49,0.98,0.835; resize and WebP compression only."
+      },
+      "used_in": [
+        "FP-03 /resources/home-command-center (hero)"
       ]
     }
   ],

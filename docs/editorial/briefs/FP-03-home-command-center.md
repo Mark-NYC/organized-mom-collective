@@ -49,3 +49,8 @@ Use the cleared Kaboompics hand-and-notepad photograph (K09 / if-01-notepad) as 
 ## Pinterest research notes
 
 Separate Pinterest-restricted searches were attempted on 2026-10-12 through both search engines. They did not return reliable Pinterest results; direct Pinterest access also failed. Autocomplete, guided terms, pin formats, boards and Trends remain unverified. Keyword proposals are based on the article, not asserted platform observations. Validate in Pinterest before producing/publishing pins. Full three-pin plan at ../pinterest/FP-03.md.
+
+
+## Hero photo revision, 2026-10-12
+
+Owner rejected the posed pen-and-notepad hero as too stock-like. Compared six Kaboompics school-bag photos at useful resolution. Selected 22548 with a faceless crop showing notebooks/folders being put into a bag; excludes the face and the bag’s brand label. Real action matches the article’s outgoing-paper routine. Responsive files: fp-03-school-bag at 640, 960, 1312 px. No image generation, retouching or heavy grading.
