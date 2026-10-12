@@ -9,6 +9,8 @@ OUT = ROOT / "photo-library-review"
 OUT.mkdir(exist_ok=True)
 EXPORTS = OUT / 'optimized-preview-only'
 EXPORTS.mkdir(exist_ok=True)
+SOURCES = OUT / 'downloaded-source-review-only'
+SOURCES.mkdir(exist_ok=True)
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; OMCResearch/1.0)"}
 
 def get(url):
@@ -54,6 +56,16 @@ def image_for(url, source):
 def make_tile(photo, i):
     raw=image_for(photo["url"],photo["source"])
     im=Image.open(io.BytesIO(raw)).convert("RGB")
+    (SOURCES / (photo["id"].lower() + "-source" + (".jpg" if im.format in ("JPEG",None) else ".png"))).write_bytes(raw)
+    source_width, source_height = im.size
+    (OUT / (photo["id"].lower() + "-inspection.json")).write_text(json.dumps({
+        "id":photo["id"],"source_url":photo["url"],
+        "source_width":source_width,"source_height":source_height,
+        "sufficient_for_1440px":source_width >= 1440,
+        "content_clearance":"manual_visual_check_required",
+        "publishing_clearance":False
+    },indent=2)+"\\n")
+
     # Internal previews only; never publish or commit as site assets.
     for width in (800, 1440):
         preview = im.copy()
