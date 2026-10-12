@@ -4,6 +4,7 @@
  *   PUBLIC  /                  brand homepage
  *           /calendar          the Family Wall Calendar product page (buy on Etsy)
  *           /companion         how the cleaning companion works (public explainer)
+ *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -26,6 +27,7 @@ export const routes = {
   /** The calendar page's options and Etsy buttons. */
   buy: '/calendar#buy',
   companion: '/companion',
+  weeklyReset: '/weekly-reset',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,

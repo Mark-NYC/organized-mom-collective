@@ -7,6 +7,7 @@ import type { APIRoute } from 'astro';
 import { getArticles, isoDate } from '../lib/articles';
 import { pillars } from '../data/pillars';
 import { routes } from '../routes';
+import { weeklyReset } from '../data/weekly-reset';
 
 export const GET: APIRoute = async ({ site }) => {
   const articles = await getArticles();
@@ -17,6 +18,8 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.home },
     { path: routes.calendar },
     { path: routes.companion },
+    // Noindex until it can be bought (buyUrl set).
+    ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     // The hub is noindex until it has articles.
     ...(articles.length ? [{ path: routes.resources, lastmod: latest }] : []),
     ...pillars.filter((p) => used.has(p.id)).map((p) => ({ path: routes.pillar(p.id) })),
