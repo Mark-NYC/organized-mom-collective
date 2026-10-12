@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Create side-by-side research contact sheets. Never deploy or mark rights cleared."""
 import io, json, pathlib, re, html, urllib.request, urllib.parse
+from html.parser import HTMLParser
 from PIL import Image, ImageDraw, ImageOps
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -32,13 +33,18 @@ def image_for(url, source):
             except Exception:
                 continue
         raise RuntimeError("Unsplash image CDN unavailable; source page remains valid")
-    patterns = [
-        r'<meta[^>]+property=["\\\']og:image["\\\'][^>]+content=["\\\']([^"\\\']+)',
-        r'<meta[^>]+content=["\\\']([^"\\\']+)["\\\'][^>]+property=["\\\']og:image'
-    ]
-    match = next((m for p in patterns if (m := re.search(p,page,re.I))),None)
-    if not match: raise RuntimeError("Cannot find og:image on source page")
-    imgurl = urllib.parse.urljoin(url, html.unescape(match.group(1)))
+    class OGImageParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.image = None
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if tag == "meta" and values.get("property") in ("og:image", "og:image:url"):
+                self.image = values.get("content")
+    parser = OGImageParser()
+    parser.feed(page)
+    if not parser.image: raise RuntimeError("Cannot find og:image on source page")
+    imgurl = urllib.parse.urljoin(url, html.unescape(parser.image))
     if urllib.parse.urlparse(imgurl).scheme != "https":
         raise ValueError("Unexpected image URL scheme")
     return get(imgurl)
