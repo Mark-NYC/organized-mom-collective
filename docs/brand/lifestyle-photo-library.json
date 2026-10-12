@@ -30,12 +30,13 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
-      "model_release_review": "requires_visual_and_context_review",
+      "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
+      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
       "publishing_clearance": false,
       "public_path": null,
       "source_license_label_verified": true,
-      "license_verification_date": "2026-10-12"
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort"
     },
     {
       "id": "K02",
@@ -51,12 +52,13 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
-      "model_release_review": "requires_visual_and_context_review",
+      "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
+      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
       "publishing_clearance": false,
       "public_path": null,
       "source_license_label_verified": true,
-      "license_verification_date": "2026-10-12"
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa"
     },
     {
       "id": "K03",
@@ -72,11 +74,13 @@
         "educational_content",
         "social"
       ],
-      "license_review": "photo_page_current_status_unverified",
-      "model_release_review": "needs_individual_scene_review",
+      "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
+      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
       "publishing_clearance": false,
       "public_path": null,
-      "source_license_label_verified": false
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/photo/18171/floral-notebook-coffee-and-laptop-for-creative-work-from-home"
     },
     {
       "id": "K05",
@@ -92,12 +96,13 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
-      "model_release_review": "requires_visual_and_context_review",
+      "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
+      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
       "publishing_clearance": false,
       "public_path": null,
       "source_license_label_verified": true,
-      "license_verification_date": "2026-10-12"
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/photo/6669/containers-of-cereals-in-kitchen-cupboard"
     },
     {
       "id": "K06",
@@ -113,12 +118,13 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
-      "model_release_review": "requires_visual_and_context_review",
+      "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
+      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
       "publishing_clearance": false,
       "public_path": null,
       "source_license_label_verified": true,
-      "license_verification_date": "2026-10-12"
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette"
     },
     {
       "id": "F01",
@@ -337,5 +343,5 @@
       "public_path": null
     }
   ],
-  "license_review_note": "Kaboompics Standard License permits website/commercial use, but individual editorial status, recognizable intellectual property and implied endorsement must be reviewed. Four of five K series photo pages were rechecked on 2026-10-12; K03 needs recheck. These labels do not confer final publishing clearance."
+  "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use."
 }
