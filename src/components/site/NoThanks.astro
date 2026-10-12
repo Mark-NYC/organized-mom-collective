@@ -1,0 +1,32 @@
+---
+/**
+ * The "No thanks" step of the post-purchase funnel (/checkout/complete → /take-back-control →
+ * /essential-routines → back to /checkout/complete). Carries the Stripe session id from this
+ * page's URL to the next page, so the last step can show her order again. Without one (someone
+ * opened the page directly) it goes to `fallback`.
+ */
+interface Props {
+  /** Next page's path, e.g. /essential-routines. */
+  next: string;
+  /** Extra query for the next page, e.g. "done=1". */
+  query?: string;
+  fallback: string;
+  label: string;
+}
+const { next, query, fallback, label } = Astro.props;
+---
+
+<a href={fallback} data-no-thanks data-next={next} data-query={query} class="text-[0.95rem] text-warm-soft underline underline-offset-4 hover:text-warm-ink">
+  {label}
+</a>
+
+<script>
+  const id = new URLSearchParams(location.search).get('session_id') ?? '';
+  if (/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) {
+    document.querySelectorAll<HTMLAnchorElement>('a[data-no-thanks]').forEach((a) => {
+      const q = new URLSearchParams({ session_id: id });
+      for (const [k, v] of new URLSearchParams(a.dataset.query ?? '')) q.set(k, v);
+      a.href = `${a.dataset.next}?${q}`;
+    });
+  }
+</script>

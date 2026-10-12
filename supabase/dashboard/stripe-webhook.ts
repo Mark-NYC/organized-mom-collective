@@ -142,8 +142,7 @@ function splitName(name) {
   const m = name.match(/^(.*) \(([^()]+)\)$/);
   return m ? [m[1], m[2]] : [name, null];
 }
-var THUMBS = /* @__PURE__ */ new Set(["calendar-26-week", "calendar-52-week", "weekly-reset-system", "take-back-control"]);
-var thumb = (slug, siteUrl) => `${siteUrl}/email/${THUMBS.has(slug) ? slug : "calendar-26-week"}.jpg`;
+var thumb = (slug, siteUrl) => `${siteUrl}/email/${/^[a-z0-9-]{1,60}$/.test(slug) ? slug : "calendar-26-week"}.jpg`;
 function itemRows(o, siteUrl, withPrices) {
   const html = o.shop_order_items.map((i) => {
     const [name, edition] = splitName(i.product_name);

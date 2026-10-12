@@ -151,9 +151,11 @@ function splitName(name: string): [string, string | null] {
   return m ? [m[1], m[2]] : [name, null];
 }
 
-/** Real product photos, resized to JPEG for email (WebP isn't safe everywhere): public/email/. */
-const THUMBS = new Set(['calendar-26-week', 'calendar-52-week', 'weekly-reset-system', 'take-back-control']);
-const thumb = (slug: string, siteUrl: string) => `${siteUrl}/email/${THUMBS.has(slug) ? slug : 'calendar-26-week'}.jpg`;
+/**
+ * Real product photos, resized to JPEG for email (WebP isn't safe everywhere): public/email/<slug>.jpg.
+ * Every product needs one (tests/shop.test.ts checks each seeded slug); a new product needs only the file.
+ */
+const thumb = (slug: string, siteUrl: string) => `${siteUrl}/email/${/^[a-z0-9-]{1,60}$/.test(slug) ? slug : 'calendar-26-week'}.jpg`;
 
 function itemRows(o: OrderRow, siteUrl: string, withPrices: boolean): Block {
   const html = o.shop_order_items

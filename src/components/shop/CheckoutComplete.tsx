@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { loadOrderStatus, money, type OrderStatus } from '../../lib/shop';
 import { routes } from '../../routes';
+import { weeklyReset } from '../../data/weekly-reset';
 
 const POLL_MS = 2000;
 const POLL_FOR_MS = 60_000;
@@ -88,6 +89,11 @@ export default function CheckoutComplete() {
 
   // Test-mode Checkout Sessions have ids starting cs_test_: say so, so a test is never mistaken for a real order.
   const test = new URLSearchParams(location.search).get('session_id')?.startsWith('cs_test_') ?? false;
+  // Post-purchase funnel: a Weekly Reset order goes on to Take Back Control (then the Essential
+  // Routines downsell). Their "No thanks" links come back here with done=1, so it isn't offered twice.
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get('session_id') ?? '';
+  const offerUpsell = Boolean(status.digital) && params.get('done') !== '1' && status.items.some((i) => i.name === weeklyReset.name);
 
   return (
     <div className="py-6">
@@ -119,6 +125,18 @@ export default function CheckoutComplete() {
         {status.tax_cents > 0 && <Row label="Tax" value={money(status.tax_cents)} />}
         <Row label="Total paid" value={money(status.total_cents)} strong />
       </dl>
+
+      {offerUpsell && (
+        <section className="mt-10 border-l-[3px] border-month bg-band px-5 py-5">
+          <h2 className="text-[1.15rem] leading-snug font-bold">Wait! One more thing before you go</h2>
+          <p className="mt-2 leading-relaxed">
+            Your Weekly Reset handles Sundays. See how to make the other 6 days flow just as smoothly: a one-time offer for Weekly Reset customers.
+          </p>
+          <a href={`${routes.takeBackControl}?session_id=${encodeURIComponent(sessionId)}`} className="btn-primary mt-4">
+            See the offer
+          </a>
+        </section>
+      )}
 
       {!status.digital && (
         <section className="mt-10 border-l-[3px] border-month bg-band px-5 py-5">

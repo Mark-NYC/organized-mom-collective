@@ -13,6 +13,7 @@ import { defaultOrderMode, describeEvent, emailOutcomeText, filterOrders, heldUn
 import { routes } from '../src/routes';
 import { WEEKLY_RESET_SLUG, weeklyReset } from '../src/data/weekly-reset';
 import { TAKE_BACK_CONTROL_SLUG, takeBackControl } from '../src/data/take-back-control';
+import { ESSENTIAL_ROUTINES_SLUG, essentialRoutines } from '../src/data/essential-routines';
 
 import envExample from '../.env.example?raw';
 import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
@@ -206,7 +207,7 @@ describe('emails', () => {
     tracking_number: '9400 1118',
     tracking_url: null,
     flags: [],
-    shop_order_items: [{ id: 'i', product_id: 'p', product_slug: 's', product_name: '26-Week Family Wall Calendar', unit_price_cents: 3400, quantity: 1, restocked: 0 }],
+    shop_order_items: [{ id: 'i', product_id: 'p', product_slug: 'calendar-26-week', product_name: '26-Week Family Wall Calendar', unit_price_cents: 3400, quantity: 1, restocked: 0 }],
   };
   const opts = { siteUrl: 'https://organizedmomcollective.com', supportEmail: 'hello@organizedmomcollective.com' };
 
@@ -446,16 +447,18 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 });
 
 describe('launch guards', () => {
-  it('nothing on the public site links to the website checkout except the Weekly Reset and Take Back Control pages, in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
+  it('nothing on the public site links to the website checkout except the funnel offer pages (Weekly Reset, Take Back Control, Essential Routines), in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
     // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts']);
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts']);
     expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
     expect(read('src/data/take-back-control.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{TAKE_BACK_CONTROL_SLUG\}` : null/);
+    expect(read('src/data/essential-routines.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{ESSENTIAL_ROUTINES_SLUG\}` : null/);
     const src = Object.keys(files).filter((f) => f.startsWith('../src/'));
     expect(src.length).toBeGreaterThan(30);
     const offenders = src
       .filter((f) => !f.startsWith('../src/components/shop/') && !f.startsWith('../src/pages/checkout/') && !allowed.has(f))
-      .filter((f) => /routes\.checkout|['"`]\/checkout/.test(files[f]));
+      // The order confirmation page (routes.checkoutComplete, /checkout/complete) isn't a checkout link.
+      .filter((f) => /routes\.checkout(?!Complete)|['"`]\/checkout(?!\/complete)/.test(files[f]));
     expect(offenders).toEqual([]);
     expect(routes.buy).toBe('/calendar#buy');
   });
@@ -497,6 +500,30 @@ describe('launch guards', () => {
     expect(seed).toMatch(new RegExp(`\\('${TAKE_BACK_CONTROL_SLUG}',\\s*'${takeBackControl.name}',[\\s\\S]*?\\n\\s*${takeBackControl.price * 100},`));
     expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
     expect(seed.match(/"path":"take-back-control\/[a-z0-9-]+\.(mp3|m4a|pdf)"/g)).toHaveLength(11);
+  });
+
+  it('the Essential Routines download is seeded at the price its page shows, reusing the routine PDFs', () => {
+    const sql = read('supabase/migrations/20261014000000_shop_essential_routines.sql');
+    const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
+    expect(seed).toMatch(new RegExp(`\\('${ESSENTIAL_ROUTINES_SLUG}',\\s*'${essentialRoutines.name}',[\\s\\S]*?\\n\\s*${essentialRoutines.price * 100},`));
+    expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
+    const paths = seed.match(/"path":"[a-z0-9\/-]+\.(mp3|pdf)"/g) ?? [];
+    expect(paths).toHaveLength(6);
+    // The routines are the same files Take Back Control delivers.
+    const tbc = read('supabase/migrations/20261013000000_shop_take_back_control.sql');
+    for (const r of ['morning-routine', 'after-school-routine', 'bedtime-routine', 'weekend-prep-routine']) {
+      expect(seed).toContain(`"path":"take-back-control/${r}.pdf"`);
+      expect(tbc).toContain(`"path":"take-back-control/${r}.pdf"`);
+    }
+  });
+
+  it('every seeded product has its email picture (public/email/<slug>.jpg)', () => {
+    const slugs = Object.entries(files)
+      .filter(([f]) => f.startsWith('../supabase/migrations/'))
+      .flatMap(([, sql]) => [...sql.matchAll(/^\s*\('([a-z0-9-]+)',\s*'/gm)].map((m) => m[1]))
+      .filter((s) => !s.startsWith('placeholder'));
+    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines']));
+    for (const slug of slugs) expect(emailAssets, slug).toContain(`../public/email/${slug}.jpg`);
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {

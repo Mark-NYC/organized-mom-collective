@@ -63,6 +63,7 @@ Dashboard (/admin/orders)
 
 - **The Weekly Reset System.** $9 download (`weekly-reset-system`), active, no stock. Sold from `/weekly-reset`. See [Digital products](#digital-products).
 - **Take Back Control.** $29 download (`take-back-control`), active, no stock. Sold from `/take-back-control`, the offer after the Weekly Reset. See [Digital products](#digital-products).
+- **Essential Routines Bundle.** $12 download (`essential-routines`), active, no stock. Sold from `/essential-routines`, the downsell when someone passes on Take Back Control.
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -143,6 +144,12 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 
   The Weekly Planner Generator (upgraded, with example weeks) and the Pantry Inventory (`/pantry`) are website tools, not files: the buyer's download page links to both (`src/components/shop/DownloadFiles.tsx`).
 - [ ] Buy it once in preview (test card): all eleven files should download.
+
+### Database update: Essential Routines (once, after Take Back Control)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261014000000_shop_essential_routines.sql` → **Run**, once. It only adds the product.
+- [ ] Redeploy `stripe-webhook` and `shop-admin` (receipt emails now use `public/email/<slug>.jpg` for every product, so later products need only that file).
+- [ ] **Storage → shop-downloads**: the 4 routine PDFs are already there (Take Back Control's). Upload the two bonuses to folder `essential-routines`, named exactly `quick-setup-audio.mp3` and `why-routines-work.pdf`.
+- [ ] Buy it once in preview (test card): all six files should download.
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.

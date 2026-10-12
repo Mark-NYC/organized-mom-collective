@@ -1,0 +1,31 @@
+---
+/**
+ * A funnel offer's call to action: goes to the checkout once the offer's buyUrl is set (shop on);
+ * until then a "Coming soon" note, never a dead link.
+ */
+interface Props {
+  label: string;
+  href: string | null;
+  /** Placement name for analytics, e.g. "routines-close". */
+  cta: string;
+  class?: string;
+}
+const { label, href, cta, class: className } = Astro.props;
+---
+
+{
+  href ? (
+    <a href={href} data-cta={cta} class:list={['btn-primary min-h-14 w-full px-8 sm:w-auto', className]}>
+      {label}
+    </a>
+  ) : (
+    <p
+      class:list={[
+        'inline-flex min-h-14 w-full items-center justify-center rounded-[3px] border border-dashed border-warm-rule px-8 text-center text-[0.75rem] font-semibold tracking-[0.16em] text-warm-soft uppercase sm:w-auto',
+        className,
+      ]}
+    >
+      {label} · Coming soon
+    </p>
+  )
+}
