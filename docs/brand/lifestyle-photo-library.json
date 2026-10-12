@@ -3,8 +3,9 @@
   "library": "Organized Mom Collective lifestyle photography",
   "branch": "photo-library-pilot-2026-10",
   "status": "pilot_owner_visual_approved_not_cleared_for_publication",
-  "style": "Kaboompics-led warm neutral natural-light home details interspersed with family faces (starting guideline 70/30)",
+  "style": "Kaboompics-first faceless domestic scenes: target 85-90% of general lifestyle placements. Reserve 10-15% for approved candid family faces where emotional connection adds value. Keep actual OMC calendar as product focus.",
   "distribution_rules": [
+    "Default to faceless Kaboompics details; no formula forces a face image into a section. Use family faces sparingly for emotional narrative.",
     "Never serve photos from this manifest in live customer-facing pages until publishing_clearance is true.",
     "Never imply that pictured people are OMC customers or endorse OMC.",
     "Retain original photo source URL and attribution metadata.",
@@ -384,5 +385,7 @@
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
-  "visual_review_note": "Actual low-resolution contact sheet inspected on October 12, 2026; no full-resolution inspection, original rights certification or approved final crops. Publishing still blocked."
+  "visual_review_note": "Actual low-resolution contact sheet inspected on October 12, 2026; no full-resolution inspection, original rights certification or approved final crops. Publishing still blocked.",
+  "expansion_batch_reference": "docs/brand/photo-expansion-batch-03.json",
+  "expansion_batch_status": "candidate_links_unverified_not_owner_approved"
 }
