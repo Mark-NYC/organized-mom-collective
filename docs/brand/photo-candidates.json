@@ -1,8 +1,8 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "created_utc": "2026-10-12",
-  "status": "candidate_shortlist_only",
-  "notes": "25 source pages discovered on Pexels by 2026-10-12, all marked 'Free download' at discovery. Files have not been downloaded or visually curated, provenance and model releases remain unverified, and nothing is approved for publishing. Categories represent research themes, not vetted final selections.",
+  "status": "research_candidates_pending_review",
+  "notes": "25 candidate URLs assembled. Do not interpret presence as a verified live page, visual approval, human-photography verification, model-release confirmation, or publication clearance. 4867365, 7299840 and 10557081 independently rechecked 2026-10-12. Other 22 need rechecking. No binaries downloaded or deployed.",
   "license_reference": {
     "name": "Pexels License",
     "url": "https://www.pexels.com/license/",
@@ -33,9 +33,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
+      "review_status": "needs_visual_and_rights_review",
       "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "source_page_status": "confirmed_live",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-4867901",
@@ -60,9 +61,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-4867369",
@@ -86,9 +88,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-4867363",
@@ -112,9 +115,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8657212",
@@ -138,9 +142,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8657214",
@@ -164,9 +169,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-6212559",
@@ -190,9 +196,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-6223613",
@@ -216,9 +223,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-5082871",
@@ -242,9 +250,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8054795",
@@ -269,9 +278,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-7299840",
@@ -296,9 +306,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
+      "review_status": "needs_visual_and_rights_review",
       "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "source_page_status": "confirmed_live",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-7299827",
@@ -323,9 +334,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-7299819",
@@ -350,9 +362,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-12788198",
@@ -377,9 +390,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-12788187",
@@ -404,9 +418,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8055697",
@@ -431,9 +446,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8055723",
@@ -458,9 +474,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8055690",
@@ -485,9 +502,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-10557081",
@@ -512,9 +530,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
+      "review_status": "needs_visual_and_rights_review",
       "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "source_page_status": "confirmed_live",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-10557083",
@@ -539,9 +558,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-9462746",
@@ -566,9 +586,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-5591909",
@@ -593,9 +614,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-8580728",
@@ -620,9 +642,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-5124872",
@@ -647,9 +670,10 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     },
     {
       "id": "pexels-4049869",
@@ -674,16 +698,19 @@
       },
       "local_original": null,
       "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "review_status": "needs_visual_and_rights_review",
+      "source_page_checked_on": null,
+      "source_page_status": "needs_reverification",
+      "brand_representation_review": "not_reviewed"
     }
   ],
   "pipeline": {
-    "source_pages_confirmed": 25,
+    "candidate_urls": 25,
+    "source_pages_individually_reverified": 3,
+    "source_pages_need_reverification": 22,
     "assets_downloaded": 0,
     "images_visually_approved": 0,
     "images_cleared_for_publication": 0,
-    "blocker": "Runtime cannot download binaries. GitHub Actions manual artifact workflow ready but not run."
+    "contact_sheet_generated": false
   }
 }
