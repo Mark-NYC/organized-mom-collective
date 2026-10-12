@@ -63,6 +63,8 @@ export async function downloadPng(
   button.textContent = 'Preparing…';
   layoutHost.classList.add(exportClass);
   root.style.width = root.style.minWidth = root.style.maxWidth = `${width}px`;
+  // The copy keeps computed margins: a centered root (margin: auto) would be shifted right and cut off.
+  root.style.margin = '0';
   try {
     // The copy keeps typed text but not ticks: mirror them as attributes.
     for (const el of fieldsIn(root)) if (isCheckbox(el)) el.toggleAttribute('checked', el.checked);
@@ -88,6 +90,7 @@ export async function downloadPng(
     });
     layoutHost.classList.remove(exportClass);
     root.style.width = root.style.minWidth = root.style.maxWidth = '';
+    root.style.margin = '';
     button.disabled = false;
     button.textContent = label;
   }

@@ -1,0 +1,30 @@
+---
+/**
+ * The upgraded weekly planner for Take Back Control buyers: the /planner design plus one-tap example
+ * weeks. Unlisted, not locked: noindex, out of the sitemap, linked only from a Take Back Control
+ * buyer's download page. Its address is PLANNER_PLUS_PATH in src/data/planner.ts (change it there
+ * to retire a shared link). Shares the free planner's saved entries (same browser key).
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import WeeklyPlanner from '../../components/site/WeeklyPlanner.astro';
+import { PLANNER_PLUS_PATH, plannerPresets } from '../../data/planner';
+
+export function getStaticPaths() {
+  return [{ params: { access: PLANNER_PLUS_PATH.split('/').pop() } }];
+}
+---
+
+<PublicLayout title="Weekly Planner Generator" description="The upgraded weekly planner from Take Back Control, with one-tap example weeks." indexable={false} width="full">
+  <section aria-labelledby="planner-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Take Back Control · Weekly Planner Generator</p>
+      <h1 id="planner-h" class="serif-hero mt-3">Plan Your Week in One Place.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Start from an example week or a blank page, make it yours, then download it as an image to print or keep on your phone. Bookmark this
+        page: it’s your upgraded planner.
+      </p>
+    </div>
+  </section>
+
+  <WeeklyPlanner presets={plannerPresets} />
+</PublicLayout>

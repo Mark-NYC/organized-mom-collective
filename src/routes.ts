@@ -6,7 +6,8 @@
  *           /companion         how the cleaning companion works (public explainer)
  *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
  *           /take-back-control "Take Back Control" upsell ($29 course + tools after the Weekly Reset; always noindex)
- *           /planner           free weekly planner, filled in on screen, downloads as a PNG
+ *           /planner           free weekly planner, filled in on screen, downloads as a PNG (the upgraded one,
+ *                              for Take Back Control buyers, is unlisted: PLANNER_PLUS_PATH in src/data/planner.ts)
  *           /pantry            free pantry inventory tracker, same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)

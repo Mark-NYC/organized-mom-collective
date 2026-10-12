@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { requestDownload, type DownloadError, type DownloadFiles as Files } from '../../lib/shop';
 import { weeklyReset } from '../../data/weekly-reset';
+import { TAKE_BACK_CONTROL_SLUG } from '../../data/take-back-control';
+import { PLANNER_PLUS_PATH } from '../../data/planner';
+import { routes } from '../../routes';
 
 /**
  * /download?t=TOKEN — the link in a digital order's emails. Trades the token for short-lived
@@ -66,6 +69,25 @@ export default function DownloadFiles() {
           </li>
         ))}
       </ul>
+
+      {state.files.some((f) => f.product === TAKE_BACK_CONTROL_SLUG) && (
+        <section aria-labelledby="tools-h" className="mt-10 rounded-[3px] bg-band px-5 py-5">
+          <h2 id="tools-h" className="text-[1.15rem] font-bold">
+            Your Website Tools
+          </h2>
+          <p className="mt-2 leading-relaxed">
+            These live on our website, not in a file. <strong>Bookmark them now</strong>: this download page stops working after {until}, but the tools don’t.
+          </p>
+          <p className="mt-4 flex flex-wrap gap-3">
+            <a href={PLANNER_PLUS_PATH} className="btn-primary min-h-12 px-6">
+              Open the Weekly Planner Generator
+            </a>
+            <a href={routes.pantry} className="btn-primary min-h-12 px-6">
+              Open the Pantry Inventory
+            </a>
+          </p>
+        </section>
+      )}
 
       {missing && (
         <p role="alert" className="mt-4 border-l-[3px] border-month bg-band px-4 py-3">
