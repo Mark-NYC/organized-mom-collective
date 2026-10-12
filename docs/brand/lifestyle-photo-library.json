@@ -36,7 +36,15 @@
       "public_path": null,
       "source_license_label_verified": true,
       "license_verification_date": "2026-10-12",
-      "source_license_url": "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort"
+      "source_license_url": "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "GitHub Actions artifact 11770035828 contact sheet, low resolution",
+        "visual_status": "preview_pass",
+        "risk": "low",
+        "observations": "Cropped adult torso/hands, unbranded-looking supplies arranged on sofa. No identifiable face or obvious readable logo at contact-sheet resolution.",
+        "action": "Inspect full resolution for packaging marks and finalize crop before deployment."
+      }
     },
     {
       "id": "K02",
@@ -58,7 +66,15 @@
       "public_path": null,
       "source_license_label_verified": true,
       "license_verification_date": "2026-10-12",
-      "source_license_url": "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa"
+      "source_license_url": "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "GitHub Actions artifact 11770035828 contact sheet, low resolution",
+        "visual_status": "preview_pass",
+        "risk": "low",
+        "observations": "Cleaning basket, sponge and cropped adult hands. No identifiable face or obvious logo at contact-sheet resolution.",
+        "action": "Inspect full resolution for branded bottles; final crop."
+      }
     },
     {
       "id": "K03",
@@ -80,7 +96,15 @@
       "public_path": null,
       "source_license_label_verified": true,
       "license_verification_date": "2026-10-12",
-      "source_license_url": "https://kaboompics.com/photo/18171/floral-notebook-coffee-and-laptop-for-creative-work-from-home"
+      "source_license_url": "https://kaboompics.com/photo/18171/floral-notebook-coffee-and-laptop-for-creative-work-from-home",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "GitHub Actions artifact 11770035828 contact sheet, low resolution",
+        "visual_status": "hold_for_rights_review",
+        "risk": "medium",
+        "observations": "Floral notebook has distinctive printed artwork, with visible laptop. This could be third-party artwork or identifiable product design. Avoid placing in customer-facing content until reviewed.",
+        "action": "Review full-resolution notebook artwork ownership/branding; consider replacement with generic planning image."
+      }
     },
     {
       "id": "K05",
@@ -102,7 +126,15 @@
       "public_path": null,
       "source_license_label_verified": true,
       "license_verification_date": "2026-10-12",
-      "source_license_url": "https://kaboompics.com/photo/6669/containers-of-cereals-in-kitchen-cupboard"
+      "source_license_url": "https://kaboompics.com/photo/6669/containers-of-cereals-in-kitchen-cupboard",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "GitHub Actions artifact 11770035828 contact sheet, low resolution",
+        "visual_status": "preview_pass",
+        "risk": "low",
+        "observations": "Pantry jars and cereal container, cropped forearm. No apparent readable packaging labels at preview resolution.",
+        "action": "Check full-size for brands and verify pantry label details."
+      }
     },
     {
       "id": "K06",
@@ -124,7 +156,15 @@
       "public_path": null,
       "source_license_label_verified": true,
       "license_verification_date": "2026-10-12",
-      "source_license_url": "https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette"
+      "source_license_url": "https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "GitHub Actions artifact 11770035828 contact sheet, low resolution",
+        "visual_status": "preview_pass",
+        "risk": "low",
+        "observations": "Unbranded-looking bakery bread in reusable net bag on simple background. No visible people or obvious marks at preview resolution.",
+        "action": "Inspect full-resolution and finalize crop; strongest initial production candidate."
+      }
     },
     {
       "id": "F01",
@@ -343,5 +383,6 @@
       "public_path": null
     }
   ],
-  "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use."
+  "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
+  "visual_review_note": "Actual low-resolution contact sheet inspected on October 12, 2026; no full-resolution inspection, original rights certification or approved final crops. Publishing still blocked."
 }
