@@ -40,12 +40,15 @@ def make_tile(photo, i):
 
 def render(photos,name):
     tiles=[]
+    results=[]
     for i,p in enumerate(photos):
         try:
             tiles.append(make_tile(p,i))
             print("OK",p["id"])
+            results.append({"id":p["id"],"status":"downloaded"})
         except Exception as e:
             print("FAILED",p["id"],str(e))
+            results.append({"id":p["id"],"status":"failed","error":str(e)})
             blank=Image.new("RGB",(430,370),"#fff3ef")
             d=ImageDraw.Draw(blank)
             d.text((12,40),p["id"]+" - preview unavailable",fill="#553333")
@@ -56,10 +59,12 @@ def render(photos,name):
     sheet=Image.new("RGB",(cols*430,rows*370),"white")
     for i,tile in enumerate(tiles):sheet.paste(tile,((i%cols)*430,(i//cols)*370))
     sheet.save(OUT/name,quality=90)
+    (OUT/(name+".status.json")).write_text(json.dumps(results,indent=2))
+    return sum(x["status"]=="downloaded" for x in results),len(results)
 
 faces=json.loads((ROOT/"docs/brand/faces-approval-batch-02.json").read_text())["photos"]
 favorites=[p for p in faces if p.get("visual_review")=="liked_by_owner"]
-render(favorites,"liked-faces-contact-sheet.jpg")
+faces_ok, faces_total = render(favorites,"liked-faces-contact-sheet.jpg")
 kab=[
 ("K01","Everyday cleaning basket","https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort"),
 ("K02","Home care basket","https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa"),
@@ -67,5 +72,8 @@ kab=[
 ("K05","Cereal containers","https://kaboompics.com/photo/6669/containers-of-cereals-in-kitchen-cupboard"),
 ("K06","Bread groceries","https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette")
 ]
-render([{"id":i,"title":title,"creator":"Karolina Grabowska","source":"Kaboompics","url":url} for i,title,url in kab],"kaboompics-style-reference.jpg")
+kab_ok, kab_total = render([{"id":i,"title":title,"creator":"Karolina Grabowska","source":"Kaboompics","url":url} for i,title,url in kab],"kaboompics-style-reference.jpg")
 (OUT/"README.txt").write_text("VISUAL RESEARCH ONLY. No downloaded image is legally cleared for publication.\n")
+\nprint(f"Successful previews: {faces_ok}/{faces_total} faces; {kab_ok}/{kab_total} Kaboompics")
+if faces_ok != faces_total or kab_ok != kab_total:
+    raise SystemExit("Incomplete preview downloads. See status.json reports in uploaded artifact.")
