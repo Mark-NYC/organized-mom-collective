@@ -6,6 +6,7 @@
  *           /companion         how the cleaning companion works (public explainer)
  *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
  *           /take-back-control "Take Back Control" upsell ($29 course + tools after the Weekly Reset; always noindex)
+ *           /planner           free weekly planner, filled in on screen, downloads as a PNG
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -32,6 +33,7 @@ export const routes = {
   companion: '/companion',
   weeklyReset: '/weekly-reset',
   takeBackControl: '/take-back-control',
+  planner: '/planner',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
