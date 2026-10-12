@@ -52,3 +52,7 @@ Non-negotiables (details in the docs above):
 | Pinterest plans (one per article) / pin exports | `docs/editorial/pinterest/{ID}.md` / `design/pinterest/{ID}/` |
 
 Conventions: reuse the existing print palette, `.label` / `.page-title` / `.text-link` classes and `marks.tsx` components; internal URLs come from `src/routes.ts` and have no trailing slash; cleaning content is read from `src/data/cleaning.ts`, never retyped.
+
+## Article and resource photography
+
+**Before choosing images for any new article, guide, resource, or editorial landing page, read `docs/brand/PHOTO-DISCOVERY.md` and follow its discovery → source verification → clearance → optimization → reuse workflow.** Prefer faceless Kaboompics images, search the cleared library first, and never publish uncleared stock photos. The GitHub Actions downloader is not itself a photo search engine.
