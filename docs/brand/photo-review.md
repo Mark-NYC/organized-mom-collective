@@ -1,6 +1,8 @@
 # Lifestyle Photo Review Board
 
-**Candidate review only. No photos are approved or deployed.** All images below load from Pexels' CDN directly in your browser. They are not stored in this repository. If a thumbnail fails, open its linked source page. Human-photo provenance and model releases are not confirmed.
+**Research-only review board. No photos are approved or deployed.** 25 candidate URLs, of which 3 source pages were independently rechecked on October 12, 2026. The remaining 22 links need validation. Thumbnail loading and visual consistency have not been verified. All images below load from Pexels' CDN directly in your browser. They are not stored in this repository. If a thumbnail fails, open its linked source page. Human-photo provenance and model releases are not confirmed.
+
+**Brand preference:** Prioritize white families in everyday home settings, with a natural and unposed feel. Appearance has not yet been reviewed for these candidates.
 
 **Visual review:** prioritize genuine household scenes, muted warm light, ordinary lived-in spaces, useful crops, and a consistent photographic style. Reject anything that looks staged or too polished. Approval for aesthetics does not approve commercial use.
 
