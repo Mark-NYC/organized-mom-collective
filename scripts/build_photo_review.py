@@ -74,6 +74,6 @@ kab=[
 ]
 kab_ok, kab_total = render([{"id":i,"title":title,"creator":"Karolina Grabowska","source":"Kaboompics","url":url} for i,title,url in kab],"kaboompics-style-reference.jpg")
 (OUT/"README.txt").write_text("VISUAL RESEARCH ONLY. No downloaded image is legally cleared for publication.\n")
-\nprint(f"Successful previews: {faces_ok}/{faces_total} faces; {kab_ok}/{kab_total} Kaboompics")
+print(f"Successful previews: {faces_ok}/{faces_total} faces; {kab_ok}/{kab_total} Kaboompics")
 if faces_ok != faces_total or kab_ok != kab_total:
     raise SystemExit("Incomplete preview downloads. See status.json reports in uploaded artifact.")
