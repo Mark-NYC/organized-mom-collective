@@ -85,7 +85,7 @@ def render(photos,name):
             d.text((12,40),p["id"]+" - preview unavailable",fill="#553333")
             d.text((12,70),str(e)[:55],fill="#553333")
             tiles.append(blank)
-    if not tiles:return
+    if not tiles:return (0,0)
     cols=3;rows=(len(tiles)+cols-1)//cols
     sheet=Image.new("RGB",(cols*430,rows*370),"white")
     for i,tile in enumerate(tiles):sheet.paste(tile,((i%cols)*430,(i//cols)*370))
