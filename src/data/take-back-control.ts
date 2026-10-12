@@ -38,7 +38,7 @@ export const takeBackControlAssets = {
     src: '/images/take-back-control/course.webp',
     width: 900,
     height: 900,
-    alt: '4 Week Complete Course, Take Back Control Course, playing on a phone. Week 1: Create Your Family Reset Rhythm, 05:24. Week 2: Morning Flow That Doesn’t Break, 06:08. Week 3: Weekly Planning on Autopilot (Audio Training), 05:23. Week 4: Declutter Your Brain, Not Just the Toys, 07:28. Extra bonus: 3 Minute Reset Ritual Audio, 02:11.',
+    alt: '4 Week Complete Course, Take Back Control Course, playing on a phone. Week 1: Create Your Family Reset Rhythm, 05:21. Week 2: Morning Flow That Doesn’t Break, 05:59. Week 3: Weekly Planning on Autopilot (Audio Training), 05:22. Week 4: Declutter Your Brain, Not Just the Toys, 07:27. Extra bonus: 3 Minute Reset Ritual Audio, 02:11.',
     spec: 'Course card on white: phone + episode list · course.webp, 900 × 900',
   },
   routines: {
