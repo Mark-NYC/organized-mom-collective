@@ -1,30 +1,36 @@
 {
-  "schema_version": "0.1.0",
-  "created_utc": "2026-10-12",
-  "status": "candidate_shortlist_only",
-  "notes": "All 10 primary Pexels photo pages and the current Pexels license page were reachable during research on 2026-10-12. Photos have NOT been visually curated from originals, downloaded, authenticated as human-shot, or model-release cleared. None approved for publication. Runtime image download blocked by network/DNS.",
+  "schema_version": "0.3.0",
+  "updated_utc": "2026-10-12",
+  "status": "active_shortlist_unapproved",
+  "notes": "The previous 25-photo batch has been retired from the active review board because its visual fit was not verified. These five replacement family photos are tagged 'Caucasian Family' on their Pexels source pages. This is source tagging, not independently verified ethnicity. No imagery has been downloaded, visually approved, model-release confirmed, or cleared for use.",
   "license_reference": {
     "name": "Pexels License",
     "url": "https://www.pexels.com/license/",
     "review_date": "2026-10-12",
     "attribution_required": false
   },
+  "pipeline": {
+    "active_candidates": 5,
+    "retired_unverified_candidates": 25,
+    "downloaded": 0,
+    "visually_approved": 0,
+    "cleared_for_publication": 0
+  },
   "photos": [
     {
-      "id": "pexels-4867365",
-      "title": "Mother and children eating breakfast",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mother-and-children-eating-4867365/",
+      "id": "pexels-3875157",
+      "title": "Parents relaxing with children in living room",
+      "photographer": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/parents-drink-tea-while-sitting-with-children-in-living-room-3875157/",
       "category": "family-routines",
-      "keywords": [
-        "family breakfast",
-        "kitchen"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -32,26 +38,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "local_webp": null
     },
     {
-      "id": "pexels-4867901",
-      "title": "Mother preparing cereal with two children",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mother-eating-with-children-4867901/",
+      "id": "pexels-7220468",
+      "title": "Parents playing with child in living room",
+      "photographer": "Pavel Danilyuk",
+      "source_url": "https://www.pexels.com/photo/low-angle-shot-of-a-family-playing-together-7220468/",
       "category": "family-routines",
-      "keywords": [
-        "breakfast",
-        "cereal"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -59,25 +61,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "local_webp": null
     },
     {
-      "id": "pexels-4867369",
-      "title": "Mother and two children sharing breakfast",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mother-and-children-eating-4867369/",
+      "id": "pexels-5593690",
+      "title": "Mother cooking with children in kitchen",
+      "photographer": "RDNE Stock project",
+      "source_url": "https://www.pexels.com/photo/2-boys-and-girl-sitting-on-blue-table-5593690/",
       "category": "family-routines",
-      "keywords": [
-        "family breakfast"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -85,25 +84,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "local_webp": null
     },
     {
-      "id": "pexels-4867363",
-      "title": "Mother preparing breakfast for children",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mom-preparing-breakfast-for-her-kids-4867363/",
+      "id": "pexels-11163598",
+      "title": "Parents spending time with daughter in living room",
+      "photographer": "Nikita Nikitin",
+      "source_url": "https://www.pexels.com/photo/parents-with-daughter-during-music-classes-11163598/",
       "category": "family-routines",
-      "keywords": [
-        "morning kitchen"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -111,25 +107,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "local_webp": null
     },
     {
-      "id": "pexels-8657212",
-      "title": "Mother and children breakfast",
-      "photographer": "Ron Lach",
-      "source_url": "https://www.pexels.com/photo/photo-of-a-mother-s-children-eating-breakfast-8657212/",
+      "id": "pexels-5522959",
+      "title": "Mother hugging son at home during Christmas",
+      "photographer": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/son-hugging-his-mother-at-christmas-5522959/",
       "category": "family-routines",
-      "keywords": [
-        "family breakfast"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -137,148 +130,7 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
-    },
-    {
-      "id": "pexels-8657214",
-      "title": "Mother and children eating at home",
-      "photographer": "Ron Lach",
-      "source_url": "https://www.pexels.com/photo/mother-with-his-children-eating-8657214/",
-      "category": "family-routines",
-      "keywords": [
-        "kitchen meal"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
-    },
-    {
-      "id": "pexels-6212559",
-      "title": "Mother making breakfast with two children",
-      "photographer": "Jep Gambardella",
-      "source_url": "https://www.pexels.com/photo/mother-and-kids-at-breakfast-in-kitchen-6212559/",
-      "category": "family-routines",
-      "keywords": [
-        "meal preparation"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
-    },
-    {
-      "id": "pexels-6223613",
-      "title": "Parent holding child while preparing breakfast",
-      "photographer": "Jep Gambardella",
-      "source_url": "https://www.pexels.com/photo/mother-carrying-one-of-her-sons-in-the-kitchen-during-breakfast-6223613/",
-      "category": "family-routines",
-      "keywords": [
-        "busy family kitchen"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
-    },
-    {
-      "id": "pexels-5082871",
-      "title": "Family preparing food together",
-      "photographer": "Vanessa Loring",
-      "source_url": "https://www.pexels.com/photo/mother-and-children-preparing-food-in-the-kitchen-5082871/",
-      "category": "family-routines",
-      "keywords": [
-        "cooking"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
-    },
-    {
-      "id": "pexels-8054795",
-      "title": "Mother and daughter at breakfast",
-      "photographer": "Annushka Ahuja",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-during-breakfast-at-home-8054795/",
-      "category": "family-routines",
-      "keywords": [
-        "kitchen",
-        "home"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "source_verified_visual_review_pending",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live"
+      "local_webp": null
     }
-  ],
-  "pipeline": {
-    "source_pages_confirmed": 10,
-    "assets_downloaded": 0,
-    "images_visually_approved": 0,
-    "images_cleared_for_publication": 0,
-    "blocker": "No outbound file download from this environment; original images/WebP/contact sheet not yet created."
-  }
+  ]
 }
