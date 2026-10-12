@@ -5,7 +5,7 @@
  * the real local PostgREST. Run by scripts/test-shop.sh (needs SHOP_E2E_* from it).
  */
 import { signStripePayload } from '../../supabase/functions/_shared/stripe.ts';
-import { FakeInbox, FakeStripe, jwt, routerFetch } from './fakes.ts';
+import { FakeInbox, FakeStorage, FakeStripe, jwt, routerFetch } from './fakes.ts';
 
 const REST = Deno.env.get('SHOP_E2E_REST')!;
 const SECRET = Deno.env.get('SHOP_E2E_JWT_SECRET')!;
@@ -38,11 +38,12 @@ for (const [k, v] of Object.entries(env)) Deno.env.set(k, v);
 const stripe = new FakeStripe();
 const inbox = new FakeInbox();
 const token = 'dashboard-admin-token';
-const fakeFetch = routerFetch({ supabaseUrl: SUPABASE_URL, restUrl: REST, stripe, inbox, users: new Map([[token, ADMIN]]) });
+const storage = new FakeStorage();
+const fakeFetch = routerFetch({ supabaseUrl: SUPABASE_URL, restUrl: REST, stripe, inbox, storage, users: new Map([[token, ADMIN]]) });
 globalThis.fetch = fakeFetch;
 
 const handlers: Record<string, (req: Request) => Promise<Response>> = {};
-for (const name of ['shop-checkout', 'stripe-webhook', 'shop-admin']) {
+for (const name of ['shop-checkout', 'stripe-webhook', 'shop-admin', 'shop-download']) {
   let captured: ((req: Request) => Promise<Response>) | null = null;
   // deno-lint-ignore no-explicit-any
   (Deno as any).serve = (h: (req: Request) => Promise<Response>) => {
@@ -53,7 +54,7 @@ for (const name of ['shop-checkout', 'stripe-webhook', 'shop-admin']) {
   if (!captured) throw new Error(`${name}: the file didn't call Deno.serve`);
   handlers[name] = captured;
 }
-console.log('dashboard files: all three load on their own and register a handler');
+console.log('dashboard files: all four load on their own and register a handler');
 
 const post = (fn: string, body: unknown, headers: Record<string, string> = {}) =>
   handlers[fn](new Request('https://fn.test/', { method: 'POST', headers: { 'content-type': 'application/json', origin: 'https://organizedmomcollective.com', 'x-forwarded-for': '198.51.100.7', ...headers }, body: JSON.stringify(body) }));
@@ -96,6 +97,21 @@ const refund = await post('shop-admin', { action: 'refund', order_id: order.id, 
 check(refund.status === 200, 'shop-admin refunds $5 through Stripe');
 check((await sql(`select payment_status || ':' || refunded_cents from shop_orders where id = '${order.id}'`)) === 'partially_refunded:500', 'order shows the partial refund');
 check(inbox.sent.length === 3, 'confirmation, shipping and refund emails sent (3)');
+
+// A download: checkout, payment, then the emailed link gives a signed URL to the private file.
+await sql(`update shop_products set active = true where slug = 'weekly-reset-system'`);
+storage.files.add('weekly-reset/weekly-command-center.pdf');
+const dl = await (await post('shop-checkout', { action: 'create', items: [{ slug: 'weekly-reset-system', quantity: 1 }] }, { 'x-shop-preview': 'dashboard-preview' })).json();
+check(dl.client_secret, 'download checkout opens a Stripe session');
+stripe.complete(dl.session_id, { email: 'smoke@example.com' });
+const dlPayload = JSON.stringify({ id: `evt_dash_dl_${Date.now()}`, type: 'checkout.session.completed', livemode: false, data: { object: { id: dl.session_id } } });
+const dlHook = await handlers['stripe-webhook'](new Request('https://fn.test/', { method: 'POST', headers: { 'stripe-signature': await signStripePayload(dlPayload, 'whsec_dashboard') }, body: dlPayload }));
+check(dlHook.status === 200, 'download order paid');
+const dlToken = await sql(`select e.token from shop_entitlements e join shop_orders o on o.id = e.order_id where o.stripe_session_id = '${dl.session_id}' and e.kind = 'download'`);
+check(/^[0-9a-f]{48}$/.test(dlToken) && inbox.sent.at(-1)!.html.includes(`/download?t=${dlToken}`), 'receipt carries the download link');
+const files = await (await post('shop-download', { token: dlToken })).json();
+check(files.files?.[0]?.url?.includes('/storage/v1/object/sign/shop-downloads/weekly-reset/weekly-command-center.pdf'), 'shop-download signs the private file');
+check((await post('shop-download', { token: 'f'.repeat(48) })).status === 404, 'shop-download refuses an unknown link');
 
 await sql(`update shop_settings set checkout_mode = 'off'`);
 console.log('dashboard files: smoke test passed');

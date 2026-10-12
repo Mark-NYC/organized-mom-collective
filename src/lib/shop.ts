@@ -41,6 +41,8 @@ export interface ShopProduct {
   weeks: number | null;
   images: { src: string; alt: string }[];
   includes_companion: boolean;
+  /** 'digital': a download (no stock, no shipping, one per order). */
+  kind: 'physical' | 'digital';
   /** Shipping units per calendar (the 52-week, two sets, is 2). */
   ship_units: number;
   available: boolean;
@@ -117,6 +119,7 @@ export type CheckoutError =
   | 'unavailable'
   | 'too_many'
   | 'invalid_cart'
+  | 'mixed_cart'
   | 'shipping_not_configured'
   | 'shipping_unavailable'
   | 'tax_not_configured'
@@ -138,7 +141,8 @@ export async function startCheckout(items: { slug: string; quantity: number }[])
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.client_secret) return data;
     const known: CheckoutError[] = [
-      'checkout_closed', 'rate_limited', 'sold_out', 'unavailable', 'too_many', 'invalid_cart', 'shipping_not_configured', 'shipping_unavailable', 'tax_not_configured',
+      'checkout_closed', 'rate_limited', 'sold_out', 'unavailable', 'too_many', 'invalid_cart', 'mixed_cart', 'shipping_not_configured', 'shipping_unavailable',
+      'tax_not_configured',
     ];
     return { error: known.includes(data.error) ? data.error : 'payment_unavailable' };
   } catch {
@@ -157,6 +161,8 @@ export interface OrderStatus {
   payment_status: OrderRow['payment_status'];
   fulfillment_status: OrderRow['fulfillment_status'];
   order_number: number | null;
+  /** A download order: nothing ships, the link is emailed. */
+  digital?: boolean;
   email_hint: string | null;
   subtotal_cents: number;
   discount_cents: number;
@@ -167,6 +173,35 @@ export interface OrderStatus {
 }
 
 export const loadOrderStatus = (sessionId: string) => rpc<OrderStatus | null>('shop_order_status', { p_session: sessionId });
+
+// ------------------------------------------------------------------ downloads (/download)
+
+export type DownloadError = 'invalid_link' | 'link_expired' | 'access_revoked' | 'rate_limited' | 'unavailable';
+
+export interface DownloadFiles {
+  /** url is null when that file couldn't be prepared (missing from storage). */
+  files: { label: string; product: string; url: string | null }[];
+  expires_at: string;
+  order_number: number | null;
+  test: boolean;
+}
+
+/** Trades the emailed token for short-lived links to the files (shop-download Edge Function). */
+export async function requestDownload(token: string): Promise<DownloadFiles | { error: DownloadError }> {
+  try {
+    const res = await fetch(`${SUPABASE}/functions/v1/shop-download`, {
+      method: 'POST',
+      headers: { apikey: ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && Array.isArray(data.files)) return data;
+    const known: DownloadError[] = ['invalid_link', 'link_expired', 'access_revoked', 'rate_limited'];
+    return { error: known.includes(data.error) ? data.error : 'unavailable' };
+  } catch {
+    return { error: 'unavailable' };
+  }
+}
 
 // Stripe.js must load from js.stripe.com (PCI); card details stay inside Stripe's iframe.
 interface EmbeddedCheckout {
@@ -229,6 +264,8 @@ export interface OrderRow {
   payment_status: 'pending' | 'paid' | 'partially_refunded' | 'refunded' | 'failed' | 'expired' | 'canceled';
   fulfillment_status: 'unfulfilled' | 'packing' | 'shipped' | 'delivered' | 'canceled';
   reservation: 'held' | 'converted' | 'released';
+  /** A download order: delivered at payment, nothing to ship. */
+  digital?: boolean;
   stripe_session_id: string | null;
   stripe_payment_intent_id: string | null;
   livemode: boolean | null;
@@ -270,6 +307,10 @@ export interface ProductRow {
   stock: number;
   max_per_order: number;
   ship_units: number;
+  /** 'digital': a download from the shop-downloads bucket; stock and shipping don't apply. */
+  kind?: 'physical' | 'digital';
+  files?: { path: string; label: string }[];
+  tax_code?: string | null;
   sort: number;
 }
 
@@ -330,7 +371,13 @@ export const EMAIL_STATUS_LABELS: Record<EmailLogRow['status'], string> = {
 /** What shop-admin reports for one email attempt. */
 export type EmailOutcome = 'sent' | 'skipped' | 'failed' | 'duplicate' | 'no_email';
 
-const EMAIL_KIND_LABELS: Record<string, string> = { confirmation: 'Receipt', shipped: 'Shipping email', refund: 'Refund email', access: 'Companion instructions' };
+const EMAIL_KIND_LABELS: Record<string, string> = {
+  confirmation: 'Receipt',
+  shipped: 'Shipping email',
+  refund: 'Refund email',
+  access: 'Companion instructions',
+  download: 'Download link email',
+};
 
 /** One sentence on what really happened to an email, from the provider's answer. */
 export function emailOutcomeText(kind: string, outcome: EmailOutcome | string | null | undefined): string {
@@ -657,6 +704,10 @@ export function describeEvent(e: Pick<OrderEvent, 'kind' | 'detail'>): string {
       return `Dispute opened${s('reason') ? `: ${s('reason').replace(/_/g, ' ')}` : ''}`;
     case 'note':
       return 'Note updated';
+    case 'downloaded':
+      return 'Customer opened the download page';
+    case 'download_link_renewed':
+      return 'New download link created (the old one stopped working)';
     default:
       return e.kind.replace(/_/g, ' ');
   }

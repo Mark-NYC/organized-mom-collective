@@ -63,6 +63,8 @@ export interface OrderRow {
   payment_status: 'pending' | 'paid' | 'partially_refunded' | 'refunded' | 'failed' | 'expired' | 'canceled';
   fulfillment_status: 'unfulfilled' | 'packing' | 'shipped' | 'delivered' | 'canceled';
   reservation: 'held' | 'converted' | 'released';
+  /** Every item is a download: nothing ships. */
+  digital?: boolean;
   stripe_session_id: string | null;
   stripe_payment_intent_id: string | null;
   livemode: boolean | null;

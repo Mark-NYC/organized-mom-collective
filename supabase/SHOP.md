@@ -1,6 +1,6 @@
 # Direct website shop
 
-Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and the site's buy buttons are unchanged.
+Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and the calendar's buy buttons are unchanged. The same checkout also sells **downloads** (the $9 Weekly Reset System, from `/weekly-reset`): see [Digital products](#digital-products).
 
 **Status: built, tested against fakes and a real local database, switched off.** Nothing is public and no real money can move until you complete [Launch](#launch).
 
@@ -61,6 +61,7 @@ Dashboard (/admin/orders)
 
 ## Products
 
+- **The Weekly Reset System.** $9 download (`weekly-reset-system`), active, no stock. Sold from `/weekly-reset`. See [Digital products](#digital-products).
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -114,11 +115,18 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261011000000_shop_launch_prep.sql` → **Run**, once. It adds columns and replaces some `shop_*` functions; existing orders, stock, emails, survey data and admins are untouched. A second run stops at the first statement and changes nothing.
 - [ ] Then redeploy **all three** functions from `supabase/dashboard/` (same steps as above: open the function → Code → replace everything → Deploy). Keep "Verify JWT" off.
 
+### Database update: digital products (once, after launch preparation)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261012000000_shop_digital.sql` → **Run**, once. It adds downloads (columns, functions, the Weekly Reset product) and creates the private Storage bucket `shop-downloads`. Existing orders, stock, emails and admins are untouched; a second run stops at the first statement.
+- [ ] Redeploy **all three** existing functions from `supabase/dashboard/` (same steps as above), then deploy the **fourth**, `shop-download` from `supabase/dashboard/shop-download.ts`, with "Verify JWT" off. It needs no new secrets.
+- [ ] **Storage → shop-downloads**: check it says *Private*. Upload the four files at exactly these paths (folder `weekly-reset`): `weekly-command-center.pdf`, `weekly-command-center-editable.pdf`, `30-minute-daily-tidy-system.pdf`, `weekly-reset-coaching-audio.mp3`. If you ran the digital-products migration before the fillable Command Center was added, add it to the product once in the SQL Editor: `update shop_products set files = jsonb_insert(files, '{1}', '{"path":"weekly-reset/weekly-command-center-editable.pdf","label":"The Weekly Command Center (fillable PDF: type in it on your computer)"}') where slug = 'weekly-reset-system';` Dashboard → Inventory lists the paths too.
+- [ ] Buy it once in preview (test card) and open the download link from the receipt email: all three files should download.
+
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
 - [ ] **Shipping prices** ([Shipping](#shipping)). Add the real rate(s) in Settings, then turn off the test placeholder.
 - [ ] Per-order limit (5) and website stock (25; separate from Etsy, not synced).
-- [ ] Refund/return policy: draft in [REFUND_POLICY_DRAFT.md](REFUND_POLICY_DRAFT.md). Not published.
+- [ ] Refund/return policy: draft in [REFUND_POLICY_DRAFT.md](REFUND_POLICY_DRAFT.md). Not published. The Weekly Reset page promises a 30-day "Actually Used It" money-back guarantee: honor it with a full refund from the dashboard (that also turns the download link off).
+- [ ] **Sales tax on downloads**: the Weekly Reset product carries Stripe tax code `txcd_10000000` (general electronically supplied services). Confirm the right code with your accountant before choosing Stripe Tax; change it in the SQL Editor (`update shop_products set tax_code = '…' where slug = 'weekly-reset-system';`).
 - [ ] Support inbox: `SHOP_EMAIL_REPLY_TO` is printed in every customer email as the contact address.
 
 ## Launch
@@ -130,7 +138,25 @@ Only after you approve it. Each step is reversible: Settings → **Off** stops n
 3. Vercel production: `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_…`, `PUBLIC_SHOP_ENABLED=true`; redeploy.
 4. Dashboard → Settings → Launch readiness: all ★ items ticked → **Open**.
 5. Optional real-money smoke test: buy one with a 100%-minus-$1 promotion code, then refund it.
-6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public links to `/checkout`, so it must be updated deliberately.
+6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public other than the Weekly Reset page links to `/checkout`, so it must be updated deliberately.
+
+## Digital products
+
+A product is either **physical** (the calendars: stock, shipping, an address) or **digital** (a download). A checkout is one or the other, never both (`mixed_cart`). The Weekly Reset page's buttons go to `/checkout?product=weekly-reset-system`, which shows only the download: no quantity, no shipping, no address.
+
+```
+/weekly-reset → /checkout?product=weekly-reset-system → Stripe (email + card; billing address only with Stripe Tax)
+stripe-webhook → shop_mark_paid: order paid AND delivered, a 'download' entitlement with a random token (7 days)
+              → receipt email with a "Download your files" button → /download?t=TOKEN
+/download → shop-download Edge Function → shop_download (token valid? paid? not expired?) → signed Storage URLs (10 min each)
+```
+
+- **The files are private.** They sit in the `shop-downloads` bucket, never public. The download page asks `shop-download` for fresh signed links on every visit; each link works for 10 minutes and downloads the file under its own name.
+- **Links last 7 days.** After that the page says the link expired and to email you. Open the order in the dashboard → Emails → **Send a new download link**: a new token, 7 more days, emailed at once; the old link stops working.
+- **Refunds.** A full refund turns the link off at once (the refund email says so). A partial refund leaves it working. Downloads never touch inventory, can't be marked shipped, and never show as "to ship".
+- **Missing files** don't break the others: the page shows that one as unavailable and tells the customer to email you. Upload it and they can reload.
+- **The token is the key.** Anyone with the link can download until it expires; the page never passes it on as a referrer, the database caps tries per connection (60/hour), and tokens are 192 random bits. Signed-in admins can see tokens in the database; nobody else can.
+- **Adding another download:** insert a product with `kind = 'digital'`, its `files` (`[{"path": "folder/file.pdf", "label": "…"}]`) and a `tax_code`, upload the files, and link to `/checkout?product=<slug>`.
 
 ## Order emails
 
@@ -188,15 +214,16 @@ Nothing here deploys itself: a merged PR changes GitHub only. Vercel deploys the
 | Piece | How to tell it's current |
 | --- | --- |
 | Database (launch-prep migration) | SQL Editor: `select column_name from information_schema.columns where table_name = 'shop_settings' and column_name = 'tax_reviewed';` returns one row |
-| Edge Functions | Each function → Code: search for `Idempotency-Key` (launch prep) and `omc-badge-144` (email redesign). Both should be present in all three. |
+| Database (digital products) | SQL Editor: `select kind from shop_products where slug = 'weekly-reset-system';` returns `digital` |
+| Edge Functions | Each function → Code: search for `Idempotency-Key` (launch prep) and `omc-badge-144` (email redesign). Both should be present in shop-checkout, stripe-webhook and shop-admin, and `download:` (digital products) in shop-admin. `shop-download` exists. |
 | Site (Vercel) | Deployments → Production: the commit matches the latest merge on GitHub. Dashboard → Orders has an "Orders: Real and test" filter. |
 
 ## Tests
 
 - `npm test`: session building, signatures, emails, dashboard math and CSV, launch guards (seed values, flags, no public links to `/checkout`), and that the paste-ready files in `supabase/dashboard/` are self-contained and up to date.
-- `npm run test:shop`: 58 end-to-end tests, then a Deno smoke test of the three paste-ready files in `supabase/dashboard/` (each loaded on its own: checkout, signed webhook, admin, shipping, refund, emails) on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
+- `npm run test:shop`: 71 end-to-end tests, then a Deno smoke test of the four paste-ready files in `supabase/dashboard/` (each loaded on its own: checkout, signed webhook, admin, shipping, refund, emails, a download) on a throwaway local database (the real migrations, PostgREST, the real function handlers; Stripe, Resend and Supabase Auth faked). Covers the launch gate (every row of the table above), payment, forged/stale/duplicate webhooks, declines, abandoned/expired/canceled checkouts, the overselling race, late payments, refunds and their idempotency, emails, downloads (no stock or shipping, mixed carts, tokens, expiry, renewal, refunds, missing files), admin auth, row-level security and the database's grants to the browser roles. Needs PostgreSQL and PostgREST locally (see `scripts/test-shop.sh`).
 
-**Not verified against the real services** (Stripe's API isn't reachable from the build sandbox): the real Stripe API and embedded iframe, Apple Pay / Google Pay sheets, Stripe Tax calculations, the exact shape of Stripe's webhook payloads for your account's API version (the code reads both old and new shapes and re-fetches sessions with a pinned API version, `2025-03-31.basil`), Supabase's hosted gateway (CORS, `x-forwarded-for`, the new `sb_secret_` keys), Supabase Auth's `/user` endpoint, Resend delivery and your DNS. The test checklist above covers these.
+**Not verified against the real services** (Stripe's API isn't reachable from the build sandbox): the real Stripe API and embedded iframe, Apple Pay / Google Pay sheets, Stripe Tax calculations, the exact shape of Stripe's webhook payloads for your account's API version (the code reads both old and new shapes and re-fetches sessions with a pinned API version, `2025-03-31.basil`), Supabase's hosted gateway (CORS, `x-forwarded-for`, the new `sb_secret_` keys), Supabase Auth's `/user` endpoint, Supabase Storage's signed URLs (the response shape is read both ways: `signedURL` / `signedUrl`), Resend delivery and your DNS. The test checklist above covers these.
 
 ## Known limits
 

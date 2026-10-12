@@ -1,10 +1,15 @@
 ---
 /**
- * Slim header for /checkout and /checkout/complete: the brand and a way home, nothing
+ * Slim header for /checkout, /checkout/complete and /download: the brand and a way home, nothing
  * else to pull her away mid-payment (the full site header would).
  */
 import { Wordmark } from '../marks';
 import { routes } from '../../routes';
+
+interface Props {
+  label?: string;
+}
+const { label = 'Secure checkout' } = Astro.props;
 ---
 
 <header class="border-b border-rule bg-paper">
@@ -15,7 +20,7 @@ import { routes } from '../../routes';
         <rect x="3" y="7" width="10" height="7" rx="1.5"></rect>
         <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path>
       </svg>
-      Secure checkout
+      {label}
     </p>
   </div>
 </header>

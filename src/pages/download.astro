@@ -1,0 +1,26 @@
+---
+/**
+ * /download?t=TOKEN: where a digital order's emails send her (see DownloadFiles). noindex,
+ * and the page never sends the token on as a referrer.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import CheckoutHeader from '../components/shop/CheckoutHeader.astro';
+import DownloadFiles from '../components/shop/DownloadFiles';
+import { supabaseConfigured } from '../lib/shop';
+---
+
+<PublicLayout title="Your downloads" description="Download the files from your Organized Mom Collective order." indexable={false} chrome={false} width="full">
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <CheckoutHeader label="Your downloads" />
+  <div class="mx-auto max-w-2xl px-5 py-8 sm:px-8 sm:py-14">
+    {
+      supabaseConfigured() ? (
+        <DownloadFiles client:only="react" />
+      ) : (
+        <div class="py-6">
+          <h1 class="page-title">Downloads aren’t available right now</h1>
+        </div>
+      )
+    }
+  </div>
+</PublicLayout>

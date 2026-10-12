@@ -142,12 +142,12 @@ function splitName(name) {
   const m = name.match(/^(.*) \(([^()]+)\)$/);
   return m ? [m[1], m[2]] : [name, null];
 }
-var THUMBS = /* @__PURE__ */ new Set(["calendar-26-week", "calendar-52-week"]);
+var THUMBS = /* @__PURE__ */ new Set(["calendar-26-week", "calendar-52-week", "weekly-reset-system"]);
 var thumb = (slug, siteUrl) => `${siteUrl}/email/${THUMBS.has(slug) ? slug : "calendar-26-week"}.jpg`;
 function itemRows(o, siteUrl, withPrices) {
   const html = o.shop_order_items.map((i) => {
     const [name, edition] = splitName(i.product_name);
-    return `<tr><td width="64" valign="top" style="padding:14px 14px 14px 0;border-bottom:1px solid ${C.rule}"><img src="${esc(thumb(i.product_slug, siteUrl))}" width="56" alt="" style="display:block;width:56px;height:auto;border:1px solid ${C.rule};border-radius:4px"></td><td valign="top" style="padding:14px 0;border-bottom:1px solid ${C.rule}"><p style="margin:0;font-weight:600;color:${C.ink}">${esc(name)}</p>` + (edition ? `<p style="margin:2px 0 0;font-size:14px;color:${C.soft}">${esc(edition)}</p>` : "") + `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ""} · includes the cleaning companion website</p></td>` + (withPrices ? `<td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid ${C.rule};white-space:nowrap;color:${C.ink}">${money(i.unit_price_cents * i.quantity)}</td>` : "") + `</tr>`;
+    return `<tr><td width="64" valign="top" style="padding:14px 14px 14px 0;border-bottom:1px solid ${C.rule}"><img src="${esc(thumb(i.product_slug, siteUrl))}" width="56" alt="" style="display:block;width:56px;height:auto;border:1px solid ${C.rule};border-radius:4px"></td><td valign="top" style="padding:14px 0;border-bottom:1px solid ${C.rule}"><p style="margin:0;font-weight:600;color:${C.ink}">${esc(name)}</p>` + (edition ? `<p style="margin:2px 0 0;font-size:14px;color:${C.soft}">${esc(edition)}</p>` : "") + `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ""} · ${o.digital ? "instant download" : "includes the cleaning companion website"}</p></td>` + (withPrices ? `<td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid ${C.rule};white-space:nowrap;color:${C.ink}">${money(i.unit_price_cents * i.quantity)}</td>` : "") + `</tr>`;
   }).join("");
   return {
     html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${C.rule}">${html}</table>`,
@@ -157,7 +157,7 @@ function itemRows(o, siteUrl, withPrices) {
 function totals(o) {
   const rows = [["Subtotal", money(o.subtotal_cents)]];
   if (o.discount_cents) rows.push([o.promotion_code ? `Discount (${o.promotion_code})` : "Discount", `−${money(o.discount_cents)}`]);
-  rows.push([o.shipping_method || "Shipping", o.shipping_cents ? money(o.shipping_cents) : "Free"]);
+  if (!o.digital) rows.push([o.shipping_method || "Shipping", o.shipping_cents ? money(o.shipping_cents) : "Free"]);
   if (o.tax_cents) rows.push(["Sales tax", money(o.tax_cents)]);
   rows.push(["Total paid", money(o.total_cents), true]);
   return {
@@ -173,6 +173,21 @@ function companionPanel(siteUrl) {
     p("Your calendar comes with the free cleaning companion website. Each day it shows a small Daily Reset and one area of the house to focus on, matching the cleaning zone printed on your calendar.", "font-size:15px"),
     button("Open the cleaning companion", `${siteUrl}/app`),
     small("Or scan the QR code printed on your calendar with your phone’s camera. No account, no subscription, nothing to install.")
+  ]);
+}
+var longDate = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
+function downloadPanel(link, supportEmail) {
+  if (!link) {
+    return panel(C.sage, C.sageRule, [
+      panelTitle("Your download"),
+      p(`Need your files? Reply to this email${supportEmail ? ` or write to ${supportEmail}` : ""} and we’ll send you a fresh download link.`, "font-size:15px")
+    ]);
+  }
+  return panel(C.sage, C.sageRule, [
+    panelTitle("Your download"),
+    p("Open your download page with the button below, then save each file to your phone or computer. The PDFs print at home, and the audio plays anywhere.", "font-size:15px"),
+    button("Download your files", link.url),
+    small(`This link works until ${longDate(link.expiresAt)}. Need it again later? Reply to this email and we’ll send a new one.`)
   ]);
 }
 function layout(b, o, opts) {
@@ -221,6 +236,21 @@ function renderBody(kind, o, opts) {
   const shipTo = ship.length ? [heading("Shipping to"), lines(ship)] : [];
   switch (kind) {
     case "confirmation":
+      if (o.digital) {
+        return {
+          subject: `Your Organized Mom Collective order ${n}: your download is ready`,
+          preheader: `Order ${n} · ${money(o.total_cents)} paid. Your files are ready to download.`,
+          eyebrow: `Order ${n} confirmed`,
+          title: hi ? `Thank you, ${hi}.` : "Thank you for your order.",
+          blocks: [
+            p("Your order is confirmed, and this email is your receipt. Your files are ready now."),
+            downloadPanel(opts.download, opts.supportEmail),
+            heading("Your order"),
+            itemRows(o, opts.siteUrl, true),
+            totals(o)
+          ]
+        };
+      }
       return {
         subject: `Your Organized Mom Collective order ${n}`,
         preheader: `Order ${n} · ${money(o.total_cents)} paid. We’ll email your tracking number when it ships.`,
@@ -269,6 +299,7 @@ function renderBody(kind, o, opts) {
         title: canceled ? "Your order has been canceled" : "Your refund is on its way",
         blocks: [
           ...canceled ? [p("Your order has been canceled and won’t be shipped. You’ve been refunded in full.")] : [],
+          ...full && o.digital ? [p("You’ve been refunded in full, so your download link no longer works.")] : [],
           panel(C.page, C.rule, [
             p("Refunded", `margin:0;font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:${C.muted}`),
             p(money(canceled ? o.refunded_cents : amount), `margin:2px 0 6px;font-family:${SERIF};font-size:30px;line-height:1.2;color:${C.ink}`),
@@ -281,6 +312,19 @@ function renderBody(kind, o, opts) {
         ]
       };
     }
+    case "download":
+      return {
+        subject: `Your download link for order ${n}`,
+        preheader: opts.download ? `A fresh link to your files, good until ${longDate(opts.download.expiresAt)}.` : "A fresh link to your files.",
+        eyebrow: `Order ${n}`,
+        title: "Here’s your download link",
+        blocks: [
+          p(hi ? `Hi ${hi}, here’s a fresh link to the files you bought. Any earlier link no longer works.` : "Here’s a fresh link to the files you bought. Any earlier link no longer works."),
+          downloadPanel(opts.download, opts.supportEmail),
+          heading("Your order"),
+          itemRows(o, opts.siteUrl, false)
+        ]
+      };
     case "access":
       return {
         subject: "Your cleaning companion: how to get started",
@@ -310,6 +354,7 @@ async function deliverEmail(deps, orderId, kind, key, extra = {}) {
   try {
     const order = await loadOrder(deps.db, orderId);
     if (!order?.email) return "no_email";
+    const download = order.digital && (kind === "confirmation" || kind === "download") ? await downloadLink(deps.db, orderId, deps.siteUrl) : null;
     const claim = await deps.db.rpc("shop_email_claim", { p_order: orderId, p_kind: kind, p_key: key, p_to: order.email });
     if (claim == null) return "duplicate";
     if (!deps.mailer.configured) {
@@ -317,7 +362,7 @@ async function deliverEmail(deps, orderId, kind, key, extra = {}) {
       return "skipped";
     }
     try {
-      const msg = renderEmail(kind, order, { siteUrl: deps.siteUrl, supportEmail: deps.supportEmail, ...extra });
+      const msg = renderEmail(kind, order, { siteUrl: deps.siteUrl, supportEmail: deps.supportEmail, ...extra, download });
       const idem = `${key}/${(await sha256Hex(`${order.email}
 ${msg.subject}
 ${msg.text}`)).slice(0, 24)}`;
@@ -332,6 +377,14 @@ ${msg.text}`)).slice(0, 24)}`;
     console.error("email", kind, orderId, err);
     return "failed";
   }
+}
+async function downloadLink(db, orderId, siteUrl) {
+  const [e] = await db.select(
+    "shop_entitlements",
+    `order_id=eq.${orderId}&kind=eq.download&select=token,expires_at,revoked_at`
+  );
+  if (!e?.token || !e.expires_at || e.revoked_at || new Date(e.expires_at).getTime() < Date.now()) return null;
+  return { url: `${siteUrl}/download?t=${e.token}`, expiresAt: e.expires_at };
 }
 
 // supabase/functions/_shared/env.ts

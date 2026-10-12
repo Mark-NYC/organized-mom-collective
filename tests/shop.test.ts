@@ -11,6 +11,7 @@ import { readEnv } from '../supabase/functions/_shared/env.ts';
 import { formEncode, signStripePayload, stripeMode, verifyStripeSignature } from '../supabase/functions/_shared/stripe.ts';
 import { defaultOrderMode, describeEvent, emailOutcomeText, filterOrders, heldUnits, money, ordersCsv, salesTotals, shippingQuote, soldUnits, type OrderRow, type ShippingRule } from '../src/lib/shop';
 import { routes } from '../src/routes';
+import { WEEKLY_RESET_SLUG, weeklyReset } from '../src/data/weekly-reset';
 
 import envExample from '../.env.example?raw';
 import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
@@ -62,11 +63,24 @@ describe('Stripe client', () => {
 describe('checkout logic', () => {
   const order: ReservedOrder = {
     order_id: '3f1c2a4e-0000-4000-8000-000000000001',
+    digital: false,
     subtotal_cents: 6800,
     checkout_minutes: 30,
     tax_mode: 'off',
     product_tax_code: 'txcd_99999999',
-    items: [{ product_id: 'p', slug: 'calendar-26-week', name: '26-Week Family Wall Calendar', edition: null, unit_price_cents: 3400, quantity: 2, image: '/images/x.webp' }],
+    items: [
+      {
+        product_id: 'p',
+        slug: 'calendar-26-week',
+        name: '26-Week Family Wall Calendar',
+        edition: null,
+        unit_price_cents: 3400,
+        quantity: 2,
+        image: '/images/x.webp',
+        kind: 'physical',
+        tax_code: 'txcd_99999999',
+      },
+    ],
     shipping_rates: [{ id: 'r', label: 'Standard shipping', amount_cents: 600, min_days: null, max_days: null }],
     tax_rates: [],
   };
@@ -88,7 +102,30 @@ describe('checkout logic', () => {
     expect(p.return_url).toBe('https://organizedmomcollective.com/checkout/complete?session_id={CHECKOUT_SESSION_ID}');
     expect(p.line_items[0]).toMatchObject({ quantity: 2, price_data: { unit_amount: 3400, currency: 'usd' } });
     expect(p.line_items[0].price_data.product_data.images).toEqual(['https://organizedmomcollective.com/images/x.webp']);
-    expect(p.shipping_options[0].shipping_rate_data.delivery_estimate).toBeUndefined();
+    expect(p.shipping_options?.[0].shipping_rate_data.delivery_estimate).toBeUndefined();
+  });
+
+  it('a download checkout collects no shipping address or option, and taxes each item by its own code', () => {
+    const download: ReservedOrder = {
+      ...order,
+      digital: true,
+      subtotal_cents: 900,
+      items: [{ ...order.items[0], slug: 'weekly-reset-system', name: 'The Weekly Reset System', unit_price_cents: 900, quantity: 1, kind: 'digital', tax_code: 'txcd_10000000' }],
+      shipping_rates: [],
+    };
+    const off = sessionParams(download, { siteUrl: 'https://organizedmomcollective.com', nowSeconds: 1000, taxRateIds: [] });
+    expect(off).not.toHaveProperty('shipping_address_collection');
+    expect(off).not.toHaveProperty('shipping_options');
+    expect(off).toMatchObject({ billing_address_collection: 'auto', automatic_tax: { enabled: false } });
+    expect(off.line_items[0].price_data.product_data.tax_code).toBeUndefined();
+    // Stripe Tax needs an address to tax a download: the billing address.
+    const taxed = sessionParams({ ...download, tax_mode: 'automatic' }, { siteUrl: 'https://organizedmomcollective.com', nowSeconds: 1000, taxRateIds: [] });
+    expect(taxed).toMatchObject({ billing_address_collection: 'required', automatic_tax: { enabled: true } });
+    expect(taxed.line_items[0].price_data.product_data.tax_code).toBe('txcd_10000000');
+    // A calendar keeps the store's code and its US shipping.
+    const cal = sessionParams({ ...order, tax_mode: 'automatic' }, { siteUrl: 'https://organizedmomcollective.com', nowSeconds: 1000, taxRateIds: [] });
+    expect(cal).toMatchObject({ shipping_address_collection: { allowed_countries: ['US'] }, billing_address_collection: 'auto' });
+    expect(checkoutError('mixed_cart')).toEqual({ status: 400, code: 'mixed_cart' });
   });
 
   it('reads completed sessions from both the current and older Stripe API shapes', () => {
@@ -225,6 +262,44 @@ describe('emails', () => {
     expect(sh.text).toContain('Tracking number: 9400 1118');
     expect(sh.html).toContain('https://tools.usps.com/go/TrackConfirmAction?tLabels=94001118');
     expect(renderEmail('access', order, opts).text).toContain('https://organizedmomcollective.com/app');
+  });
+
+  it('a download order: the receipt carries the download link, with no shipping, address or companion', () => {
+    const d: ServerOrder = {
+      ...order,
+      digital: true,
+      fulfillment_status: 'delivered',
+      shipping_name: null,
+      shipping_address: null,
+      shipping_method: null,
+      shipping_cents: 0,
+      subtotal_cents: 900,
+      total_cents: 900,
+      carrier: null,
+      tracking_number: null,
+      shop_order_items: [{ id: 'i', product_id: 'p', product_slug: 'weekly-reset-system', product_name: 'The Weekly Reset System', unit_price_cents: 900, quantity: 1, restocked: 0 }],
+    };
+    const download = { url: 'https://organizedmomcollective.com/download?t=' + 'a'.repeat(48), expiresAt: '2026-10-19T12:00:00Z' };
+    const c = renderEmail('confirmation', d, { ...opts, download });
+    expect(c.subject).toBe('[Test] Your Organized Mom Collective order #1001: your download is ready');
+    expect(c.html).toContain(download.url);
+    expect(c.text).toContain(`Download your files: ${download.url}`);
+    expect(c.text).toContain('October 19, 2026');
+    expect(c.text).toContain('Total paid: $9.00');
+    expect(c.html).toContain('instant download');
+    for (const absent of ['Shipping', 'cleaning companion', 'Maple St', 'tracking', 'ships']) expect(c.text, absent).not.toContain(absent);
+    expect(c.html).toContain('/email/weekly-reset-system.jpg');
+    // No link (expired, or none yet): say how to get one, never a dead button.
+    const none = renderEmail('confirmation', d, { ...opts, download: null });
+    expect(none.html).not.toContain('/download?t=');
+    expect(none.text).toContain('fresh download link');
+    // A renewed link.
+    const renewed = renderEmail('download', d, { ...opts, download });
+    expect(renewed.subject).toBe('[Test] Your download link for order #1001');
+    expect(renewed.text).toContain('Any earlier link no longer works');
+    expect(renewed.html).toContain(download.url);
+    // A full refund says the link is off.
+    expect(renderEmail('refund', { ...d, payment_status: 'refunded', refunded_cents: 900 }, opts).text).toContain('download link no longer works');
   });
 
   it('marks test-mode emails as tests', () => {
@@ -370,8 +445,10 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 });
 
 describe('launch guards', () => {
-  it('nothing on the public site links to the website checkout yet; buy buttons stay on Etsy', () => {
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts']);
+  it('nothing on the public site links to the website checkout except the Weekly Reset page, in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
+    // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts']);
+    expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
     const src = Object.keys(files).filter((f) => f.startsWith('../src/'));
     expect(src.length).toBeGreaterThan(30);
     const offenders = src
@@ -404,24 +481,34 @@ describe('launch guards', () => {
     expect((seed.match(/^\s*\('calendar-/gm) ?? []).length).toBe(2);
   });
 
+  it('the Weekly Reset download is seeded at the price its landing page shows, with its files', () => {
+    const sql = read('supabase/migrations/20261012000000_shop_digital.sql');
+    const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
+    expect(seed).toMatch(new RegExp(`\\('${WEEKLY_RESET_SLUG}',\\s*'${weeklyReset.name}',[\\s\\S]*?\\n\\s*${weeklyReset.price * 100},`));
+    expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
+    for (const f of ['weekly-command-center.pdf', 'weekly-command-center-editable.pdf', '30-minute-daily-tidy-system.pdf', 'weekly-reset-coaching-audio.mp3']) expect(seed).toContain(`"path":"weekly-reset/${f}"`);
+  });
+
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {
-    for (const page of ['src/pages/checkout/index.astro', 'src/pages/checkout/complete.astro', 'src/pages/admin/orders.astro']) {
+    for (const page of ['src/pages/checkout/index.astro', 'src/pages/checkout/complete.astro', 'src/pages/admin/orders.astro', 'src/pages/download.astro']) {
       expect(read(page), page).toContain('indexable={false}');
     }
-    expect(read('src/pages/sitemap.xml.ts')).not.toMatch(/checkout|admin/);
+    expect(read('src/pages/sitemap.xml.ts')).not.toMatch(/checkout|admin|download/);
+    // The download page never leaks its token to other sites.
+    expect(read('src/pages/download.astro')).toContain('name="referrer" content="no-referrer"');
   });
 });
 
 describe('paste-ready dashboard function files', () => {
   const committed = import.meta.glob<string>('../supabase/dashboard/*.ts', { query: '?raw', import: 'default', eager: true });
 
-  it('exist for all three functions and are up to date with the sources (run `npm run build:functions`)', async () => {
+  it('exist for all four functions and are up to date with the sources (run `npm run build:functions`)', async () => {
     for (const fn of DASHBOARD_FUNCTIONS as { name: string }[]) {
       const file = committed[`../supabase/dashboard/${fn.name}.ts`];
       expect(file, `${fn.name}.ts missing`).toBeDefined();
       expect(file === (await bundle(fn)), `${fn.name}.ts is out of date`).toBe(true);
     }
-    expect(Object.keys(committed)).toHaveLength(3);
+    expect(Object.keys(committed)).toHaveLength(4);
   });
 
   it('are self-contained: no imports to resolve, no secrets baked in', () => {

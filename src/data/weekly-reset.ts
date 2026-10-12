@@ -1,19 +1,29 @@
+import { shopConfigured, shopEnabled } from '../lib/shop';
+import { routes } from '../routes';
+
 /**
  * The Weekly Reset System landing page (/weekly-reset): a $9 digital bundle, sold separately
  * from the wall calendar. Copy lives in the page; the things that change live here.
  *
- * ⚠️ Until `buyUrl` (the checkout) is set, the buy buttons say "Coming soon" and the page is noindex
- * and out of the sitemap. Set it to the real checkout (Etsy digital listing, Stripe link…).
+ * Sold through the website's own Stripe checkout as a download (product `weekly-reset-system`,
+ * supabase/migrations/20261012000000_shop_digital.sql; setup in supabase/SHOP.md → Digital
+ * products). The price shown here must match that product's price in the dashboard.
+ * The buy buttons go to the checkout only in builds with the shop switched on
+ * (PUBLIC_SHOP_ENABLED=true plus its keys); until then they say "Coming soon" and the page is
+ * noindex and out of the sitemap.
  *
  * Assets switch on by themselves: drop a file at its `src` path (under public/) and the page
  * shows it; until then it shows a labeled placeholder. Never use watermarked stock (Stocksy,
  * Colourbox…): the guarantee badge is drawn in the page for that reason.
  */
+/** The shop product this page sells. */
+export const WEEKLY_RESET_SLUG = 'weekly-reset-system';
+
 export const weeklyReset = {
   name: 'The Weekly Reset System',
   price: 9,
   regularPrice: 15,
-  buyUrl: null as string | null, // PLACEHOLDER: checkout URL
+  buyUrl: shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${WEEKLY_RESET_SLUG}` : null,
   contactEmail: 'contact@organizedmomcollective.com',
 };
 

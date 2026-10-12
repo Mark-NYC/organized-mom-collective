@@ -215,6 +215,26 @@ var SHIPPING_TAX_CODE = "txcd_92010001";
 var absolute = (src, siteUrl) => /^https:\/\//.test(src) ? src : `${siteUrl}${src.startsWith("/") ? "" : "/"}${src}`;
 function sessionParams(order, opts) {
   const automatic = order.tax_mode === "automatic";
+  const shipping = order.digital ? {
+    billing_address_collection: automatic ? "required" : "auto",
+    custom_text: { submit: { message: "Your download link arrives by email right after payment." } }
+  } : {
+    shipping_address_collection: { allowed_countries: ["US"] },
+    shipping_options: order.shipping_rates.slice(0, 5).map((r) => ({
+      shipping_rate_data: {
+        type: "fixed_amount",
+        display_name: r.label,
+        fixed_amount: { amount: r.amount_cents, currency: "usd" },
+        tax_behavior: "exclusive",
+        tax_code: automatic ? SHIPPING_TAX_CODE : void 0,
+        delivery_estimate: r.min_days || r.max_days ? {
+          minimum: r.min_days ? { unit: "business_day", value: r.min_days } : void 0,
+          maximum: r.max_days ? { unit: "business_day", value: r.max_days } : void 0
+        } : void 0
+      }
+    })),
+    billing_address_collection: "auto"
+  };
   return {
     mode: "payment",
     ui_mode: "embedded",
@@ -233,29 +253,15 @@ function sessionParams(order, opts) {
         product_data: {
           name: i.edition ? `${i.name} (${i.edition})` : i.name,
           images: i.image ? [absolute(i.image, opts.siteUrl)] : void 0,
-          tax_code: automatic ? order.product_tax_code : void 0,
+          tax_code: automatic ? i.tax_code ?? order.product_tax_code : void 0,
           metadata: { slug: i.slug }
         }
       },
       dynamic_tax_rates: opts.taxRateIds.length ? opts.taxRateIds : void 0
     })),
-    shipping_address_collection: { allowed_countries: ["US"] },
-    shipping_options: order.shipping_rates.slice(0, 5).map((r) => ({
-      shipping_rate_data: {
-        type: "fixed_amount",
-        display_name: r.label,
-        fixed_amount: { amount: r.amount_cents, currency: "usd" },
-        tax_behavior: "exclusive",
-        tax_code: automatic ? SHIPPING_TAX_CODE : void 0,
-        delivery_estimate: r.min_days || r.max_days ? {
-          minimum: r.min_days ? { unit: "business_day", value: r.min_days } : void 0,
-          maximum: r.max_days ? { unit: "business_day", value: r.max_days } : void 0
-        } : void 0
-      }
-    })),
+    ...shipping,
     automatic_tax: { enabled: automatic },
     allow_promotion_codes: true,
-    billing_address_collection: "auto",
     customer_creation: "if_required",
     submit_type: "pay",
     expires_at: opts.nowSeconds + order.checkout_minutes * 60
@@ -290,6 +296,7 @@ function checkoutError(message) {
     case "too_many":
       return { status: 409, code, slug };
     case "invalid_cart":
+    case "mixed_cart":
       return { status: 400, code };
     default:
       return { status: 500, code: "server_error" };
@@ -339,7 +346,7 @@ async function create(deps, cart, ip, preview) {
     throw err;
   }
   try {
-    if (order.shipping_rates.length === 0) throw new Error("no_shipping_rates");
+    if (!order.digital && order.shipping_rates.length === 0) throw new Error("no_shipping_rates");
     const taxRateIds = order.tax_mode === "manual" ? await stripeTaxRates(deps, order) : [];
     const session = await deps.stripe.request(
       "POST",
