@@ -1,331 +1,59 @@
 {
-  "schema_version": "0.2.0",
-  "created_utc": "2026-10-12",
-  "status": "research_candidates_pending_review",
-  "notes": "25 candidate URLs assembled. Do not interpret presence as a verified live page, visual approval, human-photography verification, model-release confirmation, or publication clearance. 4867365, 7299840 and 10557081 independently rechecked 2026-10-12. Other 22 need rechecking. No binaries downloaded or deployed.",
+  "schema_version": "0.3.0",
+  "updated_utc": "2026-10-12",
+  "status": "active_shortlist_unapproved",
+  "notes": "The previous 25-photo batch has been retired from the active review board because its visual fit was not verified. These five replacement family photos are tagged 'Caucasian Family' on their Pexels source pages. This is source tagging, not independently verified ethnicity. No imagery has been downloaded, visually approved, model-release confirmed, or cleared for use.",
   "license_reference": {
     "name": "Pexels License",
     "url": "https://www.pexels.com/license/",
     "review_date": "2026-10-12",
     "attribution_required": false
   },
+  "pipeline": {
+    "active_candidates": 5,
+    "retired_unverified_candidates": 25,
+    "downloaded": 0,
+    "visually_approved": 0,
+    "cleared_for_publication": 0
+  },
   "photos": [
     {
-      "id": "pexels-4867365",
-      "title": "Mother and children eating breakfast",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mother-and-children-eating-4867365/",
+      "id": "pexels-3875157",
+      "title": "Parents relaxing with children in living room",
+      "photographer": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/parents-drink-tea-while-sitting-with-children-in-living-room-3875157/",
       "category": "family-routines",
-      "keywords": [
-        "family breakfast",
-        "kitchen"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": "2026-10-12",
+      "source_tag": "Caucasian Family",
       "source_page_status": "confirmed_live",
-      "brand_representation_review": "not_reviewed"
+      "review_status": "awaiting_visual_review",
+      "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
+      "usage_approval": {
+        "editorial_web": false,
+        "sales_pages": false,
+        "ads": false,
+        "pinterest": false
+      },
+      "local_original": null,
+      "local_webp": null
     },
     {
-      "id": "pexels-4867901",
-      "title": "Mother preparing cereal with two children",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mother-eating-with-children-4867901/",
+      "id": "pexels-7220468",
+      "title": "Parents playing with child in living room",
+      "photographer": "Pavel Danilyuk",
+      "source_url": "https://www.pexels.com/photo/low-angle-shot-of-a-family-playing-together-7220468/",
       "category": "family-routines",
-      "keywords": [
-        "breakfast",
-        "cereal"
-      ],
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-4867369",
-      "title": "Mother and two children sharing breakfast",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mother-and-children-eating-4867369/",
-      "category": "family-routines",
-      "keywords": [
-        "family breakfast"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-4867363",
-      "title": "Mother preparing breakfast for children",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/mom-preparing-breakfast-for-her-kids-4867363/",
-      "category": "family-routines",
-      "keywords": [
-        "morning kitchen"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-8657212",
-      "title": "Mother and children breakfast",
-      "photographer": "Ron Lach",
-      "source_url": "https://www.pexels.com/photo/photo-of-a-mother-s-children-eating-breakfast-8657212/",
-      "category": "family-routines",
-      "keywords": [
-        "family breakfast"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-8657214",
-      "title": "Mother and children eating at home",
-      "photographer": "Ron Lach",
-      "source_url": "https://www.pexels.com/photo/mother-with-his-children-eating-8657214/",
-      "category": "family-routines",
-      "keywords": [
-        "kitchen meal"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-6212559",
-      "title": "Mother making breakfast with two children",
-      "photographer": "Jep Gambardella",
-      "source_url": "https://www.pexels.com/photo/mother-and-kids-at-breakfast-in-kitchen-6212559/",
-      "category": "family-routines",
-      "keywords": [
-        "meal preparation"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-6223613",
-      "title": "Parent holding child while preparing breakfast",
-      "photographer": "Jep Gambardella",
-      "source_url": "https://www.pexels.com/photo/mother-carrying-one-of-her-sons-in-the-kitchen-during-breakfast-6223613/",
-      "category": "family-routines",
-      "keywords": [
-        "busy family kitchen"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-5082871",
-      "title": "Family preparing food together",
-      "photographer": "Vanessa Loring",
-      "source_url": "https://www.pexels.com/photo/mother-and-children-preparing-food-in-the-kitchen-5082871/",
-      "category": "family-routines",
-      "keywords": [
-        "cooking"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-8054795",
-      "title": "Mother and daughter at breakfast",
-      "photographer": "Annushka Ahuja",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-during-breakfast-at-home-8054795/",
-      "category": "family-routines",
-      "keywords": [
-        "kitchen",
-        "home"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-7299840",
-      "title": "Mother reading in bed with child",
-      "photographer": "Ksenia Chernaya",
-      "source_url": "https://www.pexels.com/photo/a-mother-reading-a-book-with-her-child-in-bed-7299840/",
-      "category": "bedtime",
-      "keywords": [
-        "reading",
-        "bedroom"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": "2026-10-12",
+      "source_tag": "Caucasian Family",
       "source_page_status": "confirmed_live",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-7299827",
-      "title": "Mother and child reading together",
-      "photographer": "Ksenia Chernaya",
-      "source_url": "https://www.pexels.com/photo/a-mother-reading-a-book-with-her-child-in-bed-7299827/",
-      "category": "bedtime",
-      "keywords": [
-        "bedtime",
-        "reading"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -333,279 +61,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
+      "local_webp": null
     },
     {
-      "id": "pexels-7299819",
-      "title": "Mother and son reading in bedroom",
-      "photographer": "Ksenia Chernaya",
-      "source_url": "https://www.pexels.com/photo/a-mother-reading-a-book-with-her-child-in-bed-7299819/",
-      "category": "bedtime",
-      "keywords": [
-        "sunlight",
-        "reading"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-12788198",
-      "title": "Bedtime story for daughter",
-      "photographer": "Mizuno K",
-      "source_url": "https://www.pexels.com/photo/woman-reading-book-with-daughter-in-bedroom-12788198/",
-      "category": "bedtime",
-      "keywords": [
-        "warm light",
-        "reading"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-12788187",
-      "title": "Mother reading with daughter in bed",
-      "photographer": "Mizuno K",
-      "source_url": "https://www.pexels.com/photo/mother-reading-book-with-daughter-in-bed-12788187/",
-      "category": "bedtime",
-      "keywords": [
-        "bedtime",
-        "routine"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-8055697",
-      "title": "Mother and daughter folding laundry",
-      "photographer": "Annushka Ahuja",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-sitting-beside-a-laundry-basket-8055697/",
-      "category": "home-cleaning",
-      "keywords": [
-        "laundry",
-        "chores"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-8055723",
-      "title": "Mother and daughter house chores",
-      "photographer": "Annushka Ahuja",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-doing-house-chores-8055723/",
-      "category": "home-cleaning",
-      "keywords": [
-        "laundry",
-        "home"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-8055690",
-      "title": "Mother and daughter doing chores",
-      "photographer": "Annushka Ahuja",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-doing-house-chores-together-8055690/",
-      "category": "home-cleaning",
-      "keywords": [
-        "chores",
-        "tidy"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-10557081",
-      "title": "Mother and daughter organizing laundry",
-      "photographer": "Ron Lach",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-folding-laundry-10557081/",
-      "category": "home-cleaning",
-      "keywords": [
-        "laundry",
-        "daylight"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": "2026-10-12",
-      "source_page_status": "confirmed_live",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-10557083",
-      "title": "Mother and daughter sorting laundry",
-      "photographer": "Ron Lach",
-      "source_url": "https://www.pexels.com/photo/mother-and-daughter-folding-laundry-10557083/",
-      "category": "home-cleaning",
-      "keywords": [
-        "laundry",
-        "teamwork"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-9462746",
-      "title": "Woman cleaning kitchen stove",
-      "photographer": "Liliana Drew",
-      "source_url": "https://www.pexels.com/photo/a-woman-cleaning-a-kitchen-9462746/",
-      "category": "home-cleaning",
-      "keywords": [
-        "kitchen",
-        "cleaning"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-5591909",
-      "title": "Woman cleaning kitchen counter",
+      "id": "pexels-5593690",
+      "title": "Mother cooking with children in kitchen",
       "photographer": "RDNE Stock project",
-      "source_url": "https://www.pexels.com/photo/a-woman-cleaning-a-kitchen-counter-5591909/",
-      "category": "home-cleaning",
-      "keywords": [
-        "kitchen",
-        "tidying"
-      ],
+      "source_url": "https://www.pexels.com/photo/2-boys-and-girl-sitting-on-blue-table-5593690/",
+      "category": "family-routines",
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -613,27 +84,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
+      "local_webp": null
     },
     {
-      "id": "pexels-8580728",
-      "title": "Woman writing on calendar at home",
-      "photographer": "RDNE Stock project",
-      "source_url": "https://www.pexels.com/photo/back-view-of-a-woman-writing-on-a-calendar-8580728/",
-      "category": "planning",
-      "keywords": [
-        "calendar",
-        "home"
-      ],
+      "id": "pexels-11163598",
+      "title": "Parents spending time with daughter in living room",
+      "photographer": "Nikita Nikitin",
+      "source_url": "https://www.pexels.com/photo/parents-with-daughter-during-music-classes-11163598/",
+      "category": "family-routines",
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -641,27 +107,22 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
+      "local_webp": null
     },
     {
-      "id": "pexels-5124872",
-      "title": "Hands writing in planner",
-      "photographer": "cottonbro studio",
-      "source_url": "https://www.pexels.com/photo/woman-writing-in-a-planner-5124872/",
-      "category": "planning",
-      "keywords": [
-        "planner",
-        "notebook"
-      ],
+      "id": "pexels-5522959",
+      "title": "Mother hugging son at home during Christmas",
+      "photographer": "Gustavo Fring",
+      "source_url": "https://www.pexels.com/photo/son-hugging-his-mother-at-christmas-5522959/",
+      "category": "family-routines",
       "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
+      "source_tag": "Caucasian Family",
+      "source_page_status": "confirmed_live",
+      "review_status": "awaiting_visual_review",
       "human_photographed_status": "unverified",
+      "release_status": "unknown",
+      "license_url": "https://www.pexels.com/license/",
+      "attribution_required": false,
       "usage_approval": {
         "editorial_web": false,
         "sales_pages": false,
@@ -669,48 +130,7 @@
         "pinterest": false
       },
       "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
-    },
-    {
-      "id": "pexels-4049869",
-      "title": "Woman working in kitchen with notebook",
-      "photographer": "KATRIN BOLOVTSOVA",
-      "source_url": "https://www.pexels.com/photo/young-female-freelancer-with-laptop-and-notepad-in-kitchen-4049869/",
-      "category": "planning",
-      "keywords": [
-        "laptop",
-        "planner"
-      ],
-      "source": "Pexels",
-      "license_url": "https://www.pexels.com/license/",
-      "license_checked_on": "2026-10-12",
-      "release_status": "unknown",
-      "human_photographed_status": "unverified",
-      "usage_approval": {
-        "editorial_web": false,
-        "sales_pages": false,
-        "ads": false,
-        "pinterest": false
-      },
-      "local_original": null,
-      "local_webp": null,
-      "review_status": "needs_visual_and_rights_review",
-      "source_page_checked_on": null,
-      "source_page_status": "needs_reverification",
-      "brand_representation_review": "not_reviewed"
+      "local_webp": null
     }
-  ],
-  "pipeline": {
-    "candidate_urls": 25,
-    "source_pages_individually_reverified": 3,
-    "source_pages_need_reverification": 22,
-    "assets_downloaded": 0,
-    "images_visually_approved": 0,
-    "images_cleared_for_publication": 0,
-    "contact_sheet_generated": false
-  }
+  ]
 }
