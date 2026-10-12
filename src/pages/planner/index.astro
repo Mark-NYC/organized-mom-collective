@@ -1,0 +1,56 @@
+---
+/**
+ * /planner — the free Weekly Planner Generator (public, indexable). Fill it in, it saves on this
+ * device, print it or save it as a PDF. The upgraded planner (example weeks in one tap) comes with
+ * Take Back Control; this page points to the Weekly Reset System, the way into that offer.
+ * Planner data and example weeks: src/data/planner.ts.
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import WeeklyPlanner from '../../components/site/WeeklyPlanner';
+import { routes } from '../../routes';
+import { BRAND_NAME } from '../../config';
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Free Weekly Planner',
+    url: new URL(routes.planner, site).href,
+    applicationCategory: 'LifestyleApplication',
+    operatingSystem: 'Any',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    publisher: { '@type': 'Organization', name: BRAND_NAME },
+  },
+];
+---
+
+<PublicLayout
+  title="Free Weekly Planner for Busy Moms"
+  description="A free printable weekly planner you fill in online: the week at a glance, family dinner menu, groceries, to-dos, self-care and notes. Saves as you type; print it or save it as a PDF."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-8 sm:py-12">
+    <div class="no-print mx-auto max-w-2xl text-center">
+      <p class="label text-rose-deep">Free Tool</p>
+      <h1 class="serif-title mt-3">Free Weekly Planner</h1>
+      <p class="lede mt-4 text-warm-ink">
+        Plan the whole week on one page: what’s happening each day, dinners, groceries and to-dos. Type it in here, then print it for the fridge or save it as a PDF.
+      </p>
+    </div>
+
+    <div class="mt-8">
+      <WeeklyPlanner client:load />
+    </div>
+
+    <aside class="no-print mx-auto mt-12 max-w-2xl rounded-[10px] bg-sage-wash p-6 text-center sm:p-8">
+      <p class="label text-warm-ink">Want a Head Start?</p>
+      <p class="mt-3 text-[1rem] leading-relaxed text-warm-ink">
+        The upgraded planner fills in a whole example week in one tap: back to school, summer break, the holidays, a sick week, sports season and a spring reset. It comes with
+        <strong class="font-semibold">Take Back Control</strong>, the next step after the Weekly Reset System.
+      </p>
+      <a href={routes.weeklyReset} data-cta="planner-upgrade" class="text-link mt-4 inline-block font-semibold">See the Weekly Reset System</a>
+    </aside>
+  </div>
+</PublicLayout>

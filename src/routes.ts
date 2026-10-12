@@ -5,6 +5,8 @@
  *           /calendar          the Family Wall Calendar product page (buy on Etsy)
  *           /companion         how the cleaning companion works (public explainer)
  *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
+ *           /planner           free Weekly Planner Generator (the upgraded one, for Take Back Control buyers,
+ *                              is unlisted: PLANNER_PLUS_PATH in src/data/planner.ts, noindex)
  *           /take-back-control "Take Back Control" upsell ($29 course + tools after the Weekly Reset; always noindex)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
@@ -31,6 +33,8 @@ export const routes = {
   buy: '/calendar#buy',
   companion: '/companion',
   weeklyReset: '/weekly-reset',
+  /** Free weekly planner. The upgraded one (example weeks) is PLANNER_PLUS_PATH in src/data/planner.ts. */
+  planner: '/planner',
   takeBackControl: '/take-back-control',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
