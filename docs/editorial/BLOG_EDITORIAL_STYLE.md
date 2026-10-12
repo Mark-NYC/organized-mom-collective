@@ -99,6 +99,8 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 | `fp-05-grocery-list-writing` | Hand writing a list on a notepad, coffee, open pantry behind (generated; writing blurred) | FP-05 step 4; FP-06 |
 | `fp-05-leftovers-table` | Hands setting glass containers of leftovers on a dining table (generated) | FP-05 zero night |
 | `fp-05-meal-plan` | Close-up of the calendar's meal plan and grocery list (listing photo 11) | FP-05 method |
+| `hc-03-zone-basket` | Hands arranging a wire basket of cleaning supplies on a linen sofa (Kaboompics 32280) | HC-03 hero; HC-03 pin 1 |
+| `hc-03-living-room-rug` | A vacuum head on a cream rug in front of a sofa (Kaboompics 32324) | HC-03 step 3 |
 | `fp-02-hero` | A hand writing in the printed calendar on a marble counter, a January week filled in (the homepage "On Your Wall" photo, cropped to 3:2) | FP-02 hero; pin 1 background |
 | `fp-02-week-entries` | Monday–Friday of a filled-in week: drop-offs, pick-ups, practices, dinners, zones at the bottom (listing photo 06, overlay cropped out) | FP-02 entry format |
 

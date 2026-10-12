@@ -55,4 +55,4 @@ Conventions: reuse the existing print palette, `.label` / `.page-title` / `.text
 
 ## Article and resource photography
 
-**Before choosing images for any new article, guide, resource, or editorial landing page, read `docs/brand/PHOTO-DISCOVERY.md` and follow its discovery → source verification → clearance → optimization → reuse workflow.** Prefer faceless Kaboompics images, search the cleared library first, and never publish uncleared stock photos. The GitHub Actions downloader is not itself a photo search engine.
+**Before choosing images for any new article, guide, resource, or editorial landing page, read `docs/brand/PHOTO-DISCOVERY.md` and follow its discovery → source verification → clearance → optimization → reuse workflow.** Prefer faceless Kaboompics images and search the cleared library first. The owner has approved all Kaboompics photos (standing approval, 2026-10-12): clear them yourself after the license, content and context checks in PHOTO-DISCOVERY.md, and record them in the catalog. Never publish other stock photos without the owner's clearance. The GitHub Actions downloader is not itself a photo search engine.

@@ -2,6 +2,8 @@
 
 Updated 2026-10-12. This document is a **review queue**, not a legal approval.
 
+**Kaboompics: standing owner approval (2026-10-12).** The owner has approved all Kaboompics photos for the site. Claude clears a Kaboompics photo itself once the license, content and context checks in [PHOTO-DISCOVERY.md](PHOTO-DISCOVERY.md#standing-owner-approval-kaboompics-2026-10-12) pass, and records them in the catalog. No separate PR is needed. The standard and production gate below still apply in full to every other source.
+
 ## Standard for website publication
 For a particular image, confirm (1) the photo-page license type and allowed commercial usage, (2) any visible logos, protected artwork or branded packaging, (3) recognizable people, especially children, and use context, (4) no implication that the person is a customer/endorser, (5) the final crop and alt text, and (6) an actual optimized WebP exported from the checked original. Record reviewer, date, and intended placement. Until then leave `publishing_clearance: false`.
 

@@ -3,6 +3,17 @@
 
 **Purpose:** Give Claude a repeatable image workflow whenever it creates or edits articles, printable resources, guides, lead magnets, and editorial landing pages. **Do not wait for a large prebuilt library.** Discover only the photos a piece actually needs, then grow the approved library as a byproduct.
 
+### Standing owner approval: Kaboompics (2026-10-12)
+
+**The owner has approved all Kaboompics photos for use on the site** (articles, resources, site pages and Pinterest), in the HC-03 session on 2026-10-12. A Kaboompics photo doesn't wait for a separate owner clearance: Claude may set `publishing_clearance: true`, citing this approval, once these checks pass and are recorded in `lifestyle-photo-library.json`:
+
+1. **License:** the photo page shows the standard Kaboompics license ("Free for commercial use"). Photos marked editorial-only are excluded; the approval can't cover what the license doesn't allow.
+2. **Content at full resolution:** no readable third-party logos, protected artwork or branded packaging in the final crop.
+3. **Context:** never presented as a customer, a reader's home or an endorsement; no sensitive or negative claims about a pictured person. Never used for AI training or image generation.
+4. **Style:** the faceless-first direction and color standard still apply; they guide which Kaboompics photo to pick, not whether it may be published.
+
+Other sources (Pexels, Unsplash, anything else) still need the owner's per-photo clearance below.
+
 ### Default visual direction
 - **85–90% faceless, Kaboompics-style domestic lifestyle images** for editorial lifestyle placements. Faces only when they add emotional storytelling value; never force the ratio on a single page.
 - Warm-neutral daylight, soft contrast, subtle saturation, ordinary lived-in American home settings, approachable rather than perfectly staged. Real objects and routines: calendars, grocery lists, pantry, school supplies, cleaning baskets, meal prep, cozy kitchen counters.
@@ -21,7 +32,7 @@ Read:
 - `docs/brand/photography-guidelines.md` and `docs/brand/photo-color-standard.md` for style.
 - `docs/brand/PHOTO-PUBLISHING-CLEARANCE.md` for rights-review status.
 
-Only treat an image as deployable when its entry has **`publishing_clearance: true` and a non-null verified `public_path`** and its intended placement is covered by the recorded usage clearance. The manifest currently contains primarily research candidates, not deployable site images. Visual likes or platform-level licensing never suffice.
+Only treat an image as deployable when its entry has **`publishing_clearance: true` and a non-null verified `public_path`** and its intended placement is covered by the recorded usage clearance. The manifest currently contains primarily research candidates, not deployable site images. Visual likes or platform-level licensing never suffice, except that Kaboompics photos carry the owner's standing approval (above): Claude records the checks and sets the clearance itself.
 
 **3. If no cleared library image fits, discover new photos.**
 - Search Kaboompics using the article's concrete scene terms, not vague aesthetics (e.g. `weekly planner coffee kitchen counter`, `laundry baskets living room`, `pantry jars breakfast`, `woman writing grocery list hands only`). Favor several images from one Kaboompics shoot where useful.
@@ -35,14 +46,14 @@ Only treat an image as deployable when its entry has **`publishing_clearance: tr
 - Inspect the **actual image at useful resolution** for recognizable people/children, trademarks, printed artwork, property and third-party rights. A commercial stock license is not automatic permission for every use or implied endorsement.
 - Do not imply pictured people are OMC customers, testimonials or that a real family uses this calendar. Avoid use on sensitive/negative claims that could suggest something about a depicted person.
 - Do not use Kaboompics images for AI model training or image generation. Ordinary image resize/crop/compression is fine when source license permits.
-- If rights or intended context remain uncertain, **do not place the image in a published page**. Use an already-cleared photo or continue with text until reviewed. Never quietly set `publishing_clearance` to true.
+- If rights or intended context remain uncertain, **do not place the image in a published page**. Use an already-cleared photo or continue with text until reviewed. Never quietly set `publishing_clearance` to true: for Kaboompics, record the checks and cite the standing approval; for any other source, the owner clears it.
 
 **5. Download and optimize a cleared image.**
 - Download from a lawful source using its provided download options, not a bypass of 401/paywalls/access controls. Record original source URL, download date and source license evidence.
 - Retain the original privately for audit. Make sRGB WebP responsive variants (initial targets: width 800 and 1440 pixels **without upscaling**), crop for hero/inline/Pinterest separately as needed. Compress without obvious artifacts.
 - Use stable descriptive names, e.g. `weekly-reset-laundry-basket-800.webp`, instead of random photo IDs.
 - Give meaningful alt text that describes the photo, not SEO-stuffed keyword strings.
-- Store only final **cleared** web assets under `public/images/lifestyle/`; keep research downloads, contact sheets and uncleared previews out of the public site tree.
+- Store only final **cleared** web assets in the public tree: article photos go through `scripts/article-image.py` into `public/images/resources/` and the registry in `src/data/images.ts`; other site photos under `public/images/lifestyle/`. Keep originals in `design/photography/`; keep research downloads, contact sheets and uncleared previews out of the public site tree.
 
 **6. Record and reuse.**
 For every discovered image, record or update its entry in `docs/brand/lifestyle-photo-library.json` (or an unapproved research-batch file), including:
@@ -59,7 +70,7 @@ Confirm correct aspect ratio, mobile layout, lazy loading below the fold, no bro
 ### Claude operating rules
 - **When asked to make an article or resource:** proactively perform steps 1–3. Use steps 4–7 only with the necessary source access and clearance evidence. Tell the user when an asset is still pending approval.
 - **When asked to create a draft only:** produce recommended photo URLs and captions, but never claim images were downloaded, approved or installed.
-- **When asked to implement on the site:** prefer cleared existing assets. If new external photos are needed, document the selection and rights review; do not deploy uncleared photography.
+- **When asked to implement on the site:** prefer cleared existing assets. If new external photos are needed, document the selection and rights review; do not deploy uncleared photography. Kaboompics photos that pass the standing-approval checks count as cleared.
 - **When batch-reviewing photos:** generate internal-only thumbnails/contact sheets. The existing GitHub Actions workflow `.github/workflows/lifestyle-photo-review.yml` is a known-URL downloader, **not a discovery engine**.
 - Don't generate artificial images as a substitute for genuinely sourced lifestyle photos unless the user specifically requests generated imagery.
 - Keep product photography distinct from editorial stock. First print-run offer is physical calendar plus companion website; don't suggest the future full family system is included.

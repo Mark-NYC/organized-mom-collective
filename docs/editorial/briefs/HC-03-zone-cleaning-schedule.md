@@ -69,7 +69,7 @@ Followed `docs/brand/PHOTO-DISCOVERY.md`. No cleared library image fit (none in 
 
 Discovery: Kaboompics, "Everyday Domestic Bliss" shoot by Karolina Grabowska (the shoot K01/K02 come from). Kaboompics isn't reachable from the cloud container; with the owner's approval (2026-10-12) the `Fetch Kaboompics photos for review` workflow fetched 80 photo pages and previews (`design/photography/kaboompics/HC-03/`, contact sheet and manifest with each page's license wording), then full-size originals of the shortlist (`HC-03-full/`).
 
-Visual jobs: hero (the zone kit, living room) and one inline image (the Monday Living Room zone). Shortlist: 32280 (K02, hands arranging a cleaning basket on a sofa), 32324 (vacuum head on a living-room rug), 32344 (carrying the basket), 32281 (K01). Selection, rights review and clearance: recorded in `docs/brand/lifestyle-photo-library.json`.
+Visual jobs: hero (the zone kit, living room) and one inline image (the Monday Living Room zone). Shortlist: 32280 (K02, hands arranging a cleaning basket on a sofa), 32324 (vacuum head on a living-room rug), 32344 (carrying the basket), 32281 (K01). Selected after full-resolution review: **32280 as the hero** (`hc-03-zone-basket`, library K02: hands and arms only, unlabeled supplies) and **32324 inline** (`hc-03-living-room-rug`, library K07: no people; a tiny tone-on-tone maker's badge on the vacuum head, not legible). Rejected: 32344 (part of a face), 32281 (near-duplicate of the hero). Cleared on 2026-10-12 under the owner's standing approval of Kaboompics photos; checks recorded in `docs/brand/lifestyle-photo-library.json`.
 
 ## Overlap check
 
