@@ -59,12 +59,47 @@ def license_text(page_html):
     return hits[:6], text
 
 
+def full_size(req, out):
+    """Download the original file for each chosen photo id, via the photo page's own download link
+    (the hash offered as both medium and original), scaled to at most 2400 px on the long edge."""
+    manifest = []
+    for pid in req['full_size']:
+        url = f'https://kaboompics.com/photo/{pid}/photo'
+        rec = {'kaboompics_id': pid, 'source_url': url, 'checked': str(date.today())}
+        try:
+            page = get(url)
+            rec['title'] = meta(page, 'og:title') or ''
+            rec['license_snippets'], text = license_text(page)
+            rec['editorial_only_mentioned'] = bool(re.search(r'editorial use only|for editorial use', text, re.I))
+            sizes = re.findall(r'FULL SIZE \((\d+) x (\d+) px\)', text)
+            rec['full_size_on_page'] = sizes[0] if sizes else None
+            hashes = re.findall(r'/download/([0-9a-f]{32})/(medium|original)', page)
+            main = [h for h, kind in hashes if kind == 'medium' and (h, 'original') in hashes]
+            h = main[0] if main else None
+            rec['download_url'] = f'https://kaboompics.com/download/{h}/original' if h else None
+            im = Image.open(BytesIO(get(rec['download_url'], binary=True)))
+            im.load()
+            rec['original_size'] = im.size
+            im = im.convert('RGB')
+            im.thumbnail((2400, 2400), Image.LANCZOS)
+            fn = f'{pid}-2400.jpg'
+            im.save(out / fn, quality=92)
+            rec['file'], rec['width'], rec['height'], rec['status'] = fn, im.size[0], im.size[1], 'downloaded'
+        except Exception as e:
+            rec['status'] = f'failed: {e}'
+        manifest.append(rec)
+        print(pid, rec['status'], rec.get('original_size'))
+    (out / 'manifest.json').write_text(json.dumps({'research_only': True, 'publishing_clearance': False, 'photos': manifest}, indent=2))
+
+
 def main():
     req_path = pathlib.Path(sys.argv[1])
     req = json.loads(req_path.read_text())
     name = req_path.stem
     out = ROOT / 'design' / 'photography' / 'kaboompics' / name
     out.mkdir(parents=True, exist_ok=True)
+    if req.get('full_size'):
+        return full_size(req, out)
     photos = {}
     for seed in req['seeds']:
         try:
