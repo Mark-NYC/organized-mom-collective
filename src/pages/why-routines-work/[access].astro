@@ -18,7 +18,6 @@ import { join } from 'node:path';
 // buyers see this page). Shot list and specs: README → Essential Routines.
 const photos = {
   hero: { src: '/images/why-routines-work/hero.webp', alt: 'A calm school morning: a child putting on shoes by the front door, backpack ready, while mom finishes her coffee.' },
-  autopilot: { src: '/images/why-routines-work/autopilot.webp', alt: 'Kids eating breakfast on their own at the kitchen table while mom enjoys a quiet cup of coffee.' },
   bedtime: { src: '/images/why-routines-work/bedtime.webp', alt: 'A parent reading a picture book to a child tucked into bed under a warm lamp.' },
   competence: { src: '/images/why-routines-work/competence.webp', alt: 'A child packing their own backpack at the kitchen counter.' },
   helper: { src: '/images/why-routines-work/helper.webp', alt: 'A grandparent helping a child with an after-school snack in the kitchen.' },
@@ -60,7 +59,6 @@ const note = 'mt-4 rounded-[8px] bg-sage-wash px-4 py-3 text-[0.98rem] leading-r
       backpack: the order is already chosen, so your attention is free for the things that actually need you.
     </p>
     <p class={note}><strong class="font-semibold">Result:</strong> fewer small decisions, and more patience left for the moments nobody planned.</p>
-    {has('autopilot') && <figure class={fig}><img src={photos.autopilot.src} alt={photos.autopilot.alt} width="1448" height="1086" loading="lazy" decoding="async" class={img} /></figure>}
 
     <h2 class={h2}>Why kids need routines (even when they fight them)</h2>
 
