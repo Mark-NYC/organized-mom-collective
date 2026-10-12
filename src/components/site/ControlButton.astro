@@ -1,0 +1,32 @@
+---
+/**
+ * The "Take Back Control" upsell's one call to action. Goes to the checkout once
+ * src/data/take-back-control.ts → buyUrl is set; until then a "Coming soon" note, never a dead link.
+ */
+import { takeBackControl } from '../../data/take-back-control';
+
+interface Props {
+  /** Placement name for analytics, e.g. "control-hero". */
+  cta: string;
+  class?: string;
+}
+const { cta, class: className } = Astro.props;
+const label = `Get the Complete System – $${takeBackControl.price}`;
+---
+
+{
+  takeBackControl.buyUrl ? (
+    <a href={takeBackControl.buyUrl} data-cta={cta} class:list={['btn-primary min-h-14 w-full px-8 sm:w-auto', className]}>
+      {label}
+    </a>
+  ) : (
+    <p
+      class:list={[
+        'inline-flex min-h-14 w-full items-center justify-center rounded-[3px] border border-dashed border-warm-rule px-8 text-center text-[0.75rem] font-semibold tracking-[0.16em] text-warm-soft uppercase sm:w-auto',
+        className,
+      ]}
+    >
+      {label} · Coming soon
+    </p>
+  )
+}
