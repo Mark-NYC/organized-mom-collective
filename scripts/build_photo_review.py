@@ -7,6 +7,8 @@ from PIL import Image, ImageDraw, ImageOps
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "photo-library-review"
 OUT.mkdir(exist_ok=True)
+EXPORTS = OUT / 'optimized-preview-only'
+EXPORTS.mkdir(exist_ok=True)
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; OMCResearch/1.0)"}
 
 def get(url):
@@ -52,6 +54,13 @@ def image_for(url, source):
 def make_tile(photo, i):
     raw=image_for(photo["url"],photo["source"])
     im=Image.open(io.BytesIO(raw)).convert("RGB")
+    # Internal previews only; never publish or commit as site assets.
+    for width in (800, 1440):
+        preview = im.copy()
+        preview.thumbnail((width, 2000), Image.Resampling.LANCZOS)
+        preview.save(EXPORTS / (photo["id"].lower() + "-" + str(width) + ".webp"),
+                     "WEBP", quality=82, method=6)
+
     frame=Image.new("RGB",(430,370),"#f8f7f3")
     cropped=ImageOps.contain(im,(410,288))
     frame.paste(cropped,((430-cropped.width)//2,8+(288-cropped.height)//2))
@@ -101,3 +110,26 @@ if kab_ok != kab_total or faces_ok < 6:
     raise SystemExit("Required comparison photos missing; inspect artifact status reports.")
 if faces_ok != faces_total:
     print(f"PARTIAL REVIEW: {faces_total-faces_ok} selected faces not downloaded (Unsplash HTTP 401). Not publishing cleared; see status reports.")
+
+# Output manifest is a review artifact, never a production asset registry.
+catalog = [{"id":i,"title":title,"creator":"Karolina Grabowska",
+            "source":"Kaboompics","url":url,"visual_review":"house_style_reference"}
+           for i,title,url in kab] + favorites
+manifest = []
+for p in catalog:
+    preview_files = []
+    for width in (800,1440):
+        name = p["id"].lower() + "-" + str(width) + ".webp"
+        if (EXPORTS/name).exists():
+            preview_files.append("optimized-preview-only/" + name)
+    manifest.append({"id":p["id"],"title":p["title"],"source":p["source"],
+                     "creator":p["creator"],"source_url":p["url"],
+                     "owner_visual_status":p["visual_review"],
+                     "preview_files":preview_files,
+                     "license_review":"pending_per_image",
+                     "model_release_review":"pending",
+                     "usage_approval":False,"public_asset_path":None,
+                     "notes":"Internal evaluation only; no implied customer endorsement"})
+(OUT/"photo-manifest.preview.json").write_text(json.dumps({
+    "status":"internal_review_only","deployable":False,
+    "version":"pilot-2026-10","photos":manifest},indent=2)+"\\n")
