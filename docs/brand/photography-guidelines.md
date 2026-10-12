@@ -2,6 +2,9 @@
 
 Created October 12, 2026. **Pilot in progress. Nothing in the candidate catalog is cleared for publication.**
 
+## Family casting preference
+Prioritize photographs depicting white families for this brand's lifestyle image collection. Select natural, recognizable everyday family scenes without assuming ethnicity from filenames or captions. Confirm the visual match during human review rather than automatically classifying people's identities. Maintain the same commercial-use, provenance, and release safeguards for every photograph.
+
 ## Brand target
 Real family routines and imperfect everyday home moments. Warm natural daylight, muted whisper tones, ordinary lived-in homes, human faces where rights allow. Avoid synthetic-looking families, polished white kitchens, staged smiles, and heavy HDR.
 
