@@ -77,6 +77,9 @@ def main():
             photos.setdefault(m.group(1), seed)
         for pid, url in photo_links(page).items():
             photos.setdefault(pid, url)
+    lo, hi = req.get('id_range', [0, -1])
+    for pid in range(lo, hi + 1):
+        photos.setdefault(str(pid), f'https://kaboompics.com/photo/{pid}/photo')
     ids = list(photos)[: req.get('max_photos', 40)]
     manifest = []
     thumbs = []
@@ -94,7 +97,9 @@ def main():
             cands = re.findall(r'https://[^"\'\s<>]+?%s[^"\'\s<>]*?\.(?:jpe?g|webp|png)' % pid, page)
             og = meta(page, 'og:image')
             rec['image_candidates'] = sorted(set(cands))[:12]
-            img_url = og or (cands[0] if cands else None)
+            downloads = sorted(set(urllib.parse.urljoin(url, html.unescape(h)) for h in re.findall(r'href="([^"]*download[^"]*)"', page, re.I)))
+            rec['download_links'] = downloads[:10]
+            img_url = urllib.parse.urljoin(url, og) if og else (cands[0] if cands else None)
             rec['image_url'] = img_url
             raw = get(img_url, binary=True)
             im = Image.open(BytesIO(raw))
