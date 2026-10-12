@@ -184,7 +184,8 @@
         "risk": "low",
         "observations": "Unbranded-looking bakery bread in reusable net bag on simple background. No visible people or obvious marks at preview resolution.",
         "action": "Inspect full-resolution and finalize crop; strongest initial production candidate."
-      }
+      },
+      "note_2026-10-12": "Not used in FP-01: 28541 from the same shoot (K08) chosen instead."
     },
     {
       "id": "F01",
@@ -447,6 +448,53 @@
       },
       "used_in": [
         "HC-03 /resources/zone-cleaning-schedule"
+      ]
+    },
+    {
+      "id": "K08",
+      "title": "unpacking bread from mesh grocery bag",
+      "role": "meals",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/28541/fresh-bread-on-the-kitchen-counter-ciabatta-baguette",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "fetch_status": "fetched_by_kaboompics_fetch_workflow_2026-10-12",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_photo_page_marks_free_for_commercial_use_2026-10-12",
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "full-resolution original",
+        "visual_status": "pass",
+        "risk": "low",
+        "observations": "Two hands (red nails, white sleeve) lifting a ciabatta and a roll from a cotton mesh bag on a white counter with a wood upstand. No face, no packaging, logos or text.",
+        "action": "None."
+      },
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-01-groceries-{640,960,1440}.webp",
+      "model_release_review": "not_needed_no_identifiable_person_full_resolution_2026-10-12",
+      "clearance_record": {
+        "approval": "Owner's standing approval of all Kaboompics photos (2026-10-12, docs/brand/PHOTO-DISCOVERY.md)",
+        "checks_by": "Claude (Claude Code), FP-01 session",
+        "date": "2026-10-12",
+        "license": "Kaboompics License; photo page title says 'Free for commercial use', no editorial-only wording (design/photography/kaboompics/FP-01-full/manifest.json)",
+        "original": "design/photography/kaboompics/FP-01-full/28541-2400.jpg (downloaded via the photo page's own download link, scaled to 2400 px)",
+        "approved_placements": [
+          "website_article_editorial",
+          "pinterest_pin_background"
+        ],
+        "context": "Illustrates weekly groceries and meal planning. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use.",
+        "alt_text_example": "Two hands unpacking a ciabatta and bread rolls from a cotton mesh grocery bag on a white kitchen counter.",
+        "edits": "Resize and WebP export only; no grade or crop."
+      },
+      "used_in": [
+        "FP-01 /resources/how-to-organize-your-familys-week"
       ]
     }
   ],

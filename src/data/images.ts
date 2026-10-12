@@ -30,6 +30,8 @@ export const articleImages = {
   'fp-02-week-entries': { widths: [640, 960, 1440], width: 1440, height: 888, source: 'design/etsy-listing/06.webp (cropped to Monday–Friday: text overlay removed)' },
   'hc-03-zone-basket': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 32280, Karolina Grabowska (original in design/photography/kaboompics/HC-03-full/; library K02)' },
   'hc-03-living-room-rug': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 32324, Karolina Grabowska (original in design/photography/kaboompics/HC-03-full/; library K07)' },
+  'fp-01-groceries': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 28541, Karolina Grabowska (original in design/photography/kaboompics/FP-01-full/; library K08)' },
+  'fp-01-week-on-one-page': { widths: [640, 960, 1440], width: 1440, height: 1318, source: 'design/etsy-listing/02.webp (header text cropped off)' },
   'hc-02-caddy': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-cleaning-caddy.png (generated lifestyle scene)' },
 } as const satisfies Record<string, ArticleImage>;
 
