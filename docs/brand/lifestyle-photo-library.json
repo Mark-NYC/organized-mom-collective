@@ -30,10 +30,12 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_general_license_read_photo_specific_review_pending",
-      "model_release_review": "needs_individual_scene_review",
+      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
+      "model_release_review": "requires_visual_and_context_review",
       "publishing_clearance": false,
-      "public_path": null
+      "public_path": null,
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12"
     },
     {
       "id": "K02",
@@ -49,10 +51,12 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_general_license_read_photo_specific_review_pending",
-      "model_release_review": "needs_individual_scene_review",
+      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
+      "model_release_review": "requires_visual_and_context_review",
       "publishing_clearance": false,
-      "public_path": null
+      "public_path": null,
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12"
     },
     {
       "id": "K03",
@@ -68,10 +72,11 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_general_license_read_photo_specific_review_pending",
+      "license_review": "photo_page_current_status_unverified",
       "model_release_review": "needs_individual_scene_review",
       "publishing_clearance": false,
-      "public_path": null
+      "public_path": null,
+      "source_license_label_verified": false
     },
     {
       "id": "K05",
@@ -87,10 +92,12 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_general_license_read_photo_specific_review_pending",
-      "model_release_review": "needs_individual_scene_review",
+      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
+      "model_release_review": "requires_visual_and_context_review",
       "publishing_clearance": false,
-      "public_path": null
+      "public_path": null,
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12"
     },
     {
       "id": "K06",
@@ -106,10 +113,12 @@
         "educational_content",
         "social"
       ],
-      "license_review": "source_general_license_read_photo_specific_review_pending",
-      "model_release_review": "needs_individual_scene_review",
+      "license_review": "source_page_labels_free_for_commercial_use_checked_2026-10-12",
+      "model_release_review": "requires_visual_and_context_review",
       "publishing_clearance": false,
-      "public_path": null
+      "public_path": null,
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12"
     },
     {
       "id": "F01",
@@ -327,5 +336,6 @@
       "publishing_clearance": false,
       "public_path": null
     }
-  ]
+  ],
+  "license_review_note": "Kaboompics Standard License permits website/commercial use, but individual editorial status, recognizable intellectual property and implied endorsement must be reviewed. Four of five K series photo pages were rechecked on 2026-10-12; K03 needs recheck. These labels do not confer final publishing clearance."
 }
