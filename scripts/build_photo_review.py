@@ -145,3 +145,23 @@ for p in catalog:
 (OUT/"photo-manifest.preview.json").write_text(json.dumps({
     "status":"internal_review_only","deployable":False,
     "version":"pilot-2026-10","photos":manifest},indent=2)+"\n")
+
+# Batch 03 discovery candidates: review only, never publish automatically.
+expansion_path=ROOT/"docs/brand/photo-expansion-batch-03.json"
+if expansion_path.exists():
+    expansion=json.loads(expansion_path.read_text())["photos"]
+    for p in expansion:
+        assert p["publishing_clearance"] is False
+        assert p["owner_visual_status"] == "unreviewed"
+    exp_kab=[p for p in expansion if p["source"]=="Kaboompics"]
+    exp_faces=[p for p in expansion if p["source"]=="Pexels"]
+    exp_k_ok,exp_k_total=render(exp_kab,"expansion-batch-03-kaboompics.jpg")
+    exp_f_ok,exp_f_total=render(exp_faces,"expansion-batch-03-family.jpg")
+    (OUT/"expansion-batch-03-results.json").write_text(json.dumps({
+        "visual_status":"unreviewed","publishing_clearance":False,
+        "kaboompics":{"downloaded":exp_k_ok,"total":exp_k_total},
+        "family":{"downloaded":exp_f_ok,"total":exp_f_total},
+        "source_photo_ids":[p["id"] for p in expansion],
+        "note":"Research-only images, not visually approved or rights-cleared"
+    },indent=2)+"\n")
+    print(f"EXPANSION 03: {exp_k_ok}/{exp_k_total} Kaboompics, {exp_f_ok}/{exp_f_total} family previews downloaded.")
