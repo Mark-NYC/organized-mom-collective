@@ -496,6 +496,100 @@
       "used_in": [
         "FP-01 /resources/how-to-organize-your-familys-week"
       ]
+    },
+    {
+      "id": "K09",
+      "title": "hand with pen over notepad",
+      "role": "planning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/21478/close-up-of-hand-writing-in-personal-journal",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "fetch_status": "fetched_by_kaboompics_fetch_workflow_2026-10-12",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_photo_page_marks_free_for_commercial_use_2026-10-12",
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "full-resolution original",
+        "visual_status": "pass",
+        "risk": "low",
+        "observations": "A hand with mint nails holding a rose-gold pen over a blank lined notepad in a taupe folio on oak. No face. The only print is the generic 'NOTEPAD 50 sheets' and a 'date' label; no brand or logo.",
+        "action": "None."
+      },
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-01-notepad-{640,960,1440}.webp",
+      "model_release_review": "not_needed_no_identifiable_person_full_resolution_2026-10-12",
+      "clearance_record": {
+        "approval": "Owner's standing approval of all Kaboompics photos (2026-10-12, docs/brand/PHOTO-DISCOVERY.md)",
+        "checks_by": "Claude (Claude Code), IF-01 session",
+        "date": "2026-10-12",
+        "license": "Kaboompics License; photo page title says 'Free for commercial use', no editorial-only wording (design/photography/kaboompics/IF-01-full/manifest.json)",
+        "original": "design/photography/kaboompics/IF-01-full/21478-2400.jpg (downloaded via the photo page's own download link, scaled to 2400 px)",
+        "approved_placements": [
+          "website_article_editorial",
+          "pinterest_pin_background"
+        ],
+        "context": "Illustrates writing down a weekly priority. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use.",
+        "alt_text_example": "A hand holding a rose-gold pen over a blank lined notepad in a taupe folio on a warm oak table.",
+        "edits": "Resize and WebP export only; no grade or crop."
+      },
+      "used_in": [
+        "IF-01 /resources/intentional-family-life"
+      ]
+    },
+    {
+      "id": "K10",
+      "title": "hand holding pink mug",
+      "role": "well-being",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/9262/a-woman-s-hand-holds-a-pink-mug-or-cup-over-a-marble-tray",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "fetch_status": "fetched_by_kaboompics_fetch_workflow_2026-10-12",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_photo_page_marks_free_for_commercial_use_2026-10-12",
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "full-resolution original",
+        "visual_status": "pass",
+        "risk": "low",
+        "observations": "A hand holding a pale pink ceramic mug with a looped handle beside a white vase with eucalyptus, on a marble tray. No face, no logos or text.",
+        "action": "None."
+      },
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-01-quiet-mug-{640,960,1600}.webp",
+      "model_release_review": "not_needed_no_identifiable_person_full_resolution_2026-10-12",
+      "clearance_record": {
+        "approval": "Owner's standing approval of all Kaboompics photos (2026-10-12, docs/brand/PHOTO-DISCOVERY.md)",
+        "checks_by": "Claude (Claude Code), IF-01 session",
+        "date": "2026-10-12",
+        "license": "Kaboompics License; photo page title says 'Free for commercial use', no editorial-only wording (design/photography/kaboompics/IF-01-full/manifest.json)",
+        "original": "design/photography/kaboompics/IF-01-full/9262-2400.jpg (downloaded via the photo page's own download link, scaled to 2400 px)",
+        "approved_placements": [
+          "website_article_editorial",
+          "pinterest_pin_background"
+        ],
+        "context": "Illustrates a quiet moment with the first coffee. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use.",
+        "alt_text_example": "A hand holding a pale pink mug beside a white vase with a sprig of eucalyptus, on a marble tray.",
+        "edits": "Cropped top and bottom to 4:5; resize and WebP export; no grade."
+      },
+      "used_in": [
+        "IF-01 /resources/intentional-family-life"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

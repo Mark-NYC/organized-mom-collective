@@ -32,6 +32,8 @@ export const articleImages = {
   'hc-03-living-room-rug': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 32324, Karolina Grabowska (original in design/photography/kaboompics/HC-03-full/; library K07)' },
   'fp-01-groceries': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 28541, Karolina Grabowska (original in design/photography/kaboompics/FP-01-full/; library K08)' },
   'fp-01-week-on-one-page': { widths: [640, 960, 1440], width: 1440, height: 1318, source: 'design/etsy-listing/02.webp (header text cropped off)' },
+  'if-01-notepad': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 21478, Karolina Grabowska (original in design/photography/kaboompics/IF-01-full/; library K09)' },
+  'if-01-quiet-mug': { widths: [640, 960, 1600], width: 1600, height: 2000, source: 'Kaboompics 9262, Karolina Grabowska (cropped to 4:5; original in design/photography/kaboompics/IF-01-full/; library K10)' },
   'hc-02-caddy': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'design/photography/kitchen-cleaning-caddy.png (generated lifestyle scene)' },
 } as const satisfies Record<string, ArticleImage>;
 
