@@ -1,38 +1,71 @@
 #!/usr/bin/env python3
-"""Build a visual review sheet from vetted candidate SOURCE PAGES.
+"""Create side-by-side research contact sheets. Never deploy or mark rights cleared."""
+import io, json, pathlib, re, html, urllib.request
+from PIL import Image, ImageDraw, ImageOps
 
-Downloads source image files from Pexels' canonical image CDN path.
-This is a review artifact only; nothing is deployed or licensed beyond source terms.
-"""
-import io, json, os, pathlib, urllib.request
-from PIL import Image, ImageDraw, ImageFont
-ROOT=pathlib.Path(__file__).resolve().parents[1]
-items=json.loads((ROOT/"docs/brand/photo-candidates.json").read_text())["photos"]
-out=ROOT/"photo-library-review";out.mkdir(exist_ok=True)
-tiles=[]
-for idx,p in enumerate(items,1):
-    num=p["id"].split("-")[-1]
-    url=f"https://images.pexels.com/photos/{num}/pexels-photo-{num}.jpeg?auto=compress&cs=tinysrgb&w=900"
-    try:
-        request=urllib.request.Request(url,headers={"User-Agent":"OrganizedMomCollectivePhotoResearch/1.0"})
-        with urllib.request.urlopen(request,timeout=25) as response:
-            data=response.read()
-        im=Image.open(io.BytesIO(data)).convert("RGB")
-        im.save(out/f"{p['id']}.jpg",quality=90)
-        tile=Image.new("RGB",(400,355),"white")
-        preview=im.copy();preview.thumbnail((380,270))
-        tile.paste(preview,((400-preview.width)//2,5+(270-preview.height)//2))
-        d=ImageDraw.Draw(tile)
-        d.text((10,285),f"{idx:02d}. {p['title'][:46]}",fill="black")
-        d.text((10,310),f"{p['photographer']} | {p['id']}",fill="#555555")
-        tiles.append(tile)
-        print(f"OK {p['id']}")
-    except Exception as error:
-        print(f"FAILED {p['id']}: {error}")
-if not tiles: raise SystemExit("No photos downloaded; inspect outbound network access")
-cols=3;rows=(len(tiles)+cols-1)//cols
-sheet=Image.new("RGB",(cols*400,rows*355),"#eeeeee")
-for i,t in enumerate(tiles):sheet.paste(t,((i%cols)*400,(i//cols)*355))
-sheet.save(out/"contact-sheet.jpg",quality=88)
-(out/"README.txt").write_text("PREVIEW ONLY. Not cleared for publishing. Confirm provenance and releases before use.\n")
-print(f"Contact sheet saved, {len(tiles)} candidates.")
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+OUT = ROOT / "photo-library-review"
+OUT.mkdir(exist_ok=True)
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; OMCResearch/1.0)"}
+
+def get(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=25) as response:
+        return response.read()
+
+def image_for(url, source):
+    if source == "Pexels":
+        match = re.search(r"-(\d+)/?$", url)
+        if not match: raise ValueError("Missing Pexels photo id")
+        n = match.group(1)
+        return get(f"https://images.pexels.com/photos/{n}/pexels-photo-{n}.jpeg?w=1000")
+    page = get(url).decode("utf-8", errors="replace")
+    m = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',page,re.I)
+    if not m:
+        m = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image',page,re.I)
+    if not m: raise RuntimeError("Cannot find og:image on source page")
+    imgurl = html.unescape(m.group(1))
+    if not imgurl.startswith("https://"): raise ValueError("Unexpected image URL")
+    return get(imgurl)
+
+def make_tile(photo, i):
+    raw=image_for(photo["url"],photo["source"])
+    im=Image.open(io.BytesIO(raw)).convert("RGB")
+    frame=Image.new("RGB",(430,370),"#f8f7f3")
+    cropped=ImageOps.contain(im,(410,288))
+    frame.paste(cropped,((430-cropped.width)//2,8+(288-cropped.height)//2))
+    d=ImageDraw.Draw(frame)
+    d.text((12,305),f'{photo["id"]} | {photo["title"][:46]}',fill="#303030")
+    d.text((12,330),f'{photo["creator"][:40]} | {photo.get("visual_review","reference")}',fill="#666666")
+    return frame
+
+def render(photos,name):
+    tiles=[]
+    for i,p in enumerate(photos):
+        try:
+            tiles.append(make_tile(p,i))
+            print("OK",p["id"])
+        except Exception as e:
+            print("FAILED",p["id"],str(e))
+            blank=Image.new("RGB",(430,370),"#fff3ef")
+            d=ImageDraw.Draw(blank)
+            d.text((12,40),p["id"]+" - preview unavailable",fill="#553333")
+            d.text((12,70),str(e)[:55],fill="#553333")
+            tiles.append(blank)
+    if not tiles:return
+    cols=3;rows=(len(tiles)+cols-1)//cols
+    sheet=Image.new("RGB",(cols*430,rows*370),"white")
+    for i,tile in enumerate(tiles):sheet.paste(tile,((i%cols)*430,(i//cols)*370))
+    sheet.save(OUT/name,quality=90)
+
+faces=json.loads((ROOT/"docs/brand/faces-approval-batch-02.json").read_text())["photos"]
+favorites=[p for p in faces if p.get("visual_review")=="liked_by_owner"]
+render(favorites,"liked-faces-contact-sheet.jpg")
+kab=[
+("K01","Everyday cleaning basket","https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort"),
+("K02","Home care basket","https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa"),
+("K03","Floral notebook & coffee","https://kaboompics.com/photo/18171/floral-notebook-coffee-and-laptop-for-creative-work-from-home"),
+("K05","Cereal containers","https://kaboompics.com/photo/6669/containers-of-cereals-in-kitchen-cupboard"),
+("K06","Bread groceries","https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette")
+]
+render([{"id":i,"title":title,"creator":"Karolina Grabowska","source":"Kaboompics","url":url} for i,title,url in kab],"kaboompics-style-reference.jpg")
+(OUT/"README.txt").write_text("VISUAL RESEARCH ONLY. No downloaded image is legally cleared for publication.\n")
