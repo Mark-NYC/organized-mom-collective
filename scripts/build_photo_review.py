@@ -25,7 +25,7 @@ def image_for(url, source):
     # Unsplash's OG preview may be gated; prefer the direct images.unsplash.com
     # photography CDN URL embedded in its public page.
     if source == "Unsplash":
-        candidates = re.findall(r'https?://images\\.unsplash\\.com/[^"\\s<>]+', html.unescape(page))
+        candidates = re.findall(r'https?://images[.]unsplash[.]com/[^"\s<>]+', html.unescape(page))
         for candidate in candidates:
             clean = html.unescape(candidate).replace("\\\\u0026", "&")
             if "\\\\u" in clean:
@@ -132,4 +132,4 @@ for p in catalog:
                      "notes":"Internal evaluation only; no implied customer endorsement"})
 (OUT/"photo-manifest.preview.json").write_text(json.dumps({
     "status":"internal_review_only","deployable":False,
-    "version":"pilot-2026-10","photos":manifest},indent=2)+"\\n")
+    "version":"pilot-2026-10","photos":manifest},indent=2)+"\n")
