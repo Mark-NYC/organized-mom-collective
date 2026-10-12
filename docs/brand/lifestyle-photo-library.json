@@ -2,11 +2,11 @@
   "schema_version": "1.0",
   "library": "Organized Mom Collective lifestyle photography",
   "branch": "photo-library-pilot-2026-10",
-  "status": "pilot_owner_visual_approved_not_cleared_for_publication",
+  "status": "kaboompics_standing_owner_approval_2026-10-12; other sources research only",
   "style": "Kaboompics-first faceless domestic scenes: target 85-90% of general lifestyle placements. Reserve 10-15% for approved candid family faces where emotional connection adds value. Keep actual OMC calendar as product focus.",
   "distribution_rules": [
     "Default to faceless Kaboompics details; no formula forces a face image into a section. Use family faces sparingly for emotional narrative.",
-    "Never serve photos from this manifest in live customer-facing pages until publishing_clearance is true.",
+    "Never serve photos from this manifest in live customer-facing pages until publishing_clearance is true. Kaboompics photos carry the owner's standing approval (2026-10-12); Claude clears them after the recorded checks.",
     "Never imply that pictured people are OMC customers or endorse OMC.",
     "Retain original photo source URL and attribution metadata.",
     "Preview exports exist only in GitHub Actions artifacts until individually cleared and intentionally moved into site assets."
@@ -62,9 +62,9 @@
         "social"
       ],
       "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
-      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
-      "publishing_clearance": false,
-      "public_path": null,
+      "model_release_review": "not_needed_no_identifiable_person_full_resolution_2026-10-12",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-03-zone-basket-{640,960,1440}.webp",
       "source_license_label_verified": true,
       "license_verification_date": "2026-10-12",
       "source_license_url": "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa",
@@ -74,8 +74,27 @@
         "visual_status": "preview_pass",
         "risk": "low",
         "observations": "Cleaning basket, sponge and cropped adult hands. No identifiable face or obvious logo at contact-sheet resolution.",
-        "action": "Inspect full resolution for branded bottles; final crop."
-      }
+        "action": "Inspect full resolution for branded bottles; final crop.",
+        "full_resolution_review_date": "2026-10-12",
+        "full_resolution_observations": "Cropped adult arms and hands only, no face. Amber bottles and supplies are unlabeled; no logos, artwork or readable text."
+      },
+      "clearance_record": {
+        "approval": "Owner's standing approval of all Kaboompics photos (2026-10-12, docs/brand/PHOTO-DISCOVERY.md)",
+        "checks_by": "Claude (Claude Code), HC-03 session",
+        "date": "2026-10-12",
+        "license": "Kaboompics License; photo page title says 'Free for commercial use', no editorial-only wording (design/photography/kaboompics/HC-03-full/manifest.json)",
+        "original": "design/photography/kaboompics/HC-03-full/32280-2400.jpg (downloaded via the photo page's own download link, scaled to 2400 px)",
+        "approved_placements": [
+          "website_article_editorial",
+          "pinterest_pin_background"
+        ],
+        "context": "Illustrates a cleaning routine. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use.",
+        "alt_text_example": "Hands arranging a black wire basket of cleaning brushes, sage cloths, sponges and an amber spray bottle on a light linen sofa.",
+        "edits": "Resize and WebP export only; no grade or crop."
+      },
+      "used_in": [
+        "HC-03 /resources/zone-cleaning-schedule"
+      ]
     },
     {
       "id": "K03",
@@ -382,6 +401,53 @@
       "model_release_review": "recognizable_person_requires_scene_context_review",
       "publishing_clearance": false,
       "public_path": null
+    },
+    {
+      "id": "K07",
+      "title": "vacuum on living room rug",
+      "role": "cleaning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/32324/vacuum-cleaner-head-on-a-shaggy-living-room-rug",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "fetch_status": "fetched_by_kaboompics_fetch_workflow_2026-10-12",
+      "usage_candidates": [
+        "website_section",
+        "educational_content",
+        "social"
+      ],
+      "license_review": "source_photo_page_marks_free_for_commercial_use_2026-10-12",
+      "source_license_label_verified": true,
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "full-resolution original",
+        "visual_status": "pass",
+        "risk": "low",
+        "observations": "Vacuum head on a cream shag rug in front of a grey sofa. No people. The vacuum head carries a small tone-on-tone embossed maker's badge, not legible even at 100%; no other logos or text.",
+        "action": "None. Re-check if cropped tighter on the vacuum head."
+      },
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-03-living-room-rug-{640,960,1440}.webp",
+      "model_release_review": "not_needed_no_identifiable_person_full_resolution_2026-10-12",
+      "clearance_record": {
+        "approval": "Owner's standing approval of all Kaboompics photos (2026-10-12, docs/brand/PHOTO-DISCOVERY.md)",
+        "checks_by": "Claude (Claude Code), HC-03 session",
+        "date": "2026-10-12",
+        "license": "Kaboompics License; photo page title says 'Free for commercial use', no editorial-only wording (design/photography/kaboompics/HC-03-full/manifest.json)",
+        "original": "design/photography/kaboompics/HC-03-full/32324-2400.jpg (downloaded via the photo page's own download link, scaled to 2400 px)",
+        "approved_placements": [
+          "website_article_editorial",
+          "pinterest_pin_background"
+        ],
+        "context": "Illustrates a cleaning routine. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use.",
+        "alt_text_example": "A vacuum cleaner head on a cream shag rug in front of a grey sofa.",
+        "edits": "Resize and WebP export only; no grade or crop."
+      },
+      "used_in": [
+        "HC-03 /resources/zone-cleaning-schedule"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
