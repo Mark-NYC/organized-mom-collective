@@ -17,6 +17,8 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import AssetSlot from '../components/site/AssetSlot.astro';
 import ControlButton from '../components/site/ControlButton.astro';
+import NoThanks from '../components/site/NoThanks.astro';
+import { routes } from '../routes';
 import { takeBackControl, takeBackControlAssets as assets } from '../data/take-back-control';
 import { weeklyReset } from '../data/weekly-reset';
 import { BRAND_NAME } from '../config';
@@ -209,6 +211,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         </p>
       </div>
       <div class="mt-8"><ControlButton cta="control-close" /></div>
+      <p class="mt-5"><NoThanks next={routes.essentialRoutines} fallback={routes.essentialRoutines} label="No thanks, I’ll stick with my Weekly Reset" /></p>
       <p class="mt-6 text-[0.95rem] text-warm-ink">
         <span aria-hidden="true">🔥</span> <strong class="font-semibold">One-time offer: ${price}</strong> (One payment, no subscription—you’re getting it all at once!)
       </p>

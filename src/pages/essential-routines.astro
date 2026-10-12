@@ -1,0 +1,166 @@
+---
+/**
+ * The Essential Routines Bundle: the $12 downsell, shown when someone says "No thanks" to Take Back
+ * Control. Recreated from the original WordPress page with its copy, in the public page style
+ * (serif Title Case headlines, warm ink, cream / sage washes). Sections that hold a product
+ * mockup are white, like the mockups. Standalone: no site header or footer.
+ *
+ * Wait → Daily transitions + bundle mockup → What you get (routines, bonuses, price) → Close.
+ *
+ * Honesty rules (as on /take-back-control): no countdown timer or "gone when you leave" (there is
+ * no timer), no unsourced percentages, no "normally" price that was never charged, and customer
+ * quotes only once verified (src/data/essential-routines.ts). Settings and photos live there too.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import AssetSlot from '../components/site/AssetSlot.astro';
+import OfferButton from '../components/site/OfferButton.astro';
+import NoThanks from '../components/site/NoThanks.astro';
+import { essentialRoutines, essentialRoutinesAssets as assets, routinesTestimonials } from '../data/essential-routines';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const { price } = essentialRoutines;
+const quotes = routinesTestimonials.filter((t) => t.verified);
+
+const routines = [
+  { name: 'Morning Routine Printable', body: 'Start every day calm instead of chaotic' },
+  { name: 'After School Transition Guide', body: 'End the “I’m home and everything’s crazy” spiral' },
+  { name: 'Peaceful Bedtime Flow Template', body: 'Everyone sleeps better when there’s a plan' },
+  { name: 'Weekend Prep Routine', body: 'Set up your weekends for healthy family balance' },
+];
+
+const bonuses = [
+  { name: 'Quick Setup Audio (8 minutes)', body: 'How to customize each routine for your family' },
+  { name: '“Why Routines Work” Cheat Sheet', body: 'The psychology behind why these simple changes create big results' },
+];
+
+const pad = 'py-12 sm:py-20 md:py-24';
+const check = 'M4.5 10.5 8 14l7.5-8';
+const buy = `Yes! Get the “${essentialRoutines.name}” for $${price}`;
+---
+
+<PublicLayout
+  fullTitle={`Essential Routines Bundle: 4 Printable Routines · ${BRAND_NAME}`}
+  description={`Four printable family routines (morning, after school, bedtime, weekend prep) plus the Quick Setup Audio and the “Why Routines Work” cheat sheet, for $${price}.`}
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <!-- 1. Wait (white) -->
+  <section aria-labelledby="hero-h" class="bg-paper">
+    <div class="mx-auto max-w-2xl px-5 pt-10 pb-4 text-center sm:px-8 sm:pt-14">
+      <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
+      <h1 id="hero-h" class="serif-title mt-5">
+        <span class="text-rose-deep">Wait – At Least Grab:</span>
+        <span class="mt-2 block font-serif text-[1.2rem] text-warm-soft italic sm:text-[1.35rem]">Routines That Make the Biggest Difference</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- 2. The daily transitions + bundle mockup (white, like the mockup) -->
+  <section aria-labelledby="get-it-h" class="bg-paper">
+    <div class:list={['mx-auto max-w-6xl px-5 sm:px-8', 'pt-8 pb-12 sm:pb-20']}>
+      <div class="mx-auto max-w-3xl text-center">
+        <h2 id="get-it-h" class="label text-[0.8rem] leading-relaxed text-[#55684b] sm:text-[0.85rem]">
+          I Get It – You Want to Try Your Weekly Reset First and See How It Goes.
+        </h2>
+        <div class="lede mt-5 space-y-4 text-warm-ink">
+          <p>
+            <strong class="font-semibold">But here’s what moms tell us:</strong> The Sunday planning is just the foundation. It’s the <strong
+              class="font-semibold">daily routines</strong
+            > that make everything else flow smoothly.
+          </p>
+          <p>You’ve got your Sundays handled now. But what about Monday morning chaos? The after-school meltdowns? Bedtime battles that stretch for hours?</p>
+          <p>
+            <strong class="font-semibold">These 4 printable routines solve your hardest daily transitions</strong> – and they work whether you’re having a “perfect
+            week” or everything’s falling apart.
+          </p>
+        </div>
+      </div>
+      <figure class="mx-auto mt-10 max-w-5xl">
+        <AssetSlot asset={assets.overview} sizes="(min-width: 1152px) 1024px, 100vw" eager />
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3. What you get (white: the routines and audio mockups sit on white) -->
+  <section aria-labelledby="what-h" class="bg-paper">
+    <div class="mx-auto max-w-3xl px-5 pb-12 sm:px-8 sm:pb-20">
+      <p id="what-h" class="text-center font-serif text-[1.15rem] text-warm-soft">What you get…</p>
+      <h2 class="serif-title mt-3 text-center text-[1.7rem] italic sm:text-[2.1rem]">
+        {essentialRoutines.name} – <span class="whitespace-nowrap text-rose-deep not-italic">Just ${price}</span>
+      </h2>
+
+      <figure class="mx-auto mt-10 max-w-md">
+        <AssetSlot asset={assets.routines} sizes="(min-width: 480px) 448px, 100vw" />
+      </figure>
+
+      <ul class="mx-auto mt-8 max-w-md space-y-5">
+        {
+          routines.map((r) => (
+            <li>
+              <p class="text-[1.02rem] font-semibold text-warm-ink">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="mr-1.5 inline size-5 -translate-y-px align-middle text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={check} />
+                </svg>
+                {r.name}
+              </p>
+              <p class="mt-1 pl-7 font-serif text-[1rem] text-warm-soft italic">{r.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <figure class="mx-auto mt-12 max-w-xl">
+        <AssetSlot asset={assets.audio} sizes="(min-width: 640px) 576px, 100vw" />
+      </figure>
+
+      <ul class="mt-8 space-y-5 text-center">
+        {
+          bonuses.map((b) => (
+            <li>
+              <p class="text-[1.02rem] text-warm-ink">
+                <strong class="font-semibold text-rose-deep">BONUS:</strong> <strong class="font-semibold">{b.name}</strong>
+              </p>
+              <p class="mt-1 font-serif text-[1rem] text-warm-soft italic">{b.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="mx-auto mt-12 max-w-md border-t border-warm-rule pt-8 text-center">
+        <p class="text-[1.1rem] font-semibold text-warm-ink">Today: All 4 routines + bonuses = <span class="text-rose-deep">${price}</span></p>
+      </div>
+
+      {
+        quotes.length > 0 && (
+          <div class="mt-10 space-y-5">
+            {quotes.map((t) => (
+              <figure class="rounded-[10px] bg-cream px-6 py-6 text-center">
+                <blockquote class="font-serif text-[1.1rem] leading-relaxed text-warm-ink italic">“{t.quote}”</blockquote>
+                <figcaption class="mt-3 text-[0.95rem] font-semibold text-warm-ink">– {t.name}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )
+      }
+
+      <p class="mt-12 text-center font-serif text-[1.1rem] text-warm-ink italic"><strong class="font-semibold">This bundle is only available on this page.</strong></p>
+      <p class="mx-auto mt-3 max-w-xl text-center text-[1rem] leading-relaxed text-warm-soft">
+        Your Weekly Reset System is ready for you to download, but these routines will make sure every single day flows as smoothly as your Sundays.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4. Close (sage, like the original's mint band) -->
+  <section aria-labelledby="close-h" class="bg-sage-wash">
+    <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
+      <img src="/brand/omc-badge.png" alt="" width="88" height="88" class="mx-auto size-22" />
+      <h2 id="close-h" class="sr-only">Get the {essentialRoutines.name}</h2>
+      <div class="mt-8"><OfferButton label={buy} href={essentialRoutines.buyUrl} cta="routines-close" /></div>
+      <p class="mt-6">
+        <NoThanks next={routes.checkoutComplete} query="done=1" fallback={routes.home} label="No thanks, I’ll figure it out on my own" />
+      </p>
+    </div>
+  </section>
+</PublicLayout>
