@@ -44,7 +44,7 @@ Reviewed all seven published articles’ frontmatter and headings. FP-01 owns th
 
 ## Photography
 
-Reviewed PHOTO-DISCOVERY.md, the catalog, photography guidelines, clearance notes and color standard. Cleared lifestyle images concern groceries, cleaning or notepads and do not demonstrate this setup. Use the existing real wall-calendar photo only in the product callout. No decorative hero, new stock or generated scene needed: the checklist carries the instructional visual.
+Use the cleared Kaboompics hand-and-notepad photograph (K09 / if-01-notepad) as the hero to illustrate paper and a pen within reach. Reuse the real filled-in calendar close-up (fp-02-week-entries) in the routine, and retain the real wall-calendar product callout. All responsive assets already exist. No image generation or product artwork edits. K09 full-resolution review rechecked for this neutral paper-planning context; record reuse in the catalog.
 
 ## Pinterest research notes
 

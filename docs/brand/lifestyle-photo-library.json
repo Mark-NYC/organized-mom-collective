@@ -536,12 +536,13 @@
           "website_article_editorial",
           "pinterest_pin_background"
         ],
-        "context": "Illustrates writing down a weekly priority. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use.",
+        "context": "Illustrates writing down a weekly priority. Not presented as a customer, a reader's home or an endorsement. No AI training or generation use. Reuse reviewed 2026-10-12 for FP-03: neutral paper planning and keeping a pen within reach; no endorsement or claim that this shows a finished command center.",
         "alt_text_example": "A hand holding a rose-gold pen over a blank lined notepad in a taupe folio on a warm oak table.",
         "edits": "Resize and WebP export only; no grade or crop."
       },
       "used_in": [
-        "IF-01 /resources/intentional-family-life"
+        "IF-01 /resources/intentional-family-life",
+        "FP-03 /resources/home-command-center (hero)"
       ]
     },
     {
