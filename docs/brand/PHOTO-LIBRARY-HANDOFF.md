@@ -7,7 +7,7 @@
 Read [lifestyle-photo-library.json](lifestyle-photo-library.json). Use `owner_visual_status`, `publishing_clearance`, and `public_path` as gates. Only images with `publishing_clearance: true` and non-null `public_path` may be used in production. The owner selected Kaboompics K01, K02, K03, K05, K06 as the visual standard and F03, F04, F05, F07, F08, F09, F10, F11, F12 as preferred face images. F01, F02 and F06 were rejected.
 
 ## Visual treatment
-See [photo-color-standard.md](photo-color-standard.md). Aim for an organic 2–3 Kaboompics-style home-detail images followed by one candid people photo. Warm neutrals, natural light, muted saturation, modest contrast, natural skin tones. Do not use a heavy global preset or claim the photos feature actual OMC customers.
+See [photo-color-standard.md](photo-color-standard.md). Default to approximately 85–90% faceless Kaboompics-style domestic details in general lifestyle placements; use 10–15% candid people photos only where emotional connection adds genuine value. Actual product shots should anchor conversion sections. Warm neutrals, natural light, muted saturation, modest contrast, natural skin tones. Do not use a heavy global preset or claim the photos feature actual OMC customers.
 
 ## How to generate the research-only photos
 1. GitHub Actions → **Build OMC photo comparison sheets** → Run workflow on `photo-library-pilot-2026-10` (or use a script-change commit).
@@ -23,7 +23,7 @@ See [photo-color-standard.md](photo-color-standard.md). Aim for an organic 2–3
 - These are platform-level reviews, **not** per-photo legal opinions or release documentation.
 
 ## Site usage intent
-Use home details for planning, cleaning, groceries, and meal routines. Use selected people images for family connection, morning rhythm, after-school homework, and stories. No hero claim or testimonial should suggest a photo depicts an OMC buyer. The initial physical offer is the calendar plus companion website, not a promised full future family app.
+Use home details as the primary image choice for planning, cleaning, groceries, meals and the majority of site sections. Use selected people images for family connection, morning rhythm, after-school homework, and stories. No hero claim or testimonial should suggest a photo depicts an OMC buyer. The initial physical offer is the calendar plus companion website, not a promised full future family app.
 
 ## Remaining tasks
 - Successfully run the latest exporter and inspect actual WebP and manifest outputs.
