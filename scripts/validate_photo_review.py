@@ -19,6 +19,19 @@ for p in data["photos"]:
     assert p["usage_approval"] is False
     assert p["public_asset_path"] is None
     expected=2 if statuses[p["id"]]=="downloaded" else 0
+    inspection=out/(p["id"].lower()+"-inspection.json")
+    source=out/"downloaded-source-review-only"/(p["id"].lower()+"-source.bin")
+    if expected:
+        assert source.is_file() and source.stat().st_size>1000,p["id"]
+        metadata=json.loads(inspection.read_text())
+        assert metadata["id"]==p["id"]
+        assert metadata["source_width"]>0 and metadata["source_height"]>0
+        assert metadata["publishing_clearance"] is False
+        with Image.open(source) as original:
+            original.verify()
+    else:
+        assert not source.exists() and not inspection.exists()
+
     assert len(p["preview_files"])==expected,(p["id"],p["preview_files"])
     for rel in p["preview_files"]:
         path=out/rel
