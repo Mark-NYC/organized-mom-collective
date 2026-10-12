@@ -11,6 +11,20 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { WHY_ROUTINES_PATH } from '../../data/essential-routines';
 import { BRAND_NAME } from '../../config';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+// Photos: on screen only, never printed. Each shows once its file exists in public/ (no placeholder:
+// buyers see this page). Shot list and specs: README → Essential Routines.
+const photos = {
+  hero: { src: '/images/why-routines-work/hero.webp', alt: 'A calm school morning: a child putting on shoes by the front door, backpack ready, while mom finishes her coffee.' },
+  bedtime: { src: '/images/why-routines-work/bedtime.webp', alt: 'A parent reading a picture book to a child tucked into bed under a warm lamp.' },
+  competence: { src: '/images/why-routines-work/competence.webp', alt: 'A child packing their own backpack at the kitchen counter.' },
+  helper: { src: '/images/why-routines-work/helper.webp', alt: 'A grandparent helping a child with an after-school snack in the kitchen.' },
+};
+const has = (k: keyof typeof photos) => existsSync(join(process.cwd(), 'public', photos[k].src));
+const fig = 'mt-6 overflow-hidden rounded-[10px] print:hidden';
+const img = 'block aspect-[4/3] h-auto w-full object-cover';
 
 export function getStaticPaths() {
   return [{ params: { access: WHY_ROUTINES_PATH.split('/').pop() } }];
@@ -30,6 +44,7 @@ const note = 'mt-4 rounded-[8px] bg-sage-wash px-4 py-3 text-[0.98rem] leading-r
       <h1 class="serif-title mt-3">Why Routines Work</h1>
       <p class="mt-2 font-serif text-[1.1rem] text-warm-soft italic">Why these simple changes make such a difference</p>
     </header>
+    {has('hero') && <figure class={fig}><img src={photos.hero.src} alt={photos.hero.alt} width="1448" height="1086" loading="lazy" decoding="async" class={img} /></figure>}
 
     <p class="lede mt-8 text-warm-ink">
       A routine is a decision you make once, so nobody has to make it again every morning. That’s the whole idea behind the four routines in your bundle. Here’s
@@ -57,6 +72,7 @@ const note = 'mt-4 rounded-[8px] bg-sage-wash px-4 py-3 text-[0.98rem] leading-r
       much better than a child who never knows what to expect.
     </p>
 
+    {has('bedtime') && <figure class={fig}><img src={photos.bedtime.src} alt={photos.bedtime.alt} width="1448" height="1086" loading="lazy" decoding="async" class={img} /></figure>}
     <h3 class={h3}>Building competence</h3>
     <p class="mt-3 leading-relaxed">
       Routines teach kids to be capable. When they know the steps, they can do them on their own instead of asking you what to do next at every turn.
@@ -65,6 +81,7 @@ const note = 'mt-4 rounded-[8px] bg-sage-wash px-4 py-3 text-[0.98rem] leading-r
       <strong class="font-semibold">Mom win:</strong> “Get ready for school” becomes something they can actually do, instead of you managing every single step.
     </p>
 
+    {has('competence') && <figure class={fig}><img src={photos.competence.src} alt={photos.competence.alt} width="1448" height="1086" loading="lazy" decoding="async" class={img} /></figure>}
     <h2 class={h2}>Why routines work for moms</h2>
 
     <h3 class={h3}>They lighten the mental load</h3>
@@ -85,6 +102,7 @@ const note = 'mt-4 rounded-[8px] bg-sage-wash px-4 py-3 text-[0.98rem] leading-r
       steps.
     </p>
 
+    {has('helper') && <figure class={fig}><img src={photos.helper.src} alt={photos.helper.alt} width="1448" height="1086" loading="lazy" decoding="async" class={img} /></figure>}
     <h2 class={h2}>Making your routines stick</h2>
     <ol class="mt-5 list-decimal space-y-3 pl-5 leading-relaxed marker:font-semibold marker:text-rose-deep">
       <li><strong class="font-semibold">Start with one.</strong> Pick the transition that’s hardest right now, morning, after school or bedtime, and run only that one for a week.</li>
