@@ -19,35 +19,26 @@ export const takeBackControl = {
   buyUrl: null as string | null,
 };
 
-/** The course episodes, in order, with their running times. */
-export const courseEpisodes = [
-  { title: 'Week 1: Create Your Family Reset Rhythm', time: '05:24' },
-  { title: 'Week 2: Morning Flow That Doesn’t Break', time: '06:08' },
-  { title: 'Week 3: Weekly Planning on Autopilot (Audio Training)', time: '05:23' },
-  { title: 'Week 4: Declutter Your Brain, Not Just the Toys', time: '07:26' },
-  { title: '3 Minute Reset Ritual Audio', time: '02:11', bonus: true },
-];
-
 export const takeBackControlAssets = {
   overview: {
     src: '/images/take-back-control/overview.webp',
     width: 1920,
     height: 1080,
     alt: 'Everything in Take Back Control: the pantry inventory, routine printables, chore cards and decluttering guide around a laptop showing the weekly planner, and a phone playing the audio course.',
-    spec: 'Full bundle mockup on white: printables, laptop, phone · overview.webp, about 1920 × 1080',
+    spec: 'Full bundle mockup on white: printables, laptop, phone · overview.webp, 1920 × 1080',
   },
   course: {
-    src: '/images/take-back-control/course-phone.webp',
-    width: 600,
-    height: 1100,
-    alt: 'The Take Back Control course playing on a phone: Week 2, Morning Flow That Doesn’t Break.',
-    spec: 'Phone playing the course, on white (phone only; the episode list is on the page) · course-phone.webp, about 600 × 1100',
+    src: '/images/take-back-control/course.webp',
+    width: 900,
+    height: 900,
+    alt: '4 Week Complete Course, Take Back Control Course, playing on a phone. Week 1: Create Your Family Reset Rhythm, 05:24. Week 2: Morning Flow That Doesn’t Break, 06:08. Week 3: Weekly Planning on Autopilot (Audio Training), 05:23. Week 4: Declutter Your Brain, Not Just the Toys, 07:28. Extra bonus: 3 Minute Reset Ritual Audio, 02:11.',
+    spec: 'Course card on white: phone + episode list · course.webp, 900 × 900',
   },
   routines: {
     src: '/images/take-back-control/routines.webp',
-    width: 1200,
-    height: 1100,
+    width: 900,
+    height: 900,
     alt: 'The four editable routine printables fanned out, the Morning Routine on top with editable times.',
-    spec: 'Routine printables mockup on white (“Editable Times”) · routines.webp, about 1200 × 1100',
+    spec: 'Routine printables mockup on white (“Editable Times”) · routines.webp, 900 × 900',
   },
 } satisfies Record<string, Asset>;

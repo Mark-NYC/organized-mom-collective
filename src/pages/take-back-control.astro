@@ -9,12 +9,12 @@
  * Wait! → Offer headline → The rest of your week + overview → What you get → Why this changes
  * everything → Here's the truth → Close.
  *
- * Settings, course episodes and photos: src/data/take-back-control.ts. Always noindex.
+ * Settings and photos: src/data/take-back-control.ts. Always noindex.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import AssetSlot from '../components/site/AssetSlot.astro';
 import ControlButton from '../components/site/ControlButton.astro';
-import { courseEpisodes, takeBackControl, takeBackControlAssets as assets } from '../data/take-back-control';
+import { takeBackControl, takeBackControlAssets as assets } from '../data/take-back-control';
 import { BRAND_NAME } from '../config';
 
 const { price } = takeBackControl;
@@ -114,40 +114,10 @@ const check = 'M4.5 10.5 8 14l7.5-8';
     <div class="mx-auto max-w-3xl px-5 pb-12 sm:px-8 sm:pb-20 md:pb-24">
       <h2 id="get-h" class="serif-title text-center">What You Get…</h2>
 
-      <!-- The course -->
-      <div class="mt-10 rounded-[10px] p-6 shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-warm-rule/70 sm:p-10">
-        <div class="text-center">
-          <svg aria-hidden="true" viewBox="0 0 24 24" class="mx-auto size-10 text-warm-ink" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M3 15h3v6H4a1 1 0 0 1-1-1v-5Zm18 0h-3v6h2a1 1 0 0 0 1-1v-5Z" />
-          </svg>
-          <p class="label mt-3 text-[0.8rem] text-warm-ink">4 Week Complete Course</p>
-        </div>
-        <div class="mt-8 grid items-center gap-8 sm:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
-          <figure class="mx-auto w-full max-w-[220px]">
-            <AssetSlot asset={assets.course} sizes="220px" />
-          </figure>
-          <div>
-            <h3 class="font-serif text-[1.5rem] leading-snug text-warm-ink">Take Back Control Course</h3>
-            <ol class="mt-4 border-t border-warm-rule">
-              {
-                courseEpisodes.map((e) => (
-                  <li class="flex items-center gap-3 border-b border-warm-rule py-3">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" class="size-6 shrink-0 text-warm-ink">
-                      <circle cx="12" cy="12" r="11" fill="currentColor" />
-                      <path d="M10 8v8l6-4-6-4Z" fill="#fff" />
-                    </svg>
-                    <span class="flex-1 text-[0.95rem] font-semibold text-warm-ink">
-                      {e.title}
-                      {e.bonus && <span class="ml-1.5 rounded-[3px] bg-rose-wash px-1.5 py-0.5 text-[0.65rem] tracking-[0.12em] text-rose-deep uppercase">Bonus</span>}
-                    </span>
-                    <span class="text-[0.85rem] text-warm-soft tabular-nums">{e.time}</span>
-                  </li>
-                ))
-              }
-            </ol>
-          </div>
-        </div>
-      </div>
+      <!-- The course: the card image carries the episode list (alt text repeats it). -->
+      <figure class="mx-auto mt-10 max-w-xl">
+        <AssetSlot asset={assets.course} sizes="(min-width: 640px) 576px, 100vw" />
+      </figure>
 
       <!-- The tools -->
       <h3 class="label mt-14 text-center text-[0.8rem] text-rose-deep sm:text-[0.85rem]">+ 6 Advanced Implementation Tools:</h3>
