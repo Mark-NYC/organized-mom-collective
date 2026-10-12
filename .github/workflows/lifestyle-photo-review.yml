@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/lifestyle-photo-review.yml'
       - 'scripts/build_photo_review.py'
+      - 'scripts/validate_photo_review.py'
       - 'docs/brand/faces-approval-batch-02.json'
 permissions:
   contents: read
@@ -19,7 +20,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install 'Pillow>=11,<13'
+      - run: python -m py_compile scripts/build_photo_review.py scripts/validate_photo_review.py
       - run: python scripts/build_photo_review.py
+      - run: python scripts/validate_photo_review.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
