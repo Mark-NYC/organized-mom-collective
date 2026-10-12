@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - photo-library-pilot-2026-10
+      - claude/exciting-ptolemy-v855xx
     paths:
       - '.github/workflows/lifestyle-photo-review.yml'
       - 'scripts/build_photo_review.py'
       - 'scripts/validate_photo_review.py'
       - 'scripts/validate_photo_catalog.py'
       - 'docs/brand/lifestyle-photo-library.json'
+      - 'docs/brand/PHOTO-PUBLISHING-CLEARANCE.md'
       - 'docs/brand/faces-approval-batch-02.json'
 permissions:
   contents: read
