@@ -17,6 +17,12 @@
 | U05 | Planning | [Woman writing in notebook with coffee](https://unsplash.com/photos/woman-writing-in-notebook-with-coffee-cup-TylGd9EfMd0) | Kelly Sikkema | primary |
 | U06 | Planning | [Notebook and pens on wooden table](https://unsplash.com/photos/notebook-pens-and-coffee-on-a-wooden-table-gRZynBXSdz4) | Kelly Sikkema | alternate detail |
 
+## Owner's visual direction (locked 2026-10-12)
+
+Kaboompics sets the house style. K01, K02, K03, K05 and K06 are aesthetically approved as references only. This is not legal or publishing clearance. K04, with its dated planner, stays a lower-priority alternate.
+
+Use roughly 70% household details and 30% candid human faces, adjusting by page. Source family portraits that match the Kaboompics color and lighting. The U-series images are still candidates, not approved automatically.
+
 ## Approval criteria
 
 - Rate visual match (American lived-in home), naturalism, color consistency, and usable crop.
