@@ -11,8 +11,8 @@
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex)
- *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset
- *                               (?product=weekly-reset-system), and only in builds with the shop on
+ *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset and /take-back-control
+ *                               (?product=weekly-reset-system / take-back-control), and only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
  *           /admin/orders       order, inventory and shipping dashboard, shop admins only (noindex)
@@ -37,7 +37,7 @@ export const routes = {
   pillar: (id: string) => `/resources/topics/${id}`,
   survey: '/survey',
   surveyAdmin: '/survey/admin',
-  /** Direct website checkout. Calendar buy buttons still go to Etsy; only /weekly-reset links here, in shop-enabled builds. */
+  /** Direct website checkout. Calendar buy buttons still go to Etsy; only /weekly-reset and /take-back-control link here, in shop-enabled builds. */
   checkout: '/checkout',
   checkoutComplete: '/checkout/complete',
   download: '/download',

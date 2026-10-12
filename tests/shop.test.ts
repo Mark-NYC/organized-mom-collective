@@ -12,6 +12,7 @@ import { formEncode, signStripePayload, stripeMode, verifyStripeSignature } from
 import { defaultOrderMode, describeEvent, emailOutcomeText, filterOrders, heldUnits, money, ordersCsv, salesTotals, shippingQuote, soldUnits, type OrderRow, type ShippingRule } from '../src/lib/shop';
 import { routes } from '../src/routes';
 import { WEEKLY_RESET_SLUG, weeklyReset } from '../src/data/weekly-reset';
+import { TAKE_BACK_CONTROL_SLUG, takeBackControl } from '../src/data/take-back-control';
 
 import envExample from '../.env.example?raw';
 import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
@@ -445,10 +446,11 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 });
 
 describe('launch guards', () => {
-  it('nothing on the public site links to the website checkout except the Weekly Reset page, in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
+  it('nothing on the public site links to the website checkout except the Weekly Reset and Take Back Control pages, in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
     // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts']);
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts']);
     expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
+    expect(read('src/data/take-back-control.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{TAKE_BACK_CONTROL_SLUG\}` : null/);
     const src = Object.keys(files).filter((f) => f.startsWith('../src/'));
     expect(src.length).toBeGreaterThan(30);
     const offenders = src
@@ -487,6 +489,14 @@ describe('launch guards', () => {
     expect(seed).toMatch(new RegExp(`\\('${WEEKLY_RESET_SLUG}',\\s*'${weeklyReset.name}',[\\s\\S]*?\\n\\s*${weeklyReset.price * 100},`));
     expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
     for (const f of ['weekly-command-center.pdf', 'weekly-command-center-editable.pdf', '30-minute-daily-tidy-system.pdf', 'weekly-reset-coaching-audio.mp3']) expect(seed).toContain(`"path":"weekly-reset/${f}"`);
+  });
+
+  it('the Take Back Control download is seeded at the price its page shows, with its files', () => {
+    const sql = read('supabase/migrations/20261013000000_shop_take_back_control.sql');
+    const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
+    expect(seed).toMatch(new RegExp(`\\('${TAKE_BACK_CONTROL_SLUG}',\\s*'${takeBackControl.name}',[\\s\\S]*?\\n\\s*${takeBackControl.price * 100},`));
+    expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
+    expect(seed.match(/"path":"take-back-control\/[a-z0-9-]+\.(mp3|m4a|pdf)"/g)).toHaveLength(11);
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {

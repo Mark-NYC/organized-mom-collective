@@ -1,3 +1,5 @@
+import { shopConfigured, shopEnabled } from '../lib/shop';
+import { routes } from '../routes';
 import type { Asset } from './weekly-reset';
 
 /**
@@ -5,18 +7,23 @@ import type { Asset } from './weekly-reset';
  * someone buys the Weekly Reset System (4-week audio course + 5 implementation tools).
  * Copy lives in the page; the things that change live here.
  *
- * Not sold anywhere yet: there's no shop product for it. Until buyUrl is set the buttons say
- * "Coming soon". The page is always noindex and out of the sitemap (a post-purchase offer).
+ * Sold through the website's own Stripe checkout as a download (product `take-back-control`,
+ * supabase/migrations/20261013000000_shop_take_back_control.sql, which lists its files). The
+ * price here must match that product's price in the dashboard. The buttons go to the checkout
+ * only in builds with the shop switched on; until then they say "Coming soon". The page is
+ * always noindex and out of the sitemap (a post-purchase offer).
  *
  * Assets switch on by themselves: drop a file at its `src` path (under public/) and the page
  * shows it; until then it shows a labeled placeholder. Use the real product mockups on a white
  * background (the sections they sit in are white to match).
  */
+/** The shop product this page sells. */
+export const TAKE_BACK_CONTROL_SLUG = 'take-back-control';
+
 export const takeBackControl = {
   name: 'Take Back Control',
   price: 29,
-  /** Checkout link, once a shop product exists for it. */
-  buyUrl: null as string | null,
+  buyUrl: shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${TAKE_BACK_CONTROL_SLUG}` : null,
 };
 
 export const takeBackControlAssets = {
