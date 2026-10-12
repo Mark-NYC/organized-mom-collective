@@ -99,6 +99,8 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 | `fp-05-grocery-list-writing` | Hand writing a list on a notepad, coffee, open pantry behind (generated; writing blurred) | FP-05 step 4; FP-06 |
 | `fp-05-leftovers-table` | Hands setting glass containers of leftovers on a dining table (generated) | FP-05 zero night |
 | `fp-05-meal-plan` | Close-up of the calendar's meal plan and grocery list (listing photo 11) | FP-05 method |
+| `if-01-notepad` | A hand with a pen over a blank notepad on an oak table (Kaboompics 21478) | IF-01 hero |
+| `if-01-quiet-mug` | A hand holding a pink mug beside eucalyptus (Kaboompics 9262, 4:5) | IF-01 prayer or quiet |
 | `fp-01-groceries` | Hands unpacking bread from a mesh grocery bag on a counter (Kaboompics 28541) | FP-01 hero |
 | `fp-01-week-on-one-page` | The labeled weekly page: schedule, zones, meals, groceries, to-dos (listing photo 02, header cropped off) | FP-01 section 1 |
 | `hc-03-zone-basket` | Hands arranging a wire basket of cleaning supplies on a linen sofa (Kaboompics 32280) | HC-03 hero; HC-03 pin 1 |
