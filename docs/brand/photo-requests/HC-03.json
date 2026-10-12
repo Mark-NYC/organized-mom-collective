@@ -1,0 +1,12 @@
+{
+  "article": "HC-03 zone-cleaning-schedule",
+  "requested": "2026-10-12",
+  "purpose": "Discovery for the zone cleaning article: faceless home-cleaning scenes (living room, bedroom, entry, bathroom, kitchen). Research only until reviewed and cleared in lifestyle-photo-library.json.",
+  "seeds": [
+    "https://kaboompics.com/photoshoot/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
+    "https://kaboompics.com/photo/32304/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
+    "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
+    "https://kaboompics.com/photo/32280/close-up-of-arranging-a-home-care-basket-on-a-sofa"
+  ],
+  "max_photos": 40
+}
