@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Create side-by-side research contact sheets. Never deploy or mark rights cleared."""
-import io, json, pathlib, re, html, urllib.request
+import io, json, pathlib, re, html, urllib.request, urllib.parse
 from PIL import Image, ImageDraw, ImageOps
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -19,12 +19,28 @@ def image_for(url, source):
         n = match.group(1)
         return get(f"https://images.pexels.com/photos/{n}/pexels-photo-{n}.jpeg?w=1000")
     page = get(url).decode("utf-8", errors="replace")
-    m = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',page,re.I)
-    if not m:
-        m = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image',page,re.I)
-    if not m: raise RuntimeError("Cannot find og:image on source page")
-    imgurl = html.unescape(m.group(1))
-    if not imgurl.startswith("https://"): raise ValueError("Unexpected image URL")
+    # Unsplash's OG preview may be gated; prefer the direct images.unsplash.com
+    # photography CDN URL embedded in its public page.
+    if source == "Unsplash":
+        candidates = re.findall(r'https?://images\\.unsplash\\.com/[^"\\s<>]+', html.unescape(page))
+        for candidate in candidates:
+            clean = html.unescape(candidate).replace("\\\\u0026", "&")
+            if "\\\\u" in clean:
+                continue
+            try:
+                return get(clean.split("&amp;")[0])
+            except Exception:
+                continue
+        raise RuntimeError("Unsplash image CDN unavailable; source page remains valid")
+    patterns = [
+        r'<meta[^>]+property=["\\\']og:image["\\\'][^>]+content=["\\\']([^"\\\']+)',
+        r'<meta[^>]+content=["\\\']([^"\\\']+)["\\\'][^>]+property=["\\\']og:image'
+    ]
+    match = next((m for p in patterns if (m := re.search(p,page,re.I))),None)
+    if not match: raise RuntimeError("Cannot find og:image on source page")
+    imgurl = urllib.parse.urljoin(url, html.unescape(match.group(1)))
+    if urllib.parse.urlparse(imgurl).scheme != "https":
+        raise ValueError("Unexpected image URL scheme")
     return get(imgurl)
 
 def make_tile(photo, i):
