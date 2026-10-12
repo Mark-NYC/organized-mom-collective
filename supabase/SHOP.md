@@ -1,6 +1,6 @@
 # Direct website shop
 
-Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and the calendar's buy buttons are unchanged. The same checkout also sells **downloads** (the $9 Weekly Reset System, from `/weekly-reset`): see [Digital products](#digital-products).
+Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and the calendar's buy buttons are unchanged. The same checkout also sells **downloads** (the $9 Weekly Reset System from `/weekly-reset`, and the $29 Take Back Control from `/take-back-control`): see [Digital products](#digital-products).
 
 **Status: built, tested against fakes and a real local database, switched off.** Nothing is public and no real money can move until you complete [Launch](#launch).
 
@@ -62,6 +62,7 @@ Dashboard (/admin/orders)
 ## Products
 
 - **The Weekly Reset System.** $9 download (`weekly-reset-system`), active, no stock. Sold from `/weekly-reset`. See [Digital products](#digital-products).
+- **Take Back Control.** $29 download (`take-back-control`), active, no stock. Sold from `/take-back-control`, the offer after the Weekly Reset. See [Digital products](#digital-products).
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -120,6 +121,28 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] Redeploy **all three** existing functions from `supabase/dashboard/` (same steps as above), then deploy the **fourth**, `shop-download` from `supabase/dashboard/shop-download.ts`, with "Verify JWT" off. It needs no new secrets.
 - [ ] **Storage → shop-downloads**: check it says *Private*. Upload the four files at exactly these paths (folder `weekly-reset`): `weekly-command-center.pdf`, `weekly-command-center-editable.pdf`, `30-minute-daily-tidy-system.pdf`, `weekly-reset-coaching-audio.mp3`. If you ran the digital-products migration before the fillable Command Center was added, add it to the product once in the SQL Editor: `update shop_products set files = jsonb_insert(files, '{1}', '{"path":"weekly-reset/weekly-command-center-editable.pdf","label":"The Weekly Command Center (fillable PDF: type in it on your computer)"}') where slug = 'weekly-reset-system';` Dashboard → Inventory lists the paths too.
 - [ ] Buy it once in preview (test card) and open the download link from the receipt email: all three files should download.
+
+### Database update: Take Back Control (once, after digital products)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261013000000_shop_take_back_control.sql` → **Run**, once. It only adds the product; a second run stops at the insert.
+- [ ] Redeploy `stripe-webhook` and `shop-admin` from `supabase/dashboard/` (the receipt email now has this product's picture).
+- [ ] **Storage → shop-downloads**: upload the eleven files to folder `take-back-control`, renamed to exactly:
+
+  | Your file | Upload as |
+  | --- | --- |
+  | Week 1 – Create Your Family Reset Rhythm (Control Kit).mp3 | `week-1-create-your-family-reset-rhythm.mp3` |
+  | Week 2 – Morning Flow That Doesn't Break (Control Kit).mp3 | `week-2-morning-flow-that-doesnt-break.mp3` |
+  | Week 3 – Weekly Planning on Autopilot (Control Kit).mp3 | `week-3-weekly-planning-on-autopilot.mp3` |
+  | Week 4 – Declutter Your Brain, Not Just the Toys (Control Kit).mp3 | `week-4-declutter-your-brain-not-just-the-toys.mp3` |
+  | 3-Min Reset Ritual Audio.m4a | `3-minute-reset-ritual.m4a` |
+  | Morning Routine.pdf | `morning-routine.pdf` |
+  | After-School Routine.pdf | `after-school-routine.pdf` |
+  | Bedtime Routine.pdf | `bedtime-routine.pdf` |
+  | Weekend Prep Routine.pdf | `weekend-prep-routine.pdf` |
+  | Chore Chart by Age.pdf | `chore-chart-by-age.pdf` |
+  | 7-Day Declutter Dash.pdf | `7-day-declutter-dash.pdf` |
+
+  The Weekly Planner Generator (`/planner`) and the Pantry Inventory are website tools, not files; they're being built. Don't open the checkout until both are live.
+- [ ] Buy it once in preview (test card): all eleven files should download.
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
