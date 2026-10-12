@@ -10,8 +10,7 @@
  * Honesty rules:
  * - Prices, checkout and contact live in src/data/weekly-reset.ts. Until buyUrl is set the
  *   buttons say "Coming soon" and the page is noindex (and out of the sitemap).
- * - Shop figures come from src/data/reviews.ts (whole Etsy shop) with its disclaimer, never the
- *   old landing page's numbers. Camille S.'s quote is word for word from there, with no photo.
+ * - Etsy figures come from src/data/weekly-reset.ts → etsyStats (supplied by the shop owner). Camille S.'s quote is word for word from there, with no photo.
  * - Photos switch on when their files exist (AssetSlot). The guarantee badge is drawn here.
  */
 import { existsSync } from 'node:fs';
@@ -19,8 +18,8 @@ import { join } from 'node:path';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import AssetSlot from '../components/site/AssetSlot.astro';
 import ResetButton from '../components/site/ResetButton.astro';
-import { coachingPreviewAudio, weeklyReset, weeklyResetAssets as assets } from '../data/weekly-reset';
-import { ETSY_SHOP_URL, REVIEWS_DISCLAIMER, shopStats, testimonial } from '../data/reviews';
+import { coachingPreviewAudio, etsyStats, weeklyReset, weeklyResetAssets as assets } from '../data/weekly-reset';
+import { ETSY_SHOP_URL, testimonial } from '../data/reviews';
 import { BRAND_NAME } from '../config';
 
 const { price, regularPrice, contactEmail } = weeklyReset;
@@ -74,15 +73,27 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         <p class="mt-4 text-[0.95rem] font-semibold text-warm-ink">Less than 2 lattes. Saves 5+ hours every week. Instant download.</p>
         <div class="mt-7"><ResetButton cta="reset-hero" /></div>
 
-        <!-- Trust row: the whole Etsy shop's verified figures (src/data/reviews.ts), labeled as such. -->
-        <div class="mt-7 inline-flex flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-[10px] bg-paper px-5 py-3 text-warm-ink shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)]">
-          <span class="text-[0.95rem]"><strong class="font-serif text-[1.35rem] font-normal">{shopStats.sales}</strong> sales</span>
-          <span aria-hidden="true" class="h-6 border-l border-warm-rule"></span>
-          <span class="text-[0.95rem]"><span aria-hidden="true" class="text-rose-deep">★</span> <strong class="font-serif text-[1.35rem] font-normal">{shopStats.rating}</strong> ({shopStats.reviews}) rating</span>
-          <span aria-hidden="true" class="hidden h-6 sm:block border-l border-warm-rule"></span>
-          <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="text-link text-[0.95rem]">Our Etsy shop<span class="sr-only"> (opens Etsy)</span></a>
-        </div>
-        <p class="mt-2 text-[0.8rem] leading-snug text-warm-soft">{REVIEWS_DISCLAIMER}</p>
+        <!-- Trust row: the Etsy shop's figures (src/data/weekly-reset.ts → etsyStats). -->
+        <a
+          href={ETSY_SHOP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-7 inline-flex items-center divide-x divide-warm-rule rounded-[14px] bg-paper py-3 text-warm-ink shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-warm-rule/70"
+        >
+          <span class="px-3 text-center leading-tight sm:px-6">
+            <strong class="block font-serif text-[1.6rem] font-normal">{etsyStats.sales}</strong>
+            <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">Sales</span>
+          </span>
+          <span class="px-3 text-center leading-tight sm:px-6">
+            <strong class="block font-serif text-[1.6rem] font-normal"><span aria-hidden="true" class="text-[0.8em] text-[#e8a33d]">★</span> {etsyStats.rating}</strong>
+            <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">({etsyStats.reviews}) Rating</span>
+          </span>
+          <span class="px-3 text-center leading-tight sm:px-6">
+            <strong class="block font-serif text-[1.6rem] font-normal text-[#f1641e]">Etsy</strong>
+            <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">{etsyStats.badge} · {etsyStats.years} years</span>
+          </span>
+          <span class="sr-only"> (opens our Etsy shop)</span>
+        </a>
       </div>
 
       <figure class="-mx-5 overflow-hidden sm:mx-0 sm:rounded-[10px]">
@@ -133,7 +144,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   </section>
 
   <!-- 4. The offer: why this over free printables, then what's included -->
-  <section aria-labelledby="offer-h" class="bg-cream">
+  <section aria-labelledby="offer-h" class="bg-paper">
     <div class:list={[wrap, pad]}>
       <div class="mx-auto max-w-2xl text-center">
         <h2 id="offer-h" class="serif-title"><span class="text-rose-deep">${price} New Customer Special</span> (Normally ${regularPrice})</h2>
@@ -147,14 +158,14 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         <h3 class="mt-12 font-serif text-[1.6rem] leading-snug text-warm-ink sm:text-[1.9rem]">Here’s Your Complete Weekly Reset System:</h3>
       </div>
 
-      <figure class="mx-auto mt-8 max-w-5xl overflow-hidden rounded-[10px] bg-paper">
+      <figure class="mx-auto mt-8 max-w-5xl">
         <AssetSlot asset={assets.bundle} sizes="(min-width: 1152px) 1024px, 100vw" />
       </figure>
 
       <ul class="mt-10 grid gap-5 md:grid-cols-3">
         {
           included.map((item) => (
-            <li class="rounded-[10px] bg-paper p-6 text-center shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] sm:p-7">
+            <li class="rounded-[10px] bg-cream p-6 text-center sm:p-7">
               <h4 class="font-serif text-[1.3rem] leading-snug text-warm-ink">{item.title}</h4>
               <p class="label mt-1 text-warm-soft">{item.sub}</p>
               <p class="mt-3 text-[1rem] leading-relaxed">{item.body}</p>
