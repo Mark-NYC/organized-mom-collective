@@ -1,3 +1,13 @@
+## Primary website image mix (updated October 12, 2026)
+
+**Default to faceless Kaboompics home-life photography for 85–90% of lifestyle placements.** Use the remaining 10–15% for candid human faces *only* where connection and story genuinely add value. This supersedes the previous 70/30 starting ratio. The ratios guide placement, not a mandatory batch quota.
+
+Prioritize realistic American-feeling family environments and ordinary lived-in objects: paper planners, lists, coffee, pantry jars, laundry, towels, school supplies, dinner preparation, groceries, cleaning baskets, quiet kitchen counters. Avoid overly curated luxury interiors, anonymous lifestyle images with no relevance to the copy, and recurring old-year planner pages.
+
+For site copy about systems, simplicity, routines, and product features, choose faceless domestic details as the first choice. For family motivation, overwhelm, connection and relatable stories, use a *small number* of already-liked candid face photos. Keep the physical OMC calendar prominently represented in selling sections; stock images should never substitute for showing the actual product.
+
+Favor related Kaboompics shoots rather than overmixing photographers. Review each exact image and its final crop for logos, artwork, release questions and permitted commercial use. New candidates are not automatically approved by aesthetic similarity. Never publish photos until their manifest record explicitly clears them.
+
 # Organized Mom Collective Photography Library
 
 Created October 12, 2026. **Pilot in progress. Nothing in the candidate catalog is cleared for publication.**
