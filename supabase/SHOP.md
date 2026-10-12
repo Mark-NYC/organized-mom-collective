@@ -141,7 +141,7 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
   | Chore Chart by Age.pdf | `chore-chart-by-age.pdf` |
   | 7-Day Declutter Dash.pdf | `7-day-declutter-dash.pdf` |
 
-  The Weekly Planner Generator (`/planner`) and the Pantry Inventory are website tools, not files; they're being built. Don't open the checkout until both are live.
+  The Weekly Planner Generator (upgraded, with example weeks) and the Pantry Inventory (`/pantry`) are website tools, not files: the buyer's download page links to both (`src/components/shop/DownloadFiles.tsx`).
 - [ ] Buy it once in preview (test card): all eleven files should download.
 
 ### Decisions you owe before launch

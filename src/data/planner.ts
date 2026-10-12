@@ -6,48 +6,49 @@
  * Take Back Control buyer's download page. Anyone with the link can open it. To change the link
  * (if it gets passed around), change PLANNER_PLUS_PATH; buyers' download pages pick it up.
  *
- * The planner saves on this device only (localStorage, via src/lib/storage.ts).
+ * Both use src/components/site/WeeklyPlanner.astro (the original design) and save in this browser only.
  */
 
 export const PLANNER_PLUS_PATH = '/planner/plus-r7k2m9';
 
-export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-export interface PlannerData {
-  weekOf: string;
-  /** What's happening each day, Monday first. */
-  days: string[];
-  /** Dinner each day, Monday first. */
-  meals: string[];
-  selfCare: string;
-  word: string;
-  family: string;
-  grateful: string;
-  groceries: string;
-  todo: string;
-  notes: string;
-}
-
-export const emptyPlanner = (): PlannerData => ({
-  weekOf: '',
-  days: DAYS.map(() => ''),
-  meals: DAYS.map(() => ''),
-  selfCare: '',
-  word: '',
-  family: '',
-  grateful: '',
-  groceries: '',
-  todo: '',
-  notes: '',
-});
-
-/** An example week: fills everything except "Week of". */
+/** An example week: fills everything except "Week of". Lists are one item per line. */
 export interface PlannerPreset {
   id: string;
   label: string;
   /** One line under the button. */
   hint: string;
-  data: Omit<PlannerData, 'weekOf'>;
+  data: {
+    /** What's happening each day, Monday first. */
+    days: string[];
+    /** Dinner each day, Monday first. */
+    meals: string[];
+    selfCare: string;
+    word: string;
+    family: string;
+    grateful: string;
+    groceries: string;
+    todo: string;
+    notes: string;
+  };
+}
+
+/** A preset as the planner's `data-field` values (WeeklyPlanner.astro): 2 self-care, 2 family, 6 to-do lines. */
+export function presetFields({ data: d }: PlannerPreset): Record<string, string> {
+  const items = (prefix: string, text: string, n: number) =>
+    Object.fromEntries(Array.from({ length: n }, (_, i) => [`${prefix}-${i}`, text.split('\n')[i] ?? '']));
+  return {
+    ...Object.fromEntries(DAYS.map((day, i) => [`day-${day}`, d.days[i] ?? ''])),
+    ...Object.fromEntries(DAYS.map((day, i) => [`menu-${day}`, d.meals[i] ?? ''])),
+    ...items('selfcare', d.selfCare, 2),
+    ...items('family', d.family, 2),
+    ...items('todo', d.todo, 6),
+    word: d.word,
+    prayers: d.grateful,
+    groceries: d.groceries,
+    notes: d.notes,
+  };
 }
 
 const lines = (...l: string[]) => l.join('\n');

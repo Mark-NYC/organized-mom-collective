@@ -3,6 +3,7 @@ import { requestDownload, type DownloadError, type DownloadFiles as Files } from
 import { weeklyReset } from '../../data/weekly-reset';
 import { TAKE_BACK_CONTROL_SLUG } from '../../data/take-back-control';
 import { PLANNER_PLUS_PATH } from '../../data/planner';
+import { routes } from '../../routes';
 
 /**
  * /download?t=TOKEN — the link in a digital order's emails. Trades the token for short-lived
@@ -77,9 +78,12 @@ export default function DownloadFiles() {
           <p className="mt-2 leading-relaxed">
             These live on our website, not in a file. <strong>Bookmark them now</strong>: this download page stops working after {until}, but the tools don’t.
           </p>
-          <p className="mt-4">
+          <p className="mt-4 flex flex-wrap gap-3">
             <a href={PLANNER_PLUS_PATH} className="btn-primary min-h-12 px-6">
               Open the Weekly Planner Generator
+            </a>
+            <a href={routes.pantry} className="btn-primary min-h-12 px-6">
+              Open the Pantry Inventory
             </a>
           </p>
         </section>

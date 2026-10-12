@@ -323,9 +323,6 @@
   @page {
     margin: 14mm;
   }
-  .no-print {
-    display: none !important;
-  }
   html {
     font-size: 13px;
   }
@@ -357,55 +354,6 @@
   }
   .checklist-block {
     break-inside: avoid;
-  }
-  /* The weekly planner (/planner): "Print / Save as PDF" adds html.print-planner and prints only
-     [data-print-planner] (everything around it is .no-print) with the desktop layout. The Print button
-     adds the landscape @page rule for that print only (WeeklyPlanner.tsx). */
-  html.print-planner body {
-    min-height: 0;
-  }
-  html.print-planner main > div {
-    padding: 0;
-    margin: 0;
-  }
-  html.print-planner [data-print-planner] {
-    margin: 0;
-    padding: 0;
-    background: none;
-  }
-  html.print-planner .planner-days {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
-  html.print-planner .planner-row3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  html.print-planner .planner-row4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  html.print-planner [data-print-planner] textarea,
-  html.print-planner [data-print-planner] input {
-    font-size: 0.72rem;
-    line-height: 1.45;
-  }
-  /* Fixed heights so the sheet fills exactly one landscape page (textareas can't split). */
-  html.print-planner .planner-days textarea {
-    height: 52mm;
-  }
-  html.print-planner .planner-row3 textarea {
-    height: 20mm;
-  }
-  html.print-planner .planner-row4 textarea {
-    height: 50mm;
-  }
-  html.print-planner [data-print-planner] .planner-word {
-    font-size: 1.3rem;
-    padding-top: 4mm;
-  }
-  html.print-planner .planner-notes textarea {
-    height: 16mm;
-  }
-  html.print-planner [data-print-planner] .planner-menu input {
-    padding-block: 1.2mm;
   }
   html.print-schedule .article-body > section[data-print-schedule] {
     display: block;
