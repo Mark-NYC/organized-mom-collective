@@ -79,7 +79,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
           <span class="text-[0.95rem]"><strong class="font-serif text-[1.35rem] font-normal">{shopStats.sales}</strong> sales</span>
           <span aria-hidden="true" class="h-6 border-l border-warm-rule"></span>
           <span class="text-[0.95rem]"><span aria-hidden="true" class="text-rose-deep">★</span> <strong class="font-serif text-[1.35rem] font-normal">{shopStats.rating}</strong> ({shopStats.reviews}) rating</span>
-          <span aria-hidden="true" class="h-6 border-l border-warm-rule"></span>
+          <span aria-hidden="true" class="hidden h-6 sm:block border-l border-warm-rule"></span>
           <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="text-link text-[0.95rem]">Our Etsy shop<span class="sr-only"> (opens Etsy)</span></a>
         </div>
         <p class="mt-2 text-[0.8rem] leading-snug text-warm-soft">{REVIEWS_DISCLAIMER}</p>
@@ -99,8 +99,8 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         {
           outcomes.map((o) => (
             <li class="border-b border-warm-rule py-6 text-center">
-              <p class="flex items-center justify-center gap-2 text-[1.05rem] font-semibold text-warm-ink">
-                <svg aria-hidden="true" viewBox="0 0 20 20" class="size-5 shrink-0 text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <p class="text-[1.05rem] font-semibold text-balance text-warm-ink">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="mr-1.5 inline size-5 -translate-y-px align-middle text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d={check} />
                 </svg>
                 {o.title}
@@ -147,7 +147,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         <h3 class="mt-12 font-serif text-[1.6rem] leading-snug text-warm-ink sm:text-[1.9rem]">Here’s Your Complete Weekly Reset System:</h3>
       </div>
 
-      <figure class="mx-auto mt-8 max-w-5xl">
+      <figure class="mx-auto mt-8 max-w-5xl overflow-hidden rounded-[10px] bg-paper">
         <AssetSlot asset={assets.bundle} sizes="(min-width: 1152px) 1024px, 100vw" />
       </figure>
 
