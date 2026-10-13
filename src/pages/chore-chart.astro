@@ -1,0 +1,536 @@
+---
+/**
+ * /chore-chart — a free chore chart by age: pick an age group, get starter daily and weekly chores plus
+ * three rewards, edit anything on the chart, then download it as a PNG (US Letter landscape,
+ * 11 × 8.5 in at 96 px/in, drawn at 2×). Starter chores: src/data/chore-chart.ts.
+ * Everything autosaves in this browser (`omc:chore-chart:v1`). Autosave and export: src/lib/printable.ts.
+ * Classes are prefixed `cc-` so they never collide with the site's own.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+import { choreSets, DAILY_ROWS, WEEKDAYS } from '../data/chore-chart';
+
+const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const dailyRows = Array.from({ length: DAILY_ROWS }, (_, i) => i);
+const thresholds = ['50%', '75%', '100%'];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Chore Chart by Age', item: new URL(routes.choreChart, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Chore Chart by Age"
+  description="A free chore chart by age: pick your child's age group for daily and weekly chores that fit, edit anything, then download it as an image to print."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="chore-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free chore chart</p>
+      <h1 id="chore-h" class="serif-hero mt-3">A Chore Chart That Fits Their Age.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Pick an age group and get daily and weekly chores they can actually do, plus three rewards to work toward. Change anything on the
+        chart, then download it to print and hang where everyone sees it. The chart does the reminding, so you don’t have to.
+      </p>
+    </div>
+  </section>
+
+  <div class="chore-chart-container">
+    <form class="cc-form" data-cc-form>
+      <label class="cc-field">
+        <span>Child’s name</span>
+        <input type="text" data-cc-name placeholder="e.g. Emma" autocomplete="off" maxlength="24" />
+      </label>
+      <label class="cc-field">
+        <span>Age group</span>
+        <select data-cc-age>
+          <option value="">Choose an age group</option>
+          {Object.entries(choreSets).map(([id, set]) => <option value={id}>{set.label}</option>)}
+        </select>
+      </label>
+      <button type="submit" class="cc-btn cc-btn-primary">Fill in chores</button>
+    </form>
+
+    <div class="cc-actions">
+      <button type="button" class="cc-btn cc-btn-primary" data-cc-download>Download PNG</button>
+      <button type="button" class="cc-btn" data-cc-clear>Clear chart</button>
+    </div>
+    <p class="cc-hint">Tap any chore or reward on the chart to change it.</p>
+
+    <div class="cc-sheet" id="chore-chart">
+      <input type="hidden" data-field="age" data-cc-age-field />
+      <input type="hidden" data-field="name" data-cc-name-field />
+      <div class="cc-age" data-cc-age-badge hidden></div>
+      <div class="cc-head">
+        <div class="cc-for" data-cc-for></div>
+        <div class="cc-title">Weekly Chore Chart</div>
+      </div>
+
+      <div class="cc-main">
+        <section class="cc-daily" aria-label="Daily chores">
+          <div class="cc-section-title">Daily chores</div>
+          <div class="cc-grid cc-days" aria-hidden="true">
+            <span></span>
+            {days.map((d) => <span class="cc-day">{d}</span>)}
+          </div>
+          {
+            dailyRows.map((i) => (
+              <div class="cc-grid">
+                <input class="cc-chore" type="text" data-field={`daily-${i}`} aria-label={`Daily chore ${i + 1}`} />
+                {days.map(() => (
+                  <span class="cc-box" aria-hidden="true" />
+                ))}
+              </div>
+            ))
+          }
+        </section>
+
+        <section class="cc-weekly" aria-label="Weekly chores">
+          <div class="cc-section-title cc-section-title-sage">Weekly chores</div>
+          {
+            WEEKDAYS.map((day, i) => (
+              <div class="cc-week-row">
+                <span class="cc-weekday">{day}</span>
+                <input class="cc-chore" type="text" data-field={`weekly-${i}`} aria-label={`${day} chore`} />
+                <span class="cc-box" aria-hidden="true" />
+              </div>
+            ))
+          }
+        </section>
+      </div>
+
+      <div class="cc-rewards">
+        {
+          thresholds.map((t, i) => (
+            <div class="cc-reward">
+              <span class="cc-threshold">Complete {t}</span>
+              <input class="cc-reward-text" type="text" data-field={`reward-${i}`} aria-label={`Reward for completing ${t}`} placeholder="Reward" />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <p class="cc-footnote">
+      Pair it with the weekly <a href={routes.planner} class="text-link">Planner</a> or the
+      <a href={routes.calendar} data-cta="chore-chart" class="text-link">Family Wall Calendar</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<script type="application/json" id="cc-sets" set:html={JSON.stringify(choreSets)} />
+
+<style is:global>
+  .chore-chart-container {
+    --cc-ink: var(--color-warm-ink);
+    --cc-soft: var(--color-warm-soft);
+    --cc-rule: var(--color-warm-rule);
+    --cc-rose: var(--color-rose);
+    --cc-rose-deep: var(--color-rose-deep);
+    --cc-rose-wash: var(--color-rose-wash);
+    --cc-sage: var(--color-sage);
+    --cc-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--cc-ink);
+  }
+  .chore-chart-container *,
+  .chore-chart-container *::before,
+  .chore-chart-container *::after {
+    box-sizing: border-box;
+  }
+
+  /* Form and buttons */
+  .cc-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 14px;
+    max-width: 1056px;
+    margin: 0 auto 18px;
+  }
+  .cc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 220px;
+    max-width: 320px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cc-soft);
+  }
+  .cc-field input,
+  .cc-field select {
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--cc-rule);
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--cc-ink);
+  }
+  .cc-field input:focus,
+  .cc-field select:focus {
+    outline: 2px solid var(--cc-rose-deep);
+    outline-offset: 1px;
+  }
+  .cc-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 8px;
+  }
+  .cc-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .cc-btn:hover {
+    background: var(--cc-rose-wash);
+  }
+  .cc-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .cc-btn-primary:hover {
+    background: #362e2d;
+  }
+  .cc-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .cc-hint {
+    margin: 0 auto 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--cc-soft);
+  }
+
+  /* The sheet: US Letter landscape (11 × 8.5 in at 96 px/in). */
+  .cc-sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 1056px;
+    max-width: 100%;
+    min-height: 816px;
+    margin: 0 auto;
+    padding: 30px 34px;
+    background: var(--color-ivory);
+    border: 1px solid var(--cc-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .cc-age {
+    position: absolute;
+    top: 30px;
+    right: 34px;
+    padding: 5px 12px;
+    border: 1px solid var(--cc-rose);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cc-rose-deep);
+  }
+  .cc-head {
+    text-align: center;
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid var(--cc-rose);
+  }
+  .cc-for {
+    min-height: 18px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cc-soft);
+  }
+  .cc-title {
+    font-size: 38px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--cc-ink);
+  }
+  .cc-main {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .cc-section-title {
+    margin-bottom: 10px;
+    padding: 7px;
+    border-radius: 3px;
+    background: var(--cc-rose-wash);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--cc-rose-deep);
+  }
+  .cc-section-title-sage {
+    background: var(--cc-sage-wash);
+    color: #5d6b55;
+  }
+  .cc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(7, 40px);
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .cc-day {
+    padding: 4px 0;
+    border-radius: 3px;
+    background: var(--color-warm-button);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    color: #fff;
+  }
+  .cc-chore,
+  .cc-reward-text {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--cc-rule);
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: var(--cc-ink);
+  }
+  .cc-chore:focus,
+  .cc-reward-text:focus {
+    outline: none;
+    border-color: var(--cc-rose);
+    background: var(--cc-rose-wash);
+  }
+  .cc-box {
+    height: 44px;
+    border: 1.5px solid var(--cc-rose);
+    border-radius: 3px;
+    background: #fff;
+  }
+  .cc-week-row {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) 40px;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .cc-week-row .cc-box {
+    border-color: var(--cc-sage);
+  }
+  .cc-weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    border-radius: 3px;
+    background: var(--cc-sage-wash);
+    border: 1px solid var(--cc-sage);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5d6b55;
+  }
+  .cc-rewards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .cc-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border: 1px dashed var(--cc-rose);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .cc-threshold {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--cc-rose-deep);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .cc-reward-text {
+    height: 34px;
+    border-color: transparent;
+    text-align: center;
+  }
+  .cc-reward-text::placeholder {
+    color: #c4b8b2;
+  }
+  .cc-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--cc-soft);
+  }
+
+  /* Phones and small tablets: one section under the other. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .chore-chart-container:not(.cc-exporting) .cc-sheet {
+      min-height: 0;
+      padding: 18px 10px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-age {
+      position: static;
+      align-self: center;
+      margin-bottom: 10px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-title {
+      font-size: 28px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-main,
+    .chore-chart-container:not(.cc-exporting) .cc-rewards {
+      grid-template-columns: 1fr;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-grid {
+      grid-template-columns: minmax(0, 1fr) repeat(7, 22px);
+      gap: 3px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-week-row {
+      grid-template-columns: 82px minmax(0, 1fr) 30px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-box {
+      height: 30px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-chore {
+      height: 36px;
+      padding: 0 6px;
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, clearFields, downloadPng } from '../lib/printable';
+  import type { AgeGroup, ChoreSet } from '../data/chore-chart';
+
+  const sets: Record<AgeGroup, ChoreSet> = JSON.parse(document.getElementById('cc-sets')!.textContent!);
+  const sheet = document.getElementById('chore-chart')!;
+  const form = document.querySelector<HTMLFormElement>('[data-cc-form]')!;
+  const nameInput = document.querySelector<HTMLInputElement>('[data-cc-name]')!;
+  const ageSelect = document.querySelector<HTMLSelectElement>('[data-cc-age]')!;
+  const ageField = sheet.querySelector<HTMLInputElement>('[data-cc-age-field]')!;
+  const ageBadge = sheet.querySelector<HTMLElement>('[data-cc-age-badge]')!;
+  const forLine = sheet.querySelector<HTMLElement>('[data-cc-for]')!;
+  const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
+
+  // The name is typed in the form but saved with the sheet (autosave reads [data-field] inside one root).
+  const savedName = sheet.querySelector<HTMLInputElement>('[data-cc-name-field]')!;
+
+  function render() {
+    const name = nameInput.value.trim();
+    forLine.textContent = name ? `${name}’s` : '';
+    const set = sets[ageField.value as AgeGroup];
+    ageSelect.value = set ? ageField.value : '';
+    ageBadge.hidden = !set;
+    ageBadge.textContent = set ? set.label.replace(/\s*\(.*\)/, '') : '';
+  }
+
+  const save = autosave(sheet, 'omc:chore-chart:v1', () => {
+    nameInput.value = savedName.value;
+    render();
+  });
+
+  nameInput.addEventListener('input', () => {
+    savedName.value = nameInput.value;
+    render();
+    save();
+  });
+
+  const choreFields = () => Array.from(sheet.querySelectorAll<HTMLInputElement>('.cc-chore, .cc-reward-text'));
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const set = sets[ageSelect.value as AgeGroup];
+    if (!set) {
+      ageSelect.focus();
+      return;
+    }
+    if (choreFields().some((el) => el.value.trim()) && !confirm('Replace the chores on the chart with the ones for this age?')) return;
+    sheet.querySelectorAll<HTMLInputElement>('[data-field^="daily-"]').forEach((el, i) => (el.value = set.daily[i] ?? ''));
+    set.weekly.forEach((chore, i) => (field(`weekly-${i}`).value = chore));
+    set.rewards.forEach((reward, i) => (field(`reward-${i}`).value = reward));
+    ageField.value = ageSelect.value;
+    render();
+    save();
+    sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.querySelector('[data-cc-clear]')!.addEventListener('click', () => {
+    if (!confirm('Clear everything on this chart?')) return;
+    clearFields(sheet);
+    nameInput.value = '';
+    render();
+    save();
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('[data-cc-download]')!;
+  button.addEventListener('click', async () => {
+    // The PNG would print an empty reward's "Reward" hint as if it were filled in: drop hints while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    const name = nameInput.value.trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').toLowerCase();
+    await downloadPng(sheet, {
+      filename: `${name ? `${name}-` : ''}chore-chart.png`,
+      width: 1056,
+      height: 816,
+      layoutHost: sheet.closest<HTMLElement>('.chore-chart-container')!,
+      exportClass: 'cc-exporting',
+      button,
+    });
+    hinted.forEach((el) => (el.placeholder = 'Reward'));
+  });
+</script>
