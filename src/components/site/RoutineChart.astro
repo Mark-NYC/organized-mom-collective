@@ -1,204 +1,88 @@
 ---
 /**
- * /routine-chart — free routine charts: pick a type (morning, after-school, bedtime, weekend, custom) to load
- * starter steps and times, then edit any line on the sheet (suggestion chips fill the next empty step).
- * Downloads as a PNG (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×). Everything autosaves in this
- * browser (`omc:routine-chart:v1`); Reset reloads the current type's starter routine.
- * Autosave and export: src/lib/printable.ts. Classes are prefixed `mr-` so they never collide with the site's own.
+ * A routine chart (the design, autosave and PNG export): pick a type (morning, after-school, bedtime,
+ * weekend, custom) to load starter steps and times, edit any line on the sheet, add steps from suggestion
+ * chips, download as a PNG (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×).
+ * Used by /routine-chart (free) and the upgraded chart for Take Back Control buyers (ROUTINE_PLUS_PATH),
+ * which passes `notes`: a reminder line under each step, with starter notes. Starter routines:
+ * src/data/routines.ts. Saves in this browser under `storageKey`. Classes are prefixed `mr-`.
  */
-import PublicLayout from '../layouts/PublicLayout.astro';
-import { routes } from '../routes';
-import { BRAND_NAME } from '../config';
+import { BRAND_NAME } from '../../config';
+import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
 
-const ROWS = 8;
-
-interface RoutineType {
-  label: string;
-  blurb: string;
-  title: string;
-  subtitle: string;
-  steps: [time: string, step: string][];
-  endLabel: string;
-  endTime: string;
-  ideas: string[];
+interface Props {
+  /** A reminder line under each step (the upgraded chart). */
+  notes?: boolean;
+  storageKey: string;
 }
 
-const types: Record<string, RoutineType> = {
-  morning: {
-    label: 'Morning',
-    blurb: 'Out the door on time',
-    title: 'Morning Routine',
-    subtitle: 'One step at a time',
-    steps: [
-      ['07:00', 'Wake up & stretch'],
-      ['07:10', 'Make bed'],
-      ['07:15', 'Get dressed'],
-      ['07:25', 'Eat breakfast'],
-      ['07:45', 'Brush teeth'],
-      ['07:50', 'Grab backpack & shoes'],
-    ],
-    endLabel: 'Out the door by',
-    endTime: '08:00',
-    ideas: ['Pack lunch', 'Check the calendar', 'Quick tidy up', 'Family huddle', 'Feed pets', 'Brush hair', 'Fill water bottle'],
-  },
-  afterschool: {
-    label: 'After-School',
-    blurb: 'Home, reset, then play',
-    title: 'After-School Routine',
-    subtitle: 'Home, reset, then play',
-    steps: [
-      ['15:30', 'Shoes & coat away'],
-      ['15:35', 'Unpack backpack & lunch box'],
-      ['15:40', 'Wash hands'],
-      ['15:45', 'Snack'],
-      ['16:00', 'Homework & reading'],
-      ['16:45', 'Free play'],
-    ],
-    endLabel: 'Dinner at',
-    endTime: '17:30',
-    ideas: ['Outdoor time', 'Help with dinner', 'Practice instrument', 'Set the table', 'Hand over school papers', 'Tidy room'],
-  },
-  bedtime: {
-    label: 'Bedtime',
-    blurb: 'Wind down, lights out',
-    title: 'Bedtime Routine',
-    subtitle: 'Wind down, lights out',
-    steps: [
-      ['19:00', 'Pick up toys'],
-      ['19:10', 'Bath or shower'],
-      ['19:30', 'Pajamas on'],
-      ['19:35', 'Brush teeth'],
-      ['19:40', 'Lay out tomorrow’s clothes'],
-      ['19:45', 'Read together'],
-    ],
-    endLabel: 'Lights out by',
-    endTime: '20:00',
-    ideas: ['Pack backpack', 'Bathroom one last time', 'Fill water cup', 'Talk about the day', 'Gratitude or prayers', 'Quiet music'],
-  },
-  weekend: {
-    label: 'Weekend',
-    blurb: 'Reset for the week ahead',
-    title: 'Weekend Reset',
-    subtitle: 'Get ready for the week, together',
-    steps: [
-      ['09:00', 'Family breakfast'],
-      ['09:30', 'Plan the week together'],
-      ['10:00', 'Tidy the house together'],
-      ['11:00', 'Laundry'],
-      ['14:00', 'Grocery shopping'],
-      ['16:00', 'Meal prep'],
-    ],
-    endLabel: 'Done by',
-    endTime: '17:00',
-    ideas: ['Outdoor activity', 'Family game time', 'Pack bags for Monday', 'Clean out the car', 'Water plants', 'Rest time'],
-  },
-  custom: {
-    label: 'Custom',
-    blurb: 'Start from a blank chart',
-    title: 'My Routine',
-    subtitle: '',
-    steps: [],
-    endLabel: 'Done by',
-    endTime: '',
-    ideas: ['Snack time', 'Break time', 'Play time', 'Learning time', 'Family time', 'Quick tidy up'],
-  },
-};
-
-const start = types.morning;
-const rows = Array.from({ length: ROWS }, (_, i) => start.steps[i] ?? ['', '']);
-
-const site = Astro.site!;
-const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
-      { '@type': 'ListItem', position: 2, name: 'Routine Charts', item: new URL(routes.routineChart, site).href },
-    ],
-  },
-];
+const { notes = false, storageKey } = Astro.props;
+const start = routineTypes.morning;
+const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['', '', '']);
 ---
 
-<PublicLayout
-  title="Free Routine Charts for Kids: Morning, After-School and Bedtime"
-  description="Free routine charts for busy families: morning, after-school, bedtime and weekend routines with times and steps. Edit any line, then download to print."
-  width="full"
-  jsonLd={jsonLd}
->
-  <section aria-labelledby="mr-h" class="bg-cream">
-    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-      <p class="label text-warm-soft">Free routine charts</p>
-      <h1 id="mr-h" class="serif-hero mt-3">Routines That Run Without You Repeating Yourself.</h1>
-      <p class="lede mt-4 max-w-2xl text-warm-ink">
-        Pick a routine, set the steps and times once, and hang it where it happens. The chart says “what’s next?” so you don’t have to. Change
-        any line, then download it to print. What you set stays saved in this browser.
-      </p>
-    </div>
-  </section>
+<div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined}>
+  <div class="mr-types" role="group" aria-label="Routine">
+    {
+      Object.entries(routineTypes).map(([id, t]) => (
+        <button type="button" class="mr-type" data-mr-type={id} aria-pressed={id === 'morning' ? 'true' : 'false'}>
+          <span class="mr-type-label">{t.label}</span>
+          <span class="mr-type-blurb">{t.blurb}</span>
+        </button>
+      ))
+    }
+  </div>
 
-  <div class="mr-container">
-    <div class="mr-types" role="group" aria-label="Routine">
+  <div class="mr-actions">
+    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download PNG</button>
+    <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
+  </div>
+
+  <div class="mr-ideas">
+    <span class="mr-ideas-label">Add a step</span>
+    <span class="mr-chips" data-mr-chips>
+      {start.ideas.map((idea) => <button type="button" class="mr-chip" data-idea={idea}>+ {idea}</button>)}
+    </span>
+    <p class="mr-hint">Or tap any line on the chart to type your own.</p>
+  </div>
+
+  <div class="mr-sheet" id="routine-chart">
+    <input type="hidden" data-field="type" value="morning" data-mr-type-field />
+    <div class="mr-head">
+      <input class="mr-title" type="text" data-field="title" value={start.title} aria-label="Chart title" />
+      <input class="mr-subtitle" type="text" data-field="subtitle" value={start.subtitle} aria-label="Subtitle" />
+    </div>
+
+    <ol class="mr-steps">
       {
-        Object.entries(types).map(([id, t]) => (
-          <button type="button" class="mr-type" data-mr-type={id} aria-pressed={id === 'morning' ? 'true' : 'false'}>
-            <span class="mr-type-label">{t.label}</span>
-            <span class="mr-type-blurb">{t.blurb}</span>
-          </button>
+        rows.map(([time, step, note], i) => (
+          <li class="mr-step">
+            <span class="mr-num" aria-hidden="true">{i + 1}</span>
+            <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            <span class="mr-what">
+              <input class="mr-text" type="text" data-field={`step-${i}`} data-mr-step value={step} aria-label={`Step ${i + 1}`} />
+              {notes && (
+                <input class="mr-note" type="text" data-field={`note-${i}`} value={note} placeholder="Add a reminder" aria-label={`Step ${i + 1} note`} />
+              )}
+            </span>
+            <span class="mr-box" aria-hidden="true" />
+          </li>
         ))
       }
+    </ol>
+
+    <div class="mr-done">
+      <input class="mr-end-label" type="text" data-field="end-label" value={start.endLabel} aria-label="Finish line label" />
+      <input class="mr-time" type="time" data-field="end-time" value={start.endTime} aria-label="Finish time" />
     </div>
 
-    <div class="mr-actions">
-      <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download PNG</button>
-      <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
-    </div>
-
-    <div class="mr-ideas">
-      <span class="mr-ideas-label">Add a step</span>
-      <span class="mr-chips" data-mr-chips>
-        {start.ideas.map((idea) => <button type="button" class="mr-chip" data-idea={idea}>+ {idea}</button>)}
-      </span>
-      <p class="mr-hint">Or tap any line on the chart to type your own.</p>
-    </div>
-
-    <div class="mr-sheet" id="routine-chart">
-      <input type="hidden" data-field="type" value="morning" data-mr-type-field />
-      <div class="mr-head">
-        <input class="mr-title" type="text" data-field="title" value={start.title} aria-label="Chart title" />
-        <input class="mr-subtitle" type="text" data-field="subtitle" value={start.subtitle} aria-label="Subtitle" />
-      </div>
-
-      <ol class="mr-steps">
-        {
-          rows.map(([time, step], i) => (
-            <li class="mr-step">
-              <span class="mr-num" aria-hidden="true">{i + 1}</span>
-              <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
-              <input class="mr-text" type="text" data-field={`step-${i}`} data-mr-step value={step} aria-label={`Step ${i + 1}`} />
-              <span class="mr-box" aria-hidden="true" />
-            </li>
-          ))
-        }
-      </ol>
-
-      <div class="mr-done">
-        <input class="mr-end-label" type="text" data-field="end-label" value={start.endLabel} aria-label="Finish line label" />
-        <input class="mr-time" type="time" data-field="end-time" value={start.endTime} aria-label="Finish time" />
-      </div>
-
-      <div class="mr-foot">{BRAND_NAME}</div>
-    </div>
-
-    <p class="mr-footnote">
-      More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
-      <a href={routes.screenTime} class="text-link">Screen Time Contract</a> and the
-      <a href={routes.calendar} data-cta="routine-chart" class="text-link">Family Wall Calendar</a>
-    </p>
+    <div class="mr-foot">{BRAND_NAME}</div>
   </div>
-</PublicLayout>
 
-<script type="application/json" id="mr-types" set:html={JSON.stringify(types)} />
+  <slot name="footnote" />
+</div>
+
+<script type="application/json" id="mr-types" set:html={JSON.stringify(routineTypes)} />
 
 <style is:global>
   .mr-container {
@@ -424,6 +308,31 @@ const jsonLd = [
     padding: 0 6px;
     font-size: 22px;
   }
+  .mr-what {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .mr-sheet .mr-note {
+    height: 26px;
+    padding: 0 6px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--mr-soft);
+  }
+  .mr-sheet .mr-note::placeholder {
+    color: #c4b8b2;
+  }
+  .mr-with-notes .mr-steps {
+    gap: 9px;
+  }
+  .mr-with-notes .mr-step {
+    min-height: 78px;
+  }
+  .mr-with-notes .mr-sheet .mr-text {
+    height: 36px;
+    font-size: 21px;
+  }
   .mr-box {
     width: 36px;
     height: 36px;
@@ -498,7 +407,7 @@ const jsonLd = [
     }
     .mr-container:not(.mr-exporting) .mr-step {
       grid-template-columns: 24px minmax(0, 1fr) 30px;
-      grid-template-areas: 'num time box' 'num text box';
+      grid-template-areas: 'num time box' 'num what box';
       gap: 2px 10px;
       padding: 8px 10px;
     }
@@ -511,8 +420,10 @@ const jsonLd = [
       justify-self: start;
       height: 32px;
     }
+    .mr-container:not(.mr-exporting) .mr-what {
+      grid-area: what;
+    }
     .mr-container:not(.mr-exporting) .mr-text {
-      grid-area: text;
       height: 36px;
       font-size: 18px;
     }
@@ -525,20 +436,14 @@ const jsonLd = [
 </style>
 
 <script>
-  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+  import { autosave, downloadPng, fieldsIn } from '../../lib/printable';
 
-  interface RoutineType {
-    title: string;
-    subtitle: string;
-    steps: [string, string][];
-    endLabel: string;
-    endTime: string;
-    ideas: string[];
-  }
+  import type { RoutineType } from '../../data/routines';
 
   const types: Record<string, RoutineType> = JSON.parse(document.getElementById('mr-types')!.textContent!);
   const sheet = document.getElementById('routine-chart')!;
   const host = sheet.closest<HTMLElement>('.mr-container')!;
+  const notes = host.hasAttribute('data-mr-notes');
   const typeField = sheet.querySelector<HTMLInputElement>('[data-mr-type-field]')!;
   const chips = document.querySelector<HTMLElement>('[data-mr-chips]')!;
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
@@ -556,7 +461,7 @@ const jsonLd = [
     );
   }
 
-  const save = autosave(sheet, 'omc:routine-chart:v1', renderType);
+  const save = autosave(sheet, host.dataset.mrKey!, renderType);
 
   function load(id: string) {
     const t = types[id];
@@ -566,6 +471,7 @@ const jsonLd = [
     for (let i = 0; i < rows; i++) {
       field(`time-${i}`).value = t.steps[i]?.[0] ?? '';
       field(`step-${i}`).value = t.steps[i]?.[1] ?? '';
+      if (notes) field(`note-${i}`).value = t.steps[i]?.[2] ?? '';
     }
     field('end-label').value = t.endLabel;
     field('end-time').value = t.endTime;
@@ -579,7 +485,10 @@ const jsonLd = [
     if (field('title').value !== t.title || field('subtitle').value !== t.subtitle) return true;
     if (field('end-label').value !== t.endLabel || field('end-time').value !== t.endTime) return true;
     return Array.from({ length: rows }, (_, i) => i).some(
-      (i) => field(`time-${i}`).value !== (t.steps[i]?.[0] ?? '') || field(`step-${i}`).value !== (t.steps[i]?.[1] ?? ''),
+      (i) =>
+        field(`time-${i}`).value !== (t.steps[i]?.[0] ?? '') ||
+        field(`step-${i}`).value !== (t.steps[i]?.[1] ?? '') ||
+        (notes && field(`note-${i}`).value !== (t.steps[i]?.[2] ?? '')),
     );
   };
 
@@ -625,6 +534,9 @@ const jsonLd = [
       el.type = 'text';
       el.value = twelveHour(el.value);
     });
+    // Empty notes would print their "Add a reminder" hint: drop hints while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
     const name = field('title').value.trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').toLowerCase();
     try {
       await downloadPng(sheet, {
@@ -636,6 +548,7 @@ const jsonLd = [
         button,
       });
     } finally {
+      hinted.forEach((el) => (el.placeholder = 'Add a reminder'));
       times.forEach((el, i) => {
         el.type = 'time';
         el.value = values[i];
