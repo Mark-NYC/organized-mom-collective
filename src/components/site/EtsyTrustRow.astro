@@ -17,21 +17,21 @@ const { class: className } = Astro.props;
   target="_blank"
   rel="noopener noreferrer"
   class:list={[
-    'inline-flex items-center divide-x divide-warm-rule rounded-[14px] bg-paper py-3 text-warm-ink shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-warm-rule/70',
+    'inline-grid max-w-full grid-cols-3 items-center divide-x divide-warm-rule border-y border-warm-rule py-3 text-warm-ink',
     className,
   ]}
 >
-  <span class="px-3 text-center leading-tight sm:px-6">
+  <span class="min-w-0 px-2 text-center leading-tight sm:px-6">
     <strong class="block font-serif text-[1.6rem] font-normal">{etsyStats.sales}</strong>
-    <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">Sales</span>
+    <span class="text-[0.72rem] sm:text-[0.85rem]">Sales</span>
   </span>
-  <span class="px-3 text-center leading-tight sm:px-6">
+  <span class="min-w-0 px-2 text-center leading-tight sm:px-6">
     <strong class="block font-serif text-[1.6rem] font-normal"><span aria-hidden="true" class="text-[0.8em] text-[#e8a33d]">★</span> {etsyStats.rating}</strong>
-    <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">({etsyStats.reviews}) Rating</span>
+    <span class="text-[0.72rem] sm:text-[0.85rem]">({etsyStats.reviews}) Rating</span>
   </span>
-  <span class="px-3 text-center leading-tight sm:px-6">
+  <span class="min-w-0 px-2 text-center leading-tight sm:px-6">
     <strong class="block font-serif text-[1.6rem] font-normal text-[#f1641e]">Etsy</strong>
-    <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">{etsyStats.badge} · {etsyStats.years} years</span>
+    <span class="text-[0.72rem] sm:text-[0.85rem]">{etsyStats.badge} · {etsyStats.years} years</span>
   </span>
   <span class="sr-only"> (opens our Etsy shop)</span>
 </a>

@@ -57,6 +57,10 @@ Conventions: reuse the existing print palette, `.label` / `.page-title` / `.text
 
 **Before choosing images for any new article, guide, resource, or editorial landing page, read `docs/brand/PHOTO-DISCOVERY.md` and follow its discovery → source verification → clearance → optimization → reuse workflow.** Prefer faceless Kaboompics images and search the cleared library first. The owner has approved all Kaboompics photos (standing approval, 2026-10-12): clear them yourself after the license, content and context checks in PHOTO-DISCOVERY.md, and record them in the catalog. Never publish other stock photos without the owner's clearance. The GitHub Actions downloader is not itself a photo search engine.
 
+## Public website visual design
+
+Read [docs/brand/PUBLIC-VISUAL-DESIGN.md](docs/brand/PUBLIC-VISUAL-DESIGN.md) before changing public page layouts. Use the homepage's inset gray composition, square photo edges, and shared public styles as the visual reference. Preserve tool output design and the cleaning companion's separate interface.
+
 ## Printable tool output design
 
 Read [docs/brand/TOOL-OUTPUT-DESIGN.md](docs/brand/TOOL-OUTPUT-DESIGN.md) before creating or redesigning printable tools. Shared three-color choices live in `src/data/tool-palettes.ts`; selections save with tool content and carry into downloads.

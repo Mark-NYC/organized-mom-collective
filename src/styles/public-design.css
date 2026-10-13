@@ -1,0 +1,46 @@
+/* Shared public-site composition. Printable sheets and the cleaning companion
+   keep their own styles; these selectors target editorial and marketing surfaces. */
+.omc-public {
+  --public-gray: #f1f2f2;
+  --public-sage: #e7ece5;
+}
+.omc-public .public-panel {
+  width: calc(100% - 32px);
+  max-width: 1504px;
+  margin: 24px auto;
+  border-radius: 0;
+}
+.omc-public .public-intro { background: var(--public-gray); }
+.omc-public .public-panel.bg-sage-wash { background: var(--public-sage); }
+.omc-public .public-panel > div:first-child { padding-inline: 24px; }
+.omc-public .public-panel figure,
+.omc-public .public-panel figure img { border-radius: 0; }
+.omc-public .public-editorial-intro {
+  max-width: none;
+  padding: 32px 24px;
+  background: var(--public-gray);
+}
+.omc-public .public-editorial-intro > p { max-width: 44rem; }
+.omc-public .public-article-card img { border-radius: 0; }
+.omc-public .public-feature { gap: 0; background: var(--public-gray); }
+.omc-public .public-feature > div:last-child { padding: 24px; margin-top: 0; }
+.omc-public .public-calendar-bridge { background: var(--public-sage); }
+.omc-public .public-panel a[href^="mailto:"] { overflow-wrap: anywhere; }
+.omc-public .public-shop-card { border-radius: 0; border: 0; }
+.omc-public .public-shop-card > span:last-child { padding-inline: 0; }
+.omc-public .tools-preview,
+.omc-public .tools-preview img,
+.omc-public .tools-calendar,
+.omc-public .tools-calendar img { border-radius: 0; }
+@media (min-width: 640px) {
+  .omc-public .public-editorial-intro { padding: 48px; }
+  .omc-public .public-feature > div:last-child { padding: 32px; }
+}
+@media (min-width: 900px) {
+  .omc-public .public-panel { width: calc(100% - 72px); margin-block: 28px 44px; }
+  .omc-public .public-panel > div:first-child { padding-inline: 48px; }
+  .omc-public .public-feature > div:last-child { padding: 40px; }
+}
+@media print {
+  .omc-public .public-panel { width: 100%; margin: 0; }
+}

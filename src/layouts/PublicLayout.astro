@@ -4,6 +4,7 @@
  * canonical URL, social sharing tags and structured data. Indexable unless
  * `indexable={false}`. The companion app never uses this layout (see AppLayout).
  */
+import '../styles/public-design.css';
 import BaseLayout from './BaseLayout.astro';
 import SiteHeader from '../components/resources/SiteHeader.astro';
 import SiteFooter from '../components/resources/SiteFooter.astro';
@@ -67,7 +68,7 @@ const mainClass =
     <slot name="head" />
   </Fragment>
   {chrome && <SiteHeader />}
-  <main id="main" class={mainClass || undefined}>
+  <main id="main" class:list={['omc-public', mainClass]}>
     <slot />
   </main>
   {chrome && <SiteFooter />}

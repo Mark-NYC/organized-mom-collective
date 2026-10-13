@@ -31,14 +31,14 @@ const sizes = feature ? '(min-width: 768px) 560px, 100vw' : '(min-width: 768px) 
 
 <article
   class:list={[
-    'group relative flex h-full flex-col',
-    feature && thumb && 'md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center md:gap-10',
+    'public-article-card group relative flex h-full flex-col',
+    feature && thumb && 'public-feature md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center md:gap-10',
     !thumb && 'border-t-2 border-ink pt-4',
   ]}
 >
   {
     thumb && (
-      <div class:list={['overflow-hidden rounded-[6px] bg-band', !feature && 'mb-4']}>
+      <div class:list={['overflow-hidden bg-band', !feature && 'mb-4']}>
         <img
           {...thumb}
           sizes={sizes}

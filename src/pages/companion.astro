@@ -46,7 +46,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   jsonLd={jsonLd}
 >
   <!-- Hero -->
-  <section aria-labelledby="hero-h" class="bg-cream">
+  <section aria-labelledby="hero-h" class="bg-cream public-panel public-intro">
     <div class:list={[wrap, 'grid items-center gap-10 py-10 sm:py-14 md:grid-cols-[1.3fr_1fr] md:py-16']}>
       <div>
         <p class="label text-warm-soft">The cleaning companion</p>
@@ -76,7 +76,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
       <p class="lede mt-4">Three layers, and none of them asks for more than a few minutes at a time.</p>
     </div>
 
-    <div class="mt-10 grid gap-12 md:grid-cols-3 md:gap-10">
+    <div class="mt-10 grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-10">
       <div class="border-t border-warm-rule pt-5">
         <p class="label text-warm-soft">Every day</p>
         <h3 class="mt-2 font-serif text-[1.45rem] leading-snug text-warm-ink">{dailyEssentials.title}</h3>
@@ -106,7 +106,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <ul class="mt-4 space-y-2">
           {
             week.map((d) => (
-              <li class="flex items-center justify-between gap-3">
+              <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                 <span class="flex min-w-0 items-center gap-3">
                   <span class="w-9 shrink-0 text-[0.7rem] font-bold tracking-[0.14em] uppercase">{d.day.slice(0, 3)}</span>
                   <ZoneTag icon={d.icon} label={d.zone} size="sm" />
@@ -139,7 +139,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   </section>
 
   <!-- Progress -->
-  <section aria-labelledby="progress-h" class="bg-sage-wash">
+  <section aria-labelledby="progress-h" class="bg-sage-wash public-panel">
     <div class:list={[wrap, 'grid items-center gap-10 py-14 sm:py-20 md:grid-cols-[1fr_1.2fr]']}>
       <PhoneShot
         name="week"

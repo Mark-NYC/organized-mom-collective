@@ -60,7 +60,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   width="full"
 >
   <!-- 1. Hero -->
-  <section aria-labelledby="hero-h" class="overflow-hidden bg-cream">
+  <section aria-labelledby="hero-h" class="overflow-hidden bg-cream public-panel public-intro">
     <div class:list={[wrap, 'grid items-center gap-x-12 gap-y-8 pt-8 pb-10 md:grid-cols-[1fr_1.05fr] md:py-20 lg:gap-x-16']}>
       <div class="text-center md:text-left">
         <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
@@ -87,7 +87,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <!-- 2. What 30 minutes gets you -->
   <section aria-labelledby="gets-h" class="bg-paper">
     <div class:list={['mx-auto max-w-3xl px-5 sm:px-8', pad]}>
-      <h2 id="gets-h" class="serif-title text-center">What 30 Minutes Gets You: A Week That <span class="hand-highlight whitespace-nowrap">Actually Goes to Plan</span></h2>
+      <h2 id="gets-h" class="serif-title text-center">What 30 Minutes Gets You: A Week That <span class="hand-highlight sm:whitespace-nowrap">Actually Goes to Plan</span></h2>
       <ul class="mt-9 border-t border-warm-rule">
         {
           outcomes.map((o) => (
@@ -109,7 +109,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   </section>
 
   <!-- 3. Guarantee. The badge is drawn here (no stock badge art). -->
-  <section aria-labelledby="guarantee-h" class="bg-sage-wash">
+  <section aria-labelledby="guarantee-h" class="bg-sage-wash public-panel">
     <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
       <div aria-hidden="true" class="mx-auto grid size-28 place-items-center rounded-full border-2 border-warm-ink/70 bg-paper outline outline-1 outline-offset-4 outline-warm-ink/30">
         <p class="font-serif leading-none text-warm-ink">
@@ -178,7 +178,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   </section>
 
   <!-- 5. Testimonial: Camille S., word for word, no photo (src/data/reviews.ts) -->
-  <section aria-labelledby="say-h" class="bg-blush-wash">
+  <section aria-labelledby="say-h" class="bg-blush-wash public-panel">
     <div class:list={['mx-auto max-w-3xl px-5 text-center sm:px-8', pad]}>
       <h2 id="say-h" class="serif-title">What Moms Are Saying</h2>
       <figure class="mt-8">
@@ -195,7 +195,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   </section>
 
   <!-- 6. Final CTA -->
-  <section aria-labelledby="close-h" class="bg-cream">
+  <section aria-labelledby="close-h" class="bg-cream public-panel">
     <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
       <h2 id="close-h" class="serif-title">New Customer Special</h2>
       <p class="mt-3 font-serif text-[1.1rem] text-warm-soft italic">Limited to <strong class="font-semibold text-warm-ink">first 100 moms</strong></p>
