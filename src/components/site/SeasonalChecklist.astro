@@ -1,0 +1,303 @@
+---
+/**
+ * A room-by-room seasonal cleaning checklist (design, progress, autosave): two short sections per room,
+ * ticked off on screen with overall and per-room progress. Used by /spring-cleaning-checklist and
+ * /fall-cleaning-checklist (rooms in src/data/seasonal-cleaning.ts). Ticks save in this browser under
+ * `storageKey`. An on-screen checklist, not a PNG printable. Classes are prefixed `sc-`.
+ */
+import type { Room } from '../../data/seasonal-cleaning';
+
+interface Props {
+  rooms: readonly Room[];
+  storageKey: string;
+}
+
+const { rooms, storageKey } = Astro.props;
+const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m + tasks.length, 0), 0);
+---
+
+<div class="sc-container" id="seasonal-checklist" data-sc-key={storageKey}>
+  <div class="sc-progress" aria-live="polite">
+    <div class="sc-progress-line">
+      <span class="sc-progress-label">Overall</span>
+      <span><b data-sc-done>0</b> of {total} done</span>
+    </div>
+    <div class="sc-bar"><span data-sc-bar style="width: 0%"></span></div>
+  </div>
+
+  <div class="sc-rooms">
+    {
+      rooms.map((room) => {
+        const count = room.sections.reduce((m, [, tasks]) => m + tasks.length, 0);
+        return (
+          <section class="sc-room" data-sc-room aria-labelledby={`sc-${room.id}`}>
+            <header class="sc-room-head">
+              <h2 id={`sc-${room.id}`} class="sc-room-name">{room.name}</h2>
+              <span class="sc-time">{room.time}</span>
+            </header>
+            <div class="sc-room-progress">
+              <div class="sc-bar sc-bar-small"><span data-sc-room-bar style="width: 0%"></span></div>
+              <span class="sc-count"><b data-sc-room-done>0</b>/{count}</span>
+            </div>
+            {room.sections.map(([title, tasks], s) => (
+              <div class="sc-section">
+                <h3 class="sc-section-title">{title}</h3>
+                <ul class="sc-tasks">
+                  {tasks.map((task, t) => (
+                    <li>
+                      <label class="sc-task">
+                        <input type="checkbox" data-field={`${room.id}-${s}-${t}`} />
+                        <span>{task}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        );
+      })
+    }
+  </div>
+
+  <div class="sc-actions">
+    <button type="button" class="sc-btn" data-sc-reset>Reset all progress</button>
+  </div>
+
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .sc-container {
+    --sc-ink: var(--color-warm-ink);
+    --sc-soft: var(--color-warm-soft);
+    --sc-rule: var(--color-warm-rule);
+    --sc-rose: var(--color-rose);
+    --sc-rose-deep: var(--color-rose-deep);
+    --sc-rose-wash: var(--color-rose-wash);
+    --sc-sage: var(--color-sage);
+    --sc-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--sc-ink);
+  }
+  .sc-container *,
+  .sc-container *::before,
+  .sc-container *::after {
+    box-sizing: border-box;
+  }
+
+  .sc-progress {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    max-width: 960px;
+    margin: 0 auto 24px;
+    padding: 14px 18px;
+    border: 1px solid var(--sc-rule);
+    border-radius: 6px;
+    background: rgba(255, 253, 250, 0.96);
+  }
+  .sc-progress-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+  }
+  .sc-progress-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sc-soft);
+    font-family: var(--font-sans);
+  }
+  .sc-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--sc-rose-wash);
+    overflow: hidden;
+  }
+  .sc-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--sc-rose-deep);
+    transition: width 0.3s ease;
+  }
+  .sc-bar-small {
+    flex: 1;
+    height: 6px;
+    background: var(--sc-sage-wash);
+  }
+  .sc-bar-small span {
+    background: var(--sc-sage);
+  }
+
+  .sc-rooms {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .sc-room {
+    padding: 20px 22px 14px;
+    border: 1px solid var(--sc-rule);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .sc-room.sc-complete {
+    border-color: var(--sc-sage);
+    background: var(--sc-sage-wash);
+  }
+  .sc-room-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+  }
+  .sc-room-name {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .sc-time {
+    font-size: 0.75rem;
+    color: var(--sc-soft);
+  }
+  .sc-room-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 6px;
+  }
+  .sc-count {
+    font-size: 0.8rem;
+    color: var(--sc-soft);
+  }
+  .sc-section {
+    margin-top: 12px;
+  }
+  .sc-section-title {
+    display: inline-block;
+    margin-bottom: 4px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    background: var(--sc-rose-wash);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sc-rose-deep);
+  }
+  .sc-tasks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sc-tasks li + li {
+    border-top: 1px solid var(--sc-rule);
+  }
+  .sc-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+  .sc-task input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 1px 0 0;
+    accent-color: var(--sc-rose-deep);
+    cursor: pointer;
+  }
+  .sc-task input:checked + span {
+    color: var(--sc-soft);
+    text-decoration: line-through;
+    text-decoration-color: var(--sc-rose);
+  }
+
+  .sc-actions {
+    display: flex;
+    justify-content: center;
+    margin: 28px auto 0;
+  }
+  .sc-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .sc-btn:hover {
+    background: var(--sc-rose-wash);
+  }
+  .sc-footnote {
+    max-width: 640px;
+    margin: 24px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--sc-soft);
+  }
+
+  @media (max-width: 768px) {
+    .sc-rooms {
+      grid-template-columns: 1fr;
+    }
+    .sc-room {
+      padding: 16px 14px 10px;
+    }
+    .sc-task {
+      font-size: 1.05rem;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, clearFields } from '../../lib/printable';
+
+  const root = document.getElementById('seasonal-checklist')!;
+  const boxes = (el: ParentNode) => Array.from(el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+  const pct = (done: number, all: number) => `${all ? Math.round((done / all) * 100) : 0}%`;
+
+  function update() {
+    const all = boxes(root);
+    const done = all.filter((b) => b.checked).length;
+    root.querySelector('[data-sc-done]')!.textContent = String(done);
+    root.querySelector<HTMLElement>('[data-sc-bar]')!.style.width = pct(done, all.length);
+    for (const room of root.querySelectorAll<HTMLElement>('[data-sc-room]')) {
+      const list = boxes(room);
+      const n = list.filter((b) => b.checked).length;
+      room.querySelector('[data-sc-room-done]')!.textContent = String(n);
+      room.querySelector<HTMLElement>('[data-sc-room-bar]')!.style.width = pct(n, list.length);
+      room.classList.toggle('sc-complete', n === list.length);
+    }
+  }
+
+  const save = autosave(root, root.dataset.scKey!, update);
+  root.addEventListener('change', update);
+
+  root.querySelector('[data-sc-reset]')!.addEventListener('click', () => {
+    if (!confirm('Untick every task and start over?')) return;
+    clearFields(root);
+    update();
+    save();
+  });
+</script>

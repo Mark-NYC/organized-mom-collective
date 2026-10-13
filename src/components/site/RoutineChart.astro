@@ -1,0 +1,558 @@
+---
+/**
+ * A routine chart (the design, autosave and PNG export): pick a type (morning, after-school, bedtime,
+ * weekend, custom) to load starter steps and times, edit any line on the sheet, add steps from suggestion
+ * chips, download as a PNG (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×).
+ * Used by /routine-chart (free) and the upgraded chart for Take Back Control and Essential Routines buyers (ROUTINE_PLUS_PATH),
+ * which passes `notes`: a reminder line under each step, with starter notes. Starter routines:
+ * src/data/routines.ts. Saves in this browser under `storageKey`. Classes are prefixed `mr-`.
+ */
+import { BRAND_NAME } from '../../config';
+import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
+
+interface Props {
+  /** A reminder line under each step (the upgraded chart). */
+  notes?: boolean;
+  storageKey: string;
+}
+
+const { notes = false, storageKey } = Astro.props;
+const start = routineTypes.morning;
+const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['', '', '']);
+---
+
+<div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined}>
+  <div class="mr-types" role="group" aria-label="Routine">
+    {
+      Object.entries(routineTypes).map(([id, t]) => (
+        <button type="button" class="mr-type" data-mr-type={id} aria-pressed={id === 'morning' ? 'true' : 'false'}>
+          <span class="mr-type-label">{t.label}</span>
+          <span class="mr-type-blurb">{t.blurb}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="mr-actions">
+    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download PNG</button>
+    <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
+  </div>
+
+  <div class="mr-ideas">
+    <span class="mr-ideas-label">Add a step</span>
+    <span class="mr-chips" data-mr-chips>
+      {start.ideas.map((idea) => <button type="button" class="mr-chip" data-idea={idea}>+ {idea}</button>)}
+    </span>
+    <p class="mr-hint">Or tap any line on the chart to type your own.</p>
+  </div>
+
+  <div class="mr-sheet" id="routine-chart">
+    <input type="hidden" data-field="type" value="morning" data-mr-type-field />
+    <div class="mr-head">
+      <input class="mr-title" type="text" data-field="title" value={start.title} aria-label="Chart title" />
+      <input class="mr-subtitle" type="text" data-field="subtitle" value={start.subtitle} aria-label="Subtitle" />
+    </div>
+
+    <ol class="mr-steps">
+      {
+        rows.map(([time, step, note], i) => (
+          <li class="mr-step">
+            <span class="mr-num" aria-hidden="true">{i + 1}</span>
+            <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            <span class="mr-what">
+              <input class="mr-text" type="text" data-field={`step-${i}`} data-mr-step value={step} aria-label={`Step ${i + 1}`} />
+              {notes && (
+                <input class="mr-note" type="text" data-field={`note-${i}`} value={note} placeholder="Add a reminder" aria-label={`Step ${i + 1} note`} />
+              )}
+            </span>
+            <span class="mr-box" aria-hidden="true" />
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="mr-done">
+      <input class="mr-end-label" type="text" data-field="end-label" value={start.endLabel} aria-label="Finish line label" />
+      <input class="mr-time" type="time" data-field="end-time" value={start.endTime} aria-label="Finish time" />
+    </div>
+
+    <div class="mr-foot">{BRAND_NAME}</div>
+  </div>
+
+  <slot name="footnote" />
+</div>
+
+<script type="application/json" id="mr-types" set:html={JSON.stringify(routineTypes)} />
+
+<style is:global>
+  .mr-container {
+    --mr-ink: var(--color-warm-ink);
+    --mr-soft: var(--color-warm-soft);
+    --mr-rule: var(--color-warm-rule);
+    --mr-rose: var(--color-rose);
+    --mr-rose-deep: var(--color-rose-deep);
+    --mr-rose-wash: var(--color-rose-wash);
+    --mr-sage: var(--color-sage);
+    --mr-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--mr-ink);
+  }
+  .mr-container *,
+  .mr-container *::before,
+  .mr-container *::after {
+    box-sizing: border-box;
+  }
+
+  .mr-types {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 816px;
+    margin: 0 auto 20px;
+  }
+  .mr-type {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 10px;
+    border: 1px solid var(--mr-rule);
+    border-radius: 6px;
+    background: #fff;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .mr-type:hover {
+    border-color: var(--mr-rose);
+  }
+  .mr-type[aria-pressed='true'] {
+    border-color: var(--mr-rose-deep);
+    background: var(--mr-rose-wash);
+    box-shadow: inset 0 0 0 1px var(--mr-rose-deep);
+  }
+  .mr-type-label {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--mr-ink);
+  }
+  .mr-type-blurb {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--mr-soft);
+  }
+  .mr-chips {
+    display: contents;
+  }
+  .mr-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .mr-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .mr-btn:hover {
+    background: var(--mr-rose-wash);
+  }
+  .mr-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .mr-btn-primary:hover {
+    background: #362e2d;
+  }
+  .mr-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .mr-ideas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    max-width: 816px;
+    margin: 0 auto 24px;
+  }
+  .mr-ideas-label {
+    margin-right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mr-soft);
+  }
+  .mr-chip {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--mr-rule);
+    border-radius: 999px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    color: var(--mr-ink);
+    cursor: pointer;
+  }
+  .mr-chip:hover {
+    border-color: var(--mr-rose);
+    background: var(--mr-rose-wash);
+  }
+  .mr-hint {
+    flex-basis: 100%;
+    font-size: 0.9rem;
+    color: var(--mr-soft);
+  }
+
+  /* The sheet: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .mr-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    margin: 0 auto;
+    padding: 44px 52px 28px;
+    background: var(--color-ivory);
+    border: 1px solid var(--mr-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .mr-sheet input {
+    min-width: 0;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    color: var(--mr-ink);
+  }
+  .mr-sheet input:focus {
+    outline: none;
+    background: var(--mr-rose-wash);
+  }
+  .mr-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--mr-rose);
+  }
+  .mr-sheet .mr-title {
+    width: 100%;
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-align: center;
+  }
+  .mr-sheet .mr-subtitle {
+    width: 100%;
+    margin-top: 2px;
+    font-size: 22px;
+    font-style: italic;
+    text-align: center;
+    color: var(--mr-rose-deep);
+  }
+  .mr-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mr-step {
+    display: grid;
+    grid-template-columns: 40px 138px minmax(0, 1fr) 40px;
+    gap: 14px;
+    align-items: center;
+    min-height: 74px;
+    padding: 0 18px 0 14px;
+    border: 1px solid var(--mr-rule);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .mr-num {
+    font-size: 30px;
+    line-height: 1;
+    text-align: center;
+    color: var(--mr-rose);
+  }
+  .mr-sheet .mr-time {
+    height: 40px;
+    padding: 0 8px;
+    background: var(--mr-sage-wash);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #5d6b55;
+  }
+  .mr-sheet .mr-text {
+    height: 44px;
+    padding: 0 6px;
+    font-size: 22px;
+  }
+  .mr-what {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .mr-sheet .mr-note {
+    height: 26px;
+    padding: 0 6px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--mr-soft);
+  }
+  .mr-sheet .mr-note::placeholder {
+    color: #c4b8b2;
+  }
+  .mr-with-notes .mr-steps {
+    gap: 9px;
+  }
+  .mr-with-notes .mr-step {
+    min-height: 78px;
+  }
+  .mr-with-notes .mr-sheet .mr-text {
+    height: 36px;
+    font-size: 21px;
+  }
+  .mr-box {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--mr-rose);
+    border-radius: 4px;
+  }
+  .mr-done {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: auto;
+    padding-top: 22px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .mr-done .mr-time {
+    width: 140px;
+  }
+  .mr-sheet .mr-end-label {
+    width: 240px;
+    height: 40px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-align: right;
+    text-transform: uppercase;
+  }
+  .mr-foot {
+    margin-top: 18px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .mr-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--mr-soft);
+  }
+
+  /* Phones: smaller type, time above the step. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .mr-types {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .mr-container:not(.mr-exporting) .mr-end-label {
+      width: 150px;
+      font-size: 11px;
+    }
+    .mr-container:not(.mr-exporting) .mr-sheet {
+      min-height: 0;
+      padding: 22px 12px;
+    }
+    .mr-container:not(.mr-exporting) .mr-title {
+      font-size: 34px;
+    }
+    .mr-container:not(.mr-exporting) .mr-subtitle {
+      font-size: 18px;
+    }
+    .mr-container:not(.mr-exporting) .mr-steps {
+      gap: 8px;
+    }
+    .mr-container:not(.mr-exporting) .mr-step {
+      grid-template-columns: 24px minmax(0, 1fr) 30px;
+      grid-template-areas: 'num time box' 'num what box';
+      gap: 2px 10px;
+      padding: 8px 10px;
+    }
+    .mr-container:not(.mr-exporting) .mr-num {
+      grid-area: num;
+      font-size: 22px;
+    }
+    .mr-container:not(.mr-exporting) .mr-step .mr-time {
+      grid-area: time;
+      justify-self: start;
+      height: 32px;
+    }
+    .mr-container:not(.mr-exporting) .mr-what {
+      grid-area: what;
+    }
+    .mr-container:not(.mr-exporting) .mr-text {
+      height: 36px;
+      font-size: 18px;
+    }
+    .mr-container:not(.mr-exporting) .mr-box {
+      grid-area: box;
+      width: 28px;
+      height: 28px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../../lib/printable';
+
+  import type { RoutineType } from '../../data/routines';
+
+  const types: Record<string, RoutineType> = JSON.parse(document.getElementById('mr-types')!.textContent!);
+  const sheet = document.getElementById('routine-chart')!;
+  const host = sheet.closest<HTMLElement>('.mr-container')!;
+  const notes = host.hasAttribute('data-mr-notes');
+  const typeField = sheet.querySelector<HTMLInputElement>('[data-mr-type-field]')!;
+  const chips = document.querySelector<HTMLElement>('[data-mr-chips]')!;
+  const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
+  const rows = sheet.querySelectorAll('[data-mr-step]').length;
+
+  function renderType() {
+    const id = types[typeField.value] ? typeField.value : 'morning';
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) b.setAttribute('aria-pressed', String(b.dataset.mrType === id));
+    chips.replaceChildren(
+      ...types[id].ideas.map((idea) => {
+        const chip = Object.assign(document.createElement('button'), { type: 'button', className: 'mr-chip', textContent: `+ ${idea}` });
+        chip.dataset.idea = idea;
+        return chip;
+      }),
+    );
+  }
+
+  const save = autosave(sheet, host.dataset.mrKey!, renderType);
+
+  function load(id: string) {
+    const t = types[id];
+    typeField.value = id;
+    field('title').value = t.title;
+    field('subtitle').value = t.subtitle;
+    for (let i = 0; i < rows; i++) {
+      field(`time-${i}`).value = t.steps[i]?.[0] ?? '';
+      field(`step-${i}`).value = t.steps[i]?.[1] ?? '';
+      if (notes) field(`note-${i}`).value = t.steps[i]?.[2] ?? '';
+    }
+    field('end-label').value = t.endLabel;
+    field('end-time').value = t.endTime;
+    renderType();
+    save();
+  }
+
+  /** True once the sheet differs from the current type's starter routine. */
+  const edited = () => {
+    const t = types[typeField.value] ?? types.morning;
+    if (field('title').value !== t.title || field('subtitle').value !== t.subtitle) return true;
+    if (field('end-label').value !== t.endLabel || field('end-time').value !== t.endTime) return true;
+    return Array.from({ length: rows }, (_, i) => i).some(
+      (i) =>
+        field(`time-${i}`).value !== (t.steps[i]?.[0] ?? '') ||
+        field(`step-${i}`).value !== (t.steps[i]?.[1] ?? '') ||
+        (notes && field(`note-${i}`).value !== (t.steps[i]?.[2] ?? '')),
+    );
+  };
+
+  for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) {
+    b.addEventListener('click', () => {
+      if (b.dataset.mrType === typeField.value) return;
+      if (edited() && !confirm('Switch routines? Your changes to this chart will be replaced.')) return;
+      load(b.dataset.mrType!);
+    });
+  }
+
+  // Suggestion chips fill the next empty step.
+  chips.addEventListener('click', (e) => {
+    const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');
+    if (!chip) return;
+    const empty = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-step]')).find((el) => !el.value.trim());
+    if (!empty) {
+      alert('The chart is full. Clear a step first.');
+      return;
+    }
+    empty.value = chip.dataset.idea!;
+    save();
+  });
+
+  document.querySelector('[data-mr-reset]')!.addEventListener('click', () => {
+    if (!confirm('Reset this chart to the starter routine?')) return;
+    load(types[typeField.value] ? typeField.value : 'morning');
+  });
+
+  /** 07:45 → 7:45 AM */
+  const twelveHour = (v: string) => {
+    if (!v) return '';
+    const [h, m] = v.split(':').map(Number);
+    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+  };
+
+  const button = document.querySelector<HTMLButtonElement>('[data-mr-download]')!;
+  button.addEventListener('click', async () => {
+    // Time pickers would print their --:-- hint and clock icon: show plain 12-hour text while capturing.
+    const times = Array.from(sheet.querySelectorAll<HTMLInputElement>('input[type="time"]'));
+    const values = times.map((el) => el.value);
+    times.forEach((el) => {
+      el.type = 'text';
+      el.value = twelveHour(el.value);
+    });
+    // Empty notes would print their "Add a reminder" hint: drop hints while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    const name = field('title').value.trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').toLowerCase();
+    try {
+      await downloadPng(sheet, {
+        filename: `${name || 'routine'}.png`,
+        width: 816,
+        height: 1056,
+        layoutHost: host,
+        exportClass: 'mr-exporting',
+        button,
+      });
+    } finally {
+      hinted.forEach((el) => (el.placeholder = 'Add a reminder'));
+      times.forEach((el, i) => {
+        el.type = 'time';
+        el.value = values[i];
+      });
+    }
+  });
+</script>

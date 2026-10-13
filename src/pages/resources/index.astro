@@ -25,6 +25,11 @@ const calendarPhoto = imageAttrs('hc-01-wall-calendar');
 const freeTools = [
   { href: routes.choreChart, name: 'Chore Chart by Age', summary: 'Daily and weekly chores matched to your child’s age, with rewards to work toward.' },
   { href: routes.backToSchool, name: 'Back to School Checklist', summary: 'Supplies, clothes, forms, routines and a timeline, ready to tick off.' },
+  { href: routes.screenTime, name: 'Screen Time Contract', summary: 'Jobs first, then activities that earn screen time. Fill it in together and sign it.' },
+  { href: routes.routineChart, name: 'Routine Charts', summary: 'Morning, after-school, bedtime and weekend routines, so the chart says what’s next instead of you.' },
+  { href: routes.fallCleaning, name: 'Fall Cleaning Checklist', summary: 'Put summer away and get ready for the holidays, room by room.' },
+  { href: routes.springCleaning, name: 'Spring Cleaning Checklist', summary: 'Eight rooms, two short lists each. Tick tasks off and watch your progress.' },
+  { href: routes.homeschoolRhythm, name: 'Homeschool Rhythm', summary: 'A weekly rhythm in time blocks, from a sample or a blank week.' },
   { href: routes.planner, name: 'Weekly Planner', summary: 'Plan the week’s priorities, meals and to-dos on one page.' },
   { href: routes.tryCalendar, name: 'Monthly Family Calendar', summary: 'Everyone’s activities for the month, one row per person.' },
   { href: routes.pantry, name: 'Pantry Inventory', summary: 'What you have, what expires this week and what to buy.' },
@@ -124,10 +129,10 @@ const jsonLd = all.length
     </ul>
   </section>
 
-  <section aria-labelledby="tools-h" class="mt-16 border-t border-rule pt-12">
+  <section id="free-tools" aria-labelledby="tools-h" class="mt-16 border-t border-rule pt-12">
     <h2 id="tools-h" class="section-label">Free tools</h2>
     <p class="mt-3 max-w-2xl text-[0.97rem] leading-relaxed" style="color: var(--color-prose-soft)">
-      Fill them in on screen, then download to print or keep on your phone.
+      Fill them in on screen, then download to print or keep on your phone. Your entries stay saved in your browser.
     </p>
     <ul class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {

@@ -18,6 +18,11 @@
  *           /try-the-calendar  free monthly family calendar (one row per person), same idea
  *           /chore-chart       free chore chart by age (pick an age group, edit the chores), same idea
  *           /back-to-school-checklist  free three-page back-to-school checklist, same idea
+ *           /screen-time-contract      free screen time contract (jobs first, activities earn screen time), same idea
+ *           /routine-chart     free routine charts (morning, after-school, bedtime, weekend, custom), same idea
+ *           /homeschool-rhythm free homeschool weekly rhythm (time blocks × days, sample rhythms), same idea
+ *           /spring-cleaning-checklist  free room-by-room spring cleaning checklist (ticked on screen, progress saved; no PNG)
+ *           /fall-cleaning-checklist    the fall version, same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -61,7 +66,14 @@ export const routes = {
   tryCalendar: '/try-the-calendar',
   choreChart: '/chore-chart',
   backToSchool: '/back-to-school-checklist',
+  screenTime: '/screen-time-contract',
+  routineChart: '/routine-chart',
+  homeschoolRhythm: '/homeschool-rhythm',
+  springCleaning: '/spring-cleaning-checklist',
+  fallCleaning: '/fall-cleaning-checklist',
   resources: '/resources',
+  /** The Free tools section of the resource hub. */
+  freeTools: '/resources#free-tools',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
   survey: '/survey',

@@ -1,0 +1,30 @@
+---
+/**
+ * The upgraded routine charts for Take Back Control and Essential Routines buyers: the /routine-chart design plus a reminder line
+ * under each step, with starter notes. Unlisted, not locked: noindex, out of the sitemap, linked only from a
+ * Take Back Control or Essential Routines buyer's download page. Its address is ROUTINE_PLUS_PATH in src/data/routines.ts (change
+ * it there to retire a shared link). Saves separately from the free chart (`omc:routine-chart-plus:v1`).
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import RoutineChart from '../../components/site/RoutineChart.astro';
+import { ROUTINE_PLUS_PATH } from '../../data/routines';
+
+export function getStaticPaths() {
+  return [{ params: { access: ROUTINE_PLUS_PATH.split('/').pop() } }];
+}
+---
+
+<PublicLayout title="Routine Builder" description="The upgraded routine builder for buyers, with a reminder under every step." indexable={false} width="full">
+  <section aria-labelledby="mr-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Buyer bonus · Routine Builder</p>
+      <h1 id="mr-h" class="serif-hero mt-3">Routines That Run Without You Repeating Yourself.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Pick a routine, set the steps and times, and add the reminder you’d otherwise say out loud under each one. Download it to print and
+        hang where it happens. Bookmark this page: it’s your upgraded routine builder.
+      </p>
+    </div>
+  </section>
+
+  <RoutineChart notes storageKey="omc:routine-chart-plus:v1" />
+</PublicLayout>

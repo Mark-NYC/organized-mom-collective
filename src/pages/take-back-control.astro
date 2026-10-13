@@ -28,6 +28,7 @@ const { price } = takeBackControl;
 const tools = [
   { name: 'Weekly Planner Generator – UPGRADED', kind: 'Digital Tool', body: 'The core system with advanced templates and customization options' },
   { name: 'The 4 Routine Printables', kind: 'Editable Templates', routines: true },
+  { name: 'Routine Builder – UPGRADED', kind: 'Digital Tool', body: 'Build each routine on screen with a reminder under every step, then print it' },
   { name: 'Family Chore Chart System', kind: 'Guide + Cards', body: 'Get everyone contributing with age-appropriate chores that build capable kids' },
   { name: 'Pantry Inventory', kind: 'Digital Tool', body: 'Finally know what you have and what you need' },
   { name: '7-Day Decluttering Sprint', kind: 'Daily Challenge Guide', body: 'Transform your most overwhelming spaces in just 15 minutes a day' },
@@ -207,7 +208,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         <p class="label text-[0.75rem] text-rose-deep">30-Day Money-Back Guarantee</p>
         <p class="mt-3 text-[1rem] leading-relaxed text-warm-ink">
           Use the course and tools for 30 days. If you don’t feel more in control of the rest of your week, email us at
-          <a href={`mailto:${weeklyReset.contactEmail}`} class="underline underline-offset-2">{weeklyReset.contactEmail}</a> and we’ll refund every penny — no questions asked.
+          {' '}<a href={`mailto:${weeklyReset.contactEmail}`} class="underline underline-offset-2">{weeklyReset.contactEmail}</a> and we’ll refund every penny — no questions asked.
         </p>
       </div>
       <div class="mt-8"><ControlButton cta="control-close" /></div>
