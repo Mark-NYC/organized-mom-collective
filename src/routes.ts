@@ -18,6 +18,7 @@
  *           /chore-chart       free chore chart by age (pick an age group, edit the chores), same idea
  *           /back-to-school-checklist  free three-page back-to-school checklist, same idea
  *           /screen-time-contract      free screen time contract (jobs first, activities earn screen time), same idea
+ *           /routine-chart     free routine charts (morning, after-school, bedtime, weekend, custom), same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -60,6 +61,7 @@ export const routes = {
   choreChart: '/chore-chart',
   backToSchool: '/back-to-school-checklist',
   screenTime: '/screen-time-contract',
+  routineChart: '/routine-chart',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,

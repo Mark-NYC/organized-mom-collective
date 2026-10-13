@@ -26,6 +26,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.choreChart },
     { path: routes.backToSchool },
     { path: routes.screenTime },
+    { path: routes.routineChart },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),
