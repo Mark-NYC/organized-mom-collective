@@ -66,6 +66,7 @@ Dashboard (/admin/orders)
 - **Essential Routines Bundle.** $12 download (`essential-routines`), active, no stock. Sold from `/essential-routines`, the downsell when someone passes on Take Back Control.
 - **Mind Your Own Motherhood Mug.** $23, 15oz ceramic (`mind-your-own-motherhood-mug`), active, **0 units** until you set real stock. Physical: ships like a calendar (1 shipping unit, so the same rate as one 26-week calendar), no cleaning companion in its emails. Sold from `/mind-your-own-motherhood-mug`; its checkout link shows only the mug.
 - **Real Life Reset Kit.** $7 download (`real-life-reset-kit`), active, no stock. Sold from `/real-life-reset-kit` (not linked from any funnel yet).
+- **Family Sanity Saver Starter Kit.** $7 download (`family-sanity-saver-starter-kit`), **switched off**: its calendar is the 2025–2026 edition. Page `/family-sanity-saver-starter-kit` says "Coming soon" until the new edition is in and the product is on.
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -169,6 +170,20 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
   | 15-Minute_Reset_Checklist.pdf | `15-minute-reset-checklist.pdf` |
   | Its_OK_to_Pivot_Coaching.mp3 | `its-ok-to-pivot-coaching.mp3` |
 - [ ] Buy it once in preview (test card): all three files should download.
+
+### Database update: Family Sanity Saver Starter Kit (once, after the Real Life Reset Kit)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261017000000_shop_family_sanity_saver.sql` → **Run**, once. It adds the product **switched off**.
+- [ ] **Storage → shop-downloads**: upload to folder `family-sanity-saver`, renamed exactly:
+
+  | File you have | Upload as |
+  | --- | --- |
+  | 2025-2026_Academic_Family_Wall_Calendar_Customizable.pdf | `family-wall-calendar.pdf` |
+  | 2025-2026_Academic_Family_Wall_Calendar_Customizable_copy.pdf (sample names filled in) | `family-wall-calendar-example.pdf` |
+  | Family_Wall_Calendar_Free.pdf | `blank-monthly-calendar.pdf` |
+  | Command_Center_Refresh_Sheet.pdf | `command-center-refresh-sheet.pdf` |
+  | 30-Minute-Daily-Tidy-System.pdf | `30-minute-daily-tidy-system.pdf` |
+  | Your_First_Weekly_Reset_Coaching_Session.mp3 | `first-weekly-reset-coaching-session.mp3` |
+- [ ] Later, to sell it: upload the 2026–2027 calendar files over the first two, fix the year in the calendar's download label (Dashboard → Inventory), switch the product on, and set the page's buy link (`src/data/family-sanity-saver.ts`). Then buy it once in preview: all six files should download.
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.

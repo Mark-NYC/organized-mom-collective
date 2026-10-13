@@ -15,6 +15,7 @@ import { WEEKLY_RESET_SLUG, weeklyReset } from '../src/data/weekly-reset';
 import { TAKE_BACK_CONTROL_SLUG, takeBackControl } from '../src/data/take-back-control';
 import { ESSENTIAL_ROUTINES_SLUG, essentialRoutines } from '../src/data/essential-routines';
 import { REAL_LIFE_RESET_SLUG, realLifeReset } from '../src/data/real-life-reset';
+import { FAMILY_SANITY_SAVER_SLUG, familyCommandCenter } from '../src/data/family-sanity-saver';
 import { MUG_SLUG, mug } from '../src/data/mug';
 
 import envExample from '../.env.example?raw';
@@ -554,12 +555,22 @@ describe('launch guards', () => {
     expect(seed.match(/"path":"/g)).toHaveLength(3);
   });
 
+  it('the Family Sanity Saver Starter Kit is seeded switched off (2025–2026 calendar) at the price its page shows, with its six files', () => {
+    const sql = read('supabase/migrations/20261017000000_shop_family_sanity_saver.sql');
+    const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
+    expect(seed).toMatch(new RegExp(`\\('${FAMILY_SANITY_SAVER_SLUG}',\\s*'${familyCommandCenter.name}',[\\s\\S]*?\\n\\s*${familyCommandCenter.price * 100},`));
+    expect(seed).toMatch(/false, 0, 1, false, 1, 'digital'/);
+    expect(seed.match(/"path":"family-sanity-saver\/[a-z0-9-]+\.(pdf|mp3)"/g)).toHaveLength(6);
+    // Not sold until the new edition is in: no checkout link from its page.
+    expect(familyCommandCenter.buyUrl).toBeNull();
+  });
+
   it('every seeded product has its email picture (public/email/<slug>.jpg)', () => {
     const slugs = Object.entries(files)
       .filter(([f]) => f.startsWith('../supabase/migrations/'))
       .flatMap(([, sql]) => [...sql.matchAll(/^\s*\('([a-z0-9-]+)',\s*'/gm)].map((m) => m[1]))
       .filter((s) => !s.startsWith('placeholder'));
-    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', MUG_SLUG, REAL_LIFE_RESET_SLUG]));
+    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', MUG_SLUG, REAL_LIFE_RESET_SLUG, FAMILY_SANITY_SAVER_SLUG]));
     for (const slug of slugs) expect(emailAssets, slug).toContain(`../public/email/${slug}.jpg`);
   });
 
