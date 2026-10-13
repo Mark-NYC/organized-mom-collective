@@ -27,6 +27,12 @@ Owner decision, October 13, 2026: **establish the family wall calendar as the pr
 - Its calendar is the 2025–2026 edition. Don't refresh it or build for it until the wall calendar is established.
 - Future build idea, not started: generate her calendar instead of reissuing a dated PDF. She enters names and recurring activities once (as on `/try-the-calendar`), picks a 12-month range, and downloads it as one PDF, recurring activities included. Decide first whether it uses the kit's week-rows design or the tool's monthly grid.
 
+## Shelved (off the roadmap)
+
+Kept for reference only, not planned. Don't build or mention in customer copy.
+
+- **The Seasonal Family Table** (meal planning from the previous site): [archive/seasonal-family-table.md](archive/seasonal-family-table.md).
+
 ## Phase 1: Brand, discovery and owned audience (next growth work)
 
 - Apply [VISION.md](VISION.md) and [../editorial/BRAND_VOICE.md](../editorial/BRAND_VOICE.md) to homepage, product pages, articles, Pins and emails.
