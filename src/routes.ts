@@ -22,6 +22,7 @@
  *           /homeschool-rhythm free homeschool weekly rhythm (time blocks × days, sample rhythms), same idea
  *           /spring-cleaning-checklist  free room-by-room spring cleaning checklist (ticked on screen, progress saved; no PNG)
  *           /fall-cleaning-checklist    the fall version, same idea
+ *           /new-year-declutter         eight-week New Year declutter sprint (same component, with badges)
  *           /laundry-system    free two-page laundry flow checklist (editable, PNG per page)
  *           /closet-reset      free one-page closet declutter checklist, same idea
  *           /lunch-and-snack-station  free two-page fridge printable: lunch builder + snack station, same idea
@@ -72,6 +73,7 @@ export const routes = {
   homeschoolRhythm: '/homeschool-rhythm',
   springCleaning: '/spring-cleaning-checklist',
   fallCleaning: '/fall-cleaning-checklist',
+  newYearDeclutter: '/new-year-declutter',
   laundrySystem: '/laundry-system',
   closetReset: '/closet-reset',
   lunchSnackStation: '/lunch-and-snack-station',

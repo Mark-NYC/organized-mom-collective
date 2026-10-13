@@ -1,8 +1,8 @@
 ---
 /**
  * A room-by-room seasonal cleaning checklist (design, progress, autosave): two short sections per room,
- * ticked off on screen with overall and per-room progress. Used by /spring-cleaning-checklist and
- * /fall-cleaning-checklist (rooms in src/data/seasonal-cleaning.ts). Ticks save in this browser under
+ * ticked off on screen with overall and per-room progress, and a badge per room earned at 80%. Used by /spring-cleaning-checklist and
+ * /fall-cleaning-checklist, /new-year-declutter (rooms in src/data/seasonal-cleaning.ts). Ticks save in this browser under
  * `storageKey`. An on-screen checklist, not a PNG printable. Classes are prefixed `sc-`.
  */
 import type { Room } from '../../data/seasonal-cleaning';
@@ -23,6 +23,18 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
       <span><b data-sc-done>0</b> of {total} done</span>
     </div>
     <div class="sc-bar"><span data-sc-bar style="width: 0%"></span></div>
+    <ul class="sc-badges" aria-label="Badges">
+      {
+        rooms.map((room) => (
+          <li class="sc-badge" data-sc-badge={room.id} title={`${room.name}: earned at 80% done`}>
+            <span class="sc-badge-mark" aria-hidden="true">
+              ✓
+            </span>
+            {room.badge ?? room.name}
+          </li>
+        ))
+      }
+    </ul>
   </div>
 
   <div class="sc-rooms">
@@ -30,7 +42,7 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
       rooms.map((room) => {
         const count = room.sections.reduce((m, [, tasks]) => m + tasks.length, 0);
         return (
-          <section class="sc-room" data-sc-room aria-labelledby={`sc-${room.id}`}>
+          <section class="sc-room" data-sc-room={room.id} aria-labelledby={`sc-${room.id}`}>
             <header class="sc-room-head">
               <h2 id={`sc-${room.id}`} class="sc-room-name">{room.name}</h2>
               <span class="sc-time">{room.time}</span>
@@ -112,6 +124,49 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
     text-transform: uppercase;
     color: var(--sc-soft);
     font-family: var(--font-sans);
+  }
+  .sc-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px 3px 4px;
+    border: 1px solid var(--sc-rule);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--sc-soft);
+    opacity: 0.55;
+    transition: opacity 0.3s, background-color 0.3s, border-color 0.3s;
+  }
+  .sc-badge-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--sc-rule);
+    font-size: 10px;
+    color: #fff;
+  }
+  .sc-badge.sc-earned {
+    opacity: 1;
+    border-color: var(--sc-rose);
+    background: var(--sc-rose-wash);
+    color: var(--sc-rose-deep);
+  }
+  .sc-badge.sc-earned .sc-badge-mark {
+    background: var(--sc-rose-deep);
   }
   .sc-bar {
     height: 10px;
@@ -248,6 +303,24 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
   .sc-btn:hover {
     background: var(--sc-rose-wash);
   }
+  .sc-footnote.sc-life {
+    max-width: 640px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--sc-sage);
+    background: var(--sc-sage-wash);
+    text-align: left;
+    color: var(--sc-ink);
+  }
+  .sc-life-title {
+    margin-bottom: 4px;
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+  }
+  .sc-life ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    line-height: 1.7;
+  }
   .sc-footnote {
     max-width: 640px;
     margin: 24px auto 0;
@@ -288,6 +361,11 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
       room.querySelector('[data-sc-room-done]')!.textContent = String(n);
       room.querySelector<HTMLElement>('[data-sc-room-bar]')!.style.width = pct(n, list.length);
       room.classList.toggle('sc-complete', n === list.length);
+      // Badges: earned at 80% of a section. Progress over perfection.
+      const badge = root.querySelector(`[data-sc-badge="${room.dataset.scRoom}"]`);
+      const earned = list.length > 0 && n >= list.length * 0.8;
+      badge?.classList.toggle('sc-earned', earned);
+      badge?.setAttribute('aria-label', `${badge.textContent!.replace('✓', '').trim()}: ${earned ? 'earned' : 'not yet'}`);
     }
   }
 
