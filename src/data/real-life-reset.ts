@@ -11,7 +11,7 @@ import type { Asset } from './weekly-reset';
  * only". No offer actually expires, so a timer would be a fake deadline (as on /take-back-control).
  *
  * Sold through the website's own Stripe checkout as a download (product `real-life-reset-kit`,
- * supabase/migrations/20261015000000_shop_real_life_reset.sql). The price here must match that
+ * supabase/migrations/20261016000000_shop_real_life_reset.sql). The price here must match that
  * product's price. Buttons go to the checkout only in builds with the shop switched on; until then
  * they say "Coming soon". Not wired into any funnel yet: nothing links here. Always noindex and
  * out of the sitemap ("Only available here").

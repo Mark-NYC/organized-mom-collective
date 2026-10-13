@@ -1,5 +1,5 @@
 -- Direct website shop: the Real Life Reset Kit, the $7 backup-plan offer at /real-life-reset-kit.
--- Runs after 20261014000000_shop_essential_routines.sql; only adds one product.
+-- Runs after 20261015000000_shop_mug.sql; only adds one product.
 --
 -- Upload the three files to the private shop-downloads bucket at exactly
 --   real-life-reset/plan-b-quick-pivot-framework.pdf

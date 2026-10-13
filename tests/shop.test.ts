@@ -15,6 +15,7 @@ import { WEEKLY_RESET_SLUG, weeklyReset } from '../src/data/weekly-reset';
 import { TAKE_BACK_CONTROL_SLUG, takeBackControl } from '../src/data/take-back-control';
 import { ESSENTIAL_ROUTINES_SLUG, essentialRoutines } from '../src/data/essential-routines';
 import { REAL_LIFE_RESET_SLUG, realLifeReset } from '../src/data/real-life-reset';
+import { MUG_SLUG, mug } from '../src/data/mug';
 
 import envExample from '../.env.example?raw';
 import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
@@ -223,6 +224,21 @@ describe('emails', () => {
       expect(html).toContain('/email/omc-badge-144.png');
     }
     expect(renderEmail('confirmation', order, opts).text).toContain('No account, no subscription');
+  });
+
+  it('a mug-only order never mentions the calendar or the cleaning companion', () => {
+    const mugOrder: ServerOrder = {
+      ...order,
+      shop_order_items: [{ id: 'm', product_id: 'pm', product_slug: MUG_SLUG, product_name: mug.name, unit_price_cents: 2300, quantity: 1, restocked: 0 }],
+    };
+    for (const kind of ['confirmation', 'shipped'] as const) {
+      const { text, html } = renderEmail(kind, mugOrder, opts);
+      expect(`${text}\n${html}`.toLowerCase(), kind).not.toMatch(/calendar|companion/);
+      expect(html).toContain(`/email/${MUG_SLUG}.jpg`);
+    }
+    expect(renderEmail('shipped', mugOrder, opts).text).toContain('your order has shipped');
+    // With a calendar in the box, the companion panel stays.
+    expect(renderEmail('confirmation', order, opts).text).toContain('cleaning companion');
   });
 
   it('links carriers’ tracking pages, and only https links', () => {
@@ -448,12 +464,13 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 });
 
 describe('launch guards', () => {
-  it('nothing on the public site links to the website checkout except the funnel offer pages (Weekly Reset, Take Back Control, Essential Routines, Real Life Reset Kit), in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
+  it('nothing on the public site links to the website checkout except the funnel offer pages (Weekly Reset, Take Back Control, Essential Routines, Real Life Reset Kit) and the mug page, in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
     // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/real-life-reset.ts']);
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/mug.ts', '../src/data/real-life-reset.ts']);
     expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
     expect(read('src/data/take-back-control.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{TAKE_BACK_CONTROL_SLUG\}` : null/);
     expect(read('src/data/essential-routines.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{ESSENTIAL_ROUTINES_SLUG\}` : null/);
+    expect(read('src/data/mug.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{MUG_SLUG\}` : null/);
     expect(read('src/data/real-life-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{REAL_LIFE_RESET_SLUG\}` : null/);
     const src = Object.keys(files).filter((f) => f.startsWith('../src/'));
     expect(src.length).toBeGreaterThan(30);
@@ -521,8 +538,15 @@ describe('launch guards', () => {
     }
   });
 
+  it('the mug is seeded at the price its page shows, as a physical item without the companion', () => {
+    const sql = read('supabase/migrations/20261015000000_shop_mug.sql');
+    const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
+    expect(seed).toMatch(new RegExp(`\\('${MUG_SLUG}',\\s*'${mug.name}',[\\s\\S]*?\\n\\s*${mug.price * 100},`));
+    expect(seed).toMatch(/true, 0, 5, false, 1, 'physical', 'txcd_99999999'/);
+  });
+
   it('the Real Life Reset Kit download is seeded at the price its page shows, with its files', () => {
-    const sql = read('supabase/migrations/20261015000000_shop_real_life_reset.sql');
+    const sql = read('supabase/migrations/20261016000000_shop_real_life_reset.sql');
     const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
     expect(seed).toMatch(new RegExp(`\\('${REAL_LIFE_RESET_SLUG}',\\s*'${realLifeReset.name}',[\\s\\S]*?\\n\\s*${realLifeReset.price * 100},`));
     expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
@@ -535,7 +559,7 @@ describe('launch guards', () => {
       .filter(([f]) => f.startsWith('../supabase/migrations/'))
       .flatMap(([, sql]) => [...sql.matchAll(/^\s*\('([a-z0-9-]+)',\s*'/gm)].map((m) => m[1]))
       .filter((s) => !s.startsWith('placeholder'));
-    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', 'real-life-reset-kit']));
+    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', MUG_SLUG, REAL_LIFE_RESET_SLUG]));
     for (const slug of slugs) expect(emailAssets, slug).toContain(`../public/email/${slug}.jpg`);
   });
 
