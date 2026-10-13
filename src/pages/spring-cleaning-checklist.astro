@@ -1,0 +1,51 @@
+---
+/**
+ * /spring-cleaning-checklist — a free room-by-room spring decluttering and deep-clean checklist, ticked off on
+ * screen (src/components/site/SeasonalChecklist.astro; rooms in src/data/seasonal-cleaning.ts).
+ * Ticks save in this browser (`omc:spring-cleaning:v1`).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import SeasonalChecklist from '../components/site/SeasonalChecklist.astro';
+import { springRooms } from '../data/seasonal-cleaning';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Spring Cleaning Checklist', item: new URL(routes.springCleaning, site).href },
+    ],
+  },
+];
+---
+
+
+<PublicLayout
+  title="Free Spring Cleaning Checklist, Room by Room"
+  description="A free spring cleaning and decluttering checklist for busy families: eight rooms, short sections, tick off tasks on screen and watch your progress."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="sc-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free spring cleaning checklist</p>
+      <h1 id="sc-h" class="serif-hero mt-3">Spring Clean One Room at a Time.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Eight rooms, two short lists each: clear out what winter left behind, then clean what’s left. Pick one room for a Saturday morning,
+        hand the kids their own room’s list, and tick things off as you go. Your progress saves in this browser.
+      </p>
+    </div>
+  </section>
+
+  <SeasonalChecklist rooms={springRooms} storageKey="omc:spring-cleaning:v1">
+    <p slot="footnote" class="sc-footnote">
+      Want the rest of the year handled too? The <a href={routes.companion} class="text-link">cleaning companion</a> that comes with the
+      {' '}<a href={routes.calendar} data-cta="spring-cleaning" class="text-link">Family Wall Calendar</a> gives you one small reset a day.
+      Come fall, there’s a <a href={routes.fallCleaning} class="text-link">fall checklist</a> too.
+    </p>
+  </SeasonalChecklist>
+</PublicLayout>

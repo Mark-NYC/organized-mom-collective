@@ -20,6 +20,8 @@
  *           /screen-time-contract      free screen time contract (jobs first, activities earn screen time), same idea
  *           /routine-chart     free routine charts (morning, after-school, bedtime, weekend, custom), same idea
  *           /homeschool-rhythm free homeschool weekly rhythm (time blocks × days, sample rhythms), same idea
+ *           /spring-cleaning-checklist  free room-by-room spring cleaning checklist (ticked on screen, progress saved; no PNG)
+ *           /fall-cleaning-checklist    the fall version, same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -64,6 +66,8 @@ export const routes = {
   screenTime: '/screen-time-contract',
   routineChart: '/routine-chart',
   homeschoolRhythm: '/homeschool-rhythm',
+  springCleaning: '/spring-cleaning-checklist',
+  fallCleaning: '/fall-cleaning-checklist',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/resources#free-tools',

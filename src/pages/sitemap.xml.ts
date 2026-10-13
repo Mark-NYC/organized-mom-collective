@@ -28,6 +28,8 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.screenTime },
     { path: routes.routineChart },
     { path: routes.homeschoolRhythm },
+    { path: routes.springCleaning },
+    { path: routes.fallCleaning },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),
