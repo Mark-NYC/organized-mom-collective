@@ -25,13 +25,13 @@ export const realLifeReset = {
   buyUrl: null as string | null,
 };
 
-/** The owner's kit mockup. Shows once the file is in public/ (AssetSlot); a labeled placeholder until then. */
+/** The owner’s kit mockup, white background: keep it in a white (bg-paper) section. */
 export const realLifeResetAssets = {
   kit: {
     src: '/images/real-life-reset/kit.webp',
     width: 2000,
-    height: 945,
+    height: 942,
     alt: 'The Real Life Reset Kit: the Plan B Quick-Pivot Framework, the 15-Minute Reset Checklist, and the Power Packed 7 Minute “It’s Okay to Pivot” audio playing on a phone.',
-    spec: 'Kit mockup on white: framework + checklist + phone · kit.webp, about 2000 × 945',
+    spec: 'Kit mockup on white: framework + checklist + phone · kit.webp, 2000 × 942',
   },
 } satisfies Record<string, Asset>;
