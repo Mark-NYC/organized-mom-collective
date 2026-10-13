@@ -32,6 +32,11 @@
  *           /travel-checklist          free two-page family travel checklist with trip-type chips, same idea
  *           /fall-pantry-stock-up      free one-page fall & winter pantry stock-up list, same idea
  *           /gratitude-tracker         free November family gratitude tracker (Thanksgiving week computed per year)
+ *           /holiday-gift-planner      free one-page holiday budget & gift planner (totals add themselves up)
+ *           /mental-load-worksheet     free mental load worksheet (IF-02 companion): brain dump, sort, hand over one whole job
+ *           /meal-planner              free weekly dinner planner on FP-05's full/short/zero method + grocery list
+ *           /december-countdown        free family December countdown: 24 editable dated days + idea chips
+ *           /thanksgiving-plan         free two-page Thanksgiving prep plan (thaw day and timeline from dinner time + turkey weight)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -89,6 +94,11 @@ export const routes = {
   travelChecklist: '/travel-checklist',
   fallPantry: '/fall-pantry-stock-up',
   gratitudeTracker: '/gratitude-tracker',
+  holidayGifts: '/holiday-gift-planner',
+  thanksgivingPlan: '/thanksgiving-plan',
+  decemberCountdown: '/december-countdown',
+  mealPlanner: '/meal-planner',
+  mentalLoad: '/mental-load-worksheet',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/tools',
