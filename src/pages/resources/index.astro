@@ -21,6 +21,15 @@ const featured = all.find((a) => a.data.hero) ?? all.find((a) => a.data.pillarGu
 const latest = all.filter((a) => a !== featured).slice(0, 6);
 const calendarPhoto = imageAttrs('hc-01-wall-calendar');
 
+// Free fill-in printables: filled in on screen, downloaded as an image.
+const freeTools = [
+  { href: routes.choreChart, name: 'Chore Chart by Age', summary: 'Daily and weekly chores matched to your child’s age, with rewards to work toward.' },
+  { href: routes.backToSchool, name: 'Back to School Checklist', summary: 'Supplies, clothes, forms, routines and a timeline, ready to tick off.' },
+  { href: routes.planner, name: 'Weekly Planner', summary: 'Plan the week’s priorities, meals and to-dos on one page.' },
+  { href: routes.tryCalendar, name: 'Monthly Family Calendar', summary: 'Everyone’s activities for the month, one row per person.' },
+  { href: routes.pantry, name: 'Pantry Inventory', summary: 'What you have, what expires this week and what to buy.' },
+];
+
 const site = Astro.site!;
 const description =
   'Simple systems for busy families: weekly planning, realistic cleaning routines and shared responsibilities that lighten the mental load of running a home.';
@@ -109,6 +118,29 @@ const jsonLd = all.length
             ) : (
               <p class="mt-4 text-[0.9rem] text-muted">The first guides in this topic are on the way.</p>
             )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="tools-h" class="mt-16 border-t border-rule pt-12">
+    <h2 id="tools-h" class="section-label">Free tools</h2>
+    <p class="mt-3 max-w-2xl text-[0.97rem] leading-relaxed" style="color: var(--color-prose-soft)">
+      Fill them in on screen, then download to print or keep on your phone.
+    </p>
+    <ul class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        freeTools.map((tool) => (
+          <li class="border-t-2 border-ink pt-4">
+            <h3 class="text-[1.2rem] leading-tight font-bold" style="font-family: var(--font-editorial)">
+              <a href={tool.href} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
+                {tool.name}
+              </a>
+            </h3>
+            <p class="mt-2 text-[0.95rem] leading-relaxed" style="color: var(--color-prose-soft)">
+              {tool.summary}
+            </p>
           </li>
         ))
       }
