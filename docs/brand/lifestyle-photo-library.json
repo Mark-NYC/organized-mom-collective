@@ -448,7 +448,7 @@
       },
       "used_in": [
         "HC-03 /resources/zone-cleaning-schedule",
-        "IF-03 /resources/chores-for-kids-by-age (hero)"
+        "IF-03 /resources/chores-for-kids-by-age (inline, after worked example)"
       ]
     },
     {
