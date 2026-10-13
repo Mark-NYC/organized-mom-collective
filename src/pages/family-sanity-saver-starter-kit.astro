@@ -1,0 +1,139 @@
+---
+/**
+ * The Family Sanity Saver Starter Kit landing page (/family-sanity-saver-starter-kit), selling the Family Command Center: a $7 digital offer, recreated as is from the original
+ * WordPress page (copy, order and colors). A standalone entry point: no site header or footer, not
+ * linked from the other funnel pages. The orange / green / blue colors are the old look, kept on
+ * purpose until the page is rebranded; they live only in this file.
+ *
+ * Hero → What changes at home (value stack) → Why systems fail → Review → Guarantee → Review → Close.
+ *
+ * Left out from the original: the "[family_calendar]" auto-fill demo (a WordPress shortcode with
+ * no equivalent here) and the customer avatar row (no image supplied).
+ *
+ * Settings, assets and the not-yet-sold note live in src/data/family-sanity-saver.ts. Until
+ * buyUrl is set the buttons say "Coming soon" and the page is noindex (and out of the sitemap).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import AssetSlot from '../components/site/AssetSlot.astro';
+import { familyCommandCenter as offer, familyCommandCenterAssets as assets } from '../data/family-sanity-saver';
+import FccButton from '../components/site/FccButton.astro';
+import { ETSY_SHOP_URL } from '../data/reviews';
+import { BRAND_NAME } from '../config';
+
+const { price, regularPrice, buyUrl } = offer;
+
+const changes = [
+  { title: 'Everyone Sees the Plan', value: 17, body: '12-month wall calendar (July–June) that keeps everyone on the same page. (No more “I didn’t know!”)' },
+  { title: 'They Take Ownership', value: 9, body: 'Auto-fill family name system — each person owns their row, not you.' },
+  { title: 'You Get Time Back', value: 9, body: '5-minute Quick-start Audio Guide that gets them checking it on their own.' },
+  { title: 'They Actually Help', value: 13, body: '30-minute tidy system that makes chores and schedules visible — so they take responsibility, too.' },
+];
+const bonuses = [
+  { title: 'Command Center Setup Tutorial', value: 5 },
+  { title: 'Weekly Sanity Check-Ins', value: 7 },
+];
+const totalValue = [...changes, ...bonuses].reduce((sum, i) => sum + i.value, 0);
+
+const wrap = 'mx-auto max-w-[29rem] px-5';
+const check = 'M6 10.5 8.8 13.2 14 7.5';
+---
+
+<PublicLayout
+  fullTitle={`Family Command Center: A Family System That Runs Itself · ${BRAND_NAME}`}
+  description={`A 12-month family wall calendar with an auto-fill name system, a Quick-Start Audio Guide and a 30-minute tidy system, so the kids check the plan without you reminding them. $${price}, instant download.`}
+  indexable={Boolean(buyUrl)}
+  chrome={false}
+  width="full"
+>
+  <div class="bg-white pb-16 text-[#1f2933]">
+    <!-- 1. Hero -->
+    <section aria-labelledby="hero-h" class={`${wrap} pt-8 text-center sm:pt-12`}>
+      <h1 id="hero-h" class="text-[1.15rem] leading-snug font-semibold text-balance sm:text-[1.3rem]">
+        Finally, a Family System That Runs Itself (So You Don’t Have To)
+      </h1>
+      <figure class="mt-5">
+        <AssetSlot asset={assets.hero} sizes="(min-width: 464px) 432px, 100vw" eager />
+      </figure>
+      <p class="mt-4 text-[0.95rem]">In 15 minutes, your kids start checking it <strong class="font-semibold">without you reminding them.</strong></p>
+      <p class="mt-3 text-[1.1rem] font-semibold">
+        <s class="text-[0.85em] text-[#e03131]">${regularPrice}</s> <span class="text-[#2fb344]">${price} Today</span>
+      </p>
+      <div class="mt-4"><FccButton label={`Start My Family Command Center – $${price}`} href={buyUrl} cta="fcc-hero" /></div>
+      <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="mt-4 inline-block text-[0.8rem] text-[#52606d]">
+        <strong class="font-semibold text-[#f08c00]">Etsy Best Seller</strong> | {offer.families} families
+        <span class="mt-1 block text-[#f08c00]">{offer.rating} <span aria-hidden="true">★★★★★</span></span>
+        <span class="sr-only"> (opens our Etsy shop)</span>
+      </a>
+    </section>
+
+    <!-- 2. What changes at home: the value stack -->
+    <section aria-labelledby="changes-h" class={`${wrap} mt-10`}>
+      <h2 id="changes-h" class="text-center text-[1.05rem] font-semibold">Here’s What Changes at Home:</h2>
+      <ul class="mt-5 space-y-4">
+        {
+          changes.map((c) => (
+            <li class="grid grid-cols-[1.25rem_1fr] gap-x-2.5">
+              <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-0.5 size-5">
+                <circle cx="10" cy="10" r="10" fill="#2fb344" />
+                <path d={check} fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <div>
+                <p class="text-[0.9rem] font-semibold">
+                  {c.title} (valued at ${c.value})
+                </p>
+                <p class="mt-1 text-[0.85rem] leading-relaxed text-[#2b8a3e]">{c.body}</p>
+              </div>
+            </li>
+          ))
+        }
+        {
+          bonuses.map((b) => (
+            <li class="flex items-center gap-2.5">
+              <span class="rounded-full bg-[#f08c00] px-2.5 py-0.5 text-[0.6rem] font-bold tracking-[0.08em] text-white">BONUS</span>
+              <span class="text-[0.9rem] font-semibold">
+                {b.title} (${b.value})
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="mt-6 rounded-[8px] bg-[#f8f9fa] px-5 py-5 text-center">
+        <p class="text-[0.95rem] font-semibold">Total Value: <s class="text-[#e03131]">${totalValue}</s></p>
+        <p class="mt-1 text-[1.25rem] font-bold text-[#2fb344]">Today: ${price}</p>
+      </div>
+    </section>
+
+    <!-- 3. Why every mom's system fails -->
+    <section aria-labelledby="fails-h" class={`${wrap} mt-6`}>
+      <div class="rounded-[6px] border-l-4 border-[#f59f00] bg-linear-to-r from-[#fff3bf] to-[#ffe3e3] px-6 py-6 text-center">
+        <h2 id="fails-h" class="text-[1rem] font-semibold text-[#7c4a03]">Why Every Mom’s<br />System Fails</h2>
+        <p class="mt-3 text-[0.85rem] text-[#a15c07]">Your family can’t see what you hold in your head.</p>
+        <p class="mt-3 text-[0.9rem] font-semibold text-[#e03131]">This puts it on the wall.<br />So they own it.</p>
+      </div>
+    </section>
+
+    <!-- 4. Review -->
+    <section aria-label="Customer review" class={`${wrap} mt-8`}>
+      <AssetSlot asset={assets.reviewMegan} sizes="(min-width: 464px) 432px, 100vw" />
+      <div class="mt-6 text-center"><FccButton label={`Get My Family Command Center – $${price}`} href={buyUrl} cta="fcc-review" /></div>
+    </section>
+
+    <!-- 5. Guarantee -->
+    <section aria-labelledby="guarantee-h" class={`${wrap} mt-5`}>
+      <div class="rounded-[6px] bg-[#dbe9ff] px-6 py-6 text-center">
+        <p class="inline-block rounded-full bg-white px-4 py-1 text-[0.65rem] font-bold tracking-[0.08em] text-[#1c4fbf]">✓ 100% MONEY-BACK GUARANTEE</p>
+        <h2 id="guarantee-h" class="mt-3 text-[1.05rem] font-semibold text-[#1c4fbf]">30-Day Promise</h2>
+        <p class="mt-2 text-[0.85rem] font-semibold text-[#1c4fbf]">Save 5+ hours or<br />get $17 back (${price} refund + $10 bonus)</p>
+        <p class="mt-4 text-[0.75rem] text-[#1c4fbf]">No questions asked.<br />Valid 30 days from purchase.</p>
+      </div>
+    </section>
+
+    <!-- 6. Review + close -->
+    <section aria-labelledby="close-h" class={`${wrap} mt-12`}>
+      <h2 id="close-h" class="sr-only">Get the {offer.name}</h2>
+      <AssetSlot asset={assets.reviewLauren} sizes="(min-width: 464px) 432px, 100vw" />
+      <div class="mt-6 text-center"><FccButton label={`Get My Family Command Center – $${price}`} href={buyUrl} cta="fcc-close" /></div>
+      <p class="mt-3 text-center text-[0.75rem] text-[#7b8794] italic">Instant download | 30-day guarantee</p>
+    </section>
+  </div>
+</PublicLayout>
