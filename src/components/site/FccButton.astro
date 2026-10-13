@@ -1,0 +1,25 @@
+---
+/**
+ * The /family-sanity-saver-starter-kit call to action, in that page's original orange (old look,
+ * kept until the page is rebranded). Goes to the checkout once buyUrl is set; until then a
+ * "Coming soon" note, never a dead link (like OfferButton).
+ */
+interface Props {
+  label: string;
+  href: string | null;
+  /** Placement name for analytics, e.g. "fcc-hero". */
+  cta: string;
+}
+const { label, href, cta } = Astro.props;
+const base = 'inline-flex min-h-12 w-full items-center justify-center rounded-[4px] px-6 text-center text-[0.78rem] font-bold tracking-[0.04em] uppercase';
+---
+
+{
+  href ? (
+    <a href={href} data-cta={cta} class:list={[base, 'bg-[#f7931e] text-white transition-colors hover:bg-[#e8820c]']}>
+      {label}
+    </a>
+  ) : (
+    <p class:list={[base, 'border border-dashed border-[#f7931e] text-[#b35c00]']}>{label} · Coming soon</p>
+  )
+}
