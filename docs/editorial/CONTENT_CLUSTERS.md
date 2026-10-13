@@ -57,6 +57,7 @@ FP-05 (weekly meal planning) is the hub for the meal-planning articles inside th
 | FP-05 | Weekly Meal Planning for Families: Stop Deciding Dinner Every Night | "weekly meal planning for families" · how-to | P1 | Parent FP-01. Links down to FP-06, FP-07. Bridge HC-01 (Thursday fridge check). Next → FP-07 | The 20-minute method and full / short / zero nights. Mentions default dinners and the grocery list briefly; links to FP-07 and FP-06. |
 | FP-06 | How to Make a Grocery List From Your Meal Plan | "how to make a grocery list" · how-to | P2 | Parents FP-05, FP-01. Sibling FP-07. Next → FP-04 | Owns the list: staples, store sections, shopping the kitchen first. |
 | FP-07 | How to Build a Dinner Rotation Your Family Will Eat | "dinner rotation", "meal rotation ideas" · how-to | P3 | Parents FP-05, FP-01. Sibling FP-06. Next → FP-06 | The system for choosing (default list, theme nights), not a recipe roundup. |
+| FP-08 | Command Center Reset: Where Did My Time Go? | "time audit for moms", "where does my time go" · problem-solving | P2 | Parent FP-01. Siblings FP-03, FP-04. Bridge IF-02. Next → FP-04 | Owns finding the week's repeats (questions, searches, re-decisions) and resetting an existing command center to fix them. Setup is FP-03; the weekly session is FP-04. Added 2026-10-13: the Command Center Refresh Sheet links to it. |
 
 ## Simple Home Cleaning (HC)
 
