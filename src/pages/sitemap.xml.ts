@@ -22,6 +22,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.companion },
     { path: routes.planner },
     { path: routes.pantry },
+    { path: routes.tryCalendar },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),
