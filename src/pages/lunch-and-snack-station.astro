@@ -4,7 +4,9 @@
  * Snack Builder) with the line icons from the owner's June Kit PDF, and a grown-ups' setup sheet.
  * Posters: Kalam headings, an icon and a pastel highlight per item, every item's text editable (the icon
  * stays), each downloads as a US Letter portrait PNG. Icons: public/images/tools/lunch/ (cropped from the
- * owner's own PDF and tinted warm ink). The setup sheet is src/components/site/ChecklistPages.astro.
+ * owner's own PDF and tinted warm ink). A third sheet is a Monday–Friday school lunch planner (a box per day,
+ * a 2 × 2 grid; layout used with the owner's permission). The grown-ups' setup page is
+ * src/components/site/ChecklistPages.astro.
  * Saves in this browser (`omc:lunch-posters:v1`, `omc:lunch-snack:v1`). Poster classes are prefixed `lp-`.
  */
 import '@fontsource/kalam/latin-700.css';
@@ -41,6 +43,10 @@ const posters: { id: string; title: string; rule: string; groups: { heading: str
   },
 ];
 const tints = ['lp-tint-rose', 'lp-tint-sage', 'lp-tint-sand'];
+
+// The weekly planner sheet (layout used with permission from the owner's source): a box per day, a 2 × 2 grid.
+const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const lunchParts = ['Protein', 'Carb', 'Fruit / Veggie', 'Snack'];
 
 const setup: ChecklistPage[] = [
   {
@@ -118,8 +124,8 @@ const jsonLd = [
 
   <div class="lp-container">
     <div class="lp-actions">
-      <button type="button" class="lp-btn lp-btn-primary" data-lp-download-all>Download both posters</button>
-      <button type="button" class="lp-btn" data-lp-reset>Reset posters</button>
+      <button type="button" class="lp-btn lp-btn-primary" data-lp-download-all>Download all 3 sheets</button>
+      <button type="button" class="lp-btn" data-lp-reset>Reset</button>
     </div>
 
     <div id="lunch-posters">
@@ -127,7 +133,7 @@ const jsonLd = [
         posters.map((poster, p) => (
           <div class="lp-wrap">
             <div class="lp-bar">
-              <span>Poster {p + 1} of {posters.length}</span>
+              <span>Sheet {p + 1} of {posters.length + 1} · for the kids</span>
               <button type="button" class="lp-btn lp-btn-small" data-lp-download={p} data-lp-name={poster.id}>
                 Download this poster
               </button>
@@ -161,15 +167,48 @@ const jsonLd = [
           </div>
         ))
       }
+
+      <div class="lp-wrap">
+        <div class="lp-bar">
+          <span>Sheet 3 of 3 · for grown-ups</span>
+          <button type="button" class="lp-btn lp-btn-small" data-lp-download={posters.length}>Download this sheet</button>
+        </div>
+        <div class="lp-sheet lp-planner" data-lp-sheet={posters.length}>
+          <div class="lp-title">School Lunch Planner</div>
+          <label class="lp-week">Week of <input type="text" data-field="plan-week" aria-label="Week of" /></label>
+          <div class="lp-days">
+            {
+              weekdays.map((day) => (
+                <section class="lp-day" aria-label={day}>
+                  <h2 class="lp-day-name">{day}</h2>
+                  <div class="lp-cells">
+                    {lunchParts.map((part) => (
+                      <label class="lp-cell">
+                        <span>{part}</span>
+                        <input type="text" data-field={`plan-${day.toLowerCase()}-${part.toLowerCase().replace(/\W+/g, '-')}`} aria-label={`${day} ${part}`} />
+                      </label>
+                    ))}
+                  </div>
+                </section>
+              ))
+            }
+            <section class="lp-day lp-day-buy" aria-label="To buy">
+              <h2 class="lp-day-name">To Buy</h2>
+              <textarea class="lp-buy" data-field="plan-buy" aria-label="To buy"></textarea>
+            </section>
+          </div>
+          <div class="lp-foot">{BRAND_NAME}</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <section aria-labelledby="lss-setup-h" class="lp-setup-intro">
-    <h2 id="lss-setup-h" class="serif-title">For grown-ups: set up the stations</h2>
-    <p>Do this once. Then the posters do the reminding.</p>
+    <h2 id="lss-setup-h" class="serif-title">For grown-ups: set up, then plan the week</h2>
+    <p>Set up the stations once, then fill in a week of lunches on Sunday. Tick each day as it’s packed.</p>
   </section>
 
-  <ChecklistPages title="Lunch & Snack Station Setup" pages={setup} storageKey="omc:lunch-snack:v1" filename="lunch-and-snack-setup">
+  <ChecklistPages title="Lunch & Snack Station" pages={setup} storageKey="omc:lunch-snack:v1" filename="lunch-and-snack-station">
     <p slot="footnote" class="ck-footnote">
       More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
       {' '}<a href={routes.pantry} class="text-link">Pantry Inventory</a> and the
@@ -352,6 +391,102 @@ const jsonLd = [
   .lp-tint-sand {
     background: linear-gradient(transparent 22%, #efebe7 22%, #efebe7 86%, transparent 86%);
   }
+  /* The weekly lunch planner: a box per day, two per row, a 2 × 2 grid inside. */
+  .lp-week {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lp-soft);
+  }
+  .lp-week input {
+    width: 180px;
+    border: none;
+    border-bottom: 1px solid var(--lp-rule);
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--lp-ink);
+  }
+  .lp-days {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    width: 100%;
+    margin-top: 22px;
+  }
+  .lp-day {
+    padding: 10px 12px 12px;
+    border: 2px solid var(--color-sage);
+    border-radius: 12px;
+  }
+  .lp-day-name {
+    margin-bottom: 8px;
+    font-family: 'Kalam', var(--font-serif);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.08em;
+    text-align: center;
+    color: var(--lp-ink);
+  }
+  .lp-cells {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    background: var(--color-sage);
+    border: 2px solid var(--color-sage);
+  }
+  .lp-cell {
+    display: flex;
+    flex-direction: column;
+    min-height: 92px;
+    padding: 6px 8px;
+    background: #fff;
+  }
+  .lp-cell span {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9aa59a;
+  }
+  .lp-cell input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    text-align: center;
+    color: var(--lp-ink);
+  }
+  .lp-cell input:focus,
+  .lp-buy:focus {
+    outline: none;
+    background: var(--color-rose-wash);
+  }
+  .lp-buy {
+    width: 100%;
+    height: 186px;
+    padding: 0 8px;
+    border: none;
+    resize: none;
+    background-image: linear-gradient(transparent 28px, var(--lp-rule) 28px, var(--lp-rule) 29px);
+    background-size: 100% 29px;
+    background-attachment: local;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 29px;
+    color: var(--lp-ink);
+  }
   .lp-foot {
     margin-top: auto;
     padding-top: 20px;
@@ -395,6 +530,9 @@ const jsonLd = [
     .lp-container:not(.lp-exporting) .lp-group {
       width: 100%;
     }
+    .lp-container:not(.lp-exporting) .lp-days {
+      grid-template-columns: 1fr;
+    }
     .lp-container:not(.lp-exporting) .lp-text {
       flex: 1;
       width: auto;
@@ -412,14 +550,14 @@ const jsonLd = [
   const save = autosave(root, 'omc:lunch-posters:v1');
 
   document.querySelector('[data-lp-reset]')!.addEventListener('click', () => {
-    if (!confirm('Put the starter items back on both posters?')) return;
+    if (!confirm('Put the starter items back on the posters and clear the lunch planner?')) return;
     for (const el of fieldsIn(root)) el.value = el.defaultValue;
     save();
   });
 
   const download = (p: number, button: HTMLButtonElement) =>
     downloadPng(sheets[p], {
-      filename: `${p === 0 ? 'lunch' : 'snack'}-builder-station.png`,
+      filename: `${['lunch-builder-station', 'snack-builder-station', 'school-lunch-planner'][p]}.png`,
       width: 816,
       height: 1056,
       layoutHost: host,
