@@ -650,11 +650,12 @@
         "approved_placements": [
           "website_article_editorial"
         ],
-        "context": "Neutral illustration of writing planning decisions. No customer or endorsement claim. No AI generation or training.",
+        "context": "Neutral illustration of writing planning decisions. No customer or endorsement claim. No AI generation or training. Reuse IF-02: neutral illustration of listing household jobs; no personal claim about the pictured person.",
         "edits": "Resize and WebP export only."
       },
       "used_in": [
-        "FP-04 /resources/weekly-family-reset (inline)"
+        "FP-04 /resources/weekly-family-reset (inline)",
+        "IF-02 /resources/how-to-share-the-mental-load (hero)"
       ]
     }
   ],
