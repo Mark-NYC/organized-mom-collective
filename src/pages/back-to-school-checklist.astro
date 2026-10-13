@@ -1,7 +1,7 @@
 ---
 /**
- * /back-to-school-checklist — a free three-page back-to-school checklist people tick and edit on screen, then
- * download as PNGs, one page or all three (src/components/site/ChecklistPages.astro).
+ * /back-to-school-checklist — a free four-page back-to-school checklist (the last page a dated countdown from the first day of school) people tick and edit on screen, then
+ * download as PNGs, one page or all four (src/components/site/ChecklistPages.astro).
  * Saves in this browser (`omc:back-to-school:v1`).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
@@ -100,18 +100,6 @@ const pages: ChecklistPage[] = [
             cols: 1,
             items: ['School tour or orientation', 'Met the teacher', 'Read a back-to-school book together', 'First day photo props ready', 'Sleep schedule adjusted'],
           },
-          {
-            title: 'Timeline',
-            variant: 'timeline',
-            cols: 1,
-            items: [
-              '2 months before: sort closets, see what’s needed',
-              '1 month before: shop for clothes and shoes',
-              '3 weeks before: check and clean backpacks & lunch boxes',
-              '2 weeks before: shop for supplies',
-              '1 week before: label everything, final prep',
-            ],
-          },
         ],
       },
       {
@@ -120,6 +108,29 @@ const pages: ChecklistPage[] = [
           { title: 'School-Specific Items', cols: 1, items: blanks(4) },
           { title: 'Notes', notes: 'Supply list extras, contacts, important dates…' },
         ],
+      },
+    ],
+  },
+  {
+    info: [{ field: 'start', label: 'First day of school', placeholder: '', type: 'date' }],
+    sections: [
+      {
+        title: 'Countdown to Day One',
+        groupCols: 2,
+        groups: [
+          { title: '2 months before', due: 60, items: ['Book school & sports physicals', 'Turn in the physical forms', 'Sign up for fall sports & activities'] },
+          { title: '6 weeks before', due: 42, items: ['Sort fall clothes, donate outgrown', 'School dates & days off on the calendar', 'Practices & games on the calendar'] },
+          { title: '1 month before', due: 30, items: ['Buy clothes, shoes & uniforms', 'Buy the school supply list', 'Check summer reading & math packets'] },
+          { title: '3 weeks before', due: 21, items: ['Check & clean backpacks', 'Check & clean lunch boxes', ''] },
+          { title: '2 weeks before', due: 14, items: ['Start the school bedtime', 'Line up pickup help or a sitter', 'Book haircuts'] },
+          { title: '1 week before', due: 7, items: ['Lunch & snack shopping list', 'Label everything', 'Stock homework supplies at home'] },
+          { title: 'The night before', due: 1, items: ['Pack lunches & snacks', 'Pack backpacks', 'Lay out first-day clothes', 'Set alarms'] },
+          { title: 'The first day', due: 0, items: ['First-day photo', 'Enjoy it (bring tissues)', '', ''] },
+        ],
+      },
+      {
+        title: 'Notes',
+        groups: [{ title: 'Teacher, bus, pickup times', notes: 'Teacher names, bus number, pickup plan, school phone…' }],
       },
     ],
   },
@@ -140,7 +151,7 @@ const jsonLd = [
 
 <PublicLayout
   title="Free Back to School Checklist"
-  description="A free back-to-school checklist: supplies, clothes, health forms, routines and a timeline. Tick it off on screen, edit any item, then download all three pages to print."
+  description="A free back-to-school checklist: supplies, clothes, health forms, routines and a dated countdown from the first day of school. Tick it off, edit any item, then download it to print."
   width="full"
   jsonLd={jsonLd}
 >
@@ -149,7 +160,7 @@ const jsonLd = [
       <p class="label text-warm-soft">Free back-to-school checklist</p>
       <h1 id="bts-h" class="serif-hero mt-3">Back to School, Out of Your Head.</h1>
       <p class="lede mt-4 max-w-2xl text-warm-ink">
-        Supplies, clothes, forms, routines and a timeline, all on three pages. Tick things off, change any item to match your school’s list,
+        Supplies, clothes, forms and routines, plus a countdown: enter the first day of school and every step gets a date. Tick things off, change any item to match your school’s list,
         then download to print. What you change stays saved in this browser until you reset it.
       </p>
     </div>

@@ -2,8 +2,8 @@
 /**
  * Multi-page fill-in checklists (design, autosave, PNG export): US Letter portrait pages (8.5 × 11 in at
  * 96 px/in, drawn at 2×) of sections and groups, every item an editable line with a checkbox. Each page
- * downloads on its own, or all at once. Reset puts the starter items back. Used by /back-to-school-checklist
- * and /laundry-system; data shape in src/lib/checklist-pages.ts. Saves in this browser under `storageKey`.
+ * downloads on its own, or all at once. Reset puts the starter items back. Used by /back-to-school-checklist,
+ * /laundry-system and /closet-reset; data shape in src/lib/checklist-pages.ts. Saves in this browser under `storageKey`.
  * Classes are prefixed `ck-` so they never collide with the site's own.
  */
 import type { ChecklistPage } from '../../lib/checklist-pages';
@@ -22,7 +22,7 @@ const { title, pages, storageKey, filename } = Astro.props;
 
 <div class="ck-container">
   <div class="ck-actions">
-    <button type="button" class="ck-btn ck-btn-primary" data-ck-download-all>Download all {pages.length} pages</button>
+    <button type="button" class="ck-btn ck-btn-primary" data-ck-download-all>{pages.length > 1 ? `Download all ${pages.length} pages` : 'Download PNG'}</button>
     <button type="button" class="ck-btn" data-ck-reset>Reset checklist</button>
   </div>
 
@@ -30,15 +30,17 @@ const { title, pages, storageKey, filename } = Astro.props;
     {
       pages.map((page, p) => (
         <div class="ck-page-wrap">
-          <div class="ck-page-bar">
-            <span>Page {p + 1} of {pages.length}</span>
-            <button type="button" class="ck-btn ck-btn-small" data-ck-download={p}>
-              Download page {p + 1}
-            </button>
-          </div>
+          {pages.length > 1 && (
+            <div class="ck-page-bar">
+              <span>Page {p + 1} of {pages.length}</span>
+              <button type="button" class="ck-btn ck-btn-small" data-ck-download={p}>
+                Download page {p + 1}
+              </button>
+            </div>
+          )}
           <div class="ck-page" data-ck-page={p}>
             <div class="ck-head">
-              <div class="ck-kicker">Page {p + 1}</div>
+              {pages.length > 1 && <div class="ck-kicker">Page {p + 1}</div>}
               <div class="ck-title">{title}</div>
             </div>
 
@@ -47,7 +49,7 @@ const { title, pages, storageKey, filename } = Astro.props;
                 {page.info.map((f) => (
                   <label>
                     <span>{f.label}</span>
-                    <input type="text" data-field={f.field} placeholder={f.placeholder} />
+                    <input type={f.type ?? 'text'} data-field={f.field} placeholder={f.placeholder} data-ck-start={f.type === 'date' ? '' : undefined} />
                   </label>
                 ))}
               </div>
@@ -56,6 +58,7 @@ const { title, pages, storageKey, filename } = Astro.props;
             {page.sections.map((section, s) => (
               <section class="ck-section">
                 <h2 class="ck-section-title">{section.title}</h2>
+                <div class={`ck-groups ck-groups-${section.groupCols ?? 1}`}>
                 {section.groups.map((group, g) => {
                   const id = `p${p}-s${s}-g${g}`;
                   return (
@@ -63,6 +66,7 @@ const { title, pages, storageKey, filename } = Astro.props;
                       <div class="ck-group-title">
                         {group.step && <span class="ck-step">{group.step}</span>}
                         {group.title}
+                        {group.due !== undefined && <span class="ck-due" data-ck-due={group.due} />}
                       </div>
                       {group.notes ? (
                         <textarea class="ck-notes" data-field={`${id}-notes`} placeholder={group.notes} aria-label={group.title} />
@@ -85,6 +89,7 @@ const { title, pages, storageKey, filename } = Astro.props;
                     </div>
                   );
                 })}
+                </div>
               </section>
             ))}
           </div>
@@ -285,6 +290,14 @@ const { title, pages, storageKey, filename } = Astro.props;
     border-radius: 6px;
     background: #fff;
   }
+  .ck-due:not(:empty)::before {
+    content: '·';
+    margin: 0 6px;
+  }
+  .ck-due {
+    letter-spacing: 0.06em;
+    color: var(--ck-ink);
+  }
   .ck-step {
     display: inline-flex;
     align-items: center;
@@ -311,6 +324,18 @@ const { title, pages, storageKey, filename } = Astro.props;
   }
   .ck-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ck-groups-2,
+  .ck-groups-3 {
+    display: grid;
+    gap: 0 14px;
+    align-items: start;
+  }
+  .ck-groups-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ck-groups-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .ck-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -391,6 +416,7 @@ const { title, pages, storageKey, filename } = Astro.props;
       font-size: 26px;
     }
     .ck-container:not(.ck-exporting) .ck-info,
+    .ck-container:not(.ck-exporting) .ck-groups,
     .ck-container:not(.ck-exporting) .ck-items {
       grid-template-columns: 1fr;
     }
@@ -414,7 +440,16 @@ const { title, pages, storageKey, filename } = Astro.props;
   const root = document.getElementById('checklist-pages')!;
   const host = root.closest<HTMLElement>('.ck-container')!;
   const pages = Array.from(root.querySelectorAll<HTMLElement>('[data-ck-page]'));
-  const save = autosave(root, root.dataset.ckKey!);
+  // Groups with a `due` (days before a date field, e.g. the first day of school) show that date.
+  const start = root.querySelector<HTMLInputElement>('[data-ck-start]');
+  const showDue = () => {
+    const [y, m, d] = (start?.value ?? '').split('-').map(Number);
+    for (const el of root.querySelectorAll<HTMLElement>('[data-ck-due]')) {
+      el.textContent = y ? new Date(y, m - 1, d - Number(el.dataset.ckDue)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+    }
+  };
+  const save = autosave(root, root.dataset.ckKey!, showDue);
+  start?.addEventListener('input', showDue);
 
   // Reset puts the starter items back (their value attribute) rather than blanking them.
   document.querySelector('[data-ck-reset]')!.addEventListener('click', () => {
@@ -423,6 +458,7 @@ const { title, pages, storageKey, filename } = Astro.props;
       if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
       else el.value = el.defaultValue;
     }
+    showDue();
     save();
   });
 
@@ -440,7 +476,7 @@ const { title, pages, storageKey, filename } = Astro.props;
 
   const capture = (p: number, button: HTMLButtonElement) =>
     downloadPng(pages[p], {
-      filename: `${root.dataset.ckFile}-page-${p + 1}.png`,
+      filename: pages.length > 1 ? `${root.dataset.ckFile}-page-${p + 1}.png` : `${root.dataset.ckFile}.png`,
       width: 816,
       height: 1056,
       layoutHost: host,

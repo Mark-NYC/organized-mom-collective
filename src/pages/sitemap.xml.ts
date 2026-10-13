@@ -31,6 +31,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.springCleaning },
     { path: routes.fallCleaning },
     { path: routes.laundrySystem },
+    { path: routes.closetReset },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),
