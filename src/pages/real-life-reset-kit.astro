@@ -1,0 +1,96 @@
+---
+/**
+ * The Real Life Reset Kit: a $7 offer, the backup plan for when the week falls apart. The owner's
+ * copy in the public page style (serif Title Case headlines, warm ink, cream / sage washes), laid
+ * out like /essential-routines. Standalone: no site header or footer, always noindex.
+ *
+ * Hook (Wednesday chaos) → What's inside (mockup + list) → Close.
+ *
+ * Honesty rules: no countdown timer or "today only" (nothing expires), the kit mockup shows once its
+ * file exists (AssetSlot). Settings and the not-yet-sold note live in src/data/real-life-reset.ts.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import AssetSlot from '../components/site/AssetSlot.astro';
+import OfferButton from '../components/site/OfferButton.astro';
+import { realLifeReset as offer, realLifeResetAssets as assets } from '../data/real-life-reset';
+import { BRAND_NAME } from '../config';
+
+const { price, value } = offer;
+
+const items = [
+  { name: 'Plan-B Quick-Pivot Framework', body: 'Regroup fast when life blows up your schedule' },
+  { name: '15-Minute Reset Checklist', body: 'Get back on track without starting over' },
+  { name: 'Back on Track Coaching Audio', body: 'Shake off the guilt and move forward' },
+];
+
+const pad = 'py-12 sm:py-20 md:py-24';
+const check = 'M4.5 10.5 8 14l7.5-8';
+const buy = `Get Instant Access – $${price}`;
+---
+
+<PublicLayout
+  fullTitle={`Real Life Reset Kit: Your Backup Plan When Life Gets Messy · ${BRAND_NAME}`}
+  description={`A backup plan for when the week falls apart: the Plan-B Quick-Pivot Framework, a 15-Minute Reset Checklist and the Back on Track Coaching Audio, for $${price}.`}
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <!-- 1. Hook -->
+  <section aria-labelledby="hero-h" class="bg-cream">
+    <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
+      <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
+      <h1 id="hero-h" class="serif-title mt-5">
+        Your Backup Plan When Life Gets Messy
+        <span class="mt-3 block font-serif text-[1.2rem] text-warm-soft italic sm:text-[1.35rem]">
+          {offer.name} – <span class="whitespace-nowrap text-rose-deep not-italic">Just ${price}</span>
+        </span>
+      </h1>
+      <div class="lede mt-8 space-y-4 text-warm-ink">
+        <p>Sunday planning feels amazing.</p>
+        <p>By Wednesday? <strong class="font-semibold">Sick kids. Deadlines. Chaos.</strong></p>
+        <p>Your plan’s in pieces — and you feel like you failed.</p>
+        <p class="font-serif text-[1.2rem] italic">You didn’t fail. You just need a backup plan:</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. What's inside (white, like the mockup) -->
+  <section aria-labelledby="inside-h" class="bg-paper">
+    <figure class="mx-auto max-w-5xl px-5 pt-12 sm:px-8 sm:pt-20">
+      <AssetSlot asset={assets.kit} sizes="(min-width: 1088px) 1024px, 100vw" />
+    </figure>
+    <div class="mx-auto max-w-xl px-5 py-12 sm:px-8 sm:pb-20">
+      <h2 id="inside-h" class="sr-only">What’s inside the {offer.name}</h2>
+      <ul class="space-y-6">
+        {
+          items.map((i) => (
+            <li>
+              <p class="text-[1.05rem] font-semibold text-warm-ink">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="mr-1.5 inline size-5 -translate-y-px align-middle text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={check} />
+                </svg>
+                {i.name}
+              </p>
+              <p class="mt-1 pl-7 font-serif text-[1.02rem] text-warm-soft italic">{i.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-10 text-center text-[1.05rem] text-warm-ink">
+        Because life happens. This gets you reset in <strong class="font-semibold">15 minutes or less.</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- 3. Close (sage) -->
+  <section aria-labelledby="close-h" class="bg-sage-wash">
+    <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
+      <h2 id="close-h" class="serif-title text-[1.6rem] sm:text-[2rem]">
+        ${value} value – yours for <span class="text-rose-deep">${price}</span>
+      </h2>
+      <p class="mt-3 font-serif text-[1.1rem] text-warm-soft italic">Only available here.</p>
+      <div class="mt-8"><OfferButton label={buy} href={offer.buyUrl} cta="real-life-reset-close" /></div>
+      <p class="mt-4 text-[0.95rem] font-semibold text-warm-ink">${price} (Save ${value - price})</p>
+    </div>
+  </section>
+</PublicLayout>
