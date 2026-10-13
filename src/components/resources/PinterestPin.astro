@@ -1,0 +1,38 @@
+---
+interface Props {
+  image: string;
+  alt: string;
+  description: string;
+}
+const { image, alt, description } = Astro.props;
+const pageUrl = new URL(Astro.url.pathname.replace(/\/$/, ''), Astro.site ?? Astro.url.origin).href;
+const mediaUrl = new URL(image, Astro.site ?? Astro.url.origin).href;
+const saveUrl = `https://www.pinterest.com/pin/create/button/?${new URLSearchParams({ url: pageUrl, media: mediaUrl, description })}`;
+---
+
+<aside class="pinterest-pin" aria-label="Save this routine for Sunday">
+  <p class="label">Save this routine for Sunday</p>
+  <img src={image} alt={alt} width="1000" height="1500" loading="lazy" decoding="async" />
+  <a href={saveUrl} target="_blank" rel="noopener noreferrer" data-pinterest-share data-pin-image={image} data-pin-description={description}>Save to Pinterest <span class="sr-only">(opens in a new tab)</span></a>
+</aside>
+
+<script>
+  // Share the actual public host, including while the custom domain is being mapped.
+  function updatePinterestLinks() {
+    document.querySelectorAll<HTMLAnchorElement>('[data-pinterest-share]').forEach((link) => {
+      const page = new URL(window.location.pathname, window.location.origin);
+      const media = new URL(link.dataset.pinImage!, window.location.origin);
+      link.href = `https://www.pinterest.com/pin/create/button/?${new URLSearchParams({ url: page.href, media: media.href, description: link.dataset.pinDescription! })}`;
+    });
+  }
+  updatePinterestLinks();
+  document.addEventListener('astro:page-load', updatePinterestLinks);
+</script>
+
+<style>
+  .pinterest-pin { margin: 2.5rem 0; padding: 1.5rem; background: #fbf7f1; text-align: center; border-radius: 6px; }
+  .pinterest-pin img { display: block; width: min(100%, 320px); height: auto; margin: 1rem auto; }
+  .pinterest-pin a { display: inline-flex; padding: .75rem 1.25rem; background: #545454; color: #fff; border-radius: 4px; font-size: 1rem; font-weight: 600; text-decoration: none; }
+  .pinterest-pin a:hover { background: #353535; }
+  .pinterest-pin a:focus-visible { outline: 3px solid #545454; outline-offset: 4px; }
+</style>
