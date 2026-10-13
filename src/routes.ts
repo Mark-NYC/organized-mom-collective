@@ -27,6 +27,7 @@
  *           /closet-reset      free one-page closet declutter checklist, same idea
  *           /lunch-and-snack-station  free two-page fridge printable: lunch builder + snack station, same idea
  *           /command-center-setup     free one-page setup sheet for FP-03's command center, same idea
+ *           /travel-checklist          free two-page family travel checklist with trip-type chips, same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -78,6 +79,7 @@ export const routes = {
   closetReset: '/closet-reset',
   lunchSnackStation: '/lunch-and-snack-station',
   commandCenterSetup: '/command-center-setup',
+  travelChecklist: '/travel-checklist',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/resources#free-tools',
