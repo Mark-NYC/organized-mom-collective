@@ -1,0 +1,109 @@
+---
+/**
+ * /lunch-and-snack-station — a free two-page fridge printable: a lunch builder (1 protein + 1 fruit or veg +
+ * 1 carb + 1 treat) and a snack station kids help themselves from. Every item is editable for allergies and
+ * school rules (src/components/site/ChecklistPages.astro). Saves in this browser (`omc:lunch-snack:v1`).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import ChecklistPages from '../components/site/ChecklistPages.astro';
+import type { ChecklistPage } from '../lib/checklist-pages';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const pages: ChecklistPage[] = [
+  {
+    sections: [
+      {
+        title: 'Lunch Builder',
+        groups: [{ title: 'The formula', variant: 'priority', items: ['1 protein + 1 fruit or veg + 1 carb + 1 treat'] }],
+      },
+      {
+        title: 'Pick One From Each',
+        groupCols: 2,
+        groups: [
+          { title: '1 Protein', variant: 'step', items: ['Turkey slices', 'Hard-boiled egg', 'Cheese cubes', 'Hummus', 'Nut butter (if school allows)', ''] },
+          { title: '1 Fruit or veg', variant: 'step', items: ['Apple slices', 'Grapes', 'Cherry tomatoes', 'Cucumber sticks', 'Baby carrots', ''] },
+          { title: '1 Carb', variant: 'step', items: ['Whole wheat bread or pita', 'Mini bagel', 'Tortilla wrap', 'Rice cakes', 'Pasta salad', ''] },
+          { title: '1 Treat', variant: 'step', items: ['Mini cookies', 'Chocolate square', 'Fruit leather', 'Trail mix (if nuts are OK)', '', ''] },
+        ],
+      },
+      {
+        title: 'Before It Goes in the Bag',
+        groups: [{ cols: 2, title: 'Last check', variant: 'timeline', items: ['Water bottle filled', 'Ice pack in', 'Napkin & spoon or fork', 'Lunch box zipped & in the backpack'] }],
+      },
+    ],
+  },
+  {
+    sections: [
+      {
+        title: 'Set Up the Station',
+        groups: [
+          {
+            title: 'Once',
+            variant: 'step',
+            cols: 1,
+            items: ['A low shelf or bin in the fridge and one in the pantry', 'Snacks portioned into grab-and-go containers or bags', 'A label: “1 from the fridge + 1 from the pantry”'],
+          },
+        ],
+      },
+      {
+        title: 'Snack Picks',
+        groupCols: 2,
+        groups: [
+          { title: 'Fridge', variant: 'step', items: ['Cheese stick', 'Yogurt cup or tube', 'Baby carrots', 'Apple slices', 'Mini hummus cup', ''] },
+          { title: 'Pantry', variant: 'step', items: ['Granola bar', 'Whole grain crackers', 'Dried fruit', 'Nut butter packet (if OK)', 'Pretzels', ''] },
+        ],
+      },
+      {
+        title: 'Station Rules',
+        groups: [
+          {
+            title: 'For everyone',
+            variant: 'priority',
+            cols: 1,
+            items: ['Snacks at set times, or after meals', 'Pick 1–2 without asking', 'Wrappers in the trash, containers in the sink', 'Running low? Add it to the grocery list'],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Lunch & Snack Station', item: new URL(routes.lunchSnackStation, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Lunch Builder & Snack Station Printable for Kids"
+  description="A free lunch builder and snack station printable: kids pack their own lunch with one protein, fruit or veg, carb and treat, and grab snacks without asking. Edit it and print it for the fridge."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="lss-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free lunch & snack printable</p>
+      <h1 id="lss-h" class="serif-hero mt-3">They Pack the Lunch. They Grab the Snack.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        A lunch formula kids can follow on their own, and a snack station they can use without asking you first. Swap any item for what your
+        family eats and what your school allows, then print both pages for the fridge.
+      </p>
+    </div>
+  </section>
+
+  <ChecklistPages title="Lunch & Snack Station" pages={pages} storageKey="omc:lunch-snack:v1" filename="lunch-and-snack-station">
+    <p slot="footnote" class="ck-footnote">
+      More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
+      {' '}<a href={routes.pantry} class="text-link">Pantry Inventory</a> and the
+      {' '}<a href={routes.calendar} data-cta="lunch-snack-station" class="text-link">Family Wall Calendar</a>
+    </p>
+  </ChecklistPages>
+</PublicLayout>
