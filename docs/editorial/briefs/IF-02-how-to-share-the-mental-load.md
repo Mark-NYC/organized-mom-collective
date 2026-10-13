@@ -42,3 +42,8 @@ Use owner-selected, cleared Kaboompics 16979 (fp-04-planning-desk) as a neutral 
 ## Pinterest research
 
 Separate Pinterest-restricted searches through both engines returned no reliable platform-specific evidence. Autocomplete, guided terms, pin formats, Trends and board observations unavailable. Proposed phrases require platform validation before production. Complete three-pin plan in ../pinterest/IF-02.md; no engagement or volume claims.
+
+
+## Owner-selected highlighter photo
+
+2026-10-12: Add Kaboompics 18814 below the handoff examples. Tight crop fractions 0.25,0.61,1,0.99 remove the large empty top and frame the four highlighters. Final 1200 × 912 crop inspected; no readable logo, artwork or person. Source page shows commercial license and no editorial-only marker. Original and download evidence archived on codex/mental-load-highlighters. Responsive WebP at 640/960/1200, no upscaling or retouching.

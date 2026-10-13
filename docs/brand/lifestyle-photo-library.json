@@ -657,6 +657,39 @@
         "FP-04 /resources/weekly-family-reset (inline)",
         "IF-02 /resources/how-to-share-the-mental-load (hero)"
       ]
+    },
+    {
+      "id": "K13",
+      "title": "pastel highlighters, tightly cropped",
+      "role": "planning stationery",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/18814/pastel-highlighter-on-beige-background",
+      "owner_visual_status": "explicitly_selected_2026-10-12",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-02-highlighters-{640,960,1200}.webp",
+      "license_review": "Photo page shows free commercial use; no editorial-only marker",
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "2400px original and final crop inspected",
+        "visual_status": "pass",
+        "observations": "Four capped highlighters, no people, readable logos or protected artwork. Large blank top removed."
+      },
+      "clearance_record": {
+        "approval": "Explicit user selection and standing Kaboompics approval",
+        "date": "2026-10-12",
+        "original": "design/photography/kaboompics/IF-02-highlighters/18814-2400.jpg on codex/mental-load-highlighters, download evidence in manifest.json",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "context": "Neutral stationery photograph; no endorsement, customer claim or AI use.",
+        "edits": "Tight crop fractions 0.25,0.61,1,0.99; resize and WebP export only."
+      },
+      "used_in": [
+        "IF-02 /resources/how-to-share-the-mental-load (inline)"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
