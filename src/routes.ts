@@ -30,6 +30,7 @@
  *           /command-center-setup     free one-page setup sheet for FP-03's command center, same idea
  *           /travel-checklist          free two-page family travel checklist with trip-type chips, same idea
  *           /fall-pantry-stock-up      free one-page fall & winter pantry stock-up list, same idea
+ *           /gratitude-tracker         free November family gratitude tracker (Thanksgiving week computed per year)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -84,6 +85,7 @@ export const routes = {
   commandCenterSetup: '/command-center-setup',
   travelChecklist: '/travel-checklist',
   fallPantry: '/fall-pantry-stock-up',
+  gratitudeTracker: '/gratitude-tracker',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/resources#free-tools',
