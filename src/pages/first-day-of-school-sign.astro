@@ -1,0 +1,606 @@
+---
+/**
+ * /first-day-of-school-sign — a free printable first (or last) day of school sign: a simple sign (grade, name, school
+ * year) or an "all about me" sign (age, teacher, school, favorites, what they want to be, what they're excited about).
+ * The school year fills itself in (from July it's the year starting now). Rebuilt from the old Back to School Sign
+ * Generator (ink-heavy gradients, a fixed 2024–2025, and an all-about-me layout that printed "I AM AVA'S" and put the
+ * favorite food under "I love to"). Follows docs/brand/TOOL-OUTPUT-DESIGN.md: Kalam lettering, white paper, line
+ * doodles, three palettes from src/data/tool-palettes.ts saved with the sign. Downloads as a PNG (US Letter
+ * landscape). Autosave and export: src/lib/printable.ts (`omc:school-sign:v1`). Classes prefixed `fs-`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+import { toolPalettes, defaultToolPalette } from '../data/tool-palettes';
+
+const grades = ['Preschool', 'Pre-K', 'Kindergarten', '1st Grade', '2nd Grade', '3rd Grade', '4th Grade', '5th Grade', '6th Grade', '7th Grade', '8th Grade', '9th Grade', '10th Grade', '11th Grade', '12th Grade'];
+const about = [
+  { field: 'age', label: 'I am', after: 'years old' },
+  { field: 'teacher', label: 'My teacher is' },
+  { field: 'color', label: 'My favorite color' },
+  { field: 'food', label: 'My favorite food' },
+  { field: 'grow', label: 'When I grow up, I want to be' },
+  { field: 'excited', label: 'This year I’m excited to' },
+];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'First Day of School Sign', item: new URL(routes.schoolSign, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Printable First Day of School Sign (and Last Day)"
+  description="A free printable first day of school sign: type your child’s name and grade, or fill in an all-about-me sign. Switch to last day of school in June. Print-friendly, three color choices."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="fs-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free first day of school sign</p>
+      <h1 id="fs-h" class="serif-hero mt-3">The Photo You’ll Want Every Year.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Type their name and grade for a simple sign, or let them answer the all-about-me questions. Light on ink, so it prints at home the
+        night before. Switch it to last day of school in June.
+      </p>
+    </div>
+  </section>
+
+  <div class="fs-container" id="school-sign">
+    <input type="hidden" data-field="palette" value={defaultToolPalette} />
+    <input type="hidden" data-field="layout" value="simple" />
+    <input type="hidden" data-field="day" value="first" />
+
+    <div class="fs-controls">
+      <div class="fs-toggle" role="group" aria-label="Which day">
+        <button type="button" data-fs-day="first" aria-pressed="true">First day</button>
+        <button type="button" data-fs-day="last" aria-pressed="false">Last day</button>
+      </div>
+      <div class="fs-toggle" role="group" aria-label="Kind of sign">
+        <button type="button" data-fs-layout="simple" aria-pressed="true">Simple sign</button>
+        <button type="button" data-fs-layout="about" aria-pressed="false">All about me</button>
+      </div>
+    </div>
+
+    <fieldset class="fs-palette-picker">
+      <legend>Choose your colors</legend>
+      <div class="fs-palette-options">
+        {
+          Object.entries(toolPalettes).map(([id, palette]) => (
+            <button type="button" class="fs-palette-option" data-fs-palette={id} aria-pressed={id === defaultToolPalette}>
+              <span class="fs-swatches" aria-hidden="true">
+                {palette.colors.map((color) => (
+                  <span style={{ backgroundColor: color }} />
+                ))}
+              </span>
+              <span>{palette.label}</span>
+            </button>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <div class="fs-form">
+      <label><span>Name</span><input type="text" data-field="name" placeholder="Ava" /></label>
+      <label>
+        <span>Grade</span>
+        <select data-field="grade">
+          <option value="">Choose a grade</option>
+          {grades.map((g) => <option value={g}>{g}</option>)}
+        </select>
+      </label>
+      <label><span>School year</span><input type="text" data-field="year" data-fs-year /></label>
+      <label class="fs-about-only"><span>School</span><input type="text" data-field="school" placeholder="Maple Elementary" /></label>
+      {
+        about.map((a) => (
+          <label class="fs-about-only">
+            <span>{a.label}</span>
+            <input type="text" data-field={a.field} placeholder={a.field === 'age' ? '6' : ''} />
+          </label>
+        ))
+      }
+    </div>
+
+    <div class="fs-actions">
+      <button type="button" class="fs-btn fs-btn-primary" data-fs-download>Download PNG</button>
+      <button type="button" class="fs-btn" data-fs-clear>Clear</button>
+    </div>
+
+    <div class="fs-sheet" data-fs-sheet data-layout="simple">
+      <svg class="fs-doodle fs-d1" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 18c-4-6-14-6-17 2-4 10 4 26 11 28 3 1 4-1 6-1s3 2 6 1c7-2 15-18 11-28-3-8-13-8-17-2z" class="fs-fill-1" />
+        <path d="M32 18c1-6 4-9 8-10M33 12c-5-4-10-3-12 1 4 2 8 2 12-1" />
+      </svg>
+      <svg class="fs-doodle fs-d2" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M14 50l4-14 26-26 10 10-26 26z" class="fs-fill-2" />
+        <path d="M14 50l14-4M18 36l10 10M40 14l10 10" />
+      </svg>
+      <svg class="fs-doodle fs-d3" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z" class="fs-fill-3" />
+      </svg>
+      <svg class="fs-doodle fs-d4" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M8 16c8-3 16-3 24 3v32c-8-6-16-6-24-3zM56 16c-8-3-16-3-24 3v32c8-6 16-6 24-3z" class="fs-fill-1" />
+      </svg>
+
+      <div class="fs-simple">
+        <div class="fs-kicker"><span data-fs-dayword>First</span> day of</div>
+        <div class="fs-grade"><span class="fs-swipe" data-fs-show="grade">Kindergarten</span></div>
+        <div class="fs-name" data-fs-show="name"></div>
+        <div class="fs-year" data-fs-show="year"></div>
+      </div>
+
+      <div class="fs-about">
+        <div class="fs-about-head">
+          <div class="fs-about-name" data-fs-show="name"></div>
+          <div class="fs-about-kicker">
+            <span data-fs-dayword>First</span> day of <span class="fs-swipe" data-fs-show="grade"></span>
+          </div>
+        </div>
+        <div class="fs-boxes">
+          {
+            about.map((a, i) => (
+              <div class={`fs-box fs-box-${(i % 3) + 1}`}>
+                <div class="fs-box-label">{a.label}</div>
+                <div class="fs-box-value">
+                  <span data-fs-show={a.field} />
+                  {a.after && <span class="fs-after"> {a.after}</span>}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <div class="fs-about-foot"><span data-fs-show="school"></span><span data-fs-show="year"></span></div>
+      </div>
+    </div>
+
+    <p class="fs-footnote">
+      Getting ready for the first day? The free <a href={routes.backToSchool} class="text-link">Back to School Checklist</a> counts down from it,
+      {' '}and the <a href={routes.routineChart} class="text-link">Routine Charts</a> set up school mornings. The
+      {' '}<a href={routes.calendar} data-cta="school-sign" class="text-link">Family Wall Calendar</a> keeps the school year in one place.
+    </p>
+  </div>
+</PublicLayout>
+
+<style is:global>
+  .fs-container {
+    --fs-ink: #4d4544;
+    --fs-soft: #8a7f7b;
+    --fs-rule: #e6ddd8;
+    background: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--fs-ink);
+  }
+  .fs-container *,
+  .fs-container *::before,
+  .fs-container *::after {
+    box-sizing: border-box;
+  }
+  .fs-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 auto 16px;
+  }
+  .fs-toggle {
+    display: inline-flex;
+    border: 1px solid var(--fs-rule);
+    border-radius: 999px;
+    background: #fff;
+    padding: 3px;
+  }
+  .fs-toggle button {
+    min-height: 40px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    font-size: 0.85rem;
+    color: var(--fs-ink);
+    cursor: pointer;
+  }
+  .fs-toggle button[aria-pressed='true'] {
+    background: var(--fs-ink);
+    color: #fff;
+  }
+  .fs-palette-picker {
+    margin: 0 auto 16px;
+    padding: 0;
+    border: 0;
+    text-align: center;
+  }
+  .fs-palette-picker legend {
+    float: none;
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: var(--fs-soft);
+  }
+  .fs-palette-options {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .fs-palette-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 1px solid var(--fs-rule);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--fs-ink);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .fs-palette-option[aria-pressed='true'] {
+    padding: 9px 13px;
+    border: 2px solid var(--fs-ink);
+    background: var(--color-ivory);
+  }
+  .fs-palette-option:focus-visible,
+  .fs-toggle button:focus-visible,
+  .fs-btn:focus-visible {
+    outline: 2px solid var(--fs-ink);
+    outline-offset: 3px;
+  }
+  .fs-swatches {
+    display: flex;
+    gap: 3px;
+  }
+  .fs-swatches span {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #b8ada6;
+    border-radius: 50%;
+  }
+  .fs-form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 16px;
+    max-width: 1056px;
+    margin: 0 auto 16px;
+  }
+  .fs-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fs-soft);
+  }
+  .fs-form input,
+  .fs-form select {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--fs-rule);
+    border-radius: 8px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--fs-ink);
+  }
+  .fs-form input::placeholder {
+    color: #c4b8b2;
+  }
+  .fs-container[data-layout='simple'] .fs-about-only {
+    display: none;
+  }
+  .fs-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 auto 20px;
+  }
+  .fs-btn {
+    min-height: 48px;
+    padding: 0 22px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .fs-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .fs-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  /* The sign: US Letter landscape (11 × 8.5 in at 96 px/in). White paper, charcoal text, palette accents only. */
+  .fs-sheet {
+    --fs-accent-1: #efebe7;
+    --fs-accent-2: #e6eeea;
+    --fs-accent-3: #f6f1e7;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 1056px;
+    max-width: 100%;
+    min-height: 816px;
+    margin: 0 auto;
+    padding: 56px 72px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--fs-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: 'Kalam', var(--font-serif);
+    color: var(--fs-ink);
+    text-align: center;
+  }
+  .fs-sheet::before {
+    content: '';
+    position: absolute;
+    inset: 22px;
+    border: 3px solid var(--fs-accent-1);
+    border-radius: 28px;
+    pointer-events: none;
+  }
+  .fs-doodle {
+    position: absolute;
+    width: 92px;
+    height: 92px;
+    fill: none;
+    stroke: var(--fs-ink);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fs-fill-1 {
+    fill: var(--fs-accent-1);
+  }
+  .fs-fill-2 {
+    fill: var(--fs-accent-2);
+  }
+  .fs-fill-3 {
+    fill: var(--fs-accent-3);
+  }
+  .fs-d1 {
+    top: 46px;
+    left: 52px;
+  }
+  .fs-d2 {
+    top: 46px;
+    right: 52px;
+  }
+  .fs-d3 {
+    bottom: 46px;
+    left: 52px;
+  }
+  .fs-d4 {
+    bottom: 46px;
+    right: 52px;
+  }
+  .fs-swipe {
+    padding: 0 0.2em;
+    background: linear-gradient(transparent 46%, var(--fs-accent-2) 46%, var(--fs-accent-2) 76%, transparent 76%);
+  }
+  .fs-sheet[data-layout='simple'] .fs-about,
+  .fs-sheet[data-layout='about'] .fs-simple {
+    display: none;
+  }
+  .fs-kicker {
+    font-size: 64px;
+    line-height: 1;
+  }
+  .fs-grade {
+    margin-top: 10px;
+    font-size: 120px;
+    line-height: 1.05;
+  }
+  .fs-name {
+    margin-top: 26px;
+    font-family: var(--font-sans);
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .fs-year {
+    margin-top: 8px;
+    font-size: 30px;
+    color: var(--fs-soft);
+  }
+  .fs-about-head {
+    margin-bottom: 22px;
+  }
+  .fs-about-name {
+    font-family: var(--font-sans);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .fs-about-kicker {
+    font-size: 46px;
+    line-height: 1.15;
+  }
+  .fs-boxes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    text-align: left;
+  }
+  .fs-box {
+    min-height: 116px;
+    padding: 12px 18px;
+    border: 3px solid var(--fs-accent-1);
+    border-radius: 18px;
+  }
+  .fs-box-2 {
+    border-color: var(--fs-accent-2);
+  }
+  .fs-box-3 {
+    border-color: var(--fs-accent-3);
+  }
+  .fs-box-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fs-soft);
+  }
+  .fs-box-value {
+    margin-top: 6px;
+    font-size: 28px;
+    line-height: 1.2;
+  }
+  .fs-after {
+    font-size: 22px;
+  }
+  .fs-about-foot {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 18px;
+    font-size: 24px;
+    color: var(--fs-soft);
+  }
+  .fs-footnote {
+    max-width: 1056px;
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--color-warm-soft);
+  }
+
+  /* Phones: a scaled preview. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .fs-form {
+      grid-template-columns: 1fr;
+    }
+    .fs-container:not(.fs-exporting) .fs-sheet {
+      min-height: 0;
+      padding: 40px 28px;
+    }
+    .fs-container:not(.fs-exporting) .fs-doodle {
+      width: 40px;
+      height: 40px;
+    }
+    .fs-container:not(.fs-exporting) .fs-d1,
+    .fs-container:not(.fs-exporting) .fs-d2 {
+      top: 30px;
+    }
+    .fs-container:not(.fs-exporting) .fs-d3,
+    .fs-container:not(.fs-exporting) .fs-d4 {
+      bottom: 30px;
+    }
+    .fs-container:not(.fs-exporting) .fs-d1,
+    .fs-container:not(.fs-exporting) .fs-d3 {
+      left: 30px;
+    }
+    .fs-container:not(.fs-exporting) .fs-d2,
+    .fs-container:not(.fs-exporting) .fs-d4 {
+      right: 30px;
+    }
+    .fs-container:not(.fs-exporting) .fs-kicker {
+      font-size: 30px;
+    }
+    .fs-container:not(.fs-exporting) .fs-grade {
+      font-size: 52px;
+    }
+    .fs-container:not(.fs-exporting) .fs-name,
+    .fs-container:not(.fs-exporting) .fs-about-name {
+      font-size: 22px;
+    }
+    .fs-container:not(.fs-exporting) .fs-about-kicker {
+      font-size: 26px;
+    }
+    .fs-container:not(.fs-exporting) .fs-boxes {
+      grid-template-columns: 1fr 1fr;
+    }
+    .fs-container:not(.fs-exporting) .fs-box {
+      min-height: 0;
+    }
+    .fs-container:not(.fs-exporting) .fs-box-value {
+      font-size: 20px;
+    }
+  }
+</style>
+
+<script>
+  import { toolPalettes, resolveToolPalette } from '../data/tool-palettes';
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const host = document.getElementById('school-sign')!;
+  const sheet = host.querySelector<HTMLElement>('[data-fs-sheet]')!;
+  const field = (name: string) => host.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
+
+  // From July, the school year starting now; before that, the one under way.
+  const now = new Date();
+  const start = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+  const defaultYear = `${start}–${start + 1}`;
+
+  const render = () => {
+    const palette = resolveToolPalette(field('palette').value);
+    field('palette').value = palette;
+    toolPalettes[palette].colors.forEach((c, i) => sheet.style.setProperty(`--fs-accent-${i + 1}`, c));
+    host.querySelectorAll<HTMLButtonElement>('[data-fs-palette]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fsPalette === palette)));
+
+    const layout = field('layout').value === 'about' ? 'about' : 'simple';
+    const day = field('day').value === 'last' ? 'last' : 'first';
+    sheet.dataset.layout = host.dataset.layout = layout;
+    host.querySelectorAll<HTMLButtonElement>('[data-fs-layout]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fsLayout === layout)));
+    host.querySelectorAll<HTMLButtonElement>('[data-fs-day]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fsDay === day)));
+    sheet.querySelectorAll('[data-fs-dayword]').forEach((el) => (el.textContent = day === 'last' ? 'Last' : 'First'));
+
+    if (!field('year').value.trim()) field('year').value = defaultYear;
+    for (const el of sheet.querySelectorAll<HTMLElement>('[data-fs-show]')) {
+      const value = field(el.dataset.fsShow!).value.trim();
+      el.textContent = el.dataset.fsShow === 'grade' ? value || 'School' : value;
+    }
+  };
+
+  const save = autosave(host, 'omc:school-sign:v1', render);
+  host.addEventListener('input', render);
+  host.addEventListener('change', render);
+
+  const pick = (name: string, value: string) => {
+    field(name).value = value;
+    render();
+    save();
+  };
+  host.querySelectorAll<HTMLButtonElement>('[data-fs-palette]').forEach((b) => b.addEventListener('click', () => pick('palette', b.dataset.fsPalette!)));
+  host.querySelectorAll<HTMLButtonElement>('[data-fs-layout]').forEach((b) => b.addEventListener('click', () => pick('layout', b.dataset.fsLayout!)));
+  host.querySelectorAll<HTMLButtonElement>('[data-fs-day]').forEach((b) => b.addEventListener('click', () => pick('day', b.dataset.fsDay!)));
+
+  host.querySelector('[data-fs-clear]')!.addEventListener('click', () => {
+    if (!confirm('Clear the sign? Your colors and layout stay.')) return;
+    const keep = ['palette', 'layout', 'day'];
+    for (const el of fieldsIn(host)) if (!keep.includes(el.dataset.field!)) el.value = '';
+    render();
+    save();
+  });
+
+  const button = host.querySelector<HTMLButtonElement>('[data-fs-download]')!;
+  button.addEventListener('click', async () => {
+    const name = field('name').value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const day = field('day').value === 'last' ? 'last' : 'first';
+    await downloadPng(sheet, { filename: `${name ? name + '-' : ''}${day}-day-of-school-sign.png`, width: 1056, height: 816, layoutHost: host, exportClass: 'fs-exporting', button });
+  });
+</script>

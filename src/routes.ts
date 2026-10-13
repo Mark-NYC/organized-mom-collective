@@ -33,6 +33,7 @@
  *           /fall-pantry-stock-up      free one-page fall & winter pantry stock-up list, same idea
  *           /gratitude-tracker         free November family gratitude tracker (Thanksgiving week computed per year)
  *           /holiday-gift-planner      free one-page holiday budget & gift planner (totals add themselves up)
+ *           /first-day-of-school-sign  free first/last day of school sign: simple or all-about-me, palette picker
  *           /mental-load-worksheet     free mental load worksheet (IF-02 companion): brain dump, sort, hand over one whole job
  *           /meal-planner              free weekly dinner planner on FP-05's full/short/zero method + grocery list
  *           /december-countdown        free family December countdown: 24 editable dated days + idea chips
@@ -99,6 +100,7 @@ export const routes = {
   decemberCountdown: '/december-countdown',
   mealPlanner: '/meal-planner',
   mentalLoad: '/mental-load-worksheet',
+  schoolSign: '/first-day-of-school-sign',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/tools',

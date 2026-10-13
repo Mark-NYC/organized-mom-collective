@@ -2,6 +2,7 @@ import { routes } from '../routes';
 
 export const freeTools = [
   { href: routes.choreChart, name: 'Chore Chart by Age', summary: 'Daily and weekly chores matched to your child’s age, with rewards to work toward.' },
+  { href: routes.schoolSign, name: 'First Day of School Sign', summary: 'A simple sign or an all-about-me sign for the first-day photo. Last day too.' },
   { href: routes.backToSchool, name: 'Back to School Checklist', summary: 'Supplies, clothes, forms and routines, plus a countdown dated from the first day.' },
   { href: routes.screenTime, name: 'Screen Time Contract', summary: 'Jobs first, then activities that earn screen time. Fill it in together and sign it.' },
   { href: routes.routineChart, name: 'Routine Charts', summary: 'Morning, after-school, bedtime and weekend routines, so the chart says what’s next instead of you.' },
