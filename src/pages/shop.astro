@@ -1,0 +1,81 @@
+---
+/**
+ * /shop: every product the public can buy, one card each, linking to its own page (the buying
+ * happens there: the calendar on Etsy, the rest through the website checkout once it's on).
+ * Linked from the header and footer. Prices come from each product's own settings, never retyped.
+ *
+ * Only products with a public page are listed. Take Back Control and Essential Routines are
+ * post-purchase offers (noindex, reached from the checkout), so they stay off this page.
+ * A product whose checkout isn't on yet says "Coming soon" instead of a price call to action.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { calendarOptions, formatPrice } from '../lib/reorder';
+import { weeklyReset, weeklyResetAssets } from '../data/weekly-reset';
+import { mug, mugImage } from '../data/mug';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const options = calendarOptions();
+const from = Math.min(...options.map((o) => o.price));
+
+const products = [
+  {
+    name: 'Family Wall Calendar',
+    blurb: 'The whole family’s week on one page: schedule, meals, groceries, to-dos and the day’s cleaning zone. Comes with the cleaning companion website.',
+    price: `From ${formatPrice(from)}`,
+    href: routes.calendar,
+    soon: false,
+    img: { src: '/images/reorder/calendar-in-use-960.webp', width: 960, height: 960, alt: 'The family wall calendar filled in for the week.' },
+  },
+  {
+    name: weeklyReset.name,
+    blurb: 'A printable Weekly Command Center, the 30-Minute Daily Tidy System and a coaching audio. Instant download.',
+    price: formatPrice(weeklyReset.price),
+    href: routes.weeklyReset,
+    soon: !weeklyReset.buyUrl,
+    img: weeklyResetAssets.bundle,
+  },
+  {
+    name: mug.name,
+    blurb: 'A 15oz glossy white ceramic mug. Microwave and dishwasher safe.',
+    price: formatPrice(mug.price),
+    href: routes.mug,
+    soon: !mug.buyUrl,
+    img: { src: `${mugImage.src}-960.webp`, width: 960, height: 960, alt: mugImage.alt },
+  },
+];
+---
+
+<PublicLayout title="Shop" description={`The ${BRAND_NAME} shop: the family wall calendar, the Weekly Reset System and the Mind Your Own Motherhood mug.`} width="full">
+  <section aria-labelledby="shop-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 pt-12 pb-8 text-center sm:px-8 sm:pt-16">
+      <p class="label text-warm-soft">{BRAND_NAME}</p>
+      <h1 id="shop-h" class="serif-title mt-3 text-warm-ink">Shop</h1>
+      <p class="lede mx-auto mt-4 max-w-xl text-warm-soft">Less on your mind. More hands helping.</p>
+    </div>
+  </section>
+
+  <section aria-label="Products" class="bg-cream">
+    <ul class="mx-auto grid max-w-6xl gap-6 px-5 pb-16 sm:grid-cols-2 sm:px-8 sm:pb-24 lg:grid-cols-3">
+      {
+        products.map((p) => (
+          <li>
+            <a href={p.href} data-cta={`shop-${p.href.slice(1)}`} class="group flex h-full flex-col overflow-hidden rounded-[3px] border border-warm-rule bg-paper">
+              <span class="block aspect-[4/3] overflow-hidden bg-paper">
+                <img src={p.img.src} width={p.img.width} height={p.img.height} alt={p.img.alt} loading="lazy" class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+              </span>
+              <span class="flex flex-1 flex-col p-5 sm:p-6">
+                <span class="font-serif text-[1.3rem] leading-snug text-warm-ink">{p.name}</span>
+                <span class="mt-2 flex-1 text-[0.95rem] leading-relaxed text-warm-soft">{p.blurb}</span>
+                <span class="mt-5 flex items-center justify-between gap-3 border-t border-warm-rule pt-4">
+                  <span class="font-semibold text-warm-ink tabular-nums">{p.price}</span>
+                  <span class="text-[0.7rem] font-semibold tracking-[0.16em] text-warm-soft uppercase">{p.soon ? 'Coming soon' : 'View ›'}</span>
+                </span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</PublicLayout>

@@ -4,7 +4,7 @@
  * HTTP API; without RESEND_API_KEY they're logged as "skipped" so test orders still work.
  *
  * Copy rules: a calendar order is the printed calendar plus the existing, free cleaning
- * companion website; a digital order is its download (the link in the email, good for a few
+ * companion website (other physical items, like the mug, don't come with it); a digital order is its download (the link in the email, good for a few
  * days, renewable on request). Never promise accounts, sync, or features that don't exist,
  * and never promise delivery dates.
  */
@@ -155,6 +155,10 @@ function splitName(name: string): [string, string | null] {
  * Real product photos, resized to JPEG for email (WebP isn't safe everywhere): public/email/<slug>.jpg.
  * Every product needs one (tests/shop.test.ts checks each seeded slug); a new product needs only the file.
  */
+/** Calendars come with the cleaning companion; other physical items (the mug) don't. */
+const isCalendar = (slug: string) => slug.startsWith('calendar-');
+const hasCalendar = (o: OrderRow) => o.shop_order_items.some((i) => isCalendar(i.product_slug));
+
 const thumb = (slug: string, siteUrl: string) => `${siteUrl}/email/${/^[a-z0-9-]{1,60}$/.test(slug) ? slug : 'calendar-26-week'}.jpg`;
 
 function itemRows(o: OrderRow, siteUrl: string, withPrices: boolean): Block {
@@ -168,7 +172,7 @@ function itemRows(o: OrderRow, siteUrl: string, withPrices: boolean): Block {
         `<td valign="top" style="padding:14px 0;border-bottom:1px solid ${C.rule}">` +
         `<p style="margin:0;font-weight:600;color:${C.ink}">${esc(name)}</p>` +
         (edition ? `<p style="margin:2px 0 0;font-size:14px;color:${C.soft}">${esc(edition)}</p>` : '') +
-        `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ''} · ${o.digital ? 'instant download' : 'includes the cleaning companion website'}</p></td>` +
+        `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ''}${o.digital ? ' · instant download' : isCalendar(i.product_slug) ? ' · includes the cleaning companion website' : ''}</p></td>` +
         (withPrices
           ? `<td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid ${C.rule};white-space:nowrap;color:${C.ink}">${money(i.unit_price_cents * i.quantity)}</td>`
           : '') +
@@ -329,10 +333,11 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: RenderOpts): Body {
           itemRows(o, opts.siteUrl, true),
           totals(o),
           ...shipTo,
-          companionPanel(opts.siteUrl),
+          ...(hasCalendar(o) ? [companionPanel(opts.siteUrl)] : []),
         ],
       };
     case 'shipped': {
+      const what = o.shop_order_items.every((i) => isCalendar(i.product_slug)) ? 'calendar' : 'order';
       const url = trackingLink(o.carrier, o.tracking_number, o.tracking_url);
       return {
         subject: `Your order ${n} has shipped`,
@@ -340,7 +345,7 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: RenderOpts): Body {
         eyebrow: `Order ${n} shipped`,
         title: 'Your order is on its way',
         blocks: [
-          p(hi ? `Good news, ${hi}: your calendar has shipped.` : 'Good news: your calendar has shipped.'),
+          p(hi ? `Good news, ${hi}: your ${what} has shipped.` : `Good news: your ${what} has shipped.`),
           panel(C.page, C.rule, [
             ...(o.carrier ? [p(`Carrier: ${o.carrier}`, 'margin:0 0 4px;font-size:15px')] : []),
             ...(o.tracking_number ? [p(`Tracking number: ${o.tracking_number}`, 'margin:0 0 14px;font-size:15px;font-weight:600;word-break:break-all')] : []),
@@ -351,7 +356,7 @@ function renderBody(kind: EmailKind, o: OrderRow, opts: RenderOpts): Body {
           heading('In this package'),
           itemRows(o, opts.siteUrl, false),
           p(''),
-          companionPanel(opts.siteUrl),
+          ...(hasCalendar(o) ? [companionPanel(opts.siteUrl)] : []),
         ],
       };
     }
