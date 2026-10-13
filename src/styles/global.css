@@ -501,3 +501,22 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Download signup dialog, outside the printable/export surface. */
+.tool-email-dialog { width: min(92vw, 480px); max-height: 90dvh; overflow-y: auto; border: 0; border-radius: 16px; padding: 28px; color: #4a3f3e; background: #fffdf9; box-shadow: 0 20px 80px #0003; }
+.tool-email-dialog::backdrop { background: #28211dcc; }
+.tool-email-form { position: relative; }
+.tool-email-form h2 { font-family: Georgia, serif; font-size: 28px; line-height: 1.15; padding-right: 24px; margin-bottom: 12px; }
+.tool-email-form p { font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+.tool-email-close { position: absolute; top: -12px; right: -14px; width: 44px; height: 44px; font-size: 28px; cursor: pointer; }
+.tool-email-label { display: block; font-size: 14px; margin: 16px 0 6px; }
+.tool-email-form input[type=email] { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid #b8ada6; border-radius: 6px; background: white; font-size: 16px; }
+.tool-email-consent { display: flex; gap: 10px; align-items: flex-start; margin: 18px 0 12px; font-size: 13px; line-height: 1.5; }
+.tool-email-consent input { width: 20px; height: 20px; flex: none; margin-top: 2px; accent-color: #4a3f3e; }
+.tool-email-form .tool-email-note { font-size: 12px; color: #6a5e57; }
+.tool-email-submit { width: 100%; min-height: 48px; padding: 12px; border-radius: 6px; background: #4a3f3e; color: white; font-weight: 600; cursor: pointer; }
+.tool-email-submit:disabled { opacity: .65; cursor: wait; }
+.tool-email-error { color: #a32330; }
+.tool-email-error:empty { display: none; }
+.tool-email-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.tool-email-dialog button:focus-visible, .tool-email-dialog input:focus-visible { outline: 2px solid #4a3f3e; outline-offset: 3px; }

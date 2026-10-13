@@ -1,3 +1,5 @@
+import { requireToolEmail } from './tool-email';
+
 /**
  * Shared browser code for the fill-in printables (/planner, /pantry): every `[data-field]` input inside
  * a root element autosaves to one localStorage key, can be cleared, and the root exports as a PNG.
@@ -55,6 +57,7 @@ export async function downloadPng(
   root: HTMLElement,
   opts: { filename: string; width: number; height?: number; layoutHost: HTMLElement; exportClass: string; button: HTMLButtonElement },
 ) {
+  if (!await requireToolEmail()) return;
   const { button, layoutHost, exportClass, width } = opts;
   const label = button.textContent;
   const dates = fieldsIn(root).filter((el): el is HTMLInputElement => el instanceof HTMLInputElement && el.type === 'date');

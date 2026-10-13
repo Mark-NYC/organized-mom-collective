@@ -108,3 +108,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 ### Printable output palettes
 
 The chore chart now offers Rose & Lavender, Blue & Green and Warm Neutrals (default), using `src/data/tool-palettes.ts`. The selected palette is saved in its existing browser state and applied to the PNG; clearing chores retains it. This is the standard for future tool output design, documented in `docs/brand/TOOL-OUTPUT-DESIGN.md`. Existing other tools are not yet migrated.
+
+### Chore chart email download gate
+
+Implemented, not active by default: Download opens an email popup, saves an email through the Supabase tool_email_signup RPC, then exports the chart. Marketing consent is a separate optional checkbox. Browser access is remembered without storing the email locally. Only /chore-chart is gated in this first test. Run the migration and enable PUBLIC_TOOL_EMAIL_GATE_ENABLED only after live verification; setup, data export and rollback are in [supabase/TOOL-EMAIL.md](supabase/TOOL-EMAIL.md). No automated emails are sent.

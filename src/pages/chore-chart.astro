@@ -7,6 +7,7 @@
  * Classes are prefixed `cc-` so they never collide with the site's own.
  */
 import '@fontsource/kalam/latin-700.css';
+import { toolEmailGateEnabled } from '../lib/tool-email';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
@@ -79,6 +80,7 @@ const jsonLd = [
       <button type="button" class="cc-btn" data-cc-clear>Clear chart</button>
     </div>
     <p class="cc-hint">Tap any chore or reward on the chart to change it.</p>
+    {toolEmailGateEnabled && <p class="cc-hint">Free to customize. Email required for your first download. No account needed.</p>}
 
     <div class="cc-sheet" id="chore-chart">
       <input type="hidden" data-field="palette" value={defaultToolPalette} />
