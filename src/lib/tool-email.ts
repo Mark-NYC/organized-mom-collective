@@ -72,6 +72,10 @@ function showDialog(): Promise<boolean> {
         if (result === 'ok') {
           unlocked = true;
           try { localStorage.setItem(DONE, 'yes'); } catch { /* this visit still works */ }
+          try {
+            const pinterest = (window as Window & { pintrk?: (...args: unknown[]) => void }).pintrk;
+            pinterest?.('track', 'lead', { lead_type: 'Chore chart download' });
+          } catch { /* tracking must never block the download */ }
           finish(true); return;
         }
         error.textContent = result === 'rate_limited' ? 'Too many attempts. Please try again later. Your chart is still here.' : result === 'invalid' ? 'Please check your email address.' : 'We couldn’t save your email. Please try again. Your chart is still here.';
