@@ -31,6 +31,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.springCleaning },
     { path: routes.fallCleaning },
     { path: routes.newYearDeclutter },
+    { path: routes.paperBlitz },
     { path: routes.laundrySystem },
     { path: routes.closetReset },
     { path: routes.lunchSnackStation },

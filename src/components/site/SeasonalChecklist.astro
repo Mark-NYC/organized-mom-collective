@@ -1,8 +1,9 @@
 ---
 /**
  * A room-by-room seasonal cleaning checklist (design, progress, autosave): two short sections per room,
- * ticked off on screen with overall and per-room progress, and a badge per room earned at 80%. Used by /spring-cleaning-checklist and
- * /fall-cleaning-checklist, /new-year-declutter (rooms in src/data/seasonal-cleaning.ts). Ticks save in this browser under
+ * ticked off on screen with overall and per-room progress, a badge per room earned at 80%, and an optional
+ * countdown timer per room (Room.minutes). Used by /spring-cleaning-checklist and
+ * /fall-cleaning-checklist, /new-year-declutter, /paper-clutter-blitz (rooms in src/data/seasonal-cleaning.ts). Ticks save in this browser under
  * `storageKey`. An on-screen checklist, not a PNG printable. Classes are prefixed `sc-`.
  */
 import type { Room } from '../../data/seasonal-cleaning';
@@ -46,6 +47,11 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
             <header class="sc-room-head">
               <h2 id={`sc-${room.id}`} class="sc-room-name">{room.name}</h2>
               <span class="sc-time">{room.time}</span>
+              {room.minutes && (
+                <button type="button" class="sc-timer" data-sc-timer={room.minutes * 60} aria-live="polite">
+                  Start {room.minutes}:00 timer
+                </button>
+              )}
             </header>
             <div class="sc-room-progress">
               <div class="sc-bar sc-bar-small"><span data-sc-room-bar style="width: 0%"></span></div>
@@ -221,6 +227,31 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
     font-weight: 400;
     line-height: 1.2;
   }
+  .sc-timer {
+    flex-basis: 100%;
+    min-height: 40px;
+    margin-top: 8px;
+    padding: 0 16px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
+  .sc-timer.sc-running {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .sc-timer.sc-done {
+    border-color: var(--sc-sage);
+    background: var(--sc-sage-wash);
+    color: #5d6b55;
+  }
   .sc-time {
     font-size: 0.75rem;
     color: var(--sc-soft);
@@ -371,6 +402,38 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
 
   const save = autosave(root, root.dataset.scKey!, update);
   root.addEventListener('change', update);
+
+  // Optional per-room countdown (Room.minutes): start, pause, and start again once it's done.
+  const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  for (const button of root.querySelectorAll<HTMLButtonElement>('[data-sc-timer]')) {
+    const total = Number(button.dataset.scTimer);
+    let left = total;
+    let tick: number | undefined;
+    button.addEventListener('click', () => {
+      if (tick) {
+        clearInterval(tick);
+        tick = undefined;
+        button.textContent = `Resume ${clock(left)}`;
+        button.classList.remove('sc-running');
+        return;
+      }
+      if (left === 0) left = total;
+      button.classList.add('sc-running');
+      button.classList.remove('sc-done');
+      button.textContent = `${clock(left)} · pause`;
+      tick = window.setInterval(() => {
+        left -= 1;
+        button.textContent = `${clock(left)} · pause`;
+        if (left > 0) return;
+        clearInterval(tick);
+        tick = undefined;
+        button.classList.remove('sc-running');
+        button.classList.add('sc-done');
+        button.textContent = 'Time’s up. Stop here.';
+        navigator.vibrate?.(300);
+      }, 1000);
+    });
+  }
 
   root.querySelector('[data-sc-reset]')!.addEventListener('click', () => {
     if (!confirm('Untick every task and start over?')) return;

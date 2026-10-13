@@ -1,6 +1,7 @@
 /**
  * Room-by-room seasonal cleaning checklists: spring (/spring-cleaning-checklist), fall
- * (/fall-cleaning-checklist) and the New Year declutter sprint (/new-year-declutter), both rendered by src/components/site/SeasonalChecklist.astro.
+ * (/fall-cleaning-checklist), the New Year declutter sprint (/new-year-declutter) and the paper clutter blitz
+ * (/paper-clutter-blitz), all rendered by src/components/site/SeasonalChecklist.astro.
  * Task ids come from position (room id, section, task), so reordering tasks shifts saved ticks.
  */
 
@@ -11,6 +12,8 @@ export interface Room {
   time: string;
   /** Short label for its badge; defaults to the name. */
   badge?: string;
+  /** Adds a countdown timer of this many minutes to the room. */
+  minutes?: number;
   /** Two short sections: [title, tasks]. */
   sections: readonly (readonly [string, readonly string[]])[];
 }
@@ -211,6 +214,46 @@ export const newYearRooms: readonly Room[] = [
     sections: [
       ['Ages 4–6', ['Put toys back in the right bin', 'Sort socks by person', 'Count items for the donation box']],
       ['Ages 7–10', ['Try on clothes and call out what doesn’t fit', 'Run the 10-minute pickup timer', 'Carry the donation bag to the car']],
+    ],
+  },
+];
+
+/**
+ * The three-day paper clutter blitz (/paper-clutter-blitz), timed. Uses the same two pockets as FP-03
+ * (/resources/home-command-center): “Needs attention” and “Ready to go”. Don't introduce another paper system.
+ */
+export const paperBlitzDays: readonly Room[] = [
+  {
+    id: 'day1',
+    name: 'Day 1: Clear the Counter',
+    time: '15 minutes',
+    badge: 'Day 1',
+    minutes: 15,
+    sections: [
+      ['Gather', ['Three piles or bags: trash & recycling, needs attention, keep', 'Papers from the counter, table, car, backpacks and “that chair”']],
+      ['Sort fast', ['Don’t read everything: grab, glance, drop', 'Out now: old flyers, expired coupons, takeout menus', 'Done when the timer stops, even mid-pile']],
+    ],
+  },
+  {
+    id: 'day2',
+    name: 'Day 2: Give Papers a Home',
+    time: '10 minutes',
+    badge: 'Day 2',
+    minutes: 10,
+    sections: [
+      ['Two pockets', ['“Needs attention” pocket by the calendar', '“Ready to go” pocket beside it', 'Today’s “needs attention” pile goes in']],
+      ['One folder', ['One folder or file box for papers you keep', 'Four sections: school, medical, activities, house & money', 'Yesterday’s “keep” pile filed']],
+    ],
+  },
+  {
+    id: 'day3',
+    name: 'Day 3: The 5-Minute Habit',
+    time: '5 minutes',
+    badge: 'Day 3',
+    minutes: 5,
+    sections: [
+      ['Every evening', ['New papers land in “needs attention”, nowhere else', 'After dinner: dates on the calendar, forms signed', 'Signed forms into “ready to go”, then into bags']],
+      ['Once a week', ['Clear both pockets in your weekly reset', 'Photograph keepers into a “Family Docs” album', 'Recycle anything past its date']],
     ],
   },
 ];

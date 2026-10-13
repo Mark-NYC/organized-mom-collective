@@ -23,6 +23,7 @@
  *           /spring-cleaning-checklist  free room-by-room spring cleaning checklist (ticked on screen, progress saved; no PNG)
  *           /fall-cleaning-checklist    the fall version, same idea
  *           /new-year-declutter         eight-week New Year declutter sprint (same component, with badges)
+ *           /paper-clutter-blitz        three-day paper blitz with timers (same component)
  *           /laundry-system    free two-page laundry flow checklist (editable, PNG per page)
  *           /closet-reset      free one-page closet declutter checklist, same idea
  *           /lunch-and-snack-station  free two-page fridge printable: lunch builder + snack station, same idea
@@ -75,6 +76,7 @@ export const routes = {
   springCleaning: '/spring-cleaning-checklist',
   fallCleaning: '/fall-cleaning-checklist',
   newYearDeclutter: '/new-year-declutter',
+  paperBlitz: '/paper-clutter-blitz',
   laundrySystem: '/laundry-system',
   closetReset: '/closet-reset',
   lunchSnackStation: '/lunch-and-snack-station',
