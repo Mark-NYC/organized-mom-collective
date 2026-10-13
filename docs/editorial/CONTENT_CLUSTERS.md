@@ -121,3 +121,7 @@ New topics go to the end of the relevant table with the next ID (e.g. HC-06), a 
 ## Tool-led addition: FP-09
 
 Free morning routine chart generator: a plan kids can follow. URL /resources/morning-routine-chart-generator. Intent: morning routine chart generator. Owns the short school-morning sequence and customizing the existing /routine-chart tool. FP-01 owns the family week; IF-03 owns household chores; FP-04 owns weekly planning. Parent FP-01, bridge/next IF-03. Owner-selected priority October 13, 2026. Supersedes the backlog suggestion to delay the school-morning article until July; publish evergreen now, with seasonal promotion later.
+
+## FP-10: Family launch pad by the door
+
+Owner-requested article /resources/launch-pad-by-the-door. Owns the physical bags/shoes/extras staging area and night-before departure check. FP-03 owns calendar and paper processing; FP-09 owns the get-ready sequence; FP-01 owns weekly planning. Parent FP-01, siblings FP-03/FP-09, next FP-09. No new tool: the existing command-center setup sheet already includes keys, backpacks and ready-to-go papers.
