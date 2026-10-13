@@ -158,11 +158,10 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   width="full"
   jsonLd={jsonLd}
 >
-  <!-- 1. Hero. Phones (under 768px): one-line label, headline, two-line copy, CTA, then the photo, so the CTA is on the
-       first screen. Desktop: copy left, photo right. -->
-  <section aria-labelledby="hero-h" class="overflow-hidden bg-cream">
-    <div class:list={[wrap, 'grid items-center gap-x-12 gap-y-6 pt-6 pb-8 sm:pt-8 md:grid-cols-[1.05fr_1fr] md:py-20 lg:gap-x-16']}>
-      <div>
+  <!-- 1. Inset hero: gray copy area fades into the photo. On phones the photo sits above the copy. -->
+  <section aria-labelledby="hero-h" class="home-hero">
+    <div class="home-hero-surface">
+      <div class="home-hero-copy">
         <p class="label text-warm-soft">
           <span class="text-balance">2027 Family Wall Calendar<span class="hidden sm:inline"> + <span class="whitespace-nowrap">Cleaning Companion</span></span></span>
         </p>
@@ -185,19 +184,17 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </p>
       </div>
 
-      <!-- The feeling: one complete, unedited photo at its own 3:2 ratio at every width, so nothing is
-           cropped: the wall calendar on the right, all three faces and the breakfast table. -->
-      <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
+      <figure class="home-hero-photo">
         <img
           src={family.src}
           srcset={family.srcset}
-          sizes="(min-width: 1152px) 520px, (min-width: 768px) 46vw, 100vw"
+          sizes="(min-width: 1600px) 1024px, (min-width: 900px) 68vw, calc(100vw - 32px)"
           width="1536"
           height="1024"
           fetchpriority="high"
           decoding="async"
           alt="A mom laughing with her son and daughter over breakfast at the kitchen table, a filled-in wall calendar hanging in the background."
-          class="block aspect-[3/2] h-auto w-full object-cover"
+          class="block h-auto w-full"
         />
       </figure>
     </div>
@@ -534,3 +531,28 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 </PublicLayout>
+
+<style>
+  .home-hero { padding: 20px 16px 32px; background: #fff; }
+  .home-hero-surface { --hero-gray: #f1f2f2; position: relative; isolation: isolate; overflow: hidden; max-width: 1504px; margin: 0 auto; background: var(--hero-gray); }
+  .home-hero-photo { position: relative; margin: 0; }
+  .home-hero-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--hero-gray), transparent 35%); pointer-events: none; }
+  .home-hero-copy { position: relative; z-index: 1; padding: 10px 24px 36px; }
+  .home-hero-copy h1 { font-size: clamp(2rem, 8.5vw, 3.1rem); }
+  .home-hero-surface { display: flex; flex-direction: column; }
+  .home-hero-photo { order: -1; }
+  @media (min-width: 640px) and (max-width: 899px) {
+    .home-hero-copy { padding: 16px 48px 48px; }
+    .home-hero-copy h1 { max-width: 550px; }
+  }
+  @media (min-width: 900px) {
+    .home-hero { padding: 28px 36px 44px; }
+    .home-hero-surface { display: block; min-height: 540px; }
+    .home-hero-copy { width: 48%; padding: clamp(64px, 7vw, 112px) 0 clamp(64px, 7vw, 112px) clamp(36px, 4.5vw, 72px); }
+    .home-hero-copy h1 { font-size: clamp(2.65rem, 3.7vw, 3.75rem); }
+    .home-hero-copy .lede { max-width: 390px; }
+    .home-hero-photo { position: absolute; width: 68%; right: 0; top: 0; bottom: 0; }
+    .home-hero-photo img { height: 100%; object-fit: cover; object-position: right center; }
+    .home-hero-photo::after { background: linear-gradient(to right, var(--hero-gray) 0%, rgba(241, 242, 242, 0.95) 10%, rgba(241, 242, 242, 0) 37%); }
+  }
+</style>
