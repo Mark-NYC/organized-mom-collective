@@ -188,6 +188,14 @@ A standard sequence for each article (adjust per plan):
 
 Spacing pins out keeps boards varied; don't publish all three on the same day. Don't re-upload identical images; make a new variation if a pin needs refreshing.
 
+### Seasonal free tools
+
+The free tools on `/resources#free-tools` aren't articles and have no tracker row, but the seasonal ones only earn traffic if their pins go up before the season. Each still needs a plan (same three pins, saved as `docs/editorial/pinterest/TOOL-{slug}.md`) before its first-pin date.
+
+| Tool | First pin by | Plan |
+| --- | --- | --- |
+| New Year Declutter Sprint (`/new-year-declutter`) | Early December, for January searches | Not started (owner to revisit) |
+
 ## Assets and status
 
 - **Filenames:** `{ARTICLE_ID}-{pin-type}-1000x1500.{png|jpg}`, pin type `search`, `curiosity` or `save`. Example: `HC-01-save-1000x1500.png`.
