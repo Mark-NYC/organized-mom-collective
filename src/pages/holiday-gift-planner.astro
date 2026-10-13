@@ -1,0 +1,503 @@
+---
+/**
+ * /holiday-gift-planner — a free one-page holiday budget & gift planner: a total budget, a gift list (who, gift,
+ * budget, spent, bought, wrapped) and the other holiday costs (meals, travel, host and teacher gifts…). Planned,
+ * spent and left add themselves up as you type and turn rose when you go over. Rebuilt from the old Holiday Budget
+ * + Gift Planner, whose script failed on load, so nothing saved and "Remaining" never changed. Downloads as a PNG
+ * (US Letter portrait). Autosave and export: src/lib/printable.ts (`omc:holiday-gifts:v1`). Classes prefixed `hg-`.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const GIFT_ROWS = 12;
+const gifts = Array.from({ length: GIFT_ROWS }, (_, i) => i);
+const costs = ['Holiday meals', 'Travel & gas', 'Host gifts', 'Teacher & coach gifts', 'Cards & postage', 'Decorations', 'Outings & events', ''];
+const simple = ['Set a limit for each person before you shop.', 'Write it down the day you buy it.', 'One list for the whole family, not one in your head.'];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Holiday Budget & Gift Planner', item: new URL(routes.holidayGifts, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Holiday Budget & Gift Planner"
+  description="A free holiday budget and gift planner: who you’re buying for, what you planned to spend, what you spent, and the other holiday costs. It adds up as you type. Print it."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="hg-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free holiday gift planner</p>
+      <h1 id="hg-h" class="serif-hero mt-3">Every Gift and Every Dollar, on One Page.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Set your total, list who you’re buying for, and add the costs that sneak up on you: the big meal, the drive to Grandma’s, the
+        teacher gifts. It adds itself up as you go, so January holds no surprises.
+      </p>
+    </div>
+  </section>
+
+  <div class="hg-container">
+    <div class="hg-actions">
+      <button type="button" class="hg-btn hg-btn-primary" data-hg-download>Download PNG</button>
+      <button type="button" class="hg-btn" data-hg-clear>Start over</button>
+    </div>
+
+    <div class="hg-sheet" id="holiday-gift-planner">
+      <div class="hg-head">
+        <div class="hg-title">Holiday Budget & Gift Planner</div>
+        <div class="hg-sub" data-hg-season>Holiday season</div>
+      </div>
+
+      <div class="hg-overview">
+        <label class="hg-stat hg-stat-input">
+          <span>Total budget</span>
+          <input type="text" inputmode="decimal" data-field="total" data-hg-total placeholder="$0" aria-label="Total budget" />
+        </label>
+        <div class="hg-stat"><span>Planned</span><output data-hg-planned>$0</output></div>
+        <div class="hg-stat"><span>Spent</span><output data-hg-spent>$0</output></div>
+        <div class="hg-stat"><span>Left</span><output data-hg-left>$0</output></div>
+      </div>
+
+      <h2 class="hg-section">Gifts</h2>
+      <div class="hg-scroll">
+        <table class="hg-table hg-gifts">
+          <thead>
+            <tr>
+              <th scope="col" class="hg-who">For</th>
+              <th scope="col">Gift</th>
+              <th scope="col" class="hg-money">Budget</th>
+              <th scope="col" class="hg-money">Spent</th>
+              <th scope="col" class="hg-tick">Bought</th>
+              <th scope="col" class="hg-tick">Wrapped</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              gifts.map((i) => (
+                <tr>
+                  <td><input type="text" data-field={`gift-${i}-who`} placeholder={i === 0 ? 'Ava' : ''} aria-label={`Gift ${i + 1}: for`} /></td>
+                  <td><input type="text" data-field={`gift-${i}-what`} placeholder={i === 0 ? 'Art set + sketchbook' : ''} aria-label={`Gift ${i + 1}: gift`} /></td>
+                  <td><input type="text" inputmode="decimal" data-field={`gift-${i}-budget`} data-hg-plan aria-label={`Gift ${i + 1}: budget`} /></td>
+                  <td><input type="text" inputmode="decimal" data-field={`gift-${i}-spent`} data-hg-paid aria-label={`Gift ${i + 1}: spent`} /></td>
+                  <td class="hg-tick"><input type="checkbox" data-field={`gift-${i}-bought`} aria-label={`Gift ${i + 1}: bought`} /></td>
+                  <td class="hg-tick"><input type="checkbox" data-field={`gift-${i}-wrapped`} aria-label={`Gift ${i + 1}: wrapped`} /></td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hg-bottom">
+        <div>
+          <h2 class="hg-section">Everything else</h2>
+          <table class="hg-table hg-costs">
+            <thead>
+              <tr>
+                <th scope="col">Cost</th>
+                <th scope="col" class="hg-money">Budget</th>
+                <th scope="col" class="hg-money">Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                costs.map((name, i) => (
+                  <tr>
+                    <td><input type="text" data-field={`cost-${i}-name`} value={name} aria-label={`Cost ${i + 1}`} /></td>
+                    <td><input type="text" inputmode="decimal" data-field={`cost-${i}-budget`} data-hg-plan aria-label={`Cost ${i + 1}: budget`} /></td>
+                    <td><input type="text" inputmode="decimal" data-field={`cost-${i}-spent`} data-hg-paid aria-label={`Cost ${i + 1}: spent`} /></td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="hg-side">
+          <label class="hg-notes">
+            <span>Gift ideas to remember</span>
+            <textarea data-field="ideas" aria-label="Gift ideas to remember"></textarea>
+          </label>
+          <div class="hg-simple">
+            <p class="hg-simple-title">Keep it simple</p>
+            <ul>{simple.map((s) => <li>{s}</li>)}</ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hg-foot">{BRAND_NAME}</div>
+    </div>
+
+    <p class="hg-footnote">
+      More free tools for the season: the <a href={routes.gratitudeTracker} class="text-link">Family Gratitude Tracker</a>, the
+      {' '}<a href={routes.travelChecklist} class="text-link">Family Travel Checklist</a> and the
+      {' '}<a href={routes.fallPantry} class="text-link">Fall Pantry Stock-Up</a>. Put the shopping days on the
+      {' '}<a href={routes.calendar} data-cta="holiday-gift-planner" class="text-link">Family Wall Calendar</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<style is:global>
+  .hg-container {
+    background: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--color-warm-ink);
+  }
+  .hg-container *,
+  .hg-container *::before,
+  .hg-container *::after {
+    box-sizing: border-box;
+  }
+  .hg-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .hg-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .hg-btn:hover {
+    background: var(--color-rose-wash);
+  }
+  .hg-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .hg-btn-primary:hover {
+    background: #362e2d;
+  }
+  .hg-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  /* The sheet: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .hg-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    margin: 0 auto;
+    padding: 36px 40px 20px;
+    background: #fff;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .hg-head {
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-rose);
+    text-align: center;
+  }
+  .hg-title {
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .hg-sub {
+    margin-top: 2px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--color-rose-deep);
+  }
+  .hg-overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 16px 0 6px;
+  }
+  .hg-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 6px 6px;
+    border-radius: 4px;
+    background: var(--color-sage-wash);
+  }
+  .hg-stat-input {
+    background: var(--color-rose-wash);
+  }
+  .hg-stat span {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .hg-stat output,
+  .hg-stat input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-warm-ink);
+  }
+  .hg-stat input::placeholder {
+    color: #c4b8b2;
+  }
+  .hg-stat.hg-over {
+    background: var(--color-rose);
+  }
+  .hg-stat.hg-over span,
+  .hg-stat.hg-over output {
+    color: #fff;
+  }
+  .hg-section {
+    margin: 14px 0 6px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-rose-deep);
+  }
+  .hg-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .hg-table th {
+    padding: 4px 6px;
+    background: var(--color-warm-button);
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-align: left;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .hg-table td {
+    height: 30px;
+    padding: 0 6px;
+    border-bottom: 1px solid var(--color-warm-rule);
+  }
+  .hg-table td input[type='text'] {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--color-warm-ink);
+  }
+  .hg-table input::placeholder {
+    color: #c4b8b2;
+  }
+  .hg-table input:focus,
+  .hg-stat input:focus,
+  .hg-notes textarea:focus {
+    outline: none;
+    background: var(--color-rose-wash);
+  }
+  .hg-who {
+    width: 22%;
+  }
+  .hg-money {
+    width: 13%;
+  }
+  .hg-costs .hg-money {
+    width: 24%;
+  }
+  .hg-tick {
+    width: 10%;
+    text-align: center !important;
+  }
+  .hg-tick input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--color-rose-deep);
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  .hg-bottom {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+  }
+  .hg-side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 33px;
+  }
+  .hg-notes {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .hg-notes textarea {
+    flex: 1;
+    min-height: 110px;
+    padding: 0 8px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 3px;
+    resize: none;
+    background-color: #fff;
+    background-image: linear-gradient(transparent 23px, var(--color-warm-rule) 23px, var(--color-warm-rule) 24px);
+    background-size: 100% 24px;
+    background-attachment: local;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 24px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--color-warm-ink);
+  }
+  .hg-simple {
+    padding: 10px 14px;
+    border: 1px dashed var(--color-rose);
+    border-radius: 6px;
+  }
+  .hg-simple-title {
+    margin-bottom: 4px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-rose-deep);
+  }
+  .hg-simple ul {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .hg-foot {
+    margin-top: auto;
+    padding-top: 12px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .hg-footnote {
+    max-width: 816px;
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--color-warm-soft);
+  }
+
+  /* Phones: stacked, the gift table scrolls sideways. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .hg-container:not(.hg-exporting) .hg-sheet {
+      min-height: 0;
+      padding: 20px 12px 12px;
+    }
+    .hg-container:not(.hg-exporting) .hg-title {
+      font-size: 24px;
+    }
+    .hg-container:not(.hg-exporting) .hg-overview {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .hg-container:not(.hg-exporting) .hg-bottom {
+      grid-template-columns: 1fr;
+    }
+    .hg-container:not(.hg-exporting) .hg-side {
+      padding-top: 0;
+    }
+    .hg-container:not(.hg-exporting) .hg-scroll {
+      overflow-x: auto;
+    }
+    .hg-container:not(.hg-exporting) .hg-gifts {
+      width: 640px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const sheet = document.getElementById('holiday-gift-planner')!;
+  const host = sheet.closest<HTMLElement>('.hg-container')!;
+
+  // The season this planner is for: January still counts as last year's.
+  const now = new Date();
+  const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+  sheet.querySelector('[data-hg-season]')!.textContent = `Holiday season ${year}`;
+
+  const amount = (el: HTMLInputElement) => {
+    const n = parseFloat(el.value.replace(/[^0-9.]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  };
+  const sum = (selector: string) => Array.from(sheet.querySelectorAll<HTMLInputElement>(selector)).reduce((t, el) => t + amount(el), 0);
+  const money = (n: number) => `${n < 0 ? '−' : ''}$${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+
+  const totalField = sheet.querySelector<HTMLInputElement>('[data-hg-total]')!;
+  const out = (name: string) => sheet.querySelector<HTMLOutputElement>(`[data-hg-${name}]`)!;
+  const update = () => {
+    const total = amount(totalField);
+    const planned = sum('[data-hg-plan]');
+    const spent = sum('[data-hg-paid]');
+    out('planned').textContent = money(planned);
+    out('spent').textContent = money(spent);
+    out('left').textContent = money(total - spent);
+    // Rose once the plan or the spending passes the total.
+    out('planned').parentElement!.classList.toggle('hg-over', total > 0 && planned > total);
+    out('left').parentElement!.classList.toggle('hg-over', total > 0 && spent > total);
+  };
+
+  autosave(sheet, 'omc:holiday-gifts:v1', update);
+  sheet.addEventListener('input', update);
+
+  document.querySelector('[data-hg-clear]')!.addEventListener('click', () => {
+    if (!confirm('Clear the whole planner and start over?')) return;
+    for (const el of fieldsIn(sheet)) {
+      if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
+      else el.value = el.defaultValue; // the starter cost names come back
+    }
+    sheet.dispatchEvent(new Event('input'));
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('[data-hg-download]')!;
+  button.addEventListener('click', async () => {
+    // Placeholder hints would print as if they'd been filled in: drop them while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    const hints = hinted.map((el) => el.placeholder);
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    try {
+      await downloadPng(sheet, { filename: `holiday-gift-planner-${year}.png`, width: 816, height: 1056, layoutHost: host, exportClass: 'hg-exporting', button });
+    } finally {
+      hinted.forEach((el, i) => (el.placeholder = hints[i]));
+    }
+  });
+</script>
