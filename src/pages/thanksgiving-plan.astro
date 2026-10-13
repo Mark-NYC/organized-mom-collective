@@ -1,0 +1,670 @@
+---
+/**
+ * /thanksgiving-plan — a free two-page Thanksgiving meal prep plan. Enter dinner time, turkey weight and guests:
+ * the page works out the thaw day (USDA fridge thawing, about 24 hours per 4–5 lb; we use 4), when the turkey goes
+ * in (the top of the USDA 325 °F unstuffed roasting range, plus a rest) and the day's timeline, and dates the
+ * three-weeks-out to day-before checklists from this year's Thanksgiving (the fourth Thursday). Page 2: the day's
+ * timeline, who's doing what, and a shopping list. Rebuilt from the old Thanksgiving Meal Prep Plan, whose
+ * timeline took the turkey out 3½ hours before dinner and whose edits never saved. Each page downloads as a US
+ * Letter portrait PNG. Autosave and export: src/lib/printable.ts (`omc:thanksgiving:v1`). Classes prefixed `tp-`.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const weeks = [
+  { id: 'w3', title: '3 weeks before', items: ['Pick the menu, count the guests', 'Order or buy the turkey', 'Ask guests what they’ll bring', 'Shop the pantry list', ''] },
+  { id: 'w2', title: '2 weeks before', items: ['Make and freeze pie crusts and rolls', 'Pans, platters and a meat thermometer?', 'Plan Friday’s leftover meals', 'Hand out the jobs (page 2)', ''] },
+  { id: 'w1', title: 'The week of', items: ['Turkey into the fridge to thaw (date above)', 'Make room in the fridge', 'Shop the fresh list', 'Check the day’s timeline (page 2)', ''] },
+  { id: 'w0', title: 'The day before', items: ['Bake the pies', 'Make the cranberry sauce', 'Chop vegetables, assemble casseroles', 'Label serving dishes with sticky notes', ''] },
+];
+const menu = ['Turkey', 'Gravy', 'Stuffing', 'Mashed potatoes', 'Cranberry sauce', 'Green beans', 'Rolls', 'Pie', '', ''];
+const jobs = ['Set the table', 'Drinks & appetizers', 'Bring a side or dessert', 'Clear the table', 'Dishes', 'Pack the leftovers', ''];
+const shopping = [
+  { id: 'pantry', title: 'Pantry', items: ['Broth', 'Stuffing mix or bread', 'Canned pumpkin', 'Flour & sugar', 'Pie spices', '', ''] },
+  { id: 'fresh', title: 'Fresh, the week of', items: ['Potatoes & sweet potatoes', 'Green beans', 'Celery & onions', 'Fresh sage & thyme', 'Cranberries', '', ''] },
+  { id: 'dairy', title: 'Dairy & extras', items: ['Butter', 'Milk & cream', 'Eggs', 'Whipped cream', 'Foil & leftover containers', '', ''] },
+];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Thanksgiving Meal Prep Plan', item: new URL(routes.thanksgivingPlan, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Thanksgiving Meal Prep Plan & Timeline"
+  description="A free Thanksgiving prep plan: enter dinner time and turkey size for your thaw day and the day’s cooking timeline, plus week-by-week checklists, jobs for everyone and a shopping list."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="tp-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free Thanksgiving plan</p>
+      <h1 id="tp-h" class="serif-hero mt-3">Thanksgiving, Worked Backward From Dinner.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Tell it when you want to eat and how big your turkey is. It works out the day the turkey goes in the fridge, the time it goes in the
+        oven and the whole day’s timeline. Then hand out the jobs, so you’re not the only one in the kitchen.
+      </p>
+    </div>
+  </section>
+
+  <div class="tp-container" id="thanksgiving-plan">
+    <div class="tp-actions">
+      <button type="button" class="tp-btn tp-btn-primary" data-tp-download="0">Download page 1</button>
+      <button type="button" class="tp-btn tp-btn-primary" data-tp-download="1">Download page 2</button>
+      <button type="button" class="tp-btn" data-tp-reset>Start over</button>
+    </div>
+
+    <div class="tp-sheet" data-tp-page="0">
+      <div class="tp-head">
+        <div class="tp-kicker">Page 1 · The weeks before</div>
+        <div class="tp-title">Thanksgiving Meal Prep Plan</div>
+        <div class="tp-sub" data-tp-date>Thanksgiving</div>
+      </div>
+
+      <div class="tp-inputs">
+        <label><span>Dinner at</span><input type="time" data-field="dinner" data-tp-dinner value="15:00" /></label>
+        <label><span>Turkey (lb)</span><input type="text" inputmode="decimal" data-field="weight" data-tp-weight value="15" /></label>
+        <label><span>Guests</span><input type="text" inputmode="numeric" data-field="guests" data-tp-guests placeholder="10" /></label>
+      </div>
+
+      <div class="tp-facts">
+        <div><span>Thaw in the fridge from</span><strong data-tp-thaw>—</strong></div>
+        <div><span>Turkey in the oven</span><strong data-tp-in>—</strong></div>
+        <div><span>Turkey for your guests</span><strong data-tp-size>—</strong></div>
+      </div>
+      <p class="tp-fine">
+        Frozen turkey, thawed in the fridge: about a day for every 4 lb. Roasting times are for an unstuffed turkey at 325 °F. It’s done at
+        165 °F in the thickest part of the thigh, wing and breast, so start checking 30 minutes early.
+      </p>
+
+      <div class="tp-weeks">
+        {
+          weeks.map((w) => (
+            <div class="tp-card">
+              <div class="tp-card-head">
+                <span class="tp-card-title">{w.title}</span>
+                <span class="tp-card-dates" data-tp-range={w.id} />
+              </div>
+              <ul class="tp-list">
+                {w.items.map((item, i) => (
+                  <li>
+                    <input type="checkbox" data-field={`${w.id}-${i}-done`} aria-label={`Done: ${item || 'your own'}`} />
+                    <input type="text" data-field={`${w.id}-${i}`} value={item} aria-label={`${w.title}, task ${i + 1}`} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+
+      <h2 class="tp-section">The menu, and who’s making it</h2>
+      <div class="tp-menu">
+        {
+          [0, 1].map((col) => (
+            <table class="tp-jobs">
+              <tbody>
+                {menu.slice(col * 5, col * 5 + 5).map((dish, j) => {
+                  const i = col * 5 + j;
+                  return (
+                    <tr>
+                      <td><input type="text" data-field={`menu-${i}`} value={dish} aria-label={`Dish ${i + 1}`} /></td>
+                      <td><input type="text" data-field={`menu-${i}-who`} placeholder={i === 0 ? 'Me' : i === 4 ? 'Grandma' : ''} aria-label={`Dish ${i + 1}: who’s making it`} /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ))
+        }
+      </div>
+
+      <div class="tp-foot">{BRAND_NAME}</div>
+    </div>
+
+    <div class="tp-sheet" data-tp-page="1">
+      <div class="tp-head">
+        <div class="tp-kicker">Page 2 · The day</div>
+        <div class="tp-title">Thanksgiving Day</div>
+        <div class="tp-sub" data-tp-date>Thanksgiving</div>
+      </div>
+
+      <div class="tp-day">
+        <div>
+          <h2 class="tp-section">The timeline</h2>
+          <ol class="tp-timeline" data-tp-timeline></ol>
+          <ul class="tp-list tp-extra">
+            {
+              [0, 1].map((i) => (
+                <li>
+                  <input type="text" class="tp-extra-time" data-field={`extra-${i}-time`} aria-label={`Your own step ${i + 1}: time`} />
+                  <input type="text" data-field={`extra-${i}`} aria-label={`Your own step ${i + 1}`} />
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div>
+          <h2 class="tp-section">Who’s doing what</h2>
+          <table class="tp-jobs">
+            <tbody>
+              {
+                jobs.map((job, i) => (
+                  <tr>
+                    <td><input type="text" data-field={`job-${i}`} value={job} aria-label={`Job ${i + 1}`} /></td>
+                    <td><input type="text" data-field={`job-${i}-who`} placeholder={i === 0 ? 'The kids' : ''} aria-label={`Job ${i + 1}: who`} /></td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h2 class="tp-section">Shopping list</h2>
+      <div class="tp-shop">
+        {
+          shopping.map((col) => (
+            <div>
+              <div class="tp-shop-title">{col.title}</div>
+              <ul class="tp-list">
+                {col.items.map((item, i) => (
+                  <li>
+                    <input type="checkbox" data-field={`${col.id}-${i}-done`} aria-label={`Got it: ${item || 'your own'}`} />
+                    <input type="text" data-field={`${col.id}-${i}`} value={item} aria-label={`${col.title}, item ${i + 1}`} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="tp-foot">{BRAND_NAME}</div>
+    </div>
+
+    <p class="tp-footnote">
+      Stock up early with the <a href={routes.fallPantry} class="text-link">Fall Pantry Stock-Up</a>, keep the gifts on budget with the
+      {' '}<a href={routes.holidayGifts} class="text-link">Holiday Budget & Gift Planner</a>, and write the dinner on the
+      {' '}<a href={routes.calendar} data-cta="thanksgiving-plan" class="text-link">Family Wall Calendar</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<style is:global>
+  .tp-container {
+    background: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--color-warm-ink);
+  }
+  .tp-container *,
+  .tp-container *::before,
+  .tp-container *::after {
+    box-sizing: border-box;
+  }
+  .tp-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .tp-btn {
+    min-height: 48px;
+    padding: 0 22px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .tp-btn:hover {
+    background: var(--color-rose-wash);
+  }
+  .tp-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .tp-btn-primary:hover {
+    background: #362e2d;
+  }
+  .tp-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  /* Each sheet: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .tp-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    margin: 0 auto 28px;
+    padding: 34px 40px 20px;
+    background: #fff;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .tp-head {
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-rose);
+    text-align: center;
+  }
+  .tp-kicker {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .tp-title {
+    margin-top: 2px;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .tp-sub {
+    margin-top: 2px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--color-rose-deep);
+  }
+  .tp-inputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 16px 0 10px;
+  }
+  .tp-inputs label {
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-warm-rule);
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .tp-inputs input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--color-warm-ink);
+  }
+  .tp-inputs input::placeholder,
+  .tp-container input::placeholder {
+    color: #c4b8b2;
+  }
+  .tp-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .tp-facts div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 6px;
+    border-radius: 4px;
+    background: var(--color-sage-wash);
+    text-align: center;
+  }
+  .tp-facts div:first-child {
+    background: var(--color-rose-wash);
+  }
+  .tp-facts span {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .tp-facts strong {
+    font-size: 19px;
+    font-weight: 400;
+  }
+  .tp-fine {
+    margin: 8px 0 4px;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--color-warm-soft);
+    text-align: center;
+  }
+  .tp-weeks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .tp-card {
+    padding: 10px 14px 6px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 6px;
+  }
+  .tp-card:nth-child(4) {
+    border: 1px dashed var(--color-rose);
+  }
+  .tp-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-warm-rule);
+  }
+  .tp-card-title {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-rose-deep);
+  }
+  .tp-card-dates {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--color-warm-soft);
+  }
+  .tp-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tp-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    border-bottom: 1px solid #f1ebe7;
+  }
+  .tp-list li:last-child {
+    border-bottom: none;
+  }
+  .tp-list input[type='checkbox'] {
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--color-rose-deep);
+    cursor: pointer;
+  }
+  .tp-container input[type='text'] {
+    font-weight: 400;
+  }
+  .tp-list input[type='text'],
+  .tp-jobs input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--color-warm-ink);
+  }
+  .tp-container input:focus {
+    outline: none;
+    background: var(--color-rose-wash);
+  }
+  .tp-section {
+    margin: 16px 0 6px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-rose-deep);
+  }
+  .tp-day {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 24px;
+  }
+  .tp-timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tp-timeline li {
+    display: flex;
+    gap: 10px;
+    min-height: 30px;
+    align-items: center;
+    border-bottom: 1px solid #f1ebe7;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .tp-timeline time,
+  .tp-extra-time {
+    flex: none;
+    width: 70px !important;
+    font-family: var(--font-sans) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: var(--color-rose-deep) !important;
+  }
+  .tp-timeline li.tp-key {
+    color: var(--color-rose-deep);
+  }
+  .tp-timeline li.tp-dinner {
+    font-weight: 700;
+  }
+  .tp-extra li {
+    gap: 10px;
+  }
+  .tp-jobs {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .tp-jobs td {
+    height: 30px;
+    padding: 0 4px;
+    border-bottom: 1px solid var(--color-warm-rule);
+  }
+  .tp-jobs td + td {
+    border-left: 1px solid var(--color-warm-rule);
+    padding-left: 10px;
+  }
+  .tp-menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .tp-shop {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .tp-shop-title {
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-warm-rule);
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .tp-foot {
+    margin-top: auto;
+    padding-top: 12px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .tp-footnote {
+    max-width: 816px;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--color-warm-soft);
+  }
+
+  /* Phones: one column. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .tp-container:not(.tp-exporting) .tp-sheet {
+      min-height: 0;
+      padding: 20px 12px 12px;
+    }
+    .tp-container:not(.tp-exporting) .tp-title {
+      font-size: 24px;
+    }
+    .tp-container:not(.tp-exporting) .tp-inputs,
+    .tp-container:not(.tp-exporting) .tp-facts,
+    .tp-container:not(.tp-exporting) .tp-weeks,
+    .tp-container:not(.tp-exporting) .tp-day,
+    .tp-container:not(.tp-exporting) .tp-menu,
+    .tp-container:not(.tp-exporting) .tp-shop {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const host = document.getElementById('thanksgiving-plan')!;
+  const pages = Array.from(host.querySelectorAll<HTMLElement>('[data-tp-page]'));
+
+  // This year's Thanksgiving (the fourth Thursday), or next year's once December comes.
+  const now = new Date();
+  const year = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+  const firstDow = new Date(year, 10, 1).getDay();
+  const tday = 1 + ((4 - firstDow + 7) % 7) + 21;
+  const day = (offset: number) => new Date(year, 10, tday + offset);
+  const short = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const long = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  for (const el of host.querySelectorAll('[data-tp-date]')) el.textContent = `${long(day(0))}, ${year}`;
+  const ranges: Record<string, [number, number]> = { w3: [-21, -15], w2: [-14, -8], w1: [-7, -2], w0: [-1, -1] };
+  for (const el of host.querySelectorAll<HTMLElement>('[data-tp-range]')) {
+    const [from, to] = ranges[el.dataset.tpRange!];
+    el.textContent = from === to ? long(day(from)) : `${short(day(from))}–${day(to).getDate()}`;
+  }
+
+  /** Hours at 325 °F for an unstuffed turkey: the top of each USDA range. */
+  const roastHours = (lb: number) => (lb <= 8 ? 3.25 : lb <= 12 ? 3 : lb <= 14 ? 3.75 : lb <= 18 ? 4.25 : lb <= 20 ? 4.5 : 5);
+  const clock = (mins: number) => {
+    const m = ((Math.round(mins / 5) * 5) % 1440 + 1440) % 1440;
+    const h = Math.floor(m / 60);
+    return `${h % 12 || 12}:${String(m % 60).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+  };
+  const num = (el: HTMLInputElement) => parseFloat(el.value.replace(/[^0-9.]/g, ''));
+
+  const dinnerField = host.querySelector<HTMLInputElement>('[data-tp-dinner]')!;
+  const weightField = host.querySelector<HTMLInputElement>('[data-tp-weight]')!;
+  const guestsField = host.querySelector<HTMLInputElement>('[data-tp-guests]')!;
+  const set = (name: string, text: string) => (host.querySelector(`[data-tp-${name}]`)!.textContent = text);
+  const timeline = host.querySelector('[data-tp-timeline]')!;
+
+  const update = () => {
+    const [h, m] = (dinnerField.value || '15:00').split(':').map(Number);
+    const dinner = h * 60 + m;
+    const lb = num(weightField);
+    const guests = num(guestsField);
+    const hasLb = Number.isFinite(lb) && lb > 0;
+
+    set('size', Number.isFinite(guests) && guests > 0 ? `About ${Math.ceil(guests * 1.5)} lb` : '1½ lb a person');
+    set('thaw', hasLb ? long(day(-Math.ceil(lb / 4))) : 'Add the weight');
+    // Out 45 minutes before dinner: 30 to rest under foil while the sides use the oven, 15 to carve.
+    const out = dinner - 45;
+    const ovenIn = out - roastHours(hasLb ? lb : 15) * 60;
+    set('in', hasLb ? clock(ovenIn) : '—');
+
+    const steps: [number, string, string?][] = [
+      [ovenIn - 30, 'Oven on to 325 °F, turkey into the pan'],
+      [ovenIn, 'Turkey in the oven', 'tp-key'],
+      [dinner - 120, 'Kids set the table'],
+      [dinner - 90, 'Potatoes on to boil'],
+      [out - 30, 'Start checking the turkey'],
+      [out, 'Turkey out at 165 °F, rest under foil', 'tp-key'],
+      [dinner - 40, 'Stuffing and casseroles into the oven'],
+      [dinner - 25, 'Gravy from the drippings, warm the rolls'],
+      [dinner - 15, 'Carve, fill the serving dishes'],
+      [dinner, 'Dinner', 'tp-dinner'],
+      [dinner + 60, 'Everyone clears, leftovers packed'],
+    ];
+    timeline.replaceChildren(
+      ...steps
+        .sort((a, b) => a[0] - b[0])
+        .map(([t, text, cls]) => {
+          const li = document.createElement('li');
+          if (cls) li.className = cls;
+          const time = document.createElement('time');
+          time.textContent = clock(t);
+          li.append(time, text);
+          return li;
+        }),
+    );
+  };
+
+  autosave(host, 'omc:thanksgiving:v1', update);
+  host.addEventListener('input', update);
+
+  host.querySelector('[data-tp-reset]')!.addEventListener('click', () => {
+    if (!confirm('Clear the plan and put the starter lists back?')) return;
+    for (const el of fieldsIn(host)) {
+      if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
+      else el.value = el.defaultValue;
+    }
+    host.dispatchEvent(new Event('input'));
+  });
+
+  for (const button of host.querySelectorAll<HTMLButtonElement>('[data-tp-download]')) {
+    button.addEventListener('click', async () => {
+      const n = Number(button.dataset.tpDownload);
+      const sheet = pages[n];
+      // Placeholder hints would print as if filled in; the time picker would print its clock icon. Plain text while capturing.
+      const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+      const hints = hinted.map((el) => el.placeholder);
+      hinted.forEach((el) => el.removeAttribute('placeholder'));
+      const time = dinnerField.value;
+      if (n === 0) {
+        dinnerField.type = 'text';
+        dinnerField.value = time ? clock(Number(time.split(':')[0]) * 60 + Number(time.split(':')[1])) : '';
+      }
+      try {
+        await downloadPng(sheet, { filename: `thanksgiving-plan-${year}-page-${n + 1}.png`, width: 816, height: 1056, layoutHost: host, exportClass: 'tp-exporting', button });
+      } finally {
+        hinted.forEach((el, i) => (el.placeholder = hints[i]));
+        if (n === 0) {
+          dinnerField.type = 'time';
+          dinnerField.value = time;
+        }
+      }
+    });
+  }
+</script>
