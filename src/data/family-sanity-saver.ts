@@ -10,16 +10,17 @@ import type { Asset } from './weekly-reset';
  * Recreated as is from the original WordPress page, colors included (orange buttons, green
  * checks). Those colors are the old look, not the new brand: restyle when the page is rebranded.
  *
- * Not sold yet: there is no `family-sanity-saver-starter-kit` shop product (no migration, no files), so
- * buyUrl stays null and the buttons say "Coming soon"; the page is noindex and out of the sitemap.
- * To go live, add the product the way the Weekly Reset did (supabase/SHOP.md → Digital products),
- * then build buyUrl from FAMILY_SANITY_SAVER_SLUG exactly as src/data/weekly-reset.ts does (and add
- * this file to the checkout-link allowlist in tests/shop.test.ts).
+ * Not sold yet. The shop product exists but is switched off
+ * (supabase/migrations/20261017000000_shop_family_sanity_saver.sql): its calendar is the 2025–2026
+ * edition. buyUrl stays null, so the buttons say "Coming soon" and the page is noindex and out of
+ * the sitemap. To go live: replace the files with the new edition, switch the product on, then
+ * build buyUrl from FAMILY_SANITY_SAVER_SLUG exactly as src/data/weekly-reset.ts does (and add this
+ * file to the checkout-link allowlist in tests/shop.test.ts).
  */
 export const FAMILY_SANITY_SAVER_SLUG = 'family-sanity-saver-starter-kit';
 
 export const familyCommandCenter = {
-  name: 'Family Command Center',
+  name: 'Family Sanity Saver Starter Kit',
   price: 7,
   /** Struck-through price from the original page. */
   regularPrice: 19,
@@ -33,11 +34,12 @@ export const familyCommandCenter = {
 };
 
 /**
- * What's in the kit at checkout (owner-supplied mockup, kit.webp): the 12-month wall calendar with
- * the family's names filled in, the Command Center Refresh Sheet, the 30-Minute Daily Tidy System and
- * the "Quick Coaching Guide: The Weekly Planning System" audio. The page's value-stack copy is the
- * original page's and doesn't map one to one onto these (e.g. "Weekly Sanity Check-Ins" isn't in the
- * mockup): reconcile it before the page goes live.
+ * What the buyer downloads (the six files in the migration): the 12-month wall calendar (fillable:
+ * 5 name fields, typed once, repeated on every month), an example of it filled in, a blank undated
+ * monthly page, the Command Center Refresh Sheet, the 30-Minute Daily Tidy System (fillable
+ * checkboxes) and the "Your First Weekly Reset" coaching audio (7 min 8 s). The page's value-stack
+ * copy is the original page's and doesn't map one to one onto these ("Command Center Setup
+ * Tutorial" and "Weekly Sanity Check-Ins" aren't files): reconcile it before the page goes live.
  */
 
 /**
