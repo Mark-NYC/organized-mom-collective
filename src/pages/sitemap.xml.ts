@@ -8,6 +8,7 @@ import { getArticles, isoDate } from '../lib/articles';
 import { pillars } from '../data/pillars';
 import { routes } from '../routes';
 import { weeklyReset } from '../data/weekly-reset';
+import { mug } from '../data/mug';
 
 export const GET: APIRoute = async ({ site }) => {
   const articles = await getArticles();
@@ -22,6 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.pantry },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
+    ...(mug.buyUrl ? [{ path: routes.mug }] : []),
     // The hub is noindex until it has articles.
     ...(articles.length ? [{ path: routes.resources, lastmod: latest }] : []),
     ...pillars.filter((p) => used.has(p.id)).map((p) => ({ path: routes.pillar(p.id) })),

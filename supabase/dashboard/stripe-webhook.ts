@@ -142,11 +142,13 @@ function splitName(name) {
   const m = name.match(/^(.*) \(([^()]+)\)$/);
   return m ? [m[1], m[2]] : [name, null];
 }
+var isCalendar = (slug) => slug.startsWith("calendar-");
+var hasCalendar = (o) => o.shop_order_items.some((i) => isCalendar(i.product_slug));
 var thumb = (slug, siteUrl) => `${siteUrl}/email/${/^[a-z0-9-]{1,60}$/.test(slug) ? slug : "calendar-26-week"}.jpg`;
 function itemRows(o, siteUrl, withPrices) {
   const html = o.shop_order_items.map((i) => {
     const [name, edition] = splitName(i.product_name);
-    return `<tr><td width="64" valign="top" style="padding:14px 14px 14px 0;border-bottom:1px solid ${C.rule}"><img src="${esc(thumb(i.product_slug, siteUrl))}" width="56" alt="" style="display:block;width:56px;height:auto;border:1px solid ${C.rule};border-radius:4px"></td><td valign="top" style="padding:14px 0;border-bottom:1px solid ${C.rule}"><p style="margin:0;font-weight:600;color:${C.ink}">${esc(name)}</p>` + (edition ? `<p style="margin:2px 0 0;font-size:14px;color:${C.soft}">${esc(edition)}</p>` : "") + `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ""} · ${o.digital ? "instant download" : "includes the cleaning companion website"}</p></td>` + (withPrices ? `<td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid ${C.rule};white-space:nowrap;color:${C.ink}">${money(i.unit_price_cents * i.quantity)}</td>` : "") + `</tr>`;
+    return `<tr><td width="64" valign="top" style="padding:14px 14px 14px 0;border-bottom:1px solid ${C.rule}"><img src="${esc(thumb(i.product_slug, siteUrl))}" width="56" alt="" style="display:block;width:56px;height:auto;border:1px solid ${C.rule};border-radius:4px"></td><td valign="top" style="padding:14px 0;border-bottom:1px solid ${C.rule}"><p style="margin:0;font-weight:600;color:${C.ink}">${esc(name)}</p>` + (edition ? `<p style="margin:2px 0 0;font-size:14px;color:${C.soft}">${esc(edition)}</p>` : "") + `<p style="margin:4px 0 0;font-size:13px;color:${C.muted}">Qty ${i.quantity}${withPrices && i.quantity > 1 ? ` × ${money(i.unit_price_cents)}` : ""}${o.digital ? " · instant download" : isCalendar(i.product_slug) ? " · includes the cleaning companion website" : ""}</p></td>` + (withPrices ? `<td valign="top" align="right" style="padding:14px 0 14px 12px;border-bottom:1px solid ${C.rule};white-space:nowrap;color:${C.ink}">${money(i.unit_price_cents * i.quantity)}</td>` : "") + `</tr>`;
   }).join("");
   return {
     html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${C.rule}">${html}</table>`,
@@ -261,10 +263,11 @@ function renderBody(kind, o, opts) {
           itemRows(o, opts.siteUrl, true),
           totals(o),
           ...shipTo,
-          companionPanel(opts.siteUrl)
+          ...hasCalendar(o) ? [companionPanel(opts.siteUrl)] : []
         ]
       };
     case "shipped": {
+      const what = o.shop_order_items.every((i) => isCalendar(i.product_slug)) ? "calendar" : "order";
       const url = trackingLink(o.carrier, o.tracking_number, o.tracking_url);
       return {
         subject: `Your order ${n} has shipped`,
@@ -272,7 +275,7 @@ function renderBody(kind, o, opts) {
         eyebrow: `Order ${n} shipped`,
         title: "Your order is on its way",
         blocks: [
-          p(hi ? `Good news, ${hi}: your calendar has shipped.` : "Good news: your calendar has shipped."),
+          p(hi ? `Good news, ${hi}: your ${what} has shipped.` : `Good news: your ${what} has shipped.`),
           panel(C.page, C.rule, [
             ...o.carrier ? [p(`Carrier: ${o.carrier}`, "margin:0 0 4px;font-size:15px")] : [],
             ...o.tracking_number ? [p(`Tracking number: ${o.tracking_number}`, "margin:0 0 14px;font-size:15px;font-weight:600;word-break:break-all")] : [],
@@ -283,7 +286,7 @@ function renderBody(kind, o, opts) {
           heading("In this package"),
           itemRows(o, opts.siteUrl, false),
           p(""),
-          companionPanel(opts.siteUrl)
+          ...hasCalendar(o) ? [companionPanel(opts.siteUrl)] : []
         ]
       };
     }

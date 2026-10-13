@@ -1,0 +1,74 @@
+---
+/**
+ * /mind-your-own-motherhood-mug: the $23 "Mind Your Own Motherhood" mug, in the public page style
+ * (serif Title Case headline, warm ink, cream wash). One purchase action. Settings and the photo
+ * live in src/data/mug.ts; the product (price, stock, shipping) in the shop database.
+ *
+ * Every fact here comes from the product listing the owner supplied: 15oz ceramic, glossy white,
+ * microwave and dishwasher safe. The website ships to US addresses only (supabase/SHOP.md →
+ * Shipping). Don't add delivery times, materials claims or reviews that aren't verified.
+ * Noindex, out of the sitemap and out of the footer until the buy button is live.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import OfferButton from '../components/site/OfferButton.astro';
+import { mug, mugImage } from '../data/mug';
+import { BRAND_NAME } from '../config';
+
+const live = Boolean(mug.buyUrl);
+const srcset = mugImage.widths.map((w) => `${mugImage.src}-${w}.webp ${w}w`).join(', ');
+const details = ['15oz ceramic mug, glossy white finish', '“Mind your own Motherhood” printed in soft sage', 'Microwave and dishwasher safe', 'Ships to US addresses'];
+---
+
+<PublicLayout
+  fullTitle={`Mind Your Own Motherhood Mug, 15oz Ceramic · ${BRAND_NAME}`}
+  description={`A 15oz glossy white ceramic mug printed with “Mind your own Motherhood”. Microwave and dishwasher safe. $${mug.price}.`}
+  indexable={live}
+  width="full"
+  ogImage={`${mugImage.src}-1280.webp`}
+  ogImageAlt={mugImage.alt}
+>
+  <section aria-labelledby="mug-h" class="bg-cream">
+    <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-12 sm:px-8 sm:py-20 md:grid-cols-2 md:gap-14">
+      <figure class="overflow-hidden rounded-[3px] bg-paper">
+        <img
+          src={`${mugImage.src}-960.webp`}
+          srcset={srcset}
+          sizes="(min-width: 1152px) 540px, (min-width: 768px) 46vw, 100vw"
+          width={mugImage.width}
+          height={mugImage.height}
+          alt={mugImage.alt}
+          class="aspect-square w-full object-cover"
+          fetchpriority="high"
+        />
+      </figure>
+
+      <div>
+        <p class="label text-warm-soft">The Mug</p>
+        <h1 id="mug-h" class="serif-title mt-3 text-warm-ink">Mind Your Own Motherhood</h1>
+        <p class="mt-3 font-serif text-[1.4rem] text-warm-ink">${mug.price} <span class="text-[1rem] text-warm-soft italic">· 15oz ceramic mug</span></p>
+
+        <div class="lede mt-6 space-y-4 text-warm-ink">
+          <p>For the mom who has heard every opinion on naps, screen time and snacks, and is raising her kids her way anyway.</p>
+          <p>Fifteen ounces: enough for the coffee you’ll reheat twice.</p>
+        </div>
+
+        <ul class="mt-6 space-y-2 border-t border-warm-rule pt-5 text-[0.98rem] text-warm-ink">
+          {
+            details.map((d) => (
+              <li class="flex gap-2.5">
+                <span aria-hidden="true" class="mt-[0.6em] size-1.5 shrink-0 rounded-full bg-sage" />
+                {d}
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="mt-5 font-serif text-[1rem] text-warm-soft italic">A good gift for Mother’s Day, a baby shower, or a friend who needs the reminder.</p>
+
+        <div class="mt-8">
+          <OfferButton label={`Buy the Mug · $${mug.price}`} href={mug.buyUrl} cta="mug-buy" />
+        </div>
+      </div>
+    </div>
+  </section>
+</PublicLayout>

@@ -64,6 +64,7 @@ Dashboard (/admin/orders)
 - **The Weekly Reset System.** $9 download (`weekly-reset-system`), active, no stock. Sold from `/weekly-reset`. See [Digital products](#digital-products).
 - **Take Back Control.** $29 download (`take-back-control`), active, no stock. Sold from `/take-back-control`, the offer after the Weekly Reset. See [Digital products](#digital-products).
 - **Essential Routines Bundle.** $12 download (`essential-routines`), active, no stock. Sold from `/essential-routines`, the downsell when someone passes on Take Back Control.
+- **Mind Your Own Motherhood Mug.** $23, 15oz ceramic (`mind-your-own-motherhood-mug`), active, **0 units** until you set real stock. Physical: ships like a calendar (1 shipping unit, so the same rate as one 26-week calendar), no cleaning companion in its emails. Sold from `/mind-your-own-motherhood-mug`; its checkout link shows only the mug.
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -151,6 +152,12 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] **Storage → shop-downloads**: the 4 routine PDFs are already there (Take Back Control's). Upload the Quick Setup Audio to folder `essential-routines` as `quick-setup-audio.m4a`. The "Why Routines Work" cheat sheet is a page on the site (`WHY_ROUTINES_PATH`), linked from the buyer's download page, not a file.
 - [ ] Buy it once in preview (test card): all five files should download, and the download page should link to "Why Routines Work".
 
+### Database update: the mug (once, after Essential Routines)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261015000000_shop_mug.sql` → **Run**, once. It only adds the product.
+- [ ] Redeploy `stripe-webhook` and `shop-admin` from `supabase/dashboard/` (mug-only orders no longer say "your calendar" or show the cleaning companion panel).
+- [ ] Dashboard → Inventory: set the mug's stock to what you actually have (or can fulfil). Check its shipping: it's charged one calendar's rate.
+- [ ] Buy one in preview (test card): `/checkout?product=mind-your-own-motherhood-mug` shows only the mug; the receipt shows the mug's picture and no companion panel.
+
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
 - [ ] **Shipping prices** ([Shipping](#shipping)). Add the real rate(s) in Settings, then turn off the test placeholder.
@@ -168,7 +175,7 @@ Only after you approve it. Each step is reversible: Settings → **Off** stops n
 3. Vercel production: `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_…`, `PUBLIC_SHOP_ENABLED=true`; redeploy.
 4. Dashboard → Settings → Launch readiness: all ★ items ticked → **Open**.
 5. Optional real-money smoke test: buy one with a 100%-minus-$1 promotion code, then refund it.
-6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public other than the Weekly Reset page links to `/checkout`, so it must be updated deliberately.
+6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public other than the offer pages and the mug page links to `/checkout`, so it must be updated deliberately.
 
 ## Digital products
 
