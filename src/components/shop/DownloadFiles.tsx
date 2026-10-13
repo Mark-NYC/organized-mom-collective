@@ -14,7 +14,10 @@ const WEB_TOOLS: Record<string, { label: string; href: string }[]> = {
     { label: 'Open the Routine Builder', href: ROUTINE_PLUS_PATH },
     { label: 'Open the Pantry Inventory', href: routes.pantry },
   ],
-  [ESSENTIAL_ROUTINES_SLUG]: [{ label: 'Read “Why Routines Work”', href: WHY_ROUTINES_PATH }],
+  [ESSENTIAL_ROUTINES_SLUG]: [
+    { label: 'Read “Why Routines Work”', href: WHY_ROUTINES_PATH },
+    { label: 'Open the Routine Builder', href: ROUTINE_PLUS_PATH },
+  ],
 };
 
 /**

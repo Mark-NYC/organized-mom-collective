@@ -1,9 +1,9 @@
 /**
  * The routine charts: free at /routine-chart, and the upgraded one (the same chart plus a notes line under
- * each step, with starter notes) for Take Back Control buyers at ROUTINE_PLUS_PATH.
+ * each step, with starter notes) for Take Back Control and Essential Routines buyers at ROUTINE_PLUS_PATH.
  *
- * The upgraded page is unlisted, not locked: noindex, out of the sitemap, linked only from a Take Back
- * Control buyer's download page. Anyone with the link can open it. To change the link (if it gets passed
+ * The upgraded page is unlisted, not locked: noindex, out of the sitemap, linked only from Take Back
+ * Control and Essential Routines buyers' download pages. Anyone with the link can open it. To change the link (if it gets passed
  * around), change ROUTINE_PLUS_PATH; buyers' download pages pick it up.
  *
  * Both use src/components/site/RoutineChart.astro and save in this browser only (separate keys).

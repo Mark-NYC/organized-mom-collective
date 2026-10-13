@@ -63,6 +63,8 @@ export const routes = {
   screenTime: '/screen-time-contract',
   routineChart: '/routine-chart',
   resources: '/resources',
+  /** The Free tools section of the resource hub. */
+  freeTools: '/resources#free-tools',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
   survey: '/survey',
