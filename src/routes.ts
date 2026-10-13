@@ -32,6 +32,7 @@
  *           /fall-pantry-stock-up      free one-page fall & winter pantry stock-up list, same idea
  *           /gratitude-tracker         free November family gratitude tracker (Thanksgiving week computed per year)
  *           /holiday-gift-planner      free one-page holiday budget & gift planner (totals add themselves up)
+ *           /december-countdown        free family December countdown: 24 editable dated days + idea chips
  *           /thanksgiving-plan         free two-page Thanksgiving prep plan (thaw day and timeline from dinner time + turkey weight)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
@@ -90,6 +91,7 @@ export const routes = {
   gratitudeTracker: '/gratitude-tracker',
   holidayGifts: '/holiday-gift-planner',
   thanksgivingPlan: '/thanksgiving-plan',
+  decemberCountdown: '/december-countdown',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/resources#free-tools',

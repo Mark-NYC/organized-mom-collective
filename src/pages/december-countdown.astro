@@ -1,0 +1,485 @@
+---
+/**
+ * /december-countdown — a free family December countdown: 24 dated cards (weekday letters set for this year), each
+ * an editable line with a tick, starting with a mix of five-minute fun and holiday jobs for the kids, plus "our big
+ * three" for the year. Idea chips by kind fill the day you last clicked (or the next empty one). Merges the old
+ * Advent Countdown (a photo challenge with nine repeated days) and December Traditions Builder (whose idea bank
+ * survives here; its counters never updated). Downloads as a PNG (US Letter landscape). Autosave and export:
+ * src/lib/printable.ts (`omc:december:v1`). Classes prefixed `dc-`.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const starters = [
+  'Put up the tree together',
+  'Hot cocoa after dinner',
+  'Kids pick 5 toys to donate',
+  'A holiday book at bedtime',
+  'Write wish lists or letters to Santa',
+  'Pajama movie night',
+  'Kids stamp and seal the cards',
+  'Bake cookies',
+  'Paper snowflakes for the windows',
+  'Video-call a grandparent',
+  'Wrap gifts together',
+  'Drive to see the lights',
+  'Cookies to a neighbor',
+  'Board game night',
+  'Make an ornament with this year on it',
+  'Breakfast for dinner',
+  'Kids write the teacher notes',
+  'Holiday music dance party',
+  'Make room for new toys',
+  'Gingerbread houses',
+  'Read the cards we got',
+  'Everyone tidies for the guests',
+  'Favorite memory of the year at dinner',
+  'New pajamas, cocoa, early night',
+];
+const days = starters.map((text, i) => ({ day: i + 1, text }));
+
+const ideas: Record<string, string[]> = {
+  Cozy: ['Cocoa bar with toppings', 'Candlelit dinner', 'Walk to see the lights', 'Our same movie, every year', 'Holiday books in a blanket fort'],
+  Crafty: ['Photo ornaments', 'Decorate sugar cookies', 'Make cards together', 'Gingerbread houses', 'Gifts for the grandparents'],
+  'Out & about': ['Holiday market', 'Ice skating or sledding', 'A holiday concert or play', 'Tree lighting'],
+  Giving: ['Donate toys together', 'Treats for the neighbors', 'Food drive', 'A kindness for a stranger'],
+  Memories: ['Best moments of the year', 'Letters to next-year us', 'Family photo by the tree', 'Start a gratitude jar'],
+  'Kids’ jobs': ['Wrap one gift each', 'Untangle the lights', 'Set the table for guests', 'Sort the wrapping paper', 'Pack the donation bag'],
+};
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Family December Countdown', item: new URL(routes.decemberCountdown, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Family December Countdown (Advent Activity Calendar)"
+  description="A free printable December countdown for families: 24 small, easy activities and holiday jobs for the kids, one a day. Change any day, pick your big three, print it for the fridge."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="dc-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free December countdown</p>
+      <h1 id="dc-h" class="serif-hero mt-3">24 Small Things, Not 24 Big Ones.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Most days take five minutes: cocoa, a book, a phone call to Grandma. Some days the kids do a holiday job, so the wrapping and the
+        cards aren’t all yours. Pick your big three for the year, change any day, then print it for the fridge.
+      </p>
+    </div>
+  </section>
+
+  <div class="dc-container">
+    <div class="dc-ideas" aria-label="Idea bank">
+      {
+        Object.entries(ideas).map(([kind, list]) => (
+          <div class="dc-idea-row">
+            <span class="dc-idea-kind">{kind}</span>
+            {list.map((idea) => (
+              <button type="button" class="dc-chip" data-dc-idea={idea}>
+                {idea}
+              </button>
+            ))}
+          </div>
+        ))
+      }
+      <p class="dc-hint">Click a day, then an idea to put it there. With no day picked, it goes in the next empty one.</p>
+    </div>
+
+    <div class="dc-actions">
+      <button type="button" class="dc-btn dc-btn-primary" data-dc-download>Download PNG</button>
+      <button type="button" class="dc-btn" data-dc-blank>Blank days</button>
+      <button type="button" class="dc-btn" data-dc-reset>Start over</button>
+    </div>
+
+    <div class="dc-sheet" id="december-countdown">
+      <div class="dc-head">
+        <div class="dc-title">Our December Countdown</div>
+        <div class="dc-sub" data-dc-year>December</div>
+      </div>
+
+      <ol class="dc-grid">
+        {
+          days.map(({ day, text }) => (
+            <li class="dc-card" data-dc-day={day}>
+              <div class="dc-card-top">
+                <span class="dc-num">{day}</span>
+                <span class="dc-dow" data-dc-dow />
+                <input type="checkbox" data-field={`day-${day}-done`} aria-label={`December ${day}: done`} />
+              </div>
+              <textarea data-field={`day-${day}`} rows="2" aria-label={`December ${day}`}>{text}</textarea>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="dc-big">
+        <span class="dc-big-label">Our big three</span>
+        {[0, 1, 2].map((i) => <input type="text" data-field={`big-${i}`} placeholder={i === 0 ? 'Ice skating' : ''} aria-label={`Big one ${i + 1}`} />)}
+      </div>
+
+      <div class="dc-foot">{BRAND_NAME}</div>
+    </div>
+
+    <p class="dc-footnote">
+      More free tools for the season: the <a href={routes.holidayGifts} class="text-link">Holiday Budget & Gift Planner</a>, the
+      {' '}<a href={routes.gratitudeTracker} class="text-link">Family Gratitude Tracker</a> and the
+      {' '}<a href={routes.newYearDeclutter} class="text-link">New Year Declutter Sprint</a>. Put the big three on the
+      {' '}<a href={routes.calendar} data-cta="december-countdown" class="text-link">Family Wall Calendar</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<style is:global>
+  .dc-container {
+    background: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--color-warm-ink);
+  }
+  .dc-container *,
+  .dc-container *::before,
+  .dc-container *::after {
+    box-sizing: border-box;
+  }
+  .dc-ideas {
+    max-width: 1056px;
+    margin: 0 auto 20px;
+  }
+  .dc-idea-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .dc-idea-kind {
+    width: 96px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .dc-chip {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 999px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    color: var(--color-warm-ink);
+    cursor: pointer;
+  }
+  .dc-chip:hover {
+    border-color: var(--color-rose);
+    background: var(--color-rose-wash);
+  }
+  .dc-hint {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-warm-soft);
+  }
+  .dc-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .dc-btn {
+    min-height: 48px;
+    padding: 0 22px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .dc-btn:hover {
+    background: var(--color-rose-wash);
+  }
+  .dc-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .dc-btn-primary:hover {
+    background: #362e2d;
+  }
+  .dc-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  /* The sheet: US Letter landscape (11 × 8.5 in at 96 px/in). */
+  .dc-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 1056px;
+    max-width: 100%;
+    min-height: 816px;
+    margin: 0 auto;
+    padding: 28px 32px 16px;
+    background: #fff;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .dc-head {
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-rose);
+    text-align: center;
+  }
+  .dc-title {
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .dc-sub {
+    font-size: 15px;
+    font-style: italic;
+    color: var(--color-rose-deep);
+  }
+  .dc-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dc-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 136px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 6px;
+    cursor: text;
+  }
+  .dc-card:nth-child(odd) {
+    background: #fdfaf8;
+  }
+  .dc-card.dc-weekend {
+    background: var(--color-sage-wash);
+  }
+  .dc-card.dc-last {
+    border: 1px dashed var(--color-rose);
+    background: var(--color-rose-wash);
+  }
+  .dc-container:not(.dc-exporting) .dc-card.dc-picked {
+    outline: 2px solid var(--color-rose);
+  }
+  .dc-card-top {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .dc-num {
+    font-size: 26px;
+    line-height: 1;
+    color: var(--color-rose-deep);
+  }
+  .dc-dow {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .dc-card input[type='checkbox'] {
+    width: 15px;
+    height: 15px;
+    margin: 0 0 0 auto;
+    align-self: center;
+    accent-color: var(--color-rose-deep);
+    cursor: pointer;
+  }
+  .dc-card textarea {
+    flex: 1;
+    width: 100%;
+    margin-top: 6px;
+    padding: 0;
+    border: none;
+    resize: none;
+    overflow: hidden;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--color-warm-ink);
+  }
+  .dc-card textarea:focus,
+  .dc-big input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.7);
+  }
+  .dc-big {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .dc-big-label {
+    flex: none;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-rose-deep);
+  }
+  .dc-big input {
+    flex: 1;
+    min-width: 0;
+    padding: 2px 0;
+    border: none;
+    border-bottom: 1px solid var(--color-warm-rule);
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-warm-ink);
+  }
+  .dc-big input::placeholder {
+    color: #c4b8b2;
+  }
+  .dc-foot {
+    margin-top: auto;
+    padding-top: 10px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .dc-footnote {
+    max-width: 1056px;
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--color-warm-soft);
+  }
+
+  /* Phones: two cards a row. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .dc-idea-kind {
+      width: 100%;
+    }
+    .dc-container:not(.dc-exporting) .dc-sheet {
+      min-height: 0;
+      padding: 18px 10px 12px;
+    }
+    .dc-container:not(.dc-exporting) .dc-title {
+      font-size: 24px;
+    }
+    .dc-container:not(.dc-exporting) .dc-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .dc-container:not(.dc-exporting) .dc-big {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const sheet = document.getElementById('december-countdown')!;
+  const host = sheet.closest<HTMLElement>('.dc-container')!;
+
+  // This December (January still means the one just gone).
+  const now = new Date();
+  const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+  sheet.querySelector('[data-dc-year]')!.textContent = `December ${year}`;
+  for (const card of sheet.querySelectorAll<HTMLElement>('[data-dc-day]')) {
+    const date = new Date(year, 11, Number(card.dataset.dcDay));
+    card.querySelector('[data-dc-dow]')!.textContent = date.toLocaleDateString('en-US', { weekday: 'short' });
+    card.classList.toggle('dc-weekend', date.getDay() === 0 || date.getDay() === 6);
+    card.classList.toggle('dc-last', date.getDate() === 24);
+  }
+
+  const save = autosave(sheet, 'omc:december:v1');
+  const boxes = Array.from(sheet.querySelectorAll<HTMLTextAreaElement>('textarea[data-field]'));
+
+  // The last day clicked is where the next idea goes.
+  let picked: HTMLTextAreaElement | null = null;
+  const pick = (box: HTMLTextAreaElement | null) => {
+    sheet.querySelector('.dc-picked')?.classList.remove('dc-picked');
+    picked = box;
+    box?.closest('.dc-card')!.classList.add('dc-picked');
+  };
+  for (const card of sheet.querySelectorAll<HTMLElement>('.dc-card')) {
+    card.addEventListener('click', (e) => {
+      const box = card.querySelector('textarea')!;
+      pick(box);
+      if (!(e.target instanceof HTMLInputElement)) box.focus();
+    });
+  }
+
+  for (const chip of document.querySelectorAll<HTMLButtonElement>('[data-dc-idea]')) {
+    chip.addEventListener('click', () => {
+      const target = picked ?? boxes.find((b) => !b.value.trim());
+      if (!target) {
+        alert('Every day is full. Click a day first to swap its idea.');
+        return;
+      }
+      target.value = chip.dataset.dcIdea!;
+      save();
+      // Move along so a run of clicks fills a run of days.
+      const next = boxes[boxes.indexOf(target) + 1] ?? null;
+      pick(next);
+      next?.closest('.dc-card')!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+
+  document.querySelector('[data-dc-blank]')!.addEventListener('click', () => {
+    if (!confirm('Empty all 24 days so you can fill them yourself?')) return;
+    boxes.forEach((b) => (b.value = ''));
+    pick(boxes[0]);
+    save();
+  });
+
+  document.querySelector('[data-dc-reset]')!.addEventListener('click', () => {
+    if (!confirm('Put the starter ideas back and clear the ticks?')) return;
+    for (const el of fieldsIn(sheet)) {
+      if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
+      else el.value = el.defaultValue;
+    }
+    pick(null);
+    save();
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('[data-dc-download]')!;
+  button.addEventListener('click', async () => {
+    // Placeholder hints would print as if they'd been filled in: drop them while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    const hints = hinted.map((el) => el.placeholder);
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    try {
+      await downloadPng(sheet, { filename: `december-countdown-${year}.png`, width: 1056, height: 816, layoutHost: host, exportClass: 'dc-exporting', button });
+    } finally {
+      hinted.forEach((el, i) => (el.placeholder = hints[i]));
+    }
+  });
+</script>
