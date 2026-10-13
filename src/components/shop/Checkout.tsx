@@ -29,6 +29,8 @@ export default function Checkout() {
   const [loadError, setLoadError] = useState(false);
   const [slug, setSlug] = useState('');
   const [kind, setKind] = useState<ShopProduct['kind']>('physical');
+  // A physical product that isn't a calendar (the mug) opens on its own, without the calendar choice.
+  const [single, setSingle] = useState('');
   const [qty, setQty] = useState(1);
   const [phase, setPhase] = useState<'choose' | 'opening' | 'paying'>('choose');
   const [error, setError] = useState('');
@@ -44,10 +46,14 @@ export default function Checkout() {
         setCatalog(c);
         const params = new URLSearchParams(location.search);
         const wanted = params.get('product');
-        // A link to a download opens the downloads; anything else opens the calendars.
-        const k = c.products.find((p) => p.slug === wanted)?.kind === 'digital' ? 'digital' : 'physical';
-        const list = c.products.filter((p) => (p.kind ?? 'physical') === k);
+        // A link to a download opens the downloads, a link to another physical item (the mug) opens
+        // just that item; anything else opens the calendars.
+        const linked = c.products.find((p) => p.slug === wanted);
+        const k = linked?.kind === 'digital' ? 'digital' : 'physical';
+        const one = linked && k === 'physical' && !isCalendar(linked) ? linked.slug : '';
+        const list = inList(c.products, k, one);
         setKind(k);
+        setSingle(one);
         const pick = list.find((p) => p.slug === wanted && p.available) ?? list.find((p) => p.available) ?? list[0];
         setSlug((s) => (s && list.some((p) => p.slug === s && p.available) ? s : (pick?.slug ?? '')));
       })
@@ -65,7 +71,7 @@ export default function Checkout() {
     mountRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [phase]);
 
-  const products = catalog?.products.filter((p) => (p.kind ?? 'physical') === kind) ?? [];
+  const products = catalog ? inList(catalog.products, kind, single) : [];
   const digital = kind === 'digital';
   const product = products.find((p) => p.slug === slug) ?? null;
   const max = product ? Math.max(1, product.max_quantity) : 1;
@@ -76,7 +82,7 @@ export default function Checkout() {
 
   const open = catalog.checkout_mode === 'live' || (catalog.checkout_mode === 'preview' && preview);
   if (!open || products.length === 0) {
-    return digital ? (
+    return digital || single ? (
       <Notice title="Online checkout isn’t open yet" body="Please check back soon." />
     ) : (
       <Notice title="Online checkout isn’t open yet" body="For now, the calendar is available on Etsy." etsy />
@@ -310,6 +316,13 @@ export default function Checkout() {
   );
 }
 
+/** Calendars carry their week count; other physical items (the mug) don't. */
+const isCalendar = (p: Pick<ShopProduct, 'weeks'>) => p.weeks != null;
+
+/** What the page offers: one linked item, or every download / every calendar. */
+const inList = (all: ShopProduct[], kind: ShopProduct['kind'], single: string) =>
+  single ? all.filter((p) => p.slug === single) : all.filter((p) => (p.kind ?? 'physical') === kind && (kind === 'digital' || isCalendar(p)));
+
 const productTitle = (p: Pick<ShopProduct, 'name' | 'edition'>) => (p.edition ? `${p.name}, ${p.edition}` : p.name);
 
 function ProductImage({ product, className }: { product: ShopProduct; className: string }) {
@@ -325,9 +338,9 @@ function errorText(code: CheckoutError, p: ShopProduct): string {
     case 'too_many':
       return `You can order up to ${p.max_quantity} at a time.`;
     case 'unavailable':
-      return `${p.kind === 'digital' ? 'That download' : 'That calendar'} isn’t available on the website right now.`;
+      return `${p.kind === 'digital' ? 'That download' : isCalendar(p) ? 'That calendar' : 'That item'} isn’t available on the website right now.`;
     case 'mixed_cart':
-      return 'Downloads and calendars are checked out separately.';
+      return 'Downloads and physical items are checked out separately.';
     case 'checkout_closed':
     case 'shipping_not_configured':
     case 'tax_not_configured':
