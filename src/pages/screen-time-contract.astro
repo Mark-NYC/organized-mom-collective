@@ -1,0 +1,569 @@
+---
+/**
+ * /screen-time-contract — a free screen time contract: the jobs that come first, then activities that earn
+ * screen time (every N minutes of an activity earns M minutes), with tick boxes and signature lines.
+ * Edited right on the sheet; suggestion chips fill the next empty line. Downloads as a PNG (US Letter
+ * portrait, 8.5 × 11 in at 96 px/in, drawn at 2×). Everything autosaves in this browser
+ * (`omc:screen-time:v1`); Reset puts the starter text back. Autosave and export: src/lib/printable.ts.
+ * Classes are prefixed `st-` so they never collide with the site's own.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const TASK_ROWS = 6;
+const ACTIVITY_ROWS = 6;
+const SLOTS = 8;
+const tasks = ['Finish my homework', 'Clean my room', 'Make my bed', 'Brush my teeth'];
+const activities = ['Read a book', 'Play outside', 'Do art or crafts', 'Help cook dinner'];
+const taskIdeas = ['Help with dishes', 'Take out trash', 'Feed pets', 'Pack school bag', 'Put laundry away', 'Practice spelling words'];
+const activityIdeas = ['Practice music', 'Exercise or sports', 'Build with blocks or LEGO', 'Play a board game', 'Write a story', 'Ride my bike'];
+
+const pad = (items: string[], n: number) => Array.from({ length: n }, (_, i) => items[i] ?? '');
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Screen Time Contract', item: new URL(routes.screenTime, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Screen Time Contract for Kids"
+  description="A free screen time contract for kids: jobs first, then activities that earn screen time. Edit it together, then download it to print and sign."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="st-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free screen time contract</p>
+      <h1 id="st-h" class="serif-hero mt-3">Screen Time They Earn, Not Argue For.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Jobs come first. Then every stretch of reading, playing outside or helping out earns screen time. Fill it in together, download it,
+        sign it and hang it up. The contract settles it, so you don’t have to.
+      </p>
+    </div>
+  </section>
+
+  <div class="st-container">
+    <div class="st-actions">
+      <button type="button" class="st-btn st-btn-primary" data-st-download>Download PNG</button>
+      <button type="button" class="st-btn" data-st-reset>Reset contract</button>
+    </div>
+
+    <div class="st-ideas">
+      <div class="st-ideas-row">
+        <span class="st-ideas-label">Add a job</span>
+        {taskIdeas.map((idea) => <button type="button" class="st-chip" data-st-add="task" data-idea={idea}>+ {idea}</button>)}
+      </div>
+      <div class="st-ideas-row">
+        <span class="st-ideas-label">Add an activity</span>
+        {activityIdeas.map((idea) => <button type="button" class="st-chip" data-st-add="activity" data-idea={idea}>+ {idea}</button>)}
+      </div>
+      <p class="st-hint">Or tap any line on the contract to type your own.</p>
+    </div>
+
+    <div class="st-sheet" id="screen-time">
+      <div class="st-head">
+        <div class="st-title">Screen Time</div>
+        <div class="st-subtitle">Contract</div>
+      </div>
+
+      <label class="st-name">
+        <span>Name</span>
+        <input type="text" data-field="name" placeholder="Your child’s name" />
+      </label>
+
+      <section class="st-section">
+        <h2 class="st-section-title"><span class="st-num">1</span> First, I need to…</h2>
+        <ul class="st-tasks">
+          {
+            pad(tasks, TASK_ROWS).map((task, i) => (
+              <li class="st-task">
+                <span class="st-box" aria-hidden="true" />
+                <input type="text" data-field={`task-${i}`} data-st-slot="task" value={task} aria-label={`Job ${i + 1}`} />
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="st-section">
+        <h2 class="st-section-title"><span class="st-num">2</span> Now I can earn screen time!</h2>
+        <p class="st-rule">
+          For every
+          <input type="number" min="1" max="120" class="st-minutes" data-field="minutes" data-st-minutes value="30" aria-label="Minutes of activity" />
+          minutes I spend on any of these, I earn
+          <input type="number" min="1" max="120" class="st-minutes" data-field="earn" value="15" aria-label="Minutes of screen time earned" />
+          minutes of screen time.
+        </p>
+        <div class="st-grid">
+          <div class="st-row st-row-head" aria-hidden="true">
+            <span></span>
+            {Array.from({ length: SLOTS }, () => <span class="st-slot-label"><b data-st-slot-min>30</b> min</span>)}
+          </div>
+          {
+            pad(activities, ACTIVITY_ROWS).map((activity, i) => (
+              <div class="st-row">
+                <input type="text" data-field={`activity-${i}`} data-st-slot="activity" value={activity} aria-label={`Activity ${i + 1}`} />
+                {Array.from({ length: SLOTS }, () => (
+                  <span class="st-box" aria-hidden="true" />
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <div class="st-earned">
+        <span>Screen time earned</span>
+        <input type="text" data-field="earned" aria-label="Screen time earned" />
+      </div>
+
+      <div class="st-signatures">
+        <label><input type="text" data-field="sign-child" aria-label="Child’s signature" /><span>Signed</span></label>
+        <label><input type="text" data-field="sign-parent" aria-label="Parent’s signature" /><span>Parent</span></label>
+        <label><input type="text" data-field="date" aria-label="Date" /><span>Date</span></label>
+      </div>
+
+      <div class="st-foot">{BRAND_NAME}</div>
+    </div>
+
+    <p class="st-footnote">
+      More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
+      <a href={routes.backToSchool} class="text-link">Back to School Checklist</a> and the
+      <a href={routes.calendar} data-cta="screen-time" class="text-link">Family Wall Calendar</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<style is:global>
+  .st-container {
+    --st-ink: var(--color-warm-ink);
+    --st-soft: var(--color-warm-soft);
+    --st-rule: var(--color-warm-rule);
+    --st-rose: var(--color-rose);
+    --st-rose-deep: var(--color-rose-deep);
+    --st-rose-wash: var(--color-rose-wash);
+    --st-sage: var(--color-sage);
+    --st-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--st-ink);
+  }
+  .st-container *,
+  .st-container *::before,
+  .st-container *::after {
+    box-sizing: border-box;
+  }
+
+  .st-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .st-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .st-btn:hover {
+    background: var(--st-rose-wash);
+  }
+  .st-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .st-btn-primary:hover {
+    background: #362e2d;
+  }
+  .st-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .st-ideas {
+    max-width: 816px;
+    margin: 0 auto 24px;
+  }
+  .st-ideas-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .st-ideas-label {
+    margin-right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--st-soft);
+  }
+  .st-chip {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--st-rule);
+    border-radius: 999px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    color: var(--st-ink);
+    cursor: pointer;
+  }
+  .st-chip:hover {
+    border-color: var(--st-rose);
+    background: var(--st-rose-wash);
+  }
+  .st-hint {
+    font-size: 0.9rem;
+    color: var(--st-soft);
+  }
+
+  /* The sheet: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .st-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    margin: 0 auto;
+    padding: 36px 44px 26px;
+    background: var(--color-ivory);
+    border: 1px solid var(--st-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .st-sheet input {
+    min-width: 0;
+    border: none;
+    border-bottom: 1px solid var(--st-rule);
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--st-ink);
+  }
+  .st-sheet input:focus {
+    outline: none;
+    border-bottom-color: var(--st-rose);
+    background: var(--st-rose-wash);
+  }
+  .st-sheet input::placeholder {
+    color: #c4b8b2;
+  }
+  .st-head {
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--st-rose);
+  }
+  .st-title {
+    font-size: 46px;
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+  .st-subtitle {
+    margin-top: 4px;
+    font-size: 28px;
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--st-rose-deep);
+  }
+  .st-name {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin: 22px 0 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--st-soft);
+  }
+  .st-name input {
+    flex: 1;
+    height: 36px;
+    font-size: 22px;
+    text-align: center;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .st-section {
+    margin-top: 20px;
+  }
+  .st-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--st-ink);
+  }
+  .st-num {
+    font-family: var(--font-serif);
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--st-rose);
+  }
+  .st-tasks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 22px;
+    margin: 0;
+    padding: 14px 16px;
+    list-style: none;
+    border: 1px dashed var(--st-rose);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .st-task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .st-task input {
+    flex: 1;
+    height: 32px;
+  }
+  .st-box {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--st-rose);
+    border-radius: 3px;
+    background: #fff;
+  }
+  .st-rule {
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+  .st-sheet .st-minutes {
+    width: 46px;
+    height: 28px;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .st-minutes::-webkit-inner-spin-button,
+  .st-minutes::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .st-grid {
+    padding: 12px 16px 8px;
+    border: 1px solid var(--st-sage);
+    border-radius: 6px;
+    background: var(--st-sage-wash);
+  }
+  .st-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.9fr) repeat(8, minmax(0, 1fr));
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .st-row input {
+    height: 34px;
+    border-bottom-color: #cfd7c8;
+  }
+  .st-row .st-box {
+    justify-self: center;
+    width: 30px;
+    height: 30px;
+    border-color: var(--st-sage);
+  }
+  .st-slot-label {
+    padding: 3px 0;
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #5d6b55;
+  }
+  .st-slot-label b {
+    font-size: 12px;
+  }
+  .st-earned {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin-top: 22px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .st-earned input {
+    flex: 1;
+    height: 34px;
+    border-bottom: 2px solid var(--st-rose);
+    font-size: 18px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .st-signatures {
+    display: grid;
+    grid-template-columns: 1.3fr 1.3fr 0.8fr;
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 26px;
+  }
+  .st-signatures label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--st-soft);
+  }
+  .st-signatures input {
+    height: 34px;
+    border-bottom: 1px solid var(--st-ink);
+    font-style: italic;
+    font-size: 17px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .st-foot {
+    margin-top: 18px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .st-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--st-soft);
+  }
+
+  /* Phones: single-column jobs, four earning boxes per row. The PNG is always the Letter layout with all eight. */
+  @media (max-width: 768px) {
+    .st-container:not(.st-exporting) .st-sheet {
+      min-height: 0;
+      padding: 22px 14px;
+    }
+    .st-container:not(.st-exporting) .st-title {
+      font-size: 36px;
+    }
+    .st-container:not(.st-exporting) .st-tasks {
+      grid-template-columns: 1fr;
+      padding: 10px 12px;
+    }
+    .st-container:not(.st-exporting) .st-grid {
+      padding: 10px 8px 4px;
+    }
+    .st-container:not(.st-exporting) .st-row {
+      grid-template-columns: minmax(0, 2fr) repeat(4, 30px);
+    }
+    .st-container:not(.st-exporting) .st-row > :nth-child(n + 6) {
+      display: none;
+    }
+    .st-container:not(.st-exporting) .st-signatures {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const sheet = document.getElementById('screen-time')!;
+  const host = sheet.closest<HTMLElement>('.st-container')!;
+  const minutes = sheet.querySelector<HTMLInputElement>('[data-st-minutes]')!;
+
+  const syncMinutes = () => {
+    const n = minutes.value.trim() || '30';
+    sheet.querySelectorAll('[data-st-slot-min]').forEach((el) => (el.textContent = n));
+  };
+  const save = autosave(sheet, 'omc:screen-time:v1', syncMinutes);
+  minutes.addEventListener('input', syncMinutes);
+
+  // Suggestion chips fill the next empty line of their list.
+  for (const chip of document.querySelectorAll<HTMLButtonElement>('[data-st-add]')) {
+    chip.addEventListener('click', () => {
+      const slots = Array.from(sheet.querySelectorAll<HTMLInputElement>(`[data-st-slot="${chip.dataset.stAdd}"]`));
+      const empty = slots.find((el) => !el.value.trim());
+      if (!empty) {
+        alert('That list is full. Clear a line on the contract first.');
+        return;
+      }
+      empty.value = chip.dataset.idea!;
+      save();
+    });
+  }
+
+  // Reset puts the starter text back (each field's value attribute) rather than blanking everything.
+  document.querySelector('[data-st-reset]')!.addEventListener('click', () => {
+    if (!confirm('Reset the contract to the starter jobs and activities?')) return;
+    for (const el of fieldsIn(sheet)) el.value = el.defaultValue;
+    syncMinutes();
+    save();
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('[data-st-download]')!;
+  button.addEventListener('click', async () => {
+    // The PNG would print placeholder hints as if they'd been filled in: drop them while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    const hints = hinted.map((el) => el.placeholder);
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    const name = (sheet.querySelector<HTMLInputElement>('[data-field="name"]')!.value.trim())
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase();
+    try {
+      await downloadPng(sheet, {
+        filename: `${name ? `${name}-` : ''}screen-time-contract.png`,
+        width: 816,
+        height: 1056,
+        layoutHost: host,
+        exportClass: 'st-exporting',
+        button,
+      });
+    } finally {
+      hinted.forEach((el, i) => (el.placeholder = hints[i]));
+    }
+  });
+</script>
