@@ -1,0 +1,495 @@
+---
+/**
+ * Multi-page fill-in checklists (design, autosave, PNG export): US Letter portrait pages (8.5 × 11 in at
+ * 96 px/in, drawn at 2×) of sections and groups, every item an editable line with a checkbox. Each page
+ * downloads on its own, or all at once. Reset puts the starter items back. Used by /back-to-school-checklist,
+ * /laundry-system, /closet-reset, /lunch-and-snack-station and /command-center-setup; data shape in src/lib/checklist-pages.ts. Saves in this browser under `storageKey`.
+ * Classes are prefixed `ck-` so they never collide with the site's own.
+ */
+import type { ChecklistPage } from '../../lib/checklist-pages';
+
+interface Props {
+  /** Printed at the top of every page. */
+  title: string;
+  pages: ChecklistPage[];
+  storageKey: string;
+  /** Download name, e.g. "laundry-system" → laundry-system-page-1.png. */
+  filename: string;
+}
+
+const { title, pages, storageKey, filename } = Astro.props;
+---
+
+<div class="ck-container">
+  <div class="ck-actions">
+    <button type="button" class="ck-btn ck-btn-primary" data-ck-download-all>{pages.length > 1 ? `Download all ${pages.length} pages` : 'Download PNG'}</button>
+    <button type="button" class="ck-btn" data-ck-reset>Reset checklist</button>
+  </div>
+
+  <div id="checklist-pages" class="ck-pages" data-ck-key={storageKey} data-ck-file={filename}>
+    {
+      pages.map((page, p) => (
+        <div class="ck-page-wrap">
+          {pages.length > 1 && (
+            <div class="ck-page-bar">
+              <span>Page {p + 1} of {pages.length}</span>
+              <button type="button" class="ck-btn ck-btn-small" data-ck-download={p}>
+                Download page {p + 1}
+              </button>
+            </div>
+          )}
+          <div class="ck-page" data-ck-page={p}>
+            <div class="ck-head">
+              {pages.length > 1 && <div class="ck-kicker">Page {p + 1}</div>}
+              <div class="ck-title">{title}</div>
+            </div>
+
+            {page.info && (
+              <div class="ck-info">
+                {page.info.map((f) => (
+                  <label>
+                    <span>{f.label}</span>
+                    <input type={f.type ?? 'text'} data-field={f.field} placeholder={f.placeholder} data-ck-start={f.type === 'date' ? '' : undefined} />
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {page.sections.map((section, s) => (
+              <section class="ck-section">
+                <h2 class="ck-section-title">{section.title}</h2>
+                <div class={`ck-groups ck-groups-${section.groupCols ?? 1}`}>
+                {section.groups.map((group, g) => {
+                  const id = `p${p}-s${s}-g${g}`;
+                  return (
+                    <div class:list={['ck-group', group.variant && `ck-${group.variant === 'step' ? 'step-box' : group.variant}`]}>
+                      <div class="ck-group-title">
+                        {group.step && <span class="ck-step">{group.step}</span>}
+                        {group.title}
+                        {group.due !== undefined && <span class="ck-due" data-ck-due={group.due} />}
+                      </div>
+                      {group.notes ? (
+                        <textarea class="ck-notes" data-field={`${id}-notes`} placeholder={group.notes} aria-label={group.title} />
+                      ) : (
+                        <ul class={`ck-items ck-cols-${group.cols ?? 1}`}>
+                          {group.items!.map((item, i) => (
+                            <li class="ck-item">
+                              <input type="checkbox" data-field={`${id}-${i}-done`} aria-label={item ? `Done: ${item}` : `Done: ${group.title} item ${i + 1}`} />
+                              <input
+                                type="text"
+                                data-field={`${id}-${i}`}
+                                value={item}
+                                placeholder={item ? undefined : 'Add an item'}
+                                aria-label={`${group.title} item ${i + 1}`}
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .ck-container {
+    --ck-ink: var(--color-warm-ink);
+    --ck-soft: var(--color-warm-soft);
+    --ck-rule: var(--color-warm-rule);
+    --ck-rose: var(--color-rose);
+    --ck-rose-deep: var(--color-rose-deep);
+    --ck-rose-wash: var(--color-rose-wash);
+    --ck-sage: var(--color-sage);
+    --ck-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--ck-ink);
+  }
+  .ck-container *,
+  .ck-container *::before,
+  .ck-container *::after {
+    box-sizing: border-box;
+  }
+
+  .ck-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 24px;
+  }
+  .ck-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .ck-btn:hover {
+    background: var(--ck-rose-wash);
+  }
+  .ck-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .ck-btn-primary:hover {
+    background: #362e2d;
+  }
+  .ck-btn-small {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 0.68rem;
+  }
+  .ck-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .ck-page-wrap {
+    width: 816px;
+    max-width: 100%;
+    margin: 0 auto 36px;
+  }
+  .ck-page-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ck-soft);
+  }
+
+  /* One page: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .ck-page {
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    padding: 34px 40px;
+    background: var(--color-ivory);
+    border: 1px solid var(--ck-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .ck-head {
+    text-align: center;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--ck-rose);
+  }
+  .ck-kicker {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ck-soft);
+  }
+  .ck-title {
+    font-size: 34px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .ck-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .ck-info label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ck-soft);
+  }
+  .ck-info input {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--ck-rule);
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ck-ink);
+  }
+  .ck-section {
+    padding-top: 14px;
+  }
+  .ck-section + .ck-section {
+    margin-top: 6px;
+    border-top: 1px solid var(--ck-rule);
+  }
+  .ck-section-title {
+    margin-bottom: 8px;
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ck-ink);
+  }
+  .ck-group {
+    margin-bottom: 12px;
+  }
+  .ck-group-title {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    background: var(--ck-rose-wash);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ck-rose-deep);
+  }
+  .ck-priority,
+  .ck-timeline {
+    padding: 12px 14px;
+    border-radius: 6px;
+  }
+  .ck-priority {
+    border: 1px dashed var(--ck-rose);
+    background: #fff;
+  }
+  .ck-timeline {
+    border: 1px solid var(--ck-sage);
+    background: var(--ck-sage-wash);
+  }
+  .ck-step-box {
+    padding: 10px 14px 8px;
+    border: 1px solid var(--ck-rule);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .ck-due:not(:empty)::before {
+    content: '·';
+    margin: 0 6px;
+  }
+  .ck-due {
+    letter-spacing: 0.06em;
+    color: var(--ck-ink);
+  }
+  .ck-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--ck-rose-deep);
+    font-size: 10px;
+    letter-spacing: 0;
+    color: #fff;
+  }
+  .ck-timeline .ck-group-title {
+    background: #fff;
+    color: #5d6b55;
+  }
+  .ck-items {
+    display: grid;
+    gap: 2px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ck-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ck-groups-2,
+  .ck-groups-3 {
+    display: grid;
+    gap: 0 14px;
+    align-items: start;
+  }
+  .ck-groups-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ck-groups-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ck-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ck-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 28px;
+  }
+  .ck-item input[type='checkbox'] {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--ck-rose-deep);
+    cursor: pointer;
+  }
+  .ck-item input[type='text'] {
+    flex: 1;
+    min-width: 0;
+    height: 26px;
+    padding: 0 2px;
+    border: none;
+    border-bottom: 1px solid var(--ck-rule);
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--ck-ink);
+  }
+  .ck-item input[type='text']:focus,
+  .ck-info input:focus,
+  .ck-notes:focus {
+    outline: none;
+    border-color: var(--ck-rose);
+    background-color: var(--ck-rose-wash);
+  }
+  .ck-item input[type='text']::placeholder,
+  .ck-info input::placeholder,
+  .ck-notes::placeholder {
+    color: #c4b8b2;
+  }
+  .ck-notes {
+    display: block;
+    width: 100%;
+    height: 86px;
+    padding: 0 10px;
+    border: 1px solid var(--ck-rule);
+    border-radius: 3px;
+    background-color: #fff;
+    background-image: linear-gradient(transparent 27px, var(--ck-rule) 27px, var(--ck-rule) 28px);
+    background-size: 100% 28px;
+    background-attachment: local;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 28px;
+    color: var(--ck-ink);
+    resize: vertical;
+  }
+  .ck-exporting .ck-notes {
+    resize: none;
+  }
+  .ck-footnote {
+    margin: 12px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--ck-soft);
+  }
+
+  /* Phones and small tablets: single columns, no fixed page height. The PNGs are always the Letter layout. */
+  @media (max-width: 768px) {
+    .ck-container:not(.ck-exporting) .ck-page {
+      min-height: 0;
+      padding: 20px 14px;
+    }
+    .ck-container:not(.ck-exporting) .ck-title {
+      font-size: 26px;
+    }
+    .ck-container:not(.ck-exporting) .ck-info,
+    .ck-container:not(.ck-exporting) .ck-groups,
+    .ck-container:not(.ck-exporting) .ck-items {
+      grid-template-columns: 1fr;
+    }
+    .ck-container:not(.ck-exporting) .ck-item {
+      min-height: 36px;
+    }
+    .ck-container:not(.ck-exporting) .ck-item input[type='checkbox'] {
+      width: 20px;
+      height: 20px;
+    }
+    .ck-container:not(.ck-exporting) .ck-item input[type='text'] {
+      height: 32px;
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../../lib/printable';
+
+  const root = document.getElementById('checklist-pages')!;
+  const host = root.closest<HTMLElement>('.ck-container')!;
+  const pages = Array.from(root.querySelectorAll<HTMLElement>('[data-ck-page]'));
+  // Groups with a `due` (days before a date field, e.g. the first day of school) show that date.
+  const start = root.querySelector<HTMLInputElement>('[data-ck-start]');
+  const showDue = () => {
+    const [y, m, d] = (start?.value ?? '').split('-').map(Number);
+    for (const el of root.querySelectorAll<HTMLElement>('[data-ck-due]')) {
+      el.textContent = y ? new Date(y, m - 1, d - Number(el.dataset.ckDue)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+    }
+  };
+  const save = autosave(root, root.dataset.ckKey!, showDue);
+  start?.addEventListener('input', showDue);
+
+  // Reset puts the starter items back (their value attribute) rather than blanking them.
+  document.querySelector('[data-ck-reset]')!.addEventListener('click', () => {
+    if (!confirm('Reset the checklist? Your ticks, notes and changes will be cleared.')) return;
+    for (const el of fieldsIn(root)) {
+      if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
+      else el.value = el.defaultValue;
+    }
+    showDue();
+    save();
+  });
+
+  // The PNG would print placeholder hints as if they'd been filled in: drop them while capturing.
+  const download = async (p: number, button: HTMLButtonElement) => {
+    const hinted = Array.from(pages[p].querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[placeholder]'));
+    const hints = hinted.map((el) => el.placeholder);
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    try {
+      await capture(p, button);
+    } finally {
+      hinted.forEach((el, i) => (el.placeholder = hints[i]));
+    }
+  };
+
+  const capture = (p: number, button: HTMLButtonElement) =>
+    downloadPng(pages[p], {
+      filename: pages.length > 1 ? `${root.dataset.ckFile}-page-${p + 1}.png` : `${root.dataset.ckFile}.png`,
+      width: 816,
+      height: 1056,
+      layoutHost: host,
+      exportClass: 'ck-exporting',
+      button,
+    });
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-ck-download]')) {
+    button.addEventListener('click', () => download(Number(button.dataset.ckDownload), button));
+  }
+
+  const all = document.querySelector<HTMLButtonElement>('[data-ck-download-all]')!;
+  all.addEventListener('click', async () => {
+    for (let p = 0; p < pages.length; p++) await download(p, all);
+  });
+</script>

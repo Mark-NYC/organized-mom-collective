@@ -45,7 +45,7 @@ export const routineTypes: Record<string, RoutineType> = {
     ],
     endLabel: 'Out the door by',
     endTime: '08:00',
-    ideas: ['Pack lunch', 'Check the calendar', 'Quick tidy up', 'Family huddle', 'Feed pets', 'Brush hair', 'Fill water bottle'],
+    ideas: ['Pack lunch', 'Check the calendar', 'Chore of the day', 'Family huddle', 'Feed pets', 'Brush hair', 'Fill water bottle', 'Story or devotional'],
   },
   afterschool: {
     label: 'After-School',
@@ -79,7 +79,7 @@ export const routineTypes: Record<string, RoutineType> = {
     ],
     endLabel: 'Lights out by',
     endTime: '20:00',
-    ideas: ['Pack backpack', 'Bathroom one last time', 'Fill water cup', 'Talk about the day', 'Gratitude or prayers', 'Quiet music'],
+    ideas: ['Screens off', 'Tidy up (5–10 min)', 'Pack backpack', 'Bathroom one last time', 'Fill water cup', 'Talk about the day', 'Gratitude or prayers', 'Snuggles & lights out'],
   },
   weekend: {
     label: 'Weekend',
