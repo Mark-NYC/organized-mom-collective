@@ -1,0 +1,85 @@
+---
+/**
+ * /fall-pantry-stock-up — a free one-page fall & winter pantry stock-up list: grains, canned goods, baking,
+ * spices, oils & condiments, a Thanksgiving & holiday list, and a short keep-it-stocked routine that hands off
+ * to the pantry inventory tracker (/pantry). Rebuilt from the old Pantry Stock-Up checklist, whose November
+ * option replaced the basics instead of adding to them. Edited on screen, downloaded as a PNG
+ * (src/components/site/ChecklistPages.astro). Saves in this browser (`omc:fall-pantry:v1`).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import ChecklistPages from '../components/site/ChecklistPages.astro';
+import type { ChecklistPage } from '../lib/checklist-pages';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const pages: ChecklistPage[] = [
+  {
+    sections: [
+      {
+        title: 'Stock Up',
+        groupCols: 2,
+        groups: [
+          { title: 'Grains & pasta', items: ['Rice', 'Pasta, a few shapes', 'Oats', 'Bread crumbs', 'Crackers', ''] },
+          { title: 'Canned & jarred', items: ['Tomatoes: diced, crushed, paste', 'Beans: black, kidney, white', 'Broth: chicken or vegetable', 'Tuna', 'Corn & green beans', ''] },
+          { title: 'Baking', items: ['Flour', 'Sugar: white & brown', 'Baking powder & soda', 'Vanilla', 'Chocolate chips', ''] },
+          { title: 'Spices', items: ['Cinnamon', 'Chili powder & cumin', 'Garlic powder', 'Italian seasoning', 'Salt & pepper', ''] },
+          { title: 'Oils & condiments', items: ['Olive oil', 'Vegetable oil', 'Soy sauce', 'Vinegar', 'Honey or maple syrup', ''] },
+          {
+            title: 'Thanksgiving & holiday',
+            variant: 'timeline',
+            items: ['Pumpkin puree', 'Evaporated milk', 'Cranberry sauce', 'Stuffing mix', 'Sage, thyme & rosemary', 'Pumpkin pie spice'],
+          },
+        ],
+      },
+      {
+        title: 'Keep It Stocked',
+        groups: [
+          {
+            title: 'Weekly & monthly',
+            variant: 'priority',
+            cols: 2,
+            items: ['Weekly: older cans to the front', 'Weekly: low items on the grocery list', 'Monthly: toss anything expired', 'Monthly: update the pantry tracker'],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Fall Pantry Stock-Up List', item: new URL(routes.fallPantry, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Fall & Winter Pantry Stock-Up List"
+  description="A free fall and winter pantry stock-up list: grains, canned goods, baking, spices and a Thanksgiving list, so busy weeknights and holiday baking start with a stocked pantry."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="fp-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free fall pantry list</p>
+      <h1 id="fp-h" class="serif-hero mt-3">A Stocked Pantry Before It Gets Busy.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Soup nights, snow days and holiday baking all go easier when the basics are already on the shelf. Tick off what you have, change the
+        list to what your family eats, then print it and take it shopping.
+      </p>
+    </div>
+  </section>
+
+  <ChecklistPages title="Fall & Winter Pantry Stock-Up" pages={pages} storageKey="omc:fall-pantry:v1" filename="fall-pantry-stock-up">
+    <p slot="footnote" class="ck-footnote">
+      Know what you already have with the free <a href={routes.pantry} class="text-link">Pantry Inventory</a>. Plan the meals on the
+      {' '}<a href={routes.calendar} data-cta="fall-pantry" class="text-link">Family Wall Calendar</a>’s weekly meal plan.
+    </p>
+  </ChecklistPages>
+</PublicLayout>
