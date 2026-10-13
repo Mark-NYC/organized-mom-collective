@@ -26,6 +26,12 @@ The promise is an intended outcome, not an automatic guarantee. A visible plan m
 - Busy phones and crowded calendars; she may already use several digital tools but still holds the connections, reminders and backup plans in her head.
 - **Market to mom as the likely buyer; design and write for the entire family to participate.** Never imply mom should remain the household's sole manager.
 
+## Secondary audience (future, de-emphasized)
+
+- Moms with **older kids, roughly 10 and up, in lots of activities**. The kids can read a schedule and own their own row, so the job shifts from mom running the week to the family checking it themselves.
+- Product for them: the **Family Command Center** (Family Sanity Saver Starter Kit, `/family-sanity-saver-starter-kit`). A printable 12-month calendar with a row per person, plus a refresh sheet, a tidy system and a coaching audio. Not for sale today (switched off in the shop); see the [roadmap](PRODUCT_ROADMAP.md#parked-the-older-kids-command-center).
+- **Not the focus now.** The wall calendar is the primary product for the primary audience above. Don't write homepage, article, Pin or email copy for this audience, and don't promote the kit beside the wall calendar, until the roadmap says so. Copy for the kit itself is written to this audience, not the 4–10 one.
+
 ## Two connected pains
 
 1. **Schedule fragmentation:** information arrives through school notices, activities, calendars, messages and email. Future digital consolidation aims to reduce duplicate entry and scattered plans.
