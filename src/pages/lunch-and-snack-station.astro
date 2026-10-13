@@ -1,57 +1,66 @@
 ---
 /**
- * /lunch-and-snack-station — a free two-page fridge printable: a lunch builder (1 protein + 1 fruit or veg +
- * 1 carb + 1 treat) and a snack station kids help themselves from. Every item is editable for allergies and
- * school rules (src/components/site/ChecklistPages.astro). Saves in this browser (`omc:lunch-snack:v1`).
+ * /lunch-and-snack-station — a free fridge printable in three pages: two kid-facing posters (Lunch Builder,
+ * Snack Builder) with the line icons from the owner's June Kit PDF, and a grown-ups' setup sheet.
+ * Posters: Kalam headings, an icon and a pastel highlight per item, every item's text editable (the icon
+ * stays), each downloads as a US Letter portrait PNG. Icons: public/images/tools/lunch/ (cropped from the
+ * owner's own PDF and tinted warm ink). The setup sheet is src/components/site/ChecklistPages.astro.
+ * Saves in this browser (`omc:lunch-posters:v1`, `omc:lunch-snack:v1`). Poster classes are prefixed `lp-`.
  */
+import '@fontsource/kalam/latin-700.css';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import ChecklistPages from '../components/site/ChecklistPages.astro';
 import type { ChecklistPage } from '../lib/checklist-pages';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
 
-const pages: ChecklistPage[] = [
+type Item = [icon: string, text: string];
+const posters: { id: string; title: string; rule: string; groups: { heading: string; items: Item[] }[] }[] = [
   {
-    sections: [
-      {
-        title: 'Lunch Builder',
-        groups: [{ title: 'The formula', variant: 'priority', items: ['1 protein + 1 fruit or veg + 1 carb + 1 treat'] }],
-      },
-      {
-        title: 'Pick One From Each',
-        groupCols: 2,
-        groups: [
-          { title: '1 Protein', variant: 'step', items: ['Turkey slices', 'Hard-boiled egg', 'Cheese cubes', 'Hummus', 'Nut butter (if school allows)', ''] },
-          { title: '1 Fruit or veg', variant: 'step', items: ['Apple slices', 'Grapes', 'Cherry tomatoes', 'Cucumber sticks', 'Baby carrots', ''] },
-          { title: '1 Carb', variant: 'step', items: ['Whole wheat bread or pita', 'Mini bagel', 'Tortilla wrap', 'Rice cakes', 'Pasta salad', ''] },
-          { title: '1 Treat', variant: 'step', items: ['Mini cookies', 'Chocolate square', 'Fruit leather', 'Trail mix (if nuts are OK)', '', ''] },
-        ],
-      },
-      {
-        title: 'Before It Goes in the Bag',
-        groups: [{ cols: 2, title: 'Last check', variant: 'timeline', items: ['Water bottle filled', 'Ice pack in', 'Napkin & spoon or fork', 'Lunch box zipped & in the backpack'] }],
-      },
+    id: 'lunch',
+    title: 'Lunch Builder Station',
+    rule: 'Pick one from each',
+    groups: [
+      { heading: '1 Protein', items: [['egg', 'Hard-boiled egg'], ['turkey', 'Turkey slices'], ['cheese-cubes', 'Cheese cubes']] },
+      { heading: '1 Fruit / Vegetable', items: [['apple-slice', 'Apple slices'], ['cucumber', 'Cucumber sticks'], ['carrot', 'Carrot sticks']] },
+      { heading: '1 Carb', items: [['bread', 'Whole wheat bread'], ['bagel', 'Mini bagel'], ['crackers', 'Crackers']] },
+      { heading: '1 Treat', items: [['cookie', 'Cookie'], ['chocolate', 'Chocolate square']] },
     ],
   },
   {
+    id: 'snack',
+    title: 'Snack Builder Station',
+    rule: '1 from the fridge + 1 from the pantry',
+    groups: [
+      {
+        heading: 'Fridge Picks',
+        items: [['cheese-stick', 'Cheese stick'], ['carrot-big', 'Carrot sticks'], ['apple', 'Apple slices'], ['yogurt', 'Yogurt cup'], ['hummus', 'Mini hummus cup']],
+      },
+      { heading: 'Pantry Picks', items: [['granola-bar', 'Granola bar'], ['crackers', 'Crackers'], ['dried-fruit', 'Dried fruit'], ['nut-butter', 'Nut butter pack']] },
+    ],
+  },
+];
+const tints = ['lp-tint-rose', 'lp-tint-sage', 'lp-tint-sand'];
+
+const setup: ChecklistPage[] = [
+  {
     sections: [
       {
-        title: 'Set Up the Station',
-        groups: [
-          {
-            title: 'Once',
-            variant: 'step',
-            cols: 1,
-            items: ['A low shelf or bin in the fridge and one in the pantry', 'Snacks portioned into grab-and-go containers or bags', 'A label: “1 from the fridge + 1 from the pantry”'],
-          },
-        ],
-      },
-      {
-        title: 'Snack Picks',
+        title: 'Set Up the Stations',
         groupCols: 2,
         groups: [
-          { title: 'Fridge', variant: 'step', items: ['Cheese stick', 'Yogurt cup or tube', 'Baby carrots', 'Apple slices', 'Mini hummus cup', ''] },
-          { title: 'Pantry', variant: 'step', items: ['Granola bar', 'Whole grain crackers', 'Dried fruit', 'Nut butter packet (if OK)', 'Pretzels', ''] },
+          {
+            title: 'Snack station',
+            variant: 'step',
+            step: 1,
+            items: ['A low shelf or bin in the fridge', 'A low shelf or bin in the pantry', 'Snacks portioned into grab-and-go bags', 'Label: “1 from the fridge + 1 from the pantry”'],
+          },
+          {
+            title: 'Lunch station',
+            variant: 'step',
+            step: 2,
+            items: ['Lunch Builder poster on the fridge', 'Containers & bags where kids can reach', 'Ice packs in one spot in the freezer', 'Swap any item your school doesn’t allow'],
+          },
         ],
       },
       {
@@ -60,10 +69,18 @@ const pages: ChecklistPage[] = [
           {
             title: 'For everyone',
             variant: 'priority',
-            cols: 1,
-            items: ['Snacks at set times, or after meals', 'Pick 1–2 without asking', 'Wrappers in the trash, containers in the sink', 'Running low? Add it to the grocery list'],
+            cols: 2,
+            items: ['Snacks at set times, or after meals', 'Pick 1–2 without asking', 'Wrappers in the trash', 'Containers in the sink', 'Running low? Add it to the grocery list', ''],
           },
         ],
+      },
+      {
+        title: 'Before the Lunch Goes in the Bag',
+        groups: [{ title: 'Last check', variant: 'timeline', cols: 2, items: ['Water bottle filled', 'Ice pack in', 'Napkin & spoon or fork', 'Lunch box zipped & in the backpack'] }],
+      },
+      {
+        title: 'Notes',
+        groups: [{ title: 'Allergies, school rules, favorites', notes: 'Nut-free school? Who won’t eat what? What to buy more of…' }],
       },
     ],
   },
@@ -84,7 +101,7 @@ const jsonLd = [
 
 <PublicLayout
   title="Free Lunch Builder & Snack Station Printable for Kids"
-  description="A free lunch builder and snack station printable: kids pack their own lunch with one protein, fruit or veg, carb and treat, and grab snacks without asking. Edit it and print it for the fridge."
+  description="Free lunch builder and snack station posters for the fridge: kids pick one protein, fruit or veg, carb and treat, and grab snacks without asking. Edit them and print."
   width="full"
   jsonLd={jsonLd}
 >
@@ -93,13 +110,66 @@ const jsonLd = [
       <p class="label text-warm-soft">Free lunch & snack printable</p>
       <h1 id="lss-h" class="serif-hero mt-3">They Pack the Lunch. They Grab the Snack.</h1>
       <p class="lede mt-4 max-w-2xl text-warm-ink">
-        A lunch formula kids can follow on their own, and a snack station they can use without asking you first. Swap any item for what your
-        family eats and what your school allows, then print both pages for the fridge.
+        Two posters for the fridge, with pictures so even little ones can follow them, and a setup sheet for you. Change any item to what your
+        family eats and what your school allows, then print and post them where the kids can reach.
       </p>
     </div>
   </section>
 
-  <ChecklistPages title="Lunch & Snack Station" pages={pages} storageKey="omc:lunch-snack:v1" filename="lunch-and-snack-station">
+  <div class="lp-container">
+    <div class="lp-actions">
+      <button type="button" class="lp-btn lp-btn-primary" data-lp-download-all>Download both posters</button>
+      <button type="button" class="lp-btn" data-lp-reset>Reset posters</button>
+    </div>
+
+    <div id="lunch-posters">
+      {
+        posters.map((poster, p) => (
+          <div class="lp-wrap">
+            <div class="lp-bar">
+              <span>Poster {p + 1} of {posters.length}</span>
+              <button type="button" class="lp-btn lp-btn-small" data-lp-download={p} data-lp-name={poster.id}>
+                Download this poster
+              </button>
+            </div>
+            <div class:list={['lp-sheet', `lp-sheet-${poster.id}`]} data-lp-sheet={p}>
+              <div class="lp-title">{poster.title}</div>
+              <div class="lp-rule">{poster.rule}</div>
+              {poster.groups.map((group, g) => (
+                <section class="lp-group">
+                  <h2 class="lp-heading">{group.heading}</h2>
+                  <ul class="lp-items">
+                    {group.items.map(([icon, text], i) => (
+                      <li class="lp-item">
+                        <span class="lp-box" aria-hidden="true" />
+                        <img class="lp-icon" src={`/images/tools/lunch/${icon}.png`} alt="" width="64" height="64" />
+                        <input
+                          type="text"
+                          class:list={['lp-text', tints[(g + i) % tints.length]]}
+                          data-field={`${poster.id}-${g}-${i}`}
+                          value={text}
+                          size={Math.max(text.length, 8)}
+                          aria-label={`${group.heading}: item ${i + 1}`}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+              <div class="lp-foot">{BRAND_NAME}</div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <section aria-labelledby="lss-setup-h" class="lp-setup-intro">
+    <h2 id="lss-setup-h" class="serif-title">For grown-ups: set up the stations</h2>
+    <p>Do this once. Then the posters do the reminding.</p>
+  </section>
+
+  <ChecklistPages title="Lunch & Snack Station Setup" pages={setup} storageKey="omc:lunch-snack:v1" filename="lunch-and-snack-setup">
     <p slot="footnote" class="ck-footnote">
       More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
       {' '}<a href={routes.pantry} class="text-link">Pantry Inventory</a> and the
@@ -107,3 +177,261 @@ const jsonLd = [
     </p>
   </ChecklistPages>
 </PublicLayout>
+
+<style is:global>
+  .lp-container {
+    --lp-ink: var(--color-warm-ink);
+    --lp-soft: var(--color-warm-soft);
+    --lp-rule: var(--color-warm-rule);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 8px;
+    color: var(--lp-ink);
+  }
+  .lp-container *,
+  .lp-container *::before,
+  .lp-container *::after {
+    box-sizing: border-box;
+  }
+  .lp-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 24px;
+  }
+  .lp-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .lp-btn:hover {
+    background: var(--color-rose-wash);
+  }
+  .lp-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .lp-btn-primary:hover {
+    background: #362e2d;
+  }
+  .lp-btn-small {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 0.68rem;
+  }
+  .lp-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .lp-wrap {
+    width: 816px;
+    max-width: 100%;
+    margin: 0 auto 36px;
+  }
+  .lp-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lp-soft);
+  }
+
+  /* A poster: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .lp-sheet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    padding: 44px 40px 20px;
+    background: #fff;
+    border: 1px solid var(--lp-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+  }
+  .lp-title {
+    font-family: var(--font-sans);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--lp-ink);
+  }
+  .lp-rule {
+    margin-top: 6px;
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-style: italic;
+    color: var(--color-rose-deep);
+  }
+  .lp-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 18px;
+  }
+  .lp-heading {
+    margin-bottom: 8px;
+    font-family: 'Kalam', var(--font-serif);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.12em;
+    color: var(--lp-ink);
+  }
+  /* One column width per poster, so the boxes line up from group to group. */
+  .lp-items {
+    width: 440px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .lp-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 52px;
+  }
+  .lp-box {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border: 1.5px solid var(--lp-soft);
+    border-radius: 3px;
+  }
+  .lp-icon {
+    flex: none;
+    width: 48px;
+    height: 48px;
+  }
+  .lp-sheet-snack .lp-item {
+    min-height: 74px;
+  }
+  .lp-sheet-snack .lp-icon {
+    width: 66px;
+    height: 66px;
+  }
+  .lp-text {
+    min-width: 0;
+    max-width: 440px;
+    padding: 1px 12px;
+    border: none;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--lp-soft);
+  }
+  .lp-text:focus {
+    outline: 2px solid var(--color-rose);
+    outline-offset: 1px;
+  }
+  /* Highlighter swipes, as on the printed June Kit pages. */
+  .lp-tint-rose {
+    background: linear-gradient(transparent 22%, #fbe9e8 22%, #fbe9e8 86%, transparent 86%);
+  }
+  .lp-tint-sage {
+    background: linear-gradient(transparent 22%, #e6eeea 22%, #e6eeea 86%, transparent 86%);
+  }
+  .lp-tint-sand {
+    background: linear-gradient(transparent 22%, #efebe7 22%, #efebe7 86%, transparent 86%);
+  }
+  .lp-foot {
+    margin-top: auto;
+    padding-top: 20px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .lp-setup-intro {
+    padding: 8px 20px 0;
+    background: var(--color-ivory);
+    text-align: center;
+    color: var(--color-warm-soft);
+  }
+  .lp-setup-intro p {
+    margin-top: 6px;
+  }
+
+  /* Phones: smaller type and icons. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .lp-container:not(.lp-exporting) .lp-sheet {
+      min-height: 0;
+      padding: 28px 12px 16px;
+    }
+    .lp-container:not(.lp-exporting) .lp-title {
+      font-size: 18px;
+    }
+    .lp-container:not(.lp-exporting) .lp-heading {
+      font-size: 28px;
+    }
+    .lp-container:not(.lp-exporting) .lp-item {
+      gap: 10px;
+      min-height: 44px;
+    }
+    .lp-container:not(.lp-exporting) .lp-icon {
+      width: 36px;
+      height: 36px;
+    }
+    .lp-container:not(.lp-exporting) .lp-group {
+      width: 100%;
+    }
+    .lp-container:not(.lp-exporting) .lp-text {
+      flex: 1;
+      width: auto;
+      font-size: 18px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const root = document.getElementById('lunch-posters')!;
+  const host = root.closest<HTMLElement>('.lp-container')!;
+  const sheets = Array.from(root.querySelectorAll<HTMLElement>('[data-lp-sheet]'));
+  const save = autosave(root, 'omc:lunch-posters:v1');
+
+  document.querySelector('[data-lp-reset]')!.addEventListener('click', () => {
+    if (!confirm('Put the starter items back on both posters?')) return;
+    for (const el of fieldsIn(root)) el.value = el.defaultValue;
+    save();
+  });
+
+  const download = (p: number, button: HTMLButtonElement) =>
+    downloadPng(sheets[p], {
+      filename: `${p === 0 ? 'lunch' : 'snack'}-builder-station.png`,
+      width: 816,
+      height: 1056,
+      layoutHost: host,
+      exportClass: 'lp-exporting',
+      button,
+    });
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-lp-download]')) {
+    button.addEventListener('click', () => download(Number(button.dataset.lpDownload), button));
+  }
+  const all = document.querySelector<HTMLButtonElement>('[data-lp-download-all]')!;
+  all.addEventListener('click', async () => {
+    for (let p = 0; p < sheets.length; p++) await download(p, all);
+  });
+</script>
