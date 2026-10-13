@@ -19,6 +19,7 @@
  *           /back-to-school-checklist  free three-page back-to-school checklist, same idea
  *           /screen-time-contract      free screen time contract (jobs first, activities earn screen time), same idea
  *           /routine-chart     free routine charts (morning, after-school, bedtime, weekend, custom), same idea
+ *           /homeschool-rhythm free homeschool weekly rhythm (time blocks × days, sample rhythms), same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -62,6 +63,7 @@ export const routes = {
   backToSchool: '/back-to-school-checklist',
   screenTime: '/screen-time-contract',
   routineChart: '/routine-chart',
+  homeschoolRhythm: '/homeschool-rhythm',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/resources#free-tools',

@@ -1,0 +1,519 @@
+---
+/**
+ * /homeschool-rhythm — a free homeschool weekly rhythm: five time blocks (labels editable) by seven days,
+ * plus notes. Starter rhythms fill the grid; everything is edited on the sheet. Downloads as a PNG (US Letter
+ * landscape, 11 × 8.5 in at 96 px/in, drawn at 2×). Autosaves in this browser (`omc:homeschool-rhythm:v1`).
+ * On phones the week scrolls sideways inside the sheet; the PNG is always the full Letter layout.
+ * Classes are prefixed `hr-` so they never collide with the site's own.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const blocks = ['Morning Start', 'Core Learning', 'Midday Break', 'Afternoon', 'Evening'];
+
+/** Starter rhythms: for each day, Monday first, one entry per time block. */
+const starters: Record<string, { label: string; hint: string; week: string[][] }> = {
+  structured: {
+    label: 'Structured',
+    hint: 'Same rhythm every weekday',
+    week: [
+      ['Breakfast & morning routine', 'Math, then language arts', 'Lunch & outside time', 'Science or history', 'Family reading'],
+      ['Breakfast & morning routine', 'Math, then reading & writing', 'Lunch & outside time', 'Art or music', 'Family time'],
+      ['Breakfast & morning routine', 'Math, then language arts', 'Lunch & outside time', 'Science or history', 'Family reading'],
+      ['Breakfast & morning routine', 'Math, then reading & writing', 'Lunch & outside time', 'PE or co-op', 'Family time'],
+      ['Breakfast & morning routine', 'Review & catch-up', 'Lunch out or picnic', 'Library or field trip', 'Pizza & game night'],
+      ['Chores together', 'Educational games', 'Family lunch', 'Outing or free play', 'Family movie'],
+      ['Slow morning', 'Plan the week', 'Family lunch', 'Prep materials', 'Rest'],
+    ],
+  },
+  early: {
+    label: 'Early Elementary',
+    hint: 'Short lessons, lots of play (K–3rd)',
+    week: [
+      ['Morning basket & breakfast', 'Math & phonics (45 min)', 'Lunch & quiet time', 'Nature walk or crafts', 'Family reading time'],
+      ['Faith or character time', 'Language arts focus', 'Rest & snack time', 'Science exploration', 'Free play & dinner'],
+      ['Music & movement', 'Math review & games', 'Outdoor lunch picnic', 'Art or hands-on project', 'Family movie night'],
+      ['Morning basket routine', 'Reading & writing', 'Lunch & rest', 'Geography or history', 'Cooking together'],
+      ['Field trip Friday', 'Light review work', 'Lunch out', 'Library or park time', 'Pizza & game night'],
+      ['Family chores & fun', 'Educational games', 'Family adventure', 'Free exploration', 'Family reflection'],
+      ['Slow morning', 'Plan the week', 'Family time', 'Prep materials', 'Rest & reflection'],
+    ],
+  },
+  gentle: {
+    label: 'Charlotte Mason',
+    hint: 'Living books, nature, narration',
+    week: [
+      ['Morning time for all', 'Living books (by age)', 'Nature table & lunch', 'Handicrafts & copywork', 'Tea & stories'],
+      ['Picture study & poetry', 'Narration practice', 'Outdoor observation', 'Nature journals', 'Classical music'],
+      ['Shakespeare or composer', 'Living math & science', 'Nature walk & sketching', 'Folk dancing or games', 'Read-alouds'],
+      ['Morning hymn or song', 'History through stories', 'Garden or nature work', 'Artist study & drawing', 'Family singing'],
+      ['Nature study outing', 'Living geography', 'Outdoor lunch', 'Free exploration', 'Family feast & stories'],
+      ['Family nature walk', 'Museum or cultural event', 'Family time', 'Community service', 'Prep for a rest day'],
+      ['Rest & worship', 'Quiet reading', 'Family time', 'Prep for the week', 'Gratitude'],
+    ],
+  },
+  relaxed: {
+    label: 'Relaxed',
+    hint: 'Loose blocks, fill in as you go',
+    week: [
+      ['Morning routine', 'Core lessons', 'Lunch & break', 'Projects or reading', 'Family time'],
+      ['Morning routine', 'Core lessons', 'Active break', 'Skill practice', 'Family time'],
+      ['Morning routine', 'Hands-on learning', 'Outdoor time', 'Creative time', 'Family time'],
+      ['Morning routine', 'Core lessons', 'Lunch & break', 'Projects or reading', 'Family time'],
+      ['Morning routine', 'Week wrap-up', 'Special lunch', 'Outing or celebration', 'Family fun'],
+      ['Family learning', 'Life skills', 'Adventure time', 'Creative projects', 'Family time'],
+      ['Rest', 'Plan the week', 'Family time', 'Prep', 'Quiet evening'],
+    ],
+  },
+};
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Homeschool Rhythm', item: new URL(routes.homeschoolRhythm, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Homeschool Rhythm Planner"
+  description="A free homeschool weekly rhythm planner: start from a structured, early elementary, Charlotte Mason or relaxed rhythm, make it yours, then download it to print."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="hr-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free homeschool rhythm</p>
+      <h1 id="hr-h" class="serif-hero mt-3">A Homeschool Week With a Rhythm, Not a Rigid Schedule.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Blocks instead of bells: a morning start, core learning, a real break, an afternoon and an evening. Start from a sample rhythm or a
+        blank week, change anything, then download it to print. What you type stays saved in this browser.
+      </p>
+    </div>
+  </section>
+
+  <div class="hr-container">
+    <div class="hr-starters">
+      <span class="hr-starters-label">Start from</span>
+      {
+        Object.entries(starters).map(([id, s]) => (
+          <button type="button" class="hr-starter" data-hr-starter={id}>
+            <span class="hr-starter-name">{s.label}</span>
+            <span class="hr-starter-hint">{s.hint}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="hr-actions">
+      <button type="button" class="hr-btn hr-btn-primary" data-hr-download>Download PNG</button>
+      <button type="button" class="hr-btn" data-hr-clear>Clear the week</button>
+    </div>
+    <p class="hr-swipe">Swipe sideways on the planner to see the whole week.</p>
+
+    <div class="hr-sheet" id="homeschool-rhythm">
+      <div class="hr-head">
+        <input class="hr-title" type="text" data-field="title" value="Our Homeschool Rhythm" aria-label="Title" />
+        <input class="hr-year" type="text" data-field="year" placeholder="School year 2026–27" aria-label="School year" />
+      </div>
+
+      <div class="hr-scroll">
+        <table class="hr-grid">
+          <colgroup>
+            <col class="hr-col-block" />
+            {days.map(() => <col />)}
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" class="hr-corner">Time block</th>
+              {days.map((d) => <th scope="col">{d}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              blocks.map((block, b) => (
+                <tr>
+                  <th scope="row">
+                    <textarea class="hr-block" data-field={`block-${b}`} rows="2" aria-label={`Time block ${b + 1}`}>{block}</textarea>
+                  </th>
+                  {days.map((d, i) => (
+                    <td>
+                      <textarea data-field={`d${i}-b${b}`} aria-label={`${d}, ${block}`} />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <label class="hr-notes">
+        <span>Notes &amp; reflections</span>
+        <textarea data-field="notes" placeholder="What worked this week, curriculum changes, wins to celebrate…"></textarea>
+      </label>
+
+      <div class="hr-foot">{BRAND_NAME}</div>
+    </div>
+
+    <p class="hr-footnote">
+      More free tools: <a href={routes.routineChart} class="text-link">Routine Charts</a>, the
+      <a href={routes.choreChart} class="text-link">Chore Chart by Age</a> and the
+      <a href={routes.calendar} data-cta="homeschool-rhythm" class="text-link">Family Wall Calendar</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<script type="application/json" id="hr-starters" set:html={JSON.stringify(Object.fromEntries(Object.entries(starters).map(([id, s]) => [id, s.week])))} />
+
+<style is:global>
+  .hr-container {
+    --hr-ink: var(--color-warm-ink);
+    --hr-soft: var(--color-warm-soft);
+    --hr-rule: var(--color-warm-rule);
+    --hr-rose: var(--color-rose);
+    --hr-rose-deep: var(--color-rose-deep);
+    --hr-rose-wash: var(--color-rose-wash);
+    --hr-sage: var(--color-sage);
+    --hr-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--hr-ink);
+  }
+  .hr-container *,
+  .hr-container *::before,
+  .hr-container *::after {
+    box-sizing: border-box;
+  }
+
+  .hr-starters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: 10px;
+    max-width: 1056px;
+    margin: 0 auto 20px;
+  }
+  .hr-starters-label {
+    align-self: center;
+    margin-right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hr-soft);
+  }
+  .hr-starter {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 170px;
+    padding: 10px 14px;
+    border: 1px solid var(--hr-rule);
+    border-radius: 6px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .hr-starter:hover {
+    border-color: var(--hr-rose);
+    background: var(--hr-rose-wash);
+  }
+  .hr-starter-name {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    color: var(--hr-ink);
+  }
+  .hr-starter-hint {
+    font-size: 0.75rem;
+    color: var(--hr-soft);
+  }
+
+  .hr-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .hr-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .hr-btn:hover {
+    background: var(--hr-rose-wash);
+  }
+  .hr-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .hr-btn-primary:hover {
+    background: #362e2d;
+  }
+  .hr-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .hr-swipe {
+    display: none;
+  }
+
+  /* The sheet: US Letter landscape (11 × 8.5 in at 96 px/in). */
+  .hr-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 1056px;
+    max-width: 100%;
+    min-height: 816px;
+    margin: 0 auto;
+    padding: 28px 32px 18px;
+    background: var(--color-ivory);
+    border: 1px solid var(--hr-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .hr-sheet input,
+  .hr-sheet textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    color: var(--hr-ink);
+  }
+  .hr-sheet textarea {
+    resize: none;
+  }
+  .hr-sheet input:focus,
+  .hr-sheet textarea:focus {
+    outline: none;
+    background: var(--hr-rose-wash);
+  }
+  .hr-sheet ::placeholder {
+    color: #c4b8b2;
+  }
+  .hr-head {
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--hr-rose);
+    text-align: center;
+  }
+  .hr-sheet .hr-title {
+    font-size: 34px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-align: center;
+  }
+  .hr-sheet .hr-year {
+    margin-top: 2px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--hr-rose-deep);
+  }
+  .hr-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .hr-col-block {
+    width: 104px;
+  }
+  .hr-grid th,
+  .hr-grid td {
+    border: 1px solid var(--hr-rule);
+    padding: 0;
+    vertical-align: top;
+  }
+  .hr-grid thead th {
+    padding: 7px 4px;
+    background: var(--color-warm-button);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .hr-grid thead .hr-corner {
+    background: var(--hr-rose-deep);
+  }
+  .hr-grid tbody th {
+    background: var(--hr-sage-wash);
+    vertical-align: middle;
+  }
+  .hr-sheet .hr-block {
+    height: 100%;
+    min-height: 92px;
+    padding: 8px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #5d6b55;
+    overflow: hidden;
+    display: flex;
+    align-content: center;
+  }
+  .hr-grid td {
+    background: #fff;
+  }
+  .hr-grid td textarea {
+    height: 96px;
+    padding: 6px 7px;
+    font-size: 13px;
+    line-height: 1.3;
+    overflow: hidden;
+  }
+  .hr-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hr-soft);
+  }
+  .hr-sheet .hr-notes textarea {
+    height: 66px;
+    padding: 0 8px;
+    border: 1px solid var(--hr-rule);
+    background-color: #fff;
+    background-image: linear-gradient(transparent 21px, var(--hr-rule) 21px, var(--hr-rule) 22px);
+    background-size: 100% 22px;
+    background-attachment: local;
+    font-size: 13px;
+    line-height: 22px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .hr-foot {
+    margin-top: auto;
+    padding-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .hr-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--hr-soft);
+  }
+
+  /* Phones: the week scrolls sideways inside the sheet. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .hr-swipe {
+      display: block;
+      margin: 0 auto 12px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--hr-soft);
+    }
+    .hr-starter {
+      flex: 1 1 140px;
+      min-width: 0;
+    }
+    .hr-container:not(.hr-exporting) .hr-sheet {
+      min-height: 0;
+      padding: 18px 10px 12px;
+    }
+    .hr-container:not(.hr-exporting) .hr-title {
+      font-size: 26px;
+    }
+    .hr-container:not(.hr-exporting) .hr-scroll {
+      overflow-x: auto;
+    }
+    .hr-container:not(.hr-exporting) .hr-grid {
+      width: 860px;
+    }
+    .hr-container:not(.hr-exporting) .hr-grid td textarea {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, clearFields, downloadPng } from '../lib/printable';
+
+  const starters: Record<string, string[][]> = JSON.parse(document.getElementById('hr-starters')!.textContent!);
+  const sheet = document.getElementById('homeschool-rhythm')!;
+  const host = sheet.closest<HTMLElement>('.hr-container')!;
+  const cells = Array.from(sheet.querySelectorAll<HTMLTextAreaElement>('td textarea'));
+  const save = autosave(sheet, 'omc:homeschool-rhythm:v1');
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-hr-starter]')) {
+    button.addEventListener('click', () => {
+      if (cells.some((el) => el.value.trim()) && !confirm('Replace the week with this sample rhythm? Your notes and time blocks stay.')) return;
+      const week = starters[button.dataset.hrStarter!];
+      week.forEach((day, d) => day.forEach((entry, b) => (sheet.querySelector<HTMLTextAreaElement>(`[data-field="d${d}-b${b}"]`)!.value = entry)));
+      save();
+    });
+  }
+
+  // Clear empties the week and notes; the title and time-block names go back to their starters.
+  document.querySelector('[data-hr-clear]')!.addEventListener('click', () => {
+    if (!confirm('Clear the whole week and your notes?')) return;
+    const keep = Array.from(sheet.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.hr-title, .hr-block'));
+    clearFields(sheet);
+    keep.forEach((el) => (el.value = el.defaultValue));
+    save();
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('[data-hr-download]')!;
+  button.addEventListener('click', async () => {
+    // The PNG would print placeholder hints as if they'd been filled in: drop them while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[placeholder]'));
+    const hints = hinted.map((el) => el.placeholder);
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    try {
+      await downloadPng(sheet, {
+        filename: 'homeschool-rhythm.png',
+        width: 1056,
+        height: 816,
+        layoutHost: host,
+        exportClass: 'hr-exporting',
+        button,
+      });
+    } finally {
+      hinted.forEach((el, i) => (el.placeholder = hints[i]));
+    }
+  });
+</script>
