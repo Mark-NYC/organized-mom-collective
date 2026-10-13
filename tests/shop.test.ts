@@ -14,6 +14,7 @@ import { routes } from '../src/routes';
 import { WEEKLY_RESET_SLUG, weeklyReset } from '../src/data/weekly-reset';
 import { TAKE_BACK_CONTROL_SLUG, takeBackControl } from '../src/data/take-back-control';
 import { ESSENTIAL_ROUTINES_SLUG, essentialRoutines } from '../src/data/essential-routines';
+import { REAL_LIFE_RESET_SLUG, realLifeReset } from '../src/data/real-life-reset';
 
 import envExample from '../.env.example?raw';
 import { DASHBOARD_FUNCTIONS, bundle } from '../scripts/build-dashboard-functions.mjs';
@@ -447,12 +448,13 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 });
 
 describe('launch guards', () => {
-  it('nothing on the public site links to the website checkout except the funnel offer pages (Weekly Reset, Take Back Control, Essential Routines), in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
+  it('nothing on the public site links to the website checkout except the funnel offer pages (Weekly Reset, Take Back Control, Essential Routines, Real Life Reset Kit), in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
     // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts']);
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/real-life-reset.ts']);
     expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
     expect(read('src/data/take-back-control.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{TAKE_BACK_CONTROL_SLUG\}` : null/);
     expect(read('src/data/essential-routines.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{ESSENTIAL_ROUTINES_SLUG\}` : null/);
+    expect(read('src/data/real-life-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{REAL_LIFE_RESET_SLUG\}` : null/);
     const src = Object.keys(files).filter((f) => f.startsWith('../src/'));
     expect(src.length).toBeGreaterThan(30);
     const offenders = src
@@ -519,12 +521,21 @@ describe('launch guards', () => {
     }
   });
 
+  it('the Real Life Reset Kit download is seeded at the price its page shows, with its files', () => {
+    const sql = read('supabase/migrations/20261015000000_shop_real_life_reset.sql');
+    const seed = sql.slice(sql.indexOf('insert into public.shop_products'));
+    expect(seed).toMatch(new RegExp(`\\('${REAL_LIFE_RESET_SLUG}',\\s*'${realLifeReset.name}',[\\s\\S]*?\\n\\s*${realLifeReset.price * 100},`));
+    expect(seed).toMatch(/true, 0, 1, false, 1, 'digital'/);
+    for (const f of ['plan-b-quick-pivot-framework.pdf', '15-minute-reset-checklist.pdf', 'its-ok-to-pivot-coaching.mp3']) expect(seed).toContain(`"path":"real-life-reset/${f}"`);
+    expect(seed.match(/"path":"/g)).toHaveLength(3);
+  });
+
   it('every seeded product has its email picture (public/email/<slug>.jpg)', () => {
     const slugs = Object.entries(files)
       .filter(([f]) => f.startsWith('../supabase/migrations/'))
       .flatMap(([, sql]) => [...sql.matchAll(/^\s*\('([a-z0-9-]+)',\s*'/gm)].map((m) => m[1]))
       .filter((s) => !s.startsWith('placeholder'));
-    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines']));
+    expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', 'real-life-reset-kit']));
     for (const slug of slugs) expect(emailAssets, slug).toContain(`../public/email/${slug}.jpg`);
   });
 

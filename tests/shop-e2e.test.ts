@@ -299,7 +299,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
     it('shows only active products, with availability but not the stock count', async () => {
       const res = await rest('/rpc/shop_catalog', 'anon', undefined, { method: 'POST', body: '{}' });
       const cat = await res.json();
-      expect(cat.products.map((p: { slug: string }) => p.slug)).toEqual(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines']);
+      expect(cat.products.map((p: { slug: string }) => p.slug)).toEqual(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', 'real-life-reset-kit']);
       expect(cat.products[0]).toMatchObject({ price_cents: 3400, available: true, max_quantity: 5 });
       expect(cat.products[0]).not.toHaveProperty('stock');
     });

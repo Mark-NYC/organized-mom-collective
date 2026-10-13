@@ -64,6 +64,7 @@ Dashboard (/admin/orders)
 - **The Weekly Reset System.** $9 download (`weekly-reset-system`), active, no stock. Sold from `/weekly-reset`. See [Digital products](#digital-products).
 - **Take Back Control.** $29 download (`take-back-control`), active, no stock. Sold from `/take-back-control`, the offer after the Weekly Reset. See [Digital products](#digital-products).
 - **Essential Routines Bundle.** $12 download (`essential-routines`), active, no stock. Sold from `/essential-routines`, the downsell when someone passes on Take Back Control.
+- **Real Life Reset Kit.** $7 download (`real-life-reset-kit`), active, no stock. Sold from `/real-life-reset-kit` (not linked from any funnel yet).
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -150,6 +151,17 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] Redeploy `stripe-webhook` and `shop-admin` (receipt emails now use `public/email/<slug>.jpg` for every product, so later products need only that file).
 - [ ] **Storage → shop-downloads**: the 4 routine PDFs are already there (Take Back Control's). Upload the Quick Setup Audio to folder `essential-routines` as `quick-setup-audio.m4a`. The "Why Routines Work" cheat sheet is a page on the site (`WHY_ROUTINES_PATH`), linked from the buyer's download page, not a file.
 - [ ] Buy it once in preview (test card): all five files should download, and the download page should link to "Why Routines Work".
+
+### Database update: Real Life Reset Kit (once, after Essential Routines)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261015000000_shop_real_life_reset.sql` → **Run**, once. It only adds the product.
+- [ ] **Storage → shop-downloads**: upload to folder `real-life-reset`, renamed exactly:
+
+  | File you have | Upload as |
+  | --- | --- |
+  | Plan_B_Quick-Pivot_Framework.pdf | `plan-b-quick-pivot-framework.pdf` |
+  | 15-Minute_Reset_Checklist.pdf | `15-minute-reset-checklist.pdf` |
+  | Its_OK_to_Pivot_Coaching.mp3 | `its-ok-to-pivot-coaching.mp3` |
+- [ ] Buy it once in preview (test card): all three files should download.
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.

@@ -17,7 +17,8 @@
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex)
- *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset and /take-back-control
+ *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from the offer pages (/weekly-reset, /take-back-control,
+ *                               /essential-routines, /real-life-reset-kit)
  *                               (?product=weekly-reset-system / take-back-control), and only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
