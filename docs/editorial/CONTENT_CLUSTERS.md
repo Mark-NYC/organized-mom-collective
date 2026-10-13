@@ -111,6 +111,7 @@ Planned before the review and still worth writing, but outside the initial 18. T
 | How to Plan School Lunches for the Week | how to plan school lunches | FP | Seasonal: August–September. |
 | Staying Close to Family and Friends in a Busy Season | staying connected with friends as a busy mom | IF | Uses the calendar's family and friends section. |
 | A Summer Bucket List the Kids Help Pick | summer bucket list for kids | IF | Seasonal: publish April–May (large Pinterest search). Ships with a one-page printable at `/summer-bucket-list` built on `ChecklistPages` (kids pick the items, a "one this week" line for the calendar), listed under Free tools. Don't reuse the old members-site list: a generic 35 items, nothing saved, a duplicate tracker and a link to the old June Kit. |
+| How to Create a Summer Block Schedule (Without Overcomplicating It) | summer block schedule for kids | FP | Seasonal: publish May, alongside the bucket list (each links the other). Printable: `/summer-schedule`, the `/homeschool-rhythm` grid moved into a shared component (blocks Morning / Midday / Afternoon / Evening, starters from the old June Kit example: Adventure, Creative, Connection, Learning, Mom Work). Method from the old Summer Rhythm Builder PDF and companion page: non-negotiable blocks first, then want-to-do blocks, then flexibility (15–30 min buffers, a weekly catch-up block, open blocks), themed days. Overlap boundary: FP-01 is the school-year week; this is summer only. |
 
 ## Adding to a cluster later
 
