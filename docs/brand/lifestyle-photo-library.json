@@ -623,6 +623,39 @@
       "used_in": [
         "FP-03 /resources/home-command-center (hero)"
       ]
+    },
+    {
+      "id": "K12",
+      "title": "writing in notebook at desk with books",
+      "role": "weekly planning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/16979/woman-writing-in-notebook-at-desk-with-books",
+      "owner_visual_status": "explicitly_selected_2026-10-12",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-04-planning-desk-{640,960,1440}.webp",
+      "license_review": "source page shows free personal and commercial use, no editorial-only marker",
+      "license_verification_date": "2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "visual_content_review": {
+        "review_date": "2026-10-12",
+        "review_basis": "2400px original inspected",
+        "visual_status": "pass",
+        "observations": "Hands and torso writing in an open notebook at a wood desk, books, pens and loose paper; no face, readable third-party logo or protected illustration. Small desk-tool markings and notebook labels are incidental."
+      },
+      "clearance_record": {
+        "approval": "Explicit user selection and standing Kaboompics approval",
+        "date": "2026-10-12",
+        "original": "design/photography/kaboompics/FP-04-requested/16979-2400.jpg on codex/reset-requested-photo; download and license evidence in manifest.json",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "context": "Neutral illustration of writing planning decisions. No customer or endorsement claim. No AI generation or training.",
+        "edits": "Resize and WebP export only."
+      },
+      "used_in": [
+        "FP-04 /resources/weekly-family-reset (inline)"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

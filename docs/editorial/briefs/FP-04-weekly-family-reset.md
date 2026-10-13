@@ -42,3 +42,8 @@ Follow PHOTO-DISCOVERY.md. Use existing real product photographs: fp-05-week her
 ## Pinterest research
 
 Separate platform-restricted searches attempted through both engines on 2026-10-12. Neither returned reliable Pinterest evidence. Autocomplete, guided terms, top-pin formats, board names and Trends unverified. Keyword candidates are proposals, not measured platform demand. Validate before pin production. Complete concepts in ../pinterest/FP-04.md.
+
+
+## Owner-selected inline photo
+
+2026-10-12: Add Kaboompics 16979 before the timed routine, retaining the real calendar hero. Owner explicitly selected this photo. Source page and downloaded 2400px image checked: commercial license, no editorial-only marker, hands/torso only, no identifiable face or readable brand logo in displayed scene. Papers and notebooks illustrate writing down decisions; no endorsement or claim that it depicts an OMC customer. Export responsive WebP without altering scene.
