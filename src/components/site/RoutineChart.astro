@@ -47,7 +47,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     </div>
   </fieldset>
   <div class="mr-actions">
-    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download PNG</button>
+    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download chart</button>
     <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
   </div>
 
@@ -474,6 +474,30 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-sheet .mr-text { font-size: 17px; }
     .mr-container:not(.mr-exporting) .mr-sheet .mr-end-label { font-size: 18px; }
   }
+
+  /* Quiet editorial controls, distinct from the printed poster. */
+  .mr-types { display: flex; flex-wrap: wrap; gap: 0 24px; border-bottom: 1px solid var(--mr-rule); padding-bottom: 0; }
+  .mr-type { flex: 0 1 auto; min-height: 48px; padding: 10px 0 12px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; box-shadow: none; text-align: left; }
+  .mr-type:hover { border-color: var(--mr-soft); }
+  .mr-type[aria-pressed='true'] { border-color: var(--mr-ink); background: transparent; box-shadow: none; }
+  .mr-type-label { font-size: 1rem; }
+  .mr-type[aria-pressed='true'] .mr-type-label { font-weight: 700; }
+  .mr-type-blurb { display: none; }
+  .mr-palette-picker { text-align: left; max-width: 816px; margin-bottom: 24px; }
+  .mr-palette-picker legend { font-size: .8rem; margin-bottom: 2px; }
+  .mr-palette-options { justify-content: flex-start; gap: 6px 24px; }
+  .mr-palette-option { padding: 8px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; }
+  .mr-palette-option[aria-pressed='true'] { padding: 8px 0; border: 0; border-bottom: 2px solid var(--mr-ink); background: transparent; }
+  .mr-palette-option:hover { color: #211b19; }
+  .mr-palette-option[aria-pressed='true'] > span:last-child { font-weight: 600; }
+  .mr-actions { justify-content: flex-start; align-items: center; max-width: 816px; margin-left: auto; margin-right: auto; gap: 24px; }
+  .mr-btn { border: 0; border-radius: 3px; background: transparent; font-size: .9rem; letter-spacing: 0; text-transform: none; }
+  .mr-btn:not(.mr-btn-primary) { padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  .mr-btn-primary { background: var(--color-warm-button); }
+  .mr-btn:not(.mr-btn-primary):hover { background: transparent; color: #211b19; }
+  .mr-chip { min-height: 44px; padding: 6px 0; margin-right: 12px; border: 0; border-radius: 0; background: transparent; font-family: var(--font-sans); font-size: .8rem; text-decoration: underline; text-decoration-color: var(--mr-rule); text-underline-offset: 4px; }
+  .mr-chip:hover { background: transparent; text-decoration-color: var(--mr-ink); }
+  .mr-type:focus-visible, .mr-chip:focus-visible, .mr-btn:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 4px; }
 </style>
 
 <script>
