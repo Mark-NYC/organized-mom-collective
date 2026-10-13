@@ -236,8 +236,8 @@ function readPlan(id, slug) {
     if (!PIN_STATUSES.includes(s)) fail(rel, `pin ${i + 1} status "${s}" is not one of ${PIN_STATUSES.join(', ')}`);
   });
   PIN_TYPES.forEach((type, i) => {
-    if (!new RegExp(`^${id}-${type}-1000x1500\\.(png|jpg)$`).test(assets[i] ?? '')) {
-      fail(rel, `pin ${i + 1} asset filename should be ${id}-${type}-1000x1500.png (or .jpg), found "${assets[i] ?? 'missing'}"`);
+    if (!new RegExp(`^${id}-${type}-1000x1500\\.(png|jpg|webp)$`).test(assets[i] ?? '')) {
+      fail(rel, `pin ${i + 1} asset filename should be ${id}-${type}-1000x1500.png (or .jpg/.webp), found "${assets[i] ?? 'missing'}"`);
     }
   });
   return { statuses };
