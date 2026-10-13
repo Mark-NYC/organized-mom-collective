@@ -26,13 +26,17 @@ export const realLifeReset = {
   buyUrl: shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${REAL_LIFE_RESET_SLUG}` : null,
 };
 
-/** The owner’s kit mockup, white background: keep it in a white (bg-paper) section. */
+/**
+ * The owner’s kit mockup, white background: keep it in a white (bg-paper) section. “7 Minute” is
+ * redrawn as “4 Minute” (the audio runs 4:14), in the heading and on the phone; the untouched
+ * original is design/real-life-reset/kit-original.webp.
+ */
 export const realLifeResetAssets = {
   kit: {
     src: '/images/real-life-reset/kit.webp',
     width: 2000,
     height: 942,
-    alt: 'The Real Life Reset Kit: the Plan B Quick-Pivot Framework, the 15-Minute Reset Checklist, and the Power Packed 7 Minute “It’s Okay to Pivot” audio playing on a phone.',
+    alt: 'The Real Life Reset Kit: the Plan B Quick-Pivot Framework, the 15-Minute Reset Checklist, and the Power Packed 4 Minute “It’s Okay to Pivot” audio playing on a phone.',
     spec: 'Kit mockup on white: framework + checklist + phone · kit.webp, 2000 × 942',
   },
 } satisfies Record<string, Asset>;
