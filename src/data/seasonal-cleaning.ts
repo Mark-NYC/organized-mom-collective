@@ -1,14 +1,19 @@
 /**
- * Room-by-room seasonal cleaning checklists: spring (/spring-cleaning-checklist) and fall
- * (/fall-cleaning-checklist), both rendered by src/components/site/SeasonalChecklist.astro.
+ * Room-by-room seasonal cleaning checklists: spring (/spring-cleaning-checklist), fall
+ * (/fall-cleaning-checklist), the New Year declutter sprint (/new-year-declutter) and the paper clutter blitz
+ * (/paper-clutter-blitz), all rendered by src/components/site/SeasonalChecklist.astro.
  * Task ids come from position (room id, section, task), so reordering tasks shifts saved ticks.
  */
 
 export interface Room {
   id: string;
   name: string;
-  /** A rough guide, shown as "About …". */
+  /** A rough guide or when, shown beside the name ("About 30–45 min", "Weeks 1–2"). */
   time: string;
+  /** Short label for its badge; defaults to the name. */
+  badge?: string;
+  /** Adds a countdown timer of this many minutes to the room. */
+  minutes?: number;
   /** Two short sections: [title, tasks]. */
   sections: readonly (readonly [string, readonly string[]])[];
 }
@@ -159,6 +164,96 @@ export const fallRooms: readonly Room[] = [
     sections: [
       ['Seasonal swap', ['Pack away summer gear: pool, beach, outdoor toys', 'Bring out coats, boots and fall decorations', 'Put holiday decorations where you can reach them', 'Check flashlights, batteries and emergency supplies']],
       ['Declutter', ['Go through storage boxes, donate what you don’t use', 'Sweep or vacuum the storage area', 'Label every bin']],
+    ],
+  },
+];
+
+/** The New Year declutter sprint: eight weeks, two weeks per area, plus jobs the kids can own. */
+export const newYearRooms: readonly Room[] = [
+  {
+    id: 'toys',
+    name: 'Toys',
+    time: 'Weeks 1–2',
+    sections: [
+      ['Sort it', ['Gather all the toys in one spot', 'Sort with the kids: keep, give away, broken', 'Broken toys out, give-aways in the car']],
+      ['Set it up', ['Low, labeled bins kids can reach', 'One bin out at a time', 'A 10-minute pickup timer before dinner']],
+    ],
+  },
+  {
+    id: 'clothes',
+    name: 'Clothes',
+    time: 'Weeks 3–4',
+    sections: [
+      ['Sort it', ['Kids try on winter clothes: what still fits?', 'Three piles: donate, save for a sibling, keep', 'Your own closet: what you actually wore this winter']],
+      ['Set it up', ['Spring clothes checked and sized', 'Tomorrow’s outfit spot for each kid', 'Dress-up clothes in one bin']],
+    ],
+  },
+  {
+    id: 'kitchen',
+    name: 'Kitchen',
+    time: 'Weeks 5–6',
+    sections: [
+      ['Sort it', ['Expired holiday baking supplies out', 'Gadgets you didn’t use this year: donate', 'Containers matched to lids, the rest recycled']],
+      ['Set it up', ['A snack spot kids can reach', 'Coffee or tea station in one place', 'One clear stretch of counter for meal prep']],
+    ],
+  },
+  {
+    id: 'paper',
+    name: 'Paper',
+    time: 'Weeks 7–8',
+    sections: [
+      ['Sort it', ['Holiday cards: keep the special ones', 'Important papers filed, junk mail recycled', 'Kids’ artwork: keep a few favorites, photograph the rest']],
+      ['Set it up', ['One spot for incoming mail by the door', 'School dates and key numbers on the calendar', 'Five minutes with the mail each evening']],
+    ],
+  },
+  {
+    id: 'kids',
+    name: 'Jobs the Kids Own',
+    time: 'All eight weeks',
+    badge: 'Kid helpers',
+    sections: [
+      ['Ages 4–6', ['Put toys back in the right bin', 'Sort socks by person', 'Count items for the donation box']],
+      ['Ages 7–10', ['Try on clothes and call out what doesn’t fit', 'Run the 10-minute pickup timer', 'Carry the donation bag to the car']],
+    ],
+  },
+];
+
+/**
+ * The three-day paper clutter blitz (/paper-clutter-blitz), timed. Uses the same two pockets as FP-03
+ * (/resources/home-command-center): “Needs attention” and “Ready to go”. Don't introduce another paper system.
+ */
+export const paperBlitzDays: readonly Room[] = [
+  {
+    id: 'day1',
+    name: 'Day 1: Clear the Counter',
+    time: '15 minutes',
+    badge: 'Day 1',
+    minutes: 15,
+    sections: [
+      ['Gather', ['Three piles or bags: trash & recycling, needs attention, keep', 'Papers from the counter, table, car, backpacks and “that chair”']],
+      ['Sort fast', ['Don’t read everything: grab, glance, drop', 'Out now: old flyers, expired coupons, takeout menus', 'Done when the timer stops, even mid-pile']],
+    ],
+  },
+  {
+    id: 'day2',
+    name: 'Day 2: Give Papers a Home',
+    time: '10 minutes',
+    badge: 'Day 2',
+    minutes: 10,
+    sections: [
+      ['Two pockets', ['“Needs attention” pocket by the calendar', '“Ready to go” pocket beside it', 'Today’s “needs attention” pile goes in']],
+      ['One folder', ['One folder or file box for papers you keep', 'Four sections: school, medical, activities, house & money', 'Yesterday’s “keep” pile filed']],
+    ],
+  },
+  {
+    id: 'day3',
+    name: 'Day 3: The 5-Minute Habit',
+    time: '5 minutes',
+    badge: 'Day 3',
+    minutes: 5,
+    sections: [
+      ['Every evening', ['New papers land in “needs attention”, nowhere else', 'After dinner: dates on the calendar, forms signed', 'Signed forms into “ready to go”, then into bags']],
+      ['Once a week', ['Clear both pockets in your weekly reset', 'Photograph keepers into a “Family Docs” album', 'Recycle anything past its date']],
     ],
   },
 ];

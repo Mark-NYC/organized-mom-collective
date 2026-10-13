@@ -1,0 +1,174 @@
+---
+/**
+ * /travel-checklist — a free two-page family travel checklist: a countdown (a week, three days, the day before),
+ * must-haves, packing (everyone, this trip, the kids, the travel-day bag) and coming home. Trip-type chips
+ * (beach, city, visiting family, outdoors, winter holidays) fill the next empty "This trip" line. Rebuilt from
+ * the old Travel Stress-Saver, whose download could never load its library. Edited on screen, downloaded as a
+ * PNG (src/components/site/ChecklistPages.astro). Saves in this browser (`omc:travel:v1`).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import ChecklistPages from '../components/site/ChecklistPages.astro';
+import { blanks, type ChecklistPage } from '../lib/checklist-pages';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+/** Where the "This trip" lines live (page 2, the Pack section, second group); the chips fill them. */
+const TRIP_FIELDS = 'p1-s0-g1-';
+const pages: ChecklistPage[] = [
+  {
+    info: [
+      { field: 'where', label: 'Where', placeholder: 'Grandma’s house' },
+      { field: 'when', label: 'When', placeholder: 'Nov 26–29' },
+    ],
+    sections: [
+      {
+        title: 'Before You Go',
+        groupCols: 2,
+        groups: [
+          { title: 'A week before', variant: 'step', items: ['Check the weather', 'Confirm flights, hotel or hosts', 'Pet care or a house-sitter', 'Tell the bank you’re traveling'] },
+          { title: 'Three days before', variant: 'step', items: ['Start packing from this list', 'Buy what’s missing', 'Documents in one folder', 'Prescriptions refilled'] },
+          { title: 'The day before', variant: 'step', items: ['Finish packing', 'Lay out travel outfits', 'Charge everything', 'Check departure times'] },
+          { title: 'Must-haves', variant: 'priority', items: ['IDs (and copies)', 'Emergency contacts', 'Medications + extra days', 'Basic first-aid kit'] },
+        ],
+      },
+      {
+        title: 'Coming Home',
+        groups: [{ cols: 3, title: 'The first night back', items: ['Unpack only what you need tonight', 'Start one load of laundry', 'Easy dinner planned', 'Basic groceries', 'Bags away by the weekend', 'Rest'] }],
+      },
+    ],
+  },
+  {
+    sections: [
+      {
+        title: 'Pack',
+        groupCols: 2,
+        groups: [
+          { title: 'Everyone', items: ['Clothes for each day + 2 spares', 'Extra underwear & socks', 'Comfortable shoes', 'Toiletries', 'Pajamas', 'Chargers', '', '', '', ''] },
+          { title: 'This trip', variant: 'timeline', items: blanks(10) },
+          { title: 'For the kids', items: ['A change of clothes in the carry-on', 'Comfort item', 'Books, games or tablet + headphones', 'Any gear they need', ''] },
+          { title: 'Travel-day bag', items: ['Snacks & water', 'Wipes & tissues', 'Charger & cable', 'Plastic bag for messes', ''] },
+        ],
+      },
+    ],
+  },
+];
+
+const tripIdeas: Record<string, string[]> = {
+  'Winter holidays': ['Coats, hats & gloves', 'Boots', 'Holiday outfit', 'Wrapped gifts', 'Gift for the hosts', 'Stockings'],
+  'Visiting family': ['Gift for the hosts', 'Kids’ pillow or sleep sack', 'Games for the cousins', 'Night-light', 'Comfy lounge clothes'],
+  Beach: ['Swimsuits', 'Sunscreen & sunglasses', 'Beach towels', 'Beach bag', 'Sand toys', 'Hats'],
+  City: ['Walking shoes', 'Day pack', 'Umbrella', 'Nice outfit for dinner', 'Stroller or carrier'],
+  Outdoors: ['Hiking shoes', 'Layers & rain jacket', 'Water bottles', 'Trail snacks', 'Bug spray', 'Flashlight'],
+};
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Family Travel Checklist', item: new URL(routes.travelChecklist, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Family Travel Checklist & Packing List"
+  description="A free family travel checklist: what to do a week, three days and the day before, what to pack for everyone and the kids, and the first night home. Edit it and print it."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="tc-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free family travel checklist</p>
+      <h1 id="tc-h" class="serif-hero mt-3">Pack Once. Forget Nothing.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        What to do a week out, three days out and the night before, what to pack for everyone and the kids, and an easy first night home.
+        Tap your kind of trip to add its extras, change anything, then print it and hand the kids their part.
+      </p>
+    </div>
+  </section>
+
+  <div class="tc-trips">
+    <span class="tc-trips-label">This trip is</span>
+    {
+      Object.entries(tripIdeas).map(([type, items]) => (
+        <button type="button" class="tc-chip" data-tc-trip={JSON.stringify(items)}>
+          + {type}
+        </button>
+      ))
+    }
+    <p class="tc-hint">Each tap adds that trip’s extras to the “This trip” list. Tap two for a beach trip to Grandma’s.</p>
+  </div>
+
+  <ChecklistPages title="Family Travel Checklist" pages={pages} storageKey="omc:travel:v1" filename="family-travel-checklist">
+    <p slot="footnote" class="ck-footnote">
+      More free tools: the <a href={routes.routineChart} class="text-link">Routine Charts</a>, the
+      {' '}<a href={routes.lunchSnackStation} class="text-link">Lunch & Snack Station</a> and the
+      {' '}<a href={routes.calendar} data-cta="travel-checklist" class="text-link">Family Wall Calendar</a>
+    </p>
+  </ChecklistPages>
+</PublicLayout>
+
+<style>
+  .tc-trips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 20px 0;
+    background: var(--color-ivory);
+  }
+  .tc-trips-label {
+    margin-right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .tc-chip {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 999px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: var(--color-warm-ink);
+    cursor: pointer;
+  }
+  .tc-chip:hover {
+    border-color: var(--color-rose);
+    background: var(--color-rose-wash);
+  }
+  .tc-hint {
+    flex-basis: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-warm-soft);
+  }
+</style>
+
+<script define:vars={{ prefix: TRIP_FIELDS }}>
+  // Trip chips add their extras to the empty "This trip" lines (skipping ones already listed), then save.
+  for (const chip of document.querySelectorAll('[data-tc-trip]')) {
+    chip.addEventListener('click', () => {
+      const lines = Array.from(document.querySelectorAll(`input[type="text"][data-field^="${prefix}"]`));
+      const listed = new Set(lines.map((el) => el.value.trim().toLowerCase()));
+      const extras = JSON.parse(chip.dataset.tcTrip).filter((item) => !listed.has(item.toLowerCase()));
+      const empty = lines.filter((el) => !el.value.trim());
+      if (!extras.length) return;
+      if (!empty.length) {
+        alert('The “This trip” list is full. Clear a line first.');
+        return;
+      }
+      extras.slice(0, empty.length).forEach((item, i) => (empty[i].value = item));
+      empty[0].dispatchEvent(new Event('input', { bubbles: true }));
+      empty[0].closest('.ck-group')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+</script>

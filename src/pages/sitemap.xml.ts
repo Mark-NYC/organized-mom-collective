@@ -30,10 +30,13 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.homeschoolRhythm },
     { path: routes.springCleaning },
     { path: routes.fallCleaning },
+    { path: routes.newYearDeclutter },
+    { path: routes.paperBlitz },
     { path: routes.laundrySystem },
     { path: routes.closetReset },
     { path: routes.lunchSnackStation },
     { path: routes.commandCenterSetup },
+    { path: routes.travelChecklist },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),

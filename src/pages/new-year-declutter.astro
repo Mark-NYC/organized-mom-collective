@@ -1,0 +1,60 @@
+---
+/**
+ * /new-year-declutter — a free eight-week New Year declutter sprint (toys, clothes, kitchen, paper, two weeks each, plus jobs the kids own) with badges; formerly the old site's January–February Fresh Start Sprint. Like the fall and deep-clean checklist, ticked off on
+ * screen (src/components/site/SeasonalChecklist.astro; rooms in src/data/seasonal-cleaning.ts).
+ * Ticks save in this browser (`omc:new-year-declutter:v1`).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import SeasonalChecklist from '../components/site/SeasonalChecklist.astro';
+import { newYearRooms } from '../data/seasonal-cleaning';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'New Year Declutter Sprint', item: new URL(routes.newYearDeclutter, site).href },
+    ],
+  },
+];
+---
+
+
+<PublicLayout
+  title="New Year Declutter Challenge: A Free 8-Week Sprint"
+  description="A free 8-week New Year declutter sprint for busy families: toys, clothes, kitchen and paper, two weeks each, with jobs the kids own and badges as you go."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="sc-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free New Year declutter sprint</p>
+      <h1 id="sc-h" class="serif-hero mt-3">A Fresh Start, Two Weeks at a Time.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        The holidays leave more stuff behind than any other time of year. Take it one area at a time: toys, then clothes, the kitchen, then paper,
+        two weeks each, with jobs the kids own along the way. Earn a badge once an area is 80% done. Your progress saves in this browser.
+      </p>
+    </div>
+  </section>
+
+  <SeasonalChecklist rooms={newYearRooms} storageKey="omc:new-year-declutter:v1">
+    <aside slot="footnote" class="sc-footnote sc-life">
+      <p class="sc-life-title">Bad week? Do the smaller version.</p>
+      <ul>
+        <li><b>Sick kid:</b> toss broken toys from the couch.</li>
+        <li><b>No energy:</b> one 10-minute toy pickup, that’s it.</li>
+        <li><b>Overwhelmed:</b> pick one drawer, one shelf or one bag.</li>
+        <li><b>Behind:</b> skip ahead to the next area. Come back later or don’t.</li>
+      </ul>
+    </aside>
+    <p slot="footnote" class="sc-footnote">
+      Want the rest of the year handled too? The <a href={routes.companion} class="text-link">cleaning companion</a> that comes with the
+      {' '}<a href={routes.calendar} data-cta="new-year-declutter" class="text-link">Family Wall Calendar</a> gives you one small reset a day.
+      Come spring, there’s a <a href={routes.springCleaning} class="text-link">spring checklist</a> too.
+    </p>
+  </SeasonalChecklist>
+</PublicLayout>
