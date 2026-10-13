@@ -8,6 +8,7 @@
  *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
  *           /essential-routines $12 downsell after Take Back Control (always noindex)
  *           /family-sanity-saver-starter-kit  Family Command Center landing page ($7; standalone entry point, noindex until sold)
+ *           /real-life-reset-kit  Real Life Reset Kit ($7 backup-plan offer; not linked yet, always noindex)
  *           /take-back-control "Take Back Control" upsell ($29 course + tools after the Weekly Reset; always noindex)
  *           /mind-your-own-motherhood-mug  the $23 mug (noindex until checkout is live)
  *           /planner           free weekly planner, filled in on screen, downloads as a PNG (the upgraded one,
@@ -43,6 +44,8 @@ export const routes = {
   weeklyReset: '/weekly-reset',
   takeBackControl: '/take-back-control',
   /** Standalone $7 Family Command Center landing page (noindex until sold). */
+  /** $7 Real Life Reset Kit offer (not linked from anywhere yet; always noindex). */
+  realLifeReset: '/real-life-reset-kit',
   familySanitySaver: '/family-sanity-saver-starter-kit',
   /** $12 downsell after Take Back Control (noindex). */
   essentialRoutines: '/essential-routines',

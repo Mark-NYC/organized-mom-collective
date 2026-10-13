@@ -28,7 +28,17 @@ export const familyCommandCenter = {
   families: '500+',
   /** Shop rating shown under the hero button: the whole Etsy shop's figure (src/data/reviews.ts). */
   rating: shopStats.rating,
+  /** What the buyer actually gets, in the owner's words. */
+  summary: 'A customizable 12-month wall calendar with your family’s names already filled in, plus the exact system to make it work on day one.',
 };
+
+/**
+ * What's in the kit at checkout (owner-supplied mockup, kit.webp): the 12-month wall calendar with
+ * the family's names filled in, the Command Center Refresh Sheet, the 30-Minute Daily Tidy System and
+ * the "Quick Coaching Guide: The Weekly Planning System" audio. The page's value-stack copy is the
+ * original page's and doesn't map one to one onto these (e.g. "Weekly Sanity Check-Ins" isn't in the
+ * mockup): reconcile it before the page goes live.
+ */
 
 /**
  * Customer reviews from the original page, supplied by the shop owner as images (name, date and
@@ -41,6 +51,13 @@ export const familyCommandCenterAssets = {
     height: 1080,
     alt: 'Sticky-note speech bubbles reading “When is my practice?”, “Mom what time is…” and “I forgot to tell you about…” above the filled-in January page of the Family Command Center wall calendar, with the 7 Minute Quick-Start Guide playing on a phone. Badge: 15 min setup, Family Command Center, auto-fill.',
     spec: 'Hero: speech bubbles + calendar + phone · hero.webp, 1080 × 1080',
+  },
+  kit: {
+    src: '/images/family-sanity-saver/kit.webp',
+    width: 1080,
+    height: 1280,
+    alt: 'The Family Sanity Saver Starter Kit: the 12-month wall calendar, January to May fanned out with the family’s names (Dad, Mom, Jonathan, Rose, Jaden) filled in on every week, the Command Center Refresh Sheet, the 30-Minute Daily Tidy System, and the Quick Coaching Guide: The Weekly Planning System audio playing on a phone.',
+    spec: 'Kit mockup on white · kit.webp, 1080 × 1280',
   },
   reviewMegan: {
     src: '/images/family-sanity-saver/review-megan.webp',
