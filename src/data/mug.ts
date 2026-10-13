@@ -9,7 +9,7 @@ import { routes } from '../routes';
  * `mind-your-own-motherhood-mug`, supabase/migrations/20261015000000_shop_mug.sql): stock,
  * US shipping, fulfilled by hand from the dashboard. The price here must match that product's
  * price. The buy button goes to the checkout only in builds with the shop switched on; until then
- * it says "Coming soon" and the page is noindex, out of the sitemap and out of the footer.
+ * it says "Coming soon" and the page is noindex and out of the sitemap (it's still listed on /shop).
  */
 export const MUG_SLUG = 'mind-your-own-motherhood-mug';
 

@@ -1,7 +1,7 @@
 ---
 /**
  * Footer for every public page. Links only to pages that exist: the calendar, the
- * companion explainer, the library, each topic that has articles, and the mug once it's buyable.
+ * companion explainer, the shop, the library and each topic that has articles.
  * No contact or privacy page exists yet; add them here once they're real.
  */
 import { Wordmark } from '../marks';
@@ -9,7 +9,6 @@ import { pillars } from '../../data/pillars';
 import { routes } from '../../routes';
 import { BRAND_NAME } from '../../config';
 import { getArticles } from '../../lib/articles';
-import { mug } from '../../data/mug';
 
 // Only topics that have articles get a page, so only those are linked.
 const used = new Set((await getArticles()).map((a) => a.data.pillar));
@@ -19,9 +18,8 @@ const site = [
   { href: routes.calendar, label: 'Family Wall Calendar' },
   { href: routes.resources, label: 'Free Resources' },
   { href: routes.planner, label: 'Free Weekly Planner' },
+  { href: routes.shop, label: 'Shop' },
   { href: routes.companion, label: 'Cleaning Companion' },
-  // Linked once it can be bought (shop on).
-  ...(mug.buyUrl ? [{ href: routes.mug, label: 'Mind Your Own Motherhood Mug' }] : []),
 ];
 const link = 'text-[0.95rem] underline decoration-rule underline-offset-4 hover:decoration-ink';
 ---

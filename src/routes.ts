@@ -3,6 +3,7 @@
  *
  *   PUBLIC  /                  brand homepage
  *           /calendar          the Family Wall Calendar product page (buy on Etsy)
+ *           /shop              every product (calendar, Weekly Reset, mug), linked from the header
  *           /companion         how the cleaning companion works (public explainer)
  *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
  *           /essential-routines $12 downsell after Take Back Control (always noindex)
@@ -32,6 +33,8 @@ import { DAY_PARAMS } from './lib/dates';
 export const routes = {
   home: '/',
   calendar: '/calendar',
+  /** Every product, one card each, linking to its own page. */
+  shop: '/shop',
   /** The calendar page's options and Etsy buttons. */
   buy: '/calendar#buy',
   companion: '/companion',
