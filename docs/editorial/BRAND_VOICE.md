@@ -1,12 +1,12 @@
 # Brand voice
 
-Who we write for, what we believe, and how it sounds. Read before writing or editing any article.
+Who we write for, what we believe, and how it sounds. Read before writing or editing any article. Strategic source of truth: [brand vision](../brand/VISION.md) and [product roadmap](../brand/PRODUCT_ROADMAP.md).
 
 Related: [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md) (structure) · [SEO_STRATEGY.md](SEO_STRATEGY.md) (search) · [ARTICLE_WORKFLOW.md](ARTICLE_WORKFLOW.md) (process).
 
 ## Audience
 
-A mom running a busy household: school-age kids (or younger), activities, often a job, and most of the family's planning in her head. She reads on her phone, in a spare minute: in the pickup line, after bedtime, while dinner's in the oven. She arrived from Google with a specific problem ("weekly cleaning schedule", "what's for dinner this week") and limited patience.
+**Primary reader:** a mom aged 25–35 in a suburban community, raising young school-aged children (roughly 4–10). Her children are mostly in public school, with some families homeschooling. School messages, sports, dance, pickups, birthday parties, appointments, meals and housework all compete for her attention. Some moms also work outside the home. Most of the family's coordination still lives in her head. This is the primary target, not a rule excluding other families. She reads on her phone, in a spare minute: in the pickup line, after bedtime, while dinner's in the oven. She arrived from Google with a specific problem ("weekly cleaning schedule", "what's for dinner this week") and limited patience.
 
 What she has plenty of: advice, printables, Pinterest boards, apps. What she's short on: time, and room in her head for one more thing to keep track of.
 
@@ -14,7 +14,7 @@ What she wants from us: a clear answer, one routine she can start today, and per
 
 ## Positioning
 
-**Organized Mom Collective helps busy moms run their home with simple systems that reduce the number of decisions they make.**
+**Core belief: Mom shouldn't have to manage everything alone.**\n\n**Brand promise: Less on your mind. More hands helping.**\n\n**Positioning: Organized Mom Collective helps busy moms bring family schedules, household routines, and everyday responsibilities into a shared system, so keeping family life moving doesn't fall entirely on them.**\n\nSpeak to mom as the likely buyer; show the entire family as capable participants. Our ambition is shared ownership, not merely helping mom get better at doing it all. See [VISION.md](../brand/VISION.md) for the full distinction between today's offer and the future digital system.
 
 - Not aspirational organizing. We don't sell the matching-bins, perfect-pantry version of home life.
 - Not productivity culture. The goal isn't to fit more in; it's to carry less in your head.
@@ -28,13 +28,13 @@ The products follow the same idea: a weekly paper wall calendar (schedule, meals
 
 These are the ideas we return to. Every article should express at least one of them through its advice, not by stating it as a slogan.
 
-1. **Fewer decisions beat more motivation.** A routine works when it answers "what do I do now?" before she has to ask. Systems over willpower.
-2. **Plan for the missed day.** Real weeks include sick kids and late practices. A plan that only works in a perfect week isn't a plan. Every article has a fallback.
-3. **Small and regular beats big and occasional.** Fifteen minutes a day keeps a house; a lost Saturday doesn't.
-4. **If it only lives in your head, it isn't a system.** Write it down, put it where the family can see it, and let the calendar or list do the remembering.
-5. **Running a home is shared work.** Systems should be clear enough that anyone in the family can pick up a task without asking her how.
-6. **Stop on time.** A routine with an end is one you'll start again tomorrow. Finishing the timer matters more than finishing the list.
-7. **Room for what matters.** The calendar makes space for prayer, gratitude and the people she loves. We mention this lightly and respectfully, never as a sermon.
+1. **Mom shouldn't be the family's memory.** Getting plans out of her head and in front of others lets the household see what's coming.\n2. **Visibility is a start, not the finish.** A shared calendar makes responsibilities visible; family follow-through makes them shared. Don't promise the product alone changes anyone's behavior.\n3. **Fewer decisions beat more motivation.** A routine works when it answers "what do I do now?" before she has to ask. Systems over willpower.
+4. **Plan for the missed day.** Real weeks include sick kids and late practices. A plan that only works in a perfect week isn't a plan. Every article has a fallback.
+5. **Small and regular beats big and occasional.** Fifteen minutes a day keeps a house; a lost Saturday doesn't.
+6. **If it only lives in your head, it isn't a system.** Write it down, put it where the family can see it, and let the calendar or list do the remembering.
+7. **Running a home is shared work.** Systems should be clear enough that anyone in the family can pick up a task without asking her how.
+8. **Stop on time.** A routine with an end is one you'll start again tomorrow. Finishing the timer matters more than finishing the list.
+9. **Room for what matters.** The calendar makes space for prayer, gratitude and the people she loves. We mention this lightly and respectfully, never as a sermon.
 
 ## Tone
 
@@ -47,7 +47,7 @@ These are the ideas we return to. Every article should express at least one of t
 | Plain-spoken: short words, short sentences | Corporate, clinical, or influencer-speak |
 | Honest: realistic about time and effort | Promising transformation, "game-changers", "life hacks" |
 
-Read the draft out loud. It should sound like a capable friend explaining what she does, not a brand talking about itself.
+Read the draft out loud. It should sound like a capable, down-to-earth friend explaining a practical method, not a brand talking about itself. Lead with shared responsibility, offer relief and build confidence. Don't blame husbands/partners, stereotype fathers, shame children or imply all families look the same.
 
 ## Style rules
 
@@ -70,7 +70,7 @@ Read the draft out loud. It should sound like a capable friend explaining what s
 - **Filler openers:** "In today's busy world…", "Let's face it…", "We've all been there…", "Are you tired of…?"
 - **Hype words:** game-changer, life-changing, hack, ultimate, effortless, transform, secret, must-have.
 - **Generic AI-shaped advice:** "consistency is key", "self-care is important", "find what works for you", lists of obvious tips with no system behind them.
-- **Product features we haven't verified.** See [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes).
+- **Product features we haven't verified.** See [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes).\n- **Future-as-current marketing:** digital calendar consolidation, school-email import, integrated family system, sync, subscriptions and companion "app" claims are not part of today's physical-calendar bundle. See [product roadmap](../brand/PRODUCT_ROADMAP.md).\n- **Mom as forever-manager framing:** don't imply sharing means she must assign and check every task herself.
 
 ## Writing examples
 
