@@ -1,0 +1,465 @@
+---
+/**
+ * /gratitude-tracker — a free November family gratitude tracker: a row per family member (names typed on the sheet),
+ * a box for each day of November, four weekly themes, and Thanksgiving-week prompts. The year, weekday letters and
+ * the Thanksgiving week (the fourth Thursday, computed in the browser) are set on load, so the sheet is right every
+ * year. The countdown is on the page, not the sheet, so a printout never goes stale. Downloads as a PNG (US Letter
+ * landscape, 11 × 8.5 in). Autosave and export: src/lib/printable.ts (`omc:gratitude:v1`). Classes prefixed `gt-`.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const ROWS = 6;
+const DAYS = 30;
+const days = Array.from({ length: DAYS }, (_, i) => i + 1);
+const rows = Array.from({ length: ROWS }, (_, i) => i);
+const dots = ['#b88a8c', '#9aab8f', '#d9b98c', '#96666b', '#7f9479', '#c9a27e'];
+const themes = ['Week 1 · People we love', 'Week 2 · Simple things', 'Week 3 · Our traditions', 'Week 4 · Looking ahead'];
+const prompts = ['What tradition are you most grateful for?', 'Who will you thank at dinner?', 'What makes our family us?', 'What was good about this year?'];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Family Gratitude Tracker', item: new URL(routes.gratitudeTracker, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Thanksgiving Family Gratitude Tracker"
+  description="A free November gratitude tracker for the whole family: a row for each person, a box for each day, weekly themes and Thanksgiving-week prompts. Print it for the fridge."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="gt-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free family gratitude tracker</p>
+      <h1 id="gt-h" class="serif-hero mt-3">One Thankful Thing a Day, All November.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Everyone gets a row. Each day, say one thing you’re grateful for at dinner and tick your box. By Thanksgiving the whole family has
+        a month of reasons. Type your names on the sheet, then print it for the fridge. <span data-gt-countdown></span>
+      </p>
+    </div>
+  </section>
+
+  <div class="gt-container">
+    <div class="gt-actions">
+      <button type="button" class="gt-btn gt-btn-primary" data-gt-download>Download PNG</button>
+      <button type="button" class="gt-btn" data-gt-clear>Clear ticks</button>
+    </div>
+    <p class="gt-swipe">Swipe sideways on the tracker to see the whole month.</p>
+
+    <div class="gt-sheet" id="gratitude-tracker">
+      <div class="gt-head">
+        <div class="gt-title"><span data-gt-month>November</span> Gratitude Tracker</div>
+        <input class="gt-quote" type="text" data-field="quote" placeholder="Our family motto (optional)" aria-label="Family motto" />
+      </div>
+
+      <ul class="gt-themes">{themes.map((t) => <li>{t}</li>)}</ul>
+
+      <div class="gt-scroll">
+        <table class="gt-grid">
+          <thead>
+            <tr>
+              <th scope="col" class="gt-name-col">Name</th>
+              {
+                days.map((d) => (
+                  <th scope="col" data-gt-day={d}>
+                    <span class="gt-dow" data-gt-dow />
+                    {d}
+                  </th>
+                ))
+              }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              rows.map((r) => (
+                <tr>
+                  <th scope="row">
+                    <span class="gt-dot" style={`background:${dots[r]}`} aria-hidden="true" />
+                    <input type="text" data-field={`name-${r}`} placeholder={r === 0 ? 'Name' : ''} aria-label={`Family member ${r + 1}`} />
+                  </th>
+                  {days.map((d) => (
+                    <td data-gt-day={d}>
+                      <input type="checkbox" data-field={`tick-${r}-${d}`} aria-label={`Row ${r + 1}, November ${d}`} />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gt-bottom">
+        <div class="gt-prompts">
+          <p class="gt-prompts-title">Thanksgiving week <span data-gt-week></span></p>
+          <ul>{prompts.map((p) => <li>{p}</li>)}</ul>
+        </div>
+        <label class="gt-notes">
+          <span>Favorite thankful moments</span>
+          <textarea data-field="moments" aria-label="Favorite thankful moments"></textarea>
+        </label>
+      </div>
+
+      <div class="gt-foot">{BRAND_NAME}</div>
+    </div>
+
+    <p class="gt-footnote">
+      The <a href={routes.calendar} data-cta="gratitude-tracker" class="text-link">Family Wall Calendar</a> has a “grateful for” spot on every
+      {' '}week, for after November. More free tools: the <a href={routes.fallPantry} class="text-link">Fall Pantry Stock-Up</a> and the
+      {' '}<a href={routes.travelChecklist} class="text-link">Family Travel Checklist</a>
+    </p>
+  </div>
+</PublicLayout>
+
+<style is:global>
+  .gt-container {
+    background: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--color-warm-ink);
+  }
+  .gt-container *,
+  .gt-container *::before,
+  .gt-container *::after {
+    box-sizing: border-box;
+  }
+  .gt-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .gt-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .gt-btn:hover {
+    background: var(--color-rose-wash);
+  }
+  .gt-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .gt-btn-primary:hover {
+    background: #362e2d;
+  }
+  .gt-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .gt-swipe {
+    display: none;
+  }
+
+  /* The sheet: US Letter landscape (11 × 8.5 in at 96 px/in). */
+  .gt-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 1056px;
+    max-width: 100%;
+    min-height: 816px;
+    margin: 0 auto;
+    padding: 30px 32px 18px;
+    background: #fff;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .gt-head {
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-rose);
+    text-align: center;
+  }
+  .gt-title {
+    font-size: 34px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .gt-quote {
+    width: 100%;
+    margin-top: 2px;
+    border: none;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-style: italic;
+    text-align: center;
+    color: var(--color-rose-deep);
+  }
+  .gt-quote::placeholder {
+    color: #c4b8b2;
+  }
+  .gt-quote:focus,
+  .gt-grid input[type='text']:focus,
+  .gt-notes textarea:focus {
+    outline: none;
+    background: var(--color-rose-wash);
+  }
+  .gt-themes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 14px 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+  .gt-themes li {
+    padding: 6px 8px;
+    border-radius: 3px;
+    background: var(--color-sage-wash);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #5d6b55;
+  }
+  .gt-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .gt-name-col {
+    width: 132px;
+  }
+  .gt-grid th,
+  .gt-grid td {
+    border: 1px solid var(--color-warm-rule);
+    padding: 0;
+    text-align: center;
+  }
+  .gt-grid thead th {
+    padding: 3px 0;
+    background: var(--color-warm-button);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .gt-grid thead .gt-name-col {
+    padding-left: 8px;
+    text-align: left;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .gt-dow {
+    display: block;
+    font-size: 8px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+  .gt-grid thead th.gt-tday {
+    background: var(--color-rose-deep);
+  }
+  .gt-grid td.gt-tday {
+    background: var(--color-rose-wash);
+  }
+  .gt-grid tbody th {
+    height: 52px;
+    padding: 0 6px;
+    text-align: left;
+  }
+  .gt-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+  .gt-grid tbody th input {
+    width: calc(100% - 18px);
+    border: none;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: var(--color-warm-ink);
+    vertical-align: middle;
+  }
+  .gt-grid tbody th input::placeholder {
+    color: #c4b8b2;
+  }
+  .gt-grid td input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--color-rose-deep);
+    cursor: pointer;
+  }
+  .gt-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .gt-prompts {
+    padding: 10px 14px;
+    border: 1px dashed var(--color-rose);
+    border-radius: 6px;
+  }
+  .gt-prompts-title {
+    margin-bottom: 4px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-rose-deep);
+  }
+  .gt-prompts ul {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .gt-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .gt-notes textarea {
+    flex: 1;
+    min-height: 96px;
+    padding: 0 8px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 3px;
+    resize: none;
+    background-color: #fff;
+    background-image: linear-gradient(transparent 23px, var(--color-warm-rule) 23px, var(--color-warm-rule) 24px);
+    background-size: 100% 24px;
+    background-attachment: local;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 24px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--color-warm-ink);
+  }
+  .gt-foot {
+    margin-top: auto;
+    padding-top: 10px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .gt-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--color-warm-soft);
+  }
+
+  /* Phones: the month scrolls sideways inside the sheet. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .gt-swipe {
+      display: block;
+      margin: 0 auto 12px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--color-warm-soft);
+    }
+    .gt-container:not(.gt-exporting) .gt-sheet {
+      min-height: 0;
+      padding: 18px 10px 12px;
+    }
+    .gt-container:not(.gt-exporting) .gt-title {
+      font-size: 24px;
+    }
+    .gt-container:not(.gt-exporting) .gt-themes,
+    .gt-container:not(.gt-exporting) .gt-bottom {
+      grid-template-columns: 1fr;
+    }
+    .gt-container:not(.gt-exporting) .gt-scroll {
+      overflow-x: auto;
+    }
+    .gt-container:not(.gt-exporting) .gt-grid {
+      width: 900px;
+    }
+  }
+</style>
+
+<script>
+  import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+
+  const sheet = document.getElementById('gratitude-tracker')!;
+  const host = sheet.closest<HTMLElement>('.gt-container')!;
+
+  // The November this tracker is for: this year's, or next year's once November is over.
+  const now = new Date();
+  const year = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+  const firstDow = new Date(year, 10, 1).getDay();
+  const thanksgiving = 1 + ((4 - firstDow + 7) % 7) + 21; // fourth Thursday
+  const weekStart = thanksgiving - 3; // Monday to Sunday around it
+  const weekEnd = Math.min(thanksgiving + 3, 30);
+
+  sheet.querySelector('[data-gt-month]')!.textContent = `November ${year}`;
+  sheet.querySelector('[data-gt-week]')!.textContent = `· Nov ${weekStart}–${weekEnd}`;
+  for (const th of sheet.querySelectorAll<HTMLElement>('thead [data-gt-day]')) {
+    const d = Number(th.dataset.gtDay);
+    th.querySelector('[data-gt-dow]')!.textContent = 'SMTWTFS'[new Date(year, 10, d).getDay()];
+  }
+  for (const cell of sheet.querySelectorAll<HTMLElement>('[data-gt-day]')) {
+    const d = Number(cell.dataset.gtDay);
+    cell.classList.toggle('gt-tday', d >= weekStart && d <= weekEnd);
+  }
+
+  // Countdown lives on the page only, so a printed sheet never goes stale.
+  const msPerDay = 86_400_000;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const daysLeft = Math.round((new Date(year, 10, thanksgiving).getTime() - today.getTime()) / msPerDay);
+  const countdown = document.querySelector('[data-gt-countdown]')!;
+  if (daysLeft > 0) countdown.textContent = `${daysLeft} days until Thanksgiving.`;
+  else if (daysLeft === 0) countdown.textContent = 'Happy Thanksgiving.';
+
+  const save = autosave(sheet, 'omc:gratitude:v1');
+
+  document.querySelector('[data-gt-clear]')!.addEventListener('click', () => {
+    if (!confirm('Clear all the ticks? Names and notes stay.')) return;
+    for (const el of fieldsIn(sheet)) if (el instanceof HTMLInputElement && el.type === 'checkbox') el.checked = false;
+    save();
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('[data-gt-download]')!;
+  button.addEventListener('click', async () => {
+    // Placeholder hints would print as if they'd been filled in: drop them while capturing.
+    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
+    const hints = hinted.map((el) => el.placeholder);
+    hinted.forEach((el) => el.removeAttribute('placeholder'));
+    try {
+      await downloadPng(sheet, { filename: `gratitude-tracker-november-${year}.png`, width: 1056, height: 816, layoutHost: host, exportClass: 'gt-exporting', button });
+    } finally {
+      hinted.forEach((el, i) => (el.placeholder = hints[i]));
+    }
+  });
+</script>
