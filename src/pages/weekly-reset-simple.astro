@@ -1,0 +1,78 @@
+---
+/**
+ * The Weekly Reset System, one-screen version: just the hero of /weekly-reset (headline, three
+ * outcomes, one button, Etsy trust row, guarantee line) next to the hero photo. For ads and
+ * Pins where a short page converts better. Same product, price and checkout as /weekly-reset.
+ *
+ * Always noindex and out of the sitemap: /weekly-reset is the page search engines get.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import AssetSlot from '../components/site/AssetSlot.astro';
+import ResetButton from '../components/site/ResetButton.astro';
+import EtsyTrustRow from '../components/site/EtsyTrustRow.astro';
+import { weeklyReset, weeklyResetAssets as assets } from '../data/weekly-reset';
+import { BRAND_NAME } from '../config';
+
+const { price, regularPrice } = weeklyReset;
+
+const outcomes = [
+  { pre: 'Plan your ', em: 'entire week in minutes' },
+  { pre: 'Keep your home tidy ', em: 'without all-day cleaning' },
+  { pre: 'Start Monday ', em: 'calm, not scrambling' },
+];
+---
+
+<PublicLayout
+  fullTitle={`End Sunday Night Chaos in 30 Minutes · ${weeklyReset.name} · ${BRAND_NAME}`}
+  description={`A 30-minute Sunday reset for busy moms. Plan your week, keep the house tidy, start Monday calm. Instant download, $${price}.`}
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <section aria-labelledby="hero-h" class="min-h-svh overflow-hidden bg-cream md:grid md:items-center">
+    <div class="mx-auto grid max-w-6xl items-center gap-x-12 gap-y-8 px-5 pt-8 pb-12 sm:px-8 md:grid-cols-[1fr_1.05fr] md:py-16 lg:gap-x-16">
+      <div class="text-center">
+        <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
+        <h1 id="hero-h" class="serif-hero mt-5 text-[2.2rem] sm:text-[2.9rem] lg:text-[3.2rem]">
+          End Sunday Night Chaos in 30 Minutes <span class="whitespace-nowrap">— <span class="text-rose-deep">${price}</span> <s class="text-[0.6em] text-warm-soft">${regularPrice}</s></span>
+        </h1>
+        <p class="lede mt-5 text-warm-ink">
+          Sunday nights = laundry piles, unplanned meals, Monday dread. This <strong class="hand-highlight font-semibold">30-minute reset ends the chaos.</strong>
+        </p>
+
+        <ul class="mx-auto mt-6 w-fit space-y-2 text-left text-[1.05rem] text-warm-ink">
+          {
+            outcomes.map((o) => (
+              <li class="flex gap-2">
+                <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-1 size-5 shrink-0 text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.5 10.5 8 14l7.5-8" />
+                </svg>
+                <span>{o.pre}<strong class="font-semibold">{o.em}</strong></span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="mt-6 text-[0.95rem] font-semibold text-warm-ink">Less than 2 lattes. Saves 5+ hours every week. Instant download.</p>
+        <div class="mt-6"><ResetButton cta="reset-simple" /></div>
+
+        <EtsyTrustRow class="mt-6" />
+
+        <!-- Guarantee line. The badge is drawn here (no stock badge art), same as /weekly-reset. -->
+        <p class="mx-auto mt-5 flex w-fit items-center gap-3 text-left text-[0.95rem] text-warm-ink">
+          <span aria-hidden="true" class="grid size-12 shrink-0 place-items-center rounded-full border-2 border-warm-ink/70 bg-paper font-serif leading-none">
+            <span class="text-center">
+              <span class="block text-[1.1rem]">30</span>
+              <span class="block font-sans text-[0.42rem] font-semibold tracking-[0.12em] uppercase">Day</span>
+            </span>
+          </span>
+          <span><em class="font-serif">Instant download.</em> 30-day “Actually Used It” <strong class="font-semibold">guarantee.</strong></span>
+        </p>
+      </div>
+
+      <figure class="-mx-5 overflow-hidden sm:mx-0 sm:rounded-[10px]">
+        <AssetSlot asset={assets.hero} sizes="(min-width: 768px) 50vw, 100vw" eager />
+      </figure>
+    </div>
+  </section>
+</PublicLayout>

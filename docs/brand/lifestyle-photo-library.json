@@ -447,7 +447,8 @@
         "edits": "Resize and WebP export only; no grade or crop."
       },
       "used_in": [
-        "HC-03 /resources/zone-cleaning-schedule"
+        "HC-03 /resources/zone-cleaning-schedule",
+        "IF-03 /resources/chores-for-kids-by-age (inline, after worked example)"
       ]
     },
     {

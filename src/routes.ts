@@ -6,6 +6,7 @@
  *           /shop              every product (calendar, Weekly Reset, mug), linked from the header
  *           /companion         how the cleaning companion works (public explainer)
  *           /weekly-reset      Weekly Reset System landing page ($9 digital bundle; noindex until checkout is live)
+ *           /weekly-reset-simple  one-screen version of it (hero only; always noindex)
  *           /essential-routines $12 downsell after Take Back Control (always noindex)
  *           /family-sanity-saver-starter-kit  Family Command Center landing page ($7; standalone entry point, noindex until sold)
  *           /real-life-reset-kit  Real Life Reset Kit ($7 backup-plan offer; not linked yet, always noindex)
@@ -40,7 +41,7 @@
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex)
- *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset, /take-back-control,
+ *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset(-simple), /take-back-control,
  *                               /essential-routines, /real-life-reset-kit and the mug page (?product=<slug>), and only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
@@ -62,6 +63,8 @@ export const routes = {
   buy: '/calendar#buy',
   companion: '/companion',
   weeklyReset: '/weekly-reset',
+  /** One-screen version of the Weekly Reset page, for ads and Pins (always noindex). */
+  weeklyResetSimple: '/weekly-reset-simple',
   takeBackControl: '/take-back-control',
   /** Standalone $7 Family Command Center landing page (noindex until sold). */
   /** $7 Real Life Reset Kit offer (not linked from anywhere yet; always noindex). */

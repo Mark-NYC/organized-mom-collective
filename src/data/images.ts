@@ -16,6 +16,7 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'if-03-chore-chart-fridge': { widths: [640, 960, 1122], width: 1122, height: 786, source: 'Owner-supplied chore chart refrigerator mockup, 2026-10-13; library libfile_537a824683288191988021ab971bb4a4; cropped 0,0.19,1,0.75 without altering chart design' },
   'if-02-highlighters': { widths: [640, 960, 1200], width: 1200, height: 912, source: 'Kaboompics 18814, Karolina Grabowska; tight crop 0.25,0.61,1,0.99; original archived on codex/mental-load-highlighters in design/photography/kaboompics/IF-02-highlighters/' },
   'fp-04-planning-desk': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 16979, Karolina Grabowska; original and download evidence archived on codex/reset-requested-photo in design/photography/kaboompics/FP-04-requested/' },
   'fp-03-school-bag': { widths: [640, 960, 1312], width: 1312, height: 828, source: 'Kaboompics 22548, Karolina Grabowska (faceless crop; original archived on codex/command-center-hero-photo in design/photography/kaboompics/FP-03-hero-detail/22548-2400.jpg)' },

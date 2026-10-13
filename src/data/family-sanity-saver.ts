@@ -9,6 +9,8 @@ import type { Asset } from './weekly-reset';
  *
  * Audience: moms with older kids (about 10+) in lots of activities, not the wall calendar's 4–10
  * audience. Parked behind the wall calendar for now: docs/brand/PRODUCT_ROADMAP.md → Parked.
+ * New names (rename everything together when it's revived): Own Your Row Family Calendar System
+ * (branded), Family Activity Calendar (Etsy search).
  *
  * Recreated as is from the original WordPress page, colors included (orange buttons, green
  * checks). Those colors are the old look, not the new brand: restyle when the page is rebranded.

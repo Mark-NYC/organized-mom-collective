@@ -29,7 +29,7 @@ The promise is an intended outcome, not an automatic guarantee. A visible plan m
 ## Secondary audience (future, de-emphasized)
 
 - Moms with **older kids, roughly 10 and up, in lots of activities**. The kids can read a schedule and own their own row, so the job shifts from mom running the week to the family checking it themselves.
-- Product for them: the **Family Command Center** (Family Sanity Saver Starter Kit, `/family-sanity-saver-starter-kit`). A printable 12-month calendar with a row per person, plus a refresh sheet, a tidy system and a coaching audio. Not for sale today (switched off in the shop); see the [roadmap](PRODUCT_ROADMAP.md#parked-the-older-kids-command-center).
+- Product for them: the **Own Your Row Family Calendar System** (branded name), listed in Etsy search as **Family Activity Calendar** (descriptive name). Owner decision, October 13, 2026. Older names to retire when it's revived: Family Sanity Saver Starter Kit, Family Command Center (it clashes with the Weekly Reset System's "Weekly Command Center"), Academic Family Wall Calendar. The site still uses the old names (`/family-sanity-saver-starter-kit`) until then. A printable 12-month calendar with a row per person, plus a refresh sheet, a tidy system and a coaching audio. Not for sale today (switched off in the shop); see the [roadmap](PRODUCT_ROADMAP.md#parked-the-older-kids-command-center).
 - **Not the focus now.** The wall calendar is the primary product for the primary audience above. Don't write homepage, article, Pin or email copy for this audience, and don't promote the kit beside the wall calendar, until the roadmap says so. Copy for the kit itself is written to this audience, not the 4–10 one.
 
 ## Two connected pains

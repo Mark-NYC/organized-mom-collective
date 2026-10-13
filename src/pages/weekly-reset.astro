@@ -18,8 +18,9 @@ import { join } from 'node:path';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import AssetSlot from '../components/site/AssetSlot.astro';
 import ResetButton from '../components/site/ResetButton.astro';
-import { coachingPreviewAudio, etsyStats, weeklyReset, weeklyResetAssets as assets } from '../data/weekly-reset';
-import { ETSY_SHOP_URL, testimonial } from '../data/reviews';
+import EtsyTrustRow from '../components/site/EtsyTrustRow.astro';
+import { coachingPreviewAudio, weeklyReset, weeklyResetAssets as assets } from '../data/weekly-reset';
+import { testimonial } from '../data/reviews';
 import { BRAND_NAME } from '../config';
 
 const { price, regularPrice, contactEmail } = weeklyReset;
@@ -74,26 +75,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         <div class="mt-7"><ResetButton cta="reset-hero" /></div>
 
         <!-- Trust row: the Etsy shop's figures (src/data/weekly-reset.ts → etsyStats). -->
-        <a
-          href={ETSY_SHOP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="mt-7 inline-flex items-center divide-x divide-warm-rule rounded-[14px] bg-paper py-3 text-warm-ink shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-warm-rule/70"
-        >
-          <span class="px-3 text-center leading-tight sm:px-6">
-            <strong class="block font-serif text-[1.6rem] font-normal">{etsyStats.sales}</strong>
-            <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">Sales</span>
-          </span>
-          <span class="px-3 text-center leading-tight sm:px-6">
-            <strong class="block font-serif text-[1.6rem] font-normal"><span aria-hidden="true" class="text-[0.8em] text-[#e8a33d]">★</span> {etsyStats.rating}</strong>
-            <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">({etsyStats.reviews}) Rating</span>
-          </span>
-          <span class="px-3 text-center leading-tight sm:px-6">
-            <strong class="block font-serif text-[1.6rem] font-normal text-[#f1641e]">Etsy</strong>
-            <span class="text-[0.78rem] whitespace-nowrap sm:text-[0.85rem]">{etsyStats.badge} · {etsyStats.years} years</span>
-          </span>
-          <span class="sr-only"> (opens our Etsy shop)</span>
-        </a>
+        <EtsyTrustRow class="mt-7" />
       </div>
 
       <figure class="-mx-5 overflow-hidden sm:mx-0 sm:rounded-[10px]">

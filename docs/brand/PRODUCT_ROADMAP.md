@@ -21,11 +21,19 @@ Mom shouldn't have to manage everything alone. Reduce both (1) fragmented family
 
 ## Parked: the older-kids command center
 
-Owner decision, October 13, 2026: **establish the family wall calendar as the primary product for the primary audience first.** The Family Command Center (Family Sanity Saver Starter Kit) for moms with kids roughly 10+ in lots of activities ([VISION.md → Secondary audience](VISION.md#secondary-audience-future-de-emphasized)) stays in the background:
+Owner decision, October 13, 2026: **establish the family wall calendar as the primary product for the primary audience first.** The **Own Your Row Family Calendar System** (Etsy search name: Family Activity Calendar; on the site still the Family Sanity Saver Starter Kit) for moms with kids roughly 10+ in lots of activities ([VISION.md → Secondary audience](VISION.md#secondary-audience-future-de-emphasized)) stays in the background:
 
 - Kept on the site but not promoted: the landing page says "Coming soon", the shop product is switched off, and nothing in the main site links to it.
+- When it's revived, rename the URL, page and shop product to the new names in one change.
 - Its calendar is the 2025–2026 edition. Don't refresh it or build for it until the wall calendar is established.
 - Future build idea, not started: generate her calendar instead of reissuing a dated PDF. She enters names and recurring activities once (as on `/try-the-calendar`), picks a 12-month range, and downloads it as one PDF, recurring activities included. Decide first whether it uses the kit's week-rows design or the tool's monthly grid.
+
+## Shelved (off the roadmap)
+
+Kept for reference only, not planned. Don't build or mention in customer copy.
+
+- **The Seasonal Family Table** (meal planning from the previous site): [archive/seasonal-family-table.md](archive/seasonal-family-table.md).
+- **Freemium cleaning companion** (seasonal maps free, "VIP" tier paid, from the previous site): retired. The companion stays a full bonus for calendar owners. [archive/fall-cleaning-map-freemium.md](archive/fall-cleaning-map-freemium.md).
 
 ## Phase 1: Brand, discovery and owned audience (next growth work)
 
@@ -34,6 +42,7 @@ Owner decision, October 13, 2026: **establish the family wall calendar as the pr
 - Use existing Real-Life Reset article workflow, keyword research, photo-clearance rules, internal links and per-article Pinterest plans.
 - Proposed test cadence, subject to capacity and results: ~2 SEO articles/week, ~15–25 Pins/week repackaged from content, 1 helpful email/week, up to 5 personalized creator outreaches/week. Do not present these numbers as validated optimal performance.
 - Build an email opt-in with a genuinely useful resource for school/activity-heavy families, test landing-page signup rate and create a practical welcome series.
+- **Seasonal cleaning checklists as free Pinterest offers** (idea, not built): a free fall reset checklist and a spring cleaning checklist on the public site, each a printable with an email opt-in. Path: seasonal Pins → checklist page → email → calendar plus cleaning companion. Publish ahead of each season's search interest and verify timing with real Pinterest Trends data, not assumptions. Build each one as a full family task list (age-appropriate kid tasks, whole zones a partner owns) so it shows the brand's "get everyone involved" promise. Free and ungated: no paid tier, and nothing gated inside the companion. Starting material: the retired [3-zone fall cleaning map](archive/fall-cleaning-map-freemium.md). Measure signups and calendar sales per checklist, not Pin impressions.
 - Prioritize Pinterest + SEO discovery, an owned email relationship, and micro-creator partnerships; Etsy and the direct site are conversion destinations when checkout is live.
 - Reuse winners based on qualified traffic, subscribers, conversion and actual sales, not impressions alone.
 

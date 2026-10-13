@@ -6,9 +6,12 @@
  * Everything autosaves in this browser (`omc:chore-chart:v1`). Autosave and export: src/lib/printable.ts.
  * Classes are prefixed `cc-` so they never collide with the site's own.
  */
+import '@fontsource/kalam/latin-700.css';
+import { toolEmailGateEnabled } from '../lib/tool-email';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
+import { toolPalettes, defaultToolPalette } from '../data/tool-palettes';
 import { choreSets, DAILY_ROWS, WEEKDAYS } from '../data/chore-chart';
 
 const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -61,19 +64,32 @@ const jsonLd = [
       <button type="submit" class="cc-btn cc-btn-primary">Fill in chores</button>
     </form>
 
+    <fieldset class="cc-palette-picker">
+      <legend>Choose your colors</legend>
+      <div class="cc-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="cc-palette-option" data-cc-palette={id} aria-pressed={id === defaultToolPalette}>
+            <span class="cc-swatches" aria-hidden="true">{palette.colors.map(color => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
     <div class="cc-actions">
       <button type="button" class="cc-btn cc-btn-primary" data-cc-download>Download PNG</button>
       <button type="button" class="cc-btn" data-cc-clear>Clear chart</button>
     </div>
     <p class="cc-hint">Tap any chore or reward on the chart to change it.</p>
+    {toolEmailGateEnabled && <p class="cc-hint">Free to customize. Email required for your first download. No account needed.</p>}
 
     <div class="cc-sheet" id="chore-chart">
+      <input type="hidden" data-field="palette" value={defaultToolPalette} />
       <input type="hidden" data-field="age" data-cc-age-field />
       <input type="hidden" data-field="name" data-cc-name-field />
       <div class="cc-age" data-cc-age-badge hidden></div>
       <div class="cc-head">
         <div class="cc-for" data-cc-for></div>
-        <div class="cc-title">Weekly Chore Chart</div>
+        <div class="cc-title">Weekly Chore Chart</div><p class="cc-motto">Little jobs. A big helping hand.</p>
       </div>
 
       <div class="cc-main">
@@ -113,7 +129,7 @@ const jsonLd = [
         {
           thresholds.map((t, i) => (
             <div class="cc-reward">
-              <span class="cc-threshold">Complete {t}</span>
+              <svg class="cc-star" viewBox="0 0 40 40" aria-hidden="true"><path d="m20 4 4.5 10.5L36 16l-8.5 8 2 12L20 30l-10 6 2-12-8-8 11.5-1.5Z" /></svg><span class="cc-threshold">Complete {t}</span>
               <input class="cc-reward-text" type="text" data-field={`reward-${i}`} aria-label={`Reward for completing ${t}`} placeholder="Reward" />
             </div>
           ))
@@ -234,6 +250,7 @@ const jsonLd = [
 
   /* The sheet: US Letter landscape (11 × 8.5 in at 96 px/in). */
   .cc-sheet {
+    --cc-accent-1: #EFEBE7; --cc-accent-2: #E6EEEA; --cc-accent-3: #F6F1E7;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -242,7 +259,7 @@ const jsonLd = [
     min-height: 816px;
     margin: 0 auto;
     padding: 30px 34px;
-    background: var(--color-ivory);
+    background: #fff;
     border: 1px solid var(--cc-rule);
     border-radius: 6px;
     box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
@@ -451,9 +468,52 @@ const jsonLd = [
       font-size: 15px;
     }
   }
+
+.cc-title { font-family: var(--font-sans); font-size: 28px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+.cc-for { font-family: 'Kalam', var(--font-serif); font-size: 26px; text-transform: none; letter-spacing: .04em; min-height: 34px; }
+.cc-head { border-bottom: 0; }
+.cc-motto { margin-top: 7px; font-size: 17px; font-style: italic; color: var(--cc-rose-deep); }
+.cc-section-title, .cc-section-title-sage { background: transparent; font-family: 'Kalam', var(--font-serif); font-size: 32px; text-transform: none; color: var(--cc-ink); letter-spacing: .06em; padding: 0; }
+.cc-main { gap: 20px; }
+.cc-daily, .cc-weekly { min-width: 0; padding: 14px 12px 10px; border: 2px solid var(--cc-accent-1); border-radius: 14px; }
+.cc-weekly { border-color: var(--cc-accent-2); }
+.cc-grid { grid-template-columns: minmax(0,1fr) repeat(7,32px); }
+.cc-day { background: var(--cc-accent-3); color: var(--cc-ink); border-radius: 8px; }
+.cc-chore { border: 0; border-radius: 999px; background: linear-gradient(transparent 22%, var(--cc-accent-1) 22%, var(--cc-accent-1) 86%, transparent 86%); font-family: var(--font-sans); font-size: 13px; }
+.cc-grid:nth-child(3n + 1) .cc-chore, .cc-week-row:nth-child(3n + 1) .cc-chore { background: linear-gradient(transparent 22%, var(--cc-accent-2) 22%, var(--cc-accent-2) 86%, transparent 86%); }
+.cc-grid:nth-child(3n + 2) .cc-chore, .cc-week-row:nth-child(3n + 2) .cc-chore { background: linear-gradient(transparent 22%, var(--cc-accent-3) 22%, var(--cc-accent-3) 86%, transparent 86%); }
+.cc-chore:focus, .cc-reward-text:focus { outline: 2px solid var(--cc-rose); outline-offset: 1px; }
+.cc-box { height: 32px; border-radius: 6px; border-color: #b6aaa4; }
+.cc-week-row { grid-template-columns: 80px minmax(0,1fr) 32px; }
+.cc-weekday { border: 0; background: transparent; font-family: 'Kalam', var(--font-serif); font-size: 17px; text-transform: none; letter-spacing: 0; color: var(--cc-ink); }
+.cc-reward { border: 2px solid var(--cc-accent-1); border-radius: 14px; gap: 4px; padding: 8px 12px; }
+.cc-reward:nth-child(2) { border-color: var(--cc-accent-2); }
+.cc-reward:nth-child(3) { border-color: var(--cc-accent-3); }
+.cc-star { width: 30px; height: 30px; fill: var(--cc-accent-1); stroke: var(--cc-ink); stroke-width: 1.5; stroke-linejoin: round; }
+.cc-reward:nth-child(2) .cc-star { fill: var(--cc-accent-2); }
+.cc-reward:nth-child(3) .cc-star { fill: var(--cc-accent-3); }
+.cc-threshold { background: transparent; color: var(--cc-ink); font-family: 'Kalam', var(--font-serif); font-size: 20px; letter-spacing: .02em; text-transform: none; }
+.cc-reward-text { font-family: var(--font-sans); font-size: 13px; }
+@media (max-width: 768px) {
+.chore-chart-container:not(.cc-exporting) .cc-title { font-size: 22px; letter-spacing: .08em; }
+.chore-chart-container:not(.cc-exporting) .cc-daily, .chore-chart-container:not(.cc-exporting) .cc-weekly { padding: 12px 6px; }
+.chore-chart-container:not(.cc-exporting) .cc-chore { font-size: 13px; }
+.chore-chart-container:not(.cc-exporting) .cc-week-row { grid-template-columns: 66px minmax(0,1fr) 28px; }
+.chore-chart-container:not(.cc-exporting) .cc-weekday { font-size: 15px; }
+}
+
+.cc-palette-picker { border: 0; padding: 0; margin: 0 auto 20px; max-width: 1056px; text-align: center; }
+.cc-palette-picker legend { float: none; width: 100%; margin-bottom: 10px; font-size: .85rem; color: var(--cc-soft); }
+.cc-palette-options { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.cc-palette-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--cc-rule); border-radius: 10px; background: #fff; color: var(--cc-ink); font-size: .8rem; cursor: pointer; }
+.cc-palette-option[aria-pressed="true"] { border: 2px solid var(--cc-ink); padding: 9px 13px; background: var(--color-ivory); }
+.cc-palette-option:focus-visible { outline: 2px solid var(--cc-ink); outline-offset: 3px; }
+.cc-swatches { display: flex; gap: 3px; }
+.cc-swatches span { width: 15px; height: 15px; border: 1px solid #b8ada6; border-radius: 50%; }
 </style>
 
 <script>
+  import { toolPalettes, resolveToolPalette } from '../data/tool-palettes';
   import { autosave, clearFields, downloadPng } from '../lib/printable';
   import type { AgeGroup, ChoreSet } from '../data/chore-chart';
 
@@ -470,7 +530,16 @@ const jsonLd = [
   // The name is typed in the form but saved with the sheet (autosave reads [data-field] inside one root).
   const savedName = sheet.querySelector<HTMLInputElement>('[data-cc-name-field]')!;
 
+  const paletteField = field('palette');
+  const paletteButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-cc-palette]'));
+  function renderPalette() {
+    const id = resolveToolPalette(paletteField.value);
+    paletteField.value = id;
+    toolPalettes[id].colors.forEach((color, i) => sheet.style.setProperty(`--cc-accent-${i + 1}`, color));
+    paletteButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.ccPalette === id)));
+  }
   function render() {
+    renderPalette();
     const name = nameInput.value.trim();
     forLine.textContent = name ? `${name}’s` : '';
     const set = sets[ageField.value as AgeGroup];
@@ -483,6 +552,14 @@ const jsonLd = [
     nameInput.value = savedName.value;
     render();
   });
+
+  for (const button of paletteButtons) {
+    button.addEventListener('click', () => {
+      paletteField.value = button.dataset.ccPalette!;
+      renderPalette();
+      save();
+    });
+  }
 
   nameInput.addEventListener('input', () => {
     savedName.value = nameInput.value;
@@ -511,7 +588,9 @@ const jsonLd = [
 
   document.querySelector('[data-cc-clear]')!.addEventListener('click', () => {
     if (!confirm('Clear everything on this chart?')) return;
+    const selectedPalette = paletteField.value;
     clearFields(sheet);
+    paletteField.value = selectedPalette;
     nameInput.value = '';
     render();
     save();
