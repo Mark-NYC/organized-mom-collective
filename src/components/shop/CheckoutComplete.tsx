@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { loadOrderStatus, money, type OrderStatus } from '../../lib/shop';
 import { routes } from '../../routes';
 import { weeklyReset } from '../../data/weekly-reset';
@@ -14,6 +14,28 @@ const POLL_FOR_MS = 60_000;
 export default function CheckoutComplete() {
   const [status, setStatus] = useState<OrderStatus | null | undefined>(undefined);
   const [waitedOut, setWaitedOut] = useState(false);
+  const trackedPurchase = useRef(false);
+
+  useEffect(() => {
+    if (trackedPurchase.current || status?.payment_status !== 'paid' || status.total_cents == null || status.order_number == null) return;
+    const sessionId = new URLSearchParams(location.search).get('session_id') ?? '';
+    if (!sessionId.startsWith('cs_live_')) return;
+    const pinterest = (window as Window & { pintrk?: (...args: unknown[]) => void }).pintrk;
+    if (!pinterest) return;
+    const eventId = 'omc-order-' + status.order_number;
+    const storageKey = 'omc:pinterest:checkout:' + eventId;
+    try { if (localStorage.getItem(storageKey) === 'yes') return; } catch { /* event_id still identifies the order */ }
+    try {
+      pinterest('track', 'checkout', {
+        event_id: eventId,
+        value: status.total_cents / 100,
+        order_quantity: status.items.reduce((sum, item) => sum + item.quantity, 0),
+        currency: 'USD',
+      });
+      trackedPurchase.current = true;
+      try { localStorage.setItem(storageKey, 'yes'); } catch { /* this mount is still guarded */ }
+    } catch { /* tracking must never affect order confirmation */ }
+  }, [status]);
 
   useEffect(() => {
     const sessionId = new URLSearchParams(location.search).get('session_id') ?? '';
