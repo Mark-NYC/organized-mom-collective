@@ -120,7 +120,7 @@ const components = {
 
     {
       hero && (
-        <figure class="mx-auto mt-8 max-w-[60rem] sm:mt-10">
+        <figure class:list={["mx-auto mt-8 sm:mt-10", hero.width < hero.height ? "max-w-[36rem]" : "max-w-[60rem]"]}>
           <img
             src={hero.src}
             srcset={hero.srcset}
@@ -130,7 +130,7 @@ const components = {
             alt={hero.alt}
             fetchpriority="high"
             decoding="async"
-            class="article-photo aspect-[3/2]"
+            class:list={["article-photo", hero.width < hero.height ? "aspect-auto" : "aspect-[3/2]"]}
           />
           {hero.caption && <figcaption class="article-caption mx-auto max-w-[45rem]">{hero.caption}</figcaption>}
         </figure>
