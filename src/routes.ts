@@ -11,6 +11,7 @@
  *           /planner           free weekly planner, filled in on screen, downloads as a PNG (the upgraded one,
  *                              for Take Back Control buyers, is unlisted: PLANNER_PLUS_PATH in src/data/planner.ts)
  *           /pantry            free pantry inventory tracker, same idea
+ *           /try-the-calendar  free monthly family calendar (one row per person), same idea
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -43,6 +44,7 @@ export const routes = {
   essentialRoutines: '/essential-routines',
   planner: '/planner',
   pantry: '/pantry',
+  tryCalendar: '/try-the-calendar',
   resources: '/resources',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
