@@ -27,7 +27,7 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 - **Instructional diagrams and printable examples** where they add real value (the cleaning week, checklists). Prefer data-driven components over screenshots of text.
 - **No long walls of text.** Break them with a heading, a checklist, a photo or a pull quote, not with decoration.
 - **Not everything in a box.** Most of the article is plain text on white. Use at most: one Shift (pull quote), one Tip, one product callout, one Next Small Win. Checklists are cards because they're objects to use.
-- **Consistent images:** 3:2 landscape for heroes and cards, 5:4 or 3:2 in the body, one corner radius (6px), captions in small soft text.
+- **Consistent images:** Article intros use an inset pale gray (#f1f2f2) frame with generous padding and square photo edges. Landscape heroes stay 3:2; portrait printable examples retain their natural aspect ratio and remain fully visible. Body images keep the existing 6px radius and captions in small soft text. Use fades only for lifestyle compositions with room for copy, never across printable instructions or product artwork.
 - **One primary product callout** (`<ProductCTA>`), near the end, where the article naturally leads to it.
 - **Relevant internal links** in the body, per [INTERNAL_LINKING.md](INTERNAL_LINKING.md).
 
@@ -35,7 +35,7 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 
 `src/pages/resources/[slug].astro` gives every article the same editorial frame:
 
-- **Header:** category eyebrow (breadcrumbs), Georgia H1, the `summary` as a deck, byline, date, reading time; centered from tablet up so the article opens like a magazine page.
+- **Header:** An inset pale gray intro surface holds breadcrumbs, Georgia H1, the `summary` as a deck, byline, date and reading time. Centered from tablet up. Optional hero photography joins the same surface with square edges; no decorative fade over printable examples.
 - **Hero photo** (optional `hero` in frontmatter) at ~960px wide, then a collapsed "In this article" list.
 - **Body:** a ~720px reading column (`.article-body`), 17–18px Montserrat in warm charcoal (#3d3834), with wider `.breakout` elements (~960px: the cleaning-week diagram, checklist grids, the product callout).
 - **Type scale:** H1 36→58px, H2 28→38px and H3 20→23px, all Georgia bold; H2s get extra space above (64→96px) and sit close to their first paragraph, so sections read as groups.

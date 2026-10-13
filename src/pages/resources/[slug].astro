@@ -103,7 +103,8 @@ const components = {
 
 <PublicLayout fullTitle={data.seoTitle} description={data.description} chrome width="wide" ogType="article" ogImage={ogImage} jsonLd={jsonLd}>
   <article class="article-shell">
-    <header class="mx-auto max-w-[45rem] md:max-w-[52rem] md:text-center lg:max-w-[60rem]">
+    <div class:list={['article-intro', hero && 'article-intro-with-photo']}>
+    <header class="article-intro-copy mx-auto max-w-[45rem] md:max-w-[52rem] md:text-center lg:max-w-[60rem]">
       <div class="md:[&_ol]:justify-center">
         <Breadcrumbs items={[{ label: 'Resources', href: routes.resources }, { label: pillar.name, href: routes.pillar(pillar.id) }]} />
       </div>
@@ -120,7 +121,7 @@ const components = {
 
     {
       hero && (
-        <figure class:list={["mx-auto mt-8 sm:mt-10", hero.width < hero.height ? "max-w-[36rem]" : "max-w-[60rem]"]}>
+        <figure class:list={["article-intro-photo mx-auto", hero.width < hero.height ? "max-w-[36rem]" : "max-w-[60rem]"]}>
           <img
             src={hero.src}
             srcset={hero.srcset}
@@ -136,6 +137,7 @@ const components = {
         </figure>
       )
     }
+    </div>
 
     {
       toc.length >= 4 && (
@@ -200,3 +202,15 @@ const components = {
     <a href={routes.pillar(pillar.id)} class="text-link">All {pillar.name.toLowerCase()} articles</a>
   </p>
 </PublicLayout>
+
+<style>
+  .article-intro { max-width: 60rem; margin: 0 auto; background: #f1f2f2; }
+  .article-intro-copy { padding: 28px 24px 32px; }
+  .article-intro-photo { margin-top: 0; }
+  .article-intro-photo img { border-radius: 0; }
+  .article-intro-photo figcaption { padding: 16px 24px 24px; margin-top: 0; }
+  @media (min-width: 640px) {
+    .article-intro-copy { padding: 48px 48px 40px; }
+    .article-intro-photo figcaption { padding: 20px 32px 28px; }
+  }
+</style>

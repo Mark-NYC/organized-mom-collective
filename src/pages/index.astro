@@ -148,7 +148,7 @@ const jsonLd = [
 
 const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
 const pad = 'py-12 sm:py-20 md:py-24';
-const card = 'rounded-[10px] bg-paper shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)]';
+const card = 'bg-paper';
 const cta = 'min-h-14 w-full px-8 sm:w-auto';
 ---
 
@@ -204,9 +204,9 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   <EntrywayScene />
 
   <!-- 2. The problem: recognition before the solution -->
-  <section aria-labelledby="load-h" class="bg-paper">
-    <div class:list={[wrap, pad, 'grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-16']}>
-      <div>
+  <section aria-labelledby="load-h" class="home-inset">
+    <div class="home-problem-surface">
+      <div class="home-problem-copy">
         <h2 id="load-h" class="serif-title">Does Everything Seem to <span class="hand-highlight whitespace-nowrap">Run Through You?</span></h2>
         <ul class="mt-7 border-t border-warm-rule">
           {
@@ -223,11 +223,11 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           What if there were one simple place to bring it all together?
         </p>
       </div>
-      <figure class="-mx-5 overflow-hidden bg-band sm:mx-0 sm:rounded-[10px]">
+      <figure class="home-problem-photo">
         <img
           src={kitchen.src}
           srcset={kitchen.srcset}
-          sizes="(min-width: 1152px) 500px, (min-width: 768px) 45vw, 100vw"
+          sizes="(min-width: 1600px) 900px, (min-width: 900px) 60vw, calc(100vw - 32px)"
           width="1280"
           height="1024"
           loading="lazy"
@@ -501,8 +501,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   </section>
 
   <!-- 8. Final CTA, with the product beside it: the flat 2027 page and the companion's Today screen -->
-  <section aria-labelledby="close-h" class="overflow-hidden bg-blush-wash">
-    <div class:list={[wrap, 'grid items-center gap-10 py-14 sm:py-20 md:grid-cols-[1fr_1.1fr] md:gap-16']}>
+  <section aria-labelledby="close-h" class="home-inset">
+    <div class="home-close-surface">
       <div class="relative mx-auto w-full max-w-[19rem] pr-[22%] pb-4 sm:max-w-[22rem] md:order-last md:max-w-[24rem]">
         <img
           src="/images/site/calendar-cutout-480.webp"
@@ -541,11 +541,25 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
   .home-hero-copy h1 { font-size: clamp(2rem, 8.5vw, 3.1rem); }
   .home-hero-surface { display: flex; flex-direction: column; }
   .home-hero-photo { order: -1; }
+  .home-inset { padding: 24px 16px 40px; background: #fff; }
+  .home-problem-surface, .home-close-surface { max-width: 1504px; margin: 0 auto; overflow: hidden; }
+  .home-problem-surface { --hero-gray: #f1f2f2; position: relative; isolation: isolate; display: flex; flex-direction: column; background: var(--hero-gray); }
+  .home-problem-copy { position: relative; z-index: 1; padding: 16px 24px 40px; }
+  .home-problem-photo { position: relative; margin: 0; order: -1; }
+  .home-problem-photo::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, var(--hero-gray), transparent 30%); }
+  .home-close-surface { display: grid; align-items: center; gap: 36px; padding: 40px 24px; background: #e7ece5; }
   @media (min-width: 640px) and (max-width: 899px) {
     .home-hero-copy { padding: 16px 48px 48px; }
     .home-hero-copy h1 { max-width: 550px; }
   }
   @media (min-width: 900px) {
+    .home-inset { padding: 28px 36px 48px; }
+    .home-problem-surface { display: block; }
+    .home-problem-copy { margin-left: 51%; padding: 64px clamp(36px, 4.5vw, 72px) 64px 0; }
+    .home-problem-photo { position: absolute; inset: 0 auto 0 0; width: 60%; }
+    .home-problem-photo img { height: 100%; object-fit: cover; object-position: left center; }
+    .home-problem-photo::after { background: linear-gradient(to left, var(--hero-gray), rgba(241, 242, 242, .95) 10%, transparent 40%); }
+    .home-close-surface { grid-template-columns: 1fr 1.1fr; gap: 64px; padding: 64px clamp(36px, 4.5vw, 72px); }
     .home-hero { padding: 28px 36px 44px; }
     .home-hero-surface { display: block; min-height: 540px; }
     .home-hero-copy { width: 48%; padding: clamp(64px, 7vw, 112px) 0 clamp(64px, 7vw, 112px) clamp(36px, 4.5vw, 72px); }
