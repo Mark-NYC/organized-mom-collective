@@ -5,7 +5,7 @@
  * linked from the other funnel pages. The orange / green / blue colors are the old look, kept on
  * purpose until the page is rebranded; they live only in this file.
  *
- * Hero → What changes at home (value stack) → Why systems fail → Review → Guarantee → Review → Close.
+ * Hero → The kit (mockup + what it is) → What changes at home (value stack) → Why systems fail → Review → Guarantee → Review → Close.
  *
  * Left out from the original: the "[family_calendar]" auto-fill demo (a WordPress shortcode with
  * no equivalent here) and the customer avatar row (no image supplied).
@@ -68,6 +68,10 @@ const check = 'M6 10.5 8.8 13.2 14 7.5';
 
     <!-- 2. What changes at home: the value stack -->
     <section aria-labelledby="changes-h" class={`${wrap} mt-10`}>
+      <figure class="mb-8">
+        <AssetSlot asset={assets.kit} sizes="(min-width: 464px) 432px, 100vw" />
+        <figcaption class="mt-3 text-center text-[0.9rem] leading-relaxed">{offer.summary}</figcaption>
+      </figure>
       <h2 id="changes-h" class="text-center text-[1.05rem] font-semibold">Here’s What Changes at Home:</h2>
       <ul class="mt-5 space-y-4">
         {
