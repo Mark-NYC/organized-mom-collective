@@ -110,6 +110,7 @@ Planned before the review and still worth writing, but outside the initial 18. T
 | Meal Planning on a Budget for Families | budget meal planning for family | FP | No invented savings figures. |
 | How to Plan School Lunches for the Week | how to plan school lunches | FP | Seasonal: August–September. |
 | Staying Close to Family and Friends in a Busy Season | staying connected with friends as a busy mom | IF | Uses the calendar's family and friends section. |
+| A Summer Bucket List the Kids Help Pick | summer bucket list for kids | IF | Seasonal: publish April–May (large Pinterest search). Ships with a one-page printable at `/summer-bucket-list` built on `ChecklistPages` (kids pick the items, a "one this week" line for the calendar), listed under Free tools. Don't reuse the old members-site list: a generic 35 items, nothing saved, a duplicate tracker and a link to the old June Kit. |
 
 ## Adding to a cluster later
 
