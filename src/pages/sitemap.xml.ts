@@ -17,6 +17,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const entries: { path: string; lastmod?: string }[] = [
     { path: routes.home },
+    { path: routes.freeTools },
     { path: routes.calendar },
     { path: routes.shop },
     { path: routes.companion },
@@ -39,10 +40,6 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.travelChecklist },
     { path: routes.fallPantry },
     { path: routes.gratitudeTracker },
-    { path: routes.holidayGifts },
-    { path: routes.thanksgivingPlan },
-    { path: routes.decemberCountdown },
-    { path: routes.mealPlanner },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),

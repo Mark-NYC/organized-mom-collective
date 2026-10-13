@@ -114,3 +114,7 @@ The chore chart now offers Rose & Lavender, Blue & Green and Warm Neutrals (defa
 Implemented, not active by default: Download opens an email popup, saves an email through the Supabase tool_email_signup RPC, then exports the chart. Marketing consent is a separate optional checkbox. Browser access is remembered without storing the email locally. Only /chore-chart is gated in this first test. Run the migration and enable PUBLIC_TOOL_EMAIL_GATE_ENABLED only after live verification; setup, data export and rollback are in [supabase/TOOL-EMAIL.md](supabase/TOOL-EMAIL.md). No automated emails are sent.
 
 The routine chart now shares the lunch/chore poster aesthetic and saved three-palette choice; this applies to both the free and upgraded notes variant. Routine steps, times, notes and separate storage keys are preserved. New gateway article: /resources/morning-routine-chart-generator (FP-09). The chore-only email gate is not extended to this tool.
+
+### Free tools directory
+
+`/tools` is the public, indexable directory: three featured generators followed by purpose-grouped tool links. Mobile uses compact image/text rows; desktop uses three featured columns and two link columns. The catalog lives in `src/data/free-tools.ts`, shared with the existing resources hub. Header: Free Tools and Articles; full navigation starts at 1280px to fit comfortably. Portrait chart previews retain the entire output. The planner preview is a labeled illustrative example, not a screenshot. Gate terms appear only when the chore email gate is enabled.
