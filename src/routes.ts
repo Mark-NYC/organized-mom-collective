@@ -101,7 +101,7 @@ export const routes = {
   mentalLoad: '/mental-load-worksheet',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
-  freeTools: '/resources#free-tools',
+  freeTools: '/tools',
   article: (slug: string) => `/resources/${slug}`,
   pillar: (id: string) => `/resources/topics/${id}`,
   survey: '/survey',

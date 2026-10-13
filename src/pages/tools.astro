@@ -1,0 +1,133 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+import { freeTools } from '../data/free-tools';
+import { imageAttrs } from '../data/images';
+import { toolEmailGateEnabled } from '../lib/tool-email';
+const featured = [
+  { href: routes.choreChart, title: 'Chore chart generator', summary: 'Pick their age. Choose their jobs.', action: 'Make a chore chart', image: 'if-03-chore-chart-fridge' as const, alt: 'A completed pastel chore chart hanging on a refrigerator.', article: '/resources/chores-for-kids-by-age' },
+  { href: routes.routineChart, title: 'Routine chart generator', summary: 'Give mornings, afternoons and bedtime a clear order.', action: 'Build a routine', image: 'fp-09-morning-fridge' as const, alt: 'A completed morning routine chart held by magnets on a refrigerator.', article: '/resources/morning-routine-chart-generator' },
+  { href: routes.planner, title: 'Weekly planner', summary: 'Days, meals, groceries and to-dos in one place.', action: 'Plan your week', image: null, alt: '', article: null },
+];
+const groups = [
+  { id: 'everyone', title: 'Get everyone involved', intro: 'Small responsibilities the family can share.', paths: [routes.mentalLoad, routes.lunchSnackStation, routes.screenTime, routes.gratitudeTracker, routes.decemberCountdown] },
+  { id: 'planning', title: 'Plan the week', intro: 'Put the details somewhere you can find them.', paths: [routes.mealPlanner, routes.tryCalendar, routes.pantry, routes.homeschoolRhythm, routes.backToSchool, routes.travelChecklist, routes.commandCenterSetup, routes.fallPantry, routes.thanksgivingPlan, routes.holidayGifts] },
+  { id: 'home', title: 'Keep the house moving', intro: 'A short list and a place to start.', paths: [routes.laundrySystem, routes.closetReset, routes.paperBlitz, routes.springCleaning, routes.fallCleaning, routes.newYearDeclutter] },
+];
+const site = Astro.site!;
+const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Free family tools', url: new URL(routes.freeTools, site).href, hasPart: freeTools.map(tool => ({ '@type': 'WebPage', name: tool.name, url: new URL(tool.href, site).href })) }];
+---
+<PublicLayout title="Free Family Tools: Planners, Charts & Checklists" description="Free family planners, chore charts, routine generators and home checklists. Customize the tools online, then download or use the checklist on screen." jsonLd={jsonLd} width="full">
+  <div class="tools-page">
+    <header class="tools-intro">
+      <h1>Free tools for a family that pitches in.</h1>
+      <p>Make planners, charts and checklists that fit your family. Customize online, then download and print, or check things off on screen.</p>
+      {toolEmailGateEnabled && <p class="tools-access">The chore chart asks for your email on your first download. No account needed.</p>}
+      <nav class="tools-jumps" aria-label="Browse tools by purpose">
+        {groups.map(group => <a href={`#${group.id}`}>{group.title}<span aria-hidden="true"> ↓</span></a>)}
+      </nav>
+    </header>
+    <section aria-labelledby="tools-start">
+      <h2 id="tools-start" class="tools-section-title">Start here</h2>
+      <div class="tools-featured">
+        {featured.map(tool => (
+          <article class="tools-feature">
+            <a href={tool.href} class="tools-preview" tabindex="-1" aria-hidden="true">
+              {tool.image ? <img {...imageAttrs(tool.image)} alt="" loading="lazy" decoding="async" /> : (
+                <div class="tools-planner-example">
+                  <span class="tools-example-title">Our week</span>
+                  <div class="tools-example-days">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => <span>{day}<i /></span>)}</div>
+                  <div class="tools-example-list"><span>Meals<br /><b>Tacos · Pasta · Leftovers</b></span><span>To do<br /><b>Library books<br />Soccer bag</b></span></div>
+                  <small>Example week</small>
+                </div>
+              )}
+            </a>
+            <div class="tools-feature-copy">
+              <h3><a href={tool.href}>{tool.title}</a></h3>
+              <p>{tool.summary}</p>
+              <a href={tool.href} class="tools-action">{tool.action}<span aria-hidden="true"> →</span></a>
+              {tool.article && <a href={tool.article} class="tools-example-link">See an example</a>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+    {groups.map(group => (
+      <section id={group.id} class="tools-group" aria-labelledby={`${group.id}-title`}>
+        <h2 id={`${group.id}-title`} class="tools-section-title">{group.title}</h2>
+        <p class="tools-group-intro">{group.intro}</p>
+        <div class="tools-list">
+          {group.paths.map(path => freeTools.find(tool => tool.href === path)!).map(tool => (
+            <a href={tool.href} class="tools-list-item">
+              <span><h3>{tool.name}</h3><p>{tool.summary}</p></span><span class="tools-arrow" aria-hidden="true">→</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
+    <aside class="tools-calendar" aria-labelledby="tools-calendar-title">
+      <img {...imageAttrs('hc-01-wall-calendar')} alt="The Organized Mom Collective family wall calendar hanging on a wall." loading="lazy" decoding="async" />
+      <div><h2 id="tools-calendar-title">Put the whole week where everyone can see it.</h2><p>Family plans, meals, groceries and to-dos on one weekly wall calendar.</p><a href={routes.calendar} class="tools-action" data-cta="tools-calendar">See the family wall calendar →</a></div>
+    </aside>
+  </div>
+</PublicLayout>
+<style>
+.tools-page { max-width: 1120px; margin: 0 auto; padding: 40px 20px 64px; color: var(--color-warm-ink); }
+.tools-intro { max-width: 780px; margin-bottom: 36px; }
+.tools-intro h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4.4vw, 3.4rem); line-height: 1.1; letter-spacing: -.025em; }
+.tools-intro > p { font-size: 1rem; line-height: 1.65; margin-top: 14px; max-width: 660px; }
+.tools-intro .tools-access { font-size: .85rem; color: var(--color-warm-soft); }
+.tools-jumps { display: flex; flex-wrap: wrap; gap: 0 24px; margin-top: 20px; }
+.tools-jumps a { display: inline-flex; gap: 4px; align-items: center; min-height: 44px; font-size: .85rem; text-decoration: underline; text-underline-offset: 5px; }
+.tools-section-title { font-family: var(--font-serif); font-size: clamp(1.55rem, 3vw, 2rem); line-height: 1.2; }
+.tools-featured { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 20px; }
+.tools-feature { min-width: 0; }
+.tools-preview { display: flex; align-items: center; justify-content: center; height: 210px; overflow: hidden; background: #f3eee8; border-radius: 4px; }
+.tools-preview img { width: 100%; height: 100%; object-fit: contain; }
+.tools-feature h3 { font-family: var(--font-serif); font-size: 1.35rem; margin-top: 16px; line-height: 1.2; }
+.tools-feature p { font-size: .9rem; line-height: 1.55; margin-top: 8px; }
+.tools-action { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: .88rem; font-weight: 600; text-decoration: underline; text-underline-offset: 5px; }
+.tools-example-link { display: block; width: fit-content; min-height: 44px; padding: 10px 0; font-size: .8rem; color: var(--color-warm-soft); text-decoration: underline; text-underline-offset: 4px; }
+.tools-planner-example { width: 90%; max-width: 300px; padding: 15px; background: white; border: 1px solid #d8d0c9; font-family: var(--font-serif); }
+.tools-example-title { display: block; font-size: 22px; margin-bottom: 10px; }
+.tools-example-days { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); font-size: 10px; }
+.tools-example-days > span { border: 1px solid #d8d0c9; padding: 4px; background: #e6eeea; }
+.tools-example-days i { display: block; height: 35px; margin-top: 4px; background: #fff; }
+.tools-example-list { display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px; font-size: 12px; margin-top: 10px; }
+.tools-example-list b { font-size: 10px; font-weight: 400; }
+.tools-planner-example small { display: block; margin-top: 8px; color: #6a5e57; font-size: 9px; }
+.tools-group { scroll-margin-top: 24px; margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--color-warm-rule); }
+.tools-group-intro { font-size: .9rem; margin-top: 8px; color: var(--color-warm-soft); }
+.tools-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 32px; margin-top: 16px; }
+.tools-list-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; padding: 16px 0; border-bottom: 1px solid var(--color-warm-rule); }
+.tools-list-item h3 { font-family: var(--font-serif); font-size: 1.13rem; line-height: 1.25; }
+.tools-list-item p { font-size: .86rem; line-height: 1.5; margin-top: 5px; color: var(--color-warm-soft); }
+.tools-arrow { flex: none; font-size: 22px; }
+.tools-list-item:hover h3, .tools-feature h3 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.tools-page a:focus-visible { outline: 2px solid var(--color-warm-ink); outline-offset: 5px; }
+.tools-calendar { display: grid; grid-template-columns: 170px minmax(0,1fr); gap: 28px; align-items: center; border-top: 1px solid var(--color-warm-rule); margin-top: 44px; padding-top: 28px; }
+.tools-calendar img { width: 100%; height: 170px; object-fit: contain; }
+.tools-calendar h2 { font-family: var(--font-serif); font-size: 1.65rem; line-height: 1.2; }
+.tools-calendar p { font-size: .9rem; line-height: 1.5; margin-top: 10px; }
+@media (max-width: 767px) {
+ .tools-page { padding-top: 28px; }
+ .tools-featured { grid-template-columns: 1fr; gap: 20px; }
+ .tools-feature { display: grid; grid-template-columns: 110px minmax(0,1fr); align-items: start; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid var(--color-warm-rule); }
+ .tools-preview { height: 155px; }
+ .tools-feature h3 { margin-top: 0; font-size: 1.2rem; }
+ .tools-feature p { font-size: .85rem; }
+ .tools-example-link { padding-top: 0; min-height: 44px; }
+ .tools-planner-example { padding: 6px; width: 95%; }
+ .tools-example-title { font-size: 14px; }
+ .tools-example-days { font-size: 6px; }
+ .tools-example-days > span { padding: 1px; }
+ .tools-example-list { grid-template-columns: 1fr; font-size: 9px; }
+ .tools-example-list b { font-size: 8px; }
+ .tools-list { grid-template-columns: 1fr; }
+ .tools-group { margin-top: 30px; padding-top: 22px; }
+ .tools-calendar { grid-template-columns: 95px minmax(0,1fr); gap: 16px; }
+ .tools-calendar img { height: 140px; }
+ .tools-calendar h2 { font-size: 1.35rem; }
+}
+@media (max-width: 360px) { .tools-feature { grid-template-columns: 90px minmax(0,1fr); gap: 12px; } }
+</style>

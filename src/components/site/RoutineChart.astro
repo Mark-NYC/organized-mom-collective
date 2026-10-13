@@ -7,6 +7,8 @@
  * which passes `notes`: a reminder line under each step, with starter notes. Starter routines:
  * src/data/routines.ts. Saves in this browser under `storageKey`. Classes are prefixed `mr-`.
  */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
 import { BRAND_NAME } from '../../config';
 import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
 
@@ -33,8 +35,19 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     }
   </div>
 
+  <fieldset class="mr-palette-picker">
+    <legend>Choose your colors</legend>
+    <div class="mr-palette-options">
+      {Object.entries(toolPalettes).map(([id, palette]) => (
+        <button type="button" class="mr-palette-option" data-mr-palette={id} aria-pressed={id === defaultToolPalette}>
+          <span class="mr-swatches" aria-hidden="true">{palette.colors.map(color => <span style={{ backgroundColor: color }} />)}</span>
+          <span>{palette.label}</span>
+        </button>
+      ))}
+    </div>
+  </fieldset>
   <div class="mr-actions">
-    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download PNG</button>
+    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download chart</button>
     <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
   </div>
 
@@ -47,6 +60,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   </div>
 
   <div class="mr-sheet" id="routine-chart">
+    <input type="hidden" data-field="palette" value={defaultToolPalette} />
     <input type="hidden" data-field="type" value="morning" data-mr-type-field />
     <div class="mr-head">
       <input class="mr-title" type="text" data-field="title" value={start.title} aria-label="Chart title" />
@@ -433,10 +447,62 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       height: 28px;
     }
   }
+
+  /* Same poster language as lunch station and chore chart. */
+  .mr-sheet { --mr-accent-1: #EFEBE7; --mr-accent-2: #E6EEEA; --mr-accent-3: #F6F1E7; background: #fff; }
+  .mr-head { border-bottom: 0; }
+  .mr-sheet .mr-title { font-family: 'Kalam', var(--font-serif); font-weight: 700; letter-spacing: .04em; }
+  .mr-step { border: 2px solid var(--mr-accent-1); border-radius: 14px; }
+  .mr-step:nth-child(3n + 2) { border-color: var(--mr-accent-2); }
+  .mr-step:nth-child(3n) { border-color: var(--mr-accent-3); }
+  .mr-num { font-family: 'Kalam', var(--font-serif); font-weight: 700; color: var(--mr-ink); }
+  .mr-sheet .mr-text { font-family: var(--font-sans); font-size: 20px; border-radius: 999px; background: linear-gradient(transparent 22%, var(--mr-accent-1) 22%, var(--mr-accent-1) 86%, transparent 86%); }
+  .mr-step:nth-child(3n + 2) .mr-text { background: linear-gradient(transparent 22%, var(--mr-accent-2) 22%, var(--mr-accent-2) 86%, transparent 86%); }
+  .mr-step:nth-child(3n) .mr-text { background: linear-gradient(transparent 22%, var(--mr-accent-3) 22%, var(--mr-accent-3) 86%, transparent 86%); }
+  .mr-sheet .mr-time { background: var(--mr-accent-2); color: var(--mr-ink); border-radius: 8px; }
+  .mr-box { border-color: #b6aaa4; border-radius: 6px; }
+  .mr-sheet .mr-end-label { font-family: 'Kalam', var(--font-serif); font-size: 22px; font-weight: 700; text-transform: none; letter-spacing: .02em; }
+  .mr-palette-picker { border: 0; padding: 0; margin: 0 auto 20px; text-align: center; }
+  .mr-palette-picker legend { width: 100%; margin-bottom: 10px; font-size: .85rem; color: var(--mr-soft); }
+  .mr-palette-options { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+  .mr-palette-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--mr-rule); border-radius: 10px; background: #fff; color: var(--mr-ink); font-size: .8rem; cursor: pointer; }
+  .mr-palette-option[aria-pressed="true"] { border: 2px solid var(--mr-ink); padding: 9px 13px; background: var(--color-ivory); }
+  .mr-palette-option:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 3px; }
+  .mr-swatches { display: flex; gap: 3px; }
+  .mr-swatches span { width: 15px; height: 15px; border: 1px solid #b8ada6; border-radius: 50%; }
+  @media (max-width: 768px) {
+    .mr-container:not(.mr-exporting) .mr-sheet .mr-text { font-size: 17px; }
+    .mr-container:not(.mr-exporting) .mr-sheet .mr-end-label { font-size: 18px; }
+  }
+
+  /* Quiet editorial controls, distinct from the printed poster. */
+  .mr-types { display: flex; flex-wrap: wrap; gap: 0 24px; border-bottom: 1px solid var(--mr-rule); padding-bottom: 0; }
+  .mr-type { flex: 0 1 auto; min-height: 48px; padding: 10px 0 12px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; box-shadow: none; text-align: left; }
+  .mr-type:hover { border-color: var(--mr-soft); }
+  .mr-type[aria-pressed='true'] { border-color: var(--mr-ink); background: transparent; box-shadow: none; }
+  .mr-type-label { font-size: 1rem; }
+  .mr-type[aria-pressed='true'] .mr-type-label { font-weight: 700; }
+  .mr-type-blurb { display: none; }
+  .mr-palette-picker { text-align: left; max-width: 816px; margin-bottom: 24px; }
+  .mr-palette-picker legend { font-size: .8rem; margin-bottom: 2px; }
+  .mr-palette-options { justify-content: flex-start; gap: 6px 24px; }
+  .mr-palette-option { padding: 8px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; }
+  .mr-palette-option[aria-pressed='true'] { padding: 8px 0; border: 0; border-bottom: 2px solid var(--mr-ink); background: transparent; }
+  .mr-palette-option:hover { color: #211b19; }
+  .mr-palette-option[aria-pressed='true'] > span:last-child { font-weight: 600; }
+  .mr-actions { justify-content: flex-start; align-items: center; max-width: 816px; margin-left: auto; margin-right: auto; gap: 24px; }
+  .mr-btn { border: 0; border-radius: 3px; background: transparent; font-size: .9rem; letter-spacing: 0; text-transform: none; }
+  .mr-btn:not(.mr-btn-primary) { padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+  .mr-btn-primary { background: var(--color-warm-button); }
+  .mr-btn:not(.mr-btn-primary):hover { background: transparent; color: #211b19; }
+  .mr-chip { min-height: 44px; padding: 6px 0; margin-right: 12px; border: 0; border-radius: 0; background: transparent; font-family: var(--font-sans); font-size: .8rem; text-decoration: underline; text-decoration-color: var(--mr-rule); text-underline-offset: 4px; }
+  .mr-chip:hover { background: transparent; text-decoration-color: var(--mr-ink); }
+  .mr-type:focus-visible, .mr-chip:focus-visible, .mr-btn:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 4px; }
 </style>
 
 <script>
-  import { autosave, downloadPng, fieldsIn } from '../../lib/printable';
+  import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
+  import { autosave, downloadPng } from '../../lib/printable';
 
   import type { RoutineType } from '../../data/routines';
 
@@ -449,7 +515,16 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
   const rows = sheet.querySelectorAll('[data-mr-step]').length;
 
+  const paletteField = field('palette');
+  const paletteButtons = Array.from(host.querySelectorAll<HTMLButtonElement>('[data-mr-palette]'));
+  function renderPalette() {
+    const id = resolveToolPalette(paletteField.value);
+    paletteField.value = id;
+    toolPalettes[id].colors.forEach((color, i) => sheet.style.setProperty(`--mr-accent-${i + 1}`, color));
+    paletteButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mrPalette === id)));
+  }
   function renderType() {
+    renderPalette();
     const id = types[typeField.value] ? typeField.value : 'morning';
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) b.setAttribute('aria-pressed', String(b.dataset.mrType === id));
     chips.replaceChildren(
@@ -462,6 +537,12 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   }
 
   const save = autosave(sheet, host.dataset.mrKey!, renderType);
+
+  for (const button of paletteButtons) button.addEventListener('click', () => {
+    paletteField.value = button.dataset.mrPalette!;
+    renderPalette();
+    save();
+  });
 
   function load(id: string) {
     const t = types[id];

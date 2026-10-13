@@ -17,6 +17,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const entries: { path: string; lastmod?: string }[] = [
     { path: routes.home },
+    { path: routes.freeTools },
     { path: routes.calendar },
     { path: routes.shop },
     { path: routes.companion },
