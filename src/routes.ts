@@ -21,7 +21,7 @@
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex)
  *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset, /take-back-control,
- *                               /essential-routines and the mug page (?product=<slug>), and only in builds with the shop on
+ *                               /essential-routines, /real-life-reset-kit and the mug page (?product=<slug>), and only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
  *           /admin/orders       order, inventory and shipping dashboard, shop admins only (noindex)

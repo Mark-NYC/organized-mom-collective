@@ -65,6 +65,7 @@ Dashboard (/admin/orders)
 - **Take Back Control.** $29 download (`take-back-control`), active, no stock. Sold from `/take-back-control`, the offer after the Weekly Reset. See [Digital products](#digital-products).
 - **Essential Routines Bundle.** $12 download (`essential-routines`), active, no stock. Sold from `/essential-routines`, the downsell when someone passes on Take Back Control.
 - **Mind Your Own Motherhood Mug.** $23, 15oz ceramic (`mind-your-own-motherhood-mug`), active, **0 units** until you set real stock. Physical: ships like a calendar (1 shipping unit, so the same rate as one 26-week calendar), no cleaning companion in its emails. Sold from `/mind-your-own-motherhood-mug`; its checkout link shows only the mug.
+- **Real Life Reset Kit.** $7 download (`real-life-reset-kit`), active, no stock. Sold from `/real-life-reset-kit` (not linked from any funnel yet).
 - **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
@@ -157,6 +158,17 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] Redeploy `stripe-webhook` and `shop-admin` from `supabase/dashboard/` (mug-only orders no longer say "your calendar" or show the cleaning companion panel).
 - [ ] Dashboard → Inventory: set the mug's stock to what you actually have (or can fulfil). Check its shipping: it's charged one calendar's rate.
 - [ ] Buy one in preview (test card): `/checkout?product=mind-your-own-motherhood-mug` shows only the mug; the receipt shows the mug's picture and no companion panel.
+
+### Database update: Real Life Reset Kit (once, after the mug)
+- [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261016000000_shop_real_life_reset.sql` → **Run**, once. It only adds the product.
+- [ ] **Storage → shop-downloads**: upload to folder `real-life-reset`, renamed exactly:
+
+  | File you have | Upload as |
+  | --- | --- |
+  | Plan_B_Quick-Pivot_Framework.pdf | `plan-b-quick-pivot-framework.pdf` |
+  | 15-Minute_Reset_Checklist.pdf | `15-minute-reset-checklist.pdf` |
+  | Its_OK_to_Pivot_Coaching.mp3 | `its-ok-to-pivot-coaching.mp3` |
+- [ ] Buy it once in preview (test card): all three files should download.
 
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
