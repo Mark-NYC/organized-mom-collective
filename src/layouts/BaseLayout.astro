@@ -52,9 +52,25 @@ const monthHexes = monthColors.map((m) => m.hex);
       // The current month's color (from src/theme.ts) is the accent.
       document.documentElement.style.setProperty('--month', monthHexes[new Date().getMonth()]);
     </script>
+    <!-- Pinterest Tag -->
+    <script is:inline>
+      !function(e){if(!window.pintrk){window.pintrk = function () {
+      window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+        n=window.pintrk;n.queue=[],n.version="3.0";var
+        t=document.createElement("script");t.async=!0,t.src=e;var
+        r=document.getElementsByTagName("script")[0];
+        r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+      pintrk('load', '2613936771748');
+      pintrk('page');
+    </script>
+    <!-- end Pinterest Tag -->
     <slot name="head" />
   </head>
   <body class="min-h-dvh">
+    <noscript>
+      <img height="1" width="1" style="display:none;" alt=""
+        src="https://ct.pinterest.com/v3/?event=init&amp;tid=2613936771748&amp;noscript=1" />
+    </noscript>
     <slot />
   </body>
 </html>
