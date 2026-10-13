@@ -19,6 +19,14 @@ Mom shouldn't have to manage everything alone. Reduce both (1) fragmented family
 - Gather authentic customer feedback, usage observations, objections and reviews with consent.
 - Confirm that the target audience (suburban moms 25–35 with school-aged children and activity-heavy weeks) feels the two problems acutely; don't presume product-market fit.
 
+## Parked: the older-kids command center
+
+Owner decision, October 13, 2026: **establish the family wall calendar as the primary product for the primary audience first.** The Family Command Center (Family Sanity Saver Starter Kit) for moms with kids roughly 10+ in lots of activities ([VISION.md → Secondary audience](VISION.md#secondary-audience-future-de-emphasized)) stays in the background:
+
+- Kept on the site but not promoted: the landing page says "Coming soon", the shop product is switched off, and nothing in the main site links to it.
+- Its calendar is the 2025–2026 edition. Don't refresh it or build for it until the wall calendar is established.
+- Future build idea, not started: generate her calendar instead of reissuing a dated PDF. She enters names and recurring activities once (as on `/try-the-calendar`), picks a 12-month range, and downloads it as one PDF, recurring activities included. Decide first whether it uses the kit's week-rows design or the tool's monthly grid.
+
 ## Phase 1: Brand, discovery and owned audience (next growth work)
 
 - Apply [VISION.md](VISION.md) and [../editorial/BRAND_VOICE.md](../editorial/BRAND_VOICE.md) to homepage, product pages, articles, Pins and emails.

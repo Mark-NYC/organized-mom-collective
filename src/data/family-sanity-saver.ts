@@ -7,6 +7,9 @@ import type { Asset } from './weekly-reset';
  * system, bonuses). A standalone entry point: not linked from the other funnel pages, and they
  * don't link here. Copy lives in the page; the things that change live here.
  *
+ * Audience: moms with older kids (about 10+) in lots of activities, not the wall calendar's 4–10
+ * audience. Parked behind the wall calendar for now: docs/brand/PRODUCT_ROADMAP.md → Parked.
+ *
  * Recreated as is from the original WordPress page, colors included (orange buttons, green
  * checks). Those colors are the old look, not the new brand: restyle when the page is rebranded.
  *
