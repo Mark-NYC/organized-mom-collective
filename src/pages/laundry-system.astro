@@ -1,0 +1,126 @@
+---
+/**
+ * /laundry-system — a free two-page laundry flow checklist: set up the stations, then five steps from basket to
+ * drawer, a weekly schedule and a final check. Ticked and edited on screen, downloaded as PNGs
+ * (src/components/site/ChecklistPages.astro). Saves in this browser (`omc:laundry-system:v1`).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import ChecklistPages from '../components/site/ChecklistPages.astro';
+import type { ChecklistPage } from '../lib/checklist-pages';
+import { routes } from '../routes';
+import { BRAND_NAME } from '../config';
+
+const pages: ChecklistPage[] = [
+  {
+    sections: [
+      {
+        title: 'Set Up Your Stations',
+        groups: [
+          { title: 'Dirty clothes', variant: 'step', cols: 1, items: ['Three baskets: lights, darks, towels & sheets', 'Stain spray right next to the baskets'] },
+          { title: 'Washer & dryer', variant: 'step', cols: 1, items: ['Detergent within arm’s reach', 'A drying rack for air-dry items'] },
+          { title: 'The one rule', variant: 'priority', cols: 1, items: ['Touch each item once: basket, washer, dryer, drawer'] },
+        ],
+      },
+      {
+        title: 'Basket to Dryer',
+        groups: [
+          {
+            title: 'Sort as you go',
+            variant: 'step',
+            step: 1,
+            cols: 2,
+            items: ['Dirty clothes straight into the right basket', 'Spray stains before they go in', 'Empty pockets first', 'Start a load when a basket is full'],
+          },
+          {
+            title: 'Wash simply',
+            variant: 'step',
+            step: 2,
+            cols: 2,
+            items: ['Three settings: normal, delicate, heavy', 'Phone timer for the end of the cycle', 'Cold water for most loads', 'Measure detergent: more isn’t better'],
+          },
+          {
+            title: 'Move it right away',
+            variant: 'step',
+            step: 3,
+            cols: 2,
+            items: ['Wet clothes to the dryer within 30 minutes', 'Shake items out first', 'Hang air-dry items straight away', 'Timer for the dryer too'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    sections: [
+      {
+        title: 'Dryer to Drawer',
+        groups: [
+          {
+            title: 'Unload & sort fast',
+            variant: 'step',
+            step: 4,
+            cols: 2,
+            items: ['Unload when the dryer stops', 'Sort into a pile per person', 'Hang wrinkle-prone items first', 'Fold the simple stuff: tees, socks, underwear'],
+          },
+          {
+            title: 'Put it away',
+            variant: 'step',
+            step: 5,
+            cols: 2,
+            items: ['Each pile goes to its own room', 'Kids put away their own clothes', 'Hang what needs hanging', 'No “clean clothes pile” on the couch'],
+          },
+        ],
+      },
+      {
+        title: 'Keep It Flowing',
+        groups: [
+          { title: 'Weekly schedule', variant: 'timeline', cols: 2, items: ['Monday: lights', 'Wednesday: darks', 'Friday: towels', 'Sunday: sheets'] },
+          {
+            title: 'Less laundry, less work',
+            cols: 2,
+            items: ['Older kids run their own loads', 'Fewer clothes, fewer loads', 'Wrinkle-resistant fabrics', 'Batch similar items'],
+          },
+          { title: 'Final check', variant: 'priority', cols: 1, items: ['Every station is set up', 'Everyone knows their part', 'No backlog of dirty or clean clothes'] },
+        ],
+      },
+    ],
+  },
+];
+
+const site = Astro.site!;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: BRAND_NAME, item: site.href },
+      { '@type': 'ListItem', position: 2, name: 'Laundry System', item: new URL(routes.laundrySystem, site).href },
+    ],
+  },
+];
+---
+
+<PublicLayout
+  title="Free Laundry System Checklist for Families"
+  description="A free laundry system for busy families: set up simple stations, follow five steps from basket to drawer, and get the kids putting away their own clothes."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="ls-h" class="bg-cream">
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <p class="label text-warm-soft">Free laundry system</p>
+      <h1 id="ls-h" class="serif-hero mt-3">Laundry That Moves, Not Piles Up.</h1>
+      <p class="lede mt-4 max-w-2xl text-warm-ink">
+        Set up three stations once, then follow five steps from basket to drawer, with everyone putting away their own pile. Tick it off,
+        change anything to fit your house, then download both pages to hang by the washer. What you change stays saved in this browser.
+      </p>
+    </div>
+  </section>
+
+  <ChecklistPages title="Laundry System" pages={pages} storageKey="omc:laundry-system:v1" filename="laundry-system">
+    <p slot="footnote" class="ck-footnote">
+      More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
+      {' '}<a href={routes.routineChart} class="text-link">Routine Charts</a> and the
+      {' '}<a href={routes.calendar} data-cta="laundry-system" class="text-link">Family Wall Calendar</a>
+    </p>
+  </ChecklistPages>
+</PublicLayout>

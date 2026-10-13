@@ -22,6 +22,7 @@
  *           /homeschool-rhythm free homeschool weekly rhythm (time blocks × days, sample rhythms), same idea
  *           /spring-cleaning-checklist  free room-by-room spring cleaning checklist (ticked on screen, progress saved; no PNG)
  *           /fall-cleaning-checklist    the fall version, same idea
+ *           /laundry-system    free two-page laundry flow checklist (editable, PNG per page)
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
@@ -68,6 +69,7 @@ export const routes = {
   homeschoolRhythm: '/homeschool-rhythm',
   springCleaning: '/spring-cleaning-checklist',
   fallCleaning: '/fall-cleaning-checklist',
+  laundrySystem: '/laundry-system',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/resources#free-tools',
