@@ -163,29 +163,50 @@
       "source": "Kaboompics",
       "creator": "Karolina Grabowska",
       "source_url": "https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette",
-      "owner_visual_status": "approved_as_style_reference",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
       "fetch_status": "downloaded_in_run_38298329340",
       "usage_candidates": [
         "website_section",
         "educational_content",
         "social"
       ],
-      "license_review": "source_photo_page_explicitly_marks_free_personal_and_commercial_2026-10-12",
-      "model_release_review": "final_image_brand_artwork_property_context_review_pending",
-      "publishing_clearance": false,
-      "public_path": null,
+      "license_review": "source_photo_page_free_personal_and_commercial_2026-10-14",
+      "model_release_review": "not_needed_no_people",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-06-bread-grocery-bag-{640,960,1440}.webp",
       "source_license_label_verified": true,
-      "license_verification_date": "2026-10-12",
+      "license_verification_date": "2026-10-14",
       "source_license_url": "https://kaboompics.com/photo/28538/fresh-bread-on-the-kitchen-counter-ciabatta-baguette",
       "visual_content_review": {
-        "review_date": "2026-10-12",
-        "review_basis": "GitHub Actions artifact 11770035828 contact sheet, low resolution",
-        "visual_status": "preview_pass",
+        "review_date": "2026-10-14",
+        "review_basis": "2400 x 1600 source archive and final 1440 WebP",
+        "visual_status": "pass",
         "risk": "low",
-        "observations": "Unbranded-looking bakery bread in reusable net bag on simple background. No visible people or obvious marks at preview resolution.",
-        "action": "Inspect full-resolution and finalize crop; strongest initial production candidate."
+        "observations": "Bread in unbranded cotton mesh bag on pale counter. No people, packaging, readable text, artwork or logos.",
+        "action": "None."
       },
-      "note_2026-10-12": "Not used in FP-01: 28541 from the same shoot (K08) chosen instead."
+      "note_2026-10-12": "Not used in FP-01: 28541 from the same shoot (K08) chosen instead.",
+      "used_in": [
+        "FP-06 /resources/grocery-list-from-meal-plan"
+      ],
+      "clearance_record": {
+        "approval": "Owner standing Kaboompics approval 2026-10-12, PHOTO-DISCOVERY.md",
+        "checks_by": "Codex",
+        "date": "2026-10-14",
+        "license": "Photo detail page confirms personal and commercial; download evidence FP-01-full/manifest.json",
+        "original": "design/photography/kaboompics/FP-01-full/28538-2400.jpg",
+        "approved_placements": [
+          "website_article_editorial",
+          "pinterest_pin_background"
+        ],
+        "context": "Editorial groceries illustration; no endorsement or customer-home claim; no AI use.",
+        "edits": "Responsive WebP resizing only; no crop or color grade.",
+        "dimensions": [
+          1440,
+          960
+        ],
+        "alt_text_example": "A ciabatta and baguette in a cotton mesh grocery bag on a pale kitchen counter."
+      }
     },
     {
       "id": "F01",
@@ -542,8 +563,10 @@
         "edits": "Resize and WebP export only; no grade or crop."
       },
       "used_in": [
-        "IF-01 /resources/intentional-family-life"
-      ]
+        "IF-01 /resources/intentional-family-life",
+        "FP-06 /resources/grocery-list-from-meal-plan"
+      ],
+      "reuse_review_2026_10_14": "Existing cleared notepad asset reused as editorial list-writing detail; no new endorsement or sensitive context."
     },
     {
       "id": "K10",
