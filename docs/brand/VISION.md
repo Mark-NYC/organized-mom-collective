@@ -8,6 +8,23 @@ Status: Approved strategic direction, October 13, 2026. This is an internal sour
 
 A home is shared life, and running it should become shared work. Organization should not create another job for mom.
 
+## The brand story: organized moms raise organized families
+
+**Organized moms raise organized families.** This is our signature philosophy, not a claim that mom must become perfectly organized before the family can contribute.
+
+We aren't trying to make moms more capable of handling everything alone. We help them establish visible plans, simple habits and shared responsibilities that spouses, partners and children can learn to own. Mom may initiate a system, but she should not become its permanent dispatcher, reminder or quality-control department.
+
+**The goal isn't a mom who can handle it all. It's a family that learns to handle life together.**
+
+Our brand story has three layers:
+- **Promise:** Mom doesn't have to manage everything alone.
+- **Philosophy:** Organized moms raise organized families.
+- **Outcome:** A home where everyone knows the plan and plays a part.
+
+Translate this into practical coaching: children learn age-appropriate jobs and how to check the plan; partners own meaningful responsibilities from start to finish; shared family rhythms gradually depend less on mom's memory and prompting. Participation is learned and practiced, not automatically delivered by a calendar.
+
+Use this philosophy across brand storytelling, editorial content, customer education, products and the future family system. Never suggest that teaching everyone to participate is simply another endless responsibility for mom.
+
 ## Brand promise
 
 **Less on your mind. More hands helping.**
