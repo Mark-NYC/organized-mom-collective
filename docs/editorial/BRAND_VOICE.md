@@ -24,6 +24,21 @@ Our signature format, **The Real-Life Reset**, is how that shows up on the page:
 
 The products follow the same idea: a weekly paper wall calendar (schedule, meals, groceries, to-dos, prayer and gratitude on one page) and a companion website that turns each day's cleaning zone into a short checklist. (Call it a website or "the cleaning companion", never an app, and never promise features it doesn't have.) Articles stand on their own; the products are one way to put the advice into practice. See "Product mentions" in [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#product-notes).
 
+## Signature brand story
+
+**Organized moms raise organized families.**
+
+An organized mom isn't a mom who does everything. She's a mom who helps her family learn to do things together. We teach simple, realistic ways to build shared habits, visible plans and age-appropriate ownership. The goal is **not** to turn mom into an even more efficient family manager.
+
+Message hierarchy:
+- **Promise:** Mom doesn't have to manage everything alone.
+- **Philosophy:** Organized moms raise organized families.
+- **Outcome:** A home where everyone knows the plan and plays a part.
+
+Show the difference in examples: a child checks tomorrow's backpack list; a partner owns dinner start to finish; the family looks at the week together. Don't frame mom as the person who still needs to remind, delegate or inspect everything. This is a long-term practice, not something the wall calendar automatically accomplishes.
+
+Use the signature line where it fits brand storytelling, not as a forced tagline in every article or Pin. Most content should *demonstrate* the philosophy through practical advice rather than repeat the slogan.
+
 ## Convictions
 
 These are the ideas we return to. Every article should express at least one of them through its advice, not by stating it as a slogan.
