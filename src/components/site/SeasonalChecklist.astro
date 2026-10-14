@@ -38,6 +38,7 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
     </ul>
   </div>
 
+  <p class="sc-encouragement" data-sc-encouragement role="status" aria-live="polite">Choose one small job to begin. You don't have to finish everything today.</p>
   <div class="sc-rooms">
     {
       rooms.map((room) => {
@@ -196,6 +197,7 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
     background: var(--sc-sage);
   }
 
+  .sc-encouragement { max-width:960px; margin:0 auto 18px; padding:12px 16px; border-left:3px solid var(--sc-sage); background:var(--sc-sage-wash); font-size:.9rem; line-height:1.55; }
   .sc-rooms {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -386,6 +388,18 @@ const total = rooms.reduce((n, r) => n + r.sections.reduce((m, [, tasks]) => m +
     const done = all.filter((b) => b.checked).length;
     root.querySelector('[data-sc-done]')!.textContent = String(done);
     root.querySelector<HTMLElement>('[data-sc-bar]')!.style.width = pct(done, all.length);
+    const message = root.querySelector<HTMLElement>('[data-sc-encouragement]')!;
+    const completeRooms = Array.from(root.querySelectorAll<HTMLElement>('[data-sc-room]')).filter(room => {
+      const tasks = boxes(room);
+      return tasks.length > 0 && tasks.every(task => task.checked);
+    }).length;
+    message.textContent = all.length > 0 && done === all.length
+      ? 'Look at that. You did it! Take a moment to enjoy what your family accomplished.'
+      : completeRooms > 0
+        ? `${completeRooms} ${completeRooms === 1 ? 'section' : 'sections'} finished. That’s real progress. You can stop here for today.`
+        : done > 0
+          ? `${done} ${done === 1 ? 'job' : 'jobs'} done. A little progress still counts.`
+          : 'Choose one small job to begin. You don’t have to finish everything today.';
     for (const room of root.querySelectorAll<HTMLElement>('[data-sc-room]')) {
       const list = boxes(room);
       const n = list.filter((b) => b.checked).length;
