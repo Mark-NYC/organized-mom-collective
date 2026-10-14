@@ -121,6 +121,14 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
   </div>
 </PublicLayout>
 <script>
+  import { toolEvent } from '../lib/tool-engagement';
+  document.querySelectorAll<HTMLAnchorElement>('.tools-page a[href^="/"]').forEach(link => {
+    link.addEventListener('click', () => {
+      const target = link.getAttribute('href') || '';
+      if (target.startsWith('/#') || target.startsWith('#')) return;
+      toolEvent('tool_related_click', target.replace(/^\//, '').split(/[?#]/)[0] || 'home', 'tools-directory');
+    });
+  });
   // Browser date keeps seasonal suggestions current without relying on build/deploy timing.
   const seasonal = document.querySelector<HTMLElement>('[data-seasonal-tools]');
   const month = new Date().getMonth();
