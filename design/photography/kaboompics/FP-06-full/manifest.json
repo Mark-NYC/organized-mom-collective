@@ -1,0 +1,18 @@
+{
+  "research_only": true,
+  "publishing_clearance": false,
+  "photos": [
+    {
+      "kaboompics_id": "6669",
+      "source_url": "https://kaboompics.com/photo/6669/photo",
+      "checked": "2026-10-14",
+      "status": "failed: HTTP Error 403: Forbidden"
+    },
+    {
+      "kaboompics_id": "28538",
+      "source_url": "https://kaboompics.com/photo/28538/photo",
+      "checked": "2026-10-14",
+      "status": "failed: HTTP Error 403: Forbidden"
+    }
+  ]
+}
