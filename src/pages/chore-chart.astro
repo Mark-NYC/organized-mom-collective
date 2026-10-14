@@ -42,13 +42,17 @@ const jsonLd = [
       <p class="label text-warm-soft">Free chore chart</p>
       <h1 id="chore-h" class="serif-hero mt-3">A Chore Chart That Fits Their Age.</h1>
       <p class="lede mt-4 max-w-2xl text-warm-ink">
-        Pick an age group and get daily and weekly chores they can actually do, plus three rewards to work toward. Change anything on the
+        Add their name, choose their age, and start with jobs they can actually own, plus three rewards to work toward. Change anything on the
         chart, then download it to print and hang where everyone sees it. The chart does the reminding, so you don’t have to.
       </p>
     </div>
   </section>
 
   <div class="chore-chart-container">
+    <div class="cc-steps" aria-label="Make your chore chart in three steps">
+      <span><b>1</b> Add their name</span><span><b>2</b> Choose an age</span><span><b>3</b> Make it theirs</span>
+    </div>
+    <p class="cc-start-hint" data-cc-status role="status" aria-live="polite">Start with a name and age. Your chart will fill in with suggested jobs.</p>
     <form class="cc-form" data-cc-form>
       <label class="cc-field">
         <span>Child’s name</span>
@@ -61,7 +65,7 @@ const jsonLd = [
           {Object.entries(choreSets).map(([id, set]) => <option value={id}>{set.label}</option>)}
         </select>
       </label>
-      <button type="submit" class="cc-btn cc-btn-primary">Fill in chores</button>
+      <button type="submit" class="cc-btn cc-btn-primary">Use suggested chores</button>
     </form>
 
     <fieldset class="cc-palette-picker">
@@ -79,7 +83,7 @@ const jsonLd = [
       <button type="button" class="cc-btn cc-btn-primary" data-cc-download>Download PNG</button>
       <button type="button" class="cc-btn" data-cc-clear>Clear chart</button>
     </div>
-    <p class="cc-hint">Tap any chore or reward on the chart to change it.</p>
+    <p class="cc-hint">A starting point, not a rulebook. Tap any chore or reward to make it yours.</p>
     {toolEmailGateEnabled && <p class="cc-hint">Free to customize. Email required for your first download. No account needed.</p>}
 
     <div class="cc-sheet" id="chore-chart">
@@ -166,6 +170,10 @@ const jsonLd = [
     box-sizing: border-box;
   }
 
+  .cc-steps { display:flex; justify-content:center; flex-wrap:wrap; gap:10px 24px; margin:0 auto 12px; max-width:800px; }
+  .cc-steps span { display:inline-flex; align-items:center; gap:7px; font-size:.82rem; color:var(--cc-soft); }
+  .cc-steps b { display:inline-grid; place-items:center; width:25px; height:25px; border-radius:50%; background:var(--cc-sage-wash); color:var(--cc-ink); }
+  .cc-start-hint { text-align:center; max-width:650px; margin:0 auto 22px; font-size:.92rem; color:var(--cc-ink); }
   /* Form and buttons */
   .cc-form {
     display: flex;
@@ -525,6 +533,7 @@ const jsonLd = [
   const ageField = sheet.querySelector<HTMLInputElement>('[data-cc-age-field]')!;
   const ageBadge = sheet.querySelector<HTMLElement>('[data-cc-age-badge]')!;
   const forLine = sheet.querySelector<HTMLElement>('[data-cc-for]')!;
+  const status = document.querySelector<HTMLElement>('[data-cc-status]')!;
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
 
   // The name is typed in the form but saved with the sheet (autosave reads [data-field] inside one root).
@@ -545,7 +554,13 @@ const jsonLd = [
     const set = sets[ageField.value as AgeGroup];
     ageSelect.value = set ? ageField.value : '';
     ageBadge.hidden = !set;
-    ageBadge.textContent = set ? set.label.replace(/\s*\(.*\)/, '') : '';
+    ageBadge.textContent = set ? set.label.replace(/\\s*\\(.*\\)/, '') : '';
+    const hasChores = Array.from(sheet.querySelectorAll<HTMLInputElement>('.cc-chore')).some(el => el.value.trim());
+    status.textContent = hasChores
+      ? `${name ? name + '’s' : 'Your'} chart is taking shape. Edit any job or reward, then download when ready.`
+      : set
+        ? `Great choice. Use the suggested jobs for ${set.label}, or adjust the chart to fit your family.`
+        : 'Start with a name and age. Your chart will fill in with suggested jobs.';
   }
 
   const save = autosave(sheet, 'omc:chore-chart:v1', () => {
@@ -568,21 +583,35 @@ const jsonLd = [
   });
 
   const choreFields = () => Array.from(sheet.querySelectorAll<HTMLInputElement>('.cc-chore, .cc-reward-text'));
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+  function fillSuggestedChores(askBeforeReplacing: boolean) {
     const set = sets[ageSelect.value as AgeGroup];
-    if (!set) {
-      ageSelect.focus();
-      return;
-    }
-    if (choreFields().some((el) => el.value.trim()) && !confirm('Replace the chores on the chart with the ones for this age?')) return;
+    if (!set) return false;
+    if (askBeforeReplacing && choreFields().some(el => el.value.trim()) &&
+        !confirm('Replace the chores on the chart with the ones for this age?')) return false;
     sheet.querySelectorAll<HTMLInputElement>('[data-field^="daily-"]').forEach((el, i) => (el.value = set.daily[i] ?? ''));
-    set.weekly.forEach((chore, i) => (field(`weekly-${i}`).value = chore));
+    WEEKLY_FIELD_KEYS.forEach((key,i) => (field(key).value = set.weekly[i] ?? ''));
     set.rewards.forEach((reward, i) => (field(`reward-${i}`).value = reward));
     ageField.value = ageSelect.value;
     render();
     save();
+    return true;
+  }
+  const WEEKLY_FIELD_KEYS = ['weekly-0','weekly-1','weekly-2','weekly-3','weekly-4','weekly-5','weekly-6'];
+  ageSelect.addEventListener('change', () => {
+    if (!sets[ageSelect.value as AgeGroup]) return;
+    // First selection gives an immediate useful chart. Never silently replace custom work.
+    if (!choreFields().some(el => el.value.trim())) fillSuggestedChores(false);
+    else {
+      const set = sets[ageSelect.value as AgeGroup];
+      status.textContent = `Suggested jobs for ${set.label} are ready. Select “Use suggested chores” to replace your existing jobs.`;
+    }
+  });
+  sheet.addEventListener('input', () => { render(); });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!sets[ageSelect.value as AgeGroup]) { ageSelect.focus(); return; }
+    if (!fillSuggestedChores(true)) return;
     sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
