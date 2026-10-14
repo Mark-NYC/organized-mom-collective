@@ -1,0 +1,148 @@
+{
+  "official_format_source": "https://help.pinterest.com/en/business/article/bulk-upload-video-pins",
+  "asset_commit": "ddad789e0b47e39858e5969d5e86a8d0750a96bc",
+  "count": 9,
+  "columns": [
+    "Title",
+    "Media URL",
+    "Pinterest board",
+    "Thumbnail",
+    "Description",
+    "Link",
+    "Publish date",
+    "Keywords"
+  ],
+  "csv_roundtrip": true,
+  "max_title_length": 59,
+  "max_description_length": 294,
+  "dates": "Oct 15\u2013Nov 3, 2026, 8pm New York; UTC timestamps include Nov 1 DST change.",
+  "board": "Relevant recommended board; not claiming existing account board verified. Pinterest creates absent boards.",
+  "keyword_evidence": "Relevant content phrases; native Pinterest search volume not verified.",
+  "publication": "CSV prepared only. Importing it schedules publication. No Pinterest upload performed.",
+  "url_checks": [
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/01-free-chore-chart-generator-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/01-free-chore-chart-generator-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 471688,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-save-v01-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-save-v01-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 101476,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-curiosity-v01-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-curiosity-v01-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 1943875,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/02-their-name-their-jobs-their-chart-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/02-their-name-their-jobs-their-chart-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 736989,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-save-v02-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-save-v02-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 129752,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-search-v01-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-search-v01-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 1644531,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/03-customize-and-download-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/03-customize-and-download-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 168033,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-curiosity-v02-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-curiosity-v02-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 1506311,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-search-v02-1000x1500.png",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/ddad789e0b47e39858e5969d5e86a8d0750a96bc/design/pinterest/IF-03/approved-2026-10-14/IF-03-search-v02-1000x1500.png",
+      "content_type": "image/png",
+      "bytes": 1233590,
+      "exact_original_bytes": true,
+      "dimensions": [
+        1000,
+        1500
+      ]
+    },
+    {
+      "url": "https://www.organizedmomcollective.com/chore-chart",
+      "status": 200,
+      "final_url": "https://www.organizedmomcollective.com/chore-chart",
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 27119,
+      "page_title": "Free Chore Chart by Age \u00b7 Organized Mom Collective"
+    },
+    {
+      "url": "https://www.organizedmomcollective.com/resources/chores-for-kids-by-age",
+      "status": 200,
+      "final_url": "https://www.organizedmomcollective.com/resources/chores-for-kids-by-age",
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 32592,
+      "page_title": "Free Chore Chart Generator: Customize by Age"
+    }
+  ]
+}
