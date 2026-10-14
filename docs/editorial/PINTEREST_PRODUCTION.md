@@ -1,7 +1,5 @@
 # Pinterest production playbook
 
-**Proposed replacement for review. October 14, 2026. Not committed to GitHub.**
-
 This records the methods actually used in the first editorial batch and its corrections. Requirements inherited from strategy are identified separately. Unverified techniques are not presented as working capabilities.
 
 ## Source of truth and scope
