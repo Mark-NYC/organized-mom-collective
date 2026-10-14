@@ -1,7 +1,5 @@
 # OMC Pinterest creative direction
 
-**Proposed for review. October 14, 2026. Not committed to GitHub.**
-
 ## Authority and purpose
 
 Read [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md), [BRAND_VOICE.md](BRAND_VOICE.md), [../brand/VISION.md](../brand/VISION.md) and [../brand/PUBLIC-VISUAL-DESIGN.md](../brand/PUBLIC-VISUAL-DESIGN.md) at the start of each batch. They remain the source of truth for audience, promises, factual claims and brand identity. This document captures the owner-approved editorial direction and guides visual concept selection. It does not change audience, factual claims or product boundaries in the strategy.
