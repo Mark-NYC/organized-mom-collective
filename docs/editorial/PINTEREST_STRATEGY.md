@@ -1,8 +1,8 @@
 # Pinterest strategy
 
-Every article ships with a Pinterest plan: three distinct pins that bring the right reader from Pinterest to the article. This document is the standard; the per-article plan uses [templates/pinterest-plan.md](templates/pinterest-plan.md) and is saved as `docs/editorial/pinterest/{ARTICLE_ID}.md`.
+Every article has three strategic Pinterest concepts (search-driven, curiosity-driven, and save-worthy). The default production batch is six finished creative variations, normally two per concept. Existing three-pin plans remain valid; the six-variation batch is a separate production layer until the tracker and validator are updated. This document is the standard; the per-article plan uses [templates/pinterest-plan.md](templates/pinterest-plan.md) and is saved as `docs/editorial/pinterest/{ARTICLE_ID}.md`.
 
-Related: [BRAND_VOICE.md](BRAND_VOICE.md) (applies to pin copy too) · [ARTICLE_WORKFLOW.md](ARTICLE_WORKFLOW.md) (when this happens) · [CONTENT_TRACKER.md](CONTENT_TRACKER.md) (plan and pin status) · [SEO_STRATEGY.md](SEO_STRATEGY.md) (Google research, which is separate).
+Production: [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md) defines the master-photo overlay workflow, templates, six-variation deliverables, exports and QA.\n\nRelated: [BRAND_VOICE.md](BRAND_VOICE.md) (applies to pin copy too) · [ARTICLE_WORKFLOW.md](ARTICLE_WORKFLOW.md) (when this happens) · [CONTENT_TRACKER.md](CONTENT_TRACKER.md) (plan and pin status) · [SEO_STRATEGY.md](SEO_STRATEGY.md) (Google research, which is separate).
 
 ## Why Pinterest, and how it differs from Google
 
@@ -35,9 +35,9 @@ Record in the plan:
 
 **Never invent search volume, engagement rates, trend percentages, or "this pin went viral" claims.** If a tool doesn't show a number, the plan doesn't contain one. "Observed in autocomplete on 2026-10-09" is evidence; "10K monthly searches" is not, unless a tool showed it and the plan names the tool.
 
-## The three pins
+## Three strategic concepts, six production variations
 
-Every article gets exactly three pins, each with a different job. They must be visibly different (layout, color, and image), not three crops of one design.
+Each article has three distinct *concepts*, each with a different job. Produce six finished variations by default (two search, two curiosity, two save-worthy), subject to source-photo suitability and the article's real content. Use different headline angles and at least two different template compositions, not six near-identical text swaps. One approved master photo may be reused without altering its pixels; vary the overlays and arrangements. For a checklist that cannot fit legibly over the photograph, use a solid paper panel while retaining the original photograph where visible, or a separately approved source image. Never invent checklist steps to fill the design.\n\n**Compatibility:** The existing per-article plan template and `npm run check:site` currently expect exactly three planned concepts. Do not duplicate sections or pretend that six pins are supported by the validator. Keep those three sections as the conceptual plan; track six production variants in a batch manifest or in an optional additional section, pending a separate template/validator update.
 
 ### 1. Search-driven pin
 **Job:** match a Pinterest search and clearly promise the answer.
@@ -62,11 +62,11 @@ Every article gets exactly three pins, each with a different job. They must be v
 - It must still link to the article and say there's more there ("The full routine + what to do when you miss a day").
 - Best for: saves and repeat value.
 
-### Concept rules for all three
+### Concept rules for every variation
 
 - **Based on the finished article**, not the brief or outline. Write the concepts after the article is implemented and verified, and quote its actual headings, checklist items and rules.
 - **One promise per pin.** Each promise is delivered in the article, findable without scrolling far.
-- **No product-first pins.** Pins sell the idea; the article handles the product mention. A pin may show the real calendar or app only where the article's content is genuinely about it (see "Product imagery").
+- **No product-first pins.** Pins sell the idea; the article handles the product mention. A pin may show the real calendar or cleaning companion website only where the article's content is genuinely about it (see "Product imagery").
 - **Brand voice applies.** No hype words, guilt, invented claims, or fake testimonials (see [BRAND_VOICE.md](BRAND_VOICE.md#never)).
 
 ## Visual identity
@@ -91,7 +91,7 @@ The print palette from `src/styles/global.css` and the month colors from `src/th
 
 - One accent color per pin, used for a band, a highlight bar or a small block, never for body text.
 - Vary the accent and background across an article's three pins (e.g. cream + sage accent, white + clay accent, blush + frost-blue accent), so they read as a family but not as copies.
-- No saturated brand-unrelated colors, gradients, neon, or heavy drop shadows.
+- No saturated brand-unrelated colors, gradients, neon, or heavy drop shadows. Prefer flat, subtle panels instead of gradient overlays; if a transparency treatment is required, it must remain restrained and legible.
 
 ### Typography
 
@@ -127,7 +127,7 @@ Most pins are seen small, in a two-column phone feed.
 
 ### Visual variety
 
-Across an article's three pins, vary at least two of: layout (text-top / text-panel-center / full checklist), background (photo / paper / color block), accent color, and image subject. Across the library, rotate layouts so a board doesn't look like one pin repeated.
+Across an article's six variations, vary at least two of: layout (text-top / text-panel-center / full checklist), background (photo / paper / color block), accent color, and image subject. Across the library, rotate layouts so a board doesn't look like one pin repeated.
 
 Starting layouts (adapt freely):
 
@@ -139,9 +139,9 @@ Starting layouts (adapt freely):
 
 ## Image generation and production
 
-AI image generation is allowed for **backgrounds and scenes only**: a kitchen counter in soft morning light, a tidy entryway, paper textures, a cup of coffee beside a notebook. The plan's prompt for each pin is complete (dimensions, composition, colors, lighting, typography, constraints), but:
+**Preferred workflow:** Create or approve one text-free 2:3 master photo and preserve it exactly. Compose six pin designs with independent text, panel, rule, badge and background layers, then flatten only for export. Do not send the master through an image-editing/generation model to add words. See [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md).\n\nAI image generation is allowed for **backgrounds and scenes only**: a kitchen counter in soft morning light, a tidy entryway, paper textures, a cup of coffee beside a notebook. The plan's prompt for each pin is complete (dimensions, composition, colors, lighting, typography, constraints), but:
 
-- **Text is set in a design tool, not by the image model.** Generate the image with an empty area where text will go, then add the exact overlay text in Figma or Canva with the brand fonts. Image models misspell and distort text; the overlay must match the plan word for word.
+- **Text is set in a design tool, not by the image model.** Generate the image with an empty area where text will go, then add the exact overlay text using deterministic image composition (or Figma/Canva) with the brand fonts. Image models misspell and distort text; the overlay must match the plan word for word.
 - **Never generate the calendar, the companion website, a phone screen showing it, or any packaging.** No fake product images, no imitation of the calendar's layout as if it were the real thing.
 - **No generated people's faces as the subject.** Hands, a back view, or no people at all. Nothing that looks like a testimonial or a "real customer".
 - **Style constraints for every prompt:** natural soft daylight, muted warm palette matching the brand colors, uncluttered, real-looking homes (lived-in, not staged showrooms), no glossy CGI look, no oversaturation, no surreal details, no text, letters, logos or watermarks in the generated image.
@@ -150,7 +150,7 @@ AI image generation is allowed for **backgrounds and scenes only**: a kitchen co
 ### Product imagery
 
 - The calendar may appear **only** via the real photos in `design/etsy-listing/` (or `public/images/reorder/`), unmodified apart from cropping and resizing. Don't edit the calendar's artwork, its dates or its handwriting.
-- The app may appear only as a real screenshot of the current app, showing what it actually does (a zone checklist, the Daily Reset). Don't mock up screens or features it doesn't have.
+- The cleaning companion website may appear only as a real screenshot of the current website, showing what it actually does (a zone checklist, the Daily Reset). Don't mock up screens or features it doesn't have.
 - If a pin's message doesn't need the product, leave the product out.
 
 ## Pin copy
@@ -186,11 +186,11 @@ A standard sequence for each article (adjust per plan):
 3. **About two weeks later:** curiosity-driven pin, to the pillar board.
 4. Seasonal articles (back-to-school, January, spring cleaning): schedule the first pin ahead of the season rather than at publication.
 
-Spacing pins out keeps boards varied; don't publish all three on the same day. Don't re-upload identical images; make a new variation if a pin needs refreshing.
+Spacing pins out keeps boards varied; don't publish all six on the same day. The listed three dates are the initial concept-level schedule; stagger the additional variants after these dates, monitor results, and avoid near-duplicate uploads. Don't re-upload identical images; make a new variation if a pin needs refreshing.
 
 ### Seasonal free tools
 
-The free tools on `/resources#free-tools` aren't articles and have no tracker row, but the seasonal ones only earn traffic if their pins go up before the season. Each still needs a plan (same three pins, saved as `docs/editorial/pinterest/TOOL-{slug}.md`) before its first-pin date.
+The free tools on `/resources#free-tools` aren't articles and have no tracker row, but the seasonal ones only earn traffic if their pins go up before the season. Each still needs a plan (three concepts, with six variations as the default production batch, saved as `docs/editorial/pinterest/TOOL-{slug}.md`) before its first-pin date.
 
 | Tool | First pin by | Plan |
 | --- | --- | --- |
@@ -198,10 +198,10 @@ The free tools on `/resources#free-tools` aren't articles and have no tracker ro
 
 ## Assets and status
 
-- **Filenames:** `{ARTICLE_ID}-{pin-type}-1000x1500.{png|jpg}`, pin type `search`, `curiosity` or `save`. Example: `HC-01-save-1000x1500.png`.
+- **Filenames:** `{ARTICLE_ID}-{pin-type}-v{N}-1000x1500.png`, with pin type `search`, `curiosity` or `save` and N = 01/02 within that type. Example: `HC-01-save-v02-1000x1500.png`. Legacy filenames remain accepted for existing three-pin assets.
 - **Storage:** final exports in `design/pinterest/{ARTICLE_ID}/` (source files may live in the design tool). Pins aren't served by the site; don't add them to `public/`.
 - **Production status per pin:** `planned` (concept written) → `generated` (image and overlay produced) → `reviewed` (checked against the article, this document and brand voice) → `published` (live on Pinterest, with date).
-- The plan file holds each pin's status; [CONTENT_TRACKER.md](CONTENT_TRACKER.md) mirrors it. `npm run check:site` checks that every published article has a complete plan with three pins and that the tracker matches.
+- The existing plan file holds three concept statuses; [CONTENT_TRACKER.md](CONTENT_TRACKER.md) mirrors them. `npm run check:site` checks three concept entries, not six exported variants. Record six-file delivery in the production manifest described in [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md). Update the validator and plan template explicitly before changing this contract.
 
 ## Review checklist (per pin, before `reviewed`)
 
@@ -210,5 +210,5 @@ The free tools on `/resources#free-tools` aren't articles and have no tracker ro
 - [ ] Headline readable at ≈ 250 px wide; contrast ≥ 4.5:1; nothing in the 80 px margins or bottom 160 px.
 - [ ] Brand badge or line present once, unaltered.
 - [ ] No generated product, app screen, faces, text artifacts, or misleading imagery.
-- [ ] Visibly different from the article's other two pins.
+- [ ] Distinct headline angle and clearly differentiated treatment from the other variants; no near-duplicate upload.
 - [ ] Title, description and alt text follow the rules above; no invented numbers.
