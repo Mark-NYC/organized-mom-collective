@@ -64,7 +64,7 @@ const jsonLd = [
       <button type="submit" class="cc-btn cc-btn-primary">Use suggested chores</button>
     </form>
 
-    <fieldset class="cc-palette-picker">
+    <fieldset class="cc-palette-picker" data-cc-advanced>
       <legend>Choose your colors</legend>
       <div class="cc-palette-options">
         {Object.entries(toolPalettes).map(([id, palette]) => (
@@ -76,9 +76,10 @@ const jsonLd = [
       </div>
     </fieldset>
     <div class="cc-actions">
-      <button type="button" class="cc-btn cc-btn-primary" data-cc-download>Download PNG</button>
+      <button type="button" class="cc-btn cc-btn-primary" data-cc-download>Download chart</button>
       <button type="button" class="cc-btn" data-cc-clear>Clear chart</button>
     </div>
+    <button type="button" class="cc-customize-link" data-cc-customize aria-expanded="false">Customize colors</button>
     <p class="cc-hint" data-cc-hint role="status" aria-live="polite">Choose an age to fill the chart. Tap anything to edit.</p>
     {toolEmailGateEnabled && <p class="cc-hint">Free to customize. Email required for your first download. No account needed.</p>}
 
@@ -446,6 +447,22 @@ const jsonLd = [
     .cc-actions .cc-btn { border-radius:12px; letter-spacing:0; text-transform:none; font-size:.85rem; }
     .cc-hint { max-width:340px; font-size:.83rem; line-height:1.5; }
   }
+  .cc-customize-link { display:none; }
+  @media (max-width:768px) {
+    .chore-chart-container:not(.cc-exporting) { display:flex; flex-direction:column; }
+    .chore-chart-container:not(.cc-exporting) .cc-form { order:1; }
+    .chore-chart-container:not(.cc-exporting) .cc-sheet { order:2; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions { order:3; margin-top:16px; }
+    .chore-chart-container:not(.cc-exporting) .cc-customize-link { display:block; order:4; align-self:center; min-height:44px; margin-top:8px; padding:8px 12px; text-decoration:underline; background:transparent; border:0; color:var(--cc-ink); }
+    .chore-chart-container:not(.cc-exporting) .cc-palette-picker { order:5; display:none; }
+    .chore-chart-container:not(.cc-exporting) .cc-palette-picker.cc-advanced-open { display:block; }
+    .chore-chart-container:not(.cc-exporting) .cc-hint { order:6; }
+    .chore-chart-container:not(.cc-exporting) .cc-footnote { order:7; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions { display:flex; justify-content:center; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions [data-cc-download] { flex:1; max-width:440px; min-height:52px; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions [data-cc-clear] { font-size:.8rem; }
+    .chore-chart-container:not(.cc-exporting) .cc-form .cc-btn-primary { display:none; }
+  }
   /* Phones and small tablets: one section under the other. The PNG is always the Letter layout. */
   @media (max-width: 768px) {
     .chore-chart-container:not(.cc-exporting) .cc-sheet {
@@ -539,6 +556,12 @@ const jsonLd = [
   const ageBadge = sheet.querySelector<HTMLElement>('[data-cc-age-badge]')!;
   const forLine = sheet.querySelector<HTMLElement>('[data-cc-for]')!;
   const status = document.querySelector<HTMLElement>('[data-cc-hint]')!;
+  const advanced = document.querySelector<HTMLElement>('[data-cc-advanced]')!;
+  document.querySelector<HTMLButtonElement>('[data-cc-customize]')?.addEventListener('click', e => {
+    const button=e.currentTarget as HTMLButtonElement;
+    const open=advanced.classList.toggle('cc-advanced-open');
+    button.setAttribute('aria-expanded',String(open));
+  });
   let firstAction = false;
   const started = () => {
     if (!firstAction) { firstAction = true; toolEvent('tool_first_action', 'chore-chart'); }
