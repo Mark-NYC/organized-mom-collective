@@ -57,6 +57,11 @@ const jsonLd = [
   </section>
 
   <div class="mp-container">
+    <div class="mp-quick-win" role="status" aria-live="polite">
+      <strong>Start with the nights, not the recipes.</strong>
+      <span data-mp-encouragement>Choose Full, Short or Zero for a night below. Three nights planned is already a win.</span>
+      <div class="mp-quick-bar" aria-hidden="true"><span data-mp-quick-bar></span></div>
+    </div>
     <div class="mp-actions">
       <button type="button" class="mp-btn mp-btn-primary" data-mp-download>Download PNG</button>
       <button type="button" class="mp-btn" data-mp-next>Next week</button>
@@ -176,6 +181,11 @@ const jsonLd = [
   .mp-container *::after {
     box-sizing: border-box;
   }
+  .mp-quick-win { max-width:1056px; margin:0 auto 20px; padding:16px 20px; background:var(--color-sage-wash); border-left:3px solid var(--color-sage); display:flex; flex-direction:column; gap:7px; line-height:1.5; }
+  .mp-quick-win strong { font-family:var(--font-serif); font-size:1.1rem; font-weight:500; }
+  .mp-quick-win span { font-size:.88rem; }
+  .mp-quick-bar { height:6px; max-width:280px; border-radius:999px; background:#fff; overflow:hidden; }
+  .mp-quick-bar > span { display:block; height:100%; width:0; border-radius:999px; background:var(--color-sage); transition:width .25s; }
   .mp-actions {
     display: flex;
     justify-content: center;
@@ -546,6 +556,7 @@ const jsonLd = [
 
 <script>
   import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+  import { toolEvent } from '../lib/tool-engagement';
 
   const sheet = document.getElementById('meal-planner')!;
   const host = sheet.closest<HTMLElement>('.mp-container')!;
@@ -583,6 +594,12 @@ const jsonLd = [
     }
     const labeled = counts.full + counts.short + counts.zero;
     sheet.querySelector('[data-mp-count]')!.textContent = labeled ? `${counts.full} full · ${counts.short} short · ${counts.zero} zero` : '';
+    const message = host.querySelector<HTMLElement>('[data-mp-encouragement]')!;
+    message.textContent = labeled >= 7 ? 'All seven nights have a plan. Now choose dinners and share the jobs.'
+      : labeled >= 3 ? `${labeled} nights sorted. That's fewer decisions to make later.`
+      : labeled > 0 ? `${labeled} ${labeled === 1 ? 'night' : 'nights'} sorted. Keep going whenever you're ready.`
+      : 'Choose Full, Short or Zero for a night below. Three nights planned is already a win.';
+    host.querySelector<HTMLElement>('[data-mp-quick-bar]')!.style.width = `${Math.round(labeled / 7 * 100)}%`;
   };
 
   const save = autosave(sheet, 'omc:meal-planner:v1', () => {
@@ -592,12 +609,15 @@ const jsonLd = [
   });
   weekField.addEventListener('input', showDates);
 
+  let firstAction = false;
   for (const pill of sheet.querySelectorAll<HTMLButtonElement>('[data-mp-pick]')) {
     pill.addEventListener('click', () => {
       const field = pill.closest('td')!.querySelector<HTMLInputElement>('[data-mp-kind]')!;
       // A second tap clears it.
       field.value = field.value === pill.dataset.mpPick ? '' : pill.dataset.mpPick!;
       showKinds();
+      if (!firstAction) { firstAction = true; toolEvent('tool_first_action', 'meal-planner'); }
+      toolEvent('tool_start', 'meal-planner');
       save();
     });
   }
@@ -631,6 +651,7 @@ const jsonLd = [
 
   const button = document.querySelector<HTMLButtonElement>('[data-mp-download]')!;
   button.addEventListener('click', async () => {
+    toolEvent('tool_download_click', 'meal-planner');
     // Placeholder hints would print as if they'd been filled in: drop them while capturing.
     const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[placeholder]'));
     const hints = hinted.map((el) => el.placeholder);
