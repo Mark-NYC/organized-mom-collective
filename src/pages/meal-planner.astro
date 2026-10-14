@@ -57,6 +57,14 @@ const jsonLd = [
   </section>
 
   <div class="mp-container">
+    <div class="mp-mobile-flow" aria-label="Plan dinners one day at a time">
+      <div class="mp-mobile-head"><div><span class="mp-mobile-eyebrow">PLAN ONE NIGHT</span><h2 data-mp-active-day>Monday</h2></div><div class="mp-mobile-nav"><button type="button" data-mp-prev aria-label="Previous day">←</button><button type="button" data-mp-forward aria-label="Next day">→</button></div></div>
+      <p class="mp-mobile-question">How much time do you have?</p>
+      <nav class="mp-mobile-week" aria-label="Choose a day">
+        {days.map((day,i) => <button type="button" data-mp-go={i} aria-pressed={i===0?'true':'false'}><span>{day.slice(0,3)}</span><small data-mp-day-value={i}>＋</small></button>)}
+      </nav>
+      <p class="mp-mobile-note">Choose a night, add dinner, and move on. Everything saves automatically.</p>
+    </div>
     <div class="mp-actions">
       <button type="button" class="mp-btn mp-btn-primary" data-mp-download>Download plan</button>
       <button type="button" class="mp-btn" data-mp-next>Next week</button>
@@ -495,6 +503,29 @@ const jsonLd = [
     color: var(--color-warm-soft);
   }
 
+  .mp-mobile-flow { display:none; }
+  @media (max-width:768px) {
+    .mp-mobile-flow { display:block; max-width:600px; margin:0 auto 18px; }
+    .mp-mobile-head { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .mp-mobile-eyebrow { font-size:.7rem; letter-spacing:.12em; color:var(--color-warm-soft); font-weight:600; }
+    .mp-mobile-head h2 { font-family:var(--font-serif); font-size:2rem; line-height:1.2; }
+    .mp-mobile-nav { display:flex; gap:8px; }
+    .mp-mobile-nav button { width:44px; height:44px; border:1px solid var(--color-warm-rule); border-radius:12px; background:#fff; font-size:1.25rem; }
+    .mp-mobile-question { margin:20px 0 10px; font-size:1.05rem; font-weight:600; }
+    .mp-mobile-week { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; margin:12px 0; }
+    .mp-mobile-week button { min-width:0; min-height:60px; border:1px solid var(--color-warm-rule); border-radius:9px; background:#fff; padding:7px 1px; display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center; }
+    .mp-mobile-week button[aria-pressed="true"] { background:var(--color-sage-wash); border-color:var(--color-sage); }
+    .mp-mobile-week button span { font-size:.68rem; }
+    .mp-mobile-week button small { font-size:.65rem; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mp-mobile-note { font-size:.83rem; color:var(--color-warm-soft); line-height:1.5; }
+    .mp-container:not(.mp-exporting) .mp-table tbody tr:not([data-mp-active="true"]) { display:none !important; }
+    .mp-container:not(.mp-exporting) .mp-table tbody tr[data-mp-active="true"] { display:block; }
+    .mp-container:not(.mp-exporting) .mp-table tbody tr td:nth-of-type(2)::before { content:"What's on (optional)"; display:block; margin-bottom:4px; font-size:.78rem; color:var(--color-warm-soft); }
+    .mp-container:not(.mp-exporting) .mp-table tbody tr td:nth-of-type(3)::before { content:"Dinner"; display:block; margin-bottom:4px; font-size:.78rem; color:var(--color-warm-soft); }
+    .mp-container:not(.mp-exporting) .mp-table tbody tr td:nth-of-type(4)::before { content:"Who helps? (optional)"; display:block; margin-bottom:4px; font-size:.78rem; color:var(--color-warm-soft); }
+    .mp-container:not(.mp-exporting) .mp-groceries,.mp-container:not(.mp-exporting) .mp-backups,.mp-container:not(.mp-exporting) .mp-key { display:none; }
+    .mp-container:not(.mp-exporting) .mp-sheet { min-height:0; }
+  }
   /* Keep the printable unchanged; simplify only the on-screen phone controls. */
   @media (max-width: 768px) {
     .mp-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -561,6 +592,29 @@ const jsonLd = [
   const sheet = document.getElementById('meal-planner')!;
   const host = sheet.closest<HTMLElement>('.mp-container')!;
   const weekField = sheet.querySelector<HTMLInputElement>('[data-mp-week]')!;
+  const dayRows = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mp-row]'));
+  const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  let activeDay = 0;
+  function showDay(index: number) {
+    activeDay = Math.max(0,Math.min(6,index));
+    dayRows.forEach((row,i) => {row.dataset.mpActive = String(i===activeDay);});
+    host.querySelector<HTMLElement>('[data-mp-active-day]')!.textContent = dayNames[activeDay];
+    host.querySelectorAll<HTMLButtonElement>('[data-mp-go]').forEach((btn,i)=>btn.setAttribute('aria-pressed',String(i===activeDay)));
+    const prev=host.querySelector<HTMLButtonElement>('[data-mp-prev]')!;
+    const next=host.querySelector<HTMLButtonElement>('[data-mp-forward]')!;
+    prev.disabled=activeDay===0; next.disabled=activeDay===6;
+  }
+  function updateWeekPreview() {
+    dayRows.forEach((row,i)=>{
+      const dinner=row.querySelector<HTMLTextAreaElement>('[data-field$="-dinner"]')?.value.trim();
+      host.querySelector<HTMLElement>(`[data-mp-day-value="${i}"]`)!.textContent=dinner || '＋';
+    });
+  }
+  host.querySelector('[data-mp-prev]')?.addEventListener('click',()=>showDay(activeDay-1));
+  host.querySelector('[data-mp-forward]')?.addEventListener('click',()=>showDay(activeDay+1));
+  host.querySelectorAll<HTMLButtonElement>('[data-mp-go]').forEach((b,i)=>b.addEventListener('click',()=>showDay(i)));
+  sheet.addEventListener('input',updateWeekPreview);
+
 
   const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const thisMonday = () => {
@@ -600,6 +654,8 @@ const jsonLd = [
     if (!weekField.value) weekField.value = iso(thisMonday());
     showDates();
     showKinds();
+    updateWeekPreview();
+    showDay(activeDay);
   });
   weekField.addEventListener('input', showDates);
 
@@ -629,6 +685,7 @@ const jsonLd = [
     showDates();
     showKinds();
     save();
+    updateWeekPreview();
   });
 
   document.querySelector('[data-mp-clear]')!.addEventListener('click', () => {
