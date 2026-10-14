@@ -230,7 +230,7 @@ function Intro({ headingRef, onStart }: { headingRef: React.RefObject<HTMLHeadin
         </h1>
         <div className="mt-5 h-px w-12 bg-rose" aria-hidden="true" />
         <p className="mt-5 text-[1rem] leading-relaxed">
-          We’re creating simple tools to help moms stay on top of schedules, cleaning, and everyday family life.
+          We’re creating simple tools to put family plans where everyone can see them and make household work easier to share.
         </p>
         <p className="mt-3.5 text-[1rem] leading-relaxed">Tell us what works, what doesn’t, and what you wish were easier.</p>
         <p className="mt-7 inline-flex items-center gap-2.5 text-[0.88rem] font-medium text-warm-soft">

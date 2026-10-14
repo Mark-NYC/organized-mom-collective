@@ -62,7 +62,7 @@ const others = options.filter((o) => o.id !== primary.id);
 const anyLive = options.some((o) => o.url);
 
 /** The one call to action, everywhere on the page. */
-const GET = 'Get the Calendar';
+const GET = anyLive ? 'Get the Calendar' : 'See the 2027 Calendar';
 
 const [quoteBefore, quoteAfter] = testimonial.quote.split(testimonial.highlight);
 /** Two Etsy reviews that add something Camille's quote doesn't: print quality and service. */
@@ -77,26 +77,26 @@ const icons = ['calendar', 'family', 'cleaning', 'heart'] as const;
 const rhythms: { icon: (typeof icons)[number]; title: string; body: string; on: string }[] = [
   {
     icon: 'calendar',
-    title: 'Plan the Week',
-    body: 'Put meals, appointments, and priorities where everyone can see them.',
+    title: 'Plan the Week Together',
+    body: 'Review schedules, dinners and priorities together, then write down the decisions.',
     on: 'Daily schedule · Meal plan · Grocery list · To-do',
   },
   {
     icon: 'family',
-    title: 'Get Everyone on the Same Page',
-    body: 'Give your family one shared place to see what’s coming.',
-    on: 'One page a week, where everyone walks past',
+    title: 'Give Each Job an Owner',
+    body: 'Write a name beside pickups and household jobs. The owner takes the remembering too.',
+    on: 'Names beside pickups, meals and to-dos',
   },
   {
     icon: 'cleaning',
-    title: 'Keep the House Moving',
-    body: 'Follow simple cleaning rhythms without starting over each day.',
+    title: 'Check Your Own Part',
+    body: 'Teach the habit of checking the plan and doing your part without waiting for Mom to ask.',
     on: 'Daily cleaning zone · Cleaning companion',
   },
   {
     icon: 'heart',
-    title: 'Make Room for What Matters',
-    body: 'Spend less energy managing the details.',
+    title: 'Keep the Week Manageable',
+    body: 'Share the work, leave room for people and use a smaller routine on hard weeks.',
     on: 'Family & friends · Self-care · Grateful for',
   },
 ];
@@ -121,8 +121,8 @@ const faqs = [
     a: 'No. It’s a website included with every calendar. Scan the QR code printed on the calendar and it opens in your phone’s browser. No subscription, no account, nothing to download.',
   },
   {
-    q: 'Do I have to use every section?',
-    a: 'No. Start with what helps, like the schedule and dinners, and leave the rest blank. In the companion, a missed day doesn’t put you behind.',
+    q: 'What if I’m the only one using it?',
+    a: 'Start with one job another family member agrees to own, including the reminders. Write their name beside it and check in together each week. A calendar makes the agreement visible; it won’t change habits on its own. Use only the sections that help.',
   },
   {
     q: 'When does the 2027 calendar start?',
@@ -154,7 +154,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
 
 <PublicLayout
   fullTitle={`${BRAND_NAME}: 2027 Family Wall Calendar + Cleaning Companion`}
-  description={`Less chaos, more room for what matters. A 2027 weekly family wall calendar for schedules, meals and groceries, plus an included cleaning companion website. From ${half.priceLabel} for ${half.weeks} weeks.`}
+  description={`Less on your mind. More hands helping. A 2027 weekly family wall calendar for schedules, meals and groceries, plus an included cleaning companion website. From ${half.priceLabel} for ${half.weeks} weeks.`}
   width="full"
   jsonLd={jsonLd}
 >
@@ -170,10 +170,10 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           id="hero-h"
           class="serif-hero mt-3 text-[length:min(2.6rem,calc((100vw_-_40px)/7.4))] sm:mt-4 sm:text-[3.1rem] md:text-[length:min(3.4rem,4.4vw)]"
         >
-          Less Chaos.<br /> More Room for <HandUnderline>What Matters.</HandUnderline>
+          Less on Your Mind.<br /> More Hands <HandUnderline>Helping.</HandUnderline>
         </h1>
         <p class="lede mt-4 max-w-xl text-warm-ink sm:mt-5">
-          Plan the week, keep up with the house, and get the family on the same page.
+          A weekly wall calendar for family plans, meals and household jobs, where everyone can see what’s coming and what’s theirs to do.
         </p>
         <div class="mt-5 sm:mt-7">
           <ShopButton label={GET} to="product" cta="home-hero" class={cta} />
@@ -220,7 +220,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </ul>
         <p class="lede mt-6">When everything lives in your head, even the little things start to feel like a lot.</p>
         <p class="mt-5 font-serif text-[1.3rem] leading-snug text-warm-ink italic sm:text-[1.45rem]">
-          What if there were one simple place to bring it all together?
+          Put the plan where everyone can find it. Agree on who owns what, including the remembering.
         </p>
       </div>
       <figure class="home-problem-photo">
@@ -244,7 +244,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     <div class:list={[wrap, pad]}>
       <div class="mx-auto max-w-2xl text-center">
         <h2 id="product-h" class="serif-title">One Place for the Whole Family to See the Plan.</h2>
-        <p class="lede mt-4">Two simple parts: a big weekly calendar for the whole family, and a little help with the house.</p>
+        <p class="lede mt-4">A visible plan for the family, plus clear cleaning checklists anyone can follow.</p>
       </div>
 
       <div class="mt-9 grid gap-5 md:mt-12 md:grid-cols-2 md:gap-8">
@@ -266,7 +266,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
             <p class="label text-warm-soft">The printed calendar</p>
             <h3 class="mt-2 font-serif text-[1.6rem] leading-snug text-warm-ink">On Your Wall</h3>
             <p class="mt-2 text-[1.02rem] leading-relaxed">
-              Schedules, meals, priorities, and household plans, all where everyone can see them. <span class="whitespace-nowrap">11 × 17 inches</span>, one week to
+              Schedules, meals and jobs where everyone can check them. Write the owner beside each responsibility. <span class="whitespace-nowrap">11 × 17 inches</span>, one week to
               a page.
             </p>
           </div>
@@ -282,14 +282,14 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
             <p class="label text-warm-soft">The cleaning companion website</p>
             <h3 class="mt-2 font-serif text-[1.6rem] leading-snug text-warm-ink">On Your Phone</h3>
             <p class="mt-2 text-[1.02rem] leading-relaxed">
-              Today’s cleaning tasks as a short checklist. Scan the QR code on the calendar and it opens in your browser. No app, no account.
+              Today’s cleaning tasks as a short checklist. Scan the QR code and agree on who takes the zone. No account, nothing to install.
             </p>
           </div>
         </article>
       </div>
 
       <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-relaxed text-balance text-warm-soft">
-        The cleaning zones are printed on the calendar, and the companion follows the same ones. Nothing to sync, nothing to set up.
+        The calendar and companion use the same cleaning zones. Checkmarks stay on each phone; they aren’t shared or synced.
       </p>
     </div>
   </section>
@@ -301,7 +301,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         <p class="label text-warm-soft">The Organized Mom Method</p>
         <h2 id="method-h" class="serif-title mt-3">One Family. <HandUnderline light>One Plan.</HandUnderline><br class="hidden sm:inline" /> Four Simple Rhythms.</h2>
         <p class="lede mt-4">
-          You don’t need another complicated system. Just a simple way to plan the week, keep the house moving, and make more room for the people who matter most.
+          You don’t need another complicated system. Organized moms raise organized families: introduce the routine, practice together, then let each person own their part.
         </p>
       </div>
       <ol class="mt-8 grid border-t border-warm-rule md:mt-12 md:grid-cols-2 md:border-t-0 lg:grid-cols-4">
@@ -520,8 +520,8 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
         </div>
       </div>
       <div class="text-center md:text-left">
-        <h2 id="close-h" class="serif-title">A Little More Organized.<br /> A Lot More <span class="hand-highlight hand-highlight-apricot whitespace-nowrap">Breathing Room.</span></h2>
-        <p class="lede mt-5 text-warm-ink">Bring your family’s plans, everyday routines, and priorities together in one simple system.</p>
+        <h2 id="close-h" class="serif-title">Less for You to Remember.<br /> More <span class="hand-highlight hand-highlight-apricot whitespace-nowrap">Hands Helping.</span></h2>
+        <p class="lede mt-5 text-warm-ink">A home where everyone knows the plan and plays a part. Start with one shared job and build from there.</p>
         <ShopButton label={GET} to="product" cta="home-close" class={`mt-8 ${cta}`} />
         <p class="mt-4 text-[0.9rem] text-warm-soft">
           <span class="block sm:inline">Starting at <strong class="font-semibold text-warm-ink">{half.priceLabel}</strong></span><span aria-hidden="true" class="hidden sm:inline"> · </span>

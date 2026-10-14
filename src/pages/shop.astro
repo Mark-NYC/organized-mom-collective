@@ -21,7 +21,7 @@ const from = Math.min(...options.map((o) => o.price));
 const products = [
   {
     name: 'Family Wall Calendar',
-    blurb: 'The whole family’s week on one page: schedule, meals, groceries, to-dos and the day’s cleaning zone. Comes with the cleaning companion website.',
+    blurb: 'A weekly plan everyone can check: schedules, meals and jobs with clear owners. Includes the cleaning companion website.',
     price: `From ${formatPrice(from)}`,
     href: routes.calendar,
     soon: false,
@@ -29,7 +29,7 @@ const products = [
   },
   {
     name: weeklyReset.name,
-    blurb: 'A printable Weekly Command Center, the 30-Minute Daily Tidy System and a coaching audio. Instant download.',
+    blurb: 'A printable planner, tidy guide and coaching audio for a weekly check-in the family can share. Instant download.',
     price: formatPrice(weeklyReset.price),
     href: routes.weeklyReset,
     soon: !weeklyReset.buyUrl,

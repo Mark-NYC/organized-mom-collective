@@ -10,9 +10,9 @@ const featured = [
   { href: routes.planner, title: 'Weekly planner', summary: 'Days, meals, groceries and to-dos in one place.', action: 'Plan your week', image: null, alt: '', article: null },
 ];
 const groups = [
-  { id: 'everyone', title: 'Get everyone involved', intro: 'Small responsibilities the family can share.', paths: [routes.mentalLoad, routes.lunchSnackStation, routes.screenTime, routes.gratitudeTracker, routes.decemberCountdown] },
-  { id: 'planning', title: 'Plan the week', intro: 'Put the details somewhere you can find them.', paths: [routes.mealPlanner, routes.tryCalendar, routes.pantry, routes.homeschoolRhythm, routes.backToSchool, routes.travelChecklist, routes.commandCenterSetup, routes.fallPantry, routes.thanksgivingPlan, routes.holidayGifts] },
-  { id: 'home', title: 'Keep the house moving', intro: 'A short list and a place to start.', paths: [routes.laundrySystem, routes.closetReset, routes.paperBlitz, routes.springCleaning, routes.fallCleaning, routes.newYearDeclutter] },
+  { id: 'everyone', title: 'Get everyone involved', intro: 'Whole jobs and small routines the family can own.', paths: [routes.mentalLoad, routes.lunchSnackStation, routes.screenTime, routes.gratitudeTracker, routes.decemberCountdown] },
+  { id: 'planning', title: 'Plan the week', intro: 'Put the details where everyone can find them, with a person beside each job.', paths: [routes.mealPlanner, routes.tryCalendar, routes.pantry, routes.homeschoolRhythm, routes.backToSchool, routes.travelChecklist, routes.commandCenterSetup, routes.fallPantry, routes.thanksgivingPlan, routes.holidayGifts] },
+  { id: 'home', title: 'Keep the house moving', intro: 'Clear jobs, clear owners and a smaller version for hard weeks.', paths: [routes.laundrySystem, routes.closetReset, routes.paperBlitz, routes.springCleaning, routes.fallCleaning, routes.newYearDeclutter] },
 ];
 const site = Astro.site!;
 const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Free family tools', url: new URL(routes.freeTools, site).href, hasPart: freeTools.map(tool => ({ '@type': 'WebPage', name: tool.name, url: new URL(tool.href, site).href })) }];

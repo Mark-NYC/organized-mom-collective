@@ -25,14 +25,14 @@ export const pillars = [
     id: 'family-planning',
     prefix: 'FP',
     name: 'Family Planning & Routines',
-    summary: 'One place for the family’s week: the calendar, a short weekly reset, the home command center, and dinners planned with the grocery list beside them.',
-    description: 'How to plan your family’s week: a calendar everyone uses, a home command center, a weekly reset, and meal planning with a grocery list that writes itself.',
+    summary: 'One place for the family’s week: the calendar, a weekly check-in, named owners for pickups and jobs, and dinners planned together.',
+    description: 'How to plan your family’s week: a calendar everyone uses, a home command center, a weekly reset, and meal planning with a grocery list beside the plan.',
   },
   {
     id: 'home-cleaning',
     prefix: 'HC',
     name: 'Simple Home Cleaning',
-    summary: 'A short daily reset, one zone a day, one monthly project, and a realistic way to catch up when the week got away from you.',
+    summary: 'Cleaning the family can share: a short daily reset, a zone with an owner, and a smaller version for hard weeks.',
     description: 'Simple home cleaning routines for busy families: a 15-minute daily reset, weekly zones, a monthly project, and a realistic catch-up plan.',
   },
   {

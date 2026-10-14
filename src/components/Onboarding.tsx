@@ -39,14 +39,14 @@ export default function Onboarding({ onDone }: Props) {
         <div className="flex-1 pt-5 pb-5">
           <p className="label text-muted">Your calendar companion</p>
           <h1 id="onboarding-heading" ref={headingRef} tabIndex={-1} className="mt-2.5 text-[1.45rem] leading-[1.2] font-bold outline-none min-[390px]:text-[1.6rem]">
-            Your calendar plans the week. This shows you what to clean today.
+            See today’s jobs. Decide who’s taking what.
           </h1>
 
           <ul className="mt-5 border-t border-rule-strong">
             <Row when="Today’s zone" note="The same zone printed on your calendar." time={todayZone.time}>
               <ZoneTag icon={todayZone.icon} label={todayZone.zone} size="sm" />
             </Row>
-            <Row when="Every day" note="The same five tasks every day: beds, dishes, counters." time={shortTime(dailyEssentials.minutes)}>
+            <Row when="Every day" note="Split the reset: beds, dishes, counters and pickup." time={shortTime(dailyEssentials.minutes)}>
               <ZoneTag icon={dailyEssentials.icon} label={dailyEssentials.title} size="sm" />
             </Row>
             <Row when="Monthly home project" note={`${month.name}’s deeper job. Weekends, if you have time.`}>
@@ -55,15 +55,15 @@ export default function Onboarding({ onDone }: Props) {
           </ul>
 
           <p className="mt-4 border-l-[3px] border-month pl-3.5 text-[1.05rem] leading-snug font-semibold">
-            Do what fits. Skip what doesn’t.
+            Agree on owners. Do what fits. Skip what doesn’t.
           </p>
         </div>
 
         <div className="sticky bottom-0 -mx-6 shrink-0 border-t border-rule bg-paper px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <button type="button" onClick={onDone} className="btn-primary w-full min-h-14 text-[0.8rem]">
-            Start Cleaning
+            See Today’s Jobs
           </button>
-          <p className="mt-2 text-center text-[0.8rem] text-muted">No account. Nothing to buy. Saved on this phone.</p>
+          <p className="mt-2 text-center text-[0.8rem] text-muted">No account. Saved on this phone, without shared checkmarks.</p>
         </div>
       </div>
     </div>

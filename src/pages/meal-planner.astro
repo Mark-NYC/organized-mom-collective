@@ -1,7 +1,7 @@
 ---
 /**
  * /meal-planner — a free weekly dinner planner built on FP-05's method: label each night full, short or zero by the
- * time you'll have, plan four or five dinners to fit (zero nights count), give someone a job each night, and write
+ * time you'll have, plan four or five dinners to fit (zero nights count), give each dinner an owner, including checking supplies, and write
  * the grocery list from the plan. The week starts on this week's Monday (editable); the night counts add up as you
  * go. Rebuilt from the old Weekly Meal Planner (28 boxes for three meals and snacks a day, nothing saved). Downloads
  * as a PNG (US Letter landscape). Autosave and export: src/lib/printable.ts (`omc:meal-planner:v1`). Classes `mp-`.
@@ -50,7 +50,7 @@ const jsonLd = [
       <h1 id="mp-h" class="serif-hero mt-3">Plan the Nights Before the Food.</h1>
       <p class="lede mt-4 max-w-2xl text-warm-ink">
         Mark each night full, short or zero by how much time you’ll really have. Plan four or five dinners to fit; zero nights count. Give
-        someone a job each night, then write the grocery list from the plan. About 20 minutes, once a week.
+        each dinner an owner, including checking supplies, then write the grocery list from the plan. About 20 minutes, once a week.
         {' '}<a href={routes.article('weekly-meal-planning-for-families')} class="text-link">How the method works</a>
       </p>
     </div>
@@ -81,7 +81,7 @@ const jsonLd = [
                 <th scope="col" class="mp-kind-col">The night</th>
                 <th scope="col">What’s on</th>
                 <th scope="col">Dinner</th>
-                <th scope="col">Helper’s job</th>
+                <th scope="col">Who owns what</th>
               </tr>
             </thead>
             <tbody>

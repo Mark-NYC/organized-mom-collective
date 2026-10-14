@@ -25,22 +25,21 @@ const { price, regularPrice, buyUrl } = offer;
 const changes = [
   { title: 'Everyone Sees the Plan', value: 17, body: '12-month wall calendar (July–June) that keeps everyone on the same page. (No more “I didn’t know!”)' },
   { title: 'They Take Ownership', value: 9, body: 'Auto-fill family name system — each person owns their row, not you.' },
-  { title: 'You Get Time Back', value: 9, body: '7-minute Quick-start Audio Guide that gets them checking it on their own.' },
-  { title: 'They Actually Help', value: 13, body: '30-minute tidy system that makes chores and schedules visible — so they take responsibility, too.' },
+  { title: 'You Get Time Back', value: 9, body: '7-minute Quick-start Audio Guide for introducing the habit of checking their own plans.' },
+  { title: 'They Actually Help', value: 13, body: '30-minute tidy guide for making jobs visible and agreeing on responsibilities together.' },
 ];
 const bonuses = [
   { title: 'Command Center Setup Tutorial', value: 5 },
   { title: 'Weekly Sanity Check-Ins', value: 7 },
 ];
-const totalValue = [...changes, ...bonuses].reduce((sum, i) => sum + i.value, 0);
 
 const wrap = 'mx-auto max-w-[29rem] px-5';
 const check = 'M6 10.5 8.8 13.2 14 7.5';
 ---
 
 <PublicLayout
-  fullTitle={`Family Command Center: A Family System That Runs Itself · ${BRAND_NAME}`}
-  description={`A 12-month family wall calendar with an auto-fill name system, a Quick-Start Audio Guide and a 30-minute tidy system, so the kids check the plan without you reminding them. $${price}, instant download.`}
+  fullTitle={`Family Command Center: Shared Plans for Older Kids · ${BRAND_NAME}`}
+  description={`A 12-month family wall calendar with an auto-fill name system, a Quick-Start Audio Guide and a 30-minute tidy system, for practicing shared routines with older kids. Not available to buy yet.`}
   indexable={Boolean(buyUrl)}
   chrome={false}
   width="full"
@@ -49,14 +48,14 @@ const check = 'M6 10.5 8.8 13.2 14 7.5';
     <!-- 1. Hero -->
     <section aria-labelledby="hero-h" class={`${wrap} pt-8 text-center sm:pt-12`}>
       <h1 id="hero-h" class="text-[1.15rem] leading-snug font-semibold text-balance sm:text-[1.3rem]">
-        Finally, a Family System That Runs Itself (So You Don’t Have To)
+        A Family Plan Older Kids Can Learn to Own
       </h1>
       <figure class="mt-5">
         <AssetSlot asset={assets.hero} sizes="(min-width: 464px) 432px, 100vw" eager />
       </figure>
-      <p class="mt-4 text-[0.95rem]">In 15 minutes, your kids start checking it <strong class="font-semibold">without you reminding them.</strong></p>
+      <p class="mt-4 text-[0.95rem]">Practice checking the plan together, then let each person <strong class="font-semibold">own their part.</strong></p>
       <p class="mt-3 text-[1.1rem] font-semibold">
-        <s class="text-[0.85em] text-[#e03131]">${regularPrice}</s> <span class="text-[#2fb344]">${price} Today</span>
+        <s class="text-[0.85em] text-[#e03131]">${regularPrice}</s> <span class="text-[#2fb344]">${price} · Coming soon</span>
       </p>
       <div class="mt-4"><FccButton label={`Start My Family Command Center – $${price}`} href={buyUrl} cta="fcc-hero" /></div>
       <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="mt-4 inline-block text-[0.8rem] text-[#52606d]">
@@ -83,7 +82,7 @@ const check = 'M6 10.5 8.8 13.2 14 7.5';
               </svg>
               <div>
                 <p class="text-[0.9rem] font-semibold">
-                  {c.title} (valued at ${c.value})
+                  {c.title}
                 </p>
                 <p class="mt-1 text-[0.85rem] leading-relaxed text-[#2b8a3e]">{c.body}</p>
               </div>
@@ -95,24 +94,24 @@ const check = 'M6 10.5 8.8 13.2 14 7.5';
             <li class="flex items-center gap-2.5">
               <span class="rounded-full bg-[#f08c00] px-2.5 py-0.5 text-[0.6rem] font-bold tracking-[0.08em] text-white">BONUS</span>
               <span class="text-[0.9rem] font-semibold">
-                {b.title} (${b.value})
+                {b.title}
               </span>
             </li>
           ))
         }
       </ul>
       <div class="mt-6 rounded-[8px] bg-[#f8f9fa] px-5 py-5 text-center">
-        <p class="text-[0.95rem] font-semibold">Total Value: <s class="text-[#e03131]">${totalValue}</s></p>
-        <p class="mt-1 text-[1.25rem] font-bold text-[#2fb344]">Today: ${price}</p>
+        <p class="text-[0.95rem] font-semibold">Resources listed above. <s class="text-[#e03131]"></s></p>
+        <p class="mt-1 text-[1.25rem] font-bold text-[#2fb344]">Planned price: ${price}</p>
       </div>
     </section>
 
     <!-- 3. Why every mom's system fails -->
     <section aria-labelledby="fails-h" class={`${wrap} mt-6`}>
       <div class="rounded-[6px] border-l-4 border-[#f59f00] bg-linear-to-r from-[#fff3bf] to-[#ffe3e3] px-6 py-6 text-center">
-        <h2 id="fails-h" class="text-[1rem] font-semibold text-[#7c4a03]">Why Every Mom’s<br />System Fails</h2>
+        <h2 id="fails-h" class="text-[1rem] font-semibold text-[#7c4a03]">A Visible Plan.<br />Shared Follow-Through.</h2>
         <p class="mt-3 text-[0.85rem] text-[#a15c07]">Your family can’t see what you hold in your head.</p>
-        <p class="mt-3 text-[0.9rem] font-semibold text-[#e03131]">This puts it on the wall.<br />So they own it.</p>
+        <p class="mt-3 text-[0.9rem] font-semibold text-[#e03131]">Put it on the wall.<br />Agree on who owns what.</p>
       </div>
     </section>
 
@@ -127,7 +126,7 @@ const check = 'M6 10.5 8.8 13.2 14 7.5';
       <div class="rounded-[6px] bg-[#dbe9ff] px-6 py-6 text-center">
         <p class="inline-block rounded-full bg-white px-4 py-1 text-[0.65rem] font-bold tracking-[0.08em] text-[#1c4fbf]">✓ 100% MONEY-BACK GUARANTEE</p>
         <h2 id="guarantee-h" class="mt-3 text-[1.05rem] font-semibold text-[#1c4fbf]">30-Day Promise</h2>
-        <p class="mt-2 text-[0.85rem] font-semibold text-[#1c4fbf]">Save 5+ hours or<br />get $17 back (${price} refund + $10 bonus)</p>
+        <p class="mt-2 text-[0.85rem] font-semibold text-[#1c4fbf]">When available, try it for 30 days.<br />If it isn’t useful, get $17 back (${price} refund + $10 bonus)</p>
         <p class="mt-4 text-[0.75rem] text-[#1c4fbf]">No questions asked.<br />Valid 30 days from purchase.</p>
       </div>
     </section>
@@ -137,7 +136,7 @@ const check = 'M6 10.5 8.8 13.2 14 7.5';
       <h2 id="close-h" class="sr-only">Get the {offer.name}</h2>
       <AssetSlot asset={assets.reviewLauren} sizes="(min-width: 464px) 432px, 100vw" />
       <div class="mt-6 text-center"><FccButton label={`Get My Family Command Center – $${price}`} href={buyUrl} cta="fcc-close" /></div>
-      <p class="mt-3 text-center text-[0.75rem] text-[#7b8794] italic">Instant download | 30-day guarantee</p>
+      <p class="mt-3 text-center text-[0.75rem] text-[#7b8794] italic">Not available to buy yet | A future offer for families with older kids</p>
     </section>
   </div>
 </PublicLayout>

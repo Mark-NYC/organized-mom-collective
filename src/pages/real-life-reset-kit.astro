@@ -18,9 +18,9 @@ import { BRAND_NAME } from '../config';
 const { price, value } = offer;
 
 const items = [
-  { name: 'Plan B Quick-Pivot Framework', body: 'Regroup fast when life blows up your schedule' },
+  { name: 'Plan B Quick-Pivot Framework', body: 'Decide what to keep, move or drop when the week changes' },
   { name: '15-Minute Reset Checklist', body: 'Get back on track without starting over' },
-  { name: '“It’s OK to Pivot” Coaching Audio', body: 'Shake off the guilt and move forward' },
+  { name: '“It’s OK to Pivot” Coaching Audio', body: 'A guided check-in for choosing a smaller plan' },
 ];
 
 const pad = 'py-12 sm:py-20 md:py-24';
@@ -46,10 +46,10 @@ const buy = `Get Instant Access – $${price}`;
         </span>
       </h1>
       <div class="lede mt-8 space-y-4 text-warm-ink">
-        <p>Sunday planning feels amazing.</p>
-        <p>By Wednesday? <strong class="font-semibold">Sick kids. Deadlines. Chaos.</strong></p>
-        <p>Your plan’s in pieces — and you feel like you failed.</p>
-        <p class="font-serif text-[1.2rem] italic">You didn’t fail. You just need a backup plan:</p>
+        <p>A plan helps until the week changes.</p>
+        <p>By Wednesday? <strong class="font-semibold">Sick kids. Changed pickups. Deadlines.</strong></p>
+        <p>Keep what matters today and let the rest wait.</p>
+        <p class="font-serif text-[1.2rem] italic">Review the changes together and agree on who takes the next step:</p>
       </div>
     </div>
   </section>
@@ -77,7 +77,7 @@ const buy = `Get Instant Access – $${price}`;
         }
       </ul>
       <p class="mt-10 text-center text-[1.05rem] text-warm-ink">
-        Because life happens. This gets you reset in <strong class="font-semibold">15 minutes or less.</strong>
+        Use the checklist for a <strong class="font-semibold">15-minute planning check.</strong> The audio adds guided support; the family still agrees on who does what.
       </p>
     </div>
   </section>
@@ -88,7 +88,7 @@ const buy = `Get Instant Access – $${price}`;
       <h2 id="close-h" class="serif-title text-[1.6rem] sm:text-[2rem]">
         ${value} value – yours for <span class="text-rose-deep">${price}</span>
       </h2>
-      <p class="mt-3 font-serif text-[1.1rem] text-warm-soft italic">Only available here.</p>
+      <p class="mt-3 font-serif text-[1.1rem] text-warm-soft italic">Optional guided support. Use the free reset advice if that’s enough.</p>
       <div class="mt-8"><OfferButton label={buy} href={offer.buyUrl} cta="real-life-reset-close" /></div>
       <p class="mt-4 text-[0.95rem] font-semibold text-warm-ink">${price} (Save ${value - price})</p>
     </div>

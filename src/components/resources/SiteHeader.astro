@@ -8,6 +8,7 @@
  */
 import { Wordmark } from '../marks';
 import { routes } from '../../routes';
+import { shopUrl } from '../../lib/reorder';
 
 const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
 const items = [
@@ -18,7 +19,7 @@ const items = [
   { href: routes.companion, label: 'Cleaning Companion' },
 ];
 /** Same words as the homepage's one call to action. */
-const shopLabel = 'Get the Calendar';
+const shopLabel = shopUrl() ? 'Get the Calendar' : 'See the Calendar';
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 

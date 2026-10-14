@@ -38,8 +38,8 @@ export default function SettingsApp() {
           title="Add to Home Screen"
           detail={
             standalone
-              ? 'You’re using the Home Screen app. Your checkmarks are kept on this phone.'
-              : 'Open it with one tap, like an app. Works without signal once loaded.'
+              ? 'You’re using the Home Screen shortcut. Your checkmarks are kept on this phone.'
+              : 'Open the companion with one tap. Works without signal once loaded.'
           }
           action={
             standalone ? null : (
@@ -64,7 +64,7 @@ export default function SettingsApp() {
         )}
         <Row
           title="See the welcome screen again"
-          detail="How the app works with your calendar. Your checkmarks are kept."
+          detail="How the cleaning companion works with your calendar. Your checkmarks are kept."
           action={
             <button type="button" onClick={replay} className="btn-secondary">
               Show

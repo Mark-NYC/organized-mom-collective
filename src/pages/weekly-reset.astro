@@ -29,21 +29,21 @@ const hasAudio = existsSync(join(process.cwd(), 'public', coachingPreviewAudio))
 const [quoteBefore, quoteAfter] = testimonial.quote.split(testimonial.highlight);
 
 const outcomes = [
-  { title: 'Plan your entire week in minutes', pre: 'So you ', em: 'stop going to bed with that “what am I forgetting?” feeling', post: '' },
-  { title: 'Keep your home tidy without cleaning all day', pre: 'So you can actually ', em: 'sit on the couch guilt-free', post: '' },
-  { title: 'Start Monday calm, not scrambling', pre: 'So you wake up knowing exactly what needs to happen ', em: 'instead of playing catch-up', post: '' },
+  { title: 'Review the week together', pre: 'So you ', em: 'put the details where everyone can find them', post: '' },
+  { title: 'Share the everyday household jobs', pre: 'So you can actually ', em: 'take a break without managing the next task', post: '' },
+  { title: 'Write down who’s doing what', pre: 'So each person knows their part ', em: 'without waiting for reminders', post: '' },
 ];
 
 const included = [
   {
     title: 'The Weekly Command Center',
     sub: 'Digital + Print-Ready',
-    body: 'Plan your week in under 10 minutes and know exactly what’s happening when.',
+    body: 'Write shared plans, dinners and jobs where the family can check them. Add names beside responsibilities.',
   },
   {
     title: 'The 30-Minute Daily Tidy System',
     sub: 'Step-by-Step Guide',
-    body: 'The exact system busy moms use to maintain a peaceful home without spending hours cleaning.',
+    body: 'A step-by-step cleaning guide. Agree on whole jobs each person can own and use only what fits your home.',
   },
 ];
 
@@ -53,7 +53,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
 ---
 
 <PublicLayout
-  fullTitle={`End Sunday Night Chaos in 30 Minutes · ${weeklyReset.name} · ${BRAND_NAME}`}
+  fullTitle={`A Weekly Reset the Family Can Share · ${weeklyReset.name} · ${BRAND_NAME}`}
   description={`A 30-minute Sunday reset for busy moms: the Weekly Command Center, the 30-Minute Daily Tidy System and a personal coaching audio. Instant download, $${price}.`}
   indexable={live}
   chrome={false}
@@ -65,13 +65,13 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       <div class="text-center md:text-left">
         <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
         <h1 id="hero-h" class="serif-hero mt-5 text-[2.2rem] sm:text-[2.9rem] lg:text-[3.3rem]">
-          End Sunday Night Chaos in 30 Minutes <span class="whitespace-nowrap">— Just <span class="text-rose-deep">${price}</span> <s class="text-[0.6em] text-warm-soft">${regularPrice}</s></span>
+          A Weekly Reset the Family Can Share <span class="whitespace-nowrap">— Just <span class="text-rose-deep">${price}</span> <s class="text-[0.6em] text-warm-soft">${regularPrice}</s></span>
         </h1>
-        <p class="lede mt-5 text-warm-ink">If Sunday nights feel like laundry piling up, meals unplanned, and Monday looming—this system is your reset button.</p>
+        <p class="lede mt-5 text-warm-ink">If Sunday planning falls to you, start with a short check-in together: look at the week and agree on who owns the jobs.</p>
         <p class="lede mt-4 text-warm-ink">
-          In just 30 minutes, you’ll prep your week, <strong class="font-semibold">ditch the overwhelm</strong>, and finally feel in control again.
+          Use the planner, tidy guide and audio to <strong class="font-semibold">make the work visible</strong>, then agree on responsibilities together.
         </p>
-        <p class="mt-4 text-[0.95rem] font-semibold text-warm-ink">Less than 2 lattes. Saves 5+ hours every week. Instant download.</p>
+        <p class="mt-4 text-[0.95rem] font-semibold text-warm-ink">Printable planner, tidy guide and coaching audio. One payment. Instant download.</p>
         <div class="mt-7"><ResetButton cta="reset-hero" /></div>
 
         <!-- Trust row: the Etsy shop's figures (src/data/weekly-reset.ts → etsyStats). -->
@@ -87,7 +87,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <!-- 2. What 30 minutes gets you -->
   <section aria-labelledby="gets-h" class="bg-paper">
     <div class:list={['mx-auto max-w-3xl px-5 sm:px-8', pad]}>
-      <h2 id="gets-h" class="serif-title text-center">What 30 Minutes Gets You: A Week That <span class="hand-highlight sm:whitespace-nowrap">Actually Goes to Plan</span></h2>
+      <h2 id="gets-h" class="serif-title text-center">A Simple Weekly Habit: <span class="hand-highlight sm:whitespace-nowrap">Clear Plans and Owners</span></h2>
       <ul class="mt-9 border-t border-warm-rule">
         {
           outcomes.map((o) => (
@@ -129,13 +129,13 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <section aria-labelledby="offer-h" class="bg-paper">
     <div class:list={[wrap, pad]}>
       <div class="mx-auto max-w-2xl text-center">
-        <h2 id="offer-h" class="serif-title"><span class="text-rose-deep">${price} New Customer Special</span> (Normally ${regularPrice})</h2>
-        <p class="mt-6 text-[1.05rem] font-semibold text-warm-ink">Why Smart Moms Choose This Over Free Solutions:</p>
+        <h2 id="offer-h" class="serif-title"><span class="text-rose-deep">${price} Weekly Reset Bundle</span> (Normally ${regularPrice})</h2>
+        <p class="mt-6 text-[1.05rem] font-semibold text-warm-ink">What the Paid Bundle Adds:</p>
         <div class="lede mt-4 space-y-4 text-warm-ink">
-          <p>Free printables give you pages. This gives you a <strong class="font-semibold">plan.</strong></p>
-          <p>Instead of collecting dust in a drawer, this becomes the 30-minute ritual that <strong class="font-semibold">saves you 5+ hours of chaos every week.</strong></p>
-          <p>With freebies, <strong class="font-semibold">you’re left guessing</strong> what to do and when.</p>
-          <p>With this system, you get a <strong class="font-semibold">step-by-step reset</strong> that actually sticks — even if you’ve failed before.</p>
+          <p>Start with our free tools if they meet your needs. This bundle adds <strong class="font-semibold">guided instruction.</strong></p>
+          <p>The planner, tidy guide and audio give you <strong class="font-semibold">a sequence to work through together.</strong></p>
+          <p>Use the audio for <strong class="font-semibold">your first setup</strong>, then adapt the routine to your week.</p>
+          <p>With this system, you get a <strong class="font-semibold">step-by-step reset</strong> to try with your family. Clear owners and follow-through matter more than filling every box.</p>
         </div>
         <h3 class="mt-12 font-serif text-[1.6rem] leading-snug text-warm-ink sm:text-[1.9rem]">Here’s Your Complete Weekly Reset System:</h3>
       </div>
@@ -156,9 +156,9 @@ const check = 'M4.5 10.5 8 14l7.5-8';
         }
         <li class="rounded-[10px] bg-sage-wash p-6 text-center shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-sage/50 sm:p-7">
           <h4 class="font-serif text-[1.3rem] leading-snug text-warm-ink">Personal Coaching Audio</h4>
-          <p class="label mt-1 text-warm-soft">Real Mom Voice, Not AI</p>
+          <p class="label mt-1 text-warm-soft">Guided Audio Walkthrough</p>
           <p class="mt-3 text-[1rem] leading-relaxed">
-            I’ll guide you through your very first weekly reset, step-by-step, so you <strong class="font-semibold text-warm-ink">start this Sunday feeling calm and confident.</strong>
+            The audio walks through a first weekly reset, step by step, so you can <strong class="font-semibold text-warm-ink">try the routine together and decide what to keep.</strong>
           </p>
           {
             hasAudio ? (
@@ -197,8 +197,8 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <!-- 6. Final CTA -->
   <section aria-labelledby="close-h" class="bg-cream public-panel">
     <div class:list={['mx-auto max-w-2xl px-5 text-center sm:px-8', pad]}>
-      <h2 id="close-h" class="serif-title">New Customer Special</h2>
-      <p class="mt-3 font-serif text-[1.1rem] text-warm-soft italic">Limited to <strong class="font-semibold text-warm-ink">first 100 moms</strong></p>
+      <h2 id="close-h" class="serif-title">Weekly Reset Bundle</h2>
+      <p class="mt-3 font-serif text-[1.1rem] text-warm-soft italic">Designed for <strong class="font-semibold text-warm-ink">shared family routines</strong></p>
       <div class="mt-8"><ResetButton cta="reset-close" /></div>
       <p class="mt-4 text-[0.95rem] font-semibold text-warm-ink">(Save ${regularPrice - price})</p>
       <p class="mt-8 text-[0.95rem] text-warm-soft italic">

@@ -17,7 +17,8 @@ interface Props {
   cta?: string;
   class?: string;
 }
-const { label, to, cta, class: className } = Astro.props;
+const { label: requestedLabel, to, cta, class: className } = Astro.props;
+const label = requestedLabel === 'Get the Calendar' && !shopUrl() ? 'See the Calendar' : requestedLabel;
 const internal = to === 'options' ? routes.buy : to === 'product' ? routes.calendar : null;
 const etsy = internal ? null : shopUrl();
 ---
