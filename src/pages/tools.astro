@@ -4,11 +4,7 @@ import { routes } from '../routes';
 import { freeTools } from '../data/free-tools';
 import { imageAttrs } from '../data/images';
 import { toolEmailGateEnabled } from '../lib/tool-email';
-const featured = [
-  { href: routes.choreChart, title: 'Make a chore chart', summary: 'Choose your child’s age and get a ready-to-use chart.', action: 'Create a chore chart', image: 'if-03-chore-chart-fridge' as const, alt: 'A completed pastel chore chart hanging on a refrigerator.', article: '/resources/chores-for-kids-by-age' },
-  { href: routes.routineChart, title: 'Make mornings easier', summary: 'Create a routine the kids can follow on their own.', action: 'Create a routine', image: 'fp-09-morning-fridge' as const, alt: 'A completed morning routine chart held by magnets on a refrigerator.', article: '/resources/morning-routine-chart-generator' },
-  { href: routes.mealPlanner, title: 'Figure out dinner this week', summary: 'Make a simple dinner plan, one night at a time.', action: 'Plan our dinners', image: null, alt: '', article: null },
-];
+const popularPaths = [routes.mentalLoad, routes.mealPlanner, routes.laundrySystem, routes.tryCalendar, routes.lunchSnackStation];
 const groups = [
   { id: 'everyone', title: 'Get everyone involved', intro: 'Whole jobs and small routines the family can own.', paths: [routes.mentalLoad, routes.lunchSnackStation, routes.screenTime, routes.gratitudeTracker, routes.decemberCountdown] },
   { id: 'planning', title: 'Plan the week', intro: 'Put the details where everyone can find them, with a person beside each job.', paths: [routes.mealPlanner, routes.tryCalendar, routes.pantry, routes.homeschoolRhythm, routes.backToSchool, routes.travelChecklist, routes.commandCenterSetup, routes.fallPantry, routes.thanksgivingPlan, routes.holidayGifts] },
@@ -55,42 +51,14 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
       <p>Simple tools to make family life easier—and get everyone helping.</p>
       {toolEmailGateEnabled && <p class="tools-access">The chore chart asks for your email on your first download. No account needed.</p>}
     </header>
-    <section aria-labelledby="tools-start">
-      <h2 id="tools-start" class="tools-section-title">Start with what you need right now</h2>
-      <p class="tools-section-subtitle">Three free tools you can make your own in minutes.</p>
-      <div class="tools-featured">
-        {featured.map(tool => (
-          <article class="tools-feature">
-            <a href={tool.href} class="tools-preview" tabindex="-1" aria-hidden="true">
-              {tool.image ? <img {...imageAttrs(tool.image)} alt="" loading="lazy" decoding="async" /> : (
-                <div class="tools-planner-example">
-                  <span class="tools-example-title">Our week</span>
-                  <div class="tools-example-days">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => <span>{day}<i /></span>)}</div>
-                  <div class="tools-example-list"><span>Meals<br /><b>Tacos · Pasta · Leftovers</b></span><span>To do<br /><b>Library books<br />Soccer bag</b></span></div>
-                  <small>Example week</small>
-                </div>
-              )}
-            </a>
-            <div class="tools-feature-copy">
-              <h3><a href={tool.href}>{tool.title}</a></h3>
-              <p>{tool.summary}</p>
-              <a href={tool.href} class="tools-action">{tool.action}<span aria-hidden="true"> →</span></a>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
     <section class="tools-seasonal" data-seasonal-tools aria-labelledby="tools-seasonal-heading" hidden>
-      <div class="tools-seasonal-head">
-        <h2 id="tools-seasonal-heading" class="tools-section-title">Helpful this month</h2>
-        <p class="tools-section-subtitle">A few timely things to make life easier.</p>
-      </div>
+      <div class="tools-seasonal-head"><h2 id="tools-seasonal-heading" class="tools-section-title">Helpful this season</h2></div>
       <div class="tools-seasonal-links">
         {seasonalTools.flatMap(group => group.months.map(month => ({month, paths:group.paths}))).map(({month,paths}) => (
           <div data-seasonal-month={month} hidden>
             {paths.map(path => {
               const tool = freeTools.find(item => item.href === path)!;
-              return <a href={path}><strong>{tool.name}</strong><span aria-hidden="true">→</span></a>;
+              return <a href={path} class="tools-season-button"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-4 3-7 6-7 11a7 7 0 0 0 14 0c0-5-3-8-7-11Z"/><path d="M12 9v10m-4-5 4 3 4-3"/></svg><strong>{tool.name}</strong></a>;
             })}
           </div>
         ))}
@@ -103,7 +71,7 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
         <label class="tools-search-label" for="tools-search">Search free tools</label>
         <input id="tools-search" type="search" placeholder="Search tools" autocomplete="off" />
         <nav class="tools-filter-nav" aria-label="Filter free tools">
-          <button type="button" data-tools-filter="all" aria-pressed="true">All tools</button>
+          <button type="button" data-tools-filter="popular" aria-pressed="true">Popular</button><button type="button" data-tools-filter="all" aria-pressed="false">All tools</button>
           <button type="button" data-tools-filter="everyone" aria-pressed="false">Kids &amp; routines</button>
           <button type="button" data-tools-filter="planning" aria-pressed="false">Meals &amp; planning</button>
           <button type="button" data-tools-filter="home" aria-pressed="false">Home</button>
@@ -117,7 +85,7 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
         <p class="tools-group-intro">{group.intro}</p>
         <div class="tools-list">
           {group.paths.map(path => freeTools.find(tool => tool.href === path)!).map(tool => (
-            <a href={tool.href} class="tools-list-item" data-tool-search={`${benefits[tool.href] || tool.name} ${tool.name} ${tool.summary}`.toLowerCase()}>
+            <a href={tool.href} class="tools-list-item" data-tool-popular={popularPaths.includes(tool.href) ? 'true' : 'false'} data-tool-search={`${benefits[tool.href] || tool.name} ${tool.name} ${tool.summary}`.toLowerCase()}>
               <span><h3>{benefits[tool.href] || tool.name}</h3><p>{tool.summary}</p><small class="tools-original-name">{tool.name}</small></span><span class="tools-arrow" aria-hidden="true">→</span>
             </a>
           ))}
@@ -143,15 +111,15 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
   const filterButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tools-filter]'));
   const toolGroups = Array.from(document.querySelectorAll<HTMLElement>('[data-tools-group]'));
   const empty = document.querySelector<HTMLElement>('[data-tools-empty]');
-  let activeFilter = 'all';
+  let activeFilter = 'popular';
   function filterTools() {
     const query = search?.value.trim().toLocaleLowerCase() || '';
     let visibleTotal = 0;
     for (const group of toolGroups) {
-      const groupMatches = activeFilter === 'all' || activeFilter === group.dataset.toolsGroup;
+      const groupMatches = activeFilter === 'all' || activeFilter === 'popular' || activeFilter === group.dataset.toolsGroup;
       let groupVisible = 0;
       group.querySelectorAll<HTMLElement>('[data-tool-search]').forEach(item => {
-        const found = groupMatches && (item.dataset.toolSearch || '').includes(query);
+        const found = groupMatches && (activeFilter !== 'popular' || item.dataset.toolPopular === 'true' || Boolean(query)) && (item.dataset.toolSearch || '').includes(query);
         item.hidden = !found;
         if (found) groupVisible++;
       });
@@ -161,6 +129,7 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
     if (empty) empty.hidden = visibleTotal > 0;
     filterButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.toolsFilter === activeFilter)));
   }
+  filterTools();
   search?.addEventListener('input',filterTools);
   filterButtons.forEach(button => button.addEventListener('click', () => {
     activeFilter = button.dataset.toolsFilter || 'all';
@@ -191,11 +160,15 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
 .tools-paths small { font-size:.75rem; }
 .tools-eyebrow { font-size:.65rem !important; font-weight:700; letter-spacing:.1em; color:var(--color-warm-soft); }
 .tools-feature-copy .tools-eyebrow { margin-top:14px; }
-.tools-seasonal { margin:36px 0; background:#F6F1EA; padding:22px; border-radius:10px; }
+.tools-seasonal { margin:24px 0 34px; padding:0; }
 .tools-seasonal-head { margin-bottom:14px; }
-.tools-seasonal-links > div:not([hidden]) { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.tools-seasonal-links a { display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:64px; padding:16px; border-radius:8px; background:#FFFDF9; text-decoration:none; }
-.tools-seasonal-links strong { font-family:var(--font-serif); font-size:1.05rem; }
+.tools-seasonal-links > div:not([hidden]) { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.tools-seasonal-links a { display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:8px; min-height:104px; padding:18px; border-radius:14px; background:#F2E5D9; color:#76634E; text-decoration:none; transition:transform .15s ease,filter .15s ease; }
+.tools-seasonal-links a:nth-child(2) { background:#F5E4E5; }
+.tools-seasonal-links a:nth-child(3) { background:#E5EEE7; }
+.tools-seasonal-links a:hover { transform:translateY(-2px); filter:brightness(.98); }
+.tools-seasonal-links a:focus-visible { outline:2px solid currentColor; outline-offset:3px; }
+.tools-seasonal-links strong { font-family:var(--font-sans); font-size:1rem; font-weight:600; color:#302C29; }
 .tools-seasonal-links span,.tools-original-name { font-size:.75rem; color:var(--color-warm-soft); }
 .tools-original-name { display:block; margin-top:8px; }
 .tools-jumps { display: flex; flex-wrap: wrap; gap: 0 24px; margin-top: 20px; }
@@ -250,7 +223,9 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
  .tools-paths a > span { grid-row:span 2; }
  .tools-paths a small { grid-column:2; }
  .tools-paths a { min-height:0; padding:12px 14px; }
- .tools-seasonal-links > div:not([hidden]) { grid-template-columns:1fr; }
+ .tools-seasonal-links > div:not([hidden]) { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+ .tools-seasonal-links a { min-height:100px; padding:12px 8px; }
+ .tools-seasonal-links strong { font-size:.88rem; }
  .tools-featured { grid-template-columns: 1fr; gap: 20px; }
  .tools-feature { display: grid; grid-template-columns: 110px minmax(0,1fr); align-items:stretch; gap: 0; padding:0; border:1px solid var(--color-warm-rule); border-radius:12px; }\n .tools-feature-copy { padding:12px; min-width:0; }\n .tools-feature-copy .tools-action { margin-top:12px; font-size:.79rem; }
  .tools-preview { height:100%; min-height:174px; border-radius:0; }
