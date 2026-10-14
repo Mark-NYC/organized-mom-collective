@@ -709,7 +709,8 @@
         "/images/site/family-reminders-640.webp",
         "/images/site/family-reminders-960.webp",
         "/images/site/family-reminders-1280.webp"
-      ]
+      ],
+      "export_crop": "Top 18% removed at owner request, 2026-10-14; original retained unchanged; 1536x840 crop."
     },
     {
       "id": "OMC-family-baking-reuse",
