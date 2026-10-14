@@ -46,10 +46,17 @@ The [weekday zones stay small](/resources/zone-cleaning-schedule) because the bi
 This is the rotation in the OMC cleaning companion. It mixes deeper cleaning, decluttering and seasonal preparation. It’s a planning guide, not a rule that a task only needs doing once a year. Adjust for your home and follow appliance and fabric care instructions.
 
 <table>
-  <thead><tr><th>Month</th><th>Project focus</th></tr></thead>
-  <tbody>
-    {monthlyDeepClean.map((focus) => <tr style={{ backgroundColor: monthColor(focus.month), color: '#3d3834' }}><td>{focus.name}</td><td>{focus.title}</td></tr>)}
-  </tbody>
+  <thead><tr><th style={{ padding: '12px 18px' }}>Month</th><th style={{ padding: '12px 18px' }}>Project focus</th></tr></thead>
+  {[0, 3, 6, 9].map((start) => (
+    <tbody style={{ borderTop: start === 0 ? 'none' : '12px solid #ffffff' }}>
+      {monthlyDeepClean.slice(start, start + 3).map((focus) => (
+        <tr style={{ backgroundColor: monthColor(focus.month), color: '#3d3834' }}>
+          <td style={{ padding: '14px 18px' }}>{focus.name}</td>
+          <td style={{ padding: '14px 18px' }}>{focus.title}</td>
+        </tr>
+      ))}
+    </tbody>
+  ))}
 </table>
 
 <RealLifeVersion title="Make this month’s project small enough to finish">
