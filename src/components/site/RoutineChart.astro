@@ -35,7 +35,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     }
   </div>
 
-  <fieldset class="mr-palette-picker">
+  <fieldset class="mr-palette-picker" data-mr-advanced hidden>
     <legend>Choose your colors</legend>
     <div class="mr-palette-options">
       {Object.entries(toolPalettes).map(([id, palette]) => (
@@ -47,10 +47,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     </div>
   </fieldset>
   <div class="mr-actions">
-    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download chart</button>
+    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download routine</button>
     <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
   </div>
 
+  <button type="button" class="mr-customize-link" data-mr-customize aria-expanded="false">Customize steps and colors</button>
   <div class="mr-ideas">
     <span class="mr-ideas-label">Add a step</span>
     <span class="mr-chips" data-mr-chips>
@@ -405,6 +406,20 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     color: var(--mr-soft);
   }
 
+  .mr-customize-link { display:none; }
+  @media (max-width:768px) {
+    .mr-container:not(.mr-exporting) { display:flex; flex-direction:column; }
+    .mr-container:not(.mr-exporting) .mr-types { order:1; }
+    .mr-container:not(.mr-exporting) .mr-sheet { order:2; }
+    .mr-container:not(.mr-exporting) .mr-actions { order:3; width:100%; margin-top:16px; }
+    .mr-container:not(.mr-exporting) .mr-actions [data-mr-download] { width:100%; min-height:52px; }
+    .mr-container:not(.mr-exporting) .mr-actions [data-mr-reset] { display:none; }
+    .mr-container:not(.mr-exporting) .mr-customize-link { order:4; display:block; align-self:center; min-height:44px; background:transparent; border:0; text-decoration:underline; padding:8px 12px; color:var(--mr-ink); }
+    .mr-container:not(.mr-exporting) .mr-palette-picker { order:5; }
+    .mr-container:not(.mr-exporting) .mr-ideas { order:6; }
+    .mr-container:not(.mr-exporting) .mr-ideas:not(.mr-ideas-open) { display:none; }
+    .mr-container:not(.mr-exporting) .mr-footnote { order:7; }
+  }
   /* Phones: smaller type, time above the step. The PNG is always the Letter layout. */
   @media (max-width: 768px) {
     .mr-types {
@@ -519,6 +534,15 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   const sheet = document.getElementById('routine-chart')!;
   const host = sheet.closest<HTMLElement>('.mr-container')!;
   const notes = host.hasAttribute('data-mr-notes');
+  const advanced=host.querySelector<HTMLElement>('[data-mr-advanced]')!;
+  const ideas=host.querySelector<HTMLElement>('.mr-ideas')!;
+  host.querySelector<HTMLButtonElement>('[data-mr-customize]')?.addEventListener('click',e=>{
+    const button=e.currentTarget as HTMLButtonElement;
+    const open=advanced.hidden;
+    advanced.hidden=!open;
+    ideas.classList.toggle('mr-ideas-open',open);
+    button.setAttribute('aria-expanded',String(open));
+  });
   const toolId = notes ? 'routine-chart-plus' : 'routine-chart';
   let firstAction = false;
   const action = () => { if (!firstAction) { firstAction = true; toolEvent('tool_first_action', toolId); } };
