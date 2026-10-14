@@ -10,6 +10,17 @@ Mom shouldn't have to manage everything alone. Reduce both (1) fragmented family
 
 **Two places, one family system:** digital consolidation for incoming information; a physical wall calendar for family-wide visibility and participation. Achieve practical shared responsibility through clear routines and ownership, not just another screen.
 
+## Guiding philosophy: organized moms raise organized families
+
+The product journey should help households move from mom as the default keeper of every plan and task toward family members who can see, learn and own their part. This is a behavior-change goal, not an existing product feature or promised result.
+
+- **Promise:** Mom doesn't have to manage everything alone.
+- **Philosophy:** Organized moms raise organized families.
+- **Outcome:** A home where everyone knows the plan and plays a part.
+- Design the wall calendar and coaching so family members can consult the plan without asking mom.
+- Test shared weekly rhythms, age-appropriate child ownership and end-to-end partner responsibility. Don't build a system that makes mom assign, chase and approve every step.
+- Evaluate future app features by whether they transfer coordination and ownership to the family, rather than merely creating a more powerful dashboard for mom.
+
 ## Phase 0: Initial physical offer and trust (current focus)
 
 - Sell the printed **11 × 17 inch weekly wall calendar**, bundled with access to the **cleaning companion website**.
