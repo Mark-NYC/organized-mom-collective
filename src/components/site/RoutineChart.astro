@@ -509,6 +509,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
 <script>
   import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
+  import { toolEvent } from '../../lib/tool-engagement';
   import { autosave, downloadPng } from '../../lib/printable';
 
   import type { RoutineType } from '../../data/routines';
@@ -517,6 +518,9 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   const sheet = document.getElementById('routine-chart')!;
   const host = sheet.closest<HTMLElement>('.mr-container')!;
   const notes = host.hasAttribute('data-mr-notes');
+  const toolId = notes ? 'routine-chart-plus' : 'routine-chart';
+  let firstAction = false;
+  const action = () => { if (!firstAction) { firstAction = true; toolEvent('tool_first_action', toolId); } };
   const typeField = sheet.querySelector<HTMLInputElement>('[data-mr-type-field]')!;
   const chips = document.querySelector<HTMLElement>('[data-mr-chips]')!;
   const guide = host.querySelector<HTMLElement>('[data-mr-guide]')!;
@@ -556,6 +560,8 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   function load(id: string) {
     const t = types[id];
     typeField.value = id;
+    action();
+    toolEvent('tool_start', toolId);
     field('title').value = t.title;
     field('subtitle').value = t.subtitle;
     for (let i = 0; i < rows; i++) {
@@ -600,6 +606,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       return;
     }
     empty.value = chip.dataset.idea!;
+    action();
     save();
   });
 
@@ -617,6 +624,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
   const button = document.querySelector<HTMLButtonElement>('[data-mr-download]')!;
   button.addEventListener('click', async () => {
+    toolEvent('tool_download_click', toolId);
     // Time pickers would print their --:-- hint and clock icon: show plain 12-hour text while capturing.
     const times = Array.from(sheet.querySelectorAll<HTMLInputElement>('input[type="time"]'));
     const values = times.map((el) => el.value);
