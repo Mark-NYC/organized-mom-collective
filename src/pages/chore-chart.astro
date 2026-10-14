@@ -522,6 +522,7 @@ const jsonLd = [
 
 <script>
   import { toolPalettes, resolveToolPalette } from '../data/tool-palettes';
+  import { toolEvent } from '../lib/tool-engagement';
   import { autosave, clearFields, downloadPng } from '../lib/printable';
   import type { AgeGroup, ChoreSet } from '../data/chore-chart';
 
@@ -534,6 +535,10 @@ const jsonLd = [
   const ageBadge = sheet.querySelector<HTMLElement>('[data-cc-age-badge]')!;
   const forLine = sheet.querySelector<HTMLElement>('[data-cc-for]')!;
   const status = document.querySelector<HTMLElement>('[data-cc-status]')!;
+  let firstAction = false;
+  const started = () => {
+    if (!firstAction) { firstAction = true; toolEvent('tool_first_action', 'chore-chart'); }
+  };
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
 
   // The name is typed in the form but saved with the sheet (autosave reads [data-field] inside one root).
@@ -577,6 +582,7 @@ const jsonLd = [
   }
 
   nameInput.addEventListener('input', () => {
+    started();
     savedName.value = nameInput.value;
     render();
     save();
@@ -592,6 +598,8 @@ const jsonLd = [
     WEEKLY_FIELD_KEYS.forEach((key,i) => (field(key).value = set.weekly[i] ?? ''));
     set.rewards.forEach((reward, i) => (field(`reward-${i}`).value = reward));
     ageField.value = ageSelect.value;
+    started();
+    toolEvent('tool_start', 'chore-chart');
     render();
     save();
     return true;
@@ -627,6 +635,7 @@ const jsonLd = [
 
   const button = document.querySelector<HTMLButtonElement>('[data-cc-download]')!;
   button.addEventListener('click', async () => {
+    toolEvent('tool_download_click', 'chore-chart');
     // The PNG would print an empty reward's "Reward" hint as if it were filled in: drop hints while capturing.
     const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
     hinted.forEach((el) => el.removeAttribute('placeholder'));
