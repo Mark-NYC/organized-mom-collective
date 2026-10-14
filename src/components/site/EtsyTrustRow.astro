@@ -23,15 +23,15 @@ const { class: className } = Astro.props;
 >
   <span class="min-w-0 px-2 text-center leading-tight sm:px-6">
     <strong class="block font-serif text-[1.6rem] font-normal">{etsyStats.sales}</strong>
-    <span class="text-[0.72rem] sm:text-[0.85rem]">Sales</span>
+    <span class="text-[0.72rem] sm:text-[0.85rem]">Shop sales</span>
   </span>
   <span class="min-w-0 px-2 text-center leading-tight sm:px-6">
     <strong class="block font-serif text-[1.6rem] font-normal"><span aria-hidden="true" class="text-[0.8em] text-[#e8a33d]">★</span> {etsyStats.rating}</strong>
-    <span class="text-[0.72rem] sm:text-[0.85rem]">({etsyStats.reviews}) Rating</span>
+    <span class="text-[0.72rem] sm:text-[0.85rem]">({etsyStats.reviews}) Shop reviews</span>
   </span>
   <span class="min-w-0 px-2 text-center leading-tight sm:px-6">
     <strong class="block font-serif text-[1.6rem] font-normal text-[#f1641e]">Etsy</strong>
-    <span class="text-[0.72rem] sm:text-[0.85rem]">{etsyStats.badge} · {etsyStats.years} years</span>
+    <span class="text-[0.72rem] sm:text-[0.85rem]">{etsyStats.badge}</span>
   </span>
-  <span class="sr-only"> (opens our Etsy shop)</span>
+  <span class="sr-only"> (opens our Etsy shop; figures reflect earlier calendar editions, not this bundle)</span>
 </a>

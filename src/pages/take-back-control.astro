@@ -31,7 +31,7 @@ const tools = [
   { name: 'Routine Builder – UPGRADED', kind: 'Digital Tool', body: 'Build each routine on screen with a reminder under every step, then print it' },
   { name: 'Family Chore Chart System', kind: 'Guide + Cards', body: 'Get everyone contributing with age-appropriate chores that build capable kids' },
   { name: 'Pantry Inventory', kind: 'Digital Tool', body: 'Finally know what you have and what you need' },
-  { name: '7-Day Decluttering Sprint', kind: 'Daily Challenge Guide', body: 'Transform your most overwhelming spaces in just 15 minutes a day' },
+  { name: '7-Day Decluttering Sprint', kind: 'Daily Challenge Guide', body: 'Work through a small area with a 15-minute timer, then stop' },
 ];
 
 const routines = [
@@ -45,21 +45,21 @@ const routines = [
 const reasons = [
   { icon: 'M7 7h4v4c0 2.5-1.5 4-4 5M14 7h4v4c0 2.5-1.5 4-4 5', text: 'Listen while you fold laundry, drive carpool, or prep dinner' },
   { icon: 'M13 2 5 14h6l-1 8 8-12h-6l1-8Z', text: 'Short, actionable episodes (5-7 minutes each)' },
-  { icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z', text: 'Build one habit at a time—no overwhelm' },
+  { icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z', text: 'Build one habit at a time, with room to pause' },
   { icon: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-6 9c0-3.3 2.7-6 6-6s6 2.7 6 6M17 11a2.5 2.5 0 1 0 0-5M18 14c2 .6 3.5 2.8 3.5 5.5', text: 'Get the whole family involved with age-appropriate systems' },
-  { icon: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z', text: 'One payment, yours to keep—replay and reprint anytime' },
+  { icon: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z', text: 'One payment, yours to keep: replay and reprint anytime' },
 ];
 
 const weeks = [
   'Set up your unique family rhythm',
-  'Master mornings that flow',
-  'Make planning effortless',
-  'Clear the mental clutter for good',
+  'Practice a morning routine together',
+  'Make plans visible and agree on owners',
+  'Move recurring reminders to the job’s owner',
 ];
 
 const bonuses = [
-  'Transform your spaces with the 7-Day Decluttering Sprint',
-  'Master every transition with the 4 Routine Printables',
+  'Work through one area with the 7-Day Decluttering Sprint',
+  'Put the next steps on the 4 Routine Printables',
   'Get everyone helping with the Family Chore Chart System',
 ];
 
@@ -78,8 +78,8 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <section aria-labelledby="wait-h" class="bg-paper">
     <div class="mx-auto max-w-2xl px-5 pt-10 pb-8 text-center sm:px-8 sm:pt-14">
       <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
-      <p id="wait-h" class="serif-title mt-5 text-rose-deep">Wait!</p>
-      <p class="mt-2 font-serif text-[1.1rem] text-warm-soft italic">Get the Complete Control System</p>
+      <p id="wait-h" class="serif-title mt-5 text-rose-deep">Optional Next Step</p>
+      <p class="mt-2 font-serif text-[1.1rem] text-warm-soft italic">More Guidance for Shared Routines</p>
     </div>
   </section>
 
@@ -89,9 +89,9 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       <h1 id="hero-h" class="serif-hero text-[2.1rem] sm:text-[2.7rem] lg:text-[3.1rem]">
         Add the “Take Back Control” Course + Advanced Tools for <span class="whitespace-nowrap text-rose-deep">Just ${price}</span>
       </h1>
-      <p class="lede mt-6 text-warm-ink"><strong class="font-semibold">Congratulations!</strong> Your Weekly Reset System is ready for download. But before you go…</p>
+      <p class="lede mt-6 text-warm-ink"><strong class="font-semibold">Keep your Weekly Reset.</strong> This course is an optional addition; you don’t need it to start.</p>
       <p class="lede mt-4 text-warm-ink">
-        What if you could extend that “in control” feeling to <strong class="font-semibold">every area</strong> of your mom life?
+        Want more guidance for <strong class="font-semibold">sharing the everyday work</strong>, rather than keeping it all on your list?
       </p>
       <div class="mt-8"><ControlButton cta="control-hero" /></div>
     </div>
@@ -101,11 +101,11 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <section aria-labelledby="week-h" class="bg-paper">
     <div class:list={['mx-auto max-w-6xl px-5 sm:px-8', pad]}>
       <div class="mx-auto max-w-3xl text-center">
-        <h2 id="week-h" class="label text-[0.8rem] leading-relaxed text-rose-deep sm:text-[0.85rem]">You Just Got Sunday Planning Mastered. Now Master the Rest of Your Week.</h2>
+        <h2 id="week-h" class="label text-[0.8rem] leading-relaxed text-rose-deep sm:text-[0.85rem]">A Weekly Plan Is a Start. Practice the Daily Routines Together.</h2>
         <p class="lede mt-5 text-warm-ink">
-          Your Weekly Reset System gives you control over your weekly planning. But what about the other 6 days? What about daily routines, home maintenance, and getting the whole family involved?
+          Your weekly check-in makes the plan visible. These lessons and tools offer more guidance for mornings, household jobs and routines the family can practice together.
         </p>
-        <p class="mt-6 text-[1.05rem] font-semibold text-warm-ink">Get the complete system that transforms your entire household:</p>
+        <p class="mt-6 text-[1.05rem] font-semibold text-warm-ink">An optional course and tool bundle:</p>
         <p class="mt-4 font-serif text-[1.4rem] leading-snug text-warm-ink italic sm:text-[1.7rem]">
           4-Week Audio Course + 5 Advanced Implementation Tools – <span class="text-rose-deep">${price}</span>
         </p>
@@ -164,7 +164,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <!-- 5. Why this changes everything -->
   <section aria-labelledby="why-h" class="bg-cream public-panel public-intro">
     <div class:list={['mx-auto max-w-6xl px-5 sm:px-8', pad]}>
-      <h2 id="why-h" class="label text-center text-[0.8rem] text-warm-ink sm:text-[0.85rem]">Why This Changes Everything:</h2>
+      <h2 id="why-h" class="label text-center text-[0.8rem] text-warm-ink sm:text-[0.85rem]">What the Course Adds:</h2>
       <ul class="mt-10 grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 lg:grid-cols-5">
         {
           reasons.map((r) => (
@@ -184,9 +184,9 @@ const check = 'M4.5 10.5 8 14l7.5-8';
   <section aria-labelledby="truth-h" class="bg-paper">
     <div class:list={['mx-auto max-w-3xl px-5 sm:px-8', pad]}>
       <div class="rounded-[10px] bg-sage-wash p-6 sm:p-10">
-        <h2 id="truth-h" class="label text-[0.8rem] text-warm-ink sm:text-[0.85rem]">Here’s the Truth:</h2>
+        <h2 id="truth-h" class="label text-[0.8rem] text-warm-ink sm:text-[0.85rem]">Try One Habit at a Time:</h2>
         <p class="lede mt-4 text-warm-ink">
-          You’ve already proven you can master Sunday planning with your Weekly Reset System. The problem is making the <strong class="font-semibold">other 6 days</strong> flow just as smoothly.
+          Start with one routine the family can share. Use the lessons to agree on responsibilities for the <strong class="font-semibold">days between check-ins</strong>.
         </p>
         <ul class="mt-6 space-y-1.5 text-[1rem] text-warm-ink">
           {weeks.map((w, i) => <li><strong class="font-semibold">Week {i + 1}:</strong> {w}</li>)}
@@ -195,7 +195,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
           {bonuses.map((b) => <li><strong class="font-semibold text-rose-deep italic">BONUS:</strong> {b}</li>)}
         </ul>
       </div>
-      <p class="mt-8 text-center font-serif text-[1.15rem] text-warm-ink italic">This price is <strong class="font-semibold">only on this page</strong></p>
+      <p class="mt-8 text-center font-serif text-[1.15rem] text-warm-ink italic">This is an <strong class="font-semibold">optional one-time purchase</strong></p>
     </div>
   </section>
 
@@ -214,7 +214,7 @@ const check = 'M4.5 10.5 8 14l7.5-8';
       <div class="mt-8"><ControlButton cta="control-close" /></div>
       <p class="mt-5"><NoThanks next={routes.essentialRoutines} fallback={routes.essentialRoutines} label="No thanks, I’ll stick with my Weekly Reset" /></p>
       <p class="mt-6 text-[0.95rem] text-warm-ink">
-        <span aria-hidden="true">🔥</span> <strong class="font-semibold">One-time offer: ${price}</strong> (One payment, no subscription—you’re getting it all at once!)
+        <span aria-hidden="true">🔥</span> <strong class="font-semibold">One-time payment: ${price}</strong> (No subscription. Use the lessons at your own pace.)
       </p>
     </div>
   </section>

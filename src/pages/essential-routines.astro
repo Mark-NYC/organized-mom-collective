@@ -23,15 +23,15 @@ const { price } = essentialRoutines;
 const quotes = routinesTestimonials.filter((t) => t.verified);
 
 const routines = [
-  { name: 'Morning Routine Printable', body: 'Start every day calm instead of chaotic' },
-  { name: 'After School Transition Guide', body: 'End the “I’m home and everything’s crazy” spiral' },
-  { name: 'Peaceful Bedtime Flow Template', body: 'Everyone sleeps better when there’s a plan' },
-  { name: 'Weekend Prep Routine', body: 'Set up your weekends for healthy family balance' },
+  { name: 'Morning Routine Printable', body: 'Put the morning steps where kids can follow them' },
+  { name: 'After School Transition Guide', body: 'Agree on what happens after school' },
+  { name: 'Peaceful Bedtime Flow Template', body: 'Make bedtime steps visible and predictable' },
+  { name: 'Weekend Prep Routine', body: 'Review the coming week and share preparation' },
 ];
 
 const bonuses = [
   { name: 'Quick Setup Audio (8 minutes)', body: 'How to customize each routine for your family' },
-  { name: '“Why Routines Work” Cheat Sheet', body: 'The psychology behind why these simple changes create big results' },
+  { name: '“Why Routines Work” Cheat Sheet', body: 'A short explanation of the routine approach' },
   { name: 'Routine Builder (Digital Tool)', body: 'Build each routine on screen with a reminder under every step, then print it' },
 ];
 
@@ -52,8 +52,8 @@ const buy = `Yes! Get the “${essentialRoutines.name}” for $${price}`;
     <div class="mx-auto max-w-2xl px-5 pt-10 pb-4 text-center sm:px-8 sm:pt-14">
       <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
       <h1 id="hero-h" class="serif-title mt-5">
-        <span class="text-rose-deep">Wait – At Least Grab:</span>
-        <span class="mt-2 block font-serif text-[1.2rem] text-warm-soft italic sm:text-[1.35rem]">Routines That Make the Biggest Difference</span>
+        <span class="text-rose-deep">Optional Routine Bundle:</span>
+        <span class="mt-2 block font-serif text-[1.2rem] text-warm-soft italic sm:text-[1.35rem]">Clear Steps the Family Can Practice</span>
       </h1>
     </div>
   </section>
@@ -63,18 +63,18 @@ const buy = `Yes! Get the “${essentialRoutines.name}” for $${price}`;
     <div class:list={['mx-auto max-w-6xl px-5 sm:px-8', 'pt-8 pb-12 sm:pb-20']}>
       <div class="mx-auto max-w-3xl text-center">
         <h2 id="get-it-h" class="label text-[0.8rem] leading-relaxed text-[#55684b] sm:text-[0.85rem]">
-          I Get It – You Want to Try Your Weekly Reset First and See How It Goes.
+          Start With Your Weekly Reset. Add These Only If They Help.
         </h2>
         <div class="lede mt-5 space-y-4 text-warm-ink">
           <p>
-            <strong class="font-semibold">But here’s what moms tell us:</strong> The Sunday planning is just the foundation. It’s the <strong
-              class="font-semibold">daily routines</strong
-            > that make everything else flow smoothly.
+            <strong class="font-semibold">Keep the routine visible:</strong> teach the steps once, practice together and let the chart show <strong
+              class="font-semibold">what comes next</strong
+            > without another reminder from Mom.
           </p>
-          <p>You’ve got your Sundays handled now. But what about Monday morning chaos? The after-school meltdowns? Bedtime battles that stretch for hours?</p>
+          <p>Morning, after-school, bedtime and weekend charts give everyone a shared reference. Adjust the steps to your family and keep the list short.</p>
           <p>
-            <strong class="font-semibold">These 4 printable routines solve your hardest daily transitions</strong> – and they work whether you’re having a “perfect
-            week” or everything’s falling apart.
+            <strong class="font-semibold">These 4 printable routines give you a place to start</strong>. On hard
+            weeks, use fewer steps and leave the rest.
           </p>
         </div>
       </div>
@@ -146,9 +146,9 @@ const buy = `Yes! Get the “${essentialRoutines.name}” for $${price}`;
         )
       }
 
-      <p class="mt-12 text-center font-serif text-[1.1rem] text-warm-ink italic"><strong class="font-semibold">This bundle is only available on this page.</strong></p>
+      <p class="mt-12 text-center font-serif text-[1.1rem] text-warm-ink italic"><strong class="font-semibold">A separate purchase, with no subscription.</strong></p>
       <p class="mx-auto mt-3 max-w-xl text-center text-[1rem] leading-relaxed text-warm-soft">
-        Your Weekly Reset System is ready for you to download, but these routines will make sure every single day flows as smoothly as your Sundays.
+        You can start with your Weekly Reset or our free routine chart generator. This bundle adds printable routines and guided setup audio.
       </p>
     </div>
   </section>
@@ -160,7 +160,7 @@ const buy = `Yes! Get the “${essentialRoutines.name}” for $${price}`;
       <h2 id="close-h" class="sr-only">Get the {essentialRoutines.name}</h2>
       <div class="mt-8"><OfferButton label={buy} href={essentialRoutines.buyUrl} cta="routines-close" /></div>
       <p class="mt-6">
-        <NoThanks next={routes.checkoutComplete} query="done=1" fallback={routes.home} label="No thanks, I’ll figure it out on my own" />
+        <NoThanks next={routes.checkoutComplete} query="done=1" fallback={routes.home} label="No thanks, continue to my downloads" />
       </p>
     </div>
   </section>

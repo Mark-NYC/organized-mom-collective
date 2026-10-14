@@ -1,4 +1,5 @@
 import { shopConfigured, shopEnabled } from '../lib/shop';
+import { shopStats } from './reviews';
 import { routes } from '../routes';
 
 /**
@@ -31,7 +32,7 @@ export const weeklyReset = {
  * Etsy shop figures for this page's trust row, as supplied by the shop owner (from the shop's
  * Etsy profile). Update them here; they're shown as they are, never rounded up.
  */
-export const etsyStats = { sales: '939', rating: '5.0', reviews: 104, badge: 'Super seller', years: 4 };
+export const etsyStats = { ...shopStats, badge: 'Earlier editions', years: 4 };
 
 export interface Asset {
   /** Site-relative path of the file in public/. */

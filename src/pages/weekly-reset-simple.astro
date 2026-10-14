@@ -16,15 +16,15 @@ import { BRAND_NAME } from '../config';
 const { price, regularPrice } = weeklyReset;
 
 const outcomes = [
-  { pre: 'Plan your ', em: 'entire week in minutes' },
-  { pre: 'Keep your home tidy ', em: 'without all-day cleaning' },
-  { pre: 'Start Monday ', em: 'calm, not scrambling' },
+  { pre: 'Review ', em: 'the week together' },
+  { pre: 'Share ', em: 'the household jobs' },
+  { pre: 'Write down ', em: 'who’s doing what' },
 ];
 ---
 
 <PublicLayout
-  fullTitle={`End Sunday Night Chaos in 30 Minutes · ${weeklyReset.name} · ${BRAND_NAME}`}
-  description={`A 30-minute Sunday reset for busy moms. Plan your week, keep the house tidy, start Monday calm. Instant download, $${price}.`}
+  fullTitle={`A Weekly Reset the Family Can Share · ${weeklyReset.name} · ${BRAND_NAME}`}
+  description={`A guided weekly reset for families: review plans together, agree on owners and use smaller routines on hard weeks. Instant download, $${price}.`}
   indexable={false}
   chrome={false}
   width="full"
@@ -34,10 +34,10 @@ const outcomes = [
       <div class="text-center">
         <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="56" height="56" class="size-14" /></a>
         <h1 id="hero-h" class="serif-hero mt-5 text-[2.2rem] sm:text-[2.9rem] lg:text-[3.2rem]">
-          End Sunday Night Chaos in 30 Minutes <span class="whitespace-nowrap">— <span class="text-rose-deep">${price}</span> <s class="text-[0.6em] text-warm-soft">${regularPrice}</s></span>
+          A Weekly Reset the Family Can Share <span class="whitespace-nowrap">— <span class="text-rose-deep">${price}</span> <s class="text-[0.6em] text-warm-soft">${regularPrice}</s></span>
         </h1>
         <p class="lede mt-5 text-warm-ink">
-          Sunday nights = laundry piles, unplanned meals, Monday dread. This <strong class="hand-highlight font-semibold">30-minute reset ends the chaos.</strong>
+          Review schedules, meals and household jobs together. Put the decisions on paper and <strong class="hand-highlight font-semibold">agree on who follows through.</strong>
         </p>
 
         <ul class="mx-auto mt-6 w-fit space-y-2 text-left text-[1.05rem] text-warm-ink">
@@ -53,7 +53,7 @@ const outcomes = [
           }
         </ul>
 
-        <p class="mt-6 text-[0.95rem] font-semibold text-warm-ink">Less than 2 lattes. Saves 5+ hours every week. Instant download.</p>
+        <p class="mt-6 text-[0.95rem] font-semibold text-warm-ink">Printable planner, tidy guide and coaching audio. One payment. Instant download.</p>
         <div class="mt-6"><ResetButton cta="reset-simple" /></div>
 
         <EtsyTrustRow class="mt-6" />

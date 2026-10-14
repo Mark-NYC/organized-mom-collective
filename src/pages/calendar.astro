@@ -50,7 +50,7 @@ const gallery = [
     height: 1280,
     alt: 'A hand writing in the calendar on a kitchen counter, its week filled with school runs, a meal plan, a grocery list and to-dos.',
     title: 'Dinner planned, list written',
-    body: 'Plan dinner for every night, with the grocery list right beside it. A to-do list and notes hold whatever doesn’t belong to one day.',
+    body: 'Write the dinners and who’s handling them, with groceries beside the plan. Put an owner and a day beside each extra job.',
     points: ['Meal plan', 'Grocery list', 'To-dos and notes'],
   },
   {
@@ -92,10 +92,10 @@ const specs: { term: string; icon: string; value: string }[] = [
 ];
 
 const steps = [
-  { title: 'Plan the week on the wall', body: 'Schedules, dinners, groceries and to-dos, where the whole family can see them.' },
-  { title: 'Glance at today’s zone', body: 'Every day on the calendar is printed with a cleaning zone: Living Room on Monday, Bedrooms on Tuesday, and so on.' },
+  { title: 'Review the week together', body: 'Check schedules and dinners together. Write who owns each pickup and household job.' },
+  { title: 'Agree on the zone’s owner', body: 'Each day has a printed zone. Choose who takes it, including remembering to check the list.' },
   { title: 'Scan the QR code once', body: 'The companion opens on your phone with today’s zone as a short checklist, plus a daily reset and a monthly project.' },
-  { title: 'Tick it off and move on', body: 'Small, manageable steps. Weekends are optional, and a missed day doesn’t put you behind.' },
+  { title: 'Check your own part', body: 'Each person checks the plan and follows through. Checkmarks stay on one phone. Missed days don’t stack up.' },
 ];
 
 const faqs = [
@@ -121,7 +121,7 @@ const faqs = [
   },
   {
     q: 'Where is my cleaning progress saved?',
-    a: 'On your own phone, in its browser. Starting a new calendar doesn’t reset your checkmarks or progress.',
+    a: 'On your own phone, in its browser. Checkmarks aren’t shared between phones. Starting a new calendar doesn’t reset your progress.',
   },
   {
     q: 'Where do I buy it?',
@@ -217,7 +217,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <p class="label text-warm-soft">Weekly wall calendar · 11 × 17 in</p>
         <h1 id="hero-h" class="serif-hero mt-3 sm:text-[2.9rem] lg:text-[3.2rem]">{PRODUCT}</h1>
         <p class="lede mt-4 max-w-lg text-warm-ink">
-          The family’s schedules, meals, groceries and cleaning on one page a week, so you don’t have to keep it all in your head. Plus the
+          The family’s schedules, meals, groceries and cleaning on one page a week, where everyone can check the plan and find their responsibilities. Plus the
           cleaning companion website for your phone.
         </p>
         <p class="mt-5 text-[1rem] text-warm-ink">
@@ -246,10 +246,9 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <!-- What's on every page -->
   <section aria-labelledby="page-h" class:list={[wrap, 'py-14 sm:py-20']}>
     <div class="max-w-2xl">
-      <h2 id="page-h" class="serif-title">Everything Your Week Needs, on One Page.</h2>
+      <h2 id="page-h" class="serif-title">The Everyday Details, Together on One Page.</h2>
       <p class="lede mt-4">
-        No more juggling a planner, a meal app, a grocery list on the fridge and reminders in your head. Each weekly page gives every part of
-        family life its own spot.
+        No more juggling a planner, a meal app, a grocery list on the fridge and reminders in your head. Put the details where everyone can find them, then agree on who owns the jobs.
       </p>
     </div>
     <CardSlider items={gallery} label="Calendar photos and what’s on every page" class="mt-10" />
@@ -387,8 +386,8 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <section aria-labelledby="close-h" class="bg-blush-wash public-panel">
     <div class="mx-auto max-w-2xl px-5 py-16 text-center sm:px-8 sm:py-20">
       <HandAsterisks class="mb-6" />
-      <h2 id="close-h" class="serif-title">A Little More Order.<br /> A Lot More <span class="hand-highlight hand-highlight-apricot">Room for Life.</span></h2>
-      <p class="lede mx-auto mt-5 max-w-lg text-warm-ink">Get the week out of your head and onto the wall, where everyone can see it.</p>
+      <h2 id="close-h" class="serif-title">Less for You to Remember.<br /> A Lot More <span class="hand-highlight hand-highlight-apricot">Room for Life.</span></h2>
+      <p class="lede mx-auto mt-5 max-w-lg text-warm-ink">Put the week on the wall, agree on owners and practice checking the plan without asking Mom.</p>
       <ShopButton label="Get the Calendar" cta="calendar-close" class="mt-8 min-h-14 w-full px-8 sm:w-auto" />
     </div>
   </section>

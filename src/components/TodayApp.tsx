@@ -212,7 +212,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
             id="daily"
             first
             eyebrow="Every day"
-            note="The same five tasks, every day."
+            note="Split the reset together. Each person follows through on their part."
             heading={
               <h2 id="daily-heading" className="text-[1rem] font-bold tracking-[0.18em] uppercase">
                 {dailyEssentials.title}
