@@ -823,6 +823,80 @@
       "used_in": [
         "FP-06 /resources/grocery-list-from-meal-plan"
       ]
+    },
+    {
+      "id": "HC04-K32344",
+      "title": "hc-04-cleaning-basket",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/32344/woman-carrying-a-wire-basket-with-cleaning-and-home-care-items",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "license_review": "Archived exact photo page explicitly free for commercial use; no editorial-only wording",
+      "license_verification_date": "2026-10-14",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-04-cleaning-basket-1440.webp",
+      "original_path": "design/photography/kaboompics/HC-03-full/32344-2400.jpg",
+      "model_release_review": "no_identifiable_face_in_final_crop; editorial nonendorsement context only",
+      "visual_content_review": {
+        "review_date": "2026-10-14",
+        "review_basis": "actual archived source and final crop",
+        "visual_status": "pass",
+        "observations": "No readable third-party logo or protected art; faceless crop; no customer/endorsement/sensitive claims."
+      },
+      "clearance_record": {
+        "approval": "Standing owner Kaboompics approval 2026-10-12; unique photos requested 2026-10-14",
+        "checks_by": "Codex",
+        "context": "General editorial cleaning-project illustration only",
+        "edits": "Crop and WebP resize only, no AI processing; inline display capped at 400 CSS pixels",
+        "dimensions": [
+          1440,
+          960
+        ],
+        "approved_placements": [
+          "website_article_editorial"
+        ]
+      },
+      "used_in": [
+        "HC-04 /resources/monthly-deep-cleaning-schedule"
+      ]
+    },
+    {
+      "id": "HC04-K32349",
+      "title": "hc-04-window-cleaning",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/32349/woman-wiping-a-glass-window-in-a-modern-living-room",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "license_review": "Archived exact photo page explicitly free for commercial use; no editorial-only wording",
+      "license_verification_date": "2026-10-14",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-04-window-cleaning-600.webp",
+      "original_path": "design/photography/kaboompics/HC-03/32349.jpg",
+      "model_release_review": "no_identifiable_face_in_final_crop; editorial nonendorsement context only",
+      "visual_content_review": {
+        "review_date": "2026-10-14",
+        "review_basis": "actual archived source and final crop",
+        "visual_status": "pass",
+        "observations": "No readable third-party logo or protected art; faceless crop; no customer/endorsement/sensitive claims."
+      },
+      "clearance_record": {
+        "approval": "Standing owner Kaboompics approval 2026-10-12; unique photos requested 2026-10-14",
+        "checks_by": "Codex",
+        "context": "General editorial cleaning-project illustration only",
+        "edits": "Crop and WebP resize only, no AI processing; inline display capped at 400 CSS pixels",
+        "dimensions": [
+          600,
+          900
+        ],
+        "approved_placements": [
+          "website_article_editorial"
+        ]
+      },
+      "used_in": [
+        "HC-04 /resources/monthly-deep-cleaning-schedule"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

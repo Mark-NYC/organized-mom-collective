@@ -16,6 +16,8 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'hc-04-cleaning-basket': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 32344, Karolina Grabowska; archived HC-03-full/32344-2400.jpg; crop 0,0.075,0.9,0.975 removes partial chin; first site use HC-04, 2026-10-14' },
+  'hc-04-window-cleaning': { widths: [400, 600], width: 600, height: 900, source: 'Kaboompics 32349, Karolina Grabowska; licensed 600x900 archived HC-03/32349.jpg; max 400 CSS px; first site use HC-04, 2026-10-14' },
   'fp-06-market-zucchini': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-uploaded Kaboompics 40035; original in design/photography/kaboompics/FP-06-owner-2026-10-14/market-zucchini-original.jpg; landscape crop 0,0.28,1,0.724444; no content alteration' },
   'fp-06-vegetable-flatlay': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-uploaded Kaboompics 38833; original in design/photography/kaboompics/FP-06-owner-2026-10-14/vegetable-flatlay-original.jpg; full-size 1200x1800 owner source; landscape crop 0,0.2,1,0.644444; no upscaling' },
   'fp-06-bread-grocery-bag': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 28538, Karolina Grabowska; original in design/photography/kaboompics/FP-01-full/28538-2400.jpg; clearance K06, 2026-10-14; resize only' },
