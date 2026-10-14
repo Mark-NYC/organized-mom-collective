@@ -53,15 +53,13 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
       <h1>A little less on your plate. More help at home.</h1>
       <p>Pick one thing making family life harder. Make a plan, give everyone a part, and get something off your mind. Free tools you can customize, print or use on screen.</p>
       {toolEmailGateEnabled && <p class="tools-access">The chore chart asks for your email on your first download. No account needed.</p>}
-      <p class="tools-choose-label">What could use a little help today?</p>
+      <p class="tools-choose-label">What do you need help with?</p>
       <nav class="tools-paths" aria-label="Choose where to start">
         <a href="#everyone"><span aria-hidden="true">♡</span><strong>Get the kids helping</strong><small>Shared jobs and routines</small></a>
         <a href="#planning"><span aria-hidden="true">▦</span><strong>Get our week sorted</strong><small>Plans everyone can see</small></a>
         <a href="#home"><span aria-hidden="true">⌂</span><strong>Get the house back</strong><small>Small, doable resets</small></a>
       </nav>
-      <nav class="tools-jumps" aria-label="Browse tools by purpose">
-        {groups.map(group => <a href={`#${group.id}`}>{group.title}<span aria-hidden="true"> ↓</span></a>)}
-      </nav>
+
     </header>
     <section class="tools-seasonal" data-seasonal-tools aria-labelledby="tools-seasonal-heading" hidden>
       <div class="tools-seasonal-head"><p class="tools-eyebrow">RIGHT FOR THIS SEASON</p><h2 id="tools-seasonal-heading" class="tools-section-title">A good place to start right now</h2></div>
@@ -121,6 +119,14 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
   </div>
 </PublicLayout>
 <script>
+  import { toolEvent } from '../lib/tool-engagement';
+  document.querySelectorAll<HTMLAnchorElement>('.tools-page a[href^="/"]').forEach(link => {
+    link.addEventListener('click', () => {
+      const target = link.getAttribute('href') || '';
+      if (target.startsWith('/#') || target.startsWith('#')) return;
+      toolEvent('tool_related_click', target.replace(/^\//, '').split(/[?#]/)[0] || 'home', 'tools-directory');
+    });
+  });
   // Browser date keeps seasonal suggestions current without relying on build/deploy timing.
   const seasonal = document.querySelector<HTMLElement>('[data-seasonal-tools]');
   const month = new Date().getMonth();
@@ -190,6 +196,9 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
  .tools-page { padding-top: 28px; }
  .tools-intro { margin-top: -28px; padding: 28px 20px 22px; }
  .tools-paths { grid-template-columns:1fr; gap:8px; }
+ .tools-paths a { display:grid; grid-template-columns:32px minmax(0,1fr); align-items:center; column-gap:10px; }
+ .tools-paths a > span { grid-row:span 2; }
+ .tools-paths a small { grid-column:2; }
  .tools-paths a { min-height:0; padding:12px 14px; }
  .tools-seasonal-links > div:not([hidden]) { grid-template-columns:1fr; }
  .tools-featured { grid-template-columns: 1fr; gap: 20px; }

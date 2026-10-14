@@ -58,9 +58,9 @@ const jsonLd = [
 
   <div class="mp-container">
     <div class="mp-actions">
-      <button type="button" class="mp-btn mp-btn-primary" data-mp-download>Download PNG</button>
+      <button type="button" class="mp-btn mp-btn-primary" data-mp-download>Download plan</button>
       <button type="button" class="mp-btn" data-mp-next>Next week</button>
-      <button type="button" class="mp-btn" data-mp-clear>Clear</button>
+      <button type="button" class="mp-btn mp-secondary-action" data-mp-clear>Clear</button>
     </div>
 
     <div class="mp-sheet" id="meal-planner">
@@ -495,6 +495,16 @@ const jsonLd = [
     color: var(--color-warm-soft);
   }
 
+  /* Keep the printable unchanged; simplify only the on-screen phone controls. */
+  @media (max-width: 768px) {
+    .mp-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .mp-actions .mp-btn { width:100%; letter-spacing:0; text-transform:none; font-size:.9rem; border-radius:12px; }
+    .mp-actions .mp-secondary-action { grid-column:1 / -1; width:auto; justify-self:center; border:0; text-decoration:underline; min-height:44px; }
+    .mp-container:not(.mp-exporting) .mp-table tbody tr { border:1px solid var(--color-warm-rule); border-radius:14px; padding:14px; margin-bottom:12px; background:#fff; }
+    .mp-container:not(.mp-exporting) .mp-pills { gap:6px; }
+    .mp-container:not(.mp-exporting) .mp-pill { min-height:44px; font-size:12px; letter-spacing:0; }
+    .mp-container:not(.mp-exporting) .mp-table textarea { padding:8px 2px; font-size:16px; min-height:42px; }
+  }
   /* Phones: one day per block, groceries below. The PNG is always the Letter layout. */
   @media (max-width: 768px) {
     .mp-container:not(.mp-exporting) .mp-sheet {
@@ -546,6 +556,7 @@ const jsonLd = [
 
 <script>
   import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+  import { toolEvent } from '../lib/tool-engagement';
 
   const sheet = document.getElementById('meal-planner')!;
   const host = sheet.closest<HTMLElement>('.mp-container')!;
@@ -592,12 +603,15 @@ const jsonLd = [
   });
   weekField.addEventListener('input', showDates);
 
+  let firstAction = false;
   for (const pill of sheet.querySelectorAll<HTMLButtonElement>('[data-mp-pick]')) {
     pill.addEventListener('click', () => {
       const field = pill.closest('td')!.querySelector<HTMLInputElement>('[data-mp-kind]')!;
       // A second tap clears it.
       field.value = field.value === pill.dataset.mpPick ? '' : pill.dataset.mpPick!;
       showKinds();
+      if (!firstAction) { firstAction = true; toolEvent('tool_first_action', 'meal-planner'); }
+      toolEvent('tool_start', 'meal-planner');
       save();
     });
   }
@@ -631,6 +645,7 @@ const jsonLd = [
 
   const button = document.querySelector<HTMLButtonElement>('[data-mp-download]')!;
   button.addEventListener('click', async () => {
+    toolEvent('tool_download_click', 'meal-planner');
     // Placeholder hints would print as if they'd been filled in: drop them while capturing.
     const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[placeholder]'));
     const hints = hinted.map((el) => el.placeholder);
