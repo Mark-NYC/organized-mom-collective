@@ -1,7 +1,5 @@
 # Pinterest QA checklist
 
-**Proposed for review. October 14, 2026. Not committed to GitHub.**
-
 Use current [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md), [BRAND_VOICE.md](BRAND_VOICE.md), [PINTEREST_CREATIVE_DIRECTION.md](PINTEREST_CREATIVE_DIRECTION.md) and [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md). Check the final exported files, not just the renderer preview.
 
 ## Creative quality: visual judgment
