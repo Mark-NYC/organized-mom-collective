@@ -692,6 +692,41 @@
       "used_in": [
         "IF-02 /resources/how-to-share-the-mental-load (inline)"
       ]
+    },
+    {
+      "id": "OMC-family-reminders",
+      "title": "Family reminders on the kitchen counter",
+      "source": "Owner-supplied generated lifestyle image",
+      "owner_visual_status": "approved_for_homepage_2026-10-14",
+      "publishing_clearance": true,
+      "public_path": "/images/site/family-reminders-960.webp",
+      "usage_candidates": [
+        "homepage_problem_section"
+      ],
+      "original_path": "design/photography/owner/family-reminders-original.jpeg",
+      "rights_context_review": "Owner supplied and explicitly requested publication, 2026-10-14; illustrative scene, no customer or endorsement claim",
+      "variants": [
+        "/images/site/family-reminders-640.webp",
+        "/images/site/family-reminders-960.webp",
+        "/images/site/family-reminders-1280.webp"
+      ]
+    },
+    {
+      "id": "OMC-family-baking-reuse",
+      "title": "Mom and daughter baking cookies together",
+      "source": "Existing owner-approved homepage family-kitchen asset",
+      "owner_visual_status": "approved_for_article_reuse_2026-10-14",
+      "publishing_clearance": true,
+      "public_path": "/images/resources/if-01-family-baking-960.webp",
+      "usage_candidates": [
+        "intentional-family-life_inline"
+      ],
+      "rights_context_review": "Owner explicitly requested relocation from homepage, 2026-10-14; unchanged existing asset, illustrative family scene, no customer or endorsement claim",
+      "variants": [
+        "/images/resources/if-01-family-baking-640.webp",
+        "/images/resources/if-01-family-baking-960.webp",
+        "/images/resources/if-01-family-baking-1280.webp"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

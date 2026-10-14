@@ -16,6 +16,7 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'if-01-family-baking': { widths: [640, 960, 1280], width: 1280, height: 1024, source: 'Existing owner-approved homepage family-kitchen image; reused unchanged for Intentional Family Life at owner request, 2026-10-14' },
   'fp-09-morning-fridge': { widths: [640, 898], width: 898, height: 1087, source: 'Owner-supplied morning routine fridge mockup, 2026-10-13; original design/photography/owner/fp-09-morning-fridge-original.webp; crop 0.19,0.085,0.99,0.86, chart unchanged' },
   'if-03-chore-chart-fridge': { widths: [640, 960, 1122], width: 1122, height: 786, source: 'Owner-supplied chore chart refrigerator mockup, 2026-10-13; library libfile_537a824683288191988021ab971bb4a4; cropped 0,0.19,1,0.75 without altering chart design' },
   'if-02-highlighters': { widths: [640, 960, 1200], width: 1200, height: 912, source: 'Kaboompics 18814, Karolina Grabowska; tight crop 0.25,0.61,1,0.99; original archived on codex/mental-load-highlighters in design/photography/kaboompics/IF-02-highlighters/' },
