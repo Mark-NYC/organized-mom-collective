@@ -24,6 +24,10 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 ---
 
 <div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined}>
+  <div class="mr-guide" aria-live="polite">
+    <p class="mr-guide-eyebrow">START WITH A ROUTINE</p>
+    <p data-mr-guide>Morning is ready to customize. Choose a different routine below or edit any step on the chart.</p>
+  </div>
   <div class="mr-types" role="group" aria-label="Routine">
     {
       Object.entries(routineTypes).map(([id, t]) => (
@@ -118,6 +122,9 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     box-sizing: border-box;
   }
 
+  .mr-guide { max-width:816px; margin:0 auto 18px; padding:15px 18px; background:var(--mr-sage-wash); border-left:3px solid var(--mr-sage); line-height:1.5; }
+  .mr-guide-eyebrow { font-size:.68rem; letter-spacing:.12em; color:var(--mr-soft); font-weight:700; margin-bottom:4px; }
+  .mr-guide p:last-child { font-family:var(--font-serif); font-size:1.05rem; }
   .mr-types {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -512,6 +519,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   const notes = host.hasAttribute('data-mr-notes');
   const typeField = sheet.querySelector<HTMLInputElement>('[data-mr-type-field]')!;
   const chips = document.querySelector<HTMLElement>('[data-mr-chips]')!;
+  const guide = host.querySelector<HTMLElement>('[data-mr-guide]')!;
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
   const rows = sheet.querySelectorAll('[data-mr-step]').length;
 
@@ -526,6 +534,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   function renderType() {
     renderPalette();
     const id = types[typeField.value] ? typeField.value : 'morning';
+    guide.textContent = `${types[id].label} is ready. Adjust any step or time to fit your family, then download your chart.`;
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) b.setAttribute('aria-pressed', String(b.dataset.mrType === id));
     chips.replaceChildren(
       ...types[id].ideas.map((idea) => {
