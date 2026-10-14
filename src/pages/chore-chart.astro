@@ -554,7 +554,7 @@ const jsonLd = [
     const set = sets[ageField.value as AgeGroup];
     ageSelect.value = set ? ageField.value : '';
     ageBadge.hidden = !set;
-    ageBadge.textContent = set ? set.label.replace(/\\s*\\(.*\\)/, '') : '';
+    ageBadge.textContent = set ? set.label.replace(/\s*\(.*\)/, '') : '';
     const hasChores = Array.from(sheet.querySelectorAll<HTMLInputElement>('.cc-chore')).some(el => el.value.trim());
     status.textContent = hasChores
       ? `${name ? name + '’s' : 'Your'} chart is taking shape. Edit any job or reward, then download when ready.`
