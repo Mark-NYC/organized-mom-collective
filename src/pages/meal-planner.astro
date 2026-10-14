@@ -63,7 +63,8 @@ const jsonLd = [
       <nav class="mp-mobile-week" aria-label="Choose a day">
         {days.map((day,i) => <button type="button" data-mp-go={i} aria-pressed={i===0?'true':'false'}><span>{day.slice(0,3)}</span><small data-mp-day-value={i}>＋</small></button>)}
       </nav>
-      <p class="mp-mobile-note">Choose a night, add dinner, and move on. Everything saves automatically.</p>
+      <button type="button" class="mp-mobile-full" data-mp-full aria-pressed="false">View full week and grocery list</button>
+      <p class="mp-mobile-note">Changes save automatically.</p>
     </div>
     <div class="mp-actions">
       <button type="button" class="mp-btn mp-btn-primary" data-mp-download>Download plan</button>
@@ -517,6 +518,11 @@ const jsonLd = [
     .mp-mobile-week button[aria-pressed="true"] { background:var(--color-sage-wash); border-color:var(--color-sage); }
     .mp-mobile-week button span { font-size:.68rem; }
     .mp-mobile-week button small { font-size:.65rem; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mp-mobile-full { min-height:44px; padding:8px 0; border:0; background:transparent; color:var(--color-warm-ink); text-decoration:underline; text-underline-offset:4px; font-size:.87rem; }
+    .mp-container.mp-full-view .mp-mobile-question { display:none; }
+    .mp-container.mp-full-view .mp-mobile-week { display:none; }
+    .mp-container.mp-full-view:not(.mp-exporting) .mp-table tbody tr { display:block !important; }
+    .mp-container.mp-full-view:not(.mp-exporting) .mp-groceries,.mp-container.mp-full-view:not(.mp-exporting) .mp-backups,.mp-container.mp-full-view:not(.mp-exporting) .mp-key { display:block; }
     .mp-mobile-note { font-size:.83rem; color:var(--color-warm-soft); line-height:1.5; }
     .mp-container:not(.mp-exporting) .mp-table tbody tr:not([data-mp-active="true"]) { display:none !important; }
     .mp-container:not(.mp-exporting) .mp-table tbody tr[data-mp-active="true"] { display:block; }
@@ -614,6 +620,12 @@ const jsonLd = [
   host.querySelector('[data-mp-forward]')?.addEventListener('click',()=>showDay(activeDay+1));
   host.querySelectorAll<HTMLButtonElement>('[data-mp-go]').forEach((b,i)=>b.addEventListener('click',()=>showDay(i)));
   sheet.addEventListener('input',updateWeekPreview);
+  host.querySelector<HTMLButtonElement>('[data-mp-full]')?.addEventListener('click',e=>{
+    const btn=e.currentTarget as HTMLButtonElement;
+    const full=host.classList.toggle('mp-full-view');
+    btn.setAttribute('aria-pressed',String(full));
+    btn.textContent=full?'Back to one day':'View full week and grocery list';
+  });
 
 
   const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
