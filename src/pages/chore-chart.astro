@@ -64,7 +64,7 @@ const jsonLd = [
       <button type="submit" class="cc-btn cc-btn-primary">Use suggested chores</button>
     </form>
 
-    <fieldset class="cc-palette-picker" data-cc-advanced hidden>
+    <fieldset class="cc-palette-picker" data-cc-advanced>
       <legend>Choose your colors</legend>
       <div class="cc-palette-options">
         {Object.entries(toolPalettes).map(([id, palette]) => (
@@ -454,7 +454,8 @@ const jsonLd = [
     .chore-chart-container:not(.cc-exporting) .cc-sheet { order:2; }
     .chore-chart-container:not(.cc-exporting) .cc-actions { order:3; margin-top:16px; }
     .chore-chart-container:not(.cc-exporting) .cc-customize-link { display:block; order:4; align-self:center; min-height:44px; margin-top:8px; padding:8px 12px; text-decoration:underline; background:transparent; border:0; color:var(--cc-ink); }
-    .chore-chart-container:not(.cc-exporting) .cc-palette-picker { order:5; }
+    .chore-chart-container:not(.cc-exporting) .cc-palette-picker { order:5; display:none; }
+    .chore-chart-container:not(.cc-exporting) .cc-palette-picker.cc-advanced-open { display:block; }
     .chore-chart-container:not(.cc-exporting) .cc-hint { order:6; }
     .chore-chart-container:not(.cc-exporting) .cc-footnote { order:7; }
     .chore-chart-container:not(.cc-exporting) .cc-actions { display:flex; justify-content:center; }
@@ -558,8 +559,8 @@ const jsonLd = [
   const advanced = document.querySelector<HTMLElement>('[data-cc-advanced]')!;
   document.querySelector<HTMLButtonElement>('[data-cc-customize]')?.addEventListener('click', e => {
     const button=e.currentTarget as HTMLButtonElement;
-    advanced.hidden=!advanced.hidden;
-    button.setAttribute('aria-expanded',String(!advanced.hidden));
+    const open=advanced.classList.toggle('cc-advanced-open');
+    button.setAttribute('aria-expanded',String(open));
   });
   let firstAction = false;
   const started = () => {
