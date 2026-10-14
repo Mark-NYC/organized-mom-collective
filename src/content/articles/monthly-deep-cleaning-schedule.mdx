@@ -19,6 +19,7 @@ cta: companion
 ---
 
 import { monthlyDeepClean } from '../../data/cleaning';
+import { monthColor } from '../../theme';
 
 The kitchen gets wiped. The dishes get done. But the closet shelf, window tracks and cupboard handles keep waiting for a free Saturday that never comes.
 
@@ -47,7 +48,7 @@ This is the rotation in the OMC cleaning companion. It mixes deeper cleaning, de
 <table>
   <thead><tr><th>Month</th><th>Project focus</th></tr></thead>
   <tbody>
-    {monthlyDeepClean.map((focus) => <tr><td>{focus.name}</td><td>{focus.title}</td></tr>)}
+    {monthlyDeepClean.map((focus) => <tr style={{ backgroundColor: monthColor(focus.month), color: '#3d3834' }}><td>{focus.name}</td><td>{focus.title}</td></tr>)}
   </tbody>
 </table>
 
