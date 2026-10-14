@@ -10,3 +10,7 @@ Owner-approved direction, October 13, 2026. The homepage inset gray hero is the 
 - Tool introductions use the shared visual frame. Tool controls, editable sheets, saved content, and exported printable designs remain governed by TOOL-OUTPUT-DESIGN.md.
 - Public styles live in src/styles/public-design.css and load through PublicLayout. The cleaning companion uses AppLayout and retains its own interface.
 - Check phone, tablet, and desktop widths after visual changes, including long titles, portrait printable examples, and download controls.
+
+## Free resource directory exception (October 14, 2026)
+
+The owner replaced the /tools aesthetic with a white, preview-first publication layout inspired by the supplied Clean Mama reference. Use real OMC output previews, square actions, text filters, thin rules and existing month colors. Do not restore its previous gray/cream intro, rounded seasonal tiles, pill controls or text-only category lists. Details: [TOOLS-DIRECTORY-DESIGN.md](TOOLS-DIRECTORY-DESIGN.md). Other public pages retain their existing guidance.

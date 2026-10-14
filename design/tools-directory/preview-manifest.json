@@ -1,0 +1,677 @@
+{
+  "captured": "2026-10-14",
+  "source_commit": "cdcbc08",
+  "method": "Screenshots of actual tool output elements at desktop viewport, including full pages. Two-page resources use two real sheets; on-screen seasonal checklists show one complete room section. No generated or reconstructed printable artwork. Images resized and placed on neutral paper grounds with an external shadow.",
+  "previews": [
+    {
+      "slug": "chore-chart",
+      "source_route": "/chore-chart",
+      "preview": "public/images/tools/previews/chore-chart.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1056,
+            835.796875
+          ],
+          "display_box": [
+            80,
+            66,
+            740,
+            587
+          ],
+          "selector": "#chore-chart"
+        }
+      ],
+      "sha256": "b92cc7ab12b000451200379189f0ad29552d3008a5d53b608f0c75022f393f17"
+    },
+    {
+      "slug": "routine-chart",
+      "source_route": "/routine-chart",
+      "preview": "public/images/tools/previews/routine-chart.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "#routine-chart"
+        }
+      ],
+      "sha256": "d74e7977433ca42a26c52a5bf9c0bd0b5b67609c594ff8345b50393715150067"
+    },
+    {
+      "slug": "meal-planner",
+      "source_route": "/meal-planner",
+      "preview": "public/images/tools/previews/meal-planner.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1056,
+            816
+          ],
+          "display_box": [
+            80,
+            73,
+            740,
+            573
+          ],
+          "selector": "#meal-planner"
+        }
+      ],
+      "sha256": "df98bf24d7aa5976ee37f6f6609ce9042b5fcac8e9c15667ba6401e71b359fbd"
+    },
+    {
+      "slug": "mental-load-worksheet",
+      "source_route": "/mental-load-worksheet",
+      "preview": "public/images/tools/previews/mental-load-worksheet.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "#mental-load-worksheet"
+        }
+      ],
+      "sha256": "50150fa770361c4492df7117d55a86bc5ec7bfa858dea696d556c0c3f7140ae8"
+    },
+    {
+      "slug": "try-the-calendar",
+      "source_route": "/try-the-calendar",
+      "preview": "public/images/tools/previews/try-the-calendar.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "#family-calendar"
+        }
+      ],
+      "sha256": "bae864c9654ba0137f7267ed490c4fe43d413f1a6cd7d8f896cc31280e457e8d"
+    },
+    {
+      "slug": "lunch-and-snack-station",
+      "source_route": "/lunch-and-snack-station",
+      "preview": "public/images/tools/previews/lunch-and-snack-station.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 2,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            265,
+            61,
+            440,
+            570
+          ],
+          "selector": "[data-lp-sheet=\"1\"]"
+        },
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            208,
+            89,
+            440,
+            570
+          ],
+          "selector": "[data-lp-sheet=\"0\"]"
+        }
+      ],
+      "sha256": "fab2f81065d4c1b8bf3c61e2b4bea842a126c35d63efd134838a4266978491df"
+    },
+    {
+      "slug": "laundry-system",
+      "source_route": "/laundry-system",
+      "preview": "public/images/tools/previews/laundry-system.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 2,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            265,
+            61,
+            440,
+            570
+          ],
+          "selector": "[data-ck-page=\"1\"]"
+        },
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            208,
+            89,
+            440,
+            570
+          ],
+          "selector": "[data-ck-page=\"0\"]"
+        }
+      ],
+      "sha256": "0b8f0f6085c480db6cddb32eb42572fc5928ca88ab10a2b7d2fc04b8e8b2e029"
+    },
+    {
+      "slug": "back-to-school-checklist",
+      "source_route": "/back-to-school-checklist",
+      "preview": "public/images/tools/previews/back-to-school-checklist.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 2,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            265,
+            61,
+            440,
+            570
+          ],
+          "selector": "[data-ck-page=\"1\"]"
+        },
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            208,
+            89,
+            440,
+            570
+          ],
+          "selector": "[data-ck-page=\"0\"]"
+        }
+      ],
+      "sha256": "d30ab08897138508a1f79a9a2d56da0f61b6c3029fc51cb46fa069019bbc2d70"
+    },
+    {
+      "slug": "screen-time-contract",
+      "source_route": "/screen-time-contract",
+      "preview": "public/images/tools/previews/screen-time-contract.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "#screen-time"
+        }
+      ],
+      "sha256": "7b5d984b793974a4f067a6b5c0bdf8ad807fba6d8305dfabc46f3ec07ed9e05d"
+    },
+    {
+      "slug": "holiday-gift-planner",
+      "source_route": "/holiday-gift-planner",
+      "preview": "public/images/tools/previews/holiday-gift-planner.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "#holiday-gift-planner"
+        }
+      ],
+      "sha256": "d3f2c82acc5562d7d759900442860acbbd79b618bbc454e1e773276e91c83cb6"
+    },
+    {
+      "slug": "thanksgiving-plan",
+      "source_route": "/thanksgiving-plan",
+      "preview": "public/images/tools/previews/thanksgiving-plan.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 2,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            265,
+            61,
+            440,
+            570
+          ],
+          "selector": "[data-tp-page=\"1\"]"
+        },
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            208,
+            89,
+            440,
+            570
+          ],
+          "selector": "[data-tp-page=\"0\"]"
+        }
+      ],
+      "sha256": "23300ea3a4a562368289622a52ec0fd417a9fc4f5dfaa487044bf28778ecbb71"
+    },
+    {
+      "slug": "december-countdown",
+      "source_route": "/december-countdown",
+      "preview": "public/images/tools/previews/december-countdown.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1056,
+            816
+          ],
+          "display_box": [
+            80,
+            73,
+            740,
+            573
+          ],
+          "selector": "#december-countdown"
+        }
+      ],
+      "sha256": "6fb276781db04a8898e319d3bffeca7be884d85452cce41b2fefef2c3feffbeb"
+    },
+    {
+      "slug": "gratitude-tracker",
+      "source_route": "/gratitude-tracker",
+      "preview": "public/images/tools/previews/gratitude-tracker.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1056,
+            816
+          ],
+          "display_box": [
+            80,
+            73,
+            740,
+            573
+          ],
+          "selector": "#gratitude-tracker"
+        }
+      ],
+      "sha256": "8bccbb831626866732ddb3d3fd50c053e0e48be73a519628160e95336811bea4"
+    },
+    {
+      "slug": "fall-pantry-stock-up",
+      "source_route": "/fall-pantry-stock-up",
+      "preview": "public/images/tools/previews/fall-pantry-stock-up.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "[data-ck-page=\"0\"]"
+        }
+      ],
+      "sha256": "4d12bcbea5e5748385a27db327b1709a9e357a2e31a9fb8d0e9bdf02018c03da"
+    },
+    {
+      "slug": "travel-checklist",
+      "source_route": "/travel-checklist",
+      "preview": "public/images/tools/previews/travel-checklist.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 2,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            265,
+            61,
+            440,
+            570
+          ],
+          "selector": "[data-ck-page=\"1\"]"
+        },
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            208,
+            89,
+            440,
+            570
+          ],
+          "selector": "[data-ck-page=\"0\"]"
+        }
+      ],
+      "sha256": "3e24de9c8d1e8029dec279d6ad244821f260b4d28f2f8f45f6a50a9df7d0fd62"
+    },
+    {
+      "slug": "command-center-setup",
+      "source_route": "/command-center-setup",
+      "preview": "public/images/tools/previews/command-center-setup.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "[data-ck-page=\"0\"]"
+        }
+      ],
+      "sha256": "e7cad1b18b15d4500d04e9ae8595f0ddedd2cf8bedcf2a2a23e8b211194e821b"
+    },
+    {
+      "slug": "closet-reset",
+      "source_route": "/closet-reset",
+      "preview": "public/images/tools/previews/closet-reset.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            816,
+            1056
+          ],
+          "display_box": [
+            218,
+            60,
+            463,
+            600
+          ],
+          "selector": "[data-ck-page=\"0\"]"
+        }
+      ],
+      "sha256": "9a66006dcbb018a2953344fc5bfb8c7b7e6638b4ec97a1bc80d6aaf76557aef9"
+    },
+    {
+      "slug": "paper-clutter-blitz",
+      "source_route": "/paper-clutter-blitz",
+      "preview": "public/images/tools/previews/paper-clutter-blitz.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            470,
+            505.84375
+          ],
+          "display_box": [
+            215,
+            106,
+            470,
+            507
+          ],
+          "selector": ".sc-room"
+        }
+      ],
+      "sha256": "36c9192cec6bac41ad784b4a1333aa440f9d964ffa755c2698dc28435e81653d"
+    },
+    {
+      "slug": "new-year-declutter",
+      "source_route": "/new-year-declutter",
+      "preview": "public/images/tools/previews/new-year-declutter.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            470,
+            430.0625
+          ],
+          "display_box": [
+            215,
+            144,
+            470,
+            431
+          ],
+          "selector": ".sc-room"
+        }
+      ],
+      "sha256": "af9a53553d7050accaf5cc975155d1b0342c929ea238b84ae459c2c5dc64b57e"
+    },
+    {
+      "slug": "fall-cleaning-checklist",
+      "source_route": "/fall-cleaning-checklist",
+      "preview": "public/images/tools/previews/fall-cleaning-checklist.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            470,
+            495.84375
+          ],
+          "display_box": [
+            215,
+            111,
+            470,
+            497
+          ],
+          "selector": ".sc-room"
+        }
+      ],
+      "sha256": "64571fd4e01edba9ceb0caa3e458da58a49debc900e7f560bc35716837510d16"
+    },
+    {
+      "slug": "spring-cleaning-checklist",
+      "source_route": "/spring-cleaning-checklist",
+      "preview": "public/images/tools/previews/spring-cleaning-checklist.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            470,
+            495.84375
+          ],
+          "display_box": [
+            215,
+            111,
+            470,
+            497
+          ],
+          "selector": ".sc-room"
+        }
+      ],
+      "sha256": "2d76b25e0160e9aab7f931db7597c7d416e50488c9f937eae8f11d7291bdb023"
+    },
+    {
+      "slug": "homeschool-rhythm",
+      "source_route": "/homeschool-rhythm",
+      "preview": "public/images/tools/previews/homeschool-rhythm.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1056,
+            816
+          ],
+          "display_box": [
+            80,
+            73,
+            740,
+            573
+          ],
+          "selector": "#homeschool-rhythm"
+        }
+      ],
+      "sha256": "d965984694efc71ac779d198b3b1257a8083966a356899522fdc6661555b9785"
+    },
+    {
+      "slug": "planner",
+      "source_route": "/planner",
+      "preview": "public/images/tools/previews/planner.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1200,
+            1015
+          ],
+          "display_box": [
+            95,
+            60,
+            709,
+            600
+          ],
+          "selector": "#planner"
+        }
+      ],
+      "sha256": "49434c55291ae7656734583dcf5fff7beef4451c2fcbe36833e369195ae9258d"
+    },
+    {
+      "slug": "pantry",
+      "source_route": "/pantry",
+      "preview": "public/images/tools/previews/pantry.webp",
+      "width": 900,
+      "height": 720,
+      "source": "Actual locally rendered tool DOM, clean browser state and original tool styles",
+      "pages": [
+        {
+          "page": 1,
+          "source_dimensions": [
+            1056,
+            817
+          ],
+          "display_box": [
+            80,
+            73,
+            740,
+            573
+          ],
+          "selector": "#pantry"
+        }
+      ],
+      "sha256": "35c771b431a1ea7b9dc37962777c16eb077ceea529e7570b4d038ce7b64776a4"
+    }
+  ]
+}
