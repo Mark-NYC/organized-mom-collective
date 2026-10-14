@@ -5,14 +5,44 @@ import { freeTools } from '../data/free-tools';
 import { imageAttrs } from '../data/images';
 import { toolEmailGateEnabled } from '../lib/tool-email';
 const featured = [
-  { href: routes.choreChart, title: 'Chore chart generator', summary: 'Pick their age. Choose their jobs.', action: 'Make a chore chart', image: 'if-03-chore-chart-fridge' as const, alt: 'A completed pastel chore chart hanging on a refrigerator.', article: '/resources/chores-for-kids-by-age' },
-  { href: routes.routineChart, title: 'Routine chart generator', summary: 'Give mornings, afternoons and bedtime a clear order.', action: 'Build a routine', image: 'fp-09-morning-fridge' as const, alt: 'A completed morning routine chart held by magnets on a refrigerator.', article: '/resources/morning-routine-chart-generator' },
-  { href: routes.planner, title: 'Weekly planner', summary: 'Days, meals, groceries and to-dos in one place.', action: 'Plan your week', image: null, alt: '', article: null },
+  { href: routes.choreChart, title: 'A chore chart they can own', summary: 'Choose an age, add their name, and give them jobs they can do themselves.', action: 'Make a chore chart', image: 'if-03-chore-chart-fridge' as const, alt: 'A completed pastel chore chart hanging on a refrigerator.', article: '/resources/chores-for-kids-by-age' },
+  { href: routes.routineChart, title: 'Make mornings run smoother', summary: 'Build a routine kids can follow without being reminded at every step.', action: 'Build a routine', image: 'fp-09-morning-fridge' as const, alt: 'A completed morning routine chart held by magnets on a refrigerator.', article: '/resources/morning-routine-chart-generator' },
+  { href: routes.planner, title: 'Get next week out of your head', summary: 'Bring meals, plans and family responsibilities into one simple page.', action: 'Plan your week', image: null, alt: '', article: null },
 ];
 const groups = [
   { id: 'everyone', title: 'Get everyone involved', intro: 'Whole jobs and small routines the family can own.', paths: [routes.mentalLoad, routes.lunchSnackStation, routes.screenTime, routes.gratitudeTracker, routes.decemberCountdown] },
   { id: 'planning', title: 'Plan the week', intro: 'Put the details where everyone can find them, with a person beside each job.', paths: [routes.mealPlanner, routes.tryCalendar, routes.pantry, routes.homeschoolRhythm, routes.backToSchool, routes.travelChecklist, routes.commandCenterSetup, routes.fallPantry, routes.thanksgivingPlan, routes.holidayGifts] },
   { id: 'home', title: 'Keep the house moving', intro: 'Clear jobs, clear owners and a smaller version for hard weeks.', paths: [routes.laundrySystem, routes.closetReset, routes.paperBlitz, routes.springCleaning, routes.fallCleaning, routes.newYearDeclutter] },
+];
+const benefits: Record<string, string> = {
+  [routes.mentalLoad]: 'Hand one whole job to someone else',
+  [routes.lunchSnackStation]: 'Help kids make their own lunches',
+  [routes.screenTime]: 'Agree on screen time together',
+  [routes.gratitudeTracker]: 'Make gratitude a family habit',
+  [routes.decemberCountdown]: 'Make December fun without adding more work',
+  [routes.mealPlanner]: 'Take the guesswork out of dinner',
+  [routes.tryCalendar]: 'See where everyone needs to be',
+  [routes.pantry]: 'Stop buying what you already have',
+  [routes.homeschoolRhythm]: 'Find a rhythm that fits your school days',
+  [routes.backToSchool]: 'Get ready for the first school day',
+  [routes.travelChecklist]: 'Pack for everyone without the scramble',
+  [routes.commandCenterSetup]: 'Give family papers and plans a home',
+  [routes.fallPantry]: 'Find what you need before the cold days arrive',
+  [routes.thanksgivingPlan]: 'Know when to thaw and cook the turkey',
+  [routes.holidayGifts]: 'Keep gifts and spending in one place',
+  [routes.laundrySystem]: 'Make laundry a shared family job',
+  [routes.closetReset]: 'Start with one shelf, not the whole closet',
+  [routes.paperBlitz]: 'Clear that paper pile in 15 minutes',
+  [routes.springCleaning]: 'Reset one room at a time',
+  [routes.fallCleaning]: 'Get the house ready for colder days',
+  [routes.newYearDeclutter]: 'Make progress one small area at a time',
+};
+const seasonalTools = [
+  { months: [8, 9, 10], paths: [routes.fallCleaning, routes.thanksgivingPlan, routes.holidayGifts] },
+  { months: [11], paths: [routes.decemberCountdown, routes.holidayGifts, routes.gratitudeTracker] },
+  { months: [0, 1], paths: [routes.newYearDeclutter, routes.mentalLoad, routes.laundrySystem] },
+  { months: [2, 3, 4], paths: [routes.springCleaning, routes.closetReset, routes.mentalLoad] },
+  { months: [5, 6, 7], paths: [routes.travelChecklist, routes.lunchSnackStation, routes.tryCalendar] },
 ];
 const site = Astro.site!;
 const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Free family tools', url: new URL(routes.freeTools, site).href, hasPart: freeTools.map(tool => ({ '@type': 'WebPage', name: tool.name, url: new URL(tool.href, site).href })) }];
@@ -20,15 +50,34 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
 <PublicLayout title="Free Family Tools: Planners, Charts & Checklists" description="Free family planners, chore charts, routine generators and home checklists. Customize the tools online, then download or use the checklist on screen." jsonLd={jsonLd} width="full">
   <div class="tools-page">
     <header class="tools-intro">
-      <h1>Free tools for family life.</h1>
-      <p>Make planners, charts and checklists that fit your family. Customize online, then download and print, or check things off on screen.</p>
+      <h1>A little less on your plate. More help at home.</h1>
+      <p>Pick one thing making family life harder. Make a plan, give everyone a part, and get something off your mind. Free tools you can customize, print or use on screen.</p>
       {toolEmailGateEnabled && <p class="tools-access">The chore chart asks for your email on your first download. No account needed.</p>}
+      <p class="tools-choose-label">What could use a little help today?</p>
+      <nav class="tools-paths" aria-label="Choose where to start">
+        <a href="#everyone"><span aria-hidden="true">♡</span><strong>Get the kids helping</strong><small>Shared jobs and routines</small></a>
+        <a href="#planning"><span aria-hidden="true">▦</span><strong>Get our week sorted</strong><small>Plans everyone can see</small></a>
+        <a href="#home"><span aria-hidden="true">⌂</span><strong>Get the house back</strong><small>Small, doable resets</small></a>
+      </nav>
       <nav class="tools-jumps" aria-label="Browse tools by purpose">
         {groups.map(group => <a href={`#${group.id}`}>{group.title}<span aria-hidden="true"> ↓</span></a>)}
       </nav>
     </header>
+    <section class="tools-seasonal" data-seasonal-tools aria-labelledby="tools-seasonal-heading" hidden>
+      <div class="tools-seasonal-head"><p class="tools-eyebrow">RIGHT FOR THIS SEASON</p><h2 id="tools-seasonal-heading" class="tools-section-title">A good place to start right now</h2></div>
+      <div class="tools-seasonal-links">
+        {seasonalTools.flatMap(group => group.months.map(month => ({month, paths:group.paths}))).map(({month,paths}) => (
+          <div data-seasonal-month={month} hidden>
+            {paths.map(path => {
+              const tool = freeTools.find(item => item.href === path)!;
+              return <a href={path}><strong>{benefits[path] || tool.name}</strong><span>{tool.name} →</span></a>;
+            })}
+          </div>
+        ))}
+      </div>
+    </section>
     <section aria-labelledby="tools-start">
-      <h2 id="tools-start" class="tools-section-title">Start here</h2>
+      <h2 id="tools-start" class="tools-section-title">Make something useful in a few steps</h2>
       <div class="tools-featured">
         {featured.map(tool => (
           <article class="tools-feature">
@@ -43,7 +92,7 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
               )}
             </a>
             <div class="tools-feature-copy">
-              <h3><a href={tool.href}>{tool.title}</a></h3>
+              <p class="tools-eyebrow">FREE · MAKE IT YOURS</p><h3><a href={tool.href}>{tool.title}</a></h3>
               <p>{tool.summary}</p>
               <a href={tool.href} class="tools-action">{tool.action}<span aria-hidden="true"> →</span></a>
               {tool.article && <a href={tool.article} class="tools-example-link">See an example</a>}
@@ -59,7 +108,7 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
         <div class="tools-list">
           {group.paths.map(path => freeTools.find(tool => tool.href === path)!).map(tool => (
             <a href={tool.href} class="tools-list-item">
-              <span><h3>{tool.name}</h3><p>{tool.summary}</p></span><span class="tools-arrow" aria-hidden="true">→</span>
+              <span><h3>{benefits[tool.href] || tool.name}</h3><p>{tool.summary}</p><small class="tools-original-name">{tool.name}</small></span><span class="tools-arrow" aria-hidden="true">→</span>
             </a>
           ))}
         </div>
@@ -71,12 +120,39 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
     </aside>
   </div>
 </PublicLayout>
+<script>
+  // Browser date keeps seasonal suggestions current without relying on build/deploy timing.
+  const seasonal = document.querySelector<HTMLElement>('[data-seasonal-tools]');
+  const month = new Date().getMonth();
+  const matching = seasonal?.querySelector<HTMLElement>(`[data-seasonal-month="${month}"]`);
+  if (seasonal && matching) {
+    matching.hidden = false;
+    seasonal.hidden = false;
+  }
+</script>
 <style>
 .tools-page { max-width: 1120px; margin: 0 auto; padding: 40px 20px 64px; color: var(--color-warm-ink); }
 .tools-intro { max-width: none; margin: -40px -20px 36px; padding: 40px 24px 28px; background: #4A5147; color: #FFFDF8; }
-.tools-intro h1 { font-family: var(--font-serif); font-size: clamp(1.15rem, 4.2vw, 3.4rem); line-height: 1.1; letter-spacing: -.025em; white-space: nowrap; }
+.tools-intro h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4.2vw, 3.4rem); line-height: 1.1; letter-spacing: -.025em; max-width: 900px; }
 .tools-intro > p { font-size: 1rem; line-height: 1.65; margin-top: 14px; max-width: 660px; }
 .tools-intro .tools-access { font-size: .85rem; color: #E0E5DC; }
+.tools-choose-label { font-size: .85rem !important; margin-top: 24px !important; font-weight: 600; }
+.tools-paths { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:12px; }
+.tools-paths a { color:#453F3C; background:#F6EEE8; border-radius:10px; padding:16px; min-height:110px; display:flex; flex-direction:column; gap:5px; text-decoration:none; }
+.tools-paths a:nth-child(2) { background:#E6EEE8; }
+.tools-paths a:nth-child(3) { background:#F7EBD9; }
+.tools-paths a > span { font-size:1.5rem; line-height:1; }
+.tools-paths strong { font-family:var(--font-serif); font-size:1.05rem; }
+.tools-paths small { font-size:.75rem; }
+.tools-eyebrow { font-size:.65rem !important; font-weight:700; letter-spacing:.1em; color:var(--color-warm-soft); }
+.tools-feature-copy .tools-eyebrow { margin-top:14px; }
+.tools-seasonal { margin-bottom:32px; background:#F6F1EA; padding:22px; border-radius:10px; }
+.tools-seasonal-head { margin-bottom:14px; }
+.tools-seasonal-links > div:not([hidden]) { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.tools-seasonal-links a { display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:8px; background:#FFFDF9; text-decoration:none; }
+.tools-seasonal-links strong { font-family:var(--font-serif); font-size:1.05rem; }
+.tools-seasonal-links span,.tools-original-name { font-size:.75rem; color:var(--color-warm-soft); }
+.tools-original-name { display:block; margin-top:8px; }
 .tools-jumps { display: flex; flex-wrap: wrap; gap: 0 24px; margin-top: 20px; }
 .tools-jumps a { display: inline-flex; gap: 4px; align-items: center; min-height: 44px; font-size: .85rem; text-decoration: underline; text-underline-offset: 5px; }
 .tools-section-title { font-family: var(--font-serif); font-size: clamp(1.55rem, 3vw, 2rem); line-height: 1.2; }
@@ -113,6 +189,9 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'CollectionPage', n
 @media (max-width: 767px) {
  .tools-page { padding-top: 28px; }
  .tools-intro { margin-top: -28px; padding: 28px 20px 22px; }
+ .tools-paths { grid-template-columns:1fr; gap:8px; }
+ .tools-paths a { min-height:0; padding:12px 14px; }
+ .tools-seasonal-links > div:not([hidden]) { grid-template-columns:1fr; }
  .tools-featured { grid-template-columns: 1fr; gap: 20px; }
  .tools-feature { display: grid; grid-template-columns: 110px minmax(0,1fr); align-items: start; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid var(--color-warm-rule); }
  .tools-preview { height: 155px; }
