@@ -1,0 +1,51 @@
+---
+import Checklist from './Checklist.astro';
+import { monthlyDeepClean } from '../../data/cleaning';
+import { monthColor } from '../../theme';
+const initialFocus = monthlyDeepClean[new Date().getMonth()];
+---
+
+<div data-current-month-project data-active-month={initialFocus.month}>
+  <div data-project-content style={{ borderTop: `4px solid ${monthColor(initialFocus.month)}` }}>
+    <Checklist kicker={initialFocus.name} title={initialFocus.title} items={initialFocus.tasks.map((task) => task.label)} />
+  </div>
+  {monthlyDeepClean.map((focus) => (
+    <template data-project-month={focus.month}>
+      <div style={{ borderTop: `4px solid ${monthColor(focus.month)}` }}>
+        <Checklist kicker={focus.name} title={focus.title} items={focus.tasks.map((task) => task.label)} />
+      </div>
+    </template>
+  ))}
+</div>
+
+<script>
+  function syncMonthlyProjects() {
+    const month = new Date().getMonth();
+    document.querySelectorAll('[data-current-month-project]').forEach((root) => {
+      if (root.getAttribute('data-active-month') === String(month)) return;
+      const template = root.querySelector(`template[data-project-month="${month}"]`);
+      const content = root.querySelector('[data-project-content]');
+      if (!(template instanceof HTMLTemplateElement) || !content) return;
+      content.replaceChildren(template.content.cloneNode(true));
+      content.removeAttribute('style');
+      root.setAttribute('data-active-month', String(month));
+    });
+  }
+
+  syncMonthlyProjects();
+  document.addEventListener('astro:page-load', syncMonthlyProjects);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) syncMonthlyProjects();
+  });
+
+  // A long-lived tab also follows the reader's local midnight/month rollover.
+  function scheduleNextDay() {
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    window.setTimeout(() => {
+      syncMonthlyProjects();
+      scheduleNextDay();
+    }, midnight.getTime() - now.getTime() + 1000);
+  }
+  scheduleNextDay();
+</script>

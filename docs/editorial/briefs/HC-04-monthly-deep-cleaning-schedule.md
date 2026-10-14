@@ -9,7 +9,7 @@ Research 2026-10-14: separate web query found https://livesimply.me/wp-content/u
 Separate Pinterest-focused query found https://www.pinterest.com/ideas/daily-weekly-monthly-cleaning-schedule/928426083907/ and https://es.pinterest.com/pin/111393790775241939/; indexed printables and combined daily/weekly/monthly lists. Native autocomplete, guided search, live rankings and Trends not checked. No volume or engagement claims.
 
 ## Outline and differentiation
-Tension: overlooked jobs wait for a free Saturday. Immediate answer: one monthly area, one bounded weekend job, shared ownership. Shift: focus narrows choices, does not make all tasks compulsory. Three system layers; exact data-driven 12-month rotation; five steps; October example rendered from the actual monthly task data; missed-week/month fallback; companion feature note with browser-storage limitation; one next action. Approx. 550 prose words plus the data-driven rotation/checklist.
+Tension: overlooked jobs wait for a free Saturday. Immediate answer: one monthly area, one bounded weekend job, shared ownership. Shift: focus narrows choices, does not make all tasks compulsory. Three system layers; exact data-driven 12-month rotation; five steps; current-month example rendered from the actual monthly task data; missed-week/month fallback; companion feature note with browser-storage limitation; one next action. Approx. 550 prose words plus the data-driven rotation/checklist.
 
 ## Overlap and links
 HC-01 owns whole-week routine; HC-03 owns sizing weekday zones; HC-04 owns rotating monthly projects. HC-05 remains planned and unlinked: Read next temporarily HC-01. Read HC-01, HC-03, workflow, format, voice, style, SEO, linking, tracker, clusters and photo rules. Parents/siblings HC-01 and HC-03; planning bridge FP-04. Incoming links added from HC-01 and HC-03. No new tool, account, sync or shared checkmarks promised.
@@ -19,3 +19,7 @@ src/data/cleaning.ts supplies every rotation title and October task verbatim. Co
 
 ## Unique photography
 Two Kaboompics photographs never previously deployed on OMC: 32344 (basket/brush preparation, from archived full-size download) and 32349 (inside-window cleaning, 600x900 licensed source image from review archive). Hero crop removes partial chin; final crop contains only hands/torso and unbranded supplies. Inline image displayed at max 400px, not enlarged beyond its source resolution. Actual files inspected for faces, readable marks/artwork and context; source license evidence in HC-03-full/manifest.json and HC-03/manifest.json. No new download possible while Kaboompics has a site-served bot block; no bypass attempted. 32361 was rejected for visible tool branding. Existing site photos 32280/32324 not reused. Catalog records specific clearance and new usage. Neither image claims to show a customer or endorsement.
+
+## Current-month example update: 2026-10-14
+
+CurrentMonthProject reads the canonical monthlyDeepClean array. Static HTML has a build-month fallback; browser script selects the reader’s actual local month on load, page navigation, tab visibility and the next local midnight. This avoids waiting for a site rebuild when months change. All 12 pre-rendered checklist templates use canonical labels and matching month colors; only one is inserted. Fixed October heading and closet-specific ownership copy removed.

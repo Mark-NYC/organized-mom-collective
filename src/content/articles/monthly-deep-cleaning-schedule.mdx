@@ -20,6 +20,7 @@ cta: companion
 
 import { monthlyDeepClean } from '../../data/cleaning';
 import { monthColor } from '../../theme';
+import CurrentMonthProject from '../../components/resources/CurrentMonthProject.astro';
 
 The kitchen gets wiped. The dishes get done. But the closet shelf, window tracks and cupboard handles keep waiting for a free Saturday that never comes.
 
@@ -69,15 +70,11 @@ This is the rotation in the OMC cleaning companion. It mixes deeper cleaning, de
 
 </RealLifeVersion>
 
-## Example: October’s closet cleanout
+## Example: this month’s project
 
-<Checklist
-  kicker={monthlyDeepClean[9].name}
-  title={monthlyDeepClean[9].title}
-  items={monthlyDeepClean[9].tasks.map((task) => task.label)}
-/>
+<CurrentMonthProject />
 
-These are options for the month. Pick one for this weekend. One adult can own the shelf; another can own getting donations out of the house. Children practice sorting their own things with support. The owner handles the follow-through, so the list doesn’t become more reminders for you.
+These are options for the current month. Pick one for this weekend and agree on its owner. Another adult can take a different task, including putting supplies away and handling any follow-up. Children can learn a suitable small part with support. Each owner checks their own job, so the list doesn’t become more reminders for you.
 
 <div style={{ maxWidth: '400px', margin: '0 auto' }}>
 
