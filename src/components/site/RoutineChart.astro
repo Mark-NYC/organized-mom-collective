@@ -35,7 +35,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     }
   </div>
 
-  <fieldset class="mr-palette-picker" data-mr-advanced hidden>
+  <fieldset class="mr-palette-picker" data-mr-advanced>
     <legend>Choose your colors</legend>
     <div class="mr-palette-options">
       {Object.entries(toolPalettes).map(([id, palette]) => (
@@ -415,7 +415,8 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-actions [data-mr-download] { width:100%; min-height:52px; }
     .mr-container:not(.mr-exporting) .mr-actions [data-mr-reset] { display:none; }
     .mr-container:not(.mr-exporting) .mr-customize-link { order:4; display:block; align-self:center; min-height:44px; background:transparent; border:0; text-decoration:underline; padding:8px 12px; color:var(--mr-ink); }
-    .mr-container:not(.mr-exporting) .mr-palette-picker { order:5; }
+    .mr-container:not(.mr-exporting) .mr-palette-picker { order:5; display:none; }
+    .mr-container:not(.mr-exporting) .mr-palette-picker.mr-advanced-open { display:block; }
     .mr-container:not(.mr-exporting) .mr-ideas { order:6; }
     .mr-container:not(.mr-exporting) .mr-ideas:not(.mr-ideas-open) { display:none; }
     .mr-container:not(.mr-exporting) .mr-footnote { order:7; }
@@ -538,8 +539,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   const ideas=host.querySelector<HTMLElement>('.mr-ideas')!;
   host.querySelector<HTMLButtonElement>('[data-mr-customize]')?.addEventListener('click',e=>{
     const button=e.currentTarget as HTMLButtonElement;
-    const open=advanced.hidden;
-    advanced.hidden=!open;
+    const open=advanced.classList.toggle('mr-advanced-open');
     ideas.classList.toggle('mr-ideas-open',open);
     button.setAttribute('aria-expanded',String(open));
   });
