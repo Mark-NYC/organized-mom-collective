@@ -186,9 +186,7 @@
         "action": "None."
       },
       "note_2026-10-12": "Not used in FP-01: 28541 from the same shoot (K08) chosen instead.",
-      "used_in": [
-        "FP-06 /resources/grocery-list-from-meal-plan"
-      ],
+      "used_in": [],
       "clearance_record": {
         "approval": "Owner standing Kaboompics approval 2026-10-12, PHOTO-DISCOVERY.md",
         "checks_by": "Codex",
@@ -206,7 +204,8 @@
           960
         ],
         "alt_text_example": "A ciabatta and baguette in a cotton mesh grocery bag on a pale kitchen counter."
-      }
+      },
+      "note_2026-10-14": "Removed from FP-06 at owner request; retained as an archived cleared asset, not used in the current article."
     },
     {
       "id": "F01",
@@ -563,8 +562,7 @@
         "edits": "Resize and WebP export only; no grade or crop."
       },
       "used_in": [
-        "IF-01 /resources/intentional-family-life",
-        "FP-06 /resources/grocery-list-from-meal-plan"
+        "IF-01 /resources/intentional-family-life"
       ],
       "reuse_review_2026_10_14": "Existing cleared notepad asset reused as editorial list-writing detail; no new endorsement or sensitive context."
     },
@@ -750,6 +748,80 @@
         "/images/resources/if-01-family-baking-640.webp",
         "/images/resources/if-01-family-baking-960.webp",
         "/images/resources/if-01-family-baking-1280.webp"
+      ]
+    },
+    {
+      "id": "FP06-K40035",
+      "title": "reusable mesh bag with zucchini and fresh herbs",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/40035/reusable-mesh-bag-with-zucchini-and-fresh-herbs",
+      "owner_visual_status": "owner_supplied_and_requested_publication_2026-10-14",
+      "license_review": "Kaboompics free stock photo source identified through indexed official detail page; owner downloaded and supplied after source recommendation; standing owner approval 2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_verification_date": "2026-10-14",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-06-market-zucchini-1200.webp",
+      "original_path": "design/photography/kaboompics/FP-06-owner-2026-10-14/market-zucchini-original.jpg",
+      "original_dimensions": [
+        1200,
+        1800
+      ],
+      "original_sha256": "9014ec7072c184c9cbb6ce3c1a17f54103778995ad8c92d20d83ac0a463d37ca",
+      "visual_content_review": {
+        "review_date": "2026-10-14",
+        "review_basis": "actual owner uploaded JPEG",
+        "visual_status": "pass",
+        "observations": "No recognizable faces or third-party logos. Market price sign cropped from hero; unbranded fresh produce in both. No endorsement or customer identity claims."
+      },
+      "model_release_review": "not_needed_no_identifiable_person",
+      "clearance_record": {
+        "approval": "Standing Kaboompics approval and specific owner upload/use instruction, 2026-10-14",
+        "context": "Editorial grocery shopping/stock check; not a customer home or endorsement; no AI training or generation",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "edits": "Hero landscape crop and responsive WebP; vegetable image native 200x300 WebP, explicitly capped at 200 CSS pixels"
+      },
+      "used_in": [
+        "FP-06 /resources/grocery-list-from-meal-plan"
+      ]
+    },
+    {
+      "id": "FP06-K38833",
+      "title": "mixed green vegetables flat lay on light background minimal food styling",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/38833/mixed-green-vegetables-flat-lay-on-light-background-minimal-food-styling",
+      "owner_visual_status": "owner_supplied_and_requested_publication_2026-10-14",
+      "license_review": "Kaboompics free stock photo source identified through indexed official detail page; owner downloaded and supplied after source recommendation; standing owner approval 2026-10-12",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_verification_date": "2026-10-14",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-06-vegetable-flatlay-1200.webp",
+      "original_path": "design/photography/kaboompics/FP-06-owner-2026-10-14/vegetable-flatlay-original.jpg",
+      "original_dimensions": [
+        1200,
+        1800
+      ],
+      "original_sha256": "f5b4d38223e858e3920c1eece1918cd3785ceb21b01c01940595f459a6be8496",
+      "visual_content_review": {
+        "review_date": "2026-10-14",
+        "review_basis": "full-size 1200x1800 owner-uploaded JPEG and exported landscape crop",
+        "visual_status": "pass",
+        "observations": "No recognizable faces or third-party logos. Market price sign cropped from hero; unbranded fresh produce in both. No endorsement or customer identity claims."
+      },
+      "model_release_review": "not_needed_no_identifiable_person",
+      "clearance_record": {
+        "approval": "Standing Kaboompics approval and specific owner upload/use instruction, 2026-10-14",
+        "context": "Editorial grocery shopping/stock check; not a customer home or endorsement; no AI training or generation",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "edits": "Full-size owner photo received; landscape crop 0,0.2,1,0.644444; responsive WebP sizes 640,960,1200; no upscaling"
+      },
+      "used_in": [
+        "FP-06 /resources/grocery-list-from-meal-plan"
       ]
     }
   ],

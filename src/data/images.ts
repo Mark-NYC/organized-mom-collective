@@ -16,6 +16,8 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'fp-06-market-zucchini': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-uploaded Kaboompics 40035; original in design/photography/kaboompics/FP-06-owner-2026-10-14/market-zucchini-original.jpg; landscape crop 0,0.28,1,0.724444; no content alteration' },
+  'fp-06-vegetable-flatlay': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-uploaded Kaboompics 38833; original in design/photography/kaboompics/FP-06-owner-2026-10-14/vegetable-flatlay-original.jpg; full-size 1200x1800 owner source; landscape crop 0,0.2,1,0.644444; no upscaling' },
   'fp-06-bread-grocery-bag': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 28538, Karolina Grabowska; original in design/photography/kaboompics/FP-01-full/28538-2400.jpg; clearance K06, 2026-10-14; resize only' },
   'if-01-family-baking': { widths: [640, 960, 1280], width: 1280, height: 1024, source: 'Existing owner-approved homepage family-kitchen image; reused unchanged for Intentional Family Life at owner request, 2026-10-14' },
   'fp-09-morning-fridge': { widths: [640, 898], width: 898, height: 1087, source: 'Owner-supplied morning routine fridge mockup, 2026-10-13; original design/photography/owner/fp-09-morning-fridge-original.webp; crop 0.19,0.085,0.99,0.86, chart unchanged' },
