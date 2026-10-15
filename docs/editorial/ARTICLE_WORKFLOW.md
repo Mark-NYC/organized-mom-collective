@@ -2,7 +2,11 @@
 
 The exact process for taking one article from the tracker to published, including its Pinterest plan. One article at a time: finish step 8 before starting the next. **Every article has two required deliverables: the article and its Pinterest plan.** An article without a complete plan fails `npm run check:site`.
 
-Related: [CONTENT_TRACKER.md](CONTENT_TRACKER.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md) · [SEO_STRATEGY.md](SEO_STRATEGY.md) · [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) · [BRAND_VOICE.md](BRAND_VOICE.md).
+Related: [SEARCH_OPPORTUNITY_LOOP.md](SEARCH_OPPORTUNITY_LOOP.md) · [CONTENT_TRACKER.md](CONTENT_TRACKER.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md) · [SEO_STRATEGY.md](SEO_STRATEGY.md) · [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) · [BRAND_VOICE.md](BRAND_VOICE.md).
+
+## Ongoing search and improvement review
+
+Use [SEARCH_OPPORTUNITY_LOOP.md](SEARCH_OPPORTUNITY_LOOP.md) for weekly evidence-based gap/leak review, original usefulness requirements and monthly retrospective audits. For the current baseline and prioritized existing-page work, see [ARTICLE_AUDIT_2026-10-15.md](ARTICLE_AUDIT_2026-10-15.md). Search Console query metrics must be observed, not guessed. Prioritize repairing weak existing articles before creating near-duplicate coverage. Every brief must record the page's distinctive verified practical value (a tool, worked example, handoff method, or specific fallback). Measure resource-to-tool and resource-to-product actions when instrumentation exists.
 
 ## Before you start: pick the article
 
