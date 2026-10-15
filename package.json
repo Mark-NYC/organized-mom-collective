@@ -11,6 +11,7 @@
     "test": "vitest run",
     "astro": "astro",
     "check:site": "node scripts/check-site.mjs",
+    "check:feed": "node scripts/check-pinterest-feed.mjs",
     "verify": "npm run build && npm run check:site && npm test",
     "test:shop": "bash scripts/test-shop.sh",
     "build:functions": "node scripts/build-dashboard-functions.mjs"
