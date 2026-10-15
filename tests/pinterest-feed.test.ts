@@ -54,20 +54,29 @@ const req = (method = 'GET') => new Request('https://www.organizedmomcollective.
 const env = { PUBLIC_SUPABASE_URL: 'https://example.supabase.co', PUBLIC_SUPABASE_ANON_KEY: 'anon' };
 
 describe('pinterest feed rows', () => {
-  it('lists only products that can be bought right now and are opted in', () => {
+  it('lists only opted-in products from the active catalog', () => {
     expect(feedRows(catalog()).map((r) => r.id)).toEqual(['calendar-26-week']);
-  });
-
-  it('is empty unless the store switch is Open', () => {
-    expect(feedRows(catalog({ checkout_mode: 'preview' }))).toEqual([]);
-    expect(feedRows(catalog({ checkout_mode: 'off' }))).toEqual([]);
-  });
-
-  it('leaves out sold-out products (inactive ones never reach the public catalog)', () => {
-    const c = catalog();
-    c.products[0].available = false;
-    expect(feedRows(c)).toEqual([]);
     expect(feedRows(catalog({ products: [] }))).toEqual([]);
+  });
+
+  it('says "in stock" only when the store is Open and the product is in stock', () => {
+    expect(feedRows(catalog())[0].availability).toBe('in stock');
+    for (const mode of ['preview', 'off'] as const) {
+      const rows = feedRows(catalog({ checkout_mode: mode }));
+      expect(rows.map((r) => [r.id, r.availability])).toEqual([['calendar-26-week', 'out of stock']]);
+    }
+    const soldOut = catalog();
+    soldOut.products[0].available = false;
+    expect(feedRows(soldOut)[0].availability).toBe('out of stock');
+  });
+
+  // Regression: a header-only file is what Pinterest rejected with "Catalogs doesn't support your
+  // file type". While the store is closed the calendar must still be listed (as out of stock).
+  it('never collapses to a header-only file while an opted-in product is active', () => {
+    for (const mode of ['live', 'preview', 'off'] as const) {
+      const csv = feedCsv(feedRows(catalog({ checkout_mode: mode })));
+      expect(parseCsv(csv).length).toBeGreaterThan(1);
+    }
   });
 
   it('takes price and currency from the database, never from the copy', () => {
@@ -144,8 +153,27 @@ describe('pinterest feed CSV', () => {
     expect(parsed.slice(1)).toEqual(rows.map((r) => FEED_COLUMNS.map((c) => r[c])));
   });
 
-  it('is a header row only when nothing is for sale', () => {
-    expect(feedCsv([])).toBe(FEED_COLUMNS.join(',') + '\r\n');
+  it('is plain CSV: no HTML, JSON, BOM or blank lines', () => {
+    const csv = feedCsv(feedRows(catalog({ checkout_mode: 'preview' })));
+    expect(csv.charCodeAt(0)).not.toBe(0xfeff);
+    expect(csv.startsWith('id,title,')).toBe(true);
+    expect(csv).not.toMatch(/<\s*(!doctype|html|body)|^\s*[{[]/im);
+    expect(csv).not.toMatch(/\r\n\r\n/);
+  });
+});
+
+describe('pinterest feed routing', () => {
+  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+
+  it('rewrites /pinterest-feed.csv to the function and never redirects it', () => {
+    expect(vercel.rewrites).toContainEqual({ source: '/pinterest-feed.csv', destination: '/api/pinterest-feed' });
+    expect(JSON.stringify(vercel.redirects ?? [])).not.toContain('pinterest-feed');
+  });
+
+  it('has no static file or Astro page shadowing the feed path', () => {
+    expect(existsSync(new URL('../public/pinterest-feed.csv', import.meta.url))).toBe(false);
+    expect(existsSync(new URL('../src/pages/pinterest-feed.csv.ts', import.meta.url))).toBe(false);
+    expect(existsSync(new URL('../src/middleware.ts', import.meta.url))).toBe(false);
   });
 });
 

@@ -7,11 +7,12 @@
  * public shop_catalog() RPC with the public anon key, the same call the /checkout page makes:
  * no stock counts, no Stripe or service-role secrets, no admin endpoints.
  *
- * A product is listed only when ALL of these hold (otherwise it's left out, never "in stock"):
- *   - the store switch is Open (checkout_mode 'live'); in Off or Preview nobody can buy, so the feed is empty
- *   - the product is active in Dashboard → Inventory (inactive = unpublished or future)
- *   - it's in stock (shop_catalog's `available`)
- *   - it has an entry in FEED_PRODUCTS below: its landing page, Pinterest copy and JPEG images
+ * A product is listed when it's active in Dashboard → Inventory (inactive = unpublished or future,
+ * never listed) and has an entry in FEED_PRODUCTS below (landing page, Pinterest copy, JPEG images).
+ * It's "in stock" only when it can be bought right now: store switch Open (checkout_mode 'live') AND
+ * in stock (shop_catalog's `available`). Otherwise it's listed as "out of stock", which Pinterest
+ * keeps in the catalog but doesn't show as buyable. Listing it either way keeps the feed from being
+ * a header row only, which Pinterest refuses ("Catalogs doesn't support your file type").
  *
  * Price, currency and availability always come from the database; nothing here can override them.
  * Setup and Pinterest steps: supabase/SHOP.md → Pinterest catalog feed.
@@ -129,11 +130,11 @@ const absolute = (path: string) => FEED_ORIGIN + path;
 
 /** The rows Pinterest should see right now. Pure: everything comes from `catalog`. */
 export function feedRows(catalog: Catalog): FeedRow[] {
-  if (catalog.checkout_mode !== 'live') return [];
+  const open = catalog.checkout_mode === 'live';
   const rows: FeedRow[] = [];
   for (const p of catalog.products) {
     const copy = FEED_PRODUCTS[p.slug];
-    if (!copy || !p.available) continue;
+    if (!copy) continue;
     if (!Number.isInteger(p.price_cents) || p.price_cents <= 0 || !/^[a-z]{3}$/i.test(p.currency)) continue;
     rows.push({
       id: p.slug,
@@ -142,7 +143,7 @@ export function feedRows(catalog: Catalog): FeedRow[] {
       link: absolute(copy.path),
       image_link: absolute(copy.images[0]),
       price: feedPrice(p.price_cents, p.currency),
-      availability: 'in stock',
+      availability: open && p.available ? 'in stock' : 'out of stock',
       brand: BRAND,
       condition: 'new',
       additional_image_link: copy.images.slice(1, 11).map(absolute).join(','),

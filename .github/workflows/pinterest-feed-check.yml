@@ -1,0 +1,18 @@
+name: Pinterest feed check
+# Fetches the LIVE Pinterest catalog feed like Pinterest does and fails (GitHub emails the repo
+# owner) if it stops being a 200 text/csv file with product rows. See scripts/check-pinterest-feed.mjs.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 11 * * *'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-pinterest-feed.mjs
