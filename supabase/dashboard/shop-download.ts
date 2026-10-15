@@ -81,6 +81,11 @@ var eyebrowStyle = `margin:0 0 10px;font-family:${SANS};font-size:11px;font-weig
 
 // supabase/functions/_shared/env.ts
 var STRIPE_API_VERSION = "2025-03-31.basil";
+function wwwTwin(origin) {
+  const m = origin.match(/^https:\/\/(www\.)?([a-z0-9-]+\.[a-z]{2,})$/i);
+  if (!m) return null;
+  return m[1] ? `https://${m[2]}` : `https://www.${m[2]}`;
+}
 function readEnv(get) {
   const v = (k, fallback = "") => (get(k) ?? fallback).trim();
   const siteUrl = v("SHOP_SITE_URL", "https://organizedmomcollective.com").replace(/\/$/, "");
@@ -93,7 +98,9 @@ function readEnv(get) {
     stripeWebhookSecret: v("STRIPE_WEBHOOK_SECRET"),
     liveCheckoutEnabled: v("SHOP_LIVE_CHECKOUT") === "enabled",
     siteUrl,
-    allowedOrigins: origins ? origins.split(",").map((o) => o.trim().replace(/\/$/, "")).filter(Boolean) : [siteUrl],
+    allowedOrigins: [
+      ...new Set([siteUrl, wwwTwin(siteUrl), ...origins.split(",").map((o) => o.trim().replace(/\/$/, ""))].filter((o) => Boolean(o)))
+    ],
     previewToken: v("SHOP_PREVIEW_TOKEN"),
     resendApiKey: v("RESEND_API_KEY"),
     emailFrom: v("SHOP_EMAIL_FROM", "Organized Mom Collective <orders@organizedmomcollective.com>"),

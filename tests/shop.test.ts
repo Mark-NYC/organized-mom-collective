@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { checkoutError, paidOrderData, parseCart, sessionParams, isPaidSession, type ReservedOrder } from '../supabase/functions/_shared/checkout.ts';
 import type { OrderRow as ServerOrder } from '../supabase/functions/_shared/db.ts';
 import { renderEmail, trackingLink } from '../supabase/functions/_shared/email.ts';
-import { readEnv } from '../supabase/functions/_shared/env.ts';
+import { readEnv, wwwTwin } from '../supabase/functions/_shared/env.ts';
 import { formEncode, signStripePayload, stripeMode, verifyStripeSignature } from '../supabase/functions/_shared/stripe.ts';
 import { defaultOrderMode, describeEvent, emailOutcomeText, filterOrders, heldUnits, money, ordersCsv, salesTotals, shippingQuote, soldUnits, type OrderRow, type ShippingRule } from '../src/lib/shop';
 import { routes } from '../src/routes';
@@ -176,11 +176,29 @@ describe('checkout logic', () => {
   it('defaults to the production site and test-safe settings', () => {
     const env = readEnv(() => undefined);
     expect(env.siteUrl).toBe('https://organizedmomcollective.com');
-    expect(env.allowedOrigins).toEqual(['https://organizedmomcollective.com']);
+    expect(env.allowedOrigins).toEqual(['https://organizedmomcollective.com', 'https://www.organizedmomcollective.com']);
     expect(env.liveCheckoutEnabled).toBe(false);
     // Only the exact value turns it on.
     expect(readEnv((k) => (k === 'SHOP_LIVE_CHECKOUT' ? 'true' : undefined)).liveCheckoutEnabled).toBe(false);
     expect(readEnv((k) => (k === 'SHOP_LIVE_CHECKOUT' ? 'enabled' : undefined)).liveCheckoutEnabled).toBe(true);
+  });
+
+  it('always allows the site and its www twin, plus the listed origins, and nothing else', () => {
+    const env = readEnv((k) => ({ SHOP_ALLOWED_ORIGINS: 'https://organizedmomcollective.com, https://organized-mom-collective.vercel.app/' })[k]);
+    expect(env.allowedOrigins).toEqual([
+      'https://organizedmomcollective.com',
+      'https://www.organizedmomcollective.com',
+      'https://organized-mom-collective.vercel.app',
+    ]);
+    expect(readEnv((k) => ({ SHOP_SITE_URL: 'https://www.organizedmomcollective.com' })[k]).allowedOrigins).toEqual([
+      'https://www.organizedmomcollective.com',
+      'https://organizedmomcollective.com',
+    ]);
+    // No twin for non-apex hosts, and no wildcards.
+    expect(wwwTwin('https://organized-mom-collective.vercel.app')).toBeNull();
+    expect(wwwTwin('http://localhost:4321')).toBeNull();
+    expect(wwwTwin('http://organizedmomcollective.com')).toBeNull();
+    expect(readEnv(() => undefined).allowedOrigins).not.toContain('https://evil-organizedmomcollective.com');
   });
 });
 
