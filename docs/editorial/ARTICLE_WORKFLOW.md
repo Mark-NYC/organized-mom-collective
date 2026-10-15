@@ -106,3 +106,9 @@ If an older article's content changes meaningfully, re-check its Pinterest plan:
 - Change the advice → set `updated` to today, note the change in the commit message, and re-check the Pinterest plan (add a line to its review log; regenerate any pin whose promise or copied content no longer matches).
 - Fix typos → no `updated` change.
 - Never change a published slug. If an article must be retired, keep its URL and point readers to the replacement in the body.
+
+## Additional checks for comparison/decision articles
+
+Before drafting a comparison from [CONTENT_CLUSTERS.md](CONTENT_CLUSTERS.md#decision-guides-and-comparisons-added-october-15-2026), capture the buyer decision and identical real-life scenario for both options. Add a claim log to the research brief: claim, supporting official URL, price/plan/version if applicable, date verified, and whether personally tested or documented only. Do not assert untested product behavior as firsthand observation. Write the short conditional recommendation first, then the evidence, comparison table, real-world example, costs where verifiable, and switching friction. Show honestly where a competitor or non-OMC approach wins. Follow [SEO_STRATEGY.md](SEO_STRATEGY.md#comparison-and-decision-guide-standards-october-2026).
+
+The first three planned guides are FP-11 (wall vs digital calendar), HC-06 (Clean Mama vs FlyLady), and FP-12 (best family command center systems). Reuse the existing brief, article and Pinterest workflows, including checks and approvals. Produce five distinct, truthful Pinterest creative concepts **as an optional promotional expansion** for FP-11; do not change the existing three-pin required plan or tracker schema. Do not publish or claim results until actually checked.
