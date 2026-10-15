@@ -21,7 +21,10 @@ export interface ShopEnv {
   liveCheckoutEnabled: boolean;
   /** Public site origin, for return URLs, images and emails. */
   siteUrl: string;
-  /** Browser origins allowed to call shop-checkout and shop-admin. */
+  /**
+   * Browser origins allowed to call shop-checkout, shop-download and shop-admin: always the site
+   * URL and its www/bare twin (whichever the domain redirects to), plus SHOP_ALLOWED_ORIGINS.
+   */
   allowedOrigins: string[];
   /** Lets /checkout?preview=… through while checkout_mode is 'preview'. */
   previewToken: string;
@@ -31,6 +34,13 @@ export interface ShopEnv {
 }
 
 export const STRIPE_API_VERSION = '2025-03-31.basil';
+
+/** https://example.com ⇄ https://www.example.com; null for anything else (localhost, *.vercel.app, subdomains). */
+export function wwwTwin(origin: string): string | null {
+  const m = origin.match(/^https:\/\/(www\.)?([a-z0-9-]+\.[a-z]{2,})$/i);
+  if (!m) return null;
+  return m[1] ? `https://${m[2]}` : `https://www.${m[2]}`;
+}
 
 export function readEnv(get: (key: string) => string | undefined): ShopEnv {
   const v = (k: string, fallback = '') => (get(k) ?? fallback).trim();
@@ -44,7 +54,9 @@ export function readEnv(get: (key: string) => string | undefined): ShopEnv {
     stripeWebhookSecret: v('STRIPE_WEBHOOK_SECRET'),
     liveCheckoutEnabled: v('SHOP_LIVE_CHECKOUT') === 'enabled',
     siteUrl,
-    allowedOrigins: origins ? origins.split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean) : [siteUrl],
+    allowedOrigins: [
+      ...new Set([siteUrl, wwwTwin(siteUrl), ...origins.split(',').map((o) => o.trim().replace(/\/$/, ''))].filter((o): o is string => Boolean(o))),
+    ],
     previewToken: v('SHOP_PREVIEW_TOKEN'),
     resendApiKey: v('RESEND_API_KEY'),
     emailFrom: v('SHOP_EMAIL_FROM', 'Organized Mom Collective <orders@organizedmomcollective.com>'),

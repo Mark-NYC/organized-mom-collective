@@ -921,15 +921,22 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
     });
 
     it('the database grants the browser roles nothing beyond the intended entry points', () => {
-      // Every public function anon can execute: the four intended ones, nothing else.
+      // Every public function anon can execute: the intended ones, nothing else. tool_email_signup is the
+      // chore chart download form's write-only signup (20261013010000_tool_email_signup.sql).
       expect(
         all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
               where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
-      ).toEqual(['shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track']);
+      ).toEqual(['shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track', 'tool_email_signup']);
       expect(
         all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
               where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
-      ).toEqual(['is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track']);
+      ).toEqual(['is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track', 'tool_email_signup']);
+      // The signup's contacts stay out of the browser: anon gets nothing, authenticated reads only
+      // (row-level security limits it to survey admins), and the function runs with an empty search_path.
+      expect(all(`select has_table_privilege('anon', 'public.tool_email_contacts', 'select,insert,update,delete,truncate,references,trigger') ok`)[0].ok).toBe(false);
+      expect(all(`select has_table_privilege('authenticated', 'public.tool_email_contacts', 'insert,update,delete,truncate') ok`)[0].ok).toBe(false);
+      expect(all(`select relrowsecurity ok from pg_class where oid = 'public.tool_email_contacts'::regclass`)[0].ok).toBe(true);
+      expect(all(`select prosecdef and proconfig = array['search_path=""'] ok from pg_proc where proname = 'tool_email_signup'`)[0].ok).toBe(true);
       // anon has no table privileges at all on shop tables.
       expect(
         all(`select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace

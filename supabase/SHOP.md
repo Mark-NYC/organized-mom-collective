@@ -90,7 +90,7 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
   | `shop-admin` | `supabase/dashboard/shop-admin.ts` |
 
   Replace everything in the editor with the file, deploy, then in the function's **Details/Settings** turn **off** "Verify JWT" (Enforce JWT verification) for all three. Each function checks its own callers instead.
-- [ ] Edge Functions → Secrets: `STRIPE_SECRET_KEY` (sk_**test**_…), `STRIPE_WEBHOOK_SECRET`, `SHOP_PREVIEW_TOKEN` (long random string), `SHOP_SITE_URL=https://organizedmomcollective.com`, `SHOP_ALLOWED_ORIGINS` (site URL, its `www.` form if the domain serves or redirects to `www`, plus your Vercel preview URL, comma-separated; a missing origin makes checkout, downloads and the dashboard fail in the browser), `RESEND_API_KEY`, `SHOP_EMAIL_REPLY_TO`. **Do not set `SHOP_LIVE_CHECKOUT`.**
+- [ ] Edge Functions → Secrets: `STRIPE_SECRET_KEY` (sk_**test**_…), `STRIPE_WEBHOOK_SECRET`, `SHOP_PREVIEW_TOKEN` (long random string), `SHOP_SITE_URL=https://organizedmomcollective.com`, `SHOP_ALLOWED_ORIGINS` (extra browser origins, comma-separated, e.g. your Vercel URL; the site URL and its `www.`/bare twin are always allowed), `RESEND_API_KEY`, `SHOP_EMAIL_REPLY_TO`. **Do not set `SHOP_LIVE_CHECKOUT`.**
 - (With the Supabase CLI instead: `supabase db push` and `supabase functions deploy <name>` from `supabase/functions/`; `supabase/config.toml` already turns JWT verification off.)
 
 ### Stripe (test mode)
@@ -285,7 +285,12 @@ Nothing here deploys itself: a merged PR changes GitHub only. Vercel deploys the
 | Download files | SQL Editor: every path in `shop_products.files` exists in `storage.objects` (bucket `shop-downloads`). Uploads keep the name they were uploaded with: rename to the exact paths in the tables above, or buyers get missing files. |
 | Site (Vercel) | Deployments → Production: the commit matches the latest merge on GitHub. Dashboard → Orders has an "Orders: Real and test" filter. |
 
-**Last verified 2026-10-15:** all migrations through `20261017000000` applied (every `public` function, policy and grant identical to a database built from `supabase/migrations/`); the mug added switched off; the Real Life Reset Kit and Family Sanity Saver files renamed to their product paths (all 29 download paths sign and serve); all four functions redeployed from `supabase/dashboard/` (Verify JWT off); receipt images for every product served from `/email/`. `SHOP_ALLOWED_ORIGINS` allowed `https://organizedmomcollective.com` but not `https://www.organizedmomcollective.com`, where the domain redirects.
+**Last verified 2026-10-15 (production):**
+- Database: all migrations through `20261017000000` applied; every `public` function, policy and grant identical to a database built from `supabase/migrations/`. Mug added switched off; Real Life Reset Kit and Family Sanity Saver files at their product paths (all 29 download paths sign and serve).
+- Edge Functions: all four redeployed from `supabase/dashboard/` (Verify JWT off). They accept browser calls from `https://organizedmomcollective.com`, `https://www.organizedmomcollective.com` and `https://organized-mom-collective.vercel.app`, and from nothing else. `SHOP_SITE_URL` should be `https://organizedmomcollective.com`.
+- Domain: Vercel serves the site on `www.organizedmomcollective.com` and redirects the bare domain to it (308), while canonical tags, the sitemap, robots.txt and the calendar's QR code use the bare domain. To match them: Vercel → Project → Settings → Domains → `organizedmomcollective.com` → Edit → no redirect (Connect to Production) → Save; then `www.organizedmomcollective.com` → Edit → Redirect to `organizedmomcollective.com` (308) → Save. In that order, or the two redirects loop. The functions need no change either way.
+- Left over from the 2026-10-15 fixes: an empty `shop-storage-fix` Edge Function (delete it: Edge Functions → shop-storage-fix → Delete) and the `http` database extension (Database → Extensions → http → off). Neither is reachable from the public API.
+- Production has `PUBLIC_SHOP_ENABLED` on, so `/weekly-reset`, `/real-life-reset-kit` and `/mind-your-own-motherhood-mug` show Buy buttons while the store setting is Preview: visitors who click get "checkout closed". Turn the store setting Open (test or live) or unset `PUBLIC_SHOP_ENABLED` in Vercel production until launch.
 
 ## Tests
 
