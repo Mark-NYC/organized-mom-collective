@@ -1,12 +1,12 @@
 # Resource article audit: 2026-10-15
 
-Scope: all **17** `src/content/articles/*.mdx` files currently present on the repository's default branch (excluding .gitkeep), with frontmatter, article intros, headings, body links and key components inspected. Earlier generated `content-inventory.md` states **16 published**, so regenerate inventory and reconcile its timing with the recently added FP-11 before treating that count as current.
+Scope: all **17** `src/content/articles/*.mdx` files currently present on the repository's default branch (excluding .gitkeep), with frontmatter, article intros, headings, body links and key components inspected. The latest generated `content-inventory.md` confirms **17 published**, matching the 17 article files; the earlier count of 16 was stale.
 
 **Audit limitations:** This is a repository-content review, not a live visual QA, not an instrumented generator test, not a Google Search Console/GA4 audit, and not independent verification of all article body claims. Priority labels are recommended editorial work, not proof of broken functionality. Every article currently shows a usable opening answer, and inspected files have at least two resource links by simple string count. No performance rankings are asserted.
 
 ## Across the library
 - **Preserve:** short-answer-first writing, practical bad-week fallbacks, cross-article links, tangible household routines, the shared-responsibility theme and verified-product policy.
-- **Do first:** reconcile 17 article files vs generated inventory's 16, inspect the October monthly-project behavior over all twelve months, and verify the new calendar comparison's factual scope.
+- **Do first:** validate current-month project rendering across all twelve months, verify the new calendar comparison on mobile, and test both free generators. The earlier 16-vs-17 count is resolved in the generated inventory.
 - **Improve:** a few articles explain routines well but would benefit from a single concrete completed example or copyable template; avoid repeating generic 'Mom shouldn't do it alone' language without a specific handoff.
 - **Tool pages:** generator articles intentionally don't use all default Shift/RealLifeVersion components. Judge them by what they let readers accomplish, and test the real flow rather than imposing decorative prose.
 - **Images:** zero photographs is not a defect; add images only if they teach, clarify or help a user recognize the task. Audit repeated or redundant images before adding any.
@@ -37,16 +37,19 @@ Scope: all **17** `src/content/articles/*.mdx` files currently present on the re
 
 ## Fix log (2026-10-15)
 
+- IF-02: **Edited and committed.** Replaced a generic sample line with a concrete two-week school-lunch handoff example: owner, noticing, action, reminders, and check-in. Labeled as illustrative and linked the real worksheet.
+- FP-08: **Edited and committed.** Added a three-day, three-category tally with illustrative counts and corresponding fixes. Clarified that tally marks belong to individual repeated problems, not category totals.
+- Inventory: **Reconciled.** Current generated `content-inventory.md` lists 17 published articles, matching 17 MDX files.
 - FP-11: **Edited and committed.** Corrected the implication that all digital calendars automatically alert people to event edits; clarified Google Family Calendar's default behavior and Cozi Gold's change alerts, improved household decision test and pillar link, and added official-source claim log to the brief. Still needs deployed-page/mobile check.
 - HC-04: **Edited and committed.** Aligned Friday, Saturday and Sunday descriptions with the actual cleaning program's named weekend zones and clarified that the current-month checklist follows the reader's device. Shared data source confirmed by repository inspection. Twelve-month rendered/browser QA remains pending.
 - `npm run verify`, rendered screenshots, Search Console review and generator functional checks: **not run** in this connector-only pass.
 
 ## Immediate execution order
-1. Run existing verification and regenerate inventory; check publication statuses and any missing documentation.
+1. Run `npm run verify` locally or in CI; the generated inventory already lists all 17 published articles.
 2. Review the updated FP-11 comparison at phone size; its official-source claim log is now saved.
 3. Test HC-04's current-month card in January through December; its source data and weekend labels have been reconciled.
 4. Check FP-09 and IF-03 generator flows on phone, including downloads, and match promises to behavior.
-5. Prioritize worked examples for IF-02 and FP-08; photo relevance review for FP-05 and IF-01.
+5. IF-02 and FP-08 worked examples are committed; next review photo relevance for FP-05 and IF-01.
 6. After 28+ days of meaningful Search Console data, rank real query-level gaps/leaks and revisit priorities.
 
 ## Repeatable audit columns
