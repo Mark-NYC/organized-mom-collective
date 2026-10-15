@@ -125,3 +125,15 @@ Free morning routine chart generator: a plan kids can follow. URL /resources/mor
 ## FP-10: Family launch pad by the door
 
 Owner-requested article /resources/launch-pad-by-the-door. Owns the physical bags/shoes/extras staging area and night-before departure check. FP-03 owns calendar and paper processing; FP-09 owns the get-ready sequence; FP-01 owns weekly planning. Parent FP-01, siblings FP-03/FP-09, next FP-09. No new tool: the existing command-center setup sheet already includes keys, backpacks and ready-to-go papers.
+
+## Decision guides and comparisons (added October 15, 2026)
+
+Test comparison/decision content as roughly **20% of new editorial output**, not a fixed publishing quota or a replacement for practical guides and free tools. Working mix for the next 30 days: 50% practical guides, 30% free tools, 20% decision guides. This is a hypothesis to measure, not a proven optimal ratio. Keep the same three pillars and existing IDs; prioritize based on product fit, distinct search intent, and what the search results actually show.
+
+| ID | Pillar | Proposed article | Priority | Distinct intent and overlap boundary |
+| --- | --- | --- | --- | --- |
+| FP-11 | FP | Wall Calendar vs. Digital Calendar: What's Better for Busy Families? | First comparison | Decision between physical visibility and digital updates/sharing. Compare a realistic family week; acknowledge when digital-only is better. FP-02 owns how to organize and use a calendar, not format selection. |
+| HC-06 | HC | Clean Mama vs. FlyLady: Which Cleaning Routine Fits Busy Moms? | Second comparison | Compare the current, verifiable routines on daily workload, catch-up and family involvement. Recommend either fairly. HC-01 owns OMC's weekly cleaning method, not the third-party head-to-head. Do not suggest affiliation. |
+| FP-12 | FP | Best Family Command Center Systems: Which Setup Fits Your Family? | Third comparison | Decision guide comparing distinct setups (wall, digital, hybrid) using a realistic school-and-activities scenario. FP-03 owns how to build and maintain a physical command center; avoid repeating its setup tutorial. |
+
+The comparison is successful when a mom can choose a solution even if she does not buy OMC. Keep the product mention honest: the current offer is a physical wall calendar plus companion cleaning website, **not** a synchronized family calendar app. Link each decision guide up to its pillar guide and contextually to the relevant existing article; add incoming links once published. Track in [CONTENT_TRACKER.md](CONTENT_TRACKER.md).
