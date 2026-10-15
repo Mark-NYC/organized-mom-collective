@@ -16,6 +16,7 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'fp-11-hero': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-supplied photo for FP-11, 2026-10-15; original design/photography/owner/fp-11-hero-original.jpg (1200x800); resize only, no crop or alteration; original photographer/site not stated by owner' },
   'hc-04-cleaning-basket': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 32344, Karolina Grabowska; archived HC-03-full/32344-2400.jpg; crop 0,0.075,0.9,0.975 removes partial chin; first site use HC-04, 2026-10-14' },
   'hc-04-window-cleaning': { widths: [400, 600], width: 600, height: 900, source: 'Kaboompics 32349, Karolina Grabowska; licensed 600x900 archived HC-03/32349.jpg; max 400 CSS px; first site use HC-04, 2026-10-14' },
   'fp-06-market-zucchini': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-uploaded Kaboompics 40035; original in design/photography/kaboompics/FP-06-owner-2026-10-14/market-zucchini-original.jpg; landscape crop 0,0.28,1,0.724444; no content alteration' },
