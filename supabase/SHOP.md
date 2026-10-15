@@ -309,6 +309,16 @@ The old "manual state rates" mode is switched off: one rate per state can't expr
 
 In Stripe (you, in the dashboard, before choosing Stripe Tax): Settings → Tax → origin/head-office address (your NYC address); the product tax code default; Tax → Registrations → add each state where you're registered (New York first, if your accountant confirms). Stripe also monitors thresholds in other states (Tax → Registrations → Monitoring); adding a registration there is your decision.
 
+## Pinterest catalog feed
+
+`https://www.organizedmomcollective.com/pinterest-feed.csv` (the bare domain redirects there). A Vercel Function (`api/pinterest-feed.ts`, rewritten from that path in `vercel.json`) reads `shop_catalog()` live with the public anon key on every fetch, cached at the edge for 5 minutes. No Stripe key, service-role key or admin endpoint is involved; it needs only `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` in the Vercel environment.
+
+- **Listed only when buyable:** store switch **Open**, product active, in stock, and opted in (`FEED_PRODUCTS` in `api/pinterest-feed.ts`, which holds the Pinterest title, description, landing page and JPEG images in `public/images/pinterest/catalog/`). In Off or Preview the feed is a header row only, so Pinterest shows nothing that can't be bought.
+- **Price, currency and availability** always come from the database. Change a price or stock count in Dashboard → Inventory and the feed follows within 5 minutes; Pinterest picks it up on its next daily fetch.
+- **Outage:** if the catalog can't be read the feed answers 503 (not an empty file), so Pinterest keeps the last good catalog.
+- **Opted in today:** the 26-week calendar only. The 52-week calendar needs to be sold on the website first (`CALENDAR_OPTIONS.websiteProduct`; a test enforces it). The downloads are left out until you confirm Pinterest accepts digital products for your merchant account.
+- Tests: `tests/pinterest-feed.test.ts`.
+
 ## Checking what's deployed
 
 Nothing here deploys itself: a merged PR changes GitHub only. Vercel deploys the site from GitHub (check its dashboard); Supabase SQL and Edge Functions are pasted by hand.
