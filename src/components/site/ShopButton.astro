@@ -1,12 +1,12 @@
 ---
 /**
- * "Shop" call to action. Goes straight to the Etsy listing once one is set in
- * src/config.ts (CALENDAR_OPTIONS → etsyUrl); until then it goes to the options on
- * /calendar, where each option shows "coming soon to Etsy". Never a dead link.
+ * "Shop" call to action. Goes to the website checkout when the calendar is sold there
+ * (CALENDAR_OPTIONS → websiteProduct, shop-enabled builds), else straight to the Etsy listing
+ * once one is set (etsyUrl), else to the options on /calendar. Never a dead link.
  * `to` keeps the visit on the product page instead (the homepage always does), and
  * `cta` names the placement in a data-cta attribute for analytics to hook into.
  */
-import { shopUrl } from '../../lib/reorder';
+import { shopCheckoutUrl, shopUrl } from '../../lib/reorder';
 import { routes } from '../../routes';
 
 interface Props {
@@ -18,8 +18,8 @@ interface Props {
   class?: string;
 }
 const { label: requestedLabel, to, cta, class: className } = Astro.props;
-const label = requestedLabel === 'Get the Calendar' && !shopUrl() ? 'See the Calendar' : requestedLabel;
-const internal = to === 'options' ? routes.buy : to === 'product' ? routes.calendar : null;
+const label = requestedLabel === 'Get the Calendar' && !shopUrl() && !shopCheckoutUrl() ? 'See the Calendar' : requestedLabel;
+const internal = to === 'options' ? routes.buy : to === 'product' ? routes.calendar : shopCheckoutUrl();
 const etsy = internal ? null : shopUrl();
 ---
 

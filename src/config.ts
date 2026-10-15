@@ -10,7 +10,8 @@ export interface Edition {
 }
 
 /**
- * The two calendars offered on Reorder (/app/reorder). All purchases happen on Etsy.
+ * The two calendars, on /calendar, the homepage and Reorder (/app/reorder). An option with a
+ * `websiteProduct` is bought through the website checkout in shop-enabled builds; otherwise on Etsy.
  *
  * ⚠️ UPDATE `etsyUrl` with each live Etsy listing, e.g. 'https://www.etsy.com/listing/1234567890/…'.
  * Until it's a real listing URL (null or a placeholder), that option's button stays
@@ -34,6 +35,9 @@ export const CALENDAR_OPTIONS = [
     weeks: 26,
     editions: [{ label: 'January–June 2027' }, { label: 'July–December 2027' }] as Edition[],
     etsyUrl: null as string | null, // PLACEHOLDER: half-year Etsy listing URL
+    // Sold through the website checkout (shop product slug) in shop-enabled builds; that product's edition.
+    websiteProduct: 'calendar-26-week' as string | null,
+    websiteEdition: 'January–June 2027' as string | null,
   },
   {
     id: 'full-year',
@@ -42,6 +46,9 @@ export const CALENDAR_OPTIONS = [
     weeks: 52,
     editions: [{ label: 'All of 2027' }] as Edition[],
     etsyUrl: null as string | null, // PLACEHOLDER: full-year Etsy listing URL
+    // Not on the website yet (calendar-52-week is off, 0 stock): set both once it has real stock.
+    websiteProduct: null as string | null,
+    websiteEdition: null as string | null,
   },
 ] as const;
 

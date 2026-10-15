@@ -1,7 +1,7 @@
 ---
 /**
  * /calendar — the public product page for the family wall calendar. All purchases
- * happen on Etsy (no checkout here). Every fact on this page is verified against
+ * happen through the website checkout when an option has a websiteProduct (shop-enabled builds), else on Etsy. Every fact on this page is verified against
  * src/config.ts, src/data/cleaning.ts or the Etsy listing images in design/etsy-listing/
  * (02 sections, 07 size and format, 08 two 26-week sets, 12 the damaged/misprinted promise).
  * Don't add shipping times, guarantees or features that aren't in those sources.
@@ -24,6 +24,8 @@ import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate
 
 const PRODUCT = '2027 Family Wall Calendar & Organizer';
 const options = calendarOptions();
+/** Whether the calendar is bought through this website's checkout (else Etsy). */
+const onWebsite = options.some((o) => o.checkoutUrl);
 const byWeeks = [...options].sort((a, b) => a.weeks - b.weeks);
 const half = byWeeks[0];
 const full = byWeeks[byWeeks.length - 1];
@@ -125,17 +127,21 @@ const faqs = [
   },
   {
     q: 'Where do I buy it?',
-    a: 'On Etsy. Checkout, payment, shipping options and delivery details are all handled there, on the listing.',
+    a: onWebsite
+      ? 'Right here on this website: choose your calendar below and check out securely with a card, Apple Pay or Google Pay. We ship to US addresses, and the shipping price is shown before you pay.'
+      : 'On Etsy. Checkout, payment, shipping options and delivery details are all handled there, on the listing.',
   },
   {
     q: 'What if my calendar arrives damaged or misprinted?',
-    a: 'We’ll make it right. Reach out to us through Etsy with your order.',
+    a: onWebsite
+      ? 'We’ll make it right. Email us within 30 days of delivery with your order number and a photo, and we’ll send a replacement or refund you in full. Details are on our Refunds and Returns page.'
+      : 'We’ll make it right. Reach out to us through Etsy with your order.',
   },
 ];
 
 const site = Astro.site!;
 const url = new URL(routes.calendar, site).href;
-const live = options.filter((o) => o.url);
+const live = options.filter((o) => o.buyUrl);
 const jsonLd: object[] = [
   {
     '@context': 'https://schema.org',
@@ -145,7 +151,7 @@ const jsonLd: object[] = [
     brand: { '@type': 'Brand', name: BRAND_NAME },
     url,
     image: gallery.map((g) => g.largest).map((p) => new URL(p, site).href),
-    // Offers only once a real Etsy listing exists, so nothing claims to be for sale before it is.
+    // Offers only for options that can actually be bought (website checkout or a real Etsy listing).
     ...(live.length
       ? {
           offers: live.map((o) => ({
@@ -153,7 +159,8 @@ const jsonLd: object[] = [
             name: o.name,
             price: o.price.toFixed(2),
             priceCurrency: 'USD',
-            url: o.url,
+            url: new URL(o.buyUrl!, site).href,
+            ...(o.checkoutUrl ? { availability: 'https://schema.org/InStock' } : {}),
           })),
         }
       : {}),
@@ -229,7 +236,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <a href="#buy" data-cta="calendar-hero" class="btn-primary mt-6 min-h-14 w-full px-8 sm:w-auto">Get the Calendar</a>
         <ul class="mt-6 space-y-1.5 text-[0.95rem] text-warm-ink" aria-label="At a glance">
           {
-            ['One week per page, Monday through Sunday', 'Cleaning companion included, no subscription', 'Secure checkout on Etsy'].map((t) => (
+            ['One week per page, Monday through Sunday', 'Cleaning companion included, no subscription', onWebsite ? 'Secure checkout, ships to the US' : 'Secure checkout on Etsy'].map((t) => (
               <li class="flex gap-2.5">
                 <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-[0.1rem] size-[1.1rem] shrink-0 text-rose-deep" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d={check} />
@@ -338,7 +345,14 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <CalendarOptions />
       </div>
       <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
-        Both include the cleaning companion. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.
+        {onWebsite ? (
+          <>
+            Both include the cleaning companion. Arrives damaged or misprinted? We’ll make it right:{' '}
+            <a href={routes.refunds} class="underline decoration-rule underline-offset-[3px] hover:decoration-ink">refunds and returns</a>.
+          </>
+        ) : (
+          'Both include the cleaning companion. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.'
+        )}
       </p>
       <figure class="mx-auto mt-10 max-w-xl border-t border-rule pt-8 text-center">
         <blockquote cite={ETSY_REVIEWS_URL} class="font-serif text-[1.3rem] leading-snug italic sm:text-[1.45rem]">

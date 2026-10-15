@@ -7,7 +7,7 @@ const options = calendarOptions();
 
 // Flag anything missing in the build output so it doesn't go unnoticed.
 for (const o of options) {
-  if (!o.url) console.warn(`[reorder] No valid Etsy listing URL for "${o.name}" — its button is disabled. Set etsyUrl in src/config.ts.`);
+  if (!o.buyUrl) console.warn(`[reorder] No valid Etsy listing URL for "${o.name}" — its button is disabled. Set etsyUrl in src/config.ts.`);
 }
 if (options.some((o) => o.editions.some((e) => !e.dates))) {
   console.warn('[reorder] Edition dates not confirmed — showing edition names only. See editions in src/config.ts.');
@@ -27,13 +27,13 @@ const benefits = [
   { title: 'Room for what matters most.', body: 'Weekly space for family priorities, prayer and gratitude.' },
 ];
 
-const reassurance = ['11 × 17-inch wall calendar', 'Cleaning companion included', 'Secure checkout on Etsy'];
+const reassurance = ['11 × 17-inch wall calendar', 'Cleaning companion included', options.some((o) => o.checkoutUrl) ? 'Secure checkout' : 'Secure checkout on Etsy'];
 
 /** Full-bleed tinted band on phones, a soft rounded panel from md up. */
 const band = '-mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10';
 ---
 
-<Layout title="Reorder" description={`Get your next ${BRAND_NAME} family wall calendar on Etsy.`}>
+<Layout title="Reorder" description={`Get your next ${BRAND_NAME} family wall calendar.`}>
   <style is:global>
     @media (prefers-reduced-motion: no-preference) {
       html:has(#buy) {
@@ -99,7 +99,15 @@ const band = '-mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10';
             </ul>
             {o.setsWeeks > 0 && <p class="mt-1.5 text-[0.9rem] text-soft">Ships as two {o.setsWeeks}-week sets.</p>}
             <div class="mt-auto pt-5">
-              {o.url ? (
+              {o.checkoutUrl ? (
+                <a
+                  href={o.checkoutUrl}
+                  aria-label={`Buy the ${o.name}, ${o.websiteEdition}, ${o.priceLabel}`}
+                  class:list={['btn-primary w-full', o.bestValue && 'min-h-14 text-[0.8rem] font-bold']}
+                >
+                  Buy {o.websiteEdition}
+                </a>
+              ) : o.url ? (
                 <a
                   href={o.url}
                   target="_blank"
@@ -111,7 +119,7 @@ const band = '-mx-5 px-5 sm:-mx-8 sm:px-8 md:mx-0 md:rounded-[4px] md:px-10';
                 </a>
               ) : (
                 <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.66rem] font-semibold tracking-[0.16em] text-soft uppercase">
-                  {o.shortName} coming soon to Etsy
+                  {o.shortName} coming soon
                 </p>
               )}
             </div>

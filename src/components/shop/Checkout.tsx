@@ -285,6 +285,11 @@ export default function Checkout() {
                     <p className="mt-3 flex items-center justify-center gap-2 text-[0.85rem] text-soft">
                       <LockIcon /> Secure payment by Stripe. Card, Apple Pay or Google Pay.
                     </p>
+                    <p className="mt-2 text-center text-[0.85rem] text-soft">
+                      <a href={routes.refunds} className="underline underline-offset-2" target="_blank" rel="noopener">
+                        Refunds and returns
+                      </a>
+                    </p>
                   </>
                 ) : (
                   <div className="mt-6 border-t border-rule pt-5">

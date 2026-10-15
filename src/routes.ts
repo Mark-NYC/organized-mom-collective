@@ -42,8 +42,8 @@
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex)
- *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked only from /weekly-reset(-simple), /take-back-control,
- *                               /essential-routines, /real-life-reset-kit and the mug page (?product=<slug>), and only in builds with the shop on
+ *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked from the offer pages, the calendar
+ *                               options (src/lib/reorder.ts) and the mug page once on sale (?product=<slug>), only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
  *           /admin/orders       order, inventory and shipping dashboard, shop admins only (noindex)
@@ -106,7 +106,9 @@ export const routes = {
   pillar: (id: string) => `/resources/topics/${id}`,
   survey: '/survey',
   surveyAdmin: '/survey/admin',
-  /** Direct website checkout. Calendar buy buttons still go to Etsy; only the funnel offer pages and the mug page link here, in shop-enabled builds. */
+  /** Refund and return policy (website orders), linked from the footer and the checkout. */
+  refunds: '/refunds',
+  /** Direct website checkout: the offer pages, the calendar options and (once on sale) the mug page link here, in shop-enabled builds. */
   checkout: '/checkout',
   checkoutComplete: '/checkout/complete',
   download: '/download',

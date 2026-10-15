@@ -2,7 +2,7 @@
 
 Customers buy the calendar at `/checkout` (Stripe embedded checkout); you run orders, inventory and shipping at `/admin/orders`. Etsy is untouched: no import, no sync, and the calendar's buy buttons are unchanged. The same checkout also sells **downloads** (the $9 Weekly Reset System from `/weekly-reset`, and the $29 Take Back Control from `/take-back-control`): see [Digital products](#digital-products).
 
-**Status: built, tested against fakes and a real local database, switched off.** Nothing is public and no real money can move until you complete [Launch](#launch).
+**Status (2026-10-15): built, deployed and wired to every ready product; waiting on live Stripe keys, Stripe Tax and the store switch.** No real money can move until you complete [Launch](#launch).
 
 ## The launch gate
 
@@ -64,10 +64,10 @@ Dashboard (/admin/orders)
 - **The Weekly Reset System.** $9 download (`weekly-reset-system`), active, no stock. Sold from `/weekly-reset`. See [Digital products](#digital-products).
 - **Take Back Control.** $29 download (`take-back-control`), active, no stock. Sold from `/take-back-control`, the offer after the Weekly Reset. See [Digital products](#digital-products).
 - **Essential Routines Bundle.** $12 download (`essential-routines`), active, no stock. Sold from `/essential-routines`, the downsell when someone passes on Take Back Control.
-- **Mind Your Own Motherhood Mug.** $23, 15oz ceramic (`mind-your-own-motherhood-mug`), active, **0 units** until you set real stock. Physical: ships like a calendar (1 shipping unit, so the same rate as one 26-week calendar), no cleaning companion in its emails. Sold from `/mind-your-own-motherhood-mug`; its checkout link shows only the mug.
+- **Mind Your Own Motherhood Mug.** $23, 15oz ceramic (`mind-your-own-motherhood-mug`), **switched off, 0 units** (and `MUG_ON_SALE = false` in `src/data/mug.ts`, so its page says "Coming soon") until real stock and fulfillment are confirmed. Physical: ships like a calendar (1 shipping unit, so the same rate as one 26-week calendar), no cleaning companion in its emails. Sold from `/mind-your-own-motherhood-mug`; its checkout link shows only the mug.
 - **Real Life Reset Kit.** $7 download (`real-life-reset-kit`), active, no stock. Sold from `/real-life-reset-kit` (not linked from any funnel yet).
 - **Family Sanity Saver Starter Kit.** $7 download (`family-sanity-saver-starter-kit`), **switched off**: its calendar is the 2025–2026 edition. Page `/family-sanity-saver-starter-kit` says "Coming soon" until the new edition is in and the product is on.
-- **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed.
+- **26-Week Family Wall Calendar, January–June 2027.** $34, 25 units, active. Only this edition is listed. Every calendar buy button (/calendar, the homepage, /app/reorder) goes to its checkout in shop-enabled builds (`websiteProduct` in `src/config.ts`).
 - **52-Week Family Wall Calendar.** $54, hidden, 0 units.
 - A July–December 2027 edition is **not** listed. When you have it in hand, add it as its own product with its own stock; don't change the January–June one.
 
@@ -190,20 +190,57 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
 - [ ] **Shipping prices** ([Shipping](#shipping)). Add the real rate(s) in Settings, then turn off the test placeholder.
 - [ ] Per-order limit (5) and website stock (25; separate from Etsy, not synced).
-- [ ] Refund/return policy: draft in [REFUND_POLICY_DRAFT.md](REFUND_POLICY_DRAFT.md). Not published. The Weekly Reset page promises a 30-day "Actually Used It" money-back guarantee: honor it with a full refund from the dashboard (that also turns the download link off).
+- [x] Refund/return policy: published at `/refunds` (2026-10-15), linked from the footer and the checkout; 30 days on everything, the download guarantee covers every download. The original draft: [REFUND_POLICY_DRAFT.md](REFUND_POLICY_DRAFT.md). The Weekly Reset page promises a 30-day "Actually Used It" money-back guarantee: honor it with a full refund from the dashboard (that also turns the download link off).
 - [ ] **Sales tax on downloads**: the Weekly Reset product carries Stripe tax code `txcd_10000000` (general electronically supplied services). Confirm the right code with your accountant before choosing Stripe Tax; change it in the SQL Editor (`update shop_products set tax_code = '…' where slug = 'weekly-reset-system';`).
 - [ ] Support inbox: `SHOP_EMAIL_REPLY_TO` is printed in every customer email as the contact address.
 
 ## Launch
 
-Only after you approve it. Each step is reversible: Settings → **Off** stops new checkouts instantly.
+**State on 2026-10-15:** buy buttons are wired on every product that's ready (all four downloads, the January–June 2027 calendar; the mug and the Family Sanity Saver kit stay off). The real shipping rate is in, the refund policy is published at `/refunds`, and every download file is verified. What's left is your account work: live Stripe keys, Stripe Tax, the store's tax setting, and switching checkout to Open. Each step is reversible (Settings → **Off** stops new checkouts instantly).
 
-1. Stripe live mode: activate the account; add the **live** webhook endpoint (same URL, same events); disable the test endpoint (it would otherwise fail signature checks against the live secret and Stripe will email you).
-2. Supabase secrets: `STRIPE_SECRET_KEY=sk_live_…`, `STRIPE_WEBHOOK_SECRET=<live whsec>`, `SHOP_LIVE_CHECKOUT=enabled`.
-3. Vercel production: `PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_…`, `PUBLIC_SHOP_ENABLED=true`; redeploy.
-4. Dashboard → Settings → Launch readiness: all ★ items ticked → **Open**.
-5. Optional real-money smoke test: buy one with a 100%-minus-$1 promotion code, then refund it.
-6. Switching the site's buy buttons from Etsy to `/checkout` is a separate code change (`ShopButton`, `CalendarOptions`, `/app/reorder`); `tests/shop.test.ts` → *launch guards* fails while anything public other than the offer pages and the mug page links to `/checkout`, so it must be updated deliberately.
+Do these in order.
+
+**1. Stripe: activate live payments** (dashboard.stripe.com)
+1. Top-left **Test mode** toggle → off. If Stripe asks you to *Activate payments*, complete the business, bank and identity form.
+2. **Developers → API keys**: copy the **Publishable key** (`pk_live_…`) and **Reveal** the **Secret key** (`sk_live_…`).
+3. **Developers → Webhooks → Add endpoint**:
+   - Endpoint URL: `https://uvqhmlqwmgnohhduttip.supabase.co/functions/v1/stripe-webhook`
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `payment_intent.payment_failed`, `charge.refunded`, `refund.failed`, `charge.dispute.created`
+   - **Add endpoint**, then **Signing secret → Reveal** and copy it (`whsec_…`).
+4. **Settings → Payment method domains → Add**: `organizedmomcollective.com`, then again for `www.organizedmomcollective.com` (Apple Pay / Google Pay).
+5. Back in **Test mode → Developers → Webhooks**: open the old test endpoint → **⋯ → Disable** (it would fail against the live secret).
+
+**2. Stripe Tax** (still in live mode)
+1. **Tax → Get started** (or **Settings → Tax**): head office address = your business address; default product tax code = *General - Tangible Goods* (`txcd_99999999`); prices are **exclusive** of tax.
+2. **Tax → Registrations → Add registration**: add **only** states where you hold a sales tax registration (for New York, a Certificate of Authority). Stripe collects nothing anywhere without one. If you hold none, add none: checkout then collects no tax, and Stripe keeps monitoring thresholds under **Registrations → Monitoring**.
+3. Download tax code (your call, Stripe won't classify it for you): the four downloads carry `txcd_10000000`, which Stripe says not to use for US sales. Closest listed match for the PDF bundles: `txcd_10503000` (*Digital other news or documents - downloadable - non subscription - with permanent rights*). Confirm with your accountant, then in Supabase → SQL Editor: `update shop_products set tax_code = 'txcd_10503000' where kind = 'digital';`
+
+**3. Supabase: secrets** (supabase.com → project → **Edge Functions → Secrets**). Edit or add each, then **Save**:
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | the `sk_live_…` from 1.2 |
+| `STRIPE_WEBHOOK_SECRET` | the `whsec_…` from 1.3 |
+| `SHOP_LIVE_CHECKOUT` | `enabled` |
+| `SHOP_SITE_URL` | `https://organizedmomcollective.com` |
+
+**4. Vercel: production key** (vercel.com → organized-mom-collective → **Settings → Environment Variables**)
+1. `PUBLIC_STRIPE_PUBLISHABLE_KEY` → **⋯ → Edit** → value: the `pk_live_…` from 1.2, environment **Production** only → **Save**. (`PUBLIC_SHOP_ENABLED` is already `true` in Production.)
+2. **Deployments** → latest Production deployment → **⋯ → Redeploy** (public keys are baked in at build time).
+
+**5. Store settings** (`https://organizedmomcollective.com/admin/orders` → sign in → **Settings**)
+1. **Sales tax**: choose **Stripe Tax (automatic)** → **Confirm and save**. (Choose *Don't collect tax* only if your accountant confirms it.)
+2. **Shipping**: check "USPS Ground Advantage $8.95, +$3.00 each extra" is the only active rate. Change it once you've weighed a packed calendar (see Shipping).
+3. **Launch readiness**: every ★ item ticked → **Checkout: Open**.
+
+**6. One real purchase each, then refund** (on your phone)
+1. `https://organizedmomcollective.com/weekly-reset` → Buy → pay $9 with your own card → the confirmation page says *confirmed* → the receipt email arrives → **Download your files** opens and every file downloads.
+2. `https://organizedmomcollective.com/calendar` → **Buy January–June 2027** → pay → receipt with shipping address → in the dashboard the order shows **Paid**, stock 25 → 24.
+3. Dashboard → each order → **Refund** (full; for the calendar tick *return to stock*) → refund emails arrive, the download link stops working, stock back to 25.
+
+**Etsy and overselling.** Website stock (25) is the website's own allocation, not synced with Etsy. Keep Etsy's listing quantity to the units you have *minus* 25, and when one channel runs low, move units by hand: Dashboard → Inventory → *Add / remove* on the website side, the listing quantity on Etsy's. Neither channel can then sell a unit the other already sold.
+
+**Turning on later:** the mug (`MUG_ON_SALE` in `src/data/mug.ts` and Dashboard → Inventory: real stock, Active), the 52-week calendar (`websiteProduct` in `src/config.ts` and real stock), the Family Sanity Saver kit (2026–2027 calendar files first; see its database update above).
 
 ## Digital products
 
@@ -259,7 +296,7 @@ Each rate in Settings has:
 
 "Calendars" here are shipping units: the 26-week counts 1, the 52-week counts 2 (two 26-week sets), editable per product (Inventory → Edit details → Shipping units). The database prices the cart (`shop_shipping_quote`); the checkout page shows the same estimate. If no rate covers a cart (e.g. every rate stops at 2 and someone orders 3), checkout refuses it and holds nothing.
 
-The seeded "$6 Standard shipping (test placeholder)" is **test only**: never offered with a live key, and a live checkout won't open until a real rate exists.
+**Launch rate (2026-10-15, an estimate, not a weighed quote):** "USPS Ground Advantage", $8.95 for the first calendar, +$3.00 each extra, no delivery-time promise. Basis: no packed calendar has been weighed; an 11 × 17 Wire-O calendar in a rigid mailer should fall between 1 and 2 lb, and published discounted USPS Ground Advantage commercial rates (July 2026 rate card) run $7.61–$10.67 at 1 lb and $7.99–$12.87 at 2 lb, local to cross-country. Weigh one packed calendar, price it to zone 8 on Pirate Ship, and adjust the rate in Settings. The $6 test placeholder is switched off.
 
 ## Sales tax
 
