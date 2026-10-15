@@ -1,5 +1,7 @@
 /** Reorder page helpers. Options and prices live in src/config.ts. */
 import { BEST_VALUE_ID, CALENDAR_OPTIONS } from '../config';
+import { routes } from '../routes';
+import { shopConfigured, shopEnabled } from './shop';
 
 /**
  * The URL if it's a real Etsy listing (https, etsy.com, /listing/<id>), otherwise null.
@@ -55,9 +57,15 @@ export function calendarOptions() {
   return CALENDAR_OPTIONS.map((o) => {
     const sets = o.weeks / smallest.weeks;
     const bestValue = o.id === BEST_VALUE_ID;
+    const checkoutUrl = o.websiteProduct && shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${o.websiteProduct}` : null;
+    const url = etsyListingUrl(o.etsyUrl);
     return {
       ...o,
-      url: etsyListingUrl(o.etsyUrl),
+      url,
+      /** The website checkout for this option, in shop-enabled builds. Preferred over Etsy. */
+      checkoutUrl,
+      /** Where its buy button goes: the website checkout, else its Etsy listing, else nowhere yet. */
+      buyUrl: checkoutUrl ?? url,
       shortName: o.name.replace(/ Calendar$/, ''),
       priceLabel: formatPrice(o.price),
       bestValue,
@@ -77,4 +85,9 @@ export type CalendarOption = ReturnType<typeof calendarOptions>[number];
 export function shopUrl(): string | null {
   const options = calendarOptions();
   return options.find((o) => o.bestValue && o.url)?.url ?? options.find((o) => o.url)?.url ?? null;
+}
+
+/** The website checkout a general "Get the Calendar" button goes to, or null when the calendar isn't sold on the website. */
+export function shopCheckoutUrl(): string | null {
+  return calendarOptions().find((o) => o.checkoutUrl)?.checkoutUrl ?? null;
 }

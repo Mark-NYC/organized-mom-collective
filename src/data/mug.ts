@@ -13,10 +13,16 @@ import { routes } from '../routes';
  */
 export const MUG_SLUG = 'mind-your-own-motherhood-mug';
 
+/**
+ * Off until there's real stock and fulfillment is confirmed: then set true here AND switch the
+ * product on in Dashboard → Inventory (with its real stock). Until then the page says "Coming soon".
+ */
+const MUG_ON_SALE = false;
+
 export const mug = {
   name: 'Mind Your Own Motherhood Mug',
   price: 23,
-  buyUrl: shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${MUG_SLUG}` : null,
+  buyUrl: MUG_ON_SALE && shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${MUG_SLUG}` : null,
 };
 
 /** The product photo (the real print on a white mug), 640/960/1280 in public/images/shop/; original in design/shop/. */

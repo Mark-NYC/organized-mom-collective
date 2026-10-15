@@ -18,11 +18,11 @@
  *   Each rhythm names the real calendar sections that deliver it.
  * - Prices, weeks and editions come from src/config.ts via calendarOptions(). Every
  *   shop button goes to /calendar (or its options, #buy), never straight to Etsy.
- *   The pricing cards only say "Choose" once that option's Etsy listing is live; until
- *   then they say "Coming soon to Etsy". The 26-week calendar is the first print run's
+ *   A pricing card says "Choose" once that option can be bought (website checkout in
+ *   shop-enabled builds, else a live Etsy listing); until then "Coming soon". The 26-week calendar is the first print run's
  *   main offer (PRIMARY_OPTION_ID); the full year is the secondary option.
  * - Calendar facts match /calendar and the Etsy listing images in design/etsy-listing/.
- *   Shipping and checkout are Etsy's: don't add shipping origins, times or guarantees.
+ *   Don't add shipping origins, delivery times or guarantees beyond /refunds.
  * - Photos and phone screenshots are real (see README → Where things live). The hero's
  *   breakfast photo (family-breakfast) sells the feeling, the life the product supports: it's not
  *   a customer, and the calendar in its background is not a reference for the printed layout.
@@ -58,8 +58,10 @@ const full = byWeeks[byWeeks.length - 1];
 /** The first print run's main offer first, then the rest. */
 const primary = options.find((o) => o.id === PRIMARY_OPTION_ID) ?? half;
 const others = options.filter((o) => o.id !== primary.id);
-/** Whether any option can be bought yet (a real Etsy listing in src/config.ts). */
-const anyLive = options.some((o) => o.url);
+/** Whether any option can be bought yet (website checkout, or a real Etsy listing in src/config.ts). */
+const anyLive = options.some((o) => o.buyUrl);
+/** Whether the calendar is bought through this website's checkout (else Etsy). */
+const onWebsite = options.some((o) => o.checkoutUrl);
 
 /** The one call to action, everywhere on the page. */
 const GET = anyLive ? 'Get the Calendar' : 'See the 2027 Calendar';
@@ -112,8 +114,8 @@ const priceCopy: Record<string, { cta: string; note: string }> = {
   [half.id]: { cta: 'Choose Half-Year', note: 'A great way to get started.' },
   [full.id]: { cta: 'Choose Full-Year', note: `Twice the planning for just ${formatPrice(full.price - half.price)} more.` },
 };
-/** Where an option's button goes: its live Etsy listing, else the options on /calendar. */
-const optionHref = (o: (typeof options)[number]) => o.url ?? routes.buy;
+/** Where an option's button goes: its website checkout or live Etsy listing, else the options on /calendar. */
+const optionHref = (o: (typeof options)[number]) => o.buyUrl ?? routes.buy;
 
 const faqs = [
   {
@@ -130,7 +132,9 @@ const faqs = [
   },
   {
     q: 'Where do I buy it, and how does shipping work?',
-    a: 'On Etsy. Checkout, payment, shipping options and delivery details are all shown on the Etsy listing. If your calendar arrives damaged or misprinted, reach out through Etsy with your order and we’ll make it right.',
+    a: onWebsite
+      ? 'Right here: choose your calendar and check out securely on this website with a card, Apple Pay or Google Pay. We ship to US addresses, and you see the shipping price before you pay. If your calendar arrives damaged or misprinted, email us and we’ll replace it or refund you.'
+      : 'On Etsy. Checkout, payment, shipping options and delivery details are all shown on the Etsy listing. If your calendar arrives damaged or misprinted, reach out through Etsy with your order and we’ll make it right.',
   },
 ];
 
@@ -418,7 +422,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
 
       <div class="mx-auto mt-12 max-w-2xl text-center md:mt-16">
         <h3 class="serif-title">Ready for a Little More Breathing Room?</h3>
-        {!anyLive && <p class="mt-3 text-[0.95rem] leading-snug text-warm-soft">Not on sale yet: both calendars are coming soon to Etsy.</p>}
+        {!anyLive && <p class="mt-3 text-[0.95rem] leading-snug text-warm-soft">Not on sale yet: both calendars are coming soon.</p>}
       </div>
       <ul class="mx-auto mt-7 grid max-w-3xl gap-4 sm:grid-cols-[1.15fr_1fr] sm:items-center sm:gap-6">
         {
@@ -445,7 +449,15 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
                   {o.setsWeeks > 0 ? `All of 2027, as two ${o.setsWeeks}-week sets` : o.editions.map((e) => e.label).join(' or ')}
                 </p>
                 <p class="mt-4 mb-6 text-[1rem] leading-snug text-warm-ink">{priceCopy[o.id].note}</p>
-                {o.url ? (
+                {o.checkoutUrl ? (
+                  <a
+                    href={o.checkoutUrl}
+                    data-cta={`home-price-${o.id}`}
+                    class:list={['mt-auto min-h-14 w-full px-4', main ? 'btn-primary' : 'btn-secondary border-warm-button text-[0.75rem] text-warm-ink hover:bg-warm-button']}
+                  >
+                    {priceCopy[o.id].cta}
+                  </a>
+                ) : o.url ? (
                   <a
                     href={optionHref(o)}
                     target="_blank"
@@ -459,7 +471,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
                 ) : (
                   <div class="mt-auto">
                     <p class="flex min-h-14 items-center justify-center rounded-[3px] border border-dashed border-warm-rule px-4 text-center text-[0.75rem] font-semibold tracking-[0.16em] text-warm-soft uppercase">
-                      Coming soon to Etsy
+                      Coming soon
                     </p>
                     <a href={optionHref(o)} data-cta={`home-price-${o.id}`} class="text-link mt-4 inline-block text-warm-ink">
                       See the details

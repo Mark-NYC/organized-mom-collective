@@ -483,13 +483,16 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 });
 
 describe('launch guards', () => {
-  it('nothing on the public site links to the website checkout except the funnel offer pages (Weekly Reset, Take Back Control, Essential Routines, Real Life Reset Kit) and the mug page, in shop-enabled builds; calendar buy buttons stay on Etsy', () => {
+  it('only the offer pages, the calendar options and the mug page link to the website checkout, and only in shop-enabled builds', () => {
     // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/mug.ts', '../src/data/real-life-reset.ts']);
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/mug.ts', '../src/data/real-life-reset.ts', '../src/lib/reorder.ts']);
     expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
     expect(read('src/data/take-back-control.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{TAKE_BACK_CONTROL_SLUG\}` : null/);
     expect(read('src/data/essential-routines.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{ESSENTIAL_ROUTINES_SLUG\}` : null/);
-    expect(read('src/data/mug.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{MUG_SLUG\}` : null/);
+    // The mug also waits for its own switch (real stock and fulfillment confirmed).
+    expect(read('src/data/mug.ts')).toMatch(/buyUrl: MUG_ON_SALE && shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{MUG_SLUG\}` : null/);
+    // Calendars: only options with a websiteProduct, and only in shop-enabled builds.
+    expect(read('src/lib/reorder.ts')).toMatch(/const checkoutUrl = o\.websiteProduct && shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{o\.websiteProduct\}` : null;/);
     expect(read('src/data/real-life-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{REAL_LIFE_RESET_SLUG\}` : null/);
     const src = Object.keys(files).filter((f) => f.startsWith('../src/'));
     expect(src.length).toBeGreaterThan(30);

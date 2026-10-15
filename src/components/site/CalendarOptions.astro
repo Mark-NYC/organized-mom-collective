@@ -1,8 +1,8 @@
 ---
 /**
- * The two calendar options with their Etsy buttons, best value first. Data and
- * pricing: src/config.ts via calendarOptions(). A button stays a quiet "coming soon"
- * note until its option has a real Etsy listing URL. (The app's Reorder page has its
+ * The two calendar options with their buy buttons, best value first. Data and
+ * pricing: src/config.ts via calendarOptions(). An option sold on the website goes to the
+ * checkout; otherwise to its Etsy listing; until it has either, a quiet "coming soon" note. (The app's Reorder page has its
  * own copy of this layout, written for people who already own a calendar.)
  */
 import { calendarOptions, formatPrice } from '../../lib/reorder';
@@ -31,7 +31,16 @@ const options = calendarOptions();
         </ul>
         {o.setsWeeks > 0 && <p class="mt-1.5 text-[0.9rem] text-soft">Ships as two {o.setsWeeks}-week sets.</p>}
         <div class="mt-auto pt-5">
-          {o.url ? (
+          {o.checkoutUrl ? (
+            <a
+              href={o.checkoutUrl}
+              data-cta={`calendar-buy-${o.id}`}
+              aria-label={`Buy the ${o.name}, ${o.websiteEdition}, ${o.priceLabel}`}
+              class:list={['btn-primary w-full', o.bestValue && 'min-h-14 text-[0.8rem] font-bold']}
+            >
+              Buy {o.websiteEdition}
+            </a>
+          ) : o.url ? (
             <a
               href={o.url}
               target="_blank"
@@ -43,7 +52,7 @@ const options = calendarOptions();
             </a>
           ) : (
             <p class="flex min-h-12 items-center justify-center rounded-[3px] border border-dashed border-rule-strong px-2 text-center text-[0.66rem] font-semibold tracking-[0.16em] text-soft uppercase">
-              {o.shortName} coming soon to Etsy
+              {o.shortName} coming soon
             </p>
           )}
         </div>
