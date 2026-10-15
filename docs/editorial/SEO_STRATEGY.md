@@ -100,3 +100,17 @@ An article is ready to publish only if all of these are true:
 - [ ] Its Pinterest plan is complete at `docs/editorial/pinterest/{ID}.md` (see [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md)); Pinterest keywords were researched separately from Google.
 - [ ] `npm run verify` passes.
 - [ ] Read on a phone-width screen: no horizontal scrolling, tables fit, nothing feels like filler.
+
+## Comparison and decision-guide standards (October 2026)
+
+Comparison articles are an experiment for helpful, high-intent search content, **not** a requirement to appear in AI search or a guaranteed source of AI citations or sales. Choose an actual family decision, not just a competitor keyword. Research current official product/routine pages, pricing, availability and limitations, plus firsthand use where feasible. Maintain a dated claim/source/plan-or-version/tested-vs-documented research table in the brief. Unverified differences cannot become selling points.
+
+- Open with a clear conditional verdict: choose A if X, B if Y, and keep the current setup if switching is not worthwhile.
+- Compare one concrete family task or week under the same assumptions. Show honest steps, inputs and outcomes, with original visuals/screenshots where rights and accuracy allow.
+- Use a concise mobile-friendly table of decision factors (setup effort, visibility, family participation, maintenance, ongoing costs and failure modes). Say where choices tie.
+- For price comparisons, compare the same household, period and usage, using current verified terms. If a price cannot be verified, omit the calculation rather than guess.
+- Explain switching: what carries over, what needs re-entering, and what to test first.
+- Name sources near claims; identify author as Organized Mom Collective, date facts were checked, and whether conclusions were tested firsthand or based on documentation. Recheck affected facts when providers change, not just the date stamp.
+- Keep the article independent of the sales pitch. Link the relevant OMC product or free resource as a natural next step, without pretending it solves features not available yet.
+
+Judge the experiment by indexed pages, Search Console impressions/clicks/queries, visits to relevant product or tool pages, and purchases or signups where measurable. **AI citations and qualified traffic are different outcomes.** Review after 30 to 60 days, with the caveat that organic search often takes longer to develop.
