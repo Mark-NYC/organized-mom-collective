@@ -2,7 +2,11 @@
 
 How articles are researched, targeted and marked up so a reader from Google finds the answer fast and the site reads as one connected guide.
 
-Related: [CONTENT_CLUSTERS.md](CONTENT_CLUSTERS.md) (what we target) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) · [ARTICLE_WORKFLOW.md](ARTICLE_WORKFLOW.md).
+Related: [SEARCH_OPPORTUNITY_LOOP.md](SEARCH_OPPORTUNITY_LOOP.md) (ongoing search evidence, original usefulness and outcomes) · [CONTENT_CLUSTERS.md](CONTENT_CLUSTERS.md) (what we target) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) · [ARTICLE_WORKFLOW.md](ARTICLE_WORKFLOW.md).
+
+## Ongoing search optimization
+
+Follow [SEARCH_OPPORTUNITY_LOOP.md](SEARCH_OPPORTUNITY_LOOP.md) for 28/90-day Search Console query and page exports, observed gaps/leaks, original usefulness review and follow-up results. Do not treat Search Console's regular performance data as a dedicated AI citation report. Do not assume click-through rates, growth or AI referrals without real analytics. The baseline review of existing articles is [ARTICLE_AUDIT_2026-10-15.md](ARTICLE_AUDIT_2026-10-15.md).
 
 ## Principles
 
