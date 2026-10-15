@@ -90,7 +90,7 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
   | `shop-admin` | `supabase/dashboard/shop-admin.ts` |
 
   Replace everything in the editor with the file, deploy, then in the function's **Details/Settings** turn **off** "Verify JWT" (Enforce JWT verification) for all three. Each function checks its own callers instead.
-- [ ] Edge Functions → Secrets: `STRIPE_SECRET_KEY` (sk_**test**_…), `STRIPE_WEBHOOK_SECRET`, `SHOP_PREVIEW_TOKEN` (long random string), `SHOP_SITE_URL=https://organizedmomcollective.com`, `SHOP_ALLOWED_ORIGINS` (site URL plus your Vercel preview URL, comma-separated), `RESEND_API_KEY`, `SHOP_EMAIL_REPLY_TO`. **Do not set `SHOP_LIVE_CHECKOUT`.**
+- [ ] Edge Functions → Secrets: `STRIPE_SECRET_KEY` (sk_**test**_…), `STRIPE_WEBHOOK_SECRET`, `SHOP_PREVIEW_TOKEN` (long random string), `SHOP_SITE_URL=https://organizedmomcollective.com`, `SHOP_ALLOWED_ORIGINS` (site URL, its `www.` form if the domain serves or redirects to `www`, plus your Vercel preview URL, comma-separated; a missing origin makes checkout, downloads and the dashboard fail in the browser), `RESEND_API_KEY`, `SHOP_EMAIL_REPLY_TO`. **Do not set `SHOP_LIVE_CHECKOUT`.**
 - (With the Supabase CLI instead: `supabase db push` and `supabase functions deploy <name>` from `supabase/functions/`; `supabase/config.toml` already turns JWT verification off.)
 
 ### Stripe (test mode)
@@ -158,6 +158,7 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261015000000_shop_mug.sql` → **Run**, once. It only adds the product.
 - [ ] Redeploy `stripe-webhook` and `shop-admin` from `supabase/dashboard/` (mug-only orders no longer say "your calendar" or show the cleaning companion panel).
 - [ ] Dashboard → Inventory: set the mug's stock to what you actually have (or can fulfil). Check its shipping: it's charged one calendar's rate.
+- Live project: added 2026-10-15 **switched off** (`active = false`, stock 0) until real inventory and fulfillment are confirmed. Switch it on in Dashboard → Inventory when they are.
 - [ ] Buy one in preview (test card): `/checkout?product=mind-your-own-motherhood-mug` shows only the mug; the receipt shows the mug's picture and no companion panel.
 
 ### Database update: Real Life Reset Kit (once, after the mug)
@@ -280,7 +281,11 @@ Nothing here deploys itself: a merged PR changes GitHub only. Vercel deploys the
 | Database (launch-prep migration) | SQL Editor: `select column_name from information_schema.columns where table_name = 'shop_settings' and column_name = 'tax_reviewed';` returns one row |
 | Database (digital products) | SQL Editor: `select kind from shop_products where slug = 'weekly-reset-system';` returns `digital` |
 | Edge Functions | Each function → Code: search for `Idempotency-Key` (launch prep) and `omc-badge-144` (email redesign). Both should be present in shop-checkout, stripe-webhook and shop-admin, and `download:` (digital products) in shop-admin. `shop-download` exists. |
+| Edge Functions (mug) | stripe-webhook and shop-admin → Code: search for `hasCalendar`. |
+| Download files | SQL Editor: every path in `shop_products.files` exists in `storage.objects` (bucket `shop-downloads`). Uploads keep the name they were uploaded with: rename to the exact paths in the tables above, or buyers get missing files. |
 | Site (Vercel) | Deployments → Production: the commit matches the latest merge on GitHub. Dashboard → Orders has an "Orders: Real and test" filter. |
+
+**Last verified 2026-10-15:** all migrations through `20261017000000` applied (every `public` function, policy and grant identical to a database built from `supabase/migrations/`); the mug added switched off; the Real Life Reset Kit and Family Sanity Saver files renamed to their product paths (all 29 download paths sign and serve); all four functions redeployed from `supabase/dashboard/` (Verify JWT off); receipt images for every product served from `/email/`. `SHOP_ALLOWED_ORIGINS` allowed `https://organizedmomcollective.com` but not `https://www.organizedmomcollective.com`, where the domain redirects.
 
 ## Tests
 
@@ -293,7 +298,7 @@ Nothing here deploys itself: a merged PR changes GitHub only. Vercel deploys the
 
 - **Stock hoarding.** Anyone can hold up to 5 units for 30 minutes per checkout. Rate limiting is 12 checkouts/hour per connection, keyed on the IP Supabase forwards; if that header can be spoofed upstream, the limit can be bypassed. Worst case: stock looks sold out until the holds expire. Watch *In checkout*; set checkout Off if abused.
 - **Stale holds** are released by Stripe's expiry webhook, or on the next checkout if that webhook is missed. Until then the dashboard's *In checkout* may show them.
-- **Etsy and website stock aren't connected.** If they share a shelf, take Etsy sales out here by hand.
+- **Etsy and website stock aren't connected.** Don't share a shelf: give each channel its own allocation (website stock here, Etsy listing quantity there, adding up to what you have), and move units between them by hand when one runs low. Neither channel can then sell a unit the other already sold.
 - Admin sessions last one hour (Supabase access token) and live in the tab's sessionStorage.
 
 ## Later: shipping labels
