@@ -35,10 +35,16 @@ Scope: all **17** `src/content/articles/*.mdx` files currently present on the re
 | IF-02 | [how-to-share-the-mental-load](../../src/content/articles/how-to-share-the-mental-load.mdx) | P2 | Clear full-job ownership; add a single worked handoff example readers could reuse. |
 | IF-03 | [chores-for-kids-by-age](../../src/content/articles/chores-for-kids-by-age.mdx) | P2 | Free generator is primary value; test generated chores by age, editing, download, and whether article promises match tool. |
 
+## Fix log (2026-10-15)
+
+- FP-11: **Edited and committed.** Corrected the implication that all digital calendars automatically alert people to event edits; clarified Google Family Calendar's default behavior and Cozi Gold's change alerts, improved household decision test and pillar link, and added official-source claim log to the brief. Still needs deployed-page/mobile check.
+- HC-04: **Edited and committed.** Aligned Friday, Saturday and Sunday descriptions with the actual cleaning program's named weekend zones and clarified that the current-month checklist follows the reader's device. Shared data source confirmed by repository inspection. Twelve-month rendered/browser QA remains pending.
+- `npm run verify`, rendered screenshots, Search Console review and generator functional checks: **not run** in this connector-only pass.
+
 ## Immediate execution order
 1. Run existing verification and regenerate inventory; check publication statuses and any missing documentation.
-2. Verify FP-11 comparison claims with a dated source/claim log; do not imply first-hand testing without it.
-3. Test HC-04's current-month card in January through December and confirm the design/theme data source.
+2. Review the updated FP-11 comparison at phone size; its official-source claim log is now saved.
+3. Test HC-04's current-month card in January through December; its source data and weekend labels have been reconciled.
 4. Check FP-09 and IF-03 generator flows on phone, including downloads, and match promises to behavior.
 5. Prioritize worked examples for IF-02 and FP-08; photo relevance review for FP-05 and IF-01.
 6. After 28+ days of meaningful Search Console data, rank real query-level gaps/leaks and revisit priorities.
