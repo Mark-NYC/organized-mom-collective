@@ -186,6 +186,9 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
   | Your_First_Weekly_Reset_Coaching_Session.mp3 | `first-weekly-reset-coaching-session.mp3` |
 - [ ] Later, to sell it: upload the 2026–2027 calendar files over the first two, fix the year in the calendar's download label (Dashboard → Inventory), switch the product on, and set the page's buy link (`src/data/family-sanity-saver.ts`). Then buy it once in preview: all six files should download.
 
+### Database update: settings save fix (once, after the Family Sanity Saver kit)
+- [x] **SQL Editor → New query**: paste the whole of `supabase/migrations/20261018000000_shop_settings_where.sql` → **Run**. Fixes "Something went wrong (UPDATE requires a WHERE clause)" when saving Settings (Supabase's pg_safeupdate). Applied to the live project 2026-10-15; safe to run again.
+
 ### Decisions you owe before launch
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
 - [ ] **Shipping prices** ([Shipping](#shipping)). Add the real rate(s) in Settings, then turn off the test placeholder.

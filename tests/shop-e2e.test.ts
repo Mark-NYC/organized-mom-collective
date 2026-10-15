@@ -960,6 +960,15 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       expect(all(`select relname from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r' and relname like 'shop%' and not relrowsecurity`)).toEqual([]);
     });
 
+    it('every UPDATE in a database function has a WHERE clause (Supabase’s pg_safeupdate rejects one without)', () => {
+      const defs = all<{ proname: string; def: string }>(`select p.proname, pg_get_functiondef(p.oid) def from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'public' and p.prokind = 'f'`);
+      const offenders = defs.flatMap((d) =>
+        [...d.def.matchAll(/\bupdate\s+public\.\w+\s+set\b[\s\S]*?;/gi)].filter((m) => !/\bwhere\b/i.test(m[0])).map(() => d.proname),
+      );
+      expect(offenders).toEqual([]);
+    });
+
     it('a signed-in non-admin reads zero rows from every shop table', async () => {
       await buy(1);
       for (const t of ['shop_orders', 'shop_order_items', 'shop_order_events', 'shop_entitlements', 'shop_email_log', 'shop_products', 'shop_settings', 'shop_inventory_log']) {
