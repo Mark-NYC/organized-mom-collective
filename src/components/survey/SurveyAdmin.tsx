@@ -26,7 +26,7 @@ function daysAgo(n: number) {
 }
 
 /**
- * Survey results for MFA-verified admins (AdminGate). Row-level security does the protecting:
+ * Survey results for admins (AdminGate). Row-level security does the protecting:
  * without an admin token the database returns nothing, whatever this page does.
  */
 export default function SurveyAdmin() {

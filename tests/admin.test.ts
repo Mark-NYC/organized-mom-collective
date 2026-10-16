@@ -3,20 +3,16 @@ import { readdirSync } from 'node:fs';
 import { ADMIN_IDLE_MS, ADMIN_SECTIONS } from '../src/data/admin';
 import {
   clearSession,
-  cleanCode,
   createAdminAuth,
   idleExpired,
-  isCode,
   loadSession,
   needsRefresh,
-  qrSrc,
   saveSession,
-  tokenClaims,
   type AdminSession,
 } from '../src/lib/admin/session';
 import { safeAdminLink, sortAlerts, usd, type AlertRow } from '../src/lib/admin/overview';
 import { filterPages, liveUrl, sourceUrl, type PageRow } from '../src/lib/admin/pages';
-import { auditDetail, createAdminHandler, tokenAal } from '../supabase/functions/_shared/handlers/admin.ts';
+import { auditDetail, createAdminHandler } from '../supabase/functions/_shared/handlers/admin.ts';
 import { depsFromEnv } from '../supabase/functions/_shared/deps.ts';
 
 const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url');
@@ -30,11 +26,10 @@ class MemoryStorage {
 }
 
 const session = (over: Partial<AdminSession> = {}): AdminSession => ({
-  access_token: token({ sub: 'u1', aal: 'aal2' }),
+  access_token: token({ sub: 'u1' }),
   refresh_token: 'r1',
   expires_at: Date.now() + 3600_000,
   email: 'owner@example.com',
-  aal: 'aal2',
   ...over,
 });
 
@@ -54,30 +49,6 @@ function fakeAuth(routes: Record<string, [number, unknown]>) {
 }
 
 describe('admin session', () => {
-  it('reads the aal claim from a token, defaulting to aal1', () => {
-    expect(tokenClaims(token({ aal: 'aal2', sub: 'x' })).aal).toBe('aal2');
-    expect(tokenClaims(token({ aal: 'aal1' })).aal).toBe('aal1');
-    expect(tokenClaims('not-a-jwt').aal).toBe('aal1');
-  });
-
-  it('makes Supabase\'s raw SVG QR code a valid image URL', () => {
-    const raw = 'data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg"><path fill="#000000" d="M0 0h1v1H0z"/></svg>';
-    const src = qrSrc(raw);
-    expect(src.startsWith('data:image/svg+xml;charset=utf-8,')).toBe(true);
-    expect(src).not.toContain('#');
-    expect(decodeURIComponent(src.split(',')[1])).toBe(raw.split(',')[1]);
-    // Already encoded: decoded once, encoded once (never double-encoded).
-    expect(qrSrc(src)).toBe(src);
-    expect(qrSrc('data:image/png;base64,AAAA')).toBe('data:image/png;base64,AAAA');
-  });
-
-  it('accepts only 6-digit codes, ignoring spaces', () => {
-    expect(isCode('123 456')).toBe(true);
-    expect(cleanCode(' 12 34 56 ')).toBe('123456');
-    expect(isCode('12345')).toBe(false);
-    expect(isCode('12345a')).toBe(false);
-  });
-
   it('refreshes under five minutes left and signs out after 30 idle minutes', () => {
     const now = 1_000_000_000;
     expect(needsRefresh(session({ expires_at: now + 4 * 60_000 }), now)).toBe(true);
@@ -101,12 +72,12 @@ describe('admin session', () => {
     expect(loadSession(Date.now(), store)).toBeNull();
   });
 
-  it('signs in with a password and reports the session as aal1', async () => {
+  it('signs in with a password', async () => {
     const { auth, calls } = fakeAuth({
-      'POST /token?grant_type=password': [200, { access_token: token({ aal: 'aal1' }), refresh_token: 'r', expires_in: 3600, user: { email: 'owner@example.com' } }],
+      'POST /token?grant_type=password': [200, { access_token: token({ sub: 'u1' }), refresh_token: 'r', expires_in: 3600, user: { email: 'owner@example.com' } }],
     });
     const s = await auth.signIn('owner@example.com', 'pw');
-    expect(s.aal).toBe('aal1');
+    expect(s).toMatchObject({ email: 'owner@example.com', refresh_token: 'r' });
     expect(calls[0].body).toEqual({ email: 'owner@example.com', password: 'pw' });
   });
 
@@ -116,50 +87,11 @@ describe('admin session', () => {
     );
     await expect(fakeAuth({ 'POST /token?grant_type=password': [429, {}] }).auth.signIn('a@b.c', 'x')).rejects.toThrow('Too many attempts');
   });
-
-  it('enrolls an authenticator after removing unfinished attempts', async () => {
-    const { auth, calls } = fakeAuth({
-      'DELETE /factors/old': [200, {}],
-      'POST /factors': [200, { id: 'f1', totp: { qr_code: 'data:image/svg+xml;utf-8,<svg/>', secret: 'ABC', uri: 'otpauth://x' } }],
-    });
-    const s = session({ aal: 'aal1' });
-    const e = await auth.enroll(s, [
-      { id: 'old', factor_type: 'totp', status: 'unverified' },
-      { id: 'keep', factor_type: 'totp', status: 'verified' },
-    ]);
-    expect(e).toEqual({ id: 'f1', qr: `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg/>')}`, secret: 'ABC' });
-    expect(calls.map((c) => `${c.method} ${c.path}`)).toEqual(['DELETE /factors/old', 'POST /factors']);
-    expect((calls[1].body as { factor_type: string }).factor_type).toBe('totp');
-    expect(calls.every((c) => c.auth === `Bearer ${s.access_token}`)).toBe(true);
-  });
-
-  it('verifies a code and returns the upgraded aal2 session', async () => {
-    const { auth, calls } = fakeAuth({
-      'POST /factors/f1/challenge': [200, { id: 'c1' }],
-      'POST /factors/f1/verify': [200, { access_token: token({ aal: 'aal2' }), refresh_token: 'r2', expires_in: 3600, user: { email: 'owner@example.com' } }],
-    });
-    const s = await auth.verify(session({ aal: 'aal1' }), 'f1', '123456');
-    expect(s.aal).toBe('aal2');
-    expect(s.refresh_token).toBe('r2');
-    expect(calls[1].body).toEqual({ challenge_id: 'c1', code: '123456' });
-  });
-
-  it('explains a wrong code', async () => {
-    const { auth } = fakeAuth({ 'POST /factors/f1/challenge': [200, { id: 'c1' }], 'POST /factors/f1/verify': [422, { msg: 'Invalid TOTP code entered' }] });
-    await expect(auth.verify(session(), 'f1', '000000')).rejects.toThrow('That code didn’t work');
-  });
-
-  it('lists only authenticator-app factors', async () => {
-    const { auth } = fakeAuth({
-      'GET /user': [200, { factors: [{ id: 'a', factor_type: 'totp', status: 'verified' }, { id: 'b', factor_type: 'phone', status: 'verified' }] }],
-    });
-    expect((await auth.factors(session())).map((x) => x.id)).toEqual(['a']);
-  });
 });
 
-describe('shop-admin requires an MFA session and audit-logs changes', () => {
+describe('shop-admin checks the admin list and audit-logs changes', () => {
   const ADMIN = '11111111-1111-4111-8111-111111111111';
-  const setup = () => {
+  const setup = (isAdmin = true) => {
     const rpcs: { name: string; body: Record<string, unknown> }[] = [];
     const f = (async (input: RequestInfo | URL, init: RequestInit = {}) => {
       const url = String(input);
@@ -167,7 +99,7 @@ describe('shop-admin requires an MFA session and audit-logs changes', () => {
       const rpc = url.match(/\/rest\/v1\/rpc\/(\w+)$/)?.[1];
       if (rpc) {
         rpcs.push({ name: rpc, body: JSON.parse(String(init.body ?? '{}')) });
-        return new Response(rpc === 'shop_is_admin_user' ? 'true' : 'null');
+        return new Response(rpc === 'shop_is_admin_user' ? String(isAdmin) : 'null');
       }
       throw new Error(`unexpected fetch ${url}`);
     }) as typeof fetch;
@@ -178,18 +110,18 @@ describe('shop-admin requires an MFA session and audit-logs changes', () => {
     return { rpcs, call };
   };
 
-  it('refuses a password-only (aal1) session before touching data', async () => {
-    const { rpcs, call } = setup();
-    const res = await call(token({ sub: ADMIN, aal: 'aal1' }), { action: 'whoami' });
+  it('refuses a signed-in account that is not an admin', async () => {
+    const { rpcs, call } = setup(false);
+    const res = await call(token({ sub: ADMIN }), { action: 'note', order_id: '22222222-2222-4222-8222-222222222222', note: 'x' });
     expect(res.status).toBe(403);
-    expect(await res.json()).toEqual({ error: 'mfa_required' });
-    expect(rpcs).toEqual([]);
+    expect(await res.json()).toEqual({ error: 'forbidden' });
+    expect(rpcs.map((r) => r.name)).toEqual(['shop_is_admin_user']);
   });
 
   it('records a change in the audit log without notes or addresses', async () => {
     const { rpcs, call } = setup();
     const orderId = '22222222-2222-4222-8222-222222222222';
-    const res = await call(token({ sub: ADMIN, aal: 'aal2' }), { action: 'note', order_id: orderId, note: 'Customer lives at 1 Main St' });
+    const res = await call(token({ sub: ADMIN }), { action: 'note', order_id: orderId, note: 'Customer lives at 1 Main St' });
     expect(res.status).toBe(200);
     const log = rpcs.find((r) => r.name === 'admin_log_service');
     expect(log?.body).toEqual({ p_actor: ADMIN, p_action: 'shop.note', p_target: `order:${orderId}`, p_detail: {} });
@@ -198,13 +130,11 @@ describe('shop-admin requires an MFA session and audit-logs changes', () => {
 
   it('does not log read-only actions', async () => {
     const { rpcs, call } = setup();
-    expect((await call(token({ sub: ADMIN, aal: 'aal2' }), { action: 'whoami' })).status).toBe(200);
+    expect((await call(token({ sub: ADMIN }), { action: 'whoami' })).status).toBe(200);
     expect(rpcs.map((r) => r.name)).toEqual(['shop_is_admin_user']);
   });
 
   it('keeps only small, known fields in the audit detail', () => {
-    expect(tokenAal(token({ aal: 'aal2' }))).toBe('aal2');
-    expect(tokenAal('garbage')).toBeNull();
     const d = auditDetail({ action: 'fulfillment', order_id: 'o1', status: 'shipped', carrier: 'USPS', tracking_number: '9400', notify: true, address: 'x' });
     expect(d).toEqual({ target: 'order:o1', detail: { status: 'shipped', carrier: 'USPS', notify: true } });
     expect(auditDetail({ action: 'product', product_id: 'p1', fields: { price_cents: 100, name: 'x' } }).detail).toEqual({ fields: ['price_cents', 'name'] });

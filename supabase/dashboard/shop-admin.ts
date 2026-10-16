@@ -568,15 +568,6 @@ var uuid = (v) => {
   return v;
 };
 var str = (v, max = 500) => typeof v === "string" ? v.slice(0, max) : null;
-function tokenAal(token) {
-  try {
-    const part = token.split(".")[1] ?? "";
-    const payload = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
-    return typeof payload.aal === "string" ? payload.aal : null;
-  } catch {
-    return null;
-  }
-}
 async function authenticate(deps, req) {
   const token = req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) throw new HttpError(401, "unauthorized");
@@ -586,7 +577,6 @@ async function authenticate(deps, req) {
   if (!res.ok) throw new HttpError(401, "unauthorized");
   const user = await res.json();
   if (!user.id || !UUID.test(user.id)) throw new HttpError(401, "unauthorized");
-  if (tokenAal(token) !== "aal2") throw new HttpError(403, "mfa_required");
   const ok = await deps.db.rpc("shop_is_admin_user", { p_user: user.id });
   if (!ok) throw new HttpError(403, "forbidden");
   return { id: user.id, email: user.email ?? user.id };

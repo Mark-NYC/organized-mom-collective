@@ -5,16 +5,12 @@ import {
   adminRpc,
   auditLog,
   clearSession,
-  cleanCode,
   createAdminAuth,
-  isCode,
   loadSession,
   markActive,
   needsRefresh,
   saveSession,
   type AdminSession,
-  type Enrollment,
-  type Factor,
 } from '../../lib/admin/session';
 
 const auth = createAdminAuth();
@@ -32,15 +28,12 @@ export interface AdminContext {
 type Step =
   | { kind: 'loading' }
   | { kind: 'signin' }
-  | { kind: 'enroll'; enrollment: Enrollment }
-  | { kind: 'verify'; factor: Factor }
   | { kind: 'denied' }
   | { kind: 'ready'; role: string | null; databaseReady: boolean };
 
 /**
- * Signs in to /admin: email + password, then an authenticator code. The first sign-in adds the
- * authenticator (QR code). Children render only with an MFA-verified session; the database and
- * Edge Functions refuse anything less, whatever this component does.
+ * Signs in to /admin with email + password. Children render only for an admin account; the
+ * database and Edge Functions check that again on every call, whatever this component does.
  */
 export default function AdminGate({ children }: { children: (ctx: AdminContext) => React.ReactNode }) {
   const [step, setStep] = useState<Step>({ kind: 'loading' });
@@ -61,15 +54,7 @@ export default function AdminGate({ children }: { children: (ctx: AdminContext) 
     setStep({ kind: 'signin' });
   };
 
-  /** After the password: verify or add the authenticator. */
-  const secondFactor = async (s: AdminSession) => {
-    const factors = await auth.factors(s);
-    const verified = factors.find((f) => f.status === 'verified');
-    if (verified) setStep({ kind: 'verify', factor: verified });
-    else setStep({ kind: 'enroll', enrollment: await auth.enroll(s, factors) });
-  };
-
-  /** With an aal2 session: is this account an admin? */
+  /** Signed in: is this account an admin? */
   const finish = async (s: AdminSession, fresh: boolean) => {
     try {
       const who = await adminRpc<{ admin: boolean; role: string | null }>(s, 'admin_whoami');
@@ -99,8 +84,7 @@ export default function AdminGate({ children }: { children: (ctx: AdminContext) 
       try {
         const s = needsRefresh(saved) ? await auth.refresh(saved) : saved;
         store(s);
-        if (s.aal === 'aal2') await finish(session.current!, false);
-        else await secondFactor(session.current!);
+        await finish(session.current!, false);
       } catch {
         signOut();
       }
@@ -175,46 +159,9 @@ export default function AdminGate({ children }: { children: (ctx: AdminContext) 
             const s = await auth.signIn(email, password);
             session.current = null;
             store(s);
-            await secondFactor(session.current!);
+            await finish(session.current!, true);
           }}
         />
-      )}
-      {step.kind === 'enroll' && (
-        <>
-          <h2 className="text-[1.25rem] font-bold">Add an authenticator app</h2>
-          <p className="mt-2 text-[0.95rem]">
-            The admin needs a second step at every sign-in. Scan this with an authenticator app (1Password, Google Authenticator, Authy…), then type the
-            6-digit code it shows.
-          </p>
-          <img src={step.enrollment.qr} alt="QR code for your authenticator app" width={200} height={200} className="mt-4 h-[200px] w-[200px] bg-paper" />
-          <details className="mt-2 text-[0.9rem]">
-            <summary className="cursor-pointer">Can’t scan? Enter this key instead</summary>
-            <code className="mt-1 block break-all select-all">{step.enrollment.secret}</code>
-          </details>
-          <CodeForm
-            error={error}
-            onSubmit={async (code) => {
-              setError('');
-              store(await auth.verify(session.current!, step.enrollment.id, code));
-              void auditLog(session.current!, 'admin.mfa_enrolled');
-              await finish(session.current!, true);
-            }}
-          />
-        </>
-      )}
-      {step.kind === 'verify' && (
-        <>
-          <h2 className="text-[1.25rem] font-bold">Authenticator code</h2>
-          <p className="mt-2 text-[0.95rem]">Open your authenticator app and type the 6-digit code for Organized Mom Collective.</p>
-          <CodeForm
-            error={error}
-            onSubmit={async (code) => {
-              setError('');
-              store(await auth.verify(session.current!, step.factor.id, code));
-              await finish(session.current!, true);
-            }}
-          />
-        </>
       )}
       {step.kind === 'denied' && (
         <>
@@ -225,11 +172,6 @@ export default function AdminGate({ children }: { children: (ctx: AdminContext) 
             Sign out
           </button>
         </>
-      )}
-      {(step.kind === 'enroll' || step.kind === 'verify') && (
-        <button type="button" className="text-link mt-6 text-[0.9rem]" onClick={() => signOut()}>
-          Cancel and sign out
-        </button>
       )}
     </div>
   );
@@ -275,39 +217,6 @@ function PasswordForm({ error, onSubmit }: { error: string; onSubmit: (email: st
       )}
       <button type="submit" disabled={busy} className="btn-primary w-full">
         {busy ? 'Signing in…' : 'Sign in'}
-      </button>
-    </form>
-  );
-}
-
-function CodeForm({ error, onSubmit }: { error: string; onSubmit: (code: string) => Promise<void> }) {
-  const [code, setCode] = useState('');
-  const [localError, setLocalError] = useState('');
-  const { busy, submit } = useSubmit(() => onSubmit(cleanCode(code)), setLocalError);
-  const shown = localError || error;
-  return (
-    <form onSubmit={submit} className="mt-4 space-y-4">
-      <label className="block">
-        <span className="label text-soft">6-digit code</span>
-        <input
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          required
-          autoFocus
-          maxLength={7}
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className={`${adminInput} tracking-[0.3em]`}
-        />
-      </label>
-      {shown && (
-        <p role="alert" className="text-[0.95rem] font-semibold">
-          {shown}
-        </p>
-      )}
-      <button type="submit" disabled={busy || !isCode(code)} className="btn-primary w-full">
-        {busy ? 'Checking…' : 'Continue'}
       </button>
     </form>
   );

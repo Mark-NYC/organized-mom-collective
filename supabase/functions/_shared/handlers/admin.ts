@@ -1,6 +1,6 @@
 /**
  * POST /functions/v1/shop-admin — every dashboard write. Requires a Supabase Auth access
- * token (Authorization: Bearer …) from an MFA-verified (aal2) session of an owner in admin_users;
+ * token (Authorization: Bearer …) for an owner in admin_users;
  * anything else gets 401/403 before any data is touched. Every write is recorded in admin_audit_log. Reads happen in the browser through row-level security.
  *
  * Actions (body.action):
@@ -44,21 +44,7 @@ const uuid = (v: unknown) => {
 };
 const str = (v: unknown, max = 500) => (typeof v === 'string' ? v.slice(0, max) : null);
 
-/**
- * The token's `aal` claim. Read only after Supabase Auth accepted the same token (authenticate),
- * so the payload is the verified one.
- */
-export function tokenAal(token: string): string | null {
-  try {
-    const part = token.split('.')[1] ?? '';
-    const payload = JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(part.length / 4) * 4, '='))) as { aal?: unknown };
-    return typeof payload.aal === 'string' ? payload.aal : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Verifies the access token with Supabase Auth, requires MFA (aal2), then checks admin_users. */
+/** Verifies the access token with Supabase Auth, then checks admin_users. */
 async function authenticate(deps: ShopDeps, req: Request): Promise<Admin> {
   const token = req.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) throw new HttpError(401, 'unauthorized');
@@ -68,7 +54,6 @@ async function authenticate(deps: ShopDeps, req: Request): Promise<Admin> {
   if (!res.ok) throw new HttpError(401, 'unauthorized');
   const user = (await res.json()) as { id?: string; email?: string };
   if (!user.id || !UUID.test(user.id)) throw new HttpError(401, 'unauthorized');
-  if (tokenAal(token) !== 'aal2') throw new HttpError(403, 'mfa_required');
   const ok = await deps.db.rpc<boolean>('shop_is_admin_user', { p_user: user.id });
   if (!ok) throw new HttpError(403, 'forbidden');
   return { id: user.id, email: user.email ?? user.id };

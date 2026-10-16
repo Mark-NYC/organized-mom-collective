@@ -37,8 +37,8 @@ for (const [k, v] of Object.entries(env)) Deno.env.set(k, v);
 
 const stripe = new FakeStripe();
 const inbox = new FakeInbox();
-// An MFA-verified (aal2) admin session; shop-admin refuses anything less.
-const token = jwt({ role: 'authenticated', sub: ADMIN.id, aal: 'aal2' }, 'dashboard-smoke-secret');
+// An admin's password session, as Supabase issues it.
+const token = jwt({ role: 'authenticated', sub: ADMIN.id, aal: 'aal1' }, 'dashboard-smoke-secret');
 const storage = new FakeStorage();
 const fakeFetch = routerFetch({ supabaseUrl: SUPABASE_URL, restUrl: REST, stripe, inbox, storage, users: new Map([[token, ADMIN]]) });
 globalThis.fetch = fakeFetch;
