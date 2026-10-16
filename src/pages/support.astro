@@ -1,0 +1,375 @@
+---
+/**
+ * /support — Help & Support. Six help topics with short, verified FAQs, then a contact form that
+ * goes to the support-request Edge Function (saved in support_requests, emailed to the support
+ * inbox, acknowledged to the customer; supabase/SUPPORT.md). Etsy buyers are pointed to Etsy
+ * Messages first, without leaving this page to find out how. Email is always offered as well.
+ *
+ * Topics, FAQs, limits and the contact address: src/data/support.ts. Mobile-first; no sales
+ * elements beyond the site header and footer. `?topic=<id>` preselects the form's topic.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { ETSY, FAQS, LIMITS, RESPONSE_TIME, SUPPORT_EMAIL, SUPPORT_TOPICS } from '../data/support';
+import { routes } from '../routes';
+
+const formOn = Boolean(import.meta.env.PUBLIC_SUPABASE_URL && import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+const a = 'underline decoration-warm-rule decoration-1 underline-offset-4 hover:decoration-warm-ink';
+const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Help with my order')}`;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<PublicLayout
+  title="Help & Support"
+  description="Questions about your order, your calendar or the cleaning companion website? Find quick answers or send us a message. We aim to respond within one business day."
+  width="full"
+  jsonLd={jsonLd}
+>
+  <section aria-labelledby="support-h" class="public-panel public-intro">
+    <div class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+      <p class="label text-warm-soft">Help &amp; Support</p>
+      <h1 id="support-h" class="serif-hero mt-3">How can we help?</h1>
+      <p class="lede mt-5 text-warm-ink">Questions about your order, your calendar, or getting started? We’re here to help.</p>
+      <p class="mt-3 text-[1rem] text-warm-soft">{RESPONSE_TIME}</p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a href="#contact" class="btn-primary min-h-14 px-7">Send us a message</a>
+        <a href={mailto} class={`${a} text-[1rem] text-warm-ink sm:ml-4`}>Or email us directly</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="mx-auto max-w-3xl px-5 sm:px-8">
+    <aside aria-labelledby="etsy-h" class="mt-8 rounded-lg border border-warm-rule bg-ivory p-5 sm:p-6">
+      <h2 id="etsy-h" class="text-[1.05rem] font-semibold text-warm-ink">Bought on Etsy?</h2>
+      <p class="mt-2 text-[1rem] leading-relaxed text-warm-ink">
+        Etsy Messages is the quickest way to reach us about that order: open <strong>Purchases</strong> in your Etsy account, find your calendar
+        and message us from there. Your order details come along with your message.
+      </p>
+      <p class="mt-3">
+        <a href={ETSY.purchases} target="_blank" rel="noopener noreferrer" class={`${a} text-[1rem] font-semibold text-warm-ink`}
+          >Open your Etsy purchases<span class="sr-only"> (opens Etsy)</span></a
+        >
+      </p>
+    </aside>
+
+    <nav aria-labelledby="topics-h" class="mt-12">
+      <h2 id="topics-h" class="serif-title text-[1.6rem] sm:text-[2rem]">Find an answer</h2>
+      <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+        {
+          SUPPORT_TOPICS.map((t) => (
+            <li>
+              <a href={`#${t.id}`} class="topic-card">
+                <span class="block text-[1.05rem] font-semibold text-warm-ink">{t.label}</span>
+                <span class="mt-1 block text-[0.95rem] leading-snug text-warm-soft">{t.blurb}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    {
+      SUPPORT_TOPICS.map((t) => {
+        const faqs = FAQS.filter((f) => f.topic === t.id);
+        return (
+          <section id={t.id} aria-labelledby={`${t.id}-h`} class="scroll-mt-6 border-t border-warm-rule pt-8 mt-12">
+            <h2 id={`${t.id}-h`} class="serif-title text-[1.45rem] sm:text-[1.75rem]">{t.label}</h2>
+            <div class="mt-4 divide-y divide-warm-rule">
+              {faqs.map((f) => (
+                <details class="faq group py-1">
+                  <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-2 text-[1.02rem] font-semibold text-warm-ink">
+                    {f.q}
+                    <span aria-hidden="true" class="faq-mark shrink-0 text-[1.3rem] leading-none text-warm-soft">+</span>
+                  </summary>
+                  <div class="pb-4 text-[1rem] leading-relaxed text-warm-ink">
+                    <p>{f.a}</p>
+                    {f.link && (
+                      <p class="mt-2">
+                        <a href={f.link.href} class={a} {...(f.link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                          {f.link.label}
+                          {f.link.external && <span class="sr-only"> (opens Etsy)</span>}
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                </details>
+              ))}
+            </div>
+            {t.id === 'returns' && (
+              <p class="mt-4 text-[1rem] text-warm-ink">
+                Every detail is on our <a href={routes.returns} class={a}>Returns &amp; Refunds</a> page.
+              </p>
+            )}
+            <p class="mt-4 text-[0.95rem] text-warm-soft">
+              Still need help? <a href={`?topic=${t.id}#contact`} data-topic-link={t.id} class={a}>Send us a message about this</a>
+            </p>
+          </section>
+        );
+      })
+    }
+  </div>
+
+  <section id="contact" aria-labelledby="contact-h" class="scroll-mt-4 public-panel bg-sage-wash mt-16">
+    <div class="mx-auto max-w-2xl px-5 py-12 sm:px-8 sm:py-16">
+      <h2 id="contact-h" class="serif-title">Send us a message</h2>
+      <p class="mt-3 text-[1rem] leading-relaxed text-warm-ink">
+        A real person reads every message. {RESPONSE_TIME} Bought on Etsy? <a href={ETSY.purchases} target="_blank" rel="noopener noreferrer" class={a}
+          >Etsy Messages<span class="sr-only"> (opens Etsy)</span></a
+        > is quickest for that order.
+      </p>
+
+      {
+        formOn ? (
+          <>
+            <form class="support-form mt-8" data-support-form novalidate>
+              <div class="field">
+                <label for="s-name">Your name</label>
+                <input id="s-name" name="name" type="text" autocomplete="name" required maxlength={LIMITS.name} aria-describedby="s-name-err" />
+                <p class="err" id="s-name-err" data-err="name" />
+              </div>
+              <div class="field">
+                <label for="s-email">Email</label>
+                <input id="s-email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength={LIMITS.email} aria-describedby="s-email-hint s-email-err" />
+                <p class="hint" id="s-email-hint">We’ll reply here.</p>
+                <p class="err" id="s-email-err" data-err="email" />
+              </div>
+              <div class="field">
+                <label for="s-order">
+                  Order number <span class="opt">(optional)</span>
+                </label>
+                <input id="s-order" name="order" type="text" autocomplete="off" maxlength={LIMITS.order} aria-describedby="s-order-hint s-order-err" />
+                <p class="hint" id="s-order-hint">From your Etsy receipt or order email. It helps us find your order quickly.</p>
+                <p class="err" id="s-order-err" data-err="order" />
+              </div>
+              <div class="field">
+                <label for="s-topic">What’s it about?</label>
+                <select id="s-topic" name="topic" required aria-describedby="s-topic-err">
+                  <option value="">Choose a topic</option>
+                  {SUPPORT_TOPICS.map((t) => <option value={t.id}>{t.label}</option>)}
+                </select>
+                <p class="err" id="s-topic-err" data-err="topic" />
+              </div>
+              <div class="field">
+                <label for="s-message">Message</label>
+                <textarea id="s-message" name="message" rows="6" required minlength={LIMITS.messageMin} maxlength={LIMITS.message} aria-describedby="s-message-err" />
+                <p class="err" id="s-message-err" data-err="message" />
+              </div>
+              <div class="field">
+                <label for="s-photo">
+                  Photo <span class="opt">(optional)</span>
+                </label>
+                <input id="s-photo" name="photo" type="file" accept="image/*" aria-describedby="s-photo-hint s-photo-err" />
+                <p class="hint" id="s-photo-hint">Helpful if something arrived damaged or incorrect. One photo; we’ll ask if we need more.</p>
+                <p class="err" id="s-photo-err" data-err="photo" />
+              </div>
+              <div class="trap" aria-hidden="true">
+                <label>
+                  Website
+                  <input name="website" tabindex="-1" autocomplete="off" />
+                </label>
+              </div>
+              <p class="form-error" role="alert" data-form-error />
+              <button type="submit" class="btn-primary mt-2 min-h-14 w-full sm:w-auto sm:px-10" data-submit>
+                Send message
+              </button>
+              <p class="mt-4 text-[0.9rem] leading-relaxed text-warm-soft">
+                We use your details only to answer this message. It won’t add you to any mailing list.
+              </p>
+            </form>
+            <div class="done mt-8" data-done hidden tabindex="-1">
+              <p class="label text-warm-soft">Message sent</p>
+              <p class="serif-title mt-2 text-[1.6rem]">Thank you. We’ve got it.</p>
+              <p class="mt-3 text-[1rem] leading-relaxed text-warm-ink">
+                Your reference is <strong data-ref />. <span data-ack-line /> {RESPONSE_TIME}
+              </p>
+              <p class="mt-4">
+                <a href={routes.support} class={a}>Back to Help &amp; Support</a>
+              </p>
+            </div>
+          </>
+        ) : (
+          <p class="mt-8 text-[1rem] leading-relaxed text-warm-ink">
+            Email us at <a href={mailto} class={a}>{SUPPORT_EMAIL}</a> with your order number, and we’ll take it from there.
+          </p>
+        )
+      }
+
+      <div class="mt-10 border-t border-[#d5dccb] pt-6">
+        <p class="text-[1rem] font-semibold text-warm-ink">Prefer email?</p>
+        <p class="mt-1 text-[1rem] leading-relaxed text-warm-ink">
+          Write to <a href={mailto} class={a}>{SUPPORT_EMAIL}</a>. Add your order number and a photo if something arrived damaged.
+        </p>
+      </div>
+    </div>
+  </section>
+</PublicLayout>
+
+<style>
+  .topic-card {
+    display: block;
+    height: 100%;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 0.6rem;
+    background: var(--color-ivory);
+    transition: border-color 0.15s;
+  }
+  .topic-card:hover { border-color: var(--color-warm-soft); }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq[open] .faq-mark { transform: rotate(45deg); }
+  .faq-mark { transition: transform 0.15s; }
+  .support-form .field { margin-bottom: 1.35rem; }
+  .support-form label { display: block; font-size: 0.98rem; font-weight: 600; color: var(--color-warm-ink); }
+  .support-form .opt { font-weight: 400; color: var(--color-warm-soft); }
+  .support-form input:not([type='file']),
+  .support-form select,
+  .support-form textarea {
+    display: block;
+    width: 100%;
+    margin-top: 0.45rem;
+    padding: 0.7rem 0.85rem;
+    min-height: 3.1rem;
+    font-size: 1rem;
+    color: var(--color-warm-ink);
+    background: #fff;
+    border: 1px solid #c9c2bb;
+    border-radius: 0.5rem;
+  }
+  .support-form textarea { min-height: 9rem; line-height: 1.55; resize: vertical; }
+  .support-form input[type='file'] { display: block; margin-top: 0.55rem; max-width: 100%; font-size: 0.95rem; color: var(--color-warm-ink); }
+  .support-form input[type='file']::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    font: inherit;
+    font-weight: 600;
+    color: var(--color-warm-ink);
+    background: #fff;
+    border: 1px solid #c9c2bb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  .support-form [aria-invalid='true'] { border-color: var(--color-rose-deep); }
+  .support-form .hint { margin-top: 0.4rem; font-size: 0.88rem; line-height: 1.45; color: var(--color-warm-soft); }
+  .support-form .err { margin-top: 0.35rem; font-size: 0.92rem; color: var(--color-rose-deep); }
+  .support-form .err:empty,
+  .support-form .form-error:empty { display: none; }
+  .support-form .form-error { margin-bottom: 1rem; padding: 0.85rem 1rem; font-size: 0.95rem; line-height: 1.5; color: var(--color-warm-ink); background: var(--color-rose-wash); border-radius: 0.5rem; }
+  .support-form .form-error a { text-decoration: underline; text-underline-offset: 3px; }
+  .support-form .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .done { padding: 1.5rem; background: #fff; border-radius: 0.6rem; }
+  .done:focus { outline: none; }
+</style>
+
+<script>
+  import { preparePhoto, sendSupportRequest, type PreparedPhoto } from '../lib/support';
+  import { SUPPORT_EMAIL, TOPIC_IDS, type SupportField } from '../data/support';
+
+  const form = document.querySelector<HTMLFormElement>('[data-support-form]');
+  if (form) {
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const formError = form.querySelector<HTMLElement>('[data-form-error]')!;
+    const done = document.querySelector<HTMLElement>('[data-done]')!;
+    const topic = form.querySelector<HTMLSelectElement>('select[name="topic"]')!;
+    const fieldNames: (SupportField | 'photo')[] = ['name', 'email', 'order', 'topic', 'message', 'photo'];
+    const mail = `<a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>`;
+
+    // ?topic=damaged (from a topic's "Send us a message about this") preselects the topic.
+    const pick = (id: string | null) => {
+      if (id && TOPIC_IDS.includes(id)) topic.value = id;
+    };
+    pick(new URLSearchParams(location.search).get('topic'));
+    document.querySelectorAll<HTMLAnchorElement>('[data-topic-link]').forEach((link) =>
+      link.addEventListener('click', () => pick(link.dataset.topicLink ?? null)),
+    );
+
+    const control = (name: string) => form.querySelector<HTMLInputElement>(`[name="${name}"]`);
+    function showErrors(errors: Partial<Record<string, string>>) {
+      let first: HTMLElement | null = null;
+      for (const name of fieldNames) {
+        const msg = errors[name] ?? '';
+        const el = control(name);
+        const out = form!.querySelector<HTMLElement>(`[data-err="${name}"]`);
+        if (out) out.textContent = msg;
+        if (el) {
+          if (msg) el.setAttribute('aria-invalid', 'true');
+          else el.removeAttribute('aria-invalid');
+          if (msg && !first) first = el;
+        }
+      }
+      first?.focus();
+    }
+
+    // A corrected field drops its error as she types.
+    form.addEventListener('input', (event) => {
+      const el = event.target as HTMLInputElement;
+      if (el.getAttribute('aria-invalid') !== 'true') return;
+      el.removeAttribute('aria-invalid');
+      const out = form.querySelector<HTMLElement>(`[data-err="${el.name}"]`);
+      if (out) out.textContent = '';
+    });
+
+    let busy = false;
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (busy) return;
+      formError.innerHTML = '';
+      showErrors({});
+      const data = new FormData(form);
+      const input = {
+        name: String(data.get('name') ?? ''),
+        email: String(data.get('email') ?? ''),
+        order: String(data.get('order') ?? ''),
+        topic: String(data.get('topic') ?? ''),
+        message: String(data.get('message') ?? ''),
+      };
+      busy = true;
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+      const reset = () => {
+        busy = false;
+        submit.disabled = false;
+        submit.textContent = 'Send message';
+      };
+
+      let photo: PreparedPhoto | null = null;
+      const file = data.get('photo');
+      if (file instanceof File && file.size > 0) {
+        photo = await preparePhoto(file);
+        if (!photo) {
+          showErrors({ photo: `We couldn’t read that photo. Try a different one, send without it, or email it to ${SUPPORT_EMAIL}.` });
+          reset();
+          return;
+        }
+      }
+
+      const result = await sendSupportRequest(input, String(data.get('website') ?? ''), photo);
+      if (result.ok) {
+        form.hidden = true;
+        done.querySelector('[data-ref]')!.textContent = result.reference;
+        done.querySelector('[data-ack-line]')!.textContent = result.acknowledged
+          ? `We’ve emailed a confirmation to ${input.email.trim()}.`
+          : 'Keep it handy in case you write to us again.';
+        done.hidden = false;
+        done.focus();
+        return;
+      }
+      reset();
+      if (result.reason === 'invalid') {
+        showErrors(result.fields);
+        if (!Object.keys(result.fields).length) formError.innerHTML = `Something in the form didn’t go through. Please check it, or email us at ${mail}.`;
+      } else if (result.reason === 'photo') {
+        showErrors({ photo: `That photo didn’t go through. Try sending without it, or email it to ${SUPPORT_EMAIL}.` });
+      } else if (result.reason === 'rate_limited') {
+        formError.innerHTML = `You’ve sent a few messages already, so we’ve paused the form for a little while. We’ll reply to those soon, or you can email us at ${mail}.`;
+      } else {
+        formError.innerHTML = `Sorry, your message didn’t send. Please try again in a minute, or email us at ${mail}. Nothing you typed has been lost.`;
+      }
+    });
+  }
+</script>

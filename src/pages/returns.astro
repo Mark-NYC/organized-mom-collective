@@ -1,0 +1,154 @@
+---
+/**
+ * /returns — Returns & Refunds. The official policy for physical wall calendars (terms in
+ * src/data/support.ts → POLICY, approved 2026-10-16), plus the separate, already-published
+ * 30-day guarantee on downloads. Other physical goods (the mug) and personalized products have
+ * no published terms yet: add their own section before they go on sale, never reuse the
+ * calendar's. The return address is never published: it goes out by email once a return is approved.
+ * Operating steps behind each promise: docs/operations/CUSTOMER_SUPPORT.md. /refunds redirects here.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { ETSY, POLICY, RESPONSE_TIME, SUPPORT_EMAIL, policyDate } from '../data/support';
+import { routes } from '../routes';
+
+const days = POLICY.returnWindowDays;
+const h2 = 'serif-title mt-12 text-[1.5rem] sm:text-[1.75rem]';
+const p = 'mt-3 text-[1rem] leading-relaxed text-warm-ink';
+const a = 'underline decoration-warm-rule decoration-1 underline-offset-4 hover:decoration-warm-ink';
+const list = 'mt-3 list-disc space-y-2 pl-6 text-[1rem] leading-relaxed text-warm-ink';
+const sections = [
+  { id: 'window', label: `The ${days}-day window` },
+  { id: 'how', label: 'How to request a return' },
+  { id: 'damaged', label: 'Damaged or incorrect orders' },
+  { id: 'refunds', label: 'Refunds' },
+  { id: 'cancel', label: 'Cancellations' },
+  { id: 'shipping', label: 'Shipping problems' },
+  { id: 'etsy', label: 'Bought on Etsy' },
+  { id: 'downloads', label: 'Downloads' },
+];
+---
+
+<PublicLayout
+  title="Returns & Refunds"
+  description={`Returns within ${days} days of delivery on unused wall calendars, free replacements or refunds for damaged or incorrect orders, and how refunds work for Etsy and website orders.`}
+  width="full"
+>
+  <section aria-labelledby="returns-h" class="public-panel public-intro">
+    <div class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+      <p class="label text-warm-soft">Policies</p>
+      <h1 id="returns-h" class="serif-hero mt-3">Returns &amp; Refunds</h1>
+      <p class="lede mt-5 text-warm-ink">We want you to feel good about your purchase. If something isn’t right, here’s how we’ll help.</p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a href={routes.supportContact} class="btn-primary min-h-14 px-7 text-center">Request Help With an Order</a>
+        <a href={ETSY.purchases} target="_blank" rel="noopener noreferrer" class="text-link text-warm-ink sm:ml-3"
+          >Bought on Etsy? Message us there<span class="sr-only"> (opens Etsy)</span></a
+        >
+      </div>
+      <p class="mt-6 text-[0.9rem] text-warm-soft">Effective <time datetime={POLICY.effective}>{policyDate()}</time>. Applies to our printed family wall calendars.</p>
+    </div>
+  </section>
+
+  <article class="mx-auto max-w-3xl px-5 pt-10 pb-16 sm:px-8 sm:pb-24">
+    <nav aria-labelledby="toc-h" class="border-y border-warm-rule py-5">
+      <h2 id="toc-h" class="label text-warm-soft">On this page</h2>
+      <ul class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+        {sections.map((s) => <li><a href={`#${s.id}`} class={`${a} text-[0.98rem] text-warm-ink`}>{s.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <h2 id="window" class={h2}>Our {days}-day return window</h2>
+    <p class={p}>
+      You can return a calendar within {days} calendar days of confirmed delivery. Your calendar is dated, week by week, so we keep the window
+      short: a returned calendar is only useful to another family while its weeks are still ahead.
+    </p>
+    <p class={p}>To be eligible for a change-of-mind return:</p>
+    <ul class={list}>
+      <li>Contact us within {days} days of delivery to request it.</li>
+      <li>The calendar is unused and in its original, resalable condition: nothing written in, no missing or torn pages.</li>
+      <li>You have proof of purchase, such as your order number or receipt.</li>
+    </ul>
+    <p class={p}>There are no restocking fees.</p>
+
+    <h2 id="how" class={h2}>How to request a return</h2>
+    <ol class="mt-3 list-decimal space-y-2 pl-6 text-[1rem] leading-relaxed text-warm-ink">
+      <li>
+        Message us within {days} days of delivery with your order number. Etsy orders: use Etsy Messages. Website orders: use our{' '}
+        <a href={routes.supportContact} class={a}>support form</a> or email <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a>.
+      </li>
+      <li>Once your return is approved, we’ll email you the return address. Please don’t send anything before then.</li>
+      <li>Ship the calendar back. For change-of-mind returns, return shipping is yours to pay; a trackable service protects you.</li>
+      <li>We’ll let you know when it arrives and start your refund.</li>
+    </ol>
+
+    <h2 id="damaged" class={h2}>Damaged, defective or incorrect orders</h2>
+    <p class={p}>
+      If your calendar arrives damaged, has a printing or binding defect, or isn’t what you ordered, we’ll send a replacement or a refund at no
+      additional cost to you. Send us your order number and, if you can, a photo: it helps us sort it out quickly. You
+      usually won’t need to send the calendar back; if we do need it, we’ll cover the cost and tell you how.
+    </p>
+
+    <h2 id="refunds" class={h2}>Refunds</h2>
+    <ul class={list}>
+      <li>We start your refund within {POLICY.refundStartBusinessDays} business days of receiving and checking the returned calendar.</li>
+      <li>Refunds go back to your original payment method, as far as the payment platform allows. Your bank may take a few more days to show it.</li>
+      <li>For change-of-mind returns, the original shipping cost isn’t refundable.</li>
+      <li>For damaged, defective or incorrect orders, refunds include shipping.</li>
+    </ul>
+
+    <h2 id="cancel" class={h2}>Cancellations</h2>
+    <p class={p}>
+      You can cancel before your order ships. Message us as soon as you can and we’ll check where it is in packing. If it has already shipped, we
+      can’t stop it, but it can come back as a return.
+    </p>
+
+    <h2 id="shipping" class={h2}>Shipping problems and lost packages</h2>
+    <p class={p}>
+      If your tracking stops moving or a package goes missing, message us. We’ll look into each one individually with the carrier and, for Etsy
+      orders, with Etsy, and let you know what happens next.
+    </p>
+
+    <h2 id="late" class="serif-title mt-12 text-[1.25rem]">Outside the {days} days?</h2>
+    <p class={p}>Contact us anyway. We’ll look at your situation individually.</p>
+
+    <section aria-labelledby="etsy" class="mt-12 bg-sage-wash p-6 sm:p-8">
+      <h2 id="etsy" class="serif-title text-[1.5rem] sm:text-[1.75rem]">Bought on Etsy?</h2>
+      <p class={p}>
+        Message us through Etsy for anything about that order. Etsy Messages keeps your order details in one place, so we can help you fastest.
+        Approved refunds for Etsy orders are issued through Etsy to your original payment method, and Etsy’s own buyer policies also apply.
+      </p>
+      <ol class="mt-3 list-decimal space-y-1.5 pl-6 text-[1rem] leading-relaxed text-warm-ink">
+        <li>Open <strong>Purchases</strong> in your Etsy account.</li>
+        <li>Find your calendar order and message us from there.</li>
+      </ol>
+      <p class="mt-5 flex flex-col gap-2 sm:flex-row sm:gap-6">
+        <a href={ETSY.purchases} target="_blank" rel="noopener noreferrer" class="text-link text-warm-ink"
+          >Open your Etsy purchases<span class="sr-only"> (opens Etsy)</span></a
+        >
+        <a href={ETSY.shop} target="_blank" rel="noopener noreferrer" class="text-link text-warm-ink"
+          >Visit our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
+        >
+      </p>
+    </section>
+
+    <h2 id="downloads" class={h2}>Downloads</h2>
+    <p class={p}>
+      The calendar terms above are for printed calendars only. Downloads bought on this website (the Weekly Reset System, Take Back Control, the
+      Essential Routines Bundle and the Real Life Reset Kit) have their own 30-day money-back guarantee: if it isn’t helping within 30 days of
+      purchase, email us and we’ll refund you, with nothing to send back. Once you’re refunded, the download link stops working.
+    </p>
+
+    <h2 class="serif-title mt-12 text-[1.25rem]">The cleaning companion</h2>
+    <p class={p}>
+      The <a href={routes.companion} class={a}>cleaning companion website</a> comes with your calendar at no extra cost and isn’t sold
+      separately, so there’s nothing to return or cancel.
+    </p>
+
+    <div class="mt-14 border-t border-warm-rule pt-8">
+      <p class="font-serif text-[1.25rem] leading-snug text-warm-ink">Still have a question?</p>
+      <p class={p}>
+        {RESPONSE_TIME} <a href={routes.support} class={a}>Visit Help &amp; Support</a> or email{' '}
+        <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a>.
+      </p>
+    </div>
+  </article>
+</PublicLayout>

@@ -11,6 +11,8 @@ export default defineConfig({
   integrations: [react(), mdx(), offlinePrecache()],
   // Old WordPress URLs printed in paid PDFs: keep them working (see README → Redirects).
   redirects: {
+    // The policy page's old address (linked from earlier checkout pages): now Returns & Refunds.
+    '/refunds': '/returns',
     '/command-center-reset-where-did-my-time-go-how-to-spot-and-stop-energy-leaks-in-your-week': '/resources/where-does-my-time-go',
   },
   vite: {

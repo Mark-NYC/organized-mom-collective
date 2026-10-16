@@ -25,10 +25,23 @@ export interface EmailMessage {
   text: string;
 }
 
+/** A file sent with an email (base64 content). */
+export interface Attachment {
+  filename: string;
+  content: string;
+}
+
+export interface SendOptions {
+  from?: string;
+  /** Overrides the default reply-to (the support inbox copy replies to the customer). */
+  replyTo?: string;
+  attachments?: Attachment[];
+}
+
 export interface Mailer {
   configured: boolean;
   /** `idempotencyKey`: Resend sends at most one email per key (24 hours), so a retry after a timeout can't send a second copy. */
-  send(to: string, msg: EmailMessage, idempotencyKey?: string, opts?: { from?: string }): Promise<{ id: string }>;
+  send(to: string, msg: EmailMessage, idempotencyKey?: string, opts?: SendOptions): Promise<{ id: string }>;
 }
 
 export function createResendMailer(opts: { apiKey: string; from: string; replyTo?: string; fetch?: typeof fetch }): Mailer {
@@ -43,7 +56,15 @@ export function createResendMailer(opts: { apiKey: string; from: string; replyTo
           'Content-Type': 'application/json',
           ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
         },
-        body: JSON.stringify({ from: sendOpts?.from || opts.from, to: [to], reply_to: opts.replyTo || undefined, subject: msg.subject, html: msg.html, text: msg.text }),
+        body: JSON.stringify({
+          from: sendOpts?.from || opts.from,
+          to: [to],
+          reply_to: sendOpts?.replyTo || opts.replyTo || undefined,
+          subject: msg.subject,
+          html: msg.html,
+          text: msg.text,
+          ...(sendOpts?.attachments?.length ? { attachments: sendOpts.attachments } : {}),
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
       if (!res.ok) throw new Error(data.message ?? `resend_${res.status}`);
@@ -145,7 +166,7 @@ const panelTitle = (text: string): Block => ({
   text: `\n${text}`,
 });
 
-/** Shared with the Starter Kit email (handlers/starter-kit.ts). */
+/** Shared with the Starter Kit and support emails (handlers/starter-kit.ts, handlers/support.ts). */
 export { esc, C, SANS, SERIF, eyebrowStyle, p, small, button, panel, panelTitle, type Block };
 
 /** "26-Week Family Wall Calendar (January–June 2027)" → name and edition. */
@@ -273,6 +294,7 @@ ${b.blocks.map((x) => x.html).join('\n')}
 </td></tr>
 <tr><td align="center" style="padding:24px 12px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">
 <p style="margin:0 0 10px">${support}</p>
+<p style="margin:0 0 10px"><a href="${esc(site)}/support" style="color:${C.muted}">Help &amp; Support</a> · <a href="${esc(site)}/returns" style="color:${C.muted}">Returns &amp; Refunds</a></p>
 <p style="margin:0">Organized Mom Collective · <a href="${esc(site)}" style="color:${C.muted}">organizedmomcollective.com</a></p>
 ${test ? `<p style="margin:10px 0 0">This is a test email from a test-mode order.</p>` : ''}
 </td></tr>
@@ -285,6 +307,7 @@ ${test ? `<p style="margin:10px 0 0">This is a test email from a test-mode order
     ...b.blocks.map((x) => x.text),
     '',
     opts.supportEmail ? `Questions about your order? Reply to this email or write to ${opts.supportEmail}.` : 'Questions about your order? Reply to this email.',
+    `Help & Support: ${site}/support · Returns & Refunds: ${site}/returns`,
     `Organized Mom Collective · ${site}`,
   ].join('\n');
   // Test-mode orders are never mistaken for real ones.

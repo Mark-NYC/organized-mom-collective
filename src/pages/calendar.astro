@@ -4,6 +4,7 @@
  * happen through the website checkout when an option has a websiteProduct (shop-enabled builds), else on Etsy. Every fact on this page is verified against
  * src/config.ts, src/data/cleaning.ts or the Etsy listing images in design/etsy-listing/
  * (02 sections, 07 size and format, 08 two 26-week sets, 12 the damaged/misprinted promise).
+ * Return terms come from src/data/support.ts (POLICY, RETURNS_LINE) and /returns.
  * Don't add shipping times, guarantees or features that aren't in those sources.
  * The Etsy review by #buy (src/data/reviews.ts) is of a previous calendar edition and
  * carries REVIEWS_DISCLAIMER; ratings stay out of the Product JSON-LD.
@@ -20,6 +21,7 @@ import { calendarOptions, formatPrice } from '../lib/reorder';
 import { dailyEssentials } from '../data/cleaning';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
+import { RETURNS_LINE } from '../data/support';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats } from '../data/reviews';
 
 const PRODUCT = '2027 Family Wall Calendar & Organizer';
@@ -134,8 +136,8 @@ const faqs = [
   {
     q: 'What if my calendar arrives damaged or misprinted?',
     a: onWebsite
-      ? 'We’ll make it right. Email us within 30 days of delivery with your order number and a photo, and we’ll send a replacement or refund you in full. Details are on our Refunds and Returns page.'
-      : 'We’ll make it right. Reach out to us through Etsy with your order.',
+      ? 'We’ll make it right. Send us your order number and, if you can, a photo, and we’ll send a replacement or a refund at no cost to you. Details are on our Returns & Refunds page.'
+      : 'We’ll make it right. Message us through Etsy with your order number and, if you can, a photo, and we’ll send a replacement or a refund at no cost to you.',
   },
 ];
 
@@ -345,14 +347,11 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <CalendarOptions />
       </div>
       <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
-        {onWebsite ? (
-          <>
-            Both include the cleaning companion. Arrives damaged or misprinted? We’ll make it right:{' '}
-            <a href={routes.refunds} class="underline decoration-rule underline-offset-[3px] hover:decoration-ink">refunds and returns</a>.
-          </>
-        ) : (
-          'Both include the cleaning companion. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.'
-        )}
+        Both include the cleaning companion.{onWebsite ? '' : ' Checkout is on Etsy.'}
+      </p>
+      <p class="mx-auto mt-2 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
+        {RETURNS_LINE}{' '}
+        <a href={routes.returns} class="underline decoration-rule underline-offset-[3px] hover:decoration-ink">Returns policy</a>
       </p>
       <figure class="mx-auto mt-10 max-w-xl border-t border-rule pt-8 text-center">
         <blockquote cite={ETSY_REVIEWS_URL} class="font-serif text-[1.3rem] leading-snug italic sm:text-[1.45rem]">

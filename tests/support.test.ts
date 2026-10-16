@@ -1,0 +1,236 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { routes } from '../src/routes';
+import { FAQS, LIMITS, POLICY, RETURNS_LINE, SUPPORT_TOPICS, greetingName, normalizeSupport, validateSupport } from '../src/data/support';
+import { photoName, sendSupportRequest } from '../src/lib/support';
+import { acknowledgmentEmail, createSupportHandler, inboxEmail, readPhoto } from '../supabase/functions/_shared/handlers/support';
+import { readEnv } from '../supabase/functions/_shared/env';
+
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+
+const good = { name: 'Jane  Doe', email: ' Jane@Example.com ', order: '3123456789', topic: 'damaged', message: 'The corner of my calendar arrived bent.' };
+const jpeg = '/9j/' + 'A'.repeat(400);
+
+describe('support data', () => {
+  it('holds the approved calendar terms', () => {
+    expect(POLICY.returnWindowDays).toBe(14);
+    expect(POLICY.refundStartBusinessDays).toBe(5);
+    expect(POLICY.effective).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(RETURNS_LINE).toBe('14-day returns on unused calendars. If your order arrives damaged or incorrect, we’ll make it right.');
+    expect(SUPPORT_TOPICS.map((t) => t.label)).toEqual([
+      'Orders & Shipping',
+      'Returns & Refunds',
+      'Damaged or Incorrect Orders',
+      'Using Your Calendar',
+      'Cleaning Companion Website',
+      'Other Questions',
+    ]);
+  });
+  it('answers every required question, without app or future-feature language', () => {
+    const qs = FAQS.map((f) => f.q);
+    for (const q of ['How do I return my calendar?', 'What if my calendar arrives damaged?', 'Can I cancel my order?', 'When will I receive my refund?', 'How do I track my order?', 'How do I access the cleaning companion website?', 'Is the companion website included with my calendar?', 'Do I need to download an app?', 'Can I exchange my calendar?', 'How do I contact someone?']) {
+      expect(qs).toContain(q);
+    }
+    for (const f of FAQS) {
+      // "an app" appears only to say it isn't one.
+      if (f.q !== 'Do I need to download an app?') expect(f.a).not.toMatch(/\bapp\b/i);
+      expect(f.a).not.toMatch(/coming soon|will be able|\bsync/i);
+      expect(SUPPORT_TOPICS.some((t) => t.id === f.topic)).toBe(true);
+    }
+  });
+  it('the database migration accepts exactly the same topics and limits', () => {
+    const sql = readFileSync('supabase/migrations/20261019000000_support_requests.sql', 'utf8');
+    const ids = SUPPORT_TOPICS.map((t) => `'${t.id}'`).join(', ');
+    expect(sql.split(`in (${ids})`).length).toBe(3);
+    expect(sql).toContain(`char_length(message) between ${LIMITS.messageMin} and ${LIMITS.message}`);
+    expect(sql).toContain(`char_length(name) between 1 and ${LIMITS.name}`);
+    expect(sql).toContain(`char_length(order_number) <= ${LIMITS.order}`);
+    // Never readable or writable from the browser.
+    expect(sql).toContain('revoke all on public.support_requests from public, anon, authenticated');
+    expect(sql).not.toMatch(/grant [^;]* to (anon|authenticated)/);
+  });
+  it('routes and the old /refunds redirect', () => {
+    expect(routes.support).toBe('/support');
+    expect(routes.returns).toBe('/returns');
+    expect(readFileSync('astro.config.mjs', 'utf8')).toContain(`'/refunds': '/returns'`);
+  });
+});
+
+describe('validation', () => {
+  it('normalizes and accepts a good request', () => {
+    const v = normalizeSupport(good);
+    expect(v).toEqual({ name: 'Jane Doe', email: 'jane@example.com', order: '3123456789', topic: 'damaged', message: 'The corner of my calendar arrived bent.' });
+    expect(validateSupport(v)).toEqual({});
+    expect(validateSupport(normalizeSupport({ ...good, order: '' }))).toEqual({});
+  });
+  it('names each bad field', () => {
+    const e = validateSupport(normalizeSupport({ name: '', email: 'nope', order: '<b>', topic: 'refund-me', message: 'hi' }));
+    expect(Object.keys(e).sort()).toEqual(['email', 'message', 'name', 'order', 'topic']);
+    expect(validateSupport(normalizeSupport({ ...good, message: 'x'.repeat(LIMITS.message + 1) })).message).toBeTruthy();
+  });
+  it('greets by a plain first name only', () => {
+    expect(greetingName('Jane Doe')).toBe('Jane');
+    expect(greetingName('Zoë')).toBe('Zoë');
+    expect(greetingName('http://spam.example')).toBe('');
+    expect(greetingName('Win$$$ now')).toBe('');
+  });
+});
+
+describe('photos', () => {
+  it('accepts a small JPEG only', () => {
+    expect(readPhoto(undefined)).toBeNull();
+    expect(readPhoto({ name: 'IMG 0042.HEIC', data: jpeg })).toEqual({ filename: 'img-0042.jpg', content: jpeg });
+    expect(readPhoto({ name: 'x.png', data: 'iVBORw0KGgo' + 'A'.repeat(400) })).toBe('bad');
+    expect(readPhoto({ name: 'x', data: '/9j/<script>' })).toBe('bad');
+    expect(readPhoto({ name: 'x', data: '/9j/' + 'A'.repeat(Math.ceil(LIMITS.photoBytes * 1.4)) })).toBe('bad');
+    expect(photoName('My Photo!.png')).toBe('my-photo.jpg');
+  });
+});
+
+describe('emails', () => {
+  const input = normalizeSupport(good);
+  it('acknowledgment: the approved copy and reference, never her message', () => {
+    const msg = acknowledgmentEmail(input, 'OMC-ABC234', 'https://organizedmomcollective.com');
+    expect(msg.subject).toBe('We received your message | Organized Mom Collective');
+    expect(msg.text).toContain('Hi Jane,');
+    expect(msg.text).toContain('Thanks for reaching out! We’ve received your message and will take a look.');
+    expect(msg.text).toContain('We aim to respond within one business day.');
+    expect(msg.text).toContain('Thanks for being part of Organized Mom Collective!');
+    expect(msg.text).toContain('OMC-ABC234');
+    expect(msg.text).not.toContain('arrived bent');
+  });
+  it('inbox copy: every detail, escaped', () => {
+    const msg = inboxEmail({ ...input, message: 'It was <b>bent</b> & torn' }, 'OMC-ABC234', true, 'https://organizedmomcollective.com');
+    expect(msg.subject).toBe('[OMC-ABC234] Damaged or Incorrect Orders: Jane Doe');
+    expect(msg.html).toContain('It was &lt;b&gt;bent&lt;/b&gt; &amp; torn');
+    expect(msg.text).toContain('Order number: 3123456789');
+    expect(msg.text).toContain('Photo: Attached');
+  });
+});
+
+function harness(opts: { submit?: unknown; sendFails?: (to: string, from?: string) => Error | null; configured?: boolean; dbFails?: boolean }) {
+  const rpcs: { name: string; args: Record<string, unknown> }[] = [];
+  const sends: { to: string; subject: string; key?: string; from?: string; replyTo?: string; attachments?: unknown[] }[] = [];
+  const env = readEnv((k) => ({ SHOP_EMAIL_FROM: 'OMC <orders@organizedmomcollective.com>', SHOP_EMAIL_REPLY_TO: 'help@example.com' } as Record<string, string>)[k]);
+  const deps = {
+    env,
+    db: {
+      rpc: async (name: string, args: Record<string, unknown> = {}) => {
+        rpcs.push({ name, args });
+        if (opts.dbFails) throw new Error('db down');
+        return name === 'support_submit' ? (opts.submit ?? { status: 'ok', id: '11111111-1111-1111-1111-111111111111', reference: 'OMC-ABC234', ack: true }) : null;
+      },
+      select: async () => [],
+    },
+    mailer: {
+      configured: opts.configured ?? true,
+      send: async (to: string, msg: { subject: string }, key?: string, o?: { from?: string; replyTo?: string; attachments?: unknown[] }) => {
+        sends.push({ to, subject: msg.subject, key, from: o?.from, replyTo: o?.replyTo, attachments: o?.attachments });
+        const err = opts.sendFails?.(to, o?.from);
+        if (err) throw err;
+        return { id: `email_${sends.length}` };
+      },
+    },
+    stripe: {} as never,
+    fetch,
+    now: () => 1_792_000_000,
+  };
+  const handler = createSupportHandler(deps as never);
+  const call = (body: unknown) =>
+    handler(new Request('https://fn/support-request', { method: 'POST', headers: { origin: 'https://www.organizedmomcollective.com', 'x-forwarded-for': '1.2.3.4' }, body: JSON.stringify(body) }));
+  return { call, rpcs, sends, env };
+}
+
+describe('support-request function', () => {
+  it('saves the request, emails the inbox (reply-to her, photo attached) and acknowledges her', async () => {
+    const h = harness({});
+    const res = await h.call({ ...good, website: '', photo: { name: 'bent.jpg', data: jpeg } });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: 'ok', reference: 'OMC-ABC234', acknowledged: true });
+    expect(res.headers.get('access-control-allow-origin')).toBe('https://www.organizedmomcollective.com');
+    expect(h.rpcs[0]).toEqual({
+      name: 'support_submit',
+      args: { p_name: 'Jane Doe', p_email: 'jane@example.com', p_order: '3123456789', p_topic: 'damaged', p_message: good.message, p_has_photo: true, p_client: '1.2.3.4', p_website: '' },
+    });
+    const [inbox, ack] = h.sends;
+    expect(inbox).toMatchObject({ to: 'help@example.com', replyTo: 'jane@example.com', from: 'Organized Mom Collective <hello@organizedmomcollective.com>', attachments: [{ filename: 'bent.jpg', content: jpeg }] });
+    expect(ack).toMatchObject({ to: 'jane@example.com', replyTo: 'help@example.com', subject: 'We received your message | Organized Mom Collective' });
+    expect(ack.attachments).toBeUndefined();
+    expect(h.rpcs.slice(1).map((r) => r.args)).toEqual([
+      { p_id: '11111111-1111-1111-1111-111111111111', p_kind: 'notify', p_status: 'sent' },
+      { p_id: '11111111-1111-1111-1111-111111111111', p_kind: 'ack', p_status: 'sent' },
+    ]);
+  });
+  it('SUPPORT_INBOX wins over the reply-to address', () => {
+    expect(readEnv((k) => ({ SUPPORT_INBOX: 'support@x.com', SHOP_EMAIL_REPLY_TO: 'help@x.com' } as Record<string, string>)[k]).supportInbox).toBe('support@x.com');
+    expect(readEnv(() => undefined).supportInbox).toBe('contact@organizedmomcollective.com');
+  });
+  it('rejects bad input before touching the database', async () => {
+    const h = harness({});
+    const res = await h.call({ ...good, email: 'nope' });
+    expect(res.status).toBe(400);
+    expect((await res.json()).fields.email).toBeTruthy();
+    const photo = await h.call({ ...good, photo: { name: 'x', data: 'not-an-image' } });
+    expect(await photo.json()).toEqual({ status: 'photo' });
+    expect(h.rpcs).toHaveLength(0);
+    expect(h.sends).toHaveLength(0);
+  });
+  it('rate limits, and treats the honeypot as invalid', async () => {
+    const limited = harness({ submit: { status: 'rate_limited' } });
+    const res = await limited.call(good);
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ status: 'rate_limited' });
+    expect(limited.sends).toHaveLength(0);
+    const bot = harness({ submit: { status: 'invalid' } });
+    expect((await bot.call({ ...good, website: 'spam.example' })).status).toBe(400);
+    expect(bot.rpcs[0].args.p_website).toBe('spam.example');
+  });
+  it('a saved request still succeeds when an email fails; the failure is recorded', async () => {
+    const h = harness({ sendFails: (to) => (to === 'help@example.com' ? new Error('Service unavailable') : null) });
+    expect(await (await h.call(good)).json()).toEqual({ status: 'ok', reference: 'OMC-ABC234', acknowledged: true });
+    expect(h.rpcs.find((r) => r.args.p_kind === 'notify')?.args.p_status).toBe('failed');
+  });
+  it('falls back to the shop sender when Resend refuses the support sender', async () => {
+    const h = harness({ sendFails: (_to, from) => (from?.includes('hello@') ? new Error('domain is not verified') : null) });
+    expect((await (await h.call(good)).json()).acknowledged).toBe(true);
+    expect(h.sends.filter((s) => !s.from)).toHaveLength(2);
+  });
+  it('skips the acknowledgment once an address has had enough today', async () => {
+    const h = harness({ submit: { status: 'ok', id: '11111111-1111-1111-1111-111111111111', reference: 'OMC-ABC234', ack: false } });
+    expect(await (await h.call(good)).json()).toEqual({ status: 'ok', reference: 'OMC-ABC234', acknowledged: false });
+    expect(h.sends.map((s) => s.to)).toEqual(['help@example.com']);
+    expect(h.rpcs.find((r) => r.args.p_kind === 'ack')?.args.p_status).toBe('limited');
+  });
+  it('skips emails without a provider, and reports a database failure as an error', async () => {
+    const off = harness({ configured: false });
+    expect(await (await off.call(good)).json()).toEqual({ status: 'ok', reference: 'OMC-ABC234', acknowledged: false });
+    expect(off.sends).toHaveLength(0);
+    const down = harness({ dbFails: true });
+    expect((await down.call(good)).status).toBe(500);
+  });
+});
+
+describe('support form client', () => {
+  it('sends the cleaned fields and reads the outcome', async () => {
+    vi.stubEnv('PUBLIC_SUPABASE_URL', 'https://x.supabase.co');
+    vi.stubEnv('PUBLIC_SUPABASE_ANON_KEY', 'anon');
+    vi.resetModules();
+    const { sendSupportRequest: fresh } = await import('../src/lib/support');
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'ok', reference: 'OMC-ABC234', acknowledged: true }) });
+    vi.stubGlobal('fetch', fetcher);
+    expect(await fresh(good, '', null)).toEqual({ ok: true, reference: 'OMC-ABC234', acknowledged: true });
+    expect(fetcher.mock.calls[0][0]).toBe('https://x.supabase.co/functions/v1/support-request');
+    expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({ ...normalizeSupport(good), website: '', photo: null });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, json: async () => ({ status: 'rate_limited' }) }));
+    expect(await fresh(good, '', null)).toEqual({ ok: false, reason: 'rate_limited' });
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    expect(await fresh(good, '', null)).toEqual({ ok: false, reason: 'error' });
+  });
+  it('catches bad fields without calling the server', async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    const r = await sendSupportRequest({ ...good, topic: '' }, '', null);
+    expect(r).toEqual({ ok: false, reason: 'invalid', fields: { topic: 'Please choose a topic.' } });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+});
