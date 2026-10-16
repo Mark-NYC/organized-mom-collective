@@ -3,7 +3,9 @@
 How Organized Mom Collective handles customer questions, returns and refunds. Written for one person
 fulfilling the first calendar orders; structured so new products add their own terms later.
 
-- Customer pages: [/support](https://organizedmomcollective.com/support) (help topics, FAQs, contact form) and [/returns](https://organizedmomcollective.com/returns) (policy). `/refunds` redirects to `/returns`.
+- Customer pages: [/support](https://organizedmomcollective.com/support) (help topics, FAQs, contact form) and [/returns](https://organizedmomcollective.com/returns) (policy). `/refunds` redirects permanently (308, `vercel.json`) to `/returns`.
+- Digital downloads keep their existing 30-day money-back guarantee, word for word as before; the calendar terms never apply to them.
+- The support form never adds anyone to a marketing list: requests live only in `support_requests`, separate from `tool_email_contacts`, with no consent checkbox.
 - Copy, topics, FAQs and policy numbers: `src/data/support.ts`. Change terms there and on this page together, and bump `POLICY.effective`.
 - Form backend (database, emails, setup, testing): [supabase/SUPPORT.md](../../supabase/SUPPORT.md).
 
@@ -19,10 +21,11 @@ Approved by the owner, effective **October 16, 2026**. Applies to the printed fa
 | Return shipping | Customer pays for change-of-mind returns. |
 | Original shipping | Nonrefundable for change-of-mind returns. |
 | Restocking fee | None. |
-| Refund method | Original payment method, subject to the payment platform (Etsy or Stripe). |
+| Refund method | Through the platform the order was placed on (Etsy orders in Etsy, website orders in the shop dashboard / Stripe), to the original payment method, subject to that platform. |
 | Refund timing | Initiated within 5 business days after the returned calendar is received and inspected. |
 | Cancellations | Before shipment, subject to actual fulfillment status. Once shipped, it becomes a return. |
-| Damaged, defective or incorrect | Replacement or refund at no additional cost. Ask for photos when useful. Don't require the item back unless genuinely necessary; if it is, we pay return postage. |
+| Exchanges | No direct exchanges for change-of-mind returns: return the unused calendar and reorder. |
+| Damaged, defective or incorrect | Free replacement or refund at no additional cost. **No reporting cutoff**: the 14-day window doesn't apply, and nothing here limits rights customers have by law or under Etsy's protections. Ask for photos when useful. Don't require the item back unless genuinely necessary; if it is, we pay return postage. |
 | Shipping problems, lost packages | Handled individually with the carrier and the sales platform. |
 | Outside the window | Customer can contact us for individual consideration. |
 | Return address | Never published. Sent by email only after a return is approved. |
@@ -38,6 +41,18 @@ Approved by the owner, effective **October 16, 2026**. Applies to the printed fa
 - **Channel:** Etsy orders → Etsy Messages (keeps the order attached and Etsy's records complete). Website orders and everything else → the support form or contact@organizedmomcollective.com.
 - **Privacy:** support details are used only to answer the request. They're never added to a marketing list.
 - **Product honesty:** the cleaning companion is a website (never "an app"), included with the calendar, no account, checkmarks saved on that phone. Don't promise features or sync that don't exist.
+
+## Etsy or website order? Route by where she bought
+
+| | Etsy order | Website order |
+| --- | --- | --- |
+| How to spot it | Etsy receipt / order number (on Etsy → Orders); she may write via Etsy Messages | Order number like `#1003` from her receipt email; in Admin → Orders |
+| Where to talk | Etsy Messages (ask her to message there if she used the form, or answer by email and log it on the Etsy order) | Reply to the form email, or her receipt email |
+| Cancel | Etsy → Orders → cancel | Admin → Orders → full refund (marks it canceled) |
+| Refund | **Always in Etsy** (Orders → Refund). Never refund an Etsy order off-platform (PayPal, Venmo, Stripe) | Admin → Orders → Refund (Stripe, original payment method) |
+| Replacement | Ship it and note it on the Etsy order | Ship it; Inventory → Add / remove, reason "Replacement for #…" |
+
+Not sure? Ask for the order number, or search both Etsy Orders and Admin → Orders by her name or email.
 
 ## Daily routine (five minutes)
 
@@ -82,7 +97,7 @@ Approved by the owner, effective **October 16, 2026**. Applies to the printed fa
 
 These live in Etsy (Shop Manager → Settings → Policies, and each listing). **Nothing here has been changed by the website work**: update them yourself, then tick them off.
 
-- [ ] Return & exchange policy: **accepts returns**; **does not accept exchanges** (the site says "we don't do direct swaps").
+- [ ] Return & exchange policy: **accepts returns**; **does not accept exchanges** (the site says no direct exchanges for change-of-mind returns; damaged or incorrect items get a free replacement).
 - [ ] Return window: **14 days** from delivery.
 - [ ] Buyer contacts you within 14 days; the item must be sent back within the period Etsy allows.
 - [ ] Buyer is responsible for return shipping costs (change of mind).
@@ -100,7 +115,7 @@ If Etsy's options can't express a term exactly (for example the cancellation win
 ## Open decisions and flags (not legal advice)
 
 1. **Earlier 30-day promise.** `/refunds` promised 30-day calendar returns and a 30-day damage window from 2026-10-15 until this change. No live website orders exist (checkout is in preview), and Etsy orders follow Etsy's settings, so nobody was sold under it on the website. If any Etsy buyer bought under a 30-day Etsy setting, honor what their listing said.
-2. **Damage reporting window.** The approved terms set no deadline for reporting damage. The site says "let us know" without a deadline. Decide whether you want one (e.g. 14 days from delivery) and add it in one place.
+2. **Damage reporting: decided (2026-10-16).** No cutoff. The site tells customers the 14-day window doesn't apply to damage and to tell us whenever they notice it.
 3. **Etsy's rules win on Etsy orders.** Etsy's own return settings and purchase protection apply to Etsy purchases. Keep them matched (checklist above).
 4. **State consumer law.** Some states require a posted refund policy to be conspicuous or treat an unposted policy as allowing returns (e.g. California, New York). The policy is now posted on `/returns`, linked from the footer and beside the buy buttons. If you sell in person or ship internationally, review again.
 5. **Stripe refunds** go back to the original payment method only, and some payment methods limit how long after the charge a refund is possible. "Subject to the payment platform's capabilities" covers this; refund promptly.

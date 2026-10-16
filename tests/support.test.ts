@@ -49,10 +49,33 @@ describe('support data', () => {
     expect(sql).toContain('revoke all on public.support_requests from public, anon, authenticated');
     expect(sql).not.toMatch(/grant [^;]* to (anon|authenticated)/);
   });
-  it('routes and the old /refunds redirect', () => {
+  it('routes, and /refunds redirects permanently to /returns', () => {
     expect(routes.support).toBe('/support');
     expect(routes.returns).toBe('/returns');
     expect(readFileSync('astro.config.mjs', 'utf8')).toContain(`'/refunds': '/returns'`);
+    const vercel = JSON.parse(readFileSync('vercel.json', 'utf8'));
+    expect(vercel.redirects).toContainEqual({ source: '/refunds', destination: '/returns', permanent: true });
+  });
+  it('keeps the downloads’ 30-day guarantee word for word', () => {
+    const page = readFileSync('src/pages/returns.astro', 'utf8').replace(/\s+/g, ' ');
+    expect(page).toContain(
+      'Every download (the Weekly Reset System, Take Back Control, the Essential Routines Bundle and the Real Life Reset Kit) comes with a 30-day money-back guarantee. Use it for 30 days from your purchase. If it isn’t helping, email us and we’ll refund every penny. No questions asked, nothing to send back. Once you’re refunded, your download link stops working.',
+    );
+  });
+  it('damage has no cutoff; change-of-mind has no exchanges', () => {
+    const damaged = FAQS.find((f) => f.q === 'What if my calendar arrives damaged?')!.a;
+    expect(damaged).toContain('no 14-day cutoff');
+    expect(damaged).not.toMatch(/within \d+ days/);
+    expect(FAQS.find((f) => f.q === 'Can I exchange my calendar?')!.a).toMatch(/don’t offer direct exchanges for change-of-mind returns.*replace it for free/);
+    const page = readFileSync('src/pages/returns.astro', 'utf8').replace(/\s+/g, ' ');
+    expect(page).toContain('return window doesn’t apply here');
+    expect(page).toContain('Etsy orders through Etsy, website orders through our secure checkout');
+  });
+  it('never touches marketing contacts', () => {
+    for (const f of ['supabase/migrations/20261019000000_support_requests.sql', 'supabase/functions/_shared/handlers/support.ts', 'src/lib/support.ts', 'src/pages/support.astro']) {
+      const code = readFileSync(f, 'utf8');
+      expect(code).not.toMatch(/tool_email|marketing_opt_in|tool_email_signup|starter_kit_signup/);
+    }
   });
 });
 

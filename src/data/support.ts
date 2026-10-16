@@ -137,7 +137,7 @@ export const FAQS: Faq[] = [
   {
     topic: 'orders',
     q: 'Can I cancel my order?',
-    a: 'Yes, if it hasn’t shipped yet. Message us as soon as you can and we’ll check where your order is. If it has already shipped, it can come back as a return instead.',
+    a: 'Yes, if it hasn’t shipped yet. Message us as soon as you can (through Etsy Messages for Etsy orders) and we’ll check where your order is. If it has already shipped, it can come back as a return instead.',
   },
   {
     topic: 'returns',
@@ -148,17 +148,17 @@ export const FAQS: Faq[] = [
   {
     topic: 'returns',
     q: 'When will I receive my refund?',
-    a: `We start your refund within ${POLICY.refundStartBusinessDays} business days of receiving and checking the returned calendar. It goes back to your original payment method; your bank or Etsy may take a few more days to show it.`,
+    a: `We start your refund within ${POLICY.refundStartBusinessDays} business days of receiving and checking the returned calendar. It goes back through the platform you bought on (Etsy orders through Etsy, website orders through our checkout) to your original payment method; your bank may take a few more days to show it.`,
   },
   {
     topic: 'returns',
     q: 'Can I exchange my calendar?',
-    a: `We don’t do direct swaps. If your calendar is unused and you’re within ${days} days of delivery, you can return it and order the one you want. If we sent the wrong calendar, we’ll replace it at no cost to you.`,
+    a: `We don’t offer direct exchanges for change-of-mind returns. If your calendar is unused and you’re within ${days} days of delivery, you can return it and order the one you want. If it arrived damaged or we sent the wrong one, we’ll replace it for free.`,
   },
   {
     topic: 'damaged',
     q: 'What if my calendar arrives damaged?',
-    a: 'We’re sorry, and we’ll make it right. Send us your order number and, if you can, a photo of the damage. We’ll send a replacement or a refund at no cost to you, and you usually won’t need to send the damaged calendar back.',
+    a: `We’re sorry, and we’ll make it right. Send us your order number and, if you can, a photo of the damage. We’ll send a free replacement or a refund, and you usually won’t need to send the damaged calendar back. There’s no ${days}-day cutoff for damage: tell us whenever you notice it.`,
   },
   {
     topic: 'calendar',
