@@ -22,8 +22,3 @@ verify_jwt = false
 # rate limits in support_submit (supabase/SUPPORT.md).
 [functions.support-request]
 verify_jwt = false
-
-# Called only by the Supabase Database Webhook on support_requests; checks the shared secret in
-# x-webhook-secret (SUPPORT_WEBHOOK_SECRET) itself (supabase/SUPPORT.md → Approving a return).
-[functions.support-return]
-verify_jwt = false

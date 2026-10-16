@@ -1,10 +1,13 @@
--- Return approvals on support requests. Requires 20261019000000_support_requests.sql.
--- Setup and the owner's steps: supabase/SUPPORT.md → Approving a return.
+-- Return tracking on support requests. Requires 20261019000000_support_requests.sql. Applied 2026-10-16.
 --
--- The owner approves a return by setting return_status = 'approved' on the request (Table Editor).
--- A Supabase Database Webhook then calls the support-return Edge Function, which emails that
--- customer the return instructions once. The return address itself is NEVER stored here: it lives
--- only in the Edge Function secret RETURN_ADDRESS. These columns record status and timing only.
+-- The owner tracks each return by hand with return_status (requested → approved → received →
+-- refunded, or declined) in the Table Editor. Return instructions and the address are sent MANUALLY
+-- by private email or Etsy Messages (docs/operations/CUSTOMER_SUPPORT.md); the address is never
+-- stored here or anywhere in the code.
+--
+-- return_instructions_* and support_return_claim / support_return_result were written for an
+-- automated approval email that the owner decided against (2026-10-16). They're unused; they stay in
+-- this file only because it matches what was applied to production. Don't build on them.
 begin;
 
 alter table public.support_requests

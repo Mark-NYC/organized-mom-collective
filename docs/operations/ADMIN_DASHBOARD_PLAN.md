@@ -25,7 +25,7 @@ Good enough for the first 25 orders. The pain to fix later: two logins and admin
 - **Reads:** through row-level security, as now (admins only; `anon` sees nothing).
 - **Writes:** only through Edge Functions with the service role, each checking the caller's token and role first (the `shop-admin` pattern). One function per area (`shop-admin` stays; add `support-admin`) rather than one giant one.
 - **Audit log:** an `admin_events` table (who, when, action, target, small JSON detail, never secrets or addresses) written by every admin function. Order events already exist (`shop_order_events`); fold them in or link them.
-- **Secrets stay secrets:** the return address, Stripe and Resend keys stay in Edge Function secrets. The dashboard can show *whether* something is configured (as `status` does today), never its value. The return address is never displayed in the dashboard.
+- **Secrets stay secrets:** Stripe and Resend keys stay in Edge Function secrets. The dashboard can show *whether* something is configured (as `status` does today), never its value. The return address is not stored anywhere in the system; it's sent by hand.
 - **Etsy:** no API integration in the plan. Etsy orders, refunds and messages stay in Etsy; the dashboard records the Etsy order number on support and return records and links out to Etsy.
 
 ## Sections and requirements
@@ -42,7 +42,7 @@ Good enough for the first 25 orders. The pain to fix later: two logins and admin
 
 ### 3. Returns and refunds
 - One flow per return: requested → approved → received → refunded (or declined), with dates.
-- "Approve return" button: sets `return_status = approved`, which sends the existing return-instructions email. The address is never shown on screen.
+- "Approve return" sets `return_status = approved`. The address is still sent by hand (private email or Etsy Messages) and never shown or stored in the dashboard, unless the owner later decides to automate it with the address kept in a server-side secret.
 - Website orders: refund through Stripe from the same screen (reuse `shop-admin` → `refund`), restock if sellable.
 - Etsy orders: a reminder and link to refund in Etsy, then "Mark refunded".
 - Policy checks shown, not enforced: days since delivery vs the 14-day window; damage has no cutoff.
@@ -73,10 +73,10 @@ Good enough for the first 25 orders. The pain to fix later: two logins and admin
 
 | Phase | Ships | Why first |
 | --- | --- | --- |
-| 0 (done) | Support form, `support_requests`, return approvals by Table Editor + webhook | Enough for the first 25 orders |
+| 0 (done) | Support form, `support_requests`, returns tracked in the Table Editor, return address sent by hand | Enough for the first 25 orders |
 | 1 | `/admin` shell, `admins` table + roles, MFA on, sign-in; links to the existing order and survey dashboards | Foundation; no behavior change |
 | 2 | Support section + `support-admin` function + `admin_events` | Replaces the Table Editor for daily support |
-| 3 | Returns and refunds flow, with "Approve return" | Replaces manual status edits and the webhook |
+| 3 | Returns and refunds flow, with "Approve return" | Replaces manual status edits |
 | 4 | Orders and products moved into the shell | Consolidation; same features |
 | 5 | Today view across all sections | Needs the data from 2–4 |
 | 6 | Website settings, contacts, survey moved in; retire `/admin/orders` and `/survey/admin` routes (redirect) | Cleanup |

@@ -4,7 +4,8 @@
  * src/data/support.ts → POLICY, approved 2026-10-16), plus the separate, already-published
  * 30-day guarantee on downloads. Other physical goods (the mug) and personalized products have
  * no published terms yet: add their own section before they go on sale, never reuse the
- * calendar's. The return address is never published: it goes out by email once a return is approved.
+ * calendar's. The return address is never published or stored in code: the owner sends it by hand (private email
+ * or Etsy Messages) once a return is approved (docs/operations/CUSTOMER_SUPPORT.md).
  * Operating steps behind each promise: docs/operations/CUSTOMER_SUPPORT.md. /refunds redirects here.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
@@ -79,7 +80,10 @@ const sections = [
         Message us within {days} days of delivery with your order number. Etsy orders: use Etsy Messages. Website orders: use our{' '}
         <a href={routes.supportContact} class={a}>support form</a> or email <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a>.
       </li>
-      <li>Once your return is approved, we’ll email you the return address. Please don’t send anything before then.</li>
+      <li>
+        Once your return is approved, we’ll send you the return address and shipping instructions by email (or Etsy Messages for Etsy orders).
+        Please don’t send anything before then.
+      </li>
       <li>Ship the calendar back. For change-of-mind returns, return shipping is yours to pay; a trackable service protects you.</li>
       <li>We’ll let you know when it arrives and start your refund.</li>
     </ol>

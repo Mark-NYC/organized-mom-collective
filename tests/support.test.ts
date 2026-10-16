@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { routes } from '../src/routes';
 import { FAQS, LIMITS, POLICY, RETURNS_LINE, SUPPORT_TOPICS, greetingName, normalizeSupport, validateSupport } from '../src/data/support';
 import { photoName, sendSupportRequest } from '../src/lib/support';
@@ -258,117 +258,19 @@ describe('support form client', () => {
   });
 });
 
-// ------------------------------------------------------------------ approved returns
 
-import { addressLines, createSupportReturnHandler, returnInstructionsEmail } from '../supabase/functions/_shared/handlers/support-return';
-import { readdirSync, statSync } from 'node:fs';
-
-const ADDRESS = 'Test Return Desk|1 Example Lane|Sampletown, NY 10000';
-const claimedRow = { reference: 'OMC-ABC234', name: 'Jane Doe', email: 'jane@example.com', order_number: '3123', topic: 'returns' };
-
-function returnHarness(opts: { address?: string; secret?: string; claimed?: unknown[]; sendFails?: boolean; configured?: boolean }) {
-  const rpcs: { name: string; args: Record<string, unknown> }[] = [];
-  const sends: { to: string; text: string; replyTo?: string }[] = [];
-  const env = readEnv((k) => ({
-    SHOP_EMAIL_FROM: 'OMC <orders@organizedmomcollective.com>',
-    SHOP_EMAIL_REPLY_TO: 'help@example.com',
-    RETURN_ADDRESS: opts.address ?? ADDRESS,
-    SUPPORT_WEBHOOK_SECRET: opts.secret ?? 'hook-secret',
-  } as Record<string, string>)[k]);
-  const errors: unknown[] = [];
-  vi.spyOn(console, 'error').mockImplementation((...a) => { errors.push(a); });
-  const deps = {
-    env,
-    db: {
-      rpc: async (name: string, args: Record<string, unknown> = {}) => {
-        rpcs.push({ name, args });
-        return name === 'support_return_claim' ? (opts.claimed ?? [claimedRow]) : null;
-      },
-      select: async () => [],
-    },
-    mailer: {
-      configured: opts.configured ?? true,
-      send: async (to: string, msg: { text: string }, _key?: string, o?: { replyTo?: string }) => {
-        sends.push({ to, text: msg.text, replyTo: o?.replyTo });
-        if (opts.sendFails) throw new Error('Service unavailable');
-        return { id: 'e1' };
-      },
-    },
-    stripe: {} as never,
-    fetch,
-    now: () => 1_792_000_000,
-  };
-  const handler = createSupportReturnHandler(deps as never);
-  const id = '11111111-1111-1111-1111-111111111111';
-  const call = (record: Record<string, unknown> = { id, return_status: 'approved' }, secret = 'hook-secret', extra: Record<string, unknown> = {}) =>
-    handler(new Request('https://fn/support-return', { method: 'POST', headers: { 'x-webhook-secret': secret }, body: JSON.stringify({ type: 'UPDATE', table: 'support_requests', schema: 'public', record, old_record: {}, ...extra }) }));
-  return { call, rpcs, sends, errors };
-}
-
-describe('return address: approved returns only', () => {
-  it('parses the secret into lines and rejects junk', () => {
-    expect(addressLines(ADDRESS)).toEqual(['Test Return Desk', '1 Example Lane', 'Sampletown, NY 10000']);
-    expect(addressLines('Test Return Desk\n1 Example Lane\nSampletown, NY 10000')).toHaveLength(3);
-    expect(addressLines('')).toBeNull();
-    expect(addressLines('just one line')).toBeNull();
-  });
-  it('emails the approved customer once, with the address, reply-to the support inbox', async () => {
-    const h = returnHarness({});
-    expect(await (await h.call()).json()).toEqual({ status: 'sent', reference: 'OMC-ABC234' });
-    expect(h.sends).toHaveLength(1);
-    expect(h.sends[0]).toMatchObject({ to: 'jane@example.com', replyTo: 'help@example.com' });
-    expect(h.sends[0].text).toContain('1 Example Lane');
-    expect(h.sends[0].text).toContain('OMC-ABC234');
-    expect(h.sends[0].text).toContain('Return postage is yours to cover');
-    expect(h.rpcs.map((r) => [r.name, r.args.p_status])).toEqual([['support_return_claim', undefined], ['support_return_result', 'sent']]);
-  });
-  it('never sends twice: an already-claimed request sends nothing', async () => {
-    const h = returnHarness({ claimed: [] });
-    expect(await (await h.call()).json()).toEqual({ status: 'already_sent' });
-    expect(h.sends).toHaveLength(0);
-  });
-  it('requires approval and the webhook secret', async () => {
-    const h = returnHarness({});
-    expect(await (await h.call({ id: '11111111-1111-1111-1111-111111111111', return_status: 'requested' })).json()).toEqual({ status: 'ignored' });
-    expect((await h.call(undefined, 'wrong')).status).toBe(401);
-    expect((await returnHarness({ secret: '' }).call()).status).toBe(503);
-    expect(await (await h.call(undefined, 'hook-secret', { table: 'shop_orders' })).json()).toEqual({ status: 'ignored' });
-    expect(h.sends).toHaveLength(0);
-    expect(h.rpcs).toHaveLength(0);
-  });
-  it('without a configured address: nothing sent, recorded as no_address, address never logged', async () => {
-    const h = returnHarness({ address: '' });
-    expect(await (await h.call()).json()).toEqual({ status: 'no_address' });
-    expect(h.sends).toHaveLength(0);
-    expect(h.rpcs[1].args.p_status).toBe('no_address');
-  });
-  it('a failed send releases the claim and logs no address', async () => {
-    const h = returnHarness({ sendFails: true });
-    expect(await (await h.call()).json()).toEqual({ status: 'failed' });
-    expect(h.rpcs[1].args.p_status).toBe('failed');
-    expect(JSON.stringify(h.errors)).not.toContain('Example Lane');
-  });
-  it('damaged or incorrect orders: no postage for the customer', () => {
-    const msg = returnInstructionsEmail({ ...claimedRow, topic: 'damaged' }, ['A', 'B'], 'https://organizedmomcollective.com');
-    expect(msg.text).toContain('you won’t pay for postage');
-    expect(msg.text).not.toContain('Return postage is yours');
-  });
-  it('the acknowledgment and the inbox copy never carry the address, even when it is configured', async () => {
-    const h = harness({});
-    await h.call({ ...good, topic: 'returns' });
-    const all = JSON.stringify(h.sends);
-    expect(all).not.toContain('Example Lane');
-    expect(acknowledgmentEmail(normalizeSupport(good), 'OMC-X', 'https://x').text).not.toMatch(/return address|Example Lane/);
-  });
-  it('only the support-return function reads RETURN_ADDRESS; never the site or a PUBLIC_ variable', () => {
+describe('return address stays private', () => {
+  it('no code or page reads or prints a return address; instructions go out by hand after approval', () => {
     const walk = (dir: string): string[] =>
       readdirSync(dir).flatMap((f) => {
         const path = `${dir}/${f}`;
         return statSync(path).isDirectory() ? walk(path) : [path];
       });
-    const readers = [...walk('src'), ...walk('supabase/functions'), ...walk('scripts'), ...walk('public').filter((f) => /\.(js|html|json|txt)$/.test(f))]
-      .filter((f) => /RETURN_ADDRESS|returnAddress/.test(readFileSync(f, 'utf8')));
-    expect(readers.sort()).toEqual(['supabase/functions/_shared/env.ts', 'supabase/functions/_shared/handlers/support-return.ts']);
-    expect(readFileSync('.env.example', 'utf8')).not.toMatch(/RETURN_ADDRESS/);
+    for (const f of [...walk('src'), ...walk('supabase/functions'), ...walk('supabase/dashboard')]) {
+      expect(readFileSync(f, 'utf8'), f).not.toMatch(/RETURN_ADDRESS|returnAddress/);
+    }
+    const returns = readFileSync('src/pages/returns.astro', 'utf8').replace(/\s+/g, ' ');
+    expect(returns).toContain('Once your return is approved, we’ll send you the return address');
+    expect(acknowledgmentEmail(normalizeSupport(good), 'OMC-X', 'https://x').text).not.toMatch(/return address/i);
   });
 });

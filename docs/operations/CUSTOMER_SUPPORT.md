@@ -25,14 +25,40 @@ Approved by the owner, effective **October 16, 2026**. Applies to the printed fa
 | Refund timing | Initiated within 5 business days after the returned calendar is received and inspected. |
 | Cancellations | Before shipment, subject to actual fulfillment status. Once shipped, it becomes a return. |
 | Exchanges | No direct exchanges for change-of-mind returns: return the unused calendar and reorder. |
-| Damaged, defective or incorrect | Free replacement or refund at no additional cost. **No reporting cutoff**: the 14-day window doesn't apply, and nothing here limits rights customers have by law or under Etsy's protections. Ask for photos when useful. Don't require the item back unless genuinely necessary; if it is, we pay return postage. |
+| Damaged, defective or incorrect | Free replacement or refund at no additional cost, **without requiring the customer to ship it back**. **No reporting cutoff**: the 14-day window doesn't apply, and nothing here limits rights customers have by law or under Etsy's protections. Ask for photos when useful. |
 | Shipping problems, lost packages | Handled individually with the carrier and the sales platform. |
 | Outside the window | Customer can contact us for individual consideration. |
-| Return address | Never published: not on the website, in the repository, in frontend code, in the database or in general support emails. It lives only in the Edge Function secret `RETURN_ADDRESS` and goes out only in the approved-return email (below). |
+| Return address | The owner's home address, used privately for approved physical returns (decided 2026-10-16; no PO box for launch). Never displayed on the website, never in the repository, code, database or public documentation, never in automatic emails. Sent by hand, only after approval (below). |
 
 **Why 14 days:** the calendar is dated week by week. Present this as practical (a returned calendar only helps another family while its weeks are ahead), never as a penalty.
 
 **Not covered:** other physical goods (the mug), personalized products and digital downloads need their own terms before they're sold. Downloads already carry a published 30-day money-back guarantee (on `/weekly-reset`, `/take-back-control` and `/returns`), separate from the calendar terms. The mug has no published terms yet: write them before it goes on sale.
+
+## The return address (manual, private)
+
+Launch decision (2026-10-16): approved physical returns go to the owner's home address. No PO box, no automation.
+
+1. **Never public.** The address is not on the website, in the repository, in frontend code, in the database or in any public document (this guide included). `tests/support.test.ts` fails if site or function code ever reads a return-address setting.
+2. **Approval first.** The customer contacts support (form, email or Etsy Messages) and gets approval before mailing anything. `/returns` and the FAQ say so.
+3. **Sent by hand.** After approving, the owner sends the address and instructions personally: a private email reply (website orders, or anyone who used the form) or Etsy Messages (Etsy orders). Never in the automatic acknowledgment, never in a group or public message.
+4. **Keep it handy, privately.** Save the reply below as an email template or note on your own phone or computer, with the address typed in there. Not in this repository.
+5. **Damaged or incorrect items don't come back.** Issue the replacement or refund from her photo or description. Don't send the address unless you genuinely need to inspect the item, and then cover the postage.
+
+Reply to copy into your own template (fill in the brackets; the address goes in only in your private copy):
+
+> Hi [first name],
+>
+> Your return is approved. Please send your calendar to:
+>
+> [return address]
+>
+> A few quick notes:
+> - Pop a note in the box with your reference ([OMC-… or order number]) so I can match it to you.
+> - The calendar should be unused and in its original condition.
+> - Return postage is yours to cover; a trackable service protects you if anything goes astray.
+> - I'll let you know when it arrives and start your refund within 5 business days, back through [Etsy / our checkout].
+>
+> Please keep this address just for your return. Thanks so much!
 
 ## Service expectations
 
@@ -65,14 +91,14 @@ Not sure? Ask for the order number, or search both Etsy Orders and Admin → Ord
 
 ### Standard (change-of-mind) return
 1. Check: within 14 days of delivery (use the carrier's delivery date), unused, proof of purchase.
-2. Approve: in Supabase → Table Editor → `support_requests`, set the request's `return_status` to `approved` and save. She automatically gets one short "Your return is approved" email with the return address, her reference, and the postage and refund notes, reply-to the support inbox. Check `return_instructions_status` reads `sent` (`no_address` = the secret isn't set; `failed` = save the row again to retry). Never paste the address into the form reply or the acknowledgment. Etsy orders: approve the same way if she wrote through the form; if she only wrote in Etsy Messages, create nothing and send the address there yourself.
+2. Approve: send the approved-return reply above by hand (private email, or Etsy Messages for Etsy orders). If the request came through the form, set its `return_status` to `approved` in Supabase → Table Editor → `support_requests` so you can see it's pending.
 3. Set `return_status` to `received` when it arrives. Inspect it within a couple of days. Resalable → refund the item price within 5 business days. Not resalable → explain kindly with a photo; offer to send it back.
 4. Etsy order: refund through Etsy (Orders → the order → Refund). Website order: Admin → Orders → Refund; return it to stock only if it's sellable.
 5. Set `return_status` to `refunded` (or `declined`) and `status` to `resolved`.
 
 ### Damaged, defective or incorrect
 1. Ask for the order number and a photo (unless the description is already clear).
-2. Offer a replacement or a full refund, her choice, at no cost. Don't ask for it back unless you genuinely need to inspect it; if you do, send a prepaid label.
+2. Offer a replacement or a full refund, her choice, at no cost. She doesn't ship it back. Only if you genuinely need to inspect it, ask nicely, cover the postage, and send the address by hand as above.
 3. Replacement: ship a new calendar and note it (website orders: Inventory → Add / remove, reason "Replacement for #…"). Refund: full, including shipping.
 4. Keep the photos: they're your evidence for the printer or carrier.
 
@@ -123,6 +149,6 @@ The plan for managing the website, products, orders, support, refunds and return
 3. **Etsy's rules win on Etsy orders.** Etsy's own return settings and purchase protection apply to Etsy purchases. Keep them matched (checklist above).
 4. **State consumer law.** Some states require a posted refund policy to be conspicuous or treat an unposted policy as allowing returns (e.g. California, New York). The policy is now posted on `/returns`, linked from the footer and beside the buy buttons. If you sell in person or ship internationally, review again.
 5. **Stripe refunds** go back to the original payment method only, and some payment methods limit how long after the charge a refund is possible. "Subject to the payment platform's capabilities" covers this; refund promptly.
-6. **Return address privacy.** The return address is currently the owner's home address. It is kept only in the `RETURN_ADDRESS` secret and sent only in approved-return emails (`supabase/SUPPORT.md` → Approving a return). Tests fail if anything else in the code reads it. Recipients can still forward an email, so move to a PO box or mailbox service before volume grows; then just change the secret.
+6. **Return address privacy.** The owner's home address is shared by hand, one approved customer at a time. A customer can still forward it, so share it only after approval and only for physical change-of-mind returns. Revisit a PO box or mailbox service if return volume grows past the first orders.
 7. **Data retention.** Support requests are kept until you delete them. Suggest deleting resolved requests after 12 months (Table Editor → filter `status = resolved` and `resolved_at` older than a year → delete).
 8. **Mug, personalized products, future products:** write their terms before they go on sale; add a section to `/returns` and a product line to `src/data/support.ts`.
