@@ -1,0 +1,152 @@
+---
+/**
+ * /starter-kit/kit — the Sanity Saver Starter Kit itself: five free tools as one guided path, opened
+ * straight after signup on /starter-kit and linked from the delivery email (?source=email).
+ * Not locked (the tools are public); signing up is a convenience gate, like the chore chart's.
+ *
+ * Each step: why, when, and its tool. "Done" ticks save in this browser (DONE_KEY). After the
+ * steps, the wall calendar as the next step toward one shared family system: introduced, never
+ * required, and its features aren't recreated here.
+ *
+ * Standalone (no site header/footer), noindex, out of the sitemap.
+ * Events: starter_kit_view (page: kit), starter_kit_resource_open, and cta_click
+ * (placement starter-kit-calendar) via CtaTracking.
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ShopButton from '../../components/site/ShopButton.astro';
+import { STARTER_KIT_NAME, STARTER_KIT_PROMISE, starterKitSteps } from '../../data/starter-kit';
+import { imageAttrs } from '../../data/images';
+import { BRAND_NAME } from '../../config';
+---
+
+<PublicLayout
+  fullTitle={`Your ${STARTER_KIT_NAME} · ${BRAND_NAME}`}
+  description="Your free Sanity Saver Starter Kit: five printables, in order, to get it out of your head and get everyone involved."
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <section aria-labelledby="kit-h" class="public-panel public-intro">
+    <div class="mx-auto max-w-xl px-5 pt-8 pb-10 sm:px-8 sm:pt-14 sm:pb-14">
+      <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="48" height="48" class="size-12" /></a>
+      <p class="label mt-6 text-warm-soft">Your free kit</p>
+      <h1 id="kit-h" class="serif-hero mt-2 sm:text-[2.6rem]">{STARTER_KIT_NAME}</h1>
+      <p class="kit-note mt-4" data-welcome="sent" hidden>It’s all here. We’ve also emailed you the link so you can come back anytime.</p>
+      <p class="kit-note mt-4" data-welcome="nomail" hidden>It’s all here. Bookmark this page to come back to it; we couldn’t send the email this time.</p>
+      <p class="lede mt-4 text-warm-ink">
+        {STARTER_KIT_PROMISE} Five steps, in order. Spread them across a week. The first two get the plan out of your head; the last three hand it to the family.
+      </p>
+      <p class="mt-5 text-[0.95rem] text-warm-soft" aria-live="polite"><span data-kit-count>0</span> of {starterKitSteps.length} done</p>
+      <div class="kit-progress mt-2" aria-hidden="true"><span data-kit-bar></span></div>
+    </div>
+  </section>
+
+  <section aria-label="The five steps" class="mx-auto max-w-xl px-5 py-10 sm:px-8 sm:py-14">
+    <ol class="space-y-12">
+      {
+        starterKitSteps.map((s, i) => (
+          <li class="kit-step" data-step={s.id}>
+            <a href={s.href} class="kit-preview" tabindex="-1" aria-hidden="true" data-kit-resource={s.id}>
+              <img src={`/images/tools/previews/${s.preview}.webp`} alt="" width="900" height="720" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+            </a>
+            <p class="label mt-5 text-warm-soft">Step {i + 1} · {s.when}</p>
+            <h2 class="serif-title mt-1 text-[1.6rem]! sm:text-[1.9rem]!">{s.title}</h2>
+            <p class="mt-3 text-[1.02rem] leading-relaxed text-warm-ink">{s.why}</p>
+            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-4">
+              <a href={s.href} class="btn-primary min-h-13 px-6" data-kit-resource={s.id}>{s.action}</a>
+              <label class="kit-done">
+                <input type="checkbox" data-kit-done={s.id} />
+                <span>Done</span>
+              </label>
+            </div>
+            <p class="mt-3 text-[0.85rem] text-warm-soft">{s.tool}: fill it in on screen, then download to print. It saves in this browser.</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section aria-labelledby="next-h" class="public-panel bg-sage-wash">
+    <div class="mx-auto grid max-w-xl gap-6 px-5 py-12 sm:px-8 sm:py-16">
+      <img {...imageAttrs('hc-01-wall-calendar')} sizes="(min-width:640px) 512px, 90vw" alt="The Organized Mom Collective weekly family wall calendar with sections for plans, meals and groceries." loading="lazy" decoding="async" />
+      <div>
+        <p class="label text-warm-soft">Your next step</p>
+        <h2 id="next-h" class="serif-title mt-2">One Place the Whole Family Checks</h2>
+        <p class="lede mt-4 text-warm-ink">
+          The kit gets the plan out of your head. The next step is a home for it that everyone reads, every week: a family wall calendar with room for plans, meals, groceries and shared jobs, and the cleaning companion website included.
+        </p>
+        <div class="mt-6">
+          <ShopButton label="See the Family Wall Calendar" to="product" cta="starter-kit-calendar" class="min-h-14 w-full px-8 sm:w-auto" />
+        </div>
+        <p class="mt-4 text-[0.9rem] text-warm-soft">Your kit stays free either way.</p>
+      </div>
+    </div>
+  </section>
+</PublicLayout>
+
+<style>
+  .kit-note { padding: 0.75rem 0.9rem; font-size: 0.95rem; line-height: 1.5; color: #3d3834; background: #fff; }
+  .kit-progress { height: 4px; background: #dfe1df; }
+  .kit-progress span { display: block; height: 100%; width: 0; background: #4a3f3e; transition: width 0.2s ease; }
+  .kit-preview { display: block; aspect-ratio: 5 / 4; background: #f6f7f5; }
+  .kit-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .kit-done { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; font-size: 0.98rem; color: #3d3834; cursor: pointer; }
+  .kit-done input { width: 1.25rem; height: 1.25rem; accent-color: #4a3f3e; }
+  .kit-step.is-done .kit-preview img { opacity: 0.55; }
+</style>
+
+<script>
+  import { DONE_KEY, currentSource, grantAccess, local, track } from '../../lib/starter-kit';
+  import { starterKitSteps } from '../../data/starter-kit';
+
+  const source = currentSource();
+  const params = new URLSearchParams(location.search);
+  const welcome = params.get('welcome');
+  if (welcome === 'sent' || welcome === 'nomail') {
+    document.querySelector<HTMLElement>(`[data-welcome="${welcome}"]`)!.hidden = false;
+    params.delete('welcome');
+    history.replaceState(history.state, '', location.pathname + (params.size ? `?${params}` : '') + location.hash);
+  }
+  // Arriving from the email link counts as access in this browser too.
+  if (source === 'email') grantAccess();
+  track('starter_kit_view', { entry_source: source, page: 'kit' });
+
+  let done: string[] = [];
+  try {
+    const saved = JSON.parse(local.get(DONE_KEY) ?? '[]');
+    if (Array.isArray(saved)) done = saved.filter((id): id is string => starterKitSteps.some((s) => s.id === id));
+  } catch { /* start fresh */ }
+
+  const count = document.querySelector<HTMLElement>('[data-kit-count]')!;
+  const bar = document.querySelector<HTMLElement>('[data-kit-bar]')!;
+  const render = () => {
+    count.textContent = String(done.length);
+    bar.style.width = `${(done.length / starterKitSteps.length) * 100}%`;
+    for (const box of document.querySelectorAll<HTMLInputElement>('[data-kit-done]')) {
+      const on = done.includes(box.dataset.kitDone!);
+      box.checked = on;
+      box.closest('.kit-step')?.classList.toggle('is-done', on);
+    }
+  };
+  render();
+
+  document.addEventListener('change', (e) => {
+    const box = (e.target as Element).closest<HTMLInputElement>('[data-kit-done]');
+    if (!box) return;
+    const id = box.dataset.kitDone!;
+    done = box.checked ? [...new Set([...done, id])] : done.filter((d) => d !== id);
+    local.set(DONE_KEY, JSON.stringify(done));
+    render();
+  });
+
+  document.addEventListener(
+    'click',
+    (e) => {
+      const link = (e.target as Element | null)?.closest?.<HTMLAnchorElement>('a[data-kit-resource]');
+      if (!link) return;
+      const id = link.dataset.kitResource!;
+      track('starter_kit_resource_open', { entry_source: source, resource_id: id, resource_path: new URL(link.href).pathname, step: String(starterKitSteps.findIndex((s) => s.id === id) + 1) });
+    },
+    { capture: true },
+  );
+</script>

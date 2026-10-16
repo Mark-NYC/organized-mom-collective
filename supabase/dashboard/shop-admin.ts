@@ -49,7 +49,7 @@ function createResendMailer(opts) {
   const fetchFn = opts.fetch ?? fetch;
   return {
     configured: Boolean(opts.apiKey),
-    async send(to, msg, idempotencyKey) {
+    async send(to, msg, idempotencyKey, sendOpts) {
       const res = await fetchFn("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -57,7 +57,7 @@ function createResendMailer(opts) {
           "Content-Type": "application/json",
           ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
         },
-        body: JSON.stringify({ from: opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
+        body: JSON.stringify({ from: sendOpts?.from || opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message ?? `resend_${res.status}`);
@@ -414,7 +414,8 @@ function readEnv(get) {
     previewToken: v("SHOP_PREVIEW_TOKEN"),
     resendApiKey: v("RESEND_API_KEY"),
     emailFrom: v("SHOP_EMAIL_FROM", "Organized Mom Collective <orders@organizedmomcollective.com>"),
-    emailReplyTo: v("SHOP_EMAIL_REPLY_TO")
+    emailReplyTo: v("SHOP_EMAIL_REPLY_TO"),
+    starterKitEmailFrom: v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>")
   };
 }
 

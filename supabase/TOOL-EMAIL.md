@@ -19,3 +19,13 @@ Set PUBLIC_TOOL_EMAIL_GATE_ENABLED=false and redeploy. Existing contacts remain 
 
 ## Status
 Frontend and migration code are implemented and tested locally. Migration must be applied in the live Supabase project before activation. Email provider connection and sending campaigns are separate work.
+
+## Sanity Saver Starter Kit (/starter-kit)
+
+Live since 2026-10-16. The signup goes through the `starter-kit-signup` Edge Function (Verify JWT off), not the browser RPC: `supabase/migrations/20261018000000_starter_kit_signup.sql` (applied) adds `starter_kit_signup` / `starter_kit_email_result` (service role only) and four `starter_kit_*` columns on `tool_email_contacts`.
+
+- **Consent.** Same table and rules as above. `first_tool`/`last_tool` = `starter-kit`, `consent_version` = `starter-kit-v1` when the optional box is ticked. Export marketing contacts only where `marketing_opt_in = true`.
+- **Email.** One transactional delivery email (the kit link and the five steps; no promotion), via the shop's Resend key. Sender: secret `STARTER_KIT_EMAIL_FROM` (default `Organized Mom Collective <hello@organizedmomcollective.com>`; verified working 2026-10-16). If Resend refuses it, the function falls back to `SHOP_EMAIL_FROM`. Replies go to `SHOP_EMAIL_REPLY_TO`. Outcome per contact in `starter_kit_email_status` / `starter_kit_email_id` (the Resend id). At most one per address per 24 hours; 10 signups per IP per hour.
+- **No sequence.** Nothing else is sent. A marketing sequence needs an unsubscribe link, a postal address and its own consent check before it's built.
+- **Redeploy** after editing the handler: `npm run build:functions`, then paste `supabase/dashboard/starter-kit-signup.ts` into the dashboard (or deploy the folder with the CLI).
+- **Test** without a real inbox: sign up as `delivered@resend.dev`, check the row, then delete it.
