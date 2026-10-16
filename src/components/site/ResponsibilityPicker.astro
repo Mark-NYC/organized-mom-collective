@@ -45,7 +45,7 @@ const { heading = 'Pick illustrated steps', hint } = Astro.props;
             <button type="button" class:list={['rp-tile', !src && 'rp-tile-text']} data-rp-pick={r.id} style={{ '--rp-cat': responsibilityColor(r) }}>
               {src && (
                 <span class="rp-art" aria-hidden="true">
-                  <img src={src} srcset={`${src} 1x, ${responsibilityImage(r, 256)} 2x`} width="56" height="56" alt="" loading="lazy" decoding="async" />
+                  <img src={src} width="56" height="56" alt="" loading="lazy" decoding="async" />
                 </span>
               )}
               <span class="rp-name">{r.title}</span>

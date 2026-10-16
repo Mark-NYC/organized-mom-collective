@@ -9,7 +9,7 @@ ID      the responsibility id in src/data/responsibilities.ts, e.g. brush-my-tee
 
 Copies SOURCE unchanged to design/responsibilities/{ID}.{ext} (the kept original) and writes
 public/images/responsibilities/{ID}-{128,256}.webp: square, transparent, resized only (no crop, no recolor).
-128 is the picker tile (64 px at 2×); 256 is the chart icon, sharp in the 2× PNG export.
+128 is the picker tile (56 px, sharp on 2× screens); 256 is the chart icon, sharp in the 2× PNG export.
 Then set `image: true` on the responsibility. Requires Pillow.
 """
 import argparse
@@ -42,7 +42,8 @@ def main() -> None:
     os.makedirs(OUT_DIR, exist_ok=True)
     ext = os.path.splitext(a.source)[1].lower()
     kept = os.path.join(ORIGINALS, f'{a.id}{ext}')
-    shutil.copyfile(a.source, kept)
+    if os.path.abspath(a.source) != os.path.abspath(kept):
+        shutil.copyfile(a.source, kept)
     print(os.path.relpath(kept, ROOT), f'{w}×{h}', f'{os.path.getsize(kept) // 1024} KB (original, unchanged)')
     for size in SIZES:
         out = img.resize((size, size), Image.LANCZOS)
