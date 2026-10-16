@@ -1,0 +1,26 @@
+---
+/**
+ * The routine chart's one product note, under the finished chart: the chart plans the routine, the physical
+ * Responsibility Cards teach each job. Never gates or interrupts the free download. Link or "Coming soon"
+ * from src/data/responsibility-cards.ts.
+ */
+import OfferButton from './OfferButton.astro';
+import { responsibilityCards } from '../../data/responsibility-cards';
+
+const { pageUrl, name } = responsibilityCards;
+---
+
+<aside class="rc-note" aria-labelledby="rc-note-h">
+  <p class="label text-warm-soft">After the chart</p>
+  <h2 id="rc-note-h" class="rc-note-title">Your routine is ready. Now help your kids own it.</h2>
+  <p class="rc-note-body">
+    A chart shows your child what needs to happen. Our {name} teach them how to do each task, one simple step at a time.
+  </p>
+  <OfferButton label={pageUrl ? 'Explore Responsibility Cards' : name} href={pageUrl} cta="routine-chart-cards" class="mt-5" />
+</aside>
+
+<style is:global>
+  .rc-note { max-width: 816px; margin: 32px auto 0; padding: 24px 0 0; border-top: 1px solid var(--color-warm-rule); color: var(--color-warm-ink); }
+  .rc-note-title { margin-top: 6px; font-family: var(--font-serif); font-size: 1.45rem; line-height: 1.25; }
+  .rc-note-body { max-width: 560px; margin-top: 8px; color: var(--color-warm-soft); }
+</style>

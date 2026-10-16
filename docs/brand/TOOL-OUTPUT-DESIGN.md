@@ -15,3 +15,7 @@ Implemented on the chore chart. Apply to new tools and future redesigns; existin
 ## Controls around the output
 
 Owner direction October 13: use restrained editorial controls, not rows of outlined cards or pills. Routine types are text tabs with an underline on the selected choice. Palette choices show swatches and text with an underline on selection, not boxed buttons. One solid primary download button; reset is a plain underlined action. Suggested steps are simple text links. Keep 44–48px hit targets and visible keyboard focus. The printable itself retains the playful typography and soft colors.
+
+## Responsibility illustrations
+
+The routine and chore charts may show the custom responsibility illustrations (`src/data/responsibilities.ts`) beside a line's text, on a soft circle in the job's category color (Myself & Daily Habits #D4DFC4, My Room #CDDDE1, Helping at Home #F1D8A8). Category colors stay fixed across palettes; the tool palette still drives the highlighter swipes and outlines. Charts stay charts: one line per job with its title and illustration. Never print the cards' three how-to steps, front/back layouts or card-sized cutouts from a free tool.

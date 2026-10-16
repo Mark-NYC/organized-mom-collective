@@ -77,8 +77,17 @@ export async function downloadPng(
       el.type = 'text';
       el.value = y ? `${Number(m)}/${Number(d)}/${y}` : '';
     }
+    // Illustrations added just now may still be loading: wait so the PNG never has a blank icon.
+    await Promise.all(Array.from(root.querySelectorAll('img')).map((img) => (img.complete ? null : img.decode().catch(() => null))));
     const { toPng } = await import('html-to-image');
-    const dataUrl = await toPng(root, { pixelRatio: 2, backgroundColor: '#ffffff', width, height: opts.height ?? root.offsetHeight });
+    const dataUrl = await toPng(root, {
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+      width,
+      height: opts.height ?? root.offsetHeight,
+      // An empty icon slot (<img> without src) would fail the whole capture: leave it out of the copy.
+      filter: (node) => !(node instanceof HTMLImageElement && !node.getAttribute('src')),
+    });
     const link = document.createElement('a');
     link.download = opts.filename;
     link.href = dataUrl;

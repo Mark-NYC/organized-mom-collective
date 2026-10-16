@@ -1,0 +1,112 @@
+---
+/**
+ * The illustrated responsibility library as a picker, shared by the routine chart and the chore chart:
+ * category filter (text tabs) and one tile per job (illustration + title). Picking a tile fires a bubbling
+ * `rp:pick` event ({ id }); the chart decides where it goes. Tiles only: no how-to steps, nothing printable
+ * (those belong to the physical Responsibility Cards). Data: src/data/responsibilities.ts.
+ *
+ * `routine` on the root (data-rp-routine) moves the jobs that fit that routine to the front.
+ * Slots: `target` (beside the heading, e.g. the chore chart's "Add to" select), default (a note under the tiles).
+ */
+import { responsibilities, responsibilityCategories, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
+
+interface Props {
+  heading?: string;
+  hint: string;
+}
+const { heading = 'Pick illustrated steps', hint } = Astro.props;
+---
+
+<section class="rp" data-rp aria-label={heading}>
+  <div class="rp-head">
+    <div>
+      <h2 class="rp-title">{heading}</h2>
+      <p class="rp-hint">{hint}</p>
+    </div>
+    <slot name="target" />
+  </div>
+  <div class="rp-filters" role="group" aria-label="Filter by category">
+    <button type="button" class="rp-filter" data-rp-filter="" aria-pressed="true">All</button>
+    {
+      Object.entries(responsibilityCategories).map(([id, c]) => (
+        <button type="button" class="rp-filter" data-rp-filter={id} aria-pressed="false">
+          <span class="rp-dot" style={{ backgroundColor: c.color }} aria-hidden="true" />
+          {c.label}
+        </button>
+      ))
+    }
+  </div>
+  <ul class="rp-list">
+    {
+      responsibilities.map((r) => {
+        const src = responsibilityImage(r, 128);
+        return (
+          <li data-rp-cat={r.category} data-rp-routines={r.routines.join(' ')}>
+            <button type="button" class:list={['rp-tile', !src && 'rp-tile-text']} data-rp-pick={r.id} style={{ '--rp-cat': responsibilityColor(r) }}>
+              {src && (
+                <span class="rp-art" aria-hidden="true">
+                  <img src={src} srcset={`${src} 1x, ${responsibilityImage(r, 256)} 2x`} width="56" height="56" alt="" loading="lazy" decoding="async" />
+                </span>
+              )}
+              <span class="rp-name">{r.title}</span>
+            </button>
+          </li>
+        );
+      })
+    }
+  </ul>
+  <p class="rp-status" data-rp-status role="status" aria-live="polite"></p>
+  <slot />
+</section>
+
+<style is:global>
+  .rp { max-width: 816px; margin: 0 auto 24px; color: var(--color-warm-ink); }
+  .rp-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 24px; margin-bottom: 8px; }
+  .rp-title { font-family: var(--font-serif); font-size: 1.15rem; }
+  .rp-hint { font-size: 0.85rem; color: var(--color-warm-soft); }
+  .rp-filters { display: flex; flex-wrap: wrap; gap: 0 22px; margin-bottom: 12px; border-bottom: 1px solid var(--color-warm-rule); }
+  .rp-filter { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--color-warm-ink); cursor: pointer; }
+  .rp-filter:hover { border-color: var(--color-warm-soft); }
+  .rp-filter[aria-pressed='true'] { border-color: var(--color-warm-ink); font-weight: 700; }
+  .rp-dot { width: 12px; height: 12px; border: 1px solid #b8ada6; border-radius: 50%; }
+  .rp-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .rp-list > li { display: flex; }
+  .rp-list > li[hidden] { display: none; }
+  .rp[data-rp-routine='morning'] [data-rp-routines~='morning'],
+  .rp[data-rp-routine='afterschool'] [data-rp-routines~='afterschool'],
+  .rp[data-rp-routine='bedtime'] [data-rp-routines~='bedtime'],
+  .rp[data-rp-routine='weekend'] [data-rp-routines~='weekend'] { order: -1; }
+  .rp-tile { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 6px; min-height: 44px; padding: 10px 6px 8px; border: 1px solid var(--color-warm-rule); border-radius: 10px; background: #fff; color: var(--color-warm-ink); cursor: pointer; transition: border-color 0.2s; }
+  .rp-tile:hover { border-color: var(--color-warm-ink); }
+  .rp-filter:focus-visible, .rp-tile:focus-visible { outline: 2px solid var(--color-warm-ink); outline-offset: 3px; }
+  .rp-art { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: color-mix(in srgb, var(--rp-cat) 55%, #fff); }
+  .rp-art img { width: 56px; height: 56px; }
+  /* Jobs whose illustration isn't in yet: title only, category color along the top. */
+  .rp-tile-text { justify-content: center; border-top: 4px solid var(--rp-cat); }
+  .rp-name { font-size: 0.8rem; line-height: 1.25; text-align: center; }
+  .rp-status { min-height: 1.4em; margin-top: 8px; font-size: 0.85rem; color: var(--color-warm-soft); }
+  /* Phones: one swipeable row instead of a tall grid above the chart; off-screen art loads lazily. */
+  @media (max-width: 768px) {
+    .rp-list { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+    .rp-list > li { flex: 0 0 104px; scroll-snap-align: start; }
+    .rp-filters { flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-rp]')) {
+    const filters = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-rp-filter]'));
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-rp-cat]'));
+    for (const f of filters) {
+      f.addEventListener('click', () => {
+        const cat = f.dataset.rpFilter!;
+        filters.forEach((b) => b.setAttribute('aria-pressed', String(b === f)));
+        items.forEach((li) => (li.hidden = !!cat && li.dataset.rpCat !== cat));
+      });
+    }
+    root.addEventListener('click', (e) => {
+      const tile = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-rp-pick]');
+      if (tile) root.dispatchEvent(new CustomEvent('rp:pick', { bubbles: true, detail: { id: tile.dataset.rpPick } }));
+    });
+  }
+</script>

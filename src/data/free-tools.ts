@@ -1,10 +1,10 @@
 import { routes } from '../routes';
 
 export const freeTools = [
-  { href: routes.choreChart, name: 'Chore Chart by Age', summary: 'Daily and weekly chores matched to your child’s age, with rewards to work toward.' },
+  { href: routes.choreChart, name: 'Chore Chart by Age', summary: 'Daily and weekly chores matched to your child’s age, with illustrated jobs and rewards to work toward.' },
   { href: routes.backToSchool, name: 'Back to School Checklist', summary: 'Supplies, clothes, forms and routines, plus a countdown dated from the first day.' },
   { href: routes.screenTime, name: 'Screen Time Contract', summary: 'Jobs first, then activities that earn screen time. Fill it in together and sign it.' },
-  { href: routes.routineChart, name: 'Routine Charts', summary: 'Morning, after-school, bedtime and weekend routines, so the chart says what’s next instead of you.' },
+  { href: routes.routineChart, name: 'Routine Charts', summary: 'Picture routine charts for morning, after-school, bedtime and weekend, so the chart says what’s next instead of you.' },
   { href: routes.mealPlanner, name: 'Weekly Dinner Planner', summary: 'Mark each night full, short or zero, plan dinners to fit, and write the grocery list.' },
   { href: routes.mentalLoad, name: 'Mental Load Worksheet', summary: 'Get it out of your head, sort it, and hand one whole job to someone else.' },
   { href: routes.laundrySystem, name: 'Laundry System', summary: 'Three stations and five steps from basket to drawer, with everyone pitching in.' },

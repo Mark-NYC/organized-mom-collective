@@ -4,9 +4,13 @@
  * and download as a PNG. The chart itself (design, autosave, PNG export) is
  * src/components/site/RoutineChart.astro, shared with the upgraded chart for Take Back Control and Essential Routines buyers
  * (ROUTINE_PLUS_PATH in src/data/routines.ts). Saves in this browser (`omc:routine-chart:v1`).
+ * Illustrated steps: the shared responsibility library. Under the chart, the one Responsibility Cards note
+ * (src/data/responsibility-cards.ts); the line under the picker shows only once the cards have a live page.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import RoutineChart from '../../components/site/RoutineChart.astro';
+import ResponsibilityCardsNote from '../../components/site/ResponsibilityCardsNote.astro';
+import { responsibilityCards } from '../../data/responsibility-cards';
 import { routes } from '../../routes';
 import { BRAND_NAME } from '../../config';
 
@@ -24,8 +28,8 @@ const jsonLd = [
 ---
 
 <PublicLayout
-  title="Free Routine Charts for Kids: Morning, After-School and Bedtime"
-  description="Free routine charts for busy families: morning, after-school, bedtime and weekend routines with times and steps. Edit any line, then download to print."
+  title="Free Picture Routine Charts for Kids: Morning, After-School and Bedtime"
+  description="Make a free picture routine chart for kids: tap illustrated steps like brushing teeth or packing a backpack, put them in order, add times, then download to print."
   width="full"
   jsonLd={jsonLd}
 >
@@ -34,13 +38,23 @@ const jsonLd = [
       <p class="label text-warm-soft">Free routine charts</p>
       <h1 id="mr-h" class="serif-hero mt-3">Routines That Run Without You Repeating Yourself.</h1>
       <p class="lede mt-4 max-w-2xl text-warm-ink">
-        Pick a routine, set the steps and times once, and hang it where it happens. The chart says “what’s next?” so you don’t have to. Change
-        any line, then download it to print. What you set stays saved in this browser.
+        Pick a routine, tap the illustrated steps your child needs, and set the times once. Pictures mean even early readers can check
+        what’s next without asking you. Change any line, then download it to print and hang where it happens. What you set stays saved in
+        this browser.
       </p>
     </div>
   </section>
 
   <RoutineChart storageKey="omc:routine-chart:v1">
+    {
+      responsibilityCards.pageUrl && (
+        <p slot="picker-note" class="mr-picker-note">
+          Want to teach these responsibilities step by step?{' '}
+          <a href={responsibilityCards.pageUrl} data-cta="routine-chart-picker" class="text-link">Discover our Responsibility Cards</a>
+        </p>
+      )
+    }
+    <ResponsibilityCardsNote slot="after-sheet" />
     <p slot="footnote" class="mr-footnote">
       More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
       {' '}<a href={routes.screenTime} class="text-link">Screen Time Contract</a> and the
