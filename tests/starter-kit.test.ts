@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { routes } from '../src/routes';
-import { STARTER_KIT_KIT_PATH, STARTER_KIT_PATH, starterKitSteps } from '../src/data/starter-kit';
+import { KIT_MINUTES, STARTER_KIT_KIT_PATH, STARTER_KIT_PATH, starterKitBonuses, starterKitSteps } from '../src/data/starter-kit';
 import { entrySource, signUp } from '../src/lib/starter-kit';
 import { starterKitEmail, createStarterKitHandler } from '../supabase/functions/_shared/handlers/starter-kit';
 import { readEnv } from '../supabase/functions/_shared/env';
@@ -9,12 +9,19 @@ import { existsSync } from 'node:fs';
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 describe('starter kit data', () => {
-  it('uses the real routes and existing previews', () => {
+  it('is a 30-minute reset on the real routes, with existing previews', () => {
     expect(STARTER_KIT_PATH).toBe(routes.starterKit);
     expect(STARTER_KIT_KIT_PATH).toBe(routes.starterKitKit);
-    expect(starterKitSteps.map((s) => s.href)).toEqual([routes.mentalLoad, routes.planner, routes.commandCenterSetup, routes.routineChart, routes.choreChart]);
-    for (const s of starterKitSteps) expect(existsSync(`public/images/tools/previews/${s.preview}.webp`)).toBe(true);
-    expect(new Set(starterKitSteps.map((s) => s.id)).size).toBe(starterKitSteps.length);
+    expect(starterKitSteps.map((s) => s.minutes)).toEqual([5, 10, 10, 5]);
+    expect(starterKitSteps.reduce((t, s) => t + s.minutes, 0)).toBe(KIT_MINUTES);
+    expect(starterKitSteps.map((s) => s.tool?.href)).toEqual([routes.mentalLoad, routes.planner, routes.choreChart, undefined]);
+    expect(starterKitSteps[3].questions).toEqual(['What’s happening this week?', 'Who’s responsible for what?', 'Where do we need to help each other?']);
+    expect(starterKitBonuses.map((b) => b.href)).toEqual([routes.commandCenterSetup, routes.routineChart]);
+    const previews = [...starterKitSteps.flatMap((s) => (s.tool ? [s.tool.preview] : [])), ...starterKitBonuses.map((b) => b.preview)];
+    for (const p of previews) expect(existsSync(`public/images/tools/previews/${p}.webp`)).toBe(true);
+    const ids = [...starterKitSteps.map((s) => s.id), ...starterKitBonuses.map((b) => b.id)];
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const s of starterKitSteps) expect(s.outcome.length).toBeGreaterThan(10);
   });
 });
 
@@ -53,9 +60,10 @@ describe('signup client', () => {
 describe('starter kit email', () => {
   it('is a delivery email: the kit link, every step, no sales pitch', () => {
     const msg = starterKitEmail('https://organizedmomcollective.com', 'help@example.com');
-    expect(msg.subject).toBe('Your Sanity Saver Starter Kit is here');
+    expect(msg.subject).toBe('Your Free 30-Minute Weekly Starter Kit Is Here');
+    expect(msg.text).toContain('Take back control in 30 minutes');
     expect(msg.html).toContain('https://organizedmomcollective.com/starter-kit/kit?source=email');
-    for (const s of starterKitSteps) expect(msg.text).toContain(s.title);
+    for (const s of starterKitSteps) expect(msg.text).toContain(`${s.title} (${s.minutes} min)`);
     expect(msg.text).toContain('one-time delivery email');
     expect(msg.text.toLowerCase()).not.toMatch(/calendar|buy|shop|\$/);
   });

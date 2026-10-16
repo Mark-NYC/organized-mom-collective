@@ -1,27 +1,29 @@
 ---
 /**
- * /starter-kit/kit — the Sanity Saver Starter Kit itself: five free tools as one guided path, opened
- * straight after signup on /starter-kit and linked from the delivery email (?source=email).
- * Not locked (the tools are public); signing up is a convenience gate, like the chore chart's.
+ * /starter-kit/kit — the 30-Minute Weekly Starter Kit itself: a 30-minute weekly reset in four
+ * timed steps (clear your head 5, plan your week 10, share the load 10, family check-in 5), each
+ * with short instructions, an outcome and a "Done" tick. Steps 1–3 open an existing free tool
+ * (filled in on screen, nothing to print); step 4 is three questions on this page. Then two
+ * optional bonus tools (not part of the 30 minutes), then the wall calendar as the ongoing system.
  *
- * Each step: why, when, and its tool. "Done" ticks save in this browser (DONE_KEY). After the
- * steps, the wall calendar as the next step toward one shared family system: introduced, never
- * required, and its features aren't recreated here.
+ * Opened straight after signup on /starter-kit and from the delivery email (?source=email). Not
+ * locked (the tools are public): return visits open it directly. Ticks save in this browser (DONE_KEY).
+ * The calendar is introduced, never required, and its features aren't recreated here.
  *
- * Standalone (no site header/footer), noindex, out of the sitemap.
- * Events: starter_kit_view (page: kit), starter_kit_resource_open, and cta_click
+ * Standalone (no site header/footer), noindex, out of the sitemap. Steps: src/data/starter-kit.ts.
+ * Events: starter_kit_view (page: kit), starter_kit_resource_open (steps and bonuses), and cta_click
  * (placement starter-kit-calendar) via CtaTracking.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ShopButton from '../../components/site/ShopButton.astro';
-import { STARTER_KIT_NAME, STARTER_KIT_PROMISE, starterKitSteps } from '../../data/starter-kit';
+import { KIT_MINUTES, STARTER_KIT_OFFER, STARTER_KIT_PROMISE, starterKitBonuses, starterKitSteps } from '../../data/starter-kit';
 import { imageAttrs } from '../../data/images';
 import { BRAND_NAME } from '../../config';
 ---
 
 <PublicLayout
-  fullTitle={`Your ${STARTER_KIT_NAME} · ${BRAND_NAME}`}
-  description="Your free Sanity Saver Starter Kit: five printables, in order, to get it out of your head and get everyone involved."
+  fullTitle={`Your ${STARTER_KIT_OFFER} · ${BRAND_NAME}`}
+  description="Your free 30-Minute Weekly Starter Kit: four short steps to clear your head, plan the week and share the load with your family."
   indexable={false}
   chrome={false}
   width="full"
@@ -30,40 +32,77 @@ import { BRAND_NAME } from '../../config';
     <div class="mx-auto max-w-xl px-5 pt-8 pb-10 sm:px-8 sm:pt-14 sm:pb-14">
       <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="48" height="48" class="size-12" /></a>
       <p class="label mt-6 text-warm-soft">Your free kit</p>
-      <h1 id="kit-h" class="serif-hero mt-2 sm:text-[2.6rem]">{STARTER_KIT_NAME}</h1>
+      <h1 id="kit-h" class="serif-hero mt-2 sm:text-[2.6rem]">Your <span class="whitespace-nowrap">{KIT_MINUTES}-Minute</span> Weekly Reset</h1>
       <p class="kit-note mt-4" data-welcome="sent" hidden>It’s all here. We’ve also emailed you the link so you can come back anytime.</p>
       <p class="kit-note mt-4" data-welcome="nomail" hidden>It’s all here. Bookmark this page to come back to it; we couldn’t send the email this time.</p>
       <p class="lede mt-4 text-warm-ink">
-        {STARTER_KIT_PROMISE} Five steps, in order. Spread them across a week. The first two get the plan out of your head; the last three hand it to the family.
+        Four steps, about {KIT_MINUTES} minutes. Everything fills in on your phone; nothing to print or buy. Do it in one sitting or in pieces. {STARTER_KIT_PROMISE}
       </p>
-      <p class="mt-5 text-[0.95rem] text-warm-soft" aria-live="polite"><span data-kit-count>0</span> of {starterKitSteps.length} done</p>
+      <p class="mt-5 text-[0.95rem] text-warm-soft" aria-live="polite"><span data-kit-count>0</span> of {starterKitSteps.length} steps done</p>
       <div class="kit-progress mt-2" aria-hidden="true"><span data-kit-bar></span></div>
     </div>
   </section>
 
-  <section aria-label="The five steps" class="mx-auto max-w-xl px-5 py-10 sm:px-8 sm:py-14">
-    <ol class="space-y-12">
+  <section aria-label="The four steps" class="mx-auto max-w-xl px-5 py-8 sm:px-8 sm:py-12">
+    <ol class="space-y-6">
       {
         starterKitSteps.map((s, i) => (
           <li class="kit-step" data-step={s.id}>
-            <a href={s.href} class="kit-preview" tabindex="-1" aria-hidden="true" data-kit-resource={s.id}>
-              <img src={`/images/tools/previews/${s.preview}.webp`} alt="" width="900" height="720" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
-            </a>
-            <p class="label mt-5 text-warm-soft">Step {i + 1} · {s.when}</p>
-            <h2 class="serif-title mt-1 text-[1.6rem]! sm:text-[1.9rem]!">{s.title}</h2>
-            <p class="mt-3 text-[1.02rem] leading-relaxed text-warm-ink">{s.why}</p>
-            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <a href={s.href} class="btn-primary min-h-13 px-6" data-kit-resource={s.id}>{s.action}</a>
-              <label class="kit-done">
-                <input type="checkbox" data-kit-done={s.id} />
-                <span>Done</span>
-              </label>
+            <div class="kit-step-head">
+              <span class="kit-num" aria-hidden="true">{i + 1}</span>
+              <p class="label text-warm-soft">Step {i + 1}</p>
+              <span class="kit-time">{s.minutes} min</span>
             </div>
-            <p class="mt-3 text-[0.85rem] text-warm-soft">{s.tool}: fill it in on screen, then download to print. It saves in this browser.</p>
+            <h2 class="serif-title mt-3 text-[1.55rem]! sm:text-[1.8rem]!">{s.title}</h2>
+            <ul class="kit-todo mt-3">
+              {s.todo.map((t) => <li>{t}</li>)}
+            </ul>
+            {s.questions && (
+              <ol class="kit-questions mt-3">
+                {s.questions.map((q) => <li>{q}</li>)}
+              </ol>
+            )}
+            {s.tool && (
+              <a href={s.tool.href} class="kit-tool mt-4" data-kit-resource={s.id}>
+                <img src={`/images/tools/previews/${s.tool.preview}.webp`} alt="" width="900" height="720" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+                <span>
+                  <span class="block text-[0.8rem] text-warm-soft">Free tool · fill it in on screen</span>
+                  <span class="mt-0.5 block font-semibold text-warm-ink">{s.tool.action} →</span>
+                </span>
+              </a>
+            )}
+            <p class="kit-outcome mt-4"><span class="label">Outcome</span> {s.outcome}</p>
+            <label class="kit-done mt-3">
+              <input type="checkbox" data-kit-done={s.id} />
+              <span>Mark step {i + 1} done</span>
+            </label>
           </li>
         ))
       }
     </ol>
+    <p class="kit-finished mt-6" data-kit-finished hidden>
+      That’s your week reset. The plan is out of your head, and you’re not carrying it alone.
+    </p>
+  </section>
+
+  <section aria-labelledby="bonus-h" class="mx-auto max-w-xl px-5 pb-10 sm:px-8 sm:pb-14">
+    <p class="label text-warm-soft">Optional · not part of the {KIT_MINUTES} minutes</p>
+    <h2 id="bonus-h" class="serif-title mt-2 text-[1.45rem]! sm:text-[1.7rem]!">Bonus Next Steps</h2>
+    <ul class="mt-5 space-y-4">
+      {
+        starterKitBonuses.map((b) => (
+          <li>
+            <a href={b.href} class="kit-tool" data-kit-resource={b.id}>
+              <img src={`/images/tools/previews/${b.preview}.webp`} alt="" width="900" height="720" loading="lazy" decoding="async" />
+              <span>
+                <span class="block font-semibold text-warm-ink">{b.name}</span>
+                <span class="mt-0.5 block text-[0.9rem] leading-snug text-warm-soft">{b.why}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <section aria-labelledby="next-h" class="public-panel bg-sage-wash">
@@ -71,9 +110,9 @@ import { BRAND_NAME } from '../../config';
       <img {...imageAttrs('hc-01-wall-calendar')} sizes="(min-width:640px) 512px, 90vw" alt="The Organized Mom Collective weekly family wall calendar with sections for plans, meals and groceries." loading="lazy" decoding="async" />
       <div>
         <p class="label text-warm-soft">Your next step</p>
-        <h2 id="next-h" class="serif-title mt-2">One Place the Whole Family Checks</h2>
+        <h2 id="next-h" class="serif-title mt-2">Keep the Plan Going All Week</h2>
         <p class="lede mt-4 text-warm-ink">
-          The kit gets the plan out of your head. The next step is a home for it that everyone reads, every week: a family wall calendar with room for plans, meals, groceries and shared jobs, and the cleaning companion website included.
+          You’ve made a plan together. Now give your family one place to see it and keep it going: a weekly wall calendar with room for plans, meals, groceries and shared jobs, and the cleaning companion website included.
         </p>
         <div class="mt-6">
           <ShopButton label="See the Family Wall Calendar" to="product" cta="starter-kit-calendar" class="min-h-14 w-full px-8 sm:w-auto" />
@@ -88,16 +127,31 @@ import { BRAND_NAME } from '../../config';
   .kit-note { padding: 0.75rem 0.9rem; font-size: 0.95rem; line-height: 1.5; color: #3d3834; background: #fff; }
   .kit-progress { height: 4px; background: #dfe1df; }
   .kit-progress span { display: block; height: 100%; width: 0; background: #4a3f3e; transition: width 0.2s ease; }
-  .kit-preview { display: block; aspect-ratio: 5 / 4; background: #f6f7f5; }
-  .kit-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
-  .kit-done { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; font-size: 0.98rem; color: #3d3834; cursor: pointer; }
-  .kit-done input { width: 1.25rem; height: 1.25rem; accent-color: #4a3f3e; }
-  .kit-step.is-done .kit-preview img { opacity: 0.55; }
+  .kit-step { padding: 1.25rem 1.1rem 1.1rem; background: #fff; border: 1px solid #e3e5e3; border-left: 4px solid var(--month, #cddde1); }
+  .kit-step.is-done { background: #f6f8f5; border-left-color: #7d9a7a; }
+  .kit-step-head { display: flex; align-items: center; gap: 0.6rem; }
+  .kit-num { display: inline-flex; align-items: center; justify-content: center; width: 1.9rem; height: 1.9rem; font-family: Georgia, serif; font-size: 1.05rem; color: #fff; background: #4a3f3e; }
+  .kit-step.is-done .kit-num { background: #7d9a7a; }
+  .kit-time { margin-left: auto; padding: 0.2rem 0.55rem; font-size: 0.8rem; font-weight: 600; color: #3d3834; background: #f1f2f2; }
+  .kit-todo { list-style: none; padding: 0; font-size: 1rem; line-height: 1.55; color: #3d3834; }
+  .kit-todo li { position: relative; padding-left: 1.1rem; margin-top: 0.35rem; }
+  .kit-todo li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 0.4rem; height: 0.4rem; background: #96666b; }
+  .kit-questions { padding-left: 1.4rem; list-style: decimal; font-family: Georgia, serif; font-size: 1.12rem; line-height: 1.5; color: #3d3834; }
+  .kit-questions li { margin-top: 0.3rem; }
+  .kit-tool { display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.9rem; align-items: center; padding: 0.6rem; min-height: 3.5rem; background: #f6f7f5; text-decoration: none; }
+  .kit-tool:hover span span:last-child { text-decoration: underline; text-underline-offset: 3px; }
+  .kit-tool:focus-visible { outline: 2px solid #414641; outline-offset: 2px; }
+  .kit-tool img { width: 4.5rem; height: 3.6rem; object-fit: contain; background: #fff; }
+  .kit-outcome { font-size: 0.95rem; line-height: 1.5; color: #3d3834; }
+  .kit-outcome .label { margin-right: 0.35rem; color: #5c5550; }
+  .kit-done { display: inline-flex; align-items: center; gap: 0.55rem; min-height: 2.75rem; font-size: 0.98rem; font-weight: 600; color: #3d3834; cursor: pointer; }
+  .kit-done input { width: 1.3rem; height: 1.3rem; accent-color: #4a3f3e; }
+  .kit-finished { padding: 1rem 1.1rem; font-family: Georgia, serif; font-size: 1.15rem; line-height: 1.5; color: #3d3834; background: var(--public-sage, #e7ece5); }
 </style>
 
 <script>
   import { DONE_KEY, currentSource, grantAccess, local, track } from '../../lib/starter-kit';
-  import { starterKitSteps } from '../../data/starter-kit';
+  import { starterKitBonuses, starterKitSteps } from '../../data/starter-kit';
 
   const source = currentSource();
   const params = new URLSearchParams(location.search);
@@ -119,9 +173,11 @@ import { BRAND_NAME } from '../../config';
 
   const count = document.querySelector<HTMLElement>('[data-kit-count]')!;
   const bar = document.querySelector<HTMLElement>('[data-kit-bar]')!;
+  const finished = document.querySelector<HTMLElement>('[data-kit-finished]')!;
   const render = () => {
     count.textContent = String(done.length);
     bar.style.width = `${(done.length / starterKitSteps.length) * 100}%`;
+    finished.hidden = done.length < starterKitSteps.length;
     for (const box of document.querySelectorAll<HTMLInputElement>('[data-kit-done]')) {
       const on = done.includes(box.dataset.kitDone!);
       box.checked = on;
@@ -145,7 +201,9 @@ import { BRAND_NAME } from '../../config';
       const link = (e.target as Element | null)?.closest?.<HTMLAnchorElement>('a[data-kit-resource]');
       if (!link) return;
       const id = link.dataset.kitResource!;
-      track('starter_kit_resource_open', { entry_source: source, resource_id: id, resource_path: new URL(link.href).pathname, step: String(starterKitSteps.findIndex((s) => s.id === id) + 1) });
+      const step = starterKitSteps.findIndex((s) => s.id === id);
+      const bonus = starterKitBonuses.some((b) => b.id === id);
+      track('starter_kit_resource_open', { entry_source: source, resource_id: id, resource_path: new URL(link.href).pathname, step: step >= 0 ? String(step + 1) : bonus ? 'bonus' : '' });
     },
     { capture: true },
   );

@@ -213,102 +213,97 @@ function depsFromEnv(get, fetchFn = fetch) {
 }
 
 // src/data/starter-kit.ts
-var STARTER_KIT_NAME = "Sanity Saver Starter Kit";
+var STARTER_KIT_OFFER = "30-Minute Weekly Starter Kit";
 var STARTER_KIT_KIT_PATH = "/starter-kit/kit";
+var KIT_MINUTES = 30;
 var starterKitSteps = [
   {
     id: "mental-load",
-    href: "/mental-load-worksheet",
-    tool: "Mental Load Worksheet",
-    title: "Get it out of your head",
-    why: "Write down everything you’re carrying, sort it, and pick one whole job to hand to someone else, start to finish.",
-    when: "Tonight, on your own",
-    action: "Open the worksheet",
-    preview: "mental-load-worksheet"
+    minutes: 5,
+    title: "Clear your head",
+    todo: [
+      "Set a 5-minute timer.",
+      "List everything you’re carrying: appointments, tasks, forms, worries. Messy is fine.",
+      "Don’t sort or solve anything yet."
+    ],
+    outcome: "Everything is out of your head and where you can see it.",
+    tool: { name: "Mental Load Worksheet", href: "/mental-load-worksheet", action: "Open the worksheet", preview: "mental-load-worksheet" }
   },
   {
     id: "weekly-planner",
-    href: "/planner",
-    tool: "Weekly Planner",
-    title: "Put this week on one page",
-    why: "The week’s plans, meals and to-dos in one place, so the plan lives on paper instead of in your memory.",
-    when: "Before the week starts",
-    action: "Plan your week",
-    preview: "planner"
-  },
-  {
-    id: "command-center",
-    href: "/command-center-setup",
-    tool: "Command Center Setup",
-    title: "Give the plan a home",
-    why: "One spot everyone passes: the calendar, a pen, two paper pockets, and a line for who does what.",
-    when: "This weekend",
-    action: "Open the setup sheet",
-    preview: "command-center-setup"
-  },
-  {
-    id: "routine-chart",
-    href: "/routine-chart",
-    tool: "Routine Chart",
-    title: "Let the chart say what’s next",
-    why: "Morning, after-school or bedtime steps your kids can follow on their own, so you’re not the one repeating them.",
-    when: "With your kids",
-    action: "Make a routine chart",
-    preview: "routine-chart"
+    minutes: 10,
+    title: "Plan your week",
+    todo: [
+      "Add the fixed things first: appointments, practices, pickups.",
+      "Jot down a few easy dinners.",
+      "Circle the 3 things that matter most. The rest can wait."
+    ],
+    outcome: "A realistic plan for the next seven days.",
+    tool: { name: "Weekly Planner", href: "/planner", action: "Open the planner", preview: "planner" }
   },
   {
     id: "chore-chart",
-    href: "/chore-chart",
-    tool: "Chore Chart",
-    title: "Share the jobs",
-    why: "Daily and weekly jobs matched to each child’s age, so helping becomes part of the week, not a favor you ask for.",
-    when: "At a family check-in",
-    action: "Make a chore chart",
-    preview: "chore-chart"
+    minutes: 10,
+    title: "Share the load",
+    todo: [
+      "Look at your list from step 1. Pick 2–3 jobs someone else could own.",
+      "Give each job to one person, start to finish. Not “help Mom”, but “your job”.",
+      "Pick your child’s age in the chore chart for ideas that fit."
+    ],
+    outcome: "You’re no longer the default person for everything.",
+    tool: { name: "Chore Chart", href: "/chore-chart", action: "Open the chore chart", preview: "chore-chart" }
+  },
+  {
+    id: "family-check-in",
+    minutes: 5,
+    title: "Get everyone on the same page",
+    todo: ["Gather everyone for 5 minutes: dinner, the car, or before bed.", "Ask these three questions and listen:"],
+    questions: ["What’s happening this week?", "Who’s responsible for what?", "Where do we need to help each other?"],
+    outcome: "Your family knows the plan and starts owning their part."
   }
 ];
 
 // supabase/functions/_shared/handlers/starter-kit.ts
 function starterKitEmail(siteUrl, supportEmail) {
   const link = `${siteUrl}${STARTER_KIT_KIT_PATH}?source=email`;
-  const subject = `Your ${STARTER_KIT_NAME} is here`;
+  const subject = `Your Free ${STARTER_KIT_OFFER} Is Here`;
   const steps = {
-    html: `<ol style="margin:0 0 18px;padding-left:22px">` + starterKitSteps.map((s) => `<li style="margin:0 0 8px"><strong>${esc(s.title)}</strong><br><span style="font-size:14px;color:${C.soft}">${esc(s.tool)} · ${esc(s.when)}</span></li>`).join("") + `</ol>`,
-    text: starterKitSteps.map((s, i) => `${i + 1}. ${s.title} (${s.tool}, ${s.when.toLowerCase()})`).join("\n")
+    html: `<ol style="margin:0 0 18px;padding-left:22px">` + starterKitSteps.map((s) => `<li style="margin:0 0 8px"><strong>${esc(s.title)}</strong> <span style="font-size:14px;color:${C.soft}">(${s.minutes} min)</span><br><span style="font-size:14px;color:${C.soft}">${esc(s.outcome)}</span></li>`).join("") + `</ol>`,
+    text: starterKitSteps.map((s, i) => `${i + 1}. ${s.title} (${s.minutes} min): ${s.outcome}`).join("\n")
   };
   const blocks = [
-    p("Here’s the link to your kit. Keep this email so you can come back to it anytime."),
-    button("Open your Starter Kit", link),
-    p("Five free printables, in order. Spread them across a week; each one hands a little more to the family.", "font-size:15px"),
+    p(`Take back control in ${KIT_MINUTES} minutes. Your free kit walks you through a quick weekly reset: get the coming week out of your head, make a simple plan, and start sharing the load with your family.`),
+    button(`Start your ${KIT_MINUTES}-minute reset`, link),
+    p("Four short steps:", "font-size:15px;margin-bottom:8px"),
     steps,
-    small("Each one fills in on your phone or computer and saves in that browser, then downloads to print. No account or password.")
+    small("Everything fills in on your phone. Nothing to print and no account needed. Keep this email to come back to your kit anytime.")
   ];
   const support = supportEmail ? `Questions? Reply to this email or write to <a href="mailto:${esc(supportEmail)}" style="color:${C.accent}">${esc(supportEmail)}</a>.` : "Questions? Reply to this email.";
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title></head>
 <body style="margin:0;padding:0;background:${C.page};-webkit-text-size-adjust:100%">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">Your five free printables, in order, plus the link to come back anytime.&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">Your 30-minute weekly reset, in four short steps.&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.page}" style="background:${C.page}"><tr><td align="center" style="padding:24px 12px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
 <tr><td align="center" style="padding:4px 0 20px"><a href="${esc(siteUrl)}"><img src="${esc(siteUrl)}/email/omc-badge-144.png" width="72" height="72" alt="Organized Mom Collective" style="display:block;width:72px;height:72px;border:0"></a></td></tr>
 <tr><td bgcolor="${C.card}" style="background:${C.card};border:1px solid ${C.rule};border-radius:10px;padding:32px 24px 16px;font-family:${SANS};font-size:16px;line-height:1.6;color:${C.ink}">
 <p style="${eyebrowStyle}">Your free kit</p>
-<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:700;color:${C.ink}">${esc(STARTER_KIT_NAME)}</h1>
+<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:700;color:${C.ink}">Your ${KIT_MINUTES}-Minute Weekly Starter Kit</h1>
 ${blocks.map((b) => b.html).join("\n")}
 </td></tr>
 <tr><td align="center" style="padding:24px 12px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">
-<p style="margin:0 0 10px">You’re getting this because you asked for the ${esc(STARTER_KIT_NAME)} at organizedmomcollective.com. This is a one-time delivery email.</p>
+<p style="margin:0 0 10px">You’re getting this because you asked for the free ${esc(STARTER_KIT_OFFER)} at organizedmomcollective.com. This is a one-time delivery email.</p>
 <p style="margin:0 0 10px">${support}</p>
 <p style="margin:0">Organized Mom Collective · <a href="${esc(siteUrl)}" style="color:${C.muted}">organizedmomcollective.com</a></p>
 </td></tr>
 </table></td></tr></table></body></html>`;
   const text = [
     "YOUR FREE KIT",
-    STARTER_KIT_NAME,
+    `Your ${KIT_MINUTES}-Minute Weekly Starter Kit`,
     "",
     ...blocks.map((b) => b.text),
     "",
-    `You’re getting this because you asked for the ${STARTER_KIT_NAME} at organizedmomcollective.com. This is a one-time delivery email.`,
+    `You’re getting this because you asked for the free ${STARTER_KIT_OFFER} at organizedmomcollective.com. This is a one-time delivery email.`,
     supportEmail ? `Questions? Reply to this email or write to ${supportEmail}.` : "Questions? Reply to this email.",
     `Organized Mom Collective · ${siteUrl}`
   ].join("\n");

@@ -1,6 +1,7 @@
 ---
 /**
- * /starter-kit — the free Sanity Saver Starter Kit. Printed business cards still carry the old
+ * /starter-kit — the free 30-Minute Weekly Starter Kit (Sanity Saver Starter Kit), as the printed
+ * business card promises: "Take back control in 30 minutes." Printed business cards still carry the old
  * members-site QR (members.organizedmomcollective.com/landing-starter-kit-free-qr/), which the owner
  * redirects here (with ?source=qr) in Cloudflare.
  *
@@ -14,13 +15,13 @@
  * Events: starter_kit_view, starter_kit_signup (src/lib/starter-kit.ts).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import { STARTER_KIT_KIT_PATH, STARTER_KIT_NAME, STARTER_KIT_PROMISE, starterKitSteps } from '../data/starter-kit';
+import { KIT_MINUTES, STARTER_KIT_KIT_PATH, STARTER_KIT_NAME, STARTER_KIT_OFFER, STARTER_KIT_PROMISE, starterKitSteps } from '../data/starter-kit';
 import { BRAND_NAME } from '../config';
 ---
 
 <PublicLayout
-  fullTitle={`${STARTER_KIT_NAME}: Free Family Organizing Kit · ${BRAND_NAME}`}
-  description="The free Sanity Saver Starter Kit: five printables, in order, to get the week out of your head and start sharing the jobs with your family."
+  fullTitle={`Free ${STARTER_KIT_OFFER} · ${BRAND_NAME}`}
+  description="Your free 30-Minute Weekly Starter Kit: in 30 minutes, get the coming week out of your head, make a simple plan, and start sharing the load with your family."
   indexable={false}
   chrome={false}
   width="full"
@@ -28,11 +29,12 @@ import { BRAND_NAME } from '../config';
   <section aria-labelledby="hero-h" class="public-panel public-intro">
     <div class="mx-auto max-w-xl px-5 pt-8 pb-10 sm:px-8 sm:pt-14 sm:pb-16">
       <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="48" height="48" class="size-12" /></a>
-      <p class="label mt-6 text-warm-soft">Free · {STARTER_KIT_NAME}</p>
-      <h1 id="hero-h" class="serif-hero mt-2 sm:text-[2.7rem]">{STARTER_KIT_PROMISE}</h1>
+      <p class="label mt-6 text-warm-soft">{STARTER_KIT_NAME}</p>
+      <h1 id="hero-h" class="serif-hero mt-2 sm:text-[2.7rem]">Your FREE <span class="whitespace-nowrap">30-Minute</span> Weekly Starter Kit</h1>
       <p class="lede mt-4 text-warm-ink">
-        Five free printables, in order. Get the week out of your head, give the plan a home, then hand routines and real jobs to the rest of the family.
+        Feeling like you’re always playing catch-up? In just {KIT_MINUTES} minutes, get the coming week out of your head, make a simple plan, and start sharing the load with your family.
       </p>
+      <p class="mt-3 font-serif text-[1.1rem] text-warm-ink italic">{STARTER_KIT_PROMISE}</p>
 
       <div class="kit-returning mt-6" data-kit-returning hidden>
         <a href={STARTER_KIT_KIT_PATH} class="btn-primary min-h-14 w-full">Open your Starter Kit</a>
@@ -50,29 +52,29 @@ import { BRAND_NAME } from '../config';
         <p class="kit-error mt-3" role="alert" data-kit-error></p>
         <button type="submit" class="btn-primary mt-5 min-h-14 w-full" data-kit-submit>Get the Free Kit</button>
         <p class="mt-3 text-[0.9rem] leading-relaxed text-warm-soft">
-          Free. No account or password. Your kit opens right here, and we email you the link so you can come back to it.
+          Free. No account, nothing to buy, nothing to print. Your kit opens right here, and we email you the link so you can come back to it.
         </p>
       </form>
     </div>
   </section>
 
   <section aria-labelledby="inside-h" class="mx-auto max-w-xl px-5 py-12 sm:px-8 sm:py-16">
-    <h2 id="inside-h" class="serif-title">What’s Inside</h2>
+    <h2 id="inside-h" class="serif-title">In {KIT_MINUTES} Minutes, You’ll Have</h2>
     <ol class="mt-6 space-y-5">
       {
         starterKitSteps.map((s, i) => (
           <li class="kit-step">
-            <img src={`/images/tools/previews/${s.preview}.webp`} alt="" width="900" height="720" loading="lazy" decoding="async" />
+            <span class="kit-min" aria-hidden="true">{s.minutes}<small>min</small></span>
             <div>
-              <p class="label text-warm-soft">Step {i + 1} · {s.tool}</p>
-              <h3 class="mt-1 font-serif text-[1.2rem] leading-snug text-warm-ink">{s.title}</h3>
+              <p class="label text-warm-soft">Step {i + 1} · {s.title}<span class="sr-only">, {s.minutes} minutes</span></p>
+              <p class="mt-1 font-serif text-[1.15rem] leading-snug text-warm-ink">{s.outcome}</p>
             </div>
           </li>
         ))
       }
     </ol>
     <p class="mt-10 border-t border-warm-rule pt-6 font-serif text-[1.15rem] leading-relaxed text-warm-ink italic">
-      Organized moms raise organized families. The kit isn’t about doing more yourself. It’s about getting the plan where everyone can see it and giving each person a part.
+      Organized moms raise organized families. This isn’t about doing more yourself. It’s about getting the plan where everyone can see it and giving each person a part.
     </p>
     <p class="mt-6"><a href="#hero-h" class="text-link text-warm-ink">Get the free kit</a></p>
   </section>
@@ -86,8 +88,9 @@ import { BRAND_NAME } from '../config';
   .kit-consent input { margin-top: 0.2rem; width: 1.15rem; height: 1.15rem; flex-shrink: 0; accent-color: #4a3f3e; }
   .kit-error { min-height: 0; font-size: 0.92rem; color: #96666b; }
   .kit-error:empty { display: none; }
-  .kit-step { display: grid; grid-template-columns: 5.5rem 1fr; gap: 1rem; align-items: center; }
-  .kit-step img { width: 5.5rem; height: 4.4rem; object-fit: contain; background: #f6f7f5; }
+  .kit-step { display: grid; grid-template-columns: 3.5rem 1fr; gap: 1rem; align-items: center; }
+  .kit-min { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; font-family: Georgia, serif; font-size: 1.35rem; line-height: 1; color: #3d3834; background: var(--public-sage, #e7ece5); }
+  .kit-min small { margin-top: 0.15rem; font-family: var(--font-sans); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; }
 </style>
 
 <script>

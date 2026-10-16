@@ -14,7 +14,7 @@
 import type { ShopDeps } from '../deps.ts';
 import { C, SANS, SERIF, button, esc, eyebrowStyle, p, small, type Block, type EmailMessage } from '../email.ts';
 import { clientIp, corsHeaders, json, readJson, type Handler } from '../http.ts';
-import { STARTER_KIT_KIT_PATH, STARTER_KIT_NAME, starterKitSteps } from '../../../../src/data/starter-kit.ts';
+import { KIT_MINUTES, STARTER_KIT_KIT_PATH, STARTER_KIT_OFFER, starterKitSteps } from '../../../../src/data/starter-kit.ts';
 
 interface SignupResult {
   status: 'ok' | 'invalid' | 'rate_limited';
@@ -23,20 +23,20 @@ interface SignupResult {
 
 export function starterKitEmail(siteUrl: string, supportEmail: string): EmailMessage {
   const link = `${siteUrl}${STARTER_KIT_KIT_PATH}?source=email`;
-  const subject = `Your ${STARTER_KIT_NAME} is here`;
+  const subject = `Your Free ${STARTER_KIT_OFFER} Is Here`;
   const steps: Block = {
     html:
       `<ol style="margin:0 0 18px;padding-left:22px">` +
-      starterKitSteps.map((s) => `<li style="margin:0 0 8px"><strong>${esc(s.title)}</strong><br><span style="font-size:14px;color:${C.soft}">${esc(s.tool)} · ${esc(s.when)}</span></li>`).join('') +
+      starterKitSteps.map((s) => `<li style="margin:0 0 8px"><strong>${esc(s.title)}</strong> <span style="font-size:14px;color:${C.soft}">(${s.minutes} min)</span><br><span style="font-size:14px;color:${C.soft}">${esc(s.outcome)}</span></li>`).join('') +
       `</ol>`,
-    text: starterKitSteps.map((s, i) => `${i + 1}. ${s.title} (${s.tool}, ${s.when.toLowerCase()})`).join('\n'),
+    text: starterKitSteps.map((s, i) => `${i + 1}. ${s.title} (${s.minutes} min): ${s.outcome}`).join('\n'),
   };
   const blocks: Block[] = [
-    p('Here’s the link to your kit. Keep this email so you can come back to it anytime.'),
-    button('Open your Starter Kit', link),
-    p('Five free printables, in order. Spread them across a week; each one hands a little more to the family.', 'font-size:15px'),
+    p(`Take back control in ${KIT_MINUTES} minutes. Your free kit walks you through a quick weekly reset: get the coming week out of your head, make a simple plan, and start sharing the load with your family.`),
+    button(`Start your ${KIT_MINUTES}-minute reset`, link),
+    p('Four short steps:', 'font-size:15px;margin-bottom:8px'),
     steps,
-    small('Each one fills in on your phone or computer and saves in that browser, then downloads to print. No account or password.'),
+    small('Everything fills in on your phone. Nothing to print and no account needed. Keep this email to come back to your kit anytime.'),
   ];
   const support = supportEmail
     ? `Questions? Reply to this email or write to <a href="mailto:${esc(supportEmail)}" style="color:${C.accent}">${esc(supportEmail)}</a>.`
@@ -44,28 +44,28 @@ export function starterKitEmail(siteUrl: string, supportEmail: string): EmailMes
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title></head>
 <body style="margin:0;padding:0;background:${C.page};-webkit-text-size-adjust:100%">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">Your five free printables, in order, plus the link to come back anytime.&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">Your 30-minute weekly reset, in four short steps.&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.page}" style="background:${C.page}"><tr><td align="center" style="padding:24px 12px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
 <tr><td align="center" style="padding:4px 0 20px"><a href="${esc(siteUrl)}"><img src="${esc(siteUrl)}/email/omc-badge-144.png" width="72" height="72" alt="Organized Mom Collective" style="display:block;width:72px;height:72px;border:0"></a></td></tr>
 <tr><td bgcolor="${C.card}" style="background:${C.card};border:1px solid ${C.rule};border-radius:10px;padding:32px 24px 16px;font-family:${SANS};font-size:16px;line-height:1.6;color:${C.ink}">
 <p style="${eyebrowStyle}">Your free kit</p>
-<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:700;color:${C.ink}">${esc(STARTER_KIT_NAME)}</h1>
+<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:700;color:${C.ink}">Your ${KIT_MINUTES}-Minute Weekly Starter Kit</h1>
 ${blocks.map((b) => b.html).join('\n')}
 </td></tr>
 <tr><td align="center" style="padding:24px 12px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">
-<p style="margin:0 0 10px">You’re getting this because you asked for the ${esc(STARTER_KIT_NAME)} at organizedmomcollective.com. This is a one-time delivery email.</p>
+<p style="margin:0 0 10px">You’re getting this because you asked for the free ${esc(STARTER_KIT_OFFER)} at organizedmomcollective.com. This is a one-time delivery email.</p>
 <p style="margin:0 0 10px">${support}</p>
 <p style="margin:0">Organized Mom Collective · <a href="${esc(siteUrl)}" style="color:${C.muted}">organizedmomcollective.com</a></p>
 </td></tr>
 </table></td></tr></table></body></html>`;
   const text = [
     'YOUR FREE KIT',
-    STARTER_KIT_NAME,
+    `Your ${KIT_MINUTES}-Minute Weekly Starter Kit`,
     '',
     ...blocks.map((b) => b.text),
     '',
-    `You’re getting this because you asked for the ${STARTER_KIT_NAME} at organizedmomcollective.com. This is a one-time delivery email.`,
+    `You’re getting this because you asked for the free ${STARTER_KIT_OFFER} at organizedmomcollective.com. This is a one-time delivery email.`,
     supportEmail ? `Questions? Reply to this email or write to ${supportEmail}.` : 'Questions? Reply to this email.',
     `Organized Mom Collective · ${siteUrl}`,
   ].join('\n');
