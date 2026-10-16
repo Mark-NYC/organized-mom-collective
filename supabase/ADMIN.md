@@ -21,7 +21,7 @@ One private command center at `/admin`: Overview (alerts + numbers), Pages & Fun
 
 ## Activate (in this order, so you're never locked out)
 
-1. **Merge to main** and wait for the Vercel deploy. `/admin`, `/admin/orders` and `/survey/admin` now use the new sign-in.
+1. **Merge the PR** (into the default branch) and wait for the Vercel deploy. `/admin`, `/admin/orders` and `/survey/admin` now use the new sign-in.
 2. **Add the authenticator:** open `/admin`, sign in with the shop admin account, scan the QR code with an authenticator app, type the code. (This works before the migrations; it only uses Supabase Auth.) Save the app's backup in your password manager.
 3. **Supabase → SQL Editor**, run each file once, in order (paste the whole file → Run):
    1. `supabase/migrations/20261020000000_admin_core.sql`: `admin_users` (copies the current shop admin in as owner), MFA rule, audit log. From now on every admin read needs the authenticator code.
@@ -42,7 +42,7 @@ If step 3 runs before step 2, sign in at `/admin` anyway: the sign-in adds the a
 
 ## Page inventory
 
-After every push to main, `.github/workflows/page-inventory.yml` builds the site, lists every page (including landing pages nothing links to), their tracked buttons, and checks external button links (Etsy etc.), then sends it to `site_pages_sync`.
+After every push to the default branch, `.github/workflows/page-inventory.yml` builds the site, lists every page (including landing pages nothing links to), their tracked buttons, and checks external button links (Etsy etc.), then sends it to `site_pages_sync`.
 
 1. `/admin/settings` → Page inventory → **Create token**. Copy it (shown once).
 2. GitHub → repository → Settings → Secrets and variables → Actions:

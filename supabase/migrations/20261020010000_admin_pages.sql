@@ -1,6 +1,6 @@
 -- /admin → Pages & Funnels: the page inventory. Requires 20261020000000_admin_core.sql.
 --
--- After every push to main, the GitHub Action .github/workflows/page-inventory.yml builds the site,
+-- After every push to the default branch, the GitHub Action .github/workflows/page-inventory.yml builds the site,
 -- lists every page (scripts/page-inventory.mjs) and sends it here with site_pages_sync. It
 -- authenticates with PAGE_INVENTORY_TOKEN, a random secret created in /admin → Settings; only its
 -- SHA-256 hash is stored. The token can write the inventory and nothing else.

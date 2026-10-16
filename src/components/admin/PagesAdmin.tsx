@@ -43,7 +43,7 @@ function Pages({ session, signOut, databaseReady }: AdminContext) {
   if (run === null) {
     return (
       <p className="mt-8 text-[1.0625rem]">
-        No inventory yet. It arrives from the GitHub Action after the next push to main, once its token is set up (Settings → Page inventory; steps in supabase/ADMIN.md).
+        No inventory yet. It arrives from the GitHub Action after the next push to the default branch, once its token is set up (Settings → Page inventory; steps in supabase/ADMIN.md).
       </p>
     );
   }

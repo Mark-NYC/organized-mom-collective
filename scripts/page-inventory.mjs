@@ -6,7 +6,7 @@
  *   node scripts/page-inventory.mjs --check-links --sync   # and sends it to Supabase (CI only)
  *
  * --sync needs SUPABASE_URL, SUPABASE_ANON_KEY and PAGE_INVENTORY_TOKEN (created in /admin → Settings).
- * The GitHub Action .github/workflows/page-inventory.yml runs it after every push to main.
+ * The GitHub Action .github/workflows/page-inventory.yml runs it after every push to the default branch.
  * Logic: scripts/lib/page-inventory.mjs. Setup: supabase/ADMIN.md.
  */
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';

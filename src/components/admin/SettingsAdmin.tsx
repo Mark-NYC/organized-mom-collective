@@ -122,7 +122,7 @@ function Settings({ session, role, signOut, databaseReady }: AdminContext) {
           Page inventory
         </h2>
         <p className="mt-2 text-[0.9rem] text-soft">
-          After every push to main, a GitHub Action builds the site and sends the page list here (Pages & Funnels, broken-button alerts). It signs in with a token that can
+          After every push to the default branch, a GitHub Action builds the site and sends the page list here (Pages & Funnels, broken-button alerts). It signs in with a token that can
           only write the page list.
         </p>
         {!databaseReady ? (
@@ -149,7 +149,7 @@ function Settings({ session, role, signOut, databaseReady }: AdminContext) {
                 <code className="mt-2 block break-all select-all">{newToken}</code>
                 <p className="mt-2">
                   GitHub → the repository → Settings → Secrets and variables → Actions → New repository secret, name <code>PAGE_INVENTORY_TOKEN</code>. Then run the
-                  “Page inventory” workflow (Actions tab) or push to main.
+                  “Page inventory” workflow (Actions tab) or push to the default branch.
                 </p>
               </div>
             )}

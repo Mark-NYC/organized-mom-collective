@@ -166,7 +166,7 @@ language sql stable security definer set search_path = '' as $$
   union all
   select 'website.inventory_stale', 'info', 'website',
          case when max(r.at) is null then 'Page inventory not connected yet' else 'Page inventory not updated in ' || (now()::date - max(r.at)::date) || ' days' end,
-         'The GitHub Action updates it after every push to main. Setup: supabase/ADMIN.md.', '/admin/settings'
+         'The GitHub Action updates it after every push to the default branch. Setup: supabase/ADMIN.md.', '/admin/settings'
     from public.site_inventory_runs r
   having max(r.at) is null or max(r.at) < now() - interval '8 days';
 $$;
