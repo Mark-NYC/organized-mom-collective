@@ -47,8 +47,10 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
   let download: (req: Request) => Promise<Response>;
   let storage: FakeStorage;
   const users = new Map<string, { id: string; email: string }>();
-  const adminToken = 'admin-access-token';
-  const userToken = 'regular-user-token';
+  // Access tokens as Supabase issues them; the admin's is MFA-verified (aal2).
+  const adminToken = jwt({ role: 'authenticated', sub: ADMIN_ID, aal: 'aal2' }, SECRET || 'x');
+  const adminAal1Token = jwt({ role: 'authenticated', sub: ADMIN_ID, aal: 'aal1' }, SECRET || 'x');
+  const userToken = jwt({ role: 'authenticated', sub: USER_ID, aal: 'aal2' }, SECRET || 'x');
   let ip = 0;
   let clock: number | null = null;
 
@@ -121,13 +123,15 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
   const rest = (path: string, role: 'anon' | 'authenticated', sub?: string, init: RequestInit = {}) =>
     fetch(`${REST}${path}`, {
       ...init,
-      headers: { 'content-type': 'application/json', Authorization: `Bearer ${jwt({ role, ...(sub ? { sub } : {}) }, SECRET)}`, ...(init.headers ?? {}) },
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${jwt({ role, ...(sub ? { sub, aal: 'aal2' } : {}) }, SECRET)}`, ...(init.headers ?? {}) },
     });
 
   beforeAll(() => {
     run(`insert into auth.users (id, email) values ('${ADMIN_ID}', 'owner@example.com'), ('${USER_ID}', 'someone@example.com') on conflict do nothing;
-         insert into shop_admins (user_id) values ('${ADMIN_ID}') on conflict do nothing;`);
+         insert into shop_admins (user_id) values ('${ADMIN_ID}') on conflict do nothing;
+         insert into admin_users (user_id, role) values ('${ADMIN_ID}', 'owner') on conflict do nothing;`);
     users.set(adminToken, { id: ADMIN_ID, email: 'owner@example.com' });
+    users.set(adminAal1Token, { id: ADMIN_ID, email: 'owner@example.com' });
     users.set(userToken, { id: USER_ID, email: 'someone@example.com' });
   });
 
@@ -278,6 +282,10 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       });
       expect(JSON.stringify(r.body)).not.toMatch(/sk_|whsec|re_test|preview-token/);
       expect((await adminCall({ action: 'status' }, userToken)).status).toBe(403);
+      // The admin's own password-only session (no authenticator code yet) is refused too.
+      const aal1 = await adminCall({ action: 'status' }, adminAal1Token);
+      expect(aal1.status).toBe(403);
+      expect(aal1.body).toEqual({ error: 'mfa_required' });
     });
 
     it('returns 503 when Stripe is not configured', async () => {
@@ -922,15 +930,20 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
 
     it('the database grants the browser roles nothing beyond the intended entry points', () => {
       // Every public function anon can execute: the intended ones, nothing else. tool_email_signup is the
-      // chore chart download form's write-only signup (20261013010000_tool_email_signup.sql).
+      // chore chart download form's write-only signup (20261013010000_tool_email_signup.sql); site_pages_sync
+      // is the page inventory's write-only sync, refused without the inventory token (20261020010000_admin_pages.sql).
       expect(
         all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
               where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
-      ).toEqual(['shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track', 'tool_email_signup']);
+      ).toEqual(['shop_catalog', 'shop_order_status', 'site_pages_sync', 'survey_submit', 'survey_track', 'tool_email_signup']);
       expect(
         all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
               where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
-      ).toEqual(['is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'survey_submit', 'survey_track', 'tool_email_signup']);
+      ).toEqual([
+        'admin_alert_ack', 'admin_alerts_refresh', 'admin_inventory_token_set_at', 'admin_log', 'admin_overview', 'admin_rotate_inventory_token',
+        'admin_whoami', 'is_admin', 'is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'site_pages_sync', 'survey_submit',
+        'survey_track', 'tool_email_signup',
+      ]);
       // The signup's contacts stay out of the browser: anon gets nothing, authenticated reads only
       // (row-level security limits it to survey admins), and the function runs with an empty search_path.
       expect(all(`select has_table_privilege('anon', 'public.tool_email_contacts', 'select,insert,update,delete,truncate,references,trigger') ok`)[0].ok).toBe(false);

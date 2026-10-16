@@ -25,6 +25,11 @@ create function auth.uid() returns uuid language sql stable as $$
   )::uuid;
 $$;
 
+-- The verified token's claims (Supabase's auth.jwt()); tests set request.jwt.claims.
+create function auth.jwt() returns jsonb language sql stable as $$
+  select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb);
+$$;
+
 -- Supabase's default privileges: new tables and functions are open to the API roles
 -- unless a migration revokes them (ours do).
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;

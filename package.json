@@ -14,7 +14,9 @@
     "check:feed": "node scripts/check-pinterest-feed.mjs",
     "verify": "npm run build && npm run check:site && npm test",
     "test:shop": "bash scripts/test-shop.sh",
-    "build:functions": "node scripts/build-dashboard-functions.mjs"
+    "build:functions": "node scripts/build-dashboard-functions.mjs",
+    "test:admin-sql": "bash scripts/test-admin-sql.sh",
+    "inventory": "node scripts/page-inventory.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.3",

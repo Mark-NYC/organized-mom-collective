@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import ConfirmationDialog from '../ConfirmationDialog';
-import { adminSignIn, type AdminSession } from '../../lib/survey';
+import AdminGate from '../admin/AdminGate';
+import type { AdminSession } from '../../lib/admin/session';
 import {
   EMAIL_STATUS_LABELS,
   FLAG_LABELS,
@@ -24,7 +25,6 @@ import {
   salesTotals,
   soldUnits,
   stripeTestMode,
-  supabaseConfigured,
   type EmailLogRow,
   type EmailOutcome,
   type InventoryLogRow,
@@ -37,98 +37,18 @@ import {
   type ShopStatus,
 } from '../../lib/shop';
 
-const TOKEN_KEY = 'omc:v1:shop-admin';
 const inputClass = 'mt-1.5 block min-h-11 w-full rounded-[3px] border border-rule-strong bg-paper px-3 text-[1rem] focus:border-ink';
 const CARRIERS = ['USPS', 'UPS', 'FedEx', 'DHL', 'Other'];
 
 type Data = Awaited<ReturnType<typeof loadShopData>>;
 
 /**
- * /admin/orders: website orders, inventory and checkout settings, for Supabase Auth users
- * listed in shop_admins. Reads go through row-level security; writes through the
- * shop-admin Edge Function. Without an admin token the database returns nothing.
+ * /admin/orders: website orders, inventory and checkout settings, for MFA-verified admins (AdminGate).
+ * Reads go through row-level security; writes through the shop-admin Edge Function. Without an
+ * admin token the database returns nothing.
  */
 export default function OrdersAdmin() {
-  const [auth, setAuth] = useState<AdminSession | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(TOKEN_KEY) ?? 'null') as AdminSession | null;
-      if (saved && saved.expires_at > Date.now() + 60_000) setAuth(saved);
-    } catch {
-      /* sign in again */
-    }
-    setReady(true);
-  }, []);
-
-  const signOut = () => {
-    try {
-      sessionStorage.removeItem(TOKEN_KEY);
-    } catch {
-      /* nothing saved */
-    }
-    setAuth(null);
-  };
-
-  if (!ready) return null;
-  if (!supabaseConfigured()) {
-    return <p className="mt-8 text-[1.0625rem]">Supabase isn’t configured for this build. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY (see .env.example).</p>;
-  }
-  if (!auth) {
-    return (
-      <SignIn
-        onSignedIn={(s) => {
-          try {
-            sessionStorage.setItem(TOKEN_KEY, JSON.stringify(s));
-          } catch {
-            /* this tab only */
-          }
-          setAuth(s);
-        }}
-      />
-    );
-  }
-  return <Dashboard auth={auth} onSignOut={signOut} />;
-}
-
-function SignIn({ onSignedIn }: { onSignedIn: (s: AdminSession) => void }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-
-  const submit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setBusy(true);
-    setError('');
-    try {
-      onSignedIn(await adminSignIn(email.trim(), password));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <form onSubmit={submit} className="mt-8 max-w-sm space-y-4">
-      <Field label="Email">
-        <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-      </Field>
-      <Field label="Password">
-        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
-      </Field>
-      {error && (
-        <p role="alert" className="text-[0.95rem] font-semibold">
-          {error}
-        </p>
-      )}
-      <button type="submit" disabled={busy} className="btn-primary w-full">
-        {busy ? 'Signing in…' : 'Sign in'}
-      </button>
-    </form>
-  );
+  return <AdminGate>{({ session, signOut }) => <Dashboard auth={session} onSignOut={signOut} />}</AdminGate>;
 }
 
 function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
@@ -144,7 +64,11 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'orders' | 'inventory' | 'settings'>('orders');
+  // ?tab=inventory|settings opens that tab (the admin nav links Products & Inventory here).
+  const [tab, setTab] = useState<'orders' | 'inventory' | 'settings'>(() => {
+    const t = new URLSearchParams(location.search).get('tab');
+    return t === 'inventory' || t === 'settings' ? t : 'orders';
+  });
   const [openId, setOpenId] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
 
@@ -186,15 +110,11 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
     <div className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3 text-[0.9rem] text-soft">
         <span>
-          Signed in as {auth.email}
-          {stripeTestMode() && <span className="ml-3 rounded-full border border-dashed border-rule-strong px-2 py-0.5 text-[0.75rem] whitespace-nowrap">Stripe test mode</span>}
+          {stripeTestMode() && <span className="rounded-full border border-dashed border-rule-strong px-2 py-0.5 text-[0.75rem] whitespace-nowrap">Stripe test mode</span>}
         </span>
         <span className="flex gap-5">
           <button type="button" onClick={reload} className="text-link">
             Refresh
-          </button>
-          <button type="button" onClick={onSignOut} className="text-link">
-            Sign out
           </button>
         </span>
       </div>

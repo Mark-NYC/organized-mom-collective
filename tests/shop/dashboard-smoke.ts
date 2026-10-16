@@ -37,7 +37,8 @@ for (const [k, v] of Object.entries(env)) Deno.env.set(k, v);
 
 const stripe = new FakeStripe();
 const inbox = new FakeInbox();
-const token = 'dashboard-admin-token';
+// An MFA-verified (aal2) admin session; shop-admin refuses anything less.
+const token = jwt({ role: 'authenticated', sub: ADMIN.id, aal: 'aal2' }, 'dashboard-smoke-secret');
 const storage = new FakeStorage();
 const fakeFetch = routerFetch({ supabaseUrl: SUPABASE_URL, restUrl: REST, stripe, inbox, storage, users: new Map([[token, ADMIN]]) });
 globalThis.fetch = fakeFetch;
@@ -61,6 +62,7 @@ const post = (fn: string, body: unknown, headers: Record<string, string> = {}) =
 
 await sql(`insert into auth.users values ('${ADMIN.id}', '${ADMIN.email}') on conflict do nothing;
            insert into shop_admins values ('${ADMIN.id}') on conflict do nothing;
+           insert into admin_users (user_id, role) values ('${ADMIN.id}', 'owner') on conflict do nothing;
            update shop_products set stock = 25, active = true, max_per_order = 5 where slug = 'calendar-26-week';
            update shop_settings set checkout_mode = 'preview', max_checkouts_per_hour = 1000;
            delete from shop_throttle;`);

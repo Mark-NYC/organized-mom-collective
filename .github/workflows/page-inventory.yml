@@ -1,0 +1,45 @@
+name: Page inventory
+# Builds the site after every push to the default branch and sends the list of pages, their buttons and any broken
+# links to /admin → Pages & Funnels (scripts/page-inventory.mjs → site_pages_sync). The token can only
+# write the page list. Setup: supabase/ADMIN.md → Page inventory.
+#
+# Repository secret:    PAGE_INVENTORY_TOKEN  (created in /admin → Settings → Page inventory)
+# Repository variables: PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY (public values, same as Vercel),
+#                       plus any PUBLIC_* build flags set on Vercel production, so the build matches the live site.
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: page-inventory-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  inventory:
+    # Only the default branch (the one PRs merge into), whatever it's called.
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    env:
+      PAGE_INVENTORY_TOKEN: ${{ secrets.PAGE_INVENTORY_TOKEN }}
+      SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
+      PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+      PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
+      PUBLIC_SHOP_ENABLED: ${{ vars.PUBLIC_SHOP_ENABLED }}
+      PUBLIC_TOOL_EMAIL_GATE_ENABLED: ${{ vars.PUBLIC_TOOL_EMAIL_GATE_ENABLED }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx astro build
+      - name: Inventory and sync
+        run: |
+          if [ -z "$PAGE_INVENTORY_TOKEN" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            node scripts/page-inventory.mjs --check-links
+            echo "::warning::Not synced: set the PAGE_INVENTORY_TOKEN secret and the PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY variables (supabase/ADMIN.md)."
+            exit 0
+          fi
+          node scripts/page-inventory.mjs --check-links --sync

@@ -45,12 +45,15 @@
  *           /support           Help & Support: topics, FAQs, contact form (src/data/support.ts)
  *           /returns           Returns & Refunds policy (/refunds redirects here)
  *           /survey            customer discovery survey (noindex, shared by link)
- *           /survey/admin      survey results, admins only (noindex)
+ *           /survey/admin      survey results, admins only (noindex; AdminLayout)
  *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked from the offer pages, the calendar
  *                               options (src/lib/reorder.ts) and the mug page once on sale (?product=<slug>), only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
- *           /admin/orders       order, inventory and shipping dashboard, shop admins only (noindex)
+ *   ADMIN   /admin              Overview: alerts + business numbers (password + authenticator code; noindex; supabase/ADMIN.md)
+ *           /admin/pages        Pages & Funnels (page inventory)
+ *           /admin/orders       order, inventory and shipping dashboard
+ *           /admin/settings     admin access, integrations, page inventory token, audit log
  *   QR      /start             permanent entry point printed on calendars → APP
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
  *           /app/tidy → /app/week (old name, kept so earlier links still work)

@@ -456,6 +456,7 @@ export async function adminAction<T = Record<string, unknown>>(token: string, bo
 
 const ADMIN_ERRORS: Record<string, string> = {
   forbidden: 'This account isn’t a shop admin.',
+  mfa_required: 'Sign in again with your authenticator code.',
   carrier_required: 'Add the carrier before marking it shipped.',
   not_payable_state: 'Only paid orders can be packed or shipped.',
   invalid_tracking_url: 'The tracking link must start with https://.',

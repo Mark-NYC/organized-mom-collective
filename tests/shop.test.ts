@@ -596,9 +596,12 @@ describe('launch guards', () => {
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {
-    for (const page of ['src/pages/checkout/index.astro', 'src/pages/checkout/complete.astro', 'src/pages/admin/orders.astro', 'src/pages/download.astro']) {
+    for (const page of ['src/pages/checkout/index.astro', 'src/pages/checkout/complete.astro', 'src/pages/download.astro']) {
       expect(read(page), page).toContain('indexable={false}');
     }
+    // Admin pages use AdminLayout: always noindex, no tracking scripts (check-site enforces it on the build too).
+    expect(read('src/pages/admin/orders.astro')).toContain('<AdminLayout');
+    expect(read('src/layouts/AdminLayout.astro')).toMatch(/robots="noindex" tracking=\{false\}/);
     expect(read('src/pages/sitemap.xml.ts')).not.toMatch(/checkout|admin|download/);
     // The download page never leaks its token to other sites.
     expect(read('src/pages/download.astro')).toContain('name="referrer" content="no-referrer"');

@@ -1,7 +1,7 @@
 /**
  * POST /functions/v1/shop-admin — every dashboard write. Requires a Supabase Auth access
- * token (Authorization: Bearer …) for a user listed in shop_admins; anything else gets 401/403
- * before any data is touched. Reads happen in the browser through row-level security.
+ * token (Authorization: Bearer …) from an MFA-verified (aal2) session of an owner in admin_users;
+ * anything else gets 401/403 before any data is touched. Every write is recorded in admin_audit_log. Reads happen in the browser through row-level security.
  *
  * Actions (body.action):
  *   fulfillment   { order_id, status, carrier?, tracking_number?, tracking_url?, notify? }
@@ -44,7 +44,21 @@ const uuid = (v: unknown) => {
 };
 const str = (v: unknown, max = 500) => (typeof v === 'string' ? v.slice(0, max) : null);
 
-/** Verifies the access token with Supabase Auth, then checks shop_admins. */
+/**
+ * The token's `aal` claim. Read only after Supabase Auth accepted the same token (authenticate),
+ * so the payload is the verified one.
+ */
+export function tokenAal(token: string): string | null {
+  try {
+    const part = token.split('.')[1] ?? '';
+    const payload = JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(part.length / 4) * 4, '='))) as { aal?: unknown };
+    return typeof payload.aal === 'string' ? payload.aal : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Verifies the access token with Supabase Auth, requires MFA (aal2), then checks admin_users. */
 async function authenticate(deps: ShopDeps, req: Request): Promise<Admin> {
   const token = req.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) throw new HttpError(401, 'unauthorized');
@@ -54,9 +68,24 @@ async function authenticate(deps: ShopDeps, req: Request): Promise<Admin> {
   if (!res.ok) throw new HttpError(401, 'unauthorized');
   const user = (await res.json()) as { id?: string; email?: string };
   if (!user.id || !UUID.test(user.id)) throw new HttpError(401, 'unauthorized');
+  if (tokenAal(token) !== 'aal2') throw new HttpError(403, 'mfa_required');
   const ok = await deps.db.rpc<boolean>('shop_is_admin_user', { p_user: user.id });
   if (!ok) throw new HttpError(403, 'forbidden');
   return { id: user.id, email: user.email ?? user.id };
+}
+
+/** Read-only actions; everything else is a change and goes in the audit log. */
+const READ_ONLY = new Set(['whoami', 'status']);
+
+/** What the audit log keeps about an action: ids and small values only, never addresses or notes. */
+export function auditDetail(b: Record<string, unknown>): { target: string | null; detail: Record<string, unknown> } {
+  const target = typeof b.order_id === 'string' ? `order:${b.order_id}` : typeof b.product_id === 'string' ? `product:${b.product_id}` : null;
+  const keep = ['status', 'carrier', 'amount_cents', 'restock', 'units', 'kind', 'delta', 'set', 'notify'];
+  const detail: Record<string, unknown> = Object.fromEntries(
+    keep.filter((k) => k in b && ['string', 'number', 'boolean'].includes(typeof b[k])).map((k) => [k, typeof b[k] === 'string' ? (b[k] as string).slice(0, 60) : b[k]]),
+  );
+  if (b.fields && typeof b.fields === 'object') detail.fields = Object.keys(b.fields as object).slice(0, 20);
+  return { target, detail };
 }
 
 /**
@@ -89,7 +118,15 @@ export function createAdminHandler(deps: ShopDeps): Handler {
       const admin = await authenticate(deps, req);
       const body = await readJson(req);
       if (!body) throw new HttpError(400, 'invalid_request');
-      return json(await run(deps, admin, body), 200, cors);
+      const result = await run(deps, admin, body);
+      if (!READ_ONLY.has(String(body.action))) {
+        const { target, detail } = auditDetail(body);
+        // The change already happened: a logging failure is reported, never turned into an error.
+        await deps.db
+          .rpc('admin_log_service', { p_actor: admin.id, p_action: `shop.${String(body.action).replace(/[^a-z_]/g, '').slice(0, 40) || 'unknown'}`, p_target: target, p_detail: detail })
+          .catch((err) => console.error('shop-admin audit log', err));
+      }
+      return json(result, 200, cors);
     } catch (err) {
       if (err instanceof HttpError) return json({ error: err.message }, err.status, cors);
       if (err instanceof DbError && err.status < 500) return json({ error: err.message }, 400, cors);

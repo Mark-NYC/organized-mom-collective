@@ -1,0 +1,9 @@
+---
+/** /admin/pages: every built page, from the page inventory (scripts/page-inventory.mjs). Admins only, noindex. */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PagesAdmin from '../../components/admin/PagesAdmin';
+---
+
+<AdminLayout title="Pages & Funnels" section="pages">
+  <PagesAdmin client:only="react" />
+</AdminLayout>

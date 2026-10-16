@@ -9,6 +9,8 @@
  *   - images without an alt attribute
  *   - article pages with missing or invalid JSON-LD, or fewer than two contextual links to other articles
  *   - sitemap URLs that weren't built
+ *   - admin pages (/admin/…, /survey/admin) that load GA4, the Pinterest tag, the manifest or the
+ *     service worker, aren't noindex, or are in the sitemap (AdminLayout; no third-party script near customer data)
  *   - articles that don't match their row in docs/editorial/CONTENT_TRACKER.md (id, slug, status, date)
  *   - published articles without a complete Pinterest plan (docs/editorial/pinterest/{ID}.md: three
  *     pins, valid statuses and filenames, no leftover placeholders), or a tracker row whose Pinterest
@@ -106,6 +108,20 @@ for (const file of htmlFiles) {
     const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
     const expected = SITE + (path === '/' ? '/' : path.replace(/\.html$/, ''));
     if (path !== '/404.html' && canonical !== expected) fail(rel, `canonical is ${canonical ?? 'missing'}, expected ${expected}`);
+  }
+
+  // 3b. Admin pages: no third-party script, no manifest or service worker, never indexed.
+  if (path === '/admin' || path.startsWith('/admin/') || path === '/survey/admin') {
+    for (const [needle, what] of [
+      ['googletagmanager.com', 'GA4'],
+      ['pinimg.com', 'the Pinterest tag'],
+      ['ct.pinterest.com', 'the Pinterest pixel'],
+      ['manifest.webmanifest', 'the app manifest'],
+      ['serviceWorker', 'the service worker'],
+    ]) {
+      if (html.includes(needle)) fail(rel, `admin page loads ${what}`);
+    }
+    if (indexable) fail(rel, 'admin page must be noindex');
   }
 
   // 4. Structured data must parse
@@ -268,6 +284,7 @@ else {
   for (const m of readFileSync(sitemap, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)) {
     const path = m[1].replace(SITE, '') || '/';
     if (!resolve(path)) fail('dist/sitemap.xml', `lists ${m[1]}, which wasn't built`);
+    if (path.startsWith('/admin') || path === '/survey/admin') fail('dist/sitemap.xml', `lists the admin page ${m[1]}`);
   }
 }
 
