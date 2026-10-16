@@ -6,10 +6,11 @@ import { matchResponsibility, responsibilities, responsibilityCategories, respon
 import { responsibilityCards } from '../src/data/responsibility-cards';
 
 describe('responsibility library', () => {
-  it('has the 17 jobs, unique ids, in the three categories with their colors', () => {
-    expect(responsibilities).toHaveLength(17);
-    expect(new Set(responsibilities.map((r) => r.id)).size).toBe(17);
-    expect(responsibilities.filter((r) => r.category === 'myself')).toHaveLength(7);
+  it('has the 16 jobs, unique ids, in the three categories with their colors', () => {
+    expect(responsibilities).toHaveLength(16);
+    expect(new Set(responsibilities.map((r) => r.id)).size).toBe(16);
+    expect(responsibilities.filter((r) => r.category === 'myself')).toHaveLength(6);
+    expect(responsibilities.every((r) => r.image)).toBe(true);
     expect(responsibilities.filter((r) => r.category === 'room')).toHaveLength(5);
     expect(responsibilities.filter((r) => r.category === 'home')).toHaveLength(5);
     expect(Object.fromEntries(Object.entries(responsibilityCategories).map(([id, c]) => [id, c.color]))).toEqual({

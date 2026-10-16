@@ -4,7 +4,7 @@ Originals of the custom Kids' Responsibility Cards illustrations (square, transp
 
 The website only uses the illustration and title. The cards' three how-to steps and card layouts stay off the website.
 
-The five files here were provided as 1254 × 1254 transparent WebP (the chat upload's conversion of the PNGs). Replace them with the full-resolution PNGs when available and rerun the script.
+All files here are 1254 × 1254 transparent WebP as provided, renamed to their ids. If higher-resolution PNG originals exist, replace them and rerun the script.
 
 | Id | Title | Artwork | Status |
 | --- | --- | --- | --- |
@@ -13,17 +13,16 @@ The five files here were provided as 1254 × 1254 transparent WebP (the chat upl
 | wash-my-hands | Wash My Hands | Soapy hands, water drops, sage pump bottle | In |
 | pack-my-backpack | Pack My Backpack | Sage backpack with a heart and a water bottle | In |
 | get-ready-for-bed | Get Ready for Bed | Blue moon pajamas and a moon pillow | In |
-| put-my-things-away | Put My Things Away | Sage bin with teddy bear, striped ball, books and a block (the bin with books) | Waiting for file |
-| comb-my-hair | Comb My Hair | Not received | Waiting for artwork |
-| make-my-bed | Make My Bed | Wooden bed, sage flower blanket, pink heart pillow | Waiting for file |
-| put-toys-away | Put Toys Away | Sage bin with teddy bear, ball and blocks (no books) | Waiting for file |
-| put-clothes-away | Put Clothes Away | Woven basket with folded green shirt, jeans and socks | Waiting for file |
-| tidy-my-desk | Tidy My Desk | Wooden desk with pencil cup and stacked books | Waiting for file |
-| clean-my-floor | Clean My Floor | Broom and sage dustpan | Waiting for file |
-| set-the-table | Set the Table | Plate with a blue rim, fork and knife | Waiting for file |
-| clear-the-table | Clear the Table | Hands carrying stacked plates, cup and forks | Waiting for file |
-| help-with-laundry | Help With Laundry | Laundry basket of blue, green and cream clothes | Waiting for file |
-| wipe-the-counters | Wipe the Counters | Hand wiping a counter with a blue cloth, sparkles | Waiting for file |
-| take-out-the-trash | Take Out the Trash | Gray can with lid and a tied black bag | Waiting for file |
+| comb-my-hair | Comb My Hair | Mint hairbrush and a tan comb | In |
+| make-my-bed | Make My Bed | Wooden bed, sage flower blanket, pink heart pillow | In |
+| put-toys-away | Put Toys Away | Sage bin with teddy bear, ball and blocks (no books) | In |
+| put-clothes-away | Put Clothes Away | Woven basket with folded green shirt, jeans and socks | In |
+| tidy-my-desk | Tidy My Desk | Wooden desk with pencil cup and stacked books | In |
+| clean-my-floor | Clean My Floor | Broom and sage dustpan | In |
+| set-the-table | Set the Table | Plate with a blue rim, fork and knife | In |
+| clear-the-table | Clear the Table | Hands carrying stacked plates, cup and forks | In |
+| help-with-laundry | Help With Laundry | Laundry basket of blue, green and cream clothes | In |
+| wipe-the-counters | Wipe the Counters | Hand wiping a counter with a blue cloth, sparkles | In |
+| take-out-the-trash | Take Out the Trash | Gray can with lid and a tied black bag | In |
 
-The two toy-bin illustrations are matched by content: the one with books is "Put My Things Away", the toys-only one is "Put Toys Away". Confirm or swap.
+The toys-only bin (uploaded as pick-up-toys) is "Put Toys Away". "Put My Things Away" was dropped from the library (owner decision, 2026-10-16) as redundant with Put Toys Away.

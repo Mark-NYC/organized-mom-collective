@@ -1,5 +1,5 @@
 /**
- * The shared responsibility library: the 17 illustrated jobs from the physical Kids' Responsibility Cards,
+ * The shared responsibility library: the 16 illustrated jobs from the physical Kids' Responsibility Cards,
  * used by the free routine chart (/routine-chart) and chore chart (/chore-chart) as an illustration plus a title.
  *
  * Only the title and the illustration live here, on purpose. The cards' three how-to steps are the physical
@@ -39,18 +39,17 @@ export const responsibilities: Responsibility[] = [
   { id: 'wash-my-hands', title: 'Wash My Hands', category: 'myself', image: true, routines: ['afterschool'], minAge: 2 },
   { id: 'pack-my-backpack', title: 'Pack My Backpack', category: 'myself', image: true, routines: ['bedtime', 'morning'], minAge: 4, aliases: ['grab backpack & shoes', 'pack backpack & lunch'] },
   { id: 'get-ready-for-bed', title: 'Get Ready for Bed', category: 'myself', image: true, routines: ['bedtime'], minAge: 3, aliases: ['pajamas on'] },
-  { id: 'put-my-things-away', title: 'Put My Things Away', category: 'myself', image: false, routines: ['afterschool'], minAge: 3, aliases: ['shoes & coat away'] },
-  { id: 'comb-my-hair', title: 'Comb My Hair', category: 'myself', image: false, routines: ['morning'], minAge: 4, aliases: ['brush hair'] },
-  { id: 'make-my-bed', title: 'Make My Bed', category: 'room', image: false, routines: ['morning'], minAge: 4, aliases: ['make bed (with help)'] },
-  { id: 'put-toys-away', title: 'Put Toys Away', category: 'room', image: false, routines: ['bedtime', 'afterschool'], minAge: 2, aliases: ['put away toys', 'pick up toys'] },
-  { id: 'put-clothes-away', title: 'Put Clothes Away', category: 'room', image: false, routines: ['bedtime', 'weekend'], minAge: 4 },
-  { id: 'tidy-my-desk', title: 'Tidy My Desk', category: 'room', image: false, routines: ['afterschool'], minAge: 5, aliases: ['put away school supplies'] },
-  { id: 'clean-my-floor', title: 'Clean My Floor', category: 'room', image: false, routines: ['weekend'], minAge: 5 },
-  { id: 'set-the-table', title: 'Set the Table', category: 'home', image: false, routines: ['afterschool'], minAge: 4 },
-  { id: 'clear-the-table', title: 'Clear the Table', category: 'home', image: false, routines: ['bedtime'], minAge: 4, aliases: ['clear dinner table', 'clear table after meals'] },
-  { id: 'help-with-laundry', title: 'Help With Laundry', category: 'home', image: false, routines: ['weekend'], minAge: 5, aliases: ['help sort laundry'] },
-  { id: 'wipe-the-counters', title: 'Wipe the Counters', category: 'home', image: false, routines: ['bedtime'], minAge: 6 },
-  { id: 'take-out-the-trash', title: 'Take Out the Trash', category: 'home', image: false, routines: ['weekend'], minAge: 7 },
+  { id: 'comb-my-hair', title: 'Comb My Hair', category: 'myself', image: true, routines: ['morning'], minAge: 4, aliases: ['brush hair'] },
+  { id: 'make-my-bed', title: 'Make My Bed', category: 'room', image: true, routines: ['morning'], minAge: 4, aliases: ['make bed (with help)', 'help make bed'] },
+  { id: 'put-toys-away', title: 'Put Toys Away', category: 'room', image: true, routines: ['bedtime', 'afterschool'], minAge: 2, aliases: ['put away toys', 'pick up toys', 'organize toy bin'] },
+  { id: 'put-clothes-away', title: 'Put Clothes Away', category: 'room', image: true, routines: ['bedtime', 'weekend'], minAge: 4 },
+  { id: 'tidy-my-desk', title: 'Tidy My Desk', category: 'room', image: true, routines: ['afterschool'], minAge: 5, aliases: ['put away school supplies'] },
+  { id: 'clean-my-floor', title: 'Clean My Floor', category: 'room', image: true, routines: ['weekend'], minAge: 5, aliases: ['vacuum bedroom'] },
+  { id: 'set-the-table', title: 'Set the Table', category: 'home', image: true, routines: ['afterschool'], minAge: 4 },
+  { id: 'clear-the-table', title: 'Clear the Table', category: 'home', image: true, routines: ['bedtime'], minAge: 4, aliases: ['clear dinner table', 'clear table after meals'] },
+  { id: 'help-with-laundry', title: 'Help With Laundry', category: 'home', image: true, routines: ['weekend'], minAge: 5, aliases: ['help sort laundry', 'sort laundry by color'] },
+  { id: 'wipe-the-counters', title: 'Wipe the Counters', category: 'home', image: true, routines: ['bedtime'], minAge: 6 },
+  { id: 'take-out-the-trash', title: 'Take Out the Trash', category: 'home', image: true, routines: ['weekend'], minAge: 7, aliases: ['take trash to curb'] },
 ];
 
 const byId = new Map(responsibilities.map((r) => [r.id, r]));
