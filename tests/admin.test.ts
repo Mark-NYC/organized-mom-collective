@@ -9,6 +9,7 @@ import {
   isCode,
   loadSession,
   needsRefresh,
+  qrSrc,
   saveSession,
   tokenClaims,
   type AdminSession,
@@ -57,6 +58,17 @@ describe('admin session', () => {
     expect(tokenClaims(token({ aal: 'aal2', sub: 'x' })).aal).toBe('aal2');
     expect(tokenClaims(token({ aal: 'aal1' })).aal).toBe('aal1');
     expect(tokenClaims('not-a-jwt').aal).toBe('aal1');
+  });
+
+  it('makes Supabase\'s raw SVG QR code a valid image URL', () => {
+    const raw = 'data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg"><path fill="#000000" d="M0 0h1v1H0z"/></svg>';
+    const src = qrSrc(raw);
+    expect(src.startsWith('data:image/svg+xml;charset=utf-8,')).toBe(true);
+    expect(src).not.toContain('#');
+    expect(decodeURIComponent(src.split(',')[1])).toBe(raw.split(',')[1]);
+    // Already encoded: decoded once, encoded once (never double-encoded).
+    expect(qrSrc(src)).toBe(src);
+    expect(qrSrc('data:image/png;base64,AAAA')).toBe('data:image/png;base64,AAAA');
   });
 
   it('accepts only 6-digit codes, ignoring spaces', () => {
@@ -115,7 +127,7 @@ describe('admin session', () => {
       { id: 'old', factor_type: 'totp', status: 'unverified' },
       { id: 'keep', factor_type: 'totp', status: 'verified' },
     ]);
-    expect(e).toEqual({ id: 'f1', qr: 'data:image/svg+xml;utf-8,<svg/>', secret: 'ABC' });
+    expect(e).toEqual({ id: 'f1', qr: `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg/>')}`, secret: 'ABC' });
     expect(calls.map((c) => `${c.method} ${c.path}`)).toEqual(['DELETE /factors/old', 'POST /factors']);
     expect((calls[1].body as { factor_type: string }).factor_type).toBe('totp');
     expect(calls.every((c) => c.auth === `Bearer ${s.access_token}`)).toBe(true);
