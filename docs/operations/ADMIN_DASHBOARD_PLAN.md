@@ -1,6 +1,6 @@
 # Integrated /admin dashboard: audit and plan
 
-**Status:** proposed, awaiting owner review. Nothing below is built. Written 2026-10-16; replaces the earlier support-first plan in this file (its decisions are kept where still right).
+**Status (2026-10-16):** Phases 1–3 **built** (secure shell + MFA, page inventory, Overview + alerts), waiting on the owner's activation steps in [supabase/ADMIN.md](../../supabase/ADMIN.md). Later phases planned. **Etsy is out of scope** (owner decision, 2026-10-16): no import, no sync; Etsy keeps running in Shop Manager.
 
 **Goal:** one login, one command center: what's broken, what needs me today, how the business is doing. Claude keeps editing pages and code; this is not a CMS.
 
@@ -46,7 +46,7 @@
 | Support requests + returns | `support_requests` (`status`, `return_status`), view `support_open` | 1 open (the known test row `OMC-SGAM48`) |
 | Leads + marketing consent | `tool_email_contacts` (`first_tool`, `marketing_opt_in`, `consent_version`) | 3 contacts, 1 opted in |
 | Survey | `survey_sessions`, `survey_responses` | 0 responses |
-| **Etsy orders** | none | not in the system (no API, no import) |
+| **Etsy orders** | none | out of scope (owner decision) |
 
 **Gaps:** no customer table (email is the only join key, and it isn't normalized identically everywhere); no product cost; no Etsy data; no attribution stored on any order, lead or support row.
 
@@ -116,9 +116,8 @@ GitHub Action (push to main, after Vercel build) ──► page inventory ──
 | `analytics_daily(date, path, source, medium, campaign, views, users, cta_clicks, leads, purchases)` | GA4 cached once a day, not queried live | 5 |
 | `support_events`, `reply_templates` | Resolution history, templates | 6 |
 | `customers` **view** keyed on lower(email) across orders, support, contacts, entitlements | Profiles without a duplicate store | 7 |
-| `external_orders` (Etsy CSV import, source + external id unique) | Unified order list | 8 |
-| `cost_cents`, `low_stock_threshold`, `bundle_items` on products | Margin, alerts, bundles | 9 |
-| `marketing_links(code, destination, utm…)` | QR / short links | 10 |
+| `cost_cents`, `bundle_items` on products (`low_stock_threshold` added in Phase 3) | Margin, bundles | 8 |
+| `marketing_links(code, destination, utm…)` | QR / short links | 9 |
 
 All additive. No existing table is renamed or dropped.
 
@@ -149,16 +148,15 @@ Each phase ships on its own and is useful alone. Phases 1–3 are the priority y
 | Phase | Ships | Tests |
 | --- | --- | --- |
 | **0. Account hardening** (owner, 15 min, no code) | Enroll TOTP after Phase 1 ships; turn on leaked-password protection; confirm sign-ups off; delete `shop-storage-fix` and `support-return` functions; delete test row `OMC-SGAM48` | — |
-| **1. Secure shell** | `AdminLayout` + headers; `/admin` sign-in with password + TOTP enrollment/verification; `admin_users`, `is_admin()` (aal2), audit log; `/admin/orders` and `/survey/admin` moved onto `AdminLayout` behind the same sign-in; shell nav with every section, unbuilt ones labeled "Not built yet"; remove GA/Pinterest from admin pages | SQL: anon, signed-in non-admin, and admin at aal1 all denied on every admin table/RPC; admin at aal2 allowed. Unit: sign-in states, idle sign-out. Build check: no `googletagmanager`/`pinimg` in `dist/admin/**` |
-| **2. Page inventory** | `scripts/page-inventory.mjs` (reuses check-site parsing): every built page with path, title, type (rules on path), robots, sitemap, in header/footer nav, inbound internal links, orphan flag, `data-cta` placements and destinations, source file. GitHub Action upserts to `site_pages` on main. Pages & Funnels view: filter by type/status, GitHub source link, Vercel deployment link, live preview (iframe, phone + desktop width). Traffic/leads/conversion columns read "GA4 not connected" | Unit: type rules, orphan detection, CTA extraction against fixture HTML; inventory of the real build includes `/real-life-reset-kit` (unlinked) and excludes `/admin/*` |
-| **3. Overview + alerts** | `admin_alerts`, `admin-health` on pg_cron, email digest. Overview: open alerts first, then real numbers: website orders/revenue (test vs live separated, test hidden by default), unshipped, open support, returns in progress, stock, leads and opt-ins, recent activity. Every metric without a source shows "Not connected" with what's needed. | Unit per rule with fixtures (opens, dedupes, auto-resolves); email digest content; no rule runs on test-mode orders unless asked |
+| **1. Secure shell** ✅ built | `AdminLayout` + headers; `/admin` sign-in with password + TOTP enrollment/verification; `admin_users`, `is_admin()` (aal2), audit log; `/admin/orders` and `/survey/admin` moved onto `AdminLayout` behind the same sign-in; shell nav with every section, unbuilt ones labeled "Not built yet"; remove GA/Pinterest from admin pages | SQL: anon, signed-in non-admin, and admin at aal1 all denied on every admin table/RPC; admin at aal2 allowed. Unit: sign-in states, idle sign-out. Build check: no `googletagmanager`/`pinimg` in `dist/admin/**` |
+| **2. Page inventory** ✅ built | `scripts/page-inventory.mjs` (reuses check-site parsing): every built page with path, title, type (rules on path), robots, sitemap, in header/footer nav, inbound internal links, orphan flag, `data-cta` placements and destinations, source file. GitHub Action upserts to `site_pages` on main. Pages & Funnels view: filter by type/status, GitHub source link, Vercel deployment link, live preview (iframe, phone + desktop width). Traffic/leads/conversion columns read "GA4 not connected" | Unit: type rules, orphan detection, CTA extraction against fixture HTML; inventory of the real build includes `/real-life-reset-kit` (unlinked) and excludes `/admin/*` |
+| **3. Overview + alerts** ✅ built (alert email digest still to do) | `admin_alerts`, `admin-health` on pg_cron, email digest. Overview: open alerts first, then real numbers: website orders/revenue (test vs live separated, test hidden by default), unshipped, open support, returns in progress, stock, leads and opt-ins, recent activity. Every metric without a source shows "Not connected" with what's needed. | Unit per rule with fixtures (opens, dedupes, auto-resolves); email digest content; no rule runs on test-mode orders unless asked |
 | **4. Attribution foundation** | First-touch capture (UTM, landing path, referrer host) in `sessionStorage` on public pages; sent with checkout (stored on the order and in Stripe metadata), lead signups and support requests. GA4 `purchase` (live orders, deduped like the Pinterest event) and `generate_lead`. Register GA4 custom dimensions (`cta_placement`, `page_path`) | Unit: capture/precedence rules; server re-validates and length-limits; checkout E2E stores attribution |
 | **5. Analytics** | `admin-analytics` function pulls GA4 Data API daily into `analytics_daily` (one batch, well inside quota). Analytics view: sources, Pinterest campaigns, landing pages, visitor → lead → purchase funnels from GA4 + server-side counts side by side (labeled; they won't match exactly). Pages view gets traffic/CTA columns | Unit: response mapping, quota/backoff, "no data yet" states |
 | **6. Customer service** | Support inbox in admin: filters, record view, status + return flow (requested → approved → received → refunded/declined), notes, history, reply templates (opens your email client prefilled; return address never in the system), link to website order or Etsy order number. Replaces Table Editor | Handler tests, access tests, audit entries per change |
-| **7. Customers** | Profile per email: orders (website + Etsy import), support history, lead source, marketing consent and version. Export/delete on request | View access tests; consent never inferred |
-| **8. Shop & orders** | `OrdersAdmin` inside the shell unchanged; Etsy orders via CSV import from Shop Manager into `external_orders` (read-only here; Etsy refunds stay in Etsy with a link out) | Import parser tests (dupes, partial rows); no Etsy action buttons |
-| **9. Products & inventory** | Cost, margin, bundles, per-product low-stock threshold, Etsy stock recorded manually | Margin math; threshold alert |
-| **10. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `vercel.json` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account + MFA status, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
+| **7. Customers** | Profile per email: website orders, support history, lead source, marketing consent and version. Export/delete on request | View access tests; consent never inferred |
+| **8. Products & inventory** | Cost, margin, bundles; edit the per-product low-stock threshold (column exists since Phase 3) | Margin math; threshold alert |
+| **9. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `vercel.json` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account + MFA status, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
 
 ### Cost
 
@@ -166,13 +164,26 @@ Nothing new to pay for. Supabase (pg_cron, Edge Functions, Auth MFA), Vercel, Gi
 
 ### Out of scope
 
-CMS, page editor or builder; customer accounts; Etsy write actions; in-dashboard email composer; helpdesk/ticketing products; live chat.
+CMS, page editor or builder; customer accounts; any Etsy integration; in-dashboard email composer; helpdesk/ticketing products; live chat.
 
 ---
 
-## Decisions needed from the owner before Phase 1
+## Decisions
 
-1. **Admin account:** reuse the existing shop admin login (the one Supabase user) as the single owner account? (Recommended.)
-2. **Alert delivery:** which inbox gets the immediate alerts and the daily digest, and what time?
-3. **Etsy:** CSV import now (recommended: free, no app review) or apply for Etsy API access for automatic sync later?
-4. **GA4 access (Phase 5):** OK to create a free Google Cloud service account with Viewer on the GA4 property? You'll need to click through Google's console; Claude can't.
+- 2026-10-16: Etsy out of scope; roll forward with Phases 1–3. The existing shop admin login is the single owner account (`admin_users`). Alert emails and GA4 access are decided when those phases start.
+
+## What's built (Phases 1–3)
+
+| Piece | Where |
+| --- | --- |
+| Admin layout (noindex, no trackers), nav with unbuilt sections labeled | `src/layouts/AdminLayout.astro`, `src/data/admin.ts` |
+| Sign-in: password → authenticator (enroll on first sign-in) → aal2 session; refresh; 30-min idle sign-out | `src/lib/admin/session.ts`, `src/components/admin/AdminGate.tsx` |
+| `/admin/orders`, `/survey/admin` on the shared sign-in | `src/components/shop/OrdersAdmin.tsx`, `src/components/survey/SurveyAdmin.tsx` |
+| `admin_users`, `is_admin()` (aal2 required), audit log; `shop-admin` requires aal2 and logs every change | `supabase/migrations/20261020000000_admin_core.sql`, `supabase/functions/_shared/handlers/admin.ts` |
+| Page inventory from the build, synced by GitHub Action with a write-only token | `scripts/page-inventory.mjs`, `.github/workflows/page-inventory.yml`, `20261020010000_admin_pages.sql`, `/admin/pages` |
+| Alerts (self-opening and self-resolving) and Overview numbers; unavailable data labeled | `20261020020000_admin_alerts.sql`, `/admin` |
+| Settings: account + authenticator, integration status, inventory token, audit log | `/admin/settings` |
+| Security headers on admin paths | `vercel.json` |
+| Tests | `tests/admin.test.ts`, `tests/page-inventory.test.ts`, `supabase/tests/admin-access.sql` (`npm run test:admin-sql`), `tests/shop-e2e.test.ts` |
+
+Next up: Phase 3b alert email digest (scheduled Edge Function + Resend), then Phase 4 attribution.

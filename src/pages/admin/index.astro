@@ -1,0 +1,9 @@
+---
+/** /admin: Overview. Alerts first, then the business numbers (admins only, noindex). Plan: docs/operations/ADMIN_DASHBOARD_PLAN.md. */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import OverviewAdmin from '../../components/admin/OverviewAdmin';
+---
+
+<AdminLayout title="Overview" section="overview">
+  <OverviewAdmin client:only="react" />
+</AdminLayout>

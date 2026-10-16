@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import {
-  adminSignIn,
   answerCounts,
   funnel,
   loadSurveyData,
   responsesCsv,
   surveyConfigured,
-  type AdminSession,
   type ResponseRow,
   type SessionRow,
 } from '../../lib/survey';
 import { SURVEY_SOURCES } from '../../data/survey';
+import AdminGate from '../admin/AdminGate';
+import type { AdminSession } from '../../lib/admin/session';
 
-const TOKEN_KEY = 'omc:v1:survey-admin';
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
 function isoDay(d: Date) {
@@ -27,91 +26,14 @@ function daysAgo(n: number) {
 }
 
 /**
- * Survey results for signed-in admins (Supabase Auth users listed in
- * survey_admins). Row-level security does the protecting: without an admin
- * token the database returns nothing, whatever this page does.
+ * Survey results for MFA-verified admins (AdminGate). Row-level security does the protecting:
+ * without an admin token the database returns nothing, whatever this page does.
  */
 export default function SurveyAdmin() {
-  const [auth, setAuth] = useState<AdminSession | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(TOKEN_KEY) ?? 'null') as AdminSession | null;
-      if (saved && saved.expires_at > Date.now() + 60_000) setAuth(saved);
-    } catch {
-      /* sign in again */
-    }
-    setReady(true);
-  }, []);
-
-  const signOut = () => {
-    try {
-      sessionStorage.removeItem(TOKEN_KEY);
-    } catch {
-      /* nothing saved */
-    }
-    setAuth(null);
-  };
-
-  if (!ready) return null;
   if (!surveyConfigured()) {
     return <p className="mt-8 text-[1.0625rem]">Supabase isn’t configured for this build. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY (see .env.example).</p>;
   }
-  if (!auth) {
-    return (
-      <SignIn
-        onSignedIn={(s) => {
-          try {
-            sessionStorage.setItem(TOKEN_KEY, JSON.stringify(s));
-          } catch {
-            /* this tab only */
-          }
-          setAuth(s);
-        }}
-      />
-    );
-  }
-  return <Dashboard auth={auth} onSignOut={signOut} />;
-}
-
-function SignIn({ onSignedIn }: { onSignedIn: (s: AdminSession) => void }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-
-  const submit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setBusy(true);
-    setError('');
-    try {
-      onSignedIn(await adminSignIn(email.trim(), password));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <form onSubmit={submit} className="mt-8 max-w-sm space-y-4">
-      <Field label="Email">
-        <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-      </Field>
-      <Field label="Password">
-        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
-      </Field>
-      {error && (
-        <p role="alert" className="text-[0.95rem] font-semibold">
-          {error}
-        </p>
-      )}
-      <button type="submit" disabled={busy} className="btn-primary w-full">
-        {busy ? 'Signing in…' : 'Sign in'}
-      </button>
-    </form>
-  );
+  return <AdminGate>{({ session, signOut }) => <Dashboard auth={session} onSignOut={signOut} />}</AdminGate>;
 }
 
 const inputClass = 'mt-1.5 block min-h-11 w-full rounded-[3px] border border-rule-strong bg-paper px-3 text-[1rem] focus:border-ink';
@@ -188,13 +110,6 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
 
   return (
     <div className="mt-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 text-[0.9rem] text-soft">
-        <span>Signed in as {auth.email}</span>
-        <button type="button" onClick={onSignOut} className="text-link">
-          Sign out
-        </button>
-      </div>
-
       {/* Filters: one row above the numbers. */}
       <div className="mt-6 flex flex-wrap items-end gap-3 border-y border-rule py-4">
         <Field label="From">

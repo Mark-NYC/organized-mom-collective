@@ -1,15 +1,12 @@
 ---
 /**
- * Survey results (admins only). The page itself holds no data: it signs in to
- * Supabase and row-level security returns responses only to accounts listed in
- * survey_admins. See supabase/README.md.
+ * Survey results (admins only). The page itself holds no data: it signs in (AdminGate) and
+ * row-level security returns responses only to MFA-verified admins. See supabase/README.md.
  */
-import PublicLayout from '../../layouts/PublicLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 import SurveyAdmin from '../../components/survey/SurveyAdmin';
 ---
 
-<PublicLayout title="Survey results" description="Survey results for the Organized Mom Collective team." indexable={false} chrome={false} width="wide">
-  <p class="label text-muted">Admin</p>
-  <h1 class="page-title mt-3">Survey results</h1>
+<AdminLayout title="Survey results" section="survey">
   <SurveyAdmin client:only="react" />
-</PublicLayout>
+</AdminLayout>

@@ -85,22 +85,7 @@ export async function submitSurvey(session: string, answers: SurveyAnswers, webs
 
 // ------------------------------------------------------------------ admin
 
-export interface AdminSession {
-  access_token: string;
-  expires_at: number;
-  email: string;
-}
-
-export async function adminSignIn(email: string, password: string): Promise<AdminSession> {
-  const res = await fetch(`${URL_}/auth/v1/token?grant_type=password`, {
-    method: 'POST',
-    headers: { apikey: KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!res.ok) throw new Error(res.status === 400 ? 'That email and password didn’t match.' : `Sign-in failed (${res.status}).`);
-  const data = await res.json();
-  return { access_token: data.access_token, expires_at: Date.now() + data.expires_in * 1000, email: data.user?.email ?? email };
-}
+// Sign-in for the results page: src/lib/admin/session.ts (AdminGate).
 
 export interface SessionRow {
   id: string;

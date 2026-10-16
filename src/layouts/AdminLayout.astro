@@ -1,0 +1,48 @@
+---
+/**
+ * Every /admin page (and /survey/admin): noindex, no GA4 or Pinterest tag, no site header, footer,
+ * manifest or service worker. The page holds no data; its React island signs in (AdminGate) and
+ * the database decides what an account may read. Security headers for these paths: vercel.json.
+ */
+import BaseLayout from './BaseLayout.astro';
+import { ADMIN_SECTIONS } from '../data/admin';
+
+interface Props {
+  title: string;
+  /** Which nav item is current (ADMIN_SECTIONS id). */
+  section: string;
+}
+
+const { title, section } = Astro.props;
+---
+
+<BaseLayout title={`${title} · Admin`} description="Organized Mom Collective admin." robots="noindex" tracking={false}>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <div class="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
+    <nav aria-label="Admin" class="relative -mx-1 flex flex-wrap gap-1 pb-3 text-[0.9rem]">
+      {
+        ADMIN_SECTIONS.map((s) =>
+          s.href ? (
+            <a
+              href={s.href}
+              aria-current={s.id === section ? 'page' : undefined}
+              class:list={[
+                'shrink-0 rounded-[3px] px-3 py-2 font-semibold whitespace-nowrap',
+                s.id === section ? 'bg-ink text-paper' : 'text-ink hover:bg-rule',
+              ]}
+            >
+              {s.label}
+            </a>
+          ) : (
+            <span class="relative shrink-0 cursor-help rounded-[3px] px-3 py-2 whitespace-nowrap text-muted" title={`Not built yet. ${s.pending ?? ''}`}>
+              {s.label} <span class="sr-only">(not built yet: {s.pending})</span>
+            </span>
+          ),
+        )
+      }
+    </nav>
+    <p class="label text-muted mt-4">Admin</p>
+    <h1 class="page-title mt-2">{title}</h1>
+    <slot />
+  </div>
+</BaseLayout>

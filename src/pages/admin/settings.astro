@@ -1,0 +1,9 @@
+---
+/** Admin account, authenticator, integration status and audit log (admins only, noindex). */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import SettingsAdmin from '../../components/admin/SettingsAdmin';
+---
+
+<AdminLayout title="Settings" section="settings">
+  <SettingsAdmin client:only="react" />
+</AdminLayout>

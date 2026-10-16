@@ -568,6 +568,15 @@ var uuid = (v) => {
   return v;
 };
 var str = (v, max = 500) => typeof v === "string" ? v.slice(0, max) : null;
+function tokenAal(token) {
+  try {
+    const part = token.split(".")[1] ?? "";
+    const payload = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=")));
+    return typeof payload.aal === "string" ? payload.aal : null;
+  } catch {
+    return null;
+  }
+}
 async function authenticate(deps, req) {
   const token = req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) throw new HttpError(401, "unauthorized");
@@ -577,9 +586,20 @@ async function authenticate(deps, req) {
   if (!res.ok) throw new HttpError(401, "unauthorized");
   const user = await res.json();
   if (!user.id || !UUID.test(user.id)) throw new HttpError(401, "unauthorized");
+  if (tokenAal(token) !== "aal2") throw new HttpError(403, "mfa_required");
   const ok = await deps.db.rpc("shop_is_admin_user", { p_user: user.id });
   if (!ok) throw new HttpError(403, "forbidden");
   return { id: user.id, email: user.email ?? user.id };
+}
+var READ_ONLY = /* @__PURE__ */ new Set(["whoami", "status"]);
+function auditDetail(b) {
+  const target = typeof b.order_id === "string" ? `order:${b.order_id}` : typeof b.product_id === "string" ? `product:${b.product_id}` : null;
+  const keep = ["status", "carrier", "amount_cents", "restock", "units", "kind", "delta", "set", "notify"];
+  const detail = Object.fromEntries(
+    keep.filter((k) => k in b && ["string", "number", "boolean"].includes(typeof b[k])).map((k) => [k, typeof b[k] === "string" ? b[k].slice(0, 60) : b[k]])
+  );
+  if (b.fields && typeof b.fields === "object") detail.fields = Object.keys(b.fields).slice(0, 20);
+  return { target, detail };
 }
 async function stripeTaxStatus(deps) {
   try {
@@ -606,7 +626,12 @@ function createAdminHandler(deps) {
       const admin = await authenticate(deps, req);
       const body = await readJson(req);
       if (!body) throw new HttpError(400, "invalid_request");
-      return json(await run(deps, admin, body), 200, cors);
+      const result = await run(deps, admin, body);
+      if (!READ_ONLY.has(String(body.action))) {
+        const { target, detail } = auditDetail(body);
+        await deps.db.rpc("admin_log_service", { p_actor: admin.id, p_action: `shop.${String(body.action).replace(/[^a-z_]/g, "").slice(0, 40) || "unknown"}`, p_target: target, p_detail: detail }).catch((err) => console.error("shop-admin audit log", err));
+      }
+      return json(result, 200, cors);
     } catch (err) {
       if (err instanceof HttpError) return json({ error: err.message }, err.status, cors);
       if (err instanceof DbError && err.status < 500) return json({ error: err.message }, 400, cors);
