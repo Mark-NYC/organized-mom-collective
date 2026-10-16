@@ -1,88 +1,178 @@
-# Unified /admin dashboard: plan
+# Integrated /admin dashboard: audit and plan
 
-**Status:** planned, not built. Today's tools stay as they are until each phase below replaces one. Written 2026-10-16.
+**Status:** proposed, awaiting owner review. Nothing below is built. Written 2026-10-16; replaces the earlier support-first plan in this file (its decisions are kept where still right).
 
-**Goal:** one private place, usable from a phone, to run Organized Mom Collective: website settings, products, shop orders, support requests, refunds and returns. Build it a slice at a time, each slice useful on its own, without disturbing what works today.
+**Goal:** one login, one command center: what's broken, what needs me today, how the business is doing. Claude keeps editing pages and code; this is not a CMS.
 
-## Where things are today
+---
 
-| Job | Today | Where it lives |
+## Part 1: Audit
+
+### Stack and hosting
+
+- **Astro 7, fully static** on Vercel (`dist/`). No SSR adapter. One Vercel Function: `api/pinterest-feed.ts`.
+- **Supabase** project `uvqhmlqwmgnohhduttip` (Postgres 17, us-east-1). All server logic is Supabase Edge Functions + SQL functions. Live functions: `shop-checkout`, `shop-admin`, `stripe-webhook`, `shop-download`, `starter-kit-signup`, `support-request`, plus two leftovers (`shop-storage-fix`, `support-return`) that should be deleted.
+- **Stripe** (embedded checkout, webhooks, refunds) and **Resend** (all transactional email). No other paid services.
+
+### Routes (`src/pages/`, 60 files + 17 articles)
+
+| Type | Routes |
+| --- | --- |
+| Core public | `/`, `/calendar`, `/shop`, `/companion`, `/support`, `/returns`, `/tools` |
+| Resource library | `/resources`, `/resources/<slug>` (17), `/resources/topics/<pillar>` |
+| Free tools (lead magnets) | ~25: `/planner`, `/pantry`, `/chore-chart`, `/meal-planner`, seasonal checklists, … |
+| Offer / funnel pages | `/weekly-reset`, `/weekly-reset-simple`, `/take-back-control`, `/essential-routines`, `/real-life-reset-kit` (unlinked), `/family-sanity-saver-starter-kit`, `/mind-your-own-motherhood-mug`, `/starter-kit`, `/starter-kit/kit`, `/try-the-calendar` |
+| Gated / tokenized | `/planner/[access]`, `/routine-chart/[access]`, `/why-routines-work/[access]`, `/download` |
+| Checkout | `/checkout`, `/checkout/complete` |
+| Companion website | `/start`, `/app`, `/app/week`, `/app/reorder`, `/app/settings`, `/app/tidy` |
+| Admin today | `/admin/orders`, `/survey/admin` |
+
+23 pages are noindex. Several funnel pages are deliberately linked from nowhere (e.g. `/real-life-reset-kit`), so **nav and sitemap can't be the source of truth**: the build output is. `scripts/check-site.mjs` already walks `dist/` and parses every page; the inventory reuses that.
+
+### Auth and database
+
+- **Supabase Auth**, email + password, signed in from the browser (`adminSignIn` in `src/lib/survey.ts`); token kept in `sessionStorage`.
+- Two separate admin lists: `shop_admins` (1 user), `survey_admins` (0 users). Reads via RLS (`is_shop_admin()` / `is_survey_admin()`), writes via `shop-admin` with the service role.
+- **Live state:** 1 auth user, **0 MFA factors enrolled**. Supabase advisor: leaked-password protection **off**. The docs note MFA was never wired into the sign-in.
+- RLS is on everywhere; customer tables deny `anon`. Advisor warnings are mostly intended public RPCs (`shop_catalog`, `survey_submit`, …); one real fix: `shop_download_days` has a mutable `search_path`.
+
+### Data that exists
+
+| Data | Table(s) | Live volume (2026-10-16) |
 | --- | --- | --- |
-| Website orders, refunds, restocking, inventory, product fields, shop settings, shipping rate, launch status | `/admin/orders` (shop admins) | `src/pages/admin/orders.astro`, `src/components/shop/OrdersAdmin.tsx`, `shop-admin` Edge Function, `shop_admins` |
-| Survey results | `/survey/admin` (survey admins) | `src/components/survey/SurveyAdmin.tsx`, `survey_admins` |
-| Support requests and returns | Support inbox + Supabase Table Editor (`support_open`, `support_requests`) | `supabase/SUPPORT.md`, `docs/operations/CUSTOMER_SUPPORT.md` |
-| Etsy orders, refunds, messages | Etsy Shop Manager | Etsy (no API integration) |
-| Email contacts (tool gate, Starter Kit) | Table Editor → `tool_email_contacts` | `supabase/TOOL-EMAIL.md` |
-| Site copy, products shown, prices on pages | Code (`src/data/*`, `src/config.ts`) + a deploy | Repository |
+| Website orders, items, events, fulfillment, refunds, inventory log, entitlements | `shop_*` | 8 orders, **all test mode**; store is in **Preview** (no real money yet) |
+| Products, stock, shipping, tax, store switch | `shop_products`, `shop_settings`, `shop_shipping_rates` | 7 products |
+| Transactional email outcomes | `shop_email_log`, `support_requests.notify_status/ack_status`, `tool_email_contacts.starter_kit_email_status` | 7 sent, 4 skipped, 0 failed |
+| Support requests + returns | `support_requests` (`status`, `return_status`), view `support_open` | 1 open (the known test row `OMC-SGAM48`) |
+| Leads + marketing consent | `tool_email_contacts` (`first_tool`, `marketing_opt_in`, `consent_version`) | 3 contacts, 1 opted in |
+| Survey | `survey_sessions`, `survey_responses` | 0 responses |
+| **Etsy orders** | none | not in the system (no API, no import) |
 
-Good enough for the first 25 orders. The pain to fix later: two logins and admin lists, raw tables for support, no single "what needs me today" view.
+**Gaps:** no customer table (email is the only join key, and it isn't normalized identically everywhere); no product cost; no Etsy data; no attribution stored on any order, lead or support row.
 
-## Architecture (keep the current pattern)
+### Analytics and tracking
 
-- **Pages:** one static Astro route group under `/admin` (noindex, out of the sitemap, no site header or footer), a shared admin shell (nav, sign-in state) and one React island per section. No server rendering needed: the site stays static on Vercel.
-- **Sign-in:** Supabase Auth (email + password, public sign-ups off), the same login the order dashboard uses now. Turn on MFA (TOTP) before anything new ships.
-- **Who's an admin:** one `admins` table (`user_id`, `role`: `owner` / `helper`, `added_at`), replacing `shop_admins` and `survey_admins` through views or a migration that copies them. Roles gate sections (a future helper might see support but not refunds or settings).
-- **Reads:** through row-level security, as now (admins only; `anon` sees nothing).
-- **Writes:** only through Edge Functions with the service role, each checking the caller's token and role first (the `shop-admin` pattern). One function per area (`shop-admin` stays; add `support-admin`) rather than one giant one.
-- **Audit log:** an `admin_events` table (who, when, action, target, small JSON detail, never secrets or addresses) written by every admin function. Order events already exist (`shop_order_events`); fold them in or link them.
-- **Secrets stay secrets:** Stripe and Resend keys stay in Edge Function secrets. The dashboard can show *whether* something is configured (as `status` does today), never its value. The return address is not stored anywhere in the system; it's sent by hand.
-- **Etsy:** no API integration in the plan. Etsy orders, refunds and messages stay in Etsy; the dashboard records the Etsy order number on support and return records and links out to Etsy.
+- **GA4** (`G-VGJK1B4TJ6`) and the **Pinterest tag** are loaded in `BaseLayout.astro` on every page, **including `/admin/orders` and `/survey/admin`**: third-party script on pages that show customer names and addresses. Fix first.
+- Custom events: `cta_click` (25 placements via `data-cta`, `src/lib/analytics.ts`), `starter_kit_view`, `starter_kit_signup`, `starter_kit_resource_open`, tool engagement events. Pinterest: `lead` (chore chart, starter kit), `checkout` (live orders only).
+- **Missing:** no GA4 `purchase` or `generate_lead` event; **no UTM / landing-page / referrer capture anywhere**, so no order or lead can be attributed to a Pin or campaign. Etsy clicks leave the site; Etsy sales can't be tied back except by Etsy's own stats.
+- No GA4 Data API access, Vercel Web Analytics or Pinterest API connection exists. Every traffic number in the dashboard depends on adding one.
 
-## Sections and requirements
+### Customer service and returns
 
-### 1. Today (home)
-- Counts and lists of what needs action: open support requests older than one business day, approved returns not yet received, received returns not yet refunded, unshipped paid orders, failed emails (`notify_status`, `return_instructions_status`, `shop_email_log`).
-- Each item links to its record.
+Form → `support-request` → `support_requests` + two Resend emails. Owner works it from the inbox and the Supabase Table Editor; returns are tracked by hand-editing `return_status`. Return address is never stored (keep it that way). Policy: `docs/operations/CUSTOMER_SUPPORT.md`. No reply templates, no history beyond `notes` and `resolved_at`.
 
-### 2. Support
-- List with filters (status, topic, age), search by reference, email or order number.
-- Record view: message, photo flag, email outcomes, notes, status changes (open → waiting → resolved).
-- "Reply" opens the email client with the reference in the subject. In-dashboard replies are a later option only if email replies become hard to track.
-- Link a request to a website order (and show it in the order) or record an Etsy order number.
+### Integration limits
 
-### 3. Returns and refunds
-- One flow per return: requested → approved → received → refunded (or declined), with dates.
-- "Approve return" sets `return_status = approved`. The address is still sent by hand (private email or Etsy Messages) and never shown or stored in the dashboard, unless the owner later decides to automate it with the address kept in a server-side secret.
-- Website orders: refund through Stripe from the same screen (reuse `shop-admin` → `refund`), restock if sellable.
-- Etsy orders: a reminder and link to refund in Etsy, then "Mark refunded".
-- Policy checks shown, not enforced: days since delivery vs the 14-day window; damage has no cutoff.
-
-### 4. Orders (move `/admin/orders` in)
-- Everything `OrdersAdmin` does today, unchanged in behavior, inside the shared shell.
-
-### 5. Products and inventory
-- What `OrdersAdmin` already edits (name, price, active, stock), plus product images and per-product policy text (so the mug and future products get their own return terms, never the calendar's by default).
-
-### 6. Website
-- Shop switches already in `shop_settings` (checkout mode, tax). Feature flags that are build variables today (e.g. `PUBLIC_TOOL_EMAIL_GATE_ENABLED`) stay in Vercel unless moved to runtime settings deliberately.
-- Page copy stays in code. A CMS is out of scope.
-
-### 7. Contacts and survey
-- Survey results (move `/survey/admin` in) and a marketing-consent export (only `marketing_opt_in = true`). Support contacts are never mixed in.
-
-## Non-functional requirements
-
-- Works on a phone first; every action reachable in two taps from Today.
-- No customer data in browser storage beyond the Supabase session.
-- Every destructive or money action asks for confirmation and is idempotent (request ids, as refunds already are).
-- Accessible: labeled controls, keyboard use, visible focus, status messages announced.
-- Tests per function (like `tests/shop.test.ts`), plus an access test: a signed-in non-admin and `anon` get nothing.
-- Privacy: retention rule for resolved support requests (suggested 12 months), an export/delete path per customer on request.
-
-## Build order (each phase ships on its own)
-
-| Phase | Ships | Why first |
+| Integration | State | Limits that matter |
 | --- | --- | --- |
-| 0 (done) | Support form, `support_requests`, returns tracked in the Table Editor, return address sent by hand | Enough for the first 25 orders |
-| 1 | `/admin` shell, `admins` table + roles, MFA on, sign-in; links to the existing order and survey dashboards | Foundation; no behavior change |
-| 2 | Support section + `support-admin` function + `admin_events` | Replaces the Table Editor for daily support |
-| 3 | Returns and refunds flow, with "Approve return" | Replaces manual status edits |
-| 4 | Orders and products moved into the shell | Consolidation; same features |
-| 5 | Today view across all sections | Needs the data from 2–4 |
-| 6 | Website settings, contacts, survey moved in; retire `/admin/orders` and `/survey/admin` routes (redirect) | Cleanup |
+| Stripe | Built, test keys | Refunds via API with idempotency keys (done). Reads count toward the 100 req/s live limit: don't poll; trust webhooks. |
+| Etsy | Manual (Shop Manager) | Open API v3 needs an approved app + OAuth, ~10 req/s and a daily cap. **No API to issue refunds** (Shop Manager only). Orders CSV export from Shop Manager is free and needs no approval. |
+| GA4 | Tag only | Data API is free with per-property token quotas; needs a Google Cloud service account added as Viewer. Custom event params must be registered as custom dimensions to be queryable. Data lags 24–48 h for full accuracy. |
+| Pinterest | Tag + catalog feed | API v5 analytics needs an app + OAuth token (free). |
+| Resend | Live | Sending only; delivery/bounce webhooks available but not wired. |
 
-**When to start Phase 1:** when support volume or a second person makes the Table Editor painful, or before switching the website checkout from preview to live with real volume. Not before.
+### Reuse, don't rebuild
 
-## Out of scope (for now)
+`OrdersAdmin.tsx` (orders, refunds, restock, inventory, shop settings, launch readiness), `shop-admin` function and its auth check, email-outcome logging, `check-site.mjs` page parsing, `src/lib/analytics.ts` event shape, `survey_allow` throttle ledger, `ConfirmationDialog`, the print palette and `.label`/`.page-title` styles, `supabase/tests/supabase-stub.sql` access tests.
 
-Etsy API sync, a helpdesk/ticketing product, live chat, customer accounts, an in-dashboard email composer, page-copy editing.
+---
+
+## Part 2: Architecture
+
+**Keep the static site. No SSR adapter, no new framework, no paid tools.**
+
+```
+/admin/* (static Astro pages, AdminLayout, React islands)
+   │  Supabase session (password + TOTP, aal2)
+   ├── reads ──► Postgres via RLS: is_admin() requires aal2 JWT
+   └── actions ─► Edge Functions (admin-*) ─► verify JWT + role + aal2 + throttle
+                       │                      ─► SQL functions (audit-logged)
+                       ├─► Stripe / Resend / GA4 Data API (secrets stay server-side)
+pg_cron (hourly) ──► admin-health ──► admin_alerts ──► Overview + email digest (Resend)
+GitHub Action (push to main, after Vercel build) ──► page inventory ──► site_pages
+```
+
+### Security requirements
+
+1. **`AdminLayout`**: noindex, no GA4, no Pinterest tag, no site chrome, no manifest/service worker. `vercel.json` headers for `/admin/*`: strict CSP (self + Supabase + Stripe only), `frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`.
+2. **One admin, MFA required.** Sign-in = password, then TOTP. Enrollment screen on first sign-in. `is_admin()` returns true only when the JWT's `aal = 'aal2'` and the user is in `admin_users`. Redefine `is_shop_admin()` / `is_survey_admin()` to call it, so `/admin/orders` gets MFA protection immediately with no data change.
+3. **No registration.** Confirm "Allow new users to sign up" is off; turn on leaked-password protection.
+4. **Server-side authorization on every call**: each admin function re-checks token, role and aal2; the browser never decides.
+5. **Least privilege:** new admin functions call SQL functions with the *admin's* JWT (security definer functions that check `is_admin()`), not the service role. Service role stays only where it's already required (Stripe webhook, checkout, email).
+6. **Rate limiting:** Supabase Auth's built-in limits on sign-in/MFA; per-admin throttle on admin functions (reuse the throttle ledger); exports capped.
+7. **Audit log:** `admin_audit_log` (actor, time, action, target, small JSON detail; never secrets, addresses or message bodies), append-only (no update/delete grants). Sign-ins and MFA events come from Supabase's own auth log.
+8. **Secrets** stay in Supabase function secrets. Settings shows configured / not configured, never values.
+9. **Sessions:** short access token (Supabase default 1 h) with refresh; explicit sign-out clears it; idle sign-out in the client after 30 min.
+
+### Database changes (by phase)
+
+| Object | Purpose | Phase |
+| --- | --- | --- |
+| `admin_users(user_id, role, added_at)`, `is_admin(role)` | Single admin list, roles for later helpers | 1 |
+| `admin_audit_log` | Who did what | 1 |
+| `site_pages(path, title, type, robots, in_sitemap, in_nav, inbound_links, cta_placements jsonb, source_file, build_sha, first_seen, last_seen, removed_at)` | Page inventory | 2 |
+| `admin_alerts(key, severity, area, title, detail, link, first_seen, last_seen, resolved_at, acked_at)` | Actionable alerts, deduped by `key`, auto-resolve | 3 |
+| `attribution` columns on `shop_orders`, `tool_email_contacts`, `support_requests` (`utm_source/medium/campaign/content`, `landing_path`, `referrer_host`, first-touch time) | Real attribution, stored server-side | 4 |
+| `analytics_daily(date, path, source, medium, campaign, views, users, cta_clicks, leads, purchases)` | GA4 cached once a day, not queried live | 5 |
+| `support_events`, `reply_templates` | Resolution history, templates | 6 |
+| `customers` **view** keyed on lower(email) across orders, support, contacts, entitlements | Profiles without a duplicate store | 7 |
+| `external_orders` (Etsy CSV import, source + external id unique) | Unified order list | 8 |
+| `cost_cents`, `low_stock_threshold`, `bundle_items` on products | Margin, alerts, bundles | 9 |
+| `marketing_links(code, destination, utm…)` | QR / short links | 10 |
+
+All additive. No existing table is renamed or dropped.
+
+### Alerts: "tell me when it's broken"
+
+Hourly `admin-health` function writes `admin_alerts`; each rule has a stable key so it opens once, updates, and resolves itself when the condition clears. Critical alerts email immediately; everything else goes in one daily digest. Same Resend account, no new service.
+
+| Rule | Source | Available |
+| --- | --- | --- |
+| Paid physical order not shipped after 2 business days | `shop_orders` | Phase 3 |
+| Customer email failed / skipped (no provider) | `shop_email_log`, support and starter-kit status columns | Phase 3 |
+| Support request open > 1 business day; return approved but not received in 14 days; received but not refunded | `support_requests` | Phase 3 |
+| Stock at or below threshold; active product with 0 stock | `shop_products` | Phase 3 |
+| Order flagged (oversold, amount mismatch, dispute) | `shop_orders` flags | Phase 3 |
+| Stripe webhook silent while checkouts are being created | `shop_stripe_events` vs `shop_orders` | Phase 3 |
+| Page in inventory now 404/500; page removed since last build | `site_pages` + HTTP check | Phase 3 |
+| CTA points to a dead page or an Etsy listing that 404s | `site_pages.cta_placements` + HTTP check | Phase 3 |
+| Launch-gate mismatch (e.g. store Open with test key) | existing readiness check | Phase 3 |
+| `cta_click` / `purchase` / lead event volume drops to 0 for 48 h | `analytics_daily` | Phase 5 |
+| Pinterest feed check failing | existing `pinterest-feed-check.yml` | Phase 3 (read the workflow status) |
+
+---
+
+## Part 3: Phased plan
+
+Each phase ships on its own and is useful alone. Phases 1–3 are the priority you asked for.
+
+| Phase | Ships | Tests |
+| --- | --- | --- |
+| **0. Account hardening** (owner, 15 min, no code) | Enroll TOTP after Phase 1 ships; turn on leaked-password protection; confirm sign-ups off; delete `shop-storage-fix` and `support-return` functions; delete test row `OMC-SGAM48` | — |
+| **1. Secure shell** | `AdminLayout` + headers; `/admin` sign-in with password + TOTP enrollment/verification; `admin_users`, `is_admin()` (aal2), audit log; `/admin/orders` and `/survey/admin` moved onto `AdminLayout` behind the same sign-in; shell nav with every section, unbuilt ones labeled "Not built yet"; remove GA/Pinterest from admin pages | SQL: anon, signed-in non-admin, and admin at aal1 all denied on every admin table/RPC; admin at aal2 allowed. Unit: sign-in states, idle sign-out. Build check: no `googletagmanager`/`pinimg` in `dist/admin/**` |
+| **2. Page inventory** | `scripts/page-inventory.mjs` (reuses check-site parsing): every built page with path, title, type (rules on path), robots, sitemap, in header/footer nav, inbound internal links, orphan flag, `data-cta` placements and destinations, source file. GitHub Action upserts to `site_pages` on main. Pages & Funnels view: filter by type/status, GitHub source link, Vercel deployment link, live preview (iframe, phone + desktop width). Traffic/leads/conversion columns read "GA4 not connected" | Unit: type rules, orphan detection, CTA extraction against fixture HTML; inventory of the real build includes `/real-life-reset-kit` (unlinked) and excludes `/admin/*` |
+| **3. Overview + alerts** | `admin_alerts`, `admin-health` on pg_cron, email digest. Overview: open alerts first, then real numbers: website orders/revenue (test vs live separated, test hidden by default), unshipped, open support, returns in progress, stock, leads and opt-ins, recent activity. Every metric without a source shows "Not connected" with what's needed. | Unit per rule with fixtures (opens, dedupes, auto-resolves); email digest content; no rule runs on test-mode orders unless asked |
+| **4. Attribution foundation** | First-touch capture (UTM, landing path, referrer host) in `sessionStorage` on public pages; sent with checkout (stored on the order and in Stripe metadata), lead signups and support requests. GA4 `purchase` (live orders, deduped like the Pinterest event) and `generate_lead`. Register GA4 custom dimensions (`cta_placement`, `page_path`) | Unit: capture/precedence rules; server re-validates and length-limits; checkout E2E stores attribution |
+| **5. Analytics** | `admin-analytics` function pulls GA4 Data API daily into `analytics_daily` (one batch, well inside quota). Analytics view: sources, Pinterest campaigns, landing pages, visitor → lead → purchase funnels from GA4 + server-side counts side by side (labeled; they won't match exactly). Pages view gets traffic/CTA columns | Unit: response mapping, quota/backoff, "no data yet" states |
+| **6. Customer service** | Support inbox in admin: filters, record view, status + return flow (requested → approved → received → refunded/declined), notes, history, reply templates (opens your email client prefilled; return address never in the system), link to website order or Etsy order number. Replaces Table Editor | Handler tests, access tests, audit entries per change |
+| **7. Customers** | Profile per email: orders (website + Etsy import), support history, lead source, marketing consent and version. Export/delete on request | View access tests; consent never inferred |
+| **8. Shop & orders** | `OrdersAdmin` inside the shell unchanged; Etsy orders via CSV import from Shop Manager into `external_orders` (read-only here; Etsy refunds stay in Etsy with a link out) | Import parser tests (dupes, partial rows); no Etsy action buttons |
+| **9. Products & inventory** | Cost, margin, bundles, per-product low-stock threshold, Etsy stock recorded manually | Margin math; threshold alert |
+| **10. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `vercel.json` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account + MFA status, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
+
+### Cost
+
+Nothing new to pay for. Supabase (pg_cron, Edge Functions, Auth MFA), Vercel, GitHub Actions, GA4 Data API, Pinterest API and Resend all fit the current plans/free tiers at this volume. Revisit if order volume grows by orders of magnitude.
+
+### Out of scope
+
+CMS, page editor or builder; customer accounts; Etsy write actions; in-dashboard email composer; helpdesk/ticketing products; live chat.
+
+---
+
+## Decisions needed from the owner before Phase 1
+
+1. **Admin account:** reuse the existing shop admin login (the one Supabase user) as the single owner account? (Recommended.)
+2. **Alert delivery:** which inbox gets the immediate alerts and the daily digest, and what time?
+3. **Etsy:** CSV import now (recommended: free, no app review) or apply for Etsy API access for automatic sync later?
+4. **GA4 access (Phase 5):** OK to create a free Google Cloud service account with Viewer on the GA4 property? You'll need to click through Google's console; Claude can't.
