@@ -1,16 +1,13 @@
--- /admin: one admin list, MFA required, audit log. Requires the survey and shop migrations.
+-- /admin: one admin list, roles, audit log. Requires the survey and shop migrations.
 -- Plan and setup: docs/operations/ADMIN_DASHBOARD_PLAN.md (Phase 1) and supabase/ADMIN.md.
 --
--- APPLY ONLY AFTER the admin account has a verified authenticator (TOTP) factor: from here on every
--- admin read requires an aal2 session (password + code). The new /admin sign-in enrolls the factor
--- without this migration, so the order is: deploy the site → sign in at /admin and add the
--- authenticator → run this file → redeploy shop-admin. supabase/ADMIN.md has the steps.
+-- Sign-in is email + password (owner decision 2026-10-16: no authenticator-app step).
 --
 -- What changes:
 --   admin_users       replaces shop_admins / survey_admins as the source of truth (both are copied in;
 --                     the old tables stay, unused, so nothing that references them breaks)
---   is_admin(role)    true only for an admin_users row AND an aal2 (MFA-verified) session
---   is_shop_admin()   now is_admin('owner'): every existing shop RLS policy gets the MFA rule
+--   is_admin(role)    true only for a signed-in account with an admin_users row (and the role)
+--   is_shop_admin()   now is_admin('owner'): every existing shop RLS policy uses admin_users
 --   is_survey_admin() now is_admin('helper')
 --   admin_audit_log   append-only record of admin actions (no secrets, addresses or message bodies)
 begin;
@@ -28,13 +25,12 @@ grant select, insert, update, delete on public.admin_users to service_role;
 insert into public.admin_users (user_id, role) select user_id, 'owner' from public.shop_admins on conflict do nothing;
 insert into public.admin_users (user_id, role) select user_id, 'helper' from public.survey_admins on conflict do nothing;
 
--- The MFA rule lives here and only here. auth.jwt() is the verified token PostgREST was called with.
+-- Who counts as an admin lives here and only here.
 create function public.is_admin(p_min_role text default 'helper') returns boolean
 language sql stable security definer set search_path = '' as $$
-  select coalesce(auth.jwt() ->> 'aal', '') = 'aal2'
-     and exists (
-       select 1 from public.admin_users a
-        where a.user_id = auth.uid() and (a.role = 'owner' or p_min_role = 'helper'));
+  select exists (
+    select 1 from public.admin_users a
+     where a.user_id = auth.uid() and (a.role = 'owner' or p_min_role = 'helper'));
 $$;
 revoke execute on function public.is_admin(text) from public, anon;
 grant execute on function public.is_admin(text) to authenticated;
@@ -49,8 +45,7 @@ language sql stable security definer set search_path = '' as $$
   select public.is_admin('helper');
 $$;
 
--- The shop-admin Edge Function asks this with the service role after verifying the token itself
--- (it checks the token's aal claim; the database can't see it on a service-role call).
+-- The shop-admin Edge Function asks this with the service role after verifying the token itself.
 create or replace function public.shop_is_admin_user(p_user uuid) returns boolean
 language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.admin_users where user_id = p_user and role = 'owner');
@@ -60,7 +55,6 @@ $$;
 create function public.admin_whoami() returns jsonb
 language sql stable security definer set search_path = '' as $$
   select jsonb_build_object(
-    'aal', coalesce(auth.jwt() ->> 'aal', 'aal1'),
     'role', (select role from public.admin_users where user_id = auth.uid()),
     'admin', public.is_admin('helper'));
 $$;

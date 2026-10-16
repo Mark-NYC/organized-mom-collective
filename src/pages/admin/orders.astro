@@ -1,8 +1,8 @@
 ---
 /**
  * Order management for the direct website shop (admins only). The page holds no data:
- * it signs in (AdminGate: password + authenticator code), row-level security returns orders only
- * to MFA-verified admins, and every change goes through the shop-admin Edge Function, which checks
+ * it signs in (AdminGate: email + password), row-level security returns orders only
+ * to admins (admin_users), and every change goes through the shop-admin Edge Function, which checks
  * the account again. Etsy orders are not here. Setup: supabase/SHOP.md.
  */
 import AdminLayout from '../../layouts/AdminLayout.astro';

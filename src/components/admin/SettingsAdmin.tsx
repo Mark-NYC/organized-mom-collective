@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import AdminGate, { type AdminContext } from './AdminGate';
-import { adminRpc, adminSelect, createAdminAuth, type Factor } from '../../lib/admin/session';
+import { adminRpc, adminSelect } from '../../lib/admin/session';
 import type { InventoryRun } from '../../lib/admin/pages';
 import { adminAction, type ShopStatus } from '../../lib/shop';
 import { GA4_ID, INTEGRATIONS } from '../../data/admin-integrations';
 
-const auth = createAdminAuth();
 
 interface AuditRow {
   id: number;
@@ -18,13 +17,12 @@ interface AuditRow {
 
 const when = (iso: string) => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
-/** /admin/settings: the admin account and its authenticator, integration status (never secret values), audit log. */
+/** /admin/settings: the admin account, integration status (never secret values), audit log. */
 export default function SettingsAdmin() {
   return <AdminGate>{(ctx) => <Settings {...ctx} />}</AdminGate>;
 }
 
 function Settings({ session, role, signOut, databaseReady }: AdminContext) {
-  const [factors, setFactors] = useState<Factor[] | null>(null);
   const [status, setStatus] = useState<ShopStatus | { error: string } | null>(null);
   const [log, setLog] = useState<AuditRow[] | { error: string } | null>(null);
   const [run, setRun] = useState<InventoryRun | null>(null);
@@ -33,7 +31,6 @@ function Settings({ session, role, signOut, databaseReady }: AdminContext) {
   const [tokenError, setTokenError] = useState('');
 
   useEffect(() => {
-    auth.factors(session).then(setFactors, () => setFactors([]));
     adminAction<ShopStatus>(session.access_token, { action: 'status' }).then(setStatus, (e: Error) =>
       e.message === 'expired' ? signOut() : setStatus({ error: e.message }),
     );
@@ -72,18 +69,14 @@ function Settings({ session, role, signOut, databaseReady }: AdminContext) {
           <dd>{session.email}</dd>
           <dt className="text-muted">Role</dt>
           <dd>{role ?? 'unknown until the admin migration is applied'}</dd>
-          <dt className="text-muted">Authenticator</dt>
-          <dd>
-            {factors === null
-              ? 'Loading…'
-              : factors.filter((f) => f.status === 'verified').map((f) => f.friendly_name ?? 'Authenticator app').join(', ') || 'None verified'}
-          </dd>
+          <dt className="text-muted">Sign-in</dt>
+          <dd>Email + password</dd>
           <dt className="text-muted">Idle sign-out</dt>
           <dd>30 minutes</dd>
         </dl>
         <p className="mt-3 text-[0.9rem] text-soft">
-          No public sign-up: admins are added in the database only (supabase/ADMIN.md). To replace a lost phone, remove the factor in Supabase → Authentication → Users,
-          then sign in here to add the new one.
+          No public sign-up: admins are added in the database only (supabase/ADMIN.md). Change the password in Supabase → Authentication → Users. The password is the
+          only lock on this page: keep it long and unique to this account.
         </p>
       </section>
 

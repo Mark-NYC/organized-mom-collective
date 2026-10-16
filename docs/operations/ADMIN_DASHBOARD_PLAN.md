@@ -1,6 +1,6 @@
 # Integrated /admin dashboard: audit and plan
 
-**Status (2026-10-16):** Phases 1–3 **built** (secure shell + MFA, page inventory, Overview + alerts), waiting on the owner's activation steps in [supabase/ADMIN.md](../../supabase/ADMIN.md). Later phases planned. **Etsy is out of scope** (owner decision, 2026-10-16): no import, no sync; Etsy keeps running in Shop Manager.
+**Status (2026-10-16):** Phases 1–3 **built** (secure shell, page inventory, Overview + alerts), waiting on the owner's activation steps in [supabase/ADMIN.md](../../supabase/ADMIN.md). Later phases planned. **Etsy is out of scope** (owner decision, 2026-10-16): no import, no sync; Etsy keeps running in Shop Manager.
 
 **Goal:** one login, one command center: what's broken, what needs me today, how the business is doing. Claude keeps editing pages and code; this is not a CMS.
 
@@ -83,9 +83,9 @@ Form → `support-request` → `support_requests` + two Resend emails. Owner wor
 
 ```
 /admin/* (static Astro pages, AdminLayout, React islands)
-   │  Supabase session (password + TOTP, aal2)
-   ├── reads ──► Postgres via RLS: is_admin() requires aal2 JWT
-   └── actions ─► Edge Functions (admin-*) ─► verify JWT + role + aal2 + throttle
+   │  Supabase session (email + password)
+   ├── reads ──► Postgres via RLS: is_admin() checks admin_users
+   └── actions ─► Edge Functions (admin-*) ─► verify JWT + role + throttle
                        │                      ─► SQL functions (audit-logged)
                        ├─► Stripe / Resend / GA4 Data API (secrets stay server-side)
 pg_cron (hourly) ──► admin-health ──► admin_alerts ──► Overview + email digest (Resend)
@@ -95,12 +95,12 @@ GitHub Action (push to the default branch, after Vercel build) ──► page in
 ### Security requirements
 
 1. **`AdminLayout`**: noindex, no GA4, no Pinterest tag, no site chrome, no manifest/service worker. `vercel.json` headers for `/admin/*`: strict CSP (self + Supabase + Stripe only), `frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`.
-2. **One admin, MFA required.** Sign-in = password, then TOTP. Enrollment screen on first sign-in. `is_admin()` returns true only when the JWT's `aal = 'aal2'` and the user is in `admin_users`. Redefine `is_shop_admin()` / `is_survey_admin()` to call it, so `/admin/orders` gets MFA protection immediately with no data change.
+2. **One admin, password sign-in.** Email + password (owner decision 2026-10-16: no authenticator step). `is_admin()` returns true only for an account in `admin_users`. `is_shop_admin()` / `is_survey_admin()` call it, so every existing policy uses the one list.
 3. **No registration.** Confirm "Allow new users to sign up" is off; turn on leaked-password protection.
-4. **Server-side authorization on every call**: each admin function re-checks token, role and aal2; the browser never decides.
+4. **Server-side authorization on every call**: each admin function re-checks token and role; the browser never decides.
 5. **Least privilege:** new admin functions call SQL functions with the *admin's* JWT (security definer functions that check `is_admin()`), not the service role. Service role stays only where it's already required (Stripe webhook, checkout, email).
-6. **Rate limiting:** Supabase Auth's built-in limits on sign-in/MFA; per-admin throttle on admin functions (reuse the throttle ledger); exports capped.
-7. **Audit log:** `admin_audit_log` (actor, time, action, target, small JSON detail; never secrets, addresses or message bodies), append-only (no update/delete grants). Sign-ins and MFA events come from Supabase's own auth log.
+6. **Rate limiting:** Supabase Auth's built-in limits on sign-in; per-admin throttle on admin functions (reuse the throttle ledger); exports capped.
+7. **Audit log:** `admin_audit_log` (actor, time, action, target, small JSON detail; never secrets, addresses or message bodies), append-only (no update/delete grants). Supabase's own auth log also records sign-ins.
 8. **Secrets** stay in Supabase function secrets. Settings shows configured / not configured, never values.
 9. **Sessions:** short access token (Supabase default 1 h) with refresh; explicit sign-out clears it; idle sign-out in the client after 30 min.
 
@@ -147,8 +147,8 @@ Each phase ships on its own and is useful alone. Phases 1–3 are the priority y
 
 | Phase | Ships | Tests |
 | --- | --- | --- |
-| **0. Account hardening** (owner, 15 min, no code) | Enroll TOTP after Phase 1 ships; turn on leaked-password protection; confirm sign-ups off; delete `shop-storage-fix` and `support-return` functions; delete test row `OMC-SGAM48` | — |
-| **1. Secure shell** ✅ built | `AdminLayout` + headers; `/admin` sign-in with password + TOTP enrollment/verification; `admin_users`, `is_admin()` (aal2), audit log; `/admin/orders` and `/survey/admin` moved onto `AdminLayout` behind the same sign-in; shell nav with every section, unbuilt ones labeled "Not built yet"; remove GA/Pinterest from admin pages | SQL: anon, signed-in non-admin, and admin at aal1 all denied on every admin table/RPC; admin at aal2 allowed. Unit: sign-in states, idle sign-out. Build check: no `googletagmanager`/`pinimg` in `dist/admin/**` |
+| **0. Account hardening** (owner, 15 min, no code) | Turn on leaked-password protection; confirm sign-ups off; delete `shop-storage-fix` and `support-return` functions; delete test row `OMC-SGAM48` | — |
+| **1. Secure shell** ✅ built | `AdminLayout` + headers; `/admin` email + password sign-in; `admin_users`, `is_admin()`, audit log; `/admin/orders` and `/survey/admin` moved onto `AdminLayout` behind the same sign-in; shell nav with every section, unbuilt ones labeled "Not built yet"; remove GA/Pinterest from admin pages | SQL: anon and signed-in non-admins denied on every admin table/RPC; admins allowed by role. Unit: sign-in states, idle sign-out. Build check: no `googletagmanager`/`pinimg` in `dist/admin/**` |
 | **2. Page inventory** ✅ built | `scripts/page-inventory.mjs` (reuses check-site parsing): every built page with path, title, type (rules on path), robots, sitemap, in header/footer nav, inbound internal links, orphan flag, `data-cta` placements and destinations, source file. GitHub Action upserts to `site_pages` on the default branch. Pages & Funnels view: filter by type/status, GitHub source link, Vercel deployment link, live preview (iframe, phone + desktop width). Traffic/leads/conversion columns read "GA4 not connected" | Unit: type rules, orphan detection, CTA extraction against fixture HTML; inventory of the real build includes `/real-life-reset-kit` (unlinked) and excludes `/admin/*` |
 | **3. Overview + alerts** ✅ built (alert email digest still to do) | `admin_alerts`, `admin-health` on pg_cron, email digest. Overview: open alerts first, then real numbers: website orders/revenue (test vs live separated, test hidden by default), unshipped, open support, returns in progress, stock, leads and opt-ins, recent activity. Every metric without a source shows "Not connected" with what's needed. | Unit per rule with fixtures (opens, dedupes, auto-resolves); email digest content; no rule runs on test-mode orders unless asked |
 | **4. Attribution foundation** | First-touch capture (UTM, landing path, referrer host) in `sessionStorage` on public pages; sent with checkout (stored on the order and in Stripe metadata), lead signups and support requests. GA4 `purchase` (live orders, deduped like the Pinterest event) and `generate_lead`. Register GA4 custom dimensions (`cta_placement`, `page_path`) | Unit: capture/precedence rules; server re-validates and length-limits; checkout E2E stores attribution |
@@ -156,11 +156,11 @@ Each phase ships on its own and is useful alone. Phases 1–3 are the priority y
 | **6. Customer service** | Support inbox in admin: filters, record view, status + return flow (requested → approved → received → refunded/declined), notes, history, reply templates (opens your email client prefilled; return address never in the system), link to website order or Etsy order number. Replaces Table Editor | Handler tests, access tests, audit entries per change |
 | **7. Customers** | Profile per email: website orders, support history, lead source, marketing consent and version. Export/delete on request | View access tests; consent never inferred |
 | **8. Products & inventory** | Cost, margin, bundles; edit the per-product low-stock threshold (column exists since Phase 3) | Margin math; threshold alert |
-| **9. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `vercel.json` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account + MFA status, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
+| **9. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `vercel.json` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
 
 ### Cost
 
-Nothing new to pay for. Supabase (pg_cron, Edge Functions, Auth MFA), Vercel, GitHub Actions, GA4 Data API, Pinterest API and Resend all fit the current plans/free tiers at this volume. Revisit if order volume grows by orders of magnitude.
+Nothing new to pay for. Supabase (pg_cron, Edge Functions, Auth), Vercel, GitHub Actions, GA4 Data API, Pinterest API and Resend all fit the current plans/free tiers at this volume. Revisit if order volume grows by orders of magnitude.
 
 ### Out of scope
 
@@ -170,6 +170,7 @@ CMS, page editor or builder; customer accounts; any Etsy integration; in-dashboa
 
 ## Decisions
 
+- 2026-10-16: No authenticator (MFA) step: the admin signs in with email + password only. Compensating controls: leaked-password protection on, a unique password, the audit log.
 - 2026-10-16: Etsy out of scope; roll forward with Phases 1–3. The existing shop admin login is the single owner account (`admin_users`). Alert emails and GA4 access are decided when those phases start.
 
 ## What's built (Phases 1–3)
@@ -177,12 +178,12 @@ CMS, page editor or builder; customer accounts; any Etsy integration; in-dashboa
 | Piece | Where |
 | --- | --- |
 | Admin layout (noindex, no trackers), nav with unbuilt sections labeled | `src/layouts/AdminLayout.astro`, `src/data/admin.ts` |
-| Sign-in: password → authenticator (enroll on first sign-in) → aal2 session; refresh; 30-min idle sign-out | `src/lib/admin/session.ts`, `src/components/admin/AdminGate.tsx` |
+| Sign-in: email + password; refresh; 30-min idle sign-out | `src/lib/admin/session.ts`, `src/components/admin/AdminGate.tsx` |
 | `/admin/orders`, `/survey/admin` on the shared sign-in | `src/components/shop/OrdersAdmin.tsx`, `src/components/survey/SurveyAdmin.tsx` |
-| `admin_users`, `is_admin()` (aal2 required), audit log; `shop-admin` requires aal2 and logs every change | `supabase/migrations/20261020000000_admin_core.sql`, `supabase/functions/_shared/handlers/admin.ts` |
+| `admin_users`, `is_admin()`, audit log; `shop-admin` checks `admin_users` and logs every change | `supabase/migrations/20261020000000_admin_core.sql`, `supabase/functions/_shared/handlers/admin.ts` |
 | Page inventory from the build, synced by GitHub Action with a write-only token | `scripts/page-inventory.mjs`, `.github/workflows/page-inventory.yml`, `20261020010000_admin_pages.sql`, `/admin/pages` |
 | Alerts (self-opening and self-resolving) and Overview numbers; unavailable data labeled | `20261020020000_admin_alerts.sql`, `/admin` |
-| Settings: account + authenticator, integration status, inventory token, audit log | `/admin/settings` |
+| Settings: account, integration status, inventory token, audit log | `/admin/settings` |
 | Security headers on admin paths | `vercel.json` |
 | Tests | `tests/admin.test.ts`, `tests/page-inventory.test.ts`, `supabase/tests/admin-access.sql` (`npm run test:admin-sql`), `tests/shop-e2e.test.ts` |
 

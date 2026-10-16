@@ -8,33 +8,31 @@ One private command center at `/admin`: Overview (alerts + numbers), Pages & Fun
 
 | Layer | What it does |
 | --- | --- |
-| Sign-in | Supabase Auth email + password, then an authenticator-app code (TOTP). First sign-in adds the authenticator (QR code). No public sign-up. |
-| Database | `is_admin()` is true only for a row in `admin_users` **and** an MFA-verified (`aal2`) session. Every admin table and the existing shop/survey policies go through it, so a stolen password alone reads nothing. |
-| Edge Function | `shop-admin` refuses tokens without `aal2` (`mfa_required`) and accounts not in `admin_users` as owner. |
+| Sign-in | Supabase Auth email + password. No authenticator step (owner decision 2026-10-16): the password is the only lock, so keep it long, unique to this account, and in a password manager, with leaked-password protection on. No public sign-up. |
+| Database | `is_admin()` is true only for a signed-in account with a row in `admin_users`. Every admin table and the existing shop/survey policies go through it. |
+| Edge Function | `shop-admin` refuses accounts not in `admin_users` as owner. |
 | Least privilege | Admin pages read through row-level security with the admin's own token. Admin functions are `security definer` and check `is_admin` first. The service role stays in Edge Functions. `helper` role (for a future assistant) gets survey and page inventory only, no orders, money or audit log. |
-| Audit log | `admin_audit_log`: sign-ins, authenticator setup, every `shop-admin` change, alert acknowledgments, token rotation. Append-only (a trigger refuses update/delete, even for the service role). Never stores notes, addresses or message bodies. |
-| Rate limits | Supabase Auth's own sign-in/MFA limits; 60 audit entries per admin per minute; inventory sync 30 runs/hour. |
+| Audit log | `admin_audit_log`: sign-ins, every `shop-admin` change, alert acknowledgments, token rotation. Append-only (a trigger refuses update/delete, even for the service role). Never stores notes, addresses or message bodies. |
+| Rate limits | Supabase Auth's own sign-in limits; 60 audit entries per admin per minute; inventory sync 30 runs/hour. |
 | Browser | `AdminLayout`: noindex, no GA4, no Pinterest tag, no manifest or service worker (`npm run check:site` fails the build otherwise). `vercel.json` headers on `/admin/*` and `/survey/admin`: CSP (scripts from this site only, connections to Supabase only), no framing, no referrer, `no-store`. One session per tab (`sessionStorage`), refreshed automatically, signed out after 30 minutes idle. |
 | Secrets | Stripe and Resend keys stay in Edge Function secrets. Settings shows only configured / not configured. The page-inventory token is stored as a SHA-256 hash. |
 
 `script-src` allows inline scripts because Astro's island loader is inline; third-party script hosts are still blocked.
 
-## Activate (in this order, so you're never locked out)
+## Activate
 
-1. **Merge the PR** (into the default branch) and wait for the Vercel deploy. `/admin`, `/admin/orders` and `/survey/admin` now use the new sign-in.
-2. **Add the authenticator:** open `/admin`, sign in with the shop admin account, scan the QR code with an authenticator app, type the code. (This works before the migrations; it only uses Supabase Auth.) Save the app's backup in your password manager.
-3. **Supabase → SQL Editor**, run each file once, in order (paste the whole file → Run):
-   1. `supabase/migrations/20261020000000_admin_core.sql`: `admin_users` (copies the current shop admin in as owner), MFA rule, audit log. From now on every admin read needs the authenticator code.
+1. **Supabase → SQL Editor**, run each file once, in order (paste the whole file → Run):
+   1. `supabase/migrations/20261020000000_admin_core.sql`: `admin_users` (copies the current shop admin in as owner), roles, audit log.
    2. `supabase/migrations/20261020010000_admin_pages.sql`: page inventory.
    3. `supabase/migrations/20261020020000_admin_alerts.sql`: alerts, Overview numbers, `low_stock_threshold` on products, `return_status_at` on support requests.
-4. **Redeploy `shop-admin`**: Edge Functions → shop-admin → Code → replace everything with `supabase/dashboard/shop-admin.ts` → Deploy (Verify JWT stays off). It now requires the authenticator session and writes the audit log.
-5. **Authentication → Sign In / Providers:** confirm "Allow new users to sign up" is **off**. **Authentication → Password security:** turn on leaked-password protection.
-6. **Page inventory** (see below).
-7. Sign out and in again at `/admin`; the Overview should load with its alerts.
+2. **Redeploy `shop-admin`**: Edge Functions → shop-admin → Code → replace everything with `supabase/dashboard/shop-admin.ts` → Deploy (Verify JWT stays off). It now checks `admin_users` and writes the audit log.
+3. **Authentication → Sign In / Providers:** confirm "Allow new users to sign up" is **off**. **Authentication → Password security:** turn on leaked-password protection. Make sure the admin password is long and used nowhere else.
+4. **Page inventory** (see below).
+5. Sign in at `/admin`; the Overview should load with its alerts.
 
-If step 3 runs before step 2, sign in at `/admin` anyway: the sign-in adds the authenticator before it needs the database, then everything loads.
+The order doesn't matter for access: the sign-in works before and after the migrations. Until they're applied, the new pages say "Database update pending" and `/admin/orders` keeps working.
 
-**Lost phone:** Supabase → Authentication → Users → the admin → remove the MFA factor, then sign in at `/admin` and add the new phone. Only someone with the Supabase account can do this.
+**Forgot the password:** Supabase → Authentication → Users → the admin → Send password recovery (or set a new one there).
 
 **Adding an admin later:** create the user in Authentication → Users, then
 `insert into public.admin_users (user_id, role) select id, 'helper' from auth.users where email = 'them@example.com';`
@@ -72,7 +70,7 @@ Not yet: alert emails (needs a scheduled function; Phase 3b), analytics-event al
 
 ## Tests
 
-- `npm test`: sign-in/MFA client, `shop-admin` MFA gate and audit detail, alert sorting, page filters, inventory parsing (`tests/admin.test.ts`, `tests/page-inventory.test.ts`).
-- `npm run test:admin-sql`: 80 database checks on a throwaway local Postgres (anon, signed-in stranger, owner without MFA, helper, owner with MFA; every alert rule opening, ignoring test orders, resolving and reopening; the exact function allow-list). `supabase/tests/admin-access.sql`.
-- `npm run test:shop`: the shop end-to-end suite now signs in with MFA-verified tokens and checks a password-only token is refused.
+- `npm test`: sign-in client, `shop-admin` admin check and audit detail, alert sorting, page filters, inventory parsing (`tests/admin.test.ts`, `tests/page-inventory.test.ts`).
+- `npm run test:admin-sql`: 73 database checks on a throwaway local Postgres (anon, signed-in stranger, helper, owner; every alert rule opening, ignoring test orders, resolving and reopening; the exact function allow-list). `supabase/tests/admin-access.sql`.
+- `npm run test:shop`: the shop end-to-end suite signs in with admin password sessions from `admin_users`.
 - `npm run check:site`: admin pages carry no trackers, manifest or service worker, are noindex and stay out of the sitemap.

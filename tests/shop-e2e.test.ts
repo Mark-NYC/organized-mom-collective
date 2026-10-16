@@ -47,10 +47,9 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
   let download: (req: Request) => Promise<Response>;
   let storage: FakeStorage;
   const users = new Map<string, { id: string; email: string }>();
-  // Access tokens as Supabase issues them; the admin's is MFA-verified (aal2).
-  const adminToken = jwt({ role: 'authenticated', sub: ADMIN_ID, aal: 'aal2' }, SECRET || 'x');
-  const adminAal1Token = jwt({ role: 'authenticated', sub: ADMIN_ID, aal: 'aal1' }, SECRET || 'x');
-  const userToken = jwt({ role: 'authenticated', sub: USER_ID, aal: 'aal2' }, SECRET || 'x');
+  // Access tokens as Supabase issues them for a password sign-in.
+  const adminToken = jwt({ role: 'authenticated', sub: ADMIN_ID, aal: 'aal1' }, SECRET || 'x');
+  const userToken = jwt({ role: 'authenticated', sub: USER_ID, aal: 'aal1' }, SECRET || 'x');
   let ip = 0;
   let clock: number | null = null;
 
@@ -123,7 +122,7 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
   const rest = (path: string, role: 'anon' | 'authenticated', sub?: string, init: RequestInit = {}) =>
     fetch(`${REST}${path}`, {
       ...init,
-      headers: { 'content-type': 'application/json', Authorization: `Bearer ${jwt({ role, ...(sub ? { sub, aal: 'aal2' } : {}) }, SECRET)}`, ...(init.headers ?? {}) },
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${jwt({ role, ...(sub ? { sub, aal: 'aal1' } : {}) }, SECRET)}`, ...(init.headers ?? {}) },
     });
 
   beforeAll(() => {
@@ -131,7 +130,6 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
          insert into shop_admins (user_id) values ('${ADMIN_ID}') on conflict do nothing;
          insert into admin_users (user_id, role) values ('${ADMIN_ID}', 'owner') on conflict do nothing;`);
     users.set(adminToken, { id: ADMIN_ID, email: 'owner@example.com' });
-    users.set(adminAal1Token, { id: ADMIN_ID, email: 'owner@example.com' });
     users.set(userToken, { id: USER_ID, email: 'someone@example.com' });
   });
 
@@ -282,10 +280,6 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
       });
       expect(JSON.stringify(r.body)).not.toMatch(/sk_|whsec|re_test|preview-token/);
       expect((await adminCall({ action: 'status' }, userToken)).status).toBe(403);
-      // The admin's own password-only session (no authenticator code yet) is refused too.
-      const aal1 = await adminCall({ action: 'status' }, adminAal1Token);
-      expect(aal1.status).toBe(403);
-      expect(aal1.body).toEqual({ error: 'mfa_required' });
     });
 
     it('returns 503 when Stripe is not configured', async () => {

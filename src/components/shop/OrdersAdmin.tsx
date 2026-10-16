@@ -43,7 +43,7 @@ const CARRIERS = ['USPS', 'UPS', 'FedEx', 'DHL', 'Other'];
 type Data = Awaited<ReturnType<typeof loadShopData>>;
 
 /**
- * /admin/orders: website orders, inventory and checkout settings, for MFA-verified admins (AdminGate).
+ * /admin/orders: website orders, inventory and checkout settings, for admins (AdminGate).
  * Reads go through row-level security; writes through the shop-admin Edge Function. Without an
  * admin token the database returns nothing.
  */

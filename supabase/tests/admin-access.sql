@@ -54,8 +54,8 @@ select pg_temp.expect(pg_temp.denied($q$select public.admin_log_service(null, 'x
 select pg_temp.expect(pg_temp.denied('select * from public.shop_orders'), 'anon: shop_orders denied');
 reset role;
 
--- ------------------------------------------------------------ signed in, not an admin, even with MFA
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000c3', 'aal2');
+-- ------------------------------------------------------------ signed in, not an admin
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000c3', 'aal1');
 select pg_temp.expect(pg_temp.denied('select * from public.admin_users'), 'stranger: admin_users denied');
 select pg_temp.expect(public.is_admin() is false, 'stranger: is_admin() false');
 select pg_temp.expect((public.admin_whoami() ->> 'admin')::boolean is false, 'stranger: whoami says not admin');
@@ -65,32 +65,23 @@ select pg_temp.expect(pg_temp.denied($q$select public.admin_log('test.stranger')
 select pg_temp.expect(pg_temp.denied($q$select public.admin_log_service('00000000-0000-0000-0000-0000000000c3', 'x.y')$q$), 'stranger: admin_log_service() not callable');
 reset role;
 
--- ------------------------------------------------------------ the owner WITHOUT MFA (aal1): nothing
+-- ------------------------------------------------------------ the owner, signed in with a password
 select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
-select pg_temp.expect(public.is_admin('owner') is false, 'owner at aal1: is_admin false');
-select pg_temp.expect(public.is_shop_admin() is false, 'owner at aal1: is_shop_admin false');
-select pg_temp.expect(pg_temp.count_of('select 1 from public.shop_orders') = 0, 'owner at aal1: sees no orders');
-select pg_temp.expect(public.admin_whoami() ->> 'aal' = 'aal1' and public.admin_whoami() ->> 'role' = 'owner', 'owner at aal1: whoami reports aal1 + role');
-select pg_temp.expect(pg_temp.denied($q$select public.admin_log('test.aal1')$q$), 'owner at aal1: cannot write the audit log');
-reset role;
-
--- ------------------------------------------------------------ the owner with MFA (aal2)
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
-select pg_temp.expect(public.is_admin('owner'), 'owner at aal2: is_admin(owner)');
-select pg_temp.expect(public.is_shop_admin(), 'owner at aal2: is_shop_admin');
-select pg_temp.expect(pg_temp.count_of('select 1 from public.shop_orders') = 1, 'owner at aal2: sees orders');
+select pg_temp.expect(public.is_admin('owner'), 'owner: is_admin(owner)');
+select pg_temp.expect(public.is_shop_admin(), 'owner: is_shop_admin');
+select pg_temp.expect(pg_temp.count_of('select 1 from public.shop_orders') = 1, 'owner: sees orders');
 select public.admin_log('test.sign_in', 'admin', '{"ok": true}');
-select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_audit_log where action = 'test.sign_in' and actor_email = 'owner@example.com'$q$) = 1, 'owner at aal2: audit entry written and readable');
+select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_audit_log where action = 'test.sign_in' and actor_email = 'owner@example.com'$q$) = 1, 'owner: audit entry written and readable');
 select pg_temp.expect(pg_temp.denied('update public.admin_audit_log set action = $$x.y$$'), 'owner: audit log not updatable');
 select pg_temp.expect(pg_temp.denied('delete from public.admin_audit_log'), 'owner: audit log not deletable');
 select pg_temp.expect(pg_temp.denied('insert into public.admin_audit_log (action) values ($$x.y$$)'), 'owner: audit log not directly insertable');
 select pg_temp.expect(pg_temp.denied('select * from public.admin_users'), 'owner: admin_users not readable through the API');
 reset role;
 
--- ------------------------------------------------------------ helper with MFA: survey yes, shop no
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal2');
-select pg_temp.expect(public.is_survey_admin(), 'helper at aal2: survey admin');
-select pg_temp.expect(public.is_shop_admin() is false, 'helper at aal2: not a shop admin');
+-- ------------------------------------------------------------ helper: survey yes, shop no
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal1');
+select pg_temp.expect(public.is_survey_admin(), 'helper: survey admin');
+select pg_temp.expect(public.is_shop_admin() is false, 'helper: not a shop admin');
 select pg_temp.expect(pg_temp.count_of('select 1 from public.shop_orders') = 0, 'helper: sees no orders');
 select pg_temp.expect(pg_temp.count_of('select 1 from public.admin_audit_log') = 0, 'helper: cannot read the audit log');
 reset role;
@@ -119,14 +110,11 @@ select pg_temp.expect(pg_temp.denied('select * from public.admin_secret'), 'anon
 select pg_temp.expect(pg_temp.denied('select public.admin_rotate_inventory_token()'), 'anon: cannot rotate the token');
 reset role;
 
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
-select pg_temp.expect(pg_temp.denied('select public.admin_rotate_inventory_token()'), 'owner at aal1: cannot rotate the token');
-reset role;
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal1');
 select pg_temp.expect(pg_temp.denied('select public.admin_rotate_inventory_token()'), 'helper: cannot rotate the token');
 reset role;
 
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
 select set_config('test.token', public.admin_rotate_inventory_token(), false);
 select pg_temp.expect(current_setting('test.token') ~ '^[0-9a-f]{64}$', 'owner: rotate returns a 64-hex token');
 select pg_temp.expect(public.admin_inventory_token_set_at() is not null, 'owner: token set time readable');
@@ -144,10 +132,10 @@ select pg_temp.expect(public.site_pages_sync(current_setting('test.token'), 'abc
 select pg_temp.expect(pg_temp.denied('select * from public.site_pages'), 'anon: still cannot read site_pages after sync');
 reset role;
 
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal2');
-select pg_temp.expect(pg_temp.count_of('select 1 from public.site_pages') = 3, 'helper at aal2: reads the inventory');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal1');
+select pg_temp.expect(pg_temp.count_of('select 1 from public.site_pages') = 3, 'helper: reads the inventory');
 reset role;
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000c3', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000c3', 'aal1');
 select pg_temp.expect(pg_temp.count_of('select 1 from public.site_pages') = 0, 'stranger: reads no pages');
 reset role;
 
@@ -165,19 +153,16 @@ insert into public.shop_email_log (order_id, kind, dedupe_key, to_email, status)
 insert into public.support_requests (reference, created_at, topic, name, email, message, notify_status, ack_status)
 values ('OMC-TEST01', now() - interval '8 days', 'orders', 'Test', 't@example.com', 'Where is my calendar please?', 'failed', 'sent');
 
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000b2', 'aal1');
 select pg_temp.expect(pg_temp.denied('select public.admin_alerts_refresh()'), 'helper: cannot refresh alerts');
 select pg_temp.expect(pg_temp.denied('select public.admin_overview()'), 'helper: no business numbers');
-reset role;
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
-select pg_temp.expect(pg_temp.denied('select public.admin_overview()'), 'owner at aal1: no business numbers');
 reset role;
 select pg_temp.as_user('anon', null, null);
 select pg_temp.expect(pg_temp.denied('select public.admin_alert_conditions()'), 'anon: rules not callable');
 select pg_temp.expect(pg_temp.denied('select * from public.admin_alerts'), 'anon: alerts denied');
 reset role;
 
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
 select public.admin_alerts_refresh();
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key = 'order.unshipped:00000000-0000-0000-0000-00000000d001' and severity = 'critical' and resolved_at is null$q$) = 1, 'alert: live order unshipped 6 business days → critical');
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key like '%00000000d002%'$q$) = 0, 'alert: test-mode order raises nothing');
@@ -201,14 +186,14 @@ reset role;
 update public.shop_orders set fulfillment_status = 'shipped', carrier = 'USPS' where id = '00000000-0000-0000-0000-00000000d001';
 update public.support_requests set status = 'resolved' where reference = 'OMC-TEST01';
 update public.shop_products set stock = 20 where slug = 'test-mug';
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
 select public.admin_alerts_refresh();
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key in ('order.unshipped:00000000-0000-0000-0000-00000000d001', 'support.notify:OMC-TEST01', 'support.waiting:OMC-TEST01', 'stock.out:test-mug') and resolved_at is not null$q$) = 4, 'resolve: fixed problems close themselves');
 reset role;
 
 -- A problem that comes back opens fresh (un-acknowledged).
 update public.shop_products set stock = 0 where slug = 'test-mug';
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
 select public.admin_alerts_refresh();
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key = 'stock.out:test-mug' and resolved_at is null and acked_at is null$q$) = 1, 'reopen: a returning problem is new again');
 reset role;
@@ -218,7 +203,7 @@ insert into public.support_requests (reference, topic, name, email, message, ret
 update public.support_requests set return_status = 'approved' where reference = 'OMC-TEST02';
 select pg_temp.expect((select return_status_at from public.support_requests where reference = 'OMC-TEST02') is not null, 'returns: status change stamps return_status_at');
 update public.support_requests set return_status_at = now() - interval '15 days' where reference = 'OMC-TEST02';
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
 select public.admin_alerts_refresh();
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key = 'return.not_received:OMC-TEST02'$q$) = 1, 'alert: approved return not received in 14 days');
 reset role;
@@ -227,7 +212,7 @@ reset role;
 select pg_temp.as_user('anon', null, null);
 select pg_temp.expect(public.site_pages_sync(current_setting('test.token'), 'def5678', '[{"path":"/","type":"home","indexable":true},{"path":"/calendar","type":"offer","indexable":true}]') ->> 'removed' = '1', 'sync: a page missing from the build is marked removed');
 reset role;
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal2');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000000a1', 'aal1');
 select public.admin_alerts_refresh();
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key = 'website.page_removed:/real-life-reset-kit' and severity = 'info'$q$) = 1, 'alert: removed page (info)');
 select pg_temp.expect(pg_temp.count_of($q$select 1 from public.admin_alerts where key like 'website.cta_missing:%' and resolved_at is null$q$) = 0, 'resolve: a removed page''s broken CTA closes');

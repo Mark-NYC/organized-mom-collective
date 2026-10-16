@@ -80,7 +80,7 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] Add your admin (create the user first under Authentication → Users if needed):
   `insert into public.shop_admins (user_id) select id from auth.users where email = 'you@example.com';`
 - [ ] Authentication → Sign In / Providers: turn off "Allow new users to sign up".
-- [ ] Give the admin account a long, unique password (a password manager's). The admin also requires an authenticator-app code (added at first sign-in) and, once `20261020000000_admin_core.sql` is applied, the database refuses admin reads without it: see `supabase/ADMIN.md`. Admins are listed in `admin_users` from then on (`shop_admins` is no longer consulted).
+- [ ] Give the admin account a long, unique password (a password manager's). It's the only lock on the admin (no authenticator step, owner decision 2026-10-16), so turn on Supabase's leaked-password protection too: see `supabase/ADMIN.md`. Once `20261020000000_admin_core.sql` is applied, admins are listed in `admin_users` (`shop_admins` is no longer consulted).
 - [ ] **Edge Functions → Deploy a new function → Via Editor**, three times. Each function is ONE paste-ready file in `supabase/dashboard/` (generated from `supabase/functions/` by `npm run build:functions`; never edit them by hand):
 
   | Function name (exact) | Paste this file |

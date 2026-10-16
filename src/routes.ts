@@ -50,7 +50,7 @@
  *                               options (src/lib/reorder.ts) and the mug page once on sale (?product=<slug>), only in builds with the shop on
  *           /checkout/complete  confirmation after Stripe (noindex)
  *           /download?t=…       a digital order's files, from the emailed link (noindex)
- *   ADMIN   /admin              Overview: alerts + business numbers (password + authenticator code; noindex; supabase/ADMIN.md)
+ *   ADMIN   /admin              Overview: alerts + business numbers (email + password; noindex; supabase/ADMIN.md)
  *           /admin/pages        Pages & Funnels (page inventory)
  *           /admin/orders       order, inventory and shipping dashboard
  *           /admin/settings     admin access, integrations, page inventory token, audit log
