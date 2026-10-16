@@ -1,0 +1,144 @@
+---
+/**
+ * /starter-kit — the free Sanity Saver Starter Kit. Printed business cards still carry the old
+ * members-site QR (members.organizedmomcollective.com/landing-starter-kit-free-qr/), which the owner
+ * redirects here (with ?source=qr) in Cloudflare.
+ *
+ * Mobile-first: the form is in the first screen. One email field, plus an optional, unticked
+ * marketing checkbox (separate from receiving the kit). After signup the visitor goes straight to
+ * the kit (/starter-kit/kit), even if the email fails; the one delivery email carries the same link.
+ * The wall calendar comes after the kit, on the kit page, never as a condition of getting it.
+ *
+ * Not the paid Family Sanity Saver Starter Kit (/family-sanity-saver-starter-kit): don't link it.
+ * Standalone (no site header/footer), noindex. Steps and copy: src/data/starter-kit.ts.
+ * Events: starter_kit_view, starter_kit_signup (src/lib/starter-kit.ts).
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { STARTER_KIT_KIT_PATH, STARTER_KIT_NAME, STARTER_KIT_PROMISE, starterKitSteps } from '../data/starter-kit';
+import { BRAND_NAME } from '../config';
+---
+
+<PublicLayout
+  fullTitle={`${STARTER_KIT_NAME}: Free Family Organizing Kit · ${BRAND_NAME}`}
+  description="The free Sanity Saver Starter Kit: five printables, in order, to get the week out of your head and start sharing the jobs with your family."
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <section aria-labelledby="hero-h" class="public-panel public-intro">
+    <div class="mx-auto max-w-xl px-5 pt-8 pb-10 sm:px-8 sm:pt-14 sm:pb-16">
+      <a href="/" class="inline-block"><img src="/brand/omc-badge.png" alt={BRAND_NAME} width="48" height="48" class="size-12" /></a>
+      <p class="label mt-6 text-warm-soft">Free · {STARTER_KIT_NAME}</p>
+      <h1 id="hero-h" class="serif-hero mt-2 sm:text-[2.7rem]">{STARTER_KIT_PROMISE}</h1>
+      <p class="lede mt-4 text-warm-ink">
+        Five free printables, in order. Get the week out of your head, give the plan a home, then hand routines and real jobs to the rest of the family.
+      </p>
+
+      <div class="kit-returning mt-6" data-kit-returning hidden>
+        <a href={STARTER_KIT_KIT_PATH} class="btn-primary min-h-14 w-full">Open your Starter Kit</a>
+        <p class="mt-3 text-[0.95rem] text-warm-soft">You already have it in this browser.</p>
+      </div>
+
+      <form class="kit-form mt-7" data-kit-form novalidate>
+        <label for="kit-email" class="block text-[0.95rem] font-semibold text-warm-ink">Your email</label>
+        <input id="kit-email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254" placeholder="you@example.com" class="kit-input mt-2" />
+        <div class="kit-trap" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <label class="kit-consent mt-4">
+          <input name="marketing" type="checkbox" />
+          <span>Also send me occasional family tools and product news from {BRAND_NAME}. Optional; unsubscribe anytime.</span>
+        </label>
+        <p class="kit-error mt-3" role="alert" data-kit-error></p>
+        <button type="submit" class="btn-primary mt-5 min-h-14 w-full" data-kit-submit>Get the Free Kit</button>
+        <p class="mt-3 text-[0.9rem] leading-relaxed text-warm-soft">
+          Free. No account or password. Your kit opens right here, and we email you the link so you can come back to it.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <section aria-labelledby="inside-h" class="mx-auto max-w-xl px-5 py-12 sm:px-8 sm:py-16">
+    <h2 id="inside-h" class="serif-title">What’s Inside</h2>
+    <ol class="mt-6 space-y-5">
+      {
+        starterKitSteps.map((s, i) => (
+          <li class="kit-step">
+            <img src={`/images/tools/previews/${s.preview}.webp`} alt="" width="900" height="720" loading="lazy" decoding="async" />
+            <div>
+              <p class="label text-warm-soft">Step {i + 1} · {s.tool}</p>
+              <h3 class="mt-1 font-serif text-[1.2rem] leading-snug text-warm-ink">{s.title}</h3>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-10 border-t border-warm-rule pt-6 font-serif text-[1.15rem] leading-relaxed text-warm-ink italic">
+      Organized moms raise organized families. The kit isn’t about doing more yourself. It’s about getting the plan where everyone can see it and giving each person a part.
+    </p>
+    <p class="mt-6"><a href="#hero-h" class="text-link text-warm-ink">Get the free kit</a></p>
+  </section>
+</PublicLayout>
+
+<style>
+  .kit-input { display: block; width: 100%; min-height: 3.25rem; padding: 0 0.9rem; font-size: 1rem; color: var(--color-warm-ink, #3d3834); background: #fff; border: 1px solid #c9c2bb; border-radius: 0; }
+  .kit-input:focus { outline: 2px solid #414641; outline-offset: 2px; }
+  .kit-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .kit-consent { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.92rem; line-height: 1.5; color: #5c5550; }
+  .kit-consent input { margin-top: 0.2rem; width: 1.15rem; height: 1.15rem; flex-shrink: 0; accent-color: #4a3f3e; }
+  .kit-error { min-height: 0; font-size: 0.92rem; color: #96666b; }
+  .kit-error:empty { display: none; }
+  .kit-step { display: grid; grid-template-columns: 5.5rem 1fr; gap: 1rem; align-items: center; }
+  .kit-step img { width: 5.5rem; height: 4.4rem; object-fit: contain; background: #f6f7f5; }
+</style>
+
+<script>
+  import { currentSource, grantAccess, hasAccess, signUp, track } from '../lib/starter-kit';
+  import { STARTER_KIT_KIT_PATH } from '../data/starter-kit';
+
+  const source = currentSource();
+  track('starter_kit_view', { entry_source: source, page: 'landing', returning: hasAccess() ? 'yes' : 'no' });
+
+  if (hasAccess()) document.querySelector<HTMLElement>('[data-kit-returning]')!.hidden = false;
+
+  const form = document.querySelector<HTMLFormElement>('[data-kit-form]')!;
+  const submit = form.querySelector<HTMLButtonElement>('[data-kit-submit]')!;
+  const error = form.querySelector<HTMLElement>('[data-kit-error]')!;
+  const input = form.querySelector<HTMLInputElement>('input[name="email"]')!;
+  let busy = false;
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    error.textContent = '';
+    if (!input.checkValidity() || !input.value.trim()) {
+      error.textContent = 'Please enter your email address.';
+      input.focus();
+      return;
+    }
+    busy = true;
+    submit.disabled = true;
+    submit.textContent = 'Opening your kit…';
+    const data = new FormData(form);
+    const marketing = data.get('marketing') === 'on';
+    const result = await signUp(String(data.get('email') ?? ''), marketing, String(data.get('website') ?? ''));
+
+    if (!result.ok && result.reason === 'invalid') {
+      error.textContent = 'Please check your email address.';
+      busy = false;
+      submit.disabled = false;
+      submit.textContent = 'Get the Free Kit';
+      input.focus();
+      return;
+    }
+    // Anything else opens the kit: a server or email problem never stands between her and it.
+    const email = result.ok ? result.email : result.reason;
+    const tracked = track('starter_kit_signup', { entry_source: source, marketing_opt_in: marketing ? 'yes' : 'no', email_status: email, saved: result.ok ? 'yes' : 'no' }, 800);
+    if (result.ok) {
+      try {
+        (window as Window & { pintrk?: (...args: unknown[]) => void }).pintrk?.('track', 'lead', { lead_type: 'Starter kit' });
+      } catch { /* tracking must never block the kit */ }
+    }
+    grantAccess();
+    await tracked;
+    location.assign(`${STARTER_KIT_KIT_PATH}?welcome=${result.ok && (email === 'sent' || email === 'recent') ? 'sent' : 'nomail'}`);
+  });
+</script>

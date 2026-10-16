@@ -9,6 +9,8 @@
  *           /weekly-reset-simple  one-screen version of it (hero only; always noindex)
  *           /essential-routines $12 downsell after Take Back Control (always noindex)
  *           /family-sanity-saver-starter-kit  Family Command Center landing page ($7; standalone entry point, noindex until sold)
+ *           /starter-kit       the FREE Sanity Saver Starter Kit signup (business-card QR lands here; noindex)
+ *           /starter-kit/kit   the kit itself: five free tools as a guided path (opened after signup and from its email; noindex)
  *           /real-life-reset-kit  Real Life Reset Kit ($7 backup-plan offer; not linked yet, always noindex)
  *           /take-back-control "Take Back Control" upsell ($29 course + tools after the Weekly Reset; always noindex)
  *           /mind-your-own-motherhood-mug  the $23 mug (noindex until checkout is live)
@@ -71,6 +73,9 @@ export const routes = {
   /** $7 Real Life Reset Kit offer (not linked from anywhere yet; always noindex). */
   realLifeReset: '/real-life-reset-kit',
   familySanitySaver: '/family-sanity-saver-starter-kit',
+  /** The free Sanity Saver Starter Kit (src/data/starter-kit.ts): signup, then the kit. */
+  starterKit: '/starter-kit',
+  starterKitKit: '/starter-kit/kit',
   /** $12 downsell after Take Back Control (noindex). */
   essentialRoutines: '/essential-routines',
   /** The "Mind Your Own Motherhood" mug ($23; noindex until checkout is live). */

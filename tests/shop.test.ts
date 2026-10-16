@@ -608,13 +608,13 @@ describe('launch guards', () => {
 describe('paste-ready dashboard function files', () => {
   const committed = import.meta.glob<string>('../supabase/dashboard/*.ts', { query: '?raw', import: 'default', eager: true });
 
-  it('exist for all four functions and are up to date with the sources (run `npm run build:functions`)', async () => {
+  it('exist for all five functions and are up to date with the sources (run `npm run build:functions`)', async () => {
     for (const fn of DASHBOARD_FUNCTIONS as { name: string }[]) {
       const file = committed[`../supabase/dashboard/${fn.name}.ts`];
       expect(file, `${fn.name}.ts missing`).toBeDefined();
       expect(file === (await bundle(fn)), `${fn.name}.ts is out of date`).toBe(true);
     }
-    expect(Object.keys(committed)).toHaveLength(4);
+    expect(Object.keys(committed)).toHaveLength(DASHBOARD_FUNCTIONS.length);
   });
 
   it('are self-contained: no imports to resolve, no secrets baked in', () => {

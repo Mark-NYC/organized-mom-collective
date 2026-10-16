@@ -31,6 +31,8 @@ export interface ShopEnv {
   resendApiKey: string;
   emailFrom: string;
   emailReplyTo: string;
+  /** Sender for the Starter Kit delivery email; falls back to emailFrom if Resend refuses it. */
+  starterKitEmailFrom: string;
 }
 
 export const STRIPE_API_VERSION = '2025-03-31.basil';
@@ -61,5 +63,6 @@ export function readEnv(get: (key: string) => string | undefined): ShopEnv {
     resendApiKey: v('RESEND_API_KEY'),
     emailFrom: v('SHOP_EMAIL_FROM', 'Organized Mom Collective <orders@organizedmomcollective.com>'),
     emailReplyTo: v('SHOP_EMAIL_REPLY_TO'),
+    starterKitEmailFrom: v('STARTER_KIT_EMAIL_FROM', 'Organized Mom Collective <hello@organizedmomcollective.com>'),
   };
 }

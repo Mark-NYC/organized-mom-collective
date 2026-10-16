@@ -28,14 +28,14 @@ export interface EmailMessage {
 export interface Mailer {
   configured: boolean;
   /** `idempotencyKey`: Resend sends at most one email per key (24 hours), so a retry after a timeout can't send a second copy. */
-  send(to: string, msg: EmailMessage, idempotencyKey?: string): Promise<{ id: string }>;
+  send(to: string, msg: EmailMessage, idempotencyKey?: string, opts?: { from?: string }): Promise<{ id: string }>;
 }
 
 export function createResendMailer(opts: { apiKey: string; from: string; replyTo?: string; fetch?: typeof fetch }): Mailer {
   const fetchFn = opts.fetch ?? fetch;
   return {
     configured: Boolean(opts.apiKey),
-    async send(to, msg, idempotencyKey) {
+    async send(to, msg, idempotencyKey, sendOpts) {
       const res = await fetchFn('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -43,7 +43,7 @@ export function createResendMailer(opts: { apiKey: string; from: string; replyTo
           'Content-Type': 'application/json',
           ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
         },
-        body: JSON.stringify({ from: opts.from, to: [to], reply_to: opts.replyTo || undefined, subject: msg.subject, html: msg.html, text: msg.text }),
+        body: JSON.stringify({ from: sendOpts?.from || opts.from, to: [to], reply_to: opts.replyTo || undefined, subject: msg.subject, html: msg.html, text: msg.text }),
       });
       const data = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
       if (!res.ok) throw new Error(data.message ?? `resend_${res.status}`);
@@ -144,6 +144,9 @@ const panelTitle = (text: string): Block => ({
   html: `<p style="margin:0 0 8px;font-family:${SERIF};font-size:19px;line-height:1.3;color:${C.ink}">${esc(text)}</p>`,
   text: `\n${text}`,
 });
+
+/** Shared with the Starter Kit email (handlers/starter-kit.ts). */
+export { esc, C, SANS, SERIF, eyebrowStyle, p, small, button, panel, panelTitle, type Block };
 
 /** "26-Week Family Wall Calendar (January–June 2027)" → name and edition. */
 function splitName(name: string): [string, string | null] {
