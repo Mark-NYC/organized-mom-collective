@@ -117,7 +117,7 @@ export function createAdminAuth(f: Fetch = (...a) => fetch(...a), base = URL_, k
       });
       if (!res.ok) return fail(res, 'Adding the authenticator');
       const d = (await res.json()) as { id: string; totp: { qr_code: string; secret: string } };
-      return { id: d.id, qr: d.totp.qr_code, secret: d.totp.secret };
+      return { id: d.id, qr: qrSrc(d.totp.qr_code), secret: d.totp.secret };
     },
 
     /** Checks a 6-digit code and returns the upgraded (aal2) session. */
@@ -139,6 +139,22 @@ export function createAdminAuth(f: Fetch = (...a) => fetch(...a), base = URL_, k
       if (s) await call('/logout', { method: 'POST', token: s.access_token }).catch(() => undefined);
     },
   };
+}
+
+/**
+ * Supabase returns the QR code as `data:image/svg+xml;utf-8,<svg …>` with the SVG unescaped. Its
+ * `#000000` colors end the URL at the `#`, so the image breaks. Re-encode the SVG part.
+ */
+export function qrSrc(raw: string): string {
+  const m = raw.match(/^data:image\/svg\+xml(;[^,]*)?,([\s\S]*)$/);
+  if (!m || /;base64$/i.test(m[1] ?? '')) return raw;
+  let svg = m[2];
+  try {
+    if (/%[0-9a-f]{2}/i.test(svg)) svg = decodeURIComponent(svg);
+  } catch {
+    /* not encoded after all */
+  }
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 /** Valid 6-digit authenticator code (spaces allowed while typing). */
