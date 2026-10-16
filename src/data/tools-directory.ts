@@ -12,7 +12,7 @@ export interface DirectoryPresentation {
 }
 export const directoryTools: Record<string, DirectoryPresentation> = {
   [routes.choreChart]: { title: 'Chore chart by age', description: 'Choose a few jobs, add your child’s name, and make a chart they can follow.', action: 'Make your chore chart', category: 'everyone', slug: 'chore-chart', icon: 'home' },
-  [routes.routineChart]: { title: 'Kids’ routine charts', description: 'Put morning, after-school, or bedtime steps where your child can see them.', action: 'Make your routine chart', category: 'everyone', slug: 'routine-chart', icon: 'calendar' },
+  [routes.routineChart]: { title: 'Kids’ routine charts', description: 'Tap illustrated morning, after-school, or bedtime steps and hang them where your child can see them.', action: 'Make your routine chart', category: 'everyone', slug: 'routine-chart', icon: 'calendar' },
   [routes.mealPlanner]: { title: 'Weekly dinner planner', description: 'Choose dinners for your real week and keep the grocery list beside them.', action: 'Make your dinner plan', category: 'planning', slug: 'meal-planner', icon: 'meal' },
   [routes.mentalLoad]: { title: 'Share the mental load worksheet', description: 'Get the jobs out of your head and hand over one whole responsibility.', action: 'Open the worksheet', category: 'everyone', slug: 'mental-load-worksheet', icon: 'heart' },
   [routes.tryCalendar]: { title: 'Monthly family calendar', description: 'Give each person a row, then put everyone’s plans in one place.', action: 'Make your family calendar', category: 'planning', slug: 'try-the-calendar', icon: 'calendar' },

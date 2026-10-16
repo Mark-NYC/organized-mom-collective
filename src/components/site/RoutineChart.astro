@@ -6,11 +6,15 @@
  * Used by /routine-chart (free) and the upgraded chart for Take Back Control and Essential Routines buyers (ROUTINE_PLUS_PATH),
  * which passes `notes`: a reminder line under each step, with starter notes. Starter routines:
  * src/data/routines.ts. Saves in this browser under `storageKey`. Classes are prefixed `mr-`.
+ * Illustrated steps come from the shared responsibility library (ResponsibilityPicker): a step's illustration id
+ * saves as `icon-{i}`; lines matching a library job get its illustration. Arrows reorder steps on screen (times stay put).
+ * Slots: `picker-note` (under the picker), `after-sheet` (under the chart), `footnote`.
  */
 import '@fontsource/kalam/latin-700.css';
 import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
 import { BRAND_NAME } from '../../config';
 import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
+import ResponsibilityPicker from './ResponsibilityPicker.astro';
 
 interface Props {
   /** A reminder line under each step (the upgraded chart). */
@@ -34,6 +38,10 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       ))
     }
   </div>
+
+  <ResponsibilityPicker hint="Tap one to add it to the next open step. Use the arrows on the chart to change the order.">
+    <slot name="picker-note" />
+  </ResponsibilityPicker>
 
   <fieldset class="mr-palette-picker" data-mr-advanced>
     <legend>Choose your colors</legend>
@@ -72,8 +80,10 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       {
         rows.map(([time, step, note], i) => (
           <li class="mr-step">
+            <input type="hidden" data-field={`icon-${i}`} data-mr-icon-field />
             <span class="mr-num" aria-hidden="true">{i + 1}</span>
             <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            <span class="mr-icon" data-mr-icon><img alt="" width="52" height="52" decoding="async" /></span>
             <span class="mr-what">
               <input class="mr-text" type="text" data-field={`step-${i}`} data-mr-step value={step} aria-label={`Step ${i + 1}`} />
               {notes && (
@@ -81,6 +91,10 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
               )}
             </span>
             <span class="mr-box" aria-hidden="true" />
+            <span class="mr-move">
+              <button type="button" data-mr-move={-1} aria-label={`Move step ${i + 1} up`} disabled={i === 0}>↑</button>
+              <button type="button" data-mr-move={1} aria-label={`Move step ${i + 1} down`} disabled={i === ROUTINE_ROWS - 1}>↓</button>
+            </span>
           </li>
         ))
       }
@@ -93,6 +107,8 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
     <div class="mr-foot">{BRAND_NAME}</div>
   </div>
+
+  <div class="mr-after"><slot name="after-sheet" /></div>
 
   <slot name="footnote" />
 </div>
@@ -522,12 +538,42 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-chip { min-height: 44px; padding: 6px 0; margin-right: 12px; border: 0; border-radius: 0; background: transparent; font-family: var(--font-sans); font-size: .8rem; text-decoration: underline; text-decoration-color: var(--mr-rule); text-underline-offset: 4px; }
   .mr-chip:hover { background: transparent; text-decoration-color: var(--mr-ink); }
   .mr-type:focus-visible, .mr-chip:focus-visible, .mr-btn:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 4px; }
+
+  /* Illustrated steps from the responsibility library: an icon column once any step has one, tinted by category.
+     Reorder arrows show on screen only, never in the PNG. */
+  .mr-step { grid-template-columns: 40px 138px minmax(0, 1fr) 40px 32px; }
+  .mr-sheet.mr-has-icons .mr-step { grid-template-columns: 40px 138px 60px minmax(0, 1fr) 40px 32px; }
+  .mr-icon { display: none; place-items: center; width: 60px; height: 60px; border-radius: 50%; }
+  .mr-has-icons .mr-icon { display: grid; }
+  .mr-icon[data-on] { background: color-mix(in srgb, var(--mr-cat) 60%, #fff); }
+  .mr-icon img { width: 52px; height: 52px; }
+  .mr-icon:not([data-on]) img { display: none; }
+  .mr-move { display: flex; flex-direction: column; gap: 2px; }
+  .mr-move button { width: 32px; height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--mr-soft); font-size: 16px; line-height: 1; cursor: pointer; }
+  .mr-move button:hover:not(:disabled) { background: var(--mr-accent-1); color: var(--mr-ink); }
+  .mr-move button:disabled { opacity: 0.25; cursor: default; }
+  .mr-move button:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 1px; }
+  .mr-exporting .mr-move { display: none; }
+  .mr-exporting .mr-step { grid-template-columns: 40px 138px minmax(0, 1fr) 40px; }
+  .mr-exporting .mr-sheet.mr-has-icons .mr-step { grid-template-columns: 40px 138px 60px minmax(0, 1fr) 40px; }
+  @media (max-width: 768px) {
+    .mr-container:not(.mr-exporting) .rp { order: 1; width: 100%; }
+    .mr-container:not(.mr-exporting) .mr-after { order: 7; }
+    /* Phones: time, arrows and box share the top row so the step text gets the full width below. */
+    .mr-container:not(.mr-exporting) .mr-sheet .mr-step { grid-template-columns: 22px minmax(0, 1fr) 62px 30px; grid-template-areas: 'num time move box' 'num what what what'; gap: 4px 8px; }
+    .mr-container:not(.mr-exporting) .mr-sheet.mr-has-icons .mr-step { grid-template-columns: 22px 44px minmax(0, 1fr) 62px 30px; grid-template-areas: 'num icon time move box' 'num icon what what what'; }
+    .mr-container:not(.mr-exporting) .mr-icon { grid-area: icon; width: 44px; height: 44px; }
+    .mr-container:not(.mr-exporting) .mr-icon img { width: 38px; height: 38px; }
+    .mr-container:not(.mr-exporting) .mr-move { grid-area: move; flex-direction: row; }
+    .mr-container:not(.mr-exporting) .mr-move button { width: 30px; height: 36px; }
+  }
 </style>
 
 <script>
   import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
   import { toolEvent } from '../../lib/tool-engagement';
   import { autosave, downloadPng } from '../../lib/printable';
+  import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
 
   import type { RoutineType } from '../../data/routines';
 
@@ -550,6 +596,33 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   const chips = document.querySelector<HTMLElement>('[data-mr-chips]')!;
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
   const rows = sheet.querySelectorAll('[data-mr-step]').length;
+  const stepFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-step]'));
+  const iconFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-icon-field]'));
+  const iconSlots = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mr-icon]'));
+  const picker = host.querySelector<HTMLElement>('[data-rp]')!;
+  const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
+
+  function renderIcons() {
+    let any = false;
+    iconSlots.forEach((slot, i) => {
+      const r = responsibilityById(iconFields[i].value);
+      const src = r ? responsibilityImage(r, 256) : null;
+      const img = slot.querySelector('img')!;
+      slot.toggleAttribute('data-on', !!src);
+      if (r && src) {
+        any = true;
+        if (img.getAttribute('src') !== src) img.src = src;
+        slot.style.setProperty('--mr-cat', responsibilityColor(r));
+      } else img.removeAttribute('src');
+    });
+    sheet.classList.toggle('mr-has-icons', any);
+  }
+  /** A step line that means a library job gets its illustration; an emptied line loses it. */
+  function syncIcon(i: number) {
+    const text = stepFields[i].value.trim();
+    if (!text) iconFields[i].value = '';
+    else iconFields[i].value = matchResponsibility(text) ?? iconFields[i].value;
+  }
 
   const paletteField = field('palette');
   const paletteButtons = Array.from(host.querySelectorAll<HTMLButtonElement>('[data-mr-palette]'));
@@ -561,7 +634,9 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   }
   function renderType() {
     renderPalette();
+    renderIcons();
     const id = types[typeField.value] ? typeField.value : 'morning';
+    picker.dataset.rpRoutine = id;
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) b.setAttribute('aria-pressed', String(b.dataset.mrType === id));
     chips.replaceChildren(
       ...types[id].ideas.map((idea) => {
@@ -572,7 +647,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     );
   }
 
-  const save = autosave(sheet, host.dataset.mrKey!, renderType);
+  // Charts saved before illustrations existed pick them up for lines that match a library job.
+  const save = autosave(sheet, host.dataset.mrKey!, () => {
+    stepFields.forEach((_, i) => { if (!iconFields[i].value) syncIcon(i); });
+    renderType();
+  });
 
   for (const button of paletteButtons) button.addEventListener('click', () => {
     paletteField.value = button.dataset.mrPalette!;
@@ -591,6 +670,8 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       field(`time-${i}`).value = t.steps[i]?.[0] ?? '';
       field(`step-${i}`).value = t.steps[i]?.[1] ?? '';
       if (notes) field(`note-${i}`).value = t.steps[i]?.[2] ?? '';
+      iconFields[i].value = '';
+      syncIcon(i);
     }
     field('end-label').value = t.endLabel;
     field('end-time').value = t.endTime;
@@ -629,8 +710,54 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       return;
     }
     empty.value = chip.dataset.idea!;
+    syncIcon(stepFields.indexOf(empty));
+    renderIcons();
     action();
     save();
+  });
+
+  // Library tiles fill the next empty step with the job's title and illustration.
+  picker.addEventListener('rp:pick', (e) => {
+    const r = responsibilityById((e as CustomEvent<{ id: string }>).detail.id);
+    if (!r) return;
+    const i = stepFields.findIndex((el) => !el.value.trim());
+    if (i < 0) {
+      pickerStatus.textContent = 'The chart is full. Clear a step first, then tap again.';
+      return;
+    }
+    stepFields[i].value = r.title;
+    iconFields[i].value = r.id;
+    renderIcons();
+    action();
+    save();
+    pickerStatus.textContent = `Added “${r.title}” as step ${i + 1}.`;
+  });
+
+  // Typing a line that matches a library job adds its illustration; clearing a line removes it.
+  sheet.addEventListener('input', (e) => {
+    const i = stepFields.indexOf(e.target as HTMLInputElement);
+    if (i < 0) return;
+    const before = iconFields[i].value;
+    syncIcon(i);
+    if (iconFields[i].value !== before) { renderIcons(); save(); }
+  });
+
+  // Arrows swap a step (with its note and illustration) with its neighbor; the times stay in order.
+  sheet.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-mr-move]');
+    if (!b) return;
+    const i = stepFields.indexOf(b.closest('.mr-step')!.querySelector<HTMLInputElement>('[data-mr-step]')!);
+    const j = i + Number(b.dataset.mrMove);
+    if (j < 0 || j >= rows) return;
+    const keys = ['step', 'icon', ...(notes ? ['note'] : [])];
+    for (const k of keys) {
+      const a = field(`${k}-${i}`), c = field(`${k}-${j}`);
+      [a.value, c.value] = [c.value, a.value];
+    }
+    renderIcons();
+    action();
+    save();
+    sheet.querySelectorAll<HTMLButtonElement>(`[data-mr-move="${b.dataset.mrMove}"]`)[j]?.focus();
   });
 
   document.querySelector('[data-mr-reset]')!.addEventListener('click', () => {

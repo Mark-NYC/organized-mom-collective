@@ -25,7 +25,7 @@ export interface RoutineType {
   /** The finish line, e.g. "Lights out by" 20:00. */
   endLabel: string;
   endTime: string;
-  /** Suggestion chips: each fills the next empty step. */
+  /** Suggestion chips: each fills the next empty step. Library jobs (src/data/responsibilities.ts) aren't repeated here. */
   ideas: string[];
 }
 
@@ -45,7 +45,7 @@ export const routineTypes: Record<string, RoutineType> = {
     ],
     endLabel: 'Out the door by',
     endTime: '08:00',
-    ideas: ['Pack lunch', 'Check the calendar', 'Chore of the day', 'Family huddle', 'Feed pets', 'Brush hair', 'Fill water bottle', 'Story or devotional'],
+    ideas: ['Pack lunch', 'Check the calendar', 'Chore of the day', 'Family huddle', 'Feed pets', 'Fill water bottle', 'Story or devotional'],
   },
   afterschool: {
     label: 'After-School',
@@ -62,7 +62,7 @@ export const routineTypes: Record<string, RoutineType> = {
     ],
     endLabel: 'Dinner at',
     endTime: '17:30',
-    ideas: ['Outdoor time', 'Help with dinner', 'Practice instrument', 'Set the table', 'Hand over school papers', 'Tidy room'],
+    ideas: ['Outdoor time', 'Help with dinner', 'Practice instrument', 'Hand over school papers', 'Tidy room'],
   },
   bedtime: {
     label: 'Bedtime',
@@ -79,7 +79,7 @@ export const routineTypes: Record<string, RoutineType> = {
     ],
     endLabel: 'Lights out by',
     endTime: '20:00',
-    ideas: ['Screens off', 'Tidy up (5–10 min)', 'Pack backpack', 'Bathroom one last time', 'Fill water cup', 'Talk about the day', 'Gratitude or prayers', 'Snuggles & lights out'],
+    ideas: ['Screens off', 'Tidy up (5–10 min)', 'Bathroom one last time', 'Fill water cup', 'Talk about the day', 'Gratitude or prayers', 'Snuggles & lights out'],
   },
   weekend: {
     label: 'Weekend',

@@ -5,6 +5,8 @@
  * 11 × 8.5 in at 96 px/in, drawn at 2×). Starter chores: src/data/chore-chart.ts.
  * Everything autosaves in this browser (`omc:chore-chart:v1`). Autosave and export: src/lib/printable.ts.
  * Classes are prefixed `cc-` so they never collide with the site's own.
+ * Illustrated chores: the shared responsibility library (ResponsibilityPicker). A row's illustration id saves as
+ * `daily-icon-{i}` / `weekly-icon-{i}`; rows whose text matches a library job get its illustration.
  */
 import '@fontsource/kalam/latin-700.css';
 import { toolEmailGateEnabled } from '../lib/tool-email';
@@ -13,6 +15,7 @@ import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
 import { toolPalettes, defaultToolPalette } from '../data/tool-palettes';
 import { choreSets, DAILY_ROWS, WEEKDAYS } from '../data/chore-chart';
+import ResponsibilityPicker from '../components/site/ResponsibilityPicker.astro';
 
 const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const dailyRows = Array.from({ length: DAILY_ROWS }, (_, i) => i);
@@ -32,8 +35,8 @@ const jsonLd = [
 ---
 
 <PublicLayout
-  title="Free Chore Chart by Age"
-  description="A free chore chart by age: pick your child's age group for daily and weekly chores that fit, edit anything, then download it as an image to print."
+  title="Free Picture Chore Chart by Age"
+  description="A free picture chore chart by age: start with chores that fit your child, add illustrated jobs to every day or one day a week, edit anything, then print."
   width="full"
   jsonLd={jsonLd}
 >
@@ -42,8 +45,8 @@ const jsonLd = [
       <p class="label text-warm-soft">Free chore chart</p>
       <h1 id="chore-h" class="serif-hero mt-3">A Chore Chart That Fits Their Age.</h1>
       <p class="lede mt-4 max-w-2xl text-warm-ink">
-        Add their name, choose their age, and start with jobs they can actually own, plus three rewards to work toward. Change anything on the
-        chart, then download it to print and hang where everyone sees it. The chart does the reminding, so you don’t have to.
+        Add their name, choose their age, and start with jobs they can actually own, plus three rewards to work toward. Add illustrated
+        chores to every day or to one day of the week, change anything on the chart, then download it to print and hang where everyone sees it. The chart does the reminding, so you don’t have to.
       </p>
     </div>
   </section>
@@ -63,6 +66,16 @@ const jsonLd = [
       </label>
       <button type="submit" class="cc-btn cc-btn-primary">Use suggested chores</button>
     </form>
+
+    <ResponsibilityPicker heading="Add illustrated chores" hint="Pick where it goes, then tap a chore.">
+      <label slot="target" class="cc-target">
+        <span>Add to</span>
+        <select data-cc-target>
+          <option value="daily">Daily chores</option>
+          {WEEKDAYS.map((day, i) => <option value={String(i)}>{day}</option>)}
+        </select>
+      </label>
+    </ResponsibilityPicker>
 
     <fieldset class="cc-palette-picker" data-cc-advanced>
       <legend>Choose your colors</legend>
@@ -103,7 +116,11 @@ const jsonLd = [
           {
             dailyRows.map((i) => (
               <div class="cc-grid">
-                <input class="cc-chore" type="text" data-field={`daily-${i}`} aria-label={`Daily chore ${i + 1}`} />
+                <span class="cc-chore-cell">
+                  <input type="hidden" data-field={`daily-icon-${i}`} data-cc-icon-field />
+                  <img class="cc-icon" data-cc-icon alt="" width="30" height="30" decoding="async" hidden />
+                  <input class="cc-chore" type="text" data-field={`daily-${i}`} data-cc-row aria-label={`Daily chore ${i + 1}`} />
+                </span>
                 {days.map(() => (
                   <span class="cc-box" aria-hidden="true" />
                 ))}
@@ -118,7 +135,11 @@ const jsonLd = [
             WEEKDAYS.map((day, i) => (
               <div class="cc-week-row">
                 <span class="cc-weekday">{day}</span>
-                <input class="cc-chore" type="text" data-field={`weekly-${i}`} aria-label={`${day} chore`} />
+                <span class="cc-chore-cell">
+                  <input type="hidden" data-field={`weekly-icon-${i}`} data-cc-icon-field />
+                  <img class="cc-icon" data-cc-icon alt="" width="30" height="30" decoding="async" hidden />
+                  <input class="cc-chore" type="text" data-field={`weekly-${i}`} data-cc-row aria-label={`${day} chore`} />
+                </span>
                 <span class="cc-box" aria-hidden="true" />
               </div>
             ))
@@ -139,7 +160,8 @@ const jsonLd = [
     </div>
 
     <p class="cc-footnote">
-      Pair it with the weekly <a href={routes.planner} class="text-link">Planner</a> or the
+      Make a matching <a href={routes.routineChart} class="text-link">picture routine chart</a>, or pair it with the weekly
+      {' '}<a href={routes.planner} class="text-link">Planner</a> or the
       {' '}<a href={routes.calendar} data-cta="chore-chart" class="text-link">Family Wall Calendar</a>
     </p>
   </div>
@@ -539,6 +561,21 @@ const jsonLd = [
 .cc-palette-option:focus-visible { outline: 2px solid var(--cc-ink); outline-offset: 3px; }
 .cc-swatches { display: flex; gap: 3px; }
 .cc-swatches span { width: 15px; height: 15px; border: 1px solid #b8ada6; border-radius: 50%; }
+
+/* Illustrated chores: a small icon inside the row's highlight, tinted circle by category. */
+.chore-chart-container .rp { max-width: 1056px; }
+.cc-target { display: flex; align-items: center; gap: 10px; font-size: .8rem; color: var(--cc-soft); }
+.cc-target select { min-height: 44px; padding: 0 12px; border: 1px solid var(--cc-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--cc-ink); }
+.cc-target select:focus { outline: 2px solid var(--cc-ink); outline-offset: 1px; }
+.cc-chore-cell { position: relative; display: block; min-width: 0; }
+.cc-icon { position: absolute; top: 50%; left: 4px; width: 30px; height: 30px; padding: 2px; border-radius: 50%; background: color-mix(in srgb, var(--cc-cat) 60%, #fff); transform: translateY(-50%); pointer-events: none; }
+.cc-icon[hidden] { display: none; }
+.cc-chore-cell:has(.cc-icon:not([hidden])) .cc-chore { padding-left: 40px; }
+@media (max-width: 768px) {
+  .chore-chart-container:not(.cc-exporting) .rp { order: 1; width: 100%; }
+  .chore-chart-container:not(.cc-exporting) .cc-icon { width: 26px; height: 26px; left: 2px; }
+  .chore-chart-container:not(.cc-exporting) .cc-chore-cell:has(.cc-icon:not([hidden])) .cc-chore { padding-left: 32px; }
+}
 </style>
 
 <script>
@@ -546,6 +583,7 @@ const jsonLd = [
   import { toolEvent } from '../lib/tool-engagement';
   import { autosave, clearFields, downloadPng } from '../lib/printable';
   import type { AgeGroup, ChoreSet } from '../data/chore-chart';
+  import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../data/responsibilities';
 
   const sets: Record<AgeGroup, ChoreSet> = JSON.parse(document.getElementById('cc-sets')!.textContent!);
   const sheet = document.getElementById('chore-chart')!;
@@ -568,6 +606,32 @@ const jsonLd = [
   };
   const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
 
+  // Illustrations: each chore row (8 daily, then 7 weekly) has a hidden id field and an icon.
+  const rowFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-cc-row]'));
+  const iconFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-cc-icon-field]'));
+  const iconImgs = Array.from(sheet.querySelectorAll<HTMLImageElement>('[data-cc-icon]'));
+  const picker = document.querySelector<HTMLElement>('[data-rp]')!;
+  const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
+  const target = document.querySelector<HTMLSelectElement>('[data-cc-target]')!;
+  function renderIcons() {
+    iconImgs.forEach((img, i) => {
+      const r = responsibilityById(iconFields[i].value);
+      const src = r ? responsibilityImage(r, 256) : null;
+      img.hidden = !src;
+      if (r && src) {
+        if (img.getAttribute('src') !== src) img.src = src;
+        img.style.setProperty('--cc-cat', responsibilityColor(r));
+      } else img.removeAttribute('src');
+    });
+  }
+  /** A row that means a library job gets its illustration; an emptied row loses it. */
+  function syncIcon(i: number) {
+    const text = rowFields[i].value.trim();
+    if (!text) iconFields[i].value = '';
+    else iconFields[i].value = matchResponsibility(text) ?? iconFields[i].value;
+  }
+  const syncAllIcons = (reset = false) => rowFields.forEach((_, i) => { if (reset || !iconFields[i].value) { if (reset) iconFields[i].value = ''; syncIcon(i); } });
+
   // The name is typed in the form but saved with the sheet (autosave reads [data-field] inside one root).
   const savedName = sheet.querySelector<HTMLInputElement>('[data-cc-name-field]')!;
 
@@ -581,6 +645,7 @@ const jsonLd = [
   }
   function render() {
     renderPalette();
+    renderIcons();
     const name = nameInput.value.trim();
     forLine.textContent = name ? `${name}’s` : '';
     const set = sets[ageField.value as AgeGroup];
@@ -597,6 +662,7 @@ const jsonLd = [
 
   const save = autosave(sheet, 'omc:chore-chart:v1', () => {
     nameInput.value = savedName.value;
+    syncAllIcons();
     render();
   });
 
@@ -621,9 +687,10 @@ const jsonLd = [
     if (!set) return false;
     if (askBeforeReplacing && choreFields().some(el => el.value.trim()) &&
         !confirm('Replace the chores on the chart with the ones for this age?')) return false;
-    sheet.querySelectorAll<HTMLInputElement>('[data-field^="daily-"]').forEach((el, i) => (el.value = set.daily[i] ?? ''));
+    sheet.querySelectorAll<HTMLInputElement>('[data-field^="daily-"][data-cc-row]').forEach((el, i) => (el.value = set.daily[i] ?? ''));
     WEEKLY_FIELD_KEYS.forEach((key,i) => (field(key).value = set.weekly[i] ?? ''));
     set.rewards.forEach((reward, i) => (field(`reward-${i}`).value = reward));
+    syncAllIcons(true);
     ageField.value = ageSelect.value;
     started();
     toolEvent('tool_start', 'chore-chart');
@@ -631,6 +698,7 @@ const jsonLd = [
     save();
     return true;
   }
+  const DAILY = sheet.querySelectorAll('[data-field^="daily-"][data-cc-row]').length;
   const WEEKLY_FIELD_KEYS = ['weekly-0','weekly-1','weekly-2','weekly-3','weekly-4','weekly-5','weekly-6'];
   ageSelect.addEventListener('change', () => {
     if (!sets[ageSelect.value as AgeGroup]) return;
@@ -641,7 +709,36 @@ const jsonLd = [
       status.textContent = `Suggested jobs for ${set.label} are ready. Select “Use suggested chores” to replace your existing jobs.`;
     }
   });
-  sheet.addEventListener('input', () => { render(); });
+  sheet.addEventListener('input', (e) => {
+    const i = rowFields.indexOf(e.target as HTMLInputElement);
+    if (i >= 0) {
+      const before = iconFields[i].value;
+      syncIcon(i);
+      if (iconFields[i].value !== before) save();
+    }
+    render();
+  });
+
+  // Library tiles: "Daily chores" fills the next empty daily row; a weekday fills that day's row.
+  picker.addEventListener('rp:pick', (e) => {
+    const r = responsibilityById((e as CustomEvent<{ id: string }>).detail.id);
+    if (!r) return;
+    let i: number;
+    if (target.value === 'daily') {
+      i = rowFields.slice(0, DAILY).findIndex((el) => !el.value.trim());
+      if (i < 0) { pickerStatus.textContent = 'Daily chores are full. Clear a row first, or add it to a weekday.'; return; }
+    } else {
+      i = DAILY + Number(target.value);
+      const current = rowFields[i].value.trim();
+      if (current && current !== r.title && !confirm(`Replace “${current}” with “${r.title}”?`)) return;
+    }
+    rowFields[i].value = r.title;
+    iconFields[i].value = r.id;
+    started();
+    render();
+    save();
+    pickerStatus.textContent = `Added “${r.title}” to ${target.value === 'daily' ? 'daily chores' : target.selectedOptions[0].text}.`;
+  });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
