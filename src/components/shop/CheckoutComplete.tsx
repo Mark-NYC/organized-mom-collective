@@ -178,7 +178,13 @@ export default function CheckoutComplete() {
         </section>
       )}
 
-      <p className="mt-8 text-[0.95rem] text-soft">Questions about your order? Reply to your receipt email.</p>
+      <p className="mt-8 text-[0.95rem] text-soft">
+        Questions about your order? Reply to your receipt email or visit{' '}
+        <a href={routes.support} className="underline underline-offset-2">
+          Help &amp; Support
+        </a>
+        .
+      </p>
     </div>
   );
 }

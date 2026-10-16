@@ -42,6 +42,8 @@
  *           /resources                         resource library hub
  *           /resources/<article-slug>          articles (src/content/articles/)
  *           /resources/topics/<pillar-id>      pillar pages (src/data/pillars.ts)
+ *           /support           Help & Support: topics, FAQs, contact form (src/data/support.ts)
+ *           /returns           Returns & Refunds policy (/refunds redirects here)
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex)
  *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked from the offer pages, the calendar
@@ -111,8 +113,11 @@ export const routes = {
   pillar: (id: string) => `/resources/topics/${id}`,
   survey: '/survey',
   surveyAdmin: '/survey/admin',
-  /** Refund and return policy (website orders), linked from the footer and the checkout. */
-  refunds: '/refunds',
+  /** Help & Support: help topics, FAQs and the contact form (#contact). */
+  support: '/support',
+  supportContact: '/support#contact',
+  /** Returns & Refunds policy, linked from the footer, /calendar and the checkout. The old /refunds redirects here. */
+  returns: '/returns',
   /** Direct website checkout: the offer pages, the calendar options and (once on sale) the mug page link here, in shop-enabled builds. */
   checkout: '/checkout',
   checkoutComplete: '/checkout/complete',

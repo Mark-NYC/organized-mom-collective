@@ -21,6 +21,8 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.calendar },
     { path: routes.shop },
     { path: routes.companion },
+    { path: routes.support },
+    { path: routes.returns },
     { path: routes.planner },
     { path: routes.pantry },
     { path: routes.tryCalendar },

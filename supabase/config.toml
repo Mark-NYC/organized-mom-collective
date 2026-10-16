@@ -17,3 +17,8 @@ verify_jwt = false
 
 [functions.shop-download]
 verify_jwt = false
+
+# The /support form (guests, CORS preflights). Checks its own callers: validation, honeypot and
+# rate limits in support_submit (supabase/SUPPORT.md).
+[functions.support-request]
+verify_jwt = false

@@ -33,6 +33,13 @@ export interface ShopEnv {
   emailReplyTo: string;
   /** Sender for the Starter Kit delivery email; falls back to emailFrom if Resend refuses it. */
   starterKitEmailFrom: string;
+  /**
+   * Where /support requests go: SUPPORT_INBOX, else SHOP_EMAIL_REPLY_TO, else the address the site
+   * publishes (contact@). Replies from there go straight to the customer.
+   */
+  supportInbox: string;
+  /** Sender for support emails (both the inbox copy and the acknowledgment); falls back to emailFrom if Resend refuses it. */
+  supportEmailFrom: string;
 }
 
 export const STRIPE_API_VERSION = '2025-03-31.basil';
@@ -64,5 +71,7 @@ export function readEnv(get: (key: string) => string | undefined): ShopEnv {
     emailFrom: v('SHOP_EMAIL_FROM', 'Organized Mom Collective <orders@organizedmomcollective.com>'),
     emailReplyTo: v('SHOP_EMAIL_REPLY_TO'),
     starterKitEmailFrom: v('STARTER_KIT_EMAIL_FROM', 'Organized Mom Collective <hello@organizedmomcollective.com>'),
+    supportInbox: v('SUPPORT_INBOX') || v('SHOP_EMAIL_REPLY_TO') || 'contact@organizedmomcollective.com',
+    supportEmailFrom: v('SUPPORT_EMAIL_FROM') || v('STARTER_KIT_EMAIL_FROM', 'Organized Mom Collective <hello@organizedmomcollective.com>'),
   };
 }

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
 import SettingsApp from '../../components/SettingsApp';
+import { routes } from '../../routes';
 ---
 
 <Layout title="Settings">
@@ -12,5 +13,10 @@ import SettingsApp from '../../components/SettingsApp';
         <div slot="fallback" class="h-60"></div>
       </SettingsApp>
     </div>
+    <section aria-labelledby="help-h" class="mt-6 border-t border-rule pt-8">
+      <h2 id="help-h" class="label">Help &amp; Support</h2>
+      <p class="mt-3 text-soft">Questions about the cleaning companion, your calendar or your order? We’re happy to help.</p>
+      <a href={routes.support} class="btn-secondary mt-4">Get help</a>
+    </section>
   </div>
 </Layout>

@@ -57,7 +57,15 @@ function createResendMailer(opts) {
           "Content-Type": "application/json",
           ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
         },
-        body: JSON.stringify({ from: sendOpts?.from || opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
+        body: JSON.stringify({
+          from: sendOpts?.from || opts.from,
+          to: [to],
+          reply_to: sendOpts?.replyTo || opts.replyTo || void 0,
+          subject: msg.subject,
+          html: msg.html,
+          text: msg.text,
+          ...sendOpts?.attachments?.length ? { attachments: sendOpts.attachments } : {}
+        })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message ?? `resend_${res.status}`);
@@ -211,6 +219,7 @@ ${b.blocks.map((x) => x.html).join("\n")}
 </td></tr>
 <tr><td align="center" style="padding:24px 12px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">
 <p style="margin:0 0 10px">${support}</p>
+<p style="margin:0 0 10px"><a href="${esc(site)}/support" style="color:${C.muted}">Help &amp; Support</a> · <a href="${esc(site)}/returns" style="color:${C.muted}">Returns &amp; Refunds</a></p>
 <p style="margin:0">Organized Mom Collective · <a href="${esc(site)}" style="color:${C.muted}">organizedmomcollective.com</a></p>
 ${test ? `<p style="margin:10px 0 0">This is a test email from a test-mode order.</p>` : ""}
 </td></tr>
@@ -223,6 +232,7 @@ ${test ? `<p style="margin:10px 0 0">This is a test email from a test-mode order
     ...b.blocks.map((x) => x.text),
     "",
     opts.supportEmail ? `Questions about your order? Reply to this email or write to ${opts.supportEmail}.` : "Questions about your order? Reply to this email.",
+    `Help & Support: ${site}/support · Returns & Refunds: ${site}/returns`,
     `Organized Mom Collective · ${site}`
   ].join("\n");
   return { subject: test ? `[Test] ${b.subject}` : b.subject, html, text };
@@ -415,7 +425,9 @@ function readEnv(get) {
     resendApiKey: v("RESEND_API_KEY"),
     emailFrom: v("SHOP_EMAIL_FROM", "Organized Mom Collective <orders@organizedmomcollective.com>"),
     emailReplyTo: v("SHOP_EMAIL_REPLY_TO"),
-    starterKitEmailFrom: v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>")
+    starterKitEmailFrom: v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>"),
+    supportInbox: v("SUPPORT_INBOX") || v("SHOP_EMAIL_REPLY_TO") || "contact@organizedmomcollective.com",
+    supportEmailFrom: v("SUPPORT_EMAIL_FROM") || v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>")
   };
 }
 

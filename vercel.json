@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [{ "source": "/refunds", "destination": "/returns", "permanent": true }],
   "rewrites": [{ "source": "/pinterest-feed.csv", "destination": "/api/pinterest-feed" }]
 }

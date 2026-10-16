@@ -286,8 +286,8 @@ export default function Checkout() {
                       <LockIcon /> Secure payment by Stripe. Card, Apple Pay or Google Pay.
                     </p>
                     <p className="mt-2 text-center text-[0.85rem] text-soft">
-                      <a href={routes.refunds} className="underline underline-offset-2" target="_blank" rel="noopener">
-                        Refunds and returns
+                      <a href={routes.returns} className="underline underline-offset-2" target="_blank" rel="noopener">
+                        Returns &amp; refunds
                       </a>
                     </p>
                   </>

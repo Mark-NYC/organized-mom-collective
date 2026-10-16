@@ -52,7 +52,15 @@ function createResendMailer(opts) {
           "Content-Type": "application/json",
           ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
         },
-        body: JSON.stringify({ from: sendOpts?.from || opts.from, to: [to], reply_to: opts.replyTo || void 0, subject: msg.subject, html: msg.html, text: msg.text })
+        body: JSON.stringify({
+          from: sendOpts?.from || opts.from,
+          to: [to],
+          reply_to: sendOpts?.replyTo || opts.replyTo || void 0,
+          subject: msg.subject,
+          html: msg.html,
+          text: msg.text,
+          ...sendOpts?.attachments?.length ? { attachments: sendOpts.attachments } : {}
+        })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message ?? `resend_${res.status}`);
@@ -113,7 +121,9 @@ function readEnv(get) {
     resendApiKey: v("RESEND_API_KEY"),
     emailFrom: v("SHOP_EMAIL_FROM", "Organized Mom Collective <orders@organizedmomcollective.com>"),
     emailReplyTo: v("SHOP_EMAIL_REPLY_TO"),
-    starterKitEmailFrom: v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>")
+    starterKitEmailFrom: v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>"),
+    supportInbox: v("SUPPORT_INBOX") || v("SHOP_EMAIL_REPLY_TO") || "contact@organizedmomcollective.com",
+    supportEmailFrom: v("SUPPORT_EMAIL_FROM") || v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>")
   };
 }
 

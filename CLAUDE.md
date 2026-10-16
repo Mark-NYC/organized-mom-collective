@@ -65,6 +65,10 @@ Conventions: reuse the existing print palette, `.label` / `.page-title` / `.text
 
 Read [docs/brand/PUBLIC-VISUAL-DESIGN.md](docs/brand/PUBLIC-VISUAL-DESIGN.md) before changing public page layouts. Use the homepage's inset gray composition, square photo edges, and shared public styles as the visual reference. Preserve tool output design and the cleaning companion's separate interface.
 
+## Customer support and returns
+
+Policy terms, service expectations, case workflows and the Etsy settings checklist live in [docs/operations/CUSTOMER_SUPPORT.md](docs/operations/CUSTOMER_SUPPORT.md); copy and numbers in `src/data/support.ts`. The 14-day return policy covers printed calendars only: never apply it to downloads or other products, and never change approved terms without the owner. The support form backend is in [supabase/SUPPORT.md](supabase/SUPPORT.md).
+
 ## Printable tool output design
 
 Read [docs/brand/TOOL-OUTPUT-DESIGN.md](docs/brand/TOOL-OUTPUT-DESIGN.md) before creating or redesigning printable tools. Shared three-color choices live in `src/data/tool-palettes.ts`; selections save with tool content and carry into downloads.

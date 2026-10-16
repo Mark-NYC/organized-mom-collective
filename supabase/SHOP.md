@@ -190,13 +190,13 @@ Work top to bottom. Nothing here enables real payments until the **Launch** sect
 - [ ] **Sales tax** ([Tax](#sales-tax)). Then Settings → Sales tax → choose → **Confirm and save**. Real-money checkout stays closed until you do.
 - [ ] **Shipping prices** ([Shipping](#shipping)). Add the real rate(s) in Settings, then turn off the test placeholder.
 - [ ] Per-order limit (5) and website stock (25; separate from Etsy, not synced).
-- [x] Refund/return policy: published at `/refunds` (2026-10-15), linked from the footer and the checkout; 30 days on everything, the download guarantee covers every download. The original draft: [REFUND_POLICY_DRAFT.md](REFUND_POLICY_DRAFT.md). The Weekly Reset page promises a 30-day "Actually Used It" money-back guarantee: honor it with a full refund from the dashboard (that also turns the download link off).
+- [x] Refund/return policy: published at `/returns` (`/refunds` redirects there), linked from the footer, /calendar and the checkout. Calendars: 14-day returns from 2026-10-16 (it was 30 days from 2026-10-15); downloads: the 30-day guarantee. Terms and workflows: [docs/operations/CUSTOMER_SUPPORT.md](../docs/operations/CUSTOMER_SUPPORT.md). The Weekly Reset page promises a 30-day "Actually Used It" money-back guarantee: honor it with a full refund from the dashboard (that also turns the download link off).
 - [ ] **Sales tax on downloads**: the Weekly Reset product carries Stripe tax code `txcd_10000000` (general electronically supplied services). Confirm the right code with your accountant before choosing Stripe Tax; change it in the SQL Editor (`update shop_products set tax_code = '…' where slug = 'weekly-reset-system';`).
 - [ ] Support inbox: `SHOP_EMAIL_REPLY_TO` is printed in every customer email as the contact address.
 
 ## Launch
 
-**State on 2026-10-15:** buy buttons are wired on every product that's ready (all four downloads, the January–June 2027 calendar; the mug and the Family Sanity Saver kit stay off). The real shipping rate is in, the refund policy is published at `/refunds`, and every download file is verified. What's left is your account work: live Stripe keys, Stripe Tax, the store's tax setting, and switching checkout to Open. Each step is reversible (Settings → **Off** stops new checkouts instantly).
+**State on 2026-10-15:** buy buttons are wired on every product that's ready (all four downloads, the January–June 2027 calendar; the mug and the Family Sanity Saver kit stay off). The real shipping rate is in, the refund policy is published at `/refunds` (now `/returns`), and every download file is verified. What's left is your account work: live Stripe keys, Stripe Tax, the store's tax setting, and switching checkout to Open. Each step is reversible (Settings → **Off** stops new checkouts instantly).
 
 Do these in order.
 
