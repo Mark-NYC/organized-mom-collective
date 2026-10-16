@@ -427,7 +427,9 @@ function readEnv(get) {
     emailReplyTo: v("SHOP_EMAIL_REPLY_TO"),
     starterKitEmailFrom: v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>"),
     supportInbox: v("SUPPORT_INBOX") || v("SHOP_EMAIL_REPLY_TO") || "contact@organizedmomcollective.com",
-    supportEmailFrom: v("SUPPORT_EMAIL_FROM") || v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>")
+    supportEmailFrom: v("SUPPORT_EMAIL_FROM") || v("STARTER_KIT_EMAIL_FROM", "Organized Mom Collective <hello@organizedmomcollective.com>"),
+    returnAddress: v("RETURN_ADDRESS"),
+    supportWebhookSecret: v("SUPPORT_WEBHOOK_SECRET")
   };
 }
 

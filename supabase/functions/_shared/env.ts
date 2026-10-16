@@ -40,6 +40,14 @@ export interface ShopEnv {
   supportInbox: string;
   /** Sender for support emails (both the inbox copy and the acknowledgment); falls back to emailFrom if Resend refuses it. */
   supportEmailFrom: string;
+  /**
+   * The physical return address (RETURN_ADDRESS), lines separated by newlines or "|". A secret: only
+   * the support-return function reads it, only for an approved return. Never logged, stored or sent
+   * anywhere else, and never in the repository or a PUBLIC_ build variable.
+   */
+  returnAddress: string;
+  /** Shared secret the Supabase Database Webhook sends in x-webhook-secret to support-return. */
+  supportWebhookSecret: string;
 }
 
 export const STRIPE_API_VERSION = '2025-03-31.basil';
@@ -73,5 +81,7 @@ export function readEnv(get: (key: string) => string | undefined): ShopEnv {
     starterKitEmailFrom: v('STARTER_KIT_EMAIL_FROM', 'Organized Mom Collective <hello@organizedmomcollective.com>'),
     supportInbox: v('SUPPORT_INBOX') || v('SHOP_EMAIL_REPLY_TO') || 'contact@organizedmomcollective.com',
     supportEmailFrom: v('SUPPORT_EMAIL_FROM') || v('STARTER_KIT_EMAIL_FROM', 'Organized Mom Collective <hello@organizedmomcollective.com>'),
+    returnAddress: v('RETURN_ADDRESS'),
+    supportWebhookSecret: v('SUPPORT_WEBHOOK_SECRET'),
   };
 }

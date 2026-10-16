@@ -28,7 +28,7 @@ Approved by the owner, effective **October 16, 2026**. Applies to the printed fa
 | Damaged, defective or incorrect | Free replacement or refund at no additional cost. **No reporting cutoff**: the 14-day window doesn't apply, and nothing here limits rights customers have by law or under Etsy's protections. Ask for photos when useful. Don't require the item back unless genuinely necessary; if it is, we pay return postage. |
 | Shipping problems, lost packages | Handled individually with the carrier and the sales platform. |
 | Outside the window | Customer can contact us for individual consideration. |
-| Return address | Never published. Sent by email only after a return is approved. |
+| Return address | Never published: not on the website, in the repository, in frontend code, in the database or in general support emails. It lives only in the Edge Function secret `RETURN_ADDRESS` and goes out only in the approved-return email (below). |
 
 **Why 14 days:** the calendar is dated week by week. Present this as practical (a returned calendar only helps another family while its weeks are ahead), never as a penalty.
 
@@ -65,10 +65,10 @@ Not sure? Ask for the order number, or search both Etsy Orders and Admin → Ord
 
 ### Standard (change-of-mind) return
 1. Check: within 14 days of delivery (use the carrier's delivery date), unused, proof of purchase.
-2. Approve by email with the return address and a reminder: unused, original condition, trackable shipping recommended, return postage is hers, original shipping isn't refunded.
-3. When it arrives, inspect it within a couple of days. Resalable → refund the item price within 5 business days. Not resalable → explain kindly with a photo; offer to send it back.
+2. Approve: in Supabase → Table Editor → `support_requests`, set the request's `return_status` to `approved` and save. She automatically gets one short "Your return is approved" email with the return address, her reference, and the postage and refund notes, reply-to the support inbox. Check `return_instructions_status` reads `sent` (`no_address` = the secret isn't set; `failed` = save the row again to retry). Never paste the address into the form reply or the acknowledgment. Etsy orders: approve the same way if she wrote through the form; if she only wrote in Etsy Messages, create nothing and send the address there yourself.
+3. Set `return_status` to `received` when it arrives. Inspect it within a couple of days. Resalable → refund the item price within 5 business days. Not resalable → explain kindly with a photo; offer to send it back.
 4. Etsy order: refund through Etsy (Orders → the order → Refund). Website order: Admin → Orders → Refund; return it to stock only if it's sellable.
-5. Mark the request resolved.
+5. Set `return_status` to `refunded` (or `declined`) and `status` to `resolved`.
 
 ### Damaged, defective or incorrect
 1. Ask for the order number and a photo (unless the description is already clear).
@@ -112,6 +112,10 @@ These live in Etsy (Shop Manager → Settings → Policies, and each listing). *
 
 If Etsy's options can't express a term exactly (for example the cancellation window), Etsy's setting governs Etsy orders. Match it as closely as possible and adjust the website if they disagree.
 
+## Future: one admin dashboard
+
+The plan for managing the website, products, orders, support, refunds and returns from one `/admin` is in [ADMIN_DASHBOARD_PLAN.md](ADMIN_DASHBOARD_PLAN.md). Until it exists, support runs from the inbox and Supabase's Table Editor as described above.
+
 ## Open decisions and flags (not legal advice)
 
 1. **Earlier 30-day promise.** `/refunds` promised 30-day calendar returns and a 30-day damage window from 2026-10-15 until this change. No live website orders exist (checkout is in preview), and Etsy orders follow Etsy's settings, so nobody was sold under it on the website. If any Etsy buyer bought under a 30-day Etsy setting, honor what their listing said.
@@ -119,6 +123,6 @@ If Etsy's options can't express a term exactly (for example the cancellation win
 3. **Etsy's rules win on Etsy orders.** Etsy's own return settings and purchase protection apply to Etsy purchases. Keep them matched (checklist above).
 4. **State consumer law.** Some states require a posted refund policy to be conspicuous or treat an unposted policy as allowing returns (e.g. California, New York). The policy is now posted on `/returns`, linked from the footer and beside the buy buttons. If you sell in person or ship internationally, review again.
 5. **Stripe refunds** go back to the original payment method only, and some payment methods limit how long after the charge a refund is possible. "Subject to the payment platform's capabilities" covers this; refund promptly.
-6. **Return address privacy.** A home address is only ever emailed after approval. Consider a PO box or mailbox service before volume grows.
+6. **Return address privacy.** The return address is currently the owner's home address. It is kept only in the `RETURN_ADDRESS` secret and sent only in approved-return emails (`supabase/SUPPORT.md` → Approving a return). Tests fail if anything else in the code reads it. Recipients can still forward an email, so move to a PO box or mailbox service before volume grows; then just change the secret.
 7. **Data retention.** Support requests are kept until you delete them. Suggest deleting resolved requests after 12 months (Table Editor → filter `status = resolved` and `resolved_at` older than a year → delete).
 8. **Mug, personalized products, future products:** write their terms before they go on sale; add a section to `/returns` and a product line to `src/data/support.ts`.

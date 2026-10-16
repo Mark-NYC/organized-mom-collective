@@ -43,7 +43,8 @@ export function readPhoto(raw: unknown): Photo | null | 'bad' {
   return { filename: `${base || 'photo'}.jpg`, content: data };
 }
 
-function shell(opts: { subject: string; preheader: string; eyebrow: string; title: string; blocks: Block[]; footer: string[]; siteUrl: string }): EmailMessage {
+/** The support emails' layout (shared with handlers/support-return.ts). */
+export function shell(opts: { subject: string; preheader: string; eyebrow: string; title: string; blocks: Block[]; footer: string[]; siteUrl: string }): EmailMessage {
   const { subject, preheader, eyebrow, title, blocks, footer, siteUrl } = opts;
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(subject)}</title></head>
@@ -122,7 +123,7 @@ export function inboxEmail(input: SupportInput, reference: string, hasPhoto: boo
 }
 
 /** Resend refuses an unverified sender with a 403 "domain is not verified" style message. */
-const senderRefused = (err: unknown) => /verif|domain|not allowed/i.test((err as Error)?.message ?? '');
+export const senderRefused = (err: unknown) => /verif|domain|not allowed/i.test((err as Error)?.message ?? '');
 
 export function createSupportHandler(deps: ShopDeps): Handler {
   const { supportEmailFrom: from, supportInbox, siteUrl } = deps.env;

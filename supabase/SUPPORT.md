@@ -39,6 +39,24 @@ Without `RESEND_API_KEY` requests are still saved (`notify_status = skipped`).
 
 The site needs `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` at build time (already set on Vercel). Without them `/support` shows the email address instead of the form.
 
+## Approving a return (the return address)
+
+The return address is the owner's home address, so it is kept out of everything public:
+
+- **Only** in the Edge Function secret `RETURN_ADDRESS`. Never in the repository, a `PUBLIC_` build variable, frontend code, the database, logs, the acknowledgment or the inbox copy. `tests/support.test.ts` fails if any file other than `env.ts` and `handlers/support-return.ts` reads it.
+- Sent **only** after approval, **once**, to that request's customer, by the `support-return` Edge Function (deployed 2026-10-16; refuses every call until `SUPPORT_WEBHOOK_SECRET` is set).
+
+How it works: the owner sets `return_status = 'approved'` on a request → a Database Webhook posts the row to `support-return` with the shared secret → `support_return_claim` claims the one email (no repeat on later saves) → the "Your return is approved" email goes out, reply-to the support inbox → `return_instructions_status` = `sent`. If the address secret is missing nothing is sent (`no_address`); a failed send (`failed`) releases the claim, so saving the row again retries. Migration `20261019010000_support_returns.sql` (applied 2026-10-16) adds `return_status` (`requested` / `approved` / `received` / `refunded` / `declined`), `return_instructions_sent_at`, `return_instructions_status`; all new rows start empty.
+
+**One-time setup (owner, Supabase dashboard):**
+
+1. Edge Functions → Secrets → add `RETURN_ADDRESS`: the full address, one line per row, separated by `|` (e.g. `Organized Mom Collective|Street and number|City, ST ZIP`). 2–6 lines.
+2. Same place → add `SUPPORT_WEBHOOK_SECRET`: a long random string (a password manager can generate one). Keep a copy for step 3 only.
+3. Database → Webhooks → Create a new hook: name `support-return`; table `public.support_requests`; events **Update** only; type **Supabase Edge Functions** → `support-return`, method POST; add HTTP header `x-webhook-secret` with the value from step 2. (This enables the `pg_net` extension if it isn't on.)
+4. Test: submit a request through `/support` with your own email, set its `return_status` to `approved`, and check you get the email and the row says `sent`. Then delete the test row.
+
+To change the address later (e.g. a PO box), just edit the `RETURN_ADDRESS` secret; nothing else changes.
+
 ## Testing
 
 - `npm test` → `tests/support.test.ts`: validation, photo checks, both emails, the handler's success, failure, rate-limit and fallback paths, the browser client, and that the migration matches the form's topics and limits.
