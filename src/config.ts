@@ -34,7 +34,7 @@ export const CALENDAR_OPTIONS = [
     price: 34,
     weeks: 26,
     editions: [{ label: 'January–June 2027' }, { label: 'July–December 2027' }] as Edition[],
-    etsyUrl: null as string | null, // PLACEHOLDER: half-year Etsy listing URL
+    etsyUrl: 'https://www.etsy.com/listing/4591398377/2027-family-wall-calendar-organizer' as string | null, // live listing; 26-week is a variation
     // Sold through the website checkout (shop product slug) in shop-enabled builds; that product's edition.
     websiteProduct: 'calendar-26-week' as string | null,
     websiteEdition: 'January–June 2027' as string | null,
@@ -45,7 +45,7 @@ export const CALENDAR_OPTIONS = [
     price: 54,
     weeks: 52,
     editions: [{ label: 'All of 2027' }] as Edition[],
-    etsyUrl: null as string | null, // PLACEHOLDER: full-year Etsy listing URL
+    etsyUrl: 'https://www.etsy.com/listing/4591398377/2027-family-wall-calendar-organizer' as string | null, // live listing; 52-week is a variation
     // Not on the website yet (calendar-52-week is off, 0 stock): set both once it has real stock.
     websiteProduct: null as string | null,
     websiteEdition: null as string | null,
