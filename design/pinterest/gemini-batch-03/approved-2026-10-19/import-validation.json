@@ -74,7 +74,23 @@
  "keywords_per_pin": 4,
  "keywords_note": "Master-plan keyword and article primary keyword used as hypotheses; not checked against Pinterest autocomplete or Trends; no volume claimed.",
  "thumbnail": "blank",
- "publish_date": "blank (not scheduled)",
+ "publish_date": {
+  "2026-10-20T12:00:00": [
+   21,
+   22,
+   23,
+   26,
+   30
+  ],
+  "2026-10-21T12:00:00": [
+   24,
+   25,
+   27,
+   28,
+   29
+  ]
+ },
+ "publish_date_note": "Owner schedule set 2026-10-19: five pins each day at noon. Format matches batch 02. Read as UTC, noon is 8 am Eastern; read as account-local time, it is noon local. Either way each pin stays on its date.",
  "boards_used": [
   "Chores & Shared Responsibilities",
   "Cleaning Schedules for Busy Moms",

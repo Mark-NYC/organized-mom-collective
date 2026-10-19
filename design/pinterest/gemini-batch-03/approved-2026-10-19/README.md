@@ -42,7 +42,7 @@ Headlines were matched from the visible text on each image, not from filenames o
 | Thumbnail | Blank (video pins only). |
 | Description | Unique, 275–316 characters (limit 500). Built from the destination's own copy. No hashtags. |
 | Link | Canonical `https://www.organizedmomcollective.com/…` paths, no trailing slash, no tracking parameters. |
-| Publish date | Blank. Not scheduled yet. |
+| Publish date | Owner schedule, set 2026-10-19. **October 20, noon: pins 21, 22, 23, 26, 30. October 21, noon: pins 24, 25, 27, 28, 29.** Format `YYYY-MM-DDTHH:MM:SS`, as in batch 02. Read as UTC, noon is 8 am Eastern; read as account-local time, it's noon local. Either way each pin stays on its date. Same-article and look-alike pairs are on different days: 23/27 (IF-03), 21/25 (bathroom), 21/29 (cleaning). |
 | Keywords | 4 phrases per pin. The master-plan keyword and the article's primary keyword are **hypotheses**, not checked against Pinterest autocomplete or Trends. No search volume is claimed. |
 
 UTF-8 without BOM, CRLF line endings, RFC 4180 quoting. Re-read with a CSV parser and confirmed to round-trip.
@@ -88,4 +88,5 @@ Each image was decoded and saved as PNG with no resizing, cropping, recoloring o
 1. Fix the broken pin image on the HC-07 destination: `bathroom-reset-checklist.mdx` embeds `/images/pinterest/HC-07-search-1000x1500.webp`, which isn't in the repository.
 2. Open the destination URLs on the live site and confirm each returns 200 and shows what its pin promises.
 3. Confirm the exact board spellings in the live account (the registry notes truncated profile cards).
-4. After importing, update `docs/editorial/PINTEREST_PIN_INVENTORY.md` and the master calendar only from real Pinterest evidence (pin URL and date).
+4. After importing, check that Pinterest shows five scheduled pins on October 20 and five on October 21. A community thread reports CSV imports creating only the first rows, so count them.
+5. After importing, update `docs/editorial/PINTEREST_PIN_INVENTORY.md` and the master calendar only from real Pinterest evidence (pin URL and date).
