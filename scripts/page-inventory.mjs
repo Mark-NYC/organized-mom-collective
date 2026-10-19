@@ -16,7 +16,7 @@ import { brokenStatus, buildInventory, externalCtas, internalLinks, navPaths, no
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dist = join(root, 'dist');
-const SITE = 'https://organizedmomcollective.com';
+const SITE = 'https://www.organizedmomcollective.com';
 const args = new Set(process.argv.slice(2));
 
 if (!existsSync(dist)) {
