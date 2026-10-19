@@ -46,10 +46,12 @@
  "publish_date": "blank",
  "boards": [
   "Chores & Shared Responsibilities",
-  "Cleaning Schedules & Checklists",
-  "Family Planning & Routines",
-  "Simple Home Cleaning Routines"
+  "Cleaning Schedules for Busy Moms",
+  "Family Organization Ideas",
+  "Weekly Reset Routines"
  ],
- "boards_verified_on_account": false,
- "keywords": "Relevant phrases from article primary keywords and pin copy; not verified against Pinterest autocomplete or Trends."
+ "boards_verified_on_account": "Owner screenshot; exact spelling of Family Organization Ideas and Cleaning Schedules for Busy Moms expanded from truncated labels, to confirm in the live account",
+ "keywords": "Relevant phrases from article primary keywords and pin copy; not verified against Pinterest autocomplete or Trends.",
+ "board_source": "docs/editorial/PINTEREST_BOARDS.md (branch docs/pinterest-actual-boards-2026-10-19, c0ab83b; owner account screenshot 2026-10-19)",
+ "obsolete_board_names_present": false
 }

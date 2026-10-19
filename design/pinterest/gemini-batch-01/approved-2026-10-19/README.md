@@ -35,7 +35,7 @@ The owner confirmed this format as current on 2026-10-19:
 | --- | --- |
 | Title | Unique for every pin, 49–77 characters (limit 100). Leads with the article's search phrase. |
 | Media URL | Fixed public GitHub links at commit `c515455`. All 10 returned HTTP 200 `image/png`, byte-identical to the committed files. |
-| Pinterest board | One of the four board names from the strategy (see the launch checks). |
+| Pinterest board | **Corrected 2026-10-19** to the real account boards in `docs/editorial/PINTEREST_BOARDS.md` (see below). |
 | Thumbnail | Blank. That column is only for video pins. |
 | Description | Unique for every pin, 209–295 characters (limit 500). Opens with the search phrase. No hashtags. |
 | Link | Canonical `https://www.organizedmomcollective.com` paths: no trailing slash, no tracking parameters. |
@@ -61,14 +61,14 @@ On 2026-10-19, all 10 returned HTTP 200 `image/png`, byte-identical to the commi
 ## What was verified and what wasn't
 
 - **Destinations:** each page exists in the site source. The on-image copy was checked against the article text (pin 1: HC-01 “skip it, don’t stack it”; 2: FP-04 summary; 3: calendar page hero; 4: FP-09 and `/routine-chart`; 5: FP-10; 6: `/chore-chart`; 7–8: IF-03 teaching steps; 9: HC-03 zone table; 10: HC-02 five tasks). **The live site was not verified.** This session's network policy blocked `www.organizedmomcollective.com`.
-- **Boards:** names come from the board list in `PINTEREST_STRATEGY.md`. Whether they exist on the Pinterest account was not checked.
+- **Boards:** corrected on 2026-10-19 to the account's real boards, from the registry in `docs/editorial/PINTEREST_BOARDS.md` (owner's account screenshot, PR #123, branch `docs/pinterest-actual-boards-2026-10-19`). The old planning names (*Simple Home Cleaning Routines*, *Family Planning & Routines*, *Cleaning Schedules & Checklists*) no longer appear in either CSV. Only the board column changed: titles, descriptions, links, image URLs, keywords and artwork are untouched.
 - **Keywords:** titles use the articles' existing primary keywords. No Pinterest search volumes or trends were researched or claimed.
 - **Product artwork:** pin 3's calendar page matches the content of the site's `calendar-filled-in` photo, and pin 6's chart matches the generator's jobs. Neither was pixel-compared with the master artwork.
 - **Pinterest import format:** the owner confirmed the template above on 2026-10-19. This session couldn't reach Pinterest's help center to check it independently.
 
 ## Remaining launch checks
 
-1. **Boards:** confirm all four exist on the account, spelled exactly like this: *Simple Home Cleaning Routines* (pins 1, 10), *Family Planning & Routines* (2, 3, 4, 5), *Chores & Shared Responsibilities* (6, 7, 8), *Cleaning Schedules & Checklists* (9). The IF-03 batch also used *Chores & Shared Responsibilities*, but this repository has no record that any of the four exist on the account.
+1. **Boards:** the board names are now *Cleaning Schedules for Busy Moms* (pins 1, 9, 10), *Weekly Reset Routines* (2), *Family Organization Ideas* (3, 4, 5) and *Chores & Shared Responsibilities* (6, 7, 8). The registry warns that the profile cards cut off two labels, so before importing, check the exact spelling of *Family Organization Ideas* and *Cleaning Schedules for Busy Moms* in the live account. If PR #123 changes the registry before it merges, update the CSVs to match.
 2. **Live destinations:** open all 8 destination URLs on the live site and confirm each returns 200 and shows what its pin promises. Pin 6 doesn't mention an email step, because the email gate on `/chore-chart` can be switched on or off in the code.
 3. **Image size:** confirm Pinterest accepts the eight 687 × 1024 pins without cropping them in the feed.
 4. **Publish dates:** fill these in before importing, because importing a dated file schedules the pins. Keep pins 2 and 3 well apart, and pins 7 and 8 too (see review notes).
