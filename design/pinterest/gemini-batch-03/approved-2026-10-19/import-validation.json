@@ -2,6 +2,7 @@
  "batch": "gemini-batch-03",
  "approved": "2026-10-19",
  "asset_commit": "655c945669d9f9cbfd11f0f36e1f43e1f51d86d8",
+ "asset_commit_pin_29": "5db509e7fbca48a9c4e4b2adc5774a55524e637b",
  "file": "pinterest-import-ready.csv",
  "columns": [
   "Title",
@@ -13,29 +14,20 @@
   "Publish date",
   "Keywords"
  ],
- "rows": 8,
+ "rows": 10,
  "pins_in_import": [
   21,
   22,
   23,
+  24,
   25,
   26,
   27,
   28,
+  29,
   30
  ],
- "pins_held": [
-  {
-   "pin": 24,
-   "master_id": "OMC-P0369",
-   "reason": "Owner decision: the image shows a real copyrighted book cover (“Where the Wild Things Are”, Maurice Sendak) with title and author legible."
-  },
-  {
-   "pin": 29,
-   "master_id": "OMC-P0212",
-   "reason": "Owner replaced this image on 2026-10-19; the replacement file did not reach this session. The superseded version is not shipped. Re-send the replacement to finish."
-  }
- ],
+ "pins_held": [],
  "encoding": "UTF-8, no BOM",
  "line_endings": "CRLF",
  "quoting": "RFC 4180 minimal",
@@ -123,6 +115,12 @@
    "bytes_match": true
   },
   {
+   "pin": 24,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
    "pin": 25,
    "status": 200,
    "content_type": "image/png",
@@ -142,6 +140,12 @@
   },
   {
    "pin": 28,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 29,
    "status": 200,
    "content_type": "image/png",
    "bytes_match": true
@@ -401,22 +405,32 @@
   {
    "pin": 29,
    "master_id": "OMC-P0212",
-   "original": "(pending)",
-   "original_format": "",
-   "original_size": [],
-   "original_sha256": "",
-   "original_icc": "",
-   "file": "(replacement pending)",
+   "original": "12.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "928244bf87c3d83f2a68a4d35ba15d86ec1e34551857b0e9055f8a1c280df6f7",
+   "original_icc": "none",
+   "file": "omc-small-home-cleaning-rhythm-02.png",
    "headline": "A Small Home Still Needs a Simple Cleaning Rhythm",
-   "format": "",
-   "size": [],
-   "mode": "",
-   "icc": "",
-   "sha256": "",
-   "pixel_identical_to_source": null,
-   "bytes": 0,
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "1f286a025475b2dc74d5078fbb035d3cf2530398c554c6f88c5c7d64085b65c3",
+   "pixel_identical_to_source": true,
+   "bytes": 517523,
    "sha256_match_in_repo": null,
-   "closest_repo_image": null
+   "closest_repo_image": {
+    "path": "design/photography/kaboompics/HC-03/32379.jpg",
+    "dhash_distance_bits": 102
+   },
+   "note": "Owner replacement (inset layout), 2026-10-19. Named -02 so it cannot be confused with the superseded -01 still present in asset commit 655c945."
   },
   {
    "pin": 30,
