@@ -25,6 +25,16 @@ This is a **seed record from the October 14, 2026 creative review**, not a verif
 | Teaching chores | What does “done” look like? | /resources/chores-for-kids-by-age | plate, cup, napkin; three steps (reuses IF-03 hook) | Approved 2026-10-19 (gemini-batch-01 #8) | Not published |
 | Zone cleaning | One zone each day. | /resources/zone-cleaning-schedule | Mon–Thu zone list above living room | Approved 2026-10-19 (gemini-batch-01 #9) | Not published |
 | Daily cleaning | 15 minutes. Then stop. | /resources/daily-cleaning-routine | five-task checklist over sunny counter | Approved 2026-10-19 (gemini-batch-01 #10) | Not published |
+| Meal planning | Stop Deciding Dinner at 5 PM. | /resources/weekly-meal-planning-for-families | sunlit table, handwritten meal plan, cookbooks | Approved; not published (gemini-batch-02 #11) | Not published |
+| Grocery list | Your Grocery List Starts Here | /resources/grocery-list-from-meal-plan | three panels: planning notebook, pantry shelf, blank list | Approved; not published (gemini-batch-02 #12) | Not published |
+| Command center | A Command Center That Actually Works | /resources/home-command-center | wall calendar, two paper pockets, keys, backpack (version to confirm) | Approved; not published (gemini-batch-02 #13) | Not published |
+| Family calendar | Put the Week Where Everyone Can See It | /resources/how-to-organize-a-family-calendar | boy and adult pointing at wall calendar (profile face check) | Approved; not published (gemini-batch-02 #14) | Not published |
+| Monthly deep cleaning | One Deep-Cleaning Project a Month | /resources/monthly-deep-cleaning-schedule | hands wiping out a kitchen drawer | Approved; not published (gemini-batch-02 #15) | Not published |
+| Mental load | Sharing the Mental Load Starts Here | /resources/how-to-share-the-mental-load | two adults writing family schedule together, faces out of frame | Approved; not published (gemini-batch-02 #16) | Not published |
+| Time audit | Where Does Your Time Go? | /resources/where-does-my-time-go | overhead counter: form, keys, receipt, notebook, sneakers | Approved; not published (gemini-batch-02 #17) | Not published |
+| Paper organization | The Paper Pile Needs Two Places | /resources/home-command-center | Incoming/Outgoing wall pockets, hand with envelope | Approved; not published (gemini-batch-02 #18) | Not published |
+| Meal planning | Plan Around Your Busy Nights | /resources/weekly-meal-planning-for-families | three dinners: full, short, zero-effort night | Approved; not published (gemini-batch-02 #19) | Not published |
+| Intentional family life | What Matters This Week? | /resources/intentional-family-life | table with weekly notebook, cocoa, picture books, board game | Approved; not published (gemini-batch-02 #20) | Not published |
 
 Other existing Pinterest posts and generator creative are **not comprehensively recorded here**. Before a new batch, also inspect per-article plans, asset manifests, site content and Pinterest when accessible.
 

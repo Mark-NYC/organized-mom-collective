@@ -1,0 +1,380 @@
+{
+ "batch": "gemini-batch-02",
+ "approved": "2026-10-19",
+ "asset_commit": "2d55e350d355e1598024e414fe2f402d7c96ebbe",
+ "file": "pinterest-import-ready.csv",
+ "columns": [
+  "Title",
+  "Media URL",
+  "Pinterest board",
+  "Thumbnail",
+  "Description",
+  "Link",
+  "Publish date",
+  "Keywords"
+ ],
+ "rows": 10,
+ "encoding": "UTF-8, no BOM",
+ "line_endings": "CRLF",
+ "quoting": "RFC 4180 minimal (fields with commas or quotes are double-quoted)",
+ "csv_roundtrip": true,
+ "title_lengths": [
+  63,
+  66,
+  63,
+  73,
+  65,
+  72,
+  45,
+  58,
+  63,
+  50
+ ],
+ "description_lengths": [
+  262,
+  274,
+  256,
+  274,
+  273,
+  249,
+  257,
+  256,
+  281,
+  245
+ ],
+ "alt_text_lengths": [
+  316,
+  354,
+  353,
+  324,
+  287,
+  365,
+  371,
+  366,
+  344,
+  302
+ ],
+ "unique_titles": true,
+ "unique_descriptions": true,
+ "unique_media_urls": true,
+ "thumbnail": "blank",
+ "publish_date": "blank for all 10 (owner to schedule)",
+ "keywords": "4 phrases per pin from the article primary keyword and pin copy; not verified against Pinterest autocomplete or Trends; no volume claimed.",
+ "boards_used": [
+  "Cleaning Schedules for Busy Moms",
+  "Family Organization Ideas",
+  "Meal Planning for Families",
+  "Mom Life & Mental Load",
+  "Weekly Reset Routines"
+ ],
+ "board_registry": [
+  "Meal Planning for Families",
+  "Chores & Shared Responsibilities",
+  "Family Organization Ideas",
+  "Cleaning Schedules for Busy Moms",
+  "Mom Life & Mental Load",
+  "Weekly Reset Routines"
+ ],
+ "board_source": "docs/editorial/PINTEREST_BOARDS.md on branch docs/pinterest-actual-boards-2026-10-19 (not merged at time of writing)",
+ "destinations_in_site_source": true,
+ "live_site_verified": false,
+ "live_site_note": "www.organizedmomcollective.com blocked by this session’s network policy (proxy 403 / DNS failure).",
+ "import_format_verified_against_pinterest_docs": false,
+ "import_format_note": "help.pinterest.com unreachable from this session. Columns follow the owner-confirmed Batch 01 template (2026-10-19).",
+ "media_url_checks": [
+  {
+   "pin": 11,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 12,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 13,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 14,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 15,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 16,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 17,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 18,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 19,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 20,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  }
+ ],
+ "assets": [
+  {
+   "pin": 11,
+   "original": "1.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "88ae22ce9d4c39b4bc8941335f943c27364e5c4d9cbfe6bd3752c4e32b162c15",
+   "original_icc": "none",
+   "file": "omc-stop-deciding-dinner-01.png",
+   "headline": "Stop Deciding Dinner at 5 PM.",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "4cc9efc65dc627473d684c4d11514ee9060432f61bf085005114e686532cfe5b",
+   "pixel_identical_to_source": true,
+   "bytes": 642044
+  },
+  {
+   "pin": 12,
+   "original": "2.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "fe6703d13cb5d9f245e5084470584347e8db3731b7a763817939764561828428",
+   "original_icc": "none",
+   "file": "omc-grocery-list-system-01.png",
+   "headline": "Your Grocery List Starts Here",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "230176235d091cdcda356fe372c8ee07b1014241d74b0beb427ba51d8f1b82db",
+   "pixel_identical_to_source": true,
+   "bytes": 451280
+  },
+  {
+   "pin": 13,
+   "original": "3.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "551e44d9a005a0ddf3d16f6d43f05cb91dba568ce863c5269a0727267a845941",
+   "original_icc": "none",
+   "file": "omc-family-command-center-01.png",
+   "headline": "A Command Center That Actually Works",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "ba1e3836cf243e9b81dda636201d2c1798f57ceb5dba688ae901317cee4afb24",
+   "pixel_identical_to_source": true,
+   "bytes": 337097
+  },
+  {
+   "pin": 14,
+   "original": "6.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "950c61ef773e3e85bb8827a6a6ee3e166ba2d61d4fb9724b1731ef60637e1261",
+   "original_icc": "none",
+   "file": "omc-shared-family-calendar-01.png",
+   "headline": "Put the Week Where Everyone Can See It",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "132c8ad462e2966c4178cebcaf455b786e7f77cfb17c01118a1181636e375b80",
+   "pixel_identical_to_source": true,
+   "bytes": 472077
+  },
+  {
+   "pin": 15,
+   "original": "5.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "8efc0052739e0aa117942ebc8be8e24952a116c8dd6b0659daf2c3035b14c5a8",
+   "original_icc": "none",
+   "file": "omc-monthly-deep-cleaning-01.png",
+   "headline": "One Deep-Cleaning Project a Month",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "9b2700cbb7d9611b33209418dd484471cdb08a637d3da9acdb422d9a91f32e9a",
+   "pixel_identical_to_source": true,
+   "bytes": 482445
+  },
+  {
+   "pin": 16,
+   "original": "7.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "4c4731bf513b397d907b3f5d0cb33312b662e9ae59a1010bd798a08bab32516f",
+   "original_icc": "none",
+   "file": "omc-sharing-mental-load-01.png",
+   "headline": "Sharing the Mental Load Starts Here",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "9297c6ec8c1a603f5358e2ecedc9b3d9b2c124c6c68c91a2d62f22867001962f",
+   "pixel_identical_to_source": true,
+   "bytes": 510671
+  },
+  {
+   "pin": 17,
+   "original": "8.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "c433204be76d3c00feeca09a01e444d7b788a37604272370c7e6cb51aaa155c1",
+   "original_icc": "none",
+   "file": "omc-family-time-audit-01.png",
+   "headline": "Where Does Your Time Go?",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "3f13dfc3889cb1b8f7f3d8af302aee27f2615265414b4adfb5c44a32d4e926d3",
+   "pixel_identical_to_source": true,
+   "bytes": 593167
+  },
+  {
+   "pin": 18,
+   "original": "9.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "bd8fa2c241f1e061655706f58b2eee64fc80815da403b53b754fc1a335b01b76",
+   "original_icc": "none",
+   "file": "omc-family-paper-organization-01.png",
+   "headline": "The Paper Pile Needs Two Places",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "418eea9db5440d6d2aa544be2ab4c6d85cc921a9afcbb1058aa7fb692fb3fb31",
+   "pixel_identical_to_source": true,
+   "bytes": 431721
+  },
+  {
+   "pin": 19,
+   "original": "10.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "a61ef2555e51cb9b491e77464cb67eed19016597fc80d9adc53fcfc6b325fcf3",
+   "original_icc": "none",
+   "file": "omc-busy-night-meal-planning-01.png",
+   "headline": "Plan Around Your Busy Nights",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "e5ab1e9bc42617bda846cf4197418da0401587a0ec2ee7aefe2e0b3a08c8847e",
+   "pixel_identical_to_source": true,
+   "bytes": 703805
+  },
+  {
+   "pin": 20,
+   "original": "11.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "0e5cfaa7dce9746fe9d5f678be3f1cddc6da62fd4e2980d749218d91a3cf1ea2",
+   "original_icc": "none",
+   "file": "omc-what-matters-this-week-01.png",
+   "headline": "What Matters This Week?",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
+   "sha256": "4b66cc1fa9ebd3cc05715b66946129b410716aa4137c78ce0730065be888a1c6",
+   "pixel_identical_to_source": true,
+   "bytes": 623570
+  }
+ ],
+ "errors": [],
+ "passed": true
+}
