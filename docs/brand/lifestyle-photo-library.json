@@ -897,6 +897,62 @@
       "used_in": [
         "HC-04 /resources/monthly-deep-cleaning-schedule"
       ]
+    },
+    {
+      "id": "IF07-K7888",
+      "title": "Hands washing at tiled bathroom sink",
+      "role": "IF-07 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "7888",
+      "source_url": "https://kaboompics.com/photo/7888/washing-of-hands-under-running-water",
+      "source_download_url": "https://kaboompics.com/download/ee3222afe7c5e4dbc2b0de71689944de/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Original photo detail page displays free personal and commercial license and standard Kaboompics license; verified 2026-10-19",
+      "license_verification_date": "2026-10-19",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "visual_content_review": {
+        "review_date": "2026-10-19",
+        "review_basis": "Full photographed scene as returned from the original image URL, review pending generated WebP inspection",
+        "visual_status": "source_review_pass",
+        "observations": "Faceless hands under a plain chrome faucet, unbranded white tile and sink; no obvious visible logo or art."
+      },
+      "model_release_review": "No identifiable face. Hands only. No implied endorsement.",
+      "publishing_clearance": false,
+      "public_path": null,
+      "planned_public_path": "public/images/resources/if-07-bathroom-sink-hands-{640,960,1440}.webp",
+      "used_in": [
+        "IF-07 /resources/bathroom-chores-for-kids"
+      ],
+      "status": "Automated download workflow created; verify assets and final crop before setting publishing_clearance true."
+    },
+    {
+      "id": "IF07-K35020",
+      "title": "Folded towels and natural brush on wooden bench",
+      "role": "IF-07 exclusive inline",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "35020",
+      "source_url": "https://kaboompics.com/photo/35020/wooden-bench-with-folded-towels-and-body-brush",
+      "source_download_url": "https://kaboompics.com/download/4ffdc2c19c0afdd027de4d815664a45f/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Original photo detail page displays free personal and commercial license and standard Kaboompics license; verified 2026-10-19",
+      "license_verification_date": "2026-10-19",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "visual_content_review": {
+        "review_date": "2026-10-19",
+        "review_basis": "Full photographed scene as returned from the original image URL, review pending generated WebP inspection",
+        "visual_status": "source_review_pass",
+        "observations": "White and sage folded towels on wooden bench with natural brush; no people, trademarks, visible logos or protected artwork."
+      },
+      "model_release_review": "No people; ordinary household illustration, no endorsement.",
+      "publishing_clearance": false,
+      "public_path": null,
+      "planned_public_path": "public/images/resources/if-07-bathroom-folded-towels-{400,600,800}.webp",
+      "used_in": [
+        "IF-07 /resources/bathroom-chores-for-kids"
+      ],
+      "status": "Automated download workflow created; verify assets and final crop before setting publishing_clearance true."
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
