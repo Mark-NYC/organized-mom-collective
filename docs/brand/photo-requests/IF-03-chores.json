@@ -1,0 +1,14 @@
+{
+  "article": "IF-03 chores-for-kids-by-age",
+  "requested": "2026-10-19",
+  "purpose": "Second IF-03 round with single-word searches (the gallery search returns nothing for multi-word chore phrases): scenes that match the article's jobs (laundry, dishes, setting the table, tidying toys, making a bed), ideally with a child's hands. Research only.",
+  "seeds": [
+    "https://kaboompics.com/gallery?search=toddler",
+    "https://kaboompics.com/gallery?search=daughter",
+    "https://kaboompics.com/gallery?search=son",
+    "https://kaboompics.com/gallery?search=laundry",
+    "https://kaboompics.com/gallery?search=dishes",
+    "https://kaboompics.com/gallery?search=tidying"
+  ],
+  "max_photos": 120
+}
