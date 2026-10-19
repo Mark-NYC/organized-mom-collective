@@ -1,0 +1,280 @@
+{
+ "batch": "gemini-batch-01",
+ "approved": "2026-10-19",
+ "asset_commit": "c51545508bfee9a91ec3d22290780c8b2e0a7be9",
+ "count": 10,
+ "files": [
+  {
+   "pin": 1,
+   "original": "1.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "b485f3a5994fc678420bdf0fb95231df45663c6bf2f95918fb8b46bdfa009f3b",
+   "original_icc": "none",
+   "file": "omc-cleaning-missed-day-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "7c772beeabe26c5a4be752e1a42db63f76cc1063bf08947dade0b3e3351f18e9",
+   "pixel_identical_to_source": true,
+   "bytes": 717525
+  },
+  {
+   "pin": 2,
+   "original": "2.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "228d8474fbb1b0ae9dab7051e7b88dfa833c4f4aa0bd2de56b67f07fe502f924",
+   "original_icc": "none",
+   "file": "omc-sunday-family-reset-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "e1c4125bad6d6e283c843f9ba492dea79b9f36fc8051e789f3e5d818d11c5a07",
+   "pixel_identical_to_source": true,
+   "bytes": 525473
+  },
+  {
+   "pin": 3,
+   "original": "6.webp",
+   "original_format": "WEBP",
+   "original_size": [
+    1000,
+    1500
+   ],
+   "original_sha256": "2c28904469ceedc9f3e1b24bf2c68dc7353d1c0fc2145fc701c583bb1c8c38b4",
+   "original_icc": "embedded",
+   "file": "omc-2027-family-wall-calendar-01.png",
+   "format": "PNG",
+   "size": [
+    1000,
+    1500
+   ],
+   "mode": "RGB",
+   "icc": "source profile kept",
+   "sha256": "c49dbcf4f0c6de48685a1d24fad1e1a406f570c0201eb5378bf30de040e3c7b5",
+   "pixel_identical_to_source": true,
+   "bytes": 836909
+  },
+  {
+   "pin": 4,
+   "original": "4.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "f0ee164b478c7edb4a7e82ae8c5c91e6c523236f5b2e638b06a6541e4aa67ad2",
+   "original_icc": "none",
+   "file": "omc-morning-routine-generator-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "850d72dda68c426add40648026cde4b5b1b90cd13912dfc6de494f9a3d61ebdb",
+   "pixel_identical_to_source": true,
+   "bytes": 571204
+  },
+  {
+   "pin": 5,
+   "original": "5.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "85aeb276cf69f6a313279d3e249d0563d9845b181575f54e0da177935b04ec32",
+   "original_icc": "none",
+   "file": "omc-family-entryway-routine-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "6884f15b8c97ff06f29609b3d29722b2b176619b914e11a5c660efd59c710074",
+   "pixel_identical_to_source": true,
+   "bytes": 464456
+  },
+  {
+   "pin": 6,
+   "original": "3.webp",
+   "original_format": "WEBP",
+   "original_size": [
+    1000,
+    1500
+   ],
+   "original_sha256": "73551d5e26ac931cf67d3f09c4c446fbff48ac021253a2a875cc3f687069bc7b",
+   "original_icc": "embedded",
+   "file": "omc-free-chore-chart-generator-01.png",
+   "format": "PNG",
+   "size": [
+    1000,
+    1500
+   ],
+   "mode": "RGB",
+   "icc": "source profile kept",
+   "sha256": "ade8bc56e9df0498934abb45ce187087e050c679d4e51349a114f783234c5303",
+   "pixel_identical_to_source": true,
+   "bytes": 801915
+  },
+  {
+   "pin": 7,
+   "original": "7.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "2c157e1c665e0aff4fbd5c41d03a50488238993d9185fc9ef12aa971ed863b1a",
+   "original_icc": "none",
+   "file": "omc-kids-responsibility-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "27234ab083802771c780bc5f004975553670205d441cc17fc847c9605aa98ac0",
+   "pixel_identical_to_source": true,
+   "bytes": 512466
+  },
+  {
+   "pin": 8,
+   "original": "8.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "2d0d4ba11ed9714d101fff12cff1b813b2d905c6d078aa9c9f1324054666c9a0",
+   "original_icc": "none",
+   "file": "omc-teaching-kids-chores-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "89f31c3c38a5f6c2edf21f7a66b1029d32f25320eec3992e0b47a99c0f4259d1",
+   "pixel_identical_to_source": true,
+   "bytes": 363634
+  },
+  {
+   "pin": 9,
+   "original": "9.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "363984da74248d5f05cc4b1aa500b6d332d68be5300aaed9b9acd6e88a97a179",
+   "original_icc": "none",
+   "file": "omc-weekly-cleaning-zones-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "81f9b8150fe6c7d2a69b0f9286244f7b70c9c3d987df4aaee542189ac89cfc0e",
+   "pixel_identical_to_source": true,
+   "bytes": 476728
+  },
+  {
+   "pin": 10,
+   "original": "10.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "3c8ab35df1889601b5c2b081351231b5ce726ebfbd5b14c75870d8400b077381",
+   "original_icc": "none",
+   "file": "omc-daily-cleaning-reset-01.png",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged)",
+   "sha256": "cc2489a49e14ad3f7234e003182f94ea2c0b049fece8a9318647030d49fbfb5a",
+   "pixel_identical_to_source": true,
+   "bytes": 313827
+  }
+ ],
+ "metadata": {
+  "1": {
+   "title_len": 77,
+   "description_len": 295,
+   "alt_len": 279
+  },
+  "2": {
+   "title_len": 59,
+   "description_len": 252,
+   "alt_len": 305
+  },
+  "3": {
+   "title_len": 53,
+   "description_len": 253,
+   "alt_len": 413
+  },
+  "4": {
+   "title_len": 63,
+   "description_len": 265,
+   "alt_len": 301
+  },
+  "5": {
+   "title_len": 63,
+   "description_len": 246,
+   "alt_len": 250
+  },
+  "6": {
+   "title_len": 72,
+   "description_len": 209,
+   "alt_len": 346
+  },
+  "7": {
+   "title_len": 60,
+   "description_len": 223,
+   "alt_len": 233
+  },
+  "8": {
+   "title_len": 49,
+   "description_len": 213,
+   "alt_len": 299
+  },
+  "9": {
+   "title_len": 61,
+   "description_len": 265,
+   "alt_len": 227
+  },
+  "10": {
+   "title_len": 55,
+   "description_len": 281,
+   "alt_len": 279
+  }
+ }
+}

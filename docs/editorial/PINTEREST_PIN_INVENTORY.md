@@ -15,6 +15,16 @@ This is a **seed record from the October 14, 2026 creative review**, not a verif
 | Zone cleaning | Clean One Zone. Leave the Rest. | /resources/zone-cleaning-schedule | cloth wiping bathroom sink | Approved in chat | Unverified |
 | Paper organization | Give Every Paper an Exit. | /resources/home-command-center | paper pockets to backpack; corrected one-time heading | Revised and approved in chat | Unverified |
 | Meal planning | Plan Your Nights. Then Your Dinners. | /resources/weekly-meal-planning-for-families | overhead food, leftovers, soccer schedule | Approved in chat | Unverified |
+| Weekly cleaning | Missed a day? Skip it. Don’t stack it. | /resources/weekly-cleaning-schedule-for-busy-moms | pink kitchen, towel, crumb plate, backpack | Approved 2026-10-19 (gemini-batch-01 #1) | Not published |
+| Weekly reset | 15 minutes on Sunday. | /resources/weekly-family-reset | hand writing in planner, coffee, child's hands | Approved 2026-10-19 (gemini-batch-01 #2) | Not published |
+| Wall calendar | The week on one page. | /calendar | filled-in January 2027 week, shared checklist | Approved 2026-10-19 (gemini-batch-01 #3) | Not published |
+| Morning routine | Mornings without the hunt. | /routine-chart | child's hand at backpack on peg rail | Approved 2026-10-19 (gemini-batch-01 #4) | Not published |
+| Launch pad | One spot by the door. | /resources/launch-pad-by-the-door | labeled peg rail, bench, shoes | Approved 2026-10-19 (gemini-batch-01 #5) | Not published |
+| Chore chart generator | Free Chore Chart Generator for Kids | /chore-chart | chart on fridge with arrow from generator label | Approved 2026-10-19 (gemini-batch-01 #6) | Not published |
+| Kids responsibility | A little job. A bigger ‘I can.’ | /resources/chores-for-kids-by-age | boy from behind packing backpack (reuses IF-03 hook) | Approved 2026-10-19 (gemini-batch-01 #7) | Not published |
+| Teaching chores | What does “done” look like? | /resources/chores-for-kids-by-age | plate, cup, napkin; three steps (reuses IF-03 hook) | Approved 2026-10-19 (gemini-batch-01 #8) | Not published |
+| Zone cleaning | One zone each day. | /resources/zone-cleaning-schedule | Mon–Thu zone list above living room | Approved 2026-10-19 (gemini-batch-01 #9) | Not published |
+| Daily cleaning | 15 minutes. Then stop. | /resources/daily-cleaning-routine | five-task checklist over sunny counter | Approved 2026-10-19 (gemini-batch-01 #10) | Not published |
 
 Other existing Pinterest posts and generator creative are **not comprehensively recorded here**. Before a new batch, also inspect per-article plans, asset manifests, site content and Pinterest when accessible.
 
