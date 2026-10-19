@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dist = join(root, 'dist');
-const SITE = 'https://organizedmomcollective.com';
+const SITE = 'https://www.organizedmomcollective.com';
 const ARTICLES_DIR = join(root, 'src/content/articles');
 const INVENTORY = join(root, 'docs/editorial/content-inventory.md');
 const TRACKER = join(root, 'docs/editorial/CONTENT_TRACKER.md');

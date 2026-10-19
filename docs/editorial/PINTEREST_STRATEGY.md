@@ -160,7 +160,7 @@ For free tools, distinguish the generator or interactive experience from a stati
 | Pin title | Up to 100 characters (Pinterest's limit; check the current limit when publishing). Search-driven: starts with the primary keyword. Others: the hook or the mini-guide name, with a keyword where natural. |
 | Description | Up to 500 characters. First sentence restates the promise in plain words with the primary or a secondary keyword; then one sentence on what the article adds (the fallback, the full routine). No hashtag lists, no keyword stuffing, no fake urgency. |
 | Alt text | Describes what the image shows and what the text says, for someone who can't see it: "Pin with the heading 'Weekly Cleaning Schedule for Busy Moms' above a cream panel listing Monday Living Room, Tuesday Bedrooms…". Up to 500 characters. |
-| Link | The final canonical article URL, `https://organizedmomcollective.com/resources/<slug>`, no tracking parameters unless analytics are set up and documented. |
+| Link | The final canonical article URL, `https://www.organizedmomcollective.com/resources/<slug>`, no tracking parameters unless analytics are set up and documented. |
 
 ## Boards
 

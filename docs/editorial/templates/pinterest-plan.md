@@ -10,7 +10,7 @@ Keep the bold field labels exactly as written; the check reads them.
 
 - **Article ID:** <ARTICLE ID>
 - **Article title:** <Article H1, exactly as published>
-- **Final article URL:** https://organizedmomcollective.com/resources/<slug>
+- **Final article URL:** https://www.organizedmomcollective.com/resources/<slug>
 - **Pillar:** <Family Planning & Routines / Simple Home Cleaning / Intentional Family Life>
 - **Planned from article version:** <published or updated date of the article the concepts are based on>
 

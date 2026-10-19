@@ -6,8 +6,9 @@ import tailwindcss from '@tailwindcss/vite';
 import offlinePrecache from './offline-precache.mjs';
 
 export default defineConfig({
-  // Production domain — used for canonical URLs on public pages.
-  site: 'https://organizedmomcollective.com',
+  // Production host — used for canonical URLs, og:url, JSON-LD and the sitemap. www, because Vercel serves
+  // the site there and 308-redirects the bare domain to it (Pinterest's catalog feed uses www too).
+  site: 'https://www.organizedmomcollective.com',
   integrations: [react(), mdx(), offlinePrecache()],
   // Old WordPress URLs printed in paid PDFs: keep them working (see README → Redirects).
   redirects: {
