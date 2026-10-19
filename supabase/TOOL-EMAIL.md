@@ -31,3 +31,15 @@ Live since 2026-10-16. The signup goes through the `starter-kit-signup` Edge Fun
 - **Test** without a real inbox: sign up as `delivered@resend.dev` (or `delivered+anything@resend.dev`), check the row, then delete it. Launch tests on 2026-10-16 left two such rows labeled `first_tool = test-delete-me`; delete them in Table Editor (`delete from public.tool_email_contacts where first_tool = 'test-delete-me';`). The SQL tool used for launch couldn't run deletes.
 - **Launched** 2026-10-16 (PR #115). Production host is `www.organizedmomcollective.com` (the bare domain 308s there, keeping `?source=`); the function allows both origins.
 - **Business-card QR**: Cloudflare Redirect Rule on `members.organizedmomcollective.com/landing-starter-kit-free-qr/` → `https://www.organizedmomcollective.com/starter-kit?source=qr` (301), ordered above the subdomain's catch-all.
+
+## Free responsibility chart (IF-03 article)
+
+The "Get the Free Responsibility Chart" buttons in `/resources/chores-for-kids-by-age` use the same popup, RPC, table, consent wording, throttle and one-signup-per-browser flag as the chore chart, with tool id `responsibility-chart` (`first_tool`/`last_tool`; consent `family-tools-v1`). Delivery is the same as the chore chart: the PDF (`public/downloads/kids-responsibility-chart.pdf`) downloads in the browser right after submit; no email is sent. Anyone who already signed up for the chore chart or the Starter Kit downloads without being asked again. Like the chore chart, this is a convenience gate: the PDF's URL is public.
+
+Off until both are done, in this order:
+1. Run `supabase/migrations/20261021000000_tool_email_responsibility_chart.sql` (it only widens the accepted tool ids). Test a signup with tool `responsibility-chart` and confirm the row.
+2. In Vercel set `PUBLIC_RESPONSIBILITY_CHART_GATE_ENABLED=true` (needs `PUBLIC_TOOL_EMAIL_GATE_ENABLED=true` too) and redeploy.
+
+Until then the button downloads the PDF directly. Rollback: set the flag to false and redeploy.
+
+Events: `cta_click` (placements `article-free-chart-top`, `article-free-chart-example`), then `tool_download_click` with `tool_id=responsibility-chart`, `source=article` only when the download actually starts; a Pinterest `lead` (`Responsibility chart download`) on a new signup.

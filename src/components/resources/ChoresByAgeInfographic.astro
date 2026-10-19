@@ -1,0 +1,80 @@
+---
+/**
+ * IF-03's at-a-glance infographic in HTML: four age bands with their highlight jobs, the real Responsibility
+ * Cards illustrations (art only) and links to the printable PDF and the Pinterest PNG. The files are rendered
+ * from the same data by scripts/render-printables.mjs. Data: src/data/chores-by-age.ts.
+ */
+import { ageBands, printables } from '../../data/chores-by-age';
+import { responsibilityById, responsibilityImage } from '../../data/responsibilities';
+import { BRAND_NAME } from '../../config';
+---
+
+<figure class="cba breakout" aria-labelledby="cba-caption">
+  <ol class="cba-bands">
+    {
+      ageBands.map((band) => {
+        const job = responsibilityById(band.illustration);
+        const src = job && responsibilityImage(job, 256);
+        return (
+          <li class="cba-band" style={`--c: ${band.color}`}>
+            <span class="cba-art">{src && <img src={src} alt="" width="256" height="256" loading="lazy" decoding="async" />}</span>
+            <div>
+              <p class="cba-age">{band.label}</p>
+              <p class="cba-focus">{band.focus}</p>
+              <ul class="cba-jobs">
+                {band.highlights.map((h) => (
+                  <li class:list={[h.help && 'cba-help']}>
+                    <span class="cba-box" aria-hidden="true" />
+                    <span>
+                      {h.text}
+                      {h.help && <span class="cba-tag">with help</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ol>
+  <figcaption id="cba-caption" class="cba-foot">
+    <span>Chores for kids by age, from {BRAND_NAME}. Starting points, not milestones.</span>
+    <span class="cba-downloads">
+      <a href={printables.infographicPdf.href} download data-cta="article-infographic-pdf" data-download={printables.infographicPdf.toolId} class="text-link">Print it (PDF, US Letter)</a>
+      <a href={printables.infographicPng.href} download data-cta="article-infographic-png" data-download={printables.infographicPng.toolId} class="text-link">Save the image (PNG)</a>
+    </span>
+  </figcaption>
+</figure>
+
+<script>
+  import { toolEvent } from '../../lib/tool-engagement';
+  document.querySelectorAll<HTMLAnchorElement>('.cba [data-download]').forEach((link) =>
+    link.addEventListener('click', () => toolEvent('tool_download_click', link.dataset.download!, 'article')),
+  );
+</script>
+
+<style>
+  .cba { margin-block: 2rem 2.5rem; padding: 20px 16px; background: #fffdfa; border: 1px solid var(--color-warm-rule); }
+  .cba-bands { display: grid; gap: 14px; list-style: none; margin: 0; padding: 0; }
+  .cba-band { display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: start; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--c); background: color-mix(in srgb, var(--c) 30%, white); }
+  .cba-art { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--c); }
+  .cba-art img { width: 82%; height: 82%; object-fit: contain; }
+  .cba-age { font-family: var(--font-editorial); font-weight: 700; font-size: 1.35rem; line-height: 1.15; color: var(--color-warm-ink); }
+  .cba-focus { margin-top: 2px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-warm-soft); }
+  .cba-jobs { display: grid; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+  .cba-jobs li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.98rem; line-height: 1.35; color: var(--color-warm-ink); }
+  .cba-box { flex: none; width: 16px; height: 16px; margin-top: 3px; border: 1.5px solid var(--color-warm-ink); border-radius: 4px; background: #fff; }
+  .cba-help .cba-box { background: linear-gradient(135deg, #fff 50%, var(--c) 50%); }
+  .cba-tag { margin-left: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-warm-soft); white-space: nowrap; }
+  .cba-foot { display: grid; gap: 10px; margin-top: 16px; font-size: 0.9rem; color: var(--color-warm-soft); }
+  .cba-downloads { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .cba-downloads a { display: inline-flex; align-items: center; min-height: 44px; }
+  @media (min-width: 640px) {
+    .cba { padding: 28px; }
+    .cba-bands { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .cba-band { grid-template-columns: 88px 1fr; padding: 18px 20px; }
+    .cba-art { width: 88px; height: 88px; }
+    .cba-foot { grid-template-columns: 1fr auto; align-items: center; }
+  }
+</style>

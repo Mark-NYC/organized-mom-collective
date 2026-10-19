@@ -1,0 +1,19 @@
+---
+/**
+ * One age band of IF-03's chores-by-age list as two planner checklists: what most kids this age can do on
+ * their own once practiced, and what they do with an adult. Data: src/data/chores-by-age.ts (never retyped).
+ */
+import Checklist from './Checklist.astro';
+import ChecklistGrid from './ChecklistGrid.astro';
+import { ageBands, type AgeBandId } from '../../data/chores-by-age';
+
+interface Props {
+  band: AgeBandId;
+}
+const band = ageBands.find((b) => b.id === Astro.props.band)!;
+---
+
+<ChecklistGrid>
+  <Checklist kicker={band.label} title="On their own, once practiced" items={band.own} />
+  <Checklist kicker={band.label} title="With your help" items={band.help} />
+</ChecklistGrid>

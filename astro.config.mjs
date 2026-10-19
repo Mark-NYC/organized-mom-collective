@@ -16,6 +16,8 @@ export default defineConfig({
     // permanent (308) redirect; this page is the fallback for other hosts and `astro preview`.
     '/refunds': '/returns',
     '/command-center-reset-where-did-my-time-go-how-to-spot-and-stop-energy-leaks-in-your-week': '/resources/where-does-my-time-go',
+    // Short address for IF-03 (Pins, print). One page, one canonical: the article. vercel.json answers it first.
+    '/chores-for-kids-by-age': '/resources/chores-for-kids-by-age',
   },
   vite: {
     plugins: [tailwindcss()],
