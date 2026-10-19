@@ -18,7 +18,7 @@ Ten owner-approved Pinterest pins (numbered 11–20, continuing batch 01) made w
 ## Files
 
 - `omc-*.png`: the approved pins.
-- `originals/`: the files exactly as supplied, unchanged. Names are the chat-attachment order (`1.jpg`–`11.jpg`). `4.jpg` was a byte-identical second copy of `3.jpg` (pin 13, SHA-256 `551e44d9…5941`) and isn't stored.
+- `originals/`: the files exactly as supplied, unchanged. Names follow the order the files were attached in chat. Pin 13 is `12.jpg`, the owner's final revision, confirmed 2026-10-19. The first pin 13 version (`3.jpg`, SHA-256 `551e44d9…5941`, sent twice as `3.jpg` and `4.jpg`) was superseded and isn't stored.
 - `production-manifest.csv`: original and new filenames, headline, topic, dimensions, SHA-256 hashes, repository path, public image URL and approval status.
 - `pinterest-metadata.csv`: internal production metadata (title, description, alt text, board, destination, article section, media URL, keywords, status). **It is not a Pinterest import file.**
 - `pinterest-import-ready.csv`: the Pinterest Import Content file, built from the same source data.
@@ -33,13 +33,15 @@ Headlines were matched from the visible text on each image, not from filenames o
 | Column | What's in this batch |
 | --- | --- |
 | Title | Unique, 45–73 characters (limit 100). Leads with the article's search phrase. |
-| Media URL | Immutable GitHub links at commit `2d55e35`. All 10 returned HTTP 200 `image/png`, byte-identical to the committed files. |
+| Media URL | Immutable GitHub links at commit `e4b5cc3`. All 10 returned HTTP 200 `image/png`, byte-identical to the committed files. |
 | Pinterest board | Exact names from `docs/editorial/PINTEREST_BOARDS.md` (branch `docs/pinterest-actual-boards-2026-10-19`, not yet merged). |
 | Thumbnail | Blank. That column is only for video pins. |
 | Description | Unique, 245–281 characters (limit 500). Opens with the search phrase. No hashtags. |
 | Link | Canonical `https://www.organizedmomcollective.com/resources/…` paths with no trailing slash and no tracking parameters. |
-| Publish date | Blank for all 10. The owner sets the schedule. |
+| Publish date | Owner schedule, set 2026-10-19. **October 21: pins 11, 14, 15, 16, 18. October 22: pins 12, 13, 17, 19, 20.** One pin an hour from `T14:00:00` to `T18:00:00`. Pairs that share an article (11/19, 13/18) land on different days. See the time note below. |
 | Keywords | 4 phrases per pin, taken from the article's primary keyword and the pin copy. **Not checked against Pinterest autocomplete or Trends.** No search volume is claimed. |
+
+**Publish time note:** the times use the full `YYYY-MM-DDTHH:MM:SS` format from the IF-03 batch, not batch 01's bare dates. Read as UTC, 14:00–18:00 is 10 am–2 pm Eastern. Read as local time, it's 2–6 pm. Either way each pin stays on its planned date. After importing, check that Pinterest shows five pins on each day.
 
 The file is UTF-8 with no BOM and CRLF line endings. Fields containing commas or quotes are double-quoted per RFC 4180. It has 10 rows and was re-read with a CSV parser to confirm it parses back to the same values.
 
@@ -49,7 +51,7 @@ The file is UTF-8 with no BOM and CRLF line endings. Fields containing commas or
 
 Each image was decoded and saved as PNG with no resizing, cropping, recoloring or retouching. Reopening each PNG gives the same pixels as the decoded source. The sources were untagged JPEGs, so each PNG got the same standard sRGB profile as batch 01. That tag changes no pixels.
 
-**Dimensions exception:** all 10 are 687 × 1024, the size the chat attachments arrived at. That's close to 2:3 but not exact (0.671 vs 0.667). As in batch 01, they keep their native size rather than being stretched or trimmed. Full-resolution exports from Gemini would solve this.
+**Dimensions exception:** nine pins are 687 × 1024 and pin 13 is 848 × 1264. Those are the sizes the chat attachments arrived at. Both are close to 2:3 but not exact (0.671 vs 0.667). As in batch 01, they keep their native size rather than being stretched or trimmed. Full-resolution exports from Gemini would solve this.
 
 **Duplicate check:** none of the 10 PNGs matches any image file tracked in the repository (588 scanned) by SHA-256. A perceptual difference hash found no near-duplicates either. The closest match was 92 of 256 bits apart, where a near-duplicate would be under about 10. All 10 also differ from each other.
 
@@ -61,7 +63,7 @@ Each image was decoded and saved as PNG with no resizing, cropping, recoloring o
 
 ## Review notes for the owner
 
-1. **Pin 13 version:** the packaged file is the copy supplied first (`3.jpg`), where "Works" runs into the top of the calendar. A revised pin 13 was shown in chat afterwards, but it didn't arrive as a file. Before importing, confirm which version is final. If it's the revision, it must replace this PNG and the media URL commit must be updated.
+1. **Pin 13:** this is the owner's final revision (`12.jpg`). The headline's "Works" still touches the top edge of the calendar. The owner approved it as is.
 2. **Pin 14 face check:** the boy's head is turned away, but part of his cheek and ear show in profile. The QA checklist bans visible generated faces "including profiles". The owner approved the pin, so it's flagged here rather than changed.
 3. **Pin 18 labels:** the pockets read "Incoming" and "Outgoing". The article calls them "Needs attention" and "Ready to go". It's the same system, and the description bridges the two.
 4. **Pin 19 categories:** the image labels the third night "Zero-effort" and shows sandwiches as a short night. The article says "Zero night" and lists sandwiches as a zero-night option. It's a small mismatch, and the description follows the article.
@@ -70,8 +72,7 @@ Each image was decoded and saved as PNG with no resizing, cropping, recoloring o
 
 ## Remaining launch checks
 
-1. Resolve pin 13 (note 1).
-2. Open the 8 destination URLs on the live site and confirm each returns 200 and shows what its pin promises.
-3. Confirm the exact spelling of *Meal Planning for Families*, *Family Organization Ideas* and *Cleaning Schedules for Busy Moms* in the live account. The registry notes the profile cards truncate them.
-4. Set publish dates if you're scheduling rather than publishing on import.
-5. After importing, update `docs/editorial/PINTEREST_PIN_INVENTORY.md` only from real Pinterest evidence (the pin URL and date).
+1. Open the 8 destination URLs on the live site and confirm each returns 200 and shows what its pin promises.
+2. Confirm the exact spelling of *Meal Planning for Families*, *Family Organization Ideas* and *Cleaning Schedules for Busy Moms* in the live account. The registry notes the profile cards truncate them.
+3. After importing, confirm in Pinterest that all 10 pins are scheduled, five on October 21 and five on October 22. A community thread reports CSV imports creating only the first rows, so count them.
+4. After importing, update `docs/editorial/PINTEREST_PIN_INVENTORY.md` only from real Pinterest evidence (the pin URL and date).

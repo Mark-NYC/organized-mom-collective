@@ -1,7 +1,7 @@
 {
  "batch": "gemini-batch-02",
  "approved": "2026-10-19",
- "asset_commit": "2d55e350d355e1598024e414fe2f402d7c96ebbe",
+ "asset_commit": "e4b5cc30f6343bc16378dca8e11cae71fe2e6e3e",
  "file": "pinterest-import-ready.csv",
  "columns": [
   "Title",
@@ -58,7 +58,23 @@
  "unique_descriptions": true,
  "unique_media_urls": true,
  "thumbnail": "blank",
- "publish_date": "blank for all 10 (owner to schedule)",
+ "publish_date": {
+  "2026-10-21": [
+   11,
+   14,
+   15,
+   16,
+   18
+  ],
+  "2026-10-22": [
+   12,
+   13,
+   17,
+   19,
+   20
+  ]
+ },
+ "publish_date_format": "YYYY-MM-DDTHH:MM:SS at 14:00–18:00 (as UTC = 10 am–2 pm Eastern); lands on the same date whether Pinterest reads it as UTC or US local time",
  "keywords": "4 phrases per pin from the article primary keyword and pin copy; not verified against Pinterest autocomplete or Trends; no volume claimed.",
  "boards_used": [
   "Cleaning Schedules for Busy Moms",
@@ -192,26 +208,26 @@
   },
   {
    "pin": 13,
-   "original": "3.jpg",
+   "original": "12.jpg",
    "original_format": "JPEG",
    "original_size": [
-    687,
-    1024
+    848,
+    1264
    ],
-   "original_sha256": "551e44d9a005a0ddf3d16f6d43f05cb91dba568ce863c5269a0727267a845941",
+   "original_sha256": "013462709f679200b8f92f43fbdab43aa423206d6b3bce9d8c6e7da394427b5e",
    "original_icc": "none",
    "file": "omc-family-command-center-01.png",
    "headline": "A Command Center That Actually Works",
    "format": "PNG",
    "size": [
-    687,
-    1024
+    848,
+    1264
    ],
    "mode": "RGB",
    "icc": "sRGB tag added (source untagged); same profile bytes as batch 01",
-   "sha256": "ba1e3836cf243e9b81dda636201d2c1798f57ceb5dba688ae901317cee4afb24",
+   "sha256": "76d59e21ea7967cd75fde39243cae8027007cc0b0853f7f90eda05bc8d86cd30",
    "pixel_identical_to_source": true,
-   "bytes": 337097
+   "bytes": 952773
   },
   {
    "pin": 14,
