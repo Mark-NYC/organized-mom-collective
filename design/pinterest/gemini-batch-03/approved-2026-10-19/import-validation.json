@@ -13,8 +13,9 @@
   "Publish date",
   "Keywords"
  ],
- "rows": 5,
+ "rows": 6,
  "pins_in_import": [
+  21,
   22,
   23,
   27,
@@ -22,11 +23,6 @@
   30
  ],
  "pins_held": [
-  {
-   "pin": 21,
-   "master_id": "OMC-P0163",
-   "reason": "Proposed destination does not deliver a bathroom checklist. The exact article exists: /resources/bathroom-reset-checklist (HC-07, title is this headline). Owner to confirm the swap."
-  },
   {
    "pin": 24,
    "master_id": "OMC-P0369",
@@ -116,6 +112,12 @@
  "import_format_verified_against_pinterest_docs": false,
  "import_format_note": "Columns follow the owner-confirmed Batch 01/02 template.",
  "media_url_checks": [
+  {
+   "pin": 21,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
   {
    "pin": 22,
    "status": 200,
