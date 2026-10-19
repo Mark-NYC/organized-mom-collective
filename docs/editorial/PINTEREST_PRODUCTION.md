@@ -12,6 +12,10 @@ Keep the strategy's three planned jobs: search, curiosity and save. Default prod
 
 The owner expressly authorized new supporting scenes, editorial experimentation and edits to generated backgrounds for this batch. This draft proposes recording that workflow; it does not imply that user-supplied photographs may be generatively edited. Product artwork is locked in every case.
 
+### Actual Pinterest account boards
+
+Before selecting the board in any metadata CSV or Pinterest Import Content CSV, read [PINTEREST_BOARDS.md](PINTEREST_BOARDS.md). It contains the owner's current six real topic boards, their exact names, and the mapping for Gemini batch 01. Older strategy names and draft CSV categories are not evidence that a board exists. Check screenshot-truncated titles against the live account before import.
+
 ## 1. Establish the inputs
 
 Record the article ID, URL, exact source version, article sections, approved product PNGs and approved photography. Read the finished article, not only its brief or metadata.

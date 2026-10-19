@@ -164,18 +164,20 @@ For free tools, distinguish the generator or interactive experience from a stati
 
 ## Boards
 
-Start with one board per pillar plus a few task boards. Board names are searchable phrases, not clever names. Add boards only when there are enough pins to fill them.
+**Source of truth for actual account boards:** [PINTEREST_BOARDS.md](PINTEREST_BOARDS.md). These names were established from the owner's October 19, 2026 Pinterest account screenshot and prior board naming. Consult the registry every batch, and do not use the historical proposed names below in metadata.
 
-| Board | Pillar | For |
-| --- | --- | --- |
-| Family Planning & Routines | FP | Calendar, command center, weekly reset |
-| Meal Planning for Busy Families | FP | Meal planning, grocery lists, dinner rotation |
-| Simple Home Cleaning Routines | HC | All cleaning articles |
-| Cleaning Schedules & Checklists | HC | Save-worthy cleaning pins |
-| Intentional Family Life | IF | Priorities, gratitude, prayer, self-care, shared work |
-| Chores & Shared Responsibilities | IF | Mental load, chores for kids |
+| Existing Pinterest board | Primary use |
+| --- | --- |
+| Meal Planning for Families | Meals, groceries, family food planning |
+| Chores & Shared Responsibilities | Chore charts, teaching kids household jobs, shared responsibilities |
+| Family Organization Ideas | Calendars, command centers, routine generators, entryway systems |
+| Cleaning Schedules for Busy Moms | Weekly/daily cleaning, zones and checklists |
+| Mom Life & Mental Load | Sharing household thinking and ownership |
+| Weekly Reset Routines | Weekly resets, Sunday planning and preparation |
 
-Each plan names one recommended board per pin; a pin can also be saved to a second relevant board.
+**All Pins** appears on the profile as a Pinterest aggregate collection; it is not an editorial board to assign in import metadata.
+
+Each pin needs an exact existing board name. Do not create new names in CSVs without the owner's approval. Screenshot card titles can be truncated: check current account spelling when publishing. A pin may additionally be saved to a second relevant board, subject to Pinterest policies.
 
 ## Publishing sequence
 
