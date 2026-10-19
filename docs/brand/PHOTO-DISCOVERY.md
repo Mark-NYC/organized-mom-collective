@@ -14,6 +14,18 @@
 
 Other sources (Pexels, Unsplash, anything else) still need the owner's per-photo clearance below.
 
+### Unique article photography: required (2026-10-19)
+
+**Every new resource article gets its own distinct lifestyle photo(s).** Hero and editorial `<Figure>` images must not already appear as the hero or editorial image in another article. This is a source-photo rule, not just a filename rule: two crops, sizes, or exports of one Kaboompics photo are still the same photograph.
+
+- Search the catalog to learn which photographs have already been used, **not** to pick one of those photos again for a new article.
+- Discover a fresh Kaboompics photo or shoot for the specific article subject, then verify the actual photo page, commercial-use license, full-resolution content and context. Never infer clearance from standing owner approval alone.
+- Assign article-specific image IDs (for example, `if-07-bathroom-towel`) and record the original Kaboompics photo ID, URL, placements, and article ID in the catalog and `src/data/images.ts`.
+- A second photo in an article must also be different from its hero photo and unique to that article.
+- Exceptions are **only** reusable real product photography, instructional screenshots/diagrams, and intentionally shared brand assets, with an explicit documented reason. These are not lifestyle-photo exceptions. Never quietly reuse a cleaning photo as the hero of a children's chore article.
+- If the right unique image cannot be sourced or cleared, publish the article without that image, record the gap, and leave image work open. **Never reuse an old photo as a filler or claim a candidate is installed.**
+- Before committing, run `npm run check:article-photos` and resolve any duplicate lifestyle photographs. Newly discovered photographs must be registered and their responsive files committed before the article points to them.
+
 ### Default visual direction
 - **85–90% faceless, Kaboompics-style domestic lifestyle images** for editorial lifestyle placements. Faces only when they add emotional storytelling value; never force the ratio on a single page.
 - Warm-neutral daylight, soft contrast, subtle saturation, ordinary lived-in American home settings, approachable rather than perfectly staged. Real objects and routines: calendars, grocery lists, pantry, school supplies, cleaning baskets, meal prep, cozy kitchen counters.
@@ -62,10 +74,10 @@ For every discovered image, record or update its entry in `docs/brand/lifestyle-
 - Finished filename(s), dimensions and alt-text example for cleared assets.
 - Article/resource pages using the photo, so repeated images can be monitored.
 
-Before reuse, check that the license and intended context still fit. One approved photo can be reused across multiple pages without repeated discovery work.
+Before reuse, check that the license and intended context still fit. **Editorial lifestyle photographs are exclusive to their article**, even when cleared. Reuse is limited to real product photography, instructional assets, and other explicitly documented shared-brand materials.
 
 **7. Publish and quality-check.**
-Confirm correct aspect ratio, mobile layout, lazy loading below the fold, no broken links, relevant image, no repeated hero photo across adjacent articles, and plausible color coherence with nearby images. If a new image is uncleared, block publication of the image, not creation of the article. No unapproved image should be silently deployed.
+Confirm correct aspect ratio, mobile layout, lazy loading below the fold, no broken links, relevant image, no repeated lifestyle hero or editorial photo across **any** articles, and plausible color coherence with nearby images. If a new image is uncleared, block publication of the image, not creation of the article. No unapproved image should be silently deployed.
 
 ### Claude operating rules
 - **When asked to make an article or resource:** proactively perform steps 1–3. Use steps 4–7 only with the necessary source access and clearance evidence. Tell the user when an asset is still pending approval.
@@ -77,7 +89,7 @@ Confirm correct aspect ratio, mobile layout, lazy loading below the fold, no bro
 
 ### Fast execution checklist
 - [ ] Do we actually need a photo for this section?
-- [ ] Existing **cleared** image fits?
+- [ ] Is the proposed image **unique to this article**, not used in any other article?
 - [ ] If not, searched Kaboompics by real scene keywords?
 - [ ] Selected verified source photo page and creator?
 - [ ] Reviewed exact license, subject, branding/artwork and placement?
