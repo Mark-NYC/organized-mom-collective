@@ -22,6 +22,27 @@ Ten owner-approved Pinterest pins made with Gemini, covering more than one artic
 - `production-manifest.csv`: original and new filenames, headline, topic, dimensions, SHA-256 hashes, repository path, public image URL and approval status.
 - `pinterest-metadata.csv`: internal production metadata (title, description, alt text, board, destination, media URL, status). It follows the playbook's columns plus `pin_number` and `media_url`. **It is not a Pinterest import file.**
 - `validation-report.json`: the conversion and metadata checks below.
+- `pinterest-import-ready.csv`: the Pinterest Import Content file (see below). Built from `pinterest-metadata.csv`, which stays the source of truth.
+- `import-validation.json`: the mechanical checks run on the import file.
+
+## Pinterest Import Content CSV
+
+The owner confirmed this format as current on 2026-10-19:
+
+`Title,Media URL,Pinterest board,Thumbnail,Description,Link,Publish date,Keywords`
+
+| Column | What's in this batch |
+| --- | --- |
+| Title | Unique for every pin, 49–77 characters (limit 100). Leads with the article's search phrase. |
+| Media URL | Fixed public GitHub links at commit `c515455`. All 10 returned HTTP 200 `image/png`, byte-identical to the committed files. |
+| Pinterest board | One of the four board names from the strategy (see the launch checks). |
+| Thumbnail | Blank. That column is only for video pins. |
+| Description | Unique for every pin, 209–295 characters (limit 500). Opens with the search phrase. No hashtags. |
+| Link | Canonical `https://www.organizedmomcollective.com` paths: no trailing slash, no tracking parameters. |
+| Publish date | **Blank on purpose.** The schedule gets set separately. |
+| Keywords | 4 phrases per pin, taken from the article's primary keyword and the pin copy. **Not checked against Pinterest autocomplete or Trends.** No search volume is claimed. |
+
+The file is UTF-8 with no BOM and CRLF line endings. Fields containing commas or quotes are double-quoted per RFC 4180. It has 10 rows and was re-read with a CSV parser to confirm it parses back to the same values.
 
 ## How the files were produced
 
@@ -43,7 +64,16 @@ On 2026-10-19, all 10 returned HTTP 200 `image/png`, byte-identical to the commi
 - **Boards:** names come from the board list in `PINTEREST_STRATEGY.md`. Whether they exist on the Pinterest account was not checked.
 - **Keywords:** titles use the articles' existing primary keywords. No Pinterest search volumes or trends were researched or claimed.
 - **Product artwork:** pin 3's calendar page matches the content of the site's `calendar-filled-in` photo, and pin 6's chart matches the generator's jobs. Neither was pixel-compared with the master artwork.
-- **Pinterest import format:** Pinterest's help center couldn't be reached from this session, so the current bulk-upload template wasn't checked. No import-ready CSV was made. The last batch used `Title, Media URL, Pinterest board, Thumbnail, Description, Link, Publish date, Keywords` (`design/pinterest/IF-03/approved-2026-10-14/`). Before building one from this batch, confirm that template is current and settle the publish dates.
+- **Pinterest import format:** the owner confirmed the template above on 2026-10-19. This session couldn't reach Pinterest's help center to check it independently.
+
+## Remaining launch checks
+
+1. **Boards:** confirm all four exist on the account, spelled exactly like this: *Simple Home Cleaning Routines* (pins 1, 10), *Family Planning & Routines* (2, 3, 4, 5), *Chores & Shared Responsibilities* (6, 7, 8), *Cleaning Schedules & Checklists* (9). The IF-03 batch also used *Chores & Shared Responsibilities*, but this repository has no record that any of the four exist on the account.
+2. **Live destinations:** open all 8 destination URLs on the live site and confirm each returns 200 and shows what its pin promises. Pin 6 doesn't mention an email step, because the email gate on `/chore-chart` can be switched on or off in the code.
+3. **Image size:** confirm Pinterest accepts the eight 687 × 1024 pins without cropping them in the feed.
+4. **Publish dates:** fill these in before importing, because importing a dated file schedules the pins. Keep pins 2 and 3 well apart, and pins 7 and 8 too (see review notes).
+5. **Keywords (optional):** check the Keywords phrases against Pinterest autocomplete before launch, and record what you find.
+6. **After importing:** update the Pinterest state in `docs/editorial/PINTEREST_PIN_INVENTORY.md` only from real Pinterest evidence (the pin URL and date).
 
 ## Review notes for the owner
 

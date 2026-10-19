@@ -1,0 +1,55 @@
+{
+ "file": "pinterest-import-ready.csv",
+ "columns": [
+  "Title",
+  "Media URL",
+  "Pinterest board",
+  "Thumbnail",
+  "Description",
+  "Link",
+  "Publish date",
+  "Keywords"
+ ],
+ "rows": 10,
+ "encoding": "UTF-8, no BOM",
+ "line_endings": "CRLF",
+ "quoting": "RFC 4180 minimal (fields with commas or quotes are double-quoted)",
+ "csv_roundtrip": true,
+ "title_lengths": [
+  77,
+  59,
+  53,
+  63,
+  63,
+  72,
+  60,
+  49,
+  61,
+  55
+ ],
+ "description_lengths": [
+  295,
+  252,
+  253,
+  265,
+  246,
+  209,
+  223,
+  218,
+  265,
+  281
+ ],
+ "unique_titles": true,
+ "unique_descriptions": true,
+ "unique_media_urls": true,
+ "thumbnail": "blank",
+ "publish_date": "blank",
+ "boards": [
+  "Chores & Shared Responsibilities",
+  "Cleaning Schedules & Checklists",
+  "Family Planning & Routines",
+  "Simple Home Cleaning Routines"
+ ],
+ "boards_verified_on_account": false,
+ "keywords": "Relevant phrases from article primary keywords and pin copy; not verified against Pinterest autocomplete or Trends."
+}
