@@ -49,6 +49,8 @@ jobs:
                   if not dst.is_file() or dst.stat().st_size < 4000: raise RuntimeError(f"Invalid output: {dst}")
                   print(dst, dst.stat().st_size)
           PY
+      - name: Check article image uniqueness
+        run: node scripts/check-article-photos.mjs
       - name: Commit checked photo assets to this branch
         run: |
           git config user.name "github-actions[bot]"
