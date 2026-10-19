@@ -644,7 +644,8 @@
       },
       "used_in": [
         "FP-03 /resources/home-command-center (hero)",
-        "FP-09 hero replaced by owner-supplied fridge mockup on 2026-10-13"
+        "FP-09 hero replaced by owner-supplied fridge mockup on 2026-10-13",
+        "FP-13 /resources/after-school-routine-for-kids (hero; reused existing cleared image)"
       ]
     },
     {
@@ -678,7 +679,8 @@
       },
       "used_in": [
         "FP-04 /resources/weekly-family-reset (inline)",
-        "IF-02 /resources/how-to-share-the-mental-load (hero)"
+        "IF-02 /resources/how-to-share-the-mental-load (hero)",
+        "FP-13 /resources/after-school-routine-for-kids (inline; reused existing cleared image)"
       ]
     },
     {
