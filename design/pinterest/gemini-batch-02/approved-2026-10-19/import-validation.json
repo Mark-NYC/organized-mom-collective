@@ -58,7 +58,23 @@
  "unique_descriptions": true,
  "unique_media_urls": true,
  "thumbnail": "blank",
- "publish_date": "blank for all 10 (owner to schedule)",
+ "publish_date": {
+  "2026-10-21": [
+   11,
+   14,
+   15,
+   16,
+   18
+  ],
+  "2026-10-22": [
+   12,
+   13,
+   17,
+   19,
+   20
+  ]
+ },
+ "publish_date_format": "YYYY-MM-DDTHH:MM:SS at 14:00–18:00 (as UTC = 10 am–2 pm Eastern); lands on the same date whether Pinterest reads it as UTC or US local time",
  "keywords": "4 phrases per pin from the article primary keyword and pin copy; not verified against Pinterest autocomplete or Trends; no volume claimed.",
  "boards_used": [
   "Cleaning Schedules for Busy Moms",

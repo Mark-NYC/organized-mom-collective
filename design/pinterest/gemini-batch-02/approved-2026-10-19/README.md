@@ -38,8 +38,10 @@ Headlines were matched from the visible text on each image, not from filenames o
 | Thumbnail | Blank. That column is only for video pins. |
 | Description | Unique, 245–281 characters (limit 500). Opens with the search phrase. No hashtags. |
 | Link | Canonical `https://www.organizedmomcollective.com/resources/…` paths with no trailing slash and no tracking parameters. |
-| Publish date | Blank for all 10. The owner sets the schedule. |
+| Publish date | Owner schedule, set 2026-10-19. **October 21: pins 11, 14, 15, 16, 18. October 22: pins 12, 13, 17, 19, 20.** One pin an hour from `T14:00:00` to `T18:00:00`. Pairs that share an article (11/19, 13/18) land on different days. See the time note below. |
 | Keywords | 4 phrases per pin, taken from the article's primary keyword and the pin copy. **Not checked against Pinterest autocomplete or Trends.** No search volume is claimed. |
+
+**Publish time note:** the times use the full `YYYY-MM-DDTHH:MM:SS` format from the IF-03 batch, not batch 01's bare dates. Read as UTC, 14:00–18:00 is 10 am–2 pm Eastern. Read as local time, it's 2–6 pm. Either way each pin stays on its planned date. After importing, check that Pinterest shows five pins on each day.
 
 The file is UTF-8 with no BOM and CRLF line endings. Fields containing commas or quotes are double-quoted per RFC 4180. It has 10 rows and was re-read with a CSV parser to confirm it parses back to the same values.
 
@@ -70,8 +72,8 @@ Each image was decoded and saved as PNG with no resizing, cropping, recoloring o
 
 ## Remaining launch checks
 
-1. Resolve pin 13 (note 1).
+1. Resolve pin 13 (note 1) before importing. It's on the October 22 slot.
 2. Open the 8 destination URLs on the live site and confirm each returns 200 and shows what its pin promises.
 3. Confirm the exact spelling of *Meal Planning for Families*, *Family Organization Ideas* and *Cleaning Schedules for Busy Moms* in the live account. The registry notes the profile cards truncate them.
-4. Set publish dates if you're scheduling rather than publishing on import.
+4. After importing, confirm in Pinterest that all 10 pins are scheduled, five on October 21 and five on October 22. A community thread reports CSV imports creating only the first rows, so count them.
 5. After importing, update `docs/editorial/PINTEREST_PIN_INVENTORY.md` only from real Pinterest evidence (the pin URL and date).
