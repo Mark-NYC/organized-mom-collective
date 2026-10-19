@@ -5,6 +5,11 @@
       "source": "/refunds",
       "destination": "/returns",
       "permanent": true
+    },
+    {
+      "source": "/chores-for-kids-by-age",
+      "destination": "/resources/chores-for-kids-by-age",
+      "permanent": true
     }
   ],
   "rewrites": [

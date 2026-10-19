@@ -1,0 +1,79 @@
+---
+/**
+ * IF-03's free starter chart: a preview of the real printable (US Letter PDF from scripts/render-printables.mjs)
+ * and the "Get the Free Responsibility Chart" button. The download goes through the shared download signup
+ * (src/lib/tool-email.ts, tool id 'responsibility-chart'): same dialog, consent, table and one-signup-per-browser
+ * flag as the chore chart. Until PUBLIC_RESPONSIBILITY_CHART_GATE_ENABLED is on, the PDF downloads directly.
+ *
+ * Any link on the page with data-gated-download (e.g. a second, plain text link) gets the same handling.
+ */
+import { printables } from '../../data/chores-by-age';
+import { responsibilityChartGateEnabled } from '../../lib/tool-email';
+
+interface Props {
+  /** Placement name for analytics. */
+  cta: string;
+}
+const { cta } = Astro.props;
+const { href } = printables.starterChart;
+---
+
+<aside class="rco breakout" aria-labelledby="rco-h">
+  <img
+    src="/images/tools/previews/kids-responsibility-chart.webp"
+    width="900"
+    height="696"
+    alt="The free Kids’ Responsibility Chart: a name line, three numbered jobs with a “when” line, Monday to Sunday checkboxes, and boxes for “This week I’m proud of,” “We’ll celebrate by” and “Next week I’ll practice.”"
+    decoding="async"
+  />
+  <div class="rco-copy">
+    <p class="label text-warm-soft">Free printable · US Letter</p>
+    <h2 id="rco-h" class="rco-title">A responsibility chart with room for three jobs</h2>
+    <ul class="rco-list">
+      <li>Your child’s name and the week</li>
+      <li>Three daily responsibilities, each with a “when”</li>
+      <li>Monday–Sunday boxes they tick themselves</li>
+      <li>A weekly celebration and reflection space</li>
+    </ul>
+    <a href={href} download data-gated-download data-cta={cta} class="btn-primary mt-6 w-full sm:w-auto">Get the Free Responsibility Chart</a>
+    <p class="rco-note">
+      {responsibilityChartGateEnabled ? 'Enter your email and the PDF downloads right away. No account needed.' : 'A one-page PDF to print at home. No account needed.'}
+    </p>
+  </div>
+</aside>
+
+<script>
+  import { requireToolEmail } from '../../lib/tool-email';
+  import { toolEvent } from '../../lib/tool-engagement';
+
+  const save = (href: string) => {
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = '';
+    link.click();
+  };
+  document.querySelectorAll<HTMLAnchorElement>('a[data-gated-download]').forEach((link) =>
+    link.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (!(await requireToolEmail('responsibility-chart'))) return;
+      toolEvent('tool_download_click', 'responsibility-chart', 'article');
+      save(link.href);
+    }),
+  );
+</script>
+
+<style>
+  .rco { margin-block: 2.5rem; background: var(--color-sage-wash); }
+  .rco img { display: block; width: 100%; height: auto; background: #fff; border-bottom: 1px solid var(--color-warm-rule); }
+  .rco-copy { padding: 24px 20px 28px; color: var(--color-warm-ink); }
+  .rco-title { margin-top: 6px; font-family: var(--font-editorial); font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .rco-list { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 1rem; }
+  .rco-list li { padding-left: 1.4rem; position: relative; }
+  .rco-list li::before { content: ''; position: absolute; left: 0; top: 0.3em; width: 0.85rem; height: 0.85rem; border: 1.5px solid currentColor; border-radius: 3px; }
+  .rco-note { margin-top: 10px; font-size: 0.875rem; color: var(--color-warm-soft); }
+  @media (min-width: 768px) {
+    .rco { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; }
+    .rco img { border-bottom: 0; border-right: 1px solid var(--color-warm-rule); }
+    .rco-copy { padding: 32px 36px; }
+  }
+</style>

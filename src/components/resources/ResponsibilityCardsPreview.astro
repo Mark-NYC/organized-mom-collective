@@ -1,0 +1,55 @@
+---
+/**
+ * IF-03's product section: a preview of the physical Kids' Responsibility Cards using their real illustrations and
+ * titles only (never the cards' how-to steps or layouts). No listing yet (src/data/responsibility-cards.ts →
+ * pageUrl null), so it says "Coming soon" with no price or buy link; once pageUrl is set the button links there,
+ * tracked as a CTA click.
+ */
+import '@fontsource/kalam/latin-700.css';
+import OfferButton from '../site/OfferButton.astro';
+import { responsibilityCards } from '../../data/responsibility-cards';
+import { responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
+
+const preview = ['brush-my-teeth', 'make-my-bed', 'pack-my-backpack', 'clear-the-table']
+  .map((id) => responsibilityById(id)!)
+  .map((job) => ({ title: job.title, src: responsibilityImage(job, 256), color: responsibilityColor(job) }));
+const { name, pageUrl } = responsibilityCards;
+---
+
+<section class="rcp breakout" aria-labelledby="rcp-h">
+  <div class="rcp-copy">
+    <p class="label text-warm-soft">From Organized Mom Collective</p>
+    <h2 id="rcp-h" class="rcp-title">Ready to Help Your Kids Do It Themselves?</h2>
+    <p>
+      A chart tells your child <em>what</em> to do. Our {name} teach <em>how</em>: each card shows one everyday
+      responsibility, like making the bed or packing a backpack, as a picture and a few simple steps your child can follow
+      without asking you what comes next.
+    </p>
+    <p class="mt-3">Use them alongside the chart, so “Did you do it?” can become “Check your card.”</p>
+    <OfferButton label={pageUrl ? 'See the Responsibility Cards' : name} href={pageUrl} cta="article-responsibility-cards" class="mt-6" />
+  </div>
+  <ul class="rcp-cards" aria-label={`A few of the ${name} illustrations`}>
+    {
+      preview.map((card) => (
+        <li style={`--c: ${card.color}`}>
+          {card.src && <img src={card.src} alt="" width="256" height="256" loading="lazy" decoding="async" />}
+          <span>{card.title}</span>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .rcp { margin-block: 3rem; padding: 26px 20px; background: var(--color-cream); color: var(--color-warm-ink); }
+  .rcp-title { margin-top: 6px; font-family: var(--font-editorial); font-size: 1.6rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .rcp-copy p:not(.label) { font-size: 1.0625rem; line-height: 1.65; }
+  .rcp-copy .rcp-title + p { margin-top: 12px; }
+  .rcp-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
+  .rcp-cards li { display: grid; justify-items: center; gap: 8px; padding: 14px 10px 12px; background: #fff; border: 1.5px solid var(--c); border-radius: 12px; text-align: center; font-family: 'Kalam', var(--font-sans); font-weight: 700; font-size: 1.05rem; line-height: 1.15; }
+  .rcp-cards img { width: 72%; height: auto; padding: 6%; border-radius: 50%; background: color-mix(in srgb, var(--c) 55%, white); }
+  @media (min-width: 768px) {
+    .rcp { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 36px; align-items: center; padding: 36px; }
+    .rcp-cards { margin-top: 0; }
+  }
+</style>

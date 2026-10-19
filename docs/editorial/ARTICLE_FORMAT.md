@@ -174,6 +174,8 @@ One product callout per article, after the routine, where the article naturally 
 - **Wall calendar** (11 × 17 portrait, one week per page): the labeled sections in `design/etsy-listing/02.webp`: daily schedule (a column per day), each day's cleaning zone, self-care habits, word of the week, family and friends, grateful for (prayer and gratitude), meal plan, grocery list, to-do list, notes. Editions and prices: `src/config.ts`.
 - **Companion cleaning website** (included with every calendar; always call it a website or "the cleaning companion", never an app): `src/data/cleaning.ts` and `src/pages/app/`. The 15-minute Daily Reset; Monday–Thursday zones (Living Room, Bedrooms, Entry/Bathroom, Kitchen Reset); Friday–Sunday optional (Deep Cleaning, Home Project, Catch-Up / Reset); a home project for each month; a "catch up instead" option; progress saved in the browser, no account.
 
+- **Kids’ Responsibility Cards** (physical, **not on sale**: `src/data/responsibility-cards.ts`): each card teaches one everyday responsibility with an illustration, a title and three how-to steps. Show only titles and illustrations, never the steps or card layouts; no price, availability date or buy link until `pageUrl` is set. Used in IF-03 (`ResponsibilityCardsPreview`).
+
 If a feature isn't listed here, check the companion website and the listing images before mentioning it, and add it here once verified.
 
 `cta` in frontmatter records which product the callout points to: `calendar`, `companion` or `none`.
