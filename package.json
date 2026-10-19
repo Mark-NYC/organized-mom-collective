@@ -12,11 +12,12 @@
     "astro": "astro",
     "check:site": "node scripts/check-site.mjs",
     "check:feed": "node scripts/check-pinterest-feed.mjs",
-    "verify": "npm run build && npm run check:site && npm test",
+    "verify": "npm run check:article-photos && npm run build && npm run check:site && npm test",
     "test:shop": "bash scripts/test-shop.sh",
     "build:functions": "node scripts/build-dashboard-functions.mjs",
     "test:admin-sql": "bash scripts/test-admin-sql.sh",
-    "inventory": "node scripts/page-inventory.mjs"
+    "inventory": "node scripts/page-inventory.mjs",
+    "check:article-photos": "node scripts/check-article-photos.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.3",

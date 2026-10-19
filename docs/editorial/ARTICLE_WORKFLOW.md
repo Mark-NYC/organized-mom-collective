@@ -88,10 +88,12 @@ If an older article's content changes meaningfully, re-check its Pinterest plan:
 
 ## 8. Run site verification and commit
 
+**Photo uniqueness gate:** Run `npm run check:article-photos`. Every new article needs its own lifestyle images, checked by original source identity, not only registry filename. Do not substitute a previously used Kaboompics image. Source and clearance evidence must be logged before new image assets are added.
+
 1. Run:
 
    ```sh
-   npm run verify    # astro check + build + check:site + unit tests
+   npm run verify    # photo uniqueness + astro check + build + check:site + unit tests
    ```
 
    Fix every error. `check:site` verifies links, anchors, alt text, H1/title/description/canonical, JSON-LD, the sitemap, two body links per article, the article ↔ tracker match, and the Pinterest plan (exists, three complete pins, matches the tracker). It regenerates [content-inventory.md](content-inventory.md).
