@@ -43,7 +43,7 @@
  "unique_descriptions": true,
  "unique_media_urls": true,
  "thumbnail": "blank",
- "publish_date": "blank",
+ "publish_date": "Pins 1, 2, 4, 6, 9 blank (publish on import, Oct 19); pins 3, 5, 7, 8, 10 = 2026-10-20 (owner-specified format)",
  "boards": [
   "Chores & Shared Responsibilities",
   "Cleaning Schedules for Busy Moms",

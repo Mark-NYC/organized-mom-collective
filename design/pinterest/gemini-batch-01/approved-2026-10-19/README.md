@@ -39,7 +39,7 @@ The owner confirmed this format as current on 2026-10-19:
 | Thumbnail | Blank. That column is only for video pins. |
 | Description | Unique for every pin, 209–295 characters (limit 500). Opens with the search phrase. No hashtags. |
 | Link | Canonical `https://www.organizedmomcollective.com` paths: no trailing slash, no tracking parameters. |
-| Publish date | **Blank on purpose.** The schedule gets set separately. |
+| Publish date | Owner schedule, set 2026-10-19. **Pins 1, 4, 6, 2, 9: blank**, so they publish when the file is imported on October 19. **Pins 3, 5, 7, 8, 10: `2026-10-20`.** |
 | Keywords | 4 phrases per pin, taken from the article's primary keyword and the pin copy. **Not checked against Pinterest autocomplete or Trends.** No search volume is claimed. |
 
 The file is UTF-8 with no BOM and CRLF line endings. Fields containing commas or quotes are double-quoted per RFC 4180. It has 10 rows and was re-read with a CSV parser to confirm it parses back to the same values.
@@ -71,7 +71,7 @@ On 2026-10-19, all 10 returned HTTP 200 `image/png`, byte-identical to the commi
 1. **Boards:** the board names are now *Cleaning Schedules for Busy Moms* (pins 1, 9, 10), *Weekly Reset Routines* (2), *Family Organization Ideas* (3, 4, 5) and *Chores & Shared Responsibilities* (6, 7, 8). The registry warns that the profile cards cut off two labels, so before importing, check the exact spelling of *Family Organization Ideas* and *Cleaning Schedules for Busy Moms* in the live account. If PR #123 changes the registry before it merges, update the CSVs to match.
 2. **Live destinations:** open all 8 destination URLs on the live site and confirm each returns 200 and shows what its pin promises. Pin 6 doesn't mention an email step, because the email gate on `/chore-chart` can be switched on or off in the code.
 3. **Image size:** confirm Pinterest accepts the eight 687 × 1024 pins without cropping them in the feed.
-4. **Publish dates:** fill these in before importing, because importing a dated file schedules the pins. Keep pins 2 and 3 well apart, and pins 7 and 8 too (see review notes).
+4. **Publish dates:** set as above. `2026-10-20` is a bare date, while the IF-03 batch used full UTC times such as `2026-10-16T00:00:00`. After importing, check in Pinterest that the five dated pins are scheduled for October 20 Eastern time. If Pinterest reads a bare date as midnight UTC, they would go out at 8 pm Eastern on October 19. If Pinterest rejects the bare date, use a full UTC time. For example, `2026-10-21T00:00:00` is 8 pm Eastern on October 20. Pins 7 and 8 both land on October 20 (see review notes).
 5. **Keywords (optional):** check the Keywords phrases against Pinterest autocomplete before launch, and record what you find.
 6. **After importing:** update the Pinterest state in `docs/editorial/PINTEREST_PIN_INVENTORY.md` only from real Pinterest evidence (the pin URL and date).
 
