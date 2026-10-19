@@ -35,6 +35,16 @@ This is a **seed record from the October 14, 2026 creative review**, not a verif
 | Paper organization | The Paper Pile Needs Two Places | /resources/home-command-center | Incoming/Outgoing wall pockets, hand with envelope | Approved; not published (gemini-batch-02 #18) | Not published |
 | Meal planning | Plan Around Your Busy Nights | /resources/weekly-meal-planning-for-families | three dinners: full, short, zero-effort night | Approved; not published (gemini-batch-02 #19) | Not published |
 | Intentional family life | What Matters This Week? | /resources/intentional-family-life | table with weekly notebook, cocoa, picture books, board game | Approved; not published (gemini-batch-02 #20) | Not published |
+| Bathroom reset (OMC-P0163) | A Bathroom Reset You Can Actually Finish | /resources/zone-cleaning-schedule (proposed; held, see batch 03 blocked-pins.md) | hand wiping bathroom counter, caddy, towel | Approved 2026-10-19 (gemini-batch-03 #21, corrected spelling) | Not published |
+| Grocery list (OMC-P0413) | Shop Your Pantry Before the Store | /resources/grocery-list-from-meal-plan | hand shelving tomato can, blank grocery list | Approved 2026-10-19 (gemini-batch-03 #22) | Not published |
+| Chore chart (OMC-P0119) | When the Chore Chart Stops Working | /resources/chores-for-kids-by-age | child dropping blocks into woven basket, adult steadying | Approved 2026-10-19 (gemini-batch-03 #23) | Not published |
+| Evening routine (OMC-P0369) | Tomorrow Starts Tonight | /routine-chart | dusk bedroom, backpack, folded clothes (held: real book cover) | Approved 2026-10-19 (gemini-batch-03 #24) | Not published |
+| Kids bathroom jobs (OMC-P0075) | Small Bathroom Jobs Kids Can Own | /resources/chores-for-kids-by-age (held: destination needs content) | three panels: towel hook, toothbrush cup, wiping counter | Approved 2026-10-19 (gemini-batch-03 #25) | Not published |
+| After-school drop zone (OMC-P0325) | The After-School Drop Zone | /resources/launch-pad-by-the-door (held: destination needs content) | bench, backpack, lunchbox, wall pocket, hooks | Approved 2026-10-19 (gemini-batch-03 #26) | Not published |
+| Kids chores (OMC-P0006) | Chores for 4-Year-Olds | /resources/chores-for-kids-by-age | girl from behind putting stuffed animals in basket | Approved 2026-10-19 (gemini-batch-03 #27) | Not published |
+| Family schedule + meals (OMC-P0256) | Your Family Schedule and Meals Belong Together | /resources/how-to-organize-your-familys-week | overhead planner, shin guards, produce | Approved 2026-10-19 (gemini-batch-03 #28) | Not published |
+| Small home cleaning (OMC-P0212) | A Small Home Still Needs a Simple Cleaning Rhythm | /resources/zone-cleaning-schedule | inset small apartment, hands wiping table (replacement file pending) | Approved 2026-10-19 (gemini-batch-03 #29, revised) | Not published |
+| Family routine (OMC-P0462) | The Best Family Routine Is One You Can Repeat | /resources/weekly-family-reset | boy from behind hanging backpack on peg rail (owner-approved face-fragment override) | Approved 2026-10-19 (gemini-batch-03 #30) | Not published |
 
 Other existing Pinterest posts and generator creative are **not comprehensively recorded here**. Before a new batch, also inspect per-article plans, asset manifests, site content and Pinterest when accessible.
 

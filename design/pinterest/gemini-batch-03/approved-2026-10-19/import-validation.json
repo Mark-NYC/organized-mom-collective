@@ -1,0 +1,464 @@
+{
+ "batch": "gemini-batch-03",
+ "approved": "2026-10-19",
+ "asset_commit": "655c945669d9f9cbfd11f0f36e1f43e1f51d86d8",
+ "file": "pinterest-import-ready.csv",
+ "columns": [
+  "Title",
+  "Media URL",
+  "Pinterest board",
+  "Thumbnail",
+  "Description",
+  "Link",
+  "Publish date",
+  "Keywords"
+ ],
+ "rows": 5,
+ "pins_in_import": [
+  22,
+  23,
+  27,
+  28,
+  30
+ ],
+ "pins_held": [
+  {
+   "pin": 21,
+   "master_id": "OMC-P0163",
+   "reason": "Proposed destination does not deliver a bathroom checklist. The exact article exists: /resources/bathroom-reset-checklist (HC-07, title is this headline). Owner to confirm the swap."
+  },
+  {
+   "pin": 24,
+   "master_id": "OMC-P0369",
+   "reason": "Owner decision: the image shows a real copyrighted book cover (“Where the Wild Things Are”, Maurice Sendak) with title and author legible."
+  },
+  {
+   "pin": 25,
+   "master_id": "OMC-P0075",
+   "reason": "Destination does not deliver “small bathroom jobs kids can own”. Needs a short bathroom-jobs section (e.g. in IF-03 or HC-07) before import."
+  },
+  {
+   "pin": 26,
+   "master_id": "OMC-P0325",
+   "reason": "Destination does not cover the after-school arrival: unpacking bags, incoming papers and lunchboxes. Needs an after-school section before import."
+  },
+  {
+   "pin": 29,
+   "master_id": "OMC-P0212",
+   "reason": "Owner replaced this image on 2026-10-19; the replacement file did not reach this session. The superseded version is not shipped. Re-send the replacement to finish."
+  }
+ ],
+ "encoding": "UTF-8, no BOM",
+ "line_endings": "CRLF",
+ "quoting": "RFC 4180 minimal",
+ "csv_roundtrip": true,
+ "title_lengths": {
+  "21": 67,
+  "22": 61,
+  "23": 59,
+  "24": 55,
+  "25": 49,
+  "26": 60,
+  "27": 49,
+  "28": 59,
+  "29": 66,
+  "30": 53
+ },
+ "description_lengths": {
+  "21": 275,
+  "22": 293,
+  "23": 299,
+  "24": 271,
+  "25": 228,
+  "26": 206,
+  "27": 302,
+  "28": 285,
+  "29": 277,
+  "30": 281
+ },
+ "alt_text_lengths": {
+  "21": 311,
+  "22": 328,
+  "23": 292,
+  "24": 312,
+  "25": 299,
+  "26": 380,
+  "27": 323,
+  "28": 349,
+  "29": 363,
+  "30": 354
+ },
+ "unique_titles": true,
+ "unique_descriptions": true,
+ "unique_media_urls": true,
+ "keywords_per_pin": 4,
+ "keywords_note": "Master-plan keyword and article primary keyword used as hypotheses; not checked against Pinterest autocomplete or Trends; no volume claimed.",
+ "thumbnail": "blank",
+ "publish_date": "blank (not scheduled)",
+ "boards_used": [
+  "Chores & Shared Responsibilities",
+  "Cleaning Schedules for Busy Moms",
+  "Family Organization Ideas",
+  "Meal Planning for Families",
+  "Weekly Reset Routines"
+ ],
+ "board_registry": [
+  "Meal Planning for Families",
+  "Chores & Shared Responsibilities",
+  "Family Organization Ideas",
+  "Cleaning Schedules for Busy Moms",
+  "Mom Life & Mental Load",
+  "Weekly Reset Routines"
+ ],
+ "board_source": "docs/editorial/PINTEREST_BOARDS.md on branch docs/pinterest-actual-boards-2026-10-19 (not merged at time of writing)",
+ "destinations_in_site_source": true,
+ "live_site_verified": false,
+ "import_format_verified_against_pinterest_docs": false,
+ "import_format_note": "Columns follow the owner-confirmed Batch 01/02 template.",
+ "media_url_checks": [
+  {
+   "pin": 22,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 23,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 27,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 28,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  },
+  {
+   "pin": 30,
+   "status": 200,
+   "content_type": "image/png",
+   "bytes_match": true
+  }
+ ],
+ "master_ids": {
+  "21": "OMC-P0163",
+  "22": "OMC-P0413",
+  "23": "OMC-P0119",
+  "24": "OMC-P0369",
+  "25": "OMC-P0075",
+  "26": "OMC-P0325",
+  "27": "OMC-P0006",
+  "28": "OMC-P0256",
+  "29": "OMC-P0212",
+  "30": "OMC-P0462"
+ },
+ "assets": [
+  {
+   "pin": 21,
+   "master_id": "OMC-P0163",
+   "original": "6.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "5d80d33d83b43a21ef5836a4f23a5c3bb9862f33af5de2706240ecb991e5b21f",
+   "original_icc": "none",
+   "file": "omc-bathroom-reset-checklist-01.png",
+   "headline": "A Bathroom Reset You Can Actually Finish",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "f84ea5aa0cc59344aa98516596836f64b7146c5603db15bede762639a3019062",
+   "pixel_identical_to_source": true,
+   "bytes": 493519,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/pinterest/gemini-batch-02/approved-2026-10-19/omc-what-matters-this-week-01.png",
+    "dhash_distance_bits": 99
+   }
+  },
+  {
+   "pin": 22,
+   "master_id": "OMC-P0413",
+   "original": "2.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "564641a4affeefd07a08a81f888c7508b7c1e6170ff14420de3ef6a0d16ba0c2",
+   "original_icc": "none",
+   "file": "omc-shop-your-pantry-01.png",
+   "headline": "Shop Your Pantry Before the Store",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "76c81e889f0f5ed4ed939c8f4e99ee6303a0b9b0bc091acc9261ef523fd58ad8",
+   "pixel_identical_to_source": true,
+   "bytes": 872427,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/photography/kaboompics/HC-03/32323.jpg",
+    "dhash_distance_bits": 103
+   }
+  },
+  {
+   "pin": 23,
+   "master_id": "OMC-P0119",
+   "original": "3.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "9fa46b09a1a6cb9e46cb1e48e6ea05a63c32f8a8520880b60714791fe3326478",
+   "original_icc": "none",
+   "file": "omc-chore-chart-stops-working-01.png",
+   "headline": "When the Chore Chart Stops Working",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "7b8daa858dfa0cc632bcff39f8d48e9e3e9a1b433f045b6470444207d1169089",
+   "pixel_identical_to_source": true,
+   "bytes": 783409,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/photography/kaboompics/HC-03/32381.jpg",
+    "dhash_distance_bits": 92
+   }
+  },
+  {
+   "pin": 24,
+   "master_id": "OMC-P0369",
+   "original": "4.webp",
+   "original_format": "WEBP",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "1491b32c05ced333f234219950bf5f3ee181282f65ab80553cebd81096027aa3",
+   "original_icc": "embedded sRGB (kept)",
+   "file": "omc-evening-routine-for-kids-01.png",
+   "headline": "Tomorrow Starts Tonight",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "source sRGB profile carried over unchanged",
+   "sha256": "815b01fcb46ec9405e4546faacd0cc6544e7d90e2df880f50e10c780ccafce74",
+   "pixel_identical_to_source": true,
+   "bytes": 770409,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "public/images/pinterest/FP-03-curiosity-1000x1500.webp",
+    "dhash_distance_bits": 105
+   }
+  },
+  {
+   "pin": 25,
+   "master_id": "OMC-P0075",
+   "original": "5.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "aef7c4f6095b4657c09efaf5aef714d013668ce90aaca434afa912c7dcc14a5c",
+   "original_icc": "none",
+   "file": "omc-bathroom-jobs-for-kids-01.png",
+   "headline": "Small Bathroom Jobs Kids Can Own",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "682c2cdc26c963f6b2da6235c7e1b0c0f1e823b814c2b74379ba152147653ebf",
+   "pixel_identical_to_source": true,
+   "bytes": 416822,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/photography/kaboompics/HC-03/32306.jpg",
+    "dhash_distance_bits": 101
+   }
+  },
+  {
+   "pin": 26,
+   "master_id": "OMC-P0325",
+   "original": "7.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "386bb0bbfd85a5991d001a69dc4e6a97a8853a565c683f221491169b33e375ef",
+   "original_icc": "none",
+   "file": "omc-after-school-drop-zone-01.png",
+   "headline": "The After-School Drop Zone",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "ba81d4157bba36075d181b52806dac4e528360b9cb82694e6b7e921a33a41c81",
+   "pixel_identical_to_source": true,
+   "bytes": 635147,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/pinterest/IF-03/approved-2026-10-14/IF-03-search-v02-1000x1500.png",
+    "dhash_distance_bits": 95
+   }
+  },
+  {
+   "pin": 27,
+   "master_id": "OMC-P0006",
+   "original": "8.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "37b8eee1b5f76b8922460a208d30f9d5ae248691025038810af2da450aa2720f",
+   "original_icc": "none",
+   "file": "omc-chores-for-4-year-olds-01.png",
+   "headline": "Chores for 4-Year-Olds",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "27a05afaba037fe0ca93b5f76f9cf1680b5b480856f81ca5ed1bedd7424b8749",
+   "pixel_identical_to_source": true,
+   "bytes": 780913,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/pinterest/IF-03/approved-2026-10-14/02-their-name-their-jobs-their-chart-1000x1500.png",
+    "dhash_distance_bits": 97
+   }
+  },
+  {
+   "pin": 28,
+   "master_id": "OMC-P0256",
+   "original": "9.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "09e8288705e28225c3d05befee5182de5a1ff1a028303cf6ed03b7b6d4b0c46b",
+   "original_icc": "none",
+   "file": "omc-family-schedule-and-meals-01.png",
+   "headline": "Your Family Schedule and Meals Belong Together",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "72256a24f0bec37b033cf1e937851f1880c43566ec4f1b70a0b5b598a81796dc",
+   "pixel_identical_to_source": true,
+   "bytes": 541156,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/photography/kaboompics/HC-03/32380.jpg",
+    "dhash_distance_bits": 94
+   }
+  },
+  {
+   "pin": 29,
+   "master_id": "OMC-P0212",
+   "original": "(pending)",
+   "original_format": "",
+   "original_size": [],
+   "original_sha256": "",
+   "original_icc": "",
+   "file": "(replacement pending)",
+   "headline": "A Small Home Still Needs a Simple Cleaning Rhythm",
+   "format": "",
+   "size": [],
+   "mode": "",
+   "icc": "",
+   "sha256": "",
+   "pixel_identical_to_source": null,
+   "bytes": 0,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": null
+  },
+  {
+   "pin": 30,
+   "master_id": "OMC-P0462",
+   "original": "11.jpg",
+   "original_format": "JPEG",
+   "original_size": [
+    687,
+    1024
+   ],
+   "original_sha256": "7fa4e2e858d17fe61a5691d50a975ee5a82ee40f9bc84fb0ae9b74f6014cfbe6",
+   "original_icc": "none",
+   "file": "omc-repeatable-family-routine-01.png",
+   "headline": "The Best Family Routine Is One You Can Repeat",
+   "format": "PNG",
+   "size": [
+    687,
+    1024
+   ],
+   "mode": "RGB",
+   "icc": "sRGB tag added (source untagged); same profile bytes as batches 01/02",
+   "sha256": "f4ec8089bbb2fc15f21bc73c61df26491c7dfcaacf0da3f2b4bb64110f8a1e60",
+   "pixel_identical_to_source": true,
+   "bytes": 551001,
+   "sha256_match_in_repo": null,
+   "closest_repo_image": {
+    "path": "design/pinterest/gemini-batch-01/approved-2026-10-19/omc-family-entryway-routine-01.png",
+    "dhash_distance_bits": 94
+   }
+  }
+ ],
+ "superseded": [
+  {
+   "pin": 29,
+   "original": "10.jpg",
+   "original_sha256": "8718572a33ca25f5308e3544326842889bf0b04810d038c4c7ee60a8bcfc4c01",
+   "png_sha256": "de076bf3e180cb265bf3b1e0de45c2ad9f9fc70a3aebdd664ec11252883bcc12",
+   "note": "First pin 29 version (vertical headline). Replaced by owner 2026-10-19; not shipped. Was in asset commit 655c945 only."
+  },
+  {
+   "pin": 21,
+   "original": "1.jpg",
+   "original_sha256": "e4590b3224aeb6581e773c2706d7c20ec699024934d19bd1068f319e4c630261",
+   "note": "First pin 21 version, headline misspelled “Actualy”. Replaced by 6.jpg; never stored."
+  }
+ ],
+ "duplicate_scan": {
+  "images_scanned": 610,
+  "min_within_batch_dhash_bits": 109
+ }
+}
