@@ -644,8 +644,7 @@
       },
       "used_in": [
         "FP-03 /resources/home-command-center (hero)",
-        "FP-09 hero replaced by owner-supplied fridge mockup on 2026-10-13",
-        "FP-13 /resources/after-school-routine-for-kids (hero; reused existing cleared image)"
+        "FP-09 hero replaced by owner-supplied fridge mockup on 2026-10-13"
       ]
     },
     {
@@ -679,8 +678,7 @@
       },
       "used_in": [
         "FP-04 /resources/weekly-family-reset (inline)",
-        "IF-02 /resources/how-to-share-the-mental-load (hero)",
-        "FP-13 /resources/after-school-routine-for-kids (inline; reused existing cleared image)"
+        "IF-02 /resources/how-to-share-the-mental-load (hero)"
       ]
     },
     {
@@ -979,6 +977,58 @@
         "edits": "Responsive WebP resizing only; no AI processing",
         "alt_text_example": "White and sage folded towels on a wooden bench with a natural brush."
       }
+    },
+    {
+      "id": "FP13-36702",
+      "title": "Pastel backpacks, sneakers, notebooks and school supplies arranged on a mint-colored surface.",
+      "role": "after-school routine",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/36702/pastel-backpacks-and-school-supplies-flat-lay",
+      "owner_visual_status": "standing_kaboompics_owner_approval",
+      "license_review": "Photo page commercial-use label verified by download workflow 2026-10-19",
+      "license_verification_date": "2026-10-19",
+      "source_license_url": "https://kaboompics.com/photo/36702/pastel-backpacks-and-school-supplies-flat-lay",
+      "model_release_review": "No identifiable faces expected; final visual context should be reviewed on deployment",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-13-drop-zone-{640,960,1280}.webp",
+      "clearance_record": {
+        "approval": "Kaboompics standing owner approval 2026-10-12",
+        "date": "2026-10-19",
+        "checks_by": "automated source/license and decoded-image check; visual QA pending",
+        "context": "Editorial school belongings; no implied endorsement",
+        "original": "design/photography/kaboompics/FP-13/36702.jpg",
+        "edits": "Resize and WebP export only"
+      },
+      "used_in": [
+        "FP-13 /resources/after-school-routine-for-kids (hero)"
+      ]
+    },
+    {
+      "id": "FP13-36685",
+      "title": "A coral basket holding school notebooks, a ruler and pens on a neutral tabletop.",
+      "role": "after-school routine",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_url": "https://kaboompics.com/photo/36685/coral-basket-filled-with-notebooks-and-tools",
+      "owner_visual_status": "standing_kaboompics_owner_approval",
+      "license_review": "Photo page commercial-use label verified by download workflow 2026-10-19",
+      "license_verification_date": "2026-10-19",
+      "source_license_url": "https://kaboompics.com/photo/36685/coral-basket-filled-with-notebooks-and-tools",
+      "model_release_review": "No identifiable faces expected; final visual context should be reviewed on deployment",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-13-papers-{640,960,1280}.webp",
+      "clearance_record": {
+        "approval": "Kaboompics standing owner approval 2026-10-12",
+        "date": "2026-10-19",
+        "checks_by": "automated source/license and decoded-image check; visual QA pending",
+        "context": "Editorial school belongings; no implied endorsement",
+        "original": "design/photography/kaboompics/FP-13/36685.jpg",
+        "edits": "Resize and WebP export only"
+      },
+      "used_in": [
+        "FP-13 /resources/after-school-routine-for-kids (inline)"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

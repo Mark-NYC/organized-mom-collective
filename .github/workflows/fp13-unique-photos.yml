@@ -1,0 +1,110 @@
+name: Install unique FP-13 Kaboompics photography
+on:
+  push:
+    branches:
+      - content/fp-13-after-school-drop-zone
+    paths:
+      - '.github/workflows/fp13-unique-photos.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: content/fp-13-after-school-drop-zone
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install "Pillow>=11,<13" beautifulsoup4 requests
+      - name: Download and register two distinct licensed photos
+        run: |
+          python - <<'PY'
+          import requests, json, re, io
+          from pathlib import Path
+          from PIL import Image, ImageOps
+          from bs4 import BeautifulSoup
+          photos=[
+            ('fp-13-drop-zone','36702','https://kaboompics.com/photo/36702/pastel-backpacks-and-school-supplies-flat-lay','Pastel backpacks, sneakers, notebooks and school supplies arranged on a mint-colored surface.','hero'),
+            ('fp-13-papers','36685','https://kaboompics.com/photo/36685/coral-basket-filled-with-notebooks-and-tools','A coral basket holding school notebooks, a ruler and pens on a neutral tabletop.','inline'),
+          ]
+          session=requests.Session()
+          session.headers.update({'User-Agent':'Mozilla/5.0 (compatible; OMC-photo-downloader/1.0)'})
+          image_dir=Path('public/images/resources');image_dir.mkdir(parents=True,exist_ok=True)
+          original_dir=Path('design/photography/kaboompics/FP-13'); original_dir.mkdir(parents=True,exist_ok=True)
+          metadata=[]
+          for name,id,url,alt,placement in photos:
+            response=session.get(url,timeout=30);response.raise_for_status()
+            soup=BeautifulSoup(response.text,'html.parser')
+            plain=soup.get_text(' ',strip=True).lower()
+            if 'free for personnal & commercial' not in plain and 'free for personal & commercial' not in plain:
+              raise RuntimeError(f'License cannot be verified: {url}')
+            links=[a.get('href') for a in soup.find_all('a',href=True) if 'download: medium' in a.get_text(' ',strip=True).lower() or 'download: full size' in a.get_text(' ',strip=True).lower()]
+            if not links:raise RuntimeError(f'No lawful download link: {url}')
+            from urllib.parse import urljoin
+            img=None;source_url=None
+            for href in links:
+              target=urljoin(url,href)
+              try:
+                res=session.get(target,timeout=60);res.raise_for_status()
+                candidate=Image.open(io.BytesIO(res.content)); candidate.load()
+                if candidate.width<1000:continue
+                img=ImageOps.exif_transpose(candidate).convert('RGB')
+                source_url=target
+                break
+              except Exception:continue
+            if img is None:raise RuntimeError(f'Unable to download photograph from {url}')
+            (original_dir/(id+'.jpg')).write_bytes(res.content)
+            if img.width/img.height<1.25: raise RuntimeError('Unexpected portrait crop')
+            widths=[640,960,1280]
+            for width in widths:
+              if width>img.width:raise RuntimeError('Would upscale image')
+              height=round(img.height*width/img.width)
+              resized=img.resize((width,height),Image.Resampling.LANCZOS)
+              resized.save(image_dir/f'{name}-{width}.webp','WEBP',quality=82,method=6)
+            metadata.append(dict(id=id,name=name,url=url,alt=alt,placement=placement,widths=widths,width=1280,height=round(img.height*1280/img.width),download_url=source_url))
+          registry=Path('src/data/images.ts')
+          body=registry.read_text()
+          for p in metadata:
+            entry=f"  '{p['name']}': {{ widths: [640, 960, 1280], width: 1280, height: {p['height']}, source: 'Kaboompics {p['id']}, Karolina Grabowska; original design/photography/kaboompics/FP-13/{p['id']}.jpg; first use FP-13 2026-10-19' }},\\n"
+            body=body.replace('export const articleImages = {','export const articleImages = {\\n'+entry.replace('\\n','\n'))
+          registry.write_text(body)
+          path=Path('src/content/articles/after-school-routine-for-kids.mdx')
+          article=path.read_text().replace('image: fp-03-school-bag','image: fp-13-drop-zone').replace('alt: Hands placing school notebooks and supplies into an open backpack on a wooden surface.','alt: Pastel backpacks, sneakers and school supplies arranged together on a mint-colored background.')
+          article=article.replace('image="fp-04-planning-desk"','image="fp-13-papers"').replace('alt="Open notebook on a warm wooden desk with books and writing materials nearby."','alt="A coral basket with school notebooks, pens and a ruler on a warm neutral tabletop."')
+          path.write_text(article)
+          catalog_path=Path('docs/brand/lifestyle-photo-library.json')
+          catalog=json.loads(catalog_path.read_text())
+          for p in metadata:
+            catalog['assets'].append({
+              'id':'FP13-'+p['id'],'title':p['alt'],'role':'after-school routine','source':'Kaboompics',
+              'creator':'Karolina Grabowska','source_url':p['url'],
+              'owner_visual_status':'standing_kaboompics_owner_approval',
+              'license_review':'Photo page commercial-use label verified by download workflow 2026-10-19',
+              'license_verification_date':'2026-10-19','source_license_url':p['url'],
+              'model_release_review':'No identifiable faces expected; final visual context should be reviewed on deployment',
+              'publishing_clearance':True,
+              'public_path':f"public/images/resources/{p['name']}-{{640,960,1280}}.webp",
+              'clearance_record':{'approval':'Kaboompics standing owner approval 2026-10-12','date':'2026-10-19','checks_by':'automated source/license and decoded-image check; visual QA pending','context':'Editorial school belongings; no implied endorsement','original':f"design/photography/kaboompics/FP-13/{p['id']}.jpg",'edits':'Resize and WebP export only'},
+              'used_in':['FP-13 /resources/after-school-routine-for-kids ('+p['placement']+')']
+            })
+          for id in ['K11','K12']:
+            existing=next((x for x in catalog['assets'] if x.get('id')==id),None)
+            if existing:
+              existing['used_in']=[item for item in existing.get('used_in',[]) if not item.startswith('FP-13 ')]
+          catalog_path.write_text(json.dumps(catalog,indent=2)+'\n')
+          print(json.dumps(metadata,indent=2))
+          PY
+      - name: Confirm both new image assets exist
+        run: |
+          test -s public/images/resources/fp-13-drop-zone-1280.webp
+          test -s public/images/resources/fp-13-papers-1280.webp
+      - name: Commit new photos and article references
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/images.ts src/content/articles/after-school-routine-for-kids.mdx docs/brand/lifestyle-photo-library.json public/images/resources/fp-13-*.webp design/photography/kaboompics/FP-13
+          git commit -m "Replace reused FP-13 photos with two unique Kaboompics originals"
+          git push origin HEAD:content/fp-13-after-school-drop-zone

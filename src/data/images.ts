@@ -16,6 +16,8 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'fp-13-papers': { widths: [640, 960, 1280], width: 1280, height: 853, source: 'Kaboompics 36685, Karolina Grabowska; original design/photography/kaboompics/FP-13/36685.jpg; first use FP-13 2026-10-19' },
+  'fp-13-drop-zone': { widths: [640, 960, 1280], width: 1280, height: 853, source: 'Kaboompics 36702, Karolina Grabowska; original design/photography/kaboompics/FP-13/36702.jpg; first use FP-13 2026-10-19' },
   'if-07-bathroom-sink-hands': { widths: [640, 960, 1440], width: 1440, height: 960, source: 'Kaboompics 7888, Karolina Grabowska; https://kaboompics.com/photo/7888/washing-of-hands-under-running-water; dedicated IF-07 hero 2026-10-19' },
   'if-07-bathroom-folded-towels': { widths: [400, 600, 800], width: 800, height: 1200, source: 'Kaboompics 35020, Karolina Grabowska; https://kaboompics.com/photo/35020/wooden-bench-with-folded-towels-and-body-brush; dedicated IF-07 inline 2026-10-19' },
   'fp-11-hero': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-supplied photo for FP-11, 2026-10-15; original design/photography/owner/fp-11-hero-original.jpg (1200x800); resize only, no crop or alteration; original photographer/site not stated by owner' },
