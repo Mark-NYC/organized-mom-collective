@@ -1,0 +1,16 @@
+{
+  "article": "IF-03 chores-for-kids-by-age",
+  "requested": "2026-10-19 (retry: first run found no photo links on gallery search pages)",
+  "purpose": "Discovery for Kids’ Responsibility Chart by Age: two faceless-first photos of children doing everyday jobs (hero: a child carrying or clearing dishes; inline: small hands folding laundry, putting toys away or making a bed). Previews for review; full-size originals requested separately for the picks.",
+  "seeds": [
+    "https://kaboompics.com/gallery?search=child",
+    "https://kaboompics.com/gallery?search=kids",
+    "https://kaboompics.com/gallery/photoshoots?search=child",
+    "https://kaboompics.com/gallery/photoshoots?search=kids",
+    "https://kaboompics.com/gallery/photoshoots?search=family+home",
+    "https://kaboompics.com/gallery/photoshoots/category/interior",
+    "https://kaboompics.com/gallery/photos/category/faceless",
+    "https://kaboompics.com/photo/5899/kids-desk-study-design"
+  ],
+  "max_photos": 90
+}

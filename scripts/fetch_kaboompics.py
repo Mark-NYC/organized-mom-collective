@@ -30,12 +30,11 @@ def get(url, binary=False):
 
 
 def photo_links(page_html):
-    links = re.findall(r'href="(https?://kaboompics\.com/photo/(\d+)/[^"#?]+|/photo/(\d+)/[^"#?]+)"', page_html)
+    # Absolute or relative, quoted with " or ', in href or any data attribute (gallery pages vary).
+    links = re.findall(r'((?:https?://(?:www\.)?kaboompics\.com)?/photo/(\d+)/[^"\'#?\s<>]+)', page_html)
     out = {}
-    for full, id1, id2 in links:
-        pid = id1 or id2
-        url = urllib.parse.urljoin('https://kaboompics.com', full)
-        out.setdefault(pid, url)
+    for full, pid in links:
+        out.setdefault(pid, urllib.parse.urljoin('https://kaboompics.com', full))
     return out
 
 
@@ -110,7 +109,12 @@ def main():
         m = re.search(r'/photo/(\d+)/', seed)
         if m:
             photos.setdefault(m.group(1), seed)
-        for pid, url in photo_links(page).items():
+        found = photo_links(page)
+        print('seed', seed, len(found), 'photo links')
+        if not found and not m:
+            # Keep the page so the next request can use the format it actually has.
+            (out / f'seed-{len(list(out.glob("seed-*.html"))) + 1}.html').write_text(page[:400_000])
+        for pid, url in found.items():
             photos.setdefault(pid, url)
     lo, hi = req.get('id_range', [0, -1])
     for pid in range(lo, hi + 1):
