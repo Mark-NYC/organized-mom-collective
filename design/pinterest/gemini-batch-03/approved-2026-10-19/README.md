@@ -2,7 +2,7 @@
 
 Ten owner-approved Pinterest pins (numbered 21–30, continuing batches 01 and 02) made with Gemini. Each pin carries its ID from the original 500-pin editorial calendar (`OMC_500_Pin_Content_Calendar.xlsx`). Nothing here has been imported, scheduled or published on Pinterest.
 
-**Import-ready: 6 pins (21, 22, 23, 27, 28, 30). Held: 4 pins (24, 25, 26, 29).** See [blocked-pins.md](blocked-pins.md).
+**Import-ready: 8 pins (21, 22, 23, 25, 26, 27, 28, 30). Held: 2 pins (24, 29).** See [blocked-pins.md](blocked-pins.md).
 
 | # | Master ID | Headline | File | Destination | Board | State |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -10,8 +10,8 @@ Ten owner-approved Pinterest pins (numbered 21–30, continuing batches 01 and 0
 | 22 | OMC-P0413 | Shop Your Pantry Before the Store | `omc-shop-your-pantry-01.png` | /resources/grocery-list-from-meal-plan | Meal Planning for Families | Import-ready |
 | 23 | OMC-P0119 | When the Chore Chart Stops Working | `omc-chore-chart-stops-working-01.png` | /resources/chores-for-kids-by-age | Chores & Shared Responsibilities | Import-ready |
 | 24 | OMC-P0369 | Tomorrow Starts Tonight | `omc-evening-routine-for-kids-01.png` | /routine-chart | Family Organization Ideas | Held: owner decision (book cover) |
-| 25 | OMC-P0075 | Small Bathroom Jobs Kids Can Own | `omc-bathroom-jobs-for-kids-01.png` | /resources/chores-for-kids-by-age | Chores & Shared Responsibilities | Held: destination needs content |
-| 26 | OMC-P0325 | The After-School Drop Zone | `omc-after-school-drop-zone-01.png` | /resources/launch-pad-by-the-door | Family Organization Ideas | Held: destination needs content |
+| 25 | OMC-P0075 | Small Bathroom Jobs Kids Can Own | `omc-bathroom-jobs-for-kids-01.png` | /resources/bathroom-chores-for-kids | Chores & Shared Responsibilities | Import-ready (new IF-07 article) |
+| 26 | OMC-P0325 | The After-School Drop Zone | `omc-after-school-drop-zone-01.png` | /resources/after-school-routine-for-kids | Family Organization Ideas | Import-ready (new FP-13 article) |
 | 27 | OMC-P0006 | Chores for 4-Year-Olds | `omc-chores-for-4-year-olds-01.png` | /resources/chores-for-kids-by-age | Chores & Shared Responsibilities | Import-ready |
 | 28 | OMC-P0256 | Your Family Schedule and Meals Belong Together | `omc-family-schedule-and-meals-01.png` | /resources/how-to-organize-your-familys-week | Family Organization Ideas | Import-ready |
 | 29 | OMC-P0212 | A Small Home Still Needs a Simple Cleaning Rhythm | replacement pending | /resources/zone-cleaning-schedule | Cleaning Schedules for Busy Moms | Held: replacement file not received |
@@ -23,8 +23,8 @@ Ten owner-approved Pinterest pins (numbered 21–30, continuing batches 01 and 0
 - `originals/`: the files exactly as supplied, unchanged, named in chat-attachment order. Pin 21 is `6.jpg`, the owner's corrected replacement. The first pin 21 (`1.jpg`, SHA-256 `e4590b32…0261`) read “Actualy” and isn't stored. The first pin 29 (`10.jpg`, vertical headline) was replaced by the owner; it is only in asset commit `655c945` and isn't shipped.
 - `production-manifest.csv`: master ID, original and new filenames, headline, topic, dimensions, SHA-256 hashes, repository path, public image URL, destination, validation state, board and approval/publish status.
 - `pinterest-metadata.csv`: internal production metadata for all 10 pins (master ID, title, description, alt text, board, destination and its status, article section, media URL, keywords, status, hold reason, QA note). **It is not a Pinterest import file.**
-- `pinterest-import-ready.csv`: the Pinterest Import Content file. Only the 6 pins that passed every gate.
-- `blocked-pins.md`: the 4 held pins, why, and what clears each.
+- `pinterest-import-ready.csv`: the Pinterest Import Content file. Only the 8 pins that passed every gate.
+- `blocked-pins.md`: the 2 held pins, why, and what clears each.
 - `master-calendar-update-proposal.csv`: proposed rows for the 500-pin calendar, keyed by master ID (see below).
 - `import-validation.json`: conversion results per image, the duplicate scan and the mechanical checks on the import file.
 
@@ -37,10 +37,10 @@ Headlines were matched from the visible text on each image, not from filenames o
 | Column | What's in this batch |
 | --- | --- |
 | Title | Unique, 49–67 characters (limit 100). Leads with the article's search phrase. |
-| Media URL | Immutable GitHub links at asset commit `655c945`. All 6 returned HTTP 200 `image/png`, byte-identical to the committed files. |
+| Media URL | Immutable GitHub links at asset commit `655c945`. All 8 returned HTTP 200 `image/png`, byte-identical to the committed files. |
 | Pinterest board | Exact names from `docs/editorial/PINTEREST_BOARDS.md` (branch `docs/pinterest-actual-boards-2026-10-19`, not yet merged). No new boards. |
 | Thumbnail | Blank (video pins only). |
-| Description | Unique, 275–302 characters (limit 500). Built from the destination's own copy. No hashtags. |
+| Description | Unique, 275–316 characters (limit 500). Built from the destination's own copy. No hashtags. |
 | Link | Canonical `https://www.organizedmomcollective.com/…` paths, no trailing slash, no tracking parameters. |
 | Publish date | Blank. Not scheduled yet. |
 | Keywords | 4 phrases per pin. The master-plan keyword and the article's primary keyword are **hypotheses**, not checked against Pinterest autocomplete or Trends. No search volume is claimed. |
@@ -73,9 +73,9 @@ Each image was decoded and saved as PNG with no resizing, cropping, recoloring o
 
 ## What was verified and what wasn't
 
-- **Destinations:** read in site source (`src/content/articles/`, `src/pages/routine-chart/`, `src/data/routines.ts`, `src/data/chores-by-age.ts`). 21 → HC-07 (owner switched it from `/resources/zone-cleaning-schedule`, which has no bathroom checklist); the article's title is the headline and its checklist is the six-job, 15-minute reset. 22 → FP-06 step 2 “Check the kitchen before adding more”; 23 → IF-03 “When the chart stops working”; 24 → routine chart Bedtime template (“Lay out tomorrow's clothes”); 27 → IF-03 “Chores for preschoolers (ages 4–5)”; 28 → FP-01 sections 3 and 4 (“Label each night full, short or zero”, “Dinners decided once”); 29 → HC-03 “A zone is a time limit, not a room” (small spots get combined; the article doesn't address small homes specifically); 30 → FP-04 15-minute reset and five-minute version. **The live site was not checked.**
+- **Destinations:** read in site source (`src/content/articles/`, `src/pages/routine-chart/`, `src/data/routines.ts`, `src/data/chores-by-age.ts`). 25 → IF-07 `bathroom-chores-for-kids` (written for this pin; age table built on towel, toothbrush cup and sink wipe; “Teach one job, then hand it over”). 26 → FP-13 `after-school-routine-for-kids` (written for this pin; drop zone for bags, “Needs attention” papers and lunchbox/gear, then a five-step arrival checklist). 21 → HC-07 (owner switched it from `/resources/zone-cleaning-schedule`, which has no bathroom checklist); the article's title is the headline and its checklist is the six-job, 15-minute reset. 22 → FP-06 step 2 “Check the kitchen before adding more”; 23 → IF-03 “When the chart stops working”; 24 → routine chart Bedtime template (“Lay out tomorrow's clothes”); 27 → IF-03 “Chores for preschoolers (ages 4–5)”; 28 → FP-01 sections 3 and 4 (“Label each night full, short or zero”, “Dinners decided once”); 29 → HC-03 “A zone is a time limit, not a room” (small spots get combined; the article doesn't address small homes specifically); 30 → FP-04 15-minute reset and five-minute version. **The live site was not checked.**
 - **Boards:** all 10 match the registry exactly.
-- **Media URLs:** checked for the 6 import rows.
+- **Media URLs:** checked for the 8 import rows.
 
 ## 500-pin master calendar
 
