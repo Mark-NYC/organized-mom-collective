@@ -23,6 +23,7 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 
 ## Design rules
 
+- **Every article's lifestyle photos must be unique to that article.** Never reuse another article's Kaboompics hero or editorial image, even with a new crop or filename. Real product photos and instructional assets are separate, explicitly documented exceptions. See PHOTO-DISCOVERY.md and run `npm run check:article-photos`.
 - **Photos only when they're relevant.** None is fine. Never add a photo to fill space or hit a count. Every image must show something the text is talking about.
 - **Instructional diagrams and printable examples** where they add real value (the cleaning week, checklists). Prefer data-driven components over screenshots of text.
 - **No long walls of text.** Break them with a heading, a checklist, a photo or a pull quote, not with decoration.
@@ -73,11 +74,13 @@ No newsletter block exists, because there's no signup system. Don't add one unti
 - Real family homes: kitchens, dining tables, living rooms, entryways, laundry spaces. Lived-in, slightly imperfect.
 - Candid moments: hands at work, a child helping, a counter mid-reset. Paper calendars, pens, handwritten lists, ordinary household objects.
 - **Avoid:** sterile stock, empty show homes, generated faces or anything that looks generated, staged smiles, excessive beige, decorative images that don't help the article.
-- **Look: bright, white and warm, with consistent props** (the plain glass spray bottle, sage and cream cloths, wooden brush, cream caddy in the `design/photography/` set). Reusing the same props and kitchen across articles is what makes the library feel like one brand. Polished is fine; sterile and empty isn't.
+- **Look: bright, white and warm, with consistent props** (the plain glass spray bottle, sage and cream cloths, wooden brush, cream caddy in the `design/photography/` set). A consistent palette and photographic style make the library feel like one brand. **Do not reuse the actual image across articles.** Polished is fine; sterile and empty isn't.
 - **Generated lifestyle scenes are allowed** for article photos and pins: hands and arms only, no faces, no product (calendar, companion website, phone screens, packaging), plain unbranded supplies. Keep the original in `design/photography/`, note "generated" as its `source` in `src/data/images.ts`, review at full size for artifacts (hands, fingers, reflections, warped objects), and never caption or describe one as a real home or a reader's home.
 - **Product photos are real or absent.** Use the real calendar photos (`design/etsy-listing/`) or real screenshots of the companion website. Never generate or alter product imagery.
 
 ### Adding a photo
+
+**Source uniqueness gate:** Search existing article frontmatter and `<Figure>` references and the photo catalog before selecting a new source. Record the actual source photo ID to catch re-exports of the same shot. A duplicated lifestyle photo blocks publication; if a fresh cleared photo is not available, use no image instead.
 
 1. Keep the original untouched (product originals live in `design/etsy-listing/`; put new originals in `design/photography/`).
 2. Make responsive files: `python3 scripts/article-image.py SOURCE NAME [--crop l,t,r,b]`. Crop only to frame the photo or remove a text overlay.
