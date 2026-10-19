@@ -21,7 +21,7 @@ interface Props {
   ogImage?: string;
   /** Structured data (schema.org JSON-LD) objects for this page. */
   jsonLd?: object[];
-  /** GA4 and the Pinterest tag. Off for /admin: no third-party script on pages with customer data. */
+  /** Google Tag Manager, GA4 and the Pinterest tag. Off for /admin: no third-party script on pages with customer data. */
   tracking?: boolean;
 }
 
@@ -35,6 +35,13 @@ const monthHexes = monthColors.map((m) => m.hex);
   <head>
     {tracking && (
       <>
+        <!-- Google Tag Manager -->
+        <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-5MMCJ8LN');</script>
+        <!-- End Google Tag Manager -->
         <!-- Google tag (gtag.js) -->
         <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-VGJK1B4TJ6"></script>
         <script is:inline>
@@ -83,6 +90,10 @@ const monthHexes = monthColors.map((m) => m.hex);
     <slot name="head" />
   </head>
   <body class="min-h-dvh">
+    {tracking && (
+      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5MMCJ8LN"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    )}
     {tracking && (
       <noscript>
         <img height="1" width="1" style="display:none;" alt=""
