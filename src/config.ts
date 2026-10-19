@@ -62,6 +62,19 @@ export const SITE_NAME = 'Organized Mom';
 export const BRAND_NAME = 'Organized Mom Collective';
 
 /**
+ * The plain "what is it, who's it for, what does it do" sentence. Used in the site footer,
+ * the homepage and Organization structured data so people and AI answer engines don't have
+ * to infer it from the tagline. Keep it true to what ships today (see docs/brand/VISION.md).
+ */
+export const BRAND_DEFINITION = `${BRAND_NAME} makes a printed 11 × 17-inch weekly family wall calendar for busy families with school-age kids, with a cleaning companion website for daily routines included.`;
+
+/**
+ * When the site's prices (CALENDAR_OPTIONS and the shop products) were last checked. Shown as "Prices as of …" wherever
+ * prices appear. ⚠️ Update it whenever prices change or are re-confirmed.
+ */
+export const PRICES_AS_OF = 'October 2026';
+
+/**
  * Where the printed QR code (/start) sends people.
  * The QR itself always encodes https://organizedmomcollective.com/start — never
  * change that. Change THIS to move calendar owners somewhere else later.

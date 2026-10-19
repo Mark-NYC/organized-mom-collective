@@ -10,6 +10,7 @@ import SiteHeader from '../components/resources/SiteHeader.astro';
 import SiteFooter from '../components/resources/SiteFooter.astro';
 import CtaTracking from '../components/site/CtaTracking.astro';
 import { BRAND_NAME } from '../config';
+import { pageUpdated } from '../data/page-updated';
 
 interface Props {
   title?: string;
@@ -39,12 +40,19 @@ const {
   ogType,
   ogImage = DEFAULT_OG,
   ogImageAlt = `The ${BRAND_NAME} family wall calendar, filled in for the week, on a kitchen counter.`,
-  jsonLd,
+  jsonLd: pageJsonLd,
 } = Astro.props;
 const fullTitle = Astro.props.fullTitle ?? (title ? `${title} · ${BRAND_NAME}` : BRAND_NAME);
 // Internal links never use a trailing slash (see src/routes.ts), so canonicals don't either.
 const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
 const canonical = indexable && Astro.site ? new URL(path, Astro.site).href : undefined;
+// Tool and checklist pages get a visible "Updated" date and WebPage dateModified (src/data/page-updated.ts).
+const updated = indexable ? pageUpdated[path] : undefined;
+const updatedLabel = updated && new Date(updated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const jsonLd =
+  updated && canonical
+    ? [...(pageJsonLd ?? []), { '@context': 'https://schema.org', '@type': 'WebPage', url: canonical, name: fullTitle, dateModified: updated }]
+    : pageJsonLd;
 const mainClass =
   width === 'full' ? '' : ['mx-auto px-5 sm:px-8', width === 'wide' ? 'max-w-5xl' : 'max-w-3xl', chrome ? 'py-8 sm:py-14' : 'py-12 sm:py-20'].join(' ');
 ---
@@ -70,6 +78,13 @@ const mainClass =
   {chrome && <SiteHeader />}
   <main id="main" class:list={['omc-public', mainClass]}>
     <slot />
+    {
+      updated && (
+        <p class="mx-auto max-w-6xl px-5 pt-6 pb-8 text-[0.85rem] text-muted sm:px-8">
+          Updated <time datetime={updated}>{updatedLabel}</time>
+        </p>
+      )
+    }
   </main>
   {chrome && <SiteFooter />}
   <CtaTracking />

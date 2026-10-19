@@ -4,11 +4,13 @@
  * companion explainer, the shop, the library and each topic that has articles.
  * The Help column points to /support (topics, FAQs, the contact form) and /returns.
  * No privacy page exists yet; add it here once it's real.
+ * Column labels are <p>, not headings, so the footer stays out of each page's heading outline;
+ * the brand line is BRAND_DEFINITION, the plain description of what we make.
  */
 import { Wordmark } from '../marks';
 import { pillars } from '../../data/pillars';
 import { routes } from '../../routes';
-import { BRAND_NAME } from '../../config';
+import { BRAND_DEFINITION, BRAND_NAME } from '../../config';
 import { getArticles } from '../../lib/articles';
 
 // Only topics that have articles get a page, so only those are linked.
@@ -35,10 +37,10 @@ const link = 'text-[0.95rem] underline decoration-rule underline-offset-4 hover:
   <div class="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
     <div>
       <a href={routes.home} aria-label="Organized Mom Collective home" class="inline-block"><Wordmark /></a>
-      <p class="mt-4 max-w-xs text-[0.95rem] leading-relaxed text-soft">Less on your mind. More hands helping.</p>
+      <p class="mt-4 max-w-xs text-[0.95rem] leading-relaxed text-soft">{BRAND_DEFINITION}</p>
     </div>
     <nav aria-labelledby="footer-site-h">
-      <h2 id="footer-site-h" class="label text-muted">Organized Mom Collective</h2>
+      <p id="footer-site-h" class="label text-muted">Organized Mom Collective</p>
       <ul class="mt-4 space-y-2.5">
         {
           site.map((l) => (
@@ -52,7 +54,7 @@ const link = 'text-[0.95rem] underline decoration-rule underline-offset-4 hover:
       </ul>
     </nav>
     <nav aria-labelledby="footer-help-h">
-      <h2 id="footer-help-h" class="label text-muted">Help</h2>
+      <p id="footer-help-h" class="label text-muted">Help</p>
       <ul class="mt-4 space-y-2.5">
         {
           help.map((l) => (
@@ -68,9 +70,9 @@ const link = 'text-[0.95rem] underline decoration-rule underline-offset-4 hover:
     {
       live.length > 0 && (
         <nav aria-labelledby="footer-topics-h">
-          <h2 id="footer-topics-h" class="label text-muted">
+          <p id="footer-topics-h" class="label text-muted">
             Home organization guide
-          </h2>
+          </p>
           <ul class="mt-4 space-y-2.5">
             {live.map((p) => (
               <li>

@@ -43,7 +43,7 @@ import EntrywayScene from '../components/site/EntrywayScene.astro';
 import { photo } from '../lib/images';
 import { routes } from '../routes';
 import { calendarOptions, formatPrice } from '../lib/reorder';
-import { BRAND_NAME, PRIMARY_OPTION_ID } from '../config';
+import { BRAND_DEFINITION, BRAND_NAME, PRICES_AS_OF, PRIMARY_OPTION_ID } from '../config';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
 
 const family = photo('family-breakfast', [640, 960, 1280, 1536]);
@@ -145,6 +145,7 @@ const jsonLd = [
     '@type': 'Organization',
     name: BRAND_NAME,
     url: site.href,
+    description: BRAND_DEFINITION,
     logo: new URL('/brand/omc-badge.png', site).href,
   },
   { '@context': 'https://schema.org', '@type': 'WebSite', name: BRAND_NAME, url: site.href },
@@ -158,7 +159,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
 
 <PublicLayout
   fullTitle={`${BRAND_NAME}: 2027 Family Wall Calendar + Cleaning Companion`}
-  description={`Less on your mind. More hands helping. A 2027 weekly family wall calendar for schedules, meals and groceries, plus an included cleaning companion website. From ${half.priceLabel} for ${half.weeks} weeks.`}
+  description={`${BRAND_NAME} makes a 2027 weekly family wall calendar for schedules, meals and groceries, plus an included cleaning companion website. From ${half.priceLabel} for ${half.weeks} weeks.`}
   width="full"
   jsonLd={jsonLd}
 >
@@ -177,7 +178,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           Less on Your Mind.<br /> More Hands <HandUnderline>Helping.</HandUnderline>
         </h1>
         <p class="lede mt-4 max-w-xl text-warm-ink sm:mt-5">
-          A weekly wall calendar for family plans, meals and household jobs, where everyone can see what’s coming and what’s theirs to do.
+          {BRAND_NAME} makes a weekly wall calendar for family plans, meals and household jobs, where everyone can see what’s coming and what’s theirs to do.
         </p>
         <div class="mt-5 sm:mt-7">
           <ShopButton label={GET} to="product" cta="home-hero" class={cta} />
@@ -359,6 +360,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           <span class="text-[0.95rem] whitespace-nowrap">{shopStats.reviews} Etsy reviews</span>
           <span aria-hidden="true" class="text-warm-soft">·</span>
           <span class="text-[0.95rem] whitespace-nowrap">{shopStats.sales} sales</span>
+          <span class="w-full text-[0.85rem] text-warm-soft">As of {shopStats.asOf}</span>
         </p>
       </div>
       <ul class="mx-auto mt-5 grid max-w-3xl gap-4 sm:grid-cols-2 sm:gap-5">
@@ -485,7 +487,7 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
       </ul>
 
       <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
-        Both include the cleaning companion. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.
+        Both include the cleaning companion. Prices as of {PRICES_AS_OF}. Checkout is on Etsy. Arrives damaged or misprinted? We’ll make it right.
       </p>
     </div>
   </section>
