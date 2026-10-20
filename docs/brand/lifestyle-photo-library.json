@@ -1193,7 +1193,7 @@
     {
       "id": "FP17-SKYLIGHT-BB01",
       "title": "Skylight Calendar week view on a white background (manufacturer press image)",
-      "role": "FP-17 exclusive inline product image (third-party, credited)",
+      "role": "FP-17 exclusive hero (third-party product image, credited)",
       "source": "Skylight press kit",
       "creator": "Skylight",
       "source_url": "https://myskylight.com/press",
@@ -1209,13 +1209,13 @@
       },
       "model_release_review": "No people. Third-party product image; shown only to illustrate that product, with credit, no endorsement implied.",
       "publishing_clearance": true,
-      "public_path": "public/images/resources/fp-17-skylight-week-view-{640,960,1342}.webp",
+      "public_path": "public/images/resources/fp-17-skylight-hero-{640,960,1440}.webp",
       "used_in": [
-        "FP-17 /resources/skylight-calendar-vs-paper-wall-calendar (inline)"
+        "FP-17 /resources/skylight-calendar-vs-paper-wall-calendar (hero, caption credits Skylight)"
       ],
       "status": "FP-17 only. Not for Pinterest pins, social, ads or any other article.",
       "clearance_record": {
-        "approval": "Owner approved adding the image with credit, 2026-10-20 (this session)",
+        "approval": "Owner approved adding the image with credit, then as the FP-17 hero, 2026-10-20 (this session)",
         "checks_by": "Claude",
         "date": "2026-10-20",
         "license": "Manufacturer press kit; credit 'Image: Skylight' required by its fact sheet; no explicit license for competitor sites",
@@ -1223,8 +1223,8 @@
           "website_article_editorial"
         ],
         "article_id": "FP-17",
-        "context": "Editorial comparison article; caption carries 'Image: Skylight'",
-        "edits": "Crop 0.06,0.175,0.955,0.885 (white margin) and responsive WebP resizing only",
+        "context": "Editorial comparison article hero; caption carries 'Image: Skylight'",
+        "edits": "Crop 0,0.175,1,0.885, white canvas extended to 3:2 (pure-white backdrop), responsive WebP resizing; product pixels unaltered",
         "alt_text_example": "A white-framed Skylight Calendar showing a family's week in colored event blocks, with Calendar, Chores and Lists in the left sidebar."
       }
     }

@@ -94,4 +94,4 @@ Logged-out pinterest.com search pages in headless Chromium, 2026-10-20; screensh
 - Top pins for "alternative": "14 Alternatives to the Skylight Calendar" (SlashGear), "Skylight Calendar Alternatives", "Best Digital Calendar Overall? Cozyla vs Skylight vs Echo Show 15", "How to Build Your Own Digital Wall Calendar".
 - Gap: no pin we saw breaks down free vs. Plus, or offers paper as the alternative.
 
-Skylight product image: press-kit BB-01 (week view, white background), cropped to the white margin only, captioned "Image: Skylight" as the kit fact sheet asks. Owner-cleared 2026-10-20; the kit has no written license for competitor sites and Skylight wasn't contacted. FP-17 only; never in pins.
+Hero: Skylight press-kit BB-01 (week view, white background), white canvas extended to 3:2 with the product unaltered, captioned "Image: Skylight" as the kit fact sheet asks. Owner-cleared 2026-10-20; the kit has no written license for competitor sites and Skylight wasn't contacted. FP-17 only; never in pins.
