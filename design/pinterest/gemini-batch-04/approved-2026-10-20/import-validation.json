@@ -3,23 +3,22 @@
  "reviewed": "2026-10-20",
  "asset_commit": "4cb196ee06fea3176af06e8c76d9d9c550a6a53e",
  "file": "pinterest-import-ready.csv",
- "rows": 4,
+ "rows": 6,
  "pins_in_import": [
   32,
   33,
   34,
-  35
+  35,
+  36,
+  39
  ],
  "pins_held": [
-  31
- ],
- "pins_not_received": [
-  36,
+  31,
   37,
   38,
-  39,
   40
  ],
+ "pins_not_received": [],
  "encoding": "UTF-8, no BOM",
  "line_endings": "CRLF",
  "csv_roundtrip": true,
@@ -52,7 +51,12 @@
   "32": 326,
   "33": 329,
   "34": 339,
-  "35": 312
+  "35": 312,
+  "36": 368,
+  "37": 380,
+  "38": 422,
+  "39": 324,
+  "40": 318
  },
  "limits": {
   "title": 100,
@@ -62,7 +66,7 @@
  "unique_titles": true,
  "unique_descriptions": true,
  "boards_in_registry": true,
- "media_urls": "All 5 committed PNGs returned HTTP 200 image/png from raw.githubusercontent.com at the asset commit; SHA-256 matched the committed files.",
+ "media_urls": "Pins 31–35 at asset commit 4cb196e, pins 36–40 at 8cb00ea. All 10 returned HTTP 200 image/png from raw.githubusercontent.com; SHA-256 matched the committed files.",
  "images": {
   "31": {
    "orig": "1.jpg",
@@ -113,7 +117,58 @@
    "pixel_identical": true,
    "sha": "5e0be464cc66ccc82481949b0700b0b42225d966e476e52f4950a2429c93e3b0",
    "osha": "a193bbb0500ad3bcc4989fbe146991a830dd60cfce8dfd46e4175a9be06b709e"
+  },
+  "36": {
+   "orig": "1.jpg",
+   "dst": "approved-2026-10-20/omc-weekly-cleaning-schedule-real-life-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "c08dd0c819eb90cff172f7febd49f4ebfa12c68dfd248225c3f2babc0056b3e7",
+   "osha": "1661a3ed4dc15191300f980efa3bc26ae1507aec8cf396fafd3420ad4c998567"
+  },
+  "37": {
+   "orig": "2.jpg",
+   "dst": "held-2026-10-20/omc-screen-time-routine-for-kids-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "e47438e2c463af701aa5f8355f17616649f40fc9bfbe4ad9fcb1d86d97a0f7a7",
+   "osha": "a53d3ccc3d9fb3a95466164835a87fa1d563d04daa5d7810f29c6863bec94547"
+  },
+  "38": {
+   "orig": "3.jpg",
+   "dst": "held-2026-10-20/omc-kitchen-chores-kids-can-own-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "c7058696e6fbc5a333cbbbfb814f817f63ffea2e73743bffa9cb8f8acc09d617",
+   "osha": "045006a10dcb180c8b476cbb763ce1bcf9cd968b0fac63c03437461c4d6f64bb"
+  },
+  "39": {
+   "orig": "4.jpg",
+   "dst": "approved-2026-10-20/omc-school-morning-checklist-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "00804287ff114f9fda139ce1cad29a6fa97061d37501e0058bcf710201bcbf2f",
+   "osha": "1ea4b2b1a7f481f5dab1c704b98406917d30a16aaa5af6a1972895d80d881ef5"
+  },
+  "40": {
+   "orig": "5.jpg",
+   "dst": "held-2026-10-20/omc-chores-for-5-year-olds-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "c7179836ad960f1abd4a5615785f742a3c339faa283cb2aca02343ea6755dd01",
+   "osha": "e8f6a6236d3d374611b4cfe71ce9dfcb57ddcaef9ed711268214e7199eb5c71e"
   }
  },
- "duplicate_scan": "No SHA-256 match among 1,557 tracked repo images. Closest perceptual (dHash 256-bit) distance 85 bits; batch pins differ from each other by at least 106 bits. Near-duplicate threshold ~10."
+ "duplicate_scan": "No SHA-256 match among 1,567 tracked repo images. Closest perceptual (dHash 256-bit) distance 82 bits; batch pins differ from each other by at least 106 bits. Near-duplicate threshold ~10.",
+ "asset_commit_pins_36_40": "8cb00ea10b7436ebcd873ee4c02beb4feda3b33b"
 }

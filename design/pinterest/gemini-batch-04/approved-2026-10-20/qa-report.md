@@ -7,7 +7,7 @@ Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../../docs/editorial/PINTERES
 | # | Master ID | File received | Reviewed at |
 | --- | --- | --- | --- |
 | 31–35 | OMC-P0251, P0207, P0457, P0168, P0418 | Yes (`1.jpg`–`5.jpg`, 687 × 1024 JPEG) | Full resolution, 2× zoom crops, ~250 px |
-| 36–40 | OMC-P0124, P0374, P0080, P0330, P0011 | **No.** Shown in chat, but the files never reached the session (same failure as batch 03 pin 29). | Chat preview only. Not a full-resolution review. |
+| 36–40 | OMC-P0124, P0374, P0080, P0330, P0011 | First send: no (shown in chat only). **Second send, same day: yes** (`originals/pins-36-40/1.jpg`–`5.jpg`, 687 × 1024 JPEG). | Full resolution, ~250 px |
 
 ## Verdicts
 
@@ -18,11 +18,11 @@ Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../../docs/editorial/PINTERES
 | 33 | OMC-P0457 | Teaching Kids Independence | **Pass** | Three steps match the article's checklist and backpack example; same backpack in every panel. Adult shows ear, cheek and stubbled jaw from behind: no eyes, nose or mouth (same standard as batch 03 #27). Child back of head only. Prop text (snack bag, book) is garbled but incidental. |
 | 34 | OMC-P0168 | 10-Minute Living Room Reset | **Pass** | Child and adult hands on the same stack of books, plausible. Four paraphrased steps; the article has five (adds “open the walking path”). Nothing contradicts it. |
 | 35 | OMC-P0418 | Kids Can Help Make Dinner | **Pass** | Child cropped at the shoulder, no face. Adult holds the knife, matching the article's safety rule. Icons match starter jobs; “Carry plates” isn't listed word for word but the article's place setting includes a plate. |
-| 36 | OMC-P0124 | A Weekly Cleaning Schedule for Real Life | **Not verified** (preview passes) | No file. Preview: spelling correct; toddler back view; adult hand wiping. Zone bar says “Wed Bathroom”, “Thu Kitchen”; the site says “Entry/Bathroom”, “Kitchen Reset” (acceptable shorthand). Hook close to batch 01 #9 “One zone each day.” |
-| 37 | OMC-P0374 | A Screen Time Routine Kids Can Follow | **Needs owner decision** | No file. Preview: *The Wild Robot* cover and a *CLUE* game box are legible third-party IP. Same class as batch 03 #24, which you overrode, but each pin needs its own call. Sign text spelled correctly. |
-| 38 | OMC-P0080 | Kitchen Chores Kids Can Own | **Revise** | No file. “Put away sauces and things from the fridge” is awkward and reads as taking things out. Suggest “Put sauces back in the fridge.” Panel 4 says “Wipe the table” over a kitchen counter. Suggest “Wipe the counter.” The destination has no kitchen section, and the fridge job is only loosely supported. |
-| 39 | OMC-P0330 | School Morning Checklist | **Not verified** (preview passes) | No file. Steps match the generator's School morning template. Entryway scene is close to batch 01 #4 and #5, so space them. |
-| 40 | OMC-P0011 | Chores for 5-Year-Olds | **Revise** | No file. “Make the bed” contradicts the destination: the guide puts “Make their bed” at ages 6–8; ages 4–5 is “Pull up the covers and put the pillow back.” Suggest “Pull up the covers.” |
+| 36 | OMC-P0124 | A Weekly Cleaning Schedule for Real Life | **Pass** | Spelling correct; toddler back view; adult hand wiping. Zone bar says “Wed Bathroom”, “Thu Kitchen”; the site says “Entry/Bathroom”, “Kitchen Reset” (acceptable shorthand). Hook close to batch 01 #9 “One zone each day.” |
+| 37 | OMC-P0374 | A Screen Time Routine Kids Can Follow | **Needs owner decision** | *The Wild Robot* cover and a *CLUE* game box are legible third-party IP. Same class as batch 03 #24, which you overrode, but each pin needs its own call. Sign text spelled correctly. |
+| 38 | OMC-P0080 | Kitchen Chores Kids Can Own | **Revise** | Re-sent file unchanged from the preview. “Put away sauces and things from the fridge” is awkward and reads as taking things out. Suggest “Put sauces back in the fridge.” Panel 4 says “Wipe the table” over a kitchen counter. Suggest “Wipe the counter.” The destination has no kitchen section, and the fridge job is only loosely supported. |
+| 39 | OMC-P0330 | School Morning Checklist | **Pass** | Spelling correct; only a child's arm visible. Steps match the generator's School morning template. Entryway scene is close to batch 01 #4 and #5, so space them. |
+| 40 | OMC-P0011 | Chores for 5-Year-Olds | **Revise** | Re-sent file unchanged from the preview. “Make the bed” contradicts the destination: the guide puts “Make their bed” at ages 6–8; ages 4–5 is “Pull up the covers and put the pillow back.” Suggest “Pull up the covers.” |
 
 ## Checklist results for the received files (31–35)
 
@@ -46,10 +46,26 @@ Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../../docs/editorial/PINTERES
 
 **Repetition inside the batch:** three toy-basket scenes (34, 36, 40) and three backpack/entryway scenes (31, 33, 39). Different compositions, but spread them across days.
 
+## Checklist results for the second send (36–40)
+
+| Check | 36 | 37 | 38 | 39 | 40 |
+| --- | --- | --- | --- | --- | --- |
+| Spelling, grammar, headline matches assignment | pass | pass | **fail** (caption 3 awkward, caption 4 wrong surface) | pass | pass |
+| All text readable at full size and ~250 px | pass (zone bar smallest) | pass | pass | pass | pass |
+| No visible generated face | pass (toddler from behind) | pass | pass | pass | pass |
+| Anatomy, hands, grips, objects | pass | pass | pass | pass | pass |
+| Generated prop text not presented as real info | n/a | **needs owner decision** (book cover, game box) | n/a | n/a | n/a |
+| No OMC product shown, rebuilt or claimed | pass | pass | pass | pass | pass |
+| Branding: “Organized Mom Collective” wordmark | pass | pass | pass | pass | pass |
+| Unsupported claims | pass | pass | pass | pass | pass |
+| Destination delivers the promise | pass | pass | loose (no kitchen section) | pass | **fail** (“Make the bed” is ages 6–8) |
+| PNG opens, RGB, sRGB profile, pixel-identical to source | pass | pass | pass | pass | pass |
+| 1000 × 1500 | **not met** (687 × 1024 native, all five) | | | | |
+
 ## Duplicate scan
 
-- SHA-256: no match among 1,557 image files tracked in the repository.
-- Perceptual (256-bit dHash): closest repository image 85 bits away (near-duplicate would be under ~10). The five received pins differ from each other by at least 106 bits.
+- SHA-256: no match among 1,557 image files tracked in the repository (31–35) or 1,567 (36–40).
+- Perceptual (256-bit dHash): closest repository image 85 bits away for 31–35 and 82 for 36–40 (near-duplicate would be under ~10). Pins within each send differ from each other by at least 106 bits.
 - Concept-level: pin 32 vs batch 01 #1, pin 36 vs batch 01 #9, pin 39 vs batch 01 #4/#5 (see above). Not ID duplicates.
 
 ## Destinations
