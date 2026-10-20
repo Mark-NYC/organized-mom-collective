@@ -1,0 +1,222 @@
+---
+/**
+ * An interactive, numbered checklist in the cleaning companion's style (src/components/TodayApp.tsx,
+ * TaskList.tsx, Progress.tsx): a month-bar header with an eyebrow, a spaced-caps heading, a time mark
+ * and a quiet "2 / 6" tally, the month-color progress ring at the right, then ruled rows with the printed calendar's rounded-square box
+ * and its overshooting pen tick. The next open step gets the companion's "Next" mark.
+ * Ticks save in this browser (localStorage, `storageKey`); no account, nothing leaves the
+ * device. Without JavaScript the boxes still tick, they just aren't remembered.
+ * Use it for the one routine an article exists to deliver; for read-only or printable lists use <Checklist>.
+ */
+interface Step {
+  title: string;
+  /** Minutes for this step; summed for the time mark and the time-left line. */
+  minutes: number;
+  /** One line: how to do it, or where to stop. */
+  how?: string;
+}
+interface Props {
+  steps: Step[];
+  title: string;
+  /** Small line above the title, e.g. "The Real-Life Version". */
+  kicker?: string;
+  /** Anchor id, so the article header can link straight to the checklist. */
+  id?: string;
+  /** localStorage key; bump the version when the steps change. */
+  storageKey: string;
+  /** Shown when every step is ticked. */
+  doneMessage?: string;
+}
+const { steps, title, kicker, id = 'checklist', storageKey, doneMessage = 'All done. That’s the whole reset, so stop here.' } = Astro.props;
+const total = steps.reduce((n, s) => n + s.minutes, 0);
+const SIZE = 52;
+const STROKE = 5;
+const R = (SIZE - STROKE) / 2;
+const C = 2 * Math.PI * R;
+---
+
+<section id={id} class="step-checklist my-10 scroll-mt-6" aria-labelledby={`${id}-h`} data-step-checklist={storageKey} data-total={total}>
+  <header class="border-l-[3px] border-month pl-3.5">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        {kicker && <p class="label text-muted">{kicker}</p>}
+        <h2 id={`${id}-h`} class="mt-1 text-[1.35rem] leading-tight font-bold tracking-[0.09em] text-ink uppercase min-[400px]:tracking-[0.12em] sm:text-[1.6rem]">{title}</h2>
+        <div class="mt-2.5 flex items-center gap-3">
+          <span class="inline-flex shrink-0 items-center border border-ink px-1.5 py-[3px] text-[0.64rem] leading-none font-semibold tracking-[0.16em] whitespace-nowrap text-ink uppercase tabular-nums">{total} min</span>
+          <span class="shrink-0 text-[0.66rem] font-semibold tracking-[0.16em] whitespace-nowrap text-muted uppercase tabular-nums" data-sc-tally>0 / {steps.length}</span>
+        </div>
+      </div>
+      <span class="sc-ring relative grid shrink-0 place-items-center" style={`width:${SIZE}px;height:${SIZE}px`} role="img" aria-label={`0 of ${steps.length} steps done`} data-sc-ring>
+        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true" class="-rotate-90">
+          <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" class="sc-ring-center ring-center" />
+          <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" stroke="var(--color-rule)" stroke-opacity="0.45" stroke-width={STROKE} />
+          <circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={R}
+            fill="none"
+            stroke="var(--color-month)"
+            stroke-width={STROKE}
+            stroke-linecap="round"
+            stroke-dasharray={C}
+            stroke-dashoffset={C}
+            opacity="0"
+            class="ring-fill"
+            data-sc-fill
+            data-c={C}
+          />
+        </svg>
+        <span class="absolute inset-0 grid place-items-center" aria-hidden="true">
+          <span class="text-[0.95rem] font-bold tabular-nums" data-sc-count>0</span>
+          <svg viewBox="0 0 28 28" class="absolute size-6 text-ink" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:none" data-sc-done-tick>
+            <path d="M6 14.5c1.6 1.3 3 2.9 4.3 5C13 13.4 16.8 8.7 22 5" pathLength="1" class="tick-path tick-on" />
+          </svg>
+        </span>
+      </span>
+    </div>
+    <p class="mt-1.5 min-h-[1.4em] text-[0.95rem] leading-snug text-muted tabular-nums" role="status" aria-live="polite" data-sc-status>
+      {steps.length} steps · about {total} minutes
+    </p>
+  </header>
+
+  <ol class="mt-5 border-t border-rule-strong">
+    {
+      steps.map((step, i) => (
+        <li class="border-b border-rule">
+          <label class="sc-step group flex min-h-14 cursor-pointer items-start gap-3.5 py-3 select-none">
+            <input type="checkbox" class="sc-input peer sr-only" data-minutes={step.minutes} />
+            <span
+              aria-hidden="true"
+              class="sc-box relative mt-0.5 size-8 shrink-0 rounded-[7px] border-[1.5px] border-ink transition-colors group-hover:bg-band group-active:bg-band peer-focus-visible:outline-2 peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-ink"
+            >
+              <svg viewBox="0 0 28 28" class="sc-tick absolute -top-[0.7rem] -right-[0.55rem] size-[2.3rem] overflow-visible text-ink" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 15.5c2 1.6 3.7 3.6 5.3 6.2C13 13.6 18 7.4 25 2.5" pathLength="1" class="tick-path" />
+              </svg>
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="flex items-center gap-2.5">
+                <span class="text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase tabular-nums">
+                  Step {i + 1} · {step.minutes} min
+                </span>
+                <span class="sc-next shrink-0 border-b-[3px] border-month text-[0.62rem] font-semibold tracking-[0.18em] text-muted uppercase" hidden>
+                  Next
+                </span>
+              </span>
+              <span class="sc-title mt-0.5 block text-[1.0625rem] leading-snug text-ink transition-colors sm:text-[1rem]">{step.title}</span>
+              {step.how && <span class="mt-1 block text-[0.93rem] leading-snug text-muted">{step.how}</span>}
+            </span>
+          </label>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[0.85rem] leading-snug text-muted">
+    <span class="py-2.5">Saved in this browser. No account needed.</span>
+    <button
+      type="button"
+      class="inline-flex min-h-11 items-center text-[0.7rem] font-semibold tracking-[0.16em] uppercase underline decoration-rule decoration-1 underline-offset-[6px] hover:decoration-ink print:hidden"
+      data-sc-reset
+      hidden
+    >
+      Start over
+    </button>
+  </div>
+  <p hidden data-sc-done-message>{doneMessage}</p>
+</section>
+
+<style>
+  .sc-tick { opacity: 0; transition: opacity 200ms; }
+  .sc-input:checked + .sc-box { border-color: color-mix(in srgb, var(--color-rule-strong) 60%, transparent); }
+  .sc-input:checked + .sc-box .sc-tick { opacity: 1; transition-duration: 0s; }
+  .sc-input:checked + .sc-box .tick-path { stroke-dashoffset: 0; }
+  .sc-step:has(.sc-input:checked) .sc-title {
+    color: var(--color-muted);
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in srgb, var(--color-muted) 70%, transparent);
+    text-decoration-thickness: 1px;
+  }
+  .step-checklist.is-complete [data-sc-status] { color: var(--color-ink); font-weight: 600; }
+  .step-checklist.is-complete .sc-ring-center { fill: var(--color-month); }
+  @media print {
+    .sc-ring, [data-sc-status], [data-sc-tally] { display: none; }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-step-checklist]')) {
+    const key = root.dataset.stepChecklist!;
+    const total = Number(root.dataset.total);
+    const inputs = [...root.querySelectorAll<HTMLInputElement>('.sc-input')];
+    const nexts = [...root.querySelectorAll<HTMLElement>('.sc-next')];
+    const status = root.querySelector<HTMLElement>('[data-sc-status]')!;
+    const tally = root.querySelector<HTMLElement>('[data-sc-tally]')!;
+    const ring = root.querySelector<HTMLElement>('[data-sc-ring]')!;
+    const fill = root.querySelector<SVGCircleElement>('[data-sc-fill]')!;
+    const count = root.querySelector<HTMLElement>('[data-sc-count]')!;
+    const doneTick = root.querySelector<SVGElement>('[data-sc-done-tick]')!;
+    const reset = root.querySelector<HTMLButtonElement>('[data-sc-reset]')!;
+    const doneMessage = root.querySelector<HTMLElement>('[data-sc-done-message]')!.textContent ?? '';
+    const C = Number(fill.dataset.c);
+
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+      if (Array.isArray(saved)) inputs.forEach((b, i) => (b.checked = saved[i] === true));
+    } catch {
+      /* Private mode or blocked storage: the checklist still works, it just isn't remembered. */
+    }
+
+    const update = (save: boolean) => {
+      const n = inputs.length;
+      const done = inputs.filter((b) => b.checked).length;
+      const left = inputs.filter((b) => !b.checked).reduce((m, b) => m + Number(b.dataset.minutes), 0);
+      const complete = done === n;
+      const next = inputs.findIndex((b) => !b.checked);
+      nexts.forEach((el, i) => (el.hidden = done === 0 || i !== next));
+      root.classList.toggle('is-complete', complete);
+      fill.style.strokeDashoffset = String(C * (1 - done / n));
+      fill.setAttribute('opacity', done > 0 ? '1' : '0');
+      count.textContent = String(done);
+      count.hidden = complete;
+      doneTick.style.display = complete ? '' : 'none';
+      ring.setAttribute('aria-label', complete ? 'Every step is done' : `${done} of ${n} steps done`);
+      tally.textContent = complete ? 'Done' : `${done} / ${n}`;
+      status.textContent = complete
+        ? doneMessage
+        : done === 0
+          ? `${n} steps · about ${total} minutes`
+          : `${done} of ${n} done · about ${left} min left`;
+      reset.hidden = done === 0;
+      if (save) {
+        try {
+          localStorage.setItem(key, JSON.stringify(inputs.map((b) => b.checked)));
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+
+    inputs.forEach((b) =>
+      b.addEventListener('change', () => {
+        if (b.checked) {
+          // The companion's small press on the box, and a light tap where supported.
+          const box = b.nextElementSibling as HTMLElement;
+          box.classList.add('box-pop');
+          box.addEventListener('animationend', () => box.classList.remove('box-pop'), { once: true });
+          try {
+            navigator.vibrate?.(10);
+          } catch {
+            /* not supported */
+          }
+        }
+        update(true);
+      }),
+    );
+    reset.addEventListener('click', () => {
+      inputs.forEach((b) => (b.checked = false));
+      update(true);
+      inputs[0]?.focus();
+    });
+    update(false);
+  }
+</script>

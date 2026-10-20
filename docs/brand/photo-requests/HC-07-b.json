@@ -1,0 +1,18 @@
+{
+  "article": "HC-07 bathroom-reset-checklist",
+  "requested": "2026-10-20",
+  "purpose": "Second discovery pass for the HC-07 hero and inline photo: warm, faceless bathroom or cleaning-supply scenes. First pass (HC-07) found only editorial-only bathroom shots, the IF-07 hand-washing shoot and studio sponges. Research only until cleared in lifestyle-photo-library.json.",
+  "seeds": [
+    "https://kaboompics.com/gallery?search=bathroom",
+    "https://kaboompics.com/gallery?search=towel",
+    "https://kaboompics.com/gallery?search=cleaning",
+    "https://kaboompics.com/gallery?search=cleaning+products",
+    "https://kaboompics.com/gallery?search=eco+cleaning",
+    "https://kaboompics.com/gallery?search=wiping",
+    "https://kaboompics.com/gallery?search=toilet+brush",
+    "https://kaboompics.com/gallery?search=soap+dispenser",
+    "https://kaboompics.com/gallery/photoshoots?search=cleaning",
+    "https://kaboompics.com/gallery/photoshoots?search=bathroom"
+  ],
+  "max_photos": 220
+}

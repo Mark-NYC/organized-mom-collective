@@ -3,7 +3,7 @@
  * A photograph in an article, with an optional caption. Images come from the
  * registry in src/data/images.ts (responsive sizes, no layout shift).
  *
- * size: 'content' (reading column), 'wide' (breakout, ~960px).
+ * size: 'content' (reading column), 'wide' (breakout, ~960px), 'narrow' (centered, ~26rem: portrait photos).
  */
 import { imageAttrs, type ArticleImageName } from '../../data/images';
 
@@ -12,16 +12,16 @@ interface Props {
   /** What the photo shows, for someone who can't see it. */
   alt: string;
   caption?: string;
-  size?: 'content' | 'wide';
+  size?: 'content' | 'wide' | 'narrow';
   /** Load immediately (for a photo near the top of the page). */
   priority?: boolean;
 }
 const { image, alt, caption, size = 'content', priority = false } = Astro.props;
 const attrs = imageAttrs(image);
-const sizes = size === 'wide' ? '(min-width: 1024px) 960px, 100vw' : '(min-width: 768px) 696px, 100vw';
+const sizes = size === 'wide' ? '(min-width: 1024px) 960px, 100vw' : size === 'narrow' ? '(min-width: 480px) 416px, 100vw' : '(min-width: 768px) 696px, 100vw';
 ---
 
-<figure class:list={['my-10', size === 'wide' && 'breakout']}>
+<figure class:list={['my-10', size === 'wide' && 'breakout', size === 'narrow' && 'mx-auto w-full max-w-[26rem]']}>
   <img
     {...attrs}
     sizes={sizes}
