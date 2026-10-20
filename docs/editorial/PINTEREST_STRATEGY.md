@@ -1,5 +1,7 @@
 # Pinterest strategy
 
+**Two separate lanes:** The three-concept/six-variation approach below governs the original utility/routine article and 500-pin campaign. Editorial image-first inspiration galleries use [IMAGE_FIRST_PINTEREST_WORKFLOW.md](IMAGE_FIRST_PINTEREST_WORKFLOW.md), their own OMC-V IDs, a 15-photo/15-Pin batch, and a separate official-format bulk-import CSV. Do not add these to the 500-pin plan or invent progress.
+
 Every article has three strategic Pinterest concepts (search-driven, curiosity-driven, and save-worthy). The default production batch is six finished creative variations, normally two per concept. Existing three-pin plans remain valid; the six-variation batch is a separate production layer until the tracker and validator are updated. This document is the standard; the per-article plan uses [templates/pinterest-plan.md](templates/pinterest-plan.md) and is saved as `docs/editorial/pinterest/{ARTICLE_ID}.md`.
 
 Creative direction: [PINTEREST_CREATIVE_DIRECTION.md](PINTEREST_CREATIVE_DIRECTION.md) governs visual concepts and art direction. Production: [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md) records the verified workflow and six-variation deliverables. [PINTEREST_QA_CHECKLIST.md](PINTEREST_QA_CHECKLIST.md) defines the release gate.
