@@ -1189,6 +1189,44 @@
         "edits": "Crop 0.30,0.10,1,0.70 (removes the branded coffee machine) and responsive WebP resizing only; no AI processing",
         "alt_text_example": "A kitchen chalkboard wall with a round clock, a chalk smiley face and a handwritten shopping list and weekday plan beside a window."
       }
+    },
+    {
+      "id": "FP17-SKYLIGHT-BB01",
+      "title": "Skylight Calendar week view on a white background (manufacturer press image)",
+      "role": "FP-17 exclusive inline product image (third-party, credited)",
+      "source": "Skylight press kit",
+      "creator": "Skylight",
+      "source_url": "https://myskylight.com/press",
+      "source_download_url": "https://drive.google.com/drive/folders/17W_tvY5H4Bi0Tz_oB2BOSAbUypL2Q1mc (For Media: Skylight Press Kit / Calendar Imagery / 15_ Calendar / White Background / BB-01.jpg)",
+      "license_review": "Press kit linked from myskylight.com/press ('For all media inquiries… View Press Kit'). The kit's 2025 Fact Sheet says 'Imagery (credit: Skylight)'. No written license found for use on a site that sells a competing product; Skylight not contacted.",
+      "license_verification_date": "2026-10-20",
+      "owner_visual_status": "owner_cleared",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "1500x1500 original and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Product render on white; no people. Screen shows Skylight's sample 'Jones Family' week. Unaltered apart from trimming the white margin."
+      },
+      "model_release_review": "No people. Third-party product image; shown only to illustrate that product, with credit, no endorsement implied.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-17-skylight-week-view-{640,960,1342}.webp",
+      "used_in": [
+        "FP-17 /resources/skylight-calendar-vs-paper-wall-calendar (inline)"
+      ],
+      "status": "FP-17 only. Not for Pinterest pins, social, ads or any other article.",
+      "clearance_record": {
+        "approval": "Owner approved adding the image with credit, 2026-10-20 (this session)",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Manufacturer press kit; credit 'Image: Skylight' required by its fact sheet; no explicit license for competitor sites",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-17",
+        "context": "Editorial comparison article; caption carries 'Image: Skylight'",
+        "edits": "Crop 0.06,0.175,0.955,0.885 (white margin) and responsive WebP resizing only",
+        "alt_text_example": "A white-framed Skylight Calendar showing a family's week in colored event blocks, with Calendar, Chores and Lists in the left sidebar."
+      }
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
