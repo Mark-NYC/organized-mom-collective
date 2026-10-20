@@ -13,4 +13,8 @@ Separate editorial format for visual Pinterest inspiration collections, not rout
 
 Do not redirect all images to the top of the article. Keep image anchors stable after launch. Avoid popups or nonfunctional 'save' controls. AI visuals must be labeled as concepts, never shoppable photographs.
 
-Current mudroom page is an intentional noindex preview until the 15 Gemini originals are provided and reviewed. The template contains 15 image slots and 15 extra tips; do not claim 30 unique visual photographs. The picture-specific descriptions must be finalized only after images arrive.
+The mudroom gallery uses 15 photographs and 15 numbered photo sections. Each section contains two separate practical ideas, giving readers 30 ideas without confusing paired numbers such as 'ideas 1 & 2'. Navigation labels refer to the 15 photo sections, not the two pieces of advice. Do not claim 30 unique visual photographs. Review every image and caption together before publication.
+
+## Numbering UX rule
+
+Never display grouped ranges (such as 'Ideas 1 & 2') on an individual photo. Number visual sections once as 'Mudroom idea 01 / 15', keep the secondary suggestion as an unnumbered subheading, and make jump navigation list one entry per photograph. The headline may describe 30 tips only when the body genuinely delivers two distinct ideas for each of 15 scenes.
