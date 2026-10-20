@@ -1,5 +1,7 @@
 # Image-first inspiration article template
 
+**Production workflow and import files:** [IMAGE_FIRST_PINTEREST_WORKFLOW.md](IMAGE_FIRST_PINTEREST_WORKFLOW.md). The gallery is a permanent layout standard for the image-first Pinterest lane, independent of the Real-Life Reset checklist format.
+
 Separate editorial format for visual Pinterest inspiration collections, not routine/checklist guides. Existing MDX Real-Life Reset articles remain unchanged.
 
 ## Reuse
