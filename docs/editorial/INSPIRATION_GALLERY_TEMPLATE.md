@@ -23,8 +23,8 @@ Each photo is one visual section with a short, standalone editorial H2, taken fr
 
 The dropdown lists only the 15 photo titles, linking to their permanent `#idea-N` anchors. Pinterest saving remains per photograph.
 
-## Large single-idea galleries (50 photos)
+## Large single-idea galleries (49 photos)
 
-For 50-image inspiration articles such as `beautiful-toy-storage-ideas-family-living-rooms`, use **one distinctly titled, numbered practical idea per photograph**, not two tips per photo. The shared component automatically switches between 15 x 2 and 50 x 1 formats based on presence of `secondTitle` fields; do not add dummy second tips. A 50-photo page displays 50 numbered sage circles and 50 individual `#idea-N` anchors. Keep `published:false` and all `image` fields empty until uploaded assets pass visual QA, then bind paths from the exact `UPLOAD_MANIFEST.csv` in the folder. Do not publish a gallery with broken images or produce its Pinterest CSV before image URLs are live.
+For 49-image inspiration articles such as `beautiful-toy-storage-ideas-family-living-rooms`, use **one distinctly titled, numbered practical idea per photograph**, not two tips per photo. The shared component automatically switches between 15 x 2 and 49 x 1 formats based on presence of `secondTitle` fields; do not add dummy second tips. A 49-photo page displays 49 numbered sage circles and 49 individual `#idea-N` anchors. Keep `published:false` and all `image` fields empty until uploaded assets pass visual QA, then bind paths from the exact `UPLOAD_MANIFEST.csv` in the folder. Do not publish a gallery with broken images or produce its Pinterest CSV before image URLs are live.
 
 Use `src/data/toy-storage-gallery.ts` and `src/pages/resources/beautiful-toy-storage-ideas-family-living-rooms.astro` as examples. See the corresponding image directory README for image handoff instructions.
