@@ -49,7 +49,7 @@ Gaps: almost every ranking page sells one side. Nobody says when paper is enough
 ## Differentiation
 
 - **The Shift:** "A screen fixes updating. It doesn't fix looking." Choose by the bottleneck: keeping the plan current, or getting the family to use it.
-- A neutral, vendor-free answer; a "check before you buy" list instead of unverified prices; a two-week free test before spending.
+- A neutral, vendor-free answer; a dated price-and-plan table for two displays from the makers' own sites, plus a "check before you buy" list; a two-week free test before spending.
 
 ## Structure
 
@@ -57,7 +57,7 @@ Gaps: almost every ranking page sells one side. Nobody says when paper is enough
 2. First H2: "Should you get a digital wall calendar or a paper one?" Short answer ≤100 words, by use case: digital wins with frequent changes, adults on phone calendars, nobody wanting to hand-write; paper is enough for steady weeks where the problem is nobody looking; hybrid; don't switch if it works.
 3. The Shift (as above).
 4. Table: digital display vs. paper across changes away from home, upfront cost, ongoing cost, kids reading tomorrow, writing on it, meals/lists, power/Wi-Fi, what goes stale.
-5. Checklist: "Check before you buy a display" (price for the size, which calendars it connects to, which features need a paid plan, outlet and Wi-Fi, who can add events).
+5. "What two popular displays cost (as of October 2026)": Skylight and Hearth, cited inline. Then the checklist "Check before you buy a display" (price for the size, which calendars it connects to, which features need a paid plan, outlet and Wi-Fi, who can add events).
 6. Real-Life Version: "Test both before you buy": count changes, note who asks, test a free shared phone calendar, test paper, pick or go hybrid.
 7. When Life Happens: screen and paper disagree; display nobody checks; paper stale by Wednesday.
 8. Product CTA (`calendar`): printed 11 × 17 weekly calendar, prices imported from `src/config.ts`, companion cleaning website, no sync.
@@ -81,16 +81,29 @@ Rule: every product fact from the maker's own site, fetched this session, cited 
 
 | Claim | Official source | Date | Tested or documented | Status |
 | --- | --- | --- | --- | --- |
-| Skylight models, prices, subscription, sync sources | myskylight.com | 2026-10-20 | — | **Not verified.** Host blocked by the environment's network policy (proxy CONNECT 403; WebFetch DNS failure) |
-| Hearth Display models, prices, subscription, sync sources | hearth.com / hearthdisplay.com | 2026-10-20 | — | **Not verified.** Blocked |
-| Mango Display, Invisible Computers | their sites | 2026-10-20 | — | **Not verified.** Blocked (seen only in search snippets) |
+| Skylight sells 10" ($149.99), 15" ($229.99 refurbished memory; $299.99 Calendar 2) and 27" Calendar Max ($569.99), "Starting at" | https://myskylight.com/compare-calendars | 2026-10-20 | Documented | Verified; article gives the $149.99–$569.99 range |
+| Free on all Skylight models: auto-sync with Google, Apple, Outlook, Cozi (FAQ adds Yahoo, Readdle, public links), chore chart and task manager, custom lists, mobile app | https://myskylight.com/compare-calendars | 2026-10-20 | Documented | Verified |
+| Calendar Plus is $79/year; adds Sidekick email import, photo and video screensaver, meal planning, rewards, Disney Mode | https://myskylight.com/products/calendar-skylight-plus | 2026-10-20 | Documented | Verified |
+| Skylight needs Wi-Fi at all times and an electrical outlet | https://myskylight.com/products/skylight-calendar (FAQ) | 2026-10-20 | Documented | Verified |
+| Hearth Display: 27" diagonal screen, $699 (a 48-hour flash sale showed $594.15; not used) | https://hearthdisplay.com/products/hearth-display (+ .json product data) | 2026-10-20 | Documented | Verified; list price used |
+| Hearth Family Membership: $9/month, $86.40/year, multi-year from $5.76/month; 30-day free trial; unlocks Hearth Helper (AI), routines, to-dos, meal planning, rewards | https://hearthdisplay.com/products/hearth-display | 2026-10-20 | Documented | Verified |
+| Hearth syncs Google, iCal and Outlook; calendars, syncing and profiles without membership | same page, FAQ | 2026-10-20 | Documented | Verified, **but the same page also says "Membership is required to set up your Hearth Display."** The article states both and tells readers to ask |
+| Mango Display, Invisible Computers, Cozyla, Echo Show 15 | — | — | — | Not fetched; not named |
 | OMC calendar prices | `src/config.ts` | 2026-10-20 | Repository | Verified, imported |
 | OMC calendar does not sync | ARTICLE_FORMAT.md, PRODUCT_ROADMAP.md | 2026-10-20 | Repository | Verified |
 
-**Consequence for the draft:** no product is named and no product price, plan or sync list appears. The article describes the category in general terms and gives a check-before-you-buy list. When the hosts are allowlisted, a dated, cited "as of October 2026" fact table can be added as an update.
+No quality, reliability or review claims about either product; the article says we haven't tested them. The first draft named no products because the hosts were blocked; network access was opened on 2026-10-20 and the facts above were fetched with curl from the makers' sites the same day.
 
 ## Pinterest research notes
 
-- Researched on: 2026-10-20
-- pinterest.com and trends.pinterest.com are unreachable from this environment (WebFetch DNS failure; proxy blocks the hosts). A `site:pinterest.com` web search returned no pinterest.com pages.
-- Autocomplete, guided terms, top pin formats, Trends: **not observed.** Keywords in the plan are hypotheses, labeled as such.
+- Researched on: 2026-10-20, logged-out pinterest.com search pages in headless Chromium (US English). Screenshots inspected.
+- Autocomplete: **not observed**. The search box sits behind Pinterest's login modal when logged out; we didn't bypass it.
+- Guided search terms observed:
+  - "digital wall calendar": Diy, Large, Ideas, Styling, Kitchen, Decor, Ipad, To hang, Home information center
+  - "digital family calendar": Diy, Ideas, Display, Wall, Command center wall, Command center, Organization wall, Command center ideas
+  - "family wall calendar": Ideas, Aesthetic, Diy, Large, Design ideas, Center ideas, Acrylic, Organization, Design, Electronic, 2026, Digital
+  - "skylight calendar": Wall ideas, Hacks, Wall ideas decor, Reward ideas, Color palette, Styling, Command center, Ideas, Tips, Display ideas, Screensaver, Decor, Chores kids, Family command center, Wallpaper, Aesthetic, Frame diy, Frame, Wall, Kitchen, Background, Placement, Diy, Max wall ideas, Max
+  - "paper vs digital calendar": none shown
+- Top pin formats: "digital family calendar" is dominated by headline graphics over device photos ("Digital Family Calendar That Keeps Everyone on Track", "How I Created My Own Digital Wall Calendar", "Best Digital Calendar Overall? Cozyla vs Skylight vs Echo Show 15", "Ready to Move to Digital Family Calendars?"), plus short videos. "digital wall calendar" mixes device product ads, DIY dashboard screens, one paper printable and a "We tried the Skylight Calendar" review pin. "paper vs digital calendar" is about personal planners ("Paper vs. Digital Calendars: Which Is Best?", "Why we went back to a paper calendar"), not family walls.
+- Pinterest Trends: not checked.
+- Candidate primary Pinterest keyword: digital family calendar.
