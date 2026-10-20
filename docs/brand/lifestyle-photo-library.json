@@ -1109,6 +1109,86 @@
         "edits": "Crop 0.35,0.36,1.0,0.817 and responsive WebP resizing only; no AI processing",
         "alt_text_example": "Hands drying with a soft white towel beside a brushed-steel faucet and white tiles."
       }
+    },
+    {
+      "id": "FP14-K44099",
+      "title": "Smartphone and pen on an open 2027 paper year planner on blue bedding",
+      "role": "FP-14 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "44099",
+      "source_url": "https://kaboompics.com/photo/44099/2027-year-planner-with-smartphone-and-pen-on-bed",
+      "source_download_url": "https://kaboompics.com/download/950be976ecc7840db96a9453733bea76/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo detail page reads 'Free for commercial use'; no editorial-only marker (fetch manifests FP-14-FP-17 and FP-14-FP-17-full, checked 2026-10-20)",
+      "license_verification_date": "2026-10-20",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Full-size original (6955x4637, archived 2400px copy) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "No people. Phone shown from the back (camera module only, no visible logo or screen). Planner text is a generic 'Yearly Overview Sept. 2026 – Dec. 2027' with month grids; no brand."
+      },
+      "model_release_review": "No people. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-14-planner-phone-{640,960,1440}.webp",
+      "used_in": [
+        "FP-14 /resources/digital-wall-calendar-vs-paper-calendar (hero)"
+      ],
+      "status": "Exclusive to FP-14; not used in any other article (check:article-photos).",
+      "clearance_record": {
+        "approval": "Standing Kaboompics owner approval 2026-10-12",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Free for commercial use; no editorial-only marker",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-14",
+        "context": "Faceless paper-and-phone planning still life; illustrates paper vs. digital, no product or endorsement claim",
+        "edits": "Responsive WebP resizing only; no crop, no AI processing",
+        "alt_text_example": "A blue smartphone lying on an open paper year planner showing September 2026 to December 2027, with a silver pen beside it."
+      }
+    },
+    {
+      "id": "FP17-K2368",
+      "title": "Kitchen chalkboard wall with a clock and a handwritten list and weekday plan",
+      "role": "FP-17 exclusive inline",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "2368",
+      "source_url": "https://kaboompics.com/photo/2368/kitchen-clock-with-a-daily-schedule-on-a-blackboard",
+      "source_download_url": "https://kaboompics.com/download/a91794e47752fbdad8a7a4ebcfae140e/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo detail page reads 'Free for commercial use'; no editorial-only marker (fetch manifests FP-14-FP-17 and FP-14-FP-17-full, checked 2026-10-20)",
+      "license_verification_date": "2026-10-20",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Full-size original (3648x5472, archived 2400px copy) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "No people. Chalk notes in Polish (a shopping list and weekday entries) and a chalk smiley; a first name appears in a staged note, no identifiable person. A branded coffee machine at the bottom of the original is cropped out; no logos remain."
+      },
+      "model_release_review": "No people. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-17-chalkboard-week-{400,640,960}.webp",
+      "used_in": [
+        "FP-17 /resources/skylight-calendar-vs-paper-wall-calendar (inline)"
+      ],
+      "status": "Exclusive to FP-17; not used in any other article (check:article-photos).",
+      "clearance_record": {
+        "approval": "Standing Kaboompics owner approval 2026-10-12",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Free for commercial use; no editorial-only marker",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-17",
+        "context": "Faceless handwritten family plan on a kitchen wall; illustrates the paper side, no product or endorsement claim",
+        "edits": "Crop 0.30,0.10,1,0.70 (removes the branded coffee machine) and responsive WebP resizing only; no AI processing",
+        "alt_text_example": "A kitchen chalkboard wall with a round clock, a chalk smiley face and a handwritten shopping list and weekday plan beside a window."
+      }
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
