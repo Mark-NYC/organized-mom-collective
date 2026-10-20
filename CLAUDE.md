@@ -58,6 +58,14 @@ Non-negotiables (details in the docs above):
 
 Conventions: reuse the existing print palette, `.label` / `.page-title` / `.text-link` classes and `marks.tsx` components; internal URLs come from `src/routes.ts` and have no trailing slash; cleaning content is read from `src/data/cleaning.ts`, never retyped.
 
+## Image-first Pinterest inspiration galleries (separate format)
+
+Visual home-inspiration galleries are the explicit exception to the interactive checklist article format and the standard three-concept/six-variation Pinterest plan. **Before building or publishing a gallery, read [docs/editorial/IMAGE_FIRST_PINTEREST_WORKFLOW.md](docs/editorial/IMAGE_FIRST_PINTEREST_WORKFLOW.md) and [docs/editorial/INSPIRATION_GALLERY_TEMPLATE.md](docs/editorial/INSPIRATION_GALLERY_TEMPLATE.md).**
+
+Use `src/components/resources/InspirationGallery.astro`, `src/data/inspiration-galleries.ts`, and a dedicated `src/pages/resources/<slug>.astro` route. Default production is 15 original editorial photos, two distinct tips under each titled photo, a 15-photo jump menu, and one working Pinterest Save link per photo. Give the two ideas globally consecutive numbered sage circles. Source-unique imagery, accessible alt text, deep links, honest AI concept disclosure, and photo-by-photo QA are mandatory.
+
+Gallery pins use **their own immutable `OMC-Vxxxxx` IDs and tracker**, not the legacy 500-pin `OMC-Pxxxx` inventory. The importer CSV lives under `design/pinterest/inspiration/<slug>/` and must follow Pinterest's official columns. Generate it from the manifest with `scripts/generate-inspiration-pinterest-csv.mjs`. Blank Publish date means **publish immediately upon import**. Never report a CSV as uploaded or scheduled without account evidence.
+
 ## Article and resource photography
 
 **Before choosing images for any new article, guide, resource, or editorial landing page, read `docs/brand/PHOTO-DISCOVERY.md` and follow its discovery → source verification → clearance → optimization → reuse workflow.** Prefer faceless Kaboompics images, and **require new, source-unique lifestyle photography for each article**. Search the library first for duplicate detection, not for stock-image reuse; the same source photo with different crops or filenames is still a duplicate. No lifestyle image may be shared between articles. Exceptions apply only to explicitly marked real product photos and instructional assets. Run `npm run check:article-photos` before committing. The owner has approved all Kaboompics photos (standing approval, 2026-10-12): clear them yourself after the license, content and context checks in PHOTO-DISCOVERY.md, and record them in the catalog. Never publish other stock photos without the owner's clearance. If a fresh cleared Kaboompics image is unavailable, leave the article without a photo, never reuse another article's lifestyle shot as filler. The GitHub Actions downloader is not itself a photo search engine.
