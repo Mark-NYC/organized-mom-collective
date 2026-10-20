@@ -259,7 +259,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tip": "Keep toys together in a low, defined spot using natural baskets and simple shelving that blends into the family living room.",
     "tryThis": "",
     "alt": "AI-generated design concept illustrating living-room play corner in a family living room.",
-    "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/more-toy-storage-natural-materials-baskets-and-wood.jpeg",
+    "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-natural-materials-baskets-and-wood.jpeg",
     "pinDescription": "Create a small play zone within the shared room. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
@@ -270,7 +270,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tip": "Simple wood and woven storage can make kid-friendly spaces feel connected to the rest of a warm family room.",
     "tryThis": "",
     "alt": "AI-generated design concept illustrating natural-material storage in a family living room.",
-    "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-natural-materials-baskets-and-wood.jpeg",
+    "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/more-toy-storage-natural-materials-baskets-and-wood.jpeg",
     "pinDescription": "Mix wooden toys with natural baskets. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
