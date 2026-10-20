@@ -1,9 +1,9 @@
-# Brief: FP-14 skylight-calendar-vs-paper-wall-calendar
+# Brief: FP-15 skylight-calendar-vs-paper-wall-calendar
 
 - **Pillar:** Family Planning & Routines (pillar guide? no)
 - **URL:** /resources/skylight-calendar-vs-paper-wall-calendar
 - **Researched:** 2026-10-19
-- **ID note:** Requested as FP-13, but FP-13 is already used by the published `after-school-routine-for-kids` article (its photos are registered as `fp-13-*` and its pins are scheduled). This article takes the next free ID, FP-14.
+- **ID note:** Requested as FP-13, but FP-13 is already used by the published `after-school-routine-for-kids` article (its photos are registered as `fp-13-*` and its pins are scheduled). First filed as FP-14; renumbered FP-15 on 2026-10-20 when FP-14 went to the category guide (digital wall calendars vs. paper). Boundary: FP-14 owns the device category and the hybrid; this brief owns the single-brand "is a Skylight worth it" question and should link up to FP-14.
 - **Status:** Briefed. **Blocked before drafting:** no Skylight primary source could be fetched this session (see the claim log). Do not draft until it is fetched.
 
 ## Search intent
@@ -65,7 +65,7 @@ Gaps and weak spots: no result runs the decision from the family's side ("what p
 Published articles reviewed: FP-02, FP-03, FP-11 (headings, Shift, primary keywords above); FP-12 is still Planned.
 
 - **FP-11** (wall vs digital, generic): owns the format decision across all digital calendars (Google, Cozi) with a hybrid option. **FP-14 owns one named purchase**: a dedicated digital wall display versus a paper wall calendar, i.e. the "buy a screen or not" question. Don't repeat FP-11's table or the Google/Cozi notes; link to FP-11 for "should we go digital at all".
-- **FP-12** (planned, best command center systems): compares wall, digital and hybrid *setups*. FP-14 is a single product head-to-head and should not become a roundup. When FP-12 ships, it links to FP-14 for the Skylight question.
+- **FP-12** (planned, best command center systems): compares wall, digital and hybrid *setups*. FP-15 is a single product head-to-head and should not become a roundup. When FP-12 ships, it links to FP-15 for the Skylight question.
 - **FP-02** (organize a family calendar): owns setup, what goes on it, entry format. FP-14 never teaches setup; it links to FP-02 as `next`.
 - **FP-03** (home command center): owns the physical spot and paper flow. FP-14 mentions placement only in passing.
 
