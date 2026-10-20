@@ -39,7 +39,7 @@ Ten Gemini pins assigned by the owner to master IDs from the 500-pin calendar ([
 | Pinterest board | Exact names from [PINTEREST_BOARDS.md](../../../../docs/editorial/PINTEREST_BOARDS.md). No new boards. |
 | Description | Unique, 277–313 characters (limit 500). Built from each destination's own copy. No hashtags, no product claims. |
 | Link | Canonical `https://www.organizedmomcollective.com/resources/…`, no trailing slash. All live, HTTP 200. |
-| Publish date | The master calendar's original proposed date at noon: 32 and 33 on 2026-10-26, 34 and 35 on 2026-10-27. Recommendation only; the owner sets the schedule. |
+| Publish date | Owner-requested near-term plan, set 2026-10-20 (master dates stay as proposals): **Oct 23 noon: 33, 34. Oct 24 noon: 35. Oct 27 noon: 32** (a week after batch 01's “Missed a day?”, OMC-P0122). Format `YYYY-MM-DDTHH:MM:SS`, as in batches 02–03. Assumes batches 01–03 are queued for Oct 20–22; not checked in the live account. |
 | Keywords | 4 phrases per pin. Hypotheses, not checked against Pinterest search. |
 
 UTF-8 without BOM, CRLF, RFC 4180 quoting; round-trip confirmed.
