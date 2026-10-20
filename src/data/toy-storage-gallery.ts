@@ -7,7 +7,7 @@ export const toyStorageGallery: InspirationGallery = {
   description: 'Explore 49 toy storage ideas for family living rooms: hidden cabinets, baskets, built-ins, stylish ottomans, small-space solutions and kid-friendly play corners.',
   deck: 'Realistic design inspiration for a family living room that looks beautiful, works for kids, and makes cleanup easier. Explore 49 practical ideas, one photo at a time.',
   disclosure: 'These images are AI-generated design concepts, not photographs of actual homes or listings for particular products. Check furniture dimensions and child-safety features before recreating a storage idea.',
-  published: false,
+  published: true,
   coverImage: '/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/hero for article.jpeg',
   ideas: [
   {
@@ -18,7 +18,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating hidden storage cabinet in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-concealed-living-room-cabinet.jpeg",
-    "pinDescription": "Keep the toys behind closed doors. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Keep the toys behind closed doors. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -29,7 +29,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating built-in lower cabinets in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-built-in-lower-cabinets.jpeg",
-    "pinDescription": "Make the bottom cabinets the toy zone. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Make the bottom cabinets the toy zone. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -40,7 +40,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating storage coffee table in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-lift-top-coffee-table.jpeg",
-    "pinDescription": "Put toys inside the coffee table. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Put toys inside the coffee table. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -51,7 +51,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating window-seat storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-window-seat-hidden-compartments.jpeg",
-    "pinDescription": "Add play storage beneath a window seat. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Add play storage beneath a window seat. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -62,7 +62,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating one accessible toy drawer in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-dresser-drawer-living-room.jpeg",
-    "pinDescription": "Let one drawer show children where things go. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Let one drawer show children where things go. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -73,7 +73,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating oversized woven baskets in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-oversized-woven-baskets.jpeg",
-    "pinDescription": "Gather large toys in one oversized basket. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Gather large toys in one oversized basket. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -84,7 +84,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating under-console baskets in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-baskets-under-console.jpeg",
-    "pinDescription": "Slide baskets beneath the living room console. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Slide baskets beneath the living room console. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -95,7 +95,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating matching open-shelf baskets in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-open-shelves-natural-baskets.jpeg",
-    "pinDescription": "Use baskets to calm a busy bookshelf. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use baskets to calm a busy bookshelf. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -106,7 +106,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating colorful fabric bins in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-colorful-fabric-bins.jpeg",
-    "pinDescription": "Give toy categories their own soft bins. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Give toy categories their own soft bins. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -117,7 +117,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating lidded basket pair in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-lidded-baskets-beside-sofa.jpeg",
-    "pinDescription": "Use a lidded basket for evening cleanup. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use a lidded basket for evening cleanup. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -128,7 +128,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating affordable built-in look in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-affordable-modular-built-ins.jpeg",
-    "pinDescription": "Create a built-in look with modular cabinets. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Create a built-in look with modular cabinets. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -139,7 +139,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating traditional low cupboards in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-traditional-living-room-cabinets.jpeg",
-    "pinDescription": "Hide toys in the cupboards below bookshelves. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Hide toys in the cupboards below bookshelves. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -150,7 +150,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating sage-green cabinets in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-sage-green-cabinetry.jpeg",
-    "pinDescription": "Make painted cabinetry part of the living room. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Make painted cabinetry part of the living room. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -161,7 +161,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating shallow storage wall in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-shallow-wall-to-wall-cabinets.jpeg",
-    "pinDescription": "Choose shallow cabinets in a narrow room. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Choose shallow cabinets in a narrow room. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -172,7 +172,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating bookshelves with compartments in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-bookshelves-hidden-toy-compartments.jpeg",
-    "pinDescription": "Mix display shelves with hidden toy compartments. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Mix display shelves with hidden toy compartments. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -183,7 +183,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating apartment sofa storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-small-apartment-sofa-station.jpeg",
-    "pinDescription": "Use the unused wall beside the sofa. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use the unused wall beside the sofa. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -194,7 +194,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating narrow room vertical shelves in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-narrow-living-room-vertical-shelves.jpeg",
-    "pinDescription": "Use height without crowding the floor. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use height without crowding the floor. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -205,7 +205,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating play corner behind sectional in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-play-corner-behind-sectional.jpeg",
-    "pinDescription": "Carve out a child-sized space behind the sofa. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Carve out a child-sized space behind the sofa. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -216,7 +216,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating multifunctional media console in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-multifunctional-media-console.jpeg",
-    "pinDescription": "Give the media console a second job. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Give the media console a second job. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -227,7 +227,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating tiny minimalist family room in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-minimal-small-family-room.jpeg",
-    "pinDescription": "Edit the toys before buying more furniture. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Edit the toys before buying more furniture. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Small spaces"
   },
   {
@@ -238,7 +238,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating low montessori-style shelf in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-low-open-montessori-shelves.jpeg",
-    "pinDescription": "Display just a few toys on low shelves. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Display just a few toys on low shelves. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -249,7 +249,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating toy-rotation shelf in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-wooden-toy-rotation-shelves.jpeg",
-    "pinDescription": "Rotate toys instead of storing them all in sight. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Rotate toys instead of storing them all in sight. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -260,7 +260,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating living-room play corner in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/more-toy-storage-natural-materials-baskets-and-wood.jpeg",
-    "pinDescription": "Create a small play zone within the shared room. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Create a small play zone within the shared room. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -271,7 +271,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating natural-material storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-natural-materials-baskets-and-wood.jpeg",
-    "pinDescription": "Mix wooden toys with natural baskets. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Mix wooden toys with natural baskets. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -282,7 +282,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating shelf by reading chair in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-low-shelf-beside-reading-chair.jpeg",
-    "pinDescription": "Keep favorite toys within easy reach. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Keep favorite toys within easy reach. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -293,7 +293,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating upholstered storage ottoman in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-large-upholstered-ottoman.jpg",
-    "pinDescription": "Swap an ordinary ottoman for concealed storage. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Swap an ordinary ottoman for concealed storage. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -304,7 +304,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating pull-out window drawers in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-window-bench-pull-out-drawers.jpeg",
-    "pinDescription": "Use drawers under a bench for everyday toys. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use drawers under a bench for everyday toys. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -315,7 +315,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating round storage ottoman in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-small-round-ottoman.jpeg",
-    "pinDescription": "Add a compact round storage seat. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Add a compact round storage seat. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -326,7 +326,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating low toy-storage bench in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-low-wooden-bench.jpeg",
-    "pinDescription": "Use a bench with baskets underneath. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use a bench with baskets underneath. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -337,7 +337,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating two storage ottomans in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-pair-of-ottomans.jpeg",
-    "pinDescription": "Split toys between two matching storage seats. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Split toys between two matching storage seats. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -348,7 +348,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating books beside the sofa in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-childrens-book-basket-beside-sofa.jpeg",
-    "pinDescription": "Place children's books in one easy-access basket. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Place children's books in one easy-access basket. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -359,7 +359,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating low bookshelf in cabinetry in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-low-bookshelf-living-room-cabinetry.jpeg",
-    "pinDescription": "Give children's books the lowest shelves. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Give children's books the lowest shelves. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -370,7 +370,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating cozy reading corner in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-cozy-reading-corner-with-baskets.jpeg",
-    "pinDescription": "Build a reading nook with nearby book storage. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Build a reading nook with nearby book storage. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -381,18 +381,18 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating picture-book ledges in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-narrow-wall-mounted-picture-book-shelves.jpeg",
-    "pinDescription": "Show a few illustrated covers on shallow ledges. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Show a few illustrated covers on shallow ledges. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
     "id": "idea-35",
-    "navLabel": "Extra toy storage inspiration",
-    "title": "Find a place for toys near the books",
-    "tip": "Pair a small book area with a nearby basket or low cabinet, so reading and play supplies have a clear home.",
+    "navLabel": "Open toy shelves",
+    "title": "Keep favorite toys visible on open shelves",
+    "tip": "Simple wooden shelves with open containers let children see what is available, choose toys independently, and play with more of their toys instead of forgetting what they have.",
     "tryThis": "",
-    "alt": "AI-generated design concept illustrating books and toys together in a family living room.",
+    "alt": "AI-generated family living room concept with toys in open containers on simple wooden shelves, arranged where children can see and reach them.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/7cf808c0-b6d4-4b92-88b0-86c3784f3b34.jpeg",
-    "pinDescription": "Combine a toy basket with a little library. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Keep favorite toys visible on open shelves. Open containers on simple wooden shelves help children see, choose, and use more of their toys in a family living room.",
     "category": "Family routines"
   },
   {
@@ -403,7 +403,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating traditional family room in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-warm-traditional-family-room.jpeg",
-    "pinDescription": "Hide toys inside a classic sideboard. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Hide toys inside a classic sideboard. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -414,7 +414,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating colorful eclectic storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-colorful-eclectic-family-room.jpeg",
-    "pinDescription": "Let a few colorful bins belong in the room. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Let a few colorful bins belong in the room. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -425,7 +425,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating cottage basket storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-cottage-family-room-baskets-cabinets.jpeg",
-    "pinDescription": "Use cottage-style baskets with sturdy shelving. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use cottage-style baskets with sturdy shelving. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -436,7 +436,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating coastal toy-storage zone in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-coastal-family-room-kid-friendly.jpeg",
-    "pinDescription": "Pair light-colored cabinets with woven storage. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Pair light-colored cabinets with woven storage. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -447,7 +447,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating mid-century toy cabinet in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-mid-century-modern-family-room.jpeg",
-    "pinDescription": "Choose low storage with clean mid-century lines. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Choose low storage with clean mid-century lines. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Family routines"
   },
   {
@@ -458,7 +458,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating basic cube organizer in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-basic-cube-organizer.jpeg",
-    "pinDescription": "Make an inexpensive cube organizer work harder. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Make an inexpensive cube organizer work harder. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -469,7 +469,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating affordable low shelf in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-under-stair-family-living-room.jpeg",
-    "pinDescription": "Pair a simple low shelf with a few baskets. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Pair a simple low shelf with a few baskets. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -480,7 +480,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating vintage dresser storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-repurposed-vintage-dresser.jpeg",
-    "pinDescription": "Repurpose a dresser for toy collections. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Repurpose a dresser for toy collections. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -491,7 +491,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating diy painted bench in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-diy-painted-storage-bench.jpeg",
-    "pinDescription": "Refresh a basic bench for toy storage. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Refresh a basic bench for toy storage. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -502,7 +502,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating simple shelf and baskets in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-wall-shelves-above-low-cabinet.jpeg",
-    "pinDescription": "Use low toy bins beneath higher wall shelves. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use low toy bins beneath higher wall shelves. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -513,7 +513,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating defined play corner in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-defined-living-room-play-corner.jpeg",
-    "pinDescription": "Give the living room one clear play boundary. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Give the living room one clear play boundary. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -524,7 +524,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating open-concept toy zone in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-open-concept-family-room-zone.jpeg",
-    "pinDescription": "Keep playthings near the main family gathering space. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Keep playthings near the main family gathering space. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -535,7 +535,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating behind-sofa storage in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-behind-sofa-low-shelving.jpeg",
-    "pinDescription": "Use the back of the sofa as a natural divider. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Use the back of the sofa as a natural divider. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   },
   {
@@ -546,7 +546,7 @@ export const toyStorageGallery: InspirationGallery = {
     "tryThis": "",
     "alt": "AI-generated design concept illustrating five-minute toy reset in a family living room.",
     "image": "/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/toy-storage-five-minute-family-room-reset.jpeg",
-    "pinDescription": "Make every toy's storage place obvious. Explore 50 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
+    "pinDescription": "Make every toy's storage place obvious. Explore 49 beautiful toy storage ideas for family living rooms, with practical ways to organize children's toys in shared spaces.",
     "category": "Storage"
   }
 ]
