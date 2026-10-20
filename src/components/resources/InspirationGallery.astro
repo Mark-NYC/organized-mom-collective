@@ -1,0 +1,92 @@
+---
+import type { InspirationGallery as Gallery } from '../../data/inspiration-galleries';
+interface Props { gallery: Gallery; }
+const { gallery } = Astro.props;
+const origin = Astro.site?.origin ?? 'https://www.organizedmomcollective.com';
+const canonical = new URL('/resources/'+gallery.slug,origin).href;
+const hasAllImages = gallery.ideas.every(idea=>Boolean(idea.image));
+const isLive = gallery.published && hasAllImages;
+const filters = [...new Set(gallery.ideas.map(i=>i.category))];
+---
+<article class="inspo">
+  <header class="inspo-header">
+    <p class="inspo-eyebrow">HOME ORGANIZATION / INSPIRATION</p>
+    <h1>{gallery.title}</h1>
+    <p class="inspo-deck">{gallery.deck}</p>
+    {!isLive && <p class="inspo-notice" role="status">Preview: original images are not installed yet. Pinterest saving is disabled until each image has been checked.</p>}
+  </header>
+  <div class="inspo-content">
+    <section class="inspo-ideas" aria-label="Mudroom inspiration gallery">
+      {gallery.ideas.map((idea,index)=>(
+        <div class="inspo-item" id={idea.id}>
+          <div class="inspo-image-frame">
+            {idea.image ? <img src={idea.image} width="1000" height="1500" alt={idea.alt} loading={index===0?'eager':'lazy'} fetchpriority={index===0?'high':undefined} decoding="async" /> :
+            <div class="inspo-missing" role="note">Image {String(index+1).padStart(2,'0')} to be added</div>}
+          </div>
+          <div class="inspo-item-copy">
+            <p class="inspo-counter">IDEA {String(index+1).padStart(2,'0')} OF {gallery.ideas.length}</p>
+            <h2>{idea.title}</h2>
+            <p>{idea.tip}</p>
+            <p class="inspo-tip"><strong>Try this:</strong> {idea.tryThis}</p>
+            {isLive && idea.image && <a class="inspo-save" data-inspo-save data-idea={idea.id}
+              href={'https://www.pinterest.com/pin/create/button/?'+new URLSearchParams({url:canonical+'#'+idea.id,media:new URL(idea.image,origin).href,description:idea.pinDescription}).toString()}
+              target="_blank" rel="noopener noreferrer" aria-label={'Save '+idea.title+' to Pinterest'}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.6 19.33 9.4 9.4 0 0 1 .04-2.88l1.27-5.41s-.32-.63-.32-1.57c0-1.47.85-2.56 1.9-2.56.9 0 1.33.68 1.33 1.49 0 .91-.58 2.27-.87 3.53-.25 1.05.53 1.91 1.56 1.91 1.87 0 3.32-1.97 3.32-4.82 0-2.52-1.81-4.28-4.39-4.28-3.02 0-4.79 2.26-4.79 4.6 0 .91.35 1.89.8 2.42.09.11.11.2.08.31l-.3 1.25c-.05.2-.16.24-.36.15-1.35-.63-2.19-2.6-2.19-4.19 0-3.4 2.47-6.51 7.12-6.51 3.74 0 6.65 2.67 6.65 6.25 0 3.73-2.35 6.73-5.61 6.73-1.09 0-2.12-.57-2.48-1.25l-.67 2.55c-.25.98-.95 2.21-1.42 3.04A10 10 0 1 0 12 2Z"/></svg>
+              Save to Pinterest
+            </a>}
+          </div>
+          {index===0 && <nav class="inspo-jump" aria-label="Browse the ideas"><details><summary>Browse all {gallery.ideas.length} photo ideas</summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}>{j+1}. {x.title}</a>)}</div></details></nav>}
+          {index===6 && <aside class="inspo-aside"><h3>Make the after-school routine stick</h3><p>A tidy drop zone works best when everyone knows where their things go.</p><a href="/morning-routine-chart-generator">Create a free routine chart →</a></aside>}
+        </div>
+      ))}
+    </section>
+    <section class="inspo-finish" aria-label="Make these ideas work at home">
+      <h2>15 more ways to make your small mudroom work harder</h2>
+      <p>Make one adjustment to each photo idea to create a practical setup for your own family. You do not need a renovation to get started.</p>
+      <ol>{gallery.ideas.map((idea,index)=><li><strong>{index+16}. {idea.title}:</strong> {idea.tryThis}</li>)}</ol>
+      <p>Pick one change you can make today, then teach everyone where their things belong.</p>
+      <a href="/resources/after-school-drop-zone">Build an after-school drop zone →</a>
+    </section>
+    <p class="inspo-disclosure">{gallery.disclosure}</p>
+  </div>
+</article>
+<script>
+  document.querySelectorAll<HTMLAnchorElement>('[data-inspo-save]').forEach(link=>{
+    link.addEventListener('click',()=>{
+      const w=window as Window & {dataLayer?: Record<string,string>[]};
+      w.dataLayer?.push({event:'inspiration_save_click',idea_id:link.dataset.idea??'',gallery:location.pathname});
+    });
+  });
+</script>
+<style>
+  .inspo{font-family:Montserrat,Arial,sans-serif;color:#3d3834}
+  .inspo-header{background:#f1f2f2;padding:24px 16px 28px;margin:0 auto 28px;max-width:1100px}
+  .inspo-eyebrow,.inspo-counter{font-size:11px;letter-spacing:.13em;font-weight:700;color:#67655f}
+  .inspo-header h1{font:700 clamp(2.1rem,5vw,3.65rem)/1.12 Georgia,serif;max-width:780px;margin:14px 0}
+  .inspo-deck{font-size:1.05rem;line-height:1.55;max-width:640px}
+  .inspo-notice{border-left:3px solid #756d5b;padding:10px 14px;font-size:.87rem;background:#fff}
+  .inspo-content{max-width:800px;margin:auto}
+  .inspo-item{scroll-margin-top:80px;margin-bottom:44px}
+  .inspo-image-frame{width:100%;background:#f1f2f2}
+  .inspo-image-frame img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover}
+  .inspo-missing{aspect-ratio:2/3;display:grid;place-items:center;color:#67655f;background:linear-gradient(135deg,#eeeae4,#e0e6dc);font-size:.92rem}
+  .inspo-item-copy{padding:18px 16px 6px}
+  .inspo-item h2,.inspo-finish h2{font:700 clamp(1.6rem,3.3vw,2.15rem)/1.2 Georgia,serif;margin:8px 0 12px}
+  .inspo-item-copy p{line-height:1.65;margin:8px 0}
+  .inspo-tip{font-size:.94rem}
+  .inspo-save{min-height:48px;display:inline-flex;align-items:center;gap:9px;background:#a31d26;color:#fff;padding:12px 18px;margin-top:13px;font-weight:700;text-decoration:none}
+  .inspo-save:focus-visible,.inspo-jump a:focus-visible{outline:3px solid #3d3834;outline-offset:3px}
+  .inspo-jump{padding:0 16px 15px}
+  .inspo-jump summary{padding:15px 0;border-top:1px solid #d8d8d4;border-bottom:1px solid #d8d8d4;cursor:pointer;font-weight:700}
+  .inspo-jump-links{padding:14px 0;display:grid;gap:12px}
+  .inspo-jump-links a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+  .inspo-aside{padding:22px 20px;background:#e7ece5;margin:24px 16px}
+  .inspo-aside h3{font:700 1.45rem Georgia,serif;margin-bottom:8px}
+  .inspo-aside p{line-height:1.5}.inspo-aside a,.inspo-finish a{font-weight:700;text-decoration:underline;text-underline-offset:4px}
+  .inspo-finish{padding:28px 16px;border-top:1px solid #d8d8d4}
+  .inspo-finish p{line-height:1.65}.inspo-finish ol{padding-left:22px;line-height:1.65}
+  .inspo-finish li{margin-bottom:13px}
+  .inspo-disclosure{font-size:.78rem;color:#67655f;padding:0 16px 36px;line-height:1.6}
+  @media(min-width:768px){.inspo-header{padding:48px 54px;margin-bottom:48px}.inspo-item-copy{padding:24px 0 10px}.inspo-jump{padding:0 0 18px}.inspo-aside{margin:30px 0;padding:30px}.inspo-finish{padding:32px 0}.inspo-disclosure{padding-left:0}}
+  @media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
