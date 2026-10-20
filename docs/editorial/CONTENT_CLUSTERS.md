@@ -146,3 +146,7 @@ The comparison is successful when a mom can choose a solution even if she does n
 ## FP-19: Keeping a busy family calendar current
 
 New article: `/resources/busy-family-calendar` (published 2026-10-20), primary intent **busy family calendar / managing schedule changes**. Owns processing new school, sports and pickup changes into the shared family calendar, assigning responsibility for changes and confirming tomorrow. Distinct from FP-02 (one-time calendar setup/entry format) and FP-04 (weekly planning session). Parent FP-01; siblings FP-02, FP-03 and FP-04; next FP-02. Supports master pin OMC-P0251.
+
+## HC-08: What to do after one missed cleaning day
+
+Published 2026-10-20 at `/resources/missed-cleaning-day`, supporting master pin OMC-P0207. Owns the immediate five-step response to a single skipped zone: urgent messes, a ten-minute reset, then the scheduled zone. HC-01 owns the full weekly schedule; planned HC-05 owns serious multi-day or multi-week housework backlogs. Avoid duplicating either. Links to HC-01, HC-02, HC-03 and IF-03.
