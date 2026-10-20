@@ -1,7 +1,7 @@
 /** Image-first Pinterest inspiration galleries. Originals live in public/images/inspiration. */
 export type GalleryIdea = {
   id: string; title: string; navLabel: string; tip: string; tryThis: string;
-  secondTitle: string; secondTip: string;
+  secondTitle?: string; secondTip?: string;
   alt: string; image: string; pinDescription: string;
   category: 'Storage' | 'Hooks & walls' | 'Small spaces' | 'Family routines';
 };
