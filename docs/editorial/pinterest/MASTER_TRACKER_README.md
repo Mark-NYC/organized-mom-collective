@@ -25,7 +25,7 @@
 
 Run `python3 scripts/validate_pinterest_500.py` to validate the master and reconciliation. It fails on missing/duplicate master IDs, invalid slot coverage, duplicate final filenames, or conflicting confirmed production mappings.
 
-Before any new 10-pin batch, identify and report the exact 10 **master IDs and headlines** and reconcile their state first. The current approved set is 37 distinct IDs (30 from batches 01–03, 7 from batch 04), leaving 463 master slots not marked approved. Three more batch 04 IDs are reserved with a held creative. This is a planning count, **not** proof that all remaining pins have never been designed outside the recorded Gemini batches. Three adapted slots have a finished approved creative that supersedes the old draft concept.
+Before any new 10-pin batch, identify and report the exact 10 **master IDs and headlines** and reconcile their state first. The current approved set is 40 distinct IDs (30 from batches 01–03, 10 from batch 04), leaving 460 master slots not marked approved. This is a planning count, **not** proof that all remaining pins have never been designed outside the recorded Gemini batches. Three adapted slots have a finished approved creative that supersedes the old draft concept.
 
 ## Progress reporting
 

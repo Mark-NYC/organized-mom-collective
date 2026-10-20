@@ -1,8 +1,10 @@
 # Gemini batch 04: QA report (2026-10-20)
 
 > **Update, later 2026-10-20:** pin 31 was replaced by the owner (`6.jpg`, seven-day Sun–Sat grid, dates in order, no faces, hands plausible): **pass**. Files for 36–40 arrived in commit `8cb00ea` and were checked at full resolution: 36 and 39 **pass**; 37 (needs owner decision), 38 and 40 (revise) still carry the issues below. Import-ready: 31–36 and 39.
+>
+> **Owner override, 2026-10-20:** 37, 38 and 40 approved as is. Findings below stand as recorded: 37 keeps the legible book cover and game box; 38 keeps “Put away sauces and things from the fridge” and “Wipe the table”; 40 keeps “Make the bed”. All ten are import-ready.
 
-Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../../docs/editorial/PINTEREST_QA_CHECKLIST.md). Each result is **pass**, **fail**, **needs owner decision** or **not verified**. Mechanical checks, visual judgment and owner approval are recorded separately. No owner override has been given for any batch 04 pin.
+Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../../docs/editorial/PINTEREST_QA_CHECKLIST.md). Each result is **pass**, **fail**, **needs owner decision** or **not verified**. Mechanical checks, visual judgment and owner approval are recorded separately. Owner overrides: 37, 38 and 40 (2026-10-20).
 
 ## Received
 

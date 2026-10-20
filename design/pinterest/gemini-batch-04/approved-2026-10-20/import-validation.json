@@ -3,7 +3,7 @@
  "reviewed": "2026-10-20",
  "asset_commit": "4cb196ee06fea3176af06e8c76d9d9c550a6a53e",
  "file": "pinterest-import-ready.csv",
- "rows": 7,
+ "rows": 10,
  "pins_in_import": [
   31,
   32,
@@ -11,13 +11,12 @@
   34,
   35,
   36,
-  39
- ],
- "pins_held": [
   37,
   38,
+  39,
   40
  ],
+ "pins_held": [],
  "pins_not_received": [],
  "encoding": "UTF-8, no BOM",
  "line_endings": "CRLF",
@@ -53,10 +52,10 @@
   "34": 339,
   "35": 312,
   "36": 359,
-  "37": 43,
-  "38": 43,
+  "37": 380,
+  "38": 422,
   "39": 344,
-  "40": 43
+  "40": 318
  },
  "limits": {
   "title": 100,
@@ -66,7 +65,7 @@
  "unique_titles": true,
  "unique_descriptions": true,
  "boards_in_registry": true,
- "media_urls": "All 5 committed PNGs returned HTTP 200 image/png from raw.githubusercontent.com at the asset commit; SHA-256 matched the committed files.",
+ "media_urls": "All 5 committed PNGs returned HTTP 200 image/png from raw.githubusercontent.com at the asset commit; SHA-256 matched the committed files. Pins 37, 38 and 40 moved to approved-2026-10-20 at 8559ad9; HTTP 200 image/png, SHA-256 matched.",
  "images": {
   "31": {
    "orig": "6.jpg",
@@ -130,7 +129,7 @@
   },
   "37": {
    "orig": "pins-36-40/2.jpg",
-   "dst": "held-2026-10-20/omc-screen-time-routine-for-kids-01.png",
+   "dst": "approved-2026-10-20/omc-screen-time-routine-for-kids-01.png",
    "size": "687x1024",
    "mode": "RGB",
    "icc": true,
@@ -140,7 +139,7 @@
   },
   "38": {
    "orig": "pins-36-40/3.jpg",
-   "dst": "held-2026-10-20/omc-kitchen-chores-kids-can-own-01.png",
+   "dst": "approved-2026-10-20/omc-kitchen-chores-kids-can-own-01.png",
    "size": "687x1024",
    "mode": "RGB",
    "icc": true,
@@ -160,7 +159,7 @@
   },
   "40": {
    "orig": "pins-36-40/5.jpg",
-   "dst": "held-2026-10-20/omc-chores-for-5-year-olds-01.png",
+   "dst": "approved-2026-10-20/omc-chores-for-5-year-olds-01.png",
    "size": "687x1024",
    "mode": "RGB",
    "icc": true,
@@ -169,5 +168,6 @@
    "osha": "e8f6a6236d3d374611b4cfe71ce9dfcb57ddcaef9ed711268214e7199eb5c71e"
   }
  },
- "duplicate_scan": "No SHA-256 match among 1,557 tracked repo images. Closest perceptual (dHash 256-bit) distance 85 bits; batch pins differ from each other by at least 106 bits. Near-duplicate threshold ~10."
+ "duplicate_scan": "No SHA-256 match among 1,557 tracked repo images. Closest perceptual (dHash 256-bit) distance 85 bits; batch pins differ from each other by at least 106 bits. Near-duplicate threshold ~10.",
+ "asset_commit_pins_37_38_40": "8559ad94c69c64d158701f613dba8c9bcdabe1d8"
 }
