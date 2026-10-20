@@ -1,0 +1,119 @@
+{
+ "batch": "gemini-batch-04",
+ "reviewed": "2026-10-20",
+ "asset_commit": "4cb196ee06fea3176af06e8c76d9d9c550a6a53e",
+ "file": "pinterest-import-ready.csv",
+ "rows": 4,
+ "pins_in_import": [
+  32,
+  33,
+  34,
+  35
+ ],
+ "pins_held": [
+  31
+ ],
+ "pins_not_received": [
+  36,
+  37,
+  38,
+  39,
+  40
+ ],
+ "encoding": "UTF-8, no BOM",
+ "line_endings": "CRLF",
+ "csv_roundtrip": true,
+ "title_lengths": {
+  "31": 55,
+  "32": 60,
+  "33": 67,
+  "34": 71,
+  "35": 65,
+  "36": 63,
+  "37": 54,
+  "38": 42,
+  "39": 68,
+  "40": 61
+ },
+ "description_lengths": {
+  "31": 312,
+  "32": 277,
+  "33": 313,
+  "34": 295,
+  "35": 291,
+  "36": 295,
+  "37": 279,
+  "38": 265,
+  "39": 294,
+  "40": 305
+ },
+ "alt_text_lengths": {
+  "31": 380,
+  "32": 326,
+  "33": 329,
+  "34": 339,
+  "35": 312
+ },
+ "limits": {
+  "title": 100,
+  "description": 500,
+  "alt_text": 500
+ },
+ "unique_titles": true,
+ "unique_descriptions": true,
+ "boards_in_registry": true,
+ "media_urls": "All 5 committed PNGs returned HTTP 200 image/png from raw.githubusercontent.com at the asset commit; SHA-256 matched the committed files.",
+ "images": {
+  "31": {
+   "orig": "1.jpg",
+   "dst": "held-2026-10-20/omc-busy-family-calendar-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "8a8933f62110e375c0e7d1b9d56930b4c6c8000b1614411f20e1973d9d37202c",
+   "osha": "4a77ec492598d31f882d31f5b42502fc131de51ee83c61ad654affe38100da4d"
+  },
+  "32": {
+   "orig": "2.jpg",
+   "dst": "approved-2026-10-20/omc-missed-cleaning-day-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "716229a6b526c4eee47a96a597b78f0cbdd0e2c9fd46b532e4c0e34053c9dbff",
+   "osha": "70b4e51db3466a21114d4ccc45ac932b007e9313ffb35675f8a160fe393d3844"
+  },
+  "33": {
+   "orig": "3.jpg",
+   "dst": "approved-2026-10-20/omc-teaching-kids-independence-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "941e0ec645bfdbc4639bc17929ab3356f1dc1ebcf7e6a2a040874d2b7b2cfa78",
+   "osha": "a53130ff0f05f50860de1b77bd9e1d899fc6f8bd43de9a66e894f3eabcdf53dd"
+  },
+  "34": {
+   "orig": "4.jpg",
+   "dst": "approved-2026-10-20/omc-ten-minute-living-room-reset-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "fcd72703dd021d836e87e58f9bc4fbd1aefcefd9366f239887f5083527b2871d",
+   "osha": "22c50fc08e4a07d34d4707198157801b8d8d89ea18a72e0eb9946dc6ae3789cf"
+  },
+  "35": {
+   "orig": "5.jpg",
+   "dst": "approved-2026-10-20/omc-kids-help-make-dinner-01.png",
+   "size": "687x1024",
+   "mode": "RGB",
+   "icc": true,
+   "pixel_identical": true,
+   "sha": "5e0be464cc66ccc82481949b0700b0b42225d966e476e52f4950a2429c93e3b0",
+   "osha": "a193bbb0500ad3bcc4989fbe146991a830dd60cfce8dfd46e4175a9be06b709e"
+  }
+ },
+ "duplicate_scan": "No SHA-256 match among 1,557 tracked repo images. Closest perceptual (dHash 256-bit) distance 85 bits; batch pins differ from each other by at least 106 bits. Near-duplicate threshold ~10."
+}
