@@ -1,5 +1,7 @@
 # Gemini batch 04: QA report (2026-10-20)
 
+> **Update, later 2026-10-20:** pin 31 was replaced by the owner (`6.jpg`, seven-day Sun–Sat grid, dates in order, no faces, hands plausible): **pass**. Files for 36–40 arrived in commit `8cb00ea` and were checked at full resolution: 36 and 39 **pass**; 37 (needs owner decision), 38 and 40 (revise) still carry the issues below. Import-ready: 31–36 and 39.
+
 Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../../docs/editorial/PINTEREST_QA_CHECKLIST.md). Each result is **pass**, **fail**, **needs owner decision** or **not verified**. Mechanical checks, visual judgment and owner approval are recorded separately. No owner override has been given for any batch 04 pin.
 
 ## Received
