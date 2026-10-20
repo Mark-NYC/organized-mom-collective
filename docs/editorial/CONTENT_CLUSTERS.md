@@ -154,3 +154,7 @@ Published 2026-10-20 at `/resources/missed-cleaning-day`, supporting master pin 
 ## IF-08: Teaching Kids Independence
 
 Published 2026-10-20: `/resources/teaching-kids-independence`. Supports pin OMC-P0457. This article teaches the five-step process for passing a small, age-appropriate job to a child. IF-03 covers age-based chores and IF-07 covers bathroom chores.
+
+## HC-09: The 10-Minute Living Room Reset
+
+Published 2026-10-20, `/resources/ten-minute-living-room-reset`. Supports master pin OMC-P0168. The article handles five timed jobs in one living room and assigns family participation. HC-02 owns the whole-home daily reset; HC-03 owns zone sizing. Link back to both; do not repeat either in full.
