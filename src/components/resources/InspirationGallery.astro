@@ -6,7 +6,9 @@ const origin = Astro.site?.origin ?? 'https://www.organizedmomcollective.com';
 const canonical = new URL('/resources/'+gallery.slug,origin).href;
 const hasAllImages = gallery.ideas.every(idea=>Boolean(idea.image));
 const isLive = gallery.published && hasAllImages;
-const totalIdeas = gallery.ideas.length * 2;
+const hasTwoTips = gallery.ideas.some(idea => Boolean(idea.secondTitle));
+const totalIdeas = gallery.ideas.reduce((count, idea) => count + (idea.secondTitle ? 2 : 1), 0);
+const photoTopic = gallery.slug === 'small-mudroom-ideas' ? 'mudroom' : 'toy storage';
 ---
 <article class="inspo">
   <header class="inspo-header">
@@ -16,12 +18,12 @@ const totalIdeas = gallery.ideas.length * 2;
     {!isLive && <p class="inspo-notice" role="status">This gallery is being prepared for publication.</p>}
   </header>
   <div class="inspo-content">
-    <section class="inspo-ideas" aria-label="Small mudroom ideas">
+    <section class="inspo-ideas" aria-label={gallery.title}>
       {gallery.ideas.map((idea,index)=>(
         <div class="inspo-item" id={idea.id}>
           <div class="inspo-image-frame">
             {idea.image ? <img src={idea.image} width="1000" height="1500" alt={idea.alt} loading={index===0?'eager':'lazy'} fetchpriority={index===0?'high':undefined} decoding="async" /> :
-            <div class="inspo-missing" role="note">Image {String(index+1).padStart(2,'0')} to be added</div>}
+            <div class="inspo-missing" role="note"><span>PHOTO {String(index+1).padStart(2,'0')} / {gallery.ideas.length}</span><small>Image coming soon</small></div>}
           </div>
           <div class="inspo-item-copy">
             <p class="inspo-counter">PHOTO {String(index+1).padStart(2,'0')} OF {gallery.ideas.length}</p>
@@ -29,19 +31,19 @@ const totalIdeas = gallery.ideas.length * 2;
             <div class="inspo-tips">
               <section class="inspo-tip-item" aria-labelledby={idea.id+'-tip-one'}>
                 <h3 class="inspo-tip-heading" id={idea.id+'-tip-one'}>
-                  <span class="inspo-number-circle" aria-hidden="true">{index*2+1}</span>
+                  <span class="inspo-number-circle" aria-hidden="true">{hasTwoTips ? index*2+1 : index+1}</span>
                   <span>{idea.title}</span>
                 </h3>
                 <p>{idea.tip}</p>
-                <p class="inspo-tip"><strong>Try this:</strong> {idea.tryThis}</p>
+                {idea.tryThis && <p class="inspo-tip"><strong>Try this:</strong> {idea.tryThis}</p>}
               </section>
-              <section class="inspo-tip-item" aria-labelledby={idea.id+'-tip-two'}>
+              {idea.secondTitle && <section class="inspo-tip-item" aria-labelledby={idea.id+'-tip-two'}>
                 <h3 class="inspo-tip-heading" id={idea.id+'-tip-two'}>
                   <span class="inspo-number-circle" aria-hidden="true">{index*2+2}</span>
                   <span>{idea.secondTitle}</span>
                 </h3>
                 <p>{idea.secondTip}</p>
-              </section>
+              </section>}
             </div>
             {isLive && idea.image && <a class="inspo-save" data-inspo-save data-idea={idea.id}
               href={'https://www.pinterest.com/pin/create/button/?'+new URLSearchParams({url:canonical+'#'+idea.id,media:new URL(idea.image,origin).href,description:idea.pinDescription}).toString()}
@@ -50,14 +52,14 @@ const totalIdeas = gallery.ideas.length * 2;
               Save to Pinterest
             </a>}
           </div>
-          {index===0 && <nav class="inspo-jump" aria-label="Jump to a mudroom photo"><details><summary><span><strong>Jump to a mudroom idea</strong><small>{gallery.ideas.length} spaces to explore</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
-          {index===6 && <aside class="inspo-aside"><h3>Make the after-school routine stick</h3><p>A tidy drop zone works best when everyone knows where their things go.</p><a href="/routine-chart">Create a free routine chart →</a></aside>}
+          {index===0 && <nav class="inspo-jump" aria-label={`Jump to a ${photoTopic} photo`}><details><summary><span><strong>Jump to a photo</strong><small>{gallery.ideas.length} spaces to explore</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
+          {index === Math.floor(gallery.ideas.length/2)-1 && <aside class="inspo-aside"><h3>{gallery.slug === "small-mudroom-ideas" ? "Make the after-school routine stick" : "Make toy cleanup a family habit"}</h3><p>{gallery.slug === "small-mudroom-ideas" ? "A tidy drop zone works best when everyone knows where their things go." : "Storage works better when kids know what belongs where. Turn the end-of-day reset into a small, shared routine."}</p><a href="/routine-chart">Create a free family routine chart →</a></aside>}
         </div>
       ))}
     </section>
     <section class="inspo-finish" aria-label="Put these ideas to work">
-      <h2>Start with the doorway you have</h2>
-      <p>Pick one change: somewhere for shoes, somewhere for bags, or one hook your child can reach. That is enough to begin.</p>
+      <h2>{gallery.slug === "small-mudroom-ideas" ? "Start with the doorway you have" : "Start with one toy storage zone"}</h2>
+      <p>{gallery.slug === "small-mudroom-ideas" ? "Pick one change: somewhere for shoes, somewhere for bags, or one hook your child can reach. That is enough to begin." : "Pick the toys that are used most often, give them a home your child can reach, and leave enough room to put everything away without rearranging the room."}</p>
       <p>Want a simple follow-through plan? <a href="/routine-chart">Make a free family routine chart →</a></p>
     </section>
     <p class="inspo-disclosure">{gallery.disclosure}</p>
@@ -82,7 +84,8 @@ const totalIdeas = gallery.ideas.length * 2;
   .inspo-item{scroll-margin-top:80px;margin-bottom:44px}
   .inspo-image-frame{width:100%;background:#f1f2f2}
   .inspo-image-frame img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover}
-  .inspo-missing{aspect-ratio:2/3;display:grid;place-items:center;color:#67655f;background:linear-gradient(135deg,#eeeae4,#e0e6dc);font-size:.92rem}
+  .inspo-missing{aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#67655f;background:linear-gradient(135deg,#eeeae4,#e0e6dc);font-size:.92rem}
+  .inspo-missing small{font-size:.8rem;opacity:.75}
   .inspo-item-copy{padding:18px 16px 6px}
   .inspo-photo-title,.inspo-finish h2{font:700 clamp(1.6rem,3.3vw,2.15rem)/1.2 Georgia,serif;margin:8px 0 18px}
   .inspo-item-copy p{line-height:1.65;margin:8px 0}
