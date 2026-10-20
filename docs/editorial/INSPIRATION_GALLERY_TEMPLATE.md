@@ -22,3 +22,9 @@ The mudroom gallery uses 15 photographs and 15 numbered photo sections. Each sec
 Each photo is one visual section with a short, standalone editorial H2, taken from `navLabel`, followed by two equal-weight H3 idea headings. The two practical ideas are numbered consecutively across the full gallery (1–30) with identical sage circle badges. Each H3 and its paragraph form a compact ruled tip block. Do not put a number inside the photo's H2, do not mix heading sizes between the paired ideas, and do not display 'Ideas 1 & 2' counters. The small 'Photo 01 of 15' label identifies the photograph, while the 1–30 numbers identify the actual tips.
 
 The dropdown lists only the 15 photo titles, linking to their permanent `#idea-N` anchors. Pinterest saving remains per photograph.
+
+## Large single-idea galleries (50 photos)
+
+For 50-image inspiration articles such as `beautiful-toy-storage-ideas-family-living-rooms`, use **one distinctly titled, numbered practical idea per photograph**, not two tips per photo. The shared component automatically switches between 15 x 2 and 50 x 1 formats based on presence of `secondTitle` fields; do not add dummy second tips. A 50-photo page displays 50 numbered sage circles and 50 individual `#idea-N` anchors. Keep `published:false` and all `image` fields empty until uploaded assets pass visual QA, then bind paths from the exact `UPLOAD_MANIFEST.csv` in the folder. Do not publish a gallery with broken images or produce its Pinterest CSV before image URLs are live.
+
+Use `src/data/toy-storage-gallery.ts` and `src/pages/resources/beautiful-toy-storage-ideas-family-living-rooms.astro` as examples. See the corresponding image directory README for image handoff instructions.
