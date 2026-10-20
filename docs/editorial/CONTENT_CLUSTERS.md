@@ -143,3 +143,6 @@ Test comparison/decision content as roughly **20% of new editorial output**, not
 Tracker IDs added 2026-10-20 for articles published without a row: FP-13 `after-school-routine-for-kids`, IF-07 `bathroom-chores-for-kids`, and **FP-16** `free-weekly-family-planner-printable` (published as FP-07, which stays reserved for the planned dinner rotation article; FP-14, FP-15 and FP-17 are the calendar comparisons).
 
 The comparison is successful when a mom can choose a solution even if she does not buy OMC. Keep the product mention honest: the current offer is a physical wall calendar plus companion cleaning website, **not** a synchronized family calendar app. Link each decision guide up to its pillar guide and contextually to the relevant existing article; add incoming links once published. Track in [CONTENT_TRACKER.md](CONTENT_TRACKER.md).
+## FP-19: Keeping a busy family calendar current
+
+New article: `/resources/busy-family-calendar` (published 2026-10-20), primary intent **busy family calendar / managing schedule changes**. Owns processing new school, sports and pickup changes into the shared family calendar, assigning responsibility for changes and confirming tomorrow. Distinct from FP-02 (one-time calendar setup/entry format) and FP-04 (weekly planning session). Parent FP-01; siblings FP-02, FP-03 and FP-04; next FP-02. Supports master pin OMC-P0251.
