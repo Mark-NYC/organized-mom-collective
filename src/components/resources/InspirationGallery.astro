@@ -35,7 +35,7 @@ const totalIdeas = gallery.ideas.length * 2;
               Save to Pinterest
             </a>}
           </div>
-          {index===0 && <nav class="inspo-jump" aria-label="Browse the ideas"><details><summary>Browse all {totalIdeas} ideas</summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}>{j*2+1}. {x.title} / {j*2+2}. {x.secondTitle}</a>)}</div></details></nav>}
+          {index===0 && <nav class="inspo-jump" aria-label="Jump to a mudroom photo"><details><summary><span><strong>Jump to a mudroom idea</strong><small>{gallery.ideas.length} photos · {totalIdeas} ideas</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
           {index===6 && <aside class="inspo-aside"><h3>Make the after-school routine stick</h3><p>A tidy drop zone works best when everyone knows where their things go.</p><a href="/routine-chart">Create a free routine chart →</a></aside>}
         </div>
       ))}
@@ -70,14 +70,25 @@ const totalIdeas = gallery.ideas.length * 2;
   .inspo-missing{aspect-ratio:2/3;display:grid;place-items:center;color:#67655f;background:linear-gradient(135deg,#eeeae4,#e0e6dc);font-size:.92rem}
   .inspo-item-copy{padding:18px 16px 6px}
   .inspo-item h2,.inspo-finish h2{font:700 clamp(1.6rem,3.3vw,2.15rem)/1.2 Georgia,serif;margin:8px 0 12px}
-  .inspo-item-copy p{line-height:1.65;margin:8px 0}\n  .inspo-secondary-idea{font:700 1.25rem/1.3 Georgia,serif;margin:22px 0 8px;scroll-margin-top:85px}\n  .inspo-idea-number{color:#6b7366}
+  .inspo-item-copy p{line-height:1.65;margin:8px 0}
+  .inspo-secondary-idea{font:700 1.25rem/1.3 Georgia,serif;margin:22px 0 8px;scroll-margin-top:85px}
+  .inspo-idea-number{color:#6b7366}
   .inspo-tip{font-size:.94rem}
   .inspo-save{min-height:48px;display:inline-flex;align-items:center;gap:9px;background:#a31d26;color:#fff;padding:12px 18px;margin-top:13px;font-weight:700;text-decoration:none}
   .inspo-save:focus-visible,.inspo-jump a:focus-visible{outline:3px solid #3d3834;outline-offset:3px}
   .inspo-jump{padding:0 16px 15px}
-  .inspo-jump summary{padding:15px 0;border-top:1px solid #d8d8d4;border-bottom:1px solid #d8d8d4;cursor:pointer;font-weight:700}
-  .inspo-jump-links{padding:14px 0;display:grid;gap:12px}
-  .inspo-jump-links a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+  .inspo-jump summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0;border-top:1px solid #d8d8d4;border-bottom:1px solid #d8d8d4;cursor:pointer;list-style:none}
+  .inspo-jump summary::-webkit-details-marker{display:none}
+  .inspo-jump summary strong{display:block;font-size:1rem}
+  .inspo-jump summary small{display:block;font-size:.78rem;color:#67655f;margin-top:3px}
+  .inspo-jump-chevron{font-size:1.4rem;line-height:1;transition:transform .15s}
+  .inspo-jump details[open] .inspo-jump-chevron{transform:rotate(180deg)}
+  .inspo-jump-links{padding:15px 0 20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .inspo-jump-links a{display:flex;align-items:center;gap:9px;min-height:54px;padding:10px;background:#f1f2f2;color:inherit;text-decoration:none;line-height:1.3;font-size:.82rem;font-weight:600;overflow-wrap:normal}
+  .inspo-jump-links a:hover{background:#e7ece5}
+  .inspo-jump-number{font-size:.7rem;letter-spacing:.04em;color:#67655f;flex-shrink:0}
+  .inspo-jump-label{min-width:0}
+  @media(min-width:640px){.inspo-jump-links{grid-template-columns:repeat(3,minmax(0,1fr))}.inspo-jump-links a{font-size:.9rem;padding:12px}}
   .inspo-aside{padding:22px 20px;background:#e7ece5;margin:24px 16px}
   .inspo-aside h3{font:700 1.45rem Georgia,serif;margin-bottom:8px}
   .inspo-aside p{line-height:1.5}.inspo-aside a,.inspo-finish a{font-weight:700;text-decoration:underline;text-underline-offset:4px}
