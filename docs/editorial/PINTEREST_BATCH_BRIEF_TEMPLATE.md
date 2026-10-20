@@ -21,3 +21,8 @@
 
 ## After images are returned
 Approve/revise/reject each actual design with targeted corrections. For approved finished designs provide title, natural keyword-rich description, alt text of exactly what is visible, exact article URL, **existing board if verified or clearly labeled suggested board**, and proposed date. Track real status and later performance.
+
+
+## 500-pin master-batch override
+
+When the user asks for the next **10 pins from the 500-pin CSV**, use the master tracker's permanent IDs and [PINTEREST_RESEARCH_LOOP.md](PINTEREST_RESEARCH_LOOP.md) with a proposed 6 proven-keyword / 3 audience-specific / 1 experimental distribution. This overrides only this template's **six new prompts** default for such a batch; it does not change the six-variation per-article production convention. Report verified keyword evidence and date, reference URL if researched, distinct visual scene, live landing link, and intended conversion action. Missing evidence must remain labeled unverified.
