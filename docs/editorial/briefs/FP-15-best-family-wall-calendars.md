@@ -5,7 +5,7 @@
 - **Working title (H1):** The Best Family Wall Calendars for 2027
 - **Researched:** 2026-10-20
 - **ID note:** Owner-assigned FP-15 on 2026-10-20. The Skylight vs. paper brief that held FP-15 is renumbered **FP-17** (`briefs/FP-17-skylight-calendar-vs-paper-wall-calendar.md`), unchanged otherwise.
-- **Status:** Briefed. **Blocked before drafting:** no seller page could be fetched this session (claim log below). The owner's rule for this article is that every competitor fact comes from the seller's own page, fetched in the drafting session, cited and dated "as of October 2026"; unverifiable means omitted. With zero verified competitors the article can't be a fair roundup, so it isn't drafted. Do not draft from search snippets.
+- **Status:** Published 2026-10-20. First pass (same day) was blocked by the environment's network policy; the owner then opened network access and seller pages were fetched with curl (WebFetch still failed DNS). Final picks and the verified claim log are below; the candidate list in Structure is the pre-verification plan.
 
 ## The fairness rules (owner, 2026-10-20)
 
@@ -99,26 +99,29 @@ Google check: the FP-15 queries return product pages and "best of" roundups; FP-
 
 ## Claim log (comparison article requirement)
 
-Rule: seller's own page, fetched in the drafting session, cited inline, "as of October 2026". "Tested" is always *documented only*: OMC has not tested any competitor.
+Rule: seller's own page, fetched in the drafting session, cited inline, "as of October 2026". Every competitor row is **documented only**: OMC has not tested any competitor. Fetched 2026-10-20 with curl through the session proxy.
 
-| Claim | Seller / official source to fetch | Date | Tested or documented | Status |
+| Claim | Seller page fetched | Date | Tested or documented | Status |
 | --- | --- | --- | --- | --- |
-| Amy Knapp's Big Grid Family Organizer 2027: on sale, size, layout, price | sourcebooks.com (publisher) | 2026-10-20 | — | **Not verified.** Search snippets only (17-month Aug 2026–Dec 2027, $16.99, 15 × 11, ISBN 9781728292243). WebFetch `ENOTFOUND www.lindentreebooks.com`; curl via proxy `CONNECT tunnel failed, response 403` |
-| Sandra Boynton's My Family 17-month 2026–2027: on sale, size, columns, price | publisher page (andrewsmcmeel.com / simonandschuster.com) | 2026-10-20 | — | **Not verified.** Snippets only (12 × 12, five people, $17.99). Quirk Books/Simon & Schuster hosts blocked |
-| AT-A-GLANCE 2027 monthly wall calendar: size, price | at-a-glance.com | 2026-10-20 | — | **Not verified.** Blocked |
-| A dry-erase / magnetic undated family calendar | maker's own site (brand TBD) | 2026-10-20 | — | **Not verified.** Snippets were only generic marketplace listings; no brand chosen |
-| Skylight Calendar: models, price, subscription | myskylight.com | 2026-10-20 | — | **Not verified.** `ENOTFOUND myskylight.com`. Snippets conflict on Plus price ($39/yr vs. $79/yr) |
-| Free shared phone calendar (Google Calendar sharing) | support.google.com | 2026-10-20 | — | **Not verified.** google.com blocked via proxy |
+| Sandra Boynton's 17-Month 2026–2027 My Family Wall Calendar: $17.99; 12" × 12" (12" × 27" open); Aug 2026–Dec 2027; "Space for 5 family members' activities"; 300+ stickers on 2 sheets; gusseted drop-down pocket; Andrews McMeel; in stock ("On our shelves now", schema InStock) | https://www.lindentreebooks.com/sandra-boyntons-17-month-2026-2027-my-family-wall.html | 2026-10-20 | Documented | Verified, used |
+| Amy Knapp's Big Grid Family Organizer 2027: $16.99; "17-MONTH FAMILY WALL CALENDAR (AUG. 2026 - DEC. 2027)"; "Extra-large monthly grids with lined daily writing space"; "Daily dinner planning plus 36 perforated tear-off lists"; "175+ colorful stickers"; "Large 15" x 11" format with durable wire-o binding" | https://www.barnesandnoble.com/w/2027-amy-knapps-big-grid-family-organizer-wall-calendar-amy-knapp/1148765301?ean=9781728292243 (also $16.99, in stock, Sourcebooks Plus, at Linden Tree Books) | 2026-10-20 | Documented | Verified, used. sourcebooks.com renders by JavaScript only; no publisher page text |
+| U Brands Core Command Dry Erase Monthly Organization Center: $28, available; 22" × 16" magnetic dry-erase monthly calendar, 11" × 16" magnetic weekly to-do board, 11" × 16" dry-erase board with cork bulletin strips | https://ubrands.com/products/core-command-dry-erase-monthly-organization-center-white (price and availability from the store's products JSON for the calendar-boards collection) | 2026-10-20 | Documented | Verified, used |
+| Skylight: 10" Calendar from $149.99; 15" Calendar (refurbished memory) from $229.99; 15" Calendar 2 from $299.99; 27" Calendar Max from $569.99; free features include auto-sync with Google, Apple, Outlook, Cozi, chore chart and task manager, custom lists, mobile app | https://myskylight.com/compare-calendars | 2026-10-20 | Documented | Verified, used |
+| Skylight Calendar Plus: $79/year; includes Meal Planning, Magic Import, photo screensaver, Rewards, Disney Mode | https://myskylight.com/products/calendar-skylight-plus | 2026-10-20 | Documented | Verified, used. Resolves the $39 vs. $79 conflict seen in snippets |
+| Cozi: Free (shared calendar, to-do and shopping lists, recipe library, every family member); Gold $39/year; Max $79/year | https://www.cozi.com/compare-plans/ | 2026-10-20 | Documented | Verified, used |
+| AT-A-GLANCE 2027 12" × 17" monthly wall calendar: $20.09, Jan–Dec 2027 | https://www.quill.com/2027-at-glance-12-x-17-monthly-wall-calendar-white-purple-pm2-28-27/cbs/55527719.html | 2026-10-20 | Documented | Verified, **not used**: an office calendar with no family use case Big Grid doesn't cover at a lower price |
+| Google family calendar (shared, editable by family members) | https://support.google.com/calendar/answer/7157782 | 2026-10-20 | Documented | Verified, **not used**: no fetched Google page states the price, so Cozi (price on its own page) is the $0 pick |
 | OMC 2027 calendar features | ARTICLE_FORMAT.md → Product notes, `design/etsy-listing/02.webp` | 2026-10-20 | Repository | Verified |
 | OMC prices ($34 / 26 weeks, $54 / 52 weeks) | `src/config.ts`, `PRICES_AS_OF` | 2026-10-20 | Repository | Verified, imported |
-| OMC Etsy rating 4.9 / 112 reviews | `src/data/reviews.ts` | 2026-10-20 | Repository | Usable only with `REVIEWS_DISCLAIMER`; default omit |
+| OMC Etsy rating 4.9 / 112 reviews | `src/data/reviews.ts` | 2026-10-20 | Repository | **Omitted** on purpose: a sales signal on a page whose value is neutrality |
 
-**Hosts to allowlist before drafting:** sourcebooks.com, andrewsmcmeel.com, simonandschuster.com, at-a-glance.com, myskylight.com, support.google.com, plus the maker of whichever dry-erase calendar is chosen; www.pinterest.com and trends.pinterest.com for the Pinterest pass.
+**Final picks (6):** big families → Boynton My Family; seeing the month → Big Grid; never rebuy → U Brands Core Command; meals and chores with the schedule → OMC; plans change by text → Skylight Calendar 2; $0 → Cozi Free. Where competitors beat OMC is stated in the "When another calendar beats ours" SplitList. Big Grid's dinner line is named in its row so the meals use case isn't presented as OMC-only.
+
+**Refresh rule:** prices and stock are dated "as of October 2026". Re-fetch every row before any update, and rebuild the list for the 2028 edition (slug stays the same).
 
 ## Pinterest research notes
 
-- Researched on: 2026-10-20
-- www.pinterest.com and trends.pinterest.com: proxy `CONNECT tunnel failed, response 403`. A `site:pinterest.com family wall calendar ideas` web search returned no pinterest.com pages.
-- Autocomplete, guided search terms, top pin formats, Trends: **not observed.**
-- Candidate primary Pinterest keyword (hypothesis, unverified): *family wall calendar*. Candidates: *family calendar ideas*, *family organization wall*, *weekly family planner*. Confirm on Pinterest before the plan is written.
-- Expected difference from Google (to confirm): Pinterest results for calendars lean to ideas and DIY setups (command-center walls, chalkboard calendars) rather than "best of" product lists, so the save-worthy pin is likely the "pick by what you need to see" grid, not the product table.
+- Researched on: 2026-10-20 (second pass, after network access was opened)
+- www.pinterest.com responds, but search and autocomplete render with JavaScript; the typeahead endpoint returned no JSON to a plain request, and a headless-browser read wasn't permitted in this session. Autocomplete, guided terms and Trends: **not observed.**
+- Indexed Pinterest pages via web search (`allowed_domains: pinterest.com`): DIY wall calendar roundups, dry-erase and acrylic boards, a "Forever Wall Calendar" for a command center, a digital wall calendar pin, boards named "Family Organization Wall" and "Family calendar wall". Details in `pinterest/FP-15.md`.
+- Primary Pinterest keyword: *family wall calendar* (seen in pin and shopping page titles; autocomplete unconfirmed).
