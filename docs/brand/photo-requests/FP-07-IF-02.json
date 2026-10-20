@@ -1,0 +1,17 @@
+{
+  "article": "FP-07 free-weekly-family-planner-printable; IF-02 how-to-share-the-mental-load",
+  "requested": "2026-10-20",
+  "purpose": "Unique heroes for FP-07 (a printed page on a fridge or kitchen table, pen, family planning) and IF-02 (writing a list, notes, handing over a job). Both currently borrow FP-04's Kaboompics 16979. Avoid printed third-party planner designs and dated planners. Research only until cleared in lifestyle-photo-library.json.",
+  "seeds": [
+    "https://kaboompics.com/gallery?search=to+do+list",
+    "https://kaboompics.com/gallery?search=writing+list",
+    "https://kaboompics.com/gallery?search=sticky+notes",
+    "https://kaboompics.com/gallery?search=notepad",
+    "https://kaboompics.com/gallery?search=fridge",
+    "https://kaboompics.com/gallery?search=paper+kitchen+table",
+    "https://kaboompics.com/gallery?search=pen+paper",
+    "https://kaboompics.com/gallery?search=family+planning",
+    "https://kaboompics.com/gallery?search=printer+paper"
+  ],
+  "max_photos": 220
+}
