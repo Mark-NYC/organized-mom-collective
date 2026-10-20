@@ -24,10 +24,10 @@ const totalIdeas = gallery.ideas.length * 2;
             <div class="inspo-missing" role="note">Image {String(index+1).padStart(2,'0')} to be added</div>}
           </div>
           <div class="inspo-item-copy">
-            <p class="inspo-counter">PHOTO {String(index+1).padStart(2,'0')} OF {gallery.ideas.length} · IDEAS {index*2+1} & {index*2+2}</p>
-            <h2><span class="inspo-idea-number">{index*2+1}.</span> {idea.title}</h2>
+            <p class="inspo-counter">MUDROOM IDEA {String(index+1).padStart(2,'0')} / {gallery.ideas.length}</p>
+            <h2>{idea.title}</h2>
             <p>{idea.tip}</p>
-            <p class="inspo-tip"><strong>Try this:</strong> {idea.tryThis}</p><h3 class="inspo-secondary-idea" id={idea.id+'-extra'}><span class="inspo-idea-number">{index*2+2}.</span> {idea.secondTitle}</h3><p>{idea.secondTip}</p>
+            <p class="inspo-tip"><strong>Make it work:</strong> {idea.tryThis}</p><h3 class="inspo-secondary-idea">{idea.secondTitle}</h3><p>{idea.secondTip}</p>
             {isLive && idea.image && <a class="inspo-save" data-inspo-save data-idea={idea.id}
               href={'https://www.pinterest.com/pin/create/button/?'+new URLSearchParams({url:canonical+'#'+idea.id,media:new URL(idea.image,origin).href,description:idea.pinDescription}).toString()}
               target="_blank" rel="noopener noreferrer" aria-label={'Save '+idea.title+' to Pinterest'}>
@@ -35,7 +35,7 @@ const totalIdeas = gallery.ideas.length * 2;
               Save to Pinterest
             </a>}
           </div>
-          {index===0 && <nav class="inspo-jump" aria-label="Jump to a mudroom photo"><details><summary><span><strong>Jump to a mudroom idea</strong><small>{gallery.ideas.length} photos · {totalIdeas} ideas</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
+          {index===0 && <nav class="inspo-jump" aria-label="Jump to a mudroom photo"><details><summary><span><strong>Jump to a mudroom idea</strong><small>{gallery.ideas.length} spaces to explore</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
           {index===6 && <aside class="inspo-aside"><h3>Make the after-school routine stick</h3><p>A tidy drop zone works best when everyone knows where their things go.</p><a href="/routine-chart">Create a free routine chart →</a></aside>}
         </div>
       ))}
@@ -72,7 +72,6 @@ const totalIdeas = gallery.ideas.length * 2;
   .inspo-item h2,.inspo-finish h2{font:700 clamp(1.6rem,3.3vw,2.15rem)/1.2 Georgia,serif;margin:8px 0 12px}
   .inspo-item-copy p{line-height:1.65;margin:8px 0}
   .inspo-secondary-idea{font:700 1.25rem/1.3 Georgia,serif;margin:22px 0 8px;scroll-margin-top:85px}
-  .inspo-idea-number{color:#6b7366}
   .inspo-tip{font-size:.94rem}
   .inspo-save{min-height:48px;display:inline-flex;align-items:center;gap:9px;background:#a31d26;color:#fff;padding:12px 18px;margin-top:13px;font-weight:700;text-decoration:none}
   .inspo-save:focus-visible,.inspo-jump a:focus-visible{outline:3px solid #3d3834;outline-offset:3px}
