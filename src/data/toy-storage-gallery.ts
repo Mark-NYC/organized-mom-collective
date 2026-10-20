@@ -3,7 +3,7 @@ import type { InspirationGallery } from './inspiration-galleries';
 export const toyStorageGallery: InspirationGallery = {
   slug: 'beautiful-toy-storage-ideas-family-living-rooms',
   title: '49 Beautiful Toy Storage Ideas for Family Living Rooms',
-  seoTitle: '50 Beautiful Toy Storage Ideas for Family Living Rooms',
+  seoTitle: '49 Beautiful Toy Storage Ideas for Family Living Rooms',
   description: 'Explore 49 toy storage ideas for family living rooms: hidden cabinets, baskets, built-ins, stylish ottomans, small-space solutions and kid-friendly play corners.',
   deck: 'Realistic design inspiration for a family living room that looks beautiful, works for kids, and makes cleanup easier. Explore 49 practical ideas, one photo at a time.',
   disclosure: 'These images are AI-generated design concepts, not photographs of actual homes or listings for particular products. Check furniture dimensions and child-safety features before recreating a storage idea.',
