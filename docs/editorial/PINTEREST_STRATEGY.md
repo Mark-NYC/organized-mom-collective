@@ -218,3 +218,8 @@ Use the comprehensive [PINTEREST_QA_CHECKLIST.md](PINTEREST_QA_CHECKLIST.md) for
 - [ ] No generated product art, fabricated UI, visible generated faces, text artifacts, or misleading imagery. Product placement and physical attachments have passed realism review.
 - [ ] Distinct headline angle and clearly differentiated treatment from the other variants; no near-duplicate upload.
 - [ ] Title, description and alt text follow the rules above; no invented numbers.
+
+
+## Ongoing Pinterest opportunity research
+
+Use [PINTEREST_RESEARCH_LOOP.md](PINTEREST_RESEARCH_LOOP.md) with the 500-pin master tracker. Research proven search phrases, precise mom/family situations, and a bounded creative experiment (proposed daily 6/3/1). Check competitor pins for useful patterns without copying artwork or inventing performance metrics. Document verified search evidence, differentiated imagery, and a trustworthy landing-page conversion action before commissioning new assets. Existing three strategic concepts and six-variation article planning remain compatible; the 6/3/1 ratio is for batches of ten master-plan pins, **not** a replacement for the per-article plan.
