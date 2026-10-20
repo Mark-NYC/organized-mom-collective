@@ -12,8 +12,8 @@ export const ETSY_SHOP_URL = 'https://www.etsy.com/shop/OrgMomCollective';
 /** The older family calendar listing the quotes come from. */
 export const ETSY_REVIEWS_URL = 'https://www.etsy.com/listing/1075914661/family-organizer-and-wall-calendar-meal';
 
-/** The whole Etsy shop, all items. */
-export const shopStats = { rating: '4.9', reviews: 112, sales: '1,000+' };
+/** The whole Etsy shop, all items. ⚠️ Update `asOf` whenever the figures are re-checked on Etsy. */
+export const shopStats = { rating: '4.9', reviews: 112, sales: '1,000+', asOf: 'October 2026' };
 
 /** The one disclaimer, shown wherever a rating or quote appears. Use it word for word. */
 export const REVIEWS_DISCLAIMER = 'Reviews and ratings reflect previous calendar editions sold through our Etsy shop.';

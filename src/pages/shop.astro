@@ -13,7 +13,7 @@ import { calendarOptions, formatPrice } from '../lib/reorder';
 import { weeklyReset, weeklyResetAssets } from '../data/weekly-reset';
 import { mug, mugImage } from '../data/mug';
 import { routes } from '../routes';
-import { BRAND_NAME } from '../config';
+import { BRAND_NAME, PRICES_AS_OF } from '../config';
 
 const options = calendarOptions();
 const from = Math.min(...options.map((o) => o.price));
@@ -77,5 +77,6 @@ const products = [
         ))
       }
     </ul>
+    <p class="mt-7 text-center text-[0.9rem] text-warm-soft">Prices in US dollars, as of {PRICES_AS_OF}.</p>
   </section>
 </PublicLayout>

@@ -20,7 +20,7 @@ import { photo } from '../lib/images';
 import { calendarOptions, formatPrice } from '../lib/reorder';
 import { dailyEssentials } from '../data/cleaning';
 import { routes } from '../routes';
-import { BRAND_NAME } from '../config';
+import { BRAND_NAME, PRICES_AS_OF } from '../config';
 import { RETURNS_LINE } from '../data/support';
 import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats } from '../data/reviews';
 
@@ -255,9 +255,9 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
   <!-- What's on every page -->
   <section aria-labelledby="page-h" class:list={[wrap, 'py-14 sm:py-20']}>
     <div class="max-w-2xl">
-      <h2 id="page-h" class="serif-title">The Everyday Details, Together on One Page.</h2>
+      <h2 id="page-h" class="serif-title">What’s on Every Page of the 2027 Calendar?</h2>
       <p class="lede mt-4">
-        No more juggling a planner, a meal app, a grocery list on the fridge and reminders in your head. Put the details where everyone can find them, then agree on who owns the jobs.
+        The everyday details, together on one page. No more juggling a planner, a meal app, a grocery list on the fridge and reminders in your head. Put the details where everyone can find them, then agree on who owns the jobs.
       </p>
     </div>
     <CardSlider items={gallery} label="Calendar photos and what’s on every page" class="mt-10" />
@@ -347,7 +347,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         <CalendarOptions />
       </div>
       <p class="mx-auto mt-7 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
-        Both include the cleaning companion.{onWebsite ? '' : ' Checkout is on Etsy.'}
+        Both include the cleaning companion.{onWebsite ? '' : ' Checkout is on Etsy.'} Prices as of {PRICES_AS_OF}.
       </p>
       <p class="mx-auto mt-2 max-w-2xl text-center text-[0.95rem] leading-snug text-warm-soft">
         {RETURNS_LINE}{' '}
@@ -367,7 +367,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
             {shopStats.rating}/5 from {shopStats.reviews} reviews on{' '}
             <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-rule underline-offset-[3px] hover:decoration-ink"
               >our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
-            >.
+            >, as of {shopStats.asOf}.
           </span>
           <span class="mt-1.5 block">{REVIEWS_DISCLAIMER}</span>
         </figcaption>

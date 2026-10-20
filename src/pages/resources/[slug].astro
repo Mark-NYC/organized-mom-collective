@@ -113,7 +113,15 @@ const components = {
       <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[0.85rem] text-muted md:justify-center">
         <span>By {BRAND_NAME}</span>
         <span aria-hidden="true">·</span>
-        <span>{data.updated ? 'Updated' : 'Published'} <time datetime={isoDate(updated)}>{formatDate(updated)}</time></span>
+        <span>Published <time datetime={isoDate(data.published)}>{formatDate(data.published)}</time></span>
+        {
+          data.updated && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>Updated <time datetime={isoDate(data.updated)}>{formatDate(data.updated)}</time></span>
+            </>
+          )
+        }
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
       </p>
