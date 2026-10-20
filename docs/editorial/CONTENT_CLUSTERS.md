@@ -150,3 +150,7 @@ New article: `/resources/busy-family-calendar` (published 2026-10-20), primary i
 ## HC-08: What to do after one missed cleaning day
 
 Published 2026-10-20 at `/resources/missed-cleaning-day`, supporting master pin OMC-P0207. Owns the immediate five-step response to a single skipped zone: urgent messes, a ten-minute reset, then the scheduled zone. HC-01 owns the full weekly schedule; planned HC-05 owns serious multi-day or multi-week housework backlogs. Avoid duplicating either. Links to HC-01, HC-02, HC-03 and IF-03.
+
+## IF-08: Teaching Kids Independence
+
+Published 2026-10-20: `/resources/teaching-kids-independence`. Supports pin OMC-P0457. This article teaches the five-step process for passing a small, age-appropriate job to a child. IF-03 covers age-based chores and IF-07 covers bathroom chores.
