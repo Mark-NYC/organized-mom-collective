@@ -164,3 +164,8 @@ Preserve their editorial direction. Do not carry forward the disconnected fridge
 ## Gemini image-generation companion (October 2026)
 
 For OMC Pinterest concepts generated through **Google Gemini**, use [PINTEREST_GEMINI_WORKFLOW.md](PINTEREST_GEMINI_WORKFLOW.md), [PINTEREST_GEMINI_PROMPT_TEMPLATE.md](PINTEREST_GEMINI_PROMPT_TEMPLATE.md) and [PINTEREST_GEMINI_MASTER_PROMPT.md](PINTEREST_GEMINI_MASTER_PROMPT.md). For cross-article exploration, use [PINTEREST_BATCH_BRIEF_TEMPLATE.md](PINTEREST_BATCH_BRIEF_TEMPLATE.md) and check [PINTEREST_PIN_INVENTORY.md](PINTEREST_PIN_INVENTORY.md) for prior headlines and concepts. The existing strategy's per-article three-concept and six-variation production rules remain unchanged. The Gemini companion does not override this document, the strategy or [PINTEREST_QA_CHECKLIST.md](PINTEREST_QA_CHECKLIST.md), including its ban on visible generated faces. The inventory's publication statuses are deliberately unverified unless backed by Pinterest evidence.
+
+
+## 500-pin batch research gate
+
+For 10-pin master-plan Gemini batches, first read [PINTEREST_RESEARCH_LOOP.md](PINTEREST_RESEARCH_LOOP.md), [pinterest/MASTER_TRACKER_README.md](pinterest/MASTER_TRACKER_README.md) and the live master CSV. Apply the proposed 6/3/1 testing mix where slots are still unproduced; never overwrite mapped historical approvals. Show the ten permanent IDs and pin evidence, keyword confidence, precise audience, reference pin URL when known, a different visual execution, actual landing destination and intended user action. Empty researched fields are TODOs, not invented facts. Only move production/approval status with evidence; keep batch reconciliation current.
