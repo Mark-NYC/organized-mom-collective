@@ -7,7 +7,7 @@ export type GalleryIdea = {
 };
 export type InspirationGallery = {
   slug: string; title: string; seoTitle: string; description: string;
-  deck: string; disclosure: string; published: boolean; ideas: GalleryIdea[];
+  deck: string; disclosure: string; published: boolean; coverImage?: string; ideas: GalleryIdea[];
 };
 const ideas: GalleryIdea[] = [
   {
