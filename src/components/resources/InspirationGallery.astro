@@ -24,10 +24,25 @@ const totalIdeas = gallery.ideas.length * 2;
             <div class="inspo-missing" role="note">Image {String(index+1).padStart(2,'0')} to be added</div>}
           </div>
           <div class="inspo-item-copy">
-            <p class="inspo-counter">MUDROOM PHOTO {String(index+1).padStart(2,'0')} / {gallery.ideas.length}</p>
-            <h2 class="inspo-numbered-heading"><span class="inspo-number-circle" aria-label={`Idea ${index*2+1}`}>{index*2+1}</span><span>{idea.title}</span></h2>
-            <p>{idea.tip}</p>
-            <p class="inspo-tip"><strong>Make it work:</strong> {idea.tryThis}</p><h3 class="inspo-secondary-idea inspo-numbered-heading"><span class="inspo-number-circle" aria-label={`Idea ${index*2+2}`}>{index*2+2}</span><span>{idea.secondTitle}</span></h3><p>{idea.secondTip}</p>
+            <p class="inspo-counter">PHOTO {String(index+1).padStart(2,'0')} OF {gallery.ideas.length}</p>
+            <h2 class="inspo-photo-title">{idea.navLabel}</h2>
+            <div class="inspo-tips">
+              <section class="inspo-tip-item" aria-labelledby={idea.id+'-tip-one'}>
+                <h3 class="inspo-tip-heading" id={idea.id+'-tip-one'}>
+                  <span class="inspo-number-circle" aria-hidden="true">{index*2+1}</span>
+                  <span>{idea.title}</span>
+                </h3>
+                <p>{idea.tip}</p>
+                <p class="inspo-tip"><strong>Try this:</strong> {idea.tryThis}</p>
+              </section>
+              <section class="inspo-tip-item" aria-labelledby={idea.id+'-tip-two'}>
+                <h3 class="inspo-tip-heading" id={idea.id+'-tip-two'}>
+                  <span class="inspo-number-circle" aria-hidden="true">{index*2+2}</span>
+                  <span>{idea.secondTitle}</span>
+                </h3>
+                <p>{idea.secondTip}</p>
+              </section>
+            </div>
             {isLive && idea.image && <a class="inspo-save" data-inspo-save data-idea={idea.id}
               href={'https://www.pinterest.com/pin/create/button/?'+new URLSearchParams({url:canonical+'#'+idea.id,media:new URL(idea.image,origin).href,description:idea.pinDescription}).toString()}
               target="_blank" rel="noopener noreferrer" aria-label={'Save '+idea.title+' to Pinterest'}>
@@ -69,12 +84,14 @@ const totalIdeas = gallery.ideas.length * 2;
   .inspo-image-frame img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover}
   .inspo-missing{aspect-ratio:2/3;display:grid;place-items:center;color:#67655f;background:linear-gradient(135deg,#eeeae4,#e0e6dc);font-size:.92rem}
   .inspo-item-copy{padding:18px 16px 6px}
-  .inspo-item h2,.inspo-finish h2{font:700 clamp(1.6rem,3.3vw,2.15rem)/1.2 Georgia,serif;margin:8px 0 12px}
+  .inspo-photo-title,.inspo-finish h2{font:700 clamp(1.6rem,3.3vw,2.15rem)/1.2 Georgia,serif;margin:8px 0 18px}
   .inspo-item-copy p{line-height:1.65;margin:8px 0}
-  .inspo-secondary-idea{font:700 1.25rem/1.3 Georgia,serif;margin:22px 0 8px;scroll-margin-top:85px}
-  .inspo-numbered-heading{display:flex;align-items:flex-start;gap:12px}
-  .inspo-number-circle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;height:38px;border-radius:50%;background:#d4dfc4;color:#374539;font:700 0.88rem/1 Montserrat,Arial,sans-serif;letter-spacing:0;margin-top:0;white-space:nowrap}
-  .inspo-secondary-idea .inspo-number-circle{flex-basis:34px;width:34px;height:34px;font-size:.8rem;margin-top:-3px}
+  .inspo-tips{border-top:1px solid #dedfd9}
+  .inspo-tip-item{padding:18px 0 16px;scroll-margin-top:85px}
+  .inspo-tip-item + .inspo-tip-item{border-top:1px solid #e5e5e0}
+  .inspo-tip-heading{display:flex;align-items:center;gap:12px;font:700 clamp(1.08rem,2.8vw,1.22rem)/1.35 Georgia,serif;margin:0 0 10px}
+  .inspo-number-circle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border-radius:50%;background:#d4dfc4;color:#374539;font:700 .85rem/1 Montserrat,Arial,sans-serif}
+  .inspo-tip-item p{margin-left:48px}
   .inspo-tip{font-size:.94rem}
   .inspo-save{min-height:48px;display:inline-flex;align-items:center;gap:9px;background:#a31d26;color:#fff;padding:12px 18px;margin-top:13px;font-weight:700;text-decoration:none}
   .inspo-save:focus-visible,.inspo-jump a:focus-visible{outline:3px solid #3d3834;outline-offset:3px}
