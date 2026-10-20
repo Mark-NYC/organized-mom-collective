@@ -2,7 +2,7 @@
 
 ## Installation update (2026-10-20, later)
 
-The owner supplied five of the six photos; they are installed as heroes (originals in `design/photography/kaboompics/six-article-heroes-2026-10-20/`, records in `lifestyle-photo-library.json`, registry keys in `src/data/images.ts`):
+The owner supplied all six photos; they are installed as heroes (originals in `design/photography/kaboompics/six-article-heroes-2026-10-20/`, records in `lifestyle-photo-library.json`, registry keys in `src/data/images.ts`):
 
 | Article | Registry key | Source ID |
 | --- | --- | --- |
@@ -10,9 +10,10 @@ The owner supplied five of the six photos; they are installed as heroes (origina
 | HC-08 | `hc-08-missed-cleaning-day-hero` | 30800 (matches brief) |
 | IF-08 | `if-08-teaching-kids-independence-hero` | 22717 (matches brief) |
 | HC-09 | `hc-09-ten-minute-living-room-reset-hero` | unconfirmed: supplied photo is a woman reading, not 30364's empty sofa |
+| FP-20 | `fp-20-screen-time-routine-for-kids-hero` | 1913 (matches brief) |
 | IF-09 | `if-09-kids-helping-with-dinner-hero` | unconfirmed: supplied photo is on a steel counter, not 39343's marble |
 
-**Still open:** FP-20 (`screen-time-routine-for-kids`) has no hero; its photo was not among the supplied files. Kaboompics pages return HTTP 403 to the build environment, so license pages were not re-read; each record lists this under `open_items`. FP-19's pen shows a hotel name ("HOTEL KOROŠICA"), flagged for the owner.
+**Still open:** Kaboompics pages return HTTP 403 to the build environment, so license pages were not re-read; each record lists this under `open_items`. FP-19's pen shows a hotel name ("HOTEL KOROŠICA"), flagged for the owner.
 
 
 Status: **candidates selected, installation blocked**. These are distinct Kaboompics photo IDs not found in the current `lifestyle-photo-library.json` and `src/data/images.ts` text records as of 2026-10-20. Source detail pages display standard commercial-use license. **Full-resolution contents, crops, direct download bytes, reuse in any uncataloged article, responsive output, and final rights/brand clearance have not been independently verified.**

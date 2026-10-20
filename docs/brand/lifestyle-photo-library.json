@@ -1449,6 +1449,50 @@
         "Re-read the Kaboompics photo page from a browser and record the license text and verification date",
         "Confirm the Kaboompics photo ID and URL for this exact photograph"
       ]
+    },
+    {
+      "id": "FP20-K1913",
+      "title": "Woman with a mug of coffee scrolling a tablet on a white table",
+      "role": "FP-20 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "1913",
+      "source_photo_id_note": "Matches the sourcing brief's description ('coffee on table with a tablet'); not confirmed against the page (HTTP 403).",
+      "source_url": "https://kaboompics.com/photo/1913/coffee-on-table-with-a-tablet",
+      "source_download_url": null,
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Not re-verified: kaboompics.com returned HTTP 403 to every fetch from the build environment on 2026-10-20, so the photo page and 'Free for commercial use' marker could not be read here. The sourcing brief (2026-10-20) recorded the standard commercial-use license on the candidate pages.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Owner-supplied file design/photography/kaboompics/six-article-heroes-2026-10-20/fp-20-screen-time-routine-for-kids-hero-original.jpg (2000x1333) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "One adult seen from behind, face not visible. Tablet screen shows a blurred online eyewear shop page; no readable text, brand name or logo at full resolution. No device logo visible. Mug and spoon unbranded."
+      },
+      "model_release_review": "No identifiable face (back of head and hair only). No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-20-screen-time-routine-for-kids-hero-{640,960,1440}.webp",
+      "used_in": [
+        "FP-20 /resources/screen-time-routine-for-kids (hero)"
+      ],
+      "status": "Exclusive to FP-20; not used in any other article (check:article-photos and a perceptual-hash comparison against every file in public/images and design/photography, 2026-10-20).",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-20); per-photo owner clearance. Standing Kaboompics approval checks 1 (license page) could not be completed from this environment and remain open.",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Owner-supplied; Kaboompics license page not re-read (HTTP 403)",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-20",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no AI processing",
+        "alt_text_example": "A woman in a cream knit sweater holds a mug of coffee and scrolls a tablet on a white table."
+      },
+      "open_items": [
+        "Re-read the Kaboompics photo page from a browser and record the license text and verification date"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
