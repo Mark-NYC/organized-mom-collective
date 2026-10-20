@@ -21,7 +21,7 @@ const sections = await Promise.all(pillars.map(async (pillar) => ({ pillar, arti
 
 // Featured: the newest article with a photo, else the newest pillar guide, else the newest article.
 const featured = all.find((a) => a.data.hero) ?? all.find((a) => a.data.pillarGuide) ?? all[0];
-const latest = all.filter((a) => a !== featured).slice(0, 6);
+const guides = all;
 const calendarPhoto = imageAttrs('hc-01-wall-calendar');
 const visualIdeas = [inspirationGalleries[0], toyStorageGallery].filter((gallery) => gallery.published && gallery.ideas.length && gallery.ideas.every((idea) => Boolean(idea.image)));
 
@@ -70,40 +70,80 @@ const jsonLd = all.length
     )
   }
 
-  {
-    latest.length > 0 && (
-      <section aria-labelledby="latest-h" class="mt-16">
-        <h2 id="latest-h" class="section-label">Latest guides</h2>
-        <ul class="mt-8 grid gap-x-8 gap-y-12 sm:grid-cols-2 md:grid-cols-3">
-          {latest.map((a) => (
-            <li>
-              <ArticleCard article={a} />
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+  {guides.length > 0 && (
+    <section aria-labelledby="guides-h" class="resource-rail-section mt-16 border-t border-rule pt-10">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="label text-muted">Start with one small step</p>
+          <h2 id="guides-h" class="mt-2 text-[1.8rem] font-bold" style="font-family: var(--font-editorial)">Guides</h2>
+          <p class="mt-2 text-[0.97rem]" style="color: var(--color-prose-soft)">Practical plans for everyday family life.</p>
+        </div>
+        <div class="resource-rail-controls flex shrink-0 gap-2">
+          <button type="button" data-rail-prev aria-label="Previous guides" aria-controls="guides-rail" class="resource-rail-arrow">←</button>
+          <button type="button" data-rail-next aria-label="Next guides" aria-controls="guides-rail" class="resource-rail-arrow">→</button>
+        </div>
+      </div>
+      <ul id="guides-rail" class="resource-rail mt-7" aria-label="Guides">
+        {guides.map((article) => <li class="resource-rail-card"><ArticleCard article={article} /></li>)}
+      </ul>
+    </section>
+  )}
 
   {visualIdeas.length > 0 && (
-    <section aria-labelledby="inspiration-h" class="mt-16 border-t border-rule pt-12">
-      <p class="label text-muted">Ideas for your home</p>
-      <h2 id="inspiration-h" class="mt-3 text-[1.8rem] font-bold leading-tight" style="font-family: var(--font-editorial)">A little inspiration for the spaces you use every day</h2>
-      <p class="mt-3 max-w-2xl text-[0.97rem] leading-relaxed" style="color: var(--color-prose-soft)">Browse beautiful, doable ideas, then pick one change that makes family life easier. These are AI-generated design concepts, not photos of actual homes or specific products.</p>
-      <ul class="mt-8 grid gap-8 md:grid-cols-2">
+    <section aria-labelledby="inspiration-h" class="resource-rail-section mt-16 border-t border-rule pt-10">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="label text-muted">Ideas for your home</p>
+          <h2 id="inspiration-h" class="mt-2 text-[1.8rem] font-bold" style="font-family: var(--font-editorial)">Inspiration</h2>
+          <p class="mt-2 max-w-2xl text-[0.97rem]" style="color: var(--color-prose-soft)">Beautiful spaces and clever storage ideas you can make your own.</p>
+        </div>
+        <div class="resource-rail-controls flex shrink-0 gap-2">
+          <button type="button" data-rail-prev aria-label="Previous inspiration" aria-controls="inspiration-rail" class="resource-rail-arrow">←</button>
+          <button type="button" data-rail-next aria-label="Next inspiration" aria-controls="inspiration-rail" class="resource-rail-arrow">→</button>
+        </div>
+      </div>
+      <ul id="inspiration-rail" class="resource-rail mt-7" aria-label="Inspiration">
         {visualIdeas.map((gallery) => (
-          <li>
+          <li class="resource-rail-card">
             <a href={`/resources/${gallery.slug}`} class="group block">
-              <img src={gallery.coverImage || gallery.ideas[0].image} alt={`Design inspiration for ${gallery.title.toLowerCase()}`} loading="lazy" decoding="async" class="aspect-[4/3] w-full object-cover" />
-              <h3 class="mt-4 text-[1.3rem] font-bold leading-snug group-hover:underline" style="font-family: var(--font-editorial)">{gallery.title}</h3>
-              <p class="mt-2 text-[0.95rem] leading-relaxed" style="color: var(--color-prose-soft)">{gallery.deck}</p>
-              <span class="mt-3 inline-block text-[0.95rem] font-semibold underline underline-offset-4">See the ideas →</span>
+              <img src={gallery.coverImage || gallery.ideas[0].image} alt={`Design inspiration for ${gallery.title.toLowerCase()}`} loading="lazy" decoding="async" class="aspect-[3/2] w-full object-cover" />
+              <p class="label mt-4 text-muted">Home inspiration</p>
+              <h3 class="mt-2 text-[1.25rem] font-bold leading-snug group-hover:underline" style="font-family: var(--font-editorial)">{gallery.title}</h3>
+              <span class="mt-3 inline-block text-[0.95rem] font-semibold underline underline-offset-4">Browse ideas →</span>
             </a>
           </li>
         ))}
       </ul>
+      <p class="mt-4 text-[0.82rem] text-muted">Inspiration images are AI-generated design concepts, not photographs of actual homes or specific products.</p>
     </section>
   )}
+
+  <section id="free-tools" aria-labelledby="tools-h" class="resource-rail-section mt-16 border-t border-rule pt-10">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <p class="label text-muted">Make it work for your family</p>
+        <h2 id="tools-h" class="mt-2 text-[1.8rem] font-bold" style="font-family: var(--font-editorial)">Tools</h2>
+        <p class="mt-2 text-[0.97rem]" style="color: var(--color-prose-soft)">Free, fill-in planners, charts, and checklists.</p>
+        <a href={routes.freeTools} class="mt-3 inline-block text-[0.95rem] font-semibold underline underline-offset-4">See all tools →</a>
+      </div>
+      <div class="resource-rail-controls flex shrink-0 gap-2">
+        <button type="button" data-rail-prev aria-label="Previous tools" aria-controls="tools-rail" class="resource-rail-arrow">←</button>
+        <button type="button" data-rail-next aria-label="Next tools" aria-controls="tools-rail" class="resource-rail-arrow">→</button>
+      </div>
+    </div>
+    <ul id="tools-rail" class="resource-rail mt-7" aria-label="Free tools">
+      {freeTools.map((tool) => (
+        <li class="resource-rail-card border-t-2 border-ink pt-4">
+          <p class="label text-muted">Free printable tool</p>
+          <h3 class="mt-3 text-[1.25rem] font-bold leading-tight" style="font-family: var(--font-editorial)">
+            <a href={tool.href} class="hover:underline">{tool.name}</a>
+          </h3>
+          <p class="mt-3 text-[0.97rem] leading-relaxed" style="color: var(--color-prose-soft)">{tool.summary}</p>
+          <a href={tool.href} class="mt-5 inline-block font-semibold underline underline-offset-4">Open tool →</a>
+        </li>
+      ))}
+    </ul>
+  </section>
 
   <section aria-labelledby="topics-h" class="mt-16 border-t border-rule pt-12">
     <h2 id="topics-h" class="section-label">Browse by topic</h2>
@@ -142,30 +182,6 @@ const jsonLd = all.length
     </ul>
   </section>
 
-  <section id="free-tools" aria-labelledby="tools-h" class="mt-16 border-t border-rule pt-12">
-    <h2 id="tools-h" class="section-label">Free tools</h2>
-    <p class="mt-3"><a href={routes.freeTools} class="underline underline-offset-4">Browse all free tools →</a></p>
-    <p class="mt-3 max-w-2xl text-[0.97rem] leading-relaxed" style="color: var(--color-prose-soft)">
-      Fill them in on screen, then download to print or keep on your phone. Your entries stay saved in your browser.
-    </p>
-    <ul class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {
-        freeTools.map((tool) => (
-          <li class="border-t-2 border-ink pt-4">
-            <h3 class="text-[1.2rem] leading-tight font-bold" style="font-family: var(--font-editorial)">
-              <a href={tool.href} class="hover:underline hover:decoration-month hover:decoration-[3px] hover:underline-offset-4">
-                {tool.name}
-              </a>
-            </h3>
-            <p class="mt-2 text-[0.95rem] leading-relaxed" style="color: var(--color-prose-soft)">
-              {tool.summary}
-            </p>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
   <aside aria-label="The wall calendar" class="mt-16 overflow-hidden bg-sage-wash md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:items-center">
     <img
       {...calendarPhoto}
@@ -188,3 +204,38 @@ const jsonLd = all.length
     </div>
   </aside>
 </PublicLayout>
+
+<style>
+  .resource-rail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0, min(82vw, 320px)); gap:1.5rem; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:2px; overscroll-behavior-inline:contain; padding:2px 2px 1.5rem; scrollbar-width:thin; scrollbar-color:#b5bdb0 transparent; }
+  .resource-rail-card { min-width:0; scroll-snap-align:start; }
+  .resource-rail-arrow { width:2.5rem; height:2.5rem; display:grid; place-items:center; border:1px solid #c8ceca; background:transparent; font-size:1.25rem; color:inherit; }
+  .resource-rail-arrow:hover:not(:disabled) { background:#e7ece5; }
+  .resource-rail-arrow:disabled { opacity:.3; cursor:default; }
+  .resource-rail-arrow:focus-visible { outline:2px solid currentColor; outline-offset:3px; }
+  @media(min-width:768px) { .resource-rail { grid-auto-columns:minmax(0, calc((100% - 3rem)/3)); } }
+  @media(max-width:639px) { .resource-rail-controls { display:none; } }
+  @media(prefers-reduced-motion:reduce) { .resource-rail { scroll-behavior:auto; } }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('.resource-rail-section').forEach((section) => {
+    const rail = section.querySelector<HTMLElement>('.resource-rail');
+    const previous = section.querySelector<HTMLButtonElement>('[data-rail-prev]');
+    const next = section.querySelector<HTMLButtonElement>('[data-rail-next]');
+    if (!rail || !previous || !next) return;
+    const update = () => {
+      previous.disabled = rail.scrollLeft <= 2;
+      next.disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 2;
+    };
+    const step = (direction: number) => {
+      const card = rail.querySelector<HTMLElement>('.resource-rail-card');
+      if (!card) return;
+      const gap = parseFloat(getComputedStyle(rail).columnGap) || 0;
+      rail.scrollBy({ left: direction * (card.offsetWidth + gap), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    };
+    previous.addEventListener('click', () => step(-1));
+    next.addEventListener('click', () => step(1));
+    rail.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  });
+</script>
