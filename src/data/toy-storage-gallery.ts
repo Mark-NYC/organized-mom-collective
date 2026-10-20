@@ -8,6 +8,7 @@ export const toyStorageGallery: InspirationGallery = {
   deck: 'Realistic design inspiration for a family living room that looks beautiful, works for kids, and makes cleanup easier. Explore 49 practical ideas, one photo at a time.',
   disclosure: 'These images are AI-generated design concepts, not photographs of actual homes or listings for particular products. Check furniture dimensions and child-safety features before recreating a storage idea.',
   published: false,
+  coverImage: '/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/hero for article.jpeg',
   ideas: [
   {
     "id": "idea-1",
