@@ -158,3 +158,11 @@ Published 2026-10-20: `/resources/teaching-kids-independence`. Supports pin OMC-
 ## HC-09: The 10-Minute Living Room Reset
 
 Published 2026-10-20, `/resources/ten-minute-living-room-reset`. Supports master pin OMC-P0168. The article handles five timed jobs in one living room and assigns family participation. HC-02 owns the whole-home daily reset; HC-03 owns zone sizing. Link back to both; do not repeat either in full.
+
+## IF-09: Kids Helping With Dinner
+
+Published 2026-10-20 at `/resources/kids-helping-with-dinner`, supporting master OMC-P0418. Owns safe, age-appropriate dinner participation. IF-03 covers broad age-specific chores; IF-08 covers the method of teaching responsibility; FP-05 owns meal planning.
+
+## FP-20: Screen Time Routine for Kids
+
+Published 2026-10-20 at `/resources/screen-time-routine-for-kids`, supporting master OMC-P0374. Owns family agreements for starting, stopping, parking devices and the next offline activity. FP-09 owns school morning routine chart generation and FP-04 owns weekly planning. The site offers no screen-time-control tool.
