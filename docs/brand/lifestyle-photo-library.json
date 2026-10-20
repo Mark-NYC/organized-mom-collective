@@ -1227,6 +1227,228 @@
         "edits": "Crop 0,0.175,1,0.885, white canvas extended to 3:2 (pure-white backdrop), responsive WebP resizing; product pixels unaltered",
         "alt_text_example": "A white-framed Skylight Calendar showing a family's week in colored event blocks, with Calendar, Chores and Lists in the left sidebar."
       }
+    },
+    {
+      "id": "FP19-K21474",
+      "title": "Hand writing in an open notebook on a wooden table with a mug and phone",
+      "role": "FP-19 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "21474",
+      "source_photo_id_note": "Matches the sourcing brief's description; not confirmed against the page (HTTP 403).",
+      "source_url": "https://kaboompics.com/photo/21474/hand-writing-in-notebook-with-wooden-desk-copy-space",
+      "source_download_url": null,
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Not re-verified: kaboompics.com returned HTTP 403 to every fetch from the build environment on 2026-10-20, so the photo page and 'Free for commercial use' marker could not be read here. The sourcing brief (2026-10-20) recorded the standard commercial-use license on the candidate pages.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Owner-supplied file design/photography/kaboompics/six-article-heroes-2026-10-20/fp-19-busy-family-calendar-hero-original.jpg (2000x1333) and the generated WebP files",
+        "visual_status": "pass_with_flag",
+        "observations": "Hands and lower hair only, no face. FLAG: the ballpoint pen is printed 'HOTEL KOROŠICA www.korosica.si' (a hotel name), legible at full resolution, small and rotated at display size. Cannot be cropped out without losing the subject; left unaltered. Owner should confirm or replace. Phone is face down with no visible brand."
+      },
+      "model_release_review": "No identifiable face. Hands only. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-19-busy-family-calendar-hero-{640,960,1440}.webp",
+      "used_in": [
+        "FP-19 /resources/busy-family-calendar (hero)"
+      ],
+      "status": "Exclusive to FP-19; not used in any other article (check:article-photos and a perceptual-hash comparison against every file in public/images and design/photography, 2026-10-20).",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-20); per-photo owner clearance. Standing Kaboompics approval checks 1 (license page) could not be completed from this environment and remain open.",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Owner-supplied; Kaboompics license page not re-read (HTTP 403)",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-19",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no AI processing",
+        "alt_text_example": "A hand writes with a pen in an open lined notebook on a warm wooden table, a phone and a cream mug nearby."
+      },
+      "open_items": [
+        "Re-read the Kaboompics photo page from a browser and record the license text and verification date"
+      ]
+    },
+    {
+      "id": "HC08-K30800",
+      "title": "White flower-shaped plates, small bowl and cutlery on an oak table",
+      "role": "HC-08 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "30800",
+      "source_photo_id_note": "Matches the sourcing brief's description; not confirmed against the page (HTTP 403).",
+      "source_url": "https://kaboompics.com/photo/30800/portrait-table-setting-background-with-neutral-plates-and-cutlery-and-generous-copy-space",
+      "source_download_url": null,
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Not re-verified: kaboompics.com returned HTTP 403 to every fetch from the build environment on 2026-10-20, so the photo page and 'Free for commercial use' marker could not be read here. The sourcing brief (2026-10-20) recorded the standard commercial-use license on the candidate pages.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Owner-supplied file design/photography/kaboompics/six-article-heroes-2026-10-20/hc-08-missed-cleaning-day-hero-original.jpg (600x900) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "No people, no logos or text. Supplied file is 600x900, so the largest variant is 600px (no upscaling); renders as a portrait hero at its natural ratio."
+      },
+      "model_release_review": "No people. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-08-missed-cleaning-day-hero-{400,600}.webp",
+      "used_in": [
+        "HC-08 /resources/missed-cleaning-day (hero)"
+      ],
+      "status": "Exclusive to HC-08; not used in any other article (check:article-photos and a perceptual-hash comparison against every file in public/images and design/photography, 2026-10-20).",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-20); per-photo owner clearance. Standing Kaboompics approval checks 1 (license page) could not be completed from this environment and remain open.",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Owner-supplied; Kaboompics license page not re-read (HTTP 403)",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "HC-08",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no AI processing",
+        "alt_text_example": "A fork, knife and spoon laid beside a small white bowl and two stacked flower-shaped white plates on an oak table."
+      },
+      "open_items": [
+        "Re-read the Kaboompics photo page from a browser and record the license text and verification date"
+      ]
+    },
+    {
+      "id": "IF08-K22717",
+      "title": "Girl packing a notebook and pencils into a blue school backpack on a rug",
+      "role": "IF-08 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "22717",
+      "source_photo_id_note": "Matches the sourcing brief's description; not confirmed against the page (HTTP 403).",
+      "source_url": "https://kaboompics.com/photo/22717/student-packing-school-backpack-at-home",
+      "source_download_url": null,
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Not re-verified: kaboompics.com returned HTTP 403 to every fetch from the build environment on 2026-10-20, so the photo page and 'Free for commercial use' marker could not be read here. The sourcing brief (2026-10-20) recorded the standard commercial-use license on the candidate pages.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Owner-supplied file design/photography/kaboompics/six-article-heroes-2026-10-20/if-08-teaching-kids-independence-hero-original.jpg (2000x1334) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "One child model, face visible, positive context (independently packing her bag). No readable logos: backpack, bottle and pencil case are unbranded. Not a faceless image; used because the owner supplied it."
+      },
+      "model_release_review": "Stock model; never presented as a customer, reader's child or OMC family. Positive, non-sensitive context.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-08-teaching-kids-independence-hero-{640,960,1440}.webp",
+      "used_in": [
+        "IF-08 /resources/teaching-kids-independence (hero)"
+      ],
+      "status": "Exclusive to IF-08; not used in any other article (check:article-photos and a perceptual-hash comparison against every file in public/images and design/photography, 2026-10-20).",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-20); per-photo owner clearance. Standing Kaboompics approval checks 1 (license page) could not be completed from this environment and remain open.",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Owner-supplied; Kaboompics license page not re-read (HTTP 403)",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "IF-08",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no AI processing",
+        "alt_text_example": "A girl sitting on a rug packs a pink notebook and yellow pencils into her blue school backpack, with a water bottle and pencil case beside her."
+      },
+      "open_items": [
+        "Re-read the Kaboompics photo page from a browser and record the license text and verification date"
+      ]
+    },
+    {
+      "id": "HC09-SOFA-READER",
+      "title": "Woman reading on a linen sofa by a bright window in a tidy living room",
+      "role": "HC-09 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Unconfirmed (Kaboompics)",
+      "source_photo_id": null,
+      "source_photo_id_note": "Brief candidate 30364 ('open book on neutral gray sofa') does not match this photo (woman reading, beige sofa); ID left null rather than guessed.",
+      "source_url": null,
+      "source_download_url": null,
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Not re-verified: kaboompics.com returned HTTP 403 to every fetch from the build environment on 2026-10-20, so the photo page and 'Free for commercial use' marker could not be read here. The sourcing brief (2026-10-20) recorded the standard commercial-use license on the candidate pages.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Owner-supplied file design/photography/kaboompics/six-article-heroes-2026-10-20/hc-09-ten-minute-living-room-reset-hero-original.jpg (1024x1536) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "One adult model seen from behind/three-quarter, face mostly turned away. Book shows an unidentifiable photo spread, no readable title. No logos."
+      },
+      "model_release_review": "Stock model; never presented as a customer or reader. Positive, non-sensitive context.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-09-ten-minute-living-room-reset-hero-{400,640,1024}.webp",
+      "used_in": [
+        "HC-09 /resources/ten-minute-living-room-reset (hero)"
+      ],
+      "status": "Exclusive to HC-09; not used in any other article (check:article-photos and a perceptual-hash comparison against every file in public/images and design/photography, 2026-10-20).",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-20); per-photo owner clearance. Standing Kaboompics approval checks 1 (license page) could not be completed from this environment and remain open.",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Owner-supplied; Kaboompics license page not re-read (HTTP 403)",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "HC-09",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no AI processing",
+        "alt_text_example": "A woman sits barefoot on a linen sofa reading a book by a bright window, in a tidy living room with a shaggy cream rug and a floor lamp."
+      },
+      "open_items": [
+        "Re-read the Kaboompics photo page from a browser and record the license text and verification date",
+        "Confirm the Kaboompics photo ID and URL for this exact photograph"
+      ]
+    },
+    {
+      "id": "IF09-CUCUMBER-STRAINER",
+      "title": "Hand lifting a mesh strainer of chopped cucumber over a steel bowl",
+      "role": "IF-09 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Unconfirmed (Kaboompics)",
+      "source_photo_id": null,
+      "source_photo_id_note": "Brief candidate 39343 ('on marble counter') does not match this photo (stainless counter); ID left null rather than guessed.",
+      "source_url": null,
+      "source_download_url": null,
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Not re-verified: kaboompics.com returned HTTP 403 to every fetch from the build environment on 2026-10-20, so the photo page and 'Free for commercial use' marker could not be read here. The sourcing brief (2026-10-20) recorded the standard commercial-use license on the candidate pages.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Owner-supplied file design/photography/kaboompics/six-article-heroes-2026-10-20/if-09-kids-helping-with-dinner-hero-original.jpg (1929x1350) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Adult hand only, no face, no logos or text."
+      },
+      "model_release_review": "No identifiable face. Hand only. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-09-kids-helping-with-dinner-hero-{640,960,1440}.webp",
+      "used_in": [
+        "IF-09 /resources/kids-helping-with-dinner (hero)"
+      ],
+      "status": "Exclusive to IF-09; not used in any other article (check:article-photos and a perceptual-hash comparison against every file in public/images and design/photography, 2026-10-20).",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-20); per-photo owner clearance. Standing Kaboompics approval checks 1 (license page) could not be completed from this environment and remain open.",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Owner-supplied; Kaboompics license page not re-read (HTTP 403)",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "IF-09",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Crop 0,0.0237,1,0.9763 (trims to 3:2); responsive WebP resizing only; no upscaling; no AI processing",
+        "alt_text_example": "A hand lifts a mesh strainer of chopped cucumber over a steel mixing bowl on a kitchen counter."
+      },
+      "open_items": [
+        "Re-read the Kaboompics photo page from a browser and record the license text and verification date",
+        "Confirm the Kaboompics photo ID and URL for this exact photograph"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
