@@ -44,7 +44,7 @@ Non-negotiables (details in the docs above):
 | Frontmatter schema | `src/content.config.ts` |
 | Pillars (ids, tracker prefixes, page copy) | `src/data/pillars.ts` |
 | Article template, hub, pillar pages | `src/pages/resources/[slug].astro`, `src/pages/resources/index.astro`, `src/pages/resources/topics/[pillar].astro` |
-| MDX components (StepChecklist, SplitList, WhoCanHelp, Figure, Tip, Checklist, ChecklistGrid, ProductCTA, Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Versions, CleaningWeek; legacy ProductNote) | `src/components/resources/` |
+| MDX components (StepChecklist, SplitList, WhoCanHelp, Figure, Tip, Checklist, ChecklistGrid, ProductCTA, ProductSnapshot, Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Versions, CleaningWeek; legacy ProductNote) | `src/components/resources/` |
 | Article photography registry / image tool | `src/data/images.ts` / `scripts/article-image.py` (files in `public/images/resources/`) |
 | Reference articles (the quality bar for new articles) | `src/content/articles/bathroom-reset-checklist.mdx` (HC-07, **the layout every article uses**) · `daily-cleaning-routine.mdx` (HC-02, length and tone) · `weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01, pillar guide) |
 | Article helpers / table of contents | `src/lib/articles.ts`, `src/lib/toc.ts` |

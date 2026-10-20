@@ -125,3 +125,7 @@ Rule: seller's own page, fetched in the drafting session, cited inline, "as of O
 - www.pinterest.com responds, but search and autocomplete render with JavaScript; the typeahead endpoint returned no JSON to a plain request, and a headless-browser read wasn't permitted in this session. Autocomplete, guided terms and Trends: **not observed.**
 - Indexed Pinterest pages via web search (`allowed_domains: pinterest.com`): DIY wall calendar roundups, dry-erase and acrylic boards, a "Forever Wall Calendar" for a command center, a digital wall calendar pin, boards named "Family Organization Wall" and "Family calendar wall". Details in `pinterest/FP-15.md`.
 - Primary Pinterest keyword: *family wall calendar* (seen in pin and shopping page titles; autocomplete unconfirmed).
+
+## Update 2026-10-20: product snapshots replace the table
+
+Owner request: show each product with a photo and a short snapshot instead of the comparison table. Each pick is now a `<ProductSnapshot>` (photo, best-for label, three facts, price, seller link). Photos are the sellers' own product images (og:image or first product image on the cited page), stored unaltered in `design/photography/products/FP-15/` and resized with `scripts/article-image.py` (the U Brands photo is cropped to trim empty backdrop only). Credits appear under each photo. The Big Grid cover carries the publisher's own "3,000+ reviews" badge; the cover is shown unaltered and the article doesn't repeat the claim. Our calendar uses the existing product photo `fp-01-week-on-one-page`. No facts changed.
