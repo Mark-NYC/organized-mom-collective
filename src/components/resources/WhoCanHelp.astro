@@ -1,0 +1,40 @@
+---
+/**
+ * Which jobs in a routine someone else can take: one ruled row per job, with who can
+ * own it (e.g. "Ages 6–8, with you nearby") and a short line on what that looks like.
+ * Rows marked `adult` read as the jobs that stay with a grown-up. Keep the ages in line
+ * with src/data/chores-by-age.ts and IF-07; this is a summary, not a new chore chart.
+ */
+interface Row {
+  /** The job, matching the checklist step it refers to. */
+  job: string;
+  /** Who can take it, e.g. "Ages 4+". */
+  who: string;
+  detail?: string;
+  /** A job that stays with an adult. */
+  adult?: boolean;
+}
+interface Props {
+  rows: Row[];
+  /** Accessible name for the list. */
+  label?: string;
+}
+const { rows, label = 'Who can take each job' } = Astro.props;
+---
+
+<ul class="who-can-help mt-6 border-t-2 border-ink" aria-label={label}>
+  {
+    rows.map((row) => (
+      <li class="grid gap-x-6 gap-y-1 border-b border-rule py-4 sm:grid-cols-[11rem_minmax(0,1fr)]">
+        <p class="text-[1rem] leading-snug font-semibold">{row.job}</p>
+        <div>
+          <p class:list={['label leading-snug', row.adult ? 'text-soft' : 'text-prose']}>
+            {!row.adult && <span aria-hidden="true" class="mr-1.5 inline-block h-[3px] w-4 translate-y-[-3px] bg-month" />}
+            {row.who}
+          </p>
+          {row.detail && <p class="mt-1 text-[0.95rem] leading-snug text-prose-soft">{row.detail}</p>}
+        </div>
+      </li>
+    ))
+  }
+</ul>

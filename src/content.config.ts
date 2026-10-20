@@ -49,6 +49,18 @@ const articles = defineCollection({
           caption: z.string().optional(),
         })
         .optional(),
+      /**
+       * Optional "quick win" line in the header, e.g. time "15 min", note "6 small jobs · no deep cleaning",
+       * and the id of the checklist it jumps to. For articles that deliver one short routine; with a
+       * jump, the collapsed contents list is left out so the checklist sits higher on phones.
+       */
+      quick: z
+        .object({
+          time: z.string().max(12),
+          note: z.string().max(60),
+          jump: z.object({ id: z.string(), label: z.string().max(30) }).optional(),
+        })
+        .optional(),
       /** Which product the article's product callout points to, if any: the wall calendar or the companion website. */
       cta: z.enum(['calendar', 'companion', 'none']),
       /** Drafts render in `astro dev` only. */

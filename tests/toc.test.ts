@@ -22,6 +22,8 @@ steps
 
 <WhenLifeHappens>
 </WhenLifeHappens>
+
+<StepChecklist id="checklist" title="Your 15-minute reset" storageKey="k" steps={[]} />
 `;
 
 const headings = [
@@ -38,6 +40,7 @@ describe('tableOfContents', () => {
       { slug: 'adapting-it', text: 'Adapting it' },
       { slug: 'plan-b', text: 'When the plan falls apart' },
       { slug: 'when-life-happens', text: 'When life happens' },
+      { slug: 'checklist', text: 'Your 15-minute reset' },
     ]);
   });
 });
