@@ -1,9 +1,9 @@
-# Brief: FP-14 skylight-calendar-vs-paper-wall-calendar
+# Brief: FP-15 skylight-calendar-vs-paper-wall-calendar
 
 - **Pillar:** Family Planning & Routines (pillar guide? no)
 - **URL:** /resources/skylight-calendar-vs-paper-wall-calendar
 - **Researched:** 2026-10-19
-- **ID note:** Requested as FP-13, but FP-13 is already used by the published `after-school-routine-for-kids` article (its photos are registered as `fp-13-*` and its pins are scheduled). This article takes the next free ID, FP-14.
+- **ID note:** Requested as FP-13, but FP-13 is already used by the published `after-school-routine-for-kids` article (its photos are registered as `fp-13-*` and its pins are scheduled). First filed as FP-14; renumbered FP-15 on 2026-10-20 when FP-14 went to the category guide (digital wall calendars vs. paper). Boundary: FP-14 owns the device category and the hybrid; this brief owns the single-brand "is a Skylight worth it" question and should link up to FP-14.
 - **Status:** Briefed. **Blocked before drafting:** no Skylight primary source could be fetched this session (see the claim log). Do not draft until it is fetched.
 
 ## Search intent
