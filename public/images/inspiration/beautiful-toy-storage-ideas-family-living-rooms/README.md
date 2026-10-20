@@ -10,11 +10,11 @@
 
 See [UPLOAD_MANIFEST.csv](UPLOAD_MANIFEST.csv) for the actual, exact filenames matched to each numbered photo. The initial Gemini filename requests differed from the uploaded names, so the manifest now documents what actually exists.
 
-**Before publishing**, visually inspect each image against its title and caption, correct the final descriptive alt text, run `npm run verify`, and confirm that all URLs render. Photo #35 uses the non-descriptive filename `7cf808c0-b6d4-4b92-88b0-86c3784f3b34.jpeg` and has a **provisional** caption; inspect it before setting `published: true` or generating Pinterest pins.
+**Before publishing**, visually inspect each image against its title and caption, correct the final descriptive alt text, run `npm run verify`, and confirm that all URLs render. Photo #35 uses the non-descriptive filename `7cf808c0-b6d4-4b92-88b0-86c3784f3b34.jpeg`. The owner identified the image as toys visible in open containers on simple wooden shelves; its caption, alt text and Pinterest description now reflect this.
 
-At present the page remains **draft / noindex**, and Pinterest Save buttons are hidden. This is intentional until QA is complete. Do not mistake populated paths for QA approval.
+The gallery was marked **published / indexable** in GitHub on October 20, 2026 at the owner's request. The 49 image paths and separate cover are linked, and Save buttons are enabled. Live deployment and browser QA have not been independently confirmed.
 
-## After visual approval
+## Further QA
 
 - Confirm 49 of 49 gallery photos match sections and the cover is distinct from those 49.
 - Correct captions and alt text wherever the image differs.
