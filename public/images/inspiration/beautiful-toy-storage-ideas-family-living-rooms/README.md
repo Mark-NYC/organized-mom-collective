@@ -1,26 +1,23 @@
-# 50 Beautiful Toy Storage Ideas for Family Living Rooms
-
-**UPLOAD IMAGES HERE** in this GitHub folder:
-
-`public/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/`
+# 49 Beautiful Toy Storage Ideas for Family Living Rooms
 
 **Article:** `/resources/beautiful-toy-storage-ideas-family-living-rooms`
 
-**Current status:** draft / noindex / not approved for Pinterest upload. 50 ideas and the gallery page are prepared, but image fields are deliberately empty until reviewed image files arrive. The page will display placeholders and no live Pinterest Save buttons. Do not mark `published: true` prematurely.
+**Image folder:** `public/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/`
 
-## Naming and upload
+**Upload reconciliation:** 49 article photographs and **one separate cover image** are present in GitHub. All 49 image paths are assigned to article sections in `src/data/toy-storage-gallery.ts`. The title and page data say **49**. The image cover is `hero for article.jpeg`, used above the main gallery and as the future Open Graph share image.
 
-Use the exact filenames in `UPLOAD_MANIFEST.csv` (also in this folder). All 50 images should be vertical 2:3 JPEGs, suggested 1000 x 1500 px, optimized for the web. **Matching by numbered slot is essential.** Do not upload unreviewed generations, duplicate scenes, fake text/brands, deformed toys or physically unsafe furniture.
+## Files and QA
 
-You can upload **in batches of 10** using GitHub's **Add file → Upload files** in this directory. GitHub will accept the files as long as the specified folder exists.
+See [UPLOAD_MANIFEST.csv](UPLOAD_MANIFEST.csv) for the actual, exact filenames matched to each numbered photo. The initial Gemini filename requests differed from the uploaded names, so the manifest now documents what actually exists.
 
-## Finishing after images arrive
+**Before publishing**, visually inspect each image against its title and caption, correct the final descriptive alt text, run `npm run verify`, and confirm that all URLs render. Photo #35 uses the non-descriptive filename `7cf808c0-b6d4-4b92-88b0-86c3784f3b34.jpeg` and has a **provisional** caption; inspect it before setting `published: true` or generating Pinterest pins.
 
-1. Check the file count and actual names against all 50 rows of `UPLOAD_MANIFEST.csv`. Do not silently match a mismatched image to an idea.
-2. Inspect each image for plausibility, storage safety, logos, impossible furniture and match to caption. Adjust copy / descriptive alt text to match the actual image.
-3. Update `src/data/toy-storage-gallery.ts`: for each idea, set `image: '/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/<filename>'`. Image fields stay empty before review.
-4. Verify layout at narrow/mobile and desktop widths, 50 image anchors, Pinterest Save URLs, lazy loading, performance, OG metadata, heading hierarchy and `npm run verify`.
-5. After 50/50 images pass and assets have deployed, change `published: true`, verify public image endpoints, generate a **separate 50-row Pinterest bulk CSV** in the OMC-V visual lane. Never count this as one of the existing 500 planned pins.
-6. Avoid assigning Pinterest dates or claiming publication until scheduling is requested and confirmed.
+At present the page remains **draft / noindex**, and Pinterest Save buttons are hidden. This is intentional until QA is complete. Do not mistake populated paths for QA approval.
 
-**Editorial structure:** 50 photographs, 50 separately numbered suggestions, grouped conceptually into ten sets of five in the manifest. Each photo has a short title, one practical recommendation, one image-specific Pinterest link after publication. The mudroom 15-photo/30-tip gallery stays unchanged.
+## After visual approval
+
+- Confirm 49 of 49 gallery photos match sections and the cover is distinct from those 49.
+- Correct captions and alt text wherever the image differs.
+- Verify mobile scrolling, image dimensions and lazy loading, numbered tips, image anchor links, Save links, and share preview.
+- Switch `published: true` only after confirming all images deploy correctly.
+- Prepare the separate OMC-V visual Pin batch CSV with 49 unique filenames, descriptions and `#idea-N` links. No automatic posting.
