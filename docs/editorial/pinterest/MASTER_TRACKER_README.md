@@ -30,3 +30,8 @@ Before any new 10-pin batch, identify and report the exact 10 **master IDs and h
 ## Progress reporting
 
 Report three counts separately: **planned (500)**, **confirmed unique created**, and **confirmed published**. Never add “created” counts from separate batches without de-duplicating by master ID. If prior approved files cannot be matched, report them as an **unmapped backlog**, not completed IDs. On 2026-10-20 all 20 historical Gemini 01–02 entries in `UNMAPPED_APPROVED_PINS.csv` were resolved, including three annotated editorial adaptations; that file now serves as the audit mapping log.
+
+
+## Tony Hill-inspired 6/3/1 research fields
+
+Before assigning another ten master IDs, read [PINTEREST_RESEARCH_LOOP.md](../PINTEREST_RESEARCH_LOOP.md). The master includes seven **new, non-destructive research columns**. Slots 1–6 are proposed proven keyword, 7–9 specific audience/situation, and 10 experimental. This is a future testing allocation, not proof of past creative types. Blank verified-keyword, competitor, audience, format, conversion, or evidence cells mean **not yet researched**. Don't backfill guesses. Preserve all prior master rows, statuses, IDs, and reconciliation data.
