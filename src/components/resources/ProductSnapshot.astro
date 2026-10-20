@@ -1,10 +1,12 @@
 ---
 /**
  * One product in a roundup article: the seller's own product photo, what it's best for,
- * three or four facts from the seller's page, the price and a dated source link.
- * Facts must come from the seller's page (docs/editorial/SEO_STRATEGY.md → comparison
- * standards); `ours` marks the Organized Mom Collective calendar so the disclosure is visible.
- * Photos are shown whole (object-contain) on the band color, so covers and screens of
+ * a one-line spec, pros (green ticks) and cons (red crosses), the price and a dated source link.
+ * Every pro and con must come from the seller's page or, for ours, from the verified product
+ * list (docs/editorial/ARTICLE_FORMAT.md → Product notes). `ours` marks the Organized Mom
+ * Collective calendar: a cream panel with a month-color rule, so it stands out and the
+ * disclosure is visible. Ours keeps its honest cons too.
+ * Photos are shown whole (object-contain) on a quiet band, so covers and screens of
  * different shapes line up.
  */
 import { imageAttrs, type ArticleImageName } from '../../data/images';
@@ -15,7 +17,10 @@ interface Props {
   bestFor: string;
   image: ArticleImageName;
   alt: string;
-  facts: string[];
+  /** Size, dates or format in one short line. */
+  specs?: string;
+  pros: string[];
+  cons: string[];
   price: string;
   /** Where the facts and price come from. */
   source?: { label: string; href: string };
@@ -23,26 +28,44 @@ interface Props {
   credit?: string;
   ours?: boolean;
 }
-const { name, bestFor, image, alt, facts, price, source, credit, ours = false } = Astro.props;
+const { name, bestFor, image, alt, specs, pros, cons, price, source, credit, ours = false } = Astro.props;
 const attrs = imageAttrs(image);
 ---
 
-<section class="product-snapshot my-10 border-t-2 border-ink pt-5 sm:grid sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-7">
+<section
+  class:list={[
+    'product-snapshot my-10 sm:grid sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-7',
+    ours ? 'breakout border-t-4 border-month bg-cream px-5 py-6 sm:px-8 sm:py-8' : 'border-t-2 border-ink pt-5',
+  ]}
+>
   <figure class="m-0">
-    <div class="flex aspect-[4/3] items-center justify-center bg-band p-3">
+    <div class:list={['flex aspect-[4/3] items-center justify-center p-3', ours ? 'bg-paper' : 'bg-band']}>
       <img {...attrs} sizes="(min-width: 640px) 240px, 100vw" alt={alt} loading="lazy" decoding="async" class="block h-full w-full object-contain" />
     </div>
     {credit && <figcaption class="mt-1.5 text-[0.75rem] leading-snug text-soft">Image: {credit}</figcaption>}
   </figure>
   <div class="mt-4 sm:mt-0">
-    <p class="label text-soft">Best for: {bestFor}{ours && ' · Made by us'}</p>
-    <h3 class="mt-1.5 text-[1.3rem] leading-tight font-bold" style="font-family: var(--font-editorial)">{name}</h3>
-    <ul class="mt-2">
+    <p class="label text-soft">{ours && <span class="text-prose">Made by us · </span>}Best for: {bestFor}</p>
+    <h3 class:list={['mt-1.5 leading-tight font-bold', ours ? 'text-[1.5rem]' : 'text-[1.3rem]']} style="font-family: var(--font-editorial)">{name}</h3>
+    {specs && <p class="mt-1 text-[0.9rem] leading-snug text-soft">{specs}</p>}
+    <ul class="mt-3" aria-label="Pros and cons">
       {
-        facts.map((fact) => (
-          <li class="flex items-start gap-3 border-b border-dotted border-[#cfc9c2] py-2 text-[1rem] leading-snug">
-            <span aria-hidden="true" class="mt-[0.55em] h-[2px] w-3 shrink-0 bg-ink" />
-            <span>{fact}</span>
+        pros.map((item) => (
+          <li class="flex items-start gap-2.5 border-b border-dotted border-[#cfc9c2] py-2 text-[1rem] leading-snug">
+            <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-[0.15em] h-[1.1em] w-[1.1em] shrink-0 text-[#2f7a45]">
+              <path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span><span class="sr-only">Pro: </span>{item}</span>
+          </li>
+        ))
+      }
+      {
+        cons.map((item) => (
+          <li class="flex items-start gap-2.5 border-b border-dotted border-[#cfc9c2] py-2 text-[1rem] leading-snug">
+            <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-[0.15em] h-[1.1em] w-[1.1em] shrink-0 text-[#b3261e]">
+              <path d="M5.5 5.5l9 9M14.5 5.5l-9 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
+            </svg>
+            <span><span class="sr-only">Con: </span>{item}</span>
           </li>
         ))
       }
