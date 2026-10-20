@@ -107,3 +107,7 @@ No quality, reliability or review claims about either product; the article says 
 - Top pin formats: "digital family calendar" is dominated by headline graphics over device photos ("Digital Family Calendar That Keeps Everyone on Track", "How I Created My Own Digital Wall Calendar", "Best Digital Calendar Overall? Cozyla vs Skylight vs Echo Show 15", "Ready to Move to Digital Family Calendars?"), plus short videos. "digital wall calendar" mixes device product ads, DIY dashboard screens, one paper printable and a "We tried the Skylight Calendar" review pin. "paper vs digital calendar" is about personal planners ("Paper vs. Digital Calendars: Which Is Best?", "Why we went back to a paper calendar"), not family walls.
 - Pinterest Trends: not checked.
 - Candidate primary Pinterest keyword: digital family calendar.
+
+## Photography
+
+Hero: Kaboompics 44099 (paper year planner with a phone), fetched via the photo-request workflow and cleared 2026-10-20; exclusive to FP-14.

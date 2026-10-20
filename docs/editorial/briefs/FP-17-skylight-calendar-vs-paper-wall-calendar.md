@@ -43,7 +43,7 @@ Gaps: no ranking page is dated and sourced; none maps the free vs. Plus features
 
 ## Structure (interactive guide layout)
 
-1. `quick`: "6 min" · "Sort your jobs: free, Plus or paper" · jump `#checklist`. No hero: Kaboompics returns 403 to this environment.
+1. `quick`: "6 min" · "Sort your jobs: free, Plus or paper" · jump `#checklist`. Inline photo: Kaboompics 2368 (kitchen chalkboard week), cropped to remove a branded coffee machine; fetched via the photo-request workflow and cleared 2026-10-20; exclusive to FP-17. No hero: the photo is portrait.
 2. Tension: practice moved in a group text; is a screen the fix?
 3. First H2 (required): "Is a Skylight Calendar worth it, or is a paper wall calendar enough?" Short answer ≤100 words by use case, bold lead.
 4. StepChecklist "Free, Plus or paper?": list what the wall shows; mark phone-synced items; mark chores and lists; mark meals and school emails; price the first year.
@@ -93,3 +93,5 @@ Logged-out pinterest.com search pages in headless Chromium, 2026-10-20; screensh
 - Top pins for "worth it": first-person review graphics ("Is It Worth the Money? Skylight Calendar Review", "The Ultimate Skylight Calendar Review", "How My Family Uses the Skylight Calendar", "Skylight: Is It Worth It?").
 - Top pins for "alternative": "14 Alternatives to the Skylight Calendar" (SlashGear), "Skylight Calendar Alternatives", "Best Digital Calendar Overall? Cozyla vs Skylight vs Echo Show 15", "How to Build Your Own Digital Wall Calendar".
 - Gap: no pin we saw breaks down free vs. Plus, or offers paper as the alternative.
+
+Skylight product image: press-kit BB-01 (week view, white background), cropped to the white margin only, captioned "Image: Skylight" as the kit fact sheet asks. Owner-cleared 2026-10-20; the kit has no written license for competitor sites and Skylight wasn't contacted. FP-17 only; never in pins.
