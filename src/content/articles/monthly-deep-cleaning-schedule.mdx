@@ -6,7 +6,7 @@ description: 'A monthly deep cleaning schedule with 12 rotating home projects. C
 summary: One monthly focus, a few small jobs to share, and weekends that still leave room for your family.
 pillar: home-cleaning
 published: 2026-10-14
-updated: 2026-10-15
+updated: 2026-10-20
 primaryKeyword: monthly deep cleaning checklist
 related:
   - weekly-cleaning-schedule-for-busy-moms
@@ -17,6 +17,12 @@ hero:
   image: hc-04-cleaning-basket
   alt: Cropped hands choosing a scrub brush from a black wire basket of cloths, sponges and an amber spray bottle.
 cta: companion
+quick:
+  time: 'Monthly'
+  note: 'one small weekend job'
+  jump:
+    id: checklist
+    label: 'Plan this month'
 ---
 
 import { monthlyDeepClean } from '../../data/cleaning';
@@ -25,7 +31,17 @@ import CurrentMonthProject from '../../components/resources/CurrentMonthProject.
 
 The kitchen gets wiped. The dishes get done. But the closet shelf, window tracks and cupboard handles keep waiting for a free Saturday that never comes.
 
-Here’s the monthly deep cleaning plan: **choose one area for the month, pick one manageable job for an available weekend, and agree on who owns it.** Keep the everyday cleaning separate. You don’t need to deep clean the whole house every month.
+**Choose one area for the month, pick one manageable job for an available weekend, and agree on who owns it.** You don’t need to deep clean the whole house every month.
+
+<StepChecklist id="checklist" title="Plan this month’s project" kicker="The Real-Life Version" storageKey="omc:monthly-project:v1" doneMessage="Planned. One job, one owner, one weekend." steps={[
+  { title: 'Pick the month’s focus, or the area you need most', how: 'No garage? Skip that part. You don’t need to restart in January.' },
+  { title: 'Choose one bounded job', how: 'One drawer, one shelf or the inside of one window. If it’s bigger, split it before it goes on the calendar.' },
+  { title: 'Agree on an owner, a time and a finish', how: 'Write “Saturday · closet shelf · Alex” beside the week’s plan. That adult checks supplies, sets their reminder and puts things away.' },
+  { title: 'Teach children a small part', how: 'Matching their shoes, or choosing outgrown clothes with an adult. Cleaning products and appliance jobs stay with adults.' },
+  { title: 'Review the next job at your family check-in', how: 'Choose another task, catch up, or skip the weekend.' },
+]} />
+
+Keep that review inside the [weekly family reset](/resources/weekly-family-reset), rather than adding a second planning session.
 
 <Shift title="A monthly project isn’t a monthly marathon.">
 
@@ -63,16 +79,6 @@ This is the rotation in the OMC cleaning companion. It mixes deeper cleaning, de
   ))}
 </table>
 
-<RealLifeVersion title="Make this month’s project small enough to finish">
-
-1. **Pick the month’s focus, or the area you need most.** No garage? Skip that part. You don’t need to restart in January.
-2. **Choose one bounded job.** One drawer, one shelf or the inside of one window. If it’s bigger, split it before putting it on the calendar.
-3. **Agree on an owner, a time and a finish.** Write “Saturday · closet shelf · Alex” beside the week’s plan. That adult checks supplies, sets their reminder and puts things away afterward.
-4. **Teach children a small part.** They can match their shoes or select clothes they’ve outgrown with an adult. Cleaning products and appliance jobs stay with adults.
-5. **Review the next job at your family check-in.** Choose another task, catch up, or skip the weekend. Keep this inside the [weekly family reset](/resources/weekly-family-reset), rather than adding a second planning session.
-
-</RealLifeVersion>
-
 ## Example: this month’s project
 
 The checklist below follows the current month on your device, so you can start now instead of beginning with January. It uses the same monthly tasks as the cleaning companion website.
@@ -81,15 +87,12 @@ The checklist below follows the current month on your device, so you can start n
 
 These are optional jobs, not a checklist you must finish this month. Pick one for an available day and agree on its owner. Another adult can take a different task, including putting supplies away and handling any follow-up. Children can learn a suitable small part with support. Each owner checks their own job, so the list doesn’t become more reminders for you.
 
-<div style={{ maxWidth: '400px', margin: '0 auto' }}>
-
 <Figure
   image="hc-04-window-cleaning"
   alt="Back view of a person wiping a tall glass window with a long-handled cleaning tool."
   caption="A different monthly job: one inside window, rather than every window in the house."
+  size="narrow"
 />
-
-</div>
 
 <WhenLifeHappens title="When the month gets away from you">
 
@@ -100,6 +103,11 @@ These are optional jobs, not a checklist you must finish this month. Pick one fo
 **Missed a whole month?** Start with the current need. An urgent repair or hygiene issue gets dealt with now; optional decluttering can wait.
 
 </WhenLifeHappens>
+
+## Make it part of your week
+
+- **[Weekly cleaning schedule](/resources/weekly-cleaning-schedule-for-busy-moms):** the daily reset and weekday zones that keep the basics covered.
+- **[A 15-minute bathroom reset](/resources/bathroom-reset-checklist):** the everyday version, so the monthly job stays the only deep clean.
 
 <ProductNote product="companion">
 

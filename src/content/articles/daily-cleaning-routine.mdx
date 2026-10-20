@@ -3,9 +3,9 @@ trackerId: HC-02
 title: 'The 15-Minute Daily Reset: A Simple Daily Cleaning Routine'
 seoTitle: 'Daily Cleaning Routine: The 15-Minute Daily Reset'
 description: 'A simple daily cleaning routine: the same five tasks, in the same order, in one 15-minute block a day, plus the short version for hard days.'
-summary: Five small tasks, the same ones every day, in one 15-minute block. Here’s the order, when to do it, and the short version for days that don’t cooperate.
+summary: Five small tasks, the same ones every day, in one 15-minute block, plus the short version for days that don’t cooperate.
 pillar: home-cleaning
-updated: 2026-10-13
+updated: 2026-10-20
 published: 2026-10-10
 primaryKeyword: daily cleaning routine
 related:
@@ -17,18 +17,41 @@ hero:
   image: hc-02-hero
   alt: A hand wiping a white kitchen counter with a green cloth in morning light, a glass spray bottle and a wooden scrub brush beside it, and the dishwasher open behind with clean plates in the rack.
 cta: companion
+quick:
+  time: '15 min'
+  note: '5 tasks, same every day'
+  jump:
+    id: checklist
+    label: 'Start the checklist'
 ---
 
 import { dailyEssentials } from '../../data/cleaning';
 import PinterestPin from '../../components/resources/PinterestPin.astro';
 
-It’s 8:30 in the morning. The school run is done, the beds are unmade, breakfast is still on the counter, and last night’s shoes are in the living room. Nothing is really dirty. Everything is just out.
+It’s 8:30. The school run is done, the beds are unmade and breakfast is still on the counter. Nothing is really dirty. Everything is just out.
 
-Here’s the short answer: **the Daily Reset is five tasks, the same five every day, in one 15-minute block. Agree on who takes each part, work through the list, and stop when the timer goes off.**
+**The Daily Reset is five tasks, the same five every day, in one 15-minute block. Agree on who takes each part, work through the list and stop when the timer goes off.**
 
-<Checklist kicker="Every day" title={dailyEssentials.title} time="15 min" icon={dailyEssentials.icon} items={dailyEssentials.tasks.map((t) => t.label)} />
+<StepChecklist id="checklist" title="The Daily Reset" kicker="Every day" time="15 min" storageKey="omc:daily-reset:v1" doneMessage="All done. The house is back to its starting line." steps={dailyEssentials.tasks.map((t) => ({ title: t.label, how: {
+  beds: 'Covers up, pillows back. That’s it. Beds can happen when each person gets up.',
+  dishwasher: 'Whichever it needs, so the next dishes go straight in, not into the sink.',
+  counters: 'Put back what lives somewhere else, then wipe them down.',
+  pickup: 'Living room and entry only. One basket, one lap.',
+  spills: 'Whatever you can see standing up.',
+}[t.id] }))} />
 
 It’s the daily half of a [weekly cleaning schedule built for real weeks](/resources/weekly-cleaning-schedule-for-busy-moms): this reset every day, plus [one small zone](/resources/zone-cleaning-schedule) Monday to Thursday.
+
+<Tip label="Before you start" title="Pick the time, keep the kit together.">
+
+After breakfast works for some families; after dinner fits others. Keep a cloth, a spray bottle and a brush together under the sink, so the 15 minutes doesn’t start with a search.
+
+</Tip>
+
+<Figure
+  image="hc-02-caddy"
+  alt="A cream cleaning caddy on a kitchen counter holding a glass spray bottle, folded green and white cloths and a wooden scrub brush."
+/>
 
 <Shift title="A daily routine isn’t daily cleaning. It’s putting things back.">
 
@@ -43,28 +66,19 @@ Daily lists keep growing: sinks, toilets, floors, a load of laundry. Soon it’s
   label="Save the 15-minute reset"
 />
 
-<RealLifeVersion title="How to do the Daily Reset">
-
-Pick a time the people doing the reset can use. After breakfast works for some families; after dinner fits others. Beds can happen when each person gets up. Keep a cloth, a spray bottle and a brush together under the sink, so the 15 minutes doesn’t start with a search.
-
-<Figure
-  image="hc-02-caddy"
-  alt="A cream cleaning caddy on a kitchen counter holding a glass spray bottle, folded green and white cloths and a wooden scrub brush."
-/>
-
-1. **Make the beds.** Covers up, pillows back. That’s it.
-2. **Load or unload the dishwasher.** Whichever it needs, so the next dishes go straight in, not into the sink.
-3. **Clear the kitchen counters and table.** Put back what lives somewhere else, then wipe them down.
-4. **Do a quick pickup of the main rooms.** Living room and entry only. One basket, one lap.
-5. **Wipe obvious spills and messes.** Whatever you can see standing up.
-
-Keep the same order and agreed responsibilities. For example, an adult owns dishes, another takes counters, and children put away their own things. Teach a child-sized job together, then practice checking the list instead of waiting for a prompt.
-
-</RealLifeVersion>
-
 ## Hand over part of the daily reset
 
-1. **Choose recurring parts together.** One adult can own dishes, another counters, and a child their own pickup. Include the time and what counts as done.
+Keep the same order and the same owners every day. **An adult can own dishes, another takes counters, and children take the parts they’ve been taught.**
+
+<WhoCanHelp rows={[
+  { job: 'Make beds', who: 'Ages 4–5', detail: 'Pull up the covers. From about 6, make their own bed.' },
+  { job: 'The dishwasher', who: 'Ages 6–8 with you nearby', detail: 'Unload it while you put away sharp knives. From 9–12, load or unload on their own.' },
+  { job: 'Counters and table', who: 'Ages 6+', detail: 'Set and clear the table. An adult can own the wipe-down.' },
+  { job: 'Quick pickup', who: 'Ages 2+', detail: 'Toys back in their bin and their own things back where they live.' },
+  { job: 'Wipe spills', who: 'Ages 2–3 with help', detail: 'Small spills with a damp cloth.' },
+]} />
+
+1. **Choose recurring parts together.** Include the time and what counts as done.
 2. **Teach the unfamiliar part.** Walk through it once. Children need an age-appropriate job, not an adult’s whole checklist.
 3. **Move the prompt off you.** Each adult uses their own reminder; children practice checking the list. Review what needs adjusting at the weekly check-in instead of directing every reset.
 
@@ -75,6 +89,11 @@ Keep the same order and agreed responsibilities. For example, an adult owns dish
 **On a hard day, shrink it.** The dishwasher and the counters. Five minutes, and the kitchen still works tomorrow. If you can see the hard day coming, [plan it as a zero night for dinner](/resources/weekly-meal-planning-for-families#the-real-life-version): leftovers or takeout leave less to clean.
 
 </WhenLifeHappens>
+
+## Make it part of your week
+
+- **[Zone cleaning schedule](/resources/zone-cleaning-schedule):** one small area Monday to Thursday, after the reset.
+- **[Free chore chart by age](/chore-chart):** put each child’s part of the reset where they can check it themselves.
 
 <ProductNote product="companion">
 

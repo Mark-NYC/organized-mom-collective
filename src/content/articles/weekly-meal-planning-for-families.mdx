@@ -5,7 +5,7 @@ seoTitle: 'Weekly Meal Planning for Families: The 20-Minute Method'
 description: 'Weekly meal planning for families in 20 minutes: label each night by the time you’ll have, plan four or five dinners to match, then write the grocery list.'
 summary: Decide the week’s dinners once, in about 20 minutes, by sorting the nights before you pick the food.
 pillar: family-planning
-updated: 2026-10-14
+updated: 2026-10-20
 published: 2026-10-10
 primaryKeyword: weekly meal planning for families
 related:
@@ -17,15 +17,28 @@ hero:
   image: fp-05-open-fridge
   alt: A hand opening a well-stocked fridge in a bright kitchen, with eggs, greens, carrots and glass containers of leftovers on the shelves and a school backpack on a stool behind.
 cta: calendar
+quick:
+  time: '20 min'
+  note: '4 or 5 dinners, once'
+  jump:
+    id: the-real-life-version
+    label: 'Plan the week'
 ---
 
 import PinterestPin from '../../components/resources/PinterestPin.astro';
 
 It’s 5 pm and someone asks what’s for dinner. You decide. Again.
 
-Here’s the short answer: **once a week, look at the nights together, choose four or five dinners that fit, and agree on who handles each meal and the grocery list.** About 20 minutes.
+**Once a week, look at the nights together, choose four or five dinners that fit, and agree on who handles each meal and the grocery list.** About 20 minutes.
 
-It’s the dinner part of [planning the family’s week once, on Sunday](/resources/how-to-organize-your-familys-week).
+<StepChecklist id="the-real-life-version" title="The 20-minute meal plan" kicker="The Real-Life Version" time="20 min" storageKey="omc:meal-plan:v1" doneMessage="Done. Dinner is decided for the week." steps={[
+  { title: 'Look at the week together', how: 'Note every late pickup, practice and night out from the family calendar.' },
+  { title: 'Label each night full, short or zero', how: 'By the time you’ll have, not the food you want.' },
+  { title: 'Plan four or five dinners to fit, with an owner for each', how: 'That person checks supplies and handles the meal, including the reminders. Zero nights count as planned.' },
+  { title: 'Agree on who owns groceries', how: 'Checking the fridge, writing the list and shopping.' },
+]} />
+
+It’s the dinner part of [planning the family’s week once, on Sunday](/resources/how-to-organize-your-familys-week). Start from [the family calendar](/resources/how-to-organize-a-family-calendar).
 
 <Shift title="Plan the nights before the food.">
 
@@ -40,20 +53,16 @@ Most meal plans start with recipes and assume seven nights of cooking. One late 
   label="Save the dinner plan"
 />
 
-<RealLifeVersion title="The 20-minute meal planning method">
-
-1. **Look at the week together.** Note every late pickup, practice and night out from [the family calendar](/resources/how-to-organize-a-family-calendar).
-
 <Figure
   image="fp-05-week"
   alt="A filled-in week on the wall calendar beside a coffee mug and a pen, with dinners written into the days: chicken tacos on Tuesday, pizza night on Wednesday, leftovers on Thursday."
   caption="Dinners written into the week: tacos, pizza night, leftovers."
 />
 
-2. **Label each night** full, short or zero:
+## Three kinds of night
 
 <Versions
-  title="Three kinds of night"
+  title="Label each night"
   items={[
     { name: 'Full night', body: 'Cook a real recipe, and make enough for another night.', time: '45+ min' },
     { name: 'Short night', body: 'A dinner you can make without a recipe: tacos, pasta, eggs and toast.', time: '20 min' },
@@ -67,7 +76,9 @@ Most meal plans start with recipes and assume seven nights of cooking. One late 
   caption="A short night: tacos, no recipe needed."
 />
 
-3. **Plan four or five dinners to fit, with an owner for each.** That person checks supplies and handles the meal, including the reminders. Zero nights count as planned.
+## From the plan to the grocery list
+
+Thursday’s [fridge check](/resources/weekly-cleaning-schedule-for-busy-moms#the-real-life-version) is a good moment for the grocery owner. Use [the grocery-list steps](/resources/grocery-list-from-meal-plan) to turn the meals into quantities someone else can shop from.
 
 <Figure
   image="fp-05-meal-plan"
@@ -75,14 +86,10 @@ Most meal plans start with recipes and assume seven nights of cooking. One late 
   caption="The week’s meals and the grocery list, side by side."
 />
 
-4. **Agree on who owns groceries,** including checking the fridge, writing the list and shopping. Thursday’s [fridge check](/resources/weekly-cleaning-schedule-for-busy-moms#the-real-life-version) is a good moment. Use [the grocery-list steps](/resources/grocery-list-from-meal-plan) to turn the meals into quantities someone else can shop from. The [free weekly dinner planner](/meal-planner) has the three kinds of night and the list on one page.
-
 <Figure
   image="fp-05-grocery-list-writing"
   alt="A hand writing a list on a lined notepad at the kitchen counter, a coffee mug and a cup of pens beside it, and an open pantry of pasta and rice jars behind."
 />
-
-</RealLifeVersion>
 
 ## Hand over a dinner from start to finish
 
@@ -103,6 +110,11 @@ Most meal plans start with recipes and assume seven nights of cooking. One late 
 />
 
 </WhenLifeHappens>
+
+## Make it part of your week
+
+- **[Free weekly dinner planner](/meal-planner):** the three kinds of night and the grocery list on one page.
+- **[The 15-minute weekly family reset](/resources/weekly-family-reset):** where the dinner decisions fit with rides and the calendar.
 
 <ProductCTA
   title="Dinner, on the same page as the week."

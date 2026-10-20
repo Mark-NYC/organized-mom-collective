@@ -678,7 +678,7 @@
       },
       "used_in": [
         "FP-04 /resources/weekly-family-reset (inline)",
-        "IF-02 /resources/how-to-share-the-mental-load (hero)"
+        "(2026-10-20: removed from IF-02 hero; now exclusive to FP-04)"
       ]
     },
     {
@@ -711,7 +711,7 @@
         "edits": "Tight crop fractions 0.25,0.61,1,0.99; resize and WebP export only."
       },
       "used_in": [
-        "IF-02 /resources/how-to-share-the-mental-load (inline)"
+        "IF-02 /resources/how-to-share-the-mental-load (hero since 2026-10-20)"
       ]
     },
     {
