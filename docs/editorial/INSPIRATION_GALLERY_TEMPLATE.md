@@ -15,6 +15,8 @@ Do not redirect all images to the top of the article. Keep image anchors stable 
 
 The mudroom gallery uses 15 photographs and 15 numbered photo sections. Each section contains two separate practical ideas, giving readers 30 ideas without confusing paired numbers such as 'ideas 1 & 2'. Navigation labels refer to the 15 photo sections, not the two pieces of advice. Do not claim 30 unique visual photographs. Review every image and caption together before publication.
 
-## Numbering UX rule
+## Photo titles and idea numbers
 
-Never display grouped ranges (such as 'Ideas 1 & 2') on an individual photo. Identify the image as 'Mudroom photo 01 / 15'. Give each of its two substantive idea headings a sage circular number badge, counting consecutively from 1 to 30. Jump navigation continues to list the 15 photographs by short names. The headline may describe 30 tips only when the body genuinely delivers two distinct ideas for each of 15 scenes.
+Each photo is one visual section with a short, standalone editorial H2, taken from `navLabel`, followed by two equal-weight H3 idea headings. The two practical ideas are numbered consecutively across the full gallery (1–30) with identical sage circle badges. Each H3 and its paragraph form a compact ruled tip block. Do not put a number inside the photo's H2, do not mix heading sizes between the paired ideas, and do not display 'Ideas 1 & 2' counters. The small 'Photo 01 of 15' label identifies the photograph, while the 1–30 numbers identify the actual tips.
+
+The dropdown lists only the 15 photo titles, linking to their permanent `#idea-N` anchors. Pinterest saving remains per photograph.
