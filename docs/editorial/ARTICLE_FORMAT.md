@@ -1,5 +1,7 @@
 # Article format: The Real-Life Reset
 
+**Scope exception:** This checklist-centric standard applies to practical routine and resource guides. Dedicated **image-first home-inspiration galleries** use [IMAGE_FIRST_PINTEREST_WORKFLOW.md](IMAGE_FIRST_PINTEREST_WORKFLOW.md) and [INSPIRATION_GALLERY_TEMPLATE.md](INSPIRATION_GALLERY_TEMPLATE.md), with 15 original photographs, 30 distinct tips and one saveable image per section. Do not force `StepChecklist`, the 300–600 word target, or the three-pin concept plan onto visual galleries.
+
 The structure every resource article follows, the components that build it, and how it looks on the page. Copy-ready skeleton: [templates/article.mdx](templates/article.mdx).
 
 Related: [BRAND_VOICE.md](BRAND_VOICE.md) (how it sounds) · [SEO_STRATEGY.md](SEO_STRATEGY.md) (metadata, headings) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) (links).
