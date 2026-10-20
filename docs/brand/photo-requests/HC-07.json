@@ -1,0 +1,17 @@
+{
+  "article": "HC-07 bathroom-reset-checklist",
+  "requested": "2026-10-20",
+  "purpose": "Discovery for the bathroom reset redesign: a unique faceless hero (bathroom sink/counter mid-reset, cloth, spray bottle, fresh towel) and one inline photo. Must not reuse Kaboompics 32344, 32349 (HC-04), 7888 or 35020 (IF-07). Research only until reviewed and cleared in lifestyle-photo-library.json.",
+  "seeds": [
+    "https://kaboompics.com/gallery?search=bathroom+cleaning",
+    "https://kaboompics.com/gallery?search=cleaning+sink",
+    "https://kaboompics.com/gallery?search=bathroom+sink",
+    "https://kaboompics.com/gallery?search=toilet",
+    "https://kaboompics.com/gallery?search=mirror+cleaning",
+    "https://kaboompics.com/gallery?search=bathroom+towels",
+    "https://kaboompics.com/gallery?search=spray+bottle+cleaning",
+    "https://kaboompics.com/gallery?search=cleaning+sponge",
+    "https://kaboompics.com/photo/41439/stacked-blue-cleaning-sponges"
+  ],
+  "max_photos": 140
+}

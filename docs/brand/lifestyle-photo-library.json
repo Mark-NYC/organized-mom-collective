@@ -1029,6 +1029,86 @@
       "used_in": [
         "FP-13 /resources/after-school-routine-for-kids (inline)"
       ]
+    },
+    {
+      "id": "HC07-K17876",
+      "title": "Marble bathroom counter with soap dish, wooden brush and bamboo toothbrushes",
+      "role": "HC-07 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "17876",
+      "source_url": "https://kaboompics.com/photo/17876/olive-soap-wooden-nail-brush-bamboo-toothbrushes",
+      "source_download_url": "https://kaboompics.com/download/8b6202f9335c01937020cc517e06a193/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo detail page reads 'Free for commercial use'; no editorial-only marker (fetch manifests HC-07-b and HC-07-full, checked 2026-10-20)",
+      "license_verification_date": "2026-10-20",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Full-size original (6720x4480, archived 2400px copy) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "No people. Soap bar embossed with the generic descriptor 'Thé vert, fabriqué à Marseille, huile pure végétale' (a scent and origin line, no brand or logo); bottles and their labels at the top of the frame cropped out."
+      },
+      "model_release_review": "No identifiable face. Hands only or no people. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-07-bathroom-counter-{640,960,1440}.webp",
+      "used_in": [
+        "HC-07 /resources/bathroom-reset-checklist"
+      ],
+      "status": "Exclusive to HC-07; not used in any other article (check:article-photos).",
+      "clearance_record": {
+        "approval": "Standing Kaboompics owner approval 2026-10-12",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Free for commercial use; no editorial-only marker",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "HC-07",
+        "context": "Faceless everyday bathroom scene, no customer or endorsement claim",
+        "edits": "Crop 0.08,0.25,0.83,1.0 and responsive WebP resizing only; no AI processing",
+        "alt_text_example": "A bar of green soap on a wooden dish beside a wooden scrub brush and two bamboo toothbrushes on a white marble bathroom counter."
+      }
+    },
+    {
+      "id": "HC07-K42839",
+      "title": "Hands drying with a fresh white towel at a bathroom sink",
+      "role": "HC-07 exclusive inline (fresh towel step)",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "42839",
+      "source_url": "https://kaboompics.com/photo/42839/everyday-bathroom-routine-at-home",
+      "source_download_url": "https://kaboompics.com/download/813a3409212aa63ff3968f21c6d9fe19/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo detail page reads 'Free for commercial use'; no editorial-only marker (fetch manifests HC-07-b and HC-07-full, checked 2026-10-20)",
+      "license_verification_date": "2026-10-20",
+      "owner_visual_status": "covered_by_standing_kaboompics_approval",
+      "visual_content_review": {
+        "review_date": "2026-10-20",
+        "review_basis": "Full-size original (4272x7595, archived 2400px copy) and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Hands and wrists only, plain metal bracelet without a visible face or logo. Labelled toiletry bottles and the towel's woven tag cropped out; plain faucet and tile remain."
+      },
+      "model_release_review": "No identifiable face. Hands only or no people. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-07-fresh-towel-{400,640,877}.webp",
+      "used_in": [
+        "HC-07 /resources/bathroom-reset-checklist"
+      ],
+      "status": "Exclusive to HC-07; not used in any other article (check:article-photos).",
+      "clearance_record": {
+        "approval": "Standing Kaboompics owner approval 2026-10-12",
+        "checks_by": "Claude",
+        "date": "2026-10-20",
+        "license": "Free for commercial use; no editorial-only marker",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "HC-07",
+        "context": "Faceless everyday bathroom scene, no customer or endorsement claim",
+        "edits": "Crop 0.35,0.36,1.0,0.817 and responsive WebP resizing only; no AI processing",
+        "alt_text_example": "Hands drying with a soft white towel beside a brushed-steel faucet and white tiles."
+      }
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

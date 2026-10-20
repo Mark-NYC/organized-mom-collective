@@ -1,11 +1,12 @@
 ---
 # Copy to src/content/articles/<slug>.mdx. The file name is the permanent URL slug.
 # Every field is explained in src/content.config.ts and docs/editorial/SEO_STRATEGY.md.
+# Layout: the interactive guide layout (ARTICLE_FORMAT.md). Reference: bathroom-reset-checklist.mdx (HC-07).
 trackerId: XX-00
-title: The H1, written for the reader
+title: The H1, benefit-led; include the time or size when true ("A 15-Minute …")
 seoTitle: 'The <title>, 60 characters max'
 description: The meta description. Answer the search in one or two sentences, 70 to 160 characters.
-summary: One-line promise shown under the H1 and on article cards.
+summary: One-line promise under the H1 and on cards, about 110 characters max.
 pillar: home-cleaning
 pillarGuide: false
 published: 2026-01-01
@@ -13,54 +14,84 @@ primaryKeyword: the one search query this article answers
 related:
   - an-existing-article-slug
 next: the-next-step-article-slug
-# Optional lead photo (name from src/data/images.ts). Only a real, relevant photo; delete the block otherwise.
+# The quick-win line in the header. jump.id must match the StepChecklist id. Delete `jump` if there's no tool to jump to.
+quick:
+  time: '15 min'
+  note: '6 small jobs, no deep cleaning'
+  jump:
+    id: checklist
+    label: 'Start the checklist'
+# Lead photo: a unique, cleared Kaboompics photo for this article only (docs/brand/PHOTO-DISCOVERY.md). Delete if none.
 hero:
-  image: hc-01-hero
+  image: xx-00-hero
   alt: What the photo shows, for someone who can't see it.
 # calendar | companion | none: which product the callout points to.
-cta: none
+cta: calendar
 draft: true
 ---
 
-{/* Short by default: 300–600 words of prose. Core sections only; see ARTICLE_FORMAT.md#short-by-default.
-    Reference for length: src/content/articles/daily-cleaning-routine.mdx (HC-02). */}
+{/* Short by default: 300–600 words of prose, `how` lines included. See ARTICLE_FORMAT.md. */}
 
-{/* Tension: two or three sentences. The real moment the problem bites. No invented anecdote. */}
+{/* Tension: one or two sentences. The real moment the problem bites. No invented anecdote. */}
 
 Opening tension.
 
-Here's the short answer: **the answer in one bold sentence.**
+**The short answer in one bold sentence, naming the steps.**
 
-{/* Optional: the one checklist or visual for the answer. */}
-<Checklist title="Routine name" time="15 min" items={['First task', 'Second task', 'Third task']} />
+{/* The tool, right after the answer. 4–8 steps: short title, minutes, one `how` line. Bump the storageKey version when steps change. */}
+<StepChecklist id="checklist" title="Routine name" kicker="The Real-Life Version" storageKey="omc:the-slug:v1" steps={[
+  { title: 'First step', minutes: 2, how: 'One line: how, or where to stop.' },
+  { title: 'Second step', minutes: 3, how: 'One line.' },
+  { title: 'Third step', minutes: 3, how: 'One line.' },
+]} />
 
-<Shift title="The better frame, in one line.">
+<Tip label="Before you start" title="The one practical aside.">
 
-The common assumption and why it fails. **The better frame, in bold.** 30–60 words.
+Supplies, safety or setup in two or three sentences.
 
-</Shift>
+</Tip>
 
-<RealLifeVersion title="A descriptive name for the routine">
+## What you can skip today
 
-1. **First step as an imperative.** One line: the reason or the limit.
-2. **Second step.** One line.
+One line on the better frame. **The rule in bold.**
 
-{/* Adaptations (kids, partner, working full-time): one line here, not a section. */}
+<SplitList
+  left={{ label: 'The routine · today', items: ['What it covers', 'Second', 'Third'] }}
+  right={{ label: 'Another day', items: ['What waits', 'Second', 'Third'] }}
+/>
 
-</RealLifeVersion>
+{/* Optional photo between sections: <Figure image="xx-00-detail" alt="…" caption="…" /> (unique to this article). */}
 
-<WhenLifeHappens title="When you miss a day">
+## Jobs kids can take
+
+You don't have to do all of it. **Hand one whole job to a child, including remembering when it needs doing.**
+
+{/* Ages from src/data/chores-by-age.ts. Only jobs from the checklist above. */}
+<WhoCanHelp rows={[
+  { job: 'First step', who: 'Ages 4+', detail: 'What that looks like.' },
+  { job: 'Second step', who: 'Ages 6–8 with you nearby', detail: 'One line.' },
+  { job: 'Third step', who: 'Adults', adult: true, detail: 'Why it stays with an adult.' },
+]} />
+
+<WhenLifeHappens title="When you only have five minutes">
+
+**The minimum version.** One or two sentences.
 
 **The rule for a missed day.** One or two sentences.
 
-**The minimum version for a bad night.** One or two sentences.
-
 </WhenLifeHappens>
 
-{/* Optional, at most one product mention, after the routine. Verified features only (ARTICLE_FORMAT.md#product-notes).
-    Quiet: <ProductNote product="companion">One sentence.</ProductNote>
-    With the real product photo: <ProductCTA title="…" image="hc-01-wall-calendar" alt="…">One or two sentences.</ProductCTA>
-    Set `cta` to match. */}
+## Make it part of your week
+
+- **[Parent routine](/resources/the-parent-slug):** one line on why it's the next step.
+- **[Free tool](/chore-chart):** one line.
+
+{/* The one product callout. Verified features only (ARTICLE_FORMAT.md#product-notes). Set `cta` to match. */}
+<ProductCTA title="…" image="hc-01-wall-calendar" alt="The Organized Mom Collective weekly wall calendar hanging on a wall.">
+
+One or two sentences.
+
+</ProductCTA>
 
 <NextSmallWin>
 

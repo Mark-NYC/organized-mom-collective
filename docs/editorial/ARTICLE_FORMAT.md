@@ -4,6 +4,29 @@ The structure every resource article follows, the components that build it, and 
 
 Related: [BRAND_VOICE.md](BRAND_VOICE.md) (how it sounds) · [SEO_STRATEGY.md](SEO_STRATEGY.md) (metadata, headings) · [INTERNAL_LINKING.md](INTERNAL_LINKING.md) (links).
 
+## The interactive guide layout (standard, owner-approved 2026-10-20)
+
+**Every article uses this layout**, new and existing. Reference: HC-07 (`bathroom-reset-checklist.mdx`). The standard: within five seconds of landing, a busy mom thinks "Oh, I can actually do this." Beautiful home magazine meets practical interactive guide: the useful thing near the top, the article broken into designed pieces, no long unbroken passages.
+
+| # | Section | Element | Rules |
+| --- | --- | --- | --- |
+| 1 | Header | `title`, `summary`, `quick` (frontmatter), `hero` | Benefit-led H1; put the time or size in it when it's true ("A 15-Minute…"). Summary ≤ ~110 characters. `quick` adds the time mark, a short size note ("6 small jobs, no grout") and a "Start the checklist ↓" jump; with a jump the collapsed contents list is left out. Unique Kaboompics hero (PHOTO-DISCOVERY.md). |
+| 2 | Tension | 1–2 sentences | The moment it bites. Shorter than before: the tool is the payoff. |
+| 3 | Short answer | One bold sentence | Names the steps or the rule, for search and AI answers. |
+| 4 | The tool | `<StepChecklist>` | Right after the answer, `kicker="The Real-Life Version"`, `id` matching `quick.jump.id`. 4–8 steps; each a short title, minutes, and one `how` line that holds the detail (no separate numbered list repeating it). Articles that aren't a routine put their at-a-glance tool here instead (`<CleaningWeek>`, a table, `<Versions>`, a worked example) and point `quick.jump` at it, or leave out the jump. |
+| 5 | Tip | `<Tip label="Before you start">` | Supplies, safety, the one practical aside. |
+| 6 | Visual sections | H2 + `<SplitList>`, `<WhoCanHelp>`, `<Figure>` | Two or three, each under a descriptive H2: what to skip vs. do (`SplitList`), which jobs kids can take (`WhoCanHelp`, ages from `src/data/chores-by-age.ts`), a photo between sections. One or two lines of prose per section. |
+| 7 | When Life Happens | `<WhenLifeHappens>` | Two or three bold-led lines. |
+| 8 | Next step | H2 "Make it part of your week" + 2–3 bullets | Bold links to the parent routine, a sibling article and a free tool (`/chore-chart`, `/planner` …). Text links, not cards. |
+| 9 | Product callout | `<ProductCTA>` | The one primary CTA. Verified features only. |
+| 10 | Your Next Small Win | `<NextSmallWin>` | Last thing in the body. |
+
+- **The Shift is optional** in this layout: use it when the insight isn't already shown by a `SplitList`. Never both saying the same thing.
+- **Kids get their own short section** (`WhoCanHelp`) when the routine has jobs children can take; keep it to the jobs in the checklist and link to the IF article for teaching.
+- **Interactive pieces** save in the browser (localStorage, versioned `storageKey` like `omc:<slug>:v1`), need no account, work by keyboard, and still tick without JavaScript. Style matches the cleaning companion's checklist (`src/components/TaskList.tsx`): month-bar header, progress ring, time mark, "2 / 6" tally, ruled rows, rounded-square box with the pen tick, "Next" mark. No other animation.
+- **Avoid**: SaaS-style cards, gradients, pill clusters, emoji, extra progress widgets, more than one box per section.
+- Short by default still applies (below): 300–600 words of prose. Checklist `how` lines count.
+
 ## Short by default
 
 Articles are short. Most land between **300 and 600 words of prose**; a pillar guide can run a little longer because it carries checklists. Past about 800 words, cut. The model is a simple home blog post: the answer, the routine, a printable-feeling checklist, a fallback, done. HC-02 (`daily-cleaning-routine.mdx`) is the length to aim for.
@@ -21,13 +44,15 @@ Every article must:
 
 1. **Match one specific search intent and satisfy it early.** The answer, or a compact version of it, appears in the first screen or two on a phone. Never make her scroll past a story to get what she searched for.
 2. **Start with relatable tension**, in two to four sentences, without a long introduction. Name the real moment the problem bites (5 pm, Wednesday, the pickup line). No invented anecdotes.
-3. **Introduce a useful insight that challenges an unhelpful assumption** → `<Shift>`.
-4. **Explain a concrete, easy-to-follow routine or solution** → `<RealLifeVersion>`.
+3. **Introduce a useful insight that challenges an unhelpful assumption** → a `<SplitList>` section or `<Shift>`.
+4. **Explain a concrete, easy-to-follow routine or solution** → `<StepChecklist>` (or `<RealLifeVersion>` for an article whose routine isn't a list of steps).
 5. **Include a memorable visual, checklist or example** → `<Checklist>`, `<CleaningWeek>`, a table, an entry formula, or a worked example week.
 6. **Explain how to adapt when life doesn't go to plan** → `<WhenLifeHappens>`.
 7. **Close with one small action and a relevant next article** → `<NextSmallWin>`, then the `next` article (set in frontmatter; the template renders it).
 
 ## Structure, in order
+
+The Real-Life Reset sections below still define what an article must contain; **the order and components on the page follow [the interactive guide layout](#the-interactive-guide-layout-standard-owner-approved-2026-10-20)** above where they differ.
 
 | # | Section | Element | Notes |
 | --- | --- | --- | --- |
@@ -136,6 +161,9 @@ Every article needs at least one thing she could screenshot.
 | Element | Use for | How |
 | --- | --- | --- |
 | `<Checklist kicker title time icon items />` | Any routine with discrete tasks | `<Checklist kicker="Monday" title="Living Room" time="10 min" items={['…', '…']} />`. Drawn like a printed planner sheet: small spaced-caps kicker, serif title, charcoal rule, empty boxes on dotted lines; `icon` takes a zone icon. Keep to 4–8 items. |
+| `<StepChecklist id title kicker storageKey steps />` | The article's main routine (standard layout) | `steps={[{ title: 'Clear the counter', minutes: 2, how: 'One line.' }, …]}`. Interactive: ticks, progress ring, tally, time left, "Next" mark, Start over; saved in the browser. Companion-website style. One per article. |
+| `<SplitList left right />` | Do vs. skip, today vs. another day | `left={{ label: 'The reset · today', items: [...] }} right={{ label: 'A deep clean · another day', items: [...] }}`. Two ruled lists, stacked on phones. |
+| `<WhoCanHelp rows />` | Jobs kids or other family members can take | `rows={[{ job, who: 'Ages 6–8 with you nearby', detail }, { job, who: 'Adults', adult: true, detail }]}`. Ages from `src/data/chores-by-age.ts`. |
 | `<ChecklistGrid>` | Several checklists | Wrap 2–4 `<Checklist>` cards to show them side by side (a breakout row) on wider screens. |
 | `<Figure image alt caption size />` | Photographs | `image` is a name from `src/data/images.ts`; `size="wide"` breaks out of the reading column. See [BLOG_EDITORIAL_STYLE.md](BLOG_EDITORIAL_STYLE.md#photography). |
 | `<Tip title label>` | One practical aside | Lightly tinted (sage). At most one or two per article. |

@@ -65,7 +65,7 @@ Gaps and weak spots: no result runs the decision from the family's side ("what p
 Published articles reviewed: FP-02, FP-03, FP-11 (headings, Shift, primary keywords above); FP-12 is still Planned.
 
 - **FP-11** (wall vs digital, generic): owns the format decision across all digital calendars (Google, Cozi) with a hybrid option. **FP-14 owns one named purchase**: a dedicated digital wall display versus a paper wall calendar, i.e. the "buy a screen or not" question. Don't repeat FP-11's table or the Google/Cozi notes; link to FP-11 for "should we go digital at all".
-- **FP-12** (planned, best command center systems): compares wall, digital and hybrid *setups*. FP-14 is a single product head-to-head and should not become a roundup. When FP-12 ships, it links to FP-14 for the Skylight question.
+- **FP-12** (planned, best command center systems): compares wall, digital and hybrid *setups*. FP-15 is a single product head-to-head and should not become a roundup. When FP-12 ships, it links to FP-15 for the Skylight question.
 - **FP-02** (organize a family calendar): owns setup, what goes on it, entry format. FP-14 never teaches setup; it links to FP-02 as `next`.
 - **FP-03** (home command center): owns the physical spot and paper flow. FP-14 mentions placement only in passing.
 

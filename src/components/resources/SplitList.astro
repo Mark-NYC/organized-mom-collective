@@ -1,0 +1,34 @@
+---
+/**
+ * Two short lists side by side (stacked on phones): what belongs in this routine and
+ * what waits for another day. Open and ruled, not boxed. The first list is the
+ * "do" side; the second reads softer.
+ */
+interface Side {
+  label: string;
+  items: string[];
+}
+interface Props {
+  left: Side;
+  right: Side;
+}
+const { left, right } = Astro.props;
+---
+
+<div class="split-list mt-6 grid gap-8 sm:grid-cols-2 sm:gap-10">
+  {
+    [left, right].map((side, i) => (
+      <div>
+        <p class:list={['label border-b-2 pb-2', i === 0 ? 'border-ink text-prose' : 'border-rule text-soft']}>{side.label}</p>
+        <ul class="mt-1">
+          {side.items.map((item) => (
+            <li class:list={['flex items-start gap-3 border-b border-dotted border-[#cfc9c2] py-2.5 text-[1rem] leading-snug', i === 1 && 'text-prose-soft']}>
+              <span aria-hidden="true" class:list={['mt-[0.55em] h-[2px] w-3 shrink-0', i === 0 ? 'bg-ink' : 'bg-rule']} />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</div>

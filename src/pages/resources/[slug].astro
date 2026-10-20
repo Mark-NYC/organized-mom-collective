@@ -21,6 +21,9 @@ import CleaningWeek from '../../components/resources/CleaningWeek.astro';
 import CalendarBridge from '../../components/resources/CalendarBridge.astro';
 import HandAsterisks from '../../components/site/HandAsterisks.astro';
 import Versions from '../../components/resources/Versions.astro';
+import StepChecklist from '../../components/resources/StepChecklist.astro';
+import WhoCanHelp from '../../components/resources/WhoCanHelp.astro';
+import SplitList from '../../components/resources/SplitList.astro';
 import { formatDate, getArticles, getNext, getRelated, isoDate, type Article } from '../../lib/articles';
 import { tableOfContents } from '../../lib/toc';
 import { getPillar } from '../../data/pillars';
@@ -98,6 +101,9 @@ const components = {
   Versions,
   Figure,
   Tip,
+  StepChecklist,
+  WhoCanHelp,
+  SplitList,
 };
 ---
 
@@ -110,10 +116,36 @@ const components = {
       </div>
       <h1 class="article-title mt-5">{data.title}</h1>
       <p class="article-deck mx-auto mt-5 max-w-[42rem] lg:max-w-[46rem]">{data.summary}</p>
+      {
+        data.quick && (
+          <p class="article-quick mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.95rem] text-prose md:justify-center">
+            <span class="inline-flex items-center gap-3">
+              <span class="inline-flex items-center border border-ink px-1.5 py-[4px] text-[0.68rem] leading-none font-semibold tracking-[0.16em] whitespace-nowrap uppercase">{data.quick.time}</span>
+              <span>{data.quick.note}</span>
+            </span>
+            {data.quick.jump && (
+              <>
+                <span aria-hidden="true" class="hidden text-muted sm:inline">·</span>
+                <a href={`#${data.quick.jump.id}`} class="font-semibold underline decoration-month decoration-2 underline-offset-[3px] hover:decoration-ink print:hidden">
+                  {data.quick.jump.label}<span aria-hidden="true"> ↓</span>
+                </a>
+              </>
+            )}
+          </p>
+        )
+      }
       <p class="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[0.85rem] text-muted md:justify-center">
         <span>By {BRAND_NAME}</span>
         <span aria-hidden="true">·</span>
-        <span>{data.updated ? 'Updated' : 'Published'} <time datetime={isoDate(updated)}>{formatDate(updated)}</time></span>
+        <span>Published <time datetime={isoDate(data.published)}>{formatDate(data.published)}</time></span>
+        {
+          data.updated && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>Updated <time datetime={isoDate(data.updated)}>{formatDate(data.updated)}</time></span>
+            </>
+          )
+        }
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
       </p>
@@ -140,7 +172,8 @@ const components = {
     </div>
 
     {
-      toc.length >= 4 && (
+      // An article with a "Start the checklist" jump skips the contents, so the checklist stays near the top.
+      toc.length >= 4 && !data.quick?.jump && (
         <nav aria-label="In this article" class:list={['mx-auto max-w-[45rem] border-y border-rule py-1 print:hidden', hero ? 'mt-10' : 'mt-8']}>
           {/* Collapsed, so the answer stays near the top on phones. */}
           <details class="group">

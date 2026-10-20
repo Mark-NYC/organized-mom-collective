@@ -1,6 +1,6 @@
 # Blog editorial style
 
-How a resource article should read and look. The short version of the standard; details live in the docs it links to. **HC-02 (`src/content/articles/daily-cleaning-routine.mdx`) is the reference for length and tone; HC-01 for a pillar guide.**
+How a resource article should read and look. The short version of the standard; details live in the docs it links to. **HC-07 (`src/content/articles/bathroom-reset-checklist.mdx`) is the reference for layout: every article uses the interactive guide layout in [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#the-interactive-guide-layout-standard-owner-approved-2026-10-20). HC-02 (`daily-cleaning-routine.mdx`) remains the reference for length and tone.**
 
 Goal: Organized Mom Collective reads like a warm, practical home and family publication: real-life photography, generous whitespace, editorial headings, and advice a busy parent can use tonight. Not a cleaning blog, not documentation, not a sales page.
 
@@ -27,7 +27,9 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 - **Photos only when they're relevant.** None is fine. Never add a photo to fill space or hit a count. Every image must show something the text is talking about.
 - **Instructional diagrams and printable examples** where they add real value (the cleaning week, checklists). Prefer data-driven components over screenshots of text.
 - **No long walls of text.** Break them with a heading, a checklist, a photo or a pull quote, not with decoration.
-- **Not everything in a box.** Most of the article is plain text on white. Use at most: one Shift (pull quote), one Tip, one product callout, one Next Small Win. Checklists are cards because they're objects to use.
+- **The useful thing near the top.** The interactive `<StepChecklist>` (or the article's at-a-glance tool) comes right after a one- or two-sentence opening and the bold answer.
+- **Break it up with designed pieces, not decoration:** the checklist, a `<SplitList>`, a `<WhoCanHelp>` section, a photo between sections. One or two lines of prose per section.
+- **Not everything in a box.** Most of the article is open and ruled on white. Use at most: one Tip, one product callout, one Next Small Win, and a Shift only when it adds something the visual sections don't.
 - **Consistent images:** Article intros use an inset pale gray (#f1f2f2) frame with generous padding and square photo edges. Landscape heroes stay 3:2; portrait printable examples retain their natural aspect ratio and remain fully visible. Body images keep the existing 6px radius and captions in small soft text. Use fades only for lifestyle compositions with room for copy, never across printable instructions or product artwork.
 - **One primary product callout** (`<ProductCTA>`), near the end, where the article naturally leads to it.
 - **Relevant internal links** in the body, per [INTERNAL_LINKING.md](INTERNAL_LINKING.md).
@@ -54,6 +56,9 @@ All are available in any article without imports (full reference: [ARTICLE_FORMA
 | --- | --- |
 | Photo with caption | `<Figure image="name" alt="…" caption="…" size="content \| wide" />` |
 | Practical aside, lightly tinted | `<Tip title="…">…</Tip>` |
+| Interactive checklist (the main routine) | `<StepChecklist id title kicker storageKey steps />` |
+| Do vs. skip | `<SplitList left right />` |
+| Jobs kids can take | `<WhoCanHelp rows />` |
 | Checklist card / side-by-side cards | `<Checklist kicker title time icon items />` (a printed planner sheet: kicker such as the day, serif title), `<ChecklistGrid>…</ChecklistGrid>` |
 | The product callout | `<ProductCTA title="…" image="name" alt="…">copy</ProductCTA>` (button: "See the Wall Calendar" → `/calendar`) |
 | Pull-quote insight | `<Shift title="…">…</Shift>` |
