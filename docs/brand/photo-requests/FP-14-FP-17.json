@@ -1,0 +1,18 @@
+{
+  "article": "FP-14 digital-wall-calendar-vs-paper-calendar · FP-17 skylight-calendar-vs-paper-wall-calendar",
+  "requested": "2026-10-20",
+  "purpose": "Discovery pass for two source-unique heroes (one per article): faceless household planning scenes, e.g. a paper wall or desk calendar being written on, a fridge or kitchen wall with a calendar, a phone or tablet beside a paper planner, a family schedule on a kitchen counter. No branded devices or readable third-party products. Research only until cleared in lifestyle-photo-library.json.",
+  "seeds": [
+    "https://kaboompics.com/gallery?search=wall+calendar",
+    "https://kaboompics.com/gallery?search=calendar",
+    "https://kaboompics.com/gallery?search=planner",
+    "https://kaboompics.com/gallery?search=planning",
+    "https://kaboompics.com/gallery?search=schedule",
+    "https://kaboompics.com/gallery?search=fridge",
+    "https://kaboompics.com/gallery?search=tablet+kitchen",
+    "https://kaboompics.com/gallery?search=phone+notebook",
+    "https://kaboompics.com/gallery/photoshoots?search=planner",
+    "https://kaboompics.com/gallery/photoshoots?search=calendar"
+  ],
+  "max_photos": 220
+}
