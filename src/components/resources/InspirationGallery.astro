@@ -18,6 +18,10 @@ const photoTopic = gallery.slug === 'small-mudroom-ideas' ? 'mudroom' : 'toy sto
     {!isLive && <p class="inspo-notice" role="status">This gallery is being prepared for publication.</p>}
   </header>
   <div class="inspo-content">
+    {gallery.coverImage && <figure class="inspo-cover">
+      <img src={gallery.coverImage} width="1000" height="1500" alt={`Illustrated overview of ${gallery.title.toLowerCase()}`} loading="eager" decoding="async" />
+      <figcaption>Explore all {gallery.ideas.length} ideas below.</figcaption>
+    </figure>}
     <section class="inspo-ideas" aria-label={gallery.title}>
       {gallery.ideas.map((idea,index)=>(
         <div class="inspo-item" id={idea.id}>
@@ -81,6 +85,9 @@ const photoTopic = gallery.slug === 'small-mudroom-ideas' ? 'mudroom' : 'toy sto
   .inspo-deck{font-size:1.05rem;line-height:1.55;max-width:640px}
   .inspo-notice{border-left:3px solid #756d5b;padding:10px 14px;font-size:.87rem;background:#fff}
   .inspo-content{max-width:800px;margin:auto}
+  .inspo-cover{margin:0 0 35px}
+  .inspo-cover img{display:block;width:100%;height:auto;object-fit:cover}
+  .inspo-cover figcaption{padding:10px 16px;font-size:.8rem;color:#67655f}
   .inspo-item{scroll-margin-top:80px;margin-bottom:44px}
   .inspo-image-frame{width:100%;background:#f1f2f2}
   .inspo-image-frame img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover}
