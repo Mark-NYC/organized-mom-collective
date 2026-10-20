@@ -17,4 +17,4 @@ The mudroom gallery uses 15 photographs and 15 numbered photo sections. Each sec
 
 ## Numbering UX rule
 
-Never display grouped ranges (such as 'Ideas 1 & 2') on an individual photo. Number visual sections once as 'Mudroom idea 01 / 15', keep the secondary suggestion as an unnumbered subheading, and make jump navigation list one entry per photograph. The headline may describe 30 tips only when the body genuinely delivers two distinct ideas for each of 15 scenes.
+Never display grouped ranges (such as 'Ideas 1 & 2') on an individual photo. Identify the image as 'Mudroom photo 01 / 15'. Give each of its two substantive idea headings a sage circular number badge, counting consecutively from 1 to 30. Jump navigation continues to list the 15 photographs by short names. The headline may describe 30 tips only when the body genuinely delivers two distinct ideas for each of 15 scenes.
