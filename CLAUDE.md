@@ -73,3 +73,8 @@ Policy terms, service expectations, case workflows and the Etsy settings checkli
 ## Printable tool output design
 
 Read [docs/brand/TOOL-OUTPUT-DESIGN.md](docs/brand/TOOL-OUTPUT-DESIGN.md) before creating or redesigning printable tools. Shared three-color choices live in `src/data/tool-palettes.ts`; selections save with tool content and carry into downloads.
+
+
+## Standing Pinterest 500-pin operating standard
+
+For any 500-pin batch, reconciliation or Gemini instructions, **first** read [docs/editorial/pinterest/MASTER_TRACKER_README.md](docs/editorial/pinterest/MASTER_TRACKER_README.md), [docs/editorial/PINTEREST_RESEARCH_LOOP.md](docs/editorial/PINTEREST_RESEARCH_LOOP.md) and the master CSV. Research and preserve permanent IDs, verified keywords, audience intent, source competitor reference, distinctive visual execution and actual conversion goal. Use proposed 6/3/1 lane mix only for upcoming 10-pin batches, never reinterpret historical completed work. Research observations need sources and dates; never claim assumed performance or publish stale deep links.
