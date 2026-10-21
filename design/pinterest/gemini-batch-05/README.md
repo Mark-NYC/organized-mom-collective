@@ -12,7 +12,7 @@ Ten Gemini pins assigned by the owner to master IDs from the 500-pin calendar ([
 | 44 | OMC-P0477 | Don’t Organize Your Whole Life This January | `final-2026-10-21/omc-new-year-weekly-reset-01.png` | /resources/weekly-family-reset | Weekly Reset Routines | QA pass; seasonal hold (Dec 28) |
 | 45 | OMC-P0183 | Give Laundry a Place in the Week | `final-2026-10-21/omc-family-laundry-schedule-01.png` | /resources/family-laundry-schedule (new HC-10) | Cleaning Schedules for Busy Moms | QA pass; import-ready; awaiting approval |
 | 46 | OMC-P0139 | A Cleaning Routine the Whole Family Shares | `held-2026-10-21/omc-family-cleaning-routine-01.png` | /resources/daily-cleaning-routine | Cleaning Schedules for Busy Moms | **QA fail** (face in profile, heads visible) |
-| 47 | OMC-P0389 | Your Family’s Organized Week | `held-2026-10-21/omc-meal-planning-and-groceries-01.png` | /resources/weekly-meal-planning-for-families | Meal Planning for Families | **QA fail** (wrong headline; third-party printable) |
+| 47 | OMC-P0389 | Plan Dinner and Groceries Together (replacement) | `held-2026-10-21/omc-meal-planning-and-groceries-02.png` | /resources/weekly-meal-planning-for-families | Meal Planning for Families | **QA fail** (misspelled list; 765 × 1024, not 2:3). First version `-01` also failed. |
 | 48 | OMC-P0095 | Kids Can Do Chores Without Earning Prizes | `final-2026-10-21/omc-chores-without-rewards-01.png` | /resources/chore-chart-without-rewards (new IF-11) | Chores & Shared Responsibilities | QA pass; import-ready; awaiting approval |
 | 49 | OMC-P0345 | Weekends Need a Rhythm, Not a Schedule | `final-2026-10-21/omc-weekend-routine-for-kids-01.png` | /resources/weekend-routine-for-kids (new FP-22) | Family Organization Ideas | QA pass; import-ready; awaiting approval |
 | 50 | OMC-P0026 | 5 Chores an 8-Year-Old Can Learn to Own | `final-2026-10-21/omc-chores-for-8-year-olds-01.png` | /resources/chores-for-kids-by-age | Chores & Shared Responsibilities | QA pass (minor artifact); import-ready; awaiting approval |
@@ -27,7 +27,7 @@ Ten Gemini pins assigned by the owner to master IDs from the 500-pin calendar ([
 | 44 | The part of new year family organization families often miss | Don’t Organize Your Whole Life This January |
 | 45 | Give loads a repeatable place in the week | Give Laundry a Place in the Week |
 | 46 | What cleaning schedule with kids looks like in a real home | A Cleaning Routine the Whole Family Shares |
-| 47 | What meal planner with grocery list looks like in a real home | Your Family’s Organized Week (assigned: “Plan Dinner and Groceries Together”) |
+| 47 | What meal planner with grocery list looks like in a real home | -01: Your Family’s Organized Week; -02 (replacement): Plan Dinner and Groceries Together |
 | 48 | Try a free chore chart without rewards | Kids Can Do Chores Without Earning Prizes |
 | 49 | Put weekend routine for kids to work this week | Weekends Need a Rhythm, Not a Schedule |
 | 50 | Chores for 8 year olds | 5 Chores an 8-Year-Old Can Learn to Own |
@@ -36,7 +36,7 @@ Metadata is written from the actual images, not the drafts.
 
 ## Files
 
-- `originals/`: the ten JPEGs exactly as supplied (`1.jpg` = pin 45, `2.jpg` = 41, `3.jpg` = 42, `4.jpg` = 43, `5.jpg` = 44, `6.jpg` = 50, `7.jpg` = 49, `8.jpg` = 48, `9.jpg` = 47, `10.jpg` = 46).
+- `originals/`: the ten JPEGs exactly as supplied (`1.jpg` = pin 45, `2.jpg` = 41, `3.jpg` = 42, `4.jpg` = 43, `5.jpg` = 44, `6.jpg` = 50, `7.jpg` = 49, `8.jpg` = 48, `9.jpg` = 47 first version, `10.jpg` = 46, `11.jpg` = 47 replacement).
 - `final-2026-10-21/`: QA-passed 1000 × 1500 sRGB PNGs (41, 44, 45, 48, 49, 50).
 - `held-2026-10-21/`: same export of the failed pins (42, 43, 46, 47), for review only.
 - `production-manifest.csv`: master ID, original and final filenames, dimensions, SHA-256 of both, path, immutable media URL, destination, board, QA and publish state.
