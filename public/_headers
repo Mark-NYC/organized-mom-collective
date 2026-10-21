@@ -1,0 +1,26 @@
+/admin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-src 'self' https://organizedmomcollective.com https://www.organizedmomcollective.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'self'
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+  X-Robots-Tag: noindex, nofollow
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/admin/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-src 'self' https://organizedmomcollective.com https://www.organizedmomcollective.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'self'
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+  X-Robots-Tag: noindex, nofollow
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/survey/admin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-src 'self' https://organizedmomcollective.com https://www.organizedmomcollective.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'self'
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
+  X-Robots-Tag: noindex, nofollow
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
