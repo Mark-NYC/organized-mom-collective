@@ -23,20 +23,27 @@ quick:
   note: 'five small spots'
   jump:
     id: checklist
-    label: 'Start this week’s list'
+    label: 'Write this week’s list'
 ---
 
 The week fills up on its own. The things you care about most, like a call to your mom or a real conversation at dinner, wait for “when things calm down.”
 
-**during a short family check-in, choose one thing that matters this week and one person to see or call. Share any preparation, and keep gratitude, prayer and rest small enough for the week you have.**
+**During a short family check-in, choose one thing that matters this week and one person to see or call. Share any preparation, and keep gratitude, prayer and rest small enough for the week you have.**
 
-<StepChecklist id="checklist" title="This week" kicker="Sunday" time="2 min" storageKey="omc:intentional-week:v1" doneMessage="Done. What matters has a spot this week." steps={[
-  { title: 'One thing that matters', how: 'An unhurried breakfast, a walk together or a calmer homework routine. One, not five.' },
-  { title: 'One person to see or call', how: 'Write it like an appointment: “Sun · lunch with Grandma.”' },
-  { title: 'A time for prayer or quiet', how: 'Tied to a moment that happens anyway: the first coffee, the drive after drop-off.' },
-  { title: 'One small habit for me', how: 'A 20-minute walk, a chapter before bed, with someone covering what needs doing.' },
-  { title: 'One task to hand over', how: 'A whole job, including the noticing and the reminders.' },
-]} />
+<Builder
+  id="checklist"
+  kicker="Sunday"
+  title="This week"
+  storageKey="omc:intentional-week-builder:v1"
+  template="{what} · {when} · set up by {who}"
+  listTitle="Our week"
+  max={5}
+  slots={{
+    what: { label: 'Make room for…', options: ['An unhurried breakfast', 'A walk together', 'A call to Grandma', 'Lunch with a friend', 'Quiet time with my first coffee', 'A 20-minute walk for me'] },
+    when: { label: 'When', options: ['Saturday morning', 'Sunday', 'Wednesday evening', 'After drop-off'] },
+    who: { label: 'Set up by', options: ['my partner', 'one of the kids', 'me', 'all of us'] },
+  }}
+/>
 
 <Shift title="Make room, don’t add more.">
 

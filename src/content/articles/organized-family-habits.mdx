@@ -18,7 +18,7 @@ quick:
   note: '7 habits · start with 1'
   jump:
     id: checklist
-    label: 'Choose your first habit'
+    label: 'Write your first habit'
 cta: calendar
 hero:
   image: if-10-planning-desk-hero
@@ -34,14 +34,21 @@ You can have labeled baskets, an organized pantry and a beautiful planner and st
 
 **Organized families build small, repeatable habits that make plans visible, responsibilities shared and the next step clear without Mom announcing it.** Don't introduce seven new rules today. Choose one, practice it, and build from there.
 
-<StepChecklist id="checklist" title="Choose one habit to start this week" kicker="The Real-Life Version" storageKey="omc:organized-family-habits:v1" steps={[
-  { title: 'Pick one repeated frustration', how: 'Backpacks on the floor, forgotten lunchboxes, or hearing “what’s for dinner?” every afternoon.' },
-  { title: 'Choose an existing daily cue', how: 'After breakfast, when we get home, after dinner, or before pajamas. Use a moment that already happens.' },
-  { title: 'Make the action obvious', how: 'Put hooks by the entry, a hamper by the bed, or a checklist next to the bags.' },
-  { title: 'Agree on one owner and a finish line', how: 'Say who does it, when, and what “done” looks like. Practice the job together first.' },
-  { title: 'Plan the busy-day version', how: 'What is the one-minute minimum when a child is sick or practice runs late?' },
-  { title: 'Practice, then step back', how: 'Let the cue and the shared checklist carry the reminder instead of Mom remembering for everyone.' },
-]} />
+<Builder
+  id="checklist"
+  title="Write your family’s first habit"
+  storageKey="omc:organized-family-habits-builder:v1"
+  template="After {cue}, {who} {action}."
+  listTitle="Our habit stacks"
+  max={3}
+  slots={{
+    cue: { label: 'After…', options: ['dinner', 'we get home from school', 'breakfast', 'we brush our teeth', 'pajamas', 'Sunday breakfast'] },
+    who: { label: 'Who', options: ['everyone', 'each child', 'each of us'] },
+    action: { label: 'Does what', options: ['clears their place', 'hangs their backpack and empties their lunchbox', 'takes their dishes to the sink', 'puts dirty clothes in the hamper', 'sets out tomorrow’s clothes', 'checks the family calendar'] },
+  }}
+/>
+
+Start with the one you're most tired of reminding everyone about. Add the next only when the first one runs without you.
 
 <Figure
   image="if-10-seven-habits-home"
