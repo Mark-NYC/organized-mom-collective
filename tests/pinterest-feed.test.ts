@@ -163,11 +163,9 @@ describe('pinterest feed CSV', () => {
 });
 
 describe('pinterest feed routing', () => {
-  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
-
-  it('rewrites /pinterest-feed.csv to the function and never redirects it', () => {
-    expect(vercel.rewrites).toContainEqual({ source: '/pinterest-feed.csv', destination: '/api/pinterest-feed' });
-    expect(JSON.stringify(vercel.redirects ?? [])).not.toContain('pinterest-feed');
+  it('serves /pinterest-feed.csv from the Pages Function and never redirects it', () => {
+    expect(existsSync(new URL('../functions/pinterest-feed.csv.ts', import.meta.url))).toBe(true);
+    expect(readFileSync(new URL('../astro.config.mjs', import.meta.url), 'utf8')).not.toContain('pinterest-feed');
   });
 
   it('has no static file or Astro page shadowing the feed path', () => {

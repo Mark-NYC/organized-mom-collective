@@ -2,7 +2,7 @@
 /**
  * Every /admin page (and /survey/admin): noindex, no GA4 or Pinterest tag, no site header, footer,
  * manifest or service worker. The page holds no data; its React island signs in (AdminGate) and
- * the database decides what an account may read. Security headers for these paths: vercel.json.
+ * the database decides what an account may read. Security headers for these paths: public/_headers.
  */
 import BaseLayout from './BaseLayout.astro';
 import { ADMIN_SECTIONS } from '../data/admin';

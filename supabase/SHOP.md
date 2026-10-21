@@ -311,7 +311,7 @@ In Stripe (you, in the dashboard, before choosing Stripe Tax): Settings → Tax 
 
 ## Pinterest catalog feed
 
-`https://www.organizedmomcollective.com/pinterest-feed.csv` (the bare domain redirects there). A Vercel Function (`api/pinterest-feed.ts`, rewritten from that path in `vercel.json`) reads `shop_catalog()` live with the public anon key on every fetch, cached at the edge for 5 minutes. No Stripe key, service-role key or admin endpoint is involved; it needs only `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` in the Vercel environment.
+`https://www.organizedmomcollective.com/pinterest-feed.csv` (the bare domain redirects there). A Cloudflare Pages Function (`functions/pinterest-feed.csv.ts`, calling `api/pinterest-feed.ts`) reads `shop_catalog()` live with the public anon key on every fetch, cached at the edge for 5 minutes. No Stripe key, service-role key or admin endpoint is involved; it needs only `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` in the Cloudflare Pages environment variables.
 
 - **What's listed:** every active product that's opted in (`FEED_PRODUCTS` in `api/pinterest-feed.ts`, which holds the Pinterest title, description, landing page and JPEG images in `public/images/pinterest/catalog/`). Inactive products (unpublished or future) are never listed. A product is `in stock` only when the store switch is **Open** and it has stock; otherwise `out of stock`, so Pinterest keeps it in the catalog but doesn't show it as buyable. (A header-only file is rejected by Pinterest as "Catalogs doesn't support your file type".)
 - **Give Pinterest the www URL.** The bare domain 308-redirects to www (Vercel → Domains), and that redirect answers `text/plain`; a crawler that doesn't follow it sees an unsupported file.

@@ -3,7 +3,7 @@
 How Organized Mom Collective handles customer questions, returns and refunds. Written for one person
 fulfilling the first calendar orders; structured so new products add their own terms later.
 
-- Customer pages: [/support](https://organizedmomcollective.com/support) (help topics, FAQs, contact form) and [/returns](https://organizedmomcollective.com/returns) (policy). `/refunds` redirects permanently (308, `vercel.json`) to `/returns`.
+- Customer pages: [/support](https://organizedmomcollective.com/support) (help topics, FAQs, contact form) and [/returns](https://organizedmomcollective.com/returns) (policy). `/refunds` redirects permanently (301, `dist/_redirects` from `astro.config.mjs`) to `/returns`.
 - Digital downloads keep their existing 30-day money-back guarantee, word for word as before; the calendar terms never apply to them.
 - The support form never adds anyone to a marketing list: requests live only in `support_requests`, separate from `tool_email_contacts`, with no consent checkbox.
 - Copy, topics, FAQs and policy numbers: `src/data/support.ts`. Change terms there and on this page together, and bump `POLICY.effective`.

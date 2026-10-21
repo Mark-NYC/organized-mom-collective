@@ -94,7 +94,7 @@ GitHub Action (push to the default branch, after Vercel build) ──► page in
 
 ### Security requirements
 
-1. **`AdminLayout`**: noindex, no GA4, no Pinterest tag, no site chrome, no manifest/service worker. `vercel.json` headers for `/admin/*`: strict CSP (self + Supabase + Stripe only), `frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`.
+1. **`AdminLayout`**: noindex, no GA4, no Pinterest tag, no site chrome, no manifest/service worker. `public/_headers` headers for `/admin/*`: strict CSP (self + Supabase + Stripe only), `frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`.
 2. **One admin, password sign-in.** Email + password (owner decision 2026-10-16: no authenticator step). `is_admin()` returns true only for an account in `admin_users`. `is_shop_admin()` / `is_survey_admin()` call it, so every existing policy uses the one list.
 3. **No registration.** Confirm "Allow new users to sign up" is off; turn on leaked-password protection.
 4. **Server-side authorization on every call**: each admin function re-checks token and role; the browser never decides.
@@ -156,7 +156,7 @@ Each phase ships on its own and is useful alone. Phases 1–3 are the priority y
 | **6. Customer service** | Support inbox in admin: filters, record view, status + return flow (requested → approved → received → refunded/declined), notes, history, reply templates (opens your email client prefilled; return address never in the system), link to website order or Etsy order number. Replaces Table Editor | Handler tests, access tests, audit entries per change |
 | **7. Customers** | Profile per email: website orders, support history, lead source, marketing consent and version. Export/delete on request | View access tests; consent never inferred |
 | **8. Products & inventory** | Cost, margin, bundles; edit the per-product low-stock threshold (column exists since Phase 3) | Margin math; threshold alert |
-| **9. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `vercel.json` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
+| **9. Marketing + settings** | Lead magnets (signups by `first_tool`, opt-in rate), QR/short links (static `_redirects` redirects with UTMs, generated from a data file), Pinterest performance (API v5, optional). Settings: admin account, integration status, notification preferences, audit log viewer | Redirect generation; settings never return secret values |
 
 ### Cost
 
@@ -184,7 +184,7 @@ CMS, page editor or builder; customer accounts; any Etsy integration; in-dashboa
 | Page inventory from the build, synced by GitHub Action with a write-only token | `scripts/page-inventory.mjs`, `.github/workflows/page-inventory.yml`, `20261020010000_admin_pages.sql`, `/admin/pages` |
 | Alerts (self-opening and self-resolving) and Overview numbers; unavailable data labeled | `20261020020000_admin_alerts.sql`, `/admin` |
 | Settings: account, integration status, inventory token, audit log | `/admin/settings` |
-| Security headers on admin paths | `vercel.json` |
+| Security headers on admin paths | `public/_headers` |
 | Tests | `tests/admin.test.ts`, `tests/page-inventory.test.ts`, `supabase/tests/admin-access.sql` (`npm run test:admin-sql`), `tests/shop-e2e.test.ts` |
 
 Next up: Phase 3b alert email digest (scheduled Edge Function + Resend), then Phase 4 attribution.

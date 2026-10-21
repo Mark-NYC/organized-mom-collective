@@ -1,8 +1,8 @@
 /**
  * Pinterest catalog feed: https://www.organizedmomcollective.com/pinterest-feed.csv
- * (vercel.json rewrites that path here). Pinterest fetches it daily.
+ * (served by functions/pinterest-feed.csv.ts, a Cloudflare Pages Function). Pinterest fetches it daily.
  *
- * A Vercel Function, not a build-time file, so price, stock and the store switch are read live
+ * A function, not a build-time file, so price, stock and the store switch are read live
  * from the shop database on every fetch (cached at the edge for 5 minutes). It calls only the
  * public shop_catalog() RPC with the public anon key, the same call the /checkout page makes:
  * no stock counts, no Stripe or service-role secrets, no admin endpoints.

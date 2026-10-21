@@ -5,6 +5,7 @@ import { FAQS, LIMITS, POLICY, RETURNS_LINE, SUPPORT_TOPICS, greetingName, norma
 import { photoName, sendSupportRequest } from '../src/lib/support';
 import { acknowledgmentEmail, createSupportHandler, inboxEmail, readPhoto } from '../supabase/functions/_shared/handlers/support';
 import { readEnv } from '../supabase/functions/_shared/env';
+import { redirectsFile } from '../cloudflare-redirects.mjs';
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
@@ -53,8 +54,7 @@ describe('support data', () => {
     expect(routes.support).toBe('/support');
     expect(routes.returns).toBe('/returns');
     expect(readFileSync('astro.config.mjs', 'utf8')).toContain(`'/refunds': '/returns'`);
-    const vercel = JSON.parse(readFileSync('vercel.json', 'utf8'));
-    expect(vercel.redirects).toContainEqual({ source: '/refunds', destination: '/returns', permanent: true });
+    expect(redirectsFile({ '/refunds': '/returns' })).toBe('/refunds /returns 301\n');
   });
   it('keeps the downloads’ 30-day guarantee word for word', () => {
     const page = readFileSync('src/pages/returns.astro', 'utf8').replace(/\s+/g, ' ');
