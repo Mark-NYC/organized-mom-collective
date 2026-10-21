@@ -312,10 +312,6 @@
     @apply mt-2.5 text-[0.88rem] leading-snug;
     color: var(--color-prose-soft);
   }
-  .article-caption-note {
-    @apply mt-1 block text-[0.75rem] tracking-[0.02em];
-    color: var(--color-soft);
-  }
   /* Habit-stacking chart (IF-10): a saveable "After we… / We…" reference card.
      Unlike other article tables it never scrolls sideways: two columns wrap on phones. */
   .habit-chart {

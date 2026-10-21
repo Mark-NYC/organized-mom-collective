@@ -1497,7 +1497,7 @@
     {
       "id": "IF10-PLANNER-HIGHLIGHTS",
       "title": "Hand highlighting a handwritten weekly planner page in yellow, with pink and green sticky notes",
-      "role": "IF-10 exclusive hero",
+      "role": "Retired: replaced as IF-10 hero 2026-10-21",
       "source": "Kaboompics",
       "creator": "Unconfirmed (Kaboompics)",
       "source_photo_id": null,
@@ -1516,11 +1516,9 @@
       },
       "model_release_review": "No identifiable person. Hand only. No implied endorsement.",
       "publishing_clearance": true,
-      "public_path": "public/images/resources/if-10-planner-highlights-{640,960,1440}.webp",
-      "used_in": [
-        "IF-10 /resources/organized-family-habits (hero; resource library thumbnail)"
-      ],
-      "status": "Exclusive to IF-10; not used in any other article (check:article-photos and a perceptual-hash comparison against 1,551 files in public/images and design/photography, 2026-10-21; nearest match distance 79/256, no duplicate).",
+      "public_path": null,
+      "used_in": [],
+      "status": "Not on the site. Replaced as the IF-10 hero by the owner photo IF10-OWNER-PLANNING-DESK on 2026-10-21; WebPs removed, original kept in design/photography/kaboompics/organized-family-habits/. Unused, so available for a future article if its Kaboompics ID is confirmed.",
       "clearance_record": {
         "approval": "Owner supplied this file and instructed installation in IF-10 (session 2026-10-21); per-photo owner clearance under the standing Kaboompics approval. Check 1 (license page) could not be completed from this environment and remains open.",
         "checks_by": "Claude",
@@ -1645,7 +1643,7 @@
         "visual_status": "pass",
         "observations": "No people, text, logos or third-party artwork. A small generic whiteboard-style planner hangs in the center nook; it does not reproduce the Organized Mom Collective calendar artwork and is not presented as our product."
       },
-      "rights_context_review": "Owner supplied and explicitly requested publication, 2026-10-21. Illustrative concept only: the caption discloses it as AI-generated and not a photograph of a real home or of our calendar. Never presented as a customer's home, a real family or the product.",
+      "rights_context_review": "Owner supplied and explicitly requested publication, 2026-10-21. Illustrative concept only. On-page AI disclosure line removed at owner request, 2026-10-21; the record here keeps it identified as generated. Never presented as a customer's home, a real family or the product.",
       "publishing_clearance": true,
       "public_path": "public/images/resources/if-10-seven-habits-home-{640,960,1024}.webp",
       "used_in": [
@@ -1662,6 +1660,40 @@
         "article_id": "IF-10",
         "edits": "Uncropped (full architectural layout kept); responsive WebP resizing only; no upscaling",
         "alt_text_example": "Illustrated overhead view of a family home: backpacks on hooks and shoes on a rack by the door, a kitchen with a small table, a planning nook with a wall planner, a living room with a toy basket, a bedroom with clothes set out, a laundry room with folded towels and a dining table with an open notebook."
+      }
+    },
+    {
+      "id": "IF10-OWNER-PLANNING-DESK",
+      "title": "Woman writing in an open planner at a wooden desk by a window, with sticky notes, highlighters and coffee",
+      "role": "IF-10 exclusive hero and resource library thumbnail",
+      "source": "Owner photo",
+      "creator": "Owner (owner states they took this photo)",
+      "original_path": "design/photography/owner/organized-family-habits-cover.jpg",
+      "original_note": "Received 2026-10-21 as a 1024x559 chat attachment; stored unchanged.",
+      "owner_visual_status": "owner_supplied_for_installation",
+      "visual_content_review": {
+        "review_date": "2026-10-21",
+        "review_basis": "design/photography/owner/organized-family-habits-cover.jpg and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "One adult seen from behind/three-quarter, face turned away. Children's books on a shelf show colorful covers with no readable titles; highlighters and pens show no readable brand. Planner pages are generic, not the Organized Mom Collective calendar."
+      },
+      "rights_context_review": "Owner-taken photo per owner statement, published at owner request 2026-10-21. Not presented as a customer, testimonial or our product.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-10-planning-desk-hero-{640,838}.webp",
+      "used_in": [
+        "IF-10 /resources/organized-family-habits (hero; resource library thumbnail)"
+      ],
+      "status": "Exclusive to IF-10.",
+      "clearance_record": {
+        "approval": "Owner supplied their own photo and asked for it as the IF-10 cover (session 2026-10-21)",
+        "checks_by": "Claude",
+        "date": "2026-10-21",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "IF-10",
+        "edits": "Centered crop 0.0905,0,0.9095,1 to the template's 3:2 hero frame; responsive WebP resizing only; no upscaling",
+        "alt_text_example": "A woman in a gray sweater writes in an open planner at a wooden desk by a window, with stacks of sticky notes, highlighters and a mug of coffee beside her."
       }
     }
   ],
