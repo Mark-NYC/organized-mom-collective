@@ -42,14 +42,15 @@ Every element takes an `id`; give the hero `id="checklist"` so the header's `qui
 | --- | --- |
 | `<Picker>` | FP-14, FP-17, FP-18 |
 | `<SayThis>` | IF-08 (plus a backpack-week `<Timeline>`) |
+| `<Builder>` | IF-01 ("This week"), IF-10 (first habit stack) |
 | `<Timeline>` | FP-13 |
 | Comparison tables | FP-11, FP-15 |
 | Chart by age / week graphic | IF-03 (`ChoresByAge`), HC-01 (`CleaningWeek`) |
-| `<StepChecklist>` | the other 23: do-it-now routines (HC-02, HC-07, HC-08, HC-09, FP-04, FP-06, FP-10), setups (FP-02, FP-03, FP-09, FP-16, HC-03), and the rest |
+| `<StepChecklist>` | the other 21: do-it-now routines (HC-02, HC-07, HC-08, HC-09, FP-04, FP-06, FP-10), setups (FP-02, FP-03, FP-09, FP-16, HC-03), and the rest |
 
 Supporting elements added: `<SayThis>` in IF-02 (the handoff words), `<Timeline>` in FP-20 (the after-school example), `<ReferenceChart>` in IF-10.
 
-**Still over the cap.** Checklists remain in about 75% of articles. The ones left are mostly genuine do-it-now routines, so the next conversions wait for element data (two weeks). Candidates, in order: IF-10 → `<Builder>` (owner asked to keep its checklist on 2026-10-21; ask before changing), IF-01 → `<Builder>` ("This week, we'll make room for…"), IF-07 and IF-09 → lead with their `<WhoCanHelp>` by-age chart, HC-04 → its 12-month rotation, FP-08 → `<DayCompare>` as a supporting element. New articles follow the cap from now on.
+**Still over the cap.** Checklists remain in about 70% of articles. The ones left are mostly genuine do-it-now routines, so the next conversions wait for element data (two weeks). Candidates, in order: IF-07 and IF-09 → lead with their `<WhoCanHelp>` by-age chart, HC-04 → its 12-month rotation, FP-08 → `<DayCompare>` as a supporting element. New articles follow the cap from now on.
 
 ## The components
 
