@@ -2,7 +2,7 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { routes } from '../routes';
 import { existsSync } from 'node:fs';
-const founderPhoto = existsSync('public/images/site/mark-megan-family-story.jpg');
+const founderPhoto = existsSync('public/images/site/mark-megan-family-story-1200.webp');
 ---
 
 <PublicLayout
@@ -17,11 +17,9 @@ const founderPhoto = existsSync('public/images/site/mark-megan-family-story.jpg'
   </header>
 
   <section aria-label="How it began" class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 sm:px-8 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24">
-    <!-- Replace this editorial holding space with a real founder photo when supplied.
-         Suggested asset: public/images/site/mark-megan-founders.jpg.
-         Do not replace with AI-generated people or stock models. -->
-    <div class="relative aspect-[4/5] overflow-hidden bg-[#e7ece5]">
-      {founderPhoto && <img src="/images/site/mark-megan-family-story.jpg" alt="Mark and Megan with their two sons on a wooded path in autumn" width="1536" height="1536" loading="eager" class="absolute inset-0 h-full w-full object-cover" />}
+    <!-- Real founder photo (square, so the frame is square). Never AI-generated people or stock models. -->
+    <div class="relative aspect-square overflow-hidden bg-[#e7ece5]">
+      {founderPhoto && <img src="/images/site/mark-megan-family-story-1200.webp" srcset="/images/site/mark-megan-family-story-720.webp 720w, /images/site/mark-megan-family-story-1200.webp 1200w" sizes="(min-width: 768px) 45vw, 100vw" alt="Mark and Megan with their two sons on a wooded path in autumn" width="1200" height="1200" loading="eager" class="absolute inset-0 h-full w-full object-cover" />}
       {!founderPhoto && <div class="flex h-full flex-col justify-end p-8 sm:p-12">
       <p class="font-serif text-[clamp(1.9rem,3.5vw,2.8rem)] leading-tight text-warm-ink">A family learning to work together.</p>
       <p class="label mt-7 text-warm-soft">Mark & Megan · Founders</p></div>}

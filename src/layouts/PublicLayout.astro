@@ -56,7 +56,7 @@ const jsonLd =
   updated && canonical
     ? [...(pageJsonLd ?? []), { '@context': 'https://schema.org', '@type': 'WebPage', url: canonical, name: fullTitle, dateModified: updated }]
     : pageJsonLd;
-const founderPhoto = existsSync('public/images/site/mark-megan-family-story.jpg');
+const founderPhoto = existsSync('public/images/site/mark-megan-family-story-1200.webp');
 const mainClass =
   width === 'full' ? '' : ['mx-auto px-5 sm:px-8', width === 'wide' ? 'max-w-5xl' : 'max-w-3xl', chrome ? 'py-8 sm:py-14' : 'py-12 sm:py-20'].join(' ');
 ---
@@ -94,7 +94,7 @@ const mainClass =
     <section aria-labelledby="founder-story-h" class="mx-4 my-9 bg-[#f1f2f2] px-6 py-12 sm:mx-9 sm:px-10 sm:py-16">
       <div class="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2 md:gap-14">
         <div class="relative aspect-[5/4] overflow-hidden bg-[#e7ece5]">
-          {founderPhoto && <img src="/images/site/mark-megan-family-story.jpg" alt="Mark and Megan with their two sons outdoors in autumn" width="1536" height="1536" loading="lazy" class="absolute inset-0 h-full w-full object-cover object-center" />}
+          {founderPhoto && <img src="/images/site/mark-megan-family-story-1200.webp" srcset="/images/site/mark-megan-family-story-720.webp 720w, /images/site/mark-megan-family-story-1200.webp 1200w" sizes="(min-width: 768px) 480px, 100vw" alt="Mark and Megan with their two sons outdoors in autumn" width="1200" height="1200" loading="lazy" class="absolute inset-0 h-full w-full object-cover object-center" />}
           {!founderPhoto && <div class="flex h-full flex-col justify-end p-8 sm:p-10">
           <p class="font-serif text-[2rem] leading-tight text-warm-ink">Built for our family.<br />Shared with yours.</p>
           <p class="label mt-7 text-warm-soft">Mark & Megan · Founders</p></div>}
