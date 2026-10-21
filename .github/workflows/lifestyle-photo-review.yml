@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - photo-library-pilot-2026-10
-      - claude/exciting-ptolemy-v855xx
+      - main
     paths:
       - '.github/workflows/lifestyle-photo-review.yml'
       - 'scripts/build_photo_review.py'

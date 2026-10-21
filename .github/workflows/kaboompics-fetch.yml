@@ -8,7 +8,7 @@ on:
     # Not on the base branch: merging a branch that carries a request would otherwise fetch it a
     # second time there and conflict with the results already committed on the branch.
     branches-ignore:
-      - claude/exciting-ptolemy-v855xx
+      - main
     paths:
       - 'docs/brand/photo-requests/*.json'
       - 'scripts/fetch_kaboompics.py'
