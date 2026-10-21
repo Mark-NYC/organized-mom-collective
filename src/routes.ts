@@ -2,6 +2,7 @@
  * Every internal URL in one place.
  *
  *   PUBLIC  /                  brand homepage
+ *           /our-story         how Mark and Megan began Organized Mom Collective
  *           /calendar          the Family Wall Calendar product page (buy on Etsy)
  *           /shop              every product (calendar, Weekly Reset, mug), linked from the header
  *           /companion         how the cleaning companion works (public explainer)
@@ -64,6 +65,7 @@ import { DAY_PARAMS } from './lib/dates';
 
 export const routes = {
   home: '/',
+  ourStory: '/our-story',
   calendar: '/calendar',
   /** Every product, one card each, linking to its own page. */
   shop: '/shop',
