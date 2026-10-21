@@ -56,7 +56,7 @@ Columns `Title,Media URL,Pinterest board,Thumbnail,Description,Link,Publish date
 | Pinterest board | Exact names from [PINTEREST_BOARDS.md](../../../docs/editorial/PINTEREST_BOARDS.md). |
 | Description | Two sentences, 171–286 characters, built from each destination’s own copy. No hashtags. |
 | Link | Canonical, no trailing slash (the live site 308-redirects to the trailing-slash URL, then 200). |
-| Publish date | Proposed, 12:00 each: **41 Nov 1, 45 Nov 2, 48 Nov 3, 49 Nov 4, 50 Nov 5, 47 Nov 6, 42 Nov 7, 46 Nov 8, 43 Nov 9.** The three Chores-board pins (41, 48, 50) alternate with other boards; 41 and 50 share a destination and sit four days apart, and 41 is two days after batch 04 #40. Assumes batch 04 is queued through Oct 30; not checked in the live account. A blank date would publish on import. |
+| Publish date | Owner-requested 2026-10-21: **two per day from Oct 24**, 10:00 and 16:00. **Oct 24: 41, 45 · Oct 25: 47, 49 · Oct 26: 48, 46 · Oct 27: 42, 50 · Oct 28: 43.** No board twice on one day; 41 and 50 (same destination) three days apart. Batch 04 is planned Oct 23–30 at 12:00, so most of these days carry three pins in total; not checked in the live account. A blank date would publish on import. |
 | Keywords | Four phrases per pin; hypotheses, not checked against Pinterest search. |
 
 **Pins 45, 48 and 49 link to pages created in this batch.** Confirm they return 200 before importing (see the live check below).
