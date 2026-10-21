@@ -3,9 +3,9 @@
  * Header for every public page (/, /calendar, /companion, /resources/…). Never used in the
  * companion app, which keeps its own Nav. Matches the app header's ruled, spaced-caps style.
  * The menu is a <details> disclosure, so it works without JavaScript. Below 1280px it holds every
- * link; from 1280px Free Tools and the shop button sit in the bar and the menu drops down with
- * the rest. The shop button says "Get the Calendar", the same words as the homepage CTA, goes
- * to /calendar#buy and carries data-cta for click tracking.
+ * link; from 1280px Free Tools, Articles and the shop button sit in the bar and the menu drops
+ * down with the rest. The shop button says "Get the Calendar", the same words as the homepage
+ * CTA, goes to /calendar#buy and carries data-cta for click tracking.
  */
 import { Wordmark } from '../marks';
 import { routes } from '../../routes';
@@ -17,7 +17,7 @@ const items = [
   { href: routes.calendar, label: 'Calendar' },
   { href: routes.freeTools, label: 'Free Tools', primary: true },
   { href: routes.shop, label: 'Shop' },
-  { href: routes.resources, label: 'Articles' },
+  { href: routes.resources, label: 'Articles', primary: true },
   { href: routes.companion, label: 'Cleaning Companion' },
   { href: routes.ourStory, label: 'Our Story' },
 ];
