@@ -23,11 +23,29 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) (how it sounds) · [SEO_STRATEGY.md](S
 | 9 | Product callout | `<ProductCTA>` | The one primary CTA. Verified features only. |
 | 10 | Your Next Small Win | `<NextSmallWin>` | Last thing in the body. |
 
+- **Tool spotlights** (`<ToolSpotlight>`, standard from 2026-10-21): see [Tool spotlights](#tool-spotlights) below.
 - **The Shift is optional** in this layout: use it when the insight isn't already shown by a `SplitList`. Never both saying the same thing.
 - **Kids get their own short section** (`WhoCanHelp`) when the routine has jobs children can take; keep it to the jobs in the checklist and link to the IF article for teaching.
 - **Interactive pieces** save in the browser (localStorage, versioned `storageKey` like `omc:<slug>:v1`), need no account, work by keyboard, and still tick without JavaScript. Style matches the cleaning companion's checklist (`src/components/TaskList.tsx`): month-bar header, progress ring, time mark, "2 / 6" tally, ruled rows, rounded-square box with the pen tick, "Next" mark. No other animation.
 - **Avoid**: SaaS-style cards, gradients, pill clusters, emoji, extra progress widgets, more than one box per section.
 - Short by default still applies (below): 300–600 words of prose. Checklist `how` lines count.
+
+## Tool spotlights
+
+When an article recommends one of our free tools, show it instead of only linking it: the tool's real preview, one sentence on the problem it removes, one on what changes for Mom, and a button that opens it.
+
+```mdx
+<ToolSpotlight
+  tool="/chore-chart"
+  problem="Tired of being the only one who remembers whose job is what?"
+  outcome="Pick a few jobs that fit your child's age, add their name and print a chart they check themselves. The wall does the reminding, not you."
+/>
+```
+
+- **How many.** Medium and long articles (roughly 900+ words, or five or more H2 sections): one or two, inline in the section where the tool solves that section's problem. Short articles: at most one, at the end of "Make it part of your week" (replacing that tool's bullet), before the `ProductCTA`.
+- **Which tools.** Only tools in `src/data/tools-directory.ts`; title, button label and preview come from there, so add a tool to the directory before spotlighting it. The preview is the real output (`public/images/tools/previews/{slug}.webp`), never a mockup.
+- **Copy.** `problem`: the frustration in Mom's words, one short sentence. `outcome`: what she stops carrying or what the family can now do without her, one or two short sentences, verified against what the tool actually does (print, download, on-screen). Market to mom, design for the family.
+- **Placement.** Never two spotlights back to back, never in the same section as a `Tip`, and don't also link the same tool as a bullet. The `ProductCTA` stays the one paid-product callout; a spotlight is always a free tool.
 
 ## Short by default
 
