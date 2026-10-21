@@ -1,7 +1,8 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { routes } from '../routes';
-const founderPhoto = Object.keys(import.meta.glob('/public/images/site/mark-megan-family-story.jpg')).length > 0;
+import { existsSync } from 'node:fs';
+const founderPhoto = existsSync('public/images/site/mark-megan-family-story.jpg');
 ---
 
 <PublicLayout
