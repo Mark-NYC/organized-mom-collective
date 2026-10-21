@@ -63,4 +63,4 @@ Columns `Title,Media URL,Pinterest board,Thumbnail,Description,Link,Publish date
 
 ## Live check
 
-Recorded at the end of the batch session; see the final commit message for the result.
+Checked 2026-10-21 (about 16:41 UTC) after the Cloudflare Pages deploy: `/resources/family-laundry-schedule`, `/resources/chore-chart-without-rewards` and `/resources/weekend-routine-for-kids` all return HTTP 200 with their expected titles, and all three are listed on `/resources`. The other destinations were checked live earlier the same day. Re-check before importing if the import happens days later.
