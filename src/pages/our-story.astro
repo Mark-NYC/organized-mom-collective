@@ -1,6 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { routes } from '../routes';
+const founderPhoto = Object.keys(import.meta.glob('/public/images/site/mark-megan-family-story.jpg')).length > 0;
 ---
 
 <PublicLayout
@@ -18,9 +19,11 @@ import { routes } from '../routes';
     <!-- Replace this editorial holding space with a real founder photo when supplied.
          Suggested asset: public/images/site/mark-megan-founders.jpg.
          Do not replace with AI-generated people or stock models. -->
-    <div class="flex aspect-[4/5] flex-col justify-end bg-[#e7ece5] p-8 sm:p-12">
+    <div class="relative aspect-[4/5] overflow-hidden bg-[#e7ece5]">
+      {founderPhoto && <img src="/images/site/mark-megan-family-story.jpg" alt="Mark and Megan with their two sons on a wooded path in autumn" width="1536" height="1536" loading="eager" class="absolute inset-0 h-full w-full object-cover" />}
+      {!founderPhoto && <div class="flex h-full flex-col justify-end p-8 sm:p-12">
       <p class="font-serif text-[clamp(1.9rem,3.5vw,2.8rem)] leading-tight text-warm-ink">A family learning to work together.</p>
-      <p class="label mt-7 text-warm-soft">Mark & Megan · Founders</p>
+      <p class="label mt-7 text-warm-soft">Mark & Megan · Founders</p></div>}
     </div>
     <div class="max-w-xl space-y-5 text-[1.075rem] leading-[1.8] text-warm-ink">
       <h2 class="font-serif text-[2rem] leading-tight sm:text-[2.5rem]">It started at home.</h2>
