@@ -33,7 +33,7 @@ Non-negotiables (details in the docs above):
 - Never invent statistics, studies, expertise, testimonials or first-person experiences.
 - Never describe a product feature that isn't verified (see ARTICLE_FORMAT.md → Product notes). Product mentions stay secondary.
 - Keep articles short: 300–600 words of prose, core sections only (ARTICLE_FORMAT.md → Short by default). Don't force photos.
-- **Every article uses the interactive guide layout** (ARTICLE_FORMAT.md → The interactive guide layout; reference HC-07): benefit-led header with `quick`, the interactive `<StepChecklist>` right after the answer, visual sections (`SplitList`, `WhoCanHelp`, photos), a short next-step section, one `ProductCTA`, and a `<ToolSpotlight>` for each free tool the article recommends (one or two in longer articles, one at the end of shorter ones; ARTICLE_FORMAT.md → Tool spotlights). Start from `docs/editorial/templates/article.mdx`.
+- **Every article uses the interactive guide layout** (ARTICLE_FORMAT.md → The interactive guide layout; reference HC-07): benefit-led header with `quick`, the interactive `<StepChecklist>` right after the answer, visual sections (`SplitList`, `WhoCanHelp`, photos), a short next-step section, one `ProductCTA`, and a `<ToolSpotlight>` where a free tool passes the gates and has a strategic point (printable twin, handoff, setup or close; ARTICLE_FORMAT.md → Tool spotlights; not every article gets one). Start from `docs/editorial/templates/article.mdx`.
 - Run `npm run verify` after every article and fix everything it reports. Commit the regenerated `docs/editorial/content-inventory.md` with the article.
 
 ## Code map for the library

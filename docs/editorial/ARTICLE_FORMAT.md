@@ -42,10 +42,58 @@ When an article recommends one of our free tools, show it instead of only linkin
 />
 ```
 
-- **How many.** Medium and long articles (roughly 900+ words, or five or more H2 sections): one or two, inline in the section where the tool solves that section's problem. Short articles: at most one, at the end of "Make it part of your week" (replacing that tool's bullet), before the `ProductCTA`.
-- **Which tools.** Only tools in `src/data/tools-directory.ts`; title, button label and preview come from there, so add a tool to the directory before spotlighting it. The preview is the real output (`public/images/tools/previews/{slug}.webp`), never a mockup.
-- **Copy.** `problem`: the frustration in Mom's words, one short sentence. `outcome`: what she stops carrying or what the family can now do without her, one or two short sentences, verified against what the tool actually does (print, download, on-screen). Market to mom, design for the family.
-- **Placement.** Never two spotlights back to back, never in the same section as a `Tip`, and don't also link the same tool as a bullet. The `ProductCTA` stays the one paid-product callout; a spotlight is always a free tool.
+Title, button label and preview come from `src/data/tools-directory.ts`; add a tool there before spotlighting it. The preview is the tool's real output (`public/images/tools/previews/{slug}.webp`), never a mockup.
+
+### 1. Does this article get one? Three gates, all must pass
+
+1. **Intent match.** The article already tells the reader to make the exact thing the tool makes (a chart, a weekly page, a setup sheet, a written handoff). If you'd have to add a sentence to justify the tool, it fails. No tangential tools.
+2. **Method match.** The tool works the way the article teaches. A tool with a different philosophy fails even if the topic matches (FP-20 teaches start/stop cues; the screen time contract earns minutes through activities, so FP-20 keeps no spotlight).
+3. **No substitute for what the article sells.** Calendar-buying and comparison articles (FP-02, FP-11, FP-14, FP-15, FP-17, FP-18, FP-19) end in the calendar `ProductCTA`; a free calendar or planner spotlight there competes with it. Text links stay. A how-to whose subject is a routine or system, not the calendar itself (FP-01, IF-10), may spotlight the free planner as the low-commitment first step, as long as the `ProductCTA` comes later as the upgrade.
+
+Also skip when the article already has its own tool offer (IF-03's `ResponsibilityChartOffer`) or no tool fits (essay-style IF-01; cleaning articles that hand off to the cleaning companion: HC-03, HC-04, HC-08).
+
+### 2. Where it goes: the strategic points, in order of preference
+
+| Point | When | Why it works |
+| --- | --- | --- |
+| **A. Printable twin** | The tool is the take-home version of the `StepChecklist` (IF-02, FP-09) or the article is about the tool (FP-16, replacing any bare button) | The reader just saw the steps; this is where she wants to keep them. Put it right after the checklist and its follow-up line, before the first H2. |
+| **B. Handoff point** | The section where a job moves from Mom to someone else, usually right after a `WhoCanHelp` or a numbered handoff list (HC-01, HC-02, HC-07, HC-09, IF-09, FP-01, FP-08) | The brand promise lives here: the tool is how the remembering leaves her head. End of that section, before `WhenLifeHappens`. |
+| **C. Setup point** | The section that describes what to make or where things go (FP-03) | She's picturing the setup; the sheet turns it into a plan. End of that section. |
+| **D. Close** | Only when the article has **no** `ProductCTA` and no A–C point (FP-06, FP-10, FP-13, IF-07) | Catches readers who finished. Inside "Make it part of your week", after the bullets, replacing that tool's bullet, before `NextSmallWin`. |
+
+Never at the close of an article with a `ProductCTA`: two tinted panels stacked at the decision point split attention, and the free option undercuts the paid one.
+
+### 3. Spacing and count
+
+- **Count:** one per article under ~900 words; at most two in longer articles (IF-10), in different sections, at least two H2s apart, and never the same tool twice.
+- **Not next to another box or picture block:** never directly beside a `Figure`, `PinterestPin`, `Tip`, `ProductCTA` or another spotlight. If every candidate section is already full of images (FP-05), keep the text link.
+- **Closing bullet:** with an inline spotlight (A–C), keep the tool's one-line bullet in "Make it part of your week" as the reminder for readers who scrolled past. With a close spotlight (D), the spotlight replaces the bullet.
+- Never above the `StepChecklist`, and never inside a component.
+
+### 4. Copy
+
+- `problem`: the frustration in her words, one short sentence, ideally the moment she's the only one remembering ("Every school morning, you're the one calling out the next step.").
+- `outcome`: what she stops carrying or what the family now does without her, one or two short sentences. Verify every feature against the tool page (print, download, on-screen, templates). Market to Mom, design for the family.
+- Write fresh copy per article; the same tool reads differently at a bathroom handoff and a dinner handoff. Don't reuse the directory description.
+
+### Current placements (2026-10-21)
+
+| Article | Tool | Point |
+| --- | --- | --- |
+| IF-10 | `/chore-chart`, `/planner` | B (Habit 4), C (Habit 6) |
+| IF-02 | `/mental-load-worksheet` | A |
+| FP-09 | `/routine-chart` | A |
+| FP-16 | `/planner` | A |
+| FP-01 | `/planner` | B |
+| FP-08 | `/mental-load-worksheet` | B |
+| HC-01, HC-02, HC-07, HC-09, IF-09 | `/chore-chart` | B |
+| FP-03 | `/command-center-setup` | C |
+| FP-06 | `/meal-planner` | D |
+| FP-10 | `/command-center-setup` | D |
+| FP-13 | `/routine-chart` | D |
+| IF-07 | `/chore-chart` | D |
+
+Deliberately none: FP-02, FP-11, FP-14, FP-15, FP-17, FP-18, FP-19 (gate 3); FP-20 (gate 2); FP-05 (no free slot beside its photos); IF-03 (own offer); IF-08 (no make-a-thing moment; its own checklist is the tool); IF-01, HC-03, HC-04, HC-08 (no tool fits). Revisit when an article or tool changes.
 
 ## Short by default
 
