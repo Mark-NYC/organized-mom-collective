@@ -269,7 +269,7 @@ for (const r of trackerRows) {
   if (r.pins !== expectedPins) fail('docs/editorial/CONTENT_TRACKER.md', `${r.id} Pins column is "${r.pins ?? 'missing'}", expected "${expectedPins}"`);
 }
 if (existsSync(PINTEREST_DIR)) {
-  for (const f of readdirSync(PINTEREST_DIR).filter((f) => f.endsWith('.md'))) {
+  for (const f of readdirSync(PINTEREST_DIR).filter((f) => f.endsWith('.md') && !f.endsWith('README.md'))) {
     if (!trackerRows.some((r) => `${r.id}.md` === f)) fail(`docs/editorial/pinterest/${f}`, 'file name is not a tracker ID (e.g. HC-01.md)');
   }
 }
