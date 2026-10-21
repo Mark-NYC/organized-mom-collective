@@ -29,7 +29,7 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) · [ARTICLE_FORMAT.md](ARTICLE_FORMAT.
 - **No long walls of text.** Break them with a heading, a checklist, a photo or a pull quote, not with decoration.
 - **The useful thing near the top.** The interactive `<StepChecklist>` (or the article's at-a-glance tool) comes right after a one- or two-sentence opening and the bold answer.
 - **Break it up with designed pieces, not decoration:** the checklist, a `<SplitList>`, a `<WhoCanHelp>` section, a photo between sections. One or two lines of prose per section.
-- **Not everything in a box.** Most of the article is open and ruled on white. Use at most: one Tip, one product callout, one Next Small Win, and a Shift only when it adds something the visual sections don't.
+- **Not everything in a box.** Most of the article is open and ruled on white. Use at most: one Tip per section, one product callout, one or two tool spotlights (ARTICLE_FORMAT.md → Tool spotlights), one Next Small Win, and a Shift only when it adds something the visual sections don't.
 - **Consistent images:** Article intros use an inset pale gray (#f1f2f2) frame with generous padding and square photo edges. Landscape heroes stay 3:2; portrait printable examples retain their natural aspect ratio and remain fully visible. Body images keep the existing 6px radius and captions in small soft text. Use fades only for lifestyle compositions with room for copy, never across printable instructions or product artwork.
 - **One primary product callout** (`<ProductCTA>`), near the end, where the article naturally leads to it.
 - **Relevant internal links** in the body, per [INTERNAL_LINKING.md](INTERNAL_LINKING.md).
@@ -60,6 +60,7 @@ All are available in any article without imports (full reference: [ARTICLE_FORMA
 | Do vs. skip | `<SplitList left right />` |
 | Jobs kids can take | `<WhoCanHelp rows />` |
 | Checklist card / side-by-side cards | `<Checklist kicker title time icon items />` (a printed planner sheet: kicker such as the day, serif title), `<ChecklistGrid>…</ChecklistGrid>` |
+| A free tool we recommend | `<ToolSpotlight tool="/chore-chart" problem="…" outcome="…" />` (real preview + button; rules in ARTICLE_FORMAT.md → Tool spotlights) |
 | The product callout | `<ProductCTA title="…" image="name" alt="…">copy</ProductCTA>` (button: "See the Wall Calendar" → `/calendar`) |
 | Pull-quote insight | `<Shift title="…">…</Shift>` |
 | Routine / fallback sections | `<RealLifeVersion>`, `<WhenLifeHappens>` |

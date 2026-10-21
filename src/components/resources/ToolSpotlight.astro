@@ -1,0 +1,55 @@
+---
+/**
+ * A free tool, shown where an article recommends it: the tool's real preview
+ * (public/images/tools/previews/{slug}.webp), the problem it solves, what changes
+ * for Mom, and a button that opens it. Title, button and preview come from the
+ * tools directory (src/data/tools-directory.ts), so they never drift from /tools.
+ *
+ * Same sage panel as ResponsibilityChartOffer. At most two per article, never back
+ * to back, and never in place of the one ProductCTA. Rules: ARTICLE_FORMAT.md → Tool spotlights.
+ */
+import { directoryTools } from '../../data/tools-directory';
+
+interface Props {
+  /** The tool's route, e.g. "/chore-chart" (a key of directoryTools). */
+  tool: string;
+  /** One short sentence: the frustration it removes. */
+  problem: string;
+  /** One short sentence: what's different for Mom once it's in place. */
+  outcome: string;
+  /** Small label above the title. */
+  label?: string;
+}
+const { tool, problem, outcome, label = 'Free tool' } = Astro.props;
+const entry = directoryTools[tool];
+if (!entry) throw new Error(`ToolSpotlight: "${tool}" is not in src/data/tools-directory.ts`);
+const id = `tool-${entry.slug}`;
+---
+
+<aside class="tsp breakout" aria-labelledby={`${id}-h`}>
+  <a href={tool} class="tsp-preview" tabindex="-1" aria-hidden="true">
+    <img src={`/images/tools/previews/${entry.slug}.webp`} width="900" height="720" alt="" loading="lazy" decoding="async" />
+  </a>
+  <div class="tsp-copy">
+    <p class="label text-warm-soft">{label}</p>
+    <p id={`${id}-h`} class="tsp-title">{entry.title}</p>
+    <p class="tsp-problem">{problem}</p>
+    <p class="tsp-outcome">{outcome}</p>
+    <a href={tool} class="btn-primary mt-6 w-full sm:w-auto">{entry.action}</a>
+  </div>
+</aside>
+
+<style>
+  .tsp { margin-block: 2.75rem; background: var(--color-sage-wash); color: var(--color-warm-ink); }
+  .tsp-preview { display: block; background: #fff; border-bottom: 1px solid var(--color-warm-rule); }
+  .tsp-preview img { display: block; width: 100%; height: auto; }
+  .tsp-copy { padding: 24px 20px 28px; }
+  .tsp-title { margin-top: 6px; font-family: var(--font-editorial); font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .tsp-problem { margin-top: 12px; font-size: 1rem; line-height: 1.6; color: var(--color-warm-soft); }
+  .tsp-outcome { margin-top: 8px; font-size: 1rem; line-height: 1.6; font-weight: 600; }
+  @media (min-width: 640px) {
+    .tsp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; }
+    .tsp-preview { border-bottom: 0; border-right: 1px solid var(--color-warm-rule); height: 100%; display: flex; align-items: center; }
+    .tsp-copy { padding: 32px 36px; }
+  }
+</style>
