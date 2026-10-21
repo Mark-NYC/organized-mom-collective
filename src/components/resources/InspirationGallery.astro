@@ -8,7 +8,9 @@ const hasAllImages = gallery.ideas.every(idea=>Boolean(idea.image));
 const isLive = gallery.published && hasAllImages;
 const hasTwoTips = gallery.ideas.some(idea => Boolean(idea.secondTitle));
 const totalIdeas = gallery.ideas.reduce((count, idea) => count + (idea.secondTitle ? 2 : 1), 0);
-const photoTopic = gallery.slug === 'small-mudroom-ideas' ? 'mudroom' : 'toy storage';
+const isMudroom = gallery.slug === 'small-mudroom-ideas';
+const isLivingRoom = gallery.slug === 'cozy-living-room-ideas-for-families-with-kids';
+const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : 'toy storage';
 ---
 <article class="inspo">
   <header class="inspo-header">
@@ -57,13 +59,13 @@ const photoTopic = gallery.slug === 'small-mudroom-ideas' ? 'mudroom' : 'toy sto
             </a>}
           </div>
           {index===0 && <nav class="inspo-jump" aria-label={`Jump to a ${photoTopic} photo`}><details><summary><span><strong>Jump to a photo</strong><small>{gallery.ideas.length} spaces to explore</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
-          {index === Math.floor(gallery.ideas.length/2)-1 && <aside class="inspo-aside"><h3>{gallery.slug === "small-mudroom-ideas" ? "Make the after-school routine stick" : "Make toy cleanup a family habit"}</h3><p>{gallery.slug === "small-mudroom-ideas" ? "A tidy drop zone works best when everyone knows where their things go." : "Storage works better when kids know what belongs where. Turn the end-of-day reset into a small, shared routine."}</p><a href="/routine-chart">Create a free family routine chart →</a></aside>}
+          {index === Math.floor(gallery.ideas.length/2)-1 && <aside class="inspo-aside"><h3>{isMudroom ? "Make the after-school routine stick" : isLivingRoom ? "Make the room work for everyone" : "Make toy cleanup a family habit"}</h3><p>{isMudroom ? "A tidy drop zone works best when everyone knows where their things go." : isLivingRoom ? "The coziest family rooms leave room for everyday life. Give books, blankets, and games a place everyone can reach and return them to." : "Storage works better when kids know what belongs where. Turn the end-of-day reset into a small, shared routine."}</p><a href="/routine-chart">Create a free family routine chart →</a></aside>}
         </div>
       ))}
     </section>
     <section class="inspo-finish" aria-label="Put these ideas to work">
-      <h2>{gallery.slug === "small-mudroom-ideas" ? "Start with the doorway you have" : "Start with one toy storage zone"}</h2>
-      <p>{gallery.slug === "small-mudroom-ideas" ? "Pick one change: somewhere for shoes, somewhere for bags, or one hook your child can reach. That is enough to begin." : "Pick the toys that are used most often, give them a home your child can reach, and leave enough room to put everything away without rearranging the room."}</p>
+      <h2>{isMudroom ? "Start with the doorway you have" : isLivingRoom ? "Make one cozy change this week" : "Start with one toy storage zone"}</h2>
+      <p>{isMudroom ? "Pick one change: somewhere for shoes, somewhere for bags, or one hook your child can reach. That is enough to begin." : isLivingRoom ? "You don’t need a new sofa or a perfect house. Try moving a chair, adding a lamp, or making space for family games. The best room is the one your family actually uses." : "Pick the toys that are used most often, give them a home your child can reach, and leave enough room to put everything away without rearranging the room."}</p>
       <p>Want a simple follow-through plan? <a href="/routine-chart">Make a free family routine chart →</a></p>
     </section>
     <p class="inspo-disclosure">{gallery.disclosure}</p>
