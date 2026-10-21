@@ -1,6 +1,6 @@
 # Gemini batch 05: QA report (2026-10-21)
 
-Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../docs/editorial/PINTEREST_QA_CHECKLIST.md) and the owner's batch 05 rule: **nobody shown above the shoulders** (no faces, heads, necks or reflections). Results are **pass**, **fail** or **not received**. Mechanical checks, visual judgment and owner approval are separate. **No pin in this batch is owner-approved yet.**
+Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../docs/editorial/PINTEREST_QA_CHECKLIST.md) and the owner's batch 05 rule: **nobody shown above the shoulders** (no faces, heads, necks or reflections). Results are **pass**, **fail** or **not received**. Mechanical checks, visual judgment and owner approval are separate. > **Owner approval, 2026-10-21:** all ten approved. 47 after its second replacement; **42, 43 and 46 by owner override** (“the rest of the pins pass and are approved”). The fail findings below stand as recorded: 42 shows the back of a child’s head and borrows pin 41’s support line; 43 has no wordmark; **46 shows a woman’s face in profile**, which the QA checklist lists as an automatic rejection.
 
 ## Received
 
