@@ -35,7 +35,7 @@ const id = `tool-${entry.slug}`;
     <p id={`${id}-h`} class="tsp-title">{entry.title}</p>
     <p class="tsp-problem">{problem}</p>
     <p class="tsp-outcome">{outcome}</p>
-    <a href={tool} class="btn-primary mt-6 w-full sm:w-auto">{entry.action}</a>
+    <a href={tool} class="btn-primary mt-6 w-full sm:w-auto" data-cta={`tool-spotlight:${entry.slug}`}>{entry.action}</a>
   </div>
 </aside>
 

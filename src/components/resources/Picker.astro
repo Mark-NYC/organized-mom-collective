@@ -1,0 +1,151 @@
+---
+/**
+ * A three-question picker: she answers two to four quick questions about her family and gets one
+ * recommendation, not a summary of options. For "X vs Y" and "which one fits us" articles.
+ * Each option points at a result key; the most-picked result wins, ties go to the earlier question.
+ * Answers save in this browser (localStorage). Without JavaScript every result is listed.
+ * Results must be honest: a free option or "you don't need anything new" are valid answers.
+ * Rules: docs/editorial/SAVEABLE_ELEMENTS.md.
+ */
+interface Option {
+  label: string;
+  /** Key in `results`. */
+  result: string;
+}
+interface Question {
+  question: string;
+  options: Option[];
+}
+interface Result {
+  title: string;
+  body: string;
+  href?: string;
+  /** Link label, e.g. "Read the comparison". */
+  cta?: string;
+}
+interface Props {
+  id: string;
+  title: string;
+  kicker?: string;
+  questions: Question[];
+  results: Record<string, Result>;
+  /** localStorage key; bump the version when questions change. */
+  storageKey: string;
+}
+const { id, title, kicker = 'Find your fit', questions, results, storageKey } = Astro.props;
+for (const q of questions) for (const o of q.options) if (!results[o.result]) throw new Error(`Picker ${id}: unknown result "${o.result}"`);
+---
+
+<section id={id} class="picker my-10 scroll-mt-6" aria-labelledby={`${id}-h`} data-picker={storageKey} data-picker-id={id}>
+  <header class="border-l-[3px] border-month pl-3.5">
+    <p class="label text-muted">{kicker}</p>
+    <h2 id={`${id}-h`} class="pk-title">{title}</h2>
+  </header>
+  <form class="pk-form" onsubmit="return false">
+    {
+      questions.map((q, qi) => (
+        <fieldset>
+          <legend><span class="pk-num">{qi + 1}</span>{q.question}</legend>
+          {q.options.map((o) => (
+            <label class="pk-option">
+              <input type="radio" name={`${id}-q${qi}`} value={o.result} />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </fieldset>
+      ))
+    }
+  </form>
+  <div class="pk-results" aria-live="polite">
+    <p class="pk-prompt" data-pk-prompt hidden>Answer all {questions.length} to see your fit.</p>
+    {
+      Object.entries(results).map(([key, r]) => (
+        <div class="pk-result" data-pk-result={key}>
+          <p class="label text-soft">Your fit</p>
+          <p class="pk-result-title">{r.title}</p>
+          <p class="pk-result-body">{r.body}</p>
+          {r.href && <a href={r.href} class="text-link mt-4 inline-block" data-cta={`picker:${id}`}>{r.cta ?? 'Read more'}</a>}
+        </div>
+      ))
+    }
+    <button type="button" class="pk-reset" data-pk-reset hidden>Start over</button>
+  </div>
+</section>
+
+<style>
+  .pk-title { margin-top: 4px; font-family: var(--font-editorial); font-size: 1.45rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .pk-form { margin-top: 18px; display: grid; gap: 20px; }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { display: flex; gap: 10px; align-items: baseline; padding: 0; font-weight: 600; line-height: 1.4; color: var(--color-prose); }
+  .pk-num { display: inline-grid; place-items: center; flex: none; width: 1.5rem; height: 1.5rem; border: 1px solid var(--color-ink); border-radius: 999px; font-size: 0.75rem; }
+  .pk-option { display: flex; align-items: center; gap: 12px; min-height: 2.75rem; margin-top: 4px; padding: 8px 2px; border-bottom: 1px solid var(--color-rule); cursor: pointer; line-height: 1.4; }
+  .pk-option input { width: 1.1rem; height: 1.1rem; flex: none; accent-color: var(--color-ink); }
+  .pk-option:has(input:checked) { font-weight: 600; color: var(--color-prose); }
+  .pk-results { margin-top: 24px; }
+  .pk-prompt { font-size: 0.9rem; color: var(--color-soft); }
+  .pk-result { margin-top: 12px; border-radius: 6px; background: var(--color-sage-wash); padding: 20px; }
+  .pk-result-title { margin-top: 4px; font-family: var(--font-editorial); font-size: 1.3rem; line-height: 1.25; font-weight: 700; }
+  .pk-result-body { margin-top: 6px; font-size: 1rem; line-height: 1.6; }
+  .pk-reset { margin-top: 10px; min-height: 2.75rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; text-decoration: underline; text-decoration-color: var(--color-rule); text-underline-offset: 6px; }
+  .picker.is-js .pk-result { display: none; }
+  .picker.is-js .pk-result.is-shown { display: block; }
+  @media (min-width: 640px) {
+    .pk-result { padding: 24px 28px; }
+  }
+  @media print {
+    .pk-reset, .pk-prompt { display: none; }
+  }
+</style>
+
+<script>
+  import { elementEvent } from '../../lib/element-events';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-picker]')) {
+    const key = root.dataset.picker!;
+    const id = root.dataset.pickerId!;
+    root.classList.add('is-js');
+    const groups = [...root.querySelectorAll('fieldset')].map((f) => [...f.querySelectorAll<HTMLInputElement>('input[type=radio]')]);
+    const results = [...root.querySelectorAll<HTMLElement>('[data-pk-result]')];
+    const prompt = root.querySelector<HTMLElement>('[data-pk-prompt]')!;
+    const reset = root.querySelector<HTMLButtonElement>('[data-pk-reset]')!;
+
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+      if (Array.isArray(saved)) groups.forEach((g, i) => g.forEach((r) => (r.checked = r.value === saved[i])));
+    } catch {
+      /* Blocked storage: the picker still works, it just isn't remembered. */
+    }
+
+    const update = (save: boolean) => {
+      const answers = groups.map((g) => g.find((r) => r.checked)?.value ?? null);
+      const done = answers.every(Boolean);
+      let winner: string | null = null;
+      if (done) {
+        const counts = new Map<string, number>();
+        for (const a of answers) counts.set(a!, (counts.get(a!) ?? 0) + 1);
+        const best = Math.max(...counts.values());
+        winner = answers.find((a) => counts.get(a!) === best) ?? null;
+      }
+      results.forEach((r) => r.classList.toggle('is-shown', r.dataset.pkResult === winner));
+      prompt.hidden = done;
+      reset.hidden = !answers.some(Boolean);
+      if (save) {
+        try {
+          localStorage.setItem(key, JSON.stringify(answers));
+        } catch {
+          /* ignore */
+        }
+        elementEvent('element_use', 'picker', id);
+        if (done) elementEvent('element_complete', 'picker', id);
+      }
+    };
+
+    groups.flat().forEach((r) => r.addEventListener('change', () => update(true)));
+    reset.addEventListener('click', () => {
+      groups.flat().forEach((r) => (r.checked = false));
+      update(true);
+      groups[0]?.[0]?.focus();
+    });
+    update(false);
+  }
+</script>

@@ -152,6 +152,8 @@ const C = 2 * Math.PI * R;
 </style>
 
 <script>
+  import { elementEvent } from '../../lib/element-events';
+
   for (const root of document.querySelectorAll<HTMLElement>('[data-step-checklist]')) {
     const key = root.dataset.stepChecklist!;
     const timed = root.dataset.timed !== undefined;
@@ -199,6 +201,8 @@ const C = 2 * Math.PI * R;
             : `${done} of ${n} done`;
       reset.hidden = done === 0;
       if (save) {
+        elementEvent('element_use', 'step-checklist', key);
+        if (complete) elementEvent('element_complete', 'step-checklist', key);
         try {
           localStorage.setItem(key, JSON.stringify(inputs.map((b) => b.checked)));
         } catch {

@@ -1,0 +1,198 @@
+---
+/**
+ * A fill-in builder: she fills two or three blanks in one sentence pattern ("After {cue}, {who}
+ * {action}.") from suggestions or her own words, adds the sentence to her list, then prints or
+ * copies the list. What she made, she keeps. For habits, handoffs and family rules.
+ * Saves in this browser (localStorage); nothing leaves the device. Print uses the article print
+ * mode (html.print-schedule, global.css) so only her list prints.
+ * Rules: docs/editorial/SAVEABLE_ELEMENTS.md.
+ */
+interface Slot {
+  /** Field label, e.g. "After…". */
+  label: string;
+  /** Suggestions; she can also type her own. */
+  options: string[];
+}
+interface Props {
+  id: string;
+  title: string;
+  kicker?: string;
+  /** Sentence pattern with {slot} placeholders, e.g. "After {cue}, {who} {action}." */
+  template: string;
+  slots: Record<string, Slot>;
+  /** localStorage key; bump the version when the template changes. */
+  storageKey: string;
+  /** Heading over her list, also the printed title. */
+  listTitle?: string;
+  /** Most sentences she can keep. */
+  max?: number;
+}
+const { id, title, kicker = 'Make it yours', template, slots, storageKey, listTitle = 'Our list', max = 6 } = Astro.props;
+const parts = template.split(/(\{\w+\})/).filter(Boolean);
+for (const p of parts) {
+  const m = p.match(/^\{(\w+)\}$/);
+  if (m && !slots[m[1]]) throw new Error(`Builder ${id}: template uses {${m[1]}} but no slot defines it`);
+}
+---
+
+<section id={id} class="builder my-10 scroll-mt-6" aria-labelledby={`${id}-h`} data-builder={storageKey} data-builder-id={id} data-max={max} data-print-schedule>
+  <header class="bl-form border-l-[3px] border-month pl-3.5">
+    <p class="label text-muted">{kicker}</p>
+    <h2 id={`${id}-h`} class="bl-title">{title}</h2>
+  </header>
+  <div class="bl-form bl-fields">
+    {
+      Object.entries(slots).map(([name, s]) => (
+        <label class="bl-field">
+          <span class="label text-soft">{s.label}</span>
+          <input type="text" name={name} list={`${id}-${name}-list`} placeholder={s.options[0]} autocomplete="off" data-bl-slot={name} />
+          <datalist id={`${id}-${name}-list`}>
+            {s.options.map((o) => <option value={o} />)}
+          </datalist>
+        </label>
+      ))
+    }
+  </div>
+  <p class="bl-form bl-preview" aria-live="polite" data-bl-preview>
+    {parts.map((p) => {
+      const m = p.match(/^\{(\w+)\}$/);
+      return m ? <span class="bl-blank" data-bl-fill={m[1]}>{slots[m[1]].options[0]}</span> : <span>{p}</span>;
+    })}
+  </p>
+  <div class="bl-form mt-4">
+    <button type="button" class="btn-primary w-full sm:w-auto" data-bl-add disabled>Add to {listTitle.toLowerCase()}</button>
+  </div>
+
+  <div class="bl-list" data-bl-list-wrap hidden>
+    <p class="bl-list-title">{listTitle}</p>
+    <ol class="bl-items" data-bl-list></ol>
+    <div class="bl-actions print:hidden">
+      <button type="button" class="bl-link" data-bl-print>Print the list</button>
+      <button type="button" class="bl-link" data-bl-copy>Copy</button>
+      <span class="bl-saved">Saved in this browser.</span>
+    </div>
+  </div>
+  <template data-bl-item>
+    <li><span data-bl-text></span><button type="button" class="bl-remove print:hidden" aria-label="Remove">×</button></li>
+  </template>
+</section>
+
+<style>
+  .bl-title { margin-top: 4px; font-family: var(--font-editorial); font-size: 1.45rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .bl-fields { margin-top: 18px; display: grid; gap: 14px; }
+  .bl-field { display: grid; gap: 4px; min-width: 0; }
+  .bl-field input { width: 100%; min-width: 0; min-height: 2.9rem; padding: 0 12px; border: 1px solid var(--color-rule-strong); border-radius: 4px; background: var(--color-paper); font-size: 1rem; color: var(--color-prose); }
+  .bl-field input:focus { outline: 2px solid var(--color-ink); outline-offset: 1px; }
+  .bl-preview { margin-top: 18px; font-family: var(--font-editorial); font-size: 1.3rem; line-height: 1.4; font-style: italic; color: var(--color-prose); }
+  .bl-blank { border-bottom: 2px solid var(--color-month); color: var(--color-soft); }
+  .bl-blank.is-filled { color: var(--color-prose); }
+  .builder [data-bl-add]:disabled { opacity: 0.45; cursor: not-allowed; }
+  .bl-list { margin-top: 26px; border-radius: 6px; background: var(--color-sage-wash); padding: 20px; }
+  .bl-list-title { font-family: var(--font-editorial); font-size: 1.25rem; font-weight: 700; }
+  ol { margin-top: 10px; counter-reset: bl; }
+  li { counter-increment: bl; display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #d5ddcc; font-weight: 600; line-height: 1.45; }
+  li::before { content: counter(bl); flex: none; display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--color-sage); color: #fff; font-size: 0.75rem; }
+  li > span { flex: 1; }
+  .bl-remove { flex: none; width: 2rem; height: 2rem; margin-top: -4px; font-size: 1.2rem; color: var(--color-soft); }
+  .bl-actions { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; }
+  .bl-link { min-height: 2.75rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; text-decoration: underline; text-decoration-color: var(--color-rule-strong); text-underline-offset: 6px; }
+  .bl-saved { font-size: 0.82rem; color: var(--color-soft); }
+  @media (min-width: 640px) {
+    .bl-fields { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+    .bl-list { padding: 24px 28px; }
+  }
+  @media print {
+    .bl-form, .bl-actions, .bl-remove { display: none !important; }
+    .bl-list { background: none; padding: 0; }
+  }
+</style>
+
+<script>
+  import { elementEvent } from '../../lib/element-events';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-builder]')) {
+    const key = root.dataset.builder!;
+    const id = root.dataset.builderId!;
+    const max = Number(root.dataset.max);
+    const inputs = [...root.querySelectorAll<HTMLInputElement>('[data-bl-slot]')];
+    const fills = [...root.querySelectorAll<HTMLElement>('[data-bl-fill]')];
+    const preview = root.querySelector<HTMLElement>('[data-bl-preview]')!;
+    const add = root.querySelector<HTMLButtonElement>('[data-bl-add]')!;
+    const wrap = root.querySelector<HTMLElement>('[data-bl-list-wrap]')!;
+    const list = root.querySelector<HTMLOListElement>('[data-bl-list]')!;
+    const tpl = root.querySelector<HTMLTemplateElement>('[data-bl-item]')!;
+    let items: string[] = [];
+
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(key) ?? '[]');
+      if (Array.isArray(saved)) items = saved.filter((s): s is string => typeof s === 'string').slice(0, max);
+    } catch {
+      /* Blocked storage: the builder still works, it just isn't remembered. */
+    }
+
+    const save = () => {
+      try {
+        localStorage.setItem(key, JSON.stringify(items));
+      } catch {
+        /* ignore */
+      }
+    };
+    const sentence = () => (preview.textContent ?? '').replace(/\s+/g, ' ').trim();
+    const renderList = () => {
+      list.replaceChildren(
+        ...items.map((text, i) => {
+          const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+          li.querySelector('[data-bl-text]')!.textContent = text;
+          li.querySelector('button')!.addEventListener('click', () => {
+            items.splice(i, 1);
+            save();
+            renderList();
+          });
+          return li;
+        }),
+      );
+      wrap.hidden = items.length === 0;
+      update();
+    };
+    const update = () => {
+      inputs.forEach((input) => {
+        const fill = fills.filter((f) => f.dataset.blFill === input.name);
+        const value = input.value.trim();
+        fill.forEach((f) => {
+          f.textContent = value || input.placeholder;
+          f.classList.toggle('is-filled', value !== '');
+        });
+      });
+      add.disabled = inputs.some((i) => i.value.trim() === '') || items.length >= max;
+    };
+
+    inputs.forEach((i) => i.addEventListener('input', update));
+    add.addEventListener('click', () => {
+      if (add.disabled) return;
+      items.push(sentence());
+      save();
+      inputs.forEach((i) => (i.value = ''));
+      renderList();
+      elementEvent('element_use', 'builder', id);
+      inputs[0]?.focus();
+    });
+    root.querySelector('[data-bl-print]')!.addEventListener('click', () => {
+      elementEvent('element_print', 'builder', id);
+      document.documentElement.classList.add('print-schedule');
+      window.print();
+    });
+    root.querySelector('[data-bl-copy]')!.addEventListener('click', async (e) => {
+      const button = e.currentTarget as HTMLButtonElement;
+      try {
+        await navigator.clipboard.writeText(items.map((t, i) => `${i + 1}. ${t}`).join('\n'));
+        button.textContent = 'Copied';
+        setTimeout(() => (button.textContent = 'Copy'), 1600);
+        elementEvent('element_copy', 'builder', id);
+      } catch {
+        /* Clipboard blocked: the list is still on screen to copy by hand. */
+      }
+    });
+    window.addEventListener('afterprint', () => document.documentElement.classList.remove('print-schedule'));
+    renderList();
+  }
+</script>

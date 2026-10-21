@@ -312,42 +312,6 @@
     @apply mt-2.5 text-[0.88rem] leading-snug;
     color: var(--color-prose-soft);
   }
-  /* Habit-stacking chart (IF-10): a saveable "After we… / We…" reference card.
-     Unlike other article tables it never scrolls sideways: two columns wrap on phones. */
-  .habit-chart {
-    @apply mt-8 mb-4 rounded-[6px] bg-sage-wash px-5 py-7 sm:px-9 sm:py-9;
-  }
-  .habit-chart-title {
-    font-family: var(--font-editorial);
-    @apply mt-2 text-[1.5rem] leading-tight font-bold italic sm:text-[1.85rem];
-  }
-  .habit-chart :where(table) {
-    @apply mt-5 table w-full table-fixed text-[0.98rem] sm:text-[1.05rem];
-  }
-  .habit-chart :where(th) {
-    @apply border-b-2 border-prose pb-2.5 whitespace-normal;
-  }
-  .habit-chart :where(td) {
-    @apply min-w-0 border-b border-[#d5ddcc] py-3.5 align-top;
-    color: var(--color-prose-soft);
-  }
-  .habit-chart :where(tr:last-child td) {
-    @apply border-b-0;
-  }
-  .habit-chart :where(th:last-child, td:last-child) {
-    @apply relative pr-0 pl-6 sm:pl-7;
-  }
-  .habit-chart :where(td:last-child) {
-    @apply font-semibold;
-    color: var(--color-prose);
-  }
-  .habit-chart :where(td:last-child)::before {
-    content: '→';
-    @apply absolute left-1 font-normal text-[#55684b];
-  }
-  .habit-chart-note {
-    @apply mt-5 border-t border-[#d5ddcc] pt-5 text-[0.98rem] leading-[1.65] sm:text-[1.0625rem];
-  }
 }
 
 /*
