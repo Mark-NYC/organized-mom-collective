@@ -1,0 +1,60 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { routes } from '../routes';
+---
+
+<PublicLayout
+  title="Our Story"
+  description="Meet Mark and Megan, the husband-and-wife team behind Organized Mom Collective. We started with a home that needed something to change."
+  width="full"
+>
+  <header class="mx-4 mt-5 bg-[#f1f2f2] px-6 py-16 text-center sm:mx-9 sm:py-24">
+    <p class="label text-warm-soft">Our story · Meet Mark & Megan</p>
+    <h1 class="mx-auto mt-5 max-w-4xl font-serif text-[clamp(2.5rem,6vw,5rem)] leading-[1.08] text-warm-ink">We didn’t start with an organized home.</h1>
+    <p class="mx-auto mt-6 max-w-2xl text-[1.15rem] leading-relaxed text-warm-ink sm:text-[1.3rem]">We started with a home that needed something to change.</p>
+  </header>
+
+  <section aria-label="How it began" class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 sm:px-8 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24">
+    <!-- Replace this editorial holding space with a real founder photo when supplied.
+         Suggested asset: public/images/site/mark-megan-founders.jpg.
+         Do not replace with AI-generated people or stock models. -->
+    <div class="flex aspect-[4/5] flex-col justify-end bg-[#e7ece5] p-8 sm:p-12">
+      <p class="font-serif text-[clamp(1.9rem,3.5vw,2.8rem)] leading-tight text-warm-ink">A family learning to work together.</p>
+      <p class="label mt-7 text-warm-soft">Mark & Megan · Founders</p>
+    </div>
+    <div class="max-w-xl space-y-5 text-[1.075rem] leading-[1.8] text-warm-ink">
+      <h2 class="font-serif text-[2rem] leading-tight sm:text-[2.5rem]">It started at home.</h2>
+      <p>We’re Mark and Megan, the husband-and-wife team behind Organized Mom Collective.</p>
+      <p>Like a lot of families, we were frustrated by the way things were working. There was always something to remember, plan or get done. And too much of it was falling on Megan.</p>
+      <p>We knew we didn’t want to keep living that way. We wanted everyone to know what was happening and take responsibility for their part, instead of expecting one person to hold everything together.</p>
+      <p>So we started making tools for our own family.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="building-h" class="bg-sage-wash py-14 sm:py-20">
+    <div class="mx-auto max-w-3xl px-5 sm:px-8">
+      <p class="label text-warm-soft">What we began to build</p>
+      <h2 id="building-h" class="mt-4 font-serif text-[2rem] leading-tight text-warm-ink sm:text-[2.6rem]">One plan everyone can see. A part everyone can own.</h2>
+      <div class="mt-7 space-y-5 text-[1.075rem] leading-[1.8] text-warm-ink">
+        <p>Mark thinks in systems: how to bring scattered information together and make it simple. Megan knows what family life actually asks of a mom, and helped shape those ideas into something that could work on an ordinary Tuesday.</p>
+        <p>We started with the things our family needed to see in one place. Then we worked on making responsibilities clear enough that everyone could take part.</p>
+        <p>We began to see a different way of running our home. Not just getting through another week, but helping our kids learn new skills, build habits and take ownership as they grow.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="still-learning-h" class="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
+    <h2 id="still-learning-h" class="font-serif text-[2rem] leading-tight text-warm-ink sm:text-[2.6rem]">We’re still learning, too.</h2>
+    <div class="mt-7 space-y-5 text-[1.075rem] leading-[1.8] text-warm-ink">
+      <p>Our house isn’t perfectly organized. We haven’t mastered family routines, and we don’t expect you to either.</p>
+      <p>But we’re growing toward something better: a home where we’re on the same page, where our kids grow in responsibility, and where one person doesn’t have to carry the whole mental load.</p>
+      <p>That’s why we share what we’re making. Not because we have it all figured out, but because we believe a family can learn to work together.</p>
+    </div>
+    <blockquote class="mt-10 border-l-4 border-[#bbcbb4] pl-6 font-serif text-[1.65rem] leading-snug text-warm-ink italic sm:text-[2rem]">A better organized home isn’t one where Mom does everything. It’s one where everyone plays a part.</blockquote>
+    <p class="mt-8 text-[1.075rem] leading-relaxed text-warm-ink">Organized moms raise organized families. And organized families share the load.</p>
+    <div class="mt-10 flex flex-wrap gap-4">
+      <a href={routes.calendar} data-cta="story-calendar" class="btn-primary min-h-12 px-6">See the Family Calendar</a>
+      <a href={routes.resources} data-cta="story-resources" class="btn-secondary min-h-12 px-6">Explore free resources</a>
+    </div>
+  </section>
+</PublicLayout>
