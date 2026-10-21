@@ -88,6 +88,23 @@ const mainClass =
       )
     }
   </main>
+  {chrome && path === '/' && (
+    <section aria-labelledby="founder-story-h" class="mx-4 my-9 bg-[#f1f2f2] px-6 py-12 sm:mx-9 sm:px-10 sm:py-16">
+      <div class="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2 md:gap-14">
+        <div class="flex aspect-[5/4] flex-col justify-end bg-[#e7ece5] p-8 sm:p-10">
+          <p class="font-serif text-[2rem] leading-tight text-warm-ink">Built for our family.<br />Shared with yours.</p>
+          <p class="label mt-7 text-warm-soft">Mark & Megan · Founders</p>
+        </div>
+        <div>
+          <p class="label text-warm-soft">Our story</p>
+          <h2 id="founder-story-h" class="mt-3 font-serif text-[2.2rem] leading-tight text-warm-ink">We didn’t start with an organized home.</h2>
+          <p class="mt-5 text-[1.05rem] leading-relaxed text-warm-ink">We started because we needed something to change. Too much of the planning, remembering and managing was falling on one person.</p>
+          <p class="mt-4 text-[1.05rem] leading-relaxed text-warm-ink">So we began creating tools to help our family see the plan, build better habits and share responsibility. We’re still learning, but we believe everyone can play a part.</p>
+          <a href="/our-story" data-cta="home-our-story" class="text-link mt-6 inline-flex min-h-11 items-center">Read our story <span aria-hidden="true" class="ml-2">→</span></a>
+        </div>
+      </div>
+    </section>
+  )}
   {chrome && <SiteFooter />}
   <CtaTracking />
   {accountsEnabled() && <SaveNudge />}
