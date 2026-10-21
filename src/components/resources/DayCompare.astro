@@ -1,0 +1,59 @@
+---
+/**
+ * The same day, two ways: one column where Mom carries it, one where the family does. The brand
+ * story made concrete (Mom doesn't have to manage everything alone). Rows share a time; the
+ * "after" column is the one to copy. Open and ruled; on phones each time stacks before/after.
+ * 4–7 rows, same moments in both columns. Never present it as a real family's day.
+ * Rules: docs/editorial/SAVEABLE_ELEMENTS.md.
+ */
+interface Row {
+  time: string;
+  before: string;
+  after: string;
+}
+interface Props {
+  rows: Row[];
+  title?: string;
+  kicker?: string;
+  /** Column labels. */
+  labels?: [string, string];
+}
+const { rows, title, kicker = 'The same day, two ways', labels = ['When Mom carries it', 'When everyone has a part'] } = Astro.props;
+---
+
+<div class="day-compare">
+  <p class="label flex items-center gap-2 text-soft"><span aria-hidden="true" class="inline-block h-[3px] w-6 bg-month"></span>{kicker}</p>
+  {title && <p class="dc-title">{title}</p>}
+  <div class="dc-head" aria-hidden="true"><span></span><span>{labels[0]}</span><span>{labels[1]}</span></div>
+  <ol class="dc-list">
+    {
+      rows.map((r) => (
+        <li>
+          <span class="dc-time">{r.time}</span>
+          <p class="dc-before"><span class="dc-label">{labels[0]}</span>{r.before}</p>
+          <p class="dc-after"><span class="dc-label">{labels[1]}</span>{r.after}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .day-compare { margin-block: 2.5rem; }
+  .dc-title { margin-top: 6px; font-family: var(--font-editorial); font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .dc-head { display: none; }
+  ol { margin-top: 14px; border-top: 2px solid var(--color-prose); }
+  li { display: grid; gap: 6px; padding: 14px 0; border-bottom: 1px solid var(--color-rule); }
+  .dc-time { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--color-prose); }
+  .dc-label { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-soft); }
+  .dc-before { font-size: 0.97rem; line-height: 1.5; color: var(--color-prose-soft); }
+  .dc-after { font-size: 0.97rem; line-height: 1.5; font-weight: 600; color: var(--color-prose); border-left: 3px solid var(--color-month); padding-left: 10px; }
+  @media (min-width: 640px) {
+    .dc-head { display: grid; grid-template-columns: 4.5rem 1fr 1fr; gap: 1.5rem; margin-top: 18px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+    ol { margin-top: 8px; }
+    li { grid-template-columns: 4.5rem 1fr 1fr; gap: 1.5rem; padding: 16px 0; align-items: start; }
+    .dc-time { padding-top: 3px; }
+    .dc-label { display: none; }
+    .dc-after { border-left: 0; padding-left: 0; }
+  }
+</style>

@@ -60,6 +60,13 @@ All are available in any article without imports (full reference: [ARTICLE_FORMA
 | Do vs. skip | `<SplitList left right />` |
 | Jobs kids can take | `<WhoCanHelp rows />` |
 | Checklist card / side-by-side cards | `<Checklist kicker title time icon items />` (a printed planner sheet: kicker such as the day, serif title), `<ChecklistGrid>…</ChecklistGrid>` |
+| The exact words to say | `<SayThis items />` |
+| A decision for her family | `<Picker id title questions results storageKey />` |
+| A fill-in sentence she keeps and prints | `<Builder id title template slots storageKey />` |
+| A chart of pairs to screenshot | `<ReferenceChart title columns rows>note</ReferenceChart>` |
+| The day or meeting in order | `<Timeline items />` |
+| The same day, Mom alone vs everyone | `<DayCompare rows />` |
+| Which of these to use, and when | [SAVEABLE_ELEMENTS.md](SAVEABLE_ELEMENTS.md) |
 | A free tool we recommend | `<ToolSpotlight tool="/chore-chart" problem="…" outcome="…" />` (real preview + button; rules in ARTICLE_FORMAT.md → Tool spotlights) |
 | The product callout | `<ProductCTA title="…" image="name" alt="…">copy</ProductCTA>` (button: "See the Wall Calendar" → `/calendar`) |
 | Pull-quote insight | `<Shift title="…">…</Shift>` |

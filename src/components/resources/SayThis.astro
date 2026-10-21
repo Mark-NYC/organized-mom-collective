@@ -1,0 +1,63 @@
+---
+/**
+ * Say this, not that: the exact words, the usual phrasing beside a better one. For articles about
+ * getting kids or a partner to own something (mental load, chores, independence, routines).
+ * The "say" line is a full sentence she can use tonight, in quotes; `why` is an optional short
+ * reason. Open and ruled, not boxed. 3–5 items. Rules: docs/editorial/SAVEABLE_ELEMENTS.md.
+ */
+interface Item {
+  /** The usual phrasing, e.g. "Can you help me with the dishes?" */
+  instead: string;
+  /** What to say instead, e.g. "After dinner, you load the dishwasher." */
+  say: string;
+  /** Optional: why it works, one short line. */
+  why?: string;
+}
+interface Props {
+  items: Item[];
+  /** Serif title above the rows. */
+  title?: string;
+  kicker?: string;
+  /** Column labels. */
+  labels?: [string, string];
+}
+const { items, title, kicker = 'Say this, not that', labels = ['Instead of', 'Try'] } = Astro.props;
+---
+
+<div class="say-this">
+  <p class="label flex items-center gap-2 text-soft"><span aria-hidden="true" class="inline-block h-[3px] w-6 bg-month"></span>{kicker}</p>
+  {title && <p class="say-title">{title}</p>}
+  <div class="say-head" aria-hidden="true"><span>{labels[0]}</span><span>{labels[1]}</span></div>
+  <ul class="say-list">
+    {
+      items.map((item) => (
+        <li>
+          <p class="say-instead"><span class="say-label">{labels[0]}</span>“{item.instead}”</p>
+          <div>
+            <p class="say-say"><span class="say-label">{labels[1]}</span>“{item.say}”</p>
+            {item.why && <p class="say-why">{item.why}</p>}
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .say-this { margin-block: 2.5rem; }
+  .say-title { margin-top: 6px; font-family: var(--font-editorial); font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  .say-head { display: none; }
+  ul { margin-top: 14px; border-top: 2px solid var(--color-prose); }
+  li { display: grid; gap: 6px; padding: 16px 0; border-bottom: 1px solid var(--color-rule); }
+  .say-label { display: block; margin-bottom: 2px; font-family: var(--font-sans, inherit); font-size: 0.64rem; font-style: normal; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-soft); }
+  .say-instead { font-size: 0.98rem; line-height: 1.5; color: var(--color-prose-soft); }
+  .say-say { font-family: var(--font-editorial); font-size: 1.15rem; line-height: 1.4; font-style: italic; color: var(--color-prose); }
+  .say-why { margin-top: 4px; font-size: 0.9rem; line-height: 1.5; color: var(--color-prose-soft); }
+  @media (min-width: 640px) {
+    .say-head { display: grid; grid-template-columns: 1fr 1.25fr; gap: 2rem; margin-top: 18px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+    ul { margin-top: 8px; }
+    li { grid-template-columns: 1fr 1.25fr; gap: 2rem; padding: 18px 0; }
+    .say-label { display: none; }
+    .say-say { font-size: 1.25rem; }
+  }
+</style>

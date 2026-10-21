@@ -14,7 +14,7 @@ primaryKeyword: the one search query this article answers
 related:
   - an-existing-article-slug
 next: the-next-step-article-slug
-# The quick-win line in the header. jump.id must match the StepChecklist id. Delete `jump` if there's no tool to jump to.
+# The quick-win line in the header. jump.id must match the hero element's id (StepChecklist, Picker, Builder…). Delete `jump` if there's no tool to jump to.
 quick:
   time: '15 min'
   note: '6 small jobs, no deep cleaning'
@@ -39,6 +39,7 @@ Opening tension.
 **The short answer in one bold sentence, naming the steps.**
 
 {/* The tool, right after the answer. 4–8 steps: short title, minutes, one `how` line. Bump the storageKey version when steps change. */}
+{/* The hero element: the thing she'd use again next week. Choose it by what she searched (SAVEABLE_ELEMENTS.md); a checklist is one option, not the default. Swap this block for <SayThis>, <Picker>, <Builder>, <ReferenceChart>, <Timeline> or another element when it fits better. */}
 <StepChecklist id="checklist" title="Routine name" kicker="The Real-Life Version" storageKey="omc:the-slug:v1" steps={[
   { title: 'First step', minutes: 2, how: 'One line: how, or where to stop.' },
   { title: 'Second step', minutes: 3, how: 'One line.' },

@@ -16,6 +16,7 @@ Architecture, commands, routes, storage and brand notes for the site are in [REA
 | --- | --- |
 | [BRAND_VOICE.md](docs/editorial/BRAND_VOICE.md) | Audience, positioning, tone, convictions, what we never write |
 | [ARTICLE_FORMAT.md](docs/editorial/ARTICLE_FORMAT.md) | The Real-Life Reset structure, curiosity loops, components, verified product features |
+| [SAVEABLE_ELEMENTS.md](docs/editorial/SAVEABLE_ELEMENTS.md) | The hero element menu: which saveable element (checklist, scripts, picker, builder, chart, timeline) fits which search, and the rules |
 | [BLOG_EDITORIAL_STYLE.md](docs/editorial/BLOG_EDITORIAL_STYLE.md) | How articles read and look: writing and design rules, photography direction and shot list, quality checklist |
 | [SEO_STRATEGY.md](docs/editorial/SEO_STRATEGY.md) | Intent research, keywords, headings, metadata, structured data, quality bar |
 | [CONTENT_CLUSTERS.md](docs/editorial/CONTENT_CLUSTERS.md) | The three pillars (Family Planning & Routines, Simple Home Cleaning, Intentional Family Life), 18 planned articles, relationships, overlap boundaries, backlog |
@@ -33,7 +34,7 @@ Non-negotiables (details in the docs above):
 - Never invent statistics, studies, expertise, testimonials or first-person experiences.
 - Never describe a product feature that isn't verified (see ARTICLE_FORMAT.md → Product notes). Product mentions stay secondary.
 - Keep articles short: 300–600 words of prose, core sections only (ARTICLE_FORMAT.md → Short by default). Don't force photos.
-- **Every article uses the interactive guide layout** (ARTICLE_FORMAT.md → The interactive guide layout; reference HC-07): benefit-led header with `quick`, the interactive `<StepChecklist>` right after the answer, visual sections (`SplitList`, `WhoCanHelp`, photos), a short next-step section, one `ProductCTA`, and a `<ToolSpotlight>` where a free tool passes the gates and has a strategic point (printable twin, handoff, setup or close; ARTICLE_FORMAT.md → Tool spotlights; not every article gets one). Start from `docs/editorial/templates/article.mdx`.
+- **Every article uses the interactive guide layout** (ARTICLE_FORMAT.md → The interactive guide layout; reference HC-07): benefit-led header with `quick`, one hero element right after the answer, chosen by search intent from [SAVEABLE_ELEMENTS.md](docs/editorial/SAVEABLE_ELEMENTS.md) (the `<StepChecklist>` is one option, capped at about 40% of articles), visual sections (`SplitList`, `WhoCanHelp`, photos), a short next-step section, one `ProductCTA`, and a `<ToolSpotlight>` where a free tool passes the gates and has a strategic point (printable twin, handoff, setup or close; ARTICLE_FORMAT.md → Tool spotlights; not every article gets one). Start from `docs/editorial/templates/article.mdx`.
 - Run `npm run verify` after every article and fix everything it reports. Commit the regenerated `docs/editorial/content-inventory.md` with the article.
 
 ## Code map for the library
@@ -44,7 +45,7 @@ Non-negotiables (details in the docs above):
 | Frontmatter schema | `src/content.config.ts` |
 | Pillars (ids, tracker prefixes, page copy) | `src/data/pillars.ts` |
 | Article template, hub, pillar pages | `src/pages/resources/[slug].astro`, `src/pages/resources/index.astro`, `src/pages/resources/topics/[pillar].astro` |
-| MDX components (StepChecklist, SplitList, WhoCanHelp, Figure, Tip, ToolSpotlight, Checklist, ChecklistGrid, ProductCTA, ProductSnapshot, Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Versions, CleaningWeek; legacy ProductNote) | `src/components/resources/` |
+| MDX components (StepChecklist, SayThis, Picker, Builder, ReferenceChart, Timeline, DayCompare, SplitList, WhoCanHelp, Figure, Tip, ToolSpotlight, Checklist, ChecklistGrid, ProductCTA, ProductSnapshot, Shift, RealLifeVersion, WhenLifeHappens, NextSmallWin, Versions, CleaningWeek; legacy ProductNote) | `src/components/resources/` |
 | Article photography registry / image tool | `src/data/images.ts` / `scripts/article-image.py` (files in `public/images/resources/`) |
 | Reference articles (the quality bar for new articles) | `src/content/articles/bathroom-reset-checklist.mdx` (HC-07, **the layout every article uses**) · `daily-cleaning-routine.mdx` (HC-02, length and tone) · `weekly-cleaning-schedule-for-busy-moms.mdx` (HC-01, pillar guide) |
 | Article helpers / table of contents | `src/lib/articles.ts`, `src/lib/toc.ts` |

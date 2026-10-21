@@ -1,0 +1,58 @@
+---
+/**
+ * A stretch of the day or a meeting, in order: the after-school hours, a school morning, the
+ * Sunday family check-in agenda ("5 min" stamps instead of clock times). Each stop has a time
+ * stamp, a short title, an optional line and an optional owner, so everyone's part is visible.
+ * Open, ruled, month-colored dots. 4–8 stops. Rules: docs/editorial/SAVEABLE_ELEMENTS.md.
+ */
+import { TimeMark } from '../marks';
+
+interface Stop {
+  /** "3:30" or "5 min". */
+  time: string;
+  title: string;
+  body?: string;
+  /** Who owns this stop, e.g. "Kids", "Dad". */
+  who?: string;
+}
+interface Props {
+  items: Stop[];
+  title?: string;
+  kicker?: string;
+}
+const { items, title, kicker } = Astro.props;
+---
+
+<div class="timeline">
+  {kicker && <p class="label text-soft">{kicker}</p>}
+  {title && <p class="tl-title">{title}</p>}
+  <ol class="tl-list">
+    {
+      items.map((s) => (
+        <li>
+          <span class="tl-dot" aria-hidden="true" />
+          <div class="tl-row">
+            <TimeMark>{s.time}</TimeMark>
+            {s.who && <span class="tl-who">{s.who}</span>}
+          </div>
+          <p class="tl-stop">{s.title}</p>
+          {s.body && <p class="tl-body">{s.body}</p>}
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .timeline { margin-block: 2.5rem; }
+  .tl-title { margin-top: 6px; font-family: var(--font-editorial); font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+  ol { margin-top: 18px; padding-left: 26px; border-left: 0; position: relative; }
+  ol::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: var(--color-rule); }
+  li { position: relative; padding-bottom: 22px; }
+  li:last-child { padding-bottom: 0; }
+  .tl-dot { position: absolute; left: -26px; top: 3px; width: 13px; height: 13px; border-radius: 999px; background: var(--color-paper); border: 3px solid var(--color-month); }
+  .tl-row { display: flex; align-items: center; gap: 10px; }
+  .tl-who { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-soft); }
+  .tl-stop { margin-top: 6px; font-weight: 600; line-height: 1.4; color: var(--color-prose); }
+  .tl-body { margin-top: 2px; font-size: 0.97rem; line-height: 1.55; color: var(--color-prose-soft); }
+</style>
