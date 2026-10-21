@@ -1,0 +1,82 @@
+---
+/**
+ * On every public page while accounts are on (PublicLayout): watches the page's saves
+ * (src/lib/account.ts installStorageHook) and
+ * - signed out: after she has made something here (a real tap or keypress, then a save), offers
+ *   once per page "Keep this on every device" → /account?next=this page. Dismissed for 14 days.
+ * - signed in: syncs on load, and if her account has a newer copy of something on this page,
+ *   offers to show it (a reload), never swapping content under her.
+ * Square-edged bottom card in the public palette; never on /account itself.
+ */
+import { routes } from '../../routes';
+---
+
+<div class="omc-nudge" data-account-nudge data-account-path={routes.account} hidden role="status" aria-live="polite">
+  <div class="omc-nudge-copy">
+    <p class="omc-nudge-title" data-nudge-title>Keep this on every device</p>
+    <p class="omc-nudge-body" data-nudge-body>Save it to your account with just your email. No password.</p>
+  </div>
+  <div class="omc-nudge-actions">
+    <a class="btn-primary" data-nudge-go href={routes.account}>Save it</a>
+    <button type="button" class="omc-nudge-close" data-nudge-close aria-label="Not now">×</button>
+  </div>
+</div>
+
+<style>
+  .omc-nudge { position: fixed; z-index: 40; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 18px; background: var(--color-paper); border: 1px solid var(--color-rule); box-shadow: 0 6px 24px rgb(0 0 0 / 0.12); color: var(--color-prose); }
+  .omc-nudge[hidden] { display: none; }
+  .omc-nudge-copy { flex: 1; min-width: 0; }
+  .omc-nudge-title { font-family: var(--font-editorial); font-size: 1.05rem; font-weight: 700; line-height: 1.25; }
+  .omc-nudge-body { margin-top: 2px; font-size: 0.88rem; line-height: 1.4; color: var(--color-prose-soft); }
+  .omc-nudge-actions { display: flex; align-items: center; gap: 4px; flex: none; }
+  .omc-nudge .btn-primary { min-height: 2.75rem; padding-inline: 1.1rem; }
+  .omc-nudge-close { width: 2.75rem; height: 2.75rem; font-size: 1.4rem; color: var(--color-soft); }
+  @media (min-width: 640px) {
+    .omc-nudge { left: auto; right: 24px; bottom: 24px; width: 26rem; }
+  }
+  @media print { .omc-nudge { display: none !important; } }
+</style>
+
+<script>
+  import { CHANGED_EVENT, dismissNudge, installStorageHook, loadSession, safeNext, shouldNudge, sync } from '../../lib/account';
+
+  const root = document.querySelector<HTMLElement>('[data-account-nudge]');
+  const accountPath = root?.dataset.accountPath ?? '/account';
+  if (root && location.pathname !== accountPath) {
+    installStorageHook();
+    const title = root.querySelector<HTMLElement>('[data-nudge-title]')!;
+    const body = root.querySelector<HTMLElement>('[data-nudge-body]')!;
+    const go = root.querySelector<HTMLAnchorElement>('[data-nudge-go]')!;
+    const next = safeNext(location.pathname);
+    go.href = next ? `${accountPath}?next=${encodeURIComponent(next)}` : accountPath;
+    root.querySelector('[data-nudge-close]')!.addEventListener('click', () => {
+      root.hidden = true;
+      if (!loadSession()) dismissNudge();
+    });
+
+    if (loadSession()) {
+      // Bring in anything saved from another device. If it belongs to this page, offer to show it.
+      sync()
+        .then((r) => {
+          if (!r.pulled.length) return;
+          title.textContent = 'Your latest version is ready';
+          body.textContent = 'Something on this page was updated from another device.';
+          go.textContent = 'Show it';
+          go.href = location.pathname + location.search;
+          root.hidden = false;
+        })
+        .catch(() => undefined);
+    } else {
+      let interacted = false;
+      let shown = false;
+      const mark = () => (interacted = true);
+      document.addEventListener('pointerdown', mark, { once: true, capture: true });
+      document.addEventListener('keydown', mark, { once: true, capture: true });
+      window.addEventListener(CHANGED_EVENT, () => {
+        if (shown || !interacted || !shouldNudge()) return;
+        shown = true;
+        root.hidden = false;
+      });
+    }
+  }
+</script>

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Database access tests for /admin (supabase/tests/admin-access.sql) on a throwaway database.
+# Database access tests for /admin and customer accounts (supabase/tests/admin-access.sql,
+# accounts-access.sql) on a throwaway database.
 #
 # Needs a local PostgreSQL 15+ you can connect to as a superuser, and `psql`. No PostgREST needed.
 #
@@ -19,5 +20,6 @@ for f in supabase/migrations/*.sql; do
   psql_ -d "$DB" -f "$f" 2>&1 >/dev/null | { grep -v -e 'already exists, skipping' -e 'NOTICE' || true; }
 done
 psql_ -d "$DB" -o /dev/null -f supabase/tests/admin-access.sql 2>&1 | sed 's/^psql:[^ ]* NOTICE:  //'
+psql_ -d "$DB" -o /dev/null -f supabase/tests/accounts-access.sql 2>&1 | sed 's/^psql:[^ ]* NOTICE:  //'
 psql_ -d postgres -c "drop database $DB with (force)" >/dev/null
-echo "admin access tests passed"
+echo "admin and account access tests passed"

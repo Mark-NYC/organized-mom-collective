@@ -9,6 +9,8 @@ import BaseLayout from './BaseLayout.astro';
 import SiteHeader from '../components/resources/SiteHeader.astro';
 import SiteFooter from '../components/resources/SiteFooter.astro';
 import CtaTracking from '../components/site/CtaTracking.astro';
+import SaveNudge from '../components/account/SaveNudge.astro';
+import { accountsEnabled } from '../lib/account';
 import { BRAND_NAME } from '../config';
 import { pageUpdated } from '../data/page-updated';
 
@@ -88,4 +90,5 @@ const mainClass =
   </main>
   {chrome && <SiteFooter />}
   <CtaTracking />
+  {accountsEnabled() && <SaveNudge />}
 </BaseLayout>

@@ -1,5 +1,10 @@
 /**
  * POST /functions/v1/shop-download   { token } → { files: [{ label, product, url }], expires_at, test }
+ *                                     { order } + Authorization: Bearer <customer access token> → same, expires_at null
+ *
+ * With a token: the link from the order emails (expires after DOWNLOAD_DAYS).
+ * With an order id and a signed-in customer (/account): Supabase Auth verifies the access token, then
+ * shop_account_download checks the order belongs to her verified email. No expiry; refunds still revoke.
  *
  * The /download page calls this with the token from the emailed link. The database checks
  * the token (shop_download: paid, not refunded, not expired) and lists the order's files;
@@ -18,7 +23,8 @@ export const SIGNED_URL_SECONDS = 600;
 interface DownloadGrant {
   order_number: number | null;
   livemode: boolean | null;
-  expires_at: string;
+  /** null for downloads from her account, which don't expire. */
+  expires_at: string | null;
   files: { path: string; label: string; product: string }[];
 }
 
@@ -30,11 +36,20 @@ export function createDownloadHandler(deps: ShopDeps): Handler {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405, cors);
     const body = await readJson(req, 2_000);
-    if (!body || typeof body.token !== 'string') return json({ error: 'invalid_link' }, 404, cors);
+    const bearer = req.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
+    const byAccount = Boolean(bearer) && typeof body?.order === 'string';
+    if (!body || (!byAccount && typeof body.token !== 'string')) return json({ error: 'invalid_link' }, 404, cors);
 
     let grant: DownloadGrant;
     try {
-      grant = await deps.db.rpc<DownloadGrant>('shop_download', { p_token: body.token, p_client: clientIp(req) });
+      if (byAccount) {
+        if (!UUID.test(body.order as string)) return json({ error: 'invalid_link' }, 404, cors);
+        const userId = await verifiedUser(deps, bearer!);
+        if (!userId) return json({ error: 'unauthorized' }, 401, cors);
+        grant = await deps.db.rpc<DownloadGrant>('shop_account_download', { p_user: userId, p_order: body.order, p_client: clientIp(req) });
+      } else {
+        grant = await deps.db.rpc<DownloadGrant>('shop_download', { p_token: body.token, p_client: clientIp(req) });
+      }
     } catch (err) {
       if (err instanceof DbError && STATUS[err.message]) return json({ error: err.message }, STATUS[err.message], cors);
       console.error('shop-download', err);
@@ -47,6 +62,18 @@ export function createDownloadHandler(deps: ShopDeps): Handler {
     );
     return json({ files, expires_at: grant.expires_at, order_number: grant.order_number, test: grant.livemode === false }, 200, cors);
   };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The signed-in customer's user id, if Supabase Auth accepts her access token; otherwise null. */
+async function verifiedUser(deps: ShopDeps, token: string): Promise<string | null> {
+  const res = await deps.fetch(`${deps.env.supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: deps.env.anonKey || deps.env.serviceRoleKey, Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return null;
+  const user = (await res.json().catch(() => ({}))) as { id?: string };
+  return user.id && UUID.test(user.id) ? user.id : null;
 }
 
 /** A short-lived URL for one private file, served as an attachment under its own file name. */
