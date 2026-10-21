@@ -18,11 +18,11 @@ hero:
   image: fp-14-planner-phone
   alt: A blue smartphone lying on an open paper year planner showing September 2026 to December 2027, with a silver pen beside it.
 quick:
-  time: '2 weeks'
-  note: 'test both, then choose'
+  time: '1 min'
+  note: '3 questions, one answer'
   jump:
     id: checklist
-    label: 'Run the test'
+    label: 'Find your fit'
 ---
 
 import { CALENDAR_OPTIONS } from '../../config';
@@ -33,13 +33,31 @@ The coach moves practice by text at 2 pm. Your phone knows. The calendar on the 
 
 **It depends on where your changes come from.** A digital wall calendar display is the better buy if plans change several times a week, the adults already keep the schedule in phone calendars, and nobody wants to hand-write. A paper wall calendar is enough if your week is fairly steady and the real problem is that nobody looks. Want both? Keep appointments digital and write only this week's family plan on paper. If what you have works, don't switch.
 
-<StepChecklist id="checklist" title="Test both before you buy" kicker="The Real-Life Version" storageKey="omc:digital-vs-paper-test:v1" doneMessage="Done. You know which calendar your week needs." steps={[
-  { title: 'Count this week’s changes', how: 'Each time a time, ride or event changes, note where it arrived: text, email, app or paper.' },
-  { title: 'Notice who asks “What’s tomorrow?”', how: 'If it’s the kids, the plan has to be readable without a phone.' },
-  { title: 'Try a free shared phone calendar for a week', how: 'If the adults keep it current, a display would put that same calendar on the wall.' },
-  { title: 'Try paper the next week', how: 'Write the week by the fridge during a weekly reset. Stale by Wednesday? Paper alone isn’t enough.' },
-  { title: 'Pick one, or go hybrid', how: 'Appointments in the shared digital calendar; paper holds this week’s rides, dinners and who’s doing what, copied once a week.' },
-]} />
+<Picker
+  id="checklist"
+  title="Digital display or paper: which fits your week?"
+  storageKey="omc:digital-vs-paper-picker:v1"
+  questions={[
+    { question: 'How often do plans change during the week?', options: [
+      { label: 'Several times a week, by text or email', result: 'digital' },
+      { label: 'Now and then', result: 'paper' },
+    ] },
+    { question: 'Who asks “What’s tomorrow?”', options: [
+      { label: 'Mostly the adults', result: 'digital' },
+      { label: 'The kids', result: 'paper' },
+    ] },
+    { question: 'Where does the schedule live now?', options: [
+      { label: 'In the adults’ phone calendars, kept current', result: 'digital' },
+      { label: 'On paper, or in my head', result: 'paper' },
+      { label: 'Appointments in phones, but nobody sees the week', result: 'hybrid' },
+    ] },
+  ]}
+  results={{
+    digital: { title: 'A digital wall display', body: 'Your changes arrive by phone, and the adults already keep a calendar. Try a free shared phone calendar for a week first. If it stays current, a display puts that same calendar on the wall. Price the device and any plan below.' },
+    paper: { title: 'A paper wall calendar', body: 'Your week is fairly steady and the kids need to read it without a phone. Write the week by the fridge during a weekly reset. If it’s stale by Wednesday, paper alone isn’t enough.', href: '/resources/weekly-family-reset', cta: 'The 15-minute weekly reset' },
+    hybrid: { title: 'Both: digital for appointments, paper for the week', body: 'Keep appointments in a shared phone calendar. Once a week, copy this week’s rides, dinners and who’s doing what onto paper where everyone can see it.' },
+  }}
+/>
 
 [Paper vs. digital calendars](/resources/wall-calendar-vs-digital-calendar-for-families) covers what free shared calendars do. For the paper week, use a [15-minute weekly reset](/resources/weekly-family-reset).
 

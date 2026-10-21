@@ -14,11 +14,11 @@ related:
   - best-family-wall-calendars
 next: how-to-organize-a-family-calendar
 quick:
-  time: '1 week'
-  note: 'to test it'
+  time: '1 min'
+  note: '3 questions, one answer'
   jump:
     id: checklist
-    label: 'Run the test'
+    label: 'Find your format'
 cta: calendar
 ---
 
@@ -30,13 +30,31 @@ Thursday’s square says “Dentist.” It doesn’t say what time, who’s driv
 
 **It depends on how much happens each day.** A monthly calendar is enough if your weeks are fairly steady and you mostly need to see dates coming: birthdays, school breaks, trips. A weekly one works better when each day has rides, practices and dinners to sort out, because a month square holds a line or two. Busy family? Use both: the month for dates, the week for the plan, copied over once a week.
 
-<StepChecklist id="checklist" title="Find your format in one week" kicker="The Real-Life Version" storageKey="omc:weekly-vs-monthly-test:v1" doneMessage="Done. You know which view your family needs." steps={[
-  { title: 'List this month’s dates', minutes: 3, how: 'Birthdays, school breaks, trips, deadlines. Several? You need a month view somewhere.' },
-  { title: 'Count tomorrow’s moving parts', minutes: 2, how: 'Each ride, practice, appointment and dinner decision counts as one.' },
-  { title: 'Write tomorrow in a month square', minutes: 2, how: 'Use a sticky note about 2 inches square.' },
-  { title: 'See what fell off', minutes: 1, how: 'Times, drivers, what to bring, dinner. If it mattered, a month isn’t enough on its own.' },
-  { title: 'Pick monthly, weekly or both', minutes: 2, how: 'Both means the month holds dates and the week holds the plan.' },
-]} />
+<Picker
+  id="checklist"
+  title="Weekly, monthly or both?"
+  storageKey="omc:weekly-vs-monthly-picker:v1"
+  questions={[
+    { question: 'Which sounds like your house?', options: [
+      { label: 'Steady weeks, lots of dates to remember', result: 'monthly' },
+      { label: 'Busy days, not many dates ahead', result: 'weekly' },
+      { label: 'Busy days and lots of dates', result: 'both' },
+    ] },
+    { question: 'Thursday has a dentist visit and soccer. What does the calendar need to say?', options: [
+      { label: 'Just that they’re happening', result: 'monthly' },
+      { label: 'Times, who’s driving, what to bring', result: 'weekly' },
+    ] },
+    { question: 'Birthdays, school breaks or trips this month?', options: [
+      { label: 'One or none', result: 'weekly' },
+      { label: 'Several', result: 'both' },
+    ] },
+  ]}
+  results={{
+    monthly: { title: 'A monthly calendar is enough', body: 'Your weeks are fairly steady, and what you need is to see dates coming: birthdays, school breaks, trips.', href: '/try-the-calendar', cta: 'Make a free monthly calendar' },
+    weekly: { title: 'A weekly calendar', body: 'Each day has rides, practices and dinners to sort out, and a month square holds a line or two. A weekly page has room for times, drivers and what to bring.', href: '/planner', cta: 'Try a free weekly page' },
+    both: { title: 'Both: the month for dates, the week for the plan', body: 'Keep birthdays, breaks and trips on a month view, and copy what affects this week onto a weekly page once a week, during your weekly reset.', href: '/resources/weekly-family-reset', cta: 'The 15-minute weekly reset' },
+  }}
+/>
 
 ## One week, two calendars
 

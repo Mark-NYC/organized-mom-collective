@@ -20,10 +20,10 @@ hero:
   caption: "Skylight’s week view, with Chores and Lists in the sidebar. Image: Skylight."
 quick:
   time: '6 min'
-  note: 'Sort your jobs: free, Plus or paper'
+  note: '3 questions, one answer'
   jump:
     id: checklist
-    label: 'Start the check'
+    label: 'Find your fit'
 ---
 
 import { CALENDAR_OPTIONS } from '../../config';
@@ -34,13 +34,32 @@ You’ve seen the Skylight ads, and practice just moved in a group text again. I
 
 **A Skylight is worth it if your schedule lives in phones and changes all week.** It shows everyone’s synced calendars on the wall with no retyping, and its chore chart and lists are free. A paper wall calendar is enough if your week is fairly steady, the real problem is that nobody looks, and you’d rather write dinners by hand than pay $79 a year for Skylight’s meal planning. If your current calendar works, keep it.
 
-<StepChecklist id="checklist" title="Free, Plus or paper?" kicker="The Real-Life Version" storageKey="omc:skylight-vs-paper:v1" doneMessage="Mostly phone calendars? Look at a Skylight. Mostly meals and lists? Paper does it. Stop here." steps={[
-  { title: 'List what the wall has to show', minutes: 2, how: 'Appointments, practices, dinners, groceries, chores: whatever people ask you about.' },
-  { title: 'Mark what already lives in phones', minutes: 1, how: 'A Skylight syncs those for free. On paper, someone copies them.' },
-  { title: 'Mark the chores and lists', minutes: 1, how: 'Free on a Skylight. On paper, a chore chart and the grocery list.' },
-  { title: 'Mark meals and school emails', minutes: 1, how: 'On a Skylight, meal planning and email import need Calendar Plus. On paper, you write them.' },
-  { title: 'Price the first year', minutes: 1, how: 'The device, plus Plus if you’d keep it, against a paper calendar. Numbers are below.' },
-]} />
+<Picker
+  id="checklist"
+  title="Skylight or paper: which fits your family?"
+  storageKey="omc:skylight-vs-paper-picker:v1"
+  questions={[
+    { question: 'Where do changes to your week come from?', options: [
+      { label: 'Texts, emails and phone calendars, all week', result: 'skylight' },
+      { label: 'Mostly the same week, every week', result: 'paper' },
+    ] },
+    { question: 'What do you most need on the wall?', options: [
+      { label: 'Everyone’s phone calendars, without retyping', result: 'skylight' },
+      { label: 'Dinners and the grocery list beside the week', result: 'paper' },
+      { label: 'Nothing new: we have a calendar, nobody checks it', result: 'keep' },
+    ] },
+    { question: 'How is your current calendar doing?', options: [
+      { label: 'Always out of date', result: 'skylight' },
+      { label: 'Up to date, but nobody looks at it', result: 'keep' },
+      { label: 'We don’t really have one', result: 'paper' },
+    ] },
+  ]}
+  results={{
+    skylight: { title: 'A Skylight is worth a look', body: 'Your plans live in phones and change all week. A Skylight shows everyone’s synced calendars with no retyping, and its chore chart and lists are free. Check whether the free features cover you before adding Calendar Plus at $79 a year, and check there’s an outlet and Wi-Fi where it will hang.' },
+    paper: { title: 'A paper wall calendar is enough', body: 'Your week is fairly steady, and you want the plan and dinners where everyone can see them, without a subscription. Write the week during a 15-minute weekly reset.', href: '/resources/weekly-family-reset', cta: 'The 15-minute weekly reset' },
+    keep: { title: 'Keep what you have', body: 'A new calendar won’t make anyone read it. Pick one time a day everyone checks it, like after breakfast, and practice that first.', href: '/resources/how-to-organize-a-family-calendar', cta: 'Get the family to use it' },
+  }}
+/>
 
 <Tip label="Before you buy" title="Plan the spot first.">
 

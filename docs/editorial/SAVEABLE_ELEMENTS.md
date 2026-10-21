@@ -34,6 +34,23 @@ This is the menu to draw from for current and future articles. All are MDX compo
 6. **Words count toward the 300–600.** Keep items short; the element replaces prose, it doesn't add to it.
 7. **Tracking:** the interactive elements report use (`element_use`, `element_complete`, `element_print`, `element_copy` with `element_type` and `element_id`) through `src/lib/element-events.ts`; tool spotlight buttons report clicks as `cta_click` with placement `tool-spotlight:{slug}`. Use the data before converting many articles from one element to another.
 
+## Current heroes (2026-10-21)
+
+Every element takes an `id`; give the hero `id="checklist"` so the header's `quick.jump` reaches it.
+
+| Hero | Articles |
+| --- | --- |
+| `<Picker>` | FP-14, FP-17, FP-18 |
+| `<SayThis>` | IF-08 (plus a backpack-week `<Timeline>`) |
+| `<Timeline>` | FP-13 |
+| Comparison tables | FP-11, FP-15 |
+| Chart by age / week graphic | IF-03 (`ChoresByAge`), HC-01 (`CleaningWeek`) |
+| `<StepChecklist>` | the other 23: do-it-now routines (HC-02, HC-07, HC-08, HC-09, FP-04, FP-06, FP-10), setups (FP-02, FP-03, FP-09, FP-16, HC-03), and the rest |
+
+Supporting elements added: `<SayThis>` in IF-02 (the handoff words), `<Timeline>` in FP-20 (the after-school example), `<ReferenceChart>` in IF-10.
+
+**Still over the cap.** Checklists remain in about 75% of articles. The ones left are mostly genuine do-it-now routines, so the next conversions wait for element data (two weeks). Candidates, in order: IF-10 → `<Builder>` (owner asked to keep its checklist on 2026-10-21; ask before changing), IF-01 → `<Builder>` ("This week, we'll make room for…"), IF-07 and IF-09 → lead with their `<WhoCanHelp>` by-age chart, HC-04 → its 12-month rotation, FP-08 → `<DayCompare>` as a supporting element. New articles follow the cap from now on.
+
 ## The components
 
 ### `<StepChecklist>`: do it now

@@ -13,12 +13,14 @@ interface Props {
   /** Column headings. */
   columns: [string, string];
   rows: [string, string][];
+  /** Anchor id, so the header's quick jump can link to it (e.g. "checklist"). */
+  id?: string;
 }
-const { title, kicker, columns, rows } = Astro.props;
+const { id, title, kicker, columns, rows } = Astro.props;
 const hasNote = Astro.slots.has('default');
 ---
 
-<div class="ref-chart">
+<div class="ref-chart scroll-mt-6" id={id}>
   {kicker && <p class="label text-soft">{kicker}</p>}
   <p class="ref-title">{title}</p>
   <table>

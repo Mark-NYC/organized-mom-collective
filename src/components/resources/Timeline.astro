@@ -19,11 +19,13 @@ interface Props {
   items: Stop[];
   title?: string;
   kicker?: string;
+  /** Anchor id, so the header's quick jump can link to it (e.g. "checklist"). */
+  id?: string;
 }
-const { items, title, kicker } = Astro.props;
+const { items, title, kicker, id } = Astro.props;
 ---
 
-<div class="timeline">
+<div class="timeline scroll-mt-6" id={id}>
   {kicker && <p class="label text-soft">{kicker}</p>}
   {title && <p class="tl-title">{title}</p>}
   <ol class="tl-list">
