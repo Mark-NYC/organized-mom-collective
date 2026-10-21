@@ -4,7 +4,7 @@ Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../docs/editorial/PINTEREST_Q
 
 ## Received
 
-Five of ten. The ten images were assigned in chat, but only five files reached the session (`originals/1.jpg`–`5.jpg`, 687 × 1024 JPEG). Order was set by inspecting each image, not by filename.
+All ten. Pins 41–45 arrived first (`1.jpg`–`5.jpg`), 46–50 later the same day (`6.jpg`–`10.jpg`). Nine are 687 × 1024 JPEGs; `9.jpg` (pin 47) is a native 1000 × 1500 JPEG with camera EXIF. Order was set by inspecting each image, not by filename.
 
 | File | Pin | Master ID | Headline on the image |
 | --- | --- | --- | --- |
@@ -13,7 +13,11 @@ Five of ten. The ten images were assigned in chat, but only five files reached t
 | `3.jpg` | 42 | OMC-P0271 | A Calendar Kids Check |
 | `4.jpg` | 43 | OMC-P0227 | Your Family Planner Is Missing One Thing |
 | `5.jpg` | 44 | OMC-P0477 | Don’t Organize Your Whole Life This January |
-| none | 46–50 | OMC-P0139, P0389, P0095, P0345, P0026 | **Not received** |
+| `6.jpg` | 50 | OMC-P0026 | 5 Chores an 8-Year-Old Can Learn to Own |
+| `7.jpg` | 49 | OMC-P0345 | Weekends Need a Rhythm, Not a Schedule |
+| `8.jpg` | 48 | OMC-P0095 | Kids Can Do Chores Without Earning Prizes |
+| `9.jpg` | 47 | OMC-P0389 | Your Family’s Organized Week |
+| `10.jpg` | 46 | OMC-P0139 | A Cleaning Routine the Whole Family Shares |
 
 ## Verdicts
 
@@ -24,31 +28,36 @@ Five of ten. The ten images were assigned in chat, but only five files reached t
 | 43 | OMC-P0227 | `held-2026-10-21/omc-family-planner-who-does-what-01.png` | **Fail** | No Organized Mom Collective wordmark (every approved pin carries it). White header panel instead of brand cream. Crumpled list has garbled pseudo-text (incidental). Fridge drawings show drawn stick-figure faces: illustration, not photographic faces, noted only. Fix: regenerate with the cream panel and wordmark. |
 | 44 | OMC-P0477 | `final-2026-10-21/omc-new-year-weekly-reset-01.png` | **Pass (seasonal hold)** | Copy correct, no people. Timer numerals garbled but incidental. The destination has no January section, but the pin promises “15 minutes and a shared plan”, which it delivers. Held out of the current import file because it’s a New Year pin; suggested date 2026-12-28 in `pinterest-import-seasonal-hold.csv`. |
 | 45 | OMC-P0183 | `final-2026-10-21/omc-family-laundry-schedule-01.png` | **Pass** | Four stages (wash, dry, fold, put away) match the new HC-10 article. Arm and hand only, grip on the laundry natural, washer and dryer plausible. “Put away” label slightly overlaps the drawer front; legible. |
+| 46 | OMC-P0139 | `held-2026-10-21/omc-family-cleaning-routine-01.png` | **Fail** | The woman’s face is visible in profile (eye, nose, mouth). The man’s and boy’s heads are visible from behind. Breaks the no-faces and above-shoulders rules outright. Support line “Real jobs. Growing independence.” duplicates pin 50. Fix: regenerate with hands and torsos only (a child’s hands carrying a plate, an adult’s hands at the sink). |
+| 47 | OMC-P0389 | `held-2026-10-21/omc-meal-planning-and-groceries-01.png` | **Fail** | Headline is not the assigned “Plan Dinner and Groceries Together”; support line “Simple, delicious meal planning and shopping” is generic. The focal “Weekly Meal Plan” sheet is a third-party printable with its own menu, not an OMC planner: under our wordmark it reads as our product (misleading product imagery, possible design rights). Nothing shows dinner and groceries planned together. Unlike the other nine, it’s a native 1000 × 1500 photo with camera EXIF; source and license unknown. Fix: regenerate around the real `/meal-planner` output or a blank list, with the assigned headline. |
+| 48 | OMC-P0095 | `final-2026-10-21/omc-chores-without-rewards-01.png` | **Pass** | Three labels (own your things, help with meals, put things away) and “Teach the job. Practice together. Build the habit.” match IF-11. No people. Toys in the basket are generic, no logos. |
+| 49 | OMC-P0345 | `final-2026-10-21/omc-weekend-routine-for-kids-01.png` | **Pass** | Flat lay with breakfast, play and sports gear fits the rhythm; support line matches FP-22. No people. Shin guards carry a small generic white mark, not a recognizable logo; sneakers unbranded. |
+| 50 | OMC-P0026 | `final-2026-10-21/omc-chores-for-8-year-olds-01.png` | **Pass (minor artifact)** | All five jobs match the destination’s ages 6–8 list (“Help unload the dishwasher” matches its “with help”). Minor: thin silver fringing inside the big “8” (generation artifact, visible at full size, not at feed size) and an unlabeled second clothes stack beside job 3. Your call whether to re-export. |
 
 ## Checklist, received files
 
-| Check | 41 | 42 | 43 | 44 | 45 |
-| --- | --- | --- | --- | --- | --- |
-| 1000 × 1500, 2:3 portrait, PNG, RGB, sRGB profile (final files) | pass | pass | pass | pass | pass |
-| Spelling and grammar | pass | pass (headline awkward) | pass | pass | pass |
-| Readable at full size and ~250 px | pass | pass | pass | pass | pass |
-| Brand colors and wordmark | pass | pass | **fail** | pass | pass |
-| Nobody above the shoulders | pass (no people) | **fail** | pass (no people) | pass (no people) | pass (arm only) |
-| Hands, limbs, furniture, objects undistorted | pass | pass | pass | pass | pass |
-| No fake product imagery, no OMC product shown | pass | pass | pass | pass | pass |
-| No third-party logos or watermarks | pass | pass (generic backpack patch) | pass | pass | pass |
-| Copy fits the pin and destination | pass | **fail** | pass | pass | pass |
-| Distinct concept within the batch | pass | pass | pass | pass | pass |
+| Check | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1000 × 1500, 2:3, PNG, RGB, sRGB (final files) | pass | pass | pass | pass | pass | pass | pass | pass | pass | pass |
+| Spelling and grammar | pass | pass (awkward) | pass | pass | pass | pass | pass | pass | pass | pass |
+| Readable at full size and ~250 px | pass | pass | pass | pass | pass | pass | pass | pass | pass | pass |
+| Brand colors and wordmark | pass | pass | **fail** | pass | pass | pass | pass | pass | pass | pass |
+| Nobody above the shoulders | pass | **fail** | pass | pass | pass | **fail** | pass | pass | pass | pass |
+| Hands, limbs, furniture, objects undistorted | pass | pass | pass | pass | pass | pass | pass | pass | pass | pass (“8” fringe) |
+| No fake or misleading product imagery | pass | pass | pass | pass | pass | pass | **fail** | pass | pass | pass |
+| No third-party logos or watermarks | pass | pass | pass | pass | pass | pass | **fail** (third-party printable) | pass | pass | pass |
+| Copy fits the pin and destination | pass | **fail** | pass | pass | pass | **fail** (duplicate line) | **fail** | pass | pass | pass |
+| Distinct concept within the batch | pass | pass | pass | pass | pass | pass | pass | pass | pass | pass |
 
 ## Export
 
-Gemini delivered 687 × 1024 (ratio 0.671, slightly wider than 2:3). Each final PNG is the original scaled uniformly with Lanczos to 1006 × 1500, then 3 px trimmed from each side to 1000 × 1500. No text or subject is within 3 px of an edge; nothing else was changed. **This is an upscale (×1.46): it adds no detail**, so type is a little softer than a native 1000 × 1500 export. Native-resolution Gemini exports would be better for future batches. Each PNG carries the same sRGB profile bytes as batches 01–04. Hashes are in `production-manifest.csv`.
+Nine files arrived at 687 × 1024 (ratio 0.671, slightly wider than 2:3). Each final PNG is the original scaled uniformly with Lanczos to 1006 × 1500, then 3 px trimmed from each side to 1000 × 1500. No text or subject is within 3 px of an edge; nothing else was changed. **This is an upscale (×1.46): it adds no detail**, so type is a little softer than a native 1000 × 1500 export. Native-resolution Gemini exports would be better for future batches. Each PNG carries the same sRGB profile bytes as batches 01–04. Pin 47 arrived at 1000 × 1500 and was only converted to PNG. Hashes are in `production-manifest.csv`.
 
 ## Duplicate scan
 
 - SHA-256: no match among 544 design and public image files.
-- Perceptual (256-bit dHash): closest repository image 89 bits away (near-duplicate would be under ~10); the five pins differ from each other by at least 88 bits.
-- Concept: pin 41 and batch 04 #40 (chores for 5-year-olds) share a board and destination; dated two days apart.
+- Perceptual (256-bit dHash): closest repository image 89 bits away (near-duplicate would be under ~10); the ten pins differ from each other by at least 88 bits.
+- Concept: 41 and 50 are sibling by-age chore pins to the same destination (4 days apart); 41 is two days after batch 04 #40.
 
 ## Destinations
 
@@ -63,6 +72,8 @@ Gemini delivered 687 × 1024 (ratio 0.671, slightly wider than 2:3). Each final 
 | 47 | /resources/weekly-meal-planning-for-families | Live, source verified; plan dinners and agree who owns groceries |
 | 48 | /resources/chore-chart-without-rewards | **New (IF-11)** |
 | 49 | /resources/weekend-routine-for-kids | **New (FP-22)** |
+
+Pins 45, 48 and 49 point at articles created in this batch; their live status is recorded in the README.
 
 ## Not verified
 
