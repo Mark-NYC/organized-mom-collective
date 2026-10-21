@@ -6,9 +6,10 @@ import { ESSENTIAL_ROUTINES_SLUG, WHY_ROUTINES_PATH } from '../../data/essential
 import { PLANNER_PLUS_PATH } from '../../data/planner';
 import { ROUTINE_PLUS_PATH } from '../../data/routines';
 import { routes } from '../../routes';
+import { accountsEnabled } from '../../lib/account';
 
 /** Website pages that come with a product (not files): shown as buttons for that product's buyers. */
-const WEB_TOOLS: Record<string, { label: string; href: string }[]> = {
+export const WEB_TOOLS: Record<string, { label: string; href: string }[]> = {
   [TAKE_BACK_CONTROL_SLUG]: [
     { label: 'Open the Weekly Planner Generator', href: PLANNER_PLUS_PATH },
     { label: 'Open the Routine Builder', href: ROUTINE_PLUS_PATH },
@@ -110,8 +111,14 @@ export default function DownloadFiles() {
         </p>
       )}
       <p className="mt-6 text-[0.95rem] leading-relaxed text-soft">
-        This page works until {until}. Each download button works for a few minutes; reload the page for fresh ones. Need the files again after that? Email{' '}
-        {weeklyReset.contactEmail}.
+        This page works until {until}. Each download button works for a few minutes; reload the page for fresh ones. Need the files again after that?{' '}
+        {accountsEnabled() ? (
+          <>
+            <a href={routes.account} className="font-semibold underline underline-offset-2">Sign in to your account</a> with the email you used at checkout: your files stay there.
+          </>
+        ) : (
+          <>Email {weeklyReset.contactEmail}.</>
+        )}
       </p>
     </div>
   );

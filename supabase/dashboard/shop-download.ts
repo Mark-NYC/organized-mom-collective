@@ -224,10 +224,19 @@ function createDownloadHandler(deps) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405, cors);
     const body = await readJson(req, 2e3);
-    if (!body || typeof body.token !== "string") return json({ error: "invalid_link" }, 404, cors);
+    const bearer = req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+    const byAccount = Boolean(bearer) && typeof body?.order === "string";
+    if (!body || !byAccount && typeof body.token !== "string") return json({ error: "invalid_link" }, 404, cors);
     let grant;
     try {
-      grant = await deps.db.rpc("shop_download", { p_token: body.token, p_client: clientIp(req) });
+      if (byAccount) {
+        if (!UUID.test(body.order)) return json({ error: "invalid_link" }, 404, cors);
+        const userId = await verifiedUser(deps, bearer);
+        if (!userId) return json({ error: "unauthorized" }, 401, cors);
+        grant = await deps.db.rpc("shop_account_download", { p_user: userId, p_order: body.order, p_client: clientIp(req) });
+      } else {
+        grant = await deps.db.rpc("shop_download", { p_token: body.token, p_client: clientIp(req) });
+      }
     } catch (err) {
       if (err instanceof DbError && STATUS[err.message]) return json({ error: err.message }, STATUS[err.message], cors);
       console.error("shop-download", err);
@@ -238,6 +247,15 @@ function createDownloadHandler(deps) {
     );
     return json({ files, expires_at: grant.expires_at, order_number: grant.order_number, test: grant.livemode === false }, 200, cors);
   };
+}
+var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+async function verifiedUser(deps, token) {
+  const res = await deps.fetch(`${deps.env.supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: deps.env.anonKey || deps.env.serviceRoleKey, Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return null;
+  const user = await res.json().catch(() => ({}));
+  return user.id && UUID.test(user.id) ? user.id : null;
 }
 async function signedUrl(deps, path) {
   if (!/^[A-Za-z0-9][A-Za-z0-9/_.-]{0,200}$/.test(path) || path.includes("..")) return null;

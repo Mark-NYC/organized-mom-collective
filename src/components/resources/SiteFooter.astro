@@ -12,6 +12,7 @@ import { pillars } from '../../data/pillars';
 import { routes } from '../../routes';
 import { BRAND_DEFINITION, BRAND_NAME } from '../../config';
 import { getArticles } from '../../lib/articles';
+import { accountsEnabled } from '../../lib/account';
 
 // Only topics that have articles get a page, so only those are linked.
 const used = new Set((await getArticles()).map((a) => a.data.pillar));
@@ -29,6 +30,7 @@ const help = [
   { href: routes.support, label: 'Help & Support' },
   { href: routes.returns, label: 'Returns & Refunds' },
   { href: routes.supportContact, label: 'Contact Us' },
+  ...(accountsEnabled() ? [{ href: routes.account, label: 'Your Account' }] : []),
 ];
 const link = 'text-[0.95rem] underline decoration-rule underline-offset-4 hover:decoration-ink';
 ---

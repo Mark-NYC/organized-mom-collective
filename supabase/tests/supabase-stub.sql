@@ -17,7 +17,7 @@ create schema auth;
 grant usage on schema auth, extensions to anon, authenticated, service_role;
 grant usage on schema public to anon, authenticated, service_role;
 
-create table auth.users (id uuid primary key, email text);
+create table auth.users (id uuid primary key, email text, email_confirmed_at timestamptz);
 create function auth.uid() returns uuid language sql stable as $$
   select coalesce(
     nullif(current_setting('request.jwt.claim.sub', true), ''),

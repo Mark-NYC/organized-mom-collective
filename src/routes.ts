@@ -125,6 +125,8 @@ export const routes = {
   checkout: '/checkout',
   checkoutComplete: '/checkout/complete',
   download: '/download',
+  /** Customer account (noindex): sign in with an emailed code, saved tools, purchases. Off unless PUBLIC_ACCOUNTS_ENABLED. */
+  account: '/account',
   adminOrders: '/admin/orders',
   start: '/start',
   today: '/app',

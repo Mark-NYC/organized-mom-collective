@@ -1,0 +1,21 @@
+---
+/**
+ * /account: a customer's saved tools and purchases, signed in with an emailed code. noindex, out of
+ * the sitemap. Off (an explanatory note) unless PUBLIC_ACCOUNTS_ENABLED. Setup: supabase/ACCOUNTS.md.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import AccountApp from '../components/account/AccountApp';
+---
+
+<PublicLayout title="Your account" description="Your saved charts, plans and lists, and your Organized Mom Collective purchases." indexable={false}>
+  <AccountApp client:only="react" />
+</PublicLayout>
+
+<style is:global>
+  .acct-h2 {
+    font-family: var(--font-editorial);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+</style>
