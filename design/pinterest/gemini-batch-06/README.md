@@ -1,6 +1,6 @@
 # Gemini batch 06: pins 51–60 (2026-10-22)
 
-Ten pins planned for master rows 50–59 of the 500-pin calendar ([`OMC_500_Pin_Content_Calendar.csv`](../../../docs/editorial/pinterest/OMC_500_Pin_Content_Calendar.csv)). Batch numbers are not master IDs. **All ten images received (51–55 first, 56–60 later the same day). None owner-approved. Nothing imported, scheduled or published.**
+Ten pins planned for master rows 50–59 of the 500-pin calendar ([`OMC_500_Pin_Content_Calendar.csv`](../../../docs/editorial/pinterest/OMC_500_Pin_Content_Calendar.csv)). Batch numbers are not master IDs. **All ten images received and approved by the owner for upload on 2026-10-22** (51, 55 and 59 by override of the QA holds below; 51 assigned OMC-P0028, 55 assigned OMC-P0189). All ten are in `pinterest-import-ready.csv` and live in `final-2026-10-22/` (51, 55, 59 moved from `held-2026-10-22/` in commit `4097a87`). Nothing imported, scheduled or published by Claude.
 
 - **Seven pass QA** and are in `pinterest-import-ready.csv`, pending owner approval: 52, 53, 54, 56, 57, 58, 60.
 - **Two are held** because their planned slots are already approved: 51 (OMC-P0026, batch 05 #50) and 55 (OMC-P0188, batch 02 #18, identical headline).
@@ -25,10 +25,10 @@ Boards for 56–60 are proposals from [PINTEREST_BOARDS.md](../../../docs/editor
 
 - `originals/`: the ten JPEGs exactly as supplied (`1.jpg` = 55, `2.jpg` = 54, `3.jpg` = 53, `4.jpg` = 52, `5.jpg` = 51, `6.jpg` = 60, `7.jpg` = 59, `8.jpg` = 58, `9.jpg` = 57, `10.jpg` = 56).
 - `final-2026-10-22/`: the seven QA-pass 1000 × 1500 sRGB PNGs.
-- `held-2026-10-22/`: 51, 55 and 59. Not for import.
+- `held-2026-10-22/`: empty; 51, 55 and 59 moved to final after owner approval.
 - `production-manifest.csv`: master ID, original and final filenames, dimensions, SHA-256 of both, path, immutable media URL, destination, board, QA, approval and publish state (rows for all ten).
 - `pinterest-metadata.csv`: internal metadata for every received pin, including held ones. **Not a Pinterest import file.**
-- `pinterest-import-ready.csv`: Pinterest Import Content file, pins **52, 53, 54, 56, 57, 58, 60**.
+- `pinterest-import-ready.csv`: Pinterest Import Content file, all ten pins **51–60**.
 - `qa-report.md`, `contact-sheet-2026-10-22.png`.
 
 ## Pinterest Import Content CSV

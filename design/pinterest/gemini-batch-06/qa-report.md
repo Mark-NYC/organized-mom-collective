@@ -1,6 +1,6 @@
 # Gemini batch 06: QA report (2026-10-22)
 
-Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../docs/editorial/PINTEREST_QA_CHECKLIST.md), [PINTEREST_CREATIVE_DIRECTION.md](../../../docs/editorial/PINTEREST_CREATIVE_DIRECTION.md) and [PINTEREST_STRATEGY.md](../../../docs/editorial/PINTEREST_STRATEGY.md). Results are **pass**, **fail**, **held** or **not received**. Mechanical checks, visual judgment and owner approval are separate. **Nothing in this batch is owner-approved yet.**
+Reviewed against [PINTEREST_QA_CHECKLIST.md](../../../docs/editorial/PINTEREST_QA_CHECKLIST.md), [PINTEREST_CREATIVE_DIRECTION.md](../../../docs/editorial/PINTEREST_CREATIVE_DIRECTION.md) and [PINTEREST_STRATEGY.md](../../../docs/editorial/PINTEREST_STRATEGY.md). Results are **pass**, **fail**, **held** or **not received**. Mechanical checks, visual judgment and owner approval are separate. > **Owner approval, 2026-10-22:** all ten approved for upload. 51, 55 and 59 by owner override; the findings below stand as recorded. 51 assigned OMC-P0028 and 55 assigned OMC-P0189 because their planned slots were already approved. Files moved to `final-2026-10-22/`.
 
 ## Received
 
