@@ -8,7 +8,7 @@ export type GalleryIdea = {
 export type InspirationGallery = {
   slug: string; title: string; seoTitle: string; description: string;
   deck: string; disclosure: string; published: boolean; coverImage?: string; ideas: GalleryIdea[];
-  sections?: Array<{ start: number; title: string; intro: string }>;
+  sections?: Array<{ start: number; title: string; intro: string; label: string; icon: string }>;
 };
 const ideas: GalleryIdea[] = [
   {
@@ -139,5 +139,12 @@ export const inspirationGalleries: InspirationGallery[] = [{
   deck: '15 inspiring spaces. 30 practical ideas for backpacks, shoes, coats, and the after-school pileup.',
   disclosure: 'These images are AI-generated design inspiration, not photographs of actual homes or listings for specific furniture.',
   published: true,
+  sections: [
+    { start: 0, title: "Benches & shoe storage", intro: "Entryway benches, easy-reach shoes and a drop zone that prevents piles from forming.", label: "Benches & shoes", icon: "bench" },
+    { start: 3, title: "Hooks & hidden storage", intro: "Give coats, bags and the small everyday extras one obvious place to land.", label: "Hooks & storage", icon: "hooks" },
+    { start: 6, title: "Corners & narrow entryways", intro: "Use awkward corners, slim walls and containers sized for the space you actually have.", label: "Small entryways", icon: "corner" },
+    { start: 9, title: "Kid-friendly drop zones", intro: "Make backpacks, boots and outerwear simple for children to put away themselves.", label: "Kids' drop zones", icon: "kids" },
+    { start: 12, title: "Creative mudroom makeovers", intro: "Try compact storage solutions even if your home has no dedicated mudroom.", label: "More mudroom ideas", icon: "sparkle" }
+  ],
   ideas
 }];
