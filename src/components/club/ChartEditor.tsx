@@ -21,6 +21,7 @@ import PalettePicker from './PalettePicker';
 import PrintFrame from './PrintFrame';
 import ResponsibilityChart, { JobArt, type ChartPerson } from './print/ResponsibilityChart';
 import { OwnedChecklist } from './print/Worksheet';
+import { clubNav } from '../../lib/club/nav';
 
 interface Props {
   store: ClubStore;
@@ -179,9 +180,13 @@ export default function ChartEditor({ store, kit, printable, items, household, s
             <PalettePicker value={palette} onChange={(p) => { setPalette(p); if (status === 'saved') setStatus('idle'); }} disabled={readOnly} />
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => printDocument(printable.id, orientation)}>
-              Print or save as PDF
-            </button>
+            {clubNav().canPrint ? (
+              <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => printDocument(printable.id, orientation)}>
+                Print or save as PDF
+              </button>
+            ) : (
+              <PreviewOnlyNote />
+            )}
             <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={preview} onClick={() => setPreview(!preview)}>
               {preview ? 'Hide the preview' : 'Preview the printout'}
             </button>
@@ -212,7 +217,7 @@ export default function ChartEditor({ store, kit, printable, items, household, s
                 : 'All changes saved'}
             </p>
             {status === 'conflict' ? (
-              <button type="button" className="btn-secondary" onClick={() => location.reload()}>Load the newest</button>
+              <button type="button" className="btn-secondary" onClick={() => clubNav().reload()}>Load the newest</button>
             ) : (
               <button type="button" className="btn-primary min-h-11 px-5" disabled={status === 'saving' || (!dirty && !neverSaved)} onClick={save}>
                 {neverSaved ? 'Save our chart' : 'Save changes'}
@@ -415,5 +420,14 @@ function AddJob({ person, household, unused, act }: { person: PlannedMember; hou
       )}
       <button type="button" className="justify-self-start text-[0.88rem] text-warm-soft underline underline-offset-4 sm:col-span-3" onClick={() => setOpen(false)}>Cancel</button>
     </div>
+  );
+}
+
+/** Where printing isn't possible (the hosted preview's frame blocks the print dialog). */
+export function PreviewOnlyNote() {
+  return (
+    <p className="max-w-md text-[0.9rem] leading-relaxed text-warm-soft">
+      Printing opens the print dialog on the site. In this preview, use <strong className="text-warm-ink">Preview the printout</strong> to see the exact US Letter page.
+    </p>
   );
 }

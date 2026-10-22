@@ -10,6 +10,7 @@ import type { Household } from '../../lib/club/profile';
 import type { ClubMe } from '../../lib/club/store';
 import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
+import { clubNav } from '../../lib/club/nav';
 
 export default function DashboardPage() {
   return <ClubGate page="dashboard">{(ctx) => <Dashboard ctx={ctx} />}</ClubGate>;
@@ -22,7 +23,7 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
   useEffect(() => {
     Promise.all([ctx.store.me(), ctx.store.household()])
       .then(([me, household]) => {
-        if (!household) return location.replace(ctx.href(routes.clubStart));
+        if (!household) return clubNav().go(ctx.href(routes.clubStart), { replace: true });
         setState({ me, household });
       })
       .catch(() => setError('We couldn’t load your kits. Check your connection and reload the page.'));
