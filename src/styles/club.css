@@ -23,10 +23,8 @@
   html[data-club-print] .club-print {
     display: none !important;
   }
-  html[data-club-print='ownership-chart'] .club-print[data-doc='ownership-chart'],
-  html[data-club-print='kitchen-pantry-reset'] .club-print[data-doc='kitchen-pantry-reset'],
-  html[data-club-print='who-owns-what'] .club-print[data-doc='who-owns-what'],
-  html[data-club-print='handing-over'] .club-print[data-doc='handing-over'] {
+  /* printDocument() marks the one being printed (any kit, any printable). */
+  html[data-club-print] .club-print.is-printing {
     display: block !important;
     box-shadow: none !important;
     margin: 0 !important;
@@ -374,4 +372,192 @@
 }
 .club-density-tight .club-card-head {
   min-height: 0.3in;
+}
+
+/* ------------------------------------------------------------------ portrait chart (August's launch checklist) */
+
+.club-chart-portrait {
+  width: 7.8in;
+  min-height: 10.2in;
+}
+.club-chart-portrait .club-chart-head {
+  height: 1.05in;
+}
+.club-chart-portrait .club-chart-promise {
+  max-width: 2.6in;
+  line-height: 1.5;
+}
+.club-job-check {
+  grid-template-columns: 0.3in 1fr 0.2in;
+}
+.club-density-tight .club-job-check {
+  grid-template-columns: 0.22in 1fr 0.18in;
+}
+.club-job-check .club-box {
+  width: 0.17in;
+  height: 0.17in;
+  margin: 0;
+  align-self: start;
+  margin-top: 0.03in;
+}
+@media print {
+  html[data-club-print] .club-chart-portrait {
+    height: 10.15in;
+  }
+  html[data-club-print] .club-chart-portrait[data-pages='2'] {
+    height: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ routine pages (one per child, portrait) */
+
+.club-routine-page + .club-routine-page {
+  break-before: page;
+  page-break-before: always;
+}
+.club-routine-part {
+  margin-top: 0.3in;
+}
+.club-routine-part-head {
+  display: grid;
+  grid-template-columns: 1fr 1.7in;
+  align-items: end;
+  border-bottom: 1.5px solid #e7ddd4;
+  padding-bottom: 0.06in;
+}
+.club-routine-label {
+  font-size: 20pt;
+}
+.club-routine-days {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #8a7f7b;
+}
+.club-routine-step {
+  display: grid;
+  grid-template-columns: 0.42in 1fr 1.7in;
+  gap: 0.12in;
+  align-items: center;
+  min-height: 0.5in;
+  border-bottom: 1px solid #f0e9e2;
+  break-inside: avoid;
+}
+.club-routine-step .club-job-art,
+.club-routine-step .club-job-art img {
+  width: 0.4in;
+  height: 0.4in;
+}
+.club-routine-title {
+  font-size: 12.5pt;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.club-routine-boxes {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
+}
+.club-routine-boxes .club-box {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ command center (landscape) */
+
+.club-command-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 0.16in;
+  align-items: start;
+  flex: 1;
+}
+.club-command-side {
+  display: grid;
+  gap: 0.16in;
+}
+.club-command-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1.1in;
+  gap: 0.08in;
+  align-items: center;
+  min-height: 0.36in;
+  border-bottom: 1px solid #f0e9e2;
+  font-size: 9.5pt;
+  line-height: 1.2;
+}
+.club-command-job {
+  font-weight: 600;
+}
+.club-command-row .club-chip {
+  font-size: 7pt;
+  white-space: nowrap;
+}
+.club-command-owner {
+  font-size: 13pt;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.club-command-blank {
+  height: 0.32in;
+  border-bottom: 1px solid #e7ddd4;
+}
+.club-command-intro {
+  font-size: 8.5pt;
+  color: #6e6461;
+  margin: 0.04in 0 0.02in;
+}
+.club-command-check {
+  display: grid;
+  grid-template-columns: 0.24in 1fr;
+  align-items: start;
+  font-size: 9pt;
+  line-height: 1.3;
+  padding: 0.04in 0;
+}
+.club-command-check .club-box {
+  width: 0.15in;
+  height: 0.15in;
+  margin-top: 0.01in;
+}
+@media print {
+  html[data-club-print] .club-command {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* ------------------------------------------------------------------ the one-page guide (portrait) */
+
+.club-guide {
+  margin-top: 0.3in;
+  columns: 2;
+  column-gap: 0.35in;
+}
+.club-guide section {
+  break-inside: avoid;
+  margin-bottom: 0.22in;
+}
+.club-guide h3 {
+  font-family: var(--font-serif);
+  font-size: 13pt;
+  font-weight: 700;
+  color: #3d3834;
+}
+.club-guide p {
+  margin-top: 0.06in;
+  font-size: 10.5pt;
+  line-height: 1.5;
+}
+.club-command .club-chart-title {
+  font-size: 28pt;
+  white-space: nowrap;
+}
+.club-command .club-chart-promise {
+  white-space: nowrap;
+}
+.club-sheet-lines-tight .club-sheet-line {
+  height: 0.4in;
 }

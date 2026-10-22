@@ -219,3 +219,6 @@ select pg_temp.expect(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and (p.proname like 'club\_%' or p.proname like 'account\_%') and has_function_privilege('anon', p.oid, 'execute')),
   'anon can execute no club_ or account_ function');
+
+-- The August kit is seeded as a draft, so nobody can open it yet.
+select pg_temp.expect((select status from public.club_kits where slug = '2027-08-school-year') = 'draft', 'August is seeded as a draft');

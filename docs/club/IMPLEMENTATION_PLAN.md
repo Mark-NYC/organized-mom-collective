@@ -331,6 +331,23 @@ Pure TypeScript, no database, UI, Stripe or new dependencies; nothing ships to v
 | Launch protection: `/club/*` security headers (noindex, no-store, CSP, no framing); `npm run check:site` fails if a Club page loads GA4 or the Pinterest tag, is indexable, is in the sitemap, or is linked from any page outside /club; the page inventory skips /club | `public/_headers`, `scripts/check-site.mjs`, `scripts/lib/page-inventory.mjs` |
 | QA by hand: every sample at phone and desktop width, edits survive a reload, a family change shows suggestions without changing the chart, every printable prints to one Letter page with no clipped text, a 7-person chart plus 24 extra jobs prints readably on two | `scripts/club-qa.mjs` |
 
+### Done (2026-10-23): the August 2027 kit, Ready for the School Year, behind the flag
+
+The second full kit, built on the same engine, edit layer and editor (no new framework). Curriculum entry: [YEAR_ONE_CALENDAR.md → August](YEAR_ONE_CALENDAR.md); mailer draft: [mailers/2027-08-school-year.md](mailers/2027-08-school-year.md).
+
+| Piece | Where |
+| --- | --- |
+| Kit config: launch plan items, `itemSets` (`routines`, `command`), an `overview`, `setup: 'school'`, six printables (three in the mail) | `src/data/club/kits/2027-08-school-year.ts` |
+| Config additions: `childSchool` requirements, `lead` (two weeks / one week / night before / first day), `priority`, `itemSets`, printable `items` / `editor` / `secondary` / `content`; `kitProblems()` checks them | `src/data/club/types.ts`, `src/data/club/kits/index.ts` |
+| School setup: each child's school type and first day, guessed from age, saved as the kit's `school-setup` document; due dates count back from each child's own first day | `src/lib/club/school.ts`, `KitPage.tsx` |
+| Engine options: routine placement (every eligible step, no coaches, no balance moves); household items only when some child's school matches | `src/lib/club/engines/responsibilities.ts`, `src/lib/club/edits.ts` |
+| Overview: 5–8 first actions (shared prep first, then each child's best task) | `src/lib/club/overview.ts`, `KitPage.tsx` |
+| Editors: the launch plan (the chart editor), routines per child (reorder, add, reword), command-center commitments | `ChartEditor.tsx` |
+| Printables: launch plan on one portrait page, a routine page per child in school, the command center on one landscape page, guide, huddle, backpack station | `src/components/club/print/SchoolPrintables.tsx`, `ResponsibilityChart.tsx` |
+| Print fix: the print-only rule targets `.is-printing` (it hard-coded November's ids, so other kits printed blank); QA refuses a blank page | `src/lib/club/print.ts`, `src/styles/club.css`, `scripts/club-qa.mjs` |
+| Migration: August seeded as a **draft** (not applied) | `supabase/migrations/20261024000000_club_august_kit.sql` |
+| Tests | `tests/club-august.test.ts`, `supabase/tests/club-access.sql` |
+
 ### Previewing
 
 - **Samples, no backend:** build with `PUBLIC_CLUB_ENABLED=true` (a Cloudflare Pages **Preview** environment variable, never Production) and open `/club/dashboard`. With accounts off it lists the samples; or add `?sample=rivera` to any /club page. `npm run dev` shows the pages too.
@@ -343,6 +360,6 @@ Pure TypeScript, no database, UI, Stripe or new dependencies; nothing ships to v
 ### Still open before Phase 2
 1. Accounts step 1 launch (its checklist in `supabase/ACCOUNTS.md`, `/privacy` first, with the Club's children's-data section).
 2. The private beta (D2) uses `club_access_grants` with `reason = 'beta'`; no billing needed.
-3. Megan's letter for November (`letter: null` until then; the kit can't be scheduled for members without it).
+3. Megan's letters for November and August (`letter: null` until then; the kit can't be scheduled for members without it).
 
 Phase 2 (billing) doesn't start until the owner says so.

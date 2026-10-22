@@ -1,5 +1,5 @@
 /** How the Club's pages and printables say frequencies, ownership levels and sections. */
-import type { ChartSection, Frequency, OwnershipLevel } from './types';
+import type { ChartSection, Frequency, Lead, OwnershipLevel, SchoolType } from './types';
 
 export const FREQUENCY_LABEL: Record<Frequency, string> = {
   daily: 'Every day',
@@ -24,6 +24,24 @@ export const SECTION_LABEL: Record<ChartSection, string> = {
   family: 'For the family',
   space: 'My space',
   self: 'Taking care of me',
+  morning: 'Morning',
+  'after-school': 'After school',
+  commitment: 'Every week',
+};
+
+export const SCHOOL_LABEL: Record<SchoolType, string> = {
+  public: 'Public school',
+  private: 'Private school',
+  homeschool: 'Homeschool',
+  preschool: 'Preschool',
+  none: 'Not in school this year',
+};
+
+export const LEAD_LABEL: Record<Lead, string> = {
+  'two-weeks': '2 weeks before',
+  'one-week': 'The week before',
+  'night-before': 'The night before',
+  'first-day': 'First day',
 };
 
 /** '2026-11' → 'November 2026' */

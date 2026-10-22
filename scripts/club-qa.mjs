@@ -51,12 +51,12 @@ const check = (ok, what) => {
 
 const pdfPages = (buf) => (buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
 
-async function printTo(page, doc, orientation, name) {
+async function printTo(page, doc, orientation, name, nth = 0) {
   // The real print button, with the browser's dialog stubbed: printDocument() fits the chart and sets the page up.
   await page.evaluate(() => { window.print = () => {}; });
   await page.locator('[hidden]').evaluateAll(() => {});
   const button = page.getByRole('button', { name: 'Print or save as PDF' }).filter({ visible: true });
-  await button.first().click();
+  await button.nth(nth).click();
   await page.evaluate((d) => { if (document.documentElement.dataset.clubPrint !== d) throw new Error(`printing ${document.documentElement.dataset.clubPrint}, expected ${d}`); }, doc);
   await page.emulateMedia({ media: 'print' });
   await page.evaluate(() => Promise.all([...document.images].map((i) => (i.complete ? null : i.decode().catch(() => null)))));
@@ -67,6 +67,12 @@ async function printTo(page, doc, orientation, name) {
       .filter((el) => el.scrollWidth > el.clientWidth + 1)
       .map((el) => el.textContent.trim().slice(0, 40));
   }, doc);
+  // A blank page still counts as a page: the printable itself must be showing, with its text, in print mode.
+  const shown = await page.evaluate((d) => {
+    const el = document.querySelector(`.club-print[data-doc="${d}"]`);
+    return Boolean(el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 100 && el.textContent?.trim());
+  }, doc);
+  if (!shown) failures.push(`${name}: the printout was blank (printable hidden in print)`);
   // The PNG first: page.pdf() fires afterprint, which (rightly) puts the screen back.
   const [w, h] = orientation === 'landscape' ? [1056, 816] : [816, 1056];
   await page.setViewportSize({ width: w, height: h });
@@ -143,6 +149,56 @@ for (const id of samples) {
     await page.setViewportSize({ width: 1280, height: 900 });
   }
   check(errors.length === 0, `${id}: page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// August: the overview opens with 5–8 first actions; the school setup changes the plan; every printable prints.
+for (const id of samples) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { august: id };
+  await page.goto(`${base}/club/kits/2027-08-school-year?sample=${id}`);
+  await page.getByRole('heading', { name: /^Start with these/ }).waitFor();
+  check(await noSideScroll(page), `${id}: August overview scrolls sideways on a phone`);
+  const actions = await page.locator('#club-first ~ ol > li').count();
+  entry.actions = actions;
+  check(actions >= 5 && actions <= 8, `${id}: August overview shows ${actions} first actions (expected 5–8)`);
+  check(await page.getByRole('link', { name: 'November 2026' }).count() === 1, `${id}: no month switcher to November`);
+  await page.screenshot({ path: join(out, `${id}-august-overview-phone.png`), fullPage: true });
+
+  // School setup: a first day and a different school for the first child; the chips turn into dates.
+  await page.getByRole('button', { name: /Add first days and schools|Change schools or first days/ }).click();
+  await page.locator('input[type="date"]').first().fill('2027-08-26');
+  await page.getByText('Saved', { exact: true }).waitFor();
+  check(await page.getByText(/By Aug \d+/).count() > 0, `${id}: a first day didn't turn into due dates`);
+  await page.reload();
+  await page.getByRole('heading', { name: /^Start with these/ }).waitFor();
+  check(await page.getByText(/starts Thu, Aug 26/).count() > 0, `${id}: the first day didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const kidsInSchool = await page.evaluate(() => [...document.querySelectorAll('section[aria-labelledby="club-setup"] ul > li')].filter((li) => !/Not in school/.test(li.textContent ?? '')).length);
+  for (const [tab, doc, orientation, pages] of [['Launch plan', 'school-launch', 'portrait', 1], ['Routines', 'school-routines', 'portrait', kidsInSchool], ['Command center', 'command-center', 'landscape', 1]]) {
+    await page.getByRole('button', { name: tab, exact: true }).click();
+    const r = await printTo(page, doc, orientation, `${id}-august-${doc}`);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: ${doc} has text overflowing: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  await page.getByRole('button', { name: 'In the mail', exact: true }).click();
+  for (const [n, doc] of ['school-guide', 'school-huddle', 'backpack-station'].entries()) {
+    const r = await printTo(page, doc, 'portrait', `${id}-august-${doc}`, n);
+    entry[doc] = r;
+    check(r.pages === 1, `${id}: ${doc} printed on ${r.pages} pages (expected 1)`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  // Same family, same profile: November still opens from the switcher.
+  await page.getByRole('link', { name: 'November 2026' }).click();
+  await page.getByRole('heading', { name: 'Our Family, Our Team' }).waitFor();
+  check(errors.length === 0, `${id}: August page errors: ${errors.join(' | ')}`);
   report.push(entry);
   await ctx.close();
 }

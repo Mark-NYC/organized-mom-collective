@@ -2,6 +2,9 @@
  * The Family Responsibility Chart: US Letter landscape, a card per person with their jobs, illustrations on their
  * fixed category colors, the chosen tool palette for the swipes and chips, Kalam names. Styles: src/styles/club.css.
  * Layout and density: chartLayout() in src/lib/club/print.ts.
+ *
+ * The same chart, in portrait with tick boxes and due-date chips, is August's School Launch checklist; the optional
+ * props below change only that (November's chart uses the defaults).
  */
 import { coachLine, FREQUENCY_LABEL, monthLabel, SECTION_LABEL } from '../../../data/club/labels';
 import { responsibilityById, responsibilityColor, responsibilityImage } from '../../../data/responsibilities';
@@ -25,9 +28,19 @@ interface Props {
   palette: ToolPaletteId;
   /** Shown on screen as a preview (scaled by the parent). */
   preview?: boolean;
+  orientation?: 'landscape' | 'portrait';
+  /** Under the title (default: family · month). */
+  subtitle?: string;
+  /** Top right (default: Every job has one owner). */
+  promise?: string;
+  footer?: [string, string];
+  /** The chip on each row (default: how often). */
+  chip?: (r: ChartRow) => string;
+  /** A tick box on each row (checklists). */
+  checkboxes?: boolean;
 }
 
-const SECTIONS: ChartSection[] = ['family', 'space', 'self'];
+const SECTIONS: ChartSection[] = ['family', 'space', 'self', 'morning', 'after-school'];
 
 export function JobArt({ illustration }: { illustration?: string }) {
   const r = illustration ? responsibilityById(illustration) : undefined;
@@ -40,7 +53,10 @@ export function JobArt({ illustration }: { illustration?: string }) {
   );
 }
 
-export default function ResponsibilityChart({ doc, title, familyName, month, people, rows, palette, preview }: Props) {
+export default function ResponsibilityChart({
+  doc, title, familyName, month, people, rows, palette, preview, orientation = 'landscape', subtitle, promise = 'Every job has one owner',
+  footer = ['Organized Family Club · Family Ownership Builder', 'Check the chart first'], chip: chipText = (r) => FREQUENCY_LABEL[r.frequency], checkboxes,
+}: Props) {
   const [swipe, card, chip] = toolPalettes[palette].colors;
   const names = new Map(people.map((p) => [p.id, p.firstName]));
   const byPerson = people
@@ -54,35 +70,42 @@ export default function ResponsibilityChart({ doc, title, familyName, month, peo
   const job = (r: ChartRow) => {
     const coach = coachLine(r.level, r.coachId ? names.get(r.coachId) ?? null : null);
     return (
-      <div key={r.rowId} className="club-job" style={{ ['--dot' as string]: card }}>
+      <div key={r.rowId} className={`club-job${checkboxes ? ' club-job-check' : ''}`} style={{ ['--dot' as string]: card }}>
         <JobArt illustration={r.illustration} />
         <div>
           <div className="club-job-title">{r.title}</div>
           <div className="club-job-meta">
-            <span className="club-chip" style={{ ['--chip' as string]: chip }}>{FREQUENCY_LABEL[r.frequency]}</span>
+            <span className="club-chip" style={{ ['--chip' as string]: chip }}>{chipText(r)}</span>
             {coach && <span> · {coach}</span>}
           </div>
           {r.doneMeans && <div className="club-job-done">{r.doneMeans}</div>}
         </div>
+        {checkboxes && <span className="club-box" aria-hidden="true" />}
       </div>
     );
   };
 
   return (
-    <div className={`club-print club-chart club-density-${layout.density}`} data-doc={doc} data-pages={layout.pages} data-preview={preview ? '' : undefined}>
+    <div
+      className={`club-print club-chart club-density-${layout.density}${orientation === 'portrait' ? ' club-chart-portrait' : ''}`}
+      data-doc={doc}
+      data-pages={layout.pages}
+      data-preview={preview ? '' : undefined}
+      {...(orientation === 'portrait' ? { 'data-fit-height': '10.1', 'data-fit-columns': '3,2' } : {})}
+    >
       <header className="club-chart-head">
         <div>
           <div className="club-hand club-chart-title">
             <span className="club-swipe" style={{ ['--swipe' as string]: swipe }}>{title}</span>
           </div>
           <div className="club-chart-family">
-            {familyName} · {monthLabel(month)}
+            {subtitle ?? `${familyName} · ${monthLabel(month)}`}
           </div>
         </div>
-        <div className="club-chart-promise">Every job has one owner</div>
+        <div className="club-chart-promise">{promise}</div>
       </header>
 
-      <div className="club-chart-grid" style={{ columnCount: layout.columns }}>
+      <div className="club-chart-grid" style={{ columnCount: orientation === 'portrait' ? Math.min(layout.columns, 3) : layout.columns }}>
         {byPerson.map(({ person, rows: mine }) => (
           <section key={person.id} className="club-card" style={{ borderColor: card === '#E6EEEA' ? '#d5dfd9' : undefined }}>
             <div className="club-card-head">
@@ -116,8 +139,8 @@ export default function ResponsibilityChart({ doc, title, familyName, month, peo
       </div>
 
       <footer className="club-chart-foot">
-        <span>Organized Family Club · Family Ownership Builder</span>
-        <span>Check the chart first</span>
+        <span>{footer[0]}</span>
+        <span>{footer[1]}</span>
       </footer>
     </div>
   );

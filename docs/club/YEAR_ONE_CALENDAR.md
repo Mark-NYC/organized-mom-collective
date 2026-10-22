@@ -21,7 +21,7 @@ Rules for every month (from [VISION.md](../brand/VISION.md) and [BRAND_VOICE.md]
 | **May 2027** | Finish the School Year Well | School Year Wrap-Up Builder | planning | Living Areas | May 1 | Apr 15 |
 | **Jun 2027** | Summer With a Plan | Summer Rhythm Builder | routines | Outdoor / Summer Prep | Jun 1 | May 15 |
 | **Jul 2027** | Ready to Go | Packing and Independence Builder | projects | Kitchen Deep Clean | Jul 1 | Jun 15 |
-| **Aug 2027** | Back-to-School Ready | School Launch Builder | routines + planning | Bedrooms + Back-to-School | Aug 1 | Jul 15 |
+| **Aug 2027** | Ready for the School Year (built) | School Launch Plan + routines + command center | responsibilities | Bedrooms + Back-to-School | Aug 1 | Jul 15 |
 | **Sep 2027** | A Week Everyone Can See | Sunday Family Reset Builder | planning | Entry + Storage | Sep 1 | Aug 15 |
 | **Oct 2027** | The Family That Follows Through | Family Habits and Ownership Review | responsibilities (review mode) | Closet Cleanout | Oct 1 | Sep 15 |
 
@@ -94,12 +94,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter; field guide on independence one bag at a time; activity: kids pack a practice bag.
 - **Overlap check:** free `/travel-checklist` stays free.
 
-### August: Back-to-School Ready
+### August: Ready for the School Year (built 2026-10-23, behind the flag)
 
-- **Flagship: School Launch Builder.** First-week plan dated from her first day of school (one input), plus each child's school-morning and after-school routines (reuses January's engine with school-year defaults).
-- **Worksheets:** backpack checklist per child, after-school landing station sign, team Bedrooms + Back-to-School reset.
-- **Mailer:** letter; field guide on the first two weeks; activity: first-day interview.
-- **Overlap check:** free `/back-to-school-checklist` stays free.
+Config: `src/data/club/kits/2027-08-school-year.ts` (slug `2027-08-school-year`). Mailer draft: [mailers/2027-08-school-year.md](mailers/2027-08-school-year.md).
+
+- **Opens on an overview:** 5–8 first actions, already shared out, from the launch plan (shared prep first, then each child's most useful task), with the full plan, routines and command center a tap away.
+- **School setup:** each child's school (public, private, homeschool, preschool, or not in school this year) and first day, guessed from age, changed in one line. Never assumes every child goes to school or starts the same day. Due dates count back from each child's first day.
+- **A. School Launch Plan** (flagship; one portrait page): each child's prep by age and school type, plus shared prep (calendar dates, supply lists, forms, rides, bedtimes, the backpack station) with one owner each.
+- **B. Morning and after-school routines:** a page per child, steps by age and school type, reorderable and editable.
+- **C. School-Year Command Center** (one landscape page): who owns drop-off, pick-up, activity driving, school email, lunches, papers, the homework check-in and Sunday planning; the family's own weekly commitments; the Sunday planning checklist. Made to hang beside the wall calendar, not replace it.
+- **In the mail:** Megan's letter (placeholder), the one-page guide, the School-Year Huddle, the Backpack Station Reset.
+- **Overlap check:** the free `/back-to-school-checklist`, `/routine-chart`, `/lunch-and-snack-station` and `/command-center-setup` stay free; the kit builds every child's version at once from the profile.
 
 ### September: A Week Everyone Can See
 

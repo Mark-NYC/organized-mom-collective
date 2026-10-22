@@ -10,8 +10,8 @@
  * operation returns a new object.
  */
 import type { ChartSection, Frequency, KitItem, OwnershipLevel } from '../../data/club/types';
-import { FREQUENCIES, OWNERSHIP_LEVELS } from '../../data/club/types';
-import { balanceSuggestions, eligible, generateOwnership, levelFor, type Assignment, type BalanceMove, type PinnedRow } from './engines/responsibilities';
+import { CHART_SECTIONS, FREQUENCIES, OWNERSHIP_LEVELS } from '../../data/club/types';
+import { balanceSuggestions, eligible, generateOwnership, levelFor, type Assignment, type BalanceMove, type GenerateOptions, type PinnedRow } from './engines/responsibilities';
 import { planMembers, type Household, type PlannedMember } from './profile';
 
 /** An engine suggestion as she accepted it. Kept whole, so it survives the rules or the family changing. */
@@ -121,8 +121,8 @@ const snapshot = (a: Assignment): AcceptedRow => ({
 });
 
 /** The first time she opens a kit: the engine's whole chart becomes hers. */
-export function initialEdits(household: Household, items: readonly KitItem[], month: string): DocumentEdits {
-  return { ...emptyEdits(), accepted: generateOwnership(household, items, month).rows.map(snapshot) };
+export function initialEdits(household: Household, items: readonly KitItem[], month: string, options: GenerateOptions = {}): DocumentEdits {
+  return { ...emptyEdits(), accepted: generateOwnership(household, items, month, [], options).rows.map(snapshot) };
 }
 
 const editedIds = (e: DocumentEdits) =>
@@ -160,7 +160,7 @@ function currentRows(e: DocumentEdits, items: ReadonlyMap<string, KitItem>) {
 }
 
 /** What the page shows: her chart, her hidden rows, and the engine's suggestions for what's changed. */
-export function resolveDocument(household: Household, items: readonly KitItem[], month: string, e: DocumentEdits): ResolvedDocument {
+export function resolveDocument(household: Household, items: readonly KitItem[], month: string, e: DocumentEdits, options: GenerateOptions = {}): ResolvedDocument {
   const people = new Map<string, PlannedMember>(planMembers(household, month).map((p) => [p.id, p]));
   const itemMap = new Map(items.map((i) => [i.id, i]));
   const adults = [...people.values()].filter((p) => p.stage === 'adult').length;
@@ -195,7 +195,7 @@ export function resolveDocument(household: Household, items: readonly KitItem[],
   const known = new Set(rows.map((r) => r.rowId));
   const dismissed = new Set(e.dismissed);
   const suggestions: Suggestion[] = [];
-  for (const a of generateOwnership(household, items, month, pinned).rows) {
+  for (const a of generateOwnership(household, items, month, pinned, options).rows) {
     if (a.pinned || dismissed.has(a.rowId) || hidden.has(a.rowId)) continue;
     if (!known.has(a.rowId)) {
       suggestions.push({ kind: 'add', row: a });
@@ -207,9 +207,9 @@ export function resolveDocument(household: Household, items: readonly KitItem[],
     }
   }
 
-  // Workload balance: optional moves on visible rows she didn't assign herself.
+  // Workload balance: optional moves on visible rows she didn't assign herself (off for routines: nothing to balance).
   const visible = rows.filter((r) => !hidden.has(r.rowId) && !r.needsOwner);
-  const moves = balanceSuggestions(household, items, month, visible.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: r.ownerId, locked: r.custom || has(e.assign, r.rowId) })));
+  const moves = options.balance === false ? [] : balanceSuggestions(household, items, month, visible.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: r.ownerId, locked: r.custom || has(e.assign, r.rowId) })));
   for (const m of moves) {
     const s: Suggestion = { kind: 'balance', title: visible.find((r) => r.rowId === m.rowId)!.title, ...m };
     if (!dismissed.has(suggestionId(s))) suggestions.push(s);
@@ -355,7 +355,7 @@ export function dismissSuggestion(e: DocumentEdits, s: Suggestion): DocumentEdit
 
 const isStr = (v: unknown): v is string => typeof v === 'string';
 const isNullableStr = (v: unknown): v is string | null => v === null || isStr(v);
-const SECTIONS: readonly ChartSection[] = ['family', 'space', 'self'];
+const SECTIONS: readonly ChartSection[] = CHART_SECTIONS;
 const strMap = <T>(v: unknown, ok: (x: unknown) => x is T): Record<string, T> => {
   const out: Record<string, T> = {};
   if (v && typeof v === 'object' && !Array.isArray(v)) for (const [k, x] of Object.entries(v)) if (k.length <= 120 && ok(x)) out[k] = x;

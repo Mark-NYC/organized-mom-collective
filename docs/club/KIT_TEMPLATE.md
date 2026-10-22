@@ -20,6 +20,8 @@ The source of truth is `src/data/club/types.ts`; read it there. In short:
 - **`KitConfig`**: `slug` (`YYYY-MM-theme`, permanent once printed), `month`, `theme`, `shift` (the one change it asks of the family), `engine`, `engineVersion` (bump when rules change in a way saved edits must be checked against), up to two `inputs` with defaults, `items` (the flagship's rules), an optional `reset` (the companion's monthly project from `src/data/cleaning.ts` as owned jobs), `printables` (exactly one `flagship`), `mailer` (`letter: null` until Megan writes it, field guide, activity, `qrPath = /club/kits/<slug>?source=mailer`), `related` free tools (paths from `src/routes.ts`).
 - **`KitItem`**: stable `id` (never reused or renamed once released), owner-language `title`, `doneMeans` (what "done" looks like, so nobody inspects it), `for` (`adult` whole jobs / `child` / `anyone`), `minAge`/`maxAge` (children and teens only), `levels` by age, ascending and ending at `owns`: `learning` (their job, with someone beside them), `with-check` (theirs start to finish, a coach checks), `owns` (theirs completely), `frequency`, `effort` 1–5, `section` (`family` / `space` / `self`), `scope` (`household`: one owner for the family; `each`: everyone eligible gets their own), `core` (every family needs it: never silently dropped), `excludes` (jobs covering the same ground), `requires` (household preferences), `illustration` (a `src/data/responsibilities.ts` id).
 
+- **Optional, from August:** `itemSets` (extra rule sets a printable names with `items`, ids unique across all sets), `setup: 'school'` (each child's school type and first day, saved as the `school-setup` document), `overview` (`from` an item set, 5–8 first actions), and on printables `items`, `editor` (`chart` / `routine` / `command`), `secondary` (shown under "In the mail"), `content` (a fixed checklist or activity). On items: `requires.childSchool` (school types it applies to; per child for `each`, any child for `household`), `lead` (when it's due before the first day) and `priority` (lower first in the overview).
+
 Never write "help" into a job title: the tests refuse it. Ownership is the point.
 
 ### Responsibility cards
@@ -29,6 +31,10 @@ Every card in `src/data/responsibilities.ts` is an item automatically (`cardItem
 ## November, as built
 
 `src/data/club/kits/2026-11-family-ownership.ts`: the responsibilities engine over `ownershipJobs()` (the 16 cards, 8 family jobs, 12 teen and adult whole jobs), the November Kitchen & Pantry Reset (the five November tasks from `cleaning.ts`, with ages per task id), four printables (`ownership-chart` flagship, `kitchen-pantry-reset`, `who-owns-what`, `handing-over`), the field guide "Owning a Job, Not Helping With It", the 20-minute Team Meeting activity, and `letter: null`.
+
+## August, as built
+
+`src/data/club/kits/2027-08-school-year.ts`: the School Launch Plan (flagship, one portrait page), morning and after-school routines (`itemSets.routines`, a page per child), the School-Year Command Center (`itemSets.command`, landscape), and in the mail the guide, the School-Year Huddle and the Backpack Station Reset. Overview from the launch plan; school setup per child. `letter: null`.
 
 ## Test households (every kit, every month)
 

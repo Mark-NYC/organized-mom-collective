@@ -20,14 +20,31 @@ export const FREQUENCIES: readonly Frequency[] = ['daily', 'weekdays', 'twice-we
 export type OwnershipLevel = 'learning' | 'with-check' | 'owns';
 export const OWNERSHIP_LEVELS: readonly OwnershipLevel[] = ['learning', 'with-check', 'owns'];
 
-/** Where a job sits on the chart: work for the whole family, their own room or things, taking care of themselves. */
-export type ChartSection = 'family' | 'space' | 'self';
+/**
+ * Where a row sits: work for the whole family, their own room or things, taking care of themselves; a routine's
+ * morning or after-school steps; a recurring commitment (a practice, a lesson) on the command center.
+ */
+export type ChartSection = 'family' | 'space' | 'self' | 'morning' | 'after-school' | 'commitment';
+export const CHART_SECTIONS: readonly ChartSection[] = ['family', 'space', 'self', 'morning', 'after-school', 'commitment'];
+
+/** Where a child goes to school this year (a kit's school setup; never assumed the same for every child). */
+export type SchoolType = 'public' | 'private' | 'homeschool' | 'preschool' | 'none';
+export const SCHOOL_TYPES: readonly SchoolType[] = ['public', 'private', 'homeschool', 'preschool', 'none'];
+
+/** When a one-time prep task is due, counted back from a child's first day. */
+export type Lead = 'two-weeks' | 'one-week' | 'night-before' | 'first-day';
+export const LEAD_DAYS: Record<Lead, number> = { 'two-weeks': 14, 'one-week': 7, 'night-before': 1, 'first-day': 0 };
 
 /** Household preferences that turn items on (club_households.preferences). */
 export interface Requires {
   pets?: true;
   faith_content?: true;
   school?: 'homeschool' | 'public';
+  /**
+   * A child's school type this year (kits with a school setup). On a child's own item ("each"): that child's type is
+   * one of these. On a household item: at least one child's is.
+   */
+  childSchool?: SchoolType[];
 }
 
 /** One curated thing an engine may place on someone's row. */
@@ -57,6 +74,10 @@ export interface KitItem {
   /** Household jobs every family needs: placed before the extras. */
   core?: boolean;
   area?: string;
+  /** One-time prep tasks: when, counted back from the child's (or the earliest) first day. */
+  lead?: Lead;
+  /** Shown on a kit's overview as a recommended first action, lowest first. */
+  priority?: number;
   /** Jobs that cover the same ground (cleaning a bathroom includes its sink): a family gets one or the other. */
   excludes?: string[];
   requires?: Requires;
@@ -72,10 +93,19 @@ export interface KitPrintable {
   kind: 'flagship' | 'worksheet' | 'reset' | 'activity';
   /** Component in src/components/club/print/ (Phase 1 UI). */
   component: string;
-  /** For engine-filled printables: which item set to run. */
-  items?: 'items' | 'reset';
-  /** For a worksheet: its intro and lines, each useful printed on its own. */
-  content?: { intro: string; items: string[] };
+  /** For engine-filled printables: which item set to run ('items', 'reset', or a key of the kit's `itemSets`). */
+  items?: string;
+  /**
+   * How the editor works: 'chart' (owners, the default), 'routine' (each child's ordered steps, nothing balanced,
+   * no coaches), 'command' (shared owners plus the family's recurring commitments).
+   */
+  editor?: 'chart' | 'routine' | 'command';
+  /** Tab name in the kit (defaults from the kind). */
+  tabLabel?: string;
+  /** Lives under the kit's "In the mail" tab instead of its own (the mailer's printable twins). */
+  secondary?: true;
+  /** For a worksheet: its intro and lines, each useful printed on its own; `lineLabel` heads the per-person lines. */
+  content?: { intro: string; items: string[]; lineLabel?: string };
 }
 
 export interface KitInput {
@@ -103,6 +133,15 @@ export interface KitConfig {
   items: KitItem[];
   /** The month's team reset: the companion's monthly project (src/data/cleaning.ts) as owned jobs. */
   reset?: { month: number; title: string; items: KitItem[] };
+  /** More engine-filled printables' rules, by key (KitPrintable.items). */
+  itemSets?: Record<string, KitItem[]>;
+  /** Kits that need to know where each child goes to school and when it starts. */
+  setup?: 'school';
+  /**
+   * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
+   * `priority` in `from`), then the detail one tap away.
+   */
+  overview?: { from: string; intro: string; minActions: number; maxActions: number };
   printables: KitPrintable[];
   mailer: {
     /** Megan's letter, in her words. null until she's written it; a kit can't be scheduled without it. */

@@ -1,10 +1,11 @@
 /**
  * Organized Family Club family profile: the browser-side shape of club_households + club_family_members
- * (docs/club/draft-schema.sql), ages for a kit's month, and the same validation the database applies.
+ * (supabase/migrations/20261023000000_club_core.sql), ages for a kit's month, and the same validation the database applies.
  *
  * Children never have accounts. A member is a first name (or nickname), adult or child, a role and, for children,
  * a birth year and month. No last names, photos, schools, gender or full birthdays.
  */
+import type { SchoolType } from '../../data/club/types';
 
 export type MemberKind = 'adult' | 'child';
 export type MemberRole = 'parent' | 'partner' | 'grandparent' | 'caregiver' | 'child' | 'other';
@@ -23,6 +24,8 @@ export interface FamilyMember {
   isAccountHolder?: boolean;
   /** Removed from the family. Their saved jobs keep the id and show "Needs a new owner". */
   archived?: boolean;
+  /** Where they go to school this year: set from a kit's school setup (src/lib/club/school.ts), never saved on the profile. */
+  school?: SchoolType;
 }
 
 export interface HouseholdPreferences {
@@ -55,6 +58,8 @@ export interface PlannedMember {
   /** Age in whole years on the first day of the kit's month; null for adults. */
   age: number | null;
   isAccountHolder: boolean;
+  /** From the kit's school setup, when it has one. */
+  school?: SchoolType;
 }
 
 export const MAX_MEMBERS = 12;
@@ -88,7 +93,10 @@ export function stageOf(member: FamilyMember, month: string): { stage: Stage; ag
 export function planMembers(household: Household, month: string): PlannedMember[] {
   return household.members
     .filter((m) => !m.archived)
-    .map((m) => ({ id: m.id, firstName: m.firstName.trim(), ...stageOf(m, month), isAccountHolder: Boolean(m.isAccountHolder) && m.kind === 'adult' }));
+    .map((m) => ({
+      id: m.id, firstName: m.firstName.trim(), ...stageOf(m, month), isAccountHolder: Boolean(m.isAccountHolder) && m.kind === 'adult',
+      ...(m.school ? { school: m.school } : {}),
+    }));
 }
 
 /** Problems with a profile, in the database's words ('invalid' there). Empty when it can be saved. */
