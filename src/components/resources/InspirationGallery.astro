@@ -10,7 +10,8 @@ const hasTwoTips = gallery.ideas.some(idea => Boolean(idea.secondTitle));
 const totalIdeas = gallery.ideas.reduce((count, idea) => count + (idea.secondTitle ? 2 : 1), 0);
 const isMudroom = gallery.slug === 'small-mudroom-ideas';
 const isLivingRoom = gallery.slug === 'cozy-living-room-ideas-for-families-with-kids';
-const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : 'toy storage';
+const isCloset = gallery.slug === 'closet-organization-ideas-small-closets';
+const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : isCloset ? 'closet' : 'toy storage';
 ---
 <article class="inspo">
   <header class="inspo-header">
@@ -27,6 +28,11 @@ const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : 'toy s
     <section class="inspo-ideas" aria-label={gallery.title}>
       {gallery.ideas.map((idea,index)=>(
         <div class="inspo-item" id={idea.id}>
+          {gallery.sections?.find(section => section.start === index) && <header class="inspo-section-heading">
+            <p class="inspo-eyebrow">IDEAS {String(index + 1).padStart(2,"0")}–{String(index + (gallery.sections?.find((section) => section.start > index)?.start ?? gallery.ideas.length) - index).padStart(2,"0")}</p>
+            <h2>{gallery.sections.find(section => section.start === index)?.title}</h2>
+            <p>{gallery.sections.find(section => section.start === index)?.intro}</p>
+          </header>}
           <div class="inspo-image-frame">
             {idea.image ? <img src={idea.image} width="1000" height="1500" alt={idea.alt} loading={index===0?'eager':'lazy'} fetchpriority={index===0?'high':undefined} decoding="async" /> :
             <div class="inspo-missing" role="note"><span>PHOTO {String(index+1).padStart(2,'0')} / {gallery.ideas.length}</span><small>Image coming soon</small></div>}
@@ -59,14 +65,14 @@ const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : 'toy s
             </a>}
           </div>
           {index===0 && <nav class="inspo-jump" aria-label={`Jump to a ${photoTopic} photo`}><details><summary><span><strong>Jump to a photo</strong><small>{gallery.ideas.length} spaces to explore</small></span><span class="inspo-jump-chevron" aria-hidden="true">⌄</span></summary><div class="inspo-jump-links">{gallery.ideas.map((x,j)=><a href={'#'+x.id}><span class="inspo-jump-number">{String(j+1).padStart(2,'0')}</span><span class="inspo-jump-label">{x.navLabel}</span></a>)}</div></details></nav>}
-          {index === Math.floor(gallery.ideas.length/2)-1 && <aside class="inspo-aside"><h3>{isMudroom ? "Make the after-school routine stick" : isLivingRoom ? "Make the room work for everyone" : "Make toy cleanup a family habit"}</h3><p>{isMudroom ? "A tidy drop zone works best when everyone knows where their things go." : isLivingRoom ? "The coziest family rooms leave room for everyday life. Give books, blankets, and games a place everyone can reach and return them to." : "Storage works better when kids know what belongs where. Turn the end-of-day reset into a small, shared routine."}</p><a href="/routine-chart">Create a free family routine chart →</a></aside>}
+          {index === Math.floor(gallery.ideas.length/2)-1 && <aside class="inspo-aside"><h3>{isCloset ? "Love the ideas? Start with the closet you already have" : isMudroom ? "Make the after-school routine stick" : isLivingRoom ? "Make the room work for everyone" : "Make toy cleanup a family habit"}</h3><p>{isCloset ? "Before buying baskets or building shelves, sort what you actually use. Our free Closet Reset checklist walks you through what to keep, donate and store." : isMudroom ? "A tidy drop zone works best when everyone knows where their things go." : isLivingRoom ? "The coziest family rooms leave room for everyday life. Give books, blankets, and games a place everyone can reach and return them to." : "Storage works better when kids know what belongs where. Turn the end-of-day reset into a small, shared routine."}</p><a href={isCloset ? "/closet-reset" : "/routine-chart"}>{isCloset ? "Use the free Closet Reset checklist →" : "Create a free family routine chart →"}</a></aside>}
         </div>
       ))}
     </section>
     <section class="inspo-finish" aria-label="Put these ideas to work">
-      <h2>{isMudroom ? "Start with the doorway you have" : isLivingRoom ? "Make one cozy change this week" : "Start with one toy storage zone"}</h2>
-      <p>{isMudroom ? "Pick one change: somewhere for shoes, somewhere for bags, or one hook your child can reach. That is enough to begin." : isLivingRoom ? "You don’t need a new sofa or a perfect house. Try moving a chair, adding a lamp, or making space for family games. The best room is the one your family actually uses." : "Pick the toys that are used most often, give them a home your child can reach, and leave enough room to put everything away without rearranging the room."}</p>
-      <p>Want a simple follow-through plan? <a href="/routine-chart">Make a free family routine chart →</a></p>
+      <h2>{isCloset ? "Make one closet work better this week" : isMudroom ? "Start with the doorway you have" : isLivingRoom ? "Make one cozy change this week" : "Start with one toy storage zone"}</h2>
+      <p>{isCloset ? "Start small: clear one shelf, choose what belongs there, and give each item a place you can reach. You can always add the beautiful finishing touches later." : isMudroom ? "Pick one change: somewhere for shoes, somewhere for bags, or one hook your child can reach. That is enough to begin." : isLivingRoom ? "You don’t need a new sofa or a perfect house. Try moving a chair, adding a lamp, or making space for family games. The best room is the one your family actually uses." : "Pick the toys that are used most often, give them a home your child can reach, and leave enough room to put everything away without rearranging the room."}</p>
+      <p>Want a simple follow-through plan? <a href={isCloset ? "/closet-reset" : "/routine-chart"}>{isCloset ? "Open the free Closet Reset checklist →" : "Make a free family routine chart →"}</a></p>
     </section>
     <p class="inspo-disclosure">{gallery.disclosure}</p>
   </div>
@@ -91,6 +97,9 @@ const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : 'toy s
   .inspo-cover img{display:block;width:100%;height:auto;object-fit:cover}
   .inspo-cover figcaption{padding:10px 16px;font-size:.8rem;color:#67655f}
   .inspo-item{scroll-margin-top:80px;margin-bottom:44px}
+  .inspo-section-heading{padding:42px 16px 22px;margin-top:22px;border-top:1px solid #d8d8d4}
+  .inspo-section-heading h2{font:700 clamp(1.85rem,4vw,2.6rem)/1.18 Georgia,serif;margin:12px 0}
+  .inspo-section-heading>p:last-child{max-width:650px;font-size:1rem;line-height:1.65;color:#55534e}
   .inspo-image-frame{width:100%;background:#f1f2f2}
   .inspo-image-frame img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover}
   .inspo-missing{aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#67655f;background:linear-gradient(135deg,#eeeae4,#e0e6dc);font-size:.92rem}
@@ -127,6 +136,6 @@ const photoTopic = isMudroom ? 'mudroom' : isLivingRoom ? 'living room' : 'toy s
   .inspo-finish p{line-height:1.65}.inspo-finish ol{padding-left:22px;line-height:1.65}
   .inspo-finish li{margin-bottom:13px}
   .inspo-disclosure{font-size:.78rem;color:#67655f;padding:0 16px 36px;line-height:1.6}
-  @media(min-width:768px){.inspo-header{padding:48px 54px;margin-bottom:48px}.inspo-item-copy{padding:24px 0 10px}.inspo-jump{padding:0 0 18px}.inspo-aside{margin:30px 0;padding:30px}.inspo-finish{padding:32px 0}.inspo-disclosure{padding-left:0}}
+  @media(min-width:768px){.inspo-section-heading{padding:55px 0 28px}.inspo-header{padding:48px 54px;margin-bottom:48px}.inspo-item-copy{padding:24px 0 10px}.inspo-jump{padding:0 0 18px}.inspo-aside{margin:30px 0;padding:30px}.inspo-finish{padding:32px 0}.inspo-disclosure{padding-left:0}}
   @media(prefers-reduced-motion:no-preference){:global(html){scroll-behavior:smooth}}
 </style>
