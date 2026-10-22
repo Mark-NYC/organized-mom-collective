@@ -8,6 +8,18 @@ export const toyStorageGallery: InspirationGallery = {
   deck: 'Realistic design inspiration for a family living room that looks beautiful, works for kids, and makes cleanup easier. Explore 49 practical ideas, one photo at a time.',
   disclosure: 'These images are AI-generated design concepts, not photographs of actual homes or listings for particular products. Check furniture dimensions and child-safety features before recreating a storage idea.',
   published: true,
+  sections: [
+    { start: 0, title: "Cabinets that hide the toys", intro: "Closed storage keeps the room restful while everyday playthings stay accessible.", label: "Hidden cabinets", icon: "cabinet" },
+    { start: 5, title: "Baskets, bins & easy cleanup", intro: "Open containers make it easier to find favorite toys and return them when play ends.", label: "Baskets & bins", icon: "basket" },
+    { start: 10, title: "Beautiful built-ins & shelves", intro: "Combine useful lower storage with furniture that fits your living room.", label: "Shelves & built-ins", icon: "shelves" },
+    { start: 15, title: "Small living room solutions", intro: "Make room for play without blocking walkways or overwhelming the sofa area.", label: "Small spaces", icon: "corner" },
+    { start: 20, title: "Montessori-inspired toy storage", intro: "Low, open shelves put favorite activities within a child's reach.", label: "Montessori ideas", icon: "kids" },
+    { start: 25, title: "Ottomans & storage benches", intro: "Choose seating that quietly gives blankets, games and toys a home.", label: "Ottomans & benches", icon: "bench" },
+    { start: 30, title: "Books, ledges & reading corners", intro: "Keep books visible and easy to return, with dedicated room for toys nearby.", label: "Books & reading", icon: "book" },
+    { start: 35, title: "Beautiful family rooms", intro: "Practical storage can look intentional in cottage, coastal and colorful homes.", label: "Family rooms", icon: "home" },
+    { start: 40, title: "Budget-friendly toy storage", intro: "Affordable cube organizers, existing furniture and simple shelves can work beautifully.", label: "Budget ideas", icon: "wallet" },
+    { start: 45, title: "Shared spaces that really work", intro: "Define play zones and set up an easy reset for everyone in the room.", label: "Shared spaces", icon: "sparkle" }
+  ],
   coverImage: '/images/inspiration/beautiful-toy-storage-ideas-family-living-rooms/hero for article.jpeg',
   ideas: [
   {
