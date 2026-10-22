@@ -6,6 +6,7 @@ import type { Household } from '../../lib/club/profile';
 import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
 import FamilyForm from './FamilyForm';
+import { clubNav } from '../../lib/club/nav';
 
 export default function FamilyPage({ mode }: { mode: 'start' | 'edit' }) {
   return <ClubGate page={mode === 'start' ? 'start' : 'family'}>{(ctx) => <Family ctx={ctx} mode={mode} />}</ClubGate>;
@@ -21,7 +22,7 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
     Promise.all([ctx.store.household(), ctx.store.me()])
       .then(([h, me]) => {
         // Someone who already has a family goes to the edit page instead of starting over.
-        if (h && mode === 'start') return location.replace(ctx.href(routes.clubFamily));
+        if (h && mode === 'start') return clubNav().go(ctx.href(routes.clubFamily), { replace: true });
         setHousehold(h);
         setFirstKit(me.kits[0]?.slug ?? null);
       })
@@ -43,7 +44,7 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
         onSave={async (input) => {
           const h = await ctx.store.saveHousehold(input);
           if (mode === 'start') {
-            location.assign(ctx.href(kit ? routes.clubKit(kit.slug) : routes.clubDashboard));
+            clubNav().go(ctx.href(kit ? routes.clubKit(kit.slug) : routes.clubDashboard));
             return;
           }
           setHousehold(h);

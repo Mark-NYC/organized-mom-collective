@@ -17,6 +17,8 @@ import ClubGate, { type ClubContext } from './ClubGate';
 import PalettePicker from './PalettePicker';
 import PrintFrame from './PrintFrame';
 import { ChecklistSheet, MeetingCard } from './print/Worksheet';
+import { clubNav } from '../../lib/club/nav';
+import { PreviewOnlyNote } from './ChartEditor';
 
 export default function KitPage({ slug }: { slug: string }) {
   return <ClubGate page="kit">{(ctx) => <Kit ctx={ctx} slug={slug} />}</ClubGate>;
@@ -37,7 +39,7 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
     if (!kit) return;
     ctx.store.household()
       .then(async (household) => {
-        if (!household) return location.replace(ctx.href(routes.clubStart));
+        if (!household) return clubNav().go(ctx.href(routes.clubStart), { replace: true });
         setData({ household, docs: await ctx.store.documents(slug) });
       })
       .catch((e: Error) => setError(e.message === 'not_found' ? 'closed' : 'load'));
@@ -136,7 +138,11 @@ function Sheet({ kit, printable, household }: { kit: KitConfig; printable: KitPr
         <div className="mt-8 border-t border-warm-rule pt-6">
           <PalettePicker value={palette} onChange={setPalette} />
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => printDocument(printable.id, 'portrait')}>Print or save as PDF</button>
+            {clubNav().canPrint ? (
+              <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => printDocument(printable.id, 'portrait')}>Print or save as PDF</button>
+            ) : (
+              <PreviewOnlyNote />
+            )}
             <button type="button" className="min-h-11 text-[0.92rem] font-semibold underline underline-offset-4" aria-expanded={preview} onClick={() => setPreview(!preview)}>
               {preview ? 'Hide the preview' : 'Preview the printout'}
             </button>

@@ -338,6 +338,8 @@ Pure TypeScript, no database, UI, Stripe or new dependencies; nothing ships to v
   `update club_kits set status = 'scheduled', release_at = now() where slug = '2026-11-family-ownership';`
   `insert into club_access_grants (user_id, reason, note) select id, 'preview', 'owner preview' from auth.users where email = 'you@example.com';`
 
+- **A hosted preview, no build host needed:** `node scripts/build-club-preview.mjs <Club-enabled dist> <out.html>` turns the member pages into one self-contained page (`src/preview/club-preview.tsx`): sample households only, navigation inside the page, printing replaced by "Preview the printout" (the host's frame can't open a print dialog). Owner preview published privately 2026-10-23.
+
 ### Still open before Phase 2
 1. Accounts step 1 launch (its checklist in `supabase/ACCOUNTS.md`, `/privacy` first, with the Club's children's-data section).
 2. The private beta (D2) uses `club_access_grants` with `reason = 'beta'`; no billing needed.

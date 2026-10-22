@@ -9,6 +9,7 @@ import { sampleHouseholds } from '../../data/club/samples';
 import { getSession, requestCode, signOut, verifyCode, type AccountSession } from '../../lib/account';
 import { accountStore, clubHref, resetSample, sampleFromUrl, sampleStore, type ClubStore } from '../../lib/club/store';
 import { routes } from '../../routes';
+import { clubNav } from '../../lib/club/nav';
 
 export interface ClubContext {
   store: ClubStore;
@@ -20,7 +21,7 @@ export interface ClubContext {
 type Page = 'dashboard' | 'family' | 'kit' | 'start';
 
 export default function ClubGate({ page, children }: { page: Page; children: (ctx: ClubContext) => ReactNode }) {
-  const [sample] = useState(() => (typeof location === 'undefined' ? null : sampleFromUrl(location.search)));
+  const [sample] = useState(() => (typeof location === 'undefined' ? null : sampleFromUrl(clubNav().search())));
   const [session, setSession] = useState<AccountSession | null | undefined>(sample ? null : undefined);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) 
           {link('dashboard', routes.clubDashboard, 'Kits')}
           {link('family', routes.clubFamily, 'Family')}
           {signedIn && (
-            <button type="button" className="px-2.5 py-2 text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => signOut().then(() => location.reload())}>
+            <button type="button" className="px-2.5 py-2 text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => signOut().then(() => clubNav().reload())}>
               Sign out
             </button>
           )}
@@ -76,7 +77,7 @@ function SampleBanner({ id, label }: { id: string; label: string }) {
           <strong>{label}</strong> · a made-up preview family. Changes stay in this browser tab.
         </p>
         <span className="flex gap-4">
-          <button type="button" className="underline underline-offset-4" onClick={() => { resetSample(id); location.reload(); }}>
+          <button type="button" className="underline underline-offset-4" onClick={() => { resetSample(id); clubNav().reload(); }}>
             Reset sample
           </button>
           <a className="underline underline-offset-4" href={routes.clubDashboard}>Other samples</a>
