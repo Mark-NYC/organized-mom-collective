@@ -227,6 +227,7 @@ var DAY_PARAMS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 // src/routes.ts
 var routes = {
   home: "/",
+  ourStory: "/our-story",
   calendar: "/calendar",
   /** Every product, one card each, linking to its own page. */
   shop: "/shop",
