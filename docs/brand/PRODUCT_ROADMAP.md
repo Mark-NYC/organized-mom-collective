@@ -66,6 +66,17 @@ Kept for reference only, not planned. Don't build or mention in customer copy.
 - Consider recurring email guidance or lightweight challenges *only if* users want them. Don't launch a community just to have one.
 - Learn what repeat value customers would genuinely pay for before choosing a subscription.
 
+## Proposed: Organized Family Club (planning, not launched)
+
+**Status: Exploring. Not built, not for sale, not to be mentioned in customer copy.** Owner proposal, October 22, 2026; architecture and plan in [../club/IMPLEMENTATION_PLAN.md](../club/IMPLEMENTATION_PLAN.md), curriculum in [../club/YEAR_ONE_CALENDAR.md](../club/YEAR_ONE_CALENDAR.md).
+
+- A monthly membership (working hypothesis: $5/month including the printed mailer, until fulfillment quotes are in) adding to the calendar business, not replacing it.
+- She saves her family once (first names, ages, roles; children never get accounts). Each month a kit opens already personalized: one flagship generator (November: the Family Ownership Builder), complementary worksheets and a printable PDF. Each month a universal printed mailer (Megan's letter, a field guide, a family activity, a QR code to that month's kit).
+- Twelve themes, November to October, each moving one area of family life onto someone else's row ([YEAR_ONE_CALENDAR.md](../club/YEAR_ONE_CALENDAR.md)).
+- **Depends on:** customer accounts step 1 being live (and `/privacy` published), Stripe subscriptions (none exist today), a mail house, and the decisions listed in the plan.
+- **Proposed order:** private digital beta of the November kit with a small group of families, then a first paid month (December or January, set by the mail house's turnaround) once the beta, billing tests and mailer production pass. Phase 1 groundwork (kit configuration, November kit, recommendation engine, edit merging) is built as code with tests; there are no Club pages. This is the Phase 4 subscription hypothesis tested with real families, not a validated product.
+- Free tools stay free; Club kits link to them rather than duplicating them.
+
 ## Phase 3: Integrated digital family system (future, not promised)
 
 Explore a daily digital hub for:
