@@ -45,7 +45,8 @@
         "risk": "low",
         "observations": "Cropped adult torso/hands, unbranded-looking supplies arranged on sofa. No identifiable face or obvious readable logo at contact-sheet resolution.",
         "action": "Inspect full resolution for packaging marks and finalize crop before deployment."
-      }
+      },
+      "note_2026_10_22": "Same photo now published as HC-11 hero; see HC11-K32281 for the clearance record."
     },
     {
       "id": "K02",
@@ -1695,6 +1696,219 @@
         "edits": "Centered crop 0.0905,0,0.9095,1 to the template's 3:2 hero frame; responsive WebP resizing only; no upscaling",
         "alt_text_example": "A woman in a gray sweater writes in an open planner at a wooden desk by a window, with stacks of sticky notes, highlighters and a mug of coffee beside her."
       }
+    },
+    {
+      "id": "FP23-OWNER-NOTEBOOK",
+      "title": "Hand writing with a black pen in a spiral notebook on a wooden table",
+      "role": "FP-23 exclusive hero",
+      "source": "Owner-supplied (source not identified)",
+      "creator": null,
+      "source_photo_id": null,
+      "source_photo_id_note": "Owner upload carried no filename, EXIF or source metadata; reverse lookup not possible and kaboompics.com returned HTTP 403 on 2026-10-22.",
+      "source_url": null,
+      "source_download_url": null,
+      "source_license_url": null,
+      "license_review": "Not verified: no source page identified; owner supplied the file and instructed installation.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_selected_2026-10-22",
+      "visual_content_review": {
+        "review_date": "2026-10-22",
+        "review_basis": "Full-resolution file design/photography/owner/six-article-heroes-2026-10-22/fp-23-school-paperwork-organization-hero-original.jpg and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Hands and a beige sweater sleeve only, no face. Plain black pen with no readable print; blank notebook page; no logos. Note: subject is note-writing, not school forms or folders; visually close in theme to the FP-19 hero (different source photo)."
+      },
+      "model_release_review": "No identifiable person. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-23-school-paperwork-organization-hero-{640,960,1440}.webp",
+      "used_in": [
+        "FP-23 /resources/school-paperwork-organization (hero)"
+      ],
+      "status": "Exclusive to FP-23; check:article-photos and a perceptual-hash comparison against every image in design/ and public/ (2026-10-22) found no other use.",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-22); per-photo owner clearance.",
+        "checks_by": "Claude",
+        "date": "2026-10-22",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-23",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no color or AI processing",
+        "alt_text_example": "A hand writes with a black pen in an open spiral notebook on a wooden table, a plate and a glass blurred in the background."
+      },
+      "open_items": [
+        "Identify the source page (photographer, license) and record it; owner to confirm origin"
+      ]
+    },
+    {
+      "id": "FP24-OWNER-GIFTWRAP",
+      "title": "Kraft-paper gifts, twine, tags, scissors and cedar sprigs on a sage background",
+      "role": "FP-24 exclusive hero",
+      "source": "Owner-supplied (source not identified)",
+      "creator": null,
+      "source_photo_id": null,
+      "source_photo_id_note": "Owner upload carried no filename, EXIF or source metadata; reverse lookup not possible and kaboompics.com returned HTTP 403 on 2026-10-22.",
+      "source_url": null,
+      "source_download_url": null,
+      "source_license_url": null,
+      "license_review": "Not verified: no source page identified; owner supplied the file and instructed installation.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_selected_2026-10-22",
+      "visual_content_review": {
+        "review_date": "2026-10-22",
+        "review_basis": "Full-resolution file design/photography/owner/six-article-heroes-2026-10-22/fp-24-holiday-family-planning-checklist-hero-original.jpg and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Flat lay, no people. Blank gift tags, patterned paper is a generic leaf print; no logos, text or branded packaging."
+      },
+      "model_release_review": "No identifiable person. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-24-holiday-family-planning-checklist-hero-{640,960,1440}.webp",
+      "used_in": [
+        "FP-24 /resources/holiday-family-planning-checklist (hero)"
+      ],
+      "status": "Exclusive to FP-24; check:article-photos and a perceptual-hash comparison against every image in design/ and public/ (2026-10-22) found no other use.",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-22); per-photo owner clearance.",
+        "checks_by": "Claude",
+        "date": "2026-10-22",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-24",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no color or AI processing",
+        "alt_text_example": "Gifts wrapped in brown kraft paper with twine and lace, blank tags, wooden-handled scissors and cedar sprigs laid out on a sage-green surface."
+      },
+      "open_items": [
+        "Identify the source page (photographer, license) and record it; owner to confirm origin"
+      ]
+    },
+    {
+      "id": "HC11-K32281",
+      "title": "Hands arranging a wire basket of cleaning supplies on a gray sofa",
+      "role": "HC-11 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "32281",
+      "source_photo_id_note": "Perceptual-hash match (distance 0) to the archived Kaboompics 32281 download.",
+      "source_url": "https://kaboompics.com/photo/32281/everyday-domestic-bliss-a-woman-s-journey-through-home-cleaning-and-comfort",
+      "source_download_url": "https://kaboompics.com/download/75d88ecc52c5e4642c8f1129f70a7388/original",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo page recorded 'Free for commercial use ... Free to use under the Kaboompics License', no editorial-only marker (design/photography/kaboompics/HC-03-full/manifest.json, checked 2026-10-12); same page also recorded as K01.",
+      "license_verification_date": "2026-10-12",
+      "owner_visual_status": "owner_selected_2026-10-22",
+      "visual_content_review": {
+        "review_date": "2026-10-22",
+        "review_basis": "Full-resolution file design/photography/kaboompics/HC-03-full/32281-2400.jpg and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Torso, hands and jeans only, no face. Amber bottles carry no labels; no logos. Owner upload (600x400) is a downscale of this photo (perceptual hash identical); the archived 2400px Kaboompics download was used so no upscaling was needed. Same shoot as the HC-03 hero (Kaboompics 32280), but a different source photo."
+      },
+      "model_release_review": "No identifiable person. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-11-cleaning-schedule-for-working-moms-hero-{640,960,1440}.webp",
+      "used_in": [
+        "HC-11 /resources/cleaning-schedule-for-working-moms (hero)"
+      ],
+      "status": "Exclusive to HC-11; check:article-photos and a perceptual-hash comparison against every image in design/ and public/ (2026-10-22) found no other use.",
+      "clearance_record": {
+        "approval": "Standing Kaboompics approval (2026-10-12): license, content and context checks recorded; owner also selected this photo for HC-11 on 2026-10-22.",
+        "checks_by": "Claude",
+        "date": "2026-10-22",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "HC-11",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no color or AI processing",
+        "alt_text_example": "Hands set amber spray bottles and a scrub brush into a black wire basket on a light gray sofa."
+      },
+      "open_items": []
+    },
+    {
+      "id": "FP25-OWNER-CUCUMBER-JAR",
+      "title": "Hands adding sliced cucumbers to a glass jar on a marble counter",
+      "role": "FP-25 exclusive hero",
+      "source": "Owner-supplied (source not identified)",
+      "creator": null,
+      "source_photo_id": null,
+      "source_photo_id_note": "Owner upload carried no filename, EXIF or source metadata; reverse lookup not possible and kaboompics.com returned HTTP 403 on 2026-10-22.",
+      "source_url": null,
+      "source_download_url": null,
+      "source_license_url": null,
+      "license_review": "Not verified: no source page identified; owner supplied the file and instructed installation.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_selected_2026-10-22",
+      "visual_content_review": {
+        "review_date": "2026-10-22",
+        "review_basis": "Full-resolution file design/photography/owner/six-article-heroes-2026-10-22/fp-25-easy-dinner-planning-system-hero-original.jpg and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "Hands and torso only, no face. Watch face, knife and mandoline show no readable brand at full resolution; no logos."
+      },
+      "model_release_review": "No identifiable person. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-25-easy-dinner-planning-system-hero-{640,960,1440}.webp",
+      "used_in": [
+        "FP-25 /resources/easy-dinner-planning-system (hero)"
+      ],
+      "status": "Exclusive to FP-25; check:article-photos and a perceptual-hash comparison against every image in design/ and public/ (2026-10-22) found no other use.",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-22); per-photo owner clearance.",
+        "checks_by": "Claude",
+        "date": "2026-10-22",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-25",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling; no color or AI processing",
+        "alt_text_example": "Hands slide sliced cucumbers off a knife into a glass jar on a marble counter, with a mandoline, a checked towel and a tray of whole cucumbers nearby."
+      },
+      "open_items": [
+        "Identify the source page (photographer, license) and record it; owner to confirm origin"
+      ]
+    },
+    {
+      "id": "FP26-OWNER-PINK-BACKPACK",
+      "title": "Packed pink school backpack beside a pencil cup and notebooks",
+      "role": "FP-26 exclusive hero",
+      "source": "Owner-supplied (source not identified)",
+      "creator": null,
+      "source_photo_id": null,
+      "source_photo_id_note": "Owner upload carried no filename, EXIF or source metadata; reverse lookup not possible and kaboompics.com returned HTTP 403 on 2026-10-22.",
+      "source_url": null,
+      "source_download_url": null,
+      "source_license_url": null,
+      "license_review": "Not verified: no source page identified; owner supplied the file and instructed installation.",
+      "license_verification_date": null,
+      "owner_visual_status": "owner_selected_2026-10-22",
+      "visual_content_review": {
+        "review_date": "2026-10-22",
+        "review_basis": "Full-resolution file design/photography/owner/six-article-heroes-2026-10-22/fp-26-getting-kids-out-the-door-hero-original.jpg and the generated WebP files",
+        "visual_status": "pass",
+        "observations": "No people. Backpack patch is blank; no readable logos or text on supplies."
+      },
+      "model_release_review": "No identifiable person. No implied endorsement.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-26-getting-kids-out-the-door-hero-{640,960,1440}.webp",
+      "used_in": [
+        "FP-26 /resources/getting-kids-out-the-door (hero)"
+      ],
+      "status": "Exclusive to FP-26; check:article-photos and a perceptual-hash comparison against every image in design/ and public/ (2026-10-22) found no other use.",
+      "clearance_record": {
+        "approval": "Owner supplied this file and instructed installation as the article hero (session 2026-10-22); per-photo owner clearance.",
+        "checks_by": "Claude",
+        "date": "2026-10-22",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-26",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Crop 0.008,0,0.992,1 trims 16 px from each side to reach 3:2 only; responsive WebP resizing only; no upscaling; no color or AI processing",
+        "alt_text_example": "A pale pink school backpack packed with a paint set, pencils and a notebook, beside a pink pencil cup and a stack of pastel notebooks against a white wood wall."
+      },
+      "open_items": [
+        "Identify the source page (photographer, license) and record it; owner to confirm origin"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
