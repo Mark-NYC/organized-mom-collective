@@ -3,7 +3,7 @@ import { kit } from '../src/data/club/kits/2026-11-family-ownership';
 import { ownershipJobs } from '../src/data/club/libraries/ownership-jobs';
 import type { KitItem } from '../src/data/club/types';
 import { responsibilities, type Responsibility } from '../src/data/responsibilities';
-import { capacityFor, COACH_FROM_AGE, eligible, generateOwnership, levelFor, type OwnershipPlan } from '../src/lib/club/engines/responsibilities';
+import { balanceSuggestions, BALANCE_GAP, capacityFor, COACH_FROM_AGE, eligible, generateOwnership, levelFor, STRETCH, type OwnershipPlan } from '../src/lib/club/engines/responsibilities';
 import { planMembers, type Household } from '../src/lib/club/profile';
 import { adult, families, family, kid, MONTH } from './club/fixtures';
 
@@ -119,18 +119,32 @@ describe('responsibilities engine: ownership, not helping', () => {
       for (const r of personal) expect(r.rowId).toBe(`${r.itemId}~${r.ownerId}`);
     });
 
-    it(`${name}: nobody is loaded past their capacity`, () => {
-      for (const x of plan(h).people) expect(x.load, x.id).toBeLessThanOrEqual(x.capacity);
+    it(`${name}: capacity is guidance: only core jobs stretch a teen or adult past it, a little, never a child or the account holder`, () => {
+      const p = plan(h);
+      for (const x of p.people) {
+        if (x.isAccountHolder || x.stage === 'child') expect(x.load, x.id).toBeLessThanOrEqual(x.capacity);
+        else expect(x.load, x.id).toBeLessThanOrEqual(x.capacity * STRETCH);
+        expect(x.over).toBe(x.load > x.capacity);
+      }
+      for (const x of p.people.filter((y) => y.over)) {
+        // Whatever took them past guidance was a core job.
+        const extras = p.rows.filter((r) => r.ownerId === x.id && r.scope === 'household' && !r.core);
+        const coreLoad = x.load - extras.reduce((t, r) => t + r.effort, 0);
+        expect(coreLoad, x.id).toBeGreaterThan(x.capacity - Math.max(0, ...extras.map((r) => r.effort)) - 1);
+      }
     });
 
-    it(`${name}: the account holder carries no more than the busiest other adult, and coaches no more than any other adult`, () => {
+    it(`${name}: the account holder isn't the default catch-all, and coaches no more than any other adult`, () => {
       const p = plan(h);
       const adults = p.people.filter((x) => x.stage === 'adult');
       const holder = adults.find((x) => x.isAccountHolder);
-      if (!holder || adults.length < 2) return;
-      const others = adults.filter((x) => x !== holder);
-      expect(holder.load).toBeLessThanOrEqual(Math.max(...others.map((x) => x.load)));
-      for (const o of others) expect(holder.coaching, o.id).toBeLessThanOrEqual(o.coaching);
+      if (!holder) return;
+      const open = p.rows.filter((r) => r.ownerId === null);
+      const holderRows = p.rows.filter((r) => r.ownerId === holder.id && r.scope === 'household');
+      // Never everything: either others own household jobs too, or what's left is honestly open.
+      const othersOwn = p.rows.some((r) => r.ownerId && r.ownerId !== holder.id && r.scope === 'household');
+      expect(othersOwn || open.length > 0 || holderRows.length === 0).toBe(true);
+      for (const o of adults.filter((x) => x !== holder)) expect(holder.coaching, o.id).toBeLessThanOrEqual(o.coaching);
     });
 
     it(`${name}: core jobs are never dropped: each has an owner or says it needs one`, () => {
@@ -221,6 +235,112 @@ describe('responsibilities engine: leftovers never fall to the parent by default
 
   it('extras only go to someone with room; they never become "Needs an owner"', () => {
     for (const [, h] of all) for (const r of plan(h).rows.filter((x) => x.ownerId === null)) expect(r.core).toBe(true);
+  });
+});
+
+describe('responsibilities engine: capacity as guidance', () => {
+  const big = (id: string, effort: KitItem['effort'], forWho: KitItem['for'] = 'adult'): KitItem => ({
+    id, title: `Whole job ${id}`, doneMeans: 'Done.', for: forWho, frequency: 'weekly', effort, section: 'family', scope: 'household', core: true,
+  });
+
+  it('stretches someone other than the account holder for a core job nobody has room for', () => {
+    // 4 × 5 = 20 points of adult-only core work for two adults with 16 each: everyone has room until the end.
+    const list = [big('a1', 5), big('a2', 5), big('a3', 5), big('a4', 5), big('a5', 5), big('a6', 5), big('a7', 4)];
+    const h = family('hh-stretch', [adult('hold', true), adult('part')]);
+    const p = plan(h, list);
+    const part = p.people.find((x) => x.id === 'part')!;
+    const hold = p.people.find((x) => x.id === 'hold')!;
+    expect(hold.load).toBeLessThanOrEqual(hold.capacity);
+    expect(part.load).toBeGreaterThan(part.capacity);
+    expect(part.load).toBeLessThanOrEqual(part.capacity * STRETCH);
+    expect(part.over).toBe(true);
+  });
+
+  it('leaves core work open rather than stretching the account holder', () => {
+    const list = [big('a1', 5), big('a2', 5), big('a3', 5), big('a4', 5)];
+    const p = plan(family('hh-solo-stretch', [adult('hold', true)]), list);
+    expect(p.people[0].load).toBeLessThanOrEqual(16);
+    expect(p.rows.filter((r) => r.ownerId === null).map((r) => r.itemId)).toEqual(['a4']);
+  });
+
+  it('never stretches anyone for an extra', () => {
+    const list = [big('a1', 5), big('a2', 5), big('a3', 5), { ...big('extra', 3), core: false }];
+    const p = plan(family('hh-extra', [adult('hold', true)]), list);
+    expect(p.rows.map((r) => r.itemId)).not.toContain('extra');
+  });
+
+  it('doesn’t force equal adult counts: the lean is a preference, not a rule', () => {
+    // One adult-only big job and one small job anyone can do: no reason to split them evenly.
+    const list = [big('dinner', 5), { ...big('plants', 1, 'anyone'), core: false }];
+    const p = plan(family('hh-lean', [adult('hold', true), adult('part')]), list);
+    const owners = Object.fromEntries(p.rows.map((r) => [r.itemId, r.ownerId]));
+    expect(owners.dinner).toBe('part');
+    expect(new Set(Object.values(owners)).size).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('responsibilities engine: workload balance suggestions', () => {
+  const asRows = (p: OwnershipPlan, locked: string[] = []) => p.rows.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: r.ownerId, locked: locked.includes(r.rowId) }));
+
+  it('suggests moving jobs to a partner who joins a chart one parent was running', () => {
+    const solo = family('hh-bal', [adult('mom', true), kid('ben', 9)]);
+    const chart = asRows(plan(solo));
+    const withPartner = { ...solo, members: [...solo.members, adult('dad')] };
+    const moves = balanceSuggestions(withPartner, items, MONTH, chart);
+    expect(moves.length).toBeGreaterThan(0);
+    expect(moves.every((m) => m.fromId === 'mom' && m.toId === 'dad')).toBe(true);
+    for (const m of moves) expect(m.to.after).toBeLessThanOrEqual(capacityFor({ stage: 'adult', age: null }));
+    // Each move narrows the gap.
+    for (const m of moves) expect(Math.abs(m.from.after - m.to.after)).toBeLessThan(m.from.before - m.to.before);
+  });
+
+  it('never suggests moving a job she assigned herself', () => {
+    const solo = family('hh-bal2', [adult('mom', true), kid('ben', 9)]);
+    const p = plan(solo);
+    const momRows = p.rows.filter((r) => r.ownerId === 'mom').map((r) => r.rowId);
+    const withPartner = { ...solo, members: [...solo.members, adult('dad')] };
+    expect(balanceSuggestions(withPartner, items, MONTH, asRows(p, momRows))).toEqual([]);
+  });
+
+  it('suggests nothing on a chart that’s already even', () => {
+    for (const h of [families.A, families.D, families.noKids]) {
+      const p = plan(h);
+      const adults = p.people.filter((x) => x.stage === 'adult');
+      const gap = Math.max(...adults.map((x) => x.load)) - Math.min(...adults.map((x) => x.load));
+      const moves = balanceSuggestions(h, items, MONTH, asRows(p));
+      if (gap < BALANCE_GAP && !p.people.some((x) => x.over)) expect(moves, h.id).toEqual([]);
+    }
+  });
+
+  it('never suggests moving work onto the account holder', () => {
+    for (const [, h] of all) {
+      const p = plan(h);
+      const holder = p.people.find((x) => x.isAccountHolder)?.id;
+      for (const m of balanceSuggestions(h, items, MONTH, asRows(p))) expect(m.toId).not.toBe(holder);
+    }
+    // Even when she's carrying far less than a partner.
+    const h = family('hh-light', [adult('mom', true), adult('dad')]);
+    const rows = plan(h).rows.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: 'dad', locked: false }));
+    expect(balanceSuggestions(h, items, MONTH, rows).every((m) => m.toId !== 'mom')).toBe(true);
+  });
+
+  it('is deterministic and capped', () => {
+    const solo = family('hh-bal3', [adult('mom', true), kid('k', 10), kid('l', 12)]);
+    const chart = asRows(plan(solo));
+    const h = { ...solo, members: [...solo.members, adult('dad')] };
+    expect(balanceSuggestions(h, items, MONTH, chart)).toEqual(balanceSuggestions(structuredClone(h), items, MONTH, chart));
+    expect(balanceSuggestions(h, items, MONTH, chart, 1)).toHaveLength(1);
+  });
+
+  it('moves work off anyone past guidance onto someone with room', () => {
+    const h = family('hh-over', [adult('mom', true), adult('dad'), adult('gran', false, 'grandparent'), kid('teen', 15)]);
+    const p = plan(h);
+    // Put every adult whole job on dad by hand-built chart (not locked), as if the family had been edited that way.
+    const rows = p.rows.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: itemById.get(r.itemId)!.for === 'adult' ? 'dad' : r.ownerId, locked: false }));
+    const moves = balanceSuggestions(h, items, MONTH, rows);
+    expect(moves.length).toBeGreaterThan(0);
+    expect(moves[0].fromId).toBe('dad');
+    expect(moves.every((m) => m.toId === 'gran')).toBe(true);
   });
 });
 

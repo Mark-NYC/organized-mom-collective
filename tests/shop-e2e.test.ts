@@ -934,8 +934,12 @@ describe.skipIf(!REST)('direct shop, end to end', () => {
         all(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
               where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute') order by 1`).map((r: any) => r.proname),
       ).toEqual([
+        // Customer accounts (20261022000000_accounts.sql) and the Club (20261023000000_club_core.sql): each checks the
+        // signed-in user itself. Their internals (club_has_access, club_can_open, account_max_saves…) stay server-only.
+        'account_delete', 'account_email', 'account_orders', 'account_profile', 'account_put', 'account_set_marketing',
         'admin_alert_ack', 'admin_alerts_refresh', 'admin_inventory_token_set_at', 'admin_log', 'admin_overview', 'admin_rotate_inventory_token',
-        'admin_whoami', 'is_admin', 'is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'site_pages_sync', 'survey_submit',
+        'admin_whoami', 'club_document_get', 'club_document_save', 'club_household', 'club_household_save', 'club_me',
+        'is_admin', 'is_shop_admin', 'is_survey_admin', 'shop_catalog', 'shop_order_status', 'site_pages_sync', 'survey_submit',
         'survey_track', 'tool_email_signup',
       ]);
       // The signup's contacts stay out of the browser: anon gets nothing, authenticated reads only

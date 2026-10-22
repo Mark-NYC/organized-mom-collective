@@ -49,7 +49,25 @@ export const kit: KitConfig = {
     { id: 'ownership-chart', title: 'Our Family Responsibility Chart', page: 'letter-landscape', kind: 'flagship', component: 'ResponsibilityChart', items: 'items' },
     { id: 'kitchen-pantry-reset', title: 'November Kitchen & Pantry Reset', page: 'letter-portrait', kind: 'reset', component: 'ResetChecklist', items: 'reset' },
     { id: 'who-owns-what', title: 'Who Owns What: Our Team Meeting', page: 'letter-portrait', kind: 'activity', component: 'ConversationCard' },
-    { id: 'handing-over', title: 'Handing Over a Whole Job', page: 'letter-portrait', kind: 'worksheet', component: 'Checklist' },
+    {
+      id: 'handing-over',
+      title: 'Handing Over a Whole Job',
+      page: 'letter-portrait',
+      kind: 'worksheet',
+      component: 'Checklist',
+      content: {
+        intro: 'For the grown-ups: moving a job to someone else, all of it, so it doesn’t drift back.',
+        items: [
+          'Name the whole job, from noticing it needs doing to finished.',
+          'Write down what “done” looks like, in one sentence.',
+          'Show it once, then do it together once.',
+          'Hand over the remembering too: where the list lives, when it’s due.',
+          'Step back. Done differently is still done.',
+          'Pick a day to check in, two weeks from now. Talk about how it’s going, not who forgot.',
+          'If it slips, the owner catches up. The job stays theirs.',
+        ],
+      },
+    },
   ],
   mailer: {
     // Megan writes this, in her own words. Nothing here may stand in for it.

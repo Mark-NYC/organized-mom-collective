@@ -1,0 +1,20 @@
+---
+/**
+ * /club/kits/<slug>: one page per kit in src/data/club/kits (a new month is a new config file). The page holds no
+ * family data; the island loads it (src/lib/club/store.ts) and the database decides access. Noindex, not linked;
+ * behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import KitPage from '../../../components/club/KitPage';
+import { kits } from '../../../data/club/kits';
+
+export function getStaticPaths() {
+  return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
+}
+
+const { slug, theme } = Astro.props;
+---
+
+<ClubLayout title={theme}>
+  <KitPage client:only="react" slug={slug} />
+</ClubLayout>

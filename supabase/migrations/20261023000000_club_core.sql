@@ -1,21 +1,22 @@
--- Organized Family Club: DRAFT schema for review. NOT a migration.
+-- Organized Family Club, Phase 1: households, family members, kits, member documents, preview/beta access grants,
+-- and the billing and mailing tables Phase 2 will write. Runs after the accounts migration (it reuses that sign-in
+-- and changes two account functions). Plan: docs/club/IMPLEMENTATION_PLAN.md. Access tests: supabase/tests/club-access.sql
+-- (npm run test:admin-sql).
 --
--- Lives in docs/ on purpose: nothing runs it, scripts/test-admin-sql.sh doesn't load it, and it must never be
--- pasted into the live project. When Phase 1 starts, it becomes supabase/migrations/<date>_club_core.sql with
--- its access tests in supabase/tests/club-access.sql (docs/club/IMPLEMENTATION_PLAN.md → Phase 1).
--- Checked to compile on a throwaway local Postgres 16 after supabase/tests/supabase-stub.sql and every
--- existing migration (2026-10-22).
+-- NOT APPLIED to the live project. Apply only to a Supabase branch or a local stack until the owner approves; the
+-- site's Club pages stay behind PUBLIC_CLUB_ENABLED (off) either way.
 --
--- Rules this draft follows (same as the accounts and shop migrations):
+-- Rules:
 --   * Every table has RLS on and every grant revoked from anon/authenticated first.
 --   * Customers read only their own rows; every customer write goes through a security definer function that
---     checks auth.uid(), size limits and membership. Billing, entitlement and mailing state is written only by
---     the service role (Edge Functions), never by a browser.
+--     checks auth.uid(), size limits and access. Billing, entitlement, grant and mailing state is written only by
+--     the service role (Edge Functions) or an admin, never by a browser.
 --   * Children have no accounts. A family member is a first name (or nickname), a birth year/month and a role.
---     No last names, photos, schools, gender or full birth dates.
---   * Stripe is the billing authority. club_subscriptions mirrors Stripe and is rewritten from a fresh API read
---     on every webhook, so duplicate or out-of-order events can't leave it wrong.
+--     No last names, photos, schools, gender or full birth dates. Admins can't read family members.
+--   * Stripe is the billing authority (Phase 2). club_subscriptions mirrors Stripe and is rewritten from a fresh
+--     API read on every webhook, so duplicate or out-of-order events can't leave it wrong.
 --   * Digital access and mailing eligibility are separate functions with separate rules.
+--   * Until billing exists, access comes only from club_access_grants (preview and private beta), added by an admin.
 
 begin;
 
@@ -29,7 +30,8 @@ create table public.club_households (
   display_name text check (char_length(display_name) <= 60),
   -- Optional household preferences, a closed set of keys (club_household_save checks them):
   -- { "palette": "warm-neutrals", "week_starts": "sunday"|"monday", "faith_content": true|false,
-  --   "pets": true|false, "school": "public"|"homeschool"|"mixed", "weekday_dinner": "17:30" }
+  --   "pets": true|false, "school": "public"|"homeschool"|"mixed", "weekday_dinner": "17:30",
+  --   "priorities": ["mornings", …] (ids from src/data/club/onboarding.ts) }
   preferences jsonb not null default '{}' check (jsonb_typeof(preferences) = 'object' and octet_length(preferences::text) <= 2000),
   -- Bumped on every family or preference change. Documents remember the version they were generated from.
   profile_version int not null default 1,
@@ -165,6 +167,17 @@ create table public.club_kit_entitlements (
   primary key (user_id, kit_id)
 );
 
+-- Membership access without a subscription: development previews and the private beta (docs/club → D2).
+-- Added and ended by an admin (SQL Editor, or /admin/club later); never by the customer.
+create table public.club_access_grants (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  reason text not null check (reason in ('preview', 'beta')),
+  note text check (char_length(note) <= 200),
+  granted_at timestamptz not null default now(),
+  expires_at timestamptz,
+  revoked_at timestamptz
+);
+
 -- ---------------------------------------------------------------- member-generated content
 
 -- One row per printable in a kit (the ownership chart, the conversation card, …). The generator's output is
@@ -232,16 +245,27 @@ create table public.club_mailing_recipients (
 
 -- ---------------------------------------------------------------- access rules
 
--- Digital access right now: a subscription Stripe says is trialing, active or past_due (Stripe is still
--- retrying the card), not revoked by a refund or dispute. A cancel-at-period-end subscription stays active
--- until Stripe ends it, so access runs to the end of the paid period on its own.
-create function public.club_has_access(p_user uuid) returns boolean
+-- A live subscription: Stripe says trialing, active or past_due (still retrying the card), not revoked by a
+-- refund or dispute. A cancel-at-period-end subscription stays active until Stripe ends it, so access runs to
+-- the end of the paid period on its own.
+create function public.club_has_paid_access(p_user uuid) returns boolean
 language sql stable security definer set search_path = '' as $$
   select exists (
     select 1 from public.club_subscriptions s
      where s.user_id = p_user
        and s.status in ('trialing', 'active', 'past_due')
        and s.access_revoked_at is null);
+$$;
+revoke execute on function public.club_has_paid_access(uuid) from public, anon, authenticated;
+grant execute on function public.club_has_paid_access(uuid) to service_role;
+
+-- Digital access right now: a live subscription, or an unexpired preview/beta grant.
+create function public.club_has_access(p_user uuid) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select public.club_has_paid_access(p_user)
+      or exists (
+        select 1 from public.club_access_grants g
+         where g.user_id = p_user and g.revoked_at is null and (g.expires_at is null or g.expires_at > now()));
 $$;
 revoke execute on function public.club_has_access(uuid) from public, anon, authenticated;
 grant execute on function public.club_has_access(uuid) to service_role;
@@ -319,6 +343,8 @@ begin
   select * into s from public.club_subscriptions where user_id = uid order by created_at desc limit 1;
   return jsonb_build_object(
     'access', public.club_has_access(uid),
+    'grant', (select g.reason from public.club_access_grants g
+               where g.user_id = uid and g.revoked_at is null and (g.expires_at is null or g.expires_at > now())),
     'status', s.status,
     'renews', case when s.cancel_at_period_end then null else s.current_period_end end,
     'ends', case when s.cancel_at_period_end then s.current_period_end end,
@@ -329,7 +355,7 @@ begin
                                           'can', public.club_can_open(uid, k.id)) order by k.month desc)
         from public.club_kits k where public.club_kit_released(k.id) and public.club_can_open(uid, k.id) <> 'none'), '[]'));
 end $$;
-revoke execute on function public.club_me() from public;
+revoke execute on function public.club_me() from public, anon;
 grant execute on function public.club_me() to authenticated;
 
 -- Her household and family (members archived more than a year ago are left out).
@@ -343,7 +369,7 @@ begin
   select * into h from public.club_households where owner_user_id = uid;
   if not found then return null; end if;
   return jsonb_build_object(
-    'display_name', h.display_name, 'preferences', h.preferences, 'profile_version', h.profile_version,
+    'id', h.id, 'display_name', h.display_name, 'preferences', h.preferences, 'profile_version', h.profile_version,
     'onboarded', h.onboarded_at is not null,
     'members', coalesce((
       select jsonb_agg(jsonb_build_object('id', m.id, 'first_name', m.first_name, 'kind', m.kind, 'role', m.role,
@@ -353,7 +379,7 @@ begin
         from public.club_family_members m
        where m.household_id = h.id and (m.archived_at is null or m.archived_at > now() - interval '1 year')), '[]'));
 end $$;
-revoke execute on function public.club_household() from public;
+revoke execute on function public.club_household() from public, anon;
 grant execute on function public.club_household() to authenticated;
 
 -- Save the whole family in one call (onboarding and /club/family). Members not in p_members are archived,
@@ -375,7 +401,17 @@ begin
   end if;
   if p_preferences is null or jsonb_typeof(p_preferences) <> 'object'
      or exists (select 1 from jsonb_object_keys(p_preferences) k
-                 where k not in ('palette', 'week_starts', 'faith_content', 'pets', 'school', 'weekday_dinner')) then
+                 where k not in ('palette', 'week_starts', 'faith_content', 'pets', 'school', 'weekday_dinner', 'priorities')) then
+    raise exception 'invalid';
+  end if;
+  if p_preferences ? 'priorities' and (
+       jsonb_typeof(p_preferences -> 'priorities') <> 'array'
+       or jsonb_array_length(p_preferences -> 'priorities') > 8
+       or exists (select 1 from jsonb_array_elements(p_preferences -> 'priorities') x
+                   where jsonb_typeof(x) <> 'string' or x #>> '{}' !~ '^[a-z]+(-[a-z]+)*$' or char_length(x #>> '{}') > 40)) then
+    raise exception 'invalid';
+  end if;
+  if exists (select 1 from jsonb_array_elements(p_members) x where btrim(coalesce(x ->> 'first_name', '')) = '') then
     raise exception 'invalid';
   end if;
   perform pg_advisory_xact_lock(hashtextextended('club-household:' || uid::text, 0));
@@ -415,7 +451,7 @@ exception
        or invalid_parameter_value then
     raise exception 'invalid';
 end $$;
-revoke execute on function public.club_household_save(text, jsonb, jsonb) from public;
+revoke execute on function public.club_household_save(text, jsonb, jsonb) from public, anon;
 grant execute on function public.club_household_save(text, jsonb, jsonb) to authenticated;
 
 -- A kit's saved edits for her household ('none' → not found).
@@ -437,7 +473,7 @@ begin
       from public.club_documents d join public.club_households h on h.id = d.household_id
      where h.owner_user_id = uid and d.kit_id = k.id), '{}'));
 end $$;
-revoke execute on function public.club_document_get(text) from public;
+revoke execute on function public.club_document_get(text) from public, anon;
 grant execute on function public.club_document_get(text) to authenticated;
 
 -- Save one document's edits. Members with access only; a lapsed member's earned kits are read-only.
@@ -468,7 +504,7 @@ begin
 exception
   when check_violation or not_null_violation then raise exception 'invalid';
 end $$;
-revoke execute on function public.club_document_save(text, text, jsonb, text, int, int, int) from public;
+revoke execute on function public.club_document_save(text, text, jsonb, text, int, int, int) from public, anon;
 grant execute on function public.club_document_save(text, text, jsonb, text, int, int, int) to authenticated;
 
 -- ---------------------------------------------------------------- RLS
@@ -485,14 +521,17 @@ alter table public.club_documents enable row level security;
 alter table public.club_mailing_addresses enable row level security;
 alter table public.club_mailings enable row level security;
 alter table public.club_mailing_recipients enable row level security;
+alter table public.club_access_grants enable row level security;
 
 revoke all on public.club_households, public.club_family_members, public.club_customers, public.club_subscriptions,
   public.club_invoices, public.club_stripe_events, public.club_kits, public.club_kit_entitlements,
-  public.club_documents, public.club_mailing_addresses, public.club_mailings, public.club_mailing_recipients
+  public.club_documents, public.club_mailing_addresses, public.club_mailings, public.club_mailing_recipients,
+  public.club_access_grants
   from public, anon, authenticated;
 grant all on public.club_households, public.club_family_members, public.club_customers, public.club_subscriptions,
   public.club_invoices, public.club_stripe_events, public.club_kits, public.club_kit_entitlements,
-  public.club_documents, public.club_mailing_addresses, public.club_mailings, public.club_mailing_recipients
+  public.club_documents, public.club_mailing_addresses, public.club_mailings, public.club_mailing_recipients,
+  public.club_access_grants
   to service_role;
 
 -- Customers: read-only, own rows, and only the tables a page reads directly. Everything else goes through
@@ -508,7 +547,7 @@ create policy "Members read their address" on public.club_mailing_addresses
 -- Owner admins: read everything for /admin/club; changes go through the club-admin Edge Function.
 grant select on public.club_households, public.club_family_members, public.club_customers, public.club_subscriptions,
   public.club_invoices, public.club_kits, public.club_kit_entitlements, public.club_mailing_addresses,
-  public.club_mailings, public.club_mailing_recipients to authenticated;
+  public.club_mailings, public.club_mailing_recipients, public.club_access_grants to authenticated;
 create policy "Admins read households" on public.club_households for select to authenticated using ((select public.is_admin('owner')));
 create policy "Admins read customers" on public.club_customers for select to authenticated using ((select public.is_admin('owner')));
 create policy "Admins read subscriptions" on public.club_subscriptions for select to authenticated using ((select public.is_admin('owner')));
@@ -518,7 +557,57 @@ create policy "Admins read entitlements" on public.club_kit_entitlements for sel
 create policy "Admins read addresses" on public.club_mailing_addresses for select to authenticated using ((select public.is_admin('owner')));
 create policy "Admins read mailings" on public.club_mailings for select to authenticated using ((select public.is_admin('owner')));
 create policy "Admins read recipients" on public.club_mailing_recipients for select to authenticated using ((select public.is_admin('owner')));
+create policy "Admins read grants" on public.club_access_grants for select to authenticated using ((select public.is_admin('owner')));
 -- Family members' names are not in the admin's read policies on purpose: support never needs a child's name.
 -- (club_family_members has only the member policy.)
+
+-- ---------------------------------------------------------------- accounts: two changes for the Club
+
+-- Club data lives in its own tables, never in account_saves (no omc:club… browser keys are synced).
+alter table public.account_saves drop constraint account_saves_key_check;
+alter table public.account_saves add constraint account_saves_key_check check (
+  key ~ '^omc:[a-z0-9][a-z0-9._-]*(:[a-z0-9][a-z0-9._-]*)*$' and char_length(key) <= 120
+  and key !~ '^omc:(v1|account|tool-download-access|club[a-z0-9._-]*)(:|$)'
+);
+
+-- Deleting an account with a live paid membership would leave Stripe charging her: refuse, and let club-billing
+-- (Phase 2) cancel first. Everything else is unchanged from 20261022000000_accounts.sql; her household, family,
+-- documents, grant and address go with her sign-in (on delete cascade).
+create or replace function public.account_delete() returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+  uid uuid := auth.uid();
+  e text := public.account_email();
+begin
+  if uid is null then raise exception 'not_signed_in'; end if;
+  if exists (select 1 from public.admin_users where user_id = uid)
+     or exists (select 1 from public.shop_admins where user_id = uid)
+     or exists (select 1 from public.survey_admins where user_id = uid) then
+    raise exception 'admin_account';
+  end if;
+  if public.club_has_paid_access(uid) then raise exception 'active_membership'; end if;
+  delete from public.account_saves where user_id = uid;
+  update public.shop_entitlements set user_id = null where user_id = uid;
+  if e is not null then
+    update public.tool_email_contacts set marketing_opt_in = false where email = e;
+  end if;
+  delete from auth.users where id = uid;
+end $$;
+revoke execute on function public.account_delete() from public, anon;
+grant execute on function public.account_delete() to authenticated;
+
+-- The accounts migration revoked its functions from PUBLIC only, and Supabase also grants new functions to anon
+-- directly, so signed-out visitors could call them (each refused without a sign-in, but the browser roles should
+-- get only the intended entry points; tests/shop-e2e.test.ts checks the list).
+revoke execute on function public.account_put(text, jsonb, text, text), public.account_email(), public.account_profile(),
+  public.account_set_marketing(boolean), public.account_orders(), public.account_max_saves() from anon;
+-- account_max_saves is an internal constant: account_put (security definer) calls it, nobody else needs to.
+revoke execute on function public.account_max_saves() from public, anon, authenticated;
+
+-- ---------------------------------------------------------------- the November kit
+
+-- A draft: it opens for nobody until an admin schedules it (status 'scheduled') after Megan's letter is in.
+insert into public.club_kits (slug, month, title, status, release_at, mailer_cutoff_at)
+values ('2026-11-family-ownership', '2026-11-01', 'Our Family, Our Team', 'draft', '2026-11-01 04:00:00+00', '2026-10-15 04:00:00+00');
 
 commit;

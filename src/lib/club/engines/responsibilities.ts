@@ -4,10 +4,12 @@
  * with ties broken by a stable hash, never randomness and never an AI call.
  *
  * The rules it keeps:
- * - Every household job has one owner, or is honestly marked "Needs an owner". Nobody gets a job past their weekly
- *   capacity, so leftovers never fall to a parent by default.
- * - The account holder never carries more than the other adults: they can only take a job while their load stays
- *   at or below the busiest other adult's.
+ * - Every household job has one owner, or is honestly marked "Needs an owner".
+ * - Weekly capacity by age is guidance, not a limit. Jobs are spread within it first; a core job nobody has room
+ *   for may stretch someone else a little (STRETCH), but never the account holder: what's left says
+ *   "Needs an owner" rather than falling to her by default. The parent can assign anything to anyone.
+ * - Adults aren't forced to equal counts. The account holder leans last in ties and choices (HOLDER_LEAN); real
+ *   imbalance is surfaced as optional moves (balanceSuggestions), never applied by itself.
  * - Adults and teens get whole jobs; children's jobs are theirs too, at an ownership level for their age
  *   (learning → with-check → owns). Each child job that isn't fully theirs yet names a coach, spread across the
  *   adults and older teens, so checking doesn't land on one person either.
@@ -48,8 +50,11 @@ export interface Assignment {
 
 export interface PersonSummary extends PlannedMember {
   load: number;
+  /** Guidance, not a limit. */
   capacity: number;
   coaching: number;
+  /** Load is past capacity (a stretched core job, or her own assignments). */
+  over: boolean;
 }
 
 export interface OwnershipPlan {
@@ -73,6 +78,13 @@ export function capacityFor(p: Pick<PlannedMember, 'stage' | 'age'>): number {
 export function personalLimit(age: number): number {
   return age < 6 ? 4 : age < 9 ? 5 : 4;
 }
+
+/** How far past their guidance capacity a teen or adult other than the account holder may go for a core job. */
+export const STRETCH = 1.25;
+/** Added to the account holder's score when other adults could take a job: a lean, not a cap. */
+export const HOLDER_LEAN = 0.2;
+/** Adults whose weekly loads differ by at least this many effort points get balance suggestions. */
+export const BALANCE_GAP = 4;
 
 /** Teens this old can coach a younger sibling. */
 export const COACH_FROM_AGE = 14;
@@ -194,24 +206,25 @@ export function generateOwnership(household: Household, items: readonly KitItem[
   const overlaps = (item: KitItem) =>
     (item.excludes ?? []).some((id) => placed.has(id)) || [...placed].some((id) => itemById.get(id)?.excludes?.includes(item.id));
 
+  const lean = (p: PlannedMember) => (p.isAccountHolder && adults.length > 1 ? HOLDER_LEAN : 0);
+  const score = (p: PlannedMember, item: KitItem) =>
+    (load.get(p.id)! + item.effort) / capacity.get(p.id)! + (p.stage === 'adult' ? 0.5 : 0) + lean(p);
+  const best = (list: PlannedMember[], item: KitItem) =>
+    [...list].sort((a, b) =>
+      score(a, item) - score(b, item) ||
+      Number(a.isAccountHolder) - Number(b.isAccountHolder) ||
+      tie(item.id, a.id) - tie(item.id, b.id))[0] ?? null;
+
   for (const { item, candidates } of household_) {
     if (overlaps(item)) continue;
-    const otherAdultsMax = (holder: PlannedMember) =>
-      Math.max(-Infinity, ...adults.filter((a) => a.id !== holder.id).map((a) => load.get(a.id)!));
-    const fits = candidates.filter((p) => {
-      const after = load.get(p.id)! + item.effort;
-      if (after > capacity.get(p.id)!) return false;
-      // The account holder takes a job only while staying at or below the busiest other adult.
-      if (p.isAccountHolder && adults.length > 1 && after > otherAdultsMax(p)) return false;
-      return true;
-    });
-    const score = (p: PlannedMember) => (load.get(p.id)! + item.effort) / capacity.get(p.id)! + (p.stage === 'adult' ? 0.5 : 0);
-    fits.sort((a, b) =>
-      score(a) - score(b) ||
-      Number(a.isAccountHolder) - Number(b.isAccountHolder) ||
-      tie(item.id, a.id) - tie(item.id, b.id));
-    const owner = fits[0] ?? null;
-    // Extras only go to someone with room; a core job with no room shows as "Needs an owner".
+    const after = (p: PlannedMember) => load.get(p.id)! + item.effort;
+    // Within guidance first; then, for a core job only, a little past it: teens and adults other than the account
+    // holder. Children are never stretched.
+    let owner = best(candidates.filter((p) => after(p) <= capacity.get(p.id)!), item);
+    if (!owner && (item.core || reopen.has(item.id))) {
+      owner = best(candidates.filter((p) => p.stage !== 'child' && !p.isAccountHolder && after(p) <= capacity.get(p.id)! * STRETCH), item);
+    }
+    // Extras only go to someone with room; a core job nobody can take shows as "Needs an owner".
     if (!owner && !item.core && !reopen.has(item.id)) continue;
     if (owner) load.set(owner.id, load.get(owner.id)! + item.effort);
     rows.push(row(item, reopen.get(item.id) ?? item.id, owner, false));
@@ -245,6 +258,94 @@ export function generateOwnership(household: Household, items: readonly KitItem[
   return {
     month,
     rows,
-    people: people.map((p) => ({ ...p, load: load.get(p.id)!, capacity: capacity.get(p.id)!, coaching: coaching.get(p.id)! })),
+    people: people.map((p) => ({ ...p, load: load.get(p.id)!, capacity: capacity.get(p.id)!, coaching: coaching.get(p.id)!, over: load.get(p.id)! > capacity.get(p.id)! })),
   };
+}
+
+/** A chart row as balancing sees it: whose it is now, and whether she chose that owner herself. */
+export interface BalanceRow {
+  rowId: string;
+  itemId: string | null;
+  ownerId: string | null;
+  /** She assigned this owner herself: never suggested to move. */
+  locked: boolean;
+}
+
+export interface BalanceMove {
+  rowId: string;
+  fromId: string;
+  toId: string;
+  /** Weekly effort points, before and after the move, for the two people. */
+  from: { before: number; after: number };
+  to: { before: number; after: number };
+}
+
+/**
+ * Optional moves that even out real imbalance on a chart: between adults whose loads differ by BALANCE_GAP or
+ * more, or off anyone past their guidance capacity onto someone with room. Each move takes the job that best
+ * closes the gap; moves are worked out one after another (so they don't fight), at most `limit`, deterministic.
+ * Never moves a job she assigned herself, never moves anything onto the account holder or onto someone past
+ * capacity, never applied for her.
+ */
+export function balanceSuggestions(
+  household: Household,
+  items: readonly KitItem[],
+  month: string,
+  rows: readonly BalanceRow[],
+  limit = 3,
+): BalanceMove[] {
+  const people = planMembers(household, month);
+  const byId = new Map(people.map((p) => [p.id, p]));
+  const itemById = new Map(items.map((i) => [i.id, i]));
+  const capacity = new Map(people.map((p) => [p.id, capacityFor(p)]));
+  const load = new Map(people.map((p) => [p.id, 0]));
+  const movable: { row: BalanceRow; item: KitItem }[] = [];
+  for (const r of rows) {
+    const item = r.itemId ? itemById.get(r.itemId) : undefined;
+    if (!item || item.scope !== 'household' || !r.ownerId || !byId.has(r.ownerId)) continue;
+    load.set(r.ownerId, load.get(r.ownerId)! + item.effort);
+    if (!r.locked) movable.push({ row: r, item });
+  }
+  const moves: BalanceMove[] = [];
+  const moved = new Set<string>();
+  const tie = (a: string) => stableHash(`${household.id}:balance:${a}`);
+
+  while (moves.length < limit) {
+    let pick: { score: number; key: number; move: BalanceMove } | null = null;
+    for (const { row, item } of movable) {
+      if (moved.has(row.rowId)) continue;
+      const from = byId.get(row.ownerId!)!;
+      const fromLoad = load.get(from.id)!;
+      const fromOver = fromLoad > capacity.get(from.id)!;
+      for (const to of people) {
+        // Balancing takes work off the account holder; it never suggests she take more.
+        if (to.id === from.id || to.isAccountHolder || !eligible(item, to, household.preferences)) continue;
+        const toLoad = load.get(to.id)!;
+        if (toLoad + item.effort > capacity.get(to.id)!) continue;
+        const adultsGap = from.stage === 'adult' && to.stage === 'adult' && fromLoad - toLoad >= BALANCE_GAP;
+        if (!adultsGap && !fromOver) continue;
+        // A move has to make things more even, not just shift who's heavier.
+        const gapBefore = fromLoad - toLoad;
+        const gapAfter = Math.abs(fromLoad - item.effort - (toLoad + item.effort));
+        if (gapAfter >= gapBefore && !fromOver) continue;
+        const score = gapAfter - (fromOver ? 100 : 0);
+        const key = tie(`${row.rowId}:${to.id}`);
+        if (!pick || score < pick.score || (score === pick.score && key < pick.key)) {
+          pick = {
+            score,
+            key,
+            move: { rowId: row.rowId, fromId: from.id, toId: to.id, from: { before: fromLoad, after: fromLoad - item.effort }, to: { before: toLoad, after: toLoad + item.effort } },
+          };
+        }
+      }
+    }
+    if (!pick) break;
+    const m = pick.move;
+    const effort = m.from.before - m.from.after;
+    load.set(m.fromId, load.get(m.fromId)! - effort);
+    load.set(m.toId, load.get(m.toId)! + effort);
+    moved.add(m.rowId);
+    moves.push(m);
+  }
+  return moves;
 }

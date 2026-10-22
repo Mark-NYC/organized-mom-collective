@@ -226,6 +226,11 @@ var DAY_PARAMS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 
 // src/routes.ts
 var routes = {
+  /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
+  clubStart: "/club/start",
+  clubDashboard: "/club/dashboard",
+  clubFamily: "/club/family",
+  clubKit: (slug) => `/club/kits/${slug}`,
   home: "/",
   ourStory: "/our-story",
   calendar: "/calendar",

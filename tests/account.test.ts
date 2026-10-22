@@ -7,6 +7,9 @@ import type { ShopDeps } from '../supabase/functions/_shared/deps.ts';
 describe('account sync keys', () => {
   it('syncs tool and element keys', () => {
     expect(syncableKey('omc:chore-chart:v1')).toBe(true);
+    // The Club keeps its own tables: nothing under omc:club… is synced as a save.
+    expect(syncableKey('omc:club:anything')).toBe(false);
+    expect(syncableKey('omc:club-sample:rivera')).toBe(false);
     expect(syncableKey('omc:organized-family-habits-builder:v1')).toBe(true);
     expect(syncableKey('omc:skylight-vs-paper-picker:v1')).toBe(true);
   });

@@ -1,0 +1,9 @@
+---
+/** /club/dashboard: the member's kits, newest first (from src/data/club/kits). Noindex, not linked; behind PUBLIC_CLUB_ENABLED. */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import DashboardPage from '../../components/club/Dashboard';
+---
+
+<ClubLayout title="Your kits">
+  <DashboardPage client:only="react" />
+</ClubLayout>
