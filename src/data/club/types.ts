@@ -74,6 +74,8 @@ export interface KitPrintable {
   component: string;
   /** For engine-filled printables: which item set to run. */
   items?: 'items' | 'reset';
+  /** For a worksheet: its intro and lines, each useful printed on its own. */
+  content?: { intro: string; items: string[] };
 }
 
 export interface KitInput {

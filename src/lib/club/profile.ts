@@ -32,6 +32,8 @@ export interface HouseholdPreferences {
   pets?: boolean;
   school?: 'public' | 'homeschool' | 'mixed';
   weekday_dinner?: string;
+  /** What she said matters most (src/data/club/onboarding.ts). Shown back to her; doesn't change suggestions. */
+  priorities?: string[];
 }
 
 export interface Household {
@@ -113,3 +115,23 @@ export function validateHousehold(household: Household, month: string): string[]
   }
   return errors;
 }
+
+/** 'YYYY-MM' for a date (local time). */
+export const monthOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+/**
+ * Onboarding asks a child's age, and their birthday month only if she wants to give it. Stored as a birth year and
+ * month so ages move up on their own. Without a month we record this month, so the age she typed is right today
+ * and goes up a year from now.
+ */
+export function birthFromAge(age: number, today: string, birthMonth?: number): { birthYear: number; birthMonth: number } {
+  const [y, m] = parseMonth(today);
+  const month = birthMonth ?? m;
+  // Born `age` years ago if the birthday has come this year, otherwise a year earlier.
+  const birthYear = y - age - (m < month ? 1 : 0);
+  return { birthYear, birthMonth: month };
+}
+
+/** A child's age today, for the family form. */
+export const ageNow = (m: Pick<FamilyMember, 'birthYear' | 'birthMonth'>, today: string) =>
+  m.birthYear === undefined ? null : ageInMonth(m.birthYear, m.birthMonth, today);

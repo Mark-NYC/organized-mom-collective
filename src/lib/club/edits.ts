@@ -11,7 +11,7 @@
  */
 import type { ChartSection, Frequency, KitItem, OwnershipLevel } from '../../data/club/types';
 import { FREQUENCIES, OWNERSHIP_LEVELS } from '../../data/club/types';
-import { eligible, generateOwnership, levelFor, type Assignment, type PinnedRow } from './engines/responsibilities';
+import { balanceSuggestions, eligible, generateOwnership, levelFor, type Assignment, type BalanceMove, type PinnedRow } from './engines/responsibilities';
 import { planMembers, type Household, type PlannedMember } from './profile';
 
 /** An engine suggestion as she accepted it. Kept whole, so it survives the rules or the family changing. */
@@ -24,6 +24,12 @@ export interface AcceptedRow {
   frequency: Frequency;
   ownerId: string | null;
   coachId: string | null;
+  /**
+   * The ownership level when she accepted it. Kept, so a family change (a partner joining ends the one-adult level
+   * boost; a birthday) never quietly changes the chart. Moving a job up a level is her call (setLevel).
+   * Missing in saves from before 2026-10-23: worked out from the owner's age then.
+   */
+  level?: OwnershipLevel | null;
   illustration?: string;
 }
 
@@ -46,6 +52,8 @@ export interface DocumentEdits {
   frequency: Record<string, Frequency>;
   level: Record<string, OwnershipLevel>;
   text: Record<string, string>;
+  /** Her wording for what "done" looks like. */
+  done: Record<string, string>;
   /** rowId → the library item she swapped in (keeps the row's place and owner). */
   replace: Record<string, string>;
   hidden: string[];
@@ -77,7 +85,13 @@ export interface ChartRow {
 
 export type Suggestion =
   | { kind: 'add'; row: Assignment }
-  | { kind: 'owner'; rowId: string; ownerId: string; title: string };
+  | { kind: 'owner'; rowId: string; ownerId: string; title: string }
+  /** An optional move that evens out the week (balanceSuggestions). */
+  | ({ kind: 'balance'; title: string } & BalanceMove);
+
+/** One id per suggestion, for keys, dismissal and tests. */
+export const suggestionId = (s: Suggestion) =>
+  s.kind === 'add' ? s.row.rowId : s.kind === 'owner' ? `owner:${s.rowId}` : `balance:${s.rowId}:${s.toId}`;
 
 export interface ResolvedDocument {
   rows: ChartRow[];
@@ -86,10 +100,11 @@ export interface ResolvedDocument {
 }
 
 export const MAX_TITLE = 80;
+export const MAX_DONE = 160;
 export const MAX_ADDED = 40;
 
 export const emptyEdits = (): DocumentEdits => ({
-  accepted: [], added: [], assign: {}, coach: {}, frequency: {}, level: {}, text: {}, replace: {}, hidden: [], order: [], dismissed: [],
+  accepted: [], added: [], assign: {}, coach: {}, frequency: {}, level: {}, text: {}, done: {}, replace: {}, hidden: [], order: [], dismissed: [],
 });
 
 const snapshot = (a: Assignment): AcceptedRow => ({
@@ -101,6 +116,7 @@ const snapshot = (a: Assignment): AcceptedRow => ({
   frequency: a.frequency,
   ownerId: a.ownerId,
   coachId: a.coachId,
+  level: a.level,
   ...(a.illustration ? { illustration: a.illustration } : {}),
 });
 
@@ -110,7 +126,7 @@ export function initialEdits(household: Household, items: readonly KitItem[], mo
 }
 
 const editedIds = (e: DocumentEdits) =>
-  new Set([...Object.keys(e.assign), ...Object.keys(e.coach), ...Object.keys(e.frequency), ...Object.keys(e.level), ...Object.keys(e.text), ...Object.keys(e.replace)]);
+  new Set([...Object.keys(e.assign), ...Object.keys(e.coach), ...Object.keys(e.frequency), ...Object.keys(e.level), ...Object.keys(e.text), ...Object.keys(e.done), ...Object.keys(e.replace)]);
 
 const has = <T>(o: Record<string, T>, k: string) => Object.hasOwn(o, k);
 
@@ -119,7 +135,7 @@ function currentRows(e: DocumentEdits, items: ReadonlyMap<string, KitItem>) {
   const edited = editedIds(e);
   const base = [
     ...e.accepted.map((a) => ({ ...a, custom: false })),
-    ...e.added.map((a) => ({ ...a, doneMeans: (a.itemId && items.get(a.itemId)?.doneMeans) || '', coachId: null as string | null, custom: true })),
+    ...e.added.map((a) => ({ ...a, doneMeans: (a.itemId && items.get(a.itemId)?.doneMeans) || '', coachId: null as string | null, level: undefined, custom: true })),
   ];
   return base.map((r) => {
     const swap = has(e.replace, r.rowId) ? items.get(e.replace[r.rowId]) : undefined;
@@ -129,7 +145,7 @@ function currentRows(e: DocumentEdits, items: ReadonlyMap<string, KitItem>) {
       rowId: r.rowId,
       itemId,
       title: has(e.text, r.rowId) ? e.text[r.rowId] : swap?.title ?? r.title,
-      doneMeans: swap?.doneMeans ?? (r.doneMeans || null),
+      doneMeans: has(e.done, r.rowId) ? e.done[r.rowId] : swap?.doneMeans ?? (r.doneMeans || null),
       section: swap?.section ?? r.section,
       frequency: has(e.frequency, r.rowId) ? e.frequency[r.rowId] : swap?.frequency ?? r.frequency,
       ownerId,
@@ -137,6 +153,8 @@ function currentRows(e: DocumentEdits, items: ReadonlyMap<string, KitItem>) {
       illustration: swap ? swap.illustration : r.illustration,
       edited: edited.has(r.rowId) || r.custom,
       custom: r.custom,
+      // The accepted level still applies while the job keeps the owner and the job it was accepted with.
+      keptLevel: !swap && ownerId === r.ownerId ? r.level : undefined,
     };
   });
 }
@@ -152,9 +170,12 @@ export function resolveDocument(household: Household, items: readonly KitItem[],
     const owner = r.ownerId ? people.get(r.ownerId) : undefined;
     const item = r.itemId ? itemMap.get(r.itemId) : undefined;
     const coach = r.coachId && r.coachId !== r.ownerId ? people.get(r.coachId) : undefined;
-    const level: OwnershipLevel | null = has(e.level, r.rowId) ? e.level[r.rowId] : owner && item ? levelFor(item, owner, adults === 1 ? 1 : 0) : owner ? 'owns' : null;
+    const { keptLevel, ...row } = r;
+    const level: OwnershipLevel | null = has(e.level, r.rowId) ? e.level[r.rowId]
+      : keptLevel ? keptLevel
+      : owner && item ? levelFor(item, owner, adults === 1 ? 1 : 0) : owner ? 'owns' : null;
     return {
-      ...r,
+      ...row,
       level: owner ? level : null,
       coachId: coach && level !== 'owns' ? coach.id : null,
       needsOwner: !owner,
@@ -184,6 +205,14 @@ export function resolveDocument(household: Household, items: readonly KitItem[],
       const leftOpen = has(e.assign, a.rowId) && e.assign[a.rowId] === null;
       if (r.needsOwner && !leftOpen && !dismissed.has(`owner:${a.rowId}`)) suggestions.push({ kind: 'owner', rowId: a.rowId, ownerId: a.ownerId, title: r.title });
     }
+  }
+
+  // Workload balance: optional moves on visible rows she didn't assign herself.
+  const visible = rows.filter((r) => !hidden.has(r.rowId) && !r.needsOwner);
+  const moves = balanceSuggestions(household, items, month, visible.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: r.ownerId, locked: r.custom || has(e.assign, r.rowId) })));
+  for (const m of moves) {
+    const s: Suggestion = { kind: 'balance', title: visible.find((r) => r.rowId === m.rowId)!.title, ...m };
+    if (!dismissed.has(suggestionId(s))) suggestions.push(s);
   }
 
   return { rows: rows.filter((r) => !hidden.has(r.rowId)), hidden: rows.filter((r) => hidden.has(r.rowId)), suggestions };
@@ -245,12 +274,21 @@ export function rename(e: DocumentEdits, rowId: string, title: string): Document
   return { ...e, text: withKey(e.text, rowId, cleanTitle(title)) };
 }
 
+/** Her own words for what "done" looks like. Empty puts the suggested wording back. */
+export function setDoneMeans(e: DocumentEdits, rowId: string, text: string): DocumentEdits {
+  requireRow(e, rowId);
+  const t = text.replace(/\s+/g, ' ').trim();
+  if (!t) return { ...e, done: withoutKey(e.done, rowId) };
+  if (t.length > MAX_DONE) throw new EditError('invalid_done');
+  return { ...e, done: withKey(e.done, rowId, t) };
+}
+
 /** Swap a job for another from the kit's library, keeping its place and owner. */
 export function replace(e: DocumentEdits, items: readonly KitItem[], rowId: string, itemId: string): DocumentEdits {
   requireRow(e, rowId);
   if (!items.some((i) => i.id === itemId)) throw new EditError('unknown_item');
   // Her wording belonged to the old job.
-  return { ...e, replace: withKey(e.replace, rowId, itemId), text: withoutKey(e.text, rowId) };
+  return { ...e, replace: withKey(e.replace, rowId, itemId), text: withoutKey(e.text, rowId), done: withoutKey(e.done, rowId) };
 }
 
 /** Take a job off the chart. Engine rows are hidden (and can come back); rows she added are deleted. */
@@ -303,13 +341,13 @@ export function acceptSuggestion(e: DocumentEdits, s: Suggestion): DocumentEdits
     if (rowIds(e).has(s.row.rowId)) return e;
     return { ...e, accepted: [...e.accepted, snapshot(s.row)], dismissed: e.dismissed.filter((id) => id !== s.row.rowId) };
   }
-  // An owner for a job that needs one: recorded as her choice, like any assignment.
-  return { ...e, assign: withKey(e.assign, s.rowId, s.ownerId) };
+  // An owner for a job that needs one, or a balance move: recorded as her choice, like any assignment.
+  return { ...e, assign: withKey(e.assign, s.rowId, s.kind === 'owner' ? s.ownerId : s.toId) };
 }
 
 export function dismissSuggestion(e: DocumentEdits, s: Suggestion): DocumentEdits {
-  // An owner suggestion is remembered per row, so "Not now" on who should take a job doesn't hide the job.
-  const id = s.kind === 'add' ? s.row.rowId : `owner:${s.rowId}`;
+  // Owner and balance suggestions are remembered per row (and person), so "Not now" never hides the job itself.
+  const id = suggestionId(s);
   return e.dismissed.includes(id) ? e : { ...e, dismissed: [...e.dismissed, id] };
 }
 
@@ -339,7 +377,7 @@ export function readEdits(json: unknown): DocumentEdits {
     .map((r) => ({
       rowId: r.rowId as string, itemId: r.itemId as string, title: r.title as string, doneMeans: isStr(r.doneMeans) ? r.doneMeans : '',
       section: r.section as ChartSection, frequency: r.frequency as Frequency, ownerId: r.ownerId as string | null,
-      coachId: isStr(r.coachId) ? r.coachId : null, ...(isStr(r.illustration) ? { illustration: r.illustration } : {}),
+      coachId: isStr(r.coachId) ? r.coachId : null, ...(isLevel(r.level) ? { level: r.level } : {}), ...(isStr(r.illustration) ? { illustration: r.illustration } : {}),
     }));
   const added: AddedRow[] = rows(o.added)
     .filter((r) => unique(r.rowId) && isStr(r.title) && isSection(r.section) && isFreq(r.frequency) && isNullableStr(r.ownerId))
@@ -356,6 +394,7 @@ export function readEdits(json: unknown): DocumentEdits {
     frequency: strMap(o.frequency, isFreq),
     level: strMap(o.level, isLevel),
     text: strMap(o.text, (v): v is string => isStr(v) && v.trim().length > 0 && v.length <= MAX_TITLE),
+    done: strMap(o.done, (v): v is string => isStr(v) && v.trim().length > 0 && v.length <= MAX_DONE),
     replace: strMap(o.replace, isStr),
     hidden: strList(o.hidden),
     order: strList(o.order),

@@ -3,11 +3,11 @@ import { kit } from '../src/data/club/kits/2026-11-family-ownership';
 import type { KitItem } from '../src/data/club/types';
 import {
   acceptSuggestion, addRow, assign, dismissSuggestion, EditError, initialEdits, move, readEdits, remove, rename, replace,
-  resolveDocument, restore, setCoach, setFrequency, setLevel, type DocumentEdits,
+  resolveDocument, restore, setCoach, setDoneMeans, setFrequency, setLevel, suggestionId, type DocumentEdits,
 } from '../src/lib/club/edits';
 import { generateOwnership } from '../src/lib/club/engines/responsibilities';
 import type { FamilyMember, Household } from '../src/lib/club/profile';
-import { adult, families, kid, MONTH } from './club/fixtures';
+import { adult, families, family, kid, MONTH } from './club/fixtures';
 
 const items = kit.items;
 const start = (h: Household) => initialEdits(h, items, MONTH);
@@ -15,8 +15,8 @@ const show = (h: Household, e: DocumentEdits, list: readonly KitItem[] = items, 
 const rowOf = (h: Household, e: DocumentEdits, rowId: string) => [...show(h, e).rows, ...show(h, e).hidden].find((r) => r.rowId === rowId)!;
 const withMembers = (h: Household, members: FamilyMember[]): Household => ({ ...h, profileVersion: h.profileVersion + 1, members });
 /** What she'd see on paper: the parts of each row that edits and profile changes must never move. */
-const paper = (h: Household, e: DocumentEdits) =>
-  Object.fromEntries([...show(h, e).rows, ...show(h, e).hidden].map((r) => [r.rowId, { title: r.title, ownerId: r.ownerId, frequency: r.frequency, itemId: r.itemId, section: r.section }]));
+const paper = (h: Household, e: DocumentEdits, list: readonly KitItem[] = items, withLevel = true) =>
+  Object.fromEntries([...show(h, e, list).rows, ...show(h, e, list).hidden].map((r) => [r.rowId, { title: r.title, ownerId: r.ownerId, frequency: r.frequency, itemId: r.itemId, section: r.section, ...(withLevel ? { level: r.level } : {}) }]));
 
 describe('club edits: first open', () => {
   it('shows exactly what the engine suggested, with no pending suggestions', () => {
@@ -50,6 +50,16 @@ describe('club edits: every suggestion is editable, removable and replaceable', 
     e = setCoach(e, h, 'set-the-table', 'dad');
     expect(rowOf(h, e, 'set-the-table')).toMatchObject({ level: 'with-check', coachId: 'dad' });
     expect(rowOf(h, rename(e, 'set-the-table', ''), 'set-the-table').title).toBe(items.find((i) => i.id === 'set-the-table')!.title);
+  });
+
+  it('rewords what “done” looks like, and puts the suggestion back when cleared', () => {
+    const e = setDoneMeans(e0, 'set-the-table', '  Plates and cups out by 5:45. ');
+    expect(rowOf(h, e, 'set-the-table')).toMatchObject({ doneMeans: 'Plates and cups out by 5:45.', edited: true });
+    expect(rowOf(h, setDoneMeans(e, 'set-the-table', ''), 'set-the-table').doneMeans).toBe(items.find((i) => i.id === 'set-the-table')!.doneMeans);
+    expect(() => setDoneMeans(e0, 'set-the-table', 'x'.repeat(161))).toThrow('invalid_done');
+    // Swapping the job drops wording written for the old one.
+    expect(rowOf(h, replace(e, items, 'set-the-table', 'water-the-plants'), 'set-the-table').doneMeans).toBe(items.find((i) => i.id === 'water-the-plants')!.doneMeans);
+    expect(readEdits(JSON.parse(JSON.stringify(e))).done).toEqual({ 'set-the-table': 'Plates and cups out by 5:45.' });
   });
 
   it('removes a suggestion (hidden, restorable) and never suggests it again', () => {
@@ -169,7 +179,8 @@ describe('club edits: family changes never overwrite her chart', () => {
     const cals = shown.rows.filter((r) => r.ownerId === 'cal');
     expect(cals.length).toBeGreaterThan(0);
     expect(cals.every((r) => r.needsOwner && r.level === null)).toBe(true);
-    expect(paper(gone, edited)).toEqual(paper(h, edited));
+    // Everything but the level of Cal's own jobs (a job with no owner has no level).
+    expect(paper(gone, edited, items, false)).toEqual(paper(h, edited, items, false));
     const offers = shown.suggestions.filter((s) => s.kind === 'owner');
     expect(offers.length).toBeGreaterThan(0);
     const taken = acceptSuggestion(edited, offers[0]);
@@ -203,9 +214,76 @@ describe('club edits: family changes never overwrite her chart', () => {
     const fewer = items.filter((i) => i.id !== 'empty-the-dishwasher');
     const r = show(h, edited, fewer).rows.find((x) => x.rowId === 'empty-the-dishwasher')!;
     expect(r).toMatchObject({ title: 'Dishwasher out before school' });
-    const before = paper(h, edited);
-    const after = Object.fromEntries([...show(h, edited, fewer).rows].map((x) => [x.rowId, { title: x.title, ownerId: x.ownerId, frequency: x.frequency, itemId: x.itemId, section: x.section }]));
-    expect(after).toEqual(before);
+    expect(paper(h, edited, fewer)).toEqual(paper(h, edited));
+  });
+});
+
+describe('club edits: levels are part of her chart', () => {
+  it('a partner joining a one-adult home doesn’t quietly lower the kids’ levels', () => {
+    const solo = families.B;
+    const e = start(solo);
+    const levels = (h: Household) => Object.fromEntries(show(h, e).rows.map((r) => [r.rowId, r.level]));
+    const withPartner = withMembers(solo, [...solo.members, adult('co')]);
+    expect(levels(withPartner)).toEqual(levels(solo));
+  });
+
+  it('a birthday doesn’t move a job up by itself; she does', () => {
+    const h = families.A;
+    const e = start(h);
+    const row = show(h, e).rows.find((r) => r.ownerId === 'ava' && r.level === 'learning')!;
+    const older = withMembers(h, h.members.map((m) => (m.id === 'ava' ? { ...m, birthYear: m.birthYear! - 4 } : m)));
+    expect(rowOf(older, e, row.rowId).level).toBe('learning');
+    expect(rowOf(older, setLevel(e, row.rowId, 'owns'), row.rowId).level).toBe('owns');
+  });
+
+  it('reassigning a job works out the level for its new owner', () => {
+    const h = families.A;
+    const e = start(h);
+    const household = new Set(items.filter((i) => i.scope === 'household').map((i) => i.id));
+    const row = show(h, e).rows.find((r) => r.ownerId === 'ava' && household.has(r.itemId ?? '') && r.level === 'learning')!;
+    expect(rowOf(h, assign(e, h, row.rowId, 'cal'), row.rowId).level).not.toBe('learning');
+  });
+
+  it('reads saves made before levels were kept', () => {
+    const h = families.A;
+    const e = start(h);
+    const old = JSON.parse(JSON.stringify(e));
+    for (const r of old.accepted) delete r.level;
+    expect(show(h, readEdits(old)).rows.map((r) => r.level)).toEqual(show(h, e).rows.map((r) => r.level));
+  });
+});
+
+describe('club edits: workload balance suggestions', () => {
+  const solo = family('hh-bal-e', [adult('mom', true), kid('ben', 9), kid('cal', 6)]);
+  const withPartner = withMembers(solo, [...solo.members, adult('dad')]);
+
+  it('offers optional moves when a partner joins, applies none by itself, and records an accepted one as her choice', () => {
+    const e = start(solo);
+    const before = paper(withPartner, e);
+    const moves = show(withPartner, e).suggestions.filter((s) => s.kind === 'balance');
+    expect(moves.length).toBeGreaterThan(0);
+    expect(paper(withPartner, e)).toEqual(before);
+    const m = moves[0];
+    if (m.kind !== 'balance') throw new Error('kind');
+    const taken = acceptSuggestion(e, m);
+    expect(rowOf(withPartner, taken, m.rowId)).toMatchObject({ ownerId: 'dad', edited: true });
+    // Once she's chosen, that job is hers to decide: no more moves offered for it.
+    expect(show(withPartner, taken).suggestions.some((s) => s.kind === 'balance' && s.rowId === m.rowId)).toBe(false);
+  });
+
+  it('“Not now” keeps a balance move from coming back', () => {
+    const e = start(solo);
+    const m = show(withPartner, e).suggestions.find((s) => s.kind === 'balance')!;
+    const later = dismissSuggestion(e, m);
+    expect(show(withPartner, later).suggestions.map(suggestionId)).not.toContain(suggestionId(m));
+    expect(paper(withPartner, later)).toEqual(paper(withPartner, e));
+  });
+
+  it('never offers to move a job she assigned or added herself', () => {
+    let e = start(solo);
+    for (const r of show(solo, e).rows.filter((x) => x.ownerId === 'mom')) e = assign(e, solo, r.rowId, 'mom');
+    e = addRow(e, solo, { title: 'Pay the sitter', ownerId: 'mom' });
+    expect(show(withPartner, e).suggestions.filter((s) => s.kind === 'balance')).toEqual([]);
   });
 });
 
@@ -261,6 +339,7 @@ describe('club edits: property test (seeded, deterministic)', () => {
               e = acceptSuggestion(e, one);
               // Taking an owner offer is her choice, recorded like any assignment.
               if (one.kind === 'owner') expected.set(one.rowId, { ...expected.get(one.rowId), ownerId: one.ownerId });
+              if (one.kind === 'balance') expected.set(one.rowId, { ...expected.get(one.rowId), ownerId: one.toId });
             } else e = dismissSuggestion(e, one);
             for (const x of show(h, e).suggestions) if (x.kind === 'owner') expect(expected.get(x.rowId)?.ownerId, `offer on a row she left open`).not.toBe(null);
           }

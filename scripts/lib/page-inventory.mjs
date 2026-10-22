@@ -18,7 +18,10 @@ export const OFFER_PATHS = new Set([
 ]);
 
 /** Never inventoried: the admin itself, and build files that aren't pages. */
-export const EXCLUDED = (path) => path === '/admin' || path.startsWith('/admin/') || path === '/survey/admin' || path === '/404.html' || path === '/404';
+export const EXCLUDED = (path) =>
+  path === '/admin' || path.startsWith('/admin/') || path === '/survey/admin' || path === '/404.html' || path === '/404' ||
+  // The Organized Family Club's member pages: not launched, behind PUBLIC_CLUB_ENABLED.
+  path === '/club' || path.startsWith('/club/');
 
 const decode = (s) =>
   s

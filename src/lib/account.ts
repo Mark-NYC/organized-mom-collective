@@ -9,7 +9,8 @@
  *   needs no clocks: each key remembers the server time of the copy it last matched (`at`) and
  *   whether it changed since (`dirty`). See reconcile().
  * - Not synced: the cleaning companion's own progress (omc:v1:*, step 2), this file's own keys,
- *   and the download-gate flag. The database refuses the same keys.
+ *   the download-gate flag, and anything under omc:club… (the Club has its own tables). The database refuses
+ *   the same keys.
  * Off unless PUBLIC_ACCOUNTS_ENABLED is 'true'.
  */
 
@@ -55,7 +56,8 @@ export function syncableKey(key: string): boolean {
   return (
     key.length <= 120 &&
     /^omc:[a-z0-9][a-z0-9._-]*(:[a-z0-9][a-z0-9._-]*)*$/.test(key) &&
-    !/^omc:(v1|account|tool-download-access)(:|$)/.test(key)
+    // Club data lives in its own tables (supabase/migrations/20261023000000_club_core.sql), never in saves.
+    !/^omc:(v1|account|tool-download-access|club[a-z0-9._-]*)(:|$)/.test(key)
   );
 }
 
@@ -252,6 +254,8 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (text ? JSON.parse(text) : null) as T;
 }
 const rpc = <T>(name: string, body: object = {}) => api<T>(`/rpc/${name}`, { method: 'POST', body: JSON.stringify(body) });
+/** A database function called as the signed-in customer (the Club's store, src/lib/club/store.ts). */
+export const accountRpc = rpc;
 
 export interface AccountProfile {
   email: string | null;

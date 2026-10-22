@@ -1,0 +1,9 @@
+---
+/** /club/start: the welcome and family form (after checkout, once billing exists). Noindex, not linked; behind PUBLIC_CLUB_ENABLED. */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import FamilyPage from '../../components/club/FamilyPage';
+---
+
+<ClubLayout title="Welcome">
+  <FamilyPage client:only="react" mode="start" />
+</ClubLayout>

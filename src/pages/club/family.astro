@@ -1,0 +1,9 @@
+---
+/** /club/family: edit the family profile. Noindex, not linked; behind PUBLIC_CLUB_ENABLED. */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import FamilyPage from '../../components/club/FamilyPage';
+---
+
+<ClubLayout title="Your family">
+  <FamilyPage client:only="react" mode="edit" />
+</ClubLayout>

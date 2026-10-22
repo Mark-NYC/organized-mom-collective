@@ -1,0 +1,377 @@
+/*
+ * Organized Family Club member pages: the printables and their print rules. Loaded by ClubLayout only.
+ * Print design follows docs/brand/TOOL-OUTPUT-DESIGN.md: white paper, warm charcoal text, Kalam headings, soft
+ * highlighter swipes in the chosen tool palette, rounded outlines, responsibility illustrations on their fixed
+ * category colors. One printable prints at a time (src/lib/club/print.ts sets html[data-club-print]).
+ */
+
+.club-print {
+  display: none;
+  color: #3d3834;
+  font-family: var(--font-sans);
+  background: #fff;
+}
+
+@media print {
+  html[data-club-print] body {
+    background: #fff !important;
+  }
+  html[data-club-print] [data-club-chrome],
+  html[data-club-print] .club-screen {
+    display: none !important;
+  }
+  html[data-club-print] .club-print {
+    display: none !important;
+  }
+  html[data-club-print='ownership-chart'] .club-print[data-doc='ownership-chart'],
+  html[data-club-print='kitchen-pantry-reset'] .club-print[data-doc='kitchen-pantry-reset'],
+  html[data-club-print='who-owns-what'] .club-print[data-doc='who-owns-what'],
+  html[data-club-print='handing-over'] .club-print[data-doc='handing-over'] {
+    display: block !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+}
+
+.club-hand {
+  font-family: 'Kalam', 'Comic Sans MS', cursive;
+  font-weight: 700;
+}
+
+/* A soft highlighter swipe behind a word, in the palette color set on --swipe. */
+.club-swipe {
+  background: linear-gradient(transparent 52%, var(--swipe, #efebe7) 52%, var(--swipe, #efebe7) 92%, transparent 92%);
+  padding: 0 0.12em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ------------------------------------------------------------------ the family chart (Letter landscape) */
+
+.club-chart {
+  width: 10.3in;
+  min-height: 7.8in;
+  padding: 0.05in 0.05in 0;
+  display: flex;
+  flex-direction: column;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.club-chart-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.3in;
+  height: 0.95in;
+  border-bottom: 1.5px solid #e7ddd4;
+  margin-bottom: 0.14in;
+}
+.club-chart-title {
+  font-size: 34pt;
+  line-height: 1;
+  color: #3d3834;
+}
+.club-chart-family {
+  font-family: var(--font-serif);
+  font-size: 13pt;
+  color: #5c5550;
+  margin-top: 0.06in;
+}
+.club-chart-promise {
+  text-align: right;
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #6e6461;
+  padding-bottom: 0.1in;
+}
+/* Cards flow down columns (multi-column, never split), so short and long rows pack together like a masonry wall. */
+.club-chart-grid {
+  column-gap: 0.14in;
+  flex: 1;
+}
+.club-chart-grid > .club-card {
+  margin-bottom: 0.14in;
+}
+.club-card {
+  display: block;
+  break-inside: avoid-column;
+  border: 1.4px solid #ddd2c8;
+  border-radius: 0.14in;
+  padding: 0.1in 0.12in 0.08in;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  background: #fff;
+}
+.club-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.08in;
+  min-height: 0.36in;
+  border-bottom: 1px dashed #e7ddd4;
+  margin-bottom: 0.04in;
+}
+.club-card-name {
+  font-size: 20pt;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.club-card-meta {
+  font-size: 7pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #8a7f7b;
+  white-space: nowrap;
+}
+.club-card-section {
+  font-size: 6.5pt;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #8a7f7b;
+  margin: 0.05in 0 0.01in;
+}
+.club-job {
+  display: grid;
+  grid-template-columns: 0.3in 1fr;
+  gap: 0.07in;
+  align-items: center;
+  min-height: 0.34in;
+  padding: 0.015in 0;
+  break-inside: avoid;
+}
+/* Densities (chosen by fitChart): roomy shows "done means"; compact and tight drop it and tighten rows. */
+.club-density-roomy .club-job {
+  min-height: 0.46in;
+  padding: 0.03in 0;
+}
+.club-job-done {
+  display: none;
+}
+.club-density-roomy .club-job-done {
+  display: block;
+}
+.club-density-tight .club-job {
+  min-height: 0.27in;
+  padding: 0;
+}
+.club-job-art {
+  width: 0.3in;
+  height: 0.3in;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.club-job-art img {
+  width: 0.27in;
+  height: 0.27in;
+  object-fit: contain;
+}
+.club-job-dot {
+  width: 0.1in;
+  height: 0.1in;
+  border-radius: 999px;
+  background: var(--dot, #d9cfc6);
+}
+.club-job-title {
+  font-size: 9.5pt;
+  line-height: 1.18;
+  font-weight: 600;
+  color: #3d3834;
+}
+.club-job-meta {
+  font-size: 7pt;
+  line-height: 1.25;
+  color: #6e6461;
+  margin-top: 0.01in;
+}
+.club-job-done {
+  font-size: 7pt;
+  line-height: 1.25;
+  color: #6e6461;
+  font-style: italic;
+}
+.club-chip {
+  display: inline-block;
+  padding: 0 0.05in;
+  border-radius: 999px;
+  background: var(--chip, #f6f1e7);
+  color: #4d4544;
+  font-weight: 600;
+}
+.club-density-tight .club-job-title {
+  font-size: 8.5pt;
+}
+.club-density-tight .club-card-name {
+  font-size: 16pt;
+}
+.club-density-tight .club-job-art,
+.club-density-tight .club-job-art img {
+  width: 0.22in;
+  height: 0.22in;
+}
+.club-density-tight .club-job {
+  grid-template-columns: 0.22in 1fr;
+}
+.club-chart-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a7f7b;
+  padding: 0.08in 0 0.02in;
+  margin-top: auto;
+}
+.club-needs-owner {
+  border-style: dashed;
+}
+
+/* ------------------------------------------------------------------ portrait worksheets */
+
+.club-sheet {
+  width: 7.8in;
+  min-height: 10.3in;
+  padding: 0.1in;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.club-sheet-title {
+  font-size: 30pt;
+  line-height: 1.05;
+}
+.club-sheet-sub {
+  font-family: var(--font-serif);
+  font-size: 12.5pt;
+  color: #5c5550;
+  margin-top: 0.08in;
+}
+.club-sheet-intro {
+  font-size: 10.5pt;
+  line-height: 1.5;
+  margin-top: 0.22in;
+  max-width: 6.6in;
+}
+.club-sheet-row {
+  display: grid;
+  grid-template-columns: 0.3in 1fr auto;
+  gap: 0.14in;
+  align-items: start;
+  padding: 0.14in 0;
+  border-bottom: 1px solid #ece4dc;
+  break-inside: avoid;
+  font-size: 11pt;
+  line-height: 1.35;
+}
+.club-box {
+  width: 0.22in;
+  height: 0.22in;
+  border: 1.5px solid #9a8f8a;
+  border-radius: 0.05in;
+  margin-top: 0.02in;
+}
+.club-sheet-owner {
+  font-size: 15pt;
+  white-space: nowrap;
+}
+.club-sheet-lines {
+  margin-top: 0.3in;
+}
+.club-sheet-line {
+  display: grid;
+  grid-template-columns: 1.6in 1fr;
+  gap: 0.16in;
+  align-items: end;
+  height: 0.5in;
+  border-bottom: 1px solid #d9cfc6;
+  break-inside: avoid;
+}
+.club-sheet-foot {
+  margin-top: 0.4in;
+  font-size: 7.5pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a7f7b;
+}
+
+/* ------------------------------------------------------------------ preview frame (PrintFrame.tsx) */
+
+@media screen {
+  .club-print-frame:not(.is-open) {
+    display: none;
+  }
+  .club-print-frame.is-open {
+    overflow: hidden;
+    border: 1px solid #e7ddd4;
+    background: #f4efe9;
+    padding: 12px;
+  }
+  .club-print-frame.is-open .club-print {
+    display: block;
+    transform-origin: top left;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 6px 24px rgb(77 69 68 / 0.12);
+  }
+}
+@media print {
+  html[data-club-print] .club-print-frame {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+  }
+}
+
+/* Printing: the page is only the printable. Drop the screen wrappers' padding, width caps and min-heights. */
+@media print {
+  html[data-club-print],
+  html[data-club-print] body,
+  html[data-club-print] body > div,
+  html[data-club-print] main {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    background: #fff !important;
+  }
+  /* The tab wrappers' top margins would collapse through the page and push it onto a second sheet. */
+  html[data-club-print] main > *,
+  html[data-club-print] main > * > *,
+  html[data-club-print] .club-print-frame {
+    margin: 0 !important;
+  }
+  html[data-club-print] .club-chart {
+    min-height: 0;
+    height: 7.7in;
+    overflow: hidden;
+  }
+  html[data-club-print] .club-chart[data-pages='2'] {
+    height: auto;
+  }
+  html[data-club-print] .club-sheet {
+    min-height: 0;
+  }
+}
+
+/* Tight charts: the frequency sits on the title's line to save a line per job. */
+.club-density-tight .club-job > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.05in;
+}
+.club-density-tight .club-job-meta {
+  margin-top: 0;
+}
+.club-density-tight .club-card-section {
+  margin: 0.03in 0 0;
+}
+.club-density-tight .club-card-head {
+  min-height: 0.3in;
+}

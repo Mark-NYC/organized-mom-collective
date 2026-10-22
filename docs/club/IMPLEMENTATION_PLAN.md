@@ -1,8 +1,8 @@
 # Organized Family Club: architecture and implementation plan
 
-**Status (2026-10-22): Phase 1 in progress; nothing deployed or for sale.** Built: the typed kit configuration, the November kit config, the responsibilities engine and the edit-merging logic, as pure TypeScript with tests (see [§12](#12-phase-1-progress)). No migration has been applied, no function deployed, no Stripe object created, and no Club page exists. Don't mention the Club in customer copy until Phase 4's launch gate is passed (see [PRODUCT_ROADMAP.md](../brand/PRODUCT_ROADMAP.md)).
+**Status (2026-10-23): Phase 1 built behind a disabled flag; nothing deployed, applied or for sale.** Built: the kit configuration, the November kit, the responsibilities engine with edit merging and optional balance suggestions, the Club migration with access tests (local only), and the member pages (family form, dashboard, the November kit with editing and US Letter printing) behind `PUBLIC_CLUB_ENABLED` (off). See [§12](#12-phase-1-progress). No migration has been applied to the live project, no function deployed, no Stripe object created, no email sent, and nothing links to the Club.
 
-Related: [YEAR_ONE_CALENDAR.md](YEAR_ONE_CALENDAR.md) (the 12 kits and the monthly production calendar) · [KIT_TEMPLATE.md](KIT_TEMPLATE.md) (the repeatable kit config) · [draft-schema.sql](draft-schema.sql) + [draft-schema-smoke.sql](draft-schema-smoke.sql) (the proposed tables, functions and RLS, with 27 passing access checks).
+Related: [YEAR_ONE_CALENDAR.md](YEAR_ONE_CALENDAR.md) (the 12 kits and the monthly production calendar) · [KIT_TEMPLATE.md](KIT_TEMPLATE.md) (the repeatable kit config) · the migration `supabase/migrations/20261023000000_club_core.sql` and its access tests `supabase/tests/club-access.sql` (not applied to the live project).
 
 ## The product in one paragraph
 
@@ -98,7 +98,7 @@ Browser (static pages + React islands)        Supabase Edge Functions           
 
 ## 4. Data model and RLS
 
-Full SQL: [draft-schema.sql](draft-schema.sql) (compiles on Postgres 16 after the stub and every current migration). Access checks: [draft-schema-smoke.sql](draft-schema-smoke.sql) (27 passing, 2026-10-22).
+Migration: `supabase/migrations/20261023000000_club_core.sql` (in the repo, **not applied** to the live project). Access tests: `supabase/tests/club-access.sql`, run by `npm run test:admin-sql` (including another household trying to read, rename, delete, overwrite or pull in someone else's family and chart, 2026-10-23).
 
 | Table | Holds | Customer access | Written by |
 | --- | --- | --- | --- |
@@ -182,7 +182,7 @@ The QR on every mailer is `https://www.organizedmomcollective.com/club/kits/<slu
 
 | Engine | Does | Kits |
 | --- | --- | --- |
-| `responsibilities` | Picks age-eligible jobs, assigns owners by balanced effort, sets frequency and ownership level (`learning`: their job, with someone beside them; `with-check`: theirs start to finish, a coach checks; `owns`: theirs completely). Adults get **whole jobs** (plan → do → finish), never "help Mom". Nobody goes past a weekly capacity by age, so leftovers show as "Needs an owner" instead of falling to a parent; the account holder only takes a job while staying at or below the busiest other adult, and coaching is spread the same way. Single-parent households: kids' ownership levels move up a year instead. | Nov, Mar, Apr, Oct |
+| `responsibilities` | Picks age-eligible jobs, assigns owners by balanced effort, sets frequency and ownership level (`learning`: their job, with someone beside them; `with-check`: theirs start to finish, a coach checks; `owns`: theirs completely). Adults get **whole jobs** (plan → do → finish), never "help Mom". Weekly capacity by age is **guidance**: jobs are spread within it first; a core job nobody has room for may stretch a teen or adult a little (25%), never a child and never the account holder, and whatever is still left says "Needs an owner" instead of falling to her. Adults aren't forced to equal counts: the account holder only leans last in ties, and real imbalance (adults 4+ effort points apart, or anyone past guidance) is offered as optional **workload balance suggestions** (move a job from one person to another), never applied for her and never moving work onto the account holder. Single-parent households: kids' ownership levels move up a year instead. | Nov, Mar, Apr, Oct |
 | `routines` | Ordered, timed steps per child (or the family) from start/end times and ages; owner per step. | Jan, Jun, Aug |
 | `planning` | A dated plan: dates from the kit month (holiday dates, school's last day, Sundays), prompts per family member, who leads each block. | Dec, Feb, May, Sep |
 | `projects` | A bounded project: zones or packing lists split into owned tasks with a due day, sized by age. | Mar, Jul |
@@ -201,6 +201,7 @@ suggestions = generate(profile, kitRules, pinned = chart) − chart − dismisse
 - **Someone removed** is archived, not deleted: their jobs stay on the chart marked "Needs a new owner" until she picks one.
 - **Rules change** (`engineVersion` bump): items that disappear from the rules stay on her chart exactly as accepted; new rules items show as suggestions, same panel.
 - **A job she deliberately left without an owner** gets no owner offers.
+- **Levels are kept as accepted.** A partner joining (which ends the one-adult level boost) or a birthday never changes a level by itself; moving a job up is her call. A job reassigned to someone else gets the level for its new owner.
 - Tested as properties: 200 seeded random runs of edits, new children, removals, birthdays, accepted and dismissed suggestions and database round trips; every edited field stays exactly as she left it (`tests/club-edits.test.ts`).
 
 ### PDF output
@@ -224,7 +225,7 @@ Static pages, `noindex` except `/club` once launched. Member pages use a new `Cl
 ## 9. Files
 
 ### Database (Phase 1)
-- `supabase/migrations/<date>_club_core.sql` from `docs/club/draft-schema.sql` + `club_settings`, `club_email_log`; `account_delete` refusal; `account_saves` key check excludes `omc:club`.
+- `supabase/migrations/20261023000000_club_core.sql` (built 2026-10-23; `club_settings` and `club_email_log` still to add with Phase 2–3); `account_delete` refusal; `account_saves` key check excludes `omc:club`.
 - `supabase/tests/club-access.sql` from the smoke test; add it to `scripts/test-admin-sql.sh`.
 
 ### Server (Phase 2–3)
@@ -314,9 +315,32 @@ Pure TypeScript, no database, UI, Stripe or new dependencies; nothing ships to v
 | `src/lib/club/edits.ts` | Edit operations (assign, coach, frequency, level, rename, replace, remove/restore, add, move, accept/dismiss suggestions), `resolveDocument()`, `readEdits()` for saved JSON |
 | `tests/club-profile.test.ts`, `tests/club-engine.test.ts`, `tests/club-edits.test.ts`, `tests/club-kits.test.ts`, `tests/club/fixtures.ts` | 12 test families from one adult with no kids to a single parent of six, teens, a grandparent at home, an 18-year-old still at home |
 
-### Still to do in Phase 1
-1. The migration (`supabase/migrations/<date>_club_core.sql` from `draft-schema.sql`) and `supabase/tests/club-access.sql`, run on a local stack only.
-2. `ClubLayout`, the family form, and the kit page rendering the Family Ownership Builder, the suggestions panel and the printables, with print-to-PDF, on a Preview deployment behind `PUBLIC_CLUB_ENABLED`.
-3. The Phase 1 acceptance check above on real devices.
+### Done (2026-10-23): the November member experience, behind the flag
+
+| Piece | Where |
+| --- | --- |
+| Engine adjustments: capacity as guidance (STRETCH), the account-holder lean (HOLDER_LEAN), `balanceSuggestions()`, levels kept as accepted, "done means" edits | `src/lib/club/engines/responsibilities.ts`, `src/lib/club/edits.ts` |
+| Migration: households, family members, kits (November seeded as a **draft**), documents, preview/beta access grants (`club_access_grants`, the only way in until billing), the billing and mailing tables Phase 2 writes; `account_delete` refuses with a live paid membership; `account_saves` refuses `omc:club…` keys; anon loses execute on the `account_*` functions (it had it since the accounts migration) | `supabase/migrations/20261023000000_club_core.sql` |
+| Access tests | `supabase/tests/club-access.sql` (in `npm run test:admin-sql`) |
+| Feature flag `PUBLIC_CLUB_ENABLED` (off): off, every /club page is a one-line "not available" notice with no app code | `src/data/club/config.ts`, `src/layouts/ClubLayout.astro`, `.env.example` |
+| Sample households (made-up, labeled "Sample", saved in the browser tab only): Rivera (2 parents, kids 4/7/10, a dog), Brooks (one parent, 6 and 9), Chen (2 parents, a grandparent, 5 kids and teens), Okafor (toddler), and an empty one for the welcome form | `src/data/club/samples.ts`, `?sample=<id>` on any /club page |
+| One store interface: the signed-in account (Club database functions with the account session) or a sample | `src/lib/club/store.ts` |
+| `/club/start` (welcome + family form), `/club/family` (edit), `/club/dashboard` (kits from the registry), `/club/kits/<slug>` (one page per kit config) | `src/pages/club/`, `src/components/club/` |
+| The kit: chart opens filled in; per person: reassign, reword, "done means", frequency, level, coach, swap, remove/put back, add (typed or from the library); suggestions (new person's jobs, owners for open jobs, workload moves) with Add / Not now; explicit save with conflict handling; the team reset, team meeting card, handing-over checklist and field guide | `ChartEditor.tsx`, `KitPage.tsx` |
+| Printing: US Letter (chart landscape, worksheets portrait), the three tool palettes, Kalam names, illustrations on category colors; `fitChart()` measures and picks columns and density so a family fits one page, flowing to two only for very long charts | `src/components/club/print/`, `src/lib/club/print.ts`, `src/styles/club.css` |
+| Launch protection: `/club/*` security headers (noindex, no-store, CSP, no framing); `npm run check:site` fails if a Club page loads GA4 or the Pinterest tag, is indexable, is in the sitemap, or is linked from any page outside /club; the page inventory skips /club | `public/_headers`, `scripts/check-site.mjs`, `scripts/lib/page-inventory.mjs` |
+| QA by hand: every sample at phone and desktop width, edits survive a reload, a family change shows suggestions without changing the chart, every printable prints to one Letter page with no clipped text, a 7-person chart plus 24 extra jobs prints readably on two | `scripts/club-qa.mjs` |
+
+### Previewing
+
+- **Samples, no backend:** build with `PUBLIC_CLUB_ENABLED=true` (a Cloudflare Pages **Preview** environment variable, never Production) and open `/club/dashboard`. With accounts off it lists the samples; or add `?sample=rivera` to any /club page. `npm run dev` shows the pages too.
+- **A real account (a Supabase branch or local stack only):** apply the migration there, set `PUBLIC_ACCOUNTS_ENABLED=true` and `PUBLIC_CLUB_ENABLED=true` on the preview, schedule the kit and grant access in that project's SQL Editor:
+  `update club_kits set status = 'scheduled', release_at = now() where slug = '2026-11-family-ownership';`
+  `insert into club_access_grants (user_id, reason, note) select id, 'preview', 'owner preview' from auth.users where email = 'you@example.com';`
+
+### Still open before Phase 2
+1. Accounts step 1 launch (its checklist in `supabase/ACCOUNTS.md`, `/privacy` first, with the Club's children's-data section).
+2. The private beta (D2) uses `club_access_grants` with `reason = 'beta'`; no billing needed.
+3. Megan's letter for November (`letter: null` until then; the kit can't be scheduled for members without it).
 
 Phase 2 (billing) doesn't start until the owner says so.

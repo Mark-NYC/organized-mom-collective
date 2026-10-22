@@ -1,0 +1,38 @@
+---
+/**
+ * Organized Family Club member pages (/club/…): noindex, no GA4 or Pinterest tag (family names are on these pages),
+ * no site header, footer, sales elements, manifest or service worker. Security headers: public/_headers.
+ *
+ * Behind PUBLIC_CLUB_ENABLED (src/data/club/config.ts). Off, the page is a one-line notice: no member app code, no
+ * kit content, nothing linked. `astro dev` always shows the pages.
+ */
+import BaseLayout from './BaseLayout.astro';
+import { clubEnabled, CLUB_NAME } from '../data/club/config';
+import '@fontsource/kalam/latin-700.css';
+import '../styles/club.css';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const enabled = clubEnabled();
+---
+
+<BaseLayout title={`${title} · ${CLUB_NAME}`} description={`${CLUB_NAME} member pages.`} robots="noindex" tracking={false}>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <div class="min-h-screen bg-ivory text-warm-ink">
+    {
+      enabled ? (
+        <slot />
+      ) : (
+        <main class="mx-auto max-w-xl px-4 py-24 sm:px-8">
+          <h1 class="font-serif text-[1.8rem] leading-tight">This page isn’t available.</h1>
+          <p class="mt-3 text-warm-soft">
+            <a href="/" class="underline underline-offset-4">Go to the homepage</a>
+          </p>
+        </main>
+      )
+    }
+  </div>
+</BaseLayout>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageInMonth, parseMonth, planMembers, validateHousehold, type FamilyMember } from '../src/lib/club/profile';
+import { ageInMonth, ageNow, birthFromAge, monthOf, parseMonth, planMembers, validateHousehold, type FamilyMember } from '../src/lib/club/profile';
 import { adult, families, family, kid, MONTH } from './club/fixtures';
 
 describe('club profile: ages for a kit month', () => {
@@ -73,5 +73,28 @@ describe('club profile: validation (mirrors club_household_save)', () => {
     expect(problems([{ ...adult('a', true), role: 'child' }]).join()).toMatch(/child role/);
     expect(problems([adult('a', true), { ...kid('k', 5), role: 'parent' }]).join()).toMatch(/child role/);
     expect(problems([adult('a', true), adult('a')]).join()).toMatch(/duplicate member id/);
+  });
+});
+
+describe('club profile: ages typed in onboarding', () => {
+  it('keeps the typed age right today, with or without a birthday month', () => {
+    for (const today of ['2026-10', '2026-01', '2026-12']) {
+      for (const age of [0, 3, 7, 12, 17]) {
+        const noMonth = birthFromAge(age, today);
+        expect(ageNow(noMonth, today), `${today} ${age}`).toBe(age);
+        for (const bm of [1, 6, 10, 12]) expect(ageNow(birthFromAge(age, today, bm), today), `${today} ${age} ${bm}`).toBe(age);
+      }
+    }
+  });
+
+  it('moves the age up on the birthday month', () => {
+    const b = birthFromAge(7, '2026-10', 12);
+    expect(ageNow(b, '2026-11')).toBe(7);
+    expect(ageNow(b, '2026-12')).toBe(8);
+    expect(ageNow(birthFromAge(7, '2026-10'), '2027-10')).toBe(8);
+  });
+
+  it('formats this month', () => {
+    expect(monthOf(new Date(2026, 9, 22))).toBe('2026-10');
   });
 });
