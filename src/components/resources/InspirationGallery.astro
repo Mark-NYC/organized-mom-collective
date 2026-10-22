@@ -60,7 +60,7 @@ const categoryItems = (gallery.sections ?? []).map((section, index, all) => ({
         {categoryItems.map(item => <a class="inspo-category-link" href={item.href}>
           <span class="inspo-category-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{item.iconPaths.map(d => <path d={d} />)}</svg></span>
           <span class="inspo-category-copy"><strong>{item.label}</strong><small>{item.count} ideas</small></span>
-          <span class="inspo-category-arrow" aria-hidden="true">↘</span>
+          <span class="inspo-category-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="m7 17 10-10"/></svg></span>
         </a>)}
       </div>
     </nav>}
@@ -148,7 +148,7 @@ const categoryItems = (gallery.sections ?? []).map((section, index, all) => ({
   .inspo-category-copy{display:flex;flex-direction:column;gap:3px;padding-right:12px}
   .inspo-category-copy strong{font:700 .88rem/1.3 Montserrat,Arial,sans-serif}
   .inspo-category-copy small{font-size:.74rem;color:#67655f}
-  .inspo-category-arrow{position:absolute;right:12px;bottom:12px;color:#526b55;font-size:1.05rem}
+  .inspo-category-arrow{position:absolute;right:12px;bottom:12px;color:#526b55;width:18px;height:18px}.inspo-category-arrow svg{display:block;width:100%;height:100%}
   @media(min-width:640px){.inspo-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.inspo-category-link{min-height:130px;padding:17px}}
   @media(min-width:768px){.inspo-category-nav{margin:0 0 52px}.inspo-category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .inspo-item{scroll-margin-top:80px;margin-bottom:44px}
