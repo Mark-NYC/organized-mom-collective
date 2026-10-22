@@ -1938,6 +1938,41 @@
         "alt_text_example": "Bowls of popcorn, a striped popcorn bag and movie-night candy on a wooden table beside a soft cream blanket."
       },
       "original": "design/photography/owner/chore-chart-reward-ideas-movie-night-original.webp"
+    },
+    {
+      "id": "IF11-OWNER-TOY-TRUCKS",
+      "title": "Toy trucks on a bedroom floor beside a small blue chair and a white teddy bear",
+      "role": "IF-11 exclusive hero",
+      "source": "Owner-supplied photo (chat upload)",
+      "creator": null,
+      "source_photo_id": null,
+      "source_url": null,
+      "license_review": "Owner-supplied 2026-10-22 for installation as the IF-11 hero; original photographer/site not stated by owner. Reverse search found no source page.",
+      "owner_visual_status": "owner_approved_2026-10-22",
+      "model_release_review": "No people.",
+      "content_review": "Full resolution (1200x800) checked 2026-10-22: no readable third-party logos or branded packaging; out-of-focus phrase on the teddy bear's shirt is not a brand mark.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-11-chore-chart-without-rewards-hero-{640,960,1200}.webp",
+      "used_in": [
+        "IF-11 /resources/chore-chart-without-rewards (hero)"
+      ],
+      "status": "Exclusive to IF-11.",
+      "clearance_record": {
+        "approval": "Owner-supplied and requested as IF-11 hero 2026-10-22.",
+        "checks_by": "Claude",
+        "date": "2026-10-22",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "IF-11",
+        "context": "Generic lifestyle illustration; not presented as a customer, reader's home or endorsement",
+        "edits": "Uncropped; responsive WebP resizing only; no upscaling",
+        "alt_text_example": "Toy fire trucks and small cars on a wooden bedroom floor beside a small blue chair holding a white teddy bear."
+      },
+      "original": "design/photography/owner/chore-chart-without-rewards-toy-trucks-original.jpg",
+      "open_items": [
+        "Record the original photographer/source if the owner knows it"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
