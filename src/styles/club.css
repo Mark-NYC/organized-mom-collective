@@ -409,25 +409,8 @@
   }
 }
 
-/* ------------------------------------------------------------------ routine pages (one per child, portrait) */
+/* ------------------------------------------------------------------ routine day boxes (the routine chart, below) */
 
-.club-routine-page + .club-routine-page {
-  break-before: page;
-  page-break-before: always;
-}
-.club-routine-part {
-  margin-top: 0.3in;
-}
-.club-routine-part-head {
-  display: grid;
-  grid-template-columns: 1fr 1.7in;
-  align-items: end;
-  border-bottom: 1.5px solid #e7ddd4;
-  padding-bottom: 0.06in;
-}
-.club-routine-label {
-  font-size: 20pt;
-}
 .club-routine-days {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -436,25 +419,6 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #8a7f7b;
-}
-.club-routine-step {
-  display: grid;
-  grid-template-columns: 0.42in 1fr 1.7in;
-  gap: 0.12in;
-  align-items: center;
-  min-height: 0.5in;
-  border-bottom: 1px solid #f0e9e2;
-  break-inside: avoid;
-}
-.club-routine-step .club-job-art,
-.club-routine-step .club-job-art img {
-  width: 0.4in;
-  height: 0.4in;
-}
-.club-routine-title {
-  font-size: 12.5pt;
-  font-weight: 600;
-  line-height: 1.2;
 }
 .club-routine-boxes {
   display: grid;
@@ -560,4 +524,382 @@
 }
 .club-sheet-lines-tight .club-sheet-line {
   height: 0.4in;
+}
+
+/* ------------------------------------------------------------------ three-part kits: the monthly letter (two pages) */
+
+.club-letter {
+  width: 7.8in;
+  background: transparent;
+  color: #3d3834;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+@media screen {
+  .club-print-frame.is-open .club-letter {
+    box-shadow: none;
+  }
+  .club-letter-page {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 6px 24px rgb(77 69 68 / 0.12);
+  }
+  .club-letter-page + .club-letter-page {
+    margin-top: 0.3in;
+  }
+}
+.club-letter-page {
+  box-sizing: border-box;
+  width: 7.8in;
+  height: 10.3in;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5in 0.6in 0.45in;
+  background: #fbf7f1;
+}
+.club-letter-page + .club-letter-page {
+  break-before: page;
+  page-break-before: always;
+}
+.club-letter-head,
+.club-letter-label {
+  font-family: var(--font-sans);
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #857a76;
+}
+.club-letter-head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.12in;
+  border-bottom: 1px solid #e2d8cd;
+}
+.club-letter-label {
+  display: block;
+  font-style: normal;
+}
+.club-letter-title {
+  margin-top: 0.28in;
+  font-family: var(--font-serif);
+  font-size: 30pt;
+  font-weight: 400;
+  line-height: 1.08;
+  color: #4d4544;
+}
+.club-letter-subtitle {
+  margin-top: 0.08in;
+  font-family: var(--font-serif);
+  font-size: 14pt;
+  font-style: italic;
+  color: #96666b;
+}
+.club-letter-body {
+  margin-top: 0.2in;
+  max-width: 6.3in;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  line-height: 1.45;
+}
+.club-letter-body p + p {
+  margin-top: 0.07in;
+}
+.club-letter-greeting {
+  font-style: italic;
+}
+.club-letter-signoff {
+  margin-bottom: 0.2in;
+  display: flex;
+  align-items: baseline;
+  gap: 0.14in;
+  margin-top: 0.1in !important;
+  font-style: italic;
+}
+.club-letter-signature {
+  font-size: 21pt;
+  font-style: normal;
+  color: #6e6461;
+}
+.club-letter-placeholder {
+  font-style: italic;
+  color: #857a76;
+}
+.club-letter-action {
+  margin-top: auto;
+  padding: 0.18in 0.28in 0.1in;
+  background: #f1f4ec;
+  border-top: 2px solid #9aab8f;
+}
+.club-letter-action h2 {
+  font-family: var(--font-serif);
+  font-size: 16pt;
+  font-weight: 400;
+  color: #4d4544;
+}
+.club-action {
+  list-style: none;
+  margin: 0.06in 0 0;
+  padding: 0;
+}
+.club-action-row {
+  display: grid;
+  grid-template-columns: 0.22in 1fr 1.6in;
+  gap: 0.14in;
+  align-items: end;
+  padding: 0.06in 0;
+  border-bottom: 1px solid #dfe6d8;
+  font-size: 10.5pt;
+  line-height: 1.3;
+  break-inside: avoid;
+}
+.club-action-row:last-child {
+  border-bottom: 0;
+}
+.club-action-box {
+  align-self: center;
+  width: 0.19in;
+  height: 0.19in;
+  margin: 0;
+  background: #fff;
+}
+.club-action-box.is-done {
+  background: #9aab8f;
+  border-color: #9aab8f;
+}
+.club-action-text {
+  align-self: center;
+}
+.club-action-helper {
+  display: grid;
+}
+.club-action-helper-label {
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #857a76;
+}
+.club-action-helper-line {
+  height: 0.24in;
+  border-bottom: 1px solid #b9b0a8;
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
+  font-size: 12pt;
+  line-height: 0.3in;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.club-letter-back-title {
+  margin-top: 0.34in;
+  font-family: var(--font-serif);
+  font-size: 24pt;
+  font-weight: 400;
+  line-height: 1.1;
+  color: #4d4544;
+}
+.club-letter-tips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2in 0.4in;
+  margin-top: 0.24in;
+}
+.club-letter-tips h3,
+.club-letter-example h3,
+.club-letter-invite h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-letter-tips h3 {
+  font-size: 12.5pt;
+}
+.club-letter-tips p {
+  margin-top: 0.05in;
+  font-family: var(--font-serif);
+  font-size: 10.5pt;
+  line-height: 1.5;
+}
+.club-letter-example {
+  margin-top: 0.3in;
+  padding: 0.2in 0.26in;
+  background: #fff;
+  border: 1px solid #e7ddd4;
+}
+.club-letter-example h3 {
+  margin-top: 0.04in;
+  font-size: 13pt;
+}
+.club-letter-example ol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.1in 0.3in;
+  margin: 0.14in 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.club-letter-example li {
+  display: grid;
+  grid-template-columns: 0.42in 1fr;
+  gap: 0.12in;
+  align-items: center;
+  font-size: 11pt;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.club-letter-example .club-job-art,
+.club-letter-example .club-job-art img {
+  width: 0.42in;
+  height: 0.42in;
+}
+.club-letter-invite {
+  display: grid;
+  grid-template-columns: 1.2in 1fr;
+  gap: 0.3in;
+  align-items: center;
+  margin-top: 0.3in;
+}
+.club-qr {
+  width: 1.2in;
+  height: 1.2in;
+}
+.club-letter-invite h3 {
+  font-size: 15pt;
+}
+.club-letter-invite p {
+  margin-top: 0.06in;
+  font-family: var(--font-serif);
+  font-size: 10.5pt;
+  line-height: 1.5;
+}
+.club-letter-invite .club-letter-url {
+  margin-top: 0.1in;
+  font-family: var(--font-sans);
+  font-size: 10pt;
+  font-weight: 600;
+  color: #4d4544;
+}
+.club-letter-calendar {
+  margin-top: auto;
+  padding: 0.16in 0.22in;
+  background: #f8eeec;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  font-style: italic;
+  line-height: 1.45;
+}
+.club-letter-calendar .club-letter-label {
+  margin-bottom: 0.04in;
+}
+@media print {
+  html[data-club-print] .club-letter-page {
+    height: 10.25in;
+  }
+}
+
+/* The action on its own page */
+.club-action-sheet .club-action {
+  margin-top: 0.3in;
+}
+.club-action-sheet .club-action-row {
+  grid-template-columns: 0.3in 1fr 2.1in;
+  gap: 0.2in;
+  padding: 0.22in 0;
+  border-bottom-color: #ece4dc;
+  font-size: 13pt;
+}
+.club-action-sheet .club-action-box {
+  width: 0.28in;
+  height: 0.28in;
+}
+.club-action-sheet .club-action-helper-line {
+  height: 0.3in;
+  font-size: 14pt;
+  line-height: 0.38in;
+}
+
+/* ------------------------------------------------------------------ the routine chart (one child, one routine) */
+
+.club-routine-chart-title {
+  font-size: 34pt;
+  line-height: 1.1;
+}
+.club-routine-chart-head {
+  display: grid;
+  grid-template-columns: 1fr 2.4in;
+  align-items: end;
+  margin-top: 0.3in;
+  padding-bottom: 0.08in;
+  border-bottom: 1.5px solid #e7ddd4;
+  font-size: 9pt;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #857a76;
+}
+.club-routine-chart .club-routine-days {
+  font-size: 11pt;
+}
+.club-routine-chart-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.club-routine-chart-step {
+  display: grid;
+  grid-template-columns: 0.36in 0.9in 1fr 2.4in;
+  gap: 0.16in;
+  align-items: center;
+  min-height: 1.15in;
+  border-bottom: 1px solid #f0e9e2;
+  break-inside: avoid;
+}
+.club-routine-chart-num {
+  display: grid;
+  place-items: center;
+  width: 0.36in;
+  height: 0.36in;
+  border-radius: 999px;
+  font-size: 12pt;
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-routine-chart-step .club-job-art {
+  width: 0.9in;
+  height: 0.9in;
+  background: #f3ede6;
+}
+.club-routine-chart-step .club-job-art img {
+  width: 0.82in;
+  height: 0.82in;
+}
+.club-routine-chart-step .club-job-art:not([style]) {
+  visibility: hidden;
+}
+.club-routine-chart-text {
+  font-size: 17pt;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.club-routine-chart .club-routine-boxes .club-box {
+  width: 0.34in;
+  height: 0.34in;
+}
+.club-routine-chart[data-long] .club-routine-chart-step {
+  min-height: 0.85in;
+}
+.club-routine-chart[data-long] .club-job-art {
+  width: 0.7in;
+  height: 0.7in;
+}
+.club-routine-chart[data-long] .club-job-art img {
+  width: 0.64in;
+  height: 0.64in;
+}
+.club-routine-chart-foot {
+  margin-top: 0.3in;
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
+  font-size: 15pt;
+  color: #857a76;
 }

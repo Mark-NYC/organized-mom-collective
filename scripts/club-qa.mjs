@@ -51,11 +51,11 @@ const check = (ok, what) => {
 
 const pdfPages = (buf) => (buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
 
-async function printTo(page, doc, orientation, name, nth = 0) {
+async function printTo(page, doc, orientation, name, nth = 0, label = 'Print or save as PDF') {
   // The real print button, with the browser's dialog stubbed: printDocument() fits the chart and sets the page up.
   await page.evaluate(() => { window.print = () => {}; });
   await page.locator('[hidden]').evaluateAll(() => {});
-  const button = page.getByRole('button', { name: 'Print or save as PDF' }).filter({ visible: true });
+  const button = page.getByRole('button', { name: label }).filter({ visible: true });
   await button.nth(nth).click();
   await page.evaluate((d) => { if (document.documentElement.dataset.clubPrint !== d) throw new Error(`printing ${document.documentElement.dataset.clubPrint}, expected ${d}`); }, doc);
   await page.emulateMedia({ media: 'print' });
@@ -63,9 +63,11 @@ async function printTo(page, doc, orientation, name, nth = 0) {
   const overflow = await page.evaluate((d) => {
     const root = document.querySelector(`.club-print[data-doc="${d}"]`);
     if (!root) return ['missing'];
-    return [...root.querySelectorAll('.club-job-title, .club-card-name, .club-sheet-row, .club-sheet-owner')]
-      .filter((el) => el.scrollWidth > el.clientWidth + 1)
-      .map((el) => el.textContent.trim().slice(0, 40));
+    const wide = [...root.querySelectorAll('.club-job-title, .club-card-name, .club-sheet-row, .club-sheet-owner, .club-routine-chart-text, .club-action-text')]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1);
+    // A letter page is a fixed sheet: anything taller is cut off.
+    const tall = [...root.querySelectorAll('.club-letter-page')].filter((el) => el.scrollHeight > el.clientHeight + 1);
+    return [...wide, ...tall].map((el) => el.textContent.trim().slice(0, 40));
   }, doc);
   // A blank page still counts as a page: the printable itself must be showing, with its text, in print mode.
   const shown = await page.evaluate((d) => {
@@ -153,49 +155,81 @@ for (const id of samples) {
   await ctx.close();
 }
 
-// August: the overview opens with 5–8 first actions; the school setup changes the plan; every printable prints.
+// August (letter, action, tool): one calm screen; the countdown checks off, saves and prints; the letter prints front
+// and back; the routine tool suggests 4–6 steps per child and routine and prints one chart per page.
 for (const id of samples) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const entry = { august: id };
-  await page.goto(`${base}/club/kits/2027-08-school-year?sample=${id}`);
-  await page.getByRole('heading', { name: /^Start with these/ }).waitFor();
-  check(await noSideScroll(page), `${id}: August overview scrolls sideways on a phone`);
-  const actions = await page.locator('#club-first ~ ol > li').count();
-  entry.actions = actions;
-  check(actions >= 5 && actions <= 8, `${id}: August overview shows ${actions} first actions (expected 5–8)`);
+  const kitUrl = `${base}/club/kits/2027-08-school-year?sample=${id}`;
+  await page.goto(kitUrl);
+  await page.getByRole('heading', { name: 'Your Back-to-School Countdown' }).waitFor();
+  check(await noSideScroll(page), `${id}: August scrolls sideways on a phone`);
+  const lines = await page.locator('section[aria-labelledby="club-action"] input[type="checkbox"]').count();
+  check(lines === 6, `${id}: the countdown has ${lines} lines (expected 6)`);
+  check(await page.locator('nav[aria-label="In this kit"]').count() === 0, `${id}: August shows tabs`);
   check(await page.getByRole('link', { name: 'November 2026' }).count() === 1, `${id}: no month switcher to November`);
-  await page.screenshot({ path: join(out, `${id}-august-overview-phone.png`), fullPage: true });
+  await page.screenshot({ path: join(out, `${id}-august-phone.png`), fullPage: true });
 
-  // School setup: a first day and a different school for the first child; the chips turn into dates.
-  await page.getByRole('button', { name: /Add first days and schools|Change schools or first days/ }).click();
-  await page.locator('input[type="date"]').first().fill('2027-08-26');
-  await page.getByText('Saved', { exact: true }).waitFor();
-  check(await page.getByText(/By Aug \d+/).count() > 0, `${id}: a first day didn't turn into due dates`);
+  // Check a line off and name a helper; both survive a reload.
+  await page.locator('section[aria-labelledby="club-action"] input[type="checkbox"]').first().check();
+  await page.getByPlaceholder('Who’s helping?').first().fill('Dad');
+  await page.getByText('1 of 6 done').waitFor();
   await page.reload();
-  await page.getByRole('heading', { name: /^Start with these/ }).waitFor();
-  check(await page.getByText(/starts Thu, Aug 26/).count() > 0, `${id}: the first day didn't survive a reload`);
+  await page.getByRole('heading', { name: 'Your Back-to-School Countdown' }).waitFor();
+  check(await page.locator('section[aria-labelledby="club-action"] input[type="checkbox"]').first().isChecked(), `${id}: the checked line didn't survive a reload`);
+  check(await page.getByPlaceholder('Who’s helping?').first().inputValue() === 'Dad', `${id}: the helper didn't survive a reload`);
 
   await page.setViewportSize({ width: 1280, height: 900 });
-  const kidsInSchool = await page.evaluate(() => [...document.querySelectorAll('section[aria-labelledby="club-setup"] ul > li')].filter((li) => !/Not in school/.test(li.textContent ?? '')).length);
-  for (const [tab, doc, orientation, pages] of [['Launch plan', 'school-launch', 'portrait', 1], ['Routines', 'school-routines', 'portrait', kidsInSchool], ['Command center', 'command-center', 'landscape', 1]]) {
-    await page.getByRole('button', { name: tab, exact: true }).click();
-    const r = await printTo(page, doc, orientation, `${id}-august-${doc}`);
+  for (const [doc, button, pages] of [['countdown', 'Print it', 1], ['letter', 'Print the letter', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-august-${doc}`, 0, button);
     entry[doc] = r;
     check(r.pages === pages, `${id}: ${doc} printed on ${r.pages} pages (expected ${pages})`);
-    check(r.overflow.length === 0, `${id}: ${doc} has text overflowing: ${r.overflow.join(' | ')}`);
+    check(r.overflow.length === 0, `${id}: ${doc} has text cut off: ${r.overflow.join(' | ')}`);
     await page.setViewportSize({ width: 1280, height: 900 });
   }
-  await page.getByRole('button', { name: 'In the mail', exact: true }).click();
-  for (const [n, doc] of ['school-guide', 'school-huddle', 'backpack-station'].entries()) {
-    const r = await printTo(page, doc, 'portrait', `${id}-august-${doc}`, n);
-    entry[doc] = r;
-    check(r.pages === 1, `${id}: ${doc} printed on ${r.pages} pages (expected 1)`);
-    await page.setViewportSize({ width: 1280, height: 900 });
+
+  // The tool: every child it serves, both routines, 4–6 steps; one chart prints on one page.
+  await page.getByRole('button', { name: 'Make a routine chart' }).click();
+  const kids = await page.locator('[role="group"][aria-label="Whose routine"] button').count();
+  const charts = [];
+  for (let k = 0; k < Math.max(kids, 1); k++) {
+    if (kids) await page.locator('[role="group"][aria-label="Whose routine"] button').nth(k).click();
+    for (const part of [0, 1]) {
+      await page.locator('[role="group"][aria-label="Which routine"] button').nth(part).click();
+      const steps = await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').count();
+      charts.push(steps);
+      check(steps === 0 || (steps >= 4 && steps <= 6), `${id}: child ${k} routine ${part} has ${steps} steps (expected 4–6)`);
+    }
   }
+  entry.routineSteps = charts;
+  const hasChart = charts.some((n) => n > 0);
+  if (hasChart) {
+    if (kids) await page.locator('[role="group"][aria-label="Whose routine"] button').first().click();
+    await page.locator('[role="group"][aria-label="Which routine"] button').first().click();
+    const first = await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').first().textContent();
+    await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').first().getByRole('button', { name: /Move .* down/ }).click();
+    await page.getByRole('button', { name: 'Save routine charts' }).click();
+    await page.getByText('All changes saved').waitFor();
+    const r = await printTo(page, 'school-routines', 'portrait', `${id}-august-routine`, 0, /^Print .+ chart$/);
+    entry.routine = r;
+    check(r.pages === 1, `${id}: the routine chart printed on ${r.pages} pages (expected 1)`);
+    check(r.overflow.length === 0, `${id}: the routine chart has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${kitUrl}#tool`);
+    await page.getByRole('heading', { name: /’s morning/ }).waitFor();
+    const second = await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').nth(1).textContent();
+    check(second === first, `${id}: the reordered routine didn't survive a reload`);
+    check(await noSideScroll(page), `${id}: the routine tool scrolls sideways on a phone`);
+    await page.screenshot({ path: join(out, `${id}-august-tool-phone.png`), fullPage: true });
+  } else {
+    check(await page.getByText(/Routine charts start around age three/).count() === 1, `${id}: no note for a family without a routine chart`);
+  }
+
   // Same family, same profile: November still opens from the switcher.
+  await page.goto(kitUrl);
   await page.getByRole('link', { name: 'November 2026' }).click();
   await page.getByRole('heading', { name: 'Our Family, Our Team' }).waitFor();
   check(errors.length === 0, `${id}: August page errors: ${errors.join(' | ')}`);

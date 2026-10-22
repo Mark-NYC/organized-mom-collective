@@ -1,25 +1,25 @@
 /**
- * /club/kits/<slug>: a monthly kit, opened already filled in for her family. Engine-filled printables get the chart
- * editor; the activity and worksheets print with her family's names; the field guide reads on screen. Everything comes
- * from the kit's config (src/data/club/kits/), so later kits reuse this page.
+ * /club/kits/<slug>: a monthly kit, opened already filled in for her family. Everything comes from the kit's config
+ * (src/data/club/kits/), so later kits reuse this page.
  *
- * Kits with an `overview` (August) open on it: the school setup and 5–8 first actions, with the full plan, routines
- * and command center a tab away; the mailer's printable twins sit under "In the mail". A month switcher links every
- * kit she can open. Kits without those (November) look as they always have.
+ * Three-part kits (August on: `action` and `tool`) open on one calm screen: the month's title, its one action as a
+ * checklist (check off, note who's helping, print), and one button to the optional tool; the letter reads on screen and
+ * prints front and back. A month switcher links every kit she can open. Kits without those (November) keep their tabs:
+ * engine-filled printables get the chart editor, the activity and worksheets print with her family's names, the field
+ * guide reads on screen.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { kitBySlug, kitItems } from '../../data/club/kits';
-import { FREQUENCY_LABEL, LEAD_LABEL, monthLabel, SCHOOL_LABEL } from '../../data/club/labels';
+import { monthLabel } from '../../data/club/labels';
 import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes';
-import { SCHOOL_TYPES, type KitConfig, type KitItem, type KitPrintable, type SchoolType } from '../../data/club/types';
-import type { ChartRow } from '../../lib/club/edits';
-import { topActions } from '../../lib/club/overview';
-import { dueLabel, earliestStart, inSchool, readSetup, schoolSetupFor, SETUP_DOC, startLabel, withSchool, type SchoolSetup } from '../../lib/club/school';
+import type { KitConfig, KitPrintable } from '../../data/club/types';
+import { readAction, MAX_HELPER, type ActionState } from '../../lib/club/action';
+import { schoolSetupFor, withSchool } from '../../lib/club/school';
 import { GuideSheet } from './print/SchoolPrintables';
-import { JobArt } from './print/ResponsibilityChart';
+import { ActionSheet, LetterSheets } from './print/LetterPrintables';
 import { printDocument } from '../../lib/club/print';
 import { planMembers, type Household } from '../../lib/club/profile';
-import { ConflictError, type KitDocuments } from '../../lib/club/store';
+import { ConflictError, type ClubStore, type KitDocuments } from '../../lib/club/store';
 import { routes } from '../../routes';
 import ChartEditor from './ChartEditor';
 import ClubGate, { type ClubContext } from './ClubGate';
@@ -36,32 +36,13 @@ export default function KitPage({ slug }: { slug: string }) {
 const INTRO: Record<string, string> = {
   flagship: 'We’ve suggested jobs for everyone, by age, so no one person carries the house. Every job has one owner, start to finish.',
   reset: 'This month’s team reset, from the cleaning companion’s monthly project, split into jobs with owners.',
-  'school-launch': 'Each child’s own prep for their school and first day, plus the shared prep, each with one owner. Dates count back from each child’s first day.',
-  'school-routines': 'A morning and after-school routine for each child, from their age and school. Reorder, reword or remove any step; each child’s page prints on its own.',
-  'command-center': 'Who owns each school job, all year, and your family’s weekly commitments. It prints on one page to hang beside your family calendar, where the week’s details go.',
 };
-
-/** Text on a row's chip: a due date counted back from the child's first day (or the earliest one), else how often. */
-function chipFor(items: Map<string, KitItem>, setup: SchoolSetup) {
-  const earliest = earliestStart(setup);
-  return (r: ChartRow) => {
-    const lead = r.itemId ? items.get(r.itemId)?.lead : undefined;
-    if (!lead) return FREQUENCY_LABEL[r.frequency];
-    const due = dueLabel((r.ownerId && setup[r.ownerId]?.start) || earliest, lead);
-    if (!due) return LEAD_LABEL[lead];
-    return lead === 'first-day' ? `On ${due}` : `By ${due}`;
-  };
-}
 
 function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
   const kit = kitBySlug(slug);
   const [data, setData] = useState<{ household: Household; docs: KitDocuments; kits: string[] } | null>(null);
   const [error, setError] = useState('');
   const [tab, setTab] = useState(() => (typeof location !== 'undefined' && location.hash.slice(1)) || '');
-  const [saved, setSaved] = useState<SchoolSetup>({});
-  const [setupRevision, setSetupRevision] = useState(0);
-  const [setupStatus, setSetupStatus] = useState<'idle' | 'saving' | 'saved' | 'conflict' | 'error'>('idle');
-  const [rows, setRows] = useState<Record<string, ChartRow[]>>({});
 
   useEffect(() => {
     if (!kit) return;
@@ -69,37 +50,14 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
       .then(async ([household, me]) => {
         if (!household) return clubNav().go(ctx.href(routes.clubStart), { replace: true });
         const docs = await ctx.store.documents(slug);
-        const setupDoc = docs.documents[SETUP_DOC];
-        if (setupDoc) {
-          setSaved(readSetup(setupDoc.edits));
-          setSetupRevision(setupDoc.revision);
-        }
         setData({ household, docs, kits: me.kits.map((k) => k.slug) });
       })
       .catch((e: Error) => setError(e.message === 'not_found' ? 'closed' : 'load'));
   }, [slug]);
 
+  // Kits that care where children go to school guess it from age and the family's homeschool preference: no setup step.
   const household = data?.household;
-  const setup = useMemo(() => (kit?.setup && household ? schoolSetupFor(household, kit.month, saved) : {}), [kit, household, saved]);
-  const kitHousehold = useMemo(() => (household && kit?.setup ? withSchool(household, setup) : household), [household, setup, kit]);
-  const itemMap = useMemo(() => new Map((kit ? [...kit.items, ...Object.values(kit.itemSets ?? {}).flat()] : []).map((i) => [i.id, i])), [kit]);
-  const chip = useMemo(() => chipFor(itemMap, setup), [itemMap, setup]);
-
-  // The school setup saves itself a moment after each change (it's settings, not a chart to review).
-  const saveSetup = (next: SchoolSetup) => {
-    setSaved(next);
-    setSetupStatus('saving');
-  };
-  useEffect(() => {
-    if (setupStatus !== 'saving' || !kit || !household) return;
-    const t = setTimeout(() => {
-      ctx.store
-        .saveDocument(kit.slug, SETUP_DOC, { edits: { children: saved }, palette: 'warm-neutrals', engineVersion: kit.engineVersion, profileVersion: household.profileVersion }, setupRevision)
-        .then((rev) => { setSetupRevision(rev); setSetupStatus('saved'); })
-        .catch((e) => setSetupStatus(e instanceof ConflictError ? 'conflict' : 'error'));
-    }, 600);
-    return () => clearTimeout(t);
-  }, [saved, setupStatus]);
+  const kitHousehold = useMemo(() => (household && kit?.setup ? withSchool(household, schoolSetupFor(household, kit.month)) : household), [household, kit]);
 
   if (!kit || error === 'closed') {
     return (
@@ -114,38 +72,42 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
   if (!data || !kitHousehold) return <p className="text-warm-soft">Opening your kit…</p>;
 
   const readOnly = data.docs.can === 'read';
-  const primary = kit.printables.filter((p) => !p.secondary);
-  const mail = kit.printables.filter((p) => p.secondary);
-  const tabs: { id: string; label: string }[] = [
-    ...(kit.overview ? [{ id: 'overview', label: 'Overview' }] : []),
-    ...primary.map((p) => ({ id: p.id, label: p.tabLabel ?? shortLabel(p) })),
-    ...(mail.length ? [{ id: 'in-the-mail', label: 'In the mail' }] : []),
-    ...(kit.printables.some((p) => p.component === 'Guide') ? [] : [{ id: 'field-guide', label: 'Field guide' }]),
-  ];
-  // An old or mistyped #hash opens the first tab.
-  const shown = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   const choose = (id: string) => {
     setTab(id);
     history.replaceState(null, '', `#${id}`);
   };
   const otherKits = data.kits.map((s) => kitBySlug(s)).filter((k): k is KitConfig => Boolean(k)).sort((a, b) => (a.month < b.month ? -1 : 1));
+  const top = (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <a href={ctx.href(routes.clubDashboard)} className="text-[0.9rem] text-warm-soft underline underline-offset-4">Your kits</a>
+      {otherKits.length > 1 && (
+        <nav aria-label="Monthly kits" className="flex rounded-full bg-white p-1 ring-1 ring-warm-rule">
+          {otherKits.map((k) => (
+            <a key={k.slug} href={ctx.href(routes.clubKit(k.slug))} aria-current={k.slug === kit.slug ? 'page' : undefined}
+              className="rounded-full px-4 py-2 text-[0.85rem] font-semibold text-warm-soft aria-[current=page]:bg-warm-ink aria-[current=page]:text-white">
+              {monthLabel(k.month)}
+            </a>
+          ))}
+        </nav>
+      )}
+    </div>
+  );
+
+  if (kit.action) {
+    return <ThreePartKit kit={kit} store={ctx.store} household={kitHousehold} docs={data.docs} readOnly={readOnly} top={top} view={tab} choose={choose} />;
+  }
+
+  const tabs: { id: string; label: string }[] = [
+    ...kit.printables.map((p) => ({ id: p.id, label: p.tabLabel ?? shortLabel(p) })),
+    ...(kit.printables.some((p) => p.component === 'Guide') ? [] : [{ id: 'field-guide', label: 'Field guide' }]),
+  ];
+  // An old or mistyped #hash opens the first tab.
+  const shown = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
 
   return (
     <>
       <div className="club-screen">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <a href={ctx.href(routes.clubDashboard)} className="text-[0.9rem] text-warm-soft underline underline-offset-4">Your kits</a>
-          {otherKits.length > 1 && (
-            <nav aria-label="Monthly kits" className="flex rounded-full bg-white p-1 ring-1 ring-warm-rule">
-              {otherKits.map((k) => (
-                <a key={k.slug} href={ctx.href(routes.clubKit(k.slug))} aria-current={k.slug === kit.slug ? 'page' : undefined}
-                  className="rounded-full px-4 py-2 text-[0.85rem] font-semibold text-warm-soft aria-[current=page]:bg-warm-ink aria-[current=page]:text-white">
-                  {monthLabel(k.month)}
-                </a>
-              ))}
-            </nav>
-          )}
-        </div>
+        {top}
         <p className="label mt-5 text-warm-soft">{monthLabel(kit.month)}</p>
         <h1 className="mt-2 font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.7rem]">{kit.theme}</h1>
         <p className="mt-3 max-w-2xl text-[1.05rem] leading-relaxed text-warm-soft">{kit.shift}</p>
@@ -164,13 +126,7 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
 
       {/* Every part stays mounted (unsaved edits survive switching tabs); only the chosen one shows. */}
       <div className="mt-6">
-        {kit.overview && (
-          <div hidden={shown !== 'overview'}>
-            <Overview kit={kit} household={kitHousehold} setup={setup} onSetup={saveSetup} setupStatus={setupStatus} readOnly={readOnly}
-              rows={rows} itemMap={itemMap} chip={chip} choose={(id) => { choose(id); window.scrollTo(0, 0); }} />
-          </div>
-        )}
-        {primary.map((p) => (
+        {kit.printables.map((p) => (
           <div key={p.id} hidden={shown !== p.id}>
             {p.items ? (
               <ChartEditor
@@ -182,20 +138,12 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
                 saved={data.docs.documents[p.id]}
                 readOnly={readOnly}
                 intro={INTRO[p.id] ?? INTRO[p.kind] ?? ''}
-                chip={kit.setup ? chip : undefined}
-                setup={setup}
-                onRows={(r) => setRows((all) => ({ ...all, [p.id]: r }))}
               />
             ) : (
               <Sheet kit={kit} printable={p} household={kitHousehold} />
             )}
           </div>
         ))}
-        {mail.length > 0 && (
-          <div hidden={shown !== 'in-the-mail'}>
-            <InTheMail kit={kit} printables={mail} household={kitHousehold} />
-          </div>
-        )}
         {!kit.printables.some((p) => p.component === 'Guide') && (
           <div hidden={shown !== 'field-guide'}>
             <FieldGuide kit={kit} />
@@ -217,8 +165,8 @@ function Sheet({ kit, printable, household }: { kit: KitConfig; printable: KitPr
   const familyName = household.displayName ?? 'Our family';
   const isActivity = printable.kind === 'activity';
   const isGuide = printable.component === 'Guide';
-  const steps = isActivity ? kit.mailer.activity.steps : printable.content?.items ?? [];
-  const activityIntro = printable.content?.intro ?? `About ${kit.mailer.activity.minutes} minutes, everyone together, with the family chart on the table.`;
+  const steps = isActivity ? kit.mailer.activity?.steps ?? [] : printable.content?.items ?? [];
+  const activityIntro = printable.content?.intro ?? `About ${kit.mailer.activity?.minutes ?? 20} minutes, everyone together, with the family chart on the table.`;
   return (
     <div>
       <div className="club-screen max-w-2xl">
@@ -256,7 +204,7 @@ function Sheet({ kit, printable, household }: { kit: KitConfig; printable: KitPr
         {isGuide ? (
           <GuideSheet doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} palette={palette} preview={preview} sections={kit.mailer.fieldGuide.sections} />
         ) : isActivity ? (
-          <MeetingCard doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} palette={palette} steps={steps} minutes={kit.mailer.activity.minutes} people={people} preview={preview}
+          <MeetingCard doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} palette={palette} steps={steps} minutes={kit.mailer.activity?.minutes ?? 20} people={people} preview={preview}
             {...(printable.content ? { intro: activityIntro, lineLabel: printable.content.lineLabel } : {})} />
         ) : (
           <ChecklistSheet doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} palette={palette} intro={printable.content?.intro ?? ''} items={steps} preview={preview} />
@@ -287,161 +235,190 @@ function FieldGuide({ kit }: { kit: KitConfig }) {
   );
 }
 
-/** A kit's front door: her family's situation, the school setup, and the few things to do first. */
-function Overview({ kit, household, setup, onSetup, setupStatus, readOnly, rows, itemMap, chip, choose }: {
+
+/**
+ * Three-part kits: the month's title, its one action, and one button to the optional tool. The letter reads on screen
+ * and prints front and back. The tool opens in place (#tool) and stays mounted, so unsaved edits survive going back.
+ */
+function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose }: {
   kit: KitConfig;
+  store: ClubStore;
   household: Household;
-  setup: SchoolSetup;
-  onSetup: (s: SchoolSetup) => void;
-  setupStatus: string;
+  docs: KitDocuments;
   readOnly: boolean;
-  rows: Record<string, ChartRow[]>;
-  itemMap: Map<string, KitItem>;
-  chip: (r: ChartRow) => string;
-  choose: (tab: string) => void;
+  top: ReactNode;
+  view: string;
+  choose: (id: string) => void;
 }) {
-  const o = kit.overview!;
-  const source = kit.printables.find((p) => p.items === o.from);
-  const plan = (source && rows[source.id]) ?? [];
-  const actions = topActions(plan, kitItems(kit, o.from) ?? [], o);
-  const people = planMembers(household, kit.month);
-  const names = new Map(household.members.map((m) => [m.id, m.firstName]));
-  const kids = people.filter((p) => p.stage !== 'adult');
-  const inSchoolKids = kids.filter((k) => inSchool(setup[k.id]));
-  const routinePrintable = kit.printables.find((p) => p.editor === 'routine');
-  const commandPrintable = kit.printables.find((p) => p.editor === 'command');
-  const routineKids = routinePrintable ? new Set((rows[routinePrintable.id] ?? []).map((r) => r.ownerId)).size : 0;
-  const commandRows = commandPrintable ? (rows[commandPrintable.id] ?? []).filter((r) => r.section !== 'commitment') : [];
-  const commandOwners = [...new Set(commandRows.filter((r) => !r.needsOwner).map((r) => names.get(r.ownerId ?? '')))].filter(Boolean);
-  const field = 'min-h-11 rounded-[4px] border border-warm-rule bg-white px-2.5 text-[0.95rem] text-warm-ink';
-  const missingDates = inSchoolKids.some((k) => !setup[k.id]?.start);
-  const [editing, setEditing] = useState(false);
+  const tool = kit.tool ? kit.printables.find((p) => p.id === kit.tool!.printable) : undefined;
+  const actionDoc = kit.printables.find((p) => p.component === 'Countdown');
+  const letterDoc = kit.printables.find((p) => p.component === 'Letter');
+  const [action, setAction] = useState<ActionState>(() => readAction(actionDoc && docs.documents[actionDoc.id]?.edits, kit.action!.items.length));
+  const [letterOpen, setLetterOpen] = useState(false);
+  const [letterPreview, setLetterPreview] = useState(false);
+  const showTool = Boolean(tool) && view === 'tool';
+  const kids = planMembers(household, kit.month).filter((p) => p.stage !== 'adult' && (p.age ?? 0) >= 3);
+  const open = (id: string) => {
+    choose(id);
+    window.scrollTo(0, 0);
+  };
 
   return (
-    <div className="club-screen max-w-3xl">
-      <p className="text-[1.08rem] leading-relaxed text-warm-ink">{o.intro}</p>
+    <>
+      {/* Screen-only parts carry .club-screen; each printout's frame sits outside them so it can print. */}
+      <div hidden={showTool} className="max-w-3xl">
+        <div className="club-screen">
+        {top}
+        <p className="label mt-6 text-warm-soft">{monthLabel(kit.month)}</p>
+        <h1 className="mt-2 font-serif text-[2.2rem] leading-[1.08] text-warm-ink sm:text-[2.8rem]">{kit.theme}</h1>
+        {kit.subtitle && <p className="mt-2 font-serif text-[1.25rem] italic text-rose-deep">{kit.subtitle}</p>}
+        {kit.mailer.letter && (
+          <button type="button" className="mt-4 min-h-11 text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterOpen} onClick={() => setLetterOpen(!letterOpen)}>
+            {letterOpen ? 'Close the letter' : 'Read this month’s letter'}
+          </button>
+        )}
+        {letterOpen && kit.mailer.letter && (
+          <article className="mt-3 bg-cream p-6 font-serif text-[1.05rem] leading-relaxed text-warm-ink ring-1 ring-warm-rule sm:p-8">
+            {kit.mailer.letter.greeting && <p className="italic">{kit.mailer.letter.greeting}</p>}
+            {kit.mailer.letter.body.split(/\n\n+/).map((p) => <p key={p} className="mt-3">{p}</p>)}
+            {kit.mailer.letter.signoff && <p className="mt-4 italic">Warmly, <span className="club-hand not-italic text-[1.5rem] text-warm-soft">{kit.mailer.letter.signoff}</span></p>}
+          </article>
+        )}
+        </div>
 
-      {inSchoolKids.length > 0 ? (
-        <section aria-labelledby="club-first" className="mt-6 bg-sage-wash p-5 sm:p-7">
-          <h2 id="club-first" className="font-serif text-[1.55rem] leading-tight text-warm-ink">Start with these {actions.length}</h2>
-          <p className="mt-1 text-[0.92rem] text-warm-soft">Already shared out. Everything else is in the full plan.</p>
-          <ol className="mt-4 space-y-3">
-            {actions.map((r) => (
-              <li key={r.rowId} className="grid grid-cols-[auto_1fr] gap-3 rounded-[6px] bg-white p-3.5 ring-1 ring-[#dfe6d8]">
-                <span className="mt-0.5 [&_.club-job-art]:h-9 [&_.club-job-art]:w-9 [&_img]:h-8 [&_img]:w-8"><JobArt illustration={r.illustration} /></span>
-                <span>
-                  <span className="block font-semibold leading-snug text-warm-ink">{r.title}</span>
-                  <span className="mt-0.5 block text-[0.88rem] text-warm-soft">
-                    <strong className="font-semibold text-warm-ink">{r.needsOwner ? 'Needs an owner' : names.get(r.ownerId ?? '')}</strong> · {chip(r)}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ol>
-          {source && (
-            <button type="button" className="btn-primary mt-6 w-full sm:w-auto" onClick={() => choose(source.id)}>
-              See the whole launch plan ({plan.length})
-            </button>
-          )}
-        </section>
-      ) : (
-        <p className="mt-8 border-l-[3px] border-sage bg-sage-wash px-4 py-3 text-warm-ink">Nobody’s starting school this year, so there’s nothing to prep. Change a child above if that’s not right.</p>
+        {actionDoc && (
+          <ActionChecklist kit={kit} doc={actionDoc} store={store} household={household} saved={docs.documents[actionDoc.id]} readOnly={readOnly} state={action} onChange={setAction} />
+        )}
+
+        {tool && kit.tool && (
+          <section aria-labelledby="club-tool" className="club-screen mt-10 border-t border-warm-rule pt-8">
+            <div className="flex items-start gap-4">
+              <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage-wash font-serif text-[1.1rem] text-warm-ink ring-1 ring-sage">2</span>
+              <div>
+                <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
+                <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
+                {kids.length > 0 && <p className="mt-2 text-[0.92rem] text-warm-soft">Ready for {kids.map((k) => k.firstName).join(', ')}. Optional: the countdown works without it.</p>}
+                <button type="button" className="btn-primary mt-5 w-full sm:w-auto" onClick={() => open('tool')}>{kit.tool.cta}</button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {letterDoc && (
+          <section aria-labelledby="club-letter" className="club-screen mt-12 border-t border-warm-rule pt-6">
+            <h2 id="club-letter" className="label text-warm-soft">Your printed letter</h2>
+            <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-warm-soft">It comes in the mail, front and back. Lost it, or want one for the fridge? Print another.</p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+              {clubNav().canPrint ? (
+                <button type="button" className="btn-secondary" onClick={() => printDocument(letterDoc.id, 'portrait')}>Print the letter</button>
+              ) : (
+                <PreviewOnlyNote />
+              )}
+              <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterPreview} onClick={() => setLetterPreview(!letterPreview)}>
+                {letterPreview ? 'Hide the letter' : 'See the letter, front and back'}
+              </button>
+            </div>
+          </section>
+        )}
+      </div>
+      {letterDoc && (
+        <div hidden={showTool}>
+          <PrintFrame open={letterPreview} orientation="portrait">
+            <LetterSheets doc={letterDoc.id} kit={kit} preview={letterPreview} helpers={action.helpers} done={action.done} />
+          </PrintFrame>
+        </div>
       )}
 
-      <section aria-labelledby="club-setup" className="mt-9">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="club-setup" className="label text-warm-soft">Who’s starting what</h2>
-          <span role="status" className="text-[0.82rem] text-warm-soft">
-            {setupStatus === 'saving' ? 'Saving…' : setupStatus === 'saved' ? 'Saved' : setupStatus === 'conflict' ? 'Changed on another device. Reload to see it.' : setupStatus === 'error' ? 'Couldn’t save. Check your connection.' : ''}
-          </span>
+      {tool && kit.tool && (
+        <div hidden={!showTool}>
+          <div className="club-screen">
+            <button type="button" className="min-h-11 text-[0.92rem] text-warm-soft underline underline-offset-4" onClick={() => open('')}>← Back to {kit.theme}</button>
+            <h2 className="mt-3 font-serif text-[2rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
+          </div>
+          <div className="mt-4">
+            <ChartEditor store={store} kit={kit} printable={tool} items={kitItems(kit, tool.items) ?? []} household={household} saved={docs.documents[tool.id]} readOnly={readOnly}
+              intro="Pick a child, then morning or after school. Change, reorder or add steps, then print the chart for where it happens." setup={schoolSetupFor(household, kit.month)} />
+          </div>
         </div>
-        {kids.length === 0 ? (
-          <p className="mt-3 text-warm-soft">No children on your family profile yet.</p>
-        ) : (
-          <>
-            <ul className="mt-2 divide-y divide-warm-rule border-y border-warm-rule">
-              {kids.map((k) => {
-                const c = setup[k.id];
-                return (
-                  <li key={k.id} className="py-3">
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                      <span className="font-semibold text-warm-ink">{k.firstName} <span className="font-normal text-warm-soft">· {k.age}</span></span>
-                      <span className="text-[0.9rem] text-warm-soft">
-                        {SCHOOL_LABEL[c?.type ?? 'none']}{inSchool(c) ? ` · ${c?.start ? `starts ${startLabel(c.start)}` : 'first day not set'}` : ''}
-                      </span>
-                    </div>
-                    {editing && !readOnly && (
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <select aria-label={`Where ${k.firstName} goes to school`} className={field} value={c?.type ?? 'none'}
-                          onChange={(e) => onSetup({ ...setup, [k.id]: { ...c, type: e.target.value as SchoolType } })}>
-                          {SCHOOL_TYPES.map((t) => <option key={t} value={t}>{SCHOOL_LABEL[t]}</option>)}
-                        </select>
-                        {inSchool(c) && (
-                          <label className="flex items-center gap-2 text-[0.88rem] text-warm-soft">
-                            First day
-                            <input type="date" className={field} value={c?.start ?? ''} min={`${kit.month.slice(0, 4)}-07-01`} max={`${kit.month.slice(0, 4)}-10-31`}
-                              onChange={(e) => onSetup({ ...setup, [k.id]: { ...c!, ...(e.target.value ? { start: e.target.value } : { start: undefined }) } })} />
-                          </label>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-            {!readOnly && (
-              <button type="button" className="mt-2 min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={editing} onClick={() => setEditing(!editing)}>
-                {editing ? 'Done' : missingDates ? 'Add first days and schools' : 'Change schools or first days'}
-              </button>
-            )}
-            <p className="text-[0.85rem] text-warm-soft">We guessed schools from ages. Every child can have their own school and first day; the plan follows.</p>
-          </>
-        )}
-      </section>
-
-      <section aria-label="More in this kit" className="mt-9 grid gap-4 sm:grid-cols-2">
-        {routinePrintable && (
-          <button type="button" onClick={() => choose(routinePrintable.id)} className="bg-white p-5 text-left ring-1 ring-warm-rule hover:ring-warm-ink">
-            <span className="label text-warm-soft">When you want more</span>
-            <span className="mt-2 block font-serif text-[1.3rem] text-warm-ink">Morning and after-school routines</span>
-            <span className="mt-1.5 block text-[0.92rem] text-warm-soft">{routineKids ? `${routineKids} ${routineKids === 1 ? 'chart' : 'charts'}, one per child, ready to print.` : 'One chart per child in school.'}</span>
-          </button>
-        )}
-        {commandPrintable && (
-          <button type="button" onClick={() => choose(commandPrintable.id)} className="bg-white p-5 text-left ring-1 ring-warm-rule hover:ring-warm-ink">
-            <span className="label text-warm-soft">For the whole year</span>
-            <span className="mt-2 block font-serif text-[1.3rem] text-warm-ink">School-year command center</span>
-            <span className="mt-1.5 block text-[0.92rem] text-warm-soft">Rides, school email, lunches and papers{commandOwners.length ? `, shared between ${commandOwners.join(', ')}` : ''}.</span>
-          </button>
-        )}
-      </section>
-    </div>
+      )}
+    </>
   );
 }
 
-/** The mailer's printable twins, plus where Megan's letter goes. */
-function InTheMail({ kit, printables, household }: { kit: KitConfig; printables: KitPrintable[]; household: Household }) {
+/** The month's action: check lines off, note who's helping, print it. Saves itself a moment after each change. */
+function ActionChecklist({ kit, doc, store, household, saved, readOnly, state, onChange }: {
+  kit: KitConfig;
+  doc: KitPrintable;
+  store: ClubStore;
+  household: Household;
+  saved?: KitDocuments['documents'][string];
+  readOnly: boolean;
+  state: ActionState;
+  onChange: (s: ActionState) => void;
+}) {
+  const action = kit.action!;
+  const palette = (household.preferences.palette as ToolPaletteId | undefined) ?? defaultToolPalette;
+  const [revision, setRevision] = useState(saved?.revision ?? 0);
+  const [status, setStatus] = useState<'idle' | 'pending' | 'saved' | 'conflict' | 'error'>('idle');
+  const [preview, setPreview] = useState(false);
+  const done = state.done.filter(Boolean).length;
+
+  const update = (next: ActionState) => {
+    onChange(next);
+    setStatus('pending');
+  };
+  useEffect(() => {
+    if (status !== 'pending') return;
+    const t = setTimeout(() => {
+      store
+        .saveDocument(kit.slug, doc.id, { edits: state, palette, engineVersion: kit.engineVersion, profileVersion: household.profileVersion }, revision)
+        .then((rev) => { setRevision(rev); setStatus('saved'); })
+        .catch((e) => setStatus(e instanceof ConflictError ? 'conflict' : 'error'));
+    }, 600);
+    return () => clearTimeout(t);
+  }, [state, status]);
+
   return (
-    <div>
-      <div className="club-screen max-w-2xl">
-        <p className="leading-relaxed text-warm-soft">Everything here also comes in your printed {monthLabel(kit.month).split(' ')[0]} mailer, with a QR code back to this kit. Print another copy any time.</p>
-        <section className="mt-6 bg-blush-wash p-6">
-          <p className="label text-warm-soft">A letter from Megan</p>
-          {kit.mailer.letter ? (
-            <>
-              <h2 className="mt-2 font-serif text-[1.5rem] text-warm-ink">{kit.mailer.letter.title}</h2>
-              <p className="mt-3 whitespace-pre-line leading-relaxed text-warm-ink">{kit.mailer.letter.body}</p>
-            </>
-          ) : (
-            <p className="mt-2 leading-relaxed text-warm-ink">Placeholder. Megan writes this letter herself; it opens the printed mailer.</p>
-          )}
-        </section>
-      </div>
-      {printables.map((p) => (
-        <div key={p.id} className="mt-12 border-t border-warm-rule pt-8">
-          <Sheet kit={kit} printable={p} household={household} />
+    <section aria-labelledby="club-action" className="mt-10">
+      <div className="club-screen">
+      <div className="flex items-start gap-4">
+        <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage-wash font-serif text-[1.1rem] text-warm-ink ring-1 ring-sage">1</span>
+        <div className="min-w-0 flex-1">
+          <h2 id="club-action" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{action.title.replace(/^Our /, 'Your ')}</h2>
+          <p className="mt-2 leading-relaxed text-warm-soft">{action.intro}</p>
         </div>
-      ))}
-    </div>
+      </div>
+      <ol className="mt-5 divide-y divide-[#dfe6d8] bg-sage-wash px-4 sm:px-6">
+        {action.items.map((t, i) => (
+          <li key={t} className="py-3.5">
+            <label className="flex min-h-11 cursor-pointer items-start gap-3.5">
+              <input type="checkbox" className="mt-0.5 h-6 w-6 shrink-0 accent-[#7f9274]" checked={state.done[i]} disabled={readOnly}
+                onChange={(e) => update({ ...state, done: state.done.map((d, n) => (n === i ? e.target.checked : d)) })} />
+              <span className={`text-[1.02rem] leading-snug text-warm-ink ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{t}</span>
+            </label>
+            {action.helperLabel && (
+              <input type="text" aria-label={`${action.helperLabel} ${t}`} placeholder={action.helperLabel} maxLength={MAX_HELPER} disabled={readOnly}
+                className="ml-[2.4rem] mt-1 block min-h-10 w-[calc(100%-2.4rem)] max-w-xs border-0 border-b border-[#c9d3c0] bg-transparent px-0 text-[0.95rem] text-warm-ink placeholder:text-warm-soft focus:border-warm-ink focus:outline-none"
+                value={state.helpers[i]} onChange={(e) => update({ ...state, helpers: state.helpers.map((h, n) => (n === i ? e.target.value : h)) })} />
+            )}
+          </li>
+        ))}
+      </ol>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        <p role="status" className="text-[0.88rem] text-warm-soft">
+          {status === 'pending' ? 'Saving…' : status === 'conflict' ? 'Changed on another device. Reload to see it.' : status === 'error' ? 'Couldn’t save. Check your connection.' : `${done} of ${action.items.length} done`}
+        </p>
+        <div className="flex flex-wrap items-center gap-x-6">
+          {clubNav().canPrint && <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => printDocument(doc.id, 'portrait')}>Print it</button>}
+          <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={preview} onClick={() => setPreview(!preview)}>
+            {preview ? 'Hide the preview' : 'Preview the printout'}
+          </button>
+        </div>
+      </div>
+      </div>
+      <PrintFrame open={preview} orientation="portrait">
+        <ActionSheet doc={doc.id} kit={kit} palette={palette} preview={preview} helpers={state.helpers} done={state.done} />
+      </PrintFrame>
+    </section>
   );
 }

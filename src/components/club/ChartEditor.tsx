@@ -1,12 +1,12 @@
 /**
- * One engine-filled printable in a kit (November's family chart and team reset; August's launch plan, routines and
- * command center): opens already filled in for her family,
+ * One engine-filled printable in a kit (November's family chart and team reset; August's routine charts): opens
+ * already filled in for her family,
  * then every job can be reassigned, reworded, re-timed, swapped, removed or added, and the engine's suggestions
  * (a new child's jobs, an owner for an open job, an optional workload move) are accepted or dismissed. Saved
  * explicitly; prints on US Letter. All the rules live in src/lib/club/edits.ts; this file is the screen.
  *
- * `printable.editor` picks the layout: 'chart' (people and their jobs), 'routine' (each child's morning and
- * after-school steps, in order, reorderable), 'command' (who owns each school job, plus the family's own recurring
+ * `printable.editor` picks the layout: 'chart' (people and their jobs), 'routine' (pick a child and morning or after
+ * school: four to six suggested steps, reorderable, one chart per print), 'command' (who owns each school job, plus the family's own recurring
  * commitments). The printout follows `printable.component`.
  */
 import { useEffect, useMemo, useState } from 'react';
@@ -18,10 +18,11 @@ import {
   acceptSuggestion, addRow, assign, dismissSuggestion, EditError, initialEdits, readEdits, remove, rename, replace, resolveDocument,
   restore, setCoach, setDoneMeans, setFrequency, setLevel, suggestionId, type ChartRow, type DocumentEdits, type Suggestion,
 } from '../../lib/club/edits';
-import { eligible, type GenerateOptions } from '../../lib/club/engines/responsibilities';
+import { eligible, ROUTINE_MAX_STEPS, type GenerateOptions } from '../../lib/club/engines/responsibilities';
 import { move } from '../../lib/club/edits';
 import type { SchoolSetup } from '../../lib/club/school';
-import { RoutineSheets, CommandCenterSheet } from './print/SchoolPrintables';
+import { CommandCenterSheet } from './print/SchoolPrintables';
+import { RoutineChartSheet } from './print/LetterPrintables';
 import { printDocument } from '../../lib/club/print';
 import { planMembers, type Household, type PlannedMember } from '../../lib/club/profile';
 import { ConflictError, type ClubStore, type SavedDocument } from '../../lib/club/store';
@@ -44,7 +45,7 @@ interface Props {
   chip?: (r: ChartRow) => string;
   /** Live rows, for the kit's overview. */
   onRows?: (rows: ChartRow[]) => void;
-  /** The kit's school setup, when it has one (routine pages say "After lessons" for homeschoolers). */
+  /** Each child's school, when the kit has one (a homeschooler's chart says "After lessons"). */
   setup?: SchoolSetup;
 }
 
@@ -60,12 +61,13 @@ export const roleLabel = (p: PlannedMember, household: Household) => {
 
 /** How the engine places rows for each editor: routines and the launch checklist list every step that fits a child. */
 export function placementFor(printable: KitPrintable): GenerateOptions {
-  if (printable.editor === 'routine') return { personal: 'all', balance: false };
+  if (printable.editor === 'routine') return { personal: 'all', balance: false, perSection: ROUTINE_MAX_STEPS };
   if (printable.component === 'LaunchChecklist') return { personal: 'all' };
   return {};
 }
 
-const SAVE_LABEL = { chart: 'Save our chart', routine: 'Save routines', command: 'Save command center' } as const;
+const SAVE_LABEL = { chart: 'Save our chart', routine: 'Save routine charts', command: 'Save command center' } as const;
+type Part = 'morning' | 'after-school';
 
 export default function ChartEditor({ store, kit, printable, items, household, saved, readOnly, intro, chip, onRows, setup }: Props) {
   const variant = printable.editor ?? 'chart';
@@ -80,6 +82,8 @@ export default function ChartEditor({ store, kit, printable, items, household, s
   const [notice, setNotice] = useState('');
   const [preview, setPreview] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
+  const [child, setChild] = useState<string | null>(null);
+  const [part, setPart] = useState<Part>('morning');
 
   const people = useMemo(() => planMembers(household, kit.month), [household, kit.month]);
   const names = useMemo(() => new Map(household.members.map((m) => [m.id, m.firstName])), [household]);
@@ -141,6 +145,11 @@ export default function ChartEditor({ store, kit, printable, items, household, s
   const openRows = jobRows.filter((r) => r.needsOwner);
   const chipText = chip ?? ((r: ChartRow) => FREQUENCY_LABEL[r.frequency]);
   const rowProps = { prefix: printable.id, people, names, items, readOnly, household, act, chipText, variant };
+  // Routines: children with a chart, and the one being made (the first, until she picks).
+  const routineKids = people.filter((p) => p.stage !== 'adult' && items.some((i) => i.scope === 'each' && eligible(i, p, household.preferences)));
+  const kid = routineKids.find((p) => p.id === child) ?? routineKids[0];
+  const partLabel = (x: Part) => (x === 'morning' ? 'Morning' : kid && setup?.[kid.id]?.type === 'homeschool' ? 'After lessons' : 'After school');
+  const chartRows = kid ? resolved.rows.filter((r) => r.ownerId === kid.id && !r.needsOwner && r.section === part) : [];
 
   return (
     <div>
@@ -163,9 +172,11 @@ export default function ChartEditor({ store, kit, printable, items, household, s
         )}
 
         <div className="mt-8 space-y-10">
-          {variant === 'routine' && people.filter((p) => p.stage !== 'adult').map((p) => (
-            <RoutineEditor key={p.id} person={p} rows={resolved.rows.filter((r) => r.ownerId === p.id && !r.needsOwner)} allRows={resolved.rows} items={items}
-              open={open} setOpen={setOpen} rowProps={rowProps} household={household} homeschool={setup?.[p.id]?.type === 'homeschool'} />
+          {variant === 'routine' && (kid ? (
+            <RoutineEditor person={kid} kids={routineKids} onChild={(id) => { setChild(id); setOpen(null); }} part={part} onPart={(x) => { setPart(x); setOpen(null); }}
+              partLabel={partLabel} rows={chartRows} allRows={resolved.rows} items={items} open={open} setOpen={setOpen} rowProps={rowProps} household={household} />
+          ) : (
+            <p className="border-l-[3px] border-sage bg-sage-wash px-4 py-3 text-warm-ink">Routine charts start around age three. Add a child on your family page, and theirs will be here.</p>
           ))}
           {variant !== 'routine' && people.map((p) => {
             const mine = jobRows.filter((r) => !r.needsOwner && r.ownerId === p.id);
@@ -208,11 +219,11 @@ export default function ChartEditor({ store, kit, printable, items, household, s
 
           {resolved.hidden.length > 0 && (
             <details className="border-t border-warm-rule pt-4">
-              <summary className="cursor-pointer text-[0.95rem] font-semibold text-warm-ink">Removed jobs ({resolved.hidden.length})</summary>
+              <summary className="cursor-pointer text-[0.95rem] font-semibold text-warm-ink">{variant === 'routine' ? 'Removed steps' : 'Removed jobs'} ({resolved.hidden.length})</summary>
               <ul className="mt-2 divide-y divide-warm-rule">
                 {resolved.hidden.map((r) => (
                   <li key={r.rowId} className="flex items-center justify-between gap-3 py-2.5">
-                    <span className="text-warm-soft line-through decoration-warm-rule">{r.title}</span>
+                    <span className="text-warm-soft line-through decoration-warm-rule">{r.title}{variant === 'routine' && r.ownerId ? ` · ${names.get(r.ownerId) ?? ''}` : ''}</span>
                     {!readOnly && <button type="button" className="min-h-11 text-[0.9rem] font-semibold underline underline-offset-4" onClick={() => act((e) => restore(e, r.rowId))}>Put back</button>}
                   </li>
                 ))}
@@ -228,8 +239,8 @@ export default function ChartEditor({ store, kit, printable, items, household, s
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
             {clubNav().canPrint ? (
-              <button type="button" className="btn-primary w-full sm:w-auto" onClick={() => printDocument(printable.id, orientation)}>
-                Print or save as PDF
+              <button type="button" className="btn-primary w-full sm:w-auto" disabled={variant === 'routine' && !chartRows.length} onClick={() => printDocument(printable.id, orientation)}>
+                {variant === 'routine' ? `Print ${kid?.firstName ?? ''}’s ${partLabel(part).toLowerCase()} chart` : 'Print or save as PDF'}
               </button>
             ) : (
               <PreviewOnlyNote />
@@ -247,9 +258,8 @@ export default function ChartEditor({ store, kit, printable, items, household, s
         {printable.component === 'ResetChecklist' ? (
           <OwnedChecklist doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} palette={palette} rows={resolved.rows} names={names}
             intro="This month’s team reset. Each job has one owner; tick it off when it’s done." preview={preview} />
-        ) : printable.component === 'RoutineCards' ? (
-          <RoutineSheets doc={printable.id} familyName={familyName} month={kit.month} palette={palette} preview={preview} rows={resolved.rows} setup={setup ?? {}}
-            kids={people.filter((p) => p.stage !== 'adult')} />
+        ) : printable.component === 'RoutineChart' ? (
+          <RoutineChartSheet doc={printable.id} name={kid?.firstName ?? ''} label={partLabel(part)} rows={chartRows} palette={palette} preview={preview} />
         ) : printable.component === 'CommandCenter' ? (
           <CommandCenterSheet doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} palette={palette} preview={preview} rows={resolved.rows} names={names}
             checklist={printable.content?.items ?? []} intro={printable.content?.intro ?? ''} />
@@ -369,14 +379,14 @@ function Row({ prefix, row, people, names, items, unused, open, readOnly, househ
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-semibold leading-snug text-warm-ink">{row.title}</p>
-          <p className="mt-0.5 text-[0.86rem] text-warm-soft">
+          <p className="mt-0.5 text-[0.86rem] text-warm-soft empty:hidden">
             {variant === 'routine' ? '' : chipText(row)}
             {variant !== 'routine' && owner && owner.stage !== 'adult' && row.level ? ` · ${LEVEL_LABEL[row.level]}` : ''}
             {coach ? ` · ${coach}` : ''}
             {wasOwner ? ` · was ${wasOwner}’s` : ''}
             {row.belowSuggestedAge && item?.minAge ? ` · suggested from age ${item.minAge}` : ''}
           </p>
-          {row.doneMeans && <p className="mt-0.5 text-[0.86rem] italic text-warm-soft">Done means: {row.doneMeans}</p>}
+          {row.doneMeans && variant !== 'routine' && <p className="mt-0.5 text-[0.86rem] italic text-warm-soft">Done means: {row.doneMeans}</p>}
         </div>
         {!readOnly && onMove && (
           <span className="flex shrink-0">
@@ -486,17 +496,19 @@ function AddJob({ person, household, unused, act, section, label = `+ Add a job 
     return <button type="button" className="mt-2 min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => setOpen(true)}>{label}</button>;
   }
   return (
-    <div className="mt-3 grid gap-3 rounded-[6px] bg-white p-4 ring-1 ring-warm-rule sm:grid-cols-[1fr_11rem_auto] sm:items-end">
+    <div className={`mt-3 grid gap-3 rounded-[6px] bg-white p-4 ring-1 ring-warm-rule sm:items-end ${section ? 'sm:grid-cols-[1fr_auto]' : 'sm:grid-cols-[1fr_11rem_auto]'}`}>
       <label>
         <span className="text-[0.85rem] text-warm-soft">A {noun} for {person.firstName}</span>
         <input className={`${field} mt-1`} value={title} maxLength={80} placeholder={section ? 'Feed the fish' : 'Walk the dog after school'} onChange={(e) => setTitle(e.target.value)} />
       </label>
-      <label>
-        <span className="text-[0.85rem] text-warm-soft">How often</span>
-        <select className={`${field} mt-1`} value={frequency} onChange={(e) => setFreq(e.target.value as Frequency)}>
-          {FREQUENCIES.map((f) => <option key={f} value={f}>{FREQUENCY_LABEL[f]}</option>)}
-        </select>
-      </label>
+      {!section && (
+        <label>
+          <span className="text-[0.85rem] text-warm-soft">How often</span>
+          <select className={`${field} mt-1`} value={frequency} onChange={(e) => setFreq(e.target.value as Frequency)}>
+            {FREQUENCIES.map((f) => <option key={f} value={f}>{FREQUENCY_LABEL[f]}</option>)}
+          </select>
+        </label>
+      )}
       <button type="button" className="btn-secondary" disabled={!title.trim()} onClick={() => add()}>{noun === 'job' ? 'Add job' : `Add ${noun}`}</button>
       {unused.length > 0 && (
         <label className="sm:col-span-3">
@@ -507,7 +519,7 @@ function AddJob({ person, household, unused, act, section, label = `+ Add a job 
           </select>
         </label>
       )}
-      <button type="button" className="justify-self-start text-[0.88rem] text-warm-soft underline underline-offset-4 sm:col-span-3" onClick={() => setOpen(false)}>Cancel</button>
+      <button type="button" className={`justify-self-start text-[0.88rem] text-warm-soft underline underline-offset-4 ${section ? 'sm:col-span-2' : 'sm:col-span-3'}`} onClick={() => setOpen(false)}>Cancel</button>
     </div>
   );
 }
@@ -521,9 +533,14 @@ export function PreviewOnlyNote() {
   );
 }
 
-/** Routines: one child's morning and after-school steps, in order. */
-function RoutineEditor({ person, rows, allRows, items, open, setOpen, rowProps, household, homeschool }: {
+/** Routines: pick a child and morning or after school, then change, reorder or add steps. */
+function RoutineEditor({ person, kids, onChild, part, onPart, partLabel, rows, allRows, items, open, setOpen, rowProps, household }: {
   person: PlannedMember;
+  kids: PlannedMember[];
+  onChild: (id: string) => void;
+  part: Part;
+  onPart: (p: Part) => void;
+  partLabel: (p: Part) => string;
   rows: ChartRow[];
   allRows: ChartRow[];
   items: KitItem[];
@@ -531,44 +548,58 @@ function RoutineEditor({ person, rows, allRows, items, open, setOpen, rowProps, 
   setOpen: (id: string | null) => void;
   rowProps: RowShared;
   household: Household;
-  homeschool: boolean;
 }) {
   const { act } = rowProps;
-  const mine = new Set(rows.map((r) => r.itemId));
-  const parts: { section: 'morning' | 'after-school'; label: string }[] = [
-    { section: 'morning', label: 'Morning' },
-    { section: 'after-school', label: homeschool ? 'After lessons' : 'After school' },
-  ];
-  if (!rows.length) return null;
+  const onChart = new Set(allRows.filter((r) => r.ownerId === person.id).map((r) => r.itemId));
+  const ideas = items.filter((i) => i.scope === 'each' && i.section === part && !onChart.has(i.id) && eligible(i, person, household.preferences));
+  // Moving within this routine: swap places with the neighbour in the whole saved order.
+  const moveRow = (r: ChartRow, dir: -1 | 1) => {
+    const neighbour = rows[rows.indexOf(r) + dir];
+    if (!neighbour) return;
+    const order = allRows.map((x) => x.rowId);
+    act((e) => move(e, order, r.rowId, order.indexOf(neighbour.rowId)));
+  };
+  const tab = 'min-h-11 border-b-2 border-transparent pb-1 text-[1rem] font-semibold text-warm-soft aria-[pressed=true]:border-warm-ink aria-[pressed=true]:text-warm-ink';
   return (
-    <section aria-labelledby={`who-${rowProps.prefix}-${person.id}`}>
-      <div className="flex items-baseline justify-between gap-3 border-b border-warm-rule pb-2">
-        <h3 id={`who-${rowProps.prefix}-${person.id}`} className="font-serif text-[1.5rem] text-warm-ink">{person.firstName}</h3>
-        <span className="text-[0.85rem] text-warm-soft">Age {person.age} · {rows.length} steps</span>
+    <section aria-labelledby={`${rowProps.prefix}-routine`}>
+      {kids.length > 1 && (
+        <div role="group" aria-label="Whose routine" className="flex flex-wrap gap-x-6 gap-y-1">
+          {kids.map((k) => (
+            <button key={k.id} type="button" aria-pressed={k.id === person.id} className={tab} onClick={() => onChild(k.id)}>
+              {k.firstName} <span className="font-normal text-warm-soft">{k.age}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <div role="group" aria-label="Which routine" className="mt-3 flex gap-x-6 border-b border-warm-rule">
+        {(['morning', 'after-school'] as const).map((x) => (
+          <button key={x} type="button" aria-pressed={x === part} className={tab} onClick={() => onPart(x)}>{partLabel(x)}</button>
+        ))}
       </div>
-      {parts.map(({ section, label }) => {
-        const list = rows.filter((r) => r.section === section);
-        // Moving within this part: swap places with the neighbour in the whole visible order.
-        const moveRow = (r: ChartRow, dir: -1 | 1) => {
-          const i = list.indexOf(r);
-          const neighbour = list[i + dir];
-          if (!neighbour) return;
-          const order = allRows.map((x) => x.rowId);
-          act((e) => move(e, order, r.rowId, order.indexOf(neighbour.rowId)));
-        };
-        const unused = items.filter((i) => i.scope === 'each' && i.section === section && !mine.has(i.id) && eligible(i, person, household.preferences));
-        return (
-          <div key={section} className="mt-4">
-            <h4 className="label text-warm-soft">{label}</h4>
-            <ul className="divide-y divide-warm-rule">
-              {list.map((r) => (
-                <Row key={r.rowId} {...rowProps} row={r} unused={[]} open={open === r.rowId} onToggle={() => setOpen(open === r.rowId ? null : r.rowId)} onMove={(d) => moveRow(r, d)} />
-              ))}
-            </ul>
-            {!rowProps.readOnly && <AddJob person={person} household={household} unused={unused} act={act} section={section} noun="step" label={`+ Add a ${label.toLowerCase()} step for ${person.firstName}`} />}
-          </div>
-        );
-      })}
+      <h3 id={`${rowProps.prefix}-routine`} className="mt-6 font-serif text-[1.5rem] text-warm-ink">
+        {person.firstName}’s {partLabel(part).toLowerCase()}
+        <span className="ml-2 align-middle text-[0.85rem] font-normal text-warm-soft">{rows.length} {rows.length === 1 ? 'step' : 'steps'}</span>
+      </h3>
+      <ul className="divide-y divide-warm-rule">
+        {rows.map((r) => (
+          <Row key={r.rowId} {...rowProps} row={r} unused={[]} open={open === r.rowId} onToggle={() => setOpen(open === r.rowId ? null : r.rowId)} onMove={(d) => moveRow(r, d)} />
+        ))}
+      </ul>
+      {!rows.length && <p className="py-3 text-warm-soft">No steps yet. Add one below.</p>}
+      {!rowProps.readOnly && ideas.length > 0 && (
+        <p className="mt-3 text-[0.92rem] leading-relaxed text-warm-soft">
+          More for age {person.age}:{' '}
+          {ideas.map((i, n) => (
+            <span key={i.id}>
+              {n > 0 && ' · '}
+              <button type="button" className="min-h-11 font-semibold text-warm-ink underline underline-offset-4" onClick={() => act((e) => addRow(e, household, { title: i.title, item: i, ownerId: person.id }))}>
+                + {i.title}
+              </button>
+            </span>
+          ))}
+        </p>
+      )}
+      {!rowProps.readOnly && <AddJob person={person} household={household} unused={[]} act={act} section={part} noun="step" label={`+ Write your own step`} />}
     </section>
   );
 }

@@ -96,8 +96,8 @@ export interface KitPrintable {
   /** For engine-filled printables: which item set to run ('items', 'reset', or a key of the kit's `itemSets`). */
   items?: string;
   /**
-   * How the editor works: 'chart' (owners, the default), 'routine' (each child's ordered steps, nothing balanced,
-   * no coaches), 'command' (shared owners plus the family's recurring commitments).
+   * How the editor works: 'chart' (owners, the default), 'routine' (one child's morning or after-school steps at a
+   * time, ordered, nothing balanced, no coaches), 'command' (shared owners plus the family's recurring commitments).
    */
   editor?: 'chart' | 'routine' | 'command';
   /** Tab name in the kit (defaults from the kind). */
@@ -135,8 +135,21 @@ export interface KitConfig {
   reset?: { month: number; title: string; items: KitItem[] };
   /** More engine-filled printables' rules, by key (KitPrintable.items). */
   itemSets?: Record<string, KitItem[]>;
-  /** Kits that need to know where each child goes to school and when it starts. */
+  /**
+   * Kits that need to know where each child goes to school. Today it's guessed from age and the family's
+   * homeschool preference (src/lib/club/school.ts), with no setup step.
+   */
   setup?: 'school';
+  /** The line under the theme, on screen and on the letter ("One calmer start. Everyone has a part."). */
+  subtitle?: string;
+  /**
+   * The month's one action (three-part kits: the letter, the action, the tool): a short checklist the family does
+   * together, printed on the front of the letter and checkable on screen. Never per-person assignments; each line has
+   * an optional `helperLabel` blank instead.
+   */
+  action?: { title: string; intro: string; items: string[]; helperLabel?: string };
+  /** The month's one optional tool: the printable (with an editor) it opens, and the invitation to it. */
+  tool?: { printable: string; title: string; blurb: string; cta: string };
   /**
    * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
    * `priority` in `from`), then the detail one tap away.
@@ -144,10 +157,20 @@ export interface KitConfig {
   overview?: { from: string; intro: string; minActions: number; maxActions: number };
   printables: KitPrintable[];
   mailer: {
-    /** Megan's letter, in her words. null until she's written it; a kit can't be scheduled without it. */
-    letter: { title: string; body: string } | null;
+    /**
+     * Megan's letter, in her words. null until written; `draft` until she's approved it. A kit can't be scheduled
+     * with either.
+     */
+    letter: { title: string; greeting?: string; body: string; signoff?: string; draft?: true } | null;
+    /** Three-part kits: the guidance on the back of the letter. */
     fieldGuide: { title: string; sections: { heading: string; body: string }[] };
-    activity: { title: string; minutes: number; steps: string[] };
+    /** A family activity (November's team meeting). Three-part kits use `action` instead. */
+    activity?: { title: string; minutes: number; steps: string[] };
+    /** Three-part kits: a worked example on the back of the letter, generated from the tool's own rules. */
+    example?: { title: string; age: number; section: ChartSection; items: string };
+    /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */
+    invite?: { title: string; body: string };
+    calendarNote?: string;
     /** '/club/kits/<slug>?source=mailer' */
     qrPath: string;
   };

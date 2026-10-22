@@ -1,15 +1,11 @@
 /**
- * August's printables beyond the launch checklist (which is ResponsibilityChart in portrait): a routine page per child,
- * the School-Year Command Center, and the one-page back-to-school guide. Same print system as November: US Letter,
- * the tool palettes, Kalam headings, the card illustrations. Styles: src/styles/club.css.
+ * School-year printables from August's first draft, kept for the item sets in src/data/club/libraries/school-year.ts:
+ * the School-Year Command Center and a one-page guide. Same print system as November: US Letter, the tool palettes,
+ * Kalam headings, the card illustrations. Styles: src/styles/club.css.
  */
 import { FREQUENCY_LABEL, monthLabel } from '../../../data/club/labels';
 import { toolPalettes, type ToolPaletteId } from '../../../data/tool-palettes';
 import type { ChartRow } from '../../../lib/club/edits';
-import type { SchoolSetup } from '../../../lib/club/school';
-import { JobArt } from './ResponsibilityChart';
-
-const DAYS = ['M', 'T', 'W', 'T', 'F'];
 
 interface Base {
   doc: string;
@@ -17,53 +13,6 @@ interface Base {
   month: string;
   palette: ToolPaletteId;
   preview?: boolean;
-}
-
-/** One portrait page per child: their morning and after-school steps, with a tick box per school day. */
-export function RoutineSheets({ doc, familyName, month, palette, preview, kids, rows, setup }: Base & {
-  kids: { id: string; firstName: string }[];
-  rows: ChartRow[];
-  setup: SchoolSetup;
-}) {
-  const [swipe, , chip] = toolPalettes[palette].colors;
-  const pages = kids.map((c) => ({ child: c, rows: rows.filter((r) => r.ownerId === c.id) })).filter((p) => p.rows.length);
-  return (
-    <div className="club-print club-routines" data-doc={doc} data-preview={preview ? '' : undefined}>
-      {pages.map(({ child, rows: mine }) => {
-        const home = setup[child.id]?.type === 'homeschool';
-        const part = (section: 'morning' | 'after-school', label: string) => {
-          const list = mine.filter((r) => r.section === section);
-          if (!list.length) return null;
-          return (
-            <section className="club-routine-part">
-              <div className="club-routine-part-head">
-                <span className="club-hand club-routine-label"><span className="club-swipe" style={{ ['--swipe' as string]: chip }}>{label}</span></span>
-                <span className="club-routine-days">{DAYS.map((d, i) => <span key={i}>{d}</span>)}</span>
-              </div>
-              {list.map((r) => (
-                <div key={r.rowId} className="club-routine-step">
-                  <JobArt illustration={r.illustration} />
-                  <span className="club-routine-title">{r.title}</span>
-                  <span className="club-routine-boxes">{DAYS.map((_, i) => <span key={i} className="club-box" />)}</span>
-                </div>
-              ))}
-            </section>
-          );
-        };
-        return (
-          <div key={child.id} className="club-sheet club-routine-page">
-            <div className="club-hand club-sheet-title">
-              <span className="club-swipe" style={{ ['--swipe' as string]: swipe }}>{child.firstName}’s School Days</span>
-            </div>
-            <div className="club-sheet-sub">{familyName} · {monthLabel(month)}</div>
-            {part('morning', 'Morning')}
-            {part('after-school', home ? 'After lessons' : 'After school')}
-            <div className="club-sheet-foot">My routine. I check it, not a grown-up.</div>
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 /** The School-Year Command Center: who owns each school job, the family's weekly commitments, Sunday planning. */

@@ -16,7 +16,7 @@
  * - With one adult, children's ownership levels move up a year (never their eligibility).
  * - Children get their own room and self-care jobs ("each" items) on top, not counted against family load.
  */
-import type { Frequency, KitItem, OwnershipLevel } from '../../../data/club/types';
+import type { ChartSection, Frequency, KitItem, OwnershipLevel } from '../../../data/club/types';
 import { stableHash } from '../hash';
 import { planMembers, type Household, type HouseholdPreferences, type PlannedMember } from '../profile';
 
@@ -115,13 +115,39 @@ export const householdHasSchool = (item: KitItem, people: readonly PlannedMember
 /**
  * How personal ("each") items are placed:
  * - 'limit' (charts): a few per child, alternating their space and taking care of themselves (personalLimit).
- * - 'all' (routines): every step that fits the child, in the kit's order, which is the routine's order.
+ * - 'all' (routines): every step that fits the child (up to `perSection`), in the kit's order, which is the routine's order.
  * Routines also skip coaches (a routine chart is the child's own, not a job someone checks).
  */
 export interface GenerateOptions {
   personal?: 'limit' | 'all';
   /** false: no workload balance suggestions (routines: nothing to balance). */
   balance?: boolean;
+  /**
+   * Routines: at most this many steps per child in each section, the lowest `priority` first, shown in the kit's
+   * order. The rest stay one tap away as suggestions.
+   */
+  perSection?: number;
+}
+
+/** Steps on a routine chart by default: enough to matter, few enough for a child to run it alone. */
+export const ROUTINE_MAX_STEPS = 6;
+
+/**
+ * A routine from the steps that fit a child: with a `cap`, at most that many per section (fewer by what `used` says
+ * is already there), the lowest `priority` first; always returned in the kit's order, which is the routine's order.
+ */
+export function routineSteps(fits: readonly KitItem[], cap?: number, used: (section: ChartSection) => number = () => 0): KitItem[] {
+  if (cap === undefined) return [...fits];
+  const order = new Map(fits.map((i, n) => [i, n]));
+  const chosen = new Set(
+    [...new Set(fits.map((i) => i.section))].flatMap((section) =>
+      fits
+        .filter((i) => i.section === section)
+        .sort((a, b) => (a.priority ?? Infinity) - (b.priority ?? Infinity) || order.get(a)! - order.get(b)!)
+        .slice(0, Math.max(0, cap - used(section))),
+    ),
+  );
+  return fits.filter((i) => chosen.has(i));
 }
 
 /** The ownership level for this person. Adults always own; `boost` moves children up (one-adult homes). */
@@ -199,9 +225,12 @@ export function generateOwnership(
   for (const p of people) {
     if (p.stage === 'adult') continue;
     if (routine) {
-      for (const item of items) {
+      const fits = items.filter((i) => i.scope === 'each' && eligible(i, p, prefs) && !taken.has(`${i.id}~${p.id}`));
+      const used = (section: ChartSection) => rows.filter((r) => r.ownerId === p.id && r.section === section).length;
+      const chosen = new Set(routineSteps(fits, options.perSection, used));
+      for (const item of fits) {
+        if (!chosen.has(item)) continue;
         const rowId = `${item.id}~${p.id}`;
-        if (item.scope !== 'each' || !eligible(item, p, prefs) || taken.has(rowId)) continue;
         rows.push(row(item, rowId, p, false));
         taken.add(rowId);
       }

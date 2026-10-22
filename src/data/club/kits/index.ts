@@ -86,8 +86,20 @@ export function kitProblems(kit: KitConfig): string[] {
   if (kit.printables.filter((p) => p.kind === 'flagship').length !== 1) out.push('exactly one flagship printable');
   if (kit.printables.some((p) => p.id === 'school-setup' || p.id === 'field-guide' || p.id === 'overview' || p.id === 'in-the-mail')) out.push('printable ids school-setup, field-guide, overview and in-the-mail are reserved');
   if (kit.mailer.qrPath !== `/club/kits/${kit.slug}?source=mailer`) out.push('qrPath must point at this kit');
+  // Three-part kits: one short action, one optional tool, and the letter's back page.
+  if (kit.action) {
+    if (kit.action.items.length < 3 || kit.action.items.length > 8) out.push('action: 3–8 lines (one small action, not a project)');
+    if (kit.action.items.some((t) => !t.trim() || t.length > 90)) out.push('action: each line 1–90 characters');
+    if (!kit.mailer.invite || !kit.mailer.calendarNote) out.push('action: the letter needs its invite and calendar note');
+  }
+  if (kit.tool) {
+    const p = kit.printables.find((x) => x.id === kit.tool!.printable);
+    if (!p?.editor) out.push(`tool: ${kit.tool.printable} isn't a printable with an editor`);
+  }
+  if (kit.mailer.example && !kitItems(kit, kit.mailer.example.items)) out.push(`example: no item set ${kit.mailer.example.items}`);
+  if (!kit.action && !kit.mailer.activity) out.push('a kit needs an action or an activity');
   return out;
 }
 
-/** Scheduling also needs Megan's letter: a kit never goes out with a stand-in. */
-export const schedulable = (kit: KitConfig) => kitProblems(kit).length === 0 && kit.mailer.letter !== null;
+/** Scheduling also needs Megan's letter, approved: a kit never goes out with a stand-in or a draft. */
+export const schedulable = (kit: KitConfig) => kitProblems(kit).length === 0 && kit.mailer.letter !== null && !kit.mailer.letter.draft;
