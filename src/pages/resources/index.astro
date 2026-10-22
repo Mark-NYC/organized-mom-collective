@@ -15,6 +15,7 @@ import { freeTools } from '../../data/free-tools';
 import { inspirationGalleries } from '../../data/inspiration-galleries';
 import { toyStorageGallery } from '../../data/toy-storage-gallery';
 import { cozyLivingRoomGallery } from '../../data/cozy-living-room-gallery';
+import { closetOrganizationGallery } from '../../data/closet-organization-gallery';
 import { BRAND_NAME } from '../../config';
 
 const all = await getArticles();
@@ -24,7 +25,7 @@ const sections = await Promise.all(pillars.map(async (pillar) => ({ pillar, arti
 const featured = all.find((a) => a.data.hero) ?? all.find((a) => a.data.pillarGuide) ?? all[0];
 const latest = all.filter((a) => a !== featured).slice(0, 6);
 const calendarPhoto = imageAttrs('hc-01-wall-calendar');
-const visualIdeas = [inspirationGalleries[0], toyStorageGallery, cozyLivingRoomGallery].filter((gallery) => gallery.published && gallery.ideas.length && gallery.ideas.every((idea) => Boolean(idea.image)));
+const visualIdeas = [inspirationGalleries[0], toyStorageGallery, cozyLivingRoomGallery, closetOrganizationGallery].filter((gallery) => gallery.published && gallery.ideas.length && gallery.ideas.every((idea) => Boolean(idea.image)));
 
 // Free fill-in printables: filled in on screen, downloaded as an image.
 
