@@ -8,6 +8,14 @@ export const cozyLivingRoomGallery: InspirationGallery = {
  deck: 'A room can feel beautiful and still belong to the whole family. Browse 47 cozy, doable ideas, from soft seating and warm color to unexpected vintage finds and game-night spaces.',
  disclosure: 'Images in this gallery are AI-generated design concepts, not photographs of actual homes or listings for specific products. Check dimensions, anchoring, and child safety before adapting any idea.',
  published: true,
+ sections: [
+    { start: 0, title: "Comfortable family seating", intro: "Shape a room for real conversation, reading and movie nights.", label: "Seating & sofas", icon: "sofa" },
+    { start: 8, title: "Warm colors & textures", intro: "Use a thoughtful mix of upholstery, wood, rugs and color to make the room inviting.", label: "Colors & textures", icon: "sparkle" },
+    { start: 16, title: "Kid-friendly cozy rooms", intro: "Give books, toys, throws and floor play a place in the family living room.", label: "Kid-friendly", icon: "kids" },
+    { start: 24, title: "Small & clever living rooms", intro: "Even narrow or awkward spaces can feel welcoming with the right scale and layout.", label: "Small living rooms", icon: "corner" },
+    { start: 32, title: "Details that feel like home", intro: "Lighting, curtains, plants and personal touches bring warmth without a major makeover.", label: "Cozy details", icon: "lamp" },
+    { start: 40, title: "Unexpected statement pieces", intro: "Make one memorable vintage or colorful detail the focal point of the room.", label: "Standout finds", icon: "star" }
+  ],
  ideas: [
   { id: 'idea-1', navLabel: "Layer a family sectional", title: "Layer pillows and washable throws", tip: "Start with a deep sectional, then vary two pillow textures and keep a blanket within reach.", tryThis: '', alt: "AI-generated concept of layer a family sectional in a realistic family living room.", image: "/images/inspiration/cozy-living-room-ideas-for-families-with-kids/cozy-family-living-room-01.jpeg", pinDescription: "Layer a family sectional. Explore 47 Cozy Living Room Ideas for Families with Kids, from inviting seating to family-friendly decorating inspiration.", category: 'Storage' },
   { id: 'idea-2', navLabel: "Make room for two armchairs", title: "Create a seat for actual conversation", tip: "Angle two compact chairs toward each other, even if your room cannot fit another sofa.", tryThis: '', alt: "AI-generated concept of make room for two armchairs in a realistic family living room.", image: "/images/inspiration/cozy-living-room-ideas-for-families-with-kids/cozy-family-living-room-02.jpeg", pinDescription: "Make room for two armchairs. Explore 47 Cozy Living Room Ideas for Families with Kids, from inviting seating to family-friendly decorating inspiration.", category: 'Storage' },
