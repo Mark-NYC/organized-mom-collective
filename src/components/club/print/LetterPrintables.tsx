@@ -9,6 +9,7 @@
 import { monthLabel } from '../../../data/club/labels';
 import { toolPalettes, type ToolPaletteId } from '../../../data/tool-palettes';
 import type { KitConfig } from '../../../data/club/types';
+import type { CountdownItem } from '../../../lib/club/countdown';
 import type { ChartRow } from '../../../lib/club/edits';
 import { qrPath } from '../../../lib/club/qr';
 import { exampleRoutine, qrUrl, readableUrl } from '../../../lib/club/routines';
@@ -27,18 +28,34 @@ function QrCode({ url, label }: { url: string; label: string }) {
   );
 }
 
-/** The month's action as a checklist: a box, the line, and an optional "Who's helping?" blank (filled when she typed one). */
-function ActionList({ items, helperLabel, helpers = [], done = [] }: { items: string[]; helperLabel?: string; helpers?: string[]; done?: boolean[] }) {
+/** What she's filled in online, for her own printout: done, who's helping, and when (a date, "When you can", or ''). */
+export interface ActionFill {
+  done: boolean[];
+  helpers: string[];
+  whens: string[];
+  /** "Wednesday, August 25" */
+  firstDay?: string;
+}
+
+/**
+ * The month's action as a checklist: a box, the line, a "By" blank and a "Who's helping?" blank. The mailed copy
+ * prints the blanks; her printout fills in what she chose online.
+ */
+function ActionList({ items, helperLabel, fill }: { items: CountdownItem[]; helperLabel?: string; fill?: ActionFill }) {
   return (
     <ol className="club-action">
       {items.map((t, i) => (
-        <li key={t} className="club-action-row">
-          <span className={`club-box club-action-box${done[i] ? ' is-done' : ''}`} />
-          <span className="club-action-text">{t}</span>
+        <li key={t.text} className="club-action-row">
+          <span className={`club-box club-action-box${fill?.done[i] ? ' is-done' : ''}`} />
+          <span className="club-action-text">{t.text}</span>
+          <span className="club-action-helper club-action-when">
+            <span className="club-action-helper-label">By</span>
+            <span className="club-action-helper-line">{fill?.whens[i] ?? ''}</span>
+          </span>
           {helperLabel && (
             <span className="club-action-helper">
               <span className="club-action-helper-label">{helperLabel}</span>
-              <span className="club-action-helper-line">{helpers[i] ?? ''}</span>
+              <span className="club-action-helper-line">{fill?.helpers[i] ?? ''}</span>
             </span>
           )}
         </li>
@@ -47,9 +64,13 @@ function ActionList({ items, helperLabel, helpers = [], done = [] }: { items: st
   );
 }
 
-/** The two-page letter. `helpers`/`done` fill in what she's entered on screen; the mailed copy prints them blank. */
-export function LetterSheets({ doc, kit, preview, helpers, done }: { doc: string; kit: KitConfig; preview?: boolean; helpers?: string[]; done?: boolean[] }) {
+/**
+ * The two-page letter, as mailed: the countdown's blanks stay blank (her dated copy is the countdown printout).
+ * `recipient`: her first name, only when it's reliably known; otherwise the warm generic greeting.
+ */
+export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; kit: KitConfig; preview?: boolean; recipient?: string }) {
   const letter = kit.mailer.letter;
+  const greeting = letter && (recipient?.trim() && letter.namedGreeting ? letter.namedGreeting.replace('{name}', recipient.trim()) : letter.greeting);
   const action = kit.action;
   const example = exampleRoutine(kit);
   const month = monthLabel(kit.month);
@@ -68,7 +89,7 @@ export function LetterSheets({ doc, kit, preview, helpers, done }: { doc: string
         <div className="club-letter-body">
           {letter ? (
             <>
-              {letter.greeting && <p className="club-letter-greeting">{letter.greeting}</p>}
+              {greeting && <p className="club-letter-greeting">{greeting}</p>}
               {letter.body.split(/\n\n+/).map((para) => <p key={para}>{para}</p>)}
               {letter.signoff && (
                 <p className="club-letter-signoff">
@@ -83,20 +104,24 @@ export function LetterSheets({ doc, kit, preview, helpers, done }: { doc: string
         {action && (
           <div className="club-letter-action">
             <h2>{action.title}</h2>
-            <ActionList items={action.items} helperLabel={action.helperLabel} helpers={helpers} done={done} />
+            <ActionList items={action.items} helperLabel={action.helperLabel} />
           </div>
         )}
       </section>
 
       <section className="club-letter-page" aria-label="Back">
         {head}
+        {kit.mailer.conversation && (
+          <div className="club-letter-conversation">
+            <span className="club-letter-label">{kit.mailer.conversation.label}</span>
+            <p className="club-letter-question">{kit.mailer.conversation.question}</p>
+            {kit.mailer.conversation.note && <p className="club-letter-question-note">{kit.mailer.conversation.note}</p>}
+          </div>
+        )}
         <h2 className="club-letter-back-title">{kit.mailer.fieldGuide.title}</h2>
         <div className="club-letter-tips">
           {kit.mailer.fieldGuide.sections.map((s) => (
-            <div key={s.heading}>
-              <h3>{s.heading}</h3>
-              <p>{s.body}</p>
-            </div>
+            <p key={s.heading}><strong>{s.heading}</strong> {s.body}</p>
           ))}
         </div>
         {kit.mailer.example && example.length > 0 && (
@@ -133,17 +158,18 @@ export function LetterSheets({ doc, kit, preview, helpers, done }: { doc: string
   );
 }
 
-/** The action alone, to hang beside the family calendar. */
-export function ActionSheet({ doc, kit, palette, preview, helpers, done }: { doc: string; kit: KitConfig; palette: ToolPaletteId; preview?: boolean; helpers?: string[]; done?: boolean[] }) {
+/** The action alone, dated when she's entered a first day, to hang beside the family calendar. */
+export function ActionSheet({ doc, kit, palette, preview, fill }: { doc: string; kit: KitConfig; palette: ToolPaletteId; preview?: boolean; fill?: ActionFill }) {
   const [swipe] = toolPalettes[palette].colors;
   const action = kit.action!;
   return (
     <div className="club-print club-sheet club-action-sheet" data-doc={doc} data-preview={preview ? '' : undefined}>
       <div className="club-hand club-sheet-title"><span className="club-swipe" style={{ ['--swipe' as string]: swipe }}>{action.title}</span></div>
-      {kit.subtitle && <div className="club-sheet-sub">{kit.subtitle}</div>}
+      <div className="club-sheet-sub">{fill?.firstDay ? `First day of school: ${fill.firstDay}` : kit.subtitle}</div>
       <p className="club-sheet-intro">{action.intro}</p>
-      <ActionList items={action.items} helperLabel={action.helperLabel} helpers={helpers} done={done} />
-      <div className="club-sheet-foot">Organized Family Club · {monthLabel(kit.month)} · Hang it beside the family calendar</div>
+      <ActionList items={action.items} helperLabel={action.helperLabel} fill={fill} />
+      <p className="club-action-sheet-note">Write these dates on your family wall calendar so everyone can see what’s coming.</p>
+      <div className="club-sheet-foot">Organized Family Club · {monthLabel(kit.month)}</div>
     </div>
   );
 }

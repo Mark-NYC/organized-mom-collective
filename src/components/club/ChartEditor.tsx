@@ -249,6 +249,7 @@ export default function ChartEditor({ store, kit, printable, items, household, s
               {preview ? 'Hide the preview' : 'Preview the printout'}
             </button>
           </div>
+          {variant === 'routine' && <p className="mt-3 text-[0.92rem] text-warm-ink">Tip: put the chart in a clear sleeve and use a dry-erase marker to reuse it each week.</p>}
           <p className="mt-2 text-[0.85rem] text-warm-soft">US Letter, {orientation}. On a phone, choose Print, then share or save the PDF.</p>
         </section>
         {notice && <p role="alert" className="mt-4 border-l-[3px] border-rose bg-rose-wash px-4 py-3">{notice}</p>}

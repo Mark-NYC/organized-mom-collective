@@ -89,13 +89,16 @@ export function kitProblems(kit: KitConfig): string[] {
   // Three-part kits: one short action, one optional tool, and the letter's back page.
   if (kit.action) {
     if (kit.action.items.length < 3 || kit.action.items.length > 8) out.push('action: 3–8 lines (one small action, not a project)');
-    if (kit.action.items.some((t) => !t.trim() || t.length > 90)) out.push('action: each line 1–90 characters');
+    if (kit.action.items.some((t) => !t.text.trim() || t.text.length > 90)) out.push('action: each line 1–90 characters');
+    if (kit.action.items.some((t) => !Number.isInteger(t.daysBefore) || t.daysBefore < 1 || t.daysBefore > 60)) out.push('action: daysBefore a whole number from 1 to 60');
+    if (!kit.action.items.some((t) => t.essential)) out.push('action: mark the essentials (what still matters a day or two out)');
     if (!kit.mailer.invite || !kit.mailer.calendarNote) out.push('action: the letter needs its invite and calendar note');
   }
   if (kit.tool) {
     const p = kit.printables.find((x) => x.id === kit.tool!.printable);
     if (!p?.editor) out.push(`tool: ${kit.tool.printable} isn't a printable with an editor`);
   }
+  if (kit.mailer.letter?.namedGreeting && !kit.mailer.letter.namedGreeting.includes('{name}')) out.push('letter: namedGreeting needs {name}');
   if (kit.mailer.example && !kitItems(kit, kit.mailer.example.items)) out.push(`example: no item set ${kit.mailer.example.items}`);
   if (!kit.action && !kit.mailer.activity) out.push('a kit needs an action or an activity');
   return out;

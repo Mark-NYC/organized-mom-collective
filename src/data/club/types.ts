@@ -5,6 +5,7 @@
  * A kit is one file in src/data/club/kits/, reviewed in a pull request. Its content is curated and deterministic:
  * the engines in src/lib/club/engines/ turn a family profile plus these rules into a filled-in kit, with no AI.
  */
+import type { CountdownItem } from '../../lib/club/countdown';
 
 export type EngineId = 'responsibilities' | 'routines' | 'planning' | 'projects';
 
@@ -144,10 +145,11 @@ export interface KitConfig {
   subtitle?: string;
   /**
    * The month's one action (three-part kits: the letter, the action, the tool): a short checklist the family does
-   * together, printed on the front of the letter and checkable on screen. Never per-person assignments; each line has
-   * an optional `helperLabel` blank instead.
+   * together, printed on the front of the letter and checkable on screen. Each line has a suggested number of days
+   * before a date she enters (src/lib/club/countdown.ts). Never per-person assignments; each line has an optional
+   * `helperLabel` blank instead.
    */
-  action?: { title: string; intro: string; items: string[]; helperLabel?: string };
+  action?: { title: string; intro: string; items: CountdownItem[]; helperLabel?: string };
   /** The month's one optional tool: the printable (with an editor) it opens, and the invitation to it. */
   tool?: { printable: string; title: string; blurb: string; cta: string };
   /**
@@ -161,11 +163,22 @@ export interface KitConfig {
      * Megan's letter, in her words. null until written; `draft` until she's approved it. A kit can't be scheduled
      * with either.
      */
-    letter: { title: string; greeting?: string; body: string; signoff?: string; draft?: true } | null;
+    letter: {
+      title: string;
+      /** For a letter without her name. */
+      greeting?: string;
+      /** With her first name, when it's reliably known: 'Hi {name},'. Never a made-up name. */
+      namedGreeting?: string;
+      body: string;
+      signoff?: string;
+      draft?: true;
+    } | null;
     /** Three-part kits: the guidance on the back of the letter. */
     fieldGuide: { title: string; sections: { heading: string; body: string }[] };
     /** A family activity (November's team meeting). Three-part kits use `action` instead. */
     activity?: { title: string; minutes: number; steps: string[] };
+    /** Three-part kits: the month's one family conversation question, on the back of the letter. */
+    conversation?: { label: string; question: string; note?: string };
     /** Three-part kits: a worked example on the back of the letter, generated from the tool's own rules. */
     example?: { title: string; age: number; section: ChartSection; items: string };
     /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */

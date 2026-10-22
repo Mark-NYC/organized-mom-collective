@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest';
 import { kitProblems, kits, schedulable } from '../src/data/club/kits';
 import { kit as august } from '../src/data/club/kits/2027-08-school-year';
 import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
-import { readAction } from '../src/lib/club/action';
 import { addRow, initialEdits, move, readEdits, remove, resolveDocument, type DocumentEdits } from '../src/lib/club/edits';
 import { eligible, ROUTINE_MAX_STEPS, type GenerateOptions } from '../src/lib/club/engines/responsibilities';
 import { planMembers, type Household } from '../src/lib/club/profile';
@@ -49,13 +48,13 @@ describe('August: one letter, one action, one tool', () => {
 
   it('has exactly the six countdown lines, with an optional helper blank instead of assignments', () => {
     expect(august.action!.title).toBe('Our Back-to-School Countdown');
-    expect(august.action!.items).toEqual([
-      'Add school dates and activities to the family calendar.',
-      'Check clothes, shoes and school supplies.',
-      'Set up a place for backpacks and school papers.',
-      'Decide who’s handling drop-off and pick-up.',
-      'Practice morning and after-school routines.',
-      'Pack bags and get everything ready the night before.',
+    expect(august.action!.items.map((i) => [i.text, i.daysBefore])).toEqual([
+      ['Add school dates and activities to the family calendar.', 14],
+      ['Check clothes, shoes and school supplies.', 10],
+      ['Set up a place for backpacks and school papers.', 7],
+      ['Decide who’s handling drop-off and pick-up.', 7],
+      ['Practice morning and after-school routines.', 5],
+      ['Pack bags and get everything ready the night before.', 1],
     ]);
     expect(august.action!.helperLabel).toBe('Who’s helping?');
   });
@@ -76,6 +75,12 @@ describe('August: one letter, one action, one tool', () => {
     expect(letter.draft).toBe(true);
     expect(schedulable(august)).toBe(false);
     expect(letter.body).toMatch(/family calendar/);
+    expect(letter.body).toContain('You don’t have to tackle all six at once. Start with what matters most, and share the jobs.');
+    expect(letter.namedGreeting).toBe('Hi {name},');
+  });
+
+  it('asks one family question on the back of the letter', () => {
+    expect(august.mailer.conversation?.question).toBe('What’s one thing you want to be able to do by yourself before school starts?');
   });
 
   it('puts the QR code, a readable address and one calendar reminder on the back', () => {
@@ -141,6 +146,29 @@ describe('August: the routine tool', () => {
     expect(again.suggestions).toEqual([]);
   });
 
+  it('always suggests steps in the order a day goes, at every age', () => {
+    // Where each step falls in a school day; a chart may skip phases but never goes backwards.
+    const phase: Record<string, number> = {
+      'up-and-good-morning': 1, 'up-with-alarm': 1, 'get-dressed': 2, 'make-bed-am': 3, breakfast: 4, 'brush-teeth-am': 5, 'comb-hair': 5,
+      'check-the-calendar': 6, 'at-school-spot': 7, 'by-the-door': 7,
+      'unpack-backpack': 1, 'school-things-away': 1, 'papers-to-inbox': 2, 'wash-hands-pm': 3, snack: 3, homework: 4, 'read-twenty': 4, 'toys-back': 5,
+      'clothes-for-tomorrow': 5, 'pack-for-tomorrow': 5, 'pack-my-lunch': 5, 'tomorrow-on-the-calendar': 5, 'my-family-job': 6,
+    };
+    expect(Object.keys(phase).sort()).toEqual(routines.map((i) => i.id).sort());
+    for (const prefs of [{}, { school: 'homeschool' as const }]) {
+      for (let age = 3; age <= 17; age++) {
+        const rows = routineRows(schooled(family(`hh-o${age}`, [adult('a', true), kid('k', age - 1)], prefs))).rows;
+        for (const part of ['morning', 'after-school']) {
+          const seq = rows.filter((r) => r.section === part).map((r) => phase[r.itemId!]);
+          expect(seq, `age ${age} ${part}: ${rows.filter((r) => r.section === part).map((r) => r.itemId)}`).toEqual([...seq].sort((a, b) => a - b));
+        }
+      }
+    }
+    // Waking up is first whenever it's on the chart.
+    const nine = routineRows(schooled(family('hh-9', [adult('a', true), kid('k', 8)]))).rows.filter((r) => r.section === 'morning');
+    expect(nine[0].itemId).toBe('up-with-alarm');
+  });
+
   it('homeschoolers get their school spot, never backpack-by-the-door', () => {
     const h = schooled(family('hh-home', [adult('a', true), kid('k', 7)], { school: 'homeschool' }));
     const ids = routineRows(h).rows.map((r) => r.itemId);
@@ -164,15 +192,7 @@ describe('August: the routine tool', () => {
   });
 });
 
-describe('August: the countdown’s saved state and the QR code', () => {
-  it('reads saved checks and helpers safely', () => {
-    expect(readAction({ done: [true, 'yes', false], helpers: ['Dad', 7, '  Ava   and   Ben '] }, 4)).toEqual({
-      done: [true, false, false, false],
-      helpers: ['Dad', '', ' Ava and Ben ', ''],
-    });
-    expect(readAction(null, 2)).toEqual({ done: [false, false], helpers: ['', ''] });
-  });
-
+describe('August: the QR code', () => {
   it('encodes the kit address as a version 5 code with its three finder patterns', () => {
     const m = qrMatrix(qrUrl(august.mailer.qrPath));
     expect(m.length).toBe(37);

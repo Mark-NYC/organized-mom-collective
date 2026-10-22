@@ -345,7 +345,8 @@ Owner direction: the first August draft (a 20-plus-task launch plan, an overview
 | Kept from the first draft, out of the kit: launch plan and command center item sets, school setup, overview, command center print | `src/data/club/libraries/school-year.ts`, `src/lib/club/school.ts`, `src/lib/club/overview.ts`, `SchoolPrintables.tsx`, `tests/club-school-year.test.ts` |
 | Print fix (from the first draft): the print-only rule targets `.is-printing`; QA refuses a blank page or a letter page with content cut off | `src/lib/club/print.ts`, `src/styles/club.css`, `scripts/club-qa.mjs` |
 | Migration: August seeded as a **draft** (not applied) | `supabase/migrations/20261024000000_club_august_kit.sql` |
-| Tests | `tests/club-august.test.ts` |
+| Refinements (2026-10-23): the countdown dates itself from "When does school start?" (family date, optional per-child dates, her edits kept, "go back to suggestions" lists what changes, short-notice and past-date handling); print, copy as text, `.ics` export, no sync or reminders; the letter greets her by first name when known, prints blank "By" lines, and asks one family question on the back; routine steps always in the order a day goes; a dry-erase tip by the print button; a sample family with no children yet (Hughes) | `src/lib/club/countdown.ts`, `KitPage.tsx`, `LetterPrintables.tsx`, `src/data/club/samples.ts` |
+| Tests | `tests/club-august.test.ts`, `tests/club-countdown.test.ts` |
 
 ### Previewing
 

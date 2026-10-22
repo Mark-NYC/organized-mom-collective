@@ -13,10 +13,13 @@ import { kitBySlug, kitItems } from '../../data/club/kits';
 import { monthLabel } from '../../data/club/labels';
 import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes';
 import type { KitConfig, KitPrintable } from '../../data/club/types';
-import { readAction, MAX_HELPER, type ActionState } from '../../lib/club/action';
+import {
+  addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_STARTS, planCountdown, readCountdown, resetChanges,
+  shortLabel as shortDay, type CountdownPlan, type CountdownState, type SchoolStart,
+} from '../../lib/club/countdown';
 import { schoolSetupFor, withSchool } from '../../lib/club/school';
 import { GuideSheet } from './print/SchoolPrintables';
-import { ActionSheet, LetterSheets } from './print/LetterPrintables';
+import { ActionSheet, LetterSheets, type ActionFill } from './print/LetterPrintables';
 import { printDocument } from '../../lib/club/print';
 import { planMembers, type Household } from '../../lib/club/profile';
 import { ConflictError, type ClubStore, type KitDocuments } from '../../lib/club/store';
@@ -237,8 +240,9 @@ function FieldGuide({ kit }: { kit: KitConfig }) {
 
 
 /**
- * Three-part kits: the month's title, its one action, and one button to the optional tool. The letter reads on screen
- * and prints front and back. The tool opens in place (#tool) and stays mounted, so unsaved edits survive going back.
+ * Three-part kits: the month's title, when school starts, the dated countdown, and one button to the optional tool;
+ * the letter last. The tool opens in place (#tool) and stays mounted, so unsaved edits survive going back.
+ * The countdown saves itself a moment after each change (first days, checks, dates, helpers) to the kit's document.
  */
 function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose }: {
   kit: KitConfig;
@@ -250,44 +254,63 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
   view: string;
   choose: (id: string) => void;
 }) {
+  const action = kit.action!;
   const tool = kit.tool ? kit.printables.find((p) => p.id === kit.tool!.printable) : undefined;
   const actionDoc = kit.printables.find((p) => p.component === 'Countdown');
   const letterDoc = kit.printables.find((p) => p.component === 'Letter');
-  const [action, setAction] = useState<ActionState>(() => readAction(actionDoc && docs.documents[actionDoc.id]?.edits, kit.action!.items.length));
+  const saved = actionDoc ? docs.documents[actionDoc.id] : undefined;
+  const [state, setState] = useState<CountdownState>(() => readCountdown(saved?.edits, action.items.length));
+  const [revision, setRevision] = useState(saved?.revision ?? 0);
+  const [status, setStatus] = useState<'idle' | 'pending' | 'saved' | 'conflict' | 'error'>('idle');
+  const [today] = useState(localToday);
   const [letterOpen, setLetterOpen] = useState(false);
   const [letterPreview, setLetterPreview] = useState(false);
   const showTool = Boolean(tool) && view === 'tool';
-  const kids = planMembers(household, kit.month).filter((p) => p.stage !== 'adult' && (p.age ?? 0) >= 3);
+  const children = planMembers(household, kit.month).filter((p) => p.stage !== 'adult');
+  const chartKids = children.filter((p) => (p.age ?? 0) >= 3);
+  // Her first name for the letter only when the profile says who she is: never a guess.
+  const recipient = household.members.find((m) => m.isAccountHolder && !m.archived)?.firstName;
+  const start = basisStart(state);
+  const plan = planCountdown(action.items, start.date, today, state.dates);
+  const palette = (household.preferences.palette as ToolPaletteId | undefined) ?? defaultToolPalette;
+
+  const update = (next: CountdownState) => {
+    setState(next);
+    setStatus('pending');
+  };
+  useEffect(() => {
+    if (status !== 'pending' || !actionDoc || readOnly) return;
+    const t = setTimeout(() => {
+      store
+        .saveDocument(kit.slug, actionDoc.id, { edits: state, palette, engineVersion: kit.engineVersion, profileVersion: household.profileVersion }, revision)
+        .then((rev) => { setRevision(rev); setStatus('saved'); })
+        .catch((e) => setStatus(e instanceof ConflictError ? 'conflict' : 'error'));
+    }, 600);
+    return () => clearTimeout(t);
+  }, [state, status]);
+
   const open = (id: string) => {
     choose(id);
     window.scrollTo(0, 0);
   };
+  const toTool = tool && kit.tool ? () => open('tool') : undefined;
 
   return (
     <>
       {/* Screen-only parts carry .club-screen; each printout's frame sits outside them so it can print. */}
       <div hidden={showTool} className="max-w-3xl">
         <div className="club-screen">
-        {top}
-        <p className="label mt-6 text-warm-soft">{monthLabel(kit.month)}</p>
-        <h1 className="mt-2 font-serif text-[2.2rem] leading-[1.08] text-warm-ink sm:text-[2.8rem]">{kit.theme}</h1>
-        {kit.subtitle && <p className="mt-2 font-serif text-[1.25rem] italic text-rose-deep">{kit.subtitle}</p>}
-        {kit.mailer.letter && (
-          <button type="button" className="mt-4 min-h-11 text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterOpen} onClick={() => setLetterOpen(!letterOpen)}>
-            {letterOpen ? 'Close the letter' : 'Read this month’s letter'}
-          </button>
-        )}
-        {letterOpen && kit.mailer.letter && (
-          <article className="mt-3 bg-cream p-6 font-serif text-[1.05rem] leading-relaxed text-warm-ink ring-1 ring-warm-rule sm:p-8">
-            {kit.mailer.letter.greeting && <p className="italic">{kit.mailer.letter.greeting}</p>}
-            {kit.mailer.letter.body.split(/\n\n+/).map((p) => <p key={p} className="mt-3">{p}</p>)}
-            {kit.mailer.letter.signoff && <p className="mt-4 italic">Warmly, <span className="club-hand not-italic text-[1.5rem] text-warm-soft">{kit.mailer.letter.signoff}</span></p>}
-          </article>
-        )}
+          {top}
+          <p className="label mt-6 text-warm-soft">{monthLabel(kit.month)}</p>
+          <h1 className="mt-2 font-serif text-[2.2rem] leading-[1.08] text-warm-ink sm:text-[2.8rem]">{kit.theme}</h1>
+          {kit.subtitle && <p className="mt-2 font-serif text-[1.25rem] italic text-rose-deep">{kit.subtitle}</p>}
         </div>
 
+        <SchoolStarts state={state} update={update} kids={children} readOnly={readOnly} kitYear={Number(kit.month.slice(0, 4))} />
+
         {actionDoc && (
-          <ActionChecklist kit={kit} doc={actionDoc} store={store} household={household} saved={docs.documents[actionDoc.id]} readOnly={readOnly} state={action} onChange={setAction} />
+          <Countdown kit={kit} doc={actionDoc} state={state} update={update} plan={plan} start={start} today={today} household={household}
+            readOnly={readOnly} status={status} palette={palette} toTool={toTool} />
         )}
 
         {tool && kit.tool && (
@@ -297,34 +320,46 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
               <div>
                 <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
-                {kids.length > 0 && <p className="mt-2 text-[0.92rem] text-warm-soft">Ready for {kids.map((k) => k.firstName).join(', ')}. Optional: the countdown works without it.</p>}
+                <p className="mt-2 text-[0.92rem] text-warm-soft">
+                  {chartKids.length > 0 ? `Ready for ${chartKids.map((k) => k.firstName).join(', ')}. ` : ''}Optional: the countdown works without it.
+                </p>
                 <button type="button" className="btn-primary mt-5 w-full sm:w-auto" onClick={() => open('tool')}>{kit.tool.cta}</button>
               </div>
             </div>
           </section>
         )}
 
-        {letterDoc && (
+        {letterDoc && kit.mailer.letter && (
           <section aria-labelledby="club-letter" className="club-screen mt-12 border-t border-warm-rule pt-6">
-            <h2 id="club-letter" className="label text-warm-soft">Your printed letter</h2>
-            <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-warm-soft">It comes in the mail, front and back. Lost it, or want one for the fridge? Print another.</p>
-            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-              {clubNav().canPrint ? (
-                <button type="button" className="btn-secondary" onClick={() => printDocument(letterDoc.id, 'portrait')}>Print the letter</button>
-              ) : (
-                <PreviewOnlyNote />
-              )}
-              <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterPreview} onClick={() => setLetterPreview(!letterPreview)}>
-                {letterPreview ? 'Hide the letter' : 'See the letter, front and back'}
+            <h2 id="club-letter" className="label text-warm-soft">This month’s letter</h2>
+            <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-warm-soft">
+              It comes in the mail with the same countdown. Use that copy as it is, or print the one above with your dates. Either works; there’s nothing to keep in step.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-6">
+              <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterOpen} onClick={() => setLetterOpen(!letterOpen)}>
+                {letterOpen ? 'Close the letter' : 'Read it here'}
               </button>
+              <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterPreview} onClick={() => setLetterPreview(!letterPreview)}>
+                {letterPreview ? 'Hide the printed letter' : 'See it printed, front and back'}
+              </button>
+              {clubNav().canPrint && (
+                <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => printDocument(letterDoc.id, 'portrait')}>Print another copy</button>
+              )}
             </div>
+            {letterOpen && (
+              <article className="mt-3 bg-cream p-6 font-serif text-[1.05rem] leading-relaxed text-warm-ink ring-1 ring-warm-rule sm:p-8">
+                <p className="italic">{recipient && kit.mailer.letter.namedGreeting ? kit.mailer.letter.namedGreeting.replace('{name}', recipient) : kit.mailer.letter.greeting}</p>
+                {kit.mailer.letter.body.split(/\n\n+/).map((p) => <p key={p} className="mt-3">{p}</p>)}
+                {kit.mailer.letter.signoff && <p className="mt-4 italic">Warmly, <span className="club-hand not-italic text-[1.5rem] text-warm-soft">{kit.mailer.letter.signoff}</span></p>}
+              </article>
+            )}
           </section>
         )}
       </div>
       {letterDoc && (
         <div hidden={showTool}>
           <PrintFrame open={letterPreview} orientation="portrait">
-            <LetterSheets doc={letterDoc.id} kit={kit} preview={letterPreview} helpers={action.helpers} done={action.done} />
+            <LetterSheets doc={letterDoc.id} kit={kit} preview={letterPreview} recipient={recipient} />
           </PrintFrame>
         </div>
       )}
@@ -345,79 +380,249 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
   );
 }
 
-/** The month's action: check lines off, note who's helping, print it. Saves itself a moment after each change. */
-function ActionChecklist({ kit, doc, store, household, saved, readOnly, state, onChange }: {
+const link = 'min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4';
+const dateField = 'min-h-11 rounded-[4px] border border-warm-rule bg-white px-2.5 text-[1rem] text-warm-ink focus:border-warm-ink focus:outline-none';
+
+/**
+ * "When does school start?": one family date by default; a first day per child only if she adds one, and then a
+ * plain choice of which date the countdown counts back from.
+ */
+function SchoolStarts({ state, update, kids, readOnly, kitYear }: {
+  state: CountdownState;
+  update: (s: CountdownState) => void;
+  kids: { id: string; firstName: string }[];
+  readOnly: boolean;
+  kitYear: number;
+}) {
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState('');
+  const set = (id: string, patch: Partial<SchoolStart>) => update({ ...state, starts: state.starts.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
+  const remove = (id: string) => update({ ...state, starts: state.starts.filter((s) => s.id !== id), basis: state.basis === id ? FAMILY_START : state.basis });
+  const free = kids.filter((c) => !state.starts.some((s) => s.childId === c.id));
+  const add = (label: string, childId?: string) => {
+    const id = childId ? `child-${childId}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 60) : `extra-${Date.now().toString(36)}`;
+    update({ ...state, starts: [...state.starts, { id, label, ...(childId ? { childId } : {}), date: '' }] });
+    setAdding(false);
+    setName('');
+  };
+  const dated = state.starts.filter((s) => s.date);
+  const many = state.starts.length > 1;
+  const family = state.starts.find((s) => s.id === FAMILY_START)!;
+  const extras = state.starts.filter((s) => s.id !== FAMILY_START);
+
+  return (
+    <section aria-labelledby="club-start" className="club-screen mt-8 bg-white p-5 ring-1 ring-warm-rule sm:p-6">
+      <h2 id="club-start" className="font-serif text-[1.45rem] leading-tight text-warm-ink">When does school start?</h2>
+      <p className="mt-1 text-[0.95rem] leading-relaxed text-warm-soft">We’ll work backward and suggest when to get each thing done.</p>
+      <div className="mt-4 grid gap-3">
+        <label className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className={many ? 'min-w-[6.5rem] font-semibold text-warm-ink' : 'sr-only'}>{many ? 'Everyone else' : 'First day of school'}</span>
+          <input type="date" className={dateField} value={family.date} disabled={readOnly} min={`${kitYear - 1}-01-01`} max={`${kitYear + 1}-12-31`}
+            onChange={(e) => set(FAMILY_START, { date: isDay(e.target.value) ? e.target.value : '' })} />
+        </label>
+        {extras.map((s) => (
+          <div key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <label className="flex flex-wrap items-center gap-x-3">
+              <span className="min-w-[6.5rem] font-semibold text-warm-ink">{s.label}</span>
+              <input type="date" className={dateField} value={s.date} disabled={readOnly} min={`${kitYear - 1}-01-01`} max={`${kitYear + 1}-12-31`}
+                onChange={(e) => set(s.id, { date: isDay(e.target.value) ? e.target.value : '' })} />
+            </label>
+            {!readOnly && <button type="button" className="min-h-11 text-[0.88rem] text-warm-soft underline underline-offset-4" onClick={() => remove(s.id)}>Remove<span className="sr-only"> {s.label}’s first day</span></button>}
+          </div>
+        ))}
+      </div>
+      {!readOnly && state.starts.length < MAX_STARTS && (
+        adding ? (
+          <div className="mt-3 flex flex-wrap items-end gap-3">
+            {free.length > 0 ? (
+              free.map((c) => <button key={c.id} type="button" className="btn-secondary" onClick={() => add(c.firstName, c.id)}>{c.firstName}</button>)
+            ) : (
+              <>
+                <label>
+                  <span className="block text-[0.85rem] text-warm-soft">Child’s first name</span>
+                  <input className={`${dateField} mt-1 w-44`} value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
+                </label>
+                <button type="button" className="btn-secondary" disabled={!name.trim()} onClick={() => add(name.trim())}>Add</button>
+              </>
+            )}
+            <button type="button" className="min-h-11 text-[0.88rem] text-warm-soft underline underline-offset-4" onClick={() => setAdding(false)}>Cancel</button>
+          </div>
+        ) : (
+          <button type="button" className={`${link} mt-2`} onClick={() => setAdding(true)}>+ A child starts on a different day</button>
+        )
+      )}
+      {dated.length > 1 && (
+        <fieldset className="mt-4 border-t border-warm-rule pt-3">
+          <legend className="text-[0.92rem] text-warm-soft">Dates count back from</legend>
+          <div className="mt-1 flex flex-wrap gap-x-5">
+            {dated.map((s) => (
+              <label key={s.id} className="flex min-h-11 items-center gap-2 text-[0.95rem] text-warm-ink">
+                <input type="radio" name="club-basis" className="h-5 w-5 accent-[#7f9274]" checked={basisStart(state).id === s.id} disabled={readOnly} onChange={() => update({ ...state, basis: s.id })} />
+                {s.id === FAMILY_START ? 'Everyone' : s.label} · {shortDay(s.date as string)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+    </section>
+  );
+}
+
+/** The countdown: six lines, each with its box, its suggested day (hers to change) and who's helping. */
+function Countdown({ kit, doc, state, update, plan, start, today, household, readOnly, status, palette, toTool }: {
   kit: KitConfig;
   doc: KitPrintable;
-  store: ClubStore;
+  state: CountdownState;
+  update: (s: CountdownState) => void;
+  plan: CountdownPlan;
+  start: SchoolStart;
+  today: string;
   household: Household;
-  saved?: KitDocuments['documents'][string];
   readOnly: boolean;
-  state: ActionState;
-  onChange: (s: ActionState) => void;
+  status: string;
+  palette: ToolPaletteId;
+  toTool?: () => void;
 }) {
   const action = kit.action!;
-  const palette = (household.preferences.palette as ToolPaletteId | undefined) ?? defaultToolPalette;
-  const [revision, setRevision] = useState(saved?.revision ?? 0);
-  const [status, setStatus] = useState<'idle' | 'pending' | 'saved' | 'conflict' | 'error'>('idle');
+  const [editing, setEditing] = useState<number | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [copy, setCopy] = useState<'idle' | 'copied' | 'manual'>('idle');
   const done = state.done.filter(Boolean).length;
-
-  const update = (next: ActionState) => {
-    onChange(next);
-    setStatus('pending');
+  const changes = resetChanges(action.items, plan);
+  const names = household.members.filter((m) => !m.archived).map((m) => m.firstName);
+  const dated = plan.lines.some((l) => l.date);
+  const text = countdownText(action.title, action.items, plan, state);
+  const whenLabel = (i: number) => {
+    const l = plan.lines[i];
+    return l.date ? shortDay(l.date) : l.later ? 'When you can' : '';
   };
-  useEffect(() => {
-    if (status !== 'pending') return;
-    const t = setTimeout(() => {
-      store
-        .saveDocument(kit.slug, doc.id, { edits: state, palette, engineVersion: kit.engineVersion, profileVersion: household.profileVersion }, revision)
-        .then((rev) => { setRevision(rev); setStatus('saved'); })
-        .catch((e) => setStatus(e instanceof ConflictError ? 'conflict' : 'error'));
-    }, 600);
-    return () => clearTimeout(t);
-  }, [state, status]);
+  const fill: ActionFill = { done: state.done, helpers: state.helpers, whens: action.items.map((_, i) => whenLabel(i)), ...(plan.start ? { firstDay: longLabel(plan.start) } : {}) };
+  const counting = start.id !== FAMILY_START || state.starts.filter((s) => s.date).length > 1 ? ` (${start.id === FAMILY_START ? 'everyone' : start.label})` : '';
+  const message =
+    plan.status === 'undated' ? 'Add your first day above and each line gets a suggested day. Or just use the list.'
+    : plan.status === 'ahead' ? `Suggested days, counting back from ${longLabel(plan.start!)}${counting}. They’re suggestions: change any of them.`
+    : plan.status === 'tight' ? `${plan.daysLeft} days to go${counting}, so a few things share a day. Suggestions, not deadlines.`
+    : plan.status === 'last-minute' ? `School starts ${plan.daysLeft === 1 ? 'tomorrow' : 'in two days'}${counting}. Just the essentials for now; the rest can wait.`
+    : plan.status === 'today' ? `School starts today${counting}. You’re there: the countdown has done its job.`
+    : `School has already started${counting}, so you don’t need the countdown now.`;
+
+  const download = () => {
+    const now = new Date();
+    const stamp = `${now.toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`;
+    const blob = new Blob([countdownIcs(kit.slug, action.title, action.items, plan, state, stamp)], { type: 'text/calendar' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'back-to-school-countdown.ics' });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  const copyText = () => {
+    navigator.clipboard?.writeText(text).then(() => setCopy('copied'), () => setCopy('manual')) ?? setCopy('manual');
+  };
 
   return (
     <section aria-labelledby="club-action" className="mt-10">
       <div className="club-screen">
-      <div className="flex items-start gap-4">
-        <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage-wash font-serif text-[1.1rem] text-warm-ink ring-1 ring-sage">1</span>
-        <div className="min-w-0 flex-1">
-          <h2 id="club-action" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{action.title.replace(/^Our /, 'Your ')}</h2>
-          <p className="mt-2 leading-relaxed text-warm-soft">{action.intro}</p>
+        <div className="flex items-start gap-4">
+          <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage-wash font-serif text-[1.1rem] text-warm-ink ring-1 ring-sage">1</span>
+          <div className="min-w-0 flex-1">
+            <h2 id="club-action" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{action.title.replace(/^Our /, 'Your ')}</h2>
+            <p className="mt-2 leading-relaxed text-warm-soft">{action.intro}</p>
+          </div>
         </div>
-      </div>
-      <ol className="mt-5 divide-y divide-[#dfe6d8] bg-sage-wash px-4 sm:px-6">
-        {action.items.map((t, i) => (
-          <li key={t} className="py-3.5">
-            <label className="flex min-h-11 cursor-pointer items-start gap-3.5">
-              <input type="checkbox" className="mt-0.5 h-6 w-6 shrink-0 accent-[#7f9274]" checked={state.done[i]} disabled={readOnly}
-                onChange={(e) => update({ ...state, done: state.done.map((d, n) => (n === i ? e.target.checked : d)) })} />
-              <span className={`text-[1.02rem] leading-snug text-warm-ink ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{t}</span>
-            </label>
-            {action.helperLabel && (
-              <input type="text" aria-label={`${action.helperLabel} ${t}`} placeholder={action.helperLabel} maxLength={MAX_HELPER} disabled={readOnly}
-                className="ml-[2.4rem] mt-1 block min-h-10 w-[calc(100%-2.4rem)] max-w-xs border-0 border-b border-[#c9d3c0] bg-transparent px-0 text-[0.95rem] text-warm-ink placeholder:text-warm-soft focus:border-warm-ink focus:outline-none"
-                value={state.helpers[i]} onChange={(e) => update({ ...state, helpers: state.helpers.map((h, n) => (n === i ? e.target.value : h)) })} />
-            )}
-          </li>
-        ))}
-      </ol>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-        <p role="status" className="text-[0.88rem] text-warm-soft">
-          {status === 'pending' ? 'Saving…' : status === 'conflict' ? 'Changed on another device. Reload to see it.' : status === 'error' ? 'Couldn’t save. Check your connection.' : `${done} of ${action.items.length} done`}
+        <p role="status" className={`mt-4 border-l-[3px] px-4 py-2.5 text-[0.95rem] leading-relaxed text-warm-ink ${plan.status === 'undated' ? 'border-warm-rule' : 'border-sage bg-sage-wash'}`}>
+          {message}
+          {(plan.status === 'today' || plan.status === 'started') && toTool && (
+            <> <button type="button" className="font-semibold underline underline-offset-4" onClick={toTool}>Make a routine chart for school days</button></>
+          )}
         </p>
-        <div className="flex flex-wrap items-center gap-x-6">
-          {clubNav().canPrint && <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => printDocument(doc.id, 'portrait')}>Print it</button>}
-          <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={preview} onClick={() => setPreview(!preview)}>
-            {preview ? 'Hide the preview' : 'Preview the printout'}
-          </button>
+
+        <datalist id="club-family-names">{names.map((n) => <option key={n} value={n} />)}</datalist>
+        <ol className="mt-4 divide-y divide-[#dfe6d8] bg-sage-wash px-4 sm:px-6">
+          {action.items.map((item, i) => {
+            const l = plan.lines[i];
+            return (
+              <li key={item.text} className="py-3.5">
+                <label className="flex min-h-11 cursor-pointer items-start gap-3.5">
+                  <input type="checkbox" className="mt-0.5 h-6 w-6 shrink-0 accent-[#7f9274]" checked={state.done[i]} disabled={readOnly}
+                    onChange={(e) => update({ ...state, done: state.done.map((d, n) => (n === i ? e.target.checked : d)) })} />
+                  <span className={`text-[1.02rem] leading-snug text-warm-ink ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{item.text}</span>
+                </label>
+                <div className="ml-[2.4rem] mt-1 flex flex-wrap items-center gap-x-5 gap-y-1">
+                  {(l.date || l.later || (!readOnly && (plan.start || l.edited))) && (
+                    <span className="flex min-h-10 flex-wrap items-baseline gap-x-2 text-[0.92rem]">
+                      {(l.date || l.later) && <span className={`font-semibold ${l.later ? 'text-warm-soft' : 'text-warm-ink'}`}>{l.date ? `By ${shortDay(l.date)}` : 'When you can'}</span>}
+                      {l.date && <span className="text-[0.82rem] text-warm-soft">{l.edited ? 'your date' : l.moved ? 'moved up' : 'suggested'}</span>}
+                      {!readOnly && (plan.start || l.edited) && editing !== i && (
+                        <button type="button" className="text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => setEditing(i)}>
+                          {l.date ? 'change' : 'pick a date'}<span className="sr-only"> for {item.text}</span>
+                        </button>
+                      )}
+                    </span>
+                  )}
+                  {action.helperLabel && (
+                    <input type="text" list="club-family-names" aria-label={`${action.helperLabel} ${item.text}`} placeholder={action.helperLabel} maxLength={MAX_HELPER} disabled={readOnly}
+                      className="block min-h-10 w-full max-w-[12rem] border-0 border-b border-[#c9d3c0] bg-transparent px-0 text-[0.95rem] text-warm-ink placeholder:text-warm-soft focus:border-warm-ink focus:outline-none"
+                      value={state.helpers[i]} onChange={(e) => update({ ...state, helpers: state.helpers.map((h, n) => (n === i ? e.target.value : h)) })} />
+                  )}
+                </div>
+                {editing === i && (
+                  <div className="ml-[2.4rem] mt-2 flex flex-wrap items-center gap-3">
+                    <input type="date" aria-label={`Date for ${item.text}`} className={dateField} value={l.date ?? ''} min={addDays(today, -60)}
+                      onChange={(e) => update({ ...state, dates: state.dates.map((d, n) => (n === i ? (isDay(e.target.value) ? e.target.value : null) : d)) })} />
+                    {l.edited && (
+                      <button type="button" className="min-h-10 text-[0.85rem] text-warm-soft underline underline-offset-4" onClick={() => update({ ...state, dates: state.dates.map((d, n) => (n === i ? null : d)) })}>
+                        {l.suggested ? `Use the suggestion (${shortDay(l.suggested)})` : 'Clear my date'}
+                      </button>
+                    )}
+                    <button type="button" className="btn-secondary" onClick={() => setEditing(null)}>Done</button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
+          <p className="text-[0.88rem] text-warm-soft">
+            {status === 'pending' ? 'Saving…' : status === 'conflict' ? 'Changed on another device. Reload to see it.' : status === 'error' ? 'Couldn’t save. Check your connection.' : `${done} of ${action.items.length} done`}
+          </p>
+          {!readOnly && changes.length > 0 && !confirmReset && (
+            <button type="button" className="min-h-11 text-[0.88rem] text-warm-soft underline underline-offset-4" onClick={() => setConfirmReset(true)}>Go back to the suggested dates</button>
+          )}
         </div>
-      </div>
+        {confirmReset && (
+          <div className="mt-2 bg-white p-4 ring-1 ring-warm-rule">
+            <p className="text-[0.95rem] text-warm-ink">These dates you chose would change:</p>
+            <ul className="mt-2 space-y-1 text-[0.92rem] text-warm-ink">
+              {changes.map((c) => <li key={c.text}>{c.text.replace(/\.$/, '')}: {shortDay(c.from!)} → {c.to ? shortDay(c.to) : 'no date'}</li>)}
+            </ul>
+            <div className="mt-3 flex flex-wrap gap-4">
+              <button type="button" className="btn-secondary" onClick={() => { update({ ...state, dates: state.dates.map(() => null) }); setConfirmReset(false); }}>Change them</button>
+              <button type="button" className={link} onClick={() => setConfirmReset(false)}>Keep my dates</button>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 border-t border-warm-rule pt-5">
+          <h3 className="label text-warm-soft">Print or copy your countdown</h3>
+          {dated && <p className="mt-2 text-[0.95rem] leading-relaxed text-warm-ink">Write these dates on your family wall calendar so everyone can see what’s coming.</p>}
+          <div className="mt-2 flex flex-wrap items-center gap-x-6">
+            {clubNav().canPrint && <button type="button" className={link} onClick={() => printDocument(doc.id, 'portrait')}>Print it</button>}
+            <button type="button" className={link} aria-expanded={preview} onClick={() => setPreview(!preview)}>{preview ? 'Hide the preview' : 'Preview the printout'}</button>
+            <button type="button" className={link} onClick={copyText}>{copy === 'copied' ? 'Copied' : 'Copy as text'}</button>
+            {dated && <button type="button" className={link} onClick={download}>Add to a phone calendar (.ics)</button>}
+          </div>
+          {copy === 'manual' && (
+            <label className="mt-2 block">
+              <span className="text-[0.85rem] text-warm-soft">Select the text and copy it:</span>
+              <textarea readOnly rows={action.items.length + 3} className="mt-1 block w-full rounded-[4px] border border-warm-rule bg-white p-2 font-mono text-[0.85rem] text-warm-ink" value={text} onFocus={(e) => e.target.select()} />
+            </label>
+          )}
+        </div>
       </div>
       <PrintFrame open={preview} orientation="portrait">
-        <ActionSheet doc={doc.id} kit={kit} palette={palette} preview={preview} helpers={state.helpers} done={state.done} />
+        <ActionSheet doc={doc.id} kit={kit} palette={palette} preview={preview} fill={fill} />
       </PrintFrame>
     </section>
   );

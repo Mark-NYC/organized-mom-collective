@@ -25,9 +25,12 @@ const step = (section: 'morning' | 'after-school', item: Omit<KitItem, 'for' | '
 });
 
 /**
- * School-day routine steps, in routine order. A child gets the (at most) six that fit their age and school with the
- * lowest `priority`; the rest are one tap away. School types are guessed from age and the family's homeschool
- * preference: 3–4 preschool, 5–17 school.
+ * School-day routine steps, in the order a day goes: a chart is always in this order until she moves a step.
+ * Morning: wake up, get dressed, bed, breakfast, teeth and hair, today's plan, out the door. After school: put the
+ * bag and lunch away, papers to a grown-up, wash and snack, homework or reading, get tomorrow ready, then a family job.
+ * A child gets the (at most) six that fit their age and school with the lowest `priority`, still in this order; the
+ * rest are one tap away. School types are guessed from age and the family's homeschool preference: 3–4 preschool,
+ * 5–17 school.
  */
 const routines: KitItem[] = [
   step('morning', { id: 'up-and-good-morning', title: 'Up and good morning', doneMeans: 'Out of bed when the light’s on.', minAge: 2, maxAge: 3, priority: 8, levels: [[2, 'learning']], requires: { childSchool: ANY } }),
@@ -37,23 +40,23 @@ const routines: KitItem[] = [
   step('morning', { id: 'breakfast', title: 'Breakfast at the table', doneMeans: 'Eaten and my dishes to the counter.', minAge: 2, priority: 2, levels: [[2, 'learning'], [6, 'owns']], illustration: 'clear-the-table', requires: { childSchool: ANY } }),
   step('morning', { id: 'brush-teeth-am', title: 'Brush my teeth', doneMeans: 'Two minutes.', minAge: 3, maxAge: 12, priority: 3, levels: [[3, 'learning'], [5, 'with-check'], [7, 'owns']], illustration: 'brush-my-teeth', requires: { childSchool: ANY } }),
   step('morning', { id: 'comb-hair', title: 'Comb my hair', doneMeans: 'Brushed before shoes go on.', minAge: 3, maxAge: 8, priority: 7, levels: [[3, 'learning'], [6, 'with-check'], [8, 'owns']], illustration: 'comb-my-hair', requires: { childSchool: ANY } }),
-  step('morning', { id: 'by-the-door', title: 'Backpack, lunch and shoes by the door', doneMeans: 'Ready to grab five minutes before we leave.', minAge: 4, priority: 2, levels: [[4, 'learning'], [6, 'with-check'], [8, 'owns']], illustration: 'pack-my-backpack', requires: { childSchool: AWAY } }),
-  step('morning', { id: 'at-school-spot', title: 'Ready at my school spot', doneMeans: 'Books and pencils out when lessons start.', minAge: 5, priority: 2, levels: [[5, 'learning'], [8, 'owns']], illustration: 'tidy-my-desk', requires: { childSchool: ['homeschool'] } }),
   step('morning', { id: 'check-the-calendar', title: 'Check today on the family calendar', doneMeans: 'I know what’s after school and who’s driving.', minAge: 9, priority: 5, levels: [[9, 'with-check'], [11, 'owns']], requires: { childSchool: ANY } }),
+  step('morning', { id: 'at-school-spot', title: 'Ready at my school spot', doneMeans: 'Books and pencils out when lessons start.', minAge: 5, priority: 2, levels: [[5, 'learning'], [8, 'owns']], illustration: 'tidy-my-desk', requires: { childSchool: ['homeschool'] } }),
+  step('morning', { id: 'by-the-door', title: 'Backpack, lunch and shoes by the door', doneMeans: 'Ready to grab five minutes before we leave.', minAge: 4, priority: 2, levels: [[4, 'learning'], [6, 'with-check'], [8, 'owns']], illustration: 'pack-my-backpack', requires: { childSchool: AWAY } }),
 
   step('after-school', { id: 'unpack-backpack', title: 'Lunchbox to the sink, backpack on its hook', doneMeans: 'Unpacked before anything else.', minAge: 3, priority: 1, levels: [[3, 'learning'], [6, 'with-check'], [8, 'owns']], illustration: 'pack-my-backpack', requires: { childSchool: AWAY } }),
   step('after-school', { id: 'school-things-away', title: 'Put my school things away', doneMeans: 'Books and work back at my school spot.', minAge: 4, priority: 1, levels: [[4, 'learning'], [7, 'owns']], illustration: 'tidy-my-desk', requires: { childSchool: ['homeschool'] } }),
+  step('after-school', { id: 'papers-to-inbox', title: 'School papers in the inbox for a grown-up', doneMeans: 'Anything to sign goes in the inbox the day it comes home.', minAge: 7, priority: 4, levels: [[7, 'with-check'], [9, 'owns']], requires: { childSchool: SCHOOL } }),
   step('after-school', { id: 'wash-hands-pm', title: 'Wash my hands', doneMeans: 'Soap, then snack.', minAge: 2, maxAge: 8, priority: 2, levels: [[2, 'learning'], [5, 'owns']], illustration: 'wash-my-hands', requires: { childSchool: ANY } }),
   step('after-school', { id: 'snack', title: 'Snack', doneMeans: 'From the snack spot, wrapper in the trash.', minAge: 2, priority: 3, levels: [[2, 'learning'], [5, 'owns']], requires: { childSchool: ANY } }),
-  step('after-school', { id: 'papers-to-inbox', title: 'School papers in the inbox for a grown-up', doneMeans: 'Anything to sign goes in the inbox the day it comes home.', minAge: 7, priority: 4, levels: [[7, 'with-check'], [9, 'owns']], requires: { childSchool: SCHOOL } }),
   step('after-school', { id: 'homework', title: 'Homework at my spot', doneMeans: 'Done before screens.', minAge: 7, priority: 2, levels: [[7, 'with-check'], [10, 'owns']], illustration: 'tidy-my-desk', requires: { childSchool: SCHOOL } }),
   step('after-school', { id: 'read-twenty', title: 'Read for 20 minutes', doneMeans: 'A book of my choice.', minAge: 6, maxAge: 12, priority: 6, levels: [[6, 'with-check'], [8, 'owns']], requires: { childSchool: ANY } }),
   step('after-school', { id: 'toys-back', title: 'Toys back in their bins', doneMeans: 'Before dinner.', minAge: 2, maxAge: 6, priority: 4, levels: [[2, 'learning'], [5, 'with-check']], illustration: 'put-toys-away', requires: { childSchool: ANY } }),
   step('after-school', { id: 'clothes-for-tomorrow', title: 'Lay out tomorrow’s clothes', doneMeans: 'Picked and on the chair.', minAge: 3, maxAge: 10, priority: 5, levels: [[3, 'learning'], [6, 'owns']], illustration: 'get-dressed', requires: { childSchool: ANY } }),
   step('after-school', { id: 'pack-for-tomorrow', title: 'Pack my backpack for tomorrow', doneMeans: 'Packed and by the door before bed.', minAge: 7, priority: 3, levels: [[7, 'with-check'], [9, 'owns']], illustration: 'pack-my-backpack', requires: { childSchool: SCHOOL } }),
-  step('after-school', { id: 'my-family-job', title: 'Do my family job', doneMeans: 'The one job that’s mine this week, done before dinner.', minAge: 6, priority: 5, levels: [[6, 'with-check'], [9, 'owns']], illustration: 'set-the-table', requires: { childSchool: ANY } }),
-  step('after-school', { id: 'tomorrow-on-the-calendar', title: 'Look at tomorrow on the family calendar', doneMeans: 'I know what’s on tomorrow and what I need for it.', minAge: 9, priority: 6, levels: [[9, 'with-check'], [11, 'owns']], requires: { childSchool: ANY } }),
   step('after-school', { id: 'pack-my-lunch', title: 'Pack my lunch for tomorrow', doneMeans: 'In the fridge, ready to grab.', minAge: 10, priority: 5, levels: [[10, 'with-check'], [12, 'owns']], requires: { childSchool: SCHOOL } }),
+  step('after-school', { id: 'tomorrow-on-the-calendar', title: 'Look at tomorrow on the family calendar', doneMeans: 'I know what’s on tomorrow and what I need for it.', minAge: 9, priority: 6, levels: [[9, 'with-check'], [11, 'owns']], requires: { childSchool: ANY } }),
+  step('after-school', { id: 'my-family-job', title: 'Do my family job', doneMeans: 'The one job that’s mine this week, done before dinner.', minAge: 6, priority: 5, levels: [[6, 'with-check'], [9, 'owns']], illustration: 'set-the-table', requires: { childSchool: ANY } }),
 ];
 
 export const kit: KitConfig = {
@@ -68,14 +71,14 @@ export const kit: KitConfig = {
   items: routines,
   action: {
     title: 'Our Back-to-School Countdown',
-    intro: 'Six things, done together in the weeks before school starts. Write a name beside each one, and let it be someone other than Mom when you can.',
+    intro: 'Six things to get ready together. Not all at once, and not all by you: start with what matters most, and put a name beside each one.',
     items: [
-      'Add school dates and activities to the family calendar.',
-      'Check clothes, shoes and school supplies.',
-      'Set up a place for backpacks and school papers.',
-      'Decide who’s handling drop-off and pick-up.',
-      'Practice morning and after-school routines.',
-      'Pack bags and get everything ready the night before.',
+      { text: 'Add school dates and activities to the family calendar.', daysBefore: 14 },
+      { text: 'Check clothes, shoes and school supplies.', daysBefore: 10, essential: true },
+      { text: 'Set up a place for backpacks and school papers.', daysBefore: 7 },
+      { text: 'Decide who’s handling drop-off and pick-up.', daysBefore: 7, essential: true },
+      { text: 'Practice morning and after-school routines.', daysBefore: 5 },
+      { text: 'Pack bags and get everything ready the night before.', daysBefore: 1, essential: true },
     ],
     helperLabel: 'Who’s helping?',
   },
@@ -96,11 +99,12 @@ export const kit: KitConfig = {
       draft: true,
       title: 'Before the first bell',
       greeting: 'Hi friend,',
+      namedGreeting: 'Hi {name},',
       body: [
         'Back-to-school has a way of landing on one person. The forms, the supply lists, the shoes that suddenly don’t fit, the question of who’s driving on Tuesday. If that person is usually you, this letter is for you.',
         'This year, try getting ready together. Not you preparing everyone, but everyone preparing a little. A six-year-old can try on shoes and lay out an outfit. A ten-year-old can pack their own backpack. A partner can own drop-off, start to finish.',
-        'The countdown below is six things, not sixty. Put the school dates on the family calendar where everyone can see them, then work down the list together. Write a name beside each one.',
-        'And start small. One routine that sticks by October is worth more than five perfect ones that fall apart in week two. The wobbly first weeks are normal.',
+        'The countdown below is six things, not sixty. You don’t have to tackle all six at once. Start with what matters most, and share the jobs. Put the school dates on the family calendar first, where everyone can see them.',
+        'And start small. One routine that sticks by October beats five perfect ones that fall apart in week two.',
         'You don’t have to carry the school year alone. Everyone has a part.',
       ].join('\n\n'),
       signoff: 'Megan',
@@ -108,16 +112,20 @@ export const kit: KitConfig = {
     fieldGuide: {
       title: 'Helping kids own their school day',
       sections: [
-        { heading: 'Four to six steps', body: 'Short enough to remember, long enough to matter. A longer chart turns into one more thing you have to enforce.' },
-        { heading: 'Pictures first', body: 'Early readers follow the pictures. Older kids check their own boxes. Either way, the chart does the reminding, not you.' },
-        { heading: 'Ask “What’s next?”', body: 'When a step gets missed, point to the chart instead of giving the instruction. They look; they find it; it stays theirs.' },
-        { heading: 'Practice before it counts', body: 'Run the morning twice before the first day, while being late doesn’t matter yet. Change the step that sticks.' },
+        { heading: 'Four to six steps.', body: 'Enough to matter, few enough to remember.' },
+        { heading: 'Pictures first.', body: 'Early readers follow the pictures; the chart does the reminding, not you.' },
+        { heading: 'Ask “What’s next?”', body: 'When a step gets missed, point to the chart instead of giving the instruction.' },
       ],
+    },
+    conversation: {
+      label: 'Ask at dinner this week',
+      question: 'What’s one thing you want to be able to do by yourself before school starts?',
+      note: 'Everyone answers, grown-ups too.',
     },
     example: { title: 'A school morning for a seven-year-old', age: 7, section: 'morning', items: 'items' },
     invite: {
-      title: 'Make a chart for each of your kids',
-      body: 'Scan the code, pick a child and morning or after school. We suggest steps for their age; change any of them, then print.',
+      title: 'Dates worked out, charts for each child',
+      body: 'Scan the code and enter your first day of school: we’ll suggest a day for each countdown item, then help you make a chart for each child. This page works fine without it.',
     },
     calendarNote: 'Before the first day, write every first day, early dismissal and school break on your family calendar, where everyone can see them.',
     qrPath: `/club/kits/${SLUG}?source=mailer`,
