@@ -9,42 +9,14 @@ export const closetOrganizationGallery: InspirationGallery = {
   disclosure: 'These images are AI-generated design concepts, not photographs of actual homes or specific products. Measure your space and check safe installation, weight limits, ventilation and clearances before trying an idea.',
   published: true,
   sections: [
-  {
-    "start": 0,
-    "title": "Small closet ideas that maximize every inch",
-    "intro": "When the footprint cannot grow, look for spare height, overlooked corners and the back of the door. These nine ideas make limited space easier to use."
-  },
-  {
-    "start": 9,
-    "title": "Beautiful bedroom closet makeovers",
-    "intro": "Good organization can be part of the room's personality. Try color, a practical dresser or one thoughtful built-in rather than assuming you need a full renovation."
-  },
-  {
-    "start": 17,
-    "title": "Budget-friendly closet organization hacks",
-    "intro": "Simple racks, crates, fabric organizers and basic shelves can solve real storage problems without custom cabinetry. Measure first; buy only what fits."
-  },
-  {
-    "start": 25,
-    "title": "Kids' closet organization ideas",
-    "intro": "A child's closet works best when they can see, reach and put away their own things. Low storage and simple zones make independence more realistic."
-  },
-  {
-    "start": 32,
-    "title": "Linen and hallway closet ideas",
-    "intro": "The most useful closets often hold more than clothes. Give towels, coats and household supplies predictable places that everyone can find."
-  },
-  {
-    "start": 38,
-    "title": "Clever shelves, drawers and hidden storage",
-    "intro": "These smart details make the most of narrow gaps and shallow drawers. Choose the mechanisms that solve an actual problem in your space."
-  },
-  {
-    "start": 44,
-    "title": "Closet details worth saving",
-    "intro": "Color, light and one memorable feature can turn an ordinary closet into a favorite corner of your home, while keeping everyday storage practical."
-  }
-],
+    { start: 0, title: "Small closets", intro: "Find extra room with smart rods, corners and vertical storage.", label: "Small closets", icon: "corner" },
+    { start: 9, title: "Makeovers", intro: "Give everyday storage personality with color, materials and useful built-ins.", label: "Makeovers", icon: "paint" },
+    { start: 17, title: "Budget ideas", intro: "Get more from crates, hanging organizers and basic shelves.", label: "Budget ideas", icon: "wallet" },
+    { start: 25, title: "Kids' closets", intro: "Put clothes and toys within reach so children can help maintain the space.", label: "Kids' closets", icon: "kids" },
+    { start: 32, title: "Linen & hallway", intro: "Bring order to towels, coats and household supplies.", label: "Linen & hallway", icon: "shelves" },
+    { start: 38, title: "Clever storage", intro: "Use pull-outs, drawer organizers and hidden compartments.", label: "Clever storage", icon: "cabinet" },
+    { start: 44, title: "Standout details", intro: "Finish with memorable lighting, rugs and architectural touches.", label: "Standout details", icon: "star" }
+  ],
   ideas: [
     { id: 'idea-1', navLabel: "Double hanging rods in a tiny closet", title: "Create two levels of hanging space", tip: "Short shirts and jackets can hang in two rows. Reserve a full-height section for dresses or coats.", tryThis: "Measure the height of your shortest hanging pieces; that tells you where the second rod can go.", alt: "AI-generated design concept illustrating double hanging rods in a tiny closet in a realistic organized home closet.", image: '/images/inspiration/closet-organization-ideas-small-closets/01-double-hanging-rods-small-closet.jpg', pinDescription: "Double hanging rods in a tiny closet. Discover 49 closet organization ideas for small closets, shoes, clothes and family storage.", category: "Small spaces" }, // 01-double-hanging-rods-small-closet.png
     { id: 'idea-2', navLabel: "Deep green closet with brass rails", title: "Use paint to make simple storage feel custom", tip: "Paint the back and side walls one rich shade, then let brass-colored hardware and light clothes provide contrast.", tryThis: "Try a paint sample on the back wall before committing to the whole closet.", alt: "AI-generated design concept illustrating deep green closet with brass rails in a realistic organized home closet.", image: '/images/inspiration/closet-organization-ideas-small-closets/02-olive-green-closet-brass-rails.jpeg', pinDescription: "Deep green closet with brass rails. Discover 49 closet organization ideas for small closets, shoes, clothes and family storage.", category: "Small spaces" }, // 02-olive-green-closet-brass-rails.png
