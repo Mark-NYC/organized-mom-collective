@@ -1,12 +1,12 @@
 # Organized Family Club: monthly kit template
 
-**Status (2026-10-22): proposed structure. No kit code exists yet.** The types below become `src/data/club/types.ts` in Phase 1 ([IMPLEMENTATION_PLAN.md → First implementation task](IMPLEMENTATION_PLAN.md#12-first-implementation-task)). Every kit is one TypeScript file, `src/data/club/kits/<slug>.ts`, reviewed in a pull request, plus one database row (`club_kits`) for its release time and mailer cutoff.
+**Status (2026-10-22): the configuration system is built (Phase 1); no kit is published.** Types: `src/data/club/types.ts`. Kits: `src/data/club/kits/<slug>.ts`, listed in `src/data/club/kits/index.ts`, checked by `kitProblems()` and `tests/club-kits.test.ts`. Each kit also gets one database row (`club_kits`) for its release time and mailer cutoff once the migration exists ([IMPLEMENTATION_PLAN.md → Phase 1 progress](IMPLEMENTATION_PLAN.md#12-phase-1-progress)).
 
 ## Making a kit, step by step
 
 1. **Brief** (`docs/club/briefs/<slug>.md`, copy the brief section below): theme, the one shift it asks of the family, flagship engine, inputs, worksheets, mailer contents, overlap check against the free tools and earlier kits.
 2. **Rules**: the item library for its engine (jobs, steps, prompts) with stable ids, ages and requirements. Reuse `src/data/responsibilities.ts`, `src/data/chores-by-age.ts`, `src/data/routines.ts` and cleaning content from `src/data/cleaning.ts` (read it, never retype it).
-3. **Config** (`src/data/club/kits/<slug>.ts`, shape below) and registry entry (`src/data/club/kits/index.ts`).
+3. **Config** (`src/data/club/kits/<slug>.ts`, shape below) and registry entry in `kits` (`src/data/club/kits/index.ts`), oldest first.
 4. **Tests**: `tests/club-kits.test.ts` validates every kit automatically; add engine cases for anything new the kit's rules do (a new `requires`, a new frequency).
 5. **Printables**: each worksheet is useful printed on its own, US Letter, follows [TOOL-OUTPUT-DESIGN.md](../brand/TOOL-OUTPUT-DESIGN.md) (three palettes, Kalam headings, charcoal on white).
 6. **Mailer**: Megan's letter (written by Megan; the config holds a `null` until she has), field guide, family activity, QR to `/club/kits/<slug>?source=mailer`. One print-ready PDF to the mail house.
@@ -15,115 +15,31 @@
 
 ## Config shape
 
-```ts
-// src/data/club/types.ts (Phase 1)
-export type EngineId = 'responsibilities' | 'routines' | 'planning' | 'projects';
-export type Frequency = 'daily' | 'weekdays' | 'weekly' | 'twice-weekly' | 'as-needed' | 'once';
-export type OwnershipLevel = 'helps' | 'does-with-check' | 'owns';
+The source of truth is `src/data/club/types.ts`; read it there. In short:
 
-/** One curated item an engine may place: a job, a routine step, a planning prompt or a project task. */
-export interface KitItem {
-  /** Stable forever once released: saved edits point at it. Rename the title freely; never reuse an id. */
-  id: string;
-  title: string;
-  /** Who may own it. 'adult' items are whole jobs, written start to finish. */
-  for: 'adult' | 'child' | 'anyone';
-  minAge?: number;
-  maxAge?: number;
-  /** Owner level by age, e.g. [[4, 'helps'], [7, 'does-with-check'], [10, 'owns']]. */
-  levels?: [age: number, level: OwnershipLevel][];
-  frequency: Frequency;
-  /** Relative load for balancing (1 small – 5 big). */
-  effort: 1 | 2 | 3 | 4 | 5;
-  area?: string;
-  /** Only placed when the household preference says so. */
-  requires?: { pets?: true; faith_content?: true; school?: 'homeschool' | 'public' };
-  /** A responsibilities.ts id: the illustration and its category color. */
-  illustration?: string;
-}
+- **`KitConfig`**: `slug` (`YYYY-MM-theme`, permanent once printed), `month`, `theme`, `shift` (the one change it asks of the family), `engine`, `engineVersion` (bump when rules change in a way saved edits must be checked against), up to two `inputs` with defaults, `items` (the flagship's rules), an optional `reset` (the companion's monthly project from `src/data/cleaning.ts` as owned jobs), `printables` (exactly one `flagship`), `mailer` (`letter: null` until Megan writes it, field guide, activity, `qrPath = /club/kits/<slug>?source=mailer`), `related` free tools (paths from `src/routes.ts`).
+- **`KitItem`**: stable `id` (never reused or renamed once released), owner-language `title`, `doneMeans` (what "done" looks like, so nobody inspects it), `for` (`adult` whole jobs / `child` / `anyone`), `minAge`/`maxAge` (children and teens only), `levels` by age, ascending and ending at `owns`: `learning` (their job, with someone beside them), `with-check` (theirs start to finish, a coach checks), `owns` (theirs completely), `frequency`, `effort` 1–5, `section` (`family` / `space` / `self`), `scope` (`household`: one owner for the family; `each`: everyone eligible gets their own), `core` (every family needs it: never silently dropped), `excludes` (jobs covering the same ground), `requires` (household preferences), `illustration` (a `src/data/responsibilities.ts` id).
 
-export interface KitPrintable {
-  /** club_documents.doc: stable. */
-  id: string;
-  title: string;
-  page: 'letter-portrait' | 'letter-landscape';
-  /** Personalized from the profile and saved edits, or the same for everyone (still fills in names). */
-  kind: 'flagship' | 'worksheet' | 'reset' | 'activity';
-  /** Component in src/components/club/print/. */
-  component: string;
-}
+Never write "help" into a job title: the tests refuse it. Ownership is the point.
 
-export interface KitConfig {
-  slug: string;            // '2026-11-family-ownership', permanent once printed
-  month: string;           // '2026-11'
-  theme: string;           // 'Our Family, Our Team'
-  /** The one shift this kit asks of the family, in a sentence. */
-  shift: string;
-  engine: EngineId;
-  /** Bump when rules change in a way saved edits must be checked against. */
-  engineVersion: number;
-  /** At most two kit-specific choices, each with a default, so the kit opens filled in. */
-  inputs?: { id: string; label: string; type: 'time' | 'date' | 'choice'; default: string; options?: string[] }[];
-  items: KitItem[];
-  printables: KitPrintable[];
-  mailer: {
-    /** Megan's letter, in her words. null until she's written it; the build refuses to schedule a kit with a null letter. */
-    letter: { title: string; body: string } | null;
-    fieldGuide: { title: string; sections: { heading: string; body: string }[] };
-    activity: { title: string; minutes: number; steps: string[] };
-    qrPath: string;        // '/club/kits/2026-11-family-ownership?source=mailer'
-  };
-  /** Free tools this kit points to instead of duplicating (src/data/free-tools.ts ids). */
-  related?: string[];
-}
-```
+### Responsibility cards
 
-## November example (abridged)
+Every card in `src/data/responsibilities.ts` is an item automatically (`cardItems()` in `src/data/club/libraries/ownership-jobs.ts`). Refine a card in `cardRules` there; a card added to the library without a rule still shows up, with defaults from its category (`myself` → self-care, each child; `room` → their space, each child; `home` → a family job with one owner) and its starting age. Only a card's id, title, category and starting age are used, never its how-to steps.
 
-```ts
-// src/data/club/kits/2026-11-family-ownership.ts (Phase 1)
-export const kit: KitConfig = {
-  slug: '2026-11-family-ownership',
-  month: '2026-11',
-  theme: 'Our Family, Our Team',
-  shift: 'Every household job has one owner, start to finish, and it isn’t always Mom.',
-  engine: 'responsibilities',
-  engineVersion: 1,
-  items: [
-    { id: 'own-dinner-two-nights', title: 'Dinner on two weeknights, start to finish', for: 'adult', frequency: 'twice-weekly', effort: 5, area: 'kitchen' },
-    { id: 'own-recycling', title: 'Recycling and trash, including pickup day', for: 'adult', frequency: 'weekly', effort: 2, area: 'home' },
-    { id: 'set-the-table', title: 'Set the Table', for: 'child', minAge: 4, levels: [[4, 'helps'], [6, 'owns']], frequency: 'daily', effort: 1, illustration: 'set-the-table' },
-    { id: 'clear-the-table', title: 'Clear the Table', for: 'child', minAge: 4, levels: [[4, 'does-with-check'], [7, 'owns']], frequency: 'daily', effort: 1, illustration: 'clear-the-table' },
-    { id: 'feed-the-pet', title: 'Feed the pet', for: 'child', minAge: 5, levels: [[5, 'does-with-check'], [8, 'owns']], frequency: 'daily', effort: 1, requires: { pets: true } },
-    { id: 'empty-dishwasher', title: 'Empty the dishwasher', for: 'anyone', minAge: 7, levels: [[7, 'does-with-check'], [9, 'owns']], frequency: 'daily', effort: 2 },
-    // … the rest of the library, built from responsibilities.ts and chores-by-age.ts
-  ],
-  printables: [
-    { id: 'ownership-chart', title: 'Our Family Responsibility Chart', page: 'letter-landscape', kind: 'flagship', component: 'ResponsibilityChart' },
-    { id: 'who-owns-what', title: 'Who Owns What: Our Team Meeting', page: 'letter-portrait', kind: 'activity', component: 'ConversationCard' },
-    { id: 'kitchen-pantry-reset', title: 'November Kitchen & Pantry Reset', page: 'letter-portrait', kind: 'reset', component: 'ResetChecklist' },
-    { id: 'handing-over', title: 'Handing Over a Whole Job', page: 'letter-portrait', kind: 'worksheet', component: 'Checklist' },
-  ],
-  mailer: {
-    letter: null, // Megan writes this.
-    fieldGuide: { title: 'Owning a Job, Not Helping With It', sections: [] },
-    activity: { title: 'The Team Meeting', minutes: 20, steps: [] },
-    qrPath: '/club/kits/2026-11-family-ownership?source=mailer',
-  },
-  related: ['chore-chart', 'mental-load-worksheet', 'fall-pantry-stock-up'],
-};
-```
+## November, as built
+
+`src/data/club/kits/2026-11-family-ownership.ts`: the responsibilities engine over `ownershipJobs()` (the 16 cards, 8 family jobs, 12 teen and adult whole jobs), the November Kitchen & Pantry Reset (the five November tasks from `cleaning.ts`, with ages per task id), four printables (`ownership-chart` flagship, `kitchen-pantry-reset`, `who-owns-what`, `handing-over`), the field guide "Owning a Job, Not Helping With It", the 20-minute Team Meeting activity, and `letter: null`.
 
 ## Test households (every kit, every month)
 
 | Household | Members | Checks |
 | --- | --- | --- |
-| A | 2 adults (one account holder), kids 4, 7, 10 | Ages eligible; adults whole jobs; account holder ≤ even adult share |
+| A | 2 adults (one account holder), kids 4, 7, 10, pets | Ages eligible; adults whole jobs; account holder ≤ the busiest other adult |
 | B | 1 adult, kids 6 and 9 | Single parent: kids' levels move up; no partner rows |
-| C | 2 adults, one child age 3 | Very young: "helps" levels only; nothing unsafe |
+| C | 2 adults, one child age 3 | Very young: `learning` levels only; nothing unsafe |
 | D | 2 adults, kids 5, 8, 11, 13 + `pets: true`, `faith_content: false` | Requirements honored; teen gets "owns" jobs; nothing faith-based shown |
 
-Then for household A: edit three items, add a child, archive one, change an age; the three edits must be unchanged, the archived person's jobs say "Needs a new owner", and the new child's jobs appear only as suggestions.
+These four and eight more (no kids, one adult with no kids, teens, a single parent of six, a grandparent at home, toddlers, an 18-year-old at home, no account-holder flag) are `tests/club/fixtures.ts`; the engine and edit tests run every one. Then for household A: edit three items, add a child, archive one, change an age; the three edits must be unchanged, the archived person's jobs say "Needs a new owner", and the new child's jobs appear only as suggestions.
 
 ## Brief template
 

@@ -1,6 +1,6 @@
 # Organized Family Club: architecture and implementation plan
 
-**Status (2026-10-22): planning only. Nothing here is built, deployed or for sale.** No migration has been applied, no function deployed, no Stripe object created, and no page exists. Don't mention the Club in customer copy until Phase 4's launch gate is passed (see [PRODUCT_ROADMAP.md](../brand/PRODUCT_ROADMAP.md)).
+**Status (2026-10-22): Phase 1 in progress; nothing deployed or for sale.** Built: the typed kit configuration, the November kit config, the responsibilities engine and the edit-merging logic, as pure TypeScript with tests (see [§12](#12-phase-1-progress)). No migration has been applied, no function deployed, no Stripe object created, and no Club page exists. Don't mention the Club in customer copy until Phase 4's launch gate is passed (see [PRODUCT_ROADMAP.md](../brand/PRODUCT_ROADMAP.md)).
 
 Related: [YEAR_ONE_CALENDAR.md](YEAR_ONE_CALENDAR.md) (the 12 kits and the monthly production calendar) · [KIT_TEMPLATE.md](KIT_TEMPLATE.md) (the repeatable kit config) · [draft-schema.sql](draft-schema.sql) + [draft-schema-smoke.sql](draft-schema-smoke.sql) (the proposed tables, functions and RLS, with 27 passing access checks).
 
@@ -15,7 +15,7 @@ Checked in code, not only docs.
 | Area | What exists | Where | Club reuse |
 | --- | --- | --- | --- |
 | Site | Astro 7, fully static (`dist/`), React 19 islands, Tailwind v4. No SSR adapter. | `astro.config.mjs` | Club pages are static shells with `client:only` React islands. |
-| Hosting | **Cloudflare Pages** in the repo: `_redirects` written at build (`cloudflare-redirects.mjs`), `public/_headers` for admin security headers, one Pages Function (`functions/pinterest-feed.csv.ts`). `vercel.json` was removed (commit `e0c1e94`). | `cloudflare-redirects.mjs`, `public/_headers`, `functions/` | `_headers` rules for `/club/*`; no new Pages Functions. |
+| Hosting | **Cloudflare Pages is the production hosting target** (owner, 2026-10-22; README → Hosting). In the repo: `_redirects` written at build (`cloudflare-redirects.mjs`), `public/_headers` for admin security headers, one Pages Function (`functions/pinterest-feed.csv.ts`). `vercel.json` was removed (commit `e0c1e94`). | `cloudflare-redirects.mjs`, `public/_headers`, `functions/` | `_headers` rules for `/club/*`; no new Pages Functions. |
 | Server logic | Supabase Edge Functions, one shared code base (`_shared/`), no SDKs: Stripe over `fetch`, PostgREST over `fetch` with the service role, Resend over `fetch`. Dashboard paste-ready builds via `npm run build:functions`. | `supabase/functions/`, `supabase/dashboard/` | Same pattern for three new functions. |
 | Stripe | One-time **payment-mode** embedded Checkout only. Webhook: signature check (5 min), each event id once (`shop_stripe_events`), session re-read from the API, refunds from Stripe's own total, idempotency keys. Live gate: live key + `SHOP_LIVE_CHECKOUT=enabled` + admin setting. API version `2025-03-31.basil`. **No subscriptions, Customers, invoices or Billing Portal anywhere.** | `_shared/stripe.ts`, `handlers/webhook.ts`, `handlers/checkout.ts`, `deps.ts` | `StripeClient`, `verifyStripeSignature`, `formEncode`, the gate pattern, the event-dedupe pattern. Subscription handling is new code. |
 | Auth / accounts | Supabase Auth email OTP over plain fetch, session in localStorage, token refresh; `account_saves` (localStorage keys synced, 64 KB/200 saves), purchases by verified email, `account_delete`. **Built and tested, switched off** (`PUBLIC_ACCOUNTS_ENABLED`), migration **not applied**; launch checklist open (privacy policy first). | `src/lib/account.ts`, `src/components/account/`, `supabase/migrations/20261022000000_accounts.sql`, `supabase/ACCOUNTS.md` | The Club's sign-in is this sign-in. **The Club can't launch before accounts do.** |
@@ -27,7 +27,22 @@ Checked in code, not only docs.
 
 ### Drift found (fix or confirm before building)
 
-1. **Hosting docs disagree with the code.** `supabase/SHOP.md`, `supabase/ACCOUNTS.md`, `docs/operations/PRIVACY_POLICY_DRAFT.md`, `docs/operations/ADMIN_DASHBOARD_PLAN.md` and `.github/workflows/page-inventory.yml` still say "Vercel → Environment Variables". The repo targets Cloudflare Pages, but `docs/operations/PINTEREST_MERCHANT_REVIEW.md` recorded DNS pointing at Vercel. **Confirm which host serves `www` today and where production `PUBLIC_*` build variables live.** The privacy policy names the host, so this must be right before it's published.
+1. **Legacy Vercel references (flagged for correction, 2026-10-22).** Production hosting is Cloudflare Pages ([README → Hosting](../../README.md#hosting)); build variables live in Cloudflare Pages → Settings → Variables and Secrets. These still describe Vercel and should be corrected in their own change (operational docs, so each fix should be checked against the live dashboards, not rewritten blind):
+
+   | File | What it says | Correct to |
+   | --- | --- | --- |
+   | `docs/operations/PRIVACY_POLICY_DRAFT.md` (§ Who we share it with) | "Vercel (hosting)" | Cloudflare (hosting). **Fix before `/privacy` is published.** |
+   | `supabase/ACCOUNTS.md` (launch step 10) | "Vercel → Environment Variables → `PUBLIC_ACCOUNTS_ENABLED`" | Cloudflare Pages → Variables, Production |
+   | `supabase/SHOP.md` (launch gate note, test-mode keys, the "Vercel" checklist section, launch step 4, deployment and domain notes) | Vercel env vars, deployments, domains, `*.vercel.app` | Cloudflare Pages equivalents; recheck the apex → www redirect where it's configured now |
+   | `supabase/TOOL-EMAIL.md` (steps 3 and 2) | "In Vercel … set `PUBLIC_TOOL_EMAIL_GATE_ENABLED`", "`PUBLIC_RESPONSIBILITY_CHART_GATE_ENABLED`" | Cloudflare Pages → Variables |
+   | `supabase/SUPPORT.md` | "already set on Vercel" | set in Cloudflare Pages |
+   | `supabase/ADMIN.md` | "same public values as Vercel … flags set on Vercel production" | Cloudflare Pages production |
+   | `.github/workflows/page-inventory.yml` (header comment) | "same as Vercel … set on Vercel production" | Cloudflare Pages production |
+   | `docs/operations/ADMIN_DASHBOARD_PLAN.md` | "fully static on Vercel", "One Vercel Function: `api/pinterest-feed.ts`", "after Vercel build", Vercel deployment link | Cloudflare Pages; the feed is the Pages Function `functions/pinterest-feed.csv.ts` |
+   | `docs/operations/PINTEREST_MERCHANT_REVIEW.md` | DNS → Vercel IPs, Vercel domains, `*.vercel.app` login wall | Historical review (dated); add a note that hosting moved, recheck DNS |
+   | `functions/pinterest-feed.csv.ts` (comment) | "when migrating off Vercel" | fine as history; reword to present tense when convenient |
+
+   Not hosting claims, leave as they are: `tests/shop.test.ts` and `supabase/functions/_shared/env.ts` use a `*.vercel.app` URL as an example of an extra allowed origin.
 2. **The existing webhook would see Club events.** One Stripe account, two products. If the shop endpoint stays subscribed to `checkout.session.completed` and `charge.refunded`, it will receive subscription checkouts and subscription refunds. Today it fails safe (no matching order → warning, `found: false`), but Phase 2 adds an explicit `session.mode === 'subscription'` skip with a test so it never depends on that accident.
 3. **One event table can't serve two endpoints.** If both endpoints share `shop_stripe_events`, whichever processes an event first makes the other skip it. The Club gets `club_stripe_events`.
 4. **`account_delete` deletes the sign-in outright.** With a paid subscription that would orphan a live Stripe charge. Phase 2 makes it refuse (`active_membership`) and routes Club members through `club-billing → delete`, which cancels in Stripe first.
@@ -39,9 +54,9 @@ Each has a recommendation. **Bold** ones block Phase 1.
 
 | # | Decision | Recommendation | Why |
 | --- | --- | --- | --- |
-| D1 | **Price and margin.** $5/month with a multi-piece printed mailer. | Get two real quotes (print + envelope + postage + insertion) before committing. At $5, Stripe's standard US card fee (2.9% + 30¢ ≈ 45¢; verify on your account) leaves about $4.55 for the whole mailer, any sales tax you absorb, returns and support. Price options to compare: $5 digital-only; $9–12 with mailer; or annual prepaid with the mailer. | A physical piece at $5 is the margin risk in this plan. Annual billing cuts the per-charge fee 12× and churn decisions to once a year. Don't anchor on $5 until the quote is in. |
-| D2 | **Launch month.** | Private beta of the November kit (digital, 10–20 families, free or a 100%-off test coupon) in late November; first paid month **January** ("Mornings Without the Mayhem"); first mailer drops late December for January. | Today is Oct 22. Accounts aren't live, nothing in Stripe exists, and a mailer needs content locked ~6 weeks out. A paid November with a mailer isn't realistic. January also matches "new routine" intent. |
-| D3 | **Sign in before or after paying?** | **Before.** `/club/start`: email → 6-digit code → family profile (≤ 2 minutes) → embedded Checkout for that verified account. Also handle a paid-but-not-signed-in subscription by verified-email claim (same rule as `account_orders`). | One account per subscription, no orphaned payments, no "which email did I use?" tickets, and she's already invested (her family is typed in) when she reaches the payment form. |
+| D1 | **Price and margin.** | **Working hypothesis: $5/month including the physical mailer** (owner, 2026-10-22), kept until fulfillment quotes are in. Get two quotes (print, envelope, postage, insertion) and record them here; Stripe's standard US card fee (2.9% + 30¢, verify on the account) comes out of each charge. Revisit only if the quotes don't fit. | The quote is the input the price depends on; nothing in the build is price-specific (one Stripe Price, a lookup key). |
+| D2 | **Launch month.** | Private digital beta of the November kit (10–20 families, free or a 100%-off test coupon). Choose the first paid month and first mailer month once the mail house's turnaround is known: December if its proof-to-mail time fits before a Nov 15 cutoff, otherwise January. | Production lead times in [YEAR_ONE_CALENDAR.md](YEAR_ONE_CALENDAR.md) are planning placeholders, not print deadlines; the real ones come from the mail house. Accounts going live is the other gate. |
+| D3 | **Sign in before or after paying?** | **Verify her email before payment; family onboarding after a successful checkout** (owner, 2026-10-22). `/club/start`: email → 6-digit code → embedded Checkout for that verified account → (paid) family profile. Also handle a paid-but-not-signed-in subscription by verified-email claim (same rule as `account_orders`). | One account per subscription, no orphaned payments, no "which email did I use?" tickets, and the shortest path to paying; nobody types in their children's details before they've decided to join. |
 | D4 | **Back catalog for members.** | Active members open **every released kit**. After cancelling: kits she **earned** (paid for their release month, or the one she joined on) stay open read-only, with print; no new kits, no edits. | Growing library = rising value per month (a retention reason). "Kits you paid for stay yours" removes the cancellation fear and the refund-dispute argument. |
 | D5 | **Payment failure grace.** | Digital access continues while Stripe is retrying (`past_due`), up to Stripe's retry schedule (set Smart Retries to end within ~2 weeks, then cancel). **No mailer unless the covering invoice is paid by the cutoff.** | Generous on what costs nothing (digital), strict on what costs money (print and postage). |
 | D6 | Refunds. | Full refund of an invoice → that invoice no longer earns anything (derived automatically) and the subscription is canceled now. First-month refund = full revoke. Partial (goodwill) refund → no access change. Dispute → `access_revoked_at`. A shipped mailer is never "revoked". | Simple to explain, enforced by the database, not by memory. |
@@ -55,9 +70,8 @@ Each has a recommendation. **Bold** ones block Phase 1.
 
 ```
 Browser (static pages + React islands)        Supabase Edge Functions               Postgres (club_* tables, RLS)
-/club/start  sign in (account.ts OTP) ───────────────────────────────────────────▶ auth.users
-             family profile ── rpc club_household_save ─────────────────────────▶ club_households, club_family_members
-             pay ──────────────────────────▶ club-billing {checkout}
+/club/start  1. verify email (account.ts OTP) ────────────────────────────────────▶ auth.users
+             2. pay ───────────────────────▶ club-billing {checkout}
                                                finds/creates Stripe Customer ───▶ club_customers
                                                refuses if a live sub exists
              Stripe embedded form ◀── client_secret (mode=subscription, US address)
@@ -65,6 +79,7 @@ Browser (static pages + React islands)        Supabase Edge Functions           
                                                signature, event once ───────────▶ club_stripe_events
                                                GET subscription / invoice ──────▶ club_subscriptions, club_invoices,
                                                (never trusts payload order)        club_mailing_addresses, join grant
+             3. (after payment) family profile ── rpc club_household_save ─────────▶ club_households, club_family_members
 /club/dashboard ── rpc club_me ─────────────────────────────────────────────────▶ access, status, kits she can open
 /club/kits/[slug] ── rpc club_household + club_document_get ────────────────────▶ profile + saved edits
              engine(profile, kit config) + edits → the kit, rendered and printed in the browser
@@ -111,7 +126,7 @@ Every webhook does the same thing: verify signature → record the event id (`cl
 
 | Scenario | What happens | Access | Mailer |
 | --- | --- | --- | --- |
-| New signup | `/club/start`: OTP → family → `club-billing {checkout}` creates a Customer with her verified email and `metadata.user_id`, opens embedded Checkout (`mode=subscription`, `shipping_address_collection: US`, `client_reference_id = user_id`). | From `invoice.paid` (`active`). The page polls `club_me()` until then. | If paid before the next cutoff. |
+| New signup | `/club/start`: email code → `club-billing {checkout}` creates a Customer with her verified email and `metadata.user_id`, opens embedded Checkout (`mode=subscription`, `shipping_address_collection: US`, `client_reference_id = user_id`). After payment the same page asks for her family. | From `invoice.paid` (`active`). The page polls `club_me()` until then, then shows the family form; the dashboard sends anyone without a household back to it. | If paid before the next cutoff. |
 | Existing customer (has `/account`, bought downloads) | Same auth user; `club_customers` gets her first Stripe Customer. Shop guest orders stay separate. | Same | Same |
 | Existing member tries again | `club-billing` refuses (`already_member`) and sends her to the dashboard; the unique index is the backstop. | Unchanged | Unchanged |
 | Checkout abandoned | Nothing in our tables except an orphan Stripe Customer we reuse next time. | None | None |
@@ -160,31 +175,33 @@ The QR on every mailer is `https://www.organizedmomcollective.com/club/kits/<slu
 ### Inputs, outputs, determinism
 
 - **Profile**: members with **age computed for the kit's month** from birth year/month (so October's kit sees October's ages), `is_account_holder`, preferences.
-- **Kit rules**: a curated library per kit (tasks, routine steps, prompts), each item with a stable `id`, `minAge`/`maxAge`, `kind` (`adult`/`child`/`anyone`), `area`, default `frequency`, an `effort` weight, and optional `requires` (`pets`, `faith_content`, `school: homeschool`). Built from existing libraries: `src/data/responsibilities.ts` (16 illustrated jobs with `minAge`), `src/data/chores-by-age.ts`, `src/data/routines.ts`.
+- **Kit rules** (`KitItem` in `src/data/club/types.ts`): a curated library per kit, each item with a stable `id`, `for` (`adult`/`child`/`anyone`), `minAge`/`maxAge`, ownership `levels` by age, `frequency`, an `effort` weight, `section` (family / their space / themselves), `scope` (`household`: one owner for the family; `each`: everyone eligible gets their own), `core`, `excludes` (jobs that cover the same ground) and optional `requires` (`pets`, `faith_content`, `school`). Built from existing libraries: every card in `src/data/responsibilities.ts` becomes an item automatically (a card added later gets defaults from its category and starting age), plus family jobs worded from `src/data/chores-by-age.ts` and whole jobs for teens and adults (`src/data/club/libraries/ownership-jobs.ts`).
 - **Output**: a document model (JSON) whose every row has a stable id. Same profile + same rules + same engine version → same document, byte for byte. Ties break on a stable hash of `household_id + item id`, never `Math.random`.
 
 ### The four engines (`src/lib/club/engines/`)
 
 | Engine | Does | Kits |
 | --- | --- | --- |
-| `responsibilities` | Picks age-eligible jobs, assigns owners by balanced effort, sets frequency and ownership level ("helps", "does it, someone checks", "owns it start to finish"). Adults get **whole jobs** (plan → do → finish), never "helps Mom". The account holder never carries more than an even adult share. Single-parent households: kids' ownership levels move up instead. | Nov, Mar, Apr, Oct |
+| `responsibilities` | Picks age-eligible jobs, assigns owners by balanced effort, sets frequency and ownership level (`learning`: their job, with someone beside them; `with-check`: theirs start to finish, a coach checks; `owns`: theirs completely). Adults get **whole jobs** (plan → do → finish), never "help Mom". Nobody goes past a weekly capacity by age, so leftovers show as "Needs an owner" instead of falling to a parent; the account holder only takes a job while staying at or below the busiest other adult, and coaching is spread the same way. Single-parent households: kids' ownership levels move up a year instead. | Nov, Mar, Apr, Oct |
 | `routines` | Ordered, timed steps per child (or the family) from start/end times and ages; owner per step. | Jan, Jun, Aug |
 | `planning` | A dated plan: dates from the kit month (holiday dates, school's last day, Sundays), prompts per family member, who leads each block. | Dec, Feb, May, Sep |
 | `projects` | A bounded project: zones or packing lists split into owned tasks with a due day, sized by age. | Mar, Jul |
 
 ### Edits are never overwritten
 
-The saved document is **not** the generated output. It's `edits` (assign, frequency, text, hidden, added, order, dismissed), keyed by item id and applied on top of a fresh generation every time the kit opens:
+The saved document is **not** re-generated output. It's `edits` (`src/lib/club/edits.ts`): `accepted` (the engine's rows as they were when she took them, kept whole), `added` (her own rows), and her changes on top (assign, coach, frequency, level, text, replace, hidden, order, dismissed), keyed by stable row ids. The engine runs again only to find *suggestions*, around everything already on her chart:
 
 ```
-shown = applyEdits(generate(profile, kitRules), edits)
+chart       = applyEdits(accepted + added, edits)
+suggestions = generate(profile, kitRules, pinned = chart) − chart − dismissed − hidden
 ```
 
 - **A manual change always wins.** Reassigning a job, rewording it, hiding it or reordering it pins that item.
 - **A profile change never changes the chart by itself.** When `household.profile_version` is newer than the document's, the kit shows a short "Your family changed" panel: new suggestions for a new or older child, listed with *Add* and *Not now*. Accepted ones become edits; dismissed ones go in `dismissed` and never come back.
 - **Someone removed** is archived, not deleted: their jobs stay on the chart marked "Needs a new owner" until she picks one.
-- **Rules change** (`engineVersion` bump): items that disappear from the rules but have edits stay as her own (`added`); new rules items show as suggestions, same panel.
-- Tested as properties: for any profile change, every edited item is unchanged (`tests/club-edits.test.ts`).
+- **Rules change** (`engineVersion` bump): items that disappear from the rules stay on her chart exactly as accepted; new rules items show as suggestions, same panel.
+- **A job she deliberately left without an owner** gets no owner offers.
+- Tested as properties: 200 seeded random runs of edits, new children, removals, birthdays, accepted and dismissed suggestions and database round trips; every edited field stays exactly as she left it (`tests/club-edits.test.ts`).
 
 ### PDF output
 
@@ -197,7 +214,7 @@ Static pages, `noindex` except `/club` once launched. Member pages use a new `Cl
 | Route | Purpose | Notes |
 | --- | --- | --- |
 | `/club` | Sales page | Behind `PUBLIC_CLUB_ENABLED`; until then a noindex "not available" stub, out of the sitemap, linked from nowhere. Lists only what's live. |
-| `/club/start` | Sign in → family (one screen: name, adult/child, birth month/year for kids; "Add someone") → pay | ≤ 2 minutes; nothing else asked. Preferences are optional and live in `/club/family`. |
+| `/club/start` | Verify email (6-digit code) → pay → family (one screen: name, adult/child, birth month/year for kids; "Add someone") | Family comes only after a successful payment; nothing else asked. Preferences are optional and live in `/club/family`. |
 | `/club/dashboard` | This month's kit first, then the library, then status line ("Renews Dec 1" / "Ends Dec 1") | |
 | `/club/kits/[slug]` | The kit: flagship generator filled in, worksheets, print | `getStaticPaths` from the kit registry; the page shell is static, the data comes from the RPCs. |
 | `/club/family` | Edit family and preferences | Shows "3 kits will offer new suggestions" after a change. |
@@ -238,7 +255,7 @@ Static pages, `noindex` except `/club` once launched. Member pages use a new `Cl
 
 ### Cloudflare Pages
 - `public/_headers`: `/club/*` (except `/club`) → `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store`, `Referrer-Policy: no-referrer`, a CSP allowing `connect-src` Supabase and Stripe, `frame-src`/`script-src` `https://js.stripe.com` on `/club/start` and `/club/settings`. `/admin/club` is already covered by `/admin/*`.
-- Build variables (Production and Preview separately): `PUBLIC_CLUB_ENABLED` (false in production until Phase 4), `PUBLIC_ACCOUNTS_ENABLED`, existing `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`. Public flags only show or hide pages; the server gate decides.
+- Build variables, in Cloudflare Pages → Settings → Variables and Secrets (Production and Preview separately): `PUBLIC_CLUB_ENABLED` (false in production until Phase 4), `PUBLIC_ACCOUNTS_ENABLED`, existing `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`. Public flags only show or hide pages; the server gate decides.
 - No Pages Functions, no redirects, no hosting change.
 
 ## 10. Smallest viable launch
@@ -252,9 +269,10 @@ Static pages, `noindex` except `/club` once launched. Member pages use a new `Cl
 ### Phase 0: prerequisites (no Club code)
 - Hosting confirmed (Drift 1); docs updated to the real host and env-var location.
 - Accounts step 1 launched per `supabase/ACCOUNTS.md`, including `/privacy` with the Club's children's-data section reviewed (D11).
-- D1, D2, D3, D7, D9 decided and written into this file.
+- D2, D7, D9 decided and written into this file; D1's fulfillment quotes recorded (the $5 working hypothesis confirmed or revised).
+- Legacy Vercel references corrected (Drift 1).
 
-**Accepted when:** a real customer can sign in on two devices and see the same saves; `/privacy` is live; the mail-house quote and price are recorded here.
+**Accepted when:** a real customer can sign in on two devices and see the same saves; `/privacy` is live and names the right host; the mail-house quotes are recorded here.
 
 ### Phase 1: data and engine (no payments)
 - Migration + `club-access.sql` in the repo; applied to a **Supabase branch or local stack only**.
@@ -278,10 +296,27 @@ Static pages, `noindex` except `/club` once launched. Member pages use a new `Cl
 
 **Accepted when:** one real purchase, renewal and refund on the owner's card behave as in §5; the first mailer batch is exported and mailed; the roadmap moves the Club to Live.
 
-## 12. First implementation task
+## 12. Phase 1 progress
 
-**Phase 1, task 1: the kit config types, the November kit config and the `responsibilities` engine, as pure TypeScript with tests. No database, no UI, no Stripe.**
+### Done (2026-10-22): kit configuration, November kit, responsibilities engine, edit merging
 
-Files: `src/data/club/types.ts`, `src/data/club/libraries/ownership-jobs.ts` (built from `responsibilities.ts` and `chores-by-age.ts`, adult whole-jobs added), `src/data/club/kits/2026-11-family-ownership.ts`, `src/lib/club/profile.ts`, `src/lib/club/hash.ts`, `src/lib/club/engines/responsibilities.ts`, `src/lib/club/edits.ts`, `tests/club-profile.test.ts`, `tests/club-engine.test.ts`, `tests/club-edits.test.ts`, `tests/club-kits.test.ts`.
+Pure TypeScript, no database, UI, Stripe or new dependencies; nothing ships to visitors.
 
-Done when `npm test` passes the Phase 1 engine criteria above. It's the riskiest product logic, the cheapest to change now, and nothing ships to visitors.
+| File | What it is |
+| --- | --- |
+| `src/data/club/types.ts` | `KitConfig`, `KitItem`, `KitPrintable`, frequencies, ownership levels, chart sections |
+| `src/data/club/libraries/ownership-jobs.ts` | The job library: every card in `src/data/responsibilities.ts` (refined rules for the 16 we have, defaults for any added later), family jobs from `chores-by-age.ts`, teen and adult whole jobs |
+| `src/data/club/kits/2026-11-family-ownership.ts` | November: theme, rules, the Kitchen & Pantry Reset read from `src/data/cleaning.ts` (November project), printables, field guide, team-meeting activity; Megan's letter `null` until she writes it |
+| `src/data/club/kits/index.ts` | Kit registry, `kitProblems()` validation, `schedulable()` (refuses a kit without Megan's letter) |
+| `src/lib/club/profile.ts` | Family profile types, ages for a kit month, stages (child / teen / adult), validation matching `club_household_save` |
+| `src/lib/club/hash.ts` | Stable FNV-1a hash for tie-breaks |
+| `src/lib/club/engines/responsibilities.ts` | The engine (rules above) |
+| `src/lib/club/edits.ts` | Edit operations (assign, coach, frequency, level, rename, replace, remove/restore, add, move, accept/dismiss suggestions), `resolveDocument()`, `readEdits()` for saved JSON |
+| `tests/club-profile.test.ts`, `tests/club-engine.test.ts`, `tests/club-edits.test.ts`, `tests/club-kits.test.ts`, `tests/club/fixtures.ts` | 12 test families from one adult with no kids to a single parent of six, teens, a grandparent at home, an 18-year-old still at home |
+
+### Still to do in Phase 1
+1. The migration (`supabase/migrations/<date>_club_core.sql` from `draft-schema.sql`) and `supabase/tests/club-access.sql`, run on a local stack only.
+2. `ClubLayout`, the family form, and the kit page rendering the Family Ownership Builder, the suggestions panel and the printables, with print-to-PDF, on a Preview deployment behind `PUBLIC_CLUB_ENABLED`.
+3. The Phase 1 acceptance check above on real devices.
+
+Phase 2 (billing) doesn't start until the owner says so.

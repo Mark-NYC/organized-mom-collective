@@ -1,6 +1,6 @@
 # Organized Family Club: year one editorial calendar
 
-**Status (2026-10-22): proposed curriculum, not for sale, nothing built.** Release and cutoff dates are planning targets that depend on the decisions in [IMPLEMENTATION_PLAN.md → Decisions](IMPLEMENTATION_PLAN.md#2-decisions-owed-before-building), especially D2 (November as a private digital beta, first paid month and first mailer January). Each kit is specified in full with [KIT_TEMPLATE.md](KIT_TEMPLATE.md) before it's built.
+**Status (2026-10-22): proposed curriculum, not for sale; the November kit's configuration is built (`src/data/club/kits/2026-11-family-ownership.ts`), nothing published.** Release and cutoff dates are planning targets. The first paid month and first mailer month are open ([IMPLEMENTATION_PLAN.md → D2](IMPLEMENTATION_PLAN.md#2-decisions-owed-before-building)): December if the mail house's turnaround fits a Nov 15 cutoff, otherwise January. Working price: $5/month including the mailer, until fulfillment quotes are in (D1). Each kit is specified in full with [KIT_TEMPLATE.md](KIT_TEMPLATE.md) before it's built.
 
 ## The through-line
 
@@ -13,8 +13,8 @@ Rules for every month (from [VISION.md](../brand/VISION.md) and [BRAND_VOICE.md]
 | Month | Theme | Flagship generator | Engine | Monthly reset (team version of the companion's monthly project in `src/data/cleaning.ts`) | Release (target) | Mailer cutoff (target) |
 | --- | --- | --- | --- | --- | --- | --- |
 | **Nov 2026** | Our Family, Our Team | Family Ownership Builder | responsibilities | Kitchen & Pantry Reset (companion: Kitchen + Hosting Prep) | Private beta, late Nov | No mailer (beta) |
-| **Dec 2026** | Make Room for What Matters | Holiday Teamwork Planner | planning | Holiday Reset + Declutter | Dec 1 | Nov 15 |
-| **Jan 2027** | Mornings Without the Mayhem | Morning Routine Builder | routines | Kitchen Reset | Jan 1 (**first paid month**) | Dec 15 |
+| **Dec 2026** | Make Room for What Matters | Holiday Teamwork Planner | planning | Holiday Reset + Declutter | Dec 1 (first paid month if D2 allows) | Nov 15 |
+| **Jan 2027** | Mornings Without the Mayhem | Morning Routine Builder | routines | Kitchen Reset | Jan 1 | Dec 15 |
 | **Feb 2027** | Better Together | Family Connection Planner | planning | Bedrooms + Closets | Feb 1 | Jan 15 |
 | **Mar 2027** | Spring Clean as a Team | Family Spring Cleaning Builder | projects + responsibilities | Spring Prep | Mar 1 | Feb 15 |
 | **Apr 2027** | Everybody Helps at Mealtime | Meal Responsibility Planner | responsibilities | Windows + Entry | Apr 1 | Mar 15 |
@@ -25,7 +25,7 @@ Rules for every month (from [VISION.md](../brand/VISION.md) and [BRAND_VOICE.md]
 | **Sep 2027** | A Week Everyone Can See | Sunday Family Reset Builder | planning | Entry + Storage | Sep 1 | Aug 15 |
 | **Oct 2027** | The Family That Follows Through | Family Habits and Ownership Review | responsibilities (review mode) | Closet Cleanout | Oct 1 | Sep 15 |
 
-December's dates assume the mailer is ready by Nov 15, which is only realistic if D2 moves the first paid month earlier than January. If it doesn't, December is digital-only for beta families too.
+Whether December is the first paid month with a mailer depends on the mail house's real proof-to-mail time (D2), not on the placeholder lead times below. If it doesn't fit, December's kit opens digitally for beta families and January becomes the first paid month.
 
 Slugs follow `YYYY-MM-<theme>` and are permanent once printed on a mailer: `2026-11-family-ownership`, `2026-12-holiday-teamwork`, `2027-01-mornings`, `2027-02-better-together`, `2027-03-spring-clean`, `2027-04-mealtime`, `2027-05-school-year-wrap-up`, `2027-06-summer-rhythm`, `2027-07-ready-to-go`, `2027-08-school-launch`, `2027-09-sunday-reset`, `2027-10-follow-through`.
 
@@ -35,7 +35,7 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 
 ### November: Our Family, Our Team (MVP)
 
-- **Flagship: Family Ownership Builder.** Recommends household jobs by age; every job has **one owner** (start to finish, including noticing it needs doing), a frequency (daily, a set weekday, weekly, as needed) and an ownership level by age ("helps", "does it, someone checks", "owns it"). Adults get whole jobs (dinner on two weeknights, start to finish; the recycling, including knowing pickup day). Editable: reassign, reword, change frequency, hide, add, reorder. Output: **the Family Responsibility Chart**, US Letter landscape, a row per person with their jobs and illustrations, palette choice.
+- **Flagship: Family Ownership Builder.** Recommends household jobs by age; every job has **one owner** (start to finish, including noticing it needs doing), a frequency (daily, a set weekday, weekly, as needed) and an ownership level by age (learning: their job with someone beside them; with-check: theirs start to finish, a coach checks; owns: theirs completely). Adults get whole jobs (dinner on two weeknights, start to finish; the recycling, including knowing pickup day). Editable: reassign, reword, change frequency, hide, add, reorder. Output: **the Family Responsibility Chart**, US Letter landscape, a row per person with their jobs and illustrations, palette choice.
 - **Worksheets:** "Who Owns What" conversation card (the family activity's printable); November Kitchen & Pantry Reset (team version, filled with names); a one-page "Handing over a whole job" checklist for the adults.
 - **Mailer:** Megan's letter (her words; theme: why ownership beats helping); field guide "Owning a Job, Not Helping With It" (what full ownership means at each age, how to hand a job over once and not take it back, what to do the week it slips); family activity "The Team Meeting" (20 minutes, a script, everyone picks one job to own); QR to the personalized chart.
 - **Personalization inputs:** ages, adult/child, account holder, `pets`.
@@ -48,7 +48,7 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter on doing fewer things together; field guide on dividing the season so one person isn't the season; activity: family vote on traditions.
 - **Overlap check:** free `/december-countdown` and `/holiday-gift-planner` stay free; the kit links to them instead of duplicating.
 
-### January: Mornings Without the Mayhem (first paid month)
+### January: Mornings Without the Mayhem
 
 - **Flagship: Morning Routine Builder.** Per child: ordered, timed steps from wake-up to out-the-door, sized by age, with the night-before steps they own; adults' morning jobs split, not stacked on one person. Two inputs with defaults: leave-the-house time, wake-up time.
 - **Worksheets:** night-before checklist per child, "the late morning" fallback plan (the 10-minute version), team Kitchen Reset.
@@ -122,7 +122,7 @@ See [IMPLEMENTATION_PLAN.md → Monthly fulfillment lifecycle](IMPLEMENTATION_PL
 | Kit | Brief | Config + letter | Mailer locked | Cutoff | Mail drop |
 | --- | --- | --- | --- | --- | --- |
 | Nov 2026 (beta) | done in this plan | Phase 1 | — | — | — |
-| Dec 2026 | Sep 22 (missed) | Oct 6 (missed) | Oct 20 (missed) | Nov 15 | Nov 20 |
+| Dec 2026 | set by the mail house's turnaround (D2) | | | Nov 15 | Nov 20 |
 | Jan 2027 | Oct 23 | Nov 6 | Nov 20 | Dec 15 | Dec 20 |
 | Feb 2027 | Nov 22 | Dec 6 | Dec 20 | Jan 15 | Jan 20 |
 | Mar 2027 | Dec 21 | Jan 4 | Jan 18 | Feb 15 | Feb 20 |
@@ -134,4 +134,4 @@ See [IMPLEMENTATION_PLAN.md → Monthly fulfillment lifecycle](IMPLEMENTATION_PL
 | Sep 2027 | Jun 22 | Jul 6 | Jul 20 | Aug 15 | Aug 20 |
 | Oct 2027 | Jul 22 | Aug 5 | Aug 19 | Sep 15 | Sep 20 |
 
-**Read this table before committing to dates:** December's production dates have already passed, and January's brief is due tomorrow. That's the case for D2: beta in November, first mailer in January.
+**These lead times are planning placeholders,** counted back from the release date. The real print deadlines come from the mail house's quote and turnaround (D9), and replace these columns once they're known.

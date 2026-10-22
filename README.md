@@ -22,7 +22,19 @@ npm run inventory # after a build: list every page for /admin → Pages & Funnel
 npm run build:functions # rebuild the paste-ready Edge Function files in supabase/dashboard/ after editing supabase/functions/
 ```
 
-`dist/` is a fully static site — deploy it to Netlify, Vercel, Cloudflare Pages, GitHub Pages, etc.
+`dist/` is a fully static site.
+
+## Hosting
+
+**Production hosting is Cloudflare Pages** (www.organizedmomcollective.com). Expected build settings: command `npm run build`, output directory `dist`, Node 22.12+ (check them in Cloudflare Pages → Settings → Build). What the repo gives it:
+
+- `dist/_redirects`: the permanent 301s from `redirects` in `astro.config.mjs`, written at build by `cloudflare-redirects.mjs`.
+- `public/_headers`: security headers for `/admin` and `/survey/admin` (noindex, no-store, CSP, frame denial).
+- `functions/`: Pages Functions; today only `/pinterest-feed.csv` (`functions/pinterest-feed.csv.ts` → `api/pinterest-feed.ts`).
+- Build variables (`PUBLIC_*`, see `.env.example`) are set in Cloudflare Pages → Settings → Variables and Secrets, separately for Production and Preview, and baked in at build time: change one, then redeploy.
+- Server code isn't on Cloudflare: Edge Functions and the database are Supabase (`supabase/`).
+
+The site moved here from Vercel (`vercel.json` removed in `e0c1e94`). Some setup docs still say Vercel; they're listed for correction in [docs/club/IMPLEMENTATION_PLAN.md → Drift found](docs/club/IMPLEMENTATION_PLAN.md#drift-found-fix-or-confirm-before-building).
 
 ## Where things live
 
@@ -68,6 +80,7 @@ npm run build:functions # rebuild the paste-ready Edge Function files in supabas
 | UI components | `src/components/` |
 | Date / schedule / storage logic | `src/lib/` |
 | PWA manifest, icons, service worker | `public/` |
+| **Organized Family Club** (planned membership; nothing published, no pages) | Kit types and configs `src/data/club/` (November: `kits/2026-11-family-ownership.ts`; job library built from `src/data/responsibilities.ts`: `libraries/ownership-jobs.ts`), engine and edit merging `src/lib/club/`, tests `tests/club-*.test.ts`. Plan: `docs/club/IMPLEMENTATION_PLAN.md` |
 
 ### Editing tasks
 
@@ -105,7 +118,7 @@ All keys are prefixed `omc:v1:` (see `src/lib/storage.ts`):
 | QR entry | `/start` — **permanent**, printed on every calendar as `https://organizedmomcollective.com/start` | noindex |
 | Companion app | `/app` (Today), `/app/week`, `/app/reorder`, `/app/settings`. `/app/tidy` is the old name for Week and redirects there, keeping `#monthly-focus` | `noindex, follow` |
 | Accounts (not built) | e.g. `/login`, `/account` | — |
-| Organized Family Club (planning only, nothing built) | proposed `/club`, `/club/start`, `/club/dashboard`, `/club/kits/<slug>`, `/club/family`, `/club/settings`, `/admin/club`; plan, schema draft and curriculum in `docs/club/` | — |
+| Organized Family Club (no pages yet; Phase 1 engine code only) | proposed `/club`, `/club/start`, `/club/dashboard`, `/club/kits/<slug>`, `/club/family`, `/club/settings`, `/admin/club`; plan, schema draft and curriculum in `docs/club/` | — |
 
 - **Redirects** (`redirects` in `astro.config.mjs`) keep old WordPress URLs printed in paid PDFs working. On Cloudflare each is a permanent 301 server redirect (`cloudflare-redirects.mjs` writes them to `dist/_redirects`); Astro also builds each as a small noindex page that forwards instantly and points its canonical at the new URL, the fallback for `astro preview`. Current: `/refunds` → `/returns` (the old policy page), and `/command-center-reset-where-did-my-time-go-how-to-spot-and-stop-energy-leaks-in-your-week` (the Command Center Refresh Sheet's "READ:" link) → `/resources/where-does-my-time-go`, and the short `/chores-for-kids-by-age` → `/resources/chores-for-kids-by-age` (the article stays the only page and canonical). Never remove one while a PDF in circulation still prints it.
 - **`/start` never changes.** It redirects instantly (no history entry) to `START_DESTINATION` (currently `/app?source=calendar`). If your host supports server redirects, a 302 from `/start` to the same destination is equivalent.
