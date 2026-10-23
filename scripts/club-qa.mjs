@@ -1879,7 +1879,8 @@ for (const id of [...samples, 'hughes']) {
     const [d1] = await Promise.all([page.waitForEvent('download'), page.click('[data-pk-download]')]);
     await d1.saveAs(join(out, `${id}-july-${six.toLowerCase()}-pool.png`));
   }
-  const youngest = { rivera: 'Elena', chen: 'Leo', okafor: 'Zara' }[id];
+  // The youngest child under six by the kit's month (the sample families age with the calendar: the Chens' Leo is 6 by July).
+  const youngest = { rivera: 'Elena', okafor: 'Zara' }[id];
   if (youngest) {
     await page.locator('[data-pk-print-for]').selectOption({ label: `${youngest}’s list` });
     check(await page.locator('.pk-sheet.is-young').count() === 1, `${id}: ${youngest}'s list isn't the picture-first layout`);

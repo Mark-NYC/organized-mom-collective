@@ -154,7 +154,7 @@ export function initPackingBuilder(host: HTMLElement, handoff?: ToolHandoff | nu
    * Re-plan: each person's suggested items for this outing, minus the ones she removed; her items keep her wording,
    * section, check and order, new suggestions slot in, her own items stay. The shared list the same way, with owners.
    */
-  const build = () => {
+  const build = (rebalance = false) => {
     const o = input();
     const lists: Record<string, PackItem[]> = {};
     for (const h of s.helpers) {
@@ -182,9 +182,15 @@ export function initPackingBuilder(host: HTMLElement, handoff?: ToolHandoff | nu
     const before = new Map(s.shared.map((x) => [x.key, x]));
     const sharedFresh = sharedList(o).filter((x) => !s.sharedRemoved.includes(x.key)).map((x) => {
       const was = before.get(x.key);
-      return was ? { ...x, title: was.title, ...(was.done ? { done: true } : {}), ...(was.pinned ? { owner: was.owner, pinned: true as const } : {}) } : x;
+      return was ? { ...x, title: was.title, ...(was.done ? { done: true } : {}), ...(was.pinned ? { owner: was.owner, pinned: true as const } : {}), ...(!rebalance && was.owner ? { owner: was.owner, keep: true } : {}) } : x;
     });
-    s.shared = assignShared([...sharedFresh, ...s.shared.filter((x) => !x.itemId)], s.helpers);
+    // Owners already on the list stay put (only who's going changing re-balances them); she can always reassign.
+    const kept = [...sharedFresh, ...s.shared.filter((x) => !x.itemId)].map((x) => ('keep' in x && x.keep ? { ...x, pinned: true as const } : x));
+    s.shared = assignShared(kept, s.helpers).map((x) => {
+      const { keep, pinned, ...rest } = x as SharedPackItem & { keep?: boolean };
+      // Her own choices stay pinned; owners kept only for stability don't.
+      return pinned && !(keep && !before.get(x.key)?.pinned) ? { ...rest, pinned } : rest;
+    });
   };
   if (!saved) build();
 
@@ -199,7 +205,7 @@ export function initPackingBuilder(host: HTMLElement, handoff?: ToolHandoff | nu
       if (change === 'remove') { delete s.lists[h.id]; delete s.removed[h.id]; }
       // A new age or group means new words: suggestions for that person start again (her own items stay).
       if (change === 'age' || change === 'group') s.lists[h.id] = (s.lists[h.id] ?? []).filter((x) => !x.itemId);
-      if (change !== 'name') build();
+      if (change !== 'name') build(true);
       update();
     },
   });
