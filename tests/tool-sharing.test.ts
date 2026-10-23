@@ -53,11 +53,14 @@ describe('tool handoff', () => {
 
   it('hands a child and a starting routine to the tool it’s for, and only that tool', () => {
     setToolHandoff({ tool: 'routine-chart', key: 'sample-rivera-mateo-afterschool', name: 'Mateo', age: 8, variant: 'afterschool', back: { href: '/club/kits/2027-08-school-year', label: 'Ready for the School Year' } });
-    expect(readToolHandoff('routine-chart')).toEqual({
+    expect(readToolHandoff('routine-chart', 'rivera')).toEqual({
       tool: 'routine-chart', key: 'sample-rivera-mateo-afterschool', name: 'Mateo', age: 8, variant: 'afterschool',
       back: { href: '/club/kits/2027-08-school-year', label: 'Ready for the School Year' },
     });
-    expect(readToolHandoff('chore-chart')).toBeNull();
+    expect(readToolHandoff('chore-chart', 'rivera')).toBeNull();
+    // Opened as another sample family (or as a member) in the same tab: not theirs, so nothing carries over.
+    expect(readToolHandoff('routine-chart', 'brooks')).toBeNull();
+    expect(readToolHandoff('routine-chart', null)).toBeNull();
   });
 
   it('drops anything malformed: bad keys, odd ages, off-site back links', () => {

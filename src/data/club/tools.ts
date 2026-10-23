@@ -73,6 +73,17 @@ export const clubTools = {
     title: 'Family Habit Builder',
     intro: 'Three questions, one habit. Change any words, then download your seven-day practice card or copy it. It saves in this browser.',
   },
+  'connection-planner': {
+    id: 'connection-planner',
+    path: routes.clubTool('connection-planner'),
+    // No public page yet: the component is a site tool (src/components/site/ConnectionPlanner.astro), ready for one.
+    publicPath: null,
+    perChild: false,
+    familyAges: true,
+    familyPeople: true,
+    title: 'Family Connection Planner',
+    intro: 'Answer what you like and skip the rest. Choose one idea, swap or edit any, then print or copy your plan. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;

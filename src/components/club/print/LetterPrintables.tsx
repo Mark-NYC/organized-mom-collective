@@ -41,6 +41,15 @@ function Sprig({ small }: { small?: boolean }) {
   );
 }
 
+/** February's one touch: a single fine-line heart, drawn in one stroke, in muted rose. Not a Valentine. */
+function Heart({ small }: { small?: boolean }) {
+  return (
+    <svg className={`club-heart${small ? ' club-heart-small' : ''}`} viewBox="0 0 40 36" aria-hidden="true" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 32 C 12 26, 3 19, 4 11 C 5 5, 12 3, 16 6 C 18 7.5, 19.3 9.5, 20 11 C 20.7 9.5, 22 7.5, 24 6 C 28 3, 35 5, 36 11 C 37 19, 28 26, 20 32" stroke="#b98a8e" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
 /** What she's filled in online, for her own printout: done, who's helping, when (a date, "When you can", or ''), her wording. */
 export interface ActionFill {
   done: boolean[];
@@ -67,9 +76,9 @@ function FocusLine({ label, value }: { label: string; value?: string }) {
  * The month's action as a checklist: a box, the line, a "By" blank (a countdown only) and a "Who's helping?" blank.
  * The mailed copy prints the blanks; her printout fills in what she chose online.
  */
-function ActionList({ items, helperLabel, fill, dated }: { items: CountdownItem[]; helperLabel?: string; fill?: ActionFill; dated: boolean }) {
+function ActionList({ items, helperLabel, fill, dated, below }: { items: CountdownItem[]; helperLabel?: string; fill?: ActionFill; dated: boolean; below?: boolean }) {
   return (
-    <ol className={`club-action${dated ? '' : ' club-action-undated'}${helperLabel ? '' : ' club-action-plain'}`}>
+    <ol className={`club-action${dated ? '' : ' club-action-undated'}${helperLabel ? '' : ' club-action-plain'}${below ? ' club-action-below' : ''}`}>
       {items.map((t, i) => (
         <li key={t.text} className="club-action-row">
           <span className={`club-box club-action-box${fill?.done[i] ? ' is-done' : ''}`} />
@@ -109,7 +118,11 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
   const conversationBlock = conversation && (
     <div className="club-letter-conversation">
       <span className="club-letter-label">{conversation.label}</span>
-      <p className="club-letter-question">{conversation.question}</p>
+      {conversation.prompts ? (
+        <ol className="club-letter-prompts">{conversation.prompts.map((q) => <li key={q}>{q}</li>)}</ol>
+      ) : (
+        <p className="club-letter-question">{conversation.question}</p>
+      )}
       {conversation.note && <p className="club-letter-question-note">{conversation.note}</p>}
     </div>
   );
@@ -121,10 +134,11 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
   );
   return (
     <div className="club-print club-letter" data-doc={doc} data-preview={preview ? '' : undefined} data-accent={kit.mailer.accent}
-      data-dense={action?.helperLabel && action.items.some((t) => t.detail) ? '' : undefined}>
+      data-dense={action?.helperLabel && action.helperPlacement !== 'below' && action.items.some((t) => t.detail) ? '' : undefined}>
       <section className="club-letter-page" aria-label="Front">
         {head}
         {kit.mailer.accent === 'evergreen' && <Sprig />}
+        {kit.mailer.accent === 'blush' && <Heart />}
         <h1 className="club-letter-title">{kit.theme}</h1>
         {kit.subtitle && <p className="club-letter-subtitle">{kit.subtitle}</p>}
         <div className="club-letter-body">
@@ -147,7 +161,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             <h2>{action.title}</h2>
             {action.note && <p className="club-letter-action-note">{action.note}</p>}
             {action.focus && <FocusLine label={action.focus.printLabel} />}
-            <ActionList items={action.items} helperLabel={action.helperLabel} dated={action.kind === 'countdown'} />
+            <ActionList items={action.items} helperLabel={action.helperLabel} dated={action.kind === 'countdown'} below={action.helperPlacement === 'below'} />
           </div>
         )}
       </section>
@@ -157,6 +171,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
         {conversation?.placement !== 'after-example' && conversationBlock}
         <h2 className="club-letter-back-title">
           {kit.mailer.accent === 'evergreen' && <Sprig small />}
+          {kit.mailer.accent === 'blush' && <Heart small />}
           {kit.mailer.fieldGuide.title}
         </h2>
         {kit.mailer.fieldGuide.intro && <p className="club-letter-back-intro">{kit.mailer.fieldGuide.intro}</p>}
@@ -218,7 +233,7 @@ export function ActionSheet({ doc, kit, palette, preview, fill }: { doc: string;
       <p className="club-sheet-intro">{action.intro}</p>
       {action.note && <p className="club-sheet-intro club-action-sheet-tip">{action.note}</p>}
       {action.focus && <FocusLine label={action.focus.printLabel} value={fill?.focus?.thing} />}
-      <ActionList items={action.items} helperLabel={action.helperLabel} fill={fill} dated={action.kind === 'countdown'} />
+      <ActionList items={action.items} helperLabel={action.helperLabel} fill={fill} dated={action.kind === 'countdown'} below={action.helperPlacement === 'below'} />
       {action.focus && (
         <div className="club-focus-plan">
           <FocusLine label={action.focus.planLabel} value={fill?.focus?.plan} />

@@ -725,6 +725,176 @@ for (const id of [...samples, 'hughes']) {
   await ctx.close();
 }
 
+// February (letter, three-part connection challenge, the Family Connection Planner): ideas per line save; the challenge
+// and the letter print; "Find Something to Do Together" opens the planner with the children's ages and first names.
+const febUrl = (id) => `${base}/club/kits/2027-02-better-together?sample=${id}`;
+const cnNames = (page) => page.locator('.cn-card .cn-card-name').allTextContents();
+const YOUNG_ONLY = ['Kitchen dance party', 'Read together', 'Five-minute bedtime chat'];
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { february: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(febUrl(id));
+  await page.getByRole('heading', { name: 'Our Family Connection Challenge' }).waitFor();
+  check(await noSideScroll(page), `${id}: February scrolls sideways on a phone`);
+  check(await lines.count() === 3, `${id}: the challenge has ${await lines.count()} actions (expected 3)`);
+  check(await page.getByPlaceholder('Our idea (optional)').count() === 3, `${id}: February is missing its "Our idea" lines`);
+  check(await page.locator('section[aria-labelledby="club-action"] input[type="date"]').count() === 0, `${id}: February asks for dates`);
+  await page.screenshot({ path: join(out, `${id}-february-phone.png`), fullPage: true });
+
+  await page.getByPlaceholder('Our idea (optional)').first().fill('Friday pizza and board games');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 3 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our Family Connection Challenge' }).waitFor();
+  check(await page.getByPlaceholder('Our idea (optional)').first().inputValue() === 'Friday pizza and board games', `${id}: the idea didn't survive a reload`);
+  check(await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: the checked action didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['connection-challenge', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-february-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: February ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: February ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Friday pizza and board games'), `${id}: her printout is missing her idea`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(!front.includes('Friday pizza') && front.includes('Make a shared space more inviting.') && (front.match(/Our idea/g) ?? []).length === 3, `${id}: the mailed letter's challenge is wrong`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-heart')]; return h.length === 2 && h.every((x) => parseFloat(getComputedStyle(x).height) > 15 || getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's heart is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Make Room for Connection', 'Make ordinary moments count.', 'Let everyone contribute.', 'Keep it simple enough to repeat.', 'What’s something that made you laugh this week?', 'What’s one thing you appreciate about someone in our family?', 'Family Connection Planner', 'Find simple activities that fit your family’s ages, time, and budget.', 'organizedmomcollective.com/club/kits/2027-02-better-together', 'let everyone help make it happen.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  check((back.match(/do together more often/g) ?? []).length === 1, `${id}: the letter's question repeats on the back`);
+  entry.greeting = await page.evaluate(() => document.querySelector('.club-letter-greeting')?.textContent);
+
+  // The tool: the connection planner, with the family's ages and first names.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Find Something to Do Together', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/connection-planner/);
+  await page.locator('.cn-card').nth(2).waitFor();
+  check(await page.locator('.cn[data-cn-handoff]').count() === 1, `${id}: the Club page isn't the site's connection planner`);
+  const agesNote = await page.locator('[data-cn-ages-note]').textContent();
+  check(id === 'hughes' ? /Tap any/.test(agesNote) : /^From your family profile: \d/.test(agesNote), `${id}: the planner's ages: "${agesNote}"`);
+  const slots = await page.locator('.cn-card [data-cn-slot]').allTextContents();
+  check(slots.join() === 'Family moment,One-on-one moment,Simple connection rhythm', `${id}: the three ideas are ${slots.join(', ')}`);
+  check(await page.locator('[data-cn-plan]').isHidden(), `${id}: a plan shows before anything is chosen`);
+  entry.ideas = { ages: agesNote, first: await cnNames(page) };
+  await page.screenshot({ path: join(out, `${id}-february-planner-phone.png`), fullPage: true });
+
+  // Time and budget change the ideas.
+  await page.getByRole('button', { name: 'About an hour' }).click();
+  await page.getByRole('button', { name: 'Under $25' }).click();
+  entry.ideas.hour25 = await cnNames(page);
+  check(entry.ideas.hour25.join() !== entry.ideas.first.join(), `${id}: time and budget didn't change the ideas`);
+
+  // Swap the first, edit and choose the second, plan it, reload: all still there.
+  const before = await cnNames(page);
+  await page.locator('.cn-card').nth(0).getByRole('button', { name: /^Swap/ }).click();
+  const after = await cnNames(page);
+  check(after[0] !== before[0] && after[1] === before[1] && after[2] === before[2] && (await page.locator('.cn-card [data-cn-slot]').first().textContent()) === 'Family moment', `${id}: swapping didn't replace just the family moment`);
+  const second = page.locator('.cn-card').nth(1);
+  await second.getByRole('button', { name: /^Edit/ }).click();
+  await second.locator('[data-cn-edit-title]').fill('Saturday muffins, just the two of us');
+  await second.getByRole('button', { name: /^Done editing/ }).click();
+  await second.getByRole('button', { name: /^Choose/ }).click();
+  check(await page.locator('[data-cn-plan]').isVisible(), `${id}: choosing an idea didn't show the plan`);
+  const people = await page.locator('[data-cn-person]').allTextContents();
+  entry.people = people;
+  check(people.length >= 1, `${id}: no family names to choose who's joining`);
+  for (const n of people.slice(0, 2)) await page.locator(`[data-cn-person="${n}"]`).click();
+  const whoWant = people.length > 1 ? `${people[0]} and ${people[1]}` : people[0];
+  check(await page.locator('[data-cn-who]').inputValue() === whoWant, `${id}: who's joining reads "${await page.locator('[data-cn-who]').inputValue()}"`);
+  await page.locator('[data-cn-when]').fill('Saturday morning');
+  await page.getByRole('button', { name: '15 minutes' }).click();
+  check((await cnNames(page))[1] === 'Saturday muffins, just the two of us', `${id}: the chosen idea moved when answers changed`);
+  await page.reload();
+  await page.locator('.cn-card').nth(2).waitFor();
+  check(await page.locator('.cn-card.is-chosen .cn-card-name').textContent() === 'Saturday muffins, just the two of us', `${id}: the chosen, edited idea didn't survive a reload`);
+  check(await page.locator('[data-cn-sheet-name]').textContent() === 'Saturday muffins, just the two of us' && await page.locator('[data-cn-sheet-who]').textContent() === whoWant && await page.locator('[data-cn-sheet-when]').textContent() === 'Saturday morning', `${id}: the plan doesn't show the chosen idea, who and when`);
+  const plan = await page.locator('[data-cn-sheet]').textContent();
+  check(plan.includes('Something to ask') && plan.includes('family and friends section') && !/score|streak|points/i.test(plan), `${id}: the plan is missing its question or calendar line`);
+  check(await noSideScroll(page), `${id}: the planner scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-february-planner-chosen.png`), fullPage: true });
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-cn-download]')]);
+  await dl.saveAs(join(out, `${id}-february-plan.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the planner asked for an email`);
+  await page.click('[data-cn-copy]');
+  await page.waitForTimeout(200);
+  const copied = await page.locator('[data-cn-status]').textContent();
+  const fallback = await page.locator('[data-cn-copy-fallback]').inputValue();
+  check(/^Copied/.test(copied) || fallback.includes('Saturday muffins'), `${id}: copying the plan didn't work`);
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-02/);
+  check(errors.length === 0, `${id}: February page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+{
+  const first = (id) => report.find((e) => e.february === id)?.ideas.hour25.join();
+  check(first('okafor') !== first('chen'), `February: a toddler family and a family with teens got the same ideas (${first('okafor')})`);
+}
+
+// No family profile, teenagers only: nothing childish, and the planner works with no setup.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/connection-planner?sample=new`);
+  await page.locator('.cn-card').nth(2).waitFor();
+  check(/Tap any/.test(await page.locator('[data-cn-ages-note]').textContent()), 'no profile: the planner claims ages from a profile');
+  await page.getByRole('button', { name: 'Teens', exact: true }).click();
+  const seen = new Set(await cnNames(page));
+  for (const time of ['15 minutes', 'About an hour', 'More time']) {
+    await page.getByRole('button', { name: time, exact: true }).click();
+    for (const n of await cnNames(page)) seen.add(n);
+  }
+  check(![...seen].some((n) => YOUNG_ONLY.includes(n)), `teens: childish ideas offered (${[...seen].join(', ')})`);
+  await page.locator('.cn-card').first().getByRole('button', { name: /^Choose/ }).click();
+  check(await page.locator('[data-cn-person]').count() === 0, 'no profile: the planner shows names it can’t know');
+  await page.locator('[data-cn-who]').fill('Everyone who’s home');
+  report.push({ teensNoProfile: [...seen] });
+  await ctx.close();
+}
+
+// Two families in one browser, February: one family's plan never shows up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(febUrl('rivera'));
+  await page.getByRole('button', { name: 'Find Something to Do Together', exact: true }).click();
+  await page.locator('.cn-card').nth(2).waitFor();
+  await page.locator('.cn-card').first().getByRole('button', { name: /^Choose/ }).click();
+  await page.locator('[data-cn-when]').fill('Rivera Friday');
+  await page.goto(febUrl('okafor'));
+  await page.getByRole('button', { name: 'Find Something to Do Together', exact: true }).click();
+  await page.locator('.cn-card').nth(2).waitFor();
+  check(await page.locator('.cn-card.is-chosen').count() === 0 && await page.locator('[data-cn-plan]').isHidden(), 'leak: Rivera’s chosen idea shows in the Okafors’ planner');
+  check((await page.locator('[data-cn-family]').inputValue()) === 'The Okafors', 'leak: the Okafors’ plan has another family’s name');
+  await page.locator('.cn-card').first().getByRole('button', { name: /^Choose/ }).click();
+  check(await page.locator('[data-cn-when]').inputValue() === '' && !(await page.locator('[data-cn-person]').allTextContents()).includes('Ana'), 'leak: Rivera’s plan details or names show for the Okafors');
+  // Same tab, straight to each tool's address as another sample family: the Okafors' handoff doesn't carry over.
+  for (const [tool, ready, probe] of [
+    ['connection-planner', '.cn-card', () => document.querySelector('[data-cn-family]')?.value ?? ''],
+    ['habit-builder', '[data-hb-statement]', () => document.querySelector('[data-hb-family]')?.value ?? ''],
+    ['traditions-picker', '.tp-card', () => document.querySelector('[data-tp-family]')?.value ?? ''],
+    ['chore-chart', '#chore-chart', () => document.querySelector('[data-cc-name]')?.value ?? ''],
+    ['routine-chart', '.mr-container', () => document.querySelector('.mr-container [data-field="title"]')?.value ?? ''],
+  ]) {
+    await page.goto(`${base}/club/tools/${tool}?sample=brooks`);
+    await page.locator(ready).first().waitFor();
+    const shown = await page.evaluate(probe);
+    check(!/Okafor|Zara/.test(shown) && !/Okafor|Zara/.test(await page.locator('h1').first().textContent()), `leak: ${tool} opened as Brooks shows the Okafors' "${shown}"`);
+  }
+  report.push({ februaryLeakCheck: 'ok' });
+  await ctx.close();
+}
+
 // Two families in one browser: nothing one does shows up in the other's kit or tools.
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

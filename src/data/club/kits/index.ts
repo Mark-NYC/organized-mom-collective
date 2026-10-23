@@ -8,11 +8,12 @@ import { routineTypes } from '../../routines';
 import { clubToolById } from '../tools';
 import { kit as november2026 } from './2026-11-family-ownership';
 import { kit as january2027 } from './2027-01-fresh-start-together';
+import { kit as february2027 } from './2027-02-better-together';
 import { kit as august2027 } from './2027-08-school-year';
 import { kit as october2027 } from './2027-10-home-works-together';
 import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, january2027, august2027, october2027, december2027];
+export const kits: readonly KitConfig[] = [november2026, january2027, february2027, august2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 
@@ -95,7 +96,7 @@ export function kitProblems(kit: KitConfig): string[] {
   if (kit.action) {
     if (kit.action.items.length < 3 || kit.action.items.length > 8) out.push('action: 3–8 lines (one small action, not a project)');
     if (kit.action.items.some((t) => !t.text.trim() || t.text.length > 90)) out.push('action: each line 1–90 characters');
-    if (kit.action.items.some((t) => t.detail !== undefined && (!t.detail.trim() || t.detail.length > 100))) out.push('action: each detail 1–100 characters');
+    if (kit.action.items.some((t) => t.detail !== undefined && (!t.detail.trim() || t.detail.length > 120))) out.push('action: each detail 1–120 characters');
     if (kit.action.kind === 'countdown') {
       if (kit.action.items.some((t) => !Number.isInteger(t.daysBefore) || t.daysBefore! < 1 || t.daysBefore! > 60)) out.push('action: daysBefore a whole number from 1 to 60');
       if (!kit.action.items.some((t) => t.essential)) out.push('action: mark the essentials (what still matters a day or two out)');
@@ -103,6 +104,7 @@ export function kitProblems(kit: KitConfig): string[] {
       out.push('action: a checklist has no dates (daysBefore, essential are for a countdown)');
     }
     if (!kit.mailer.invite || !kit.mailer.calendarNote) out.push('action: the letter needs its invite and calendar note');
+    if (kit.action.helperPlacement === 'below' && !kit.action.helperLabel) out.push('action: a blank below each line needs a helperLabel');
     const f = kit.action.focus;
     if (f) {
       const n = kit.action.items.length;
@@ -112,6 +114,8 @@ export function kitProblems(kit: KitConfig): string[] {
     }
   }
   if (kit.tool && !clubToolById(kit.tool.tool)) out.push(`tool: ${kit.tool.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
+  const prompts = kit.mailer.conversation?.prompts;
+  if (prompts && (prompts.length < 2 || prompts.length > 4 || !prompts.includes(kit.mailer.conversation!.question))) out.push('conversation: 2–4 prompts, the letter’s question among them');
   if (kit.mailer.letter?.namedGreeting && !kit.mailer.letter.namedGreeting.includes('{name}')) out.push('letter: namedGreeting needs {name}');
   if (kit.mailer.example && !routineTypes[kit.mailer.example.variant]) out.push(`example: no routine ${kit.mailer.example.variant}`);
   if (!kit.action && !kit.mailer.activity) out.push('a kit needs an action or an activity');

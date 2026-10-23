@@ -54,6 +54,8 @@ export const MAX_FOCUS = 80;
 export const MAX_PLAN = 160;
 
 export const MAX_HELPER = 40;
+/** A helper blank under the line holds a short note (February's "Our idea"), so saved blanks keep up to this. */
+export const MAX_NOTE = 60;
 export const MAX_TEXT = 90;
 export const MAX_STARTS = 6;
 export const FAMILY_START = 'family';
@@ -209,7 +211,7 @@ export function readCountdown(json: unknown, lines: number): CountdownState {
     done: Array.from({ length: lines }, (_, i) => arr('done')[i] === true),
     helpers: Array.from({ length: lines }, (_, i) => {
       const h = arr('helpers')[i];
-      return typeof h === 'string' ? h.replace(/\s+/g, ' ').slice(0, MAX_HELPER) : '';
+      return typeof h === 'string' ? h.replace(/\s+/g, ' ').slice(0, MAX_NOTE) : '';
     }),
     dates: Array.from({ length: lines }, (_, i) => (isDay(arr('dates')[i]) ? (arr('dates')[i] as Day) : null)),
     texts: Array.from({ length: lines }, (_, i) => {

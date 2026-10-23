@@ -5,11 +5,12 @@
 import { useState } from 'react';
 import { clubToolById } from '../../data/club/tools';
 import { readToolHandoff } from '../../lib/tool-handoff';
+import { clubNav } from '../../lib/club/nav';
 import { routes } from '../../routes';
 import ClubGate from './ClubGate';
 
 export default function ClubToolBar({ tool }: { tool: string }) {
-  const [handoff] = useState(() => readToolHandoff(tool));
+  const [handoff] = useState(() => readToolHandoff(tool, new URLSearchParams(clubNav().search()).get('sample')));
   const info = clubToolById(tool);
   const title = info?.title ?? 'Tool';
   // A family tool is the family's, not one person's: its title stays the tool's own.
@@ -26,8 +27,9 @@ export default function ClubToolBar({ tool }: { tool: string }) {
           </h1>
           <p className="mt-2 leading-relaxed text-warm-soft">
             {person ? `It starts with ${person}’s name on it${handoff?.age !== undefined ? `, and the jobs suited to age ${handoff.age} come first` : ''}. ` : ''}
-            {info?.familyAges && handoff?.ages?.length ? 'Your children’s ages come from your family profile. ' : ''}
-            {info?.familyPeople && handoff?.people?.length ? 'Your family’s names come from your profile. ' : ''}
+            {info?.familyAges && handoff?.ages?.length && info.familyPeople && handoff.people?.length ? 'Your children’s ages and your family’s names come from your profile. '
+              : info?.familyAges && handoff?.ages?.length ? 'Your children’s ages come from your family profile. '
+              : info?.familyPeople && handoff?.people?.length ? 'Your family’s names come from your profile. ' : ''}
             {info?.intro}
           </p>
         </div>

@@ -175,8 +175,11 @@ describe('January: the tool is the Family Habit Builder', () => {
     const store = new Map<string, string>();
     (globalThis as { sessionStorage?: unknown }).sessionStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => store.set(k, v), removeItem: (k: string) => store.delete(k) };
     store.set('omc:tool-handoff', JSON.stringify({ tool: 'habit-builder', key: 'sample-rivera-family', people: [{ name: ' Ana ', adult: true }, { name: '' }, 7], text: 'Shoes everywhere', date: '2027-01-04', variant: 'kitchen' }));
-    expect(readToolHandoff('habit-builder')).toMatchObject({ people: [{ name: 'Ana', adult: true }], text: 'Shoes everywhere', date: '2027-01-04', variant: 'kitchen' });
+    expect(readToolHandoff('habit-builder', 'rivera')).toMatchObject({ people: [{ name: 'Ana', adult: true }], text: 'Shoes everywhere', date: '2027-01-04', variant: 'kitchen' });
+    // Another sample family's handoff, or a sample's on a member's page, is ignored.
+    expect(readToolHandoff('habit-builder', 'okafor')).toBeNull();
+    expect(readToolHandoff('habit-builder', null)).toBeNull();
     store.set('omc:tool-handoff', JSON.stringify({ tool: 'habit-builder', key: 'k', date: 'soon' }));
-    expect(readToolHandoff('habit-builder')!.date).toBeUndefined();
+    expect(readToolHandoff('habit-builder', null)!.date).toBeUndefined();
   });
 });

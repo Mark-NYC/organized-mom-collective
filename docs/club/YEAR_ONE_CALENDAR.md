@@ -65,7 +65,16 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter on mornings; field guide on teaching a routine once and letting the chart do the reminding; activity: a timed practice run on a weekend morning.
 - **Overlap check:** free `/routine-chart` (one routine, typed in) stays free; the kit builds every child's chart at once from ages.
 
-### February: Better Together
+### February: Better Together (built 2026-10-23, behind the flag)
+
+*Less managing life. More enjoying it together.* Owner direction, 2026-10-23: replaces the earlier February plan below. Config: `src/data/club/kits/2027-02-better-together.ts`. Mailer: [mailers/2027-02-better-together.md](mailers/2027-02-better-together.md).
+
+- **The letter:** Make Room for Each Other (about 170 words): you can care for your family all day without enjoying them; organizing is for making room for the people you love; Mom isn't the entertainment director. Asks "What's something you'd love for us to do together more often?" A draft for Megan.
+- **The action:** Our Family Connection Challenge, three actions (do something together, one-on-one time with every grown-up taking a turn, one shared space made inviting on its cleaning-zone day), each with an optional "Our idea" line. No dates or scores.
+- **The tool:** the Family Connection Planner, a new site tool on the traditions picker's shared idea rules: three ideas (family, one-on-one, a rhythm), swap, edit, choose one, a one-page plan.
+- **Back of the letter:** Make Room for Connection (three principles), three conversation prompts, the QR code, one calendar note.
+
+### February (earlier plan): Better Together
 
 - **Flagship: Family Connection Planner.** A month of small, dated connection moments (one-on-one time per child with each adult, a family night per week), rotated so each pairing gets a turn; who plans each one.
 - **Worksheets:** conversation cards by age, one-on-one date menu, team Bedrooms + Closets reset.

@@ -1006,3 +1006,82 @@
   line-height: 1.45;
   font-size: 14pt;
 }
+
+/* February: an "Our idea" blank under each line, full width, instead of a name beside it. */
+.club-action-below .club-action-row,
+.club-action-sheet .club-action-below .club-action-row {
+  grid-template-columns: 0.22in 1fr;
+  row-gap: 0.04in;
+}
+.club-action-sheet .club-action-below .club-action-row {
+  grid-template-columns: 0.3in 1fr;
+}
+.club-action-below .club-action-helper {
+  grid-column: 2;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: 0.1in;
+}
+.club-action-below .club-action-helper-line {
+  height: 0.21in;
+}
+.club-action-sheet .club-action-below .club-action-helper-line {
+  height: 0.32in;
+}
+
+/* February's prompts: a short list instead of one big question. */
+.club-letter-prompts {
+  margin: 0.1in 0 0;
+  padding: 0 0 0 0.24in;
+  font-family: var(--font-serif);
+  font-size: 14pt;
+  line-height: 1.35;
+  color: #4d4544;
+}
+.club-letter-prompts li + li {
+  margin-top: 0.07in;
+}
+.club-letter-prompts li::marker {
+  font-family: var(--font-sans);
+  font-size: 10pt;
+  font-weight: 600;
+  color: #9a6a6f;
+}
+
+/* February's touch: one fine-line heart, and blush panels instead of sage. */
+.club-heart {
+  display: block;
+  flex: none;
+  width: 0.3in;
+  height: 0.27in;
+  margin: 0.14in 0 -0.2in;
+}
+.club-heart-small {
+  display: inline-block;
+  width: 0.24in;
+  height: 0.22in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.01in;
+}
+.club-letter .club-action-below .club-action-row {
+  font-size: 10.8pt;
+  padding: 0.05in 0;
+}
+.club-letter .club-action-below .club-action-detail {
+  font-size: 9pt;
+}
+.club-print[data-accent='blush'] .club-letter-action,
+.club-print[data-accent='blush'] .club-letter-conversation {
+  background: #f8eeec;
+  border-top-color: #c9a0a3;
+}
+.club-print[data-accent='blush'] .club-action-row {
+  border-bottom-color: #eedcd8;
+}
+.club-print[data-accent='blush'] .club-action-box.is-done {
+  background: #b98a8e;
+  border-color: #b98a8e;
+}
+.club-print[data-accent='blush'] .club-letter-calendar {
+  background: #eef2ec;
+}

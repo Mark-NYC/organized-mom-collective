@@ -14,7 +14,7 @@ import { monthLabel } from '../../data/club/labels';
 import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes';
 import type { KitConfig, KitPrintable } from '../../data/club/types';
 import {
-  addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_STARTS, planCountdown, readCountdown, resetChanges,
+  addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_NOTE, MAX_STARTS, planCountdown, readCountdown, resetChanges,
   shortLabel as shortDay, lineDetail, lineText, MAX_TEXT, checkInFor, focusLines, MAX_FOCUS, MAX_PLAN, type FocusState, type CountdownPlan, type CountdownState, type SchoolStart,
 } from '../../lib/club/countdown';
 import { schoolSetupFor, withSchool } from '../../lib/club/school';
@@ -488,6 +488,7 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
   const names = household.members.filter((m) => !m.archived).map((m) => m.firstName);
   const dated = plan.lines.some((l) => l.date);
   const focus = action.focus;
+  const below = action.helperPlacement === 'below';
   const text = focus
     ? [action.title, '', ...focusLines(focus.printLabel, state.focus), ...countdownText(action.title, action.items, plan, state).split('\n').slice(2)].join('\n')
     : countdownText(action.title, action.items, plan, state);
@@ -597,8 +598,8 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
                     </span>
                   )}
                   {action.helperLabel && (
-                    <input type="text" list="club-family-names" aria-label={`${action.helperLabel} ${words}`} placeholder={action.helperLabel} maxLength={MAX_HELPER} disabled={readOnly}
-                      className="block min-h-10 w-full max-w-[12rem] border-0 border-b border-[#c9d3c0] bg-transparent px-0 text-[0.95rem] text-warm-ink placeholder:text-warm-soft focus:border-warm-ink focus:outline-none"
+                    <input type="text" list={below ? undefined : 'club-family-names'} aria-label={`${action.helperLabel} ${words}`} placeholder={below ? `${action.helperLabel} (optional)` : action.helperLabel} maxLength={below ? MAX_NOTE : MAX_HELPER} disabled={readOnly}
+                      className={`block min-h-10 w-full ${below ? '' : 'max-w-[12rem]'} border-0 border-b border-[#c9d3c0] bg-transparent px-0 text-[0.95rem] text-warm-ink placeholder:text-warm-soft focus:border-warm-ink focus:outline-none`}
                       value={state.helpers[i]} onChange={(e) => update({ ...state, helpers: state.helpers.map((h, n) => (n === i ? e.target.value : h)) })} />
                   )}
                   {action.editable && !readOnly && wording !== i && (

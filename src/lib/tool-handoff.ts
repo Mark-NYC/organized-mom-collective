@@ -50,7 +50,12 @@ export function clearToolHandoff() {
 }
 
 /** The handoff for `tool`, checked field by field; null when there's none (or it's for another tool). */
-export function readToolHandoff(tool: string): ToolHandoff | null {
+/**
+ * `sample`: the Club sample household this page is showing (`?sample=<id>`; the hosted preview passes its own). A
+ * handoff made for another household's key is ignored, so opening a tool's address as a different sample family in
+ * the same tab never shows the last family's names. Keys start with the household id ('sample-rivera-…').
+ */
+export function readToolHandoff(tool: string, sample: string | null = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('sample')): ToolHandoff | null {
   let o: Partial<ToolHandoff> | null = null;
   try {
     o = JSON.parse(sessionStorage.getItem(KEY) ?? 'null');
@@ -58,6 +63,7 @@ export function readToolHandoff(tool: string): ToolHandoff | null {
     return null;
   }
   if (!o || o.tool !== tool || typeof o.key !== 'string' || !ID.test(o.key)) return null;
+  if (sample ? !o.key.startsWith(`sample-${sample}-`) : o.key.startsWith('sample-')) return null;
   const name = typeof o.name === 'string' ? o.name.replace(/\s+/g, ' ').trim().slice(0, 30) : '';
   const back = o.back && typeof o.back.href === 'string' && o.back.href.startsWith('/') && !o.back.href.startsWith('//') && typeof o.back.label === 'string' ? { href: o.back.href, label: o.back.label.slice(0, 60) } : undefined;
   return {

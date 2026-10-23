@@ -15,6 +15,7 @@ import { initRoutineChart } from '../components/site/routine-chart';
 import { initChoreChart } from '../components/site/chore-chart';
 import { initTraditionsPicker } from '../components/site/traditions-picker';
 import { initHabitBuilder } from '../components/site/habit-builder';
+import { initConnectionPlanner } from '../components/site/connection-planner';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -76,17 +77,21 @@ Object.defineProperty(HTMLImageElement.prototype, 'src', {
 // Site tools hosted in the Club: the markup the Club page renders (built into the preview), wired up with the same
 // behavior module the site uses. One tool, two entry points; the preview only swaps how the page arrives.
 const toolMarkup = (globalThis as { __CLUB_TOOLS?: Record<string, string> }).__CLUB_TOOLS ?? {};
+// The preview's page address is the host's, so the sample family comes from the preview's own route.
+let sample: string | null = null;
 const toolInit: Record<string, (host: HTMLElement) => void> = {
-  'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart')),
-  'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart')),
-  'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker')),
-  'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder')),
+  'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart', sample)),
+  'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart', sample)),
+  'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker', sample)),
+  'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder', sample)),
+  'connection-planner': (host) => initConnectionPlanner(host.querySelector<HTMLElement>('.cn')!, readToolHandoff('connection-planner', sample)),
 };
 
-function ToolPage({ tool }: { tool: string }) {
+function ToolPage({ tool, search }: { tool: string; search: string }) {
   const host = useRef<HTMLElement>(null);
   useEffect(() => {
     if (host.current) {
+      sample = new URLSearchParams(search).get('sample');
       swapImages(host.current);
       toolInit[tool]?.(host.current);
     }
@@ -148,7 +153,7 @@ function App() {
       {route.path === '/club/start' ? <FamilyPage key={key} mode="start" />
         : route.path === '/club/family' ? <FamilyPage key={key} mode="edit" />
         : kit ? <KitPage key={key} slug={kit.slug} />
-        : tool && toolMarkup[tool] ? <ToolPage key={key} tool={tool} />
+        : tool && toolMarkup[tool] ? <ToolPage key={key} tool={tool} search={route.search} />
         : <Dashboard key={key} />}
     </div>
   );

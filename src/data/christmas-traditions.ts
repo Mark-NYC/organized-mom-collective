@@ -7,12 +7,14 @@
  * old enough to help, so everyone can join in.
  */
 
+import { ageFocus, ideaFits, kidBand, rankIdeas, type IdeaScale, type KidBand } from '../lib/idea-picker';
+
 export type TraditionTime = 'short' | 'hour' | 'half-day';
 export type TraditionCost = 'free' | 'under-25' | 'flexible';
 export type TraditionSetting = 'home' | 'out';
 export type TraditionKind = 'giving' | 'cozy' | 'making' | 'food' | 'outing' | 'together';
 /** Under 5, 5–8, 9 and up. */
-export type KidBand = 'little' | 'young' | 'older';
+export type { KidBand };
 
 export interface Tradition {
   /** Stable once released: saved picks point at it. */
@@ -193,51 +195,16 @@ export interface TraditionPrefs {
 /** Opens with suggestions straight away: no question has to be answered first. */
 export const defaultPrefs: TraditionPrefs = { ages: [], time: 'hour', cost: 'under-25', setting: 'either' };
 
-const TIME_ORDER: TraditionTime[] = ['short', 'hour', 'half-day'];
-const COST_ORDER: TraditionCost[] = ['free', 'under-25', 'flexible'];
+const SCALE: IdeaScale = { time: ['short', 'hour', 'half-day'], cost: ['free', 'under-25', 'flexible'] };
 
-/** Who the kids' line is for: the youngest child old enough to help (2 and up), so everyone can join in. */
-export function kidBand(ages: readonly number[]): KidBand {
-  const helpers = ages.filter((a) => a >= 2);
-  if (!ages.length) return 'young';
-  const youngest = helpers.length ? Math.min(...helpers) : 2;
-  return youngest < 5 ? 'little' : youngest < 9 ? 'young' : 'older';
-}
+/** Who the kids' line is for, and which ages an idea should suit: the site's shared idea rules (src/lib/idea-picker.ts). */
+export { kidBand, ageFocus };
 
 /** True when the idea fits: within her time and budget, where she wants it, and right for her children's ages. */
-export function fits(t: Tradition, p: TraditionPrefs): boolean {
-  if (TIME_ORDER.indexOf(t.time) > TIME_ORDER.indexOf(p.time)) return false;
-  if (COST_ORDER.indexOf(t.cost) > COST_ORDER.indexOf(p.cost)) return false;
-  if (p.setting !== 'either' && t.setting !== p.setting) return false;
-  const kids = p.ages.filter((a) => a >= 2);
-  if (t.minAge !== undefined && kids.length && Math.min(...kids) < t.minAge) return false;
-  if (t.young && kids.length && kids.every((a) => a >= 13)) return false;
-  return true;
-}
+export const fits = (t: Tradition, p: TraditionPrefs) => ideaFits(t, p, SCALE);
 
-/** Which ages an idea should suit for this family: the youngest helper's band, or 'teens' when every child is one. */
-export function ageFocus(ages: readonly number[]): KidBand | 'teens' | null {
-  const kids = ages.filter((a) => a >= 2);
-  if (!kids.length) return null;
-  return kids.every((a) => a >= 13) ? 'teens' : kidBand(kids);
-}
-
-/** Best first: the time she has (not much less), then ideas that suit her children's ages, then her budget. Ties keep the list's order. */
-function score(t: Tradition, p: TraditionPrefs) {
-  const timeGap = TIME_ORDER.indexOf(p.time) - TIME_ORDER.indexOf(t.time);
-  const costGap = COST_ORDER.indexOf(p.cost) - COST_ORDER.indexOf(t.cost);
-  const focus = ageFocus(p.ages);
-  return (timeGap === 0 ? 4 : timeGap === 1 ? 2 : 0) + (focus && t.suits?.includes(focus) ? 1.5 : 0) + (costGap === 0 ? 1 : 0.5);
-}
-
-/** Every idea that fits, best first. */
-export function rankTraditions(p: TraditionPrefs): Tradition[] {
-  return traditions
-    .map((t, i) => ({ t, i, s: score(t, p) }))
-    .filter(({ t }) => fits(t, p))
-    .sort((a, b) => b.s - a.s || a.i - b.i)
-    .map(({ t }) => t);
-}
+/** Every idea that fits, best first: time, then the children's ages, then budget. Ties keep the list's order. */
+export const rankTraditions = (p: TraditionPrefs): Tradition[] => rankIdeas(traditions, p, SCALE);
 
 /**
  * Three suggestions: the ones she's keeping stay; the rest are the best that fit, never two of one kind, with one

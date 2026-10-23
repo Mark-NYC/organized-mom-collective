@@ -161,6 +161,8 @@ export interface KitConfig {
     intro: string;
     items: CountdownItem[];
     helperLabel?: string;
+    /** Where the helper blank goes: beside the line (a name: "Who's helping?") or under it, full width (February's "Our idea"). */
+    helperPlacement?: 'beside' | 'below';
     /** One line under the intro, on screen and on the letter: how to use it if she's already started (December). */
     note?: string;
     /** She can reword a line for her family (her wording prints on her copy; the mailer keeps the kit's). */
@@ -231,6 +233,8 @@ export interface KitConfig {
       note?: string;
       /** Where it sits on the back: first (August) or after the example (October). */
       placement?: 'top' | 'after-example';
+      /** Several short prompts instead of the one question (February): printed as a list, the letter's question among them. */
+      prompts?: string[];
     };
     /** Three-part kits: a worked example on the back of the letter: the tool's own starter (src/data/routines.ts). */
     example?: { title: string; variant: string };
@@ -239,8 +243,8 @@ export interface KitConfig {
     calendarNote?: string;
     /** '/club/kits/<slug>?source=mailer' */
     qrPath: string;
-    /** A restrained seasonal touch on the letter: December's evergreen sprig and muted evergreen and clay colors. */
-    accent?: 'evergreen';
+    /** A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush panels. */
+    accent?: 'evergreen' | 'blush';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];
