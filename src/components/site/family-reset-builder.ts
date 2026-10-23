@@ -209,6 +209,9 @@ export function initFamilyResetBuilder(host: HTMLElement, handoff?: ToolHandoff 
 
   // ---------------------------------------------------------------- the steps
   function renderSteps() {
+    // A field still focused in the old steps would fire its own change while being removed: let it finish first.
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && stepsBox.contains(active)) active.blur();
     const m = resetMinutes(s.helpers);
     const total = s.steps.reduce((n, x) => n + x.minutes, 0);
     $<HTMLElement>('[data-fr-timing]').textContent = `About ${total} minutes. ${m.note}`;
