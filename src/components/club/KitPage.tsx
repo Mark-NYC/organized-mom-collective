@@ -15,7 +15,7 @@ import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes
 import type { KitConfig, KitPrintable } from '../../data/club/types';
 import {
   addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_STARTS, planCountdown, readCountdown, resetChanges,
-  shortLabel as shortDay, type CountdownPlan, type CountdownState, type SchoolStart,
+  shortLabel as shortDay, lineText, MAX_TEXT, type CountdownPlan, type CountdownState, type SchoolStart,
 } from '../../lib/club/countdown';
 import { schoolSetupFor, withSchool } from '../../lib/club/school';
 import { GuideSheet } from './print/SchoolPrintables';
@@ -257,7 +257,7 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
 }) {
   const action = kit.action!;
   const tool = kit.tool ? clubToolById(kit.tool.tool) : undefined;
-  const actionDoc = kit.printables.find((p) => p.component === 'Countdown');
+  const actionDoc = kit.printables.find((p) => p.component === 'Action');
   const letterDoc = kit.printables.find((p) => p.component === 'Letter');
   const saved = actionDoc ? docs.documents[actionDoc.id] : undefined;
   const [state, setState] = useState<CountdownState>(() => readCountdown(saved?.edits, action.items.length));
@@ -300,9 +300,15 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
           <p className="label mt-6 text-warm-soft">{monthLabel(kit.month)}</p>
           <h1 className="mt-2 font-serif text-[2.2rem] leading-[1.08] text-warm-ink sm:text-[2.8rem]">{kit.theme}</h1>
           {kit.subtitle && <p className="mt-2 font-serif text-[1.25rem] italic text-rose-deep">{kit.subtitle}</p>}
+          {kit.mailer.letterLinkTop && kit.mailer.letter && (
+            <button type="button" className="mt-3 min-h-11 text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4"
+              onClick={() => { setLetterOpen(true); requestAnimationFrame(() => document.getElementById('club-letter')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }}>
+              Read this month’s letter
+            </button>
+          )}
         </div>
 
-        <SchoolStarts state={state} update={update} kids={children} readOnly={readOnly} kitYear={Number(kit.month.slice(0, 4))} />
+        {action.kind === 'countdown' && <SchoolStarts state={state} update={update} kids={children} readOnly={readOnly} kitYear={Number(kit.month.slice(0, 4))} />}
 
         {actionDoc && (
           <Countdown kit={kit} doc={actionDoc} state={state} update={update} plan={plan} start={start} today={today} household={household}
@@ -316,8 +322,8 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
               <div>
                 <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
-                <p className="mt-2 text-[0.92rem] text-warm-soft">Optional: the countdown works without it.</p>
-                <ToolLauncher tool={tool} cta={kit.tool.cta} kids={chartKids} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
+                {kit.tool.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{kit.tool.note}</p>}
+                <ToolLauncher tool={tool} cta={kit.tool.cta} kids={chartKids} household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
               </div>
             </div>
           </section>
@@ -327,7 +333,7 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
           <section aria-labelledby="club-letter" className="club-screen mt-12 border-t border-warm-rule pt-6">
             <h2 id="club-letter" className="label text-warm-soft">This month’s letter</h2>
             <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-warm-soft">
-              It comes in the mail with the same countdown. Use that copy as it is, or print the one above with your dates. Either works; there’s nothing to keep in step.
+              {kit.mailer.screenNote}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-x-6">
               <button type="button" className="min-h-11 text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4" aria-expanded={letterOpen} onClick={() => setLetterOpen(!letterOpen)}>
@@ -466,7 +472,9 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
   toTool?: () => void;
 }) {
   const action = kit.action!;
+  const countdown = action.kind === 'countdown';
   const [editing, setEditing] = useState<number | null>(null);
+  const [wording, setWording] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [preview, setPreview] = useState(false);
   const [copy, setCopy] = useState<'idle' | 'copied' | 'manual'>('idle');
@@ -479,7 +487,7 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
     const l = plan.lines[i];
     return l.date ? shortDay(l.date) : l.later ? 'When you can' : '';
   };
-  const fill: ActionFill = { done: state.done, helpers: state.helpers, whens: action.items.map((_, i) => whenLabel(i)), ...(plan.start ? { firstDay: longLabel(plan.start) } : {}) };
+  const fill: ActionFill = { done: state.done, helpers: state.helpers, texts: state.texts, whens: action.items.map((_, i) => whenLabel(i)), ...(plan.start ? { firstDay: longLabel(plan.start) } : {}) };
   const counting = start.id !== FAMILY_START || state.starts.filter((s) => s.date).length > 1 ? ` (${start.id === FAMILY_START ? 'everyone' : start.label})` : '';
   const message =
     plan.status === 'undated' ? 'Add your first day above and each line gets a suggested day. Or just use the list.'
@@ -509,49 +517,67 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
         <div className="flex items-start gap-4">
           <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage-wash font-serif text-[1.1rem] text-warm-ink ring-1 ring-sage">1</span>
           <div className="min-w-0 flex-1">
-            <h2 id="club-action" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{action.title.replace(/^Our /, 'Your ')}</h2>
+            <h2 id="club-action" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{action.screenTitle ?? action.title}</h2>
             <p className="mt-2 leading-relaxed text-warm-soft">{action.intro}</p>
           </div>
         </div>
-        <p role="status" className={`mt-4 border-l-[3px] px-4 py-2.5 text-[0.95rem] leading-relaxed text-warm-ink ${plan.status === 'undated' ? 'border-warm-rule' : 'border-sage bg-sage-wash'}`}>
-          {message}
-          {(plan.status === 'today' || plan.status === 'started') && toTool && (
-            <> <button type="button" className="font-semibold underline underline-offset-4" onClick={toTool}>Make a routine chart for school days</button></>
-          )}
-        </p>
+        {countdown && (
+          <p role="status" className={`mt-4 border-l-[3px] px-4 py-2.5 text-[0.95rem] leading-relaxed text-warm-ink ${plan.status === 'undated' ? 'border-warm-rule' : 'border-sage bg-sage-wash'}`}>
+            {message}
+            {(plan.status === 'today' || plan.status === 'started') && toTool && (
+              <> <button type="button" className="font-semibold underline underline-offset-4" onClick={toTool}>Make a routine chart for school days</button></>
+            )}
+          </p>
+        )}
 
         <datalist id="club-family-names">{names.map((n) => <option key={n} value={n} />)}</datalist>
         <ol className="mt-4 divide-y divide-[#dfe6d8] bg-sage-wash px-4 sm:px-6">
           {action.items.map((item, i) => {
             const l = plan.lines[i];
+            const words = lineText(action.items, state, i);
             return (
               <li key={item.text} className="py-3.5">
                 <label className="flex min-h-11 cursor-pointer items-start gap-3.5">
                   <input type="checkbox" className="mt-0.5 h-6 w-6 shrink-0 accent-[#7f9274]" checked={state.done[i]} disabled={readOnly}
                     onChange={(e) => update({ ...state, done: state.done.map((d, n) => (n === i ? e.target.checked : d)) })} />
-                  <span className={`text-[1.02rem] leading-snug text-warm-ink ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{item.text}</span>
+                  <span className={`text-[1.02rem] leading-snug text-warm-ink ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{words}</span>
                 </label>
+                {wording === i && (
+                  <div className="ml-[2.4rem] mt-1 flex flex-wrap items-center gap-3">
+                    <input type="text" aria-label={`Your wording for: ${item.text}`} className={`${dateField} w-full`} maxLength={MAX_TEXT} value={words}
+                      onChange={(e) => update({ ...state, texts: state.texts.map((t, n) => (n === i ? (e.target.value.trim() && e.target.value !== item.text ? e.target.value : null) : t)) })} />
+                    {state.texts[i] !== null && (
+                      <button type="button" className="min-h-10 text-[0.85rem] text-warm-soft underline underline-offset-4" onClick={() => update({ ...state, texts: state.texts.map((t, n) => (n === i ? null : t)) })}>Use our wording</button>
+                    )}
+                    <button type="button" className="btn-secondary" onClick={() => setWording(null)}>Done</button>
+                  </div>
+                )}
                 <div className="ml-[2.4rem] mt-1 flex flex-wrap items-center gap-x-5 gap-y-1">
-                  {(l.date || l.later || (!readOnly && (plan.start || l.edited))) && (
+                  {countdown && (l.date || l.later || (!readOnly && (plan.start || l.edited))) && (
                     <span className="flex min-h-10 flex-wrap items-baseline gap-x-2 text-[0.92rem]">
                       {(l.date || l.later) && <span className={`font-semibold ${l.later ? 'text-warm-soft' : 'text-warm-ink'}`}>{l.date ? `By ${shortDay(l.date)}` : 'When you can'}</span>}
                       {l.date && <span className="text-[0.82rem] text-warm-soft">{l.edited ? 'your date' : l.moved ? 'moved up' : 'suggested'}</span>}
                       {!readOnly && (plan.start || l.edited) && editing !== i && (
                         <button type="button" className="text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => setEditing(i)}>
-                          {l.date ? 'change' : 'pick a date'}<span className="sr-only"> for {item.text}</span>
+                          {l.date ? 'change' : 'pick a date'}<span className="sr-only"> for {words}</span>
                         </button>
                       )}
                     </span>
                   )}
                   {action.helperLabel && (
-                    <input type="text" list="club-family-names" aria-label={`${action.helperLabel} ${item.text}`} placeholder={action.helperLabel} maxLength={MAX_HELPER} disabled={readOnly}
+                    <input type="text" list="club-family-names" aria-label={`${action.helperLabel} ${words}`} placeholder={action.helperLabel} maxLength={MAX_HELPER} disabled={readOnly}
                       className="block min-h-10 w-full max-w-[12rem] border-0 border-b border-[#c9d3c0] bg-transparent px-0 text-[0.95rem] text-warm-ink placeholder:text-warm-soft focus:border-warm-ink focus:outline-none"
                       value={state.helpers[i]} onChange={(e) => update({ ...state, helpers: state.helpers.map((h, n) => (n === i ? e.target.value : h)) })} />
                   )}
+                  {action.editable && !readOnly && wording !== i && (
+                    <button type="button" className="min-h-10 text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => setWording(i)}>
+                      {state.texts[i] !== null ? 'your wording · change' : 'reword'}<span className="sr-only"> {words}</span>
+                    </button>
+                  )}
                 </div>
-                {editing === i && (
+                {countdown && editing === i && (
                   <div className="ml-[2.4rem] mt-2 flex flex-wrap items-center gap-3">
-                    <input type="date" aria-label={`Date for ${item.text}`} className={dateField} value={l.date ?? ''} min={addDays(today, -60)}
+                    <input type="date" aria-label={`Date for ${words}`} className={dateField} value={l.date ?? ''} min={addDays(today, -60)}
                       onChange={(e) => update({ ...state, dates: state.dates.map((d, n) => (n === i ? (isDay(e.target.value) ? e.target.value : null) : d)) })} />
                     {l.edited && (
                       <button type="button" className="min-h-10 text-[0.85rem] text-warm-soft underline underline-offset-4" onClick={() => update({ ...state, dates: state.dates.map((d, n) => (n === i ? null : d)) })}>
@@ -587,13 +613,14 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
         )}
 
         <div className="mt-6 border-t border-warm-rule pt-5">
-          <h3 className="label text-warm-soft">Print or copy your countdown</h3>
+          <h3 className="label text-warm-soft">Print or copy your {countdown ? 'countdown' : 'list'}</h3>
           {dated && <p className="mt-2 text-[0.95rem] leading-relaxed text-warm-ink">Write these dates on your family wall calendar so everyone can see what’s coming.</p>}
+          {!countdown && kit.mailer.calendarNote && <p className="mt-2 text-[0.95rem] leading-relaxed text-warm-ink">{kit.mailer.calendarNote}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-x-6">
             {clubNav().canPrint && <button type="button" className={link} onClick={() => printDocument(doc.id, 'portrait')}>Print it</button>}
             <button type="button" className={link} aria-expanded={preview} onClick={() => setPreview(!preview)}>{preview ? 'Hide the preview' : 'Preview the printout'}</button>
             <button type="button" className={link} onClick={copyText}>{copy === 'copied' ? 'Copied' : 'Copy as text'}</button>
-            {dated && <button type="button" className={link} onClick={download}>Add to a phone calendar (.ics)</button>}
+            {countdown && dated && <button type="button" className={link} onClick={download}>Add to a phone calendar (.ics)</button>}
           </div>
           {copy === 'manual' && (
             <label className="mt-2 block">
@@ -615,9 +642,11 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
  * handed over (src/lib/tool-handoff.ts), so she doesn't retype what her family profile says. With one child it opens
  * straight away; with several it asks who it's for; with none it opens the tool as any visitor would see it.
  */
-function ToolLauncher({ tool, cta, kids, back, href }: {
+function ToolLauncher({ tool, cta, kids, household, back, href }: {
   tool: ClubTool;
   cta: string;
+  /** Saved copies are kept per family, so two families in one browser (or two samples) never share a chart. */
+  household: string;
   kids: { id: string; firstName: string; age: number | null }[];
   back: { href: string; label: string };
   href: (path: string) => string;
@@ -627,7 +656,7 @@ function ToolLauncher({ tool, cta, kids, back, href }: {
   const go = (kid?: { id: string; firstName: string; age: number | null }) => {
     setToolHandoff({
       tool: tool.id,
-      key: kid ? `${kid.id}-${variant ?? 'default'}`.replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 80) : 'family',
+      key: `${household}-${kid ? `${kid.id}-${variant ?? 'chart'}` : 'family'}`.replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 120),
       ...(kid ? { name: kid.firstName, ...(kid.age !== null ? { age: kid.age } : {}) } : {}),
       ...(variant ? { variant } : {}),
       back,

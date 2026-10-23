@@ -24,6 +24,15 @@ describe('one routine chart', () => {
     expect(readFileSync('src/styles/club.css', 'utf8')).not.toMatch(/club-routine-chart/);
   });
 
+  it('every page with a chore chart uses the same component, and the public page keeps its email step', () => {
+    const users = files('src/pages').filter((f) => /ChoreChart/.test(readFileSync(f, 'utf8')));
+    expect(users.sort()).toEqual(['src/pages/chore-chart.astro', 'src/pages/club/tools/chore-chart.astro']);
+    for (const f of users) expect(readFileSync(f, 'utf8'), f).toMatch(/import ChoreChart from '(\.\.\/)+components\/site\/ChoreChart\.astro'/);
+    expect(readFileSync('src/components/site/ChoreChart.astro', 'utf8')).toMatch(/import \{ initChoreChart \} from '\.\/chore-chart'/);
+    // The download gate is keyed to the public path, so Club members are never asked for an email.
+    expect(readFileSync('src/lib/tool-email.ts', 'utf8')).toMatch(/pathname\.replace\(\/\\\/\$\/, ''\) === '\/chore-chart'/);
+  });
+
   it('every Club tool is a page that hosts the public component in handoff mode', () => {
     for (const t of Object.values(clubTools)) {
       const page = readFileSync(`src/pages${t.path}.astro`, 'utf8');

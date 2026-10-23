@@ -22,13 +22,22 @@ export interface ToolHandoff {
 }
 
 const KEY = 'omc:tool-handoff';
-const ID = /^[A-Za-z0-9_-]{1,80}$/;
+const ID = /^[A-Za-z0-9_-]{1,120}$/;
 
 export function setToolHandoff(h: ToolHandoff) {
   try {
     sessionStorage.setItem(KEY, JSON.stringify(h));
   } catch {
     /* The tool opens without it: blank, as for any visitor. */
+  }
+}
+
+/** Forget any handoff: pages other than a tool's call it, so a tool opened later (or another family's) starts clean. */
+export function clearToolHandoff() {
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    /* nothing to forget */
   }
 }
 

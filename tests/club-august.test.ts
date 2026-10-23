@@ -19,7 +19,7 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 describe('August: one letter, one action, one tool', () => {
   it('passes every kit check, beside November', () => {
     expect(kitProblems(august)).toEqual([]);
-    expect(kits.map((k) => k.slug)).toEqual(['2026-11-family-ownership', '2027-08-school-year']);
+    expect(kits.map((k) => k.slug)).toEqual(['2026-11-family-ownership', '2027-08-school-year', '2027-10-home-works-together']);
   });
 
   it('keeps November exactly as it was', () => {
@@ -51,7 +51,7 @@ describe('August: one letter, one action, one tool', () => {
   });
 
   it('prints the countdown and the letter, and nothing from the first draft: no launch plan, command center, overview or item sets', () => {
-    expect(august.printables.map((p) => [p.id, p.component])).toEqual([['countdown', 'Countdown'], ['letter', 'Letter']]);
+    expect(august.printables.map((p) => [p.id, p.component])).toEqual([['countdown', 'Action'], ['letter', 'Letter']]);
     expect(august.overview).toBeUndefined();
     expect(august.itemSets).toBeUndefined();
     expect(august.printables.some((p) => p.secondary || p.editor)).toBe(false);

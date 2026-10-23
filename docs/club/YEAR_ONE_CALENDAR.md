@@ -23,11 +23,11 @@ Rules for every month (from [VISION.md](../brand/VISION.md) and [BRAND_VOICE.md]
 | **Jul 2027** | Ready to Go | Packing and Independence Builder | projects | Kitchen Deep Clean | Jul 1 | Jun 15 |
 | **Aug 2027** | Ready for the School Year (built) | Letter + six-line countdown + routine chart tool | responsibilities | Bedrooms + Back-to-School | Aug 1 | Jul 15 |
 | **Sep 2027** | A Week Everyone Can See | Sunday Family Reset Builder | planning | Entry + Storage | Sep 1 | Aug 15 |
-| **Oct 2027** | The Family That Follows Through | Family Habits and Ownership Review | responsibilities (review mode) | Closet Cleanout | Oct 1 | Sep 15 |
+| **Oct 2027** | A Home That Works Together (built) | Letter + five-line Fall Home Reset + chore chart | responsibilities | Fall Home Reset | Oct 1 | Sep 15 |
 
 Whether December is the first paid month with a mailer depends on the mail house's real proof-to-mail time (D2), not on the placeholder lead times below. If it doesn't fit, December's kit opens digitally for beta families and January becomes the first paid month.
 
-Slugs follow `YYYY-MM-<theme>` and are permanent once printed on a mailer: `2026-11-family-ownership`, `2026-12-holiday-teamwork`, `2027-01-mornings`, `2027-02-better-together`, `2027-03-spring-clean`, `2027-04-mealtime`, `2027-05-school-year-wrap-up`, `2027-06-summer-rhythm`, `2027-07-ready-to-go`, `2027-08-school-launch`, `2027-09-sunday-reset`, `2027-10-follow-through`.
+Slugs follow `YYYY-MM-<theme>` and are permanent once printed on a mailer: `2026-11-family-ownership`, `2026-12-holiday-teamwork`, `2027-01-mornings`, `2027-02-better-together`, `2027-03-spring-clean`, `2027-04-mealtime`, `2027-05-school-year-wrap-up`, `2027-06-summer-rhythm`, `2027-07-ready-to-go`, `2027-08-school-launch`, `2027-09-sunday-reset`, `2027-10-home-works-together` (built; replaced the planned `2027-10-follow-through`).
 
 ## Kit by kit
 
@@ -114,12 +114,15 @@ The first kit in the three-part shape every month now follows (owner direction, 
 - **Mailer:** letter; field guide on keeping the meeting short and kept; activity: the first Sunday reset.
 - **Note:** the wall calendar is the natural place for this week to live; mention it once, secondary, per ARTICLE_FORMAT product rules, and never imply sync.
 
-### October: The Family That Follows Through
+### October: A Home That Works Together (built 2026-10-23, behind the flag)
 
-- **Flagship: Family Habits and Ownership Review.** Reads her saved November chart (and any later ones): which jobs stayed with their owner, which drifted back, and suggests next-level ownership by each child's new age. Output: a new chart for year two.
-- **Worksheets:** "what stuck" family reflection, certificate per person for a job they own, team Closet Cleanout.
-- **Mailer:** letter on a year of shared work; field guide on what to do when jobs drift back; activity: family awards night.
-- **Retention note:** the review only works for members who kept their November chart; it's the natural renewal point for year two.
+*Little jobs. Shared responsibility. A home ready for the season ahead.* Owner direction, 2026-10-23: replaces the planned "Family That Follows Through" review. Config: `src/data/club/kits/2027-10-home-works-together.ts`. Mailer: [mailers/2027-10-home-works-together.md](mailers/2027-10-home-works-together.md).
+
+- **The letter:** about 160 words: you shouldn't be the only one noticing what needs doing; a family works better when everyone knows what they can contribute; October before the busy season. Asks "What's one thing around our home you think you could take care of without being reminded?" A draft for Megan.
+- **The action:** Our Fall Home Reset, five lines (outgrown clothes, the entryway, essentials, one cluttered area, one job each), a "Who's helping?" blank on each, wording she can change. A plain checklist: no dates, reminders or tracking; one weekend or across the month.
+- **The tool:** the site's chore chart (`/chore-chart`), opened inside the Club for the child she picks, with their name and age group's chores filled in. The calendar says when; the chart says who.
+- **Back of the letter:** From Helping Mom to Owning a Job: three principles, one example, the family question, the QR code, and one calendar note.
+- **Not November:** October resets the physical home and starts one owned job each; November (Our Family, Our Team) builds ongoing shared responsibilities and follow-through.
 
 ## Monthly production calendar (per kit)
 

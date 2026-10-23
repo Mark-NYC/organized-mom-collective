@@ -26,7 +26,9 @@ export const kit: KitConfig = {
   engineVersion: 2,
   items: [],
   action: {
+    kind: 'countdown',
     title: 'Our Back-to-School Countdown',
+    screenTitle: 'Your Back-to-School Countdown',
     intro: 'Six things to get ready together. Not all at once, and not all by you: start with what matters most, and put a name beside each one.',
     items: [
       { text: 'Add school dates and activities to the family calendar.', daysBefore: 14 },
@@ -43,9 +45,10 @@ export const kit: KitConfig = {
     title: 'Make your kids’ school-day routines',
     blurb: 'A picture chart for each child, morning or after school, made with our routine chart: tap illustrated steps, put them in order, add times, then download it to print.',
     cta: 'Make a routine chart',
+    note: 'Optional: the countdown works without it.',
   },
   printables: [
-    { id: 'countdown', title: 'Our Back-to-School Countdown', page: 'letter-portrait', kind: 'flagship', component: 'Countdown' },
+    { id: 'countdown', title: 'Our Back-to-School Countdown', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
     { id: 'letter', title: 'Your August letter', page: 'letter-portrait', kind: 'worksheet', component: 'Letter' },
   ],
   mailer: {
@@ -82,6 +85,7 @@ export const kit: KitConfig = {
       title: 'Dates worked out, charts for each child',
       body: 'Scan the code and enter your first day of school: we’ll suggest a day for each countdown item, then help you make a chart for each child. This page works fine without it.',
     },
+    screenNote: 'It comes in the mail with the same countdown. Use that copy as it is, or print the one above with your dates. Either works; there’s nothing to keep in step.',
     calendarNote: 'Before the first day, write every first day, early dismissal and school break on your family calendar, where everyone can see them.',
     qrPath: `/club/kits/${SLUG}?source=mailer`,
   },

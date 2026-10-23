@@ -1,0 +1,21 @@
+---
+/**
+ * /club/tools/chore-chart: the site's chore chart (the same component as /chore-chart: ChoreChart.astro and
+ * chore-chart.ts), inside the Club. Opened from a kit for one child (src/lib/tool-handoff.ts): their own saved
+ * chart, their name and age group's chores filled in, age-suited jobs first. Club layout: noindex, no trackers, no
+ * site navigation. The public page's email-before-download step stays on /chore-chart only. Behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import ChoreChart from '../../../components/site/ChoreChart.astro';
+---
+
+<ClubLayout title="Chore Chart">
+  <ClubToolBar client:only="react" tool="chore-chart" />
+  <!-- No side padding of its own: the chart lays itself out exactly as on /chore-chart. -->
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <ChoreChart storageKey="omc:club:chore-chart:v1" handoff>
+      <p slot="footnote" class="cc-footnote">The family calendar says when; this chart shows everyone their part.</p>
+    </ChoreChart>
+  </section>
+</ClubLayout>

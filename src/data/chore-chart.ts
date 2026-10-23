@@ -61,3 +61,14 @@ export const choreSets: Record<AgeGroup, ChoreSet> = {
     rewards: ['Gas money', '$20 allowance', 'Extended curfew'],
   },
 };
+
+/** The starter set for a child's age: the youngest group starts at 2 and covers anyone younger. */
+export function ageGroupFor(age: number): AgeGroup {
+  if (age <= 3) return '2-3';
+  if (age <= 5) return '4-5';
+  if (age <= 7) return '6-7';
+  if (age <= 10) return '8-10';
+  if (age <= 13) return '11-13';
+  if (age <= 16) return '14-16';
+  return '17+';
+}

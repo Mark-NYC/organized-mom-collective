@@ -294,6 +294,104 @@ for (const id of [...samples, 'hughes']) {
   await ctx.close();
 }
 
+// October (letter, five-line reset, the site's chore chart): no dates anywhere; checks, helpers and her wording save;
+// her copy and the letter print; "Make a Family Chore Chart" opens the site's own chart for a child, prefilled.
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { october: id };
+  const kitUrl = `${base}/club/kits/2027-10-home-works-together?sample=${id}`;
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(kitUrl);
+  await page.getByRole('heading', { name: 'Our Fall Home Reset' }).waitFor();
+  check(await noSideScroll(page), `${id}: October scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the reset has ${await lines.count()} lines (expected 5)`);
+  check(await page.locator('section[aria-labelledby="club-start"], input[type="date"]').count() === 0, `${id}: October asks for dates`);
+  check(await page.getByText(/^By [A-Z][a-z]{2} \d+$/).count() === 0, `${id}: October shows due dates`);
+  await page.screenshot({ path: join(out, `${id}-october-phone.png`), fullPage: true });
+
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByPlaceholder('Who’s helping?').first().fill('Dad');
+  await lines.nth(1).getByRole('button', { name: /^reword/ }).click();
+  await lines.nth(1).locator('input[type="text"]').first().fill('Set up the mudroom for coats and boots.');
+  await lines.nth(1).getByRole('button', { name: 'Done' }).click();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our Fall Home Reset' }).waitFor();
+  check(await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: the checked line didn't survive a reload`);
+  check(await page.getByPlaceholder('Who’s helping?').first().inputValue() === 'Dad', `${id}: the helper didn't survive a reload`);
+  check(await lines.nth(1).locator('label > span').textContent() === 'Set up the mudroom for coats and boots.', `${id}: her wording didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['fall-reset', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-october-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: October ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: October ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Dad') && sheet.includes('Set up the mudroom'), `${id}: her printout is missing her helper or wording`);
+  const mailed = await page.evaluate(() => document.querySelector('.club-letter .club-action')?.textContent ?? '');
+  check(!mailed.includes('Dad') && !mailed.includes('mudroom') && mailed.includes('Get the entryway ready'), `${id}: the mailed letter shows her own entries`);
+  check(await page.evaluate(() => document.querySelectorAll('.club-letter .club-action-when').length === 0), `${id}: the October letter prints "By" blanks`);
+  entry.greeting = await page.evaluate(() => document.querySelector('.club-letter-greeting')?.textContent);
+
+  // The tool: the site's own chore chart, opened in the Club for a child, prefilled, downloadable.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Make a Family Chore Chart', exact: true }).click();
+  await page.waitForTimeout(300);
+  const chooser = page.locator('section[aria-labelledby="club-tool"] .btn-secondary');
+  const kidCount = /\/club\/tools\//.test(page.url()) ? 0 : await chooser.count();
+  const kidName = kidCount ? (await chooser.first().textContent()).replace(/\d+/g, '').trim() : null;
+  if (kidCount) await chooser.first().click();
+  await page.waitForURL(/\/club\/tools\/chore-chart/);
+  await page.waitForSelector('#chore-chart');
+  const name = await page.inputValue('[data-cc-name]');
+  entry.choreChart = { name, age: await page.inputValue('[data-cc-age]') };
+  check(await page.locator('.chore-chart-container[data-cc-handoff]').count() === 1, `${id}: the Club page isn't the site's chore chart`);
+  check(kidName ? name.toLowerCase() === kidName.toLowerCase() && Boolean(entry.choreChart.age) : true, `${id}: the chore chart didn't open for ${kidName}: "${name}"`);
+  check(await noSideScroll(page), `${id}: the chore chart scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-october-chore-phone.png`), fullPage: true });
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-cc-download]')]);
+  entry.choreDownload = dl.suggestedFilename();
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the Club chore chart asked for an email`);
+  await dl.saveAs(join(out, `${id}-october-chore.png`));
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\//);
+  check(errors.length === 0, `${id}: October page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// Two families in one browser: nothing one does shows up in the other's kit or tools.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/kits/2027-10-home-works-together?sample=rivera`);
+  await page.getByRole('heading', { name: 'Our Fall Home Reset' }).waitFor();
+  await page.locator('section[aria-labelledby="club-action"] .club-screen ol > li input[type="checkbox"]').first().check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: 'Make a Family Chore Chart', exact: true }).click();
+  await page.locator('section[aria-labelledby="club-tool"] .btn-secondary').first().click();
+  await page.waitForSelector('#chore-chart');
+  const riveraKid = await page.inputValue('[data-cc-name]');
+  // Brooks, same browser: their own reset, and a chore chart opened straight from its address carries nobody over.
+  await page.goto(`${base}/club/kits/2027-10-home-works-together?sample=brooks`);
+  await page.getByRole('heading', { name: 'Our Fall Home Reset' }).waitFor();
+  check(await page.getByText('0 of 5 done').count() === 1, 'leak: Rivera’s checked line shows in Brooks’s reset');
+  await page.goto(`${base}/club/tools/chore-chart?sample=brooks`);
+  await page.waitForSelector('#chore-chart');
+  const name = await page.inputValue('[data-cc-name]');
+  check(name !== riveraKid, `leak: Brooks’s chore chart opened with Rivera’s ${riveraKid}`);
+  report.push({ leakCheck: { riveraKid, brooksOpenedWith: name } });
+  await ctx.close();
+}
+
 // Family changes: add a child on the family page, then the kit shows suggestions without changing the chart.
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });

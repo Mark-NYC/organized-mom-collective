@@ -19,6 +19,10 @@ export interface ClubTool {
   perChild: boolean;
   /** Starting choices the kit can offer before opening (the tool's own ids). */
   variants?: { id: string; label: string }[];
+  /** Its name on the Club page ("Sofia’s chore chart"), lowercase after the name. */
+  title: string;
+  /** One line under the title: what she does with it. */
+  intro: string;
 }
 
 export const clubTools = {
@@ -31,6 +35,16 @@ export const clubTools = {
       { id: 'morning', label: 'Morning' },
       { id: 'afterschool', label: 'After school' },
     ],
+    title: 'Routine chart',
+    intro: 'Tap illustrated steps, put them in order, add times, then download it to print. It saves in this browser.',
+  },
+  'chore-chart': {
+    id: 'chore-chart',
+    path: routes.clubTool('chore-chart'),
+    publicPath: routes.choreChart,
+    perChild: true,
+    title: 'Chore chart',
+    intro: 'Start from chores that fit their age, add illustrated jobs to every day or one day a week, change anything, then download it to print. It saves in this browser.',
   },
 } satisfies Record<string, ClubTool>;
 

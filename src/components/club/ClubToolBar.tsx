@@ -3,12 +3,15 @@
  * back to the kit, and who the tool was opened for. The tool itself is the site's own component, below this island.
  */
 import { useState } from 'react';
+import { clubToolById } from '../../data/club/tools';
 import { readToolHandoff } from '../../lib/tool-handoff';
 import { routes } from '../../routes';
 import ClubGate from './ClubGate';
 
-export default function ClubToolBar({ tool, title }: { tool: string; title: string }) {
+export default function ClubToolBar({ tool }: { tool: string }) {
   const [handoff] = useState(() => readToolHandoff(tool));
+  const info = clubToolById(tool);
+  const title = info?.title ?? 'Tool';
   return (
     <ClubGate page="tool">
       {({ href }) => (
@@ -21,7 +24,7 @@ export default function ClubToolBar({ tool, title }: { tool: string; title: stri
           </h1>
           <p className="mt-2 leading-relaxed text-warm-soft">
             {handoff?.name ? `It starts with ${handoff.name}’s name on it${handoff.age !== undefined ? `, and the jobs suited to age ${handoff.age} come first` : ''}. ` : ''}
-            Tap illustrated steps, put them in order, add times, then download it to print. It saves in this browser.
+            {info?.intro}
           </p>
         </div>
       )}

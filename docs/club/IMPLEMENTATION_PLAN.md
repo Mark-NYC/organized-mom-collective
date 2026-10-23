@@ -347,7 +347,8 @@ Owner direction: the first August draft (a 20-plus-task launch plan, an overview
 | Migration: August seeded as a **draft** (not applied) | `supabase/migrations/20261024000000_club_august_kit.sql` |
 | Refinements (2026-10-23): the countdown dates itself from "When does school start?" (family date, optional per-child dates, her edits kept, "go back to suggestions" lists what changes, short-notice and past-date handling); print, copy as text, `.ics` export, no sync or reminders; the letter greets her by first name when known, prints blank "By" lines, and asks one family question on the back; routine steps always in the order a day goes; a dry-erase tip by the print button; a sample family with no children yet (Hughes) | `src/lib/club/countdown.ts`, `KitPage.tsx`, `LetterPrintables.tsx`, `src/data/club/samples.ts` |
 | One routine chart (2026-10-23): August's own routine editor and chart print are gone; "Make a routine chart" opens the site's routine chart inside the Club for a chosen child (name, age, morning or after school handed over). The public chart's script moved into one shared module; its pages, markup, behavior and analytics are unchanged (checked before and after). The reusable pattern for future kit tools is in [KIT_TEMPLATE.md → Tools](KIT_TEMPLATE.md) | `src/components/site/RoutineChart.astro`, `routine-chart.ts`, `src/lib/tool-handoff.ts`, `src/data/club/tools.ts`, `src/pages/club/tools/routine-chart.astro`, `src/components/club/ClubToolBar.tsx` |
-| Tests | `tests/club-august.test.ts`, `tests/club-countdown.test.ts`, `tests/tool-sharing.test.ts` |
+| The October 2027 kit, A Home That Works Together (2026-10-23): a second configuration on the same page and print components: `action.kind: 'checklist'` (five lines, no dates, editable wording), the chore chart as its tool. The public chore chart moved into `ChoreChart.astro` + `chore-chart.ts` (public markup and behavior checked identical before and after), hosted at `/club/tools/chore-chart`. Handoffs now clear on other Club pages and saved charts are keyed per household. Migration seeds October as a **draft** (not applied) | `src/data/club/kits/2027-10-home-works-together.ts`, `src/components/site/ChoreChart.astro`, `chore-chart.ts`, `tool-handoff-ui.ts`, `src/pages/club/tools/chore-chart.astro`, `supabase/migrations/20261025000000_club_october_kit.sql` |
+| Tests | `tests/club-august.test.ts`, `tests/club-countdown.test.ts`, `tests/club-october.test.ts`, `tests/tool-sharing.test.ts` |
 
 ### Previewing
 
@@ -361,6 +362,6 @@ Owner direction: the first August draft (a 20-plus-task launch plan, an overview
 ### Still open before Phase 2
 1. Accounts step 1 launch (its checklist in `supabase/ACCOUNTS.md`, `/privacy` first, with the Club's children's-data section).
 2. The private beta (D2) uses `club_access_grants` with `reason = 'beta'`; no billing needed.
-3. Megan's letters: November's (`letter: null`), and her approval or rewrite of August's draft (`draft: true`). Neither kit can be scheduled for members until then.
+3. Megan's letters: November's (`letter: null`), and her approval or rewrite of August's and October's drafts (`draft: true`). No kit can be scheduled for members until then.
 
 Phase 2 (billing) doesn't start until the owner says so.

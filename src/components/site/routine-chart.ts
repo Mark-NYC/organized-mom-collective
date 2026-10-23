@@ -13,14 +13,7 @@ import { autosave, downloadPng } from '../../lib/printable';
 import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
 import { routineTypes, type RoutineType } from '../../data/routines';
 import type { ToolHandoff } from '../../lib/tool-handoff';
-
-const hasSaved = (key: string) => {
-  try {
-    return localStorage.getItem(key) !== null;
-  } catch {
-    return false;
-  }
-};
+import { hasSaved, orderPickerForAge } from './tool-handoff-ui';
 
 export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null) {
   const types: Record<string, RoutineType> = routineTypes;
@@ -138,12 +131,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       if (handoff.name) field('title').value = `${handoff.name}’s ${types[id].title}`;
       save();
     }
-    if (handoff.age !== undefined) {
-      const age = handoff.age;
-      for (const li of picker.querySelectorAll<HTMLElement>('[data-rp-min]')) li.toggleAttribute('data-rp-later', Number(li.dataset.rpMin) > age);
-      const hint = picker.querySelector<HTMLElement>('.rp-hint');
-      if (hint) hint.textContent = `Jobs suited to ${handoff.name ?? 'your child'} (age ${age}) come first. Tap one to add it to the next open step; the arrows on the chart change the order.`;
-    }
+    if (handoff.age !== undefined) orderPickerForAge(picker, handoff.age, handoff.name);
   }
 
   /** True once the sheet differs from the current type's starter routine. */

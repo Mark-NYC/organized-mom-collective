@@ -1,6 +1,6 @@
 -- Organized Family Club: the August 2027 kit, Ready for the School Year (src/data/club/kits/2027-08-school-year.ts).
--- A draft: it opens for nobody until an admin schedules it after Megan's letter is in. Its school setup and parts
--- save in club_documents like any kit (docs 'school-setup', 'school-launch', 'school-routines', 'command-center').
+-- A draft: it opens for nobody until an admin schedules it after Megan's letter is in. Its countdown saves in
+-- club_documents like any kit (doc 'countdown'); the routine chart is the site's own and saves in the browser.
 --
 -- NOT APPLIED to the live project. Runs after 20261023000000_club_core.sql.
 begin;

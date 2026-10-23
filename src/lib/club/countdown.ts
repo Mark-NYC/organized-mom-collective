@@ -12,8 +12,8 @@ export type Day = string;
 
 export interface CountdownItem {
   text: string;
-  /** Suggested days before the first day of school. */
-  daysBefore: number;
+  /** Suggested days before the first day of school (a countdown; a plain checklist has none). */
+  daysBefore?: number;
   /** Still worth doing when school starts in a day or two. */
   essential?: true;
 }
@@ -31,6 +31,8 @@ export interface SchoolStart {
 export interface CountdownState {
   done: boolean[];
   helpers: string[];
+  /** Her own wording for a line (kits whose action is `editable`), or null for the kit's. */
+  texts: (string | null)[];
   /** Her own date for a line, or null to follow the suggestion. */
   dates: (Day | null)[];
   starts: SchoolStart[];
@@ -39,6 +41,7 @@ export interface CountdownState {
 }
 
 export const MAX_HELPER = 40;
+export const MAX_TEXT = 90;
 export const MAX_STARTS = 6;
 export const FAMILY_START = 'family';
 
@@ -130,6 +133,7 @@ export function planCountdown(items: readonly CountdownItem[], start: Day | '' |
       daysLeft: left,
       lines: items.map((item, i) => {
         if (!item.essential) return line(i, null, false, true);
+        if (item.daysBefore === undefined) return line(i, null);
         const ideal = addDays(start, -item.daysBefore);
         return daysBetween(today, ideal) >= 0 ? line(i, ideal) : line(i, today, true);
       }),
@@ -138,7 +142,7 @@ export function planCountdown(items: readonly CountdownItem[], start: Day | '' |
 
   // Lines whose day has gone move to the days left (never onto the night before), at most a couple a day,
   // more only when the days run out. Everything else keeps its suggested day.
-  const ideal = items.map((item) => addDays(start, -item.daysBefore));
+  const ideal = items.map((item) => addDays(start, -(item.daysBefore ?? 0)));
   const past = ideal.map((d, i) => (daysBetween(today, d) < 0 ? i : -1)).filter((i) => i >= 0);
   const room = Math.max(1, left - 1);
   const window = (d: Day) => daysBetween(today, d) >= 0 && daysBetween(d, start) >= 2;
@@ -195,19 +199,27 @@ export function readCountdown(json: unknown, lines: number): CountdownState {
       return typeof h === 'string' ? h.replace(/\s+/g, ' ').slice(0, MAX_HELPER) : '';
     }),
     dates: Array.from({ length: lines }, (_, i) => (isDay(arr('dates')[i]) ? (arr('dates')[i] as Day) : null)),
+    texts: Array.from({ length: lines }, (_, i) => {
+      const t = arr('texts')[i];
+      const clean = typeof t === 'string' ? t.replace(/\s+/g, ' ').trim().slice(0, MAX_TEXT) : '';
+      return clean || null;
+    }),
     starts,
     basis,
   };
 }
 
-/** The countdown as plain text, to paste into a note or a message. */
+/** A line's words: hers when she changed them, else the kit's. */
+export const lineText = (items: readonly CountdownItem[], s: CountdownState, i: number) => s.texts[i] ?? items[i].text;
+
+/** The countdown (or checklist) as plain text, to paste into a note or a message. */
 export function countdownText(title: string, items: readonly CountdownItem[], plan: CountdownPlan, s: CountdownState): string {
   const head = [title, ...(plan.start ? [`First day of school: ${longLabel(plan.start)}`] : []), ''];
   const rows = items.map((item, i) => {
     const l = plan.lines[i];
     const when = l.date ? `${shortLabel(l.date)}: ` : l.later ? 'When you can: ' : '';
     const who = s.helpers[i].trim() ? ` (${s.helpers[i].trim()})` : '';
-    return `${s.done[i] ? '[x]' : '[ ]'} ${when}${item.text}${who}`;
+    return `${s.done[i] ? '[x]' : '[ ]'} ${when}${lineText(items, s, i)}${who}`;
   });
   return [...head, ...rows].join('\n');
 }
@@ -258,7 +270,7 @@ export function countdownIcs(slug: string, title: string, items: readonly Countd
       const d = plan.lines[i].date;
       if (!d) return [];
       const who = s.helpers[i].trim() ? ` (${s.helpers[i].trim()})` : '';
-      return event(`${slug}-${i + 1}-${compact(d)}`, d, `${item.text.replace(/\.$/, '')}${who}`);
+      return event(`${slug}-${i + 1}-${compact(d)}`, d, `${lineText(items, s, i).replace(/\.$/, '')}${who}`);
     }),
     'END:VCALENDAR',
   ];

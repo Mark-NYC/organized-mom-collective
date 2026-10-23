@@ -12,7 +12,7 @@ import { CLUB_NAME } from '../../../data/club/config';
 ---
 
 <ClubLayout title="Routine Chart">
-  <ClubToolBar client:only="react" tool="routine-chart" title="Routine chart" />
+  <ClubToolBar client:only="react" tool="routine-chart" />
   <!-- No side padding of its own: the chart lays itself out exactly as on /routine-chart. -->
   <section id="club-tool-host" class="w-full pb-20 pt-4">
     <RoutineChart storageKey="omc:club:routine-chart:v1" handoff brand={CLUB_NAME} />

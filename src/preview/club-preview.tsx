@@ -12,6 +12,7 @@ import FamilyPage from '../components/club/FamilyPage';
 import KitPage from '../components/club/KitPage';
 import ClubToolBar from '../components/club/ClubToolBar';
 import { initRoutineChart } from '../components/site/routine-chart';
+import { initChoreChart } from '../components/site/chore-chart';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -75,8 +76,8 @@ Object.defineProperty(HTMLImageElement.prototype, 'src', {
 const toolMarkup = (globalThis as { __CLUB_TOOLS?: Record<string, string> }).__CLUB_TOOLS ?? {};
 const toolInit: Record<string, (host: HTMLElement) => void> = {
   'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart')),
+  'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart')),
 };
-const toolTitle: Record<string, string> = { 'routine-chart': 'Routine chart' };
 
 function ToolPage({ tool }: { tool: string }) {
   const host = useRef<HTMLElement>(null);
@@ -88,7 +89,7 @@ function ToolPage({ tool }: { tool: string }) {
   }, [tool]);
   return (
     <>
-      <ClubToolBar tool={tool} title={toolTitle[tool] ?? tool} />
+      <ClubToolBar tool={tool} />
       <section ref={host} id="club-tool-host" className="w-full pb-20 pt-4" dangerouslySetInnerHTML={{ __html: (toolMarkup[tool] ?? '').replace(/\/images\/[^"]+?\.webp/g, (p) => images[p] ?? p) }} />
     </>
   );

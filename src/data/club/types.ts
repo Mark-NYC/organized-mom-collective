@@ -149,12 +149,26 @@ export interface KitConfig {
    * before a date she enters (src/lib/club/countdown.ts). Never per-person assignments; each line has an optional
    * `helperLabel` blank instead.
    */
-  action?: { title: string; intro: string; items: CountdownItem[]; helperLabel?: string };
+  action?: {
+    /**
+     * 'countdown' (August): she enters a date and each line gets a suggested day (`daysBefore`).
+     * 'checklist' (October): the lines alone, no dates, done whenever suits the family.
+     */
+    kind: 'countdown' | 'checklist';
+    title: string;
+    /** The heading on screen, when it differs from the printed title ("Your Back-to-School Countdown"). */
+    screenTitle?: string;
+    intro: string;
+    items: CountdownItem[];
+    helperLabel?: string;
+    /** She can reword a line for her family (her wording prints on her copy; the mailer keeps the kit's). */
+    editable?: true;
+  };
   /**
    * The month's one optional tool: one of the site's own tools, opened inside the Club (src/data/club/tools.ts), never
    * a Club copy of it; and the invitation to it.
    */
-  tool?: { tool: string; title: string; blurb: string; cta: string };
+  tool?: { tool: string; title: string; blurb: string; cta: string; note?: string };
   /**
    * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
    * `priority` in `from`), then the detail one tap away.
@@ -176,12 +190,24 @@ export interface KitConfig {
       signoff?: string;
       draft?: true;
     } | null;
-    /** Three-part kits: the guidance on the back of the letter. */
-    fieldGuide: { title: string; sections: { heading: string; body: string }[] };
+    /** Three-part kits: the guidance on the back of the letter (a short `intro`, then a few principles). */
+    fieldGuide: { title: string; intro?: string; sections: { heading: string; body: string }[] };
+    /** Three-part kits: a short worked example in words, on the back of the letter. */
+    story?: { title: string; body: string };
+    /** Three-part kits: on the kit page, how the mailed copy and her own printout relate (one or the other, never both). */
+    screenNote?: string;
+    /** A "Read this month's letter" link under the kit's title (the letter itself sits at the end of the page). */
+    letterLinkTop?: true;
     /** A family activity (November's team meeting). Three-part kits use `action` instead. */
     activity?: { title: string; minutes: number; steps: string[] };
     /** Three-part kits: the month's one family conversation question, on the back of the letter. */
-    conversation?: { label: string; question: string; note?: string };
+    conversation?: {
+      label: string;
+      question: string;
+      note?: string;
+      /** Where it sits on the back: first (August) or after the example (October). */
+      placement?: 'top' | 'after-example';
+    };
     /** Three-part kits: a worked example on the back of the letter: the tool's own starter (src/data/routines.ts). */
     example?: { title: string; variant: string };
     /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */

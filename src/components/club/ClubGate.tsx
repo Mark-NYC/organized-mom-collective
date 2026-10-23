@@ -10,6 +10,7 @@ import { getSession, requestCode, signOut, verifyCode, type AccountSession } fro
 import { accountStore, clubHref, resetSample, sampleFromUrl, sampleStore, type ClubStore } from '../../lib/club/store';
 import { routes } from '../../routes';
 import { clubNav } from '../../lib/club/nav';
+import { clearToolHandoff } from '../../lib/tool-handoff';
 
 export interface ClubContext {
   store: ClubStore;
@@ -23,6 +24,11 @@ type Page = 'dashboard' | 'family' | 'kit' | 'start' | 'tool';
 export default function ClubGate({ page, children }: { page: Page; children: (ctx: ClubContext) => ReactNode }) {
   const [sample] = useState(() => (typeof location === 'undefined' ? null : sampleFromUrl(clubNav().search())));
   const [session, setSession] = useState<AccountSession | null | undefined>(sample ? null : undefined);
+
+  // Only a tool's own page reads a handoff; anywhere else drops it, so it never carries over to another family or visit.
+  useEffect(() => {
+    if (page !== 'tool') clearToolHandoff();
+  }, [page]);
 
   useEffect(() => {
     if (sample || !clubAccountsEnabled()) return setSession(null);
