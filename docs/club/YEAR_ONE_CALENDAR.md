@@ -146,7 +146,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Worksheets:** "I'm bored" menu by age, summer jobs chart, team Outdoor / Summer Prep.
 - **Mailer:** letter; field guide on rhythm vs. schedule; activity: summer bucket list vote.
 
-### July: Ready to Go
+### July: Ready to Go (built 2026-10-23, behind the flag)
+
+*Less packing for Mom. More independence for everyone.* Owner direction, 2026-10-23: replaces the earlier July plan below. Config: `src/data/club/kits/2027-07-ready-to-go.ts`. Mailer: [mailers/2027-07-ready-to-go.md](mailers/2027-07-ready-to-go.md).
+
+- **The letter:** They Can Get Themselves Ready (about 160 words): children practice getting their own things ready; grown-ups keep supplies, driving and safety. Asks "What's one thing you think you could get ready by yourself before we leave?" A draft for Megan.
+- **The action:** Our Ready-to-Go Challenge, five steps for one outing, with where you're going and when written above them. One outing is enough.
+- **The tool:** the Family Packing & Independence Builder, a new site tool (`/club/tools/packing`): where, who, how long (and only the details that matter); a list per person ("I can pack myself" / "A grown-up helps with"), a short shared list with owners, Pack · Check · Unpack; edit, save lists on the device, print one person or everyone.
+- **Back of the letter:** Pack · Check · Unpack, getting ready by age, the question, the QR code, the travel bag note, the calendar note.
+- **Not June or August:** no summer rhythm, no back-to-school prep, no trip planner or itinerary. The free `/travel-checklist` stays the trip-level checklist it is.
+
+### July (earlier plan): Ready to Go
 
 - **Flagship: Packing and Independence Builder.** Packing lists per person by age and trip type; kids pack their own from a list with a check step at the age that needs it.
 - **Worksheets:** car bag list, house-before-we-leave list, team Kitchen Deep Clean.

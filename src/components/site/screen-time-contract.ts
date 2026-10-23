@@ -39,6 +39,7 @@ export function initScreenTime(host: HTMLElement, handoff?: ToolHandoff | null) 
   };
   function render() {
     const f = format();
+    sheet.dataset.stFormat = f;
     for (const el of host.querySelectorAll<HTMLElement>('[data-st-only]')) el.hidden = el.dataset.stOnly !== f;
     for (const b of host.querySelectorAll<HTMLButtonElement>('[data-st-format-btn]')) b.setAttribute('aria-pressed', String(b.dataset.stFormatBtn === f));
     for (const b of host.querySelectorAll<HTMLButtonElement>('[data-st-age]')) b.setAttribute('aria-pressed', String(b.dataset.stAge === age()));

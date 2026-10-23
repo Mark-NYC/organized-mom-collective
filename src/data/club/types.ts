@@ -261,6 +261,8 @@ export interface KitConfig {
     example?: { title: string; variant: string };
     /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */
     invite?: { title: string; body: string; tools?: { title: string; body: string }[] };
+    /** A short framework given pride of place on the back (July's Pack. Check. Unpack.): a few words, each with a line. */
+    framework?: { steps: { word: string; text: string }[] };
     /** A small cut-out card on the back (June's "When I'm Bored…"): a title and a few short ideas. */
     card?: { title: string; ideas: string[] };
     calendarNote?: string;
@@ -268,9 +270,9 @@ export interface KitConfig {
     qrPath: string;
     /**
      * A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush
-     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels; June's fine-line sun and apricot panels.
+     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels; June's fine-line sun and apricot panels; July's fine-line compass and soft blue panels.
      */
-    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school' | 'summer';
+    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school' | 'summer' | 'travel';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

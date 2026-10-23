@@ -883,6 +883,7 @@ for (const id of [...samples, 'hughes']) {
     ['connection-planner', '.cn-card', () => document.querySelector('[data-cn-family]')?.value ?? ''],
     ['meal-team', '.mlt-row', () => document.querySelector('[data-mlt-family]')?.value ?? ''],
     ['school-wrap-up', '.wu', () => document.querySelector('[data-wu-family]')?.value ?? ''],
+    ['packing', '.pk', () => document.querySelector('[data-pk-save-name]')?.value ?? ''],
     ['screen-time', '.st-container', () => document.querySelector('[data-st-sheet] [data-field="name"]')?.value ?? ''],
     ['habit-builder', '[data-hb-statement]', () => document.querySelector('[data-hb-family]')?.value ?? ''],
     ['traditions-picker', '.tp-card', () => document.querySelector('[data-tp-family]')?.value ?? ''],
@@ -1723,6 +1724,213 @@ for (const id of [...samples, 'hughes']) {
   await page.waitForSelector('#screen-time');
   check(await page.inputValue('[data-field="a-amount"]') !== 'Rivera secret amount', 'leak: a Club agreement shows on the public page');
   report.push({ juneLeakCheck: 'ok' });
+  await ctx.close();
+}
+
+// July (letter, Ready-to-Go Challenge, the Family Packing & Independence Builder): the outing, day and checks save;
+// the challenge and the letter print; "Build Our Packing Lists" opens the builder with the family and the outing.
+const julUrl = (id) => `${base}/club/kits/2027-07-ready-to-go?sample=${id}`;
+/** Each person's list on screen: name → [section, item] pairs. */
+const pkLists = (page) => page.locator('[data-pk-person]').evaluateAll((cards) => Object.fromEntries(cards.map((c) => [c.querySelector('h3').textContent.replace(/’s list$/, ''),
+  [...c.querySelectorAll('[data-pk-item]')].map((li) => [li.closest('.pk-rows').previousElementSibling?.tagName === 'H4' ? li.closest('.pk-rows').previousElementSibling.textContent : 'My list', li.querySelector('input[type="text"]').value])])));
+const pkShared = (page) => page.locator('[data-pk-shared-item]').evaluateAll((rows) => rows.map((r) => `${r.querySelector('input[type="text"]').value} → ${r.querySelector('select').selectedOptions[0]?.textContent ?? ''}`));
+const pkAllowed = (page) => page.evaluate(() => [...document.querySelectorAll('[data-pk-shared-item] select')].every((sel) => !sel.selectedOptions[0]?.disabled));
+const SIX = { rivera: 'Mateo', brooks: 'Lily', chen: 'Ivy', okafor: null };
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { july: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(julUrl(id));
+  await page.getByRole('heading', { name: 'Our Ready-to-Go Challenge' }).waitFor();
+  check(await noSideScroll(page), `${id}: July scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the challenge has ${await lines.count()} steps (expected 5)`);
+  await page.screenshot({ path: join(out, `${id}-july-phone.png`), fullPage: true });
+
+  await page.getByRole('group', { name: 'Outings' }).getByRole('button', { name: 'Pool or beach' }).click();
+  await page.getByLabel(/^When/).fill('2027-07-10');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our Ready-to-Go Challenge' }).waitFor();
+  check(await page.getByLabel('Where we’re going').inputValue() === 'Pool or beach' && await page.getByLabel(/^When/).inputValue() === '2027-07-10' && await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: the outing, day or check didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['ready-to-go', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-july-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: July ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: July ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Pool or beach') && sheet.includes('Saturday, July 10') && sheet.includes('Unpack when you get home.'), `${id}: her printed challenge is missing the outing, day or a step`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('Ready to Go') && front.includes('More independence for everyone') && front.includes('Where we’re going') && front.includes('When') && front.includes('Megan') && !front.includes('Pool or beach'), `${id}: the letter's front is wrong`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-compass')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's compass is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Raising Kids Who Can Get Themselves Ready', 'Pack', 'Gather your things.', 'Make sure you have what you need.', 'Put everything away when you get home.', 'Getting ready, by age', '13+', 'What’s one thing you think you could get ready by yourself before we leave?', 'Make Your Family’s Packing Lists', 'organizedmomcollective.com/club/kits/2027-07-ready-to-go', 'Before your next outing', 'have their bags ready.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  check(await page.locator('.club-letter .club-qr').count() === 1, `${id}: July's letter should have one QR code`);
+
+  // The tool, opened with the family and the outing she chose.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Build Our Packing Lists', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/packing/);
+  await page.locator('[data-pk-person]').first().waitFor();
+  check(await page.locator('.pk[data-pk-handoff]').count() === 1, `${id}: the Club page isn't the site's packing builder`);
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  entry.people = names;
+  check(names.length >= 1 && !names.includes('Adult 1'), `${id}: the builder didn't take the family (${names.join(', ')})`);
+  check(await page.locator('[data-pk-outing="pool"][aria-pressed="true"]').count() === 1, `${id}: the builder didn't open on the pool`);
+  check(await page.locator('[data-pk-person]').count() === names.length, `${id}: not one list per person`);
+  check(await page.locator('[data-pk-shared]').count() === 1, `${id}: no shared list`);
+  check(await pkAllowed(page), `${id}: a shared item went to someone who can't own it`);
+  const pool = await pkLists(page);
+  entry.pool = pool;
+  const six = SIX[id];
+  if (six) {
+    const mine = pool[six];
+    check(mine.some(([s, t]) => s === 'I can pack myself' && t === 'Swimsuit') && mine.some(([s, t]) => s === 'I can pack myself' && t === 'Towel'), `${id}: ${six} can't pack their own swimsuit and towel`);
+    check(mine.some(([s, t]) => s === 'A grown-up helps with' && /Medicine/.test(t)), `${id}: ${six}'s medicine isn't a grown-up's`);
+    check(!mine.some(([, t]) => /Pajamas|Outfits|Sleeping/.test(t)), `${id}: a pool trip packs like a vacation`);
+  }
+  for (const [who, items] of Object.entries(pool)) check(!items.some(([s, t]) => s === 'I can pack myself' && /Medicine|forms|documents/i.test(t)), `${id}: ${who} packs a grown-up's item alone`);
+  check(await noSideScroll(page), `${id}: the builder scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-july-builder-pool.png`), fullPage: true });
+
+  // Camp for a day, then a five-night vacation: different lists, the right details.
+  await page.locator('[data-pk-outing="camp"]').click();
+  const camp = await pkLists(page);
+  entry.camp = camp;
+  check(Object.values(camp).every((items) => !items.some(([, t]) => /Sleeping bag|Pajamas/.test(t))), `${id}: a day camp packs sleeping gear`);
+  check(await page.locator('[data-pk-pref-box="camp-list"]').isVisible() && await page.locator('[data-pk-pref-box="laundry"]').isHidden(), `${id}: camp shows the wrong extra questions`);
+  await page.screenshot({ path: join(out, `${id}-july-builder-camp.png`), fullPage: true });
+  await page.locator('[data-pk-outing="vacation"]').click();
+  await page.locator('[data-pk-nights]').fill('5');
+  await page.locator('[data-pk-nights]').dispatchEvent('change');
+  const vac = await pkLists(page);
+  entry.vacation = vac;
+  check(Object.values(vac).some((items) => items.some(([, t]) => t === 'Outfits for 6 days')), `${id}: five nights isn't six days of outfits`);
+  const vacShared = await pkShared(page);
+  entry.vacationShared = vacShared;
+  check(vacShared.some((x) => /documents/.test(x)) && vacShared.length <= 12, `${id}: the vacation's shared list is off (${vacShared.length})`);
+  check(await pkAllowed(page), `${id}: a vacation shared item went to someone who can't own it`);
+  const adults = names.filter((n, i) => i < 3 && !/^\d/.test(n));
+  if (['rivera', 'okafor', 'chen'].includes(id)) {
+    const owners = new Set(vacShared.map((x) => x.split(' → ')[1]));
+    check(owners.size > 1, `${id}: one person got the whole shared list`);
+  }
+  void adults;
+  await page.locator('[data-pk-pref="laundry"]').check();
+  check(Object.values(await pkLists(page)).some((items) => items.some(([, t]) => t === 'Outfits for 4 days')), `${id}: laundry didn't cap the outfits`);
+  await page.screenshot({ path: join(out, `${id}-july-builder-vacation.png`), fullPage: true });
+
+  // Back to the pool; edit: reword, move to the other section, reorder, remove, add, reassign shared; keep it all.
+  await page.locator('[data-pk-outing="pool"]').click();
+  const card = page.locator('[data-pk-person]').last();
+  const first = card.locator('[data-pk-item]').first();
+  await first.locator('input[type="text"]').fill('My purple backpack');
+  await first.locator('input[type="text"]').blur();
+  await card.locator('[data-pk-item]').nth(1).getByRole('button', { name: /^Move down/ }).click();
+  const removed = await card.locator('[data-pk-item]').last().locator('input[type="text"]').inputValue();
+  await card.locator('[data-pk-item]').last().getByRole('button', { name: /^Remove/ }).click();
+  await card.getByPlaceholder(/^Add to/).fill('Goggles with the blue strap');
+  await card.getByRole('button', { name: 'Add', exact: true }).click();
+  const swap = card.locator('.pk-swap').first();
+  const isChild = await swap.count() > 0;
+  if (isChild) await swap.click();
+  const sharedRow = page.locator('[data-pk-shared-item]').first();
+  const pick = (await sharedRow.locator('select option:not([disabled])').allTextContents()).filter((t) => t !== 'Who?').pop();
+  await sharedRow.locator('select').selectOption({ label: pick });
+  const before = await pkLists(page);
+  const beforeShared = await pkShared(page);
+  const lastName = Object.keys(before).pop();
+  check(before[lastName].some(([, t]) => t === 'My purple backpack') && before[lastName].some(([, t]) => t === 'Goggles with the blue strap') && !before[lastName].some(([, t]) => t === removed), `${id}: edits didn't apply`);
+  if (isChild) check(before[lastName].some(([s, t]) => s === 'A grown-up helps with' && t === 'My purple backpack'), `${id}: moving an item to "A grown-up helps" didn't stick`);
+  await page.locator('[data-pk-fresh]').click();
+  await page.reload();
+  await page.locator('[data-pk-person]').first().waitFor();
+  check(JSON.stringify(await pkLists(page)) === JSON.stringify(before) && JSON.stringify(await pkShared(page)) === JSON.stringify(beforeShared), `${id}: edits didn't survive new suggestions and a reload`);
+
+  // Save it, switch outings, open it again.
+  const name = await page.locator('[data-pk-save-name]').inputValue();
+  entry.savedName = name;
+  await page.locator('[data-pk-save]').click();
+  await page.locator('[data-pk-outing="sleepover"]').click();
+  check(await page.locator('[data-pk-saved-box]').isVisible(), `${id}: the saved lists don't show`);
+  await page.locator('[data-pk-open]').click();
+  check(await page.locator('[data-pk-outing="pool"][aria-pressed="true"]').count() === 1 && (await pkLists(page))[lastName].some(([, t]) => t === 'My purple backpack'), `${id}: the saved list didn't open as it was`);
+  check(/on this device/.test(await page.locator('[data-pk-saved-box]').textContent()), `${id}: the saved lists don't say they're on this device only`);
+
+  // Print: one person's list on one page; everyone's lists plus the shared list, each on its own page.
+  check(await page.locator('.pk-sheet').count() === names.length + 1, `${id}: printing everyone isn't one page each plus the shared list`);
+  check(await page.evaluate(() => [...document.querySelectorAll('.pk-sheet')].every((s) => s.scrollHeight <= s.clientHeight + 1)), `${id}: a printout runs off its page`);
+  if (six) {
+    await page.locator('[data-pk-print-for]').selectOption({ label: `${six}’s list` });
+    check(await page.locator('.pk-sheet').count() === 1, `${id}: ${six}'s list didn't print alone`);
+    const one = await page.locator('.pk-sheet').textContent();
+    check(one.includes(`${six}’s Packing List`) && one.includes('I can pack myself') && one.includes('A grown-up helps with') && one.includes('Pack') && one.includes('Unpack') && one.includes('Pool or beach'), `${id}: ${six}'s printout is missing its parts`);
+    const [d1] = await Promise.all([page.waitForEvent('download'), page.click('[data-pk-download]')]);
+    await d1.saveAs(join(out, `${id}-july-${six.toLowerCase()}-pool.png`));
+  }
+  // The youngest child under six by the kit's month (the sample families age with the calendar: the Chens' Leo is 6 by July).
+  const youngest = { rivera: 'Elena', okafor: 'Zara' }[id];
+  if (youngest) {
+    await page.locator('[data-pk-print-for]').selectOption({ label: `${youngest}’s list` });
+    check(await page.locator('.pk-sheet.is-young').count() === 1, `${id}: ${youngest}'s list isn't the picture-first layout`);
+    const [dy] = await Promise.all([page.waitForEvent('download'), page.click('[data-pk-download]')]);
+    await dy.saveAs(join(out, `${id}-july-${youngest.toLowerCase()}-young.png`));
+  }
+  await page.locator('[data-pk-print-for]').selectOption({ label: 'The shared list' });
+  check(await page.locator('.pk-sheet').count() === 1 && /Our Shared List/.test(await page.locator('.pk-sheet').textContent()), `${id}: the shared list didn't print alone`);
+  const [ds] = await Promise.all([page.waitForEvent('download'), page.click('[data-pk-download]')]);
+  await ds.saveAs(join(out, `${id}-july-shared.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the builder asked for an email`);
+  await page.locator('[data-pk-print-for]').selectOption({ index: 0 });
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-07/);
+  check(errors.length === 0, `${id}: July page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// No family profile: one adult and one child to start; a teen added gets their own fuller list.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/packing?sample=new`);
+  await page.locator('[data-pk-person]').first().waitFor();
+  check((await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1,Child 1', 'no profile: the builder should start with one adult and one child');
+  await page.getByRole('button', { name: '+ Teen' }).click();
+  const lists = await pkLists(page);
+  check(lists['Teen 1']?.length > 0, 'no profile: the added teen got no list');
+  report.push({ packingNoProfile: Object.keys(lists) });
+  await ctx.close();
+}
+
+// Two families in one browser, July: one family's lists and saved lists never show up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  await page.goto(julUrl('rivera'));
+  await page.getByRole('button', { name: 'Build Our Packing Lists', exact: true }).click();
+  await page.locator('[data-pk-person]').first().waitFor();
+  await page.getByPlaceholder('Add a shared item').fill('Rivera secret item');
+  await page.locator('[data-pk-shared] .pk-add').getByRole('button', { name: 'Add', exact: true }).click();
+  await page.locator('[data-pk-save]').click();
+  await page.goto(julUrl('okafor'));
+  await page.getByRole('button', { name: 'Build Our Packing Lists', exact: true }).click();
+  await page.locator('[data-pk-person]').first().waitFor();
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  check(!names.includes('Ana') && names.includes('Zara') && !(await pkShared(page)).some((x) => x.includes('Rivera secret item')) && await page.locator('[data-pk-saved-box]').isHidden(), `leak: the Okafors’ packing lists show the Riveras’ (${names.join(', ')})`);
+  report.push({ julyLeakCheck: 'ok' });
   await ctx.close();
 }
 
