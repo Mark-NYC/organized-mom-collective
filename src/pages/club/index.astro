@@ -2,29 +2,30 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../../config';
 const perks = [
-  {number:'01', title:'A letter worth opening', body:'A personal note from our family to yours, with a helpful focus for the month.'},
-  {number:'02', title:'One family challenge', body:'A small, practical step to share the remembering, planning or doing with someone else at home.'},
-  {number:'03', title:'A personalized digital kit', body:'A featured generator, plus supporting pages you can use and print. Built around your family, not a blank worksheet you have to figure out.'}
+  {number:'01', title:'We choose a practical focus', body:'One area of family life to improve, from shared chores to more time together. No searching for the next system.'},
+  {number:'02', title:'We prepare the resources', body:'A personalized generator and ready-to-use printable pages mean you don’t have to start with an empty chart.'},
+  {number:'03', title:'You start it together', body:'A simple family activity gives everyone a place to begin and a responsibility to own.'}
 ];
 const steps = [
-  ['Join the Club','A simple monthly membership, planned at $5 a month.'],
-  ['Meet the month’s focus','A letter arrives in your mailbox with encouragement and a practical next step.'],
-  ['Make the kit yours','Open the digital kit and tailor the tools to your family.'],
-  ['Try one change together','Give someone else a real part to own, then build on it next month.']
+  ['Open your letter', 'See what your family is working on this month.'],
+  ['Make your plan', 'Tell the generator about your household. Start with a plan made for your family, not a blank page.'],
+  ['Start together', 'Gather the family, agree on the next step, and give everyone a real part to own.']
 ];
 const questions = [
-  ['What comes with each month?', 'The planned membership includes a printed monthly letter and field guide, a family activity, and a digital kit with a personalized generator and supporting printable pages.'],
-  ['Is it really $5 a month?', 'That is our planned subscription price. Final pricing and fulfillment terms will be confirmed before enrollment opens.'],
-  ['Do I need your wall calendar?', 'No. The Club stands on its own and also works alongside the Organized Mom Collective wall calendar.'],
-  ['Will this give me even more work?', 'The point is one manageable change, not another full organizing system. Pick the part that helps this month and skip the rest.'],
-  ['When will the first letter arrive?', 'The mailing schedule and first delivery cutoff will be published when enrollment opens.'],
-  ['Can I cancel?', 'Cancellation and billing terms will be clearly available before you subscribe. Membership is not currently available to purchase.']
+  ['How is the Club different from the wall calendar?', 'The calendar gives you one place for schedules and shared plans. The Club gives your family a prepared monthly improvement plan, a personalized tool and guidance for putting it into practice.'],
+  ['What do I receive each month?', 'The planned membership includes a mailed personal letter and field guide, one family challenge, and a digital kit with a personalized generator and supporting printable pages.'],
+  ['Do I have to create the plans myself?', 'No. The featured generator creates a starting plan from your family’s details. You can review and adjust it together instead of building from scratch.'],
+  ['Do I need to own the wall calendar?', 'Not at all. The Club works on its own, and it also complements the calendar.'],
+  ['Do I have to print everything?', 'The mailer comes in the mail. The digital kit is designed to use on screen and includes printable pages if paper works better for your home.'],
+  ['What if we miss a month?', 'Start with what helps your family now. There is no expectation to overhaul your home or finish every activity.'],
+  ['When will the first letter arrive?', 'Enrollment and mailing cutoff dates will be published before subscriptions open.'],
+  ['Can I cancel?', 'Pricing, cancellation and billing terms will be shown before you subscribe. The Club is not yet available to purchase.']
 ];
 const check = 'M5 12l4 4L19 6';
 ---
 <PublicLayout
   fullTitle={`Organized Family Club · ${BRAND_NAME}`}
-  description="A personal monthly letter, a practical family challenge and digital tools to help everyone share the load. Explore the Organized Family Club."
+  description="A better-running family, without figuring it all out yourself. Organized Family Club brings ready-to-use personalized plans, a family challenge and a monthly letter."
   indexable={false}
   chrome={false}
   width="full"
@@ -36,70 +37,111 @@ const check = 'M5 12l4 4L19 6';
     </header>
     <section class="club-hero" aria-labelledby="club-hero-title">
       <div class="club-hero-copy">
-        <p class="club-eyebrow">A little help for the whole family</p>
-        <h1 id="club-hero-title">A little less on Mom’s plate. <em>A little more teamwork at home.</em></h1>
-        <p class="club-lede">A more organized home doesn't happen because Mom works harder. It happens when everyone starts working together.</p>
-        <p>Meet the Organized Family Club: a thoughtful letter in your mailbox, one practical family challenge, and a digital kit to make one small change together each month.</p>
+        <p class="club-eyebrow">The Organized Family Club</p>
+        <h1 id="club-hero-title">A better-running family. <em>Without figuring it all out yourself.</em></h1>
+        <p class="club-lede">Every month, get a ready-to-use family plan, personalized tools, and a simple challenge to help everyone work better together.</p>
+        <p>Less researching, planning and reminding. More shared ownership, one month at a time.</p>
         <div class="club-hero-action">
-          <a href="#monthly" class="club-button" data-cta="club-hero-preview">Take a look inside <span aria-hidden="true">→</span></a>
-          <p><strong>Planned at $5/month</strong> · Enrollment opening later</p>
+          <a href="#monthly" class="club-button" data-cta="club-hero-kits">See what’s inside <span aria-hidden="true">→</span></a>
+          <p><strong>$5/month planned</strong> · Enrollment not yet open</p>
         </div>
       </div>
-      <div class="club-hero-art" aria-label="Illustration of a personal letter and a family planning guide">
+      <div class="club-hero-art" aria-label="Illustration showing ready-to-use family planning sheets and a mailed letter">
         <div class="club-envelope-back"></div>
-        <div class="club-paper club-paper-rear"><span>ONE SMALL STEP</span><div></div><div></div><div></div></div>
-        <div class="club-paper club-paper-front"><small>ORGANIZED FAMILY CLUB</small><strong>A letter for your family</strong><p>Little changes add up when everyone plays a part.</p><span>With love, Mark & Megan</span></div>
+        <div class="club-paper club-paper-rear"><span>FAMILY PLAN</span><div></div><div></div><div></div></div>
+        <div class="club-paper club-paper-front"><small>ORGANIZED FAMILY CLUB</small><strong>Your family’s plan, ready to go.</strong><p>One small improvement. Everyone has a part.</p><span>WITH LOVE, MARK &amp; MEGAN</span></div>
         <div class="club-envelope-front"></div>
       </div>
     </section>
     <section class="club-narrow club-problem" aria-labelledby="club-problem-title">
-      <p class="club-eyebrow">Sound familiar?</p>
-      <h2 id="club-problem-title">You’re not supposed to be the family reminder system.</h2>
-      <p>You know when the appointments are. You remember what’s for dinner. You notice the laundry, the school papers and the backpack that still needs packing.</p>
-      <p>Even when everyone wants to help, you can end up doing the remembering and the reminding.</p>
-      <p class="club-serif-note">What if the answer wasn’t doing more, but helping everyone own their part?</p>
+      <p class="club-eyebrow">The invisible extra job</p>
+      <h2 id="club-problem-title">You’re managing the family. And the system that’s supposed to help manage the family.</h2>
+      <p>The chore charts. The routines. The checklists saved from Pinterest.</p>
+      <p>Someone still has to find the ideas, make the plans, explain how they work and remind everyone to follow through.</p>
+      <p>And somehow, that someone is usually you.</p>
+      <p class="club-serif-note">You shouldn’t have to build another system just to get everyone helping.</p>
     </section>
     <section class="club-surface club-contrast" aria-labelledby="club-contrast-title">
-      <div class="club-center"><p class="club-eyebrow">A different way forward</p><h2 id="club-contrast-title">The goal isn’t a perfect home. It’s a family that works together.</h2></div>
-      <div class="club-comparison">
-        <div><p class="club-eyebrow">When it all runs through you</p><ul><li>Mom keeps the schedule in her head.</li><li>Chores take repeated reminders.</li><li>Good intentions get lost in busy weeks.</li></ul></div>
-        <div><p class="club-eyebrow">When everyone owns a part</p><ul><li>Plans are where everyone can see them.</li><li>People follow through on whole jobs.</li><li>Small routines are easier to repeat.</li></ul></div>
+      <div class="club-center">
+        <p class="club-eyebrow">Less setup for Mom. More ownership for everyone.</p>
+        <h2 id="club-contrast-title">We help with the planning. Your family shares the doing.</h2>
+        <p>Each month, we choose one part of family life to improve and prepare the tools to help you start together.</p>
+      </div>
+      <div class="club-included club-promise">
+        {perks.map((perk) => <article class="club-included-item"><span class="club-number">{perk.number}</span><h3>{perk.title}</h3><p>{perk.body}</p></article>)}
       </div>
     </section>
     <section class="club-section" id="monthly" aria-labelledby="club-monthly-title">
-      <div class="club-center"><p class="club-eyebrow">The monthly experience</p><h2 id="club-monthly-title">A little something good in your mailbox every month.</h2><p>Not ten new habits. One thoughtful focus, one useful kit, and one next step to try together.</p></div>
-      <div class="club-included">
-        {perks.map((perk) => <article class="club-included-item"><span class="club-number">{perk.number}</span><div><h3>{perk.title}</h3><p>{perk.body}</p></div></article>)}
+      <div class="club-center">
+        <p class="club-eyebrow">Ready-to-use monthly kits</p>
+        <h2 id="club-monthly-title">A fresh family improvement, ready to go each month.</h2>
+        <p>Different challenges. The same idea: we do much of the setup so your family can get started together.</p>
       </div>
+      <div class="club-kit-grid">
+        <article class="club-kit">
+          <div class="club-kit-preview"><span>NOVEMBER</span><strong>Share the load</strong><p>Our family’s ownership plan</p><div class="club-preview-line">Daily care <span>✓</span></div><div class="club-preview-line">Room jobs <span>✓</span></div><div class="club-preview-line">Helping at home <span>✓</span></div></div>
+          <div class="club-kit-copy"><p class="club-eyebrow">Family ownership</p><h3>Share the Load</h3><p>Turn the household to-do list into a responsibility plan with jobs matched to family members’ ages and abilities.</p><p class="club-kit-result"><strong>Ready-to-use result:</strong> A personalized ownership plan that everyone can review together.</p></div>
+        </article>
+        <article class="club-kit">
+          <div class="club-kit-preview club-kit-preview-blush"><span>FEBRUARY</span><strong>Better together</strong><p>Our family connection plan</p><div class="club-preview-line">Together time <span>♡</span></div><div class="club-preview-line">One-on-one ideas <span>♡</span></div><div class="club-preview-line">Weekly rhythm <span>♡</span></div></div>
+          <div class="club-kit-copy"><p class="club-eyebrow">Family connection</p><h3>Better Together</h3><p>Find age-appropriate ways to spend meaningful time together without planning everything from scratch.</p><p class="club-kit-result"><strong>Ready-to-use result:</strong> A connection plan with family activities and simple weekly rhythms.</p></div>
+        </article>
+        <article class="club-kit">
+          <div class="club-kit-preview club-kit-preview-blue"><span>MARCH</span><strong>Spring clean as a team</strong><p>Our room-by-room plan</p><div class="club-preview-line">Kitchen <span>✓</span></div><div class="club-preview-line">Bedrooms <span>✓</span></div><div class="club-preview-line">Living spaces <span>✓</span></div></div>
+          <div class="club-kit-copy"><p class="club-eyebrow">Shared home care</p><h3>Spring Clean as a Team</h3><p>Divide spring cleaning into age-appropriate jobs and short, manageable sessions.</p><p class="club-kit-result"><strong>Ready-to-use result:</strong> A room-by-room plan with clear assignments for the family.</p></div>
+        </article>
+      </div>
+      <p class="club-footnote club-kit-disclaimer">These are conceptual previews of planned kits, not screenshots of finished personalized output. Final contents may change before launch.</p>
     </section>
-    <section class="club-surface club-example" aria-labelledby="club-example-title">
-      <div class="club-example-copy"><p class="club-eyebrow">A look at a sample month</p><h2 id="club-example-title">August: Ready for School</h2><p>School starts soon. Instead of putting the whole countdown in Mom’s head, invite the family into the preparations.</p>
-        <div class="club-rule-list"><p><strong>The letter</strong><span>A fresh start that doesn’t depend on a perfect first day.</span></p><p><strong>The challenge</strong><span>Share the school prep jobs, from backpacks to new routines.</span></p><p><strong>The digital tool</strong><span>Enter the first day of school and get a dated preparation plan for your family.</span></p></div>
-        <p class="club-footnote">Illustrative month preview. Final kit contents may change before launch.</p>
+    <section class="club-surface club-example club-mailer" aria-labelledby="club-example-title">
+      <div class="club-example-copy">
+        <p class="club-eyebrow">A personal touch, delivered</p>
+        <h2 id="club-example-title">Something good in the mail. Something useful for your family.</h2>
+        <p>The digital kit does the preparation. The letter helps your family put the plan into practice.</p>
+        <div class="club-rule-list">
+          <p><strong>A personal letter</strong><span>Encouragement from Mark and Megan and a clear focus for the month.</span></p>
+          <p><strong>A family field guide</strong><span>A practical starting point, without another long book or course to work through.</span></p>
+          <p><strong>A family activity</strong><span>A simple way to gather everyone and take the first step together.</span></p>
+          <p><strong>Access to your kit</strong><span>A QR code to your personalized digital resources and printable pages.</span></p>
+        </div>
       </div>
-      <div class="club-sample-sheet">
-        <p class="club-eyebrow">BACK-TO-SCHOOL COUNTDOWN</p><h3>Ready for the first day</h3><p>One family. One plan. Everyone has a part.</p>
-        <div class="club-sample-row"><span>✓</span><div><b>Four weeks before</b><small>Check supplies and school information</small></div></div>
-        <div class="club-sample-row"><span>✓</span><div><b>Two weeks before</b><small>Practice your morning routine</small></div></div>
-        <div class="club-sample-row"><span>✓</span><div><b>One week before</b><small>Get backpacks and clothes ready</small></div></div>
-        <div class="club-sample-bottom">THE ORGANIZED FAMILY CLUB</div>
+      <div class="club-sample-sheet club-letter-preview" aria-label="Illustrative layout of the monthly letter, not a final printed product">
+        <p class="club-eyebrow">ORGANIZED FAMILY CLUB</p>
+        <h3>Dear family,</h3>
+        <p>One small change this month can make home feel a little easier for everyone.</p>
+        <p>Start with a conversation. Choose one job to share, and make sure everyone knows what belongs to them.</p>
+        <p class="club-letter-signature">With love,<br />Mark &amp; Megan</p>
+        <div class="club-sample-bottom">YOUR MONTHLY LETTER + FAMILY FIELD GUIDE</div>
       </div>
     </section>
     <section class="club-section" aria-labelledby="club-how-title">
-      <div class="club-center"><p class="club-eyebrow">How it works</p><h2 id="club-how-title">One small step each month. That’s it.</h2></div>
+      <div class="club-center"><p class="club-eyebrow">How it works</p><h2 id="club-how-title">Open it. Make it yours. Do it together.</h2><p>Start with the plan we’ve prepared. Make it fit your household, then let the family take part.</p></div>
       <div class="club-steps">{steps.map(([title,body],i)=><div class="club-step"><span>{String(i+1).padStart(2,'0')}</span><h3>{title}</h3><p>{body}</p></div>)}</div>
     </section>
     <section class="club-surface club-calendar" aria-labelledby="club-calendar-title">
-      <img src="/images/site/calendar-cutout-720.webp" width="720" height="1058" loading="lazy" alt="Organized Mom Collective weekly wall calendar, with space for family schedules, meals and household jobs" />
-      <div><p class="club-eyebrow">Better together</p><h2 id="club-calendar-title">A natural companion to your wall calendar.</h2><p>The wall calendar helps everyone see the plan. The Club helps your family practice sharing the work behind that plan.</p><p>You can use the Club on its own. No calendar purchase required.</p><a class="club-text-link" href="/calendar" data-cta="club-calendar">See the wall calendar <span aria-hidden="true">→</span></a></div>
+      <img src="/images/site/calendar-cutout-720.webp" width="720" height="1058" loading="lazy" alt="Organized Mom Collective weekly wall calendar for schedules, meals and household jobs" />
+      <div>
+        <p class="club-eyebrow">Two different ways to help your family</p>
+        <h2 id="club-calendar-title">The calendar shows the plan. The Club helps you build better ways of doing life together.</h2>
+        <p><strong>The Wall Calendar</strong> gives everyone one place to see schedules, meals and responsibilities for the week.</p>
+        <p><strong>The Monthly Club</strong> gives you prepared tools, personalized plans and guidance for improving one part of family life at a time.</p>
+        <p>You don’t need a calendar to join. If you already have one, the Club is a natural next step.</p>
+        <a class="club-text-link" href="/calendar" data-cta="club-calendar">See the wall calendar <span aria-hidden="true">→</span></a>
+      </div>
     </section>
     <section class="club-section club-story" aria-labelledby="club-story-title">
       <div class="club-story-photo"><img src="/images/site/mark-megan-family-story-1200.webp" width="1200" height="1200" loading="lazy" alt="Mark and Megan with their family outdoors" /></div>
-      <div><p class="club-eyebrow">From our family to yours</p><h2 id="club-story-title">We started building these tools because our own family needed them.</h2><p>We didn’t begin with an effortlessly organized home. We began because too much of the planning and remembering was landing on Megan, and we knew something needed to change.</p><p>Mark loves building systems. Megan helped make those systems useful in real family life. Together we began creating tools that make the plan visible and invite everyone to take part.</p><p><strong>Organized moms raise organized families.</strong> That’s the idea behind this Club.</p><a class="club-text-link" href="/our-story" data-cta="club-story">Read our story <span aria-hidden="true">→</span></a></div>
+      <div><p class="club-eyebrow">From our family to yours</p><h2 id="club-story-title">We started building these tools because our own family needed them.</h2>
+        <p>We didn’t start with a perfectly organized home. Too much of the planning, remembering and managing was landing on Megan, and we needed something to change.</p>
+        <p>Mark loves building systems. Megan helps make sure they work for real family life. Together, we began creating tools so the plan doesn’t have to live in one person’s head.</p>
+        <p>We wanted the Club to do more than hand Mom another project. We want to help prepare the next step and invite the whole family into it.</p>
+        <p><strong>Organized moms raise organized families.</strong> That’s the heart behind it.</p>
+        <a class="club-text-link" href="/our-story" data-cta="club-story">Read our story <span aria-hidden="true">→</span></a>
+      </div>
     </section>
-    <section class="club-surface club-reassurance" aria-labelledby="club-reassurance-title"><div class="club-center"><p class="club-eyebrow">Made for real life</p><h2 id="club-reassurance-title">Practical help. Not more homework for Mom.</h2></div><div class="club-benefits"><div><h3>One focus at a time</h3><p>No giant home overhaul.</p></div><div><h3>Shared ownership</h3><p>Everyone has a real part to play.</p></div><div><h3>Ready-to-use tools</h3><p>Less work setting things up.</p></div><div><h3>Room for real weeks</h3><p>Pick up where you left off.</p></div></div></section>
+    <section class="club-surface club-reassurance" aria-labelledby="club-reassurance-title"><div class="club-center"><p class="club-eyebrow">Built for real weeks</p><h2 id="club-reassurance-title">Prepared for you. Started together.</h2></div><div class="club-benefits"><div><h3>One focus at a time</h3><p>Skip the giant overhaul.</p></div><div><h3>No blank-page setup</h3><p>Make a plan from your family’s details.</p></div><div><h3>Real ownership</h3><p>Everyone learns their part.</p></div><div><h3>Room to start small</h3><p>Use what helps this month.</p></div></div></section>
     <section class="club-narrow club-faq" aria-labelledby="club-faq-title"><p class="club-eyebrow">Good questions</p><h2 id="club-faq-title">Before you join</h2><div>{questions.map(([q,a],i)=><details open={i===0}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
-    <section class="club-final" id="join" aria-labelledby="club-final-title"><p class="club-eyebrow">Organized Family Club</p><h2 id="club-final-title">You don’t need to do everything. You need a family that works together.</h2><p>And that starts with one small change.</p><div class="club-final-offer"><p class="club-price">$5 <span>/ month · planned price</span></p><ul>{['A thoughtful monthly letter','One practical family challenge','A personalized digital kit'].map(item=><li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d={check}/></svg>{item}</li>)}</ul><p class="club-notice">Enrollment isn’t open yet. We’re finishing the printed mailer, monthly billing, and member access before taking subscriptions.</p><a class="club-button" href="/resources" data-cta="club-final-resources">Explore our free resources <span aria-hidden="true">→</span></a></div></section>
+    <section class="club-final" id="join" aria-labelledby="club-final-title"><p class="club-eyebrow">Organized Family Club</p><h2 id="club-final-title">Less time figuring it all out. More time making it work together.</h2><p>A fresh family plan, with the preparation already done.</p><div class="club-final-offer"><p class="club-price">$5 <span>/ month · planned price</span></p><ul>{['A personalized, ready-to-use monthly kit','A simple family challenge','A thoughtful letter delivered by mail'].map(item=><li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d={check}/></svg>{item}</li>)}</ul><p class="club-notice">Enrollment isn’t open yet. We’re finishing the printed mailer, subscription billing and member access before taking payments.</p><a class="club-button" href="/resources" data-cta="club-final-resources">Explore our free resources <span aria-hidden="true">→</span></a></div></section>
     <footer class="club-footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Questions? Contact us</a></footer>
   </div>
   <style>
@@ -109,5 +151,27 @@ const check = 'M5 12l4 4L19 6';
     @media(max-width:800px){.club-hero{grid-template-columns:1fr}.club-hero-copy{padding:45px 28px}.club-hero-art{min-height:390px}.club-paper{padding:22px}.club-paper-front{gap:12px}.club-hero-action .club-button{width:100%}.club-comparison,.club-example,.club-calendar,.club-story{grid-template-columns:1fr}.club-included,.club-steps{grid-template-columns:1fr 1fr}.club-benefits{grid-template-columns:1fr 1fr}.club-example,.club-calendar,.club-reassurance{padding:44px 24px}.club-story-photo{max-width:520px}.club-calendar img{max-height:320px}.club-narrow,.club-section{padding-top:75px;padding-bottom:75px}}
     @media(max-width:520px){.club h1{font-size:2.45rem}.club h2{font-size:2.15rem}.club-included,.club-steps{grid-template-columns:1fr}.club-included{gap:22px}.club-comparison>div{padding:25px}.club-comparison{grid-template-columns:1fr}.club-rule-list p{grid-template-columns:1fr;gap:4px}.club-benefits{grid-template-columns:1fr 1fr;gap:18px}.club-benefits h3{font-size:1.1rem}.club-final-offer{padding:24px}.club-footer{flex-direction:column}.club-sample-sheet{transform:none}}
     @media(prefers-reduced-motion:reduce){.club-button{transition:none}}
+
+    /* Club-specific previews of proposed kits; not fabricated product screenshots */
+    .club-kit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}
+    .club-kit{min-width:0;border:1px solid #e0dfd9;background:#fff}
+    .club-kit-preview{padding:26px 24px;min-height:265px;background:#d4dfc4;display:flex;flex-direction:column;gap:12px}
+    .club-kit-preview>span{font-size:.72rem;font-weight:700;letter-spacing:.13em}
+    .club-kit-preview>strong{font:400 1.75rem/1.12 Georgia,serif}
+    .club-kit-preview>p{font-size:.85rem;margin:0 0 8px}
+    .club-kit-preview-blush{background:#e8d2d6}.club-kit-preview-blue{background:#cddde1}
+    .club-preview-line{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #54545447;padding:4px 0;font-size:.85rem}
+    .club-kit-copy{padding:27px 24px 30px}
+    .club-kit-copy h3{margin:12px 0 16px}
+    .club-kit-copy>p:not(.club-eyebrow){font-size:.95rem}
+    .club-kit-result{border-top:1px solid #dfded8;padding-top:16px;margin-top:18px!important}
+    .club-kit-disclaimer{text-align:center;max-width:750px;margin:22px auto 0!important}
+    .club-promise{max-width:1050px;margin:0 auto}
+    .club-mailer{background:#fbf7f1}
+    .club-letter-preview{min-height:470px;transform:rotate(1deg)}
+    .club-letter-preview>p:nth-of-type(2){font-family:Georgia,serif;font-size:1.25rem;line-height:1.55}
+    .club-letter-signature{font-family:Georgia,serif;font-style:italic;font-size:1.3rem;margin:34px 0!important}
+    @media(max-width:850px){.club-kit-grid{grid-template-columns:1fr}.club-kit{display:grid;grid-template-columns:.8fr 1fr}.club-kit-preview{min-height:295px}.club-kit-copy{padding:25px}}
+    @media(max-width:560px){.club-kit{display:block}.club-kit-preview{min-height:0}.club-letter-preview{min-height:0}}
   </style>
 </PublicLayout>
