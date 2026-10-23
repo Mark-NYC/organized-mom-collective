@@ -34,7 +34,10 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
 
   const { me, household } = state;
   const open = me.kits.map((k) => ({ access: k.can, kit: kitBySlug(k.slug) })).filter((k): k is { access: 'edit' | 'read'; kit: KitConfig } => Boolean(k.kit));
-  const [current, ...earlier] = open;
+  // A bonus that opens before its own month (November's gift of September's kit) is a gift, not this month's kit.
+  const early = (k: { kit: KitConfig }) => open.some((g) => g.kit.bonus?.slug === k.kit.slug && g.kit.month < k.kit.month);
+  const gifts = open.filter(early);
+  const [current, ...earlier] = open.filter((k) => !early(k));
   const you = household!.members.find((m) => m.isAccountHolder && !m.archived) ?? household!.members.find((m) => !m.archived);
   const team = household!.members.filter((m) => !m.archived);
 
@@ -53,6 +56,16 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
         <KitCard kit={current.kit} access={current.access} href={ctx.href(routes.clubKit(current.kit.slug))} featured />
       ) : (
         <p className="mt-8 max-w-xl text-warm-soft">Your first kit will appear here when it opens.</p>
+      )}
+
+      {gifts.length > 0 && (
+        <section className="mt-10" data-club-gifts>
+          <h2 className="label text-warm-soft">A bonus with your membership</h2>
+          <p className="mt-2 max-w-xl text-[0.95rem] leading-relaxed text-warm-soft">Your Club membership includes helpful resources from previous months, too. Use them whenever they help.</p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            {gifts.map((k) => <KitCard key={k.kit.slug} kit={k.kit} access={k.access} href={ctx.href(routes.clubKit(k.kit.slug))} />)}
+          </div>
+        </section>
       )}
 
       {earlier.length > 0 && (

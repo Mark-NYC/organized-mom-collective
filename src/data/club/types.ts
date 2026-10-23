@@ -166,8 +166,10 @@ export interface KitConfig {
     /**
      * 'countdown' (August): she enters a date and each line gets a suggested day (`daysBefore`).
      * 'checklist' (October): the lines alone, no dates, done whenever suits the family.
+     * 'paths' (November): no lines (`items` empty); two to four short pathways (`paths`) she circles one of, and the
+     * `blanks` to fill in under them. Online, the kit's `coach` takes its place.
      */
-    kind: 'countdown' | 'checklist';
+    kind: 'countdown' | 'checklist' | 'paths';
     title: string;
     /** The heading on screen, when it differs from the printed title ("Your Back-to-School Countdown"). */
     screenTitle?: string;
@@ -180,6 +182,10 @@ export interface KitConfig {
     note?: string;
     /** She can reword a line for her family (her wording prints on her copy; the mailer keeps the kit's). */
     editable?: true;
+    /** 'paths': where a family might be, its one next step, and a few short lines on how. */
+    paths?: { label: string; step: string; lines: string[] }[];
+    /** 'paths': lines to write on under them ("Our family’s next step", "When we’ll try it"). */
+    blanks?: string[];
     /**
      * The family's one thing (January): a blank above the steps on the letter; online, one of the suggestions (the
      * tool's own ids, handed to it) or her own words, a short plan on step `planAt`, an optional start day on step
@@ -210,6 +216,17 @@ export interface KitConfig {
    * time agreement), each opened like `tool`. A kit has one or the other.
    */
   toolkit?: { title: string; intro: string; tools: KitTool[] };
+  /**
+   * November: a guided conversation in the kit itself instead of a site tool (src/components/club/RhythmGuide.tsx,
+   * rules in src/data/rhythm-guide.ts): a few questions, only the ones that fit, then one plan to edit, print or copy.
+   * Saves in the kit's `next-step` document.
+   */
+  coach?: { id: 'rhythm-ownership'; title: string; intro: string; cta: string };
+  /**
+   * An earlier kit given with this one (November: September's, for members who weren't there for it). A link to the
+   * real kit, never a copy of it; access comes from club_kit_bonuses (supabase/migrations), not from this config.
+   */
+  bonus?: { slug: string; title: string; blurb: string; cta: string; note: string };
   /**
    * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
    * `priority` in `from`), then the detail one tap away.
@@ -264,7 +281,9 @@ export interface KitConfig {
     /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */
     invite?: { title: string; body: string; tools?: { title: string; body: string }[] };
     /** A short framework given pride of place on the back (July's Pack. Check. Unpack.): a few words, each with a line. */
-    framework?: { steps: { word: string; text: string }[] };
+    framework?: { title?: string; intro?: string; steps: { word: string; text: string }[] };
+    /** A small note on the back for new members (November: September's kit is theirs too). Words only, no prices. */
+    bonus?: { title: string; body: string };
     /** A small cut-out card on the back (June's "When I'm Bored…"): a title and a few short ideas. */
     card?: { title: string; ideas: string[] };
     calendarNote?: string;
@@ -272,9 +291,9 @@ export interface KitConfig {
     qrPath: string;
     /**
      * A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush
-     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels; June's fine-line sun and apricot panels; July's fine-line compass and soft blue panels; September's fine-line calendar page and sage panels.
+     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels; June's fine-line sun and apricot panels; July's fine-line compass and soft blue panels; September's fine-line calendar page and sage panels; November's three fine-line figures, linked, and soft clay panels.
      */
-    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school' | 'summer' | 'travel' | 'calendar';
+    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school' | 'summer' | 'travel' | 'calendar' | 'team';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

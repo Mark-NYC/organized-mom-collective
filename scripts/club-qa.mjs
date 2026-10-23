@@ -109,52 +109,94 @@ for (const id of samples) {
   check(await noSideScroll(page), `${id}: family form scrolls sideways on a phone`);
   await page.screenshot({ path: join(out, `${id}-family-phone.png`), fullPage: true });
 
-  await page.goto(`${base}/club/kits/2026-11-family-ownership?sample=${id}`);
+  // November: one calm screen and the guide. Each sample family takes a different path to its one plan.
+  const novUrl = `${base}/club/kits/2026-11-family-ownership?sample=${id}`;
+  await page.goto(novUrl);
   await page.getByRole('heading', { name: 'Our Family, Our Team' }).waitFor();
-  check(await noSideScroll(page), `${id}: kit scrolls sideways on a phone`);
-  const people = await page.locator('section[aria-labelledby^="who-ownership-chart-"]:not([aria-labelledby="who-ownership-chart-open"])').count();
-  const jobs = await page.locator('section[aria-labelledby^="who-ownership-chart-"] li').count();
-  entry.people = people;
-  entry.jobs = jobs;
-  check(people > 0 && jobs >= people, `${id}: the kit didn't open filled in (${people} people, ${jobs} jobs)`);
-  // One job each to start (the weekly plan is September's): no long lists, nothing "Needs an owner".
-  const perPerson = await page.locator('section[aria-labelledby^="who-ownership-chart-"]').evaluateAll((els) => els.map((e) => e.querySelectorAll('li').length));
-  check(perPerson.every((n) => n <= 1) && jobs >= people - 1, `${id}: November opened with ${perPerson.join('/')} jobs per person (expected one each)`);
-  check(await page.locator('section[aria-labelledby="who-ownership-chart-open"]').count() === 0, `${id}: November opened with jobs that need an owner`);
-  check(await page.getByText(/family calendar|Doctor and dentist|birthday parties/i).count() === 0, `${id}: November suggests a weekly-plan job`);
-  await page.screenshot({ path: join(out, `${id}-kit-phone.png`), fullPage: true });
-
-  // Edits: reword and reassign the first job, add one, remove one, save, reload.
-  const first = page.locator('section[aria-labelledby^="who-ownership-chart-"] li').first();
-  await first.getByRole('button', { name: /^Change/ }).click();
-  await first.getByLabel('The job').fill('QA reworded job');
-  await first.getByLabel('How often').selectOption('weekdays');
-  await first.getByRole('button', { name: 'Done' }).click();
-  await page.getByRole('button', { name: /^\+ Add a job for/ }).first().click();
-  await page.getByLabel(/^A job for/).fill('QA custom job');
-  await page.getByRole('button', { name: 'Add job', exact: true }).click();
-  // Remove a suggested job from the last person (the custom job above went to the first).
-  const other = page.locator('section[aria-labelledby^="who-ownership-chart-"]:not([aria-labelledby="who-ownership-chart-open"])').last().locator('li').first();
-  await other.getByRole('button', { name: /^Change/ }).click();
-  await other.getByRole('button', { name: 'Remove from the chart' }).click();
-  await page.getByRole('button', { name: /Save our chart|Save changes/ }).first().click();
-  await page.getByText('All changes saved').first().waitFor();
+  check(await noSideScroll(page), `${id}: November scrolls sideways on a phone`);
+  check(await page.locator('nav[aria-label="In this kit"]').count() === 0, `${id}: November still shows tabs`);
+  check(await page.getByText('Make the plan together. Learn to share the load.').count() > 0, `${id}: November's subtitle is missing`);
+  check(await page.locator('[data-guide-screen]').count() === 0, `${id}: the guide opened before she asked`);
+  await page.screenshot({ path: join(out, `${id}-november-phone.png`), fullPage: true });
+  await page.getByRole('button', { name: 'Find Our Family’s Next Step' }).click();
+  await page.getByRole('heading', { name: 'How has your family’s weekly planning been going?' }).waitFor();
+  const choose = (name) => page.getByRole('button', { name, exact: true }).click();
+  const scenario = { rivera: 'leadership', brooks: 'restart', chen: 'restart', okafor: 'first-meeting' }[id];
+  if (id === 'rivera') {
+    // E: going well, but Mom still leads → share the leadership.
+    await choose('It’s going pretty well.');
+    await choose('Mom still leads most of it.');
+    await page.getByRole('heading', { name: 'Share the meeting leadership' }).waitFor();
+    await page.getByRole('button', { name: /^Sofia/ }).click();
+    await choose('Sunday evening');
+  } else if (id === 'brooks') {
+    // C: kept forgetting → make it visible.
+    await choose('We started, but got off track.');
+    check(await page.locator('[data-guide-screen] [aria-pressed]').count() === 6, `${id}: the obstacle question should have six answers`);
+    await choose('We kept forgetting.');
+    await page.getByRole('heading', { name: 'Make the meeting visible' }).waitFor();
+    check(await page.getByRole('radio').count() === 3, `${id}: the adjustments should be three to choose one from`);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await choose('Sunday evening');
+  } else if (id === 'chen') {
+    // D: the kids weren't participating → one small role each, from their real ages.
+    await choose('We started, but got off track.');
+    await choose('The kids weren’t participating.');
+    await page.getByRole('heading', { name: 'Give everyone one small meeting role' }).waitFor();
+    check(await page.getByText(/^Grace: bring schedule updates/).count() === 1, `${id}: no role for Grace from her age`);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await choose('Saturday morning');
+  } else {
+    // B: never started → a time and a place → a first-meeting plan.
+    await choose('We haven’t started yet.');
+    await page.getByText('That’s okay. You don’t need to catch up.').waitFor();
+    await choose('Friday after dinner');
+    await page.getByRole('heading', { name: 'Where will you keep the meeting guide?' }).waitFor();
+    await choose('On the refrigerator');
+  }
+  await page.locator(`[data-guide-plan="${scenario}"]`).waitFor();
+  check(await noSideScroll(page), `${id}: November's plan scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-november-plan-phone.png`), fullPage: true });
+  entry.plan = await page.locator('[data-guide-plan] h3').first().textContent();
+  // Edit, step back and forward again: the edit stays (the same answers keep her plan).
+  await page.getByLabel('Our reminder').fill('QA reminder on the fridge');
+  await page.getByRole('button', { name: '← Back' }).click();
+  await page.locator('[data-guide-screen]:not([data-guide-screen="plan"])').waitFor();
+  const backTo = await page.locator('[data-guide-screen]').getAttribute('data-guide-screen');
+  entry.backTo = backTo;
+  if (backTo === 'time') await choose({ rivera: 'Sunday evening', brooks: 'Sunday evening', chen: 'Saturday morning' }[id]);
+  else await choose('On the refrigerator');
+  await page.locator(`[data-guide-plan="${scenario}"]`).waitFor();
+  check(await page.getByLabel('Our reminder').inputValue() === 'QA reminder on the fridge', `${id}: going back and forward lost her edit`);
+  await page.getByText('Your answers save as you go.').waitFor();
+  await page.waitForTimeout(700);
   await page.reload();
   await page.getByRole('heading', { name: 'Our Family, Our Team' }).waitFor();
-  check(await page.getByText('QA reworded job').count() > 0, `${id}: a reworded job didn't survive a reload`);
-  check(await page.getByText('QA custom job').count() > 0, `${id}: an added job didn't survive a reload`);
-  check(await page.getByText(/Removed jobs \(1\)/).count() > 0, `${id}: a removed job didn't survive a reload`);
+  await page.locator(`[data-guide-plan="${scenario}"]`).waitFor();
+  check(await page.getByLabel('Our reminder').inputValue() === 'QA reminder on the fridge', `${id}: her plan didn't survive a reload`);
+  check(await page.getByRole('button', { name: 'Copy as text' }).count() === 1, `${id}: no copy button on the plan`);
 
-  // Desktop print of every printable.
+  // Desktop print: her plan on one page; the letter front and back.
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const [tab, doc, orientation] of [['Family chart', 'ownership-chart', 'landscape'], ['Team reset', 'kitchen-pantry-reset', 'portrait'], ['Team meeting', 'who-owns-what', 'portrait'], ['Handing Over a Whole Job', 'handing-over', 'portrait']]) {
-    await page.getByRole('button', { name: tab, exact: true }).click();
-    const r = await printTo(page, doc, orientation, `${id}-${doc}`);
+  for (const [doc, button, pages] of [['next-step', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-november-${doc}`, 0, button);
     entry[doc] = r;
-    check(r.pages === 1, `${id}: ${doc} printed on ${r.pages} pages (expected 1)`);
-    check(r.overflow.length === 0, `${id}: ${doc} has text overflowing: ${r.overflow.join(' | ')}`);
+    check(r.pages === pages, `${id}: November ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: November ${doc} has text cut off: ${r.overflow.join(' | ')}`);
     await page.setViewportSize({ width: 1280, height: 900 });
   }
+  const sheet = await page.evaluate(() => document.querySelector('.club-next')?.textContent ?? '');
+  check(sheet.includes('QA reminder on the fridge') && sheet.includes('Check-in question'), `${id}: her printed plan is missing her edit or the check-in`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  for (const part of ['Our Family, Our Team', 'Make the plan together. Learn to share the load.', 'It’s Okay to Start Again', 'Megan', 'We’re just getting started', 'We started, but got off track', 'We’re ready to share more ownership', 'Our family’s next step', 'When we’ll try it']) {
+    check(front.includes(part), `${id}: the November letter's front is missing "${part}"`);
+  }
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Make the Rhythm Stick', 'Ready for the Next Step?', 'Hand it over', 'What’s one thing that would help our family work better together this week?', 'New to the Club? We’ve got you.', 'organizedmomcollective.com/club/kits/2026-11-family-ownership']) {
+    check(back.includes(part), `${id}: the November letter's back is missing "${part}"`);
+  }
+  check(await page.locator('.club-letter .club-qr').count() === 1, `${id}: November's letter should have one QR code`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-team')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's team mark is missing or squashed`);
   check(errors.length === 0, `${id}: page errors: ${errors.join(' | ')}`);
   report.push(entry);
   await ctx.close();
@@ -2102,55 +2144,69 @@ for (const id of [...samples, 'hughes']) {
   await ctx.close();
 }
 
-// Family changes: add a child on the family page, then the kit shows suggestions without changing the chart.
+// November's other paths. A: a new member is welcomed, opens the real September kit as a bonus, comes back without
+// losing anything, then hands off one whole job (F, G). Going well and shared → straight to the handoff; someone else
+// leads → a handoff is offered, not pushed. And one family's answers never show in another's.
 {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const choose = (name) => page.getByRole('button', { name, exact: true }).click();
   await page.goto(`${base}/club/kits/2026-11-family-ownership?sample=brooks`);
-  await page.getByRole('button', { name: 'Save our chart' }).click();
-  await page.getByText('All changes saved').waitFor();
-  const before = await page.locator('section[aria-labelledby^="who-ownership-chart-"] li').allTextContents();
-  await page.goto(`${base}/club/family?sample=brooks`);
-  await page.getByRole('button', { name: '+ Add a grown-up' }).click();
-  await page.getByLabel('First name').nth(1).fill('Sam');
-  await page.getByRole('button', { name: '+ Add a child' }).click();
-  await page.getByLabel('First name').last().fill('Nora');
-  await page.getByLabel('Age').last().selectOption('11');
-  await page.getByRole('button', { name: 'Save our family' }).click();
-  await page.getByText('Saved.').waitFor();
-  await page.goto(`${base}/club/kits/2026-11-family-ownership?sample=brooks`);
-  await page.getByRole('heading', { name: 'Suggested changes' }).first().waitFor();
-  const after = await page.locator('section[aria-labelledby^="who-ownership-chart-"] li').allTextContents();
-  const suggestions = await page.locator('#ownership-chart-suggestions + p + ul li').count();
-  check(suggestions > 0, 'family change: no suggestions shown');
-  const changed = before.filter((t) => !after.includes(t));
-  check(changed.length === 0, `family change: the saved chart changed by itself: ${changed.join(' | ')}`);
-  // One job each: the new grown-up and the new child get a suggestion apiece, and nothing is rebalanced.
-  check(suggestions === 2, `family change: ${suggestions} suggestions (expected one each for Sam and Nora)`);
-  check(await page.getByText(/^Move /).count() === 0, 'family change: a workload move on a one-job chart');
-  await page.getByRole('button', { name: /Add all/ }).click();
-  await page.screenshot({ path: join(out, 'brooks-after-family-change.png'), fullPage: true });
-  report.push({ familyChange: { suggestions } });
-  await ctx.close();
-}
+  await page.getByRole('button', { name: 'Find Our Family’s Next Step' }).click();
+  await choose('I’m new to the Club.');
+  await page.getByRole('heading', { name: 'Welcome to the Club!' }).waitFor();
+  await page.locator('[data-guide-bonus]').waitFor();
+  await page.screenshot({ path: join(out, 'brooks-november-welcome-phone.png'), fullPage: true });
+  await page.getByRole('link', { name: 'Open My Bonus September Kit' }).first().click();
+  await page.waitForURL(/\/club\/kits\/2027-09-a-week-everyone-can-see\?from=2026-11-family-ownership&sample=brooks/);
+  await page.getByRole('heading', { name: 'Our First 15-Minute Family Meeting' }).waitFor();
+  check(await page.locator('[data-club-bonus-from]').count() === 1, 'bonus: September doesn’t say it came with November');
+  await page.screenshot({ path: join(out, 'brooks-september-bonus-phone.png'), fullPage: true });
+  await page.getByRole('link', { name: '← Back to Our Family, Our Team' }).click();
+  await page.getByRole('heading', { name: 'Welcome to the Club!' }).waitFor();
+  await page.getByRole('button', { name: 'Start November’s Guide' }).click();
+  await choose('Hand off one whole job');
+  await page.getByRole('heading', { name: 'What’s one thing you’re ready to stop managing alone?' }).waitFor();
+  check(await page.locator('[data-guide-screen] [aria-pressed]').count() === 6, 'handoff: six job choices, not dozens');
+  await choose('School preparation');
+  check(await page.getByRole('button', { name: /^Jess/ }).count() === 0, 'handoff: the account holder is offered as the new owner');
+  await page.getByRole('button', { name: /^Max/ }).click();
+  await choose('They might do it differently than I would.');
+  await page.getByText('Agree on done, then let go of how').waitFor();
+  check((await page.getByLabel('Responsibility: what do they own?').inputValue()).startsWith('Max owns'), 'handoff: the responsibility isn’t written for Max');
+  await page.getByRole('button', { name: 'Make our handoff plan' }).click();
+  await page.locator('[data-guide-plan="handoff"]').waitFor();
+  check(await page.getByText('Our Ownership Handoff Plan').count() > 0 && await page.getByText('Hand it over', { exact: true }).count() > 0, 'handoff: the plan is missing its title or stages');
+  check(await noSideScroll(page), 'handoff: the plan scrolls sideways on a phone');
+  await page.screenshot({ path: join(out, 'brooks-november-handoff-phone.png'), fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const r = await printTo(page, 'next-step', 'portrait', 'brooks-november-handoff', 0, 'Print it');
+  check(r.pages === 1 && r.overflow.length === 0, `handoff: printed on ${r.pages} pages, overflow ${r.overflow.join(' | ')}`);
+  report.push({ handoff: r });
 
-// Stress: the biggest family plus 24 extra jobs still prints readably (at most two pages, nothing clipped).
-{
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  const page = await ctx.newPage();
-  await page.goto(`${base}/club/kits/2026-11-family-ownership?sample=chen`);
+  // Same browser, another family: nothing of Brooks's carries over.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${base}/club/kits/2026-11-family-ownership?sample=okafor`);
   await page.getByRole('heading', { name: 'Our Family, Our Team' }).waitFor();
-  const adders = page.getByRole('button', { name: /^\+ Add a job for/ });
-  const n = await adders.count();
-  for (let i = 0; i < 24; i++) {
-    await adders.nth(i % n).click();
-    await page.getByLabel(/^A job for/).fill(`Extra job number ${i + 1} with a longer name to wrap`);
-    await page.getByRole('button', { name: 'Add job', exact: true }).click();
-  }
-  const r = await printTo(page, 'ownership-chart', 'landscape', 'stress-ownership-chart');
-  report.push({ stress: r });
-  check(r.pages <= 2, `stress: chart printed on ${r.pages} pages (expected at most 2)`);
-  check(r.overflow.length === 0, `stress: text overflowing: ${r.overflow.join(' | ')}`);
+  check(await page.locator('[data-guide-screen]').count() === 0 && await page.getByText('Max owns').count() === 0, 'leak: Brooks’s guide shows in Okafor’s kit');
+
+  // F: going well, shared → the handoff, no other questions.
+  await page.goto(`${base}/club/kits/2026-11-family-ownership?sample=chen`);
+  await page.getByRole('button', { name: 'Find Our Family’s Next Step' }).click();
+  await choose('It’s going pretty well.');
+  await choose('We share it pretty well.');
+  await page.getByRole('heading', { name: 'What’s one thing you’re ready to stop managing alone?' }).waitFor();
+  // Someone else leads: that's working; the handoff is offered, not pushed.
+  await page.getByRole('button', { name: '← Back' }).click();
+  await choose('Another person usually leads.');
+  await page.getByRole('heading', { name: 'That sounds like it’s working. Keep it.' }).waitFor();
+  await choose('Not right now');
+  await page.getByRole('heading', { name: 'Keep doing what works.' }).waitFor();
+  check(await page.locator('[data-guide-plan]').count() === 0, 'going well: a plan was forced on a family that said not now');
+  check(errors.length === 0, `November paths: page errors: ${errors.join(' | ')}`);
+  report.push({ novemberPaths: 'ok' });
   await ctx.close();
 }
 

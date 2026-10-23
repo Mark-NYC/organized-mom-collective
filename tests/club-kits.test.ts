@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { monthlyDeepClean } from '../src/data/cleaning';
 import { kitBySlug, kitProblems, kits, schedulable } from '../src/data/club/kits';
-import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
+import { ownershipBuilder as november } from '../src/data/club/libraries/family-ownership-builder';
 import { ownershipJobs } from '../src/data/club/libraries/ownership-jobs';
 import type { KitConfig } from '../src/data/club/types';
 import { responsibilities } from '../src/data/responsibilities';

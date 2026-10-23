@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { kitBySlug, kitProblems, schedulable } from '../src/data/club/kits';
 import { kit as october } from '../src/data/club/kits/2027-10-home-works-together';
-import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
+import { ownershipBuilder as november } from '../src/data/club/libraries/family-ownership-builder';
 import { kit as august } from '../src/data/club/kits/2027-08-school-year';
 import { clubTools } from '../src/data/club/tools';
 import { adultOneJob, ageGroupFor, choreSets, oneJobs } from '../src/data/chore-chart';

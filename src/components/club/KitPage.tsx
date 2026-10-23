@@ -4,9 +4,11 @@
  *
  * Three-part kits (August on: `action` and `tool`) open on one calm screen: the month's title, its one action as a
  * checklist (check off, note who's helping, print), and one button to the optional tool; the letter reads on screen and
- * prints front and back. A month switcher links every kit she can open. Kits without those (November) keep their tabs:
- * engine-filled printables get the chart editor, the activity and worksheets print with her family's names, the field
- * guide reads on screen.
+ * prints front and back. November's three-part kit has a coach instead of a tool: the Family Rhythm & Ownership Guide
+ * (RhythmGuide.tsx), and its bonus, September's kit, linked. A month switcher links every kit she can open. A kit
+ * without `action` keeps tabs (no registered kit today; the Family Ownership Builder's configuration still renders
+ * this way): engine-filled printables get the chart editor, the activity and worksheets print with her family's
+ * names, the field guide reads on screen.
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { kitBySlug, kitItems } from '../../data/club/kits';
@@ -30,6 +32,7 @@ import ChartEditor from './ChartEditor';
 import ClubGate, { type ClubContext } from './ClubGate';
 import PalettePicker from './PalettePicker';
 import PrintFrame from './PrintFrame';
+import RhythmGuide from './RhythmGuide';
 import { ChecklistSheet, MeetingCard } from './print/Worksheet';
 import { clubNav } from '../../lib/club/nav';
 import { PreviewOnlyNote } from './ChartEditor';
@@ -100,7 +103,7 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
   );
 
   if (kit.action) {
-    return <ThreePartKit kit={kit} store={ctx.store} household={kitHousehold} docs={data.docs} readOnly={readOnly} top={top} href={ctx.href} />;
+    return <ThreePartKit kit={kit} store={ctx.store} household={kitHousehold} docs={data.docs} readOnly={readOnly} top={top} href={ctx.href} kits={data.kits} />;
   }
 
   const tabs: { id: string; label: string }[] = [
@@ -247,7 +250,7 @@ function FieldGuide({ kit }: { kit: KitConfig }) {
  * the letter last. The tool is one of the site's own (src/data/club/tools.ts), opened on its Club page for the child
  * she picks. The countdown saves itself a moment after each change (first days, checks, dates, helpers).
  */
-function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
+function ThreePartKit({ kit, store, household, docs, readOnly, top, href, kits }: {
   kit: KitConfig;
   store: ClubStore;
   household: Household;
@@ -255,6 +258,8 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
   readOnly: boolean;
   top: ReactNode;
   href: (path: string) => string;
+  /** The kits she can open: a bonus links only when it's one of them. */
+  kits: string[];
 }) {
   const action = kit.action!;
   const tool = kit.tool ? clubToolById(kit.tool.tool) : undefined;
@@ -274,6 +279,11 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
   const start = basisStart(state);
   const plan = planCountdown(action.items, start.date, today, state.dates);
   const palette = (household.preferences.palette as ToolPaletteId | undefined) ?? defaultToolPalette;
+  // November's bonus (September's kit), when she can open it; and on the bonus kit, the way back to the kit it came with.
+  const bonusHref = kit.bonus && kits.includes(kit.bonus.slug) ? href(`${routes.clubKit(kit.bonus.slug)}?from=${kit.slug}`) : null;
+  const [from] = useState(() => (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('from') : null));
+  const giver = from ? kitBySlug(from) : undefined;
+  const cameFrom = giver?.bonus?.slug === kit.slug ? giver : undefined;
 
   const update = (next: CountdownState) => {
     setState(next);
@@ -306,6 +316,12 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
       <div className="max-w-3xl">
         <div className="club-screen">
           {top}
+          {cameFrom && (
+            <p className="mt-4 bg-cream px-4 py-3 text-[0.92rem] text-warm-ink ring-1 ring-warm-rule" data-club-bonus-from>
+              A bonus with your {monthLabel(cameFrom.month)} kit, yours to use whenever it helps.{' '}
+              <a className="font-semibold underline underline-offset-4" href={href(routes.clubKit(cameFrom.slug))}>← Back to {cameFrom.theme}</a>
+            </p>
+          )}
           <p className="label mt-6 text-warm-soft">{monthLabel(kit.month)}</p>
           <h1 className="mt-2 font-serif text-[2.2rem] leading-[1.08] text-warm-ink sm:text-[2.8rem]">{kit.theme}</h1>
           {kit.subtitle && <p className="mt-2 font-serif text-[1.25rem] italic text-rose-deep">{kit.subtitle}</p>}
@@ -322,6 +338,21 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
         {actionDoc && (
           <Countdown kit={kit} doc={actionDoc} state={state} update={update} plan={plan} start={start} today={today} household={household}
             readOnly={readOnly} status={status} palette={palette} toTool={toTool} />
+        )}
+
+        {kit.coach && <RhythmGuide kit={kit} household={household} store={store} docs={docs} readOnly={readOnly} bonusHref={bonusHref} />}
+
+        {kit.bonus && (
+          <section aria-labelledby="club-bonus" className="club-screen mt-10 border-t border-warm-rule pt-6" data-club-bonus>
+            <p className="label text-warm-soft">New to the Club?</p>
+            <h2 id="club-bonus" className="mt-1 font-serif text-[1.35rem] leading-tight text-warm-ink">{kit.bonus.title}</h2>
+            <p className="mt-2 max-w-xl leading-relaxed text-warm-soft">{kit.bonus.blurb} {kit.bonus.note}</p>
+            {bonusHref ? (
+              <a className="mt-2 inline-block min-h-11 py-2 text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4" href={bonusHref}>{kit.bonus.cta}</a>
+            ) : (
+              <p className="mt-2 text-[0.92rem] text-warm-soft">It opens here as soon as it’s ready for your account.</p>
+            )}
+          </section>
         )}
 
         {tool && kit.tool && (

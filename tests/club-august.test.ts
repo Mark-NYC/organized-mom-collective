@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { kitProblems, kits, schedulable } from '../src/data/club/kits';
 import { kit as august } from '../src/data/club/kits/2027-08-school-year';
-import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
+import { ownershipBuilder as november } from '../src/data/club/libraries/family-ownership-builder';
 import { clubTools } from '../src/data/club/tools';
 import { matchResponsibility } from '../src/data/responsibilities';
 import { routineTypes } from '../src/data/routines';

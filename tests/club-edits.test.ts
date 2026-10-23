@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { kit } from '../src/data/club/kits/2026-11-family-ownership';
+import { ownershipBuilder as kit } from '../src/data/club/libraries/family-ownership-builder';
 import type { KitItem } from '../src/data/club/types';
 import {
   acceptSuggestion, addRow, assign, dismissSuggestion, EditError, initialEdits, move, readEdits, remove, rename, replace,

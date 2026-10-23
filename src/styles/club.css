@@ -1674,3 +1674,273 @@
   margin-top: 0.14in;
   margin-bottom: 0.12in;
 }
+
+/* November's touch: three fine-line figures linked by one clay arc; soft clay panels. Front: the letter and three
+   paths to circle, with two lines to write on. Back: four ideas, the four-step handoff, the question, the bonus. */
+.club-team {
+  display: block;
+  flex: none;
+  width: 0.62in;
+  height: 0.39in;
+  margin: 0.12in 0 -0.14in;
+}
+.club-team-small {
+  display: inline-block;
+  width: 0.42in;
+  height: 0.26in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.04in;
+}
+.club-print[data-accent='team'] .club-letter-action,
+.club-print[data-accent='team'] .club-letter-conversation {
+  background: #f6efe8;
+  border-top-color: #c9a58b;
+}
+.club-print[data-accent='team'] .club-letter-calendar {
+  background: #eef1eb;
+}
+.club-letter[data-accent='team'] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-accent='team'] .club-letter-subtitle {
+  font-size: 13pt;
+}
+.club-letter[data-accent='team'] .club-letter-body {
+  margin-top: 0.12in;
+  font-size: 10.8pt;
+  line-height: 1.4;
+}
+.club-letter[data-accent='team'] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-accent='team'] .club-letter-signature {
+  font-size: 18pt;
+}
+.club-letter[data-accent='team'] .club-letter-action {
+  padding: 0.12in 0.22in 0.06in;
+}
+.club-paths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.1in;
+  margin: 0.08in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-paths > li {
+  position: relative;
+  padding: 0.09in 0.11in 0.08in;
+  border: 1.2px solid #dcc4b0;
+  border-radius: 8px;
+  background: #fff;
+}
+.club-path-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 0.22in;
+  height: 0.22in;
+  border: 1.2px solid #9aab8f;
+  border-radius: 999px;
+  font-family: 'Kalam', cursive;
+  font-size: 10pt;
+  line-height: 1;
+  color: #4d4544;
+}
+.club-path-label {
+  display: block;
+  margin-top: 0.04in;
+  font-family: var(--font-serif);
+  font-size: 11.6pt;
+  line-height: 1.2;
+  color: #4d4544;
+}
+.club-path-step {
+  display: block;
+  margin-top: 0.06in;
+  font-size: 8.8pt;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #4d4544;
+}
+.club-path-step span {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 6.6pt;
+  color: #857a76;
+}
+.club-paths ul {
+  margin: 0.06in 0 0;
+  padding: 0 0 0 0.11in;
+  font-family: var(--font-serif);
+  font-size: 9.4pt;
+  line-height: 1.34;
+  color: #5c5550;
+}
+.club-paths-blanks {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 0.24in;
+  margin-top: 0.08in;
+}
+.club-paths-blanks .club-action-helper-line {
+  height: 0.34in;
+}
+.club-letter[data-accent='team'] .club-letter-back-title {
+  margin-top: 0.18in;
+}
+.club-letter[data-accent='team'] .club-letter-tips {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.06in 0.24in;
+  margin-top: 0.08in;
+}
+.club-letter[data-accent='team'] .club-letter-tips p {
+  font-size: 10.8pt;
+  line-height: 1.36;
+}
+.club-letter-framework-wrap {
+  margin-top: 0.26in;
+}
+.club-letter-framework-title {
+  font-family: var(--font-serif);
+  font-size: 15pt;
+  font-weight: 400;
+  color: #4d4544;
+}
+.club-letter-framework-intro {
+  margin-top: 0.04in;
+  font-family: var(--font-serif);
+  font-size: 10.2pt;
+  line-height: 1.38;
+  color: #5c5550;
+}
+.club-letter[data-accent='team'] .club-letter-framework {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.09in;
+  margin-top: 0.1in;
+}
+.club-letter[data-accent='team'] .club-letter-framework li {
+  padding: 0.09in 0.11in 0.1in;
+  border-color: #dcc4b0;
+}
+.club-letter[data-accent='team'] .club-letter-framework li:nth-child(2) {
+  border-color: #b7c4b0;
+}
+.club-letter[data-accent='team'] .club-letter-framework li:nth-child(4) {
+  border-color: #b9c8d2;
+}
+.club-letter[data-accent='team'] .club-letter-framework strong {
+  font-size: 16pt;
+}
+.club-letter[data-accent='team'] .club-letter-framework span {
+  font-size: 9.8pt;
+}
+.club-letter[data-accent='team'] .club-letter-conversation {
+  margin-top: 0.24in;
+  padding: 0.13in 0.3in;
+}
+.club-letter[data-accent='team'] .club-letter-question {
+  font-size: 14.5pt;
+}
+.club-letter-bonus {
+  margin-top: 0.16in;
+  padding: 0.1in 0.2in;
+  border: 1px dashed #c9a58b;
+  border-radius: 8px;
+  font-family: var(--font-serif);
+  font-size: 10pt;
+  line-height: 1.38;
+  color: #4d4544;
+}
+.club-letter-bonus strong {
+  font-weight: 700;
+}
+.club-letter[data-accent='team'] .club-letter-invite {
+  margin-top: 0.14in;
+  margin-bottom: 0.1in;
+}
+
+/* November's plan (NextStepSheet.tsx): one card for beside the calendar. */
+.club-next .club-next-label {
+  display: block;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #857a76;
+}
+.club-next p {
+  font-family: var(--font-serif);
+  font-size: 12pt;
+  line-height: 1.42;
+  color: #3d3834;
+}
+.club-next-goal {
+  margin-top: 0.3in;
+  padding: 0.16in 0.24in;
+  border-radius: 8px;
+}
+.club-next-goal p {
+  font-size: 16pt;
+}
+.club-next-row {
+  margin-top: 0.22in;
+}
+.club-next-statement {
+  font-size: 14pt !important;
+}
+.club-next-roles {
+  margin: 0.08in 0 0;
+  padding-left: 0.2in;
+  font-family: var(--font-serif);
+  font-size: 11.5pt;
+  line-height: 1.45;
+}
+.club-next-own {
+  margin-top: 0.06in;
+}
+.club-next-stages {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.1in;
+  margin: 0.26in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-next-stages li {
+  display: grid;
+  align-content: start;
+  gap: 0.04in;
+  padding: 0.12in 0.13in;
+  border: 1.2px solid #dcc4b0;
+  border-radius: 8px;
+  font-family: var(--font-serif);
+  font-size: 10pt;
+  line-height: 1.35;
+}
+.club-next-stages strong {
+  font-family: 'Kalam', cursive;
+  font-size: 15pt;
+  line-height: 1.05;
+}
+.club-next-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.3in;
+}
+.club-next-coach {
+  margin-top: 0.22in;
+  font-style: italic;
+  font-size: 11pt !important;
+  color: #5c5550 !important;
+}
+.club-next-check {
+  margin-top: 0.3in;
+  padding: 0.16in 0.24in;
+  border-top: 2px solid #9aab8f;
+  background: #f1f4ec;
+}
+.club-next-check p {
+  font-size: 14pt;
+}

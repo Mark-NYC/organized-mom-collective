@@ -121,6 +121,22 @@ select pg_temp.expect(pg_temp.fails($$select public.club_document_save('2026-11-
 select pg_temp.expect(pg_temp.fails(format($$select public.club_document_save('2026-11-family-ownership', 'big', jsonb_build_object('x', repeat('a', 40000)), 'warm-neutrals', 1, 2, 0)$$), 'invalid'), 'edits are capped at 32 KB');
 reset role;
 
+-- November's bonus: September's kit opens with November, before its own release date, once it isn't a draft.
+select pg_temp.as_user('authenticated', :A);
+select pg_temp.expect(pg_temp.fails($$select public.club_document_get('2027-09-a-week-everyone-can-see')$$, 'not_found'), 'the bonus stays closed while September is a draft');
+reset role;
+update public.club_kits set status = 'scheduled' where slug in ('2027-09-a-week-everyone-can-see', '2027-10-home-works-together');
+select pg_temp.expect((select release_at > now() from public.club_kits where slug = '2027-09-a-week-everyone-can-see'), 'September''s own release date is still ahead');
+select pg_temp.as_user('authenticated', :A);
+select pg_temp.expect(public.club_document_get('2027-09-a-week-everyone-can-see') ->> 'can' = 'edit', 'with November open, September opens as its bonus');
+select pg_temp.expect(public.club_me() -> 'kits' @> '[{"slug":"2027-09-a-week-everyone-can-see","can":"edit"}]'::jsonb, 'and club_me lists it');
+select pg_temp.expect(not (public.club_me() -> 'kits' @> '[{"slug":"2027-10-home-works-together"}]'::jsonb), 'a scheduled kit that isn''t a bonus stays closed until its date');
+select pg_temp.expect(public.club_document_save('2027-09-a-week-everyone-can-see', 'family-meeting', '{"done":[true]}', 'warm-neutrals', 1, 2, 0) = 1, 'she can use the bonus kit like any kit');
+select pg_temp.expect(pg_temp.fails($$select public.club_bonus_open('00000000-0000-0000-0000-000000c1ba01', gen_random_uuid())$$), 'the bonus rule is server-only');
+select pg_temp.expect(pg_temp.fails($$select * from public.club_kit_bonuses$$) or not exists (select 1 from public.club_kit_bonuses), 'the bonus table isn''t readable from the browser');
+reset role;
+update public.club_kits set status = 'draft' where slug = '2027-10-home-works-together';
+
 select pg_temp.as_user('authenticated', :B);
 select pg_temp.expect((public.club_document_get(:KIT) -> 'documents') = '{}'::jsonb, 'B sees none of A''s documents through the kit');
 select pg_temp.expect(pg_temp.fails($$select * from public.club_documents$$), 'B can''t read the documents table');
@@ -133,6 +149,7 @@ select pg_temp.expect((select edits from public.club_documents d join public.clu
 select pg_temp.as_user('authenticated', :C);
 select pg_temp.expect(pg_temp.fails($$select public.club_document_save('2026-11-family-ownership', 'ownership-chart', '{}', 'warm-neutrals', 1, 1, 0)$$, 'read_only'), 'no access: no saving');
 select pg_temp.expect(pg_temp.fails($$select public.club_document_get('2026-11-family-ownership')$$, 'not_found'), 'no access: kit closed');
+select pg_temp.expect(pg_temp.fails($$select public.club_document_get('2027-09-a-week-everyone-can-see')$$, 'not_found'), 'no access: no bonus either');
 select pg_temp.expect(public.club_household() is null, 'no household yet');
 reset role;
 
@@ -184,7 +201,9 @@ values (:A, (select id from public.club_kits where slug = :KIT), '00000000-0000-
 select pg_temp.as_user('authenticated', :A);
 select pg_temp.expect(public.club_document_get(:KIT) ->> 'can' = 'read', 'lapsed with the join grant: read-only');
 select pg_temp.expect(pg_temp.fails($$select public.club_document_save('2026-11-family-ownership', 'ownership-chart', '{}', 'warm-neutrals', 1, 2, 2)$$, 'read_only'), 'and can''t edit');
+select pg_temp.expect(public.club_document_get('2027-09-a-week-everyone-can-see') ->> 'can' = 'read', 'the bonus stays with the earned kit, read-only');
 reset role;
+update public.club_kits set status = 'draft' where slug = '2027-09-a-week-everyone-can-see';
 
 -- Mailing eligibility is separate from digital access.
 update public.club_subscriptions set status = 'active', ended_at = null where user_id = :A;

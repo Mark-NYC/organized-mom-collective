@@ -124,6 +124,37 @@ function CalendarPage({ small }: { small?: boolean }) {
   );
 }
 
+/** November's touch: three fine-line figures, small, linked by one arc, in sage with a clay heart between them. */
+function Team({ small }: { small?: boolean }) {
+  return (
+    <svg className={`club-team${small ? ' club-team-small' : ''}`} viewBox="0 0 64 40" aria-hidden="true" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {[[14, 13, 4.2], [32, 10, 5], [50, 13, 4.2]].map(([x, y, r]) => (
+        <g key={x} stroke="#6f8a72" strokeWidth="1.3">
+          <circle cx={x} cy={y} r={r} />
+          <path d={`M${x - r * 1.7} ${y + r * 4.4} C ${x - r * 1.6} ${y + r * 2}, ${x + r * 1.6} ${y + r * 2}, ${x + r * 1.7} ${y + r * 4.4}`} />
+        </g>
+      ))}
+      <path d="M8 36 C 22 31, 42 31, 56 36" stroke="#b4826b" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
+/** November's paths: where a family might be, circle one; its next step and a few lines. */
+function Paths({ paths }: { paths: { label: string; step: string; lines: string[] }[] }) {
+  return (
+    <ol className="club-paths">
+      {paths.map((x, i) => (
+        <li key={x.label}>
+          <span className="club-path-mark">{i + 1}</span>
+          <span className="club-path-label">{x.label}</span>
+          <span className="club-path-step"><span>Our next step:</span> {x.step}</span>
+          <ul>{x.lines.map((l) => <li key={l}>{l}</li>)}</ul>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /** What she's filled in online, for her own printout: done, who's helping, when (a date, "When you can", or ''), her wording. */
 export interface ActionFill {
   done: boolean[];
@@ -219,6 +250,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
         {kit.mailer.accent === 'summer' && <Sun />}
         {kit.mailer.accent === 'travel' && <Compass />}
         {kit.mailer.accent === 'calendar' && <CalendarPage />}
+        {kit.mailer.accent === 'team' && <Team />}
         <h1 className="club-letter-title">{kit.theme}</h1>
         {kit.subtitle && <p className="club-letter-subtitle">{kit.subtitle}</p>}
         <div className="club-letter-body">
@@ -242,7 +274,15 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             {action.note && <p className="club-letter-action-note">{action.note}</p>}
             {action.focus && <FocusLine label={action.focus.printLabel} />}
             {action.focus?.whenLabel && <FocusLine label={action.focus.whenLabel} />}
-            <ActionList items={action.items} helperLabel={action.helperLabel} dated={action.kind === 'countdown'} below={action.helperPlacement === 'below'} />
+            {action.kind === 'paths' ? (
+              <>
+                <p className="club-letter-action-note">{action.intro}</p>
+                <Paths paths={action.paths ?? []} />
+                <div className="club-paths-blanks">{(action.blanks ?? []).map((b) => <FocusLine key={b} label={b} />)}</div>
+              </>
+            ) : (
+              <ActionList items={action.items} helperLabel={action.helperLabel} dated={action.kind === 'countdown'} below={action.helperPlacement === 'below'} />
+            )}
           </div>
         )}
       </section>
@@ -259,6 +299,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           {kit.mailer.accent === 'summer' && <Sun small />}
           {kit.mailer.accent === 'travel' && <Compass small />}
           {kit.mailer.accent === 'calendar' && <CalendarPage small />}
+          {kit.mailer.accent === 'team' && <Team small />}
           {kit.mailer.fieldGuide.title}
         </h2>
         {kit.mailer.fieldGuide.intro && <p className="club-letter-back-intro">{kit.mailer.fieldGuide.intro}</p>}
@@ -291,9 +332,13 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           </div>
         )}
         {kit.mailer.framework && (
-          <ol className="club-letter-framework">
-            {kit.mailer.framework.steps.map((f) => <li key={f.word}><strong>{f.word}</strong><span>{f.text}</span></li>)}
-          </ol>
+          <div className="club-letter-framework-wrap">
+            {kit.mailer.framework.title && <h3 className="club-letter-framework-title">{kit.mailer.framework.title}</h3>}
+            {kit.mailer.framework.intro && <p className="club-letter-framework-intro">{kit.mailer.framework.intro}</p>}
+            <ol className="club-letter-framework">
+              {kit.mailer.framework.steps.map((f) => <li key={f.word}><strong>{f.word}</strong><span>{f.text}</span></li>)}
+            </ol>
+          </div>
         )}
         {kit.mailer.card && (
           <div className="club-letter-pair club-letter-pair-card">
@@ -352,6 +397,9 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           </div>
         )}
         {conversation?.placement === 'after-example' && conversationBlock}
+        {kit.mailer.bonus && (
+          <p className="club-letter-bonus"><strong>{kit.mailer.bonus.title}</strong> {kit.mailer.bonus.body}</p>
+        )}
         {kit.mailer.invite && (
           <div className="club-letter-invite">
             <QrCode url={qrUrl(kit.mailer.qrPath)} label={`QR code for ${readableUrl(kit.mailer.qrPath)}`} />

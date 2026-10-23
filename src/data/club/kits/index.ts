@@ -100,7 +100,14 @@ export function kitProblems(kit: KitConfig): string[] {
   if (kit.mailer.qrPath !== `/club/kits/${kit.slug}?source=mailer`) out.push('qrPath must point at this kit');
   // Three-part kits: one short action, one optional tool, and the letter's back page.
   if (kit.action) {
-    if (kit.action.items.length < 3 || kit.action.items.length > 8) out.push('action: 3–8 lines (one small action, not a project)');
+    if (kit.action.kind === 'paths') {
+      const paths = kit.action.paths ?? [];
+      if (kit.action.items.length) out.push('action: paths have no lines of their own (items stays empty)');
+      if (paths.length < 2 || paths.length > 4) out.push('action: two to four paths');
+      if (paths.some((x) => !x.label.trim() || !x.step.trim() || x.lines.length < 1 || x.lines.length > 6 || x.lines.some((l) => !l.trim() || l.length > 60))) out.push('action: each path needs a label, a step and 1–6 short lines');
+      if (!kit.action.blanks?.length || kit.action.blanks.length > 3) out.push('action: paths need one to three blanks to write on');
+      if (!kit.coach) out.push('action: paths go with the kit’s coach (the guide online)');
+    } else if (kit.action.items.length < 3 || kit.action.items.length > 8) out.push('action: 3–8 lines (one small action, not a project)');
     if (kit.action.items.some((t) => !t.text.trim() || t.text.length > 90)) out.push('action: each line 1–90 characters');
     if (kit.action.items.some((t) => t.detail !== undefined && (!t.detail.trim() || t.detail.length > 120))) out.push('action: each detail 1–120 characters');
     if (kit.action.kind === 'countdown') {
@@ -124,6 +131,14 @@ export function kitProblems(kit: KitConfig): string[] {
   }
   if (kit.tool && !clubToolById(kit.tool.tool)) out.push(`tool: ${kit.tool.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
   if (kit.tool && kit.toolkit) out.push('a kit has one tool or a toolkit, not both');
+  if (kit.coach && (kit.tool || kit.toolkit)) out.push('a kit has a coach or a tool, not both');
+  if (kit.coach && !kit.printables.some((p) => p.id === 'next-step' && p.component === 'NextStep')) out.push('coach: the plan prints as the next-step printable');
+  if (kit.bonus) {
+    const given = kitBySlug(kit.bonus.slug);
+    if (!given || given.slug === kit.slug) out.push(`bonus: ${kit.bonus.slug} isn't another kit in the registry`);
+    if (!kit.mailer.bonus) out.push('bonus: the letter says so on the back (mailer.bonus)');
+  }
+  if (kit.mailer.bonus && !kit.bonus) out.push('mailer.bonus without a bonus kit');
   if (kit.toolkit && (kit.toolkit.tools.length < 2 || kit.toolkit.tools.length > 3)) out.push('toolkit: two or three tools');
   for (const t of kit.toolkit?.tools ?? []) if (!clubToolById(t.tool)) out.push(`toolkit: ${t.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
   const prompts = kit.mailer.conversation?.prompts;
