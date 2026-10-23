@@ -73,10 +73,17 @@ export default function RhythmGuide({ kit, household, store, docs, readOnly, bon
     if (open) heading.current?.focus();
   }, [screen, open]);
 
+  // Leaving for September's kit: save first, so coming back finds her right where she was.
+  const leave = (to: string) => {
+    if (readOnly || status !== 'pending') { clubNav().go(to); return; }
+    store.saveDocument(kit.slug, DOC, { edits: s as unknown as Record<string, unknown>, palette, engineVersion: kit.engineVersion, profileVersion: household.profileVersion }, revision)
+      .catch(() => null)
+      .finally(() => clubNav().go(to));
+  };
   const restart = () => update(emptyGuide());
   const body = !open ? null : (
     <div className="mt-6 bg-white p-5 ring-1 ring-warm-rule sm:p-7" data-guide-screen={screen}>
-      <Screen s={s} screen={screen} update={update} people={people} kit={kit} household={household} bonusHref={bonusHref} heading={heading} readOnly={readOnly} preview={preview} setPreview={setPreview} />
+      <Screen s={s} screen={screen} update={update} people={people} kit={kit} household={household} bonusHref={bonusHref} heading={heading} readOnly={readOnly} preview={preview} setPreview={setPreview} leave={leave} />
       <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-warm-rule pt-4">
         {screen !== 'start' ? (
           <button type="button" className={link} onClick={() => update(back(s))} disabled={readOnly}>← Back</button>
@@ -147,7 +154,7 @@ function OwnWords({ labelText, value, onChange, onDone, rows, disabled }: { labe
   );
 }
 
-function Screen({ s, screen, update, people, kit, household, bonusHref, heading, readOnly, preview, setPreview }: {
+function Screen({ s, screen, update, people, kit, household, bonusHref, heading, readOnly, preview, setPreview, leave }: {
   s: GuideState;
   screen: ReturnType<typeof currentScreen>;
   update: (p: Partial<GuideState>) => void;
@@ -159,8 +166,14 @@ function Screen({ s, screen, update, people, kit, household, bonusHref, heading,
   readOnly: boolean;
   preview: boolean;
   setPreview: (v: boolean) => void;
+  leave: (to: string) => void;
 }) {
   const [draft, setDraft] = useState('');
+  const go = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    leave(e.currentTarget.getAttribute('href')!);
+  };
   const [starting, setStarting] = useState(false);
   const [fix, setFix] = useState(0);
   useEffect(() => { setDraft(''); setFix(0); }, [screen]);
@@ -188,7 +201,7 @@ function Screen({ s, screen, update, people, kit, household, bonusHref, heading,
               <h4 className="mt-1 font-serif text-[1.25rem] leading-tight text-warm-ink">{bonus.title}</h4>
               <p className="mt-2 leading-relaxed text-warm-soft">It includes a simple guide for gathering your family around the calendar and making the week’s plan together. {bonus.blurb}</p>
               {bonusHref ? (
-                <a className="btn-primary mt-4 inline-block w-full text-center sm:w-auto" href={bonusHref}>{bonus.cta}</a>
+                <a className="btn-primary mt-4 inline-block w-full text-center sm:w-auto" href={bonusHref} onClick={go}>{bonus.cta}</a>
               ) : (
                 <p className="mt-3 text-[0.92rem] text-warm-soft">It opens here as soon as it’s ready for your account.</p>
               )}
@@ -311,7 +324,7 @@ function Screen({ s, screen, update, people, kit, household, bonusHref, heading,
           </Question>
           {meeting && bonusHref && (
             <p className="mt-3 text-[0.95rem] text-warm-ink">
-              September’s meeting guide walks you through it: <a className={link} href={bonusHref}>open the September kit</a>.
+              September’s meeting guide walks you through it: <a className={link} href={bonusHref} onClick={go}>open the September kit</a>.
             </p>
           )}
           {list(TIME_OPTIONS.map((o) => <Choice key={o.id} on={s.time === o.id} disabled={readOnly} onClick={() => update({ time: o.id })}>{o.label}</Choice>))}
@@ -472,8 +485,8 @@ function PlanView({ s, plan, update, kit, household, heading, readOnly, preview,
         </>
       )}
       {input('Who’s involved', plan.who, (v) => set({ who: v }), 160)}
-      {input('Our reminder', plan.cue, (v) => set({ cue: v }), 160)}
-      {input('Check-in question', plan.checkIn, (v) => set({ checkIn: v }), 160)}
+      {input('Our reminder', plan.cue, (v) => set({ cue: v }), 160, 2)}
+      {input('Check-in question', plan.checkIn, (v) => set({ checkIn: v }), 160, 2)}
 
       <div className="mt-6 border-t border-warm-rule pt-5">
         <h4 className="label text-warm-soft">Print or copy your plan</h4>

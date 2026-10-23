@@ -281,7 +281,7 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href, kits }
   const palette = (household.preferences.palette as ToolPaletteId | undefined) ?? defaultToolPalette;
   // November's bonus (September's kit), when she can open it; and on the bonus kit, the way back to the kit it came with.
   const bonusHref = kit.bonus && kits.includes(kit.bonus.slug) ? href(`${routes.clubKit(kit.bonus.slug)}?from=${kit.slug}`) : null;
-  const [from] = useState(() => (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('from') : null));
+  const [from] = useState(() => new URLSearchParams(clubNav().search()).get('from'));
   const giver = from ? kitBySlug(from) : undefined;
   const cameFrom = giver?.bonus?.slug === kit.slug ? giver : undefined;
 
