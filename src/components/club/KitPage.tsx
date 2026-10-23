@@ -323,7 +323,7 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
                 <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
                 {kit.tool.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{kit.tool.note}</p>}
-                <ToolLauncher tool={tool} cta={kit.tool.cta} kids={chartKids} household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
+                <ToolLauncher tool={tool} cta={kit.tool.cta} start={kit.tool.start} kids={tool.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids} household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
               </div>
             </div>
           </section>
@@ -638,13 +638,16 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
 }
 
 /**
- * Opens one of the site's tools inside the Club for one of her children, with their name, age and a starting choice
- * handed over (src/lib/tool-handoff.ts), so she doesn't retype what her family profile says. With one child it opens
- * straight away; with several it asks who it's for; with none it opens the tool as any visitor would see it.
+ * Opens one of the site's tools inside the Club for one person in her family (children, or everyone for a tool that
+ * suits grown-ups too), with their name, age and a starting choice handed over (src/lib/tool-handoff.ts), so she
+ * doesn't retype what her family profile says. One person: it opens straight away; several: it asks who it's for;
+ * nobody: it opens the tool as any visitor would see it.
  */
-function ToolLauncher({ tool, cta, kids, household, back, href }: {
+function ToolLauncher({ tool, cta, start, kids, household, back, href }: {
   tool: ClubTool;
   cta: string;
+  /** The tool's starting choice when the kit offers none (October's chore chart: 'one-job'). */
+  start?: string;
   /** Saved copies are kept per family, so two families in one browser (or two samples) never share a chart. */
   household: string;
   kids: { id: string; firstName: string; age: number | null }[];
@@ -652,7 +655,7 @@ function ToolLauncher({ tool, cta, kids, household, back, href }: {
   href: (path: string) => string;
 }) {
   const [choosing, setChoosing] = useState(false);
-  const [variant, setVariant] = useState(tool.variants?.[0]?.id);
+  const [variant, setVariant] = useState(tool.variants?.[0]?.id ?? start);
   const go = (kid?: { id: string; firstName: string; age: number | null }) => {
     setToolHandoff({
       tool: tool.id,

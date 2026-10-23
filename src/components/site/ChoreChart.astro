@@ -1,7 +1,7 @@
 ---
 /**
  * The chore chart by age (markup, styles, sheet): pick an age group for starter daily and weekly chores plus three
- * rewards, edit anything on the chart, add illustrated chores from the responsibility library, download a PNG
+ * rewards (or start with one job someone can own: `oneJobs`), edit anything on the chart, add illustrated chores from the responsibility library, download a PNG
  * (US Letter landscape, 11 × 8.5 in at 96 px/in, drawn at 2×). Starter chores: src/data/chore-chart.ts.
  * Behavior: chore-chart.ts beside it, one module for every page with this chart (/chore-chart and the Organized
  * Family Club's /club/tools/chore-chart). Classes are prefixed `cc-`. Saves in this browser under `storageKey`.
@@ -43,6 +43,7 @@ const thresholds = ['50%', '75%', '100%'];
       </select>
     </label>
     <button type="submit" class="cc-btn cc-btn-primary">Use suggested chores</button>
+    <button type="button" class="cc-btn cc-btn-one" data-cc-one-job>Start with one job</button>
   </form>
 
   <ResponsibilityPicker heading="Add illustrated chores" hint="Pick where it goes, then tap a chore.">
@@ -81,7 +82,7 @@ const thresholds = ['50%', '75%', '100%'];
     <div class="cc-age" data-cc-age-badge hidden></div>
     <div class="cc-head">
       <div class="cc-for" data-cc-for></div>
-      <div class="cc-title">Weekly Chore Chart</div><p class="cc-motto">Little jobs. A big helping hand.</p>
+      <div class="cc-title">Weekly Chore Chart</div><p class="cc-motto">My jobs, start to finish.</p>
     </div>
 
     <div class="cc-main">
@@ -432,6 +433,7 @@ const thresholds = ['50%', '75%', '100%'];
     .cc-form { display:grid; grid-template-columns:1fr; gap:12px; }
     .cc-field { width:100%; max-width:none; }
     .cc-form .cc-btn-primary { width:100%; border-radius:12px; font-size:.9rem; letter-spacing:0; text-transform:none; }
+    .cc-form .cc-btn-one { width:100%; border-radius:12px; font-size:.9rem; }
     .cc-palette-picker { margin-top:20px; }
     .cc-palette-picker legend { text-align:left; }
     .cc-palette-options { justify-content:flex-start; gap:6px; }

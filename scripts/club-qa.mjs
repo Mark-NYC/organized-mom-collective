@@ -351,9 +351,11 @@ for (const id of [...samples, 'hughes']) {
   await page.waitForURL(/\/club\/tools\/chore-chart/);
   await page.waitForSelector('#chore-chart');
   const name = await page.inputValue('[data-cc-name]');
-  entry.choreChart = { name, age: await page.inputValue('[data-cc-age]') };
+  const jobs = await page.$$eval('#chore-chart .cc-chore, #chore-chart .cc-reward-text', (els) => els.map((e) => e.value).filter(Boolean));
+  entry.choreChart = { name, age: await page.inputValue('[data-cc-age]'), jobs };
+  check(jobs.length === 1, `${id}: the chore chart opened with ${jobs.length} jobs and rewards, not one job (${jobs.join(', ')})`);
   check(await page.locator('.chore-chart-container[data-cc-handoff]').count() === 1, `${id}: the Club page isn't the site's chore chart`);
-  check(kidName ? name.toLowerCase() === kidName.toLowerCase() && Boolean(entry.choreChart.age) : true, `${id}: the chore chart didn't open for ${kidName}: "${name}"`);
+  check(kidName ? name.toLowerCase() === kidName.toLowerCase() : Boolean(name), `${id}: the chore chart didn't open for ${kidName ?? 'the one person'}: "${name}"`);
   check(await noSideScroll(page), `${id}: the chore chart scrolls sideways on a phone`);
   await page.screenshot({ path: join(out, `${id}-october-chore-phone.png`), fullPage: true });
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-cc-download]')]);

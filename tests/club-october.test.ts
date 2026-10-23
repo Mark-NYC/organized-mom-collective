@@ -9,7 +9,8 @@ import { kit as october } from '../src/data/club/kits/2027-10-home-works-togethe
 import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
 import { kit as august } from '../src/data/club/kits/2027-08-school-year';
 import { clubTools } from '../src/data/club/tools';
-import { ageGroupFor, choreSets } from '../src/data/chore-chart';
+import { adultOneJob, ageGroupFor, choreSets, oneJobs } from '../src/data/chore-chart';
+import { matchResponsibility, responsibilities } from '../src/data/responsibilities';
 import { countdownText, lineText, planCountdown, readCountdown } from '../src/lib/club/countdown';
 import { qrMatrix } from '../src/lib/club/qr';
 import { qrUrl, readableUrl } from '../src/lib/club/routines';
@@ -113,6 +114,30 @@ describe('October: the tool is the site’s chore chart', () => {
   it('opens the public chore chart inside the Club, never a Club copy', () => {
     expect(october.tool).toMatchObject({ tool: 'chore-chart', title: 'Give everyone a job they can own', cta: 'Make a Family Chore Chart' });
     expect(clubTools['chore-chart']).toMatchObject({ path: routes.clubTool('chore-chart'), publicPath: routes.choreChart, perChild: true });
+  });
+
+  it('opens one job per person, grown-ups included, never a full week of chores', () => {
+    expect(october.tool!.start).toBe('one-job');
+    expect(clubTools['chore-chart'].people).toBe('everyone');
+  });
+
+  it('suggests one age-fit job each, with its picture for children up to 13, and a whole job for a grown-up', () => {
+    for (const [group, job] of Object.entries(oneJobs)) {
+      expect(job, group).not.toMatch(/\bhelp/i);
+      const pic = matchResponsibility(job);
+      if (['2-3', '4-5', '6-7', '8-10', '11-13'].includes(group)) {
+        expect(pic, group).toBeTruthy();
+        const min = responsibilities.find((r) => r.id === pic)!.minAge;
+        expect(min, group).toBeLessThanOrEqual(Number(group.split('-')[0]) + 1);
+      }
+    }
+    expect(adultOneJob).not.toMatch(/\bhelp/i);
+  });
+
+  it('prints ownership, not helping, on every chore chart', () => {
+    const chart = readFileSync('src/components/site/ChoreChart.astro', 'utf8');
+    expect(chart).toContain('My jobs, start to finish.');
+    expect(chart).not.toMatch(/helping hand/i);
   });
 
   it('maps every child’s age to one of the chart’s own age groups', () => {

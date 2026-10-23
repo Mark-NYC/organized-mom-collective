@@ -44,6 +44,8 @@ export const kit: KitConfig = {
     blurb: 'Choose one realistic responsibility for each family member. Make a simple chart so everyone knows their part.',
     cta: 'Make a Family Chore Chart',
     note: 'Optional. The wall calendar says when; the chart shows everyone their part.',
+    // One job each, like the reset's fifth line; the full week of chores is a tap away in the chart.
+    start: 'one-job',
   },
   printables: [
     { id: 'fall-reset', title: 'Our Fall Home Reset', page: 'letter-portrait', kind: 'flagship', component: 'Action' },

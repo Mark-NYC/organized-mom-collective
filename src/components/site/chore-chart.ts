@@ -5,12 +5,13 @@
  *
  * `handoff` (src/lib/tool-handoff.ts): another page opening the chart for someone, e.g. a Club child. It gets its own
  * saved chart (the storage key plus `handoff.key`); a first chart starts with `handoff.name` and the chores for
- * `handoff.age`'s group, and the picker puts jobs suited to that age first. Without one, nothing changes.
+ * `handoff.age`'s group (`variant: 'one-job'`: one job for that age, or a grown-up's), and the picker puts jobs
+ * suited to that age first. Without one, nothing changes.
  */
 import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
 import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, clearFields, downloadPng } from '../../lib/printable';
-import { choreSets, ageGroupFor, type AgeGroup, type ChoreSet } from '../../data/chore-chart';
+import { adultOneJob, choreSets, ageGroupFor, oneJobs, type AgeGroup, type ChoreSet } from '../../data/chore-chart';
 import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
 import type { ToolHandoff } from '../../lib/tool-handoff';
 import { hasSaved, orderPickerForAge } from './tool-handoff-ui';
@@ -134,6 +135,34 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
     save();
     return true;
   }
+  // "Start with one job": one job they can own start to finish, everything else left blank to add later (no rewards
+  // either: the family decides). `job` is a grown-up's, who has no age group.
+  function fillOneJob(askBeforeReplacing: boolean, quiet = false, job?: string) {
+    const text = job ?? oneJobs[ageSelect.value as AgeGroup];
+    if (!text) return false;
+    if (askBeforeReplacing && choreFields().some(el => el.value.trim()) &&
+        !confirm('Start over with one job? The chores on the chart will be cleared.')) return false;
+    choreFields().forEach((el) => (el.value = ''));
+    field('daily-0').value = text;
+    syncAllIcons(true);
+    ageField.value = job ? '' : ageSelect.value;
+    if (!quiet) {
+      started();
+      toolEvent('tool_start', 'chore-chart');
+    }
+    render();
+    save();
+    status.textContent = `One job to start: ${text}. Add more when this one sticks.`;
+    return true;
+  }
+  host.querySelector<HTMLButtonElement>('[data-cc-one-job]')?.addEventListener('click', () => {
+    if (!sets[ageSelect.value as AgeGroup]) {
+      status.textContent = 'Choose an age group first, and we’ll suggest one job that fits.';
+      ageSelect.focus();
+      return;
+    }
+    if (fillOneJob(true)) sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   const DAILY = sheet.querySelectorAll('[data-field^="daily-"][data-cc-row]').length;
   const WEEKLY_FIELD_KEYS = ['weekly-0','weekly-1','weekly-2','weekly-3','weekly-4','weekly-5','weekly-6'];
   ageSelect.addEventListener('change', () => {
@@ -176,14 +205,18 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
     pickerStatus.textContent = `Added “${r.title}” to ${target.value === 'daily' ? 'daily chores' : target.selectedOptions[0].text}.`;
   });
 
-  // Opened for someone: their first chart starts with their name and the chores for their age group, and the
-  // picker puts the jobs suited to their age first. Their saved chart is never replaced.
+  // Opened for someone: their first chart starts with their name and the chores for their age group (or, with
+  // `variant: 'one-job'`, one job for their age, or a grown-up's job when there's no age), and the picker puts the
+  // jobs suited to their age first. Their saved chart is never replaced.
   if (handoff) {
     if (fresh) {
       if (handoff.name) nameInput.value = savedName.value = handoff.name;
       const group = handoff.age !== undefined ? ageGroupFor(handoff.age) : null;
-      if (group) {
-        ageSelect.value = group;
+      if (group) ageSelect.value = group;
+      // No name and no age ("someone else"): the chart opens blank, as for any visitor.
+      if (handoff.variant === 'one-job' && (group || handoff.name)) {
+        fillOneJob(false, true, group ? undefined : adultOneJob);
+      } else if (group) {
         fillSuggestedChores(false, true);
       } else {
         render();

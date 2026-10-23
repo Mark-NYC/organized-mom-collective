@@ -120,7 +120,7 @@ The first kit in the three-part shape every month now follows (owner direction, 
 
 - **The letter:** about 160 words: you shouldn't be the only one noticing what needs doing; a family works better when everyone knows what they can contribute; October before the busy season. Asks "What's one thing around our home you think you could take care of without being reminded?" A draft for Megan.
 - **The action:** Our Fall Home Reset, five lines (outgrown clothes, the entryway, essentials, one cluttered area, one job each), a "Who's helping?" blank on each, wording she can change. A plain checklist: no dates, reminders or tracking; one weekend or across the month.
-- **The tool:** the site's chore chart (`/chore-chart`), opened inside the Club for the child she picks, with their name and age group's chores filled in. The calendar says when; the chart says who.
+- **The tool:** the site's chore chart (`/chore-chart`), opened inside the Club for anyone in the family she picks, grown-ups included, starting with **one job they can own** (one age-fit job for a child, a whole job for a grown-up; no rewards filled in). The full week of chores for their age is a tap away. The calendar says when; the chart says who.
 - **Back of the letter:** From Helping Mom to Owning a Job: three principles, one example, the family question, the QR code, and one calendar note.
 - **Not November:** October resets the physical home and starts one owned job each; November (Our Family, Our Team) builds ongoing shared responsibilities and follow-through.
 

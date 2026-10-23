@@ -168,7 +168,15 @@ export interface KitConfig {
    * The month's one optional tool: one of the site's own tools, opened inside the Club (src/data/club/tools.ts), never
    * a Club copy of it; and the invitation to it.
    */
-  tool?: { tool: string; title: string; blurb: string; cta: string; note?: string };
+  tool?: {
+    tool: string;
+    title: string;
+    blurb: string;
+    cta: string;
+    note?: string;
+    /** How the tool starts when the kit offers no choice (the tool's own variant id, e.g. the chore chart's 'one-job'). */
+    start?: string;
+  };
   /**
    * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
    * `priority` in `from`), then the detail one tap away.
