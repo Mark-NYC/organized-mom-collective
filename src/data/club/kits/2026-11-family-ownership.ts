@@ -11,6 +11,11 @@ import type { KitConfig, KitItem } from '../types';
 const SLUG = '2026-11-family-ownership';
 /** src/data/cleaning.ts months are 0-based: 10 is November ("Kitchen + Hosting Prep"). */
 const RESET_MONTH = 10;
+/**
+ * Weekly coordination is September's (the Family Weekly Reset): November leaves out the library's calendar,
+ * appointment and party-ride jobs, so the chart is about ongoing ownership, not this week's plan.
+ */
+const WEEKLY_PLAN = new Set(['family-calendar', 'appointments', 'birthday-parties']);
 
 /** Who can own each of the November project's tasks, by task id. Wording stays in cleaning.ts. */
 const resetRules: Record<string, Pick<KitItem, 'minAge' | 'levels' | 'effort'>> = {
@@ -40,13 +45,13 @@ export const kit: KitConfig = {
   slug: SLUG,
   month: '2026-11',
   theme: 'Our Family, Our Team',
-  shift: 'Every household job has one owner, start to finish, and it isn’t always Mom.',
+  shift: 'Everyone owns one job, start to finish, without waiting to be asked. And it isn’t always Mom.',
   engine: 'responsibilities',
   engineVersion: 1,
-  items: ownershipJobs(),
+  items: ownershipJobs().filter((i) => !WEEKLY_PLAN.has(i.id)),
   reset: { month: RESET_MONTH, title: 'November Kitchen & Pantry Reset', items: resetItems },
   printables: [
-    { id: 'ownership-chart', title: 'Our Family Responsibility Chart', page: 'letter-landscape', kind: 'flagship', component: 'ResponsibilityChart', items: 'items' },
+    { id: 'ownership-chart', title: 'Our Family Responsibility Chart', page: 'letter-landscape', kind: 'flagship', component: 'ResponsibilityChart', items: 'items', perPerson: 1 },
     { id: 'kitchen-pantry-reset', title: 'November Kitchen & Pantry Reset', page: 'letter-portrait', kind: 'reset', component: 'ResetChecklist', items: 'reset' },
     { id: 'who-owns-what', title: 'Who Owns What: Our Team Meeting', page: 'letter-portrait', kind: 'activity', component: 'ConversationCard' },
     {
@@ -63,7 +68,7 @@ export const kit: KitConfig = {
           'Show it once, then do it together once.',
           'Hand over the remembering too: where the list lives, when it’s due.',
           'Step back. Done differently is still done.',
-          'Pick a day to check in, two weeks from now. Talk about how it’s going, not who forgot.',
+          'Pick a day to check in, a week from now. Talk about how it’s going, not who forgot.',
           'If it slips, the owner catches up. The job stays theirs.',
         ],
       },

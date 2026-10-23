@@ -394,3 +394,47 @@ describe('responsibilities engine: pinned rows (what she already has)', () => {
     expect(p.rows.some((r) => r.ownerId === 'cal')).toBe(true);
   });
 });
+
+describe('responsibilities engine: one job each (November’s chart)', () => {
+  const one = (h: Household) => generateOwnership(h, items, MONTH, [], { perPerson: 1, balance: false });
+
+  it('gives every person old enough exactly one job, and lists nothing as "Needs an owner"', () => {
+    for (const [name, h] of Object.entries(families)) {
+      const p = one(h);
+      expect(p.rows.some((r) => r.ownerId === null), name).toBe(false);
+      for (const m of planMembers(h, MONTH)) expect(rowsOf(p, m.id).length, `${name}: ${m.id}`).toBeLessThanOrEqual(1);
+      for (const m of planMembers(h, MONTH).filter((x) => (x.age ?? 99) >= 3)) expect(rowsOf(p, m.id), `${name}: ${m.id}`).toHaveLength(1);
+    }
+  });
+
+  it('prefers a household job; a child too young for one gets one of their own', () => {
+    const p = one(families.toddlers);
+    expect(rowsOf(p, 'quin')[0].scope).toBe('household');
+    expect(rowsOf(p, 't2')[0].scope).toBe('each');
+    for (const id of ['ben', 'cal']) expect(rowsOf(one(families.A), id)[0].scope, id).toBe('household');
+  });
+
+  it('suits the job to the age, gives adults whole jobs, and the account holder still takes part', () => {
+    const p = one(families.D);
+    const who = people(families.D);
+    for (const r of p.rows) expect(eligible(itemById.get(r.itemId)!, who.get(r.ownerId!)!, families.D.preferences), r.rowId).toBe(true);
+    expect(itemById.get(rowsOf(p, 'jo')[0].itemId)!.for).toBe('adult');
+    expect(rowsOf(p, 'mia')).toHaveLength(1);
+  });
+
+  it('works for a single parent, teens and three generations, and is deterministic', () => {
+    for (const h of [families.B, families.teens, families.grandparent, families.bigSolo]) {
+      expect(one(h)).toEqual(one(h));
+      expect(new Set(one(h).rows.map((r) => r.itemId)).size).toBe(one(h).rows.length);
+    }
+    expect(rowsOf(one(families.grandparent), 'nan')).toHaveLength(1);
+  });
+
+  it('places a new family member around the jobs already on the chart', () => {
+    const first = one(families.C);
+    const pinned = first.rows.map((r) => ({ rowId: r.rowId, itemId: r.itemId, ownerId: r.ownerId }));
+    const grown = family('hh-c', [...families.C.members, kid('new', 9)]);
+    const next = generateOwnership(grown, items, MONTH, pinned, { perPerson: 1, balance: false });
+    expect(next.rows.filter((r) => !r.pinned).map((r) => r.ownerId)).toEqual(['new']);
+  });
+});

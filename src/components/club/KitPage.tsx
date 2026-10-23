@@ -39,7 +39,7 @@ export default function KitPage({ slug }: { slug: string }) {
 }
 
 const INTRO: Record<string, string> = {
-  flagship: 'We’ve suggested jobs for everyone, by age, so no one person carries the house. Every job has one owner, start to finish.',
+  flagship: 'We’ve suggested one job for each person, by age: theirs to notice, do and finish without being asked. Change it, swap it, or add another.',
   reset: 'This month’s team reset, from the cleaning companion’s monthly project, split into jobs with owners.',
 };
 

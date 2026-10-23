@@ -194,6 +194,15 @@
   color: #6e6461;
   font-style: italic;
 }
+/* November's one-job chart: I own / When / Done looks like. */
+.club-job-label {
+  font-size: 6.5pt;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a7f7a;
+}
 .club-chip {
   display: inline-block;
   padding: 0 0.05in;

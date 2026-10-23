@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { monthlyDeepClean } from '../src/data/cleaning';
 import { kitBySlug, kitProblems, kits, schedulable } from '../src/data/club/kits';
 import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
+import { ownershipJobs } from '../src/data/club/libraries/ownership-jobs';
 import type { KitConfig } from '../src/data/club/types';
 import { responsibilities } from '../src/data/responsibilities';
 import { routes } from '../src/routes';
@@ -56,13 +57,20 @@ describe('club kits: the November kit', () => {
     expect(november.items.map((i) => i.id)).toEqual([
       ...responsibilities.map((r) => r.id),
       'feed-the-pet', 'shoes-and-coats', 'empty-the-dishwasher', 'load-the-dishwasher', 'put-groceries-away', 'water-the-plants', 'wipe-the-bathroom-sink', 'vacuum-the-living-room',
-      'close-the-kitchen', 'cook-one-dinner', 'clean-the-bathroom', 'floors', 'dinner-two-nights', 'groceries', 'family-laundry', 'family-calendar', 'school-paperwork', 'appointments', 'birthday-parties', 'bills',
+      'close-the-kitchen', 'cook-one-dinner', 'clean-the-bathroom', 'floors', 'dinner-two-nights', 'groceries', 'family-laundry', 'school-paperwork', 'bills',
     ]);
+  });
+
+  it('leaves the weekly plan to September: the library keeps its calendar, appointment and party jobs, November skips them', () => {
+    const weekly = ['family-calendar', 'appointments', 'birthday-parties'];
+    expect(ownershipJobs().filter((i) => weekly.includes(i.id))).toHaveLength(3);
+    expect(november.items.filter((i) => weekly.includes(i.id))).toEqual([]);
+    expect(november.printables.find((p) => p.id === 'ownership-chart')!.perPerson).toBe(1);
   });
 
   it('gives adults whole jobs and children jobs with a path to owning them', () => {
     const adults = november.items.filter((i) => i.for === 'adult');
-    expect(adults.length).toBeGreaterThanOrEqual(6);
+    expect(adults.length).toBeGreaterThanOrEqual(5);
     expect(adults.every((i) => i.scope === 'household' && i.effort >= 2)).toBe(true);
     for (const i of november.items.filter((x) => x.for !== 'adult' && x.levels)) expect(i.levels!.at(-1)![1], i.id).toBe('owns');
   });

@@ -5,13 +5,15 @@
  * suggested minutes, how each person can take part at their age, one discussion question, and who leads.
  *
  * After the FP-04 article's weekly family reset (src/content/articles/weekly-family-reset.mdx): check the week, agree
- * on rides and owners, match dinners to the nights, ask who needs help. Timing is a guide: little ones get a shorter
+ * who's covering this week's rides and preparations, match dinners to the nights, ask who needs help. Timing is a guide: little ones get a shorter
  * version; a big household may need a few more minutes.
  *
  * The rules it keeps:
  * - Only what makes this family's weeks complicated: the concerns she picks change the steps' words, never add forms.
  * - Everyone takes part at their age: a young child points to one thing on the calendar; a teen adds their own plans
- *   and rides; grown-ups own whole jobs. No second adult is assumed.
+ *   and rides; grown-ups cover what the week needs. No second adult is assumed.
+ * - This week only: who's handling this week's rides and preparations, never standing jobs or a chore chart (that's
+ *   November's Family Ownership Builder; neither depends on the other).
  * - Mom isn't the permanent leader: anyone can lead (a young child by asking the first question), the family can
  *   rotate, or decide together. Adults keep the decisions that need one.
  */
@@ -86,11 +88,11 @@ export function resetAgenda(o: ResetInput): ResetStep[] {
     ...(has('work') ? ['work shifts and late days'] : []),
     ...(has('other') && o.other.trim() ? [o.other.trim().toLowerCase()] : []),
   ];
-  // 3. Who's doing what.
+  // 3. Who's handling this week's preparations.
   const owns = [
-    ...(has('transport') || has('activities') ? ['rides and pickups'] : []),
-    'getting ready for activities',
-    ...(has('chores') ? ['the household jobs on the to-do list'] : []),
+    ...(has('transport') || has('activities') ? ['each ride and pickup'] : []),
+    'getting ready for each activity',
+    ...(has('chores') ? ['what has to get done at home before a busy day'] : []),
   ];
   const single = adults.length === 1;
 
@@ -113,12 +115,12 @@ export function resetAgenda(o: ResetInput): ResetStep[] {
       ],
     },
     {
-      key: 'who', title: 'Who’s doing what?', minutes: 3,
-      body: `Put a name beside each job: ${list(owns)}. A whole job, not a reminder.`,
+      key: 'who', title: 'Who’s doing what this week?', minutes: 3,
+      body: `Who is handling the important preparations this week? Put a name beside ${list(owns)}.`,
       parts: [
         ...(single && (has('transport') || has('activities')) ? ['For rides you can’t cover, decide who to ask: a carpool, a grandparent or a friend.'] : []),
         ...(bands.has('young') ? ['Little ones choose one way to get ready, like putting the library book by the door.'] : []),
-        ...(bands.has('school') ? ['Kids pack their own bags for activity days.'] : []),
+        ...(bands.has('school') ? ['Kids say what they need ready for each activity day.'] : []),
         ...(bands.has('teen') ? ['Teens say which rides they need and plan around clashes.'] : []),
       ],
     },
@@ -129,7 +131,7 @@ export function resetAgenda(o: ResetInput): ResetStep[] {
         : 'Find the busiest day. Decide what can be ready the night before, and add it to the to-do list.',
       parts: [
         ...(has('meals') && (bands.has('school') || bands.has('teen')) ? ['Kids pick one dinner or add to the grocery list.'] : []),
-        ...(has('chores') ? ['Look at the to-do list: who takes what this week?'] : []),
+        ...(has('chores') ? ['Look at the to-do list: what has to happen this week?'] : []),
       ],
     },
     {

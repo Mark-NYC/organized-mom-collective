@@ -21,7 +21,7 @@ export const kit: KitConfig = {
   month: '2027-09',
   theme: 'A Week Everyone Can See',
   subtitle: 'One family. One calendar. Everyone knows the plan.',
-  shift: 'The family looks at the week together in a 15-minute meeting around the wall calendar, everyone owning their part, instead of Mom carrying the plan in her head.',
+  shift: 'The family looks at the week together in a 15-minute meeting around the wall calendar, everyone taking their part, instead of Mom carrying the plan in her head.',
   engine: 'planning',
   engineVersion: 1,
   items: [],
@@ -33,7 +33,7 @@ export const kit: KitConfig = {
     items: [
       { text: 'Gather around the calendar. (3 min)', detail: 'Everyone where they can see the wall calendar. Each person shares one important thing coming up.' },
       { text: 'Look at the week ahead. (4 min)', detail: 'School, appointments, practices, family events. Add anything missing to the calendar.' },
-      { text: 'Decide who’s doing what. (3 min)', detail: 'Rides, getting ready for activities, important jobs. A whole job each, not reminders.' },
+      { text: 'Decide who’s doing what. (3 min)', detail: 'Rides, pickups and getting ready for activities: a name beside each.' },
       { text: 'Make the week easier. (3 min)', detail: 'On the busiest days: simple meals in the meal plan, the grocery list, what can be ready ahead.' },
       { text: 'Ask who needs help. (2 min)', detail: 'Everyone says what they need. Make final changes to the calendar, and you’re done.' },
     ],
@@ -71,7 +71,7 @@ export const kit: KitConfig = {
       body: [
         'When life gets busy, it’s easy for one person to become the keeper of everyone’s schedule. Mom remembers the appointments, checks the school emails, knows who’s picking up whom, thinks about dinner, and reminds everyone what comes next.',
         'Even with a calendar on the wall, she can still be the only one carrying the plan.',
-        'A family calendar works best when the whole family uses it, and a short weekly meeting is a simple way to start. Everyone sees what’s coming, adds what they know, and takes their part. Children learn to look ahead to their own activities and get their things ready. The grown-ups in the house own whole jobs instead of waiting to be told.',
+        'A family calendar works best when the whole family uses it, and a short weekly meeting is a simple way to start. Everyone sees what’s coming, adds what they know, and takes their part. Children learn to look ahead to their own activities and get their things ready. The grown-ups share the rides and the plans instead of waiting to be told.',
         'Mom doesn’t need to be the family’s walking calendar. The calendar can do that, for everyone.',
         'The meeting below takes about fifteen minutes. Start this week.',
         `At dinner this week, ask: “${QUESTION}”`,
@@ -83,7 +83,7 @@ export const kit: KitConfig = {
       title: 'The Calendar Is Everyone’s',
       sections: [
         { heading: 'Everyone brings something.', body: 'Each person adds what they know: a practice, a form, a late day at work.' },
-        { heading: 'Owners, not reminders.', body: 'A ride or a job belongs to someone, start to finish, so nobody has to chase it.' },
+        { heading: 'A name beside each plan.', body: 'Every ride and pickup this week has someone on it, so nobody has to chase it.' },
         { heading: 'Short beats perfect.', body: 'Fifteen minutes most weeks does more than an hour now and then.' },
       ],
     },

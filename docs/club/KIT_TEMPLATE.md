@@ -31,7 +31,7 @@ Every card in `src/data/responsibilities.ts` is an item automatically (`cardItem
 
 ## November, as built
 
-`src/data/club/kits/2026-11-family-ownership.ts`: the responsibilities engine over `ownershipJobs()` (the 16 cards, 8 family jobs, 12 teen and adult whole jobs), the November Kitchen & Pantry Reset (the five November tasks from `cleaning.ts`, with ages per task id), four printables (`ownership-chart` flagship, `kitchen-pantry-reset`, `who-owns-what`, `handing-over`), the field guide "Owning a Job, Not Helping With It", the 20-minute Team Meeting activity, and `letter: null`.
+`src/data/club/kits/2026-11-family-ownership.ts`: the responsibilities engine over `ownershipJobs()` (the 16 cards, 8 family jobs, 12 teen and adult whole jobs, less the three weekly-plan jobs that are September's), one job per person to start (`perPerson: 1`), the November Kitchen & Pantry Reset (the five November tasks from `cleaning.ts`, with ages per task id), four printables (`ownership-chart` flagship, `kitchen-pantry-reset`, `who-owns-what`, `handing-over`), the field guide "Owning a Job, Not Helping With It", the 20-minute Team Meeting activity, and `letter: null`.
 
 ## Tools: reuse the site's, never copy them
 

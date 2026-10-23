@@ -57,6 +57,7 @@ export const roleLabel = (p: PlannedMember, household: Household) => {
 /** How the engine places rows for each editor: the launch checklist lists every task that fits a child. */
 export function placementFor(printable: KitPrintable): GenerateOptions {
   if (printable.component === 'LaunchChecklist') return { personal: 'all' };
+  if (printable.perPerson) return { perPerson: printable.perPerson, balance: false };
   return {};
 }
 
@@ -245,7 +246,8 @@ export default function ChartEditor({ store, kit, printable, items, household, s
           <ResponsibilityChart doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} people={chartPeople} rows={resolved.rows} palette={palette} preview={preview}
             orientation="portrait" checkboxes chip={chipText} promise="Every task has one owner" footer={[`Organized Family Club · ${kit.theme}`, 'Tick it off when it’s done']} />
         ) : (
-          <ResponsibilityChart doc={printable.id} title="Our Family Team" familyName={familyName} month={kit.month} people={chartPeople} rows={resolved.rows} palette={palette} preview={preview} />
+          <ResponsibilityChart doc={printable.id} title={printable.perPerson ? kit.theme : 'Our Family Team'} familyName={familyName} month={kit.month} people={chartPeople} rows={resolved.rows} palette={palette} preview={preview}
+            {...(printable.perPerson ? { labels: true, promise: 'Each of us owns our part' } : {})} />
         )}
       </PrintFrame>
 

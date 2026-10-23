@@ -127,6 +127,12 @@ export interface GenerateOptions {
    * order. The rest stay one tap away as suggestions.
    */
   perSection?: number;
+  /**
+   * Ownership charts (November): how many jobs each person starts with. Household jobs first, most constrained
+   * first; a child too young for any gets one of their own instead. Jobs nobody gets aren't listed as "Needs an
+   * owner": the chart stays short, and she can add more.
+   */
+  perPerson?: number;
 }
 
 /**
@@ -219,8 +225,10 @@ export function generateOwnership(
   // 2. Personal jobs: each child and teen gets their own, alternating their space and taking care of themselves,
   //    up to their limit. Within each, what they're still learning comes first (that's what a chart is for), then a
   //    stable per-child order, so siblings don't all get the same list.
+  const cap = options.perPerson;
+  const count = (p: PlannedMember) => rows.filter((r) => r.ownerId === p.id).length;
   for (const p of people) {
-    if (p.stage === 'adult') continue;
+    if (p.stage === 'adult' || cap !== undefined) continue;
     if (routine) {
       const fits = items.filter((i) => i.scope === 'each' && eligible(i, p, prefs) && !taken.has(`${i.id}~${p.id}`));
       const used = (section: ChartSection) => rows.filter((r) => r.ownerId === p.id && r.section === section).length;
@@ -275,8 +283,10 @@ export function generateOwnership(
       Number(a.isAccountHolder) - Number(b.isAccountHolder) ||
       tie(item.id, a.id) - tie(item.id, b.id))[0] ?? null;
 
-  for (const { item, candidates } of household_) {
+  for (const { item, candidates: all } of household_) {
     if (overlaps(item)) continue;
+    const candidates = cap === undefined ? all : all.filter((p) => count(p) < cap);
+    if (cap !== undefined && !candidates.length && !reopen.has(item.id)) continue;
     const after = (p: PlannedMember) => load.get(p.id)! + item.effort;
     // Within guidance first; then, for a core job only, a little past it: teens and adults other than the account
     // holder. Children are never stretched.
@@ -285,10 +295,22 @@ export function generateOwnership(
       owner = best(candidates.filter((p) => p.stage !== 'child' && !p.isAccountHolder && after(p) <= capacity.get(p.id)! * STRETCH), item);
     }
     // Extras only go to someone with room; a core job nobody can take shows as "Needs an owner".
-    if (!owner && !item.core && !reopen.has(item.id)) continue;
+    if (!owner && (cap !== undefined || !item.core) && !reopen.has(item.id)) continue;
     if (owner) load.set(owner.id, load.get(owner.id)! + item.effort);
     rows.push(row(item, reopen.get(item.id) ?? item.id, owner, false));
     placed.add(item.id);
+  }
+
+  // 3b. One job each: a child with no household job they're old enough for gets one of their own, learning first.
+  if (cap !== undefined) {
+    const rank = { learning: 0, 'with-check': 1, owns: 2 } as const;
+    for (const p of people) {
+      if (p.stage === 'adult' || count(p) > 0) continue;
+      const item = items
+        .filter((i) => i.scope === 'each' && eligible(i, p, prefs) && !taken.has(`${i.id}~${p.id}`))
+        .sort((a, b) => rank[levelFor(a, p, boost)] - rank[levelFor(b, p, boost)] || tie(a.id, p.id) - tie(b.id, p.id))[0];
+      if (item) rows.push(row(item, `${item.id}~${p.id}`, p, false));
+    }
   }
 
   // 4. Coaches for children's jobs that aren't fully theirs yet.

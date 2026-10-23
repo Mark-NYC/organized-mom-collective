@@ -101,6 +101,8 @@ export interface KitPrintable {
    * commitments).
    */
   editor?: 'chart' | 'command';
+  /** Ownership charts: each person starts with this many jobs (November: one). No balancing; she can add more. */
+  perPerson?: number;
   /** Tab name in the kit (defaults from the kind). */
   tabLabel?: string;
   /** Lives under the kit's "In the mail" tab instead of its own (the mailer's printable twins). */

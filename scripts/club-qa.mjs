@@ -117,6 +117,11 @@ for (const id of samples) {
   entry.people = people;
   entry.jobs = jobs;
   check(people > 0 && jobs >= people, `${id}: the kit didn't open filled in (${people} people, ${jobs} jobs)`);
+  // One job each to start (the weekly plan is September's): no long lists, nothing "Needs an owner".
+  const perPerson = await page.locator('section[aria-labelledby^="who-ownership-chart-"]').evaluateAll((els) => els.map((e) => e.querySelectorAll('li').length));
+  check(perPerson.every((n) => n <= 1) && jobs >= people - 1, `${id}: November opened with ${perPerson.join('/')} jobs per person (expected one each)`);
+  check(await page.locator('section[aria-labelledby="who-ownership-chart-open"]').count() === 0, `${id}: November opened with jobs that need an owner`);
+  check(await page.getByText(/family calendar|Doctor and dentist|birthday parties/i).count() === 0, `${id}: November suggests a weekly-plan job`);
   await page.screenshot({ path: join(out, `${id}-kit-phone.png`), fullPage: true });
 
   // Edits: reword and reassign the first job, add one, remove one, save, reload.
@@ -2120,7 +2125,9 @@ for (const id of [...samples, 'hughes']) {
   check(suggestions > 0, 'family change: no suggestions shown');
   const changed = before.filter((t) => !after.includes(t));
   check(changed.length === 0, `family change: the saved chart changed by itself: ${changed.join(' | ')}`);
-  check(await page.getByText(/Move .* from Jess to Sam/).count() > 0, 'family change: no workload balance suggestion toward the new partner');
+  // One job each: the new grown-up and the new child get a suggestion apiece, and nothing is rebalanced.
+  check(suggestions === 2, `family change: ${suggestions} suggestions (expected one each for Sam and Nora)`);
+  check(await page.getByText(/^Move /).count() === 0, 'family change: a workload move on a one-job chart');
   await page.getByRole('button', { name: /Add all/ }).click();
   await page.screenshot({ path: join(out, 'brooks-after-family-change.png'), fullPage: true });
   report.push({ familyChange: { suggestions } });

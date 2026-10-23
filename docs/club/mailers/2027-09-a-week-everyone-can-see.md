@@ -32,7 +32,7 @@ The Club stationery with September's touch (`mailer.accent: 'calendar'`): a fine
    >
    > Even with a calendar on the wall, she can still be the only one carrying the plan.
    >
-   > A family calendar works best when the whole family uses it, and a short weekly meeting is a simple way to start. Everyone sees what's coming, adds what they know, and takes their part. Children learn to look ahead to their own activities and get their things ready. The grown-ups in the house own whole jobs instead of waiting to be told.
+   > A family calendar works best when the whole family uses it, and a short weekly meeting is a simple way to start. Everyone sees what's coming, adds what they know, and takes their part. Children learn to look ahead to their own activities and get their things ready. The grown-ups share the rides and the plans instead of waiting to be told.
    >
    > Mom doesn't need to be the family's walking calendar. The calendar can do that, for everyone.
    >
@@ -45,13 +45,13 @@ The Club stationery with September's touch (`mailer.accent: 'calendar'`): a fine
 4. **Our First 15-Minute Family Meeting** (sage panel): "One short conversation. One shared plan." Note: "The minutes are a guide. With little ones, keep it shorter; a big household may need a little longer." **Our family meeting day and time ______**, then five checkboxes:
    1. **Gather around the calendar. (3 min)** Everyone where they can see the wall calendar. Each person shares one important thing coming up.
    2. **Look at the week ahead. (4 min)** School, appointments, practices, family events. Add anything missing to the calendar.
-   3. **Decide who's doing what. (3 min)** Rides, getting ready for activities, important jobs. A whole job each, not reminders.
+   3. **Decide who's doing what. (3 min)** Rides, pickups and getting ready for activities: a name beside each.
    4. **Make the week easier. (3 min)** On the busiest days: simple meals in the meal plan, the grocery list, what can be ready ahead.
    5. **Ask who needs help. (2 min)** Everyone says what they need. Make final changes to the calendar, and you're done.
 
 ## Back (placeholder copy)
 
-1. **The Calendar Is Everyone's.** Everyone brings something. / Owners, not reminders. / Short beats perfect.
+1. **The Calendar Is Everyone's.** Everyone brings something. / A name beside each plan. / Short beats perfect.
 2. **Taking part, by age:** 3–5 point to one thing on the calendar they're looking forward to · 6–9 name one thing to remember and get their own bag ready · 10–12 read the week aloud, lead a step, pack for their activities · 13+ add their own plans, flag clashes, say which rides they need.
 3. **Take turns leading** (beside it): the meeting doesn't have to be Mom's; a young child can lead by asking the first question; a teen can guide the whole thing.
 4. **Ask at dinner this week:** *What's one thing happening this week that everyone needs to know about?*
@@ -63,7 +63,7 @@ The Club stationery with September's touch (`mailer.accent: 'calendar'`): a fine
 Component `src/components/site/FamilyResetBuilder.astro` + `family-reset-builder.ts`, rules `src/data/family-reset.ts`. Hosted at `/club/tools/family-reset`; no public page yet. Kit copy (placeholder): **Make Your Family Weekly Reset** · "Tell us who's taking part, what makes your weeks busy, and when you'll meet. We'll make a 15-minute guide to keep by the calendar." · **Build Our Weekly Reset**.
 
 - **Three questions (and who leads).** Who's taking part (the family profile, or add people; not everyone has to come every week). What makes your weeks complicated (school, activities, transportation, meals and groceries, household responsibilities, appointments, work schedules, something else in her words): these only change the steps' words. When you meet (Sunday, Friday, Saturday or another day, optional time). Who leads: one person, take turns (this week and next), or decide together.
-- **The guide.** Five steps, about 15 minutes: What's happening this week? (3) · Look at the week ahead (4, on the calendar's daily schedule) · Who's doing what? (3, a name beside each job) · What about meals? / Make the week easier (3, meal plan and grocery list, or the to-do list) · Who needs help? (2). Lines for how each person takes part at their age; one question for the family's ages; an optional question of their own.
+- **The guide.** Five steps, about 15 minutes: What's happening this week? (3) · Look at the week ahead (4, on the calendar's daily schedule) · Who's doing what this week? (3, a name beside this week's rides and preparations) · What about meals? / Make the week easier (3, meal plan and grocery list, or the to-do list) · Who needs help? (2). Lines for how each person takes part at their age; one question for the family's ages; an optional question of their own.
 - **Not Mom by default.** The first leader is an older child (8+) or another grown-up when there is one; leading is described by age (a young child asks the first question; a teen guides it; grown-ups keep the calls that need a grown-up). Single parents: no second adult assumed; rides they can't cover prompt "who to ask: a carpool, a grandparent or a friend".
 - **Editing.** Reword, retime, reorder, remove steps; edit the participation lines; change the question, leader, day. New suggestions keep it all. Saved in the browser.
 - **Printing.** One US Letter page, generous white space, for a clear sleeve: title, family name, meeting day and time, total minutes, five numbered steps with minutes and short participation lines, the question, this week's leader (and next week's), and "The plan lives on the wall calendar…". No grids, no writing sections, no grocery list.

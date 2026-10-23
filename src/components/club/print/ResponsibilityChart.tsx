@@ -38,6 +38,8 @@ interface Props {
   chip?: (r: ChartRow) => string;
   /** A tick box on each row (checklists). */
   checkboxes?: boolean;
+  /** November's one-job chart: each row reads I own / When / Done looks like. */
+  labels?: boolean;
 }
 
 const SECTIONS: ChartSection[] = ['family', 'space', 'self', 'morning', 'after-school'];
@@ -55,7 +57,7 @@ export function JobArt({ illustration }: { illustration?: string }) {
 
 export default function ResponsibilityChart({
   doc, title, familyName, month, people, rows, palette, preview, orientation = 'landscape', subtitle, promise = 'Every job has one owner',
-  footer = ['Organized Family Club · Family Ownership Builder', 'Check the chart first'], chip: chipText = (r) => FREQUENCY_LABEL[r.frequency], checkboxes,
+  footer = ['Organized Family Club · Family Ownership Builder', 'Check the chart first'], chip: chipText = (r) => FREQUENCY_LABEL[r.frequency], checkboxes, labels,
 }: Props) {
   const [swipe, card, chip] = toolPalettes[palette].colors;
   const names = new Map(people.map((p) => [p.id, p.firstName]));
@@ -73,12 +75,14 @@ export default function ResponsibilityChart({
       <div key={r.rowId} className={`club-job${checkboxes ? ' club-job-check' : ''}`} style={{ ['--dot' as string]: card }}>
         <JobArt illustration={r.illustration} />
         <div>
+          {labels && <div className="club-job-label">I own</div>}
           <div className="club-job-title">{r.title}</div>
           <div className="club-job-meta">
+            {labels && <span className="club-job-label">When </span>}
             <span className="club-chip" style={{ ['--chip' as string]: chip }}>{chipText(r)}</span>
             {coach && <span> · {coach}</span>}
           </div>
-          {r.doneMeans && <div className="club-job-done">{r.doneMeans}</div>}
+          {r.doneMeans && <div className="club-job-done">{labels && <span className="club-job-label">Done looks like </span>}{r.doneMeans}</div>}
         </div>
         {checkboxes && <span className="club-box" aria-hidden="true" />}
       </div>
