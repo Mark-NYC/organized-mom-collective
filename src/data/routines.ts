@@ -9,6 +9,8 @@
  * Both use src/components/site/RoutineChart.astro and save in this browser only (separate keys).
  */
 
+import { summerRhythm } from './summer-rhythm';
+
 export const ROUTINE_PLUS_PATH = '/routine-chart/plus-h4w8q3';
 
 /** Steps on a chart. */
@@ -27,7 +29,16 @@ export interface RoutineType {
   endTime: string;
   /** Suggestion chips: each fills the next empty step. Library jobs (src/data/responsibilities.ts) aren't repeated here. */
   ideas: string[];
+  /**
+   * Parts of the day the steps belong to (the Summer type: Morning, Midday, Afternoon, Evening), shown on the chart
+   * instead of a clock time when a step has none. The steps are built by src/data/summer-rhythm.ts.
+   */
+  anchors?: string[];
+  /** A step's illustration when its words aren't a library job's title (e.g. "Set the table" for a teen's "Help with dinner"). */
+  icons?: (string | undefined)[];
 }
+
+const summer = summerRhythm({ stage: 'school', days: 'home', structure: 'balanced', focus: [] });
 
 export const routineTypes: Record<string, RoutineType> = {
   morning: {
@@ -97,6 +108,18 @@ export const routineTypes: Record<string, RoutineType> = {
     endLabel: 'Done by',
     endTime: '17:00',
     ideas: ['Outdoor activity', 'Family game time', 'Pack bags for Monday', 'Clean out the car', 'Water plants', 'Rest time'],
+  },
+  summer: {
+    label: 'Summer',
+    blurb: 'A loose rhythm for summer days',
+    title: 'Our Summer Rhythm',
+    subtitle: 'A few anchors, lots of summer',
+    steps: summer.steps,
+    anchors: summer.anchors,
+    icons: summer.icons,
+    endLabel: summer.endLabel,
+    endTime: summer.endTime,
+    ideas: ['Play outside', 'Read for a while', 'Help make lunch', 'Call a grandparent', 'Ride my bike', 'Water the plants', 'Free play'],
   },
   custom: {
     label: 'Custom',

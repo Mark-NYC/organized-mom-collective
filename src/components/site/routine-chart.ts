@@ -3,6 +3,9 @@
  * at /routine-chart, the buyers' chart (ROUTINE_PLUS_PATH) and the Organized Family Club's (/club/tools/routine-chart).
  * One implementation: improve it here and every entry point gets it.
  *
+ * The Summer type (June's Summer Rhythm Builder) adds three quick answers above the chart (src/data/summer-rhythm.ts)
+ * and parts of the day in place of clock times; every other type works as before.
+ *
  * `handoff` (src/lib/tool-handoff.ts): another page opening the chart for someone, e.g. a Club child. It gets its own
  * saved chart (the storage key plus `handoff.key`); a first chart starts from `handoff.variant` with `handoff.name`
  * in the title, and the picker puts jobs suited to `handoff.age` first. Without one, nothing changes.
@@ -12,6 +15,7 @@ import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, downloadPng } from '../../lib/printable';
 import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
 import { routineTypes, type RoutineType } from '../../data/routines';
+import { ageStage, FOCI, summerRhythm, type SummerInput } from '../../data/summer-rhythm';
 import type { ToolHandoff } from '../../lib/tool-handoff';
 import { hasSaved, orderPickerForAge } from './tool-handoff-ui';
 
@@ -37,6 +41,9 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const stepFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-step]'));
   const iconFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-icon-field]'));
   const iconSlots = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mr-icon]'));
+  const anchorFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-anchor]'));
+  const summerField = sheet.querySelector<HTMLInputElement>('[data-mr-summer-field]')!;
+  const summerBox = host.querySelector<HTMLElement>('[data-mr-summer]')!;
   const picker = host.querySelector<HTMLElement>('[data-rp]')!;
   const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
 
@@ -70,9 +77,73 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     toolPalettes[id].colors.forEach((color, i) => sheet.style.setProperty(`--mr-accent-${i + 1}`, color));
     paletteButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mrPalette === id)));
   }
+  /**
+   * Parts of the day: each heads the first step that has it; a chart with parts and no clock times shows the parts
+   * in the time column.
+   */
+  function renderAnchors() {
+    let last = '';
+    let any = false;
+    anchorFields.forEach((f, i) => {
+      const v = f.value.trim();
+      const first = Boolean(v) && v !== last && Boolean(stepFields[i].value.trim());
+      f.toggleAttribute('data-first', first);
+      if (v) { any = true; last = v; }
+    });
+    const times = Array.from({ length: rows }, (_, i) => field(`time-${i}`).value);
+    sheet.classList.toggle('mr-anchored', any);
+    sheet.classList.toggle('mr-untimed', any && times.every((t) => !t));
+  }
+
+  // ---- The Summer type's three questions: who it's for, their days, how much structure, and what needs attention.
+  interface SummerState extends SummerInput { snap?: string }
+  const readSummer = (): SummerState => {
+    try {
+      const o = JSON.parse(summerField.value || '{}');
+      return {
+        stage: ['young', 'school', 'teen'].includes(o.stage) ? o.stage : 'school',
+        days: o.days === 'camp' ? 'camp' : 'home',
+        structure: ['relaxed', 'balanced', 'structured'].includes(o.structure) ? o.structure : 'balanced',
+        focus: Array.isArray(o.focus) ? FOCI.filter((f) => o.focus.includes(f)) : [],
+        ...(typeof o.snap === 'string' ? { snap: o.snap } : {}),
+      };
+    } catch {
+      return { stage: 'school', days: 'home', structure: 'balanced', focus: [] };
+    }
+  };
+  /** What's on the chart now, to tell whether she's changed it since the rhythm was made. */
+  const snapshot = () => JSON.stringify(Array.from({ length: rows }, (_, i) => [field(`time-${i}`).value, field(`step-${i}`).value, anchorFields[i].value]));
+  function renderSummer() {
+    const on = typeField.value === 'summer';
+    summerBox.hidden = !on;
+    if (!on) return;
+    const st = readSummer();
+    for (const b of summerBox.querySelectorAll<HTMLButtonElement>('[data-mr-summer-stage]')) b.setAttribute('aria-pressed', String(b.dataset.mrSummerStage === st.stage));
+    for (const b of summerBox.querySelectorAll<HTMLButtonElement>('[data-mr-summer-days]')) b.setAttribute('aria-pressed', String(b.dataset.mrSummerDays === st.days));
+    for (const b of summerBox.querySelectorAll<HTMLButtonElement>('[data-mr-summer-structure]')) b.setAttribute('aria-pressed', String(b.dataset.mrSummerStructure === st.structure));
+    for (const b of summerBox.querySelectorAll<HTMLButtonElement>('[data-mr-summer-focus]')) b.setAttribute('aria-pressed', String(st.focus.includes(b.dataset.mrSummerFocus as SummerInput['focus'][number])));
+  }
+  /** Write the rhythm for these answers onto the chart (the title and colors stay). */
+  function applySummer(st: SummerState) {
+    const r = summerRhythm(st);
+    for (let i = 0; i < rows; i++) {
+      field(`time-${i}`).value = r.steps[i]?.[0] ?? '';
+      field(`step-${i}`).value = r.steps[i]?.[1] ?? '';
+      if (notes) field(`note-${i}`).value = '';
+      anchorFields[i].value = r.anchors[i] ?? '';
+      iconFields[i].value = r.icons[i] ?? '';
+      if (!iconFields[i].value) syncIcon(i);
+    }
+    field('end-label').value = r.endLabel;
+    field('end-time').value = r.endTime;
+    summerField.value = JSON.stringify({ ...st, snap: snapshot() });
+  }
+
   function renderType() {
     renderPalette();
     renderIcons();
+    renderAnchors();
+    renderSummer();
     const id = types[typeField.value] ? typeField.value : 'morning';
     picker.dataset.rpRoutine = id;
     for (const b of host.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) b.setAttribute('aria-pressed', String(b.dataset.mrType === id));
@@ -113,11 +184,14 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       field(`time-${i}`).value = t.steps[i]?.[0] ?? '';
       field(`step-${i}`).value = t.steps[i]?.[1] ?? '';
       if (notes) field(`note-${i}`).value = t.steps[i]?.[2] ?? '';
-      iconFields[i].value = '';
-      syncIcon(i);
+      anchorFields[i].value = t.anchors?.[i] ?? '';
+      iconFields[i].value = t.icons?.[i] ?? '';
+      if (!iconFields[i].value) syncIcon(i);
     }
     field('end-label').value = t.endLabel;
     field('end-time').value = t.endTime;
+    // Summer starts from her last answers (or the defaults).
+    if (id === 'summer') applySummer(readSummer());
     renderType();
     save();
   }
@@ -127,8 +201,9 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   if (handoff) {
     if (fresh) {
       const id = handoff.variant && types[handoff.variant] ? handoff.variant : typeField.value || 'morning';
+      if (id === 'summer' && handoff.age !== undefined) summerField.value = JSON.stringify({ ...readSummer(), stage: ageStage(handoff.age) });
       load(id, true);
-      if (handoff.name) field('title').value = `${handoff.name}’s ${types[id].title}`;
+      if (handoff.name) field('title').value = `${handoff.name}’s ${types[id].title.replace(/^Our /, '')}`;
       save();
     }
     if (handoff.age !== undefined) orderPickerForAge(picker, handoff.age, handoff.name);
@@ -143,6 +218,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       (i) =>
         field(`time-${i}`).value !== (t.steps[i]?.[0] ?? '') ||
         field(`step-${i}`).value !== (t.steps[i]?.[1] ?? '') ||
+        anchorFields[i].value !== (t.anchors?.[i] ?? '') ||
         (notes && field(`note-${i}`).value !== (t.steps[i]?.[2] ?? '')),
     );
   };
@@ -190,6 +266,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
 
   // Typing a line that matches a library job adds its illustration; clearing a line removes it.
   sheet.addEventListener('input', (e) => {
+    renderAnchors();
     const i = stepFields.indexOf(e.target as HTMLInputElement);
     if (i < 0) return;
     const before = iconFields[i].value;
@@ -204,7 +281,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     const i = stepFields.indexOf(b.closest('.mr-step')!.querySelector<HTMLInputElement>('[data-mr-step]')!);
     const j = i + Number(b.dataset.mrMove);
     if (j < 0 || j >= rows) return;
-    const keys = ['step', 'icon', ...(notes ? ['note'] : [])];
+    const keys = ['step', 'icon', 'anchor', ...(notes ? ['note'] : [])];
     for (const k of keys) {
       const a = field(`${k}-${i}`), c = field(`${k}-${j}`);
       [a.value, c.value] = [c.value, a.value];
@@ -213,6 +290,36 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     action();
     save();
     sheet.querySelectorAll<HTMLButtonElement>(`[data-mr-move="${b.dataset.mrMove}"]`)[j]?.focus();
+  });
+
+  // A summer answer re-makes the rhythm straight away, unless she's changed the chart since: then it asks first.
+  summerBox.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!b) return;
+    const st = readSummer();
+    const d = b.dataset;
+    if (d.mrSummerStage) st.stage = d.mrSummerStage as SummerInput['stage'];
+    else if (d.mrSummerDays) st.days = d.mrSummerDays as SummerInput['days'];
+    else if (d.mrSummerStructure) st.structure = d.mrSummerStructure as SummerInput['structure'];
+    else if (d.mrSummerFocus) {
+      const f = d.mrSummerFocus as SummerInput['focus'][number];
+      st.focus = st.focus.includes(f) ? st.focus.filter((x) => x !== f) : [...st.focus, f];
+    } else return;
+    const status = summerBox.querySelector<HTMLElement>('[data-mr-summer-status]')!;
+    if (st.snap && st.snap !== snapshot() && !confirm('Remake the rhythm with these answers? Your changes to the steps will be replaced.')) {
+      // Keep her chart; remember the answer for next time.
+      summerField.value = JSON.stringify(st);
+      renderSummer();
+      save();
+      status.textContent = 'Your chart stayed as it is.';
+      return;
+    }
+    applySummer(st);
+    renderIcons();
+    renderType();
+    action();
+    save();
+    status.textContent = 'Rhythm updated. Change any step on the chart.';
   });
 
   host.querySelector('[data-mr-reset]')!.addEventListener('click', () => {

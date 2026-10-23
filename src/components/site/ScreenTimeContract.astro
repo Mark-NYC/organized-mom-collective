@@ -1,0 +1,593 @@
+---
+/**
+ * The screen time tool (markup, styles, PNG export), in two formats on one sheet:
+ * - Agreement (June's Family Screen Time Agreement): when screens are on, how much (the family's own number), what
+ *   happens before screens, where devices are used, how screen time ends, what the grown-ups agree to, a review line
+ *   and signatures. Starter wording by age (3–5, 6–12, teens), all editable.
+ * - Earn it (the original /screen-time-contract): the jobs that come first, then activities that earn screen time
+ *   (every N minutes of an activity earns M minutes), with tick boxes and signature lines.
+ * Edited right on the sheet; suggestion chips fill the next empty line. Downloads as a PNG (US Letter portrait,
+ * 8.5 × 11 in at 96 px/in, drawn at 2×). Autosaves in this browser under `storageKey` (a sheet saved before the
+ * Agreement existed opens as Earn it). Used by /screen-time-contract and the Club's /club/tools/screen-time.
+ * Behavior: screen-time-contract.ts beside it. Classes are prefixed `st-`.
+ */
+import { BRAND_NAME } from '../../config';
+import { screenAges, screenStarters, earnIdeas } from '../../data/screen-time';
+
+interface Props {
+  storageKey: string;
+  /** The format a first visit opens in. */
+  format?: 'earn' | 'agreement';
+  /** Opened for someone by another page (src/lib/tool-handoff.ts; the Club): their own sheet, their name, wording for their age. */
+  handoff?: boolean;
+  brand?: string;
+}
+const { storageKey, format = 'earn', handoff = false, brand = BRAND_NAME } = Astro.props;
+
+const TASK_ROWS = 6;
+const ACTIVITY_ROWS = 6;
+const SLOTS = 8;
+const pad = (items: readonly string[], n: number) => Array.from({ length: n }, (_, i) => items[i] ?? '');
+const a = screenStarters.school;
+---
+
+<div class="st-container" data-st-key={storageKey} data-st-start={format} data-st-handoff={handoff ? '' : undefined}>
+  <div class="st-formats" role="group" aria-label="Format">
+    <button type="button" class="st-format" data-st-format-btn="agreement" aria-pressed={format === 'agreement' ? 'true' : 'false'}>
+      <span>Family agreement</span><small>When, where, how it ends, and what grown-ups agree to</small>
+    </button>
+    <button type="button" class="st-format" data-st-format-btn="earn" aria-pressed={format === 'earn' ? 'true' : 'false'}>
+      <span>Earn-it contract</span><small>Jobs first, then activities that earn screen time</small>
+    </button>
+  </div>
+
+  <div class="st-ages" data-st-only="agreement" role="group" aria-label="Who’s it for?">
+    <span class="st-ideas-label">Wording for</span>
+    {screenAges.map((x) => <button type="button" class="st-age" data-st-age={x.id} aria-pressed={x.id === 'school' ? 'true' : 'false'}>{x.label}</button>)}
+  </div>
+
+  <div class="st-actions">
+    <button type="button" class="st-btn st-btn-primary" data-st-download>Download PNG</button>
+    <button type="button" class="st-btn" data-st-reset>Reset</button>
+  </div>
+
+  <div class="st-ideas" data-st-only="earn">
+    <div class="st-ideas-row">
+      <span class="st-ideas-label">Add a job</span>
+      {earnIdeas.tasks.map((idea) => <button type="button" class="st-chip" data-st-add="task" data-idea={idea}>+ {idea}</button>)}
+    </div>
+    <div class="st-ideas-row">
+      <span class="st-ideas-label">Add an activity</span>
+      {earnIdeas.activities.map((idea) => <button type="button" class="st-chip" data-st-add="activity" data-idea={idea}>+ {idea}</button>)}
+    </div>
+    <p class="st-hint">Or tap any line on the contract to type your own.</p>
+  </div>
+  <div class="st-ideas" data-st-only="agreement">
+    <div class="st-ideas-row">
+      <span class="st-ideas-label">Before screens</span>
+      {earnIdeas.before.map((idea) => <button type="button" class="st-chip" data-st-add="before" data-idea={idea}>+ {idea}</button>)}
+    </div>
+    <p class="st-hint">Every line is yours to change: tap it and type. Agree on it together, then sign.</p>
+  </div>
+
+  <div class="st-sheet" id={handoff ? 'screen-time-club' : 'screen-time'} data-st-sheet>
+    <input type="hidden" data-field="format" value="" data-st-format-field />
+    <input type="hidden" data-field="age" value="school" data-st-age-field />
+    <div class="st-head">
+      <div class="st-title">Screen Time</div>
+      <div class="st-subtitle" data-st-only="earn">Contract</div>
+      <div class="st-subtitle" data-st-only="agreement">Our Family Agreement</div>
+    </div>
+
+    <label class="st-name">
+      <span>Name</span>
+      <input type="text" data-field="name" placeholder="Your child’s name, or our family" />
+    </label>
+
+    <div data-st-only="earn" class="st-format-body">
+      <section class="st-section">
+        <h2 class="st-section-title"><span class="st-num">1</span> First, I need to…</h2>
+        <ul class="st-tasks">
+          {pad(earnIdeas.taskStart, TASK_ROWS).map((task, i) => (
+            <li class="st-task">
+              <span class="st-box" aria-hidden="true" />
+              <input type="text" data-field={`task-${i}`} data-st-slot="task" value={task} aria-label={`Job ${i + 1}`} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="st-section">
+        <h2 class="st-section-title"><span class="st-num">2</span> Now I can earn screen time!</h2>
+        <p class="st-rule">
+          For every
+          <input type="number" min="1" max="120" class="st-minutes" data-field="minutes" data-st-minutes value="30" aria-label="Minutes of activity" />
+          minutes I spend on any of these, I earn
+          <input type="number" min="1" max="120" class="st-minutes" data-field="earn" value="15" aria-label="Minutes of screen time earned" />
+          minutes of screen time.
+        </p>
+        <div class="st-grid">
+          <div class="st-row st-row-head" aria-hidden="true">
+            <span></span>
+            {Array.from({ length: SLOTS }, () => <span class="st-slot-label"><b data-st-slot-min>30</b> min</span>)}
+          </div>
+          {pad(earnIdeas.activityStart, ACTIVITY_ROWS).map((activity, i) => (
+            <div class="st-row">
+              <input type="text" data-field={`activity-${i}`} data-st-slot="activity" value={activity} aria-label={`Activity ${i + 1}`} />
+              {Array.from({ length: SLOTS }, () => <span class="st-box" aria-hidden="true" />)}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div class="st-earned">
+        <span>Screen time earned</span>
+        <input type="text" data-field="earned" aria-label="Screen time earned" />
+      </div>
+    </div>
+
+    <div data-st-only="agreement" class="st-format-body st-agree">
+      <section class="st-section">
+        <h2 class="st-section-title"><span class="st-num">1</span> When screens are on</h2>
+        <div class="st-lines">
+          <label class="st-line"><span>Weekdays</span><input type="text" data-field="a-weekday" value={a.weekday} /></label>
+          <label class="st-line"><span>Weekends</span><input type="text" data-field="a-weekend" value={a.weekend} /></label>
+          <label class="st-line"><span>How much</span><input type="text" data-field="a-amount" value="" placeholder={a.amountHint} data-st-amount /></label>
+        </div>
+      </section>
+      <div class="st-two">
+        <section class="st-section">
+          <h2 class="st-section-title"><span class="st-num">2</span> Before screens</h2>
+          <ul class="st-checks">
+            {pad(a.before, 4).map((t, i) => (
+              <li><span class="st-box" aria-hidden="true" /><input type="text" data-field={`a-before-${i}`} data-st-slot="before" value={t} aria-label={`Before screens ${i + 1}`} /></li>
+            ))}
+          </ul>
+        </section>
+        <section class="st-section">
+          <h2 class="st-section-title"><span class="st-num">3</span> Where devices go</h2>
+          <ul class="st-plain">
+            {pad(a.where, 3).map((t, i) => <li><input type="text" data-field={`a-where-${i}`} value={t} aria-label={`Where devices are used ${i + 1}`} /></li>)}
+          </ul>
+        </section>
+      </div>
+      <section class="st-section">
+        <h2 class="st-section-title"><span class="st-num">4</span> When screen time ends</h2>
+        <ol class="st-steps">
+          {pad(a.end, 3).map((t, i) => <li><span class="st-step-n" aria-hidden="true">{i + 1}</span><input type="text" data-field={`a-end-${i}`} value={t} aria-label={`When screen time ends ${i + 1}`} /></li>)}
+        </ol>
+      </section>
+      <section class="st-section st-adults">
+        <h2 class="st-section-title"><span class="st-num">5</span> What grown-ups agree to</h2>
+        <ul class="st-plain">
+          {pad(a.adults, 3).map((t, i) => <li><input type="text" data-field={`a-adult-${i}`} value={t} aria-label={`Grown-ups agree ${i + 1}`} /></li>)}
+        </ul>
+      </section>
+      <p class="st-review">
+        If something isn’t working, we’ll change it together. We’ll check in on
+        <input type="text" data-field="a-review" value="" aria-label="When we’ll check in" placeholder="a date" />
+      </p>
+    </div>
+
+    <div class="st-signatures">
+      <label><input type="text" data-field="sign-child" aria-label="Child’s signature" /><span>Signed</span></label>
+      <label><input type="text" data-field="sign-parent" aria-label="Parent’s signature" /><span>Parent</span></label>
+      <label><input type="text" data-field="date" aria-label="Date" /><span>Date</span></label>
+    </div>
+
+    <div class="st-foot">{brand}</div>
+  </div>
+
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .st-container {
+    --st-ink: var(--color-warm-ink);
+    --st-soft: var(--color-warm-soft);
+    --st-rule: var(--color-warm-rule);
+    --st-rose: var(--color-rose);
+    --st-rose-deep: var(--color-rose-deep);
+    --st-rose-wash: var(--color-rose-wash);
+    --st-sage: var(--color-sage);
+    --st-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--st-ink);
+  }
+  .st-container *,
+  .st-container *::before,
+  .st-container *::after {
+    box-sizing: border-box;
+  }
+
+  .st-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 20px;
+  }
+  .st-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .st-btn:hover {
+    background: var(--st-rose-wash);
+  }
+  .st-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .st-btn-primary:hover {
+    background: #362e2d;
+  }
+  .st-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .st-ideas {
+    max-width: 816px;
+    margin: 0 auto 24px;
+  }
+  .st-ideas-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .st-ideas-label {
+    margin-right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--st-soft);
+  }
+  .st-chip {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--st-rule);
+    border-radius: 999px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    color: var(--st-ink);
+    cursor: pointer;
+  }
+  .st-chip:hover {
+    border-color: var(--st-rose);
+    background: var(--st-rose-wash);
+  }
+  .st-hint {
+    font-size: 0.9rem;
+    color: var(--st-soft);
+  }
+
+  /* The sheet: US Letter portrait (8.5 × 11 in at 96 px/in). */
+  .st-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 816px;
+    max-width: 100%;
+    min-height: 1056px;
+    margin: 0 auto;
+    padding: 36px 44px 26px;
+    background: var(--color-ivory);
+    border: 1px solid var(--st-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .st-sheet input {
+    min-width: 0;
+    border: none;
+    border-bottom: 1px solid var(--st-rule);
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--st-ink);
+  }
+  .st-sheet input:focus {
+    outline: none;
+    border-bottom-color: var(--st-rose);
+    background: var(--st-rose-wash);
+  }
+  .st-sheet input::placeholder {
+    color: #c4b8b2;
+  }
+  .st-head {
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--st-rose);
+  }
+  .st-title {
+    font-size: 46px;
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+  .st-subtitle {
+    margin-top: 4px;
+    font-size: 28px;
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--st-rose-deep);
+  }
+  .st-name {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin: 22px 0 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--st-soft);
+  }
+  .st-name input {
+    flex: 1;
+    height: 36px;
+    font-size: 22px;
+    text-align: center;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .st-section {
+    margin-top: 20px;
+  }
+  .st-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--st-ink);
+  }
+  .st-num {
+    font-family: var(--font-serif);
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--st-rose);
+  }
+  .st-tasks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 22px;
+    margin: 0;
+    padding: 14px 16px;
+    list-style: none;
+    border: 1px dashed var(--st-rose);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .st-task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .st-task input {
+    flex: 1;
+    height: 32px;
+  }
+  .st-box {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--st-rose);
+    border-radius: 3px;
+    background: #fff;
+  }
+  .st-rule {
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+  .st-sheet .st-minutes {
+    width: 46px;
+    height: 28px;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .st-minutes::-webkit-inner-spin-button,
+  .st-minutes::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .st-grid {
+    padding: 12px 16px 8px;
+    border: 1px solid var(--st-sage);
+    border-radius: 6px;
+    background: var(--st-sage-wash);
+  }
+  .st-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.9fr) repeat(8, minmax(0, 1fr));
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .st-row input {
+    height: 34px;
+    border-bottom-color: #cfd7c8;
+  }
+  .st-row .st-box {
+    justify-self: center;
+    width: 30px;
+    height: 30px;
+    border-color: var(--st-sage);
+  }
+  .st-slot-label {
+    padding: 3px 0;
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #5d6b55;
+  }
+  .st-slot-label b {
+    font-size: 12px;
+  }
+  .st-earned {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin-top: 22px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .st-earned input {
+    flex: 1;
+    height: 34px;
+    border-bottom: 2px solid var(--st-rose);
+    font-size: 18px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .st-signatures {
+    display: grid;
+    grid-template-columns: 1.3fr 1.3fr 0.8fr;
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 26px;
+  }
+  .st-signatures label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--st-soft);
+  }
+  .st-signatures input {
+    height: 34px;
+    border-bottom: 1px solid var(--st-ink);
+    font-style: italic;
+    font-size: 17px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .st-foot {
+    margin-top: 18px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #b3a7a1;
+  }
+  .st-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--st-soft);
+  }
+
+  /* Phones: single-column jobs, four earning boxes per row. The PNG is always the Letter layout with all eight. */
+  @media (max-width: 768px) {
+    .st-container:not(.st-exporting) .st-sheet {
+      min-height: 0;
+      padding: 22px 14px;
+    }
+    .st-container:not(.st-exporting) .st-title {
+      font-size: 36px;
+    }
+    .st-container:not(.st-exporting) .st-tasks {
+      grid-template-columns: 1fr;
+      padding: 10px 12px;
+    }
+    .st-container:not(.st-exporting) .st-grid {
+      padding: 10px 8px 4px;
+    }
+    .st-container:not(.st-exporting) .st-row {
+      grid-template-columns: minmax(0, 2fr) repeat(4, 30px);
+    }
+    .st-container:not(.st-exporting) .st-row > :nth-child(n + 6) {
+      display: none;
+    }
+    .st-container:not(.st-exporting) .st-signatures {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Formats and the Agreement layout. */
+  .st-formats { display: flex; flex-wrap: wrap; gap: 0 26px; max-width: 816px; margin: 0 auto 14px; border-bottom: 1px solid var(--st-rule); }
+  .st-format { display: grid; min-height: 52px; padding: 8px 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; text-align: left; color: var(--st-soft); cursor: pointer; }
+  .st-format span { font-family: var(--font-serif); font-size: 1.02rem; }
+  .st-format small { font-size: 0.78rem; }
+  .st-format[aria-pressed='true'] { border-bottom-color: var(--st-ink); color: var(--st-ink); }
+  .st-format[aria-pressed='true'] span { font-weight: 700; }
+  .st-ages { display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; max-width: 816px; margin: 0 auto 10px; }
+  .st-age { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 0.98rem; color: var(--st-soft); cursor: pointer; }
+  .st-age[aria-pressed='true'] { border-bottom-color: var(--st-ink); color: var(--st-ink); font-weight: 600; }
+  .st-format:focus-visible, .st-age:focus-visible, .st-chip:focus-visible, .st-btn:focus-visible { outline: 2px solid var(--st-ink); outline-offset: 3px; }
+  .st-container [data-st-only][hidden] { display: none !important; }
+  .st-actions { max-width: 816px; }
+  .st-agree .st-section { margin-top: 16px; }
+  .st-agree .st-section-title { margin-bottom: 8px; }
+  .st-agree .st-num { font-size: 36px; }
+  .st-lines { display: grid; gap: 6px; padding: 10px 16px; border: 1px solid var(--st-sage); border-radius: 6px; background: var(--st-sage-wash); }
+  .st-line { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: end; gap: 12px; font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5d6b55; }
+  .st-line input { height: 32px; font-size: 17px; letter-spacing: 0; text-transform: none; border-bottom-color: #cfd7c8; }
+  .st-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .st-checks, .st-plain, .st-steps { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .st-checks li { display: flex; align-items: center; gap: 10px; }
+  .st-checks input, .st-plain input, .st-steps input { flex: 1; width: 100%; height: 30px; font-size: 16px; }
+  .st-plain li { display: flex; align-items: center; gap: 10px; }
+  .st-plain li::before { content: ''; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--st-sage); }
+  .st-steps { counter-reset: st-step; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .st-steps li { display: flex; align-items: center; gap: 8px; }
+  .st-steps .st-step-n { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--st-rose-wash); font-family: var(--font-sans); font-size: 12px; font-weight: 700; }
+  .st-adults { padding: 10px 16px 12px; border: 1px dashed var(--st-rose); border-radius: 6px; background: #fff; }
+  .st-review { margin-top: 16px; font-size: 15px; font-style: italic; line-height: 1.6; color: var(--st-soft); }
+  .st-sheet .st-review input { width: 170px; height: 26px; font-style: normal; }
+  @media (max-width: 768px) {
+    .st-container:not(.st-exporting) .st-two, .st-container:not(.st-exporting) .st-steps { grid-template-columns: 1fr; }
+    .st-container:not(.st-exporting) .st-line { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>
+
+<script>
+  import { initScreenTime } from './screen-time-contract';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.st-container')) {
+    initScreenTime(host, host.hasAttribute('data-st-handoff') ? readToolHandoff('screen-time') : null);
+  }
+</script>

@@ -1,13 +1,15 @@
 ---
 /**
  * A routine chart (the design, autosave and PNG export): pick a type (morning, after-school, bedtime,
- * weekend, custom) to load starter steps and times, edit any line on the sheet, add steps from suggestion
+ * weekend, summer, custom) to load starter steps and times, edit any line on the sheet, add steps from suggestion
  * chips, download as a PNG (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×).
  * Used by /routine-chart (free) and the upgraded chart for Take Back Control and Essential Routines buyers (ROUTINE_PLUS_PATH),
  * which passes `notes`: a reminder line under each step, with starter notes. Starter routines:
  * src/data/routines.ts. Saves in this browser under `storageKey`. Classes are prefixed `mr-`.
  * Illustrated steps come from the shared responsibility library (ResponsibilityPicker): a step's illustration id
  * saves as `icon-{i}`; lines matching a library job get its illustration. Arrows reorder steps on screen (times stay put).
+ * The Summer type (src/data/summer-rhythm.ts) shows three quick questions above the chart and a part of the day
+ * (`anchor-{i}`: Morning, Midday…) heading each group of steps, in the time column when a step has no time.
  * Slots: `picker-note` (under the picker), `after-sheet` (under the chart), `footnote`.
  * Behavior: src/components/site/routine-chart.ts (shared by every page that shows this chart, the Club's included).
  */
@@ -15,6 +17,7 @@ import '@fontsource/kalam/latin-700.css';
 import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
 import { BRAND_NAME } from '../../config';
 import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
+import { dayOptions, focusOptions, stageOptions, structureOptions } from '../../data/summer-rhythm';
 import ResponsibilityPicker from './ResponsibilityPicker.astro';
 
 interface Props {
@@ -46,6 +49,24 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       ))
     }
   </div>
+
+  <section class="mr-summer" data-mr-summer hidden aria-labelledby="mr-summer-h">
+    <h2 id="mr-summer-h" class="mr-summer-title">Shape your summer rhythm</h2>
+    <p class="mr-summer-note">A few anchors for ordinary summer days, not a schedule. Camps, trips and plans go on the family calendar.</p>
+    <div class="mr-summer-q" role="group" aria-label="Who’s it for?"><span>Who’s it for?</span>
+      {stageOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-stage={o.id} aria-pressed={o.id === 'school' ? 'true' : 'false'}>{o.label}</button>)}
+    </div>
+    <div class="mr-summer-q" role="group" aria-label="Their days"><span>Their days</span>
+      {dayOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-days={o.id} aria-pressed={o.id === 'home' ? 'true' : 'false'}>{o.label}</button>)}
+    </div>
+    <div class="mr-summer-q" role="group" aria-label="How much structure?"><span>How much structure?</span>
+      {structureOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-structure={o.id} aria-pressed={o.id === 'balanced' ? 'true' : 'false'} title={o.hint}>{o.label}</button>)}
+    </div>
+    <div class="mr-summer-q" role="group" aria-label="What needs the most attention? (optional)"><span>What needs the most attention? <em>Optional</em></span>
+      {focusOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-focus={o.id} aria-pressed="false">{o.label}</button>)}
+    </div>
+    <p class="mr-summer-status" data-mr-summer-status role="status" aria-live="polite"></p>
+  </section>
 
   <ResponsibilityPicker hint="Tap one to add it to the next open step. Use the arrows on the chart to change the order.">
     <slot name="picker-note" />
@@ -79,6 +100,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   <div class="mr-sheet" id="routine-chart">
     <input type="hidden" data-field="palette" value={defaultToolPalette} />
     <input type="hidden" data-field="type" value="morning" data-mr-type-field />
+    <input type="hidden" data-field="summer" value="" data-mr-summer-field />
     <div class="mr-head">
       <input class="mr-title" type="text" data-field="title" value={start.title} aria-label="Chart title" />
       <input class="mr-subtitle" type="text" data-field="subtitle" value={start.subtitle} aria-label="Subtitle" />
@@ -90,7 +112,10 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
           <li class="mr-step">
             <input type="hidden" data-field={`icon-${i}`} data-mr-icon-field />
             <span class="mr-num" aria-hidden="true">{i + 1}</span>
-            <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            <span class="mr-when">
+              <input class="mr-anchor" type="text" data-field={`anchor-${i}`} data-mr-anchor maxlength="14" aria-label={`Step ${i + 1} part of the day`} />
+              <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            </span>
             <span class="mr-icon" data-mr-icon><img alt="" width="52" height="52" decoding="async" /></span>
             <span class="mr-what">
               <input class="mr-text" type="text" data-field={`step-${i}`} data-mr-step value={step} aria-label={`Step ${i + 1}`} />
@@ -476,9 +501,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       grid-area: num;
       font-size: 22px;
     }
-    .mr-container:not(.mr-exporting) .mr-step .mr-time {
+    .mr-container:not(.mr-exporting) .mr-step .mr-when {
       grid-area: time;
       justify-self: start;
+    }
+    .mr-container:not(.mr-exporting) .mr-step .mr-time {
       height: 32px;
     }
     .mr-container:not(.mr-exporting) .mr-what {
@@ -574,6 +601,30 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-move { grid-area: move; flex-direction: row; }
     .mr-container:not(.mr-exporting) .mr-move button { width: 30px; height: 36px; }
   }
+</style>
+
+<style is:global>
+  /* The Summer type: a part of the day (Morning, Midday…) heads its first step, in the time column when there's no time. */
+  .mr-when { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+  .mr-sheet .mr-anchor { display: none; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: var(--mr-accent-3); font-family: 'Kalam', var(--font-serif); font-size: 19px; font-weight: 700; color: var(--mr-ink); }
+  .mr-sheet.mr-anchored .mr-anchor { display: block; }
+  .mr-sheet.mr-anchored .mr-anchor:not([data-first]) { visibility: hidden; height: 0; }
+  .mr-sheet.mr-untimed .mr-when .mr-time { display: none; }
+  .mr-sheet.mr-untimed .mr-anchor { height: 40px; font-size: 22px; }
+  .mr-sheet.mr-anchored:not(.mr-untimed) .mr-anchor[data-first] { font-size: 16px; height: 26px; }
+  .mr-container:not(.mr-exporting) .mr-sheet.mr-anchored .mr-anchor:not([data-first]) { display: none; }
+
+  .mr-summer { max-width: 816px; margin: 0 auto 22px; padding: 16px 18px; border: 1px solid var(--mr-rule); border-top: 3px solid var(--mr-sage); background: #fff; }
+  .mr-summer[hidden] { display: none; }
+  .mr-summer-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 400; }
+  .mr-summer-note { margin-top: 2px; font-size: 0.88rem; color: var(--mr-soft); }
+  .mr-summer-q { display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; margin-top: 10px; }
+  .mr-summer-q > span { flex-basis: 100%; font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mr-soft); }
+  .mr-summer-q > span em { font-style: normal; font-weight: 400; letter-spacing: 0.04em; text-transform: none; }
+  .mr-opt { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 0.98rem; color: var(--mr-soft); cursor: pointer; }
+  .mr-opt[aria-pressed='true'] { border-bottom-color: var(--mr-ink); color: var(--mr-ink); font-weight: 600; }
+  .mr-opt:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 3px; }
+  .mr-summer-status { min-height: 1.3em; margin-top: 6px; font-size: 0.88rem; color: var(--mr-soft); }
 </style>
 
 <script>
