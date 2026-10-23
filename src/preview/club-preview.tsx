@@ -13,6 +13,7 @@ import KitPage from '../components/club/KitPage';
 import ClubToolBar from '../components/club/ClubToolBar';
 import { initRoutineChart } from '../components/site/routine-chart';
 import { initChoreChart } from '../components/site/chore-chart';
+import { initTraditionsPicker } from '../components/site/traditions-picker';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -77,6 +78,7 @@ const toolMarkup = (globalThis as { __CLUB_TOOLS?: Record<string, string> }).__C
 const toolInit: Record<string, (host: HTMLElement) => void> = {
   'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart')),
   'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart')),
+  'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker')),
 };
 
 function ToolPage({ tool }: { tool: string }) {

@@ -161,6 +161,8 @@ export interface KitConfig {
     intro: string;
     items: CountdownItem[];
     helperLabel?: string;
+    /** One line under the intro, on screen and on the letter: how to use it if she's already started (December). */
+    note?: string;
     /** She can reword a line for her family (her wording prints on her copy; the mailer keeps the kit's). */
     editable?: true;
   };
@@ -223,6 +225,8 @@ export interface KitConfig {
     calendarNote?: string;
     /** '/club/kits/<slug>?source=mailer' */
     qrPath: string;
+    /** A restrained seasonal touch on the letter: December's evergreen sprig and muted evergreen and clay colors. */
+    accent?: 'evergreen';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

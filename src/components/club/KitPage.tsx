@@ -15,7 +15,7 @@ import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes
 import type { KitConfig, KitPrintable } from '../../data/club/types';
 import {
   addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_STARTS, planCountdown, readCountdown, resetChanges,
-  shortLabel as shortDay, lineText, MAX_TEXT, type CountdownPlan, type CountdownState, type SchoolStart,
+  shortLabel as shortDay, lineDetail, lineText, MAX_TEXT, type CountdownPlan, type CountdownState, type SchoolStart,
 } from '../../lib/club/countdown';
 import { schoolSetupFor, withSchool } from '../../lib/club/school';
 import { GuideSheet } from './print/SchoolPrintables';
@@ -86,10 +86,11 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
     <div className="flex flex-wrap items-center justify-between gap-3">
       <a href={ctx.href(routes.clubDashboard)} className="text-[0.9rem] text-warm-soft underline underline-offset-4">Your kits</a>
       {otherKits.length > 1 && (
-        <nav aria-label="Monthly kits" className="flex rounded-full bg-white p-1 ring-1 ring-warm-rule">
+        // Scrolls within itself once the months outgrow a phone's width; the page never scrolls sideways.
+        <nav aria-label="Monthly kits" ref={(el) => { const cur = el?.querySelector<HTMLElement>('[aria-current=page]'); if (el && cur) el.scrollLeft = cur.offsetLeft + cur.offsetWidth - el.clientWidth + 4; }} className="flex max-w-full overflow-x-auto rounded-full bg-white p-1 ring-1 ring-warm-rule">
           {otherKits.map((k) => (
             <a key={k.slug} href={ctx.href(routes.clubKit(k.slug))} aria-current={k.slug === kit.slug ? 'page' : undefined}
-              className="rounded-full px-4 py-2 text-[0.85rem] font-semibold text-warm-soft aria-[current=page]:bg-warm-ink aria-[current=page]:text-white">
+              className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[0.85rem] font-semibold text-warm-soft aria-[current=page]:bg-warm-ink aria-[current=page]:text-white">
               {monthLabel(k.month)}
             </a>
           ))}
@@ -323,7 +324,8 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
                 <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
                 {kit.tool.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{kit.tool.note}</p>}
-                <ToolLauncher tool={tool} cta={kit.tool.cta} start={kit.tool.start} kids={tool.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids} household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
+                <ToolLauncher tool={tool} cta={kit.tool.cta} start={kit.tool.start} kids={tool.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids}
+                  ages={children.flatMap((c) => (c.age !== null ? [c.age] : []))} familyName={household.displayName} household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
               </div>
             </div>
           </section>
@@ -519,6 +521,7 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
           <div className="min-w-0 flex-1">
             <h2 id="club-action" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{action.screenTitle ?? action.title}</h2>
             <p className="mt-2 leading-relaxed text-warm-soft">{action.intro}</p>
+            {action.note && <p className="mt-3 border-l-[3px] border-sage bg-sage-wash px-4 py-2.5 text-[0.95rem] leading-relaxed text-warm-ink">{action.note}</p>}
           </div>
         </div>
         {countdown && (
@@ -535,12 +538,16 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
           {action.items.map((item, i) => {
             const l = plan.lines[i];
             const words = lineText(action.items, state, i);
+            const detail = lineDetail(action.items, state, i);
             return (
               <li key={item.text} className="py-3.5">
                 <label className="flex min-h-11 cursor-pointer items-start gap-3.5">
                   <input type="checkbox" className="mt-0.5 h-6 w-6 shrink-0 accent-[#7f9274]" checked={state.done[i]} disabled={readOnly}
                     onChange={(e) => update({ ...state, done: state.done.map((d, n) => (n === i ? e.target.checked : d)) })} />
-                  <span className={`text-[1.02rem] leading-snug text-warm-ink ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{words}</span>
+                  <span className="min-w-0">
+                    <span className={`text-[1.02rem] leading-snug text-warm-ink ${detail ? 'font-semibold' : ''} ${state.done[i] ? 'line-through decoration-sage' : ''}`}>{words}</span>
+                    {detail && <span className="mt-0.5 block text-[0.93rem] leading-snug text-warm-soft">{detail}</span>}
+                  </span>
                 </label>
                 {wording === i && (
                   <div className="ml-[2.4rem] mt-1 flex flex-wrap items-center gap-3">
@@ -643,8 +650,11 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
  * doesn't retype what her family profile says. One person: it opens straight away; several: it asks who it's for;
  * nobody: it opens the tool as any visitor would see it.
  */
-function ToolLauncher({ tool, cta, start, kids, household, back, href }: {
+function ToolLauncher({ tool, cta, start, kids, ages, familyName, household, back, href }: {
   tool: ClubTool;
+  /** A family tool's children's ages (the traditions picker); `familyName` goes on its printout. */
+  ages: number[];
+  familyName?: string;
   cta: string;
   /** The tool's starting choice when the kit offers none (October's chore chart: 'one-job'). */
   start?: string;
@@ -661,6 +671,7 @@ function ToolLauncher({ tool, cta, start, kids, household, back, href }: {
       tool: tool.id,
       key: `${household}-${kid ? `${kid.id}-${variant ?? 'chart'}` : 'family'}`.replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 120),
       ...(kid ? { name: kid.firstName, ...(kid.age !== null ? { age: kid.age } : {}) } : {}),
+      ...(tool.familyAges ? { ...(ages.length ? { ages } : {}), ...(familyName ? { name: familyName } : {}) } : {}),
       ...(variant ? { variant } : {}),
       back,
     });

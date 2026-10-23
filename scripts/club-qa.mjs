@@ -369,6 +369,189 @@ for (const id of [...samples, 'hughes']) {
   await ctx.close();
 }
 
+// December (letter, five-decision Christmas plan, the traditions picker): no dates; checks, helpers and her wording
+// save; her copy and the letter print; "Find Our Christmas Traditions" opens the picker with the children's ages.
+const decUrl = (id) => `${base}/club/kits/2027-12-christmas-family-affair?sample=${id}`;
+const cardNames = (page) => page.locator('.tp-card .tp-card-name').allTextContents();
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { december: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(decUrl(id));
+  await page.getByRole('heading', { name: 'Our Family Christmas Plan' }).waitFor();
+  check(await noSideScroll(page), `${id}: December scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the plan has ${await lines.count()} lines (expected 5)`);
+  check(await page.locator('section[aria-labelledby="club-start"], input[type="date"]').count() === 0, `${id}: December asks for dates`);
+  check(await page.locator('.club-screen').getByText(/^Already made your plans\?/).count() === 1, `${id}: December is missing the already-planned note`);
+  check(await page.getByText('Pick two or three Christmas traditions your family really wants to enjoy.').count() >= 1, `${id}: the plan's detail lines are missing`);
+  check(await page.getByRole('button', { name: 'Read this month’s letter' }).count() === 1, `${id}: no "Read this month's letter" link`);
+  await page.screenshot({ path: join(out, `${id}-december-phone.png`), fullPage: true });
+
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByPlaceholder('Who’s helping?').nth(2).fill('Grandma');
+  await lines.nth(3).getByRole('button', { name: /^reword/ }).click();
+  await lines.nth(3).locator('input[type="text"]').first().fill('Bake for the church food pantry.');
+  await lines.nth(3).getByRole('button', { name: 'Done' }).click();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our Family Christmas Plan' }).waitFor();
+  check(await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: the checked decision didn't survive a reload`);
+  check(await page.getByPlaceholder('Who’s helping?').nth(2).inputValue() === 'Grandma', `${id}: the helper didn't survive a reload`);
+  check((await lines.nth(3).locator('label > span').textContent()) === 'Bake for the church food pantry.', `${id}: her wording didn't survive a reload (or kept our detail)`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['christmas-plan', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-december-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: December ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: December ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Grandma') && sheet.includes('church food pantry'), `${id}: her printout is missing her helper or wording`);
+  const mailed = await page.evaluate(() => document.querySelector('.club-letter .club-action')?.textContent ?? '');
+  check(!mailed.includes('Grandma') && !mailed.includes('food pantry') && mailed.includes('Choose one way to give together.'), `${id}: the mailed letter shows her own entries`);
+  check(await page.evaluate(() => document.querySelectorAll('.club-letter .club-action-when').length === 0), `${id}: the December letter prints "By" blanks`);
+  check(await page.evaluate(() => document.querySelectorAll('.club-letter .club-sprig').length === 2 && document.querySelector('.club-letter')?.dataset.accent === 'evergreen'), `${id}: the December letter is missing its evergreen touch`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Making Christmas Together', 'Choose what matters.', 'Share the preparations.', 'Leave room to enjoy it.', 'What’s one thing we could each do to make Christmas special for someone else?', 'Find Your Family’s Christmas Traditions', 'organizedmomcollective.com/club/kits/2027-12-christmas-family-affair', 'Leave some open space, too.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  entry.greeting = await page.evaluate(() => document.querySelector('.club-letter-greeting')?.textContent);
+
+  // The tool: the traditions picker, for the whole family, with the children's ages from the profile.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Find Our Christmas Traditions', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/traditions-picker/);
+  await page.locator('.tp-card').nth(2).waitFor();
+  check(await page.locator('.tp[data-tp-handoff]').count() === 1, `${id}: the Club page isn't the site's traditions picker`);
+  check(await page.locator('.tp-card').count() === 3, `${id}: the picker shows ${await page.locator('.tp-card').count()} ideas (expected 3)`);
+  const agesNote = await page.locator('[data-tp-ages-note]').textContent();
+  check(id === 'hughes' ? /Tap any/.test(agesNote) : /^From your family profile: \d/.test(agesNote), `${id}: the picker's ages: "${agesNote}"`);
+  check(await page.getByText('Three meaningful traditions are better than twenty things you feel obligated to do.').count() >= 1, `${id}: the picker is missing the fewer-is-better reminder`);
+  check(await noSideScroll(page), `${id}: the picker scrolls sideways on a phone`);
+  const first = await cardNames(page);
+  entry.traditions = { ages: agesNote, first, kids: await page.locator('.tp-card [data-tp-kids]').allTextContents() };
+  await page.screenshot({ path: join(out, `${id}-december-picker-phone.png`), fullPage: true });
+
+  // Time and budget change the ideas; every meta stays within them.
+  await page.getByRole('button', { name: 'Half a day' }).click();
+  await page.getByRole('button', { name: 'Flexible', exact: true }).click();
+  const big = await cardNames(page);
+  await page.getByRole('button', { name: '15–30 minutes' }).click();
+  await page.getByRole('button', { name: 'Free', exact: true }).click();
+  const small = await cardNames(page);
+  const smallMeta = await page.locator('.tp-card [data-tp-meta]').allTextContents();
+  check(big.join() !== small.join(), `${id}: time and budget didn't change the ideas (${big.join(', ')})`);
+  check(smallMeta.every((m) => /minutes/.test(m) && /Free$/.test(m)), `${id}: a short, free search suggested ${smallMeta.join(' | ')}`);
+  entry.traditions.halfDayFlexible = big;
+  entry.traditions.shortFree = small;
+  await page.getByRole('button', { name: 'About an hour' }).click();
+  await page.getByRole('button', { name: 'Under $25' }).click();
+
+  // Swap one, keep two, reload: still there; the printout has the two.
+  const before = await cardNames(page);
+  await page.locator('.tp-card').nth(1).getByRole('button', { name: /^Swap/ }).click();
+  const swapped = await cardNames(page);
+  check(swapped[1] !== before[1] && swapped[0] === before[0] && swapped[2] === before[2] && !before.includes(swapped[1]), `${id}: swapping didn't replace just that idea (${before.join(', ')} → ${swapped.join(', ')})`);
+  await page.locator('.tp-card').nth(0).getByRole('checkbox').check();
+  await page.locator('.tp-card').nth(2).getByRole('checkbox').check();
+  await page.reload();
+  await page.locator('.tp-card').nth(2).waitFor();
+  const kept = await page.locator('.tp-card.is-kept .tp-card-name').allTextContents();
+  check(kept.length === 2 && kept[0] === swapped[0] && kept[1] === swapped[2], `${id}: kept ideas didn't survive a reload (${kept.join(', ')})`);
+  check(await page.locator('.tp-card.is-kept [data-tp-swap]:not([hidden])').count() === 0, `${id}: a kept idea can still be swapped`);
+  const printed = await page.locator('.tp-sheet-item .tp-sheet-name').allTextContents();
+  check(printed.join() === kept.join(), `${id}: the printout shows ${printed.join(', ')}, not the kept ${kept.join(', ')}`);
+  check((await page.locator('.tp-sheet-num').allTextContents()).join() === '1,2', `${id}: the printout isn't numbered 1, 2`);
+  const family = (await page.locator('[data-tp-sheet-family]').textContent()).trim();
+  check(id === 'hughes' ? family === 'The Hughes family' : family.length > 0, `${id}: the printout's family name is "${family}"`);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-tp-download]')]);
+  entry.traditionsDownload = dl.suggestedFilename();
+  await dl.saveAs(join(out, `${id}-december-traditions.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the picker asked for an email`);
+  await page.click('[data-tp-copy]');
+  await page.waitForTimeout(200);
+  const copied = await page.locator('[data-tp-status]').textContent();
+  const fallback = await page.locator('[data-tp-copy-fallback]').inputValue();
+  check(/^Copied/.test(copied) || (fallback.includes(kept[0]) && fallback.includes('Three meaningful traditions')), `${id}: copying didn't work ("${copied}")`);
+  await page.locator('.tp-sheet').screenshot({ path: join(out, `${id}-december-traditions-sheet.png`) });
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-12/);
+  check(errors.length === 0, `${id}: December page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+{
+  const first = (id) => report.find((e) => e.december === id)?.traditions.first.join();
+  check(first('okafor') !== first('brooks'), `December: a toddler family and a school-age family got the same ideas (${first('okafor')})`);
+}
+
+// A family that's already done most of Christmas, opening the kit mid-December: still useful, nothing overdue.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.clock.setFixedTime(new Date('2027-12-15T19:00:00'));
+  await page.goto(decUrl('chen'));
+  await page.getByRole('heading', { name: 'Our Family Christmas Plan' }).waitFor();
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  for (const [i, who] of [[0, 'Everyone'], [1, 'Mei'], [2, 'David']]) {
+    await lines.nth(i).locator('input[type="checkbox"]').check();
+    await page.getByPlaceholder('Who’s helping?').nth(i).fill(who);
+  }
+  await page.getByText('3 of 5 done').waitFor();
+  const text = await page.locator('main').textContent();
+  check(!/overdue|too late|missed|already passed|deadline/i.test(text), 'mid-December: the kit reads as late or overdue');
+  check(/Already made your plans\? Use this as a quick family check-in\./.test(text), 'mid-December: no check-in note for a family already planned');
+  await page.screenshot({ path: join(out, 'chen-december-mid-month.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Find Our Christmas Traditions', exact: true }).click();
+  await page.locator('.tp-card').nth(2).waitFor();
+  report.push({ midDecember: { done: 3, picker: await cardNames(page) } });
+  await ctx.close();
+}
+
+// No family profile at all: the picker still works on its own, with defaults and no handoff.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/traditions-picker?sample=new`);
+  await page.locator('.tp-card').nth(2).waitFor();
+  check(/Tap any/.test(await page.locator('[data-tp-ages-note]').textContent()), 'no profile: the picker claims ages from a profile');
+  await page.getByRole('button', { name: 'Under 5' }).click();
+  const toddler = await page.locator('.tp-card [data-tp-kids]').allTextContents();
+  report.push({ noProfile: { names: await cardNames(page), kids: toddler } });
+  check(toddler.length === 3, 'no profile: picking an age broke the ideas');
+  await ctx.close();
+}
+
+// Two families in one browser, December: one family's kept traditions never show in the other's picker.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(decUrl('rivera'));
+  await page.getByRole('button', { name: 'Find Our Christmas Traditions', exact: true }).click();
+  await page.locator('.tp-card').nth(2).waitFor();
+  await page.locator('.tp-card').nth(0).getByRole('checkbox').check();
+  await page.locator('[data-tp-family]').fill('Rivera Party of Five');
+  const riveraNote = await page.locator('[data-tp-ages-note]').textContent();
+  await page.goto(decUrl('okafor'));
+  await page.getByRole('button', { name: 'Find Our Christmas Traditions', exact: true }).click();
+  await page.locator('.tp-card').nth(2).waitFor();
+  check(await page.locator('.tp-card.is-kept').count() === 0, 'leak: Rivera’s kept tradition shows in the Okafors’ picker');
+  check((await page.locator('[data-tp-sheet-family]').textContent()).trim() === 'The Okafors', 'leak: the Okafors’ printout has another family’s name');
+  check(await page.locator('[data-tp-ages-note]').textContent() !== riveraNote, 'leak: the Okafors’ picker has Rivera’s ages');
+  await page.goto(`${base}/club/tools/traditions-picker?sample=okafor`);
+  await page.locator('.tp-card').nth(2).waitFor();
+  check(await page.locator('.tp-card.is-kept').count() === 0 && !(await page.locator('[data-tp-sheet-family]').textContent()).includes('Rivera'), 'leak: the picker opened from its address carries a family over');
+  report.push({ decemberLeakCheck: 'ok' });
+  await ctx.close();
+}
+
 // Two families in one browser: nothing one does shows up in the other's kit or tools.
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -381,6 +564,7 @@ for (const id of [...samples, 'hughes']) {
   await page.getByRole('button', { name: 'Make a Family Chore Chart', exact: true }).click();
   await page.locator('section[aria-labelledby="club-tool"] .btn-secondary').first().click();
   await page.waitForSelector('#chore-chart');
+  await page.waitForFunction(() => document.querySelector('[data-cc-name]')?.value);
   const riveraKid = await page.inputValue('[data-cc-name]');
   // Brooks, same browser: their own reset, and a chore chart opened straight from its address carries nobody over.
   await page.goto(`${base}/club/kits/2027-10-home-works-together?sample=brooks`);

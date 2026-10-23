@@ -12,6 +12,8 @@ export type Day = string;
 
 export interface CountdownItem {
   text: string;
+  /** A sentence under the line (December's plan: "Pick two or three Christmas traditions…"). Her own wording replaces both. */
+  detail?: string;
   /** Suggested days before the first day of school (a countdown; a plain checklist has none). */
   daysBefore?: number;
   /** Still worth doing when school starts in a day or two. */
@@ -211,6 +213,8 @@ export function readCountdown(json: unknown, lines: number): CountdownState {
 
 /** A line's words: hers when she changed them, else the kit's. */
 export const lineText = (items: readonly CountdownItem[], s: CountdownState, i: number) => s.texts[i] ?? items[i].text;
+/** The line's detail sentence, unless she's reworded the line (her words replace both). */
+export const lineDetail = (items: readonly CountdownItem[], s: CountdownState, i: number) => (s.texts[i] === null ? items[i].detail : undefined);
 
 /** The countdown (or checklist) as plain text, to paste into a note or a message. */
 export function countdownText(title: string, items: readonly CountdownItem[], plan: CountdownPlan, s: CountdownState): string {
@@ -219,7 +223,8 @@ export function countdownText(title: string, items: readonly CountdownItem[], pl
     const l = plan.lines[i];
     const when = l.date ? `${shortLabel(l.date)}: ` : l.later ? 'When you can: ' : '';
     const who = s.helpers[i].trim() ? ` (${s.helpers[i].trim()})` : '';
-    return `${s.done[i] ? '[x]' : '[ ]'} ${when}${lineText(items, s, i)}${who}`;
+    const detail = lineDetail(items, s, i);
+    return `${s.done[i] ? '[x]' : '[ ]'} ${when}${lineText(items, s, i)}${detail ? ` ${detail}` : ''}${who}`;
   });
   return [...head, ...rows].join('\n');
 }

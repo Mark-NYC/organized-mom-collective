@@ -35,12 +35,12 @@ Every card in `src/data/responsibilities.ts` is an item automatically (`cardItem
 
 ## Tools: reuse the site's, never copy them
 
-A kit's tool is always one of the site's own tools, opened inside the Club. There is one implementation: improve it on the site and every kit gets it. Two so far: the routine chart (August) and the chore chart (October). The pattern:
+A kit's tool is always one of the site's own tools, opened inside the Club. There is one implementation: improve it on the site and every kit gets it. Three so far: the routine chart (August), the chore chart (October) and the Family Christmas Traditions Picker (December, a new site tool with no public page yet). The pattern:
 
 1. **The tool is one component with one behavior module** that the public page and the Club page both render (`RoutineChart.astro` + `routine-chart.ts`; `ChoreChart.astro` + `chore-chart.ts`, extracted from `/chore-chart` on 2026-10-23). If a tool still lives inside its public page, extract it first, then check the public page is unchanged. Shared handoff behavior (saved-copy check, age-ordered picker): `src/components/site/tool-handoff-ui.ts`.
 2. **A handoff mode on the component** (`handoff` prop): it reads `readToolHandoff(id)` (`src/lib/tool-handoff.ts`) for a child's first name and age and a starting choice, keeps a separate saved copy per handoff key, and otherwise behaves exactly as on the public page. Public pages never set it.
 3. **A Club page** at `src/pages/club/tools/<id>.astro`: `ClubLayout` (noindex, no trackers, no site navigation), `ClubToolBar` (member header, back to the kit, whose it is) and the public component with `handoff`. Off behind `PUBLIC_CLUB_ENABLED` like every /club page.
-4. **List it** in `src/data/club/tools.ts` (`path`, `publicPath`, `perChild`, starting `variants`, `title`, `intro`), and name it in the kit's `tool`. The kit's button asks who it's for (one child: opens straight away; none: opens as any visitor sees it), calls `setToolHandoff()` and goes to the Club page. Names travel in this tab's sessionStorage, never in the URL; Club pages other than a tool's clear it, and saved copies are keyed by household, so families never share a chart. A public tool's own extras that don't belong to members stay on the public page (the chore chart's email-before-download is keyed to `/chore-chart`).
+4. **List it** in `src/data/club/tools.ts` (`path`, `publicPath` (null while there's no public page), `perChild`, starting `variants`, `familyAges` for a family tool that takes the children's ages and the family's name, `title`, `intro`), and name it in the kit's `tool`. The kit's button asks who it's for (one child: opens straight away; none: opens as any visitor sees it), calls `setToolHandoff()` and goes to the Club page. Names travel in this tab's sessionStorage, never in the URL; Club pages other than a tool's clear it, and saved copies are keyed by household, so families never share a chart. A public tool's own extras that don't belong to members stay on the public page (the chore chart's email-before-download is keyed to `/chore-chart`).
 5. **Check the public page didn't change:** same markup and the same behavior on desktop and mobile (steps, picker, reordering, saving, download, analytics events). `tests/tool-sharing.test.ts` fails if a Club copy of a tool appears.
 
 The hosted preview (`scripts/build-club-preview.mjs`) embeds each Club tool page's built markup and wires it with the same module.
@@ -52,6 +52,10 @@ The hosted preview (`scripts/build-club-preview.mjs`) embeds each Club tool page
 ## October, as built
 
 `src/data/club/kits/2027-10-home-works-together.ts`: the letter (draft), Our Fall Home Reset (`kind: 'checklist'`, five lines, editable wording, no dates), and the site's chore chart (`tool: 'chore-chart'`, `start: 'one-job'`), opened for anyone she picks, grown-ups included, with one job to start. Same page, print and letter components as August.
+
+## December, as built
+
+`src/data/club/kits/2027-12-christmas-family-affair.ts`: the letter (draft), Our Family Christmas Plan (`kind: 'checklist'`, five lines each with a `detail` sentence, an `action.note` for families already planned, editable wording, no dates), and the Family Christmas Traditions Picker (`tool: 'traditions-picker'`), opened once for the whole family with the children's ages (`ToolHandoff.ages`). `mailer.accent: 'evergreen'` adds the letter's sprig and muted evergreen and clay colors. Same page, print and letter components as August and October.
 
 ## Test households (every kit, every month)
 

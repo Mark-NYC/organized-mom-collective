@@ -851,3 +851,98 @@
   font-size: 11pt;
   line-height: 1.5;
 }
+
+/* A line's detail sentence (December's plan), under its words. */
+.club-action-detail {
+  display: block;
+  margin-top: 0.02in;
+  font-size: 9pt;
+  line-height: 1.3;
+  color: #6e6461;
+}
+.club-action-sheet .club-action-detail {
+  font-size: 11pt;
+}
+.club-letter-action-note {
+  margin-top: 0.03in;
+  font-family: var(--font-serif);
+  font-size: 9.5pt;
+  font-style: italic;
+  line-height: 1.35;
+  color: #5c5550;
+}
+.club-action-sheet-tip {
+  font-style: italic;
+}
+
+/* December's seasonal touch: one fine evergreen sprig, muted evergreen and soft clay instead of sage and rose. */
+.club-sprig {
+  display: block;
+  width: 1.15in;
+  height: 0.46in;
+  margin: 0.2in 0 -0.12in;
+}
+.club-sprig-small {
+  display: inline-block;
+  width: 0.62in;
+  height: 0.25in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.02in;
+}
+.club-print[data-accent='evergreen'] .club-letter-subtitle {
+  color: #a0705c;
+}
+.club-print[data-accent='evergreen'] .club-letter-action,
+.club-print[data-accent='evergreen'] .club-letter-conversation {
+  background: #eef1eb;
+  border-top-color: #6f8a72;
+}
+.club-print[data-accent='evergreen'] .club-action-row {
+  border-bottom-color: #dbe2d6;
+}
+.club-print[data-accent='evergreen'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='evergreen'] .club-letter-calendar {
+  background: #f6ede6;
+}
+
+/* December's front carries a longer plan (a sentence under each decision): a slightly tighter letter so it fits. */
+.club-letter[data-accent='evergreen'] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-accent='evergreen'] .club-letter-subtitle {
+  font-size: 13pt;
+}
+.club-letter[data-accent='evergreen'] .club-letter-body {
+  margin-top: 0.14in;
+  font-size: 10.6pt;
+  line-height: 1.4;
+}
+.club-letter[data-accent='evergreen'] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-accent='evergreen'] .club-letter-signature {
+  font-size: 18pt;
+}
+.club-letter[data-accent='evergreen'] .club-letter-signoff {
+  margin-bottom: 0.08in;
+}
+.club-letter[data-accent='evergreen'] .club-letter-action {
+  padding-top: 0.1in;
+}
+.club-letter[data-accent='evergreen'] .club-letter-action .club-action-row {
+  grid-template-columns: 0.22in 1fr 1.25in;
+  padding: 0.035in 0;
+  font-size: 10pt;
+}
+.club-letter .club-action-detail {
+  font-size: 8.4pt;
+}
+.club-letter[data-accent='evergreen'] .club-sprig:not(.club-sprig-small) {
+  width: 0.95in;
+  height: 0.38in;
+  margin: 0.12in 0 0;
+}

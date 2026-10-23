@@ -13,12 +13,14 @@ export interface ClubTool {
   id: string;
   /** The Club page that hosts it. */
   path: string;
-  /** The public page with the same tool (the source of truth for how it works). */
-  publicPath: string;
+  /** The public page with the same tool, or null while it's a Club-only tool (the component is still the site's). */
+  publicPath: string | null;
   /** Opened for one person at a time: the kit asks who it's for. */
   perChild: boolean;
   /** Who the kit offers: children (3 and up) only, or the grown-ups too. */
   people?: 'children' | 'everyone';
+  /** A family tool (not per person) that gets the children's ages from the family profile. */
+  familyAges?: true;
   /** Starting choices the kit can offer before opening (the tool's own ids). */
   variants?: { id: string; label: string }[];
   /** Its name on the Club page ("Sofia’s chore chart"), lowercase after the name. */
@@ -48,6 +50,16 @@ export const clubTools = {
     people: 'everyone',
     title: 'Chore chart',
     intro: 'Add more jobs only when the first one sticks, or use the full week of chores for their age. Change anything, then download it to print. It saves in this browser.',
+  },
+  'traditions-picker': {
+    id: 'traditions-picker',
+    path: routes.clubTool('traditions-picker'),
+    // No public page yet: the component is a site tool (src/components/site/TraditionsPicker.astro), ready for one.
+    publicPath: null,
+    perChild: false,
+    familyAges: true,
+    title: 'Family Christmas Traditions Picker',
+    intro: 'Answer what you like and skip the rest. Keep one to three ideas, swap the others, then print or copy your picks. It saves in this browser.',
   },
 } satisfies Record<string, ClubTool>;
 

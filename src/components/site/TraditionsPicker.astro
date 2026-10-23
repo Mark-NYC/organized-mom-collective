@@ -1,0 +1,256 @@
+---
+/**
+ * The Family Christmas Traditions Picker (markup, styles, printable): a few optional questions (children's ages, time,
+ * budget, at home or out), three suggestions straight away, "We’ll do this" on one to three of them, swap any other,
+ * then download the picks to print (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×) or copy them as text.
+ * Ideas and rules: src/data/christmas-traditions.ts. Behavior: traditions-picker.ts beside it, one module for every
+ * page with this picker (today the Organized Family Club's /club/tools/traditions-picker; a public page can host the
+ * same component without a handoff). Classes are prefixed `tp-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { ageOptions, costOptions, settingOptions, timeOptions, TRADITIONS_REMINDER } from '../../data/christmas-traditions';
+
+interface Props {
+  storageKey: string;
+  /**
+   * Opened for a family by another page (src/lib/tool-handoff.ts; the Organized Family Club): its own saved picks,
+   * the children's ages from the family profile, the family's name on the printout. Public pages never set it.
+   */
+  handoff?: boolean;
+  /** The line at the foot of the printout. */
+  brand?: string;
+}
+
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+---
+
+<div class="tp" data-tp-key={storageKey} data-tp-handoff={handoff ? '' : undefined}>
+  <form class="tp-form" data-tp-form>
+    <fieldset class="tp-q">
+      <legend>Children’s ages</legend>
+      <p class="tp-q-note" data-tp-ages-note>Tap any that apply, or skip it.</p>
+      <div class="tp-options" data-tp-ages>
+        {ageOptions.map((o) => <button type="button" class="tp-option" data-tp-age={o.id} aria-pressed="false">{o.label}</button>)}
+      </div>
+    </fieldset>
+    <fieldset class="tp-q">
+      <legend>Time you have</legend>
+      <div class="tp-options">
+        {timeOptions.map((o) => <button type="button" class="tp-option" data-tp-time={o.id} aria-pressed={o.id === 'hour' ? 'true' : 'false'}>{o.label}</button>)}
+      </div>
+    </fieldset>
+    <fieldset class="tp-q">
+      <legend>Budget</legend>
+      <div class="tp-options">
+        {costOptions.map((o) => <button type="button" class="tp-option" data-tp-cost={o.id} aria-pressed={o.id === 'under-25' ? 'true' : 'false'}>{o.label}</button>)}
+      </div>
+    </fieldset>
+    <fieldset class="tp-q">
+      <legend>Where</legend>
+      <div class="tp-options">
+        {settingOptions.map((o) => <button type="button" class="tp-option" data-tp-setting={o.id} aria-pressed={o.id === 'either' ? 'true' : 'false'}>{o.label}</button>)}
+      </div>
+    </fieldset>
+  </form>
+
+  <p class="tp-reminder">{TRADITIONS_REMINDER}</p>
+
+  <section class="tp-results" aria-labelledby="tp-results-h">
+    <h2 id="tp-results-h" class="tp-results-title">Three ideas for your family</h2>
+    <p class="tp-results-note">Tick <strong>We’ll do this</strong> on one, two or all three. Swap any you don’t love.</p>
+    <ol class="tp-list" data-tp-list></ol>
+    <p class="tp-status" data-tp-status role="status" aria-live="polite"></p>
+  </section>
+
+  <template data-tp-card>
+    <li class="tp-card">
+      <div class="tp-card-head">
+        <h3 class="tp-card-name" data-tp-name></h3>
+        <p class="tp-card-meta" data-tp-meta></p>
+      </div>
+      <p class="tp-card-about" data-tp-about></p>
+      <p class="tp-card-kids"><span>Kids can</span> <span data-tp-kids></span></p>
+      <div class="tp-card-actions">
+        <label class="tp-keep"><input type="checkbox" data-tp-keep /> We’ll do this</label>
+        <button type="button" class="tp-swap" data-tp-swap>Swap this idea</button>
+      </div>
+    </li>
+  </template>
+
+  <section class="tp-out" aria-labelledby="tp-out-h">
+    <h2 id="tp-out-h" class="tp-results-title">Print or copy your traditions</h2>
+    <label class="tp-family">
+      <span>Family name on the printout (optional)</span>
+      <input type="text" data-tp-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" />
+    </label>
+    <fieldset class="tp-palette">
+      <legend>Choose your colors</legend>
+      <div class="tp-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="tp-palette-option" data-tp-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+            <span class="tp-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+    <div class="tp-buttons">
+      <button type="button" class="tp-btn tp-btn-primary" data-tp-download>Download to print</button>
+      <button type="button" class="tp-btn" data-tp-copy>Copy as text</button>
+    </div>
+    <textarea class="tp-copy-fallback" data-tp-copy-fallback readonly rows="10" hidden aria-label="Your traditions as text"></textarea>
+    <p class="tp-calendar">Write your traditions on the family wall calendar, and leave some open space, too.</p>
+
+    <p class="tp-sheet-hint" data-tp-sheet-hint>Your printout appears here once you tick “We’ll do this” on an idea.</p>
+    <div class="tp-sheet-wrap">
+      <div class="tp-sheet" id="traditions-sheet" data-tp-sheet>
+        <div class="tp-sheet-family" data-tp-sheet-family></div>
+        <div class="tp-sheet-title"><span class="tp-swipe">Our Christmas Traditions</span></div>
+        <p class="tp-sheet-sub">A few things we’ll enjoy together this year</p>
+        <ol class="tp-sheet-list" data-tp-sheet-list></ol>
+        <div class="tp-sheet-foot">
+          <p class="tp-sheet-reminder">{TRADITIONS_REMINDER}</p>
+          <p class="tp-sheet-cal">Put them on the family calendar. Leave some open space, too.</p>
+          <p class="tp-sheet-brand">{brand}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .tp {
+    --tp-ink: var(--color-warm-ink);
+    --tp-soft: var(--color-warm-soft);
+    --tp-rule: var(--color-warm-rule);
+    --tp-a1: #EFEBE7; --tp-a2: #E6EEEA; --tp-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--tp-ink);
+  }
+  .tp *, .tp *::before, .tp *::after { box-sizing: border-box; }
+
+  /* Questions: underlined text choices (docs/brand/TOOL-OUTPUT-DESIGN.md → Controls around the output). */
+  .tp-form { display: grid; gap: 14px; }
+  .tp-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .tp-q legend, .tp-palette legend, .tp-family > span {
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--tp-soft);
+  }
+  .tp-q-note { margin: 2px 0 0; font-size: 0.85rem; color: var(--tp-soft); }
+  .tp-options { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  .tp-option {
+    min-height: 44px;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    color: var(--tp-soft);
+    cursor: pointer;
+  }
+  .tp-option[aria-pressed='true'] { border-bottom-color: var(--tp-ink); color: var(--tp-ink); font-weight: 600; }
+  .tp-option:focus-visible, .tp-swap:focus-visible, .tp-palette-option:focus-visible, .tp-btn:focus-visible { outline: 2px solid var(--tp-ink); outline-offset: 3px; }
+
+  .tp-reminder {
+    margin: 22px 0 0;
+    padding: 12px 16px;
+    border-left: 3px solid #7d917c;
+    background: #eef2ec;
+    font-family: var(--font-serif);
+    font-style: italic;
+    line-height: 1.45;
+  }
+
+  .tp-results, .tp-out { margin-top: 28px; }
+  .tp-results-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; color: var(--tp-ink); }
+  .tp-results-note { margin-top: 4px; font-size: 0.95rem; color: var(--tp-soft); }
+  .tp-list { display: grid; gap: 12px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .tp-card { padding: 16px 18px 10px; background: #fff; border: 1px solid var(--tp-rule); border-radius: 4px; }
+  .tp-card.is-kept { border-color: #7d917c; box-shadow: inset 3px 0 0 #7d917c; }
+  .tp-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; }
+  .tp-card-name { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; line-height: 1.25; }
+  .tp-card-meta { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; color: var(--tp-soft); }
+  .tp-card-about { margin-top: 6px; line-height: 1.5; }
+  .tp-card-kids { margin-top: 6px; font-size: 0.95rem; line-height: 1.45; color: var(--tp-ink); }
+  .tp-card-kids > span:first-child { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7f6a; }
+  .tp-card-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 18px; margin-top: 6px; }
+  .tp-keep { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; }
+  .tp-keep input { width: 22px; height: 22px; accent-color: #7d917c; }
+  .tp-swap { min-height: 44px; border: 0; background: none; font-size: 0.9rem; color: var(--tp-soft); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .tp-swap[hidden] { display: none; }
+  .tp-status { min-height: 1.4em; margin-top: 8px; font-size: 0.92rem; color: var(--tp-soft); }
+
+  .tp-family { display: grid; gap: 6px; max-width: 360px; margin-top: 12px; }
+  .tp-family input { min-height: 46px; padding: 0 12px; border: 1px solid var(--tp-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--tp-ink); }
+  .tp-palette { margin: 14px 0 0; padding: 0; border: 0; }
+  .tp-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .tp-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--tp-ink); cursor: pointer; }
+  .tp-palette-option[aria-pressed='true'] { border-bottom-color: var(--tp-ink); font-weight: 600; }
+  .tp-swatches { display: flex; }
+  .tp-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .tp-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .tp-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .tp-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .tp-btn:disabled { opacity: 0.6; cursor: wait; }
+  .tp-copy-fallback { display: block; width: 100%; margin-top: 10px; padding: 8px; border: 1px solid var(--tp-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+  .tp-copy-fallback[hidden] { display: none; }
+  .tp-calendar { margin-top: 10px; font-family: var(--font-serif); font-style: italic; color: var(--tp-soft); }
+
+  /* The printout: US Letter portrait (8.5 × 11 in at 96 px/in), scaled to fit a phone on screen. */
+  .tp-sheet-wrap { margin-top: 18px; overflow: hidden; }
+  .tp-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 816px;
+    height: 1056px;
+    padding: 56px 64px 44px;
+    background: #fff;
+    border: 1px solid var(--tp-rule);
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+    color: #3d3834;
+    transform-origin: top left;
+  }
+  .tp-sheet-family { min-height: 18px; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--tp-soft); text-align: center; }
+  .tp-sheet-title { margin-top: 10px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 46px; font-weight: 700; line-height: 1.1; }
+  .tp-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--tp-a1) 52%, var(--tp-a1) 92%, transparent 92%); }
+  .tp-sheet-sub { margin-top: 8px; text-align: center; font-size: 17px; font-style: italic; color: #5c5550; }
+  .tp-sheet-list { display: grid; gap: 22px; margin: 34px 0 0; padding: 0; list-style: none; }
+  .tp-sheet-item { display: grid; grid-template-columns: 46px 1fr; gap: 18px; padding: 18px 20px; border: 2px solid var(--tp-a2); border-radius: 14px; }
+  /* A real number, not a CSS counter: the download's copy of the page doesn't keep counters. */
+  .tp-sheet-num { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--tp-a3); font-family: 'Kalam', var(--font-serif); font-size: 24px; font-weight: 700; }
+  .tp-sheet-name { font-size: 22px; font-weight: 600; line-height: 1.2; }
+  .tp-sheet-meta { margin-top: 2px; font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tp-soft); }
+  .tp-sheet-about { margin-top: 6px; font-size: 15px; line-height: 1.45; }
+  .tp-sheet-kids { margin-top: 6px; font-size: 15px; line-height: 1.4; }
+  .tp-sheet-kids b { font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7f6a; }
+  .tp-sheet-lines { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 12px; }
+  .tp-sheet-lines span { display: block; padding-top: 18px; border-bottom: 1px solid #b9b0a8; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tp-soft); }
+  .tp-sheet-hint { margin-top: 14px; font-size: 0.92rem; color: var(--tp-soft); }
+  .tp-sheet-hint[hidden], .tp-sheet-wrap[hidden] { display: none; }
+  .tp-sheet-foot { margin-top: auto; text-align: center; }
+  .tp-sheet-reminder { font-family: 'Kalam', var(--font-serif); font-size: 20px; font-weight: 700; line-height: 1.35; }
+  .tp-sheet-cal { margin-top: 6px; font-size: 15px; font-style: italic; color: #5c5550; }
+  .tp-sheet-brand { margin-top: 18px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f89; }
+  /* While downloading: the sheet at its real size. */
+  .tp-exporting .tp-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initTraditionsPicker } from './traditions-picker';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.tp')) {
+    initTraditionsPicker(host, host.hasAttribute('data-tp-handoff') ? readToolHandoff('traditions-picker') : null);
+  }
+</script>

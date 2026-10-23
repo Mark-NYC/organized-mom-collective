@@ -15,6 +15,8 @@ export interface ToolHandoff {
   /** First name, shown on the tool's output (a chart title). */
   name?: string;
   age?: number;
+  /** A family tool's children's ages (the traditions picker), youngest first. */
+  ages?: number[];
   /** The tool's own starting choice, e.g. 'morning' or 'afterschool'. */
   variant?: string;
   /** Where "Back" goes. */
@@ -57,6 +59,7 @@ export function readToolHandoff(tool: string): ToolHandoff | null {
     key: o.key,
     ...(name ? { name } : {}),
     ...(typeof o.age === 'number' && Number.isInteger(o.age) && o.age >= 0 && o.age < 30 ? { age: o.age } : {}),
+    ...(Array.isArray(o.ages) && o.ages.length ? { ages: o.ages.filter((a): a is number => Number.isInteger(a) && a >= 0 && a < 30).slice(0, 12).sort((a, b) => a - b) } : {}),
     ...(typeof o.variant === 'string' && ID.test(o.variant) ? { variant: o.variant } : {}),
     ...(back ? { back } : {}),
   };

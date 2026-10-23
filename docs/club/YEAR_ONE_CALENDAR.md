@@ -124,6 +124,16 @@ The first kit in the three-part shape every month now follows (owner direction, 
 - **Back of the letter:** From Helping Mom to Owning a Job: three principles, one example, the family question, the QR code, and one calendar note.
 - **Not November:** October resets the physical home and starts one owned job each; November (Our Family, Our Team) builds ongoing shared responsibilities and follow-through.
 
+### December: Christmas Is a Family Affair (built 2026-10-23, behind the flag)
+
+*More together. Less on Mom.* Owner direction, 2026-10-23: replaces the planned "Make Room for What Matters" (Holiday Teamwork Planner) above for 2027. Config: `src/data/club/kits/2027-12-christmas-family-affair.ts`. Mailer: [mailers/2027-12-christmas-family-affair.md](mailers/2027-12-christmas-family-affair.md).
+
+- **The letter:** You Get to Enjoy Christmas, Too (about 180 words): loving Christmas doesn't mean carrying all of it; a Christmas the family makes together isn't a lesser one. Asks "What's one thing we could each do to make Christmas special for someone else?" A draft for Megan.
+- **The action:** Our Family Christmas Plan, five decisions (what matters, dates on the calendar, gift preparations, one way to give, Christmas-week jobs), each with its sentence and a "Who's helping?" blank, wording she can change. No dates or deadlines; "Already made your plans?" turns it into a check-in, so it works in late November or mid-December.
+- **The tool:** the Family Christmas Traditions Picker, a new site tool (nothing on the site did this), opened with the children's ages: three ideas that fit the family's time, budget and ages; keep up to three, swap the rest, print or copy.
+- **Back of the letter:** the family question first, Making Christmas Together (three principles), the QR code, one calendar note.
+- **Not October or November:** celebration and sharing the work of it, not a chore system.
+
 ## Monthly production calendar (per kit)
 
 See [IMPLEMENTATION_PLAN.md → Monthly fulfillment lifecycle](IMPLEMENTATION_PLAN.md#6-monthly-fulfillment-lifecycle). In short: brief 10 weeks out, config and letter 8 weeks out, mailer locked 6 weeks out, cutoff the 15th of the month before, mail drop around the 20th, kit opens the 1st.

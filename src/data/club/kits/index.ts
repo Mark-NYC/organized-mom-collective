@@ -9,8 +9,9 @@ import { clubToolById } from '../tools';
 import { kit as november2026 } from './2026-11-family-ownership';
 import { kit as august2027 } from './2027-08-school-year';
 import { kit as october2027 } from './2027-10-home-works-together';
+import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, august2027, october2027];
+export const kits: readonly KitConfig[] = [november2026, august2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 
@@ -93,6 +94,7 @@ export function kitProblems(kit: KitConfig): string[] {
   if (kit.action) {
     if (kit.action.items.length < 3 || kit.action.items.length > 8) out.push('action: 3–8 lines (one small action, not a project)');
     if (kit.action.items.some((t) => !t.text.trim() || t.text.length > 90)) out.push('action: each line 1–90 characters');
+    if (kit.action.items.some((t) => t.detail !== undefined && (!t.detail.trim() || t.detail.length > 100))) out.push('action: each detail 1–100 characters');
     if (kit.action.kind === 'countdown') {
       if (kit.action.items.some((t) => !Number.isInteger(t.daysBefore) || t.daysBefore! < 1 || t.daysBefore! > 60)) out.push('action: daysBefore a whole number from 1 to 60');
       if (!kit.action.items.some((t) => t.essential)) out.push('action: mark the essentials (what still matters a day or two out)');

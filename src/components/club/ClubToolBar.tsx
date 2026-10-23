@@ -12,6 +12,8 @@ export default function ClubToolBar({ tool }: { tool: string }) {
   const [handoff] = useState(() => readToolHandoff(tool));
   const info = clubToolById(tool);
   const title = info?.title ?? 'Tool';
+  // A family tool is the family's, not one person's: its title stays the tool's own.
+  const person = info?.familyAges ? undefined : handoff?.name;
   return (
     <ClubGate page="tool">
       {({ href }) => (
@@ -20,10 +22,11 @@ export default function ClubToolBar({ tool }: { tool: string }) {
             ← Back to {handoff?.back?.label ?? 'your kits'}
           </a>
           <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink sm:text-[2.4rem]">
-            {handoff?.name ? `${handoff.name}’s ${title.toLowerCase()}` : title}
+            {person ? `${person}’s ${title.toLowerCase()}` : title}
           </h1>
           <p className="mt-2 leading-relaxed text-warm-soft">
-            {handoff?.name ? `It starts with ${handoff.name}’s name on it${handoff.age !== undefined ? `, and the jobs suited to age ${handoff.age} come first` : ''}. ` : ''}
+            {person ? `It starts with ${person}’s name on it${handoff?.age !== undefined ? `, and the jobs suited to age ${handoff.age} come first` : ''}. ` : ''}
+            {info?.familyAges && handoff?.ages?.length ? 'Your children’s ages come from your family profile. ' : ''}
             {info?.intro}
           </p>
         </div>
