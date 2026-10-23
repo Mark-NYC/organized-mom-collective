@@ -133,6 +133,17 @@ export const clubTools = {
     title: 'Family Packing & Independence Builder',
     intro: 'Choose where you’re going, who’s coming and how long. Everyone gets their own list, with a short shared one. Change anything, save it for next time, then print. It saves in this browser.',
   },
+  'family-reset': {
+    id: 'family-reset',
+    path: routes.clubTool('family-reset'),
+    // No public page yet: the component is a site tool (src/components/site/FamilyResetBuilder.astro), ready for one.
+    // Not the paid Weekly Reset System (/weekly-reset): this makes a free meeting guide for the wall calendar.
+    publicPath: null,
+    perChild: false,
+    familyPeople: true,
+    title: 'Family Weekly Reset Builder',
+    intro: 'Choose who’s taking part, what makes your weeks complicated and when you’ll meet. Change any step, the question or who leads, then print one page to keep by the calendar. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;

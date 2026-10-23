@@ -1,0 +1,205 @@
+---
+/**
+ * The Family Weekly Reset Builder (markup, styles, printout): who's taking part, what makes the family's weeks
+ * complicated, and when it meets; then a 15-minute meeting guide in five steps around the wall calendar, how each
+ * person takes part at their age, one question, and who leads. Everything can be changed: reword, retime, reorder,
+ * remove steps, add one question of the family's own, change the leader or the day. Prints one US Letter page (8.5 ×
+ * 11 in at 96 px/in, drawn at 2×) to keep by the calendar, in a clear sleeve if you like. Not a planner: the week's plan
+ * stays on the wall calendar. Rules: src/data/family-reset.ts. Behavior: family-reset-builder.ts beside it (today the
+ * Club's /club/tools/family-reset; a public page can host the same component without a handoff). Classes are prefixed
+ * `fr-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { concernOptions, dayOptions, leadershipOptions } from '../../data/family-reset';
+import HelpersEditor from './HelpersEditor.astro';
+
+interface Props {
+  storageKey: string;
+  /** Opened for a family by another page (src/lib/tool-handoff.ts): its own saved guide, the family as people, its name on the guide. */
+  handoff?: boolean;
+  brand?: string;
+}
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+---
+
+<div class="fr" data-fr-key={storageKey} data-fr-handoff={handoff ? '' : undefined} data-fr-brand={brand}>
+  <form class="fr-form">
+    <fieldset class="fr-q">
+      <legend><span class="fr-n">1</span> Who’s taking part?</legend>
+      <p class="fr-q-note" data-fr-people-note>Everyone who usually joins. Not everyone has to be there every week.</p>
+      <HelpersEditor />
+    </fieldset>
+    <fieldset class="fr-q">
+      <legend><span class="fr-n">2</span> What makes your weeks complicated?</legend>
+      <p class="fr-q-note">Choose any. They shape the questions, nothing more.</p>
+      <div class="fr-checks">
+        {concernOptions.map((c) => <label class="fr-check"><input type="checkbox" data-fr-concern={c.id} /> {c.label}</label>)}
+      </div>
+      <label class="fr-field" data-fr-other-box hidden><span>Something else</span><input type="text" data-fr-other maxlength="40" placeholder="e.g. shared custody weeks" /></label>
+    </fieldset>
+    <fieldset class="fr-q">
+      <legend><span class="fr-n">3</span> When will your family meet?</legend>
+      <div class="fr-options">
+        {dayOptions.map((d) => <button type="button" class="fr-option" data-fr-day={d.id} aria-pressed={d.id === 'sunday' ? 'true' : 'false'}>{d.label}</button>)}
+      </div>
+      <div class="fr-when">
+        <label class="fr-field" data-fr-other-day-box hidden><span>Which day?</span><input type="text" data-fr-other-day maxlength="20" placeholder="e.g. Thursday" /></label>
+        <label class="fr-field"><span>Time (optional)</span><input type="time" data-fr-time /></label>
+      </div>
+    </fieldset>
+    <fieldset class="fr-q">
+      <legend><span class="fr-n">4</span> Who leads?</legend>
+      <p class="fr-q-note">It doesn’t have to be Mom. A young child can lead by asking the first question.</p>
+      <div class="fr-options">
+        {leadershipOptions.map((l) => <button type="button" class="fr-option" data-fr-lead={l.id} aria-pressed={l.id === 'rotate' ? 'true' : 'false'} title={l.hint}>{l.label}</button>)}
+      </div>
+      <div class="fr-when" data-fr-leader-box>
+        <label class="fr-field"><span data-fr-leader-label>This week</span><select data-fr-leader></select></label>
+        <label class="fr-field" data-fr-next-box><span>Next week</span><select data-fr-next></select></label>
+      </div>
+      <p class="fr-q-note" data-fr-leader-note></p>
+    </fieldset>
+  </form>
+
+  <section class="fr-plan" aria-labelledby="fr-plan-h">
+    <h2 id="fr-plan-h" class="fr-title">Your 15-minute meeting</h2>
+    <p class="fr-timing" data-fr-timing></p>
+    <ol class="fr-steps" data-fr-steps></ol>
+    <label class="fr-field fr-wide"><span>The question for this week</span><input type="text" data-fr-question maxlength="100" /></label>
+    <label class="fr-field fr-wide"><span>A question of your own (optional)</span><input type="text" data-fr-own maxlength="100" placeholder="e.g. What’s one thing we’re celebrating?" /></label>
+    <div class="fr-plan-tools">
+      <button type="button" class="fr-link" data-fr-fresh>New suggestions (keeps your changes)</button>
+    </div>
+    <p class="fr-status" data-fr-status role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="fr-out" aria-labelledby="fr-out-h">
+    <h2 id="fr-out-h" class="fr-title">Print your guide</h2>
+    <p class="fr-q-note">One page to keep beside the wall calendar. A clear sleeve makes it last all year.</p>
+    <label class="fr-field"><span>Family name on the guide (optional)</span>
+      <input type="text" data-fr-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" /></label>
+    <fieldset class="fr-palette">
+      <legend>Choose your colors</legend>
+      <div class="fr-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="fr-palette-option" data-fr-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+            <span class="fr-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+    <div class="fr-buttons">
+      <button type="button" class="fr-btn fr-btn-primary" data-fr-download>Download the guide</button>
+      <button type="button" class="fr-btn" data-fr-copy>Copy as text</button>
+    </div>
+    <textarea class="fr-copy-fallback" data-fr-copy-fallback readonly rows="12" hidden aria-label="Your guide as text"></textarea>
+    <div class="fr-sheets" data-fr-sheets></div>
+  </section>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .fr {
+    --fr-ink: var(--color-warm-ink);
+    --fr-soft: var(--color-warm-soft);
+    --fr-rule: var(--color-warm-rule);
+    --fr-a1: #EFEBE7; --fr-a2: #E6EEEA; --fr-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--fr-ink);
+  }
+  .fr *, .fr *::before, .fr *::after { box-sizing: border-box; }
+  .fr [hidden] { display: none !important; }
+  .fr-form { display: grid; gap: 22px; }
+  .fr-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .fr-q legend { padding: 0; font-family: var(--font-serif); font-size: 1.2rem; line-height: 1.3; }
+  .fr-n { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 6px; border-radius: 50%; background: #eef2ec; box-shadow: inset 0 0 0 1px #9aab8f; font-size: 0.9rem; vertical-align: 2px; }
+  .fr-q-note { margin: 4px 0 0; font-size: 0.88rem; color: var(--fr-soft); }
+  .fr-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 0 18px; margin-top: 4px; }
+  .fr-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 0.95rem; }
+  .fr-check input { flex: none; width: 20px; height: 20px; accent-color: #7d917c; }
+  .fr-options { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: 4px; }
+  .fr-option { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 1rem; color: var(--fr-soft); cursor: pointer; }
+  .fr-option[aria-pressed='true'] { border-bottom-color: var(--fr-ink); color: var(--fr-ink); font-weight: 600; }
+  .fr-when { display: flex; flex-wrap: wrap; gap: 0 16px; }
+  .fr-field { display: grid; gap: 6px; max-width: 360px; margin-top: 10px; }
+  .fr-wide { max-width: none; }
+  .fr-field > span, .fr-palette legend { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fr-soft); }
+  .fr-field input, .fr-field select, .fr-step input, .fr-step textarea { min-width: 0; min-height: 44px; padding: 0 10px; border: 1px solid var(--fr-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--fr-ink); }
+  .fr-link { min-height: 44px; padding: 0; border: 0; background: none; font-size: 0.9rem; font-weight: 600; color: var(--fr-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .fr-mv, .fr-x { width: 40px; min-height: 40px; border: 0; background: none; font-size: 1.15rem; line-height: 1; color: var(--fr-soft); cursor: pointer; }
+  .fr-x { font-size: 1.4rem; }
+  .fr-mv:disabled { opacity: 0.25; cursor: default; }
+  .fr-option:focus-visible, .fr-link:focus-visible, .fr-mv:focus-visible, .fr-x:focus-visible, .fr-btn:focus-visible, .fr-palette-option:focus-visible { outline: 2px solid var(--fr-ink); outline-offset: 3px; }
+
+  .fr-plan, .fr-out { margin-top: 30px; }
+  .fr-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .fr-timing { margin-top: 6px; font-size: 0.9rem; color: var(--fr-soft); }
+  .fr-steps { display: grid; gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
+  .fr-step { display: grid; grid-template-columns: minmax(0, 1fr) 4.6rem 40px 40px 40px; gap: 6px; align-items: center; padding: 12px 14px; background: #fff; border: 1px solid var(--fr-rule); border-left: 3px solid #9aab8f; }
+  .fr-step textarea { grid-column: 1 / -1; padding: 8px 10px; resize: vertical; line-height: 1.35; font-size: 0.96rem; }
+  .fr-step .fr-parts { min-height: 64px; font-size: 0.9rem; color: var(--fr-soft); }
+  .fr-step label { display: contents; }
+  .fr-step-title { font-weight: 600; }
+  .fr-plan-tools { margin-top: 10px; }
+  .fr-status { min-height: 1.4em; margin-top: 6px; font-size: 0.92rem; color: var(--fr-soft); }
+  @media (max-width: 600px) {
+    .fr-step { grid-template-columns: minmax(0, 1fr) 3.8rem 34px 34px 34px; padding: 10px; gap: 4px; }
+    .fr-step-title { grid-column: 1 / -1; }
+  }
+
+  .fr-palette { margin: 14px 0 0; padding: 0; border: 0; }
+  .fr-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .fr-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--fr-ink); cursor: pointer; }
+  .fr-palette-option[aria-pressed='true'] { border-bottom-color: var(--fr-ink); font-weight: 600; }
+  .fr-swatches { display: flex; }
+  .fr-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .fr-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .fr-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .fr-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .fr-btn:disabled { opacity: 0.6; cursor: wait; }
+  .fr-copy-fallback { display: block; width: 100%; margin-top: 10px; padding: 8px; border: 1px solid var(--fr-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+
+  /* The printout: one US Letter page, scaled to fit a phone on screen. Generous white space; no writing grids. */
+  .fr-sheets { display: grid; gap: 16px; margin-top: 16px; }
+  .fr-sheet-wrap { overflow: hidden; }
+  .fr-sheet { display: flex; flex-direction: column; width: 816px; height: 1056px; padding: 52px 64px 38px; background: #fff; border: 1px solid var(--fr-rule); box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08); font-family: var(--font-serif); color: #3d3834; transform-origin: top left; }
+  .fr-sheet-family { min-height: 16px; text-align: center; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: #6b625c; }
+  .fr-sheet-title { margin-top: 4px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 44px; font-weight: 700; line-height: 1.1; }
+  .fr-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--fr-a1) 52%, var(--fr-a1) 92%, transparent 92%); }
+  .fr-sheet-meta { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 28px; margin-top: 10px; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5c5550; }
+  .fr-sheet-meta b { color: #3d3834; }
+  .fr-sheet-steps { display: grid; gap: 14px; margin: 26px 0 0; padding: 0; list-style: none; }
+  .fr-sheet-step { display: grid; grid-template-columns: 46px 1fr 70px; gap: 14px; align-items: start; }
+  .fr-sheet-num { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--fr-a2); border: 1.5px solid #8a807a; font-family: 'Kalam', var(--font-serif); font-size: 22px; font-weight: 700; }
+  .fr-sheet-step h3 { font-size: 20px; font-weight: 700; line-height: 1.2; }
+  .fr-sheet-step p { margin-top: 3px; font-size: 15px; line-height: 1.4; }
+  .fr-sheet-step ul { margin: 4px 0 0; padding: 0; list-style: none; }
+  .fr-sheet-step li { position: relative; padding-left: 14px; font-size: 13.5px; font-style: italic; line-height: 1.4; color: #5c5550; }
+  .fr-sheet-step li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: #8a807a; }
+  .fr-sheet-min { justify-self: end; padding: 4px 10px; border-radius: 999px; background: var(--fr-a3); border: 1px solid #c9bfb6; font-family: var(--font-sans); font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .fr-sheet-q { margin-top: 22px; padding: 14px 18px; background: var(--fr-a3); border-radius: 8px; }
+  .fr-sheet-q span { display: block; font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #5c5550; }
+  .fr-sheet-q p { margin-top: 4px; font-size: 19px; line-height: 1.35; }
+  .fr-sheet-lead { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 26px; margin-top: 20px; font-family: var(--font-sans); font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #5c5550; }
+  .fr-sheet-lead em { min-width: 170px; padding: 0 6px 2px; border-bottom: 1.5px solid #8a807a; font-family: 'Kalam', var(--font-serif); font-size: 22px; font-style: normal; letter-spacing: 0; text-transform: none; color: #3d3834; }
+  .fr-sheet-lead-note { margin-top: 6px; font-size: 13px; font-style: italic; color: #5c5550; }
+  .fr-sheet-foot { margin-top: auto; padding-top: 14px; text-align: center; }
+  .fr-sheet-cal { font-size: 14.5px; font-style: italic; color: #4d4544; }
+  .fr-sheet-brand { margin-top: 10px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #8a807a; }
+  .fr-sheets.is-compact .fr-sheet-steps { gap: 8px; margin-top: 16px; }
+  .fr-sheets.is-compact .fr-sheet-step p { font-size: 14px; }
+  .fr-exporting .fr-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initFamilyResetBuilder } from './family-reset-builder';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.fr')) {
+    initFamilyResetBuilder(host, host.hasAttribute('data-fr-handoff') ? readToolHandoff('family-reset') : null);
+  }
+</script>

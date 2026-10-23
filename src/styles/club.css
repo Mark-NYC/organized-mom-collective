@@ -1593,3 +1593,75 @@
 .club-letter[data-accent='travel'] .club-letter-action .club-action-row {
   padding: 0.035in 0;
 }
+
+/* September's touch: a fine-line wall calendar page, sage panels, an apricot day. */
+.club-calpage {
+  display: block;
+  flex: none;
+  width: 0.42in;
+  height: 0.42in;
+  margin: 0.12in 0 -0.16in;
+}
+.club-calpage-small {
+  display: inline-block;
+  width: 0.3in;
+  height: 0.3in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.06in;
+}
+.club-print[data-accent='calendar'] .club-letter-action,
+.club-print[data-accent='calendar'] .club-letter-conversation {
+  background: #eef1eb;
+  border-top-color: #9aab8f;
+}
+.club-print[data-accent='calendar'] .club-action-row {
+  border-bottom-color: #dbe2d6;
+}
+.club-print[data-accent='calendar'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='calendar'] .club-letter-calendar,
+.club-print[data-accent='calendar'] .club-letter-tip {
+  background: #f8eee5;
+}
+.club-letter[data-accent='calendar'] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-accent='calendar'] .club-letter-body {
+  margin-top: 0.12in;
+  font-size: 10.6pt;
+  line-height: 1.4;
+}
+.club-letter[data-accent='calendar'] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-accent='calendar'] .club-letter-signature {
+  font-size: 18pt;
+}
+.club-letter[data-accent='calendar'] .club-letter-action .club-action-row {
+  padding: 0.035in 0;
+}
+.club-letter[data-accent='calendar'] .club-letter-back-title {
+  margin-top: 0.2in;
+}
+.club-letter[data-accent='calendar'] .club-letter-tips {
+  gap: 0.04in;
+  margin-top: 0.08in;
+}
+.club-letter[data-accent='calendar'] .club-letter-tips p {
+  font-size: 10.6pt;
+  line-height: 1.38;
+}
+.club-letter[data-accent='calendar'] .club-letter-conversation {
+  margin-top: 0.16in;
+  padding: 0.12in 0.3in;
+}
+.club-letter[data-accent='calendar'] .club-letter-question {
+  font-size: 15pt;
+}
+.club-letter[data-accent='calendar'] .club-letter-invite {
+  margin-top: 0.14in;
+  margin-bottom: 0.12in;
+}

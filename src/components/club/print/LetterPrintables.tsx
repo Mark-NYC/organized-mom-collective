@@ -112,6 +112,18 @@ function Compass({ small }: { small?: boolean }) {
   );
 }
 
+/** September's touch: a fine-line wall calendar page, its week ruled in sage, one day marked in apricot. */
+function CalendarPage({ small }: { small?: boolean }) {
+  return (
+    <svg className={`club-calpage${small ? ' club-calpage-small' : ''}`} viewBox="0 0 40 40" aria-hidden="true" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="7" y="8" width="26" height="26" rx="2" stroke="#6f8a72" strokeWidth="1.3" />
+      <path d="M13 5v6M27 5v6M7 15h26" stroke="#6f8a72" strokeWidth="1.3" />
+      <path d="M13 15v19M20 15v19M27 15v19" stroke="#9aab8f" strokeWidth="0.9" />
+      <rect x="21.5" y="18" width="4" height="4" rx="0.8" fill="#e8c6ab" stroke="#d2a283" strokeWidth="0.9" />
+    </svg>
+  );
+}
+
 /** What she's filled in online, for her own printout: done, who's helping, when (a date, "When you can", or ''), her wording. */
 export interface ActionFill {
   done: boolean[];
@@ -206,6 +218,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
         {kit.mailer.accent === 'school' && <Notebook />}
         {kit.mailer.accent === 'summer' && <Sun />}
         {kit.mailer.accent === 'travel' && <Compass />}
+        {kit.mailer.accent === 'calendar' && <CalendarPage />}
         <h1 className="club-letter-title">{kit.theme}</h1>
         {kit.subtitle && <p className="club-letter-subtitle">{kit.subtitle}</p>}
         <div className="club-letter-body">
@@ -245,6 +258,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           {kit.mailer.accent === 'school' && <Notebook small />}
           {kit.mailer.accent === 'summer' && <Sun small />}
           {kit.mailer.accent === 'travel' && <Compass small />}
+          {kit.mailer.accent === 'calendar' && <CalendarPage small />}
           {kit.mailer.fieldGuide.title}
         </h2>
         {kit.mailer.fieldGuide.intro && <p className="club-letter-back-intro">{kit.mailer.fieldGuide.intro}</p>}
