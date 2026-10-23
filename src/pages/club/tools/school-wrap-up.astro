@@ -1,0 +1,19 @@
+---
+/**
+ * /club/tools/school-wrap-up: the School Year Wrap-Up Builder (a site tool: WrapUpBuilder.astro and
+ * wrap-up-builder.ts), inside the Club. Opened from the May kit (src/lib/tool-handoff.ts) with the family’s first
+ * names, children’s ages and the account holder, and its own saved plan per family. Works the same with no handoff,
+ * for anyone. Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import WrapUpBuilder from '../../../components/site/WrapUpBuilder.astro';
+import { CLUB_NAME } from '../../../data/club/config';
+---
+
+<ClubLayout title="School Year Wrap-Up Builder">
+  <ClubToolBar client:only="react" tool="school-wrap-up" />
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <WrapUpBuilder storageKey="omc:club:school-wrap-up:v1" handoff brand={CLUB_NAME} />
+  </section>
+</ClubLayout>

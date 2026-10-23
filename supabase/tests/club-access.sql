@@ -219,3 +219,14 @@ select pg_temp.expect(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and (p.proname like 'club\_%' or p.proname like 'account\_%') and has_function_privilege('anon', p.oid, 'execute')),
   'anon can execute no club_ or account_ function');
+
+-- The January, February, March, August, October and December kits are seeded as drafts, so nobody can open them yet.
+select pg_temp.expect((select status from public.club_kits where slug = '2027-08-school-year') = 'draft', 'August is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-10-home-works-together') = 'draft', 'October is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-12-christmas-family-affair') = 'draft', 'December is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-01-fresh-start-together') = 'draft', 'January is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-02-better-together') = 'draft', 'February is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-03-spring-clean-together') = 'draft', 'March is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-04-everybody-helps-at-mealtime') = 'draft', 'April is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-05-finish-the-school-year') = 'draft', 'May is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-06-summer-with-a-plan') = 'draft', 'June is seeded as a draft');

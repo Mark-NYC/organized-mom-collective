@@ -16,7 +16,7 @@
  * - With one adult, children's ownership levels move up a year (never their eligibility).
  * - Children get their own room and self-care jobs ("each" items) on top, not counted against family load.
  */
-import type { Frequency, KitItem, OwnershipLevel } from '../../../data/club/types';
+import type { ChartSection, Frequency, KitItem, OwnershipLevel } from '../../../data/club/types';
 import { stableHash } from '../hash';
 import { planMembers, type Household, type HouseholdPreferences, type PlannedMember } from '../profile';
 
@@ -102,8 +102,49 @@ export function eligible(item: KitItem, p: PlannedMember, prefs: HouseholdPrefer
   if (!meetsRequirements(item, prefs)) return false;
   if (p.stage === 'adult') return item.for !== 'child';
   if (item.for === 'adult') return false;
+  // A child's own school item fits only their school type (household items are checked against every child).
+  if (item.scope === 'each' && item.requires?.childSchool && !(p.school && item.requires.childSchool.includes(p.school))) return false;
   const age = p.age ?? 0;
   return age >= (item.minAge ?? 0) && age <= (item.maxAge ?? Infinity);
+}
+
+/** A household item that needs a school type (a supply list, school forms) fits when at least one child has it. */
+export const householdHasSchool = (item: KitItem, people: readonly PlannedMember[]) =>
+  !item.requires?.childSchool || people.some((p) => p.stage !== 'adult' && p.school !== undefined && item.requires!.childSchool!.includes(p.school));
+
+/**
+ * How personal ("each") items are placed:
+ * - 'limit' (charts): a few per child, alternating their space and taking care of themselves (personalLimit).
+ * - 'all' (routines): every step that fits the child (up to `perSection`), in the kit's order, which is the routine's order.
+ * Routines also skip coaches (a routine chart is the child's own, not a job someone checks).
+ */
+export interface GenerateOptions {
+  personal?: 'limit' | 'all';
+  /** false: no workload balance suggestions (routines: nothing to balance). */
+  balance?: boolean;
+  /**
+   * Routines: at most this many steps per child in each section, the lowest `priority` first, shown in the kit's
+   * order. The rest stay one tap away as suggestions.
+   */
+  perSection?: number;
+}
+
+/**
+ * A routine from the steps that fit a child: with a `cap`, at most that many per section (fewer by what `used` says
+ * is already there), the lowest `priority` first; always returned in the kit's order, which is the routine's order.
+ */
+export function routineSteps(fits: readonly KitItem[], cap?: number, used: (section: ChartSection) => number = () => 0): KitItem[] {
+  if (cap === undefined) return [...fits];
+  const order = new Map(fits.map((i, n) => [i, n]));
+  const chosen = new Set(
+    [...new Set(fits.map((i) => i.section))].flatMap((section) =>
+      fits
+        .filter((i) => i.section === section)
+        .sort((a, b) => (a.priority ?? Infinity) - (b.priority ?? Infinity) || order.get(a)! - order.get(b)!)
+        .slice(0, Math.max(0, cap - used(section))),
+    ),
+  );
+  return fits.filter((i) => chosen.has(i));
 }
 
 /** The ownership level for this person. Adults always own; `boost` moves children up (one-adult homes). */
@@ -116,8 +157,15 @@ export function levelFor(item: KitItem, p: PlannedMember, boost = 0): OwnershipL
   return level;
 }
 
-export function generateOwnership(household: Household, items: readonly KitItem[], month: string, pinned: readonly PinnedRow[] = []): OwnershipPlan {
+export function generateOwnership(
+  household: Household,
+  items: readonly KitItem[],
+  month: string,
+  pinned: readonly PinnedRow[] = [],
+  options: GenerateOptions = {},
+): OwnershipPlan {
   const people = planMembers(household, month);
+  const routine = options.personal === 'all';
   const byId = new Map(people.map((p) => [p.id, p]));
   const prefs = household.preferences;
   const itemById = new Map(items.map((i) => [i.id, i]));
@@ -173,6 +221,18 @@ export function generateOwnership(household: Household, items: readonly KitItem[
   //    stable per-child order, so siblings don't all get the same list.
   for (const p of people) {
     if (p.stage === 'adult') continue;
+    if (routine) {
+      const fits = items.filter((i) => i.scope === 'each' && eligible(i, p, prefs) && !taken.has(`${i.id}~${p.id}`));
+      const used = (section: ChartSection) => rows.filter((r) => r.ownerId === p.id && r.section === section).length;
+      const chosen = new Set(routineSteps(fits, options.perSection, used));
+      for (const item of fits) {
+        if (!chosen.has(item)) continue;
+        const rowId = `${item.id}~${p.id}`;
+        rows.push(row(item, rowId, p, false));
+        taken.add(rowId);
+      }
+      continue;
+    }
     const already = rows.filter((r) => r.ownerId === p.id && r.scope === 'each').length;
     let room = personalLimit(p.age ?? 0) - already;
     const rank = { learning: 0, 'with-check': 1, owns: 2 } as const;
@@ -193,7 +253,7 @@ export function generateOwnership(household: Household, items: readonly KitItem[
 
   // 3. Household jobs, most constrained first: core before extras, fewest possible owners, biggest, then id.
   const household_ = items
-    .filter((i) => i.scope === 'household' && !taken.has(i.id) && people.some((p) => eligible(i, p, prefs)))
+    .filter((i) => i.scope === 'household' && !taken.has(i.id) && householdHasSchool(i, people) && people.some((p) => eligible(i, p, prefs)))
     .map((i) => ({ item: i, candidates: people.filter((p) => eligible(i, p, prefs)) }))
     .sort((a, b) =>
       Number(Boolean(b.item.core)) - Number(Boolean(a.item.core)) ||
@@ -234,7 +294,7 @@ export function generateOwnership(household: Household, items: readonly KitItem[
   // 4. Coaches for children's jobs that aren't fully theirs yet.
   const coaches = people.filter((p) => p.stage === 'adult' || (p.stage === 'teen' && (p.age ?? 0) >= COACH_FROM_AGE));
   const memberOrder = new Map(household.members.map((m, n) => [m.id, n]));
-  const sectionOrder = { family: 0, space: 1, self: 2 } as const;
+  const sectionOrder = { family: 0, space: 1, self: 2, morning: 3, 'after-school': 4, commitment: 5 } as const;
   rows.sort((a, b) =>
     (a.ownerId === null ? 1 : 0) - (b.ownerId === null ? 1 : 0) ||
     (memberOrder.get(a.ownerId ?? '') ?? 0) - (memberOrder.get(b.ownerId ?? '') ?? 0) ||
@@ -242,7 +302,7 @@ export function generateOwnership(household: Household, items: readonly KitItem[
     (order.get(a.itemId) ?? 0) - (order.get(b.itemId) ?? 0));
   for (const r of rows) {
     const owner = r.ownerId ? byId.get(r.ownerId) : undefined;
-    if (!owner || owner.stage === 'adult' || r.level === 'owns') continue;
+    if (routine || !owner || owner.stage === 'adult' || r.level === 'owns') continue;
     const options = coaches.filter((c) => c.id !== owner.id && (c.stage === 'adult' || (c.age ?? 0) - (owner.age ?? 0) >= 3));
     options.sort((a, b) =>
       coaching.get(a.id)! - coaching.get(b.id)! ||

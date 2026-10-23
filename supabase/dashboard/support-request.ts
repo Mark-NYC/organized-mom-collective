@@ -231,6 +231,8 @@ var routes = {
   clubDashboard: "/club/dashboard",
   clubFamily: "/club/family",
   clubKit: (slug) => `/club/kits/${slug}`,
+  /** A site tool hosted inside the Club (src/data/club/tools.ts). */
+  clubTool: (id) => `/club/tools/${id}`,
   home: "/",
   ourStory: "/our-story",
   calendar: "/calendar",

@@ -61,3 +61,31 @@ export const choreSets: Record<AgeGroup, ChoreSet> = {
     rewards: ['Gas money', '$20 allowance', 'Extended curfew'],
   },
 };
+
+/**
+ * "Start with one job": a single job someone this age can own start to finish, instead of a full week of chores
+ * (the Organized Family Club opens the chart this way). Children's jobs use the picture library's titles, so they
+ * print with their illustration. Rewards are left for the family to decide.
+ */
+export const oneJobs: Record<AgeGroup, string> = {
+  '2-3': 'Put Toys Away',
+  '4-5': 'Set the Table',
+  '6-7': 'Clear the Table',
+  '8-10': 'Wipe the Counters',
+  '11-13': 'Take Out the Trash',
+  '14-16': 'Kitchen cleanup after dinner',
+  '17+': 'Plan and cook one family dinner',
+};
+/** A grown-up's one job: a whole job, not a hand with one. */
+export const adultOneJob = 'Grocery list and shopping';
+
+/** The starter set for a child's age: the youngest group starts at 2 and covers anyone younger. */
+export function ageGroupFor(age: number): AgeGroup {
+  if (age <= 3) return '2-3';
+  if (age <= 5) return '4-5';
+  if (age <= 7) return '6-7';
+  if (age <= 10) return '8-10';
+  if (age <= 13) return '11-13';
+  if (age <= 16) return '14-16';
+  return '17+';
+}

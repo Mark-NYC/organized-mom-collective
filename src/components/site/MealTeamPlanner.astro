@@ -1,0 +1,207 @@
+---
+/**
+ * The Family Meal Responsibility Planner (markup, styles, printouts): who's helping (with any limits, and whether
+ * there's a food allergy at home), which meals, and the same jobs all week or rotating; then "Our Mealtime Team" (who
+ * owns each part of mealtime, the weekly thinking first) and an optional weekly view. Every owner can be changed, any
+ * job removed or added; new suggestions keep her choices. Prints on US Letter (8.5 × 11 in at 96 px/in, drawn at 2×):
+ * the team chart, and the week when jobs rotate. Not a meal plan: meals go in the wall calendar's meal plan,
+ * groceries in its grocery list. Jobs and rules: src/data/mealtime-jobs.ts. Behavior: meal-team-planner.ts beside it
+ * (today the Club's /club/tools/meal-team; a public page can host the same component without a handoff). Classes
+ * are prefixed `mlt-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { DAYS, mealOptions, partLabel } from '../../data/mealtime-jobs';
+import HelpersEditor from './HelpersEditor.astro';
+
+interface Props {
+  storageKey: string;
+  /** Opened for a family by another page (src/lib/tool-handoff.ts): its own saved plan, the family as helpers, its name on the chart. */
+  handoff?: boolean;
+  brand?: string;
+}
+
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+---
+
+<div class="mlt" data-mlt-key={storageKey} data-mlt-handoff={handoff ? '' : undefined} data-mlt-brand={brand}>
+  <form class="mlt-form">
+    <fieldset class="mlt-q">
+      <legend><span class="mlt-n">1</span> Who’s helping?</legend>
+      <p class="mlt-q-note" data-mlt-people-note>Add everyone who eats at home. Limits are optional: we’ll only suggest jobs that fit.</p>
+      <HelpersEditor />
+      <label class="mlt-check"><input type="checkbox" data-mlt-allergy /> Someone at home has a food allergy (choosing meals, cooking and leftovers stay with grown-ups)</label>
+    </fieldset>
+    <fieldset class="mlt-q">
+      <legend><span class="mlt-n">2</span> Which meals need shared jobs?</legend>
+      <p class="mlt-q-note">Start with one. Dinner is a good place to begin.</p>
+      <div class="mlt-options">
+        {mealOptions.map((m) => <button type="button" class="mlt-option" data-mlt-meal={m.id} aria-pressed={m.id === 'dinner' ? 'true' : 'false'}>{m.label}</button>)}
+      </div>
+    </fieldset>
+    <fieldset class="mlt-q">
+      <legend><span class="mlt-n">3</span> How should jobs be assigned?</legend>
+      <div class="mlt-options">
+        <button type="button" class="mlt-option" data-mlt-mode="same" aria-pressed="true">Keep the same jobs all week</button>
+        <button type="button" class="mlt-option" data-mlt-mode="rotate" aria-pressed="false">Rotate jobs</button>
+      </div>
+      <p class="mlt-q-note" data-mlt-mode-note>Each person owns the same job every day. Easiest for younger children to remember.</p>
+      <div class="mlt-days" data-mlt-days-box>
+        <span>Days you usually eat at home (optional)</span>
+        <div class="mlt-options">{DAYS.map((d, i) => <button type="button" class="mlt-option mlt-day" data-mlt-day={i} aria-pressed="true">{d}</button>)}</div>
+      </div>
+    </fieldset>
+  </form>
+
+  <section class="mlt-plan" aria-labelledby="mlt-plan-h">
+    <h2 id="mlt-plan-h" class="mlt-title">Your mealtime plan</h2>
+    <div class="mlt-tabs" role="group" aria-label="Which view">
+      <button type="button" class="mlt-option" data-mlt-view="team" aria-pressed="true">Our Mealtime Team</button>
+      <button type="button" class="mlt-option" data-mlt-view="week" aria-pressed="false">Our Weekly Meal Responsibilities</button>
+    </div>
+    <p class="mlt-balance" data-mlt-balance></p>
+    <div data-mlt-team></div>
+    <div data-mlt-week hidden></div>
+    <div class="mlt-plan-tools">
+      <button type="button" class="mlt-link" data-mlt-fresh>New suggestions (keeps your changes)</button>
+    </div>
+    <p class="mlt-status" data-mlt-status role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="mlt-out" aria-labelledby="mlt-out-h">
+    <h2 id="mlt-out-h" class="mlt-title">Print your chart</h2>
+    <p class="mlt-q-note">For the fridge or beside the family calendar. Meals still go in the calendar’s meal plan, groceries in its grocery list: this chart shows who makes each part happen.</p>
+    <label class="mlt-field"><span>Family name on the chart (optional)</span>
+      <input type="text" data-mlt-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" /></label>
+    <fieldset class="mlt-palette">
+      <legend>Choose your colors</legend>
+      <div class="mlt-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="mlt-palette-option" data-mlt-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+            <span class="mlt-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+    <div class="mlt-buttons">
+      <button type="button" class="mlt-btn mlt-btn-primary" data-mlt-download>Download the chart</button>
+      <button type="button" class="mlt-btn" data-mlt-copy>Copy as text</button>
+    </div>
+    <textarea class="mlt-copy-fallback" data-mlt-copy-fallback readonly rows="12" hidden aria-label="Your plan as text"></textarea>
+    <div class="mlt-sheets" data-mlt-sheets></div>
+  </section>
+  <template data-mlt-parts>{Object.entries(partLabel).map(([id, label]) => <option value={id}>{label}</option>)}</template>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .mlt {
+    --mlt-ink: var(--color-warm-ink);
+    --mlt-soft: var(--color-warm-soft);
+    --mlt-rule: var(--color-warm-rule);
+    --mlt-a1: #EFEBE7; --mlt-a2: #E6EEEA; --mlt-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--mlt-ink);
+  }
+  .mlt *, .mlt *::before, .mlt *::after { box-sizing: border-box; }
+  .mlt [hidden] { display: none !important; }
+  .mlt-form { display: grid; gap: 22px; }
+  .mlt-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .mlt-q legend { padding: 0; font-family: var(--font-serif); font-size: 1.2rem; line-height: 1.3; }
+  .mlt-n { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 6px; border-radius: 50%; background: #eef2ec; box-shadow: inset 0 0 0 1px #9aab8f; font-size: 0.9rem; vertical-align: 2px; }
+  .mlt-q-note { margin: 2px 0 0; font-size: 0.88rem; color: var(--mlt-soft); }
+  .mlt-options { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: 4px; }
+  .mlt-option { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 1rem; color: var(--mlt-soft); cursor: pointer; text-align: left; }
+  .mlt-option[aria-pressed='true'] { border-bottom-color: var(--mlt-ink); color: var(--mlt-ink); font-weight: 600; }
+  .mlt-day { min-width: 2.6rem; text-align: center; }
+  .mlt-option:focus-visible, .mlt-link:focus-visible, .mlt-x:focus-visible, .mlt-btn:focus-visible, .mlt-palette-option:focus-visible { outline: 2px solid var(--mlt-ink); outline-offset: 3px; }
+  .mlt-check { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; margin-top: 10px; font-size: 0.92rem; line-height: 1.4; }
+  .mlt-check input { flex: none; width: 20px; height: 20px; margin-top: 2px; accent-color: #7d917c; }
+  .mlt-days { margin-top: 8px; }
+  .mlt-days > span, .mlt-field > span, .mlt-palette legend { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mlt-soft); }
+  .mlt-field { display: grid; gap: 6px; max-width: 360px; margin-top: 12px; }
+  .mlt-field input, .mlt-row select, .mlt-add input, .mlt-add select { min-width: 0; min-height: 44px; padding: 0 10px; border: 1px solid var(--mlt-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--mlt-ink); }
+  .mlt-link { min-height: 44px; padding: 0; border: 0; background: none; font-size: 0.9rem; font-weight: 600; color: var(--mlt-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .mlt-x { width: 44px; min-height: 44px; border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--mlt-soft); cursor: pointer; }
+
+  .mlt-plan, .mlt-out { margin-top: 30px; }
+  .mlt-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .mlt-tabs { display: flex; gap: 0 22px; margin-top: 6px; border-bottom: 1px solid var(--mlt-rule); }
+  .mlt-balance { margin-top: 10px; padding: 10px 14px; border-left: 3px solid #e4b998; background: #fbf1e8; font-size: 0.92rem; line-height: 1.45; }
+  .mlt-part { margin-top: 16px; background: #fff; border: 1px solid var(--mlt-rule); border-top: 3px solid #9aab8f; padding: 12px 14px; }
+  .mlt-part h3 { font-family: var(--font-sans); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #6b7f6a; }
+  .mlt-part-note { margin-top: 2px; font-size: 0.85rem; color: var(--mlt-soft); }
+  .mlt-rows { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .mlt-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7rem, 11rem) auto; gap: 6px; align-items: center; }
+  .mlt-row textarea { display: block; width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--mlt-rule); border-radius: 3px; background: #fff; resize: none; font-family: var(--font-serif); font-size: 0.98rem; line-height: 1.3; color: var(--mlt-ink); }
+  .mlt-row.is-open select { border-color: #c9a0a3; background: #f8eeec; }
+  .mlt-row-note { grid-column: 1 / -1; margin-top: -2px; font-size: 0.8rem; color: #9a6a6f; }
+  .mlt-add { display: grid; grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) minmax(7rem, 10rem) auto; gap: 6px; margin-top: 14px; }
+  @media (max-width: 560px) {
+    .mlt-row { grid-template-columns: minmax(0, 1fr) auto; }
+    .mlt-row textarea { grid-column: 1 / -1; }
+    .mlt-add { grid-template-columns: minmax(0, 1fr) auto; }
+    .mlt-add input { grid-column: 1 / -1; }
+  }
+  .mlt-week-same { margin-top: 12px; display: grid; gap: 8px; }
+  .mlt-week-same p { line-height: 1.45; }
+  .mlt-grid-wrap { margin-top: 12px; overflow-x: auto; }
+  .mlt-grid { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .mlt-grid th, .mlt-grid td { padding: 6px 8px; border-bottom: 1px solid #ece4dc; text-align: left; vertical-align: top; }
+  .mlt-grid th { font-family: var(--font-sans); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mlt-soft); }
+  .mlt-plan-tools { margin-top: 10px; }
+  .mlt-status { min-height: 1.4em; margin-top: 6px; font-size: 0.92rem; color: var(--mlt-soft); }
+
+  .mlt-palette { margin: 14px 0 0; padding: 0; border: 0; }
+  .mlt-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .mlt-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--mlt-ink); cursor: pointer; }
+  .mlt-palette-option[aria-pressed='true'] { border-bottom-color: var(--mlt-ink); font-weight: 600; }
+  .mlt-swatches { display: flex; }
+  .mlt-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .mlt-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .mlt-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .mlt-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .mlt-btn:disabled { opacity: 0.6; cursor: wait; }
+  .mlt-copy-fallback { display: block; width: 100%; margin-top: 10px; padding: 8px; border: 1px solid var(--mlt-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+
+  /* The printouts: US Letter portrait (8.5 × 11 in at 96 px/in), scaled to fit a phone on screen. */
+  .mlt-sheets { display: grid; gap: 16px; margin-top: 16px; }
+  .mlt-sheet-wrap { overflow: hidden; }
+  .mlt-sheet { display: flex; flex-direction: column; width: 816px; height: 1056px; padding: 48px 60px 36px; background: #fff; border: 1px solid var(--mlt-rule); box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08); font-family: var(--font-serif); color: #3d3834; transform-origin: top left; }
+  .mlt-sheet-family { min-height: 16px; text-align: center; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mlt-soft); }
+  .mlt-sheet-title { margin-top: 6px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 42px; font-weight: 700; line-height: 1.1; }
+  .mlt-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--mlt-a1) 52%, var(--mlt-a1) 92%, transparent 92%); }
+  .mlt-sheet-sub { margin-top: 4px; text-align: center; font-size: 16px; font-style: italic; color: #5c5550; }
+  .mlt-sheet-part { margin-top: 10px; }
+  .mlt-sheet-part-head { padding: 5px 12px; background: var(--mlt-a2); border-radius: 8px; font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .mlt-sheet-row { display: grid; grid-template-columns: 30px 1fr 190px; gap: 12px; align-items: center; padding: 3px 8px; border-bottom: 1px solid #ece4dc; font-size: 15px; line-height: 1.25; }
+  .mlt-sheets.is-compact .mlt-sheet-row { padding: 1px 8px; font-size: 14px; }
+  .mlt-sheets.is-compact .mlt-sheet-part { margin-top: 7px; }
+  .mlt-sheets.is-compact .mlt-sheet-art { width: 26px; height: 26px; }
+  .mlt-sheet-art { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+  .mlt-sheet-icon { display: grid; place-items: center; background: color-mix(in srgb, var(--mlt-a2) 70%, #fff); color: #5f6f5c; }
+  .mlt-sheet-icon svg { width: 22px; height: 22px; }
+  .mlt-sheet-week { margin-top: 16px; font-size: 14px; line-height: 1.45; color: #4d4544; }
+  .mlt-sheet-owner { font-family: 'Kalam', var(--font-serif); font-size: 19px; font-weight: 700; text-align: right; line-height: 1.1; }
+  .mlt-sheet-owner small { display: block; font-family: var(--font-sans); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mlt-soft); }
+  .mlt-sheet-foot { margin-top: auto; padding-top: 14px; text-align: center; }
+  .mlt-sheet-cal { font-size: 14px; font-style: italic; color: #5c5550; }
+  .mlt-sheet-brand { margin-top: 10px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f89; }
+  .mlt-sheet-grid { width: 100%; margin-top: 20px; border-collapse: collapse; }
+  .mlt-sheet-grid th, .mlt-sheet-grid td { padding: 9px 8px; border: 1px solid #e3dad1; text-align: center; vertical-align: middle; font-size: 14px; line-height: 1.25; }
+  .mlt-sheet-grid th { background: var(--mlt-a2); font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .mlt-sheet-grid td:first-child { font-family: var(--font-sans); font-size: 12px; font-weight: 700; background: var(--mlt-a3); }
+  .mlt-exporting .mlt-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initMealTeamPlanner } from './meal-team-planner';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.mlt')) {
+    initMealTeamPlanner(host, host.hasAttribute('data-mlt-handoff') ? readToolHandoff('meal-team') : null);
+  }
+</script>

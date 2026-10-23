@@ -1,0 +1,249 @@
+---
+/**
+ * The Family Habit Builder (markup, styles, printable card): three questions (what to make easier, when it could
+ * happen, who takes part), one habit statement she can edit ("After dinner, everyone spends five minutes resetting
+ * the kitchen."), when, who and what done looks like, an optional start day, and a seven-day practice card to download
+ * (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×) or copy as text. One habit, seven days: no streaks,
+ * points, rewards or reminders. Choices and rules: src/data/family-habits.ts. Behavior: habit-builder.ts beside it,
+ * one module for every page with this tool (today the Organized Family Club's /club/tools/habit-builder; a public page
+ * can host the same component without a handoff). Classes are prefixed `hb-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { HABIT_REFLECTION, habitAreas, habitMoments, OTHER_AREA, PRACTICE_DAYS, whoOptions } from '../../data/family-habits';
+
+interface Props {
+  storageKey: string;
+  /**
+   * Opened for a family by another page (src/lib/tool-handoff.ts; the Organized Family Club): its own saved habit,
+   * the family's first names for "who", its one thing and start day from the kit, its name on the card. Public pages
+   * never set it.
+   */
+  handoff?: boolean;
+  /** The line at the foot of the card. */
+  brand?: string;
+}
+
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+const days = Array.from({ length: PRACTICE_DAYS }, (_, i) => i);
+---
+
+<div class="hb" data-hb-key={storageKey} data-hb-handoff={handoff ? '' : undefined}>
+  <form class="hb-form" data-hb-form>
+    <fieldset class="hb-q">
+      <legend><span class="hb-n">1</span> What would your family like to make easier?</legend>
+      <div class="hb-options">
+        {habitAreas.map((a) => <button type="button" class="hb-option" data-hb-area={a.id} aria-pressed="false">{a.label}</button>)}
+        <button type="button" class="hb-option" data-hb-area={OTHER_AREA} aria-pressed="false">Something else</button>
+      </div>
+      <div class="hb-other" data-hb-other hidden>
+        <label class="hb-field"><span>What would you like to make easier?</span>
+          <input type="text" data-hb-other-label maxlength="80" placeholder="e.g. Laundry on the bedroom floor" autocomplete="off" /></label>
+        <label class="hb-field"><span>What will everyone do?</span>
+          <input type="text" data-hb-other-action maxlength="100" placeholder="e.g. put dirty clothes in the hamper" autocomplete="off" /></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="hb-q">
+      <legend><span class="hb-n">2</span> When could this happen?</legend>
+      <p class="hb-q-note">Tie it to something you already do every day.</p>
+      <div class="hb-options">
+        {habitMoments.map((m) => <button type="button" class="hb-option" data-hb-moment={m.id} aria-pressed="false">{m.label}</button>)}
+        <button type="button" class="hb-option" data-hb-moment={OTHER_AREA} aria-pressed="false">Another time</button>
+      </div>
+      <label class="hb-field hb-other" data-hb-moment-other hidden><span>When, in your words</span>
+        <input type="text" data-hb-moment-text maxlength="60" placeholder="e.g. Right after soccer practice" autocomplete="off" /></label>
+    </fieldset>
+
+    <fieldset class="hb-q">
+      <legend><span class="hb-n">3</span> Who will take part?</legend>
+      <p class="hb-q-note" data-hb-who-note>Optional. The whole family is a good place to start.</p>
+      <div class="hb-options">
+        {whoOptions.map((w) => <button type="button" class="hb-option" data-hb-who={w.id} aria-pressed={w.id === 'everyone' ? 'true' : 'false'}>{w.label}</button>)}
+      </div>
+      <div class="hb-people" data-hb-people hidden></div>
+      <label class="hb-field hb-other" data-hb-names-typed hidden><span>Their names</span>
+        <input type="text" data-hb-names-text maxlength="80" placeholder="e.g. Sam and Ruby" autocomplete="off" /></label>
+    </fieldset>
+  </form>
+
+  <section class="hb-result" aria-labelledby="hb-result-h">
+    <p class="hb-label">Our family’s new rhythm</p>
+    <h2 id="hb-result-h" class="sr-only">Your family habit</h2>
+    <label class="hb-statement-wrap">
+      <span class="sr-only">Your habit, in your words</span>
+      <textarea class="hb-statement" data-hb-statement rows="3" maxlength="160"></textarea>
+    </label>
+    <p class="hb-edit-note"><span data-hb-edit-note>Change any words. It’s yours.</span> <button type="button" class="hb-link" data-hb-reset-words hidden>Use the suggested wording</button></p>
+    <dl class="hb-facts">
+      <div><dt>When</dt><dd data-hb-when></dd></div>
+      <div><dt>Who</dt><dd data-hb-who-label></dd></div>
+      <div class="hb-done-row"><dt><label for="hb-done">Done means</label></dt>
+        <dd><textarea id="hb-done" class="hb-done" data-hb-done rows="2" maxlength="160"></textarea></dd></div>
+    </dl>
+    <div class="hb-start">
+      <label class="hb-field"><span>Start day (optional)</span><input type="date" data-hb-start /></label>
+      <p class="hb-checkin" data-hb-checkin></p>
+    </div>
+    <p class="hb-calendar">Write the start day and a check-in day on your family wall calendar. Seven days, then decide together what to keep or change.</p>
+  </section>
+
+  <section class="hb-out" aria-labelledby="hb-out-h">
+    <h2 id="hb-out-h" class="hb-title">Your seven-day practice card</h2>
+    <label class="hb-field hb-family"><span>Family name on the card (optional)</span>
+      <input type="text" data-hb-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" /></label>
+    <fieldset class="hb-palette">
+      <legend>Choose your colors</legend>
+      <div class="hb-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="hb-palette-option" data-hb-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+            <span class="hb-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+    <div class="hb-buttons">
+      <button type="button" class="hb-btn hb-btn-primary" data-hb-download>Download the card</button>
+      <button type="button" class="hb-btn" data-hb-copy>Copy as text</button>
+    </div>
+    <p class="hb-status" data-hb-status role="status" aria-live="polite"></p>
+    <textarea class="hb-copy-fallback" data-hb-copy-fallback readonly rows="10" hidden aria-label="Your habit as text"></textarea>
+
+    <div class="hb-sheet-wrap">
+      <div class="hb-sheet" id="habit-card" data-hb-sheet>
+        <div class="hb-sheet-family" data-hb-sheet-family></div>
+        <div class="hb-sheet-title"><span class="hb-swipe">Our family’s new rhythm</span></div>
+        <div class="hb-sheet-habit">
+          <img class="hb-sheet-art" data-hb-art alt="" width="72" height="72" hidden />
+          <p class="hb-sheet-statement" data-hb-sheet-statement></p>
+        </div>
+        <dl class="hb-sheet-facts">
+          <div><dt>When</dt><dd data-hb-sheet-when></dd></div>
+          <div><dt>Who</dt><dd data-hb-sheet-who></dd></div>
+          <div><dt>Done means</dt><dd data-hb-sheet-done></dd></div>
+        </dl>
+        <div class="hb-sheet-week">
+          <p class="hb-sheet-label">Seven days of practice</p>
+          <p class="hb-sheet-week-note">Tick the days you tried it. Missing one is fine: just pick it up again.</p>
+          <ol class="hb-sheet-days">
+            {days.map(() => <li><span class="hb-sheet-day" data-hb-day></span><span class="hb-sheet-box" aria-hidden="true"></span></li>)}
+          </ol>
+          <p class="hb-sheet-dates" data-hb-sheet-dates></p>
+        </div>
+        <div class="hb-sheet-reflect">
+          <p class="hb-sheet-label">After seven days, ask together</p>
+          <p class="hb-sheet-question">{HABIT_REFLECTION}</p>
+          <span class="hb-sheet-line"></span><span class="hb-sheet-line"></span>
+        </div>
+        <div class="hb-sheet-foot">
+          <p class="hb-sheet-cal">Write the start day and your check-in day on the family calendar.</p>
+          <p class="hb-sheet-brand">{brand}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .hb {
+    --hb-ink: var(--color-warm-ink);
+    --hb-soft: var(--color-warm-soft);
+    --hb-rule: var(--color-warm-rule);
+    --hb-a1: #EFEBE7; --hb-a2: #E6EEEA; --hb-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--hb-ink);
+  }
+  .hb *, .hb *::before, .hb *::after { box-sizing: border-box; }
+  .hb [hidden] { display: none !important; }
+
+  /* Questions: underlined text choices (docs/brand/TOOL-OUTPUT-DESIGN.md → Controls around the output). */
+  .hb-form { display: grid; gap: 20px; }
+  .hb-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .hb-q legend { padding: 0; font-family: var(--font-serif); font-size: 1.2rem; line-height: 1.3; color: var(--hb-ink); }
+  .hb-n { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 6px; border-radius: 50%; background: #eef2ec; box-shadow: inset 0 0 0 1px #9aab8f; font-size: 0.9rem; vertical-align: 2px; }
+  .hb-q-note { margin: 2px 0 0; font-size: 0.88rem; color: var(--hb-soft); }
+  .hb-options { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: 4px; }
+  .hb-option { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 1rem; color: var(--hb-soft); cursor: pointer; text-align: left; }
+  .hb-option[aria-pressed='true'] { border-bottom-color: var(--hb-ink); color: var(--hb-ink); font-weight: 600; }
+  .hb-option:focus-visible, .hb-link:focus-visible, .hb-palette-option:focus-visible, .hb-btn:focus-visible { outline: 2px solid var(--hb-ink); outline-offset: 3px; }
+  .hb-other { display: grid; gap: 10px; margin-top: 8px; }
+  .hb-field { display: grid; gap: 6px; }
+  .hb-field > span, .hb-palette legend, .hb-label, .hb-facts dt {
+    padding: 0; font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hb-soft);
+  }
+  .hb-field input { min-height: 46px; max-width: 420px; padding: 0 12px; border: 1px solid var(--hb-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--hb-ink); }
+  .hb-people { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 6px; }
+  .hb-person { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 0.98rem; cursor: pointer; }
+  .hb-person input { width: 20px; height: 20px; accent-color: #7d917c; }
+
+  .hb-result { margin-top: 28px; padding: 20px 20px 18px; background: #fff; border: 1px solid var(--hb-rule); border-top: 3px solid #9aab8f; }
+  .hb-statement { display: block; width: 100%; margin-top: 8px; padding: 6px 0; border: 0; border-bottom: 1px dashed #c9d3c0; background: transparent; resize: vertical; font-family: var(--font-serif); font-size: 1.4rem; line-height: 1.35; color: var(--hb-ink); }
+  .hb-statement:focus, .hb-done:focus { outline: none; border-bottom-color: var(--hb-ink); }
+  .hb-edit-note { margin-top: 6px; font-size: 0.85rem; color: var(--hb-soft); }
+  .hb-link { min-height: 40px; border: 0; background: none; font-size: 0.85rem; font-weight: 600; color: var(--hb-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .hb-facts { display: grid; gap: 10px; margin: 14px 0 0; }
+  .hb-facts > div { display: grid; grid-template-columns: 7rem 1fr; gap: 10px; align-items: baseline; }
+  .hb-facts dd { margin: 0; line-height: 1.45; }
+  .hb-done { display: block; width: 100%; padding: 4px 0; border: 0; border-bottom: 1px dashed #c9d3c0; background: transparent; resize: vertical; font-family: inherit; font-size: 1rem; line-height: 1.45; color: var(--hb-ink); }
+  .hb-start { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 20px; margin-top: 16px; }
+  .hb-checkin { min-height: 1.4em; margin: 0 0 12px; font-size: 0.95rem; }
+  .hb-calendar { margin-top: 12px; font-family: var(--font-serif); font-style: italic; color: var(--hb-soft); }
+  @media (max-width: 520px) { .hb-facts > div { grid-template-columns: 1fr; gap: 2px; } }
+
+  .hb-out { margin-top: 30px; }
+  .hb-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .hb-family { max-width: 360px; margin-top: 12px; }
+  .hb-palette { margin: 14px 0 0; padding: 0; border: 0; }
+  .hb-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .hb-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--hb-ink); cursor: pointer; }
+  .hb-palette-option[aria-pressed='true'] { border-bottom-color: var(--hb-ink); font-weight: 600; }
+  .hb-swatches { display: flex; }
+  .hb-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .hb-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .hb-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .hb-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .hb-btn:disabled { opacity: 0.6; cursor: wait; }
+  .hb-status { min-height: 1.4em; margin-top: 8px; font-size: 0.92rem; color: var(--hb-soft); }
+  .hb-copy-fallback { display: block; width: 100%; margin-top: 6px; padding: 8px; border: 1px solid var(--hb-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+
+  /* The card: US Letter portrait (8.5 × 11 in at 96 px/in), scaled to fit a phone on screen. */
+  .hb-sheet-wrap { margin-top: 16px; overflow: hidden; }
+  .hb-sheet { display: flex; flex-direction: column; width: 816px; height: 1056px; padding: 60px 72px 44px; background: #fff; border: 1px solid var(--hb-rule); box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08); font-family: var(--font-serif); color: #3d3834; transform-origin: top left; }
+  .hb-sheet-family { min-height: 18px; text-align: center; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--hb-soft); }
+  .hb-sheet-title { margin-top: 10px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 44px; font-weight: 700; line-height: 1.1; }
+  .hb-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--hb-a1) 52%, var(--hb-a1) 92%, transparent 92%); }
+  .hb-sheet-habit { display: flex; align-items: center; gap: 22px; margin-top: 34px; padding: 26px 30px; border: 2px solid var(--hb-a2); border-radius: 16px; }
+  .hb-sheet-art { flex: none; width: 72px; height: 72px; border-radius: 50%; background: var(--hb-a3); }
+  .hb-sheet-statement { font-size: 27px; line-height: 1.35; }
+  .hb-sheet-facts { display: grid; gap: 12px; margin: 26px 0 0; padding: 0 6px; }
+  .hb-sheet-facts > div { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: baseline; }
+  .hb-sheet-facts dt, .hb-sheet-label { font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #6b7f6a; }
+  .hb-sheet-facts dd { margin: 0; font-size: 17px; line-height: 1.4; }
+  .hb-sheet-week { margin-top: 34px; padding: 22px 26px; background: var(--hb-a3); border-radius: 14px; }
+  .hb-sheet-week-note { margin-top: 4px; font-size: 14px; font-style: italic; color: #5c5550; }
+  .hb-sheet-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+  .hb-sheet-days li { display: grid; justify-items: center; gap: 8px; }
+  .hb-sheet-day { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #5c5550; white-space: nowrap; }
+  .hb-sheet-box { width: 36px; height: 36px; border: 2px solid #b9b0a8; border-radius: 8px; background: #fff; }
+  .hb-sheet-dates { margin-top: 12px; font-size: 14px; color: #5c5550; text-align: center; min-height: 1em; }
+  .hb-sheet-reflect { margin-top: 30px; padding: 0 6px; }
+  .hb-sheet-question { margin-top: 6px; font-family: 'Kalam', var(--font-serif); font-size: 22px; font-weight: 700; line-height: 1.3; }
+  .hb-sheet-line { display: block; height: 34px; border-bottom: 1px solid #c9c0b8; }
+  .hb-sheet-foot { margin-top: auto; text-align: center; }
+  .hb-sheet-cal { font-size: 15px; font-style: italic; color: #5c5550; }
+  .hb-sheet-brand { margin-top: 14px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f89; }
+  .hb-exporting .hb-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initHabitBuilder } from './habit-builder';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.hb')) {
+    initHabitBuilder(host, host.hasAttribute('data-hb-handoff') ? readToolHandoff('habit-builder') : null);
+  }
+</script>

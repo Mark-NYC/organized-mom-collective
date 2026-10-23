@@ -25,7 +25,8 @@ const dataUri = (file) => `data:${MIME[extname(file)] ?? 'application/octet-stre
 
 // 1. The CSS every Club page links, fonts inlined (woff2 only; the woff fallbacks are dropped).
 const cssFiles = new Set();
-for (const page of ['club/dashboard', 'club/family', 'club/start', ...readdirSync(join(dist, 'club/kits')).map((k) => `club/kits/${k}`)]) {
+const toolPages = readdirSync(join(dist, 'club/tools')).map((t) => `club/tools/${t}`);
+for (const page of ['club/dashboard', 'club/family', 'club/start', ...readdirSync(join(dist, 'club/kits')).map((k) => `club/kits/${k}`), ...toolPages]) {
   const html = readFileSync(join(dist, page, 'index.html'), 'utf8');
   for (const m of html.matchAll(/<link rel="stylesheet" href="([^"]+\.css)"/g)) cssFiles.add(m[1]);
   for (const m of html.matchAll(/<style>([\s\S]*?)<\/style>/g)) cssFiles.add({ inline: m[1] });
@@ -37,8 +38,26 @@ css = css.replace(/url\((\/_astro\/[^)]+\.woff2)\)/g, (_, p) => `url(${dataUri(j
 // 2. Illustrations the chart can show.
 const imgDir = join(root, 'public/images/responsibilities');
 const images = Object.fromEntries(
-  readdirSync(imgDir).filter((f) => f.endsWith('-128.webp')).map((f) => [`/images/responsibilities/${f}`, dataUri(join(imgDir, f))]),
+  readdirSync(imgDir).filter((f) => f.endsWith('-128.webp') || f.endsWith('-256.webp')).map((f) => [`/images/responsibilities/${f}`, dataUri(join(imgDir, f))]),
 );
+
+// 2b. Site tools hosted in the Club (src/data/club/tools.ts): the page's own server-rendered tool markup, as built,
+// which the preview shows and wires up with the tool's one behavior module (see club-preview.tsx).
+const hostMarkup = (html) => {
+  const start = html.indexOf('<section id="club-tool-host"');
+  if (start < 0) return '';
+  const open = html.indexOf('>', start) + 1;
+  let depth = 1;
+  const tag = /<(\/?)section\b[^>]*>/g;
+  tag.lastIndex = open;
+  for (let m; (m = tag.exec(html)); ) {
+    depth += m[1] ? -1 : 1;
+    // The page's own module scripts don't apply here: the preview wires the tool itself.
+    if (depth === 0) return html.slice(open, m.index).replace(/<script\b[\s\S]*?<\/script>/g, '');
+  }
+  return '';
+};
+const tools = Object.fromEntries(toolPages.map((p) => [p.split('/').pop(), hostMarkup(readFileSync(join(dist, p, 'index.html'), 'utf8'))]));
 
 // 3. The app. React comes from cdnjs (UMD globals), so it isn't bundled.
 const globals = { react: 'React', 'react-dom': 'ReactDOM', 'react-dom/client': 'ReactDOM' };
@@ -76,8 +95,8 @@ ${css}
 <div id="club-preview"></div>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script>window.__CLUB_IMAGES = ${JSON.stringify(images)};</script>
+<script>window.__CLUB_IMAGES = ${JSON.stringify(images)}; window.__CLUB_TOOLS = ${JSON.stringify(tools).replace(/<\/script/gi, '<\\/script')};</script>
 <script>${js}</script>
 `;
 writeFileSync(out, page);
-console.log(`✓ ${out} (${Math.round(page.length / 1024)} KB: ${cssFiles.size} stylesheets, ${Object.keys(images).length} illustrations)`);
+console.log(`✓ ${out} (${Math.round(page.length / 1024)} KB: ${cssFiles.size} stylesheets, ${Object.keys(images).length} illustrations, tools: ${Object.entries(tools).map(([k, v]) => `${k} ${Math.round(v.length / 1024)} KB`).join(', ')})`);

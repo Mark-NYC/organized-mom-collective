@@ -1,0 +1,243 @@
+---
+/**
+ * The Family Connection Planner (markup, styles, printable plan): a few optional questions (children's ages, what kind
+ * of connection, time, budget, where), three suggestions straight away (a family moment, a one-on-one moment, a simple
+ * rhythm), swap or edit any, choose one, then download a one-page plan to print (US Letter portrait, 8.5 × 11 in at
+ * 96 px/in, drawn at 2×) or copy it as text. Ideas and rules: src/data/connection-ideas.ts. Behavior:
+ * connection-planner.ts beside it, one module for every page with this tool (today the Organized Family Club's
+ * /club/tools/connection-planner; a public page can host the same component without a handoff). Classes are prefixed
+ * `cn-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { ageOptions, CONNECTION_NOTE, costOptions, defaultConnectionPrefs as d, kindOptions, settingOptions, timeOptions } from '../../data/connection-ideas';
+
+interface Props {
+  storageKey: string;
+  /**
+   * Opened for a family by another page (src/lib/tool-handoff.ts; the Organized Family Club): its own saved plan,
+   * the children's ages and first names from the family profile, the family's name on the plan. Public pages never set it.
+   */
+  handoff?: boolean;
+  /** The line at the foot of the plan. */
+  brand?: string;
+}
+
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+const q = (legend: string, attr: string, options: { id: string; label: string }[], chosen: string) => ({ legend, attr, options, chosen });
+const questions = [
+  q('What kind of connection?', 'data-cn-kind', kindOptions, d.kind),
+  q('How much time?', 'data-cn-time', timeOptions, d.time),
+  q('Budget', 'data-cn-cost', costOptions, d.cost),
+  q('Where (optional)', 'data-cn-setting', settingOptions, d.setting),
+];
+---
+
+<div class="cn" data-cn-key={storageKey} data-cn-handoff={handoff ? '' : undefined}>
+  <form class="cn-form" data-cn-form>
+    <fieldset class="cn-q">
+      <legend>Children’s ages</legend>
+      <p class="cn-q-note" data-cn-ages-note>Tap any that apply, or skip it.</p>
+      <div class="cn-options">
+        {ageOptions.map((o) => <button type="button" class="cn-option" data-cn-age={o.id} aria-pressed="false">{o.label}</button>)}
+      </div>
+    </fieldset>
+    {questions.map((x) => (
+      <fieldset class="cn-q">
+        <legend>{x.legend}</legend>
+        <div class="cn-options">
+          {x.options.map((o) => <button type="button" class="cn-option" {...{ [x.attr]: o.id }} aria-pressed={o.id === x.chosen ? 'true' : 'false'}>{o.label}</button>)}
+        </div>
+      </fieldset>
+    ))}
+  </form>
+
+  <p class="cn-lead">{CONNECTION_NOTE}</p>
+
+  <section class="cn-results" aria-labelledby="cn-results-h">
+    <h2 id="cn-results-h" class="cn-title">Three ideas for your family</h2>
+    <p class="cn-note">Choose the one you’d like to do. Swap or edit any of them.</p>
+    <ol class="cn-list" data-cn-list></ol>
+    <p class="cn-status" data-cn-status role="status" aria-live="polite"></p>
+  </section>
+
+  <template data-cn-card>
+    <li class="cn-card">
+      <p class="cn-card-slot" data-cn-slot></p>
+      <div class="cn-card-head">
+        <h3 class="cn-card-name" data-cn-name></h3>
+        <p class="cn-card-meta" data-cn-meta></p>
+      </div>
+      <p class="cn-card-about" data-cn-about></p>
+      <div class="cn-card-edit" data-cn-edit hidden>
+        <label><span>Title</span><input type="text" data-cn-edit-title maxlength="60" /></label>
+        <label><span>What you’ll do</span><textarea data-cn-edit-about rows="3" maxlength="200"></textarea></label>
+        <button type="button" class="cn-link" data-cn-edit-reset>Use our wording</button>
+      </div>
+      <p class="cn-card-line" data-cn-prep-line><span>Prep</span> <span data-cn-prep></span></p>
+      <p class="cn-card-line"><span>Shared</span> <span data-cn-share></span></p>
+      <div class="cn-card-actions">
+        <button type="button" class="cn-choose" data-cn-choose aria-pressed="false">Choose this one</button>
+        <span class="cn-card-links">
+          <button type="button" class="cn-link" data-cn-edit-toggle aria-expanded="false">Edit</button>
+          <button type="button" class="cn-link" data-cn-swap>Swap this idea</button>
+        </span>
+      </div>
+    </li>
+  </template>
+
+  <section class="cn-out" aria-labelledby="cn-out-h">
+    <h2 id="cn-out-h" class="cn-title">Your connection plan</h2>
+    <p class="cn-hint" data-cn-hint>Choose one idea above and your plan appears here.</p>
+    <div class="cn-plan" data-cn-plan hidden>
+      <label class="cn-field"><span>Who’s joining?</span><input type="text" data-cn-who maxlength="80" /></label>
+      <div class="cn-people" data-cn-people hidden></div>
+      <label class="cn-field"><span>When we’d like to do it</span><input type="text" data-cn-when maxlength="60" placeholder="e.g. Friday after dinner" /></label>
+      <label class="cn-field"><span>Simple prep (optional)</span><input type="text" data-cn-prep-input maxlength="100" /></label>
+      <label class="cn-field"><span>A question to ask (optional)</span><input type="text" data-cn-question maxlength="120" /></label>
+      <label class="cn-field"><span>Family name on the plan (optional)</span><input type="text" data-cn-family maxlength="40" placeholder="e.g. The Rivera Family" /></label>
+      <fieldset class="cn-palette">
+        <legend>Choose your colors</legend>
+        <div class="cn-palette-options">
+          {Object.entries(toolPalettes).map(([id, palette]) => (
+            <button type="button" class="cn-palette-option" data-cn-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+              <span class="cn-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+              <span>{palette.label}</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+      <div class="cn-buttons">
+        <button type="button" class="cn-btn cn-btn-primary" data-cn-download>Download the plan</button>
+        <button type="button" class="cn-btn" data-cn-copy>Copy as text</button>
+      </div>
+      <textarea class="cn-copy-fallback" data-cn-copy-fallback readonly rows="10" hidden aria-label="Your plan as text"></textarea>
+      <p class="cn-calendar">Write it in the family and friends section of your wall calendar, or on the day you chose.</p>
+
+      <div class="cn-sheet-wrap">
+        <div class="cn-sheet" id="connection-plan" data-cn-sheet>
+          <div class="cn-sheet-family" data-cn-sheet-family></div>
+          <div class="cn-sheet-title"><span class="cn-swipe">Our Family Connection Plan</span></div>
+          <div class="cn-sheet-idea">
+            <p class="cn-sheet-slot" data-cn-sheet-slot></p>
+            <p class="cn-sheet-name" data-cn-sheet-name></p>
+            <p class="cn-sheet-about" data-cn-sheet-about></p>
+          </div>
+          <dl class="cn-sheet-facts">
+            <div><dt>Who’s joining</dt><dd data-cn-sheet-who></dd></div>
+            <div><dt>When</dt><dd data-cn-sheet-when></dd></div>
+            <div data-cn-sheet-prep-row><dt>Simple prep</dt><dd data-cn-sheet-prep></dd></div>
+            <div><dt>Shared, not managed</dt><dd data-cn-sheet-share></dd></div>
+          </dl>
+          <div class="cn-sheet-question" data-cn-sheet-question-box>
+            <p class="cn-sheet-label">Something to ask</p>
+            <p class="cn-sheet-q" data-cn-sheet-question></p>
+          </div>
+          <div class="cn-sheet-foot">
+            <p class="cn-sheet-cal">Write it in the family and friends section of the wall calendar, or on the day you chose.</p>
+            <p class="cn-sheet-brand">{brand}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .cn {
+    --cn-ink: var(--color-warm-ink);
+    --cn-soft: var(--color-warm-soft);
+    --cn-rule: var(--color-warm-rule);
+    --cn-a1: #EFEBE7; --cn-a2: #E6EEEA; --cn-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--cn-ink);
+  }
+  .cn *, .cn *::before, .cn *::after { box-sizing: border-box; }
+  .cn [hidden] { display: none !important; }
+
+  /* Questions: underlined text choices (docs/brand/TOOL-OUTPUT-DESIGN.md → Controls around the output). */
+  .cn-form { display: grid; gap: 14px; }
+  .cn-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .cn-q legend, .cn-palette legend, .cn-field > span, .cn-card-edit span {
+    padding: 0; font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cn-soft);
+  }
+  .cn-q-note { margin: 2px 0 0; font-size: 0.85rem; color: var(--cn-soft); }
+  .cn-options { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  .cn-option { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 1rem; color: var(--cn-soft); cursor: pointer; }
+  .cn-option[aria-pressed='true'] { border-bottom-color: var(--cn-ink); color: var(--cn-ink); font-weight: 600; }
+  .cn-option:focus-visible, .cn-link:focus-visible, .cn-choose:focus-visible, .cn-palette-option:focus-visible, .cn-btn:focus-visible { outline: 2px solid var(--cn-ink); outline-offset: 3px; }
+
+  .cn-lead { margin: 22px 0 0; padding: 12px 16px; border-left: 3px solid #c9a0a3; background: #f8eeec; font-family: var(--font-serif); font-style: italic; line-height: 1.45; }
+  .cn-results, .cn-out { margin-top: 28px; }
+  .cn-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .cn-note, .cn-hint { margin-top: 4px; font-size: 0.95rem; color: var(--cn-soft); }
+  .cn-list { display: grid; gap: 12px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .cn-card { padding: 14px 18px 8px; background: #fff; border: 1px solid var(--cn-rule); border-radius: 4px; }
+  .cn-card.is-chosen { border-color: #b98a8e; box-shadow: inset 3px 0 0 #b98a8e; }
+  .cn-card-slot { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #9a6a6f; }
+  .cn-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; margin-top: 2px; }
+  .cn-card-name { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; line-height: 1.25; }
+  .cn-card-meta { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; color: var(--cn-soft); }
+  .cn-card-about { margin-top: 6px; line-height: 1.5; }
+  .cn-card-line { margin-top: 6px; font-size: 0.95rem; line-height: 1.45; }
+  .cn-card-line > span:first-child { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7f6a; }
+  .cn-card-edit { display: grid; gap: 8px; margin-top: 8px; }
+  .cn-card-edit label { display: grid; gap: 4px; }
+  .cn-card-edit input, .cn-card-edit textarea, .cn-field input { min-height: 44px; padding: 8px 12px; border: 1px solid var(--cn-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--cn-ink); }
+  .cn-card-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px; margin-top: 6px; }
+  .cn-choose { min-height: 44px; padding: 0 16px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-warm-button); cursor: pointer; }
+  .cn-choose[aria-pressed='true'] { background: var(--color-warm-button); color: #fff; }
+  .cn-card-links { display: inline-flex; gap: 16px; }
+  .cn-link { min-height: 44px; border: 0; background: none; font-size: 0.9rem; color: var(--cn-soft); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; justify-self: start; }
+  .cn-status { min-height: 1.4em; margin-top: 8px; font-size: 0.92rem; color: var(--cn-soft); }
+
+  .cn-plan { display: grid; gap: 12px; margin-top: 12px; }
+  .cn-field { display: grid; gap: 6px; max-width: 520px; }
+  .cn-people { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: -6px; }
+  .cn-person { min-height: 40px; padding: 4px 0; border: 0; border-bottom: 2px solid transparent; background: none; font-size: 0.95rem; color: var(--cn-soft); cursor: pointer; }
+  .cn-person[aria-pressed='true'] { border-bottom-color: var(--cn-ink); color: var(--cn-ink); font-weight: 600; }
+  .cn-palette { margin: 0; padding: 0; border: 0; }
+  .cn-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .cn-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--cn-ink); cursor: pointer; }
+  .cn-palette-option[aria-pressed='true'] { border-bottom-color: var(--cn-ink); font-weight: 600; }
+  .cn-swatches { display: flex; }
+  .cn-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .cn-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+  .cn-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .cn-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .cn-btn:disabled { opacity: 0.6; cursor: wait; }
+  .cn-copy-fallback { display: block; width: 100%; padding: 8px; border: 1px solid var(--cn-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+  .cn-calendar { font-family: var(--font-serif); font-style: italic; color: var(--cn-soft); }
+
+  /* The plan: US Letter portrait (8.5 × 11 in at 96 px/in), scaled to fit a phone on screen. */
+  .cn-sheet-wrap { margin-top: 4px; overflow: hidden; }
+  .cn-sheet { display: flex; flex-direction: column; width: 816px; height: 1056px; padding: 64px 76px 44px; background: #fff; border: 1px solid var(--cn-rule); box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08); font-family: var(--font-serif); color: #3d3834; transform-origin: top left; }
+  .cn-sheet-family { min-height: 18px; text-align: center; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cn-soft); }
+  .cn-sheet-title { margin-top: 10px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 42px; font-weight: 700; line-height: 1.1; }
+  .cn-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--cn-a1) 52%, var(--cn-a1) 92%, transparent 92%); }
+  .cn-sheet-idea { margin-top: 36px; padding: 28px 34px; border: 2px solid var(--cn-a2); border-radius: 16px; text-align: center; }
+  .cn-sheet-slot, .cn-sheet-facts dt, .cn-sheet-label { font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #6b7f6a; }
+  .cn-sheet-name { margin-top: 8px; font-size: 30px; line-height: 1.25; }
+  .cn-sheet-about { margin-top: 10px; font-size: 17px; line-height: 1.5; color: #4d4544; }
+  .cn-sheet-facts { display: grid; gap: 18px; margin: 34px 0 0; padding: 0 6px; }
+  .cn-sheet-facts > div { display: grid; grid-template-columns: 170px 1fr; gap: 16px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px solid #ece4dc; }
+  .cn-sheet-facts dd { margin: 0; min-height: 24px; font-size: 18px; line-height: 1.4; }
+  .cn-sheet-question { margin-top: 30px; padding: 22px 28px; background: var(--cn-a3); border-radius: 14px; }
+  .cn-sheet-q { margin-top: 6px; font-family: 'Kalam', var(--font-serif); font-size: 24px; font-weight: 700; line-height: 1.3; }
+  .cn-sheet-foot { margin-top: auto; text-align: center; }
+  .cn-sheet-cal { font-size: 15px; font-style: italic; color: #5c5550; }
+  .cn-sheet-brand { margin-top: 14px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f89; }
+  .cn-exporting .cn-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initConnectionPlanner } from './connection-planner';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.cn')) {
+    initConnectionPlanner(host, host.hasAttribute('data-cn-handoff') ? readToolHandoff('connection-planner') : null);
+  }
+</script>

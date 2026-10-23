@@ -80,10 +80,17 @@ function KitCard({ kit, access, href, featured }: { kit: KitConfig; access: 'edi
     <article className={featured ? 'mt-8 max-w-3xl bg-sage-wash p-6 sm:p-9' : 'bg-white p-5 ring-1 ring-warm-rule'}>
       <p className="label text-warm-soft">{monthLabel(kit.month)}{featured ? ' · Newest kit' : ''}</p>
       <h2 className={`mt-2 font-serif text-warm-ink ${featured ? 'text-[1.8rem] leading-[1.15] sm:text-[2.2rem]' : 'text-[1.35rem] leading-snug'}`}>{kit.theme}</h2>
-      <p className="mt-3 max-w-xl leading-relaxed text-warm-soft">{kit.shift}</p>
+      {kit.subtitle ? (
+        <p className="mt-2 max-w-xl font-serif text-[1.15rem] italic text-rose-deep">{kit.subtitle}</p>
+      ) : (
+        <p className="mt-3 max-w-xl leading-relaxed text-warm-soft">{kit.shift}</p>
+      )}
       {featured && (
         <ul className="mt-5 grid gap-1.5 text-[0.95rem] text-warm-ink sm:grid-cols-2">
-          {kit.printables.map((p) => <li key={p.id}>· {p.title}</li>)}
+          {(kit.action
+            ? ['A letter from Megan', kit.action.title, ...(kit.tool ? [kit.tool.title] : []), ...(kit.toolkit?.tools.map((t) => t.title) ?? [])]
+            : kit.printables.map((p) => p.title)
+          ).map((t) => <li key={t}>· {t}</li>)}
         </ul>
       )}
       <a href={href} className={featured ? 'btn-primary mt-7 w-full sm:w-auto' : 'mt-4 inline-block text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4'}>

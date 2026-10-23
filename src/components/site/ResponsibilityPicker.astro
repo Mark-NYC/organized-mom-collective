@@ -41,7 +41,7 @@ const { heading = 'Pick illustrated steps', hint } = Astro.props;
       responsibilities.map((r) => {
         const src = responsibilityImage(r, 128);
         return (
-          <li data-rp-cat={r.category} data-rp-routines={r.routines.join(' ')}>
+          <li data-rp-cat={r.category} data-rp-routines={r.routines.join(' ')} data-rp-min={r.minAge}>
             <button type="button" class:list={['rp-tile', !src && 'rp-tile-text']} data-rp-pick={r.id} style={{ '--rp-cat': responsibilityColor(r) }}>
               {src && (
                 <span class="rp-art" aria-hidden="true">
@@ -76,6 +76,8 @@ const { heading = 'Pick illustrated steps', hint } = Astro.props;
   .rp[data-rp-routine='afterschool'] [data-rp-routines~='afterschool'],
   .rp[data-rp-routine='bedtime'] [data-rp-routines~='bedtime'],
   .rp[data-rp-routine='weekend'] [data-rp-routines~='weekend'] { order: -1; }
+  /* A chart opened for a child of a known age (src/components/site/routine-chart.ts): jobs for older kids go last. */
+  .rp[data-rp-routine] li[data-rp-later][data-rp-min] { order: 1; opacity: 0.6; }
   .rp-tile { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 6px; min-height: 44px; padding: 10px 6px 8px; border: 1px solid var(--color-warm-rule); border-radius: 10px; background: #fff; color: var(--color-warm-ink); cursor: pointer; transition: border-color 0.2s; }
   .rp-tile:hover { border-color: var(--color-warm-ink); }
   .rp-filter:focus-visible, .rp-tile:focus-visible { outline: 2px solid var(--color-warm-ink); outline-offset: 3px; }

@@ -63,19 +63,20 @@ export function OwnedChecklist({ rows, names, intro, ...base }: Base & { rows: C
 }
 
 /** Steps, then a line per person (the Team Meeting card). */
-export function MeetingCard({ steps, minutes, people, ...base }: Base & { steps: string[]; minutes: number; people: string[] }) {
+export function MeetingCard({ steps, minutes, people, intro, lineLabel, ...base }: Base & { steps: string[]; minutes: number; people: string[]; intro?: string; lineLabel?: string }) {
   return (
     <Sheet {...base}>
       <p className="club-sheet-intro">
-        About {minutes} minutes, everyone together, with the family chart on the table.
+        {intro ?? `About ${minutes} minutes, everyone together, with the family chart on the table.`}
       </p>
       <ol style={{ marginTop: '0.18in', paddingLeft: '0.25in', listStyle: 'decimal', fontSize: '11pt', lineHeight: 1.5 }}>
         {steps.map((s) => (
           <li key={s} style={{ marginBottom: '0.06in' }}>{s}</li>
         ))}
       </ol>
-      <div className="club-sheet-lines">
-        <div className="club-card-section" style={{ marginBottom: '0.05in' }}>The job I’m choosing to own this month</div>
+      {/* Big families: shorter write-in lines, so everyone still fits on one page. */}
+      <div className={`club-sheet-lines${people.length > 5 ? ' club-sheet-lines-tight' : ''}`}>
+        <div className="club-card-section" style={{ marginBottom: '0.05in' }}>{lineLabel ?? 'The job I’m choosing to own this month'}</div>
         {people.map((n) => (
           <div key={n} className="club-sheet-line">
             <span className="club-hand" style={{ fontSize: '15pt' }}>{n}</span>

@@ -10,6 +10,7 @@ import { getSession, requestCode, signOut, verifyCode, type AccountSession } fro
 import { accountStore, clubHref, resetSample, sampleFromUrl, sampleStore, type ClubStore } from '../../lib/club/store';
 import { routes } from '../../routes';
 import { clubNav } from '../../lib/club/nav';
+import { clearToolHandoff } from '../../lib/tool-handoff';
 
 export interface ClubContext {
   store: ClubStore;
@@ -18,11 +19,16 @@ export interface ClubContext {
   href: (path: string) => string;
 }
 
-type Page = 'dashboard' | 'family' | 'kit' | 'start';
+type Page = 'dashboard' | 'family' | 'kit' | 'start' | 'tool';
 
 export default function ClubGate({ page, children }: { page: Page; children: (ctx: ClubContext) => ReactNode }) {
   const [sample] = useState(() => (typeof location === 'undefined' ? null : sampleFromUrl(clubNav().search())));
   const [session, setSession] = useState<AccountSession | null | undefined>(sample ? null : undefined);
+
+  // Only a tool's own page reads a handoff; anywhere else drops it, so it never carries over to another family or visit.
+  useEffect(() => {
+    if (page !== 'tool') clearToolHandoff();
+  }, [page]);
 
   useEffect(() => {
     if (sample || !clubAccountsEnabled()) return setSession(null);
@@ -38,7 +44,7 @@ export default function ClubGate({ page, children }: { page: Page; children: (ct
     <>
       <MemberHeader page={page} href={href} signedIn={Boolean(session)} />
       {sample && store && <SampleBanner id={sample} label={store.label} />}
-      <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-8 sm:pt-10">
+      <main className={`mx-auto w-full max-w-5xl px-4 pt-6 sm:px-8 sm:pt-10 ${page === 'tool' ? 'pb-2' : 'pb-28'}`}>
         {store ? children({ store, sample, href }) : clubAccountsEnabled() ? <ClubSignIn onSignedIn={setSession} /> : <NoSignIn />}
       </main>
     </>

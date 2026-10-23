@@ -1,0 +1,207 @@
+---
+/**
+ * The School Year Wrap-Up Builder (markup, styles, printouts): when school ends (one family date, or a child's own),
+ * which kinds of closeout work apply, and who's helping; then a short plan in two groups, before school ends and after
+ * the last day, each task with a suggested day and an owner. Everything can be changed: check off, re-date, reassign,
+ * remove, add her own. Prints on US Letter (8.5 × 11 in at 96 px/in, drawn at 2×): the family's plan, or one child's.
+ * Not a school planner: school events go on the wall calendar. Tasks and rules: src/data/school-wrapup.ts (dates from
+ * August's countdown, src/lib/club/countdown.ts). Behavior: wrap-up-builder.ts beside it (today the Club's
+ * /club/tools/school-wrap-up; a public page can host the same component without a handoff). Classes are prefixed
+ * `wu-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { pickOptions } from '../../data/school-wrapup';
+import HelpersEditor from './HelpersEditor.astro';
+
+interface Props {
+  storageKey: string;
+  /** Opened for a family by another page (src/lib/tool-handoff.ts): its own saved plan, the family as helpers, its name on the plan. */
+  handoff?: boolean;
+  brand?: string;
+}
+
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+---
+
+<div class="wu" data-wu-key={storageKey} data-wu-handoff={handoff ? '' : undefined} data-wu-brand={brand}>
+  <form class="wu-form">
+    <fieldset class="wu-q">
+      <legend><span class="wu-n">1</span> When is the last day of school?</legend>
+      <label class="wu-field"><span>Last day of school</span><input type="date" data-wu-family-day /></label>
+      <p class="wu-q-note">One date for everyone. A child finishing on a different day, or not in school, can have their own below.</p>
+      <ul class="wu-kids" data-wu-kids></ul>
+    </fieldset>
+    <fieldset class="wu-q">
+      <legend><span class="wu-n">2</span> Which school responsibilities apply?</legend>
+      <p class="wu-q-note">All on to start. Switch off anything that doesn’t apply.</p>
+      <div class="wu-picks">
+        {pickOptions.map((p) => <label class="wu-check"><input type="checkbox" data-wu-pick={p.id} checked /> {p.label}</label>)}
+      </div>
+    </fieldset>
+    <fieldset class="wu-q">
+      <legend><span class="wu-n">3</span> Who can help?</legend>
+      <p class="wu-q-note" data-wu-people-note>Add your children and the grown-ups at home. Each child closes out their own year; grown-ups take what needs a signature or a decision.</p>
+      <HelpersEditor />
+    </fieldset>
+  </form>
+
+  <section class="wu-plan" aria-labelledby="wu-plan-h">
+    <h2 id="wu-plan-h" class="wu-title">Your school year wrap-up</h2>
+    <p class="wu-timing" data-wu-timing hidden></p>
+    <div data-wu-groups></div>
+    <div class="wu-add">
+      <select data-wu-add-phase aria-label="When">
+        <option value="before">Before school ends</option>
+        <option value="after">After the last day</option>
+      </select>
+      <input type="text" data-wu-add-title maxlength="100" placeholder="A task of your own" aria-label="Your own task" />
+      <select data-wu-add-who aria-label="Who does it"></select>
+      <button type="button" class="wu-link" data-wu-add>Add</button>
+    </div>
+    <div class="wu-plan-tools">
+      <button type="button" class="wu-link" data-wu-fresh>New suggestions (keeps your changes)</button>
+      <button type="button" class="wu-link" data-wu-reset-dates>Use the suggested dates</button>
+    </div>
+    <p class="wu-note">Suggested dates are ideas, not school deadlines. If your school gave you a date, enter it: we’ll keep it.</p>
+    <p class="wu-status" data-wu-status role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="wu-out" aria-labelledby="wu-out-h">
+    <h2 id="wu-out-h" class="wu-title">Print your plan</h2>
+    <p class="wu-q-note">One page to keep beside the family calendar. The closeout dates go on the calendar, too.</p>
+    <label class="wu-field"><span>Print for</span><select data-wu-print-for></select></label>
+    <label class="wu-field"><span>Family name on the plan (optional)</span>
+      <input type="text" data-wu-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" /></label>
+    <fieldset class="wu-palette">
+      <legend>Choose your colors</legend>
+      <div class="wu-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="wu-palette-option" data-wu-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+            <span class="wu-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+    <div class="wu-buttons">
+      <button type="button" class="wu-btn wu-btn-primary" data-wu-download>Download the plan</button>
+      <button type="button" class="wu-btn" data-wu-copy>Copy as text</button>
+    </div>
+    <textarea class="wu-copy-fallback" data-wu-copy-fallback readonly rows="12" hidden aria-label="Your plan as text"></textarea>
+    <div class="wu-sheets" data-wu-sheets></div>
+  </section>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .wu {
+    --wu-ink: var(--color-warm-ink);
+    --wu-soft: var(--color-warm-soft);
+    --wu-rule: var(--color-warm-rule);
+    --wu-a1: #EFEBE7; --wu-a2: #E6EEEA; --wu-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--wu-ink);
+  }
+  .wu *, .wu *::before, .wu *::after { box-sizing: border-box; }
+  .wu [hidden] { display: none !important; }
+  .wu-form { display: grid; gap: 22px; }
+  .wu-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .wu-q legend { padding: 0; font-family: var(--font-serif); font-size: 1.2rem; line-height: 1.3; }
+  .wu-n { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 6px; border-radius: 50%; background: #eaf0f4; box-shadow: inset 0 0 0 1px #8fa7b8; font-size: 0.9rem; vertical-align: 2px; }
+  .wu-q-note, .wu-note { margin: 4px 0 0; font-size: 0.88rem; color: var(--wu-soft); }
+  .wu-field { display: grid; gap: 6px; max-width: 360px; margin-top: 10px; }
+  .wu-field > span, .wu-palette legend, .wu-group h3 { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--wu-soft); }
+  .wu-field input, .wu-field select, .wu-kid select, .wu-kid input, .wu-row select, .wu-row input[type='date'], .wu-add input, .wu-add select {
+    min-width: 0; min-height: 44px; padding: 0 10px; border: 1px solid var(--wu-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--wu-ink);
+  }
+  .wu-kids { display: grid; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+  .wu-kid { display: grid; grid-template-columns: minmax(5rem, 9rem) minmax(0, 12rem) minmax(0, 11rem); gap: 6px; align-items: center; }
+  .wu-kid > span { font-family: var(--font-serif); font-size: 1rem; }
+  .wu-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0 18px; margin-top: 4px; }
+  .wu-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 0.95rem; line-height: 1.3; }
+  .wu-check input { flex: none; width: 20px; height: 20px; accent-color: #7d917c; }
+  .wu-link { min-height: 44px; padding: 0; border: 0; background: none; font-size: 0.9rem; font-weight: 600; color: var(--wu-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .wu-x { width: 44px; min-height: 44px; border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--wu-soft); cursor: pointer; }
+  .wu-link:focus-visible, .wu-x:focus-visible, .wu-btn:focus-visible, .wu-palette-option:focus-visible { outline: 2px solid var(--wu-ink); outline-offset: 3px; }
+
+  .wu-plan, .wu-out { margin-top: 30px; }
+  .wu-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .wu-timing { margin-top: 10px; padding: 10px 14px; border-left: 3px solid #8fa7b8; background: #eef3f6; font-size: 0.92rem; line-height: 1.45; }
+  .wu-group { margin-top: 16px; background: #fff; border: 1px solid var(--wu-rule); border-top: 3px solid #8fa7b8; padding: 12px 14px; }
+  .wu-group[data-wu-group='after'] { border-top-color: #9aab8f; }
+  .wu-group h3 { color: #5d7383; font-weight: 700; }
+  .wu-group[data-wu-group='after'] h3 { color: #6b7f6a; }
+  .wu-group-note { margin-top: 2px; font-size: 0.85rem; color: var(--wu-soft); }
+  .wu-rows { display: grid; gap: 10px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .wu-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) 10.5rem minmax(7rem, 10rem) auto; gap: 6px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #efe8e1; }
+  .wu-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .wu-row > input[type='checkbox'] { width: 22px; height: 22px; accent-color: #7d917c; }
+  .wu-row textarea { display: block; width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--wu-rule); border-radius: 3px; background: #fff; resize: none; font-family: var(--font-serif); font-size: 0.98rem; line-height: 1.3; color: var(--wu-ink); }
+  .wu-row.is-done textarea { color: var(--wu-soft); text-decoration: line-through; }
+  .wu-row.is-open select { border-color: #c9a0a3; background: #f8eeec; }
+  .wu-row-note { grid-column: 2 / -1; margin-top: -2px; font-size: 0.8rem; color: var(--wu-soft); }
+  .wu-add { display: grid; grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) minmax(7rem, 10rem) auto; gap: 6px; margin-top: 14px; }
+  @media (max-width: 600px) {
+    .wu-kid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .wu-kid > span { grid-column: 1 / -1; }
+    .wu-row { grid-template-columns: 28px 9.6rem minmax(0, 1fr) 44px; }
+    .wu-row > input[type='checkbox'] { grid-row: 1; grid-column: 1; align-self: start; margin-top: 11px; }
+    .wu-row textarea { grid-row: 1; grid-column: 2 / 4; }
+    .wu-row > .wu-x { grid-row: 1; grid-column: 4; }
+    .wu-row > input[type='date'] { grid-row: 2; grid-column: 2; }
+    .wu-row > select { grid-row: 2; grid-column: 3 / 5; }
+    .wu-add { grid-template-columns: minmax(0, 1fr) auto; }
+    .wu-add input { grid-column: 1 / -1; }
+  }
+  .wu-plan-tools { display: flex; flex-wrap: wrap; gap: 0 22px; margin-top: 10px; }
+  .wu-status { min-height: 1.4em; margin-top: 6px; font-size: 0.92rem; color: var(--wu-soft); }
+
+  .wu-palette { margin: 14px 0 0; padding: 0; border: 0; }
+  .wu-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .wu-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--wu-ink); cursor: pointer; }
+  .wu-palette-option[aria-pressed='true'] { border-bottom-color: var(--wu-ink); font-weight: 600; }
+  .wu-swatches { display: flex; }
+  .wu-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .wu-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .wu-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .wu-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .wu-btn:disabled { opacity: 0.6; cursor: wait; }
+  .wu-copy-fallback { display: block; width: 100%; margin-top: 10px; padding: 8px; border: 1px solid var(--wu-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+
+  /* The printout: US Letter portrait (8.5 × 11 in at 96 px/in), scaled to fit a phone on screen. */
+  .wu-sheets { display: grid; gap: 16px; margin-top: 16px; }
+  .wu-sheet-wrap { overflow: hidden; }
+  .wu-sheet { display: flex; flex-direction: column; width: 816px; height: 1056px; padding: 48px 60px 36px; background: #fff; border: 1px solid var(--wu-rule); box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08); font-family: var(--font-serif); color: #3d3834; transform-origin: top left; }
+  .wu-sheet-family { min-height: 16px; text-align: center; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--wu-soft); }
+  .wu-sheet-title { margin-top: 6px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 40px; font-weight: 700; line-height: 1.1; }
+  .wu-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--wu-a1) 52%, var(--wu-a1) 92%, transparent 92%); }
+  .wu-sheet-sub { margin-top: 6px; text-align: center; font-size: 15px; font-style: italic; line-height: 1.4; color: #5c5550; }
+  .wu-sheet-group { margin-top: 14px; }
+  .wu-sheet-group-head { padding: 6px 12px; background: var(--wu-a2); border-radius: 8px; font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .wu-sheet-row { display: grid; grid-template-columns: 26px 64px 1fr 170px; gap: 12px; align-items: center; padding: 6px 8px; border-bottom: 1px solid #ece4dc; font-size: 15px; line-height: 1.3; }
+  .wu-sheet-box { width: 22px; height: 22px; border: 1.5px solid #8a807a; border-radius: 4px; background: #fff; }
+  .wu-sheet-box.is-done { background: var(--wu-a1); }
+  .wu-sheet-date { font-family: var(--font-sans); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: #5d7383; }
+  .wu-sheet-owner { font-family: 'Kalam', var(--font-serif); font-size: 18px; font-weight: 700; text-align: right; line-height: 1.1; }
+  .wu-sheet-owner small { display: block; font-family: var(--font-sans); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wu-soft); }
+  .wu-sheets.is-compact .wu-sheet-row { padding: 3px 8px; font-size: 14px; }
+  .wu-sheets.is-compact .wu-sheet-group { margin-top: 10px; }
+  .wu-sheet-five { margin-top: 16px; padding: 10px 14px; background: var(--wu-a3); font-size: 14px; line-height: 1.45; }
+  .wu-sheet-five strong { font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .wu-sheet-foot { margin-top: auto; padding-top: 14px; text-align: center; }
+  .wu-sheet-cal { font-size: 14px; font-style: italic; color: #5c5550; }
+  .wu-sheet-brand { margin-top: 10px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f89; }
+  .wu-exporting .wu-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initWrapUpBuilder } from './wrap-up-builder';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.wu')) {
+    initWrapUpBuilder(host, host.hasAttribute('data-wu-handoff') ? readToolHandoff('school-wrap-up') : null);
+  }
+</script>

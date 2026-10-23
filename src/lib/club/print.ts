@@ -66,11 +66,14 @@ export function fitChart(root: HTMLElement): { density: Density; pages: number; 
   document.body.appendChild(probe);
   const grid = probe.querySelector<HTMLElement>('.club-chart-grid');
   const cards = grid?.children.length ?? 1;
+  // A portrait checklist says how tall its page is and which column counts to try (data-fit-*).
+  const maxHeight = Number(root.dataset.fitHeight ?? 0) * 96 || CHART_HEIGHT_PX;
+  const wanted = root.dataset.fitColumns?.split(',').map(Number).filter((n) => n > 0);
   const setColumns = (el: HTMLElement | null, n: number) => {
     if (el) el.style.columnCount = String(n);
   };
   // Widest first: everyone side by side when five or fewer, then four, then three columns of cards.
-  const columnOptions = [...new Set([Math.min(cards, 5), Math.min(cards, 4), Math.min(cards, 3)])];
+  const columnOptions = [...new Set((wanted?.length ? wanted : [5, 4, 3]).map((n) => Math.min(cards, n)))];
   let chosen = { density: 'tight' as Density, pages: 2, columns: Math.min(cards, 4) };
   search: for (const d of ['roomy', 'compact', 'tight'] as const) {
     probe.classList.remove('club-density-roomy', 'club-density-compact', 'club-density-tight');
@@ -78,7 +81,7 @@ export function fitChart(root: HTMLElement): { density: Density; pages: number; 
     for (const columns of columnOptions) {
       setColumns(grid, columns);
       const clipped = [...probe.querySelectorAll<HTMLElement>('.club-job-title, .club-card-name')].some((t) => t.scrollWidth > t.clientWidth + 1);
-      if (probe.scrollHeight <= CHART_HEIGHT_PX + 1 && !clipped) {
+      if (probe.scrollHeight <= maxHeight + 1 && !clipped) {
         chosen = { density: d, pages: 1, columns };
         break search;
       }
@@ -105,11 +108,15 @@ export function printDocument(doc: string, orientation: 'portrait' | 'landscape'
   style.id = PAGE_STYLE_ID;
   style.textContent = `@media print { @page { size: letter ${orientation}; margin: 0.35in; } }`;
   document.head.appendChild(style);
-  const chart = document.querySelector<HTMLElement>(`.club-print.club-chart[data-doc="${doc}"]`);
+  const chart = document.querySelector<HTMLElement>(`.club-print.club-chart[data-doc="${doc}"]:not(.club-command)`);
   if (chart) fitChart(chart);
+  for (const el of document.querySelectorAll('.club-print.is-printing')) el.classList.remove('is-printing');
+  const target = document.querySelectorAll<HTMLElement>(`.club-print[data-doc="${doc}"]`);
+  for (const el of target) el.classList.add('is-printing');
   html.dataset.clubPrint = doc;
   const done = () => {
     delete html.dataset.clubPrint;
+    for (const el of target) el.classList.remove('is-printing');
     style.remove();
     window.removeEventListener('afterprint', done);
   };

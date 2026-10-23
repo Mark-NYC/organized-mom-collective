@@ -89,6 +89,18 @@ export const sampleHouseholds: SampleHousehold[] = [
     },
   },
   {
+    id: 'hughes',
+    label: 'Sample: the Hughes family',
+    shows: 'A parent who hasn’t added the children yet',
+    household: {
+      id: 'sample-hughes',
+      displayName: 'The Hughes family',
+      preferences: {},
+      profileVersion: 1,
+      members: [{ id: 'sample-hughes-claire', firstName: 'Claire', kind: 'adult', role: 'parent', isAccountHolder: true }],
+    },
+  },
+  {
     id: 'new',
     label: 'Sample: a new member',
     shows: 'No family yet: try the welcome form',

@@ -1,0 +1,19 @@
+---
+/**
+ * /club/tools/screen-time: the site's screen time tool (the same component as /screen-time-contract:
+ * ScreenTimeContract.astro and screen-time-contract.ts), inside the Club. Opened from a kit for one child, or for the
+ * whole family (src/lib/tool-handoff.ts): its own saved sheet, the family agreement format, wording for the child's
+ * age, their name on it. Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import ScreenTimeContract from '../../../components/site/ScreenTimeContract.astro';
+import { CLUB_NAME } from '../../../data/club/config';
+---
+
+<ClubLayout title="Screen Time Agreement">
+  <ClubToolBar client:only="react" tool="screen-time" />
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <ScreenTimeContract storageKey="omc:club:screen-time:v1" format="agreement" handoff brand={CLUB_NAME} />
+  </section>
+</ClubLayout>

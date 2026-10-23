@@ -1,0 +1,19 @@
+---
+/**
+ * /club/tools/connection-planner: the Family Connection Planner (a site tool: ConnectionPlanner.astro and
+ * connection-planner.ts), inside the Club. Opened from the February kit (src/lib/tool-handoff.ts) with the children's
+ * ages and the family's first names, and its own saved plan per family. Works the same with no handoff, for anyone.
+ * Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED like every /club page.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import ConnectionPlanner from '../../../components/site/ConnectionPlanner.astro';
+import { CLUB_NAME } from '../../../data/club/config';
+---
+
+<ClubLayout title="Family Connection Planner">
+  <ClubToolBar client:only="react" tool="connection-planner" />
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <ConnectionPlanner storageKey="omc:club:connection-planner:v1" handoff brand={CLUB_NAME} />
+  </section>
+</ClubLayout>

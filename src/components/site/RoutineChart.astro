@@ -1,33 +1,44 @@
 ---
 /**
  * A routine chart (the design, autosave and PNG export): pick a type (morning, after-school, bedtime,
- * weekend, custom) to load starter steps and times, edit any line on the sheet, add steps from suggestion
+ * weekend, summer, custom) to load starter steps and times, edit any line on the sheet, add steps from suggestion
  * chips, download as a PNG (US Letter portrait, 8.5 × 11 in at 96 px/in, drawn at 2×).
  * Used by /routine-chart (free) and the upgraded chart for Take Back Control and Essential Routines buyers (ROUTINE_PLUS_PATH),
  * which passes `notes`: a reminder line under each step, with starter notes. Starter routines:
  * src/data/routines.ts. Saves in this browser under `storageKey`. Classes are prefixed `mr-`.
  * Illustrated steps come from the shared responsibility library (ResponsibilityPicker): a step's illustration id
  * saves as `icon-{i}`; lines matching a library job get its illustration. Arrows reorder steps on screen (times stay put).
+ * The Summer type (src/data/summer-rhythm.ts) shows three quick questions above the chart and a part of the day
+ * (`anchor-{i}`: Morning, Midday…) heading each group of steps, in the time column when a step has no time.
  * Slots: `picker-note` (under the picker), `after-sheet` (under the chart), `footnote`.
+ * Behavior: src/components/site/routine-chart.ts (shared by every page that shows this chart, the Club's included).
  */
 import '@fontsource/kalam/latin-700.css';
 import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
 import { BRAND_NAME } from '../../config';
 import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
+import { dayOptions, focusOptions, stageOptions, structureOptions } from '../../data/summer-rhythm';
 import ResponsibilityPicker from './ResponsibilityPicker.astro';
 
 interface Props {
   /** A reminder line under each step (the upgraded chart). */
   notes?: boolean;
   storageKey: string;
+  /**
+   * Opened for someone by another page (src/lib/tool-handoff.ts; the Organized Family Club): their own saved chart,
+   * their name in the title, age-suited jobs first. Public pages never set it.
+   */
+  handoff?: boolean;
+  /** The line at the foot of the chart (default: the brand name). */
+  brand?: string;
 }
 
-const { notes = false, storageKey } = Astro.props;
+const { notes = false, storageKey, handoff = false, brand = BRAND_NAME } = Astro.props;
 const start = routineTypes.morning;
 const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['', '', '']);
 ---
 
-<div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined}>
+<div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined} data-mr-handoff={handoff ? '' : undefined}>
   <div class="mr-types" role="group" aria-label="Routine">
     {
       Object.entries(routineTypes).map(([id, t]) => (
@@ -38,6 +49,24 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       ))
     }
   </div>
+
+  <section class="mr-summer" data-mr-summer hidden aria-labelledby="mr-summer-h">
+    <h2 id="mr-summer-h" class="mr-summer-title">Shape your summer rhythm</h2>
+    <p class="mr-summer-note">A few anchors for ordinary summer days, not a schedule. Camps, trips and plans go on the family calendar.</p>
+    <div class="mr-summer-q" role="group" aria-label="Who’s it for?"><span>Who’s it for?</span>
+      {stageOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-stage={o.id} aria-pressed={o.id === 'school' ? 'true' : 'false'}>{o.label}</button>)}
+    </div>
+    <div class="mr-summer-q" role="group" aria-label="Their days"><span>Their days</span>
+      {dayOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-days={o.id} aria-pressed={o.id === 'home' ? 'true' : 'false'}>{o.label}</button>)}
+    </div>
+    <div class="mr-summer-q" role="group" aria-label="How much structure?"><span>How much structure?</span>
+      {structureOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-structure={o.id} aria-pressed={o.id === 'balanced' ? 'true' : 'false'} title={o.hint}>{o.label}</button>)}
+    </div>
+    <div class="mr-summer-q" role="group" aria-label="What needs the most attention? (optional)"><span>What needs the most attention? <em>Optional</em></span>
+      {focusOptions.map((o) => <button type="button" class="mr-opt" data-mr-summer-focus={o.id} aria-pressed="false">{o.label}</button>)}
+    </div>
+    <p class="mr-summer-status" data-mr-summer-status role="status" aria-live="polite"></p>
+  </section>
 
   <ResponsibilityPicker hint="Tap one to add it to the next open step. Use the arrows on the chart to change the order.">
     <slot name="picker-note" />
@@ -71,6 +100,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   <div class="mr-sheet" id="routine-chart">
     <input type="hidden" data-field="palette" value={defaultToolPalette} />
     <input type="hidden" data-field="type" value="morning" data-mr-type-field />
+    <input type="hidden" data-field="summer" value="" data-mr-summer-field />
     <div class="mr-head">
       <input class="mr-title" type="text" data-field="title" value={start.title} aria-label="Chart title" />
       <input class="mr-subtitle" type="text" data-field="subtitle" value={start.subtitle} aria-label="Subtitle" />
@@ -82,7 +112,10 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
           <li class="mr-step">
             <input type="hidden" data-field={`icon-${i}`} data-mr-icon-field />
             <span class="mr-num" aria-hidden="true">{i + 1}</span>
-            <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            <span class="mr-when">
+              <input class="mr-anchor" type="text" data-field={`anchor-${i}`} data-mr-anchor maxlength="14" aria-label={`Step ${i + 1} part of the day`} />
+              <input class="mr-time" type="time" data-field={`time-${i}`} value={time} aria-label={`Step ${i + 1} time`} />
+            </span>
             <span class="mr-icon" data-mr-icon><img alt="" width="52" height="52" decoding="async" /></span>
             <span class="mr-what">
               <input class="mr-text" type="text" data-field={`step-${i}`} data-mr-step value={step} aria-label={`Step ${i + 1}`} />
@@ -105,7 +138,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       <input class="mr-time" type="time" data-field="end-time" value={start.endTime} aria-label="Finish time" />
     </div>
 
-    <div class="mr-foot">{BRAND_NAME}</div>
+    <div class="mr-foot">{brand}</div>
   </div>
 
   <div class="mr-after"><slot name="after-sheet" /></div>
@@ -113,7 +146,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   <slot name="footnote" />
 </div>
 
-<script type="application/json" id="mr-types" set:html={JSON.stringify(routineTypes)} />
 
 <style is:global>
   .mr-container {
@@ -469,9 +501,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       grid-area: num;
       font-size: 22px;
     }
-    .mr-container:not(.mr-exporting) .mr-step .mr-time {
+    .mr-container:not(.mr-exporting) .mr-step .mr-when {
       grid-area: time;
       justify-self: start;
+    }
+    .mr-container:not(.mr-exporting) .mr-step .mr-time {
       height: 32px;
     }
     .mr-container:not(.mr-exporting) .mr-what {
@@ -569,238 +603,35 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   }
 </style>
 
+<style is:global>
+  /* The Summer type: a part of the day (Morning, Midday…) heads its first step, in the time column when there's no time. */
+  .mr-when { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+  .mr-sheet .mr-anchor { display: none; width: 100%; min-width: 0; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: var(--mr-accent-3); font-family: 'Kalam', var(--font-serif); font-size: 19px; font-weight: 700; color: var(--mr-ink); }
+  .mr-sheet.mr-anchored .mr-anchor { display: block; }
+  .mr-sheet.mr-anchored .mr-anchor:not([data-first]) { visibility: hidden; height: 0; }
+  .mr-sheet.mr-untimed .mr-when .mr-time { display: none; }
+  .mr-sheet.mr-untimed .mr-anchor { height: 40px; font-size: 22px; }
+  .mr-sheet.mr-anchored:not(.mr-untimed) .mr-anchor[data-first] { font-size: 16px; height: 26px; }
+  .mr-container:not(.mr-exporting) .mr-sheet.mr-anchored .mr-anchor:not([data-first]) { display: none; }
+
+  .mr-summer { max-width: 816px; margin: 0 auto 22px; padding: 16px 18px; border: 1px solid var(--mr-rule); border-top: 3px solid var(--mr-sage); background: #fff; }
+  .mr-summer[hidden] { display: none; }
+  .mr-summer-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 400; }
+  .mr-summer-note { margin-top: 2px; font-size: 0.88rem; color: var(--mr-soft); }
+  .mr-summer-q { display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; margin-top: 10px; }
+  .mr-summer-q > span { flex-basis: 100%; font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mr-soft); }
+  .mr-summer-q > span em { font-style: normal; font-weight: 400; letter-spacing: 0.04em; text-transform: none; }
+  .mr-opt { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 0.98rem; color: var(--mr-soft); cursor: pointer; }
+  .mr-opt[aria-pressed='true'] { border-bottom-color: var(--mr-ink); color: var(--mr-ink); font-weight: 600; }
+  .mr-opt:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 3px; }
+  .mr-summer-status { min-height: 1.3em; margin-top: 6px; font-size: 0.88rem; color: var(--mr-soft); }
+</style>
+
 <script>
-  import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
-  import { toolEvent } from '../../lib/tool-engagement';
-  import { autosave, downloadPng } from '../../lib/printable';
-  import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
+  import { initRoutineChart } from './routine-chart';
+  import { readToolHandoff } from '../../lib/tool-handoff';
 
-  import type { RoutineType } from '../../data/routines';
-
-  const types: Record<string, RoutineType> = JSON.parse(document.getElementById('mr-types')!.textContent!);
-  const sheet = document.getElementById('routine-chart')!;
-  const host = sheet.closest<HTMLElement>('.mr-container')!;
-  const notes = host.hasAttribute('data-mr-notes');
-  const advanced=host.querySelector<HTMLElement>('[data-mr-advanced]')!;
-  const ideas=host.querySelector<HTMLElement>('.mr-ideas')!;
-  host.querySelector<HTMLButtonElement>('[data-mr-customize]')?.addEventListener('click',e=>{
-    const button=e.currentTarget as HTMLButtonElement;
-    const open=advanced.classList.toggle('mr-advanced-open');
-    ideas.classList.toggle('mr-ideas-open',open);
-    button.setAttribute('aria-expanded',String(open));
-  });
-  const toolId = notes ? 'routine-chart-plus' : 'routine-chart';
-  let firstAction = false;
-  const action = () => { if (!firstAction) { firstAction = true; toolEvent('tool_first_action', toolId); } };
-  const typeField = sheet.querySelector<HTMLInputElement>('[data-mr-type-field]')!;
-  const chips = document.querySelector<HTMLElement>('[data-mr-chips]')!;
-  const field = (name: string) => sheet.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
-  const rows = sheet.querySelectorAll('[data-mr-step]').length;
-  const stepFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-step]'));
-  const iconFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-icon-field]'));
-  const iconSlots = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mr-icon]'));
-  const picker = host.querySelector<HTMLElement>('[data-rp]')!;
-  const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
-
-  function renderIcons() {
-    let any = false;
-    iconSlots.forEach((slot, i) => {
-      const r = responsibilityById(iconFields[i].value);
-      const src = r ? responsibilityImage(r, 256) : null;
-      const img = slot.querySelector('img')!;
-      slot.toggleAttribute('data-on', !!src);
-      if (r && src) {
-        any = true;
-        if (img.getAttribute('src') !== src) img.src = src;
-        slot.style.setProperty('--mr-cat', responsibilityColor(r));
-      } else img.removeAttribute('src');
-    });
-    sheet.classList.toggle('mr-has-icons', any);
+  for (const host of document.querySelectorAll<HTMLElement>('.mr-container')) {
+    initRoutineChart(host, host.hasAttribute('data-mr-handoff') ? readToolHandoff('routine-chart') : null);
   }
-  /** A step line that means a library job gets its illustration; an emptied line loses it. */
-  function syncIcon(i: number) {
-    const text = stepFields[i].value.trim();
-    if (!text) iconFields[i].value = '';
-    else iconFields[i].value = matchResponsibility(text) ?? iconFields[i].value;
-  }
-
-  const paletteField = field('palette');
-  const paletteButtons = Array.from(host.querySelectorAll<HTMLButtonElement>('[data-mr-palette]'));
-  function renderPalette() {
-    const id = resolveToolPalette(paletteField.value);
-    paletteField.value = id;
-    toolPalettes[id].colors.forEach((color, i) => sheet.style.setProperty(`--mr-accent-${i + 1}`, color));
-    paletteButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mrPalette === id)));
-  }
-  function renderType() {
-    renderPalette();
-    renderIcons();
-    const id = types[typeField.value] ? typeField.value : 'morning';
-    picker.dataset.rpRoutine = id;
-    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) b.setAttribute('aria-pressed', String(b.dataset.mrType === id));
-    chips.replaceChildren(
-      ...types[id].ideas.map((idea) => {
-        const chip = Object.assign(document.createElement('button'), { type: 'button', className: 'mr-chip', textContent: `+ ${idea}` });
-        chip.dataset.idea = idea;
-        return chip;
-      }),
-    );
-  }
-
-  // Charts saved before illustrations existed pick them up for lines that match a library job.
-  const save = autosave(sheet, host.dataset.mrKey!, () => {
-    stepFields.forEach((_, i) => { if (!iconFields[i].value) syncIcon(i); });
-    renderType();
-  });
-
-  for (const button of paletteButtons) button.addEventListener('click', () => {
-    paletteField.value = button.dataset.mrPalette!;
-    renderPalette();
-    save();
-  });
-
-  function load(id: string) {
-    const t = types[id];
-    typeField.value = id;
-    action();
-    toolEvent('tool_start', toolId);
-    field('title').value = t.title;
-    field('subtitle').value = t.subtitle;
-    for (let i = 0; i < rows; i++) {
-      field(`time-${i}`).value = t.steps[i]?.[0] ?? '';
-      field(`step-${i}`).value = t.steps[i]?.[1] ?? '';
-      if (notes) field(`note-${i}`).value = t.steps[i]?.[2] ?? '';
-      iconFields[i].value = '';
-      syncIcon(i);
-    }
-    field('end-label').value = t.endLabel;
-    field('end-time').value = t.endTime;
-    renderType();
-    save();
-  }
-
-  /** True once the sheet differs from the current type's starter routine. */
-  const edited = () => {
-    const t = types[typeField.value] ?? types.morning;
-    if (field('title').value !== t.title || field('subtitle').value !== t.subtitle) return true;
-    if (field('end-label').value !== t.endLabel || field('end-time').value !== t.endTime) return true;
-    return Array.from({ length: rows }, (_, i) => i).some(
-      (i) =>
-        field(`time-${i}`).value !== (t.steps[i]?.[0] ?? '') ||
-        field(`step-${i}`).value !== (t.steps[i]?.[1] ?? '') ||
-        (notes && field(`note-${i}`).value !== (t.steps[i]?.[2] ?? '')),
-    );
-  };
-
-  for (const b of document.querySelectorAll<HTMLButtonElement>('[data-mr-type]')) {
-    b.addEventListener('click', () => {
-      if (b.dataset.mrType === typeField.value) return;
-      if (edited() && !confirm('Switch routines? Your changes to this chart will be replaced.')) return;
-      load(b.dataset.mrType!);
-    });
-  }
-
-  // Suggestion chips fill the next empty step.
-  chips.addEventListener('click', (e) => {
-    const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');
-    if (!chip) return;
-    const empty = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-step]')).find((el) => !el.value.trim());
-    if (!empty) {
-      alert('The chart is full. Clear a step first.');
-      return;
-    }
-    empty.value = chip.dataset.idea!;
-    syncIcon(stepFields.indexOf(empty));
-    renderIcons();
-    action();
-    save();
-  });
-
-  // Library tiles fill the next empty step with the job's title and illustration.
-  picker.addEventListener('rp:pick', (e) => {
-    const r = responsibilityById((e as CustomEvent<{ id: string }>).detail.id);
-    if (!r) return;
-    const i = stepFields.findIndex((el) => !el.value.trim());
-    if (i < 0) {
-      pickerStatus.textContent = 'The chart is full. Clear a step first, then tap again.';
-      return;
-    }
-    stepFields[i].value = r.title;
-    iconFields[i].value = r.id;
-    renderIcons();
-    action();
-    save();
-    pickerStatus.textContent = `Added “${r.title}” as step ${i + 1}.`;
-  });
-
-  // Typing a line that matches a library job adds its illustration; clearing a line removes it.
-  sheet.addEventListener('input', (e) => {
-    const i = stepFields.indexOf(e.target as HTMLInputElement);
-    if (i < 0) return;
-    const before = iconFields[i].value;
-    syncIcon(i);
-    if (iconFields[i].value !== before) { renderIcons(); save(); }
-  });
-
-  // Arrows swap a step (with its note and illustration) with its neighbor; the times stay in order.
-  sheet.addEventListener('click', (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-mr-move]');
-    if (!b) return;
-    const i = stepFields.indexOf(b.closest('.mr-step')!.querySelector<HTMLInputElement>('[data-mr-step]')!);
-    const j = i + Number(b.dataset.mrMove);
-    if (j < 0 || j >= rows) return;
-    const keys = ['step', 'icon', ...(notes ? ['note'] : [])];
-    for (const k of keys) {
-      const a = field(`${k}-${i}`), c = field(`${k}-${j}`);
-      [a.value, c.value] = [c.value, a.value];
-    }
-    renderIcons();
-    action();
-    save();
-    sheet.querySelectorAll<HTMLButtonElement>(`[data-mr-move="${b.dataset.mrMove}"]`)[j]?.focus();
-  });
-
-  document.querySelector('[data-mr-reset]')!.addEventListener('click', () => {
-    if (!confirm('Reset this chart to the starter routine?')) return;
-    load(types[typeField.value] ? typeField.value : 'morning');
-  });
-
-  /** 07:45 → 7:45 AM */
-  const twelveHour = (v: string) => {
-    if (!v) return '';
-    const [h, m] = v.split(':').map(Number);
-    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
-  };
-
-  const button = document.querySelector<HTMLButtonElement>('[data-mr-download]')!;
-  button.addEventListener('click', async () => {
-    toolEvent('tool_download_click', toolId);
-    // Time pickers would print their --:-- hint and clock icon: show plain 12-hour text while capturing.
-    const times = Array.from(sheet.querySelectorAll<HTMLInputElement>('input[type="time"]'));
-    const values = times.map((el) => el.value);
-    times.forEach((el) => {
-      el.type = 'text';
-      el.value = twelveHour(el.value);
-    });
-    // Empty notes would print their "Add a reminder" hint: drop hints while capturing.
-    const hinted = Array.from(sheet.querySelectorAll<HTMLInputElement>('[placeholder]'));
-    hinted.forEach((el) => el.removeAttribute('placeholder'));
-    const name = field('title').value.trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').toLowerCase();
-    try {
-      await downloadPng(sheet, {
-        filename: `${name || 'routine'}.png`,
-        width: 816,
-        height: 1056,
-        layoutHost: host,
-        exportClass: 'mr-exporting',
-        button,
-      });
-    } finally {
-      hinted.forEach((el) => (el.placeholder = 'Add a reminder'));
-      times.forEach((el, i) => {
-        el.type = 'time';
-        el.value = values[i];
-      });
-    }
-  });
 </script>

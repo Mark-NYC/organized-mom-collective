@@ -1,14 +1,26 @@
 /**
  * The Organized Family Club member pages as one self-contained page, for viewing outside the site (a hosted preview).
  * Made-up sample households only (src/data/club/samples.ts); no sign-in, no database, nothing sent anywhere.
- * Built by scripts/build-club-preview.mjs. Navigation stays inside the page; printing is off (the page's frame can't
+ * Built by scripts/build-club-preview.mjs. Site tools the Club hosts (src/data/club/tools.ts) come in as the Club
+ * page's built markup plus the tool's one behavior module. Navigation stays inside the page; printing is off (the page's frame can't
  * open a print dialog), and "Preview the printout" shows the real US Letter page.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Dashboard from '../components/club/Dashboard';
 import FamilyPage from '../components/club/FamilyPage';
 import KitPage from '../components/club/KitPage';
+import ClubToolBar from '../components/club/ClubToolBar';
+import { initRoutineChart } from '../components/site/routine-chart';
+import { initScreenTime } from '../components/site/screen-time-contract';
+import { initChoreChart } from '../components/site/chore-chart';
+import { initTraditionsPicker } from '../components/site/traditions-picker';
+import { initHabitBuilder } from '../components/site/habit-builder';
+import { initConnectionPlanner } from '../components/site/connection-planner';
+import { initSpringCleaningBuilder } from '../components/site/spring-cleaning-builder';
+import { initMealTeamPlanner } from '../components/site/meal-team-planner';
+import { initWrapUpBuilder } from '../components/site/wrap-up-builder';
+import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
 
@@ -41,6 +53,64 @@ const swapImages = (root: ParentNode) => {
   }
 };
 new MutationObserver(() => swapImages(document)).observe(document.documentElement, { childList: true, subtree: true });
+// The hosted preview's frame can't download files itself; its host offers them through the `downloads` capability
+// (with a confirmation). Site code still makes its usual download link; this hands that file over instead.
+type Downloads = { save(r: { filename: string; data: Blob }): Promise<unknown> };
+let downloads: Downloads | null = null;
+(globalThis as { claude?: { use?: (n: string) => Promise<unknown> } }).claude?.use?.('downloads').then((d) => { downloads = d as Downloads | null; }, () => {});
+const nativeClick = HTMLAnchorElement.prototype.click;
+HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+  const href = this.href;
+  if (downloads && this.download && /^(data|blob):/.test(href)) {
+    const filename = this.download;
+    fetch(href).then((r) => r.blob()).then((data) => downloads!.save({ filename, data })).catch(() => { /* declined or not allowed here */ });
+    return;
+  }
+  nativeClick.call(this);
+};
+
+// Tools set image sources from script (the routine chart's illustrations): hand them the inlined copy directly.
+const srcProp = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src')!;
+Object.defineProperty(HTMLImageElement.prototype, 'src', {
+  ...srcProp,
+  set(this: HTMLImageElement, v: string) {
+    srcProp.set!.call(this, images[v] ?? v);
+  },
+});
+
+// Site tools hosted in the Club: the markup the Club page renders (built into the preview), wired up with the same
+// behavior module the site uses. One tool, two entry points; the preview only swaps how the page arrives.
+const toolMarkup = (globalThis as { __CLUB_TOOLS?: Record<string, string> }).__CLUB_TOOLS ?? {};
+// The preview's page address is the host's, so the sample family comes from the preview's own route.
+let sample: string | null = null;
+const toolInit: Record<string, (host: HTMLElement) => void> = {
+  'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart', sample)),
+  'screen-time': (host) => initScreenTime(host.querySelector<HTMLElement>('.st-container')!, readToolHandoff('screen-time', sample)),
+  'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart', sample)),
+  'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker', sample)),
+  'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder', sample)),
+  'connection-planner': (host) => initConnectionPlanner(host.querySelector<HTMLElement>('.cn')!, readToolHandoff('connection-planner', sample)),
+  'spring-cleaning': (host) => initSpringCleaningBuilder(host.querySelector<HTMLElement>('.sb')!, readToolHandoff('spring-cleaning', sample)),
+  'meal-team': (host) => initMealTeamPlanner(host.querySelector<HTMLElement>('.mlt')!, readToolHandoff('meal-team', sample)),
+  'school-wrap-up': (host) => initWrapUpBuilder(host.querySelector<HTMLElement>('.wu')!, readToolHandoff('school-wrap-up', sample)),
+};
+
+function ToolPage({ tool, search }: { tool: string; search: string }) {
+  const host = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (host.current) {
+      sample = new URLSearchParams(search).get('sample');
+      swapImages(host.current);
+      toolInit[tool]?.(host.current);
+    }
+  }, [tool]);
+  return (
+    <>
+      <ClubToolBar tool={tool} />
+      <section ref={host} id="club-tool-host" className="w-full pb-20 pt-4" dangerouslySetInnerHTML={{ __html: (toolMarkup[tool] ?? '').replace(/\/images\/[^"]+?\.webp/g, (p) => images[p] ?? p) }} />
+    </>
+  );
+}
 
 function App() {
   const [route, setRoute] = useState<Route>(saved);
@@ -85,11 +155,13 @@ function App() {
 
   const key = route.path + route.search;
   const kit = kits.find((k) => route.path === `/club/kits/${k.slug}`);
+  const tool = route.path.startsWith('/club/tools/') ? route.path.slice('/club/tools/'.length) : '';
   return (
     <div className="min-h-full bg-ivory text-warm-ink">
       {route.path === '/club/start' ? <FamilyPage key={key} mode="start" />
         : route.path === '/club/family' ? <FamilyPage key={key} mode="edit" />
         : kit ? <KitPage key={key} slug={kit.slug} />
+        : tool && toolMarkup[tool] ? <ToolPage key={key} tool={tool} search={route.search} />
         : <Dashboard key={key} />}
     </div>
   );

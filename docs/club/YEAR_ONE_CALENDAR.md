@@ -21,13 +21,13 @@ Rules for every month (from [VISION.md](../brand/VISION.md) and [BRAND_VOICE.md]
 | **May 2027** | Finish the School Year Well | School Year Wrap-Up Builder | planning | Living Areas | May 1 | Apr 15 |
 | **Jun 2027** | Summer With a Plan | Summer Rhythm Builder | routines | Outdoor / Summer Prep | Jun 1 | May 15 |
 | **Jul 2027** | Ready to Go | Packing and Independence Builder | projects | Kitchen Deep Clean | Jul 1 | Jun 15 |
-| **Aug 2027** | Back-to-School Ready | School Launch Builder | routines + planning | Bedrooms + Back-to-School | Aug 1 | Jul 15 |
+| **Aug 2027** | Ready for the School Year (built) | Letter + six-line countdown + routine chart tool | responsibilities | Bedrooms + Back-to-School | Aug 1 | Jul 15 |
 | **Sep 2027** | A Week Everyone Can See | Sunday Family Reset Builder | planning | Entry + Storage | Sep 1 | Aug 15 |
-| **Oct 2027** | The Family That Follows Through | Family Habits and Ownership Review | responsibilities (review mode) | Closet Cleanout | Oct 1 | Sep 15 |
+| **Oct 2027** | A Home That Works Together (built) | Letter + five-line Fall Home Reset + chore chart | responsibilities | Fall Home Reset | Oct 1 | Sep 15 |
 
 Whether December is the first paid month with a mailer depends on the mail house's real proof-to-mail time (D2), not on the placeholder lead times below. If it doesn't fit, December's kit opens digitally for beta families and January becomes the first paid month.
 
-Slugs follow `YYYY-MM-<theme>` and are permanent once printed on a mailer: `2026-11-family-ownership`, `2026-12-holiday-teamwork`, `2027-01-mornings`, `2027-02-better-together`, `2027-03-spring-clean`, `2027-04-mealtime`, `2027-05-school-year-wrap-up`, `2027-06-summer-rhythm`, `2027-07-ready-to-go`, `2027-08-school-launch`, `2027-09-sunday-reset`, `2027-10-follow-through`.
+Slugs follow `YYYY-MM-<theme>` and are permanent once printed on a mailer: `2026-11-family-ownership`, `2026-12-holiday-teamwork`, `2027-01-mornings`, `2027-02-better-together`, `2027-03-spring-clean`, `2027-04-mealtime`, `2027-05-school-year-wrap-up`, `2027-06-summer-rhythm`, `2027-07-ready-to-go`, `2027-08-school-launch`, `2027-09-sunday-reset`, `2027-10-home-works-together` (built; replaced the planned `2027-10-follow-through`).
 
 ## Kit by kit
 
@@ -48,40 +48,99 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter on doing fewer things together; field guide on dividing the season so one person isn't the season; activity: family vote on traditions.
 - **Overlap check:** free `/december-countdown` and `/holiday-gift-planner` stay free; the kit links to them instead of duplicating.
 
-### January: Mornings Without the Mayhem
+### January: A Fresh Start, Together (built 2026-10-23, behind the flag)
+
+*One small change. A better rhythm for everyone.* Owner direction, 2026-10-23: replaces "Mornings Without the Mayhem" below for January 2027. Config: `src/data/club/kits/2027-01-fresh-start-together.ts`. Mailer: [mailers/2027-01-fresh-start-together.md](mailers/2027-01-fresh-start-together.md).
+
+- **The letter:** You Don't Need a Whole New Routine (about 170 words): January asks for everything at once; choose one recurring frustration, not all of them. Asks "What's one part of our day that we could make easier for everyone?" A draft for Megan.
+- **The action:** Our One-Thing Family Reset, five steps (choose one frustration, agree on a simpler plan, give everyone a part, put it on the calendar, try it for seven days), with "Our one thing this month" written above them. Online: the one thing (a suggestion or her words), a simple plan, an optional start day and its check-in a week later. No tracking.
+- **The tool:** the Family Habit Builder, a new site tool: what to make easier, when (tied to something the family already does), who; one editable habit sentence and a seven-day practice card.
+- **Back of the letter:** Small Changes That Stick (three principles), one worked example, the family question, the QR code, one calendar note.
+- **Not another month:** one rhythm, not a declutter, a responsibility overhaul or a 30-day program.
+
+### January (earlier plan): Mornings Without the Mayhem
 
 - **Flagship: Morning Routine Builder.** Per child: ordered, timed steps from wake-up to out-the-door, sized by age, with the night-before steps they own; adults' morning jobs split, not stacked on one person. Two inputs with defaults: leave-the-house time, wake-up time.
 - **Worksheets:** night-before checklist per child, "the late morning" fallback plan (the 10-minute version), team Kitchen Reset.
 - **Mailer:** letter on mornings; field guide on teaching a routine once and letting the chart do the reminding; activity: a timed practice run on a weekend morning.
 - **Overlap check:** free `/routine-chart` (one routine, typed in) stays free; the kit builds every child's chart at once from ages.
 
-### February: Better Together
+### February: Better Together (built 2026-10-23, behind the flag)
+
+*Less managing life. More enjoying it together.* Owner direction, 2026-10-23: replaces the earlier February plan below. Config: `src/data/club/kits/2027-02-better-together.ts`. Mailer: [mailers/2027-02-better-together.md](mailers/2027-02-better-together.md).
+
+- **The letter:** Make Room for Each Other (about 170 words): you can care for your family all day without enjoying them; organizing is for making room for the people you love; Mom isn't the entertainment director. Asks "What's something you'd love for us to do together more often?" A draft for Megan.
+- **The action:** Our Family Connection Challenge, three actions (do something together, one-on-one time with every grown-up taking a turn, one shared space made inviting on its cleaning-zone day), each with an optional "Our idea" line. No dates or scores.
+- **The tool:** the Family Connection Planner, a new site tool on the traditions picker's shared idea rules: three ideas (family, one-on-one, a rhythm), swap, edit, choose one, a one-page plan.
+- **Back of the letter:** Make Room for Connection (three principles), three conversation prompts, the QR code, one calendar note.
+
+### February (earlier plan): Better Together
 
 - **Flagship: Family Connection Planner.** A month of small, dated connection moments (one-on-one time per child with each adult, a family night per week), rotated so each pairing gets a turn; who plans each one.
 - **Worksheets:** conversation cards by age, one-on-one date menu, team Bedrooms + Closets reset.
 - **Mailer:** letter on connection as part of the family system; field guide on keeping it small; activity: family night plan.
 
-### March: Spring Clean as a Team
+### March: Spring Clean as a Team (built 2026-10-23, behind the flag)
+
+*Less cleaning for Mom. More helping hands.* Owner direction, 2026-10-23: replaces the earlier March plan below. Config: `src/data/club/kits/2027-03-spring-clean-together.ts`. Mailer: [mailers/2027-03-spring-clean-together.md](mailers/2027-03-spring-clean-together.md).
+
+- **The letter:** This House Belongs to All of Us (about 160 words): spring cleaning shouldn't be one person's weekend; everyone does something real, at their age. Asks "What's one space in our home we could make better together?" A draft for Megan.
+- **The action:** Our One-Room Family Reset, five steps, with the space and when written above them and an optional "Who's helping?" per step. Thirty minutes is a starting point; one room is enough.
+- **The tool:** the Family Spring Cleaning Builder, a new site tool: rooms, who's helping (with limits), session length; safe, age-fit jobs for each person in time-boxed sessions; edit anything; print one room.
+- **Back of the letter:** the field guide, optional decluttering ideas, the question, the QR code, one calendar note.
+- **Not October or November:** one seasonal project, not ongoing chores; it divides the work of what's on the calendar.
+
+### March (earlier plan): Spring Clean as a Team
 
 - **Flagship: Family Spring Cleaning Builder.** Spring Prep zones split into owned tasks with a due day, sized by age, so no one person does the spring clean.
 - **Worksheets:** donate / keep / toss station sign, room-by-room team checklist, finish-line celebration card.
 - **Mailer:** letter; field guide on teaching a cleaning task to a child; activity: the 30-minute family blitz.
 - **Overlap check:** free `/spring-cleaning-checklist` stays free; the kit assigns it.
 
-### April: Everybody Helps at Mealtime
+### April: Everybody Helps at Mealtime (built 2026-10-23, behind the flag)
+
+*Less on Mom's plate. Everyone has a place at the table.* Owner direction, 2026-10-23: replaces the earlier April plan below. Config: `src/data/club/kits/2027-04-everybody-helps-at-mealtime.ts`. Mailer: [mailers/2027-04-everybody-helps-at-mealtime.md](mailers/2027-04-everybody-helps-at-mealtime.md).
+
+- **The letter:** Dinner Is Everyone's Job (about 150 words): the thinking behind meals is work too, and it usually lands on Mom; everybody eats, so everybody can help, at their age. Asks "What's one part of mealtime you could take responsibility for this week?" A draft for Megan.
+- **The action:** Our Family Dinner Team, five steps, with the meal and when written above them and an optional "Who's helping?" per step. Any meal counts.
+- **The tool:** the Family Meal Responsibility Planner, a new site tool (`/club/tools/meal-team`): who's helping (with limits and an allergy setting), which meals, the same jobs or rotating; planning, prep, serving and cleanup shared out, the thinking included; edit anything; print the team chart (and the week, when rotating).
+- **Back of the letter:** before / during / after, kitchen jobs by age, a five-minute pantry check, the question, the QR code, the calendar's meal-plan and grocery-list sections.
+- **Not the free `/meal-planner`:** that plans what to eat; this shares who does the work. Meals still go in the calendar's meal plan.
+
+### April (earlier plan): Everybody Helps at Mealtime
 
 - **Flagship: Meal Responsibility Planner.** Weeknight dinners as owned jobs: who plans, who cooks (with an adult for younger kids), who sets, who clears, rotating weekly; a kid-led meal per week from age 8.
 - **Worksheets:** family meal ideas list by who can make it, grocery list ownership, team Windows + Entry reset.
 - **Mailer:** letter; field guide on letting kids cook with real jobs; activity: kids plan and make one dinner.
 - **Overlap check:** free `/meal-planner` and `/lunch-and-snack-station` stay free.
 
-### May: Finish the School Year Well
+### May: Finish the School Year Well (built 2026-10-23, behind the flag)
+
+*Less end-of-year chaos. More ready for summer.* Owner direction, 2026-10-23: replaces the earlier May plan below. Config: `src/data/club/kits/2027-05-finish-the-school-year.ts`. Mailer: [mailers/2027-05-finish-the-school-year.md](mailers/2027-05-finish-the-school-year.md).
+
+- **The letter:** You Don't Have to Wrap Up Everything Yourself (about 160 words): the end of school is a small holiday season of things to remember; the school year belongs to the kids, too. Asks "What's one thing you're proud of from this school year?" A draft for Megan.
+- **The action:** Our School Year Wrap-Up, five steps each with a sentence, an optional "Who's helping?" per step, no dates; works whether school ends in May or June.
+- **The tool:** the School Year Wrap-Up Builder, a new site tool (`/club/tools/school-wrap-up`): the last day (family or per child), which closeout work applies, who's helping; a short plan before school ends and after the last day with August's countdown dates, children owning their own closeout; print the family's plan or one child's.
+- **Back of the letter:** three principles, the Five Favorites Rule, a cut-out "My School Year" reflection with room to write, the QR code, the calendar note.
+- **Not August or June:** August gets ready for the start; May finishes well. No summer planning, school planner, first-day routines or supply shopping.
+
+### May (earlier plan): Finish the School Year Well
 
 - **Flagship: School Year Wrap-Up Builder.** The last four weeks as a dated plan: teacher thank-yous, end-of-year events, paperwork, clearing backpacks, each owned by a person.
 - **Worksheets:** end-of-year memory page per child, summer kickoff list, team Living Areas reset.
 - **Mailer:** letter; field guide on the end-of-year pile-up; activity: memory interview.
 
-### June: Summer With a Plan
+### June: Summer With a Plan (built 2026-10-23, behind the flag)
+
+*More freedom for the kids. Less managing for Mom.* Owner direction, 2026-10-23: replaces the earlier June plan below. Config: `src/data/club/kits/2027-06-summer-with-a-plan.ts`. Mailer: [mailers/2027-06-summer-with-a-plan.md](mailers/2027-06-summer-with-a-plan.md).
+
+- **The letter:** Summer Doesn't Need a Schedule for Every Hour (about 160 words): a few rhythms everyone agrees on instead of one person managing every hour. Asks "What would make this summer really good for each of us?" A draft for Megan.
+- **The action:** Our Summer Family Agreement, four decisions (anchors, screens, responsibilities, one fun plan), a "We decided" line under each, no dates.
+- **The tools (the one two-tool month):** the site's own routine chart, Summer type (the Summer Rhythm Builder: daily anchors, not hours), and the site's own screen time tool, family agreement format (when, how much, before screens, where devices go, how it ends, what grown-ups agree to). Each optional, each per child or the whole family.
+- **Back of the letter:** three principles, a cut-out "When I'm Bored…" card, the outdoor gear tip, both tools under one QR code, the calendar note.
+- **Not July or August:** no connection plans (July), no school-day routines (August), no summer planner or activity grid.
+
+### June (earlier plan): Summer With a Plan
 
 - **Flagship: Summer Rhythm Builder.** A loose daily and weekly rhythm (not a schedule) per child by age: morning jobs, quiet time, outside time, one weekly outing each child chooses.
 - **Worksheets:** "I'm bored" menu by age, summer jobs chart, team Outdoor / Summer Prep.
@@ -94,12 +153,18 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter; field guide on independence one bag at a time; activity: kids pack a practice bag.
 - **Overlap check:** free `/travel-checklist` stays free.
 
-### August: Back-to-School Ready
+### August: Ready for the School Year (built 2026-10-23, simplified the same day, behind the flag)
 
-- **Flagship: School Launch Builder.** First-week plan dated from her first day of school (one input), plus each child's school-morning and after-school routines (reuses January's engine with school-year defaults).
-- **Worksheets:** backpack checklist per child, after-school landing station sign, team Bedrooms + Back-to-School reset.
-- **Mailer:** letter; field guide on the first two weeks; activity: first-day interview.
-- **Overlap check:** free `/back-to-school-checklist` stays free.
+*One calmer start. Everyone has a part.* Config: `src/data/club/kits/2027-08-school-year.ts`. Mailer: [mailers/2027-08-school-year.md](mailers/2027-08-school-year.md).
+
+The first kit in the three-part shape every month now follows (owner direction, 2026-10-23): **one letter, one action, one optional tool**, with the family calendar staying the plan.
+
+- **The letter:** about 160 words to Mom, greeting her by first name when it's known: get ready together, give kids their part, put the plan on the family calendar, start small. A draft for Megan to approve or rewrite.
+- **The action:** Our Back-to-School Countdown, six lines with "By" and "Who's helping?" blanks. Online she enters when school starts (one family date, or one per child, picking which the countdown counts from) and each line gets a suggested day (14, 10, 7, 7, 5 and 1 days before), changeable; past days move to a practical one, a day or two out keeps only the essentials, after the first day it points to the routine charts. Print, copy as text, or a calendar file; nothing syncs.
+- **The conversation:** one question on the back of the letter: "What's one thing you want to be able to do by yourself before school starts?"
+- **The tool:** the site's routine chart (`/routine-chart`), opened inside the Club for the child she picks, with their name in the title, the routine she chose and the picture steps suited to their age first. Same tool, same printable, no Club copy.
+- **Removed from the first draft** (kept as `src/data/club/libraries/school-year.ts`): the 20-plus-task launch plan with an owner per task, the overview, the per-child school and first-day setup, the School-Year Command Center with its Sunday checklist and commitments, the separate guide, huddle and backpack-station pieces.
+- **Overlap check:** the free `/routine-chart` and `/back-to-school-checklist` stay free; the Club chart is personalized by each child's age.
 
 ### September: A Week Everyone Can See
 
@@ -108,12 +173,25 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter; field guide on keeping the meeting short and kept; activity: the first Sunday reset.
 - **Note:** the wall calendar is the natural place for this week to live; mention it once, secondary, per ARTICLE_FORMAT product rules, and never imply sync.
 
-### October: The Family That Follows Through
+### October: A Home That Works Together (built 2026-10-23, behind the flag)
 
-- **Flagship: Family Habits and Ownership Review.** Reads her saved November chart (and any later ones): which jobs stayed with their owner, which drifted back, and suggests next-level ownership by each child's new age. Output: a new chart for year two.
-- **Worksheets:** "what stuck" family reflection, certificate per person for a job they own, team Closet Cleanout.
-- **Mailer:** letter on a year of shared work; field guide on what to do when jobs drift back; activity: family awards night.
-- **Retention note:** the review only works for members who kept their November chart; it's the natural renewal point for year two.
+*Little jobs. Shared responsibility. A home ready for the season ahead.* Owner direction, 2026-10-23: replaces the planned "Family That Follows Through" review. Config: `src/data/club/kits/2027-10-home-works-together.ts`. Mailer: [mailers/2027-10-home-works-together.md](mailers/2027-10-home-works-together.md).
+
+- **The letter:** about 160 words: you shouldn't be the only one noticing what needs doing; a family works better when everyone knows what they can contribute; October before the busy season. Asks "What's one thing around our home you think you could take care of without being reminded?" A draft for Megan.
+- **The action:** Our Fall Home Reset, five lines (outgrown clothes, the entryway, essentials, one cluttered area, one job each), a "Who's helping?" blank on each, wording she can change. A plain checklist: no dates, reminders or tracking; one weekend or across the month.
+- **The tool:** the site's chore chart (`/chore-chart`), opened inside the Club for anyone in the family she picks, grown-ups included, starting with **one job they can own** (one age-fit job for a child, a whole job for a grown-up; no rewards filled in). The full week of chores for their age is a tap away. The calendar says when; the chart says who.
+- **Back of the letter:** From Helping Mom to Owning a Job: three principles, one example, the family question, the QR code, and one calendar note.
+- **Not November:** October resets the physical home and starts one owned job each; November (Our Family, Our Team) builds ongoing shared responsibilities and follow-through.
+
+### December: Christmas Is a Family Affair (built 2026-10-23, behind the flag)
+
+*More together. Less on Mom.* Owner direction, 2026-10-23: replaces the planned "Make Room for What Matters" (Holiday Teamwork Planner) above for 2027. Config: `src/data/club/kits/2027-12-christmas-family-affair.ts`. Mailer: [mailers/2027-12-christmas-family-affair.md](mailers/2027-12-christmas-family-affair.md).
+
+- **The letter:** You Get to Enjoy Christmas, Too (about 180 words): loving Christmas doesn't mean carrying all of it; a Christmas the family makes together isn't a lesser one. Asks "What's one thing we could each do to make Christmas special for someone else?" A draft for Megan.
+- **The action:** Our Family Christmas Plan, five decisions (what matters, dates on the calendar, gift preparations, one way to give, Christmas-week jobs), each with its sentence and a "Who's helping?" blank, wording she can change. No dates or deadlines; "Already made your plans?" turns it into a check-in, so it works in late November or mid-December.
+- **The tool:** the Family Christmas Traditions Picker, a new site tool (nothing on the site did this), opened with the children's ages: three ideas that fit the family's time, budget and ages; keep up to three, swap the rest, print or copy.
+- **Back of the letter:** the family question first, Making Christmas Together (three principles), the QR code, one calendar note.
+- **Not October or November:** celebration and sharing the work of it, not a chore system.
 
 ## Monthly production calendar (per kit)
 

@@ -23,10 +23,8 @@
   html[data-club-print] .club-print {
     display: none !important;
   }
-  html[data-club-print='ownership-chart'] .club-print[data-doc='ownership-chart'],
-  html[data-club-print='kitchen-pantry-reset'] .club-print[data-doc='kitchen-pantry-reset'],
-  html[data-club-print='who-owns-what'] .club-print[data-doc='who-owns-what'],
-  html[data-club-print='handing-over'] .club-print[data-doc='handing-over'] {
+  /* printDocument() marks the one being printed (any kit, any printable). */
+  html[data-club-print] .club-print.is-printing {
     display: block !important;
     box-shadow: none !important;
     margin: 0 !important;
@@ -374,4 +372,1112 @@
 }
 .club-density-tight .club-card-head {
   min-height: 0.3in;
+}
+
+/* ------------------------------------------------------------------ portrait chart (August's launch checklist) */
+
+.club-chart-portrait {
+  width: 7.8in;
+  min-height: 10.2in;
+}
+.club-chart-portrait .club-chart-head {
+  height: 1.05in;
+}
+.club-chart-portrait .club-chart-promise {
+  max-width: 2.6in;
+  line-height: 1.5;
+}
+.club-job-check {
+  grid-template-columns: 0.3in 1fr 0.2in;
+}
+.club-density-tight .club-job-check {
+  grid-template-columns: 0.22in 1fr 0.18in;
+}
+.club-job-check .club-box {
+  width: 0.17in;
+  height: 0.17in;
+  margin: 0;
+  align-self: start;
+  margin-top: 0.03in;
+}
+@media print {
+  html[data-club-print] .club-chart-portrait {
+    height: 10.15in;
+  }
+  html[data-club-print] .club-chart-portrait[data-pages='2'] {
+    height: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ command center (landscape) */
+
+.club-command-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 0.16in;
+  align-items: start;
+  flex: 1;
+}
+.club-command-side {
+  display: grid;
+  gap: 0.16in;
+}
+.club-command-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1.1in;
+  gap: 0.08in;
+  align-items: center;
+  min-height: 0.36in;
+  border-bottom: 1px solid #f0e9e2;
+  font-size: 9.5pt;
+  line-height: 1.2;
+}
+.club-command-job {
+  font-weight: 600;
+}
+.club-command-row .club-chip {
+  font-size: 7pt;
+  white-space: nowrap;
+}
+.club-command-owner {
+  font-size: 13pt;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.club-command-blank {
+  height: 0.32in;
+  border-bottom: 1px solid #e7ddd4;
+}
+.club-command-intro {
+  font-size: 8.5pt;
+  color: #6e6461;
+  margin: 0.04in 0 0.02in;
+}
+.club-command-check {
+  display: grid;
+  grid-template-columns: 0.24in 1fr;
+  align-items: start;
+  font-size: 9pt;
+  line-height: 1.3;
+  padding: 0.04in 0;
+}
+.club-command-check .club-box {
+  width: 0.15in;
+  height: 0.15in;
+  margin-top: 0.01in;
+}
+@media print {
+  html[data-club-print] .club-command {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* ------------------------------------------------------------------ the one-page guide (portrait) */
+
+.club-guide {
+  margin-top: 0.3in;
+  columns: 2;
+  column-gap: 0.35in;
+}
+.club-guide section {
+  break-inside: avoid;
+  margin-bottom: 0.22in;
+}
+.club-guide h3 {
+  font-family: var(--font-serif);
+  font-size: 13pt;
+  font-weight: 700;
+  color: #3d3834;
+}
+.club-guide p {
+  margin-top: 0.06in;
+  font-size: 10.5pt;
+  line-height: 1.5;
+}
+.club-command .club-chart-title {
+  font-size: 28pt;
+  white-space: nowrap;
+}
+.club-command .club-chart-promise {
+  white-space: nowrap;
+}
+.club-sheet-lines-tight .club-sheet-line {
+  height: 0.4in;
+}
+
+/* ------------------------------------------------------------------ three-part kits: the monthly letter (two pages) */
+
+.club-letter {
+  width: 7.8in;
+  background: transparent;
+  color: #3d3834;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+@media screen {
+  .club-print-frame.is-open .club-letter {
+    box-shadow: none;
+  }
+  .club-letter-page {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 6px 24px rgb(77 69 68 / 0.12);
+  }
+  .club-letter-page + .club-letter-page {
+    margin-top: 0.3in;
+  }
+}
+.club-letter-page {
+  box-sizing: border-box;
+  width: 7.8in;
+  height: 10.3in;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5in 0.6in 0.45in;
+  background: #fbf7f1;
+}
+.club-letter-page + .club-letter-page {
+  break-before: page;
+  page-break-before: always;
+}
+.club-letter-head,
+.club-letter-label {
+  font-family: var(--font-sans);
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #857a76;
+}
+.club-letter-head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.12in;
+  border-bottom: 1px solid #e2d8cd;
+}
+.club-letter-label {
+  display: block;
+  font-style: normal;
+}
+.club-letter-title {
+  margin-top: 0.28in;
+  font-family: var(--font-serif);
+  font-size: 30pt;
+  font-weight: 400;
+  line-height: 1.08;
+  color: #4d4544;
+}
+.club-letter-subtitle {
+  margin-top: 0.08in;
+  font-family: var(--font-serif);
+  font-size: 14pt;
+  font-style: italic;
+  color: #96666b;
+}
+.club-letter-body {
+  margin-top: 0.22in;
+  max-width: 6.5in;
+  font-family: var(--font-serif);
+  font-size: 11.5pt;
+  line-height: 1.47;
+}
+.club-letter-body p + p {
+  margin-top: 0.07in;
+}
+.club-letter-greeting {
+  font-style: italic;
+}
+.club-letter-signoff {
+  margin-bottom: 0.14in;
+  display: flex;
+  align-items: baseline;
+  gap: 0.14in;
+  margin-top: 0.1in !important;
+  font-style: italic;
+}
+.club-letter-signature {
+  font-size: 21pt;
+  font-style: normal;
+  color: #6e6461;
+}
+.club-letter-placeholder {
+  font-style: italic;
+  color: #857a76;
+}
+.club-letter-action {
+  margin-top: auto;
+  padding: 0.14in 0.28in 0.06in;
+  background: #f1f4ec;
+  border-top: 2px solid #9aab8f;
+}
+.club-letter-action h2 {
+  font-family: var(--font-serif);
+  font-size: 16pt;
+  font-weight: 400;
+  color: #4d4544;
+}
+.club-action {
+  list-style: none;
+  margin: 0.06in 0 0;
+  padding: 0;
+}
+.club-action-row {
+  display: grid;
+  grid-template-columns: 0.22in 1fr 0.8in 1.3in;
+  gap: 0.14in;
+  align-items: end;
+  padding: 0.06in 0;
+  border-bottom: 1px solid #dfe6d8;
+  font-size: 10.5pt;
+  line-height: 1.3;
+  break-inside: avoid;
+}
+.club-action-row:last-child {
+  border-bottom: 0;
+}
+.club-action-box {
+  align-self: center;
+  width: 0.19in;
+  height: 0.19in;
+  margin: 0;
+  background: #fff;
+}
+.club-action-box.is-done {
+  background: #9aab8f;
+  border-color: #9aab8f;
+}
+.club-action-text {
+  align-self: center;
+}
+.club-action-helper {
+  display: grid;
+}
+.club-action-helper-label {
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #857a76;
+}
+.club-action-helper-line {
+  height: 0.24in;
+  border-bottom: 1px solid #b9b0a8;
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
+  font-size: 12pt;
+  line-height: 0.3in;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.club-letter-back-title {
+  margin-top: 0.3in;
+  font-family: var(--font-serif);
+  font-size: 19pt;
+  font-weight: 400;
+  line-height: 1.1;
+  color: #4d4544;
+}
+.club-letter-conversation {
+  margin-top: 0.28in;
+  padding: 0.22in 0.3in 0.2in;
+  background: #f1f4ec;
+  border-top: 2px solid #9aab8f;
+}
+.club-letter-question {
+  margin-top: 0.08in;
+  font-family: var(--font-serif);
+  font-size: 18pt;
+  line-height: 1.28;
+  color: #4d4544;
+}
+.club-letter-question-note {
+  margin-top: 0.1in;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  font-style: italic;
+  color: #5c5550;
+}
+.club-letter-tips {
+  display: grid;
+  gap: 0.07in;
+  margin-top: 0.12in;
+}
+.club-letter-example h3,
+.club-letter-invite h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-letter-tips p {
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  line-height: 1.45;
+}
+.club-letter-tips strong {
+  color: #4d4544;
+}
+.club-letter-example {
+  margin-top: 0.24in;
+  padding: 0.2in 0.26in;
+  background: #fff;
+  border: 1px solid #e7ddd4;
+}
+.club-letter-example h3 {
+  margin-top: 0.04in;
+  font-size: 13pt;
+}
+.club-letter-example ol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.1in 0.3in;
+  margin: 0.14in 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.club-letter-example li {
+  display: grid;
+  grid-template-columns: 0.42in 1fr;
+  gap: 0.12in;
+  align-items: center;
+  font-size: 11pt;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.club-letter-example .club-job-art,
+.club-letter-example .club-job-art img {
+  width: 0.42in;
+  height: 0.42in;
+}
+.club-letter-invite {
+  display: grid;
+  grid-template-columns: 1.2in 1fr;
+  gap: 0.3in;
+  align-items: center;
+  margin-top: 0.24in;
+  margin-bottom: 0.2in;
+}
+.club-qr {
+  width: 1.2in;
+  height: 1.2in;
+}
+.club-letter-invite h3 {
+  font-size: 15pt;
+}
+.club-letter-invite p {
+  margin-top: 0.06in;
+  font-family: var(--font-serif);
+  font-size: 10.5pt;
+  line-height: 1.5;
+}
+.club-letter-invite .club-letter-url {
+  margin-top: 0.1in;
+  font-family: var(--font-sans);
+  font-size: 10pt;
+  font-weight: 600;
+  color: #4d4544;
+}
+.club-letter-calendar {
+  margin-top: auto;
+  padding: 0.16in 0.22in;
+  background: #f8eeec;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  font-style: italic;
+  line-height: 1.45;
+}
+.club-letter-calendar .club-letter-label {
+  margin-bottom: 0.04in;
+}
+@media print {
+  html[data-club-print] .club-letter-page {
+    height: 10.25in;
+  }
+}
+
+/* The action on its own page */
+.club-action-sheet .club-action {
+  margin-top: 0.3in;
+}
+.club-action-sheet .club-action-row {
+  grid-template-columns: 0.3in 1fr 1.15in 1.75in;
+  gap: 0.2in;
+  padding: 0.22in 0;
+  border-bottom-color: #ece4dc;
+  font-size: 13pt;
+}
+.club-action-sheet .club-action-box {
+  width: 0.28in;
+  height: 0.28in;
+}
+.club-action-sheet .club-action-helper-line {
+  height: 0.3in;
+  font-size: 14pt;
+  line-height: 0.38in;
+}
+
+.club-action-when .club-action-helper-line {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 10.5pt;
+}
+.club-action-sheet .club-action-when .club-action-helper-line {
+  font-size: 12pt;
+}
+.club-action-sheet-note {
+  margin-top: 0.3in;
+  font-family: var(--font-serif);
+  font-size: 12pt;
+  font-style: italic;
+  color: #5c5550;
+}
+
+/* A checklist without dates (October's reset): no "By" column. */
+.club-action-undated .club-action-row {
+  grid-template-columns: 0.22in 1fr 1.7in;
+}
+.club-action-sheet .club-action-undated .club-action-row {
+  grid-template-columns: 0.3in 1fr 2.2in;
+}
+.club-letter-back-intro {
+  margin-top: 0.1in;
+  font-family: var(--font-serif);
+  font-size: 11.5pt;
+  line-height: 1.5;
+}
+.club-letter-story p {
+  margin-top: 0.06in;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+/* A line's detail sentence (December's plan), under its words. */
+.club-action-detail {
+  display: block;
+  margin-top: 0.02in;
+  font-size: 9pt;
+  line-height: 1.3;
+  color: #6e6461;
+}
+.club-action-sheet .club-action-detail {
+  font-size: 11pt;
+}
+.club-letter-action-note {
+  margin-top: 0.03in;
+  font-family: var(--font-serif);
+  font-size: 9.5pt;
+  font-style: italic;
+  line-height: 1.35;
+  color: #5c5550;
+}
+.club-action-sheet-tip {
+  font-style: italic;
+}
+
+/* December's seasonal touch: one fine evergreen sprig, muted evergreen and soft clay instead of sage and rose. */
+.club-sprig {
+  display: block;
+  width: 1.15in;
+  height: 0.46in;
+  margin: 0.2in 0 -0.12in;
+}
+.club-sprig-small {
+  display: inline-block;
+  width: 0.62in;
+  height: 0.25in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.02in;
+}
+.club-print[data-accent='evergreen'] .club-letter-subtitle {
+  color: #a0705c;
+}
+.club-print[data-accent='evergreen'] .club-letter-action,
+.club-print[data-accent='evergreen'] .club-letter-conversation {
+  background: #eef1eb;
+  border-top-color: #6f8a72;
+}
+.club-print[data-accent='evergreen'] .club-action-row {
+  border-bottom-color: #dbe2d6;
+}
+.club-print[data-accent='evergreen'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='evergreen'] .club-letter-calendar {
+  background: #f6ede6;
+}
+
+/* A front with a longer action (a sentence and a helper blank on each line: December): a slightly tighter letter so it fits. */
+.club-letter[data-dense] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-dense] .club-letter-subtitle {
+  font-size: 13pt;
+}
+.club-letter[data-dense] .club-letter-body {
+  margin-top: 0.14in;
+  font-size: 10.6pt;
+  line-height: 1.4;
+}
+.club-letter[data-dense] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-dense] .club-letter-signature {
+  font-size: 18pt;
+}
+.club-letter[data-dense] .club-letter-signoff {
+  margin-bottom: 0.08in;
+}
+.club-letter[data-dense] .club-letter-action {
+  padding-top: 0.1in;
+}
+.club-letter[data-dense] .club-letter-action .club-action-row {
+  grid-template-columns: 0.22in 1fr 1.25in;
+  padding: 0.035in 0;
+  font-size: 10pt;
+}
+.club-letter .club-action-detail {
+  font-size: 8.4pt;
+}
+.club-letter[data-accent='evergreen'] .club-sprig:not(.club-sprig-small) {
+  width: 0.95in;
+  height: 0.38in;
+  margin: 0.12in 0 0;
+}
+
+/* January: the family's one thing (a blank on the letter), and on her copy the plan and its two days. */
+.club-focus-line {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.12in;
+  align-items: end;
+  margin: 0.08in 0 0.04in;
+}
+.club-focus-line .club-action-helper-line {
+  height: 0.26in;
+}
+.club-action-sheet .club-focus-line {
+  margin-top: 0.24in;
+}
+.club-action-sheet .club-focus-line .club-action-helper-line {
+  height: 0.32in;
+  font-size: 15pt;
+  line-height: 0.4in;
+}
+.club-focus-plan {
+  margin-top: 0.1in;
+}
+.club-focus-days {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3in;
+}
+.club-focus-days .club-action-helper-line {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11pt !important;
+}
+/* No helper blank on each line (January): the line takes the width. */
+.club-action-plain .club-action-row,
+.club-letter[data-dense] .club-letter-action .club-action-plain .club-action-row,
+.club-action-sheet .club-action-plain .club-action-row {
+  grid-template-columns: 0.22in 1fr;
+}
+.club-action-sheet .club-action-plain .club-action-row {
+  grid-template-columns: 0.3in 1fr;
+}
+/* January's steps: a sentence under each, no helper blank; a little more room to write the one thing. */
+.club-letter .club-action-plain .club-action-row {
+  padding: 0.05in 0;
+}
+.club-letter-action .club-focus-line {
+  margin: 0.12in 0 0.06in;
+}
+.club-letter-action .club-focus-line .club-action-helper-line {
+  height: 0.32in;
+}
+/* Her plan can run two lines: it wraps instead of being cut off. */
+.club-action-sheet .club-focus-plan > .club-focus-line .club-action-helper-line {
+  height: auto;
+  min-height: 0.32in;
+  white-space: normal;
+  line-height: 1.45;
+  font-size: 14pt;
+}
+
+/* February: an "Our idea" blank under each line, full width, instead of a name beside it. */
+.club-action-below .club-action-row,
+.club-action-sheet .club-action-below .club-action-row {
+  grid-template-columns: 0.22in 1fr;
+  row-gap: 0.04in;
+}
+.club-action-sheet .club-action-below .club-action-row {
+  grid-template-columns: 0.3in 1fr;
+}
+.club-action-below .club-action-helper {
+  grid-column: 2;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: 0.1in;
+}
+.club-action-below .club-action-helper-line {
+  height: 0.21in;
+}
+.club-action-sheet .club-action-below .club-action-helper-line {
+  height: 0.32in;
+}
+
+/* February's prompts: a short list instead of one big question. */
+.club-letter-prompts {
+  margin: 0.1in 0 0;
+  padding: 0 0 0 0.24in;
+  font-family: var(--font-serif);
+  font-size: 14pt;
+  line-height: 1.35;
+  color: #4d4544;
+}
+.club-letter-prompts li + li {
+  margin-top: 0.07in;
+}
+.club-letter-prompts li::marker {
+  font-family: var(--font-sans);
+  font-size: 10pt;
+  font-weight: 600;
+  color: #9a6a6f;
+}
+
+/* February's touch: one fine-line heart, and blush panels instead of sage. */
+.club-heart {
+  display: block;
+  flex: none;
+  width: 0.3in;
+  height: 0.27in;
+  margin: 0.14in 0 -0.2in;
+}
+.club-heart-small {
+  display: inline-block;
+  width: 0.24in;
+  height: 0.22in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.01in;
+}
+.club-letter .club-action-below .club-action-row {
+  font-size: 10.8pt;
+  padding: 0.05in 0;
+}
+.club-letter .club-action-below .club-action-detail {
+  font-size: 9pt;
+}
+.club-print[data-accent='blush'] .club-letter-action,
+.club-print[data-accent='blush'] .club-letter-conversation {
+  background: #f8eeec;
+  border-top-color: #c9a0a3;
+}
+.club-print[data-accent='blush'] .club-action-row {
+  border-bottom-color: #eedcd8;
+}
+.club-print[data-accent='blush'] .club-action-box.is-done {
+  background: #b98a8e;
+  border-color: #b98a8e;
+}
+.club-print[data-accent='blush'] .club-letter-calendar {
+  background: #eef2ec;
+}
+
+/* March's touch: one fine-line stem with a few leaves. */
+.club-stem {
+  display: block;
+  flex: none;
+  width: 0.85in;
+  height: 0.38in;
+  margin: 0.14in 0 -0.16in;
+}
+.club-stem-small {
+  display: inline-block;
+  width: 0.6in;
+  height: 0.27in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.03in;
+}
+
+/* A short optional list on the back of the letter (March's decluttering ideas). */
+.club-letter-checklist-note {
+  margin-top: 0.04in;
+  font-family: var(--font-serif);
+  font-size: 10.5pt;
+  font-style: italic;
+  color: #5c5550;
+}
+.club-letter-checklist ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.08in 0.3in;
+  margin: 0.12in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.1in;
+  font-size: 10.5pt;
+}
+.club-letter-checklist .club-box {
+  flex: none;
+  width: 0.16in;
+  height: 0.16in;
+  background: #fff;
+}
+/* March's front: the dense layout fits with room to spare, so the letter stays a little larger. */
+.club-letter[data-dense][data-accent='spring'] .club-letter-title {
+  margin-top: 0.14in;
+}
+.club-letter[data-dense][data-accent='spring'] .club-letter-body {
+  font-size: 11pt;
+  line-height: 1.45;
+}
+
+/* April's touch: a fine-line place setting, pale apricot panels, sage checks. */
+.club-place {
+  display: block;
+  flex: none;
+  width: 0.72in;
+  height: 0.36in;
+  margin: 0.14in 0 -0.16in;
+}
+.club-place-small {
+  display: inline-block;
+  width: 0.5in;
+  height: 0.25in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.03in;
+}
+.club-print[data-accent='table'] .club-letter-subtitle {
+  color: #a8775c;
+}
+.club-print[data-accent='table'] .club-letter-action,
+.club-print[data-accent='table'] .club-letter-conversation {
+  background: #f8eee5;
+  border-top-color: #d2a283;
+}
+.club-print[data-accent='table'] .club-action-row {
+  border-bottom-color: #ecdccd;
+}
+.club-print[data-accent='table'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='table'] .club-letter-calendar {
+  background: #eef1eb;
+}
+
+/* A compact reference and a small tip, side by side on the back (April). */
+.club-letter-pair {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 0.18in;
+  align-items: stretch;
+}
+.club-letter-pair {
+  margin-top: 0.22in;
+}
+.club-letter-pair > .club-letter-example {
+  margin-top: 0;
+  padding: 0.14in 0.18in;
+}
+.club-letter-ages dl {
+  margin: 0.08in 0 0;
+}
+.club-letter-ages dl > div {
+  display: grid;
+  grid-template-columns: 0.62in 1fr;
+  gap: 0.1in;
+  padding: 0.03in 0;
+  border-bottom: 1px solid #e6e0d8;
+  font-size: 9.6pt;
+  line-height: 1.3;
+}
+.club-letter-ages dt {
+  font-family: var(--font-sans);
+  font-size: 8.6pt;
+  font-weight: 600;
+  color: #5f7563;
+}
+.club-letter-ages .club-letter-checklist-note {
+  font-size: 9pt;
+}
+.club-letter-tip p {
+  margin-top: 0.08in;
+  font-family: var(--font-serif);
+  font-size: 10.2pt;
+  line-height: 1.4;
+}
+.club-print[data-accent='table'] .club-letter-tip {
+  background: #f8eee5;
+}
+/* April's back carries a reference and a tip as well: a slightly tighter back so it all fits. */
+.club-letter[data-accent='table'] .club-letter-back-title {
+  margin-top: 0.22in;
+}
+.club-letter[data-accent='table'] .club-letter-tips {
+  gap: 0.04in;
+  margin-top: 0.08in;
+}
+.club-letter[data-accent='table'] .club-letter-tips p {
+  font-size: 10.6pt;
+  line-height: 1.38;
+}
+.club-letter[data-accent='table'] .club-letter-conversation {
+  margin-top: 0.18in;
+  padding: 0.14in 0.3in 0.14in;
+}
+.club-letter[data-accent='table'] .club-letter-question {
+  font-size: 16pt;
+}
+.club-letter[data-accent='table'] .club-letter-invite {
+  margin-top: 0.16in;
+  margin-bottom: 0.14in;
+}
+
+/* May's touch: a fine-line open notebook, soft blue panels, sage checks. */
+.club-notebook {
+  display: block;
+  flex: none;
+  width: 0.72in;
+  height: 0.36in;
+  margin: 0.14in 0 -0.16in;
+}
+.club-notebook-small {
+  display: inline-block;
+  width: 0.5in;
+  height: 0.25in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.03in;
+}
+.club-print[data-accent='school'] .club-letter-subtitle {
+  color: #5d7383;
+}
+.club-print[data-accent='school'] .club-letter-action,
+.club-print[data-accent='school'] .club-letter-conversation {
+  background: #eef3f6;
+  border-top-color: #8fa7b8;
+}
+.club-print[data-accent='school'] .club-action-row {
+  border-bottom-color: #dbe4ea;
+}
+.club-print[data-accent='school'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='school'] .club-letter-calendar {
+  background: #eef1eb;
+}
+.club-letter-tip-wide p {
+  font-size: 10.6pt;
+}
+.club-print[data-accent='school'] .club-letter-tip {
+  background: #f6f1e7;
+  border-color: #e7ddd4;
+}
+.club-letter[data-accent='school'] .club-letter-back-title {
+  margin-top: 0.22in;
+}
+.club-letter[data-accent='school'] .club-letter-tips {
+  gap: 0.04in;
+  margin-top: 0.08in;
+}
+.club-letter[data-accent='school'] .club-letter-tips p {
+  font-size: 10.6pt;
+  line-height: 1.38;
+}
+.club-letter[data-accent='school'] .club-letter-example {
+  margin-top: 0.16in;
+  padding: 0.12in 0.2in;
+}
+.club-letter[data-accent='school'] .club-letter-invite {
+  margin-top: 0.14in;
+  margin-bottom: 0.12in;
+}
+
+/* A keepsake for a child (May's reflection prompts): a dashed edge to cut along, room to write, no grading look. */
+.club-letter-reflection {
+  margin-top: 0.16in;
+  padding: 0.14in 0.24in 0.12in;
+  border: 1.2px dashed #a9b9c4;
+  border-radius: 6px;
+  background: #fff;
+}
+.club-letter-reflection-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.2in;
+}
+.club-letter-reflection-head h3 {
+  font-family: 'Kalam', cursive;
+  font-size: 17pt;
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-letter-reflection-head p {
+  font-family: var(--font-serif);
+  font-size: 9pt;
+  font-style: italic;
+  color: #6b625c;
+  text-align: right;
+}
+.club-letter-reflection-name {
+  display: grid;
+  grid-template-columns: auto 2.4in;
+  justify-content: start;
+  gap: 0.12in;
+  align-items: end;
+  margin-top: 0.02in;
+  font-family: var(--font-sans);
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b625c;
+}
+.club-letter-reflection ol {
+  display: grid;
+  gap: 0.06in;
+  margin: 0.06in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-reflection-q {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  color: #4d4544;
+}
+.club-write {
+  display: block;
+  height: 0.3in;
+  border-bottom: 1px solid #c9c0b8;
+}
+
+/* June's touch: a fine-line sun, pale apricot panels, a soft blue calendar note. */
+.club-sun {
+  display: block;
+  flex: none;
+  width: 0.42in;
+  height: 0.42in;
+  margin: 0.12in 0 -0.16in;
+}
+.club-sun-small {
+  display: inline-block;
+  width: 0.3in;
+  height: 0.3in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.06in;
+}
+.club-print[data-accent='summer'] .club-letter-subtitle {
+  color: #a8775c;
+}
+.club-print[data-accent='summer'] .club-letter-action,
+.club-print[data-accent='summer'] .club-letter-conversation {
+  background: #f8eee5;
+  border-top-color: #d2a283;
+}
+.club-print[data-accent='summer'] .club-action-row {
+  border-bottom-color: #ecdccd;
+}
+.club-print[data-accent='summer'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='summer'] .club-letter-calendar {
+  background: #eef3f6;
+}
+.club-letter[data-accent='summer'] .club-letter-back-title {
+  margin-top: 0.22in;
+}
+.club-letter[data-accent='summer'] .club-letter-tips {
+  gap: 0.05in;
+  margin-top: 0.1in;
+}
+
+/* A small card to cut out for the fridge (June's "When I'm Bored…"), beside a short tip. */
+.club-letter-pair-card {
+  grid-template-columns: 1.15fr 1fr;
+  align-items: start;
+}
+.club-letter-card {
+  padding: 0.16in 0.22in 0.14in;
+  border: 1.2px dashed #c8a68e;
+  border-radius: 8px;
+  background: #fff;
+}
+.club-letter-card h3 {
+  font-family: 'Kalam', cursive;
+  font-size: 18pt;
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-letter-card ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.07in 0.16in;
+  margin: 0.08in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-card li {
+  display: flex;
+  align-items: center;
+  gap: 0.07in;
+  font-family: var(--font-serif);
+  font-size: 10.6pt;
+  line-height: 1.25;
+}
+.club-letter-card li::before {
+  content: '';
+  flex: none;
+  width: 0.09in;
+  height: 0.09in;
+  border-radius: 50%;
+  background: #9aab8f;
+}
+.club-print[data-accent='summer'] .club-letter-tip {
+  background: #eef3f6;
+  border-color: #dbe4ea;
+}
+.club-letter-invite-tools {
+  display: grid;
+  gap: 0.05in;
+  margin: 0.08in 0 0.04in;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-serif);
+  font-size: 10.4pt;
+  line-height: 1.35;
+}
+.club-letter-invite-tools strong {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 8.4pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4d4544;
+}
+/* June's front: a four-line agreement with a writing line under each, so the letter sits a little tighter. */
+.club-letter[data-accent='summer'] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-accent='summer'] .club-letter-body {
+  margin-top: 0.12in;
+  font-size: 10.6pt;
+  line-height: 1.4;
+}
+.club-letter[data-accent='summer'] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-accent='summer'] .club-letter-signature {
+  font-size: 18pt;
 }
