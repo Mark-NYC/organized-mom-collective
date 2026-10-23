@@ -73,7 +73,7 @@ function ToolPage({ tool }: { tool: string }) {
   return (
     <>
       <ClubToolBar tool={tool} title={toolTitle[tool] ?? tool} />
-      <section ref={host} id="club-tool-host" className="mx-auto w-full max-w-6xl px-4 pb-20 pt-4 sm:px-8" dangerouslySetInnerHTML={{ __html: (toolMarkup[tool] ?? '').replace(/\/images\/[^"]+?\.webp/g, (p) => images[p] ?? p) }} />
+      <section ref={host} id="club-tool-host" className="w-full pb-20 pt-4" dangerouslySetInnerHTML={{ __html: (toolMarkup[tool] ?? '').replace(/\/images\/[^"]+?\.webp/g, (p) => images[p] ?? p) }} />
     </>
   );
 }

@@ -13,8 +13,9 @@ import { CLUB_NAME } from '../../../data/club/config';
 
 <ClubLayout title="Routine Chart">
   <ClubToolBar client:only="react" tool="routine-chart" title="Routine chart" />
-  <section id="club-tool-host" class="mx-auto w-full max-w-6xl px-4 pb-20 pt-4 sm:px-8">
+  <!-- No side padding of its own: the chart lays itself out exactly as on /routine-chart. -->
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
     <RoutineChart storageKey="omc:club:routine-chart:v1" handoff brand={CLUB_NAME} />
-    <p class="mx-auto mt-6 max-w-[816px] text-[0.92rem] text-warm-soft">Tip: put the chart in a clear sleeve and use a dry-erase marker to reuse it each week.</p>
+    <p class="mx-auto mt-6 max-w-[816px] px-5 text-[0.92rem] text-warm-soft">Tip: put the chart in a clear sleeve and use a dry-erase marker to reuse it each week.</p>
   </section>
 </ClubLayout>
