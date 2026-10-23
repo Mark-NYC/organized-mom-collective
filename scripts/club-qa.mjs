@@ -883,6 +883,7 @@ for (const id of [...samples, 'hughes']) {
     ['connection-planner', '.cn-card', () => document.querySelector('[data-cn-family]')?.value ?? ''],
     ['meal-team', '.mlt-row', () => document.querySelector('[data-mlt-family]')?.value ?? ''],
     ['school-wrap-up', '.wu', () => document.querySelector('[data-wu-family]')?.value ?? ''],
+    ['screen-time', '.st-container', () => document.querySelector('[data-st-sheet] [data-field="name"]')?.value ?? ''],
     ['habit-builder', '[data-hb-statement]', () => document.querySelector('[data-hb-family]')?.value ?? ''],
     ['traditions-picker', '.tp-card', () => document.querySelector('[data-tp-family]')?.value ?? ''],
     ['chore-chart', '#chore-chart', () => document.querySelector('[data-cc-name]')?.value ?? ''],
@@ -1526,6 +1527,202 @@ for (const id of samples) {
   const direct = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
   check(!direct.includes('Zara') && !direct.includes('Ana'), `leak: the wrap-up builder opened by address as Brooks shows another family (${direct.join(', ')})`);
   report.push({ mayLeakCheck: 'ok' });
+  await ctx.close();
+}
+
+// June (letter, four-decision agreement, two optional site tools): answers and checks save; the agreement and the
+// letter print; each tool opens the site's own component for a child, prefilled, editable, downloadable.
+const junUrl = (id) => `${base}/club/kits/2027-06-summer-with-a-plan?sample=${id}`;
+/** Open one of June's tools from its card: pick the child named `who` (or the first) when the kit asks. */
+async function openJuneTool(page, tool, cta, who) {
+  const card = page.locator(`[data-club-kit-tool="${tool}"]`);
+  await card.getByRole('button', { name: cta, exact: true }).click();
+  await page.waitForTimeout(300);
+  if (!/\/club\/tools\//.test(page.url())) {
+    check(await card.getByRole('group', { name: 'Which routine' }).count() === 0, `${tool}: the kit's start should hide the tool's own routine tabs`);
+    const kids = card.locator('.btn-secondary');
+    if (await kids.count()) await (who ? kids.filter({ hasText: who }).first() : kids.first()).click();
+  }
+  await page.waitForURL(new RegExp(`/club/tools/${tool}`));
+}
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { june: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(junUrl(id));
+  await page.getByRole('heading', { name: 'Our Summer Family Agreement' }).waitFor();
+  check(await noSideScroll(page), `${id}: June scrolls sideways on a phone`);
+  check(await lines.count() === 4, `${id}: the agreement has ${await lines.count()} decisions (expected 4)`);
+  check(await page.getByPlaceholder('We decided').count() === 4, `${id}: June is missing its answer lines`);
+  check(await page.locator('section[aria-labelledby="club-action"] input[type="date"]').count() === 0, `${id}: June's agreement shouldn't ask for a date`);
+  check(await page.getByRole('heading', { name: 'Your Summer Toolkit' }).count() === 1 && await page.locator('[data-club-kit-tool]').count() === 2, `${id}: June's toolkit should offer two tools`);
+  await page.screenshot({ path: join(out, `${id}-june-phone.png`), fullPage: true });
+
+  await page.getByPlaceholder('We decided').nth(0).fill('Breakfast, quiet reading after lunch, evening tidy');
+  await page.getByPlaceholder('We decided').nth(3).fill('Picnic at the lake in July');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 4 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our Summer Family Agreement' }).waitFor();
+  check(await page.getByPlaceholder('We decided').nth(0).inputValue() === 'Breakfast, quiet reading after lunch, evening tidy' && await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: answers or checks didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['summer-agreement', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-june-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: June ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: June ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Picnic at the lake in July') && sheet.includes('Choose our daily anchors.'), `${id}: her printed agreement is missing an answer or a decision`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('Summer With a Plan') && front.includes('Less managing for Mom') && front.includes('Megan') && front.includes('What would make this summer really good for each of us?') && !front.includes('Picnic'), `${id}: the letter's front is wrong`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-sun')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's sun is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['A Little Structure. A Lot of Summer.', 'Keep a few predictable anchors.', 'Agree before the argument.', 'Leave room for boredom.', 'When I’m Bored…', 'Invite someone to play', 'Before the summer adventures begin', 'swim gear', 'Build Your Summer Rhythm', 'Make Your Family Screen Agreement', 'organizedmomcollective.com/club/kits/2027-06-summer-with-a-plan', 'Let the summer rhythm handle the ordinary days in between.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  check(await page.locator('.club-letter .club-qr').count() === 1, `${id}: June's letter should have exactly one QR code`);
+
+  // Tool one: the routine chart's Summer type, for a child.
+  await page.setViewportSize({ width: 390, height: 844 });
+  const who = { rivera: 'Elena', brooks: 'Max', chen: 'Grace', okafor: 'Zara' }[id];
+  await openJuneTool(page, 'routine-chart', 'Build Our Summer Rhythm', who);
+  await page.waitForSelector('#routine-chart');
+  const title = await page.inputValue('[data-field="title"]');
+  entry.rhythmTitle = title;
+  check(await page.locator('.mr-container[data-mr-handoff]').count() === 1, `${id}: the rhythm isn't the site's routine chart`);
+  check(await page.locator('[data-mr-type="summer"][aria-pressed="true"]').count() === 1, `${id}: the chart didn't open on Summer`);
+  check(who ? title === `${who}’s Summer Rhythm` : /Summer Rhythm$/.test(title), `${id}: the rhythm didn't open for the child: "${title}"`);
+  check(await page.locator('[data-mr-summer]').isVisible(), `${id}: the summer questions are hidden`);
+  const stageWant = { rivera: 'young', brooks: 'school', chen: 'teen', okafor: 'young' }[id] ?? 'school';
+  check(await page.locator(`[data-mr-summer-stage="${stageWant}"][aria-pressed="true"]`).count() === 1, `${id}: the rhythm didn't pick ${stageWant} wording`);
+  const anchors = await page.locator('.mr-anchor[data-first]').evaluateAll((els) => els.map((e) => e.value));
+  check(anchors.join() === 'Morning,Midday,Afternoon,Evening', `${id}: the rhythm's anchors are ${anchors.join(', ')}`);
+  check(await page.locator('.mr-sheet.mr-untimed').count() === 1, `${id}: a balanced rhythm shouldn't show clock times`);
+  const balanced = await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value).filter(Boolean));
+  entry.rhythmBalanced = balanced;
+  await page.screenshot({ path: join(out, `${id}-june-rhythm-phone.png`), fullPage: true });
+  await page.locator('[data-mr-summer-structure="relaxed"]').click();
+  const relaxed = await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value).filter(Boolean));
+  check(relaxed.length < balanced.length, `${id}: relaxed isn't lighter than balanced`);
+  await page.locator('[data-mr-summer-structure="structured"]').click();
+  check(await page.locator('.mr-sheet.mr-untimed').count() === 0 && (await page.inputValue('[data-field="time-0"]')) !== '', `${id}: more structured didn't add rough times`);
+  await page.locator('[data-mr-summer-days="camp"]').click();
+  check((await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value))).some((v) => /Camp/.test(v)), `${id}: a camp day doesn't mention camp`);
+  // Edit a line, move a step, reload: kept; a new answer asks before replacing it (accepted here).
+  await page.locator('[data-mr-summer-structure="balanced"]').click();
+  await page.locator('[data-mr-summer-days="home"]').click();
+  await page.locator('[data-field="step-1"]').fill('Pancakes on the porch');
+  await page.locator('[data-mr-move="1"]').first().click();
+  const edited = await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value));
+  await page.reload();
+  await page.waitForSelector('#routine-chart');
+  check(JSON.stringify(await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value))) === JSON.stringify(edited), `${id}: the rhythm didn't keep her edits`);
+  check(await noSideScroll(page), `${id}: the rhythm scrolls sideways on a phone`);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-mr-download]')]);
+  await dl.saveAs(join(out, `${id}-june-rhythm.png`));
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-06/);
+
+  // Tool two: the screen time tool's agreement, for a child.
+  const whoScreen = { rivera: 'Sofia', brooks: 'Lily', chen: 'Owen', okafor: 'Zara' }[id];
+  await openJuneTool(page, 'screen-time', 'Make Our Screen Agreement', whoScreen);
+  await page.waitForSelector('[data-st-sheet]');
+  check(await page.locator('.st-container[data-st-handoff]').count() === 1, `${id}: the agreement isn't the site's screen time tool`);
+  check(await page.locator('[data-st-format-btn="agreement"][aria-pressed="true"]').count() === 1, `${id}: the screen tool didn't open as the family agreement`);
+  check(!whoScreen || await page.inputValue('[data-field="name"]') === whoScreen, `${id}: the agreement isn't in ${whoScreen}'s name`);
+  const screenWant = { rivera: 'school', brooks: 'school', chen: 'teen', okafor: 'young' }[id] ?? 'school';
+  check(await page.locator(`[data-st-age="${screenWant}"][aria-pressed="true"]`).count() === 1, `${id}: the agreement didn't use ${screenWant} wording`);
+  const adults = await page.$$eval('[data-field^="a-adult-"]', (els) => els.map((e) => e.value).filter(Boolean));
+  entry.screenAdults = adults;
+  check(adults.length === 3, `${id}: the agreement has ${adults.length} grown-up commitments`);
+  check(await page.inputValue('[data-field="a-amount"]') === '', `${id}: the agreement filled in how much screen time`);
+  await page.locator('[data-field="a-amount"]').fill('An hour on weekdays');
+  await page.locator('[data-field="a-weekday"]').fill('After quiet time');
+  await page.reload();
+  await page.waitForSelector('[data-st-sheet]');
+  check(await page.inputValue('[data-field="a-amount"]') === 'An hour on weekdays' && await page.inputValue('[data-field="a-weekday"]') === 'After quiet time', `${id}: the agreement didn't keep her edits`);
+  check(await noSideScroll(page), `${id}: the agreement scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-june-screen-phone.png`), fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  check(await page.evaluate(() => { const s = document.querySelector('[data-st-sheet]'); return s.scrollHeight <= 1056 + 1; }), `${id}: the agreement runs past US Letter`);
+  const [sdl] = await Promise.all([page.waitForEvent('download'), page.click('[data-st-download]')]);
+  entry.screenDownload = sdl.suggestedFilename();
+  await sdl.saveAs(join(out, `${id}-june-screen.png`));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-06/);
+  check(errors.length === 0, `${id}: June page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// The public tools still work on their own, as they always have: the routine chart opens on Morning, the screen time
+// page opens as the earn-it contract and keeps a sheet saved before the agreement existed.
+{
+  const ctx = await browser.newContext({ viewport: { width: 1100, height: 900 }, acceptDownloads: true });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto(`${base}/routine-chart`);
+  await page.waitForSelector('#routine-chart');
+  check(await page.locator('[data-mr-type="morning"][aria-pressed="true"]').count() === 1 && await page.inputValue('[data-field="step-0"]') === 'Wake up & stretch', 'public: the routine chart no longer opens on Morning');
+  check(await page.locator('[data-mr-summer]').isHidden() && await page.locator('.mr-sheet.mr-anchored').count() === 0, 'public: summer controls show on the morning chart');
+  await page.click('[data-mr-type="summer"]');
+  check(await page.locator('[data-mr-summer]').isVisible() && await page.locator('.mr-anchor[data-first]').count() === 4, 'public: the Summer type doesn’t show its questions and anchors');
+  await page.screenshot({ path: join(out, 'public-routine-summer.png'), fullPage: true });
+  await page.click('[data-mr-type="bedtime"]');
+  check(await page.locator('.mr-sheet.mr-anchored').count() === 0 && await page.inputValue('[data-field="time-0"]') === '19:00', 'public: anchors linger after leaving Summer');
+  const [rdl] = await Promise.all([page.waitForEvent('download'), page.click('[data-mr-download]')]);
+  check(/\.png$/.test(rdl.suggestedFilename()), 'public: the routine chart didn’t download');
+
+  await page.evaluate(() => localStorage.setItem('omc:screen-time:v1', JSON.stringify({ name: 'Old Sheet', 'task-0': 'Feed the cat', minutes: '20', earn: '10' })));
+  await page.goto(`${base}/screen-time-contract`);
+  await page.waitForSelector('#screen-time');
+  check(await page.locator('[data-st-format-btn="earn"][aria-pressed="true"]').count() === 1, 'public: the screen time page no longer opens as the earn-it contract');
+  check(await page.inputValue('[data-field="name"]') === 'Old Sheet' && await page.inputValue('[data-field="task-0"]') === 'Feed the cat' && await page.inputValue('[data-field="minutes"]') === '20', 'public: a sheet saved before the agreement lost its contents');
+  check(await page.locator('[data-st-slot-min]').first().textContent() === '20', 'public: the earning boxes lost their minutes');
+  await page.click('[data-st-format-btn="agreement"]');
+  check(await page.locator('.st-agree').isVisible() && await page.locator('.st-grid').isHidden(), 'public: switching to the agreement didn’t switch the sheet');
+  await page.click('[data-st-age="teen"]');
+  check((await page.inputValue('[data-field="a-weekday"]')) === 'Once my responsibilities are done', 'public: the teen wording didn’t apply');
+  await page.screenshot({ path: join(out, 'public-screen-agreement.png'), fullPage: true });
+  check(await page.evaluate(() => document.querySelector('#screen-time').scrollHeight <= 1057), 'public: the agreement runs past US Letter');
+  await page.click('[data-st-format-btn="earn"]');
+  const [sdl] = await Promise.all([page.waitForEvent('download'), page.click('[data-st-download]')]);
+  check(/screen-time-contract\.png$/.test(sdl.suggestedFilename()), `public: the contract downloaded as ${sdl.suggestedFilename()}`);
+  await page.setViewportSize({ width: 390, height: 844 });
+  check(await noSideScroll(page), 'public: the screen time page scrolls sideways on a phone');
+  check(errors.length === 0, `public tools: page errors: ${errors.join(' | ')}`);
+  report.push({ publicTools: 'ok' });
+  await ctx.close();
+}
+
+// Two families in one browser, June: one family's summer rhythm and agreement never show up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  await page.goto(junUrl('rivera'));
+  await openJuneTool(page, 'screen-time', 'Make Our Screen Agreement', 'Sofia');
+  await page.waitForSelector('[data-st-sheet]');
+  await page.locator('[data-field="a-amount"]').fill('Rivera secret amount');
+  await page.goto(junUrl('okafor'));
+  await openJuneTool(page, 'screen-time', 'Make Our Screen Agreement', 'Zara');
+  await page.waitForSelector('[data-st-sheet]');
+  check(await page.inputValue('[data-field="a-amount"]') === '' && await page.inputValue('[data-field="name"]') === 'Zara', 'leak: the Okafors’ agreement shows the Riveras’');
+  await page.goto(`${base}/screen-time-contract`);
+  await page.waitForSelector('#screen-time');
+  check(await page.inputValue('[data-field="a-amount"]') !== 'Rivera secret amount', 'leak: a Club agreement shows on the public page');
+  report.push({ juneLeakCheck: 'ok' });
   await ctx.close();
 }
 

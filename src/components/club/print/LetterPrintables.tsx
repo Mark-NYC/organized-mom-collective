@@ -86,6 +86,19 @@ function Notebook({ small }: { small?: boolean }) {
   );
 }
 
+/** June's touch: a fine-line sun, sage rays around a pale apricot center. No beach, no cartoon. */
+function Sun({ small }: { small?: boolean }) {
+  return (
+    <svg className={`club-sun${small ? ' club-sun-small' : ''}`} viewBox="0 0 40 40" aria-hidden="true" fill="none" strokeLinecap="round">
+      <circle cx="20" cy="20" r="7.5" stroke="#d2a283" strokeWidth="1.3" fill="#f8eee5" />
+      {Array.from({ length: 8 }, (_, i) => {
+        const a = (i * Math.PI) / 4;
+        return <path key={i} d={`M${20 + Math.cos(a) * 11} ${20 + Math.sin(a) * 11} L ${20 + Math.cos(a) * 16} ${20 + Math.sin(a) * 16}`} stroke="#7d917c" strokeWidth="1.3" />;
+      })}
+    </svg>
+  );
+}
+
 /** What she's filled in online, for her own printout: done, who's helping, when (a date, "When you can", or ''), her wording. */
 export interface ActionFill {
   done: boolean[];
@@ -178,6 +191,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
         {kit.mailer.accent === 'spring' && <Stem />}
         {kit.mailer.accent === 'table' && <PlaceSetting />}
         {kit.mailer.accent === 'school' && <Notebook />}
+        {kit.mailer.accent === 'summer' && <Sun />}
         <h1 className="club-letter-title">{kit.theme}</h1>
         {kit.subtitle && <p className="club-letter-subtitle">{kit.subtitle}</p>}
         <div className="club-letter-body">
@@ -215,6 +229,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           {kit.mailer.accent === 'spring' && <Stem small />}
           {kit.mailer.accent === 'table' && <PlaceSetting small />}
           {kit.mailer.accent === 'school' && <Notebook small />}
+          {kit.mailer.accent === 'summer' && <Sun small />}
           {kit.mailer.fieldGuide.title}
         </h2>
         {kit.mailer.fieldGuide.intro && <p className="club-letter-back-intro">{kit.mailer.fieldGuide.intro}</p>}
@@ -246,7 +261,21 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             <p>{kit.mailer.story.body}</p>
           </div>
         )}
-        {kit.mailer.tip && !kit.mailer.ageGuide && (
+        {kit.mailer.card && (
+          <div className="club-letter-pair club-letter-pair-card">
+            <div className="club-letter-card">
+              <h3>{kit.mailer.card.title}</h3>
+              <ul>{kit.mailer.card.ideas.map((t) => <li key={t}>{t}</li>)}</ul>
+            </div>
+            {kit.mailer.tip && (
+              <div className="club-letter-example club-letter-tip">
+                <span className="club-letter-label">{kit.mailer.tip.title}</span>
+                <p>{kit.mailer.tip.body}</p>
+              </div>
+            )}
+          </div>
+        )}
+        {kit.mailer.tip && !kit.mailer.ageGuide && !kit.mailer.card && (
           <div className="club-letter-example club-letter-tip club-letter-tip-wide">
             <span className="club-letter-label">{kit.mailer.tip.title}</span>
             <p>{kit.mailer.tip.body}</p>
@@ -295,6 +324,11 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             <div>
               <h3>{kit.mailer.invite.title}</h3>
               <p>{kit.mailer.invite.body}</p>
+              {kit.mailer.invite.tools && (
+                <ul className="club-letter-invite-tools">
+                  {kit.mailer.invite.tools.map((t) => <li key={t.title}><strong>{t.title}</strong> {t.body}</li>)}
+                </ul>
+              )}
               <p className="club-letter-url">{readableUrl(kit.mailer.qrPath)}</p>
             </div>
           </div>

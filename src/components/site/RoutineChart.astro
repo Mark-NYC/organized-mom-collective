@@ -606,7 +606,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 <style is:global>
   /* The Summer type: a part of the day (Morning, Midday…) heads its first step, in the time column when there's no time. */
   .mr-when { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
-  .mr-sheet .mr-anchor { display: none; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: var(--mr-accent-3); font-family: 'Kalam', var(--font-serif); font-size: 19px; font-weight: 700; color: var(--mr-ink); }
+  .mr-sheet .mr-anchor { display: none; width: 100%; min-width: 0; height: 30px; padding: 0 8px; border: 0; border-radius: 8px; background: var(--mr-accent-3); font-family: 'Kalam', var(--font-serif); font-size: 19px; font-weight: 700; color: var(--mr-ink); }
   .mr-sheet.mr-anchored .mr-anchor { display: block; }
   .mr-sheet.mr-anchored .mr-anchor:not([data-first]) { visibility: hidden; height: 0; }
   .mr-sheet.mr-untimed .mr-when .mr-time { display: none; }

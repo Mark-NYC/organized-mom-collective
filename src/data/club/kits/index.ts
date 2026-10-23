@@ -12,11 +12,12 @@ import { kit as february2027 } from './2027-02-better-together';
 import { kit as march2027 } from './2027-03-spring-clean-together';
 import { kit as april2027 } from './2027-04-everybody-helps-at-mealtime';
 import { kit as may2027 } from './2027-05-finish-the-school-year';
+import { kit as june2027 } from './2027-06-summer-with-a-plan';
 import { kit as august2027 } from './2027-08-school-year';
 import { kit as october2027 } from './2027-10-home-works-together';
 import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, january2027, february2027, march2027, april2027, may2027, august2027, october2027, december2027];
+export const kits: readonly KitConfig[] = [november2026, january2027, february2027, march2027, april2027, may2027, june2027, august2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 
@@ -120,6 +121,9 @@ export function kitProblems(kit: KitConfig): string[] {
     }
   }
   if (kit.tool && !clubToolById(kit.tool.tool)) out.push(`tool: ${kit.tool.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
+  if (kit.tool && kit.toolkit) out.push('a kit has one tool or a toolkit, not both');
+  if (kit.toolkit && (kit.toolkit.tools.length < 2 || kit.toolkit.tools.length > 3)) out.push('toolkit: two or three tools');
+  for (const t of kit.toolkit?.tools ?? []) if (!clubToolById(t.tool)) out.push(`toolkit: ${t.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
   const prompts = kit.mailer.conversation?.prompts;
   if (prompts && (prompts.length < 2 || prompts.length > 4 || !prompts.includes(kit.mailer.conversation!.question))) out.push('conversation: 2–4 prompts, the letter’s question among them');
   if (kit.mailer.letter?.namedGreeting && !kit.mailer.letter.namedGreeting.includes('{name}')) out.push('letter: namedGreeting needs {name}');

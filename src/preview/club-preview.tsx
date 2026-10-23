@@ -12,6 +12,7 @@ import FamilyPage from '../components/club/FamilyPage';
 import KitPage from '../components/club/KitPage';
 import ClubToolBar from '../components/club/ClubToolBar';
 import { initRoutineChart } from '../components/site/routine-chart';
+import { initScreenTime } from '../components/site/screen-time-contract';
 import { initChoreChart } from '../components/site/chore-chart';
 import { initTraditionsPicker } from '../components/site/traditions-picker';
 import { initHabitBuilder } from '../components/site/habit-builder';
@@ -84,6 +85,7 @@ const toolMarkup = (globalThis as { __CLUB_TOOLS?: Record<string, string> }).__C
 let sample: string | null = null;
 const toolInit: Record<string, (host: HTMLElement) => void> = {
   'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart', sample)),
+  'screen-time': (host) => initScreenTime(host.querySelector<HTMLElement>('.st-container')!, readToolHandoff('screen-time', sample)),
   'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart', sample)),
   'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker', sample)),
   'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder', sample)),

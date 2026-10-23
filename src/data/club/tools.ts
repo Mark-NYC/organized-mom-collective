@@ -114,6 +114,14 @@ export const clubTools = {
     title: 'School Year Wrap-Up Builder',
     intro: 'Enter when school ends and what applies. We’ll suggest what to finish, when, and who can help. Change anything, then print. It saves in this browser.',
   },
+  'screen-time': {
+    id: 'screen-time',
+    path: routes.clubTool('screen-time'),
+    publicPath: routes.screenTime,
+    perChild: true,
+    title: 'Screen time agreement',
+    intro: 'Agree together on when screens are on, what comes first, where devices go and how screen time ends, and what grown-ups agree to. Change any line, then download it to print and sign. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;

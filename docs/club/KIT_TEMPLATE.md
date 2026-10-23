@@ -77,6 +77,10 @@ The hosted preview (`scripts/build-club-preview.mjs`) embeds each Club tool page
 
 `src/data/club/kits/2027-05-finish-the-school-year.ts`: the letter (draft), Our School Year Wrap-Up (`kind: 'checklist'`, five steps each with a `detail`, "Who's helping?" beside each, an `action.note`; no focus, no dates). The back uses `mailer.tip` full width (the Five Favorites Rule) and a new `mailer.reflection` (a child's keepsake: three prompts with two writing lines each, a dashed cut-out edge), no back-page question (it's in the letter), and the `school` accent (a fine-line open notebook, soft blue panels). The tool is the School Year Wrap-Up Builder (`tool: 'school-wrap-up'`), opened with the family's first names, children's ages and the account holder.
 
+## June, as built
+
+`src/data/club/kits/2027-06-summer-with-a-plan.ts`: the letter (draft), Our Summer Family Agreement (`kind: 'checklist'`, four decisions each with a `detail`, a "We decided" line under each: `helperLabel` with `helperPlacement: 'below'`). Instead of `tool`, a `toolkit` of two independent tools (each a `KitTool` with its own `start`, so the kit opens the routine chart on Summer and the screen time tool on its agreement, without the tool's own variant tabs). The back adds `mailer.card` (a small cut-out card) beside `mailer.tip`, `mailer.invite.tools` (two tools under one QR code), and the `summer` accent (a fine-line sun, apricot panels). A kit has a `tool` or a `toolkit`, not both.
+
 ## Test households (every kit, every month)
 
 | Household | Members | Checks |

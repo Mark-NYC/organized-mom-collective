@@ -117,6 +117,17 @@ export interface KitInput {
   options?: string[];
 }
 
+/** A site tool a kit opens inside the Club, with the kit's own words for it. */
+export interface KitTool {
+  tool: string;
+  title: string;
+  blurb: string;
+  cta: string;
+  note?: string;
+  /** How the tool starts when the kit offers no choice (the tool's own variant id, e.g. the chore chart's 'one-job'). */
+  start?: string;
+}
+
 export interface KitConfig {
   /** 'YYYY-MM-theme', permanent once printed on a mailer. */
   slug: string;
@@ -191,15 +202,12 @@ export interface KitConfig {
    * The month's one optional tool: one of the site's own tools, opened inside the Club (src/data/club/tools.ts), never
    * a Club copy of it; and the invitation to it.
    */
-  tool?: {
-    tool: string;
-    title: string;
-    blurb: string;
-    cta: string;
-    note?: string;
-    /** How the tool starts when the kit offers no choice (the tool's own variant id, e.g. the chore chart's 'one-job'). */
-    start?: string;
-  };
+  tool?: KitTool;
+  /**
+   * Instead of one tool, a short toolkit of two independent, optional tools (June: the summer rhythm and the screen
+   * time agreement), each opened like `tool`. A kit has one or the other.
+   */
+  toolkit?: { title: string; intro: string; tools: KitTool[] };
   /**
    * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
    * `priority` in `from`), then the detail one tap away.
@@ -252,15 +260,17 @@ export interface KitConfig {
     /** Three-part kits: a worked example on the back of the letter: the tool's own starter (src/data/routines.ts). */
     example?: { title: string; variant: string };
     /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */
-    invite?: { title: string; body: string };
+    invite?: { title: string; body: string; tools?: { title: string; body: string }[] };
+    /** A small cut-out card on the back (June's "When I'm Bored…"): a title and a few short ideas. */
+    card?: { title: string; ideas: string[] };
     calendarNote?: string;
     /** '/club/kits/<slug>?source=mailer' */
     qrPath: string;
     /**
      * A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush
-     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels.
+     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels; June's fine-line sun and apricot panels.
      */
-    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school';
+    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school' | 'summer';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

@@ -571,14 +571,14 @@ const a = screenStarters.school;
   .st-checks input, .st-plain input, .st-steps input { flex: 1; width: 100%; height: 30px; font-size: 16px; }
   .st-plain li { display: flex; align-items: center; gap: 10px; }
   .st-plain li::before { content: ''; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--st-sage); }
-  .st-steps { counter-reset: st-step; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .st-steps { gap: 6px; }
   .st-steps li { display: flex; align-items: center; gap: 8px; }
   .st-steps .st-step-n { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--st-rose-wash); font-family: var(--font-sans); font-size: 12px; font-weight: 700; }
   .st-adults { padding: 10px 16px 12px; border: 1px dashed var(--st-rose); border-radius: 6px; background: #fff; }
   .st-review { margin-top: 16px; font-size: 15px; font-style: italic; line-height: 1.6; color: var(--st-soft); }
   .st-sheet .st-review input { width: 170px; height: 26px; font-style: normal; }
   @media (max-width: 768px) {
-    .st-container:not(.st-exporting) .st-two, .st-container:not(.st-exporting) .st-steps { grid-template-columns: 1fr; }
+    .st-container:not(.st-exporting) .st-two { grid-template-columns: 1fr; }
     .st-container:not(.st-exporting) .st-line { grid-template-columns: 1fr; gap: 2px; }
   }
 </style>

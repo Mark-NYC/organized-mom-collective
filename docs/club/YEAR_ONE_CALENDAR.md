@@ -130,7 +130,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Worksheets:** end-of-year memory page per child, summer kickoff list, team Living Areas reset.
 - **Mailer:** letter; field guide on the end-of-year pile-up; activity: memory interview.
 
-### June: Summer With a Plan
+### June: Summer With a Plan (built 2026-10-23, behind the flag)
+
+*More freedom for the kids. Less managing for Mom.* Owner direction, 2026-10-23: replaces the earlier June plan below. Config: `src/data/club/kits/2027-06-summer-with-a-plan.ts`. Mailer: [mailers/2027-06-summer-with-a-plan.md](mailers/2027-06-summer-with-a-plan.md).
+
+- **The letter:** Summer Doesn't Need a Schedule for Every Hour (about 160 words): a few rhythms everyone agrees on instead of one person managing every hour. Asks "What would make this summer really good for each of us?" A draft for Megan.
+- **The action:** Our Summer Family Agreement, four decisions (anchors, screens, responsibilities, one fun plan), a "We decided" line under each, no dates.
+- **The tools (the one two-tool month):** the site's own routine chart, Summer type (the Summer Rhythm Builder: daily anchors, not hours), and the site's own screen time tool, family agreement format (when, how much, before screens, where devices go, how it ends, what grown-ups agree to). Each optional, each per child or the whole family.
+- **Back of the letter:** three principles, a cut-out "When I'm Bored…" card, the outdoor gear tip, both tools under one QR code, the calendar note.
+- **Not July or August:** no connection plans (July), no school-day routines (August), no summer planner or activity grid.
+
+### June (earlier plan): Summer With a Plan
 
 - **Flagship: Summer Rhythm Builder.** A loose daily and weekly rhythm (not a schedule) per child by age: morning jobs, quiet time, outside time, one weekly outing each child chooses.
 - **Worksheets:** "I'm bored" menu by age, summer jobs chart, team Outdoor / Summer Prep.

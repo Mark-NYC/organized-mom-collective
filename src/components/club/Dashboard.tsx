@@ -88,7 +88,7 @@ function KitCard({ kit, access, href, featured }: { kit: KitConfig; access: 'edi
       {featured && (
         <ul className="mt-5 grid gap-1.5 text-[0.95rem] text-warm-ink sm:grid-cols-2">
           {(kit.action
-            ? ['A letter from Megan', kit.action.title, ...(kit.tool ? [kit.tool.title] : [])]
+            ? ['A letter from Megan', kit.action.title, ...(kit.tool ? [kit.tool.title] : []), ...(kit.toolkit?.tools.map((t) => t.title) ?? [])]
             : kit.printables.map((p) => p.title)
           ).map((t) => <li key={t}>· {t}</li>)}
         </ul>

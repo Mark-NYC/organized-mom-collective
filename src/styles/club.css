@@ -1360,3 +1360,124 @@
   height: 0.3in;
   border-bottom: 1px solid #c9c0b8;
 }
+
+/* June's touch: a fine-line sun, pale apricot panels, a soft blue calendar note. */
+.club-sun {
+  display: block;
+  flex: none;
+  width: 0.42in;
+  height: 0.42in;
+  margin: 0.12in 0 -0.16in;
+}
+.club-sun-small {
+  display: inline-block;
+  width: 0.3in;
+  height: 0.3in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.06in;
+}
+.club-print[data-accent='summer'] .club-letter-subtitle {
+  color: #a8775c;
+}
+.club-print[data-accent='summer'] .club-letter-action,
+.club-print[data-accent='summer'] .club-letter-conversation {
+  background: #f8eee5;
+  border-top-color: #d2a283;
+}
+.club-print[data-accent='summer'] .club-action-row {
+  border-bottom-color: #ecdccd;
+}
+.club-print[data-accent='summer'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='summer'] .club-letter-calendar {
+  background: #eef3f6;
+}
+.club-letter[data-accent='summer'] .club-letter-back-title {
+  margin-top: 0.22in;
+}
+.club-letter[data-accent='summer'] .club-letter-tips {
+  gap: 0.05in;
+  margin-top: 0.1in;
+}
+
+/* A small card to cut out for the fridge (June's "When I'm Bored…"), beside a short tip. */
+.club-letter-pair-card {
+  grid-template-columns: 1.15fr 1fr;
+  align-items: start;
+}
+.club-letter-card {
+  padding: 0.16in 0.22in 0.14in;
+  border: 1.2px dashed #c8a68e;
+  border-radius: 8px;
+  background: #fff;
+}
+.club-letter-card h3 {
+  font-family: 'Kalam', cursive;
+  font-size: 18pt;
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-letter-card ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.07in 0.16in;
+  margin: 0.08in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-card li {
+  display: flex;
+  align-items: center;
+  gap: 0.07in;
+  font-family: var(--font-serif);
+  font-size: 10.6pt;
+  line-height: 1.25;
+}
+.club-letter-card li::before {
+  content: '';
+  flex: none;
+  width: 0.09in;
+  height: 0.09in;
+  border-radius: 50%;
+  background: #9aab8f;
+}
+.club-print[data-accent='summer'] .club-letter-tip {
+  background: #eef3f6;
+  border-color: #dbe4ea;
+}
+.club-letter-invite-tools {
+  display: grid;
+  gap: 0.05in;
+  margin: 0.08in 0 0.04in;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-serif);
+  font-size: 10.4pt;
+  line-height: 1.35;
+}
+.club-letter-invite-tools strong {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 8.4pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4d4544;
+}
+/* June's front: a four-line agreement with a writing line under each, so the letter sits a little tighter. */
+.club-letter[data-accent='summer'] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-accent='summer'] .club-letter-body {
+  margin-top: 0.12in;
+  font-size: 10.6pt;
+  line-height: 1.4;
+}
+.club-letter[data-accent='summer'] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-accent='summer'] .club-letter-signature {
+  font-size: 18pt;
+}

@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { kitBySlug, kitItems } from '../../data/club/kits';
 import { monthLabel } from '../../data/club/labels';
 import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes';
-import type { KitConfig, KitPrintable } from '../../data/club/types';
+import type { KitConfig, KitPrintable, KitTool } from '../../data/club/types';
 import {
   addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_NOTE, MAX_STARTS, planCountdown, readCountdown, resetChanges,
   shortLabel as shortDay, lineDetail, lineText, MAX_TEXT, checkInFor, focusLines, MAX_FOCUS, MAX_PLAN, type FocusState, type CountdownPlan, type CountdownState, type SchoolStart,
@@ -290,7 +290,15 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
     return () => clearTimeout(t);
   }, [state, status]);
 
-  const toTool = tool && kit.tool ? () => document.getElementById('club-tool')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : undefined;
+  const toTool = (tool && kit.tool) || kit.toolkit ? () => document.getElementById('club-tool')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : undefined;
+  /** A tool's button (and, for a per-child tool, who it's for), handing it the family. */
+  const launcher = (site: ClubTool, t: KitTool) => (
+    <ToolLauncher tool={site} cta={t.cta} start={t.start} kids={site.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids}
+      ages={children.flatMap((c) => (c.age !== null ? [c.age] : []))} familyName={household.displayName}
+      people={planMembers(household, kit.month).map((p) => ({ name: p.firstName, adult: p.stage === 'adult', ...(p.age !== null ? { age: p.age } : {}), ...(p.isAccountHolder ? { holder: true as const } : {}) }))}
+      extra={action.focus ? { ...(state.focus.area ? { variant: state.focus.area } : {}), ...(state.focus.text.trim() ? { text: state.focus.text.trim() } : {}), ...(state.focus.start ? { date: state.focus.start } : {}) } : undefined}
+      household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
+  );
 
   return (
     <>
@@ -324,11 +332,30 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
                 <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
                 {kit.tool.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{kit.tool.note}</p>}
-                <ToolLauncher tool={tool} cta={kit.tool.cta} start={kit.tool.start} kids={tool.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids}
-                  ages={children.flatMap((c) => (c.age !== null ? [c.age] : []))} familyName={household.displayName}
-                  people={planMembers(household, kit.month).map((p) => ({ name: p.firstName, adult: p.stage === 'adult', ...(p.age !== null ? { age: p.age } : {}), ...(p.isAccountHolder ? { holder: true as const } : {}) }))}
-                  extra={action.focus ? { ...(state.focus.area ? { variant: state.focus.area } : {}), ...(state.focus.text.trim() ? { text: state.focus.text.trim() } : {}), ...(state.focus.start ? { date: state.focus.start } : {}) } : undefined}
-                  household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
+                {launcher(tool, kit.tool)}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {kit.toolkit && (
+          <section aria-labelledby="club-tool" className="club-screen mt-10 border-t border-warm-rule pt-8">
+            <div className="flex items-start gap-4">
+              <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage-wash font-serif text-[1.1rem] text-warm-ink ring-1 ring-sage">2</span>
+              <div className="min-w-0 flex-1">
+                <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.toolkit.title}</h2>
+                <p className="mt-2 leading-relaxed text-warm-soft">{kit.toolkit.intro}</p>
+                {kit.toolkit.tools.map((t) => {
+                  const site = clubToolById(t.tool);
+                  return site && (
+                    <div key={t.tool} className="mt-6 bg-white p-5 ring-1 ring-warm-rule" data-club-kit-tool={t.tool}>
+                      <h3 className="font-serif text-[1.3rem] leading-tight text-warm-ink">{t.title}</h3>
+                      <p className="mt-2 leading-relaxed text-warm-soft">{t.blurb}</p>
+                      {t.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{t.note}</p>}
+                      {launcher(site, t)}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -722,7 +749,8 @@ function ToolLauncher({ tool, cta, start, kids, ages, familyName, people, extra,
   href: (path: string) => string;
 }) {
   const [choosing, setChoosing] = useState(false);
-  const [variant, setVariant] = useState(tool.variants?.[0]?.id ?? start);
+  // A kit that names its start (June's summer rhythm) opens there, without the tool's own variant tabs.
+  const [variant, setVariant] = useState(start ?? tool.variants?.[0]?.id);
   const go = (kid?: { id: string; firstName: string; age: number | null }) => {
     setToolHandoff({
       tool: tool.id,
@@ -746,7 +774,7 @@ function ToolLauncher({ tool, cta, start, kids, ages, familyName, people, extra,
   }
   return (
     <div className="mt-5 bg-white p-4 ring-1 ring-warm-rule sm:p-5">
-      {tool.variants && (
+      {tool.variants && !start && (
         <div role="group" aria-label="Which routine" className="flex gap-x-6 border-b border-warm-rule">
           {tool.variants.map((v) => <button key={v.id} type="button" aria-pressed={v.id === variant} className={tab} onClick={() => setVariant(v.id)}>{v.label}</button>)}
         </div>
