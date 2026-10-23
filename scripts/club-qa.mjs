@@ -881,6 +881,7 @@ for (const id of [...samples, 'hughes']) {
   // Same tab, straight to each tool's address as another sample family: the Okafors' handoff doesn't carry over.
   for (const [tool, ready, probe] of [
     ['connection-planner', '.cn-card', () => document.querySelector('[data-cn-family]')?.value ?? ''],
+    ['meal-team', '.mlt-row', () => document.querySelector('[data-mlt-family]')?.value ?? ''],
     ['habit-builder', '[data-hb-statement]', () => document.querySelector('[data-hb-family]')?.value ?? ''],
     ['traditions-picker', '.tp-card', () => document.querySelector('[data-tp-family]')?.value ?? ''],
     ['chore-chart', '#chore-chart', () => document.querySelector('[data-cc-name]')?.value ?? ''],
@@ -954,7 +955,7 @@ for (const id of [...samples, 'hughes']) {
   await page.waitForURL(/\/club\/tools\/spring-cleaning/);
   await page.locator('.sb-room').first().waitFor();
   check(await page.locator('.sb[data-sb-handoff]').count() === 1, `${id}: the Club page isn't the site's cleaning builder`);
-  const helpers = await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value));
+  const helpers = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
   entry.helpers = helpers;
   check(helpers.length >= 1 && !helpers.includes('Adult 1'), `${id}: the builder didn't take the family as helpers (${helpers.join(', ')})`);
   check((await page.locator('.sb-room .sb-room-name').first().textContent()) === 'Living room', `${id}: the builder didn't open on the living room`);
@@ -973,9 +974,9 @@ for (const id of [...samples, 'hughes']) {
 
   // Limits are rules: a seated-only grown-up gets only seated jobs, wherever they are.
   if (id === 'chen') {
-    const lin = page.locator('[data-sb-helper]').filter({ has: page.locator('[data-sb-name][value="Lin"]') });
+    const lin = page.locator('[data-hp-helper]').filter({ has: page.locator('[data-hp-name][value="Lin"]') });
     await page.getByRole('button', { name: 'Limits for Lin' }).click();
-    await page.locator('[data-sb-helper]').nth(2).getByLabel('Seated jobs only').check();
+    await page.locator('[data-hp-helper]').nth(2).getByLabel('Seated jobs only').check();
     check(await sbAllowed(page), 'chen: a limit was broken after adding it');
     entry.linJobs = await page.locator('.sb-job').evaluateAll((rows) => rows.filter((r) => r.querySelector('select').selectedOptions[0].textContent === 'Lin').map((r) => r.querySelector('textarea').value));
     void lin;
@@ -1045,7 +1046,7 @@ for (const id of [...samples, 'hughes']) {
   const page = await ctx.newPage();
   await page.goto(`${base}/club/tools/spring-cleaning?sample=new`);
   await page.locator('.sb-room').first().waitFor();
-  check((await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1', 'no profile: the builder invents people');
+  check((await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1', 'no profile: the builder invents people');
   await page.getByRole('button', { name: '+ School-age child' }).click();
   await page.getByRole('button', { name: '+ Teen' }).click();
   const owners = await page.locator('.sb-job select').evaluateAll((els) => els.map((e) => e.selectedOptions[0].textContent));
@@ -1068,14 +1069,220 @@ for (const id of [...samples, 'hughes']) {
   await page.goto(marUrl('okafor'));
   await page.getByRole('button', { name: 'Build Our Cleaning Plan', exact: true }).click();
   await page.locator('.sb-room').first().waitFor();
-  const names = await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value));
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
   const jobs = await page.locator('.sb-job textarea').evaluateAll((els) => els.map((e) => e.value));
   check(!names.includes('Ana') && names.includes('Zara') && !jobs.includes('Rivera secret job'), `leak: the Okafors’ cleaning plan shows the Riveras’ (${names.join(', ')})`);
   await page.goto(`${base}/club/tools/spring-cleaning?sample=brooks`);
   await page.locator('.sb-room').first().waitFor();
-  const direct = await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value));
+  const direct = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
   check(!direct.includes('Zara') && !direct.includes('Ana'), `leak: the cleaning builder opened by address as Brooks shows another family (${direct.join(', ')})`);
   report.push({ marchLeakCheck: 'ok' });
+  await ctx.close();
+}
+
+// April (letter, Family Dinner Team, the Family Meal Responsibility Planner): the meal, the day and helpers save; the
+// dinner team and the letter print; "Build Our Mealtime Plan" opens the planner with the family as helpers.
+const aprUrl = (id) => `${base}/club/kits/2027-04-everybody-helps-at-mealtime?sample=${id}`;
+/** Every job row's chosen person is one the planner allows (no grown-ups-only job, allergy rule or limit broken). */
+const mltAllowed = (page) => page.evaluate(() => [...document.querySelectorAll('.mlt-row select')].every((sel) => !sel.selectedOptions[0]?.disabled));
+const mltOwners = (page) => page.locator('.mlt-row').evaluateAll((rows) => rows.map((r) => `${r.querySelector('select').selectedOptions[0].textContent}: ${r.querySelector('textarea').value}`));
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { april: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(aprUrl(id));
+  await page.getByRole('heading', { name: 'Our Family Dinner Team' }).waitFor();
+  check(await noSideScroll(page), `${id}: April scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the dinner team has ${await lines.count()} steps (expected 5)`);
+  check(await page.getByPlaceholder('Who’s helping?').count() === 5, `${id}: April is missing its helper lines`);
+  await page.screenshot({ path: join(out, `${id}-april-phone.png`), fullPage: true });
+
+  await page.getByRole('group', { name: 'Ideas' }).getByRole('button', { name: 'Taco night' }).click();
+  await page.getByLabel(/When we’re having it/).fill('2027-04-09');
+  await page.getByPlaceholder('Who’s helping?').nth(2).fill('Kids set the table');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our Family Dinner Team' }).waitFor();
+  check(await page.getByLabel('Which meal?').inputValue() === 'Taco night', `${id}: the meal didn't survive a reload`);
+  check(await page.getByLabel(/When we’re having it/).inputValue() === '2027-04-09', `${id}: the day didn't survive a reload`);
+  check(await page.getByPlaceholder('Who’s helping?').nth(2).inputValue() === 'Kids set the table' && await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: helpers or checks didn't survive a reload`);
+  // Her own meal, typed.
+  await page.getByLabel('Which meal?').fill('Grandma’s chili');
+  await page.getByLabel('Which meal?').blur();
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['dinner-team', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-april-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: April ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: April ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Grandma’s chili') && sheet.includes('Friday, April 9') && sheet.includes('Kids set the table'), `${id}: her printed dinner team is missing the meal, day or helper`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('The meal we’re making') && front.includes('When we’re having it') && !front.includes('chili') && !front.includes('April 9'), `${id}: the mailed letter's blanks are wrong`);
+  check(front.includes('Everybody Helps at Mealtime') && front.includes('Less on Mom’s plate') && front.includes('Megan'), `${id}: the letter's front is missing its title, subtitle or signature`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-place')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's place setting is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Everyone Has a Place at the Table', 'Before the meal.', 'During the meal.', 'After the meal.', 'Kitchen jobs by age', '3–5', '13+', 'A five-minute pantry check', 'add only what’s missing', 'What’s one part of mealtime you could take responsibility for this week?', 'Make Your Family Meal Responsibility Plan', 'organizedmomcollective.com/club/kits/2027-04-everybody-helps-at-mealtime', 'meal-planning and grocery-list sections']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+
+  // The tool: the meal planner, with the family as helpers, dinner and the same jobs all week.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Build Our Mealtime Plan', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/meal-team/);
+  await page.locator('.mlt-row').first().waitFor();
+  check(await page.locator('.mlt[data-mlt-handoff]').count() === 1, `${id}: the Club page isn't the site's meal planner`);
+  const helpers = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  entry.helpers = helpers;
+  check(helpers.length >= 1 && !helpers.includes('Adult 1'), `${id}: the planner didn't take the family as helpers (${helpers.join(', ')})`);
+  check(await page.locator('[data-mlt-meal="dinner"][aria-pressed="true"]').count() === 1 && await page.locator('[data-mlt-meal][aria-pressed="true"]').count() === 1, `${id}: the planner didn't start on dinner alone`);
+  check(await page.locator('[data-mlt-mode="same"][aria-pressed="true"]').count() === 1, `${id}: the planner didn't start with the same jobs all week`);
+  check(await mltAllowed(page), `${id}: a job went to someone who can't safely do it`);
+  check(await page.locator('.mlt-row.is-open').count() === 0, `${id}: a dinner job has nobody`);
+  const owners = await mltOwners(page);
+  entry.dinner = owners;
+  for (const h of helpers) check(owners.some((o) => o.startsWith(`${h}:`)) || owners.some((o) => o.startsWith('Everyone:')) && helpers.length === 1, `${id}: ${h} has no mealtime job`);
+  for (const part of ['week', 'before', 'during', 'after']) check(await page.locator(`[data-mlt-part="${part}"] .mlt-row`).count() > 0, `${id}: the plan has no ${part} jobs`);
+  entry.balance = await page.locator('[data-mlt-balance]').textContent();
+  check(await noSideScroll(page), `${id}: the planner scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-april-planner-phone.png`), fullPage: true });
+
+  // Breakfast instead of dinner: different jobs, still safe.
+  await page.locator('[data-mlt-meal="breakfast"]').click();
+  await page.locator('[data-mlt-meal="dinner"]').click();
+  const breakfast = await mltOwners(page);
+  entry.breakfast = breakfast;
+  check(breakfast.some((o) => o.includes('bowls, spoons')) && !breakfast.some((o) => o.includes('Cook the main dish')), `${id}: breakfast plans look like dinner`);
+  check(await mltAllowed(page), `${id}: a breakfast job went to someone who can't safely do it`);
+  // All three meals.
+  await page.locator('[data-mlt-meal="lunch"]').click();
+  await page.locator('[data-mlt-meal="dinner"]').click();
+  const three = await mltOwners(page);
+  check(['Breakfast:', 'Lunch:', 'Dinner:'].every((m) => three.some((o) => o.includes(m))), `${id}: three meals don't each have jobs`);
+  check(await mltAllowed(page), `${id}: a job went to someone who can't safely do it with three meals`);
+  await page.locator('[data-mlt-meal="breakfast"]').click();
+  await page.locator('[data-mlt-meal="lunch"]').click();
+
+  // Limits and the allergy rule.
+  if (id === 'chen') {
+    await page.getByRole('button', { name: 'Limits for Lin' }).click();
+    await page.locator('[data-hp-helper]').nth(2).getByLabel('Seated jobs only').check();
+    check(await mltAllowed(page), 'chen: a limit was broken after adding it');
+    entry.linJobs = (await mltOwners(page)).filter((o) => o.startsWith('Lin:'));
+  }
+  await page.locator('[data-mlt-allergy]').check();
+  check(await mltAllowed(page), `${id}: the allergy rule was broken`);
+  await page.locator('[data-mlt-allergy]').uncheck();
+
+  // Edit: reword, reassign, remove, add our own; then new suggestions keep all of it, and so does a reload.
+  const firstRow = page.locator('.mlt-row').first();
+  await firstRow.locator('textarea').fill('Plan the week’s dinners on Sunday');
+  await firstRow.locator('textarea').blur();
+  const after = page.locator('[data-mlt-part="after"] .mlt-row').filter({ hasNot: page.locator('select option[value="everyone"]:checked') });
+  const target = after.first();
+  const pick = (await target.locator('select option:not([disabled])').allTextContents()).filter((t) => t !== 'Needs someone' && t !== 'Everyone').pop();
+  await target.locator('select').selectOption({ label: pick });
+  const pickedJob = await target.locator('textarea').inputValue();
+  const removed = await page.locator('[data-mlt-part="during"] .mlt-row textarea').first().inputValue();
+  await page.locator('[data-mlt-part="during"] .mlt-row').first().getByRole('button', { name: /^Remove/ }).click();
+  await page.getByLabel('Part of mealtime').selectOption('after');
+  await page.getByLabel('Your own job').fill('Feed the dog after dinner');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  const before = await mltOwners(page);
+  check(before.includes(`${pick}: ${pickedJob}`) && before.some((o) => o.endsWith('Plan the week’s dinners on Sunday')) && before.some((o) => o.endsWith('Feed the dog after dinner')) && !before.some((o) => o.endsWith(removed)), `${id}: edits didn't apply`);
+  await page.locator('[data-mlt-fresh]').click();
+  const fresh = await mltOwners(page);
+  check(fresh.includes(`${pick}: ${pickedJob}`) && fresh.some((o) => o.endsWith('Plan the week’s dinners on Sunday')) && fresh.some((o) => o.endsWith('Feed the dog after dinner')) && !fresh.some((o) => o.endsWith(removed)), `${id}: new suggestions erased her edits`);
+  await page.reload();
+  await page.locator('.mlt-row').first().waitFor();
+  const reloaded = await mltOwners(page);
+  check(reloaded.join('|') === fresh.join('|'), `${id}: the edited plan didn't survive a reload`);
+
+  // Rotate: the weekly view becomes a day-by-day grid, and the printout gains the week.
+  await page.locator('[data-mlt-mode="rotate"]').click();
+  await page.locator('[data-mlt-day="5"]').click();
+  await page.locator('[data-mlt-day="6"]').click();
+  await page.locator('[data-mlt-view="week"]').click();
+  const gridRows = await page.locator('.mlt-grid tbody tr').count();
+  check(helpers.length === 1 || gridRows === 5, `${id}: the rotation grid has ${gridRows} days (expected Mon–Fri)`);
+  if (helpers.length > 1) {
+    const cols = await page.locator('.mlt-grid tbody tr').evaluateAll((rows) => rows.map((r) => [...r.querySelectorAll('td')].map((td) => td.textContent)));
+    entry.rotation = cols;
+    const varied = cols[0].some((_, c) => new Set(cols.map((r) => r[c])).size > 1);
+    check(varied, `${id}: rotating didn't change anyone's jobs from day to day`);
+  }
+  check(await noSideScroll(page), `${id}: the weekly grid scrolls the page sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-april-week-phone.png`), fullPage: true });
+  check(await page.locator('.mlt-sheet').count() >= 2, `${id}: a rotating plan didn't add the week to the printout`);
+  check(await page.evaluate(() => [...document.querySelectorAll('.mlt-sheet')].every((s) => s.scrollHeight <= s.clientHeight + 1)), `${id}: a printout runs off its page`);
+  const sheetText = (await page.locator('.mlt-sheet[data-mlt-sheet="Our Mealtime Team"]').allTextContents()).join(' ');
+  entry.chartPages = await page.locator('.mlt-sheet[data-mlt-sheet="Our Mealtime Team"]').count();
+  check(sheetText.includes('Our Mealtime Team') && sheetText.includes('Feed the dog after dinner') && sheetText.includes('meal plan') && sheetText.includes('grocery list'), `${id}: the chart is missing its title, her job or the calendar tie-in`);
+  const downloads = [];
+  page.on('download', (d) => downloads.push(d));
+  await page.click('[data-mlt-download]');
+  await page.waitForTimeout(3500);
+  check(downloads.length >= 1, `${id}: no chart downloaded`);
+  for (const [i, d] of downloads.entries()) await d.saveAs(join(out, `${id}-april-chart-${i + 1}.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the planner asked for an email`);
+  await page.click('[data-mlt-copy]');
+  await page.waitForTimeout(200);
+  const copied = await page.locator('[data-mlt-status]').textContent();
+  const fallback = await page.locator('[data-mlt-copy-fallback]').inputValue();
+  check(/^Copied/.test(copied) || (fallback.includes('BEFORE THE MEAL') && fallback.includes('Mon:')), `${id}: copying the plan didn't work`);
+  await page.locator('[data-mlt-mode="same"]').click();
+  await page.locator('[data-mlt-view="team"]').click();
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-04/);
+  check(errors.length === 0, `${id}: April page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// No family profile: one adult to start; add a young child and a teen, and the plan shares the work with them.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/meal-team?sample=new`);
+  await page.locator('.mlt-row').first().waitFor();
+  check((await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1', 'no profile: the planner invents people');
+  await page.getByRole('button', { name: '+ Young child' }).click();
+  await page.getByRole('button', { name: '+ Teen' }).click();
+  const owners = await mltOwners(page);
+  check(owners.some((o) => o.startsWith('Child')) && owners.some((o) => o.startsWith('Teen')), `no profile: added helpers got no jobs (${owners.join(', ')})`);
+  check(await mltAllowed(page), 'no profile: a job went to someone who can’t safely do it');
+  report.push({ mealNoProfile: owners });
+  await ctx.close();
+}
+
+// Two families in one browser, April: one family's plan never shows up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(aprUrl('rivera'));
+  await page.getByRole('button', { name: 'Build Our Mealtime Plan', exact: true }).click();
+  await page.locator('.mlt-row').first().waitFor();
+  await page.getByLabel('Your own job').fill('Rivera secret job');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.goto(aprUrl('okafor'));
+  await page.getByRole('button', { name: 'Build Our Mealtime Plan', exact: true }).click();
+  await page.locator('.mlt-row').first().waitFor();
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  const jobs = await mltOwners(page);
+  check(!names.includes('Ana') && names.includes('Zara') && !jobs.some((j) => j.includes('Rivera secret job')), `leak: the Okafors’ meal plan shows the Riveras’ (${names.join(', ')})`);
+  await page.goto(`${base}/club/tools/meal-team?sample=brooks`);
+  await page.locator('.mlt-row').first().waitFor();
+  const direct = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  check(!direct.includes('Zara') && !direct.includes('Ana'), `leak: the meal planner opened by address as Brooks shows another family (${direct.join(', ')})`);
+  report.push({ aprilLeakCheck: 'ok' });
   await ctx.close();
 }
 

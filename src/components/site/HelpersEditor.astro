@@ -1,0 +1,50 @@
+---
+/**
+ * "Who's helping?" for the site's family job planners (the Family Spring Cleaning Builder, the Family Meal
+ * Responsibility Planner): a row per person (name, group, a child's age, optional limits, remove) and quick adds by
+ * group. Behavior: helpers-editor.ts beside it; data: src/lib/household-helpers.ts. Classes are prefixed `hp-`. The
+ * host tool supplies its own limits and decides what a change means for its plan.
+ */
+import { GROUPS, groupLabel } from '../../lib/household-helpers';
+---
+
+<div class="hp" data-hp>
+  <ul class="hp-people" data-hp-people></ul>
+  <div class="hp-add">
+    {GROUPS.map((g) => <button type="button" class="hp-link" data-hp-add={g}>+ {groupLabel[g]}</button>)}
+  </div>
+  <template data-hp-person>
+    <li class="hp-person">
+      <div class="hp-person-main">
+        <input type="text" class="hp-name" data-hp-name maxlength="30" aria-label="Name" />
+        <select class="hp-group" data-hp-group aria-label="Who they are">
+          {GROUPS.map((g) => <option value={g}>{groupLabel[g]}</option>)}
+        </select>
+        <input type="number" class="hp-age" data-hp-age min="2" max="17" inputmode="numeric" aria-label="Age (optional)" placeholder="Age" />
+        <button type="button" class="hp-link" data-hp-limits-toggle aria-expanded="false">Limits</button>
+        <button type="button" class="hp-x" data-hp-remove>×</button>
+      </div>
+      <div class="hp-limits" data-hp-limits hidden></div>
+    </li>
+  </template>
+</div>
+
+<style is:global>
+  .hp [hidden] { display: none !important; }
+  .hp-people { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .hp-person { padding: 6px 8px; background: #fff; border: 1px solid var(--color-warm-rule); border-radius: 4px; }
+  .hp-person-main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.3fr) 4.2rem auto auto; gap: 6px; align-items: center; }
+  .hp-person-main:has(.hp-age[hidden]) .hp-group { grid-column: span 2; }
+  .hp-person input, .hp-person select { min-width: 0; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-warm-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--color-warm-ink); }
+  .hp-limits { display: flex; flex-wrap: wrap; gap: 0 16px; padding: 6px 4px 2px; }
+  .hp-limits label { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 0.92rem; }
+  .hp-limits input { width: 20px; height: 20px; accent-color: #7d917c; }
+  .hp-add { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 4px; }
+  .hp-link { min-height: 44px; padding: 0; border: 0; background: none; font-size: 0.9rem; font-weight: 600; color: var(--color-warm-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .hp-x { width: 44px; min-height: 44px; border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--color-warm-soft); cursor: pointer; }
+  .hp-link:focus-visible, .hp-x:focus-visible { outline: 2px solid var(--color-warm-ink); outline-offset: 3px; }
+  @media (max-width: 520px) {
+    .hp-person-main { grid-template-columns: minmax(0, 1fr) 3.6rem auto auto; }
+    .hp-name { grid-column: 1 / -1; }
+  }
+</style>

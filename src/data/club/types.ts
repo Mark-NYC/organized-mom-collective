@@ -225,6 +225,10 @@ export interface KitConfig {
     fieldGuide: { title: string; intro?: string; sections: { heading: string; body: string }[] };
     /** Three-part kits: a short worked example in words, on the back of the letter. */
     story?: { title: string; body: string };
+    /** A compact reference on the back (April's kitchen jobs by age): a few rows, suggestions, never rules. */
+    ageGuide?: { title: string; note: string; rows: { ages: string; jobs: string }[] };
+    /** One small tip on the back (April's five-minute pantry check). */
+    tip?: { title: string; body: string };
     /** A short optional list on the back (March's decluttering ideas): small boxes, framed as ideas, not more work. */
     checklist?: { title: string; note: string; items: string[] };
     /** Three-part kits: on the kit page, how the mailed copy and her own printout relate (one or the other, never both). */
@@ -250,8 +254,11 @@ export interface KitConfig {
     calendarNote?: string;
     /** '/club/kits/<slug>?source=mailer' */
     qrPath: string;
-    /** A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush panels; March's leafy stem. */
-    accent?: 'evergreen' | 'blush' | 'spring';
+    /**
+     * A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush
+     * panels; March's leafy stem; April's place setting and pale apricot panels.
+     */
+    accent?: 'evergreen' | 'blush' | 'spring' | 'table';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

@@ -1138,3 +1138,105 @@
   font-size: 11pt;
   line-height: 1.45;
 }
+
+/* April's touch: a fine-line place setting, pale apricot panels, sage checks. */
+.club-place {
+  display: block;
+  flex: none;
+  width: 0.72in;
+  height: 0.36in;
+  margin: 0.14in 0 -0.16in;
+}
+.club-place-small {
+  display: inline-block;
+  width: 0.5in;
+  height: 0.25in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.03in;
+}
+.club-print[data-accent='table'] .club-letter-subtitle {
+  color: #a8775c;
+}
+.club-print[data-accent='table'] .club-letter-action,
+.club-print[data-accent='table'] .club-letter-conversation {
+  background: #f8eee5;
+  border-top-color: #d2a283;
+}
+.club-print[data-accent='table'] .club-action-row {
+  border-bottom-color: #ecdccd;
+}
+.club-print[data-accent='table'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='table'] .club-letter-calendar {
+  background: #eef1eb;
+}
+
+/* A compact reference and a small tip, side by side on the back (April). */
+.club-letter-pair {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 0.18in;
+  align-items: stretch;
+}
+.club-letter-pair {
+  margin-top: 0.22in;
+}
+.club-letter-pair > .club-letter-example {
+  margin-top: 0;
+  padding: 0.14in 0.18in;
+}
+.club-letter-ages dl {
+  margin: 0.08in 0 0;
+}
+.club-letter-ages dl > div {
+  display: grid;
+  grid-template-columns: 0.62in 1fr;
+  gap: 0.1in;
+  padding: 0.03in 0;
+  border-bottom: 1px solid #e6e0d8;
+  font-size: 9.6pt;
+  line-height: 1.3;
+}
+.club-letter-ages dt {
+  font-family: var(--font-sans);
+  font-size: 8.6pt;
+  font-weight: 600;
+  color: #5f7563;
+}
+.club-letter-ages .club-letter-checklist-note {
+  font-size: 9pt;
+}
+.club-letter-tip p {
+  margin-top: 0.08in;
+  font-family: var(--font-serif);
+  font-size: 10.2pt;
+  line-height: 1.4;
+}
+.club-print[data-accent='table'] .club-letter-tip {
+  background: #f8eee5;
+}
+/* April's back carries a reference and a tip as well: a slightly tighter back so it all fits. */
+.club-letter[data-accent='table'] .club-letter-back-title {
+  margin-top: 0.22in;
+}
+.club-letter[data-accent='table'] .club-letter-tips {
+  gap: 0.04in;
+  margin-top: 0.08in;
+}
+.club-letter[data-accent='table'] .club-letter-tips p {
+  font-size: 10.6pt;
+  line-height: 1.38;
+}
+.club-letter[data-accent='table'] .club-letter-conversation {
+  margin-top: 0.18in;
+  padding: 0.14in 0.3in 0.14in;
+}
+.club-letter[data-accent='table'] .club-letter-question {
+  font-size: 16pt;
+}
+.club-letter[data-accent='table'] .club-letter-invite {
+  margin-top: 0.16in;
+  margin-bottom: 0.14in;
+}

@@ -10,7 +10,8 @@
  */
 import '@fontsource/kalam/latin-700.css';
 import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
-import { cleaningRooms, groupLabel, OTHER_ROOM, sessionOptions } from '../../data/spring-cleaning';
+import { cleaningRooms, OTHER_ROOM, sessionOptions } from '../../data/spring-cleaning';
+import HelpersEditor from './HelpersEditor.astro';
 
 interface Props {
   storageKey: string;
@@ -43,10 +44,7 @@ const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astr
     <fieldset class="sb-q">
       <legend><span class="sb-n">2</span> Who’s helping?</legend>
       <p class="sb-q-note" data-sb-people-note>Add everyone who’s joining in. Limits are optional: we’ll only suggest jobs that fit.</p>
-      <ul class="sb-people" data-sb-people></ul>
-      <div class="sb-add-people">
-        {(['adult', 'teen', 'school', 'young'] as const).map((g) => <button type="button" class="sb-link" data-sb-add={g}>+ {groupLabel[g]}</button>)}
-      </div>
+      <HelpersEditor />
     </fieldset>
 
     <fieldset class="sb-q">
@@ -58,20 +56,6 @@ const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astr
     </fieldset>
   </form>
 
-  <template data-sb-person>
-    <li class="sb-person">
-      <div class="sb-person-main">
-        <input type="text" class="sb-person-name" data-sb-name maxlength="30" aria-label="Name" />
-        <select class="sb-person-group" data-sb-group aria-label="Who they are">
-          {(['adult', 'teen', 'school', 'young'] as const).map((g) => <option value={g}>{groupLabel[g]}</option>)}
-        </select>
-        <input type="number" class="sb-person-age" data-sb-age min="2" max="17" inputmode="numeric" aria-label="Age (optional)" placeholder="Age" />
-        <button type="button" class="sb-link" data-sb-limits-toggle aria-expanded="false">Limits</button>
-        <button type="button" class="sb-x" data-sb-remove>×</button>
-      </div>
-      <div class="sb-limits" data-sb-limits hidden></div>
-    </li>
-  </template>
 
   <section class="sb-plan" aria-labelledby="sb-plan-h">
     <h2 id="sb-plan-h" class="sb-title">Your family cleaning plan</h2>
@@ -134,25 +118,13 @@ const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astr
   .sb-option:focus-visible, .sb-link:focus-visible, .sb-x:focus-visible, .sb-btn:focus-visible, .sb-palette-option:focus-visible { outline: 2px solid var(--sb-ink); outline-offset: 3px; }
   .sb-field { display: grid; gap: 6px; }
   .sb-field > span, .sb-palette legend { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sb-soft); }
-  .sb-field input, .sb-field select, .sb-person input, .sb-person select, .sb-job input, .sb-job select, .sb-add-job input, .sb-add-job select, .sb-room-tools select {
+  .sb-field input, .sb-field select, .sb-job input, .sb-job select, .sb-add-job input, .sb-add-job select, .sb-room-tools select {
     min-height: 44px; padding: 0 10px; border: 1px solid var(--sb-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--sb-ink); min-width: 0;
   }
   .sb-other { max-width: 360px; margin-top: 8px; }
   .sb-link { min-height: 44px; padding: 0; border: 0; background: none; font-size: 0.9rem; font-weight: 600; color: var(--sb-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
   .sb-x { width: 44px; min-height: 44px; border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--sb-soft); cursor: pointer; }
 
-  .sb-people { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
-  .sb-person { padding: 6px 8px; background: #fff; border: 1px solid var(--sb-rule); border-radius: 4px; }
-  .sb-person-main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.3fr) 4.2rem auto auto; gap: 6px; align-items: center; }
-  .sb-limits { display: flex; flex-wrap: wrap; gap: 0 16px; padding: 6px 4px 2px; }
-  .sb-limits label { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 0.92rem; }
-  .sb-limits input { width: 20px; height: 20px; accent-color: #7d917c; }
-  .sb-add-people { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 4px; }
-  @media (max-width: 520px) {
-    .sb-person-main { grid-template-columns: minmax(0, 1fr) 3.6rem auto auto; }
-    .sb-person-name { grid-column: 1 / -1; }
-  }
-  .sb-person-main:has(.sb-person-age[hidden]) .sb-person-group { grid-column: span 2; }
 
   .sb-plan, .sb-out { margin-top: 30px; }
   .sb-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }

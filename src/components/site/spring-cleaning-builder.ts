@@ -16,10 +16,12 @@ import { toolPalettes, resolveToolPalette, type ToolPaletteId } from '../../data
 import { toolEvent } from '../../lib/tool-engagement';
 import { downloadPng } from '../../lib/printable';
 import {
-  cannotDo, coreJobs, groupFor, groupLabel, jobById, limitOptions, OTHER_ROOM, planRoom, roomById,
+  cannotDo, coreJobs, jobById, limitOptions, OTHER_ROOM, planRoom, roomById,
   sessionCount, sessionMinutes, sessionOptions, suppliesFor,
-  type CleaningJob, type Group, type Helper, type Limit, type PlannedJob, type SessionLength,
+  type CleaningJob, type Helper, type PlannedJob, type SessionLength,
 } from '../../data/spring-cleaning';
+import { groupLabel, helpersFromHandoff, readHelpers } from '../../lib/household-helpers';
+import { initHelpersEditor } from './helpers-editor';
 import type { ToolHandoff } from '../../lib/tool-handoff';
 
 interface RoomPlan {
@@ -43,7 +45,6 @@ interface Saved {
   next: number;
 }
 
-const GROUPS: Group[] = ['adult', 'teen', 'school', 'young'];
 const LIMITS = limitOptions.map((l) => l.id);
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').slice(0, max) : '');
 const isLength = (v: unknown): v is SessionLength => sessionOptions.includes(v as SessionLength);
@@ -52,12 +53,7 @@ function read(key: string): Saved | null {
   try {
     const o = JSON.parse(localStorage.getItem(key) ?? 'null');
     if (!o || o.v !== 1 || !Array.isArray(o.helpers) || !Array.isArray(o.rooms)) return null;
-    const helpers: Helper[] = o.helpers.slice(0, 12).flatMap((h: Partial<Helper>) => (typeof h?.id === 'string' && GROUPS.includes(h.group as Group) ? [{
-      id: h.id.slice(0, 20), name: clean(h.name, 30) || groupLabel[h.group as Group], group: h.group as Group,
-      age: Number.isInteger(h.age) && h.age! >= 2 && h.age! < 18 ? h.age! : null,
-      limits: Array.isArray(h.limits) ? h.limits.filter((l): l is Limit => LIMITS.includes(l as Limit)) : [],
-      ...(h.holder ? { holder: true } : {}),
-    }] : []));
+    const helpers = readHelpers(o.helpers, LIMITS);
     const ids = new Set(helpers.map((h) => h.id));
     const rooms: RoomPlan[] = o.rooms.slice(0, 12).flatMap((r: Partial<RoomPlan>) => (typeof r?.key === 'string' && roomById(r.key) && Array.isArray(r.jobs) ? [{
       key: r.key, name: clean(r.name, 40) || roomById(r.key)!.label, length: isLength(r.length) ? r.length : 30, custom: r.custom === true,
@@ -96,8 +92,6 @@ export function initSpringCleaningBuilder(host: HTMLElement, handoff?: ToolHando
   };
   const status = $<HTMLElement>('[data-sb-status]');
   const roomsBox = $<HTMLElement>('[data-sb-rooms]');
-  const peopleList = $<HTMLUListElement>('[data-sb-people]');
-  const personTpl = $<HTMLTemplateElement>('[data-sb-person]');
   const sheets = $<HTMLElement>('[data-sb-sheets]');
   const printSelect = $<HTMLSelectElement>('[data-sb-print-room]');
   const downloadBtn = $<HTMLButtonElement>('[data-sb-download]');
@@ -105,10 +99,7 @@ export function initSpringCleaningBuilder(host: HTMLElement, handoff?: ToolHando
   const otherName = $<HTMLInputElement>('[data-sb-other-name]');
 
   const saved = read(key);
-  const fromProfile = (handoff?.people ?? []).map((p, i): Helper => {
-    const group = p.adult ? 'adult' : groupFor(p.age ?? null);
-    return { id: `h${i}`, name: p.name, group, age: p.adult ? null : p.age ?? null, limits: [], ...(p.holder ? { holder: true } : {}) };
-  });
+  const fromProfile = helpersFromHandoff(handoff);
   const s: Saved = saved ?? {
     v: 1,
     helpers: fromProfile.length ? fromProfile : [{ id: 'h0', name: 'Adult 1', group: 'adult', age: null, limits: [] }],
@@ -183,72 +174,26 @@ export function initSpringCleaningBuilder(host: HTMLElement, handoff?: ToolHando
       : 'Add everyone who’s joining in. Limits are optional: we’ll only suggest jobs that fit.';
   }
 
-  function renderPeople() {
-    peopleList.replaceChildren(...s.helpers.map((h) => {
-      const li = (personTpl.content.cloneNode(true) as DocumentFragment).firstElementChild as HTMLLIElement;
-      li.dataset.sbHelper = h.id;
-      const name = $<HTMLInputElement>('[data-sb-name]', li);
-      const group = $<HTMLSelectElement>('[data-sb-group]', li);
-      const age = $<HTMLInputElement>('[data-sb-age]', li);
-      const limitsBox = $<HTMLElement>('[data-sb-limits]', li);
-      const toggle = $<HTMLButtonElement>('[data-sb-limits-toggle]', li);
-      name.value = h.name;
-      name.setAttribute('aria-label', `Name (${groupLabel[h.group]})`);
-      group.value = h.group;
-      age.value = h.age === null ? '' : String(h.age);
-      age.hidden = h.group === 'adult';
-      toggle.textContent = h.limits.length ? `Limits (${h.limits.length})` : 'Limits';
-      toggle.setAttribute('aria-label', `Limits for ${h.name}`);
-      $<HTMLButtonElement>('[data-sb-remove]', li).setAttribute('aria-label', `Remove ${h.name}`);
-      limitsBox.replaceChildren(...limitOptions.map((l) => {
-        const box = el('input', { type: 'checkbox', checked: h.limits.includes(l.id) });
-        box.addEventListener('change', () => {
-          started();
-          h.limits = box.checked ? [...h.limits, l.id] : h.limits.filter((x) => x !== l.id);
-          // A known limit always wins: jobs it rules out leave this person, even in rooms she's edited.
-          for (const room of s.rooms) for (const x of room.jobs) if (x.owner === h.id && cannotDo(asJob(x), h)) x.owner = null;
-          peopleChanged();
-          update();
-        });
-        return el('label', {}, box, l.label);
-      }));
-      toggle.addEventListener('click', () => {
-        limitsBox.hidden = !limitsBox.hidden;
-        toggle.setAttribute('aria-expanded', String(!limitsBox.hidden));
-      });
-      name.addEventListener('input', () => {
-        h.name = name.value.slice(0, 30) || groupLabel[h.group];
+  const people = initHelpersEditor($<HTMLElement>('[data-hp]'), {
+    helpers: () => s.helpers,
+    setHelpers: (next) => { s.helpers = next; },
+    limits: limitOptions,
+    newId: () => newId('h'),
+    say,
+    onChange: (change, h) => {
+      started();
+      if (change === 'name') {
         save();
         renderRooms();
         renderSheets();
-      });
-      group.addEventListener('change', () => {
-        started();
-        h.group = group.value as Group;
-        if (h.group === 'adult') h.age = null;
-        else if (h.age !== null && groupFor(h.age) !== h.group) h.age = null;
-        peopleChanged();
-        update();
-      });
-      age.addEventListener('change', () => {
-        started();
-        const n = Number(age.value);
-        h.age = age.value && Number.isInteger(n) && n >= 2 && n < 18 ? n : null;
-        if (h.age !== null) h.group = groupFor(h.age);
-        peopleChanged();
-        update();
-      });
-      $<HTMLButtonElement>('[data-sb-remove]', li).addEventListener('click', () => {
-        started();
-        if (s.helpers.length === 1) return say('Keep at least one person. Add someone else first.');
-        s.helpers = s.helpers.filter((x) => x !== h);
-        peopleChanged();
-        say(`${h.name} is off the plan.`);
-        update();
-      });
-      return li;
-    }));
-  }
+        return;
+      }
+      // A known limit always wins: jobs it rules out leave this person, even in rooms she's edited.
+      if (change === 'limits') for (const room of s.rooms) for (const x of room.jobs) if (x.owner === h.id && cannotDo(asJob(x), h)) x.owner = null;
+      peopleChanged();
+      update();
+    },
+  });
 
   // ---------------------------------------------------------------- the plan
   const helperById = (id: string | null) => s.helpers.find((h) => h.id === id);
@@ -487,7 +432,7 @@ export function initSpringCleaningBuilder(host: HTMLElement, handoff?: ToolHando
   function update() {
     save();
     renderQuestions();
-    renderPeople();
+    people.render();
     renderRooms();
     renderPrint();
   }
@@ -531,18 +476,6 @@ export function initSpringCleaningBuilder(host: HTMLElement, handoff?: ToolHando
       }
       if (kept) say(`Rooms you’ve changed kept their sessions. Change one with its own “Sessions of” setting.`);
       update();
-    });
-  }
-  for (const b of all<HTMLButtonElement>('[data-sb-add]')) {
-    b.addEventListener('click', () => {
-      started();
-      const group = b.dataset.sbAdd as Group;
-      const count = s.helpers.filter((h) => h.group === group).length + 1;
-      const h: Helper = { id: newId('h'), name: `${group === 'adult' ? 'Adult' : group === 'teen' ? 'Teen' : 'Child'} ${count}`, group, age: null, limits: [] };
-      s.helpers.push(h);
-      peopleChanged();
-      update();
-      all<HTMLInputElement>('[data-sb-name]').at(-1)?.select();
     });
   }
   printSelect.addEventListener('change', () => {

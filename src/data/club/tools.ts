@@ -94,6 +94,16 @@ export const clubTools = {
     title: 'Family Spring Cleaning Builder',
     intro: 'Choose the rooms, who’s helping and how long a session is. Change any job or who has it, then print one room at a time. It saves in this browser.',
   },
+  'meal-team': {
+    id: 'meal-team',
+    path: routes.clubTool('meal-team'),
+    // No public page yet: the component is a site tool (src/components/site/MealTeamPlanner.astro), ready for one.
+    publicPath: null,
+    perChild: false,
+    familyPeople: true,
+    title: 'Family Meal Responsibility Planner',
+    intro: 'Choose who’s helping and which meals you want to share. Change any job or who has it, then print your chart. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;

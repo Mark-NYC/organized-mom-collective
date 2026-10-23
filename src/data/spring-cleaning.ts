@@ -18,7 +18,10 @@
  * - People work side by side, so a session is as long as its busiest person, not the sum of every job.
  */
 
-export type Group = 'adult' | 'teen' | 'school' | 'young';
+import { ageOf, groupAge, groupFor, groupLabel, rankOf as rank, type Group, type Helper } from '../lib/household-helpers';
+
+export { groupAge, groupFor, groupLabel };
+export type { Group, Helper };
 export type Limit = 'no-lift' | 'no-high' | 'no-floor' | 'seated' | 'no-products';
 export type SessionLength = 15 | 30 | 60;
 type Tag = 'lift' | 'high' | 'floor' | 'products';
@@ -51,10 +54,6 @@ export interface CleaningRoom {
   jobs: CleaningJob[];
 }
 
-export const groupLabel: Record<Group, string> = { adult: 'Adult', teen: 'Teen', school: 'School-age child', young: 'Young child' };
-/** An age to plan with when only the group is known. */
-export const groupAge: Record<Group, number | null> = { adult: null, teen: 14, school: 8, young: 4 };
-export const groupFor = (age: number | null): Group => (age === null || age >= 18 ? 'adult' : age >= 13 ? 'teen' : age >= 6 ? 'school' : 'young');
 
 export const limitOptions: { id: Limit; label: string }[] = [
   { id: 'no-lift', label: 'No heavy lifting' },
@@ -198,19 +197,7 @@ export const roomById = (id: string): CleaningRoom | undefined =>
   cleaningRooms.find((r) => r.id === id) ?? (id === OTHER_ROOM ? { id: OTHER_ROOM, label: 'Another space', jobs: otherRoomJobs } : undefined);
 export const jobById = (id: string) => [...cleaningRooms.flatMap((r) => r.jobs), ...otherRoomJobs].find((x) => x.id === id);
 
-export interface Helper {
-  id: string;
-  name: string;
-  group: Group;
-  /** Their real age when known; otherwise the group decides. */
-  age: number | null;
-  limits: Limit[];
-  /** The person whose account it is (usually Mom): goes last when others are equally free. */
-  holder?: boolean;
-}
-
-/** The age a job's minimum is checked against: real age, or the group's (grown-ups: none). */
-const ageOf = (h: Helper) => (h.group === 'adult' ? null : h.age ?? groupAge[h.group]);
+/** Who's helping: src/lib/household-helpers.ts (shared with the meal planner); `limits` hold this tool's `Limit` ids. */
 
 /** How much longer a job takes a younger helper. */
 export function paceFor(h: Helper): number {
@@ -236,8 +223,6 @@ export const canDo = (job: CleaningJob, h: Helper) => cannotDo(job, h) === null;
 /** Minutes added to the account holder's load when choosing, so she's picked last in near ties (not never). */
 export const HOLDER_LEAN = 3;
 
-/** Experience order: when two people have done the same, the less experienced gets the job. */
-const rank = (h: Helper) => (h.group === 'young' ? 0 : h.group === 'school' ? 1 : h.group === 'teen' ? 2 : 3);
 
 export interface PlannedJob {
   /** Unique within the plan: the job's id, or a custom id. */

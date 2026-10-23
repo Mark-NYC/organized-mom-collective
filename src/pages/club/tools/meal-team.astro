@@ -1,0 +1,19 @@
+---
+/**
+ * /club/tools/meal-team: the Family Meal Responsibility Planner (a site tool: MealTeamPlanner.astro and
+ * meal-team-planner.ts), inside the Club. Opened from the April kit (src/lib/tool-handoff.ts) with the family’s
+ * first names and children’s ages, and its own saved plan per family. Works the same with no
+ * handoff, for anyone. Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import MealTeamPlanner from '../../../components/site/MealTeamPlanner.astro';
+import { CLUB_NAME } from '../../../data/club/config';
+---
+
+<ClubLayout title="Family Meal Responsibility Planner">
+  <ClubToolBar client:only="react" tool="meal-team" />
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <MealTeamPlanner storageKey="omc:club:meal-team:v1" handoff brand={CLUB_NAME} />
+  </section>
+</ClubLayout>

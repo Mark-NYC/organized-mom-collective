@@ -17,6 +17,7 @@ import { initTraditionsPicker } from '../components/site/traditions-picker';
 import { initHabitBuilder } from '../components/site/habit-builder';
 import { initConnectionPlanner } from '../components/site/connection-planner';
 import { initSpringCleaningBuilder } from '../components/site/spring-cleaning-builder';
+import { initMealTeamPlanner } from '../components/site/meal-team-planner';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -87,6 +88,7 @@ const toolInit: Record<string, (host: HTMLElement) => void> = {
   'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder', sample)),
   'connection-planner': (host) => initConnectionPlanner(host.querySelector<HTMLElement>('.cn')!, readToolHandoff('connection-planner', sample)),
   'spring-cleaning': (host) => initSpringCleaningBuilder(host.querySelector<HTMLElement>('.sb')!, readToolHandoff('spring-cleaning', sample)),
+  'meal-team': (host) => initMealTeamPlanner(host.querySelector<HTMLElement>('.mlt')!, readToolHandoff('meal-team', sample)),
 };
 
 function ToolPage({ tool, search }: { tool: string; search: string }) {

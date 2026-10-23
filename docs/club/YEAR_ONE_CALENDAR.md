@@ -97,7 +97,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter; field guide on teaching a cleaning task to a child; activity: the 30-minute family blitz.
 - **Overlap check:** free `/spring-cleaning-checklist` stays free; the kit assigns it.
 
-### April: Everybody Helps at Mealtime
+### April: Everybody Helps at Mealtime (built 2026-10-23, behind the flag)
+
+*Less on Mom's plate. Everyone has a place at the table.* Owner direction, 2026-10-23: replaces the earlier April plan below. Config: `src/data/club/kits/2027-04-everybody-helps-at-mealtime.ts`. Mailer: [mailers/2027-04-everybody-helps-at-mealtime.md](mailers/2027-04-everybody-helps-at-mealtime.md).
+
+- **The letter:** Dinner Is Everyone's Job (about 150 words): the thinking behind meals is work too, and it usually lands on Mom; everybody eats, so everybody can help, at their age. Asks "What's one part of mealtime you could take responsibility for this week?" A draft for Megan.
+- **The action:** Our Family Dinner Team, five steps, with the meal and when written above them and an optional "Who's helping?" per step. Any meal counts.
+- **The tool:** the Family Meal Responsibility Planner, a new site tool (`/club/tools/meal-team`): who's helping (with limits and an allergy setting), which meals, the same jobs or rotating; planning, prep, serving and cleanup shared out, the thinking included; edit anything; print the team chart (and the week, when rotating).
+- **Back of the letter:** before / during / after, kitchen jobs by age, a five-minute pantry check, the question, the QR code, the calendar's meal-plan and grocery-list sections.
+- **Not the free `/meal-planner`:** that plans what to eat; this shares who does the work. Meals still go in the calendar's meal plan.
+
+### April (earlier plan): Everybody Helps at Mealtime
 
 - **Flagship: Meal Responsibility Planner.** Weeknight dinners as owned jobs: who plans, who cooks (with an adult for younger kids), who sets, who clears, rotating weekly; a kid-led meal per week from age 8.
 - **Worksheets:** family meal ideas list by who can make it, grocery list ownership, team Windows + Entry reset.
