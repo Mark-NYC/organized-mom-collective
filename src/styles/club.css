@@ -1481,3 +1481,115 @@
 .club-letter[data-accent='summer'] .club-letter-signature {
   font-size: 18pt;
 }
+
+/* July's touch: a fine-line compass, soft blue panels, an apricot needle. */
+.club-compass {
+  display: block;
+  flex: none;
+  width: 0.42in;
+  height: 0.42in;
+  margin: 0.12in 0 -0.16in;
+}
+.club-compass-small {
+  display: inline-block;
+  width: 0.3in;
+  height: 0.3in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.06in;
+}
+.club-print[data-accent='travel'] .club-letter-subtitle {
+  color: #5d7383;
+}
+.club-print[data-accent='travel'] .club-letter-action,
+.club-print[data-accent='travel'] .club-letter-conversation {
+  background: #eef3f6;
+  border-top-color: #8fa7b8;
+}
+.club-print[data-accent='travel'] .club-action-row {
+  border-bottom-color: #dbe4ea;
+}
+.club-print[data-accent='travel'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='travel'] .club-letter-calendar {
+  background: #f8eee5;
+}
+.club-print[data-accent='travel'] .club-letter-tip {
+  background: #f8eee5;
+}
+.club-letter[data-accent='travel'] .club-letter-back-title {
+  margin-top: 0.2in;
+}
+.club-letter[data-accent='travel'] .club-letter-back-intro {
+  margin-top: 0.06in;
+}
+.club-letter[data-accent='travel'] .club-letter-tips {
+  display: none;
+}
+.club-letter[data-accent='travel'] .club-letter-conversation {
+  margin-top: 0.16in;
+  padding: 0.12in 0.3in;
+}
+.club-letter[data-accent='travel'] .club-letter-question {
+  font-size: 15pt;
+}
+.club-letter[data-accent='travel'] .club-letter-invite {
+  margin-top: 0.14in;
+  margin-bottom: 0.12in;
+}
+
+/* A short framework, given pride of place (July's Pack. Check. Unpack.): three large words, a line under each. */
+.club-letter-framework {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.12in;
+  margin: 0.16in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-framework li {
+  display: grid;
+  gap: 0.03in;
+  padding: 0.12in 0.16in 0.14in;
+  border: 1.2px solid #b9c8d2;
+  border-radius: 8px;
+  background: #fff;
+}
+.club-letter-framework li:nth-child(2) {
+  border-color: #b7c4b0;
+}
+.club-letter-framework li:nth-child(3) {
+  border-color: #dcbfa6;
+}
+.club-letter-framework strong {
+  font-family: 'Kalam', cursive;
+  font-size: 22pt;
+  font-weight: 700;
+  line-height: 1;
+  color: #4d4544;
+}
+.club-letter-framework span {
+  font-family: var(--font-serif);
+  font-size: 10.6pt;
+  line-height: 1.3;
+}
+/* July's front: the outing and when lines plus five steps with a sentence each, so the letter sits a little tighter. */
+.club-letter[data-accent='travel'] .club-letter-title {
+  margin-top: 0.06in;
+  font-size: 27pt;
+}
+.club-letter[data-accent='travel'] .club-letter-body {
+  margin-top: 0.12in;
+  font-size: 10.6pt;
+  line-height: 1.4;
+}
+.club-letter[data-accent='travel'] .club-letter-body p + p {
+  margin-top: 0.05in;
+}
+.club-letter[data-accent='travel'] .club-letter-signature {
+  font-size: 18pt;
+}
+.club-letter[data-accent='travel'] .club-letter-action .club-action-row {
+  padding: 0.035in 0;
+}

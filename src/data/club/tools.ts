@@ -122,6 +122,17 @@ export const clubTools = {
     title: 'Screen time agreement',
     intro: 'Agree together on when screens are on, what comes first, where devices go and how screen time ends, and what grown-ups agree to. Change any line, then download it to print and sign. It saves in this browser.',
   },
+  packing: {
+    id: 'packing',
+    path: routes.clubTool('packing'),
+    // No public page yet: the component is a site tool (src/components/site/PackingBuilder.astro), ready for one.
+    // The public /travel-checklist stays the trip-level checklist it is.
+    publicPath: null,
+    perChild: false,
+    familyPeople: true,
+    title: 'Family Packing & Independence Builder',
+    intro: 'Choose where you’re going, who’s coming and how long. Everyone gets their own list, with a short shared one. Change anything, save it for next time, then print. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;

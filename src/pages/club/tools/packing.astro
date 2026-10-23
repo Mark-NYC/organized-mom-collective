@@ -1,0 +1,19 @@
+---
+/**
+ * /club/tools/packing: the Family Packing & Independence Builder (a site tool: PackingBuilder.astro and
+ * packing-builder.ts), inside the Club. Opened from the July kit (src/lib/tool-handoff.ts) with the family's first
+ * names, children's ages, the account holder and the outing she chose, and its own saved lists per family. Works the
+ * same with no handoff, for anyone. Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import PackingBuilder from '../../../components/site/PackingBuilder.astro';
+import { CLUB_NAME } from '../../../data/club/config';
+---
+
+<ClubLayout title="Family Packing & Independence Builder">
+  <ClubToolBar client:only="react" tool="packing" />
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <PackingBuilder storageKey="omc:club:packing:v1" handoff brand={CLUB_NAME} />
+  </section>
+</ClubLayout>
