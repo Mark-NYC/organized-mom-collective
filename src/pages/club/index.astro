@@ -1,0 +1,113 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { BRAND_NAME } from '../../config';
+const perks = [
+  {number:'01', title:'A letter worth opening', body:'A personal note from our family to yours, with a helpful focus for the month.'},
+  {number:'02', title:'One family challenge', body:'A small, practical step to share the remembering, planning or doing with someone else at home.'},
+  {number:'03', title:'A personalized digital kit', body:'A featured generator, plus supporting pages you can use and print. Built around your family, not a blank worksheet you have to figure out.'}
+];
+const steps = [
+  ['Join the Club','A simple monthly membership, planned at $5 a month.'],
+  ['Meet the month’s focus','A letter arrives in your mailbox with encouragement and a practical next step.'],
+  ['Make the kit yours','Open the digital kit and tailor the tools to your family.'],
+  ['Try one change together','Give someone else a real part to own, then build on it next month.']
+];
+const questions = [
+  ['What comes with each month?', 'The planned membership includes a printed monthly letter and field guide, a family activity, and a digital kit with a personalized generator and supporting printable pages.'],
+  ['Is it really $5 a month?', 'That is our planned subscription price. Final pricing and fulfillment terms will be confirmed before enrollment opens.'],
+  ['Do I need your wall calendar?', 'No. The Club stands on its own and also works alongside the Organized Mom Collective wall calendar.'],
+  ['Will this give me even more work?', 'The point is one manageable change, not another full organizing system. Pick the part that helps this month and skip the rest.'],
+  ['When will the first letter arrive?', 'The mailing schedule and first delivery cutoff will be published when enrollment opens.'],
+  ['Can I cancel?', 'Cancellation and billing terms will be clearly available before you subscribe. Membership is not currently available to purchase.']
+];
+const check = 'M5 12l4 4L19 6';
+---
+<PublicLayout
+  fullTitle={`Organized Family Club · ${BRAND_NAME}`}
+  description="A personal monthly letter, a practical family challenge and digital tools to help everyone share the load. Explore the Organized Family Club."
+  indexable={false}
+  chrome={false}
+  width="full"
+>
+  <div class="club">
+    <header class="club-header">
+      <a href="/" aria-label="Organized Mom Collective home"><img src="/brand/omc-badge.png" alt="" width="56" height="56" /></a>
+      <a href="#monthly" class="club-header-link" data-cta="club-nav-preview">What’s inside <span aria-hidden="true">↗</span></a>
+    </header>
+    <section class="club-hero" aria-labelledby="club-hero-title">
+      <div class="club-hero-copy">
+        <p class="club-eyebrow">A little help for the whole family</p>
+        <h1 id="club-hero-title">A little less on Mom’s plate. <em>A little more teamwork at home.</em></h1>
+        <p class="club-lede">A more organized home doesn't happen because Mom works harder. It happens when everyone starts working together.</p>
+        <p>Meet the Organized Family Club: a thoughtful letter in your mailbox, one practical family challenge, and a digital kit to make one small change together each month.</p>
+        <div class="club-hero-action">
+          <a href="#monthly" class="club-button" data-cta="club-hero-preview">Take a look inside <span aria-hidden="true">→</span></a>
+          <p><strong>Planned at $5/month</strong> · Enrollment opening later</p>
+        </div>
+      </div>
+      <div class="club-hero-art" aria-label="Illustration of a personal letter and a family planning guide">
+        <div class="club-envelope-back"></div>
+        <div class="club-paper club-paper-rear"><span>ONE SMALL STEP</span><div></div><div></div><div></div></div>
+        <div class="club-paper club-paper-front"><small>ORGANIZED FAMILY CLUB</small><strong>A letter for your family</strong><p>Little changes add up when everyone plays a part.</p><span>With love, Mark & Megan</span></div>
+        <div class="club-envelope-front"></div>
+      </div>
+    </section>
+    <section class="club-narrow club-problem" aria-labelledby="club-problem-title">
+      <p class="club-eyebrow">Sound familiar?</p>
+      <h2 id="club-problem-title">You’re not supposed to be the family reminder system.</h2>
+      <p>You know when the appointments are. You remember what’s for dinner. You notice the laundry, the school papers and the backpack that still needs packing.</p>
+      <p>Even when everyone wants to help, you can end up doing the remembering and the reminding.</p>
+      <p class="club-serif-note">What if the answer wasn’t doing more, but helping everyone own their part?</p>
+    </section>
+    <section class="club-surface club-contrast" aria-labelledby="club-contrast-title">
+      <div class="club-center"><p class="club-eyebrow">A different way forward</p><h2 id="club-contrast-title">The goal isn’t a perfect home. It’s a family that works together.</h2></div>
+      <div class="club-comparison">
+        <div><p class="club-eyebrow">When it all runs through you</p><ul><li>Mom keeps the schedule in her head.</li><li>Chores take repeated reminders.</li><li>Good intentions get lost in busy weeks.</li></ul></div>
+        <div><p class="club-eyebrow">When everyone owns a part</p><ul><li>Plans are where everyone can see them.</li><li>People follow through on whole jobs.</li><li>Small routines are easier to repeat.</li></ul></div>
+      </div>
+    </section>
+    <section class="club-section" id="monthly" aria-labelledby="club-monthly-title">
+      <div class="club-center"><p class="club-eyebrow">The monthly experience</p><h2 id="club-monthly-title">A little something good in your mailbox every month.</h2><p>Not ten new habits. One thoughtful focus, one useful kit, and one next step to try together.</p></div>
+      <div class="club-included">
+        {perks.map((perk) => <article class="club-included-item"><span class="club-number">{perk.number}</span><div><h3>{perk.title}</h3><p>{perk.body}</p></div></article>)}
+      </div>
+    </section>
+    <section class="club-surface club-example" aria-labelledby="club-example-title">
+      <div class="club-example-copy"><p class="club-eyebrow">A look at a sample month</p><h2 id="club-example-title">August: Ready for School</h2><p>School starts soon. Instead of putting the whole countdown in Mom’s head, invite the family into the preparations.</p>
+        <div class="club-rule-list"><p><strong>The letter</strong><span>A fresh start that doesn’t depend on a perfect first day.</span></p><p><strong>The challenge</strong><span>Share the school prep jobs, from backpacks to new routines.</span></p><p><strong>The digital tool</strong><span>Enter the first day of school and get a dated preparation plan for your family.</span></p></div>
+        <p class="club-footnote">Illustrative month preview. Final kit contents may change before launch.</p>
+      </div>
+      <div class="club-sample-sheet">
+        <p class="club-eyebrow">BACK-TO-SCHOOL COUNTDOWN</p><h3>Ready for the first day</h3><p>One family. One plan. Everyone has a part.</p>
+        <div class="club-sample-row"><span>✓</span><div><b>Four weeks before</b><small>Check supplies and school information</small></div></div>
+        <div class="club-sample-row"><span>✓</span><div><b>Two weeks before</b><small>Practice your morning routine</small></div></div>
+        <div class="club-sample-row"><span>✓</span><div><b>One week before</b><small>Get backpacks and clothes ready</small></div></div>
+        <div class="club-sample-bottom">THE ORGANIZED FAMILY CLUB</div>
+      </div>
+    </section>
+    <section class="club-section" aria-labelledby="club-how-title">
+      <div class="club-center"><p class="club-eyebrow">How it works</p><h2 id="club-how-title">One small step each month. That’s it.</h2></div>
+      <div class="club-steps">{steps.map(([title,body],i)=><div class="club-step"><span>{String(i+1).padStart(2,'0')}</span><h3>{title}</h3><p>{body}</p></div>)}</div>
+    </section>
+    <section class="club-surface club-calendar" aria-labelledby="club-calendar-title">
+      <img src="/images/site/calendar-cutout-720.webp" width="720" height="1058" loading="lazy" alt="Organized Mom Collective weekly wall calendar, with space for family schedules, meals and household jobs" />
+      <div><p class="club-eyebrow">Better together</p><h2 id="club-calendar-title">A natural companion to your wall calendar.</h2><p>The wall calendar helps everyone see the plan. The Club helps your family practice sharing the work behind that plan.</p><p>You can use the Club on its own. No calendar purchase required.</p><a class="club-text-link" href="/calendar" data-cta="club-calendar">See the wall calendar <span aria-hidden="true">→</span></a></div>
+    </section>
+    <section class="club-section club-story" aria-labelledby="club-story-title">
+      <div class="club-story-photo"><img src="/images/site/mark-megan-family-story-1200.webp" width="1200" height="1200" loading="lazy" alt="Mark and Megan with their family outdoors" /></div>
+      <div><p class="club-eyebrow">From our family to yours</p><h2 id="club-story-title">We started building these tools because our own family needed them.</h2><p>We didn’t begin with an effortlessly organized home. We began because too much of the planning and remembering was landing on Megan, and we knew something needed to change.</p><p>Mark loves building systems. Megan helped make those systems useful in real family life. Together we began creating tools that make the plan visible and invite everyone to take part.</p><p><strong>Organized moms raise organized families.</strong> That’s the idea behind this Club.</p><a class="club-text-link" href="/our-story" data-cta="club-story">Read our story <span aria-hidden="true">→</span></a></div>
+    </section>
+    <section class="club-surface club-reassurance" aria-labelledby="club-reassurance-title"><div class="club-center"><p class="club-eyebrow">Made for real life</p><h2 id="club-reassurance-title">Practical help. Not more homework for Mom.</h2></div><div class="club-benefits"><div><h3>One focus at a time</h3><p>No giant home overhaul.</p></div><div><h3>Shared ownership</h3><p>Everyone has a real part to play.</p></div><div><h3>Ready-to-use tools</h3><p>Less work setting things up.</p></div><div><h3>Room for real weeks</h3><p>Pick up where you left off.</p></div></div></section>
+    <section class="club-narrow club-faq" aria-labelledby="club-faq-title"><p class="club-eyebrow">Good questions</p><h2 id="club-faq-title">Before you join</h2><div>{questions.map(([q,a],i)=><details open={i===0}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
+    <section class="club-final" id="join" aria-labelledby="club-final-title"><p class="club-eyebrow">Organized Family Club</p><h2 id="club-final-title">You don’t need to do everything. You need a family that works together.</h2><p>And that starts with one small change.</p><div class="club-final-offer"><p class="club-price">$5 <span>/ month · planned price</span></p><ul>{['A thoughtful monthly letter','One practical family challenge','A personalized digital kit'].map(item=><li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d={check}/></svg>{item}</li>)}</ul><p class="club-notice">Enrollment isn’t open yet. We’re finishing the printed mailer, monthly billing, and member access before taking subscriptions.</p><a class="club-button" href="/resources" data-cta="club-final-resources">Explore our free resources <span aria-hidden="true">→</span></a></div></section>
+    <footer class="club-footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Questions? Contact us</a></footer>
+  </div>
+  <style>
+    .club{--ink:#545454;--sage:#e7ece5;--ivory:#FBF7F1;--rule:#dfded8;color:var(--ink);font-family:Montserrat,Arial,sans-serif;line-height:1.65}
+    .club h1,.club h2,.club h3,.club-serif-note,.club-paper strong,.club-sample-sheet h3{font-family:Georgia,serif;font-weight:400;line-height:1.16;letter-spacing:-.025em}
+    .club h1{font-size:clamp(2.4rem,4.3vw,4.6rem)}.club h2{font-size:clamp(2rem,3.2vw,3.25rem)}.club h3{font-size:1.5rem}.club p{margin:0}.club p+p{margin-top:1rem}.club-eyebrow{font-size:.73rem!important;text-transform:uppercase;letter-spacing:.17em;font-weight:700}.club-header{max-width:1440px;margin:auto;padding:18px clamp(20px,4vw,60px);display:flex;align-items:center;justify-content:space-between}.club-header img{width:52px;height:52px;object-fit:contain}.club-header-link,.club-text-link{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:5px}.club-hero,.club-surface{margin:0 clamp(16px,2.4vw,36px);background:#f1f2f2}.club-hero{min-height:630px;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden}.club-hero-copy{max-width:720px;padding:clamp(36px,5.5vw,90px);z-index:1}.club-hero h1{margin:20px 0 24px}.club-hero h1 em{font-style:normal;color:#667e69}.club-lede{font-size:1.25rem;line-height:1.5;font-weight:600;margin-bottom:14px!important}.club-hero-action{margin-top:30px}.club-hero-action p{font-size:.82rem;margin-top:13px}.club-button{display:inline-flex;align-items:center;justify-content:center;gap:20px;min-height:55px;padding:14px 26px;background:#545454;color:white;text-decoration:none;font-weight:700;font-size:.94rem;transition:background .2s}.club-button:hover{background:#344b3b;color:white}.club-hero-art{min-height:560px;position:relative;background:#e7ece5;display:flex;justify-content:center;align-items:center;overflow:hidden}.club-envelope-back{position:absolute;width:70%;height:43%;top:42%;background:#e9e0d0;transform:rotate(-9deg);box-shadow:12px 22px 28px #6662}.club-envelope-front{position:absolute;width:74%;height:28%;top:61%;background:linear-gradient(150deg,#eee5d8 50%,#d5c5b8 50%);transform:rotate(-9deg);box-shadow:7px 15px 19px #6662}.club-paper{position:absolute;background:#fffefa;width:57%;height:63%;top:15%;padding:28px;box-shadow:7px 15px 25px #6662}.club-paper-front{transform:rotate(5deg);display:flex;flex-direction:column;gap:20px}.club-paper-front small,.club-paper-front span{font-size:clamp(.55rem,1vw,.77rem);letter-spacing:.1em}.club-paper-front strong{font-size:clamp(1.25rem,2.2vw,2.5rem)}.club-paper-front p{font-family:Georgia,serif;font-size:clamp(.85rem,1.25vw,1.2rem)}.club-paper-front span{margin-top:auto}.club-paper-rear{transform:translate(-12%,-8%) rotate(-14deg);background:#d4dfc4}.club-paper-rear span{font-size:.7rem;letter-spacing:.16em}.club-paper-rear div{height:1px;background:#929e88;margin-top:28px}.club-narrow{max-width:780px;margin:auto;padding:110px 24px}.club-problem h2,.club-faq h2{margin:16px 0 30px}.club-problem>p:not(.club-eyebrow){font-size:1.13rem;line-height:1.8}.club-serif-note{font-size:1.6rem!important;margin-top:35px!important;color:#657f66}.club-center{text-align:center;max-width:780px;margin:0 auto 50px}.club-center h2{margin:15px 0 18px}.club-center>p:last-child{font-size:1.06rem}.club-contrast,.club-example,.club-calendar,.club-reassurance{padding:clamp(42px,6vw,94px)}.club-comparison{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:950px;margin:auto}.club-comparison>div{padding:36px;background:#fff}.club-comparison>div:last-child{background:#e7ece5}.club-comparison ul{padding-left:20px;margin:22px 0 0}.club-comparison li{padding:7px 0}.club-section{padding:110px 24px;max-width:1100px;margin:auto}.club-included{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}.club-included-item{border-top:2px solid #d5c5b8;padding-top:22px}.club-number{font-size:.78rem;font-weight:700;color:#718775}.club-included h3{margin:14px 0}.club-example{display:grid;grid-template-columns:1fr .82fr;align-items:center;gap:clamp(30px,6vw,100px);background:#fbf7f1}.club-example h2{margin:14px 0 22px}.club-rule-list{margin:28px 0}.club-rule-list p{border-top:1px solid var(--rule);padding:15px 0;display:grid;grid-template-columns:130px 1fr;gap:16px;font-size:.94rem}.club-rule-list p:last-child{border-bottom:1px solid var(--rule)}.club-footnote{font-size:.8rem;color:#777}.club-sample-sheet{background:#fff;box-shadow:12px 18px 35px #6552;padding:clamp(25px,4vw,55px);transform:rotate(2deg)}.club-sample-sheet h3{font-size:2.2rem;margin:24px 0 12px}.club-sample-sheet>p:nth-of-type(2){font-size:.9rem;margin-bottom:26px}.club-sample-row{display:flex;gap:16px;padding:18px 0;border-top:1px solid var(--rule)}.club-sample-row>span{font-size:1.3rem;color:#768e75}.club-sample-row div{display:grid}.club-sample-row small{color:#777}.club-sample-bottom{border-top:1px solid var(--rule);margin-top:20px;padding-top:18px;font-size:.65rem;letter-spacing:.13em}.club-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:25px}.club-step{border-top:1px solid var(--rule);padding-top:24px}.club-step span{font-size:1.15rem;color:#718775}.club-step h3{font-size:1.35rem;margin:18px 0 10px}.club-calendar{display:grid;grid-template-columns:.65fr 1fr;gap:clamp(35px,7vw,130px);align-items:center;background:#e7ece5}.club-calendar img{max-height:480px;width:100%;object-fit:contain}.club-calendar h2{margin:16px 0 25px}.club-calendar .club-text-link,.club-story .club-text-link{display:inline-block;margin-top:20px}.club-story{display:grid;grid-template-columns:.85fr 1fr;gap:clamp(30px,6vw,90px);align-items:center}.club-story-photo img{width:100%;height:auto;aspect-ratio:1;object-fit:cover}.club-story h2{margin:16px 0 24px}.club-benefits{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}.club-benefits>div{border-top:1px solid #a9baaa;padding-top:20px}.club-benefits h3{font-size:1.25rem;margin-bottom:12px}.club-faq details{border-bottom:1px solid var(--rule)}.club-faq summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0;font-weight:650;list-style:none}.club-faq summary::-webkit-details-marker{display:none}.club-faq details[open] summary span{transform:rotate(45deg)}.club-faq details p{padding:0 30px 24px 0}.club-final{margin:0 clamp(16px,2.4vw,36px);background:#e7ece5;text-align:center;padding:95px 24px}.club-final>h2{max-width:830px;margin:18px auto 23px}.club-final-offer{max-width:470px;margin:44px auto 0;background:white;padding:35px;text-align:left}.club-price{font-size:3rem;font-family:Georgia,serif}.club-price span{font:400 .85rem Montserrat,Arial,sans-serif}.club-final-offer ul{list-style:none;padding:0;margin:20px 0}.club-final-offer li{display:flex;gap:10px;align-items:center;padding:7px 0}.club-final-offer li svg{width:20px;height:20px;color:#657f66;flex-shrink:0}.club-notice{font-size:.86rem;line-height:1.6;margin:20px 0!important}.club-final-offer .club-button{width:100%;text-align:center}.club-footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:35px clamp(20px,4vw,60px);font-size:.82rem}.club-footer a{color:inherit}
+    @media(max-width:800px){.club-hero{grid-template-columns:1fr}.club-hero-copy{padding:45px 28px}.club-hero-art{min-height:390px}.club-paper{padding:22px}.club-paper-front{gap:12px}.club-hero-action .club-button{width:100%}.club-comparison,.club-example,.club-calendar,.club-story{grid-template-columns:1fr}.club-included,.club-steps{grid-template-columns:1fr 1fr}.club-benefits{grid-template-columns:1fr 1fr}.club-example,.club-calendar,.club-reassurance{padding:44px 24px}.club-story-photo{max-width:520px}.club-calendar img{max-height:320px}.club-narrow,.club-section{padding-top:75px;padding-bottom:75px}}
+    @media(max-width:520px){.club h1{font-size:2.45rem}.club h2{font-size:2.15rem}.club-included,.club-steps{grid-template-columns:1fr}.club-included{gap:22px}.club-comparison>div{padding:25px}.club-comparison{grid-template-columns:1fr}.club-rule-list p{grid-template-columns:1fr;gap:4px}.club-benefits{grid-template-columns:1fr 1fr;gap:18px}.club-benefits h3{font-size:1.1rem}.club-final-offer{padding:24px}.club-footer{flex-direction:column}.club-sample-sheet{transform:none}}
+    @media(prefers-reduced-motion:reduce){.club-button{transition:none}}
+  </style>
+</PublicLayout>
