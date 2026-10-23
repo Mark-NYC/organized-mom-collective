@@ -1085,3 +1085,56 @@
 .club-print[data-accent='blush'] .club-letter-calendar {
   background: #eef2ec;
 }
+
+/* March's touch: one fine-line stem with a few leaves. */
+.club-stem {
+  display: block;
+  flex: none;
+  width: 0.85in;
+  height: 0.38in;
+  margin: 0.14in 0 -0.16in;
+}
+.club-stem-small {
+  display: inline-block;
+  width: 0.6in;
+  height: 0.27in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.03in;
+}
+
+/* A short optional list on the back of the letter (March's decluttering ideas). */
+.club-letter-checklist-note {
+  margin-top: 0.04in;
+  font-family: var(--font-serif);
+  font-size: 10.5pt;
+  font-style: italic;
+  color: #5c5550;
+}
+.club-letter-checklist ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.08in 0.3in;
+  margin: 0.12in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.1in;
+  font-size: 10.5pt;
+}
+.club-letter-checklist .club-box {
+  flex: none;
+  width: 0.16in;
+  height: 0.16in;
+  background: #fff;
+}
+/* March's front: the dense layout fits with room to spare, so the letter stays a little larger. */
+.club-letter[data-dense][data-accent='spring'] .club-letter-title {
+  margin-top: 0.14in;
+}
+.club-letter[data-dense][data-accent='spring'] .club-letter-body {
+  font-size: 11pt;
+  line-height: 1.45;
+}

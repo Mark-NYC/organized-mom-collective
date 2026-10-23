@@ -1,0 +1,19 @@
+---
+/**
+ * /club/tools/spring-cleaning: the Family Spring Cleaning Builder (a site tool: SpringCleaningBuilder.astro and
+ * spring-cleaning-builder.ts), inside the Club. Opened from the March kit (src/lib/tool-handoff.ts) with the family's
+ * first names, children's ages and the room she chose, and its own saved plan per family. Works the same with no
+ * handoff, for anyone. Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../../layouts/ClubLayout.astro';
+import ClubToolBar from '../../../components/club/ClubToolBar';
+import SpringCleaningBuilder from '../../../components/site/SpringCleaningBuilder.astro';
+import { CLUB_NAME } from '../../../data/club/config';
+---
+
+<ClubLayout title="Family Spring Cleaning Builder">
+  <ClubToolBar client:only="react" tool="spring-cleaning" />
+  <section id="club-tool-host" class="w-full pb-20 pt-4">
+    <SpringCleaningBuilder storageKey="omc:club:spring-cleaning:v1" handoff brand={CLUB_NAME} />
+  </section>
+</ClubLayout>

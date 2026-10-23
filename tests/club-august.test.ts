@@ -19,7 +19,7 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 describe('August: one letter, one action, one tool', () => {
   it('passes every kit check, beside November', () => {
     expect(kitProblems(august)).toEqual([]);
-    expect(kits.map((k) => k.slug)).toEqual(['2026-11-family-ownership', '2027-01-fresh-start-together', '2027-02-better-together', '2027-08-school-year', '2027-10-home-works-together', '2027-12-christmas-family-affair']);
+    expect(kits.map((k) => k.slug)).toEqual(['2026-11-family-ownership', '2027-01-fresh-start-together', '2027-02-better-together', '2027-03-spring-clean-together', '2027-08-school-year', '2027-10-home-works-together', '2027-12-christmas-family-affair']);
   });
 
   it('keeps November exactly as it was', () => {

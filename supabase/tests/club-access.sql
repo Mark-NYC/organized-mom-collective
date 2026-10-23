@@ -220,9 +220,10 @@ select pg_temp.expect(not exists (
    where n.nspname = 'public' and (p.proname like 'club\_%' or p.proname like 'account\_%') and has_function_privilege('anon', p.oid, 'execute')),
   'anon can execute no club_ or account_ function');
 
--- The January, February, August, October and December kits are seeded as drafts, so nobody can open them yet.
+-- The January, February, March, August, October and December kits are seeded as drafts, so nobody can open them yet.
 select pg_temp.expect((select status from public.club_kits where slug = '2027-08-school-year') = 'draft', 'August is seeded as a draft');
 select pg_temp.expect((select status from public.club_kits where slug = '2027-10-home-works-together') = 'draft', 'October is seeded as a draft');
 select pg_temp.expect((select status from public.club_kits where slug = '2027-12-christmas-family-affair') = 'draft', 'December is seeded as a draft');
 select pg_temp.expect((select status from public.club_kits where slug = '2027-01-fresh-start-together') = 'draft', 'January is seeded as a draft');
 select pg_temp.expect((select status from public.club_kits where slug = '2027-02-better-together') = 'draft', 'February is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-03-spring-clean-together') = 'draft', 'March is seeded as a draft');

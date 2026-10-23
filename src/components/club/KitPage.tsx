@@ -326,7 +326,7 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
                 {kit.tool.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{kit.tool.note}</p>}
                 <ToolLauncher tool={tool} cta={kit.tool.cta} start={kit.tool.start} kids={tool.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids}
                   ages={children.flatMap((c) => (c.age !== null ? [c.age] : []))} familyName={household.displayName}
-                  people={planMembers(household, kit.month).map((p) => ({ name: p.firstName, adult: p.stage === 'adult' }))}
+                  people={planMembers(household, kit.month).map((p) => ({ name: p.firstName, adult: p.stage === 'adult', ...(p.age !== null ? { age: p.age } : {}), ...(p.isAccountHolder ? { holder: true as const } : {}) }))}
                   extra={action.focus ? { ...(state.focus.area ? { variant: state.focus.area } : {}), ...(state.focus.text.trim() ? { text: state.focus.text.trim() } : {}), ...(state.focus.start ? { date: state.focus.start } : {}) } : undefined}
                   household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
               </div>
@@ -490,7 +490,7 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
   const focus = action.focus;
   const below = action.helperPlacement === 'below';
   const text = focus
-    ? [action.title, '', ...focusLines(focus.printLabel, state.focus), ...countdownText(action.title, action.items, plan, state).split('\n').slice(2)].join('\n')
+    ? [action.title, '', ...focusLines(focus.printLabel, state.focus, focus.whenLabel), ...countdownText(action.title, action.items, plan, state).split('\n').slice(2)].join('\n')
     : countdownText(action.title, action.items, plan, state);
   const setFocus = (patch: Partial<FocusState>) => update({ ...state, focus: { ...state.focus, ...patch } });
   const whenLabel = (i: number) => {
@@ -498,7 +498,7 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
     return l.date ? shortDay(l.date) : l.later ? 'When you can' : '';
   };
   const fill: ActionFill = { done: state.done, helpers: state.helpers, texts: state.texts, whens: action.items.map((_, i) => whenLabel(i)), ...(plan.start ? { firstDay: longLabel(plan.start) } : {}),
-    ...(focus ? { focus: { thing: state.focus.text.trim(), plan: state.focus.plan.trim(), start: state.focus.start ? longLabel(state.focus.start) : '', checkIn: state.focus.start ? longLabel(checkInFor(state.focus.start)) : '' } } : {}) };
+    ...(focus ? { focus: { thing: state.focus.text.trim(), plan: state.focus.plan.trim(), start: state.focus.start ? longLabel(state.focus.start) : '', checkIn: state.focus.start && !focus.whenLabel ? longLabel(checkInFor(state.focus.start)) : '' } } : {}) };
   const counting = start.id !== FAMILY_START || state.starts.filter((s) => s.date).length > 1 ? ` (${start.id === FAMILY_START ? 'everyone' : start.label})` : '';
   const message =
     plan.status === 'undated' ? 'Add your first day above and each line gets a suggested day. Or just use the list.'
@@ -550,13 +550,20 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
                 placeholder="Choose one below, or write your own"
                 onChange={(e) => setFocus({ text: e.target.value, area: focus.suggestions.find((x) => x.label === e.target.value.trim())?.id ?? null })} />
             </label>
-            <div role="group" aria-label="Ideas for your one thing" className="mt-2 flex flex-wrap gap-x-5">
+            <div role="group" aria-label={focus.suggestionsLabel ?? 'Ideas for your one thing'} className="mt-2 flex flex-wrap gap-x-5">
               {focus.suggestions.map((x) => (
                 <button key={x.id} type="button" disabled={readOnly} aria-pressed={state.focus.area === x.id}
                   className="min-h-11 border-b-2 border-transparent text-[0.95rem] text-warm-soft aria-[pressed=true]:border-warm-ink aria-[pressed=true]:font-semibold aria-[pressed=true]:text-warm-ink"
                   onClick={() => setFocus({ area: x.id, text: x.label })}>{x.label}</button>
               ))}
             </div>
+            {focus.whenLabel && (
+              <label className="mt-3 block">
+                <span className="block text-[0.85rem] font-semibold text-warm-ink">{focus.whenLabel} (optional)</span>
+                <input type="date" className={`${dateField} mt-1`} disabled={readOnly} value={state.focus.start}
+                  onChange={(e) => setFocus({ start: isDay(e.target.value) ? e.target.value : '' })} />
+              </label>
+            )}
           </div>
         )}
         <datalist id="club-family-names">{names.map((n) => <option key={n} value={n} />)}</datalist>

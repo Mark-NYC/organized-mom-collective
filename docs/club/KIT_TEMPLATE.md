@@ -35,7 +35,7 @@ Every card in `src/data/responsibilities.ts` is an item automatically (`cardItem
 
 ## Tools: reuse the site's, never copy them
 
-A kit's tool is always one of the site's own tools, opened inside the Club. There is one implementation: improve it on the site and every kit gets it. Five so far: the routine chart (August), the chore chart (October), the Family Christmas Traditions Picker (December), the Family Habit Builder (January) and the Family Connection Planner (February); the last three are new site tools with no public page yet. Idea pickers share their fit-and-rank rules (`src/lib/idea-picker.ts`). The pattern:
+A kit's tool is always one of the site's own tools, opened inside the Club. There is one implementation: improve it on the site and every kit gets it. Six so far: the routine chart (August), the chore chart (October), the Family Christmas Traditions Picker (December), the Family Habit Builder (January), the Family Connection Planner (February) and the Family Spring Cleaning Builder (March); the last four are new site tools with no public page yet. Idea pickers share their fit-and-rank rules (`src/lib/idea-picker.ts`). The pattern:
 
 1. **The tool is one component with one behavior module** that the public page and the Club page both render (`RoutineChart.astro` + `routine-chart.ts`; `ChoreChart.astro` + `chore-chart.ts`, extracted from `/chore-chart` on 2026-10-23). If a tool still lives inside its public page, extract it first, then check the public page is unchanged. Shared handoff behavior (saved-copy check, age-ordered picker): `src/components/site/tool-handoff-ui.ts`.
 2. **A handoff mode on the component** (`handoff` prop): it reads `readToolHandoff(id)` (`src/lib/tool-handoff.ts`) for a child's first name and age and a starting choice, keeps a separate saved copy per handoff key, and otherwise behaves exactly as on the public page. Public pages never set it.
@@ -64,6 +64,10 @@ The hosted preview (`scripts/build-club-preview.mjs`) embeds each Club tool page
 ## February, as built
 
 `src/data/club/kits/2027-02-better-together.ts`: the letter (draft), Our Family Connection Challenge (`kind: 'checklist'`, three lines each with a `detail`, an optional "Our idea" blank under each: `helperLabel` with `helperPlacement: 'below'`, saved like helpers, up to 60 characters), three back-page prompts (`conversation.prompts`, the letter's question among them), `mailer.accent: 'blush'`. The tool is the Family Connection Planner (`tool: 'connection-planner'`), opened with the children's ages and the family's first names. Same page, print and letter components as the other three-part kits.
+
+## March, as built
+
+`src/data/club/kits/2027-03-spring-clean-together.ts`: the letter (draft), Our One-Room Family Reset (`kind: 'checklist'`, five steps, "Who's helping?" beside each, an `action.note`), with `action.focus` taking the space (suggestions are the builder's room ids, `suggestionsLabel`) and a `whenLabel` day (no plan, no check-in). The back adds `mailer.checklist` (short optional ideas) and the `spring` accent. The tool is the Family Spring Cleaning Builder (`tool: 'spring-cleaning'`), opened with the family's first names, children's ages and the account holder (`ToolHandoff.people[].age`, `.holder`) and the room she chose.
 
 ## Test households (every kit, every month)
 

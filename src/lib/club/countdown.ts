@@ -239,12 +239,15 @@ function readFocus(json: unknown): FocusState {
 /** The check-in: a week after the start, when the seven days of practice are done. */
 export const checkInFor = (start: Day | '') => (start ? addDays(start, 7) : '');
 
-/** The one thing, its plan and its days, as lines for her copied text (empty when she hasn't filled any). */
-export function focusLines(label: string, f: FocusState): string[] {
+/**
+ * The one thing, its plan and its days, as lines for her copied text (empty when she hasn't filled any). With a
+ * `whenLabel` (March), the day is just when it happens; otherwise (January) it starts a week with a check-in.
+ */
+export function focusLines(label: string, f: FocusState, whenLabel?: string): string[] {
   const out = [
     ...(f.text.trim() ? [`${label}: ${f.text.trim()}`] : []),
     ...(f.plan.trim() ? [`Our plan: ${f.plan.trim()}`] : []),
-    ...(f.start ? [`We start: ${longLabel(f.start)} · We check in: ${longLabel(checkInFor(f.start))}`] : []),
+    ...(f.start ? [whenLabel ? `${whenLabel}: ${longLabel(f.start)}` : `We start: ${longLabel(f.start)} · We check in: ${longLabel(checkInFor(f.start))}`] : []),
   ];
   return out.length ? [...out, ''] : [];
 }

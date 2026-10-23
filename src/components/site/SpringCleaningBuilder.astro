@@ -1,0 +1,231 @@
+---
+/**
+ * The Family Spring Cleaning Builder (markup, styles, printouts): three decisions (which spaces, who's helping with
+ * any limits, how long a session is), then a plan per room: time-boxed sessions with each person's jobs, every job
+ * editable, reassignable and removable, one room regenerated without touching the others, and a US Letter printout
+ * per room (8.5 × 11 in at 96 px/in, drawn at 2×) to download on its own, or the whole plan copied as text.
+ * Rooms, jobs and rules: src/data/spring-cleaning.ts. Behavior: spring-cleaning-builder.ts beside it, one module for
+ * every page with this tool (today the Organized Family Club's /club/tools/spring-cleaning; a public page can host the
+ * same component without a handoff). Classes are prefixed `sb-`. Saves in this browser under `storageKey`.
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { cleaningRooms, groupLabel, OTHER_ROOM, sessionOptions } from '../../data/spring-cleaning';
+
+interface Props {
+  storageKey: string;
+  /**
+   * Opened for a family by another page (src/lib/tool-handoff.ts; the Organized Family Club): its own saved plan, the
+   * family's first names and children's ages as helpers, a starting room, the family's name on the printouts.
+   * Public pages never set it.
+   */
+  handoff?: boolean;
+  /** The line at the foot of each printout. */
+  brand?: string;
+}
+
+const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astro.props;
+---
+
+<div class="sb" data-sb-key={storageKey} data-sb-handoff={handoff ? '' : undefined} data-sb-brand={brand}>
+  <form class="sb-form" data-sb-form>
+    <fieldset class="sb-q">
+      <legend><span class="sb-n">1</span> Which spaces would you like to tackle?</legend>
+      <p class="sb-q-note">Start with one. You can add another anytime.</p>
+      <div class="sb-options">
+        {cleaningRooms.map((r) => <button type="button" class="sb-option" data-sb-room={r.id} aria-pressed="false">{r.label}</button>)}
+        <button type="button" class="sb-option" data-sb-room={OTHER_ROOM} aria-pressed="false">Something else</button>
+      </div>
+      <label class="sb-field sb-other" data-sb-other hidden><span>Name the space</span>
+        <input type="text" data-sb-other-name maxlength="40" placeholder="e.g. Garage shelves" autocomplete="off" /></label>
+    </fieldset>
+
+    <fieldset class="sb-q">
+      <legend><span class="sb-n">2</span> Who’s helping?</legend>
+      <p class="sb-q-note" data-sb-people-note>Add everyone who’s joining in. Limits are optional: we’ll only suggest jobs that fit.</p>
+      <ul class="sb-people" data-sb-people></ul>
+      <div class="sb-add-people">
+        {(['adult', 'teen', 'school', 'young'] as const).map((g) => <button type="button" class="sb-link" data-sb-add={g}>+ {groupLabel[g]}</button>)}
+      </div>
+    </fieldset>
+
+    <fieldset class="sb-q">
+      <legend><span class="sb-n">3</span> How much time for a session?</legend>
+      <p class="sb-q-note">Everyone works at the same time. Little ones? Try 15.</p>
+      <div class="sb-options">
+        {sessionOptions.map((m) => <button type="button" class="sb-option" data-sb-length={m} aria-pressed={m === 30 ? 'true' : 'false'}>{m} minutes</button>)}
+      </div>
+    </fieldset>
+  </form>
+
+  <template data-sb-person>
+    <li class="sb-person">
+      <div class="sb-person-main">
+        <input type="text" class="sb-person-name" data-sb-name maxlength="30" aria-label="Name" />
+        <select class="sb-person-group" data-sb-group aria-label="Who they are">
+          {(['adult', 'teen', 'school', 'young'] as const).map((g) => <option value={g}>{groupLabel[g]}</option>)}
+        </select>
+        <input type="number" class="sb-person-age" data-sb-age min="2" max="17" inputmode="numeric" aria-label="Age (optional)" placeholder="Age" />
+        <button type="button" class="sb-link" data-sb-limits-toggle aria-expanded="false">Limits</button>
+        <button type="button" class="sb-x" data-sb-remove>×</button>
+      </div>
+      <div class="sb-limits" data-sb-limits hidden></div>
+    </li>
+  </template>
+
+  <section class="sb-plan" aria-labelledby="sb-plan-h">
+    <h2 id="sb-plan-h" class="sb-title">Your family cleaning plan</h2>
+    <p class="sb-note">Estimates, not promises. Change any job, who has it, or remove it. One room done is a win.</p>
+    <div class="sb-rooms" data-sb-rooms></div>
+    <p class="sb-status" data-sb-status role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="sb-out" aria-labelledby="sb-out-h">
+    <h2 id="sb-out-h" class="sb-title">Print a room</h2>
+    <p class="sb-note">Each room prints on its own page, with big boxes to tick. Print just the one you’re doing.</p>
+    <label class="sb-field sb-family"><span>Family name on the printout (optional)</span>
+      <input type="text" data-sb-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" /></label>
+    <label class="sb-field sb-print-room"><span>Room to print</span><select data-sb-print-room></select></label>
+    <fieldset class="sb-palette">
+      <legend>Choose your colors</legend>
+      <div class="sb-palette-options">
+        {Object.entries(toolPalettes).map(([id, palette]) => (
+          <button type="button" class="sb-palette-option" data-sb-palette={id} aria-pressed={id === defaultToolPalette ? 'true' : 'false'}>
+            <span class="sb-swatches" aria-hidden="true">{palette.colors.map((color) => <span style={{ backgroundColor: color }} />)}</span>
+            <span>{palette.label}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+    <div class="sb-buttons">
+      <button type="button" class="sb-btn sb-btn-primary" data-sb-download>Download this room</button>
+      <button type="button" class="sb-btn" data-sb-copy>Copy the whole plan</button>
+    </div>
+    <textarea class="sb-copy-fallback" data-sb-copy-fallback readonly rows="12" hidden aria-label="Your plan as text"></textarea>
+    <p class="sb-calendar">Put the session on your family wall calendar so everyone knows when it’s happening.</p>
+    <div class="sb-sheets" data-sb-sheets></div>
+  </section>
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .sb {
+    --sb-ink: var(--color-warm-ink);
+    --sb-soft: var(--color-warm-soft);
+    --sb-rule: var(--color-warm-rule);
+    --sb-a1: #EFEBE7; --sb-a2: #E6EEEA; --sb-a3: #F6F1E7;
+    max-width: 816px;
+    margin: 0 auto;
+    padding: 8px 20px 40px;
+    color: var(--sb-ink);
+  }
+  .sb *, .sb *::before, .sb *::after { box-sizing: border-box; }
+  .sb [hidden] { display: none !important; }
+
+  /* Questions: underlined text choices (docs/brand/TOOL-OUTPUT-DESIGN.md → Controls around the output). */
+  .sb-form { display: grid; gap: 22px; }
+  .sb-q { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .sb-q legend { padding: 0; font-family: var(--font-serif); font-size: 1.2rem; line-height: 1.3; }
+  .sb-n { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 6px; border-radius: 50%; background: #eef2ec; box-shadow: inset 0 0 0 1px #9aab8f; font-size: 0.9rem; vertical-align: 2px; }
+  .sb-q-note, .sb-note { margin: 2px 0 0; font-size: 0.88rem; color: var(--sb-soft); }
+  .sb-options { display: flex; flex-wrap: wrap; gap: 0 20px; margin-top: 4px; }
+  .sb-option { min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-family: var(--font-serif); font-size: 1rem; color: var(--sb-soft); cursor: pointer; }
+  .sb-option[aria-pressed='true'] { border-bottom-color: var(--sb-ink); color: var(--sb-ink); font-weight: 600; }
+  .sb-option:focus-visible, .sb-link:focus-visible, .sb-x:focus-visible, .sb-btn:focus-visible, .sb-palette-option:focus-visible { outline: 2px solid var(--sb-ink); outline-offset: 3px; }
+  .sb-field { display: grid; gap: 6px; }
+  .sb-field > span, .sb-palette legend { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sb-soft); }
+  .sb-field input, .sb-field select, .sb-person input, .sb-person select, .sb-job input, .sb-job select, .sb-add-job input, .sb-add-job select, .sb-room-tools select {
+    min-height: 44px; padding: 0 10px; border: 1px solid var(--sb-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--sb-ink); min-width: 0;
+  }
+  .sb-other { max-width: 360px; margin-top: 8px; }
+  .sb-link { min-height: 44px; padding: 0; border: 0; background: none; font-size: 0.9rem; font-weight: 600; color: var(--sb-ink); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .sb-x { width: 44px; min-height: 44px; border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--sb-soft); cursor: pointer; }
+
+  .sb-people { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .sb-person { padding: 6px 8px; background: #fff; border: 1px solid var(--sb-rule); border-radius: 4px; }
+  .sb-person-main { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.3fr) 4.2rem auto auto; gap: 6px; align-items: center; }
+  .sb-limits { display: flex; flex-wrap: wrap; gap: 0 16px; padding: 6px 4px 2px; }
+  .sb-limits label { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 0.92rem; }
+  .sb-limits input { width: 20px; height: 20px; accent-color: #7d917c; }
+  .sb-add-people { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 4px; }
+  @media (max-width: 520px) {
+    .sb-person-main { grid-template-columns: minmax(0, 1fr) 3.6rem auto auto; }
+    .sb-person-name { grid-column: 1 / -1; }
+  }
+  .sb-person-main:has(.sb-person-age[hidden]) .sb-person-group { grid-column: span 2; }
+
+  .sb-plan, .sb-out { margin-top: 30px; }
+  .sb-title { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .sb-rooms { display: grid; gap: 12px; margin-top: 14px; }
+  .sb-room { background: #fff; border: 1px solid var(--sb-rule); border-top: 3px solid #9aab8f; }
+  .sb-room-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; width: 100%; padding: 14px 16px; border: 0; background: none; text-align: left; cursor: pointer; color: var(--sb-ink); }
+  .sb-room-name { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 600; }
+  .sb-room-sum { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; color: var(--sb-soft); }
+  .sb-room-body { padding: 0 16px 14px; }
+  .sb-room-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+  .sb-room-tools label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--sb-soft); }
+  .sb-session { margin-top: 12px; border-top: 1px solid #ece4dc; padding-top: 10px; }
+  .sb-session-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; align-items: baseline; }
+  .sb-session-title { font-family: var(--font-sans); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #6b7f6a; }
+  .sb-session-supplies { margin-top: 2px; font-size: 0.85rem; color: var(--sb-soft); }
+  .sb-jobs { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .sb-job { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7rem, 11rem) auto; gap: 6px; align-items: center; }
+  .sb-job textarea { display: block; width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--sb-rule); border-radius: 3px; background: #fff; resize: none; font-family: var(--font-serif); font-size: 0.98rem; line-height: 1.3; color: var(--sb-ink); }
+  .sb-job.is-open select { border-color: #c9a0a3; background: #f8eeec; }
+  .sb-job-note { grid-column: 1 / -1; margin-top: -2px; font-size: 0.8rem; color: #9a6a6f; }
+  .sb-add-job { display: grid; grid-template-columns: minmax(0, 1fr) minmax(7rem, 11rem) auto; gap: 6px; margin-top: 10px; }
+  @media (max-width: 520px) {
+    .sb-job, .sb-add-job { grid-template-columns: minmax(0, 1fr) auto; }
+    .sb-job textarea, .sb-add-job input { grid-column: 1 / -1; }
+  }
+  .sb-status { min-height: 1.4em; margin-top: 8px; font-size: 0.92rem; color: var(--sb-soft); }
+
+  .sb-family, .sb-print-room { max-width: 360px; margin-top: 12px; }
+  .sb-palette { margin: 14px 0 0; padding: 0; border: 0; }
+  .sb-palette-options { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+  .sb-palette-option { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: 0.85rem; color: var(--sb-ink); cursor: pointer; }
+  .sb-palette-option[aria-pressed='true'] { border-bottom-color: var(--sb-ink); font-weight: 600; }
+  .sb-swatches { display: flex; }
+  .sb-swatches span { width: 16px; height: 16px; margin-right: -4px; border: 1px solid rgba(77, 69, 68, 0.15); border-radius: 50%; }
+  .sb-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .sb-btn { min-height: 48px; padding: 0 22px; border: 1px solid var(--color-warm-button); border-radius: 3px; background: #fff; color: var(--color-warm-button); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; }
+  .sb-btn-primary { background: var(--color-warm-button); color: #fff; }
+  .sb-btn:disabled { opacity: 0.6; cursor: wait; }
+  .sb-copy-fallback { display: block; width: 100%; margin-top: 10px; padding: 8px; border: 1px solid var(--sb-rule); font-family: ui-monospace, monospace; font-size: 0.82rem; }
+  .sb-calendar { margin-top: 10px; font-family: var(--font-serif); font-style: italic; color: var(--sb-soft); }
+
+  /* The printout: one US Letter page per room (8.5 × 11 in at 96 px/in), scaled to fit a phone on screen. */
+  .sb-sheets { display: grid; gap: 16px; margin-top: 16px; }
+  .sb-sheet-wrap { overflow: hidden; }
+  .sb-sheet { display: flex; flex-direction: column; width: 816px; height: 1056px; padding: 52px 64px 40px; background: #fff; border: 1px solid var(--sb-rule); box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08); font-family: var(--font-serif); color: #3d3834; transform-origin: top left; }
+  .sb-sheet-family { min-height: 16px; text-align: center; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--sb-soft); }
+  .sb-sheet-title { margin-top: 8px; text-align: center; font-family: 'Kalam', var(--font-serif); font-size: 42px; font-weight: 700; line-height: 1.1; }
+  .sb-swipe { padding: 0 14px; background: linear-gradient(transparent 52%, var(--sb-a1) 52%, var(--sb-a1) 92%, transparent 92%); }
+  .sb-sheet-sub { margin-top: 6px; text-align: center; font-size: 16px; font-style: italic; color: #5c5550; }
+  .sb-sheet-session { margin-top: 22px; }
+  .sb-sheet-session-head { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 14px; background: var(--sb-a2); border-radius: 8px; font-family: var(--font-sans); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .sb-sheet-person { display: grid; grid-template-columns: 150px 1fr; gap: 14px; padding: 10px 6px 4px; border-bottom: 1px solid #ece4dc; }
+  .sb-sheet-name { font-family: 'Kalam', var(--font-serif); font-size: 21px; font-weight: 700; line-height: 1.2; }
+  .sb-sheet-name small { display: block; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sb-soft); }
+  .sb-sheet-jobs { margin: 0; padding: 0; list-style: none; }
+  .sb-sheet-jobs li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; padding: 4px 0 8px; font-size: 16px; line-height: 1.35; }
+  .sb-sheet-box { width: 24px; height: 24px; margin-top: 1px; border: 2px solid #b9b0a8; border-radius: 6px; }
+  .sb-sheet-supplies { margin-top: 18px; font-size: 14px; color: #5c5550; }
+  .sb-sheet-supplies b { font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7f6a; }
+  .sb-sheet-note { margin-top: 16px; }
+  .sb-sheet-note p { font-family: var(--font-sans); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7f6a; }
+  .sb-sheet-note span { display: block; height: 30px; border-bottom: 1px solid #c9c0b8; }
+  .sb-sheet-foot { margin-top: auto; text-align: center; }
+  .sb-sheet-cal { font-size: 14px; font-style: italic; color: #5c5550; }
+  .sb-sheet-brand { margin-top: 10px; font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f89; }
+  .sb-exporting .sb-sheet { transform: none !important; box-shadow: none; border: 0; }
+</style>
+
+<script>
+  import { initSpringCleaningBuilder } from './spring-cleaning-builder';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.sb')) {
+    initSpringCleaningBuilder(host, host.hasAttribute('data-sb-handoff') ? readToolHandoff('spring-cleaning') : null);
+  }
+</script>

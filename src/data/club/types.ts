@@ -176,10 +176,15 @@ export interface KitConfig {
       label: string;
       printLabel: string;
       suggestions: { id: string; label: string }[];
-      planAt: number;
-      planLabel: string;
-      startAt: number;
-      startLabel: string;
+      /** What the suggestions are, for screen readers (default "Ideas for your one thing"). */
+      suggestionsLabel?: string;
+      /** January: a short plan on this step, and a start day on `startAt` with its check-in a week later. */
+      planAt?: number;
+      planLabel?: string;
+      startAt?: number;
+      startLabel?: string;
+      /** March: one optional day with the one thing ("When we’re doing it"), a blank on the letter. No check-in. */
+      whenLabel?: string;
     };
   };
   /**
@@ -220,6 +225,8 @@ export interface KitConfig {
     fieldGuide: { title: string; intro?: string; sections: { heading: string; body: string }[] };
     /** Three-part kits: a short worked example in words, on the back of the letter. */
     story?: { title: string; body: string };
+    /** A short optional list on the back (March's decluttering ideas): small boxes, framed as ideas, not more work. */
+    checklist?: { title: string; note: string; items: string[] };
     /** Three-part kits: on the kit page, how the mailed copy and her own printout relate (one or the other, never both). */
     screenNote?: string;
     /** A "Read this month's letter" link under the kit's title (the letter itself sits at the end of the page). */
@@ -243,8 +250,8 @@ export interface KitConfig {
     calendarNote?: string;
     /** '/club/kits/<slug>?source=mailer' */
     qrPath: string;
-    /** A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush panels. */
-    accent?: 'evergreen' | 'blush';
+    /** A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush panels; March's leafy stem. */
+    accent?: 'evergreen' | 'blush' | 'spring';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

@@ -9,11 +9,12 @@ import { clubToolById } from '../tools';
 import { kit as november2026 } from './2026-11-family-ownership';
 import { kit as january2027 } from './2027-01-fresh-start-together';
 import { kit as february2027 } from './2027-02-better-together';
+import { kit as march2027 } from './2027-03-spring-clean-together';
 import { kit as august2027 } from './2027-08-school-year';
 import { kit as october2027 } from './2027-10-home-works-together';
 import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, january2027, february2027, august2027, october2027, december2027];
+export const kits: readonly KitConfig[] = [november2026, january2027, february2027, march2027, august2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 
@@ -109,8 +110,11 @@ export function kitProblems(kit: KitConfig): string[] {
     if (f) {
       const n = kit.action.items.length;
       if (kit.action.kind !== 'checklist') out.push('action: a one-thing focus goes with a plain checklist');
-      if (!Number.isInteger(f.planAt) || f.planAt < 0 || f.planAt >= n || !Number.isInteger(f.startAt) || f.startAt < 0 || f.startAt >= n) out.push('action: focus planAt and startAt must be lines of the action');
-      if (!f.suggestions.length || f.suggestions.length > 8 || f.suggestions.some((x) => !ID.test(x.id) || !x.label.trim())) out.push('action: focus needs 1–8 suggestions with ids');
+      const line = (x: number | undefined) => x === undefined || (Number.isInteger(x) && x >= 0 && x < n);
+      if (!line(f.planAt) || !line(f.startAt)) out.push('action: focus planAt and startAt must be lines of the action');
+      if ((f.planAt === undefined) !== (f.planLabel === undefined) || (f.startAt === undefined) !== (f.startLabel === undefined)) out.push('action: focus planAt/startAt need their labels');
+      if (f.startAt !== undefined && f.whenLabel) out.push('action: a focus has a start day or a when, not both');
+      if (!f.suggestions.length || f.suggestions.length > 12 || f.suggestions.some((x) => !ID.test(x.id) || !x.label.trim())) out.push('action: focus needs 1–12 suggestions with ids');
     }
   }
   if (kit.tool && !clubToolById(kit.tool.tool)) out.push(`tool: ${kit.tool.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);

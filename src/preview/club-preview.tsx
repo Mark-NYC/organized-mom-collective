@@ -16,6 +16,7 @@ import { initChoreChart } from '../components/site/chore-chart';
 import { initTraditionsPicker } from '../components/site/traditions-picker';
 import { initHabitBuilder } from '../components/site/habit-builder';
 import { initConnectionPlanner } from '../components/site/connection-planner';
+import { initSpringCleaningBuilder } from '../components/site/spring-cleaning-builder';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -85,6 +86,7 @@ const toolInit: Record<string, (host: HTMLElement) => void> = {
   'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker', sample)),
   'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder', sample)),
   'connection-planner': (host) => initConnectionPlanner(host.querySelector<HTMLElement>('.cn')!, readToolHandoff('connection-planner', sample)),
+  'spring-cleaning': (host) => initSpringCleaningBuilder(host.querySelector<HTMLElement>('.sb')!, readToolHandoff('spring-cleaning', sample)),
 };
 
 function ToolPage({ tool, search }: { tool: string; search: string }) {

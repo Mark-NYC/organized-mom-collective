@@ -895,6 +895,190 @@ for (const id of [...samples, 'hughes']) {
   await ctx.close();
 }
 
+// March (letter, One-Room Family Reset, the Family Spring Cleaning Builder): the room, the day and helpers save; the
+// reset and the letter print; "Build Our Cleaning Plan" opens the builder with the family as helpers.
+const marUrl = (id) => `${base}/club/kits/2027-03-spring-clean-together?sample=${id}`;
+/** Every job row's chosen person is one the builder allows (no grown-ups-only job or limit broken). */
+const sbAllowed = (page) => page.evaluate(() => [...document.querySelectorAll('.sb-job select')].every((sel) => !sel.selectedOptions[0]?.disabled));
+const sbSessionMinutes = (page) => page.locator('.sb-room .sb-session-title').allTextContents();
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { march: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(marUrl(id));
+  await page.getByRole('heading', { name: 'Our One-Room Family Reset' }).waitFor();
+  check(await noSideScroll(page), `${id}: March scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the reset has ${await lines.count()} steps (expected 5)`);
+  check(await page.getByPlaceholder('Who’s helping?').count() === 5, `${id}: March is missing its helper lines`);
+  check(await page.locator('section[aria-labelledby="club-action"] input[type="date"]').count() === 1, `${id}: March should have one optional date`);
+  await page.screenshot({ path: join(out, `${id}-march-phone.png`), fullPage: true });
+
+  await page.getByRole('group', { name: 'Rooms to choose from' }).getByRole('button', { name: 'Living room' }).click();
+  await page.getByLabel(/When we’re doing it/).fill('2027-03-06');
+  await page.getByPlaceholder('Who’s helping?').nth(1).fill('Everyone');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our One-Room Family Reset' }).waitFor();
+  check(await page.getByLabel('Which room or space?').inputValue() === 'Living room', `${id}: the room didn't survive a reload`);
+  check(await page.getByLabel(/When we’re doing it/).inputValue() === '2027-03-06', `${id}: the day didn't survive a reload`);
+  check(await page.getByPlaceholder('Who’s helping?').nth(1).inputValue() === 'Everyone' && await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: helpers or checks didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['one-room-reset', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-march-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: March ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: March ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Living room') && sheet.includes('Saturday, March 6') && sheet.includes('Everyone'), `${id}: her printed reset is missing the room, day or helper`);
+  check(!sheet.includes('check in'), `${id}: March's printout has a check-in`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('The space we’re resetting') && front.includes('When we’re doing it') && !front.includes('Living room') && !front.includes('March 6'), `${id}: the mailed letter's blanks are wrong`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-stem')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's stem is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Your Spring Reset Field Guide', 'Start with one room.', 'Give everyone a real job.', 'Work in short sessions.', 'Outgrown clothes and shoes', 'not four more projects', 'What’s one space in our home we could make better together?', 'Build Your Family Spring Cleaning Plan', 'organizedmomcollective.com/club/kits/2027-03-spring-clean-together', 'so everyone knows when it’s happening.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  entry.greeting = await page.evaluate(() => document.querySelector('.club-letter-greeting')?.textContent);
+
+  // The tool: the cleaning builder, with the family as helpers and the living room first.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Build Our Cleaning Plan', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/spring-cleaning/);
+  await page.locator('.sb-room').first().waitFor();
+  check(await page.locator('.sb[data-sb-handoff]').count() === 1, `${id}: the Club page isn't the site's cleaning builder`);
+  const helpers = await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value));
+  entry.helpers = helpers;
+  check(helpers.length >= 1 && !helpers.includes('Adult 1'), `${id}: the builder didn't take the family as helpers (${helpers.join(', ')})`);
+  check((await page.locator('.sb-room .sb-room-name').first().textContent()) === 'Living room', `${id}: the builder didn't open on the living room`);
+  check(await sbAllowed(page), `${id}: a job went to someone who can't safely do it`);
+  check(await page.locator('.sb-job .sb-job-note').filter({ hasText: 'Needs someone' }).count() === 0, `${id}: a living-room job has nobody`);
+  check(await noSideScroll(page), `${id}: the builder scrolls sideways on a phone`);
+
+  // The simplest case: one room, 15 minutes, a short plan straight away.
+  await page.locator('[data-sb-length="15"]').click();
+  const first = (await sbSessionMinutes(page))[0];
+  const firstMin = Number(/About (\d+) minutes/.exec(first)?.[1]);
+  check(firstMin > 0 && firstMin <= 15, `${id}: a 15-minute session reads "${first}"`);
+  entry.living15 = await page.locator('.sb-room .sb-session').first().locator('.sb-job').evaluateAll((rows) => rows.map((r) => `${r.querySelector('select').selectedOptions[0].textContent}: ${r.querySelector('textarea').value}`));
+  await page.screenshot({ path: join(out, `${id}-march-builder-15.png`), fullPage: true });
+  await page.locator('[data-sb-length="30"]').click();
+
+  // Limits are rules: a seated-only grown-up gets only seated jobs, wherever they are.
+  if (id === 'chen') {
+    const lin = page.locator('[data-sb-helper]').filter({ has: page.locator('[data-sb-name][value="Lin"]') });
+    await page.getByRole('button', { name: 'Limits for Lin' }).click();
+    await page.locator('[data-sb-helper]').nth(2).getByLabel('Seated jobs only').check();
+    check(await sbAllowed(page), 'chen: a limit was broken after adding it');
+    entry.linJobs = await page.locator('.sb-job').evaluateAll((rows) => rows.filter((r) => r.querySelector('select').selectedOptions[0].textContent === 'Lin').map((r) => r.querySelector('textarea').value));
+    void lin;
+  }
+
+  // Several rooms: each its own sessions, only the open room expanded.
+  await page.locator('[data-sb-room="kitchen"]').click();
+  await page.locator('[data-sb-room="bathroom"]').click();
+  check(await page.locator('.sb-room').count() === 3, `${id}: three rooms should show three plans`);
+  check(await page.locator('.sb-room .sb-room-body').count() === 1, `${id}: more than one room is expanded at once`);
+  check(await sbAllowed(page), `${id}: a kitchen or bathroom job went to someone who can't safely do it`);
+  entry.bathroom = await page.locator('.sb-room-sum').allTextContents();
+
+  // Edit the living room (rename, reassign, remove, add our own), then refresh only the kitchen: the living room keeps its edits.
+  await page.locator('.sb-room-head').first().click();
+  const living = page.locator('.sb-room').first();
+  const row = living.locator('.sb-job').first();
+  await row.locator('textarea').fill('Collect everything that wandered in here');
+  await row.locator('textarea').blur();
+  await living.locator('.sb-job').nth(1).getByRole('button', { name: /^Remove/ }).click();
+  await living.getByLabel(/^Add a job to/).selectOption('__own');
+  await living.getByLabel('Your own job').fill('Water the plants');
+  await living.getByRole('button', { name: 'Add', exact: true }).click();
+  const owners = await living.locator('.sb-job select').first().locator('option:not([disabled])').allTextContents();
+  await living.locator('.sb-job select').first().selectOption({ label: owners[owners.length - 1] });
+  const livingBefore = await living.locator('.sb-job textarea').evaluateAll((els) => els.map((e) => e.value));
+  check(livingBefore.includes('Collect everything that wandered in here') && livingBefore.includes('Water the plants'), `${id}: living-room edits didn't apply`);
+  await page.locator('.sb-room-head').nth(1).click();
+  await page.getByRole('button', { name: /^New suggestions for Kitchen/ }).click();
+  await page.locator('.sb-room-head').first().click();
+  const livingAfter = await page.locator('.sb-room').first().locator('.sb-job textarea').evaluateAll((els) => els.map((e) => e.value));
+  check(livingAfter.join('|') === livingBefore.join('|'), `${id}: refreshing the kitchen changed the living room`);
+  await page.reload();
+  await page.locator('.sb-room').first().waitFor();
+  const livingReload = await page.locator('.sb-room').first().locator('.sb-job textarea').evaluateAll((els) => els.map((e) => e.value));
+  check(livingReload.join('|') === livingBefore.join('|'), `${id}: the edited plan didn't survive a reload`);
+
+  // Print one room only.
+  await page.locator('[data-sb-print-room]').selectOption({ label: 'Living room' });
+  const sheetText = await page.locator('.sb-sheet').first().textContent();
+  check(sheetText.includes('Living room Reset') && sheetText.includes('Water the plants') && !sheetText.includes('Kitchen'), `${id}: the living-room printout isn't just the living room`);
+  check(await page.locator('.sb-sheet .sb-sheet-box').count() >= 4, `${id}: the printout has too few boxes`);
+  check(await page.evaluate(() => [...document.querySelectorAll('.sb-sheet')].every((s) => s.scrollHeight <= s.clientHeight + 1)), `${id}: a printout runs off its page`);
+  await page.screenshot({ path: join(out, `${id}-march-builder-phone.png`), fullPage: true });
+  const downloads = [];
+  page.on('download', (d) => downloads.push(d));
+  await page.click('[data-sb-download]');
+  await page.waitForTimeout(2500);
+  check(downloads.length >= 1, `${id}: no printout downloaded`);
+  if (downloads[0]) await downloads[0].saveAs(join(out, `${id}-march-living.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the builder asked for an email`);
+  await page.click('[data-sb-copy]');
+  await page.waitForTimeout(200);
+  const copied = await page.locator('[data-sb-status]').textContent();
+  const fallback = await page.locator('[data-sb-copy-fallback]').inputValue();
+  check(/^Copied/.test(copied) || (fallback.includes('LIVING ROOM') && fallback.includes('KITCHEN')), `${id}: copying the plan didn't work`);
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-03/);
+  check(errors.length === 0, `${id}: March page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// No family profile: one adult to start; add a child and a teen, and the plan shares the work with them.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/spring-cleaning?sample=new`);
+  await page.locator('.sb-room').first().waitFor();
+  check((await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1', 'no profile: the builder invents people');
+  await page.getByRole('button', { name: '+ School-age child' }).click();
+  await page.getByRole('button', { name: '+ Teen' }).click();
+  const owners = await page.locator('.sb-job select').evaluateAll((els) => els.map((e) => e.selectedOptions[0].textContent));
+  check(owners.some((o) => o.startsWith('Child')) && owners.some((o) => o.startsWith('Teen')), `no profile: added helpers got no jobs (${owners.join(', ')})`);
+  check(await sbAllowed(page), 'no profile: a job went to someone who can’t safely do it');
+  report.push({ cleaningNoProfile: owners });
+  await ctx.close();
+}
+
+// Two families in one browser, March: one family's plan never shows up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(marUrl('rivera'));
+  await page.getByRole('button', { name: 'Build Our Cleaning Plan', exact: true }).click();
+  await page.locator('.sb-room').first().waitFor();
+  await page.locator('.sb-room').first().getByLabel(/^Add a job to/).selectOption('__own');
+  await page.locator('.sb-room').first().getByLabel('Your own job').fill('Rivera secret job');
+  await page.locator('.sb-room').first().getByRole('button', { name: 'Add', exact: true }).click();
+  await page.goto(marUrl('okafor'));
+  await page.getByRole('button', { name: 'Build Our Cleaning Plan', exact: true }).click();
+  await page.locator('.sb-room').first().waitFor();
+  const names = await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value));
+  const jobs = await page.locator('.sb-job textarea').evaluateAll((els) => els.map((e) => e.value));
+  check(!names.includes('Ana') && names.includes('Zara') && !jobs.includes('Rivera secret job'), `leak: the Okafors’ cleaning plan shows the Riveras’ (${names.join(', ')})`);
+  await page.goto(`${base}/club/tools/spring-cleaning?sample=brooks`);
+  await page.locator('.sb-room').first().waitFor();
+  const direct = await page.locator('[data-sb-name]').evaluateAll((els) => els.map((e) => e.value));
+  check(!direct.includes('Zara') && !direct.includes('Ana'), `leak: the cleaning builder opened by address as Brooks shows another family (${direct.join(', ')})`);
+  report.push({ marchLeakCheck: 'ok' });
+  await ctx.close();
+}
+
 // Two families in one browser: nothing one does shows up in the other's kit or tools.
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

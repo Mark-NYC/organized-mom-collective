@@ -50,6 +50,18 @@ function Heart({ small }: { small?: boolean }) {
   );
 }
 
+/** March's touch: one fine-line stem with a few new leaves, in muted sage. */
+function Stem({ small }: { small?: boolean }) {
+  return (
+    <svg className={`club-stem${small ? ' club-stem-small' : ''}`} viewBox="0 0 90 40" aria-hidden="true" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 34 C 26 30, 50 22, 86 8" stroke="#6f8a72" strokeWidth="1.4" />
+      {[[22, 30, -1], [38, 25, 1], [54, 19, -1], [70, 13, 1]].map(([x, y, side]) => (
+        <path key={x} d={`M${x} ${y} C ${x + 3} ${y - 9 * side}, ${x + 12} ${y - 10 * side}, ${x + 14} ${y - 6 * side} C ${x + 10} ${y - 2 * side}, ${x + 5} ${y - 1 * side}, ${x} ${y}`} stroke="#7d917c" strokeWidth="1.2" />
+      ))}
+    </svg>
+  );
+}
+
 /** What she's filled in online, for her own printout: done, who's helping, when (a date, "When you can", or ''), her wording. */
 export interface ActionFill {
   done: boolean[];
@@ -134,11 +146,12 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
   );
   return (
     <div className="club-print club-letter" data-doc={doc} data-preview={preview ? '' : undefined} data-accent={kit.mailer.accent}
-      data-dense={action?.helperLabel && action.helperPlacement !== 'below' && action.items.some((t) => t.detail) ? '' : undefined}>
+      data-dense={action?.helperLabel && action.helperPlacement !== 'below' && (action.items.some((t) => t.detail) || action.focus) ? '' : undefined}>
       <section className="club-letter-page" aria-label="Front">
         {head}
         {kit.mailer.accent === 'evergreen' && <Sprig />}
         {kit.mailer.accent === 'blush' && <Heart />}
+        {kit.mailer.accent === 'spring' && <Stem />}
         <h1 className="club-letter-title">{kit.theme}</h1>
         {kit.subtitle && <p className="club-letter-subtitle">{kit.subtitle}</p>}
         <div className="club-letter-body">
@@ -161,6 +174,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             <h2>{action.title}</h2>
             {action.note && <p className="club-letter-action-note">{action.note}</p>}
             {action.focus && <FocusLine label={action.focus.printLabel} />}
+            {action.focus?.whenLabel && <FocusLine label={action.focus.whenLabel} />}
             <ActionList items={action.items} helperLabel={action.helperLabel} dated={action.kind === 'countdown'} below={action.helperPlacement === 'below'} />
           </div>
         )}
@@ -172,6 +186,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
         <h2 className="club-letter-back-title">
           {kit.mailer.accent === 'evergreen' && <Sprig small />}
           {kit.mailer.accent === 'blush' && <Heart small />}
+          {kit.mailer.accent === 'spring' && <Stem small />}
           {kit.mailer.fieldGuide.title}
         </h2>
         {kit.mailer.fieldGuide.intro && <p className="club-letter-back-intro">{kit.mailer.fieldGuide.intro}</p>}
@@ -201,6 +216,13 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             <span className="club-letter-label">For example</span>
             <h3>{kit.mailer.story.title}</h3>
             <p>{kit.mailer.story.body}</p>
+          </div>
+        )}
+        {kit.mailer.checklist && (
+          <div className="club-letter-example club-letter-checklist">
+            <span className="club-letter-label">{kit.mailer.checklist.title}</span>
+            <p className="club-letter-checklist-note">{kit.mailer.checklist.note}</p>
+            <ul>{kit.mailer.checklist.items.map((t) => <li key={t}><span className="club-box" />{t}</li>)}</ul>
           </div>
         )}
         {conversation?.placement === 'after-example' && conversationBlock}
@@ -233,14 +255,17 @@ export function ActionSheet({ doc, kit, palette, preview, fill }: { doc: string;
       <p className="club-sheet-intro">{action.intro}</p>
       {action.note && <p className="club-sheet-intro club-action-sheet-tip">{action.note}</p>}
       {action.focus && <FocusLine label={action.focus.printLabel} value={fill?.focus?.thing} />}
+      {action.focus?.whenLabel && <FocusLine label={action.focus.whenLabel} value={fill?.focus?.start} />}
       <ActionList items={action.items} helperLabel={action.helperLabel} fill={fill} dated={action.kind === 'countdown'} below={action.helperPlacement === 'below'} />
-      {action.focus && (
+      {action.focus?.planLabel && (
         <div className="club-focus-plan">
           <FocusLine label={action.focus.planLabel} value={fill?.focus?.plan} />
-          <div className="club-focus-days">
-            <FocusLine label="We start" value={fill?.focus?.start} />
-            <FocusLine label="We check in" value={fill?.focus?.checkIn} />
-          </div>
+          {action.focus.startAt !== undefined && (
+            <div className="club-focus-days">
+              <FocusLine label="We start" value={fill?.focus?.start} />
+              <FocusLine label="We check in" value={fill?.focus?.checkIn} />
+            </div>
+          )}
         </div>
       )}
       <p className="club-action-sheet-note">

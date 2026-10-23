@@ -80,7 +80,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Worksheets:** conversation cards by age, one-on-one date menu, team Bedrooms + Closets reset.
 - **Mailer:** letter on connection as part of the family system; field guide on keeping it small; activity: family night plan.
 
-### March: Spring Clean as a Team
+### March: Spring Clean as a Team (built 2026-10-23, behind the flag)
+
+*Less cleaning for Mom. More helping hands.* Owner direction, 2026-10-23: replaces the earlier March plan below. Config: `src/data/club/kits/2027-03-spring-clean-together.ts`. Mailer: [mailers/2027-03-spring-clean-together.md](mailers/2027-03-spring-clean-together.md).
+
+- **The letter:** This House Belongs to All of Us (about 160 words): spring cleaning shouldn't be one person's weekend; everyone does something real, at their age. Asks "What's one space in our home we could make better together?" A draft for Megan.
+- **The action:** Our One-Room Family Reset, five steps, with the space and when written above them and an optional "Who's helping?" per step. Thirty minutes is a starting point; one room is enough.
+- **The tool:** the Family Spring Cleaning Builder, a new site tool: rooms, who's helping (with limits), session length; safe, age-fit jobs for each person in time-boxed sessions; edit anything; print one room.
+- **Back of the letter:** the field guide, optional decluttering ideas, the question, the QR code, one calendar note.
+- **Not October or November:** one seasonal project, not ongoing chores; it divides the work of what's on the calendar.
+
+### March (earlier plan): Spring Clean as a Team
 
 - **Flagship: Family Spring Cleaning Builder.** Spring Prep zones split into owned tasks with a due day, sized by age, so no one person does the spring clean.
 - **Worksheets:** donate / keep / toss station sign, room-by-room team checklist, finish-line celebration card.

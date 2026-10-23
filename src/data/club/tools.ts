@@ -84,6 +84,16 @@ export const clubTools = {
     title: 'Family Connection Planner',
     intro: 'Answer what you like and skip the rest. Choose one idea, swap or edit any, then print or copy your plan. It saves in this browser.',
   },
+  'spring-cleaning': {
+    id: 'spring-cleaning',
+    path: routes.clubTool('spring-cleaning'),
+    // No public page yet: the component is a site tool (src/components/site/SpringCleaningBuilder.astro), ready for one.
+    publicPath: null,
+    perChild: false,
+    familyPeople: true,
+    title: 'Family Spring Cleaning Builder',
+    intro: 'Choose the rooms, who’s helping and how long a session is. Change any job or who has it, then print one room at a time. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;
