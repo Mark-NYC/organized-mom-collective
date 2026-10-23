@@ -15,10 +15,11 @@ import { kit as may2027 } from './2027-05-finish-the-school-year';
 import { kit as june2027 } from './2027-06-summer-with-a-plan';
 import { kit as july2027 } from './2027-07-ready-to-go';
 import { kit as august2027 } from './2027-08-school-year';
+import { kit as september2027 } from './2027-09-a-week-everyone-can-see';
 import { kit as october2027 } from './2027-10-home-works-together';
 import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, january2027, february2027, march2027, april2027, may2027, june2027, july2027, august2027, october2027, december2027];
+export const kits: readonly KitConfig[] = [november2026, january2027, february2027, march2027, april2027, may2027, june2027, july2027, august2027, september2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 

@@ -176,7 +176,17 @@ The first kit in the three-part shape every month now follows (owner direction, 
 - **Removed from the first draft** (kept as `src/data/club/libraries/school-year.ts`): the 20-plus-task launch plan with an owner per task, the overview, the per-child school and first-day setup, the School-Year Command Center with its Sunday checklist and commitments, the separate guide, huddle and backpack-station pieces.
 - **Overlap check:** the free `/routine-chart` and `/back-to-school-checklist` stay free; the Club chart is personalized by each child's age.
 
-### September: A Week Everyone Can See
+### September: A Week Everyone Can See (built 2026-10-23, behind the flag)
+
+*One family. One calendar. Everyone knows the plan.* Owner direction, 2026-10-23: replaces the earlier September plan below (the "Sunday Family Reset" working name became the Family Weekly Reset Builder, any day). Config: `src/data/club/kits/2027-09-a-week-everyone-can-see.ts`. Mailer: [mailers/2027-09-a-week-everyone-can-see.md](mailers/2027-09-a-week-everyone-can-see.md).
+
+- **The letter:** You Don't Have to Remember Everything (about 165 words): Mom doesn't need to be the family's walking calendar; a short weekly meeting makes the calendar everyone's. Asks "What's one thing happening this week that everyone needs to know about?" A draft for Megan.
+- **The action:** Our First 15-Minute Family Meeting, five steps with suggested minutes (3, 4, 3, 3, 2), the meeting day and time written above them.
+- **The tool:** the Family Weekly Reset Builder, a new site tool (`/club/tools/family-reset`): who's taking part, what makes the weeks complicated, when you meet, who leads; a one-page 15-minute guide to keep by the calendar.
+- **Back of the letter:** the calendar is everyone's (three principles), taking part by age, take turns leading, the question, the QR code, the calendar note. *Placeholder copy: the brief's back-page section didn't arrive.*
+- **Not a planner:** the week's plan stays on the wall calendar; no grids, no second calendar, no meeting history. Not the paid Weekly Reset System (`/weekly-reset`).
+
+### September (earlier plan): A Week Everyone Can See
 
 - **Flagship: Sunday Family Reset Builder.** A 30-minute weekly family meeting: who leads which part, a running order, what each person brings (their week's activities, one job update).
 - **Worksheets:** weekly meeting agenda, "this week" board, team Entry + Storage reset.

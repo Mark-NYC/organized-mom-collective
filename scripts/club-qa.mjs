@@ -883,6 +883,7 @@ for (const id of [...samples, 'hughes']) {
     ['connection-planner', '.cn-card', () => document.querySelector('[data-cn-family]')?.value ?? ''],
     ['meal-team', '.mlt-row', () => document.querySelector('[data-mlt-family]')?.value ?? ''],
     ['school-wrap-up', '.wu', () => document.querySelector('[data-wu-family]')?.value ?? ''],
+    ['family-reset', '.fr', () => document.querySelector('[data-fr-own]')?.value ?? ''],
     ['packing', '.pk', () => document.querySelector('[data-pk-save-name]')?.value ?? ''],
     ['screen-time', '.st-container', () => document.querySelector('[data-st-sheet] [data-field="name"]')?.value ?? ''],
     ['habit-builder', '[data-hb-statement]', () => document.querySelector('[data-hb-family]')?.value ?? ''],
@@ -1931,6 +1932,142 @@ for (const id of [...samples, 'hughes']) {
   const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
   check(!names.includes('Ana') && names.includes('Zara') && !(await pkShared(page)).some((x) => x.includes('Rivera secret item')) && await page.locator('[data-pk-saved-box]').isHidden(), `leak: the Okafors’ packing lists show the Riveras’ (${names.join(', ')})`);
   report.push({ julyLeakCheck: 'ok' });
+  await ctx.close();
+}
+
+// September (letter, first 15-minute family meeting, the Family Weekly Reset Builder): the meeting day and checks
+// save; the meeting and the letter print; "Build Our Weekly Reset" opens the builder with the family and the day.
+const sepUrl = (id) => `${base}/club/kits/2027-09-a-week-everyone-can-see?sample=${id}`;
+const frSteps = (page) => page.locator('[data-fr-step]').evaluateAll((els) => els.map((e) => `${e.querySelector('.fr-step-title').value}|${e.querySelector('input[type="number"]').value}`));
+const HOLDER = { rivera: 'Ana', brooks: 'Jess', chen: 'Mei', okafor: 'Ada', hughes: 'Claire' };
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { september: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(sepUrl(id));
+  await page.getByRole('heading', { name: 'Our First 15-Minute Family Meeting' }).waitFor();
+  check(await noSideScroll(page), `${id}: September scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the meeting has ${await lines.count()} steps (expected 5)`);
+  await page.screenshot({ path: join(out, `${id}-september-phone.png`), fullPage: true });
+  await page.getByRole('group', { name: 'Ideas' }).getByRole('button', { name: 'Friday after dinner' }).click();
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our First 15-Minute Family Meeting' }).waitFor();
+  check(await page.getByLabel('Our family meeting day and time').inputValue() === 'Friday after dinner' && await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: the meeting day or check didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['family-meeting', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-september-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: September ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: September ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Friday after dinner') && sheet.includes('(3 min)') && sheet.includes('Ask who needs help.'), `${id}: her printed meeting is missing the day, the minutes or a step`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('A Week Everyone Can See') && front.includes('Everyone knows the plan') && front.includes('Our family meeting day and time') && front.includes('Megan') && !front.includes('Friday after dinner'), `${id}: the letter's front is wrong`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-calpage')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's calendar mark is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['The Calendar Is Everyone’s', 'Taking part, by age', 'Take turns leading', 'What’s one thing happening this week that everyone needs to know about?', 'Make Your Family Weekly Reset', 'organizedmomcollective.com/club/kits/2027-09-a-week-everyone-can-see']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  check(await page.locator('.club-letter .club-qr').count() === 1, `${id}: September's letter should have one QR code`);
+
+  // The tool, opened with the family and the day she chose.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Build Our Weekly Reset', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/family-reset/);
+  await page.locator('[data-fr-step]').first().waitFor();
+  check(await page.locator('.fr[data-fr-handoff]').count() === 1, `${id}: the Club page isn't the site's weekly reset builder`);
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  entry.people = names;
+  check(names.length >= 1 && !names.includes('Adult 1'), `${id}: the builder didn't take the family (${names.join(', ')})`);
+  check(await page.locator('[data-fr-day="friday"][aria-pressed="true"]').count() === 1, `${id}: the builder didn't open on Friday`);
+  check(await page.locator('[data-fr-step]').count() === 5, `${id}: the guide isn't five steps`);
+  const leader = await page.locator('[data-fr-leader]').evaluate((s) => s.selectedOptions[0]?.textContent ?? '');
+  entry.leader = leader;
+  check(names.length === 1 || leader !== HOLDER[id], `${id}: Mom leads by default (${leader})`);
+  const before = await frSteps(page);
+  await page.locator('[data-fr-concern="meals"]').check();
+  await page.locator('[data-fr-concern="transport"]').check();
+  const meals = await frSteps(page);
+  entry.steps = meals;
+  check(meals.some((x) => x.startsWith('What about meals?')) && !before.some((x) => x.startsWith('What about meals?')), `${id}: choosing meals didn't change the guide`);
+  const sheetText = await page.locator('.fr-sheet').textContent();
+  check(/Our Family Weekly Reset/.test(sheetText) && /Fridays/.test(sheetText) && /This week’s meeting leader/.test(sheetText) && /wall calendar/.test(sheetText) && /15 minutes/.test(sheetText), `${id}: the guide is missing its parts`);
+  check(await noSideScroll(page), `${id}: the builder scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-september-builder-phone.png`), fullPage: true });
+
+  // Edit: reword, retime, reorder, remove, own question, leader, day; new suggestions and a reload keep it all.
+  const first = page.locator('[data-fr-step]').first();
+  await first.locator('.fr-step-title').fill('What’s coming up?');
+  await first.locator('.fr-step-title').blur();
+  await first.locator('input[type="number"]').fill('4');
+  await first.locator('input[type="number"]').dispatchEvent('change');
+  await page.locator('[data-fr-step]').nth(1).getByRole('button', { name: /^Move down/ }).click();
+  const removed = await page.locator('[data-fr-step]').nth(3).locator('.fr-step-title').inputValue();
+  await page.locator('[data-fr-step]').nth(3).getByRole('button', { name: /^Remove/ }).click();
+  await page.locator('[data-fr-own]').fill('What are we celebrating?');
+  await page.locator('[data-fr-own]').dispatchEvent('change');
+  await page.locator('[data-fr-lead="one"]').click();
+  const pickName = names[names.length - 1];
+  await page.locator('[data-fr-leader]').selectOption({ label: pickName });
+  await page.locator('[data-fr-day="other"]').click();
+  await page.locator('[data-fr-other-day]').fill('Thursday');
+  await page.locator('[data-fr-other-day]').dispatchEvent('change');
+  const edited = await frSteps(page);
+  await page.locator('[data-fr-fresh]').click();
+  await page.reload();
+  await page.locator('[data-fr-step]').first().waitFor();
+  const kept = await frSteps(page);
+  check(JSON.stringify(kept) === JSON.stringify(edited) && kept[0] === 'What’s coming up?|4' && !kept.some((x) => x.startsWith(`${removed}|`)), `${id}: edits didn't survive new suggestions and a reload`);
+  const guide = await page.locator('.fr-sheet').textContent();
+  check(guide.includes('What are we celebrating?') && guide.includes('Thursdays') && guide.includes(pickName), `${id}: the guide lost her question, day or leader`);
+  check(await page.evaluate(() => [...document.querySelectorAll('.fr-sheet')].every((s) => s.scrollHeight <= s.clientHeight + 1)) && await page.locator('.fr-sheet').count() === 1, `${id}: the guide isn't one US Letter page`);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-fr-download]')]);
+  await dl.saveAs(join(out, `${id}-september-guide.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the builder asked for an email`);
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-09/);
+  check(errors.length === 0, `${id}: September page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// No family profile: one adult and one child to start, and a guide straight away.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/family-reset?sample=new`);
+  await page.locator('[data-fr-step]').first().waitFor();
+  check((await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1,Child 1', 'no profile: the builder should start with one adult and one child');
+  check(await page.locator('[data-fr-step]').count() === 5, 'no profile: no guide');
+  report.push({ resetNoProfile: 'ok' });
+  await ctx.close();
+}
+
+// Two families in one browser, September: one family's guide never shows up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(sepUrl('rivera'));
+  await page.getByRole('button', { name: 'Build Our Weekly Reset', exact: true }).click();
+  await page.locator('[data-fr-step]').first().waitFor();
+  await page.locator('[data-fr-own]').fill('Rivera secret question');
+  await page.locator('[data-fr-own]').dispatchEvent('change');
+  await page.goto(sepUrl('okafor'));
+  await page.getByRole('button', { name: 'Build Our Weekly Reset', exact: true }).click();
+  await page.locator('[data-fr-step]').first().waitFor();
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  check(!names.includes('Ana') && names.includes('Zara') && await page.locator('[data-fr-own]').inputValue() === '', `leak: the Okafors’ guide shows the Riveras’ (${names.join(', ')})`);
+  report.push({ septemberLeakCheck: 'ok' });
   await ctx.close();
 }
 
