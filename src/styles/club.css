@@ -1240,3 +1240,123 @@
   margin-top: 0.16in;
   margin-bottom: 0.14in;
 }
+
+/* May's touch: a fine-line open notebook, soft blue panels, sage checks. */
+.club-notebook {
+  display: block;
+  flex: none;
+  width: 0.72in;
+  height: 0.36in;
+  margin: 0.14in 0 -0.16in;
+}
+.club-notebook-small {
+  display: inline-block;
+  width: 0.5in;
+  height: 0.25in;
+  margin: 0 0.1in 0 0;
+  vertical-align: -0.03in;
+}
+.club-print[data-accent='school'] .club-letter-subtitle {
+  color: #5d7383;
+}
+.club-print[data-accent='school'] .club-letter-action,
+.club-print[data-accent='school'] .club-letter-conversation {
+  background: #eef3f6;
+  border-top-color: #8fa7b8;
+}
+.club-print[data-accent='school'] .club-action-row {
+  border-bottom-color: #dbe4ea;
+}
+.club-print[data-accent='school'] .club-action-box.is-done {
+  background: #6f8a72;
+  border-color: #6f8a72;
+}
+.club-print[data-accent='school'] .club-letter-calendar {
+  background: #eef1eb;
+}
+.club-letter-tip-wide p {
+  font-size: 10.6pt;
+}
+.club-print[data-accent='school'] .club-letter-tip {
+  background: #f6f1e7;
+  border-color: #e7ddd4;
+}
+.club-letter[data-accent='school'] .club-letter-back-title {
+  margin-top: 0.22in;
+}
+.club-letter[data-accent='school'] .club-letter-tips {
+  gap: 0.04in;
+  margin-top: 0.08in;
+}
+.club-letter[data-accent='school'] .club-letter-tips p {
+  font-size: 10.6pt;
+  line-height: 1.38;
+}
+.club-letter[data-accent='school'] .club-letter-example {
+  margin-top: 0.16in;
+  padding: 0.12in 0.2in;
+}
+.club-letter[data-accent='school'] .club-letter-invite {
+  margin-top: 0.14in;
+  margin-bottom: 0.12in;
+}
+
+/* A keepsake for a child (May's reflection prompts): a dashed edge to cut along, room to write, no grading look. */
+.club-letter-reflection {
+  margin-top: 0.16in;
+  padding: 0.14in 0.24in 0.12in;
+  border: 1.2px dashed #a9b9c4;
+  border-radius: 6px;
+  background: #fff;
+}
+.club-letter-reflection-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.2in;
+}
+.club-letter-reflection-head h3 {
+  font-family: 'Kalam', cursive;
+  font-size: 17pt;
+  font-weight: 700;
+  color: #4d4544;
+}
+.club-letter-reflection-head p {
+  font-family: var(--font-serif);
+  font-size: 9pt;
+  font-style: italic;
+  color: #6b625c;
+  text-align: right;
+}
+.club-letter-reflection-name {
+  display: grid;
+  grid-template-columns: auto 2.4in;
+  justify-content: start;
+  gap: 0.12in;
+  align-items: end;
+  margin-top: 0.02in;
+  font-family: var(--font-sans);
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b625c;
+}
+.club-letter-reflection ol {
+  display: grid;
+  gap: 0.06in;
+  margin: 0.06in 0 0;
+  padding: 0;
+  list-style: none;
+}
+.club-letter-reflection-q {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  color: #4d4544;
+}
+.club-write {
+  display: block;
+  height: 0.3in;
+  border-bottom: 1px solid #c9c0b8;
+}

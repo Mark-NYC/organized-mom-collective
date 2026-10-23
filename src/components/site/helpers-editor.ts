@@ -9,7 +9,7 @@ export type HelperChange = 'name' | 'group' | 'age' | 'limits' | 'add' | 'remove
 export interface HelpersEditorOptions {
   helpers: () => Helper[];
   setHelpers: (next: Helper[]) => void;
-  /** The tool's own limits. */
+  /** The tool's own limits (none: no Limits button). */
   limits: readonly { id: string; label: string }[];
   newId: () => string;
   /** After a change: the tool re-plans (not for a name) and calls render(). */
@@ -36,6 +36,8 @@ export function initHelpersEditor(root: HTMLElement, o: HelpersEditorOptions) {
       group.value = h.group;
       age.value = h.age === null ? '' : String(h.age);
       age.hidden = h.group === 'adult';
+      // A tool without limits (the wrap-up builder) shows no Limits button.
+      toggle.hidden = !o.limits.length;
       toggle.textContent = h.limits.length ? `Limits (${h.limits.length})` : 'Limits';
       toggle.setAttribute('aria-label', `Limits for ${h.name}`);
       q<HTMLButtonElement>('[data-hp-remove]', li).setAttribute('aria-label', `Remove ${h.name}`);

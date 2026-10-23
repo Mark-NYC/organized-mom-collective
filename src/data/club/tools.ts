@@ -104,6 +104,16 @@ export const clubTools = {
     title: 'Family Meal Responsibility Planner',
     intro: 'Choose who’s helping and which meals you want to share. Change any job or who has it, then print your chart. It saves in this browser.',
   },
+  'school-wrap-up': {
+    id: 'school-wrap-up',
+    path: routes.clubTool('school-wrap-up'),
+    // No public page yet: the component is a site tool (src/components/site/WrapUpBuilder.astro), ready for one.
+    publicPath: null,
+    perChild: false,
+    familyPeople: true,
+    title: 'School Year Wrap-Up Builder',
+    intro: 'Enter when school ends and what applies. We’ll suggest what to finish, when, and who can help. Change anything, then print. It saves in this browser.',
+  },
 } satisfies Record<string, ClubTool>;
 
 export type ClubToolId = keyof typeof clubTools;

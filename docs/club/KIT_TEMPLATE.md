@@ -35,7 +35,7 @@ Every card in `src/data/responsibilities.ts` is an item automatically (`cardItem
 
 ## Tools: reuse the site's, never copy them
 
-A kit's tool is always one of the site's own tools, opened inside the Club. There is one implementation: improve it on the site and every kit gets it. Seven so far: the routine chart (August), the chore chart (October), the Family Christmas Traditions Picker (December), the Family Habit Builder (January), the Family Connection Planner (February), the Family Spring Cleaning Builder (March) and the Family Meal Responsibility Planner (April); the last five are new site tools with no public page yet. Job planners share who's helping (`src/lib/household-helpers.ts`, editor `HelpersEditor.astro`). Idea pickers share their fit-and-rank rules (`src/lib/idea-picker.ts`). The pattern:
+A kit's tool is always one of the site's own tools, opened inside the Club. There is one implementation: improve it on the site and every kit gets it. Eight so far: the routine chart (August), the chore chart (October), the Family Christmas Traditions Picker (December), the Family Habit Builder (January), the Family Connection Planner (February), the Family Spring Cleaning Builder (March), the Family Meal Responsibility Planner (April) and the School Year Wrap-Up Builder (May); the last six are new site tools with no public page yet. Date-based tools reuse August's countdown (`src/lib/club/countdown.ts`). Job planners share who's helping (`src/lib/household-helpers.ts`, editor `HelpersEditor.astro`). Idea pickers share their fit-and-rank rules (`src/lib/idea-picker.ts`). The pattern:
 
 1. **The tool is one component with one behavior module** that the public page and the Club page both render (`RoutineChart.astro` + `routine-chart.ts`; `ChoreChart.astro` + `chore-chart.ts`, extracted from `/chore-chart` on 2026-10-23). If a tool still lives inside its public page, extract it first, then check the public page is unchanged. Shared handoff behavior (saved-copy check, age-ordered picker): `src/components/site/tool-handoff-ui.ts`.
 2. **A handoff mode on the component** (`handoff` prop): it reads `readToolHandoff(id)` (`src/lib/tool-handoff.ts`) for a child's first name and age and a starting choice, keeps a separate saved copy per handoff key, and otherwise behaves exactly as on the public page. Public pages never set it.
@@ -72,6 +72,10 @@ The hosted preview (`scripts/build-club-preview.mjs`) embeds each Club tool page
 ## April, as built
 
 `src/data/club/kits/2027-04-everybody-helps-at-mealtime.ts`: the letter (draft), Our Family Dinner Team (`kind: 'checklist'`, five steps, "Who's helping?" beside each, an `action.note`), with `action.focus` taking the meal (a few ideas to tap, or her own) and a `whenLabel` day. The back adds `mailer.ageGuide` (a compact reference, framed as suggestions) and `mailer.tip` side by side, and the `table` accent (a fine-line place setting, pale apricot panels). The tool is the Family Meal Responsibility Planner (`tool: 'meal-team'`), opened with the family's first names, children's ages and the account holder.
+
+## May, as built
+
+`src/data/club/kits/2027-05-finish-the-school-year.ts`: the letter (draft), Our School Year Wrap-Up (`kind: 'checklist'`, five steps each with a `detail`, "Who's helping?" beside each, an `action.note`; no focus, no dates). The back uses `mailer.tip` full width (the Five Favorites Rule) and a new `mailer.reflection` (a child's keepsake: three prompts with two writing lines each, a dashed cut-out edge), no back-page question (it's in the letter), and the `school` accent (a fine-line open notebook, soft blue panels). The tool is the School Year Wrap-Up Builder (`tool: 'school-wrap-up'`), opened with the family's first names, children's ages and the account holder.
 
 ## Test households (every kit, every month)
 

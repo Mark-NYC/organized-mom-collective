@@ -228,3 +228,4 @@ select pg_temp.expect((select status from public.club_kits where slug = '2027-01
 select pg_temp.expect((select status from public.club_kits where slug = '2027-02-better-together') = 'draft', 'February is seeded as a draft');
 select pg_temp.expect((select status from public.club_kits where slug = '2027-03-spring-clean-together') = 'draft', 'March is seeded as a draft');
 select pg_temp.expect((select status from public.club_kits where slug = '2027-04-everybody-helps-at-mealtime') = 'draft', 'April is seeded as a draft');
+select pg_temp.expect((select status from public.club_kits where slug = '2027-05-finish-the-school-year') = 'draft', 'May is seeded as a draft');

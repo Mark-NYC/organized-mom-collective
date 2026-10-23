@@ -229,6 +229,8 @@ export interface KitConfig {
     ageGuide?: { title: string; note: string; rows: { ages: string; jobs: string }[] };
     /** One small tip on the back (April's five-minute pantry check). */
     tip?: { title: string; body: string };
+    /** A small keepsake on the back for a child to fill in (May's reflection prompts), with room to write; can be cut out. */
+    reflection?: { title: string; note: string; prompts: string[] };
     /** A short optional list on the back (March's decluttering ideas): small boxes, framed as ideas, not more work. */
     checklist?: { title: string; note: string; items: string[] };
     /** Three-part kits: on the kit page, how the mailed copy and her own printout relate (one or the other, never both). */
@@ -256,9 +258,9 @@ export interface KitConfig {
     qrPath: string;
     /**
      * A restrained seasonal touch on the letter: December's evergreen sprig; February's fine-line heart and blush
-     * panels; March's leafy stem; April's place setting and pale apricot panels.
+     * panels; March's leafy stem; April's place setting and pale apricot panels; May's open notebook and soft blue panels.
      */
-    accent?: 'evergreen' | 'blush' | 'spring' | 'table';
+    accent?: 'evergreen' | 'blush' | 'spring' | 'table' | 'school';
   };
   /** Free tools this kit points to instead of duplicating (paths from src/routes.ts). */
   related?: string[];

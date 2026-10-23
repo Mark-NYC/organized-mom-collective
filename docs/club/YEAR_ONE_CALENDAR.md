@@ -114,7 +114,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter; field guide on letting kids cook with real jobs; activity: kids plan and make one dinner.
 - **Overlap check:** free `/meal-planner` and `/lunch-and-snack-station` stay free.
 
-### May: Finish the School Year Well
+### May: Finish the School Year Well (built 2026-10-23, behind the flag)
+
+*Less end-of-year chaos. More ready for summer.* Owner direction, 2026-10-23: replaces the earlier May plan below. Config: `src/data/club/kits/2027-05-finish-the-school-year.ts`. Mailer: [mailers/2027-05-finish-the-school-year.md](mailers/2027-05-finish-the-school-year.md).
+
+- **The letter:** You Don't Have to Wrap Up Everything Yourself (about 160 words): the end of school is a small holiday season of things to remember; the school year belongs to the kids, too. Asks "What's one thing you're proud of from this school year?" A draft for Megan.
+- **The action:** Our School Year Wrap-Up, five steps each with a sentence, an optional "Who's helping?" per step, no dates; works whether school ends in May or June.
+- **The tool:** the School Year Wrap-Up Builder, a new site tool (`/club/tools/school-wrap-up`): the last day (family or per child), which closeout work applies, who's helping; a short plan before school ends and after the last day with August's countdown dates, children owning their own closeout; print the family's plan or one child's.
+- **Back of the letter:** three principles, the Five Favorites Rule, a cut-out "My School Year" reflection with room to write, the QR code, the calendar note.
+- **Not August or June:** August gets ready for the start; May finishes well. No summer planning, school planner, first-day routines or supply shopping.
+
+### May (earlier plan): Finish the School Year Well
 
 - **Flagship: School Year Wrap-Up Builder.** The last four weeks as a dated plan: teacher thank-yous, end-of-year events, paperwork, clearing backpacks, each owned by a person.
 - **Worksheets:** end-of-year memory page per child, summer kickoff list, team Living Areas reset.

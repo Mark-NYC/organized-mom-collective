@@ -18,6 +18,7 @@ import { initHabitBuilder } from '../components/site/habit-builder';
 import { initConnectionPlanner } from '../components/site/connection-planner';
 import { initSpringCleaningBuilder } from '../components/site/spring-cleaning-builder';
 import { initMealTeamPlanner } from '../components/site/meal-team-planner';
+import { initWrapUpBuilder } from '../components/site/wrap-up-builder';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -89,6 +90,7 @@ const toolInit: Record<string, (host: HTMLElement) => void> = {
   'connection-planner': (host) => initConnectionPlanner(host.querySelector<HTMLElement>('.cn')!, readToolHandoff('connection-planner', sample)),
   'spring-cleaning': (host) => initSpringCleaningBuilder(host.querySelector<HTMLElement>('.sb')!, readToolHandoff('spring-cleaning', sample)),
   'meal-team': (host) => initMealTeamPlanner(host.querySelector<HTMLElement>('.mlt')!, readToolHandoff('meal-team', sample)),
+  'school-wrap-up': (host) => initWrapUpBuilder(host.querySelector<HTMLElement>('.wu')!, readToolHandoff('school-wrap-up', sample)),
 };
 
 function ToolPage({ tool, search }: { tool: string; search: string }) {

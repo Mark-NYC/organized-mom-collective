@@ -882,6 +882,7 @@ for (const id of [...samples, 'hughes']) {
   for (const [tool, ready, probe] of [
     ['connection-planner', '.cn-card', () => document.querySelector('[data-cn-family]')?.value ?? ''],
     ['meal-team', '.mlt-row', () => document.querySelector('[data-mlt-family]')?.value ?? ''],
+    ['school-wrap-up', '.wu', () => document.querySelector('[data-wu-family]')?.value ?? ''],
     ['habit-builder', '[data-hb-statement]', () => document.querySelector('[data-hb-family]')?.value ?? ''],
     ['traditions-picker', '.tp-card', () => document.querySelector('[data-tp-family]')?.value ?? ''],
     ['chore-chart', '#chore-chart', () => document.querySelector('[data-cc-name]')?.value ?? ''],
@@ -1283,6 +1284,248 @@ for (const id of [...samples, 'hughes']) {
   const direct = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
   check(!direct.includes('Zara') && !direct.includes('Ana'), `leak: the meal planner opened by address as Brooks shows another family (${direct.join(', ')})`);
   report.push({ aprilLeakCheck: 'ok' });
+  await ctx.close();
+}
+
+// May (letter, School Year Wrap-Up, the School Year Wrap-Up Builder): checks and helpers save; the wrap-up and the
+// letter print; "Build Our School Year Plan" opens the builder with the family; dates are August's, never overdue.
+const mayUrl = (id) => `${base}/club/kits/2027-05-finish-the-school-year?sample=${id}`;
+const localDay = (n = 0) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const wuRows = (page) => page.locator('.wu-row').evaluateAll((rows) => rows.map((r) => ({ title: r.querySelector('textarea').value, date: r.querySelector('input[type="date"]').value, owner: r.querySelector('select').selectedOptions[0]?.textContent ?? '', phase: r.closest('[data-wu-group]').dataset.wuGroup })));
+const wuAllowed = (page) => page.evaluate(() => [...document.querySelectorAll('.wu-row select')].every((sel) => !sel.selectedOptions[0]?.disabled));
+for (const id of samples) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  page.on('dialog', (d) => d.accept());
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { may: id };
+  const lines = page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+  await page.goto(mayUrl(id));
+  await page.getByRole('heading', { name: 'Our School Year Wrap-Up' }).waitFor();
+  check(await noSideScroll(page), `${id}: May scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the wrap-up has ${await lines.count()} steps (expected 5)`);
+  check(await page.getByPlaceholder('Who’s helping?').count() === 5, `${id}: May is missing its helper lines`);
+  check(await page.locator('section[aria-labelledby="club-action"] input[type="date"]').count() === 0, `${id}: May's checklist shouldn't ask for a date`);
+  check(await page.getByText('Read this month’s letter').count() >= 1, `${id}: May has no "Read this month's letter" link`);
+  await page.screenshot({ path: join(out, `${id}-may-phone.png`), fullPage: true });
+
+  await page.getByPlaceholder('Who’s helping?').nth(2).fill('Each kid, their own');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our School Year Wrap-Up' }).waitFor();
+  check(await page.getByPlaceholder('Who’s helping?').nth(2).inputValue() === 'Each kid, their own' && await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: helpers or checks didn't survive a reload`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['school-wrap-up', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-may-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: May ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: May ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes('Each kid, their own') && sheet.includes('Sort school papers.'), `${id}: her printed wrap-up is missing a helper or a step`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('Finish the School Year Well') && front.includes('Less end-of-year chaos') && front.includes('Megan') && front.includes('Start wherever you are') && !front.includes('Each kid'), `${id}: the letter's front is wrong`);
+  check(await page.evaluate(() => { const h = [...document.querySelectorAll('.club-letter .club-notebook')]; return h.length === 2 && h.every((x) => getComputedStyle(x).flexShrink === '0'); }), `${id}: the letter's notebook is missing or squashed`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Close the Year, Keep What Matters', 'Finish the loose ends.', 'Let your child help sort.', 'Celebrate their growth.', 'The Five Favorites Rule', 'My favorite memory this year was', 'Something new I learned was', 'Something I’m proud of is', 'Build Your School Year Wrap-Up Plan', 'organizedmomcollective.com/club/kits/2027-05-finish-the-school-year', 'so everyone can see the plan.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  // Room to write: two lines per prompt, each at least a quarter inch apart.
+  const writing = await page.evaluate(() => [...document.querySelectorAll('.club-letter-reflection li')].map((li) => [...li.querySelectorAll('.club-write')].reduce((n, w) => n + parseFloat(getComputedStyle(w).height), 0)));
+  check(writing.length === 3 && writing.every((h) => h >= 50), `${id}: the reflection prompts lack writing room (${writing.join(', ')})`);
+
+  // The tool: the builder, with the family as helpers.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Build Our School Year Plan', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/school-wrap-up/);
+  await page.locator('.wu-row').first().waitFor();
+  check(await page.locator('.wu[data-wu-handoff]').count() === 1, `${id}: the Club page isn't the site's wrap-up builder`);
+  const helpers = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  entry.helpers = helpers;
+  check(helpers.length >= 1 && !helpers.includes('Adult 1'), `${id}: the builder didn't take the family as helpers (${helpers.join(', ')})`);
+  check(await page.locator('[data-hp-limits-toggle]:visible').count() === 0, `${id}: the builder shows a Limits button`);
+  check(await page.locator('[data-wu-pick]:checked').count() === 6, `${id}: not every responsibility starts on`);
+  const undated = await wuRows(page);
+  check(undated.every((r) => r.date === ''), `${id}: dates appeared before a last day`);
+  await page.screenshot({ path: join(out, `${id}-may-builder-input.png`), fullPage: true });
+
+  // Late May.
+  await page.locator('[data-wu-family-day]').fill('2027-05-27');
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  const late = await wuRows(page);
+  entry.lateMay = late;
+  check(late.every((r) => r.date), `${id}: a late-May task has no date`);
+  check(late.some((r) => r.date === '2027-05-13' && /wall calendar/.test(r.title)), `${id}: the calendar task isn't 14 days before May 27`);
+  check(late.filter((r) => r.phase === 'after').some((r) => r.date === '2027-05-28'), `${id}: nothing the day after May 27`);
+  check(await wuAllowed(page), `${id}: a task went to someone who can't own it`);
+  check(await page.locator('.wu-row.is-open').count() === 0, `${id}: a task has nobody`);
+  const titles = late.map((r) => `${r.title}|${r.date}`);
+  check(new Set(titles).size === titles.length, `${id}: a task repeats`);
+  check(await noSideScroll(page), `${id}: the builder scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-may-plan-late-may.png`), fullPage: true });
+
+  // Late June, and a child with a different day.
+  await page.locator('[data-wu-family-day]').fill('2027-06-24');
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  const june = await wuRows(page);
+  entry.lateJune = june;
+  check(june.some((r) => r.date === '2027-06-10' && /wall calendar/.test(r.title)) && june.some((r) => r.date === '2027-06-29'), `${id}: late-June dates are off`);
+  const kids = await page.locator('[data-wu-kid]').count();
+  if (kids > 1) {
+    const first = page.locator('[data-wu-kid]').first();
+    const name = (await first.locator('span').textContent()).trim();
+    await first.locator('select').selectOption('own');
+    await first.locator('input[type="date"]').fill('2027-06-04');
+    await first.locator('input[type="date"]').dispatchEvent('change');
+    const mixed = await wuRows(page);
+    entry.mixed = mixed;
+    check(mixed.some((r) => r.date === '2027-06-04' && /Celebrate/.test(r.title) && r.title.includes(name)), `${id}: ${name}'s own last day has no celebration`);
+    check(mixed.some((r) => r.date === '2027-06-24' && /Celebrate/.test(r.title)), `${id}: the others lost their celebration`);
+    await page.screenshot({ path: join(out, `${id}-may-plan-mixed.png`), fullPage: true });
+    await first.locator('select').selectOption('family');
+  }
+
+  // Three days away: nothing overdue, trips combined.
+  await page.locator('[data-wu-family-day]').fill(localDay(3));
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  const soon = await wuRows(page);
+  entry.threeDays = soon;
+  check(soon.every((r) => r.date >= localDay(0)), `${id}: three days out shows something before today`);
+  check(await page.locator('[data-wu-timing]').isVisible() && /a few things moved|just what matters/.test(await page.locator('[data-wu-timing]').textContent()), `${id}: no gentle note for a close last day`);
+  await page.screenshot({ path: join(out, `${id}-may-plan-three-days.png`), fullPage: true });
+
+  // Already over: only the after-school closeout, from today.
+  await page.locator('[data-wu-family-day]').fill(localDay(-6));
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  const over = await wuRows(page);
+  entry.over = over;
+  check(over.every((r) => r.phase === 'after' && r.date >= localDay(0)), `${id}: a finished school year still shows before-tasks or past dates`);
+  check(/School’s out/.test(await page.locator('[data-wu-timing]').textContent()), `${id}: no note that school's out`);
+
+  // Edit: date, owner, wording, remove, add, check off; new suggestions and a reload keep it; "Use the suggested dates" clears her date.
+  await page.locator('[data-wu-family-day]').fill('2027-06-15');
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  const row = page.locator('[data-wu-group="before"] .wu-row').first();
+  await row.locator('input[type="date"]').fill('2027-06-03');
+  await row.locator('input[type="date"]').dispatchEvent('change');
+  await row.locator('textarea').fill('Write every school event on the calendar');
+  await row.locator('textarea').blur();
+  await page.locator('[data-wu-group="before"] .wu-row').first().locator('input[type="checkbox"]').check();
+  const removed = await page.locator('[data-wu-group="after"] .wu-row textarea').last().inputValue();
+  await page.locator('[data-wu-group="after"] .wu-row').last().getByRole('button', { name: /^Remove/ }).click();
+  await page.locator('[data-wu-add-title]').fill('Thank-you note for the teacher');
+  await page.locator('[data-wu-add]').click();
+  const edited = await wuRows(page);
+  check(edited.some((r) => r.date === '2027-06-03' && r.title === 'Write every school event on the calendar') && edited.some((r) => r.title === 'Thank-you note for the teacher') && !edited.some((r) => r.title === removed), `${id}: edits didn't apply`);
+  await page.locator('[data-wu-fresh]').click();
+  await page.reload();
+  await page.locator('.wu-row').first().waitFor();
+  const kept = await wuRows(page);
+  check(JSON.stringify(kept) === JSON.stringify(await wuRows(page)) && kept.some((r) => r.date === '2027-06-03' && r.title === 'Write every school event on the calendar') && kept.some((r) => r.title === 'Thank-you note for the teacher') && !kept.some((r) => r.title === removed), `${id}: edits didn't survive new suggestions and a reload`);
+  check(await page.locator('[data-wu-group="before"] .wu-row').first().locator('input[type="checkbox"]').isChecked(), `${id}: a checked task came back unchecked`);
+  await page.locator('[data-wu-reset-dates]').click();
+  const reset = await wuRows(page);
+  check(reset.some((r) => r.date === '2027-06-01' && r.title === 'Write every school event on the calendar'), `${id}: "Use the suggested dates" didn't restore the suggestion`);
+
+  // Print: the family's plan on one page, then one child's.
+  check(await page.evaluate(() => [...document.querySelectorAll('.wu-sheet')].every((s) => s.scrollHeight <= s.clientHeight + 1)), `${id}: a printout runs off its page`);
+  const familySheets = await page.locator('.wu-sheet').count();
+  entry.familyPages = familySheets;
+  const fam = (await page.locator('.wu-sheet').allTextContents()).join(' ');
+  check(fam.includes('Our School Year Wrap-Up') && fam.includes('Before school ends') && fam.includes('After school ends') && fam.includes('Last day of school: Tuesday, June 15') && fam.includes('not school deadlines'), `${id}: the family plan is missing its parts`);
+  check(await page.locator('.wu-sheet .wu-sheet-box').count() >= 5, `${id}: the plan has too few checkboxes`);
+  const downloads = [];
+  page.on('download', (d) => downloads.push(d));
+  await page.click('[data-wu-download]');
+  await page.waitForTimeout(3000);
+  check(downloads.length >= 1, `${id}: no plan downloaded`);
+  for (const [i, d] of downloads.entries()) await d.saveAs(join(out, `${id}-may-plan-family-${i + 1}.png`));
+  const options = await page.locator('[data-wu-print-for] option').allTextContents();
+  if (options.length > 1) {
+    await page.locator('[data-wu-print-for]').selectOption({ index: options.length - 1 });
+    const one = (await page.locator('.wu-sheet').allTextContents()).join(' ');
+    entry.childPages = await page.locator('.wu-sheet').count();
+    check(entry.childPages === 1, `${id}: one child's plan took ${entry.childPages} pages`);
+    check(/School Year Wrap-Up/.test(one) && !one.includes('Finish the school forms'), `${id}: one child's plan includes the grown-ups' forms`);
+    const before = downloads.length;
+    await page.click('[data-wu-download]');
+    await page.waitForTimeout(2500);
+    if (downloads[before]) await downloads[before].saveAs(join(out, `${id}-may-plan-child.png`));
+    await page.locator('[data-wu-print-for]').selectOption('family');
+  }
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the builder asked for an email`);
+  await page.click('[data-wu-copy]');
+  await page.waitForTimeout(200);
+  const copied = await page.locator('[data-wu-status]').textContent();
+  const fallback = await page.locator('[data-wu-copy-fallback]').inputValue();
+  check(/^Copied/.test(copied) || (fallback.includes('BEFORE SCHOOL ENDS') && fallback.includes('AFTER THE LAST DAY')), `${id}: copying the plan didn't work`);
+  await page.screenshot({ path: join(out, `${id}-may-builder-phone.png`), fullPage: true });
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-05/);
+  check(errors.length === 0, `${id}: May page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// A grown-up with no children on the profile: the builder asks for a child instead of planning nothing.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(mayUrl('hughes'));
+  await page.getByRole('heading', { name: 'Our School Year Wrap-Up' }).waitFor();
+  await page.getByRole('button', { name: 'Build Our School Year Plan', exact: true }).click();
+  await page.locator('[data-wu-timing]').waitFor();
+  check(/Add a child/.test(await page.locator('[data-wu-timing]').textContent()) && await page.locator('.wu-row').count() === 0, 'hughes: a family without children should be asked to add one');
+  await page.getByRole('button', { name: '+ School-age child' }).click();
+  await page.locator('.wu-row').first().waitFor();
+  report.push({ mayNoChildren: 'ok' });
+  await ctx.close();
+}
+
+// No family profile: one adult and one child to start; a date gives a plan; adding a teen adds their own tasks.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/school-wrap-up?sample=new`);
+  await page.locator('.wu-row').first().waitFor();
+  check((await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value))).join() === 'Adult 1,Child 1', 'no profile: the builder should start with one adult and one child');
+  await page.locator('[data-wu-family-day]').fill('2027-06-10');
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  await page.getByRole('button', { name: '+ Teen' }).click();
+  const rows = await wuRows(page);
+  check(rows.some((r) => /locker/.test(r.title) && r.owner.startsWith('Teen')), `no profile: the teen got no tasks of their own (${rows.map((r) => r.owner).join(', ')})`);
+  check(await wuAllowed(page), 'no profile: a task went to someone who can’t own it');
+  report.push({ wrapNoProfile: rows.length });
+  await ctx.close();
+}
+
+// Two families in one browser, May: one family's plan never shows up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(mayUrl('rivera'));
+  await page.getByRole('button', { name: 'Build Our School Year Plan', exact: true }).click();
+  await page.locator('.wu-row').first().waitFor();
+  await page.locator('[data-wu-add-title]').fill('Rivera secret task');
+  await page.locator('[data-wu-add]').click();
+  await page.locator('[data-wu-family-day]').fill('2027-06-09');
+  await page.locator('[data-wu-family-day]').dispatchEvent('change');
+  await page.goto(mayUrl('okafor'));
+  await page.getByRole('button', { name: 'Build Our School Year Plan', exact: true }).click();
+  await page.locator('.wu-row').first().waitFor();
+  const names = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  const rows = await wuRows(page);
+  check(!names.includes('Ana') && names.includes('Zara') && !rows.some((r) => r.title === 'Rivera secret task') && await page.locator('[data-wu-family-day]').inputValue() === '', `leak: the Okafors’ wrap-up shows the Riveras’ (${names.join(', ')})`);
+  await page.goto(`${base}/club/tools/school-wrap-up?sample=brooks`);
+  await page.locator('.wu-row').first().waitFor();
+  const direct = await page.locator('[data-hp-name]').evaluateAll((els) => els.map((e) => e.value));
+  check(!direct.includes('Zara') && !direct.includes('Ana'), `leak: the wrap-up builder opened by address as Brooks shows another family (${direct.join(', ')})`);
+  report.push({ mayLeakCheck: 'ok' });
   await ctx.close();
 }
 

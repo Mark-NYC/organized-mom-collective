@@ -74,6 +74,18 @@ function PlaceSetting({ small }: { small?: boolean }) {
   );
 }
 
+/** May's touch: a fine-line open notebook in sage with a soft blue ribbon. No caps, no pencils. */
+function Notebook({ small }: { small?: boolean }) {
+  return (
+    <svg className={`club-notebook${small ? ' club-notebook-small' : ''}`} viewBox="0 0 80 40" aria-hidden="true" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M40 10 C 32 6, 20 6, 10 8 V 34 C 20 32, 32 32, 40 36 C 48 32, 60 32, 70 34 V 8 C 60 6, 48 6, 40 10 Z" stroke="#6f8a72" strokeWidth="1.3" />
+      <path d="M40 10 V 36" stroke="#6f8a72" strokeWidth="1.2" />
+      <path d="M16 15 C 23 14, 29 14, 34 15.5 M16 21 C 23 20, 29 20, 34 21.5 M46 15.5 C 51 14, 57 14, 64 15" stroke="#9aab8f" strokeWidth="1" />
+      <path d="M56 7 V 20 L 59 17 L 62 20 V 6.5" stroke="#8fa7b8" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
 /** What she's filled in online, for her own printout: done, who's helping, when (a date, "When you can", or ''), her wording. */
 export interface ActionFill {
   done: boolean[];
@@ -165,6 +177,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
         {kit.mailer.accent === 'blush' && <Heart />}
         {kit.mailer.accent === 'spring' && <Stem />}
         {kit.mailer.accent === 'table' && <PlaceSetting />}
+        {kit.mailer.accent === 'school' && <Notebook />}
         <h1 className="club-letter-title">{kit.theme}</h1>
         {kit.subtitle && <p className="club-letter-subtitle">{kit.subtitle}</p>}
         <div className="club-letter-body">
@@ -201,6 +214,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           {kit.mailer.accent === 'blush' && <Heart small />}
           {kit.mailer.accent === 'spring' && <Stem small />}
           {kit.mailer.accent === 'table' && <PlaceSetting small />}
+          {kit.mailer.accent === 'school' && <Notebook small />}
           {kit.mailer.fieldGuide.title}
         </h2>
         {kit.mailer.fieldGuide.intro && <p className="club-letter-back-intro">{kit.mailer.fieldGuide.intro}</p>}
@@ -232,15 +246,33 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             <p>{kit.mailer.story.body}</p>
           </div>
         )}
-        {(kit.mailer.ageGuide || kit.mailer.tip) && (
+        {kit.mailer.tip && !kit.mailer.ageGuide && (
+          <div className="club-letter-example club-letter-tip club-letter-tip-wide">
+            <span className="club-letter-label">{kit.mailer.tip.title}</span>
+            <p>{kit.mailer.tip.body}</p>
+          </div>
+        )}
+        {kit.mailer.reflection && (
+          <div className="club-letter-reflection">
+            <div className="club-letter-reflection-head">
+              <h3>{kit.mailer.reflection.title}</h3>
+              <p>{kit.mailer.reflection.note}</p>
+            </div>
+            <p className="club-letter-reflection-name"><span>Name</span><span className="club-action-helper-line" /></p>
+            <ol>
+              {kit.mailer.reflection.prompts.map((q) => (
+                <li key={q}><span className="club-letter-reflection-q">{q}</span><span className="club-write" /><span className="club-write" /></li>
+              ))}
+            </ol>
+          </div>
+        )}
+        {kit.mailer.ageGuide && (
           <div className="club-letter-pair">
-            {kit.mailer.ageGuide && (
-              <div className="club-letter-example club-letter-ages">
-                <span className="club-letter-label">{kit.mailer.ageGuide.title}</span>
-                <dl>{kit.mailer.ageGuide.rows.map((r) => <div key={r.ages}><dt>{r.ages}</dt><dd>{r.jobs}</dd></div>)}</dl>
-                <p className="club-letter-checklist-note">{kit.mailer.ageGuide.note}</p>
-              </div>
-            )}
+            <div className="club-letter-example club-letter-ages">
+              <span className="club-letter-label">{kit.mailer.ageGuide.title}</span>
+              <dl>{kit.mailer.ageGuide.rows.map((r) => <div key={r.ages}><dt>{r.ages}</dt><dd>{r.jobs}</dd></div>)}</dl>
+              <p className="club-letter-checklist-note">{kit.mailer.ageGuide.note}</p>
+            </div>
             {kit.mailer.tip && (
               <div className="club-letter-example club-letter-tip">
                 <span className="club-letter-label">{kit.mailer.tip.title}</span>
