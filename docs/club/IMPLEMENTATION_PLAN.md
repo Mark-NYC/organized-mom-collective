@@ -346,7 +346,8 @@ Owner direction: the first August draft (a 20-plus-task launch plan, an overview
 | Print fix (from the first draft): the print-only rule targets `.is-printing`; QA refuses a blank page or a letter page with content cut off | `src/lib/club/print.ts`, `src/styles/club.css`, `scripts/club-qa.mjs` |
 | Migration: August seeded as a **draft** (not applied) | `supabase/migrations/20261024000000_club_august_kit.sql` |
 | Refinements (2026-10-23): the countdown dates itself from "When does school start?" (family date, optional per-child dates, her edits kept, "go back to suggestions" lists what changes, short-notice and past-date handling); print, copy as text, `.ics` export, no sync or reminders; the letter greets her by first name when known, prints blank "By" lines, and asks one family question on the back; routine steps always in the order a day goes; a dry-erase tip by the print button; a sample family with no children yet (Hughes) | `src/lib/club/countdown.ts`, `KitPage.tsx`, `LetterPrintables.tsx`, `src/data/club/samples.ts` |
-| Tests | `tests/club-august.test.ts`, `tests/club-countdown.test.ts` |
+| One routine chart (2026-10-23): August's own routine editor and chart print are gone; "Make a routine chart" opens the site's routine chart inside the Club for a chosen child (name, age, morning or after school handed over). The public chart's script moved into one shared module; its pages, markup, behavior and analytics are unchanged (checked before and after). The reusable pattern for future kit tools is in [KIT_TEMPLATE.md → Tools](KIT_TEMPLATE.md) | `src/components/site/RoutineChart.astro`, `routine-chart.ts`, `src/lib/tool-handoff.ts`, `src/data/club/tools.ts`, `src/pages/club/tools/routine-chart.astro`, `src/components/club/ClubToolBar.tsx` |
+| Tests | `tests/club-august.test.ts`, `tests/club-countdown.test.ts`, `tests/tool-sharing.test.ts` |
 
 ### Previewing
 

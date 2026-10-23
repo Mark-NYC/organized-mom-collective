@@ -1,28 +1,19 @@
 /**
  * The August 2027 kit, Ready for the School Year, in the three-part shape: one letter, one action (the six-line
- * countdown), one optional tool (a school-day routine chart per child). November stays exactly as it was.
+ * countdown), one optional tool: the site's own routine chart, opened inside the Club. November stays as it was.
  */
 import { describe, expect, it } from 'vitest';
 import { kitProblems, kits, schedulable } from '../src/data/club/kits';
 import { kit as august } from '../src/data/club/kits/2027-08-school-year';
 import { kit as november } from '../src/data/club/kits/2026-11-family-ownership';
-import { addRow, initialEdits, move, readEdits, remove, resolveDocument, type DocumentEdits } from '../src/lib/club/edits';
-import { eligible, ROUTINE_MAX_STEPS, type GenerateOptions } from '../src/lib/club/engines/responsibilities';
-import { planMembers, type Household } from '../src/lib/club/profile';
+import { clubTools } from '../src/data/club/tools';
+import { matchResponsibility } from '../src/data/responsibilities';
+import { routineTypes } from '../src/data/routines';
+import { routes } from '../src/routes';
 import { qrMatrix } from '../src/lib/club/qr';
 import { exampleRoutine, qrUrl, readableUrl } from '../src/lib/club/routines';
-import { schoolSetupFor, withSchool } from '../src/lib/club/school';
-import { placementFor } from '../src/components/club/ChartEditor';
 import { readFileSync, readdirSync } from 'node:fs';
-import { adult, families, family, kid } from './club/fixtures';
 
-const MONTH = august.month;
-const routines = august.items;
-const tool = august.printables.find((p) => p.id === august.tool!.printable)!;
-const opts: GenerateOptions = placementFor(tool);
-/** As the kit page does it: schools guessed from age and the homeschool preference, no setup step. */
-const schooled = (h: Household) => withSchool(h, schoolSetupFor(h, MONTH));
-const routineRows = (h: Household, e?: DocumentEdits) => resolveDocument(h, routines, MONTH, e ?? initialEdits(h, routines, MONTH, opts), opts);
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
 describe('August: one letter, one action, one tool', () => {
@@ -59,13 +50,11 @@ describe('August: one letter, one action, one tool', () => {
     expect(august.action!.helperLabel).toBe('Who’s helping?');
   });
 
-  it('has three printables and nothing from the first draft: no launch plan, command center, overview, setup step or item sets', () => {
-    expect(august.printables.map((p) => [p.id, p.component])).toEqual([['school-routines', 'RoutineChart'], ['countdown', 'Countdown'], ['letter', 'Letter']]);
+  it('prints the countdown and the letter, and nothing from the first draft: no launch plan, command center, overview or item sets', () => {
+    expect(august.printables.map((p) => [p.id, p.component])).toEqual([['countdown', 'Countdown'], ['letter', 'Letter']]);
     expect(august.overview).toBeUndefined();
     expect(august.itemSets).toBeUndefined();
-    expect(august.printables.some((p) => p.secondary || p.editor === 'command')).toBe(false);
-    expect(new Set(routines.map((i) => i.section))).toEqual(new Set(['morning', 'after-school']));
-    for (const i of routines) expect(i.title, i.id).not.toMatch(/\bhelp/i);
+    expect(august.printables.some((p) => p.secondary || p.editor)).toBe(false);
   });
 
   it('has a 150–200 word letter, still a draft for Megan, so the kit can’t be scheduled yet', () => {
@@ -96,99 +85,17 @@ describe('August: one letter, one action, one tool', () => {
   });
 });
 
-describe('August: the routine tool', () => {
-  it('suggests four to six steps for every age it serves, at school, preschool or home', () => {
-    for (const prefs of [{}, { school: 'homeschool' as const }]) {
-      for (let age = 3; age <= 17; age++) {
-        const h = schooled(family(`hh-${age}`, [adult('a', true), kid('k', age - 1)], prefs)); // fixture ages are for Nov 2026
-        const rows = routineRows(h).rows;
-        for (const part of ['morning', 'after-school']) {
-          const n = rows.filter((r) => r.section === part).length;
-          expect(n, `${JSON.stringify(prefs)} age ${age} ${part}`).toBeGreaterThanOrEqual(4);
-          expect(n, `${JSON.stringify(prefs)} age ${age} ${part}`).toBeLessThanOrEqual(ROUTINE_MAX_STEPS);
-        }
-      }
-    }
+describe('August: the tool is the site’s routine chart', () => {
+  it('opens the site’s own routine chart inside the Club, never a Club copy', () => {
+    expect(august.tool!.tool).toBe('routine-chart');
+    expect(clubTools['routine-chart']).toMatchObject({ path: routes.clubTool('routine-chart'), publicPath: routes.routineChart, perChild: true });
+    expect(clubTools['routine-chart'].variants.map((v) => v.id).every((id) => id in routineTypes)).toBe(true);
+    expect(august.items).toEqual([]);
   });
 
-  it('works for every sample shape: fitting steps only, no coaches, nothing for toddlers or adults', () => {
-    for (const [name, base] of Object.entries(families)) {
-      const h = schooled(base);
-      const people = new Map(planMembers(h, MONTH).map((p) => [p.id, p]));
-      const { rows, suggestions } = routineRows(h);
-      for (const r of rows) {
-        const p = people.get(r.ownerId!)!;
-        expect(p.stage, `${name} ${r.rowId}`).not.toBe('adult');
-        expect(eligible(routines.find((i) => i.id === r.itemId)!, p, h.preferences), `${name} ${r.rowId}`).toBe(true);
-        expect(r.coachId).toBeNull();
-      }
-      for (const p of people.values()) if (p.stage !== 'adult' && (p.age ?? 0) < 3) expect(rows.filter((r) => r.ownerId === p.id), `${name} ${p.id}`).toEqual([]);
-      expect(suggestions, name).toEqual([]);
-    }
-  });
-
-  it('keeps the routine’s order, her reordering, her own steps and her removals', () => {
-    const h = schooled(families.A);
-    const ben = routineRows(h).rows.filter((r) => r.ownerId === 'ben' && r.section === 'morning');
-    const order = new Map(routines.map((i, n) => [i.id, n]));
-    expect(ben.map((r) => order.get(r.itemId!))).toEqual([...ben.map((r) => order.get(r.itemId!)!)].sort((a, b) => a - b));
-    let e = initialEdits(h, routines, MONTH, opts);
-    const all = routineRows(h, e).rows.map((r) => r.rowId);
-    e = move(e, all, ben[2].rowId, all.indexOf(ben[0].rowId));
-    e = addRow(e, h, { title: 'Feed the fish', ownerId: 'ben', section: 'morning', frequency: 'weekdays' });
-    e = remove(e, ben[1].rowId);
-    const again = routineRows(h, readEdits(JSON.parse(JSON.stringify(e))));
-    const mine = again.rows.filter((r) => r.ownerId === 'ben' && r.section === 'morning');
-    expect(mine[0].rowId).toBe(ben[2].rowId);
-    expect(mine.map((r) => r.title)).toContain('Feed the fish');
-    expect(mine.map((r) => r.rowId)).not.toContain(ben[1].rowId);
-    // A removed step isn't suggested back, and nothing is balanced between children.
-    expect(again.suggestions).toEqual([]);
-  });
-
-  it('always suggests steps in the order a day goes, at every age', () => {
-    // Where each step falls in a school day; a chart may skip phases but never goes backwards.
-    const phase: Record<string, number> = {
-      'up-and-good-morning': 1, 'up-with-alarm': 1, 'get-dressed': 2, 'make-bed-am': 3, breakfast: 4, 'brush-teeth-am': 5, 'comb-hair': 5,
-      'check-the-calendar': 6, 'at-school-spot': 7, 'by-the-door': 7,
-      'unpack-backpack': 1, 'school-things-away': 1, 'papers-to-inbox': 2, 'wash-hands-pm': 3, snack: 3, homework: 4, 'read-twenty': 4, 'toys-back': 5,
-      'clothes-for-tomorrow': 5, 'pack-for-tomorrow': 5, 'pack-my-lunch': 5, 'tomorrow-on-the-calendar': 5, 'my-family-job': 6,
-    };
-    expect(Object.keys(phase).sort()).toEqual(routines.map((i) => i.id).sort());
-    for (const prefs of [{}, { school: 'homeschool' as const }]) {
-      for (let age = 3; age <= 17; age++) {
-        const rows = routineRows(schooled(family(`hh-o${age}`, [adult('a', true), kid('k', age - 1)], prefs))).rows;
-        for (const part of ['morning', 'after-school']) {
-          const seq = rows.filter((r) => r.section === part).map((r) => phase[r.itemId!]);
-          expect(seq, `age ${age} ${part}: ${rows.filter((r) => r.section === part).map((r) => r.itemId)}`).toEqual([...seq].sort((a, b) => a - b));
-        }
-      }
-    }
-    // Waking up is first whenever it's on the chart.
-    const nine = routineRows(schooled(family('hh-9', [adult('a', true), kid('k', 8)]))).rows.filter((r) => r.section === 'morning');
-    expect(nine[0].itemId).toBe('up-with-alarm');
-  });
-
-  it('homeschoolers get their school spot, never backpack-by-the-door', () => {
-    const h = schooled(family('hh-home', [adult('a', true), kid('k', 7)], { school: 'homeschool' }));
-    const ids = routineRows(h).rows.map((r) => r.itemId);
-    expect(ids).toContain('at-school-spot');
-    expect(ids).not.toContain('by-the-door');
-  });
-
-  it('prints mostly pictures for young children', () => {
-    for (const age of [4, 6, 8]) {
-      const h = schooled(family(`hh-p${age}`, [adult('a', true), kid('k', age - 1)]));
-      const morning = routineRows(h).rows.filter((r) => r.section === 'morning');
-      expect(morning.every((r) => r.illustration), `age ${age}`).toBe(true);
-    }
-  });
-
-  it('the letter’s example is exactly what the tool suggests for a seven-year-old’s morning', () => {
-    const h = schooled(family('hh-7', [adult('a', true), kid('k', 6)]));
-    const tool7 = routineRows(h).rows.filter((r) => r.section === 'morning').map((r) => r.itemId);
-    expect(exampleRoutine(august).map((i) => i.id)).toEqual(tool7);
-    expect(tool7.length).toBeGreaterThanOrEqual(4);
+  it('the letter’s example is the routine chart’s own morning starter, with its illustrations', () => {
+    expect(exampleRoutine(august).map((s) => s.title)).toEqual(routineTypes.morning.steps.map(([, t]) => t));
+    for (const s of exampleRoutine(august)) expect(s.illustration).toBe(matchResponsibility(s.title));
   });
 });
 

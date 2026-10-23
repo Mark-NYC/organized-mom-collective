@@ -1,7 +1,6 @@
 /**
  * Three-part kits' printables (August on): the monthly letter (front: the letter and the month's action; back:
- * guidance, a worked example, the QR code and one calendar reminder), the action on its own page, and the tool's
- * routine chart, one child and one routine per page. US Letter portrait, same print system as November.
+ * guidance, a worked example, the QR code and one calendar reminder) and the action on its own page. US Letter portrait, same print system as November.
  *
  * The letter is the mailer's printable twin: stationery, not a worksheet. Georgia for the editorial voice, Montserrat
  * for labels, Kalam only for the signature, warm ivory paper, muted brand colors. Styles: src/styles/club.css.
@@ -10,12 +9,9 @@ import { monthLabel } from '../../../data/club/labels';
 import { toolPalettes, type ToolPaletteId } from '../../../data/tool-palettes';
 import type { KitConfig } from '../../../data/club/types';
 import type { CountdownItem } from '../../../lib/club/countdown';
-import type { ChartRow } from '../../../lib/club/edits';
 import { qrPath } from '../../../lib/club/qr';
 import { exampleRoutine, qrUrl, readableUrl } from '../../../lib/club/routines';
 import { JobArt } from './ResponsibilityChart';
-
-const DAYS = ['M', 'T', 'W', 'T', 'F'];
 
 /** The QR code as crisp SVG modules. */
 function QrCode({ url, label }: { url: string; label: string }) {
@@ -132,7 +128,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
             </div>
             <ol>
               {example.map((s) => (
-                <li key={s.id}>
+                <li key={s.title}>
                   <JobArt illustration={s.illustration} />
                   <span>{s.title}</span>
                 </li>
@@ -170,41 +166,6 @@ export function ActionSheet({ doc, kit, palette, preview, fill }: { doc: string;
       <ActionList items={action.items} helperLabel={action.helperLabel} fill={fill} />
       <p className="club-action-sheet-note">Write these dates on your family wall calendar so everyone can see what’s coming.</p>
       <div className="club-sheet-foot">Organized Family Club · {monthLabel(kit.month)}</div>
-    </div>
-  );
-}
-
-/** One child's routine: big pictures, four to six steps, a box per school day. Simple enough to run without a grown-up. */
-export function RoutineChartSheet({ doc, name, label, rows, palette, preview }: {
-  doc: string;
-  name: string;
-  /** "Morning", "After school", "After lessons". */
-  label: string;
-  rows: ChartRow[];
-  palette: ToolPaletteId;
-  preview?: boolean;
-}) {
-  const [swipe, , chip] = toolPalettes[palette].colors;
-  return (
-    <div className="club-print club-sheet club-routine-chart" data-doc={doc} data-preview={preview ? '' : undefined} data-long={rows.length > 6 ? '' : undefined}>
-      <div className="club-hand club-routine-chart-title">
-        <span className="club-swipe" style={{ ['--swipe' as string]: swipe }}>{name}’s {label}</span>
-      </div>
-      <div className="club-routine-chart-head">
-        <span>My school days</span>
-        <span className="club-routine-days">{DAYS.map((d, i) => <span key={i}>{d}</span>)}</span>
-      </div>
-      <ol className="club-routine-chart-steps">
-        {rows.map((r, n) => (
-          <li key={r.rowId} className="club-routine-chart-step">
-            <span className="club-routine-chart-num" style={{ background: chip }}>{n + 1}</span>
-            <JobArt illustration={r.illustration} />
-            <span className="club-routine-chart-text">{r.title}</span>
-            <span className="club-routine-boxes">{DAYS.map((_, i) => <span key={i} className="club-box" />)}</span>
-          </li>
-        ))}
-      </ol>
-      <div className="club-routine-chart-foot">My routine. I check it myself.</div>
     </div>
   );
 }

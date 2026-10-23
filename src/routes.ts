@@ -55,7 +55,7 @@
  *           /admin/pages        Pages & Funnels (page inventory)
  *           /admin/orders       order, inventory and shipping dashboard
  *           /admin/settings     admin access, integrations, page inventory token, audit log
- *   CLUB    /club/start, /club/dashboard, /club/family, /club/kits/<slug>   Organized Family Club member pages
+ *   CLUB    /club/start, /club/dashboard, /club/family, /club/kits/<slug>, /club/tools/<tool>   Organized Family Club member pages
  *                               (noindex, not linked; a "not available" notice unless PUBLIC_CLUB_ENABLED; docs/club/)
  *   QR      /start             permanent entry point printed on calendars → APP
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
@@ -71,6 +71,8 @@ export const routes = {
   clubDashboard: '/club/dashboard',
   clubFamily: '/club/family',
   clubKit: (slug: string) => `/club/kits/${slug}`,
+  /** A site tool hosted inside the Club (src/data/club/tools.ts). */
+  clubTool: (id: string) => `/club/tools/${id}`,
   home: '/',
   ourStory: '/our-story',
   calendar: '/calendar',

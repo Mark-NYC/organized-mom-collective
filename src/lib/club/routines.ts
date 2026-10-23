@@ -1,20 +1,20 @@
 /**
- * Routine helpers for three-part kits: the worked example printed on the back of the letter comes from the same rules
- * the routine tool uses, so the letter and the tool never disagree.
+ * Routine helpers for three-part kits. The letter's worked example is the site routine chart's own starter
+ * (src/data/routines.ts), with the same illustrations the chart gives those lines, so the letter and the tool it
+ * points to never disagree.
  */
-import { kitItems } from '../../data/club/kits';
-import type { KitConfig, KitItem } from '../../data/club/types';
-import { eligible, ROUTINE_MAX_STEPS, routineSteps } from './engines/responsibilities';
-import type { PlannedMember } from './profile';
-import { defaultSchool } from './school';
+import { matchResponsibility } from '../../data/responsibilities';
+import { routineTypes } from '../../data/routines';
+import type { KitConfig } from '../../data/club/types';
 
-/** The letter's example routine (`mailer.example`): what the tool suggests for a child of that age. */
-export function exampleRoutine(kit: KitConfig): KitItem[] {
-  const ex = kit.mailer.example;
-  if (!ex) return [];
-  const child: PlannedMember = { id: 'example', firstName: '', stage: ex.age >= 13 ? 'teen' : 'child', age: ex.age, isAccountHolder: false, school: defaultSchool(ex.age, {}) };
-  const fits = (kitItems(kit, ex.items) ?? []).filter((i) => i.scope === 'each' && i.section === ex.section && eligible(i, child, {}));
-  return routineSteps(fits, ROUTINE_MAX_STEPS);
+/** The letter's example routine (`mailer.example`): the routine chart's starter steps, with their illustrations. */
+export function exampleRoutine(kit: KitConfig): { title: string; illustration?: string }[] {
+  const type = kit.mailer.example ? routineTypes[kit.mailer.example.variant] : undefined;
+  if (!type) return [];
+  return type.steps.map(([, title]) => {
+    const illustration = matchResponsibility(title);
+    return { title, ...(illustration ? { illustration } : {}) };
+  });
 }
 
 /** The printed QR code's address (the site's canonical origin, as in astro.config.mjs). */

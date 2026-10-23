@@ -4,6 +4,8 @@
  */
 import { responsibilityById } from '../../responsibilities';
 import { FREQUENCIES, OWNERSHIP_LEVELS, SCHOOL_TYPES, type KitConfig, type KitItem } from '../types';
+import { routineTypes } from '../../routines';
+import { clubToolById } from '../tools';
 import { kit as november2026 } from './2026-11-family-ownership';
 import { kit as august2027 } from './2027-08-school-year';
 
@@ -94,12 +96,9 @@ export function kitProblems(kit: KitConfig): string[] {
     if (!kit.action.items.some((t) => t.essential)) out.push('action: mark the essentials (what still matters a day or two out)');
     if (!kit.mailer.invite || !kit.mailer.calendarNote) out.push('action: the letter needs its invite and calendar note');
   }
-  if (kit.tool) {
-    const p = kit.printables.find((x) => x.id === kit.tool!.printable);
-    if (!p?.editor) out.push(`tool: ${kit.tool.printable} isn't a printable with an editor`);
-  }
+  if (kit.tool && !clubToolById(kit.tool.tool)) out.push(`tool: ${kit.tool.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
   if (kit.mailer.letter?.namedGreeting && !kit.mailer.letter.namedGreeting.includes('{name}')) out.push('letter: namedGreeting needs {name}');
-  if (kit.mailer.example && !kitItems(kit, kit.mailer.example.items)) out.push(`example: no item set ${kit.mailer.example.items}`);
+  if (kit.mailer.example && !routineTypes[kit.mailer.example.variant]) out.push(`example: no routine ${kit.mailer.example.variant}`);
   if (!kit.action && !kit.mailer.activity) out.push('a kit needs an action or an activity');
   return out;
 }

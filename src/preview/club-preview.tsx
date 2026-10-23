@@ -1,14 +1,18 @@
 /**
  * The Organized Family Club member pages as one self-contained page, for viewing outside the site (a hosted preview).
  * Made-up sample households only (src/data/club/samples.ts); no sign-in, no database, nothing sent anywhere.
- * Built by scripts/build-club-preview.mjs. Navigation stays inside the page; printing is off (the page's frame can't
+ * Built by scripts/build-club-preview.mjs. Site tools the Club hosts (src/data/club/tools.ts) come in as the Club
+ * page's built markup plus the tool's one behavior module. Navigation stays inside the page; printing is off (the page's frame can't
  * open a print dialog), and "Preview the printout" shows the real US Letter page.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Dashboard from '../components/club/Dashboard';
 import FamilyPage from '../components/club/FamilyPage';
 import KitPage from '../components/club/KitPage';
+import ClubToolBar from '../components/club/ClubToolBar';
+import { initRoutineChart } from '../components/site/routine-chart';
+import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
 
@@ -41,6 +45,38 @@ const swapImages = (root: ParentNode) => {
   }
 };
 new MutationObserver(() => swapImages(document)).observe(document.documentElement, { childList: true, subtree: true });
+// Tools set image sources from script (the routine chart's illustrations): hand them the inlined copy directly.
+const srcProp = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src')!;
+Object.defineProperty(HTMLImageElement.prototype, 'src', {
+  ...srcProp,
+  set(this: HTMLImageElement, v: string) {
+    srcProp.set!.call(this, images[v] ?? v);
+  },
+});
+
+// Site tools hosted in the Club: the markup the Club page renders (built into the preview), wired up with the same
+// behavior module the site uses. One tool, two entry points; the preview only swaps how the page arrives.
+const toolMarkup = (globalThis as { __CLUB_TOOLS?: Record<string, string> }).__CLUB_TOOLS ?? {};
+const toolInit: Record<string, (host: HTMLElement) => void> = {
+  'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart')),
+};
+const toolTitle: Record<string, string> = { 'routine-chart': 'Routine chart' };
+
+function ToolPage({ tool }: { tool: string }) {
+  const host = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (host.current) {
+      swapImages(host.current);
+      toolInit[tool]?.(host.current);
+    }
+  }, [tool]);
+  return (
+    <>
+      <ClubToolBar tool={tool} title={toolTitle[tool] ?? tool} />
+      <section ref={host} id="club-tool-host" className="mx-auto w-full max-w-6xl px-4 pb-20 pt-4 sm:px-8" dangerouslySetInnerHTML={{ __html: (toolMarkup[tool] ?? '').replace(/\/images\/[^"]+?\.webp/g, (p) => images[p] ?? p) }} />
+    </>
+  );
+}
 
 function App() {
   const [route, setRoute] = useState<Route>(saved);
@@ -85,11 +121,13 @@ function App() {
 
   const key = route.path + route.search;
   const kit = kits.find((k) => route.path === `/club/kits/${k.slug}`);
+  const tool = route.path.startsWith('/club/tools/') ? route.path.slice('/club/tools/'.length) : '';
   return (
     <div className="min-h-full bg-ivory text-warm-ink">
       {route.path === '/club/start' ? <FamilyPage key={key} mode="start" />
         : route.path === '/club/family' ? <FamilyPage key={key} mode="edit" />
         : kit ? <KitPage key={key} slug={kit.slug} />
+        : tool && toolMarkup[tool] ? <ToolPage key={key} tool={tool} />
         : <Dashboard key={key} />}
     </div>
   );

@@ -129,9 +129,6 @@ export interface GenerateOptions {
   perSection?: number;
 }
 
-/** Steps on a routine chart by default: enough to matter, few enough for a child to run it alone. */
-export const ROUTINE_MAX_STEPS = 6;
-
 /**
  * A routine from the steps that fit a child: with a `cap`, at most that many per section (fewer by what `used` says
  * is already there), the lowest `priority` first; always returned in the kit's order, which is the routine's order.

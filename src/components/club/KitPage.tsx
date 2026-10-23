@@ -24,6 +24,8 @@ import { printDocument } from '../../lib/club/print';
 import { planMembers, type Household } from '../../lib/club/profile';
 import { ConflictError, type ClubStore, type KitDocuments } from '../../lib/club/store';
 import { routes } from '../../routes';
+import { clubToolById, type ClubTool } from '../../data/club/tools';
+import { setToolHandoff } from '../../lib/tool-handoff';
 import ChartEditor from './ChartEditor';
 import ClubGate, { type ClubContext } from './ClubGate';
 import PalettePicker from './PalettePicker';
@@ -97,7 +99,7 @@ function Kit({ ctx, slug }: { ctx: ClubContext; slug: string }) {
   );
 
   if (kit.action) {
-    return <ThreePartKit kit={kit} store={ctx.store} household={kitHousehold} docs={data.docs} readOnly={readOnly} top={top} view={tab} choose={choose} />;
+    return <ThreePartKit kit={kit} store={ctx.store} household={kitHousehold} docs={data.docs} readOnly={readOnly} top={top} href={ctx.href} />;
   }
 
   const tabs: { id: string; label: string }[] = [
@@ -241,21 +243,20 @@ function FieldGuide({ kit }: { kit: KitConfig }) {
 
 /**
  * Three-part kits: the month's title, when school starts, the dated countdown, and one button to the optional tool;
- * the letter last. The tool opens in place (#tool) and stays mounted, so unsaved edits survive going back.
- * The countdown saves itself a moment after each change (first days, checks, dates, helpers) to the kit's document.
+ * the letter last. The tool is one of the site's own (src/data/club/tools.ts), opened on its Club page for the child
+ * she picks. The countdown saves itself a moment after each change (first days, checks, dates, helpers).
  */
-function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose }: {
+function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
   kit: KitConfig;
   store: ClubStore;
   household: Household;
   docs: KitDocuments;
   readOnly: boolean;
   top: ReactNode;
-  view: string;
-  choose: (id: string) => void;
+  href: (path: string) => string;
 }) {
   const action = kit.action!;
-  const tool = kit.tool ? kit.printables.find((p) => p.id === kit.tool!.printable) : undefined;
+  const tool = kit.tool ? clubToolById(kit.tool.tool) : undefined;
   const actionDoc = kit.printables.find((p) => p.component === 'Countdown');
   const letterDoc = kit.printables.find((p) => p.component === 'Letter');
   const saved = actionDoc ? docs.documents[actionDoc.id] : undefined;
@@ -265,7 +266,6 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
   const [today] = useState(localToday);
   const [letterOpen, setLetterOpen] = useState(false);
   const [letterPreview, setLetterPreview] = useState(false);
-  const showTool = Boolean(tool) && view === 'tool';
   const children = planMembers(household, kit.month).filter((p) => p.stage !== 'adult');
   const chartKids = children.filter((p) => (p.age ?? 0) >= 3);
   // Her first name for the letter only when the profile says who she is: never a guess.
@@ -289,16 +289,12 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
     return () => clearTimeout(t);
   }, [state, status]);
 
-  const open = (id: string) => {
-    choose(id);
-    window.scrollTo(0, 0);
-  };
-  const toTool = tool && kit.tool ? () => open('tool') : undefined;
+  const toTool = tool && kit.tool ? () => document.getElementById('club-tool')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : undefined;
 
   return (
     <>
       {/* Screen-only parts carry .club-screen; each printout's frame sits outside them so it can print. */}
-      <div hidden={showTool} className="max-w-3xl">
+      <div className="max-w-3xl">
         <div className="club-screen">
           {top}
           <p className="label mt-6 text-warm-soft">{monthLabel(kit.month)}</p>
@@ -320,10 +316,8 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
               <div>
                 <h2 id="club-tool" className="font-serif text-[1.6rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
-                <p className="mt-2 text-[0.92rem] text-warm-soft">
-                  {chartKids.length > 0 ? `Ready for ${chartKids.map((k) => k.firstName).join(', ')}. ` : ''}Optional: the countdown works without it.
-                </p>
-                <button type="button" className="btn-primary mt-5 w-full sm:w-auto" onClick={() => open('tool')}>{kit.tool.cta}</button>
+                <p className="mt-2 text-[0.92rem] text-warm-soft">Optional: the countdown works without it.</p>
+                <ToolLauncher tool={tool} cta={kit.tool.cta} kids={chartKids} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
               </div>
             </div>
           </section>
@@ -357,25 +351,13 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, view, choose
         )}
       </div>
       {letterDoc && (
-        <div hidden={showTool}>
+        <div>
           <PrintFrame open={letterPreview} orientation="portrait">
             <LetterSheets doc={letterDoc.id} kit={kit} preview={letterPreview} recipient={recipient} />
           </PrintFrame>
         </div>
       )}
 
-      {tool && kit.tool && (
-        <div hidden={!showTool}>
-          <div className="club-screen">
-            <button type="button" className="min-h-11 text-[0.92rem] text-warm-soft underline underline-offset-4" onClick={() => open('')}>← Back to {kit.theme}</button>
-            <h2 className="mt-3 font-serif text-[2rem] leading-tight text-warm-ink">{kit.tool.title}</h2>
-          </div>
-          <div className="mt-4">
-            <ChartEditor store={store} kit={kit} printable={tool} items={kitItems(kit, tool.items) ?? []} household={household} saved={docs.documents[tool.id]} readOnly={readOnly}
-              intro="Pick a child, then morning or after school. Change, reorder or add steps, then print the chart for where it happens." setup={schoolSetupFor(household, kit.month)} />
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -625,5 +607,57 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
         <ActionSheet doc={doc.id} kit={kit} palette={palette} preview={preview} fill={fill} />
       </PrintFrame>
     </section>
+  );
+}
+
+/**
+ * Opens one of the site's tools inside the Club for one of her children, with their name, age and a starting choice
+ * handed over (src/lib/tool-handoff.ts), so she doesn't retype what her family profile says. With one child it opens
+ * straight away; with several it asks who it's for; with none it opens the tool as any visitor would see it.
+ */
+function ToolLauncher({ tool, cta, kids, back, href }: {
+  tool: ClubTool;
+  cta: string;
+  kids: { id: string; firstName: string; age: number | null }[];
+  back: { href: string; label: string };
+  href: (path: string) => string;
+}) {
+  const [choosing, setChoosing] = useState(false);
+  const [variant, setVariant] = useState(tool.variants?.[0]?.id);
+  const go = (kid?: { id: string; firstName: string; age: number | null }) => {
+    setToolHandoff({
+      tool: tool.id,
+      key: kid ? `${kid.id}-${variant ?? 'default'}`.replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 80) : 'family',
+      ...(kid ? { name: kid.firstName, ...(kid.age !== null ? { age: kid.age } : {}) } : {}),
+      ...(variant ? { variant } : {}),
+      back,
+    });
+    clubNav().go(href(tool.path));
+  };
+  const tab = 'min-h-11 border-b-2 border-transparent pb-1 text-[0.95rem] font-semibold text-warm-soft aria-[pressed=true]:border-warm-ink aria-[pressed=true]:text-warm-ink';
+
+  if (!tool.perChild || kids.length === 0) {
+    return <button type="button" className="btn-primary mt-5 w-full sm:w-auto" onClick={() => go()}>{cta}</button>;
+  }
+  if (!choosing) {
+    return <button type="button" className="btn-primary mt-5 w-full sm:w-auto" onClick={() => (kids.length === 1 ? go(kids[0]) : setChoosing(true))}>{cta}</button>;
+  }
+  return (
+    <div className="mt-5 bg-white p-4 ring-1 ring-warm-rule sm:p-5">
+      {tool.variants && (
+        <div role="group" aria-label="Which routine" className="flex gap-x-6 border-b border-warm-rule">
+          {tool.variants.map((v) => <button key={v.id} type="button" aria-pressed={v.id === variant} className={tab} onClick={() => setVariant(v.id)}>{v.label}</button>)}
+        </div>
+      )}
+      <p className="mt-4 text-[0.95rem] text-warm-ink">Who’s it for?</p>
+      <div className="mt-2 flex flex-wrap gap-3">
+        {kids.map((k) => (
+          <button key={k.id} type="button" className="btn-secondary" onClick={() => go(k)}>
+            {k.firstName}{k.age !== null ? <span className="ml-1.5 font-normal opacity-70">{k.age}</span> : null}
+          </button>
+        ))}
+      </div>
+      <button type="button" className="mt-3 min-h-11 text-[0.88rem] text-warm-soft underline underline-offset-4" onClick={() => go()}>Someone else</button>
+    </div>
   );
 }

@@ -42,7 +42,7 @@ For the mail house: the on-screen version has a 0.35 in home-printer margin; the
 
 1. **Ask at dinner this week** (sage panel, the largest type on the page): *What's one thing you want to be able to do by yourself before school starts?* Everyone answers, grown-ups too.
 2. **Helping kids own their school day**: three one-line tips: Four to six steps · Pictures first · Ask "What's next?"
-3. **For example: a school morning for a seven-year-old**, with the responsibility-card illustrations: Get dressed · Make my bed · Breakfast at the table · Brush my teeth · Comb my hair · Backpack, lunch and shoes by the door. Generated from the routine tool's own rules (`exampleRoutine()`), so the paper matches what she'll see online.
+3. **For example: a school morning to start from**, with the responsibility-card illustrations: the routine chart's own morning starter (Wake up & stretch · Make bed · Get dressed · Eat breakfast · Brush teeth · Grab backpack & shoes), so the paper matches the tool the QR code opens.
 4. **Dates worked out, charts for each child**: the QR code (1.2 in, quiet zone kept) beside "Scan the code and enter your first day of school: we'll suggest a day for each countdown item, then help you make a chart for each child. This page works fine without it." and the readable address **organizedmomcollective.com/club/kits/2027-08-school-year**. The code encodes `https://www.organizedmomcollective.com/club/kits/2027-08-school-year?source=mailer` (permanent once printed; never rename the slug). Test the printed proof on two phones before approving it.
 5. **On the family calendar** (rose band, the one reminder): Before the first day, write every first day, early dismissal and school break on your family calendar, where everyone can see them.
 

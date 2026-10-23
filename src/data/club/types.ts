@@ -97,10 +97,10 @@ export interface KitPrintable {
   /** For engine-filled printables: which item set to run ('items', 'reset', or a key of the kit's `itemSets`). */
   items?: string;
   /**
-   * How the editor works: 'chart' (owners, the default), 'routine' (one child's morning or after-school steps at a
-   * time, ordered, nothing balanced, no coaches), 'command' (shared owners plus the family's recurring commitments).
+   * How the editor works: 'chart' (owners, the default), 'command' (shared owners plus the family's recurring
+   * commitments).
    */
-  editor?: 'chart' | 'routine' | 'command';
+  editor?: 'chart' | 'command';
   /** Tab name in the kit (defaults from the kind). */
   tabLabel?: string;
   /** Lives under the kit's "In the mail" tab instead of its own (the mailer's printable twins). */
@@ -150,8 +150,11 @@ export interface KitConfig {
    * `helperLabel` blank instead.
    */
   action?: { title: string; intro: string; items: CountdownItem[]; helperLabel?: string };
-  /** The month's one optional tool: the printable (with an editor) it opens, and the invitation to it. */
-  tool?: { printable: string; title: string; blurb: string; cta: string };
+  /**
+   * The month's one optional tool: one of the site's own tools, opened inside the Club (src/data/club/tools.ts), never
+   * a Club copy of it; and the invitation to it.
+   */
+  tool?: { tool: string; title: string; blurb: string; cta: string };
   /**
    * The kit opens on a short overview: her family's situation and a few recommended first actions (items with
    * `priority` in `from`), then the detail one tap away.
@@ -179,8 +182,8 @@ export interface KitConfig {
     activity?: { title: string; minutes: number; steps: string[] };
     /** Three-part kits: the month's one family conversation question, on the back of the letter. */
     conversation?: { label: string; question: string; note?: string };
-    /** Three-part kits: a worked example on the back of the letter, generated from the tool's own rules. */
-    example?: { title: string; age: number; section: ChartSection; items: string };
+    /** Three-part kits: a worked example on the back of the letter: the tool's own starter (src/data/routines.ts). */
+    example?: { title: string; variant: string };
     /** Three-part kits: the invitation beside the QR code, and the one reminder about the family calendar. */
     invite?: { title: string; body: string };
     calendarNote?: string;

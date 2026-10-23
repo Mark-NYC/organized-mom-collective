@@ -157,7 +157,7 @@ for (const id of samples) {
 
 // August (letter, action, tool): one calm screen; the countdown works undated, then dates itself from the first day
 // (plenty of time, three days, tomorrow, already started), keeps her own dates, saves, prints and copies; the letter
-// prints front and back; the routine tool suggests 4–6 steps per child and routine and prints one chart per page.
+// prints front and back; "Make a routine chart" opens the site's own routine chart for a child, prefilled.
 const pad = (n) => String(n).padStart(2, '0');
 const dayFromNow = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 for (const id of [...samples, 'hughes']) {
@@ -255,43 +255,35 @@ for (const id of [...samples, 'hughes']) {
   check(await page.evaluate(() => [...document.querySelectorAll('.club-letter .club-action-when .club-action-helper-line')].every((el) => !el.textContent)), `${id}: the mailed letter prints dates`);
   check(await page.evaluate(() => [...document.querySelectorAll('.club-action-sheet .club-action-when .club-action-helper-line')].filter((el) => el.textContent).length === 6), `${id}: the countdown printout is missing dates`);
 
-  // The tool: every child it serves, both routines, 4–6 steps; one chart prints on one page.
-  await page.getByRole('button', { name: 'Make a routine chart' }).click();
-  const kids = await page.locator('[role="group"][aria-label="Whose routine"] button').count();
-  const charts = [];
-  const anyChart = await page.locator('[role="group"][aria-label="Which routine"]').count();
-  for (let k = 0; anyChart && k < Math.max(kids, 1); k++) {
-    if (kids) await page.locator('[role="group"][aria-label="Whose routine"] button').nth(k).click();
-    for (const part of [0, 1]) {
-      await page.locator('[role="group"][aria-label="Which routine"] button').nth(part).click();
-      const steps = await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').count();
-      charts.push(steps);
-      check(steps === 0 || (steps >= 4 && steps <= 6), `${id}: child ${k} routine ${part} has ${steps} steps (expected 4–6)`);
-    }
+  // The tool: the site's own routine chart, opened in the Club for a child, prefilled, editable, downloadable.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Make a routine chart', exact: true }).click();
+  // Several children: pick one (after school); one child opens straight away; none opens it as any visitor sees it.
+  await page.waitForTimeout(300);
+  const chooser = page.locator('section[aria-labelledby="club-tool"] .btn-secondary');
+  const kidCount = /\/club\/tools\//.test(page.url()) ? 0 : await chooser.count();
+  if (kidCount) {
+    await page.locator('section[aria-labelledby="club-tool"]').getByRole('button', { name: 'After school' }).click();
+    await chooser.first().click();
   }
-  entry.routineSteps = charts;
-  if (charts.some((n) => n > 0)) {
-    if (kids) await page.locator('[role="group"][aria-label="Whose routine"] button').first().click();
-    await page.locator('[role="group"][aria-label="Which routine"] button').first().click();
-    // Print as suggested first, then check her reordering survives a reload.
-    const r = await printTo(page, 'school-routines', 'portrait', `${id}-august-routine`, 0, /^Print .+ chart$/);
-    entry.routine = r;
-    check(r.pages === 1, `${id}: the routine chart printed on ${r.pages} pages (expected 1)`);
-    check(r.overflow.length === 0, `${id}: the routine chart has text cut off: ${r.overflow.join(' | ')}`);
-    await page.setViewportSize({ width: 390, height: 844 });
-    const first = await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').first().textContent();
-    await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').first().getByRole('button', { name: /Move .* down/ }).click();
-    await page.getByRole('button', { name: 'Save routine charts' }).click();
-    await page.getByText('All changes saved').waitFor();
-    await page.goto(`${kitUrl}#tool`);
-    await page.getByRole('heading', { name: /’s morning/ }).waitFor();
-    const second = await page.locator('section[aria-labelledby="school-routines-routine"] > ul > li').nth(1).textContent();
-    check(second === first, `${id}: the reordered routine didn't survive a reload`);
-    check(await noSideScroll(page), `${id}: the routine tool scrolls sideways on a phone`);
-    await page.screenshot({ path: join(out, `${id}-august-tool-phone.png`), fullPage: true });
-  } else {
-    check(await page.getByText(/Routine charts start around age three/).count() === 1, `${id}: no note for a family without a routine chart`);
-  }
+  await page.waitForURL(/\/club\/tools\/routine-chart/);
+  await page.waitForSelector('#routine-chart');
+  const title = await page.inputValue('[data-field="title"]');
+  entry.routineTitle = title;
+  check(kidCount ? /’s After-School Routine$/.test(title) : /Routine$/.test(title), `${id}: the routine chart didn't open for the child: "${title}"`);
+  check(await page.locator('.mr-container[data-mr-handoff]').count() === 1, `${id}: the Club page isn't the site's routine chart`);
+  check(await noSideScroll(page), `${id}: the routine chart scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-august-routine-phone.png`), fullPage: true });
+  await page.locator('[data-mr-move="1"]').first().click();
+  const order = await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value));
+  await page.reload();
+  await page.waitForSelector('#routine-chart');
+  check(JSON.stringify(await page.$$eval('[data-mr-step]', (els) => els.map((e) => e.value))) === JSON.stringify(order), `${id}: the routine chart didn't keep her edits`);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-mr-download]')]);
+  entry.routineDownload = dl.suggestedFilename();
+  await dl.saveAs(join(out, `${id}-august-routine.png`));
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\//);
 
   // Same family, same profile: November still opens from the switcher.
   await page.goto(kitUrl);
