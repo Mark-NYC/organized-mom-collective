@@ -1,0 +1,38 @@
+---
+/**
+ * Top bar on every public page with chrome: days left until January 1, 2027, linking to the
+ * calendar's buy section. The site is static, so the number is set at build time and refreshed
+ * in the browser on load; once the new year arrives the bar hides itself.
+ */
+import { routes } from '../../routes';
+
+const NEW_YEAR = '2027-01-01T00:00:00';
+const daysLeft = (now: Date) => Math.ceil((new Date(NEW_YEAR).getTime() - now.getTime()) / 86_400_000);
+const buildDays = daysLeft(new Date());
+---
+
+{
+  buildDays > 0 && (
+    <a
+      href={routes.buy}
+      data-cta="countdown-bar"
+      data-countdown={NEW_YEAR}
+      class="flex min-h-10 items-center justify-center gap-2 bg-warm-button px-4 py-2 text-center text-[0.68rem] font-semibold tracking-[0.18em] text-paper uppercase hover:underline"
+    >
+      <span data-countdown-days class="text-[0.9rem] tracking-normal tabular-nums">{buildDays}</span>
+      <span><span data-countdown-unit>{buildDays === 1 ? 'Day' : 'Days'}</span> left to get your 2027 calendar</span>
+    </a>
+  )
+}
+
+<script is:inline>
+  (() => {
+    const bar = document.querySelector('[data-countdown]');
+    if (!bar) return;
+    // Local midnight, so the count rolls over at the visitor's midnight, not UTC's.
+    const days = Math.ceil((new Date(bar.dataset.countdown).getTime() - Date.now()) / 86400000);
+    if (days <= 0) return bar.remove();
+    bar.querySelector('[data-countdown-days]').textContent = String(days);
+    bar.querySelector('[data-countdown-unit]').textContent = days === 1 ? 'Day' : 'Days';
+  })();
+</script>

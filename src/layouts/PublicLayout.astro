@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs';
 import SiteHeader from '../components/resources/SiteHeader.astro';
 import SiteFooter from '../components/resources/SiteFooter.astro';
 import CtaTracking from '../components/site/CtaTracking.astro';
+import CountdownBar from '../components/site/CountdownBar.astro';
 import SaveNudge from '../components/account/SaveNudge.astro';
 import { accountsEnabled } from '../lib/account';
 import { BRAND_NAME } from '../config';
@@ -79,6 +80,7 @@ const mainClass =
     <meta name="twitter:card" content="summary_large_image" />
     <slot name="head" />
   </Fragment>
+  {chrome && <CountdownBar />}
   {chrome && <SiteHeader />}
   <main id="main" class:list={['omc-public', mainClass]}>
     <slot />
