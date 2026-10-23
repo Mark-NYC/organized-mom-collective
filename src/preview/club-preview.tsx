@@ -45,6 +45,22 @@ const swapImages = (root: ParentNode) => {
   }
 };
 new MutationObserver(() => swapImages(document)).observe(document.documentElement, { childList: true, subtree: true });
+// The hosted preview's frame can't download files itself; its host offers them through the `downloads` capability
+// (with a confirmation). Site code still makes its usual download link; this hands that file over instead.
+type Downloads = { save(r: { filename: string; data: Blob }): Promise<unknown> };
+let downloads: Downloads | null = null;
+(globalThis as { claude?: { use?: (n: string) => Promise<unknown> } }).claude?.use?.('downloads').then((d) => { downloads = d as Downloads | null; }, () => {});
+const nativeClick = HTMLAnchorElement.prototype.click;
+HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+  const href = this.href;
+  if (downloads && this.download && /^(data|blob):/.test(href)) {
+    const filename = this.download;
+    fetch(href).then((r) => r.blob()).then((data) => downloads!.save({ filename, data })).catch(() => { /* declined or not allowed here */ });
+    return;
+  }
+  nativeClick.call(this);
+};
+
 // Tools set image sources from script (the routine chart's illustrations): hand them the inlined copy directly.
 const srcProp = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src')!;
 Object.defineProperty(HTMLImageElement.prototype, 'src', {
