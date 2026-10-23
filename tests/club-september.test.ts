@@ -99,7 +99,7 @@ describe('September: the Family Weekly Reset Builder', () => {
     expect(text(brooks, ['work'])).toMatch(/work shifts/);
     expect(text(brooks, ['chores'])).toMatch(/to-do list/);
     expect(JSON.stringify(agenda(brooks, ['other'], 'Shared custody weeks'))).toMatch(/shared custody weeks/);
-    expect(text(brooks, ['transport'])).toMatch(/ride and pickup/);
+    expect(text(brooks, ['transport'])).toMatch(/ride or pickup/);
   });
 
   it('lets everyone take part at their age, and assumes no second adult', () => {

@@ -90,8 +90,8 @@ export function resetAgenda(o: ResetInput): ResetStep[] {
   ];
   // 3. Who's handling this week's preparations.
   const owns = [
-    ...(has('transport') || has('activities') ? ['each ride and pickup'] : []),
-    'getting ready for each activity',
+    ...(has('transport') || has('activities') ? ['each ride or pickup'] : []),
+    'what each activity needs',
     ...(has('chores') ? ['what has to get done at home before a busy day'] : []),
   ];
   const single = adults.length === 1;
