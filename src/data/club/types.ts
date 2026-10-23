@@ -165,6 +165,20 @@ export interface KitConfig {
     note?: string;
     /** She can reword a line for her family (her wording prints on her copy; the mailer keeps the kit's). */
     editable?: true;
+    /**
+     * The family's one thing (January): a blank above the steps on the letter; online, one of the suggestions (the
+     * tool's own ids, handed to it) or her own words, a short plan on step `planAt`, an optional start day on step
+     * `startAt` with its check-in a week later. No tracking beyond the steps' checkboxes.
+     */
+    focus?: {
+      label: string;
+      printLabel: string;
+      suggestions: { id: string; label: string }[];
+      planAt: number;
+      planLabel: string;
+      startAt: number;
+      startLabel: string;
+    };
   };
   /**
    * The month's one optional tool: one of the site's own tools, opened inside the Club (src/data/club/tools.ts), never

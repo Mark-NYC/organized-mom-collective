@@ -908,32 +908,32 @@
   background: #f6ede6;
 }
 
-/* December's front carries a longer plan (a sentence under each decision): a slightly tighter letter so it fits. */
-.club-letter[data-accent='evergreen'] .club-letter-title {
+/* A front with a longer action (a sentence and a helper blank on each line: December): a slightly tighter letter so it fits. */
+.club-letter[data-dense] .club-letter-title {
   margin-top: 0.06in;
   font-size: 27pt;
 }
-.club-letter[data-accent='evergreen'] .club-letter-subtitle {
+.club-letter[data-dense] .club-letter-subtitle {
   font-size: 13pt;
 }
-.club-letter[data-accent='evergreen'] .club-letter-body {
+.club-letter[data-dense] .club-letter-body {
   margin-top: 0.14in;
   font-size: 10.6pt;
   line-height: 1.4;
 }
-.club-letter[data-accent='evergreen'] .club-letter-body p + p {
+.club-letter[data-dense] .club-letter-body p + p {
   margin-top: 0.05in;
 }
-.club-letter[data-accent='evergreen'] .club-letter-signature {
+.club-letter[data-dense] .club-letter-signature {
   font-size: 18pt;
 }
-.club-letter[data-accent='evergreen'] .club-letter-signoff {
+.club-letter[data-dense] .club-letter-signoff {
   margin-bottom: 0.08in;
 }
-.club-letter[data-accent='evergreen'] .club-letter-action {
+.club-letter[data-dense] .club-letter-action {
   padding-top: 0.1in;
 }
-.club-letter[data-accent='evergreen'] .club-letter-action .club-action-row {
+.club-letter[data-dense] .club-letter-action .club-action-row {
   grid-template-columns: 0.22in 1fr 1.25in;
   padding: 0.035in 0;
   font-size: 10pt;
@@ -945,4 +945,64 @@
   width: 0.95in;
   height: 0.38in;
   margin: 0.12in 0 0;
+}
+
+/* January: the family's one thing (a blank on the letter), and on her copy the plan and its two days. */
+.club-focus-line {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.12in;
+  align-items: end;
+  margin: 0.08in 0 0.04in;
+}
+.club-focus-line .club-action-helper-line {
+  height: 0.26in;
+}
+.club-action-sheet .club-focus-line {
+  margin-top: 0.24in;
+}
+.club-action-sheet .club-focus-line .club-action-helper-line {
+  height: 0.32in;
+  font-size: 15pt;
+  line-height: 0.4in;
+}
+.club-focus-plan {
+  margin-top: 0.1in;
+}
+.club-focus-days {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3in;
+}
+.club-focus-days .club-action-helper-line {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11pt !important;
+}
+/* No helper blank on each line (January): the line takes the width. */
+.club-action-plain .club-action-row,
+.club-letter[data-dense] .club-letter-action .club-action-plain .club-action-row,
+.club-action-sheet .club-action-plain .club-action-row {
+  grid-template-columns: 0.22in 1fr;
+}
+.club-action-sheet .club-action-plain .club-action-row {
+  grid-template-columns: 0.3in 1fr;
+}
+/* January's steps: a sentence under each, no helper blank; a little more room to write the one thing. */
+.club-letter .club-action-plain .club-action-row {
+  padding: 0.05in 0;
+}
+.club-letter-action .club-focus-line {
+  margin: 0.12in 0 0.06in;
+}
+.club-letter-action .club-focus-line .club-action-helper-line {
+  height: 0.32in;
+}
+/* Her plan can run two lines: it wraps instead of being cut off. */
+.club-action-sheet .club-focus-plan > .club-focus-line .club-action-helper-line {
+  height: auto;
+  min-height: 0.32in;
+  white-space: normal;
+  line-height: 1.45;
+  font-size: 14pt;
 }

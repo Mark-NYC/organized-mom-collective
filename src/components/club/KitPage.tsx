@@ -15,7 +15,7 @@ import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes
 import type { KitConfig, KitPrintable } from '../../data/club/types';
 import {
   addDays, basisStart, countdownIcs, countdownText, FAMILY_START, isDay, localToday, longLabel, MAX_HELPER, MAX_STARTS, planCountdown, readCountdown, resetChanges,
-  shortLabel as shortDay, lineDetail, lineText, MAX_TEXT, type CountdownPlan, type CountdownState, type SchoolStart,
+  shortLabel as shortDay, lineDetail, lineText, MAX_TEXT, checkInFor, focusLines, MAX_FOCUS, MAX_PLAN, type FocusState, type CountdownPlan, type CountdownState, type SchoolStart,
 } from '../../lib/club/countdown';
 import { schoolSetupFor, withSchool } from '../../lib/club/school';
 import { GuideSheet } from './print/SchoolPrintables';
@@ -25,7 +25,7 @@ import { planMembers, type Household } from '../../lib/club/profile';
 import { ConflictError, type ClubStore, type KitDocuments } from '../../lib/club/store';
 import { routes } from '../../routes';
 import { clubToolById, type ClubTool } from '../../data/club/tools';
-import { setToolHandoff } from '../../lib/tool-handoff';
+import { setToolHandoff, type ToolHandoff } from '../../lib/tool-handoff';
 import ChartEditor from './ChartEditor';
 import ClubGate, { type ClubContext } from './ClubGate';
 import PalettePicker from './PalettePicker';
@@ -325,7 +325,10 @@ function ThreePartKit({ kit, store, household, docs, readOnly, top, href }: {
                 <p className="mt-2 leading-relaxed text-warm-soft">{kit.tool.blurb}</p>
                 {kit.tool.note && <p className="mt-2 text-[0.92rem] text-warm-soft">{kit.tool.note}</p>}
                 <ToolLauncher tool={tool} cta={kit.tool.cta} start={kit.tool.start} kids={tool.people === 'everyone' ? [...chartKids, ...planMembers(household, kit.month).filter((p) => p.stage === 'adult')] : chartKids}
-                  ages={children.flatMap((c) => (c.age !== null ? [c.age] : []))} familyName={household.displayName} household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
+                  ages={children.flatMap((c) => (c.age !== null ? [c.age] : []))} familyName={household.displayName}
+                  people={planMembers(household, kit.month).map((p) => ({ name: p.firstName, adult: p.stage === 'adult' }))}
+                  extra={action.focus ? { ...(state.focus.area ? { variant: state.focus.area } : {}), ...(state.focus.text.trim() ? { text: state.focus.text.trim() } : {}), ...(state.focus.start ? { date: state.focus.start } : {}) } : undefined}
+                  household={household.id} back={{ href: href(routes.clubKit(kit.slug)), label: kit.theme }} href={href} />
               </div>
             </div>
           </section>
@@ -484,12 +487,17 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
   const changes = resetChanges(action.items, plan);
   const names = household.members.filter((m) => !m.archived).map((m) => m.firstName);
   const dated = plan.lines.some((l) => l.date);
-  const text = countdownText(action.title, action.items, plan, state);
+  const focus = action.focus;
+  const text = focus
+    ? [action.title, '', ...focusLines(focus.printLabel, state.focus), ...countdownText(action.title, action.items, plan, state).split('\n').slice(2)].join('\n')
+    : countdownText(action.title, action.items, plan, state);
+  const setFocus = (patch: Partial<FocusState>) => update({ ...state, focus: { ...state.focus, ...patch } });
   const whenLabel = (i: number) => {
     const l = plan.lines[i];
     return l.date ? shortDay(l.date) : l.later ? 'When you can' : '';
   };
-  const fill: ActionFill = { done: state.done, helpers: state.helpers, texts: state.texts, whens: action.items.map((_, i) => whenLabel(i)), ...(plan.start ? { firstDay: longLabel(plan.start) } : {}) };
+  const fill: ActionFill = { done: state.done, helpers: state.helpers, texts: state.texts, whens: action.items.map((_, i) => whenLabel(i)), ...(plan.start ? { firstDay: longLabel(plan.start) } : {}),
+    ...(focus ? { focus: { thing: state.focus.text.trim(), plan: state.focus.plan.trim(), start: state.focus.start ? longLabel(state.focus.start) : '', checkIn: state.focus.start ? longLabel(checkInFor(state.focus.start)) : '' } } : {}) };
   const counting = start.id !== FAMILY_START || state.starts.filter((s) => s.date).length > 1 ? ` (${start.id === FAMILY_START ? 'everyone' : start.label})` : '';
   const message =
     plan.status === 'undated' ? 'Add your first day above and each line gets a suggested day. Or just use the list.'
@@ -533,6 +541,23 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
           </p>
         )}
 
+        {focus && (
+          <div className="mt-4 bg-white p-4 ring-1 ring-warm-rule sm:p-5">
+            <label className="block">
+              <span className="font-serif text-[1.2rem] text-warm-ink">{focus.label}</span>
+              <input type="text" className={`${dateField} mt-2 w-full`} maxLength={MAX_FOCUS} disabled={readOnly} value={state.focus.text}
+                placeholder="Choose one below, or write your own"
+                onChange={(e) => setFocus({ text: e.target.value, area: focus.suggestions.find((x) => x.label === e.target.value.trim())?.id ?? null })} />
+            </label>
+            <div role="group" aria-label="Ideas for your one thing" className="mt-2 flex flex-wrap gap-x-5">
+              {focus.suggestions.map((x) => (
+                <button key={x.id} type="button" disabled={readOnly} aria-pressed={state.focus.area === x.id}
+                  className="min-h-11 border-b-2 border-transparent text-[0.95rem] text-warm-soft aria-[pressed=true]:border-warm-ink aria-[pressed=true]:font-semibold aria-[pressed=true]:text-warm-ink"
+                  onClick={() => setFocus({ area: x.id, text: x.label })}>{x.label}</button>
+              ))}
+            </div>
+          </div>
+        )}
         <datalist id="club-family-names">{names.map((n) => <option key={n} value={n} />)}</datalist>
         <ol className="mt-4 divide-y divide-[#dfe6d8] bg-sage-wash px-4 sm:px-6">
           {action.items.map((item, i) => {
@@ -582,6 +607,26 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
                     </button>
                   )}
                 </div>
+                {focus?.planAt === i && (
+                  <label className="ml-[2.4rem] mt-2 block">
+                    <span className="text-[0.85rem] font-semibold text-warm-ink">{focus.planLabel}</span>
+                    <textarea rows={2} maxLength={MAX_PLAN} disabled={readOnly} value={state.focus.plan} placeholder="e.g. After dinner, everyone spends five minutes resetting the kitchen."
+                      className="mt-1 block w-full rounded-[4px] border border-warm-rule bg-white p-2.5 text-[1rem] leading-snug text-warm-ink focus:border-warm-ink focus:outline-none"
+                      onChange={(e) => setFocus({ plan: e.target.value })} />
+                  </label>
+                )}
+                {focus?.startAt === i && (
+                  <div className="ml-[2.4rem] mt-2 flex flex-wrap items-end gap-x-4 gap-y-1">
+                    <label>
+                      <span className="block text-[0.85rem] font-semibold text-warm-ink">{focus.startLabel}</span>
+                      <input type="date" className={`${dateField} mt-1`} disabled={readOnly} value={state.focus.start}
+                        onChange={(e) => setFocus({ start: isDay(e.target.value) ? e.target.value : '' })} />
+                    </label>
+                    <p className="min-h-11 py-2 text-[0.92rem] text-warm-ink">
+                      {state.focus.start ? `Check in together ${longLabel(checkInFor(state.focus.start))}.` : 'Start whenever suits your family.'}
+                    </p>
+                  </div>
+                )}
                 {countdown && editing === i && (
                   <div className="ml-[2.4rem] mt-2 flex flex-wrap items-center gap-3">
                     <input type="date" aria-label={`Date for ${words}`} className={dateField} value={l.date ?? ''} min={addDays(today, -60)}
@@ -650,11 +695,15 @@ function Countdown({ kit, doc, state, update, plan, start, today, household, rea
  * doesn't retype what her family profile says. One person: it opens straight away; several: it asks who it's for;
  * nobody: it opens the tool as any visitor would see it.
  */
-function ToolLauncher({ tool, cta, start, kids, ages, familyName, household, back, href }: {
+function ToolLauncher({ tool, cta, start, kids, ages, familyName, people, extra, household, back, href }: {
   tool: ClubTool;
   /** A family tool's children's ages (the traditions picker); `familyName` goes on its printout. */
   ages: number[];
   familyName?: string;
+  /** A family tool's first names (the habit builder's "who"). */
+  people: { name: string; adult: boolean }[];
+  /** What she's chosen in the kit that the tool starts from (January: her one thing and start day). */
+  extra?: Pick<ToolHandoff, 'variant' | 'text' | 'date'>;
   cta: string;
   /** The tool's starting choice when the kit offers none (October's chore chart: 'one-job'). */
   start?: string;
@@ -672,7 +721,9 @@ function ToolLauncher({ tool, cta, start, kids, ages, familyName, household, bac
       key: `${household}-${kid ? `${kid.id}-${variant ?? 'chart'}` : 'family'}`.replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 120),
       ...(kid ? { name: kid.firstName, ...(kid.age !== null ? { age: kid.age } : {}) } : {}),
       ...(tool.familyAges ? { ...(ages.length ? { ages } : {}), ...(familyName ? { name: familyName } : {}) } : {}),
+      ...(tool.familyPeople ? { ...(people.length ? { people } : {}), ...(familyName ? { name: familyName } : {}) } : {}),
       ...(variant ? { variant } : {}),
+      ...extra,
       back,
     });
     clubNav().go(href(tool.path));

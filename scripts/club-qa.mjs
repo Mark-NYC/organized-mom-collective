@@ -552,6 +552,179 @@ for (const id of [...samples, 'hughes']) {
   await ctx.close();
 }
 
+// January (letter, One-Thing Family Reset, the Family Habit Builder): the one thing, plan and start day save; the
+// plan and the letter print; "Build Our Family Habit" opens the builder with the family's names and its one thing.
+const janUrl = (id) => `${base}/club/kits/2027-01-fresh-start-together?sample=${id}`;
+const janLines = (page) => page.locator('section[aria-labelledby="club-action"] .club-screen ol > li');
+const janCustom = { brooks: { thing: 'Laundry on the bedroom floor', action: 'put dirty clothes in the hamper' } };
+for (const id of [...samples, 'hughes']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, acceptDownloads: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  const entry = { january: id };
+  const custom = janCustom[id];
+  const lines = janLines(page);
+  await page.goto(janUrl(id));
+  await page.getByRole('heading', { name: 'Our One-Thing Family Reset' }).waitFor();
+  check(await noSideScroll(page), `${id}: January scrolls sideways on a phone`);
+  check(await lines.count() === 5, `${id}: the reset has ${await lines.count()} steps (expected 5)`);
+  check(await page.getByPlaceholder('Who’s helping?').count() === 0, `${id}: January asks who's helping on every step`);
+  check(await page.locator('section[aria-labelledby="club-action"] input[type="date"]').count() === 1, `${id}: January should have exactly one (optional) date: the start day`);
+  check(await page.getByText(/^By [A-Z][a-z]{2} \d+$/).count() === 0, `${id}: January shows due dates`);
+  await page.screenshot({ path: join(out, `${id}-january-phone.png`), fullPage: true });
+
+  const thing = page.getByLabel('What is your family’s one thing?');
+  if (custom) await thing.fill(custom.thing);
+  else await page.getByRole('group', { name: 'Ideas for your one thing' }).getByRole('button', { name: 'Keeping the kitchen tidy' }).click();
+  const planText = id === 'chen' ? 'After dinner, everyone spends five minutes resetting the kitchen. Grace clears, Owen wipes the table, Ivy puts cups away, Leo stacks the placemats.' : 'After dinner, everyone spends five minutes resetting the kitchen.';
+  await page.getByLabel('Our simpler plan').fill(planText);
+  await page.getByLabel('Start day (optional)').fill('2027-01-10');
+  await lines.first().locator('input[type="checkbox"]').check();
+  await page.getByText('1 of 5 done').waitFor();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Our One-Thing Family Reset' }).waitFor();
+  const want = custom ? custom.thing : 'Keeping the kitchen tidy';
+  check(await thing.inputValue() === want, `${id}: the one thing didn't survive a reload ("${await thing.inputValue()}")`);
+  check(await page.getByLabel('Our simpler plan').inputValue() === planText, `${id}: the plan didn't survive a reload`);
+  check(await page.getByLabel('Start day (optional)').inputValue() === '2027-01-10', `${id}: the start day didn't survive a reload`);
+  check(await page.getByText('Check in together Sunday, January 17.').count() === 1, `${id}: no check-in a week after the start`);
+  check(await lines.first().locator('input[type="checkbox"]').isChecked(), `${id}: the checked step didn't survive a reload`);
+  if (!custom) check(await page.getByRole('button', { name: 'Keeping the kitchen tidy' }).getAttribute('aria-pressed') === 'true', `${id}: the chosen suggestion isn't marked`);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const [doc, button, pages] of [['one-thing-plan', 'Print it', 1], ['letter', 'Print another copy', 2]]) {
+    const r = await printTo(page, doc, 'portrait', `${id}-january-${doc}`, 0, button);
+    entry[doc] = r;
+    check(r.pages === pages, `${id}: January ${doc} printed on ${r.pages} pages (expected ${pages})`);
+    check(r.overflow.length === 0, `${id}: January ${doc} has text cut off: ${r.overflow.join(' | ')}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+  }
+  check(await page.evaluate(() => [...document.querySelectorAll('.club-action-sheet .club-focus-line .club-action-helper-line')].every((el) => el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= el.clientHeight + 1)), `${id}: her one thing or plan is cut off on her printout`);
+  const sheet = await page.evaluate(() => document.querySelector('.club-action-sheet')?.textContent ?? '');
+  check(sheet.includes(want) && sheet.includes('resetting the kitchen') && sheet.includes('Sunday, January 10') && sheet.includes('Sunday, January 17'), `${id}: her printed plan is missing her one thing, plan or days`);
+  const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
+  check(front.includes('Our one thing this month') && !front.includes(want) && front.includes('Try it for seven days.'), `${id}: the mailed letter's front is wrong (one-thing blank, five steps)`);
+  const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');
+  for (const part of ['Small Changes That Stick', 'Start with something small.', 'Connect it to something you already do.', 'Let everyone play a part.', 'The kitchen after dinner', 'What’s one part of our day that we could make easier for everyone?', 'Build Your Family Habit', 'organizedmomcollective.com/club/kits/2027-01-fresh-start-together', 'Write both on your family calendar.']) {
+    check(back.includes(part), `${id}: the letter's back is missing "${part}"`);
+  }
+  entry.greeting = await page.evaluate(() => document.querySelector('.club-letter-greeting')?.textContent);
+
+  // The tool: the habit builder, with the family's names, its one thing and start day.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Build Our Family Habit', exact: true }).click();
+  await page.waitForURL(/\/club\/tools\/habit-builder/);
+  const statement = page.locator('[data-hb-statement]');
+  await statement.waitFor();
+  check(await page.locator('.hb[data-hb-handoff]').count() === 1, `${id}: the Club page isn't the site's habit builder`);
+  check(await page.locator('[data-hb-start]').inputValue() === '2027-01-10', `${id}: the builder didn't get the start day`);
+  const days = await page.locator('[data-hb-day]').allTextContents();
+  check(days.length === 7 && days[0] === 'Sun 1/10' && days[6] === 'Sat 1/16', `${id}: the practice days are ${days.join(', ')}`);
+  if (custom) {
+    check(await page.locator('[data-hb-area="other"]').getAttribute('aria-pressed') === 'true' && await page.locator('[data-hb-other-label]').inputValue() === custom.thing, `${id}: the builder didn't open on her own one thing`);
+    await page.locator('[data-hb-other-action]').fill(custom.action);
+    check(await statement.inputValue() === 'After dinner, everyone puts dirty clothes in the hamper.', `${id}: custom habit reads "${await statement.inputValue()}"`);
+  } else {
+    check(await page.locator('[data-hb-area="kitchen"]').getAttribute('aria-pressed') === 'true', `${id}: the builder didn't open on the kitchen`);
+    check(await statement.inputValue() === 'After dinner, everyone spends five minutes resetting the kitchen.', `${id}: the habit reads "${await statement.inputValue()}"`);
+  }
+  // A different moment changes the sentence.
+  await page.locator('[data-hb-moment="before-bed"]').click();
+  check((await statement.inputValue()).startsWith('Before bedtime, everyone'), `${id}: the moment didn't change the habit`);
+  // Who: the family's own first names.
+  await page.locator('[data-hb-who="some"]').click();
+  const people = await page.locator('[data-hb-person]').evaluateAll((els) => els.map((e) => e.value));
+  entry.people = people;
+  check(people.length >= 1, `${id}: no family names to choose from`);
+  await page.locator('[data-hb-person]').first().check();
+  if (people.length > 1) await page.locator('[data-hb-person]').nth(1).check();
+  const picked = people.slice(0, 2);
+  check(picked.every((n) => (statement.inputValue ? true : false)) && (await statement.inputValue()).includes(picked[0]), `${id}: chosen names aren't in the habit ("${await statement.inputValue()}")`);
+  entry.habit = await statement.inputValue();
+  // Her own words stay through a reload and a changed answer; ours come back on request.
+  await statement.fill('Before bed, we all spend five minutes getting tomorrow ready.');
+  await page.locator('[data-hb-moment="after-dinner"]').click();
+  await page.reload();
+  await statement.waitFor();
+  check(await statement.inputValue() === 'Before bed, we all spend five minutes getting tomorrow ready.', `${id}: her own words didn't stay`);
+  check(await page.locator('[data-hb-sheet-statement]').textContent() === 'Before bed, we all spend five minutes getting tomorrow ready.', `${id}: the card doesn't show her words`);
+  check(await page.locator('.hb-sheet-box').count() === 7, `${id}: the card has ${await page.locator('.hb-sheet-box').count()} practice boxes`);
+  const card = await page.locator('[data-hb-sheet]').textContent();
+  check(card.includes('Did this make our day easier? What should we change?') && !/streak|points|badge|reward/i.test(card), `${id}: the card's reflection or no-scoring rule is off`);
+  check(await noSideScroll(page), `${id}: the builder scrolls sideways on a phone`);
+  await page.screenshot({ path: join(out, `${id}-january-builder-phone.png`), fullPage: true });
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-hb-download]')]);
+  await dl.saveAs(join(out, `${id}-january-card.png`));
+  check(await page.locator('dialog.tool-email-dialog').count() === 0, `${id}: the builder asked for an email`);
+  await page.getByRole('button', { name: 'Use the suggested wording' }).click();
+  entry.suggestedAgain = await statement.inputValue();
+  check(entry.suggestedAgain.startsWith('After dinner,'), `${id}: "Use the suggested wording" gave "${entry.suggestedAgain}"`);
+  await page.click('[data-hb-copy]');
+  await page.waitForTimeout(200);
+  const copied = await page.locator('[data-hb-status]').textContent();
+  const fallback = await page.locator('[data-hb-copy-fallback]').inputValue();
+  check(/^Copied/.test(copied) || fallback.includes('Did this make our day easier?'), `${id}: copying the habit didn't work`);
+  await page.getByRole('link', { name: /^← Back to/ }).click();
+  await page.waitForURL(/\/club\/kits\/2027-01/);
+  check(errors.length === 0, `${id}: January page errors: ${errors.join(' | ')}`);
+  report.push(entry);
+  await ctx.close();
+}
+
+// Opened in March 2027 (a late joiner, or a look back): no deadlines, the start day still works.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.clock.setFixedTime(new Date('2027-03-15T19:00:00'));
+  await page.goto(janUrl('chen'));
+  await page.getByRole('heading', { name: 'Our One-Thing Family Reset' }).waitFor();
+  await page.getByLabel('Start day (optional)').fill('2027-03-16');
+  check(await page.getByText('Check in together Tuesday, March 23.').count() === 1, 'late January: the check-in date is wrong');
+  check(!/overdue|too late|missed|deadline/i.test(await page.locator('main').textContent()), 'late January: the kit reads as late');
+  report.push({ lateJanuary: 'ok' });
+  await ctx.close();
+}
+
+// No family profile: the builder works on its own, with typed names.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/club/tools/habit-builder?sample=new`);
+  const statement = page.locator('[data-hb-statement]');
+  await statement.waitFor();
+  check(await statement.inputValue() === 'After dinner, everyone spends five minutes resetting the kitchen.', 'no profile: the builder doesn’t open with an example habit');
+  await page.locator('[data-hb-area="out-the-door"]').click();
+  await page.locator('[data-hb-who="some"]').click();
+  check(await page.locator('[data-hb-person]').count() === 0, 'no profile: the builder shows names it can’t know');
+  await page.locator('[data-hb-names-text]').fill('Sam and Ruby');
+  report.push({ habitNoProfile: await statement.inputValue() });
+  check(await statement.inputValue() === 'Before bedtime, Sam and Ruby put shoes, coats and bags by the door.', `no profile: typed names give "${await statement.inputValue()}"`);
+  await ctx.close();
+}
+
+// Two families in one browser, January: one family's habit and names never show up in the other's.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(janUrl('rivera'));
+  await page.getByRole('button', { name: 'Build Our Family Habit', exact: true }).click();
+  await page.locator('[data-hb-statement]').fill('Rivera rule: shoes off at the door.');
+  await page.goto(janUrl('okafor'));
+  await page.getByRole('button', { name: 'Build Our Family Habit', exact: true }).click();
+  await page.locator('[data-hb-statement]').waitFor();
+  check(!(await page.locator('[data-hb-statement]').inputValue()).includes('Rivera'), 'leak: Rivera’s habit shows in the Okafors’ builder');
+  await page.locator('[data-hb-who="some"]').click();
+  const names = await page.locator('[data-hb-person]').evaluateAll((els) => els.map((e) => e.value));
+  check(!names.includes('Ana') && names.includes('Zara'), `leak: the Okafors’ builder lists ${names.join(', ')}`);
+  await page.goto(janUrl('rivera'));
+  await page.getByRole('heading', { name: 'Our One-Thing Family Reset' }).waitFor();
+  check(await page.getByLabel('What is your family’s one thing?').inputValue() === '', 'leak: a one thing appeared in a family that never chose one');
+  report.push({ januaryLeakCheck: 'ok' });
+  await ctx.close();
+}
+
 // Two families in one browser: nothing one does shows up in the other's kit or tools.
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

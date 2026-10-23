@@ -21,6 +21,8 @@ export interface ClubTool {
   people?: 'children' | 'everyone';
   /** A family tool (not per person) that gets the children's ages from the family profile. */
   familyAges?: true;
+  /** A family tool that gets the family's first names (adult or not) for choosing who takes part. */
+  familyPeople?: true;
   /** Starting choices the kit can offer before opening (the tool's own ids). */
   variants?: { id: string; label: string }[];
   /** Its name on the Club page ("Sofia’s chore chart"), lowercase after the name. */
@@ -60,6 +62,16 @@ export const clubTools = {
     familyAges: true,
     title: 'Family Christmas Traditions Picker',
     intro: 'Answer what you like and skip the rest. Keep one to three ideas, swap the others, then print or copy your picks. It saves in this browser.',
+  },
+  'habit-builder': {
+    id: 'habit-builder',
+    path: routes.clubTool('habit-builder'),
+    // No public page yet: the component is a site tool (src/components/site/HabitBuilder.astro), ready for one.
+    publicPath: null,
+    perChild: false,
+    familyPeople: true,
+    title: 'Family Habit Builder',
+    intro: 'Three questions, one habit. Change any words, then download your seven-day practice card or copy it. It saves in this browser.',
   },
 } satisfies Record<string, ClubTool>;
 

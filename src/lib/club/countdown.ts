@@ -40,7 +40,18 @@ export interface CountdownState {
   starts: SchoolStart[];
   /** The start the dates count back from. */
   basis: string;
+  /** The family's one thing (kits with `action.focus`): a suggestion's id or null for her own words, a plan, a start day. */
+  focus: FocusState;
 }
+
+export interface FocusState {
+  area: string | null;
+  text: string;
+  plan: string;
+  start: Day | '';
+}
+export const MAX_FOCUS = 80;
+export const MAX_PLAN = 160;
 
 export const MAX_HELPER = 40;
 export const MAX_TEXT = 90;
@@ -208,7 +219,32 @@ export function readCountdown(json: unknown, lines: number): CountdownState {
     }),
     starts,
     basis,
+    focus: readFocus(o.focus),
   };
+}
+
+function readFocus(json: unknown): FocusState {
+  const f = (json && typeof json === 'object' ? json : {}) as Record<string, unknown>;
+  const line = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').slice(0, max) : '');
+  return {
+    area: typeof f.area === 'string' && /^[a-z0-9-]{1,40}$/.test(f.area) ? f.area : null,
+    text: line(f.text, MAX_FOCUS),
+    plan: line(f.plan, MAX_PLAN),
+    start: isDay(f.start) ? f.start : '',
+  };
+}
+
+/** The check-in: a week after the start, when the seven days of practice are done. */
+export const checkInFor = (start: Day | '') => (start ? addDays(start, 7) : '');
+
+/** The one thing, its plan and its days, as lines for her copied text (empty when she hasn't filled any). */
+export function focusLines(label: string, f: FocusState): string[] {
+  const out = [
+    ...(f.text.trim() ? [`${label}: ${f.text.trim()}`] : []),
+    ...(f.plan.trim() ? [`Our plan: ${f.plan.trim()}`] : []),
+    ...(f.start ? [`We start: ${longLabel(f.start)} · We check in: ${longLabel(checkInFor(f.start))}`] : []),
+  ];
+  return out.length ? [...out, ''] : [];
 }
 
 /** A line's words: hers when she changed them, else the kit's. */

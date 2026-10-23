@@ -49,6 +49,18 @@ export interface ActionFill {
   texts?: (string | null)[];
   /** "Wednesday, August 25" */
   firstDay?: string;
+  /** January: her one thing, plan and days, already in words. */
+  focus?: { thing: string; plan: string; start: string; checkIn: string };
+}
+
+/** The one-thing line: a blank on the mailed letter, her words on her copy. */
+function FocusLine({ label, value }: { label: string; value?: string }) {
+  return (
+    <p className="club-focus-line">
+      <span className="club-action-helper-label">{label}</span>
+      <span className="club-action-helper-line">{value ?? ''}</span>
+    </p>
+  );
 }
 
 /**
@@ -57,7 +69,7 @@ export interface ActionFill {
  */
 function ActionList({ items, helperLabel, fill, dated }: { items: CountdownItem[]; helperLabel?: string; fill?: ActionFill; dated: boolean }) {
   return (
-    <ol className={`club-action${dated ? '' : ' club-action-undated'}`}>
+    <ol className={`club-action${dated ? '' : ' club-action-undated'}${helperLabel ? '' : ' club-action-plain'}`}>
       {items.map((t, i) => (
         <li key={t.text} className="club-action-row">
           <span className={`club-box club-action-box${fill?.done[i] ? ' is-done' : ''}`} />
@@ -108,7 +120,8 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
     </div>
   );
   return (
-    <div className="club-print club-letter" data-doc={doc} data-preview={preview ? '' : undefined} data-accent={kit.mailer.accent}>
+    <div className="club-print club-letter" data-doc={doc} data-preview={preview ? '' : undefined} data-accent={kit.mailer.accent}
+      data-dense={action?.helperLabel && action.items.some((t) => t.detail) ? '' : undefined}>
       <section className="club-letter-page" aria-label="Front">
         {head}
         {kit.mailer.accent === 'evergreen' && <Sprig />}
@@ -133,6 +146,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
           <div className="club-letter-action">
             <h2>{action.title}</h2>
             {action.note && <p className="club-letter-action-note">{action.note}</p>}
+            {action.focus && <FocusLine label={action.focus.printLabel} />}
             <ActionList items={action.items} helperLabel={action.helperLabel} dated={action.kind === 'countdown'} />
           </div>
         )}
@@ -203,7 +217,17 @@ export function ActionSheet({ doc, kit, palette, preview, fill }: { doc: string;
       <div className="club-sheet-sub">{fill?.firstDay ? `First day of school: ${fill.firstDay}` : kit.subtitle}</div>
       <p className="club-sheet-intro">{action.intro}</p>
       {action.note && <p className="club-sheet-intro club-action-sheet-tip">{action.note}</p>}
+      {action.focus && <FocusLine label={action.focus.printLabel} value={fill?.focus?.thing} />}
       <ActionList items={action.items} helperLabel={action.helperLabel} fill={fill} dated={action.kind === 'countdown'} />
+      {action.focus && (
+        <div className="club-focus-plan">
+          <FocusLine label={action.focus.planLabel} value={fill?.focus?.plan} />
+          <div className="club-focus-days">
+            <FocusLine label="We start" value={fill?.focus?.start} />
+            <FocusLine label="We check in" value={fill?.focus?.checkIn} />
+          </div>
+        </div>
+      )}
       <p className="club-action-sheet-note">
         {action.kind === 'countdown' ? 'Write these dates on your family wall calendar so everyone can see what’s coming.' : kit.mailer.calendarNote}
       </p>

@@ -7,11 +7,12 @@ import { FREQUENCIES, OWNERSHIP_LEVELS, SCHOOL_TYPES, type KitConfig, type KitIt
 import { routineTypes } from '../../routines';
 import { clubToolById } from '../tools';
 import { kit as november2026 } from './2026-11-family-ownership';
+import { kit as january2027 } from './2027-01-fresh-start-together';
 import { kit as august2027 } from './2027-08-school-year';
 import { kit as october2027 } from './2027-10-home-works-together';
 import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, august2027, october2027, december2027];
+export const kits: readonly KitConfig[] = [november2026, january2027, august2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 
@@ -102,6 +103,13 @@ export function kitProblems(kit: KitConfig): string[] {
       out.push('action: a checklist has no dates (daysBefore, essential are for a countdown)');
     }
     if (!kit.mailer.invite || !kit.mailer.calendarNote) out.push('action: the letter needs its invite and calendar note');
+    const f = kit.action.focus;
+    if (f) {
+      const n = kit.action.items.length;
+      if (kit.action.kind !== 'checklist') out.push('action: a one-thing focus goes with a plain checklist');
+      if (!Number.isInteger(f.planAt) || f.planAt < 0 || f.planAt >= n || !Number.isInteger(f.startAt) || f.startAt < 0 || f.startAt >= n) out.push('action: focus planAt and startAt must be lines of the action');
+      if (!f.suggestions.length || f.suggestions.length > 8 || f.suggestions.some((x) => !ID.test(x.id) || !x.label.trim())) out.push('action: focus needs 1–8 suggestions with ids');
+    }
   }
   if (kit.tool && !clubToolById(kit.tool.tool)) out.push(`tool: ${kit.tool.tool} isn't a site tool the Club hosts (src/data/club/tools.ts)`);
   if (kit.mailer.letter?.namedGreeting && !kit.mailer.letter.namedGreeting.includes('{name}')) out.push('letter: namedGreeting needs {name}');

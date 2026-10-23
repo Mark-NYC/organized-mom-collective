@@ -17,6 +17,12 @@ export interface ToolHandoff {
   age?: number;
   /** A family tool's children's ages (the traditions picker), youngest first. */
   ages?: number[];
+  /** A family tool's people, first names only (the habit builder's "who"). */
+  people?: { name: string; adult: boolean }[];
+  /** A starting answer in her own words (the habit builder: the family's one thing). */
+  text?: string;
+  /** A day she chose ('YYYY-MM-DD'; the habit builder: the start day). */
+  date?: string;
   /** The tool's own starting choice, e.g. 'morning' or 'afterschool'. */
   variant?: string;
   /** Where "Back" goes. */
@@ -60,6 +66,9 @@ export function readToolHandoff(tool: string): ToolHandoff | null {
     ...(name ? { name } : {}),
     ...(typeof o.age === 'number' && Number.isInteger(o.age) && o.age >= 0 && o.age < 30 ? { age: o.age } : {}),
     ...(Array.isArray(o.ages) && o.ages.length ? { ages: o.ages.filter((a): a is number => Number.isInteger(a) && a >= 0 && a < 30).slice(0, 12).sort((a, b) => a - b) } : {}),
+    ...(Array.isArray(o.people) && o.people.length ? { people: o.people.flatMap((p) => (p && typeof p.name === 'string' && p.name.trim() ? [{ name: p.name.replace(/\s+/g, ' ').trim().slice(0, 30), adult: p.adult === true }] : [])).slice(0, 12) } : {}),
+    ...(typeof o.text === 'string' && o.text.trim() ? { text: o.text.replace(/\s+/g, ' ').trim().slice(0, 80) } : {}),
+    ...(typeof o.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.date) ? { date: o.date } : {}),
     ...(typeof o.variant === 'string' && ID.test(o.variant) ? { variant: o.variant } : {}),
     ...(back ? { back } : {}),
   };

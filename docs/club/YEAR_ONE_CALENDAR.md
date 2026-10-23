@@ -48,7 +48,17 @@ Each kit: one flagship generator, two or three complementary worksheets (each us
 - **Mailer:** letter on doing fewer things together; field guide on dividing the season so one person isn't the season; activity: family vote on traditions.
 - **Overlap check:** free `/december-countdown` and `/holiday-gift-planner` stay free; the kit links to them instead of duplicating.
 
-### January: Mornings Without the Mayhem
+### January: A Fresh Start, Together (built 2026-10-23, behind the flag)
+
+*One small change. A better rhythm for everyone.* Owner direction, 2026-10-23: replaces "Mornings Without the Mayhem" below for January 2027. Config: `src/data/club/kits/2027-01-fresh-start-together.ts`. Mailer: [mailers/2027-01-fresh-start-together.md](mailers/2027-01-fresh-start-together.md).
+
+- **The letter:** You Don't Need a Whole New Routine (about 170 words): January asks for everything at once; choose one recurring frustration, not all of them. Asks "What's one part of our day that we could make easier for everyone?" A draft for Megan.
+- **The action:** Our One-Thing Family Reset, five steps (choose one frustration, agree on a simpler plan, give everyone a part, put it on the calendar, try it for seven days), with "Our one thing this month" written above them. Online: the one thing (a suggestion or her words), a simple plan, an optional start day and its check-in a week later. No tracking.
+- **The tool:** the Family Habit Builder, a new site tool: what to make easier, when (tied to something the family already does), who; one editable habit sentence and a seven-day practice card.
+- **Back of the letter:** Small Changes That Stick (three principles), one worked example, the family question, the QR code, one calendar note.
+- **Not another month:** one rhythm, not a declutter, a responsibility overhaul or a 30-day program.
+
+### January (earlier plan): Mornings Without the Mayhem
 
 - **Flagship: Morning Routine Builder.** Per child: ordered, timed steps from wake-up to out-the-door, sized by age, with the night-before steps they own; adults' morning jobs split, not stacked on one person. Two inputs with defaults: leave-the-house time, wake-up time.
 - **Worksheets:** night-before checklist per child, "the late morning" fallback plan (the 10-minute version), team Kitchen Reset.

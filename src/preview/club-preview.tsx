@@ -14,6 +14,7 @@ import ClubToolBar from '../components/club/ClubToolBar';
 import { initRoutineChart } from '../components/site/routine-chart';
 import { initChoreChart } from '../components/site/chore-chart';
 import { initTraditionsPicker } from '../components/site/traditions-picker';
+import { initHabitBuilder } from '../components/site/habit-builder';
 import { readToolHandoff } from '../lib/tool-handoff';
 import { kits } from '../data/club/kits';
 import { setClubNav } from '../lib/club/nav';
@@ -79,6 +80,7 @@ const toolInit: Record<string, (host: HTMLElement) => void> = {
   'routine-chart': (host) => initRoutineChart(host.querySelector<HTMLElement>('.mr-container')!, readToolHandoff('routine-chart')),
   'chore-chart': (host) => initChoreChart(host.querySelector<HTMLElement>('.chore-chart-container')!, readToolHandoff('chore-chart')),
   'traditions-picker': (host) => initTraditionsPicker(host.querySelector<HTMLElement>('.tp')!, readToolHandoff('traditions-picker')),
+  'habit-builder': (host) => initHabitBuilder(host.querySelector<HTMLElement>('.hb')!, readToolHandoff('habit-builder')),
 };
 
 function ToolPage({ tool }: { tool: string }) {

@@ -13,7 +13,7 @@ export default function ClubToolBar({ tool }: { tool: string }) {
   const info = clubToolById(tool);
   const title = info?.title ?? 'Tool';
   // A family tool is the family's, not one person's: its title stays the tool's own.
-  const person = info?.familyAges ? undefined : handoff?.name;
+  const person = info?.familyAges || info?.familyPeople ? undefined : handoff?.name;
   return (
     <ClubGate page="tool">
       {({ href }) => (
@@ -27,6 +27,7 @@ export default function ClubToolBar({ tool }: { tool: string }) {
           <p className="mt-2 leading-relaxed text-warm-soft">
             {person ? `It starts with ${person}’s name on it${handoff?.age !== undefined ? `, and the jobs suited to age ${handoff.age} come first` : ''}. ` : ''}
             {info?.familyAges && handoff?.ages?.length ? 'Your children’s ages come from your family profile. ' : ''}
+            {info?.familyPeople && handoff?.people?.length ? 'Your family’s names come from your profile. ' : ''}
             {info?.intro}
           </p>
         </div>
