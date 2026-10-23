@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { KitConfig } from '../../data/club/types';
 import {
   back, buildPlan, coachingFor, currentScreen, defineFor, emptyGuide, HARD_COACHING, HARD_OPTIONS, JOB_OPTIONS, jobFor, leadCandidates,
-  LEADER_OPTIONS, OBSTACLE_OPTIONS, PLACE_OPTIONS, planKey, planText, readGuide, START_OPTIONS, TIME_OPTIONS, type GuideState, type Plan,
+  LEADER_OPTIONS, OBSTACLE_OPTIONS, ownsPhrase, PLACE_OPTIONS, planKey, planText, readGuide, START_OPTIONS, TIME_OPTIONS, type GuideState, type Plan,
 } from '../../data/rhythm-guide';
 import { defaultToolPalette, type ToolPaletteId } from '../../data/tool-palettes';
 import { printDocument } from '../../lib/club/print';
@@ -199,7 +199,7 @@ function Screen({ s, screen, update, people, kit, household, bonusHref, heading,
             <div className="mt-5 bg-cream p-5 ring-1 ring-warm-rule" data-guide-bonus>
               <p className="label text-warm-soft">A gift with your membership</p>
               <h4 className="mt-1 font-serif text-[1.25rem] leading-tight text-warm-ink">{bonus.title}</h4>
-              <p className="mt-2 leading-relaxed text-warm-soft">It includes a simple guide for gathering your family around the calendar and making the week’s plan together. {bonus.blurb}</p>
+              <p className="mt-2 leading-relaxed text-warm-soft">{bonus.blurb}</p>
               {bonusHref ? (
                 <a className="btn-primary mt-4 inline-block w-full text-center sm:w-auto" href={bonusHref} onClick={go}>{bonus.cta}</a>
               ) : (
@@ -372,7 +372,7 @@ function Screen({ s, screen, update, people, kit, household, bonusHref, heading,
               <Choice key={p.id} on={s.ownerId === p.id} disabled={readOnly} onClick={() => update({ ownerId: p.id, ownerName: '' })}>
                 <span className="font-semibold">{p.firstName}</span>{p.age !== null ? <span className="text-warm-soft">, {p.age}</span> : null}
                 {s.job !== 'other' && (
-                  <span className="mt-0.5 block text-[0.88rem] text-warm-soft">{item ? `Suits their age: ${item.title}` : 'A smaller part of it, to start'}</span>
+                  <span className="mt-0.5 block text-[0.88rem] text-warm-soft">{item ? `Suits their age: ${ownsPhrase(item)}` : 'A smaller part of it, to start'}</span>
                 )}
               </Choice>
             );

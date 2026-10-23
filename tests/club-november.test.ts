@@ -181,7 +181,7 @@ describe('the guide: only the questions that fit', () => {
     const h = household('rivera');
     const base = walk({ start: 'going-well' }, { leader: 'shared' }, { job: 'school' }, { ownerId: idOf(h, 'Sofia') });
     const d = defineFor(base, members(h), november.items, h.preferences);
-    expect(d.statement).toBe('Sofia owns pack my backpack.');
+    expect(d.statement).toBe('Sofia owns getting their school bag ready.');
     expect(d.when).toBe('Every school night');
     expect(d.done).toBe('Packed the night before and waiting by the door.');
     const coach = (hard: GuideState['hard']) => plan({ ...base, hard, define: d }, h)!.handoff!.coaching;
@@ -190,16 +190,26 @@ describe('the guide: only the questions that fit', () => {
     expect(coach('follow-through')).toMatch(/check in after one week/);
     expect(coach('reminding')).toMatch(/trigger/);
     const p = plan({ ...base, hard: 'standards', define: d }, h)!;
-    expect(p).toMatchObject({ kind: 'handoff', title: 'Our Ownership Handoff Plan', goal: 'Hand off one whole job.', step: 'Sofia owns pack my backpack.' });
+    expect(p).toMatchObject({ kind: 'handoff', title: 'Our Ownership Handoff Plan', goal: 'Hand off one whole job.', step: 'Sofia owns getting their school bag ready.' });
     expect(p.handoff!.stages.map((x) => x.word)).toEqual(['Show it', 'Do it together', 'Hand it over', 'Check in']);
     expect(p.handoff!.stages[3].text).toMatch(/week/);
+  });
+
+  it('every job the handoff can offer reads as something a person owns', () => {
+    const h = household('chen');
+    for (const job of ['kitchen', 'laundry', 'school', 'space', 'groceries'] as const) {
+      for (const m of members(h).filter((x) => !x.isAccountHolder)) {
+        const st = defineFor(walk({ job, ownerId: m.id }), members(h), november.items, h.preferences).statement;
+        expect(st, st).not.toMatch(/\bmy\b|owns (pack|put|wipe|clear|load|vacuum|close)\b/i);
+      }
+    }
   });
 
   it('suggests the version of a job that suits the person’s age, and an adult gets the whole job', () => {
     const h = household('rivera');
     const define = (job: GuideState['job'], name: string) => defineFor(walk({ job, ownerId: idOf(h, name) }), members(h), november.items, h.preferences).statement;
-    expect(define('laundry', 'Luis')).toBe('Luis owns family laundry, start to finish.');
-    expect(define('laundry', 'Mateo')).toMatch(/Mateo owns (my own laundry|put my clean clothes away)/i);
+    expect(define('laundry', 'Luis')).toBe('Luis owns the family laundry, start to finish.');
+    expect(define('laundry', 'Mateo')).toMatch(/Mateo owns (their own laundry|putting their clean clothes away)/);
     expect(define('kitchen', 'Elena')).not.toMatch(/close the kitchen/);
     expect(defineFor(walk({ job: 'other', jobOther: 'the recycling', ownerName: 'Gran' }), members(h), november.items, h.preferences).statement).toBe('Gran owns the recycling.');
   });

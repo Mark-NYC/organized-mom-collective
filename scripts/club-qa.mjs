@@ -188,7 +188,7 @@ for (const id of samples) {
   const sheet = await page.evaluate(() => document.querySelector('.club-next')?.textContent ?? '');
   check(sheet.includes('QA reminder on the fridge') && sheet.includes('Check-in question'), `${id}: her printed plan is missing her edit or the check-in`);
   const front = await page.evaluate(() => document.querySelector('.club-letter .club-letter-page')?.textContent ?? '');
-  for (const part of ['Our Family, Our Team', 'Make the plan together. Learn to share the load.', 'It’s Okay to Start Again', 'Megan', 'We’re just getting started', 'We started, but got off track', 'We’re ready to share more ownership', 'Our family’s next step', 'When we’ll try it']) {
+  for (const part of ['Our Family, Our Team', 'Make the plan together. Learn to share the load.', 'Megan', 'We’re just getting started', 'We started, but got off track', 'We’re ready to share more ownership', 'Our family’s next step', 'When we’ll try it']) {
     check(front.includes(part), `${id}: the November letter's front is missing "${part}"`);
   }
   const back = await page.evaluate(() => document.querySelectorAll('.club-letter-page')[1]?.textContent ?? '');

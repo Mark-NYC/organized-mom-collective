@@ -410,12 +410,33 @@ export function jobFor(job: JobChoice | null, person: PlannedMember | undefined,
 
 const lowerFirst = (t: string) => (/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t);
 
+/** Each library job as something a person owns ("Sofia owns getting their school bag ready"): the titles are chart words. */
+const OWNS: Record<string, string> = {
+  'close-the-kitchen': 'closing the kitchen each night',
+  'load-the-dishwasher': 'loading and starting the dishwasher',
+  'wipe-the-counters': 'wiping the kitchen counters',
+  'clear-the-table': 'clearing the table after dinner',
+  'family-laundry': 'the family laundry, start to finish',
+  'help-with-laundry': 'their own laundry, folded and put away',
+  'put-clothes-away': 'putting their clean clothes away',
+  'school-paperwork': 'school papers: reading, signing and returning them',
+  'pack-my-backpack': 'getting their school bag ready',
+  'vacuum-the-living-room': 'vacuuming the living room',
+  'shoes-and-coats': 'the entry: shoes and coats put away',
+  'put-toys-away': 'putting the toys away',
+  groceries: 'the groceries: the list, the shopping and restocking',
+  'put-groceries-away': 'putting the groceries away',
+};
+
+/** A library job as something a person owns, for the screen and the plan. */
+export const ownsPhrase = (item: KitItem) => OWNS[item.id] ?? lowerFirst(item.title);
+
 /** The handoff's three lines, prefilled from the library for this person; hers to change. */
 export function defineFor(s: GuideState, people: readonly PlannedMember[], items: readonly KitItem[], prefs: HouseholdPreferences) {
   const person = people.find((p) => p.id === s.ownerId);
   const name = person?.firstName ?? (s.ownerName.trim() || 'They');
   const item = jobFor(s.job, person, items, prefs);
-  const what = s.job === 'other' ? s.jobOther.trim() : item ? lowerFirst(item.title) : label(JOB_OPTIONS, s.job).toLowerCase();
+  const what = s.job === 'other' ? s.jobOther.trim() : item ? OWNS[item.id] ?? lowerFirst(item.title) : label(JOB_OPTIONS, s.job).toLowerCase();
   return {
     statement: `${name} owns ${what}.`,
     when: s.job && s.job !== 'other' ? JOB_ITEMS[s.job].when : '',
