@@ -60,7 +60,6 @@ const initial=[
      <div class="asr-panel asr-panel-am"><header><span class="asr-circle">01</span><div><h3>Before School</h3><p>First things first. I can do this!</p></div><span class="asr-accent">MORNING</span></header><div class="asr-rows" data-asr-group="morning">
       {initial.filter(x=>x.group==='morning').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="morning">
         <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
-        <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
         <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
         <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
         <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
@@ -68,6 +67,7 @@ const initial=[
      </div></div>
      <div class="asr-panel asr-panel-pm"><header><span class="asr-circle">02</span><div><h3>After School</h3><p>Come home. Reset. Enjoy the afternoon.</p></div><span class="asr-accent">AFTERNOON</span></header><div class="asr-rows" data-asr-group="after">
       {initial.filter(x=>x.group==='after').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="after">
+        <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
         <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
         <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
         <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
@@ -106,7 +106,7 @@ const initial=[
 .asr-panel>header{margin-bottom:9px}
 .asr-panel h3{font-size:27px}
 .asr-rows{display:flex;flex-direction:column;gap:6px}
-.asr-row{display:grid;grid-template-columns:90px 62px minmax(0,1fr);align-items:center;text-align:left;gap:20px;min-height:58px;padding:5px 19px;border-radius:7px}
+.asr-row{display:grid;grid-template-columns:82px 62px minmax(0,1fr);grid-template-rows:58px;align-items:center;text-align:left;column-gap:18px;row-gap:0;min-height:58px;padding:3px 15px;border-radius:7px}.asr-row>time{grid-column:1;grid-row:1}.asr-row>img{grid-column:2;grid-row:1}.asr-row>strong{grid-column:3;grid-row:1;min-width:0}.asr-row>.asr-remove{grid-column:3;grid-row:1}
 .asr-row time{font:700 18px/1.15 Montserrat,Arial,sans-serif;color:#536558;white-space:nowrap;font-variant-numeric:tabular-nums}
 .asr-row img{width:58px;height:47px;object-fit:contain}
 .asr-row strong{font:600 16px/1.24 Montserrat,Arial,sans-serif;overflow-wrap:normal}
