@@ -1,0 +1,440 @@
+---
+/** Shared November physical worksheet prototype, rendered in both preview and member kit. */
+import { JOB_PRESETS, LIMITS } from '../../lib/worksheet/content';
+import { monthColors } from '../../theme';
+const first=JOB_PRESETS[0];
+---
+<main class="ws-shell" style={`--ws-month-color: ${monthColors[10].hex}`}>
+  <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
+  <div class="ws-intro">
+    <p class="ws-eyebrow">Your November family plan is prepared.</p>
+    <h1>Your November plan. <em>Already prepared.</em></h1>
+    <p>A simple plan for sharing the load. Change anything you want, or leave it just as it is.</p>
+  </div>
+  <div class="ws-workspace">
+    <div class="ws-left">
+      <div class="ws-ready">
+        <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
+        <h2>Ready for your family.</h2>
+        <p>We made a starting plan for <span id="ws-ready-family">the Goering Family</span>. You can change any recommendation, or just download it as is.</p>
+        <div class="ws-field" hidden><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
+      </div>
+      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
+      <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Megan</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
+        <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
+        <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Prepare tomorrow’s clothes and supplies</p><p id="ws-child1-desc">Lay out clothes, check supplies and put everything in its ready spot.</p></article>
+        <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
+      </div>
+      <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Send it.</button><button type="button" class="ws-secondary" id="ws-review">Review or change plan</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
+      <form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
+        <input type="hidden" name="planTitle" id="ws-plan-title" value="Our School-Night Reset"/>
+        <input type="hidden" name="planGoal" id="ws-plan-goal" value="Tomorrow is ready without one person managing every step."/>
+        <h2 id="ws-edit-heading">Adjust your plan</h2>
+        <p class="ws-note">Only edit what you want changed. Everything else is ready.</p>
+        <div class="ws-field ws-profile"><label for="ws-family">Family name</label><input id="ws-family" name="familyName" value="Goering" maxlength={LIMITS.familyName}/><p id="ws-family-hint" class="ws-hint"></p></div>
+        <fieldset id="ws-mom-fields" class="ws-edit-group"><legend>Existing responsibility</legend><div class="ws-field"><label for="ws-mom-name">Name</label><input id="ws-mom-name" name="momName" value="Megan" maxlength="28"/></div><div class="ws-field"><label for="ws-mom-owns-input">Already owns</label><input id="ws-mom-owns-input" name="momOwns" value="Family calendar and weekly schedule" maxlength="110"/></div><div class="ws-field"><label for="ws-mom-relief-input">What she will no longer need to coordinate</label><textarea id="ws-mom-relief-input" name="momRelief" maxlength="170" rows="2">Reminding everyone about tomorrow and following up on school readiness.</textarea></div></fieldset><fieldset id="ws-adult-fields" class="ws-edit-group">
+          <legend>Adult handoff</legend>
+          <div class="ws-field"><label for="ws-adult-owner">Adult name</label><input id="ws-adult-owner" name="adultOwner" value="Mark" maxlength="28"/></div>
+          <div class="ws-field"><label for="ws-adult-job">Suggested whole responsibility</label><select id="ws-adult-job" name="adultJob"><option>Own the school communications and forms</option><option>Plan and manage weekday dinners</option><option>Manage family appointments and transportation</option><option>Own household supplies and restocking</option><option>Manage the weekly laundry system</option><option value="custom">Custom responsibility</option></select><input id="ws-adult-custom" name="adultCustom" maxlength="90" placeholder="Whole responsibility" hidden/></div>
+          <div class="ws-field"><label for="ws-adult-when">When</label><input id="ws-adult-when" name="adultWhen" value="Check messages and forms each school day" maxlength="80"/></div>
+          <div class="ws-field"><label for="ws-adult-steps">What finished looks like</label><textarea id="ws-adult-steps" name="adultSteps" rows="3" maxlength="260"></textarea></div>
+        </fieldset>
+        <fieldset id="ws-child1-fields" class="ws-edit-group">
+          <legend>First child</legend>
+          <div class="ws-field"><label for="ws-owner">Name</label><input id="ws-owner" name="owner" value="Andrew" maxlength={LIMITS.owner}/></div>
+          <div class="ws-field"><label for="ws-job">Suggested job</label><select id="ws-job" name="preset">{JOB_PRESETS.map((p,i)=><option value={String(i)}>{p.job}</option>)}<option value="custom">Custom job</option></select></div>
+          <div class="ws-field" id="ws-custom-wrap" hidden><label for="ws-custom">Custom job</label><input id="ws-custom" name="job" maxlength={LIMITS.job}/></div>
+          <div class="ws-field"><label for="ws-when">When</label><input id="ws-when" name="when" value={first.when} maxlength={LIMITS.when}/></div>
+          <div class="ws-field"><label for="ws-done">Specific finished result</label><textarea id="ws-done" name="done" rows="3" maxlength={LIMITS.done}>{first.done}</textarea><p class="ws-hint"><span id="ws-done-count"></span></p></div>
+        </fieldset>
+        <fieldset id="ws-child2-fields" class="ws-edit-group">
+          <legend>Second child</legend>
+          <div class="ws-field"><label for="ws-child2">Name</label><input id="ws-child2" name="secondChild" value="Philip" maxlength="28"/></div>
+          <div class="ws-field"><label for="ws-child2-job">Suggested job</label><select id="ws-child2-job"><option value="1">Pack my school bag</option><option value="0">Set and clear the dinner table</option><option value="2">Put away my clean laundry</option><option value="4">Keep the entryway tidy</option><option value="custom">Custom job</option></select><input id="ws-child2-custom" maxlength="90" placeholder="Custom responsibility" hidden/></div>
+          <div class="ws-field"><label for="ws-child2-done">What finished looks like</label><textarea id="ws-child2-done" name="secondDone" rows="3" maxlength="260">Homework, folder, water bottle and lunch box packed, bag by the door.</textarea></div>
+        <div class="ws-field"><label for="ws-child2-when">When</label><input id="ws-child2-when" name="secondWhen" maxlength="80" value="Every school night, before bed"/></div>
+        </fieldset>
+        <div class="ws-field"><label for="ws-existing">Other responsibilities already owned <span class="ws-optional">optional</span></label><input id="ws-existing" name="existing" maxlength="130" placeholder="Megan: calendar"/></div>
+        <div class="ws-field"><label for="ws-checkin">Family check-in <span class="ws-optional">optional</span></label><div class="ws-date-row"><input id="ws-checkin" name="checkIn" type="date"/><button type="button" id="ws-two-weeks" class="ws-link">In two weeks</button></div><p id="ws-date-hint" class="ws-hint"></p></div>
+        <button type="button" id="ws-done-editing" class="ws-download">Done editing</button>
+        <button type="submit" id="ws-download" class="ws-download" disabled>Download personalized PDF</button>
+        <p id="ws-status" class="ws-status" role="status" aria-live="polite"></p>
+        <p class="ws-helper">Two US Letter pages. Print front and back on one sheet, 100% scale, long-edge flip.</p>
+      </form>
+      <p class="ws-disclaimer">This is a preview of future Club membership. No plan is saved or mailed. Recommendations are examples based on a sample family.</p>
+    </div>
+    <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview">
+      <div class="ws-preview-head"><h2>Your November mailer</h2><span>One sheet · printed on both sides</span></div>
+      <div class="ws-pages" id="ws-pages" aria-busy="true">
+        <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
+        <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
+      </div>
+      <button type="submit" form="ws-form" class="ws-download ws-download-again" disabled>Download PDF</button>
+    </section>
+  </div>
+</main>
+<script>
+  import { JOB_PRESETS } from '../../lib/worksheet/content';
+  import { createMetrics, FONT_FILES, FONT_URL, type FontBytes } from '../../lib/worksheet/fonts';
+  import { layoutWorksheet } from '../../lib/worksheet/layout';
+  import { normalize } from '../../lib/worksheet/normalize';
+  import { renderSvg } from '../../lib/worksheet/svg';
+  import type { FontKey, Metrics, WorksheetInput } from '../../lib/worksheet/types';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const form = $<HTMLFormElement>('ws-form');
+  const preset = $<HTMLSelectElement>('ws-job');
+  const custom = $<HTMLInputElement>('ws-custom');
+  const when = $<HTMLInputElement>('ws-when');
+  const done = $<HTMLTextAreaElement>('ws-done');
+  const checkIn = $<HTMLInputElement>('ws-checkin');
+  const child2 = $<HTMLSelectElement>('ws-child2-job');
+  const sample = $<HTMLSelectElement>('ws-sample');
+  const sampleProfiles = {
+    goering:{mom:'Megan',momOwns:'Family calendar and weekly schedule',momRelief:'Reminding everyone about tomorrow and following up on school readiness.',title:'Our School-Night Reset',goal:'Tomorrow is ready without one person managing every step.',family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Prepare tomorrow’s clothes and school supplies',childWhen:'Every school night before bed',childDone:'Lay out tomorrow’s clothes. Check school supplies. Put everything in the ready spot.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
+    rivera:{mom:'Casey',momOwns:'Family meals and groceries',momRelief:'Directing every step of the evening cleanup.',title:'Our Evening Reset',goal:'Everyone helps put the shared spaces back in order.',family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
+    bennett:{mom:'Taylor',momOwns:'Dinner planning',momRelief:'Tracking everyones commitments and chasing updates.',title:'Our Week-Ahead Plan',goal:'Everyone notices and prepares for their part of the coming week.',family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
+  } as const;
+  function applySample(key:keyof typeof sampleProfiles) {
+    const p=sampleProfiles[key];
+    const value=(id:string,v:string)=> {($<HTMLInputElement|HTMLTextAreaElement>(id)).value=v;};
+    value('ws-mom-name',p.mom);value('ws-mom-owns-input',p.momOwns);value('ws-mom-relief-input',p.momRelief);value('ws-family',p.family);value('ws-plan-title',p.title);value('ws-plan-goal',p.goal);value('ws-adult-owner',p.adult);value('ws-adult-when',p.adultWhen);
+    value('ws-owner',p.child1);value('ws-when',p.childWhen);value('ws-done',p.childDone);
+    value('ws-child2',p.child2);value('ws-child2-when',p.secondWhen);value('ws-existing',p.existing);
+    const pick=(id:string,customId:string,job:string,list:string[])=>{
+      const el=$<HTMLSelectElement>(id);const idx=list.findIndex(x=>x===job);
+      el.value=idx<0?'custom':String(idx);
+      const custom=$<HTMLInputElement>(customId);custom.hidden=idx>=0;custom.value=job;
+    };
+    const adultOptions=Array.from($<HTMLSelectElement>('ws-adult-job').options).filter(o=>o.value!=='custom').map(o=>o.value);
+    const adultIndex=adultOptions.indexOf(p.adultJob);
+    const adultSelect=$<HTMLSelectElement>('ws-adult-job');
+    adultSelect.value=adultIndex<0?'custom':adultOptions[adultIndex];
+    adultCustom.hidden=adultIndex>=0;adultCustom.value=p.adultJob;
+    value('ws-adult-steps',adultCatalog[p.adultJob]?.steps??'Notice what needs doing. Make a plan. Follow through without reminders.');
+    pick('ws-job','ws-custom',p.childJob,JOB_PRESETS.map(x=>x.job));
+    $('ws-custom-wrap').hidden=$<HTMLSelectElement>('ws-job').value!=='custom';
+    const options=Array.from(child2.options).filter(x=>x.value!=='custom');
+    const match=options.find(o=>JOB_PRESETS[Number(o.value)].job===p.secondJob);
+    child2.value=match?.value??'custom';child2Custom.hidden=Boolean(match);child2Custom.value=p.secondJob;
+    value('ws-child2-done',p.child2==='Philip' ? 'Pack homework and school folder. Check water bottle and lunch container. Put bag by the door.' : match ? JOB_PRESETS[Number(match.value)].done : 'Complete the whole job and put everything back where it belongs.');
+    last={when:p.childWhen,done:p.childDone};
+    originalJobs=jobSelections();refreshPlanTheme();
+    closeInlineEditors();
+    $('ws-approval-note').textContent='Sample plan prepared. Nothing is mailed from this demo.';
+    update();
+  }
+  sample.addEventListener('change',()=>applySample(sample.value as keyof typeof sampleProfiles));
+  // The shared Family tab owns the sample household. The original three-case
+  // selector remains only as an internal baseline for job recommendations.
+  window.addEventListener('omc:club-preview-household',(event:Event)=>{
+    const h=(event as CustomEvent<{household:{displayName?:string;members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean}[]} | null}>).detail?.household;
+    if(!h)return;
+    const adults=h.members.filter(m=>m.kind==='adult'&&!m.archived);
+    const children=h.members.filter(m=>m.kind==='child'&&!m.archived);
+    const holder=adults.find(m=>m.isAccountHolder)??adults[0];
+    sample.value='rivera';
+    applySample('rivera');
+    const put=(id:string,name:string|undefined)=>{if(name)($<HTMLInputElement>(id)).value=name;};
+    put('ws-family',h.displayName);
+    put('ws-mom-name',holder?.firstName);
+    put('ws-adult-owner',adults.find(m=>m!==holder)?.firstName??holder?.firstName);
+    put('ws-owner',children[0]?.firstName);
+    put('ws-child2',children[1]?.firstName);
+    $('ws-ready-family').textContent=h.displayName??'your family';
+    update();
+  });
+
+  $('ws-approve').addEventListener('click',()=>{const error=planIssue();$('ws-approval-note').textContent=error??'Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
+  $('ws-review').addEventListener('click',()=>toggleInlineEditor('adult'));
+  const child2Custom = $<HTMLInputElement>('ws-child2-custom');
+  const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
+  const setBusy = (busy: boolean) => downloads.forEach((b) => (b.disabled = busy));
+  const status = $<HTMLParagraphElement>('ws-status');
+  const sheets = [...document.querySelectorAll<HTMLElement>('.ws-sheet')];
+
+  let fonts: FontBytes | null = null;
+  let metrics: Metrics | null = null;
+
+  function planIssue():string|null {
+    const data=normalize(input());
+    if(!data.momName || !data.momOwns || !data.momRelief)return 'Complete the existing responsibility and intended relief.';
+    if(!data.adultOwner || !data.owner || !data.secondChild)return 'Add a name for each featured person before approving.';
+    if(!data.adultJob || !data.job || !data.secondJob)return 'Each person needs a responsibility before this plan is ready.';
+    if(!data.adultWhen || !data.when || !data.secondWhen)return 'Add a time for every responsibility.';
+    if(!data.adultSteps || !data.done || !data.secondDone)return 'Each responsibility needs specific steps before this plan is ready.';
+    return null;
+  }
+  const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  checkIn.min = isoDate(new Date());
+
+  function input(): WorksheetInput {
+    const v = (name: string) => (form.elements.namedItem(name) as HTMLInputElement).value;
+    return {
+      familyName: v('familyName'),
+      owner: v('owner'),
+      adultOwner: v('adultOwner'),
+      adultJob: v('adultJob') === 'custom' ? v('adultCustom') : v('adultJob'),
+      adultWhen: v('adultWhen'),
+      existing: v('existing'),
+      secondChild: v('secondChild'),
+      secondJob: child2.value === 'custom' ? child2Custom.value : JOB_PRESETS[Number(child2.value)].job,
+      secondWhen: v('secondWhen'),
+      secondDone: v('secondDone'),
+      job: preset.value === 'custom' ? custom.value : JOB_PRESETS[Number(preset.value)].job,
+      when: when.value,
+      done: done.value,
+      checkIn: checkIn.value,
+      planTitle: v('planTitle'),
+      planGoal: v('planGoal'),
+      adultSteps: v('adultSteps'),
+      momName: v('momName'),momOwns: v('momOwns'),momRelief: v('momRelief'),
+    };
+  }
+
+  function hints(data: ReturnType<typeof normalize>) {
+    $('ws-family-hint').textContent = data.familyName ? `Prints as “${data.familyName}”.` : 'Prints as a line to write on.';
+    $('ws-done-count').textContent = `${done.value.length} / ${done.maxLength} characters`;
+    const past = checkIn.value && checkIn.value < isoDate(new Date());
+    $('ws-date-hint').textContent = checkIn.value && !data.checkIn ? 'Choose a valid date.' : past ? 'That date has already passed.' : data.checkIn ? `Prints as “${data.checkIn}”.` : 'Leave blank to write it in.';
+  }
+
+  let queued = false;
+  function update() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      const data = normalize(input());
+      hints(data);
+      const set = (id:string,value:string) => { const e=document.getElementById(id); if(e)e.textContent=value; };
+      set('ws-ready-family',(data.familyName??'your family').replace(/^The /,'the '));
+      set('ws-plan-heading',data.planTitle??'Our Family Ownership Plan');
+      set('ws-plan-goal-line',data.planGoal??'');
+      set('ws-mom-title',data.momName??'Family member');set('ws-mom-owns',data.momOwns??'Existing contribution');
+      set('ws-adult-title',data.adultOwner??'Adult');
+      set('ws-adult-summary',data.adultJob??'Choose a responsibility');
+      set('ws-adult-desc',data.adultWhen??'');
+      set('ws-child1-title',data.owner??'Child');
+      set('ws-child1-summary',data.job??'Choose a job');
+      set('ws-child1-desc',data.done??'');
+      set('ws-child2-title',data.secondChild??'Child');
+      set('ws-child2-summary',data.secondJob??'Choose a job');
+      set('ws-child2-desc',data.secondDone??data.secondWhen??'');
+      if (!metrics) return;
+      layoutWorksheet(metrics, data).forEach((page, i) => {
+        sheets[i].innerHTML = renderSvg(page, i ? 'Back of the worksheet' : 'Front of the worksheet');
+      });
+    });
+  }
+
+  // A preset fills "when" and "finished", unless they've been changed from the last preset's wording.
+  let last: { when: string; done: string } = { when: when.value, done: done.value };
+  preset.addEventListener('change', () => {
+    const isCustom = preset.value === 'custom';
+    $('ws-custom-wrap').hidden = !isCustom;
+    if (isCustom) {
+      when.value = '';
+      done.value = '';
+      last = { when: '', done: '' };
+      custom.focus();
+    } else {
+      const p = JOB_PRESETS[Number(preset.value)];
+      when.value = p.when;
+      done.value = p.done;
+      last = { when: p.when, done: p.done };
+    }
+    refreshPlanTheme();update();
+  });
+  const adultJob = $<HTMLSelectElement>('ws-adult-job');
+  const adultCustom = $<HTMLInputElement>('ws-adult-custom');
+
+  const adultCatalog: Record<string,{when:string;steps:string}> = {
+    'Own the school communications and forms':{when:'Check each school day and follow up before deadlines',steps:'Check school messages and deadlines. Handle forms and responses. Add important dates to the family calendar.'},
+    'Plan and manage weekday dinners':{when:'Plan once a week and manage each assigned dinner',steps:'Choose the meals. Prepare or arrange the ingredients. Manage serving and cleanup.'},
+    'Manage family appointments and transportation':{when:'Review the coming week each Sunday',steps:'Review upcoming appointments and commitments. Confirm transportation and rides. Update the family calendar.'},
+    'Own household supplies and restocking':{when:'Check supplies once a week',steps:'Notice which essentials are low. Make the restocking list. Buy or arrange replacements.'},
+    'Manage the weekly laundry system':{when:'On the family laundry days',steps:'Gather and sort loads. Run and dry the laundry. Make sure clean clothes get put away.'},
+  };
+  const jobSelections = () => [adultJob.value === 'custom' ? adultCustom.value : adultJob.value,preset.value==='custom'? custom.value : JOB_PRESETS[Number(preset.value)].job,child2.value==='custom'?child2Custom.value:JOB_PRESETS[Number(child2.value)].job];
+  let originalJobs:string[]=[];
+  function refreshPlanTheme(){
+    const current=jobSelections();
+    const matched=current.every((job,i)=>job===originalJobs[i]);
+    const key=sample.value as keyof typeof sampleProfiles;
+    const p=sampleProfiles[key];
+    ($<HTMLInputElement>('ws-plan-title')).value=matched?p.title:'Our Family Ownership Plan';
+    ($<HTMLInputElement>('ws-plan-goal')).value=matched?p.goal:'Everyone knows their whole job, when to do it, and what finished means.';
+  }
+  adultJob.addEventListener('change', () => {
+    adultCustom.hidden = adultJob.value !== 'custom';
+    if (!adultCustom.hidden) { adultCustom.focus(); ($<HTMLTextAreaElement>('ws-adult-steps')).value=''; ($<HTMLInputElement>('ws-adult-when')).value=''; }
+    else {const d=adultCatalog[adultJob.value];if(d){($<HTMLTextAreaElement>('ws-adult-steps')).value=d.steps;($<HTMLInputElement>('ws-adult-when')).value=d.when;}}
+    refreshPlanTheme();update();
+  });
+  form.addEventListener('input',()=>{refreshPlanTheme();update();});
+  child2.addEventListener('change',()=> {
+    child2Custom.hidden = child2.value !== 'custom';
+    const selected=child2.value==='custom'?null:JOB_PRESETS[Number(child2.value)];
+    if(!selected) {($<HTMLInputElement>('ws-child2-when')).value='';($<HTMLTextAreaElement>('ws-child2-done')).value='';child2Custom.focus();}
+    if(selected) $('ws-child2-when').setAttribute('value',selected.when);
+    if(selected) ($<HTMLInputElement>('ws-child2-when')).value=selected.when;
+    if(selected) ($<HTMLTextAreaElement>('ws-child2-done')).value=selected.done;
+    refreshPlanTheme();update();
+  });
+  // Keep the PDF form as the single data source while locating each editor below its owner.
+  // Form-associated controls outside the form still appear in form.elements.
+  const inlineEditors = new Map<string,HTMLElement>();
+  const editorGroups: Record<string,string> = {mom:'ws-mom-fields',adult:'ws-adult-fields',child1:'ws-child1-fields',child2:'ws-child2-fields'};
+  Object.entries(editorGroups).forEach(([role,id])=>{
+    const article=document.querySelector<HTMLElement>(`.ws-rec:has([data-edit="${role}"])`);
+    const group=$<HTMLFieldSetElement>(id);
+    if(!article)return;
+    const panel=document.createElement('div');
+    panel.className='ws-inline-editor';
+    panel.id=`ws-inline-${role}`;
+    panel.hidden=true;
+    panel.appendChild(group);
+    group.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>('input, textarea, select').forEach(control=>control.setAttribute('form','ws-form'));
+    const doneButton=document.createElement('button');
+    doneButton.type='button';
+    doneButton.className='ws-inline-done';
+    doneButton.textContent='Done';
+    doneButton.addEventListener('click',()=>toggleInlineEditor(role));
+    panel.appendChild(doneButton);
+    article.appendChild(panel);
+    inlineEditors.set(role,panel);
+    const edit=article.querySelector<HTMLButtonElement>('.ws-edit');
+    edit?.setAttribute('aria-expanded','false');
+    edit?.setAttribute('aria-controls',panel.id);
+  });
+  function closeInlineEditors(){
+    inlineEditors.forEach((panel,role)=>{
+      panel.hidden=true;
+      const button=document.querySelector<HTMLButtonElement>(`[data-edit="${role}"]`);
+      if(button){button.setAttribute('aria-expanded','false');button.textContent='Edit';}
+    });
+  }
+  function toggleInlineEditor(role:string){
+    const panel=inlineEditors.get(role);
+    if(!panel)return;
+    const opening=panel.hidden;
+    closeInlineEditors();
+    if(opening){
+      panel.hidden=false;
+      const button=document.querySelector<HTMLButtonElement>(`[data-edit="${role}"]`);
+      if(button){button.setAttribute('aria-expanded','true');button.textContent='Close';}
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>('.ws-edit').forEach(button=>button.addEventListener('click',()=>toggleInlineEditor(button.dataset.edit??'adult')));
+  $('ws-done-editing').addEventListener('click',()=>{closeInlineEditors();update();});
+  document.querySelectorAll<HTMLElement>('.ws-inline-editor').forEach(panel=>{
+    panel.addEventListener('input',()=>{refreshPlanTheme();update();});
+    panel.addEventListener('change',()=>{refreshPlanTheme();update();});
+  });
+  form.addEventListener('change', update);
+  $('ws-two-weeks').addEventListener('click', () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    checkIn.value = isoDate(d);
+    update();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!fonts || !metrics) return;
+    const issue=planIssue();
+    if(issue){status.textContent=issue;toggleInlineEditor(issue.startsWith('Complete the existing')?'mom':'adult');return;}
+    setBusy(true);
+    status.textContent = 'Making your PDF…';
+    try {
+      const { createWorksheetPdf, worksheetFileName } = await import('../../lib/worksheet/index');
+      const values = input();
+      const pdf = await createWorksheetPdf(values, fonts, { metrics });
+      const url = URL.createObjectURL(new Blob([pdf as BlobPart], { type: 'application/pdf' }));
+      const a = Object.assign(document.createElement('a'), { href: url, download: worksheetFileName(values) });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      status.textContent = 'PDF downloaded. This demo does not submit a mailing.';
+    } catch (err) {
+      console.error(err);
+      status.textContent = 'Something went wrong making the PDF. Please try again.';
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  async function start() {
+    try {
+      const keys = Object.keys(FONT_FILES) as FontKey[];
+      const files = await Promise.all(keys.map(async (k) => {
+        const res = await fetch(FONT_URL + FONT_FILES[k]);
+        if (!res.ok) throw new Error(`font ${k}: ${res.status}`);
+        return new Uint8Array(await res.arrayBuffer());
+      }));
+      fonts = Object.fromEntries(keys.map((k, i) => [k, files[i]])) as FontBytes;
+      metrics = createMetrics(fonts);
+      // Draw the preview once its faces are ready, so it never shows a fallback font.
+      await Promise.all(['400 12px "WS Gelasio"', 'italic 400 12px "WS Gelasio"', 'italic 600 12px "WS Gelasio"', '400 12px "WS Montserrat"', '500 12px "WS Montserrat"', '600 12px "WS Montserrat"'].map((f) => document.fonts.load(f)));
+      setBusy(false);
+      $('ws-pages').setAttribute('aria-busy', 'false');
+      update();
+    } catch (err) {
+      console.error(err);
+      sheets[0].innerHTML = '<p class="ws-loading">The preview couldn’t load. Check your connection and refresh.</p>';
+      status.textContent = 'The worksheet couldn’t load. Refresh to try again.';
+    }
+  }
+  applySample('goering');
+  start();
+</script>
+<style is:global>
+@font-face{font-family:'WS Gelasio';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/gelasio-400.ttf) format('truetype')}
+@font-face{font-family:'WS Gelasio';font-weight:400;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-400-italic.ttf) format('truetype')}
+@font-face{font-family:'WS Gelasio';font-weight:600;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-600-italic.ttf) format('truetype')}
+@font-face{font-family:'WS Montserrat';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-400.ttf) format('truetype')}
+@font-face{font-family:'WS Montserrat';font-weight:500;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-500.ttf) format('truetype')}
+@font-face{font-family:'WS Montserrat';font-weight:600;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-600.ttf) format('truetype')}
+</style>
+<style>
+.ws-shell{max-width:1440px;margin:auto;padding:24px clamp(16px,3vw,52px) 72px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}
+.ws-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.ws-back{font-size:13px;text-decoration:underline;text-underline-offset:4px;padding:10px 0}
+.ws-eyebrow{font-size:10px;font-weight:650;letter-spacing:.19em;text-transform:uppercase}
+.ws-intro{max-width:780px;padding:40px 0 36px}
+.ws-intro h1{font-family:Georgia,serif;font-size:clamp(34px,5vw,60px);line-height:1.06;font-weight:400;letter-spacing:-.02em;margin:12px 0 18px;color:#3d3d3d}
+.ws-intro p:last-child{font-size:16px;line-height:1.7;max-width:620px}
+.ws-workspace{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);align-items:start;gap:clamp(20px,3vw,44px)}
+.ws-controls{background:#f5f5f5;border:1px solid #dcdcdc;padding:26px;position:sticky;top:16px}
+.ws-controls h2,.ws-preview-head h2{font-family:Georgia,serif;font-size:25px;font-weight:400;margin:0 0 20px;color:#3d3d3d}
+.ws-field{margin-bottom:16px}
+.ws-field label{display:block;font-size:11px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;color:#4a4a4a}
+.ws-optional{font-weight:500;letter-spacing:.04em;text-transform:none;color:#6b6b6b;margin-left:4px}
+.ws-controls input,.ws-controls textarea,.ws-controls select{display:block;width:100%;min-height:46px;background:#fff;border:1px solid #b5b5b5;border-radius:0;padding:11px 12px;font:400 15px/1.4 'Montserrat Variable',Montserrat,sans-serif;color:#333}
+.ws-controls textarea{resize:vertical;min-height:104px}
+.ws-controls select{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23545454' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:38px}
+.ws-controls :focus-visible{outline:2px solid #545454;outline-offset:2px}
+.ws-controls [hidden]{display:none}
+.ws-hint{font-size:11.5px;line-height:1.5;color:#666;margin:6px 0 0;min-height:1em}
+.ws-date-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ws-date-row input{flex:1 1 150px;width:auto}
+.ws-link{font-size:12px;text-decoration:underline;text-underline-offset:4px;min-height:44px;padding:0 2px;cursor:pointer;color:#545454;background:none}
+.ws-note{font-size:12px;line-height:1.55;margin:4px 0 16px;color:#555}
+.ws-download{display:block;width:100%;min-height:52px;background:#454545;color:#fff;font-weight:650;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border:0}
+.ws-download:hover{background:#333}
+.ws-download:disabled{background:#8a8a8a;cursor:progress}
+.ws-status{font-size:12.5px;line-height:1.5;margin:10px 0 0;min-height:1.5em;color:#3d3d3d}
+.ws-helper{font-size:11.5px;line-height:1.6;color:#666;margin:8px 0 0}
+.ws-preview-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ws-preview-head span{font-size:11px;letter-spacing:.06em}
+.ws-pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:28px;align-items:start}
+.ws-page{margin:0;min-width:0}
+.ws-sheet{aspect-ratio:8.5/11;background:#fff;box-shadow:0 10px 34px rgba(0,0,0,.13);border:1px solid #e3e3e3;position:relative}
+.ws-sheet :global(svg){display:block;width:100%;height:100%}
+.ws-page figcaption{font-size:10px;font-weight:650;letter-spacing:.19em;text-transform:uppercase;text-align:center;margin-top:12px}
+.ws-jump,.ws-download-again{display:none}
+.ws-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;margin:0;padding:20px;text-align:center}
+@media(max-width:860px){.ws-jump{display:inline-block;font-size:13px;text-decoration:underline;text-underline-offset:4px;padding:10px 0 14px;margin-top:-12px}.ws-download-again{display:block;margin-top:24px}.ws-workspace{grid-template-columns:1fr}.ws-controls{position:static;padding:20px}.ws-intro{padding:28px 0 26px}.ws-controls input,.ws-controls textarea,.ws-controls select{font-size:16px}}
+</style>
