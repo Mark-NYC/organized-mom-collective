@@ -7,6 +7,7 @@ import { FREQUENCIES, OWNERSHIP_LEVELS, SCHOOL_TYPES, type KitConfig, type KitIt
 import { routineTypes } from '../../routines';
 import { clubToolById } from '../tools';
 import { kit as november2026 } from './2026-11-family-ownership';
+import { kit as december2026 } from './2026-12-christmas-mission';
 import { kit as january2027 } from './2027-01-fresh-start-together';
 import { kit as february2027 } from './2027-02-better-together';
 import { kit as march2027 } from './2027-03-spring-clean-together';
@@ -19,7 +20,7 @@ import { kit as september2027 } from './2027-09-a-week-everyone-can-see';
 import { kit as october2027 } from './2027-10-home-works-together';
 import { kit as december2027 } from './2027-12-christmas-family-affair';
 
-export const kits: readonly KitConfig[] = [november2026, january2027, february2027, march2027, april2027, may2027, june2027, july2027, august2027, september2027, october2027, december2027];
+export const kits: readonly KitConfig[] = [november2026, december2026, january2027, february2027, march2027, april2027, may2027, june2027, july2027, august2027, september2027, october2027, december2027];
 
 export const kitBySlug = (slug: string) => kits.find((k) => k.slug === slug);
 
