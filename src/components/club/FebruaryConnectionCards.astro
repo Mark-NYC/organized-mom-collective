@@ -56,9 +56,7 @@ const examples=[
      <div class="fbc-grid">
       {examples.map((item,i)=><article class="fbc-card" data-card={i}>
        <div class="fbc-card-top"><span>AN INVITATION FOR SOMEONE YOU LOVE</span><span>0{i+1}</span></div>
-       <div class="fbc-illustration" aria-hidden="true">
-        {i===0?<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="19" y="22" width="42" height="37" rx="3"/><path d="M19 35h42M32 22v37"/><path d="M43 45h8m-4-4v8M23 14l6-5 6 5M49 11l6 6"/></svg>:i===1?<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M22 59V40c0-11 8-18 18-18s18 7 18 18v19M16 59h48M30 59V43M50 59V43"/><path d="M40 26c-10-17-27-1 0 16 27-17 10-33 0-16z"/></svg>:i===2?<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M14 49h52M21 49v14M59 49v14M22 49l7-24h22l7 24"/><path d="M35 30v13M45 30v13M30 18c3-5 9-5 12 0 3-5 9-5 12 0"/></svg>:<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M14 30h52v35H14zM14 30l26 19 26-19M14 65l18-22M66 65L48 43"/><path d="M40 14c-5-9-18-1 0 12 18-13 5-21 0-12z"/></svg>}
-       </div>
+       <div class="fbc-illustration" aria-hidden="true"><img src={['puzzle-piece','adult-and-child-together','family-group','helping-hands'].map(n=>'/images/club/shared-icons/'+n+'.png')[i]} alt="" width="65" height="64" /></div>
        <p class="fbc-overline">A LITTLE TIME TOGETHER</p>
        <h3 data-out="headline">{item.headline}</h3>
        <p class="fbc-from"><span>FROM</span> <strong data-out="owner">{item.owner}</strong></p>
@@ -105,7 +103,7 @@ const examples=[
 .fbc-card:nth-child(4){background:linear-gradient(to bottom,#f6ebee 0,#f6ebee 153px,#fff 153px,#fff 100%)}
 .fbc-card:nth-child(odd){border-right:1px dashed #bcb9b9}.fbc-card:nth-child(-n+2){border-bottom:1px dashed #bcb9b9}
 .fbc-card-top{display:flex;justify-content:space-between;font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.08em;color:#636063;gap:7px}
-.fbc-illustration{width:65px;height:64px;margin:8px auto 1px;color:#9b6477}.fbc-illustration svg{width:100%;height:100%}
+.fbc-illustration{width:65px;height:64px;margin:8px auto 1px;color:#9b6477}.fbc-illustration img{width:100%;height:100%;object-fit:contain;display:block}
 .fbc-overline{text-align:center;font-size:7px;color:#8b6372}.fbc-card h3{font:600 italic 26px/1.14 'FBC Gelasio',Georgia,serif;text-align:center;color:#976479;margin:7px 0 9px;overflow-wrap:anywhere}
 .fbc-from{text-align:center;font:12px 'FBC Gelasio',Georgia,serif;margin:0 0 18px;border-bottom:5px solid #e8d2d6;padding-bottom:12px}
 .fbc-from span{font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.15em}.fbc-from strong{font-weight:400;font-style:italic;font-size:16px}
