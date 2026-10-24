@@ -26,6 +26,7 @@ export const COLORS = {
   soft: '#575757',
   faint: '#7a7a7a',
   blue: monthColors[10].hex,
+  heading: '#8A6D58', // readable deep tone of November's warm mushroom
   blueRule: monthColors[10].hex,
   frame: '#8c8c8c',
   hair: '#cfcfcf',
@@ -115,7 +116,7 @@ function front(m:Metrics,d:WorksheetData):Page {
  g.rect(X0,39,52,4,COLORS.blue);
  g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
  g.label(X0,94,d.familyName??'Our family',{size:7});
- g.block(X0,137,d.planTitle??'Our Family Ownership Plan','serif',{width:W,maxLines:2,size:31,min:23,lead:1.15});
+ g.block(X0,137,d.planTitle??'Our Family Ownership Plan','serif',{width:W,maxLines:2,size:31,min:23,lead:1.15,color:COLORS.heading});
  g.block(X0,165,d.planGoal??'Everyone owns a part. Everyone knows what finished means.','sans',{width:W,maxLines:2,size:9.5,min:8.5,lead:1.2,color:COLORS.soft});
  const group=(y:number,name:string|null,job:string|null,when:string|null,done:string|null)=>{
   g.line(X0,y-24,X1,y-24,COLORS.blue,.9);
@@ -140,7 +141,7 @@ function back(m:Metrics,d:WorksheetData):Page {
  g.rect(X0,39,52,4,COLORS.blue);
  g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
  g.label(X0,103,'A little less to carry');
- g.text(X0,148,'How we hand it over','serif',32);
+ g.text(X0,148,'How we hand it over','serif',32,{color:COLORS.heading});
  g.block(X0,188,'Show the plan to everyone who will own a part. Agree on what finished means, and where things belong. Then let each person take the lead.','serif',{width:W,maxLines:3,size:14,min:12,lead:1.45});
  const lines=[
   ['Start together','Walk through each job once. Practice anything new.'],
