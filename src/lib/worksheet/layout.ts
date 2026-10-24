@@ -127,8 +127,10 @@ function front(m:Metrics,d:WorksheetData):Page {
  group(215,d.adultOwner,d.adultJob,d.adultWhen,adultSteps.join('. '));
  group(386,d.owner,d.job,d.when,d.done);
  group(557,d.secondChild,d.secondJob,d.secondWhen,d.secondDone);
- g.line(X0,696,X1,696,COLORS.hair,.8);
- g.block(X0,719,'One less thing for one person to carry.','serifItalic',{width:W,maxLines:1,size:15,min:12,lead:1.1});
+ g.line(X0,681,X1,681,COLORS.hair,.8);
+ g.block(X0,707,d.momName??'Mom','serif',{width:140,maxLines:1,size:19,min:12,lead:1});
+ g.label(X0+157,697,'Already owning',{size:6.1});
+ g.block(X0+157,715,d.momOwns??'An existing family responsibility','sans',{width:W-157,maxLines:2,size:10,min:8.5,lead:1.2});
  g.footer('Front · 1 / 2');
  return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
@@ -145,10 +147,12 @@ function back(m:Metrics,d:WorksheetData):Page {
   ['Adjust without taking it back','If a step is too hard, simplify it together. Keep a clear owner.']
  ];
  lines.forEach((item,i)=>{const y=289+i*104;g.line(X0,y-24,X1,y-24,COLORS.hair,.75);g.text(X0,y,item[0],'serif',19);g.block(X0,y+26,item[1],'sans',{width:W,maxLines:2,size:11,min:10,lead:1.3});});
- g.line(X0,587,X1,587,COLORS.hair,.8);
- g.text(X0,621,'A note from Megan','serifItalic',21);
- g.block(X0,657,'The goal is not a perfectly organized family overnight. It is a home where everyone can see their part and carry it. Start small, and give each other room to grow.','serif',{width:W,maxLines:4,size:13,min:11,lead:1.38});
- g.text(X0,722,'Megan','serifBoldItalic',18);
+ g.line(X0,580,X1,580,COLORS.hair,.8);
+ g.label(X0,601,'What the family aims to take off '+(d.momName??'Mom')+'’s plate',{size:6.3});
+ g.block(X0,626,d.momRelief??'The responsibility for managing and reminding everyone about their jobs.','serifItalic',{width:W,maxLines:2,size:14,min:11,lead:1.3});
+ g.text(X0,670,'A note from Megan','serifItalic',19);
+ g.block(X0,694,'The goal is not a perfect family overnight. Start small, and let everyone grow into their role.','serif',{width:W,maxLines:2,size:11.5,min:10.5,lead:1.35});
+ g.text(X0,732,'Megan','serifBoldItalic',15);
  g.footer('Back · 2 / 2');
  return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
