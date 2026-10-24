@@ -34,7 +34,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npx astro build
+      # Match Cloudflare Pages: type-check first, then generate the static site.
+      - run: npm run build
       - name: Inventory and sync
         run: |
           if [ -z "$PAGE_INVENTORY_TOKEN" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
