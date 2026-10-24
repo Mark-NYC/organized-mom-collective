@@ -1,0 +1,24 @@
+---
+/** Shared December physical mission prototype, rendered in both preview and member kit. */
+import { monthColors } from '../../theme';
+import {families} from '../../lib/december/traditions';
+---
+<main class="dec" style={`--accent:${monthColors[11].hex}`}>
+  <a href="/club/worksheet-generator/" class="back">← November experiment</a>
+  <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>Your Christmas Mission Has Arrived!</h1><p>A surprise addressed to the children. One kindness mission and two Christmas cards, ready to give.</p></header>
+  <div class="workspace">
+    <section class="details" aria-label="December tradition plan">
+      <div hidden><label for="family">Explore a sample family</label>
+      <select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select>
+      <p class="demo">Demo only · Nothing is saved or mailed</p></div>
+      <h2 id="mission-title">One mission. Two Christmas cards.</h2>
+      <p id="mission-summary">The children choose someone to encourage, make a card, and ask a grown-up to help deliver it.</p>
+      <h3>The three steps</h3>
+      <ol><li>Choose someone to surprise.</li><li>Make their Christmas card.</li><li>Deliver your kindness with a grown-up.</li></ol>
+      <p class="duration">No special supplies or shopping. Just a pen, a kind idea, and the two cards included on the second sheet.</p>
+      <button type="button" id="download" disabled>Download mission + cards</button>
+      <p class="demo" id="message" role="status" aria-live="polite">Two US Letter pages. Print page 1 for the kids. Print page 2 on one side only, then cut and fold the two cards.</p>
+    </section>
+    <section class="preview" aria-label="Actual print preview"><div class="previewheading"><h2>Your December mission</h2><span>Mission + two gift cards</span></div><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Personalized mission</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Two one-sided cards · cut and fold</figcaption></figure></div></section>
+  </div>
+</main>
