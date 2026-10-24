@@ -1,0 +1,134 @@
+---
+import {Image} from 'astro:assets';
+import morning from '../../../assets/icons/ofc/primary/morning-start.png';
+import move from '../../../assets/icons/ofc/primary/move-play.png';
+import create from '../../../assets/icons/ofc/primary/create-explore.png';
+import lunch from '../../../assets/icons/ofc/primary/lunch-reset.png';
+import quiet from '../../../assets/icons/ofc/primary/quiet-time.png';
+import free from '../../../assets/icons/ofc/primary/free-afternoon.png';
+import evening from '../../../assets/icons/ofc/primary/evening-reset.png';
+interface Props {storageKey?:string}
+const {storageKey='omc:club:may-summer-rhythm:v1'}=Astro.props;
+const blocks=[
+ {key:'morning',title:'Morning Start',time:'8:00',desc:'Breakfast · Get dressed · Make beds',icon:morning,tint:'#F3E7C5'},
+ {key:'move',title:'Move & Play',time:'9:00',desc:'Outside · Bikes · Park · Backyard',icon:move,tint:'#DEE9CF'},
+ {key:'create',title:'Create & Explore',time:'10:30',desc:'Read · Build · Draw · Make',icon:create,tint:'#E8E0D5'},
+ {key:'lunch',title:'Lunch & Reset',time:'12:00',desc:'Eat · Clear dishes · Tidy up',icon:lunch,tint:'#F1DECA'},
+ {key:'quiet',title:'Quiet Time',time:'1:00',desc:'Read · Puzzles · Quiet play',icon:quiet,tint:'#DFE8EC'},
+ {key:'free',title:'Free Afternoon',time:'2:00',desc:'Friends · Outings · Free play',icon:free,tint:'#E8E0E9'},
+ {key:'evening',title:'Evening Reset',time:'Evening',desc:'Pick up · Wash up · Wind down',icon:evening,tint:'#E3E4ED'},
+];
+---
+<div class="msr" data-msr-key={storageKey}>
+ <header class="msr-intro"><a href="/club">← Organized Family Club</a><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>
+ <div class="msr-layout">
+  <aside class="msr-editor">
+   <p class="msr-label">YOUR FAMILY'S SUMMER RHYTHM</p><h2>Ready for the fridge.</h2><p>Start with the prepared day. Change only what your family needs.</p>
+   <label>Morning starts<select data-start><option value="7">7:00 AM</option><option value="7.5">7:30 AM</option><option value="8" selected>8:00 AM</option><option value="8.5">8:30 AM</option><option value="9">9:00 AM</option><option value="9.5">9:30 AM</option></select></label>
+   <label>Quiet time<select data-quiet><option value="independent">Independent play and reading</option><option value="rest">Rest or nap</option><option value="older">Independent recharge</option></select></label>
+   <label>Favorite kind of play<select data-play><option value="outdoors">Outdoor play</option><option value="active">Sports and movement</option><option value="creative">Making and creativity</option><option value="mixed">A mix of everything</option></select></label>
+   <div class="msr-message"><strong>Made for ordinary days at home.</strong><p>On camp days, trips, or appointments, follow the anchors that fit. The printed rhythm stays useful even when plans change.</p></div>
+   <button type="button" data-print>Print rhythm / Save PDF</button><button type="button" data-reset class="msr-reset">Restore suggested rhythm</button>
+   <p class="msr-note">US Letter · 8.5 × 11 inches · one page. Draft icons are being reviewed before print production.</p>
+  </aside>
+  <section class="msr-preview" aria-label="May illustrated rhythm board preview">
+   <div class="msr-preview-head"><h2>Your summer board</h2><span>One page · US Letter</span></div>
+   <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet>
+    <div class="msr-sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
+    <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span>A DAY AT HOME</span></div>
+    <div class="msr-rows">
+     {blocks.map((b,i)=><div class="msr-row" style={'--msr-tint:'+b.tint}>
+      <div class="msr-icon-box"><Image src={b.icon} alt="" width={70} height={70} loading="eager" class="msr-icon" /></div>
+      <div class="msr-row-copy"><h3>{b.title}</h3><p data-desc={b.key}>{b.desc}</p></div>
+      <span class="msr-time" data-time={i}>{b.time}</span>
+     </div>)}
+    </div>
+    <div class="msr-rule"><span>OUR SUMMER RULE</span><strong>Check the rhythm before asking Mom.</strong><p>Our plans can change. We can still find what's next.</p></div>
+    <footer class="msr-foot"><span>ORGANIZED FAMILY CLUB</span><span>OUR SUMMER DAY · MAY</span></footer>
+   </article></div>
+   <p class="msr-note">Visual proof using the seven supplied draft PNG icons. Artwork still needs approval and cleanup before mailing.</p>
+  </section>
+ </div>
+</div>
+<style is:global>
+.msr,.msr *{box-sizing:border-box}.msr{font-family:Montserrat,Arial,sans-serif;color:#454a43;max-width:1480px;margin:0 auto;padding:25px clamp(18px,3.5vw,52px) 65px}.msr-intro{max-width:760px;margin:0 0 38px}.msr-intro>a{display:inline-block;font-size:12px;color:inherit;margin-bottom:28px}.msr-label{font-size:10px;font-weight:700;letter-spacing:.16em;color:#62765e}.msr-intro h1{font:400 clamp(37px,4.5vw,60px)/1.12 Georgia,serif;margin:12px 0 16px}.msr-intro h1 em{color:#6b8464}.msr-intro>p:last-child{font-size:15px;line-height:1.7}.msr-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:clamp(22px,4vw,64px)}.msr-editor{border-top:8px solid #d4dfc4;padding-top:19px}.msr-editor h2{font:italic 29px Georgia,serif;color:#5a7154;margin:12px 0}.msr-editor>p:nth-of-type(2){font-size:13px;line-height:1.65;margin-bottom:23px}.msr-editor label{display:block;border-top:1px solid #dfe5d9;margin-top:16px;padding-top:15px;font-size:12px;font-weight:700}.msr-editor select{display:block;width:100%;min-height:45px;margin-top:8px;padding:8px;border:1px solid #aab6a3;background:white;color:#464d42;font:13px Montserrat,Arial,sans-serif}.msr-message{background:#f1f5ee;margin:25px 0 20px;padding:19px}.msr-message strong{font:400 20px Georgia,serif;color:#506849}.msr-message p{font-size:12px;line-height:1.7;margin:10px 0 0}.msr-editor button[data-print]{display:block;width:100%;border:0;background:#4f654b;color:#fff;padding:16px;cursor:pointer;font-size:12px;font-weight:700}.msr-reset{display:block;margin:10px auto;background:none;border:0;color:#4c6046;text-decoration:underline;min-height:40px;cursor:pointer;font-size:12px}.msr-note{font-size:11px;line-height:1.6;color:#777}.msr-preview{min-width:0}.msr-preview-head{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:baseline;border-bottom:1px solid #dfe5d9;margin-bottom:20px}.msr-preview-head h2{font:400 26px Georgia,serif}.msr-preview-head span{font-size:12px;color:#777}.msr-stage{position:relative}.msr-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;padding:38px 48px 23px;border:1px solid #e2e7df;box-shadow:0 8px 30px #0002;background:white;color:#464e44;transform:scale(var(--msr-scale,.8));transform-origin:top left;display:flex;flex-direction:column;overflow:hidden}.msr-sheet-head{background:#e4eddc;border-top:9px solid #cbdcbf;min-height:153px;padding:19px 28px}.msr-sheet-head>span{font-size:10px;letter-spacing:.15em;font-weight:700;color:#526849}.msr-sheet-head h2{font:400 50px/1.1 Georgia,serif;color:#3f5a40;margin:10px 0 6px}.msr-sheet-head p{font:italic 17px Georgia,serif;color:#587052;margin:0}.msr-family{display:flex;justify-content:space-between;gap:18px;margin:19px 0 12px;font-size:10px;font-weight:700;letter-spacing:.12em;color:#687866}.msr-rows{display:flex;flex-direction:column;gap:8px}.msr-row{display:grid;grid-template-columns:80px minmax(0,1fr) auto;align-items:center;gap:16px;min-height:91px;padding:7px 16px 7px 7px;border:1px solid #e4e8e0;border-radius:9px;background:white}.msr-icon-box{width:76px;height:76px;border-radius:8px;background:var(--msr-tint);display:flex;align-items:center;justify-content:center}.msr-icon{width:65px;height:65px;object-fit:contain;display:block;mix-blend-mode:multiply}.msr-row-copy h3{font:400 24px/1.1 Georgia,serif;color:#455644;margin:0 0 7px}.msr-row-copy p{font:12px/1.45 Montserrat,Arial,sans-serif;color:#5d685b;margin:0}.msr-time{font-size:14px;font-weight:700;color:#577350;white-space:nowrap}.msr-rule{background:#edf3e9;border-radius:7px;margin-top:16px;padding:14px 15px;text-align:center}.msr-rule span{display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#687c61}.msr-rule strong{display:block;font:400 22px Georgia,serif;color:#3e5e3f;margin:5px 0}.msr-rule p{margin:0;font-size:11px;color:#647960}.msr-foot{display:flex;justify-content:space-between;border-top:1px solid #dfe6dc;margin-top:auto;padding-top:9px;font-size:9px;letter-spacing:.1em;font-weight:700;color:#687964}
+@media(max-width:1080px){.msr-layout{grid-template-columns:1fr}.msr-editor{max-width:720px}}
+@page{size:letter portrait;margin:0}
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.msr-stage,.msr-sheet,.msr-sheet *{visibility:visible!important}.msr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.msr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msr-icon{mix-blend-mode:normal!important}}
+</style>
+<script>
+import {ageInMonth} from '../../lib/club/profile';
+type Person={firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;archived?:boolean};
+type Quiet='independent'|'rest'|'older';
+type Play='outdoors'|'active'|'creative'|'mixed';
+type Options={start:number;quiet:Quiet;play:Play};
+const defaults:Options={start:8,quiet:'independent',play:'outdoors'};
+const clock=(n:number)=>{const h=Math.floor(n);const min=Math.round((n-h)*60);return String((h+11)%12+1)+':'+String(min).padStart(2,'0')};
+for(const root of document.querySelectorAll<HTMLElement>('.msr')){
+ const storageKey=root.dataset.msrKey??'omc:preview:may:v1';
+ let profile='';
+ let options={...defaults};
+ let children:Person[]=[];
+ let familyLabel="OUR FAMILY'S SUMMER RHYTHM";
+ const stage=root.querySelector<HTMLElement>('[data-stage]');
+ const sheet=root.querySelector<HTMLElement>('[data-sheet]');
+ const fit=()=>{
+  if(!stage||!sheet)return;
+  const width=Math.max(200,(stage.parentElement?.clientWidth??816)-4);
+  const scale=Math.min(1,width/816);
+  stage.style.width=String(816*scale)+'px';
+  stage.style.height=String(1056*scale)+'px';
+  sheet.style.setProperty('--msr-scale',String(scale));
+ };
+ fit();
+ const parent=stage?.parentElement;
+ if(parent&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(parent);
+ window.addEventListener('resize',fit);
+ const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({profile,options}))}catch{}};
+ const render=()=>{
+  const offsets=[0,1,2.5,4,5,6];
+  const times=[...offsets.map(x=>clock(options.start+x)),'Evening'];
+  root.querySelectorAll<HTMLElement>('[data-time]').forEach((el,i)=>{el.textContent=times[i]??'Evening'});
+  const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
+  const quiet=root.querySelector<HTMLElement>('[data-desc="quiet"]');
+  if(quiet)quiet.textContent=options.quiet==='rest'?'Nap · Rest · Quiet books':options.quiet==='older'?'Read · Recharge · Independent time':'Read · Puzzles · Quiet play';
+  const move=root.querySelector<HTMLElement>('[data-desc="move"]');
+  if(move)move.textContent=options.play==='active'?'Ball games · Movement · Outdoors':options.play==='creative'?'Explore · Move · Make something':options.play==='mixed'?'Get moving · Choose how to play':'Outside · Bikes · Park · Backyard';
+  const free=root.querySelector<HTMLElement>('[data-desc="free"]');
+  if(free)free.textContent=options.play==='creative'?'Art · Make · Friends · Free play':options.play==='active'?'Friends · Sports · Free play':'Friends · Outings · Free play';
+  const start=root.querySelector<HTMLSelectElement>('[data-start]');if(start)start.value=String(options.start);
+  const qs=root.querySelector<HTMLSelectElement>('[data-quiet]');if(qs)qs.value=options.quiet;
+  const ps=root.querySelector<HTMLSelectElement>('[data-play]');if(ps)ps.value=options.play;
+ };
+ const suggested=()=>{
+  const ages=children.map(p=>ageInMonth(p.birthYear??2027,p.birthMonth,'2027-05'));
+  options={...defaults,quiet:ages.length&&Math.min(...ages)<5?'rest':ages.length&&Math.min(...ages)>11?'older':'independent'};
+ };
+ root.querySelector<HTMLSelectElement>('[data-start]')?.addEventListener('change',e=>{options.start=Number((e.target as HTMLSelectElement).value);save();render()});
+ root.querySelector<HTMLSelectElement>('[data-quiet]')?.addEventListener('change',e=>{options.quiet=(e.target as HTMLSelectElement).value as Quiet;save();render()});
+ root.querySelector<HTMLSelectElement>('[data-play]')?.addEventListener('change',e=>{options.play=(e.target as HTMLSelectElement).value as Play;save();render()});
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{suggested();save();render()});
+ root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const detail=(event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail;
+  if(!detail?.household)return;
+  const nextProfile=(detail.sample??'account')+':'+detail.household.id;
+  const changed=profile!==nextProfile;
+  profile=nextProfile;
+  children=detail.household.members.filter(p=>!p.archived&&p.kind==='child');
+  const name=(detail.household.displayName??'').trim();
+  familyLabel=name?name.toUpperCase()+' · SUMMER RHYTHM':"OUR FAMILY'S SUMMER RHYTHM";
+  if(changed){
+   suggested();
+   try{const stored=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(stored?.profile===profile&&stored.options){
+    const o=stored.options;
+    if([7,7.5,8,8.5,9,9.5].includes(o.start))options.start=o.start;
+    if(['independent','rest','older'].includes(o.quiet))options.quiet=o.quiet;
+    if(['outdoors','active','creative','mixed'].includes(o.play))options.play=o.play;
+   }}catch{}
+  }
+  save();render();
+ });
+ render();
+}
+</script>
