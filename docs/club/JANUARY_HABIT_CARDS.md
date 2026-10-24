@@ -33,3 +33,16 @@ Use `docs/brand/TOOL-OUTPUT-DESIGN.md`, `docs/brand/PUBLIC-VISUAL-DESIGN.md`, an
 ## Validation questions
 
 Can a child recognize the current cue, understand the next action and use the physical reminder without Mom directing? Can a parent start using the delivered tool in under two minutes? Would Mom pay $5 for these pre-prepared cards without doing the formatting herself?
+
+
+## Canonical visual references (October 24 update)
+
+The January cards and editor must match these existing Club product prototypes, NOT the older Kalam-heavy printable-tools aesthetic:
+
+1. `/club/december-preview/` and `src/pages/club/december-preview.astro`: Gelasio bold italic serif emphasis, Montserrat small uppercase labels, spacious mostly white workspace, charcoal button, restrained botanical/line motifs. Its print layouts live in `src/lib/december/layout.ts`.
+2. `/club/worksheet-generator/` and `src/pages/club/worksheet-generator.astro`: prepared-plan editor on the left, actual printable preview on the right, simple gray inputs, thin month-color rules, generous margins, actual embedded Gelasio/Montserrat print fonts. Its print layouts live in `src/lib/worksheet/layout.ts`.
+3. `src/theme.ts`: January's precise color is **#CDDDE1** (soft frost blue). Do not borrow December evergreen or November mushroom as January's accent.
+
+Use deep blue-gray #527384 for readable serif emphasis, January blue only for pale decorative strips and rules. Keep each removable card at real physical size, with minimal iconography, "WHEN THIS HAPPENS" / "HERE'S WHAT I DO NEXT" / "PLACE THIS CARD" instructions. Four cards per US Letter print sheet is a useful preview layout, not a requirement for every family to adopt four habits.
+
+**Production gap:** Current January prototype uses browser print-to-PDF, unlike the December and November true PDF renderers. Before print-mail integration, switch to the shared operation-based SVG/PDF pipeline so both previews and generated mailing PDFs use the same font metrics and physical positions. This prototype is not production-ready.
