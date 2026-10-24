@@ -76,6 +76,7 @@ export function normalize(input: WorksheetInput): WorksheetData {
     secondChild: clean(input.secondChild, 28),
     secondJob: clean(input.secondJob, 90),
     secondWhen: clean(input.secondWhen, 80),
+    secondDone: clean(input.secondDone, 260, true),
     checkIn: checkInDate(input.checkIn),
   };
 }
