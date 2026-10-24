@@ -2,6 +2,7 @@
 /** Unlisted, noindex January product review. Uses the same actual printable as the member tool. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import JanuaryHabitCards from '../../components/club/JanuaryHabitCards.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
 ---
 <PublicLayout
   fullTitle="January Habit Cards Preview | Organized Family Club"
@@ -11,7 +12,8 @@ import JanuaryHabitCards from '../../components/club/JanuaryHabitCards.astro';
   width="full"
   tracking={false}
 >
-  <main class="mx-auto w-full py-8">
+  <ClubPrototypeNav client:only="react" month="january" />
+  <main id="club-month-content" class="mx-auto w-full py-8">
     <JanuaryHabitCards storageKey="omc:preview:january-habit-cards:v2" />
   </main>
 </PublicLayout>
