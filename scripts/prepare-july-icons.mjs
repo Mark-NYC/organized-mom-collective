@@ -82,23 +82,17 @@ for(const [folder,name] of icons){
 // August: copy the new, padded vector exports unchanged. No pixel cropping.
 const augustIcons=[
  'morning-start','shirt','breakfast-bowl','toothbrush','basket',
- 'dish','book','check-look','home','book-stack',
- 'backpack','sneakers','coat','lunchbox','school-folder','school-notebook',
- 'school-bus','washing-hands','yogurt-cup','apple','carrot',
- 'cheese-wedge','crackers','granola-bar'
+ 'dish','book','check-look','home','book-stack'
 ];
 const augustDestination=join(root,'public/images/club/august-v2');
-const foodDestination=join(root,'public/images/club/snack-icons');
 await mkdir(augustDestination,{recursive:true});
-await mkdir(foodDestination,{recursive:true});
 for(const name of augustIcons){
  const input=join(root,'assets/icons/ofc/updatedicons/svg',name+'.svg');
  const output=join(augustDestination,name+'.svg');
  const svg=await readFile(input,'utf8');
- if(!/<svg\b[^>]*\bviewBox="0 0 [0-9.]+ [0-9.]+"/.test(svg)||!svg.includes('<path')){
+ if(!svg.includes('viewBox="0 0 48 48"')||!svg.includes('<path')){
   throw Error('Unexpected August vector icon: '+name);
  }
  await copyFile(input,output);
- if(['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar'].includes(name))await copyFile(input,join(foodDestination,name+'.svg'));
 }
 console.log('Prepared '+icons.length+' July illustrations and copied '+augustIcons.length+' new August vector icons.');
