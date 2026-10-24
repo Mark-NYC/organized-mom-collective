@@ -111,7 +111,7 @@ function front(m: Metrics,d:WorksheetData):Page{
  g.text(X0,148,'Everyone owns a part.','serif',36);
  g.text(X0,173,'Two whole jobs. Shared responsibility. Less reminding.','sans',10,{color:COLORS.soft});
  const card=(y:number,title:string,owner:string|null,job:string|null,when:string|null)=>{
-  g.section(y,169,null,title);
+  g.section(y,146,null,title);
   g.label(X0+PAD,y+41,'Owner');
   if(owner)g.block(X0+PAD,y+69,owner,'serif',{width:170,maxLines:1,size:25,min:15,lead:1});else g.dots(X0+PAD,X0+180,y+70);
   g.label(X0+210,y+41,'Whole responsibility');
@@ -120,12 +120,13 @@ function front(m: Metrics,d:WorksheetData):Page{
   g.label(X0+PAD,y+116,'When it happens');
   if(when)g.block(X0+PAD,y+136,when,'sans',{width:W-2*PAD,maxLines:2,size:10,min:8,lead:1.25});else g.dots(X0+PAD,X1-PAD,y+141);
  };
- card(198,'01   Adult ownership',d.adultOwner,d.adultJob,d.adultWhen);
- card(379,'02   Child ownership',d.owner,d.job,d.when);
- g.rect(X0,562,W,97,COLORS.panel,COLORS.frame);
- g.label(X0+PAD,581,'Already helping our family');
- if(d.existing)g.block(X0+PAD,610,d.existing,'serif',{width:W-2*PAD,maxLines:2,size:13,min:10,lead:1.25});else {g.dots(X0+PAD,X1-PAD,611);g.dots(X0+PAD,X1-PAD,641);}
- g.text(X0,694,'The goal is not more chores. It is shared ownership.','serifItalic',15);
+ card(191,'01   Adult ownership',d.adultOwner,d.adultJob,d.adultWhen);
+ card(348,'02   Child ownership',d.owner,d.job,d.when);
+ card(505,'03   Child ownership',d.secondChild,d.secondJob,d.secondWhen);
+ g.rect(X0,665,W,42,COLORS.panel,COLORS.frame);
+ g.label(X0+PAD,679,'Our family, our team');
+ if(d.existing)g.block(X0+PAD,697,d.existing,'serif',{width:W-2*PAD,maxLines:1,size:9,min:7,lead:1.1});
+ 
  g.footer('Front · 1 / 2');return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
 function back(m:Metrics,d:WorksheetData):Page{
