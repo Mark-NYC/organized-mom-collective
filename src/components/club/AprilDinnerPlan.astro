@@ -1,21 +1,17 @@
 ---
 /** April 2027: one fully prepared family dinner; two-sided US Letter deliverable. */
 import {monthColors} from '../../theme';
+import {aprilDinners} from '../../data/club/april-dinners';
 interface Props { storageKey?:string }
 const {storageKey='omc:club:april-dinner:v1'}=Astro.props;
-const meals=[
- {id:'bowls',name:'Build-Your-Own Taco Bowls',time:'25–30 minutes',ingredients:['Rice','Ground beef or beans','Shredded cheese','Lettuce','Salsa','Taco seasoning'],cooking:'An adult cooks rice and the protein. Helpers set out toppings and bowls.'},
- {id:'pasta',name:'Pasta & Salad Night',time:'20–25 minutes',ingredients:['Pasta','Pasta sauce','Salad greens','Cucumber','Cheese','Bread (optional)'],cooking:'An adult boils and drains pasta. Helpers put salad ingredients and plates on the table.'},
- {id:'breakfast',name:'Breakfast for Dinner',time:'20–25 minutes',ingredients:['Eggs','Bread or tortillas','Fruit','Yogurt','Milk or water','Butter or oil'],cooking:'An adult cooks eggs and handles the stove. Helpers wash fruit and get the table ready.'}
-];
-const defaults={meal:'bowls',captain:'Luis',checker:'Sofia',table:'Mateo',cook:'Ana'};
-const steps=['Check the ingredients and make a plan','Gather ingredients and prepare the food','Set the table and put everything out','Everyone serves and enjoys dinner','Clear dishes, put away leftovers, and reset the kitchen'];
+const meals=aprilDinners;
+const steps=['Check ingredients & assign helpers','Cook safely using the directions on the back','Set out the food and call the family','Eat together; captain leads the cleanup'];
 ---
 <div class="adc" data-adc-key={storageKey} style={'--adc-accent:'+monthColors[3].hex}>
- <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>One complete meal, prepared for a family team. Someone besides Mom becomes Dinner Captain—and owns the plan, from checking ingredients to cleanup.</p></header>
+ <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>A ready-to-use dinner with real ingredient quantities, simple instructions, and one person responsible for seeing it through—from prep to cleanup.</p></header>
  <div class="adc-layout">
  <section class="adc-controls" aria-label="Customize your family's dinner plan">
-  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Pick a simple dinner your family eats, then check who's responsible. You can print the plan as suggested.</p></div>
+  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Choose one of three fully prepared dinners. Each includes amounts, cooking steps, and a team. Edit the roles only if you need to.</p></div>
   <label>Tonight's dinner<select data-meal>{meals.map(m=><option value={m.id}>{m.name}</option>)}</select></label>
   <div class="adc-roles-editor">
    <label>Dinner captain <small>Owns the whole job—not just one step.</small><select data-role="captain"></select></label>
@@ -23,7 +19,7 @@ const steps=['Check the ingredients and make a plan','Gather ingredients and pre
    <label>Table captain <small>Sets dishes and toppings.</small><select data-role="table"></select></label>
    <label>Cooking lead <small>Adult; handles the stove and knives.</small><select data-role="cook"></select></label>
   </div>
-  <div class="adc-explainer"><h3>The captain owns the whole meal.</h3><p>That means checking what's needed, asking others for help, and confirming cleanup is finished. A capable adult leads if children aren't ready. Kids still get meaningful roles.</p><p>Ingredients are example shopping lists; check allergies, quantities, and preferences before making a meal. An adult supervises food safety and all hot or sharp tasks.</p></div>
+  <div class="adc-explainer"><h3>The captain owns the whole meal.</h3><p>That means checking what's needed, asking others for help, and confirming cleanup is finished. A capable adult leads if children aren't ready. Kids still get meaningful roles.</p><p>Recipes serve approximately four; check ingredients for allergies, food preferences, and quantities. An adult handles stove use, knives, and hot food.</p></div>
   <button type="button" data-print class="adc-button">Print both sides / Save PDF</button><button type="button" data-reset class="adc-reset">Restore prepared assignments</button>
   <p class="adc-status" role="status">Two US Letter pages, intended for double-sided printing. Choose actual size and flip on the long edge.</p>
  </section>
@@ -34,7 +30,7 @@ const steps=['Check the ingredients and make a plan','Gather ingredients and pre
    <article class="adc-sheet adc-front">
     <div class="adc-sheet-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight, <em>we've got dinner.</em></h2><span>ONE DINNER PLANNED. EVERYONE HAS A PART.</span></div>
     <div class="adc-sheet-inner">
-     <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal>{meals[0].name}</h3></div><div class="adc-time" data-out-time>{meals[0].time}</div></div>
+     <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal>{meals[0].name}</h3></div><div class="adc-time"><span data-out-time>{meals[0].time}</span><small data-out-servings>{meals[0].servings}</small></div></div>
      <div class="adc-section-label">OUR DINNER TEAM</div>
      <div class="adc-team-grid">
       <div><span>DINNER CAPTAIN</span><strong data-out-role="captain">Luis</strong><p>Owns the whole plan</p></div>
@@ -42,24 +38,32 @@ const steps=['Check the ingredients and make a plan','Gather ingredients and pre
       <div><span>TABLE CAPTAIN</span><strong data-out-role="table">Mateo</strong><p>Gets the table ready</p></div>
       <div><span>COOKING LEAD</span><strong data-out-role="cook">Ana</strong><p>Handles adult cooking</p></div>
      </div>
-     <div class="adc-section-label">BEFORE WE START · CHECK INGREDIENTS</div>
+     <div class="adc-section-label">CHECK THE INGREDIENTS · ABOUT FOUR SERVINGS</div>
      <div class="adc-ingredients">{meals[0].ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient>{x}</span></div>)}</div>
      <div class="adc-section-label">OUR DINNER PLAN</div>
      <div class="adc-steps">
       {steps.map((step,i)=><div class="adc-step"><span>{String(i+1).padStart(2,'0')}</span><strong>{step}</strong><i></i></div>)}
      </div>
-     <div class="adc-rule"><span>OUR FAMILY RULE</span><p>Ask the Dinner Captain what's next—not Mom. The captain leads, and the whole team helps finish.</p></div>
+     <div class="adc-rule"><span>OUR FAMILY RULE</span><p>Ask the Dinner Captain what’s next, not Mom. The captain leads the plan and finishes with the team.</p></div>
     </div>
     <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · FRONT</span></footer>
    </article>
    <article class="adc-sheet adc-back">
     <div class="adc-sheet-head adc-back-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Dinner captain, <em>you've got this.</em></h2><span>THE PLAN TO LEAD YOUR TEAM FROM START TO FINISH.</span></div>
     <div class="adc-sheet-inner adc-back-inner">
-     <div class="adc-back-section"><span class="adc-tiny">01 · BEFORE DINNER</span><h3>Check. Ask. Get ready.</h3><p>See if the ingredients are in the kitchen. If anything is missing, ask an adult about a substitute. Ask the ingredients checker to gather what you need and the table captain to prepare the table.</p></div>
-     <div class="adc-back-section"><span class="adc-tiny">02 · MAKE DINNER</span><h3>Let your team do their part.</h3><p data-out-cooking>{meals[0].cooking}</p><p>Keep the five steps on the front in view. Don't do everyone's job for them. Ask each person to take ownership of their part.</p></div>
-     <div class="adc-back-section"><span class="adc-tiny">03 · AFTER DINNER</span><h3>Finish the whole job.</h3><div class="adc-back-check"><i></i>Everyone clears their own dishes.</div><div class="adc-back-check"><i></i>A grown-up puts away perishable leftovers promptly.</div><div class="adc-back-check"><i></i>The team wipes surfaces and resets the kitchen.</div></div>
-     <div class="adc-captain-box"><span>FOR THE GROWN-UPS</span><p>Give the Dinner Captain room to lead. Step in for safety or help if asked—but let them make the invitations, handle the small decisions, and see the job through. A child can lead parts of the meal without using the stove.</p></div>
-     <div class="adc-back-note">A WIN FOR TONIGHT: MOM ISN'T THE DEFAULT PROJECT MANAGER.</div>
+      <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title>{meals[0].name}</h3></div><span data-out-recipe-time>{meals[0].time}</span></div>
+      <p class="adc-recipe-intro">Real directions for the cooking lead. Everyone else can start their assigned jobs from the front.</p>
+      <div class="adc-recipe-steps">
+        {meals[0].instructions.map((instruction,i)=><div class="adc-recipe-step"><span>{String(i+1).padStart(2,'0')}</span><p data-out-instruction={i}>{instruction}</p></div>)}
+      </div>
+      <div class="adc-captain-check">
+        <span>DINNER CAPTAIN · CLOSE THE LOOP</span>
+        <div><i></i> Ingredients and helpers ready</div>
+        <div><i></i> Dinner on the table</div>
+        <div><i></i> Dishes cleared, leftovers refrigerated, kitchen reset</div>
+      </div>
+      <div class="adc-captain-box"><span>FOR THE GROWN-UPS</span><p>Give the captain the plan and room to lead. Help with food safety and hot or sharp tasks, but let the captain invite helpers, make the small decisions, and check that the whole job is finished.</p></div>
+      <div class="adc-back-note">THE CAPTAIN LEADS. THE TEAM HELPS. MOM DOES NOT HAVE TO COORDINATE.</div>
     </div>
     <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · BACK</span></footer>
    </article>
@@ -85,13 +89,9 @@ const steps=['Check the ingredients and make a plan','Gather ingredients and pre
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
+import {aprilDinners} from '../../data/club/april-dinners';
 type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;isAccountHolder?:boolean;archived?:boolean};
-type Choice={id:string;name:string;time:string;ingredients:string[];cooking:string};
-const choices:Choice[]=[
- {id:'bowls',name:'Build-Your-Own Taco Bowls',time:'25–30 minutes',ingredients:['Rice','Ground beef or beans','Shredded cheese','Lettuce','Salsa','Taco seasoning'],cooking:'An adult cooks rice and the protein. Helpers set out toppings and bowls.'},
- {id:'pasta',name:'Pasta & Salad Night',time:'20–25 minutes',ingredients:['Pasta','Pasta sauce','Salad greens','Cucumber','Cheese','Bread (optional)'],cooking:'An adult boils and drains pasta. Helpers put salad ingredients and plates on the table.'},
- {id:'breakfast',name:'Breakfast for Dinner',time:'20–25 minutes',ingredients:['Eggs','Bread or tortillas','Fruit','Yogurt','Milk or water','Butter or oil'],cooking:'An adult cooks eggs and handles the stove. Helpers wash fruit and get the table ready.'}
-];
+const choices=aprilDinners;
 type Role='captain'|'checker'|'table'|'cook';
 const roles:Role[]=['captain','checker','table','cook'];
 for(const root of document.querySelectorAll<HTMLElement>('.adc')){
@@ -138,7 +138,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   const mealSelect=root.querySelector<HTMLSelectElement>('[data-meal]');if(mealSelect)mealSelect.value=meal;
   const mealText=root.querySelector<HTMLElement>('[data-out-meal]');if(mealText)mealText.textContent=selection.name;
   const timeText=root.querySelector<HTMLElement>('[data-out-time]');if(timeText)timeText.textContent=selection.time;
-  const cookText=root.querySelector<HTMLElement>('[data-out-cooking]');if(cookText)cookText.textContent=selection.cooking;
+  const servings=root.querySelector<HTMLElement>('[data-out-servings]');if(servings)servings.textContent=selection.servings;
+  const backTitle=root.querySelector<HTMLElement>('[data-out-recipe-title]');if(backTitle)backTitle.textContent=selection.name;
+  const backTime=root.querySelector<HTMLElement>('[data-out-recipe-time]');if(backTime)backTime.textContent=selection.time;
+  root.querySelectorAll<HTMLElement>('[data-out-instruction]').forEach((el,i)=>{el.textContent=selection.instructions[i]??''});
   root.querySelectorAll<HTMLElement>('[data-ingredient]').forEach((span,i)=>{span.textContent=selection.ingredients[i]??''});
   for(const role of roles){
    const select=root.querySelector<HTMLSelectElement>('[data-role="'+role+'"]');
