@@ -14,12 +14,12 @@ const first = JOB_PRESETS[0];
   <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
   <div class="ws-intro">
     <p class="ws-eyebrow">One problem. One ready-to-use tool.</p>
-    <h1>Give the whole job <em>to someone else.</em></h1>
-    <p>Choose one recurring job. Make the expectations clear. Download a two-sided worksheet to print, sign together and put on the fridge.</p>
+    <h1>Share the work. <em>Not just the chores.</em></h1>
+    <p>Start with one meaningful adult handoff and one child responsibility. Give the whole family a plan, not Mom another assignment.</p>
   </div>
   <div class="ws-workspace">
     <form class="ws-controls" id="ws-form" aria-label="Personalize your worksheet" novalidate>
-      <h2>Make it yours</h2>
+      <h2>Build your family plan</h2>
       <a href="#ws-preview" class="ws-jump">See your worksheet ↓</a>
       <div class="ws-field">
         <label for="ws-family">Family name</label>
@@ -27,11 +27,31 @@ const first = JOB_PRESETS[0];
         <p class="ws-hint" id="ws-family-hint" aria-live="polite"></p>
       </div>
       <div class="ws-field">
-        <label for="ws-owner">Who will own the job?</label>
+        <label for="ws-adult-owner">Adult who will own a whole job</label>
+        <input id="ws-adult-owner" name="adultOwner" value="Mark" maxlength="28" autocomplete="off" />
+      </div>
+      <div class="ws-field">
+        <label for="ws-adult-job">Adult responsibility</label>
+        <select id="ws-adult-job" name="adultJob">
+          <option>Own the school communications and forms</option>
+          <option>Plan and manage weekday dinners</option>
+          <option>Manage family appointments and transportation</option>
+          <option>Own household supplies and restocking</option>
+          <option>Manage the weekly laundry system</option>
+          <option value="custom">Write my own…</option>
+        </select>
+        <input id="ws-adult-custom" name="adultCustom" maxlength="90" placeholder="Whole responsibility" hidden />
+      </div>
+      <div class="ws-field">
+        <label for="ws-adult-when">Adult responsibility rhythm</label>
+        <input id="ws-adult-when" name="adultWhen" value="Check messages and forms each school day" maxlength="80" />
+      </div>
+      <div class="ws-field">
+        <label for="ws-owner">Child taking ownership</label>
         <input id="ws-owner" name="owner" value="Andrew" maxlength={LIMITS.owner} autocomplete="off" placeholder="First name" />
       </div>
       <div class="ws-field">
-        <label for="ws-job">The job</label>
+        <label for="ws-job">Child responsibility</label>
         <select id="ws-job" name="preset">
           {JOB_PRESETS.map((p, i) => <option value={String(i)}>{p.job}</option>)}
           <option value="custom">Write my own…</option>
@@ -42,13 +62,17 @@ const first = JOB_PRESETS[0];
         <input id="ws-custom" name="job" maxlength={LIMITS.job} autocomplete="off" placeholder="The whole job, not just one step" />
       </div>
       <div class="ws-field">
-        <label for="ws-when">When does it happen?</label>
+        <label for="ws-when">When the child does it</label>
         <input id="ws-when" name="when" value={first.when} maxlength={LIMITS.when} autocomplete="off" />
       </div>
       <div class="ws-field">
-        <label for="ws-done">What does finished look like?</label>
+        <label for="ws-done">Child: what finished looks like</label>
         <textarea id="ws-done" name="done" rows="4" maxlength={LIMITS.done}>{first.done}</textarea>
         <p class="ws-hint"><span id="ws-done-count"></span></p>
+      </div>
+      <div class="ws-field">
+        <label for="ws-existing">Other family contributions <span class="ws-optional">optional</span></label>
+        <input id="ws-existing" name="existing" maxlength="130" placeholder="Philip: bags · Megan: family calendar" />
       </div>
       <div class="ws-field">
         <label for="ws-checkin">First family check-in <span class="ws-optional">optional</span></label>
@@ -58,7 +82,7 @@ const first = JOB_PRESETS[0];
         </div>
         <p class="ws-hint" id="ws-date-hint" aria-live="polite"></p>
       </div>
-      <p class="ws-note">Leave anything blank and it prints as a line to write on.</p>
+      <p class="ws-note">Start with two handoffs, not a new chore for everyone. Add existing contributions only if useful.</p>
       <button type="submit" class="ws-download" id="ws-download" disabled>Download PDF</button>
       <p class="ws-status" id="ws-status" role="status" aria-live="polite"></p>
       <p class="ws-helper">US Letter, 2 pages. Print double-sided on one sheet (flip on long edge) at 100% scale, in color. Mails flat in a 9 × 12 envelope.</p>
@@ -105,6 +129,10 @@ const first = JOB_PRESETS[0];
     return {
       familyName: v('familyName'),
       owner: v('owner'),
+      adultOwner: v('adultOwner'),
+      adultJob: $('ws-adult-job').value === 'custom' ? v('adultCustom') : v('adultJob'),
+      adultWhen: v('adultWhen'),
+      existing: v('existing'),
       job: preset.value === 'custom' ? custom.value : JOB_PRESETS[Number(preset.value)].job,
       when: when.value,
       done: done.value,
@@ -152,7 +180,15 @@ const first = JOB_PRESETS[0];
     }
     update();
   });
+  const adultJob = $<HTMLSelectElement>('ws-adult-job');
+  const adultCustom = $<HTMLInputElement>('ws-adult-custom');
+  adultJob.addEventListener('change', () => {
+    adultCustom.hidden = adultJob.value !== 'custom';
+    if (!adultCustom.hidden) adultCustom.focus();
+    update();
+  });
   form.addEventListener('input', update);
+  form.addEventListener('change', update);
   $('ws-two-weeks').addEventListener('click', () => {
     const d = new Date();
     d.setDate(d.getDate() + 14);
