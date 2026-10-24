@@ -1,0 +1,1 @@
+OFC illustrated icon vector set, corrected extraction. 43 original hand-drawn symbols each traced from full-resolution source and re-centered with at least 5 units of transparent padding inside its 48x48 artboard. PNG versions provided at 512px. Automated trace, review before brand approval.
