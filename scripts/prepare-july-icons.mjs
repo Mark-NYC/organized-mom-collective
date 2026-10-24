@@ -6,7 +6,7 @@
  * alpha bounds, and fit that artwork into a generously padded output canvas.
  */
 import sharp from 'sharp';
-import {mkdir} from 'node:fs/promises';
+import {mkdir,copyFile,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 const root=process.cwd();
 const source=join(root,'assets/icons/ofc/updatedicons/png');
@@ -79,27 +79,20 @@ for(const [folder,name] of icons){
  console.log(name+': removed '+removed+' caption components; full art bounds '+JSON.stringify(bounds)+'; output '+image.width+'x'+image.height);
 }
 
+// August: copy the new, padded vector exports unchanged. No pixel cropping.
 const augustIcons=[
- ['primary','morning-start'],['supporting','shirt'],['supporting','breakfast-bowl'],
- ['supporting','toothbrush'],['supporting','basket'],['supporting','made-bed'],
- ['supporting','dish'],['supporting','book']
+ 'morning-start','shirt','breakfast-bowl','toothbrush','basket',
+ 'dish','book','check-look','home','book-stack'
 ];
-const augustDestination=join(root,'public/images/club/august');
+const augustDestination=join(root,'public/images/club/august-v2');
 await mkdir(augustDestination,{recursive:true});
-for(const [folder,name] of augustIcons){
- const input=join(source,name+'.png'),output=join(augustDestination,name+'.png');
- const {data,info}=await sharp(input).resize(256,256,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
- if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected August icon dimensions: '+name);
- // Updated transparent icon exports contain no embedded captions.
- const bounds=alphaBounds(data,info.width,info.height);
- await sharp(data,{raw:{width:256,height:256,channels:4}})
-  .extract(bounds)
-  .resize({width:170,height:102,fit:'contain',background:{r:0,g:0,b:0,alpha:0}})
-  .extend({top:14,bottom:14,left:15,right:15,background:{r:0,g:0,b:0,alpha:0}})
-  .png().toFile(output);
- const safe=await sharp(output).ensureAlpha().raw().toBuffer({resolveWithObject:true});
- const drawn=alphaBounds(safe.data,safe.info.width,safe.info.height);
- if(drawn.left<8||drawn.top<8||drawn.left+drawn.width>safe.info.width-8||drawn.top+drawn.height>safe.info.height-8)throw Error('August icon touches edge: '+name);
+for(const name of augustIcons){
+ const input=join(root,'assets/icons/ofc/updatedicons/svg',name+'.svg');
+ const output=join(augustDestination,name+'.svg');
+ const svg=await readFile(input,'utf8');
+ if(!svg.includes('viewBox="0 0 48 48"')||!svg.includes('<path')){
+  throw Error('Unexpected August vector icon: '+name);
+ }
+ await copyFile(input,output);
 }
-console.log('Prepared '+icons.length+' July and '+augustIcons.length+' August illustrated icon PNGs.');
-
+console.log('Prepared '+icons.length+' July illustrations and copied '+augustIcons.length+' new August vector icons.');
