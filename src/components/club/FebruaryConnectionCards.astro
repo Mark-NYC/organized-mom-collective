@@ -1,0 +1,177 @@
+---
+/** February 2027: four personalized invitations to connection, designed to stay visible in a shared space.
+ * One US Letter four-up cut sheet. Same Gelasio/Montserrat editorial system as Nov–Jan.
+ * The card is an invitation anyone can initiate, not an activity for Mom to coordinate.
+ */
+import {monthColors} from '../../theme';
+interface Props { storageKey?: string }
+const {storageKey='omc:club:february-connection:v1'}=Astro.props;
+const examples=[
+ {owner:'Sofia',headline:'Let’s play!',invite:'Want to play a game with me?',idea:'Pick a game we already have. Invite someone to play for 20 minutes.',place:'The dining table'},
+ {owner:'Mateo',headline:'Just you & me',invite:'Can we have 15 minutes together?',idea:'Choose drawing, reading, building, or a walk. Ask a grown-up to join.',place:'The family bulletin board'},
+ {owner:'Luis',headline:'Together tonight',invite:'Who wants to do something together?',idea:'Choose a simple at-home activity. Everyone who joins can take a part.',place:'The fridge'},
+ {owner:'Ana',headline:'A little kindness',invite:'Who could we encourage today?',idea:'Invite someone to write a note, share a kind word, or do something thoughtful.',place:'The kitchen counter'}
+];
+---
+<div class="fbc" data-fbc-key={storageKey} style={`--feb-accent:${monthColors[1].hex}`}>
+ <header class="fbc-intro">
+  <a href="/club" class="fbc-back">← Organized Family Club</a>
+  <p class="fbc-kicker">ORGANIZED FAMILY CLUB · FEBRUARY 2027</p>
+  <h1>More connection. <em>Less coordinating.</em></h1>
+  <p>Four prepared invitations for your family to initiate togetherness. Keep the cards somewhere everyone can see them. No checklist, no schedule, and no reminders from Mom.</p>
+ </header>
+ <div class="fbc-workspace">
+  <section class="fbc-editor-pane" aria-label="Customize the connection cards">
+   <div class="fbc-editor-heading">
+    <p class="fbc-kicker">FEBRUARY · YOUR PREPARED CARDS</p>
+    <h2>Ready for your family.</h2>
+    <p>Start with these ideas or change them to fit your people. You don't need to use all four at once.</p>
+   </div>
+   <div class="fbc-editor-list">
+    {examples.map((item,i)=><fieldset data-editor={i}>
+     <legend><span>0{i+1}</span> {item.headline}</legend>
+     <label>Who starts the invitation?<input data-field="owner" maxlength="32" value={item.owner}/></label>
+     <label>Invitation title<input data-field="headline" maxlength="44" value={item.headline}/></label>
+     <label>What they can say<input data-field="invite" maxlength="88" value={item.invite}/></label>
+     <label>A simple way to do it<textarea data-field="idea" maxlength="180" rows="3">{item.idea}</textarea></label>
+    </fieldset>)}
+   </div>
+   <div class="fbc-place">
+    <h3>Where will your family see the cards?</h3>
+    <p>Put them somewhere shared and visible. Anyone can pick up a card and make the invitation.</p>
+    <label for="fbc-shared-place">Our card spot</label>
+    <select id="fbc-shared-place" data-shared-place>
+     <option value="Dining table">Dining table</option><option value="Family bulletin board">Family bulletin board</option><option value="Refrigerator">Refrigerator</option><option value="Bathroom mirror">Bathroom mirror</option><option value="Kitchen counter">Kitchen counter</option><option value="Somewhere everyone sees">Another shared spot</option>
+    </select>
+   </div>
+   <button class="fbc-download" type="button" data-print>Print four connection cards / Save PDF</button>
+   <button class="fbc-reset" type="button" data-reset>Restore suggested cards</button>
+   <p class="fbc-status" role="status" aria-live="polite" data-status>US Letter · Print at actual size, with background graphics enabled. Cut along the dotted lines.</p>
+  </section>
+  <section class="fbc-preview-pane" aria-label="Printable connection card preview">
+   <div class="fbc-preview-heading"><h2>Your February connection cards</h2><span>One sheet · four invitations</span></div>
+   <div class="fbc-scroll">
+    <div class="fbc-paper">
+     <div class="fbc-paper-top"><span>ORGANIZED FAMILY CLUB · FEBRUARY 2027</span><span>BETTER TOGETHER</span></div>
+     <div class="fbc-grid">
+      {examples.map((item,i)=><article class="fbc-card" data-card={i}>
+       <div class="fbc-card-top"><span>AN INVITATION FOR SOMEONE YOU LOVE</span><span>0{i+1}</span></div>
+       <div class="fbc-illustration" aria-hidden="true">
+        {i===0?<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="19" y="22" width="42" height="37" rx="3"/><path d="M19 35h42M32 22v37"/><path d="M43 45h8m-4-4v8M23 14l6-5 6 5M49 11l6 6"/></svg>:i===1?<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M22 59V40c0-11 8-18 18-18s18 7 18 18v19M16 59h48M30 59V43M50 59V43"/><path d="M40 26c-10-17-27-1 0 16 27-17 10-33 0-16z"/></svg>:i===2?<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M14 49h52M21 49v14M59 49v14M22 49l7-24h22l7 24"/><path d="M35 30v13M45 30v13M30 18c3-5 9-5 12 0 3-5 9-5 12 0"/></svg>:<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M14 30h52v35H14zM14 30l26 19 26-19M14 65l18-22M66 65L48 43"/><path d="M40 14c-5-9-18-1 0 12 18-13 5-21 0-12z"/></svg>}
+       </div>
+       <p class="fbc-overline">A LITTLE TIME TOGETHER</p>
+       <h3 data-out="headline">{item.headline}</h3>
+       <p class="fbc-from"><span>FROM</span> <strong data-out="owner">{item.owner}</strong></p>
+       <div class="fbc-invitation" data-out="invite">{item.invite}</div>
+       <p class="fbc-how" data-out="idea">{item.idea}</p>
+       <div class="fbc-card-foot">SEE THIS CARD? MAKE THE INVITATION.</div>
+      </article>)}
+     </div>
+     <div class="fbc-paper-foot"><span>KEEP THESE SOMEWHERE EVERYONE CAN SEE.</span><span data-out-place>Dining table</span></div>
+    </div>
+   </div>
+   <p class="fbc-preview-note">These are real, separate cut-apart cards. Put out one or two at a time; store the rest for another day.</p>
+  </section>
+ </div>
+</div>
+<style is:global>
+@font-face{font-family:'FBC Gelasio';src:url('/fonts/worksheet/gelasio-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'FBC Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
+@font-face{font-family:'FBC Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'FBC Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf') format('truetype');font-weight:600;font-display:swap}
+.fbc,.fbc *{box-sizing:border-box}.fbc{max-width:1440px;margin:0 auto;padding:25px clamp(17px,3.5vw,54px) 85px;color:#454545;font-family:'FBC Montserrat',Montserrat,sans-serif}
+.fbc-back{font-size:12px;text-decoration:underline;text-underline-offset:4px;display:inline-block;margin-bottom:32px}
+.fbc-kicker,.fbc-overline{font:600 10px 'FBC Montserrat',sans-serif;letter-spacing:.17em;color:#555}
+.fbc-intro{max-width:800px;margin-bottom:42px}.fbc-intro h1{font:400 clamp(36px,4.6vw,58px)/1.1 'FBC Gelasio',Georgia,serif;letter-spacing:-.03em;margin:14px 0 18px;color:#3b3b3b}
+.fbc-intro h1 em{font-weight:600;color:#9b6477}.fbc-intro>p:last-child{font:15px/1.7 'FBC Montserrat',sans-serif;max-width:650px}
+.fbc-workspace{display:grid;grid-template-columns:minmax(290px,355px) minmax(0,1fr);gap:clamp(25px,3vw,48px);align-items:start}
+.fbc-editor-pane{min-width:0}.fbc-editor-heading{border-top:9px solid var(--feb-accent);padding-top:21px}.fbc-editor-heading h2{font:600 italic 28px 'FBC Gelasio',Georgia,serif;color:#9b6477;margin:12px 0}.fbc-editor-heading>p:last-child{font-size:13px;line-height:1.65}
+.fbc-editor-list{margin-top:20px}.fbc-editor-list fieldset{border:0;border-top:1px solid #e8d2d6;margin:0;padding:17px 0 21px;min-width:0}.fbc-editor-list legend{font:400 19px 'FBC Gelasio',Georgia,serif;padding:0 10px 0 0}.fbc-editor-list legend span{font:600 12px 'FBC Montserrat',sans-serif;color:#9b6477;margin-right:10px}.fbc-editor-list label,.fbc-place label{display:block;margin-top:13px;font:600 10px/1.4 'FBC Montserrat',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.fbc-editor-list input,.fbc-editor-list textarea,.fbc-place select{display:block;width:100%;margin-top:7px;padding:11px 12px;background:white;border:1px solid #bcbcbc;border-radius:0;min-height:44px;font:14px/1.45 'FBC Montserrat',sans-serif;color:#333;resize:vertical}
+.fbc-editor-list textarea{min-height:85px}.fbc input:focus-visible,.fbc textarea:focus-visible,.fbc select:focus-visible,.fbc button:focus-visible{outline:2px solid #905d70;outline-offset:2px}
+.fbc-place{border-top:2px solid var(--feb-accent);padding-top:19px}.fbc-place h3{font:400 23px 'FBC Gelasio',Georgia,serif;margin:0 0 9px}.fbc-place p{font-size:12px;line-height:1.6}
+.fbc-download{display:block;width:100%;background:#454545;border:0;color:#fff;cursor:pointer;min-height:52px;margin-top:22px;font:600 12px 'FBC Montserrat',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:14px}
+.fbc-reset{display:block;cursor:pointer;margin:12px auto;border:0;background:none;text-decoration:underline;text-underline-offset:4px;min-height:44px;font:600 12px 'FBC Montserrat',sans-serif;color:#454545}
+.fbc-status,.fbc-preview-note{font-size:11px;line-height:1.6;color:#666}
+.fbc-preview-pane{min-width:0}.fbc-preview-heading{border-bottom:1px solid var(--feb-accent);padding-bottom:15px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.fbc-preview-heading h2{font:400 25px 'FBC Gelasio',Georgia,serif}.fbc-preview-heading span{font-size:12px}
+.fbc-scroll{overflow-x:auto;padding:6px 0 25px}
+.fbc-paper{width:816px;height:1056px;background:white;box-shadow:0 12px 30px #0002;padding:40px 45px 27px;display:flex;flex-direction:column;color:#3d3834}
+.fbc-paper-top{border-top:9px solid var(--feb-accent);height:44px;display:flex;align-items:center;justify-content:space-between;font:600 8px 'FBC Montserrat',sans-serif;letter-spacing:.1em}
+.fbc-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:1px dashed #bcb9b9;margin:12px 0}
+.fbc-card{min-width:0;min-height:0;display:flex;flex-direction:column;padding:19px 23px 17px;background:linear-gradient(to bottom,#f8eff1 0,#f8eff1 153px,#fff 153px,#fff 100%);overflow:hidden}
+.fbc-card:nth-child(2){background:linear-gradient(to bottom,#f4e8eb 0,#f4e8eb 153px,#fff 153px,#fff 100%)}
+.fbc-card:nth-child(3){background:linear-gradient(to bottom,#fbf3f4 0,#fbf3f4 153px,#fff 153px,#fff 100%)}
+.fbc-card:nth-child(4){background:linear-gradient(to bottom,#f6ebee 0,#f6ebee 153px,#fff 153px,#fff 100%)}
+.fbc-card:nth-child(odd){border-right:1px dashed #bcb9b9}.fbc-card:nth-child(-n+2){border-bottom:1px dashed #bcb9b9}
+.fbc-card-top{display:flex;justify-content:space-between;font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.08em;color:#636063;gap:7px}
+.fbc-illustration{width:65px;height:64px;margin:8px auto 1px;color:#9b6477}.fbc-illustration svg{width:100%;height:100%}
+.fbc-overline{text-align:center;font-size:7px;color:#8b6372}.fbc-card h3{font:600 italic 26px/1.14 'FBC Gelasio',Georgia,serif;text-align:center;color:#976479;margin:7px 0 9px;overflow-wrap:anywhere}
+.fbc-from{text-align:center;font:12px 'FBC Gelasio',Georgia,serif;margin:0 0 18px;border-bottom:5px solid #e8d2d6;padding-bottom:12px}
+.fbc-from span{font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.15em}.fbc-from strong{font-weight:400;font-style:italic;font-size:16px}
+.fbc-invitation{font:600 italic 20px/1.24 'FBC Gelasio',Georgia,serif;color:#6f4858;margin:0 0 16px;overflow-wrap:anywhere}
+.fbc-how{font:12px/1.44 'FBC Montserrat',sans-serif;margin:0;overflow-wrap:anywhere}
+.fbc-card-foot{border-top:1px solid #e8d2d6;margin-top:auto;padding-top:11px;font:600 8px 'FBC Montserrat',sans-serif;letter-spacing:.09em;color:#82606d}
+.fbc-paper-foot{display:flex;justify-content:space-between;align-items:center;height:17px;flex-shrink:0;font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.1em;color:#747074}
+.fbc-preview-note{max-width:710px}
+@media(min-width:1130px){.fbc-paper{transform:scale(.85);transform-origin:top left;margin:0}.fbc-scroll{height:925px}}
+@media(max-width:1129px){.fbc-workspace{grid-template-columns:1fr}.fbc-editor-pane{max-width:700px}}
+@page{size:letter portrait;margin:0}
+@media print{
+ html,body{margin:0!important;padding:0!important;background:white!important}
+ body *{visibility:hidden!important}
+ .fbc-paper,.fbc-paper *{visibility:visible!important}
+ .fbc-paper{position:absolute!important;left:0!important;top:0!important;transform:none!important;width:8.5in!important;height:11in!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ .fbc-scroll{overflow:visible!important;height:auto!important}
+ .fbc-card{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+}
+</style>
+<script>
+type Card={owner:string;headline:string;invite:string;idea:string};
+const defaults:Card[]=[
+ {owner:'Sofia',headline:'Let’s play!',invite:'Want to play a game with me?',idea:'Pick a game we already have. Invite someone to play for 20 minutes.'},
+ {owner:'Mateo',headline:'Just you & me',invite:'Can we have 15 minutes together?',idea:'Choose drawing, reading, building, or a walk. Ask a grown-up to join.'},
+ {owner:'Luis',headline:'Together tonight',invite:'Who wants to do something together?',idea:'Choose a simple at-home activity. Everyone who joins can take a part.'},
+ {owner:'Ana',headline:'A little kindness',invite:'Who could we encourage today?',idea:'Invite someone to write a note, share a kind word, or do something thoughtful.'}
+];
+for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
+ const key=root.dataset.fbcKey??'omc:preview:february:v1';
+ const storage=key.startsWith('omc:club:')?sessionStorage:localStorage;
+ const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-editor]'));
+ const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-card]'));
+ const place=root.querySelector<HTMLSelectElement>('[data-shared-place]');
+ let values=defaults.map(x=>({...x}));
+ let sharedPlace='Dining table';
+ let automatic=defaults.map(x=>x.owner);
+ try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);sharedPlace=typeof saved.sharedPlace==='string'?saved.sharedPlace:sharedPlace;}}
+ catch{}
+ try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4)automatic=saved;}catch{}
+ const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values,sharedPlace}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
+ const draw=()=>{
+  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
+  cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;out.textContent=values[i][field]||' ';}));
+  if(place)place.value=sharedPlace;
+  const footer=root.querySelector<HTMLElement>('[data-out-place]');if(footer)footer.textContent=sharedPlace;
+ };
+ editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;values[i][field]=input.value.slice(0,180);save();draw()})));
+ place?.addEventListener('change',()=>{sharedPlace=place.value;save();draw()});
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));sharedPlace='Dining table';automatic=defaults.map(x=>x.owner);try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
+ root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const h=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean}[]} | null}>).detail?.household;
+  if(!h)return;
+  const members=h.members.filter(m=>!m.archived);
+  const kids=members.filter(m=>m.kind==='child');
+  const adults=members.filter(m=>m.kind==='adult');
+  const next=[
+   kids[0]?.firstName??adults[0]?.firstName??'Family',
+   kids[1]?.firstName??kids[0]?.firstName??adults[0]?.firstName??'Family',
+   adults.find(m=>!m.isAccountHolder)?.firstName??adults[0]?.firstName??'Family',
+   adults.find(m=>m.isAccountHolder)?.firstName??adults[0]?.firstName??'Family'
+  ];
+  values.forEach((v,i)=>{if(v.owner===automatic[i]||v.owner===defaults[i].owner)v.owner=next[i]});
+  automatic=next;save();draw();
+ });
+ draw();
+}
+</script>
