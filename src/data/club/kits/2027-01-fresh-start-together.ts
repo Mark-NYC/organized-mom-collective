@@ -19,22 +19,22 @@ const SLUG = '2027-01-fresh-start-together';
 export const kit: KitConfig = {
   slug: SLUG,
   month: '2027-01',
-  theme: 'A Fresh Start, Together',
-  subtitle: 'One small change. A better rhythm for everyone.',
-  shift: 'Instead of a list of resolutions for Mom to manage, the family fixes one recurring frustration together and practices a better rhythm for a week.',
+  theme: 'Our Family Habit Cards',
+  subtitle: 'Build the habit. Lose the reminder.',
+  shift: 'Instead of Mom repeatedly prompting the same routine, the family attaches one useful action to something already happening and places a reminder where that action takes place.',
   engine: 'routines',
   engineVersion: 1,
   items: [],
   action: {
     kind: 'checklist',
-    title: 'Our One-Thing Family Reset',
-    intro: 'One problem. One shared solution. One week of practice.',
+    title: 'Our Family Habit Plan',
+    intro: 'One daily frustration. One existing cue. One small action.',
     items: [
       { text: 'Choose one frustration.', detail: 'What’s one part of everyday family life that isn’t working well?' },
-      { text: 'Agree on a simpler plan.', detail: 'What would make that part of the day easier?' },
-      { text: 'Give everyone a part.', detail: 'What can each family member do to make the plan work?' },
-      { text: 'Put it on the calendar.', detail: 'Choose when you’ll start and when you’ll check in.' },
-      { text: 'Try it for seven days.', detail: 'Practice together, then decide what to keep or change.' },
+      { text: 'Use a habit that already happens.', detail: 'After breakfast, coming home, or brushing teeth: pick one reliable cue.' },
+      { text: 'Choose the next small action.', detail: 'Give each person a realistic part that follows that cue.' },
+      { text: 'Place the reminder where it happens.', detail: 'The child sees the card at the point of action, not on a chart Mom manages.' },
+      { text: 'Try it for seven days.', detail: 'No points or streaks. Keep the cue if it works, adjust if it does not.' },
     ],
     focus: {
       label: 'What is your family’s one thing?',
@@ -49,13 +49,13 @@ export const kit: KitConfig = {
   },
   tool: {
     tool: 'habit-builder',
-    title: 'Build Your Family Habit',
-    blurb: 'Turn one small change into a habit everyone can practice together.',
-    cta: 'Build Our Family Habit',
+    title: 'Make Your Habit Reminder Card',
+    blurb: 'Tie one small action to something you already do, then place the reminder where it happens.',
+    cta: 'Make Our Habit Card',
     note: 'Optional. The reset works without it.',
   },
   printables: [
-    { id: 'one-thing-plan', title: 'Our One-Thing Family Reset', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
+    { id: 'one-thing-plan', title: 'Our Family Habit Plan', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
     { id: 'letter', title: 'Your January letter', page: 'letter-portrait', kind: 'worksheet', component: 'Letter' },
   ],
   mailer: {
@@ -95,7 +95,7 @@ export const kit: KitConfig = {
     },
     invite: {
       title: 'Build Your Family Habit',
-      body: 'Scan the code for this month’s kit and our Family Habit Builder. Answer three questions (what to make easier, when it could happen, who takes part) and it writes one simple habit for your family, with a seven-day practice card to print.',
+      body: 'Scan the code for this month’s kit and our Family Habit Builder. Choose the daily problem, an existing anchor and who participates. Print a habit reminder card and put it right where the action happens.',
     },
     calendarNote: 'Choose your start day and a day to check in together. Write both on your family calendar.',
     screenNote: 'It comes in the mail with the same reset. Use that copy as it is, or print the one above with your one thing and plan on it. Either works; there’s nothing to keep in step.',
