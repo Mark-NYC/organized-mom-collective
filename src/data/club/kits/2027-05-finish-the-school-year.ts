@@ -1,98 +1,71 @@
 /**
- * May kit: Finish the School Year Well (docs/club/YEAR_ONE_CALENDAR.md → May; mailer in
- * docs/club/mailers/2027-05-finish-the-school-year.md). Planning-phase content: not published, not for sale.
- *
- * The three-part shape, like the other three-part kits: one letter, one action, one optional tool.
- * - The letter (`mailer.letter`): you don't have to wrap up everything yourself; the school year belongs to the kids, too.
- * - The action (`action`, a plain checklist, no dates): Our School Year Wrap-Up, five steps each with a sentence, and
- *   an optional helper on each. It works whether school ends in May or June, with no last-day date.
- * - The tool (`tool`): the School Year Wrap-Up Builder, a site tool opened inside the Club with the family's first
- *   names and children's ages: what to finish before the last day and after it, a suggested day for each (August's
- *   countdown dates) and who can do it.
- * May is the opposite of August: August gets ready for the start, May finishes well. No summer planning (June), no
- * school planner, no first-day routines or supply shopping. The back of the letter keeps a few memories: the Five
- * Favorites Rule and three reflection prompts.
+ * May 2027: Our Summer Day. Existing slug retained for stable member URLs.
+ * Physical-first single illustrated US Letter rhythm board; no school-year closeout worksheet.
+ * Prototype art is still under visual review.
  */
 import type { KitConfig } from '../types';
-
-const SLUG = '2027-05-finish-the-school-year';
-const QUESTION = 'What’s one thing you’re proud of from this school year?';
-
-export const kit: KitConfig = {
-  slug: SLUG,
-  month: '2027-05',
-  theme: 'Finish the School Year Well',
-  subtitle: 'Less end-of-year chaos. More ready for summer.',
-  shift: 'The family closes out the school year together, each child finishing their own, instead of Mom remembering every form, book and backpack.',
-  engine: 'planning',
-  engineVersion: 1,
-  items: [],
-  action: {
-    kind: 'checklist',
-    title: 'Our School Year Wrap-Up',
-    intro: 'Five little things to finish the year together.',
-    note: 'Start wherever you are. Some children finish in May, others in June; these work either way.',
-    items: [
-      { text: 'Check the calendar.', detail: 'Add remaining school events, celebrations, and important dates.' },
-      { text: 'Handle the loose ends.', detail: 'Check library books, forms, borrowed supplies, and anything that needs to be returned.' },
-      { text: 'Sort school papers.', detail: 'Choose a few favorite pieces of artwork or schoolwork to keep, and recycle what isn’t needed.' },
-      { text: 'Reset school gear.', detail: 'Empty backpacks and lunchboxes, sort reusable supplies, and put things away.' },
-      { text: 'Celebrate the year.', detail: 'Have each child share something they learned, enjoyed, or accomplished.' },
-    ],
-    helperLabel: 'Who’s helping?',
-  },
-  tool: {
-    tool: 'school-wrap-up',
-    title: 'Make Your School Year Closeout Plan',
-    blurb: 'Enter your child’s last day of school, and we’ll help you figure out what needs to happen before and after.',
-    cta: 'Build Our School Year Plan',
-    note: 'Optional. The wrap-up works without it.',
-  },
-  printables: [
-    { id: 'school-wrap-up', title: 'Our School Year Wrap-Up', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
-    { id: 'letter', title: 'Your May letter', page: 'letter-portrait', kind: 'worksheet', component: 'Letter' },
+const SLUG='2027-05-finish-the-school-year';
+export const kit:KitConfig={
+ slug:SLUG,
+ month:'2027-05',
+ theme:'Our Family Summer Rhythm',
+ subtitle:'A little structure. Plenty of freedom.',
+ shift:'When school structure disappears, kids can look at a simple visual day rhythm instead of relying on Mom to direct every transition.',
+ engine:'planning',
+ engineVersion:1,
+ items:[],
+ action:{
+  kind:'checklist',
+  title:'Our Summer Day',
+  intro:'A ready-to-follow day rhythm for ordinary summer days at home.',
+  note:'The times are anchors, not strict appointments. Follow the blocks that fit on trips or camp days. The mailed visual board is the actual product.',
+  items:[
+   {text:'Morning Start — breakfast, get dressed, make beds'},
+   {text:'Move & Play — go outside and get active'},
+   {text:'Create & Explore — read, build, draw or make'},
+   {text:'Lunch & Reset — eat, clear dishes and tidy'},
+   {text:'Quiet Time — books, puzzles or a rest'},
+   {text:'Free Afternoon — friends, outings or free play'},
+   {text:'Evening Reset — pick up, wash up and wind down'}
   ],
-  mailer: {
-    // A draft for Megan to approve or rewrite in her own words. No invented stories, numbers or quotes.
-    letter: {
-      draft: true,
-      title: 'You Don’t Have to Wrap Up Everything Yourself',
-      greeting: 'Hi friend,',
-      namedGreeting: 'Hi {name},',
-      body: [
-        'The end of the school year can feel a little like another holiday season. There are concerts and class parties, library books to return, forms to sign, and a pile of papers that somehow grew all year. It’s easy for one person to end up remembering all of it.',
-        'The school year belongs to your kids, too. They can help finish it well.',
-        'Children can gather their own things, check for borrowed books, sort their papers and choose the few pieces worth keeping. Grown-ups can share the forms and the final-day details, so no one is coordinating everything alone.',
-        'It doesn’t have to be perfect. Every school year ends a little differently, so start wherever you are. The goal is to finish the season together, notice how much your children have grown, and head into summer with fewer loose ends.',
-        `At dinner this week, ask: “${QUESTION}”`,
-      ].join('\n\n'),
-      signoff: 'Megan',
-    },
-    fieldGuide: {
-      title: 'Close the Year, Keep What Matters',
-      sections: [
-        { heading: 'Finish the loose ends.', body: 'Return what belongs to school and bring home what belongs to your child.' },
-        { heading: 'Let your child help sort.', body: 'Invite children to choose favorite schoolwork and decide what they’re ready to let go of.' },
-        { heading: 'Celebrate their growth.', body: 'Take a moment to notice what each child learned or accomplished.' },
-      ],
-    },
-    tip: {
-      title: 'The Five Favorites Rule',
-      body: 'When the school papers come home, invite your child to choose five favorites worth keeping. Five is a suggestion, not a strict limit: it just makes choosing easier.',
-    },
-    reflection: {
-      title: 'My School Year',
-      note: 'For your child to fill in, then keep with their five favorites.',
-      prompts: ['My favorite memory this year was…', 'Something new I learned was…', 'Something I’m proud of is…'],
-    },
-    invite: {
-      title: 'Build Your School Year Wrap-Up Plan',
-      body: 'Tell us when school ends, and we’ll help you figure out what to finish, when to do it, and who can help. Scan the code, then tap “Build Our School Year Plan.”',
-    },
-    calendarNote: 'Add the remaining school events and your closeout dates to the family calendar so everyone can see the plan.',
-    screenNote: 'It comes in the mail with the same wrap-up. Use that copy as it is, or print the one above with your names on it. Either works; there’s nothing to keep in step.',
-    letterLinkTop: true,
-    accent: 'school',
-    qrPath: `/club/kits/${SLUG}?source=mailer`,
+ },
+ tool:{
+  tool:'school-wrap-up',
+  title:'Adjust Our Summer Day',
+  blurb:'Preview the kid-first visual rhythm board, then adjust the morning start and activity anchors only if needed.',
+  cta:'See Our Summer Rhythm',
+  note:'Optional. The mailed rhythm works without editing.',
+ },
+ printables:[{id:'summer-rhythm',title:'Our Summer Day Rhythm',page:'letter-portrait',kind:'flagship',component:'Action'}],
+ mailer:{
+  letter:{
+   draft:true,
+   title:'Their Summer Day, Without All the Reminders',
+   greeting:'Hi friend,',
+   namedGreeting:'Hi {name},',
+   body:[
+    'When school ends, so does a lot of the structure your children have been following all year. The questions start: What now? What are we doing? Can you help me decide?',
+    'This month’s tool is for your kids. Put their Summer Day Rhythm where they can see it. Walk through the pictures together, then let the board do some of the reminding.',
+    'It is a rhythm, not an hour-by-hour schedule. You can skip or move blocks for camp, trips, and appointments without making the board obsolete.',
+    'Try one simple phrase: Check the rhythm before asking Mom. Give your children time to grow into it.'
+   ].join('\n\n'),
+   signoff:'Megan',
   },
+  fieldGuide:{
+   title:'A Simple Rhythm Kids Can Follow',
+   intro:'Three ways to let the board take work off Mom’s plate.',
+   sections:[
+    {heading:'Put it at kid height.',body:'The fridge or another shared space works well. Children need to see it without asking.'},
+    {heading:'Walk it once together.',body:'Point to the seven pictures. Explain that the times are flexible anchors.'},
+    {heading:'Point back to the rhythm.',body:'When a child asks what happens next, let them check the picture and choose an activity.'}
+   ],
+  },
+  tip:{title:'The Summer Rule',body:'Check the rhythm before asking Mom. The board shows the next part of the day; children still ask an adult for help with safety and big decisions.'},
+  invite:{title:'Preview Your Family Summer Day',body:'Use the companion only when you want to adjust your usual start time or activity blocks. The printed rhythm is ready to use.'},
+  calendarNote:'Keep actual camps, appointments and trips on the family wall calendar. The summer rhythm covers ordinary days at home without trying to predict changing plans.',
+  screenNote:'Use the illustrated mailed rhythm as-is, or revisit the digital preview if your family’s usual anchors change.',
+  letterLinkTop:true,
+  accent:'school',
+  qrPath:'/club/may-preview/',
+ }
 };
