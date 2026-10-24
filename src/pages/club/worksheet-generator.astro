@@ -6,12 +6,14 @@
  * here is stored or sent. Server-side rendering and mail fulfillment: docs/club/WORKSHEET_PDF.md.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
 import { JOB_PRESETS, LIMITS } from '../../lib/worksheet/content';
 import { monthColors } from '../../theme';
 const first = JOB_PRESETS[0];
 ---
 <PublicLayout fullTitle="November Job Ownership Worksheet | Organized Family Club" description="Create a personalized family job handoff worksheet and download a two-page, double-sided PDF." indexable={false} chrome={false} width="full" tracking={false}>
-<main class="ws-shell" style={`--ws-month-color: ${monthColors[10].hex}`}>
+<ClubPrototypeNav client:only="react" month="november" />
+<main id="club-month-content" class="ws-shell" style={`--ws-month-color: ${monthColors[10].hex}`}>
   <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
   <div class="ws-intro">
     <p class="ws-eyebrow">Your November family plan is prepared.</p>
