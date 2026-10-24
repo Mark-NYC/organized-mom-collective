@@ -50,7 +50,7 @@ button.addEventListener('click',async()=>{
  if(!metrics||!bytes)return;
  button.disabled=true;message.textContent='Preparing your mission and cards…';
  try{
- const f=current();const pdf=await renderPdf(decemberPages(metrics,f),bytes,{title:'December Christmas Mission · '+f.family,subject:'Personalized kids Christmas mission and two one-sided cards'});
+ const f=current();const pdf=await renderPdf(decemberPages(metrics,f),bytes,{title:'December Christmas Mission · '+f.family,subject:'Personalized kids Christmas mission and two one-sided cards',duplex:false});
  const url=URL.createObjectURL(new Blob([pdf as BlobPart],{type:'application/pdf'}));
  const link=document.createElement('a');link.href=url;link.download='december-christmas-mission-'+f.id+'.pdf';document.body.appendChild(link);link.click();link.remove();
  setTimeout(()=>URL.revokeObjectURL(url),60000);
