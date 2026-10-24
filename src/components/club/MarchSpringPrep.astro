@@ -38,7 +38,7 @@ const taskTypes:Record<string,string>={
   </section>
   <section class="msc-preview" aria-label="March project print preview">
    <div class="msc-preview-head"><h2>Our March project</h2><p>One sheet · shared family plan</p></div>
-   <div class="msc-print-scroll"><article class="msc-sheet" data-sheet>
+   <div class="msc-print-scroll"><div class="msc-sheet-stage" data-sheet-stage><article class="msc-sheet" data-sheet>
     <header class="msc-sheet-head"><p>ORGANIZED FAMILY CLUB <span>· MARCH 2027</span></p><h2>Our Family <em>Spring Prep</em></h2><p>{project.description}</p></header>
     <div class="msc-sheet-family"><span>PREPARED FOR</span><strong data-family>Our Family</strong></div>
     <p class="msc-sheet-caption">Five small jobs. Everyone knows their part.</p>
@@ -52,7 +52,7 @@ const taskTypes:Record<string,string>={
     </div>
     <div class="msc-sheet-principle"><span>TEAMWORK TIP</span><p>Pick a task, put on a favorite song or set a 15-minute timer, and let each person lead their own job. When the music stops, check what’s finished together.</p></div>
     <footer class="msc-sheet-bottom"><div><span>THE SAME MARCH PROJECT IN YOUR COMPANION</span><strong>organizedmomcollective.com/app/week</strong></div><p>FRI · DEEP CLEAN &nbsp; SAT · HOME PROJECT &nbsp; SUN · RESET</p></footer>
-   </article></div>
+   </article></div></div>
    <p class="msc-preview-note">A real single-sheet plan built from the same March task definitions as the companion. Printed checkboxes are for the family's use; they do not sync with the app.</p>
   </section>
  </div>
@@ -71,7 +71,7 @@ const taskTypes:Record<string,string>={
 .msc-reminder{border-top:2px solid var(--msc-month);padding:18px 0}.msc-reminder h3{font:400 20px 'MSC Gelasio',Georgia,serif;margin:0 0 9px}.msc-reminder p{font:12px/1.7 'MSC Montserrat',sans-serif}
 .msc-print{background:#454545;color:#fff;min-height:52px;padding:14px;border:0;cursor:pointer;width:100%;font:600 12px 'MSC Montserrat',sans-serif;letter-spacing:.07em;text-transform:uppercase}.msc-reset{display:block;margin:10px auto;border:0;background:none;text-decoration:underline;text-underline-offset:4px;color:#454545;min-height:45px;cursor:pointer;font:600 12px 'MSC Montserrat',sans-serif}.msc-status,.msc-preview-note{font:11px/1.6 'MSC Montserrat',sans-serif;color:#666}
 .msc-preview-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--msc-month);padding-bottom:14px;margin-bottom:21px}.msc-preview-head h2{font:400 25px 'MSC Gelasio',Georgia,serif}.msc-preview-head p{font-size:12px}
-.msc-print-scroll{overflow-x:auto;padding:5px 0 25px}.msc-sheet{width:816px;height:1056px;background:#fff;box-shadow:0 12px 30px #0002;padding:42px 51px 31px;display:flex;flex-direction:column}
+.msc-print-scroll{width:100%;overflow:visible;padding:5px 0 24px;display:flex;justify-content:center}.msc-sheet-stage{position:relative;width:694px;height:898px;flex:0 0 auto}.msc-sheet-stage .msc-sheet{position:absolute;top:0;left:0;transform:scale(var(--msc-preview-scale,.85));transform-origin:top left}.msc-sheet{width:816px;height:1056px;background:#fff;box-shadow:0 12px 30px #0002;padding:42px 51px 31px;display:flex;flex-direction:column}
 .msc-sheet-head{background:#edf5f0;border-top:11px solid var(--msc-month);padding:24px 27px 27px;min-height:206px}.msc-sheet-head>p:first-child{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.14em;color:#405f53}.msc-sheet-head h2{font:400 43px/1.1 'MSC Gelasio',Georgia,serif;color:#3d6556;margin:20px 0 12px}.msc-sheet-head h2 em{font-weight:600}.msc-sheet-head>p:last-child{font:italic 18px 'MSC Gelasio',Georgia,serif;color:#577669}
 .msc-sheet-family{padding:22px 0 14px;border-bottom:1px solid var(--msc-month);display:flex;justify-content:space-between;align-items:baseline;gap:15px}.msc-sheet-family span,.msc-sheet-family strong{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.12em}.msc-sheet-family strong{font-size:13px;letter-spacing:0}
 .msc-sheet-caption{font:italic 20px 'MSC Gelasio',Georgia,serif;margin:19px 0 12px;color:#497666}
@@ -89,9 +89,9 @@ const taskTypes:Record<string,string>={
 .msc-sheet-principle{padding:11px 16px}
 .msc-sheet-bottom{margin-top:11px;padding-top:9px}
 @media print{
- .msc-sheet{max-height:11in!important;overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ .msc-sheet{max-height:11in!important;overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}.msc-sheet-stage{position:static!important;display:block!important;width:8.5in!important;height:11in!important;transform:none!important}.msc-print-scroll{display:block!important;padding:0!important;margin:0!important}
 }
-@media(min-width:1130px){.msc-sheet{transform:scale(.85);transform-origin:top left}.msc-print-scroll{height:930px}}
+
 @media(max-width:1129px){.msc-workspace{grid-template-columns:1fr}.msc-editor{max-width:700px}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.msc-sheet,.msc-sheet *{visibility:visible!important}.msc-sheet{position:absolute!important;left:0!important;top:0!important;margin:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msc-print-scroll{height:auto!important;overflow:visible!important}}
@@ -103,6 +103,23 @@ const project=monthlyDeepClean.find(p=>p.month===2)!;
 const adultOnly=new Set(['mar-vents','mar-curtains']);
 const kidFriendly=new Set(['mar-baseboards','mar-winter-gear','mar-donate']);
 for(const root of document.querySelectorAll<HTMLElement>('.msc')){
+ const stage=root.querySelector<HTMLElement>('[data-sheet-stage]');
+ const preview=root.querySelector<HTMLElement>('.msc-preview');
+ const fitPreview=()=>{
+  if(!stage||!preview)return;
+  // Keep the entire Letter page visible without an inner horizontal/vertical scrollbar.
+  // Print CSS resets scaling so the PDF stays exactly 8.5 x 11 inches.
+  const width=Math.max(220,preview.clientWidth-4);
+  const height=Math.min(820,Math.max(440,window.innerHeight*0.82));
+  const scale=Math.min(1,width/816,height/1056);
+  stage.style.width=`${816*scale}px`;
+  stage.style.height=`${1056*scale}px`;
+  stage.style.setProperty('--msc-preview-scale',String(scale));
+ };
+ fitPreview();
+ const previewObserver=typeof ResizeObserver!=='undefined'?new ResizeObserver(fitPreview):null;
+ if(previewObserver)previewObserver.observe(preview);
+ window.addEventListener('resize',fitPreview);
  const key=root.dataset.mscKey??'omc:preview:march:v1';
  const store=sessionStorage; // Do not persist family member names beyond this tab.
  let members:Member[]=[];
