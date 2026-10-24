@@ -70,8 +70,8 @@ export const clubTools = {
     publicPath: null,
     perChild: false,
     familyPeople: true,
-    title: 'Family Habit Builder',
-    intro: 'Three questions, one habit. Change any words, then download your seven-day practice card or copy it. It saves in this browser.',
+    title: 'Family Habit Reminder Cards',
+    intro: 'Choose an everyday cue and one small next action. Put the personalized reminder card where the habit happens. Edit or reprint anytime.',
   },
   'connection-planner': {
     id: 'connection-planner',
