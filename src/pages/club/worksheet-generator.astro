@@ -26,7 +26,7 @@ const first = JOB_PRESETS[0];
         <div class="ws-field"><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
       <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
-      <div id="ws-recommendations">
+      <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Megan</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Prepare tomorrow’s clothes and supplies</p><p id="ws-child1-desc">Lay out clothes, check supplies and put everything in its ready spot.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
@@ -38,7 +38,7 @@ const first = JOB_PRESETS[0];
         <h2 id="ws-edit-heading">Adjust your plan</h2>
         <p class="ws-note">Only edit what you want changed. Everything else is ready.</p>
         <div class="ws-field ws-profile"><label for="ws-family">Family name</label><input id="ws-family" name="familyName" value="Goering" maxlength={LIMITS.familyName}/><p id="ws-family-hint" class="ws-hint"></p></div>
-        <fieldset id="ws-adult-fields" class="ws-edit-group">
+        <fieldset id="ws-mom-fields" class="ws-edit-group"><legend>Existing responsibility</legend><div class="ws-field"><label for="ws-mom-name">Name</label><input id="ws-mom-name" name="momName" value="Megan" maxlength="28"/></div><div class="ws-field"><label for="ws-mom-owns-input">Already owns</label><input id="ws-mom-owns-input" name="momOwns" value="Family calendar and weekly schedule" maxlength="110"/></div><div class="ws-field"><label for="ws-mom-relief-input">What she will no longer need to coordinate</label><textarea id="ws-mom-relief-input" name="momRelief" maxlength="170" rows="2">Reminding everyone about tomorrow and following up on school readiness.</textarea></div></fieldset><fieldset id="ws-adult-fields" class="ws-edit-group">
           <legend>Adult handoff</legend>
           <div class="ws-field"><label for="ws-adult-owner">Adult name</label><input id="ws-adult-owner" name="adultOwner" value="Mark" maxlength="28"/></div>
           <div class="ws-field"><label for="ws-adult-job">Suggested whole responsibility</label><select id="ws-adult-job" name="adultJob"><option>Own the school communications and forms</option><option>Plan and manage weekday dinners</option><option>Manage family appointments and transportation</option><option>Own household supplies and restocking</option><option>Manage the weekly laundry system</option><option value="custom">Custom responsibility</option></select><input id="ws-adult-custom" name="adultCustom" maxlength="90" placeholder="Whole responsibility" hidden/></div>
@@ -97,14 +97,14 @@ const first = JOB_PRESETS[0];
   const child2 = $<HTMLSelectElement>('ws-child2-job');
   const sample = $<HTMLSelectElement>('ws-sample');
   const sampleProfiles = {
-    goering:{title:'Our School-Night Reset',goal:'Tomorrow is ready without one person managing every step.',family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Prepare tomorrow’s clothes and school supplies',childWhen:'Every school night before bed',childDone:'Lay out tomorrow’s clothes. Check school supplies. Put everything in the ready spot.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
-    rivera:{title:'Our Evening Reset',goal:'Everyone helps put the shared spaces back in order.',family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
-    bennett:{title:'Our Week-Ahead Plan',goal:'Everyone notices and prepares for their part of the coming week.',family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
+    goering:{mom:'Megan',momOwns:'Family calendar and weekly schedule',momRelief:'Reminding everyone about tomorrow and following up on school readiness.',title:'Our School-Night Reset',goal:'Tomorrow is ready without one person managing every step.',family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Prepare tomorrow’s clothes and school supplies',childWhen:'Every school night before bed',childDone:'Lay out tomorrow’s clothes. Check school supplies. Put everything in the ready spot.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
+    rivera:{mom:'Casey',momOwns:'Family meals and groceries',momRelief:'Directing every step of the evening cleanup.',title:'Our Evening Reset',goal:'Everyone helps put the shared spaces back in order.',family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
+    bennett:{mom:'Taylor',momOwns:'Dinner planning',momRelief:'Tracking everyones commitments and chasing updates.',title:'Our Week-Ahead Plan',goal:'Everyone notices and prepares for their part of the coming week.',family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
   } as const;
   function applySample(key:keyof typeof sampleProfiles) {
     const p=sampleProfiles[key];
     const value=(id:string,v:string)=> {($<HTMLInputElement|HTMLTextAreaElement>(id)).value=v;};
-    value('ws-family',p.family);value('ws-plan-title',p.title);value('ws-plan-goal',p.goal);value('ws-adult-owner',p.adult);value('ws-adult-when',p.adultWhen);
+    value('ws-mom-name',p.mom);value('ws-mom-owns-input',p.momOwns);value('ws-mom-relief-input',p.momRelief);value('ws-family',p.family);value('ws-plan-title',p.title);value('ws-plan-goal',p.goal);value('ws-adult-owner',p.adult);value('ws-adult-when',p.adultWhen);
     value('ws-owner',p.child1);value('ws-when',p.childWhen);value('ws-done',p.childDone);
     value('ws-child2',p.child2);value('ws-child2-when',p.secondWhen);value('ws-existing',p.existing);
     const pick=(id:string,customId:string,job:string,list:string[])=>{
@@ -144,6 +144,7 @@ const first = JOB_PRESETS[0];
 
   function planIssue():string|null {
     const data=normalize(input());
+    if(!data.momName || !data.momOwns || !data.momRelief)return 'Complete the existing responsibility and intended relief.';
     if(!data.adultOwner || !data.owner || !data.secondChild)return 'Add a name for each featured person before approving.';
     if(!data.adultJob || !data.job || !data.secondJob)return 'Each person needs a responsibility before this plan is ready.';
     if(!data.adultWhen || !data.when || !data.secondWhen)return 'Add a time for every responsibility.';
@@ -173,6 +174,7 @@ const first = JOB_PRESETS[0];
       planTitle: v('planTitle'),
       planGoal: v('planGoal'),
       adultSteps: v('adultSteps'),
+      momName: v('momName'),momOwns: v('momOwns'),momRelief: v('momRelief'),
     };
   }
 
@@ -195,6 +197,7 @@ const first = JOB_PRESETS[0];
       set('ws-ready-family',(data.familyName??'your family').replace(/^The /,'the '));
       set('ws-plan-heading',data.planTitle??'Our Family Ownership Plan');
       set('ws-plan-goal-line',data.planGoal??'');
+      set('ws-mom-title',data.momName??'Family member');set('ws-mom-owns',data.momOwns??'Existing contribution');
       set('ws-adult-title',data.adultOwner??'Adult');
       set('ws-adult-summary',data.adultJob??'Choose a responsibility');
       set('ws-adult-desc',data.adultWhen??'');
@@ -439,3 +442,4 @@ const first = JOB_PRESETS[0];
 .ws-plan-heading{font:normal 25px/1.2 Georgia,serif;color:#3d3d3d;margin:0 0 5px!important}
 #ws-plan-goal-line{font-size:12px;color:#666;line-height:1.5;margin-bottom:20px}
 </style>
+<style is:global>#ws-form[data-active-group="mom"] #ws-adult-fields,#ws-form[data-active-group="mom"] #ws-child1-fields,#ws-form[data-active-group="mom"] #ws-child2-fields{display:none}#ws-form[data-active-group="adult"] #ws-mom-fields,#ws-form[data-active-group="child1"] #ws-mom-fields,#ws-form[data-active-group="child2"] #ws-mom-fields{display:none}</style>
