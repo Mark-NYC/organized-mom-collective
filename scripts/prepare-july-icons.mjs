@@ -96,3 +96,35 @@ for(const name of augustIcons){
  await copyFile(input,output);
 }
 console.log('Prepared '+icons.length+' July illustrations and copied '+augustIcons.length+' new August vector icons.');
+ 
+// v3 previews: retain high-resolution original PNGs; rasterize the newly
+// redrawn SVGs at print-friendly resolution. Never crop or trace either source.
+const expandedNames=[
+ 'backpack','sneakers','coat','lunchbox','school-folder','school-notebook',
+ 'school-bus','washing-hands','yogurt-cup','apple','carrot','cheese-wedge',
+ 'crackers','granola-bar'
+];
+const previewIconNames=[
+ 'morning-start','shirt','breakfast-bowl','toothbrush','book',
+ ...expandedNames
+];
+const previewDir=join(root,'public/images/club/august-v3');
+const snackDir=join(root,'public/images/club/snack-icons-v2');
+await mkdir(previewDir,{recursive:true});
+await mkdir(snackDir,{recursive:true});
+const snacks=new Set(['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar']);
+for(const name of previewIconNames){
+ const isNew=expandedNames.includes(name);
+ const input=join(root,'assets/icons/ofc/updatedicons',isNew?'svg':'png',name+(isNew?'.svg':'.png'));
+ const meta=await sharp(input).metadata();
+ if(isNew&&meta.format!=='svg')throw Error('New OFC artwork is not SVG: '+name);
+ if(!isNew&&meta.format!=='png')throw Error('Original OFC artwork is not PNG: '+name);
+ const out=join(previewDir,name+'.png');
+ // Contain the entire original art with safe padding, regardless of aspect ratio.
+ await sharp(input,{density:300}).resize({width:420,height:420,fit:'contain',background:'#00000000'})
+  .extend({top:46,bottom:46,left:46,right:46,background:'#00000000'})
+  .png().toFile(out);
+ if(snacks.has(name))await copyFile(out,join(snackDir,name+'.png'));
+}
+console.log('Prepared '+previewIconNames.length+' August v3 and '+snacks.size+' June v2 PNG icons.');
+
