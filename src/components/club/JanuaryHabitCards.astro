@@ -52,9 +52,7 @@ const defaults = [
               <span class="jhc-brand">ORGANIZED FAMILY CLUB</span>
               <span class="jhc-card-number">0{i+1}</span>
             </div>
-            <div class="jhc-card-icon" aria-hidden="true">
-              {i===0 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M15 28h34v9c0 10-7 16-17 16s-17-6-17-16V28ZM12 28h40M23 18c-4-4 5-7 1-12M34 18c-4-4 5-7 1-12M45 18c-4-4 5-7 1-12"/></svg> : i===1 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M19 26c0-8 5-13 13-13s13 5 13 13v27H19V26ZM19 33h26M25 33v-6h14v6M26 19c3-2 9-2 12 0M25 42h14v8H25zM14 35h5M45 35h5"/></svg> : i===2 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M19 10h26l4 9-10 7-7-7-7 7-10-7 4-9ZM25 26v27h14V26M18 53h28"/></svg> : <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M11 23h42M15 23v28M49 23v28M21 23l4-12h14l4 12M28 11v12M36 11v12M9 51h12M43 51h12"/></svg>}
-            </div>
+            <div class="jhc-card-icon" aria-hidden="true"><img src={['breakfast-bowl','backpack','pajamas','dish'].map(n=>'/images/club/shared-icons/'+n+'.png')[i]} alt="" width="58" height="58" /></div>
             <p class="jhc-small-title">ONE LITTLE HABIT</p>
             <h3 class="jhc-card-name" data-print-field="name">{item.name}</h3>
             <div class="jhc-card-rule"></div>
@@ -149,7 +147,7 @@ const defaults = [
 .jhc-card{background:white;padding:20px 27px 18px}
 .jhc-card-top,.jhc-brand,.jhc-card-number{color:#666}
 .jhc-card-icon,.jhc-card:nth-child(2) .jhc-card-icon,.jhc-card:nth-child(3) .jhc-card-icon,.jhc-card:nth-child(4) .jhc-card-icon{width:50px;height:50px;background:transparent;border-radius:0;color:#527384;transform:none;margin:17px auto 9px}
-.jhc-card-icon svg{width:37px;height:37px;stroke-width:1.7}
+.jhc-card-icon img{width:50px;height:50px;object-fit:contain;display:block}
 .jhc-small-title{color:#666}
 .jhc-card-name{font:600 italic 26px/1.14 'JHC Gelasio',Georgia,serif;color:#527384;margin:7px 0}
 .jhc-card-rule{height:5px;width:72px;background:var(--jhc-month);border-radius:0;transform:none;margin:3px auto 18px}
