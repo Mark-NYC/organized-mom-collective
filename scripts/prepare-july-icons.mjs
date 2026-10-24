@@ -128,3 +128,19 @@ for(const name of previewIconNames){
 }
 console.log('Prepared '+previewIconNames.length+' August v3 and '+snacks.size+' June v2 PNG icons.');
 
+
+ // Shared reusable art for May, January, February and July Club previews.
+ // Render supplied original PNGs as-is, and newer SVG-only illustrations to padded PNGs.
+ const sharedIcons=['morning-start','move-play','create-explore','lunch-reset','quiet-time','free-afternoon','evening-reset','breakfast-bowl','backpack','pajamas','dish','family-group','friend-pair','book','home','made-bed','shirt','paintbrush','star','basket','puzzle-piece','blocks','scissors','tree','bike','jump-rope','sidewalk-chalk','conversation-bubbles','adult-and-child-together','helping-hands'];
+ const sharedDir=join(root,'public/images/club/shared-icons');
+ await mkdir(sharedDir,{recursive:true});
+ const svgOnly=new Set(['backpack','conversation-bubbles','adult-and-child-together','helping-hands']);
+ for(const name of sharedIcons){
+  const svg=svgOnly.has(name);
+  const input=join(root,'assets/icons/ofc/updatedicons',svg?'svg':'png',name+(svg?'.svg':'.png'));
+  const output=join(sharedDir,name+'.png');
+  await sharp(input,{density:300}).resize({width:420,height:420,fit:'contain',background:'#00000000'})
+   .extend({top:46,bottom:46,left:46,right:46,background:'#00000000'})
+   .png().toFile(output);
+ }
+ console.log('Prepared '+sharedIcons.length+' consistent shared Club illustrations.');
