@@ -1,0 +1,10 @@
+---
+/** Unlisted July 2027 independent activity board design review. */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
+import JulyActivityBoard from '../../components/club/JulyActivityBoard.astro';
+---
+<PublicLayout fullTitle="July Activity Board Preview | Organized Family Club" description="A kid-readable activity board with three tiers: 5-Minute Ideas, Keep Me Busy, and My Own Project." indexable={false} chrome={false} width="full" tracking={false}>
+ <ClubPrototypeNav client:only="react" month="july" />
+ <main id="club-month-content"><JulyActivityBoard storageKey="omc:preview:july-activities:v1" /></main>
+</PublicLayout>
