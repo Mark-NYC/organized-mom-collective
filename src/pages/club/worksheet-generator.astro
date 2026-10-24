@@ -22,7 +22,7 @@ const first = JOB_PRESETS[0];
       <div class="ws-ready">
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
         <h2>Ready for your family.</h2>
-        <p>We made a starting plan for the Goering family. You can change any recommendation, or just download it as is.</p>
+        <p>We made a starting plan for <span id="ws-ready-family">the Goering Family</span>. You can change any recommendation, or just download it as is.</p>
         <div class="ws-field"><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
       <div class="ws-rec-head"><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
@@ -33,6 +33,8 @@ const first = JOB_PRESETS[0];
       </div>
       <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Send it.</button><button type="button" class="ws-secondary" id="ws-review">Review or change plan</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
       <form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
+        <input type="hidden" name="planTitle" id="ws-plan-title" value="Our School-Night Reset"/>
+        <input type="hidden" name="planGoal" id="ws-plan-goal" value="Tomorrow is ready without one person managing every step."/>
         <h2 id="ws-edit-heading">Adjust your plan</h2>
         <p class="ws-note">Only edit what you want changed. Everything else is ready.</p>
         <div class="ws-field ws-profile"><label for="ws-family">Family name</label><input id="ws-family" name="familyName" value="Goering" maxlength={LIMITS.familyName}/><p id="ws-family-hint" class="ws-hint"></p></div>
@@ -41,6 +43,7 @@ const first = JOB_PRESETS[0];
           <div class="ws-field"><label for="ws-adult-owner">Adult name</label><input id="ws-adult-owner" name="adultOwner" value="Mark" maxlength="28"/></div>
           <div class="ws-field"><label for="ws-adult-job">Suggested whole responsibility</label><select id="ws-adult-job" name="adultJob"><option>Own the school communications and forms</option><option>Plan and manage weekday dinners</option><option>Manage family appointments and transportation</option><option>Own household supplies and restocking</option><option>Manage the weekly laundry system</option><option value="custom">Custom responsibility</option></select><input id="ws-adult-custom" name="adultCustom" maxlength="90" placeholder="Whole responsibility" hidden/></div>
           <div class="ws-field"><label for="ws-adult-when">When</label><input id="ws-adult-when" name="adultWhen" value="Check messages and forms each school day" maxlength="80"/></div>
+          <div class="ws-field"><label for="ws-adult-steps">What finished looks like</label><textarea id="ws-adult-steps" name="adultSteps" rows="3" maxlength="260"></textarea></div>
         </fieldset>
         <fieldset id="ws-child1-fields" class="ws-edit-group">
           <legend>First child</legend>
@@ -94,14 +97,14 @@ const first = JOB_PRESETS[0];
   const child2 = $<HTMLSelectElement>('ws-child2-job');
   const sample = $<HTMLSelectElement>('ws-sample');
   const sampleProfiles = {
-    goering:{family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Prepare tomorrow’s clothes and school supplies',childWhen:'Every school night before bed',childDone:'Lay out tomorrow’s clothes. Check school supplies. Put everything in the ready spot.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
-    rivera:{family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
-    bennett:{family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
+    goering:{title:'Our School-Night Reset',goal:'Tomorrow is ready without one person managing every step.',family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Prepare tomorrow’s clothes and school supplies',childWhen:'Every school night before bed',childDone:'Lay out tomorrow’s clothes. Check school supplies. Put everything in the ready spot.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
+    rivera:{title:'Our Evening Reset',goal:'Everyone helps put the shared spaces back in order.',family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
+    bennett:{title:'Our Week-Ahead Plan',goal:'Everyone notices and prepares for their part of the coming week.',family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
   } as const;
   function applySample(key:keyof typeof sampleProfiles) {
     const p=sampleProfiles[key];
     const value=(id:string,v:string)=> {($<HTMLInputElement|HTMLTextAreaElement>(id)).value=v;};
-    value('ws-family',p.family);value('ws-adult-owner',p.adult);value('ws-adult-when',p.adultWhen);
+    value('ws-family',p.family);value('ws-plan-title',p.title);value('ws-plan-goal',p.goal);value('ws-adult-owner',p.adult);value('ws-adult-when',p.adultWhen);
     value('ws-owner',p.child1);value('ws-when',p.childWhen);value('ws-done',p.childDone);
     value('ws-child2',p.child2);value('ws-child2-when',p.secondWhen);value('ws-existing',p.existing);
     const pick=(id:string,customId:string,job:string,list:string[])=>{
@@ -114,6 +117,7 @@ const first = JOB_PRESETS[0];
     const adultSelect=$<HTMLSelectElement>('ws-adult-job');
     adultSelect.value=adultIndex<0?'custom':adultOptions[adultIndex];
     adultCustom.hidden=adultIndex>=0;adultCustom.value=p.adultJob;
+    value('ws-adult-steps',adultCatalog[p.adultJob]?.steps??'Notice what needs doing. Make a plan. Follow through without reminders.');
     pick('ws-job','ws-custom',p.childJob,JOB_PRESETS.map(x=>x.job));
     $('ws-custom-wrap').hidden=$<HTMLSelectElement>('ws-job').value!=='custom';
     const options=Array.from(child2.options).filter(x=>x.value!=='custom');
@@ -121,6 +125,7 @@ const first = JOB_PRESETS[0];
     child2.value=match?.value??'custom';child2Custom.hidden=Boolean(match);child2Custom.value=p.secondJob;
     value('ws-child2-done',p.child2==='Philip' ? 'Pack homework and school folder. Check water bottle and lunch container. Put bag by the door.' : match ? JOB_PRESETS[Number(match.value)].done : 'Complete the whole job and put everything back where it belongs.');
     last={when:p.childWhen,done:p.childDone};
+    originalJobs=jobSelections();refreshPlanTheme();
     form.classList.remove('is-editing');
     $('ws-approval-note').textContent='Sample plan prepared. Nothing is mailed from this demo.';
     update();
@@ -157,6 +162,9 @@ const first = JOB_PRESETS[0];
       when: when.value,
       done: done.value,
       checkIn: checkIn.value,
+      planTitle: v('planTitle'),
+      planGoal: v('planGoal'),
+      adultSteps: v('adultSteps'),
     };
   }
 
@@ -176,6 +184,7 @@ const first = JOB_PRESETS[0];
       const data = normalize(input());
       hints(data);
       const set = (id:string,value:string) => { const e=document.getElementById(id); if(e)e.textContent=value; };
+      set('ws-ready-family',(data.familyName??'your family').replace(/^The /,'the '));
       set('ws-adult-title',data.adultOwner??'Adult');
       set('ws-adult-summary',data.adultJob??'Choose a responsibility');
       set('ws-adult-desc',data.adultWhen??'');
@@ -198,33 +207,52 @@ const first = JOB_PRESETS[0];
     const isCustom = preset.value === 'custom';
     $('ws-custom-wrap').hidden = !isCustom;
     if (isCustom) {
-      if (when.value === last.when) when.value = '';
-      if (done.value === last.done) done.value = '';
+      when.value = '';
+      done.value = '';
       last = { when: '', done: '' };
       custom.focus();
     } else {
       const p = JOB_PRESETS[Number(preset.value)];
-      if (!when.value.trim() || when.value === last.when) when.value = p.when;
-      if (!done.value.trim() || done.value === last.done) done.value = p.done;
+      when.value = p.when;
+      done.value = p.done;
       last = { when: p.when, done: p.done };
     }
-    update();
+    refreshPlanTheme();update();
   });
   const adultJob = $<HTMLSelectElement>('ws-adult-job');
   const adultCustom = $<HTMLInputElement>('ws-adult-custom');
+
+  const adultCatalog: Record<string,{when:string;steps:string}> = {
+    'Own the school communications and forms':{when:'Check each school day and follow up before deadlines',steps:'Check school messages and deadlines. Handle forms and responses. Add important dates to the family calendar.'},
+    'Plan and manage weekday dinners':{when:'Plan once a week and manage each assigned dinner',steps:'Choose the meals. Prepare or arrange the ingredients. Manage serving and cleanup.'},
+    'Manage family appointments and transportation':{when:'Review the coming week each Sunday',steps:'Review upcoming appointments and commitments. Confirm transportation and rides. Update the family calendar.'},
+    'Own household supplies and restocking':{when:'Check supplies once a week',steps:'Notice which essentials are low. Make the restocking list. Buy or arrange replacements.'},
+    'Manage the weekly laundry system':{when:'On the family laundry days',steps:'Gather and sort loads. Run and dry the laundry. Make sure clean clothes get put away.'},
+  };
+  const jobSelections = () => [adultJob.value === 'custom' ? adultCustom.value : adultJob.value,preset.value==='custom'? custom.value : JOB_PRESETS[Number(preset.value)].job,child2.value==='custom'?child2Custom.value:JOB_PRESETS[Number(child2.value)].job];
+  let originalJobs:string[]=[];
+  function refreshPlanTheme(){
+    const current=jobSelections();
+    const matched=current.every((job,i)=>job===originalJobs[i]);
+    const key=sample.value as keyof typeof sampleProfiles;
+    const p=sampleProfiles[key];
+    ($<HTMLInputElement>('ws-plan-title')).value=matched?p.title:'Our Family Ownership Plan';
+    ($<HTMLInputElement>('ws-plan-goal')).value=matched?p.goal:'Everyone knows their whole job, when to do it, and what finished means.';
+  }
   adultJob.addEventListener('change', () => {
     adultCustom.hidden = adultJob.value !== 'custom';
-    if (!adultCustom.hidden) adultCustom.focus();
-    update();
+    if (!adultCustom.hidden) { adultCustom.focus(); ($<HTMLTextAreaElement>('ws-adult-steps')).value=''; ($<HTMLInputElement>('ws-adult-when')).value=''; }
+    else {const d=adultCatalog[adultJob.value];if(d){($<HTMLTextAreaElement>('ws-adult-steps')).value=d.steps;($<HTMLInputElement>('ws-adult-when')).value=d.when;}}
+    refreshPlanTheme();update();
   });
-  form.addEventListener('input', update);
+  form.addEventListener('input',()=>{refreshPlanTheme();update();});
   child2.addEventListener('change',()=> {
     child2Custom.hidden = child2.value !== 'custom';
     const selected=child2.value==='custom'?null:JOB_PRESETS[Number(child2.value)];
     if(selected) $('ws-child2-when').setAttribute('value',selected.when);
     if(selected) ($<HTMLInputElement>('ws-child2-when')).value=selected.when;
     if(selected) ($<HTMLTextAreaElement>('ws-child2-done')).value=selected.done;
-    update();
+    refreshPlanTheme();update();
   });
   document.querySelectorAll<HTMLButtonElement>('.ws-edit').forEach(b=>b.addEventListener('click',()=>{
     form.classList.add('is-editing');
