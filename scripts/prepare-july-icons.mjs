@@ -79,7 +79,7 @@ for(const [folder,name] of icons){
  console.log(name+': removed '+removed+' caption components; full art bounds '+JSON.stringify(bounds)+'; output '+image.width+'x'+image.height);
 }
 
-// August: copy the new, padded vector exports unchanged. No pixel cropping.
+// August and June: use the original high-resolution updatedicons PNG artwork without vector tracing or cropping.
 const augustIcons=[
  'morning-start','shirt','breakfast-bowl','toothbrush','basket',
  'dish','book','check-look','home','book-stack',
@@ -92,13 +92,11 @@ const foodDestination=join(root,'public/images/club/snack-icons');
 await mkdir(augustDestination,{recursive:true});
 await mkdir(foodDestination,{recursive:true});
 for(const name of augustIcons){
- const input=join(root,'assets/icons/ofc/updatedicons/svg',name+'.svg');
- const output=join(augustDestination,name+'.svg');
- const svg=await readFile(input,'utf8');
- if(!/<svg\b[^>]*\bviewBox="0 0 [0-9.]+ [0-9.]+"/.test(svg)||!svg.includes('<path')){
-  throw Error('Unexpected August vector icon: '+name);
- }
+ const input=join(root,'assets/icons/ofc/updatedicons/png',name+'.png');
+ const output=join(augustDestination,name+'.png');
+ const meta=await sharp(input).metadata();
+ if(!meta.width||!meta.height||meta.format!=='png')throw Error('Unexpected OFC PNG icon: '+name);
  await copyFile(input,output);
- if(['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar'].includes(name))await copyFile(input,join(foodDestination,name+'.svg'));
+ if(['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar'].includes(name))await copyFile(input,join(foodDestination,name+'.png'));
 }
-console.log('Prepared '+icons.length+' July illustrations and copied '+augustIcons.length+' new August vector icons.');
+console.log('Prepared '+icons.length+' July illustrations and copied '+augustIcons.length+' new August PNG icons.');
