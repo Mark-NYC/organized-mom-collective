@@ -105,62 +105,57 @@ class Draw {
 }
 
 
-function front(m: Metrics,d:WorksheetData):Page{
- const g=new Draw(m);g.header('Our family, our team');
- g.label(X0,110,d.familyName??'Your family');
- g.text(X0,148,'Everyone owns a part.','serif',36);
- g.text(X0,173,'Three whole jobs. Shared responsibility. Less reminding.','sans',10,{color:COLORS.soft});
- const card=(y:number,title:string,owner:string|null,job:string|null,when:string|null)=>{
-  g.section(y,146,null,title);
-  g.label(X0+PAD,y+41,'Owner');
-  if(owner)g.block(X0+PAD,y+69,owner,'serif',{width:170,maxLines:1,size:25,min:15,lead:1});else g.dots(X0+PAD,X0+180,y+70);
-  g.label(X0+210,y+41,'Whole responsibility');
-  if(job)g.block(X0+210,y+63,job,'serif',{width:W-224,maxLines:2,size:18,min:10,lead:1.2});else g.dots(X0+210,X1-PAD,y+71);
-  g.line(X0+PAD,y+96,X1-PAD,y+96);
-  g.label(X0+PAD,y+116,'When it happens');
-  if(when)g.block(X0+PAD,y+136,when,'sans',{width:W-2*PAD,maxLines:2,size:10,min:8,lead:1.25});else g.dots(X0+PAD,X1-PAD,y+141);
- };
- card(191,'01   Adult ownership',d.adultOwner,d.adultJob,d.adultWhen);
- card(348,'02   Child ownership',d.owner,d.job,d.when);
- card(505,'03   Child ownership',d.secondChild,d.secondJob,d.secondWhen);
- g.rect(X0,665,W,42,COLORS.panel,COLORS.frame);
- g.label(X0+PAD,679,'Our family, our team');
- if(d.existing)g.block(X0+PAD,697,d.existing,'serif',{width:W-2*PAD,maxLines:1,size:9,min:7,lead:1.1});
- 
- g.footer('Front · 1 / 2');return {width:PAGE_W,height:PAGE_H,ops:g.ops};
-}
 
-function back(m:Metrics,d:WorksheetData):Page{
- const g=new Draw(m);g.header('The handoff');
- g.label(X0,110,'Prepared for your family');
- g.text(X0,149,'Everyone gets a clear handoff.','serif',29);
- g.text(X0,171,'Teach it once. Give the owner the noticing, too.','serifItalic',13,{color:COLORS.soft});
- g.section(192,114,null,'Adult ownership');
- g.block(X0+PAD,235,(d.adultOwner??'Adult')+' · '+(d.adultJob??'Whole responsibility'),'serif',{width:W-2*PAD,maxLines:2,size:16,min:10,lead:1.2});
- g.block(X0+PAD,273,'Agree on finished, timing and access. Transfer decisions and reminders, not only the task. Check in once.','sans',{width:W-2*PAD,maxLines:2,size:10,min:8.5,lead:1.32});
- const half=(W-12)/2;
- const child=(x:number,name:string|null,job:string|null,done:string|null)=>{
-  g.rect(x,318,half,241,COLORS.white,COLORS.frame);
-  g.rect(x,318,half,22,COLORS.blue,COLORS.frame);
-  g.label(x+12,333,(name??'Child')+' · My handoff',{size:6.7});
-  g.block(x+12,364,job??'My responsibility','serif',{width:half-24,maxLines:2,size:16,min:10,lead:1.18});
-  g.label(x+12,409,'Finished means');
-  if(done)g.block(x+12,429,done,'sans',{width:half-24,maxLines:5,size:9.1,min:7.5,lead:1.28});
-  else g.dots(x+12,x+half-12,431);
-  g.line(x+12,484,x+half-12,484);
-  g.label(x+12,503,'First week');
-  g.block(x+12,523,'Days 1–2: together. Days 3–4: child leads. Days 5–7: step back.','sans',{width:half-24,maxLines:3,size:9,min:8,lead:1.25});
+function planName(d:WorksheetData):string {
+ const j=[d.adultJob,d.job,d.secondJob].join(' ').toLowerCase();
+ if(/school|bag|homework|clothes|folder/.test(j))return 'Our School-Night Reset';
+ if(/toy|entryway|supplies|tidy|laundry/.test(j))return 'Our Family Reset';
+ if(/appointment|transportation|trash|recycling|calendar/.test(j))return 'Our Week-Ahead Plan';
+ return 'Our Family Ownership Plan';
+}
+function steps(text:string|null):string[] {
+ return (text??'').split(/\n|[.;]+/).map(s=>s.trim()).filter(Boolean).slice(0,3);
+}
+function front(m:Metrics,d:WorksheetData):Page {
+ const g=new Draw(m);
+ g.rect(X0,39,52,4,COLORS.blue);
+ g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
+ g.label(X0,94,d.familyName??'Our family',{size:7});
+ g.block(X0,137,planName(d),'serif',{width:W,maxLines:2,size:31,min:23,lead:1.15});
+ g.text(X0,165,'Everyone owns a part. Everyone knows what finished means.','sans',9.5,{color:COLORS.soft});
+ const group=(y:number,name:string|null,job:string|null,when:string|null,done:string|null)=>{
+  g.line(X0,y-24,X1,y-24,COLORS.hair,.8);
+  g.block(X0,y,name??'A family member','serif',{width:145,maxLines:1,size:22,min:13,lead:1});
+  g.block(X0+166,y,job??'One whole responsibility','serifItalic',{width:W-166,maxLines:2,size:15,min:10,lead:1.17});
+  if(when)g.block(X0,y+22,when,'sans',{width:W,maxLines:1,size:9.2,min:8,lead:1.2,color:COLORS.soft});
+  steps(done).forEach((s,i)=>{g.circle(X0+5,y+49+i*29,2,COLORS.ink);g.block(X0+17,y+53+i*29,s,'sans',{width:W-17,maxLines:2,size:11.3,min:9.4,lead:1.2});});
  };
- child(X0,d.owner,d.job,d.done);
- child(X0+half+12,d.secondChild,d.secondJob,d.secondDone);
- g.section(572,89,null,'One family check-in');
- g.text(X0+PAD,613,'What worked? What needs to change?','serifItalic',14);
- g.dots(X0+PAD,X1-PAD,635);
- if(d.checkIn)g.text(X0+PAD,654,d.checkIn,'sansMedium',8);
- g.rect(X0,673,W,64,COLORS.panel,COLORS.frame);
- g.label(X0+PAD,689,'Bring it to your calendar');
- g.block(X0+PAD,706,'Write each owner beside their job so the plan carries the reminder.','serif',{width:W-2*PAD,maxLines:1,size:10,min:8.4,lead:1.25});
- g.text(X0+PAD,727,'We grow stronger when everyone owns a part.  — Megan','serifItalic',9.8,{color:COLORS.soft});
+ const adultSteps=steps(d.adultJob?.toLowerCase().includes('school')?'Check messages and deadlines. Handle forms and responses. Add important dates to the family calendar.':d.adultJob?.toLowerCase().includes('supplies')?'Notice what is running low. Make the restocking list. Buy or arrange replacements before they run out.':d.adultJob?.toLowerCase().includes('appointment')?'Review next week’s commitments. Confirm rides and appointments. Update the shared calendar.':d.adultJob?.toLowerCase().includes('dinner')?'Choose the meals. Prepare or arrange ingredients. Own serving and cleanup.':d.adultJob?.toLowerCase().includes('laundry')?'Gather and sort laundry. Run the loads. Make sure clean clothes get put away.':'Notice what needs doing. Make the plan. Follow through without reminders.');
+ group(215,d.adultOwner,d.adultJob,d.adultWhen,adultSteps.join('. '));
+ group(386,d.owner,d.job,d.when,d.done);
+ group(557,d.secondChild,d.secondJob,d.secondWhen,d.secondDone);
+ g.line(X0,696,X1,696,COLORS.hair,.8);
+ g.block(X0,719,'One less thing for one person to carry.','serifItalic',{width:W,maxLines:1,size:15,min:12,lead:1.1});
+ g.footer('Front · 1 / 2');
+ return {width:PAGE_W,height:PAGE_H,ops:g.ops};
+}
+function back(m:Metrics,d:WorksheetData):Page {
+ const g=new Draw(m);
+ g.rect(X0,39,52,4,COLORS.blue);
+ g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
+ g.label(X0,103,'A little less to carry');
+ g.text(X0,148,'How we hand it over','serif',32);
+ g.block(X0,188,'Show the plan to everyone who will own a part. Agree on what finished means, and where things belong. Then let each person take the lead.','serif',{width:W,maxLines:3,size:14,min:12,lead:1.45});
+ const lines=[
+  ['Start together','Walk through each job once. Practice anything new.'],
+  ['Hand over the noticing','The owner remembers when it happens, not just how to do it.'],
+  ['Adjust without taking it back','If a step is too hard, simplify it together. Keep a clear owner.']
+ ];
+ lines.forEach((item,i)=>{const y=289+i*104;g.line(X0,y-24,X1,y-24,COLORS.hair,.75);g.text(X0,y,item[0],'serif',19);g.block(X0,y+26,item[1],'sans',{width:W,maxLines:2,size:11,min:10,lead:1.3});});
+ g.line(X0,587,X1,587,COLORS.hair,.8);
+ g.text(X0,621,'A note from Megan','serifItalic',21);
+ g.block(X0,657,'The goal is not a perfectly organized family overnight. It is a home where everyone can see their part and carry it. Start small, and give each other room to grow.','serif',{width:W,maxLines:4,size:13,min:11,lead:1.38});
+ g.text(X0,722,'Megan','serifBoldItalic',18);
  g.footer('Back · 2 / 2');
  return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
