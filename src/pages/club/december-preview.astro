@@ -27,7 +27,8 @@ import {families} from '../../lib/december/traditions';
 </main>
 </PublicLayout>
 <script>
-import {families} from '../../lib/december/traditions';
+import {families, type Family} from '../../lib/december/traditions';
+import type {Household} from '../../lib/club/profile';
 import {decemberPages} from '../../lib/december/layout';
 import {renderSvg} from '../../lib/worksheet/svg';
 import {renderPdf} from '../../lib/worksheet/pdf';
@@ -37,7 +38,22 @@ const get=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 const family=get<HTMLSelectElement>('family');
 const button=get<HTMLButtonElement>('download'),message=get<HTMLElement>('message');
 let bytes:FontBytes|null=null,metrics:Metrics|null=null;
-function current(){return families.find(f=>f.id===family.value)??families[0];}
+let clubHousehold:Household|null=null;
+function current():Family {
+ if(clubHousehold){
+  const adults=clubHousehold.members.filter(m=>m.kind==='adult'&&!m.archived);
+  const children=clubHousehold.members.filter(m=>m.kind==='child'&&!m.archived);
+  const members=[adults[0]?.firstName??'A parent',adults[1]?.firstName??'a grown-up',...children.map(m=>m.firstName)];
+  const ages=[0,0,...children.map(m=>m.birthYear?2026-m.birthYear:8)];
+  return {id:'rivera',label:'Family profile',family:clubHousehold.displayName??'Our Family',members,ages,recommended:'kindness'};
+ }
+ return families.find(f=>f.id===family.value)??families[0];
+}
+window.addEventListener('omc:club-preview-household',(event:Event)=>{
+ const detail=(event as CustomEvent<{household:Household|null}>).detail;
+ clubHousehold=detail?.household??null;
+ show();
+});
 function show(){
  const f=current();
  const children=f.members.slice(2);
