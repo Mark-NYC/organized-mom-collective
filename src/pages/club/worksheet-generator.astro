@@ -130,7 +130,7 @@ const first = JOB_PRESETS[0];
       familyName: v('familyName'),
       owner: v('owner'),
       adultOwner: v('adultOwner'),
-      adultJob: $('ws-adult-job').value === 'custom' ? v('adultCustom') : v('adultJob'),
+      adultJob: v('adultJob') === 'custom' ? v('adultCustom') : v('adultJob'),
       adultWhen: v('adultWhen'),
       existing: v('existing'),
       job: preset.value === 'custom' ? custom.value : JOB_PRESETS[Number(preset.value)].job,
