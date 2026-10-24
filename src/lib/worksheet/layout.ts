@@ -106,13 +106,6 @@ class Draw {
 
 
 
-function planName(d:WorksheetData):string {
- const j=[d.adultJob,d.job,d.secondJob].join(' ').toLowerCase();
- if(/school|bag|homework|clothes|folder/.test(j))return 'Our School-Night Reset';
- if(/toy|entryway|supplies|tidy|laundry/.test(j))return 'Our Family Reset';
- if(/appointment|transportation|trash|recycling|calendar/.test(j))return 'Our Week-Ahead Plan';
- return 'Our Family Ownership Plan';
-}
 function steps(text:string|null):string[] {
  return (text??'').split(/\n|[.;]+/).map(s=>s.trim()).filter(Boolean).slice(0,3);
 }
@@ -121,8 +114,8 @@ function front(m:Metrics,d:WorksheetData):Page {
  g.rect(X0,39,52,4,COLORS.blue);
  g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
  g.label(X0,94,d.familyName??'Our family',{size:7});
- g.block(X0,137,planName(d),'serif',{width:W,maxLines:2,size:31,min:23,lead:1.15});
- g.text(X0,165,'Everyone owns a part. Everyone knows what finished means.','sans',9.5,{color:COLORS.soft});
+ g.block(X0,137,d.planTitle??'Our Family Ownership Plan','serif',{width:W,maxLines:2,size:31,min:23,lead:1.15});
+ g.block(X0,165,d.planGoal??'Everyone owns a part. Everyone knows what finished means.','sans',{width:W,maxLines:2,size:9.5,min:8.5,lead:1.2,color:COLORS.soft});
  const group=(y:number,name:string|null,job:string|null,when:string|null,done:string|null)=>{
   g.line(X0,y-24,X1,y-24,COLORS.hair,.8);
   g.block(X0,y,name??'A family member','serif',{width:145,maxLines:1,size:24,min:15,lead:1});
@@ -130,7 +123,7 @@ function front(m:Metrics,d:WorksheetData):Page {
   if(when)g.block(X0,y+22,when,'sans',{width:W,maxLines:1,size:10,min:9,lead:1.2,color:COLORS.soft});
   steps(done).forEach((s,i)=>{g.circle(X0+5,y+49+i*31,2,COLORS.ink);g.block(X0+17,y+53+i*31,s,'sans',{width:W-17,maxLines:2,size:12.5,min:10.5,lead:1.2});});
  };
- const adultSteps=steps(d.adultJob?.toLowerCase().includes('school')?'Check messages and deadlines. Handle forms and responses. Add important dates to the family calendar.':d.adultJob?.toLowerCase().includes('supplies')?'Notice what is running low. Make the restocking list. Buy or arrange replacements before they run out.':d.adultJob?.toLowerCase().includes('appointment')?'Review next week’s commitments. Confirm rides and appointments. Update the shared calendar.':d.adultJob?.toLowerCase().includes('dinner')?'Choose the meals. Prepare or arrange ingredients. Own serving and cleanup.':d.adultJob?.toLowerCase().includes('laundry')?'Gather and sort laundry. Run the loads. Make sure clean clothes get put away.':'Notice what needs doing. Make the plan. Follow through without reminders.');
+ const adultSteps=steps(d.adultSteps);
  group(215,d.adultOwner,d.adultJob,d.adultWhen,adultSteps.join('. '));
  group(386,d.owner,d.job,d.when,d.done);
  group(557,d.secondChild,d.secondJob,d.secondWhen,d.secondDone);
