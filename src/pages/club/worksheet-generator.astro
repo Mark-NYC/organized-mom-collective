@@ -13,81 +13,57 @@ const first = JOB_PRESETS[0];
 <main class="ws-shell">
   <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
   <div class="ws-intro">
-    <p class="ws-eyebrow">One problem. One ready-to-use tool.</p>
-    <h1>Share the work. <em>Not just the chores.</em></h1>
-    <p>Start with one meaningful adult handoff and one child responsibility. Give the whole family a plan, not Mom another assignment.</p>
+    <p class="ws-eyebrow">Your November family plan is prepared.</p>
+    <h1>One family. <em>More shared ownership.</em></h1>
+    <p>Our recommendations are ready. Review them if you like, or download the finished family tool just as it is.</p>
   </div>
   <div class="ws-workspace">
-    <form class="ws-controls" id="ws-form" aria-label="Personalize your worksheet" novalidate>
-      <h2>Build your family plan</h2>
-      <a href="#ws-preview" class="ws-jump">See your worksheet ↓</a>
-      <div class="ws-field">
-        <label for="ws-family">Family name</label>
-        <input id="ws-family" name="familyName" value="Goering" maxlength={LIMITS.familyName} autocomplete="family-name" placeholder="Goering" />
-        <p class="ws-hint" id="ws-family-hint" aria-live="polite"></p>
+    <div class="ws-left">
+      <div class="ws-ready">
+        <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
+        <h2>Your family's next step is ready.</h2>
+        <p>We made a starting plan for the Goering family. You can change any recommendation, or just download it as is.</p>
+        <p class="ws-demo">Demo family · Not linked to an account or mailing</p>
       </div>
-      <div class="ws-field">
-        <label for="ws-adult-owner">Adult who will own a whole job</label>
-        <input id="ws-adult-owner" name="adultOwner" value="Mark" maxlength="28" autocomplete="off" />
+      <div class="ws-rec-head"><h2>Recommended for your family</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
+      <div id="ws-recommendations">
+        <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
+        <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Set and clear the dinner table</p><p id="ws-child1-desc">Set plates and utensils, clear dishes, wipe the table and push in chairs.</p></article>
+        <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
       </div>
-      <div class="ws-field">
-        <label for="ws-adult-job">Adult responsibility</label>
-        <select id="ws-adult-job" name="adultJob">
-          <option>Own the school communications and forms</option>
-          <option>Plan and manage weekday dinners</option>
-          <option>Manage family appointments and transportation</option>
-          <option>Own household supplies and restocking</option>
-          <option>Manage the weekly laundry system</option>
-          <option value="custom">Write my own…</option>
-        </select>
-        <input id="ws-adult-custom" name="adultCustom" maxlength="90" placeholder="Whole responsibility" hidden />
-      </div>
-      <div class="ws-field">
-        <label for="ws-adult-when">Adult responsibility rhythm</label>
-        <input id="ws-adult-when" name="adultWhen" value="Check messages and forms each school day" maxlength="80" />
-      </div>
-      <div class="ws-field">
-        <label for="ws-owner">Child taking ownership</label>
-        <input id="ws-owner" name="owner" value="Andrew" maxlength={LIMITS.owner} autocomplete="off" placeholder="First name" />
-      </div>
-      <div class="ws-field">
-        <label for="ws-job">Child responsibility</label>
-        <select id="ws-job" name="preset">
-          {JOB_PRESETS.map((p, i) => <option value={String(i)}>{p.job}</option>)}
-          <option value="custom">Write my own…</option>
-        </select>
-      </div>
-      <div class="ws-field" id="ws-custom-wrap" hidden>
-        <label for="ws-custom">Your job</label>
-        <input id="ws-custom" name="job" maxlength={LIMITS.job} autocomplete="off" placeholder="The whole job, not just one step" />
-      </div>
-      <div class="ws-field">
-        <label for="ws-when">When the child does it</label>
-        <input id="ws-when" name="when" value={first.when} maxlength={LIMITS.when} autocomplete="off" />
-      </div>
-      <div class="ws-field">
-        <label for="ws-done">Child: what finished looks like</label>
-        <textarea id="ws-done" name="done" rows="4" maxlength={LIMITS.done}>{first.done}</textarea>
-        <p class="ws-hint"><span id="ws-done-count"></span></p>
-      </div>
-      <div class="ws-field">
-        <label for="ws-existing">Other family contributions <span class="ws-optional">optional</span></label>
-        <input id="ws-existing" name="existing" maxlength="130" placeholder="Philip: bags · Megan: family calendar" />
-      </div>
-      <div class="ws-field">
-        <label for="ws-checkin">First family check-in <span class="ws-optional">optional</span></label>
-        <div class="ws-date-row">
-          <input id="ws-checkin" name="checkIn" type="date" />
-          <button type="button" class="ws-link" id="ws-two-weeks">Two weeks from today</button>
-        </div>
-        <p class="ws-hint" id="ws-date-hint" aria-live="polite"></p>
-      </div>
-      <p class="ws-note">Start with two handoffs, not a new chore for everyone. Add existing contributions only if useful.</p>
-      <button type="submit" class="ws-download" id="ws-download" disabled>Download PDF</button>
-      <p class="ws-status" id="ws-status" role="status" aria-live="polite"></p>
-      <p class="ws-helper">US Letter, 2 pages. Print double-sided on one sheet (flip on long edge) at 100% scale, in color. Mails flat in a 9 × 12 envelope.</p>
-      <p class="ws-helper">Everything stays in this browser. Nothing you type is saved or sent.</p>
-    </form>
+      <form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
+        <h2 id="ws-edit-heading">Adjust your plan</h2>
+        <p class="ws-note">Only edit what you want changed. Everything else is ready.</p>
+        <div class="ws-field ws-profile"><label for="ws-family">Family name</label><input id="ws-family" name="familyName" value="Goering" maxlength={LIMITS.familyName}/><p id="ws-family-hint" class="ws-hint"></p></div>
+        <fieldset id="ws-adult-fields" class="ws-edit-group">
+          <legend>Adult handoff</legend>
+          <div class="ws-field"><label for="ws-adult-owner">Adult name</label><input id="ws-adult-owner" name="adultOwner" value="Mark" maxlength="28"/></div>
+          <div class="ws-field"><label for="ws-adult-job">Suggested whole responsibility</label><select id="ws-adult-job" name="adultJob"><option>Own the school communications and forms</option><option>Plan and manage weekday dinners</option><option>Manage family appointments and transportation</option><option>Own household supplies and restocking</option><option>Manage the weekly laundry system</option><option value="custom">Custom responsibility</option></select><input id="ws-adult-custom" name="adultCustom" maxlength="90" placeholder="Whole responsibility" hidden/></div>
+          <div class="ws-field"><label for="ws-adult-when">When</label><input id="ws-adult-when" name="adultWhen" value="Check messages and forms each school day" maxlength="80"/></div>
+        </fieldset>
+        <fieldset id="ws-child1-fields" class="ws-edit-group">
+          <legend>First child</legend>
+          <div class="ws-field"><label for="ws-owner">Name</label><input id="ws-owner" name="owner" value="Andrew" maxlength={LIMITS.owner}/></div>
+          <div class="ws-field"><label for="ws-job">Suggested job</label><select id="ws-job" name="preset">{JOB_PRESETS.map((p,i)=><option value={String(i)}>{p.job}</option>)}<option value="custom">Custom job</option></select></div>
+          <div class="ws-field" id="ws-custom-wrap" hidden><label for="ws-custom">Custom job</label><input id="ws-custom" name="job" maxlength={LIMITS.job}/></div>
+          <div class="ws-field"><label for="ws-when">When</label><input id="ws-when" name="when" value={first.when} maxlength={LIMITS.when}/></div>
+          <div class="ws-field"><label for="ws-done">Specific finished result</label><textarea id="ws-done" name="done" rows="3" maxlength={LIMITS.done}>{first.done}</textarea><p class="ws-hint"><span id="ws-done-count"></span></p></div>
+        </fieldset>
+        <fieldset id="ws-child2-fields" class="ws-edit-group">
+          <legend>Second child</legend>
+          <div class="ws-field"><label for="ws-child2">Name</label><input id="ws-child2" name="secondChild" value="Philip" maxlength="28"/></div>
+          <div class="ws-field"><label for="ws-child2-job">Suggested job</label><select id="ws-child2-job"><option value="1">Pack my school bag</option><option value="0">Set and clear the dinner table</option><option value="2">Put away my clean laundry</option><option value="4">Keep the entryway tidy</option><option value="custom">Custom job</option></select><input id="ws-child2-custom" maxlength="90" placeholder="Custom responsibility" hidden/></div>
+          <div class="ws-field"><label for="ws-child2-when">When</label><input id="ws-child2-when" name="secondWhen" maxlength="80" value="Every school night, before bed"/></div>
+        </fieldset>
+        <div class="ws-field"><label for="ws-existing">Other responsibilities already owned <span class="ws-optional">optional</span></label><input id="ws-existing" name="existing" maxlength="130" placeholder="Megan: calendar"/></div>
+        <div class="ws-field"><label for="ws-checkin">Family check-in <span class="ws-optional">optional</span></label><div class="ws-date-row"><input id="ws-checkin" name="checkIn" type="date"/><button type="button" id="ws-two-weeks" class="ws-link">In two weeks</button></div><p id="ws-date-hint" class="ws-hint"></p></div>
+        <button type="button" id="ws-done-editing" class="ws-download">Done editing</button>
+        <button type="submit" id="ws-download" class="ws-download" disabled>Download personalized PDF</button>
+        <p id="ws-status" class="ws-status" role="status" aria-live="polite"></p>
+        <p class="ws-helper">Two US Letter pages. Print front and back on one sheet, 100% scale, long-edge flip.</p>
+      </form>
+      <p class="ws-disclaimer">This is a preview of future Club membership. No plan is saved or mailed. Recommendations are examples based on a sample family.</p>
+    </div>
     <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview">
       <div class="ws-preview-head"><h2>Your two-sided worksheet</h2><span>8.5 × 11 in · front and back</span></div>
       <div class="ws-pages" id="ws-pages" aria-busy="true">
@@ -113,6 +89,8 @@ const first = JOB_PRESETS[0];
   const when = $<HTMLInputElement>('ws-when');
   const done = $<HTMLTextAreaElement>('ws-done');
   const checkIn = $<HTMLInputElement>('ws-checkin');
+  const child2 = $<HTMLSelectElement>('ws-child2-job');
+  const child2Custom = $<HTMLInputElement>('ws-child2-custom');
   const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
   const setBusy = (busy: boolean) => downloads.forEach((b) => (b.disabled = busy));
   const status = $<HTMLParagraphElement>('ws-status');
@@ -133,6 +111,9 @@ const first = JOB_PRESETS[0];
       adultJob: v('adultJob') === 'custom' ? v('adultCustom') : v('adultJob'),
       adultWhen: v('adultWhen'),
       existing: v('existing'),
+      secondChild: v('secondChild'),
+      secondJob: child2.value === 'custom' ? child2Custom.value : JOB_PRESETS[Number(child2.value)].job,
+      secondWhen: v('secondWhen'),
       job: preset.value === 'custom' ? custom.value : JOB_PRESETS[Number(preset.value)].job,
       when: when.value,
       done: done.value,
@@ -155,6 +136,16 @@ const first = JOB_PRESETS[0];
       queued = false;
       const data = normalize(input());
       hints(data);
+      const set = (id:string,value:string) => { const e=document.getElementById(id); if(e)e.textContent=value; };
+      set('ws-adult-title',data.adultOwner??'Adult');
+      set('ws-adult-summary',data.adultJob??'Choose a responsibility');
+      set('ws-adult-desc',data.adultWhen??'');
+      set('ws-child1-title',data.owner??'Child');
+      set('ws-child1-summary',data.job??'Choose a job');
+      set('ws-child1-desc',data.done??'');
+      set('ws-child2-title',data.secondChild??'Child');
+      set('ws-child2-summary',data.secondJob??'Choose a job');
+      set('ws-child2-desc',data.secondWhen??'');
       if (!metrics) return;
       layoutWorksheet(metrics, data).forEach((page, i) => {
         sheets[i].innerHTML = renderSvg(page, i ? 'Back of the worksheet' : 'Front of the worksheet');
@@ -188,6 +179,20 @@ const first = JOB_PRESETS[0];
     update();
   });
   form.addEventListener('input', update);
+  child2.addEventListener('change',()=> {
+    child2Custom.hidden = child2.value !== 'custom';
+    const selected=child2.value==='custom'?null:JOB_PRESETS[Number(child2.value)];
+    if(selected) $('ws-child2-when').setAttribute('value',selected.when);
+    if(selected) ($<HTMLInputElement>('ws-child2-when')).value=selected.when;
+    update();
+  });
+  document.querySelectorAll<HTMLButtonElement>('.ws-edit').forEach(b=>b.addEventListener('click',()=>{
+    form.classList.add('is-editing');
+    const group=b.dataset.edit??'adult';
+    form.dataset.activeGroup=group;
+    form.scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+  $('ws-done-editing').addEventListener('click',()=>{form.classList.remove('is-editing');update();});
   form.addEventListener('change', update);
   $('ws-two-weeks').addEventListener('click', () => {
     const d = new Date();
@@ -211,7 +216,7 @@ const first = JOB_PRESETS[0];
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
-      status.textContent = 'Downloaded. Print it double-sided at 100% scale.';
+      status.textContent = 'PDF downloaded. This demo does not submit a mailing.';
     } catch (err) {
       console.error(err);
       status.textContent = 'Something went wrong making the PDF. Please try again.';
@@ -293,3 +298,28 @@ const first = JOB_PRESETS[0];
 @media(max-width:860px){.ws-jump{display:inline-block;font-size:13px;text-decoration:underline;text-underline-offset:4px;padding:10px 0 14px;margin-top:-12px}.ws-download-again{display:block;margin-top:24px}.ws-workspace{grid-template-columns:1fr}.ws-controls{position:static;padding:20px}.ws-intro{padding:28px 0 26px}.ws-controls input,.ws-controls textarea,.ws-controls select{font-size:16px}}
 </style>
 </PublicLayout>
+
+<style is:global>
+.ws-left{min-width:0}
+.ws-ready{padding:22px 24px;background:#d0e1e4;border:1px solid #b9c9cc;margin-bottom:22px}
+.ws-ready h2{font:normal 28px/1.14 Georgia,serif;margin:12px 0}
+.ws-ready p{font-size:13px;line-height:1.6}
+.ws-ready .ws-demo{font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase}
+.ws-rec-head h2{font:normal 23px Georgia,serif;margin:12px 0 4px}
+.ws-rec-head p,.ws-disclaimer{font-size:12px;line-height:1.6;color:#666}
+.ws-rec{border:1px solid #c9c9c9;padding:15px 17px;margin:14px 0;background:white}
+.ws-rec-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.ws-rec-top span{font-size:10px;letter-spacing:.15em;font-weight:650}
+.ws-edit{font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ws-rec h3{font:normal 23px Georgia,serif;margin:10px 0 3px}
+.ws-rec-job{font-weight:650!important;color:#4c4c4c}
+.ws-rec p{font-size:12px;line-height:1.5;margin:7px 0}
+#ws-form{display:none;position:static!important;margin-top:20px}
+#ws-form.is-editing{display:block}
+.ws-edit-group{border:0;padding:0;margin:0 0 20px;min-width:0}
+.ws-edit-group legend{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+#ws-form[data-active-group="adult"] #ws-child1-fields,#ws-form[data-active-group="adult"] #ws-child2-fields{display:none}
+#ws-form[data-active-group="child1"] #ws-adult-fields,#ws-form[data-active-group="child1"] #ws-child2-fields{display:none}
+#ws-form[data-active-group="child2"] #ws-adult-fields,#ws-form[data-active-group="child2"] #ws-child1-fields{display:none}
+.ws-disclaimer{margin:18px 0}
+</style>
