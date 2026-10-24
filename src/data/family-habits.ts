@@ -110,7 +110,7 @@ export function practiceDays(start?: string | null): string[] {
 }
 
 /** The habit as plain text, for a note, a message or the family calendar. */
-export function habitText(h: { statement: string; when: string; who: string; doneMeans: string; start?: string; checkIn?: string }): string {
+export function habitText(h: { statement: string; when: string; who: string; doneMeans: string; placement?: string; start?: string; checkIn?: string }): string {
   return [
     'Our family’s new rhythm',
     '',
@@ -118,6 +118,7 @@ export function habitText(h: { statement: string; when: string; who: string; don
     '',
     `When: ${h.when}`,
     `Who: ${h.who}`,
+    `Reminder spot: ${h.placement?.trim() || "Where the habit happens"}`,
     ...(h.doneMeans.trim() ? [`Done means: ${h.doneMeans.trim()}`] : []),
     ...(h.start ? [`We start: ${h.start}${h.checkIn ? ` · We check in: ${h.checkIn}` : ''}`] : []),
     '',
