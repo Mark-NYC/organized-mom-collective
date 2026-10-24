@@ -1,0 +1,10 @@
+---
+/** Unlisted Club August 2027 printed routines proof. */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
+import AugustSchoolRoutines from '../../components/club/AugustSchoolRoutines.astro';
+---
+<PublicLayout fullTitle="August School Day Routines Preview | Organized Family Club" description="Personalized school morning and after-school routines in one printed sheet." indexable={false} chrome={false} width="full" tracking={false}>
+ <ClubPrototypeNav client:only="react" month="august" />
+ <main id="club-month-content"><AugustSchoolRoutines storageKey="omc:preview:august-school-routines:v1" /></main>
+</PublicLayout>
