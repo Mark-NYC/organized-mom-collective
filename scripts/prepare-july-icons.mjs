@@ -82,10 +82,15 @@ for(const [folder,name] of icons){
 // August: copy the new, padded vector exports unchanged. No pixel cropping.
 const augustIcons=[
  'morning-start','shirt','breakfast-bowl','toothbrush','basket',
- 'dish','book','check-look','home','book-stack'
+ 'dish','book','check-look','home','book-stack',
+ 'backpack','sneakers','coat','lunchbox','school-folder','school-notebook',
+ 'school-bus','washing-hands','yogurt-cup','apple','carrot',
+ 'cheese-wedge','crackers','granola-bar'
 ];
 const augustDestination=join(root,'public/images/club/august-v2');
+const foodDestination=join(root,'public/images/club/snack-icons');
 await mkdir(augustDestination,{recursive:true});
+await mkdir(foodDestination,{recursive:true});
 for(const name of augustIcons){
  const input=join(root,'assets/icons/ofc/updatedicons/svg',name+'.svg');
  const output=join(augustDestination,name+'.svg');
@@ -94,5 +99,6 @@ for(const name of augustIcons){
   throw Error('Unexpected August vector icon: '+name);
  }
  await copyFile(input,output);
+ if(['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar'].includes(name))await copyFile(input,join(foodDestination,name+'.svg'));
 }
 console.log('Prepared '+icons.length+' July illustrations and copied '+augustIcons.length+' new August vector icons.');
