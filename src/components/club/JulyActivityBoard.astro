@@ -1,17 +1,8 @@
 ---
 /** July Club printed prototype: child-led activity decision board, one letter-size page. */
-import book from '../../../assets/icons/ofc/july-clean/book.svg';
-import blocks from '../../../assets/icons/ofc/july-clean/blocks.svg';
-import puzzle from '../../../assets/icons/ofc/july-clean/puzzle-piece.svg';
-import tree from '../../../assets/icons/ofc/july-clean/tree.svg';
-import scissors from '../../../assets/icons/ofc/july-clean/scissors.svg';
-import bike from '../../../assets/icons/ofc/july-clean/bike.svg';
-import rope from '../../../assets/icons/ofc/july-clean/jump-rope.svg';
-import friends from '../../../assets/icons/ofc/july-clean/friend-pair.svg';
-import lightbulb from '../../../assets/icons/ofc/july-clean/lightbulb.svg';
 interface Props {storageKey?:string}
 const {storageKey='omc:club:july-activities:v1'}=Astro.props;
-const icons={book:book.src,blocks:blocks.src,puzzle:puzzle.src,tree:tree.src,scissors:scissors.src,bike:bike.src,rope:rope.src,friends:friends.src,lightbulb:lightbulb.src};
+const icons={book:'/images/club/july/book.png',blocks:'/images/club/july/blocks.png',puzzle:'/images/club/july/puzzle-piece.png',tree:'/images/club/july/tree.png',scissors:'/images/club/july/scissors.png',bike:'/images/club/july/bike.png',rope:'/images/club/july/jump-rope.png',friends:'/images/club/july/friend-pair.png',lightbulb:'/images/club/july/lightbulb.png'};
 const tiers=[
  {id:'quick',num:'01',title:'5-Minute Ideas',subtitle:'I can start right now.',hint:'NO SETUP · BY MYSELF',color:'#E3EEDC',
   items:[{id:'read',label:'Read a book',icon:'book'},{id:'draw',label:'Draw something new',icon:'scissors'},{id:'build',label:'Build with blocks',icon:'blocks'}]},
