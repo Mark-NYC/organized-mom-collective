@@ -87,7 +87,7 @@ const augustDestination=join(root,'public/images/club/august');
 await mkdir(augustDestination,{recursive:true});
 for(const [folder,name] of augustIcons){
  const input=join(source,folder,name+'.png'),output=join(augustDestination,name+'.png');
- const {data,info}=await sharp(input).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ const {data,info}=await sharp(input).resize(256,256,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected August icon dimensions: '+name);
  removeCaptionPixels(data,info.width,info.height);
  const bounds=alphaBounds(data,info.width,info.height);
