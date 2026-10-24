@@ -81,5 +81,8 @@ export function normalize(input: WorksheetInput): WorksheetData {
     planTitle: clean(input.planTitle, 80),
     planGoal: clean(input.planGoal, 170),
     adultSteps: clean(input.adultSteps, 260, true),
+    momName: clean(input.momName, 28),
+    momOwns: clean(input.momOwns, 110),
+    momRelief: clean(input.momRelief, 170),
   };
 }
