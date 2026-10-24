@@ -11,13 +11,14 @@ import ClubMonthAccess from '../../../components/club/ClubMonthAccess';
 import NovemberOwnershipPrototype from '../../../components/club/NovemberOwnershipPrototype.astro';
 import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
 import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
+import FebruaryConnectionCards from '../../../components/club/FebruaryConnectionCards.astro';
 
 export function getStaticPaths() {
   return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
 }
 
 const { slug, theme } = Astro.props;
-const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : null;
+const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : null;
 ---
 
 <ClubLayout title={theme}>
@@ -27,7 +28,8 @@ const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-
       <div id="club-month-content" hidden>
         {month === 'november' ? <NovemberOwnershipPrototype /> :
          month === 'december' ? <DecemberMissionPrototype /> :
-         <JanuaryHabitCards storageKey="omc:club:january-habit-cards:v2" />}
+         month === 'january' ? <JanuaryHabitCards storageKey="omc:club:january-habit-cards:v2" /> :
+         <FebruaryConnectionCards storageKey="omc:club:february-connection:v1" />}
       </div>
     </>
   ) : <KitPage client:only="react" slug={slug} />}
