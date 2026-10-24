@@ -223,6 +223,25 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   values=defaults.map(x=>({...x}));try{localStorage.removeItem(key)}catch{}paint();
   const status=root.querySelector<HTMLElement>('[data-status]');if(status)status.textContent='Original suggestions restored. Print at 100% / actual size on US Letter paper.';
  });
+ // Keep the four actual printable cards, but derive the starting owners from
+ // the shared Club family settings. Never replace custom card names on profile edits.
+ let suggestedNames=defaults.map(d=>d.name);
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const household=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean}[]} | null}>).detail?.household;
+  if(!household)return;
+  const kids=household.members.filter(m=>m.kind==='child'&&!m.archived);
+  const adults=household.members.filter(m=>m.kind==='adult'&&!m.archived);
+  const nextNames=[
+   kids[0]?kids[0].firstName+'’s morning':'My morning',
+   kids[1]?kids[1].firstName+'’s backpack':kids[0]?kids[0].firstName+'’s backpack':'My backpack',
+   kids[2]?kids[2].firstName+'’s bedroom':kids[0]?kids[0].firstName+'’s bedroom':'My bedroom',
+   adults.length>1?'Our kitchen':'Our kitchen'
+  ];
+  values.forEach((item,i)=>{if(item.name===suggestedNames[i]||item.name===defaults[i].name)item.name=nextNames[i]});
+  suggestedNames=nextNames;
+  try{localStorage.setItem(key,JSON.stringify(values))}catch{}
+  paint();
+ });
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
  paint();
 }
