@@ -12,13 +12,14 @@ import type {Household} from '../../lib/club/profile';
 const months=[
  {slug:'november',label:'November',url:'/club/worksheet-generator/'},
  {slug:'december',label:'December',url:'/club/december-preview/'},
- {slug:'january',label:'January',url:'/preview/january-habit-cards'}
+ {slug:'january',label:'January',url:'/preview/january-habit-cards'},
+ {slug:'february',label:'February',url:'/club/february-preview/'}
 ] as const;
 const SAMPLE_SESSION='omc:club:active-preview-sample';
 const isKnown=(id:string)=>sampleHouseholds.some(x=>x.id===id&&x.id!=='new');
 const selected=()=>{try{const q=new URLSearchParams(location.search).get('sample');if(q&&isKnown(q))return q;const saved=sessionStorage.getItem(SAMPLE_SESSION);return saved&&isKnown(saved)?saved:'rivera'}catch{return 'rivera'}};
 
-export default function ClubPrototypeNav({month}:{month:'november'|'december'|'january'}){
+export default function ClubPrototypeNav({month}:{month:'november'|'december'|'january'|'february'}){
  const [sample,setSample]=useState(selected);
  const [tab,setTab]=useState<'kits'|'family'>('kits');
  const [household,setHousehold]=useState<Household|null>(null);
@@ -58,7 +59,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
     <p>These are the same family settings used in the Club member pages. Save your edits and return to any month to see the updated sample profile.</p>
     {household?<FamilyForm key={sample+'-'+household.profileVersion} household={household} mode="edit" submitLabel="Save our family" onSave={async input=>{
       const updated=await sampleStore(sample)!.saveHousehold(input);
-      setHousehold(updated);setStatus('Saved for all three monthly previews in this browser tab.');
+      setHousehold(updated);setStatus('Saved for all four monthly previews in this browser tab.');
       window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:updated,sample}}));
      }}/>:<p>Loading family settings…</p>}
     {status&&<p role="status" className="cproto-status">{status}</p>}
