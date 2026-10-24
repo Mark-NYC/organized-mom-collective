@@ -152,7 +152,7 @@ const baseDesc:Record<Key,string>={
 };
 const defaults:Options={start:8,quiet:'independent',play:'outdoors',structure:'balanced',days:'home'};
 const hhmm=(n:number)=>{const normalized=(n+24)%24;const h=Math.floor(normalized);const min=Math.round((normalized-h)*60);return String(h).padStart(2,'0')+':'+String(min).padStart(2,'0')};
-const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.split(':').map(Number);return String(hour%12||12)+':'+String(min).padStart(2,'0')};
+const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.split(':').map(Number);return String(hour%12||12)+':'+String(min).padStart(2,'0')+(hour<12?' AM':' PM')};
 for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const storageKey=root.dataset.msrKey??'omc:preview:may:v2';
  let profile='';
