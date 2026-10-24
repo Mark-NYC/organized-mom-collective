@@ -1,86 +1,75 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { monthColors } from '../../theme';
-import {families,traditions,prepare} from '../../lib/december/traditions';
+import {families} from '../../lib/december/traditions';
 ---
-<PublicLayout fullTitle="December Family Tradition Preview | Organized Family Club" description="Private December mailer prototype" indexable={false} chrome={false} width="full" tracking={false}>
+<PublicLayout fullTitle="December Christmas Mission Preview | Organized Family Club" description="Private December mailer prototype" indexable={false} chrome={false} width="full" tracking={false}>
 <main class="dec" style={`--accent:${monthColors[11].hex}`}>
   <a href="/club/worksheet-generator/" class="back">← November experiment</a>
-  <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>A Tradition We Make Together</h1><p>One meaningful Christmas tradition, prepared for the whole family. No planning worksheet.</p></header>
+  <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>Your Christmas Mission Has Arrived!</h1><p>A surprise addressed to the children. One kindness mission and two Christmas cards, ready to give.</p></header>
   <div class="workspace">
     <section class="details" aria-label="December tradition plan">
       <label for="family">Explore a sample family</label>
       <select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select>
       <p class="demo">Demo only · Nothing is saved or mailed</p>
-      <h2 id="tradition-title">Our Christmas Kindness Night</h2>
-      <p id="tradition-summary"></p>
-      <div class="switch"><label for="tradition">Choose a different tradition</label><select id="tradition">{traditions.map(t=><option value={t.id}>{t.name}</option>)}</select></div>
-      <h3>What we'll need</h3><ul id="supplies"></ul><p id="duration" class="duration"></p>
-      <h3>Everyone has a part</h3><div id="roles"></div>
-      <h3>How we'll do it</h3><ol id="steps"></ol>
-      <button type="button" id="download" disabled>Download our December mailer</button>
-      <p class="demo" id="message" role="status" aria-live="polite">A single US Letter sheet, printed front and back.</p>
+      <h2 id="mission-title">One mission. Two Christmas cards.</h2>
+      <p id="mission-summary">The children choose someone to encourage, make a card, and ask a grown-up to help deliver it.</p>
+      <h3>The three steps</h3>
+      <ol><li>Choose someone to surprise.</li><li>Make their Christmas card.</li><li>Deliver your kindness with a grown-up.</li></ol>
+      <p class="duration">No special supplies or shopping. Just a pen, a kind idea, and the two cards included on the second sheet.</p>
+      <button type="button" id="download" disabled>Download mission + cards</button>
+      <p class="demo" id="message" role="status" aria-live="polite">Two US Letter pages. Print page 1 for the kids. Print page 2 on one side only, then cut and fold the two cards.</p>
     </section>
-    <section class="preview" aria-label="Actual print preview"><div class="previewheading"><h2>Your December mailer</h2><span>Front & back</span></div><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Front</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Back</figcaption></figure></div></section>
+    <section class="preview" aria-label="Actual print preview"><div class="previewheading"><h2>Your December mission</h2><span>Mission + two gift cards</span></div><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Personalized mission</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Two one-sided cards · cut and fold</figcaption></figure></div></section>
   </div>
 </main>
 </PublicLayout>
 <script>
-import {families,traditions,prepare, type FamilyId,type TraditionId} from '../../lib/december/traditions';
+import {families} from '../../lib/december/traditions';
 import {decemberPages} from '../../lib/december/layout';
 import {renderSvg} from '../../lib/worksheet/svg';
 import {renderPdf} from '../../lib/worksheet/pdf';
-import {createMetrics,FONT_FILES,FONT_URL, type FontBytes} from '../../lib/worksheet/fonts';
+import {createMetrics,FONT_FILES,FONT_URL,type FontBytes} from '../../lib/worksheet/fonts';
 import type {FontKey,Metrics} from '../../lib/worksheet/types';
 const get=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
-const family=get<HTMLSelectElement>('family'),tradition=get<HTMLSelectElement>('tradition');
+const family=get<HTMLSelectElement>('family');
 const button=get<HTMLButtonElement>('download'),message=get<HTMLElement>('message');
-let bytes:FontBytes|null=null, metrics:Metrics|null=null;
-function current(){
- const f=families.find(x=>x.id===family.value)||families[0];
- const t=traditions.find(x=>x.id===tradition.value)||traditions[0];
- return prepare(f,t);
-}
-function list(id:string,items:string[],ordered=false){
- const el=get<HTMLElement>(id);el.replaceChildren();
- items.forEach(s=>{const li=document.createElement(ordered?'li':'li');li.textContent=s;el.appendChild(li)});
-}
+let bytes:FontBytes|null=null,metrics:Metrics|null=null;
+function current(){return families.find(f=>f.id===family.value)??families[0];}
 function show(){
- const p=current();get<HTMLElement>('tradition-title').textContent=p.tradition.name;
- get<HTMLElement>('tradition-summary').textContent=p.tradition.summary;
- list('supplies',p.tradition.supplies);
- get<HTMLElement>('duration').textContent=p.tradition.duration;
- const el=get<HTMLElement>('roles');el.replaceChildren();
- p.names.forEach((name,i)=>{
-   const entry=document.createElement('div');entry.className='role';
-   const strong=document.createElement('strong');strong.textContent=name;
-   const line=document.createElement('span');line.textContent=p.roles[i]??'Join in.';
-   entry.append(strong,line);el.appendChild(entry);
- });
- list('steps',p.tradition.steps,true);
- if(metrics){const pages=decemberPages(metrics,p);get<HTMLElement>('front').innerHTML=renderSvg(pages[0],'December tradition front');get<HTMLElement>('reverse').innerHTML=renderSvg(pages[1],'December tradition back');}
+ const f=current();
+ const children=f.members.slice(2);
+ const names=children.join(' & ');
+ get<HTMLElement>('mission-title').textContent=names+', your Christmas mission is ready.';
+ if(metrics){const pages=decemberPages(metrics,f);
+ get<HTMLElement>('front').innerHTML=renderSvg(pages[0],'Personalized Christmas mission');
+ get<HTMLElement>('reverse').innerHTML=renderSvg(pages[1],'Two Christmas kindness cards, one-sided');}
 }
-family.addEventListener('change',()=>{const f=families.find(x=>x.id===family.value)||families[0];tradition.value=f.recommended;show();});
-tradition.addEventListener('change',show);
+family.addEventListener('change',show);
 button.addEventListener('click',async()=>{
  if(!metrics||!bytes)return;
- button.disabled=true;message.textContent='Preparing PDF…';
+ button.disabled=true;message.textContent='Preparing your mission and cards…';
  try{
- const p=current();const pdf=await renderPdf(decemberPages(metrics,p),bytes,{title:`${p.tradition.name} · ${p.family}`,subject:'Organized Family Club December tradition'});
+ const f=current();const pdf=await renderPdf(decemberPages(metrics,f),bytes,{title:'December Christmas Mission · '+f.family,subject:'Personalized kids Christmas mission and two one-sided cards'});
  const url=URL.createObjectURL(new Blob([pdf as BlobPart],{type:'application/pdf'}));
- const a=document.createElement('a');a.href=url;a.download=`december-family-tradition-${family.value}.pdf`;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
- message.textContent='PDF downloaded. This demo does not schedule a mailing.';
- }catch(err){console.error(err);message.textContent='PDF failed to generate. Please try again.';}
+ const link=document.createElement('a');link.href=url;link.download='december-christmas-mission-'+f.id+'.pdf';document.body.appendChild(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),60000);
+ message.textContent='Downloaded. Print each PDF page on a separate sheet, single-sided. This demo does not mail anything.';
+ }catch(e){console.error(e);message.textContent='Could not generate the PDF. Please try again.';}
  finally{button.disabled=false;}
 });
 async function start(){
  try{
  const keys=Object.keys(FONT_FILES) as FontKey[];
- const files=await Promise.all(keys.map(async k=>{const response=await fetch(FONT_URL+FONT_FILES[k]);if(!response.ok)throw Error('Font loading failed');return new Uint8Array(await response.arrayBuffer());}));
- bytes=Object.fromEntries(keys.map((k,i)=>[k,files[i]])) as FontBytes;metrics=createMetrics(bytes);
+ const files=await Promise.all(keys.map(async key=>{
+ const response=await fetch(FONT_URL+FONT_FILES[key]);if(!response.ok)throw Error('Font loading failed');
+ return new Uint8Array(await response.arrayBuffer());
+ }));
+ bytes=Object.fromEntries(keys.map((k,i)=>[k,files[i]])) as FontBytes;
+ metrics=createMetrics(bytes);
  await Promise.all(['400 12px "WS Gelasio"','italic 400 12px "WS Gelasio"','italic 600 12px "WS Gelasio"','400 12px "WS Montserrat"','600 12px "WS Montserrat"'].map(f=>document.fonts.load(f)));
  button.disabled=false;show();
- }catch(err){console.error(err);message.textContent='Could not load PDF preview. Refresh to try again.';}
+ }catch(e){console.error(e);message.textContent='Preview could not load. Please refresh.';}
 }
 show();start();
 </script>
@@ -119,3 +108,5 @@ figure{margin:0;min-width:0}.sheet{aspect-ratio:612/792;border:1px solid #ddd;bo
 @media(max-width:950px){.workspace{grid-template-columns:1fr}.details{max-width:680px}}
 @media(max-width:560px){.sheets{grid-template-columns:1fr}.previewheading{margin-top:12px}}
 </style>
+
+<style>.details h2{font-size:25px}.details .duration{border-top:1px solid var(--accent);padding-top:15px}#download{margin-top:22px}</style>
