@@ -64,7 +64,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
       </section>
       <section class="jss-zone jss-pantry"><div class="jss-zone-title"><span>02</span><div><h3 data-jss-edit="pantryTitle" contenteditable="true" role="textbox" aria-label="Edit pantry heading">From the pantry</h3><p>Choose one</p></div></div>
        <div class="jss-foods">
-        {initialPantry.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="pantry" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong></div>})}
+        {initialPantry.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="pantry" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong><button type="button" class="jss-remove" data-jss-remove aria-label={'Remove '+f.name} title="Remove this row">×</button></div>})}
        </div>
       </section>
      </div>
