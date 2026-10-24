@@ -17,6 +17,10 @@ export interface WorksheetInput {
   when?: string;
   /** What finished looks like. Line breaks are kept. */
   done?: string;
+  adultOwner?: string;
+  adultJob?: string;
+  adultWhen?: string;
+  existing?: string;
   /** First family check-in, ISO date (YYYY-MM-DD). */
   checkIn?: string;
 }
@@ -28,6 +32,10 @@ export interface WorksheetData {
   job: string | null;
   when: string | null;
   done: string | null;
+  adultOwner: string | null;
+  adultJob: string | null;
+  adultWhen: string | null;
+  existing: string | null;
   /** Formatted for print ("Saturday, November 14"), or null. */
   checkIn: string | null;
 }
