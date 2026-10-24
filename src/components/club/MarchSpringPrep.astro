@@ -1,0 +1,147 @@
+---
+/**
+ * March 2027: tangible family ownership layer over /app's Spring Prep.
+ * Task labels/IDs are imported from src/data/cleaning.ts, never copied.
+ * One intact US Letter printout, not another cleaning program.
+ */
+import {monthlyDeepClean,weekend} from '../../data/cleaning';
+import {monthColors} from '../../theme';
+interface Props{storageKey?:string}
+const {storageKey='omc:club:march-spring-prep:v1'}=Astro.props;
+const project=monthlyDeepClean.find(x=>x.month===2)!;
+const taskTypes:Record<string,string>={
+ 'mar-baseboards':'Children can wipe reachable areas with a soft, damp cloth. An adult handles anything higher.',
+ 'mar-vents':'Adult job. Keep children off ladders and away from ceiling fans and vents.',
+ 'mar-winter-gear':'Kids can help sort their own gear; a grown-up decides what is ready to store.',
+ 'mar-curtains':'Adult job for removal, washing, and rehanging. Kids can help with safe sorting.',
+ 'mar-donate':'Children can suggest items. A grown-up approves what leaves the home.'
+};
+---
+<div class="msc" data-msc-key={storageKey} style={`--msc-month:${monthColors[2].hex}`}>
+ <div class="msc-intro"><a href="/club" class="msc-back">← Organized Family Club</a><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH 2027</p><h1>Spring prep. <em>Everyone has a part.</em></h1>
+ <p>We took March’s actual cleaning project from your companion and prepared a family-facing plan. Five familiar tasks, with one person to start each one. Do one when it fits your week.</p></div>
+ <div class="msc-workspace">
+  <section class="msc-editor" aria-label="Customize March's family project">
+   <div class="msc-editor-head"><p class="msc-overline">MARCH · THE MONTHLY HOME PROJECT</p><h2>Already prepared.</h2><p>Pick who leads each task. You can change every suggestion, or leave the plan as it is.</p></div>
+   <p class="msc-app-link"><a href="/app/week#monthly-focus">View the same five tasks in /app →</a></p>
+   <div class="msc-owners">
+    {project.tasks.map((t,i)=><div class="msc-owner-row" data-task={t.id}>
+      <div class="msc-owner-heading"><span>0{i+1}</span><strong>{t.label}</strong></div>
+      <p class="msc-task-note">{taskTypes[t.id]}</p>
+      <label>Who will lead this task?<select data-owner={t.id} aria-label={`Owner for ${t.label}`}><option value="">Choose a family member</option></select></label>
+    </div>)}
+   </div>
+   <div class="msc-reminder"><h3>The project is optional.</h3><p>Friday: Deep Cleaning · Saturday: Home Project · Sunday: Catch-Up / Reset. Choose one task on a weekend that works—or skip it. No deadline and no expectation to finish all five.</p></div>
+   <button type="button" class="msc-print" data-print>Print our family plan / Save PDF</button>
+   <button type="button" class="msc-reset" data-reset>Restore suggested owners</button>
+   <p class="msc-status" data-status role="status" aria-live="polite">One intact US Letter sheet. Print at 100% / actual size. No cutting required.</p>
+  </section>
+  <section class="msc-preview" aria-label="March project print preview">
+   <div class="msc-preview-head"><h2>Our March project</h2><p>One sheet · shared family plan</p></div>
+   <div class="msc-print-scroll"><article class="msc-sheet" data-sheet>
+    <header class="msc-sheet-head"><p>ORGANIZED FAMILY CLUB <span>· MARCH 2027</span></p><h2>Our Family <em>Spring Prep</em></h2><p>{project.description}</p></header>
+    <div class="msc-sheet-family"><span>PREPARED FOR</span><strong data-family>Our Family</strong></div>
+    <p class="msc-sheet-caption">Five small jobs. Everyone knows their part.</p>
+    <div class="msc-sheet-tasks">
+    {project.tasks.map((t,i)=><section class="msc-task" data-printed-task={t.id}>
+      <div class="msc-task-num">0{i+1}</div>
+      <div class="msc-task-text"><h3>{t.label}</h3><p>{taskTypes[t.id]}</p></div>
+      <div class="msc-task-person"><span>LED BY</span><strong data-printed-owner={t.id}>Our family</strong></div>
+      <div class="msc-check" aria-hidden="true"></div>
+    </section>)}
+    </div>
+    <div class="msc-sheet-principle"><span>OUR FAMILY RULE</span><p>Pick one task when it works for you. Start it together. No one needs to finish the whole list.</p></div>
+    <footer class="msc-sheet-bottom"><div><span>THE SAME MARCH PROJECT IN YOUR COMPANION</span><strong>organizedmomcollective.com/app/week</strong></div><p>FRI · DEEP CLEAN &nbsp; SAT · HOME PROJECT &nbsp; SUN · RESET</p></footer>
+   </article></div>
+   <p class="msc-preview-note">A real single-sheet plan built from the same March task definitions as the companion. Printed checkboxes are for the family's use; they do not sync with the app.</p>
+  </section>
+ </div>
+</div>
+<style is:global>
+@font-face{font-family:'MSC Gelasio';src:url('/fonts/worksheet/gelasio-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'MSC Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
+@font-face{font-family:'MSC Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'MSC Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf') format('truetype');font-weight:600;font-display:swap}
+.msc,.msc *{box-sizing:border-box}.msc{max-width:1440px;margin:auto;padding:26px clamp(17px,3.5vw,54px) 85px;color:#454545;font-family:'MSC Montserrat',sans-serif}
+.msc-back{font-size:12px;text-decoration:underline;text-underline-offset:4px;display:inline-block;margin-bottom:31px}.msc-overline{font:600 10px 'MSC Montserrat',sans-serif;letter-spacing:.16em}
+.msc-intro{max-width:770px;margin-bottom:44px}.msc-intro h1{font:400 clamp(36px,4.5vw,58px)/1.08 'MSC Gelasio',Georgia,serif;letter-spacing:-.02em;margin:12px 0 19px;color:#393e3b}.msc-intro h1 em{font-weight:600;color:#497666}.msc-intro>p:last-child{font-size:15px;line-height:1.7;max-width:650px}
+.msc-workspace{display:grid;grid-template-columns:minmax(290px,365px) minmax(0,1fr);gap:clamp(26px,3vw,48px);align-items:start}.msc-editor,.msc-preview{min-width:0}
+.msc-editor-head{border-top:9px solid var(--msc-month);padding-top:21px}.msc-editor-head h2{font:600 italic 28px 'MSC Gelasio',Georgia,serif;color:#497666;margin:12px 0}.msc-editor-head>p:last-child{font-size:13px;line-height:1.65}.msc-app-link{font-size:12px;margin:18px 0 23px}.msc-app-link a{text-decoration:underline;text-underline-offset:4px}
+.msc-owner-row{border-top:1px solid var(--msc-month);padding:15px 0 20px}.msc-owner-heading{display:flex;gap:12px;align-items:baseline}.msc-owner-heading span{font-size:11px;font-weight:600;color:#497666}.msc-owner-heading strong{font:400 19px 'MSC Gelasio',Georgia,serif}.msc-task-note{font-size:12px;line-height:1.6;color:#656565;margin:8px 0 13px}.msc-owner-row label{font-size:10px;font-weight:600;letter-spacing:.07em;display:block;text-transform:uppercase}.msc-owner-row select{display:block;width:100%;min-height:45px;margin-top:8px;border:1px solid #b8b8b8;padding:10px 12px;background:#fff;color:#454545;font:13px 'MSC Montserrat',sans-serif}
+.msc-reminder{border-top:2px solid var(--msc-month);padding:18px 0}.msc-reminder h3{font:400 20px 'MSC Gelasio',Georgia,serif;margin:0 0 9px}.msc-reminder p{font:12px/1.7 'MSC Montserrat',sans-serif}
+.msc-print{background:#454545;color:#fff;min-height:52px;padding:14px;border:0;cursor:pointer;width:100%;font:600 12px 'MSC Montserrat',sans-serif;letter-spacing:.07em;text-transform:uppercase}.msc-reset{display:block;margin:10px auto;border:0;background:none;text-decoration:underline;text-underline-offset:4px;color:#454545;min-height:45px;cursor:pointer;font:600 12px 'MSC Montserrat',sans-serif}.msc-status,.msc-preview-note{font:11px/1.6 'MSC Montserrat',sans-serif;color:#666}
+.msc-preview-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--msc-month);padding-bottom:14px;margin-bottom:21px}.msc-preview-head h2{font:400 25px 'MSC Gelasio',Georgia,serif}.msc-preview-head p{font-size:12px}
+.msc-print-scroll{overflow-x:auto;padding:5px 0 25px}.msc-sheet{width:816px;height:1056px;background:#fff;box-shadow:0 12px 30px #0002;padding:42px 51px 31px;display:flex;flex-direction:column}
+.msc-sheet-head{background:#edf5f0;border-top:11px solid var(--msc-month);padding:24px 27px 27px;min-height:206px}.msc-sheet-head>p:first-child{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.14em;color:#405f53}.msc-sheet-head h2{font:400 43px/1.1 'MSC Gelasio',Georgia,serif;color:#3d6556;margin:20px 0 12px}.msc-sheet-head h2 em{font-weight:600}.msc-sheet-head>p:last-child{font:italic 18px 'MSC Gelasio',Georgia,serif;color:#577669}
+.msc-sheet-family{padding:22px 0 14px;border-bottom:1px solid var(--msc-month);display:flex;justify-content:space-between;align-items:baseline;gap:15px}.msc-sheet-family span,.msc-sheet-family strong{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.12em}.msc-sheet-family strong{font-size:13px;letter-spacing:0}
+.msc-sheet-caption{font:italic 20px 'MSC Gelasio',Georgia,serif;margin:19px 0 12px;color:#497666}
+.msc-sheet-tasks{flex:1}.msc-task{display:grid;grid-template-columns:30px minmax(0,1fr) 126px 22px;gap:12px;padding:20px 2px;border-top:1px solid #cdded4;align-items:center;min-height:111px}.msc-task-num{font:600 10px 'MSC Montserrat',sans-serif;color:#497666}.msc-task-text h3{font:400 19px/1.15 'MSC Gelasio',Georgia,serif;margin:0 0 7px}.msc-task-text p{font:10px/1.5 'MSC Montserrat',sans-serif;color:#606060}.msc-task-person{text-align:left}.msc-task-person span{display:block;font:600 8px 'MSC Montserrat',sans-serif;letter-spacing:.12em;color:#658070;margin-bottom:6px}.msc-task-person strong{font:600 italic 16px/1.2 'MSC Gelasio',Georgia,serif;color:#3e6c5a;overflow-wrap:anywhere}.msc-check{width:17px;height:17px;border:1.5px solid #829e90}
+.msc-sheet-principle{background:#f0f5f1;padding:17px 20px;display:grid;grid-template-columns:125px 1fr;gap:14px}.msc-sheet-principle span{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.1em;color:#3d6556}.msc-sheet-principle p{font:italic 15px/1.35 'MSC Gelasio',Georgia,serif}
+.msc-sheet-bottom{display:flex;align-items:end;justify-content:space-between;border-top:1px solid #c7ded3;margin-top:17px;padding-top:14px;gap:20px}.msc-sheet-bottom span{display:block;font:600 7px 'MSC Montserrat',sans-serif;letter-spacing:.08em}.msc-sheet-bottom strong{font:400 11px 'MSC Montserrat',sans-serif}.msc-sheet-bottom>p{font:600 7px 'MSC Montserrat',sans-serif;letter-spacing:.04em;white-space:nowrap}
+@media(min-width:1130px){.msc-sheet{transform:scale(.85);transform-origin:top left}.msc-print-scroll{height:930px}}
+@media(max-width:1129px){.msc-workspace{grid-template-columns:1fr}.msc-editor{max-width:700px}}
+@page{size:letter portrait;margin:0}
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.msc-sheet,.msc-sheet *{visibility:visible!important}.msc-sheet{position:absolute!important;left:0!important;top:0!important;margin:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msc-print-scroll{height:auto!important;overflow:visible!important}}
+</style>
+<script>
+import {monthlyDeepClean} from '../../data/cleaning';
+type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;archived?:boolean;isAccountHolder?:boolean};
+const project=monthlyDeepClean.find(p=>p.month===2)!;
+const adultOnly=new Set(['mar-vents','mar-curtains']);
+const kidFriendly=new Set(['mar-baseboards','mar-winter-gear','mar-donate']);
+for(const root of document.querySelectorAll<HTMLElement>('.msc')){
+ const key=root.dataset.mscKey??'omc:preview:march:v1';
+ const store=key.startsWith('omc:club:')?sessionStorage:localStorage;
+ let members:Member[]=[];
+ let family='Our Family';
+ let chosen:Record<string,string>={};
+ let custom=new Set<string>();
+ let sampleKey='';
+ const pick=(task:string,people:Member[]):Member|undefined=>{
+  const adults=people.filter(m=>m.kind==='adult');
+  const kids=people.filter(m=>m.kind==='child'&&m.birthYear!==undefined&&2027-m.birthYear>=5);
+  if(adultOnly.has(task))return adults[task==='mar-vents'&&adults.length>1?1:0];
+  if(task==='mar-baseboards')return kids[0]??adults[0];
+  if(task==='mar-winter-gear')return kids[1]??kids[0]??adults[0];
+  if(task==='mar-donate')return kids[2]??kids[0]??adults[0];
+  return adults[0];
+ };
+ const draw=()=>{
+  const live=members.filter(m=>!m.archived);
+  for(const task of project.tasks){
+   const select=root.querySelector<HTMLSelectElement>(`[data-owner="${task.id}"]`);
+   const printed=root.querySelector<HTMLElement>(`[data-printed-owner="${task.id}"]`);
+   if(!select||!printed)continue;
+   const current=chosen[task.id]??'';
+   select.replaceChildren();
+   const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Choose a family member';select.append(placeholder);
+   for(const m of live){
+    if(adultOnly.has(task.id)&&m.kind!=='adult')continue;
+    const option=document.createElement('option');option.value=m.id;option.textContent=m.firstName;select.append(option);
+   }
+   select.value=live.some(m=>m.id===current)?current:'';
+   printed.textContent=live.find(m=>m.id===select.value)?.firstName??'Choose together';
+  }
+  const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
+ };
+ const save=()=>{try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom]}))}catch{}};
+ root.querySelectorAll<HTMLSelectElement>('[data-owner]').forEach(select=>select.addEventListener('change',()=>{const task=select.dataset.owner!;chosen[task]=select.value;custom.add(task);save();draw()}));
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{custom.clear();for(const t of project.tasks)chosen[t.id]=pick(t.id,members)?.id??'';save();draw()});
+ root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const detail=(event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail;
+  if(!detail?.household)return;
+  const h=detail.household;
+  const id=(detail.sample??'account')+':'+(h.displayName??'');
+  const changed=id!==sampleKey;
+  members=h.members.filter(m=>!m.archived);
+  family=h.displayName??'Our Family';
+  if(changed){chosen={};custom.clear();sampleKey=id;
+   try{const saved=JSON.parse(store.getItem(key)??'null');if(saved?.sampleKey===id){chosen=saved.chosen??{};custom=new Set(Array.isArray(saved.custom)?saved.custom:[])}}catch{}
+  }
+  for(const task of project.tasks)if(!custom.has(task.id)||!members.some(m=>m.id===chosen[task.id]))chosen[task.id]=pick(task.id,members)?.id??'';
+  save();draw();
+ });
+ draw();
+}
+</script>
