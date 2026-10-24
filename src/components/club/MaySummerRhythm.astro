@@ -100,17 +100,39 @@ import {ageInMonth} from '../../lib/club/profile';
 type Person={firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;archived?:boolean};
 type Quiet='independent'|'rest'|'older';
 type Play='outdoors'|'active'|'creative'|'mixed';
-type Options={start:number;quiet:Quiet;play:Play};
-const defaults:Options={start:8,quiet:'independent',play:'outdoors'};
-const clock=(n:number)=>{const h=Math.floor(n);const min=Math.round((n-h)*60);return String((h+11)%12+1)+':'+String(min).padStart(2,'0')};
+type Structure='relaxed'|'balanced'|'structured';
+type Days='home'|'camp';
+type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'evening';
+type Edit={title?:string;desc?:string;time?:string};
+type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days};
+const keys:Key[]=['morning','move','create','lunch','quiet','free','evening'];
+const labels:Record<Key,string>={morning:'Morning Start',move:'Move & Play',create:'Create & Explore',lunch:'Lunch & Reset',quiet:'Quiet Time',free:'Free Afternoon',evening:'Evening Reset'};
+const baseDesc:Record<Key,string>={
+ morning:'Breakfast · Get dressed · Make beds',
+ move:'Outside · Bikes · Park · Backyard',
+ create:'Read · Build · Draw · Make',
+ lunch:'Eat · Clear dishes · Tidy up',
+ quiet:'Read · Puzzles · Quiet play',
+ free:'Friends · Outings · Free play',
+ evening:'Pick up · Wash up · Wind down'
+};
+const defaults:Options={start:8,quiet:'independent',play:'outdoors',structure:'balanced',days:'home'};
+const hhmm=(n:number)=>{const normalized=(n+24)%24;const h=Math.floor(normalized);const min=Math.round((normalized-h)*60);return String(h).padStart(2,'0')+':'+String(min).padStart(2,'0')};
+const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.split(':').map(Number);return String(hour%12||12)+':'+String(min).padStart(2,'0')};
 for(const root of document.querySelectorAll<HTMLElement>('.msr')){
- const storageKey=root.dataset.msrKey??'omc:preview:may:v1';
+ const storageKey=root.dataset.msrKey??'omc:preview:may:v2';
  let profile='';
- let options={...defaults};
+ let options:Options={...defaults};
+ let edits:Partial<Record<Key,Edit>>={};
+ let order:Key[]=[...keys];
  let children:Person[]=[];
  let familyLabel="OUR FAMILY'S SUMMER RHYTHM";
  const stage=root.querySelector<HTMLElement>('[data-stage]');
  const sheet=root.querySelector<HTMLElement>('[data-sheet]');
+ const list=root.querySelector<HTMLElement>('[data-print-rows]');
+ const editor=root.querySelector<HTMLElement>('[data-edit-rows]');
+ const nodes=new Map<Key,HTMLElement>();
+ list?.querySelectorAll<HTMLElement>('[data-rhythm-key]').forEach(el=>{const key=el.dataset.rhythmKey as Key;if(keys.includes(key))nodes.set(key,el)});
  const fit=()=>{
   if(!stage||!sheet)return;
   const width=Math.max(200,(stage.parentElement?.clientWidth??816)-4);
@@ -123,30 +145,106 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const parent=stage?.parentElement;
  if(parent&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(parent);
  window.addEventListener('resize',fit);
- const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({profile,options}))}catch{}};
- const render=()=>{
-  const offsets=[0,1,2.5,4,5,6];
-  const times=[...offsets.map(x=>clock(options.start+x)),'Evening'];
-  root.querySelectorAll<HTMLElement>('[data-time]').forEach((el,i)=>{el.textContent=times[i]??'Evening'});
-  const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
-  const quiet=root.querySelector<HTMLElement>('[data-desc="quiet"]');
-  if(quiet)quiet.textContent=options.quiet==='rest'?'Nap · Rest · Quiet books':options.quiet==='older'?'Read · Recharge · Independent time':'Read · Puzzles · Quiet play';
-  const move=root.querySelector<HTMLElement>('[data-desc="move"]');
-  if(move)move.textContent=options.play==='active'?'Ball games · Movement · Outdoors':options.play==='creative'?'Explore · Move · Make something':options.play==='mixed'?'Get moving · Choose how to play':'Outside · Bikes · Park · Backyard';
-  const free=root.querySelector<HTMLElement>('[data-desc="free"]');
-  if(free)free.textContent=options.play==='creative'?'Art · Make · Friends · Free play':options.play==='active'?'Friends · Sports · Free play':'Friends · Outings · Free play';
-  const start=root.querySelector<HTMLSelectElement>('[data-start]');if(start)start.value=String(options.start);
-  const qs=root.querySelector<HTMLSelectElement>('[data-quiet]');if(qs)qs.value=options.quiet;
-  const ps=root.querySelector<HTMLSelectElement>('[data-play]');if(ps)ps.value=options.play;
- };
- const suggested=()=>{
+ const ageDefaults=()=>{
   const ages=children.map(p=>ageInMonth(p.birthYear??2027,p.birthMonth,'2027-05'));
-  options={...defaults,quiet:ages.length&&Math.min(...ages)<5?'rest':ages.length&&Math.min(...ages)>11?'older':'independent'};
+  const quiet:Quiet=ages.length&&Math.min(...ages)<5?'rest':ages.length&&Math.min(...ages)>11?'older':'independent';
+  options={...defaults,quiet};
+  edits={};
+  order=[...keys];
  };
- root.querySelector<HTMLSelectElement>('[data-start]')?.addEventListener('change',e=>{options.start=Number((e.target as HTMLSelectElement).value);save();render()});
- root.querySelector<HTMLSelectElement>('[data-quiet]')?.addEventListener('change',e=>{options.quiet=(e.target as HTMLSelectElement).value as Quiet;save();render()});
- root.querySelector<HTMLSelectElement>('[data-play]')?.addEventListener('change',e=>{options.play=(e.target as HTMLSelectElement).value as Play;save();render()});
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{suggested();save();render()});
+ const starter=(key:Key):Required<Edit>=>{
+  let title=labels[key],desc=baseDesc[key];
+  const idx=keys.indexOf(key);
+  const offset=[0,1,2.5,4,5,6,10][idx];
+  let time=key==='evening'?'':hhmm(options.start+offset);
+  if(options.days==='camp'){
+   const names:Partial<Record<Key,[string,string]>>={
+    move:['Pack & Head Out','Pack bag · Water bottle · Shoes'],
+    create:['Camp or Program','Play · Learn · Explore · Friends'],
+    lunch:['Lunch & Reset','Lunch · Pack things · Tidy up'],
+    quiet:['Recharge','Snack · Quiet time · Rest'],
+    free:['After-Camp Play','Outside · Friends · Free time']
+   };
+   if(names[key]){title=names[key]![0];desc=names[key]![1]}
+   const campOffsets=[0,.5,1,4,7.5,8.5,10];
+   time=key==='evening'?'':hhmm(options.start+campOffsets[idx]);
+  }else{
+   if(key==='quiet')desc=options.quiet==='rest'?'Nap · Rest · Quiet books':options.quiet==='older'?'Read · Recharge · Independent time':'Read · Puzzles · Quiet play';
+   if(key==='move')desc=options.play==='active'?'Ball games · Movement · Outdoors':options.play==='creative'?'Explore · Move · Make something':options.play==='mixed'?'Get moving · Choose how to play':baseDesc.move;
+   if(key==='free')desc=options.play==='creative'?'Art · Make · Friends · Free play':options.play==='active'?'Friends · Sports · Free play':baseDesc.free;
+  }
+  return {title,desc,time};
+ };
+ const resolved=(key:Key):Required<Edit>=>({...starter(key),...(edits[key]??{})});
+ const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({profile,options,edits,order}))}catch{}};
+ const renderEditor=()=>{
+  if(!editor)return;
+  editor.replaceChildren();
+  for(const [i,key] of order.entries()){
+   const values=resolved(key);
+   const wrapper=document.createElement('div');wrapper.className='msr-edit-row';
+   const top=document.createElement('div');top.className='msr-edit-top';
+   const name=document.createElement('span');name.textContent=String(i+1)+'. '+labels[key];
+   const buttons=document.createElement('div');buttons.className='msr-edit-buttons';
+   for(const dir of [-1,1]){
+    const button=document.createElement('button');button.type='button';button.textContent=dir<0?'↑':'↓';button.title=dir<0?'Move earlier':'Move later';
+    button.setAttribute('aria-label',(dir<0?'Move ':'Move ')+labels[key]+(dir<0?' earlier':' later'));
+    button.disabled=dir<0?i===0:i===order.length-1;
+    button.addEventListener('click',()=>{const j=order.indexOf(key),next=j+dir;if(next<0||next>=order.length)return;[order[j],order[next]]=[order[next],order[j]];save();render(true)});
+    buttons.append(button);
+   }
+   top.append(name,buttons);wrapper.append(top);
+   const fields:[keyof Edit,string,number][]=[['title','Block name',38],['desc','Activity examples',78],['time','Start time (optional)',5]];
+   for(const [field,labelText,max] of fields){
+    const label=document.createElement('label');label.textContent=labelText;
+    const input=document.createElement('input');input.type=field==='time'?'time':'text';
+    input.maxLength=max;input.value=values[field];input.setAttribute('aria-label',labels[key]+' — '+labelText);
+    if(field==='time')input.className='msr-edit-clock';
+    input.addEventListener('input',()=>{
+      const raw=input.value;const clean=field==='time'?raw:raw.slice(0,max);
+      edits[key]={...(edits[key]??{}),[field]:clean};
+      save();render(false);
+    });
+    label.append(input);wrapper.append(label);
+   }
+   editor.append(wrapper);
+  }
+ };
+ const render=(buildEditor=false)=>{
+  root.dataset.msrStructure=options.structure;
+  root.dataset.msrDays=options.days;
+  const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
+  const visible=options.structure==='relaxed'?order.filter(k=>k!=='create'&&k!=='free'):order;
+  for(const key of order){
+   const node=nodes.get(key);if(!node||!list)continue;
+   list.append(node);
+   node.hidden=!visible.includes(key);
+   const v=resolved(key);
+   const title=node.querySelector<HTMLElement>('[data-title]');if(title)title.textContent=v.title;
+   const desc=node.querySelector<HTMLElement>('[data-desc]');if(desc)desc.textContent=v.desc;
+   const time=node.querySelector<HTMLElement>('[data-time]');if(time)time.textContent=clock(v.time);
+   if(time)time.hidden=options.structure==='relaxed'||!v.time;
+  }
+  const day=root.querySelector<HTMLSelectElement>('[data-days]');if(day)day.value=options.days;
+  const start=root.querySelector<HTMLSelectElement>('[data-start]');if(start)start.value=String(options.start);
+  const quiet=root.querySelector<HTMLSelectElement>('[data-quiet]');if(quiet)quiet.value=options.quiet;
+  const play=root.querySelector<HTMLSelectElement>('[data-play]');if(play)play.value=options.play;
+  root.querySelectorAll<HTMLInputElement>('input[name="msr-structure"]').forEach(el=>{el.checked=el.value===options.structure});
+  if(buildEditor)renderEditor();
+ };
+ const update=()=>{save();render(true)};
+ root.querySelector<HTMLSelectElement>('[data-days]')?.addEventListener('change',e=>{
+  options.days=(e.target as HTMLSelectElement).value as Days;
+  // The parent's custom words are preserved when changing day types.
+  update();
+ });
+ root.querySelectorAll<HTMLInputElement>('input[name="msr-structure"]').forEach(el=>el.addEventListener('change',()=>{
+  if(el.checked){options.structure=el.value as Structure;update()}
+ }));
+ root.querySelector<HTMLSelectElement>('[data-start]')?.addEventListener('change',e=>{options.start=Number((e.target as HTMLSelectElement).value);update()});
+ root.querySelector<HTMLSelectElement>('[data-quiet]')?.addEventListener('change',e=>{options.quiet=(e.target as HTMLSelectElement).value as Quiet;update()});
+ root.querySelector<HTMLSelectElement>('[data-play]')?.addEventListener('change',e=>{options.play=(e.target as HTMLSelectElement).value as Play;update()});
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{ageDefaults();update()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
  window.addEventListener('omc:club-preview-household',(event:Event)=>{
   const detail=(event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail;
@@ -158,16 +256,33 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   const name=(detail.household.displayName??'').trim();
   familyLabel=name?name.toUpperCase()+' · SUMMER RHYTHM':"OUR FAMILY'S SUMMER RHYTHM";
   if(changed){
-   suggested();
-   try{const stored=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(stored?.profile===profile&&stored.options){
-    const o=stored.options;
-    if([7,7.5,8,8.5,9,9.5].includes(o.start))options.start=o.start;
-    if(['independent','rest','older'].includes(o.quiet))options.quiet=o.quiet;
-    if(['outdoors','active','creative','mixed'].includes(o.play))options.play=o.play;
-   }}catch{}
+   ageDefaults();
+   try{
+    const stored=JSON.parse(sessionStorage.getItem(storageKey)??'null');
+    if(stored?.profile===profile&&stored.options){
+     const o=stored.options;
+     if([7,7.5,8,8.5,9,9.5].includes(o.start))options.start=o.start;
+     if(['independent','rest','older'].includes(o.quiet))options.quiet=o.quiet;
+     if(['outdoors','active','creative','mixed'].includes(o.play))options.play=o.play;
+     if(['home','camp'].includes(o.days))options.days=o.days;
+     if(['relaxed','balanced','structured'].includes(o.structure))options.structure=o.structure;
+     const savedOrder=stored.order;
+     if(Array.isArray(savedOrder)&&savedOrder.length===keys.length&&new Set(savedOrder).size===keys.length&&savedOrder.every(k=>keys.includes(k)))order=savedOrder;
+     if(stored.edits&&typeof stored.edits==='object'){
+      for(const key of keys){
+       const obj=stored.edits[key];if(!obj||typeof obj!=='object')continue;
+       const edit:Edit={};
+       if(typeof obj.title==='string')edit.title=obj.title.slice(0,38);
+       if(typeof obj.desc==='string')edit.desc=obj.desc.slice(0,78);
+       if(typeof obj.time==='string'&&(/^([01]\d|2[0-3]):[0-5]\d$/.test(obj.time)||obj.time===''))edit.time=obj.time;
+       edits[key]=edit;
+      }
+     }
+    }
+   }catch{}
   }
-  save();render();
+  update();
  });
- render();
+ render(true);
 }
 </script>
