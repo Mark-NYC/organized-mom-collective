@@ -95,7 +95,7 @@ for(const name of augustIcons){
  const input=join(root,'assets/icons/ofc/updatedicons/svg',name+'.svg');
  const output=join(augustDestination,name+'.svg');
  const svg=await readFile(input,'utf8');
- if(!svg.includes('viewBox="0 0 48 48"')||!svg.includes('<path')){
+ if(!/<svg\b[^>]*\bviewBox="0 0 [0-9.]+ [0-9.]+"/.test(svg)||!svg.includes('<path')){
   throw Error('Unexpected August vector icon: '+name);
  }
  await copyFile(input,output);
