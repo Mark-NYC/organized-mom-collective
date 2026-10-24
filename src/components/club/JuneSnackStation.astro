@@ -1,0 +1,217 @@
+---
+/** June: one kid-first snack-choice poster made from existing Lunch & Snack Station assets. */
+interface Props {storageKey?:string}
+const {storageKey='omc:club:june-snack-station:v1'}=Astro.props;
+const foods=[
+ {id:'yogurt',name:'Yogurt cup',zone:'fridge'},
+ {id:'cheese-stick',name:'Cheese stick',zone:'fridge'},
+ {id:'apple',name:'Apple slices',zone:'fridge'},
+ {id:'carrot-big',name:'Carrot sticks',zone:'fridge'},
+ {id:'cucumber',name:'Cucumber sticks',zone:'fridge'},
+ {id:'hummus',name:'Hummus cup',zone:'fridge'},
+ {id:'egg',name:'Hard-boiled egg',zone:'fridge'},
+ {id:'cheese-cubes',name:'Cheese cubes',zone:'fridge'},
+ {id:'crackers',name:'Crackers',zone:'pantry'},
+ {id:'granola-bar',name:'Granola bar',zone:'pantry'},
+ {id:'dried-fruit',name:'Dried fruit',zone:'pantry'},
+ {id:'bagel',name:'Mini bagel',zone:'pantry'},
+ {id:'bread',name:'Bread',zone:'pantry'},
+ {id:'nut-butter',name:'Nut butter pack',zone:'pantry'},
+] as const;
+const initialFridge=['yogurt','cheese-stick','apple','cucumber'];
+const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
+---
+<div class="jss" data-jss-key={storageKey}>
+ <header class="jss-intro"><a href="/club">← Organized Family Club</a><p class="jss-overline">ORGANIZED FAMILY CLUB · JUNE 2027</p><h1>The snacks are handled. <em>By the kids.</em></h1><p>One visual station, prepared for your family, so kids can see what they may choose—and put things away when they're done.</p></header>
+ <div class="jss-layout">
+  <aside class="jss-editor">
+   <p class="jss-overline">MAKE IT YOUR FAMILY'S</p><h2>Ready for the fridge.</h2>
+   <p>We’ve prepared eight choices. Take a moment to confirm the foods your kids can safely get themselves, then print. No meal planning, shopping list, or ongoing chart to manage.</p>
+   <div class="jss-controls">
+    <label>Snack rule
+     <select data-rule>
+      <option value="two">Choose one from each side</option>
+      <option value="one">Choose any one snack</option>
+     </select>
+    </label>
+    <label>After-snack reminder
+     <select data-reset>
+      <option value="Put food away · Bring dishes to the sink">Put food away + dishes to the sink</option>
+      <option value="Put food away · Throw wrappers away">Put food away + wrappers in trash</option>
+      <option value="Put food away · Wipe your spot">Put food away + wipe your spot</option>
+     </select>
+    </label>
+   </div>
+   <details class="jss-customize"><summary>Change the food choices <span>Optional</span></summary><p>Click a choice to swap it for something your family keeps on hand. You can also edit its label on the poster.</p><div data-jss-choices></div></details>
+   <div class="jss-caution"><strong>A quick parent check</strong><p>These are example foods, not allergy- or age-screened recommendations. Before children use the station, choose foods that are safe for each child, prepare anything that needs cutting, and decide what requires adult help. Young children should be supervised when eating.</p></div>
+   <button type="button" class="jss-primary" data-jss-print>Print Station / Save PDF</button>
+   <button type="button" class="jss-download" data-jss-download>Download image (PNG)</button>
+   <button type="button" class="jss-restore" data-jss-restore>Restore starter choices</button>
+   <p class="jss-note">One US Letter poster, 8.5 × 11 inches. This is a design proof for the planned printed mailer.</p>
+  </aside>
+  <section class="jss-preview" aria-label="June snack station printable preview">
+   <div class="jss-preview-top"><h2>June's printed tool</h2><span>One page · prepared for kids</span></div>
+   <div class="jss-stage" data-jss-stage>
+    <article class="jss-sheet" data-jss-sheet>
+     <div class="jss-sheet-head"><span>ORGANIZED FAMILY CLUB · JUNE 2027</span><h2>I can make <em>my own snack!</em></h2><p>Pick it. Enjoy it. Put it away.</p></div>
+     <div class="jss-family" data-jss-family>OUR FAMILY'S SNACK STATION</div>
+     <div class="jss-instruction"><span>MY SNACK RULE</span><strong data-jss-rule-text>Choose one from each side.</strong></div>
+     <div class="jss-columns">
+      <section class="jss-zone jss-fridge"><div class="jss-zone-title"><span>01</span><div><h3>From the fridge</h3><p>Choose one</p></div></div>
+       <div class="jss-foods">
+        {initialFridge.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="fridge" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong></div>})}
+       </div>
+      </section>
+      <section class="jss-zone jss-pantry"><div class="jss-zone-title"><span>02</span><div><h3>From the pantry</h3><p>Choose one</p></div></div>
+       <div class="jss-foods">
+        {initialPantry.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="pantry" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong></div>})}
+       </div>
+      </section>
+     </div>
+     <div class="jss-done"><span>AND WHEN I'M DONE…</span><strong data-jss-reset-text>Put food away · Bring dishes to the sink</strong></div>
+     <div class="jss-footer"><span>OUR FAMILY KNOWS THE PLAN</span><span>ORGANIZED FAMILY CLUB · JUNE</span></div>
+    </article>
+   </div>
+   <p class="jss-note">This poster is the full mailed deliverable, not a worksheet to complete. Food illustrations reuse the site's existing Lunch &amp; Snack Station assets.</p>
+  </section>
+ </div>
+</div>
+<style is:global>
+.jss,.jss *{box-sizing:border-box}.jss{max-width:1480px;padding:25px clamp(18px,3.5vw,52px) 70px;margin:auto;color:#484941;font-family:Montserrat,Arial,sans-serif}
+.jss-intro{max-width:750px;margin-bottom:36px}.jss-intro>a{display:inline-block;font-size:12px;color:#47483e;margin-bottom:27px}.jss-overline{font-size:10px;font-weight:700;letter-spacing:.15em;color:#75846a}
+.jss-intro h1{font:400 clamp(38px,4.5vw,61px)/1.13 Georgia,serif;margin:12px 0 14px}.jss-intro h1 em{color:#87976e}.jss-intro>p:last-child{font-size:15px;line-height:1.7}
+.jss-layout{display:grid;grid-template-columns:minmax(280px,350px) minmax(0,1fr);gap:clamp(28px,4vw,62px);align-items:start}.jss-editor{border-top:8px solid #e8d8aa;padding-top:16px}
+.jss-editor h2{font:italic 30px Georgia,serif;color:#728261;margin:10px 0}.jss-editor>p:nth-of-type(2){font-size:13px;line-height:1.75}
+.jss-controls label{display:block;border-top:1px solid #e4e6dd;padding-top:15px;margin-top:18px;font-size:12px;font-weight:700}
+.jss-controls select,.jss-customize select{width:100%;min-height:44px;margin-top:9px;padding:9px;border:1px solid #b8c3ae;background:#fff;color:#424a3d;font:12px Montserrat,Arial,sans-serif}
+.jss-customize{border:1px solid #d4decf;margin:24px 0;border-radius:6px;padding:0 13px}.jss-customize summary{padding:15px 0;cursor:pointer;font-size:13px;font-weight:700}.jss-customize summary span{font-size:11px;color:#7d8b74;font-weight:400}.jss-customize>p{font-size:11px;line-height:1.65}.jss-choice{padding:9px 0;border-top:1px solid #e7ede4}.jss-choice label{font-size:11px;font-weight:700;display:block}.jss-choice select{margin-top:5px}
+.jss-caution{padding:17px;background:#f6f2e8;margin:22px 0}.jss-caution strong{font:20px Georgia,serif}.jss-caution p{font-size:11px;line-height:1.7;margin:7px 0 0}.jss-primary,.jss-download{width:100%;min-height:49px;padding:11px;cursor:pointer;font-weight:700;font-size:12px}.jss-primary{border:0;background:#596e50;color:#fff}.jss-download{border:1px solid #9daf94;background:#fff;color:#596e50;margin-top:10px}.jss-restore{display:block;margin:8px auto 0;border:0;min-height:42px;background:none;color:#57694e;text-decoration:underline;cursor:pointer;font-size:12px}.jss-note{font-size:11px;line-height:1.7;color:#85887f}
+.jss-preview{min-width:0}.jss-preview-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid #e4e8df}.jss-preview-top h2{font:400 26px Georgia,serif}.jss-preview-top span{font-size:11px;color:#7f837b}
+.jss-stage{position:relative}.jss-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;transform:scale(var(--jss-scale,.8));transform-origin:top left;padding:40px 47px 28px;background:white;border:1px solid #e5e7e0;box-shadow:0 8px 26px #0002;display:flex;flex-direction:column;overflow:hidden}
+.jss-sheet-head{background:#f6eaca;border-top:8px solid #ebd7a4;padding:21px 27px 18px;min-height:161px}.jss-sheet-head>span{display:block;font-size:10px;font-weight:700;letter-spacing:.15em;color:#777452}.jss-sheet-head h2{font:400 46px/1.08 Georgia,serif;color:#575c43;margin:12px 0 8px}.jss-sheet-head h2 em{font-style:italic;color:#78865f}.jss-sheet-head p{font:italic 17px Georgia,serif;color:#7d7d65;margin:0}
+.jss-family{font-size:11px;letter-spacing:.13em;font-weight:700;color:#737e69;margin:21px 0 13px}.jss-instruction{border:1px solid #e2e9dc;background:#f6faf2;border-radius:5px;padding:11px 15px;display:flex;align-items:baseline;gap:15px}.jss-instruction span,.jss-done span{font-size:10px;font-weight:700;letter-spacing:.08em;color:#7e8f73}.jss-instruction strong{font:22px Georgia,serif;color:#445b3e}
+.jss-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.jss-zone{border:1px solid #e5e4da;border-radius:9px;overflow:hidden;background:#fff}.jss-zone-title{padding:16px 14px 12px;display:flex;gap:12px;align-items:center;background:#e6eee3}.jss-zone-title>span{font:italic 32px Georgia,serif;color:#8fa389}.jss-zone-title h3{font:400 24px Georgia,serif;margin:0;color:#4b6046}.jss-zone-title p{font-size:11px;margin:4px 0 0;color:#687760}.jss-pantry .jss-zone-title{background:#f5e5cb}.jss-pantry .jss-zone-title>span{color:#b69c75}.jss-pantry .jss-zone-title h3{color:#7a6045}
+.jss-foods{padding:6px 11px 11px}.jss-food{min-height:104px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #e8eae5}.jss-food:last-child{border-bottom:0}.jss-food img{width:68px;height:68px;object-fit:contain;flex:none}.jss-food strong{font:400 19px/1.25 Montserrat,Arial,sans-serif;color:#57594f;min-width:0;outline-offset:4px;overflow-wrap:anywhere}
+.jss-food strong[contenteditable]:hover{outline:1px dashed #a6b69d}.jss-food strong[contenteditable]:focus{outline:2px solid #94ae8e;background:#f5faf2}
+.jss-done{margin-top:19px;background:#eaf1e7;border-radius:6px;padding:17px;text-align:center}.jss-done span{display:block;margin-bottom:9px}.jss-done strong{font:400 20px Georgia,serif;color:#4a6044}
+.jss-footer{margin-top:auto;display:flex;justify-content:space-between;border-top:1px solid #dfe5dc;padding-top:9px;font-size:9px;letter-spacing:.1em;color:#78816f;font-weight:700}
+.jss.jss-export .jss-stage{height:1056px!important;width:816px!important}.jss.jss-export .jss-sheet{transform:none!important;box-shadow:none!important}
+@media(max-width:1080px){.jss-layout{display:flex;flex-direction:column}.jss-preview{order:0;width:100%}.jss-editor{order:1;max-width:720px;width:100%}.jss-food strong[contenteditable]{pointer-events:none}}
+@page{size:letter portrait;margin:0}
+@media print{html,body{padding:0!important;margin:0!important;background:white!important}body *{visibility:hidden!important}.jss-stage,.jss-sheet,.jss-sheet *{visibility:visible!important}.jss-stage{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important}.jss-sheet{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.jss-food strong[contenteditable]{outline:none!important;background:transparent!important}}
+</style>
+<script>
+type Zone='fridge'|'pantry';
+type Food={id:string;name:string;zone:Zone};
+type Item={id:string;label:string};
+type State={fridge:Item[];pantry:Item[];rule:'one'|'two';reset:string};
+const foods:Food[]=[
+ {id:'yogurt',name:'Yogurt cup',zone:'fridge'},{id:'cheese-stick',name:'Cheese stick',zone:'fridge'},
+ {id:'apple',name:'Apple slices',zone:'fridge'},{id:'carrot-big',name:'Carrot sticks',zone:'fridge'},
+ {id:'cucumber',name:'Cucumber sticks',zone:'fridge'},{id:'hummus',name:'Hummus cup',zone:'fridge'},
+ {id:'egg',name:'Hard-boiled egg',zone:'fridge'},{id:'cheese-cubes',name:'Cheese cubes',zone:'fridge'},
+ {id:'crackers',name:'Crackers',zone:'pantry'},{id:'granola-bar',name:'Granola bar',zone:'pantry'},
+ {id:'dried-fruit',name:'Dried fruit',zone:'pantry'},{id:'bagel',name:'Mini bagel',zone:'pantry'},
+ {id:'bread',name:'Bread',zone:'pantry'},{id:'nut-butter',name:'Nut butter pack',zone:'pantry'}
+];
+const starter=():State=>({
+ fridge:['yogurt','cheese-stick','apple','cucumber'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
+ pantry:['crackers','granola-bar','dried-fruit','bagel'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
+ rule:'two',reset:'Put food away · Bring dishes to the sink'
+});
+for(const root of document.querySelectorAll<HTMLElement>('.jss')){
+ const key=root.dataset.jssKey??'omc:preview:june-snack-station:v1';
+ let profile='';let state=starter();let family="OUR FAMILY'S SNACK STATION";
+ const stage=root.querySelector<HTMLElement>('[data-jss-stage]');
+ const sheet=root.querySelector<HTMLElement>('[data-jss-sheet]');
+ const fit=()=>{
+  if(!stage||!sheet)return;
+  const width=Math.max(200,(stage.parentElement?.clientWidth??816)-4);
+  const scale=Math.min(1,width/816);stage.style.width=String(scale*816)+'px';stage.style.height=String(scale*1056)+'px';sheet.style.setProperty('--jss-scale',String(scale));
+ };
+ fit();const parent=stage?.parentElement;if(parent&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(parent);window.addEventListener('resize',fit);
+ const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({profile,state}))}catch{}};
+ const draw=()=>{
+  root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
+   const zone=el.dataset.zone as Zone;const index=Number(el.dataset.slot);const item=state[zone]?.[index];if(!item)return;
+   const img=el.querySelector<HTMLImageElement>('img');if(img)img.src='/images/tools/lunch/'+item.id+'.png';
+   const title=el.querySelector<HTMLElement>('[data-food-text]');if(title&&document.activeElement!==title)title.textContent=item.label;
+  });
+  const rule=root.querySelector<HTMLElement>('[data-jss-rule-text]');if(rule)rule.textContent=state.rule==='two'?'Choose one from each side.':'Choose one snack from either side.';
+  root.querySelectorAll<HTMLElement>('.jss-zone-title p').forEach(el=>el.textContent=state.rule==='two'?'Choose one':'Pick one you like');
+  const reset=root.querySelector<HTMLElement>('[data-jss-reset-text]');if(reset)reset.textContent=state.reset;
+  const fam=root.querySelector<HTMLElement>('[data-jss-family]');if(fam)fam.textContent=family;
+  const ruleSelect=root.querySelector<HTMLSelectElement>('[data-rule]');if(ruleSelect)ruleSelect.value=state.rule;
+  const resetSelect=root.querySelector<HTMLSelectElement>('[data-reset]');if(resetSelect)resetSelect.value=state.reset;
+ };
+ const makeChoices=()=>{
+  const container=root.querySelector<HTMLElement>('[data-jss-choices]');if(!container)return;container.replaceChildren();
+  for(const zone of ['fridge','pantry'] as Zone[]){
+   for(let i=0;i<4;i++){
+    const field=document.createElement('div');field.className='jss-choice';
+    const label=document.createElement('label');label.textContent=(zone==='fridge'?'Fridge':'Pantry')+' · choice '+(i+1);
+    const select=document.createElement('select');select.setAttribute('aria-label',label.textContent);
+    for(const food of foods.filter(f=>f.zone===zone)){
+     const opt=document.createElement('option');opt.value=food.id;opt.textContent=food.name;select.append(opt);
+    }
+    select.value=state[zone][i].id;
+    select.addEventListener('change',()=>{
+     const food=foods.find(f=>f.id===select.value&&f.zone===zone);if(!food)return;
+     state[zone][i]={id:food.id,label:food.name};save();draw();
+    });
+    label.append(select);field.append(label);container.append(field);
+   }
+  }
+ };
+ root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
+  const zone=el.dataset.zone as Zone,index=Number(el.dataset.slot);
+  const title=el.querySelector<HTMLElement>('[data-food-text]');if(!title)return;
+  title.addEventListener('input',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').slice(0,36);save()});
+  title.addEventListener('blur',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').trim().slice(0,36)||foods.find(f=>f.id===state[zone][index].id)!.name;save();draw()});
+  title.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();title.blur()}});
+ });
+ root.querySelector<HTMLSelectElement>('[data-rule]')?.addEventListener('change',e=>{state.rule=(e.target as HTMLSelectElement).value as State['rule'];save();draw()});
+ root.querySelector<HTMLSelectElement>('[data-reset]')?.addEventListener('change',e=>{state.reset=(e.target as HTMLSelectElement).value;save();draw()});
+ root.querySelector('[data-jss-restore]')?.addEventListener('click',()=>{state=starter();save();draw();makeChoices()});
+ root.querySelector('[data-jss-print]')?.addEventListener('click',()=>window.print());
+ const download=root.querySelector<HTMLButtonElement>('[data-jss-download]');
+ download?.addEventListener('click',async()=>{
+  if(!sheet||!download)return;
+  download.disabled=true;const label=download.textContent;download.textContent='Preparing image…';root.classList.add('jss-export');
+  try{
+   await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   const {toPng}=await import('html-to-image');
+   const png=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});
+   const a=document.createElement('a');a.download='our-family-snack-station.png';a.href=png;a.click();
+  }catch(err){console.error('Snack station image export error',err);alert('Image download failed. Please try Print / Save PDF instead.')}
+  finally{root.classList.remove('jss-export');download.disabled=false;download.textContent=label}
+ });
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const detail=(event as CustomEvent<{household:{id:string;displayName?:string};sample?:string}>).detail;
+  if(!detail?.household)return;
+  const next=(detail.sample??'account')+':'+detail.household.id;const changed=profile!==next;profile=next;
+  const display=detail.household.displayName?.trim();family=display?display.toUpperCase()+' · SNACK STATION':"OUR FAMILY'S SNACK STATION";
+  if(changed){
+   state=starter();
+   try{
+    const saved=JSON.parse(sessionStorage.getItem(key)??'null');
+    if(saved?.profile===profile&&saved.state){
+     const s=saved.state;
+     if(['one','two'].includes(s.rule))state.rule=s.rule;
+     if(['Put food away · Bring dishes to the sink','Put food away · Throw wrappers away','Put food away · Wipe your spot'].includes(s.reset))state.reset=s.reset;
+     for(const zone of ['fridge','pantry'] as Zone[]){
+      if(Array.isArray(s[zone])&&s[zone].length===4){
+       for(let i=0;i<4;i++){
+        const item=s[zone][i];if(!item||!foods.some(f=>f.id===item.id&&f.zone===zone))continue;
+        state[zone][i]={id:item.id,label:typeof item.label==='string'?(item.label.slice(0,36)):foods.find(f=>f.id===item.id)!.name};
+       }
+      }
+     }
+    }
+   }catch{}
+  }
+  save();draw();makeChoices();
+ });
+ draw();makeChoices();
+}
+</script>
