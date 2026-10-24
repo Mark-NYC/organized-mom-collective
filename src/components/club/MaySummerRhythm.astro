@@ -1,22 +1,14 @@
 ---
-import {Image} from 'astro:assets';
-import morning from '../../../assets/icons/ofc/primary/morning-start.png';
-import move from '../../../assets/icons/ofc/primary/move-play.png';
-import create from '../../../assets/icons/ofc/primary/create-explore.png';
-import lunch from '../../../assets/icons/ofc/primary/lunch-reset.png';
-import quiet from '../../../assets/icons/ofc/primary/quiet-time.png';
-import free from '../../../assets/icons/ofc/primary/free-afternoon.png';
-import evening from '../../../assets/icons/ofc/primary/evening-reset.png';
 interface Props {storageKey?:string}
 const {storageKey='omc:club:may-summer-rhythm:v1'}=Astro.props;
 const blocks=[
- {key:'morning',title:'Morning Start',time:'8:00',desc:'Breakfast · Get dressed · Make beds',icon:morning,tint:'#F8E8B5'},
- {key:'move',title:'Move & Play',time:'9:00',desc:'Outside · Bikes · Park · Backyard',icon:move,tint:'#F4DEA3'},
- {key:'create',title:'Create & Explore',time:'10:30',desc:'Read · Build · Draw · Make',icon:create,tint:'#F0D493'},
- {key:'lunch',title:'Lunch & Reset',time:'12:00',desc:'Eat · Clear dishes · Tidy up',icon:lunch,tint:'#DDEBDB'},
- {key:'quiet',title:'Quiet Time',time:'1:00',desc:'Read · Puzzles · Quiet play',icon:quiet,tint:'#D1E5D6'},
- {key:'free',title:'Free Afternoon',time:'2:00',desc:'Friends · Outings · Free play',icon:free,tint:'#C3DDCF'},
- {key:'evening',title:'Evening Reset',time:'Evening',desc:'Pick up · Wash up · Wind down',icon:evening,tint:'#D1D7EA'},
+ {key:'morning',title:'Morning Start',time:'8:00',desc:'Breakfast · Get dressed · Make beds',icon:'/images/club/shared-icons/morning-start.png',tint:'#F8E8B5'},
+ {key:'move',title:'Move & Play',time:'9:00',desc:'Outside · Bikes · Park · Backyard',icon:'/images/club/shared-icons/move-play.png',tint:'#F4DEA3'},
+ {key:'create',title:'Create & Explore',time:'10:30',desc:'Read · Build · Draw · Make',icon:'/images/club/shared-icons/create-explore.png',tint:'#F0D493'},
+ {key:'lunch',title:'Lunch & Reset',time:'12:00',desc:'Eat · Clear dishes · Tidy up',icon:'/images/club/shared-icons/lunch-reset.png',tint:'#DDEBDB'},
+ {key:'quiet',title:'Quiet Time',time:'1:00',desc:'Read · Puzzles · Quiet play',icon:'/images/club/shared-icons/quiet-time.png',tint:'#D1E5D6'},
+ {key:'free',title:'Free Afternoon',time:'2:00',desc:'Friends · Outings · Free play',icon:'/images/club/shared-icons/free-afternoon.png',tint:'#C3DDCF'},
+ {key:'evening',title:'Evening Reset',time:'Evening',desc:'Pick up · Wash up · Wind down',icon:'/images/club/shared-icons/evening-reset.png',tint:'#D1D7EA'},
 ];
 ---
 <div class="msr" data-msr-key={storageKey}>
@@ -42,7 +34,7 @@ const blocks=[
    <div class="msr-message"><strong>A reusable rhythm, not a rigid calendar.</strong><p>On camp days, trips, or appointments, follow the anchors that fit. The printed rhythm stays useful even when plans change.</p></div>
    <button type="button" data-print>Print rhythm / Save PDF</button>
    <button type="button" class="msr-download" data-download>Download as image (PNG)</button><button type="button" data-reset class="msr-reset">Restore suggested rhythm</button>
-   <p class="msr-note">US Letter · 8.5 × 11 inches · one page. Draft icons are being reviewed before print production.</p>
+   <p class="msr-note">US Letter · 8.5 × 11 inches · one page. Illustrations from the updated OFC icon collection.</p>
   </aside>
   <section class="msr-preview" aria-label="May illustrated rhythm board preview">
    <div class="msr-preview-head"><h2>Your summer board</h2><span>One page · US Letter</span></div>
@@ -51,7 +43,7 @@ const blocks=[
     <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span data-day-label>A DAY AT HOME</span></div>
     <div class="msr-rows" data-print-rows>
      {blocks.map((b,i)=><div class="msr-row" data-rhythm-key={b.key} style={'--msr-tint:'+b.tint}>
-      <div class="msr-icon-box"><Image src={b.icon} alt="" width={70} height={70} loading="eager" class="msr-icon" /></div>
+      <div class="msr-icon-box"><img src={b.icon} alt="" width="70" height="70" loading="eager" class="msr-icon" /></div>
       <div class="msr-row-copy"><h3 data-title contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} name`}>{b.title}</h3><p data-desc contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} activities`}>{b.desc}</p></div>
       <span class="msr-time" data-time role="button" tabindex="0" title="Click to change this time" aria-label={`Change ${b.title} time`}>{b.time}</span>
       <div class="msr-row-actions" aria-label={`Edit ${b.title} position`}><button type="button" data-move-up aria-label={`Move ${b.title} earlier`} title="Move earlier">↑</button><button type="button" data-move-down aria-label={`Move ${b.title} later`} title="Move later">↓</button><button type="button" data-remove aria-label={`Remove ${b.title}`} title="Remove block">×</button></div>
@@ -60,7 +52,7 @@ const blocks=[
     <div class="msr-rule"><span>OUR SUMMER RULE</span><strong>Check the rhythm before asking Mom.</strong><p>Our plans can change. We can still find what's next.</p></div>
     <footer class="msr-foot"><span>ORGANIZED FAMILY CLUB</span><span>OUR SUMMER DAY · MAY</span></footer>
    </article></div>
-   <p class="msr-note">Visual proof using the seven supplied draft PNG icons. Artwork still needs approval and cleanup before mailing.</p>
+   <p class="msr-note">Visual proof with the updated seven-image OFC icon collection.</p>
   </section>
  </div>
 </div>
