@@ -7,10 +7,11 @@
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { JOB_PRESETS, LIMITS } from '../../lib/worksheet/content';
+import { monthColors } from '../../theme';
 const first = JOB_PRESETS[0];
 ---
 <PublicLayout fullTitle="November Job Ownership Worksheet | Organized Family Club" description="Create a personalized family job handoff worksheet and download a two-page, double-sided PDF." indexable={false} chrome={false} width="full" tracking={false}>
-<main class="ws-shell">
+<main class="ws-shell" style={`--ws-month-color: ${monthColors[10].hex}`}>
   <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
   <div class="ws-intro">
     <p class="ws-eyebrow">Your November family plan is prepared.</p>
@@ -443,3 +444,11 @@ const first = JOB_PRESETS[0];
 #ws-plan-goal-line{font-size:12px;color:#666;line-height:1.5;margin-bottom:20px}
 </style>
 <style is:global>#ws-form[data-active-group="mom"] #ws-adult-fields,#ws-form[data-active-group="mom"] #ws-child1-fields,#ws-form[data-active-group="mom"] #ws-child2-fields{display:none}#ws-form[data-active-group="adult"] #ws-mom-fields,#ws-form[data-active-group="child1"] #ws-mom-fields,#ws-form[data-active-group="child2"] #ws-mom-fields{display:none}</style>
+<style is:global>
+/* November's accent comes from the printed calendar's canonical month palette. */
+.ws-intro .ws-eyebrow{border-left:4px solid var(--ws-month-color);padding-left:10px}
+.ws-ready{border-bottom-color:var(--ws-month-color)!important}
+.ws-rec{border-bottom-color:var(--ws-month-color)!important}
+.ws-actions{border-top-color:var(--ws-month-color)!important}
+.ws-plan-heading{display:inline-block;border-bottom:3px solid var(--ws-month-color);padding-bottom:7px}
+</style>
