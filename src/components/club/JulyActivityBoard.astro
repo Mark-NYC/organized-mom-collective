@@ -80,29 +80,68 @@ const tiers=[
 </style>
 <script>
 type Tier='quick'|'busy'|'project';
-type Idea={id:string;label:string;icon:string;removed?:boolean};
+type Idea={id:string;label:string;icon:string;removed?:boolean;minAge?:number;maxAge?:number};
 type State={quick:Idea[];busy:Idea[];project:Idea[];focus:'mixed'|'inside'|'outside';child:string;intro:string;rule:string};
 const library:Record<Tier,Idea[]>={
- quick:[{id:'read',label:'Read a book',icon:'book'},{id:'draw',label:'Draw something new',icon:'scissors'},{id:'build',label:'Build with blocks',icon:'blocks'},{id:'stretch',label:'Try ten stretches',icon:'rope'},{id:'doodle',label:'Doodle a funny animal',icon:'scissors'},{id:'look',label:'Find five things in nature',icon:'tree'}],
- busy:[{id:'puzzle',label:'Finish a puzzle',icon:'puzzle'},{id:'outdoor',label:'Explore outside',icon:'tree'},{id:'craft',label:'Make a paper craft',icon:'scissors'},{id:'bike',label:'Ride my bike',icon:'bike'},{id:'tower',label:'Build a giant tower',icon:'blocks'},{id:'reading',label:'Read a whole chapter',icon:'book'}],
- project:[{id:'city',label:'Build a mini city',icon:'blocks'},{id:'story',label:'Write & draw a story',icon:'book'},{id:'course',label:'Design an obstacle course',icon:'rope'},{id:'comic',label:'Make my own comic book',icon:'scissors'},{id:'garden',label:'Observe a plant growing',icon:'tree'},{id:'mural',label:'Make a big art project',icon:'scissors'}]
+ quick:[
+  {id:'picture',label:'Look at a picture book',icon:'book',maxAge:5},
+  {id:'sort',label:'Sort blocks by color',icon:'blocks',maxAge:5},
+  {id:'doodle',label:'Draw a funny animal',icon:'scissors',maxAge:8},
+  {id:'read',label:'Read a book',icon:'book',minAge:6},
+  {id:'draw',label:'Draw something new',icon:'scissors',minAge:6},
+  {id:'build',label:'Build with blocks',icon:'blocks'},
+  {id:'stretch',label:'Try ten stretches',icon:'rope',minAge:6},
+  {id:'look',label:'Find five things in nature',icon:'tree',minAge:6}
+ ],
+ busy:[
+  {id:'pretend',label:'Set up pretend play',icon:'blocks',maxAge:5},
+  {id:'easy-puzzle',label:'Work on a picture puzzle',icon:'puzzle',maxAge:5},
+  {id:'picture-art',label:'Make a big picture',icon:'scissors',maxAge:5},
+  {id:'puzzle',label:'Finish a puzzle',icon:'puzzle',minAge:6},
+  {id:'outdoor',label:'Explore outside (ask first)',icon:'tree',minAge:6},
+  {id:'craft',label:'Make a paper craft',icon:'scissors',minAge:6},
+  {id:'bike',label:'Ride my bike (ask first)',icon:'bike',minAge:6},
+  {id:'tower',label:'Build a giant tower',icon:'blocks'},
+  {id:'reading',label:'Read a whole chapter',icon:'book',minAge:9}
+ ],
+ project:[
+  {id:'small-town',label:'Build a pretend town',icon:'blocks',maxAge:5},
+  {id:'picture-story',label:'Make a picture story',icon:'book',maxAge:5},
+  {id:'big-art',label:'Add to a big drawing',icon:'scissors',maxAge:5},
+  {id:'city',label:'Build a mini city',icon:'blocks',minAge:6},
+  {id:'story',label:'Write & draw a story',icon:'book',minAge:9},
+  {id:'course',label:'Design a safe obstacle course',icon:'rope',minAge:6},
+  {id:'comic',label:'Make my own comic book',icon:'scissors',minAge:6},
+  {id:'garden',label:'Observe a plant growing',icon:'tree',minAge:6},
+  {id:'mural',label:'Make a big art project',icon:'scissors',minAge:6}
+ ]
 };
-const templates:Record<Tier,string[]>={quick:['read','draw','build'],busy:['puzzle','outdoor','craft'],project:['city','story','course']};
-const fresh=():State=>({
- quick:templates.quick.map(id=>({...library.quick.find(a=>a.id===id)!})),
- busy:templates.busy.map(id=>({...library.busy.find(a=>a.id===id)!})),
- project:templates.project.map(id=>({...library.project.find(a=>a.id===id)!})),
- focus:'mixed',child:'family',intro:'Pick something that sounds good. Start small or make something big.',
- rule:"Pick one. Give it a try. Put things away when you're done."
-});
+const ageGroups={
+ little:{quick:['picture','sort','build'],busy:['pretend','easy-puzzle','picture-art'],project:['small-town','picture-story','big-art']},
+ middle:{quick:['read','draw','build'],busy:['puzzle','outdoor','craft'],project:['city','comic','course']},
+ older:{quick:['read','draw','stretch'],busy:['puzzle','reading','craft'],project:['city','story','garden']}
+} satisfies Record<string,Record<Tier,string[]>>;
+const eligible=(idea:Idea,age:number)=> (idea.minAge??0)<=age&&(idea.maxAge??99)>=age;
+const defaultsFor=(age:number,child='family'):State=>{
+ const preset=age<=5?ageGroups.little:age>=10?ageGroups.older:ageGroups.middle;
+ const select=(tier:Tier)=>preset[tier].map(id=>({...library[tier].find(x=>x.id===id)!}));
+ return {quick:select('quick'),busy:select('busy'),project:select('project'),focus:'mixed',child,
+  intro:'Pick something that sounds good. Start small or make something big.',
+  rule:"Pick one. Give it a try. Put things away when you're done."};
+};
+const fresh=():State=>defaultsFor(8);
 for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  const key=root.dataset.jabKey??'omc:club:july-activities:v1';
  const icons=JSON.parse(root.dataset.jabIcons??'{}') as Record<string,string>;
- let state=fresh();let profile='';let family='My own ideas for summer';let kids:{id:string;firstName:string;birthYear?:number}[]=[];
+ let state=fresh();let profile='';let family='My own ideas for summer';let kids:{id:string;firstName:string;birthYear?:number;birthMonth?:number}[]=[];
+ let boards:Record<string,State>={};
+ const selectedAge=(child=state.child)=>{const kid=kids.find(k=>k.id===child);if(!kid?.birthYear)return 8;
+  return Math.max(2,Math.min(18,2027-kid.birthYear-(kid.birthMonth&&kid.birthMonth>7?1:0)))};
+ const validIdeas=(tier:Tier)=>library[tier].filter(idea=>eligible(idea,selectedAge()));
  const stage=root.querySelector<HTMLElement>('[data-jab-stage]');const sheet=root.querySelector<HTMLElement>('[data-jab-sheet]');
  const fit=()=>{if(!stage||!sheet)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';sheet.style.setProperty('--jab-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
- const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({profile,state}))}catch{}};
+ const save=()=>{boards[state.child]=structuredClone(state);try{sessionStorage.setItem(key,JSON.stringify({profile,state,boards}))}catch{}};
  const draw=()=>{
   for(const tier of ['quick','busy','project'] as Tier[])for(const row of root.querySelectorAll<HTMLElement>('[data-jab-item="'+tier+'"]')){
    const item=state[tier][Number(row.dataset.jabSlot)];if(!item)continue;row.hidden=!!item.removed;
@@ -121,7 +160,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
     const item=state[tier][i];const wrap=document.createElement('div');wrap.className='jab-option';const label=document.createElement('label');
     label.textContent=({quick:'5-Minute',busy:'Keep Me Busy',project:'My Project'} as Record<Tier,string>)[tier]+' · '+(i+1);
     const select=document.createElement('select');select.setAttribute('aria-label',label.textContent);
-    for(const suggestion of library[tier]){const opt=document.createElement('option');opt.value=suggestion.id;opt.textContent=suggestion.label;select.append(opt)}
+    for(const suggestion of validIdeas(tier)){const opt=document.createElement('option');opt.value=suggestion.id;opt.textContent=suggestion.label;select.append(opt)}
+    if(!validIdeas(tier).some(x=>x.id===item.id)){const opt=document.createElement('option');opt.value=item.id;opt.textContent=item.label+' (custom)';select.append(opt)}
     select.value=item.id;select.addEventListener('change',()=>{
      const replacement=library[tier].find(x=>x.id===select.value);if(!replacement)return;
      state[tier][i]={...replacement,removed:item.removed};save();draw();
@@ -134,12 +174,23 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  };
  const updateFamily=()=>{const kid=kids.find(k=>k.id===state.child);family=kid?kid.firstName+"'s ideas for summer":'Our ideas for summer'};
  const childSelect=root.querySelector<HTMLSelectElement>('[data-jab-child]');
- childSelect?.addEventListener('change',()=>{state.child=childSelect.value;updateFamily();save();draw()});
+ childSelect?.addEventListener('change',()=>{
+  save();
+  const id=childSelect.value;
+  state=boards[id]?structuredClone(boards[id]):defaultsFor(selectedAge(id),id);
+  updateFamily();save();draw();options();
+ });
  root.querySelector<HTMLSelectElement>('[data-jab-focus]')?.addEventListener('change',event=>{
   const focus=(event.target as HTMLSelectElement).value as State['focus'];state.focus=focus;
-  if(focus==='inside'){state.busy[1]={...library.busy.find(a=>a.id==='tower')!};state.project[2]={...library.project.find(a=>a.id==='comic')!}}
-  else if(focus==='outside'){state.quick[1]={...library.quick.find(a=>a.id==='look')!};state.busy[1]={...library.busy.find(a=>a.id==='bike')!};state.project[2]={...library.project.find(a=>a.id==='garden')!}}
-  else{state.quick[1]={...library.quick.find(a=>a.id==='draw')!};state.busy[1]={...library.busy.find(a=>a.id==='outdoor')!};state.project[2]={...library.project.find(a=>a.id==='course')!}}
+  // Only suggest activities appropriate to the selected child's age.
+  const age=selectedAge();
+  const choose=(tier:Tier,slot:number,ids:string[])=>{
+   const candidate=ids.map(id=>library[tier].find(x=>x.id===id)).find((x):x is Idea=>!!x&&eligible(x,age));
+   if(candidate)state[tier][slot]={...candidate};
+  };
+  if(focus==='inside'){choose('busy',1,['tower','easy-puzzle']);choose('project',2,['comic','big-art'])}
+  else if(focus==='outside'){choose('quick',1,['look','sort']);choose('busy',1,['bike','pretend']);choose('project',2,['garden','big-art'])}
+  else{choose('quick',1,['draw','sort']);choose('busy',1,['outdoor','easy-puzzle']);choose('project',2,['course','big-art'])}
   save();draw();options();
  });
  root.querySelectorAll<HTMLElement>('[data-jab-item]').forEach(row=>{
@@ -150,7 +201,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   row.querySelector('[data-jab-remove]')?.addEventListener('click',()=>{state[tier][index].removed=true;save();draw();options()});
  });
  for(const name of ['intro','rule'] as const){const el=root.querySelector<HTMLElement>('[data-jab-edit="'+name+'"]');el?.addEventListener('input',()=>{state[name]=(el.textContent??'').replace(/\s+/g,' ').slice(0,130);save()});el?.addEventListener('blur',()=>{state[name]=(el.textContent??'').trim().slice(0,130);save();draw()});el?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur()}})}
- root.querySelector('[data-jab-reset]')?.addEventListener('click',()=>{const child=state.child;state=fresh();state.child=child;updateFamily();save();draw();options()});
+ root.querySelector('[data-jab-reset]')?.addEventListener('click',()=>{const child=state.child;state=defaultsFor(selectedAge(child),child);updateFamily();save();draw();options()});
  root.querySelector('[data-jab-print]')?.addEventListener('click',()=>window.print());
  const dl=root.querySelector<HTMLButtonElement>('[data-jab-download]');
  dl?.addEventListener('click',async()=>{
@@ -162,22 +213,27 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   finally{root.classList.remove('jab-export');dl.disabled=false;dl.textContent=label}
  });
  window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number}[]};sample?:string}>).detail;
+  const detail=(event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}>).detail;
   if(!detail?.household)return;const next=(detail.sample??'account')+':'+detail.household.id;
   kids=(detail.household.members??[]).filter(x=>x.kind==='child');
   const select=root.querySelector<HTMLSelectElement>('[data-jab-child]');
   if(select){select.replaceChildren();const familyOption=document.createElement('option');familyOption.value='family';familyOption.textContent='The whole family';select.append(familyOption);
    for(const kid of kids){const option=document.createElement('option');option.value=kid.id;option.textContent=kid.firstName;select.append(option)}}
-  if(profile!==next){profile=next;state=fresh();
+  if(profile!==next){profile=next;state=fresh();boards={};
    try{const record=JSON.parse(sessionStorage.getItem(key)??'null');if(record?.profile===profile&&record.state){
-    const s=record.state;state.focus=['mixed','inside','outside'].includes(s.focus)?s.focus:'mixed';state.child=typeof s.child==='string'?s.child:'family';
+    const s=record.state;
+    if(record.boards&&typeof record.boards==='object')boards=record.boards;
+    state=defaultsFor(selectedAge(typeof s.child==='string'?s.child:'family'),typeof s.child==='string'?s.child:'family');
+    state.focus=['mixed','inside','outside'].includes(s.focus)?s.focus:'mixed';
     for(const name of ['intro','rule'] as const)if(typeof s[name]==='string')state[name]=s[name].slice(0,130);
     for(const tier of ['quick','busy','project'] as Tier[])if(Array.isArray(s[tier])&&s[tier].length===3){
      state[tier]=s[tier].map((a:Idea,i:number)=>{const found=library[tier].find(x=>x.id===a?.id);return found?{...found,label:typeof a.label==='string'?a.label.slice(0,55):found.label,removed:a.removed===true}:state[tier][i]});
     }
    }}catch{}
   }
-  if(state.child!=='family'&&!kids.some(x=>x.id===state.child))state.child='family';updateFamily();save();draw();options();
+  if(state.child!=='family'&&!kids.some(x=>x.id===state.child))state.child='family';
+  if(state.child==='family'&&profile===next&&!boards.family&&kids.length){state=defaultsFor(selectedAge(kids[0].id),kids[0].id)}
+  updateFamily();save();draw();options();
  });
  updateFamily();draw();options();
 }
