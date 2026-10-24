@@ -70,7 +70,7 @@ export function decemberPages(m:Metrics,f:Family):[Page,Page]{
   b.rect(57,top+68,10,10);
   if(addSprig)b.sprig(211,top+111,1.05);
   else {b.circle(246,top+99,3,DEEP);b.circle(221,top+127,2,DEEP);b.circle(258,top+130,2,DEEP);}
-  b.block(65,top+193,headline,'serifBoldItalic',22,217,3,DEEP,1.17);
+  b.block(65,top+193,headline,'serifBoldItalic',22,217,3,DEEP);
   b.block(65,top+245,kicker,'serifItalic',11,215,2,SOFT);
   b.line(65,top+292,260,top+292,ACCENT,1);
   b.text(330,top+67,'DEAR __________________,','sansBold',9,SOFT);
