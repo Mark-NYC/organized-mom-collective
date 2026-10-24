@@ -54,7 +54,8 @@ const first = JOB_PRESETS[0];
           <legend>Second child</legend>
           <div class="ws-field"><label for="ws-child2">Name</label><input id="ws-child2" name="secondChild" value="Philip" maxlength="28"/></div>
           <div class="ws-field"><label for="ws-child2-job">Suggested job</label><select id="ws-child2-job"><option value="1">Pack my school bag</option><option value="0">Set and clear the dinner table</option><option value="2">Put away my clean laundry</option><option value="4">Keep the entryway tidy</option><option value="custom">Custom job</option></select><input id="ws-child2-custom" maxlength="90" placeholder="Custom responsibility" hidden/></div>
-          <div class="ws-field"><label for="ws-child2-when">When</label><input id="ws-child2-when" name="secondWhen" maxlength="80" value="Every school night, before bed"/></div>
+          <div class="ws-field"><label for="ws-child2-done">What finished looks like</label><textarea id="ws-child2-done" name="secondDone" rows="3" maxlength="260">Homework, folder, water bottle and lunch box packed, bag by the door.</textarea></div>
+        <div class="ws-field"><label for="ws-child2-when">When</label><input id="ws-child2-when" name="secondWhen" maxlength="80" value="Every school night, before bed"/></div>
         </fieldset>
         <div class="ws-field"><label for="ws-existing">Other responsibilities already owned <span class="ws-optional">optional</span></label><input id="ws-existing" name="existing" maxlength="130" placeholder="Megan: calendar"/></div>
         <div class="ws-field"><label for="ws-checkin">Family check-in <span class="ws-optional">optional</span></label><div class="ws-date-row"><input id="ws-checkin" name="checkIn" type="date"/><button type="button" id="ws-two-weeks" class="ws-link">In two weeks</button></div><p id="ws-date-hint" class="ws-hint"></p></div>
@@ -118,6 +119,7 @@ const first = JOB_PRESETS[0];
     const options=Array.from(child2.options).filter(x=>x.value!=='custom');
     const match=options.find(o=>JOB_PRESETS[Number(o.value)].job===p.secondJob);
     child2.value=match?.value??'custom';child2Custom.hidden=Boolean(match);child2Custom.value=p.secondJob;
+    value('ws-child2-done',match ? JOB_PRESETS[Number(match.value)].done : 'Complete the whole job and put everything back where it belongs.');
     last={when:p.childWhen,done:p.childDone};
     form.classList.remove('is-editing');
     $('ws-approval-note').textContent='Sample plan prepared. Nothing is mailed from this demo.';
@@ -150,6 +152,7 @@ const first = JOB_PRESETS[0];
       secondChild: v('secondChild'),
       secondJob: child2.value === 'custom' ? child2Custom.value : JOB_PRESETS[Number(child2.value)].job,
       secondWhen: v('secondWhen'),
+      secondDone: v('secondDone'),
       job: preset.value === 'custom' ? custom.value : JOB_PRESETS[Number(preset.value)].job,
       when: when.value,
       done: done.value,
@@ -220,6 +223,7 @@ const first = JOB_PRESETS[0];
     const selected=child2.value==='custom'?null:JOB_PRESETS[Number(child2.value)];
     if(selected) $('ws-child2-when').setAttribute('value',selected.when);
     if(selected) ($<HTMLInputElement>('ws-child2-when')).value=selected.when;
+    if(selected) ($<HTMLTextAreaElement>('ws-child2-done')).value=selected.done;
     update();
   });
   document.querySelectorAll<HTMLButtonElement>('.ws-edit').forEach(b=>b.addEventListener('click',()=>{
