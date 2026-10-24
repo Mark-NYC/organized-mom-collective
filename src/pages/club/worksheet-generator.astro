@@ -25,7 +25,7 @@ const first = JOB_PRESETS[0];
         <p>We made a starting plan for <span id="ws-ready-family">the Goering Family</span>. You can change any recommendation, or just download it as is.</p>
         <div class="ws-field"><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
-      <div class="ws-rec-head"><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
+      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
       <div id="ws-recommendations">
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Prepare tomorrow’s clothes and supplies</p><p id="ws-child1-desc">Lay out clothes, check supplies and put everything in its ready spot.</p></article>
@@ -131,7 +131,7 @@ const first = JOB_PRESETS[0];
     update();
   }
   sample.addEventListener('change',()=>applySample(sample.value as keyof typeof sampleProfiles));
-  $('ws-approve').addEventListener('click',()=>{$('ws-approval-note').textContent='Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
+  $('ws-approve').addEventListener('click',()=>{const error=planIssue();$('ws-approval-note').textContent=error??'Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
   $('ws-review').addEventListener('click',()=>{form.classList.add('is-editing');form.dataset.activeGroup='adult';form.scrollIntoView({behavior:'smooth',block:'start'});});
   const child2Custom = $<HTMLInputElement>('ws-child2-custom');
   const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
@@ -142,6 +142,14 @@ const first = JOB_PRESETS[0];
   let fonts: FontBytes | null = null;
   let metrics: Metrics | null = null;
 
+  function planIssue():string|null {
+    const data=normalize(input());
+    if(!data.adultOwner || !data.owner || !data.secondChild)return 'Add a name for each featured person before approving.';
+    if(!data.adultJob || !data.job || !data.secondJob)return 'Each person needs a responsibility before this plan is ready.';
+    if(!data.adultWhen || !data.when || !data.secondWhen)return 'Add a time for every responsibility.';
+    if(!data.adultSteps || !data.done || !data.secondDone)return 'Each responsibility needs specific steps before this plan is ready.';
+    return null;
+  }
   const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   checkIn.min = isoDate(new Date());
 
@@ -185,6 +193,8 @@ const first = JOB_PRESETS[0];
       hints(data);
       const set = (id:string,value:string) => { const e=document.getElementById(id); if(e)e.textContent=value; };
       set('ws-ready-family',(data.familyName??'your family').replace(/^The /,'the '));
+      set('ws-plan-heading',data.planTitle??'Our Family Ownership Plan');
+      set('ws-plan-goal-line',data.planGoal??'');
       set('ws-adult-title',data.adultOwner??'Adult');
       set('ws-adult-summary',data.adultJob??'Choose a responsibility');
       set('ws-adult-desc',data.adultWhen??'');
@@ -249,6 +259,7 @@ const first = JOB_PRESETS[0];
   child2.addEventListener('change',()=> {
     child2Custom.hidden = child2.value !== 'custom';
     const selected=child2.value==='custom'?null:JOB_PRESETS[Number(child2.value)];
+    if(!selected) {($<HTMLInputElement>('ws-child2-when')).value='';($<HTMLTextAreaElement>('ws-child2-done')).value='';child2Custom.focus();}
     if(selected) $('ws-child2-when').setAttribute('value',selected.when);
     if(selected) ($<HTMLInputElement>('ws-child2-when')).value=selected.when;
     if(selected) ($<HTMLTextAreaElement>('ws-child2-done')).value=selected.done;
@@ -272,6 +283,8 @@ const first = JOB_PRESETS[0];
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!fonts || !metrics) return;
+    const issue=planIssue();
+    if(issue){status.textContent=issue;form.classList.add('is-editing');return;}
     setBusy(true);
     status.textContent = 'Making your PDF…';
     try {
@@ -422,4 +435,7 @@ const first = JOB_PRESETS[0];
 .ws-preview{background:none!important;box-shadow:none!important}
 .ws-pages{background:none!important}
 .ws-ready select{border:1px solid #ccc!important;background:#fff!important}
+</style><style is:global>
+.ws-plan-heading{font:normal 25px/1.2 Georgia,serif;color:#3d3d3d;margin:0 0 5px!important}
+#ws-plan-goal-line{font-size:12px;color:#666;line-height:1.5;margin-bottom:20px}
 </style>
