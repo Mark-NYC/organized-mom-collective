@@ -5,7 +5,7 @@
  * physical cards, and every card names a pre-existing anchor and one next action.
  * Kept reusable in the Club and the unlisted owner review preview.
  */
-import '@fontsource/kalam/latin-700.css';
+import { monthColors } from '../../theme';
 interface Props { storageKey?: string; }
 const {storageKey='omc:club:january-habit-cards:v1'} = Astro.props;
 const defaults = [
@@ -15,14 +15,14 @@ const defaults = [
   {name: 'Our kitchen', anchor: 'After we finish dinner', action: 'We clear the table together.', place: 'By the kitchen table', kind:'table'},
 ];
 ---
-<div class="jhc" data-jhc-storage={storageKey}>
+<div class="jhc" data-jhc-storage={storageKey} style={`--jhc-month:${monthColors[0].hex}`}>
   <div class="jhc-intro">
-    <p class="jhc-overline">JANUARY · ORGANIZED FAMILY CLUB</p>
-    <h2>Habit cards that do the reminding.</h2>
-    <p>We’ve prepared four everyday examples. Keep the ones that fit your family, and change anything that doesn’t. Start with just one or two cards. Put each one where the habit actually happens.</p>
+    <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · JANUARY</p>
+    <h2>Your family’s habits. <em>Already prepared.</em></h2>
+    <p>Four small reminders, tied to things your family already does. Change anything, or print the suggestions as they are. Start with one or two.</p>
   </div>
-  <div class="jhc-config" aria-label="Customize your family habit cards">
-    <div class="jhc-config-heading"><h3>Your family's cards</h3><p>Already filled in. Edits update the actual printed cards.</p></div>
+  <div class="jhc-workspace"><div class="jhc-config" aria-label="Customize your family habit cards">
+    <div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
     <div class="jhc-forms">
       {defaults.map((item, i) => (
         <fieldset class="jhc-editor" data-jhc-editor={i}>
@@ -35,16 +35,16 @@ const defaults = [
       ))}
     </div>
     <div class="jhc-actions">
-      <button class="jhc-print" type="button" data-print>Print four habit cards / Save PDF</button>
+      <button class="jhc-print" type="button" data-print>Print cards / Save PDF</button>
       <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
     </div>
     <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
   </div>
 
-  <div class="jhc-preview-heading"><h3>Your printable habit cards</h3><p>Four separate cards on one 8.5 × 11 inch sheet</p></div>
+  <div class="jhc-preview-panel"><div class="jhc-preview-heading"><h3>Your January habit cards</h3><p>Four cut-out reminders · US Letter</p></div>
   <div class="jhc-print-scroll">
     <div class="jhc-page" data-jhc-page>
-      <div class="jhc-sheet-label">ORGANIZED FAMILY CLUB <span>JANUARY · OUR FAMILY HABITS</span></div>
+      <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
       <div class="jhc-card-grid">
         {defaults.map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
@@ -55,15 +55,15 @@ const defaults = [
             <div class="jhc-card-icon" aria-hidden="true">
               {i===0 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M15 28h34v9c0 10-7 16-17 16s-17-6-17-16V28ZM12 28h40M23 18c-4-4 5-7 1-12M34 18c-4-4 5-7 1-12M45 18c-4-4 5-7 1-12"/></svg> : i===1 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M19 26c0-8 5-13 13-13s13 5 13 13v27H19V26ZM19 33h26M25 33v-6h14v6M26 19c3-2 9-2 12 0M25 42h14v8H25zM14 35h5M45 35h5"/></svg> : i===2 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M19 10h26l4 9-10 7-7-7-7 7-10-7 4-9ZM25 26v27h14V26M18 53h28"/></svg> : <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M11 23h42M15 23v28M49 23v28M21 23l4-12h14l4 12M28 11v12M36 11v12M9 51h12M43 51h12"/></svg>}
             </div>
-            <p class="jhc-small-title">MY NEXT LITTLE HABIT</p>
+            <p class="jhc-small-title">ONE LITTLE HABIT</p>
             <h3 class="jhc-card-name" data-print-field="name">{item.name}</h3>
             <div class="jhc-card-rule"></div>
-            <p class="jhc-anchor-label">AFTER I ALREADY...</p>
+            <p class="jhc-anchor-label">WHEN THIS HAPPENS</p>
             <p class="jhc-anchor" data-print-field="anchor">{item.anchor}</p>
-            <p class="jhc-action-label">THEN I WILL...</p>
+            <p class="jhc-action-label">HERE’S WHAT I DO NEXT</p>
             <p class="jhc-action" data-print-field="action">{item.action}</p>
             <div class="jhc-card-bottom">
-              <span>MY REMINDER GOES</span>
+              <span>PLACE THIS CARD</span>
               <p data-print-field="place">{item.place}</p>
             </div>
           </article>
@@ -71,6 +71,8 @@ const defaults = [
       </div>
       <div class="jhc-sheet-footer"><span>One habit at a time. The card is the reminder.</span><span>✂ CUT ALONG THE DOTTED LINES</span></div>
     </div>
+  </div>
+  </div>
   </div>
 </div>
 <style is:global>
