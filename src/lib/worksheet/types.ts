@@ -21,6 +21,9 @@ export interface WorksheetInput {
   adultJob?: string;
   adultWhen?: string;
   existing?: string;
+  secondChild?: string;
+  secondJob?: string;
+  secondWhen?: string;
   /** First family check-in, ISO date (YYYY-MM-DD). */
   checkIn?: string;
 }
@@ -36,6 +39,9 @@ export interface WorksheetData {
   adultJob: string | null;
   adultWhen: string | null;
   existing: string | null;
+  secondChild: string | null;
+  secondJob: string | null;
+  secondWhen: string | null;
   /** Formatted for print ("Saturday, November 14"), or null. */
   checkIn: string | null;
 }
