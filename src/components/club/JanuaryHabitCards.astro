@@ -1,0 +1,137 @@
+---
+/**
+ * January 2027 prototype: real, individual habit cue cards on one Letter-sized cut sheet.
+ * A standalone printable, not a routine chart or a tracker. The printed sheet is 2x2
+ * physical cards, and every card names a pre-existing anchor and one next action.
+ * Kept reusable in the Club and the unlisted owner review preview.
+ */
+import '@fontsource/kalam/latin-700.css';
+interface Props { storageKey?: string; }
+const {storageKey='omc:club:january-habit-cards:v1'} = Astro.props;
+const defaults = [
+  {name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my dishes away.', place: 'By the breakfast table', kind:'home'},
+  {name: 'My backpack', anchor: 'After I put on my shoes', action: 'I grab my backpack.', place: 'Next to my shoes', kind:'school'},
+  {name: 'My bedroom', anchor: 'After I get dressed', action: 'I put my pajamas away.', place: 'On my dresser', kind:'bed'},
+  {name: 'Our kitchen', anchor: 'After we finish dinner', action: 'We clear the table together.', place: 'By the kitchen table', kind:'table'},
+];
+---
+<div class="jhc" data-jhc-storage={storageKey}>
+  <div class="jhc-intro">
+    <p class="jhc-overline">JANUARY · ORGANIZED FAMILY CLUB</p>
+    <h2>Habit cards that do the reminding.</h2>
+    <p>We’ve prepared four everyday examples. Keep the ones that fit your family, and change anything that doesn’t. Start with just one or two cards. Put each one where the habit actually happens.</p>
+  </div>
+  <div class="jhc-config" aria-label="Customize your family habit cards">
+    <div class="jhc-config-heading"><h3>Your family's cards</h3><p>Already filled in. Edits update the actual printed cards.</p></div>
+    <div class="jhc-forms">
+      {defaults.map((item, i) => (
+        <fieldset class="jhc-editor" data-jhc-editor={i}>
+          <legend><span class="jhc-editor-num">0{i+1}</span> Habit card {i+1}</legend>
+          <label><span>Whose card?</span><input data-field="name" maxlength="42" value={item.name}/></label>
+          <label><span>After I already...</span><input data-field="anchor" maxlength="85" value={item.anchor}/></label>
+          <label><span>Then I will...</span><textarea data-field="action" maxlength="105" rows="2">{item.action}</textarea></label>
+          <label><span>Put the reminder...</span><input data-field="place" maxlength="70" value={item.place}/></label>
+        </fieldset>
+      ))}
+    </div>
+    <div class="jhc-actions">
+      <button class="jhc-print" type="button" data-print>Print four habit cards / Save PDF</button>
+      <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
+    </div>
+    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
+  </div>
+
+  <div class="jhc-preview-heading"><h3>Your printable habit cards</h3><p>Four separate cards on one 8.5 × 11 inch sheet</p></div>
+  <div class="jhc-print-scroll">
+    <div class="jhc-page" data-jhc-page>
+      <div class="jhc-sheet-label">ORGANIZED FAMILY CLUB <span>JANUARY · OUR FAMILY HABITS</span></div>
+      <div class="jhc-card-grid">
+        {defaults.map((item, i) => (
+          <article class="jhc-card" data-jhc-card={i}>
+            <div class="jhc-card-top">
+              <span class="jhc-brand">ORGANIZED FAMILY CLUB</span>
+              <span class="jhc-card-number">0{i+1}</span>
+            </div>
+            <div class="jhc-card-icon" aria-hidden="true">
+              {i===0 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M15 28h34v9c0 10-7 16-17 16s-17-6-17-16V28ZM12 28h40M23 18c-4-4 5-7 1-12M34 18c-4-4 5-7 1-12M45 18c-4-4 5-7 1-12"/></svg> : i===1 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M19 26c0-8 5-13 13-13s13 5 13 13v27H19V26ZM19 33h26M25 33v-6h14v6M26 19c3-2 9-2 12 0M25 42h14v8H25zM14 35h5M45 35h5"/></svg> : i===2 ? <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M19 10h26l4 9-10 7-7-7-7 7-10-7 4-9ZM25 26v27h14V26M18 53h28"/></svg> : <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M11 23h42M15 23v28M49 23v28M21 23l4-12h14l4 12M28 11v12M36 11v12M9 51h12M43 51h12"/></svg>}
+            </div>
+            <p class="jhc-small-title">MY NEXT LITTLE HABIT</p>
+            <h3 class="jhc-card-name" data-print-field="name">{item.name}</h3>
+            <div class="jhc-card-rule"></div>
+            <p class="jhc-anchor-label">AFTER I ALREADY...</p>
+            <p class="jhc-anchor" data-print-field="anchor">{item.anchor}</p>
+            <p class="jhc-action-label">THEN I WILL...</p>
+            <p class="jhc-action" data-print-field="action">{item.action}</p>
+            <div class="jhc-card-bottom">
+              <span>MY REMINDER GOES</span>
+              <p data-print-field="place">{item.place}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div class="jhc-sheet-footer"><span>One habit at a time. The card is the reminder.</span><span>✂ CUT ALONG THE DOTTED LINES</span></div>
+    </div>
+  </div>
+</div>
+<style is:global>
+.jhc{color:#494741;font-family:Montserrat,Arial,sans-serif;max-width:1080px;margin:0 auto;padding:0 14px 64px}
+.jhc *{box-sizing:border-box}.jhc-overline,.jhc-small-title,.jhc-brand,.jhc-card-number,.jhc-sheet-label,.jhc-sheet-footer,.jhc-card-bottom span,.jhc-anchor-label,.jhc-action-label{font-family:Montserrat,Arial,sans-serif;font-size:10px;letter-spacing:.15em;font-weight:700}
+.jhc-overline{color:#7b8e7b}.jhc-intro{max-width:750px;margin-bottom:30px}.jhc-intro h2{font-family:Georgia,serif;font-size:clamp(30px,4vw,44px);font-weight:400;line-height:1.14;margin:9px 0 16px}.jhc-intro>p:last-child{font-family:Georgia,serif;font-size:18px;line-height:1.55;color:#6b6860}
+.jhc-config{background:#f5f4f0;padding:24px 28px 22px;margin-bottom:32px}.jhc-config-heading h3,.jhc-preview-heading h3{font-family:Georgia,serif;font-size:26px;font-weight:400}.jhc-config-heading p,.jhc-preview-heading p{font-size:14px;color:#777269;margin-top:5px}
+.jhc-forms{display:grid;grid-template-columns:1fr 1fr;gap:22px 28px;margin-top:24px}.jhc-editor{border:0;border-top:1px solid #d7d6cf;padding:15px 0 0;min-width:0}.jhc-editor legend{font-family:Georgia,serif;font-size:18px;padding-right:8px}.jhc-editor-num{font:700 12px Montserrat,Arial,sans-serif;color:#788e79;margin-right:8px}.jhc-editor label{display:block;margin-top:14px}.jhc-editor label span{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:#77796f;display:block;margin-bottom:7px}.jhc-editor input,.jhc-editor textarea{font:15px Georgia,serif;color:#423e39;width:100%;padding:10px 12px;min-height:42px;background:#fff;border:1px solid #d5d0c7;border-radius:0;resize:vertical}.jhc-editor input:focus-visible,.jhc-editor textarea:focus-visible,.jhc-actions button:focus-visible{outline:2px solid #586f5a;outline-offset:2px}
+.jhc-actions{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:25px}.jhc-print{background:#4a4a45;border:1px solid #4a4a45;color:white;font-size:12px;letter-spacing:.08em;font-weight:700;padding:15px 22px;min-height:48px;cursor:pointer}.jhc-reset{background:transparent;text-decoration:underline;text-underline-offset:3px;border:0;padding:12px 5px;min-height:48px;cursor:pointer;color:#4a4a45;font-weight:600}.jhc-help{font-size:12px;color:#777269;margin-top:13px;line-height:1.5}
+.jhc-preview-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 15px}.jhc-print-scroll{overflow-x:auto;padding:1px 0 20px}
+.jhc-page{width:816px;height:1056px;background:#fbfaf7;box-shadow:0 4px 25px #30292019;margin:0 auto;padding:40px 45px 29px;display:flex;flex-direction:column;color:#484740}
+.jhc-sheet-label{display:flex;justify-content:space-between;align-items:center;color:#68796a;font-size:9px;height:28px;flex-shrink:0}.jhc-sheet-label span{color:#827b72}
+.jhc-card-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;flex:1;margin:12px 0 12px;border:1px dashed #bcbab0}
+.jhc-card{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:23px 27px 19px;background:#fff}
+.jhc-card:nth-child(odd){border-right:1px dashed #bcbab0}.jhc-card:nth-child(-n+2){border-bottom:1px dashed #bcbab0}
+.jhc-card-top{display:flex;justify-content:space-between;align-items:center;color:#959089}.jhc-brand{font-size:8px}.jhc-card-number{color:#8b9a84}
+.jhc-card-icon{width:58px;height:58px;margin:13px auto 7px;background:#e9eee7;border-radius:50%;display:flex;justify-content:center;align-items:center;color:#576953;transform:rotate(-3deg)}.jhc-card:nth-child(2) .jhc-card-icon{background:#e8eff1}.jhc-card:nth-child(3) .jhc-card-icon{background:#f3e7d6}.jhc-card:nth-child(4) .jhc-card-icon{background:#f0e7e5}.jhc-card-icon svg{height:37px;width:37px}
+.jhc-small-title{text-align:center;color:#8b9686;font-size:8px;margin:3px 0 0}
+.jhc-card-name{font-family:Kalam,Georgia,serif;font-size:26px;line-height:1.1;text-align:center;font-weight:700;margin:5px 0 6px;overflow-wrap:anywhere}
+.jhc-card-rule{width:90px;height:7px;background:#d9e3d6;margin:0 auto 13px;transform:rotate(-2deg);border-radius:45%}
+.jhc-anchor-label,.jhc-action-label{color:#758773;margin:0 0 7px;font-size:8px}.jhc-anchor{font:17px/1.2 Georgia,serif;margin:0 0 14px;overflow-wrap:anywhere}.jhc-action{font:700 20px/1.2 Georgia,serif;margin:0;overflow-wrap:anywhere}.jhc-action-label{color:#ab8b76}
+.jhc-card-bottom{border-top:1px solid #d9dbd4;margin-top:auto;padding-top:10px}.jhc-card-bottom span{font-size:8px;color:#8c8c83}.jhc-card-bottom p{font:italic 14px Georgia,serif;margin:5px 0 0;overflow-wrap:anywhere}
+.jhc-sheet-footer{display:flex;align-items:center;justify-content:space-between;color:#99928a;font-size:8px;height:14px}
+@media(max-width:700px){.jhc-forms{grid-template-columns:1fr}.jhc-config{padding:20px}.jhc-preview-heading{display:block}.jhc-page{margin-left:0}}
+@page{size:letter portrait;margin:0}
+@media print{
+ html,body{margin:0!important;padding:0!important;background:white!important}
+ body *{visibility:hidden!important}
+ .jhc-page,.jhc-page *{visibility:visible!important}
+ .jhc-page{position:absolute!important;left:0!important;top:0!important;box-shadow:none!important;margin:0!important;width:8.5in!important;height:11in!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ .jhc-print-scroll{overflow:visible!important}
+ .jhc{padding:0!important}
+}
+</style>
+<script>
+const defaults = [
+  {name:'My morning',anchor:'After I finish breakfast',action:'I put my dishes away.',place:'By the breakfast table'},
+  {name:'My backpack',anchor:'After I put on my shoes',action:'I grab my backpack.',place:'Next to my shoes'},
+  {name:'My bedroom',anchor:'After I get dressed',action:'I put my pajamas away.',place:'On my dresser'},
+  {name:'Our kitchen',anchor:'After we finish dinner',action:'We clear the table together.',place:'By the kitchen table'}
+];
+for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
+ const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v1';
+ const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-editor]'));
+ const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-card]'));
+ let values=defaults.map(x=>({...x}));
+ try {const saved=JSON.parse(localStorage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
+ const paint=()=>{
+  editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
+  cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];target.textContent=values[i][field] || ' ';}));
+ };
+ editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
+  const field=input.dataset.field as keyof typeof defaults[number];values[i][field]=input.value.slice(0,105);
+  try{localStorage.setItem(key,JSON.stringify(values))}catch{}
+  paint();
+ })));
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{
+  values=defaults.map(x=>({...x}));try{localStorage.removeItem(key)}catch{}paint();
+  const status=root.querySelector<HTMLElement>('[data-status]');if(status)status.textContent='Original suggestions restored. Print at 100% / actual size on US Letter paper.';
+ });
+ root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ paint();
+}
+</script>
