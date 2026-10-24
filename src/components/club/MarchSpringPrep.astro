@@ -78,6 +78,19 @@ const taskTypes:Record<string,string>={
 .msc-sheet-tasks{flex:1}.msc-task{display:grid;grid-template-columns:30px minmax(0,1fr) 126px 22px;gap:12px;padding:20px 2px;border-top:1px solid #cdded4;align-items:center;min-height:111px}.msc-task-num{font:600 10px 'MSC Montserrat',sans-serif;color:#497666}.msc-task-text h3{font:400 19px/1.15 'MSC Gelasio',Georgia,serif;margin:0 0 7px}.msc-task-text p{font:10px/1.5 'MSC Montserrat',sans-serif;color:#606060}.msc-task-person{text-align:left}.msc-task-person span{display:block;font:600 8px 'MSC Montserrat',sans-serif;letter-spacing:.12em;color:#658070;margin-bottom:6px}.msc-task-person strong{font:600 italic 16px/1.2 'MSC Gelasio',Georgia,serif;color:#3e6c5a;overflow-wrap:anywhere}.msc-check{width:17px;height:17px;border:1.5px solid #829e90}
 .msc-sheet-principle{background:#f0f5f1;padding:17px 20px;display:grid;grid-template-columns:125px 1fr;gap:14px}.msc-sheet-principle span{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.1em;color:#3d6556}.msc-sheet-principle p{font:italic 15px/1.35 'MSC Gelasio',Georgia,serif}
 .msc-sheet-bottom{display:flex;align-items:end;justify-content:space-between;border-top:1px solid #c7ded3;margin-top:17px;padding-top:14px;gap:20px}.msc-sheet-bottom span{display:block;font:600 7px 'MSC Montserrat',sans-serif;letter-spacing:.08em}.msc-sheet-bottom strong{font:400 11px 'MSC Montserrat',sans-serif}.msc-sheet-bottom>p{font:600 7px 'MSC Montserrat',sans-serif;letter-spacing:.04em;white-space:nowrap}
+/* Leave a little print-height reserve: a forced 11in sheet must not overflow into a second page. */
+.msc-sheet{padding-top:24px;padding-bottom:22px;overflow:hidden}
+.msc-sheet-head{min-height:154px;padding:14px 25px 15px;border-top-width:8px}
+.msc-sheet-head h2{font-size:39px;margin:11px 0 7px}
+.msc-sheet-family{padding:13px 0 10px}
+.msc-sheet-caption{margin:11px 0 9px}
+.msc-sheet-tasks{flex:1;min-height:0}
+.msc-task{padding:13px 2px;min-height:0}
+.msc-sheet-principle{padding:11px 16px}
+.msc-sheet-bottom{margin-top:11px;padding-top:9px}
+@media print{
+ .msc-sheet{max-height:11in!important;overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}
+}
 @media(min-width:1130px){.msc-sheet{transform:scale(.85);transform-origin:top left}.msc-print-scroll{height:930px}}
 @media(max-width:1129px){.msc-workspace{grid-template-columns:1fr}.msc-editor{max-width:700px}}
 @page{size:letter portrait;margin:0}
