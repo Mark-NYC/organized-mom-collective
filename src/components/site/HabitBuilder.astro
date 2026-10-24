@@ -85,11 +85,12 @@ const days = Array.from({ length: PRACTICE_DAYS }, (_, i) => i);
       <label class="hb-field"><span>Start day (optional)</span><input type="date" data-hb-start /></label>
       <p class="hb-checkin" data-hb-checkin></p>
     </div>
+    <label class="hb-field hb-placement"><span>Where will the reminder go?</span><input type="text" data-hb-placement maxlength="80" placeholder="e.g. On the bathroom mirror" autocomplete="off" /></label>
     <p class="hb-calendar">Write the start day and a check-in day on your family wall calendar. Seven days, then decide together what to keep or change.</p>
   </section>
 
   <section class="hb-out" aria-labelledby="hb-out-h">
-    <h2 id="hb-out-h" class="hb-title">Your seven-day practice card</h2>
+    <h2 id="hb-out-h" class="hb-title">Your family habit reminder card</h2>
     <label class="hb-field hb-family"><span>Family name on the card (optional)</span>
       <input type="text" data-hb-family maxlength="40" placeholder="e.g. The Rivera Family" autocomplete="off" /></label>
     <fieldset class="hb-palette">
@@ -104,7 +105,7 @@ const days = Array.from({ length: PRACTICE_DAYS }, (_, i) => i);
       </div>
     </fieldset>
     <div class="hb-buttons">
-      <button type="button" class="hb-btn hb-btn-primary" data-hb-download>Download the card</button>
+      <button type="button" class="hb-btn hb-btn-primary" data-hb-download>Download reminder card</button>
       <button type="button" class="hb-btn" data-hb-copy>Copy as text</button>
     </div>
     <p class="hb-status" data-hb-status role="status" aria-live="polite"></p>
@@ -122,9 +123,10 @@ const days = Array.from({ length: PRACTICE_DAYS }, (_, i) => i);
           <div><dt>When</dt><dd data-hb-sheet-when></dd></div>
           <div><dt>Who</dt><dd data-hb-sheet-who></dd></div>
           <div><dt>Done means</dt><dd data-hb-sheet-done></dd></div>
+          <div><dt>Reminder spot</dt><dd data-hb-sheet-placement></dd></div>
         </dl>
-        <div class="hb-sheet-week">
-          <p class="hb-sheet-label">Seven days of practice</p>
+        <div class="hb-sheet-week" hidden>
+          <p class="hb-sheet-label">One habit, practiced together</p>
           <p class="hb-sheet-week-note">Tick the days you tried it. Missing one is fine: just pick it up again.</p>
           <ol class="hb-sheet-days">
             {days.map(() => <li><span class="hb-sheet-day" data-hb-day></span><span class="hb-sheet-box" aria-hidden="true"></span></li>)}
@@ -137,7 +139,7 @@ const days = Array.from({ length: PRACTICE_DAYS }, (_, i) => i);
           <span class="hb-sheet-line"></span><span class="hb-sheet-line"></span>
         </div>
         <div class="hb-sheet-foot">
-          <p class="hb-sheet-cal">Write the start day and your check-in day on the family calendar.</p>
+          <p class="hb-sheet-cal">Put this reminder where the habit happens. Notice the cue, then do the next thing.</p>
           <p class="hb-sheet-brand">{brand}</p>
         </div>
       </div>
@@ -189,6 +191,7 @@ const days = Array.from({ length: PRACTICE_DAYS }, (_, i) => i);
   .hb-facts > div { display: grid; grid-template-columns: 7rem 1fr; gap: 10px; align-items: baseline; }
   .hb-facts dd { margin: 0; line-height: 1.45; }
   .hb-done { display: block; width: 100%; padding: 4px 0; border: 0; border-bottom: 1px dashed #c9d3c0; background: transparent; resize: vertical; font-family: inherit; font-size: 1rem; line-height: 1.45; color: var(--hb-ink); }
+  .hb-placement { margin-top: 16px; }
   .hb-start { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 20px; margin-top: 16px; }
   .hb-checkin { min-height: 1.4em; margin: 0 0 12px; font-size: 0.95rem; }
   .hb-calendar { margin-top: 12px; font-family: var(--font-serif); font-style: italic; color: var(--hb-soft); }
