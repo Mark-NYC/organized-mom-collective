@@ -24,6 +24,11 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
  const [household,setHousehold]=useState<Household|null>(null);
  const [status,setStatus]=useState('');
  useEffect(()=>{
+  const main=document.getElementById('club-month-content');
+  if(main) main.hidden=tab==='family';
+  return ()=>{if(main)main.hidden=false};
+ },[tab]);
+ useEffect(()=>{
   try{sessionStorage.setItem(SAMPLE_SESSION,sample)}catch{}
   const store=sampleStore(sample);
   store?.household().then(h=>{setHousehold(h);window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:h,sample}}))})
