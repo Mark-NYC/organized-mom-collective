@@ -4,7 +4,7 @@
  * Task labels/IDs are imported from src/data/cleaning.ts, never copied.
  * One intact US Letter printout, not another cleaning program.
  */
-import {monthlyDeepClean,weekend} from '../../data/cleaning';
+import {monthlyDeepClean} from '../../data/cleaning';
 import {monthColors} from '../../theme';
 interface Props{storageKey?:string}
 const {storageKey='omc:club:march-spring-prep:v1'}=Astro.props;
@@ -91,7 +91,7 @@ const adultOnly=new Set(['mar-vents','mar-curtains']);
 const kidFriendly=new Set(['mar-baseboards','mar-winter-gear','mar-donate']);
 for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  const key=root.dataset.mscKey??'omc:preview:march:v1';
- const store=key.startsWith('omc:club:')?sessionStorage:localStorage;
+ const store=sessionStorage; // Do not persist family member names beyond this tab.
  let members:Member[]=[];
  let family='Our Family';
  let chosen:Record<string,string>={};
@@ -99,7 +99,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  let sampleKey='';
  const pick=(task:string,people:Member[]):Member|undefined=>{
   const adults=people.filter(m=>m.kind==='adult');
-  const kids=people.filter(m=>m.kind==='child'&&m.birthYear!==undefined&&2027-m.birthYear>=5);
+  const kids=people.filter(m=>m.kind==='child'&&m.birthYear!==undefined&&2027-m.birthYear-(m.birthMonth&&m.birthMonth>3?1:0)>=5);
   if(adultOnly.has(task))return adults[task==='mar-vents'&&adults.length>1?1:0];
   if(task==='mar-baseboards')return kids[0]??adults[0];
   if(task==='mar-winter-gear')return kids[1]??kids[0]??adults[0];
