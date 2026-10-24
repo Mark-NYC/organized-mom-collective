@@ -127,13 +127,13 @@ const first = JOB_PRESETS[0];
     value('ws-child2-done',p.child2==='Philip' ? 'Pack homework and school folder. Check water bottle and lunch container. Put bag by the door.' : match ? JOB_PRESETS[Number(match.value)].done : 'Complete the whole job and put everything back where it belongs.');
     last={when:p.childWhen,done:p.childDone};
     originalJobs=jobSelections();refreshPlanTheme();
-    form.classList.remove('is-editing');
+    closeInlineEditors();
     $('ws-approval-note').textContent='Sample plan prepared. Nothing is mailed from this demo.';
     update();
   }
   sample.addEventListener('change',()=>applySample(sample.value as keyof typeof sampleProfiles));
   $('ws-approve').addEventListener('click',()=>{const error=planIssue();$('ws-approval-note').textContent=error??'Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
-  $('ws-review').addEventListener('click',()=>{form.classList.add('is-editing');form.dataset.activeGroup='adult';form.scrollIntoView({behavior:'smooth',block:'start'});});
+  $('ws-review').addEventListener('click',()=>toggleInlineEditor('adult'));
   const child2Custom = $<HTMLInputElement>('ws-child2-custom');
   const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
   const setBusy = (busy: boolean) => downloads.forEach((b) => (b.disabled = busy));
@@ -269,13 +269,56 @@ const first = JOB_PRESETS[0];
     if(selected) ($<HTMLTextAreaElement>('ws-child2-done')).value=selected.done;
     refreshPlanTheme();update();
   });
-  document.querySelectorAll<HTMLButtonElement>('.ws-edit').forEach(b=>b.addEventListener('click',()=>{
-    form.classList.add('is-editing');
-    const group=b.dataset.edit??'adult';
-    form.dataset.activeGroup=group;
-    form.scrollIntoView({behavior:'smooth',block:'start'});
-  }));
-  $('ws-done-editing').addEventListener('click',()=>{form.classList.remove('is-editing');update();});
+  // Keep the PDF form as the single data source while locating each editor below its owner.
+  // Form-associated controls outside the form still appear in form.elements.
+  const inlineEditors = new Map<string,HTMLElement>();
+  const editorGroups: Record<string,string> = {mom:'ws-mom-fields',adult:'ws-adult-fields',child1:'ws-child1-fields',child2:'ws-child2-fields'};
+  Object.entries(editorGroups).forEach(([role,id])=>{
+    const article=document.querySelector<HTMLElement>(`.ws-rec:has([data-edit="${role}"])`);
+    const group=$<HTMLFieldSetElement>(id);
+    if(!article)return;
+    const panel=document.createElement('div');
+    panel.className='ws-inline-editor';
+    panel.id=`ws-inline-${role}`;
+    panel.hidden=true;
+    panel.appendChild(group);
+    group.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>('input, textarea, select').forEach(control=>control.setAttribute('form','ws-form'));
+    const doneButton=document.createElement('button');
+    doneButton.type='button';
+    doneButton.className='ws-inline-done';
+    doneButton.textContent='Done';
+    doneButton.addEventListener('click',()=>toggleInlineEditor(role));
+    panel.appendChild(doneButton);
+    article.appendChild(panel);
+    inlineEditors.set(role,panel);
+    const edit=article.querySelector<HTMLButtonElement>('.ws-edit');
+    edit?.setAttribute('aria-expanded','false');
+    edit?.setAttribute('aria-controls',panel.id);
+  });
+  function closeInlineEditors(){
+    inlineEditors.forEach((panel,role)=>{
+      panel.hidden=true;
+      const button=document.querySelector<HTMLButtonElement>(`[data-edit="${role}"]`);
+      if(button){button.setAttribute('aria-expanded','false');button.textContent='Edit';}
+    });
+  }
+  function toggleInlineEditor(role:string){
+    const panel=inlineEditors.get(role);
+    if(!panel)return;
+    const opening=panel.hidden;
+    closeInlineEditors();
+    if(opening){
+      panel.hidden=false;
+      const button=document.querySelector<HTMLButtonElement>(`[data-edit="${role}"]`);
+      if(button){button.setAttribute('aria-expanded','true');button.textContent='Close';}
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>('.ws-edit').forEach(button=>button.addEventListener('click',()=>toggleInlineEditor(button.dataset.edit??'adult')));
+  $('ws-done-editing').addEventListener('click',()=>{closeInlineEditors();update();});
+  document.querySelectorAll<HTMLElement>('.ws-inline-editor').forEach(panel=>{
+    panel.addEventListener('input',()=>{refreshPlanTheme();update();});
+    panel.addEventListener('change',()=>{refreshPlanTheme();update();});
+  });
   form.addEventListener('change', update);
   $('ws-two-weeks').addEventListener('click', () => {
     const d = new Date();
@@ -288,7 +331,7 @@ const first = JOB_PRESETS[0];
     e.preventDefault();
     if (!fonts || !metrics) return;
     const issue=planIssue();
-    if(issue){status.textContent=issue;form.classList.add('is-editing');return;}
+    if(issue){status.textContent=issue;toggleInlineEditor(issue.startsWith('Complete the existing')?'mom':'adult');return;}
     setBusy(true);
     status.textContent = 'Making your PDF…';
     try {
@@ -451,4 +494,20 @@ const first = JOB_PRESETS[0];
 .ws-rec{border-bottom-color:var(--ws-month-color)!important}
 .ws-actions{border-top-color:var(--ws-month-color)!important}
 .ws-plan-heading{display:inline-block;border-bottom:3px solid var(--ws-month-color);padding-bottom:7px}
+</style>
+<style is:global>
+/* In-place owner editors: the summary never navigates or scrolls to a separate form. */
+.ws-inline-editor[hidden]{display:none!important}
+.ws-inline-editor{padding:18px 0 8px;border-top:1px solid var(--ws-month-color);margin-top:16px}
+.ws-inline-editor .ws-edit-group{border:0;margin:0;padding:0;min-width:0}
+.ws-inline-editor legend{display:none}
+.ws-inline-editor .ws-field{margin:0 0 14px}
+.ws-inline-editor .ws-field label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.ws-inline-editor input,.ws-inline-editor textarea,.ws-inline-editor select{box-sizing:border-box;width:100%;max-width:100%;min-height:44px;padding:10px 12px;background:#fff;color:#333;border:1px solid #bbb;border-radius:0;font:400 15px/1.4 Montserrat,sans-serif}
+.ws-inline-editor textarea{min-height:92px;resize:vertical}
+.ws-inline-editor [hidden]{display:none!important}
+.ws-inline-editor .ws-hint{font-size:11px;color:#666}
+.ws-inline-done{min-height:44px;padding:0 22px;background:#454545;color:white;font-size:13px;cursor:pointer}
+.ws-edit[aria-expanded="true"]{font-weight:650}
+#ws-form{display:none!important}
 </style>
