@@ -6,14 +6,12 @@
  * Club layout: noindex, no trackers, no site navigation. Behind PUBLIC_CLUB_ENABLED like every /club page.
  */
 import ClubLayout from '../../../layouts/ClubLayout.astro';
-import ClubToolBar from '../../../components/club/ClubToolBar';
-import HabitBuilder from '../../../components/site/HabitBuilder.astro';
-import { CLUB_NAME } from '../../../data/club/config';
+import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
 ---
 
-<ClubLayout title="Family Habit Builder">
-  <ClubToolBar client:only="react" tool="habit-builder" />
+<ClubLayout title="January Habit Cards">
+  
   <section id="club-tool-host" class="w-full pb-20 pt-4">
-    <HabitBuilder storageKey="omc:club:habit-builder:v1" handoff brand={CLUB_NAME} />
+    <JanuaryHabitCards storageKey="omc:club:january-habit-cards:v2" />
   </section>
 </ClubLayout>
