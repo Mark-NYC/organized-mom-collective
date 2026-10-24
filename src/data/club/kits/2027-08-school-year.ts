@@ -1,93 +1,67 @@
 /**
- * August kit: Ready for the School Year (docs/club/YEAR_ONE_CALENDAR.md → August; mailer in
- * docs/club/mailers/2027-08-school-year.md). Planning-phase content: not published, not for sale.
- *
- * The three-part shape every kit is moving to: one letter, one action, one optional tool.
- * - The letter (`mailer.letter`), printed on the front of a double-sided Letter sheet.
- * - The action (`action`): a six-line Back-to-School Countdown, printed under the letter, checkable on screen.
- * - The tool (`tool`): the site's routine chart (/routine-chart), opened inside the Club for one child at a time with
- *   their name and age (src/data/club/tools.ts). No Club copy of it.
- * The back of the letter teaches kids owning their routines, with the routine chart's own morning starter.
- * The family calendar stays the plan; nothing here is a second one. The first draft's launch plan and command center
- * live on in src/data/club/libraries/school-year.ts.
+ * August 2027 Club: My School Day.
+ * Flagship: one illustrated morning + after-school routine sheet,
+ * seeded from the existing Routine Chart Generator defaults.
+ * Preserve 2027-08-school-year slug for existing member links.
  */
 import type { KitConfig } from '../types';
 import { routes } from '../../../routes';
-
 const SLUG = '2027-08-school-year';
-
 export const kit: KitConfig = {
-  slug: SLUG,
-  month: '2027-08',
-  theme: 'Ready for the School Year',
-  subtitle: 'One calmer start. Everyone has a part.',
-  shift: 'Get ready for school together, with the plan on the family calendar, instead of Mom getting everyone ready.',
-  engine: 'responsibilities',
-  engineVersion: 2,
-  items: [],
-  action: {
-    kind: 'countdown',
-    title: 'Our Back-to-School Countdown',
-    screenTitle: 'Your Back-to-School Countdown',
-    intro: 'Six things to get ready together. Not all at once, and not all by you: start with what matters most, and put a name beside each one.',
-    items: [
-      { text: 'Add school dates and activities to the family calendar.', daysBefore: 14 },
-      { text: 'Check clothes, shoes and school supplies.', daysBefore: 10, essential: true },
-      { text: 'Set up a place for backpacks and school papers.', daysBefore: 7 },
-      { text: 'Decide who’s handling drop-off and pick-up.', daysBefore: 7, essential: true },
-      { text: 'Practice morning and after-school routines.', daysBefore: 5 },
-      { text: 'Pack bags and get everything ready the night before.', daysBefore: 1, essential: true },
-    ],
-    helperLabel: 'Who’s helping?',
+ slug: SLUG,
+ month: '2027-08',
+ theme: 'My School Day',
+ subtitle: 'Ready for school. Ready for home.',
+ shift: 'Children can follow a short picture-led morning and after-school routine rather than waiting for Mom to repeat instructions.',
+ engine: 'routines',
+ engineVersion: 2,
+ items: [],
+ tool: {
+  tool: 'routine-chart',
+  title: 'Adjust Your School Day Routine',
+  blurb: 'The Club mails a finished school day board. You can use the existing Routine Chart Generator for a more detailed custom routine if you want.',
+  cta: 'Open the Routine Chart Generator',
+  start: 'morning',
+  note: 'Optional. The mailed routine board is ready to display.',
+ },
+ printables: [
+  { id: 'school-day', title: 'My School Day', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
+ ],
+ mailer: {
+  letter: {
+   draft: true,
+   title: 'A School Day They Can Follow',
+   greeting: 'Hi friend,',
+   namedGreeting: 'Hi {name},',
+   body: [
+    'When school starts, morning and afternoon reminders can pile up. Get dressed. Find your backpack. Put your lunchbox away. Before long, Mom is managing every little transition.',
+    'This month your family receives one illustrated school-day routine. It gives kids a simple place to look for what happens next before school and when they get home.',
+    'Review the routine, hang it where your child can see it, and practice together once. The goal is not a perfect morning. It is one less set of instructions Mom needs to repeat each day.',
+    'Adjust the steps online only if you need to. Your printed tool is intended to be useful as delivered.',
+   ].join('\n\n'),
+   signoff: 'Megan',
   },
-  tool: {
-    tool: 'routine-chart',
-    title: 'Make your kids’ school-day routines',
-    blurb: 'A picture chart for each child, morning or after school, made with our routine chart: tap illustrated steps, put them in order, add times, then download it to print.',
-    cta: 'Make a routine chart',
-    note: 'Optional: the countdown works without it.',
+  fieldGuide: {
+   title: 'Help Them Own the Next Step',
+   sections: [
+    { heading: 'See it.', body: 'Put the illustrated routine at your child’s eye level where transitions happen.' },
+    { heading: 'Practice once.', body: 'Walk through the steps together before the school-day rush.' },
+    { heading: 'Point, don’t repeat.', body: 'Help your child check the next picture instead of delivering every reminder.' },
+   ],
   },
-  printables: [
-    { id: 'countdown', title: 'Our Back-to-School Countdown', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
-    { id: 'letter', title: 'Your August letter', page: 'letter-portrait', kind: 'worksheet', component: 'Letter' },
-  ],
-  mailer: {
-    // A draft for Megan to approve or rewrite in her own words. No invented stories, numbers or quotes.
-    letter: {
-      draft: true,
-      title: 'Before the first bell',
-      greeting: 'Hi friend,',
-      namedGreeting: 'Hi {name},',
-      body: [
-        'Back-to-school has a way of landing on one person. The forms, the supply lists, the shoes that suddenly don’t fit, the question of who’s driving on Tuesday. If that person is usually you, this letter is for you.',
-        'This year, try getting ready together. Not you preparing everyone, but everyone preparing a little. A six-year-old can try on shoes and lay out an outfit. A ten-year-old can pack their own backpack. A partner can own drop-off, start to finish.',
-        'The countdown below is six things, not sixty. You don’t have to tackle all six at once. Start with what matters most, and share the jobs. Put the school dates on the family calendar first, where everyone can see them.',
-        'And start small. One routine that sticks by October beats five perfect ones that fall apart in week two.',
-        'You don’t have to carry the school year alone. Everyone has a part.',
-      ].join('\n\n'),
-      signoff: 'Megan',
-    },
-    fieldGuide: {
-      title: 'Helping kids own their school day',
-      sections: [
-        { heading: 'Four to six steps.', body: 'Enough to matter, few enough to remember.' },
-        { heading: 'Pictures first.', body: 'Early readers follow the pictures; the chart does the reminding, not you.' },
-        { heading: 'Ask “What’s next?”', body: 'When a step gets missed, point to the chart instead of giving the instruction.' },
-      ],
-    },
-    conversation: {
-      label: 'Ask at dinner this week',
-      question: 'What’s one thing you want to be able to do by yourself before school starts?',
-      note: 'Everyone answers, grown-ups too.',
-    },
-    example: { title: 'A school morning to start from', variant: 'morning' },
-    invite: {
-      title: 'Dates worked out, charts for each child',
-      body: 'Scan the code and enter your first day of school: we’ll suggest a day for each countdown item, then help you make a chart for each child. This page works fine without it.',
-    },
-    screenNote: 'It comes in the mail with the same countdown. Use that copy as it is, or print the one above with your dates. Either works; there’s nothing to keep in step.',
-    calendarNote: 'Before the first day, write every first day, early dismissal and school break on your family calendar, where everyone can see them.',
-    qrPath: `/club/kits/${SLUG}?source=mailer`,
+  tip: {
+   title: 'One page, not one more project',
+   body: 'The routine comes prepared. Choose one child’s version to display first, and adjust only steps that do not fit your household.',
   },
-  related: [routes.routineChart, routes.backToSchool],
+  invite: {
+   title: 'Make It Yours',
+   body: 'Change or reorder routine steps online if needed, or use the full Routine Chart Generator for more options.',
+  },
+  calendarNote: 'Put school start times, practices, drop-off arrangements, and events on the family calendar. The routine page handles the daily actions in between.',
+  screenNote: 'The mailed routine board is the product. Optional digital edits are available, but no setup is required to begin.',
+  letterLinkTop: true,
+  accent: 'school',
+  qrPath: '/club/kits/' + SLUG + '?source=mailer',
+ },
+ related: [routes.routineChart, routes.backToSchool],
 };
