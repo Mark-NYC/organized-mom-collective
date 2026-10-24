@@ -30,6 +30,9 @@ export interface WorksheetInput {
   planTitle?: string;
   planGoal?: string;
   adultSteps?: string;
+  momName?: string;
+  momOwns?: string;
+  momRelief?: string;
 }
 
 /** Cleaned input: trimmed, length-capped, characters the fonts can't draw simplified. `null` means "leave a line". */
@@ -52,6 +55,9 @@ export interface WorksheetData {
   planTitle: string | null;
   planGoal: string | null;
   adultSteps: string | null;
+  momName: string | null;
+  momOwns: string | null;
+  momRelief: string | null;
 }
 
 export type FontKey = 'serif' | 'serifItalic' | 'serifBoldItalic' | 'sans' | 'sansMedium' | 'sansBold';
