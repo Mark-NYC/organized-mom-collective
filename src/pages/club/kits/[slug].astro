@@ -7,14 +7,28 @@
 import ClubLayout from '../../../layouts/ClubLayout.astro';
 import KitPage from '../../../components/club/KitPage';
 import { kits } from '../../../data/club/kits';
+import ClubMonthAccess from '../../../components/club/ClubMonthAccess';
+import NovemberOwnershipPrototype from '../../../components/club/NovemberOwnershipPrototype.astro';
+import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
+import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
 
 export function getStaticPaths() {
   return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
 }
 
 const { slug, theme } = Astro.props;
+const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2027-12-christmas-family-affair" || slug === "2026-12-holiday-teamwork" ? "december" : null;
 ---
 
 <ClubLayout title={theme}>
-  <KitPage client:only="react" slug={slug} />
+  {month ? (
+    <>
+      <ClubMonthAccess client:only="react" slug={slug} />
+      <div id="club-month-content" hidden>
+        {month === 'november' ? <NovemberOwnershipPrototype /> :
+         month === 'december' ? <DecemberMissionPrototype /> :
+         <JanuaryHabitCards storageKey="omc:club:january-habit-cards:v2" />}
+      </div>
+    </>
+  ) : <KitPage client:only="react" slug={slug} />}
 </ClubLayout>
