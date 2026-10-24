@@ -15,13 +15,14 @@ import FebruaryConnectionCards from '../../../components/club/FebruaryConnection
 import MarchSpringPrep from '../../../components/club/MarchSpringPrep.astro';
 import AprilDinnerPlan from '../../../components/club/AprilDinnerPlan.astro';
 import MaySummerRhythm from '../../../components/club/MaySummerRhythm.astro';
+import JuneSnackStation from '../../../components/club/JuneSnackStation.astro';
 
 export function getStaticPaths() {
   return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
 }
 
 const { slug, theme } = Astro.props;
-const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : null;
+const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : slug === "2027-06-summer-with-a-plan" ? "june" : null;
 ---
 
 <ClubLayout title={theme}>
@@ -35,7 +36,8 @@ const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-
          month === "february" ? <FebruaryConnectionCards storageKey="omc:club:february-connection:v1" /> :
          month === "march" ? <MarchSpringPrep storageKey="omc:club:march-spring-prep:v1" /> :
          month === "april" ? <AprilDinnerPlan storageKey="omc:club:april-dinner:v1" /> :
-         <MaySummerRhythm storageKey="omc:club:may-summer-rhythm:v1" />}
+         month === "may" ? <MaySummerRhythm storageKey="omc:club:may-summer-rhythm:v1" /> :
+         <JuneSnackStation storageKey="omc:club:june-snack-station:v1" />}
       </div>
     </>
   ) : <KitPage client:only="react" slug={slug} />}
