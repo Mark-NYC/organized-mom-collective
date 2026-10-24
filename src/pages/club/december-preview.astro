@@ -1,0 +1,121 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { monthColors } from '../../theme';
+import {families,traditions,prepare} from '../../lib/december/traditions';
+---
+<PublicLayout fullTitle="December Family Tradition Preview | Organized Family Club" description="Private December mailer prototype" indexable={false} chrome={false} width="full" tracking={false}>
+<main class="dec" style={`--accent:${monthColors[11].hex}`}>
+  <a href="/club/worksheet-generator/" class="back">← November experiment</a>
+  <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>A Tradition We Make Together</h1><p>One meaningful Christmas tradition, prepared for the whole family. No planning worksheet.</p></header>
+  <div class="workspace">
+    <section class="details" aria-label="December tradition plan">
+      <label for="family">Explore a sample family</label>
+      <select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select>
+      <p class="demo">Demo only · Nothing is saved or mailed</p>
+      <h2 id="tradition-title">Our Christmas Kindness Night</h2>
+      <p id="tradition-summary"></p>
+      <div class="switch"><label for="tradition">Choose a different tradition</label><select id="tradition">{traditions.map(t=><option value={t.id}>{t.name}</option>)}</select></div>
+      <h3>What we'll need</h3><ul id="supplies"></ul><p id="duration" class="duration"></p>
+      <h3>Everyone has a part</h3><div id="roles"></div>
+      <h3>How we'll do it</h3><ol id="steps"></ol>
+      <button type="button" id="download" disabled>Download our December mailer</button>
+      <p class="demo" id="message" role="status" aria-live="polite">A single US Letter sheet, printed front and back.</p>
+    </section>
+    <section class="preview" aria-label="Actual print preview"><div class="previewheading"><h2>Your December mailer</h2><span>Front & back</span></div><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Front</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Back</figcaption></figure></div></section>
+  </div>
+</main>
+</PublicLayout>
+<script>
+import {families,traditions,prepare, type FamilyId,type TraditionId} from '../../lib/december/traditions';
+import {decemberPages} from '../../lib/december/layout';
+import {renderSvg} from '../../lib/worksheet/svg';
+import {renderPdf} from '../../lib/worksheet/pdf';
+import {createMetrics,FONT_FILES,FONT_URL, type FontBytes} from '../../lib/worksheet/fonts';
+import type {FontKey,Metrics} from '../../lib/worksheet/types';
+const get=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
+const family=get<HTMLSelectElement>('family'),tradition=get<HTMLSelectElement>('tradition');
+const button=get<HTMLButtonElement>('download'),message=get<HTMLElement>('message');
+let bytes:FontBytes|null=null, metrics:Metrics|null=null;
+function current(){
+ const f=families.find(x=>x.id===family.value)||families[0];
+ const t=traditions.find(x=>x.id===tradition.value)||traditions[0];
+ return prepare(f,t);
+}
+function list(id:string,items:string[],ordered=false){
+ const el=get<HTMLElement>(id);el.replaceChildren();
+ items.forEach(s=>{const li=document.createElement(ordered?'li':'li');li.textContent=s;el.appendChild(li)});
+}
+function show(){
+ const p=current();get<HTMLElement>('tradition-title').textContent=p.tradition.name;
+ get<HTMLElement>('tradition-summary').textContent=p.tradition.summary;
+ list('supplies',p.tradition.supplies);
+ get<HTMLElement>('duration').textContent=p.tradition.duration;
+ const el=get<HTMLElement>('roles');el.replaceChildren();
+ p.names.forEach((name,i)=>{
+   const entry=document.createElement('div');entry.className='role';
+   const strong=document.createElement('strong');strong.textContent=name;
+   const line=document.createElement('span');line.textContent=p.roles[i]??'Join in.';
+   entry.append(strong,line);el.appendChild(entry);
+ });
+ list('steps',p.tradition.steps,true);
+ if(metrics){const pages=decemberPages(metrics,p);get<HTMLElement>('front').innerHTML=renderSvg(pages[0],'December tradition front');get<HTMLElement>('reverse').innerHTML=renderSvg(pages[1],'December tradition back');}
+}
+family.addEventListener('change',()=>{const f=families.find(x=>x.id===family.value)||families[0];tradition.value=f.recommended;show();});
+tradition.addEventListener('change',show);
+button.addEventListener('click',async()=>{
+ if(!metrics||!bytes)return;
+ button.disabled=true;message.textContent='Preparing PDF…';
+ try{
+ const p=current();const pdf=await renderPdf(decemberPages(metrics,p),bytes,{title:`${p.tradition.name} · ${p.family}`,subject:'Organized Family Club December tradition'});
+ const url=URL.createObjectURL(new Blob([pdf as BlobPart],{type:'application/pdf'}));
+ const a=document.createElement('a');a.href=url;a.download=`december-family-tradition-${family.value}.pdf`;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ message.textContent='PDF downloaded. This demo does not schedule a mailing.';
+ }catch(err){console.error(err);message.textContent='PDF failed to generate. Please try again.';}
+ finally{button.disabled=false;}
+});
+async function start(){
+ try{
+ const keys=Object.keys(FONT_FILES) as FontKey[];
+ const files=await Promise.all(keys.map(async k=>{const response=await fetch(FONT_URL+FONT_FILES[k]);if(!response.ok)throw Error('Font loading failed');return new Uint8Array(await response.arrayBuffer());}));
+ bytes=Object.fromEntries(keys.map((k,i)=>[k,files[i]])) as FontBytes;metrics=createMetrics(bytes);
+ await Promise.all(['400 12px "WS Gelasio"','italic 400 12px "WS Gelasio"','italic 600 12px "WS Gelasio"','400 12px "WS Montserrat"','600 12px "WS Montserrat"'].map(f=>document.fonts.load(f)));
+ button.disabled=false;show();
+ }catch(err){console.error(err);message.textContent='Could not load PDF preview. Refresh to try again.';}
+}
+show();start();
+</script>
+<style is:global>
+@font-face{font-family:'WS Gelasio';src:url('/fonts/worksheet/gelasio-400.ttf');font-weight:400}
+@font-face{font-family:'WS Gelasio';src:url('/fonts/worksheet/gelasio-400-italic.ttf');font-weight:400;font-style:italic}
+@font-face{font-family:'WS Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf');font-weight:600;font-style:italic}
+@font-face{font-family:'WS Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf');font-weight:400}
+@font-face{font-family:'WS Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf');font-weight:600}
+</style>
+<style>
+.dec{max-width:1440px;margin:auto;padding:28px clamp(18px,3.5vw,54px) 90px;color:#454545}
+.back{font-size:12px;text-decoration:underline;text-underline-offset:3px}
+header{margin:38px 0 42px;max-width:750px}
+.eyebrow{font:600 11px Montserrat,sans-serif;letter-spacing:.16em}
+h1,h2,h3{font-family:Georgia,serif}
+h1{font-size:clamp(36px,4.4vw,58px);font-weight:700;font-style:italic;color:#527468;line-height:1.1;margin:16px 0}
+header>p:last-child{line-height:1.65;max-width:650px}
+.workspace{display:grid;grid-template-columns:minmax(290px,350px) minmax(0,1fr);gap:clamp(25px,4vw,55px)}
+.details{min-width:0}.details h2{font-size:27px;margin:28px 0 8px;color:#527468;font-weight:700;font-style:italic}
+.details h3{font-size:19px;margin:29px 0 12px}.details>p{line-height:1.6}
+label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px}
+select{background:white;width:100%;border:1px solid #bbb;border-radius:0;padding:12px;font-size:15px;min-height:46px;color:#333}
+.switch{margin-top:25px;padding-top:20px;border-top:1px solid var(--accent)}
+.demo,.duration{font-size:12px;color:#686868;margin:9px 0}
+ul,ol{padding-left:21px;line-height:1.7;font-size:14px}li{margin-bottom:6px}
+.role{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--accent);font-size:13px;line-height:1.5}
+.role strong{font-family:Georgia,serif;font-size:16px}
+#download{width:100%;background:#454545;border:0;color:white;min-height:51px;margin-top:25px;padding:13px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+#download:disabled{opacity:.55;cursor:default}
+.previewheading{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--accent);margin-bottom:25px}
+.previewheading h2{font-size:25px}.previewheading span{font-size:12px}
+.sheets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+figure{margin:0;min-width:0}.sheet{aspect-ratio:612/792;border:1px solid #ddd;box-shadow:0 12px 32px #0002;background:#fff;display:grid;place-items:center;font-size:13px}
+.sheet svg{display:block;width:100%;height:100%}figcaption{text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-top:10px}
+@media(max-width:950px){.workspace{grid-template-columns:1fr}.details{max-width:680px}}
+@media(max-width:560px){.sheets{grid-template-columns:1fr}.previewheading{margin-top:12px}}
+</style>
