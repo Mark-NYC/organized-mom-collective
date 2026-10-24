@@ -13,11 +13,11 @@ const icons={
  clothes:'/images/club/august-v2/shirt.svg',
  breakfast:'/images/club/august-v2/breakfast-bowl.svg',
  teeth:'/images/club/august-v2/toothbrush.svg',
- bag:'/images/club/august-v2/basket.svg',
- shoes:'/images/club/august-v2/shirt.svg',
- hands:'/images/club/august-v2/dish.svg',
- snack:'/images/club/august-v2/breakfast-bowl.svg',
- book:'/images/club/august-v2/book.svg',
+ bag:'/images/club/august-v2/backpack.svg',
+ shoes:'/images/club/august-v2/sneakers.svg',
+ hands:'/images/club/august-v2/washing-hands.svg',
+ snack:'/images/club/august-v2/yogurt-cup.svg',
+ book:'/images/club/august-v2/school-notebook.svg',
 };
 const initial=[
  {id:'wake',time:morning[0][0],label:morning[0][1],icon:'wake',group:'morning'},
@@ -121,7 +121,7 @@ type Group='morning'|'after';
 type Step={id:string;time:string;label:string;icon:string;group:Group;removed?:boolean};
 type Board={steps:Step[];mode:'standard'|'simple';footer:string;child:string};
 type Child={id:string;firstName:string;birthYear?:number;birthMonth?:number};
-const iconPaths:Record<string,string>={wake:"/images/club/august-v2/morning-start.svg",clothes:"/images/club/august-v2/shirt.svg",breakfast:"/images/club/august-v2/breakfast-bowl.svg",teeth:"/images/club/august-v2/toothbrush.svg",bag:"/images/club/august-v2/basket.svg",shoes:"/images/club/august-v2/shirt.svg",hands:"/images/club/august-v2/dish.svg",snack:"/images/club/august-v2/breakfast-bowl.svg",book:"/images/club/august-v2/book.svg"};
+const iconPaths:Record<string,string>={wake:"/images/club/august-v2/morning-start.svg",clothes:"/images/club/august-v2/shirt.svg",breakfast:"/images/club/august-v2/breakfast-bowl.svg",teeth:"/images/club/august-v2/toothbrush.svg",bag:"/images/club/august-v2/backpack.svg",shoes:"/images/club/august-v2/sneakers.svg",hands:"/images/club/august-v2/washing-hands.svg",snack:"/images/club/august-v2/yogurt-cup.svg",book:"/images/club/august-v2/school-notebook.svg"};
 const seeds:Step[]=[
  {id:'wake',time:'07:00',label:'Wake up & stretch',icon:'wake',group:'morning'},
  {id:'dress',time:'07:15',label:'Get dressed',icon:'clothes',group:'morning'},
