@@ -1,0 +1,10 @@
+---
+/** Unlisted May Summer Day Rhythm design review. Uses real draft OFC icons. */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
+import MaySummerRhythm from '../../components/club/MaySummerRhythm.astro';
+---
+<PublicLayout fullTitle="May Summer Day Rhythm Preview | Organized Family Club" description="Kid-first illustrated May rhythm board preview." indexable={false} chrome={false} width="full" tracking={false}>
+ <ClubPrototypeNav client:only="react" month="may" />
+ <main id="club-month-content"><MaySummerRhythm storageKey="omc:preview:may-summer-rhythm:v1" /></main>
+</PublicLayout>
