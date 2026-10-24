@@ -19,7 +19,7 @@ export { createMetrics, FONT_FILES, FONT_URL, FONT_DIR, FONT_CSS, type FontBytes
 export { JOB_PRESETS, LIMITS, WORKSHEET } from './content.ts';
 export type { WorksheetInput, WorksheetData, Page, Op } from './types.ts';
 
-/** A file name safe for every OS: november-i-own-this-job-goering.pdf. */
+/** A file name safe for every OS: november-family-plan-goering.pdf. */
 export function worksheetFileName(input: WorksheetInput): string {
   const data = normalize(input);
   const slug = (data.familyName ?? '')
@@ -30,15 +30,15 @@ export function worksheetFileName(input: WorksheetInput): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 40);
-  return `${WORKSHEET.month.toLowerCase()}-i-own-this-job${slug ? `-${slug}` : ''}.pdf`;
+  return `${WORKSHEET.month.toLowerCase()}-family-plan${slug ? `-${slug}` : ''}.pdf`;
 }
 
 export async function createWorksheetPdf(input: WorksheetInput, fonts: FontBytes, opts: { metrics?: Metrics; date?: Date } = {}): Promise<Uint8Array> {
   const data = normalize(input);
   const pages = layoutWorksheet(opts.metrics ?? createMetrics(fonts), data);
   return renderPdf(pages, fonts, {
-    title: `I Own This Job · ${WORKSHEET.month} ${WORKSHEET.year}${data.familyName ? ` · ${data.familyName}` : ''}`,
-    subject: `${WORKSHEET.brand} family ownership worksheet`,
+    title: `${data.planTitle ?? 'Our Family Ownership Plan'} · ${WORKSHEET.month} ${WORKSHEET.year}${data.familyName ? ` · ${data.familyName}` : ''}`,
+    subject: `${WORKSHEET.brand} prepared family ownership plan`,
     date: opts.date,
   });
 }
