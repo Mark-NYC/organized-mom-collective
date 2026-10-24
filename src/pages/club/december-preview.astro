@@ -1,10 +1,12 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
 import { monthColors } from '../../theme';
 import {families} from '../../lib/december/traditions';
 ---
 <PublicLayout fullTitle="December Christmas Mission Preview | Organized Family Club" description="Private December mailer prototype" indexable={false} chrome={false} width="full" tracking={false}>
-<main class="dec" style={`--accent:${monthColors[11].hex}`}>
+<ClubPrototypeNav client:only="react" month="december" />
+<main id="club-month-content" class="dec" style={`--accent:${monthColors[11].hex}`}>
   <a href="/club/worksheet-generator/" class="back">← November experiment</a>
   <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>Your Christmas Mission Has Arrived!</h1><p>A surprise addressed to the children. One kindness mission and two Christmas cards, ready to give.</p></header>
   <div class="workspace">
