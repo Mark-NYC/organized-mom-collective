@@ -17,6 +17,8 @@ export interface PdfMeta {
   subject?: string;
   /** Fixed for reproducible files; defaults to now. */
   date?: Date;
+  /** Set false for separate, single-sided sheets (December gift cards). */
+  duplex?: boolean;
 }
 
 export async function renderPdf(pages: Page[], bytes: FontBytes, meta: PdfMeta): Promise<Uint8Array> {
@@ -36,7 +38,7 @@ export async function renderPdf(pages: Page[], bytes: FontBytes, meta: PdfMeta):
   // Print at 100% (never "fit to page"), double-sided, flipped on the long edge.
   const prefs = doc.catalog.getOrCreateViewerPreferences();
   prefs.setPrintScaling(PrintScaling.None);
-  prefs.setDuplex(Duplex.DuplexFlipLongEdge);
+  prefs.setDuplex(meta.duplex === false ? Duplex.Simplex : Duplex.DuplexFlipLongEdge);
 
   for (const p of pages) {
     const page = doc.addPage([p.width, p.height]);
