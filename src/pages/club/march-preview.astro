@@ -1,0 +1,10 @@
+---
+/** Unlisted, noindex March 2027 Club product review. The printable is shared with its member kit. */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
+import MarchSpringPrep from '../../components/club/MarchSpringPrep.astro';
+---
+<PublicLayout fullTitle="March Spring Prep Family Plan Preview | Organized Family Club" description="March's app-connected family spring preparation printable." indexable={false} chrome={false} width="full" tracking={false}>
+ <ClubPrototypeNav client:only="react" month="march" />
+ <main id="club-month-content"><MarchSpringPrep storageKey="omc:preview:march-spring-prep:v1" /></main>
+</PublicLayout>
