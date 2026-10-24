@@ -125,10 +125,10 @@ function front(m:Metrics,d:WorksheetData):Page {
  g.text(X0,165,'Everyone owns a part. Everyone knows what finished means.','sans',9.5,{color:COLORS.soft});
  const group=(y:number,name:string|null,job:string|null,when:string|null,done:string|null)=>{
   g.line(X0,y-24,X1,y-24,COLORS.hair,.8);
-  g.block(X0,y,name??'A family member','serif',{width:145,maxLines:1,size:22,min:13,lead:1});
-  g.block(X0+166,y,job??'One whole responsibility','serifItalic',{width:W-166,maxLines:2,size:15,min:10,lead:1.17});
-  if(when)g.block(X0,y+22,when,'sans',{width:W,maxLines:1,size:9.2,min:8,lead:1.2,color:COLORS.soft});
-  steps(done).forEach((s,i)=>{g.circle(X0+5,y+49+i*29,2,COLORS.ink);g.block(X0+17,y+53+i*29,s,'sans',{width:W-17,maxLines:2,size:11.3,min:9.4,lead:1.2});});
+  g.block(X0,y,name??'A family member','serif',{width:145,maxLines:1,size:24,min:15,lead:1});
+  g.block(X0+166,y,job??'One whole responsibility','serifItalic',{width:W-166,maxLines:2,size:16,min:11,lead:1.17});
+  if(when)g.block(X0,y+22,when,'sans',{width:W,maxLines:1,size:10,min:9,lead:1.2,color:COLORS.soft});
+  steps(done).forEach((s,i)=>{g.circle(X0+5,y+49+i*31,2,COLORS.ink);g.block(X0+17,y+53+i*31,s,'sans',{width:W-17,maxLines:2,size:12.5,min:10.5,lead:1.2});});
  };
  const adultSteps=steps(d.adultJob?.toLowerCase().includes('school')?'Check messages and deadlines. Handle forms and responses. Add important dates to the family calendar.':d.adultJob?.toLowerCase().includes('supplies')?'Notice what is running low. Make the restocking list. Buy or arrange replacements before they run out.':d.adultJob?.toLowerCase().includes('appointment')?'Review next week’s commitments. Confirm rides and appointments. Update the shared calendar.':d.adultJob?.toLowerCase().includes('dinner')?'Choose the meals. Prepare or arrange ingredients. Own serving and cleanup.':d.adultJob?.toLowerCase().includes('laundry')?'Gather and sort laundry. Run the loads. Make sure clean clothes get put away.':'Notice what needs doing. Make the plan. Follow through without reminders.');
  group(215,d.adultOwner,d.adultJob,d.adultWhen,adultSteps.join('. '));
