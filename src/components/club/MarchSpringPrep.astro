@@ -9,6 +9,10 @@ import {monthColors} from '../../theme';
 interface Props{storageKey?:string}
 const {storageKey='omc:club:march-spring-prep:v1'}=Astro.props;
 const project=monthlyDeepClean.find(x=>x.month===2)!;
+const taskIcons:Record<string,string>={
+ 'mar-baseboards':'spray-bottle-cloth','mar-vents':'duster','mar-winter-gear':'sorting-clothes',
+ 'mar-curtains':'washing-window','mar-donate':'donation-box'
+};
 const taskTypes:Record<string,string>={
  'mar-baseboards':'Children can wipe reachable areas with a soft, damp cloth. An adult handles anything higher.',
  'mar-vents':'Adult job. Keep children off ladders and away from ceiling fans and vents.',
@@ -45,7 +49,7 @@ const taskTypes:Record<string,string>={
     <div class="msc-sheet-tasks">
     {project.tasks.map((t,i)=><section class="msc-task" data-printed-task={t.id}>
       <div class="msc-task-num">0{i+1}</div>
-      <div class="msc-task-text"><h3>{t.label}</h3><p>{taskTypes[t.id]}</p></div>
+      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="42" height="42" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p>{taskTypes[t.id]}</p></div></div>
       <div class="msc-task-person"><span>LED BY</span><strong data-printed-owner={t.id}>Our family</strong></div>
       <div class="msc-check" aria-hidden="true"></div>
     </section>)}
@@ -75,7 +79,7 @@ const taskTypes:Record<string,string>={
 .msc-sheet-head{background:#edf5f0;border-top:11px solid var(--msc-month);padding:24px 27px 27px;min-height:206px}.msc-sheet-head>p:first-child{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.14em;color:#405f53}.msc-sheet-head h2{font:400 43px/1.1 'MSC Gelasio',Georgia,serif;color:#3d6556;margin:20px 0 12px}.msc-sheet-head h2 em{font-weight:600}.msc-sheet-head>p:last-child{font:italic 18px 'MSC Gelasio',Georgia,serif;color:#577669}
 .msc-sheet-family{padding:22px 0 14px;border-bottom:1px solid var(--msc-month);display:flex;justify-content:space-between;align-items:baseline;gap:15px}.msc-sheet-family span,.msc-sheet-family strong{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.12em}.msc-sheet-family strong{font-size:13px;letter-spacing:0}
 .msc-sheet-caption{font:italic 20px 'MSC Gelasio',Georgia,serif;margin:19px 0 12px;color:#497666}
-.msc-sheet-tasks{flex:1}.msc-task{display:grid;grid-template-columns:30px minmax(0,1fr) 126px 22px;gap:12px;padding:20px 2px;border-top:1px solid #cdded4;align-items:center;min-height:111px}.msc-task-num{font:600 10px 'MSC Montserrat',sans-serif;color:#497666}.msc-task-text h3{font:400 19px/1.15 'MSC Gelasio',Georgia,serif;margin:0 0 7px}.msc-task-text p{font:10px/1.5 'MSC Montserrat',sans-serif;color:#606060}.msc-task-person{text-align:left}.msc-task-person span{display:block;font:600 8px 'MSC Montserrat',sans-serif;letter-spacing:.12em;color:#658070;margin-bottom:6px}.msc-task-person strong{font:600 italic 16px/1.2 'MSC Gelasio',Georgia,serif;color:#3e6c5a;overflow-wrap:anywhere}.msc-check{width:17px;height:17px;border:1.5px solid #829e90}
+.msc-sheet-tasks{flex:1}.msc-task{display:grid;grid-template-columns:30px minmax(0,1fr) 126px 22px;gap:12px;padding:20px 2px;border-top:1px solid #cdded4;align-items:center;min-height:111px}.msc-task-num{font:600 10px 'MSC Montserrat',sans-serif;color:#497666}.msc-task-text{display:flex;align-items:center;gap:10px;min-width:0}.msc-task-icon{width:42px;height:42px;flex:0 0 42px;object-fit:contain}.msc-task-text h3{font:400 19px/1.15 'MSC Gelasio',Georgia,serif;margin:0 0 7px}.msc-task-text p{font:10px/1.5 'MSC Montserrat',sans-serif;color:#606060}.msc-task-person{text-align:left}.msc-task-person span{display:block;font:600 8px 'MSC Montserrat',sans-serif;letter-spacing:.12em;color:#658070;margin-bottom:6px}.msc-task-person strong{font:600 italic 16px/1.2 'MSC Gelasio',Georgia,serif;color:#3e6c5a;overflow-wrap:anywhere}.msc-check{width:17px;height:17px;border:1.5px solid #829e90}
 .msc-sheet-principle{background:#f0f5f1;padding:17px 20px;display:grid;grid-template-columns:125px 1fr;gap:14px}.msc-sheet-principle span{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.1em;color:#3d6556}.msc-sheet-principle p{font:italic 15px/1.35 'MSC Gelasio',Georgia,serif}
 .msc-sheet-bottom{display:flex;align-items:end;justify-content:space-between;border-top:1px solid #c7ded3;margin-top:17px;padding-top:14px;gap:20px}.msc-sheet-bottom span{display:block;font:600 7px 'MSC Montserrat',sans-serif;letter-spacing:.08em}.msc-sheet-bottom strong{font:400 11px 'MSC Montserrat',sans-serif}.msc-sheet-bottom>p{font:600 7px 'MSC Montserrat',sans-serif;letter-spacing:.04em;white-space:nowrap}
 /* Leave a little print-height reserve: a forced 11in sheet must not overflow into a second page. */
