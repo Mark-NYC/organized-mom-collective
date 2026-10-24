@@ -107,6 +107,66 @@ const defaults = [
  .jhc{padding:0!important}
 }
 </style>
+
+<style is:global>
+/* January: match the actual December preview and November worksheet typography/layout. */
+@font-face{font-family:'JHC Gelasio';src:url('/fonts/worksheet/gelasio-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'JHC Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
+@font-face{font-family:'JHC Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'JHC Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf') format('truetype');font-weight:600;font-display:swap}
+.jhc{max-width:1440px;padding:0 clamp(16px,3vw,48px) 65px;margin:0 auto;color:#454545;font-family:'JHC Montserrat',Montserrat,sans-serif}
+.jhc-intro{max-width:790px!important;margin:0 0 38px!important}
+.jhc-back{display:inline-block;margin-bottom:30px;font-size:12px;text-decoration:underline;text-underline-offset:4px}
+.jhc-overline{font:600 10px 'JHC Montserrat',sans-serif!important;letter-spacing:.17em!important;color:#545454!important}
+.jhc-intro h2{font:400 clamp(36px,4.5vw,57px)/1.09 'JHC Gelasio',Georgia,serif!important;color:#3d3d3d!important;letter-spacing:-.02em;margin:12px 0 18px!important}
+.jhc-intro h2 em{font:600 italic 1em 'JHC Gelasio',Georgia,serif;color:#527384}
+.jhc-intro>p:last-child{font:15px/1.7 'JHC Montserrat',sans-serif!important;color:#555!important;max-width:625px}
+.jhc-workspace{display:grid;grid-template-columns:minmax(295px,355px) minmax(0,1fr);gap:clamp(25px,3vw,48px);align-items:start}
+.jhc-config{min-width:0;background:transparent!important;margin:0!important;padding:0!important}
+.jhc-config-heading{border-top:9px solid var(--jhc-month);padding-top:22px}
+.jhc-config-heading h3{font:600 italic 27px/1.2 'JHC Gelasio',Georgia,serif!important;color:#527384;margin:12px 0}
+.jhc-config-heading>p:last-child{font:13px/1.6 'JHC Montserrat',sans-serif!important;color:#555}
+.jhc-forms{grid-template-columns:1fr!important;gap:0!important;margin-top:25px!important}
+.jhc-editor{border-top:1px solid var(--jhc-month);padding:14px 0 18px}
+.jhc-editor legend{font:400 19px 'JHC Gelasio',Georgia,serif}
+.jhc-editor-num{font:600 12px 'JHC Montserrat',sans-serif;color:#527384}
+.jhc-editor label{margin-top:12px}
+.jhc-editor label span{font:600 10px 'JHC Montserrat',sans-serif;letter-spacing:.08em;color:#555}
+.jhc-editor input,.jhc-editor textarea{font:14px/1.4 'JHC Montserrat',sans-serif;min-height:46px;border:1px solid #b5b5b5;border-radius:0;color:#333}
+.jhc-actions{display:block;margin-top:16px}
+.jhc-print{width:100%;background:#454545;border:0;min-height:52px;font:600 12px 'JHC Montserrat',sans-serif;letter-spacing:.11em;text-transform:uppercase}
+.jhc-reset{display:block;margin:12px auto;font:600 12px 'JHC Montserrat',sans-serif}
+.jhc-help{font:11px/1.6 'JHC Montserrat',sans-serif;color:#666}
+.jhc-preview-panel{min-width:0}
+.jhc-preview-heading{border-bottom:1px solid var(--jhc-month);padding-bottom:13px;margin:0 0 25px;display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.jhc-preview-heading h3{font:400 25px 'JHC Gelasio',Georgia,serif}
+.jhc-preview-heading p{font:12px 'JHC Montserrat',sans-serif}
+.jhc-print-scroll{overflow-x:auto;padding:4px 0 24px}
+.jhc-page{background:#fff;box-shadow:0 12px 32px #0002;color:#3d3834}
+.jhc-sheet-label{font:600 8px 'JHC Montserrat',sans-serif;border-top:9px solid var(--jhc-month);height:43px;padding-top:14px;color:#555}
+.jhc-sheet-label span{color:#555}
+.jhc-card-grid{border-color:#bdbdbd}
+.jhc-card{background:white;padding:20px 27px 18px}
+.jhc-card-top,.jhc-brand,.jhc-card-number{color:#666}
+.jhc-card-icon,.jhc-card:nth-child(2) .jhc-card-icon,.jhc-card:nth-child(3) .jhc-card-icon,.jhc-card:nth-child(4) .jhc-card-icon{width:50px;height:50px;background:transparent;border-radius:0;color:#527384;transform:none;margin:17px auto 9px}
+.jhc-card-icon svg{width:37px;height:37px;stroke-width:1.7}
+.jhc-small-title{color:#666}
+.jhc-card-name{font:600 italic 26px/1.14 'JHC Gelasio',Georgia,serif;color:#527384;margin:7px 0}
+.jhc-card-rule{height:5px;width:72px;background:var(--jhc-month);border-radius:0;transform:none;margin:3px auto 18px}
+.jhc-anchor-label,.jhc-action-label{color:#555}
+.jhc-anchor{font:400 16px/1.32 'JHC Gelasio',Georgia,serif;margin-bottom:19px}
+.jhc-action{font:600 italic 19px/1.22 'JHC Gelasio',Georgia,serif;color:#527384}
+.jhc-card-bottom{border-top:1px solid var(--jhc-month);padding-top:12px}
+.jhc-card-bottom span{color:#555}
+.jhc-card-bottom p{font:italic 13px 'JHC Gelasio',Georgia,serif;color:#454545}
+.jhc-sheet-footer{color:#666}
+@media(min-width:1120px){.jhc-page{transform:scale(.85);transform-origin:top left;margin:0}.jhc-print-scroll{height:927px}}
+@media(max-width:1119px){.jhc-workspace{grid-template-columns:1fr}.jhc-config{max-width:680px}.jhc-forms{grid-template-columns:1fr!important}}
+@media print{
+ .jhc-page{transform:none!important;position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;box-shadow:none!important}
+ .jhc-print-scroll{height:auto!important;overflow:visible!important}
+}
+</style>
 <script>
 const defaults = [
   {name:'My morning',anchor:'After I finish breakfast',action:'I put my dishes away.',place:'By the breakfast table'},
