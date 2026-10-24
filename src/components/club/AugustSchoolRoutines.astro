@@ -1,0 +1,221 @@
+---
+/** August Club one-page school routine preview.
+ * Seeded from the canonical /routine-chart morning + afterschool routines.
+ * The Club preview is pre-filled; the existing public generator remains intact.
+ */
+import {routineTypes} from '../../data/routines';
+interface Props {storageKey?:string}
+const {storageKey='omc:club:august-school-routines:v1'}=Astro.props;
+const morning=routineTypes.morning.steps;
+const after=routineTypes.afterschool.steps;
+const icons={
+ clothes:'/images/responsibilities/get-dressed-256.webp',
+ teeth:'/images/responsibilities/brush-my-teeth-256.webp',
+ bag:'/images/responsibilities/pack-my-backpack-256.webp',
+ bed:'/images/responsibilities/make-my-bed-256.webp',
+ hands:'/images/responsibilities/wash-my-hands-256.webp',
+ lunch:'/images/responsibilities/clear-the-table-256.webp',
+ shoes:'/images/responsibilities/get-dressed-256.webp',
+ paper:'/images/responsibilities/tidy-my-desk-256.webp',
+ book:'/images/club/july/book.png',
+ breakfast:'/images/responsibilities/set-the-table-256.webp',
+};
+const initial=[
+ {id:'wake',label:morning[0][1],icon:'bed',group:'morning'},
+ {id:'dress',label:morning[2][1],icon:'clothes',group:'morning'},
+ {id:'eat',label:morning[3][1],icon:'breakfast',group:'morning'},
+ {id:'teeth',label:morning[4][1],icon:'teeth',group:'morning'},
+ {id:'backpack',label:morning[5][1],icon:'bag',group:'morning'},
+ {id:'shoes',label:after[0][1],icon:'shoes',group:'after'},
+ {id:'unpack',label:after[1][1],icon:'bag',group:'after'},
+ {id:'wash',label:after[2][1],icon:'hands',group:'after'},
+ {id:'snack',label:after[3][1],icon:'lunch',group:'after'},
+ {id:'homework',label:after[4][1],icon:'book',group:'after'},
+];
+---
+<div class="asr" data-asr-key={storageKey} data-asr-icons={JSON.stringify(icons)} data-asr-starters={JSON.stringify(initial)}>
+ <header class="asr-intro">
+  <a href="/club">← Organized Family Club</a>
+  <p class="asr-eyebrow">ORGANIZED FAMILY CLUB · AUGUST 2027</p>
+  <h1>Fewer reminders. <em>Smoother school days.</em></h1>
+  <p>A ready-made picture routine for mornings and after school. Kids can see the next step instead of asking Mom what to do.</p>
+ </header>
+ <div class="asr-layout">
+  <aside class="asr-editor">
+   <p class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINE</p><h2>Already prepared.</h2>
+   <p>Choose a child and review their routine. Click the words on the sheet to edit; use the × beside any step to remove it. Nothing to assemble or track each day.</p>
+   <label>Routine for <select data-asr-child><option value="family">Our family</option></select></label>
+   <label>Routine detail <select data-asr-mode><option value="standard">Five steps per routine</option><option value="simple">Four essentials per routine</option></select></label>
+   <details class="asr-customize"><summary>Adjust the steps <span>Optional</span></summary><p>Reorder or restore steps without changing the rest of your family’s boards.</p><div data-asr-options></div></details>
+   <div class="asr-parent-note"><strong>One small handoff</strong><p>Show your child where this sheet lives, walk through it once, then invite them to check what's next. Adults continue to own school travel, medications, and safety decisions.</p></div>
+   <button class="asr-primary" data-asr-print type="button">Print School Routines / Save PDF</button>
+   <button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button>
+   <button class="asr-reset" data-asr-reset type="button">Restore original steps</button>
+   <p class="asr-small">One premium 8.5 × 11-inch sheet. Changes in this design preview save in this browser tab only.</p>
+  </aside>
+  <section class="asr-preview">
+   <div class="asr-preview-heading"><h2>August’s printed tool</h2><span>One page · Kid-readable</span></div>
+   <div class="asr-stage" data-asr-stage>
+    <article class="asr-sheet" data-asr-sheet>
+     <header class="asr-paper-head"><p>ORGANIZED FAMILY CLUB · AUGUST 2027</p><h2>My School Day</h2><span data-asr-name>Our morning & after-school routine</span></header>
+     <div class="asr-panel asr-panel-am"><header><span class="asr-circle">01</span><div><h3>Before School</h3><p>First things first. I can do this!</p></div><span class="asr-accent">MORNING</span></header><div class="asr-rows" data-asr-group="morning">
+      {initial.filter(x=>x.group==='morning').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="morning">
+        <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
+        <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
+        <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
+       </div>)}
+     </div></div>
+     <div class="asr-panel asr-panel-pm"><header><span class="asr-circle">02</span><div><h3>After School</h3><p>Come home. Reset. Enjoy the afternoon.</p></div><span class="asr-accent">AFTERNOON</span></header><div class="asr-rows" data-asr-group="after">
+      {initial.filter(x=>x.group==='after').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="after">
+        <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
+        <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
+        <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
+       </div>)}
+     </div></div>
+     <footer class="asr-paper-foot"><strong data-asr-footer contenteditable="true" role="textbox" aria-label="Edit reminder">Check my routine. Do my part. Then I'm ready!</strong><span>ORGANIZED FAMILY CLUB · AUGUST</span></footer>
+    </article>
+   </div>
+   <p class="asr-small">A tailored Club edition of the <a href="/routine-chart/">Routine Chart Generator</a>, delivered already filled in—not another worksheet for Mom to complete.</p>
+  </section>
+ </div>
+</div>
+<style is:global>
+.asr,.asr *{box-sizing:border-box}.asr{max-width:1480px;margin:auto;padding:27px clamp(18px,3.5vw,52px) 70px;color:#484941;font-family:Montserrat,Arial,sans-serif}
+.asr-intro{max-width:760px;margin-bottom:34px}.asr-intro>a{font-size:12px;color:#43493f;display:inline-block;margin-bottom:25px}.asr-eyebrow{font-size:10px!important;letter-spacing:.15em;font-weight:700;color:#718569}.asr-intro h1{font:400 clamp(38px,4.4vw,60px)/1.14 Georgia,serif;margin:12px 0}.asr-intro h1 em{color:#788e72}.asr-intro>p:last-child{font-size:15px;line-height:1.75}
+.asr-layout{display:grid;grid-template-columns:minmax(275px,350px) minmax(0,1fr);gap:clamp(25px,4vw,60px);align-items:start}
+.asr-editor{border-top:8px solid #d8e6df;padding-top:16px}.asr-editor h2{font:italic 30px Georgia,serif;color:#668075;margin:10px 0}.asr-editor>p:nth-of-type(2){font-size:13px;line-height:1.75}.asr-editor label{display:block;font-weight:700;font-size:12px;margin:18px 0}.asr-editor select,.asr-option select{display:block;width:100%;min-height:44px;padding:9px;border:1px solid #b8c5bd;background:#fff;color:#424c43;font:12px Montserrat,Arial,sans-serif;margin-top:8px}
+.asr-customize{border:1px solid #d7e1dc;border-radius:6px;margin:22px 0;padding:0 13px}.asr-customize summary{padding:15px 0;font-size:13px;font-weight:700;cursor:pointer}.asr-customize summary span{font-weight:400;font-size:11px;color:#849289}.asr-customize>p{font-size:11px;line-height:1.6}.asr-option{padding:11px 0;border-top:1px solid #e5eae6}.asr-option strong{display:block;font-size:12px}.asr-option button{font-size:11px;margin:8px 6px 0 0;background:#fff;border:1px solid #b7c8bb;color:#527253;border-radius:3px;padding:7px 10px;cursor:pointer}
+.asr-parent-note{background:#f3f5ef;padding:17px;margin:20px 0}.asr-parent-note strong{font:21px Georgia,serif}.asr-parent-note p{font-size:11px;line-height:1.75;margin:7px 0 0}.asr-primary,.asr-secondary{width:100%;min-height:48px;cursor:pointer;font-size:12px;font-weight:700}.asr-primary{background:#5f7767;border:0;color:white}.asr-secondary{border:1px solid #b7c9bc;color:#5f7767;background:white;margin-top:9px}.asr-reset{border:0;text-decoration:underline;background:none;color:#607867;font-size:12px;cursor:pointer;min-height:40px;display:block;margin:8px auto}.asr-small{font-size:11px;line-height:1.65;color:#858982}
+.asr-preview{min-width:0}.asr-preview-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid #e1e6e3;margin-bottom:17px}.asr-preview-heading h2{font:26px Georgia,serif}.asr-preview-heading span{font-size:11px;color:#858982}
+.asr-stage{position:relative}.asr-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;transform:scale(var(--asr-scale,1));transform-origin:top left;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002;background:#fff;padding:35px 45px 27px;display:flex;flex-direction:column;overflow:hidden}
+.asr-paper-head{text-align:center;padding:12px 15px 15px;border-top:7px solid #deeae4}.asr-paper-head p{font-size:10px;color:#7c9085;letter-spacing:.15em;font-weight:700;margin:0}.asr-paper-head h2{font:400 49px Georgia,serif;color:#506255;margin:9px 0 7px}.asr-paper-head>span{font:italic 17px Georgia,serif;color:#849487}
+.asr-panel{border-radius:10px;padding:15px 18px 17px;margin-top:17px}.asr-panel-am{background:#f7ebd0}.asr-panel-pm{background:#dfeae8}.asr-panel>header{display:flex;align-items:center;gap:12px;margin-bottom:12px}.asr-circle{font:italic 34px Georgia,serif;color:#9a8560}.asr-panel-pm .asr-circle{color:#6e958e}.asr-panel header div{flex:1}.asr-panel h3{font:400 27px Georgia,serif;color:#655a47;margin:0}.asr-panel-pm h3{color:#4c6d65}.asr-panel header p{font:italic 12px Georgia,serif;color:#807b6b;margin:4px 0 0}.asr-panel-pm header p{color:#67817b}.asr-accent{font-size:10px;letter-spacing:.1em;font-weight:700;color:#8b7b5c}
+.asr-rows{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.asr-row{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:142px;background:white;border-radius:8px;text-align:center;padding:11px 7px}.asr-row[hidden]{display:none!important}.asr-row img{display:block;width:80px;height:80px;object-fit:contain}.asr-row strong{font:500 13px/1.3 Montserrat,Arial,sans-serif;color:#526052;overflow-wrap:anywhere}.asr-remove{position:absolute;top:3px;right:3px;width:26px;height:26px;border:1px solid #b9caba;border-radius:50%;background:white;color:#607761;font-size:19px;cursor:pointer;opacity:0}.asr-row:hover .asr-remove,.asr-row:focus-within .asr-remove{opacity:1}.asr [contenteditable]{cursor:text;outline-offset:3px}.asr [contenteditable]:hover{outline:1px dashed #98b19c}.asr [contenteditable]:focus{outline:2px solid #7da588;background:#f4fcf5}
+.asr-paper-foot{margin-top:auto;text-align:center;border-top:1px solid #dee5dd;padding-top:17px}.asr-paper-foot strong{display:block;font:italic 20px Georgia,serif;color:#65806c}.asr-paper-foot span{display:block;margin-top:12px;font-size:9px;letter-spacing:.12em;font-weight:700;color:#9ca99f}
+.asr.asr-export .asr-stage{width:816px!important;height:1056px!important}.asr.asr-export .asr-sheet{transform:none!important;box-shadow:none!important}.asr.asr-export .asr-remove{display:none!important}
+@media(max-width:1050px){.asr-layout{display:flex;flex-direction:column}.asr-preview{order:0;width:100%}.asr-editor{order:1;max-width:720px;width:100%}.asr-remove{opacity:1}}
+@page{size:letter portrait;margin:0}
+@media print{html,body{padding:0!important;margin:0!important;background:#fff!important}body *{visibility:hidden!important}.asr-stage,.asr-sheet,.asr-sheet *{visibility:visible!important}.asr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.asr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.asr-remove{display:none!important}.asr [contenteditable]{outline:none!important;background:transparent!important}}
+</style>
+<script>
+type Group='morning'|'after';
+type Step={id:string;label:string;icon:string;group:Group;removed?:boolean};
+type Board={steps:Step[];mode:'standard'|'simple';footer:string;child:string};
+type Child={id:string;firstName:string;birthYear?:number;birthMonth?:number};
+const iconPaths:Record<string,string>={
+ clothes:'/images/responsibilities/get-dressed-256.webp',teeth:'/images/responsibilities/brush-my-teeth-256.webp',
+ bag:'/images/responsibilities/pack-my-backpack-256.webp',bed:'/images/responsibilities/make-my-bed-256.webp',
+ hands:'/images/responsibilities/wash-my-hands-256.webp',lunch:'/images/responsibilities/clear-the-table-256.webp',
+ shoes:'/images/responsibilities/get-dressed-256.webp',paper:'/images/responsibilities/tidy-my-desk-256.webp',
+ book:'/images/club/july/book.png',breakfast:'/images/responsibilities/set-the-table-256.webp'
+};
+const seeds:Step[]=[
+ {id:'wake',label:'Wake up & stretch',icon:'bed',group:'morning'},
+ {id:'dress',label:'Get dressed',icon:'clothes',group:'morning'},
+ {id:'eat',label:'Eat breakfast',icon:'breakfast',group:'morning'},
+ {id:'teeth',label:'Brush teeth',icon:'teeth',group:'morning'},
+ {id:'backpack',label:'Grab backpack & shoes',icon:'bag',group:'morning'},
+ {id:'shoes',label:'Shoes & coat away',icon:'shoes',group:'after'},
+ {id:'unpack',label:'Unpack backpack & lunch box',icon:'bag',group:'after'},
+ {id:'wash',label:'Wash hands',icon:'hands',group:'after'},
+ {id:'snack',label:'Snack',icon:'lunch',group:'after'},
+ {id:'homework',label:'Homework & reading',icon:'book',group:'after'},
+];
+const initial=(child='family',age=8):Board=>{
+ const steps=seeds.map(x=>({...x}));
+ if(age<=5){steps.find(s=>s.id==='homework')!.label='Look at a book';steps.find(s=>s.id==='backpack')!.label='Get my school bag'}
+ if(age>=11){steps.find(s=>s.id==='backpack')!.label='Check bag & school supplies';steps.find(s=>s.id==='homework')!.label='Homework & study time'}
+ return {steps,mode:'standard',footer:"Check my routine. Do my part. Then I'm ready!",child};
+};
+for(const root of document.querySelectorAll<HTMLElement>('.asr')){
+ const key=root.dataset.asrKey??'omc:club:august-school-routines:v1';
+ let board=initial(),profile='',kids:Child[]=[];
+ const saved:Record<string,Board>={};
+ const stage=root.querySelector<HTMLElement>('[data-asr-stage]'),paper=root.querySelector<HTMLElement>('[data-asr-sheet]');
+ const fit=()=>{if(!stage||!paper)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4),scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';paper.style.setProperty('--asr-scale',String(scale))};
+ fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
+ const age=(id=board.child)=>{const k=kids.find(k=>k.id===id);return k?.birthYear?Math.max(3,2027-k.birthYear-((k.birthMonth??1)>8?1:0)):8};
+ const remember=()=>{saved[board.child]=structuredClone(board);try{sessionStorage.setItem(key,JSON.stringify({profile,boards:saved}))}catch{}};
+ const draw=()=>{
+  for(const group of ['morning','after'] as Group[]){
+   const holder=root.querySelector<HTMLElement>('[data-asr-group="'+group+'"]');if(!holder)continue;
+   const byId=new Map(Array.from(holder.querySelectorAll<HTMLElement>('[data-asr-id]')).map(x=>[x.dataset.asrId,x]));
+   const steps=board.steps.filter(s=>s.group===group);
+   for(const step of steps){const row=byId.get(step.id);if(!row)continue;row.hidden=!!step.removed||(board.mode==='simple'&&((group==='morning'&&step.id==='wake')||(group==='after'&&step.id==='wash')));
+    const image=row.querySelector<HTMLImageElement>('img');if(image)image.src=iconPaths[step.icon]??iconPaths.bag;
+    const label=row.querySelector<HTMLElement>('[data-asr-text]');if(label&&document.activeElement!==label)label.textContent=step.label;
+    holder.append(row);
+   }
+  }
+  const person=kids.find(k=>k.id===board.child);const heading=root.querySelector<HTMLElement>('[data-asr-name]');
+  if(heading)heading.textContent=person?person.firstName+"'s morning & after-school routines":'Our morning & after-school routines';
+  const foot=root.querySelector<HTMLElement>('[data-asr-footer]');if(foot&&document.activeElement!==foot)foot.textContent=board.footer;
+  const child=root.querySelector<HTMLSelectElement>('[data-asr-child]');if(child)child.value=board.child;
+  const mode=root.querySelector<HTMLSelectElement>('[data-asr-mode]');if(mode)mode.value=board.mode;
+ };
+ const makeOptions=()=>{
+  const holder=root.querySelector<HTMLElement>('[data-asr-options]');if(!holder)return;holder.replaceChildren();
+  for(const group of ['morning','after'] as Group[]){
+   const title=document.createElement('h3');title.textContent=group==='morning'?'Before school':'After school';holder.append(title);
+   const groupSteps=board.steps.filter(x=>x.group===group);
+   for(const step of groupSteps){
+    const wrapper=document.createElement('div');wrapper.className='asr-option';
+    const label=document.createElement('strong');label.textContent=step.label;wrapper.append(label);
+    const toggle=document.createElement('button');toggle.type='button';toggle.textContent=step.removed?'＋ Restore':'× Remove';
+    toggle.addEventListener('click',()=>{step.removed=!step.removed;remember();draw();makeOptions()});wrapper.append(toggle);
+    for(const dir of [-1,1]){
+     const btn=document.createElement('button');btn.type='button';btn.textContent=dir===-1?'↑ Up':'↓ Down';
+     const idx=groupSteps.indexOf(step);btn.disabled=(dir===-1&&idx===0)||(dir===1&&idx===groupSteps.length-1);
+     btn.addEventListener('click',()=>{const current=board.steps.indexOf(step),other=board.steps.indexOf(groupSteps[idx+dir]);if(other<0)return;
+      [board.steps[current],board.steps[other]]=[board.steps[other],board.steps[current]];remember();draw();makeOptions()});
+     wrapper.append(btn);
+    }
+    holder.append(wrapper);
+   }
+  }
+ };
+ root.querySelector<HTMLSelectElement>('[data-asr-child]')?.addEventListener('change',e=>{
+  remember();const target=(e.target as HTMLSelectElement).value;board=saved[target]?structuredClone(saved[target]):initial(target,age(target));remember();draw();makeOptions();
+ });
+ root.querySelector<HTMLSelectElement>('[data-asr-mode]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLSelectElement).value as Board['mode'];remember();draw()});
+ root.querySelectorAll<HTMLElement>('[data-asr-id]').forEach(row=>{
+  const id=row.dataset.asrId!,label=row.querySelector<HTMLElement>('[data-asr-text]');
+  label?.addEventListener('input',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.label=(label.textContent??'').replace(/\s+/g,' ').slice(0,55);remember()}});
+  label?.addEventListener('blur',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.label=(label.textContent??'').replace(/\s+/g,' ').trim().slice(0,55)||seeds.find(v=>v.id===id)!.label;remember();draw();makeOptions()}});
+  label?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();label.blur()}});
+  row.querySelector('[data-asr-remove]')?.addEventListener('click',()=>{const s=board.steps.find(x=>x.id===id);if(s){s.removed=true;remember();draw();makeOptions()}});
+ });
+ const footer=root.querySelector<HTMLElement>('[data-asr-footer]');
+ footer?.addEventListener('input',()=>{board.footer=(footer.textContent??'').replace(/\s+/g,' ').slice(0,120);remember()});
+ footer?.addEventListener('blur',()=>{board.footer=(footer.textContent??'').trim().slice(0,120);remember();draw()});
+ footer?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();footer.blur()}});
+ root.querySelector('[data-asr-reset]')?.addEventListener('click',()=>{board=initial(board.child,age());remember();draw();makeOptions()});
+ root.querySelector('[data-asr-print]')?.addEventListener('click',()=>window.print());
+ const dl=root.querySelector<HTMLButtonElement>('[data-asr-png]');
+ dl?.addEventListener('click',async()=>{
+  if(!paper||!dl)return;dl.disabled=true;const old=dl.textContent;dl.textContent='Preparing image…';root.classList.add('asr-export');
+  try{await Promise.all(Array.from(paper.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   const {toPng}=await import('html-to-image');const png=await toPng(paper,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});
+   const a=document.createElement('a');a.href=png;a.download='my-school-day-routines.png';a.click();
+  }catch(error){console.error('August export failed',error);alert('Image download failed. Use Print / Save PDF instead.')}
+  finally{root.classList.remove('asr-export');dl.disabled=false;dl.textContent=old}
+ });
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const {household,sample}=(event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}>).detail??{};
+  if(!household)return;const next=sample+':'+household.id;
+  kids=(household.members??[]).filter(x=>x.kind==='child');
+  const select=root.querySelector<HTMLSelectElement>('[data-asr-child]');
+  if(select){select.replaceChildren();const option=document.createElement('option');option.value='family';option.textContent='Our family';select.append(option);
+   for(const kid of kids){const opt=document.createElement('option');opt.value=kid.id;opt.textContent=kid.firstName;select.append(opt)}}
+  if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=initial();
+   try{const s=JSON.parse(sessionStorage.getItem(key)??'null');if(s?.profile===profile&&s.boards){
+     for(const [id,value] of Object.entries(s.boards))if(value&&typeof value==='object'&&Array.isArray((value as Board).steps))saved[id]=value as Board;
+     board=saved[s?.active]??saved.family??board;
+   }}catch{}
+  }
+  if(board.child!=='family'&&!kids.some(x=>x.id===board.child))board=initial();
+  remember();draw();makeOptions();
+ });
+ draw();makeOptions();
+}
+</script>
