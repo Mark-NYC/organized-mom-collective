@@ -78,5 +78,8 @@ export function normalize(input: WorksheetInput): WorksheetData {
     secondWhen: clean(input.secondWhen, 80),
     secondDone: clean(input.secondDone, 260, true),
     checkIn: checkInDate(input.checkIn),
+    planTitle: clean(input.planTitle, 80),
+    planGoal: clean(input.planGoal, 170),
+    adultSteps: clean(input.adultSteps, 260, true),
   };
 }
