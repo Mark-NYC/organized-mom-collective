@@ -27,6 +27,9 @@ export interface WorksheetInput {
   secondDone?: string;
   /** First family check-in, ISO date (YYYY-MM-DD). */
   checkIn?: string;
+  planTitle?: string;
+  planGoal?: string;
+  adultSteps?: string;
 }
 
 /** Cleaned input: trimmed, length-capped, characters the fonts can't draw simplified. `null` means "leave a line". */
@@ -46,6 +49,9 @@ export interface WorksheetData {
   secondDone: string | null;
   /** Formatted for print ("Saturday, November 14"), or null. */
   checkIn: string | null;
+  planTitle: string | null;
+  planGoal: string | null;
+  adultSteps: string | null;
 }
 
 export type FontKey = 'serif' | 'serifItalic' | 'serifBoldItalic' | 'sans' | 'sansMedium' | 'sansBold';
