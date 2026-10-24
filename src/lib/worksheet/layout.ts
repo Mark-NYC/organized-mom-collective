@@ -150,9 +150,10 @@ function back(m:Metrics,d:WorksheetData):Page{
  g.text(X0+PAD,612,'What worked? What needs to change?','serifItalic',14);
  g.dots(X0+PAD,X1-PAD,633);
  if(d.checkIn)g.text(X0+PAD,651,d.checkIn,'sansMedium',8);
- g.rect(X0,670,W,68,COLORS.panel,COLORS.frame);
- g.label(X0+PAD,688,'Bring it to your calendar');
- g.block(X0+PAD,712,'Write each owner next to their job. Let the plan carry the reminder.','serif',{width:W-2*PAD,maxLines:2,size:11,min:9,lead:1.25});
+ g.rect(X0,665,W,73,COLORS.panel,COLORS.frame);
+ g.label(X0+PAD,682,'Bring it to your calendar');
+ g.block(X0+PAD,701,'Write each owner beside the job. Let your calendar carry the reminder.','serif',{width:W-2*PAD,maxLines:1,size:10,min:8.5,lead:1.25});
+ g.text(X0+PAD,724,'A family where everyone shares the load is worth building.  — Megan','serifItalic',10,{color:COLORS.soft});
  g.footer('Back · 2 / 2');return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
 export function layoutWorksheet(m:Metrics,d:WorksheetData):[Page,Page]{return [front(m,d),back(m,d)];}
