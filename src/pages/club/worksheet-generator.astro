@@ -28,7 +28,7 @@ const first = JOB_PRESETS[0];
       <div class="ws-rec-head"><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
       <div id="ws-recommendations">
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
-        <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Set and clear the dinner table</p><p id="ws-child1-desc">Set plates and utensils, clear dishes, wipe the table and push in chairs.</p></article>
+        <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Prepare tomorrow’s clothes and supplies</p><p id="ws-child1-desc">Lay out clothes, check supplies and put everything in its ready spot.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
       </div>
       <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Send it.</button><button type="button" class="ws-secondary" id="ws-review">Review or change plan</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
@@ -382,4 +382,16 @@ const first = JOB_PRESETS[0];
 .ws-preview{background:transparent!important}
 .ws-preview-head{border-bottom:1px solid #d5d5d5;padding-bottom:12px}
 .ws-disclaimer{font-size:11px}
+</style>
+<style is:global>
+/* November proof: editorial surfaces, not a nested-card dashboard. */
+.ws-ready{background:none!important;box-shadow:none!important;border:0!important;border-bottom:1px solid #d8d8d8!important;padding:0 0 16px!important}
+.ws-ready .ws-eyebrow{color:#666!important}
+.ws-rec{background:none!important;box-shadow:none!important;border:0!important;border-bottom:1px solid #d8d8d8!important;border-radius:0!important;padding:18px 0!important}
+.ws-rec:last-child{border-bottom:0!important}
+.ws-rec-head{padding:0!important}
+.ws-actions{background:none!important;box-shadow:none!important;border:0!important;border-top:1px solid #d8d8d8!important;padding:20px 0!important}
+.ws-preview{background:none!important;box-shadow:none!important}
+.ws-pages{background:none!important}
+.ws-ready select{border:1px solid #ccc!important;background:#fff!important}
 </style>
