@@ -39,6 +39,7 @@ interface Saved {
   doneMeans: string | null;
   start: string;
   family: string;
+  placement: string;
   palette: ToolPaletteId;
 }
 
@@ -64,6 +65,7 @@ function read(key: string): Saved | null {
       doneMeans: typeof o.doneMeans === 'string' ? clean(o.doneMeans, MAX_HABIT_TEXT) : null,
       start: typeof o.start === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.start) ? o.start : '',
       family: clean(o.family, 40),
+      placement: clean(o.placement, 80),
       palette: resolveToolPalette(String(o.palette ?? '')),
     };
   } catch {
@@ -93,6 +95,7 @@ export function initHabitBuilder(host: HTMLElement, handoff?: ToolHandoff | null
     doneMeans: null,
     start: handoff?.date ?? '',
     family: handoff?.name ?? '',
+    placement: '',
     palette: resolveToolPalette(''),
   };
 
@@ -100,6 +103,7 @@ export function initHabitBuilder(host: HTMLElement, handoff?: ToolHandoff | null
   const doneBox = $<HTMLTextAreaElement>('[data-hb-done]');
   const startInput = $<HTMLInputElement>('[data-hb-start]');
   const familyInput = $<HTMLInputElement>('[data-hb-family]');
+  const placementInput = $<HTMLInputElement>('[data-hb-placement]');
   const otherLabel = $<HTMLInputElement>('[data-hb-other-label]');
   const otherAction = $<HTMLInputElement>('[data-hb-other-action]');
   const momentText = $<HTMLInputElement>('[data-hb-moment-text]');
@@ -190,6 +194,7 @@ export function initHabitBuilder(host: HTMLElement, handoff?: ToolHandoff | null
     $<HTMLElement>('[data-hb-sheet-when]').textContent = whenText();
     $<HTMLElement>('[data-hb-sheet-who]').textContent = whoText();
     $<HTMLElement>('[data-hb-sheet-done]').textContent = done() || ' ';
+    $<HTMLElement>('[data-hb-sheet-placement]').textContent = s.placement || 'Put this card where the next action happens.';
     const labels = practiceDays(s.start);
     all<HTMLElement>('[data-hb-day]').forEach((el, i) => (el.textContent = labels[i]));
     $<HTMLElement>('[data-hb-sheet-dates]').textContent = s.start ? `We start ${dayLabel(s.start)} · We check in ${dayLabel(check)}` : 'We start ________________   We check in ________________';
@@ -246,11 +251,13 @@ export function initHabitBuilder(host: HTMLElement, handoff?: ToolHandoff | null
   momentText.value = s.otherMoment;
   namesText.value = s.typedNames;
   familyInput.value = s.family;
+  placementInput.value = s.placement;
   typed(otherLabel, (v) => (s.otherLabel = v.slice(0, 80)));
   typed(otherAction, (v) => (s.otherAction = v.slice(0, 100)));
   typed(momentText, (v) => (s.otherMoment = v.slice(0, 60)));
   typed(namesText, (v) => (s.typedNames = v.slice(0, 80)));
   typed(familyInput, (v) => (s.family = v.slice(0, 40)));
+  typed(placementInput, (v) => (s.placement = v.slice(0, 80)));
   statementBox.addEventListener('input', () => {
     started();
     const v = statementBox.value.slice(0, MAX_HABIT_TEXT);
@@ -282,12 +289,12 @@ export function initHabitBuilder(host: HTMLElement, handoff?: ToolHandoff | null
   downloadBtn.addEventListener('click', () => {
     if (!statement().trim()) return say('Write your habit first: what will everyone do?');
     toolEvent('tool_download_click', 'habit-builder');
-    downloadPng(sheet, { filename: 'our-family-habit.png', width: 816, height: 1056, layoutHost: host, exportClass: 'hb-exporting', button: downloadBtn });
+    downloadPng(sheet, { filename: 'our-family-habit-reminder.png', width: 816, height: 1056, layoutHost: host, exportClass: 'hb-exporting', button: downloadBtn });
   });
   $<HTMLButtonElement>('[data-hb-copy]').addEventListener('click', () => {
     if (!statement().trim()) return say('Write your habit first: what will everyone do?');
     const text = habitText({
-      statement: statement(), when: whenText(), who: whoText(), doneMeans: done(),
+      statement: statement(), when: whenText(), who: whoText(), doneMeans: done(), placement: s.placement,
       ...(s.start ? { start: dayLabel(s.start), checkIn: dayLabel(checkInDay(s.start)) } : {}),
     });
     const manual = () => {
