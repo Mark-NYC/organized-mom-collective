@@ -24,7 +24,8 @@ export default function offlinePrecache() {
           .filter((f) => f.endsWith('index.html'))
           .map((f) => url(f).replace(/\/index\.html$/, ''));
         const assets = [
-          ...walk(join(root, '_astro')),
+          // Not the Club worksheet generator's PDF engine (pdf-lib, fontkit: ~1 MB the companion never loads).
+          ...walk(join(root, '_astro')).filter((f) => !/[\\/]worksheet[.-]/.test(f)),
           ...walk(join(root, 'icons')),
           ...walk(join(root, 'brand')),
           join(root, 'manifest.webmanifest'),

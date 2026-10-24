@@ -32,6 +32,8 @@ interface Props {
   ogImage?: string;
   ogImageAlt?: string;
   jsonLd?: object[];
+  /** GA4 and the Pinterest tag (BaseLayout). Off for Club pages, which load no third-party scripts. */
+  tracking?: boolean;
 }
 
 const DEFAULT_OG = '/images/site/og-calendar.jpg';
@@ -45,6 +47,7 @@ const {
   ogImage = DEFAULT_OG,
   ogImageAlt = `The ${BRAND_NAME} family wall calendar, filled in for the week, on a kitchen counter.`,
   jsonLd: pageJsonLd,
+  tracking = true,
 } = Astro.props;
 const fullTitle = Astro.props.fullTitle ?? (title ? `${title} · ${BRAND_NAME}` : BRAND_NAME);
 // Internal links never use a trailing slash (see src/routes.ts), so canonicals don't either.
@@ -63,6 +66,7 @@ const mainClass =
 ---
 
 <BaseLayout
+  tracking={tracking}
   title={fullTitle}
   description={description}
   robots={indexable ? 'index' : 'noindex'}

@@ -1,98 +1,259 @@
 ---
+/**
+ * November "I Own This Job" worksheet generator (Organized Family Club, unlaunched: noindex, never linked).
+ * The worksheet is drawn by src/lib/worksheet/: the preview is an SVG of the same layout the PDF draws, in the same
+ * embedded fonts, so what's on screen is what downloads. The PDF is made in the browser with pdf-lib; nothing typed
+ * here is stored or sent. Server-side rendering and mail fulfillment: docs/club/WORKSHEET_PDF.md.
+ */
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import { JOB_PRESETS, LIMITS } from '../../lib/worksheet/content';
+const first = JOB_PRESETS[0];
 ---
-<PublicLayout fullTitle="November Job Ownership Worksheet | Organized Family Club" description="Create a personalized family job handoff worksheet and save a two-page, double-sided PDF." indexable={false} chrome={false} width="full">
-<main class="gen-shell">
-  <div class="gen-top"><a href="/club/" class="back">← Organized Family Club</a><span class="eyebrow">November · Foundation · Prototype</span></div>
-  <div class="intro">
-    <div><p class="eyebrow">One problem. One ready-to-use tool.</p><h1>Give the whole job <em>to someone else.</em></h1><p>Choose one recurring job. Make the expectations clear. Give your family a plan you can print, use, and put on the fridge.</p></div>
+<PublicLayout fullTitle="November Job Ownership Worksheet | Organized Family Club" description="Create a personalized family job handoff worksheet and download a two-page, double-sided PDF." indexable={false} chrome={false} width="full" tracking={false}>
+<main class="ws-shell">
+  <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
+  <div class="ws-intro">
+    <p class="ws-eyebrow">One problem. One ready-to-use tool.</p>
+    <h1>Give the whole job <em>to someone else.</em></h1>
+    <p>Choose one recurring job. Make the expectations clear. Download a two-sided worksheet to print, sign together and put on the fridge.</p>
   </div>
-  <div class="workspace">
-    <section class="controls" aria-label="Personalize your worksheet">
+  <div class="ws-workspace">
+    <form class="ws-controls" id="ws-form" aria-label="Personalize your worksheet" novalidate>
       <h2>Make it yours</h2>
-      <label>Family name<input id="family" value="The Goering Family" maxlength="55" autocomplete="off"/></label>
-      <label>Who will own the job?<input id="owner" value="Andrew" maxlength="42" autocomplete="off"/></label>
-      <label>Age (optional)<input id="age" type="number" min="2" max="99" value="8" /></label>
-      <label>Choose a job<select id="job"><option value="Set and clear the dinner table">Set and clear the dinner table</option><option value="Pack my school bag each evening">Pack my school bag each evening</option><option value="Put away clean laundry">Put away clean laundry</option><option value="Empty the dishwasher">Empty the dishwasher</option><option value="Keep the entryway tidy">Keep the entryway tidy</option><option value="custom">Write my own job…</option></select></label>
-      <label id="custom-wrap" hidden>Custom job<input id="custom" maxlength="90" placeholder="The whole job, not just one step"/></label>
-      <label>When does it happen?<input id="when" value="After dinner, every evening" maxlength="90"/></label>
-      <label>What does finished look like?<textarea id="done" rows="3" maxlength="280">Dishes moved to the sink, table wiped, chairs pushed in, and supplies put away.</textarea></label>
-      <label>First check-in date<input id="checkin" type="date"/></label>
-      <p class="privacy">This prototype runs in your browser. Your entries are not saved or sent to a server.</p>
-      <button type="button" class="print" id="print">Print / Save as PDF ↗</button>
-      <p class="helper">Choose <strong>Save as PDF</strong> in your print dialog. Print double-sided on one 8.5 × 11 sheet, flip on long edge. For flat mailing, do not fold.</p>
-    </section>
-    <section class="preview" aria-label="Print preview"><div class="preview-heading"><h2>Your two-sided worksheet</h2><span>8.5 × 11 in · 2 pages</span></div>
-      <div id="print-document">
-        <article class="sheet" aria-label="Page 1, worksheet">
-          <div class="print-head"><span class="month">November</span><span class="identity">ORGANIZED FAMILY CLUB</span></div>
-          <div class="sheet-inner">
-            <p class="eyebrow">Family ownership · Month 11</p>
-            <h2 class="sheet-title">I own this job.</h2>
-            <p class="sheet-deck">One whole job. One clear owner. Less reminding for everyone.</p>
-            <div class="gray-panel"><span class="panel-label">PREPARED FOR</span><strong data-fill="family"></strong><span class="panel-sub">A small step toward a home where everyone plays a part.</span></div>
-            <div class="rule-section"><div class="section-band">01 &nbsp; THE JOB</div><div class="field-label">THIS JOB BELONGS TO</div><div class="filled" data-fill="owner"></div><div class="field-label">MY JOB IS</div><div class="filled" data-fill="job"></div><div class="field-label">WHEN IT HAPPENS</div><div class="filled" data-fill="when"></div></div>
-            <div class="rule-section"><div class="section-band">02 &nbsp; DONE LOOKS LIKE</div><div class="written" data-fill="done"></div><div class="dot-lines" aria-hidden="true"></div></div>
-            <div class="rule-section"><div class="section-band">03 &nbsp; THE HANDOFF</div><div class="handoff"><div><b>1</b><strong>SHOW IT</strong><small>Watch someone do the whole job.</small></div><div><b>2</b><strong>DO IT TOGETHER</strong><small>Practice until the steps are clear.</small></div><div><b>3</b><strong>HAND IT OVER</strong><small>The owner does it and notices when it is needed.</small></div><div><b>4</b><strong>CHECK IN</strong><small>Talk about how it went, then adjust.</small></div></div></div>
-            <p class="sheet-footer">ORGANIZED MOM COLLECTIVE <span>01 / 02</span></p>
-          </div>
-        </article>
-        <article class="sheet" aria-label="Page 2, coaching and follow-through">
-          <div class="print-head"><span class="month">November</span><span class="identity">OUR FAMILY, OUR TEAM</span></div>
-          <div class="sheet-inner">
-            <p class="eyebrow">A note for your family</p><h2 class="sheet-title">Helping is good.<br/><em>Owning is better.</em></h2>
-            <p class="letter">When one person has to notice every job, ask for help, and check that it got done, the responsibility never really moves. This month, give someone the entire job. Start with one. Show them what done looks like, practice together, then give them room to learn.</p>
-            <p class="letter">The goal isn't perfection. It's a home where everyone can see what's needed and take responsibility for their part.</p>
-            <div class="rule-section"><div class="section-band">THIS WEEK'S FAMILY CHECK-IN</div><p class="prompt">What worked? What was hard? What should we change?</p><div class="dot-lines tall" aria-hidden="true"></div><p class="checkdate">Let's check in again: <strong data-fill="checkin"></strong></p></div>
-            <div class="rule-section"><div class="section-band">TRY IT TOGETHER</div><div class="checks"><p>□ We agreed on what finished means.</p><p>□ We practiced it together.</p><p>□ The owner knows when to do it.</p><p>□ We will check in without constant reminders.</p></div></div>
-            <div class="note"><span class="panel-label">BRING IT TO YOUR CALENDAR</span><p>Write the owner's name beside the day or routine. Then let the calendar do some of the reminding.</p></div>
-            <p class="signoff">Cheering you on,<br/><em>Megan</em></p>
-            <p class="sheet-footer">ORGANIZED MOM COLLECTIVE <span>02 / 02</span></p>
-          </div>
-        </article>
+      <a href="#ws-preview" class="ws-jump">See your worksheet ↓</a>
+      <div class="ws-field">
+        <label for="ws-family">Family name</label>
+        <input id="ws-family" name="familyName" value="Goering" maxlength={LIMITS.familyName} autocomplete="family-name" placeholder="Goering" />
+        <p class="ws-hint" id="ws-family-hint" aria-live="polite"></p>
       </div>
+      <div class="ws-field">
+        <label for="ws-owner">Who will own the job?</label>
+        <input id="ws-owner" name="owner" value="Andrew" maxlength={LIMITS.owner} autocomplete="off" placeholder="First name" />
+      </div>
+      <div class="ws-field">
+        <label for="ws-job">The job</label>
+        <select id="ws-job" name="preset">
+          {JOB_PRESETS.map((p, i) => <option value={String(i)}>{p.job}</option>)}
+          <option value="custom">Write my own…</option>
+        </select>
+      </div>
+      <div class="ws-field" id="ws-custom-wrap" hidden>
+        <label for="ws-custom">Your job</label>
+        <input id="ws-custom" name="job" maxlength={LIMITS.job} autocomplete="off" placeholder="The whole job, not just one step" />
+      </div>
+      <div class="ws-field">
+        <label for="ws-when">When does it happen?</label>
+        <input id="ws-when" name="when" value={first.when} maxlength={LIMITS.when} autocomplete="off" />
+      </div>
+      <div class="ws-field">
+        <label for="ws-done">What does finished look like?</label>
+        <textarea id="ws-done" name="done" rows="4" maxlength={LIMITS.done}>{first.done}</textarea>
+        <p class="ws-hint"><span id="ws-done-count"></span></p>
+      </div>
+      <div class="ws-field">
+        <label for="ws-checkin">First family check-in <span class="ws-optional">optional</span></label>
+        <div class="ws-date-row">
+          <input id="ws-checkin" name="checkIn" type="date" />
+          <button type="button" class="ws-link" id="ws-two-weeks">Two weeks from today</button>
+        </div>
+        <p class="ws-hint" id="ws-date-hint" aria-live="polite"></p>
+      </div>
+      <p class="ws-note">Leave anything blank and it prints as a line to write on.</p>
+      <button type="submit" class="ws-download" id="ws-download" disabled>Download PDF</button>
+      <p class="ws-status" id="ws-status" role="status" aria-live="polite"></p>
+      <p class="ws-helper">US Letter, 2 pages. Print double-sided on one sheet (flip on long edge) at 100% scale, in color. Mails flat in a 9 × 12 envelope.</p>
+      <p class="ws-helper">Everything stays in this browser. Nothing you type is saved or sent.</p>
+    </form>
+    <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview">
+      <div class="ws-preview-head"><h2>Your two-sided worksheet</h2><span>8.5 × 11 in · front and back</span></div>
+      <div class="ws-pages" id="ws-pages" aria-busy="true">
+        <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
+        <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
+      </div>
+      <button type="submit" form="ws-form" class="ws-download ws-download-again" disabled>Download PDF</button>
     </section>
   </div>
 </main>
 <script>
-  const el = (id: string) => document.getElementById(id) as HTMLInputElement;
-  const fields = ['family','owner','age','job','custom','when','done','checkin'];
-  const update = () => {
-    const custom = el('job').value === 'custom';
-    const customWrap = document.getElementById('custom-wrap');
-    if (customWrap) customWrap.hidden = !custom;
-    const job = custom ? el('custom').value : el('job').value;
-    const checkin = el('checkin').value;
-    const values: Record<string,string> = {
-      family: el('family').value || 'Your family',
-      owner: el('owner').value || 'Our new owner',
-      job: job || 'Our chosen household job',
-      when: el('when').value || 'We will decide together',
-      done: el('done').value || 'Write together what finished looks like.',
-      checkin: checkin ? new Date(checkin + 'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '____________________',
+  import { JOB_PRESETS } from '../../lib/worksheet/content';
+  import { createMetrics, FONT_FILES, FONT_URL, type FontBytes } from '../../lib/worksheet/fonts';
+  import { layoutWorksheet } from '../../lib/worksheet/layout';
+  import { normalize } from '../../lib/worksheet/normalize';
+  import { renderSvg } from '../../lib/worksheet/svg';
+  import type { FontKey, Metrics, WorksheetInput } from '../../lib/worksheet/types';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const form = $<HTMLFormElement>('ws-form');
+  const preset = $<HTMLSelectElement>('ws-job');
+  const custom = $<HTMLInputElement>('ws-custom');
+  const when = $<HTMLInputElement>('ws-when');
+  const done = $<HTMLTextAreaElement>('ws-done');
+  const checkIn = $<HTMLInputElement>('ws-checkin');
+  const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
+  const setBusy = (busy: boolean) => downloads.forEach((b) => (b.disabled = busy));
+  const status = $<HTMLParagraphElement>('ws-status');
+  const sheets = [...document.querySelectorAll<HTMLElement>('.ws-sheet')];
+
+  let fonts: FontBytes | null = null;
+  let metrics: Metrics | null = null;
+
+  const isoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  checkIn.min = isoDate(new Date());
+
+  function input(): WorksheetInput {
+    const v = (name: string) => (form.elements.namedItem(name) as HTMLInputElement).value;
+    return {
+      familyName: v('familyName'),
+      owner: v('owner'),
+      job: preset.value === 'custom' ? custom.value : JOB_PRESETS[Number(preset.value)].job,
+      when: when.value,
+      done: done.value,
+      checkIn: checkIn.value,
     };
-    document.querySelectorAll<HTMLElement>('[data-fill]').forEach(node => { node.textContent = values[node.dataset.fill || ''] || ''; });
-  };
-  fields.forEach(id => el(id)?.addEventListener('input',update));
-  el('job').addEventListener('change',update);
-  el('print').addEventListener('click',()=>{ update();window.print(); });
+  }
+
+  function hints(data: ReturnType<typeof normalize>) {
+    $('ws-family-hint').textContent = data.familyName ? `Prints as “${data.familyName}”.` : 'Prints as a line to write on.';
+    $('ws-done-count').textContent = `${done.value.length} / ${done.maxLength} characters`;
+    const past = checkIn.value && checkIn.value < isoDate(new Date());
+    $('ws-date-hint').textContent = checkIn.value && !data.checkIn ? 'Choose a valid date.' : past ? 'That date has already passed.' : data.checkIn ? `Prints as “${data.checkIn}”.` : 'Leave blank to write it in.';
+  }
+
+  let queued = false;
+  function update() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      const data = normalize(input());
+      hints(data);
+      if (!metrics) return;
+      layoutWorksheet(metrics, data).forEach((page, i) => {
+        sheets[i].innerHTML = renderSvg(page, i ? 'Back of the worksheet' : 'Front of the worksheet');
+      });
+    });
+  }
+
+  // A preset fills "when" and "finished", unless they've been changed from the last preset's wording.
+  let last: { when: string; done: string } = { when: when.value, done: done.value };
+  preset.addEventListener('change', () => {
+    const isCustom = preset.value === 'custom';
+    $('ws-custom-wrap').hidden = !isCustom;
+    if (isCustom) {
+      if (when.value === last.when) when.value = '';
+      if (done.value === last.done) done.value = '';
+      last = { when: '', done: '' };
+      custom.focus();
+    } else {
+      const p = JOB_PRESETS[Number(preset.value)];
+      if (!when.value.trim() || when.value === last.when) when.value = p.when;
+      if (!done.value.trim() || done.value === last.done) done.value = p.done;
+      last = { when: p.when, done: p.done };
+    }
+    update();
+  });
+  form.addEventListener('input', update);
+  $('ws-two-weeks').addEventListener('click', () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    checkIn.value = isoDate(d);
+    update();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!fonts || !metrics) return;
+    setBusy(true);
+    status.textContent = 'Making your PDF…';
+    try {
+      const { createWorksheetPdf, worksheetFileName } = await import('../../lib/worksheet/index');
+      const values = input();
+      const pdf = await createWorksheetPdf(values, fonts, { metrics });
+      const url = URL.createObjectURL(new Blob([pdf as BlobPart], { type: 'application/pdf' }));
+      const a = Object.assign(document.createElement('a'), { href: url, download: worksheetFileName(values) });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      status.textContent = 'Downloaded. Print it double-sided at 100% scale.';
+    } catch (err) {
+      console.error(err);
+      status.textContent = 'Something went wrong making the PDF. Please try again.';
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  async function start() {
+    try {
+      const keys = Object.keys(FONT_FILES) as FontKey[];
+      const files = await Promise.all(keys.map(async (k) => {
+        const res = await fetch(FONT_URL + FONT_FILES[k]);
+        if (!res.ok) throw new Error(`font ${k}: ${res.status}`);
+        return new Uint8Array(await res.arrayBuffer());
+      }));
+      fonts = Object.fromEntries(keys.map((k, i) => [k, files[i]])) as FontBytes;
+      metrics = createMetrics(fonts);
+      // Draw the preview once its faces are ready, so it never shows a fallback font.
+      await Promise.all(['400 12px "WS Gelasio"', 'italic 400 12px "WS Gelasio"', 'italic 600 12px "WS Gelasio"', '400 12px "WS Montserrat"', '500 12px "WS Montserrat"', '600 12px "WS Montserrat"'].map((f) => document.fonts.load(f)));
+      setBusy(false);
+      $('ws-pages').setAttribute('aria-busy', 'false');
+      update();
+    } catch (err) {
+      console.error(err);
+      sheets[0].innerHTML = '<p class="ws-loading">The preview couldn’t load. Check your connection and refresh.</p>';
+      status.textContent = 'The worksheet couldn’t load. Refresh to try again.';
+    }
+  }
   update();
+  start();
 </script>
+<style is:global>
+@font-face{font-family:'WS Gelasio';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/gelasio-400.ttf) format('truetype')}
+@font-face{font-family:'WS Gelasio';font-weight:400;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-400-italic.ttf) format('truetype')}
+@font-face{font-family:'WS Gelasio';font-weight:600;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-600-italic.ttf) format('truetype')}
+@font-face{font-family:'WS Montserrat';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-400.ttf) format('truetype')}
+@font-face{font-family:'WS Montserrat';font-weight:500;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-500.ttf) format('truetype')}
+@font-face{font-family:'WS Montserrat';font-weight:600;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-600.ttf) format('truetype')}
+</style>
 <style>
-.gen-shell{max-width:1510px;margin:auto;padding:24px clamp(16px,3vw,52px) 70px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}
-.gen-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.back{font-size:12px;text-decoration:underline;text-underline-offset:4px}.eyebrow,.panel-label,.field-label,.identity{font-size:10px;font-weight:650;letter-spacing:.19em;text-transform:uppercase}.intro{max-width:800px;padding:46px 0 38px}.intro h1{font-family:Georgia,serif;font-size:clamp(34px,5vw,64px);line-height:1.05;font-weight:400;letter-spacing:-.025em;margin:12px 0 20px}.intro h1 em{font-weight:400}.intro p:last-child{font-size:16px;line-height:1.7;max-width:650px}
-.workspace{display:grid;grid-template-columns:minmax(270px,355px) minmax(0,1fr);align-items:start;gap:clamp(18px,3vw,44px)}
-.controls{background:#f5f5f5;border:1px solid #ddd;padding:26px;position:sticky;top:16px}.controls h2,.preview-heading h2{font-family:Georgia,serif;font-size:26px;font-weight:400;margin:0 0 20px}.controls label{display:grid;gap:6px;font-size:11px;font-weight:650;letter-spacing:.06em;margin-bottom:16px}.controls input,.controls textarea,.controls select{width:100%;background:white;border:1px solid #bbb;border-radius:0;padding:11px 12px;font-family:inherit;font-size:13px;letter-spacing:normal;font-weight:400;color:#333}.controls :focus-visible{outline:2px solid #545454;outline-offset:2px}.controls textarea{resize:vertical}.controls [hidden]{display:none}.print{background:#545454;color:white;padding:16px;width:100%;font-weight:650;font-size:11px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer}.privacy,.helper{font-size:11px;line-height:1.6;color:#666}.preview-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.preview-heading span{font-size:11px}
-#print-document{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:24px;align-items:start}.sheet{aspect-ratio:8.5/11;background:white;box-shadow:0 8px 32px #0002;border:1px solid #e1e1e1;min-width:0;color:#545454;container-type:inline-size}.print-head{height:7.5%;background:#d0e1e4;display:flex;align-items:center;justify-content:space-between;padding:0 6%;border-bottom:1px solid #aaa}.month{font:italic 5.5cqw Georgia,serif;letter-spacing:.06em}.identity{font-size:1.7cqw;letter-spacing:.16em}.sheet-inner{height:92.5%;padding:4.2% 6% 2.5%;display:flex;flex-direction:column}.sheet-inner>.eyebrow{font-size:1.65cqw;letter-spacing:.15em}.sheet-title{font:normal 7cqw/1.04 Georgia,serif;letter-spacing:-.025em;margin:2.4% 0 1.5%}.sheet-deck{font-size:2cqw;line-height:1.4;margin:0 0 4%}.gray-panel{background:#f5f5f5;padding:3%;display:flex;flex-direction:column;gap:1cqw;border:1px solid #c8c8c8}.panel-label{font-size:1.55cqw}.gray-panel strong{font:normal 4.4cqw Georgia,serif}.panel-sub{font-size:1.7cqw;line-height:1.4}.rule-section{border:1px solid #aaa;margin-top:3%}.section-band{background:#d0e1e4;border-bottom:1px solid #aaa;font-size:1.8cqw;font-weight:650;letter-spacing:.18em;padding:1.7% 2.5%}.field-label{font-size:1.55cqw;padding:2.5% 2.5% .5%}.filled{padding:0 2.5% 2%;border-bottom:1px solid #d5d5d5;font-size:2.2cqw;line-height:1.35;min-height:3cqw}.rule-section .filled:last-child{border-bottom:0}.written{white-space:pre-wrap;overflow-wrap:anywhere;font-size:2cqw;line-height:1.55;padding:2% 2.5%;min-height:7cqw}.dot-lines{height:7cqw;margin:0 2.5% 2%;background-image:radial-gradient(#c2c2c2 .5px,transparent .7px);background-size:7px 12px}.handoff{display:grid;grid-template-columns:repeat(4,1fr)}.handoff>div{display:flex;flex-direction:column;gap:.9cqw;padding:2.5cqw 1cqw;text-align:center;border-right:1px solid #ddd}.handoff>div:last-child{border:0}.handoff b{display:grid;place-items:center;margin:auto;width:4.5cqw;height:4.5cqw;border-radius:50%;background:#d0e1e4;font-size:2cqw}.handoff strong{font-size:1.7cqw;letter-spacing:.04em}.handoff small{font:1.9cqw/1.35 Georgia,serif}.sheet-footer{margin-top:auto;border-top:1px solid #aaa;padding-top:1.3%;display:flex;justify-content:space-between;font-size:1.4cqw;letter-spacing:.14em}.letter{font:2.5cqw/1.55 Georgia,serif;margin:3% 0}.prompt{font:2.35cqw/1.4 Georgia,serif;padding:1% 2.5%;margin:0}.dot-lines.tall{height:13cqw}.checkdate{font-size:1.9cqw;margin:1.8% 2.5%}.checks{display:grid;grid-template-columns:1fr 1fr;gap:0 2%;padding:1.5% 2%}.checks p{font-size:1.8cqw;line-height:1.4;margin:2% 0}.note{background:#f5f5f5;padding:3%;margin-top:4%;border:1px solid #ccc}.note p{font:2.25cqw/1.5 Georgia,serif;margin:2% 0 0}.signoff{font:2.3cqw/1.4 Georgia,serif;margin:3% 0}.signoff em{font-size:3.6cqw}
-@media(max-width:850px){.workspace{grid-template-columns:1fr}.controls{position:static}.intro{padding:35px 0}.preview-heading{margin:12px 0}}
-@page{size:letter;margin:0}
-@media print{
- html,body{margin:0!important;padding:0!important;background:white!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
- body *{visibility:hidden!important}
- #print-document,#print-document *{visibility:visible!important}
- #print-document{position:absolute!important;inset:0 auto auto 0!important;display:block!important;width:8.5in!important;margin:0!important;padding:0!important;gap:0!important}
- #print-document .sheet{width:8.5in!important;height:11in!important;aspect-ratio:auto!important;break-after:page!important;page-break-after:always!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;overflow:hidden!important;container-type:inline-size!important}
- #print-document .sheet:last-child{break-after:auto!important;page-break-after:auto!important}
-}
+.ws-shell{max-width:1440px;margin:auto;padding:24px clamp(16px,3vw,52px) 72px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}
+.ws-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.ws-back{font-size:13px;text-decoration:underline;text-underline-offset:4px;padding:10px 0}
+.ws-eyebrow{font-size:10px;font-weight:650;letter-spacing:.19em;text-transform:uppercase}
+.ws-intro{max-width:780px;padding:40px 0 36px}
+.ws-intro h1{font-family:Georgia,serif;font-size:clamp(34px,5vw,60px);line-height:1.06;font-weight:400;letter-spacing:-.02em;margin:12px 0 18px;color:#3d3d3d}
+.ws-intro p:last-child{font-size:16px;line-height:1.7;max-width:620px}
+.ws-workspace{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);align-items:start;gap:clamp(20px,3vw,44px)}
+.ws-controls{background:#f5f5f5;border:1px solid #dcdcdc;padding:26px;position:sticky;top:16px}
+.ws-controls h2,.ws-preview-head h2{font-family:Georgia,serif;font-size:25px;font-weight:400;margin:0 0 20px;color:#3d3d3d}
+.ws-field{margin-bottom:16px}
+.ws-field label{display:block;font-size:11px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;color:#4a4a4a}
+.ws-optional{font-weight:500;letter-spacing:.04em;text-transform:none;color:#6b6b6b;margin-left:4px}
+.ws-controls input,.ws-controls textarea,.ws-controls select{display:block;width:100%;min-height:46px;background:#fff;border:1px solid #b5b5b5;border-radius:0;padding:11px 12px;font:400 15px/1.4 'Montserrat Variable',Montserrat,sans-serif;color:#333}
+.ws-controls textarea{resize:vertical;min-height:104px}
+.ws-controls select{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23545454' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:38px}
+.ws-controls :focus-visible{outline:2px solid #545454;outline-offset:2px}
+.ws-controls [hidden]{display:none}
+.ws-hint{font-size:11.5px;line-height:1.5;color:#666;margin:6px 0 0;min-height:1em}
+.ws-date-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ws-date-row input{flex:1 1 150px;width:auto}
+.ws-link{font-size:12px;text-decoration:underline;text-underline-offset:4px;min-height:44px;padding:0 2px;cursor:pointer;color:#545454;background:none}
+.ws-note{font-size:12px;line-height:1.55;margin:4px 0 16px;color:#555}
+.ws-download{display:block;width:100%;min-height:52px;background:#454545;color:#fff;font-weight:650;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border:0}
+.ws-download:hover{background:#333}
+.ws-download:disabled{background:#8a8a8a;cursor:progress}
+.ws-status{font-size:12.5px;line-height:1.5;margin:10px 0 0;min-height:1.5em;color:#3d3d3d}
+.ws-helper{font-size:11.5px;line-height:1.6;color:#666;margin:8px 0 0}
+.ws-preview-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ws-preview-head span{font-size:11px;letter-spacing:.06em}
+.ws-pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:28px;align-items:start}
+.ws-page{margin:0;min-width:0}
+.ws-sheet{aspect-ratio:8.5/11;background:#fff;box-shadow:0 10px 34px rgba(0,0,0,.13);border:1px solid #e3e3e3;position:relative}
+.ws-sheet :global(svg){display:block;width:100%;height:100%}
+.ws-page figcaption{font-size:10px;font-weight:650;letter-spacing:.19em;text-transform:uppercase;text-align:center;margin-top:12px}
+.ws-jump,.ws-download-again{display:none}
+.ws-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;margin:0;padding:20px;text-align:center}
+@media(max-width:860px){.ws-jump{display:inline-block;font-size:13px;text-decoration:underline;text-underline-offset:4px;padding:10px 0 14px;margin-top:-12px}.ws-download-again{display:block;margin-top:24px}.ws-workspace{grid-template-columns:1fr}.ws-controls{position:static;padding:20px}.ws-intro{padding:28px 0 26px}.ws-controls input,.ws-controls textarea,.ws-controls select{font-size:16px}}
 </style>
 </PublicLayout>

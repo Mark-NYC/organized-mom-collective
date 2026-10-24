@@ -21,3 +21,4 @@ npm-debug.log*
 
 # page inventory output (scripts/page-inventory.mjs)
 page-inventory.json
+worksheet-qa/
