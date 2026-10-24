@@ -1,0 +1,35 @@
+---
+/**
+ * Unlisted, noindex product prototype for the January 2027 habit reminder card.
+ * Reuses the real January HabitBuilder rather than imitating it.
+ * Deliberately outside ClubLayout and the membership gate. No member data, auth,
+ * subscription access or private kit documents are loaded on this route.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HabitBuilder from '../../components/site/HabitBuilder.astro';
+import '@fontsource/kalam/latin-700.css';
+import '../../styles/club.css';
+---
+
+<BaseLayout
+  title="January Habit Cards Preview · Organized Family Club"
+  description="Unlisted January habit reminder card prototype."
+  robots="noindex"
+  tracking={false}
+>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <main class="min-h-screen bg-ivory px-4 py-10 text-warm-ink sm:px-8">
+    <div class="mx-auto mb-7 max-w-[816px]">
+      <p class="label text-warm-soft">ORGANIZED FAMILY CLUB · JANUARY 2027</p>
+      <h1 class="mt-3 font-serif text-[2.1rem] leading-tight sm:text-[2.7rem]">Our Family Habit Cards</h1>
+      <p class="mt-3 text-lg text-warm-soft">Build the habit. Lose the reminder.</p>
+      <div class="mt-5 border-l-2 border-sage bg-white px-5 py-4 text-sm leading-relaxed text-warm-ink">
+        <strong>Unlisted product preview.</strong> This uses the actual Habit Builder, without a Club login.
+        Choose one frustrating daily moment, connect the next action to a habit your family already does,
+        then print the reminder and put it where the action happens.
+        Changes save only in this browser. This is not the finished mailed version.
+      </div>
+    </div>
+    <HabitBuilder storageKey="omc:preview:january-habit-card:v1" brand="Organized Family Club" />
+  </main>
+</BaseLayout>
