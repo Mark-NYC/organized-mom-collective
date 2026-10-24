@@ -9,28 +9,27 @@ const {storageKey='omc:club:august-school-routines:v1'}=Astro.props;
 const morning=routineTypes.morning.steps;
 const after=routineTypes.afterschool.steps;
 const icons={
- clothes:'/images/responsibilities/get-dressed-256.webp',
- teeth:'/images/responsibilities/brush-my-teeth-256.webp',
- bag:'/images/responsibilities/pack-my-backpack-256.webp',
- bed:'/images/responsibilities/make-my-bed-256.webp',
- hands:'/images/responsibilities/wash-my-hands-256.webp',
- lunch:'/images/responsibilities/clear-the-table-256.webp',
- shoes:'/images/responsibilities/get-dressed-256.webp',
- paper:'/images/responsibilities/tidy-my-desk-256.webp',
- book:'/images/club/july/book.png',
- breakfast:'/images/responsibilities/set-the-table-256.webp',
+ wake:'/images/club/august/morning-start.png',
+ clothes:'/images/club/august/shirt.png',
+ breakfast:'/images/club/august/breakfast-bowl.png',
+ teeth:'/images/club/august/toothbrush.png',
+ bag:'/images/club/august/basket.png',
+ shoes:'/images/club/august/shirt.png',
+ hands:'/images/club/august/dish.png',
+ snack:'/images/club/august/breakfast-bowl.png',
+ book:'/images/club/august/book.png',
 };
 const initial=[
- {id:'wake',label:morning[0][1],icon:'bed',group:'morning'},
- {id:'dress',label:morning[2][1],icon:'clothes',group:'morning'},
- {id:'eat',label:morning[3][1],icon:'breakfast',group:'morning'},
- {id:'teeth',label:morning[4][1],icon:'teeth',group:'morning'},
- {id:'backpack',label:morning[5][1],icon:'bag',group:'morning'},
- {id:'shoes',label:after[0][1],icon:'shoes',group:'after'},
- {id:'unpack',label:after[1][1],icon:'bag',group:'after'},
- {id:'wash',label:after[2][1],icon:'hands',group:'after'},
- {id:'snack',label:after[3][1],icon:'lunch',group:'after'},
- {id:'homework',label:after[4][1],icon:'book',group:'after'},
+ {id:'wake',time:morning[0][0],label:morning[0][1],icon:'wake',group:'morning'},
+ {id:'dress',time:morning[2][0],label:morning[2][1],icon:'clothes',group:'morning'},
+ {id:'eat',time:morning[3][0],label:morning[3][1],icon:'breakfast',group:'morning'},
+ {id:'teeth',time:morning[4][0],label:morning[4][1],icon:'teeth',group:'morning'},
+ {id:'backpack',time:morning[5][0],label:morning[5][1],icon:'bag',group:'morning'},
+ {id:'shoes',time:after[0][0],label:after[0][1],icon:'shoes',group:'after'},
+ {id:'unpack',time:after[1][0],label:after[1][1],icon:'bag',group:'after'},
+ {id:'wash',time:after[2][0],label:after[2][1],icon:'hands',group:'after'},
+ {id:'snack',time:after[3][0],label:after[3][1],icon:'snack',group:'after'},
+ {id:'homework',time:after[4][0],label:after[4][1],icon:'book',group:'after'},
 ];
 ---
 <div class="asr" data-asr-key={storageKey} data-asr-icons={JSON.stringify(icons)} data-asr-starters={JSON.stringify(initial)}>
@@ -43,9 +42,9 @@ const initial=[
  <div class="asr-layout">
   <aside class="asr-editor">
    <p class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINE</p><h2>Already prepared.</h2>
-   <p>Choose a child and review their routine. Click the words on the sheet to edit; use the × beside any step to remove it. Nothing to assemble or track each day.</p>
+   <p>Choose a child and review their routine. Edit the time or words right on the sheet; use × to remove any step. Nothing to assemble or track each day.</p>
    <label>Routine for <select data-asr-child><option value="family">Our family</option></select></label>
-   <label>Routine detail <select data-asr-mode><option value="standard">Five steps per routine</option><option value="simple">Four essentials per routine</option></select></label>
+   <label>Routine detail <select data-asr-mode><option value="standard">Five timed steps per routine</option><option value="simple">Four essentials per routine</option></select></label>
    <details class="asr-customize"><summary>Adjust the steps <span>Optional</span></summary><p>Reorder or restore steps without changing the rest of your family’s boards.</p><div data-asr-options></div></details>
    <div class="asr-parent-note"><strong>One small handoff</strong><p>Show your child where this sheet lives, walk through it once, then invite them to check what's next. Adults continue to own school travel, medications, and safety decisions.</p></div>
    <button class="asr-primary" data-asr-print type="button">Print School Routines / Save PDF</button>
@@ -60,6 +59,8 @@ const initial=[
      <header class="asr-paper-head"><p>ORGANIZED FAMILY CLUB · AUGUST 2027</p><h2>My School Day</h2><span data-asr-name>Our morning & after-school routine</span></header>
      <div class="asr-panel asr-panel-am"><header><span class="asr-circle">01</span><div><h3>Before School</h3><p>First things first. I can do this!</p></div><span class="asr-accent">MORNING</span></header><div class="asr-rows" data-asr-group="morning">
       {initial.filter(x=>x.group==='morning').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="morning">
+        <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
+        <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
         <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
         <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
         <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
@@ -96,30 +97,42 @@ const initial=[
 @media(max-width:1050px){.asr-layout{display:flex;flex-direction:column}.asr-preview{order:0;width:100%}.asr-editor{order:1;max-width:720px;width:100%}.asr-remove{opacity:1}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{padding:0!important;margin:0!important;background:#fff!important}body *{visibility:hidden!important}.asr-stage,.asr-sheet,.asr-sheet *{visibility:visible!important}.asr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.asr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.asr-remove{display:none!important}.asr [contenteditable]{outline:none!important;background:transparent!important}}
+
+/* August is a sequential time-based routine, never a card grid. */
+.asr-sheet{padding:27px 46px 22px}
+.asr-paper-head{padding:10px 15px 12px}
+.asr-paper-head h2{font-size:44px;margin:6px 0}
+.asr-panel{padding:13px 18px 14px;margin-top:14px}
+.asr-panel>header{margin-bottom:9px}
+.asr-panel h3{font-size:27px}
+.asr-rows{display:flex;flex-direction:column;gap:6px}
+.asr-row{display:grid;grid-template-columns:90px 62px minmax(0,1fr);align-items:center;text-align:left;gap:20px;min-height:58px;padding:5px 19px;border-radius:7px}
+.asr-row time{font:700 18px/1.15 Montserrat,Arial,sans-serif;color:#536558;white-space:nowrap;font-variant-numeric:tabular-nums}
+.asr-row img{width:58px;height:47px;object-fit:contain}
+.asr-row strong{font:600 16px/1.24 Montserrat,Arial,sans-serif;overflow-wrap:normal}
+.asr-row .asr-remove{right:5px;top:50%;transform:translateY(-50%)}
+.asr-row strong{padding-right:11px}
+.asr-paper-foot{padding-top:10px}
+.asr-paper-foot strong{font-size:18px}
+.asr-paper-foot span{margin-top:8px}
 </style>
 <script>
 type Group='morning'|'after';
-type Step={id:string;label:string;icon:string;group:Group;removed?:boolean};
+type Step={id:string;time:string;label:string;icon:string;group:Group;removed?:boolean};
 type Board={steps:Step[];mode:'standard'|'simple';footer:string;child:string};
 type Child={id:string;firstName:string;birthYear?:number;birthMonth?:number};
-const iconPaths:Record<string,string>={
- clothes:'/images/responsibilities/get-dressed-256.webp',teeth:'/images/responsibilities/brush-my-teeth-256.webp',
- bag:'/images/responsibilities/pack-my-backpack-256.webp',bed:'/images/responsibilities/make-my-bed-256.webp',
- hands:'/images/responsibilities/wash-my-hands-256.webp',lunch:'/images/responsibilities/clear-the-table-256.webp',
- shoes:'/images/responsibilities/get-dressed-256.webp',paper:'/images/responsibilities/tidy-my-desk-256.webp',
- book:'/images/club/july/book.png',breakfast:'/images/responsibilities/set-the-table-256.webp'
-};
+const iconPaths:Record<string,string>={wake:"/images/club/august/morning-start.png",clothes:"/images/club/august/shirt.png",breakfast:"/images/club/august/breakfast-bowl.png",teeth:"/images/club/august/toothbrush.png",bag:"/images/club/august/basket.png",shoes:"/images/club/august/shirt.png",hands:"/images/club/august/dish.png",snack:"/images/club/august/breakfast-bowl.png",book:"/images/club/august/book.png"};
 const seeds:Step[]=[
- {id:'wake',label:'Wake up & stretch',icon:'bed',group:'morning'},
- {id:'dress',label:'Get dressed',icon:'clothes',group:'morning'},
- {id:'eat',label:'Eat breakfast',icon:'breakfast',group:'morning'},
- {id:'teeth',label:'Brush teeth',icon:'teeth',group:'morning'},
- {id:'backpack',label:'Grab backpack & shoes',icon:'bag',group:'morning'},
- {id:'shoes',label:'Shoes & coat away',icon:'shoes',group:'after'},
- {id:'unpack',label:'Unpack backpack & lunch box',icon:'bag',group:'after'},
- {id:'wash',label:'Wash hands',icon:'hands',group:'after'},
- {id:'snack',label:'Snack',icon:'lunch',group:'after'},
- {id:'homework',label:'Homework & reading',icon:'book',group:'after'},
+ {id:'wake',time:'07:00',label:'Wake up & stretch',icon:'wake',group:'morning'},
+ {id:'dress',time:'07:15',label:'Get dressed',icon:'clothes',group:'morning'},
+ {id:'eat',time:'07:25',label:'Eat breakfast',icon:'breakfast',group:'morning'},
+ {id:'teeth',time:'07:45',label:'Brush teeth',icon:'teeth',group:'morning'},
+ {id:'backpack',time:'07:50',label:'Grab backpack & shoes',icon:'bag',group:'morning'},
+ {id:'shoes',time:'15:30',label:'Shoes & coat away',icon:'shoes',group:'after'},
+ {id:'unpack',time:'15:35',label:'Unpack backpack & lunch box',icon:'bag',group:'after'},
+ {id:'wash',time:'15:40',label:'Wash hands',icon:'hands',group:'after'},
+ {id:'snack',time:'15:45',label:'Snack',icon:'snack',group:'after'},
+ {id:'homework',time:'16:00',label:'Homework & reading',icon:'book',group:'after'},
 ];
 const initial=(child='family',age=8):Board=>{
  const steps=seeds.map(x=>({...x}));
@@ -143,6 +156,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
    const steps=board.steps.filter(s=>s.group===group);
    for(const step of steps){const row=byId.get(step.id);if(!row)continue;row.hidden=!!step.removed||(board.mode==='simple'&&((group==='morning'&&step.id==='wake')||(group==='after'&&step.id==='wash')));
     const image=row.querySelector<HTMLImageElement>('img');if(image)image.src=iconPaths[step.icon]??iconPaths.bag;
+    const clock=row.querySelector<HTMLElement>('[data-asr-time]');if(clock&&document.activeElement!==clock)clock.textContent=step.time;
     const label=row.querySelector<HTMLElement>('[data-asr-text]');if(label&&document.activeElement!==label)label.textContent=step.label;
     holder.append(row);
    }
@@ -180,6 +194,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
  root.querySelector<HTMLSelectElement>('[data-asr-mode]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLSelectElement).value as Board['mode'];remember();draw()});
  root.querySelectorAll<HTMLElement>('[data-asr-id]').forEach(row=>{
   const id=row.dataset.asrId!,label=row.querySelector<HTMLElement>('[data-asr-text]');
+  const clock=row.querySelector<HTMLElement>('[data-asr-time]');
+  clock?.addEventListener('input',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.time=(clock.textContent??'').trim().slice(0,16);remember()}});
+  clock?.addEventListener('blur',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.time=(clock.textContent??'').trim().slice(0,16);remember();draw()}});
+  clock?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clock.blur()}});
   label?.addEventListener('input',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.label=(label.textContent??'').replace(/\s+/g,' ').slice(0,55);remember()}});
   label?.addEventListener('blur',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.label=(label.textContent??'').replace(/\s+/g,' ').trim().slice(0,55)||seeds.find(v=>v.id===id)!.label;remember();draw();makeOptions()}});
   label?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();label.blur()}});
