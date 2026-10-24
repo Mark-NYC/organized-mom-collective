@@ -23,7 +23,7 @@ const first = JOB_PRESETS[0];
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
         <h2>Your family's next step is ready.</h2>
         <p>We made a starting plan for the Goering family. You can change any recommendation, or just download it as is.</p>
-        <p class="ws-demo">Demo family · Not linked to an account or mailing</p>
+        <div class="ws-field"><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
       <div class="ws-rec-head"><h2>Recommended for your family</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
       <div id="ws-recommendations">
@@ -31,6 +31,7 @@ const first = JOB_PRESETS[0];
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Set and clear the dinner table</p><p id="ws-child1-desc">Set plates and utensils, clear dishes, wipe the table and push in chairs.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
       </div>
+      <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Send it.</button><button type="button" class="ws-secondary" id="ws-review">Review or change plan</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
       <form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
         <h2 id="ws-edit-heading">Adjust your plan</h2>
         <p class="ws-note">Only edit what you want changed. Everything else is ready.</p>
@@ -65,7 +66,7 @@ const first = JOB_PRESETS[0];
       <p class="ws-disclaimer">This is a preview of future Club membership. No plan is saved or mailed. Recommendations are examples based on a sample family.</p>
     </div>
     <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview">
-      <div class="ws-preview-head"><h2>Your two-sided worksheet</h2><span>8.5 × 11 in · front and back</span></div>
+      <div class="ws-preview-head"><h2>Your November mailer</h2><span>One sheet · printed on both sides</span></div>
       <div class="ws-pages" id="ws-pages" aria-busy="true">
         <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
         <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
@@ -90,6 +91,41 @@ const first = JOB_PRESETS[0];
   const done = $<HTMLTextAreaElement>('ws-done');
   const checkIn = $<HTMLInputElement>('ws-checkin');
   const child2 = $<HTMLSelectElement>('ws-child2-job');
+  const sample = $<HTMLSelectElement>('ws-sample');
+  const sampleProfiles = {
+    goering:{family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Set and clear the dinner table',childWhen:'Before and after dinner',childDone:'Before: set plates, forks and cups. After: move dishes to sink, wipe table, push in chairs.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
+    rivera:{family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
+    bennett:{family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
+  } as const;
+  function applySample(key:keyof typeof sampleProfiles) {
+    const p=sampleProfiles[key];
+    const value=(id:string,v:string)=> {($<HTMLInputElement|HTMLTextAreaElement>(id)).value=v;};
+    value('ws-family',p.family);value('ws-adult-owner',p.adult);value('ws-adult-when',p.adultWhen);
+    value('ws-owner',p.child1);value('ws-when',p.childWhen);value('ws-done',p.childDone);
+    value('ws-child2',p.child2);value('ws-child2-when',p.secondWhen);value('ws-existing',p.existing);
+    const pick=(id:string,customId:string,job:string,list:string[])=>{
+      const el=$<HTMLSelectElement>(id);const idx=list.findIndex(x=>x===job);
+      el.value=idx<0?'custom':String(idx);
+      const custom=$<HTMLInputElement>(customId);custom.hidden=idx>=0;custom.value=job;
+    };
+    const adultOptions=Array.from($<HTMLSelectElement>('ws-adult-job').options).filter(o=>o.value!=='custom').map(o=>o.value);
+    const adultIndex=adultOptions.indexOf(p.adultJob);
+    const adultSelect=$<HTMLSelectElement>('ws-adult-job');
+    adultSelect.value=adultIndex<0?'custom':adultOptions[adultIndex];
+    adultCustom.hidden=adultIndex>=0;adultCustom.value=p.adultJob;
+    pick('ws-job','ws-custom',p.childJob,JOB_PRESETS.map(x=>x.job));
+    $('ws-custom-wrap').hidden=$<HTMLSelectElement>('ws-job').value!=='custom';
+    const options=Array.from(child2.options).filter(x=>x.value!=='custom');
+    const match=options.find(o=>JOB_PRESETS[Number(o.value)].job===p.secondJob);
+    child2.value=match?.value??'custom';child2Custom.hidden=Boolean(match);child2Custom.value=p.secondJob;
+    last={when:p.childWhen,done:p.childDone};
+    form.classList.remove('is-editing');
+    $('ws-approval-note').textContent='Sample plan prepared. Nothing is mailed from this demo.';
+    update();
+  }
+  sample.addEventListener('change',()=>applySample(sample.value as keyof typeof sampleProfiles));
+  $('ws-approve').addEventListener('click',()=>{$('ws-approval-note').textContent='Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
+  $('ws-review').addEventListener('click',()=>{form.classList.add('is-editing');form.dataset.activeGroup='adult';form.scrollIntoView({behavior:'smooth',block:'start'});});
   const child2Custom = $<HTMLInputElement>('ws-child2-custom');
   const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
   const setBusy = (busy: boolean) => downloads.forEach((b) => (b.disabled = busy));
@@ -246,7 +282,7 @@ const first = JOB_PRESETS[0];
       status.textContent = 'The worksheet couldn’t load. Refresh to try again.';
     }
   }
-  update();
+  applySample('goering');
   start();
 </script>
 <style is:global>
@@ -322,4 +358,12 @@ const first = JOB_PRESETS[0];
 #ws-form[data-active-group="child1"] #ws-adult-fields,#ws-form[data-active-group="child1"] #ws-child2-fields{display:none}
 #ws-form[data-active-group="child2"] #ws-adult-fields,#ws-form[data-active-group="child2"] #ws-child1-fields{display:none}
 .ws-disclaimer{margin:18px 0}
+</style><style is:global>
+.ws-actions{margin:22px 0;padding:20px;border:1px solid #c8c8c8;background:#f7f7f5}
+.ws-actions .ws-download{width:100%;margin-bottom:10px}
+.ws-secondary{display:block;width:100%;padding:11px 16px;border:1px solid #777;background:white;color:#454545;font-weight:600;text-align:center}
+.ws-actions .ws-status{font-size:11px;line-height:1.5;margin-top:10px}
+.ws-ready select{background:white!important;color:#454545!important}
+.ws-rec{background:#fff}
+.ws-preview{background:#f7f7f5}
 </style>
