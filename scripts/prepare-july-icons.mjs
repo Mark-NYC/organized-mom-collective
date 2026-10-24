@@ -144,3 +144,12 @@ console.log('Prepared '+previewIconNames.length+' August v3 and '+snacks.size+' 
    .png().toFile(output);
  }
  console.log('Prepared '+sharedIcons.length+' consistent shared Club illustrations.');
+
+// Publish original supplied PNGs unchanged for the Club preview printables.
+const allIconSource=join(root,'assets/icons/ofc/updatedicons/png');
+const iconLibraryOutput=join(root,'public/images/club/icon-library');
+const {readdir}=await import('node:fs/promises');
+await mkdir(iconLibraryOutput,{recursive:true});
+const iconFiles=(await readdir(allIconSource)).filter(n=>n.endsWith('.png'));
+for(const filename of iconFiles)await copyFile(join(allIconSource,filename),join(iconLibraryOutput,filename));
+console.log('Published '+iconFiles.length+' original Club PNG icons without cropping or conversion.');
