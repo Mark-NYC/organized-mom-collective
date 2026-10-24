@@ -9,7 +9,7 @@ import sharp from 'sharp';
 import {mkdir} from 'node:fs/promises';
 import {join} from 'node:path';
 const root=process.cwd();
-const source=join(root,'assets/icons/ofc/updated');
+const source=join(root,'assets/icons/ofc/updatedicons/png');
 const destination=join(root,'public/images/club/july');
 const icons=[
  ['supporting','book'],['supporting','blocks'],['supporting','puzzle-piece'],
@@ -58,10 +58,10 @@ function alphaBounds(data,width,height){
  return {left,top,width:right-left+1,height:bottom-top+1};
 }
 for(const [folder,name] of icons){
- const input=join(source,folder,name+'.png'),output=join(destination,name+'.png');
- const {data,info}=await sharp(input).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ const input=join(source,name+'.png'),output=join(destination,name+'.png');
+ const {data,info}=await sharp(input).resize(256,256,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected icon dimensions: '+name);
- const removed=removeCaptionPixels(data,info.width,info.height);
+ const removed=0; // Updated transparent icon exports contain no embedded captions.
  const bounds=alphaBounds(data,info.width,info.height);
  // Full surviving illustration, NOT a hardcoded rectangle in the source.
  // The output has transparent safe margins on all sides for print and preview.
@@ -86,10 +86,10 @@ const augustIcons=[
 const augustDestination=join(root,'public/images/club/august');
 await mkdir(augustDestination,{recursive:true});
 for(const [folder,name] of augustIcons){
- const input=join(source,folder,name+'.png'),output=join(augustDestination,name+'.png');
+ const input=join(source,name+'.png'),output=join(augustDestination,name+'.png');
  const {data,info}=await sharp(input).resize(256,256,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected August icon dimensions: '+name);
- removeCaptionPixels(data,info.width,info.height);
+ // Updated transparent icon exports contain no embedded captions.
  const bounds=alphaBounds(data,info.width,info.height);
  await sharp(data,{raw:{width:256,height:256,channels:4}})
   .extract(bounds)
