@@ -8,6 +8,7 @@ const meals=aprilDinners;
 const initial=meals.find(m=>m.id==='tacos-b')!;
 const initialMeals=meals.filter(m=>m.effort==='quick'&&m.category==='tacos');
 const steps=['Check ingredients & assign helpers','Cook safely using the directions on the back','Set out the food and call the family','Eat together; captain leads the cleanup'];
+const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washing-dishes'];
 ---
 <div class="adc" data-adc-key={storageKey} style={'--adc-accent:'+monthColors[3].hex}>
  <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>A ready-to-use dinner with real ingredient quantities, simple instructions, and one person responsible for seeing it through—from prep to cleanup.</p></header>
@@ -51,7 +52,7 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
      <div class="adc-ingredients">{initial.ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient>{x}</span></div>)}</div>
      <div class="adc-section-label">OUR DINNER PLAN</div>
      <div class="adc-steps">
-      {steps.map((step,i)=><div class="adc-step"><span>{String(i+1).padStart(2,'0')}</span><strong>{step}</strong><i></i></div>)}
+      {steps.map((step,i)=><div class="adc-step"><span>{String(i+1).padStart(2,'0')}</span><img src={"/images/club/icon-library/"+stepIcons[i]+".png"} width="30" height="30" alt="" class="adc-step-icon"/><strong>{step}</strong><i></i></div>)}
      </div>
      <div class="adc-rule"><span>OUR FAMILY RULE</span><p>Ask the Dinner Captain what’s next, not Mom. The captain leads the plan and finishes with the team.</p></div>
     </div>
@@ -96,7 +97,7 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
 .adc-team-grid{gap:8px}.adc-team-grid>div{padding:9px 12px;min-height:68px}
 .adc-team-grid strong{font-size:19px;margin:3px 0}
 .adc-ingredients{row-gap:8px}.adc-ingredient{font-size:11px}
-.adc-step{min-height:35px;font-size:11px}
+.adc-step{min-height:35px;font-size:11px;display:flex;align-items:center;gap:9px}.adc-step-icon{width:30px;height:30px;object-fit:contain;flex-shrink:0}
 .adc-rule{padding:10px 14px;grid-template-columns:120px 1fr}
 .adc-rule p{font-size:13px}
 .adc-foot{margin-top:12px;padding-top:8px}
