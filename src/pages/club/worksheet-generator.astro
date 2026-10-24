@@ -14,18 +14,18 @@ const first = JOB_PRESETS[0];
   <div class="ws-top"><a href="/club" class="ws-back">← Organized Family Club</a><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
   <div class="ws-intro">
     <p class="ws-eyebrow">Your November family plan is prepared.</p>
-    <h1>One family. <em>More shared ownership.</em></h1>
-    <p>Our recommendations are ready. Review them if you like, or download the finished family tool just as it is.</p>
+    <h1>Your November plan. <em>Already prepared.</em></h1>
+    <p>A simple plan for sharing the load. Change anything you want, or leave it just as it is.</p>
   </div>
   <div class="ws-workspace">
     <div class="ws-left">
       <div class="ws-ready">
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
-        <h2>Your family's next step is ready.</h2>
+        <h2>Ready for your family.</h2>
         <p>We made a starting plan for the Goering family. You can change any recommendation, or just download it as is.</p>
         <div class="ws-field"><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
-      <div class="ws-rec-head"><h2>Recommended for your family</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
+      <div class="ws-rec-head"><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
       <div id="ws-recommendations">
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Set and clear the dinner table</p><p id="ws-child1-desc">Set plates and utensils, clear dishes, wipe the table and push in chairs.</p></article>
@@ -94,7 +94,7 @@ const first = JOB_PRESETS[0];
   const child2 = $<HTMLSelectElement>('ws-child2-job');
   const sample = $<HTMLSelectElement>('ws-sample');
   const sampleProfiles = {
-    goering:{family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Set and clear the dinner table',childWhen:'Before and after dinner',childDone:'Before: set plates, forks and cups. After: move dishes to sink, wipe table, push in chairs.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
+    goering:{family:'Goering',adult:'Mark',adultJob:'Own the school communications and forms',adultWhen:'Check school messages each weekday; complete forms and update the calendar',child1:'Andrew',childJob:'Prepare tomorrow’s clothes and school supplies',childWhen:'Every school night before bed',childDone:'Lay out tomorrow’s clothes. Check school supplies. Put everything in the ready spot.',child2:'Philip',secondJob:'Pack my school bag',secondWhen:'Each school night before bed',existing:'Megan: family calendar'},
     rivera:{family:'Rivera',adult:'Jordan',adultJob:'Own household supplies and restocking',adultWhen:'Check essential supplies on Sundays and restock before they run out',child1:'Sofia',childJob:'Put toys away',childWhen:'Before dinner, with an adult nearby',childDone:'Put blocks in their bin, books on the shelf and stuffed toys in the basket. A grown-up helps with sorting.',child2:'Leo',secondJob:'Keep the entryway tidy',secondWhen:'After school with a grown-up checking',existing:'Casey: meals and grocery shopping'},
     bennett:{family:'Bennett',adult:'Alex',adultJob:'Manage family appointments and transportation',adultWhen:'Review next week each Sunday; confirm rides and update the family calendar',child1:'Maya',childJob:'Put away my clean laundry',childWhen:'On laundry day, without waiting for a reminder',childDone:'Sort and fold clean clothes, put each item in the right drawer or closet, return the basket.',child2:'Ethan',secondJob:'Take out the trash and recycling',secondWhen:'The evening before scheduled pickup',existing:'Taylor: dinner planning'}
   } as const;
@@ -119,7 +119,7 @@ const first = JOB_PRESETS[0];
     const options=Array.from(child2.options).filter(x=>x.value!=='custom');
     const match=options.find(o=>JOB_PRESETS[Number(o.value)].job===p.secondJob);
     child2.value=match?.value??'custom';child2Custom.hidden=Boolean(match);child2Custom.value=p.secondJob;
-    value('ws-child2-done',match ? JOB_PRESETS[Number(match.value)].done : 'Complete the whole job and put everything back where it belongs.');
+    value('ws-child2-done',p.child2==='Philip' ? 'Pack homework and school folder. Check water bottle and lunch container. Put bag by the door.' : match ? JOB_PRESETS[Number(match.value)].done : 'Complete the whole job and put everything back where it belongs.');
     last={when:p.childWhen,done:p.childDone};
     form.classList.remove('is-editing');
     $('ws-approval-note').textContent='Sample plan prepared. Nothing is mailed from this demo.';
@@ -184,7 +184,7 @@ const first = JOB_PRESETS[0];
       set('ws-child1-desc',data.done??'');
       set('ws-child2-title',data.secondChild??'Child');
       set('ws-child2-summary',data.secondJob??'Choose a job');
-      set('ws-child2-desc',data.secondWhen??'');
+      set('ws-child2-desc',data.secondDone??data.secondWhen??'');
       if (!metrics) return;
       layoutWorksheet(metrics, data).forEach((page, i) => {
         sheets[i].innerHTML = renderSvg(page, i ? 'Back of the worksheet' : 'Front of the worksheet');
@@ -370,4 +370,16 @@ const first = JOB_PRESETS[0];
 .ws-ready select{background:white!important;color:#454545!important}
 .ws-rec{background:#fff}
 .ws-preview{background:#f7f7f5}
+</style>
+<style is:global>
+.ws-ready{background:transparent!important;border:0!important;border-bottom:1px solid #d5d5d5!important;padding:0 0 18px!important;margin-bottom:10px!important}
+.ws-ready h2{font-size:26px!important}
+.ws-rec-head{margin-top:20px}
+.ws-rec{border:0!important;border-bottom:1px solid #d0d0d0!important;padding:14px 0 17px!important;margin:0!important;box-shadow:none!important}
+.ws-rec:last-child{border-bottom:0!important}
+.ws-rec h3{font-size:23px!important}
+.ws-actions{background:transparent!important;border:0!important;border-top:1px solid #d0d0d0!important;padding:22px 0!important;margin-top:12px!important}
+.ws-preview{background:transparent!important}
+.ws-preview-head{border-bottom:1px solid #d5d5d5;padding-bottom:12px}
+.ws-disclaimer{font-size:11px}
 </style>
