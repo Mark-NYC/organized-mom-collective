@@ -206,21 +206,23 @@ const defaults = [
 ];
 for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v1';
+ // Family names never go into persistent localStorage on signed-in Club pages.
+ const storage = key.startsWith('omc:club:') ? sessionStorage : localStorage;
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-editor]'));
  const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-card]'));
  let values=defaults.map(x=>({...x}));
- try {const saved=JSON.parse(localStorage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
+ try {const saved=JSON.parse(storage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
  const paint=()=>{
   editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
   cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];target.textContent=values[i][field] || ' ';}));
  };
  editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
   const field=input.dataset.field as keyof typeof defaults[number];values[i][field]=input.value.slice(0,105);
-  try{localStorage.setItem(key,JSON.stringify(values))}catch{}
+  try{storage.setItem(key,JSON.stringify(values))}catch{}
   paint();
  })));
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{
-  values=defaults.map(x=>({...x}));try{localStorage.removeItem(key)}catch{}paint();
+  values=defaults.map(x=>({...x}));try{storage.removeItem(key)}catch{}paint();
   const status=root.querySelector<HTMLElement>('[data-status]');if(status)status.textContent='Original suggestions restored. Print at 100% / actual size on US Letter paper.';
  });
  // Keep the four actual printable cards, but derive the starting owners from
@@ -239,7 +241,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   ];
   values.forEach((item,i)=>{if(item.name===suggestedNames[i]||item.name===defaults[i].name)item.name=nextNames[i]});
   suggestedNames=nextNames;
-  try{localStorage.setItem(key,JSON.stringify(values))}catch{}
+  try{storage.setItem(key,JSON.stringify(values))}catch{}
   paint();
  });
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
