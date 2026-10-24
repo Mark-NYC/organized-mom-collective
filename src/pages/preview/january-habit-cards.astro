@@ -6,7 +6,7 @@
  * subscription access or private kit documents are loaded on this route.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import HabitBuilder from '../../components/site/HabitBuilder.astro';
+import JanuaryHabitCards from '../../components/club/JanuaryHabitCards.astro';
 import '@fontsource/kalam/latin-700.css';
 import '../../styles/club.css';
 ---
@@ -24,12 +24,12 @@ import '../../styles/club.css';
       <h1 class="mt-3 font-serif text-[2.1rem] leading-tight sm:text-[2.7rem]">Our Family Habit Cards</h1>
       <p class="mt-3 text-lg text-warm-soft">Build the habit. Lose the reminder.</p>
       <div class="mt-5 border-l-2 border-sage bg-white px-5 py-4 text-sm leading-relaxed text-warm-ink">
-        <strong>Unlisted product preview.</strong> This uses the actual Habit Builder, without a Club login.
-        Choose one frustrating daily moment, connect the next action to a habit your family already does,
-        then print the reminder and put it where the action happens.
+        <strong>Unlisted product preview.</strong> This uses the actual January habit card sheet, without a Club login.
+        Start with four prepared cards, edit only what you need,
+        then print the cards and put them where the actions happen.
         Changes save only in this browser. This is not the finished mailed version.
       </div>
     </div>
-    <HabitBuilder storageKey="omc:preview:january-habit-card:v1" brand="Organized Family Club" />
+    <JanuaryHabitCards storageKey="omc:preview:january-habit-cards:v2" />
   </main>
 </BaseLayout>
