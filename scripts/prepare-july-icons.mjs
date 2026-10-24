@@ -77,4 +77,28 @@ for(const [folder,name] of icons){
  }
  console.log(name+': removed '+removed+' caption components; full art bounds '+JSON.stringify(bounds)+'; output '+image.width+'x'+image.height);
 }
-console.log('Prepared '+icons.length+' illustrated July PNGs without text or cropped artwork.');
+
+const augustIcons=[
+ ['primary','morning-start'],['supporting','shirt'],['supporting','breakfast-bowl'],
+ ['supporting','toothbrush'],['supporting','basket'],['supporting','made-bed'],
+ ['supporting','dish'],['supporting','book']
+];
+const augustDestination=join(root,'public/images/club/august');
+await mkdir(augustDestination,{recursive:true});
+for(const [folder,name] of augustIcons){
+ const input=join(source,folder,name+'.png'),output=join(augustDestination,name+'.png');
+ const {data,info}=await sharp(input).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected August icon dimensions: '+name);
+ removeCaptionPixels(data,info.width,info.height);
+ const bounds=alphaBounds(data,info.width,info.height);
+ await sharp(data,{raw:{width:256,height:256,channels:4}})
+  .extract(bounds)
+  .resize({width:170,height:102,fit:'contain',background:{r:0,g:0,b:0,alpha:0}})
+  .extend({top:14,bottom:14,left:15,right:15,background:{r:0,g:0,b:0,alpha:0}})
+  .png().toFile(output);
+ const safe=await sharp(output).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ const drawn=alphaBounds(safe.data,safe.info.width,safe.info.height);
+ if(drawn.left<8||drawn.top<8||drawn.left+drawn.width>safe.info.width-8||drawn.top+drawn.height>safe.info.height-8)throw Error('August icon touches edge: '+name);
+}
+console.log('Prepared '+icons.length+' July and '+augustIcons.length+' August illustrated icon PNGs.');
+
