@@ -58,7 +58,8 @@ function alphaBounds(data,width,height){
  return {left,top,width:right-left+1,height:bottom-top+1};
 }
 for(const [folder,name] of icons){
- const input=join(source,name+'.png'),output=join(destination,name+'.png');
+ const input=name==='lightbulb' ? join(root,'assets/icons/ofc/utility/lightbulb.png') : join(source,name+'.png');
+ const output=join(destination,name+'.png');
  const {data,info}=await sharp(input).resize(256,256,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected icon dimensions: '+name);
  const removed=0; // Updated transparent icon exports contain no embedded captions.
