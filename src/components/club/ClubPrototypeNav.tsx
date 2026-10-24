@@ -33,7 +33,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
   const store=sampleStore(sample);
   store?.household().then(h=>{setHousehold(h);window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:h,sample}}))})
    .catch(()=>setStatus('Unable to load the sample family.'));
- },[sample,tab]);
+ },[sample]);
  const href=(url:string)=>url+'?sample='+encodeURIComponent(sample);
  return <div className="cproto-shell" data-club-chrome>
   <header className="cproto-top">
