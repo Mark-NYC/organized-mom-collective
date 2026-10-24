@@ -6,6 +6,7 @@
  * Print-safe: nothing is drawn within 0.5 in of the paper's edge, no bleed.
  */
 import { WORKSHEET } from './content.ts';
+import { monthColors } from '../../theme.ts';
 import { fit } from './text.ts';
 import type { FontKey, Metrics, Op, Page, WorksheetData } from './types.ts';
 
@@ -24,8 +25,8 @@ export const COLORS = {
   ink: '#333333',
   soft: '#575757',
   faint: '#7a7a7a',
-  blue: '#cddde1',
-  blueRule: '#9fb9c0',
+  blue: monthColors[10].hex,
+  blueRule: monthColors[10].hex,
   frame: '#8c8c8c',
   hair: '#cfcfcf',
   panel: '#f3f3f2',
@@ -117,7 +118,7 @@ function front(m:Metrics,d:WorksheetData):Page {
  g.block(X0,137,d.planTitle??'Our Family Ownership Plan','serif',{width:W,maxLines:2,size:31,min:23,lead:1.15});
  g.block(X0,165,d.planGoal??'Everyone owns a part. Everyone knows what finished means.','sans',{width:W,maxLines:2,size:9.5,min:8.5,lead:1.2,color:COLORS.soft});
  const group=(y:number,name:string|null,job:string|null,when:string|null,done:string|null)=>{
-  g.line(X0,y-24,X1,y-24,COLORS.hair,.8);
+  g.line(X0,y-24,X1,y-24,COLORS.blue,.9);
   g.block(X0,y,name??'A family member','serif',{width:145,maxLines:1,size:24,min:15,lead:1});
   g.block(X0+166,y,job??'One whole responsibility','serifItalic',{width:W-166,maxLines:2,size:16,min:11,lead:1.17});
   if(when)g.block(X0,y+22,when,'sans',{width:W,maxLines:1,size:10,min:9,lead:1.2,color:COLORS.soft});
@@ -127,7 +128,7 @@ function front(m:Metrics,d:WorksheetData):Page {
  group(215,d.adultOwner,d.adultJob,d.adultWhen,adultSteps.join('. '));
  group(386,d.owner,d.job,d.when,d.done);
  group(557,d.secondChild,d.secondJob,d.secondWhen,d.secondDone);
- g.line(X0,681,X1,681,COLORS.hair,.8);
+ g.line(X0,681,X1,681,COLORS.blue,.9);
  g.block(X0,707,d.momName??'Mom','serif',{width:140,maxLines:1,size:19,min:12,lead:1});
  g.label(X0+157,697,'Already owning',{size:6.1});
  g.block(X0+157,715,d.momOwns??'An existing family responsibility','sans',{width:W-157,maxLines:2,size:10,min:8.5,lead:1.2});
@@ -146,8 +147,8 @@ function back(m:Metrics,d:WorksheetData):Page {
   ['Hand over the noticing','The owner remembers when it happens, not just how to do it.'],
   ['Adjust without taking it back','If a step is too hard, simplify it together. Keep a clear owner.']
  ];
- lines.forEach((item,i)=>{const y=289+i*104;g.line(X0,y-24,X1,y-24,COLORS.hair,.75);g.text(X0,y,item[0],'serif',19);g.block(X0,y+26,item[1],'sans',{width:W,maxLines:2,size:11,min:10,lead:1.3});});
- g.line(X0,580,X1,580,COLORS.hair,.8);
+ lines.forEach((item,i)=>{const y=289+i*104;g.line(X0,y-24,X1,y-24,COLORS.blue,.9);g.text(X0,y,item[0],'serif',19);g.block(X0,y+26,item[1],'sans',{width:W,maxLines:2,size:11,min:10,lead:1.3});});
+ g.line(X0,580,X1,580,COLORS.blue,.9);
  g.label(X0,601,'What the family aims to take off '+(d.momName??'Mom')+'’s plate',{size:6.3});
  g.block(X0,626,d.momRelief??'The responsibility for managing and reminding everyone about their jobs.','serifItalic',{width:W,maxLines:2,size:14,min:11,lead:1.3});
  g.text(X0,670,'A note from Megan','serifItalic',19);
