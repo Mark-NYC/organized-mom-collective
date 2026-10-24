@@ -47,7 +47,7 @@ const blocks=[
    <div class="msr-preview-head"><h2>Your summer board</h2><span>One page · US Letter</span></div>
    <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet>
     <div class="msr-sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
-    <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span>A DAY AT HOME</span></div>
+    <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span data-day-label>A DAY AT HOME</span></div>
     <div class="msr-rows" data-print-rows>
      {blocks.map((b,i)=><div class="msr-row" data-rhythm-key={b.key} style={'--msr-tint:'+b.tint}>
       <div class="msr-icon-box"><Image src={b.icon} alt="" width={70} height={70} loading="eager" class="msr-icon" /></div>
@@ -218,6 +218,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   root.dataset.msrStructure=options.structure;
   root.dataset.msrDays=options.days;
   const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
+  const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':'A DAY AT HOME';
   const visible=options.structure==='relaxed'?order.filter(k=>k!=='create'&&k!=='free'):order;
   for(const key of order){
    const node=nodes.get(key);if(!node||!list)continue;
@@ -226,7 +227,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    const v=resolved(key);
    const title=node.querySelector<HTMLElement>('[data-title]');if(title)title.textContent=v.title;
    const desc=node.querySelector<HTMLElement>('[data-desc]');if(desc)desc.textContent=v.desc;
-   const time=node.querySelector<HTMLElement>('[data-time]');if(time)time.textContent=clock(v.time);
+   const time=node.querySelector<HTMLElement>('[data-time]');if(time)time.textContent=options.structure==='balanced'&&v.time?'~'+clock(v.time):clock(v.time);
    if(time)time.hidden=options.structure==='relaxed'||!v.time;
   }
   const day=root.querySelector<HTMLSelectElement>('[data-days]');if(day)day.value=options.days;
