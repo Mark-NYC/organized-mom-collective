@@ -14,13 +14,14 @@ import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro'
 import FebruaryConnectionCards from '../../../components/club/FebruaryConnectionCards.astro';
 import MarchSpringPrep from '../../../components/club/MarchSpringPrep.astro';
 import AprilDinnerPlan from '../../../components/club/AprilDinnerPlan.astro';
+import MaySummerRhythm from '../../../components/club/MaySummerRhythm.astro';
 
 export function getStaticPaths() {
   return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
 }
 
 const { slug, theme } = Astro.props;
-const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : null;
+const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : null;
 ---
 
 <ClubLayout title={theme}>
@@ -33,7 +34,8 @@ const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-
          month === 'january' ? <JanuaryHabitCards storageKey="omc:club:january-habit-cards:v2" /> :
          month === "february" ? <FebruaryConnectionCards storageKey="omc:club:february-connection:v1" /> :
          month === "march" ? <MarchSpringPrep storageKey="omc:club:march-spring-prep:v1" /> :
-         <AprilDinnerPlan storageKey="omc:club:april-dinner:v1" />}
+         month === "april" ? <AprilDinnerPlan storageKey="omc:club:april-dinner:v1" /> :
+         <MaySummerRhythm storageKey="omc:club:may-summer-rhythm:v1" />}
       </div>
     </>
   ) : <KitPage client:only="react" slug={slug} />}
