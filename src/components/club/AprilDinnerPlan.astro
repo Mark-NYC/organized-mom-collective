@@ -75,6 +75,43 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
 </div>
 <style is:global>
 .adc,.adc *{box-sizing:border-box}.adc{max-width:1450px;margin:0 auto;padding:28px clamp(18px,3.5vw,52px) 75px;color:#454545;font-family:Montserrat,Arial,sans-serif}.adc-intro{max-width:780px;margin:0 0 42px}.adc-intro>a{font-size:12px;text-decoration:underline;display:inline-block;margin-bottom:30px}.adc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.16em}.adc-intro h1{font:400 clamp(38px,4.5vw,62px)/1.1 Georgia,serif;margin:14px 0 18px}.adc-intro h1 em{color:#786c91}.adc-intro>p:last-child{font-size:15px;line-height:1.75}.adc-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:clamp(22px,4vw,60px);align-items:start}.adc-controls,.adc-view{min-width:0}.adc-controls-head{border-top:9px solid var(--adc-accent);padding:20px 0 24px}.adc-controls-head h2{font:italic 27px Georgia,serif;color:#786c91;margin:12px 0}.adc-controls-head p:last-child{font-size:13px;line-height:1.65}.adc-controls label{display:block;border-top:1px solid #ddd8e8;padding-top:15px;margin-bottom:18px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.adc-controls label small{display:block;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:0;text-transform:none;margin-top:5px}.adc-controls select{display:block;width:100%;min-height:45px;border:1px solid #b9b3be;background:white;color:#454545;font:13px Montserrat,Arial,sans-serif;padding:9px 10px;margin-top:8px}.adc-explainer{border-top:3px solid #ddd8e8;padding:19px 0}.adc-explainer h3{font:400 22px Georgia,serif;margin:0 0 10px}.adc-explainer p{font-size:12px;line-height:1.7;margin:0 0 13px}.adc-button{background:#454545;color:#fff;border:0;width:100%;min-height:52px;padding:12px;cursor:pointer;font-weight:700;font-size:12px}.adc-reset{display:block;border:0;background:none;cursor:pointer;text-decoration:underline;color:#454545;min-height:44px;margin:8px auto;font-size:12px}.adc-status,.adc-preview-note{font-size:11px;line-height:1.6;color:#666}.adc-view-title{display:flex;justify-content:space-between;align-items:baseline;gap:15px;flex-wrap:wrap;border-bottom:1px solid #ddd8e8;padding-bottom:14px;margin-bottom:20px}.adc-view-title h2{font:400 25px Georgia,serif}.adc-view-title span{font-size:12px}.adc-stage{width:100%;position:relative}.adc-pages{position:absolute;top:0;left:0;transform:scale(var(--adc-scale,.78));transform-origin:top left;display:flex;flex-direction:column;gap:28px;width:816px}.adc-sheet{width:816px;height:1056px;background:white;border:1px solid #ebe6e9;box-shadow:0 8px 30px #0002;display:flex;flex-direction:column;overflow:hidden;color:#4a4450;padding:38px 46px 24px}.adc-sheet-head{background:#f1eef8;border-top:10px solid #ddd8e8;padding:21px 27px 24px;min-height:172px}.adc-sheet-head>p{font-size:9px;letter-spacing:.16em;font-weight:700;margin:0}.adc-sheet-head h2{font:400 41px/1.14 Georgia,serif;color:#635877;margin:17px 0 13px}.adc-sheet-head h2 em{font-style:italic;font-weight:700}.adc-sheet-head>span{font-size:9px;letter-spacing:.09em;font-weight:700}.adc-sheet-inner{flex:1;min-height:0;display:flex;flex-direction:column}.adc-meal-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:21px 0 15px;border-bottom:1px solid #ddd8e8}.adc-meal-head h3{font:400 27px Georgia,serif;margin:9px 0 0}.adc-tiny{font-size:10px;font-weight:700;letter-spacing:.13em;color:#756c87}.adc-time{white-space:nowrap;padding:12px;background:#f4f1f8;font-size:11px}.adc-section-label{font-size:10px;font-weight:700;letter-spacing:.14em;margin:18px 0 12px}.adc-team-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.adc-team-grid>div{background:#f6f3fa;padding:12px 16px;min-height:79px}.adc-team-grid span{display:block;font-size:8px;font-weight:700;letter-spacing:.11em}.adc-team-grid strong{font:400 20px Georgia,serif;display:block;color:#66587d;margin:4px 0}.adc-team-grid p{font-size:10px;margin:0}.adc-ingredients{display:grid;grid-template-columns:1fr 1fr;gap:9px 25px}.adc-ingredient{display:flex;align-items:center;gap:10px;font-size:12px}.adc-ingredient i,.adc-step i,.adc-back-check i{width:14px;height:14px;flex:0 0 14px;border:1px solid #827b90;display:inline-block}.adc-steps{border-top:1px solid #ddd8e8}.adc-step{border-bottom:1px solid #ddd8e8;display:grid;grid-template-columns:25px 1fr 14px;gap:13px;align-items:center;min-height:40px;font-size:12px}.adc-step>span{color:#786c91;font-weight:700;font-size:10px}.adc-step strong{font-weight:500}.adc-rule{background:#f4f1f8;padding:12px 18px;display:grid;grid-template-columns:125px 1fr;gap:15px;margin-top:auto}.adc-rule span{font-size:9px;font-weight:700;letter-spacing:.08em}.adc-rule p{font:italic 15px/1.4 Georgia,serif;margin:0}.adc-foot{display:flex;justify-content:space-between;border-top:1px solid #ddd8e8;padding-top:11px;font-size:9px;letter-spacing:.1em;font-weight:700;margin-top:17px}.adc-back-head{background:#f1eef8}.adc-back-inner{padding-top:20px}.adc-back-section{border-bottom:1px solid #ddd8e8;padding:0 5px 22px;margin-bottom:22px}.adc-back-section h3{font:400 25px Georgia,serif;color:#635877;margin:10px 0 13px}.adc-back-section>p{font-size:13px;line-height:1.7;margin:0 0 11px}.adc-back-check{font-size:13px;display:flex;gap:12px;align-items:center;padding:8px 0}.adc-captain-box{background:#f4f1f8;padding:21px 23px}.adc-captain-box span{font-size:10px;font-weight:700;letter-spacing:.13em}.adc-captain-box p{font:italic 17px/1.5 Georgia,serif;margin:12px 0 0}.adc-back-note{margin-top:auto;text-align:center;font-size:10px;letter-spacing:.12em;color:#716583;font-weight:700;padding-top:24px}
+
+/* Print refinement: fewer decorative gaps, more usable cooking content. */
+.adc-sheet{padding:30px 44px 22px}
+.adc-sheet-head{min-height:145px;padding:16px 25px 17px;border-top-width:8px}
+.adc-sheet-head h2{font-size:37px;margin:11px 0 9px}
+.adc-meal-head{padding:14px 0 10px}.adc-meal-head h3{font-size:24px}
+.adc-time{text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center;padding:10px 12px;font-size:11px;font-weight:700}
+.adc-time small{font-size:9px;font-weight:400}
+.adc-section-label{margin:12px 0 8px}
+.adc-team-grid{gap:8px}.adc-team-grid>div{padding:9px 12px;min-height:68px}
+.adc-team-grid strong{font-size:19px;margin:3px 0}
+.adc-ingredients{row-gap:8px}.adc-ingredient{font-size:11px}
+.adc-step{min-height:35px;font-size:11px}
+.adc-rule{padding:10px 14px;grid-template-columns:120px 1fr}
+.adc-rule p{font-size:13px}
+.adc-foot{margin-top:12px;padding-top:8px}
+.adc-back-inner{padding-top:15px}
+.adc-recipe-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;border-bottom:1px solid #ddd8e8;padding:4px 0 16px}
+.adc-recipe-top h3{font:400 26px Georgia,serif;color:#635877;margin:8px 0 0}
+.adc-recipe-top>span{font-size:11px;white-space:nowrap;margin-top:12px}
+.adc-recipe-intro{font:13px/1.55 Montserrat,Arial,sans-serif;margin:13px 0 18px}
+.adc-recipe-steps{border-top:1px solid #ddd8e8;display:grid;gap:0}
+.adc-recipe-step{display:grid;grid-template-columns:34px 1fr;gap:13px;border-bottom:1px solid #ddd8e8;padding:17px 0;align-items:start}
+.adc-recipe-step>span{color:#766b90;font:700 11px Montserrat,Arial,sans-serif}
+.adc-recipe-step p{font:13px/1.6 Montserrat,Arial,sans-serif;margin:0}
+.adc-captain-check{margin-top:18px;padding:16px 20px;background:#faf8fc;display:grid;gap:9px}
+.adc-captain-check>span{font-size:10px;letter-spacing:.13em;font-weight:700;color:#66587d;margin-bottom:4px}
+.adc-captain-check>div{display:flex;align-items:center;gap:12px;font-size:11px}
+.adc-captain-check i{width:13px;height:13px;flex:0 0 13px;border:1px solid #8d8794}
+.adc-captain-box{padding:16px 20px;margin-top:14px}
+.adc-captain-box p{font:italic 14px/1.5 Georgia,serif;margin:8px 0 0}
+.adc-back-note{font-size:9px;padding-top:13px}
+@media print{
+ .adc-sheet{overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ .adc-sheet-head,.adc-captain-check,.adc-captain-box{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+}
+
 @media(max-width:1100px){.adc-layout{grid-template-columns:1fr}.adc-controls{max-width:720px}}
 @page{size:letter portrait;margin:0}
 @media print{
