@@ -42,7 +42,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
      </select>
     </label>
    </div>
-   <details class="jss-customize"><summary>Change the food choices <span>Optional</span></summary><p>Click a choice to swap it for something your family keeps on hand. You can also edit its label on the poster.</p><div data-jss-choices></div></details>
+   <details class="jss-customize"><summary>Change the food choices <span>Optional</span></summary><p>Swap a food, or remove a row you don't need. On the chart, click any words to edit them directly.</p><div data-jss-choices></div></details>
    <div class="jss-caution"><strong>A quick parent check</strong><p>These are example foods, not allergy- or age-screened recommendations. Before children use the station, choose foods that are safe for each child, prepare anything that needs cutting, and decide what requires adult help. Young children should be supervised when eating.</p></div>
    <button type="button" class="jss-primary" data-jss-print>Print Station / Save PDF</button>
    <button type="button" class="jss-download" data-jss-download>Download image (PNG)</button>
@@ -53,22 +53,22 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
    <div class="jss-preview-top"><h2>June's printed tool</h2><span>One page · prepared for kids</span></div>
    <div class="jss-stage" data-jss-stage>
     <article class="jss-sheet" data-jss-sheet>
-     <div class="jss-sheet-head"><span>ORGANIZED FAMILY CLUB · JUNE 2027</span><h2>I can make <em>my own snack!</em></h2><p>Pick it. Enjoy it. Put it away.</p></div>
+     <div class="jss-sheet-head"><span>ORGANIZED FAMILY CLUB · JUNE 2027</span><h2>I can make <em data-jss-edit="headline" contenteditable="true" role="textbox" aria-label="Edit snack station heading">my own snack!</em></h2><p data-jss-edit="subtitle" contenteditable="true" role="textbox" aria-label="Edit subtitle">Pick it. Enjoy it. Put it away.</p></div>
      <div class="jss-family" data-jss-family>OUR FAMILY'S SNACK STATION</div>
-     <div class="jss-instruction"><span>MY SNACK RULE</span><strong data-jss-rule-text>Choose one from each side.</strong></div>
+     <div class="jss-instruction"><span>MY SNACK RULE</span><strong data-jss-rule-text data-jss-edit="rule" contenteditable="true" role="textbox" aria-label="Edit snack rule">Choose one from each side.</strong></div>
      <div class="jss-columns">
-      <section class="jss-zone jss-fridge"><div class="jss-zone-title"><span>01</span><div><h3>From the fridge</h3><p>Choose one</p></div></div>
+      <section class="jss-zone jss-fridge"><div class="jss-zone-title"><span>01</span><div><h3 data-jss-edit="fridgeTitle" contenteditable="true" role="textbox" aria-label="Edit fridge heading">From the fridge</h3><p>Choose one</p></div></div>
        <div class="jss-foods">
-        {initialFridge.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="fridge" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong></div>})}
+        {initialFridge.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="fridge" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong><button type="button" class="jss-remove" data-jss-remove aria-label={'Remove '+f.name} title="Remove this row">×</button></div>})}
        </div>
       </section>
-      <section class="jss-zone jss-pantry"><div class="jss-zone-title"><span>02</span><div><h3>From the pantry</h3><p>Choose one</p></div></div>
+      <section class="jss-zone jss-pantry"><div class="jss-zone-title"><span>02</span><div><h3 data-jss-edit="pantryTitle" contenteditable="true" role="textbox" aria-label="Edit pantry heading">From the pantry</h3><p>Choose one</p></div></div>
        <div class="jss-foods">
         {initialPantry.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="pantry" data-slot={i}><img src={'/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong></div>})}
        </div>
       </section>
      </div>
-     <div class="jss-done"><span>AND WHEN I'M DONE…</span><strong data-jss-reset-text>Put food away · Bring dishes to the sink</strong></div>
+     <div class="jss-done"><span>AND WHEN I'M DONE…</span><strong data-jss-reset-text data-jss-edit="cleanup" contenteditable="true" role="textbox" aria-label="Edit cleanup reminder">Put food away · Bring dishes to the sink</strong></div>
      <div class="jss-footer"><span>OUR FAMILY KNOWS THE PLAN</span><span>ORGANIZED FAMILY CLUB · JUNE</span></div>
     </article>
    </div>
@@ -91,20 +91,28 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 .jss-sheet-head{background:#f6eaca;border-top:8px solid #ebd7a4;padding:21px 27px 18px;min-height:161px}.jss-sheet-head>span{display:block;font-size:10px;font-weight:700;letter-spacing:.15em;color:#777452}.jss-sheet-head h2{font:400 46px/1.08 Georgia,serif;color:#575c43;margin:12px 0 8px}.jss-sheet-head h2 em{font-style:italic;color:#78865f}.jss-sheet-head p{font:italic 17px Georgia,serif;color:#7d7d65;margin:0}
 .jss-family{font-size:11px;letter-spacing:.13em;font-weight:700;color:#737e69;margin:21px 0 13px}.jss-instruction{border:1px solid #e2e9dc;background:#f6faf2;border-radius:5px;padding:11px 15px;display:flex;align-items:baseline;gap:15px}.jss-instruction span,.jss-done span{font-size:10px;font-weight:700;letter-spacing:.08em;color:#7e8f73}.jss-instruction strong{font:22px Georgia,serif;color:#445b3e}
 .jss-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.jss-zone{border:1px solid #e5e4da;border-radius:9px;overflow:hidden;background:#fff}.jss-zone-title{padding:16px 14px 12px;display:flex;gap:12px;align-items:center;background:#e6eee3}.jss-zone-title>span{font:italic 32px Georgia,serif;color:#8fa389}.jss-zone-title h3{font:400 24px Georgia,serif;margin:0;color:#4b6046}.jss-zone-title p{font-size:11px;margin:4px 0 0;color:#687760}.jss-pantry .jss-zone-title{background:#f5e5cb}.jss-pantry .jss-zone-title>span{color:#b69c75}.jss-pantry .jss-zone-title h3{color:#7a6045}
-.jss-foods{padding:6px 11px 11px}.jss-food{min-height:104px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #e8eae5}.jss-food:last-child{border-bottom:0}.jss-food img{width:68px;height:68px;object-fit:contain;flex:none}.jss-food strong{font:400 19px/1.25 Montserrat,Arial,sans-serif;color:#57594f;min-width:0;outline-offset:4px;overflow-wrap:anywhere}
+.jss-foods{padding:6px 11px 11px}.jss-food{min-height:104px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #e8eae5}.jss-food:last-child{border-bottom:0}.jss-food[hidden]{display:none!important}.jss-food img{width:68px;height:68px;object-fit:contain;flex:none}.jss-food strong{font:400 19px/1.25 Montserrat,Arial,sans-serif;color:#57594f;min-width:0;outline-offset:4px;overflow-wrap:anywhere}
+.jss-food{position:relative}.jss-remove{position:absolute;right:2px;top:3px;border:1px solid #cad7c5;border-radius:50%;width:27px;height:27px;background:#fff;color:#577057;font-size:19px;cursor:pointer;opacity:0}
+.jss-food:hover .jss-remove,.jss-food:focus-within .jss-remove{opacity:1}
+.jss-toggle{margin-top:7px;padding:5px 9px;border:1px solid #bac9b4;background:#fff;color:#5a7051;border-radius:3px;font-size:11px;cursor:pointer}
+.jss [data-jss-edit]{cursor:text;outline-offset:3px}
+.jss [data-jss-edit]:hover{outline:1px dashed #a6b69d}
+.jss [data-jss-edit]:focus{outline:2px solid #94ae8e;background:#f5faf2}
+@media print{.jss-remove{display:none!important}.jss [data-jss-edit]{outline:none!important;background:transparent!important}}
+.jss.jss-export .jss-remove{display:none!important}
 .jss-food strong[contenteditable]:hover{outline:1px dashed #a6b69d}.jss-food strong[contenteditable]:focus{outline:2px solid #94ae8e;background:#f5faf2}
 .jss-done{margin-top:19px;background:#eaf1e7;border-radius:6px;padding:17px;text-align:center}.jss-done span{display:block;margin-bottom:9px}.jss-done strong{font:400 20px Georgia,serif;color:#4a6044}
 .jss-footer{margin-top:auto;display:flex;justify-content:space-between;border-top:1px solid #dfe5dc;padding-top:9px;font-size:9px;letter-spacing:.1em;color:#78816f;font-weight:700}
 .jss.jss-export .jss-stage{height:1056px!important;width:816px!important}.jss.jss-export .jss-sheet{transform:none!important;box-shadow:none!important}
-@media(max-width:1080px){.jss-layout{display:flex;flex-direction:column}.jss-preview{order:0;width:100%}.jss-editor{order:1;max-width:720px;width:100%}.jss-food strong[contenteditable]{pointer-events:none}}
+@media(max-width:1080px){.jss-layout{display:flex;flex-direction:column}.jss-preview{order:0;width:100%}.jss-editor{order:1;max-width:720px;width:100%}.jss-food strong[contenteditable]{pointer-events:none}.jss-remove{opacity:1;width:29px;height:29px;top:3px}.jss [data-jss-edit]{pointer-events:none}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{padding:0!important;margin:0!important;background:white!important}body *{visibility:hidden!important}.jss-stage,.jss-sheet,.jss-sheet *{visibility:visible!important}.jss-stage{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important}.jss-sheet{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.jss-food strong[contenteditable]{outline:none!important;background:transparent!important}}
 </style>
 <script>
 type Zone='fridge'|'pantry';
 type Food={id:string;name:string;zone:Zone};
-type Item={id:string;label:string};
-type State={fridge:Item[];pantry:Item[];rule:'one'|'two';reset:string};
+type Item={id:string;label:string;removed?:boolean};
+type State={fridge:Item[];pantry:Item[];rule:'one'|'two';reset:string;text:Record<string,string>};
 const foods:Food[]=[
  {id:'yogurt',name:'Yogurt cup',zone:'fridge'},{id:'cheese-stick',name:'Cheese stick',zone:'fridge'},
  {id:'apple',name:'Apple slices',zone:'fridge'},{id:'carrot-big',name:'Carrot sticks',zone:'fridge'},
@@ -117,7 +125,7 @@ const foods:Food[]=[
 const starter=():State=>({
  fridge:['yogurt','cheese-stick','apple','cucumber'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
  pantry:['crackers','granola-bar','dried-fruit','bagel'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
- rule:'two',reset:'Put food away · Bring dishes to the sink'
+ rule:'two',reset:'Put food away · Bring dishes to the sink',text:{}
 });
 for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  const key=root.dataset.jssKey??'omc:preview:june-snack-station:v1';
@@ -134,12 +142,15 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  const draw=()=>{
   root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
    const zone=el.dataset.zone as Zone;const index=Number(el.dataset.slot);const item=state[zone]?.[index];if(!item)return;
+   el.hidden=!!item.removed;
    const img=el.querySelector<HTMLImageElement>('img');if(img)img.src='/images/tools/lunch/'+item.id+'.png';
    const title=el.querySelector<HTMLElement>('[data-food-text]');if(title&&document.activeElement!==title)title.textContent=item.label;
   });
-  const rule=root.querySelector<HTMLElement>('[data-jss-rule-text]');if(rule)rule.textContent=state.rule==='two'?'Choose one from each side.':'Choose one snack from either side.';
+  const rule=root.querySelector<HTMLElement>('[data-jss-rule-text]');if(rule&&document.activeElement!==rule)rule.textContent=state.text.rule??(state.rule==='two'?'Choose one from each side.':'Choose one snack from either side.');
   root.querySelectorAll<HTMLElement>('.jss-zone-title p').forEach(el=>el.textContent=state.rule==='two'?'Choose one':'Pick one you like');
-  const reset=root.querySelector<HTMLElement>('[data-jss-reset-text]');if(reset)reset.textContent=state.reset;
+  const reset=root.querySelector<HTMLElement>('[data-jss-reset-text]');if(reset&&document.activeElement!==reset)reset.textContent=state.text.cleanup??state.reset;
+  const initial:Record<string,string>={headline:'my own snack!',subtitle:'Pick it. Enjoy it. Put it away.',fridgeTitle:'From the fridge',pantryTitle:'From the pantry'};
+  for(const [key,value] of Object.entries(initial)){const node=root.querySelector<HTMLElement>('[data-jss-edit="'+key+'"]');if(node&&document.activeElement!==node)node.textContent=state.text[key]??value}
   const fam=root.querySelector<HTMLElement>('[data-jss-family]');if(fam)fam.textContent=family;
   const ruleSelect=root.querySelector<HTMLSelectElement>('[data-rule]');if(ruleSelect)ruleSelect.value=state.rule;
   const resetSelect=root.querySelector<HTMLSelectElement>('[data-reset]');if(resetSelect)resetSelect.value=state.reset;
@@ -157,21 +168,33 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
     select.value=state[zone][i].id;
     select.addEventListener('change',()=>{
      const food=foods.find(f=>f.id===select.value&&f.zone===zone);if(!food)return;
-     state[zone][i]={id:food.id,label:food.name};save();draw();
+     state[zone][i]={id:food.id,label:food.name,removed:state[zone][i].removed};save();draw();
     });
-    label.append(select);field.append(label);container.append(field);
+    label.append(select);field.append(label);
+    const toggle=document.createElement('button');toggle.type='button';toggle.className='jss-toggle';toggle.textContent=state[zone][i].removed?'＋ Restore row':'× Remove row';
+    toggle.setAttribute('aria-label',(state[zone][i].removed?'Restore ':'Remove ')+state[zone][i].label);
+    toggle.addEventListener('click',()=>{state[zone][i].removed=!state[zone][i].removed;save();draw();makeChoices()});
+    field.append(toggle);container.append(field);
    }
   }
  };
  root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
   const zone=el.dataset.zone as Zone,index=Number(el.dataset.slot);
+  const remove=el.querySelector<HTMLButtonElement>('[data-jss-remove]');
+  remove?.addEventListener('click',()=>{state[zone][index].removed=true;save();draw();makeChoices()});
   const title=el.querySelector<HTMLElement>('[data-food-text]');if(!title)return;
   title.addEventListener('input',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').slice(0,36);save()});
   title.addEventListener('blur',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').trim().slice(0,36)||foods.find(f=>f.id===state[zone][index].id)!.name;save();draw()});
   title.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();title.blur()}});
  });
- root.querySelector<HTMLSelectElement>('[data-rule]')?.addEventListener('change',e=>{state.rule=(e.target as HTMLSelectElement).value as State['rule'];save();draw()});
- root.querySelector<HTMLSelectElement>('[data-reset]')?.addEventListener('change',e=>{state.reset=(e.target as HTMLSelectElement).value;save();draw()});
+ root.querySelectorAll<HTMLElement>('[data-jss-edit]').forEach(el=>{
+  const field=el.dataset.jssEdit;if(!field)return;
+  el.addEventListener('input',()=>{state.text[field]=(el.textContent??'').replace(/\s+/g,' ').slice(0,110);save()});
+  el.addEventListener('blur',()=>{state.text[field]=(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,110);save();draw()});
+  el.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();el.blur()}});
+ });
+ root.querySelector<HTMLSelectElement>('[data-rule]')?.addEventListener('change',e=>{state.rule=(e.target as HTMLSelectElement).value as State['rule'];delete state.text.rule;save();draw()});
+ root.querySelector<HTMLSelectElement>('[data-reset]')?.addEventListener('change',e=>{state.reset=(e.target as HTMLSelectElement).value;delete state.text.cleanup;save();draw()});
  root.querySelector('[data-jss-restore]')?.addEventListener('click',()=>{state=starter();save();draw();makeChoices()});
  root.querySelector('[data-jss-print]')?.addEventListener('click',()=>window.print());
  const download=root.querySelector<HTMLButtonElement>('[data-jss-download]');
@@ -198,12 +221,17 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
     if(saved?.profile===profile&&saved.state){
      const s=saved.state;
      if(['one','two'].includes(s.rule))state.rule=s.rule;
+     if(s.text&&typeof s.text==='object'){
+      for(const field of ['headline','subtitle','rule','cleanup','fridgeTitle','pantryTitle']){
+       if(typeof s.text[field]==='string')state.text[field]=s.text[field].slice(0,110);
+      }
+     }
      if(['Put food away · Bring dishes to the sink','Put food away · Throw wrappers away','Put food away · Wipe your spot'].includes(s.reset))state.reset=s.reset;
      for(const zone of ['fridge','pantry'] as Zone[]){
       if(Array.isArray(s[zone])&&s[zone].length===4){
        for(let i=0;i<4;i++){
         const item=s[zone][i];if(!item||!foods.some(f=>f.id===item.id&&f.zone===zone))continue;
-        state[zone][i]={id:item.id,label:typeof item.label==='string'?(item.label.slice(0,36)):foods.find(f=>f.id===item.id)!.name};
+        state[zone][i]={id:item.id,label:typeof item.label==='string'?(item.label.slice(0,36)):foods.find(f=>f.id===item.id)!.name,removed:item.removed===true};
        }
       }
      }
