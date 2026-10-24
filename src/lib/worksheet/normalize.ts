@@ -69,6 +69,10 @@ export function normalize(input: WorksheetInput): WorksheetData {
     job: clean(input.job, LIMITS.job),
     when: clean(input.when, LIMITS.when),
     done: clean(input.done, LIMITS.done, true),
+    adultOwner: clean(input.adultOwner, 28),
+    adultJob: clean(input.adultJob, 90),
+    adultWhen: clean(input.adultWhen, 80),
+    existing: clean(input.existing, 130),
     checkIn: checkInDate(input.checkIn),
   };
 }
