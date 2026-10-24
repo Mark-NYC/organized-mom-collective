@@ -167,6 +167,36 @@ const defaults = [
  .jhc-print-scroll{height:auto!important;overflow:visible!important}
 }
 </style>
+
+<style is:global>
+/* January frost-blue tonal treatment. Kept flat and lightweight for dependable print. */
+.jhc-card{
+  --jhc-wash:#eef5f7;
+  --jhc-icon-wash:#dfedf1;
+  background:linear-gradient(to bottom,var(--jhc-wash) 0,var(--jhc-wash) 153px,#fff 153px,#fff 100%)!important;
+}
+.jhc-card:nth-child(2){--jhc-wash:#e8f1f4;--jhc-icon-wash:#d8e8ee}
+.jhc-card:nth-child(3){--jhc-wash:#f1f6f7;--jhc-icon-wash:#e3eef1}
+.jhc-card:nth-child(4){--jhc-wash:#eaf3f6;--jhc-icon-wash:#dcebf0}
+.jhc-card-icon,
+.jhc-card:nth-child(2) .jhc-card-icon,
+.jhc-card:nth-child(3) .jhc-card-icon,
+.jhc-card:nth-child(4) .jhc-card-icon{
+  background:var(--jhc-icon-wash)!important;
+  border-radius:50%!important;
+}
+.jhc-card-rule{background:var(--jhc-month)!important}
+@media print{
+  .jhc-card,
+  .jhc-card:nth-child(2),
+  .jhc-card:nth-child(3),
+  .jhc-card:nth-child(4),
+  .jhc-card-icon{
+    print-color-adjust:exact!important;
+    -webkit-print-color-adjust:exact!important;
+  }
+}
+</style>
 <script>
 const defaults = [
   {name:'My morning',anchor:'After I finish breakfast',action:'I put my dishes away.',place:'By the breakfast table'},
