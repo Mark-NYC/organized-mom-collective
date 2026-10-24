@@ -26,7 +26,7 @@ const first = JOB_PRESETS[0];
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
         <h2>Ready for your family.</h2>
         <p>We made a starting plan for <span id="ws-ready-family">the Goering Family</span>. You can change any recommendation, or just download it as is.</p>
-        <div class="ws-field"><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
+        <div class="ws-field" hidden><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
       <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
       <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Megan</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
@@ -134,6 +134,26 @@ const first = JOB_PRESETS[0];
     update();
   }
   sample.addEventListener('change',()=>applySample(sample.value as keyof typeof sampleProfiles));
+  // The shared Family tab owns the sample household. The original three-case
+  // selector remains only as an internal baseline for job recommendations.
+  window.addEventListener('omc:club-preview-household',(event:Event)=>{
+    const h=(event as CustomEvent<{household:{displayName?:string;members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean}[]} | null}>).detail?.household;
+    if(!h)return;
+    const adults=h.members.filter(m=>m.kind==='adult'&&!m.archived);
+    const children=h.members.filter(m=>m.kind==='child'&&!m.archived);
+    const holder=adults.find(m=>m.isAccountHolder)??adults[0];
+    sample.value='rivera';
+    applySample('rivera');
+    const put=(id:string,name:string|undefined)=>{if(name)($<HTMLInputElement>(id)).value=name;};
+    put('ws-family',h.displayName);
+    put('ws-mom-name',holder?.firstName);
+    put('ws-adult-owner',adults.find(m=>m!==holder)?.firstName??holder?.firstName);
+    put('ws-owner',children[0]?.firstName);
+    put('ws-child2',children[1]?.firstName);
+    $('ws-ready-family').textContent=h.displayName??'your family';
+    update();
+  });
+
   $('ws-approve').addEventListener('click',()=>{const error=planIssue();$('ws-approval-note').textContent=error??'Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
   $('ws-review').addEventListener('click',()=>toggleInlineEditor('adult'));
   const child2Custom = $<HTMLInputElement>('ws-child2-custom');
