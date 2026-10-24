@@ -12,14 +12,14 @@ const DEEP='#527468',INK='#3d3834',SOFT='#66635f';
 class Pen{
  ops:Op[]=[];
  constructor(private m:Metrics){}
- text(x:number,y:number,t:string,font:FontKey,size:number,color=INK){this.ops.push({t:'text',x,y,text:t,font,size,color});}
- block(x:number,y:number,t:string,font:FontKey,size:number,w:number,max=3,color=INK,leading=1.32){
+ text(x:number,y:number,t:string,font:FontKey,size:number,color:string=INK){this.ops.push({t:'text',x,y,text:t,font,size,color});}
+ block(x:number,y:number,t:string,font:FontKey,size:number,w:number,max=3,color:string=INK,leading=1.32){
   const v=fit(this.m,font,t,{size,min:Math.max(9,size-3),width:w,maxLines:max});
   v.lines.forEach((line,i)=>this.text(x,y+i*v.size*leading,line,font,v.size,color));
  }
- line(x:number,y:number,x2:number,y2:number,color=ACCENT,sw=1){this.ops.push({t:'line',x1:x,y1:y,x2,y2,color,sw});}
- rect(x:number,y:number,w:number,h:number,color=ACCENT){this.ops.push({t:'rect',x,y,w,h,fill:color});}
- circle(x:number,y:number,r:number,color=ACCENT){this.ops.push({t:'circle',cx:x,cy:y,r,fill:color});}
+ line(x:number,y:number,x2:number,y2:number,color:string=ACCENT,sw=1){this.ops.push({t:'line',x1:x,y1:y,x2,y2,color,sw});}
+ rect(x:number,y:number,w:number,h:number,color:string=ACCENT){this.ops.push({t:'rect',x,y,w,h,fill:color});}
+ circle(x:number,y:number,r:number,color:string=ACCENT){this.ops.push({t:'circle',cx:x,cy:y,r,fill:color});}
  sprig(x:number,y:number,scale=1){
   this.line(x,y,x+34*scale,y-28*scale,DEEP,.8);
   for(let i=0;i<3;i++){const dx=(i+1)*8*scale,dy=-(i+1)*7*scale;
@@ -30,7 +30,7 @@ class Pen{
 }
 const sheet=(ops:Op[]):Page=>({width:612,height:792,ops});
 export function decemberPages(m:Metrics,f:Family):[Page,Page]{
- const [first,second,...kids]=f.members;
+ const [,second,...kids]=f.members;
  const names=kids.length===1?kids[0]:kids.length===2?kids.join(' & '):kids.slice(0,-1).join(', ')+' & '+kids[kids.length-1];
  const helper=second||'a grown-up';
  const a=new Pen(m);
