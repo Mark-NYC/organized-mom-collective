@@ -1,18 +1,27 @@
 ---
 /** April 2027: one fully prepared family dinner; two-sided US Letter deliverable. */
 import {monthColors} from '../../theme';
-import {aprilDinners} from '../../data/club/april-dinners';
+import {aprilDinners,dinnerCategories} from '../../data/club/april-dinners';
 interface Props { storageKey?:string }
 const {storageKey='omc:club:april-dinner:v1'}=Astro.props;
 const meals=aprilDinners;
+const initial=meals.find(m=>m.id==='tacos-b')!;
+const initialMeals=meals.filter(m=>m.effort==='quick'&&m.category==='tacos');
 const steps=['Check ingredients & assign helpers','Cook safely using the directions on the back','Set out the food and call the family','Eat together; captain leads the cleanup'];
 ---
 <div class="adc" data-adc-key={storageKey} style={'--adc-accent:'+monthColors[3].hex}>
  <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>A ready-to-use dinner with real ingredient quantities, simple instructions, and one person responsible for seeing it through—from prep to cleanup.</p></header>
  <div class="adc-layout">
  <section class="adc-controls" aria-label="Customize your family's dinner plan">
-  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Choose one of three fully prepared dinners. Each includes amounts, cooking steps, and a team. Edit the roles only if you need to.</p></div>
-  <label>Tonight's dinner<select data-meal>{meals.map(m=><option value={m.id}>{m.name}</option>)}</select></label>
+  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Choose the kind of evening first. Then pick a dinner family and a fully prepared recipe. All 48 options include ingredient amounts, cooking steps, and a team.</p></div>
+  <label>What kind of night is it?<select data-effort>
+    <option value="full">Full night · time to prepare</option>
+    <option value="quick" selected>Quick night · around 15–20 minutes</option>
+    <option value="minimal">Minimal-effort · almost no prep</option>
+   </select></label>
+   <label>Choose a dinner family<select data-category>{dinnerCategories.map(c=><option value={c.id}>{c.name}</option>)}</select></label>
+   <label>Choose tonight's recipe<select data-meal>{initialMeals.map(m=><option value={m.id}>{m.name}</option>)}</select></label>
+   <p class="adc-filter-count" data-filter-count>Two prepared taco-night options available for a quick evening. Change either filter for more.</p>
   <div class="adc-roles-editor">
    <label>Dinner captain <small>Owns the whole job—not just one step.</small><select data-role="captain"></select></label>
    <label>Ingredients checker <small>Checks pantry and gathers food.</small><select data-role="checker"></select></label>
@@ -30,7 +39,7 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
    <article class="adc-sheet adc-front">
     <div class="adc-sheet-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight, <em>we've got dinner.</em></h2><span>ONE DINNER PLANNED. EVERYONE HAS A PART.</span></div>
     <div class="adc-sheet-inner">
-     <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal>{meals[0].name}</h3></div><div class="adc-time"><span data-out-time>{meals[0].time}</span><small data-out-servings>{meals[0].servings}</small></div></div>
+     <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal>{initial.name}</h3></div><div class="adc-time"><span data-out-time>{initial.time}</span><small data-out-servings>{initial.servings}</small></div></div>
      <div class="adc-section-label">OUR DINNER TEAM</div>
      <div class="adc-team-grid">
       <div><span>DINNER CAPTAIN</span><strong data-out-role="captain">Luis</strong><p>Owns the whole plan</p></div>
@@ -39,7 +48,7 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
       <div><span>COOKING LEAD</span><strong data-out-role="cook">Ana</strong><p>Handles adult cooking</p></div>
      </div>
      <div class="adc-section-label">CHECK THE INGREDIENTS · ABOUT FOUR SERVINGS</div>
-     <div class="adc-ingredients">{meals[0].ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient>{x}</span></div>)}</div>
+     <div class="adc-ingredients">{initial.ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient>{x}</span></div>)}</div>
      <div class="adc-section-label">OUR DINNER PLAN</div>
      <div class="adc-steps">
       {steps.map((step,i)=><div class="adc-step"><span>{String(i+1).padStart(2,'0')}</span><strong>{step}</strong><i></i></div>)}
@@ -51,10 +60,10 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
    <article class="adc-sheet adc-back">
     <div class="adc-sheet-head adc-back-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Dinner captain, <em>you've got this.</em></h2><span>THE PLAN TO LEAD YOUR TEAM FROM START TO FINISH.</span></div>
     <div class="adc-sheet-inner adc-back-inner">
-      <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title>{meals[0].name}</h3></div><span data-out-recipe-time>{meals[0].time}</span></div>
+      <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title>{initial.name}</h3></div><span data-out-recipe-time>{initial.time}</span></div>
       <p class="adc-recipe-intro">Real directions for the cooking lead. Everyone else can start their assigned jobs from the front.</p>
       <div class="adc-recipe-steps">
-        {meals[0].instructions.map((instruction,i)=><div class="adc-recipe-step"><span>{String(i+1).padStart(2,'0')}</span><p data-out-instruction={i}>{instruction}</p></div>)}
+        {initial.instructions.map((instruction,i)=><div class="adc-recipe-step"><span>{String(i+1).padStart(2,'0')}</span><p data-out-instruction={i}>{instruction}</p></div>)}
       </div>
       <div class="adc-captain-check">
         <span>DINNER CAPTAIN · CLOSE THE LOOP</span>
@@ -74,7 +83,7 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
  </div>
 </div>
 <style is:global>
-.adc,.adc *{box-sizing:border-box}.adc{max-width:1450px;margin:0 auto;padding:28px clamp(18px,3.5vw,52px) 75px;color:#454545;font-family:Montserrat,Arial,sans-serif}.adc-intro{max-width:780px;margin:0 0 42px}.adc-intro>a{font-size:12px;text-decoration:underline;display:inline-block;margin-bottom:30px}.adc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.16em}.adc-intro h1{font:400 clamp(38px,4.5vw,62px)/1.1 Georgia,serif;margin:14px 0 18px}.adc-intro h1 em{color:#786c91}.adc-intro>p:last-child{font-size:15px;line-height:1.75}.adc-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:clamp(22px,4vw,60px);align-items:start}.adc-controls,.adc-view{min-width:0}.adc-controls-head{border-top:9px solid var(--adc-accent);padding:20px 0 24px}.adc-controls-head h2{font:italic 27px Georgia,serif;color:#786c91;margin:12px 0}.adc-controls-head p:last-child{font-size:13px;line-height:1.65}.adc-controls label{display:block;border-top:1px solid #ddd8e8;padding-top:15px;margin-bottom:18px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.adc-controls label small{display:block;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:0;text-transform:none;margin-top:5px}.adc-controls select{display:block;width:100%;min-height:45px;border:1px solid #b9b3be;background:white;color:#454545;font:13px Montserrat,Arial,sans-serif;padding:9px 10px;margin-top:8px}.adc-explainer{border-top:3px solid #ddd8e8;padding:19px 0}.adc-explainer h3{font:400 22px Georgia,serif;margin:0 0 10px}.adc-explainer p{font-size:12px;line-height:1.7;margin:0 0 13px}.adc-button{background:#454545;color:#fff;border:0;width:100%;min-height:52px;padding:12px;cursor:pointer;font-weight:700;font-size:12px}.adc-reset{display:block;border:0;background:none;cursor:pointer;text-decoration:underline;color:#454545;min-height:44px;margin:8px auto;font-size:12px}.adc-status,.adc-preview-note{font-size:11px;line-height:1.6;color:#666}.adc-view-title{display:flex;justify-content:space-between;align-items:baseline;gap:15px;flex-wrap:wrap;border-bottom:1px solid #ddd8e8;padding-bottom:14px;margin-bottom:20px}.adc-view-title h2{font:400 25px Georgia,serif}.adc-view-title span{font-size:12px}.adc-stage{width:100%;position:relative}.adc-pages{position:absolute;top:0;left:0;transform:scale(var(--adc-scale,.78));transform-origin:top left;display:flex;flex-direction:column;gap:28px;width:816px}.adc-sheet{width:816px;height:1056px;background:white;border:1px solid #ebe6e9;box-shadow:0 8px 30px #0002;display:flex;flex-direction:column;overflow:hidden;color:#4a4450;padding:38px 46px 24px}.adc-sheet-head{background:#f1eef8;border-top:10px solid #ddd8e8;padding:21px 27px 24px;min-height:172px}.adc-sheet-head>p{font-size:9px;letter-spacing:.16em;font-weight:700;margin:0}.adc-sheet-head h2{font:400 41px/1.14 Georgia,serif;color:#635877;margin:17px 0 13px}.adc-sheet-head h2 em{font-style:italic;font-weight:700}.adc-sheet-head>span{font-size:9px;letter-spacing:.09em;font-weight:700}.adc-sheet-inner{flex:1;min-height:0;display:flex;flex-direction:column}.adc-meal-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:21px 0 15px;border-bottom:1px solid #ddd8e8}.adc-meal-head h3{font:400 27px Georgia,serif;margin:9px 0 0}.adc-tiny{font-size:10px;font-weight:700;letter-spacing:.13em;color:#756c87}.adc-time{white-space:nowrap;padding:12px;background:#f4f1f8;font-size:11px}.adc-section-label{font-size:10px;font-weight:700;letter-spacing:.14em;margin:18px 0 12px}.adc-team-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.adc-team-grid>div{background:#f6f3fa;padding:12px 16px;min-height:79px}.adc-team-grid span{display:block;font-size:8px;font-weight:700;letter-spacing:.11em}.adc-team-grid strong{font:400 20px Georgia,serif;display:block;color:#66587d;margin:4px 0}.adc-team-grid p{font-size:10px;margin:0}.adc-ingredients{display:grid;grid-template-columns:1fr 1fr;gap:9px 25px}.adc-ingredient{display:flex;align-items:center;gap:10px;font-size:12px}.adc-ingredient i,.adc-step i,.adc-back-check i{width:14px;height:14px;flex:0 0 14px;border:1px solid #827b90;display:inline-block}.adc-steps{border-top:1px solid #ddd8e8}.adc-step{border-bottom:1px solid #ddd8e8;display:grid;grid-template-columns:25px 1fr 14px;gap:13px;align-items:center;min-height:40px;font-size:12px}.adc-step>span{color:#786c91;font-weight:700;font-size:10px}.adc-step strong{font-weight:500}.adc-rule{background:#f4f1f8;padding:12px 18px;display:grid;grid-template-columns:125px 1fr;gap:15px;margin-top:auto}.adc-rule span{font-size:9px;font-weight:700;letter-spacing:.08em}.adc-rule p{font:italic 15px/1.4 Georgia,serif;margin:0}.adc-foot{display:flex;justify-content:space-between;border-top:1px solid #ddd8e8;padding-top:11px;font-size:9px;letter-spacing:.1em;font-weight:700;margin-top:17px}.adc-back-head{background:#f1eef8}.adc-back-inner{padding-top:20px}.adc-back-section{border-bottom:1px solid #ddd8e8;padding:0 5px 22px;margin-bottom:22px}.adc-back-section h3{font:400 25px Georgia,serif;color:#635877;margin:10px 0 13px}.adc-back-section>p{font-size:13px;line-height:1.7;margin:0 0 11px}.adc-back-check{font-size:13px;display:flex;gap:12px;align-items:center;padding:8px 0}.adc-captain-box{background:#f4f1f8;padding:21px 23px}.adc-captain-box span{font-size:10px;font-weight:700;letter-spacing:.13em}.adc-captain-box p{font:italic 17px/1.5 Georgia,serif;margin:12px 0 0}.adc-back-note{margin-top:auto;text-align:center;font-size:10px;letter-spacing:.12em;color:#716583;font-weight:700;padding-top:24px}
+.adc,.adc *{box-sizing:border-box}.adc{max-width:1450px;margin:0 auto;padding:28px clamp(18px,3.5vw,52px) 75px;color:#454545;font-family:Montserrat,Arial,sans-serif}.adc-intro{max-width:780px;margin:0 0 42px}.adc-intro>a{font-size:12px;text-decoration:underline;display:inline-block;margin-bottom:30px}.adc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.16em}.adc-intro h1{font:400 clamp(38px,4.5vw,62px)/1.1 Georgia,serif;margin:14px 0 18px}.adc-intro h1 em{color:#786c91}.adc-intro>p:last-child{font-size:15px;line-height:1.75}.adc-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:clamp(22px,4vw,60px);align-items:start}.adc-controls,.adc-view{min-width:0}.adc-controls-head{border-top:9px solid var(--adc-accent);padding:20px 0 24px}.adc-controls-head h2{font:italic 27px Georgia,serif;color:#786c91;margin:12px 0}.adc-controls-head p:last-child{font-size:13px;line-height:1.65}.adc-controls label{display:block;border-top:1px solid #ddd8e8;padding-top:15px;margin-bottom:18px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.adc-controls label small{display:block;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:0;text-transform:none;margin-top:5px}.adc-controls select{display:block;width:100%;min-height:45px;border:1px solid #b9b3be;background:white;color:#454545;font:13px Montserrat,Arial,sans-serif;padding:9px 10px;margin-top:8px}.adc-filter-count{font-size:11px;color:#6c6374;line-height:1.55;margin:-2px 0 20px}.adc-explainer{border-top:3px solid #ddd8e8;padding:19px 0}.adc-explainer h3{font:400 22px Georgia,serif;margin:0 0 10px}.adc-explainer p{font-size:12px;line-height:1.7;margin:0 0 13px}.adc-button{background:#454545;color:#fff;border:0;width:100%;min-height:52px;padding:12px;cursor:pointer;font-weight:700;font-size:12px}.adc-reset{display:block;border:0;background:none;cursor:pointer;text-decoration:underline;color:#454545;min-height:44px;margin:8px auto;font-size:12px}.adc-status,.adc-preview-note{font-size:11px;line-height:1.6;color:#666}.adc-view-title{display:flex;justify-content:space-between;align-items:baseline;gap:15px;flex-wrap:wrap;border-bottom:1px solid #ddd8e8;padding-bottom:14px;margin-bottom:20px}.adc-view-title h2{font:400 25px Georgia,serif}.adc-view-title span{font-size:12px}.adc-stage{width:100%;position:relative}.adc-pages{position:absolute;top:0;left:0;transform:scale(var(--adc-scale,.78));transform-origin:top left;display:flex;flex-direction:column;gap:28px;width:816px}.adc-sheet{width:816px;height:1056px;background:white;border:1px solid #ebe6e9;box-shadow:0 8px 30px #0002;display:flex;flex-direction:column;overflow:hidden;color:#4a4450;padding:38px 46px 24px}.adc-sheet-head{background:#f1eef8;border-top:10px solid #ddd8e8;padding:21px 27px 24px;min-height:172px}.adc-sheet-head>p{font-size:9px;letter-spacing:.16em;font-weight:700;margin:0}.adc-sheet-head h2{font:400 41px/1.14 Georgia,serif;color:#635877;margin:17px 0 13px}.adc-sheet-head h2 em{font-style:italic;font-weight:700}.adc-sheet-head>span{font-size:9px;letter-spacing:.09em;font-weight:700}.adc-sheet-inner{flex:1;min-height:0;display:flex;flex-direction:column}.adc-meal-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:21px 0 15px;border-bottom:1px solid #ddd8e8}.adc-meal-head h3{font:400 27px Georgia,serif;margin:9px 0 0}.adc-tiny{font-size:10px;font-weight:700;letter-spacing:.13em;color:#756c87}.adc-time{white-space:nowrap;padding:12px;background:#f4f1f8;font-size:11px}.adc-section-label{font-size:10px;font-weight:700;letter-spacing:.14em;margin:18px 0 12px}.adc-team-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.adc-team-grid>div{background:#f6f3fa;padding:12px 16px;min-height:79px}.adc-team-grid span{display:block;font-size:8px;font-weight:700;letter-spacing:.11em}.adc-team-grid strong{font:400 20px Georgia,serif;display:block;color:#66587d;margin:4px 0}.adc-team-grid p{font-size:10px;margin:0}.adc-ingredients{display:grid;grid-template-columns:1fr 1fr;gap:9px 25px}.adc-ingredient{display:flex;align-items:center;gap:10px;font-size:12px}.adc-ingredient i,.adc-step i,.adc-back-check i{width:14px;height:14px;flex:0 0 14px;border:1px solid #827b90;display:inline-block}.adc-steps{border-top:1px solid #ddd8e8}.adc-step{border-bottom:1px solid #ddd8e8;display:grid;grid-template-columns:25px 1fr 14px;gap:13px;align-items:center;min-height:40px;font-size:12px}.adc-step>span{color:#786c91;font-weight:700;font-size:10px}.adc-step strong{font-weight:500}.adc-rule{background:#f4f1f8;padding:12px 18px;display:grid;grid-template-columns:125px 1fr;gap:15px;margin-top:auto}.adc-rule span{font-size:9px;font-weight:700;letter-spacing:.08em}.adc-rule p{font:italic 15px/1.4 Georgia,serif;margin:0}.adc-foot{display:flex;justify-content:space-between;border-top:1px solid #ddd8e8;padding-top:11px;font-size:9px;letter-spacing:.1em;font-weight:700;margin-top:17px}.adc-back-head{background:#f1eef8}.adc-back-inner{padding-top:20px}.adc-back-section{border-bottom:1px solid #ddd8e8;padding:0 5px 22px;margin-bottom:22px}.adc-back-section h3{font:400 25px Georgia,serif;color:#635877;margin:10px 0 13px}.adc-back-section>p{font-size:13px;line-height:1.7;margin:0 0 11px}.adc-back-check{font-size:13px;display:flex;gap:12px;align-items:center;padding:8px 0}.adc-captain-box{background:#f4f1f8;padding:21px 23px}.adc-captain-box span{font-size:10px;font-weight:700;letter-spacing:.13em}.adc-captain-box p{font:italic 17px/1.5 Georgia,serif;margin:12px 0 0}.adc-back-note{margin-top:auto;text-align:center;font-size:10px;letter-spacing:.12em;color:#716583;font-weight:700;padding-top:24px}
 
 /* Print refinement: fewer decorative gaps, more usable cooking content. */
 .adc-sheet{padding:30px 44px 22px}
@@ -126,7 +135,7 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
-import {aprilDinners} from '../../data/club/april-dinners';
+import {aprilDinners,dinnerCategories,type DinnerEffort} from '../../data/club/april-dinners';
 type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;isAccountHolder?:boolean;archived?:boolean};
 const choices=aprilDinners;
 type Role='captain'|'checker'|'table'|'cook';
@@ -136,7 +145,9 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
  const storage=sessionStorage;
  let members:Member[]=[];
  let profile='';
- let meal='bowls';
+ let effort:DinnerEffort='quick';
+ let category='tacos';
+ let meal='tacos-b';
  let assignments:Record<Role,string>={captain:'',checker:'',table:'',cook:''};
  let customized=new Set<Role>();
  const stage=root.querySelector<HTMLElement>('[data-adc-stage]');
@@ -169,10 +180,17 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   if(role==='table')return kids.filter(m=>eligible(role,m)).find(m=>m.id!==assignments.checker)?.id??kids.find(m=>eligible(role,m))?.id??adults[0]?.id??'';
   return '';
  };
- const save=()=>{try{storage.setItem(key,JSON.stringify({profile,meal,assignments,customized:[...customized]}))}catch{}};
+ const save=()=>{try{storage.setItem(key,JSON.stringify({profile,effort,category,meal,assignments,customized:[...customized]}))}catch{}};
  const draw=()=>{
-  const selection=choices.find(m=>m.id===meal)??choices[0];
-  const mealSelect=root.querySelector<HTMLSelectElement>('[data-meal]');if(mealSelect)mealSelect.value=meal;
+  const filtered=choices.filter(m=>m.category===category&&m.effort===effort);
+  const selection=filtered.find(m=>m.id===meal)??filtered[0]??choices[0];
+  meal=selection.id;
+  const effortSelect=root.querySelector<HTMLSelectElement>('[data-effort]');if(effortSelect)effortSelect.value=effort;
+  const categorySelect=root.querySelector<HTMLSelectElement>('[data-category]');if(categorySelect)categorySelect.value=category;
+  const mealSelect=root.querySelector<HTMLSelectElement>('[data-meal]');
+  if(mealSelect){mealSelect.replaceChildren();for(const option of filtered){const el=document.createElement('option');el.value=option.id;el.textContent=option.name;mealSelect.append(el)}mealSelect.value=meal;}
+  const count=root.querySelector<HTMLElement>('[data-filter-count]');
+  if(count)count.textContent=filtered.length+' ready-to-lead '+(effort==='minimal'?'minimal-effort':effort)+' dinner option'+(filtered.length===1?'':'s')+' in this family. Each prints as one complete dinner plan.';
   const mealText=root.querySelector<HTMLElement>('[data-out-meal]');if(mealText)mealText.textContent=selection.name;
   const timeText=root.querySelector<HTMLElement>('[data-out-time]');if(timeText)timeText.textContent=selection.time;
   const servings=root.querySelector<HTMLElement>('[data-out-servings]');if(servings)servings.textContent=selection.servings;
@@ -194,10 +212,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
    text.textContent=members.find(m=>m.id===select.value)?.firstName??'Our family';
   }
  };
+ root.querySelector<HTMLSelectElement>('[data-effort]')?.addEventListener('change',e=>{effort=(e.target as HTMLSelectElement).value as DinnerEffort;const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
+ root.querySelector<HTMLSelectElement>('[data-category]')?.addEventListener('change',e=>{category=(e.target as HTMLSelectElement).value;const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
  root.querySelector<HTMLSelectElement>('[data-meal]')?.addEventListener('change',e=>{meal=(e.target as HTMLSelectElement).value;save();draw()});
  for(const role of roles)root.querySelector<HTMLSelectElement>('[data-role="'+role+'"]')?.addEventListener('change',e=>{assignments[role]=(e.target as HTMLSelectElement).value;customized.add(role);save();draw()});
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{
-   meal='bowls';customized.clear();
+   effort='quick';category='tacos';meal='tacos-b';customized.clear();
    for(const role of roles)assignments[role]=suggested(role);
    save();draw();
  });
@@ -209,9 +229,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   const switched=nextProfile!==profile;
   profile=nextProfile;members=detail.household.members.filter(m=>!m.archived);
   if(switched){
-   meal='bowls';customized.clear();assignments={captain:'',checker:'',table:'',cook:''};
+   effort='quick';category='tacos';meal='tacos-b';customized.clear();assignments={captain:'',checker:'',table:'',cook:''};
    try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.profile===profile){
-     meal=choices.some(x=>x.id===saved.meal)?saved.meal:'bowls';
+     const savedMeal=choices.find(x=>x.id===saved.meal);
+     if(savedMeal){effort=savedMeal.effort;category=savedMeal.category;meal=savedMeal.id}
+     else {effort='quick';category='tacos';meal='tacos-b'}
      customized=new Set(roles.filter(r=>saved.customized?.includes(r)));
      for(const role of roles)assignments[role]=typeof saved.assignments?.[role]==='string'?saved.assignments[role]:'';
    }}catch{}
