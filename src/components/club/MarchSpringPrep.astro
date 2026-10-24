@@ -118,7 +118,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  };
  fitPreview();
  const previewObserver=typeof ResizeObserver!=='undefined'?new ResizeObserver(fitPreview):null;
- if(previewObserver)previewObserver.observe(preview);
+ if(previewObserver && preview) previewObserver.observe(preview);
  window.addEventListener('resize',fitPreview);
  const key=root.dataset.mscKey??'omc:preview:march:v1';
  const store=sessionStorage; // Do not persist family member names beyond this tab.
