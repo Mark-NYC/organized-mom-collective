@@ -11,9 +11,9 @@ import {families} from '../../lib/december/traditions';
   <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>Your Christmas Mission Has Arrived!</h1><p>A surprise addressed to the children. One kindness mission and two Christmas cards, ready to give.</p></header>
   <div class="workspace">
     <section class="details" aria-label="December tradition plan">
-      <label for="family">Explore a sample family</label>
+      <div hidden><label for="family">Explore a sample family</label>
       <select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select>
-      <p class="demo">Demo only · Nothing is saved or mailed</p>
+      <p class="demo">Demo only · Nothing is saved or mailed</p></div>
       <h2 id="mission-title">One mission. Two Christmas cards.</h2>
       <p id="mission-summary">The children choose someone to encourage, make a card, and ask a grown-up to help deliver it.</p>
       <h3>The three steps</h3>
