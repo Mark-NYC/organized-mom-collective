@@ -41,7 +41,7 @@ const upcoming = [
   ['March','Spring Cleaning as a Family','One manageable project, with age-appropriate parts for everyone.'],
   ['April','Dinner Isn’t Just Mom’s Job','Clear ownership of preparation, meals and cleanup.'],
   ['May','Our Family Summer Rhythm','A repeatable day rhythm kids can follow when school structure disappears.'],
-  ['June','Summer Responsibilities','Small, useful ways the family shares the work of summer.'],
+  ['June','My Family’s Snack Station','A picture-led snack station lets kids choose approved snacks and clean up without Mom managing every request.'],
   ['July','Growing Independence','Practical preparation kids can learn to handle themselves.'],
   ['August','Back-to-School Readiness','A shared plan for getting ready without Mom carrying every detail.'],
   ['September','The Family Weekly Rhythm','A simple way everyone stays on the same page.'],
@@ -161,7 +161,7 @@ const faqs = [
 
   <section class="ofc-next" aria-labelledby="ofc-next-heading">
     <div class="ofc-section-head"><p class="ofc-eyebrow">A LOOK AT WHAT’S AHEAD</p><h2 id="ofc-next-heading">One small improvement <em>each month.</em></h2><p>No catch-up. No coursework. Join in any month and use what helps your family right now.</p></div>
-    <div class="ofc-next-grid">{upcoming.map(([month,title,description],i)=><div class="ofc-next-item"><span>{String(i+4).padStart(2,'0')} · {month}</span><div><h3>{title}</h3><p>{description}</p>{month === "February" && <a href="/club/february-preview/" class="ofc-text-link">Preview February’s connection cards →</a>}{month === "March" && <a href="/club/march-preview/" class="ofc-text-link">Preview March’s spring prep plan →</a>}{month === "April" && <a href="/club/april-preview/" class="ofc-text-link">Preview April’s dinner captain plan →</a>}{month === "May" && <a href="/club/may-preview/" class="ofc-text-link">Preview May’s illustrated summer rhythm →</a>}</div></div>)}</div>
+    <div class="ofc-next-grid">{upcoming.map(([month,title,description],i)=><div class="ofc-next-item"><span>{String(i+4).padStart(2,'0')} · {month}</span><div><h3>{title}</h3><p>{description}</p>{month === "February" && <a href="/club/february-preview/" class="ofc-text-link">Preview February’s connection cards →</a>}{month === "March" && <a href="/club/march-preview/" class="ofc-text-link">Preview March’s spring prep plan →</a>}{month === "April" && <a href="/club/april-preview/" class="ofc-text-link">Preview April’s dinner captain plan →</a>}{month === "May" && <a href="/club/may-preview/" class="ofc-text-link">Preview May’s illustrated summer rhythm →</a>}{month === "June" && <a href="/club/june-preview/" class="ofc-text-link">Preview June’s snack station →</a>}</div></div>)}</div>
     <p class="ofc-disclaimer">Future topics are a working roadmap, not finalized mailer designs. We’ll refine them based on what actually helps families.</p>
   </section>
 
