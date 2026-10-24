@@ -104,149 +104,54 @@ class Draw {
   }
 }
 
-function front(m: Metrics, d: WorksheetData): Page {
-  const g = new Draw(m);
-  const t = WORKSHEET.front;
-  g.header(WORKSHEET.brand);
 
-  // Title, with the family's name in a gray panel beside it.
-  g.label(X0, 114, t.eyebrow);
-  g.text(X0 - 1.5, 156, t.title, 'serif', 42, { tracking: -0.6 });
-  g.text(X0, 178, t.deck, 'sans', 9, { color: COLORS.soft });
-  const px = 372;
-  const pw = X1 - px;
-  g.rect(px, 98, pw, 88, COLORS.panel, COLORS.frame);
-  g.label(px + PAD, 114, t.preparedFor);
-  if (d.familyName) g.block(px + PAD, 136, d.familyName, 'serif', { width: pw - PAD * 2, maxLines: 2, size: 18, min: 10, lead: 1.15 });
-  else g.dots(px + PAD, X1 - PAD, 140);
-  g.block(px + PAD, 168, t.preparedNote, 'sans', { width: pw - PAD * 2, maxLines: 2, size: 6.8, min: 6, lead: 1.4, color: COLORS.soft });
-
-  // 01 The job: owner and when side by side, then the whole job.
-  let y = 204;
-  g.section(y, 146, '01', t.sections.job);
-  const mid = X0 + 264;
-  g.line(mid, y + 20, mid, y + 82);
-  g.line(X0, y + 82, X1, y + 82);
-  g.label(X0 + PAD, y + 37, t.owner);
-  if (d.owner) g.block(X0 + PAD, y + 67, d.owner, 'serif', { width: mid - X0 - PAD * 2, maxLines: 1, size: 26, min: 14, lead: 1 });
-  else g.dots(X0 + PAD, mid - PAD, y + 68);
-  g.label(mid + PAD, y + 37, t.when);
-  if (d.when) g.block(mid + PAD, y + 55, d.when, 'serif', { width: X1 - mid - PAD * 2, maxLines: 2, size: 13, min: 9.5, lead: 1.25 });
-  else g.dots(mid + PAD, X1 - PAD, y + 68);
-  g.label(X0 + PAD, y + 99, t.job);
-  if (d.job) g.block(X0 + PAD, y + 119, d.job, 'serif', { width: W - PAD * 2, maxLines: 2, size: 17, min: 11, lead: 1.15 });
-  else g.dots(X0 + PAD, X1 - PAD, y + 126);
-
-  // 02 What finished looks like: their words, then a line for more.
-  y = 362;
-  g.section(y, 118, '02', t.sections.done);
-  if (d.done) {
-    const b = g.block(X0 + PAD, y + 40, d.done, 'serif', { width: W - PAD * 2, maxLines: 3, size: 12.5, min: 9.5, lead: 1.38 });
-    if (b.lines.length <= 2 && b.bottom < y + 70) g.dots(X0 + PAD, X1 - PAD, y + 80);
-    const lw = g.label(X0 + PAD, y + 104, t.addMore);
-    g.dots(X0 + PAD + lw + 10, X1 - PAD, y + 104);
-  } else {
-    [44, 44 + WRITE_GAP, 44 + WRITE_GAP * 2].forEach((dy) => g.dots(X0 + PAD, X1 - PAD, y + dy + 12));
-  }
-
-  // 03 The handoff: four steps across, each with a box and a date.
-  y = 492;
-  g.section(y, 150, '03', t.sections.handoff);
-  const col = W / 4;
-  t.handoff.forEach((step, i) => {
-    const cx = X0 + col * i + col / 2;
-    if (i) g.line(X0 + col * i, y + 20, X0 + col * i, y + 150);
-    g.circle(cx, y + 44, 12, COLORS.blue, COLORS.blueRule);
-    g.text(cx, y + 47.6, String(i + 1), 'serifBoldItalic', 12, { align: 'center' });
-    g.label(cx, y + 73, step.title, { align: 'center', color: COLORS.ink });
-    g.block(cx, y + 89, step.body, 'serif', { width: col - 24, maxLines: 3, size: 9.6, min: 8, lead: 1.32, align: 'center', color: COLORS.soft });
-    const bx = X0 + col * i + 13;
-    g.box(bx, y + 126);
-    const lw = g.label(bx + 14, y + 133.5, t.handoffDate, { size: 5.8 });
-    g.dots(bx + 14 + lw + 6, X0 + col * (i + 1) - 13, y + 134);
-  });
-
-  // My promise, signed by both.
-  y = 654;
-  g.rect(X0, y, W, 86, COLORS.panel, COLORS.frame);
-  g.label(X0 + PAD, y + 17, t.promiseLabel);
-  g.block(X0 + PAD, y + 37, t.promise, 'serifItalic', { width: W - PAD * 2, maxLines: 2, size: 13, min: 10, lead: 1.3 });
-  const half = W / 2;
-  [t.signOwner, t.signCoach].forEach((who, i) => {
-    const x = X0 + PAD + half * i;
-    const lw = g.label(x, y + 72, who, { size: 5.8 });
-    g.line(x + lw + 8, y + 72.5, X0 + half * (i + 1) - PAD, y + 72.5, COLORS.faint, 0.6);
-  });
-
-  g.footer('Front  ·  1 / 2');
-  return { width: PAGE_W, height: PAGE_H, ops: g.ops };
+function front(m: Metrics,d:WorksheetData):Page{
+ const g=new Draw(m);g.header('Our family, our team');
+ g.label(X0,110,d.familyName??'Your family');
+ g.text(X0,148,'Everyone owns a part.','serif',36);
+ g.text(X0,173,'Two whole jobs. Shared responsibility. Less reminding.','sans',10,{color:COLORS.soft});
+ const card=(y:number,title:string,owner:string|null,job:string|null,when:string|null)=>{
+  g.section(y,169,null,title);
+  g.label(X0+PAD,y+41,'Owner');
+  if(owner)g.block(X0+PAD,y+69,owner,'serif',{width:170,maxLines:1,size:25,min:15,lead:1});else g.dots(X0+PAD,X0+180,y+70);
+  g.label(X0+210,y+41,'Whole responsibility');
+  if(job)g.block(X0+210,y+63,job,'serif',{width:W-224,maxLines:2,size:18,min:10,lead:1.2});else g.dots(X0+210,X1-PAD,y+71);
+  g.line(X0+PAD,y+96,X1-PAD,y+96);
+  g.label(X0+PAD,y+116,'When it happens');
+  if(when)g.block(X0+PAD,y+136,when,'sans',{width:W-2*PAD,maxLines:2,size:10,min:8,lead:1.25});else g.dots(X0+PAD,X1-PAD,y+141);
+ };
+ card(198,'01   Adult ownership',d.adultOwner,d.adultJob,d.adultWhen);
+ card(379,'02   Child ownership',d.owner,d.job,d.when);
+ g.rect(X0,562,W,97,COLORS.panel,COLORS.frame);
+ g.label(X0+PAD,581,'Already helping our family');
+ if(d.existing)g.block(X0+PAD,610,d.existing,'serif',{width:W-2*PAD,maxLines:2,size:13,min:10,lead:1.25});else {g.dots(X0+PAD,X1-PAD,611);g.dots(X0+PAD,X1-PAD,641);}
+ g.text(X0,694,'The goal is not more chores. It is shared ownership.','serifItalic',15);
+ g.footer('Front · 1 / 2');return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
-
-function back(m: Metrics, d: WorksheetData): Page {
-  const g = new Draw(m);
-  const t = WORKSHEET.back;
-  g.header('Our family, our team');
-
-  g.label(X0, 114, t.eyebrow);
-  g.text(X0 - 1, 148, t.title[0], 'serif', 31, { tracking: -0.4 });
-  g.text(X0 - 1, 183, t.title[1], 'serifItalic', 31, { tracking: -0.4 });
-
-  // For the grown-ups: the kit's handoff rules, beside the title.
-  const px = 352;
-  const pw = X1 - px;
-  g.rect(px, 98, pw, 100, COLORS.panel, COLORS.frame);
-  g.label(px + PAD, 114, t.guidanceLabel);
-  let gy = 130;
-  for (const line of t.guidance) {
-    g.circle(px + PAD + 2, gy - 2.8, 1.5, COLORS.soft);
-    const b = g.block(px + PAD + 10, gy, line, 'serif', { width: pw - PAD * 2 - 10, maxLines: 2, size: 9.4, min: 8, lead: 1.3 });
-    gy = b.bottom + 16;
-  }
-
-  // The letter, full width.
-  let ly = 222;
-  for (const p of t.letter) {
-    const b = g.block(X0, ly, p, 'serif', { width: W, maxLines: 5, size: 11, min: 9.5, lead: 1.42 });
-    ly = b.bottom + 21;
-  }
-
-  // Family check-in: three questions, two writing lines each.
-  let y = 326;
-  g.section(y, 238, null, t.checkInLabel);
-  const dw = g.label(X1 - PAD - 150, y + 13.2, t.checkInDate, { color: COLORS.ink, size: 7 });
-  if (d.checkIn) g.text(X1 - PAD - 150 + dw + 8, y + 13.6, d.checkIn, 'sansMedium', 8, { color: COLORS.ink });
-  else g.dots(X1 - PAD - 150 + dw + 8, X1 - PAD, y + 14);
-  t.prompts.forEach((q, i) => {
-    const qy = y + 42 + i * 72;
-    g.text(X0 + PAD, qy, q, 'serifItalic', 12.5);
-    g.dots(X0 + PAD, X1 - PAD, qy + WRITE_GAP);
-    g.dots(X0 + PAD, X1 - PAD, qy + WRITE_GAP * 2);
-  });
-
-  // Try it together: four boxes.
-  y = 576;
-  g.section(y, 72, null, t.tryLabel);
-  t.checks.forEach((c, i) => {
-    const x = X0 + PAD + (i % 2) * (W / 2);
-    const cy = y + 38 + Math.floor(i / 2) * 21;
-    g.box(x, cy - 7.5);
-    g.text(x + 16, cy, c, 'sans', 8.6);
-  });
-
-  // Bring it to the calendar, and the sign-off.
-  y = 660;
-  const nw = 340;
-  g.rect(X0, y, nw, 80, COLORS.panel, COLORS.frame);
-  g.label(X0 + PAD, y + 17, t.calendarLabel);
-  g.block(X0 + PAD, y + 37, t.calendar(d.owner), 'serif', { width: nw - PAD * 2, maxLines: 3, size: 10.6, min: 8.5, lead: 1.38 });
-  g.text(X0 + nw + 26, y + 30, t.signoff, 'serifItalic', 12, { color: COLORS.soft });
-  g.text(X0 + nw + 26, y + 64, t.signature, 'serifBoldItalic', 28);
-
-  g.footer('Back  ·  2 / 2');
-  return { width: PAGE_W, height: PAGE_H, ops: g.ops };
+function back(m:Metrics,d:WorksheetData):Page{
+ const g=new Draw(m);g.header('The handoff');
+ g.label(X0,114,'Your first-week plan');
+ g.text(X0,152,'Hand over the whole job.','serif',34);
+ g.text(X0,176,'Not just the doing. The remembering, too.','serifItalic',15,{color:COLORS.soft});
+ const half=(W-12)/2;
+ const coach=(x:number,title:string,owner:string|null,job:string|null,steps:string[])=>{
+  g.rect(x,203,half,252,COLORS.white,COLORS.frame);
+  g.rect(x,203,half,24,COLORS.blue,COLORS.frame);
+  g.label(x+12,220,title,{size:7});
+  g.block(x+12,257,(owner??'Someone')+': '+(job??'one whole job'),'serif',{width:half-24,maxLines:3,size:16,min:10,lead:1.2});
+  steps.forEach((s,i)=>{const y=328+i*39;g.circle(x+20,y-4,9,COLORS.panel,COLORS.hair);g.text(x+20,y,String(i+1),'sansBold',8,{align:'center'});g.block(x+35,y-4,s,'sans',{width:half-45,maxLines:3,size:8.6,min:7.5,lead:1.2});});
+ };
+ coach(X0,'Adult to adult',d.adultOwner,d.adultJob,['Agree on the result and the timeline.','Transfer the planning and reminders.','Check in. Do not take the job back.']);
+ coach(X0+half+12,'Adult to child',d.owner,d.job,['Days 1–2: demonstrate together.','Days 3–4: let them lead.','Days 5–7: step back and check in.']);
+ g.section(468,95,null,'What finished looks like for the child');
+ if(d.done)g.block(X0+PAD,509,d.done,'serif',{width:W-2*PAD,maxLines:3,size:12,min:9.4,lead:1.3});else {g.dots(X0+PAD,X1-PAD,517);g.dots(X0+PAD,X1-PAD,542);}
+ g.section(575,83,null,'Our family check-in');
+ g.text(X0+PAD,612,'What worked? What needs to change?','serifItalic',14);
+ g.dots(X0+PAD,X1-PAD,633);
+ if(d.checkIn)g.text(X0+PAD,651,d.checkIn,'sansMedium',8);
+ g.rect(X0,670,W,68,COLORS.panel,COLORS.frame);
+ g.label(X0+PAD,688,'Bring it to your calendar');
+ g.block(X0+PAD,712,'Write each owner next to their job. Let the plan carry the reminder.','serif',{width:W-2*PAD,maxLines:2,size:11,min:9,lead:1.25});
+ g.footer('Back · 2 / 2');return {width:PAGE_W,height:PAGE_H,ops:g.ops};
 }
-
-/** Both pages: front (the job) and back (check-in and encouragement). Always exactly two. */
-export function layoutWorksheet(m: Metrics, d: WorksheetData): [Page, Page] {
-  return [front(m, d), back(m, d)];
-}
+export function layoutWorksheet(m:Metrics,d:WorksheetData):[Page,Page]{return [front(m,d),back(m,d)];}
