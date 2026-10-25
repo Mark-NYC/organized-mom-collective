@@ -14,9 +14,34 @@ const blocks=[
 <div class="msr" data-msr-key={storageKey}>
  <header class="msr-intro"><a href="/club">← Organized Family Club</a><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>
  <div class="msr-layout">
-  <aside class="msr-editor">
-   <p class="msr-label">YOUR FAMILY'S SUMMER RHYTHM</p><h2>Ready for the fridge.</h2><p>Your illustrated plan is already made. On desktop, click the words or times on the chart to edit them; hover over a block to move or remove it.</p>
-   <label>Kind of summer day<select data-days><option value="home">Mostly at home</option><option value="camp">Camp or a program</option></select></label>
+  <aside class="msr-editor" aria-label="Prepared May summer rhythm">
+   <div class="msr-editor-head"><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h2>Less reminding. <em>More summer freedom.</em></h2><button type="button" class="msr-vision-button" data-open-vision>Why this matters <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></button></div>
+   <div class="msr-prepared" id="may-edit-controls">
+    <span class="msr-label">YOUR FAMILY'S PREPARED RHYTHM</span>
+    <strong>Our Summer Day</strong>
+    <p>Seven familiar anchors your kids can check without asking Mom what comes next.</p>
+    <div class="msr-summary-line"><span>Day type</span><b data-summary-days>Mostly at home</b></div>
+    <div class="msr-summary-line"><span>Structure</span><b data-summary-structure>Balanced</b></div>
+    <div class="msr-summary-line"><span>Morning start</span><b data-summary-start>8:00 AM</b></div>
+    <div class="msr-summary-line"><span>Quiet time</span><b data-summary-quiet>Independent play</b></div>
+    <button type="button" class="msr-edit-trigger" data-open-editor>Make changes <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></button>
+   </div>
+   <p class="msr-subnote">A reusable rhythm, not a rigid schedule. Trips, camps and appointments fit around the anchors that work for your family.</p>
+   <div class="msr-actions">
+    <div class="msr-primary-actions"><a class="msr-jump-edit" href="#may-edit-controls">Make changes <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button type="button" data-print>Print / Save PDF</button></div>
+    <button type="button" class="msr-download" data-download>Download image (PNG)</button>
+    <button type="button" data-reset class="msr-reset">Restore suggested rhythm</button>
+   </div>
+  </aside>
+  <dialog class="msr-dialog msr-vision-dialog" data-vision-dialog aria-labelledby="msr-vision-title">
+   <div class="msr-dialog-top"><div><span class="msr-label">ORGANIZED FAMILY CLUB · MAY</span><h2 id="msr-vision-title">Why this matters</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <p>When school ends, the daily structure disappears, and Mom becomes the one everyone asks what to do next. This illustrated rhythm gives children a simple place to look for their next activity while keeping the day flexible. We've prepared realistic anchors and activity ideas, so Mom doesn't have to invent and announce the plan all summer long.</p>
+   <button type="button" class="msr-dialog-done" data-close-modal>Back to our plan</button>
+  </dialog>
+  <dialog class="msr-dialog msr-edit-dialog" data-editor-dialog aria-labelledby="msr-edit-title">
+   <div class="msr-dialog-top"><div><span class="msr-label">MAKE IT YOURS · MAY</span><h2 id="msr-edit-title">Edit your summer rhythm</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <p>The rhythm is ready to use. Change only what needs to fit your family.</p>
+   <div class="msr-dialog-form">   <label>Kind of summer day<select data-days><option value="home">Mostly at home</option><option value="camp">Camp or a program</option></select></label>
    <fieldset class="msr-structure"><legend>How much structure?</legend>
     <label><input type="radio" name="msr-structure" value="relaxed" /> Relaxed <small>Five broad anchors; no set times</small></label>
     <label><input type="radio" name="msr-structure" value="balanced" checked /> Balanced <small>Seven blocks with flexible times</small></label>
@@ -31,13 +56,11 @@ const blocks=[
     <div data-edit-rows class="msr-edit-rows"></div>
    </details>
    <div class="msr-removed" data-removed-container hidden><strong>Removed blocks</strong><div data-removed-actions></div><p>Tap a block to add it back without losing your other changes.</p></div>
-   <div class="msr-message"><strong>A reusable rhythm, not a rigid calendar.</strong><p>On camp days, trips, or appointments, follow the anchors that fit. The printed rhythm stays useful even when plans change.</p></div>
-   <button type="button" data-print>Print rhythm / Save PDF</button>
-   <button type="button" class="msr-download" data-download>Download as image (PNG)</button><button type="button" data-reset class="msr-reset">Restore suggested rhythm</button>
-   <p class="msr-note">US Letter · 8.5 × 11 inches · one page. Illustrations from the updated OFC icon collection.</p>
-  </aside>
+</div>
+   <button type="button" class="msr-dialog-done" data-close-modal>Done · See our plan</button>
+  </dialog>
   <section class="msr-preview" aria-label="May illustrated rhythm board preview">
-   <div class="msr-preview-head"><h2>Your summer board</h2><span>One page · US Letter</span></div>
+   
    <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet>
     <div class="msr-sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
     <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span data-day-label>A DAY AT HOME</span></div>
@@ -52,7 +75,7 @@ const blocks=[
     <div class="msr-rule"><span>OUR SUMMER RULE</span><strong>Check the rhythm before asking Mom.</strong><p>Our plans can change. We can still find what's next.</p></div>
     <footer class="msr-foot"><span>ORGANIZED FAMILY CLUB</span><span>OUR SUMMER DAY · MAY</span></footer>
    </article></div>
-   <p class="msr-note">Visual proof with the updated seven-image OFC icon collection.</p>
+   
   </section>
  </div>
 </div>
@@ -121,6 +144,88 @@ const blocks=[
 @media(max-width:1080px){.msr-layout{grid-template-columns:1fr}.msr-editor{max-width:720px}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.msr-stage,.msr-sheet,.msr-sheet *{visibility:visible!important}.msr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.msr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msr-icon{mix-blend-mode:normal!important}}
+
+/* Prepared-plan shell shared in spirit with March and April. */
+.msr{padding:0;max-width:none}
+.msr-intro{display:none}
+.msr-layout{gap:0;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr)}
+.msr-editor{min-width:0;background:#faf9f7;border:0;border-right:1px solid #e5e0e1;padding:15px clamp(17px,2vw,26px);display:flex;flex-direction:column}
+.msr-editor-head{border-top:5px solid #d4dfc4;padding-top:11px}
+.msr-editor-head h2{font:400 clamp(23px,2.7vw,31px)/1.1 Georgia,serif;color:#4f654b;margin:10px 0 7px}
+.msr-editor-head em{font-style:italic}
+.msr-vision-button,.msr-edit-trigger{display:inline-flex;gap:7px;align-items:center;min-height:35px;background:none;border:0;padding:7px 0;text-decoration:underline;text-underline-offset:3px;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.msr-prepared{background:#fff;border:1px solid #dfe5d9;margin-top:17px;padding:15px}
+.msr-prepared>strong{display:block;font:400 23px Georgia,serif;color:#4f654b;margin:8px 0}
+.msr-prepared>p{font:12px/1.55 Montserrat,Arial,sans-serif;margin:0 0 12px}
+.msr-summary-line{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e4e9e0;padding:10px 0;font-size:12px}
+.msr-summary-line b{font-size:12px;text-align:right;color:#4f654b}
+.msr-subnote{font:11px/1.6 Montserrat,Arial,sans-serif;color:#686f64;margin:14px 0}
+.msr-actions{margin-top:auto}
+.msr-primary-actions>button[data-print]{width:100%;border:0;background:#4f654b;color:#fff;padding:13px;min-height:45px;cursor:pointer;font-size:12px;font-weight:700}
+.msr-actions .msr-download{margin-top:7px;min-height:36px}
+.msr-actions .msr-reset{margin:4px auto;min-height:32px}
+.msr-jump-edit{display:none}
+.msr-preview{background:#f5f3f2;min-width:0;padding:16px clamp(18px,3vw,45px) 38px}
+.msr-stage{margin:0 auto}
+.msr-dialog{position:fixed;inset:0;margin:auto;width:min(520px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;border:1px solid #d9e1d5;border-radius:10px;padding:24px 26px;background:#fff;color:#454a43;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
+.msr-dialog::backdrop{background:rgba(33,40,36,.52)}
+.msr-dialog-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.msr-dialog-top h2{font:400 29px/1.15 Georgia,serif;color:#4f654b;margin:9px 0 13px}
+.msr-dialog-close{border:0;background:#edf3e9;color:#4f654b;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;cursor:pointer}
+.msr-dialog>p{font:14px/1.65 Montserrat,Arial,sans-serif;margin:0 0 20px}
+.msr-dialog-done{width:100%;border:0;min-height:46px;background:#4f654b;color:#fff;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;padding:12px}
+.msr-dialog-form .msr-structure{display:block}
+.msr-dialog-form>label{display:block;border-top:1px solid #dfe5d9;margin-top:12px;padding-top:11px;font:700 12px Montserrat,Arial,sans-serif}
+.msr-dialog-form select{display:block;width:100%;min-height:43px;margin-top:7px;padding:8px;border:1px solid #aab6a3;background:#fff;color:#464d42;font:13px Montserrat,Arial,sans-serif}
+.msr-dialog-form .msr-customize{display:block;margin:17px 0}
+.msr-dialog-form .msr-customize summary{list-style-position:inside}
+.msr-dialog-form .msr-removed{margin:13px 0}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content:not([hidden]) .msr),body:has(#club-month-content:not([hidden]) .msr){height:100%;overflow:hidden}
+ #club-month-content:not([hidden]):has(.msr){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ .msr,.msr-layout{height:100%;margin:0}
+ .msr-editor{height:100%;overflow:hidden}
+ .msr-prepared{margin-top:clamp(8px,2vh,17px);padding:clamp(10px,1.4vh,15px)}
+ .msr-summary-line{padding:clamp(5px,1vh,10px) 0}
+ .msr-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+}
+@media screen and (max-width:1100px){
+ .msr{padding:0 0 45px}
+ .msr-layout{display:flex;flex-direction:column;gap:0}
+ .msr-preview{order:0;padding:15px 14px 26px}
+ .msr-editor{order:1;max-width:none;width:100%;border:0;padding:22px}
+ .msr-prepared{max-width:620px}
+}
+@media screen and (max-width:700px){
+ .msr{padding-bottom:calc(135px + env(safe-area-inset-bottom,0px))}
+ .msr-editor{padding:17px 18px}
+ .msr-prepared{scroll-margin-top:12px}
+ .msr-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(250,249,247,.98);border-top:1px solid #d9e1d5;box-shadow:0 -5px 20px #0001;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px))}
+ .msr-primary-actions{display:flex;gap:9px}
+ .msr-jump-edit{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;border:1px solid #4f654b;border-radius:4px;background:#fff;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;min-height:45px;padding:8px;text-decoration:none}
+ .msr-primary-actions>button[data-print]{flex:1.3;min-width:0;width:auto;border-radius:4px;font-size:12px;padding:8px}
+ .msr-actions .msr-download{min-height:32px}
+ .msr-actions .msr-reset{min-height:26px;font-size:11px}
+ .msr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{
+ .msr-dialog,.msr-actions,.msr-editor,.msr-intro{display:none!important}
+ .msr-preview{padding:0!important}
+}
+
+.msr-dialog-form .msr-structure label{border:0;margin:0;padding:8px 0;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600}
+.msr-dialog-form .msr-structure input{width:17px;height:17px;accent-color:#587554;flex:0 0 17px}
+.msr-dialog-form .msr-structure small{font-size:10px;line-height:1.35;color:#757f72;font-weight:400;margin-left:auto;text-align:right;max-width:165px}
+@media screen and (min-width:1101px) and (max-height:700px){
+ .msr-editor{padding-top:9px;padding-bottom:9px}
+ .msr-editor-head{padding-top:6px}
+ .msr-editor-head h2{font-size:23px}
+ .msr-prepared{padding:10px;margin-top:9px}
+ .msr-summary-line{padding:5px 0}
+ .msr-subnote{font-size:10px;margin:7px 0}
+ .msr-actions .msr-download{min-height:30px}
+ .msr-actions .msr-reset{min-height:27px}
+}
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
@@ -205,6 +310,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   return {title,desc,time};
  };
  const resolved=(key:Key):Required<Edit>=>({...starter(key),...(edits[key]??{})});
+ const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
+ const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
+ root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
+ root.querySelector('[data-open-editor]')?.addEventListener('click',()=>editorDialog?.showModal());
+ root.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
+ for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
  const renderEditor=()=>{
   if(!editor)return;
@@ -283,6 +394,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    node.querySelector<HTMLButtonElement>('[data-move-down]')?.toggleAttribute('disabled',order.indexOf(key)===order.length-1);
    node.querySelector<HTMLButtonElement>('[data-remove]')?.toggleAttribute('disabled',order.length<=1);
   }
+  const summaries:[string,string][]=[['days',options.days==='camp'?'Camp or program':'Mostly at home'],['structure',options.structure==='relaxed'?'Relaxed':options.structure==='structured'?'More structured':'Balanced'],['start',clock(hhmm(options.start))],['quiet',options.quiet==='rest'?'Rest or nap':options.quiet==='older'?'Independent recharge':'Independent play']];
+  for(const [kind,value] of summaries){const el=root.querySelector<HTMLElement>('[data-summary-'+kind+']');if(el)el.textContent=value}
   const day=root.querySelector<HTMLSelectElement>('[data-days]');if(day)day.value=options.days;
   const start=root.querySelector<HTMLSelectElement>('[data-start]');if(start)start.value=String(options.start);
   const quiet=root.querySelector<HTMLSelectElement>('[data-quiet]');if(quiet)quiet.value=options.quiet;
@@ -350,8 +463,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }catch(err){console.error('Summer rhythm PNG export failed',err);alert('Sorry, the image could not be saved. You can still use Print / Save PDF.')}
   finally{root.classList.remove('msr-exporting');download.disabled=false;download.textContent=prior}
  });
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail;
+ const applyHousehold=(detail:{household:{id:string;displayName?:string;members:Person[]};sample?:string})=>{
   if(!detail?.household)return;
   const nextProfile=(detail.sample??'account')+':'+detail.household.id;
   const changed=profile!==nextProfile;
@@ -388,7 +500,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    }catch{}
   }
   update();
- });
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string;members:Person[]};sample?:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  render(true);
 }
 </script>
