@@ -326,7 +326,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  root.querySelectorAll('[data-close-vision]').forEach(button=>button.addEventListener('click',()=>visionDialog?.close()));
  visionDialog?.addEventListener('click',event=>{if(event.target===visionDialog)visionDialog.close()});
  const ownerDialog=root.querySelector<HTMLDialogElement>('[data-owner-dialog]');
- root.querySelector('[data-open-owners]')?.addEventListener('click',()=>ownerDialog?.showModal());
+ root.querySelectorAll('[data-open-owners]').forEach(button=>button.addEventListener('click',()=>ownerDialog?.showModal()));
  root.querySelectorAll('[data-close-owners]').forEach(button=>button.addEventListener('click',()=>ownerDialog?.close()));
  ownerDialog?.addEventListener('click',event=>{if(event.target===ownerDialog)ownerDialog.close()});
  const draw=()=>{
