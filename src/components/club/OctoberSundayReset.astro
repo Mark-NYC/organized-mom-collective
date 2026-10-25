@@ -237,14 +237,17 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  root.querySelector('[data-osr-print]')?.addEventListener('click',()=>window.print());
  const png=root.querySelector<HTMLButtonElement>('[data-osr-png]');png?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-osr-front]');if(!front)return;png.disabled=true;const original=png.textContent;png.textContent='Preparing image…';root.classList.add('osr-export');
   try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const uri=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.download='our-sunday-reset.png';link.href=uri;link.click()}catch(error){console.error(error);alert('Image download failed. Please use Print / Save PDF instead.')}finally{root.classList.remove('osr-export');png.disabled=false;png.textContent=original}});
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:Household;sample:string}>).detail;if(!detail?.household)return;
+ const applyHousehold=(detail:{household:Household;sample:string})=>{
+  if(!detail?.household)return;
   const key=detail.sample+':'+detail.household.id;members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
   if(key!==current){current=key;state={trigger:defaultTrigger,leadId:members.find(m=>m.kind==='adult'&&!m.isAccountHolder)?.id??members.find(m=>m.kind==='adult')?.id??'',assignments:{}};try{const previous=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(previous?.current===key&&previous.state&&typeof previous.state.trigger==='string'&&typeof previous.state.assignments==='object')state=previous.state}catch{}}
   if(!members.some(m=>m.id===state.leadId&&m.kind==='adult'))state.leadId=members.find(m=>m.kind==='adult')?.id??'';
   fillAssignments();
   const select=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(select){select.replaceChildren();for(const adult of members.filter(m=>m.kind==='adult')){const item=document.createElement('option');item.value=adult.id;item.textContent=(adult.role==='parent'||adult.role==='partner')?(members.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner')).indexOf(adult)===0?'Mom':'Dad'):adult.firstName;select.append(item)}}save();paint();
- });
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  paint();
 }
 </script>
