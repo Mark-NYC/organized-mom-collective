@@ -83,7 +83,7 @@ const taskTypes:Record<string,string>={
 .msc-reminder{border-top:2px solid var(--msc-month);padding:18px 0}.msc-reminder h3{font:400 20px 'MSC Gelasio',Georgia,serif;margin:0 0 9px}.msc-reminder p{font:12px/1.7 'MSC Montserrat',sans-serif}
 .msc-print{background:#454545;color:#fff;min-height:52px;padding:14px;border:0;cursor:pointer;width:100%;font:600 12px 'MSC Montserrat',sans-serif;letter-spacing:.07em;text-transform:uppercase}.msc-reset{display:block;margin:10px auto;border:0;background:none;text-decoration:underline;text-underline-offset:4px;color:#454545;min-height:45px;cursor:pointer;font:600 12px 'MSC Montserrat',sans-serif}.msc-status,.msc-preview-note{font:11px/1.6 'MSC Montserrat',sans-serif;color:#666}
 .msc-preview-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--msc-month);padding-bottom:14px;margin-bottom:21px}.msc-preview-head h2{font:400 25px 'MSC Gelasio',Georgia,serif}.msc-preview-head p{font-size:12px}
-.msc-print-scroll{width:100%;overflow:visible;padding:5px 0 24px;display:flex;justify-content:center}.msc-sheet-stage{position:relative;width:694px;height:898px;flex:0 0 auto}.msc-sheet-stage .msc-sheet{position:absolute;top:0;left:0;transform:scale(var(--msc-preview-scale,.85));transform-origin:top left}.msc-sheet{width:816px;height:1056px;background:#fff;box-shadow:0 12px 30px #0002;padding:42px 51px 31px;display:flex;flex-direction:column}
+.msc-print-scroll{width:100%;overflow:visible;padding:5px 0 24px;display:flex;justify-content:center}.msc-sheet-stage{position:relative;width:816px;height:1056px;flex:0 0 auto}.msc-sheet-stage .msc-sheet{position:absolute;top:0;left:0;transform:scale(var(--msc-preview-scale,1));transform-origin:top left}.msc-sheet{width:816px;height:1056px;background:#fff;box-shadow:0 12px 30px #0002;padding:42px 51px 31px;display:flex;flex-direction:column}
 .msc-sheet-head{background:#edf5f0;border-top:11px solid var(--msc-month);padding:24px 27px 27px;min-height:206px}.msc-sheet-head>p:first-child{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.14em;color:#405f53}.msc-sheet-head h2{font:400 43px/1.1 'MSC Gelasio',Georgia,serif;color:#3d6556;margin:20px 0 12px}.msc-sheet-head h2 em{font-weight:600}.msc-sheet-head>p:last-child{font:italic 18px 'MSC Gelasio',Georgia,serif;color:#577669}
 .msc-sheet-family{padding:22px 0 14px;border-bottom:1px solid var(--msc-month);display:flex;justify-content:space-between;align-items:baseline;gap:15px}.msc-sheet-family span,.msc-sheet-family strong{font:600 9px 'MSC Montserrat',sans-serif;letter-spacing:.12em}.msc-sheet-family strong{font-size:13px;letter-spacing:0}
 .msc-sheet-caption{font:italic 20px 'MSC Gelasio',Georgia,serif;margin:19px 0 12px;color:#497666}
@@ -144,11 +144,9 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  const preview=root.querySelector<HTMLElement>('.msc-preview');
  const fitPreview=()=>{
   if(!stage||!preview)return;
-  // Keep the entire Letter page visible without an inner horizontal/vertical scrollbar.
-  // Print CSS resets scaling so the PDF stays exactly 8.5 x 11 inches.
-  const width=Math.max(220,preview.clientWidth-4);
-  const height=Math.min(820,Math.max(440,window.innerHeight*0.82));
-  const scale=Math.min(1,width/816,height/1056);
+  // Match June: scale to preview width, without limiting height.
+  const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);
+  const scale=Math.min(1,width/816);
   stage.style.width=`${816*scale}px`;
   stage.style.height=`${1056*scale}px`;
   stage.style.setProperty('--msc-preview-scale',String(scale));
