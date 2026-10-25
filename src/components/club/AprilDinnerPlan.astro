@@ -11,10 +11,10 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
 const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washing-dishes'];
 ---
 <div class="adc" data-adc-key={storageKey} style={'--adc-accent:'+monthColors[3].hex}>
- <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>A ready-to-use dinner with real ingredient quantities, simple instructions, and one person responsible for seeing it through—from prep to cleanup.</p></header>
+ <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>One fully prepared dinner for tonight, plus a reusable four-role Dinner Team your family can use again and again.</p></header>
  <div class="adc-layout">
  <section class="adc-controls" aria-label="Customize your family's dinner plan">
-  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Choose the kind of evening first. Then pick a dinner family and a fully prepared recipe. All 48 options include ingredient amounts, cooking steps, and a team.</p></div>
+  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Choose the kind of evening, then pick a prepared recipe. All 48 options include ingredient amounts, cooking steps, and a team you can reuse next time.</p></div>
   <label>What kind of night is it?<select data-effort>
     <option value="full">Full night · time to prepare</option>
     <option value="quick" selected>Quick night · around 15–20 minutes</option>
@@ -59,21 +59,25 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
     <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · FRONT</span></footer>
    </article>
    <article class="adc-sheet adc-back">
-    <div class="adc-sheet-head adc-back-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Dinner captain, <em>you've got this.</em></h2><span>THE PLAN TO LEAD YOUR TEAM FROM START TO FINISH.</span></div>
+    <div class="adc-sheet-head adc-back-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight's dinner. <em>Tomorrow's team.</em></h2><span>COOK THIS MEAL. KEEP THE TEAM FOR NEXT TIME.</span></div>
     <div class="adc-sheet-inner adc-back-inner">
       <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title>{initial.name}</h3></div><span data-out-recipe-time>{initial.time}</span></div>
-      <p class="adc-recipe-intro">Real directions for the cooking lead. Everyone else can start their assigned jobs from the front.</p>
+      <p class="adc-recipe-intro">Follow these directions for tonight’s meal. The Cooking Lead handles hot or sharp tasks; everyone else does their part.</p>
       <div class="adc-recipe-steps">
         {initial.instructions.map((instruction,i)=><div class="adc-recipe-step"><span>{String(i+1).padStart(2,'0')}</span><p data-out-instruction={i}>{instruction}</p></div>)}
       </div>
-      <div class="adc-captain-check">
-        <span>DINNER CAPTAIN · CLOSE THE LOOP</span>
-        <div><i></i> Ingredients and helpers ready</div>
-        <div><i></i> Dinner on the table</div>
-        <div><i></i> Dishes cleared, leftovers refrigerated, kitchen reset</div>
-      </div>
-      <div class="adc-captain-box"><span>FOR THE GROWN-UPS</span><p>Give the captain the plan and room to lead. Help with food safety and hot or sharp tasks, but let the captain invite helpers, make the small decisions, and check that the whole job is finished.</p></div>
-      <div class="adc-back-note">THE CAPTAIN LEADS. THE TEAM HELPS. MOM DOES NOT HAVE TO COORDINATE.</div>
+      <section class="adc-repeat" aria-label="Reusable family dinner team guide">
+        <div class="adc-repeat-heading"><div><span class="adc-tiny">SAVE THIS FOR ANOTHER NIGHT</span><h3>Our Dinner Team</h3></div><span class="adc-repeat-tag">USE AGAIN</span></div>
+        <p class="adc-repeat-intro">Different dinner, same four jobs. Each person knows how to help without waiting for Mom to assign every step.</p>
+        <div class="adc-repeat-roles">
+          <div><strong>DINNER CAPTAIN</strong><span>Chooses with the family, invites helpers, and sees the whole job through.</span></div>
+          <div><strong>INGREDIENTS CHECKER</strong><span>Checks what we have and gathers what we need.</span></div>
+          <div><strong>TABLE CAPTAIN</strong><span>Sets the table, then helps clear it.</span></div>
+          <div><strong>COOKING LEAD</strong><span>Leads the recipe. An adult handles heat, knives, and food safety.</span></div>
+        </div>
+        <div class="adc-repeat-sequence"><span>THE CAPTAIN'S FOUR STEPS</span><div><b>1 <strong>Choose</strong><small>Pick dinner</small></b><b>2 <strong>Gather</strong><small>Check food &amp; helpers</small></b><b>3 <strong>Make</strong><small>Lead the team</small></b><b>4 <strong>Reset</strong><small>Finish together</small></b></div></div>
+        <div class="adc-repeat-next"><strong>Next time, choose another dinner and use the same team.</strong><span>Swap people if you want. Keep the four jobs and the four steps.</span></div>
+      </section>
     </div>
     <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · BACK</span></footer>
    </article>
@@ -117,6 +121,33 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
 .adc-captain-box{padding:16px 20px;margin-top:14px}
 .adc-captain-box p{font:italic 14px/1.5 Georgia,serif;margin:8px 0 0}
 .adc-back-note{font-size:9px;padding-top:13px}
+/* April reusable dinner system: compact enough to share the back with a full recipe. */
+.adc-back-head h2{font-size:34px}
+.adc-back-inner{padding-top:11px}
+.adc-recipe-top{padding:2px 0 9px}
+.adc-recipe-top h3{font-size:22px;margin:5px 0 0}
+.adc-recipe-intro{font-size:11px;line-height:1.4;margin:9px 0 10px}
+.adc-recipe-step{padding:9px 0;grid-template-columns:26px 1fr;gap:9px}
+.adc-recipe-step p{font-size:11px;line-height:1.4}
+.adc-repeat{margin-top:13px;border-top:3px solid #ddd8e8;padding-top:11px}
+.adc-repeat-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.adc-repeat-heading h3{font:400 25px Georgia,serif;color:#635877;margin:4px 0}
+.adc-repeat-tag{font-size:8px;font-weight:700;letter-spacing:.1em;background:#f1eef8;padding:7px 9px;white-space:nowrap}
+.adc-repeat-intro{font-size:10px;line-height:1.4;margin:4px 0 10px}
+.adc-repeat-roles{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.adc-repeat-roles>div{background:#f8f6fb;padding:9px 11px;min-height:59px}
+.adc-repeat-roles strong{font-size:9px;letter-spacing:.06em;display:block;margin-bottom:4px}
+.adc-repeat-roles span{font-size:10px;line-height:1.35;display:block}
+.adc-repeat-sequence{margin-top:12px}
+.adc-repeat-sequence>span{font-size:9px;font-weight:700;letter-spacing:.12em}
+.adc-repeat-sequence>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:7px}
+.adc-repeat-sequence b{background:#f1eef8;padding:8px 6px;font-size:10px;color:#635877;font-weight:700;min-height:53px}
+.adc-repeat-sequence b strong{display:block;color:#4a4450;font-size:11px;margin:3px 0}
+.adc-repeat-sequence b small{display:block;font-size:9px;color:#4a4450;font-weight:400}
+.adc-repeat-next{margin-top:11px;border-left:4px solid #b8aecb;padding:7px 12px;background:#faf8fc}
+.adc-repeat-next strong{font:italic 14px/1.3 Georgia,serif;display:block}
+.adc-repeat-next span{font-size:9px;display:block;margin-top:4px}
+@media print{.adc-repeat-roles>div,.adc-repeat-sequence b,.adc-repeat-next,.adc-repeat-tag{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
 @media print{
  .adc-sheet{overflow:hidden!important;break-inside:avoid!important;page-break-inside:avoid!important}
  .adc-sheet-head,.adc-captain-check,.adc-captain-box{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
