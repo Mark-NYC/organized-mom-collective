@@ -301,8 +301,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   }catch(err){console.error('July image export failed',err);alert('Image download failed; please use Print / Save PDF.')}
   finally{root.classList.remove('jab-export');dl.disabled=false;dl.textContent=label}
  });
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}>).detail;
+ const applyHousehold=(detail:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string})=>{
   if(!detail?.household)return;const next=(detail.sample??'account')+':'+detail.household.id;
   kids=(detail.household.members??[]).filter(x=>x.kind==='child');
   const select=root.querySelector<HTMLSelectElement>('[data-jab-child]');
@@ -323,7 +322,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   if(state.child!=='family'&&!kids.some(x=>x.id===state.child))state.child='family';
   if(state.child==='family'&&profile===next&&!boards.family&&kids.length){state=defaultsFor(selectedAge(kids[0].id),kids[0].id)}
   updateFamily();save();draw();options();
- });
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  updateFamily();draw();options();
 }
 </script>
