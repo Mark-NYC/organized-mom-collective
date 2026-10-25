@@ -156,32 +156,35 @@ for(const name of previewIconNames){
   .png().toFile(out);
  // June snacks are prepared independently from their current PNG sources below.
 }
-// June snack illustrations must follow the replacement PNG library, not legacy SVGs.
-// Fail clearly if a required snack image is absent rather than shipping a broken printable.
-const juneSnackNames=['yogurt-cup','apple','carrot','cucumber-sticks','mini-bagels','cheese-wedge','crackers','granola-bar'];
-const juneMissing=[];
-for(const name of juneSnackNames){
- const actual=iconAliases[name] || name;
- // These two snacks must use the exact replacement PNG artwork, never SVG or aliases.
- const exactJunePng=new Set(['cucumber-sticks','mini-bagels']);
- const preferred=join(pngRoot,name+'.png');
- const renamed=join(pngRoot,actual+'.png');
- const input=exactJunePng.has(name)
-  ? (await exists(preferred) ? preferred : null)
-  : (await exists(preferred) ? preferred : await exists(renamed) ? renamed : null);
- if(!input){juneMissing.push(name+' (expected '+actual+'.png)');continue;}
- const output=join(snackDir,name+'.png');
+// June gets current replacement artwork directly from the PNG source folder.
+// Publish ALL PNGs here so existing June item references keep working, not only
+// the small set that originally appeared in August's preview.
+const junePngFiles=(await (await import('node:fs/promises')).readdir(pngRoot)).filter(n=>n.toLowerCase().endsWith('.png'));
+async function renderJunePng(input,output){
  await sharp(input).rotate().resize({width:420,height:420,fit:'contain',background:'#00000000'})
   .extend({top:46,bottom:46,left:46,right:46,background:'#00000000'})
   .png().toFile(output);
- console.log('June snack: '+name+'.png <- '+input.slice(root.length+1));
 }
-if(juneMissing.length)throw Error('Missing June snack PNGs: '+juneMissing.join(', '));
-console.log('Prepared '+juneSnackNames.length+' June snack PNGs.');
-console.log('Prepared August v3 icon previews.');
+for(const filename of junePngFiles){
+ await renderJunePng(join(pngRoot,filename),join(snackDir,filename));
+}
+// June's older printable still refers to apple/carrot instead of fruit/carrot-sticks.
+// Keep their old public URLs, but supply the new PNG artwork behind those names.
+const juneCompatibilityNames=['apple','carrot'];
+for(const name of juneCompatibilityNames){
+ if(junePngFiles.includes(name+'.png'))continue;
+ const replacement=iconAliases[name];
+ const input=replacement && join(pngRoot,replacement+'.png');
+ if(!input || !(await exists(input)))throw Error('Missing June PNG for '+name+': '+replacement+'.png');
+ await renderJunePng(input,join(snackDir,name+'.png'));
+ console.log('June PNG alias: '+name+'.png <- '+replacement+'.png');
+}
+const requiredJuneSnacks=['yogurt-cup','apple','carrot','cucumber-sticks','mini-bagels','cheese-wedge','crackers','granola-bar'];
+const missingJune=requiredJuneSnacks.filter(name=>!junePngFiles.includes(name+'.png')&&!juneCompatibilityNames.includes(name));
+if(missingJune.length)throw Error('Missing required June snack PNGs: '+missingJune.join(', '));
+console.log('Published '+junePngFiles.length+' replacement PNG illustrations for June, plus compatibility names.');
 
-
- // Shared reusable art for May, January, February and July Club previews.
+// Shared reusable art for May, January, February and July Club previews.
  // Render supplied original PNGs as-is, and newer SVG-only illustrations to padded PNGs.
  const sharedIcons=['morning-start','move-play','create-explore','lunch-reset','quiet-time','free-afternoon','evening-reset','breakfast-bowl','backpack','pajamas','dish','family-group','friend-pair','book','home','made-bed','shirt','paintbrush','star','basket','puzzle-piece','blocks','scissors','tree','bike','jump-rope','sidewalk-chalk','conversation-bubbles','adult-and-child-together','helping-hands'];
  const sharedDir=join(root,'public/images/club/shared-icons');
