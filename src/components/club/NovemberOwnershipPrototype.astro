@@ -19,7 +19,7 @@ const first=JOB_PRESETS[0];
         <p>We made a ready-to-use ownership plan for <span id="ws-ready-family">the Goering Family</span>. Each person has a part with a clear finish line.</p><button class="ws-open-editor" type="button" data-ws-open>Edit responsibilities</button>
         <div class="ws-field" hidden><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
-      <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
+      <div class="ws-actions"><div class="ws-mobile-actions"><button type="button" class="ws-mobile-edit" data-ws-open>Make changes</button><button type="submit" form="ws-form" class="ws-download ws-mobile-print" disabled>Download PDF</button></div><button type="button" class="ws-download" id="ws-approve">Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
     <dialog class="ws-edit-dialog" id="ws-edit-dialog" aria-labelledby="ws-dialog-title"><div class="ws-dialog-top"><div><span class="ws-eyebrow">MAKE IT YOURS · NOVEMBER</span><h2 id="ws-dialog-title">Edit family ownership</h2></div><button type="button" class="ws-close-dialog" data-ws-close aria-label="Close editor">×</button></div><p>We have prepared real responsibilities for your family. Adjust only what needs to change.</p>      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>Each person knows what they own and what finished looks like. Change a handoff only if it doesn’t fit your family.</p></div>
       <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Mom</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Dad</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
@@ -455,6 +455,14 @@ const first=JOB_PRESETS[0];
  #club-month-content .ws-edit-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{#club-month-content .ws-floating-edit,#club-month-content .ws-edit-dialog{display:none!important}}
+
+#club-month-content .ws-mobile-actions{display:none}
+@media screen and (max-width:700px){
+ #club-month-content .ws-mobile-actions{display:flex;gap:9px;align-items:stretch}
+ #club-month-content .ws-mobile-edit{flex:1;min-height:45px;border:1px solid #5f7767;background:#fff;color:#5f7767;border-radius:4px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+ #club-month-content .ws-mobile-print{flex:1.3;min-width:0;font-size:12px;letter-spacing:0;text-transform:none;min-height:45px}
+ #club-month-content .ws-actions #ws-approve,#club-month-content .ws-actions #ws-review,#club-month-content .ws-actions #ws-approval-note{display:none}
+}
 </style>
 <style>
 .ws-shell{max-width:1440px;margin:auto;padding:24px clamp(16px,3vw,52px) 72px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}
