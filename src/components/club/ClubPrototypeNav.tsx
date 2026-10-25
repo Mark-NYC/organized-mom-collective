@@ -60,8 +60,16 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
    </select></label>
    <span>Sample preview · family changes save in this browser tab only</span>
   </div>
-  {tab==='kits'?<nav aria-label="Preview months" className="cproto-months cproto-inner">{months.map(m=>
-   <a key={m.slug} aria-current={month===m.slug?'page':undefined} href={href(m.url)}>{m.label}</a>)}</nav>
+  {tab==='kits'?<>
+   <nav aria-label="Preview months" className="cproto-months cproto-inner">{months.map(m=>
+    <a key={m.slug} aria-current={month===m.slug?'page':undefined} href={href(m.url)}>{m.label}</a>)}</nav>
+   <div className="cproto-month-mobile cproto-inner">
+    <label htmlFor="cproto-month-picker">Preview month</label>
+    <select id="cproto-month-picker" value={month} onChange={e=>{const next=months.find(m=>m.slug===e.target.value);if(next)window.location.assign(href(next.url))}}>
+     {months.map(m=><option key={m.slug} value={m.slug}>{m.label}</option>)}
+    </select>
+   </div>
+  </>
    :<section className="cproto-inner cproto-family">
     <p className="cproto-overline">ORGANIZED FAMILY CLUB / FAMILY SETTINGS</p>
     <p>These are the same family settings used in the Club member pages. Save your edits and return to any month to see the updated sample profile.</p>
@@ -89,6 +97,21 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
    .cproto-months{display:flex;gap:20px;padding-top:14px;padding-bottom:14px;border-bottom:1px solid #e3e3e3}
    .cproto-months a{font-size:13px;color:#454545;text-decoration:none;padding:6px 0}
    .cproto-months a[aria-current=page]{font-weight:700;border-bottom:2px solid #454545}
+   .cproto-month-mobile{display:none}
+   @media(max-width:700px){
+    .cproto-top .cproto-inner{flex-wrap:nowrap;gap:6px;padding-top:7px;padding-bottom:7px}
+    .cproto-brand{font-size:16px;line-height:1.2}
+    .cproto-top nav{gap:2px;flex-shrink:0}
+    .cproto-top nav button{padding:7px 9px;font-size:12px}
+    .cproto-sample{padding-top:8px;padding-bottom:8px;gap:4px}
+    .cproto-sample label{width:100%;justify-content:space-between;gap:8px}
+    .cproto-sample select{max-width:min(65vw,270px);min-width:0}
+    .cproto-sample span{font-size:10px;line-height:1.4}
+    .cproto-months{display:none}
+    .cproto-month-mobile{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:9px;padding-bottom:9px;border-bottom:1px solid #e3e3e3}
+    .cproto-month-mobile label{font-size:12px;font-weight:700;white-space:nowrap}
+    .cproto-month-mobile select{flex:1;min-width:0;max-width:230px;min-height:42px;border:1px solid #b8b8b8;border-radius:4px;background:#fff;color:#454545;padding:8px 12px;font:600 13px Montserrat,Arial,sans-serif}
+   }
    .cproto-family{padding-top:35px;padding-bottom:40px;max-width:850px}
    .cproto-family>p{font-size:14px;line-height:1.6;margin:0 0 15px}
    .cproto-overline{font-weight:600;letter-spacing:.14em;font-size:10px!important}
