@@ -13,26 +13,57 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
 <div class="adc" data-adc-key={storageKey} style={'--adc-accent:'+monthColors[3].hex}>
  <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>One fully prepared dinner for tonight, plus a reusable four-role Dinner Team your family can use again and again.</p></header>
  <div class="adc-layout">
- <section class="adc-controls" aria-label="Customize your family's dinner plan">
-  <div class="adc-controls-head"><p class="adc-eyebrow">APRIL · YOUR PREPARED DINNER</p><h2>One meal. Everyone has a part.</h2><p>Choose the kind of evening, then pick a prepared recipe. All 48 options include ingredient amounts, cooking steps, and a team you can reuse next time.</p></div>
-  <label>What kind of night is it?<select data-effort>
+ <section class="adc-controls" aria-label="Your prepared April dinner plan">
+  <div class="adc-controls-head">
+   <p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL</p>
+   <h2>Tonight, <em>we've got dinner.</em></h2>
+   <p class="adc-vision">Dinner shouldn't depend on Mom to plan, assign, cook, and clean up. This meal is already planned. Everyone gets a part, and your Dinner Team can use the same four jobs again next time.</p>
+  </div>
+  <div class="adc-prepared">
+   <div class="adc-summary-block">
+    <span class="adc-summary-label">TONIGHT'S PREPARED MEAL</span>
+    <strong data-summary-meal>{initial.name}</strong>
+    <p data-summary-time>{initial.time} · About 4 servings</p>
+    <button type="button" class="adc-edit-link" data-open-dinner>Change dinner <span aria-hidden="true">↗</span></button>
+   </div>
+   <div class="adc-summary-block adc-summary-team">
+    <span class="adc-summary-label">YOUR DINNER TEAM</span>
+    <div class="adc-summary-row"><span>Dinner captain</span><strong data-summary-role="captain">Dad</strong></div>
+    <div class="adc-summary-row"><span>Ingredients checker</span><strong data-summary-role="checker">Sofia</strong></div>
+    <div class="adc-summary-row"><span>Table captain</span><strong data-summary-role="table">Mateo</strong></div>
+    <div class="adc-summary-row"><span>Cooking lead</span><strong data-summary-role="cook">Mom</strong></div>
+    <button type="button" class="adc-edit-link" data-open-team>Edit team <span aria-hidden="true">↗</span></button>
+   </div>
+  </div>
+  <div class="adc-actions"><button type="button" data-print class="adc-button">Print both sides / Save PDF</button><button type="button" data-reset class="adc-reset">Restore prepared plan</button></div>
+ </section>
+ <dialog class="adc-dialog" data-dinner-dialog aria-labelledby="adc-dinner-dialog-title">
+  <div class="adc-dialog-top"><div><span class="adc-eyebrow">MAKE IT YOURS · APRIL</span><h2 id="adc-dinner-dialog-title">Choose your dinner</h2></div><button type="button" class="adc-dialog-close" data-close-dialog aria-label="Close dinner editor">×</button></div>
+  <p>Every meal comes ready to cook, with ingredients, directions, and the same four family roles. Choose what fits tonight.</p>
+  <div class="adc-dialog-fields">
+   <label>What kind of night is it?<select data-effort>
     <option value="full">Full night · time to prepare</option>
     <option value="quick" selected>Quick night · around 15–20 minutes</option>
     <option value="minimal">Minimal-effort · almost no prep</option>
    </select></label>
    <label>Choose a dinner family<select data-category>{dinnerCategories.map(c=><option value={c.id}>{c.name}</option>)}</select></label>
    <label>Choose tonight's recipe<select data-meal>{initialMeals.map(m=><option value={m.id}>{m.name}</option>)}</select></label>
-   <p class="adc-filter-count" data-filter-count>Two prepared taco-night options available for a quick evening. Change either filter for more.</p>
-  <div class="adc-roles-editor">
-   <label>Dinner captain <small>Owns the whole job—not just one step.</small><select data-role="captain"></select></label>
-   <label>Ingredients checker <small>Checks pantry and gathers food.</small><select data-role="checker"></select></label>
-   <label>Table captain <small>Sets dishes and toppings.</small><select data-role="table"></select></label>
-   <label>Cooking lead <small>Adult; handles the stove and knives.</small><select data-role="cook"></select></label>
+   <p class="adc-filter-count" data-filter-count>Choose an effort and dinner family to explore all 48 recipes.</p>
   </div>
-  <div class="adc-explainer"><h3>The captain owns the whole meal.</h3><p>That means checking what's needed, asking others for help, and confirming cleanup is finished. A capable adult leads if children aren't ready. Kids still get meaningful roles.</p><p>Recipes serve approximately four; check ingredients for allergies, food preferences, and quantities. An adult handles stove use, knives, and hot food.</p></div>
-  <button type="button" data-print class="adc-button">Print both sides / Save PDF</button><button type="button" data-reset class="adc-reset">Restore prepared assignments</button>
-  <p class="adc-status" role="status">Two US Letter pages, intended for double-sided printing. Choose actual size and flip on the long edge.</p>
- </section>
+  <p class="adc-dialog-help">Recipes serve approximately four. Check ingredients for allergies and preferences. An adult handles heat, knives, and food safety.</p>
+  <button type="button" class="adc-dialog-done" data-close-dialog>Done · See my plan</button>
+ </dialog>
+ <dialog class="adc-dialog" data-team-dialog aria-labelledby="adc-team-dialog-title">
+  <div class="adc-dialog-top"><div><span class="adc-eyebrow">SHARE THE LOAD · APRIL</span><h2 id="adc-team-dialog-title">Your Dinner Team</h2></div><button type="button" class="adc-dialog-close" data-close-dialog aria-label="Close team editor">×</button></div>
+  <p>The captain owns the whole meal: chooses, gathers helpers, makes it happen, and checks that cleanup is done. Other family members have clear jobs.</p>
+  <div class="adc-roles-editor">
+   <label>Dinner captain <small>Owns the whole job, not just one step.</small><select data-role="captain"></select></label>
+   <label>Ingredients checker <small>Checks the pantry and gathers food.</small><select data-role="checker"></select></label>
+   <label>Table captain <small>Sets dishes and toppings, then clears.</small><select data-role="table"></select></label>
+   <label>Cooking lead <small>An adult handles stove use and knives.</small><select data-role="cook"></select></label>
+  </div>
+  <button type="button" class="adc-dialog-done" data-close-dialog>Done · See my plan</button>
+ </dialog>
  <section class="adc-view" aria-label="Two-page April printable preview">
   <div class="adc-view-title"><h2>Your April dinner plan</h2><span>Front + back · US Letter</span></div>
   <div class="adc-stage" data-adc-stage>
@@ -164,38 +195,73 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
  .adc-sheet{position:relative!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;box-shadow:none!important;border:0!important;page-break-after:always!important;break-after:page!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
  .adc-sheet:last-child{page-break-after:auto!important;break-after:auto!important}
 }
-/* April desktop experiment: one fixed, non-scrolling sidebar and one scrolling preview. */
+/* April prepared-plan experiment: stationary summary, editable dialogs, scrolling preview. */
+.adc-controls-head h2 em{color:#786c91}
+.adc-vision{font-size:12px;line-height:1.6;margin:9px 0 0}
+.adc-prepared{display:grid;gap:12px}
+.adc-summary-block{background:#fff;border:1px solid #e6e0e8;padding:15px 16px}
+.adc-summary-label{display:block;color:#756c87;font-size:10px;font-weight:700;letter-spacing:.12em;margin-bottom:9px}
+.adc-summary-block>strong{font:400 20px/1.25 Georgia,serif;display:block;color:#51465d}
+.adc-summary-block>p{font-size:11px;color:#68616d;margin:5px 0 0}
+.adc-summary-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px solid #f2eff3;font-size:11px}
+.adc-summary-row strong{font-size:11px;color:#51465d;white-space:nowrap}
+.adc-edit-link{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;padding:12px 0 0;color:#675679;text-decoration:underline;font:700 11px Montserrat,Arial,sans-serif;cursor:pointer;min-height:34px}
+.adc-actions{margin-top:14px}
+.adc-dialog{box-sizing:border-box;width:min(480px,calc(100vw - 32px));max-height:min(740px,calc(100dvh - 40px));overflow-y:auto;overscroll-behavior:contain;border:1px solid #e6e0e8;border-radius:10px;background:#fff;box-shadow:0 22px 70px #0003;padding:23px 26px;color:#454545;font-family:Montserrat,Arial,sans-serif}
+.adc-dialog::backdrop{background:rgba(38,32,43,.52)}
+.adc-dialog-top{display:flex;justify-content:space-between;align-items:start;gap:15px}
+.adc-dialog-top h2{font:400 29px Georgia,serif;margin:8px 0 12px;color:#635877}
+.adc-dialog-close{border:0;background:#f2eef4;width:36px;height:36px;flex:0 0 36px;font-size:26px;cursor:pointer;border-radius:50%;color:#51465d}
+.adc-dialog>p{font-size:12px;line-height:1.65;margin:0 0 16px}
+.adc-dialog label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin:0 0 16px}
+.adc-dialog label small{display:block;font-size:11px;line-height:1.45;font-weight:400;text-transform:none;letter-spacing:0;margin-top:5px}
+.adc-dialog select{display:block;width:100%;min-height:46px;background:white;border:1px solid #b9b3be;border-radius:4px;margin-top:8px;padding:9px 11px;color:#454545;font:13px Montserrat,Arial,sans-serif}
+.adc-dialog .adc-filter-count{font-size:11px;color:#6c6374;line-height:1.5;margin:0 0 14px}
+.adc-dialog .adc-dialog-help{font-size:11px;color:#6c6374}
+.adc-dialog-done{width:100%;border:0;background:#454545;color:#fff;min-height:46px;padding:10px 15px;font-weight:700;cursor:pointer}
 @media screen and (min-width:1101px){
  html:has(#club-month-content:not([hidden]) .adc),body:has(#club-month-content:not([hidden]) .adc){height:100%;overflow:hidden}
  #club-month-content:not([hidden]){position:fixed;top:var(--adc-nav-height,180px);bottom:0;left:0;right:0;overflow:hidden}
  .adc{max-width:none;height:100%;padding:0;margin:0}
  .adc-intro{display:none}
- .adc-layout{height:100%;display:grid;grid-template-columns:clamp(290px,27vw,370px) minmax(0,1fr);gap:0;align-items:stretch}
- .adc-controls{position:relative;height:100%;max-height:none;overflow:hidden;padding:clamp(12px,1.6vh,20px) clamp(15px,2vw,27px);background:#faf9f7;border-right:1px solid #e5e0e7}
- .adc-controls-head{padding:8px 0 8px;border-top-width:5px}
- .adc-controls-head h2{font-size:clamp(19px,2.7vh,24px);margin:5px 0 4px}
- .adc-controls-head p:last-child{display:none}
- .adc-controls label{padding-top:clamp(5px,1vh,9px);margin-bottom:clamp(5px,1vh,10px);font-size:10px}
- .adc-controls select{min-height:34px;margin-top:4px;padding:5px 8px;font-size:12px}
- .adc-controls label small{margin-top:1px;font-size:10px}
- .adc-filter-count,.adc-explainer,.adc-status{display:none}
- .adc-roles-editor{margin-top:10px}
- .adc-button{min-height:40px;padding:8px;font-size:11px;margin-top:4px}
- .adc-reset{min-height:27px;margin:2px auto;font-size:11px}
+ .adc-layout{height:100%;display:grid;grid-template-columns:clamp(310px,28vw,400px) minmax(0,1fr);gap:0;align-items:stretch}
+ .adc-controls{position:relative;height:100%;overflow:hidden;padding:clamp(12px,1.6vh,20px) clamp(15px,2vw,27px);background:#faf9f7;border-right:1px solid #e5e0e7;display:flex;flex-direction:column}
+ .adc-controls-head{border-top:5px solid var(--adc-accent);padding:9px 0 14px}
+ .adc-controls-head h2{font-size:clamp(22px,2.9vh,29px);margin:6px 0}
+ .adc-controls-head p:last-child{display:block;font-size:clamp(11px,1.35vh,12px);line-height:1.45}
+ .adc-prepared{gap:clamp(7px,1.2vh,12px)}
+ .adc-summary-block{padding:clamp(9px,1.3vh,15px) 15px}
+ .adc-summary-label{margin-bottom:5px}
+ .adc-summary-row{padding:clamp(3px,.6vh,5px) 0}
+ .adc-edit-link{padding-top:7px;min-height:26px}
+ .adc-actions{margin-top:auto;padding-top:8px}
+ .adc-button{min-height:42px}
+ .adc-reset{min-height:28px;margin:2px auto}
  .adc-view{height:100%;overflow-y:auto;overscroll-behavior:contain;padding:18px clamp(18px,3vw,48px) 35px;background:#f5f3f2}
  .adc-view-title{position:relative;background:transparent;margin-bottom:16px}
  .adc-view-title h2{font-size:22px;margin:0}
  .adc-stage{margin:0 auto}
  .adc-preview-note{max-width:816px;margin:16px auto}
 }
-@media screen and (min-width:1101px) and (max-height:750px){
- .adc-controls-head h2{font-size:19px}
- .adc-controls label{padding-top:4px;margin-bottom:4px}
- .adc-controls select{min-height:30px}
- .adc-roles-editor{margin-top:5px}
- .adc-controls label small{display:none}
- .adc-button{min-height:34px}
+@media screen and (min-width:1101px) and (max-height:720px){
+ .adc-controls-head{padding:6px 0 8px}
+ .adc-controls-head h2{font-size:21px}
+ .adc-controls-head p:last-child{font-size:11px;line-height:1.35}
+ .adc-summary-block{padding:8px 12px}
+ .adc-summary-block>strong{font-size:17px}
+ .adc-summary-row{padding:2px 0}
+ .adc-prepared{gap:6px}
+ .adc-actions{padding-top:3px}
+ .adc-button{min-height:36px}
 }
+@media screen and (max-width:1100px){
+ .adc-controls{background:#faf9f7;padding:20px}
+ .adc-intro{display:none}
+ .adc-prepared{max-width:580px}
+ .adc-vision{max-width:640px}
+ .adc-view{margin-top:20px}
+}
+@media print{.adc-dialog{display:none!important}}
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
@@ -259,6 +325,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   return index===0?'Mom':index===1?'Dad':member.firstName;
  };
  const save=()=>{try{storage.setItem(key,JSON.stringify({profile,effort,category,meal,assignments,customized:[...customized]}))}catch{}};
+ const dinnerDialog=root.querySelector<HTMLDialogElement>('[data-dinner-dialog]');
+ const teamDialog=root.querySelector<HTMLDialogElement>('[data-team-dialog]');
+ root.querySelector('[data-open-dinner]')?.addEventListener('click',()=>dinnerDialog?.showModal());
+ root.querySelector('[data-open-team]')?.addEventListener('click',()=>teamDialog?.showModal());
+ root.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
+ for(const dialog of [dinnerDialog,teamDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const draw=()=>{
   const filtered=choices.filter(m=>m.category===category&&m.effort===effort);
   const selection=filtered.find(m=>m.id===meal)??filtered[0]??choices[0];
@@ -272,6 +344,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   const mealText=root.querySelector<HTMLElement>('[data-out-meal]');if(mealText)mealText.textContent=selection.name;
   const timeText=root.querySelector<HTMLElement>('[data-out-time]');if(timeText)timeText.textContent=selection.time;
   const servings=root.querySelector<HTMLElement>('[data-out-servings]');if(servings)servings.textContent=selection.servings;
+  const summaryMeal=root.querySelector<HTMLElement>('[data-summary-meal]');if(summaryMeal)summaryMeal.textContent=selection.name;
+  const summaryTime=root.querySelector<HTMLElement>('[data-summary-time]');if(summaryTime)summaryTime.textContent=selection.time+' · '+selection.servings;
   const backTitle=root.querySelector<HTMLElement>('[data-out-recipe-title]');if(backTitle)backTitle.textContent=selection.name;
   const backTime=root.querySelector<HTMLElement>('[data-out-recipe-time]');if(backTime)backTime.textContent=selection.time;
   root.querySelectorAll<HTMLElement>('[data-out-instruction]').forEach((el,i)=>{el.textContent=selection.instructions[i]??''});
@@ -288,6 +362,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
    }
    select.value=members.some(m=>m.id===chosen&&eligible(role,m))?chosen:'';
    text.textContent=members.find(m=>m.id===select.value)?displayName(members.find(m=>m.id===select.value)!):'Our family';
+   const summaryRole=root.querySelector<HTMLElement>('[data-summary-role="'+role+'"]');if(summaryRole)summaryRole.textContent=text.textContent;
   }
  };
  root.querySelector<HTMLSelectElement>('[data-effort]')?.addEventListener('change',e=>{effort=(e.target as HTMLSelectElement).value as DinnerEffort;const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
