@@ -162,9 +162,13 @@ const juneSnackNames=['yogurt-cup','apple','carrot','cucumber-sticks','mini-bage
 const juneMissing=[];
 for(const name of juneSnackNames){
  const actual=iconAliases[name] || name;
+ // These two snacks must use the exact replacement PNG artwork, never SVG or aliases.
+ const exactJunePng=new Set(['cucumber-sticks','mini-bagels']);
  const preferred=join(pngRoot,name+'.png');
  const renamed=join(pngRoot,actual+'.png');
- const input=await exists(preferred) ? preferred : await exists(renamed) ? renamed : null;
+ const input=exactJunePng.has(name)
+  ? (await exists(preferred) ? preferred : null)
+  : (await exists(preferred) ? preferred : await exists(renamed) ? renamed : null);
  if(!input){juneMissing.push(name+' (expected '+actual+'.png)');continue;}
  const output=join(snackDir,name+'.png');
  await sharp(input).rotate().resize({width:420,height:420,fit:'contain',background:'#00000000'})
