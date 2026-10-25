@@ -44,6 +44,7 @@ const taskTypes:Record<string,string>={
    </div>
    <div class="msc-reminder"><h3>The project is optional.</h3><p>Friday: Deep Cleaning · Saturday: Home Project · Sunday: Catch-Up / Reset. Choose one task on a weekend that works—or skip it. No deadline and no expectation to finish all five.</p></div>
    <button type="button" class="msc-print" data-print>Print our family plan / Save PDF</button>
+   <button type="button" class="msc-png" data-single-page-png>Download image (PNG)</button>
    <button type="button" class="msc-reset" data-reset>Restore suggested owners</button>
    <p class="msc-status" data-status role="status" aria-live="polite">One intact US Letter sheet. Print at 100% / actual size. No cutting required.</p>
   </section>
@@ -127,6 +128,10 @@ const taskTypes:Record<string,string>={
 .msc-sheet-principle p{font-size:12px}
 .msc-sheet-bottom{margin-top:7px;padding-top:7px}
 @media(max-width:1080px){.msc-workspace{display:flex!important;flex-direction:column!important}.msc-preview{order:0;width:100%;min-width:0}.msc-editor{order:1;width:100%;max-width:720px}.msc-print-scroll{justify-content:flex-start}}
+
+.msc-png{display:block;width:100%;min-height:46px;margin-top:10px;padding:12px;border:1px solid #aaa;background:white;color:#454545;font:600 12px Montserrat,sans-serif;cursor:pointer}
+.msc-png:disabled{opacity:.55;cursor:wait}
+.msc.msc-image-export [data-sheet]{transform:none!important;box-shadow:none!important;margin:0!important}
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
@@ -190,6 +195,21 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  root.querySelectorAll<HTMLSelectElement>('[data-owner]').forEach(select=>select.addEventListener('change',()=>{const task=select.dataset.owner!;chosen[task]=select.value;custom.add(task);save();draw()}));
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{custom.clear();for(const t of project.tasks)chosen[t.id]=pick(t.id,members)?.id??'';save();draw()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
+  const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
+  const sheet=root.querySelector<HTMLElement>("[data-sheet]");
+  if(!button||!sheet)return;
+  button.disabled=true;const old=button.textContent;button.textContent='Preparing image…';
+  root.classList.add('msc-image-export');
+  try{
+   await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   const {toPng}=await import('html-to-image');
+   const png=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',margin:'0',boxShadow:'none'}});
+   const link=document.createElement('a');link.href=png;link.download="march-family-spring-prep.png";link.click();
+  }catch(error){console.error('Single-page image export failed',error);alert('Image download failed. Please use Print / Save PDF instead.')}
+  finally{root.classList.remove('msc-image-export');button.disabled=false;button.textContent=old}
+ });
+ 
  window.addEventListener('omc:club-preview-household',(event:Event)=>{
   const detail=(event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail;
   if(!detail?.household)return;
