@@ -8,7 +8,7 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
   <a href="/club">← Organized Family Club</a>
   <p class="srr-eyebrow">ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p>
   <h1>Less asking. <em>More doing.</em></h1>
-  <p>A ready-to-use reset for the mess you ask about again and again. One clear cue, three visible jobs, and a finish line kids can recognize.</p>
+  <p>A ready-to-use reset for the mess you ask about again and again. One recognizable cue, age-appropriate cleanup jobs, and a finish line kids can recognize.</p>
  </header>
  <div class="srr-layout">
   <aside class="srr-editor">
@@ -17,7 +17,7 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
    <p>Start with the room reset below. Make a few changes only if your family's routine needs them. This is one repeatable moment, not another daily chart to manage.</p>
    <label>Reset owner <select data-srr-child><option value="family">Our kids together</option></select></label>
    <label>Reset area <select data-srr-area><option value="bedroom">Bedroom floor</option><option value="playroom">Playroom</option><option value="living">Living room toys</option></select></label>
-   <label>When it happens <select data-srr-trigger><option value="Before our evening activity">Before our evening activity</option><option value="Before dinner">Before dinner</option><option value="After school snack">After school snack</option><option value="Before bedtime stories">Before bedtime stories</option></select></label>
+   <label>When it happens <select data-srr-trigger><option value="After our afternoon snack">Before our evening activity</option><option value="Before dinner">Before dinner</option><option value="After school snack">After school snack</option><option value="Before bedtime stories">Before bedtime stories</option></select></label>
    <details><summary>Change the three jobs <span>Optional</span></summary>
     <label>Job 1 <input data-srr-job="0" maxlength="60"/></label>
     <label>Job 2 <input data-srr-job="1" maxlength="60"/></label>
@@ -36,32 +36,26 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
      <article class="srr-sheet srr-front" data-srr-front>
       <header class="srr-paper-head">
        <p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p>
-       <h2>Our 5-Minute Reset</h2>
+       <h2>Our Daily Reset</h2>
        <span data-srr-owner>Our kids' bedroom reset</span>
       </header>
       <section class="srr-trigger-box">
        <span>WHEN DO WE START?</span>
-       <h3 data-srr-cue>Before our evening activity</h3>
-       <p>We take five minutes to reset our space.</p>
+       <h3 data-srr-cue>After our afternoon snack</h3>
+       <p>We put our things away before moving on.</p>
       </section>
       <h3 class="srr-section-title">Three things. Then we're done.</h3>
       <div class="srr-jobs">
-       <div class="srr-job"><div class="srr-icon">
-        <svg viewBox="0 0 100 100" fill="none" stroke="#545454" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 40h62l-7 40H26L19 40Z"/><path d="M24 51h52M34 41V29l16-10 16 10v12M37 61v10M50 60v11M63 61v10"/><rect x="8" y="23" width="24" height="20" rx="2"/><path d="M12 23v-6h15v6"/></svg>
-       </div><span class="srr-number">01</span><strong data-srr-job-label="0">Toys in their homes</strong></div>
-       <div class="srr-job"><div class="srr-icon">
-        <svg viewBox="0 0 100 100" fill="none" stroke="#545454" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 41h54l-7 43H30L23 41ZM20 41h60M34 52l4 22M50 52v22M66 52l-4 22"/><path d="M33 39 26 24l16-8 7 12 12-9 13 14-9 7"/></svg>
-       </div><span class="srr-number">02</span><strong data-srr-job-label="1">Clothes in the hamper</strong></div>
-       <div class="srr-job"><div class="srr-icon">
-        <svg viewBox="0 0 100 100" fill="none" stroke="#545454" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 25v55h70V25M15 63h70M24 63V41h23v22M53 45h23v18M24 80l12-17 12 17M62 80l8-17 8 17"/><path d="M59 31h14M66 24v14"/></svg>
-       </div><span class="srr-number">03</span><strong data-srr-job-label="2">Floor clear to walk</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="0" src="/images/club/icon-library/basket.png" alt="" width="112" height="112" /></div><span class="srr-number">01</span><strong data-srr-job-label="0">Toys in their homes</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/shirt.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1">Clothes in the hamper</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/made-bed.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2">Floor clear to walk</strong></div>
       </div>
       <section class="srr-done">
        <h3>How do we know it's finished?</h3>
        <p>Everything has a home. Nothing is left on the floor.</p>
        <div class="srr-checks"><span>✓ Toys away</span><span>✓ Clothes away</span><span>✓ Clear floor</span></div>
       </section>
-      <footer class="srr-paper-foot"><strong>First we reset. Then we play.</strong><span>NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</span></footer>
+      <footer class="srr-paper-foot"><strong>Notice the cue. Reset. Then play.</strong><span>NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</span></footer>
      </article>
      <article class="srr-sheet srr-back" data-srr-back>
       <header class="srr-paper-head"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Let the Routine Remind Them</h2><span>A simple plan for fewer repeat requests.</span></header>
@@ -84,11 +78,11 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
 .srr,.srr *{box-sizing:border-box}.srr{max-width:1480px;margin:auto;padding:27px clamp(18px,3.5vw,52px) 70px;color:#484941;font-family:Montserrat,Arial,sans-serif}
 .srr-intro{max-width:780px;margin-bottom:34px}.srr-intro>a{font-size:12px;color:#43493f;display:inline-block;margin-bottom:25px}.srr-eyebrow{font-size:10px!important;letter-spacing:.15em;font-weight:700;color:#718569}.srr-intro h1{font:400 clamp(38px,4.4vw,60px)/1.14 Georgia,serif;margin:12px 0}.srr-intro h1 em{color:#788e72}.srr-intro>p:last-child{font-size:15px;line-height:1.75}
 .srr-layout{display:grid;grid-template-columns:minmax(275px,350px) minmax(0,1fr);gap:clamp(25px,4vw,60px);align-items:start}
-.srr-editor{border-top:8px solid #d8e6df;padding-top:16px}.srr-editor h2{font:italic 30px Georgia,serif;color:#668075;margin:10px 0}.srr-editor>p:nth-of-type(2){font-size:13px;line-height:1.75}.srr-editor label{display:block;font-size:12px;font-weight:700;margin:18px 0}.srr-editor select,.srr-editor input{display:block;margin-top:7px;width:100%;padding:10px;min-height:44px;color:#454545;background:#fff;border:1px solid #b8c5bd;font:12px Montserrat,Arial,sans-serif}.srr-editor details{border:1px solid #d7e1dc;border-radius:6px;padding:0 13px;margin:22px 0}.srr-editor summary{padding:15px 0;cursor:pointer;font-size:13px;font-weight:700}.srr-editor summary span{font-weight:400;font-size:11px;color:#849289}.srr-note{background:#f3f5ef;padding:17px;margin:20px 0}.srr-note strong{font:21px Georgia,serif}.srr-note p{font-size:11px;line-height:1.7;margin:7px 0 0}.srr-primary,.srr-secondary{width:100%;min-height:48px;cursor:pointer;font-size:12px;font-weight:700}.srr-primary{border:0;background:#5f7767;color:#fff}.srr-secondary{border:1px solid #b7c9bc;background:#fff;color:#5f7767;margin-top:9px}.srr-restore{display:block;margin:8px auto;background:none;border:0;text-decoration:underline;cursor:pointer;color:#607867;min-height:40px}.srr-small{font-size:11px;line-height:1.65;color:#858982}
+.srr-editor{border-top:8px solid #d8e6df;padding-top:16px}.srr-editor h2{font:italic 30px Georgia,serif;color:#668075;margin:10px 0}.srr-editor>p:nth-of-type(2){font-size:13px;line-height:1.75}.srr-editor label{display:block;font-size:12px;font-weight:700;margin:18px 0}.srr-editor select,.srr-editor input{display:block;margin-top:7px;width:100%;padding:10px;min-height:44px;color:#454545;background:#fff;border:1px solid #b8c5bd;font:12px Montserrat,Arial,sans-serif}.srr-cue-help{font-size:11px;line-height:1.55;color:#718073;margin:8px 0 15px}.srr-editor details{border:1px solid #d7e1dc;border-radius:6px;padding:0 13px;margin:22px 0}.srr-editor summary{padding:15px 0;cursor:pointer;font-size:13px;font-weight:700}.srr-editor summary span{font-weight:400;font-size:11px;color:#849289}.srr-note{background:#f3f5ef;padding:17px;margin:20px 0}.srr-note strong{font:21px Georgia,serif}.srr-note p{font-size:11px;line-height:1.7;margin:7px 0 0}.srr-primary,.srr-secondary{width:100%;min-height:48px;cursor:pointer;font-size:12px;font-weight:700}.srr-primary{border:0;background:#5f7767;color:#fff}.srr-secondary{border:1px solid #b7c9bc;background:#fff;color:#5f7767;margin-top:9px}.srr-restore{display:block;margin:8px auto;background:none;border:0;text-decoration:underline;cursor:pointer;color:#607867;min-height:40px}.srr-small{font-size:11px;line-height:1.65;color:#858982}
 .srr-preview{min-width:0}.srr-preview-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid #e1e6e3;margin-bottom:17px}.srr-preview-heading h2{font:26px Georgia,serif}.srr-preview-heading span{font-size:11px;color:#858982}
 .srr-stage{width:100%}.srr-pages{display:flex;flex-direction:column;gap:22px;align-items:flex-start}.srr-sheet{position:relative;width:816px;height:1056px;transform:scale(var(--srr-scale,1));transform-origin:top left;flex-shrink:0;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002;background:#fff;padding:42px 52px 30px;display:flex;flex-direction:column;overflow:hidden}.srr-paper-head{text-align:center;padding:12px 10px 20px;border-top:7px solid #deeae4}.srr-paper-head>p{font-size:10px;letter-spacing:.15em;font-weight:700;color:#7c9085;margin:0}.srr-paper-head h2{font:400 45px/1.1 Georgia,serif;color:#506255;margin:14px 0 10px}.srr-paper-head span{font:italic 17px Georgia,serif;color:#849487}
 .srr-trigger-box{margin:25px 0;background:#dfeae3;border-radius:12px;padding:26px;text-align:center}.srr-trigger-box>span{font-size:12px;letter-spacing:.12em;font-weight:700;color:#617d67}.srr-trigger-box h3{font:400 31px Georgia,serif;color:#4b6855;margin:12px 0}.srr-trigger-box p{font-size:14px;color:#66786b;margin:0}.srr-section-title{text-align:center;font:28px Georgia,serif;color:#57594d;margin:17px 0 21px}
-.srr-jobs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.srr-job{min-height:245px;border-radius:12px;background:#faf5eb;padding:14px;display:flex;align-items:center;flex-direction:column;text-align:center}.srr-job:nth-child(2){background:#f1e6de}.srr-job:nth-child(3){background:#edf2ec}.srr-icon{height:126px;width:126px;display:grid;place-items:center}.srr-icon svg{width:108px;height:108px}.srr-number{font:italic 15px Georgia,serif;color:#8c937d;margin:0 0 12px}.srr-job strong{font-size:16px;line-height:1.35;color:#4d5a4d}
+.srr-jobs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.srr-job{min-height:245px;border-radius:12px;background:#faf5eb;padding:14px;display:flex;align-items:center;flex-direction:column;text-align:center}.srr-job:nth-child(2){background:#f1e6de}.srr-job:nth-child(3){background:#edf2ec}.srr-icon{height:126px;width:126px;display:grid;place-items:center}.srr-icon img{width:112px;height:112px;object-fit:contain}.srr-number{font:italic 15px Georgia,serif;color:#8c937d;margin:0 0 12px}.srr-job strong{font-size:16px;line-height:1.35;color:#4d5a4d}
 .srr-done{margin-top:28px;border:1px solid #d6dfd7;border-radius:12px;padding:22px 24px;text-align:center}.srr-done h3{font:27px Georgia,serif;color:#506255;margin:0 0 9px}.srr-done p{font-size:13px;margin:0 0 16px;color:#66786b}.srr-checks{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.srr-checks span{background:#edf3ec;padding:8px 11px;border-radius:20px;font-size:11px;font-weight:700;color:#506b54}
 .srr-paper-foot{margin-top:auto;text-align:center;border-top:1px solid #dee5dd;padding-top:19px}.srr-paper-foot strong{display:block;font:italic 23px Georgia,serif;color:#65806c}.srr-paper-foot span,.srr-back-foot{display:block;margin-top:14px;font-size:9px;letter-spacing:.12em;font-weight:700;color:#9ca99f;text-align:center}
 .srr-parent-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin:30px 0}.srr-parent-grid>div{background:#f7f7f2;border-radius:9px;padding:24px 22px;min-height:190px}.srr-step{font:italic 23px Georgia,serif;color:#91a692}.srr-parent-grid h3{font:23px Georgia,serif;color:#52685a;margin:8px 0}.srr-parent-grid p{font-size:13px;line-height:1.65;color:#596259;margin:0}.srr-parent-promise{background:#e2ede5;padding:24px;border-radius:10px}.srr-parent-promise h3,.srr-parent-note h3{font:25px Georgia,serif;color:#506255;margin:0 0 9px}.srr-parent-promise p,.srr-parent-note p{font-size:13px;line-height:1.7;margin:0;color:#596259}.srr-parent-note{padding:26px 8px;margin-top:15px}.srr-parent-note p{font-style:italic}.srr-back-foot{margin-top:auto;padding-top:15px;border-top:1px solid #dce5dd}
