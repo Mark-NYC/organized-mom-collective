@@ -341,7 +341,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
- root.querySelector('[data-open-editor]')?.addEventListener('click',()=>editorDialog?.showModal());
+ root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
