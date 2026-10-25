@@ -331,8 +331,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   finally{root.classList.remove('msc-image-export');button.disabled=false;button.textContent=old}
  });
  
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail;
+ const applyHousehold=(detail:{household:{displayName?:string;members:Member[]}|null;sample?:string|null})=>{
   if(!detail?.household)return;
   const h=detail.household;
   const id=(detail.sample??'account')+':'+(h.displayName??'');
@@ -344,7 +343,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   }
   for(const task of project.tasks)if(!custom.has(task.id)||!members.some(m=>m.id===chosen[task.id]&&(!adultOnly.has(task.id)||m.kind==='adult')))chosen[task.id]=pick(task.id,members)?.id??'';
   save();draw();
- });
- draw();
-}
-</script>
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{displayName?:string;members:Member[]}|null;sample?:string|null}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
