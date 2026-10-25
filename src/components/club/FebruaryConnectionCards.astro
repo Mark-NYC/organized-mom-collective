@@ -44,7 +44,7 @@ const examples=[
   <section class="fbc-preview-pane" aria-label="Printable connection card preview">
    <div class="fbc-preview-heading"><h2>Your February connection cards</h2><span>One sheet · four invitations</span></div>
    <div class="fbc-scroll">
-    <div class="fbc-paper">
+    <div class="fbc-stage" data-fbc-stage><div class="fbc-paper">
      <div class="fbc-paper-top"><span>ORGANIZED FAMILY CLUB · FEBRUARY 2027</span><span>BETTER TOGETHER</span></div>
      <div class="fbc-grid">
       {examples.map((item,i)=><article class="fbc-card" data-card={i}>
@@ -60,7 +60,7 @@ const examples=[
       </article>)}
      </div>
      <div class="fbc-paper-foot"><span>FOUR LITTLE WAYS TO SAY: I CHOOSE YOU.</span><span>HAND ONE TO SOMEONE YOU LOVE.</span></div>
-    </div>
+    </div></div>
    </div>
    <p class="fbc-preview-note">Four separate cut-apart invitations, ready for family members to give directly to each other. No distribution or scheduling needed.</p>
   </section>
@@ -117,6 +117,12 @@ const examples=[
  .fbc-scroll{overflow:visible!important;height:auto!important}
  .fbc-card{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
 }
+/* Same responsive single-page preview behavior as June. */
+.fbc-stage{position:relative;flex:0 0 auto}
+.fbc-stage .fbc-paper{position:absolute;left:0;top:0;margin:0!important;transform:scale(var(--fbc-scale,1))!important;transform-origin:top left}
+.fbc-scroll{overflow:visible!important;height:auto!important}
+@media(max-width:1080px){.fbc-workspace{display:flex!important;flex-direction:column!important}.fbc-preview-pane{order:0;width:100%}.fbc-editor-pane{order:1;width:100%;max-width:720px}}
+@media print{.fbc-stage{position:static!important;width:8.5in!important;height:11in!important}.fbc-stage .fbc-paper{position:absolute!important;transform:none!important}}
 </style>
 <script>
 type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
@@ -127,6 +133,9 @@ const defaults:Card[]=[
  {owner:"Ana",recipient:"Mateo",headline:"Let's have fun!",invite:"Mateo, will you make a blanket fort with me?",idea:"I'll bring the blankets!"}
 ];
 for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
+ const stage=root.querySelector<HTMLElement>('[data-fbc-stage]');
+ const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--fbc-scale',String(scale))};
+ fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
  const key=root.dataset.fbcKey??'omc:preview:february:v1';
  const storage=key.startsWith('omc:club:')?sessionStorage:localStorage;
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-editor]'));
