@@ -166,7 +166,7 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
 }
 /* April desktop experiment: one fixed, non-scrolling sidebar and one scrolling preview. */
 @media screen and (min-width:1101px){
- html:has(.adc),body:has(.adc){height:100%;overflow:hidden}
+ html:has(#club-month-content:not([hidden]) .adc),body:has(#club-month-content:not([hidden]) .adc){height:100%;overflow:hidden}
  #club-month-content:not([hidden]){position:fixed;top:var(--adc-nav-height,180px);bottom:0;left:0;right:0;overflow:hidden}
  .adc{max-width:none;height:100%;padding:0;margin:0}
  .adc-intro{display:none}
