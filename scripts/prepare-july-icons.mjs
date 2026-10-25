@@ -6,11 +6,22 @@
  * alpha bounds, and fit that artwork into a generously padded output canvas.
  */
 import sharp from 'sharp';
-import {mkdir,copyFile,readFile} from 'node:fs/promises';
+import {mkdir,copyFile,readFile,access} from 'node:fs/promises';
 import {join} from 'node:path';
 const root=process.cwd();
 const source=join(root,'assets/icons/ofc/updatedicons/png');
 const destination=join(root,'public/images/club/july');
+const pngRoot=join(root,'assets/icons/ofc/updatedicons/png');
+const svgRoot=join(root,'assets/icons/ofc/updatedicons/svg');
+async function exists(path){try{await access(path);return true;}catch{return false;}}
+async function iconInput(name, preferSvg=false){
+ const png=join(pngRoot,name+'.png'),svg=join(svgRoot,name+'.svg');
+ if(preferSvg && await exists(svg))return svg;
+ if(await exists(png))return png;
+ if(await exists(svg))return svg;
+ console.warn('Optional icon source missing: '+name);
+ return null;
+}
 const icons=[
  ['supporting','book'],['supporting','blocks'],['supporting','puzzle-piece'],
  ['supporting','tree'],['supporting','scissors'],['supporting','bike'],
@@ -58,7 +69,8 @@ function alphaBounds(data,width,height){
  return {left,top,width:right-left+1,height:bottom-top+1};
 }
 for(const [folder,name] of icons){
- const input=name==='lightbulb' ? join(root,'assets/icons/ofc/utility/lightbulb.png') : join(source,name+'.png');
+ const input=name==='lightbulb' ? join(root,'assets/icons/ofc/utility/lightbulb.png') : await iconInput(name);
+ if(!input || !(await exists(input))) {console.warn('Skipping missing July icon: '+name);continue;}
  const output=join(destination,name+'.png');
  const {data,info}=await sharp(input).resize(256,256,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  if(info.width!==256||info.height!==256||info.channels!==4)throw Error('Unexpected icon dimensions: '+name);
@@ -89,6 +101,7 @@ await mkdir(augustDestination,{recursive:true});
 for(const name of augustIcons){
  const input=join(root,'assets/icons/ofc/updatedicons/svg',name+'.svg');
  const output=join(augustDestination,name+'.svg');
+ if(!(await exists(input))){console.warn('Skipping missing August SVG: '+name);continue;}
  const svg=await readFile(input,'utf8');
  if(!svg.includes('viewBox="0 0 48 48"')||!svg.includes('<path')){
   throw Error('Unexpected August vector icon: '+name);
@@ -115,10 +128,11 @@ await mkdir(snackDir,{recursive:true});
 const snacks=new Set(['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar']);
 for(const name of previewIconNames){
  const isNew=expandedNames.includes(name);
- const input=join(root,'assets/icons/ofc/updatedicons',isNew?'svg':'png',name+(isNew?'.svg':'.png'));
+ const input=await iconInput(name,isNew);
+ if(!input){console.warn('Skipping missing preview icon: '+name);continue;}
  const meta=await sharp(input).metadata();
- if(isNew&&meta.format!=='svg')throw Error('New OFC artwork is not SVG: '+name);
- if(!isNew&&meta.format!=='png')throw Error('Original OFC artwork is not PNG: '+name);
+ if(isNew&&meta.format!=='svg'&&meta.format!=='png')throw Error('Unsupported OFC artwork: '+name);
+ if(!isNew&&meta.format!=='png'&&meta.format!=='svg')throw Error('Unsupported OFC artwork: '+name);
  const out=join(previewDir,name+'.png');
  // Contain the entire original art with safe padding, regardless of aspect ratio.
  await sharp(input,{density:300}).resize({width:420,height:420,fit:'contain',background:'#00000000'})
@@ -137,7 +151,8 @@ console.log('Prepared '+previewIconNames.length+' August v3 and '+snacks.size+' 
  const svgOnly=new Set(['backpack','conversation-bubbles','adult-and-child-together','helping-hands']);
  for(const name of sharedIcons){
   const svg=svgOnly.has(name);
-  const input=join(root,'assets/icons/ofc/updatedicons',svg?'svg':'png',name+(svg?'.svg':'.png'));
+  const input=await iconInput(name,svg);
+  if(!input){console.warn('Skipping missing shared icon: '+name);continue;}
   const output=join(sharedDir,name+'.png');
   await sharp(input,{density:300}).resize({width:420,height:420,fit:'contain',background:'#00000000'})
    .extend({top:46,bottom:46,left:46,right:46,background:'#00000000'})
