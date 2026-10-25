@@ -256,3 +256,39 @@ for(const dir of transparencyDirs){
  }
 }
 console.log('Cleaned white matte from '+transparentFiles+' Club PNG previews; retained original artwork dimensions and source files.');
+
+
+// October preview: create small, transparency-preserving WebP derivatives
+// from the six dedicated October icons. Original PNG sources are untouched.
+const octoberNames=[
+ 'what-is-coming','what-will-I-need','what-can-I-prepare',
+ 'clothes-for-cooler-mornings','school-and-activity-gear','a-home-for-everything'
+];
+const octoberSource=join(pngRoot,'october');
+const octoberOutput=join(root,'public/images/club/october');
+await mkdir(octoberOutput,{recursive:true});
+for(const name of octoberNames){
+ const source=join(octoberSource,name+'.png');
+ if(!(await exists(source)))throw Error('Missing required October icon: '+source);
+ const dest=join(octoberOutput,name+'.webp');
+ const {data,info}=await sharp(source).rotate().resize({
+  width:360,height:360,fit:'contain',withoutEnlargement:true,
+  background:{r:0,g:0,b:0,alpha:0}
+ }).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ // Remove near-white neutral matte without erasing colored illustration detail.
+ // This matches the Club's charcoal/white-matte handling for the PNG library.
+ for(let i=0;i<data.length;i+=4){
+  const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+  if(a===0)continue;
+  if(Math.max(r,g,b)-Math.min(r,g,b)>14)continue;
+  const v=(r+g+b)/3;
+  if(v<125)continue;
+  const opacity=Math.max(0,Math.min(1,(255-v)/171));
+  const nextAlpha=Math.round(a*opacity);
+  if(nextAlpha===a)continue;
+  data[i]=84;data[i+1]=84;data[i+2]=84;data[i+3]=nextAlpha;
+ }
+ await sharp(data,{raw:{width:info.width,height:info.height,channels:4}})
+  .webp({quality:86,alphaQuality:100,effort:5}).toFile(dest);
+ console.log('October WebP: '+name);
+}
