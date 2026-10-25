@@ -51,15 +51,12 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
     <nav aria-label="Club">
      <button type="button" className={tab==='kits'?'cproto-active':''} onClick={()=>setTab('kits')}>Kits</button>
      <button type="button" className={tab==='family'?'cproto-active':''} onClick={()=>setTab('family')}>Family</button>
+     <label className="cproto-header-sample"><span className="cproto-picker-label">Preview family</span><select aria-label="Preview family" value={sample} onChange={e=>{setTab('kits');setSample(e.target.value)}}>
+      {sampleHouseholds.filter(s=>s.id!=='new').map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
+     </select></label>
     </nav>
    </div>
   </header>
-  <div className="cproto-inner cproto-sample">
-   <label>Preview family <select value={sample} onChange={e=>{setTab('kits');setSample(e.target.value)}}>
-    {sampleHouseholds.filter(s=>s.id!=='new').map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
-   </select></label>
-   <span>Sample preview · family changes save in this browser tab only</span>
-  </div>
   {tab==='kits'?<>
    <nav aria-label="Preview months" className="cproto-months cproto-inner">{months.map(m=>
     <a key={m.slug} aria-current={month===m.slug?'page':undefined} href={href(m.url)}>{m.label}</a>)}</nav>
@@ -90,10 +87,8 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
    .cproto-top nav{display:flex;gap:9px}
    .cproto-top nav button{border:0;background:none;min-height:44px;padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer;color:#454545}
    .cproto-top nav button.cproto-active{border-bottom:2px solid #454545}
-   .cproto-sample{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:#f6f6f5;font-size:12px}
-   .cproto-sample label{display:flex;align-items:center;gap:12px;font-weight:600}
-   .cproto-sample select{font-size:12px;padding:8px;border:1px solid #b8b8b8;background:#fff;color:#454545;max-width:275px}
-   .cproto-sample span{color:#686868}
+   .cproto-header-sample{display:flex;align-items:center;gap:9px;margin-left:8px;font-size:11px;font-weight:600;white-space:nowrap}
+   .cproto-header-sample select{max-width:220px;min-width:135px;min-height:36px;padding:6px 26px 6px 9px;border:1px solid #b8b8b8;border-radius:4px;background:#fff;color:#454545;font:600 12px Montserrat,Arial,sans-serif;cursor:pointer}
    .cproto-months{display:flex;gap:20px;padding-top:14px;padding-bottom:14px;border-bottom:1px solid #e3e3e3}
    .cproto-months a{font-size:13px;color:#454545;text-decoration:none;padding:6px 0}
    .cproto-months a[aria-current=page]{font-weight:700;border-bottom:2px solid #454545}
@@ -103,10 +98,13 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
     .cproto-brand{font-size:16px;line-height:1.2}
     .cproto-top nav{gap:2px;flex-shrink:0}
     .cproto-top nav button{padding:7px 9px;font-size:12px}
-    .cproto-sample{padding-top:8px;padding-bottom:8px;gap:4px}
-    .cproto-sample label{width:100%;justify-content:space-between;gap:8px}
-    .cproto-sample select{max-width:min(65vw,270px);min-width:0}
-    .cproto-sample span{font-size:10px;line-height:1.4}
+    .cproto-top .cproto-inner{flex-wrap:wrap;justify-content:space-between;gap:5px;padding-top:8px;padding-bottom:8px}
+    .cproto-brand{font-size:15px}
+    .cproto-top nav{flex:1 1 auto;justify-content:flex-end;min-width:0;gap:0}
+    .cproto-top nav button{padding:6px 7px;font-size:12px;min-height:38px}
+    .cproto-header-sample{gap:0;margin-left:5px;min-width:0}
+    .cproto-picker-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .cproto-header-sample select{min-width:0;max-width:clamp(105px,29vw,160px);width:29vw;min-height:36px;padding:5px 18px 5px 6px;font-size:11px}
     .cproto-months{display:none}
     .cproto-month-mobile{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:9px;padding-bottom:9px;border-bottom:1px solid #e3e3e3}
     .cproto-month-mobile label{font-size:12px;font-weight:700;white-space:nowrap}
