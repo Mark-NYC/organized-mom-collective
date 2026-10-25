@@ -57,7 +57,7 @@ const taskTypes:Record<string,string>={
     <div class="msc-sheet-tasks">
     {project.tasks.map((t,i)=><section class="msc-task" data-printed-task={t.id}>
       <div class="msc-task-num">0{i+1}</div>
-      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="42" height="42" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p class="msc-supplies">SUPPLIES · {handoffs[t.id].supplies}</p><p class="msc-steps"><b>GET READY</b> {handoffs[t.id].ready}<br/><b>DO THE JOB</b> {handoffs[t.id].doJob}<br/><b>CHECK IT'S DONE</b> {handoffs[t.id].done}</p></div></div>
+      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="73" height="73" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p class="msc-supplies">SUPPLIES · {handoffs[t.id].supplies}</p><p class="msc-steps"><b>GET READY</b> {handoffs[t.id].ready}<br/><b>DO THE JOB</b> {handoffs[t.id].doJob}<br/><b>CHECK IT'S DONE</b> {handoffs[t.id].done}</p></div></div>
       <div class="msc-task-person"><span>THIS JOB IS MINE</span><strong data-printed-owner={t.id}>Our family</strong></div>
       <div class="msc-check" aria-hidden="true"></div>
     </section>)}
@@ -116,7 +116,10 @@ const taskTypes:Record<string,string>={
 .msc-sheet-caption{font-size:17px;margin:7px 0}
 .msc-task{grid-template-columns:21px minmax(0,1fr) 89px 16px;gap:8px;padding:9px 0;align-items:start}
 .msc-task-text{align-items:flex-start;gap:8px}
-.msc-task-icon{height:29px;width:29px;flex-basis:29px}
+/* 2.5× the original 29px print icons; reserve their full width beside each job. */
+.msc-task-icon{height:72.5px;width:72.5px;flex:0 0 72.5px;object-fit:contain}
+.msc-task-text{gap:10px;align-items:center}
+.msc-task{align-items:center}
 .msc-task-text h3{font-size:17px;margin:0 0 3px}
 .msc-task-text p.msc-supplies{font:600 8px/1.4 'MSC Montserrat',sans-serif;color:#497666;margin-bottom:4px}
 .msc-task-text p.msc-steps{font:9px/1.48 'MSC Montserrat',sans-serif;color:#454545}
