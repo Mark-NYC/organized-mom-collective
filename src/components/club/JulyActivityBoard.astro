@@ -15,22 +15,40 @@ const tiers=[
 <div class="jab" data-jab-key={storageKey} data-jab-icons={JSON.stringify(icons)}>
  <header class="jab-intro"><a href="/club">← Organized Family Club</a><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h1>Less “I'm bored.” <em>More “I've got this.”</em></h1><p>A picture-led board that gives kids real options they can start themselves. Choose, try, and keep going—without Mom having to plan every moment.</p></header>
  <div class="jab-layout">
-  <aside class="jab-editor">
-   <p class="jab-eyebrow">PREPARED FOR YOUR FAMILY</p><h2>Ready to use.</h2>
-   <p>The activities are selected for the child you choose below. Review them once, then print. You can edit or remove an idea right on the board; advanced choices are optional.</p>
-   <label>Who is this for?<select data-jab-child><option value="family">The whole family</option></select></label>
+  <aside class="jab-editor" aria-label="Prepared July activity board">
+   <div class="jab-editor-head"><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h2>Less “I'm bored.” <em>More “I've got this.”</em></h2><button type="button" class="jab-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
+   <div class="jab-prepared" id="july-edit-controls"><span class="jab-eyebrow">YOUR FAMILY'S PREPARED BOARD</span><strong>What Can I Do Right Now?</strong><p>Nine illustrated activity ideas in three levels, ready for kids to start on their own.</p>
+    <div class="jab-summary-row"><span>Prepared for</span><b data-jab-summary-child>Whole family</b></div>
+    <div class="jab-summary-row"><span>Activity style</span><b data-jab-summary-focus>A little of everything</b></div>
+    <div class="jab-summary-row"><span>Ideas included</span><b data-jab-summary-count>9 activities</b></div>
+    <button type="button" class="jab-edit-link" data-open-editor>Edit activity choices <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+   </div>
+   <p class="jab-guidance-compact">Use activities your child can safely start with materials you already have. Supervise where needed.</p>
+   <div class="jab-actions"><div class="jab-primary-actions"><a class="jab-jump-edit" href="#july-edit-controls">Make changes <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button class="jab-primary" type="button" data-jab-print>Print / Save PDF</button></div>
+    <button class="jab-secondary" type="button" data-jab-download>Download image (PNG)</button>
+    <button class="jab-clear" type="button" data-jab-reset>Restore starter board</button></div>
+  </aside>
+  <dialog class="jab-dialog" data-vision-dialog aria-labelledby="jab-vision-title">
+   <div class="jab-dialog-head"><div><span class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY</span><h2 id="jab-vision-title">Why this matters</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <p>Summer free time shouldn't mean Mom has to plan and direct every activity. This picture-led board gives kids realistic choices they can start themselves, from something quick to a project they can return to later.</p>
+   <button type="button" class="jab-dialog-done" data-close-dialog>Back to our plan</button>
+  </dialog>
+  <dialog class="jab-dialog jab-editor-dialog" data-editor-dialog aria-labelledby="jab-editor-title">
+   <div class="jab-dialog-head"><div><span class="jab-eyebrow">MAKE IT YOURS · JULY</span><h2 id="jab-editor-title">Edit activity board</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <p>We've prepared the activities for your family. Change only what doesn't fit.</p>
+   <div class="jab-dialog-fields">   <label>Who is this for?<select data-jab-child><option value="family">The whole family</option></select></label>
    <label>Activity style<select data-jab-focus>
      <option value="mixed">A little of everything</option><option value="inside">Mostly indoors</option><option value="outside">Mostly outdoors</option>
    </select></label>
    <details class="jab-customize"><summary>Change activity choices <span>Optional</span></summary><p>Only if you want: swap or restore an idea here. On the board itself, click the text to edit or × to remove.</p><div data-jab-options></div></details>
-   <div class="jab-guidance"><strong>Make this work at home</strong><p>Only keep activities your child can safely start with supplies already available. Supervise activities when needed. For little ones, adult help and shorter attention spans are normal.</p></div>
-   <button class="jab-primary" type="button" data-jab-print>Print Board / Save PDF</button>
-   <button class="jab-secondary" type="button" data-jab-download>Download image (PNG)</button>
-   <button class="jab-clear" type="button" data-jab-reset>Restore starter board</button>
-   <p class="jab-note">US Letter · One reusable printed sheet · Preview edits stay in this browser tab.</p>
-  </aside>
+</div>
+      <div class="jab-guidance"><strong>Make this work at home</strong><p>Only keep activities your child can safely start with supplies already available. Supervise activities when needed. For little ones, adult help and shorter attention spans are normal.</p></div>
+
+   <button type="button" class="jab-dialog-done" data-close-dialog>Done · See our board</button>
+  </dialog>
   <section class="jab-preview" aria-label="July illustrated activity board">
-   <div class="jab-preview-bar"><h2>July's printed tool</h2><span>One page · Kid-led</span></div>
+   <button type="button" class="jab-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+   
    <div class="jab-stage" data-jab-stage>
     <article class="jab-sheet" data-jab-sheet>
      <header class="jab-sheet-header"><p>ORGANIZED FAMILY CLUB · JULY 2027</p><h2>What Can I Do <em>Right Now?</em></h2><div class="jab-for" data-jab-for>My own ideas for summer</div></header>
@@ -50,7 +68,7 @@ const tiers=[
      <footer class="jab-footer"><strong data-jab-edit="rule" contenteditable="true" role="textbox" aria-label="Edit finishing rule">Pick one. Give it a try. Put things away when you're done.</strong><span>ORGANIZED FAMILY CLUB</span></footer>
     </article>
    </div>
-   <p class="jab-note">Unlike May's daily rhythm, July gives kids specific choices they can initiate during their free time. These are starter ideas, not a requirement to buy materials or plan projects.</p>
+   
   </section>
  </div>
 </div>
@@ -68,6 +86,76 @@ const tiers=[
 @media(max-width:1050px){.jab-layout{display:flex;flex-direction:column}.jab-preview{order:0;width:100%}.jab-editor{order:1;max-width:730px;width:100%}.jab-remove{opacity:1}.jab [contenteditable]{pointer-events:auto}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.jab-stage,.jab-sheet,.jab-sheet *{visibility:visible!important}.jab-stage{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important}.jab-sheet{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.jab-remove{display:none!important}.jab [contenteditable]{outline:none!important;background:transparent!important}}
+
+/* July matches the prepared-plan layout established for March–June. */
+.jab{padding:0;max-width:none}.jab-intro{display:none}
+.jab-layout{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+.jab-editor{display:flex;flex-direction:column;min-width:0;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:15px clamp(17px,2vw,26px)}
+.jab-editor-head{border-top:5px solid #e1ebcf;padding-top:10px;flex:0 0 auto}
+.jab-editor-head h2{font:400 clamp(23px,2.7vw,31px)/1.12 Georgia,serif;color:#647b59;margin:9px 0}
+.jab-editor-head h2 em{font-style:italic}
+.jab-edit-link{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:7px 0;border:0;background:transparent;color:#607755;text-decoration:underline;text-underline-offset:3px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.jab-prepared{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;background:#fff;border:1px solid #e0e6da;padding:14px;margin-top:15px}
+.jab-prepared>strong{display:block;font:400 23px Georgia,serif;color:#607755;margin:8px 0}
+.jab-prepared>p{font:12px/1.55 Montserrat,Arial,sans-serif;margin:0 0 11px}
+.jab-summary-row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e7eae4;padding:10px 0;font-size:12px}
+.jab-summary-row b{color:#607755;text-align:right;font-size:12px;max-width:60%}
+.jab-guidance-compact{font:11px/1.48 Montserrat,Arial,sans-serif;color:#747269;margin:10px 0;flex:0 0 auto}
+.jab-actions{margin-top:auto;flex:0 0 auto;padding-top:5px;background:#faf9f7}
+.jab-primary-actions .jab-primary{min-height:43px;padding:10px}
+.jab-actions .jab-secondary{min-height:34px;margin-top:6px}
+.jab-actions .jab-clear{min-height:29px;margin:3px auto}
+.jab-jump-edit{display:none}
+.jab-preview{background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}
+.jab-stage{margin:0 auto}
+.jab-floating-edit{display:none}
+.jab-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(540px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px 26px;border:1px solid #dce2d7;border-radius:10px;background:#fff;box-shadow:0 20px 65px #0003;color:#484941;font-family:Montserrat,Arial,sans-serif}
+.jab-dialog::backdrop{background:rgba(33,40,36,.52)}
+.jab-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.jab-dialog-head h2{font:400 29px/1.13 Georgia,serif;margin:9px 0 13px;color:#647b59}
+.jab-dialog-close{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border:0;border-radius:50%;background:#eff2e9;color:#607755;cursor:pointer}
+.jab-dialog>p{font:14px/1.65 Montserrat,Arial,sans-serif;margin:0 0 18px}
+.jab-dialog-done{width:100%;min-height:46px;padding:12px;background:#607755;border:0;color:#fff;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.jab-dialog-fields>label{display:block;margin:12px 0;font-size:12px;font-weight:700}
+.jab-dialog-fields .jab-customize{margin:17px 0}
+.jab-dialog .jab-guidance{margin:14px 0;padding:14px}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content:not([hidden]) .jab),body:has(#club-month-content:not([hidden]) .jab){height:100%;overflow:hidden}
+ #club-month-content:not([hidden]):has(.jab){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ .jab,.jab-layout{height:100%;margin:0}
+ .jab-editor{height:100%;overflow:hidden}
+ .jab-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ .jab-floating-edit{position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:13px 19px;min-height:52px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+ .jab-floating-edit:hover{background:#303030}
+ .jab-floating-edit:focus-visible{outline:3px solid #9caf9a;outline-offset:3px}
+}
+@media screen and (min-width:1101px) and (max-height:700px){
+ .jab-editor{padding-top:9px;padding-bottom:9px}.jab-editor-head{padding-top:6px}
+ .jab-editor-head h2{font-size:23px;margin:5px 0}
+ .jab-prepared{margin-top:8px;padding:9px}.jab-summary-row{padding:5px 0}
+ .jab-guidance-compact{font-size:10px;margin:6px 0}
+ .jab-actions .jab-secondary{min-height:30px}.jab-actions .jab-clear{min-height:26px}
+}
+@media screen and (max-width:1100px){
+ .jab{padding:0 0 40px}
+ .jab-layout{display:flex;flex-direction:column;gap:0}
+ .jab-preview{order:0;width:100%;padding:14px 14px 28px}
+ .jab-editor{order:1;width:100%;max-width:none;border:0;padding:20px}
+ .jab-prepared{flex:auto;overflow:visible;max-width:620px}
+}
+@media screen and (max-width:700px){
+ .jab{padding-bottom:calc(138px + env(safe-area-inset-bottom,0px))}
+ .jab-editor{padding:17px 18px}
+ .jab-prepared{scroll-margin-top:12px}
+ .jab-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid #dce2d7;background:rgba(250,249,247,.98);box-shadow:0 -5px 20px #0001}
+ .jab-primary-actions{display:flex;gap:9px}
+ .jab-jump-edit{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-height:45px;padding:8px;border:1px solid #607755;border-radius:4px;background:#fff;color:#607755;font:700 12px Montserrat,Arial,sans-serif;text-decoration:none}
+ .jab-primary-actions .jab-primary{flex:1.3;min-width:0;min-height:45px;padding:8px;font-size:12px}
+ .jab-actions .jab-secondary{min-height:31px}
+ .jab-actions .jab-clear{min-height:25px;font-size:11px}
+ .jab-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{.jab-dialog,.jab-actions,.jab-floating-edit,.jab-editor{display:none!important}.jab-preview{padding:0!important}}
 </style>
 <script>
 type Tier='quick'|'busy'|'project';
@@ -132,6 +220,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  const stage=root.querySelector<HTMLElement>('[data-jab-stage]');const sheet=root.querySelector<HTMLElement>('[data-jab-sheet]');
  const fit=()=>{if(!stage||!sheet)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';sheet.style.setProperty('--jab-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
+ const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
+ const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
+ root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
+ root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
+ root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
+ for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
  const save=()=>{boards[state.child]=structuredClone(state);try{sessionStorage.setItem(key,JSON.stringify({profile,state,boards}))}catch{}};
  const draw=()=>{
   for(const tier of ['quick','busy','project'] as Tier[])for(const row of root.querySelectorAll<HTMLElement>('[data-jab-item="'+tier+'"]')){
@@ -141,6 +235,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   }
   const title=root.querySelector<HTMLElement>('[data-jab-for]');if(title)title.textContent=family;
   for(const name of ['intro','rule'] as const){const el=root.querySelector<HTMLElement>('[data-jab-edit="'+name+'"]');if(el&&document.activeElement!==el)el.textContent=state[name]}
+  const kid=kids.find(k=>k.id===state.child);
+  const summaryChild=root.querySelector<HTMLElement>('[data-jab-summary-child]');if(summaryChild)summaryChild.textContent=kid?.firstName??'Whole family';
+  const summaryFocus=root.querySelector<HTMLElement>('[data-jab-summary-focus]');if(summaryFocus)summaryFocus.textContent=state.focus==='inside'?'Mostly indoors':state.focus==='outside'?'Mostly outdoors':'A little of everything';
+  const count=root.querySelector<HTMLElement>('[data-jab-summary-count]');if(count)count.textContent=([...state.quick,...state.busy,...state.project].filter(x=>!x.removed).length)+' activities';
   const child=root.querySelector<HTMLSelectElement>('[data-jab-child]');if(child)child.value=state.child;
   const focus=root.querySelector<HTMLSelectElement>('[data-jab-focus]');if(focus)focus.value=state.focus;
  };
