@@ -13,19 +13,19 @@ const first=JOB_PRESETS[0];
   </div>
   <div class="ws-workspace">
     <div class="ws-left">
-      <div class="ws-ready">
+      <div class="ws-ready" id="november-edit-controls">
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
-        <h2>Already prepared.</h2>
-        <p>We made a starting plan for <span id="ws-ready-family">the Goering Family</span>. You can change any recommendation, or just download it as is.</p>
+        <h2>Less reminding. <em>More ownership.</em></h2>
+        <p>We made a ready-to-use ownership plan for <span id="ws-ready-family">the Goering Family</span>. Each person has a part with a clear finish line.</p><button class="ws-open-editor" type="button" data-ws-open>Edit responsibilities</button>
         <div class="ws-field" hidden><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
-      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>Each person knows what they own and what finished looks like. Change a handoff only if it doesn’t fit your family.</p></div>
+      <div class="ws-actions"><div class="ws-mobile-actions"><button type="button" class="ws-mobile-edit" data-ws-open>Make changes</button><button type="submit" form="ws-form" class="ws-download ws-mobile-print" disabled>Download PDF</button></div><button type="button" class="ws-download" id="ws-approve">Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
+    <dialog class="ws-edit-dialog" id="ws-edit-dialog" aria-labelledby="ws-dialog-title"><div class="ws-dialog-top"><div><span class="ws-eyebrow">MAKE IT YOURS · NOVEMBER</span><h2 id="ws-dialog-title">Edit family ownership</h2></div><button type="button" class="ws-close-dialog" data-ws-close aria-label="Close editor">×</button></div><p>We have prepared real responsibilities for your family. Adjust only what needs to change.</p>      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>Each person knows what they own and what finished looks like. Change a handoff only if it doesn’t fit your family.</p></div>
       <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Mom</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Dad</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Prepare tomorrow’s clothes and supplies</p><p id="ws-child1-desc">Lay out clothes, check supplies and put everything in its ready spot.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
       </div>
-      <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
       <details class="ws-advanced"><summary>More plan options <span>Optional</span></summary><form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
         <input type="hidden" name="planTitle" id="ws-plan-title" value="Our School-Night Reset"/>
         <input type="hidden" name="planGoal" id="ws-plan-goal" value="Tomorrow is ready without one person managing every step."/>
@@ -61,10 +61,11 @@ const first=JOB_PRESETS[0];
         <p id="ws-status" class="ws-status" role="status" aria-live="polite"></p>
         <p class="ws-helper">Two US Letter pages. Print front and back on one sheet, 100% scale, long-edge flip.</p>
       </form></details>
+<button type="button" class="ws-dialog-done" data-ws-close>Done · See our plan</button></dialog>
       <p class="ws-disclaimer">This is a preview of future Club membership. No plan is saved or mailed. Recommendations are examples based on a sample family.</p>
     </div>
-    <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview">
-      <div class="ws-preview-head"><h2>November’s printed tool</h2><span>One 8.5 × 11 sheet · front & back</span></div>
+    <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview"><button type="button" class="ws-floating-edit" data-ws-open><span>✎</span> MAKE CHANGES</button>
+      
       <div class="ws-pages" id="ws-pages" aria-busy="true">
         <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
         <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
@@ -146,7 +147,12 @@ const first=JOB_PRESETS[0];
   });
 
   $('ws-approve').addEventListener('click',()=>{const error=planIssue();$('ws-approval-note').textContent=error??'Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
-  $('ws-review').addEventListener('click',()=>toggleInlineEditor('adult'));
+  $('ws-review').addEventListener('click',()=>{editorDialog?.showModal();toggleInlineEditor('adult')});
+  const editorDialog=document.querySelector<HTMLDialogElement>('#club-month-content #ws-edit-dialog');
+  document.querySelectorAll<HTMLButtonElement>('#club-month-content [data-ws-open]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
+  document.querySelectorAll<HTMLButtonElement>('#club-month-content [data-ws-close]').forEach(button=>button.addEventListener('click',()=>editorDialog?.close()));
+  editorDialog?.addEventListener('click',event=>{if(event.target===editorDialog)editorDialog.close()});
+
   const child2Custom = $<HTMLInputElement>('ws-child2-custom');
   const downloads = [...document.querySelectorAll<HTMLButtonElement>('.ws-download')];
   const setBusy = (busy: boolean) => downloads.forEach((b) => (b.disabled = busy));
@@ -397,6 +403,66 @@ const first=JOB_PRESETS[0];
 @font-face{font-family:'WS Montserrat';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-400.ttf) format('truetype')}
 @font-face{font-family:'WS Montserrat';font-weight:500;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-500.ttf) format('truetype')}
 @font-face{font-family:'WS Montserrat';font-weight:600;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-600.ttf) format('truetype')}
+
+/* November's member worksheet engine is shared. Layout changes apply only to Club preview. */
+#club-month-content .ws-shell{max-width:none;margin:0;padding:0}
+#club-month-content .ws-top,#club-month-content .ws-intro{display:none}
+#club-month-content .ws-workspace{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+#club-month-content .ws-left{display:flex;flex-direction:column;min-width:0;background:#faf9f7;padding:15px clamp(17px,2vw,26px);border:0;border-right:1px solid #e5e0e1}
+#club-month-content .ws-ready{border-top:5px solid #d8e6df;padding-top:12px;margin:0;background:#fff;border-bottom:1px solid #e0e6da;padding-bottom:15px}
+#club-month-content .ws-ready h2{font:400 clamp(23px,2.5vw,31px)/1.12 Georgia,serif;margin:12px 0;color:#5f7767}
+#club-month-content .ws-ready>p{padding:0 14px}
+#club-month-content .ws-ready>.ws-eyebrow{padding:0 14px}
+#club-month-content .ws-ready h2{padding:0 14px}
+#club-month-content .ws-open-editor{display:block;margin:12px 14px 0;min-height:38px;border:0;background:none;color:#5f7767;text-decoration:underline;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+#club-month-content .ws-actions{display:flex;flex-direction:column;gap:8px;margin:auto 0 0;padding-top:12px}
+#club-month-content .ws-actions #ws-approve{min-height:45px}
+#club-month-content #ws-review{display:none}
+#club-month-content .ws-actions .ws-status{font-size:10px}
+#club-month-content .ws-disclaimer{font-size:10px;margin-top:10px}
+#club-month-content .ws-preview{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}
+#club-month-content .ws-page{width:min(100%,816px)}
+#club-month-content .ws-preview .ws-download-again{max-width:816px}
+#club-month-content .ws-edit-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(680px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:25px;background:#fff;border:1px solid #dce2d7;border-radius:10px;box-shadow:0 20px 65px #0003;color:#484941;font-family:Montserrat,Arial,sans-serif}
+#club-month-content .ws-edit-dialog::backdrop{background:rgba(33,40,36,.52)}
+#club-month-content .ws-dialog-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+#club-month-content .ws-dialog-top h2{font:400 29px/1.15 Georgia,serif;color:#5f7767;margin:10px 0}
+#club-month-content .ws-close-dialog{height:36px;width:36px;flex:0 0 36px;border:0;border-radius:50%;background:#eef3ef;color:#5f7767;font-size:24px;cursor:pointer}
+#club-month-content .ws-edit-dialog>p{font-size:13px;line-height:1.6}
+#club-month-content .ws-dialog-done{width:100%;min-height:45px;background:#5f7767;color:#fff;border:0;font-weight:700;cursor:pointer;margin-top:14px}
+#club-month-content .ws-rec-head{margin-top:20px}
+#club-month-content .ws-rec-head>p{font-size:12px}
+#club-month-content .ws-floating-edit{display:none}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content .ws-shell),body:has(#club-month-content .ws-shell){height:100%;overflow:hidden}
+ #club-month-content:has(.ws-shell){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ #club-month-content .ws-shell,#club-month-content .ws-workspace{height:100%}
+ #club-month-content .ws-left{height:100%;overflow:hidden}
+ #club-month-content .ws-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ #club-month-content .ws-floating-edit{display:inline-flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;align-items:center;gap:9px;min-height:52px;border:0;border-radius:999px;padding:13px 19px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+}
+@media screen and (max-width:1100px){
+ #club-month-content .ws-shell{padding:0 0 40px}
+ #club-month-content .ws-workspace{display:flex;flex-direction:column;gap:0}
+ #club-month-content .ws-preview{order:0;width:100%;padding:14px 14px 28px}
+ #club-month-content .ws-left{order:1;max-width:none;width:100%;border:0;padding:20px}
+}
+@media screen and (max-width:700px){
+ #club-month-content .ws-shell{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+ #club-month-content .ws-left{padding:17px 18px}
+ #club-month-content .ws-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));background:#faf9f7;border-top:1px solid #dce2d7;box-shadow:0 -5px 20px #0001}
+ #club-month-content .ws-actions #ws-approve{font-size:12px;min-height:43px}
+ #club-month-content .ws-edit-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{#club-month-content .ws-floating-edit,#club-month-content .ws-edit-dialog{display:none!important}}
+
+#club-month-content .ws-mobile-actions{display:none}
+@media screen and (max-width:700px){
+ #club-month-content .ws-mobile-actions{display:flex;gap:9px;align-items:stretch}
+ #club-month-content .ws-mobile-edit{flex:1;min-height:45px;border:1px solid #5f7767;background:#fff;color:#5f7767;border-radius:4px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+ #club-month-content .ws-mobile-print{flex:1.3;min-width:0;font-size:12px;letter-spacing:0;text-transform:none;min-height:45px}
+ #club-month-content .ws-actions #ws-approve,#club-month-content .ws-actions #ws-review,#club-month-content .ws-actions #ws-approval-note{display:none}
+}
 </style>
 <style>
 .ws-shell{max-width:1440px;margin:auto;padding:24px clamp(16px,3vw,52px) 72px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}
