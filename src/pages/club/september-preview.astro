@@ -1,0 +1,10 @@
+---
+/** Unlisted September 2027 family reset prototype. */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
+import SeptemberRoomReset from '../../components/club/SeptemberRoomReset.astro';
+---
+<PublicLayout fullTitle="September 5-Minute Reset Preview | Organized Family Club" description="A prepared daily reset with visual jobs and a clear finish line." indexable={false} chrome={false} width="full" tracking={false}>
+ <ClubPrototypeNav client:only="react" month="september" />
+ <main id="club-month-content"><SeptemberRoomReset storageKey="omc:preview:september-room-reset:v1" /></main>
+</PublicLayout>
