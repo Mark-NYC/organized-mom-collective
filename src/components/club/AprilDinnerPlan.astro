@@ -262,6 +262,36 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
  .adc-vision{max-width:640px}
  .adc-view{margin-top:20px}
 }
+/* Mobile: see the finished plan first, edit only if needed, and keep saving in reach. */
+@media screen and (max-width:700px){
+ .adc{padding:0 0 calc(96px + env(safe-area-inset-bottom,0px))}
+ .adc-controls{padding:20px 18px 8px;background:#faf9f7}
+ .adc-controls-head{padding:13px 0 12px;border-top:5px solid var(--adc-accent)}
+ .adc-controls-head h2{font-size:clamp(27px,7vw,36px);margin:9px 0}
+ .adc-controls-head .adc-vision{font-size:13px;line-height:1.55;margin:7px 0 0}
+ .adc-prepared{gap:8px}
+ .adc-summary-block{padding:12px 14px}
+ .adc-summary-block>strong{font-size:20px}
+ .adc-summary-team{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:2px 10px}
+ .adc-summary-team .adc-summary-label{width:100%;margin-bottom:3px}
+ .adc-summary-team .adc-summary-row{display:none}
+ .adc-summary-team .adc-edit-link{margin-left:auto;padding:4px 0;min-height:32px}
+ .adc-summary-team::after{content:"Four roles assigned to your family";font-size:11px;color:#68616d;order:0}
+ .adc-summary-team .adc-edit-link{order:1}
+ .adc-edit-link{font-size:12px;min-height:38px}
+ .adc-view{margin-top:0;padding:18px 14px 28px;background:#f5f3f2}
+ .adc-view-title{margin-bottom:14px;gap:6px}
+ .adc-view-title h2{font-size:22px;margin:0}
+ .adc-view-title span{font-size:11px}
+ .adc-stage{margin:0 auto}
+ .adc-actions{position:fixed;bottom:0;left:0;right:0;z-index:20;margin:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(250,249,247,.97);border-top:1px solid #ddd8e8;box-shadow:0 -6px 20px #00000012}
+ .adc-actions .adc-button{min-height:48px;font-size:13px;border-radius:5px}
+ .adc-actions .adc-reset{display:none}
+ .adc-preview-note{margin-bottom:18px}
+}
+@media screen and (min-width:701px) and (max-width:1100px){
+ .adc-controls{padding:22px}
+}
 @media print{.adc-dialog{display:none!important}}
 </style>
 <script>
