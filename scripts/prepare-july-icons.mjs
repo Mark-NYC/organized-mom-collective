@@ -14,11 +14,46 @@ const destination=join(root,'public/images/club/july');
 const pngRoot=join(root,'assets/icons/ofc/updatedicons/png');
 const svgRoot=join(root,'assets/icons/ofc/updatedicons/svg');
 async function exists(path){try{await access(path);return true;}catch{return false;}}
+const iconAliases={
+ 'blocks':'building-blocks',
+ 'bike':'bicycle',
+ 'friend-pair':'playing-with-friends',
+ 'puzzle-piece':'puzzele-piece',
+ 'shirt':'getting-dressed',
+ 'dish':'place-setting',
+ 'family-group':'family-playing-game',
+ 'made-bed':'morning-start',
+ 'basket':'sorting-clothes',
+ 'paintbrush':'drawing-and-coloring',
+ 'sidewalk-chalk':'drawing-and-coloring',
+ 'scissors':'drawing-and-coloring',
+ 'home':'morning-start',
+ 'book-stack':'book',
+ 'check-look':'star',
+ 'conversation-bubbles':'family-playing-game',
+ 'adult-and-child-together':'parent-child-reading',
+ 'helping-hands':'washing-dishes',
+ 'sneakers':'putting-on-shoes',
+ 'coat':'getting-dressed',
+ 'lunchbox':'backpack',
+ 'school-folder':'doing-homework',
+ 'school-notebook':'doing-homework',
+ 'school-bus':'backpack',
+ 'apple':'fruit',
+ 'carrot':'carrot-sticks',
+ 'jump-rope':'move-play'
+};
 async function iconInput(name, preferSvg=false){
  const png=join(pngRoot,name+'.png'),svg=join(svgRoot,name+'.svg');
  if(preferSvg && await exists(svg))return svg;
  if(await exists(png))return png;
  if(await exists(svg))return svg;
+ const replacement=iconAliases[name];
+ if(replacement){
+  const aliasPng=join(pngRoot,replacement+'.png'),aliasSvg=join(svgRoot,replacement+'.svg');
+  if(await exists(aliasPng)){console.log('Mapped '+name+' to '+replacement+'.png');return aliasPng;}
+  if(await exists(aliasSvg)){console.log('Mapped '+name+' to '+replacement+'.svg');return aliasSvg;}
+ }
  console.warn('Optional icon source missing: '+name);
  return null;
 }
@@ -167,4 +202,11 @@ const {readdir}=await import('node:fs/promises');
 await mkdir(iconLibraryOutput,{recursive:true});
 const iconFiles=(await readdir(allIconSource)).filter(n=>n.endsWith('.png'));
 for(const filename of iconFiles)await copyFile(join(allIconSource,filename),join(iconLibraryOutput,filename));
+for(const name of Object.keys(iconAliases)){
+ const existing=join(iconLibraryOutput,name+'.png');
+ if(await exists(existing))continue;
+ const input=await iconInput(name);
+ if(!input)continue;
+ await sharp(input,{density:300}).png().toFile(existing);
+}
 console.log('Published '+iconFiles.length+' original Club PNG icons without cropping or conversion.');
