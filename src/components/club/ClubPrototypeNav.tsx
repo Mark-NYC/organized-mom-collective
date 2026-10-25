@@ -20,13 +20,14 @@ const months=[
  {slug:'june',label:'June',url:'/club/june-preview/'},
  {slug:'july',label:'July',url:'/club/july-preview/'},
  {slug:'august',label:'August',url:'/club/august-preview/'},
- {slug:'september',label:'September',url:'/club/september-preview/'}
+ {slug:'september',label:'September',url:'/club/september-preview/'},
+ {slug:'october',label:'October',url:'/club/october-preview/'}
 ] as const;
 const SAMPLE_SESSION='omc:club:active-preview-sample';
 const isKnown=(id:string)=>sampleHouseholds.some(x=>x.id===id&&x.id!=='new');
 const selected=()=>{try{const q=new URLSearchParams(location.search).get('sample');if(q&&isKnown(q))return q;const saved=sessionStorage.getItem(SAMPLE_SESSION);return saved&&isKnown(saved)?saved:'rivera'}catch{return 'rivera'}};
 
-export default function ClubPrototypeNav({month}:{month:'november'|'december'|'january'|'february'|'march'|'april'|'may'|'june'|'july'|'august'|'september'}){
+export default function ClubPrototypeNav({month}:{month:'november'|'december'|'january'|'february'|'march'|'april'|'may'|'june'|'july'|'august'|'september'|'october'}){
  const [sample,setSample]=useState(selected);
  const [tab,setTab]=useState<'kits'|'family'>('kits');
  const [household,setHousehold]=useState<Household|null>(null);
