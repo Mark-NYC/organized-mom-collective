@@ -7,10 +7,10 @@ import {monthColors} from '../../theme';
 interface Props { storageKey?: string }
 const {storageKey='omc:club:february-connection:v1'}=Astro.props;
 const examples=[
- {owner:'Sofia',headline:'Let’s play!',invite:'Want to play a game with me?',idea:'Pick a game we already have. Invite someone to play for 20 minutes.',place:'The dining table'},
- {owner:'Mateo',headline:'Just you & me',invite:'Can we have 15 minutes together?',idea:'Choose drawing, reading, building, or a walk. Ask a grown-up to join.',place:'The family bulletin board'},
- {owner:'Luis',headline:'Together tonight',invite:'Who wants to do something together?',idea:'Choose a simple at-home activity. Everyone who joins can take a part.',place:'The fridge'},
- {owner:'Ana',headline:'A little kindness',invite:'Who could we encourage today?',idea:'Invite someone to write a note, share a kind word, or do something thoughtful.',place:'The kitchen counter'}
+ {owner:"Sofia",recipient:"Dad",headline:"Game night?",invite:"Dad, will you play a game with me tonight?",idea:"I'll get the game ready!"},
+ {owner:"Mateo",recipient:"Mom",headline:"Just us two",invite:"Mom, will you read a book with me after dinner?",idea:"I'll pick the book!"},
+ {owner:"Luis",recipient:"Sofia",headline:"I picked you!",invite:"Sofia, want to build something with me this weekend?",idea:"You choose what we build."},
+ {owner:"Ana",recipient:"Mateo",headline:"Let's have fun!",invite:"Mateo, will you make a blanket fort with me?",idea:"I'll bring the blankets!"}
 ];
 ---
 <div class="fbc" data-fbc-key={storageKey} style={`--feb-accent:${monthColors[1].hex}`}>
@@ -18,33 +18,26 @@ const examples=[
   <a href="/club" class="fbc-back">← Organized Family Club</a>
   <p class="fbc-kicker">ORGANIZED FAMILY CLUB · FEBRUARY 2027</p>
   <h1>More connection. <em>Less coordinating.</em></h1>
-  <p>Four prepared invitations for your family to initiate togetherness. Keep the cards somewhere everyone can see them. No checklist, no schedule, and no reminders from Mom.</p>
+  <p>Four personal invitations, already prepared for your family. Each one helps someone give the gift of time together. No scheduling or reminders from Mom.</p>
  </header>
  <div class="fbc-workspace">
   <section class="fbc-editor-pane" aria-label="Customize the connection cards">
    <div class="fbc-editor-heading">
     <p class="fbc-kicker">FEBRUARY · YOUR PREPARED CARDS</p>
     <h2>Ready for your family.</h2>
-    <p>Start with these ideas or change them to fit your people. You don't need to use all four at once.</p>
+    <p>Each card is ready to hand to someone special. You can change a name or invitation, but there is nothing you need to plan.</p>
    </div>
    <div class="fbc-editor-list">
     {examples.map((item,i)=><fieldset data-editor={i}>
      <legend><span>0{i+1}</span> {item.headline}</legend>
-     <label>Who starts the invitation?<input data-field="owner" maxlength="32" value={item.owner}/></label>
+     <label>From<input data-field="owner" maxlength="32" value={item.owner}/></label>
+     <label>To<input data-field="recipient" maxlength="32" value={item.recipient}/></label>
      <label>Invitation title<input data-field="headline" maxlength="44" value={item.headline}/></label>
-     <label>What they can say<input data-field="invite" maxlength="88" value={item.invite}/></label>
-     <label>A simple way to do it<textarea data-field="idea" maxlength="180" rows="3">{item.idea}</textarea></label>
+     <label>Personal invitation<input data-field="invite" maxlength="88" value={item.invite}/></label>
+     <label>A little extra note<textarea data-field="idea" maxlength="180" rows="3">{item.idea}</textarea></label>
     </fieldset>)}
    </div>
-   <div class="fbc-place">
-    <h3>Where will your family see the cards?</h3>
-    <p>Put them somewhere shared and visible. Anyone can pick up a card and make the invitation.</p>
-    <label for="fbc-shared-place">Our card spot</label>
-    <select id="fbc-shared-place" data-shared-place>
-     <option value="Dining table">Dining table</option><option value="Family bulletin board">Family bulletin board</option><option value="Refrigerator">Refrigerator</option><option value="Bathroom mirror">Bathroom mirror</option><option value="Kitchen counter">Kitchen counter</option><option value="Somewhere everyone sees">Another shared spot</option>
-    </select>
-   </div>
-   <button class="fbc-download" type="button" data-print>Print four connection cards / Save PDF</button>
+   <button class="fbc-download" type="button" data-print>Print four invitations / Save PDF</button>
    <button class="fbc-reset" type="button" data-reset>Restore suggested cards</button>
    <p class="fbc-status" role="status" aria-live="polite" data-status>US Letter · Print at actual size, with background graphics enabled. Cut along the dotted lines.</p>
   </section>
@@ -59,16 +52,17 @@ const examples=[
        <div class="fbc-illustration" aria-hidden="true"><img src={['board-game','parent-child-reading','family-playing-game','kindness-note'].map(n=>'/images/club/icon-library/'+n+'.png')[i]} alt="" width="65" height="64" /></div>
        <p class="fbc-overline">A LITTLE TIME TOGETHER</p>
        <h3 data-out="headline">{item.headline}</h3>
-       <p class="fbc-from"><span>FROM</span> <strong data-out="owner">{item.owner}</strong></p>
+       <p class="fbc-to"><span>TO</span> <strong data-out="recipient">{item.recipient}</strong></p>
        <div class="fbc-invitation" data-out="invite">{item.invite}</div>
        <p class="fbc-how" data-out="idea">{item.idea}</p>
-       <div class="fbc-card-foot">SEE THIS CARD? MAKE THE INVITATION.</div>
+       <p class="fbc-signoff">WITH LOVE, <strong data-out="owner">{item.owner}</strong></p>
+       <div class="fbc-card-foot">GIVE THIS TO SOMEONE YOU LOVE.</div>
       </article>)}
      </div>
-     <div class="fbc-paper-foot"><span>KEEP THESE SOMEWHERE EVERYONE CAN SEE.</span><span data-out-place>Dining table</span></div>
+     <div class="fbc-paper-foot"><span>FOUR LITTLE WAYS TO SAY: I CHOOSE YOU.</span><span>HAND ONE TO SOMEONE YOU LOVE.</span></div>
     </div>
    </div>
-   <p class="fbc-preview-note">These are real, separate cut-apart cards. Put out one or two at a time; store the rest for another day.</p>
+   <p class="fbc-preview-note">Four separate cut-apart invitations, ready for family members to give directly to each other. No distribution or scheduling needed.</p>
   </section>
  </div>
 </div>
@@ -84,10 +78,9 @@ const examples=[
 .fbc-intro h1 em{font-weight:600;color:#9b6477}.fbc-intro>p:last-child{font:15px/1.7 'FBC Montserrat',sans-serif;max-width:650px}
 .fbc-workspace{display:grid;grid-template-columns:minmax(290px,355px) minmax(0,1fr);gap:clamp(25px,3vw,48px);align-items:start}
 .fbc-editor-pane{min-width:0}.fbc-editor-heading{border-top:9px solid var(--feb-accent);padding-top:21px}.fbc-editor-heading h2{font:600 italic 28px 'FBC Gelasio',Georgia,serif;color:#9b6477;margin:12px 0}.fbc-editor-heading>p:last-child{font-size:13px;line-height:1.65}
-.fbc-editor-list{margin-top:20px}.fbc-editor-list fieldset{border:0;border-top:1px solid #e8d2d6;margin:0;padding:17px 0 21px;min-width:0}.fbc-editor-list legend{font:400 19px 'FBC Gelasio',Georgia,serif;padding:0 10px 0 0}.fbc-editor-list legend span{font:600 12px 'FBC Montserrat',sans-serif;color:#9b6477;margin-right:10px}.fbc-editor-list label,.fbc-place label{display:block;margin-top:13px;font:600 10px/1.4 'FBC Montserrat',sans-serif;letter-spacing:.06em;text-transform:uppercase}
-.fbc-editor-list input,.fbc-editor-list textarea,.fbc-place select{display:block;width:100%;margin-top:7px;padding:11px 12px;background:white;border:1px solid #bcbcbc;border-radius:0;min-height:44px;font:14px/1.45 'FBC Montserrat',sans-serif;color:#333;resize:vertical}
+.fbc-editor-list{margin-top:20px}.fbc-editor-list fieldset{border:0;border-top:1px solid #e8d2d6;margin:0;padding:17px 0 21px;min-width:0}.fbc-editor-list legend{font:400 19px 'FBC Gelasio',Georgia,serif;padding:0 10px 0 0}.fbc-editor-list legend span{font:600 12px 'FBC Montserrat',sans-serif;color:#9b6477;margin-right:10px}.fbc-editor-list label{display:block;margin-top:13px;font:600 10px/1.4 'FBC Montserrat',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.fbc-editor-list input,.fbc-editor-list textarea{display:block;width:100%;margin-top:7px;padding:11px 12px;background:white;border:1px solid #bcbcbc;border-radius:0;min-height:44px;font:14px/1.45 'FBC Montserrat',sans-serif;color:#333;resize:vertical}
 .fbc-editor-list textarea{min-height:85px}.fbc input:focus-visible,.fbc textarea:focus-visible,.fbc select:focus-visible,.fbc button:focus-visible{outline:2px solid #905d70;outline-offset:2px}
-.fbc-place{border-top:2px solid var(--feb-accent);padding-top:19px}.fbc-place h3{font:400 23px 'FBC Gelasio',Georgia,serif;margin:0 0 9px}.fbc-place p{font-size:12px;line-height:1.6}
 .fbc-download{display:block;width:100%;background:#454545;border:0;color:#fff;cursor:pointer;min-height:52px;margin-top:22px;font:600 12px 'FBC Montserrat',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:14px}
 .fbc-reset{display:block;cursor:pointer;margin:12px auto;border:0;background:none;text-decoration:underline;text-underline-offset:4px;min-height:44px;font:600 12px 'FBC Montserrat',sans-serif;color:#454545}
 .fbc-status,.fbc-preview-note{font-size:11px;line-height:1.6;color:#666}
@@ -105,10 +98,11 @@ const examples=[
 .fbc-card-top{display:flex;justify-content:space-between;font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.08em;color:#636063;gap:7px}
 .fbc-illustration{width:65px;height:64px;margin:8px auto 1px;color:#9b6477}.fbc-illustration img{width:100%;height:100%;object-fit:contain;display:block}
 .fbc-overline{text-align:center;font-size:7px;color:#8b6372}.fbc-card h3{font:600 italic 26px/1.14 'FBC Gelasio',Georgia,serif;text-align:center;color:#976479;margin:7px 0 9px;overflow-wrap:anywhere}
-.fbc-from{text-align:center;font:12px 'FBC Gelasio',Georgia,serif;margin:0 0 18px;border-bottom:5px solid #e8d2d6;padding-bottom:12px}
-.fbc-from span{font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.15em}.fbc-from strong{font-weight:400;font-style:italic;font-size:16px}
+.fbc-to{text-align:center;font:12px 'FBC Gelasio',Georgia,serif;margin:0 0 18px;border-bottom:5px solid #e8d2d6;padding-bottom:12px}
+.fbc-to span{font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.15em}.fbc-to strong{font-weight:400;font-style:italic;font-size:16px}
 .fbc-invitation{font:600 italic 20px/1.24 'FBC Gelasio',Georgia,serif;color:#6f4858;margin:0 0 16px;overflow-wrap:anywhere}
 .fbc-how{font:12px/1.44 'FBC Montserrat',sans-serif;margin:0;overflow-wrap:anywhere}
+.fbc-signoff{font:600 9px 'FBC Montserrat',sans-serif;letter-spacing:.08em;color:#82606d;margin:14px 0 0}.fbc-signoff strong{font-weight:600}
 .fbc-card-foot{border-top:1px solid #e8d2d6;margin-top:auto;padding-top:11px;font:600 8px 'FBC Montserrat',sans-serif;letter-spacing:.09em;color:#82606d}
 .fbc-paper-foot{display:flex;justify-content:space-between;align-items:center;height:17px;flex-shrink:0;font:600 7px 'FBC Montserrat',sans-serif;letter-spacing:.1em;color:#747074}
 .fbc-preview-note{max-width:710px}
@@ -125,35 +119,34 @@ const examples=[
 }
 </style>
 <script>
-type Card={owner:string;headline:string;invite:string;idea:string};
+type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
 const defaults:Card[]=[
- {owner:'Sofia',headline:'Let’s play!',invite:'Want to play a game with me?',idea:'Pick a game we already have. Invite someone to play for 20 minutes.'},
- {owner:'Mateo',headline:'Just you & me',invite:'Can we have 15 minutes together?',idea:'Choose drawing, reading, building, or a walk. Ask a grown-up to join.'},
- {owner:'Luis',headline:'Together tonight',invite:'Who wants to do something together?',idea:'Choose a simple at-home activity. Everyone who joins can take a part.'},
- {owner:'Ana',headline:'A little kindness',invite:'Who could we encourage today?',idea:'Invite someone to write a note, share a kind word, or do something thoughtful.'}
+ {owner:"Sofia",recipient:"Dad",headline:"Game night?",invite:"Dad, will you play a game with me tonight?",idea:"I'll get the game ready!"},
+ {owner:"Mateo",recipient:"Mom",headline:"Just us two",invite:"Mom, will you read a book with me after dinner?",idea:"I'll pick the book!"},
+ {owner:"Luis",recipient:"Sofia",headline:"I picked you!",invite:"Sofia, want to build something with me this weekend?",idea:"You choose what we build."},
+ {owner:"Ana",recipient:"Mateo",headline:"Let's have fun!",invite:"Mateo, will you make a blanket fort with me?",idea:"I'll bring the blankets!"}
 ];
 for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  const key=root.dataset.fbcKey??'omc:preview:february:v1';
  const storage=key.startsWith('omc:club:')?sessionStorage:localStorage;
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-editor]'));
  const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-card]'));
- const place=root.querySelector<HTMLSelectElement>('[data-shared-place]');
+
  let values=defaults.map(x=>({...x}));
- let sharedPlace='Dining table';
- let automatic=defaults.map(x=>x.owner);
- try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);sharedPlace=typeof saved.sharedPlace==='string'?saved.sharedPlace:sharedPlace;}}
+
+ let automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));
+ try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);}}
  catch{}
- try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4)automatic=saved;}catch{}
- const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values,sharedPlace}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
+ try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
+ const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
  const draw=()=>{
   editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
   cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;out.textContent=values[i][field]||' ';}));
-  if(place)place.value=sharedPlace;
-  const footer=root.querySelector<HTMLElement>('[data-out-place]');if(footer)footer.textContent=sharedPlace;
+
  };
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;values[i][field]=input.value.slice(0,180);save();draw()})));
- place?.addEventListener('change',()=>{sharedPlace=place.value;save();draw()});
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));sharedPlace='Dining table';automatic=defaults.map(x=>x.owner);try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
+
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
  window.addEventListener('omc:club-preview-household',(event:Event)=>{
   const h=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean}[]} | null}>).detail?.household;
@@ -161,13 +154,18 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
   const members=h.members.filter(m=>!m.archived);
   const kids=members.filter(m=>m.kind==='child');
   const adults=members.filter(m=>m.kind==='adult');
-  const next=[
-   kids[0]?.firstName??adults[0]?.firstName??'Family',
-   kids[1]?.firstName??kids[0]?.firstName??adults[0]?.firstName??'Family',
-   adults.find(m=>!m.isAccountHolder)?.firstName??adults[0]?.firstName??'Family',
-   adults.find(m=>m.isAccountHolder)?.firstName??adults[0]?.firstName??'Family'
-  ];
-  values.forEach((v,i)=>{if(v.owner===automatic[i]||v.owner===defaults[i].owner)v.owner=next[i]});
+  const all=[...kids,...adults];
+  const next=defaults.map((fallback,i)=>{
+   const sender=(i<2?kids[i%Math.max(1,kids.length)]??adults[0]:adults[(i-2)%Math.max(1,adults.length)]??kids[0]);
+   const recipient=all.find(m=>m!==sender && (i<2?m.kind==='adult':m.kind==='child'))??all.find(m=>m!==sender);
+   return {owner:sender?.firstName??fallback.owner,recipient:recipient?.firstName??fallback.recipient};
+  });
+  values.forEach((v,i)=>{
+   if(v.owner===automatic[i]?.owner||v.owner===defaults[i].owner)v.owner=next[i].owner;
+   if(v.recipient===automatic[i]?.recipient||v.recipient===defaults[i].recipient)v.recipient=next[i].recipient;
+   const initial=defaults[i];
+   if(v.invite===initial.invite || v.invite===initial.invite.replace(initial.recipient,next[i].recipient))v.invite=initial.invite.replace(initial.recipient,next[i].recipient);
+  });
   automatic=next;save();draw();
  });
  draw();
