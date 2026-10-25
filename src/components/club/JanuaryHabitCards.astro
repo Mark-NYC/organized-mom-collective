@@ -23,7 +23,8 @@ const defaults = [
   </div>
   <div class="jhc-workspace"><div class="jhc-config" aria-label="Customize your family habit cards">
     <div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
-    <div class="jhc-forms">
+    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>Four little habits. Ready to use.</h3><p>Each card connects one familiar moment to a simple next action. Start with one or two.</p><div class="jhc-summary-row"><span>Cards included</span><strong>4 reminders</strong></div><div class="jhc-summary-row"><span>Format</span><strong>One cut-out sheet</strong></div><button type="button" class="jhc-edit-trigger" data-jhc-open>Make changes</button></div>
+    <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>The four cards are ready to print. Edit the reminders that need to fit your family.</p>    <div class="jhc-forms">
       {defaults.map((item, i) => (
         <fieldset class="jhc-editor" data-jhc-editor={i}>
           <legend><span class="jhc-editor-num">0{i+1}</span> Habit card {i+1}</legend>
@@ -34,7 +35,9 @@ const defaults = [
         </fieldset>
       ))}
     </div>
+<button type="button" class="jhc-dialog-done" data-jhc-close>Done · See our cards</button></dialog>
     <div class="jhc-actions">
+      <a href="#january-edit-controls" class="jhc-jump-edit">Make changes</a>
       <button class="jhc-print" type="button" data-print>Print cards / Save PDF</button>
       <button type="button" class="jhc-png" data-single-page-png>Download image (PNG)</button>
    <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
@@ -42,7 +45,7 @@ const defaults = [
     <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
   </div>
 
-  <div class="jhc-preview-panel"><div class="jhc-preview-heading"><h3>Your January habit cards</h3><p>Four cut-out reminders · US Letter</p></div>
+  <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>MAKE CHANGES</button>
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
@@ -105,6 +108,64 @@ const defaults = [
  .jhc-print-scroll{overflow:visible!important}
  .jhc{padding:0!important}
 }
+
+/* Club preview layout only — preserve the member kit presentation. */
+#club-month-content .jhc{max-width:none;margin:0;padding:0}
+#club-month-content .jhc-intro{display:none}
+#club-month-content .jhc-workspace{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);align-items:stretch;gap:0}
+#club-month-content .jhc-config{margin:0;min-width:0;padding:16px clamp(17px,2vw,26px);display:flex;flex-direction:column;background:#faf9f7;border-right:1px solid #e5e0e1}
+#club-month-content .jhc-config-heading{border-top:5px solid #d8e6df;padding-top:10px}
+#club-month-content .jhc-config-heading h3{font:400 clamp(23px,2.5vw,31px)/1.1 Georgia,serif;color:#527468;margin:9px 0}
+#club-month-content .jhc-prepared{flex:1 1 auto;min-height:0;overflow-y:auto;border:1px solid #e0e6da;background:#fff;margin-top:15px;padding:14px}
+#club-month-content .jhc-prepared h3{font:400 23px Georgia,serif;color:#527468;margin:10px 0}
+#club-month-content .jhc-prepared>p:not(.jhc-overline){font-size:12px;line-height:1.6;color:#606c62}
+#club-month-content .jhc-summary-row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e7eae4;padding:10px 0;font-size:12px}
+#club-month-content .jhc-summary-row strong{color:#527468;text-align:right}
+#club-month-content .jhc-edit-trigger{border:0;background:transparent;color:#527468;text-decoration:underline;font:700 12px Montserrat,Arial,sans-serif;padding:10px 0;cursor:pointer}
+#club-month-content .jhc-actions{display:flex;flex-direction:column;gap:7px;flex:0 0 auto;margin:0;padding-top:10px}
+#club-month-content .jhc-actions .jhc-print{width:100%;min-height:45px;padding:10px}
+#club-month-content .jhc-actions .jhc-png{width:100%;min-height:36px}
+#club-month-content .jhc-actions .jhc-reset{min-height:30px;padding:3px}
+#club-month-content .jhc-help{flex:0 0 auto;font-size:10px}
+#club-month-content .jhc-preview-panel{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}
+#club-month-content .jhc-print-scroll{overflow-x:hidden}
+#club-month-content .jhc-stage{margin:0 auto}
+#club-month-content .jhc-floating-edit,#club-month-content .jhc-jump-edit{display:none}
+#club-month-content .jhc-dialog{position:fixed;inset:0;margin:auto;width:min(650px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px;box-sizing:border-box;border:1px solid #dce2d7;border-radius:10px;background:#fff;color:#484941;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
+#club-month-content .jhc-dialog::backdrop{background:rgba(33,40,36,.52)}
+#club-month-content .jhc-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+#club-month-content .jhc-dialog-head h2{font:400 28px Georgia,serif;color:#527468;margin:0 0 15px}
+#club-month-content .jhc-dialog-head button{height:36px;width:36px;border:0;border-radius:50%;background:#edf2ec;font-size:24px;cursor:pointer}
+#club-month-content .jhc-dialog>p{font:13px/1.6 Montserrat,Arial,sans-serif}
+#club-month-content .jhc-dialog .jhc-forms{grid-template-columns:1fr 1fr}
+#club-month-content .jhc-dialog-done{width:100%;min-height:46px;border:0;background:#527468;color:#fff;font-weight:700;cursor:pointer;margin-top:18px}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content .jhc),body:has(#club-month-content .jhc){height:100%;overflow:hidden}
+ #club-month-content:has(.jhc){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden;padding:0!important}
+ #club-month-content .jhc,#club-month-content .jhc-workspace{height:100%}
+ #club-month-content .jhc-config{height:100%;overflow:hidden}
+ #club-month-content .jhc-preview-panel{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ #club-month-content .jhc-floating-edit{display:inline-flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;align-items:center;gap:10px;min-height:52px;border:0;border-radius:999px;padding:13px 19px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+}
+@media screen and (max-width:1100px){
+ #club-month-content .jhc{padding:0 0 40px}
+ #club-month-content .jhc-workspace{display:flex;flex-direction:column;gap:0}
+ #club-month-content .jhc-preview-panel{order:0;width:100%;padding:14px 14px 28px}
+ #club-month-content .jhc-config{order:1;width:100%;border:0;padding:20px}
+ #club-month-content .jhc-prepared{flex:auto;overflow:visible}
+}
+@media screen and (max-width:700px){
+ #club-month-content .jhc{padding-bottom:calc(155px + env(safe-area-inset-bottom,0px))}
+ #club-month-content .jhc-config{padding:17px 18px}
+ #club-month-content .jhc-prepared{scroll-margin-top:12px}
+ #club-month-content .jhc-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));margin:0;border-top:1px solid #dce2d7;background:#faf9f7;box-shadow:0 -5px 20px #0001;display:grid;grid-template-columns:1fr 1.25fr;gap:7px}
+ #club-month-content .jhc-jump-edit{display:flex;align-items:center;justify-content:center;min-height:45px;border:1px solid #527468;color:#527468;background:#fff;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}
+ #club-month-content .jhc-actions .jhc-print{min-width:0;font-size:12px}
+ #club-month-content .jhc-actions .jhc-png,#club-month-content .jhc-actions .jhc-reset{grid-column:1/-1}
+ #club-month-content .jhc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+ #club-month-content .jhc-dialog .jhc-forms{grid-template-columns:1fr}
+}
+@media print{#club-month-content .jhc-dialog,#club-month-content .jhc-floating-edit,#club-month-content .jhc-actions{display:none!important}}
 </style>
 
 <style is:global>
@@ -214,6 +275,10 @@ const defaults = [
   {name:'Our kitchen',anchor:'After we finish dinner',action:'We clear the table together.',place:'By the kitchen table'}
 ];
 for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
+ const editorDialog=root.querySelector<HTMLDialogElement>('[data-jhc-dialog]');
+ root.querySelectorAll('[data-jhc-open]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
+ root.querySelectorAll('[data-jhc-close]').forEach(button=>button.addEventListener('click',()=>editorDialog?.close()));
+ editorDialog?.addEventListener('click',event=>{if(event.target===editorDialog)editorDialog.close()});
  const stage=root.querySelector<HTMLElement>('[data-jhc-stage]');
  const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--jhc-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
