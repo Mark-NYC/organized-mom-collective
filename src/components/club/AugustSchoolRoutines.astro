@@ -40,20 +40,15 @@ const initial=[
   <p>A ready-made picture routine for mornings and after school. Kids can see the next step instead of asking Mom what to do.</p>
  </header>
  <div class="asr-layout">
-  <aside class="asr-editor">
-   <p class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINE</p><h2>Already prepared.</h2>
-   <p>Choose a child and review their routine. Edit the time or words right on the sheet; use × to remove any step. Nothing to assemble or track each day.</p>
-   <label>Routine for <select data-asr-child><option value="family">Our family</option></select></label>
+  <aside class="asr-editor"><div class="asr-editor-head"><p class="asr-eyebrow">ORGANIZED FAMILY CLUB · AUGUST 2027</p><h2>Fewer reminders. <em>Smoother school days.</em></h2><button type="button" class="asr-edit-link" data-open-vision>Why this matters</button></div><div class="asr-prepared" id="august-edit-controls"><span class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINES</span><strong>My School Day</strong><p>Two ready-made picture routines for before and after school.</p><button type="button" class="asr-edit-link" data-open-editor>Edit routines <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div><div class="asr-actions"><div class="asr-primary-actions"><a class="asr-jump" href="#august-edit-controls">Make changes</a><button class="asr-primary" data-asr-print type="button">Print / Save PDF</button></div><button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button><button class="asr-reset" data-asr-reset type="button">Restore original steps</button></div></aside>
+  <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
+  <dialog class="asr-dialog" data-asr-editor aria-labelledby="asr-editor-title"><div class="asr-dialog-head"><h2 id="asr-editor-title">Edit school routines</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Review the prepared steps and adjust what doesn't fit your family.</p><div class="asr-dialog-fields">   <label>Routine for <select data-asr-child><option value="family">Our family</option></select></label>
    <label>Routine detail <select data-asr-mode><option value="standard">Five timed steps per routine</option><option value="simple">Four essentials per routine</option></select></label>
    <details class="asr-customize"><summary>Adjust the steps <span>Optional</span></summary><p>Reorder or restore steps without changing the rest of your family’s boards.</p><div data-asr-options></div></details>
    <div class="asr-parent-note"><strong>One small handoff</strong><p>Show your child where this sheet lives, walk through it once, then invite them to check what's next. Adults continue to own school travel, medications, and safety decisions.</p></div>
-   <button class="asr-primary" data-asr-print type="button">Print School Routines / Save PDF</button>
-   <button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button>
-   <button class="asr-reset" data-asr-reset type="button">Restore original steps</button>
-   <p class="asr-small">One premium 8.5 × 11-inch sheet. Changes in this design preview save in this browser tab only.</p>
-  </aside>
-  <section class="asr-preview">
-   <div class="asr-preview-heading"><h2>August’s printed tool</h2><span>One page · Kid-readable</span></div>
+</div><button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button></dialog>
+  <section class="asr-preview"><button type="button" class="asr-float" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+   
    <div class="asr-stage" data-asr-stage>
     <article class="asr-sheet" data-asr-sheet>
      <header class="asr-paper-head"><p>ORGANIZED FAMILY CLUB · AUGUST 2027</p><h2>My School Day</h2><span data-asr-name>Our morning & after-school routine</span></header>
@@ -76,7 +71,7 @@ const initial=[
      <footer class="asr-paper-foot"><strong data-asr-footer contenteditable="true" role="textbox" aria-label="Edit reminder">Check my routine. Do my part. Then I'm ready!</strong><span>ORGANIZED FAMILY CLUB · AUGUST</span></footer>
     </article>
    </div>
-   <p class="asr-small">A tailored Club edition of the <a href="/routine-chart/">Routine Chart Generator</a>, delivered already filled in—not another worksheet for Mom to complete.</p>
+   
   </section>
  </div>
 </div>
@@ -115,6 +110,33 @@ const initial=[
 .asr-paper-foot{padding-top:10px}
 .asr-paper-foot strong{font-size:18px}
 .asr-paper-foot span{margin-top:8px}
+
+.asr{max-width:none;padding:0}.asr-intro{display:none}.asr-layout{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+.asr-editor{display:flex;flex-direction:column;min-width:0;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:16px 22px}
+.asr-editor-head{border-top:5px solid #deeae4;padding-top:10px}.asr-editor-head h2{font:400 clamp(23px,2.5vw,31px)/1.12 Georgia,serif;color:#506d60;margin:10px 0}
+.asr-edit-link{display:inline-flex;align-items:center;gap:8px;border:0;background:none;color:#506d60;font:700 12px Montserrat,Arial,sans-serif;text-decoration:underline;min-height:36px;cursor:pointer}
+.asr-prepared{min-height:0;flex:1 1 auto;overflow-y:auto;background:#fff;border:1px solid #e0e6da;margin-top:15px;padding:15px}
+.asr-prepared>strong{display:block;font:400 23px Georgia,serif;color:#506d60;margin:8px 0}.asr-prepared>p{font:12px/1.6 Montserrat,Arial,sans-serif;margin:0 0 15px}
+.asr-actions{flex:0 0 auto;margin-top:auto;padding-top:12px;background:#faf9f7}.asr-actions .asr-primary{min-height:44px;padding:9px}.asr-actions .asr-secondary{min-height:34px;margin-top:7px}.asr-actions .asr-reset{min-height:28px;margin:5px auto}
+.asr-preview{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}.asr-stage{margin:0 auto}
+.asr-float,.asr-jump{display:none}
+.asr-dialog{position:fixed;inset:0;margin:auto;width:min(540px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;padding:24px;background:#fff;border:1px solid #dce2d7;border-radius:10px;box-shadow:0 20px 65px #0003;color:#484941;font-family:Montserrat,Arial,sans-serif}
+.asr-dialog::backdrop{background:rgba(33,40,36,.52)}.asr-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.asr-dialog-head h2{font:400 28px Georgia,serif;color:#506d60;margin:0 0 14px}.asr-dialog-head button{border:0;background:#eef3ef;border-radius:50%;height:36px;width:36px;cursor:pointer;font-size:23px}
+.asr-dialog>p{font:14px/1.65 Montserrat,Arial,sans-serif}.asr-dialog-done{width:100%;min-height:46px;padding:12px;background:#506d60;color:white;border:0;font-weight:700;cursor:pointer}
+.asr-dialog-fields>label{display:block;font-size:12px;font-weight:700;margin:15px 0}.asr-dialog .asr-customize{margin:18px 0}.asr-dialog .asr-parent-note{margin:16px 0}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content:not([hidden]) .asr),body:has(#club-month-content:not([hidden]) .asr){height:100%;overflow:hidden}
+ #club-month-content:not([hidden]):has(.asr){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ .asr,.asr-layout{height:100%;margin:0}.asr-editor{height:100%;overflow:hidden}.asr-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ .asr-float{display:flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;align-items:center;gap:9px;min-height:52px;border:0;border-radius:999px;padding:13px 19px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+}
+@media screen and (max-width:1100px){.asr{padding:0 0 40px}.asr-layout{display:flex;flex-direction:column;gap:0}.asr-preview{order:0;width:100%;padding:14px 14px 26px}.asr-editor{order:1;width:100%;max-width:none;border:0;padding:20px}.asr-prepared{overflow:visible;flex:auto}}
+@media screen and (max-width:700px){.asr{padding-bottom:135px}.asr-editor{padding:17px 18px}.asr-prepared{scroll-margin-top:12px}
+ .asr-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));background:#faf9f7;border-top:1px solid #dce2d7;box-shadow:0 -5px 20px #0001}
+ .asr-primary-actions{display:flex;gap:9px}.asr-jump{display:flex;flex:1;align-items:center;justify-content:center;border:1px solid #506d60;border-radius:4px;background:#fff;color:#506d60;padding:8px;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}.asr-primary-actions .asr-primary{flex:1.3;min-width:0;font-size:12px}
+ .asr-actions .asr-secondary{min-height:30px}.asr-actions .asr-reset{min-height:25px}.asr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{.asr-editor,.asr-actions,.asr-dialog,.asr-float{display:none!important}.asr-preview{padding:0!important}}
 </style>
 <script>
 type Group='morning'|'after';
@@ -148,6 +170,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
  const fit=()=>{if(!stage||!paper)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4),scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';paper.style.setProperty('--asr-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
  const age=(id=board.child)=>{const k=kids.find(k=>k.id===id);return k?.birthYear?Math.max(3,2027-k.birthYear-((k.birthMonth??1)>8?1:0)):8};
+ const visionDialog=root.querySelector<HTMLDialogElement>('[data-asr-vision]');
+ const editorDialog=root.querySelector<HTMLDialogElement>('[data-asr-editor]');
+ root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
+ root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
+ root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
+ for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const remember=()=>{saved[board.child]=structuredClone(board);try{sessionStorage.setItem(key,JSON.stringify({profile,boards:saved}))}catch{}};
  const draw=()=>{
   for(const group of ['morning','after'] as Group[]){
