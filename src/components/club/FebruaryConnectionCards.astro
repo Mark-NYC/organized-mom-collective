@@ -27,7 +27,8 @@ const examples=[
     <h2>Ready for your family.</h2>
     <p>Kids address parents as Mom or Dad on the invitations, not by first name. Check the names and adjust them to what your family calls each person. No planning needed.</p>
    </div>
-   <div class="fbc-editor-list">
+   <div class="fbc-prepared" id="february-edit-controls"><span class="fbc-kicker">FOUR INVITATIONS · ALREADY PREPARED</span><h3>Give someone your time.</h3><p>Four personalized cards, ready to cut apart and hand to someone you love. Kids can initiate the invitation themselves.</p><div class="fbc-summary-row"><span>Cards included</span><strong>4 personal invitations</strong></div><div class="fbc-summary-row"><span>What happens next</span><strong>Choose · Give · Connect</strong></div><button type="button" class="fbc-edit-link" data-fbc-open>Make changes <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
+   <dialog class="fbc-dialog" data-fbc-dialog aria-labelledby="fbc-dialog-title"><div class="fbc-dialog-heading"><div><span class="fbc-kicker">MAKE IT YOURS · FEBRUARY</span><h2 id="fbc-dialog-title">Edit connection cards</h2></div><button type="button" data-fbc-close aria-label="Close">×</button></div><p>These invitations are ready to use. Change only the names or invitation ideas that don't fit your family.</p>   <div class="fbc-editor-list">
     {examples.map((item,i)=><fieldset data-editor={i}>
      <legend><span>0{i+1}</span> {item.headline}</legend>
      <label>From<input data-field="owner" maxlength="32" value={item.owner}/></label>
@@ -37,13 +38,15 @@ const examples=[
      <label>A little extra note<textarea data-field="idea" maxlength="180" rows="3">{item.idea}</textarea></label>
     </fieldset>)}
    </div>
+<button type="button" class="fbc-dialog-done" data-fbc-close>Done · See our cards</button></dialog>
+   <div class="fbc-actions"><a class="fbc-jump-edit" href="#february-edit-controls">Make changes</a>
    <button class="fbc-download" type="button" data-print>Print four invitations / Save PDF</button>
    <button type="button" class="fbc-png" data-single-page-png>Download image (PNG)</button>
    <button class="fbc-reset" type="button" data-reset>Restore suggested cards</button>
-   <p class="fbc-status" role="status" aria-live="polite" data-status>US Letter · Print at actual size, with background graphics enabled. Cut along the dotted lines.</p>
+   <p class="fbc-status" role="status" aria-live="polite" data-status>US Letter · Print at actual size, with background graphics enabled. Cut along the dotted lines.</p></div>
   </section>
-  <section class="fbc-preview-pane" aria-label="Printable connection card preview">
-   <div class="fbc-preview-heading"><h2>Your February connection cards</h2><span>One sheet · four invitations</span></div>
+  <section class="fbc-preview-pane" aria-label="Printable connection card preview"><button type="button" class="fbc-floating-edit" data-fbc-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+
    <div class="fbc-scroll">
     <div class="fbc-stage" data-fbc-stage><div class="fbc-paper">
      <div class="fbc-paper-top"><span>ORGANIZED FAMILY CLUB · FEBRUARY 2027</span><span>BETTER TOGETHER</span></div>
@@ -63,7 +66,7 @@ const examples=[
      <div class="fbc-paper-foot"><span>FOUR LITTLE WAYS TO SAY: I CHOOSE YOU.</span><span>HAND ONE TO SOMEONE YOU LOVE.</span></div>
     </div></div>
    </div>
-   <p class="fbc-preview-note">Four separate cut-apart invitations, ready for family members to give directly to each other. No distribution or scheduling needed.</p>
+
   </section>
  </div>
 </div>
@@ -128,6 +131,63 @@ const examples=[
 .fbc-png{display:block;width:100%;min-height:46px;margin-top:10px;padding:12px;border:1px solid #aaa;background:white;color:#454545;font:600 12px Montserrat,sans-serif;cursor:pointer}
 .fbc-png:disabled{opacity:.55;cursor:wait}
 .fbc.fbc-image-export .fbc-paper{transform:none!important;box-shadow:none!important;margin:0!important}
+
+/* February standard prepared-plan format, used only by public Club preview. */
+#club-month-content .fbc{max-width:none;margin:0;padding:0}
+#club-month-content .fbc-intro{display:none}
+#club-month-content .fbc-workspace{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+#club-month-content .fbc-editor-pane{min-width:0;background:#faf9f7;border-right:1px solid #e5e0e1;padding:15px clamp(17px,2vw,26px);display:flex;flex-direction:column}
+#club-month-content .fbc-editor-heading{border-top:5px solid var(--feb-accent);padding-top:10px}
+#club-month-content .fbc-editor-heading h2{font:400 clamp(23px,2.5vw,31px)/1.12 Georgia,serif;color:#9b6477;margin:9px 0}
+#club-month-content .fbc-editor-heading>p:last-child{font-size:12px;line-height:1.55}
+#club-month-content .fbc-prepared{flex:1 1 auto;min-height:0;overflow-y:auto;margin-top:15px;padding:14px;border:1px solid #e7dee1;background:#fff}
+#club-month-content .fbc-prepared h3{font:400 23px Georgia,serif;color:#9b6477;margin:10px 0}
+#club-month-content .fbc-prepared>p{font-size:12px;line-height:1.6;color:#5c5a57}
+#club-month-content .fbc-summary-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #ece2e5;font-size:12px}
+#club-month-content .fbc-summary-row strong{color:#9b6477;text-align:right}
+#club-month-content .fbc-edit-link{display:inline-flex;align-items:center;gap:8px;padding:8px 0;border:0;background:none;text-decoration:underline;color:#9b6477;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+#club-month-content .fbc-actions{flex:0 0 auto;margin-top:auto;padding-top:10px}
+#club-month-content .fbc-actions .fbc-download{margin:0;min-height:45px;padding:10px}
+#club-month-content .fbc-actions .fbc-png{min-height:34px;margin-top:7px}
+#club-month-content .fbc-actions .fbc-reset{min-height:30px;margin:4px auto}
+#club-month-content .fbc-status{flex:0 0 auto;font-size:10px}
+#club-month-content .fbc-preview-pane{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}
+#club-month-content .fbc-stage{margin:0 auto}
+#club-month-content .fbc-floating-edit,#club-month-content .fbc-jump-edit{display:none}
+#club-month-content .fbc-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(660px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px;border:1px solid #e3d4d9;border-radius:10px;background:white;color:#454545;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
+#club-month-content .fbc-dialog::backdrop{background:rgba(33,40,36,.52)}
+#club-month-content .fbc-dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+#club-month-content .fbc-dialog-heading h2{font:400 29px Georgia,serif;color:#9b6477;margin:8px 0}
+#club-month-content .fbc-dialog-heading button{flex:0 0 36px;width:36px;height:36px;border:0;border-radius:50%;background:#f8eff1;color:#9b6477;font-size:24px;cursor:pointer}
+#club-month-content .fbc-dialog>p{font:13px/1.6 Montserrat,Arial,sans-serif}
+#club-month-content .fbc-dialog .fbc-editor-list{margin-top:15px}
+#club-month-content .fbc-dialog-done{width:100%;min-height:46px;border:0;background:#9b6477;color:white;font-weight:700;cursor:pointer;margin-top:15px}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content .fbc),body:has(#club-month-content .fbc){height:100%;overflow:hidden}
+ #club-month-content:has(.fbc){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ #club-month-content .fbc,#club-month-content .fbc-workspace{height:100%}
+ #club-month-content .fbc-editor-pane{height:100%;overflow:hidden}
+ #club-month-content .fbc-preview-pane{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ #club-month-content .fbc-floating-edit{display:inline-flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;align-items:center;gap:9px;padding:13px 19px;min-height:52px;border:0;border-radius:999px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+}
+@media screen and (max-width:1100px){
+ #club-month-content .fbc{padding:0 0 40px}
+ #club-month-content .fbc-workspace{display:flex!important;flex-direction:column!important;gap:0}
+ #club-month-content .fbc-preview-pane{order:0;width:100%;padding:14px 14px 28px}
+ #club-month-content .fbc-editor-pane{order:1;max-width:none;width:100%;border:0;padding:20px}
+ #club-month-content .fbc-prepared{overflow:visible;flex:auto}
+}
+@media screen and (max-width:700px){
+ #club-month-content .fbc{padding-bottom:calc(145px + env(safe-area-inset-bottom,0px))}
+ #club-month-content .fbc-editor-pane{padding:17px 18px}
+ #club-month-content .fbc-prepared{scroll-margin-top:12px}
+ #club-month-content .fbc-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid #e3d4d9;background:#faf9f7;box-shadow:0 -5px 20px #0001;display:grid;grid-template-columns:1fr 1.3fr;gap:7px}
+ #club-month-content .fbc-jump-edit{display:flex;align-items:center;justify-content:center;min-height:45px;border:1px solid #9b6477;background:#fff;color:#9b6477;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}
+ #club-month-content .fbc-actions .fbc-download{min-width:0;font-size:12px;text-transform:none;letter-spacing:0}
+ #club-month-content .fbc-actions .fbc-png,#club-month-content .fbc-actions .fbc-reset{grid-column:1/-1}
+ #club-month-content .fbc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{#club-month-content .fbc-dialog,#club-month-content .fbc-floating-edit,#club-month-content .fbc-actions{display:none!important}}
 </style>
 <script>
 type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
@@ -138,6 +198,10 @@ const defaults:Card[]=[
  {owner:"Ana",recipient:"Mateo",headline:"Let's have fun!",invite:"Mateo, will you make a blanket fort with me?",idea:"I'll bring the blankets!"}
 ];
 for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
+ const editDialog=root.querySelector<HTMLDialogElement>('[data-fbc-dialog]');
+ root.querySelectorAll('[data-fbc-open]').forEach(button=>button.addEventListener('click',()=>editDialog?.showModal()));
+ root.querySelectorAll('[data-fbc-close]').forEach(button=>button.addEventListener('click',()=>editDialog?.close()));
+ editDialog?.addEventListener('click',event=>{if(event.target===editDialog)editDialog.close()});
  const stage=root.querySelector<HTMLElement>('[data-fbc-stage]');
  const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--fbc-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
