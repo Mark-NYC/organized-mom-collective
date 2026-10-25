@@ -158,7 +158,7 @@ for(const name of previewIconNames){
 }
 // June snack illustrations must follow the replacement PNG library, not legacy SVGs.
 // Fail clearly if a required snack image is absent rather than shipping a broken printable.
-const juneSnackNames=['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar'];
+const juneSnackNames=['yogurt-cup','apple','carrot','cucumber-sticks','mini-bagels','cheese-wedge','crackers','granola-bar'];
 const juneMissing=[];
 for(const name of juneSnackNames){
  const actual=iconAliases[name] || name;
