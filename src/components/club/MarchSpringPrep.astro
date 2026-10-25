@@ -33,7 +33,7 @@ const taskTypes:Record<string,string>={
  <p>The same five optional jobs from your cleaning companion, now prepared for independent ownership. Each person sees what to gather, what to do, and how to know the job is finished.</p></div>
  <div class="msc-workspace">
   <section class="msc-editor" aria-label="Prepared March spring project">
-   <div class="msc-editor-head"><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH</p><h2>Spring prep. <em>Everyone has a part.</em></h2><p class="msc-vision">Mom shouldn't have to plan every spring-cleaning job, explain every step, and check that it's finished. We've prepared five optional jobs with age-appropriate owners, supplies, and clear finish lines. Each person can take responsibility for their own job.</p></div>
+   <div class="msc-editor-head"><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH</p><h2>Spring prep. <em>Everyone has a part.</em></h2><button type="button" class="msc-vision-trigger" data-open-vision aria-haspopup="dialog">Why this matters <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div>
    <div class="msc-prepared">
     <div class="msc-summary-heading"><span>YOUR FAMILY'S PREPARED PLAN</span><p>Five ready-to-use jobs. Choose one, a few, or none this month.</p></div>
     <div class="msc-summary-jobs">
@@ -48,6 +48,11 @@ const taskTypes:Record<string,string>={
     <button type="button" class="msc-reset" data-reset>Restore suggested owners</button>
    </div>
   </section>
+  <dialog class="msc-dialog msc-vision-dialog" data-vision-dialog aria-labelledby="msc-vision-title">
+   <div class="msc-dialog-head"><div><span class="msc-overline">ORGANIZED FAMILY CLUB · MARCH</span><h2 id="msc-vision-title">Why this matters</h2></div><button type="button" class="msc-dialog-close" data-close-vision aria-label="Close introduction"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <p class="msc-vision-copy">Mom shouldn't have to plan every spring-cleaning job, explain every step, and check that it's finished. We've prepared five optional jobs with age-appropriate owners, supplies, and clear finish lines. Each person can take responsibility for their own job.</p>
+   <button type="button" class="msc-dialog-done" data-close-vision>Back to our plan</button>
+  </dialog>
   <dialog class="msc-dialog" data-owner-dialog aria-labelledby="msc-owner-title">
    <div class="msc-dialog-head"><div><span class="msc-overline">MARCH · FAMILY JOB OWNERSHIP</span><h2 id="msc-owner-title">Edit job assignments</h2></div><button type="button" class="msc-dialog-close" data-close-owners aria-label="Close assignment editor"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>Each job is optional. We've suggested an owner for each one based on your family. Change any name. Adults handle unsafe work.</p>
@@ -62,7 +67,7 @@ const taskTypes:Record<string,string>={
    <button type="button" class="msc-dialog-done" data-close-owners>Done · See our plan</button>
   </dialog>
   <section class="msc-preview" aria-label="March project print preview">
-   <div class="msc-preview-head"><h2>Our March project</h2><p>One sheet · shared family plan</p></div>
+   
    <div class="msc-print-scroll"><div class="msc-sheet-stage" data-sheet-stage><article class="msc-sheet" data-sheet>
     <header class="msc-sheet-head"><p>ORGANIZED FAMILY CLUB <span>· MARCH 2027</span></p><h2>Our Family <em>Spring Prep</em></h2><p>{project.description}</p></header>
     <div class="msc-sheet-family"><span>PREPARED FOR</span><strong data-family>Our Family</strong></div>
@@ -151,7 +156,7 @@ const taskTypes:Record<string,string>={
 
 /* March prepared-plan editor: same shell as April, with March-specific job assignments. */
 .msc-editor-head h2{font:400 clamp(25px,2.5vw,32px)/1.12 'MSC Gelasio',Georgia,serif;color:#3d6556;margin:9px 0}.msc-editor-head h2 em{font-weight:600}
-.msc-editor-head .msc-vision{font:12px/1.58 'MSC Montserrat',sans-serif;margin:7px 0 0}
+
 .msc-prepared{background:#fff;border:1px solid #dfebe3;padding:14px 15px}
 .msc-summary-heading>span{display:block;font-size:10px;font-weight:600;letter-spacing:.12em;color:#497666}
 .msc-summary-heading p{font-size:11px;line-height:1.45;margin:5px 0 11px;color:#686868}
@@ -176,19 +181,19 @@ const taskTypes:Record<string,string>={
  .msc-editor{display:flex;flex-direction:column;height:100%;overflow:hidden;padding:clamp(12px,1.4vh,19px) clamp(16px,2vw,27px);background:#faf9f7;border-right:1px solid #e5e0e7;max-width:none}
  .msc-editor-head{border-top-width:5px;padding-top:8px}
  .msc-editor-head h2{font-size:clamp(23px,2.9vh,30px)}
- .msc-editor-head .msc-vision{font-size:clamp(10px,1.35vh,12px);line-height:1.48}
+
  .msc-prepared{margin-top:clamp(9px,1.8vh,17px);padding:clamp(9px,1.35vh,14px) 13px}
  .msc-summary-heading p{margin-bottom:5px}
  .msc-summary-row{padding:clamp(4px,.7vh,9px) 0}
  .msc-optional{margin:clamp(6px,1vh,12px) 0}
  .msc-actions{padding-top:4px}
- .msc-preview{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;background:#f5f3f2;padding:20px clamp(18px,3vw,46px) 38px}
- .msc-preview-head{margin:0 0 14px;padding-bottom:12px}
+ .msc-preview{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;background:#f5f3f2;padding:14px clamp(18px,3vw,46px) 38px}
+
  .msc-print-scroll{justify-content:center}
 }
 @media screen and (min-width:1101px) and (max-height:750px){
  .msc-editor-head h2{font-size:23px}
- .msc-editor-head .msc-vision{font-size:10px;line-height:1.38}
+
  .msc-prepared{margin-top:6px;padding:8px 12px}
  .msc-summary-row{padding:3px 0}
  .msc-summary-heading p{margin:3px 0 5px}
@@ -210,7 +215,7 @@ const taskTypes:Record<string,string>={
  .msc-editor{padding:17px 18px 11px}
  .msc-editor-head{padding-top:10px;border-top-width:5px}
  .msc-editor-head h2{font-size:30px}
- .msc-editor-head .msc-vision{font-size:12px;line-height:1.52}
+
  .msc-prepared{padding:11px 13px}
  .msc-summary-row{padding:7px 0}
  .msc-optional{margin:9px 0 0}
@@ -223,6 +228,10 @@ const taskTypes:Record<string,string>={
 @media print{
  .msc-dialog,.msc-actions{display:none!important}
 }
+
+/* Shared monthly vision presentation standard: 14px copy, 1.65 line-height in a centered dialog. */
+.msc-vision-trigger{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;min-height:38px;padding:7px 0;margin:4px 0 1px;border:0;background:transparent;color:#3e6c5a;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:600 12px 'MSC Montserrat',sans-serif}
+.msc-vision-dialog .msc-vision-copy{font:400 14px/1.65 'MSC Montserrat',sans-serif;margin:3px 0 22px;color:#454545;letter-spacing:normal}
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
@@ -275,6 +284,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  const nav=document.querySelector<HTMLElement>('.cproto-shell');
  const positionShell=()=>{if(nav)document.documentElement.style.setProperty('--msc-nav-height',nav.getBoundingClientRect().bottom+'px')};
  positionShell();window.addEventListener('resize',positionShell);
+ const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
+ root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
+ root.querySelectorAll('[data-close-vision]').forEach(button=>button.addEventListener('click',()=>visionDialog?.close()));
+ visionDialog?.addEventListener('click',event=>{if(event.target===visionDialog)visionDialog.close()});
  const ownerDialog=root.querySelector<HTMLDialogElement>('[data-owner-dialog]');
  root.querySelector('[data-open-owners]')?.addEventListener('click',()=>ownerDialog?.showModal());
  root.querySelectorAll('[data-close-owners]').forEach(button=>button.addEventListener('click',()=>ownerDialog?.close()));
