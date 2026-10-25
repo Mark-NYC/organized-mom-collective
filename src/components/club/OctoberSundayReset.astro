@@ -169,7 +169,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   const cue=root.querySelector<HTMLElement>('[data-osr-cue]');if(cue)cue.textContent=state.trigger;
   const selected=root.querySelector<HTMLSelectElement>('[data-osr-trigger]');if(selected)selected.value=state.trigger;
   const leadSelect=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(leadSelect)leadSelect.value=lead()?.id??'';
-  const who=root.querySelector<HTMLElement>('[data-osr-lead-name]');if(who)who.textContent=(lead()?.firstName??'An adult')+' owns the follow-through';
+  const childFacingLead=()=>{const adult=lead();if(!adult)return 'the responsible adult';const parents=members.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner'));const index=parents.indexOf(adult);return index===0?'Mom':index===1?'Dad':adult.firstName;};
+   const who=root.querySelector<HTMLElement>('[data-osr-lead-name]');if(who)who.textContent=(lead()?.firstName??'An adult')+' owns the follow-through';
   const people=root.querySelector<HTMLElement>('[data-osr-people]');if(people){people.replaceChildren();for(const member of members.slice(0,9)){
    const entry=document.createElement('div');entry.className='osr-person'+(member.kind==='adult'?' osr-adult':'');
    const name=document.createElement('strong');name.textContent=member.firstName;
@@ -185,8 +186,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
     div.append(label,input);editor.append(div);
   }}
   const childCount=members.filter(m=>m.kind==='child').length;
-  const clothes=root.querySelector<HTMLElement>('[data-osr-clothes]');if(clothes)clothes.textContent=childCount?'Kids try on their coats, jackets and shoes; little ones have adult help. Anything too small is reported to '+(lead()?.firstName??'the responsible adult')+'.':'Check jackets, shoes and layers for cooler mornings; set aside anything that needs replacing.';
-  const gear=root.querySelector<HTMLElement>('[data-osr-gear]');if(gear)gear.textContent='Each person checks what they need for school, work, or activities this week. Prepare what is clean and ready; tell '+(lead()?.firstName??'the responsible adult')+' about gaps.';
+  const clothes=root.querySelector<HTMLElement>('[data-osr-clothes]');if(clothes)clothes.textContent=childCount?'Kids try on their coats, jackets and shoes; little ones have adult help. Anything too small is reported to '+childFacingLead()+'.':'Check jackets, shoes and layers for cooler mornings; set aside anything that needs replacing.';
+  const gear=root.querySelector<HTMLElement>('[data-osr-gear]');if(gear)gear.textContent='Each person checks what they need for school, work, or activities this week. Prepare what is clean and ready; tell '+childFacingLead()+' about gaps.';
   const home=root.querySelector<HTMLElement>('[data-osr-home]');if(home)home.textContent='Give coats, shoes, bags and outdoor gear a reachable home so everyone can find and put away their own things.';
  };
  root.querySelector<HTMLSelectElement>('[data-osr-trigger]')?.addEventListener('change',e=>{state.trigger=(e.target as HTMLSelectElement).value;save();paint()});
