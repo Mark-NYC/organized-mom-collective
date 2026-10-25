@@ -1,11 +1,11 @@
 ---
-/** February 2027: four personalized invitations to connection, designed to stay visible in a shared space.
+/** February 2027: four personalized invitations to connection, designed to be handed directly to someone loved.
  * One US Letter four-up cut sheet. Same Gelasio/Montserrat editorial system as Nov–Jan.
  * The card is an invitation anyone can initiate, not an activity for Mom to coordinate.
  */
 import {monthColors} from '../../theme';
 interface Props { storageKey?: string }
-const {storageKey='omc:club:february-connection:v1'}=Astro.props;
+const {storageKey='omc:club:february-connection:v2'}=Astro.props;
 const examples=[
  {owner:"Sofia",recipient:"Dad",headline:"Game night?",invite:"Dad, will you play a game with me tonight?",idea:"I'll get the game ready!"},
  {owner:"Mateo",recipient:"Mom",headline:"Just us two",invite:"Mom, will you read a book with me after dinner?",idea:"I'll pick the book!"},
@@ -144,7 +144,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
   cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;out.textContent=values[i][field]||' ';}));
 
  };
- editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;values[i][field]=input.value.slice(0,180);save();draw()})));
+ editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;const previous=values[i].recipient;const oldInvite=values[i].invite;values[i][field]=input.value.slice(0,180);if(field==='recipient'&&previous&&oldInvite.startsWith(previous+','))values[i].invite=values[i].recipient+oldInvite.slice(previous.length);save();draw()})));
 
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
@@ -164,7 +164,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
    if(v.owner===automatic[i]?.owner||v.owner===defaults[i].owner)v.owner=next[i].owner;
    if(v.recipient===automatic[i]?.recipient||v.recipient===defaults[i].recipient)v.recipient=next[i].recipient;
    const initial=defaults[i];
-   if(v.invite===initial.invite || v.invite===initial.invite.replace(initial.recipient,next[i].recipient))v.invite=initial.invite.replace(initial.recipient,next[i].recipient);
+   if(v.invite===initial.invite || v.invite.startsWith((automatic[i]?.recipient??initial.recipient)+','))v.invite=next[i].recipient+initial.invite.slice(initial.recipient.length);
   });
   automatic=next;save();draw();
  });
