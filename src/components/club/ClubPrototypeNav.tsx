@@ -41,7 +41,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
  useEffect(()=>{
   try{sessionStorage.setItem(SAMPLE_SESSION,sample)}catch{}
   const store=sampleStore(sample);
-  store?.household().then(h=>{setHousehold(h);window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:h,sample}}))})
+  store?.household().then(h=>{setHousehold(h);const detail={household:h,sample};(window as Window & {__ofcPreviewHousehold?:typeof detail}).__ofcPreviewHousehold=detail;window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail}))})
    .catch(()=>setStatus('Unable to load the sample family.'));
  },[sample]);
  // Keep both fixed preview panels aligned with the live navigation height.
@@ -89,7 +89,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
     {household?<FamilyForm key={sample+'-'+household.profileVersion} household={household} mode="edit" submitLabel="Save our family" onSave={async input=>{
       const updated=await sampleStore(sample)!.saveHousehold(input);
       setHousehold(updated);setStatus('Saved for all monthly previews in this browser tab.');
-      window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:updated,sample}}));
+      const detail={household:updated,sample};(window as Window & {__ofcPreviewHousehold?:typeof detail}).__ofcPreviewHousehold=detail;window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail}));
      }}/>:<p>Loading family settings…</p>}
     {status&&<p role="status" className="cproto-status">{status}</p>}
     <button type="button" className="cproto-return" onClick={()=>setTab('kits')}>← Back to {month[0].toUpperCase()+month.slice(1)} kit</button>
