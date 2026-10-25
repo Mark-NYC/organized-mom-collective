@@ -3,7 +3,7 @@
  * Uses the existing FamilyForm and Club sample store, not a second profile model.
  * Previews remain explicitly demos: family changes stay in this tab.
  */
-import {useEffect,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import FamilyForm from './FamilyForm';
 import {sampleHouseholds} from '../../data/club/samples';
 import {sampleStore} from '../../lib/club/store';
@@ -29,6 +29,7 @@ const selected=()=>{try{const q=new URLSearchParams(location.search).get('sample
 
 export default function ClubPrototypeNav({month}:{month:'november'|'december'|'january'|'february'|'march'|'april'|'may'|'june'|'july'|'august'|'september'|'october'}){
  const [sample,setSample]=useState(selected);
+ const shellRef=useRef<HTMLDivElement>(null);
  const [tab,setTab]=useState<'kits'|'family'>('kits');
  const [household,setHousehold]=useState<Household|null>(null);
  const [status,setStatus]=useState('');
@@ -43,8 +44,23 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
   store?.household().then(h=>{setHousehold(h);window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:h,sample}}))})
    .catch(()=>setStatus('Unable to load the sample family.'));
  },[sample]);
+ // Keep both fixed preview panels aligned with the live navigation height.
+ useLayoutEffect(()=>{
+  const shell=shellRef.current;
+  if(!shell)return;
+  const sync=()=>{
+   const bottom=Math.ceil(shell.getBoundingClientRect().bottom)+'px';
+   document.documentElement.style.setProperty('--msc-nav-height',bottom);
+   document.documentElement.style.setProperty('--adc-nav-height',bottom);
+  };
+  sync();
+  const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(sync):null;
+  observer?.observe(shell);
+  window.addEventListener('resize',sync);
+  return ()=>{observer?.disconnect();window.removeEventListener('resize',sync)};
+ },[tab]);
  const href=(url:string)=>url+'?sample='+encodeURIComponent(sample);
- return <div className="cproto-shell" data-club-chrome>
+ return <div ref={shellRef} className="cproto-shell" data-club-chrome>
   <header className="cproto-top">
    <div className="cproto-inner">
     <a className="cproto-brand" href="/club">Organized Family Club</a>
