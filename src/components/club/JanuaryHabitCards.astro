@@ -209,6 +209,9 @@ const defaults = [
   {name:'Our kitchen',anchor:'After we finish dinner',action:'We clear the table together.',place:'By the kitchen table'}
 ];
 for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
+ const stage=root.querySelector<HTMLElement>('[data-jhc-stage]');
+ const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--jhc-scale',String(scale))};
+ fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
  const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v1';
  // Family names never go into persistent localStorage on signed-in Club pages.
  const storage = key.startsWith('omc:club:') ? sessionStorage : localStorage;
