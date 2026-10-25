@@ -36,7 +36,8 @@ const defaults = [
     </div>
     <div class="jhc-actions">
       <button class="jhc-print" type="button" data-print>Print cards / Save PDF</button>
-      <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
+      <button type="button" class="jhc-png" data-single-page-png>Download image (PNG)</button>
+   <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
     </div>
     <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
   </div>
@@ -200,6 +201,10 @@ const defaults = [
 .jhc-print-scroll{overflow:visible!important;display:block!important;height:auto!important}
 @media(max-width:1080px){.jhc-workspace{display:flex!important;flex-direction:column!important}.jhc-preview-panel{order:0;width:100%;min-width:0}.jhc-config{order:1;width:100%;max-width:720px}}
 @media print{.jhc-stage{position:static!important;width:8.5in!important;height:11in!important}.jhc-stage .jhc-page{position:absolute!important;transform:none!important}}
+
+.jhc-png{display:block;width:100%;min-height:46px;margin-top:10px;padding:12px;border:1px solid #aaa;background:white;color:#454545;font:600 12px Montserrat,sans-serif;cursor:pointer}
+.jhc-png:disabled{opacity:.55;cursor:wait}
+.jhc.jhc-image-export [data-jhc-page]{transform:none!important;box-shadow:none!important;margin:0!important}
 </style>
 <script>
 const defaults = [
@@ -256,6 +261,21 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   paint();
  });
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
+  const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
+  const sheet=root.querySelector<HTMLElement>("[data-jhc-page]");
+  if(!button||!sheet)return;
+  button.disabled=true;const old=button.textContent;button.textContent='Preparing image…';
+  root.classList.add('jhc-image-export');
+  try{
+   await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   const {toPng}=await import('html-to-image');
+   const png=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',margin:'0',boxShadow:'none'}});
+   const link=document.createElement('a');link.href=png;link.download="january-family-habit-cards.png";link.click();
+  }catch(error){console.error('Single-page image export failed',error);alert('Image download failed. Please use Print / Save PDF instead.')}
+  finally{root.classList.remove('jhc-image-export');button.disabled=false;button.textContent=old}
+ });
+ 
  paint();
 }
 </script>
