@@ -1,0 +1,154 @@
+---
+/** October's two-sided, age-tailored family-ready printout. */
+interface Props {storageKey?:string}
+const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
+---
+<div class="osr" data-osr-key={storageKey}>
+ <header class="osr-intro">
+  <a href="/club">← Organized Family Club</a>
+  <p class="osr-kicker">ORGANIZED FAMILY CLUB · OCTOBER 2027</p>
+  <h1>Raise a family that <em>thinks ahead.</em></h1>
+  <p>One family rhythm for every Sunday, plus a one-time fall readiness check. Everyone learns to notice what is coming, prepare what they need, and own their part.</p>
+ </header>
+ <div class="osr-layout">
+  <aside class="osr-editor">
+   <p class="osr-kicker">YOUR FAMILY'S OCTOBER TOOL</p><h2>Already prepared.</h2>
+   <p>Choose a Sunday cue. Your family members and their age-appropriate responsibilities are filled in from the selected household. Only adjust what needs to change.</p>
+   <label>Sunday Reset happens
+    <select data-osr-trigger>
+     <option value="Every Sunday after lunch">Every Sunday after lunch</option>
+     <option value="Every Sunday after breakfast">Every Sunday after breakfast</option>
+     <option value="Every Sunday before dinner">Every Sunday before dinner</option>
+     <option value="Every Sunday after church">Every Sunday after church</option>
+     <option value="Every Sunday at our weekly family check-in">Every Sunday at our weekly family check-in</option>
+    </select>
+   </label>
+   <label>Adult who handles unresolved needs <select data-osr-lead><option value="">First available adult</option></select></label>
+   <details><summary>Adjust family assignments <span>Optional</span></summary>
+    <p>Each person's job should be theirs to begin and finish, without Mom directing each step.</p>
+    <div data-osr-edit-assignments></div>
+   </details>
+   <div class="osr-note"><strong>One Sunday. Three questions.</strong><p>The wall calendar remains the plan. This page helps everyone use it. Adults own transportation, purchases, safety, and problems children can't solve themselves.</p></div>
+   <button class="osr-primary" type="button" data-osr-print>Print both sides / Save PDF</button>
+   <button class="osr-secondary" type="button" data-osr-png>Download Sunday Reset (PNG)</button>
+   <button class="osr-reset" type="button" data-osr-restore>Restore prepared version</button>
+   <p class="osr-small">One double-sided 8.5 × 11-inch sheet. Print on both sides, flip on long edge. Preview edits stay in this browser tab.</p>
+  </aside>
+  <section class="osr-preview">
+   <div class="osr-preview-heading"><h2>October's printed tool</h2><span>Front: every Sunday · Back: once this fall</span></div>
+   <div class="osr-stage" data-osr-stage>
+    <div class="osr-pages" data-osr-pages>
+     <article class="osr-paper osr-front" data-osr-front>
+      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Sunday Reset</h2><span data-osr-family>A family that prepares together</span></header>
+      <section class="osr-cue"><span>OUR WEEKLY MOMENT</span><strong data-osr-cue>Every Sunday after lunch</strong><p>Open our wall calendar together. Then each person prepares their part.</p></section>
+      <div class="osr-three">
+       <div><img src="/images/club/icon-library/book.png" alt="" width="74" height="74"/><span>01</span><strong>What's coming?</strong><p>Look at this week's calendar.</p></div>
+       <div><img src="/images/club/icon-library/backpack.png" alt="" width="74" height="74"/><span>02</span><strong>What will I need?</strong><p>Think about clothes, gear, and help.</p></div>
+       <div><img src="/images/club/icon-library/basket.png" alt="" width="74" height="74"/><span>03</span><strong>What can I prepare?</strong><p>Get it ready or tell the right person.</p></div>
+      </div>
+      <div class="osr-people-head"><h3>Everyone has a part</h3><span>START IT · FINISH IT · CHECK IT</span></div>
+      <div class="osr-people" data-osr-people><div class="osr-person"><strong>Our family</strong><p>Check the calendar and prepare what you need.</p></div></div>
+      <div class="osr-finish"><strong>WE'RE READY WHEN…</strong><p>Everyone knows the week ahead, has prepared their things, and has told the responsible adult what still needs attention.</p></div>
+      <footer class="osr-foot"><strong>Notice. Prepare. Take ownership.</strong><span>OUR FAMILY'S SUNDAY RHYTHM</span></footer>
+     </article>
+     <article class="osr-paper osr-back" data-osr-back>
+      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Fall Readiness Check</h2><span>Do once. Then use Sunday's reset to stay ready.</span></header>
+      <section class="osr-fall-intro"><strong>THIS WEEK'S FAMILY HANDOFF</strong><p>Before colder mornings catch us off guard, everyone checks what belongs to them. If something needs replacing, the adult named below owns the follow-through.</p></section>
+      <div class="osr-fall-sections">
+       <section><img src="/images/club/icon-library/coat.png" alt="" width="76" height="76"/><div><h3>Clothes for cooler mornings</h3><p data-osr-clothes>Each child tries on their jacket and shoes. Set aside things that don't fit.</p></div></section>
+       <section><img src="/images/club/icon-library/backpack.png" alt="" width="76" height="76"/><div><h3>School and activity gear</h3><p data-osr-gear>Check backpacks, water bottles, and the gear needed for this week's activities.</p></div></section>
+       <section><img src="/images/club/icon-library/home.png" alt="" width="76" height="76"/><div><h3>A home for everything</h3><p data-osr-home>Make sure coats, bags, and shoes have an easy-to-reach place to land.</p></div></section>
+      </div>
+      <section class="osr-own"><span>WHO HANDLES WHAT STILL NEEDS ATTENTION?</span><h3 data-osr-lead-name>Our designated adult</h3><p>Repairs, purchases, missing supplies, and other adult decisions go here, not automatically to Mom.</p></section>
+      <div class="osr-notes"><h3>Make it work without Mom directing it</h3><p><strong>First Sunday:</strong> Show kids how to look ahead on the calendar, find their items, and spot a problem. Help little ones with their first check.</p><p><strong>Next Sundays:</strong> Use the same cue. Adults model their own preparation. Ask each child to show what's ready rather than repeatedly telling them what to do.</p><p><strong>If something is missing:</strong> Tell the adult owner. They decide and follow through. Don't hand the entire problem back to Mom.</p></div>
+      <footer class="osr-foot"><strong>We learn to think ahead together.</strong><span>ONE FALL CHECK · ONE LASTING FAMILY RHYTHM</span></footer>
+     </article>
+    </div>
+   </div>
+  </section>
+ </div>
+</div>
+<style is:global>
+.osr,.osr *{box-sizing:border-box}.osr{max-width:1480px;margin:0 auto;padding:27px clamp(18px,3.5vw,52px) 70px;font-family:Montserrat,Arial,sans-serif;color:#484941}
+.osr-intro{max-width:790px;margin-bottom:34px}.osr-intro>a{font-size:12px;color:#43493f;display:inline-block;margin-bottom:25px}.osr-kicker{font-size:10px!important;letter-spacing:.15em;font-weight:700;color:#718569}.osr-intro h1{font:400 clamp(38px,4.4vw,60px)/1.14 Georgia,serif;margin:12px 0}.osr-intro h1 em{color:#788e72}.osr-intro>p:last-child{font-size:15px;line-height:1.75}
+.osr-layout{display:grid;grid-template-columns:minmax(275px,350px) minmax(0,1fr);gap:clamp(25px,4vw,60px);align-items:start}
+.osr-editor{border-top:8px solid #d8e6df;padding-top:16px}.osr-editor h2{font:italic 30px Georgia,serif;color:#668075;margin:10px 0}.osr-editor>p:nth-of-type(2){font-size:13px;line-height:1.75}.osr-editor label{display:block;font-size:12px;font-weight:700;margin:17px 0}.osr-editor select,.osr-editor input{display:block;width:100%;min-height:44px;padding:9px;border:1px solid #b8c5bd;background:white;color:#424c43;font:12px Montserrat,Arial,sans-serif;margin-top:8px}
+.osr-editor details{border:1px solid #d7e1dc;border-radius:6px;margin:21px 0;padding:0 13px}.osr-editor summary{padding:15px 0;font-size:13px;font-weight:700;cursor:pointer}.osr-editor details>p{font-size:11px;line-height:1.6}.osr-edit-entry{border-top:1px solid #e2e8e3;padding:10px 0}.osr-edit-entry label{margin:0 0 8px;font-size:11px}.osr-edit-entry input{margin-top:5px}.osr-note{background:#f3f5ef;padding:17px;margin:20px 0}.osr-note strong{font:21px Georgia,serif}.osr-note p{font-size:11px;line-height:1.7;margin:7px 0 0}
+.osr-primary,.osr-secondary{width:100%;min-height:48px;cursor:pointer;font-size:12px;font-weight:700}.osr-primary{background:#5f7767;border:0;color:#fff}.osr-secondary{border:1px solid #b7c9bc;color:#5f7767;background:white;margin-top:9px}.osr-reset{border:0;text-decoration:underline;background:none;color:#607867;font-size:12px;cursor:pointer;min-height:40px;display:block;margin:8px auto}.osr-small{font-size:11px;line-height:1.65;color:#858982}
+.osr-preview{min-width:0}.osr-preview-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid #e1e6e3;margin-bottom:17px}.osr-preview-heading h2{font:26px Georgia,serif}.osr-preview-heading span{font-size:11px;color:#858982}
+.osr-stage{width:100%;min-width:0}.osr-pages{display:flex;flex-direction:column;gap:22px;align-items:flex-start}.osr-paper{position:relative;width:816px;height:1056px;transform:scale(var(--osr-scale,1));transform-origin:top left;flex-shrink:0;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002;background:#fff;padding:36px 48px 28px;display:flex;flex-direction:column;overflow:hidden}
+.osr-paper-head{text-align:center;border-top:7px solid #deeae4;padding:12px 14px 14px}.osr-paper-head>p{font-size:10px;color:#7c9085;letter-spacing:.15em;font-weight:700;margin:0}.osr-paper-head h2{font:400 45px/1.1 Georgia,serif;color:#506255;margin:12px 0 8px}.osr-paper-head span{font:italic 17px Georgia,serif;color:#849487}
+.osr-cue{background:#e4eee6;border-radius:10px;text-align:center;padding:18px;margin-top:17px}.osr-cue span,.osr-fall-intro strong,.osr-own span{font-size:10px;color:#59765e;letter-spacing:.12em;font-weight:700}.osr-cue strong{display:block;color:#456249;font:27px Georgia,serif;margin:7px 0}.osr-cue p{font-size:12px;color:#647867;margin:0}
+.osr-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.osr-three>div{background:#faf4e7;border-radius:10px;padding:13px 10px;text-align:center;min-height:185px}.osr-three>div:nth-child(2){background:#f3e7e1}.osr-three>div:nth-child(3){background:#e9f0e7}.osr-three img{width:70px;height:70px;object-fit:contain;display:block;margin:0 auto 3px}.osr-three span{display:block;font:italic 13px Georgia,serif;color:#8f9986}.osr-three strong{display:block;font:19px Georgia,serif;color:#52685a;margin:3px 0 6px}.osr-three p{font-size:11px;line-height:1.45;margin:0;color:#67736a}
+.osr-people-head{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid #e2e7e0;gap:10px}.osr-people-head h3{font:26px Georgia,serif;color:#52685a;margin:8px 0}.osr-people-head span{font-size:9px;letter-spacing:.11em;font-weight:700;color:#8a958b}
+.osr-people{display:grid;gap:5px;margin-top:9px}.osr-person{display:grid;grid-template-columns:114px 1fr;align-items:center;gap:13px;background:#f6f7f3;border-radius:6px;padding:9px 14px;min-height:48px}.osr-person strong{font:600 13px Montserrat,Arial,sans-serif;color:#47634e}.osr-person p{font:12px/1.45 Montserrat,Arial,sans-serif;margin:0;color:#555f55}.osr-person.osr-adult{background:#e8eee8}
+.osr-finish{margin-top:15px;border:1px solid #d6e3d8;border-radius:9px;padding:13px 17px;text-align:center}.osr-finish strong{font-size:10px;letter-spacing:.1em;color:#64856a}.osr-finish p{font-size:12px;line-height:1.55;margin:6px 0 0;color:#5d705f}
+.osr-foot{margin-top:auto;padding-top:14px;border-top:1px solid #e1e9e0;text-align:center}.osr-foot strong{font:italic 20px Georgia,serif;color:#65806c}.osr-foot span{display:block;font-size:9px;letter-spacing:.12em;font-weight:700;color:#98a99b;margin-top:9px}
+.osr-fall-intro{background:#edf3ec;padding:18px 21px;margin-top:20px;border-radius:9px}.osr-fall-intro p{font-size:12px;line-height:1.6;color:#627368;margin:7px 0 0}.osr-fall-sections{display:grid;gap:12px;margin:18px 0}.osr-fall-sections section{display:grid;grid-template-columns:90px 1fr;align-items:center;gap:16px;border-radius:9px;padding:14px 17px;background:#faf5e9}.osr-fall-sections section:nth-child(2){background:#f2eae5}.osr-fall-sections section:nth-child(3){background:#eaf0e9}.osr-fall-sections img{width:76px;height:76px;object-fit:contain}.osr-fall-sections h3{font:23px Georgia,serif;color:#556c57;margin:0 0 7px}.osr-fall-sections p{font-size:12px;line-height:1.55;color:#5e685e;margin:0}.osr-own{background:#e4eee6;padding:18px 21px;border-radius:9px}.osr-own h3{font:25px Georgia,serif;color:#4b6651;margin:6px 0}.osr-own p{font-size:12px;line-height:1.55;color:#647467;margin:0}
+.osr-notes{padding:12px 8px}.osr-notes h3{font:23px Georgia,serif;color:#546957;margin:9px 0}.osr-notes p{font-size:12px;line-height:1.55;color:#606a60;margin:8px 0}
+.osr.osr-export .osr-paper{transform:none!important;box-shadow:none!important;margin:0!important}
+@media(max-width:1050px){.osr-layout{display:flex;flex-direction:column}.osr-preview{order:0;width:100%}.osr-editor{order:1;max-width:720px;width:100%}}
+@page{size:letter portrait;margin:0}
+@media print{html,body{margin:0!important;padding:0!important;background:white!important}body *{visibility:hidden!important}.osr-pages,.osr-paper,.osr-paper *{visibility:visible!important}.osr-pages{display:block!important;position:absolute!important;top:0!important;left:0!important;width:8.5in!important;gap:0!important}.osr-paper{position:relative!important;top:auto!important;left:auto!important;width:8.5in!important;height:11in!important;page-break-after:always!important;break-after:page!important;transform:none!important;margin:0!important;border:0!important;box-shadow:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.osr-paper:last-child{page-break-after:auto!important;break-after:auto!important}}
+</style>
+<script>
+type Member={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number;role?:string;isAccountHolder?:boolean};
+type Household={id:string;displayName?:string;members?:Member[]};
+type State={trigger:string;leadId:string;assignments:Record<string,string>};
+const defaultTrigger='Every Sunday after lunch';
+const ageOf=(m:Member)=>m.birthYear?Math.max(1,2027-m.birthYear-((m.birthMonth??1)>10?1:0)):8;
+const assigned=(m:Member)=>m.kind!=='child'?'Review the calendar, own logistics and any follow-through that needs an adult.':ageOf(m)<=4?'Find my coat and shoes with a grown-up.':ageOf(m)<=7?'Find my backpack, choose Monday clothes, and put shoes by the door.':ageOf(m)<=11?'Check the week, prepare school bag, clothes and activity gear.':'Review this week’s plans, prepare my own gear and flag any unmet needs.';
+for(const root of document.querySelectorAll<HTMLElement>('.osr')){
+ const storageKey=root.dataset.osrKey??'omc:preview:october-sunday-reset:v1';
+ let current='',members:Member[]=[];
+ let state:State={trigger:defaultTrigger,leadId:'',assignments:{}};
+ const stage=root.querySelector<HTMLElement>('[data-osr-stage]');
+ const pages=root.querySelector<HTMLElement>('[data-osr-pages]');
+ const sheets=Array.from(root.querySelectorAll<HTMLElement>('.osr-paper'));
+ const fit=()=>{if(!stage||!pages)return;const scale=Math.min(1,Math.max(180,stage.clientWidth-2)/816);pages.style.gap=22*scale+'px';for(const sheet of sheets){sheet.style.setProperty('--osr-scale',String(scale));sheet.style.marginBottom=-(1056*(1-scale))+'px';sheet.style.marginRight=-(816*(1-scale))+'px'}};
+ fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
+ const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({current,state}))}catch{}};
+ const fillAssignments=()=>{for(const member of members)if(!state.assignments[member.id])state.assignments[member.id]=assigned(member)};
+ const lead=()=>members.find(m=>m.id===state.leadId&&m.kind==='adult')??members.find(m=>m.kind==='adult');
+ const paint=()=>{
+  const family=root.querySelector<HTMLElement>('[data-osr-family]');if(family)family.textContent='A weekly rhythm for '+(members.length?members.map(m=>m.firstName).slice(0,2).join(' & ')+(members.length>2?' and family':''):'our family');
+  const cue=root.querySelector<HTMLElement>('[data-osr-cue]');if(cue)cue.textContent=state.trigger;
+  const selected=root.querySelector<HTMLSelectElement>('[data-osr-trigger]');if(selected)selected.value=state.trigger;
+  const leadSelect=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(leadSelect)leadSelect.value=lead()?.id??'';
+  const who=root.querySelector<HTMLElement>('[data-osr-lead-name]');if(who)who.textContent=(lead()?.firstName??'An adult')+' owns the follow-through';
+  const people=root.querySelector<HTMLElement>('[data-osr-people]');if(people){people.replaceChildren();for(const member of members.slice(0,9)){
+   const entry=document.createElement('div');entry.className='osr-person'+(member.kind==='adult'?' osr-adult':'');
+   const name=document.createElement('strong');name.textContent=member.firstName;
+   const job=document.createElement('p');job.textContent=state.assignments[member.id]??assigned(member);
+   entry.append(name,job);people.append(entry);
+  }if(members.length===0){const empty=document.createElement('div');empty.className='osr-person';empty.textContent='Choose a preview family to see prepared assignments.';people.append(empty)}}
+  const editor=root.querySelector<HTMLElement>('[data-osr-edit-assignments]');
+  if(editor){editor.replaceChildren();for(const member of members){
+    const div=document.createElement('div');div.className='osr-edit-entry';
+    const label=document.createElement('label');label.textContent=member.firstName+' — weekly preparation';
+    const input=document.createElement('input');input.type='text';input.maxLength=105;input.value=state.assignments[member.id]??assigned(member);
+    input.addEventListener('input',()=>{state.assignments[member.id]=input.value.slice(0,105);save();const row=Array.from(root.querySelectorAll<HTMLElement>('.osr-person')).find(x=>x.querySelector('strong')?.textContent===member.firstName);if(row)row.querySelector('p')!.textContent=input.value});
+    div.append(label,input);editor.append(div);
+  }}
+  const childCount=members.filter(m=>m.kind==='child').length;
+  const clothes=root.querySelector<HTMLElement>('[data-osr-clothes]');if(clothes)clothes.textContent=childCount?'Kids try on their coats, jackets and shoes; little ones have adult help. Anything too small is reported to '+(lead()?.firstName??'the responsible adult')+'.':'Check jackets, shoes and layers for cooler mornings; set aside anything that needs replacing.';
+  const gear=root.querySelector<HTMLElement>('[data-osr-gear]');if(gear)gear.textContent='Each person checks what they need for school, work, or activities this week. Prepare what is clean and ready; tell '+(lead()?.firstName??'the responsible adult')+' about gaps.';
+  const home=root.querySelector<HTMLElement>('[data-osr-home]');if(home)home.textContent='Give coats, shoes, bags and outdoor gear a reachable home so everyone can find and put away their own things.';
+ };
+ root.querySelector<HTMLSelectElement>('[data-osr-trigger]')?.addEventListener('change',e=>{state.trigger=(e.target as HTMLSelectElement).value;save();paint()});
+ root.querySelector<HTMLSelectElement>('[data-osr-lead]')?.addEventListener('change',e=>{state.leadId=(e.target as HTMLSelectElement).value;save();paint()});
+ root.querySelector('[data-osr-restore]')?.addEventListener('click',()=>{state={trigger:defaultTrigger,leadId:members.find(m=>m.kind==='adult'&&!m.isAccountHolder)?.id??members.find(m=>m.kind==='adult')?.id??'',assignments:{}};fillAssignments();save();paint()});
+ root.querySelector('[data-osr-print]')?.addEventListener('click',()=>window.print());
+ const png=root.querySelector<HTMLButtonElement>('[data-osr-png]');png?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-osr-front]');if(!front)return;png.disabled=true;const original=png.textContent;png.textContent='Preparing image…';root.classList.add('osr-export');
+  try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const uri=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.download='our-sunday-reset.png';link.href=uri;link.click()}catch(error){console.error(error);alert('Image download failed. Please use Print / Save PDF instead.')}finally{root.classList.remove('osr-export');png.disabled=false;png.textContent=original}});
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const detail=(event as CustomEvent<{household:Household;sample:string}>).detail;if(!detail?.household)return;
+  const key=detail.sample+':'+detail.household.id;members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
+  if(key!==current){current=key;state={trigger:defaultTrigger,leadId:members.find(m=>m.kind==='adult'&&!m.isAccountHolder)?.id??members.find(m=>m.kind==='adult')?.id??'',assignments:{}};try{const previous=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(previous?.current===key&&previous.state&&typeof previous.state.trigger==='string'&&typeof previous.state.assignments==='object')state=previous.state}catch{}}
+  if(!members.some(m=>m.id===state.leadId&&m.kind==='adult'))state.leadId=members.find(m=>m.kind==='adult')?.id??'';
+  fillAssignments();
+  const select=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(select){select.replaceChildren();for(const adult of members.filter(m=>m.kind==='adult')){const item=document.createElement('option');item.value=adult.id;item.textContent=adult.firstName;select.append(item)}}save();paint();
+ });
+ paint();
+}
+</script>
