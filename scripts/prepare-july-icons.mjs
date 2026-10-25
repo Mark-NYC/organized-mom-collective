@@ -154,9 +154,27 @@ for(const name of previewIconNames){
  await sharp(input,{density:300}).resize({width:420,height:420,fit:'contain',background:'#00000000'})
   .extend({top:46,bottom:46,left:46,right:46,background:'#00000000'})
   .png().toFile(out);
- if(snacks.has(name))await copyFile(out,join(snackDir,name+'.png'));
+ // June snacks are prepared independently from their current PNG sources below.
 }
-console.log('Prepared '+previewIconNames.length+' August v3 and '+snacks.size+' June v2 PNG icons.');
+// June snack illustrations must follow the replacement PNG library, not legacy SVGs.
+// Fail clearly if a required snack image is absent rather than shipping a broken printable.
+const juneSnackNames=['yogurt-cup','apple','carrot','cheese-wedge','crackers','granola-bar'];
+const juneMissing=[];
+for(const name of juneSnackNames){
+ const actual=iconAliases[name] || name;
+ const preferred=join(pngRoot,name+'.png');
+ const renamed=join(pngRoot,actual+'.png');
+ const input=await exists(preferred) ? preferred : await exists(renamed) ? renamed : null;
+ if(!input){juneMissing.push(name+' (expected '+actual+'.png)');continue;}
+ const output=join(snackDir,name+'.png');
+ await sharp(input).rotate().resize({width:420,height:420,fit:'contain',background:'#00000000'})
+  .extend({top:46,bottom:46,left:46,right:46,background:'#00000000'})
+  .png().toFile(output);
+ console.log('June snack: '+name+'.png <- '+input.slice(root.length+1));
+}
+if(juneMissing.length)throw Error('Missing June snack PNGs: '+juneMissing.join(', '));
+console.log('Prepared '+juneSnackNames.length+' June snack PNGs.');
+console.log('Prepared August v3 icon previews.');
 
 
  // Shared reusable art for May, January, February and July Club previews.
