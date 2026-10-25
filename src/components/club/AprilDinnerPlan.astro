@@ -164,11 +164,37 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
  .adc-sheet{position:relative!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;box-shadow:none!important;border:0!important;page-break-after:always!important;break-after:page!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
  .adc-sheet:last-child{page-break-after:auto!important;break-after:auto!important}
 }
+/* April desktop experiment: one fixed, non-scrolling sidebar and one scrolling preview. */
 @media screen and (min-width:1101px){
- .adc-layout{align-items:start;grid-template-columns:minmax(290px,360px) minmax(0,1fr)}
- .adc-controls{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:10px}
- .adc-view{height:calc(100vh - 40px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:12px}
- .adc-view-title{position:sticky;top:0;z-index:2;background:#fff;padding-top:10px}
+ html:has(.adc),body:has(.adc){height:100%;overflow:hidden}
+ #club-month-content:not([hidden]){position:fixed;top:var(--adc-nav-height,180px);bottom:0;left:0;right:0;overflow:hidden}
+ .adc{max-width:none;height:100%;padding:0;margin:0}
+ .adc-intro{display:none}
+ .adc-layout{height:100%;display:grid;grid-template-columns:clamp(290px,27vw,370px) minmax(0,1fr);gap:0;align-items:stretch}
+ .adc-controls{position:relative;height:100%;max-height:none;overflow:hidden;padding:clamp(12px,1.6vh,20px) clamp(15px,2vw,27px);background:#faf9f7;border-right:1px solid #e5e0e7}
+ .adc-controls-head{padding:8px 0 8px;border-top-width:5px}
+ .adc-controls-head h2{font-size:clamp(19px,2.7vh,24px);margin:5px 0 4px}
+ .adc-controls-head p:last-child{display:none}
+ .adc-controls label{padding-top:clamp(5px,1vh,9px);margin-bottom:clamp(5px,1vh,10px);font-size:10px}
+ .adc-controls select{min-height:34px;margin-top:4px;padding:5px 8px;font-size:12px}
+ .adc-controls label small{margin-top:1px;font-size:10px}
+ .adc-filter-count,.adc-explainer,.adc-status{display:none}
+ .adc-roles-editor{margin-top:10px}
+ .adc-button{min-height:40px;padding:8px;font-size:11px;margin-top:4px}
+ .adc-reset{min-height:27px;margin:2px auto;font-size:11px}
+ .adc-view{height:100%;overflow-y:auto;overscroll-behavior:contain;padding:18px clamp(18px,3vw,48px) 35px;background:#f5f3f2}
+ .adc-view-title{position:relative;background:transparent;margin-bottom:16px}
+ .adc-view-title h2{font-size:22px;margin:0}
+ .adc-stage{margin:0 auto}
+ .adc-preview-note{max-width:816px;margin:16px auto}
+}
+@media screen and (min-width:1101px) and (max-height:750px){
+ .adc-controls-head h2{font-size:19px}
+ .adc-controls label{padding-top:4px;margin-bottom:4px}
+ .adc-controls select{min-height:30px}
+ .adc-roles-editor{margin-top:5px}
+ .adc-controls label small{display:none}
+ .adc-button{min-height:34px}
 }
 </style>
 <script>
@@ -191,6 +217,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
  const stage=root.querySelector<HTMLElement>('[data-adc-stage]');
  const view=root.querySelector<HTMLElement>('.adc-view');
  const pages=root.querySelector<HTMLElement>('[data-adc-pages]');
+ const alignDesktopShell=()=>{
+  const nav=document.querySelector<HTMLElement>('.cproto-shell');
+  if(nav)document.documentElement.style.setProperty('--adc-nav-height',nav.getBoundingClientRect().bottom+'px');
+ };
+ alignDesktopShell();
+ window.addEventListener('resize',alignDesktopShell);
  const fit=()=>{
   if(!stage||!view||!pages)return;
   const width=Math.max(200,view.clientWidth-6);
