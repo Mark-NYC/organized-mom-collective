@@ -5,28 +5,28 @@ import { monthColors } from '../../theme';
 const first=JOB_PRESETS[0];
 ---
 <main class="ws-shell" style={`--ws-month-color: ${monthColors[10].hex}`}>
-  <div class="ws-top"><span class="ws-eyebrow">November · Our Family, Our Team</span></div>
+  <div class="ws-top"><a class="ws-back" href="/club">← Organized Family Club</a><span class="ws-eyebrow">ORGANIZED FAMILY CLUB · NOVEMBER 2027</span></div>
   <div class="ws-intro">
-    <p class="ws-eyebrow">Your November family plan is prepared.</p>
-    <h1>Your November plan. <em>Already prepared.</em></h1>
-    <p>A simple plan for sharing the load. Change anything you want, or leave it just as it is.</p>
+    <p class="ws-eyebrow">ONE WHOLE JOB · HANDED OFF</p>
+    <h1>Less reminding. <em>More ownership.</em></h1>
+    <p>One ready-made plan that gives every family member a real responsibility, with a clear finish line. You can adjust it, but you don’t have to build it.</p>
   </div>
   <div class="ws-workspace">
     <div class="ws-left">
       <div class="ws-ready">
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
-        <h2>Ready for your family.</h2>
+        <h2>Already prepared.</h2>
         <p>We made a starting plan for <span id="ws-ready-family">the Goering Family</span>. You can change any recommendation, or just download it as is.</p>
         <div class="ws-field" hidden><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
-      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>These are suggestions to agree on together, not assigned obligations.</p></div>
+      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>Each person knows what they own and what finished looks like. Change a handoff only if it doesn’t fit your family.</p></div>
       <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Megan</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Mark</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child1">Edit</button></div><h3 id="ws-child1-title">Andrew</h3><p class="ws-rec-job" id="ws-child1-summary">Prepare tomorrow’s clothes and supplies</p><p id="ws-child1-desc">Lay out clothes, check supplies and put everything in its ready spot.</p></article>
         <article class="ws-rec" data-role="child"><div class="ws-rec-top"><span>CHILD HANDOFF · AGE 8</span><button class="ws-edit" type="button" data-edit="child2">Edit</button></div><h3 id="ws-child2-title">Philip</h3><p class="ws-rec-job" id="ws-child2-summary">Pack the school bag</p><p id="ws-child2-desc">Put tomorrow's folder, water bottle and supplies in the bag before bed.</p></article>
       </div>
-      <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Send it.</button><button type="button" class="ws-secondary" id="ws-review">Review or change plan</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
-      <form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
+      <div class="ws-actions"><button type="button" class="ws-download" id="ws-approve">Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
+      <details class="ws-advanced"><summary>More plan options <span>Optional</span></summary><form class="ws-controls" id="ws-form" aria-label="Optional plan adjustments" novalidate>
         <input type="hidden" name="planTitle" id="ws-plan-title" value="Our School-Night Reset"/>
         <input type="hidden" name="planGoal" id="ws-plan-goal" value="Tomorrow is ready without one person managing every step."/>
         <h2 id="ws-edit-heading">Adjust your plan</h2>
@@ -60,16 +60,16 @@ const first=JOB_PRESETS[0];
         <button type="submit" id="ws-download" class="ws-download" disabled>Download personalized PDF</button>
         <p id="ws-status" class="ws-status" role="status" aria-live="polite"></p>
         <p class="ws-helper">Two US Letter pages. Print front and back on one sheet, 100% scale, long-edge flip.</p>
-      </form>
+      </form></details>
       <p class="ws-disclaimer">This is a preview of future Club membership. No plan is saved or mailed. Recommendations are examples based on a sample family.</p>
     </div>
     <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview">
-      <div class="ws-preview-head"><h2>Your November mailer</h2><span>One sheet · printed on both sides</span></div>
+      <div class="ws-preview-head"><h2>November’s printed tool</h2><span>One 8.5 × 11 sheet · front & back</span></div>
       <div class="ws-pages" id="ws-pages" aria-busy="true">
         <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
         <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
       </div>
-      <button type="submit" form="ws-form" class="ws-download ws-download-again" disabled>Download PDF</button>
+      <button type="submit" form="ws-form" class="ws-download ws-download-again" disabled>Download printable PDF</button>
     </section>
   </div>
 </main>
@@ -437,4 +437,65 @@ const first=JOB_PRESETS[0];
 .ws-jump,.ws-download-again{display:none}
 .ws-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;margin:0;padding:20px;text-align:center}
 @media(max-width:860px){.ws-jump{display:inline-block;font-size:13px;text-decoration:underline;text-underline-offset:4px;padding:10px 0 14px;margin-top:-12px}.ws-download-again{display:block;margin-top:24px}.ws-workspace{grid-template-columns:1fr}.ws-controls{position:static;padding:20px}.ws-intro{padding:28px 0 26px}.ws-controls input,.ws-controls textarea,.ws-controls select{font-size:16px}}
+
+/* Shared 2027 Club preview presentation: clean two-column editor and full-size print proof. */
+.ws-shell{max-width:1480px;padding:27px clamp(18px,3.5vw,52px) 80px;color:#484941}
+.ws-top{justify-content:space-between}
+.ws-back{color:#43493f;text-decoration:none;font-size:12px;margin:0;padding:0}
+.ws-eyebrow{color:#718569;letter-spacing:.15em;font-weight:700;font-size:10px}
+.ws-intro{max-width:780px;padding:32px 0 34px}
+.ws-intro h1{font:400 clamp(38px,4.4vw,60px)/1.14 Georgia,serif;margin:12px 0;color:#414a42}
+.ws-intro h1 em{color:#788e72}
+.ws-intro>p:last-child{font-size:15px;line-height:1.75}
+.ws-workspace{grid-template-columns:minmax(275px,350px) minmax(0,1fr);gap:clamp(25px,4vw,60px)}
+.ws-left{min-width:0;border-top:8px solid #d8e6df;padding-top:16px}
+.ws-ready{margin-bottom:20px}
+.ws-ready h2{font:italic 30px Georgia,serif;color:#668075;margin:9px 0 12px}
+.ws-ready>p:not(.ws-eyebrow),.ws-rec-head>p,.ws-disclaimer{font-size:12px;line-height:1.75;color:#626d63}
+.ws-demo{font-size:10px!important;color:#879187!important}
+.ws-rec-head{border-top:1px solid #dce6df;padding-top:17px}
+.ws-plan-heading{font:400 22px Georgia,serif!important;color:#506a58!important;margin:0 0 7px}
+.ws-rec-head h2{font:400 21px Georgia,serif;color:#506a58;margin:19px 0 7px}
+#ws-recommendations{display:grid;gap:12px;margin:17px 0 20px}
+.ws-rec{background:#f8faf6;border:1px solid #e1e9df;border-radius:8px;padding:15px 16px;min-width:0}
+.ws-rec[data-role="adult"]{background:#eff5ee}
+.ws-rec[data-role="child"]{background:#f7f1e5;border-color:#ede4d4}
+.ws-rec-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ws-rec-top span{font-size:10px;letter-spacing:.12em;color:#778978;font-weight:700}
+.ws-rec h3{font:400 21px Georgia,serif;margin:9px 0 5px;color:#506255}
+.ws-rec-job{font-size:13px!important;font-weight:700;color:#4d6051;margin:0 0 6px}
+.ws-rec>p:not(.ws-rec-job){font-size:11px;line-height:1.65;color:#6e776b;margin:4px 0}
+.ws-edit{border:1px solid #b7c9bc;color:#59745d;background:white;min-height:32px;padding:5px 11px;border-radius:4px;font-size:11px;cursor:pointer}
+.ws-actions{display:grid;gap:9px;margin:22px 0 8px}
+.ws-download{background:#5f7767;min-height:48px;text-transform:none;letter-spacing:0;font-size:12px;font-weight:700;border-radius:2px}
+.ws-download:hover{background:#4f6858}
+.ws-secondary{min-height:45px;background:#fff;border:1px solid #b7c9bc;color:#5f7767;font-weight:700;font-size:12px;cursor:pointer}
+.ws-status{font-size:11px;color:#7e887e;margin:4px 0 0}
+.ws-inline-editor{border-top:1px solid #d8e2d8;margin-top:15px;padding-top:15px}
+.ws-inline-editor[hidden]{display:none}
+.ws-inline-editor fieldset{border:0;padding:0;margin:0;min-width:0}
+.ws-inline-editor legend{font:italic 18px Georgia,serif;color:#5c755f;margin-bottom:12px}
+.ws-inline-editor .ws-field{margin-bottom:12px}
+.ws-inline-editor label{display:block;font-weight:700;font-size:11px;margin-bottom:7px}
+.ws-inline-editor input,.ws-inline-editor textarea,.ws-inline-editor select{width:100%;max-width:100%;box-sizing:border-box;padding:10px;min-height:43px;border:1px solid #becbc0;border-radius:3px;background:#fff;color:#424c43;font:12px Montserrat,Arial,sans-serif}
+.ws-inline-editor textarea{min-height:85px}
+.ws-inline-done{background:#5f7767;color:#fff;border:0;padding:10px 17px;cursor:pointer;font-weight:700}
+.ws-advanced{margin:22px 0;border:1px solid #d7e1dc;border-radius:6px}
+.ws-advanced>summary{padding:15px;cursor:pointer;font-size:13px;font-weight:700;color:#546a59}
+.ws-advanced>summary span{font-size:11px;font-weight:400;color:#849289;margin-left:7px}
+.ws-advanced .ws-controls{background:transparent;position:static;border:0;border-top:1px solid #d7e1dc;padding:17px}
+.ws-controls h2{font:italic 23px Georgia,serif;color:#668075}
+.ws-controls input,.ws-controls textarea,.ws-controls select{font-size:12px;border-color:#b8c5bd;border-radius:3px}
+.ws-disclaimer{padding-top:12px}
+.ws-preview{min-width:0}
+.ws-preview-head{border-bottom:1px solid #e1e6e3;margin-bottom:17px}
+.ws-preview-head h2{font:400 26px Georgia,serif;color:#414a42;margin:0 0 15px}
+.ws-preview-head span{font-size:11px;letter-spacing:0;color:#858982}
+.ws-pages{display:flex;flex-direction:column;align-items:center;gap:28px}
+.ws-page{width:min(100%,816px);margin:0}
+.ws-sheet{width:100%;aspect-ratio:8.5/11;overflow:hidden;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002}
+.ws-page figcaption{font-size:11px;font-weight:700;color:#7a867c;letter-spacing:.12em;margin:12px 0 4px}
+.ws-download-again{display:block;max-width:816px;margin:24px auto 0}
+@media(max-width:1050px){.ws-workspace{display:flex;flex-direction:column}.ws-preview{order:0;width:100%}.ws-left{order:1;width:100%;max-width:720px}.ws-intro{padding:26px 0}.ws-page{width:min(100%,816px)}}
+@media(max-width:600px){.ws-shell{padding-inline:16px}.ws-preview-head h2{font-size:23px}.ws-page{width:100%}.ws-intro h1{font-size:38px}}
 </style>
