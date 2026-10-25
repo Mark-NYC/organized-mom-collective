@@ -23,6 +23,7 @@ const iconAliases={
  'sneakers':'putting-on-shoes',
  'apple':'fruit',
  'carrot':'carrot-sticks',
+ 'boiled-egg':'hard-boiled-egg',
 };
 async function iconInput(name, preferSvg=false){
  const png=join(pngRoot,name+'.png'),svg=join(svgRoot,name+'.svg');
@@ -170,16 +171,16 @@ for(const filename of junePngFiles){
 }
 // June's older printable still refers to apple/carrot instead of fruit/carrot-sticks.
 // Keep their old public URLs, but supply the new PNG artwork behind those names.
-const juneCompatibilityNames=['apple','carrot'];
+const juneCompatibilityNames=['apple','carrot','boiled-egg'];
 for(const name of juneCompatibilityNames){
- if(junePngFiles.includes(name+'.png'))continue;
+ if(name!=='boiled-egg' && junePngFiles.includes(name+'.png'))continue;
  const replacement=iconAliases[name];
  const input=replacement && join(pngRoot,replacement+'.png');
  if(!input || !(await exists(input)))throw Error('Missing June PNG for '+name+': '+replacement+'.png');
  await renderJunePng(input,join(snackDir,name+'.png'));
  console.log('June PNG alias: '+name+'.png <- '+replacement+'.png');
 }
-const requiredJuneSnacks=['yogurt-cup','apple','carrot','cucumber-sticks','mini-bagels','cheese-wedge','crackers','granola-bar'];
+const requiredJuneSnacks=['yogurt-cup','apple','carrot','cucumber-sticks','mini-bagels','hard-boiled-egg','cheese-wedge','crackers','granola-bar'];
 const missingJune=requiredJuneSnacks.filter(name=>!junePngFiles.includes(name+'.png')&&!juneCompatibilityNames.includes(name));
 if(missingJune.length)throw Error('Missing required June snack PNGs: '+missingJune.join(', '));
 console.log('Published '+junePngFiles.length+' replacement PNG illustrations for June, plus compatibility names.');
