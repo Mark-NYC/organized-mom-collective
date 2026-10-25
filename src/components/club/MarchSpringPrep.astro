@@ -371,3 +371,6 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:{displayName?:string;members:Member[]}|null;sample?:string|null}}).__ofcPreviewHousehold;
  if(cached)applyHousehold(cached);
+ draw();
+}
+</script>
