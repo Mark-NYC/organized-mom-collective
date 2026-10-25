@@ -168,7 +168,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
   };
   const next=defaults.map((fallback,i)=>{
    const sender=(i<2?kids[i%Math.max(1,kids.length)]??adults[0]:adults[(i-2)%Math.max(1,adults.length)]??kids[0]);
-   const recipient=all.find(m=>m!==sender && (i<2?m.kind==='adult':m.kind==='child'))??all.find(m=>m!==sender);
+   const preferred=i<2 ? (parentAdults[i%Math.max(parentAdults.length,1)]??adults[i%Math.max(adults.length,1)]) : kids[(i-2)%Math.max(kids.length,1)];
+   const recipient=(preferred!==sender?preferred:undefined)??all.find(m=>m!==sender && (i<2?m.kind==='adult':m.kind==='child'))??all.find(m=>m!==sender);
    return {owner:address(sender,false)||fallback.owner,recipient:address(recipient,sender?.kind==='child')||fallback.recipient};
   });
   values.forEach((v,i)=>{
