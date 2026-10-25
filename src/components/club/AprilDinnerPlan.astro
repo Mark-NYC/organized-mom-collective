@@ -406,8 +406,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
    save();draw();
  });
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{id:string;members:Member[]}|null;sample?:string}>).detail;
+ const applyHousehold=(detail:{household:{id:string;members:Member[]}|null;sample?:string})=>{
   if(!detail?.household)return;
   const nextProfile=(detail.sample??'account')+':'+detail.household.id;
   const switched=nextProfile!==profile;
@@ -424,7 +423,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   }
   for(const role of roles){if(!customized.has(role)||!members.some(m=>m.id===assignments[role]&&eligible(role,m)))assignments[role]=suggested(role)}
   save();draw();
- });
- draw();
-}
-</script>
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members:Member[]}|null;sample?:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members:Member[]}|null;sample?:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
