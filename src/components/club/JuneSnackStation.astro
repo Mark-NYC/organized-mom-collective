@@ -324,8 +324,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   }catch(err){console.error('Snack station image export error',err);alert('Image download failed. Please try Print / Save PDF instead.')}
   finally{root.classList.remove('jss-export');download.disabled=false;download.textContent=label}
  });
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{id:string;displayName?:string};sample?:string}>).detail;
+ const applyHousehold=(detail:{household:{id:string;displayName?:string};sample?:string})=>{
   if(!detail?.household)return;
   const next=(detail.sample??'account')+':'+detail.household.id;const changed=profile!==next;profile=next;
   const display=detail.household.displayName?.trim();family=display?display.toUpperCase()+' · SNACK STATION':"OUR FAMILY'S SNACK STATION";
@@ -354,7 +353,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
    }catch{}
   }
   save();draw();makeChoices();
- });
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string};sample?:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string};sample?:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  draw();makeChoices();
 }
 </script>
