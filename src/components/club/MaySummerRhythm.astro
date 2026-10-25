@@ -449,8 +449,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }catch(err){console.error('Summer rhythm PNG export failed',err);alert('Sorry, the image could not be saved. You can still use Print / Save PDF.')}
   finally{root.classList.remove('msr-exporting');download.disabled=false;download.textContent=prior}
  });
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const detail=(event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail;
+ const applyHousehold=(detail:{household:{id:string;displayName?:string;members:Person[]};sample?:string})=>{
   if(!detail?.household)return;
   const nextProfile=(detail.sample??'account')+':'+detail.household.id;
   const changed=profile!==nextProfile;
@@ -487,7 +486,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    }catch{}
   }
   update();
- });
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string;members:Person[]};sample?:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  render(true);
 }
 </script>
