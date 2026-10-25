@@ -34,7 +34,7 @@ const taskTypes:Record<string,string>={
  <div class="msc-workspace">
   <section class="msc-editor" aria-label="Prepared March spring project">
    <div class="msc-editor-head"><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH</p><h2>Spring prep. <em>Everyone has a part.</em></h2><button type="button" class="msc-vision-trigger" data-open-vision aria-haspopup="dialog">Why this matters <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button></div>
-   <div class="msc-prepared">
+   <div class="msc-prepared" id="march-edit-controls">
     <div class="msc-summary-heading"><span>YOUR FAMILY'S PREPARED PLAN</span><p>Five ready-to-use jobs. Choose one, a few, or none this month.</p></div>
     <div class="msc-summary-jobs">
      {project.tasks.map((t,i)=><div class="msc-summary-row"><span class="msc-summary-index">0{i+1}</span><span class="msc-summary-task">{t.label}</span><strong data-summary-owner={t.id}>Preparing...</strong></div>)}
@@ -43,7 +43,7 @@ const taskTypes:Record<string,string>={
    </div>
    <p class="msc-optional">No deadlines, no tracking. Each owner gathers supplies, does the job, and checks their own work. An adult handles tasks involving heights or safety.</p>
    <div class="msc-actions">
-    <button type="button" class="msc-print" data-print>Print our family plan / Save PDF</button>
+    <div class="msc-primary-actions"><a class="msc-jump-edit" href="#march-edit-controls">Make changes <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button type="button" class="msc-print" data-print>Print / Save PDF</button></div>
     <button type="button" class="msc-png" data-single-page-png>Download image (PNG)</button>
     <button type="button" class="msc-reset" data-reset>Restore suggested owners</button>
    </div>
@@ -256,6 +256,9 @@ const taskTypes:Record<string,string>={
 /* Shared monthly vision presentation standard: 14px copy, 1.65 line-height in a centered dialog. */
 .msc-vision-trigger{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;min-height:38px;padding:7px 0;margin:4px 0 1px;border:0;background:transparent;color:#3e6c5a;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:600 12px 'MSC Montserrat',sans-serif}
 .msc-vision-dialog .msc-vision-copy{font:400 14px/1.65 'MSC Montserrat',sans-serif;margin:3px 0 22px;color:#454545;letter-spacing:normal}
+
+.msc-jump-edit{display:none}
+@media screen and (max-width:700px){.msc-primary-actions{display:flex;align-items:stretch;gap:9px}.msc-jump-edit{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-width:0;border:1px solid #497666;border-radius:4px;background:#fff;color:#3d6556;text-decoration:none;font:600 12px 'MSC Montserrat',sans-serif;padding:8px;min-height:45px}.msc-primary-actions .msc-print{flex:1.3;min-width:0;font-size:11px;letter-spacing:0;padding:8px}.msc-prepared{scroll-margin-top:12px}}
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
