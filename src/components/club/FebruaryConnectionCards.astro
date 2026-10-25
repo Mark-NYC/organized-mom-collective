@@ -38,6 +38,7 @@ const examples=[
     </fieldset>)}
    </div>
    <button class="fbc-download" type="button" data-print>Print four invitations / Save PDF</button>
+   <button type="button" class="fbc-png" data-single-page-png>Download image (PNG)</button>
    <button class="fbc-reset" type="button" data-reset>Restore suggested cards</button>
    <p class="fbc-status" role="status" aria-live="polite" data-status>US Letter · Print at actual size, with background graphics enabled. Cut along the dotted lines.</p>
   </section>
@@ -123,6 +124,10 @@ const examples=[
 .fbc-scroll{overflow:visible!important;height:auto!important}
 @media(max-width:1080px){.fbc-workspace{display:flex!important;flex-direction:column!important}.fbc-preview-pane{order:0;width:100%}.fbc-editor-pane{order:1;width:100%;max-width:720px}}
 @media print{.fbc-stage{position:static!important;width:8.5in!important;height:11in!important}.fbc-stage .fbc-paper{position:absolute!important;transform:none!important}}
+
+.fbc-png{display:block;width:100%;min-height:46px;margin-top:10px;padding:12px;border:1px solid #aaa;background:white;color:#454545;font:600 12px Montserrat,sans-serif;cursor:pointer}
+.fbc-png:disabled{opacity:.55;cursor:wait}
+.fbc.fbc-image-export .fbc-paper{transform:none!important;box-shadow:none!important;margin:0!important}
 </style>
 <script>
 type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
@@ -157,6 +162,21 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
 
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
+  const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
+  const sheet=root.querySelector<HTMLElement>(".fbc-paper");
+  if(!button||!sheet)return;
+  button.disabled=true;const old=button.textContent;button.textContent='Preparing image…';
+  root.classList.add('fbc-image-export');
+  try{
+   await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   const {toPng}=await import('html-to-image');
+   const png=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',margin:'0',boxShadow:'none'}});
+   const link=document.createElement('a');link.href=png;link.download="february-family-invitations.png";link.click();
+  }catch(error){console.error('Single-page image export failed',error);alert('Image download failed. Please use Print / Save PDF instead.')}
+  finally{root.classList.remove('fbc-image-export');button.disabled=false;button.textContent=old}
+ });
+ 
  window.addEventListener('omc:club-preview-household',(event:Event)=>{
   const h=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean;role?:string}[]} | null}>).detail?.household;
   if(!h)return;
