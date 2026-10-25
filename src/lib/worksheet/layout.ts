@@ -126,11 +126,11 @@ function front(m:Metrics,d:WorksheetData):Page {
   steps(done).forEach((s,i)=>{g.circle(X0+5,y+49+i*31,2,COLORS.ink);g.block(X0+17,y+53+i*31,s,'sans',{width:W-17,maxLines:2,size:12.5,min:10.5,lead:1.2});});
  };
  const adultSteps=steps(d.adultSteps);
- group(215,d.adultOwner,d.adultJob,d.adultWhen,adultSteps.join('. '));
+ group(215,'Dad',d.adultJob,d.adultWhen,adultSteps.join('. '));
  group(386,d.owner,d.job,d.when,d.done);
  group(557,d.secondChild,d.secondJob,d.secondWhen,d.secondDone);
  g.line(X0,681,X1,681,COLORS.blue,.9);
- g.block(X0,707,d.momName??'Mom','serif',{width:140,maxLines:1,size:19,min:12,lead:1});
+ g.block(X0,707,'Mom','serif',{width:140,maxLines:1,size:19,min:12,lead:1});
  g.label(X0+157,697,'Already owning',{size:6.1});
  g.block(X0+157,715,d.momOwns??'An existing family responsibility','sans',{width:W-157,maxLines:2,size:10,min:8.5,lead:1.2});
  g.footer('Front · 1 / 2');
@@ -150,7 +150,7 @@ function back(m:Metrics,d:WorksheetData):Page {
  ];
  lines.forEach((item,i)=>{const y=289+i*104;g.line(X0,y-24,X1,y-24,COLORS.blue,.9);g.text(X0,y,item[0],'serif',19);g.block(X0,y+26,item[1],'sans',{width:W,maxLines:2,size:11,min:10,lead:1.3});});
  g.line(X0,580,X1,580,COLORS.blue,.9);
- g.label(X0,601,'What the family aims to take off '+(d.momName??'Mom')+'’s plate',{size:6.3});
+ g.label(X0,601,'What the family aims to take off Mom’s plate',{size:6.3});
  g.block(X0,626,d.momRelief??'The responsibility for managing and reminding everyone about their jobs.','serifItalic',{width:W,maxLines:2,size:14,min:11,lead:1.3});
  g.text(X0,670,'A note from Megan','serifItalic',19);
  g.block(X0,694,'The goal is not a perfect family overnight. Start small, and let everyone grow into their role.','serif',{width:W,maxLines:2,size:11.5,min:10.5,lead:1.35});
