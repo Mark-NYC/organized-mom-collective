@@ -226,6 +226,24 @@ const blocks=[
  .msr-actions .msr-download{min-height:30px}
  .msr-actions .msr-reset{min-height:27px}
 }
+
+/* Desktop fit: bottom actions are never clipped. The summary alone can scroll on very short screens. */
+@media screen and (min-width:1101px){
+ .msr-editor{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:0}
+ .msr-editor-head{flex:0 0 auto}
+ .msr-prepared{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin-bottom:0}
+ .msr-subnote{flex:0 0 auto;margin:9px 0;font-size:10px;line-height:1.42}
+ .msr-actions{flex:0 0 auto;margin-top:auto;padding-top:6px;padding-bottom:1px;background:#faf9f7}
+ .msr-primary-actions>button[data-print]{min-height:42px;padding:9px}
+ .msr-actions .msr-download{min-height:32px;margin-top:5px}
+ .msr-actions .msr-reset{min-height:28px;margin:2px auto}
+}
+@media screen and (min-width:1101px) and (max-height:650px){
+ .msr-subnote{display:none}
+ .msr-editor-head h2{margin:5px 0}
+ .msr-vision-button{min-height:28px;padding:3px 0}
+ .msr-actions{padding-top:4px}
+}
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
