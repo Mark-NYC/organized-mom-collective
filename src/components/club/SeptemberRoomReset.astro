@@ -94,12 +94,18 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
 </style>
 <script>
 type Child={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number};
-type State={owner:string;area:string;trigger:string;jobs:string[]};
+type State={owner:string;area:string;trigger:string;jobs:string[];custom?:boolean};
+const ageOf=(child?:Child)=>child?.birthYear?Math.max(2,2027-child.birthYear-((child.birthMonth??1)>9?1:0)):8;
+const areaJobs:Record<string,string[]>={bedroom:['Toys in their homes','Clothes in the hamper','Floor clear to walk'],playroom:['Toys into bins','Books on their shelf','Playroom floor clear'],living:['Toys in their basket','Books and games away','Floor and couch clear']};
+const areaIcons:Record<string,string[]>={bedroom:['basket','shirt','made-bed'],playroom:['blocks','book','home'],living:['basket','book','home']};
+const prepare=(area:string,age:number)=>{const jobs=[...(areaJobs[area]??areaJobs.bedroom)];if(age<=5){jobs[0]='Toys into a basket';jobs[1]=area==='bedroom'?'Clothes into the hamper':'Books in their home'}else if(age>=10){jobs[0]='Put away my things';jobs[1]=area==='bedroom'?'Laundry sorted and put away':'Books and games put away';jobs[2]='Check the entire space'}return jobs};
 const defaults:State={owner:'family',area:'bedroom',trigger:'After our afternoon snack',jobs:['Toys in their homes','Clothes in the hamper','Floor clear to walk']};
 const descriptions:Record<string,string>={bedroom:'bedroom reset',playroom:'playroom reset',living:'living room reset'};
 for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  const storageKey=root.dataset.srrKey||'omc:preview:september-room-reset:v1';
  let familyKey='',children:Child[]=[];
+ const age=()=>state.owner==='family'?(children.length?Math.min(...children.map(ageOf)):8):ageOf(children.find(c=>c.id===state.owner));
+ const prepareState=()=>{state.jobs=prepare(state.area,age());state.custom=false};
  let state:State={...defaults,jobs:[...defaults.jobs]};
  const stage=root.querySelector<HTMLElement>('[data-srr-stage]');
  const pages=root.querySelector<HTMLElement>('[data-srr-pages]');
@@ -108,26 +114,35 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
  const remember=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({familyKey,state}))}catch{}};
  const render=()=>{
-  const owner=root.querySelector<HTMLElement>('[data-srr-owner]');const selected=children.find(c=>c.id===state.owner);
-  if(owner)owner.textContent=selected?selected.firstName+"'s "+descriptions[state.area]:(state.owner==='family'?"Our kids' ":"Our family ")+descriptions[state.area];
+  const years=age(),count=years<=5?2:3;
+  const selected=children.find(c=>c.id===state.owner);
+  const owner=root.querySelector<HTMLElement>('[data-srr-owner]');
+  if(owner)owner.textContent=selected?selected.firstName+"'s "+descriptions[state.area]:"Our kids' "+descriptions[state.area];
   const cue=root.querySelector<HTMLElement>('[data-srr-cue]');if(cue)cue.textContent=state.trigger;
-  root.querySelectorAll<HTMLElement>('[data-srr-job-label]').forEach(el=>{const i=Number(el.dataset.srrJobLabel);el.textContent=state.jobs[i]??''});
-  const c=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(c)c.value=state.owner;
-  const a=root.querySelector<HTMLSelectElement>('[data-srr-area]');if(a)a.value=state.area;
-  const t=root.querySelector<HTMLSelectElement>('[data-srr-trigger]');if(t)t.value=state.trigger;
-  root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>input.value=state.jobs[Number(input.dataset.srrJob)]??'');
+  const duration=root.querySelector<HTMLElement>('[data-srr-duration]');if(duration)duration.textContent=years<=5?'A small reset. A grown-up helps me start.':years>=10?'I own this reset and check my own work.':'A few minutes to put our things away.';
+  const heading=root.querySelector<HTMLElement>('[data-srr-count]');if(heading)heading.textContent=count===2?'Two little jobs. Then we’re done.':'Three things. Then we’re done.';
+  const grid=root.querySelector<HTMLElement>('[data-srr-jobs]');grid?.classList.toggle('srr-two',count===2);
+  const cards=Array.from(root.querySelectorAll<HTMLElement>('.srr-job'));
+  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src='/images/club/icon-library/'+(areaIcons[state.area]??areaIcons.bedroom)[i]+'.png'});
+  const finish=root.querySelector<HTMLElement>('[data-srr-finish]');if(finish)finish.textContent=years<=5?'Everything is back in its place. A grown-up helps check.':years>=10?'All things put away and the whole space checked.':'Everything is in its home. The walking space is clear.';
+  const first=root.querySelector<HTMLElement>('[data-srr-start]');if(first)first.textContent=years<=5?'Start with just one toy.':years>=10?'Start by scanning the floor and putting away what you see.':'Start with the toys nearest your feet.';
+  const checks=root.querySelector<HTMLElement>('[data-srr-checks]');if(checks)checks.replaceChildren(...state.jobs.slice(0,count).map(label=>{const chip=document.createElement('span');chip.textContent='✓ '+label;return chip}));
+  const child=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(child)child.value=state.owner;
+  const area=root.querySelector<HTMLSelectElement>('[data-srr-area]');if(area)area.value=state.area;
+  const trigger=root.querySelector<HTMLSelectElement>('[data-srr-trigger]');if(trigger)trigger.value=state.trigger;
+  root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>{const i=Number(input.dataset.srrJob);input.value=state.jobs[i]??'';if(input.parentElement)input.parentElement.hidden=i>=count});
  };
- root.querySelector<HTMLSelectElement>('[data-srr-child]')?.addEventListener('change',e=>{state.owner=(e.target as HTMLSelectElement).value;remember();render()});
- root.querySelector<HTMLSelectElement>('[data-srr-area]')?.addEventListener('change',e=>{state.area=(e.target as HTMLSelectElement).value;remember();render()});
+ root.querySelector<HTMLSelectElement>('[data-srr-child]')?.addEventListener('change',e=>{state.owner=(e.target as HTMLSelectElement).value;if(!state.custom)prepareState();remember();render()});
+ root.querySelector<HTMLSelectElement>('[data-srr-area]')?.addEventListener('change',e=>{state.area=(e.target as HTMLSelectElement).value;prepareState();remember();render()});
  root.querySelector<HTMLSelectElement>('[data-srr-trigger]')?.addEventListener('change',e=>{state.trigger=(e.target as HTMLSelectElement).value;remember();render()});
- root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>input.addEventListener('input',()=>{state.jobs[Number(input.dataset.srrJob)]=input.value.slice(0,60);remember();render()}));
- root.querySelector('[data-srr-reset]')?.addEventListener('click',()=>{state={...defaults,jobs:[...defaults.jobs]};remember();render()});
+ root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>input.addEventListener('input',()=>{state.jobs[Number(input.dataset.srrJob)]=input.value.slice(0,60);state.custom=true;remember();render()}));
+ root.querySelector('[data-srr-reset]')?.addEventListener('click',()=>{state={...defaults,jobs:[...defaults.jobs]};prepareState();remember();render()});
  root.querySelector('[data-srr-print]')?.addEventListener('click',()=>window.print());
  const pngButton=root.querySelector<HTMLButtonElement>('[data-srr-png]');
- pngButton?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-srr-front]');if(!front)return;pngButton.disabled=true;root.classList.add('srr-export');const prev=pngButton.textContent;pngButton.textContent='Preparing image…';try{const {toPng}=await import('html-to-image');const url=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});const link=document.createElement('a');link.href=url;link.download='september-5-minute-room-reset.png';link.click()}catch(err){console.error(err);alert('Image export failed. Use Print / Save PDF instead.')}finally{root.classList.remove('srr-export');pngButton.textContent=prev;pngButton.disabled=false}});
+ pngButton?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-srr-front]');if(!front)return;pngButton.disabled=true;root.classList.add('srr-export');const prev=pngButton.textContent;pngButton.textContent='Preparing image…';try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const url=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.href=url;link.download='september-5-minute-room-reset.png';link.click()}catch(err){console.error(err);alert('Image export failed. Use Print / Save PDF instead.')}finally{root.classList.remove('srr-export');pngButton.textContent=prev;pngButton.disabled=false}});
  window.addEventListener('omc:club-preview-household',(e:Event)=>{const detail=(e as CustomEvent<{household:{id:string;members?:Child[]};sample:string}>).detail;if(!detail?.household)return;const next=detail.sample+':'+detail.household.id;children=(detail.household.members??[]).filter(x=>x.kind==='child');const childSelect=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(childSelect){childSelect.replaceChildren();const opt=document.createElement('option');opt.value='family';opt.textContent='Our kids together';childSelect.append(opt);for(const c of children){const option=document.createElement('option');option.value=c.id;option.textContent=c.firstName;childSelect.append(option)}}
- if(next!==familyKey){familyKey=next;state={...defaults,jobs:[...defaults.jobs]};try{const saved=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(saved?.familyKey===next&&saved.state&&Array.isArray(saved.state.jobs)&&saved.state.jobs.length===3&&['bedroom','playroom','living'].includes(saved.state.area))state=saved.state}catch{}}
- if(state.owner!=='family'&&!children.some(c=>c.id===state.owner))state.owner='family';remember();render()});
+ if(next!==familyKey){familyKey=next;state={...defaults,jobs:[...defaults.jobs]};prepareState();try{const saved=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(saved?.familyKey===next&&saved.state&&Array.isArray(saved.state.jobs)&&saved.state.jobs.length===3&&['bedroom','playroom','living'].includes(saved.state.area))state=saved.state}catch{}}
+ if(state.owner!=='family'&&!children.some(c=>c.id===state.owner))state.owner='family';if(!state.custom)prepareState();remember();render()});
  render();
 }
 </script>
