@@ -43,10 +43,10 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
      <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal>{initial.name}</h3></div><div class="adc-time"><span data-out-time>{initial.time}</span><small data-out-servings>{initial.servings}</small></div></div>
      <div class="adc-section-label">OUR DINNER TEAM</div>
      <div class="adc-team-grid">
-      <div><span>DINNER CAPTAIN</span><strong data-out-role="captain">Luis</strong><p>Owns the whole plan</p></div>
+      <div><span>DINNER CAPTAIN</span><strong data-out-role="captain">Dad</strong><p>Owns the whole plan</p></div>
       <div><span>INGREDIENTS CHECKER</span><strong data-out-role="checker">Sofia</strong><p>Checks and gathers</p></div>
       <div><span>TABLE CAPTAIN</span><strong data-out-role="table">Mateo</strong><p>Gets the table ready</p></div>
-      <div><span>COOKING LEAD</span><strong data-out-role="cook">Ana</strong><p>Handles adult cooking</p></div>
+      <div><span>COOKING LEAD</span><strong data-out-role="cook">Mom</strong><p>Handles adult cooking</p></div>
      </div>
      <div class="adc-section-label">CHECK THE INGREDIENTS · ABOUT FOUR SERVINGS</div>
      <div class="adc-ingredients">{initial.ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient>{x}</span></div>)}</div>
@@ -168,7 +168,7 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
 <script>
 import {ageInMonth} from '../../lib/club/profile';
 import {aprilDinners,dinnerCategories,type DinnerEffort} from '../../data/club/april-dinners';
-type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;isAccountHolder?:boolean;archived?:boolean};
+type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;isAccountHolder?:boolean;archived?:boolean;role?:string};
 const choices=aprilDinners;
 type Role='captain'|'checker'|'table'|'cook';
 const roles:Role[]=['captain','checker','table','cook'];
@@ -212,6 +212,14 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   if(role==='table')return kids.filter(m=>eligible(role,m)).find(m=>m.id!==assignments.checker)?.id??kids.find(m=>eligible(role,m))?.id??adults[0]?.id??'';
   return '';
  };
+ // Child-facing roles use family titles for parents; saved assignments remain member IDs.
+ // The profile currently has no preferred-address field, so these are editable defaults.
+ const displayName=(member:Member)=>{
+  if(member.kind==='child')return member.firstName;
+  const parents=members.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner'));
+  const index=parents.findIndex(m=>m.id===member.id);
+  return index===0?'Mom':index===1?'Dad':member.firstName;
+ };
  const save=()=>{try{storage.setItem(key,JSON.stringify({profile,effort,category,meal,assignments,customized:[...customized]}))}catch{}};
  const draw=()=>{
   const filtered=choices.filter(m=>m.category===category&&m.effort===effort);
@@ -238,10 +246,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
    select.replaceChildren();
    const blank=document.createElement('option');blank.value='';blank.textContent='Choose a family member';select.append(blank);
    for(const m of members.filter(x=>eligible(role,x))){
-    const opt=document.createElement('option');opt.value=m.id;opt.textContent=m.firstName;select.append(opt);
+    const opt=document.createElement('option');opt.value=m.id;opt.textContent=displayName(m);select.append(opt);
    }
    select.value=members.some(m=>m.id===chosen&&eligible(role,m))?chosen:'';
-   text.textContent=members.find(m=>m.id===select.value)?.firstName??'Our family';
+   text.textContent=members.find(m=>m.id===select.value)?displayName(members.find(m=>m.id===select.value)!):'Our family';
   }
  };
  root.querySelector<HTMLSelectElement>('[data-effort]')?.addEventListener('change',e=>{effort=(e.target as HTMLSelectElement).value as DinnerEffort;const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
