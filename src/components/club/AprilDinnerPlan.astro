@@ -207,7 +207,8 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
 .adc-summary-row strong{font-size:11px;color:#51465d;white-space:nowrap}
 .adc-edit-link{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;padding:12px 0 0;color:#675679;text-decoration:underline;font:700 11px Montserrat,Arial,sans-serif;cursor:pointer;min-height:34px}
 .adc-actions{margin-top:14px}
-.adc-dialog{box-sizing:border-box;width:min(480px,calc(100vw - 32px));max-height:min(740px,calc(100dvh - 40px));overflow-y:auto;overscroll-behavior:contain;border:1px solid #e6e0e8;border-radius:10px;background:#fff;box-shadow:0 22px 70px #0003;padding:23px 26px;color:#454545;font-family:Montserrat,Arial,sans-serif}
+.adc-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(480px,calc(100vw - 64px));max-height:min(740px,calc(100dvh - 80px));overflow-y:auto;overscroll-behavior:contain;border:1px solid #e6e0e8;border-radius:10px;background:#fff;box-shadow:0 22px 70px #0003;padding:23px 26px;color:#454545;font-family:Montserrat,Arial,sans-serif}
+@media(max-width:600px){.adc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:20px}} 
 .adc-dialog::backdrop{background:rgba(38,32,43,.52)}
 .adc-dialog-top{display:flex;justify-content:space-between;align-items:start;gap:15px}
 .adc-dialog-top h2{font:400 29px Georgia,serif;margin:8px 0 12px;color:#635877}
