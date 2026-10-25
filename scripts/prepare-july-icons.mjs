@@ -217,3 +217,42 @@ for(const name of Object.keys(iconAliases)){
  await sharp(input,{density:300}).png().toFile(existing);
 }
 console.log('Published '+iconFiles.length+' original Club PNG icons without cropping or conversion.');
+
+
+/**
+ * White-matte removal for the Club's monochrome line illustrations.
+ * Process PUBLIC copies only. Leave original assets unchanged and keep all
+ * image dimensions. For neutral grayscale pixels, unmatte against white,
+ * which removes white backgrounds and avoids pale fringe around the ink.
+ * Colored artwork and genuinely translucent pixels retain their colors.
+ */
+async function transparentClubPng(input){
+ const {data,info}=await sharp(input).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ let changed=0;
+ for(let i=0;i<data.length;i+=4){
+  const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+  if(a===0)continue;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b);
+  if(max-min>14)continue; // Leave color artwork untouched.
+  const value=(r+g+b)/3;
+  if(value<125)continue; // Preserve dark ink.
+  const ink=84; // Original Club charcoal linework reference.
+  const opacity=Math.max(0,Math.min(1,(255-value)/(255-ink)));
+  const outAlpha=Math.round(a*opacity);
+  if(outAlpha===a)continue;
+  data[i]=ink;data[i+1]=ink;data[i+2]=ink;data[i+3]=outAlpha;
+  changed++;
+ }
+ if(changed)await sharp(data,{raw:{width:info.width,height:info.height,channels:4}})
+  .png().toFile(input+'.transparent-tmp.png').then(async()=>{const {rename}=await import('node:fs/promises');await rename(input+'.transparent-tmp.png',input)});
+ return changed;
+}
+const transparencyDirs=[destination,previewDir,snackDir,sharedDir,iconLibraryOutput];
+let transparentFiles=0;
+for(const dir of transparencyDirs){
+ for(const filename of (await readdir(dir)).filter(n=>n.toLowerCase().endsWith('.png'))){
+  const updated=await transparentClubPng(join(dir,filename));
+  if(updated)transparentFiles++;
+ }
+}
+console.log('Cleaned white matte from '+transparentFiles+' Club PNG previews; retained original artwork dimensions and source files.');
