@@ -11,11 +11,29 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
   <p>A ready-to-use reset for the mess you ask about again and again. One recognizable cue, age-appropriate cleanup jobs, and a finish line kids can recognize.</p>
  </header>
  <div class="srr-layout">
-  <aside class="srr-editor">
-   <p class="srr-eyebrow">YOUR FAMILY'S DAILY RESET</p>
-   <h2>Already prepared.</h2>
-   <p>Your family’s reset is already prepared. Choose a child to see their age-appropriate plan. Change only what does not fit.</p>
-   <label>Reset owner <select data-srr-child><option value="family">Our kids together</option></select></label>
+  <aside class="srr-editor" aria-label="Prepared September room reset">
+   <div class="srr-editor-head"><p class="srr-eyebrow">ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Less asking. <em>More doing.</em></h2><button type="button" class="srr-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
+   <div class="srr-prepared" id="september-edit-controls"><span class="srr-eyebrow">YOUR FAMILY'S PREPARED RESET</span><strong>Our Daily Reset</strong><p>One noticeable cue, simple age-appropriate cleanup jobs, and a clear finish line your kids can recognize.</p>
+     <div class="srr-summary-row"><span>Reset owner</span><b data-srr-summary-owner>Our kids together</b></div>
+     <div class="srr-summary-row"><span>Reset area</span><b data-srr-summary-area>Bedroom floor</b></div>
+     <div class="srr-summary-row"><span>When to start</span><b data-srr-summary-trigger>After our afternoon snack</b></div>
+     <button type="button" class="srr-edit-link" data-open-editor>Edit our reset <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+   </div>
+   <p class="srr-compact-note">Practice together once, then let kids check the pictures. Adults may still need to help younger children begin.</p>
+   <div class="srr-actions"><div class="srr-primary-actions"><a class="srr-jump-edit" href="#september-edit-controls">Make changes <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button class="srr-primary" type="button" data-srr-print>Print / Save PDF</button></div>
+     <button class="srr-secondary" type="button" data-srr-png>Download front as image (PNG)</button>
+     <button class="srr-restore" type="button" data-srr-reset>Restore prepared plan</button>
+   </div>
+  </aside>
+  <dialog class="srr-dialog" data-srr-vision aria-labelledby="srr-vision-title">
+   <div class="srr-dialog-head"><h2 id="srr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
+   <p>Mom shouldn't have to notice every mess, start every cleanup, and check every job. This prepared reset gives children a recognizable cue and a clear finish line so they can gradually take responsibility for one space.</p>
+   <button type="button" class="srr-dialog-done" data-close-dialog>Back to our plan</button>
+  </dialog>
+  <dialog class="srr-dialog" data-srr-editor aria-labelledby="srr-editor-title">
+   <div class="srr-dialog-head"><h2 id="srr-editor-title">Edit our daily reset</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
+   <p>We've prepared the reset. Change only what doesn't fit your family.</p>
+   <div class="srr-dialog-fields">   <label>Reset owner <select data-srr-child><option value="family">Our kids together</option></select></label>
    <label>Reset area <select data-srr-area><option value="bedroom">Bedroom floor</option><option value="playroom">Playroom</option><option value="living">Living room toys</option></select></label>
    <label>What starts the reset? <select data-srr-trigger><option value="After our afternoon snack">After our afternoon snack</option><option value="When our daily cleanup alarm rings">When our daily cleanup alarm rings</option><option value="When screen time ends">When screen time ends</option><option value="Before our next play activity">Before our next play activity</option><option value="Before bedtime stories">Before bedtime stories</option></select></label><p class="srr-cue-help">Choose a cue kids can notice without Mom announcing it. If using an alarm, set it once on a household device.</p>
    <details><summary>Adjust the cleanup jobs <span>Optional</span></summary>
@@ -23,14 +41,13 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
     <label>Job 2 <input data-srr-job="1" maxlength="60"/></label>
     <label>Job 3 <input data-srr-job="2" maxlength="60"/></label>
    </details>
-   <div class="srr-note"><strong>One small handoff</strong><p>Show the children what finished looks like and practice the reset together once. For the first few days, an adult may still need to help them start. The goal is fewer repeated reminders, not instant perfection.</p></div>
-   <button class="srr-primary" type="button" data-srr-print>Print both sides / Save PDF</button>
-   <button class="srr-secondary" type="button" data-srr-png>Download front as image (PNG)</button>
-   <button class="srr-restore" type="button" data-srr-reset>Restore prepared plan</button>
-   <p class="srr-small">Two sides of one 8.5 × 11-inch sheet. Print double-sided, flip on long edge. Preview changes stay in this browser tab.</p>
-  </aside>
-  <section class="srr-preview">
-   <div class="srr-preview-heading"><h2>September's printed tool</h2><span>Front for kids · Back for parents</span></div>
+</div>
+      <div class="srr-note"><strong>One small handoff</strong><p>Show the children what finished looks like and practice the reset together once. For the first few days, an adult may still need to help them start. The goal is fewer repeated reminders, not instant perfection.</p></div>
+
+   <button type="button" class="srr-dialog-done" data-close-dialog>Done · See our reset</button>
+  </dialog>
+  <section class="srr-preview"><button type="button" class="srr-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+   
    <div class="srr-stage" data-srr-stage>
     <div class="srr-pages" data-srr-pages>
      <article class="srr-sheet srr-front" data-srr-front>
@@ -91,6 +108,54 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
 @media(max-width:1050px){.srr-layout{display:flex;flex-direction:column}.srr-preview{order:0;width:100%}.srr-editor{order:1;max-width:720px;width:100%}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{margin:0!important;padding:0!important;background:white!important}body *{visibility:hidden!important}.srr-pages,.srr-sheet,.srr-sheet *{visibility:visible!important}.srr-pages{display:block!important;position:absolute!important;top:0!important;left:0!important;width:8.5in!important;gap:0!important}.srr-sheet{position:relative!important;top:auto!important;left:auto!important;page-break-after:always!important;break-after:page!important;width:8.5in!important;height:11in!important;transform:none!important;margin-bottom:0!important;margin-right:0!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.srr-sheet:last-child{page-break-after:auto!important;break-after:auto!important}}
+
+/* September shared Club experience: prepared summary + independent printable preview. */
+.srr{max-width:none;padding:0}.srr-intro{display:none}
+.srr-layout{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+.srr-editor{display:flex;flex-direction:column;min-width:0;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:15px clamp(17px,2vw,26px)}
+.srr-editor-head{border-top:5px solid #d8e6df;padding-top:10px;flex:0 0 auto}
+.srr-editor-head h2{font:400 clamp(23px,2.7vw,31px)/1.12 Georgia,serif;color:#5f7767;margin:9px 0}.srr-editor-head h2 em{font-style:italic}
+.srr-edit-link{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:7px 0;border:0;background:transparent;color:#5f7767;text-decoration:underline;text-underline-offset:3px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.srr-prepared{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;background:#fff;border:1px solid #e0e6da;padding:14px;margin-top:15px}
+.srr-prepared>strong{display:block;font:400 23px Georgia,serif;color:#5f7767;margin:8px 0}.srr-prepared>p{font:12px/1.55 Montserrat,Arial,sans-serif;margin:0 0 11px}
+.srr-summary-row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e7eae4;padding:10px 0;font-size:12px}.srr-summary-row b{color:#5f7767;text-align:right;font-size:12px;max-width:58%}
+.srr-compact-note{font:11px/1.48 Montserrat,Arial,sans-serif;color:#747269;margin:10px 0;flex:0 0 auto}
+.srr-actions{margin-top:auto;flex:0 0 auto;padding-top:5px;background:#faf9f7}.srr-primary-actions .srr-primary{min-height:43px;padding:10px}.srr-actions .srr-secondary{min-height:34px;margin-top:6px}.srr-actions .srr-restore{min-height:29px;margin:3px auto}
+.srr-jump-edit,.srr-floating-edit{display:none}
+.srr-preview{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}.srr-stage{margin:0 auto;max-width:816px}
+.srr-pages{align-items:flex-start}
+.srr-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(540px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px 26px;border:1px solid #dce2d7;border-radius:10px;background:#fff;box-shadow:0 20px 65px #0003;color:#484941;font-family:Montserrat,Arial,sans-serif}
+.srr-dialog::backdrop{background:rgba(33,40,36,.52)}.srr-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.srr-dialog-head h2{font:400 29px/1.13 Georgia,serif;margin:0 0 16px;color:#5f7767}.srr-dialog-head button{flex:0 0 36px;width:36px;height:36px;border:0;border-radius:50%;background:#eff2e9;color:#5f7767;cursor:pointer;font-size:23px}
+.srr-dialog>p{font:14px/1.65 Montserrat,Arial,sans-serif;margin:0 0 18px}.srr-dialog-done{width:100%;min-height:46px;padding:12px;background:#5f7767;border:0;color:#fff;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.srr-dialog-fields label{display:block;font-size:12px;font-weight:700;margin:14px 0}.srr-dialog-fields select,.srr-dialog-fields input{display:block;width:100%;min-height:44px;margin-top:7px;padding:10px;background:#fff;border:1px solid #b8c5bd;color:#454545;font:12px Montserrat,Arial,sans-serif}
+.srr-dialog-fields details{border:1px solid #d7e1dc;border-radius:6px;padding:0 13px;margin:20px 0}.srr-dialog-fields summary{padding:15px 0;cursor:pointer;font-size:13px;font-weight:700}.srr-dialog-fields summary span{font-size:11px;color:#849289;font-weight:400}
+.srr-dialog .srr-note{margin:14px 0;padding:14px}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content:not([hidden]) .srr),body:has(#club-month-content:not([hidden]) .srr){height:100%;overflow:hidden}
+ #club-month-content:not([hidden]):has(.srr){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ .srr,.srr-layout{height:100%;margin:0}.srr-editor{height:100%;overflow:hidden}.srr-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ .srr-floating-edit{position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;display:inline-flex;align-items:center;gap:10px;min-height:52px;border:0;border-radius:999px;padding:13px 19px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+ .srr-floating-edit:hover{background:#303030}.srr-floating-edit:focus-visible{outline:3px solid #9caf9a;outline-offset:3px}
+}
+@media screen and (min-width:1101px) and (max-height:700px){
+ .srr-editor{padding-top:9px;padding-bottom:9px}.srr-editor-head{padding-top:6px}.srr-editor-head h2{font-size:23px;margin:5px 0}
+ .srr-prepared{margin-top:8px;padding:9px}.srr-summary-row{padding:5px 0}.srr-compact-note{font-size:10px;margin:6px 0}
+ .srr-actions .srr-secondary{min-height:30px}.srr-actions .srr-restore{min-height:26px}
+}
+@media screen and (max-width:1100px){
+ .srr{padding:0 0 40px}.srr-layout{display:flex;flex-direction:column;gap:0}
+ .srr-preview{order:0;width:100%;padding:14px 14px 28px}.srr-editor{order:1;width:100%;max-width:none;border:0;padding:20px}.srr-prepared{overflow:visible;flex:auto}
+}
+@media screen and (max-width:700px){
+ .srr{padding-bottom:calc(138px + env(safe-area-inset-bottom,0px))}.srr-editor{padding:17px 18px}.srr-prepared{scroll-margin-top:12px}
+ .srr-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid #dce2d7;background:rgba(250,249,247,.98);box-shadow:0 -5px 20px #0001}
+ .srr-primary-actions{display:flex;gap:9px}.srr-jump-edit{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-height:45px;padding:8px;border:1px solid #5f7767;border-radius:4px;background:#fff;color:#5f7767;font:700 12px Montserrat,Arial,sans-serif;text-decoration:none}
+ .srr-primary-actions .srr-primary{flex:1.3;min-width:0;min-height:45px;padding:8px;font-size:12px}
+ .srr-actions .srr-secondary{min-height:31px}.srr-actions .srr-restore{min-height:25px;font-size:11px}
+ .srr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{.srr-editor,.srr-actions,.srr-dialog,.srr-floating-edit{display:none!important}.srr-preview{padding:0!important}}
 </style>
 <script>
 type Child={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number};
@@ -112,6 +177,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  const sheets=Array.from(root.querySelectorAll<HTMLElement>('.srr-sheet'));
  const fit=()=>{if(!stage||!pages)return;const w=Math.max(180,stage.clientWidth-2),scale=Math.min(1,w/816);pages.style.gap=22*scale+'px';for(const sheet of sheets){sheet.style.setProperty('--srr-scale',String(scale));sheet.style.marginBottom=-(1056*(1-scale))+'px';sheet.style.marginRight=-(816*(1-scale))+'px'}};
  fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
+ const visionDialog=root.querySelector<HTMLDialogElement>('[data-srr-vision]');
+ const editorDialog=root.querySelector<HTMLDialogElement>('[data-srr-editor]');
+ root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
+ root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
+ root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
+ for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const remember=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({familyKey,state}))}catch{}};
  const render=()=>{
   const years=age(),count=years<=5?2:3;
@@ -127,6 +198,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
   const finish=root.querySelector<HTMLElement>('[data-srr-finish]');if(finish)finish.textContent=years<=5?'Everything is back in its place. A grown-up helps check.':years>=10?'All things put away and the whole space checked.':'Everything is in its home. The walking space is clear.';
   const first=root.querySelector<HTMLElement>('[data-srr-start]');if(first)first.textContent=years<=5?'Start with just one toy.':years>=10?'Start by scanning the floor and putting away what you see.':'Start with the toys nearest your feet.';
   const checks=root.querySelector<HTMLElement>('[data-srr-checks]');if(checks)checks.replaceChildren(...state.jobs.slice(0,count).map(label=>{const chip=document.createElement('span');chip.textContent='✓ '+label;return chip}));
+  const summaries:[string,string][]=[['owner',selected?.firstName??'Our kids together'],['area',state.area==='bedroom'?'Bedroom floor':state.area==='playroom'?'Playroom':'Living room toys'],['trigger',state.trigger]];
+  for(const [k,value] of summaries){const el=root.querySelector<HTMLElement>('[data-srr-summary-'+k+']');if(el)el.textContent=value}
   const child=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(child)child.value=state.owner;
   const area=root.querySelector<HTMLSelectElement>('[data-srr-area]');if(area)area.value=state.area;
   const trigger=root.querySelector<HTMLSelectElement>('[data-srr-trigger]');if(trigger)trigger.value=state.trigger;
@@ -140,9 +213,13 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  root.querySelector('[data-srr-print]')?.addEventListener('click',()=>window.print());
  const pngButton=root.querySelector<HTMLButtonElement>('[data-srr-png]');
  pngButton?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-srr-front]');if(!front)return;pngButton.disabled=true;root.classList.add('srr-export');const prev=pngButton.textContent;pngButton.textContent='Preparing image…';try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const url=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.href=url;link.download='september-5-minute-room-reset.png';link.click()}catch(err){console.error(err);alert('Image export failed. Use Print / Save PDF instead.')}finally{root.classList.remove('srr-export');pngButton.textContent=prev;pngButton.disabled=false}});
- window.addEventListener('omc:club-preview-household',(e:Event)=>{const detail=(e as CustomEvent<{household:{id:string;members?:Child[]};sample:string}>).detail;if(!detail?.household)return;const next=detail.sample+':'+detail.household.id;children=(detail.household.members??[]).filter(x=>x.kind==='child');const childSelect=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(childSelect){childSelect.replaceChildren();const opt=document.createElement('option');opt.value='family';opt.textContent='Our kids together';childSelect.append(opt);for(const c of children){const option=document.createElement('option');option.value=c.id;option.textContent=c.firstName;childSelect.append(option)}}
+ const applyHousehold=(detail:{household:{id:string;members?:Child[]};sample:string})=>{if(!detail?.household)return;const next=detail.sample+':'+detail.household.id;children=(detail.household.members??[]).filter(x=>x.kind==='child');const childSelect=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(childSelect){childSelect.replaceChildren();const opt=document.createElement('option');opt.value='family';opt.textContent='Our kids together';childSelect.append(opt);for(const c of children){const option=document.createElement('option');option.value=c.id;option.textContent=c.firstName;childSelect.append(option)}}
  if(next!==familyKey){familyKey=next;state={...defaults,jobs:[...defaults.jobs]};prepareState();try{const saved=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(saved?.familyKey===next&&saved.state&&Array.isArray(saved.state.jobs)&&saved.state.jobs.length===3&&['bedroom','playroom','living'].includes(saved.state.area))state=saved.state}catch{}}
- if(state.owner!=='family'&&!children.some(c=>c.id===state.owner))state.owner='family';if(!state.custom)prepareState();remember();render()});
+ if(state.owner!=='family'&&!children.some(c=>c.id===state.owner))state.owner='family';if(!state.custom)prepareState();remember();render()
+ };
+ window.addEventListener('omc:club-preview-household',(e:Event)=>applyHousehold((e as CustomEvent<{household:{id:string;members?:Child[]};sample:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:Child[]};sample:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  render();
 }
 </script>
