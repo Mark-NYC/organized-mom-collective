@@ -7,19 +7,22 @@ import {families} from '../../lib/december/traditions';
   
   <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>Your Christmas Mission Has Arrived!</h1><p>A surprise addressed to the children. One kindness mission and two Christmas cards, ready to give.</p></header>
   <div class="workspace">
-    <section class="details" aria-label="December tradition plan">
-      <div hidden><label for="family">Explore a sample family</label>
-      <select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select>
-      <p class="demo">Demo only · Nothing is saved or mailed</p></div>
-      <h2 id="mission-title">One mission. Two Christmas cards.</h2>
-      <p id="mission-summary">The children choose someone to encourage, make a card, and ask a grown-up to help deliver it.</p>
-      <h3>The three steps</h3>
-      <ol><li>Choose someone to surprise.</li><li>Make their Christmas card.</li><li>Deliver your kindness with a grown-up.</li></ol>
-      <p class="duration">No special supplies or shopping. Just a pen, a kind idea, and the two cards included on the second sheet.</p>
-      <button type="button" id="download" disabled>Download mission + cards</button>
-      <p class="demo" id="message" role="status" aria-live="polite">Two US Letter pages. Print page 1 for the kids. Print page 2 on one side only, then cut and fold the two cards.</p>
+    <section class="details" aria-label="December mission plan">
+      <div class="dec-prepared" id="december-edit-controls">
+       <p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h2>Your Christmas Mission Has Arrived!</h2>
+       <button type="button" class="dec-why" data-dec-why>Why this matters</button>
+       <div class="dec-summary"><span class="eyebrow">YOUR FAMILY'S PREPARED MISSION</span><h3 id="mission-title">One mission. Two Christmas cards.</h3><p id="mission-summary">The children choose someone to encourage, make a card, and ask a grown-up to help deliver it.</p>
+        <p class="dec-summary-line"><span>Included</span><strong>Kindness mission + 2 cards</strong></p>
+        <p class="dec-summary-line"><span>Supplies</span><strong>Just a pen</strong></p>
+        <button type="button" class="dec-edit-link" data-dec-edit>Make changes</button>
+       </div>
+       <p class="dec-note">One simple act of kindness that kids can initiate. A grown-up helps deliver the cards.</p>
+      </div>
+      <div class="dec-actions"><div class="dec-primary-actions"><a href="#december-edit-controls" class="dec-jump">Make changes</a><button type="button" id="download" disabled>Download PDF</button></div><p class="demo" id="message" role="status" aria-live="polite">Print each PDF page single-sided. Cut and fold the two cards.</p></div>
     </section>
-    <section class="preview" aria-label="Actual print preview"><div class="previewheading"><h2>Your December mission</h2><span>Mission + two gift cards</span></div><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Personalized mission</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Two one-sided cards · cut and fold</figcaption></figure></div></section>
+    <dialog class="dec-dialog" id="dec-why-dialog" aria-labelledby="dec-why-title"><div class="dec-dialog-header"><h2 id="dec-why-title">Why this matters</h2><button type="button" data-dec-close aria-label="Close">×</button></div><p>Children don't have to wait for Mom to plan every meaningful Christmas activity. Their own kindness mission comes prepared with two cards so they can choose who to encourage, create something personal, and help deliver it.</p><button type="button" class="dec-dialog-done" data-dec-close>Back to our mission</button></dialog>
+    <dialog class="dec-dialog" id="dec-edit-dialog" aria-labelledby="dec-edit-title"><div class="dec-dialog-header"><h2 id="dec-edit-title">Make it your family’s mission</h2><button type="button" data-dec-close aria-label="Close">×</button></div><p>The mission and cards are prepared for the family selected in the top navigation. To personalize names, use the family selector above. You can also explore another sample below.</p><label for="family">Explore a sample family</label><select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select><p class="demo">Sample preview only · Nothing is saved or mailed.</p><button type="button" class="dec-dialog-done" data-dec-close>Done · See our mission</button></dialog>
+    <section class="preview" aria-label="Actual print preview"><button type="button" class="dec-float" data-dec-edit><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>MAKE CHANGES</button><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Personalized mission</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Two one-sided cards · cut and fold</figcaption></figure></div></section>
   </div>
 </main>
 
@@ -51,11 +54,16 @@ function current():Family {
  }
  return families.find(f=>f.id===family.value)??families[0];
 }
-window.addEventListener('omc:club-preview-household',(event:Event)=>{
- const detail=(event as CustomEvent<{household:Household|null}>).detail;
- clubHousehold=detail?.household??null;
- show();
-});
+const applyHousehold=(detail:{household:Household|null})=>{clubHousehold=detail?.household??null;show()};
+window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household|null}>).detail));
+const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household|null}}).__ofcPreviewHousehold;
+if(cached)applyHousehold(cached);
+const editDialog=document.querySelector<HTMLDialogElement>('#dec-edit-dialog');
+const whyDialog=document.querySelector<HTMLDialogElement>('#dec-why-dialog');
+document.querySelectorAll('[data-dec-edit]').forEach(el=>el.addEventListener('click',()=>editDialog?.showModal()));
+document.querySelector('[data-dec-why]')?.addEventListener('click',()=>whyDialog?.showModal());
+document.querySelectorAll('[data-dec-close]').forEach(el=>el.addEventListener('click',()=>el.closest('dialog')?.close()));
+for(const dialog of [editDialog,whyDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
 function show(){
  const f=current();
  const children=f.members.slice(2);
@@ -99,6 +107,63 @@ show();start();
 @font-face{font-family:'WS Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf');font-weight:600;font-style:italic}
 @font-face{font-family:'WS Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf');font-weight:400}
 @font-face{font-family:'WS Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf');font-weight:600}
+
+/* December club preview format, scoped so member kit remains unaffected. */
+#club-month-content .dec{max-width:none;margin:0;padding:0;font-family:Montserrat,Arial,sans-serif}
+#club-month-content .dec>header{display:none}
+#club-month-content .dec .workspace{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+#club-month-content .dec .details{display:flex;flex-direction:column;min-width:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:16px clamp(17px,2vw,26px)}
+#club-month-content .dec-prepared{border-top:5px solid #d8e6df;padding-top:12px;min-height:0;overflow-y:auto;flex:1 1 auto}
+#club-month-content .dec-prepared>h2{font:400 clamp(23px,2.6vw,31px)/1.1 Georgia,serif;color:#527468;margin:10px 0}
+#club-month-content .dec-why,#club-month-content .dec-edit-link{border:0;background:transparent;color:#527468;text-decoration:underline;text-underline-offset:3px;font:700 12px Montserrat,Arial,sans-serif;min-height:35px;cursor:pointer}
+#club-month-content .dec-summary{border:1px solid #e0e6da;background:#fff;padding:15px;margin-top:12px}
+#club-month-content .dec-summary h3{font:400 22px Georgia,serif;color:#527468;margin:11px 0}
+#club-month-content .dec-summary>p{font:12px/1.6 Montserrat,Arial,sans-serif}
+#club-month-content .dec-summary-line{border-top:1px solid #e7eae4;padding:10px 0;margin:0!important;display:flex;justify-content:space-between;gap:10px;font:12px Montserrat,Arial,sans-serif}
+#club-month-content .dec-summary-line strong{text-align:right;color:#527468}
+#club-month-content .dec-note{font:11px/1.5 Montserrat,Arial,sans-serif;color:#686e65;margin:12px 0}
+#club-month-content .dec-actions{flex:0 0 auto;margin-top:auto;background:#faf9f7;padding-top:8px}
+#club-month-content .dec-actions #download{margin:0;min-height:45px;text-transform:none;letter-spacing:0;background:#527468}
+#club-month-content .dec-actions .demo{font-size:10px;line-height:1.45}
+#club-month-content .dec-jump,#club-month-content .dec-float{display:none}
+#club-month-content .dec .preview{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}
+#club-month-content .dec .sheets{display:flex;flex-direction:column;align-items:center;gap:28px}
+#club-month-content .dec .sheets figure{width:min(100%,816px);margin:0}
+#club-month-content .dec .sheet{width:100%}
+#club-month-content .dec-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(540px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;padding:24px;background:#fff;border:1px solid #dce2d7;border-radius:10px;box-shadow:0 20px 65px #0003;color:#454545;font-family:Montserrat,Arial,sans-serif}
+#club-month-content .dec-dialog::backdrop{background:rgba(33,40,36,.52)}
+#club-month-content .dec-dialog-header{display:flex;align-items:start;justify-content:space-between;gap:15px}
+#club-month-content .dec-dialog-header h2{font:400 28px Georgia,serif;color:#527468;margin:0 0 14px}
+#club-month-content .dec-dialog-header button{width:36px;height:36px;border:0;border-radius:50%;background:#edf2ec;font-size:24px;cursor:pointer}
+#club-month-content .dec-dialog>p{font:13px/1.65 Montserrat,Arial,sans-serif}
+#club-month-content .dec-dialog-done{width:100%;min-height:46px;border:0;background:#527468;color:#fff;font-weight:700;cursor:pointer;margin-top:16px}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content .dec),body:has(#club-month-content .dec){height:100%;overflow:hidden}
+ #club-month-content:has(.dec){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
+ #club-month-content .dec,#club-month-content .dec .workspace{height:100%}
+ #club-month-content .dec .details{height:100%;overflow:hidden}
+ #club-month-content .dec .preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ #club-month-content .dec-float{display:inline-flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;align-items:center;gap:9px;min-height:52px;border:0;border-radius:999px;padding:13px 19px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+}
+@media screen and (max-width:1100px){
+ #club-month-content .dec{padding:0 0 42px}
+ #club-month-content .dec .workspace{display:flex;flex-direction:column;gap:0}
+ #club-month-content .dec .preview{order:0;width:100%;padding:14px 14px 28px}
+ #club-month-content .dec .details{order:1;width:100%;max-width:none;border:0;padding:20px}
+ #club-month-content .dec-prepared{overflow:visible;flex:auto}
+}
+@media screen and (max-width:700px){
+ #club-month-content .dec{padding-bottom:110px}
+ #club-month-content .dec .details{padding:17px 18px}
+ #club-month-content .dec-prepared{scroll-margin-top:12px}
+ #club-month-content .dec-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid #dce2d7;background:#faf9f7;box-shadow:0 -5px 20px #0001}
+ #club-month-content .dec-primary-actions{display:flex;gap:9px}
+ #club-month-content .dec-jump{display:flex;flex:1;align-items:center;justify-content:center;min-height:45px;border:1px solid #527468;background:white;color:#527468;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}
+ #club-month-content .dec-actions #download{flex:1.3;min-width:0;font-size:12px}
+ #club-month-content .dec-actions .demo{margin:5px 0 0;font-size:9px}
+ #club-month-content .dec-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+}
+@media print{#club-month-content .dec-float,#club-month-content .dec-dialog,#club-month-content .dec-actions{display:none!important}}
 </style>
 <style>
 .dec{max-width:1440px;margin:auto;padding:28px clamp(18px,3.5vw,54px) 90px;color:#454545}
