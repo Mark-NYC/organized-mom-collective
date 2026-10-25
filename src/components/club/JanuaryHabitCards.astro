@@ -266,6 +266,41 @@ const defaults = [
 .jhc-png{display:block;width:100%;min-height:46px;margin-top:10px;padding:12px;border:1px solid #aaa;background:white;color:#454545;font:600 12px Montserrat,sans-serif;cursor:pointer}
 .jhc-png:disabled{opacity:.55;cursor:wait}
 .jhc.jhc-image-export [data-jhc-page]{transform:none!important;box-shadow:none!important;margin:0!important}
+
+/* January preview: restore standardized sidebar after legacy global !important styles. */
+#club-month-content .jhc-workspace{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);align-items:stretch;gap:0}
+#club-month-content .jhc-config{
+ display:flex!important;flex-direction:column!important;min-width:0;max-width:none!important;
+ margin:0!important;padding:15px clamp(17px,2vw,26px)!important;
+ background:#faf9f7!important;border-right:1px solid #e5e0e1
+}
+#club-month-content .jhc-config-heading{border-top:5px solid #d8e6df;padding-top:11px}
+#club-month-content .jhc-config-heading h3{font:400 clamp(23px,2.6vw,31px)/1.12 Georgia,serif!important;color:#527468!important;margin:9px 0}
+#club-month-content .jhc-config-heading>p:last-child{font:12px/1.55 Montserrat,Arial,sans-serif!important;margin:6px 0 0}
+#club-month-content .jhc-prepared{display:block;min-height:0;flex:1 1 auto;overflow-y:auto;background:#fff;border:1px solid #e0e6da;padding:15px;margin-top:15px}
+#club-month-content .jhc-prepared h3{font:400 23px Georgia,serif;color:#527468;margin:9px 0}
+#club-month-content .jhc-actions{display:flex!important;flex-direction:column;align-items:stretch;gap:7px;margin:0!important;padding-top:9px;flex:0 0 auto}
+#club-month-content .jhc-actions .jhc-print{min-height:45px;margin:0;padding:10px;letter-spacing:0;text-transform:none}
+#club-month-content .jhc-actions .jhc-png{min-height:34px}
+#club-month-content .jhc-actions .jhc-reset{min-height:30px;margin:2px auto;padding:3px}
+#club-month-content .jhc-help{font:10px/1.45 Montserrat,Arial,sans-serif;margin:7px 0 0}
+@media screen and (min-width:1101px){
+ #club-month-content .jhc-workspace,#club-month-content .jhc{height:100%}
+ #club-month-content .jhc-config{height:100%;overflow:hidden}
+ #club-month-content .jhc-preview-panel{height:100%;overflow-y:auto}
+}
+@media screen and (max-width:1100px){
+ #club-month-content .jhc-workspace{display:flex;flex-direction:column;gap:0}
+ #club-month-content .jhc-preview-panel{order:0;width:100%}
+ #club-month-content .jhc-config{order:1;width:100%;max-width:none!important;padding:20px!important;border-right:0}
+ #club-month-content .jhc-prepared{flex:auto;overflow:visible}
+}
+@media screen and (max-width:700px){
+ #club-month-content .jhc-config{padding:17px 18px!important}
+ #club-month-content .jhc-actions{display:grid!important;grid-template-columns:1fr 1.25fr;gap:7px;position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0!important;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));background:#faf9f7;border-top:1px solid #dce2d7}
+ #club-month-content .jhc-jump-edit{display:flex;justify-content:center;align-items:center}
+ #club-month-content .jhc-actions .jhc-png,#club-month-content .jhc-actions .jhc-reset{grid-column:1/-1}
+}
 </style>
 <script>
 const defaults = [
