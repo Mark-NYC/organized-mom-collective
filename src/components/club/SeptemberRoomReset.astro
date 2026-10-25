@@ -1,7 +1,7 @@
 ---
 /** September Club preview: one personalized reset trigger, child-facing front and parent-facing back. */
 interface Props {storageKey?:string}
-const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
+const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
 ---
 <div class="srr" data-srr-key={storageKey}>
  <header class="srr-intro">
@@ -102,7 +102,7 @@ const prepare=(area:string,age:number)=>{const jobs=[...(areaJobs[area]??areaJob
 const defaults:State={owner:'family',area:'bedroom',trigger:'After our afternoon snack',jobs:['Toys in their homes','Clothes in the hamper','Floor clear to walk']};
 const descriptions:Record<string,string>={bedroom:'bedroom reset',playroom:'playroom reset',living:'living room reset'};
 for(const root of document.querySelectorAll<HTMLElement>('.srr')){
- const storageKey=root.dataset.srrKey||'omc:preview:september-room-reset:v1';
+ const storageKey=root.dataset.srrKey||'omc:preview:september-room-reset:v2';
  let familyKey='',children:Child[]=[];
  const age=()=>state.owner==='family'?(children.length?Math.min(...children.map(ageOf)):8):ageOf(children.find(c=>c.id===state.owner));
  const prepareState=()=>{state.jobs=prepare(state.area,age());state.custom=false};
