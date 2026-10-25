@@ -13,6 +13,13 @@ const taskIcons:Record<string,string>={
  'mar-baseboards':'spray-bottle-cloth','mar-vents':'duster','mar-winter-gear':'sorting-clothes',
  'mar-curtains':'washing-window','mar-donate':'donation-box'
 };
+const handoffs:Record<string,{ready:string;doJob:string;done:string;supplies:string;childRole:string}> = {
+ 'mar-baseboards':{ready:'Take a soft cloth and dampen it with water. Choose one room.',doJob:'Wipe reachable baseboards and corners.',done:'No visible dust; cloth rinsed and put away.',supplies:'Soft cloth + water',childRole:'Children 5+: own one reachable room.'},
+ 'mar-vents':{ready:'Turn fans off. Gather a microfiber duster.',doJob:'An adult dusts accessible vents and fan blades safely.',done:'Visible dust is gone; tools put away.',supplies:'Microfiber duster + cloth',childRole:'Children: put away safe supplies only.'},
+ 'mar-winter-gear':{ready:'Gather hats, gloves and scarves. Get a storage bin.',doJob:'Sort items; set aside anything still needed.',done:'Stored items are clean and dry; labeled bin put away.',supplies:'Storage bin + label',childRole:'Children 5+: sort their own gear.'},
+ 'mar-curtains':{ready:'Check fabric care labels and gather supplies.',doJob:'An adult cleans one set and handles taking down/rehanging.',done:'Curtains are clean, dry and rehung properly.',supplies:'Laundry supplies or duster',childRole:'Children: help with safe sorting only.'},
+ 'mar-donate':{ready:'Get a bag. Choose one small area.',doJob:'Suggest unused items; ask before adding anyone else’s.',done:'Adult approves contents; bag goes to donation spot.',supplies:'Donation bag',childRole:'Children 5+: suggest their own items.'}
+};
 const taskTypes:Record<string,string>={
  'mar-baseboards':'Children can wipe reachable areas with a soft, damp cloth. An adult handles anything higher.',
  'mar-vents':'Adult job. Keep children off ladders and away from ceiling fans and vents.',
@@ -23,15 +30,15 @@ const taskTypes:Record<string,string>={
 ---
 <div class="msc" data-msc-key={storageKey} style={`--msc-month:${monthColors[2].hex}`}>
  <div class="msc-intro"><a href="/club" class="msc-back">← Organized Family Club</a><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH 2027</p><h1>Spring prep. <em>Everyone has a part.</em></h1>
- <p>We took March’s actual cleaning project from your companion and prepared a family-facing plan. Five familiar tasks, with one person to start each one. Do one when it fits your week.</p></div>
+ <p>The same five optional jobs from your cleaning companion, now prepared for independent ownership. Each person sees what to gather, what to do, and how to know the job is finished.</p></div>
  <div class="msc-workspace">
   <section class="msc-editor" aria-label="Customize March's family project">
-   <div class="msc-editor-head"><p class="msc-overline">MARCH · THE MONTHLY HOME PROJECT</p><h2>Already prepared.</h2><p>Pick who leads each task. You can change every suggestion, or leave the plan as it is.</p></div>
+   <div class="msc-editor-head"><p class="msc-overline">MARCH · THE MONTHLY HOME PROJECT</p><h2>Ready to hand off.</h2><p>We suggest age-appropriate owners from your family. Change a name if needed. Every job includes supplies, steps and a clear finish line.</p></div>
    <p class="msc-app-link"><a href="/app/week#monthly-focus">View the same five tasks in /app →</a></p>
    <div class="msc-owners">
     {project.tasks.map((t,i)=><div class="msc-owner-row" data-task={t.id}>
       <div class="msc-owner-heading"><span>0{i+1}</span><strong>{t.label}</strong></div>
-      <p class="msc-task-note">{taskTypes[t.id]}</p>
+      <p class="msc-task-note">{handoffs[t.id].childRole} {taskTypes[t.id]}</p>
       <label>Who will lead this task?<select data-owner={t.id} aria-label={`Owner for ${t.label}`}><option value="">Choose a family member</option></select></label>
     </div>)}
    </div>
@@ -45,16 +52,16 @@ const taskTypes:Record<string,string>={
    <div class="msc-print-scroll"><div class="msc-sheet-stage" data-sheet-stage><article class="msc-sheet" data-sheet>
     <header class="msc-sheet-head"><p>ORGANIZED FAMILY CLUB <span>· MARCH 2027</span></p><h2>Our Family <em>Spring Prep</em></h2><p>{project.description}</p></header>
     <div class="msc-sheet-family"><span>PREPARED FOR</span><strong data-family>Our Family</strong></div>
-    <p class="msc-sheet-caption">Five small jobs. Everyone knows their part.</p>
+    <p class="msc-sheet-caption">This job is mine. I can finish it.</p>
     <div class="msc-sheet-tasks">
     {project.tasks.map((t,i)=><section class="msc-task" data-printed-task={t.id}>
       <div class="msc-task-num">0{i+1}</div>
-      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="42" height="42" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p>{taskTypes[t.id]}</p></div></div>
-      <div class="msc-task-person"><span>LED BY</span><strong data-printed-owner={t.id}>Our family</strong></div>
+      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="42" height="42" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p class="msc-supplies">SUPPLIES · {handoffs[t.id].supplies}</p><p class="msc-steps"><b>GET READY</b> {handoffs[t.id].ready}<br/><b>DO THE JOB</b> {handoffs[t.id].doJob}<br/><b>CHECK IT'S DONE</b> {handoffs[t.id].done}</p></div></div>
+      <div class="msc-task-person"><span>THIS JOB IS MINE</span><strong data-printed-owner={t.id}>Our family</strong></div>
       <div class="msc-check" aria-hidden="true"></div>
     </section>)}
     </div>
-    <div class="msc-sheet-principle"><span>TEAMWORK TIP</span><p>Pick a task, put on a favorite song or set a 15-minute timer, and let each person lead their own job. When the music stops, check what’s finished together.</p></div>
+    <div class="msc-sheet-principle"><span>THE OWNERSHIP RULE</span><p>If your name is on the job, you get ready, do it, check your own work, and put supplies away. Ask an adult only when safety or family decisions require it.</p></div>
     <footer class="msc-sheet-bottom"><div><span>THE SAME MARCH PROJECT IN YOUR COMPANION</span><strong>organizedmomcollective.com/app/week</strong></div><p>FRI · DEEP CLEAN &nbsp; SAT · HOME PROJECT &nbsp; SUN · RESET</p></footer>
    </article></div></div>
    <p class="msc-preview-note">A real single-sheet plan built from the same March task definitions as the companion. Printed checkboxes are for the family's use; they do not sync with the app.</p>
@@ -99,6 +106,26 @@ const taskTypes:Record<string,string>={
 @media(max-width:1129px){.msc-workspace{grid-template-columns:1fr}.msc-editor{max-width:700px}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.msc-sheet,.msc-sheet *{visibility:visible!important}.msc-sheet{position:absolute!important;left:0!important;top:0!important;margin:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msc-print-scroll{height:auto!important;overflow:visible!important}}
+
+/* March handoff: five legible three-step jobs, still one US Letter sheet. */
+.msc-sheet-head{min-height:120px;padding:11px 21px 12px}
+.msc-sheet-head h2{font-size:33px;margin:7px 0 5px}
+.msc-sheet-head>p:last-child{font-size:14px}
+.msc-sheet-family{padding:9px 0 7px}
+.msc-sheet-caption{font-size:17px;margin:7px 0}
+.msc-task{grid-template-columns:21px minmax(0,1fr) 89px 16px;gap:8px;padding:9px 0;align-items:start}
+.msc-task-text{align-items:flex-start;gap:8px}
+.msc-task-icon{height:29px;width:29px;flex-basis:29px}
+.msc-task-text h3{font-size:17px;margin:0 0 3px}
+.msc-task-text p.msc-supplies{font:600 8px/1.4 'MSC Montserrat',sans-serif;color:#497666;margin-bottom:4px}
+.msc-task-text p.msc-steps{font:9px/1.48 'MSC Montserrat',sans-serif;color:#454545}
+.msc-steps b{font-size:8px;letter-spacing:.035em;color:#3d6556;margin-right:3px}
+.msc-task-person span{font-size:7px;line-height:1.4}
+.msc-task-person strong{font-size:13px}
+.msc-check{width:14px;height:14px}
+.msc-sheet-principle{padding:9px 12px;grid-template-columns:110px 1fr;gap:10px}
+.msc-sheet-principle p{font-size:12px}
+.msc-sheet-bottom{margin-top:7px;padding-top:7px}
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
@@ -137,7 +164,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   if(adultOnly.has(task))return adults[task==='mar-vents'&&adults.length>1?1:0];
   if(task==='mar-baseboards')return kids[0]??adults[0];
   if(task==='mar-winter-gear')return kids[1]??kids[0]??adults[0];
-  if(task==='mar-donate')return kids[2]??kids[0]??adults[0];
+  if(task==='mar-donate')return adults[0]??kids[2]??kids[0];
   return adults[0];
  };
  const draw=()=>{
@@ -153,8 +180,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
     if(adultOnly.has(task.id)&&m.kind!=='adult')continue;
     const option=document.createElement('option');option.value=m.id;option.textContent=m.firstName;select.append(option);
    }
-   select.value=live.some(m=>m.id===current)?current:'';
-   printed.textContent=live.find(m=>m.id===select.value)?.firstName??'Choose together';
+   select.value=live.some(m=>m.id===current&&( !adultOnly.has(task.id)||m.kind==='adult'))?current:'';
+   printed.textContent=live.find(m=>m.id===select.value)?.firstName??'Optional · unassigned';
   }
   const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
  };
@@ -173,7 +200,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   if(changed){chosen={};custom.clear();sampleKey=id;
    try{const saved=JSON.parse(store.getItem(key)??'null');if(saved?.sampleKey===id){chosen=saved.chosen??{};custom=new Set(Array.isArray(saved.custom)?saved.custom:[])}}catch{}
   }
-  for(const task of project.tasks)if(!custom.has(task.id)||!members.some(m=>m.id===chosen[task.id]))chosen[task.id]=pick(task.id,members)?.id??'';
+  for(const task of project.tasks)if(!custom.has(task.id)||!members.some(m=>m.id===chosen[task.id]&&(!adultOnly.has(task.id)||m.kind==='adult')))chosen[task.id]=pick(task.id,members)?.id??'';
   save();draw();
  });
  draw();
