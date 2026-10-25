@@ -246,8 +246,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
   }catch(error){console.error('August export failed',error);alert('Image download failed. Use Print / Save PDF instead.')}
   finally{root.classList.remove('asr-export');dl.disabled=false;dl.textContent=old}
  });
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const {household,sample}=(event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}>).detail??{};
+ const applyHousehold=(detail:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string})=>{
+  const {household,sample}=detail??{};
   if(!household)return;const next=sample+':'+household.id;
   kids=(household.members??[]).filter(x=>x.kind==='child');
   const select=root.querySelector<HTMLSelectElement>('[data-asr-child]');
@@ -261,7 +261,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
   }
   if(board.child!=='family'&&!kids.some(x=>x.id===board.child))board=initial();
   remember();draw();makeOptions();
- });
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
  draw();makeOptions();
 }
 </script>
