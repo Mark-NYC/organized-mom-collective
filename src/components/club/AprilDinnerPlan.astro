@@ -373,7 +373,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
  const save=()=>{try{storage.setItem(key,JSON.stringify({profile,effort,category,meal,assignments,customized:[...customized]}))}catch{}};
  const dinnerDialog=root.querySelector<HTMLDialogElement>('[data-dinner-dialog]');
  const teamDialog=root.querySelector<HTMLDialogElement>('[data-team-dialog]');
- root.querySelector('[data-open-dinner]')?.addEventListener('click',()=>dinnerDialog?.showModal());
+ root.querySelectorAll('[data-open-dinner]').forEach(button=>button.addEventListener('click',()=>dinnerDialog?.showModal()));
  root.querySelector('[data-open-team]')?.addEventListener('click',()=>teamDialog?.showModal());
  root.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [dinnerDialog,teamDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
