@@ -14,11 +14,11 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
   <aside class="srr-editor">
    <p class="srr-eyebrow">YOUR FAMILY'S DAILY RESET</p>
    <h2>Already prepared.</h2>
-   <p>Start with the room reset below. Make a few changes only if your family's routine needs them. This is one repeatable moment, not another daily chart to manage.</p>
+   <p>Your family’s reset is already prepared. Choose a child to see their age-appropriate plan. Change only what does not fit.</p>
    <label>Reset owner <select data-srr-child><option value="family">Our kids together</option></select></label>
    <label>Reset area <select data-srr-area><option value="bedroom">Bedroom floor</option><option value="playroom">Playroom</option><option value="living">Living room toys</option></select></label>
-   <label>When it happens <select data-srr-trigger><option value="After our afternoon snack">Before our evening activity</option><option value="Before dinner">Before dinner</option><option value="After school snack">After school snack</option><option value="Before bedtime stories">Before bedtime stories</option></select></label>
-   <details><summary>Change the three jobs <span>Optional</span></summary>
+   <label>What starts the reset? <select data-srr-trigger><option value="After our afternoon snack">After our afternoon snack</option><option value="When our daily cleanup alarm rings">When our daily cleanup alarm rings</option><option value="When screen time ends">When screen time ends</option><option value="Before our next play activity">Before our next play activity</option><option value="Before bedtime stories">Before bedtime stories</option></select></label><p class="srr-cue-help">Choose a cue kids can notice without Mom announcing it. If using an alarm, set it once on a household device.</p>
+   <details><summary>Adjust the cleanup jobs <span>Optional</span></summary>
     <label>Job 1 <input data-srr-job="0" maxlength="60"/></label>
     <label>Job 2 <input data-srr-job="1" maxlength="60"/></label>
     <label>Job 3 <input data-srr-job="2" maxlength="60"/></label>
@@ -42,30 +42,31 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
       <section class="srr-trigger-box">
        <span>WHEN DO WE START?</span>
        <h3 data-srr-cue>After our afternoon snack</h3>
-       <p>We put our things away before moving on.</p>
+       <p data-srr-duration>We put our things away before moving on.</p>
       </section>
-      <h3 class="srr-section-title">Three things. Then we're done.</h3>
-      <div class="srr-jobs">
+      <h3 class="srr-section-title" data-srr-count>Three things. Then we’re done.</h3>
+      <div class="srr-jobs" data-srr-jobs>
        <div class="srr-job"><div class="srr-icon"><img data-srr-icon="0" src="/images/club/icon-library/basket.png" alt="" width="112" height="112" /></div><span class="srr-number">01</span><strong data-srr-job-label="0">Toys in their homes</strong></div>
        <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/shirt.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1">Clothes in the hamper</strong></div>
        <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/made-bed.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2">Floor clear to walk</strong></div>
-      </div>
+      </div><p class="srr-start" data-srr-start>Start with the toys nearest your feet.</p>
       <section class="srr-done">
        <h3>How do we know it's finished?</h3>
-       <p>Everything has a home. Nothing is left on the floor.</p>
-       <div class="srr-checks"><span>✓ Toys away</span><span>✓ Clothes away</span><span>✓ Clear floor</span></div>
+       <p data-srr-finish>Everything has a home. Nothing is left on the floor.</p>
+       <div class="srr-checks" data-srr-checks><span>✓ Toys away</span><span>✓ Clothes away</span><span>✓ Clear floor</span></div>
       </section>
       <footer class="srr-paper-foot"><strong>Notice the cue. Reset. Then play.</strong><span>NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</span></footer>
      </article>
      <article class="srr-sheet srr-back" data-srr-back>
       <header class="srr-paper-head"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Let the Routine Remind Them</h2><span>A simple plan for fewer repeat requests.</span></header>
-      <section class="srr-parent-grid">
-       <div><span class="srr-step">01</span><h3>Set up the cue</h3><p>Choose a moment that already happens every day. Keep the reset visible near the room. Don't rely on a reminder only Mom can give.</p></div>
-       <div><span class="srr-step">02</span><h3>Show what “done” means</h3><p>Do the three jobs together once. Make sure the bins, hamper, and shelves are easy for your child to reach.</p></div>
-       <div><span class="srr-step">03</span><h3>When they resist</h3><p>Stay calm and consistent: “The reset comes before our next play activity.” Don't make dinner or other basic needs conditional on cleaning.</p></div>
-       <div><span class="srr-step">04</span><h3>When they drift off</h3><p>Point to the next picture. Help them restart one step if needed, then let them finish. Keep the job small enough to succeed.</p></div>
-      </section>
-      <section class="srr-parent-promise"><h3>What we're working toward</h3><p>One predictable cue instead of five requests. The first week is practice, not a test. Give children real ownership as they learn to notice and finish.</p></section>
+      <section class="srr-rollout">
+  <div><span>DAY 1</span><h3>Show it together</h3><p>Post the plan near the room. Show where everything belongs and reset together once.</p></div>
+  <div><span>DAYS 2–3</span><h3>Practice at the cue</h3><p>When the cue happens, point to the first picture. Help younger children start and let them finish what they can.</p></div>
+  <div><span>DAYS 4–7</span><h3>Give the job back</h3><p>Let them notice, start, and finish. Check once afterward. Celebrate effort and follow-through.</p></div>
+ </section><section class="srr-parent-grid">
+  <div><h3>If they resist</h3><p>Stay calm: “We reset before our next play activity.” Never withhold meals or other basic needs.</p></div>
+  <div><h3>If they get distracted</h3><p>Point to the next picture. Help begin one item if needed, then hand the job back.</p></div>
+ </section><section class="srr-parent-promise"><h3>Fewer reminders, over time</h3><p>Start with one manageable space. The first week is practice. Young kids may still need help, but the cue and clear steps can gradually replace repeated requests.</p></section>
       <section class="srr-parent-note"><h3>A note from Megan</h3><p>Start with one mess that keeps coming back. A small reset your kids can learn to own is worth more than another long list you have to manage.</p></section>
       <footer class="srr-back-foot">ONE FAMILY · ONE DAILY RESET · LESS REMINDING</footer>
      </article>
@@ -83,9 +84,9 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
 .srr-stage{width:100%}.srr-pages{display:flex;flex-direction:column;gap:22px;align-items:flex-start}.srr-sheet{position:relative;width:816px;height:1056px;transform:scale(var(--srr-scale,1));transform-origin:top left;flex-shrink:0;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002;background:#fff;padding:42px 52px 30px;display:flex;flex-direction:column;overflow:hidden}.srr-paper-head{text-align:center;padding:12px 10px 20px;border-top:7px solid #deeae4}.srr-paper-head>p{font-size:10px;letter-spacing:.15em;font-weight:700;color:#7c9085;margin:0}.srr-paper-head h2{font:400 45px/1.1 Georgia,serif;color:#506255;margin:14px 0 10px}.srr-paper-head span{font:italic 17px Georgia,serif;color:#849487}
 .srr-trigger-box{margin:25px 0;background:#dfeae3;border-radius:12px;padding:26px;text-align:center}.srr-trigger-box>span{font-size:12px;letter-spacing:.12em;font-weight:700;color:#617d67}.srr-trigger-box h3{font:400 31px Georgia,serif;color:#4b6855;margin:12px 0}.srr-trigger-box p{font-size:14px;color:#66786b;margin:0}.srr-section-title{text-align:center;font:28px Georgia,serif;color:#57594d;margin:17px 0 21px}
 .srr-jobs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.srr-job{min-height:245px;border-radius:12px;background:#faf5eb;padding:14px;display:flex;align-items:center;flex-direction:column;text-align:center}.srr-job:nth-child(2){background:#f1e6de}.srr-job:nth-child(3){background:#edf2ec}.srr-icon{height:126px;width:126px;display:grid;place-items:center}.srr-icon img{width:112px;height:112px;object-fit:contain}.srr-number{font:italic 15px Georgia,serif;color:#8c937d;margin:0 0 12px}.srr-job strong{font-size:16px;line-height:1.35;color:#4d5a4d}
-.srr-done{margin-top:28px;border:1px solid #d6dfd7;border-radius:12px;padding:22px 24px;text-align:center}.srr-done h3{font:27px Georgia,serif;color:#506255;margin:0 0 9px}.srr-done p{font-size:13px;margin:0 0 16px;color:#66786b}.srr-checks{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.srr-checks span{background:#edf3ec;padding:8px 11px;border-radius:20px;font-size:11px;font-weight:700;color:#506b54}
+.srr-jobs.srr-two{grid-template-columns:repeat(2,1fr);max-width:485px;margin:auto}.srr-job[hidden]{display:none!important}.srr-start{text-align:center;font-size:13px;font-weight:600;color:#607665;margin:16px 0 0}.srr-done{margin-top:28px;border:1px solid #d6dfd7;border-radius:12px;padding:22px 24px;text-align:center}.srr-done h3{font:27px Georgia,serif;color:#506255;margin:0 0 9px}.srr-done p{font-size:13px;margin:0 0 16px;color:#66786b}.srr-checks{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.srr-checks span{background:#edf3ec;padding:8px 11px;border-radius:20px;font-size:11px;font-weight:700;color:#506b54}
 .srr-paper-foot{margin-top:auto;text-align:center;border-top:1px solid #dee5dd;padding-top:19px}.srr-paper-foot strong{display:block;font:italic 23px Georgia,serif;color:#65806c}.srr-paper-foot span,.srr-back-foot{display:block;margin-top:14px;font-size:9px;letter-spacing:.12em;font-weight:700;color:#9ca99f;text-align:center}
-.srr-parent-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin:30px 0}.srr-parent-grid>div{background:#f7f7f2;border-radius:9px;padding:24px 22px;min-height:190px}.srr-step{font:italic 23px Georgia,serif;color:#91a692}.srr-parent-grid h3{font:23px Georgia,serif;color:#52685a;margin:8px 0}.srr-parent-grid p{font-size:13px;line-height:1.65;color:#596259;margin:0}.srr-parent-promise{background:#e2ede5;padding:24px;border-radius:10px}.srr-parent-promise h3,.srr-parent-note h3{font:25px Georgia,serif;color:#506255;margin:0 0 9px}.srr-parent-promise p,.srr-parent-note p{font-size:13px;line-height:1.7;margin:0;color:#596259}.srr-parent-note{padding:26px 8px;margin-top:15px}.srr-parent-note p{font-style:italic}.srr-back-foot{margin-top:auto;padding-top:15px;border-top:1px solid #dce5dd}
+.srr-rollout{display:grid;gap:10px;margin:18px 0}.srr-rollout>div{background:#f7f7f2;padding:15px 18px;border-radius:9px}.srr-rollout span{font-size:10px;letter-spacing:.1em;font-weight:700;color:#7c9982}.srr-rollout h3{font:22px Georgia,serif;color:#52685a;margin:4px 0}.srr-rollout p{font-size:12px;line-height:1.5;margin:0;color:#596259}.srr-parent-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}.srr-parent-grid>div{background:#f7f7f2;border-radius:9px;padding:17px;min-height:128px}.srr-step{font:italic 23px Georgia,serif;color:#91a692}.srr-parent-grid h3{font:20px Georgia,serif;color:#52685a;margin:8px 0}.srr-parent-grid p{font-size:12px;line-height:1.55;color:#596259;margin:0}.srr-parent-promise{background:#e2ede5;padding:17px 20px;border-radius:10px}.srr-parent-promise h3,.srr-parent-note h3{font:25px Georgia,serif;color:#506255;margin:0 0 9px}.srr-parent-promise p,.srr-parent-note p{font-size:13px;line-height:1.7;margin:0;color:#596259}.srr-parent-note{padding:14px 8px;margin-top:8px}.srr-parent-note p{font-style:italic}.srr-back-foot{margin-top:auto;padding-top:15px;border-top:1px solid #dce5dd}
 .srr.srr-export .srr-sheet{transform:none!important;box-shadow:none!important}
 @media(max-width:1050px){.srr-layout{display:flex;flex-direction:column}.srr-preview{order:0;width:100%}.srr-editor{order:1;max-width:720px;width:100%}}
 @page{size:letter portrait;margin:0}
@@ -94,7 +95,7 @@ const {storageKey='omc:preview:september-room-reset:v1'}=Astro.props;
 <script>
 type Child={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number};
 type State={owner:string;area:string;trigger:string;jobs:string[]};
-const defaults:State={owner:'family',area:'bedroom',trigger:'Before our evening activity',jobs:['Toys in their homes','Clothes in the hamper','Floor clear to walk']};
+const defaults:State={owner:'family',area:'bedroom',trigger:'After our afternoon snack',jobs:['Toys in their homes','Clothes in the hamper','Floor clear to walk']};
 const descriptions:Record<string,string>={bedroom:'bedroom reset',playroom:'playroom reset',living:'living room reset'};
 for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  const storageKey=root.dataset.srrKey||'omc:preview:september-room-reset:v1';
