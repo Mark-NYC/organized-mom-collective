@@ -170,7 +170,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   const selected=root.querySelector<HTMLSelectElement>('[data-osr-trigger]');if(selected)selected.value=state.trigger;
   const leadSelect=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(leadSelect)leadSelect.value=lead()?.id??'';
   const childFacingLead=()=>{const adult=lead();if(!adult)return 'the responsible adult';const parents=members.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner'));const index=parents.indexOf(adult);return index===0?'Mom':index===1?'Dad':adult.firstName;};
-   const who=root.querySelector<HTMLElement>('[data-osr-lead-name]');if(who)who.textContent=(lead()?.firstName??'An adult')+' owns the follow-through';
+   const who=root.querySelector<HTMLElement>('[data-osr-lead-name]');if(who)who.textContent=childFacingLead()+' owns the follow-through';
   const people=root.querySelector<HTMLElement>('[data-osr-people]');if(people){people.replaceChildren();for(const member of members.slice(0,9)){
    const entry=document.createElement('div');entry.className='osr-person'+(member.kind==='adult'?' osr-adult':'');
    const name=document.createElement('strong');name.textContent=member.firstName;
@@ -202,7 +202,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   if(key!==current){current=key;state={trigger:defaultTrigger,leadId:members.find(m=>m.kind==='adult'&&!m.isAccountHolder)?.id??members.find(m=>m.kind==='adult')?.id??'',assignments:{}};try{const previous=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(previous?.current===key&&previous.state&&typeof previous.state.trigger==='string'&&typeof previous.state.assignments==='object')state=previous.state}catch{}}
   if(!members.some(m=>m.id===state.leadId&&m.kind==='adult'))state.leadId=members.find(m=>m.kind==='adult')?.id??'';
   fillAssignments();
-  const select=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(select){select.replaceChildren();for(const adult of members.filter(m=>m.kind==='adult')){const item=document.createElement('option');item.value=adult.id;item.textContent=adult.firstName;select.append(item)}}save();paint();
+  const select=root.querySelector<HTMLSelectElement>('[data-osr-lead]');if(select){select.replaceChildren();for(const adult of members.filter(m=>m.kind==='adult')){const item=document.createElement('option');item.value=adult.id;item.textContent=(adult.role==='parent'||adult.role==='partner')?(members.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner')).indexOf(adult)===0?'Mom':'Dad'):adult.firstName;select.append(item)}}save();paint();
  });
  paint();
 }
