@@ -41,7 +41,10 @@ function current():Family {
  if(clubHousehold){
   const adults=clubHousehold.members.filter(m=>m.kind==='adult'&&!m.archived);
   const children=clubHousehold.members.filter(m=>m.kind==='child'&&!m.archived);
-  const members=[adults[0]?.firstName??'A parent',adults[1]?.firstName??'a grown-up',...children.map(m=>m.firstName)];
+  // The mission speaks to children, so its helper should be someone they naturally address.
+  // Keep saved first names unchanged; only the printed child-facing instruction uses a title.
+  const helper=adults[1] ? ((adults[1].role==='partner'||adults[1].role==='parent')?'Dad':adults[1].firstName) : (adults[0]?.role==='parent'?'Mom':adults[0]?.firstName??'a grown-up');
+  const members=[adults[0]?.firstName??'A parent',helper,...children.map(m=>m.firstName)];
   const ages=[0,0,...children.map(m=>m.birthYear?2026-m.birthYear:8)];
   return {id:'rivera',label:'Family profile',family:clubHousehold.displayName??'Our Family',members,ages,recommended:'kindness'};
  }
