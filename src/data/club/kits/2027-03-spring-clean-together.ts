@@ -22,18 +22,18 @@ export const kit: KitConfig = {
   slug: SLUG,
   month: '2027-03',
   theme: 'Our Family Spring Prep',
-  subtitle: 'The March project from your companion, shared with the whole family.',
-  shift: 'The five existing March Spring Prep jobs have age-aware owners, so Mom does not have to translate the companion checklist into family assignments.',
+  subtitle: 'Five familiar spring jobs, with a clear owner and a finish line for each.',
+  shift: 'March teaches independent ownership rather than adding cleaning chores: each existing companion task includes its owner, supplies, get-ready cue, action and self-check.',
   engine: 'planning',
   engineVersion: 1,
   items: [],
   action: {
     kind: 'checklist',
     title: 'Our Family Spring Prep',
-    intro: 'Five familiar March tasks. One clear person to start each one.',
+    intro: 'Five optional March tasks. One named owner, supplies and three clear steps for each: get ready, do the job, check it is done.',
     note: 'These are the same optional Spring Prep tasks in /app. Do one task on a weekend that fits, or skip it. Nobody has to finish all five.',
     items: springPrep.tasks.map((task) => ({ text: task.label })),
-    helperLabel: 'Led by',
+    helperLabel: 'This job is mine',
   },
   printables: [
     { id: 'spring-prep-family-plan', title: 'Our Family Spring Prep', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
@@ -55,11 +55,11 @@ export const kit: KitConfig = {
       signoff: 'Megan',
     },
     fieldGuide: {
-      title: 'How We Share March Spring Prep',
+      title: 'How We Hand Off a Job',
       sections: [
         { heading: 'Start with one room.', body: 'A visible win is more encouraging than an unfinished whole-house project.' },
-        { heading: 'Give everyone a real job.', body: 'Assign manageable responsibilities that people can complete with increasing independence.' },
-        { heading: 'Work in short sessions.', body: 'Set a timer, work together, and stop when the session is finished.' },
+        { heading: 'Give everyone a real job.', body: 'Give each job one age-appropriate owner and a clear finish line. Younger children own a smaller, safe part.' },
+        { heading: 'Work in short sessions.', body: 'The owner gathers supplies, does the work, checks the result and puts supplies away. No ongoing tracking or reminders.' },
       ],
     },
     checklist: {
@@ -75,7 +75,7 @@ export const kit: KitConfig = {
     },
     invite: {
       title: 'Review Your Family Spring Prep Sheet',
-      body: 'The five tasks match the companion. See who leads each task, edit the suggested owners if you like, and print one family-facing sheet.'
+      body: 'See suggested age-appropriate owners for the same five companion tasks, adjust names if needed, and print one sheet with supplies and three-step handoffs.'
     },
     calendarNote: 'Spring Prep is the same optional monthly project in /app. Choose one weekend task if it fits; no separate plan or deadline.',
     screenNote: 'This printable matches the companion’s March Spring Prep project. Printed checkmarks do not currently sync with /app.',
