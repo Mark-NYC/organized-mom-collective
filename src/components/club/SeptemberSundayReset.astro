@@ -2,7 +2,7 @@
 /** September's mailed flagship. Activity calendar is digital only. */
 ---
 <section class="ofc-september" data-ofc-september>
- <header class="ofc-september-heading"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h1>A Week Everyone Can See</h1><p>One weekly rhythm. Everyone knows the plan and helps get ready.</p></header>
+ <header class="ofc-september-heading"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h1>A Week Everyone Can See</h1><p>Make this your family's familiar 15-minute rhythm each week. Everyone sees what's next and owns their part.</p></header>
  <div class="ofc-preview-tabs" role="tablist" aria-label="September resources">
   <button type="button" role="tab" id="ofc-reset-tab" aria-controls="ofc-reset-panel" aria-selected="true" tabindex="0" data-ofc-tab="reset">Sunday Reset <span>Included by mail</span></button>
   <button type="button" role="tab" id="ofc-calendar-tab" aria-controls="ofc-calendar-panel" aria-selected="false" tabindex="-1" data-ofc-tab="calendar">Family Activity Calendar <span>Digital companion</span></button>
@@ -20,7 +20,7 @@
    </article>
    <article class="ofc-reset-paper ofc-reset-back">
     <header><span>ORGANIZED FAMILY CLUB · SEPTEMBER</span><h2>Everyone Has <em>a Part</em></h2><p data-ofc-family-back>Our family</p></header>
-    <h3>Our weekly preparation team</h3><p>Start with one small job each. People can trade roles when the week changes.</p>
+    <h3>Our weekly preparation team</h3><p>Everyone brings something to the Sunday Reset. Keep the same rhythm each week and share the jobs as plans change.</p>
     <div data-ofc-roles class="ofc-reset-roles"><p>Preparing family roles…</p></div>
     <div class="ofc-reset-prompts"><h3>Five questions for any Sunday</h3><p>What's happening this week?</p><p>What changed since last week?</p><p>What needs to be ready ahead of time?</p><p>Who is taking care of each part?</p><p>Where can we leave some breathing room?</p></div>
     <div class="ofc-reset-note"><strong>A note from Megan</strong><p>Start with a few minutes together and let everyone share what they see. The goal isn't a perfect week. It's a family that starts noticing, planning, and preparing together.</p></div>
@@ -46,16 +46,45 @@
 #ofc-calendar-panel{max-width:1260px;margin:auto}
 @media(max-width:600px){.ofc-september{padding:22px 10px 50px}.ofc-preview-tabs button{font-size:13px;padding:12px 5px}.ofc-preview-tabs button span{font-size:9px}.ofc-reset-paper{padding:25px 20px;min-height:0}.ofc-reset-steps li{gap:6px}.ofc-reset-steps b{min-width:75px}.ofc-reset-tools{padding:13px}}
 @media print{@page{size:letter portrait;margin:0}body:has(.ofc-september-print) *{visibility:hidden!important}body:has(.ofc-september-print) .ofc-reset-paper,body:has(.ofc-september-print) .ofc-reset-paper *{visibility:visible!important}body:has(.ofc-september-print) .ofc-reset-pages{display:block!important;position:absolute;left:0;top:0;width:8.5in}body:has(.ofc-september-print) .ofc-reset-paper{display:flex!important;width:8.5in!important;height:11in!important;min-height:11in!important;aspect-ratio:auto!important;padding:.42in!important;box-shadow:none!important;border:0!important;break-after:page!important;page-break-after:always!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body:has(.ofc-september-print) .ofc-reset-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
+.ofc-reset-role{min-height:26px}.ofc-reset-role strong{overflow-wrap:anywhere;word-break:break-word}.ofc-reset-paper header>p{overflow-wrap:anywhere}
+@media print{.ofc-reset-role{break-inside:avoid}.ofc-reset-roles{gap:4px}.ofc-reset-role{padding:5px 8px}.ofc-reset-prompts p{padding-bottom:4px;margin:4px 0}}
 </style>
 <script>
+import {accountStore,sampleStore,type ClubStore} from '../../lib/club/store';
+import {defaultToolPalette} from '../../data/tool-palettes';
 const root=document.querySelector<HTMLElement>('[data-ofc-september]');
 if(root){
  const tabs=Array.from(root.querySelectorAll<HTMLButtonElement>('[data-ofc-tab]'));
  const activate=(name:string)=>{tabs.forEach(t=>{const active=t.dataset.ofcTab===name;t.setAttribute('aria-selected',String(active));t.tabIndex=active?0:-1});root.querySelectorAll<HTMLElement>('[data-ofc-panel]').forEach(p=>{p.hidden=p.dataset.ofcPanel!==name})};
  tabs.forEach((button,i)=>{button.addEventListener('click',()=>activate(button.dataset.ofcTab!));button.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const next=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];activate(next.dataset.ofcTab!);next.focus()}if(e.key==='Home'||e.key==='End'){e.preventDefault();const next=tabs[e.key==='Home'?0:tabs.length-1];activate(next.dataset.ofcTab!);next.focus()}})});
  const time=root.querySelector<HTMLSelectElement>('[data-ofc-time]')!;
- time.addEventListener('change',()=>{root.querySelector('[data-ofc-print-time]')!.textContent=time.value;try{sessionStorage.setItem('omc:club:september:sunday-time:v1',time.value)}catch{}});
- try{const saved=sessionStorage.getItem('omc:club:september:sunday-time:v1');if(saved&&Array.from(time.options).some(o=>o.value===saved)){time.value=saved;time.dispatchEvent(new Event('change'))}}catch{}
+ let store:ClubStore|null=null,revision=0,identity='',version=1,loading=0,canEdit=false;
+ let pending:Promise<void>=Promise.resolve();
+ const timeStatus=(message:string)=>{root.querySelector('[data-ofc-reset-status]')!.textContent=message};
+ const saveTime=()=>{
+  if(!store||!canEdit)return;
+  const chosen=time.value;const current=identity;const activeStore=store;const profileVersion=version;
+  timeStatus('Saving Sunday Reset…');
+  pending=pending.then(async()=>{if(current!==identity)return;revision=await activeStore.saveDocument('2027-09-a-week-everyone-can-see','sunday-reset-settings',{edits:{gatherTime:chosen},palette:defaultToolPalette,engineVersion:1,profileVersion},revision)})
+   .then(()=>{if(current===identity)timeStatus(activeStore.kind==='sample'?'Saved in this preview browser tab. No mailing is initiated.':'Saved to your Club account. No mailing is initiated.')})
+   .catch(()=>{if(current===identity){canEdit=false;time.disabled=true;timeStatus('Unable to save the Sunday Reset time. Reload before making more edits.')}});
+ };
+ time.addEventListener('change',()=>{root.querySelector('[data-ofc-print-time]')!.textContent=time.value;saveTime()});
+ const hydrateTime=async(detail:{household:{id:string;profileVersion?:number}|null;sample:string|null})=>{
+  const h=detail.household;if(!h)return;const next=h.id+'::'+(detail.sample??'account');if(identity===next)return;
+  identity=next;const request=++loading;store=detail.sample?sampleStore(detail.sample):accountStore;revision=0;canEdit=false;version=h.profileVersion??1;time.disabled=true;
+  timeStatus('Loading your Sunday Reset…');
+  try{
+   const docs=await store.documents('2027-09-a-week-everyone-can-see');if(loading!==request)return;
+   const saved=docs.documents['sunday-reset-settings'];revision=saved?.revision??0;
+   const option=(saved?.edits as {gatherTime?:unknown}|undefined)?.gatherTime;
+   time.value=typeof option==='string'&&Array.from(time.options).some(o=>o.value===option)?option:'Sunday after lunch';
+   root.querySelector('[data-ofc-print-time]')!.textContent=time.value;canEdit=docs.can==='edit';time.disabled=!canEdit;
+   timeStatus(canEdit?'Ready to review. Your printed Sunday Reset remains useful without the digital calendar.':'Read-only Sunday Reset preview.');
+  }catch{timeStatus('Unable to load your saved Sunday Reset. Reload to retry.')}
+ };
+ window.addEventListener('omc:club-preview-household',(e:Event)=>void hydrateTime((e as CustomEvent<Parameters<typeof hydrateTime>[0]>).detail));
+ const cachedTime=(window as Window&{__ofcPreviewHousehold?:Parameters<typeof hydrateTime>[0]}).__ofcPreviewHousehold;if(cachedTime)void hydrateTime(cachedTime);
  const apply=(h:{displayName?:string;members:{firstName:string;kind:string;archived?:boolean;role?:string;isAccountHolder?:boolean}[]}|null)=>{
   if(!h)return;
   const family=h.displayName?.trim()||'Our family';root.querySelector('[data-ofc-family]')!.textContent=family;root.querySelector('[data-ofc-family-back]')!.textContent=family;
@@ -66,6 +95,6 @@ if(root){
  };
  window.addEventListener('omc:club-preview-household',(e:Event)=>apply((e as CustomEvent<{household:Parameters<typeof apply>[0]}>).detail.household));
  const cached=(window as Window&{__ofcPreviewHousehold?:{household:Parameters<typeof apply>[0]}}).__ofcPreviewHousehold;if(cached)apply(cached.household);
- root.querySelector('[data-ofc-print]')!.addEventListener('click',()=>{root.classList.add('ofc-september-print');window.print();setTimeout(()=>root.classList.remove('ofc-september-print'),400)});
+ root.querySelector('[data-ofc-print]')!.addEventListener('click',()=>{root.classList.add('ofc-september-print');window.addEventListener('afterprint',()=>root.classList.remove('ofc-september-print'),{once:true});window.print()});
 }
 </script>
