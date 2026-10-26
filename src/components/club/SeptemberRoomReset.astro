@@ -195,8 +195,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  const render=()=>{
   const years=age(),count=years<=5?2:3;
   const selected=children.find(c=>c.id===state.owner);
-  setText('owner',r=root.querySelector<HTMLElement>('[data-srr-owner]'));
-  if(owner)owner.textContent=selected?selected.firstName+"'s "+descriptions[state.area]:"Our kids' "+descriptions[state.area];
+  setText('owner',selected?selected.firstName+"'s "+descriptions[state.area]:"Our kids' "+descriptions[state.area]);
   setText('cue',state.trigger);
   setText('duration',years<=5?'A small reset. A grown-up helps me start.':years>=10?'I own this reset and check my own work.':'A few minutes to put our things away.');
   setText('count',count===2?'Two little jobs. Then we’re done.':'Three things. Then we’re done.');
