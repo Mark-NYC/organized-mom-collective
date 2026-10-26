@@ -25,8 +25,8 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
       <div class="fvp-room wall fvp-photo-room" id="fvp-room">
 
         <div class="fvp-frame"><div class="fvp-mat"><article class="fvp-art" id="fvp-art">
-          <p class="fvp-word" id="fvp-art-word">Love</p>
           <div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div>
+          <p class="fvp-word" id="fvp-art-word">Love</p>
           <h3 id="fvp-art-name">The Johnson Family</h3>
         </article></div></div>
       </div>
@@ -285,6 +285,15 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 .fvp-photo-room .fvp-art .fvp-word{font-size:clamp(3px,.444cqw,6px)!important}
 @media print{
  .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{font-size:7.2px!important}
+}
+
+/* Artwork first, value beneath, then a full extra line before the family signature. */
+.fvp-art .fvp-symbol{order:0!important}
+.fvp-art .fvp-word{order:1!important}
+.fvp-art h3{order:2!important;margin-top:1.3em!important}
+.fvp-photo-room .fvp-art h3{margin-top:1.3em!important}
+@media print{
+ .fvp-art h3,.fvp-photo-room .fvp-art h3{margin-top:1.3em!important}
 }
 </style>
 <script>
