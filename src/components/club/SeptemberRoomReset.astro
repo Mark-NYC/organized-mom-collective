@@ -44,10 +44,10 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
    </section>
    <section class="srr-guide-section"><h3>Where are we cleaning up?</h3>
     <div class="srr-choice-grid srr-area-choices">
-     <button type="button" data-srr-area-choice="whole"><span aria-hidden="true">⌂</span>Whole House</button>
-     <button type="button" data-srr-area-choice="bedroom"><span aria-hidden="true">▱</span>Bedroom</button>
-     <button type="button" data-srr-area-choice="playroom"><span aria-hidden="true">▦</span>Playroom</button>
-     <button type="button" data-srr-area-choice="living"><span aria-hidden="true">▤</span>Living Room</button>
+     <button type="button" data-srr-area-choice="whole"><img src="/images/club/september/whole-house.png" width="44" height="44" alt="" />Whole House</button>
+     <button type="button" data-srr-area-choice="bedroom"><img src="/images/club/september/bedroom.png" width="44" height="44" alt="" />Bedroom</button>
+     <button type="button" data-srr-area-choice="playroom"><img src="/images/club/september/playroom.png" width="44" height="44" alt="" />Playroom</button>
+     <button type="button" data-srr-area-choice="living"><img src="/images/club/september/living-room.png" width="44" height="44" alt="" />Living Room</button>
     </div>
    </section>
    <section class="srr-guide-section"><div class="srr-guide-caption"><h3>Your family's cleanup jobs</h3><span>Prepared for you</span></div><p class="srr-guide-tip">Choose a different job or person only if needed.</p><div class="srr-guide-jobs" data-srr-guided-jobs></div></section>
@@ -73,7 +73,7 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
       <h3 class="srr-section-title" data-srr-count contenteditable="true" role="textbox" aria-label="Edit count">Three things. Then we’re done.</h3>
       <div class="srr-jobs" data-srr-jobs>
        <div class="srr-job"><div class="srr-icon"><img data-srr-icon="0" src="/images/club/icon-library/toys-in-toy-basket.png" alt="" width="112" height="112" /></div><span class="srr-number">01</span><strong data-srr-job-label="0" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Toys in their homes</strong></div>
-       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/sorting-clothes.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Clothes in Hamper</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/september/clothes-in-hamper.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Clothes in Hamper</strong></div>
        <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/clear-floor.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Floor Vacuum-Ready</strong></div>
       </div><p class="srr-start" data-srr-start contenteditable="true" role="textbox" aria-label="Edit start">Start with the toys nearest your feet.</p>
       <section class="srr-done">
@@ -185,7 +185,7 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
 .srr-choice-grid button:hover{border-color:#819b81;background:#f9fbf7}
 .srr-choice-grid button.is-active{border:2px solid #6c8a71;background:#edf4ec;padding:9px 11px}
 .srr-choice-grid button.is-active::after{content:"✓";margin-left:auto;color:#507454;font-weight:700}
-.srr-area-choices button span{font:24px/1 Georgia,serif;color:#74917d;width:24px;text-align:center}
+.srr-area-choices button img{width:45px;height:45px;object-fit:contain;flex-shrink:0}
 .srr-guide-caption{display:flex;gap:14px;justify-content:space-between;align-items:baseline}
 .srr-guide-caption span{font:500 10px Montserrat,Arial,sans-serif;color:#809080}
 .srr-guide-tip{font:12px/1.5 Montserrat,Arial,sans-serif;color:#718073;margin:0 0 13px}
@@ -209,7 +209,7 @@ type State={owner:string;area:string;trigger:string;jobs:string[];jobOwners?:str
 const ageOf=(child?:Child)=>child?.birthYear?Math.max(2,2027-child.birthYear-((child.birthMonth??1)>9?1:0)):8;
 const jobOptions=['Toys Put Away','Clothes in Hamper','Personal Belongings Put Away','Floor Vacuum-Ready','Backpack Put Away','Books Put Away','Play Area Cleared'];
 const areaJobs:Record<string,string[]>={whole:['Toys Put Away','Clothes in Hamper','Floor Vacuum-Ready'],bedroom:['Toys Put Away','Clothes in Hamper','Floor Vacuum-Ready'],playroom:['Toys Put Away','Books Put Away','Play Area Cleared'],living:['Toys Put Away','Personal Belongings Put Away','Floor Vacuum-Ready']};
-const jobIcons:Record<string,string>={'Toys Put Away':'toys-in-toy-basket','Clothes in Hamper':'sorting-clothes','Personal Belongings Put Away':'toys-in-toy-basket','Floor Vacuum-Ready':'clear-floor','Backpack Put Away':'backpack','Books Put Away':'book','Play Area Cleared':'clear-floor'};
+const jobIcons:Record<string,string>={'Toys Put Away':'/images/club/icon-library/toys-in-toy-basket.png','Clothes in Hamper':'/images/club/september/clothes-in-hamper.png','Personal Belongings Put Away':'/images/club/september/personal-belongings-put-away.png','Floor Vacuum-Ready':'/images/club/icon-library/clear-floor.png','Backpack Put Away':'/images/club/icon-library/backpack.png','Books Put Away':'/images/club/icon-library/book.png','Play Area Cleared':'/images/club/icon-library/clear-floor.png'};
 const prepare=(area:string,age:number)=>{const jobs=[...(areaJobs[area]??areaJobs.bedroom)];if(age<=5){jobs[0]='Toys Put Away';jobs[1]='Clothes in Hamper'}return jobs};
 const defaults:State={owner:'family',area:'whole',trigger:'Before Dinner',jobs:['Toys Put Away','Clothes in Hamper','Floor Vacuum-Ready'],jobOwners:[]};
 const descriptions:Record<string,string>={whole:'whole-house cleanup',bedroom:'bedroom cleanup',playroom:'playroom cleanup',living:'living room cleanup'};
@@ -242,7 +242,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
   setText('count',count===2?'Two little jobs. Then we’re done.':'Three things. Then we’re done.');
   const grid=root.querySelector<HTMLElement>('[data-srr-jobs]');grid?.classList.toggle('srr-two',count===2);
   const cards=Array.from(root.querySelectorAll<HTMLElement>('.srr-job'));
-  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label&&document.activeElement!==label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src='/images/club/icon-library/'+(jobIcons[state.jobs[i]]??'toys-in-toy-basket')+'.png';let who=card.querySelector<HTMLElement>('.srr-job-owner');if(!who){who=document.createElement('span');who.className='srr-job-owner';card.append(who)}const fallback=selected?.firstName??(children.length>1?(i===count-1?'Everyone':children[i%children.length].firstName):children.length===1?children[0].firstName:'Our kids');const key=state.jobOwners?.[i];const assigned=key==='everyone'?'Everyone':children.find(c=>c.id===key)?.firstName??fallback;who.textContent='Person responsible: '+assigned});
+  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label&&document.activeElement!==label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src=(jobIcons[state.jobs[i]]??jobIcons['Toys Put Away']);let who=card.querySelector<HTMLElement>('.srr-job-owner');if(!who){who=document.createElement('span');who.className='srr-job-owner';card.append(who)}const fallback=selected?.firstName??(children.length>1?(i===count-1?'Everyone':children[i%children.length].firstName):children.length===1?children[0].firstName:'Our kids');const key=state.jobOwners?.[i];const assigned=key==='everyone'?'Everyone':children.find(c=>c.id===key)?.firstName??fallback;who.textContent='Person responsible: '+assigned});
   setText('finish',state.jobs.includes('Floor Vacuum-Ready')?'Toys, clothes, and loose belongings are off the floor so it could be vacuumed.':'Each item is back where it belongs.');
   setText('start',years<=5?'Start with just one toy.':years>=10?'Start by scanning the floor and putting away what you see.':'Start with the toys nearest your feet.');
   const checks=root.querySelector<HTMLElement>('[data-srr-checks]');if(checks)checks.replaceChildren(...state.jobs.slice(0,count).map(label=>{const chip=document.createElement('span');chip.textContent='✓ '+label;return chip}));
@@ -255,7 +255,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
   const jobList=root.querySelector<HTMLElement>('[data-srr-guided-jobs]');
   if(jobList){jobList.replaceChildren();for(let i=0;i<count;i++){
    const entry=document.createElement('div');entry.className='srr-guided-job';
-   const icon=document.createElement('img');icon.src='/images/club/icon-library/'+(jobIcons[state.jobs[i]]??'toys-in-toy-basket')+'.png';icon.alt='';icon.width=60;icon.height=60;
+   const icon=document.createElement('img');icon.src=(jobIcons[state.jobs[i]]??jobIcons['Toys Put Away']);icon.alt='';icon.width=60;icon.height=60;
    const fields=document.createElement('div');fields.className='srr-guided-fields';
    const jobLabel=document.createElement('label');jobLabel.textContent='Cleanup job '+(i+1);const jobSelect=document.createElement('select');jobSelect.setAttribute('aria-label','Cleanup job '+(i+1));
    for(const name of [...new Set([...jobOptions,state.jobs[i]])]){const opt=document.createElement('option');opt.value=name;opt.textContent=name;jobSelect.append(opt)}jobSelect.value=state.jobs[i];jobLabel.append(jobSelect);
