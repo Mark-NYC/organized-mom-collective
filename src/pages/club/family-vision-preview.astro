@@ -7,13 +7,17 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 <PublicLayout fullTitle="Our Family Vision | Organized Family Club" description="Personalize your family vision print and see it framed in your home." indexable={false} chrome={false} width="full" tracking={false}>
 <main class="fvp">
   <header class="fvp-top"><a href="/club">← Organized Family Club</a><span>WELCOME PRINT · DESIGN PREVIEW</span></header>
-  <section class="fvp-intro"><p class="eyebrow">A LITTLE SOMETHING FOR YOUR FAMILY</p><h1>Let's make it <em>yours.</em></h1><p>Pick a word that feels like your family, add your name, and see a keepsake made just for you. Two easy choices. We’ll handle the design.</p></section>
+
   <div class="fvp-grid">
     <section class="fvp-editor" aria-labelledby="personalize-heading">
-      <h2 id="personalize-heading">Your family's print</h2><p>Add your family name and choose up to two values.</p>
+  <section class="fvp-intro"><p class="eyebrow">A LITTLE SOMETHING FOR YOUR FAMILY</p><h1>Let's make it <em>yours.</em></h1><p>Pick a word that feels like your family, add your name, and see a keepsake made just for you. Two easy choices. We’ll handle the design.</p></section>
+      <div class="fvp-editor-summary"><span class="eyebrow">YOUR PERSONALIZED KEEPSAKE</span><strong id="fvp-summary-name">The Johnson Family</strong><p id="fvp-summary-values">Love</p><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Customize your print</button></div>
+      <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
+      <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose up to two values.</p>
       <div class="fvp-step"><label for="fvp-name"><b>01</b> What do you call your family?</label><p>It'll appear on the finished print.</p><input id="fvp-name" maxlength="45" autocomplete="off" value="The Johnson Family" placeholder="The Johnson Family" /></div>
       <fieldset class="fvp-step"><legend><b>02</b> Choose your family values</legend><p>Pick one or two values that describe the family you want to be.</p><div class="fvp-values" id="fvp-values"><button type="button" data-value="Love" class="fvp-value selected" aria-pressed="true"><img src={visionImages["love-vision.jpeg"]} alt="" loading="lazy"><span>Love</span></button><button type="button" data-value="Faith" class="fvp-value" aria-pressed="false"><img src={visionImages["faith-vision.jpeg"]} alt="" loading="lazy"><span>Faith</span></button><button type="button" data-value="Joy" class="fvp-value" aria-pressed="false"><img src={visionImages["joy-vision.jpeg"]} alt="" loading="lazy"><span>Joy</span></button><button type="button" data-value="Peace" class="fvp-value" aria-pressed="false"><img src={visionImages["peace-vision.jpeg"]} alt="" loading="lazy"><span>Peace</span></button><button type="button" data-value="Adventure" class="fvp-value" aria-pressed="false"><img src={visionImages["adventure-vision.jpeg"]} alt="" loading="lazy"><span>Adventure</span></button><button type="button" data-value="Kindness" class="fvp-value" aria-pressed="false"><img src={visionImages["kindness-vision.jpeg"]} alt="" loading="lazy"><span>Kindness</span></button><button type="button" data-value="Courage" class="fvp-value" aria-pressed="false"><img src={visionImages["courage-vision.jpeg"]} alt="" loading="lazy"><span>Courage</span></button><button type="button" data-value="Gratitude" class="fvp-value" aria-pressed="false"><img src={visionImages["gratitude-vision.jpeg"]} alt="" loading="lazy"><span>Gratitude</span></button><button type="button" data-value="Togetherness" class="fvp-value" aria-pressed="false"><img src={visionImages["togetherness.jpg"]} alt="" loading="lazy"><span>Togetherness</span></button><button type="button" data-value="Hospitality" class="fvp-value" aria-pressed="false"><img src={visionImages["hospitality-vision.jpeg"]} alt="" loading="lazy"><span>Hospitality</span></button><button type="button" data-value="Growth" class="fvp-value" aria-pressed="false"><img src={visionImages["growth-vision.jpeg"]} alt="" loading="lazy"><span>Growth</span></button><button type="button" data-value="Creativity" class="fvp-value" aria-pressed="false"><img src={visionImages["creativity-vision.jpeg"]} alt="" loading="lazy"><span>Creativity</span></button><button type="button" data-value="Generosity" class="fvp-value" aria-pressed="false"><img src={visionImages["generosity-vision.jpeg"]} alt="" loading="lazy"><span>Generosity</span></button><button type="button" data-value="Wonder" class="fvp-value" aria-pressed="false"><img src={visionImages["wonder-vision.jpg"]} alt="" loading="lazy"><span>Wonder</span></button><button type="button" data-value="Perseverance" class="fvp-value" aria-pressed="false"><img src={visionImages["perseverance-vision.jpeg"]} alt="" loading="lazy"><span>Perseverance</span></button><button type="button" data-value="Rest" class="fvp-value" aria-pressed="false"><img src={visionImages["rest-vision.jpg"]} alt="" loading="lazy"><span>Rest</span></button><button type="button" data-value="Hope" class="fvp-value" aria-pressed="false"><img src={visionImages["hope-vision.jpeg"]} alt="" loading="lazy"><span>Hope</span></button><button type="button" data-value="Home" class="fvp-value" aria-pressed="false"><img src={visionImages["home-vision.jpg"]} alt="" loading="lazy"><span>Home</span></button><button type="button" data-value="Service" class="fvp-value" aria-pressed="false"><img src={visionImages["service-vision.jpeg"]} alt="" loading="lazy"><span>Service</span></button><button type="button" data-value="Playfulness" class="fvp-value" aria-pressed="false"><img src={visionImages["playfulness-vision.jpg"]} alt="" loading="lazy"><span>Playfulness</span></button></div><p class="fvp-selection-hint" id="fvp-selection-hint" aria-live="polite">Love selected. Choose one more if you like.</p></fieldset>
-      <div class="fvp-ready"><strong>Your design is ready.</strong><p>It updates automatically as you choose. You can see it in a frame or print a sample to try at home.</p><button type="button" id="fvp-print">Print sample / Save PDF</button><button type="button" class="fvp-reset" id="fvp-reset">Start over</button></div>
+      <div class="fvp-dialog-done"><button type="button" id="fvp-done-editor">Done · See my print</button></div></dialog>
+      <div class="fvp-ready"><strong>Ready to display.</strong><p>Your design updates automatically. See it framed or print the finished artwork.</p><button type="button" id="fvp-print">Print / Save PDF</button><button type="button" class="fvp-reset" id="fvp-reset">Start over</button></div>
     </section>
     <section class="fvp-visual" aria-label="Live family vision print preview">
       <div class="fvp-visual-head"><div><p class="eyebrow">MADE FOR YOUR HOME</p><h2>Picture it in your space.</h2></div><span>LIVE PREVIEW</span></div>
@@ -67,6 +71,75 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 @media(max-width:850px){.fvp-photo-room{height:auto;min-height:0}.fvp-room.paper{height:72vw;min-height:420px}}
 @media(max-width:490px){.fvp-photo-room{height:auto;min-height:0}.fvp-room.paper{height:103vw;min-height:390px}}
 @media print{.fvp-photo-room{background:white!important;aspect-ratio:auto!important;container-type:normal!important}.fvp-photo-room .fvp-frame{position:static!important;left:auto!important;top:auto!important;width:8.5in!important;height:11in!important}.fvp-photo-room .fvp-art{padding:1.1in .9in .8in!important}.fvp-photo-room .fvp-art h3{font-size:47px!important}.fvp-photo-room .fvp-word{font-size:43px!important}.fvp-photo-room .fvp-phrase{font-size:21px!important}.fvp-photo-room .fvp-art-top{font-size:13px!important}.fvp-photo-room .fvp-we{font-size:12px!important}.fvp-photo-room .fvp-art-footer{font-size:10px!important}.fvp-photo-room .fvp-art-leaf{font-size:42px!important}}
+
+/* Match the June prepared-plan workspace: small fixed editing sidebar and large scrollable preview. */
+.fvp{max-width:none;margin:0;padding:0;background:#faf9f7}
+.fvp-top{padding:12px clamp(18px,3vw,45px);background:#fff;border-bottom:1px solid #e4e3df;min-height:49px}
+.fvp-grid{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+.fvp-editor{display:flex;flex-direction:column;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:17px clamp(17px,2vw,26px);min-width:0}
+.fvp-intro{margin:0 0 15px;max-width:none}
+.fvp-intro h1{font-size:clamp(29px,2.7vw,38px);margin:9px 0}
+.fvp-intro>p:last-child{font-size:12px;line-height:1.6;margin:0}
+.fvp-editor-summary{padding:17px;background:white;border:1px solid #e5e8e0;flex:1;min-height:0}
+.fvp-editor-summary strong{display:block;font:400 25px Georgia,serif;color:#53694e;margin:16px 0 8px;overflow-wrap:anywhere}
+.fvp-editor-summary>p{font:italic 19px Georgia,serif;color:#708767;margin:0 0 18px}
+.fvp-edit-trigger{width:100%;min-height:45px;border:1px solid #b5c6ad;background:#eff5ea;color:#4b6246;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;border-radius:4px}
+.fvp-ready{margin-top:auto;padding:15px 0 0;background:transparent}
+.fvp-ready strong{font-size:19px}
+.fvp-ready p{margin:7px 0 12px}
+.fvp-ready button#fvp-print{min-height:46px}
+.fvp-visual{background:#f5f3f2;padding:18px clamp(18px,3vw,45px) 40px;min-width:0}
+.fvp-visual-head h2{margin:5px 0 13px;font-size:27px}
+.fvp-scenes{margin-bottom:12px}
+.fvp-room.paper{height:min(75vw,800px);max-height:800px;min-height:500px}
+.fvp-caption{margin:9px 0 17px}
+.fvp-note{padding:13px 0}
+.fvp-note strong{font-size:18px}
+.fvp-note p{margin:6px 0}
+.fvp-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(635px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;padding:24px;border:1px solid #dce2d7;border-radius:10px;background:#fff;box-shadow:0 20px 65px #0003;color:#454a43;font-family:Montserrat,Arial,sans-serif}
+.fvp-dialog::backdrop{background:rgba(33,40,36,.52)}
+.fvp-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.fvp-dialog-header button{display:grid;place-items:center;width:37px;height:37px;border:0;border-radius:50%;background:#eff2e9;color:#53694e;font-size:25px;cursor:pointer}
+.fvp-dialog>h2{font:400 29px Georgia,serif;color:#53694e;margin:8px 0}
+.fvp-dialog>p{font-size:13px;line-height:1.6}
+.fvp-dialog .fvp-values{grid-template-columns:repeat(4,minmax(0,1fr))}
+.fvp-dialog-done{position:sticky;bottom:-24px;padding:14px 0 0;background:white}
+.fvp-dialog-done button{width:100%;min-height:47px;border:0;background:#596e50;color:white;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+@media screen and (min-width:1101px){
+ html:has(.fvp),body:has(.fvp){height:100%;overflow:hidden}
+ .fvp{position:fixed;top:0;bottom:0;left:0;right:0;display:flex;flex-direction:column;overflow:hidden;height:100%}
+ .fvp-grid{flex:1;min-height:0}
+ .fvp-editor{height:100%;overflow-y:auto}
+ .fvp-visual{height:100%;overflow-y:auto;overscroll-behavior:contain}
+}
+@media screen and (max-width:1100px){
+ .fvp-grid{display:flex;flex-direction:column}
+ .fvp-visual{order:0;padding:20px 18px}
+ .fvp-editor{order:1;border:0;padding:20px}
+ .fvp-room.paper{height:85vw;min-height:440px}
+ .fvp-editor-summary{flex:auto}
+}
+@media screen and (max-width:700px){
+ .fvp{padding-bottom:92px}
+ .fvp-top{min-height:45px;padding:10px 16px}
+ .fvp-editor{padding:17px 18px}
+ .fvp-visual{padding:14px}
+ .fvp-visual-head h2{font-size:23px}
+ .fvp-ready{position:fixed;bottom:0;left:0;right:0;z-index:20;margin:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:#faf9f7;border-top:1px solid #dce2d7;box-shadow:0 -5px 20px #0001}
+ .fvp-ready>strong,.fvp-ready>p{display:none}
+ .fvp-ready button#fvp-print{min-height:45px}
+ .fvp-ready .fvp-reset{display:none}
+ .fvp-dialog{padding:17px;max-height:calc(100dvh - 25px)}
+ .fvp-dialog .fvp-values{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media print{
+ html:has(.fvp),body:has(.fvp){overflow:visible!important;height:auto!important}
+ .fvp{position:static!important;display:block!important;height:auto!important;overflow:visible!important;padding:0!important}
+ .fvp-grid{display:block!important}
+ .fvp-visual{display:block!important;height:auto!important;overflow:visible!important;padding:0!important}
+ .fvp-dialog,.fvp-editor-summary{display:none!important}
+ .fvp-room.paper{height:auto!important}
+}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
@@ -77,6 +150,8 @@ function render(){
  const name=(byId('fvp-name') as HTMLInputElement).value.trim()||'Your Family';
  const first=selectedValues[0],second=selectedValues[1];
  byId('fvp-art-name')!.textContent=name;
+ byId('fvp-summary-name')!.textContent=name;
+ byId('fvp-summary-values')!.textContent=selectedValues.join(' + ');
  byId('fvp-art-word')!.textContent=second?first+' & '+second:first;
  byId('fvp-art-phrase')!.textContent=second?'We choose '+first.toLowerCase()+' and '+second.toLowerCase()+' in the way we live, love, and grow together.':valuePhrases[first];
  const symbol=byId('fvp-symbol')!;
@@ -85,6 +160,11 @@ function render(){
  for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]')){const yes=selectedValues.includes(b.dataset.value!);b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',String(yes));}
  byId('fvp-selection-hint')!.textContent=selectedValues.join(' + ')+' selected.'+(selectedValues.length===1?' Choose one more if you like.':' Select a value to remove it.');
 }
+const editorDialog=byId('fvp-dialog') as HTMLDialogElement;
+byId('fvp-open-editor')?.addEventListener('click',()=>editorDialog.showModal());
+byId('fvp-close-editor')?.addEventListener('click',()=>editorDialog.close());
+byId('fvp-done-editor')?.addEventListener('click',()=>editorDialog.close());
+editorDialog.addEventListener('click',(event)=>{if(event.target===editorDialog)editorDialog.close();});
 byId('fvp-name')?.addEventListener('input',render);
 for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]'))b.addEventListener('click',()=>{const v=b.dataset.value!;if(selectedValues.includes(v)){if(selectedValues.length>1)selectedValues=selectedValues.filter(x=>x!==v);}else selectedValues=selectedValues.length===2?[selectedValues[0],v]:[...selectedValues,v];render();});
 for(const b of document.querySelectorAll<HTMLButtonElement>('[data-scene]'))b.addEventListener('click',()=>{const scene=b.dataset.scene!;byId('fvp-room')!.className='fvp-room '+scene+(scene==='wall'?' fvp-photo-room':'');document.querySelectorAll('[data-scene]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});byId('fvp-caption')!.textContent=scene==='paper'?'Actual printable layout. US Letter, 8.5 × 11 inches.':'Styled wall preview. Frame and decor are not included.';});
