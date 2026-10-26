@@ -17,14 +17,14 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
     </section>
     <section class="fvp-visual" aria-label="Live family vision print preview">
       <div class="fvp-visual-head"><div><p class="eyebrow">MADE FOR YOUR HOME</p><h2>Picture it in your space.</h2></div><span>LIVE PREVIEW</span></div>
-      <div class="fvp-scenes" role="group" aria-label="Choose display scene"><button type="button" class="selected" data-scene="wall" aria-pressed="true">On the wall</button><button type="button" data-scene="table" aria-pressed="false">On an entry table</button><button type="button" data-scene="paper" aria-pressed="false">Just the print</button></div>
-      <div class="fvp-room wall" id="fvp-room">
-        <div class="fvp-wainscot"></div><div class="fvp-table"><div class="fvp-books"></div><div class="fvp-vase"><i></i><i></i><i></i></div></div>
+      <div class="fvp-scenes" role="group" aria-label="Choose display scene"><button type="button" class="selected" data-scene="wall" aria-pressed="true">On the wall</button><button type="button" data-scene="paper" aria-pressed="false">Just the print</button></div>
+      <div class="fvp-room wall fvp-photo-room" id="fvp-room">
+
         <div class="fvp-frame"><div class="fvp-mat"><article class="fvp-art" id="fvp-art">
           <div class="fvp-art-top">OUR FAMILY</div><div class="fvp-art-rule"></div><div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div><h3 id="fvp-art-name">The Johnson Family</h3><div class="fvp-art-tiny-rule"></div><p class="fvp-we">WE CHOOSE</p><p class="fvp-word" id="fvp-art-word">Together</p><p class="fvp-phrase" id="fvp-art-phrase">We show up for each other, share the work, and make room for joy.</p><div class="fvp-art-leaf">❧</div><p class="fvp-art-footer">ORGANIZED FAMILY CLUB</p>
         </article></div></div>
       </div>
-      <p class="fvp-caption" id="fvp-caption">Styled preview of your personalized 8.5 × 11 inch print in a frame. Frame and decor are not included.</p>
+      <p class="fvp-caption" id="fvp-caption">See your personalized family artwork in a real wooden frame. Frame and decor are not included.</p>
       <div class="fvp-note"><span>✉</span><div><strong>Something lovely for your mailbox.</strong><p>The plan is to print your finished family vision on quality paper and send it as a welcome keepsake. This page is a design prototype; ordering and mailing aren't active yet.</p></div></div>
     </section>
   </div>
@@ -51,6 +51,22 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 @media(max-width:850px){.fvp-grid{grid-template-columns:1fr}.fvp-visual{order:-1}.fvp-symbol{height:29%}.fvp-word{font-size:clamp(21px,4.7vw,38px)}}
 @media(max-width:490px){.fvp-room{min-height:390px}.fvp-symbol{height:27%}.fvp-word{font-size:20px}}
 @media print{.fvp-symbol{height:31%!important;width:80%!important;gap:.15in!important}.fvp-symbol img{max-width:100%!important;mix-blend-mode:normal!important}.fvp-symbol.two img{width:48%!important}.fvp-word{font-size:43px!important}.fvp-phrase{font-size:21px!important}}
+.fvp-photo-room{aspect-ratio:1264/848;height:auto;min-height:0;max-height:none;display:block;background:#eee9df url('/images/club/family-vision-frame.webp') center/100% 100% no-repeat;container-type:inline-size}
+.fvp-photo-room .fvp-frame{position:absolute;left:34.02%;top:16.85%;width:32.44%;height:65.10%;max-height:none;aspect-ratio:auto;padding:0;box-shadow:none;background:transparent;display:flex}
+.fvp-photo-room .fvp-mat{padding:0;box-shadow:none;background:#fff;min-height:0}
+.fvp-photo-room .fvp-art{border:0;padding:6% 6% 4%;background:#fff;min-height:0}
+.fvp-photo-room .fvp-art h3{font-size:clamp(11px,2.4cqw,31px)}
+.fvp-photo-room .fvp-word{font-size:clamp(12px,2.45cqw,34px)}
+.fvp-photo-room .fvp-phrase{font-size:clamp(7px,1.08cqw,15px)}
+.fvp-photo-room .fvp-art-top{font-size:clamp(5px,.7cqw,10px)}
+.fvp-photo-room .fvp-we{font-size:clamp(5px,.65cqw,10px)}
+.fvp-photo-room .fvp-art-footer{font-size:clamp(4px,.51cqw,7px)}
+.fvp-photo-room .fvp-symbol{height:29%;margin-top:0}
+.fvp-photo-room .fvp-art-leaf{font-size:clamp(12px,2cqw,27px)}
+.fvp-room.paper{aspect-ratio:auto;height:min(65vw,690px);min-height:460px;max-height:690px;display:flex}
+@media(max-width:850px){.fvp-photo-room{height:auto;min-height:0}.fvp-room.paper{height:72vw;min-height:420px}}
+@media(max-width:490px){.fvp-photo-room{height:auto;min-height:0}.fvp-room.paper{height:103vw;min-height:390px}}
+@media print{.fvp-photo-room{background:white!important;aspect-ratio:auto!important;container-type:normal!important}.fvp-photo-room .fvp-frame{position:static!important;left:auto!important;top:auto!important;width:8.5in!important;height:11in!important}.fvp-photo-room .fvp-art{padding:1.1in .9in .8in!important}.fvp-photo-room .fvp-art h3{font-size:47px!important}.fvp-photo-room .fvp-word{font-size:43px!important}.fvp-photo-room .fvp-phrase{font-size:21px!important}.fvp-photo-room .fvp-art-top{font-size:13px!important}.fvp-photo-room .fvp-we{font-size:12px!important}.fvp-photo-room .fvp-art-footer{font-size:10px!important}.fvp-photo-room .fvp-art-leaf{font-size:42px!important}}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
@@ -71,7 +87,7 @@ function render(){
 }
 byId('fvp-name')?.addEventListener('input',render);
 for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]'))b.addEventListener('click',()=>{const v=b.dataset.value!;if(selectedValues.includes(v)){if(selectedValues.length>1)selectedValues=selectedValues.filter(x=>x!==v);}else selectedValues=selectedValues.length===2?[selectedValues[0],v]:[...selectedValues,v];render();});
-for(const b of document.querySelectorAll<HTMLButtonElement>('[data-scene]'))b.addEventListener('click',()=>{const scene=b.dataset.scene!;byId('fvp-room')!.className='fvp-room '+scene;document.querySelectorAll('[data-scene]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});byId('fvp-caption')!.textContent=scene==='paper'?'Actual printable layout. US Letter, 8.5 × 11 inches.':scene==='table'?'Styled entry-table preview. Frame and decor are not included.':'Styled wall preview. Frame and decor are not included.';});
+for(const b of document.querySelectorAll<HTMLButtonElement>('[data-scene]'))b.addEventListener('click',()=>{const scene=b.dataset.scene!;byId('fvp-room')!.className='fvp-room '+scene+(scene==='wall'?' fvp-photo-room':'');document.querySelectorAll('[data-scene]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});byId('fvp-caption')!.textContent=scene==='paper'?'Actual printable layout. US Letter, 8.5 × 11 inches.':'Styled wall preview. Frame and decor are not included.';});
 byId('fvp-print')?.addEventListener('click',()=>window.print());
 byId('fvp-reset')?.addEventListener('click',()=>{(byId('fvp-name') as HTMLInputElement).value='The Johnson Family';selectedValues=['Love'];document.querySelector<HTMLButtonElement>('[data-scene="wall"]')?.click();render();});
 render();
