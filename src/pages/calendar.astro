@@ -22,7 +22,7 @@ import { dailyEssentials } from '../data/cleaning';
 import { routes } from '../routes';
 import { BRAND_NAME, PRICES_AS_OF } from '../config';
 import { RETURNS_LINE } from '../data/support';
-import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, raquelReview } from '../data/reviews';
+import { REVIEWS_DISCLAIMER, reviewDate, shopStats, raquelReview } from '../data/reviews';
 
 const PRODUCT = '2027 Family Wall Calendar & Organizer';
 const options = calendarOptions();
@@ -182,7 +182,6 @@ const jsonLd: object[] = [
   },
 ];
 
-const quality = review('quality');
 const check = 'M4.5 10.5 8 14l7.5-8';
 
 const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
