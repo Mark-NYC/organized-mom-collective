@@ -292,7 +292,7 @@ const choices:Record<Group,{id:string;label:string;icon:string}[]>={
   const select=root.querySelector<HTMLSelectElement>('[data-asr-child]');
   if(select){select.replaceChildren();const option=document.createElement('option');option.value='family';option.textContent='Our family';select.append(option);
    for(const kid of kids){const opt=document.createElement('option');opt.value=kid.id;opt.textContent=kid.firstName;select.append(opt)}}
-  if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=initial();
+  if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=kids[0]?initial(kids[0].id,age(kids[0].id)):initial();
    try{const s=JSON.parse(localStorage.getItem(key)??'null');if(s?.profile===profile&&s.boards){
      for(const [id,value] of Object.entries(s.boards))if(value&&typeof value==='object'&&Array.isArray((value as Board).steps))saved[id]=value as Board;
      board=saved[s?.active]??saved.family??(kids[0]?initial(kids[0].id,age(kids[0].id)):board);
