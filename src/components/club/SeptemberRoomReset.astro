@@ -14,8 +14,8 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
   <aside class="srr-editor" aria-label="Prepared September room reset">
    <div class="srr-editor-head"><p class="srr-eyebrow">ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Less asking. <em>More doing.</em></h2><button type="button" class="srr-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
    <div class="srr-prepared" id="september-edit-controls"><span class="srr-eyebrow">YOUR FAMILY'S PREPARED RESET</span><strong>Our Daily Reset</strong><p>One noticeable cue, simple age-appropriate cleanup jobs, and a clear finish line your kids can recognize.</p>
-     <div class="srr-summary-row"><span>Reset owner</span><b data-srr-summary-owner>Our kids together</b></div>
-     <div class="srr-summary-row"><span>Reset area</span><b data-srr-summary-area>Bedroom floor</b></div>
+     <div class="srr-summary-row"><span>Person responsible</span><b data-srr-summary-owner>Our kids together</b></div>
+     <div class="srr-summary-row"><span>Cleanup area</span><b data-srr-summary-area>Bedroom floor</b></div>
      <div class="srr-summary-row"><span>When to start</span><b data-srr-summary-trigger>After our afternoon snack</b></div>
      <button type="button" class="srr-edit-link" data-open-editor>Edit our reset <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
@@ -33,13 +33,13 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
   <dialog class="srr-dialog" data-srr-editor aria-labelledby="srr-editor-title">
    <div class="srr-dialog-head"><h2 id="srr-editor-title">Edit our daily reset</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
    <p>We've prepared the reset. Change only what doesn't fit your family.</p>
-   <div class="srr-dialog-fields">   <label>Reset owner <select data-srr-child><option value="family">Our kids together</option></select></label>
-   <label>Reset area <select data-srr-area><option value="bedroom">Bedroom floor</option><option value="playroom">Playroom</option><option value="living">Living room toys</option></select></label>
-   <label>What starts the reset? <select data-srr-trigger><option value="After our afternoon snack">After our afternoon snack</option><option value="When our daily cleanup alarm rings">When our daily cleanup alarm rings</option><option value="When screen time ends">When screen time ends</option><option value="Before our next play activity">Before our next play activity</option><option value="Before bedtime stories">Before bedtime stories</option></select></label><p class="srr-cue-help">Choose a cue kids can notice without Mom announcing it. If using an alarm, set it once on a household device.</p>
+   <div class="srr-dialog-fields">   <label>Person responsible <select data-srr-child><option value="family">Our kids together</option></select></label>
+   <label>Where are we cleaning up? <select data-srr-area><option value="whole">Whole House</option><option value="bedroom">Bedroom floor</option><option value="playroom">Playroom</option><option value="living">Living room toys</option></select></label>
+   <label>When do we start? <select data-srr-trigger><option value="Before Dinner">Before Dinner</option><option value="After Dinner">After Dinner</option><option value="Before Bedtime">Before Bedtime</option><option value="After School">After School</option><option value="Before the Next Play Activity">Before the Next Play Activity</option><option value="After our afternoon snack">After our afternoon snack</option><option value="When our daily cleanup alarm rings">When our daily cleanup alarm rings</option><option value="When screen time ends">When screen time ends</option><option value="Before our next play activity">Before our next play activity</option></select></label><p class="srr-cue-help">Pick a familiar moment in the day. A gentle reminder is fine. No exact clock time needed.</p>
    <details><summary>Adjust the cleanup jobs <span>Optional</span></summary>
-    <label>Job 1 <input data-srr-job="0" maxlength="60"/></label>
-    <label>Job 2 <input data-srr-job="1" maxlength="60"/></label>
-    <label>Job 3 <input data-srr-job="2" maxlength="60"/></label>
+    <label>Job 1 <select data-srr-job="0"></select></label>
+    <label>Job 2 <select data-srr-job="1"></select></label>
+    <label>Job 3 <select data-srr-job="2"></select></label>
    </details>
 </div>
       <div class="srr-note"><strong>One small handoff</strong><p>Show the children what finished looks like and practice the reset together once. For the first few days, an adult may still need to help them start. The goal is fewer repeated reminders, not instant perfection.</p></div>
@@ -64,8 +64,8 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
       <h3 class="srr-section-title" data-srr-count contenteditable="true" role="textbox" aria-label="Edit count">Three things. Then we’re done.</h3>
       <div class="srr-jobs" data-srr-jobs>
        <div class="srr-job"><div class="srr-icon"><img data-srr-icon="0" src="/images/club/icon-library/toys-in-toy-basket.png" alt="" width="112" height="112" /></div><span class="srr-number">01</span><strong data-srr-job-label="0" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Toys in their homes</strong></div>
-       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/stack-of-clothes.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Clothes in the hamper</strong></div>
-       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/clear-floor.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Floor clear to walk</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/basket.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Clothes in Hamper</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/clear-floor.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Floor Vacuum-Ready</strong></div>
       </div><p class="srr-start" data-srr-start contenteditable="true" role="textbox" aria-label="Edit start">Start with the toys nearest your feet.</p>
       <section class="srr-done">
        <h3>How do we know it's finished?</h3>
@@ -77,13 +77,13 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
      <article class="srr-sheet srr-back" data-srr-back>
       <header class="srr-paper-head"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Let the Routine Remind Them</h2><span>A simple plan for fewer repeat requests.</span></header>
       <section class="srr-rollout">
-  <div><span>DAY 1</span><h3>Show it together</h3><p>Post the plan near the room. Show where everything belongs and reset together once.</p></div>
-  <div><span>DAYS 2–3</span><h3>Practice at the cue</h3><p>When the cue happens, point to the first picture. Help younger children start and let them finish what they can.</p></div>
-  <div><span>DAYS 4–7</span><h3>Give the job back</h3><p>Let them notice, start, and finish. Check once afterward. Celebrate effort and follow-through.</p></div>
+  <div><span>STEP 1</span><h3>Remind Them of Their Job</h3><p data-srr-coaching-cue>It’s almost dinnertime. Let’s get our cleanup jobs done.</p></div>
+  <div><span>STEP 2</span><h3>Help Them Begin if Needed</h3><p>Try: “Let’s find the first three toys that need to go away.” Help with the start, not the whole job.</p></div>
+  <div><span>STEP 3</span><h3>Let Them Finish on Their Own</h3><p>Once they start, let them complete their job. Point to what finished looks like instead of doing it for them.</p></div>
  </section><section class="srr-parent-grid">
-  <div><h3>If they resist</h3><p>Stay calm: “We reset before our next play activity.” Never withhold meals or other basic needs.</p></div>
-  <div><h3>If they get distracted</h3><p>Point to the next picture. Help begin one item if needed, then hand the job back.</p></div>
- </section><section class="srr-parent-promise"><h3>Fewer reminders, over time</h3><p>Start with one manageable space. The first week is practice. Young kids may still need help, but the cue and clear steps can gradually replace repeated requests.</p></section>
+  <div><h3>If they resist</h3><p>Stay calm. Remind them of your agreed cleanup time and their specific job. Help them begin if needed.</p></div>
+  <div><h3>If they get distracted</h3><p>Gently redirect them to their job. Name one small next action, then let them finish.</p></div>
+ </section><section class="srr-parent-promise"><h3>Fewer reminders, over time</h3><p>Start small. Kids may still need reminders, but a familiar cue and clear finish line reduce how much Mom has to direct.</p></section>
       <section class="srr-parent-note"><h3>A note from Megan</h3><p>Start with one mess that keeps coming back. A small reset your kids can learn to own is worth more than another long list you have to manage.</p></section>
       <footer class="srr-back-foot">ONE FAMILY · ONE DAILY RESET · LESS REMINDING</footer>
      </article>
@@ -168,11 +168,13 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
 type Child={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number};
 type State={owner:string;area:string;trigger:string;jobs:string[];custom?:boolean;text?:Record<string,string>};
 const ageOf=(child?:Child)=>child?.birthYear?Math.max(2,2027-child.birthYear-((child.birthMonth??1)>9?1:0)):8;
-const areaJobs:Record<string,string[]>={bedroom:['Toys in their homes','Clothes in the hamper','Floor clear to walk'],playroom:['Toys into bins','Books on their shelf','Playroom floor clear'],living:['Toys in their basket','Books and games away','Floor and couch clear']};
-const areaIcons:Record<string,string[]>={bedroom:['toys-in-toy-basket','stack-of-clothes','clear-floor'],playroom:['blocks','book','home'],living:['basket','book','home']};
-const prepare=(area:string,age:number)=>{const jobs=[...(areaJobs[area]??areaJobs.bedroom)];if(age<=5){jobs[0]='Toys into a basket';jobs[1]=area==='bedroom'?'Clothes into the hamper':'Books in their home'}else if(age>=10){jobs[0]='Put away my things';jobs[1]=area==='bedroom'?'Laundry sorted and put away':'Books and games put away';jobs[2]='Check the entire space'}return jobs};
-const defaults:State={owner:'family',area:'bedroom',trigger:'After our afternoon snack',jobs:['Toys in their homes','Clothes in the hamper','Floor clear to walk']};
-const descriptions:Record<string,string>={bedroom:'bedroom reset',playroom:'playroom reset',living:'living room reset'};
+const jobOptions=['Toys Put Away','Clothes in Hamper','Personal Belongings Put Away','Floor Vacuum-Ready','Backpack Put Away','Books Put Away','Play Area Cleared'];
+const areaJobs:Record<string,string[]>={whole:['Toys Put Away','Clothes in Hamper','Floor Vacuum-Ready'],bedroom:['Toys Put Away','Clothes in Hamper','Floor Vacuum-Ready'],playroom:['Toys Put Away','Books Put Away','Play Area Cleared'],living:['Toys Put Away','Personal Belongings Put Away','Floor Vacuum-Ready']};
+const jobIcons:Record<string,string>={'Toys Put Away':'toys-in-toy-basket','Clothes in Hamper':'basket','Personal Belongings Put Away':'basket','Floor Vacuum-Ready':'clear-floor','Backpack Put Away':'backpack','Books Put Away':'book','Play Area Cleared':'clear-floor'};
+const prepare=(area:string,age:number)=>{const jobs=[...(areaJobs[area]??areaJobs.bedroom)];if(age<=5){jobs[0]='Toys Put Away';jobs[1]='Clothes in Hamper'}return jobs};
+const defaults:State={owner:'family',area:'whole',trigger:'Before Dinner',jobs:['Toys Put Away','Clothes in Hamper','Floor Vacuum-Ready']};
+const descriptions:Record<string,string>={whole:'whole-house cleanup',bedroom:'bedroom cleanup',playroom:'playroom cleanup',living:'living room cleanup'};
+const coachingCues:Record<string,string>={'Before Dinner':"It's almost dinnertime. Let's get our cleanup jobs done.",'After Dinner':"Dinner's finished. Time to put our things away.",'Before Bedtime':"Before we get ready for bed, let's finish our cleanup jobs.",'After School':"Now that we're home, let's put our things where they belong.",'Before the Next Play Activity':"Before starting something new, let's put away what we've been using."};
 for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  const storageKey=root.dataset.srrKey||'omc:preview:september-room-reset:v2';
  let familyKey='',children:Child[]=[];
@@ -195,22 +197,24 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  const render=()=>{
   const years=age(),count=years<=5?2:3;
   const selected=children.find(c=>c.id===state.owner);
-  setText('owner',selected?selected.firstName+"'s "+descriptions[state.area]:"Our kids' "+descriptions[state.area]);
+  setText('owner',selected?selected.firstName+"'s "+descriptions[state.area]:"Our family's "+descriptions[state.area]);
   setText('cue',state.trigger);
   setText('duration',years<=5?'A small reset. A grown-up helps me start.':years>=10?'I own this reset and check my own work.':'A few minutes to put our things away.');
   setText('count',count===2?'Two little jobs. Then we’re done.':'Three things. Then we’re done.');
   const grid=root.querySelector<HTMLElement>('[data-srr-jobs]');grid?.classList.toggle('srr-two',count===2);
   const cards=Array.from(root.querySelectorAll<HTMLElement>('.srr-job'));
-  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label&&document.activeElement!==label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src='/images/club/icon-library/'+(areaIcons[state.area]??areaIcons.bedroom)[i]+'.png'});
-  setText('finish',years<=5?'Everything is back in its place. A grown-up helps check.':years>=10?'All things put away and the whole space checked.':'Everything is in its home. The walking space is clear.');
+  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label&&document.activeElement!==label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src='/images/club/icon-library/'+(jobIcons[state.jobs[i]]??'basket')+'.png'});
+  setText('finish',state.jobs.includes('Floor Vacuum-Ready')?'Toys, clothes, and loose belongings are off the floor so it could be vacuumed.':'Each item is back where it belongs.');
   setText('start',years<=5?'Start with just one toy.':years>=10?'Start by scanning the floor and putting away what you see.':'Start with the toys nearest your feet.');
   const checks=root.querySelector<HTMLElement>('[data-srr-checks]');if(checks)checks.replaceChildren(...state.jobs.slice(0,count).map(label=>{const chip=document.createElement('span');chip.textContent='✓ '+label;return chip}));
-  const summaries:[string,string][]=[['owner',selected?.firstName??'Our kids together'],['area',state.area==='bedroom'?'Bedroom floor':state.area==='playroom'?'Playroom':'Living room toys'],['trigger',state.trigger]];
+  const summaries:[string,string][]=[['owner',selected?.firstName??'Our kids together'],['area',state.area==='whole'?'Whole House':state.area==='bedroom'?'Bedroom':state.area==='playroom'?'Playroom':'Living Room'],['trigger',state.trigger]];
+  const coaching=root.querySelector<HTMLElement>('[data-srr-coaching-cue]');if(coaching)coaching.textContent=coachingCues[state.trigger]??`It's cleanup time: ${state.trigger}. Let's put our things away.`;
   for(const [k,value] of summaries){const el=root.querySelector<HTMLElement>('[data-srr-summary-'+k+']');if(el)el.textContent=value}
   const child=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(child)child.value=state.owner;
   const area=root.querySelector<HTMLSelectElement>('[data-srr-area]');if(area)area.value=state.area;
   const trigger=root.querySelector<HTMLSelectElement>('[data-srr-trigger]');if(trigger)trigger.value=state.trigger;
-  root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>{const i=Number(input.dataset.srrJob);input.value=state.jobs[i]??'';if(input.parentElement)input.parentElement.hidden=i>=count});
+  root.querySelectorAll<HTMLSelectElement>('[data-srr-job]').forEach(input=>{const i=Number(input.dataset.srrJob);input.replaceChildren(...jobOptions.map(job=>{const option=document.createElement('option');option.value=job;option.textContent=job;return option}));input.value=state.jobs[i]??jobOptions[0];if(input.parentElement)input.parentElement.hidden=i>=count});
+  const ownerControl=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(ownerControl){ownerControl.hidden=ownerControl.options.length<=1;const label=ownerControl.closest('label');let plain=label?.querySelector<HTMLElement>('[data-srr-owner-plain]');if(!plain&&label){plain=document.createElement('span');plain.dataset.srrOwnerPlain='';label.append(plain)}if(plain){plain.hidden=ownerControl.options.length>1;plain.textContent=ownerControl.selectedOptions[0]?.textContent??'Our kids together'}}
  };
  root.querySelectorAll<HTMLElement>('.srr-sheet [contenteditable="true"]').forEach(el=>{
   const index=el.dataset.srrJobLabel;
@@ -228,13 +232,13 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  root.querySelector<HTMLSelectElement>('[data-srr-child]')?.addEventListener('change',e=>{state.owner=(e.target as HTMLSelectElement).value;if(!state.custom)prepareState();remember();render()});
  root.querySelector<HTMLSelectElement>('[data-srr-area]')?.addEventListener('change',e=>{state.area=(e.target as HTMLSelectElement).value;state.text={};prepareState();remember();render()});
  root.querySelector<HTMLSelectElement>('[data-srr-trigger]')?.addEventListener('change',e=>{state.trigger=(e.target as HTMLSelectElement).value;if(state.text)delete state.text.cue;remember();render()});
- root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>input.addEventListener('input',()=>{state.jobs[Number(input.dataset.srrJob)]=input.value.slice(0,60);state.custom=true;remember();render()}));
+ root.querySelectorAll<HTMLSelectElement>('[data-srr-job]').forEach(input=>input.addEventListener('change',()=>{state.jobs[Number(input.dataset.srrJob)]=input.value;state.custom=true;remember();render()}));
  root.querySelector('[data-srr-reset]')?.addEventListener('click',()=>{state={...defaults,jobs:[...defaults.jobs]};prepareState();remember();render()});
  root.querySelector('[data-srr-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  const pngButton=root.querySelector<HTMLButtonElement>('[data-srr-png]');
  pngButton?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-srr-front]');if(!front)return;pngButton.disabled=true;root.classList.add('srr-export');const prev=pngButton.textContent;pngButton.textContent='Preparing image…';try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const url=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.href=url;link.download='september-5-minute-room-reset.png';link.click()}catch(err){console.error(err);alert('Image export failed. Use Print / Save PDF instead.')}finally{root.classList.remove('srr-export');pngButton.textContent=prev;pngButton.disabled=false}});
  const applyHousehold=(detail:{household:{id:string;members?:Child[]};sample:string})=>{if(!detail?.household)return;const next=detail.sample+':'+detail.household.id;children=(detail.household.members??[]).filter(x=>x.kind==='child');const childSelect=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(childSelect){childSelect.replaceChildren();const opt=document.createElement('option');opt.value='family';opt.textContent='Our kids together';childSelect.append(opt);for(const c of children){const option=document.createElement('option');option.value=c.id;option.textContent=c.firstName;childSelect.append(option)}}
- if(next!==familyKey){familyKey=next;state={...defaults,jobs:[...defaults.jobs]};prepareState();try{const saved=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(saved?.familyKey===next&&saved.state&&Array.isArray(saved.state.jobs)&&saved.state.jobs.length===3&&['bedroom','playroom','living'].includes(saved.state.area))state=saved.state}catch{}}
+ if(next!==familyKey){familyKey=next;state={...defaults,jobs:[...defaults.jobs]};prepareState();try{const saved=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(saved?.familyKey===next&&saved.state&&Array.isArray(saved.state.jobs)&&saved.state.jobs.length===3&&['whole','bedroom','playroom','living'].includes(saved.state.area))state=saved.state}catch{}}
  if(state.owner!=='family'&&!children.some(c=>c.id===state.owner))state.owner='family';if(!state.custom)prepareState();remember();render()
  };
  window.addEventListener('omc:club-preview-household',(e:Event)=>applyHousehold((e as CustomEvent<{household:{id:string;members?:Child[]};sample:string}>).detail));
