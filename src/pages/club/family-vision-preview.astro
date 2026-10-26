@@ -25,9 +25,9 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
       <div class="fvp-room wall fvp-photo-room" id="fvp-room">
 
         <div class="fvp-frame"><div class="fvp-mat"><article class="fvp-art" id="fvp-art">
-          <h3 id="fvp-art-name">The Johnson Family</h3>
-          <div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div>
           <p class="fvp-word" id="fvp-art-word">Love</p>
+          <div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div>
+          <h3 id="fvp-art-name">The Johnson Family</h3>
         </article></div></div>
       </div>
       <p class="fvp-caption" id="fvp-caption">See your personalized family artwork in a real wooden frame. Frame and decor are not included.</p>
@@ -201,6 +201,43 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
  .fvp-art h3,.fvp-photo-room .fvp-art h3{font-size:43px!important}
  .fvp-art .fvp-symbol,.fvp-photo-room .fvp-art .fvp-symbol{height:3.65in!important;width:5.7in!important}
  .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{font-size:46px!important}
+}
+
+/* Family Vision: understated uppercase value, central watercolor, serif family signature. */
+.fvp-art .fvp-word{
+  order:0;
+  width:100%;
+  max-width:100%;
+  font-family:Montserrat,Arial,sans-serif!important;
+  font-style:normal!important;
+  font-weight:700!important;
+  font-size:clamp(10px,1.05vw,16px)!important;
+  line-height:1.4!important;
+  letter-spacing:clamp(2px,1.15vw,13px)!important;
+  text-transform:uppercase;
+  color:#929a8a!important;
+  text-align:center;
+  padding-left:clamp(2px,1.15vw,13px);
+  overflow-wrap:normal;
+}
+.fvp-art .fvp-symbol{order:1}
+.fvp-art h3{order:2}
+.fvp-photo-room .fvp-art .fvp-word{
+  font-size:clamp(5px,1.06cqw,14px)!important;
+  letter-spacing:clamp(1px,1.14cqw,12px)!important;
+  padding-left:clamp(1px,1.14cqw,12px);
+}
+@media print{
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{
+  font-family:Montserrat,Arial,sans-serif!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  font-size:17px!important;
+  letter-spacing:20px!important;
+  line-height:1.4!important;
+  padding-left:20px!important;
+  color:#929a8a!important;
+ }
 }
 </style>
 <script>
