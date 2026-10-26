@@ -64,6 +64,12 @@ export function createClubBillingHandler(deps: ClubDeps): Handler {
   };
 }
 
+/** Where Stripe sends her back: the page's own origin when it's allowed (a Pages preview), else the site. */
+export function returnBase(deps: ClubDeps, req: Request): string {
+  const origin = req.headers.get('origin')?.replace(/\/$/, '') ?? '';
+  return deps.env.allowedOrigins.includes(origin) ? origin : deps.env.siteUrl;
+}
+
 class Refusal extends Error {
   constructor(message: string, readonly status = 400) {
     super(message);
@@ -111,7 +117,7 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
 
   const meta = { club: 'organized-family-club', plan, email, ...(user ? { user_id: user.id } : {}) };
   const expiresAt = deps.now() + 60 * 60;
-  const site = deps.env.siteUrl;
+  const site = returnBase(deps, req);
   const session = await deps.stripe.request<{ id: string; url: string; livemode: boolean; expires_at: number }>('POST', '/v1/checkout/sessions', {
     mode: 'subscription',
     customer,
@@ -159,7 +165,7 @@ async function portal(deps: ClubDeps, req: Request) {
   if (!own) throw new Refusal('no_membership', 404);
   const session = await deps.stripe.request<{ url: string }>('POST', '/v1/billing_portal/sessions', {
     customer: own.stripe_customer_id,
-    return_url: `${deps.env.siteUrl}/club/dashboard`,
+    return_url: `${returnBase(deps, req)}/club/dashboard`,
     ...(state.settings.portal_configuration_id ? { configuration: state.settings.portal_configuration_id } : {}),
   });
   return { url: session.url };

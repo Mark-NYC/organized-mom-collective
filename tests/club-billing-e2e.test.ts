@@ -284,3 +284,30 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(sql(`select count(*) from public.admin_audit_log where action like 'club.%'`)).not.toBe('0');
   });
 });
+
+describe('Club allowed origins', () => {
+  it('adds CLUB_ALLOWED_ORIGINS for the Club only, keeping the site and shop origins', async () => {
+    const { readClubEnv } = await import('../supabase/functions/_shared/club/deps');
+    const { readEnv } = await import('../supabase/functions/_shared/env');
+    const vars: Record<string, string> = {
+      SHOP_SITE_URL: 'https://www.organizedmomcollective.com',
+      SHOP_ALLOWED_ORIGINS: 'https://shop-extra.example.com',
+      CLUB_ALLOWED_ORIGINS: 'https://claude-x.organized-mom-collective.pages.dev/, javascript:alert(1)',
+    };
+    const club = readClubEnv((k) => vars[k]);
+    expect(club.allowedOrigins).toEqual(['https://www.organizedmomcollective.com', 'https://organizedmomcollective.com', 'https://shop-extra.example.com', 'https://claude-x.organized-mom-collective.pages.dev']);
+    expect(readEnv((k) => vars[k]).allowedOrigins).not.toContain('https://claude-x.organized-mom-collective.pages.dev');
+  });
+});
+
+describe('Club return URLs', () => {
+  it('send her back to an allowed preview origin, never to an unlisted one', async () => {
+    const { returnBase } = await import('../supabase/functions/_shared/handlers/club-billing');
+    const { readClubEnv } = await import('../supabase/functions/_shared/club/deps');
+    const env = readClubEnv((k) => ({ SHOP_SITE_URL: 'https://www.organizedmomcollective.com', CLUB_ALLOWED_ORIGINS: 'https://p.organized-mom-collective.pages.dev' })[k]);
+    const at = (origin?: string) => returnBase({ env } as never, new Request('https://x/', { headers: origin ? { origin } : {} }));
+    expect(at('https://p.organized-mom-collective.pages.dev')).toBe('https://p.organized-mom-collective.pages.dev');
+    expect(at('https://evil.example.com')).toBe('https://www.organizedmomcollective.com');
+    expect(at()).toBe('https://www.organizedmomcollective.com');
+  });
+});

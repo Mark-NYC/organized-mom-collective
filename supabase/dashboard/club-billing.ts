@@ -209,8 +209,11 @@ var CLUB_PRICES = {
 var isPlan = (v) => v === "monthly" || v === "annual";
 function readClubEnv(get) {
   const v = (k) => (get(k) ?? "").trim();
+  const shop = readEnv(get);
+  const extra = v("CLUB_ALLOWED_ORIGINS").split(",").map((o) => o.trim().replace(/\/$/, "")).filter((o) => /^https:\/\/[a-z0-9.-]+$/i.test(o));
   return {
-    ...readEnv(get),
+    ...shop,
+    allowedOrigins: [.../* @__PURE__ */ new Set([...shop.allowedOrigins, ...extra])],
     clubStripeSecretKey: v("CLUB_STRIPE_SECRET_KEY"),
     clubWebhookSecret: v("CLUB_STRIPE_WEBHOOK_SECRET"),
     clubLiveCheckout: v("CLUB_LIVE_CHECKOUT") === "enabled",
@@ -288,6 +291,10 @@ function createClubBillingHandler(deps) {
     }
   };
 }
+function returnBase(deps, req) {
+  const origin = req.headers.get("origin")?.replace(/\/$/, "") ?? "";
+  return deps.env.allowedOrigins.includes(origin) ? origin : deps.env.siteUrl;
+}
 var Refusal = class extends Error {
   constructor(message, status = 400) {
     super(message);
@@ -329,7 +336,7 @@ async function checkout(deps, req, body) {
   }
   const meta = { club: "organized-family-club", plan, email, ...user ? { user_id: user.id } : {} };
   const expiresAt = deps.now() + 60 * 60;
-  const site = deps.env.siteUrl;
+  const site = returnBase(deps, req);
   const session = await deps.stripe.request("POST", "/v1/checkout/sessions", {
     mode: "subscription",
     customer,
@@ -376,7 +383,7 @@ async function portal(deps, req) {
   if (!own) throw new Refusal("no_membership", 404);
   const session = await deps.stripe.request("POST", "/v1/billing_portal/sessions", {
     customer: own.stripe_customer_id,
-    return_url: `${deps.env.siteUrl}/club/dashboard`,
+    return_url: `${returnBase(deps, req)}/club/dashboard`,
     ...state.settings.portal_configuration_id ? { configuration: state.settings.portal_configuration_id } : {}
   });
   return { url: session.url };

@@ -221,8 +221,11 @@ async function verifyStripeSignature(payload, header, secret, nowSeconds = Math.
 var CLUB_PRODUCT_TAG = "organized-family-club";
 function readClubEnv(get) {
   const v = (k) => (get(k) ?? "").trim();
+  const shop = readEnv(get);
+  const extra = v("CLUB_ALLOWED_ORIGINS").split(",").map((o) => o.trim().replace(/\/$/, "")).filter((o) => /^https:\/\/[a-z0-9.-]+$/i.test(o));
   return {
-    ...readEnv(get),
+    ...shop,
+    allowedOrigins: [.../* @__PURE__ */ new Set([...shop.allowedOrigins, ...extra])],
     clubStripeSecretKey: v("CLUB_STRIPE_SECRET_KEY"),
     clubWebhookSecret: v("CLUB_STRIPE_WEBHOOK_SECRET"),
     clubLiveCheckout: v("CLUB_LIVE_CHECKOUT") === "enabled",

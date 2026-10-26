@@ -8,6 +8,8 @@
  *   CLUB_STRIPE_WEBHOOK_SECRET  optional: whsec_… if the endpoint was made by hand (club-admin → stripe_setup stores its own)
  *   CLUB_LIVE_CHECKOUT          "enabled" only after the owner approves live payments; without it live keys are refused
  *   CLUB_EMAIL_FROM             optional sender, default hello@
+ *   CLUB_ALLOWED_ORIGINS        optional, comma-separated extra browser origins for the Club functions only (a Cloudflare
+ *                               Pages preview), on top of the site and SHOP_ALLOWED_ORIGINS; the shop is unaffected
  */
 import { createDb, type Db } from '../db.ts';
 import { createResendMailer, type Mailer } from '../email.ts';
@@ -41,8 +43,11 @@ export const CLUB_PRODUCT_TAG = 'organized-family-club';
 
 export function readClubEnv(get: (key: string) => string | undefined): ClubEnv {
   const v = (k: string) => (get(k) ?? '').trim();
+  const shop = readEnv(get);
+  const extra = v('CLUB_ALLOWED_ORIGINS').split(',').map((o) => o.trim().replace(/\/$/, '')).filter((o) => /^https:\/\/[a-z0-9.-]+$/i.test(o));
   return {
-    ...readEnv(get),
+    ...shop,
+    allowedOrigins: [...new Set([...shop.allowedOrigins, ...extra])],
     clubStripeSecretKey: v('CLUB_STRIPE_SECRET_KEY'),
     clubWebhookSecret: v('CLUB_STRIPE_WEBHOOK_SECRET'),
     clubLiveCheckout: v('CLUB_LIVE_CHECKOUT') === 'enabled',

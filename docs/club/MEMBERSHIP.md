@@ -63,7 +63,8 @@ Settings (`/admin/club → Setup`): checkout `off|test|live`, first printed mail
 9. Decide sales tax for a subscription with a printed component (accountant), as for the shop.
 
 ### Cloudflare Pages (Preview first)
-10. Preview variables: `PUBLIC_CLUB_ENABLED=true`, `PUBLIC_ACCOUNTS_ENABLED=true`, `PUBLIC_CLUB_CHECKOUT_ENABLED=true` (existing `PUBLIC_SUPABASE_URL`/`ANON_KEY`). Add the preview origin to the function secret `SHOP_ALLOWED_ORIGINS` if it isn't the production domain.
+10. Pages project `organized-mom-collective` → Settings → Variables and Secrets → **Preview** (not Production): `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` (same values as Production; Preview has none today), `PUBLIC_CLUB_ENABLED=true`, `PUBLIC_ACCOUNTS_ENABLED=true`, `PUBLIC_CLUB_CHECKOUT_ENABLED=true`. Then retry the latest preview deployment so the build picks them up.
+11. Supabase function secret `CLUB_ALLOWED_ORIGINS` = the preview's stable branch URL (e.g. `https://claude-vibrant-wozniak-kjitd.organized-mom-collective.pages.dev`). It lets the Club functions answer that page (CORS) and sends Stripe Checkout and the Billing Portal back to it; it doesn't touch the shop's `SHOP_ALLOWED_ORIGINS`.
 
 ### Test on the preview (30 minutes)
 11. Setup → checkout **test**. Buy monthly with card `4242 4242 4242 4242` → welcome page → code → family → address → dashboard shows November. Admin → Members shows her. Buy again with the same email → "already a member". Billing Portal → switch to annual → twelve months. Cancel → "set to end" email. Use a Stripe **test clock** for renewal and a declined renewal (`4000 0000 0000 0341`). Refund an invoice from Stripe → its months disappear.
