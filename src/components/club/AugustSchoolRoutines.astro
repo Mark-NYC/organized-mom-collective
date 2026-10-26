@@ -46,11 +46,19 @@ const initial=[
  <div class="asr-layout">
   <aside class="asr-editor"><div class="asr-editor-head"><h2>Fewer reminders. <em>Smoother school days.</em></h2><button type="button" class="asr-edit-link" data-open-vision>Why this matters</button></div><div class="asr-prepared" id="august-edit-controls"><span class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINES</span><strong>My School Day</strong><p>Two ready-made picture routines for before and after school.</p><button type="button" class="asr-edit-link" data-open-editor>Edit routines <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div><div class="asr-actions"><div class="asr-primary-actions"><a class="asr-jump" href="#august-edit-controls">Make changes</a><button class="asr-primary" data-asr-print type="button">Print / Save PDF</button></div><button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button><button class="asr-reset" data-asr-reset type="button">Restore original steps</button></div></aside>
   <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
-  <dialog class="asr-dialog" data-asr-editor aria-labelledby="asr-editor-title"><div class="asr-dialog-head"><h2 id="asr-editor-title">Edit school routines</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Review the prepared steps and adjust what doesn't fit your family.</p><div class="asr-dialog-fields">   <label>Routine for <select data-asr-child><option value="family">Our family</option></select></label>
-   <label>Routine detail <select data-asr-mode><option value="standard">Recommended steps</option><option value="simple">Shorter routine</option></select></label>
-   <div class="asr-customize"><h3>Customize each routine</h3><p>Add, edit, remove or reorder steps for the selected child. Changes save automatically.</p><div data-asr-options></div></div>
-   <div class="asr-parent-note"><strong>One small handoff</strong><p>Show your child where this sheet lives, walk through it once, then invite them to check what's next. Adults continue to own school travel, medications, and safety decisions.</p></div>
-</div><button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button></dialog>
+  <dialog class="asr-dialog asr-guided-dialog" data-asr-editor aria-labelledby="asr-editor-title">
+   <div class="asr-dialog-head"><div><span class="asr-guide-kicker">MAKE IT YOURS · AUGUST</span><h2 id="asr-editor-title">Our school routines</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
+   <p class="asr-guide-intro">We've prepared a starting routine. Just change what doesn't fit your child.</p>
+   <div class="asr-guide-section"><strong>Whose routine?</strong><div class="asr-child-chips" data-asr-children></div></div>
+   <div class="asr-routine-tabs" role="tablist" aria-label="School routine"><button type="button" data-asr-tab="morning" role="tab" aria-selected="true">Before school</button><button type="button" data-asr-tab="after" role="tab" aria-selected="false">After school</button></div>
+   <div class="asr-guide-section"><div class="asr-guide-caption"><strong data-asr-guided-title>Morning routine</strong><span>Tap any step to change it</span></div><div class="asr-guided-steps" data-asr-options></div>
+    <button type="button" class="asr-guide-add" data-asr-add>＋ Add a step</button>
+    <div data-asr-gallery class="asr-guide-gallery" hidden></div>
+   </div>
+   <details class="asr-guide-more"><summary>More options</summary><label class="asr-mode-choice"><input type="checkbox" data-asr-shorter/> Use a shorter routine</label><p>Hides two optional steps without deleting them. Removed steps can be restored in the list above.</p></details>
+   <div class="asr-guide-saved">✓ Changes save automatically for each child</div>
+   <button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button>
+  </dialog>
   <section class="asr-preview"><button type="button" class="asr-float" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
    
    <div class="asr-stage" data-asr-stage>
@@ -161,6 +169,49 @@ const initial=[
 .asr .asr-sheet [contenteditable="true"]:focus::after{opacity:0}
 @media print{.asr .asr-sheet [contenteditable="true"]::after{display:none!important}}
 .asr.asr-export .asr-sheet [contenteditable="true"]::after{display:none!important}
+
+/* August guided editor: edit decisions in context rather than displaying a long form. */
+.asr-guided-dialog{width:min(570px,calc(100vw - 28px));padding:26px 28px}
+.asr-guide-kicker{display:block;font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.14em;color:#728977;margin-bottom:7px}
+.asr-guided-dialog .asr-dialog-head h2{margin-bottom:8px}
+.asr-guide-intro{font:13px/1.65 Montserrat,Arial,sans-serif!important;margin:2px 0 22px!important;color:#636c62}
+.asr-guide-section{margin:16px 0}.asr-guide-section>strong,.asr-guide-caption strong{font-size:12px;color:#465d50}
+.asr-child-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.asr-child-chips button{border:1px solid #cbd8cb;background:#fff;color:#516b5b;border-radius:99px;padding:10px 16px;min-height:40px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-child-chips button[aria-pressed=true]{background:#506d60;color:#fff;border-color:#506d60}
+.asr-routine-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#f0f4ef;border-radius:9px;margin:20px 0}
+.asr-routine-tabs button{border:0;background:transparent;color:#637768;border-radius:6px;min-height:43px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-routine-tabs button[aria-selected=true]{background:#fff;color:#45624f;box-shadow:0 1px 5px #0001}
+.asr-guide-caption{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:12px}
+.asr-guide-caption span{font-size:10px;color:#819084}
+.asr-guided-steps{display:grid;gap:8px}
+.asr-step-card{border:1px solid #dce5dc;border-radius:9px;background:#fff;overflow:hidden}
+.asr-step-card[data-expanded=true]{border-color:#8da994}
+.asr-step-main{width:100%;display:flex;align-items:center;gap:12px;padding:8px 12px;min-height:68px;text-align:left;border:0;background:transparent;cursor:pointer;color:#4b6152}
+.asr-step-main img{width:46px;height:46px;object-fit:contain;flex:0 0 46px}
+.asr-step-copy{flex:1;min-width:0;display:grid;gap:4px}
+.asr-step-copy strong{font:600 13px Montserrat,Arial,sans-serif;overflow-wrap:anywhere}
+.asr-step-copy small{color:#7d8e81;font:11px Montserrat,Arial,sans-serif}
+.asr-step-chevron{font-size:23px;color:#92a394}
+.asr-step-detail{padding:10px 13px 13px;border-top:1px solid #e2e9e2;background:#fafcf9;display:grid;gap:10px}
+.asr-step-detail label{display:grid;gap:6px;font:700 11px Montserrat,Arial,sans-serif;color:#506d60}
+.asr-step-detail input{width:100%;min-height:40px;border:1px solid #c6d6ca;background:#fff;border-radius:5px;padding:8px;font:13px Montserrat,Arial,sans-serif;color:#425b4a}
+.asr-step-actions{display:flex;gap:7px;flex-wrap:wrap}
+.asr-step-actions button{border:1px solid #c4d3c6;background:#fff;color:#506d60;padding:8px 10px;border-radius:6px;font:700 11px Montserrat,Arial,sans-serif;min-height:36px;cursor:pointer}
+.asr-step-actions button:disabled{opacity:.35;cursor:default}
+.asr-guide-add{width:100%;min-height:43px;margin-top:11px;border:1px dashed #a6bca9;border-radius:8px;background:#f8fbf7;color:#506d60;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-guide-gallery{background:#f7faf6;border:1px solid #e0e9df;border-radius:8px;padding:12px;margin-top:9px}
+.asr-guide-gallery>strong{display:block;font-size:12px;margin-bottom:10px}
+.asr-gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.asr-gallery-grid button{border:1px solid #d5e0d5;border-radius:7px;background:white;padding:8px;display:flex;gap:7px;align-items:center;min-height:53px;text-align:left;color:#506d60;font:600 11px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-gallery-grid button:disabled{opacity:.5;cursor:default}
+.asr-gallery-grid img{width:32px;height:32px;object-fit:contain}
+.asr-guide-more{border-top:1px solid #e0e8e0;padding:14px 0;margin:17px 0 6px;color:#506d60;font-size:12px}
+.asr-guide-more summary{cursor:pointer;font-weight:700}
+.asr-guide-more p{font-size:11px;line-height:1.5;color:#748176}
+.asr-mode-choice{display:flex;gap:9px;align-items:center;margin-top:14px}
+.asr-guide-saved{font-size:11px;color:#67856e;text-align:center;margin:18px 0 12px}
+@media(max-width:600px){.asr-guided-dialog{padding:18px;max-height:calc(100dvh - 28px)}.asr-gallery-grid{grid-template-columns:1fr 1fr}}
 </style>
 <script>
 type Group='morning'|'after';
@@ -271,46 +322,74 @@ const choices:Record<Group,{id:string;label:string;icon:string}[]>={
    const person=kids.find(k=>k.id===board.child);const heading=root.querySelector<HTMLElement>('[data-asr-name]');
    if(heading)heading.textContent=person?person.firstName+"'s morning & after-school routines":'Our morning & after-school routines';
    const foot=root.querySelector<HTMLElement>('[data-asr-footer]');if(foot&&document.activeElement!==foot)foot.textContent=board.footer;
-   const child=root.querySelector<HTMLSelectElement>('[data-asr-child]');if(child)child.value=board.child;
-   const mode=root.querySelector<HTMLSelectElement>('[data-asr-mode]');if(mode)mode.value=board.mode;
+ 
+  };
+  let activeTab:Group='morning',expandedId='',galleryOpen=false;
+  const changeChild=(id:string)=>{if(id===board.child)return;remember();board=saved[id]?structuredClone(saved[id]):initial(id,age(id));expandedId='';galleryOpen=false;remember();draw();makeOptions()};
+  const addStep=(item:{id:string;label:string;icon:string})=>{
+   const group=activeTab;
+   const prior=board.steps.find(s=>s.id===item.id&&s.group===group);
+   if(group==='morning'){
+    const siblingIds=item.id.includes('lunch')?['lunch','pack-lunch','stow-lunch']:item.id.includes('water')?['water','fill-water','stow-water']:[];
+    for(const other of board.steps)if(siblingIds.includes(other.id)&&other.id!==item.id)other.removed=true;
+   }
+   if(prior){prior.removed=false;prior.label=item.label}
+   else{const previous=board.steps.filter(s=>s.group===group).at(-1);board.steps.push({id:item.id,time:previous?.time??(group==='morning'?'07:50':'16:00'),label:item.label,icon:item.icon,group})}
+   galleryOpen=false;expandedId=item.id;remember();draw();makeOptions();
   };
   const makeOptions=()=>{
    const holder=root.querySelector<HTMLElement>('[data-asr-options]');if(!holder)return;holder.replaceChildren();
-   for(const group of ['morning','after'] as Group[]){
-    const title=document.createElement('h3');title.textContent=group==='morning'?'Before school':'After school';holder.append(title);
-    const groupSteps=board.steps.filter(x=>x.group===group);
-    for(const step of groupSteps){
-     const wrapper=document.createElement('div');wrapper.className='asr-option';
-     const edit=document.createElement('input');edit.type='text';edit.value=step.label;edit.maxLength=55;edit.setAttribute('aria-label','Step wording');edit.addEventListener('input',()=>{step.label=edit.value;remember();draw()});wrapper.append(edit);
-     const toggle=document.createElement('button');toggle.type='button';toggle.textContent=step.removed?'＋ Restore':'× Remove';
-     toggle.addEventListener('click',()=>{step.removed=!step.removed;remember();draw();makeOptions()});wrapper.append(toggle);
-     for(const dir of [-1,1]){
-      const btn=document.createElement('button');btn.type='button';btn.textContent=dir===-1?'↑ Up':'↓ Down';
-      const idx=groupSteps.indexOf(step);btn.disabled=(dir===-1&&idx===0)||(dir===1&&idx===groupSteps.length-1);
-      btn.addEventListener('click',()=>{const current=board.steps.indexOf(step),other=board.steps.indexOf(groupSteps[idx+dir]);if(other<0)return;
-       [board.steps[current],board.steps[other]]=[board.steps[other],board.steps[current]];remember();draw();makeOptions()});wrapper.append(btn);
+   const people=root.querySelector<HTMLElement>('[data-asr-children]');
+   if(people){people.replaceChildren();for(const person of [{id:'family',firstName:'Our family'},...kids]){
+    const chip=document.createElement('button');chip.type='button';chip.textContent=person.firstName;chip.setAttribute('aria-pressed',String(board.child===person.id));chip.addEventListener('click',()=>changeChild(person.id));people.append(chip)
+   }}
+   root.querySelectorAll<HTMLButtonElement>('[data-asr-tab]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.asrTab===activeTab)));
+   const title=root.querySelector<HTMLElement>('[data-asr-guided-title]');
+   if(title)title.textContent=(kids.find(k=>k.id===board.child)?.firstName??'Our family')+(activeTab==='morning'?"'s morning":' · After school');
+   const visible=board.steps.filter(s=>s.group===activeTab&&!s.removed);
+   for(const step of board.steps.filter(s=>s.group===activeTab)){
+    const removed=Boolean(step.removed),expanded=expandedId===step.id;
+    const card=document.createElement('div');card.className='asr-step-card';card.dataset.expanded=String(expanded);
+    const head=document.createElement('button');head.type='button';head.className='asr-step-main';head.setAttribute('aria-expanded',String(expanded));
+    const image=document.createElement('img');image.src=iconPaths[step.icon]??iconPaths.bag;image.alt='';
+    const copy=document.createElement('span');copy.className='asr-step-copy';
+    const name=document.createElement('strong');name.textContent=step.label+(removed?' · Removed':'');
+    const time=document.createElement('small');time.textContent=removed?'Tap to restore':formatTime(step.time);
+    const chevron=document.createElement('span');chevron.className='asr-step-chevron';chevron.textContent=expanded?'⌃':'›';
+    copy.append(name,time);head.append(image,copy,chevron);
+    head.addEventListener('click',()=>{expandedId=expanded?'':step.id;makeOptions()});card.append(head);
+    if(expanded){
+     const details=document.createElement('div');details.className='asr-step-detail';
+     if(!removed){
+      const label=document.createElement('label');label.textContent='Activity name';const input=document.createElement('input');input.type='text';input.maxLength=55;input.value=step.label;input.addEventListener('input',()=>{step.label=input.value;name.textContent=input.value;remember();draw()});label.append(input);
+      const timeLabel=document.createElement('label');timeLabel.textContent='Time (5-minute choices or custom)';const timeInput=document.createElement('input');timeInput.type='time';timeInput.step='300';timeInput.value=validTime(step.time)?step.time:'07:30';timeInput.addEventListener('change',()=>{if(!validTime(timeInput.value))return;step.time=timeInput.value;remember();draw();time.textContent=formatTime(step.time)});timeLabel.append(timeInput);
+      details.append(label,timeLabel);
      }
-     holder.append(wrapper);
+     const actions=document.createElement('div');actions.className='asr-step-actions';
+     const toggle=document.createElement('button');toggle.type='button';toggle.textContent=removed?'＋ Restore step':'Remove step';toggle.addEventListener('click',()=>{step.removed=!removed;remember();draw();makeOptions()});actions.append(toggle);
+     if(!removed){for(const dir of [-1,1]){
+      const button=document.createElement('button');button.type='button';button.textContent=dir<0?'↑ Earlier':'↓ Later';
+      const idx=visible.indexOf(step),near=visible[idx+dir];button.disabled=!near;
+      button.addEventListener('click',()=>{if(!near)return;const a=board.steps.indexOf(step),b=board.steps.indexOf(near);[board.steps[a],board.steps[b]]=[board.steps[b],board.steps[a]];remember();draw();makeOptions()});actions.append(button);
+     }}
+     details.append(actions);card.append(details);
     }
-    const addLabel=document.createElement('label');addLabel.textContent='Add a step';addLabel.className='asr-add-label';
-    const select=document.createElement('select');const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Choose an activity…';select.append(placeholder);
-    for(const option of choices[group]){const opt=document.createElement('option');opt.value=option.id;opt.textContent=option.label;select.append(opt)}
-    select.addEventListener('change',()=>{
-     const selected=choices[group].find(c=>c.id===select.value);if(!selected)return;
-     const prior=board.steps.find(s=>s.id===selected.id&&s.group===group);
-     if(group==='morning'){const siblings=selected.id.includes('lunch')?['lunch','pack-lunch','stow-lunch']:selected.id.includes('water')?['water','fill-water','stow-water']:[];for(const other of board.steps)if(siblings.includes(other.id)&&other.id!==selected.id)other.removed=true}
-     if(prior){prior.removed=false}
-     else{const previous=board.steps.filter(s=>s.group===group).at(-1);board.steps.push({id:selected.id,time:previous?.time??(group==='morning'?'07:50':'16:00'),label:selected.label,icon:selected.icon,group})}
-     remember();draw();makeOptions();
-    });
-    addLabel.append(select);holder.append(addLabel);
+    holder.append(card);
    }
+   const gallery=root.querySelector<HTMLElement>('[data-asr-gallery]');
+   const add=root.querySelector<HTMLButtonElement>('[data-asr-add]');
+   if(add){add.textContent=galleryOpen?'× Close activity choices':'＋ Add a step';add.setAttribute('aria-expanded',String(galleryOpen))}
+   if(gallery){gallery.hidden=!galleryOpen;gallery.replaceChildren();if(galleryOpen){
+    const heading=document.createElement('strong');heading.textContent='Choose an activity';const grid=document.createElement('div');grid.className='asr-gallery-grid';
+    for(const item of choices[activeTab]){const button=document.createElement('button');button.type='button';const img=document.createElement('img');img.src=iconPaths[item.icon]??iconPaths.bag;img.alt='';const label=document.createElement('span');label.textContent=item.label;button.append(img,label);button.addEventListener('click',()=>addStep(item));grid.append(button)}
+    const custom=document.createElement('button');custom.type='button';custom.textContent='＋ Custom activity';custom.addEventListener('click',()=>addStep({id:'custom-'+Date.now(),label:'My new step',icon:activeTab==='morning'?'bag':'book'}));grid.append(custom);
+    gallery.append(heading,grid);
+   }}
+   const shorter=root.querySelector<HTMLInputElement>('[data-asr-shorter]');if(shorter)shorter.checked=board.mode==='simple';
   };
-
- root.querySelector<HTMLSelectElement>('[data-asr-child]')?.addEventListener('change',e=>{
-  remember();const target=(e.target as HTMLSelectElement).value;board=saved[target]?structuredClone(saved[target]):initial(target,age(target));remember();draw();makeOptions();
- });
- root.querySelector<HTMLSelectElement>('[data-asr-mode]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLSelectElement).value as Board['mode'];remember();draw()});
+  root.querySelectorAll<HTMLButtonElement>('[data-asr-tab]').forEach(button=>button.addEventListener('click',()=>{activeTab=button.dataset.asrTab as Group;expandedId='';galleryOpen=false;makeOptions()}));
+  root.querySelector('[data-asr-add]')?.addEventListener('click',()=>{galleryOpen=!galleryOpen;expandedId='';makeOptions()});
+  root.querySelector<HTMLInputElement>('[data-asr-shorter]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLInputElement).checked?'simple':'standard';remember();draw();makeOptions()});
  const footer=root.querySelector<HTMLElement>('[data-asr-footer]');
  footer?.addEventListener('input',()=>{board.footer=(footer.textContent??'').replace(/\s+/g,' ').slice(0,120);remember()});
  footer?.addEventListener('blur',()=>{board.footer=(footer.textContent??'').trim().slice(0,120);remember();draw()});
@@ -330,9 +409,6 @@ const choices:Record<Group,{id:string;label:string;icon:string}[]>={
   const {household,sample}=detail??{};
   if(!household)return;const next=sample+':'+household.id;
   kids=(household.members??[]).filter(x=>x.kind==='child');
-  const select=root.querySelector<HTMLSelectElement>('[data-asr-child]');
-  if(select){select.replaceChildren();const option=document.createElement('option');option.value='family';option.textContent='Our family';select.append(option);
-   for(const kid of kids){const opt=document.createElement('option');opt.value=kid.id;opt.textContent=kid.firstName;select.append(opt)}}
   if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=kids[0]?initial(kids[0].id,age(kids[0].id)):initial();
    try{const s=JSON.parse(localStorage.getItem(key)??'null');if(s?.profile===profile&&s.boards){
      for(const [id,value] of Object.entries(s.boards))if(value&&typeof value==='object'&&Array.isArray((value as Board).steps))saved[id]=value as Board;
