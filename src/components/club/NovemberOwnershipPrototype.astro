@@ -272,14 +272,8 @@ const first=JOB_PRESETS[0];
     if(y>=702&&y<741&&x>=190)return 'ws-mom-owns-input';
     return null;
   }
-  let activeEdit:{host:HTMLElement;commit:()=>void;nodes:SVGTextElement[]}|null=null;
-  function closeInlinePreview(commit:boolean){
-    if(!activeEdit)return;
-    const current=activeEdit;activeEdit=null;
-    if(commit)current.commit();
-    current.nodes.forEach(node=>node.style.removeProperty('visibility'));
-    current.host.remove();
-  }
+  let activeEdit:{element:HTMLDivElement;finish:(commit:boolean)=>void}|null=null;
+  function closeInlinePreview(commit:boolean){activeEdit?.finish(commit)}
   function originalValue(field:PreviewField):string{
     const control=$<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>(field.id);
     if(field.kind!=='job')return control.value;
@@ -290,15 +284,15 @@ const first=JOB_PRESETS[0];
     }
     return field.id==='ws-adult-job'?value:JOB_PRESETS[Number(value)]?.job??'';
   }
-  function saveInlinePreview(field:PreviewField,value:string){
+  function saveInlinePreview(field:PreviewField,value:string,redraw=true){
     if(field.kind==='job'){
       const select=$<HTMLSelectElement>(field.id);
       const option=Array.from(select.options).find(item=>item.value!=='custom' && (field.id==='ws-adult-job'?item.value===value:JOB_PRESETS[Number(item.value)]?.job===value));
       if(option)select.value=option.value;
       else{
         select.value='custom';
-        const id=field.id==='ws-adult-job'?'ws-adult-custom':field.id==='ws-job'?'ws-custom':'ws-child2-custom';
-        $<HTMLInputElement>(id).value=value.slice(0,90);
+        const customId=field.id==='ws-adult-job'?'ws-adult-custom':field.id==='ws-job'?'ws-custom':'ws-child2-custom';
+        $<HTMLInputElement>(customId).value=value.slice(0,90);
       }
       if(field.id==='ws-adult-job')adultCustom.hidden=select.value!=='custom';
       if(field.id==='ws-job')$('ws-custom-wrap').hidden=select.value!=='custom';
@@ -306,59 +300,87 @@ const first=JOB_PRESETS[0];
     }else{
       const control=$<HTMLInputElement|HTMLTextAreaElement>(field.id);
       control.value=value.slice(0,control.maxLength>0?control.maxLength:260);
-      control.dispatchEvent(new Event('input',{bubbles:true}));
     }
-    refreshPlanTheme();
-    update();
+    if(redraw){refreshPlanTheme();update()}
   }
   function editPrintedText(node:SVGTextElement,field:PreviewField){
     closeInlinePreview(true);
     const sheet=node.closest<HTMLElement>('.ws-sheet');
-    if(!sheet)return;
-    const rect=node.getBoundingClientRect();
-    const sheetRect=sheet.getBoundingClientRect();
-    const multi=['ws-adult-steps','ws-done','ws-child2-done','ws-mom-relief-input'].includes(field.id);
-    const editor=document.createElement(multi?'textarea':'input') as HTMLInputElement|HTMLTextAreaElement;
-    editor.className='ws-on-paper-input';
-    editor.setAttribute('aria-label','Edit '+field.label);
-    editor.setAttribute('title','Edit '+field.label);
-    editor.value=originalValue(field);
-    const reference=$<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(field.id);
-    editor.maxLength=field.kind==='job'?90:reference instanceof HTMLSelectElement?90:reference.maxLength>0?reference.maxLength:260;
-    // Position the input using the measured SVG text, not guessed percentages.
-    // The user types inside the paper itself, just like June's editable labels.
-    const left=Math.max(0,rect.left-sheetRect.left-3);
-    const top=Math.max(0,rect.top-sheetRect.top-3);
-    const availableWidth=Math.max(90,sheetRect.width-left-12);
-    editor.style.left=left+'px';
-    editor.style.top=top+'px';
-    editor.style.width=Math.min(availableWidth,Math.max(rect.width+30,multi?availableWidth*.85:105))+'px';
-    const svg=sheet.querySelector('svg');
-    const svgWidth=svg?.viewBox.baseVal.width||612;
-    const textSize=parseFloat(node.style.fontSize)||12;
-    const scale=sheetRect.width/svgWidth;
-    editor.style.fontSize=Math.max(12,textSize*scale)+'px';
-    editor.style.fontFamily=node.style.fontFamily||'Georgia,serif';
-    editor.style.fontStyle=node.style.fontStyle||'normal';
-    editor.style.fontWeight=node.style.fontWeight||'400';
-    if(multi){
-      editor.style.height=Math.min(140,Math.max(56,64*scale))+'px';
-    }
-    const fieldNodes=Array.from(sheet.querySelectorAll<SVGTextElement>('svg text.ws-print-editable'))
+    const svg=node.ownerSVGElement;
+    if(!sheet||!svg)return;
+    const nodes=Array.from(sheet.querySelectorAll<SVGTextElement>('svg text.ws-print-editable'))
       .filter(item=>item.dataset.wsField===field.id);
-    fieldNodes.forEach(item=>item.style.visibility='hidden');
-    sheet.append(editor);
-    const initial=editor.value;
-    const commit=()=>{if(editor.value.trim()!==initial)saveInlinePreview(field,editor.value.trim())};
-    activeEdit={host:editor,commit,nodes:fieldNodes};
-    editor.addEventListener('keydown',event=>{
-      const key=event as KeyboardEvent;
-      if(key.key==='Escape'){key.preventDefault();closeInlinePreview(false)}
-      if(key.key==='Enter'&&!multi){key.preventDefault();closeInlinePreview(true)}
+    if(!nodes.length)return;
+    // foreignObject hosts real editable HTML *inside* the printed SVG. Unlike the
+    // previous overlay, it follows the exact same viewBox and type scale as the PDF.
+    const first=nodes[0];
+    const x=Number(first.getAttribute('x'))||36;
+    const baseline=Number(first.getAttribute('y'))||100;
+    const fontSize=parseFloat(first.style.fontSize)||12;
+    const page=sheet.dataset.page==='1'?1:0;
+    const nameField=field.id==='ws-owner'||field.id==='ws-child2';
+    const jobField=field.kind==='job';
+    const stepField=['ws-adult-steps','ws-done','ws-child2-done'].includes(field.id);
+    const width=nameField?150:jobField?Math.max(100,576-x):Math.max(110,576-x);
+    const nextSection=page===1?681:baseline<220?248:baseline<390?370:baseline<555?540:baseline<690?680:744;
+    const height=stepField?Math.min(115,nextSection-baseline+fontSize):field.id==='ws-mom-relief-input'?53:Math.max(fontSize*2.2,30);
+    const foreign=document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
+    foreign.setAttribute('x',String(x-2));
+    foreign.setAttribute('y',String(baseline-fontSize*1.05));
+    foreign.setAttribute('width',String(width));
+    foreign.setAttribute('height',String(height));
+    foreign.classList.add('ws-inplace-host');
+    const editable=document.createElement('div');
+    editable.className='ws-inplace-text';
+    editable.contentEditable='true';
+    editable.setAttribute('role','textbox');
+    editable.setAttribute('aria-label','Edit '+field.label);
+    editable.setAttribute('spellcheck','true');
+    editable.setAttribute('data-ws-field',field.id);
+    editable.style.fontFamily=first.style.fontFamily;
+    editable.style.fontSize=fontSize+'px';
+    editable.style.fontStyle=first.style.fontStyle;
+    editable.style.fontWeight=first.style.fontWeight;
+    editable.style.lineHeight='1.28';
+    editable.textContent=originalValue(field);
+    foreign.appendChild(editable);
+    nodes.forEach(n=>n.style.visibility='hidden');
+    svg.appendChild(foreign);
+    const before=originalValue(field);
+    let finished=false;
+    const finish=(commit:boolean)=>{
+      if(finished)return;
+      finished=true;
+      activeEdit=null;
+      const content=(editable.textContent??'').replace(/\s+/g,' ').trim();
+      if(commit&&content!==before)saveInlinePreview(field,content,false);
+      foreign.remove();
+      nodes.forEach(n=>n.style.removeProperty('visibility'));
+      // One layout render after editing ends, not on each keystroke: caret stays put.
+      if(commit){refreshPlanTheme();update()}
+    };
+    activeEdit={element:editable,finish};
+    editable.addEventListener('input',()=>{
+      const content=(editable.textContent??'').replace(/\s+/g,' ').trim();
+      // Keep the form/PDF model synchronized without destroying the focused text.
+      saveInlinePreview(field,content,false);
     });
-    editor.addEventListener('blur',()=>closeInlinePreview(true),{once:true});
-    editor.focus();
-    editor.select();
+    editable.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();saveInlinePreview(field,before,false);finish(false);update()}
+      if(event.key==='Enter'&&!stepField&&field.id!=='ws-mom-relief-input'){
+        event.preventDefault();editable.blur();
+      }
+    });
+    editable.addEventListener('blur',()=>finish(true),{once:true});
+    editable.focus();
+    // Like June: leave the normal text caret in the actual page, not a separate input.
+    const selection=window.getSelection();
+    if(selection){
+      const range=document.createRange();
+      range.selectNodeContents(editable);
+      range.collapse(false);
+      selection.removeAllRanges();selection.addRange(range);
+    }
   }
   function bindPrintedText(pageIndex:number,page:ReturnType<typeof layoutWorksheet>[number],sheet:HTMLElement){
     const texts=Array.from(sheet.querySelectorAll<SVGTextElement>('svg text'));
@@ -379,6 +401,8 @@ const first=JOB_PRESETS[0];
       });
     });
   }
+
+  window.addEventListener('beforeprint',()=>closeInlinePreview(true));
 
   // A preset fills "when" and "finished", unless they've been changed from the last preset's wording.
   let last: { when: string; done: string } = { when: when.value, done: done.value };
@@ -494,6 +518,7 @@ const first=JOB_PRESETS[0];
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    closeInlinePreview(true);
     if (!fonts || !metrics) return;
     const issue=planIssue();
     if(issue){status.textContent=issue;toggleInlineEditor(issue.startsWith('Complete the existing')?'mom':'adult');return;}
@@ -546,9 +571,9 @@ const first=JOB_PRESETS[0];
 #club-month-content .ws-tap-hint{margin:0 auto 12px;max-width:816px;color:#5f7767;font:600 12px/1.5 Montserrat,Arial,sans-serif;text-align:center}
 #club-month-content .ws-sheet svg text.ws-print-editable{cursor:text;text-decoration:underline;text-decoration-style:dotted;text-decoration-color:#6f9866;text-underline-offset:2px}
 #club-month-content .ws-sheet svg text.ws-print-editable:hover,#club-month-content .ws-sheet svg text.ws-print-editable:focus{fill:#3e6c52;outline:1px dashed #6f9866;outline-offset:2px}
-#club-month-content .ws-sheet .ws-on-paper-input{position:absolute;z-index:5;box-sizing:border-box;display:block;margin:0;padding:2px 3px;min-height:26px;max-width:calc(100% - 12px);border:0;border-bottom:1px dashed #6f9866;border-radius:0;outline:0;background:#fff;color:#333;line-height:1.35;box-shadow:none;resize:none}
-#club-month-content .ws-sheet .ws-on-paper-input:focus{border-bottom:2px solid #6f9866;background:#f7faf5}
-@media print{#club-month-content .ws-tap-hint,#club-month-content .ws-sheet .ws-on-paper-input{display:none!important}#club-month-content .ws-sheet svg text.ws-print-editable{text-decoration:none!important}}
+#club-month-content .ws-sheet .ws-inplace-text{display:block;width:100%;height:100%;box-sizing:border-box;padding:0 2px;margin:0;background:#f7faf5;color:#333;outline:0;border-bottom:1px dashed #6f9866;white-space:pre-wrap;overflow:hidden;overflow-wrap:break-word;cursor:text}
+#club-month-content .ws-sheet .ws-inplace-text:focus{outline:1px solid #6f9866;outline-offset:-1px}
+@media print{#club-month-content .ws-tap-hint{display:none!important}#club-month-content .ws-sheet svg text.ws-print-editable{text-decoration:none!important}}
 @font-face{font-family:'WS Gelasio';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/gelasio-400.ttf) format('truetype')}
 @font-face{font-family:'WS Gelasio';font-weight:400;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-400-italic.ttf) format('truetype')}
 @font-face{font-family:'WS Gelasio';font-weight:600;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-600-italic.ttf) format('truetype')}
