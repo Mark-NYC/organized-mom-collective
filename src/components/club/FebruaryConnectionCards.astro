@@ -229,19 +229,19 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
  const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
  const draw=()=>{
-  // Directly edit printed invitation fields without losing the selection or caret.
- cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{
-  const field=out.dataset.out as keyof Card;
-  const max=field==='idea'?180:field==='invite'?88:field==='headline'?44:32;
-  const capture=()=>{values[i][field]=(out.textContent??'').replace(/\\s+/g,' ').slice(0,max);save()};
-  out.addEventListener('input',capture);
-  out.addEventListener('blur',()=>{values[i][field]=(out.textContent??'').replace(/\\s+/g,' ').trim().slice(0,max);save();draw()});
-  out.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();out.blur()}});
- }));
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
   cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;if(document.activeElement!==out)out.textContent=values[i][field]||' ';}));
 
  };
+  // Directly edit printed invitation fields without losing the selection or caret.
+ cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{
+  const field=out.dataset.out as keyof Card;
+  const max=field==='idea'?180:field==='invite'?88:field==='headline'?44:32;
+  const capture=()=>{values[i][field]=(out.textContent??'').replace(/\s+/g,' ').slice(0,max);save()};
+  out.addEventListener('input',capture);
+  out.addEventListener('blur',()=>{values[i][field]=(out.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);save();draw()});
+  out.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();out.blur()}});
+ }));
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;const previous=values[i].recipient;const oldInvite=values[i].invite;values[i][field]=input.value.slice(0,180);if(field==='recipient'&&previous&&oldInvite.startsWith(previous+','))values[i].invite=values[i].recipient+oldInvite.slice(previous.length);save();draw()})));
 
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
