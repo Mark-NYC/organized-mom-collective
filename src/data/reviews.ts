@@ -54,3 +54,13 @@ export const testimonial = {
   highlight: 'the kids actually enjoyed it',
   name: 'Camille S.',
 };
+
+/** Customer-supplied Etsy review dated October 23, 2026. Keep the wording exact. */
+export const raquelReview = {
+  name: 'Raquel',
+  date: '2026-10-23',
+  rating: 5,
+  quote: "This calendar is life changing. Quite literally! When they say, it will lighten your mental load, they are not kidding. We live busy lives and often host people and have lots of activities so being able to keep up with all the activities as well as with cleaning and meals is a challenge especially while trying to eat healthy. This calendar has made such a difference. I cannot say it enough. If you're thinking of a tool to make your life and home more clean, get this immediately.",
+  highlight: 'This calendar is life changing. Quite literally!',
+  reviewerUrl: 'https://www.etsy.com/people/qar6xkf6?ref=shop_review',
+};
