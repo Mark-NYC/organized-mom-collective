@@ -173,12 +173,12 @@ const {storageKey='omc:club:november:ownership-printable:v1'}=Astro.props;
 type Person={id:string;name:string;kind:'adult'|'child';label:string;job:string;when:string;done:string};
 type State={family:string;familyLine:string;planTitle:string;goal:string;readyWhen:string;guideIntro:string;familyRule:string;people:Person[]};
 const samplePeople=():Person[]=>[
- {id:'mom',name:'Mom',kind:'adult',label:'ADULT RESPONSIBILITY',job:'Prepare tomorrow's lunch items',when:'After dinner',done:'Lunch items that can be prepared tonight are ready.'},
+ {id:'mom',name:'Mom',kind:'adult',label:'ADULT RESPONSIBILITY',job:"Prepare tomorrow's lunch items",when:'After dinner',done:'Lunch items that can be prepared tonight are ready.'},
  {id:'dad',name:'Dad',kind:'adult',label:'ADULT RESPONSIBILITY',job:'Own school messages, forms and deadlines',when:'Check each weekday afternoon',done:'Messages checked, forms handled, deadlines added to our calendar.'},
  {id:'child1',name:'Andrew',kind:'child',label:'CHILD RESPONSIBILITY',job:"Lay out tomorrow's clothes and supplies",when:'Before bedtime',done:'Clothes ready and needed supplies in their place.'},
  {id:'child2',name:'Philip',kind:'child',label:'CHILD RESPONSIBILITY',job:'Pack my school bag',when:'Before bedtime',done:'Folder, water bottle and supplies packed; bag by the door.'}
 ];
-const makeState=(family='Our family'):State=>({family,familyLine:'A ready-to-use plan for '+family,planTitle:'Our School-Night Reset',goal:'Tomorrow is ready without Mom managing every step.',readyWhen:'Tomorrow's bags, clothes, supplies, and plans are ready.',guideIntro:"The person who owns the job notices when it's time, does their part, and checks that it's finished. Mom doesn't have to direct every step.",familyRule:'Ask the owner what comes next. Let the owner finish the job.',people:samplePeople()});
+const makeState=(family='Our family'):State=>({family,familyLine:'A ready-to-use plan for '+family,planTitle:'Our School-Night Reset',goal:'Tomorrow is ready without Mom managing every step.',readyWhen:"Tomorrow's bags, clothes, supplies, and plans are ready.",guideIntro:"The person who owns the job notices when it's time, does their part, and checks that it's finished. Mom doesn't have to direct every step.",familyRule:'Ask the owner what comes next. Let the owner finish the job.',people:samplePeople()});
 const ageOf=(person:{birthYear?:number;birthMonth?:number})=>person.birthYear?Math.max(2,2027-person.birthYear-((person.birthMonth??1)>11?1:0)):8;
 for(const root of document.querySelectorAll<HTMLElement>('.nvp')){
  const key=root.dataset.nvpKey??'omc:club:november:ownership-printable:v1';
