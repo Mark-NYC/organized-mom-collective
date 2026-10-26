@@ -79,6 +79,12 @@ const NEXT: Record<string, string[]> = {
 
 const day = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '–');
 const month = (iso: string) => iso.slice(0, 7);
+// Cutoffs are New York deadlines: shown in New York time wherever the owner is.
+const deadline = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }) : '–';
+const monthName = (iso: string) => new Date(`${iso.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const ORDINALS: [number, string][] = [[1, 'first'], [2, 'second'], [3, 'third'], [4, 'fourth'], [-1, 'last']];
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const thisMonth = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
@@ -220,8 +226,10 @@ function Fulfillment({ session, signOut }: AdminContext) {
   const [rows, setRows] = useState<Order[] | null>(null);
   const [err, setErr] = useState('');
   const load = () => adminRpc<Order[]>(session, 'club_admin_fulfillment', { p_month: `${m}-01` }).then(setRows, (e: Error) => (e.message === 'expired' ? signOut() : setErr(e.message)));
+  const [cutoff, setCutoff] = useState<Cutoff | null>(null);
   useEffect(() => {
     load();
+    adminRpc<Cutoff[]>(session, 'club_admin_cutoffs', { p_from: `${m}-01`, p_count: 1 }).then((r) => setCutoff(r[0] ?? null), () => setCutoff(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m]);
   const set = async (o: Order, status: string) => {
@@ -251,7 +259,13 @@ function Fulfillment({ session, signOut }: AdminContext) {
         <button type="button" className="underline" onClick={csv}>Download approved addresses (CSV)</button>
         <p className="pb-2 text-soft">{Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(' · ')}</p>
       </div>
-      <p className="mt-2 max-w-3xl text-[0.85rem] text-soft">Pipeline: paid month → family profile → address → published resource → print view, Save as PDF, mark PDF ready → Approve (freezes the address) → Printed → Mailed. Late = paid after the cutoff: mail it in a catch-up batch.</p>
+      {cutoff && (
+        <p className="mt-3 text-[0.95rem]">
+          {monthName(cutoff.month)}’s list {new Date(cutoff.cutoff_at) < new Date() ? 'closed' : 'closes'} <strong>{deadline(cutoff.cutoff_at)}</strong>
+          {cutoff.launch_exception_cutoff_at && <> · launch exception open until <strong>{deadline(cutoff.launch_exception_cutoff_at)}</strong></>}
+        </p>
+      )}
+      <p className="mt-2 max-w-3xl text-[0.85rem] text-soft">Pipeline: paid month → family profile → address → published resource → print view, Save as PDF, mark PDF ready → Approve (freezes the address) → Printed → Mailed. Payments earn the earliest month whose list is still open, so a month’s list is complete once it closes. Late = added by hand after the list closed: mail it in a catch-up batch.</p>
       {err && <p role="alert" className="mt-4">{err}</p>}
       {rows && (
         <div className="mt-4 overflow-x-auto">
@@ -294,13 +308,13 @@ function Kits({ session }: AdminContext) {
     <>
       <p className="max-w-3xl text-[0.9rem] text-soft">A draft opens for nobody, whatever they paid for. Publish a month once its printable and letter are final; entitled members can then open it (annual members can open future months they own).</p>
       <table className="mt-4 w-full text-left text-[0.9rem]">
-        <thead><tr className="border-b border-rule"><th className="py-2">Month</th><th>Resource</th><th>Mailing cutoff</th><th>Status</th><th /></tr></thead>
+        <thead><tr className="border-b border-rule"><th className="py-2">Month</th><th>Resource</th><th>Mailing list closes</th><th>Status</th><th /></tr></thead>
         <tbody>
           {kits?.map((k) => (
             <tr key={k.slug} className="border-b border-rule">
               <td className="py-2">{month(k.month)}</td>
               <td>{clubResourceBySlug(k.slug)?.title ?? k.title}<br /><span className="text-soft">{k.slug}{clubResourceBySlug(k.slug) ? '' : ' · no member page yet'}</span></td>
-              <td>{day(k.mailer_cutoff_at)}</td>
+              <td>{deadline(k.mailer_cutoff_at)}</td>
               <td>{k.status}</td>
               <td>{k.status === 'draft' ? <button type="button" className="underline" onClick={() => set(k.slug, 'scheduled')}>Publish</button> : <button type="button" className="underline" onClick={() => set(k.slug, 'draft')}>Back to draft</button>}</td>
             </tr>
@@ -318,8 +332,77 @@ interface Status {
   webhook_secret: boolean;
   resend: boolean;
   prices: { monthly: boolean; annual: boolean } | null;
-  settings: { checkout_mode: string; first_mailing_month: string; cutoff_day: number; member_review: boolean; portal_configuration_id: string | null };
+  settings: {
+    checkout_mode: string;
+    first_mailing_month: string;
+    cutoff_ordinal: number;
+    cutoff_weekday: number;
+    launch_exception_month: string | null;
+    launch_exception_cutoff_at: string | null;
+    member_review: boolean;
+    portal_configuration_id: string | null;
+  };
   webhook_url: string;
+}
+
+interface Cutoff { month: string; cutoff_at: string; cutoff_date: string; launch_exception_cutoff_at: string | null }
+
+/** The cutoff rule, the next months' calculated deadlines, and the one-time launch exception. */
+function Cutoffs({ session, settings, save }: { session: AdminContext['session']; settings: Status['settings']; save: (p: Record<string, unknown>) => Promise<void> }) {
+  const [rows, setRows] = useState<Cutoff[] | null>(null);
+  const [launchDay, setLaunchDay] = useState('');
+  useEffect(() => {
+    adminRpc<Cutoff[]>(session, 'club_admin_cutoffs', { p_from: thisMonth(), p_count: 7 }).then(setRows, () => setRows([]));
+  }, [session, settings]);
+  const ordinal = ORDINALS.find(([n]) => n === settings.cutoff_ordinal)?.[1] ?? '';
+  const rule = `${ordinal} ${WEEKDAYS[settings.cutoff_weekday]}`;
+  return (
+    <section>
+      <h2 className="label">Mailing cutoff</h2>
+      <p className="mt-2 text-[0.95rem]">Each month’s printed mailing list closes at <strong>11:59 pm New York time on the {rule}</strong> of the month before. A payment made before a month’s list closes earns that month’s mailing; after it, the next open month’s. Digital access never depends on it.</p>
+      <div className="mt-3 flex flex-wrap items-end gap-3">
+        <label className="block"><span className="label">Which</span>
+          <select className={adminInput} value={settings.cutoff_ordinal} onChange={(e) => save({ cutoff_ordinal: Number(e.target.value) })}>
+            {ORDINALS.map(([n, name]) => <option key={n} value={n}>{name}</option>)}
+          </select></label>
+        <label className="block"><span className="label">Weekday</span>
+          <select className={adminInput} value={settings.cutoff_weekday} onChange={(e) => save({ cutoff_weekday: Number(e.target.value) })}>
+            {WEEKDAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+          </select></label>
+      </div>
+      <table className="mt-4 w-full text-left text-[0.9rem]">
+        <thead><tr className="border-b border-rule"><th className="py-2">Mailing for</th><th>List closes</th></tr></thead>
+        <tbody>
+          {rows?.map((r) => (
+            <tr key={r.month} className="border-b border-rule">
+              <td className="py-2">{monthName(r.month)}</td>
+              <td>
+                {deadline(r.cutoff_at)}
+                {r.launch_exception_cutoff_at && <><br /><strong>Launch exception: open until {deadline(r.launch_exception_cutoff_at)}</strong> for families whose payment covers {monthName(r.month)}</>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <h3 className="label mt-6">Launch exception (one time)</h3>
+      {settings.launch_exception_month && settings.launch_exception_cutoff_at ? (
+        <p className="mt-2 text-[0.95rem]">
+          On: families who pay for {monthName(settings.launch_exception_month)} by <strong>{deadline(settings.launch_exception_cutoff_at)}</strong> also get its printed mailing, on top of their regular one. Every other month follows the rule.{' '}
+          <button type="button" className="underline" onClick={() => confirm('Turn the launch exception off? Payments after this won’t add its month’s mailing.') && save({ launch_exception_month: null, launch_exception_cutoff_at: null })}>Turn off</button>
+        </p>
+      ) : (
+        <p className="mt-2 text-[0.95rem]">Off. Every month follows the rule.</p>
+      )}
+      <div className="mt-2 flex flex-wrap items-end gap-3">
+        <label className="block"><span className="label">{settings.launch_exception_month ? 'Move the deadline to' : 'Open the first mailing month until'}</span>
+          <input type="date" className={adminInput} value={launchDay} onChange={(e) => setLaunchDay(e.target.value)} /></label>
+        <button type="button" className="underline" disabled={!launchDay} onClick={() => save({
+          launch_exception_month: settings.launch_exception_month ?? settings.first_mailing_month,
+          launch_exception_cutoff_at: `${launchDay} 23:59:59 America/New_York`,
+        })}>Save (11:59 pm New York time that day)</button>
+      </div>
+    </section>
+  );
 }
 
 function Setup({ session }: AdminContext) {
@@ -379,11 +462,10 @@ function Setup({ session }: AdminContext) {
             </select></label>
           <label className="block"><span className="label">First printed mailing month</span>
             <input type="month" className={adminInput} defaultValue={st.settings.first_mailing_month.slice(0, 7)} onBlur={(e) => e.target.value && save({ first_mailing_month: `${e.target.value}-01` })} /></label>
-          <label className="block"><span className="label">Default cutoff day (of the month before)</span>
-            <input type="number" min={1} max={28} className={adminInput} defaultValue={st.settings.cutoff_day} onBlur={(e) => save({ cutoff_day: Number(e.target.value) })} /></label>
           <label className="flex items-center gap-2 pt-6"><input type="checkbox" checked={st.settings.member_review} onChange={(e) => save({ member_review: e.target.checked })} /> Ask members to review before printing</label>
         </div>
       </section>
+      <Cutoffs session={session} settings={st.settings} save={save} />
       <section>
         <h2 className="label">Emails (each member gets each one once)</h2>
         <div className="mt-2 flex flex-wrap items-end gap-3">

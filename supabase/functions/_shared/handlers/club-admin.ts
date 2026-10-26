@@ -82,7 +82,7 @@ export function createClubAdminHandler(deps: ClubDeps): Handler {
 }
 
 async function status(deps: ClubDeps) {
-  const [settings] = await deps.db.select<Record<string, unknown>>('club_settings', 'select=checkout_mode,first_mailing_month,cutoff_day,member_review,portal_configuration_id');
+  const [settings] = await deps.db.select<Record<string, unknown>>('club_settings', 'select=checkout_mode,first_mailing_month,cutoff_ordinal,cutoff_weekday,launch_exception_month,launch_exception_cutoff_at,member_review,portal_configuration_id');
   const blocked = clubStripeBlocked(deps);
   let prices: Record<ClubPlan, boolean> | null = null;
   if (!blocked) {

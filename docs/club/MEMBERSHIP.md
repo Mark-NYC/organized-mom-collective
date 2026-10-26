@@ -9,7 +9,7 @@ Guiding principle: **One family. One monthly problem. One tailored plan. Deliver
 | | Monthly · $5/month | Annual · $60/year |
 | --- | --- | --- |
 | Digital | The month each paid invoice covers (a November 2 joiner gets November; December's payment unlocks December) | The twelve consecutive months starting with the month paid, unlocked at once |
-| Printed mailing | One per paid month (from `first_mailing_month`) | Twelve, one each month |
+| Printed mailing | One per paid month (from `first_mailing_month`), for the earliest month whose list is still open when she pays: join Nov 2 → December's; join Nov 20 → January's | Twelve consecutive, from the first open list |
 | Renewal | Each paid month adds that month | The renewal adds the next twelve as **membership year 2** |
 | Failed payment | Nothing new until it's paid; months already received stay | Same |
 | Cancel | At period end (Billing Portal); everything received stays, read and print only | Same |
@@ -24,7 +24,9 @@ No automatic discount. Pausing isn't offered (a paused or unpaid subscription pa
 - **Access is explicit rows, not payment counts.** `club_entitlements`: one live row per member × calendar month × `digital|physical`, recording the resource edition (`kit_id`), membership year, plan, and the invoice and paid period that granted it. Unique indexes make a replayed webhook a no-op.
 - **Only a paid invoice's own line periods grant** (`club_invoice_apply`). Open, failed, voided, disputed, refunded or duplicate-subscription invoices grant nothing.
 - **Digital:** a member opens a *published* month she holds an active digital entitlement for (`club_can_open`). Live membership → edit; ended → read and print. Drafts open for nobody.
-- **Physical:** each physical entitlement has exactly one `club_fulfillment_orders` row, and a household can never have two non-canceled mailings for one month.
+- **Physical:** each physical entitlement has exactly one `club_fulfillment_orders` row, and a household can never have two non-canceled mailings for one month. Physical eligibility is separate from digital access: a missed cutoff moves her mailing to the next open month and never closes a month she paid for online.
+- **Mailing cutoff (a rule, not a date):** a month's list closes at **11:59 pm New York time on the second Sunday of the month before** (`club_settings.cutoff_ordinal` / `cutoff_weekday`; any first–fourth or last weekday). Second Sunday of November → December's list, of December → January's. `club_cutoff_at(month)` calculates it for any month and year; the admin shows the dates. Each payment earns the earliest month whose list is still open and that she doesn't hold yet (`club_next_mailing_month`), so a month's list is complete once it closes.
+- **Launch exception (one time):** `launch_exception_month` + `launch_exception_cutoff_at`. Families whose paid invoice covers that month and is paid by the deadline also get that month's mailing, on top of their regular one; no other month changes, and it lapses after the deadline. Set to **November 2026, through Sunday November 8, 2026, 11:59 pm ET** (founding families, week of November 2). Turn off in Setup.
 - **Sign-in:** passwordless 6-digit code (Supabase Auth OTP). A guest who pays gets an *unconfirmed* account for that email; nothing opens until she proves the inbox. Stable ids: `club_households.id` ↔ owner `auth.users.id` ↔ `club_customers.stripe_customer_id`.
 - **Duplicate checkouts:** reused open Checkout for repeat clicks; refused when a live membership exists (database and Stripe both checked); if two checkouts still both finish, the second subscription is canceled, refunded and flagged `duplicate`, and never grants.
 - **RLS:** members read only their own household, family, address, entitlements and mailings; every write is a checked function. Admin functions require `is_admin('owner')` and write `admin_audit_log`. Children's names reach an admin only through one mailing's print view (`club_admin_fulfillment_bundle`, audited). No Stripe or service keys in the browser.
@@ -43,9 +45,11 @@ Paid month → eligible mailing → family profile → personalized PDF → queu
 1. **Readiness** per household: `needs_profile`, `needs_address`, `mail_paused`, `needs_resource` (month still draft), `needs_pdf`, `ready`. Send profile reminders and "review before printing" emails from **Setup & emails**.
 2. **Print view** → browser Print → Save as PDF → **Mark PDF ready** (audited: it shows that family's names).
 3. **approved** (freezes the address) → download the CSV of approved addresses for the mail house → **printed** → **mailed**. Returned mail → **returned** → re-approve with the corrected address. **skipped / on_hold** need a note.
-4. **Late** = paid after that month's cutoff: still owed; send in a catch-up batch.
+4. **Late** = added by hand (an admin grant) after that month's list closed: send in a catch-up batch. Payments are never late; they earn the next open month.
 
-Settings (`/admin/club → Setup`): checkout `off|test|live`, first printed mailing month (default **November 2026**), default cutoff day (15th of the month before; a kit's own `mailer_cutoff_at` wins), member review on/off. Months publish in **Monthly resources** (draft → published).
+Settings (`/admin/club → Setup`): checkout `off|test|live`, first printed mailing month (default **November 2026**), mailing cutoff rule (default second Sunday, with the next months' calculated deadlines in New York time), the launch exception, member review on/off. Kits' `mailer_cutoff_at` follows the rule (synced on every settings save).
+
+Supabase API connections load pg-safeupdate: every UPDATE/DELETE in a database function needs a WHERE (one-row tables: `where id`), or it fails with "UPDATE requires a WHERE clause". `supabase/tests/club-membership.sql` checks every public function. Months publish in **Monthly resources** (draft → published).
 
 ## What you must do (in order)
 

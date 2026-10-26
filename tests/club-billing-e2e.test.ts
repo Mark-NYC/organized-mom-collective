@@ -111,8 +111,9 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(uid('mia@example.com')).toMatch(/^[0-9a-f-]{36}$/);
     expect(sql(`select email_confirmed_at is null from auth.users where email = 'mia@example.com'`)).toBe('t');
     expect(months('mia@example.com')).toBe('2026-11');
-    expect(months('mia@example.com', 'physical')).toBe('2026-11');
-    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('mia@example.com')}'`)).toBe('1');
+    // Paid Nov 2, before December's list closes (Sunday Nov 8): December's mailing, and November's by the launch exception.
+    expect(months('mia@example.com', 'physical')).toBe('2026-11,2026-12');
+    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('mia@example.com')}'`)).toBe('2');
     expect(sql(`select line1 from public.club_mailing_addresses where user_id = '${uid('mia@example.com')}'`)).toBe('12 Oak Ln');
     expect(sql(`select status || ':' || plan from public.club_subscriptions where stripe_subscription_id = '${monthlySub}'`)).toBe('active:monthly');
     expect(sql(`select (select household_id from public.club_customers c where c.user_id = h.owner_user_id) = h.id from public.club_households h where owner_user_id = '${uid('mia@example.com')}'`)).toBe('t');
@@ -135,7 +136,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     const me = asMember<Record<string, any>>('mia@example.com', 'select public.club_me() as j');
     expect(me.j).toMatchObject({ access: true, plan: 'monthly', onboarded: false, member: true });
     const nov = me.j.months.find((m: any) => m.month === '2026-11-01');
-    expect(nov).toMatchObject({ state: 'available', mailing: { readiness: 'needs_profile', late: true } });
+    expect(nov).toMatchObject({ state: 'available', mailing: { readiness: 'needs_profile', late: false } });
     expect(me.j.months.find((m: any) => m.month === '2026-12-01').state).toBe('locked');
   });
 
@@ -203,7 +204,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     const renewal = stripe.renew(annualSub);
     await deliver(renewal.events);
     expect(months('ana@example.com').split(',')).toHaveLength(24);
-    expect(sql(`select string_agg(distinct membership_year::text, ',') from public.club_entitlements where user_id = '${uid('ana@example.com')}' and resource_month >= '2028-01-01'`)).toBe('2');
+    expect(sql(`select string_agg(distinct membership_year::text, ',') from public.club_entitlements where user_id = '${uid('ana@example.com')}' and invoice_id = '${renewal.invoice}'`)).toBe('2');
     const ref = await post(admin, { action: 'refund', invoice: renewal.invoice }, 'tok_owner');
     expect(ref.body.refund_status).toBe('succeeded');
     await deliver([stripe.refundedEvent(renewal.invoice)], { times: 2 });
@@ -270,8 +271,9 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   it('mailing queue: one order per paid delivery month, readiness tracked, manual review to mailed', async () => {
     const orders = sql(`select count(*) from public.club_fulfillment_orders where resource_month = '2026-12-01' and status <> 'canceled'`);
     expect(Number(orders)).toBe(1); // Mia's paid December
-    const late = sql(`select string_agg(late::text, ',') from public.club_fulfillment_orders where user_id = '${uid('mia.new@example.com')}' order by 1`);
-    expect(late).toContain('true');
+    // Every payment earns a month whose list was still open: nothing from an invoice is late.
+    const late = sql(`select string_agg(distinct late::text, ',') from public.club_fulfillment_orders where user_id = '${uid('mia.new@example.com')}'`);
+    expect(late).toBe('false');
   });
 
   it('emails batches go once per member: resource ready, profile reminder', async () => {
