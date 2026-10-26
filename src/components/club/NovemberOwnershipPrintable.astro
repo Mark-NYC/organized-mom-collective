@@ -1,0 +1,298 @@
+---
+/** November's actual two-sided family handoff, with October-style HTML print pages. */
+interface Props { storageKey?:string }
+const {storageKey='omc:club:november:ownership-printable:v1'}=Astro.props;
+---
+<div class="nvp" data-nvp-key={storageKey}>
+ <div class="nvp-layout">
+  <aside class="nvp-sidebar" aria-label="Prepared November plan">
+   <header class="nvp-sidebar-head"><p class="nvp-eyebrow">ORGANIZED FAMILY CLUB · NOVEMBER 2027</p><h1>Less reminding. <em>More ownership.</em></h1><button type="button" class="nvp-text-button" data-why>Why this matters</button></header>
+   <div class="nvp-prepared">
+    <p class="nvp-eyebrow">YOUR FAMILY'S PREPARED HANDOFF</p>
+    <h2 data-sidebar-title>Our School-Night Reset</h2>
+    <p>A real job for each person, with a clear starting cue and a finish line they can recognize. Prepared for your family, not another chart to maintain.</p>
+    <div class="nvp-summary-row"><span>Family</span><b data-summary-family>Our family</b></div>
+    <div class="nvp-summary-row"><span>Adult responsibility</span><b data-summary-adult>School communication</b></div>
+    <div class="nvp-summary-row"><span>Kid handoffs</span><b data-summary-kids>Two responsibilities</b></div>
+    <button type="button" class="nvp-text-button" data-open-editor>Adjust responsibilities <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+   </div>
+   <p class="nvp-note">Start with one handoff. Show what finished looks like, then let the owner practice doing the whole job.</p>
+   <div class="nvp-actions">
+    <button type="button" class="nvp-primary" data-print>Print / Save PDF</button>
+    <button type="button" class="nvp-secondary" data-png>Download front as PNG</button>
+    <button type="button" class="nvp-restore" data-restore>Restore prepared plan</button>
+   </div>
+  </aside>
+  <section class="nvp-preview" aria-label="November two-sided printable">
+   <button class="nvp-floating" type="button" data-open-editor>MAKE CHANGES <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+   <div class="nvp-stage" data-stage><div class="nvp-pages">
+    <article class="nvp-sheet nvp-front" data-front>
+     <header class="nvp-paper-head"><p>ORGANIZED FAMILY CLUB · NOVEMBER 2027</p><h2>Our Family <em>Ownership Plan</em></h2><span data-edit="familyLine" contenteditable="true" role="textbox" aria-label="Edit family heading">A ready-to-use plan for our family</span></header>
+     <section class="nvp-hero"><span>ONE WHOLE JOB · ONE CLEAR OWNER</span><strong data-edit="planTitle" contenteditable="true" role="textbox" aria-label="Edit plan title">Our School-Night Reset</strong><p data-edit="goal" contenteditable="true" role="textbox" aria-label="Edit plan goal">Tomorrow is ready without Mom managing every step.</p></section>
+     <div class="nvp-section-heading"><h3>Everyone has a part</h3><span>START IT · OWN IT · FINISH IT</span></div>
+     <section class="nvp-owners" data-people>
+      <div class="nvp-person"><span>01</span><div><small>EXISTING CONTRIBUTION</small><h4>Mom</h4><p>Family calendar and weekly schedule</p></div></div>
+      <div class="nvp-person"><span>02</span><div><small>ADULT HANDOFF</small><h4>Dad</h4><p>Own school communications and forms</p></div></div>
+      <div class="nvp-person"><span>03</span><div><small>KID HANDOFF</small><h4>Child</h4><p>Prepare tomorrow's clothes</p></div></div>
+     </section>
+     <section class="nvp-finish"><strong>WE'RE READY WHEN…</strong><p data-edit="readyWhen" contenteditable="true" role="textbox" aria-label="Edit finish line">Each person has finished their job without Mom checking every step.</p></section>
+     <footer class="nvp-foot"><strong>We all know our part.</strong><span>ONE FAMILY · SHARED OWNERSHIP</span></footer>
+    </article>
+    <article class="nvp-sheet nvp-back" data-back>
+     <header class="nvp-paper-head"><p>ORGANIZED FAMILY CLUB · NOVEMBER 2027</p><h2>How We <em>Hand Off a Job</em></h2><span>A simple way to move responsibility beyond Mom.</span></header>
+     <section class="nvp-guide-intro"><strong>A WHOLE JOB, NOT JUST A REMINDER</strong><p data-edit="guideIntro" contenteditable="true" role="textbox" aria-label="Edit ownership explanation">The person who owns the job notices when it's time, does their part, and checks that it's finished. Mom doesn't have to direct every step.</p></section>
+     <div class="nvp-steps">
+      <div><span>01</span><strong>Know when</strong><p>Connect the job to a time or a cue the person can recognize.</p></div>
+      <div><span>02</span><strong>Do the job</strong><p>Take responsibility for the whole task, with age-appropriate help.</p></div>
+      <div><span>03</span><strong>Check it's done</strong><p>Use the finish line below instead of waiting to be reminded.</p></div>
+     </div>
+     <h3 class="nvp-back-section-title">What finished looks like for us</h3>
+     <div class="nvp-details" data-details></div>
+     <section class="nvp-family-cue"><span>OUR FAMILY HANDOFF RULE</span><strong data-edit="familyRule" contenteditable="true" role="textbox" aria-label="Edit family rule">Ask the owner what comes next. Let the owner finish the job.</strong></section>
+     <section class="nvp-parent-note"><h3>A note for Mom &amp; Dad</h3><p>Practice the handoff once. Make the starting cue obvious, keep expectations realistic, and let kids build confidence by finishing their part. The goal is shared ownership—not perfection on day one.</p></section>
+     <footer class="nvp-foot"><strong>Notice. Do. Finish.</strong><span>LESS MANAGING · MORE FAMILY OWNERSHIP</span></footer>
+    </article>
+   </div></div>
+  </section>
+ </div>
+ <dialog class="nvp-dialog" data-dialog aria-labelledby="nvp-dialog-title">
+  <div class="nvp-dialog-head"><div><p class="nvp-eyebrow">MAKE IT YOURS · NOVEMBER</p><h2 id="nvp-dialog-title">Adjust responsibilities</h2></div><button type="button" data-close aria-label="Close">×</button></div>
+  <p>We prepared an age-appropriate starting plan. Change only the parts that don't fit.</p>
+  <label class="nvp-label">Our plan name<input data-control="planTitle" maxlength="65"/></label>
+  <label class="nvp-label">The goal<input data-control="goal" maxlength="140"/></label>
+  <div data-editor-people></div>
+  <button class="nvp-dialog-done" type="button" data-close>Done · See our plan</button>
+ </dialog>
+ <dialog class="nvp-dialog" data-why-dialog aria-labelledby="nvp-why-title">
+  <div class="nvp-dialog-head"><h2 id="nvp-why-title">Why this matters</h2><button type="button" data-why-close aria-label="Close">×</button></div>
+  <p>Passing out tasks isn't the same as handing off ownership. This plan makes the owner, starting cue and definition of finished visible, so Mom isn't the family's reminder system.</p>
+  <button class="nvp-dialog-done" type="button" data-why-close>Back to our plan</button>
+ </dialog>
+</div>
+<style is:global>
+.nvp,.nvp *{box-sizing:border-box}
+.nvp{font-family:Montserrat,Arial,sans-serif;color:#484941}
+.nvp-layout{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0}
+.nvp-sidebar{display:flex;flex-direction:column;min-width:0;background:#faf9f7;border-right:1px solid #e5e0e1;padding:15px clamp(17px,2vw,26px)}
+.nvp-sidebar-head{border-top:5px solid #d8e6df;padding-top:10px}
+.nvp-eyebrow{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.14em;color:#718569;margin:0}
+.nvp-sidebar-head h1{font:400 clamp(23px,2.7vw,31px)/1.12 Georgia,serif;color:#5f7767;margin:10px 0}
+.nvp-sidebar-head em{font-style:italic}
+.nvp-text-button{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:7px 0;border:0;background:none;color:#5f7767;text-decoration:underline;text-underline-offset:3px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.nvp-prepared{background:#fff;border:1px solid #e0e6da;padding:15px;margin-top:17px;flex:1 1 auto;min-height:0;overflow-y:auto}
+.nvp-prepared h2{font:400 23px Georgia,serif;color:#5f7767;margin:9px 0}
+.nvp-prepared>p:not(.nvp-eyebrow){font:12px/1.65 Montserrat,Arial,sans-serif}
+.nvp-summary-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid #e7eae4;font-size:12px}
+.nvp-summary-row b{color:#5f7767;text-align:right;max-width:58%;font-size:12px}
+.nvp-note{font:11px/1.55 Montserrat,Arial,sans-serif;color:#747269;margin:12px 0}
+.nvp-actions{margin-top:auto;padding-top:9px}
+.nvp-primary,.nvp-secondary{width:100%;min-height:45px;cursor:pointer;font:700 12px Montserrat,Arial,sans-serif}
+.nvp-primary{border:0;background:#5f7767;color:#fff}.nvp-secondary{background:#fff;border:1px solid #9caf9a;color:#5f7767;margin-top:8px}
+.nvp-restore{display:block;margin:8px auto 0;border:0;background:none;text-decoration:underline;color:#647c69;font-size:11px;min-height:30px;cursor:pointer}
+.nvp-preview{background:#f5f3f2;min-width:0;padding:16px clamp(18px,3vw,45px) 38px}
+.nvp-stage{width:100%;max-width:816px;margin:0 auto}.nvp-pages{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.nvp-sheet{position:relative;width:816px;height:1056px;flex:none;transform-origin:top left;transform:scale(var(--nvp-scale,1));padding:35px 49px 25px;background:white;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002;overflow:hidden;display:flex;flex-direction:column}
+.nvp-paper-head{text-align:center;border-top:7px solid #dce9e2;padding:13px 9px 15px}
+.nvp-paper-head>p{font-size:10px;letter-spacing:.15em;font-weight:700;color:#778a7c;margin:0}
+.nvp-paper-head h2{font:400 42px/1.12 Georgia,serif;color:#4a6757;margin:12px 0 8px}.nvp-paper-head h2 em{font-style:italic;color:#668574}
+.nvp-paper-head>span{font:italic 16px Georgia,serif;color:#849487}
+.nvp-hero{background:#e9f1eb;text-align:center;padding:18px 23px 17px;margin:18px 0 21px;border-radius:4px}
+.nvp-hero>span,.nvp-guide-intro strong,.nvp-finish strong,.nvp-family-cue span{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#4d715d}
+.nvp-hero>strong{display:block;font:400 28px Georgia,serif;color:#3e6552;margin:7px 0}.nvp-hero p{font:12px/1.55 Montserrat,Arial,sans-serif;margin:0;color:#607868}
+.nvp-section-heading{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid #cddbd1;padding-bottom:9px;gap:10px}
+.nvp-section-heading h3{font:400 25px Georgia,serif;margin:0;color:#516f5c}
+.nvp-section-heading span{font-size:9px;font-weight:700;letter-spacing:.08em;color:#779080}
+.nvp-owners{display:grid;gap:0;margin-top:2px}
+.nvp-person{display:grid;grid-template-columns:37px minmax(0,1fr);gap:12px;border-bottom:1px solid #dce7dd;padding:15px 4px 13px}
+.nvp-person>span{font:italic 27px Georgia,serif;color:#8aa793}
+.nvp-person small{display:block;color:#7a907f;font-size:9px;letter-spacing:.12em;font-weight:700}
+.nvp-person h4{font:400 20px Georgia,serif;color:#476b55;margin:4px 0}
+.nvp-person p{font:12px/1.4 Montserrat,Arial,sans-serif;margin:0;color:#505e51}
+.nvp-finish{margin-top:16px;padding:14px 17px;background:#edf5ef}
+.nvp-finish p{font:italic 16px/1.4 Georgia,serif;color:#4b6955;margin:7px 0 0}
+.nvp-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;border-top:1px solid #c7dacc;padding-top:11px}
+.nvp-foot strong{font:italic 18px Georgia,serif;color:#507a63}
+.nvp-foot span{font-size:9px;letter-spacing:.1em;font-weight:700;color:#7d8c7d}
+.nvp-guide-intro{margin:17px 0;padding:15px 2px;border-top:1px solid #cddbd1;border-bottom:1px solid #cddbd1}
+.nvp-guide-intro p{font:12px/1.6 Montserrat,Arial,sans-serif;margin:8px 0 0}
+.nvp-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:4px 0 21px}
+.nvp-steps>div{background:#edf3ec;padding:13px 11px;min-height:125px}
+.nvp-steps>div:nth-child(2){background:#faf0e2}.nvp-steps>div:nth-child(3){background:#f2e9e6}
+.nvp-steps span{font:italic 24px Georgia,serif;color:#75947d}
+.nvp-steps strong{display:block;font:400 18px Georgia,serif;color:#4e7059;margin:5px 0}
+.nvp-steps p{font:11px/1.5 Montserrat,Arial,sans-serif;margin:0}
+.nvp-back-section-title{font:400 23px Georgia,serif;color:#4c705a;margin:0 0 7px}
+.nvp-details{display:grid;gap:0}
+.nvp-detail{padding:10px 2px;border-top:1px solid #dce7dd;display:grid;grid-template-columns:115px minmax(0,1fr);gap:12px}
+.nvp-detail strong{font:600 13px Montserrat,Arial,sans-serif;color:#476b55}
+.nvp-detail p{font:11px/1.45 Montserrat,Arial,sans-serif;margin:0}
+.nvp-detail small{font-size:10px;color:#819086}
+.nvp-family-cue{margin-top:14px;background:#edf5ef;padding:14px 16px;text-align:center}
+.nvp-family-cue strong{display:block;font:italic 16px/1.35 Georgia,serif;color:#4b6955;margin-top:7px}
+.nvp-parent-note{padding:12px 3px 5px}.nvp-parent-note h3{font:italic 19px Georgia,serif;color:#507a63;margin:0 0 7px}
+.nvp-parent-note p{font:11px/1.55 Montserrat,Arial,sans-serif;margin:0}
+.nvp-sheet [contenteditable="true"]{position:relative;cursor:text;outline-offset:2px;overflow-wrap:anywhere}
+.nvp-sheet [contenteditable="true"]:focus{outline:2px solid #6f9866;background:#f7faf5}
+.nvp-sheet [contenteditable="true"]::after{content:"";display:inline-block;width:12px;height:12px;margin-left:6px;vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");opacity:.7;pointer-events:none}
+.nvp-sheet [contenteditable="true"]:hover::after{opacity:1}
+.nvp-sheet [contenteditable="true"]:focus::after{opacity:0}
+.nvp-dialog{position:fixed;inset:0;margin:auto;width:min(570px,calc(100vw - 38px));max-height:calc(100dvh - 60px);overflow:auto;border:1px solid #dce2d7;border-radius:9px;box-shadow:0 18px 60px #0003;padding:22px 25px;background:white;color:#484941}
+.nvp-dialog::backdrop{background:#20292188}
+.nvp-dialog-head{display:flex;justify-content:space-between;align-items:start;gap:10px}.nvp-dialog-head h2{font:400 30px Georgia,serif;color:#52735b;margin:8px 0}
+.nvp-dialog-head button{width:36px;height:36px;background:#eff2e9;border:0;border-radius:50%;font-size:24px;color:#52735b;cursor:pointer}
+.nvp-dialog>p{font:12px/1.6 Montserrat,Arial,sans-serif}
+.nvp-label{display:block;font-size:12px;font-weight:700;margin:12px 0}.nvp-label input,.nvp-label textarea{display:block;width:100%;min-height:42px;margin-top:6px;border:1px solid #bccdc1;padding:10px;color:#484941;font:12px Montserrat,Arial,sans-serif}
+.nvp-label textarea{min-height:65px;resize:vertical}.nvp-editor-person{border-top:1px solid #e0e8e0;padding:12px 0}
+.nvp-editor-person>strong{font:400 19px Georgia,serif;color:#4e715b}.nvp-editor-person .nvp-label{margin:7px 0}
+.nvp-dialog-done{width:100%;min-height:44px;margin-top:15px;background:#5f7767;color:white;border:0;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.nvp-floating{display:none}
+@media screen and (min-width:1101px){
+ html:has(#club-month-content:not([hidden]) .nvp),body:has(#club-month-content:not([hidden]) .nvp){height:100%;overflow:hidden}
+ #club-month-content:not([hidden]):has(.nvp){position:fixed;left:0;right:0;top:var(--adc-nav-height,118px);bottom:0;overflow:hidden}
+ .nvp,.nvp-layout{height:100%}
+ .nvp-sidebar{height:100%;overflow:hidden}.nvp-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ .nvp-floating{display:flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;gap:8px;align-items:center;border:0;border-radius:999px;padding:14px 19px;background:#454545;color:white;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer;box-shadow:0 8px 25px #0003}
+}
+@media screen and (max-width:1100px){.nvp-layout{display:flex;flex-direction:column}.nvp-preview{order:0;width:100%;padding:14px 14px 28px}.nvp-sidebar{order:1;width:100%;padding:20px}.nvp-prepared{overflow:visible}}
+@media screen and (max-width:700px){.nvp{padding-bottom:130px}.nvp-sidebar{padding:16px}.nvp-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#faf9f7;padding:9px 14px;border-top:1px solid #dce2d7;box-shadow:0 -5px 20px #0001}.nvp-actions .nvp-primary{min-height:42px}.nvp-actions .nvp-secondary{min-height:29px}.nvp-actions .nvp-restore{display:none}}
+@page{size:letter portrait;margin:0}
+@media print{
+ html,body{padding:0!important;margin:0!important;background:white!important}
+ body *{visibility:hidden!important}
+ .nvp,.nvp-layout,.nvp-preview,.nvp-stage,.nvp-pages,.nvp-sheet,.nvp-sheet *{visibility:visible!important}
+ .nvp,.nvp-layout,.nvp-preview,.nvp-stage,.nvp-pages{width:100%!important;max-width:none!important;height:auto!important;overflow:visible!important;padding:0!important;margin:0!important;background:white!important;display:block!important;position:static!important}
+ .nvp-sidebar,.nvp-floating,.nvp-dialog{display:none!important}
+ .nvp-sheet{position:relative!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;margin:0!important;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ .nvp-sheet:last-child{break-after:auto;page-break-after:auto}
+ .nvp-sheet [contenteditable="true"]::after{display:none!important}
+}
+.nvp.nvp-export .nvp-sheet [contenteditable="true"]::after{display:none!important}
+.nvp.nvp-export .nvp-sheet{transform:none!important;box-shadow:none!important}
+</style>
+<script>
+type Person={id:string;name:string;kind:'adult'|'child';label:string;job:string;when:string;done:string};
+type State={family:string;familyLine:string;planTitle:string;goal:string;readyWhen:string;guideIntro:string;familyRule:string;people:Person[]};
+const samplePeople=():Person[]=>[
+ {id:'mom',name:'Mom',kind:'adult',label:'EXISTING CONTRIBUTION',job:'Keep our family calendar and weekly schedule up to date',when:'Throughout the week',done:'Everyone can see the schedule and the plans are current.'},
+ {id:'dad',name:'Dad',kind:'adult',label:'ADULT HANDOFF',job:'Own school messages, forms and deadlines',when:'Check each weekday afternoon',done:'Messages checked, forms handled, deadlines added to our calendar.'},
+ {id:'child1',name:'Andrew',kind:'child',label:'KID HANDOFF',job:"Lay out tomorrow's clothes and supplies",when:'Before bedtime',done:'Clothes ready and needed supplies in their place.'},
+ {id:'child2',name:'Philip',kind:'child',label:'KID HANDOFF',job:'Pack my school bag',when:'Before bedtime',done:'Folder, water bottle and supplies packed; bag by the door.'}
+];
+const makeState=(family='Our family'):State=>({family,familyLine:'A ready-to-use plan for '+family,planTitle:'Our School-Night Reset',goal:'Tomorrow is ready without Mom managing every step.',readyWhen:'Each person has finished their job without Mom checking every step.',guideIntro:"The person who owns the job notices when it's time, does their part, and checks that it's finished. Mom doesn't have to direct every step.",familyRule:'Ask the owner what comes next. Let the owner finish the job.',people:samplePeople()});
+const ageOf=(person:{birthYear?:number;birthMonth?:number})=>person.birthYear?Math.max(2,2027-person.birthYear-((person.birthMonth??1)>11?1:0)):8;
+for(const root of document.querySelectorAll<HTMLElement>('.nvp')){
+ const key=root.dataset.nvpKey??'omc:club:november:ownership-printable:v1';
+ let familyKey='',state=makeState();
+ const stage=root.querySelector<HTMLElement>('[data-stage]');
+ const sheets=Array.from(root.querySelectorAll<HTMLElement>('.nvp-sheet'));
+ const fit=()=>{if(!stage)return;const scale=Math.min(1,Math.max(180,stage.clientWidth-2)/816);for(const sheet of sheets){sheet.style.setProperty('--nvp-scale',String(scale));sheet.style.marginRight=-(816*(1-scale))+'px';sheet.style.marginBottom=-(1056*(1-scale))+'px'}};
+ fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
+ const dialog=root.querySelector<HTMLDialogElement>('[data-dialog]');
+ const why=root.querySelector<HTMLDialogElement>('[data-why-dialog]');
+ root.querySelectorAll('[data-open-editor]').forEach(el=>el.addEventListener('click',()=>{drawEditor();dialog?.showModal()}));
+ root.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>dialog?.close()));
+ root.querySelector('[data-why]')?.addEventListener('click',()=>why?.showModal());
+ root.querySelectorAll('[data-why-close]').forEach(el=>el.addEventListener('click',()=>why?.close()));
+ for(const d of [dialog,why])d?.addEventListener('click',e=>{if(e.target===d)d.close()});
+ const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({familyKey,state}))}catch{}};
+ const clean=(el:HTMLElement,max:number)=>(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);
+ const editable=(el:HTMLElement,key:string,max=130)=>{
+  el.setAttribute('contenteditable','true');el.setAttribute('role','textbox');el.setAttribute('aria-label','Edit '+key);
+  el.dataset.field=key;
+  el.addEventListener('input',()=>{(state as unknown as Record<string,string>)[key]=clean(el,max);save()});
+  el.addEventListener('blur',()=>{(state as unknown as Record<string,string>)[key]=clean(el,max);draw();save()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
+ };
+ const update=(selector:string,value:string)=>{const el=root.querySelector<HTMLElement>(selector);if(el&&document.activeElement!==el)el.textContent=value};
+ const draw=()=>{
+  for(const field of ['familyLine','planTitle','goal','readyWhen','guideIntro','familyRule'] as const)update('[data-edit="'+field+'"]',state[field]);
+  update('[data-sidebar-title]',state.planTitle);
+  update('[data-summary-family]',state.family);
+  update('[data-summary-adult]',state.people.find(p=>p.label==='ADULT HANDOFF')?.job??'Shared adult responsibility');
+  update('[data-summary-kids]',state.people.filter(p=>p.kind==='child').length+' prepared handoffs');
+  const front=root.querySelector<HTMLElement>('[data-people]');
+  const back=root.querySelector<HTMLElement>('[data-details]');
+  if(front){front.replaceChildren();state.people.slice(0,5).forEach((p,i)=>{
+   const row=document.createElement('div');row.className='nvp-person';
+   const num=document.createElement('span');num.textContent=String(i+1).padStart(2,'0');
+   const div=document.createElement('div');const category=document.createElement('small');category.textContent=p.label;
+   const name=document.createElement('h4');name.textContent=p.name;name.contentEditable='true';name.dataset.personField='name';name.dataset.personId=p.id;name.setAttribute('role','textbox');name.setAttribute('aria-label','Edit owner name');
+   const job=document.createElement('p');job.textContent=p.job;job.contentEditable='true';job.dataset.personField='job';job.dataset.personId=p.id;job.setAttribute('role','textbox');job.setAttribute('aria-label','Edit owner job');
+   div.append(category,name,job);row.append(num,div);front.append(row);
+  })}
+  if(back){back.replaceChildren();state.people.slice(0,5).forEach(p=>{
+   const row=document.createElement('div');row.className='nvp-detail';
+   const name=document.createElement('strong');name.textContent=p.name;
+   const rest=document.createElement('div');
+   const when=document.createElement('small');when.textContent='WHEN · '+p.when;when.contentEditable='true';when.dataset.personField='when';when.dataset.personId=p.id;when.setAttribute('role','textbox');when.setAttribute('aria-label','Edit starting cue');
+   const done=document.createElement('p');done.textContent=p.done;done.contentEditable='true';done.dataset.personField='done';done.dataset.personId=p.id;done.setAttribute('role','textbox');done.setAttribute('aria-label','Edit finished result');
+   rest.append(when,done);row.append(name,rest);back.append(row);
+  })}
+ };
+ const drawEditor=()=>{
+  for(const field of ['planTitle','goal'] as const){const el=root.querySelector<HTMLInputElement>('[data-control="'+field+'"]');if(el)el.value=state[field]}
+  const holder=root.querySelector<HTMLElement>('[data-editor-people]');if(!holder)return;holder.replaceChildren();
+  state.people.forEach(p=>{
+   const part=document.createElement('section');part.className='nvp-editor-person';
+   const head=document.createElement('strong');head.textContent=p.name+' · '+p.label.toLowerCase();part.append(head);
+   for(const field of ['name','job','when','done'] as const){
+    const label=document.createElement('label');label.className='nvp-label';label.textContent=field==='done'?'Finished means':field==='when'?'When it happens':field==='job'?'Whole responsibility':'Owner';
+    const input=document.createElement(field==='done'?'textarea':'input') as HTMLInputElement|HTMLTextAreaElement;
+    input.value=p[field];input.maxLength=field==='done'?175:field==='job'?100:75;
+    input.addEventListener('input',()=>{p[field]=input.value;save();draw()});
+    label.append(input);part.append(label);
+   }holder.append(part);
+  });
+ };
+ root.querySelectorAll<HTMLElement>('[data-edit]').forEach(el=>{
+  const field=el.dataset.edit as keyof State;
+  if(field&&field!=='people'&&field!=='family')editable(el,field,field==='guideIntro'?220:field==='readyWhen'?160:145);
+ });
+ for(const field of ['planTitle','goal'] as const)root.querySelector<HTMLInputElement>('[data-control="'+field+'"]')?.addEventListener('input',e=>{state[field]=(e.target as HTMLInputElement).value;save();draw()});
+ const updatePerson=(e:Event)=>{
+  const el=(e.target as HTMLElement).closest<HTMLElement>('[data-person-field][data-person-id]');
+  if(!el)return;
+  const p=state.people.find(x=>x.id===el.dataset.personId);const f=el.dataset.personField as 'name'|'job'|'when'|'done';
+  if(!p||!f)return;p[f]=clean(el,f==='done'?175:105);save();
+ };
+ root.querySelector('[data-people]')?.addEventListener('input',updatePerson);
+ root.querySelector('[data-details]')?.addEventListener('input',updatePerson);
+ for(const selector of ['[data-people]','[data-details]']){
+  root.querySelector(selector)?.addEventListener('focusout',e=>{if((e.target as HTMLElement).matches('[data-person-field]')){updatePerson(e);draw()}});
+  root.querySelector(selector)?.addEventListener('keydown',e=>{if((e as KeyboardEvent).key==='Enter'){e.preventDefault();(e.target as HTMLElement).blur()}});
+ }
+ root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
+ const png=root.querySelector<HTMLButtonElement>('[data-png]');
+ png?.addEventListener('click',async()=>{
+  const sheet=root.querySelector<HTMLElement>('[data-front]');if(!sheet||!png)return;
+  (document.activeElement as HTMLElement|null)?.blur();png.disabled=true;const label=png.textContent;png.textContent='Preparing image…';root.classList.add('nvp-export');
+  try{
+   const {toPng}=await import('html-to-image');
+   const uri=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginRight:'0px',marginBottom:'0px'},skipFonts:true});
+   const a=document.createElement('a');a.href=uri;a.download='november-our-family-ownership-plan.png';a.click();
+  }catch(err){console.error('November PNG export failed',err);alert('Image download failed. Use Print / Save PDF instead.')}
+  finally{root.classList.remove('nvp-export');png.disabled=false;png.textContent=label}
+ });
+ root.querySelector('[data-restore]')?.addEventListener('click',()=>{state=makeState(state.family);save();draw()});
+ const applyHousehold=(detail:{household:{id:string;displayName?:string;members?:Array<{id:string;firstName:string;kind:string;role?:string;birthYear?:number;birthMonth?:number}>};sample?:string})=>{
+  if(!detail?.household)return;
+  const id=(detail.sample??'account')+':'+detail.household.id;
+  if(id===familyKey)return;
+  familyKey=id;
+  const family=detail.household.displayName?.trim()||'Our family';state=makeState(family);
+  const members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
+  if(members.length){
+   const adults=members.filter(m=>m.kind==='adult');const kids=members.filter(m=>m.kind==='child');
+   state.people=[];
+   adults.slice(0,2).forEach((m,i)=>state.people.push({id:m.id,name:i===0?'Mom':'Dad',kind:'adult',label:i===0?'EXISTING CONTRIBUTION':'ADULT HANDOFF',job:i===0?'Keep our family calendar and weekly schedule current':'Own school messages, forms and deadlines',when:i===0?'Throughout the week':'Check each weekday afternoon',done:i===0?'The family calendar reflects current plans.':'Messages checked, forms handled and dates placed on the calendar.'}));
+   kids.slice(0,3).forEach((m,i)=>{const age=ageOf(m);const jobs=age<=5?[['Put away my toys','After playtime','My toys are in their basket.'],['Put shoes in their home','When we come inside','Shoes are in their place.']]:age<=9?[["Lay out tomorrow's clothes",'Before bedtime','Clothes ready for the morning.'],['Pack my school bag','Before bedtime','Folder, water bottle and supplies packed.']]:[['Prepare my school and activity gear','Each evening','My bag, clothes and gear are ready.'],['Own my laundry reset','After laundry is finished','Clothes sorted, folded and put away.']];const job=jobs[i%jobs.length];state.people.push({id:m.id,name:m.firstName,kind:'child',label:'KID HANDOFF',job:job[0],when:job[1],done:job[2]})});
+  }
+  try{const previous=JSON.parse(sessionStorage.getItem(key)??'null');if(previous?.familyKey===id&&previous.state?.people&&Array.isArray(previous.state.people))state=previous.state}catch{}
+  save();draw();
+ };
+ window.addEventListener('omc:club-preview-household',e=>applyHousehold((e as CustomEvent<Parameters<typeof applyHousehold>[0]>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:Parameters<typeof applyHousehold>[0]}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
+ draw();
+}
+</script>
