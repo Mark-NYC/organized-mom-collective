@@ -48,19 +48,24 @@ const jobs=october?[
 @media print{@page{size:letter portrait;margin:0}body:has(.ofc-season-printing) *{visibility:hidden!important}body:has(.ofc-season-printing) .ofc-season-paper,body:has(.ofc-season-printing) .ofc-season-paper *{visibility:visible!important}body:has(.ofc-season-printing) .ofc-season-pages{position:absolute;top:0;left:0;width:8.5in;display:block!important}body:has(.ofc-season-printing) .ofc-season-paper{width:8.5in!important;height:11in!important;min-height:11in!important;padding:.43in!important;box-shadow:none!important;border:0!important;break-after:page!important;page-break-after:always!important;aspect-ratio:auto!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body:has(.ofc-season-printing) .ofc-season-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
 </style>
 <script>
+import {accountStore,sampleStore,type ClubStore} from '../../lib/club/store';
+import {defaultToolPalette} from '../../data/tool-palettes';
 const roots=document.querySelectorAll<HTMLElement>('[data-ofc-season]');
 roots.forEach(root=>{
  const month=root.dataset.ofcSeason!;
  const selects=Array.from(root.querySelectorAll<HTMLSelectElement>('[data-ofc-owner]'));
- const savedKey='omc:club:'+month+':owners:v1';
- let saved:string[]=[];try{const x=JSON.parse(sessionStorage.getItem(savedKey)||'[]');if(Array.isArray(x))saved=x}catch{}
+ const slug=month==='october'?'2027-10-home-works-together':'2027-11-busy-season-sunday-reset';
+ let saved:string[]=[];let store:ClubStore|null=null;let revision=0;let profileVersion=1;let canSave=true;let identity='';let loadId=0;
+ const save=async()=>{if(!store||!canSave)return;try{revision=await store.saveDocument(slug,'seasonal-owners',{edits:{owners:saved},palette:defaultToolPalette,engineVersion:1,profileVersion},revision)}catch{canSave=false;const status=root.querySelector('[role=status]');if(status)status.textContent='Unable to save your changes. Reload before making more edits.'}};
+ const read=async()=>{const n=++loadId;try{const docs=await store?.documents(slug);if(n!==loadId)return;canSave=docs?.can==='edit';const doc=docs?.documents['seasonal-owners'];revision=doc?.revision??0;const owners=(doc?.edits as {owners?:unknown}|undefined)?.owners;saved=Array.isArray(owners)?owners.filter(x=>typeof x==='string'):[];selects.forEach((select,i)=>{if(Array.from(select.options).some(o=>o.value===saved[i]))select.value=saved[i]})}catch{canSave=false}};
  const apply=(household:{displayName?:string;members:{id:string;firstName:string;archived?:boolean}[]}|null)=>{
   if(!household)return;const family=household.displayName||'Our family';root.querySelector('[data-ofc-season-family]')!.textContent=family;root.querySelector('[data-ofc-season-family-back]')!.textContent=family;
   selects.forEach((select,i)=>{const prior=select.value||saved[i]||'';select.replaceChildren();const together=document.createElement('option');together.value='';together.textContent='Our family together';select.append(together);household.members.filter(m=>!m.archived).forEach(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=m.firstName;select.append(option)});if(Array.from(select.options).some(o=>o.value===prior))select.value=prior});
  };
- selects.forEach((select,i)=>select.addEventListener('change',()=>{saved[i]=select.value;try{sessionStorage.setItem(savedKey,JSON.stringify(saved))}catch{}}));
- window.addEventListener('omc:club-preview-household',(e:Event)=>apply((e as CustomEvent<{household:Parameters<typeof apply>[0]}>).detail.household));
- const cached=(window as Window&{__ofcPreviewHousehold?:{household:Parameters<typeof apply>[0]}}).__ofcPreviewHousehold;if(cached)apply(cached.household);
+ selects.forEach((select,i)=>select.addEventListener('change',()=>{saved[i]=select.value;void save()}));
+ const hydrate=(detail:{household:Parameters<typeof apply>[0];sample:string|null})=>{const h=detail.household;if(!h)return;const next=(h as {id?:string}).id+'-'+detail.sample;if(next!==identity){identity=next;store=detail.sample?sampleStore(detail.sample):accountStore;profileVersion=(h as typeof h&{profileVersion?:number}).profileVersion??1;saved=[];revision=0;apply(h);void read()}else apply(h)};
+ window.addEventListener('omc:club-preview-household',(e:Event)=>hydrate((e as CustomEvent<Parameters<typeof hydrate>[0]>).detail));
+ const cached=(window as Window&{__ofcPreviewHousehold?:Parameters<typeof hydrate>[0]}).__ofcPreviewHousehold;if(cached)hydrate(cached);
  root.querySelector('[data-ofc-season-print]')!.addEventListener('click',()=>{root.classList.add('ofc-season-printing');window.print();setTimeout(()=>root.classList.remove('ofc-season-printing'),400)});
 });
 </script>
