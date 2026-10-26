@@ -347,6 +347,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
     select.addEventListener('change',()=>{
      const selected=choices[group].find(c=>c.id===select.value);if(!selected)return;
      const prior=board.steps.find(s=>s.id===selected.id&&s.group===group);
+     if(group==='morning'){const siblings=selected.id.includes('lunch')?['lunch','pack-lunch','stow-lunch']:selected.id.includes('water')?['water','fill-water','stow-water']:[];for(const other of board.steps)if(siblings.includes(other.id)&&other.id!==selected.id)other.removed=true}
      if(prior){prior.removed=false}
      else{const previous=board.steps.filter(s=>s.group===group).at(-1);board.steps.push({id:selected.id,time:previous?.time??(group==='morning'?'07:50':'16:00'),label:selected.label,icon:selected.icon,group})}
      remember();draw();makeOptions();
