@@ -44,7 +44,7 @@ import { photo } from '../lib/images';
 import { routes } from '../routes';
 import { calendarOptions, formatPrice } from '../lib/reorder';
 import { BRAND_DEFINITION, BRAND_NAME, PRICES_AS_OF, PRIMARY_OPTION_ID } from '../config';
-import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial } from '../data/reviews';
+import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, testimonial, raquelReview } from '../data/reviews';
 
 const family = photo('family-breakfast', [640, 960, 1280, 1536]);
 const kitchen = photo('family-reminders');
@@ -327,6 +327,17 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
           ))
         }
       </ol>
+      <figure class="mx-auto mt-9 max-w-3xl rounded-[10px] border border-rose/30 bg-paper px-6 py-8 text-center sm:px-10">
+        <p aria-label="5 out of 5 stars" class="text-rose-deep tracking-[0.2em]">★★★★★</p>
+        <blockquote class="mt-4 font-serif text-[1.55rem] leading-snug text-warm-ink italic sm:text-[1.85rem]">
+          <p>“{raquelReview.highlight}”</p>
+        </blockquote>
+        <p class="mx-auto mt-4 max-w-xl text-[0.98rem] leading-relaxed text-warm-ink">“When they say, it will lighten your mental load, they are not kidding.”</p>
+        <figcaption class="mt-5 text-[0.9rem] text-warm-soft">
+          <a href={raquelReview.reviewerUrl} target="_blank" rel="noopener noreferrer" class="font-semibold text-warm-ink underline underline-offset-2">Raquel</a> · 5-star Etsy review · <time datetime={raquelReview.date}>{reviewDate(raquelReview.date)}</time>
+        </figcaption>
+      </figure>
+
       <HandAsterisks class="mt-10" />
       <p class="mx-auto mt-4 max-w-xl text-center font-serif text-[1.15rem] leading-snug text-warm-ink italic sm:text-[1.25rem]">
         Start with what helps. You don’t need a perfect routine or every box filled in.
