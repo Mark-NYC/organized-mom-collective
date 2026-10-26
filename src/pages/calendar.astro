@@ -22,7 +22,7 @@ import { dailyEssentials } from '../data/cleaning';
 import { routes } from '../routes';
 import { BRAND_NAME, PRICES_AS_OF } from '../config';
 import { RETURNS_LINE } from '../data/support';
-import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats } from '../data/reviews';
+import { ETSY_REVIEWS_URL, ETSY_SHOP_URL, REVIEWS_DISCLAIMER, review, reviewDate, shopStats, raquelReview } from '../data/reviews';
 
 const PRODUCT = '2027 Family Wall Calendar & Organizer';
 const options = calendarOptions();
@@ -353,23 +353,14 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
         {RETURNS_LINE}{' '}
         <a href={routes.returns} class="underline decoration-rule underline-offset-[3px] hover:decoration-ink">Returns policy</a>
       </p>
-      <figure class="mx-auto mt-10 max-w-xl border-t border-rule pt-8 text-center">
-        <blockquote cite={ETSY_REVIEWS_URL} class="font-serif text-[1.3rem] leading-snug italic sm:text-[1.45rem]">
-          <p>“{quality.quote}”</p>
+      <figure class="mx-auto mt-10 max-w-2xl border-t border-rule pt-8 text-center">
+        <p aria-label="5 out of 5 stars" class="text-rose-deep tracking-[0.2em]">★★★★★</p>
+        <blockquote class="mt-4 font-serif text-[1.25rem] leading-relaxed italic sm:text-[1.4rem]">
+          <p>“{raquelReview.quote}”</p>
         </blockquote>
-        <figcaption class="mt-4 text-[0.9rem] leading-snug text-balance text-warm-soft">
-          <span class="font-semibold text-ink">{quality.name}</span>, <time datetime={quality.date}>{reviewDate(quality.date)}</time> ·{' '}
-          <a href={ETSY_REVIEWS_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-rule underline-offset-[3px] hover:decoration-ink"
-            >Read the review on Etsy<span class="sr-only"> (opens Etsy)</span></a
-          >
-          <span class="mt-1.5 block">
-            <span aria-hidden="true">★</span>{' '}
-            {shopStats.rating}/5 from {shopStats.reviews} reviews on{' '}
-            <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="underline decoration-rule underline-offset-[3px] hover:decoration-ink"
-              >our Etsy shop<span class="sr-only"> (opens Etsy)</span></a
-            >, as of {shopStats.asOf}.
-          </span>
-          <span class="mt-1.5 block">{REVIEWS_DISCLAIMER}</span>
+        <figcaption class="mt-5 text-[0.9rem] leading-snug text-warm-soft">
+          <a href={raquelReview.reviewerUrl} target="_blank" rel="noopener noreferrer" class="font-semibold text-ink underline underline-offset-2">{raquelReview.name}</a> · 5-star Etsy review · <time datetime={raquelReview.date}>{reviewDate(raquelReview.date)}</time>
+          <span class="mt-3 block text-[0.85rem]">Past Etsy shop reviews: {shopStats.rating}/5 from {shopStats.reviews} reviews as of {shopStats.asOf}. {REVIEWS_DISCLAIMER}</span>
         </figcaption>
       </figure>
     </div>
