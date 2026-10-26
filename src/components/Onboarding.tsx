@@ -29,7 +29,7 @@ export default function Onboarding({ onDone }: Props) {
       : { icon: weekend.icon, zone: plan.day.zone, time: 'Optional' };
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="onboarding-heading" className="fixed inset-0 z-50 overflow-y-auto bg-paper">
+    <div role="dialog" aria-modal="true" aria-labelledby="onboarding-heading" className="fixed inset-x-0 top-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 overflow-y-auto bg-paper">
       <div className="h-1 bg-month" aria-hidden="true" />
       <div className="mx-auto flex min-h-[calc(100dvh-0.25rem)] max-w-md flex-col px-6 pt-[env(safe-area-inset-top)]">
         <div className="flex h-14 shrink-0 items-center border-b border-rule">
