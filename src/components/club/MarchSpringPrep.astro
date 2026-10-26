@@ -10,7 +10,7 @@ interface Props{storageKey?:string}
 const {storageKey='omc:club:march-spring-prep:v1'}=Astro.props;
 const project=monthlyDeepClean.find(x=>x.month===2)!;
 const taskIcons:Record<string,string>={
- 'mar-baseboards':'spray-bottle-cloth','mar-vents':'duster','mar-winter-gear':'sorting-clothes',
+ 'mar-baseboards':'spray-bottle-and-cloth','mar-vents':'duster','mar-winter-gear':'sorting-clothes',
  'mar-curtains':'washing-window','mar-donate':'donation-box'
 };
 const handoffs:Record<string,{ready:string;doJob:string;done:string;supplies:string;childRole:string}> = {
@@ -402,7 +402,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   button.disabled=true;const old=button.textContent;button.textContent='Preparing image…';
   root.classList.add('msc-image-export');
   try{
-   await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   await Promise.all(Array.from(sheet.querySelectorAll('img')).map(async img=>{if(!img.complete)await img.decode();if(!img.naturalWidth)throw new Error('Illustration unavailable: '+new URL(img.currentSrc||img.src).pathname)}));
    const {toPng}=await import('html-to-image');
    const options={pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',cacheBust:true,style:{transform:'none',margin:'0',boxShadow:'none'}};
    let png:string;
