@@ -21,10 +21,9 @@ const tiers=[
     <div class="jab-summary-row"><span>Prepared for</span><b data-jab-summary-child>Whole family</b></div>
     <div class="jab-summary-row"><span>Activity style</span><b data-jab-summary-focus>A little of everything</b></div>
     <div class="jab-summary-row"><span>Ideas included</span><b data-jab-summary-count>9 activities</b></div>
-    <button type="button" class="jab-edit-link" data-open-activities>Choose activities <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
    <p class="jab-guidance-compact">Use activities your child can safely start with materials you already have. Supervise where needed.</p>
-   <div class="jab-actions"><div class="jab-primary-actions"><a class="jab-jump-edit" href="#july-edit-controls">Make changes <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button class="jab-primary" type="button" data-jab-print>Print / Save PDF</button></div>
+   <div class="jab-actions"><button class="jab-primary jab-main-choose" type="button" data-open-activities>Choose Activities</button><div class="jab-primary-actions"><button class="jab-secondary" type="button" data-jab-print>Print / Save PDF</button></div>
     <button class="jab-secondary" type="button" data-jab-download>Download image (PNG)</button>
     <button class="jab-clear" type="button" data-jab-reset>Restore starter board</button></div>
   </aside>
@@ -36,21 +35,20 @@ const tiers=[
   <dialog class="jab-dialog jab-editor-dialog" data-editor-dialog aria-labelledby="jab-editor-title">
    <div class="jab-dialog-head"><div><span class="jab-eyebrow">MAKE IT YOURS · JULY</span><h2 id="jab-editor-title">Edit activity board</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>We've prepared the activities for your family. Change only what doesn't fit.</p>
-   <div class="jab-dialog-fields">   <label>Who are the activities for?<select data-jab-child><option value="family">My children</option></select></label>
-   <label>Play with<select data-jab-participation><option value="solo">By myself</option><option value="sibling">With a sibling</option><option value="friends">With friends already here</option></select></label>
-   <label>My kids enjoy<select data-jab-interest><option value="mixed">A bit of everything</option><option value="art">Art and crafts</option><option value="building">Building and LEGO</option><option value="movement">Movement</option><option value="stories">Stories and imagination</option><option value="games">Puzzles and games</option></select></label>
-   <label>Activity style<select data-jab-focus>
-     <option value="mixed">A little of everything</option><option value="inside">Mostly indoors</option><option value="outside">Mostly outdoors</option>
-   </select></label>
-   <button type="button" class="jab-choose-button" data-open-activities>Choose activities with pictures</button><p class="jab-choice-tip">Tap the pictures to choose up to three activities in each section.</p>
-</div>
+
       <div class="jab-guidance"><strong>Make this work at home</strong><p>Only keep activities your child can safely start with supplies already available. Supervise activities when needed. For little ones, adult help and shorter attention spans are normal.</p></div>
 
    <button type="button" class="jab-dialog-done" data-close-dialog>Done · See our board</button>
   </dialog>
   <dialog class="jab-dialog jab-activity-dialog" data-activity-dialog aria-labelledby="jab-activity-title">
    <div class="jab-dialog-head"><div><span class="jab-eyebrow">MAKE IT YOURS · JULY</span><h2 id="jab-activity-title">Choose Your Activities</h2></div><button type="button" class="jab-dialog-close" data-activity-cancel aria-label="Close">×</button></div>
-   <p>We've picked activities for your family. Tap a picture to add or remove it. Choose up to three in each group.</p>
+   <details class="jab-picker-filters"><summary>Personalize activities <span>Child, play style & interests</span></summary><div class="jab-dialog-fields"><label>Who are the activities for?<select data-jab-child><option value="family">My children</option></select></label>
+   <label>Play with<select data-jab-participation><option value="solo">By myself</option><option value="sibling">With a sibling</option><option value="friends">With friends already here</option></select></label>
+   <label>My kids enjoy<select data-jab-interest><option value="mixed">A bit of everything</option><option value="art">Art and crafts</option><option value="building">Building and LEGO</option><option value="movement">Movement</option><option value="stories">Stories and imagination</option><option value="games">Puzzles and games</option></select></label>
+   <label>Activity style<select data-jab-focus>
+     <option value="mixed">A little of everything</option><option value="inside">Mostly indoors</option><option value="outside">Mostly outdoors</option>
+   </select></label></div></details>
+   <p class="jab-picker-instruction">Tap pictures to choose up to three activities in each group.</p>
    <div class="jab-activity-tabs" role="tablist" aria-label="Activity category"><button type="button" role="tab" data-activity-tab="quick" aria-selected="true">Start Playing</button><button type="button" role="tab" data-activity-tab="busy" aria-selected="false">Make & Imagine</button><button type="button" role="tab" data-activity-tab="project" aria-selected="false">Keep Going</button></div>
    <div class="jab-activity-status"><span data-activity-count>3 of 3 selected</span><span data-activity-age></span></div>
    <div class="jab-activity-grid" data-activity-grid></div>
@@ -58,7 +56,7 @@ const tiers=[
    <div class="jab-activity-footer"><button type="button" data-activity-cancel>Cancel</button><button type="button" class="jab-dialog-done" data-activity-save>Save My Activities</button></div>
   </dialog>
   <section class="jab-preview" aria-label="July illustrated activity board">
-   <button type="button" class="jab-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+   <button type="button" class="jab-floating-edit" data-open-activities><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>CHOOSE ACTIVITIES</span></button>
    
    <div class="jab-stage" data-jab-stage>
     <article class="jab-sheet" data-jab-sheet>
@@ -187,6 +185,23 @@ const tiers=[
 .jab-activity-footer button:first-child{flex:1;background:#fff;border:1px solid #aabca4;padding:12px;cursor:pointer;color:#536c4d}
 .jab-activity-footer .jab-dialog-done{flex:2;width:auto;margin:0}
 @media(max-width:480px){.jab-activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.jab-activity-card{min-height:145px}.jab-activity-card img{height:82px}}
+
+
+.jab-main-choose{min-height:50px;font-size:13px;margin:0 0 9px}
+.jab-actions .jab-primary-actions .jab-secondary{margin-top:0;min-height:40px}
+.jab-picker-filters{border:1px solid #dae3d6;border-radius:7px;margin:12px 0 10px;background:#f9faf7}
+.jab-picker-filters summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;cursor:pointer;font:700 13px Montserrat,Arial,sans-serif;color:#526e4e;list-style:none}
+.jab-picker-filters summary::-webkit-details-marker{display:none}
+.jab-picker-filters summary:after{content:"⌄";font-size:20px}
+.jab-picker-filters[open] summary:after{content:"⌃"}
+.jab-picker-filters summary span{font-size:10px;font-weight:500;color:#7c8775}
+.jab-picker-filters .jab-dialog-fields{padding:0 14px 14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.jab-picker-filters .jab-dialog-fields label{font:700 11px Montserrat,Arial,sans-serif;color:#52624d}
+.jab-picker-filters select{width:100%;min-height:40px;margin-top:6px;border:1px solid #c8d3c3;border-radius:4px;background:white;padding:8px;font:12px Montserrat,Arial,sans-serif;color:#4a5646}
+.jab-picker-instruction{margin:12px 0 7px!important;font:12px/1.5 Montserrat,Arial,sans-serif!important}
+.jab-activity-tabs{margin:8px 0}
+.jab-activity-status{margin:8px 0}
+@media(max-width:520px){.jab-picker-filters .jab-dialog-fields{grid-template-columns:1fr}.jab-picker-filters summary span{font-size:9px}}
 
 /* June reference: visible pencil indicates inline-editable text before hover.
    A CSS pseudo-element keeps the cue out of saved text and the text cursor. */
@@ -340,7 +355,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  };
  const openActivityPicker=()=>{
   activityDraft={quick:structuredClone(state.quick.filter(x=>!x.removed)),busy:structuredClone(state.busy.filter(x=>!x.removed)),project:structuredClone(state.project.filter(x=>!x.removed))};
-  activeActivityTier='quick';pickerMessage('');renderActivityPicker();editorDialog?.close();activityDialog?.showModal();
+  activeActivityTier='quick';pickerMessage('');renderActivityPicker();activityDialog?.showModal();
  };
  root.querySelectorAll('[data-open-activities]').forEach(b=>b.addEventListener('click',openActivityPicker));
  root.querySelectorAll('[data-activity-cancel]').forEach(b=>b.addEventListener('click',()=>activityDialog?.close()));
