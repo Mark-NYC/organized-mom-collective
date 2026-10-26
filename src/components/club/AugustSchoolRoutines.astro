@@ -137,6 +137,13 @@ const initial=[
  .asr-actions .asr-secondary{min-height:30px}.asr-actions .asr-reset{min-height:25px}.asr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{.asr-editor,.asr-actions,.asr-dialog,.asr-float{display:none!important}.asr-preview{padding:0!important}}
+/* June-style always-visible inline editing pencil (not part of editable text). */
+.asr .asr-sheet [contenteditable="true"]{position:relative;cursor:text;outline-offset:2px}
+.asr .asr-sheet [contenteditable="true"]::after{content:"";display:inline-block;width:12px;height:12px;margin-left:6px;vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");opacity:.7;pointer-events:none}
+.asr .asr-sheet [contenteditable="true"]:hover::after{opacity:1}
+.asr .asr-sheet [contenteditable="true"]:focus::after{opacity:0}
+@media print{.asr .asr-sheet [contenteditable="true"]::after{display:none!important}}
+.asr.asr-export .asr-sheet [contenteditable="true"]::after{display:none!important}
 </style>
 <script>
 type Group='morning'|'after';
