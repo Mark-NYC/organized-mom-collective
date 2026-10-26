@@ -1,10 +1,10 @@
 ---
-/** Unlisted November editor preview, sharing the exact printable with the member kit. */
+/** Unlisted November editor preview, using the updated October-style printable and June-style direct editing. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
-import NovemberOwnershipPrototype from '../../components/club/NovemberOwnershipPrototype.astro';
+import NovemberOwnershipPrintable from '../../components/club/NovemberOwnershipPrintable.astro';
 ---
 <PublicLayout fullTitle="November Job Ownership Worksheet | Organized Family Club" description="November Club sample preview." indexable={false} chrome={false} width="full" tracking={false}>
  <ClubPrototypeNav client:only="react" month="november" />
- <div id="club-month-content"><NovemberOwnershipPrototype /></div>
+ <div id="club-month-content"><NovemberOwnershipPrintable /></div>
 </PublicLayout>
