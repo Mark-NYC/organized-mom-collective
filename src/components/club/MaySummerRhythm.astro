@@ -462,7 +462,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    list.append(node);
    node.hidden=!visible.includes(key);
    const v=resolved(key);
-   node.style.setProperty('--msr-tint',tintFor(v.time,blocks.find(b=>b.key===key)?.tint??'#DDEBDB'));
+   node.style.setProperty('--msr-tint',tintFor(v.time,({morning:'#F8E8B5',move:'#F4DEA3',create:'#F0D493',lunch:'#DDEBDB',quiet:'#D1E5D6',free:'#C3DDCF',snack:'#E4E9D5',evening:'#D1D7EA'} as Record<Key,string>)[key]));
    const title=node.querySelector<HTMLElement>('[data-title]');if(title)title.textContent=v.title;
    const desc=node.querySelector<HTMLElement>('[data-desc]');if(desc)desc.textContent=v.desc;
    const time=node.querySelector<HTMLElement>('[data-time]');if(time){const formatted=clock(v.time);const match=formatted.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:formatted));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
