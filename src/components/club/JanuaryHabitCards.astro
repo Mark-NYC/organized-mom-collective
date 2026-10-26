@@ -59,6 +59,7 @@ const defaults = [
             </div>
             <div class="jhc-card-icon" aria-hidden="true"><img src={['dishes-in-sink','backpack','pajamas','table-after-meal'].map(n=>'/images/club/icon-library/'+n+'.png')[i]} alt="" width="58" height="58" /></div>
             <p class="jhc-small-title">ONE LITTLE HABIT</p>
+            <p class="jhc-card-owner" data-jhc-owner>FOR THE FAMILY</p>
             <h3 class="jhc-card-name" data-print-field="name" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit name">{item.name}</h3>
             <div class="jhc-card-rule"></div>
             <p class="jhc-anchor-label">WHEN THIS HAPPENS</p>
@@ -336,7 +337,8 @@ const defaults = [
 .jhc-card-grid .jhc-anchor{font-size:22px}
 .jhc-card-grid .jhc-action{font-size:26px}
 
-/* January: two separate, landscape-proportioned cards side by side on a portrait Letter sheet. */
+/* January: two separate cards side by side on a portrait Letter sheet. */
+.jhc-card-owner{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.08em;text-align:center;color:#527384;margin:6px 0 12px}
 .jhc-card-grid[data-jhc-card-grid]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:1fr!important;align-items:stretch!important;justify-content:stretch!important;gap:0!important;border:1px dashed #bdbdbd!important;margin:70px 26px 90px!important;flex:1!important}
 .jhc-card-grid[data-jhc-card-grid] .jhc-card{width:auto!important;min-width:0!important;height:auto!important;max-height:none!important;padding:35px 27px 28px!important;border:0!important;overflow:hidden!important}
 .jhc-card-grid[data-jhc-card-grid] .jhc-card:first-child{border-right:1px dashed #bdbdbd!important}
@@ -408,6 +410,8 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
    if(finderStep===0){const next=make('button','Next: Choose what would help','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;next.type='button';next.disabled=selectedHabits.length===0;next.addEventListener('click',()=>{finderStep=1;renderFinder()})}
   }else{
    const picks=[...selectedHabits];
+   const priority=otherSuggestion[finderAnswers[1]];
+   if(priority&&picks.includes(priority))picks.sort((a,b)=>Number(b===priority)-Number(a===priority));
    // Respect the family's choice of one or two habits. Never add a second without asking.
    const who=finderAnswers[2]||'Everyone';
    picks.slice(0,2).forEach((choice,i)=>{const suggestion=suggestions[choice];make('h3',`Card ${i+1}: ${suggestion.name}`);make('p',`For: ${who}`);make('p',`When: ${suggestion.anchor}`);make('p',suggestion.action)});
@@ -432,7 +436,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   root.querySelector<HTMLElement>('[data-jhc-card-grid]')?.classList.toggle('jhc-one-card',activeCount===1);
   const habitLabel=root.querySelector<HTMLElement>('[data-jhc-habit-label]');if(habitLabel)habitLabel.textContent=values[0].name;
   editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
-  cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];if(document.activeElement!==target)target.textContent=values[i][field] || ' ';}));
+  cards.forEach((el,i)=>{const owner=el.querySelector<HTMLElement>('[data-jhc-owner]');if(owner)owner.textContent='FOR '+((values[i] as typeof values[number] & {who?:string}).who||'THE FAMILY').toUpperCase();el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];if(document.activeElement!==target)target.textContent=values[i][field] || ' ';});});
  };
  // Click directly on printed words; keep caret in place and save to the existing card state.
  cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{
