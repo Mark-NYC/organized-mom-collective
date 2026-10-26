@@ -4,20 +4,20 @@ interface Props {storageKey?:string}
 const {storageKey='omc:club:july-activities:v1'}=Astro.props;
 const icons={book:'/images/club/icon-library/book.png',blocks:'/images/club/icon-library/building-blocks.png',puzzle:'/images/club/icon-library/puzzle-piece.png',tree:'/images/club/icon-library/tree.png',scissors:'/images/club/icon-library/drawing-coloring.png',bike:'/images/club/icon-library/bike.png',rope:'/images/club/icon-library/building-an-obstacle-course.png',friends:'/images/club/icon-library/playing-with-friends.png',lightbulb:'/images/club/icon-library/star.png'};
 const tiers=[
- {id:'quick',num:'01',title:'5-Minute Ideas',subtitle:'I can start right now.',hint:'NO SETUP · BY MYSELF',color:'#E3EEDC',
-  items:[{id:'read',label:'Read a book',icon:'book'},{id:'draw',label:'Draw something new',icon:'scissors'},{id:'build',label:'Build with blocks',icon:'blocks'}]},
- {id:'busy',num:'02',title:'Keep Me Busy',subtitle:'I want to get into something.',hint:'A LITTLE SETUP · KEEP GOING',color:'#F6E8BE',
+ {id:'quick',num:'01',title:'Start Playing',subtitle:'I can start right now.',hint:'NO SETUP · BY MYSELF',color:'#E3EEDC',
+  items:[{id:'read',label:'Read a book',icon:'book'},{id:'draw',label:'Draw a superhero',icon:'scissors'},{id:'build',label:'Build with blocks',icon:'blocks'}]},
+ {id:'busy',num:'02',title:'Make & Imagine',subtitle:'I want to get into something.',hint:'A LITTLE SETUP · KEEP GOING',color:'#F6E8BE',
   items:[{id:'puzzle',label:'Finish a puzzle',icon:'puzzle'},{id:'outdoor',label:'Explore outside',icon:'tree'},{id:'craft',label:'Make a paper craft',icon:'scissors'}]},
- {id:'project',num:'03',title:'My Own Project',subtitle:'I can work on this again tomorrow.',hint:'BUILD IT OVER TIME · MY IDEA',color:'#DFE7F1',
-  items:[{id:'city',label:'Build a mini city',icon:'blocks'},{id:'story',label:'Write & draw a story',icon:'book'},{id:'course',label:'Design an obstacle course',icon:'rope'}]}
+ {id:'project',num:'03',title:'Keep Going',subtitle:'I can work on this again tomorrow.',hint:'BUILD IT OVER TIME · MY IDEA',color:'#DFE7F1',
+  items:[{id:'city',label:'Build a LEGO city',icon:'blocks'},{id:'story',label:'Write & draw a story',icon:'book'},{id:'course',label:'Design an obstacle course',icon:'rope'}]}
 ];
 ---
 <div class="jab" data-jab-key={storageKey} data-jab-icons={JSON.stringify(icons)}>
- <header class="jab-intro"><a href="/club">← Organized Family Club</a><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h1>Less “I'm bored.” <em>More “I've got this.”</em></h1><p>A picture-led board that gives kids real options they can start themselves. Choose, try, and keep going—without Mom having to plan every moment.</p></header>
+ <header class="jab-intro"><a href="/club">← Organized Family Club</a><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h1>I'm Bored! <em>What Can I Do?</em></h1><p>Fun things kids can start without asking Mom or Dad to entertain them.</p></header>
  <div class="jab-layout">
   <aside class="jab-editor" aria-label="Prepared July activity board">
-   <div class="jab-editor-head"><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h2>Less “I'm bored.” <em>More “I've got this.”</em></h2><button type="button" class="jab-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
-   <div class="jab-prepared" id="july-edit-controls"><span class="jab-eyebrow">YOUR FAMILY'S PREPARED BOARD</span><strong>What Can I Do Right Now?</strong><p>Nine illustrated activity ideas in three levels, ready for kids to start on their own.</p>
+   <div class="jab-editor-head"><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h2>I'm Bored! <em>What Can I Do?</em></h2><button type="button" class="jab-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
+   <div class="jab-prepared" id="july-edit-controls"><span class="jab-eyebrow">YOUR FAMILY'S PREPARED BOARD</span><strong>What Can I Do Right Now?</strong><p>Nine illustrated activities, prepared for your children's ages and interests.</p>
     <div class="jab-summary-row"><span>Prepared for</span><b data-jab-summary-child>Whole family</b></div>
     <div class="jab-summary-row"><span>Activity style</span><b data-jab-summary-focus>A little of everything</b></div>
     <div class="jab-summary-row"><span>Ideas included</span><b data-jab-summary-count>9 activities</b></div>
@@ -36,11 +36,13 @@ const tiers=[
   <dialog class="jab-dialog jab-editor-dialog" data-editor-dialog aria-labelledby="jab-editor-title">
    <div class="jab-dialog-head"><div><span class="jab-eyebrow">MAKE IT YOURS · JULY</span><h2 id="jab-editor-title">Edit activity board</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>We've prepared the activities for your family. Change only what doesn't fit.</p>
-   <div class="jab-dialog-fields">   <label>Who is this for?<select data-jab-child><option value="family">The whole family</option></select></label>
+   <div class="jab-dialog-fields">   <label>Who are the activities for?<select data-jab-child><option value="family">My children</option></select></label>
+   <label>Play with<select data-jab-participation><option value="solo">By myself</option><option value="sibling">With a sibling</option><option value="friends">With friends already here</option></select></label>
+   <label>My kids enjoy<select data-jab-interest><option value="mixed">A bit of everything</option><option value="art">Art and crafts</option><option value="building">Building and LEGO</option><option value="movement">Movement</option><option value="stories">Stories and imagination</option><option value="games">Puzzles and games</option></select></label>
    <label>Activity style<select data-jab-focus>
      <option value="mixed">A little of everything</option><option value="inside">Mostly indoors</option><option value="outside">Mostly outdoors</option>
    </select></label>
-   <details class="jab-customize"><summary>Change activity choices <span>Optional</span></summary><p>Only if you want: swap or restore an idea here. On the board itself, click the text to edit or × to remove.</p><div data-jab-options></div></details>
+   <details class="jab-customize"><summary>Change activity choices <span>Optional</span></summary><p>Only if you want: swap or restore an idea here. On the board, edit activity names directly or use × to remove.</p><div data-jab-options></div></details>
 </div>
       <div class="jab-guidance"><strong>Make this work at home</strong><p>Only keep activities your child can safely start with supplies already available. Supervise activities when needed. For little ones, adult help and shorter attention spans are normal.</p></div>
 
@@ -51,8 +53,8 @@ const tiers=[
    
    <div class="jab-stage" data-jab-stage>
     <article class="jab-sheet" data-jab-sheet>
-     <header class="jab-sheet-header"><p>ORGANIZED FAMILY CLUB · JULY 2027</p><h2>What Can I Do <em>Right Now?</em></h2><div class="jab-for" data-jab-for>My own ideas for summer</div></header>
-     <p class="jab-sub" data-jab-edit="intro" contenteditable="true" role="textbox" aria-label="Edit board introduction">Pick something that sounds good. Start small or make something big.</p>
+     <header class="jab-sheet-header"><p>ORGANIZED FAMILY CLUB · JULY 2027</p><h2>I'm Bored! <em>What Can I Do?</em></h2><div class="jab-for" data-jab-for>My own ideas for summer</div></header>
+     <p class="jab-sub" data-jab-edit="intro" contenteditable="true" role="textbox" aria-label="Edit board introduction">Fun things I can do without asking Mom or Dad.</p>
      <div class="jab-tiers">
       {tiers.map(t=><section class={'jab-tier jab-tier-'+t.id} data-jab-tier={t.id} style={'--jab-tint:'+t.color}>
         <header class="jab-tier-head"><div class="jab-step">{t.num}</div><div class="jab-tier-heading"><h3>{t.title}</h3><p>{t.subtitle}</p></div><span>{t.id==="quick"?"START NOW":t.id==="busy"?"STAY WITH IT":"COME BACK TOMORROW"}</span></header>
@@ -65,7 +67,7 @@ const tiers=[
         </div>
        </section>)}
      </div>
-     <footer class="jab-footer"><strong data-jab-edit="rule" contenteditable="true" role="textbox" aria-label="Edit finishing rule">Pick one. Give it a try. Put things away when you're done.</strong><span>ORGANIZED FAMILY CLUB</span></footer>
+     <footer class="jab-footer"><strong data-jab-edit="rule" contenteditable="true" role="textbox" aria-label="Edit finishing rule">Before asking: Pick one · Get what you need · Have fun · Put things away.</strong><span>ORGANIZED FAMILY CLUB</span></footer>
     </article>
    </div>
    
@@ -174,16 +176,16 @@ const tiers=[
 <script>
 type Tier='quick'|'busy'|'project';
 type Idea={id:string;label:string;icon:string;removed?:boolean;minAge?:number;maxAge?:number};
-type State={quick:Idea[];busy:Idea[];project:Idea[];focus:'mixed'|'inside'|'outside';child:string;intro:string;rule:string};
+type State={quick:Idea[];busy:Idea[];project:Idea[];focus:'mixed'|'inside'|'outside';child:string;participation:'solo'|'sibling'|'friends';interest:string;intro:string;rule:string};
 const library:Record<Tier,Idea[]>={
  quick:[
   {id:'picture',label:'Look at a picture book',icon:'book',maxAge:5},
   {id:'sort',label:'Sort blocks by color',icon:'blocks',maxAge:5},
   {id:'doodle',label:'Draw a funny animal',icon:'scissors',maxAge:8},
   {id:'read',label:'Read a book',icon:'book',minAge:6},
-  {id:'draw',label:'Draw something new',icon:'scissors',minAge:6},
+  {id:'draw',label:'Draw a superhero',icon:'scissors',minAge:6},
   {id:'build',label:'Build with blocks',icon:'blocks'},
-  {id:'stretch',label:'Try ten stretches',icon:'rope',minAge:6},
+  {id:'stretch',label:'Have a dance party',icon:'rope',minAge:6},
   {id:'look',label:'Find five things in nature',icon:'tree',minAge:6}
  ],
  busy:[
@@ -191,7 +193,7 @@ const library:Record<Tier,Idea[]>={
   {id:'easy-puzzle',label:'Work on a picture puzzle',icon:'puzzle',maxAge:5},
   {id:'picture-art',label:'Make a big picture',icon:'scissors',maxAge:5},
   {id:'puzzle',label:'Finish a puzzle',icon:'puzzle',minAge:6},
-  {id:'outdoor',label:'Explore outside (ask first)',icon:'tree',minAge:6},
+  {id:'outdoor',label:'Find five things in nature',icon:'tree',minAge:6},
   {id:'craft',label:'Make a paper craft',icon:'scissors',minAge:6},
   {id:'bike',label:'Ride my bike (ask first)',icon:'bike',minAge:6},
   {id:'tower',label:'Build a giant tower',icon:'blocks'},
@@ -201,14 +203,15 @@ const library:Record<Tier,Idea[]>={
   {id:'small-town',label:'Build a pretend town',icon:'blocks',maxAge:5},
   {id:'picture-story',label:'Make a picture story',icon:'book',maxAge:5},
   {id:'big-art',label:'Add to a big drawing',icon:'scissors',maxAge:5},
-  {id:'city',label:'Build a mini city',icon:'blocks',minAge:6},
+  {id:'city',label:'Build a LEGO city',icon:'blocks',minAge:6},
   {id:'story',label:'Write & draw a story',icon:'book',minAge:9},
   {id:'course',label:'Design a safe obstacle course',icon:'rope',minAge:6},
-  {id:'comic',label:'Make my own comic book',icon:'scissors',minAge:6},
+  {id:'comic',label:'Draw a comic strip',icon:'scissors',minAge:6},
   {id:'garden',label:'Observe a plant growing',icon:'tree',minAge:6},
   {id:'mural',label:'Make a big art project',icon:'scissors',minAge:6}
  ]
 };
+const interestIds:Record<string,string[]>={mixed:[],art:['doodle','draw','craft','comic','picture-art','big-art','mural'],building:['build','tower','city','small-town'],movement:['stretch','course','bike','look'],stories:['read','picture','story','pretend','picture-story'],games:['puzzle','easy-puzzle','course']};
 const ageGroups={
  little:{quick:['picture','sort','build'],busy:['pretend','easy-puzzle','picture-art'],project:['small-town','picture-story','big-art']},
  middle:{quick:['read','draw','build'],busy:['puzzle','outdoor','craft'],project:['city','comic','course']},
@@ -218,9 +221,9 @@ const eligible=(idea:Idea,age:number)=> (idea.minAge??0)<=age&&(idea.maxAge??99)
 const defaultsFor=(age:number,child='family'):State=>{
  const preset=age<=5?ageGroups.little:age>=10?ageGroups.older:ageGroups.middle;
  const select=(tier:Tier)=>preset[tier].map(id=>({...library[tier].find(x=>x.id===id)!}));
- return {quick:select('quick'),busy:select('busy'),project:select('project'),focus:'mixed',child,
-  intro:'Pick something that sounds good. Start small or make something big.',
-  rule:"Pick one. Give it a try. Put things away when you're done."};
+ return {quick:select('quick'),busy:select('busy'),project:select('project'),focus:'mixed',child,participation:'solo',interest:'mixed',
+  intro:'Fun things I can do without asking Mom or Dad.',
+  rule:"Before asking: Pick one · Get what you need · Have fun · Put things away."};
 };
 const fresh=():State=>defaultsFor(8);
 for(const root of document.querySelectorAll<HTMLElement>('.jab')){
@@ -240,21 +243,23 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
- const save=()=>{boards[state.child]=structuredClone(state);try{sessionStorage.setItem(key,JSON.stringify({profile,state,boards}))}catch{}};
+ const save=()=>{boards[state.child]=structuredClone(state);try{localStorage.setItem(key,JSON.stringify({profile,state,boards}))}catch{}};
  const draw=()=>{
   for(const tier of ['quick','busy','project'] as Tier[])for(const row of root.querySelectorAll<HTMLElement>('[data-jab-item="'+tier+'"]')){
    const item=state[tier][Number(row.dataset.jabSlot)];if(!item)continue;row.hidden=!!item.removed;
-   const img=row.querySelector<HTMLImageElement>('img');if(img)img.src=icons[item.icon]??icons.book;
+   const img=row.querySelector<HTMLImageElement>('img');if(img){img.src=icons[item.icon]??icons.lightbulb;img.alt=item.label;}
    const txt=row.querySelector<HTMLElement>('[data-jab-label]');if(txt&&document.activeElement!==txt)txt.textContent=item.label;
   }
   const title=root.querySelector<HTMLElement>('[data-jab-for]');if(title)title.textContent=family;
   for(const name of ['intro','rule'] as const){const el=root.querySelector<HTMLElement>('[data-jab-edit="'+name+'"]');if(el&&document.activeElement!==el)el.textContent=state[name]}
   const kid=kids.find(k=>k.id===state.child);
-  const summaryChild=root.querySelector<HTMLElement>('[data-jab-summary-child]');if(summaryChild)summaryChild.textContent=kid?.firstName??'Whole family';
-  const summaryFocus=root.querySelector<HTMLElement>('[data-jab-summary-focus]');if(summaryFocus)summaryFocus.textContent=state.focus==='inside'?'Mostly indoors':state.focus==='outside'?'Mostly outdoors':'A little of everything';
+  const summaryChild=root.querySelector<HTMLElement>('[data-jab-summary-child]');if(summaryChild)summaryChild.textContent=(kid?.firstName??'My children')+' · '+({solo:'By myself',sibling:'With a sibling',friends:'With friends'}[state.participation]);
+  const summaryFocus=root.querySelector<HTMLElement>('[data-jab-summary-focus]');if(summaryFocus)summaryFocus.textContent=state.interest==='mixed'?'A bit of everything':state.interest;
   const count=root.querySelector<HTMLElement>('[data-jab-summary-count]');if(count)count.textContent=([...state.quick,...state.busy,...state.project].filter(x=>!x.removed).length)+' activities';
   const child=root.querySelector<HTMLSelectElement>('[data-jab-child]');if(child)child.value=state.child;
   const focus=root.querySelector<HTMLSelectElement>('[data-jab-focus]');if(focus)focus.value=state.focus;
+  const participation=root.querySelector<HTMLSelectElement>('[data-jab-participation]');if(participation)participation.value=state.participation;
+  const interest=root.querySelector<HTMLSelectElement>('[data-jab-interest]');if(interest)interest.value=state.interest;
  };
  const options=()=>{
   const parent=root.querySelector<HTMLElement>('[data-jab-options]');if(!parent)return;parent.replaceChildren();
@@ -275,7 +280,21 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
    }
   }
  };
- const updateFamily=()=>{const kid=kids.find(k=>k.id===state.child);family=kid?kid.firstName+"'s ideas for summer":'Our ideas for summer'};
+ root.querySelector<HTMLSelectElement>('[data-jab-participation]')?.addEventListener('change',e=>{
+   const value=(e.target as HTMLSelectElement).value as State['participation'];
+   state.participation=value==='sibling'&&kids.length<2?'solo':value;
+   save();draw();options();
+ });
+ root.querySelector<HTMLSelectElement>('[data-jab-interest]')?.addEventListener('change',e=>{
+   state.interest=(e.target as HTMLSelectElement).value;
+   const ids=interestIds[state.interest]??[];
+   if(ids.length)for(const tier of ['quick','busy','project'] as Tier[]){
+     const age=selectedAge();const matches=library[tier].filter(x=>ids.includes(x.id)&&eligible(x,age));
+     matches.slice(0,3).forEach((x,i)=>{state[tier][i]={...x}});
+   }
+   save();draw();options();
+ });
+ const updateFamily=()=>{const kid=kids.find(k=>k.id===state.child);family=kid?kid.firstName+"'s activity ideas":'Our activity ideas'};
  const childSelect=root.querySelector<HTMLSelectElement>('[data-jab-child]');
  childSelect?.addEventListener('change',()=>{
   save();
@@ -319,14 +338,16 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   if(!detail?.household)return;const next=(detail.sample??'account')+':'+detail.household.id;
   kids=(detail.household.members??[]).filter(x=>x.kind==='child');
   const select=root.querySelector<HTMLSelectElement>('[data-jab-child]');
-  if(select){select.replaceChildren();const familyOption=document.createElement('option');familyOption.value='family';familyOption.textContent='The whole family';select.append(familyOption);
+  if(select){select.replaceChildren();const familyOption=document.createElement('option');familyOption.value='family';familyOption.textContent='My children';select.append(familyOption);
    for(const kid of kids){const option=document.createElement('option');option.value=kid.id;option.textContent=kid.firstName;select.append(option)}}
   if(profile!==next){profile=next;state=fresh();boards={};
-   try{const record=JSON.parse(sessionStorage.getItem(key)??'null');if(record?.profile===profile&&record.state){
+   try{const record=JSON.parse(localStorage.getItem(key)??'null');if(record?.profile===profile&&record.state){
     const s=record.state;
     if(record.boards&&typeof record.boards==='object')boards=record.boards;
     state=defaultsFor(selectedAge(typeof s.child==='string'?s.child:'family'),typeof s.child==='string'?s.child:'family');
     state.focus=['mixed','inside','outside'].includes(s.focus)?s.focus:'mixed';
+    state.participation=['solo','sibling','friends'].includes(s.participation)?s.participation:'solo';
+    state.interest=typeof s.interest==='string'&&s.interest in interestIds?s.interest:'mixed';
     for(const name of ['intro','rule'] as const)if(typeof s[name]==='string')state[name]=s[name].slice(0,130);
     for(const tier of ['quick','busy','project'] as Tier[])if(Array.isArray(s[tier])&&s[tier].length===3){
      state[tier]=s[tier].map((a:Idea,i:number)=>{const found=library[tier].find(x=>x.id===a?.id);return found?{...found,label:typeof a.label==='string'?a.label.slice(0,55):found.label,removed:a.removed===true}:state[tier][i]});
@@ -335,6 +356,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   }
   if(state.child!=='family'&&!kids.some(x=>x.id===state.child))state.child='family';
   if(state.child==='family'&&profile===next&&!boards.family&&kids.length){state=defaultsFor(selectedAge(kids[0].id),kids[0].id)}
+  if(kids.length<2&&state.participation==='sibling')state.participation='solo';
   updateFamily();save();draw();options();
  };
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}>).detail));
