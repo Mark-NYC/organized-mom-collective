@@ -39,15 +39,17 @@
 </style>
 <script>
 import {weeksOf,occursOn,calendarMembers,validateActivity,DAY_NAMES,type CalendarActivity,type CalendarMember} from '../../lib/family-calendar/core';
+import {accountStore,sampleStore,type ClubStore} from '../../lib/club/store';
+import {defaultToolPalette} from '../../data/tool-palettes';
 type PreviewProfile={household:{id:string;displayName?:string;members:{id:string;firstName:string;archived?:boolean}[]}|null;sample:string};
 const root=document.querySelector<HTMLElement>('[data-ofc-calendar]');
 if(root){
  const $=<T extends Element=HTMLElement>(selector:string)=>root.querySelector<T>(selector)!;
  let members:CalendarMember[]=[];let activities:CalendarActivity[]=[];let familyId='sample';let month=new Date(2027,8,1);
- const key=()=> 'omc:club:calendar:preview:v1:'+familyId;
+ let store:ClubStore|null=null;let revision=0;let profileVersion=1;let canSave=true;let loadSequence=0;
  const setStatus=(s:string)=>{$('[data-ofc-status]').textContent=s};
- const save=()=>{try{sessionStorage.setItem(key(),JSON.stringify(activities));setStatus('Saved in this preview session. No mailing is initiated.')}catch{setStatus('Unable to save changes in this browser.')}};
- const load=()=>{try{let v:unknown=JSON.parse(sessionStorage.getItem(key())||'[]');activities=Array.isArray(v)?v.filter(validateActivity):[]}catch{activities=[]}};
+ const save=async()=>{if(!store||!canSave){setStatus('This calendar is read-only.');return}try{revision=await store.saveDocument('2027-09-a-week-everyone-can-see','family-activity-calendar',{edits:{activities},palette:defaultToolPalette,engineVersion:1,profileVersion},revision);setStatus('Saved to your Club family. No mailing is initiated.')}catch(e){setStatus(e instanceof Error&&e.message==='conflict'?'Changes were saved elsewhere. Reload before editing again.':'Unable to save. Please try again.');canSave=false}};
+ const load=async()=>{const sequence=++loadSequence;activities=[];revision=0;canSave=true;try{const data=await store?.documents('2027-09-a-week-everyone-can-see');if(sequence!==loadSequence)return;canSave=data?.can==='edit';const saved=data?.documents['family-activity-calendar'];revision=saved?.revision??0;const value=(saved?.edits as {activities?:unknown}|undefined)?.activities;activities=Array.isArray(value)?value.filter(validateActivity):[]}catch{setStatus('Unable to load your saved calendar.');canSave=false}render()};
  const render=()=>{
   const personSelect=$<HTMLSelectElement>('[data-ofc-member]');const previous=personSelect.value;personSelect.replaceChildren();
   members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;personSelect.append(o)});if(members.some(m=>m.id===previous))personSelect.value=previous;
@@ -64,10 +66,10 @@ if(root){
     const last=document.createElement('td');last.className='ofc-side';last.style.backgroundColor=m.color;row.append(last);body.append(row)});table.append(body);weeks.append(table);
   });
   const list=$('[data-ofc-list]');list.replaceChildren();activities.forEach(a=>{const m=members.find(m=>m.id===a.memberId);if(!m)return;const el=document.createElement('div');el.className='ofc-activity-item';const label=document.createElement('span');label.textContent=m.name+' · '+a.name+' · '+(a.kind==='weekly'?(a.days??[]).map(d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', '):a.date??'');const buttons=document.createElement('div');
-   const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const name=prompt('Activity',a.name);if(name===null)return;if(!name.trim()||name.trim().length>60)return;const day=prompt('Day (Sun, Mon, Tue, Wed, Thu, Fri, Sat)',(a.days??[1]).map(d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', '));if(day===null)return;const found=day.split(',').map(s=>['sun','mon','tue','wed','thu','fri','sat'].indexOf(s.trim().slice(0,3).toLowerCase())).filter(d=>d>=0);if(!found.length){setStatus('Choose a valid weekday.');return}a.name=name.trim();a.kind='weekly';a.days=found;save();render()});
+   const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const name=prompt('Activity',a.name);if(name===null)return;if(!name.trim()||name.trim().length>60)return;const day=prompt('Day (Sun, Mon, Tue, Wed, Thu, Fri, Sat)',(a.days??[1]).map(d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', '));if(day===null)return;const found=day.split(',').map(s=>['sun','mon','tue','wed','thu','fri','sat'].indexOf(s.trim().slice(0,3).toLowerCase())).filter(d=>d>=0);if(!found.length){setStatus('Choose a valid weekday.');return}a.name=name.trim();a.kind='weekly';a.days=found;void save();render()});
    const del=document.createElement('button');del.type='button';del.textContent='Remove';del.addEventListener('click',()=>{activities=activities.filter(x=>x.id!==a.id);save();render()});buttons.append(edit,del);el.append(label,buttons);list.append(el)});
  };
- const apply=(detail:PreviewProfile)=>{const h=detail?.household;if(!h)return;const next=h.id+'-'+detail.sample;if(next!==familyId){familyId=next;load()}members=calendarMembers(h);render()};
+ const apply=(detail:PreviewProfile)=>{const h=detail?.household;if(!h)return;const next=h.id+'-'+detail.sample;if(next!==familyId){familyId=next;store=detail.sample?sampleStore(detail.sample):accountStore;profileVersion=(h as typeof h & {profileVersion?:number}).profileVersion??1;members=calendarMembers(h);render();void load()}else{members=calendarMembers(h);render()}};
  window.addEventListener('omc:club-preview-household',(e:Event)=>apply((e as CustomEvent<PreviewProfile>).detail));
  const cached=(window as Window&{__ofcPreviewHousehold?:PreviewProfile}).__ofcPreviewHousehold;if(cached)apply(cached);
  $<HTMLFormElement>('[data-ofc-add]').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget as HTMLFormElement;const input=f.elements.namedItem('activity') as HTMLInputElement;const select=f.elements.namedItem('member') as HTMLSelectElement;const day=f.elements.namedItem('day') as HTMLSelectElement;const name=input.value.trim();if(!name||!select.value)return;activities.push({id:crypto.randomUUID(),kind:'weekly',memberId:select.value,name,days:[Number(day.value)]});input.value='';save();render()});
