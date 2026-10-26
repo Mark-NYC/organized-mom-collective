@@ -437,6 +437,20 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   if(i<0||next<0||next>=order.length)return;
   [order[i],order[next]]=[order[next],order[i]];update();
  };
+ // Time-based pastel progression. Each daypart has its own palette, with a
+ // gradual change within that range rather than a hardcoded color per activity.
+ const interpolate=(first:string,last:string,progress:number)=>{
+  const t=Math.max(0,Math.min(1,progress));
+  const rgb=[1,3,5].map(i=>Math.round(parseInt(first.slice(i,i+2),16)*(1-t)+parseInt(last.slice(i,i+2),16)*t));
+  return '#'+rgb.map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+ };
+ const tintFor=(time:string,fallback:string)=>{
+  if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time))return fallback;
+  const minute=Number(time.slice(0,2))*60+Number(time.slice(3,5));
+  if(minute<720)return interpolate('#FBF0CC','#EDCE86',minute/719);
+  if(minute<1080)return interpolate('#DEEDDB','#B9D8C7',(minute-720)/360);
+  return interpolate('#DBDFF0','#B4BBD9',(minute-1080)/359);
+ };
  const render=(buildEditor=false)=>{
   root.dataset.msrStructure=options.structure;
   root.dataset.msrDays=options.days;
@@ -448,6 +462,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    list.append(node);
    node.hidden=!visible.includes(key);
    const v=resolved(key);
+   node.style.setProperty('--msr-tint',tintFor(v.time,blocks.find(b=>b.key===key)?.tint??'#DDEBDB'));
    const title=node.querySelector<HTMLElement>('[data-title]');if(title)title.textContent=v.title;
    const desc=node.querySelector<HTMLElement>('[data-desc]');if(desc)desc.textContent=v.desc;
    const time=node.querySelector<HTMLElement>('[data-time]');if(time){const formatted=clock(v.time);const match=formatted.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:formatted));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
