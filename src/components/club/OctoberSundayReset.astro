@@ -7,78 +7,75 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
  <header class="osr-intro">
   <a href="/club">← Organized Family Club</a>
   <p class="osr-kicker">ORGANIZED FAMILY CLUB · OCTOBER 2027</p>
-  <h1>Our Family <em>Fall Readiness.</em></h1>
-  <p>One prepared fall plan for your family, plus a simple way to notice what needs to be ready next.</p>
+  <h1>Our Family <em>Sunday Reset.</em></h1>
+  <p>One weekly rhythm using your family wall calendar, with a ready-made fall project to help everyone practice.</p>
  </header>
  <div class="osr-layout">
   <aside class="osr-editor" aria-label="Prepared October Sunday Reset">
-   <div class="osr-editor-head"><p class="osr-kicker">ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Fall Readiness.</em></h2><button type="button" class="osr-edit-link" data-open-vision>Why this matters</button></div>
-   <div class="osr-prepared" id="october-edit-controls"><span class="osr-kicker">YOUR FAMILY'S PREPARED FALL PLAN</span><strong>Our Fall Readiness</strong><p>One seasonal preparation, with a clear part for each family member.</p>
-    <div class="osr-summary-row"><span>Preparation cue</span><b data-osr-summary-trigger>When our family is ready</b></div>
-    <div class="osr-summary-row"><span>Follow-through owner</span><b data-osr-summary-lead>Prepared for your family</b></div>
-    <button type="button" class="osr-edit-link" data-open-editor>Edit family plan <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+   <div class="osr-editor-head"><p class="osr-kicker">ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Sunday Reset.</em></h2><button type="button" class="osr-edit-link" data-open-vision>Why this matters</button></div>
+   <div class="osr-prepared" id="october-edit-controls"><span class="osr-kicker">YOUR FAMILY'S PREPARED SUNDAY RESET</span><strong>Our Sunday Reset</strong><p>Look ahead, get ready, share the work. Your first practice: getting ready for fall.</p>
+    <div class="osr-summary-row"><span>Weekly rhythm</span><b data-osr-summary-trigger>Sunday after lunch</b></div>
+    <div class="osr-summary-row"><span>First example</span><b data-osr-summary-lead>Getting Ready for Fall</b></div>
+    <button type="button" class="osr-edit-link" data-open-editor>Edit Sunday Reset <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
-   <p class="osr-compact-note">Use your wall calendar to look ahead. Adults handle purchases, transportation and safety.</p>
-   <div class="osr-actions"><div class="osr-primary-actions"><a class="osr-jump-edit" href="#october-edit-controls">Make changes</a><button class="osr-primary" type="button" data-osr-print>Print / Save PDF</button></div><button class="osr-secondary" type="button" data-osr-png>Download Fall Plan (PNG)</button><button class="osr-reset" type="button" data-osr-restore>Restore prepared version</button></div>
+   <p class="osr-compact-note">Keep this sheet beside your wall calendar. Everyone learns to prepare, not just Mom.</p>
+   <div class="osr-actions"><div class="osr-primary-actions"><a class="osr-jump-edit" href="#october-edit-controls">Make changes</a><button class="osr-primary" type="button" data-osr-print>Print / Save PDF</button></div><button class="osr-secondary" type="button" data-osr-png>Download Sunday Reset (PNG)</button><button class="osr-reset" type="button" data-osr-restore>Restore prepared version</button></div>
   </aside>
-  <dialog class="osr-dialog" data-osr-vision aria-labelledby="osr-vision-title"><div class="osr-dialog-head"><h2 id="osr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Mom shouldn't have to think ahead for everyone. The fall plan shares immediate seasonal jobs. The other side shows how children can spot an upcoming need and prepare early with help when needed.</p><button type="button" class="osr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
+  <dialog class="osr-dialog" data-osr-vision aria-labelledby="osr-vision-title"><div class="osr-dialog-head"><h2 id="osr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Mom shouldn't be the only one noticing what's coming. The Sunday Reset gives the whole family a way to use the wall calendar, anticipate needs, and own preparations. The fall example is simply the first time to practice.</p><button type="button" class="osr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
   <dialog class="osr-dialog osr-guided-dialog" data-osr-editor aria-labelledby="osr-editor-title">
-   <div class="osr-dialog-head"><div><span class="osr-guide-kicker">MAKE IT YOURS · OCTOBER</span><h2 id="osr-editor-title">Our family fall plan</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
-   <p class="osr-guide-intro">We've prepared a starting plan for your family. Just change what doesn't fit.</p>
-   <section class="osr-guide-section"><h3>When will your family get ready?</h3>
-    <div class="osr-choice-grid" data-osr-trigger-choices>
-     <button type="button" data-osr-trigger-choice="When our family is ready">Whenever works for us</button>
-     <button type="button" data-osr-trigger-choice="This weekend">This weekend</button>
-     <button type="button" data-osr-trigger-choice="After school one day">After school one day</button>
-     <button type="button" data-osr-trigger-choice="On our next free afternoon">Our next free afternoon</button>
-    </div>
-   </section>
-   <section class="osr-guide-section"><div class="osr-guide-caption"><h3>Who's handling the follow-through?</h3><span>Adult decisions</span></div>
-    <p class="osr-guide-tip">Choose the adult responsible for missing items, purchases, or donation decisions.</p>
-    <div class="osr-choice-grid" data-osr-lead-choices></div>
-   </section>
-   <section class="osr-guide-section"><div class="osr-guide-caption"><h3>Everyone has a part</h3><span>Prepared for your family</span></div>
-    <p class="osr-guide-tip">Change an assignment or its wording only if needed. Everyone can ask for help.</p>
-    <div class="osr-guide-jobs" data-osr-edit-assignments></div>
-   </section>
-   <details class="osr-guide-more"><summary>More options</summary>
-    <p>Edit the three fall checks below. Changes also appear on the printed page.</p>
-    <label>Warmer clothing <textarea data-osr-extra="clothes" rows="2" maxlength="180"></textarea></label>
-    <label>Summer clothing and donations <textarea data-osr-extra="gear" rows="2" maxlength="180"></textarea></label>
-    <label>Seasonal gear <textarea data-osr-extra="home" rows="2" maxlength="180"></textarea></label>
-    <p>Tip: You can also click the pencil marks on the preview to edit its text directly.</p>
-   </details>
-   <p class="osr-guide-saved">✓ Changes save automatically for this family</p>
-   <button type="button" class="osr-dialog-done" data-close-dialog>Done · See our plan</button>
+    <div class="osr-dialog-head"><div><span class="osr-guide-kicker">MAKE IT YOURS · OCTOBER</span><h2 id="osr-editor-title">Our Family Sunday Reset</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
+    <p class="osr-guide-intro">Your weekly rhythm and first fall example are prepared. Change only what doesn't fit.</p>
+    <section class="osr-guide-section"><h3>1. When will you reset each Sunday?</h3>
+      <div class="osr-choice-grid" data-osr-trigger-choices>
+       <button type="button" data-osr-trigger-choice="Sunday after breakfast">After breakfast</button>
+       <button type="button" data-osr-trigger-choice="Sunday after church">After church</button>
+       <button type="button" data-osr-trigger-choice="Sunday after lunch">After lunch</button>
+       <button type="button" data-osr-trigger-choice="Sunday evening">Sunday evening</button>
+      </div>
+    </section>
+    <section class="osr-guide-section">
+      <div class="osr-guide-caption"><h3>2. Everyone's weekly Sunday Reset role</h3><span>Keep and reuse</span></div>
+      <p class="osr-guide-tip">These are ongoing roles for checking the calendar and preparing ahead, not fall chores.</p>
+      <div class="osr-guide-jobs" data-osr-edit-assignments></div>
+    </section>
+    <section class="osr-guide-section">
+      <div class="osr-guide-caption"><h3>3. First example: Getting Ready for Fall</h3><span>Do once</span></div>
+      <p class="osr-guide-tip">We've assigned a few timely jobs. Adjust or remove anything that doesn't apply.</p>
+      <div class="osr-guide-jobs" data-osr-fall-editor></div>
+      <button type="button" class="osr-guide-add" data-osr-restore-fall>Restore all fall jobs</button>
+    </section>
+    <details class="osr-guide-more"><summary>More options</summary>
+      <label>Sunday Reset cue <input type="text" maxlength="85" data-osr-custom-trigger placeholder="E.g. Sunday at 4 PM" /></label>
+      <p>You can also edit printed wording directly using the pencil marks on the preview.</p>
+    </details>
+    <p class="osr-guide-saved">✓ Changes save automatically for this family</p>
+    <button type="button" class="osr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
   <section class="osr-preview"><button type="button" class="osr-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
    
    <div class="osr-stage" data-osr-stage>
     <div class="osr-pages" data-osr-pages>
      <article class="osr-paper osr-front" data-osr-front>
-      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Getting Ready for <em>What's Ahead</em></h2><span data-osr-family contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit family">A family that prepares together</span></header>
-      <section class="osr-cue"><span>OUR FAMILY'S PREPARATION CUE</span><strong data-osr-cue contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit cue">When our family is ready</strong><p>Use our existing wall calendar to spot upcoming needs. Prepare when it makes sense.</p></section>
-      <p class="osr-sheet-caption">Three steps to prepare ahead.</p><div class="osr-three">
-       <div><img src="/images/club/october/what-is-coming.webp" alt="" width="74" height="74"/><span>01</span><strong>Look Ahead</strong><p>What's coming up on our family calendar?</p></div>
-       <div><img src="/images/club/october/what-will-I-need.webp" alt="" width="74" height="74"/><span>02</span><strong>Prepare Early</strong><p>What needs to be packed, changed, or checked?</p></div>
-       <div><img src="/images/club/october/what-can-I-prepare.webp" alt="" width="74" height="74"/><span>03</span><strong>Share the Responsibility</strong><p>What can I do myself, and who can help?</p></div>
+      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Sunday Reset</em></h2><span data-osr-family contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit family">Look ahead. Get ready. Share the work.</span></header>
+      <section class="osr-cue"><span>OUR WEEKLY FAMILY RHYTHM</span><strong data-osr-cue contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit cue" >Sunday after lunch</strong><p>Spend 10–15 minutes with our wall calendar. Everyone looks ahead and prepares their part.</p></section>
+      <p class="osr-sheet-caption">Every Sunday, three simple steps.</p><div class="osr-three">
+       <div><img src="/images/club/october/what-is-coming.webp" alt="" width="74" height="74"/><span>01</span><strong>Look Ahead</strong><p>What's coming up this week? Look at our wall calendar.</p></div>
+       <div><img src="/images/club/october/what-will-I-need.webp" alt="" width="74" height="74"/><span>02</span><strong>Prepare Early</strong><p>What can we pack, check, or prepare before we need it?</p></div>
+       <div><img src="/images/club/october/what-can-I-prepare.webp" alt="" width="74" height="74"/><span>03</span><strong>Share the Work</strong><p>Who owns each step? Ask for help when needed.</p></div>
       </div>
-      <div class="osr-people-head"><h3>Everyone has a part</h3><span>NOTICE · PREPARE · ASK FOR HELP</span></div>
+      <div class="osr-people-head"><h3>Everyone has a part</h3><span>OUR WEEKLY ROLES</span></div>
       <div class="osr-people" data-osr-people><div class="osr-person"><strong>Our family</strong><p>Check the calendar and prepare what you need.</p></div></div>
-      <div class="osr-finish"><strong>WE'RE READY WHEN…</strong><p>Tomorrow needs something? Get it ready today. Recorder on Tuesday? Pack it Monday night. Ask an adult for help when needed.</p></div>
-      <footer class="osr-foot"><strong>Notice. Prepare. Take ownership.</strong><span>USE WITH OUR EXISTING CALENDAR</span></footer>
+      <div class="osr-finish"><strong>WE'RE READY WHEN…</strong><p>Something needed Tuesday? Put it in your bag Monday night. Ask for help early when you need it.</p></div>
+      <footer class="osr-foot"><strong>Notice. Prepare. Take ownership.</strong><span>START ON THE BACK WITH OUR FALL EXAMPLE</span></footer>
      </article>
      <article class="osr-paper osr-back" data-osr-back>
-      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Fall Readiness</em></h2><span>A new season. Everyone has a part.</span></header>
-      <section class="osr-fall-intro"><strong>OUR ONE-TIME FALL PREPARATION</strong><p>Check what fits, keep what is useful, and store or donate what is outgrown. Everyone helps; adults make final donation and purchase decisions.</p></section>
-      <p class="osr-sheet-caption">Check → Keep → Store or Donate</p><div class="osr-fall-sections">
-       <section><img src="/images/club/october/clothes-for-cooler-mornings.webp" alt="" width="76" height="76"/><div><h3>Check warmer clothes</h3><p data-osr-clothes contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit clothes">Each child tries on their jacket and shoes. Set aside things that don't fit.</p></div></section>
-       <section><img src="/images/club/october/school-and-activity-gear.webp" alt="" width="76" height="76"/><div><h3>Sort summer clothes</h3><p data-osr-gear contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit gear">Check backpacks, water bottles, and the gear needed for this week's activities.</p></div></section>
-       <section><img src="/images/club/october/a-home-for-everything.webp" alt="" width="76" height="76"/><div><h3>Check seasonal gear</h3><p data-osr-home contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit home">Make sure coats, bags, and shoes have an easy-to-reach place to land.</p></div></section>
-      </div>
-      <section class="osr-own"><span>WHO HANDLES WHAT STILL NEEDS ATTENTION?</span><h3 data-osr-lead-name contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit lead-name">Our designated adult</h3><p>Repairs, purchases, missing supplies, and other adult decisions go here, not automatically to Mom.</p></section>
-      <div class="osr-notes"><h3>What finished looks like</h3><p><strong>Check:</strong> Try on clothes and gather out-of-season items. Younger children can gather; older children can help sort.</p><p><strong>Keep or store:</strong> Put useful items where they belong. Set aside outgrown clothing for an adult to review.</p><p><strong>Ask for help:</strong> Tell the assigned adult what is missing or needs replacing. No weekly checklist required.</p></div>
-      <footer class="osr-foot"><strong>We learn to think ahead together.</strong><span>ONE FALL PLAN · A PRACTICAL FAMILY HABIT</span></footer>
+      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Let's Try It: <em>Fall Readiness</em></h2><span>Our first Sunday Reset, prepared for our family.</span></header>
+      <section class="osr-fall-intro"><strong>01 · LOOK AHEAD</strong><p>Cooler days are coming. What does everyone need? Use your wall calendar, then try this prepared fall project together.</p></section>
+      <p class="osr-sheet-caption">02 · GET READY: CHECK → KEEP → STORE OR DONATE</p>
+      <div class="osr-fall-sections" data-osr-fall-sections></div>
+      <section class="osr-own"><span>03 · SHARE THE WORK</span><h3>Everyone handles their part</h3><p>Children can gather, try on, and sort. Adults help with purchases and make final donation decisions. Ask for help early.</p></section>
+      <div class="osr-notes"><h3>Next Sunday, try it again</h3><p>Turn to the front and use the same three steps with whatever is coming up on your family's wall calendar. Your fall jobs are done once, not every week.</p></div>
+      <footer class="osr-foot"><strong>We learn to think ahead together.</strong><span>ONE SUNDAY RESET · ONE FIRST EXAMPLE</span></footer>
      </article>
     </div>
    </div>
@@ -228,22 +225,34 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
 .osr-guide-saved{font:600 11px 'OSR Montserrat',sans-serif;color:#668569;margin:11px 0 17px}
 .osr-guided-dialog .osr-dialog-done{border-radius:5px}
 @media(max-width:540px){.osr-guided-dialog{padding:20px 17px}.osr-choice-grid button{font-size:11px;min-height:46px;padding:9px}}
+
+.osr-guide-add{border:1px solid #cbd9ce;background:#fff;color:#506b56;padding:10px 14px;font:600 12px 'OSR Montserrat',sans-serif;border-radius:6px;margin-top:10px;cursor:pointer}
+.osr-guided-job select{width:100%;min-height:38px;margin-top:5px;border:1px solid #ccd8cc;border-radius:5px;background:#fff;padding:7px;color:#465747;font:12px 'OSR Montserrat',sans-serif}
+.osr-guided-job .osr-job-remove{border:0;background:transparent;color:#8c514c;cursor:pointer;font:600 11px 'OSR Montserrat',sans-serif;padding:7px 0}
+.osr-fall-sections .osr-person-task{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}
+.osr-fall-sections .osr-task-owner{font:600 italic 14px 'OSR Gelasio',Georgia,serif;color:#426c55;margin:0 0 3px}
 </style>
 <script>
 type Member={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number;role?:string;isAccountHolder?:boolean};
 type Household={id:string;displayName?:string;members?:Member[]};
-type State={trigger:string;leadId:string;assignments:Record<string,string>;text?:Record<string,string>;names?:Record<string,string>};
-const defaultTrigger='When our family is ready';
+type FallJob={id:string;title:string;description:string;icon:string;ownerId:string;removed?:boolean};
+type State={trigger:string;assignments:Record<string,string>;fallJobs:FallJob[];text?:Record<string,string>;names?:Record<string,string>};
+const defaultTrigger='Sunday after lunch';
 const ageOf=(m:Member)=>m.birthYear?Math.max(1,2027-m.birthYear-((m.birthMonth??1)>10?1:0)):8;
-const assigned=(m:Member)=>m.kind!=='child'?'Review the calendar, own logistics and any follow-through that needs an adult.':ageOf(m)<=4?'Find my coat and shoes with a grown-up.':ageOf(m)<=7?'Find my backpack, choose Monday clothes, and put shoes by the door.':ageOf(m)<=11?'Check the week, prepare school bag, clothes and activity gear.':'Review this week’s plans, prepare my own gear and flag any unmet needs.';
+const weeklyRole=(m:Member,i:number)=>m.kind==='adult'?(m.isAccountHolder?'Review our shared plans and prepare my own commitments.':'Own upcoming transportation, supplies, and logistics.'):(ageOf(m)<=5?'Look at the picture calendar with an adult and get my clothes ready.':ageOf(m)<=10?(i%2===0?'Check school and activity days; spot what I need.':'Prepare my clothes, bag, and belongings for the week.'):'Review my calendar, prepare for commitments, and ask for help early.');
+const fallTemplates=[
+ {id:'warm',title:'Check warmer clothes',description:'Try on long sleeves, pants, sweaters, and jackets. Set aside what no longer fits.',icon:'/images/club/october/clothes-for-cooler-mornings.webp'},
+ {id:'summer',title:'Sort summer clothes',description:'Gather summer clothes. Keep what may fit next year, store it, and set aside outgrown items for adult review.',icon:'/images/club/october/school-and-activity-gear.webp'},
+ {id:'gear',title:'Check seasonal gear',description:'Check coats, boots, hats, and gloves where needed. Flag anything missing or outgrown.',icon:'/images/club/october/a-home-for-everything.webp'}
+];
 for(const root of document.querySelectorAll<HTMLElement>('.osr')){
- const storageKey=root.dataset.osrKey??'omc:preview:october-sunday-reset:v1';
+ const storageKey=root.dataset.osrKey??'omc:preview:october-sunday-reset:v2';
  let current='',members:Member[]=[];
- let state:State={trigger:defaultTrigger,leadId:'',assignments:{}};
+ let state:State={trigger:defaultTrigger,assignments:{},fallJobs:[]};
  const stage=root.querySelector<HTMLElement>('[data-osr-stage]');
  const pages=root.querySelector<HTMLElement>('[data-osr-pages]');
  const sheets=Array.from(root.querySelectorAll<HTMLElement>('.osr-paper'));
- const fit=()=>{if(!stage||!pages)return;const scale=Math.min(1,Math.max(180,stage.clientWidth-2)/816);pages.style.gap=22*scale+'px';for(const sheet of sheets){sheet.style.setProperty('--osr-scale',String(scale));sheet.style.marginBottom=-(1056*(1-scale))+'px';sheet.style.marginRight=-(816*(1-scale))+'px'}};
+ const fit=()=>{if(!stage||!pages)return;const scale=Math.min(1,Math.max(180,stage.clientWidth-2)/816);pages.style.gap=22*scale+'px';for(const sheet of sheets){sheet.style.setProperty('--osr-scale',String(scale));sheet.style.marginBottom=-(1056*(1-scale))+'px';sheet.style.marginRight=-(816*(1-scale))+'px')}};
  fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-osr-vision]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-osr-editor]');
@@ -252,88 +261,74 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({current,state}))}catch{}};
- const fillAssignments=()=>{for(const member of members)if(!state.assignments[member.id])state.assignments[member.id]=assigned(member)};
- const lead=()=>members.find(m=>m.id===state.leadId&&m.kind==='adult')??members.find(m=>m.kind==='adult');
+ const nameOf=(m:Member)=>{if(m.kind==='child')return state.names?.[m.id]??m.firstName;const parents=members.filter(x=>x.kind==='adult'&&(x.role==='parent'||x.role==='partner'));const ix=parents.findIndex(x=>x.id===m.id);return state.names?.[m.id]??(ix===0?'Mom':ix===1?'Dad':m.firstName)};
+ const defaultFallJobs=():FallJob[]=>{const children=members.filter(m=>m.kind==='child');const adults=members.filter(m=>m.kind==='adult');return fallTemplates.map((item,i)=>({...item,ownerId:(i===2?adults[0]?.id:children[i]?.id??adults[i%Math.max(1,adults.length)]?.id)??members[i%Math.max(1,members.length)]?.id??''}))};
+ const setup=()=>{members.forEach((m,i)=>{if(state.assignments[m.id]===undefined)state.assignments[m.id]=weeklyRole(m,i)});if(!state.fallJobs?.length)state.fallJobs=defaultFallJobs()};
  const clean=(el:HTMLElement,max:number)=>(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);
  const write=(id:string,value:string)=>{const el=root.querySelector<HTMLElement>('[data-osr-'+id+']');if(el&&document.activeElement!==el)el.textContent=state.text?.[id]??value};
- const fieldsForEdit=(el:HTMLElement)=>['family','cue','clothes','gear','home','lead-name'].find(id=>el.hasAttribute('data-osr-'+id));
- const paint=()=>{
-  write('family','A plan for '+(members.length?members.map(m=>m.firstName).slice(0,2).join(' & ')+(members.length>2?' and family':''):'our family'));
-  write('cue',state.trigger);
-  const summaryCue=root.querySelector<HTMLElement>('[data-osr-summary-trigger]');if(summaryCue)summaryCue.textContent=state.trigger;
-  root.querySelectorAll<HTMLButtonElement>('[data-osr-trigger-choice]').forEach(button=>{const active=button.dataset.osrTriggerChoice===state.trigger;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active))});
-  root.querySelectorAll<HTMLButtonElement>('[data-osr-lead-choice]').forEach(button=>{const active=button.dataset.osrLeadChoice===(lead()?.id??'');button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active))});
-  const childFacingLead=()=>{const adult=lead();if(!adult)return 'the responsible adult';const parents=members.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner'));const index=parents.indexOf(adult);return index===0?'Mom':index===1?'Dad':adult.firstName;};
-   const summaryLead=root.querySelector<HTMLElement>('[data-osr-summary-lead]');if(summaryLead)summaryLead.textContent=childFacingLead();
-   write('lead-name',childFacingLead()+' owns the follow-through');
-  const people=root.querySelector<HTMLElement>('[data-osr-people]');if(people){people.replaceChildren();for(const member of members.slice(0,9)){
-   const entry=document.createElement('div');entry.className='osr-person'+(member.kind==='adult'?' osr-adult':'');
-   const name=document.createElement('strong');name.textContent=state.names?.[member.id]??member.firstName;name.contentEditable='true';name.setAttribute('role','textbox');name.setAttribute('aria-label','Edit family member name');name.dataset.osrPersonName=member.id;
-   const job=document.createElement('p');job.textContent=state.assignments[member.id]??assigned(member);job.contentEditable='true';job.setAttribute('role','textbox');job.setAttribute('aria-label','Edit family preparation job');job.dataset.osrPersonJob=member.id;
-   entry.append(name,job);people.append(entry);
-  }if(members.length===0){const empty=document.createElement('div');empty.className='osr-person';empty.textContent='Choose a preview family to see prepared assignments.';people.append(empty)}}
-  const editor=root.querySelector<HTMLElement>('[data-osr-edit-assignments]');
-  if(editor){editor.replaceChildren();for(const member of members){
+ const personChoices=(selected:string,change:(value:string)=>void)=>{const select=document.createElement('select');select.setAttribute('aria-label','Assigned family member');members.forEach(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=nameOf(m);select.append(option)});select.value=selected;select.addEventListener('change',()=>change(select.value));return select};
+ const drawFall=()=>{const container=root.querySelector<HTMLElement>('[data-osr-fall-sections]');if(!container)return;container.replaceChildren();for(const item of state.fallJobs.filter(x=>!x.removed)){
+  const section=document.createElement('section');section.className='osr-person-task';
+  const img=document.createElement('img');img.src=item.icon;img.alt='';img.width=58;img.height=58;
+  const details=document.createElement('div');const heading=document.createElement('h3');heading.textContent=item.title;
+  const owner=document.createElement('p');owner.className='osr-task-owner';owner.textContent=nameOf(members.find(m=>m.id===item.ownerId)??members[0]??{id:'',firstName:'Our family',kind:'adult'});
+  const description=document.createElement('p');description.textContent=item.description;
+  details.append(heading,owner,description);section.append(img,details);container.append(section);
+ }if(!container.children.length){const empty=document.createElement('p');empty.textContent='No fall jobs selected. Restore a task in Make Changes.';container.append(empty)}};
+ const drawEditor=()=>{
+  const weekly=root.querySelector<HTMLElement>('[data-osr-edit-assignments]');if(weekly){weekly.replaceChildren();for(const member of members){
    const card=document.createElement('div');card.className='osr-guided-job';
-   const header=document.createElement('div');header.className='osr-guided-job-header';
-   const name=document.createElement('strong');name.textContent=state.names?.[member.id]??member.firstName;
-   const kind=document.createElement('span');kind.textContent=member.kind==='adult'?'ADULT':'FAMILY MEMBER';header.append(name,kind);
-   const label=document.createElement('label');label.textContent='Preparation responsibility';
-   const input=document.createElement('input');input.type='text';input.maxLength=105;input.value=state.assignments[member.id]??assigned(member);
-   input.setAttribute('aria-label','Preparation responsibility for '+member.firstName);
-   input.addEventListener('input',()=>{state.assignments[member.id]=input.value.slice(0,105);save();const row=root.querySelector<HTMLElement>('[data-osr-person-job="'+member.id+'"]');if(row)row.textContent=input.value});
-   label.append(input);card.append(header,label);editor.append(card);
+   const heading=document.createElement('div');heading.className='osr-guided-job-header';const title=document.createElement('strong');title.textContent=nameOf(member);heading.append(title);
+   const label=document.createElement('label');label.textContent='Weekly responsibility';
+   const input=document.createElement('input');input.type='text';input.maxLength=105;input.value=state.assignments[member.id]??'';
+   input.addEventListener('input',()=>{state.assignments[member.id]=input.value;save();const row=root.querySelector<HTMLElement>('[data-osr-person-job="'+member.id+'"]');if(row)row.textContent=input.value});
+   label.append(input);card.append(heading,label);weekly.append(card);
   }}
-  root.querySelectorAll<HTMLTextAreaElement>('[data-osr-extra]').forEach(field=>{const id=field.dataset.osrExtra!;const printed=root.querySelector<HTMLElement>('[data-osr-'+id+']');field.value=state.text?.[id]??printed?.textContent??''});
-  const childCount=members.filter(m=>m.kind==='child').length;
-  write('clothes',childCount?'Kids try on their coats, jackets and shoes; little ones have adult help. Anything too small is reported to '+childFacingLead()+'.':'Check long sleeves, pants, sweaters and jackets; set aside anything that no longer fits.');
-  write('gear','Gather summer clothes. Check what may fit next year, store what is useful, and set aside outgrown items for an adult to review.');
-  write('home','Check coats, boots, hats and gloves where relevant. Identify missing or outgrown gear; skip anything your climate does not need.');
+  const fall=root.querySelector<HTMLElement>('[data-osr-fall-editor]');if(fall){fall.replaceChildren();for(const item of state.fallJobs){
+   const card=document.createElement('div');card.className='osr-guided-job';
+   const heading=document.createElement('div');heading.className='osr-guided-job-header';const title=document.createElement('strong');title.textContent=item.title;
+   const tag=document.createElement('span');tag.textContent=item.removed?'REMOVED':'ONE-TIME JOB';heading.append(title,tag);card.append(heading);
+   if(item.removed){const restore=document.createElement('button');restore.type='button';restore.className='osr-guide-add';restore.textContent='Restore this job';restore.addEventListener('click',()=>{item.removed=false;save();paint()});card.append(restore)}
+   else{
+    const ownerLabel=document.createElement('label');ownerLabel.textContent='Who owns this job?';ownerLabel.append(personChoices(item.ownerId,id=>{item.ownerId=id;save();drawFall()}));card.append(ownerLabel);
+    const titleLabel=document.createElement('label');titleLabel.textContent='Job';const ti=document.createElement('input');ti.value=item.title;ti.maxLength=65;ti.addEventListener('input',()=>{item.title=ti.value;save();drawFall()});titleLabel.append(ti);card.append(titleLabel);
+    const descLabel=document.createElement('label');descLabel.textContent='What finished looks like';const di=document.createElement('input');di.value=item.description;di.maxLength=180;di.addEventListener('input',()=>{item.description=di.value;save();drawFall()});descLabel.append(di);card.append(descLabel);
+    const remove=document.createElement('button');remove.type='button';remove.className='osr-job-remove';remove.textContent='Remove this job';remove.addEventListener('click',()=>{item.removed=true;save();paint()});card.append(remove);
+   }fall.append(card);
+  }}
  };
- // Save text as it is typed, without rerendering and losing the caret.
- root.querySelectorAll<HTMLElement>('.osr-paper [contenteditable="true"]').forEach(el=>{
-  const id=fieldsForEdit(el);if(!id)return;
-  const saveField=()=>{
-   const value=clean(el,180);(state.text??={})[id]=value;
-   if(id==='cue')state.trigger=value;
-   save();
-  };
-  el.addEventListener('input',saveField);
-  el.addEventListener('blur',()=>{saveField();paint()});
-  el.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
+ const paint=()=>{
+  write('family','Look ahead. Get ready. Share the work.');
+  write('cue',state.trigger);
+  const summary=root.querySelector<HTMLElement>('[data-osr-summary-trigger]');if(summary)summary.textContent=state.trigger;
+  root.querySelectorAll<HTMLButtonElement>('[data-osr-trigger-choice]').forEach(button=>{const active=button.dataset.osrTriggerChoice===state.trigger;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active))});
+  const custom=root.querySelector<HTMLInputElement>('[data-osr-custom-trigger]');if(custom&&document.activeElement!==custom)custom.value=state.trigger.startsWith('Sunday')&&['Sunday after breakfast','Sunday after church','Sunday after lunch','Sunday evening'].includes(state.trigger)?'':state.trigger;
+  const people=root.querySelector<HTMLElement>('[data-osr-people]');if(people){people.replaceChildren();for(const member of members.slice(0,9)){
+   const row=document.createElement('div');row.className='osr-person'+(member.kind==='adult'?' osr-adult':'');
+   const name=document.createElement('strong');name.textContent=nameOf(member);name.contentEditable='true';name.dataset.osrPersonName=member.id;name.setAttribute('aria-label','Edit family member name');
+   const job=document.createElement('p');job.textContent=state.assignments[member.id]??'';job.contentEditable='true';job.dataset.osrPersonJob=member.id;job.setAttribute('aria-label','Edit weekly responsibility');
+   row.append(name,job);people.append(row);
+  }if(!members.length){const row=document.createElement('div');row.className='osr-person';row.textContent='Choose a preview family to see prepared roles.';people.append(row)}}
+  drawFall();drawEditor();
+ };
+ root.querySelectorAll<HTMLElement>('.osr-paper [contenteditable="true"]').forEach(el=>{if(!el.hasAttribute('data-osr-family')&&!el.hasAttribute('data-osr-cue'))return;const id=el.hasAttribute('data-osr-cue')?'cue':'family';
+  const saveField=()=>{(state.text??={})[id]=clean(el,130);if(id==='cue')state.trigger=clean(el,85);save()};
+  el.addEventListener('input',saveField);el.addEventListener('blur',()=>{saveField();paint()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur()}})
  });
- // Person rows are recreated by paint(), so bind their edits through delegation.
- root.querySelector<HTMLElement>('[data-osr-people]')?.addEventListener('input',e=>{
-  const el=(e.target as HTMLElement).closest<HTMLElement>('[data-osr-person-job],[data-osr-person-name]');
-  if(!el)return;
-  if(el.dataset.osrPersonJob){state.assignments[el.dataset.osrPersonJob]=clean(el,105)}
-  if(el.dataset.osrPersonName){(state.names??={})[el.dataset.osrPersonName]=clean(el,35)}
-  save();
- });
- root.querySelector<HTMLElement>('[data-osr-people]')?.addEventListener('focusout',e=>{
-  if((e.target as HTMLElement).matches('[data-osr-person-job],[data-osr-person-name]'))paint();
- });
- root.querySelector<HTMLElement>('[data-osr-people]')?.addEventListener('keydown',e=>{
-  if((e as KeyboardEvent).key==='Enter'){e.preventDefault();(e.target as HTMLElement).blur()}
- });
+ root.querySelector<HTMLElement>('[data-osr-people]')?.addEventListener('input',event=>{const el=(event.target as HTMLElement).closest<HTMLElement>('[data-osr-person-job],[data-osr-person-name]');if(!el)return;if(el.dataset.osrPersonJob)state.assignments[el.dataset.osrPersonJob]=clean(el,105);if(el.dataset.osrPersonName)(state.names??={})[el.dataset.osrPersonName]=clean(el,35);save()});
+ root.querySelector<HTMLElement>('[data-osr-people]')?.addEventListener('focusout',()=>paint());
+ root.querySelector<HTMLElement>('[data-osr-people]')?.addEventListener('keydown',event=>{if((event as KeyboardEvent).key==='Enter'){event.preventDefault();(event.target as HTMLElement).blur()}});
  root.querySelectorAll<HTMLButtonElement>('[data-osr-trigger-choice]').forEach(button=>button.addEventListener('click',()=>{state.trigger=button.dataset.osrTriggerChoice??defaultTrigger;if(state.text)delete state.text.cue;save();paint()}));
- root.querySelector<HTMLElement>('[data-osr-lead-choices]')?.addEventListener('click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-osr-lead-choice]');if(!button)return;state.leadId=button.dataset.osrLeadChoice??'';save();paint()});
- root.querySelectorAll<HTMLTextAreaElement>('[data-osr-extra]').forEach(field=>field.addEventListener('input',()=>{const id=field.dataset.osrExtra!;(state.text??={})[id]=field.value.slice(0,180);const printed=root.querySelector<HTMLElement>('[data-osr-'+id+']');if(printed)printed.textContent=field.value;save()}));
- root.querySelector('[data-osr-restore]')?.addEventListener('click',()=>{state={trigger:defaultTrigger,leadId:members.find(m=>m.kind==='adult'&&!m.isAccountHolder)?.id??members.find(m=>m.kind==='adult')?.id??'',assignments:{}};fillAssignments();save();paint()});
+ root.querySelector<HTMLInputElement>('[data-osr-custom-trigger]')?.addEventListener('input',event=>{state.trigger=(event.target as HTMLInputElement).value.slice(0,85);if(state.text)delete state.text.cue;save();write('cue',state.trigger);const summary=root.querySelector<HTMLElement>('[data-osr-summary-trigger]');if(summary)summary.textContent=state.trigger});
+ root.querySelector('[data-osr-restore-fall]')?.addEventListener('click',()=>{state.fallJobs=defaultFallJobs();save();paint()});
+ root.querySelector('[data-osr-restore]')?.addEventListener('click',()=>{state={trigger:defaultTrigger,assignments:{},fallJobs:[]};setup();save();paint()});
  root.querySelector('[data-osr-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
- const png=root.querySelector<HTMLButtonElement>('[data-osr-png]');png?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-osr-front]');if(!front)return;png.disabled=true;const original=png.textContent;png.textContent='Preparing image…';root.classList.add('osr-export');
-  try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const uri=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.download='our-family-fall-readiness.png';link.href=uri;link.click()}catch(error){console.error(error);alert('Image download failed. Please use Print / Save PDF instead.')}finally{root.classList.remove('osr-export');png.disabled=false;png.textContent=original}});
- const applyHousehold=(detail:{household:Household;sample:string})=>{
-  if(!detail?.household)return;
-  const key=detail.sample+':'+detail.household.id;members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
-  if(key!==current){current=key;state={trigger:defaultTrigger,leadId:members.find(m=>m.kind==='adult'&&!m.isAccountHolder)?.id??members.find(m=>m.kind==='adult')?.id??'',assignments:{}};try{const previous=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(previous?.current===key&&previous.state&&typeof previous.state.trigger==='string'&&typeof previous.state.assignments==='object')state=previous.state}catch{}}
-  if(!members.some(m=>m.id===state.leadId&&m.kind==='adult'))state.leadId=members.find(m=>m.kind==='adult')?.id??'';
-  fillAssignments();
-  const choices=root.querySelector<HTMLElement>('[data-osr-lead-choices]');if(choices){choices.replaceChildren();const adults=members.filter(m=>m.kind==='adult');for(const [index,adult] of adults.entries()){const button=document.createElement('button');button.type='button';button.dataset.osrLeadChoice=adult.id;button.textContent=(adult.role==='parent'||adult.role==='partner')?(index===0?'Mom':'Dad'):adult.firstName;choices.append(button)}if(adults.length===1){const note=document.createElement('p');note.className='osr-guide-tip';note.textContent='Your household has one participating adult.';choices.append(note)}}save();paint();
- };
+ const png=root.querySelector<HTMLButtonElement>('[data-osr-png]');png?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-osr-front]');if(!front)return;png.disabled=true;const original=png.textContent;png.textContent='Preparing image…';root.classList.add('osr-export');try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const uri=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.download='our-family-sunday-reset.png';link.href=uri;link.click()}catch(error){console.error(error);alert('Image download failed. Please use Print / Save PDF instead.')}finally{root.classList.remove('osr-export');png.disabled=false;png.textContent=original}});
+ const applyHousehold=(detail:{household:Household;sample:string})=>{if(!detail?.household)return;const key=detail.sample+':'+detail.household.id;members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
+  if(key!==current){current=key;state={trigger:defaultTrigger,assignments:{},fallJobs:[]};try{const previous=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(previous?.current===key&&previous.state&&typeof previous.state.trigger==='string'&&previous.state.assignments&&Array.isArray(previous.state.fallJobs))state=previous.state}catch{}}setup();save();paint()};
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string}>).detail));
- const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string}}).__ofcPreviewHousehold;
- if(cached)applyHousehold(cached);
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string}}).__ofcPreviewHousehold;if(cached)applyHousehold(cached);
  paint();
 }
 </script>
