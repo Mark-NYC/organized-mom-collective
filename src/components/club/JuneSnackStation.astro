@@ -133,22 +133,16 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 .jss [data-jss-edit]:hover{outline:1px dashed #a6b69d}
 .jss [data-jss-edit]:focus{outline:2px solid #94ae8e;background:#f5faf2}
 
-/* Pencil experiment: a visual cue on the editable words themselves.
-   Pseudo-elements do not enter textContent, saved choices, or the caret. */
+/* Discoverable edit cue: show the pencil before hover, with direct typing unchanged.
+   CSS-only SVG does not enter editable text, saved content, or image/PDF exports. */
 .jss-sheet [contenteditable="true"]{position:relative}
 .jss-sheet [contenteditable="true"]::after{
  content:"";display:inline-block;width:12px;height:12px;margin-left:6px;
- vertical-align:baseline;background: center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");
- opacity:0;pointer-events:none;transition:opacity .12s ease;
+ vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");
+ opacity:.7;pointer-events:none;transition:opacity .12s ease;
 }
-.jss-sheet [contenteditable="true"]:hover::after,
-.jss-sheet [contenteditable="true"]:focus-visible::after{opacity:.75}
+.jss-sheet [contenteditable="true"]:hover::after{opacity:1}
 .jss-sheet [contenteditable="true"]:focus::after{opacity:0}
-@media(hover:none){
- .jss-sheet [data-jss-edit]::after{opacity:.75}
- .jss-sheet [data-food-text]::after{opacity:.55}
- .jss-sheet [contenteditable="true"]:focus::after{opacity:0}
-}
 @media print{.jss-sheet [contenteditable="true"]::after{display:none!important}}
 .jss.jss-export .jss-sheet [contenteditable="true"]::after{display:none!important}
 
