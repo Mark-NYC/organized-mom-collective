@@ -3,7 +3,6 @@
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import { SITE_NAME } from '../config';
-import { ONBOARDED_KEY } from '../lib/storage';
 
 interface Props {
   title?: string;
@@ -33,14 +32,6 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
         window.__omcInstallPrompt = e;
         window.dispatchEvent(new Event('omc:installable'));
       });
-    </script>
-    <script is:inline define:vars={{ ONBOARDED_KEY }}>
-      // First visit to Today: hide app chrome until the onboarding screen renders.
-      try {
-        if (false && /^\/app\/cleaning\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
-          document.documentElement.classList.add('needs-onboarding');
-        }
-      } catch (e) {}
     </script>
   </Fragment>
   <a
