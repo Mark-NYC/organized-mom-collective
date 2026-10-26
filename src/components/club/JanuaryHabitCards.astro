@@ -343,9 +343,9 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{
   const field=target.dataset.printField as keyof typeof defaults[number];
   const max=field==='name'?42:field==='anchor'?85:field==='action'?105:70;
-  const capture=()=>{values[i][field]=(target.textContent??'').replace(/\\s+/g,' ').slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}};
+  const capture=()=>{values[i][field]=(target.textContent??'').replace(/\s+/g,' ').slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}};
   target.addEventListener('input',capture);
-  target.addEventListener('blur',()=>{values[i][field]=(target.textContent??'').replace(/\\s+/g,' ').trim().slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}paint()});
+  target.addEventListener('blur',()=>{values[i][field]=(target.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}paint()});
   target.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();target.blur()}});
  }));
  editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
