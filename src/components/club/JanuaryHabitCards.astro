@@ -326,6 +326,9 @@ const defaults = [
 .jhc-finder-dialog h3{font:400 24px/1.3 Georgia,serif;color:#527468;margin:18px 0}
 .jhc-finder-choice{display:block;width:100%;padding:14px;margin:8px 0;border:1px solid #d5ded3;text-align:left;background:white;color:#454545;font:600 13px Montserrat,Arial,sans-serif;cursor:pointer}
 .jhc-finder-choice:hover,.jhc-finder-choice:focus-visible{background:#eaf1eb;outline:2px solid #527468}
+.jhc-finder-choice[aria-pressed='true']{background:#dce9e4;border:2px solid #527468;padding:13px;color:#254b3f}
+.jhc-finder-choice[aria-pressed='true']::before{content:'✓  ';font-weight:800}
+.jhc-finder-choice:disabled{opacity:.4;cursor:not-allowed}
 .jhc-finder-actions{display:flex;justify-content:space-between;gap:8px;margin-top:18px}.jhc-finder-actions button{padding:10px;border:0;background:transparent;color:#527468;text-decoration:underline;cursor:pointer}
 .jhc-finder-apply{background:#527468!important;color:white!important;text-decoration:none!important;width:100%;padding:15px!important;margin-top:14px;font-weight:700}
 @media print{.jhc-finder-dialog{display:none!important}}
@@ -377,7 +380,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  let selectedHabits:string[]=[];
  const finderQuestions=[
   {question:'What do you keep reminding everyone to do?',options:['Get ready to leave','Put things away','Clear up after meals','Get ready for bed','Start homework','Check what comes next']},
-  {question:'What would you love them to do without being asked?',options:['Have their things ready','Put things back when finished','Take dishes to the kitchen','Get clothes ready for tomorrow','Begin homework at the same time','Look at the family plan first']},
+  {question:'Which one would help most right now?',options:[]},
   {question:'Who will practice these habits?',options:['The kids','One child','Mom and Dad','Everyone']}
  ];
  const suggestions:Record<string,{name:string;anchor:string;action:string;place:string}>={
@@ -388,11 +391,6 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   'Start homework':{name:'Homework first',anchor:'After our afternoon snack',action:'We get out our homework and start.',place:'At the homework spot'},
   'Check what comes next':{name:'Check our plan',anchor:'Before asking what’s next',action:'We look at our family calendar.',place:'Beside our calendar'}
  };
- const otherSuggestion:Record<string,string>={
-  'Have their things ready':'Get ready to leave','Put things back when finished':'Put things away',
-  'Take dishes to the kitchen':'Clear up after meals','Get clothes ready for tomorrow':'Get ready for bed',
-  'Begin homework at the same time':'Start homework','Look at the family plan first':'Check what comes next'
- };
  const renderFinder=()=>{
   if(!finderBody)return;
   finderBody.replaceChildren();
@@ -401,16 +399,17 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   if(finderStep<3){
    const q=finderQuestions[finderStep];make('h3',q.question);
    if(finderStep===0)make('p','Choose one or two. Start with the parts of the day that need the most reminders.');
-   if(finderStep===1)make('p','Pick what would help most. Your chosen habits will appear on the cards.');
-   q.options.forEach(option=>{
+   if(finderStep===1)make('p','We’ll put this habit first on your page.');
+   const options=finderStep===1?selectedHabits:q.options;
+   options.forEach(option=>{
     const btn=make('button',option,'jhc-finder-choice') as HTMLButtonElement;btn.type='button';
-    if(finderStep===0){btn.setAttribute('aria-pressed',String(selectedHabits.includes(option)));btn.addEventListener('click',()=>{selectedHabits=selectedHabits.includes(option)?selectedHabits.filter(x=>x!==option):selectedHabits.length<2?[...selectedHabits,option]:[selectedHabits[1],option];renderFinder()})}
+    if(finderStep===0){btn.setAttribute('aria-pressed',String(selectedHabits.includes(option)));btn.addEventListener('click',()=>{selectedHabits=selectedHabits.includes(option)?selectedHabits.filter(x=>x!==option):selectedHabits.length<2?[...selectedHabits,option]:selectedHabits;renderFinder()})}
     else btn.addEventListener('click',()=>{finderAnswers[finderStep]=option;finderStep++;renderFinder()});
    });
-   if(finderStep===0){const next=make('button','Next: Choose what would help','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;next.type='button';next.disabled=selectedHabits.length===0;next.addEventListener('click',()=>{finderStep=1;renderFinder()})}
+   if(finderStep===0){make('p',`${selectedHabits.length} of 2 habits chosen`);const next=make('button','Next: Choose what would help','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;next.type='button';next.disabled=selectedHabits.length===0;next.addEventListener('click',()=>{finderStep=1;renderFinder()})}
   }else{
    const picks=[...selectedHabits];
-   const priority=otherSuggestion[finderAnswers[1]];
+   const priority=finderAnswers[1];
    if(priority&&picks.includes(priority))picks.sort((a,b)=>Number(b===priority)-Number(a===priority));
    // Respect the family's choice of one or two habits. Never add a second without asking.
    const who=finderAnswers[2]||'Everyone';
@@ -420,7 +419,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   }
   const back=root.querySelector<HTMLButtonElement>('[data-jhc-finder-back]');if(back)back.hidden=finderStep===0;
  };
- root.querySelectorAll('[data-jhc-finder-open]').forEach(button=>button.addEventListener('click',()=>{finderStep=0;finderAnswers.length=0;selectedHabits=[];renderFinder();finder?.showModal()}));
+ root.querySelectorAll('[data-jhc-finder-open]').forEach(button=>button.addEventListener('click',(event)=>{event.preventDefault();if(!finder)return;finderStep=0;finderAnswers.length=0;selectedHabits=[];renderFinder();if(!finder.open)finder.showModal();}));
  root.querySelectorAll('[data-jhc-finder-close]').forEach(b=>b.addEventListener('click',()=>finder?.close()));
  root.querySelector('[data-jhc-finder-back]')?.addEventListener('click',()=>{finderStep=Math.max(0,finderStep-1);renderFinder()});
  finder?.addEventListener('click',e=>{if(e.target===finder)finder.close()});
