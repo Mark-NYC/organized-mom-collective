@@ -10,22 +10,22 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 
   <div class="fvp-grid">
     <section class="fvp-editor" aria-labelledby="personalize-heading">
-  <section class="fvp-intro"><p class="eyebrow">A LITTLE SOMETHING FOR YOUR FAMILY</p><h1>Let's make it <em>yours.</em></h1><p>Pick a word that feels like your family, add your name, and see a keepsake made just for you. Two easy choices. We’ll handle the design.</p></section>
-      <div class="fvp-editor-summary"><span class="eyebrow">YOUR PERSONALIZED KEEPSAKE</span><strong id="fvp-summary-name">The Johnson Family</strong><p id="fvp-summary-values">Love</p><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Customize your print</button></div>
+  <section class="fvp-intro"><p class="eyebrow">ORGANIZED FAMILY CLUB · WELCOME PRINT</p><h1>Our Family <em>Vision.</em></h1><p>Your family's name, one meaningful value, and one beautiful watercolor. Prepared as a keepsake for your home.</p></section>
+      <div class="fvp-editor-summary"><span class="eyebrow">YOUR PREPARED FAMILY PRINT</span><strong>Ready for your wall.</strong><p class="fvp-summary-explainer">A personal reminder of the kind of family you are becoming. One image, one value, and your family name.</p><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><div class="fvp-summary-row"><span>Artwork</span><b>One watercolor</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Change name or artwork</button></div>
       <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
-      <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose up to two values.</p>
+      <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose one watercolor.</p>
       <div class="fvp-step"><label for="fvp-name"><b>01</b> What do you call your family?</label><p>It'll appear on the finished print.</p><input id="fvp-name" maxlength="45" autocomplete="off" value="The Johnson Family" placeholder="The Johnson Family" /></div>
-      <fieldset class="fvp-step"><legend><b>02</b> Choose your family values</legend><p>Pick one or two values that describe the family you want to be.</p><div class="fvp-values" id="fvp-values"><button type="button" data-value="Love" class="fvp-value selected" aria-pressed="true"><img src={visionImages["love-vision.jpeg"]} alt="" loading="lazy"><span>Love</span></button><button type="button" data-value="Faith" class="fvp-value" aria-pressed="false"><img src={visionImages["faith-vision.jpeg"]} alt="" loading="lazy"><span>Faith</span></button><button type="button" data-value="Joy" class="fvp-value" aria-pressed="false"><img src={visionImages["joy-vision.jpeg"]} alt="" loading="lazy"><span>Joy</span></button><button type="button" data-value="Peace" class="fvp-value" aria-pressed="false"><img src={visionImages["peace-vision.jpeg"]} alt="" loading="lazy"><span>Peace</span></button><button type="button" data-value="Adventure" class="fvp-value" aria-pressed="false"><img src={visionImages["adventure-vision.jpeg"]} alt="" loading="lazy"><span>Adventure</span></button><button type="button" data-value="Kindness" class="fvp-value" aria-pressed="false"><img src={visionImages["kindness-vision.jpeg"]} alt="" loading="lazy"><span>Kindness</span></button><button type="button" data-value="Courage" class="fvp-value" aria-pressed="false"><img src={visionImages["courage-vision.jpeg"]} alt="" loading="lazy"><span>Courage</span></button><button type="button" data-value="Gratitude" class="fvp-value" aria-pressed="false"><img src={visionImages["gratitude-vision.jpeg"]} alt="" loading="lazy"><span>Gratitude</span></button><button type="button" data-value="Togetherness" class="fvp-value" aria-pressed="false"><img src={visionImages["togetherness.jpg"]} alt="" loading="lazy"><span>Togetherness</span></button><button type="button" data-value="Hospitality" class="fvp-value" aria-pressed="false"><img src={visionImages["hospitality-vision.jpeg"]} alt="" loading="lazy"><span>Hospitality</span></button><button type="button" data-value="Growth" class="fvp-value" aria-pressed="false"><img src={visionImages["growth-vision.jpeg"]} alt="" loading="lazy"><span>Growth</span></button><button type="button" data-value="Creativity" class="fvp-value" aria-pressed="false"><img src={visionImages["creativity-vision.jpeg"]} alt="" loading="lazy"><span>Creativity</span></button><button type="button" data-value="Generosity" class="fvp-value" aria-pressed="false"><img src={visionImages["generosity-vision.jpeg"]} alt="" loading="lazy"><span>Generosity</span></button><button type="button" data-value="Wonder" class="fvp-value" aria-pressed="false"><img src={visionImages["wonder-vision.jpg"]} alt="" loading="lazy"><span>Wonder</span></button><button type="button" data-value="Perseverance" class="fvp-value" aria-pressed="false"><img src={visionImages["perseverance-vision.jpeg"]} alt="" loading="lazy"><span>Perseverance</span></button><button type="button" data-value="Rest" class="fvp-value" aria-pressed="false"><img src={visionImages["rest-vision.jpg"]} alt="" loading="lazy"><span>Rest</span></button><button type="button" data-value="Hope" class="fvp-value" aria-pressed="false"><img src={visionImages["hope-vision.jpeg"]} alt="" loading="lazy"><span>Hope</span></button><button type="button" data-value="Home" class="fvp-value" aria-pressed="false"><img src={visionImages["home-vision.jpg"]} alt="" loading="lazy"><span>Home</span></button><button type="button" data-value="Service" class="fvp-value" aria-pressed="false"><img src={visionImages["service-vision.jpeg"]} alt="" loading="lazy"><span>Service</span></button><button type="button" data-value="Playfulness" class="fvp-value" aria-pressed="false"><img src={visionImages["playfulness-vision.jpg"]} alt="" loading="lazy"><span>Playfulness</span></button></div><p class="fvp-selection-hint" id="fvp-selection-hint" aria-live="polite">Love selected. Choose one more if you like.</p></fieldset>
+      <fieldset class="fvp-step"><legend><b>02</b> Choose one family value</legend><p>Choose the one illustration and value that best represents your family.</p><div class="fvp-values" id="fvp-values"><button type="button" data-value="Love" class="fvp-value selected" aria-pressed="true"><img src={visionImages["love-vision.jpeg"]} alt="" loading="lazy"><span>Love</span></button><button type="button" data-value="Faith" class="fvp-value" aria-pressed="false"><img src={visionImages["faith-vision.jpeg"]} alt="" loading="lazy"><span>Faith</span></button><button type="button" data-value="Joy" class="fvp-value" aria-pressed="false"><img src={visionImages["joy-vision.jpeg"]} alt="" loading="lazy"><span>Joy</span></button><button type="button" data-value="Peace" class="fvp-value" aria-pressed="false"><img src={visionImages["peace-vision.jpeg"]} alt="" loading="lazy"><span>Peace</span></button><button type="button" data-value="Adventure" class="fvp-value" aria-pressed="false"><img src={visionImages["adventure-vision.jpeg"]} alt="" loading="lazy"><span>Adventure</span></button><button type="button" data-value="Kindness" class="fvp-value" aria-pressed="false"><img src={visionImages["kindness-vision.jpeg"]} alt="" loading="lazy"><span>Kindness</span></button><button type="button" data-value="Courage" class="fvp-value" aria-pressed="false"><img src={visionImages["courage-vision.jpeg"]} alt="" loading="lazy"><span>Courage</span></button><button type="button" data-value="Gratitude" class="fvp-value" aria-pressed="false"><img src={visionImages["gratitude-vision.jpeg"]} alt="" loading="lazy"><span>Gratitude</span></button><button type="button" data-value="Togetherness" class="fvp-value" aria-pressed="false"><img src={visionImages["togetherness.jpg"]} alt="" loading="lazy"><span>Togetherness</span></button><button type="button" data-value="Hospitality" class="fvp-value" aria-pressed="false"><img src={visionImages["hospitality-vision.jpeg"]} alt="" loading="lazy"><span>Hospitality</span></button><button type="button" data-value="Growth" class="fvp-value" aria-pressed="false"><img src={visionImages["growth-vision.jpeg"]} alt="" loading="lazy"><span>Growth</span></button><button type="button" data-value="Creativity" class="fvp-value" aria-pressed="false"><img src={visionImages["creativity-vision.jpeg"]} alt="" loading="lazy"><span>Creativity</span></button><button type="button" data-value="Generosity" class="fvp-value" aria-pressed="false"><img src={visionImages["generosity-vision.jpeg"]} alt="" loading="lazy"><span>Generosity</span></button><button type="button" data-value="Wonder" class="fvp-value" aria-pressed="false"><img src={visionImages["wonder-vision.jpg"]} alt="" loading="lazy"><span>Wonder</span></button><button type="button" data-value="Perseverance" class="fvp-value" aria-pressed="false"><img src={visionImages["perseverance-vision.jpeg"]} alt="" loading="lazy"><span>Perseverance</span></button><button type="button" data-value="Rest" class="fvp-value" aria-pressed="false"><img src={visionImages["rest-vision.jpg"]} alt="" loading="lazy"><span>Rest</span></button><button type="button" data-value="Hope" class="fvp-value" aria-pressed="false"><img src={visionImages["hope-vision.jpeg"]} alt="" loading="lazy"><span>Hope</span></button><button type="button" data-value="Home" class="fvp-value" aria-pressed="false"><img src={visionImages["home-vision.jpg"]} alt="" loading="lazy"><span>Home</span></button><button type="button" data-value="Service" class="fvp-value" aria-pressed="false"><img src={visionImages["service-vision.jpeg"]} alt="" loading="lazy"><span>Service</span></button><button type="button" data-value="Playfulness" class="fvp-value" aria-pressed="false"><img src={visionImages["playfulness-vision.jpg"]} alt="" loading="lazy"><span>Playfulness</span></button></div><p class="fvp-selection-hint" id="fvp-selection-hint" aria-live="polite">Love selected. Pick another to replace it.</p></fieldset>
       <div class="fvp-dialog-done"><button type="button" id="fvp-done-editor">Done · See my print</button></div></dialog>
       <div class="fvp-ready"><strong>Ready to display.</strong><p>Your design updates automatically. See it framed or print the finished artwork.</p><button type="button" id="fvp-print">Print / Save PDF</button><button type="button" class="fvp-reset" id="fvp-reset">Start over</button></div>
     </section>
     <section class="fvp-visual" aria-label="Live family vision print preview"><button type="button" class="fvp-floating-edit" id="fvp-floating-edit">✎ Customize your print</button>
-      <div class="fvp-visual-head"><div><p class="eyebrow">MADE FOR YOUR HOME</p><h2>Picture it in your space.</h2></div><span>LIVE PREVIEW</span></div>
+      <div class="fvp-visual-head"><div><p class="eyebrow">MADE FOR YOUR HOME</p><h2>Made for your home.</h2></div><span>LIVE PREVIEW</span></div>
       <div class="fvp-scenes" role="group" aria-label="Choose display scene"><button type="button" class="selected" data-scene="wall" aria-pressed="true">On the wall</button><button type="button" data-scene="paper" aria-pressed="false">Just the print</button></div>
       <div class="fvp-room wall fvp-photo-room" id="fvp-room">
 
         <div class="fvp-frame"><div class="fvp-mat"><article class="fvp-art" id="fvp-art">
-          <div class="fvp-art-top">OUR FAMILY</div><div class="fvp-art-rule"></div><div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div><h3 id="fvp-art-name">The Johnson Family</h3><div class="fvp-art-tiny-rule"></div><p class="fvp-we">WE CHOOSE</p><p class="fvp-word" id="fvp-art-word">Together</p><p class="fvp-phrase" id="fvp-art-phrase">We show up for each other, share the work, and make room for joy.</p><div class="fvp-art-leaf">❧</div><p class="fvp-art-footer">ORGANIZED FAMILY CLUB</p>
+          <div class="fvp-art-top">OUR FAMILY</div><div class="fvp-art-rule"></div><div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div><h3 id="fvp-art-name">The Johnson Family</h3><div class="fvp-art-tiny-rule"></div><p class="fvp-we">WE CHOOSE</p><p class="fvp-word" id="fvp-art-word">Together</p><p class="fvp-phrase" id="fvp-art-phrase">We show up for each other, share the work, and make room for joy.</p><div class="fvp-art-leaf" aria-hidden="true">❧</div><p class="fvp-art-footer">ORGANIZED FAMILY CLUB</p>
         </article></div></div>
       </div>
       <p class="fvp-caption" id="fvp-caption">See your personalized family artwork in a real wooden frame. Frame and decor are not included.</p>
@@ -144,26 +144,72 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
  .fvp-dialog,.fvp-editor-summary{display:none!important}
  .fvp-room.paper{height:auto!important}
 }
+
+/* Unified Club proof styling: warm editorial, one watercolor, prepared-plan controls. */
+.fvp{color:#484941;background:#faf9f7}
+.fvp-top{border-bottom:1px solid #e5e0e1;background:#faf9f7}
+.fvp-editor{background:#faf9f7;border-right-color:#e5e0e1}
+.fvp-intro{border-top:5px solid #e8d8aa;padding-top:12px;margin-bottom:19px}
+.fvp-intro h1{font:400 clamp(28px,2.5vw,34px)/1.14 Georgia,serif;color:#657455;margin:10px 0}
+.fvp-intro h1 em{color:#87976e}
+.fvp-intro>p:last-child{color:#666c61;line-height:1.65}
+.fvp-editor-summary{padding:16px;background:#fff;border:1px solid #e5e8e0;flex:1 1 auto}
+.fvp-editor-summary>strong{font:400 24px Georgia,serif;color:#657455;margin:8px 0 9px}
+.fvp-editor-summary .fvp-summary-explainer{font:12px/1.65 Montserrat,Arial,sans-serif;color:#62675e;margin:0 0 14px}
+.fvp-summary-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-top:1px solid #e7eae4;padding:11px 0;font:12px/1.4 Montserrat,Arial,sans-serif}
+.fvp-summary-row span{color:#656c60}
+.fvp-summary-row b{color:#596e50;max-width:60%;text-align:right;overflow-wrap:anywhere}
+.fvp-edit-trigger{border:0;background:none;text-decoration:underline;text-underline-offset:3px;text-align:left;padding:10px 0;min-height:40px;font:700 12px Montserrat,Arial,sans-serif;color:#596e50}
+.fvp-ready{background:#faf9f7}
+.fvp-ready button#fvp-print{background:#596e50}
+.fvp-visual{background:#f5f3f2}
+.fvp-visual-head h2{font:400 27px Georgia,serif;color:#657455}
+.fvp-scenes button{min-height:40px;border:1px solid #d4ddd0;border-radius:4px;background:white;color:#596e50}
+.fvp-scenes button.selected{background:#596e50;border-color:#596e50;color:white}
+.fvp-room.paper{background:#eae9e6}
+.fvp-room.paper .fvp-frame{aspect-ratio:8.5/11;width:auto;height:96%;max-height:96%;border:1px solid #dfe1da;box-shadow:0 8px 26px #0002}
+.fvp-art{background:#fff}
+.fvp-symbol{width:78%;height:34%;margin-top:2%;flex-shrink:0}
+.fvp-symbol img{max-width:100%;width:100%;height:100%;object-fit:contain;mix-blend-mode:normal;background:#fff}
+.fvp-photo-room .fvp-symbol{height:38%;width:83%}
+.fvp-dialog .fvp-values{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fvp-value{background:#fff;border:1px solid #e0e4dc;padding:8px;border-radius:5px}
+.fvp-value img{background:#fff;border-radius:3px}
+.fvp-value.selected{background:#f4f8f0;border:2px solid #859c7a;padding:7px}
+.fvp-dialog>h2{color:#657455}
+.fvp-dialog-done button{background:#596e50}
+@media(max-width:700px){.fvp-dialog .fvp-values{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media print{
+ .fvp-symbol{width:75%!important;height:38%!important}
+ .fvp-symbol img{background:white!important}
+ .fvp-room.paper .fvp-frame{height:11in!important;width:8.5in!important;max-height:none!important}
+}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
 const valuePhrases:Record<string,string>={"Love":"We choose love in how we speak, serve, and show up for each other.","Faith":"We trust God, love one another, and walk forward in faith.","Joy":"We make room for laughter and celebrate the little things.","Peace":"We practice patience, speak gently, and make room for calm.","Adventure":"We try new things, stay curious, and explore together.","Kindness":"We use kind words, notice needs, and care for others.","Courage":"We do what is right, even when it feels difficult.","Gratitude":"We notice the good and give thanks every day.","Togetherness":"We show up for each other and make time to belong.","Hospitality":"We make room at our table and welcome people in.","Growth":"We keep learning, try again, and grow together.","Creativity":"We imagine, make, and see things in new ways.","Generosity":"We share what we have with open hands and hearts.","Wonder":"We ask questions, notice beauty, and stay amazed.","Perseverance":"We keep going, help each other, and do not give up.","Rest":"We slow down, make space to breathe, and enjoy being together.","Hope":"We look forward with hope and believe good things can grow.","Home":"We make our home a place of belonging and care.","Service":"We notice where help is needed and gladly do our part.","Playfulness":"We laugh often, play together, and make everyday memories."};
 const byId=(id:string)=>document.getElementById(id);
-let selectedValues=['Love'];
+let selectedValue='Love';
 function render(){
  const name=(byId('fvp-name') as HTMLInputElement).value.trim()||'Your Family';
- const first=selectedValues[0],second=selectedValues[1];
  byId('fvp-art-name')!.textContent=name;
  byId('fvp-summary-name')!.textContent=name;
- byId('fvp-summary-values')!.textContent=selectedValues.join(' + ');
- byId('fvp-art-word')!.textContent=second?first+' & '+second:first;
- byId('fvp-art-phrase')!.textContent=second?'We choose '+first.toLowerCase()+' and '+second.toLowerCase()+' in the way we live, love, and grow together.':valuePhrases[first];
+ byId('fvp-summary-values')!.textContent=selectedValue;
+ byId('fvp-art-word')!.textContent=selectedValue;
+ byId('fvp-art-phrase')!.textContent=valuePhrases[selectedValue];
  const symbol=byId('fvp-symbol')!;
- symbol.innerHTML=selectedValues.map(value=>'<img src="'+valueImages[value]+'" alt="">').join('');
- symbol.classList.toggle('two',Boolean(second));
- for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]')){const yes=selectedValues.includes(b.dataset.value!);b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',String(yes));}
- byId('fvp-selection-hint')!.textContent=selectedValues.join(' + ')+' selected.'+(selectedValues.length===1?' Choose one more if you like.':' Select a value to remove it.');
+ const image=symbol.querySelector('img')??document.createElement('img');
+ image.src=valueImages[selectedValue];
+ image.alt='';
+ if(!image.parentElement)symbol.append(image);
+ for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]')){
+  const yes=b.dataset.value===selectedValue;
+  b.classList.toggle('selected',yes);
+  b.setAttribute('aria-pressed',String(yes));
+ }
+ byId('fvp-selection-hint')!.textContent=selectedValue+' selected. Choose a different image to replace it.';
 }
+
 const editorDialog=byId('fvp-dialog') as HTMLDialogElement;
 byId('fvp-open-editor')?.addEventListener('click',()=>editorDialog.showModal());
 byId('fvp-floating-edit')?.addEventListener('click',()=>editorDialog.showModal());
@@ -171,9 +217,9 @@ byId('fvp-close-editor')?.addEventListener('click',()=>editorDialog.close());
 byId('fvp-done-editor')?.addEventListener('click',()=>editorDialog.close());
 editorDialog.addEventListener('click',(event)=>{if(event.target===editorDialog)editorDialog.close();});
 byId('fvp-name')?.addEventListener('input',render);
-for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]'))b.addEventListener('click',()=>{const v=b.dataset.value!;if(selectedValues.includes(v)){if(selectedValues.length>1)selectedValues=selectedValues.filter(x=>x!==v);}else selectedValues=selectedValues.length===2?[selectedValues[0],v]:[...selectedValues,v];render();});
+for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]'))b.addEventListener('click',()=>{selectedValue=b.dataset.value!;render();});
 for(const b of document.querySelectorAll<HTMLButtonElement>('[data-scene]'))b.addEventListener('click',()=>{const scene=b.dataset.scene!;byId('fvp-room')!.className='fvp-room '+scene+(scene==='wall'?' fvp-photo-room':'');document.querySelectorAll('[data-scene]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});byId('fvp-caption')!.textContent=scene==='paper'?'Actual printable layout. US Letter, 8.5 × 11 inches.':'Styled wall preview. Frame and decor are not included.';});
 byId('fvp-print')?.addEventListener('click',()=>window.print());
-byId('fvp-reset')?.addEventListener('click',()=>{(byId('fvp-name') as HTMLInputElement).value='The Johnson Family';selectedValues=['Love'];document.querySelector<HTMLButtonElement>('[data-scene="wall"]')?.click();render();});
+byId('fvp-reset')?.addEventListener('click',()=>{(byId('fvp-name') as HTMLInputElement).value='The Johnson Family';selectedValue='Love';document.querySelector<HTMLButtonElement>('[data-scene="wall"]')?.click();render();});
 render();
 </script>
