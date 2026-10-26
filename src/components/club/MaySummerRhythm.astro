@@ -542,7 +542,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    actions.append(none,custom);pop.append(title,grid,actions);root.append(pop);
    position();document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',keysDown,true);
    window.addEventListener('resize',position);root.querySelector('.msr-preview')?.addEventListener('scroll',position);
-   (grid.querySelector('[aria-pressed="true"]')||grid.querySelector('button'))?.focus();
+   (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]')||grid.querySelector<HTMLButtonElement>('button'))?.focus();
   };
   time?.addEventListener('click',editTime);
   time?.addEventListener('keydown',e=>{if(e.target===time&&(e.key==='Enter'||e.key===' ')){e.preventDefault();editTime()}});
