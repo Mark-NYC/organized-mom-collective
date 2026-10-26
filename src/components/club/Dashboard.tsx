@@ -1,8 +1,9 @@
 /**
- * /club/dashboard: her family, her plan and billing status, this month's resource, every month she has (open), the
- * months still ahead (locked until paid), months from before she joined (not included), each month's printed
- * mailing status, family and address editing, billing and email. Everything comes from club_me (the database
- * decides access); the resource pages check again on their own.
+ * /club/dashboard: her family, her plan and billing status, her Family Vision welcome print (personalize, approve,
+ * its status), this month's resource, only the months she has bought (a first December shows the welcome print as
+ * that month's resource), each month's printed mailing status, the next month and the payment that brings it,
+ * family and address editing, billing and email. Everything comes from club_me (the database decides access); the
+ * resource pages check again on their own.
  */
 import { useEffect, useState } from 'react';
 import { getSession } from '../../lib/account';
@@ -13,6 +14,7 @@ import {
   loadMembership,
   mailingText,
   monthName,
+  welcomeText,
   openPortal,
   saveAddress,
   shortDate,
@@ -39,8 +41,8 @@ function sampleMembership(): Membership {
   return {
     access: true, grant: 'preview', member: true, plan: 'annual', status: 'active', payment_problem: false, renews: null, ends: null,
     ended_at: null, revoked: false, onboarded: true, has_address: true, enrolled_at: null, first_paid_month: `${clubResources[0].month}-01`,
-    current_month: cur, membership_year: 1,
-    months: clubResources.map((r) => ({ month: `${r.month}-01`, slug: r.slug, title: r.title, published: true, can: 'edit', state: 'available', membership_year: 1, plan: 'annual', mailing: null })),
+    current_month: cur, membership_year: 1, welcome: null, next: null,
+    months: clubResources.map((r) => ({ month: `${r.month}-01`, slug: r.slug, title: r.title, published: true, can: 'edit', state: 'available', membership_year: 1, plan: 'annual', fulfilled_by: 'monthly_resource', mailing: null })),
   };
 }
 
@@ -69,10 +71,7 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
   if (!me) return <p className="text-warm-soft">Loading…</p>;
 
   const you = household?.members.find((m) => m.isAccountHolder && !m.archived) ?? household?.members.find((m) => !m.archived);
-  const months = me.months.filter((m) => clubResourceBySlug(m.slug) || m.state !== 'before_enrollment');
-  const mine = months.filter((m) => m.state === 'available' || m.state === 'preparing');
-  const ahead = months.filter((m) => m.state === 'locked');
-  const before = months.filter((m) => m.state === 'before_enrollment' && clubResourceBySlug(m.slug));
+  const mine = me.months;
   const current = mine.find((m) => m.month === me.current_month && m.state === 'available') ?? [...mine].reverse().find((m) => m.state === 'available' && m.month <= me.current_month) ?? mine.find((m) => m.state === 'available');
   const years = [...new Set(mine.map((m) => m.membership_year ?? 1))].sort();
 
@@ -96,33 +95,33 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
         <p className="mt-5 max-w-2xl border-l-[3px] border-rose bg-rose-wash px-4 py-3">Add your mailing address below so we can mail your printed resources.</p>
       )}
 
+      {me.welcome && <WelcomeCard w={me.welcome} href={ctx.href(routes.clubFamilyVision)} />}
+
       {current && <CurrentCard m={current} href={ctx.href(routes.clubResource(current.slug!))} />}
 
       {years.map((y) => (
         <section key={y} className="mt-12">
           <h2 className="label text-warm-soft">{me.plan === 'annual' || years.length > 1 ? `Your resources · Year ${y}` : 'Your resources'}</h2>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            {mine.filter((m) => (m.membership_year ?? 1) === y).map((m) => <MonthCard key={m.month} m={m} href={m.slug ? ctx.href(routes.clubResource(m.slug)) : null} />)}
+            {mine.filter((m) => (m.membership_year ?? 1) === y).map((m) => (
+              m.state === 'welcome_vision'
+                ? <WelcomeMonthCard key={m.month} m={m} href={ctx.href(routes.clubFamilyVision)} />
+                : <MonthCard key={m.month} m={m} href={m.slug ? ctx.href(routes.clubResource(m.slug)) : null} />
+            ))}
           </div>
         </section>
       ))}
 
-      {ahead.length > 0 && (
-        <section className="mt-12">
-          <h2 className="label text-warm-soft">Coming up</h2>
-          <p className="mt-1 text-[0.92rem] text-warm-soft">{me.access ? 'Each month opens when that month’s payment goes through.' : 'Rejoin any time to receive these months.'}</p>
-          <ul className="mt-3 divide-y divide-warm-rule border-y border-warm-rule">
-            {ahead.map((m) => <li key={m.month} className="flex justify-between gap-4 py-3 text-warm-soft"><span>{monthName(m.month)} · {clubResourceBySlug(m.slug)?.title ?? m.title ?? 'Monthly resource'}</span><span aria-label="Locked">Locked</span></li>)}
-          </ul>
+      {me.next && (
+        <section className="mt-10 max-w-3xl border-y border-warm-rule py-4">
+          <h2 className="label text-warm-soft">Next</h2>
+          <p className="mt-1 text-[1.02rem] text-warm-ink">
+            {monthName(me.next.month)} · {clubResourceBySlug(me.next.slug)?.title ?? me.next.title ?? 'Monthly resource'}
+          </p>
+          <p className="mt-1 text-[0.92rem] text-warm-soft">
+            {me.next.payment_on ? `Opens with your ${shortDate(me.next.payment_on)} payment` : 'Opens with your next payment'}, and its printed copy goes out in the {monthName(me.next.month)} mailing.
+          </p>
         </section>
-      )}
-
-      {before.length > 0 && (
-        <details className="mt-10 max-w-2xl">
-          <summary className="cursor-pointer text-[0.92rem] text-warm-soft underline underline-offset-4">Months before you joined ({before.length})</summary>
-          <p className="mt-2 text-[0.9rem] text-warm-soft">These came out before your membership started, so they aren’t part of it.</p>
-          <ul className="mt-2 text-[0.92rem] text-warm-soft">{before.map((m) => <li key={m.month}>{monthName(m.month)} · {clubResourceBySlug(m.slug)?.title ?? m.title}</li>)}</ul>
-        </details>
       )}
 
       <section className="mt-12 grid max-w-3xl gap-8 border-t border-warm-rule pt-6 sm:grid-cols-2">
@@ -177,6 +176,36 @@ function Status({ me, sample }: { me: Membership; sample: boolean }) {
       {!me.access && !sample && <a href={routes.clubJoin} className="ml-4 text-[0.92rem] font-semibold underline underline-offset-4">Rejoin</a>}
       {err && <p role="alert" className="mt-2 text-[0.9rem]">{err}</p>}
     </div>
+  );
+}
+
+function WelcomeCard({ w, href }: { w: NonNullable<Membership['welcome']>; href: string }) {
+  const todo = w.status === 'pending' && (!w.approved || !w.personalized);
+  return (
+    <article className={`mt-8 max-w-3xl p-6 sm:p-9 ${todo ? 'bg-sage-wash' : 'bg-white ring-1 ring-warm-rule'}`}>
+      <p className="label text-warm-soft">Your welcome print{w.satisfies_month ? ` · Your ${monthName(w.satisfies_month).split(' ')[0]} resource` : ''}</p>
+      <h2 className="mt-2 font-serif text-[1.8rem] leading-[1.15] text-warm-ink sm:text-[2.2rem]">Our Family Vision</h2>
+      {w.satisfies_month && (
+        <p className="mt-2 max-w-xl text-[0.98rem] leading-relaxed text-warm-ink">
+          You joined in {monthName(w.satisfies_month)}, so this personalized print is your {monthName(w.satisfies_month).split(' ')[0]} resource. Your monthly resources start with your next payment.
+        </p>
+      )}
+      <p className="mt-2 text-[0.95rem] text-warm-soft">{welcomeText(w)}</p>
+      <a href={href} className={`${todo ? 'btn-primary' : 'text-[0.95rem] font-semibold underline underline-offset-4'} mt-5 inline-block`}>
+        {todo ? 'Personalize your print' : 'See your print'}
+      </a>
+    </article>
+  );
+}
+
+function WelcomeMonthCard({ m, href }: { m: MembershipMonth; href: string }) {
+  return (
+    <article className="bg-white p-5 ring-1 ring-warm-rule">
+      <p className="label text-warm-soft">{monthName(m.month)}</p>
+      <h3 className="mt-1 font-serif text-[1.3rem] leading-snug text-warm-ink">Our Family Vision print</h3>
+      <p className="mt-1 text-[0.88rem] text-warm-soft">Your personalized welcome print is this month’s resource.</p>
+      <a href={href} className="mt-3 inline-block text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4">See your print</a>
+    </article>
   );
 }
 

@@ -2,8 +2,8 @@
  * /club/welcome: where Stripe sends her after paying, and where the welcome email's sign-in leads.
  * 1. Payment confirmed (the Checkout session, read on the server). 2. Sign in with that email's 6-digit code
  * (this proves the inbox; nothing opens before it). 3. Wait for the webhook to finish her membership (seconds).
- * 4. Family: first names and kids' ages, nothing more. 5. Mailing address, if Checkout didn't give one. Then her
- * dashboard. Each step is skipped when it's already done, so coming back later just picks up where she left off.
+ * 4. Family: first names and kids' ages, nothing more. 5. Mailing address, if Checkout didn't give one. 6. Her
+ * Family Vision welcome print (/club/family-vision) until she approves it; then her dashboard. Each step is skipped when it's already done, so coming back later just picks up where she left off.
  */
 import { useEffect, useState } from 'react';
 import type { Household } from '../../lib/club/profile';
@@ -55,7 +55,7 @@ export default function ClubWelcome() {
   return <ClubGate page="welcome" signInIntro={intro}>{(ctx) => <Setup ctx={ctx} />}</ClubGate>;
 }
 
-type Step = { kind: 'waiting' } | { kind: 'not_member' } | { kind: 'family'; household: Household | null } | { kind: 'address'; address: Address | null } | { kind: 'done' };
+type Step = { kind: 'waiting' } | { kind: 'not_member' } | { kind: 'family'; household: Household | null } | { kind: 'address'; address: Address | null } | { kind: 'done'; to: string };
 
 function Setup({ ctx }: { ctx: ClubContext }) {
   const [step, setStep] = useState<Step>({ kind: 'waiting' });
@@ -64,13 +64,14 @@ function Setup({ ctx }: { ctx: ClubContext }) {
   const next = async () => {
     if (ctx.store.kind === 'sample') {
       const h = await ctx.store.household();
-      return setStep(h ? { kind: 'done' } : { kind: 'family', household: null });
+      return setStep(h ? { kind: 'done', to: routes.clubDashboard } : { kind: 'family', household: null });
     }
     const me = await loadMembership();
     if (!me.member && !me.grant) return setStep({ kind: 'not_member' });
     if (!me.onboarded) return setStep({ kind: 'family', household: await ctx.store.household() });
     if (!me.has_address) return setStep({ kind: 'address', address: await loadAddress() });
-    setStep({ kind: 'done' });
+    // Then her welcome print, until she has approved it.
+    setStep({ kind: 'done', to: me.welcome?.status === 'pending' && !me.welcome.approved ? routes.clubFamilyVision : routes.clubDashboard });
   };
 
   useEffect(() => {
@@ -89,7 +90,7 @@ function Setup({ ctx }: { ctx: ClubContext }) {
   }, []);
 
   useEffect(() => {
-    if (step.kind === 'done') clubNav().go(ctx.href(routes.clubDashboard), { replace: true });
+    if (step.kind === 'done') clubNav().go(ctx.href(step.to), { replace: true });
   }, [step.kind]);
 
   if (error) return <p role="alert">{error}</p>;
@@ -108,7 +109,7 @@ function Setup({ ctx }: { ctx: ClubContext }) {
     case 'family':
       return (
         <>
-          <p className="label text-warm-soft">Step 1 of 2</p>
+          <p className="label text-warm-soft">Step 1 of 3</p>
           <FamilyForm household={step.household} mode="start" submitLabel="Save our family" onSave={async (input) => {
             await ctx.store.saveHousehold(input);
             await next();
@@ -118,12 +119,12 @@ function Setup({ ctx }: { ctx: ClubContext }) {
     case 'address':
       return (
         <>
-          <p className="label text-warm-soft">Step 2 of 2</p>
+          <p className="label text-warm-soft">Step 2 of 3</p>
           <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink">Where should we mail it?</h1>
-          <p className="mt-3 mb-6 max-w-xl leading-relaxed text-warm-soft">Your printed mailing comes here each month.</p>
-          <AddressForm address={step.address} submitLabel="Save and open my account" onSave={async (a) => {
+          <p className="mt-3 mb-6 max-w-xl leading-relaxed text-warm-soft">Your welcome print and your printed mailings come here.</p>
+          <AddressForm address={step.address} submitLabel="Save and continue" onSave={async (a) => {
             await saveAddress(a);
-            setStep({ kind: 'done' });
+            await next();
           }} />
         </>
       );

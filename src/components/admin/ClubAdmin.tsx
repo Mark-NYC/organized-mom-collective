@@ -1,6 +1,7 @@
 /**
- * /admin/club (owner admins): Organized Family Club members, billing state, paid months, the monthly fulfillment
- * queue, kit publishing, email batches, Stripe setup. Reads and changes go through the club_admin_* database
+ * /admin/club (owner admins): Organized Family Club members, billing state, paid months and what fulfills each, the
+ * welcome print queue, the monthly fulfillment queue (regular and catch-up batches), kit publishing, email batches,
+ * Stripe setup. Reads and changes go through the club_admin_* database
  * functions (owner check and audit log in the database) and the club-admin Edge Function (Stripe, Resend). Children's
  * names appear only in a mailing's print view, one household at a time (audited).
  */
@@ -47,6 +48,7 @@ interface Member {
   payment_problem: boolean;
   stripe_subscription_id: string | null;
   months: string[];
+  welcome: { status: string; readiness: string; satisfies_month: string | null; mailed_at: string | null } | null;
   address: { name: string; line1: string; line2: string | null; city: string; state: string; postal_code: string; paused: boolean } | null;
 }
 
@@ -65,7 +67,19 @@ interface Order {
   mailed_at: string | null;
   note: string | null;
   address: Record<string, string> | null;
+  fulfillment_type: 'monthly_resource' | 'welcome_vision';
+  batch: 'regular' | 'catch_up' | 'welcome';
+  satisfies_month: string | null;
+  first_paid_month: string | null;
+  enrolled_at: string | null;
+  vision_value?: string | null;
+  family_name?: string | null;
 }
+
+const BATCH: Record<Order['batch'], string> = { regular: 'Regular batch', catch_up: 'Catch-up (paid after the cutoff)', welcome: 'Welcome print' };
+const printHref = (o: Pick<Order, 'id' | 'kit_slug' | 'fulfillment_type'>) =>
+  o.fulfillment_type === 'welcome_vision' ? `${routes.clubFamilyVision}?fulfillment=${o.id}`
+    : o.kit_slug && clubResourceBySlug(o.kit_slug) ? `${routes.clubResource(o.kit_slug)}?fulfillment=${o.id}` : null;
 
 const NEXT: Record<string, string[]> = {
   pending: ['approved', 'on_hold', 'skipped'],
@@ -144,7 +158,7 @@ function Members({ session, signOut }: AdminContext) {
       {rows && (
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-[0.9rem]">
-            <thead><tr className="border-b border-rule"><th className="py-2">Member</th><th>Plan · status</th><th>Joined</th><th>Paid months</th><th>Profile</th><th>Address</th><th /></tr></thead>
+            <thead><tr className="border-b border-rule"><th className="py-2">Member</th><th>Plan · status</th><th>Joined</th><th>Paid months</th><th>Welcome print</th><th>Profile</th><th>Address</th><th /></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <Fragment key={r.user_id}>
@@ -155,11 +169,12 @@ function Members({ session, signOut }: AdminContext) {
                       {r.flags?.length ? <><br /><span className="text-soft">{r.flags.join(', ')}</span></> : null}</td>
                     <td>{day(r.enrolled_at)}<br /><span className="text-soft">from {r.first_paid_month ? month(r.first_paid_month) : '–'}</span></td>
                     <td>{r.months.length ? `${month(r.months[0])} … ${month(r.months[r.months.length - 1])} (${r.months.length})` : '–'}</td>
+                    <td>{r.welcome ? `${r.welcome.status} · ${r.welcome.readiness}` : '–'}{r.welcome?.satisfies_month && <><br /><span className="text-soft">is their {month(r.welcome.satisfies_month)}</span></>}</td>
                     <td>{r.onboarded ? `${r.adults} adult${r.adults === 1 ? '' : 's'}, kids born ${r.child_birth_years.join(', ') || '–'}` : <strong>Not yet</strong>}</td>
                     <td>{r.address ? `${r.address.city}, ${r.address.state}${r.address.paused ? ' (paused)' : ''}` : <strong>Missing</strong>}</td>
                     <td><button type="button" className="underline" onClick={() => setOpen(open === r.user_id ? null : r.user_id)}>{open === r.user_id ? 'Close' : 'Manage'}</button></td>
                   </tr>
-                  {open === r.user_id && <tr><td colSpan={7} className="bg-paper p-4"><MemberTools member={r} session={session} onDone={load} /></td></tr>}
+                  {open === r.user_id && <tr><td colSpan={8} className="bg-paper p-4"><MemberTools member={r} session={session} onDone={load} /></td></tr>}
                 </Fragment>
               ))}
             </tbody>
@@ -199,6 +214,7 @@ function MemberTools({ member, session, onDone }: { member: Member; session: Adm
   };
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      <MemberMonths member={member} session={session} />
       <div>
         <p className="font-semibold">Entitlement override</p>
         <p className="text-[0.85rem] text-soft">For goodwill, a refund of part of a year, or a correction. Every override needs a note and goes in the audit log. Refunds made in Stripe revoke their months by themselves.</p>
@@ -221,7 +237,105 @@ function MemberTools({ member, session, onDone }: { member: Member; session: Adm
   );
 }
 
-function Fulfillment({ session, signOut }: AdminContext) {
+interface MemberMonth {
+  month: string;
+  fulfilled_by: 'monthly_resource' | 'welcome_vision';
+  kit_slug: string | null;
+  plan: string;
+  invoice: string | null;
+  source: string;
+  revoked: boolean;
+  revoked_reason: string | null;
+  mailing: { id: string; status: string; batch: Order['batch']; cutoff_at: string | null; mailed_at: string | null } | null;
+}
+
+/** Each paid month: what fulfills it, the payment behind it, and its printed copy. */
+function MemberMonths({ member, session }: { member: Member; session: AdminContext['session'] }) {
+  const [d, setD] = useState<{ welcome: { status: string; readiness: string; satisfies_month: string | null; vision_value: string | null } | null; months: MemberMonth[] } | null>(null);
+  useEffect(() => {
+    adminRpc<NonNullable<typeof d>>(session, 'club_admin_member_months', { p_user: member.user_id }).then(setD, () => setD({ welcome: null, months: [] }));
+  }, [member.user_id]);
+  if (!d) return <p className="sm:col-span-2">Loading months…</p>;
+  return (
+    <div className="sm:col-span-2">
+      <p className="font-semibold">Paid months</p>
+      <p className="text-[0.85rem] text-soft">
+        Welcome print: {d.welcome ? `${d.welcome.status} · ${d.welcome.readiness}${d.welcome.vision_value ? ` · “${d.welcome.vision_value}”` : ''}${d.welcome.satisfies_month ? ` · fulfills ${month(d.welcome.satisfies_month)}` : ''}` : 'none'}
+      </p>
+      <table className="mt-2 w-full text-left text-[0.85rem]">
+        <thead><tr className="border-b border-rule"><th className="py-1">Month</th><th>Fulfilled by</th><th>Paid by</th><th>Printed copy</th></tr></thead>
+        <tbody>
+          {d.months.map((x) => (
+            <tr key={`${x.month}-${x.invoice}`} className={`border-b border-rule ${x.revoked ? 'text-soft line-through' : ''}`}>
+              <td className="py-1">{month(x.month)}</td>
+              <td>{x.fulfilled_by === 'welcome_vision' ? 'Family Vision welcome print' : clubResourceBySlug(x.kit_slug)?.title ?? x.kit_slug ?? 'Monthly resource'}</td>
+              <td>{x.source === 'admin' ? 'admin grant' : `${x.plan} · ${x.invoice}`}{x.revoked && ` (${x.revoked_reason})`}</td>
+              <td>{x.fulfilled_by === 'welcome_vision' ? 'the welcome print' : x.mailing ? `${x.mailing.status} · ${BATCH[x.mailing.batch]}` : '–'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Welcome prints go out as soon as the family approves them: no monthly cutoff. */
+function WelcomeQueue({ session }: AdminContext) {
+  const [rows, setRows] = useState<Order[] | null>(null);
+  const [err, setErr] = useState('');
+  const load = () => adminRpc<Order[]>(session, 'club_admin_welcome_queue').then(setRows, (e: Error) => setErr(e.message));
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const set = async (o: Order, status: string) => {
+    const note = status === 'skipped' || status === 'on_hold' || status === 'returned' ? prompt('Note (why):') ?? '' : null;
+    try {
+      await adminRpc(session, 'club_admin_set_fulfillment', { p_order: o.id, p_status: status, p_note: note || null, p_pdf: null });
+      load();
+    } catch (e) {
+      alert((e as Error).message === 'not_ready' ? 'Not ready: the family approves it, we have an address, and its PDF is marked ready.' : (e as Error).message);
+    }
+  };
+  return (
+    <section className="mb-10">
+      <h2 className="label">Welcome prints ({rows?.length ?? '…'})</h2>
+      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One per household, from the first payment. Family personalizes and approves it → Print view → Save as PDF → Mark PDF ready → Approve → Printed → Mailed. A December joiner’s print is also her December resource.</p>
+      {err && <p role="alert">{err}</p>}
+      {rows && rows.length > 0 && (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[900px] text-left text-[0.9rem]">
+            <thead><tr className="border-b border-rule"><th className="py-2">Household</th><th>Joined</th><th>Print</th><th>Readiness</th><th>Status</th><th>Print view</th><th>Move to</th></tr></thead>
+            <tbody>
+              {rows.map((o) => (
+                <tr key={o.id} className="border-b border-rule align-top">
+                  <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span></td>
+                  <td>{day(o.enrolled_at)}<br /><span className="text-soft">first month {o.first_paid_month ? month(o.first_paid_month) : '–'}</span></td>
+                  <td>{o.family_name ? `${o.family_name} · ${o.vision_value}` : <span className="text-soft">not personalized</span>}{o.satisfies_month && <><br /><strong>Their {month(o.satisfies_month)} resource</strong></>}</td>
+                  <td>{o.readiness}{o.pdf_status === 'ready' ? ' · PDF ✓' : ''}</td>
+                  <td>{o.status}{o.member_approved_at ? <><br /><span className="text-soft">approved {day(o.member_approved_at)}</span></> : null}</td>
+                  <td>{o.family_name ? <a className="underline" href={printHref(o)!}>Print view</a> : '–'}</td>
+                  <td className="space-x-2">{(NEXT[o.status] ?? []).map((st) => <button key={st} type="button" className="underline" onClick={() => set(o, st)}>{st}</button>)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Fulfillment(ctx: AdminContext) {
+  return (
+    <>
+      <WelcomeQueue {...ctx} />
+      <MonthlyFulfillment {...ctx} />
+    </>
+  );
+}
+
+function MonthlyFulfillment({ session, signOut }: AdminContext) {
   const [m, setM] = useState(thisMonth().slice(0, 7));
   const [rows, setRows] = useState<Order[] | null>(null);
   const [err, setErr] = useState('');
@@ -265,21 +379,23 @@ function Fulfillment({ session, signOut }: AdminContext) {
           {cutoff.launch_exception_cutoff_at && <> · launch exception open until <strong>{deadline(cutoff.launch_exception_cutoff_at)}</strong></>}
         </p>
       )}
-      <p className="mt-2 max-w-3xl text-[0.85rem] text-soft">Pipeline: paid month → family profile → address → published resource → print view, Save as PDF, mark PDF ready → Approve (freezes the address) → Printed → Mailed. Payments earn the earliest month whose list is still open, so a month’s list is complete once it closes. Late = added by hand after the list closed: mail it in a catch-up batch.</p>
+      <p className="mt-2 max-w-3xl text-[0.85rem] text-soft">Pipeline: paid month → family profile → address → published resource → print view, Save as PDF, mark PDF ready → Approve (freezes the address) → Printed → Mailed. Each paid month mails that month’s own resource. Paid by the month’s cutoff → its regular batch; paid after (monthly renewals, late joiners) → its catch-up batch, prepared once the payment lands. Never moved to another month.</p>
       {err && <p role="alert" className="mt-4">{err}</p>}
       {rows && (
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-[0.9rem]">
-            <thead><tr className="border-b border-rule"><th className="py-2">Household</th><th>Readiness</th><th>Status</th><th>Member review</th><th>Address</th><th>Print</th><th>Move to</th></tr></thead>
+            <thead><tr className="border-b border-rule"><th className="py-2">Household</th><th>What</th><th>Readiness</th><th>Status</th><th>Member review</th><th>Address</th><th>Print</th><th>Move to</th></tr></thead>
             <tbody>
               {rows.map((o) => (
                 <tr key={o.id} className="border-b border-rule align-top">
-                  <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span>{o.late && <><br /><strong>Late</strong></>}</td>
+                  <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span></td>
+                  <td>{o.fulfillment_type === 'welcome_vision' ? 'Welcome print' : clubResourceBySlug(o.kit_slug)?.title ?? o.kit_slug ?? 'Monthly resource'}<br />
+                    <span className={o.batch === 'catch_up' ? 'font-semibold' : 'text-soft'}>{BATCH[o.batch]}</span>{o.satisfies_month && <><br /><span className="text-soft">is their {month(o.satisfies_month)}</span></>}</td>
                   <td>{o.readiness}{o.pdf_status === 'ready' ? ' · PDF ✓' : ''}</td>
                   <td>{o.status}{o.mailed_at ? ` ${day(o.mailed_at)}` : ''}{o.note && <><br /><span className="text-soft">{o.note}</span></>}</td>
                   <td>{o.member_approved_at ? `Approved ${day(o.member_approved_at)}` : '–'}</td>
                   <td>{o.address ? `${o.address.city}, ${o.address.state}` : '–'}</td>
-                  <td>{o.kit_slug && clubResourceBySlug(o.kit_slug) ? <a className="underline" href={`${routes.clubResource(o.kit_slug)}?fulfillment=${o.id}`}>Print view</a> : '–'}</td>
+                  <td>{printHref(o) ? <a className="underline" href={printHref(o)!}>Print view</a> : '–'}</td>
                   <td className="space-x-2">{(NEXT[o.status] ?? []).map((s) => <button key={s} type="button" className="underline" onClick={() => set(o, s)}>{s}</button>)}</td>
                 </tr>
               ))}
@@ -359,7 +475,7 @@ function Cutoffs({ session, settings, save }: { session: AdminContext['session']
   return (
     <section>
       <h2 className="label">Mailing cutoff</h2>
-      <p className="mt-2 text-[0.95rem]">Each month’s printed mailing list closes at <strong>11:59 pm New York time on the {rule}</strong> of the month before. A payment made before a month’s list closes earns that month’s mailing; after it, the next open month’s. Digital access never depends on it.</p>
+      <p className="mt-2 text-[0.95rem]">Each month’s printed mailing list closes at <strong>11:59 pm New York time on the {rule}</strong> of the month before. Each paid month’s printed copy is that month’s resource: paid by its cutoff, it’s in the regular batch; paid after, in that month’s catch-up batch. Digital access never depends on it, and the welcome print never waits for it.</p>
       <div className="mt-3 flex flex-wrap items-end gap-3">
         <label className="block"><span className="label">Which</span>
           <select className={adminInput} value={settings.cutoff_ordinal} onChange={(e) => save({ cutoff_ordinal: Number(e.target.value) })}>
@@ -378,7 +494,7 @@ function Cutoffs({ session, settings, save }: { session: AdminContext['session']
               <td className="py-2">{monthName(r.month)}</td>
               <td>
                 {deadline(r.cutoff_at)}
-                {r.launch_exception_cutoff_at && <><br /><strong>Launch exception: open until {deadline(r.launch_exception_cutoff_at)}</strong> for families whose payment covers {monthName(r.month)}</>}
+                {r.launch_exception_cutoff_at && <><br /><strong>Launch exception: open until {deadline(r.launch_exception_cutoff_at)}</strong> for the founding batch</>}
               </td>
             </tr>
           ))}
@@ -387,8 +503,8 @@ function Cutoffs({ session, settings, save }: { session: AdminContext['session']
       <h3 className="label mt-6">Launch exception (one time)</h3>
       {settings.launch_exception_month && settings.launch_exception_cutoff_at ? (
         <p className="mt-2 text-[0.95rem]">
-          On: families who pay for {monthName(settings.launch_exception_month)} by <strong>{deadline(settings.launch_exception_cutoff_at)}</strong> also get its printed mailing, on top of their regular one. Every other month follows the rule.{' '}
-          <button type="button" className="underline" onClick={() => confirm('Turn the launch exception off? Payments after this won’t add its month’s mailing.') && save({ launch_exception_month: null, launch_exception_cutoff_at: null })}>Turn off</button>
+          On: families who pay for {monthName(settings.launch_exception_month)} by <strong>{deadline(settings.launch_exception_cutoff_at)}</strong> get that month’s printed resource in its regular (founding) batch instead of a catch-up batch. It never adds a mailing; every other month follows the rule.{' '}
+          <button type="button" className="underline" onClick={() => confirm('Turn the launch exception off? That month’s regular batch then closes at the normal cutoff (already passed).') && save({ launch_exception_month: null, launch_exception_cutoff_at: null })}>Turn off</button>
         </p>
       ) : (
         <p className="mt-2 text-[0.95rem]">Off. Every month follows the rule.</p>

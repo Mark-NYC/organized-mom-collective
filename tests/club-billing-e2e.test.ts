@@ -111,9 +111,9 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(uid('mia@example.com')).toMatch(/^[0-9a-f-]{36}$/);
     expect(sql(`select email_confirmed_at is null from auth.users where email = 'mia@example.com'`)).toBe('t');
     expect(months('mia@example.com')).toBe('2026-11');
-    // Paid Nov 2, before December's list closes (Sunday Nov 8): December's mailing, and November's by the launch exception.
-    expect(months('mia@example.com', 'physical')).toBe('2026-11,2026-12');
-    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('mia@example.com')}'`)).toBe('2');
+    // Paid Nov 2, before the Nov 8 founding deadline: November's printed copy in the regular batch, plus her welcome print.
+    expect(months('mia@example.com', 'physical')).toBe('2026-11');
+    expect(sql(`select string_agg(fulfillment_type || ':' || late, ',' order by fulfillment_type) from public.club_fulfillment_orders where user_id = '${uid('mia@example.com')}'`)).toBe('monthly_resource:false,welcome_vision:false');
     expect(sql(`select line1 from public.club_mailing_addresses where user_id = '${uid('mia@example.com')}'`)).toBe('12 Oak Ln');
     expect(sql(`select status || ':' || plan from public.club_subscriptions where stripe_subscription_id = '${monthlySub}'`)).toBe('active:monthly');
     expect(sql(`select (select household_id from public.club_customers c where c.user_id = h.owner_user_id) = h.id from public.club_households h where owner_user_id = '${uid('mia@example.com')}'`)).toBe('t');
@@ -137,7 +137,9 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(me.j).toMatchObject({ access: true, plan: 'monthly', onboarded: false, member: true });
     const nov = me.j.months.find((m: any) => m.month === '2026-11-01');
     expect(nov).toMatchObject({ state: 'available', mailing: { readiness: 'needs_profile', late: false } });
-    expect(me.j.months.find((m: any) => m.month === '2026-12-01').state).toBe('locked');
+    expect(me.j.months.find((m: any) => m.month === '2026-12-01')).toBeUndefined(); // only months she bought
+    expect(me.j.welcome).toMatchObject({ readiness: 'needs_vision', approved: false, satisfies_month: null });
+    expect(me.j.next.month).toBe('2026-12-01');
   });
 
   it('an existing member is refused a second checkout, signed in or not', async () => {
@@ -195,7 +197,8 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     annualSub = [...stripe.subs.values()].find((s) => s.metadata.email === 'ana@example.com')!.id;
     expect(months('ana@example.com').split(',')).toHaveLength(12);
     expect(months('ana@example.com').split(',')[0]).toBe('2027-01');
-    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('ana@example.com')}'`)).toBe('12');
+    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('ana@example.com')}' and fulfillment_type = 'monthly_resource'`)).toBe('12');
+    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('ana@example.com')}' and fulfillment_type = 'welcome_vision'`)).toBe('1');
     expect(sql(`select count(*) from public.club_mailing_addresses where user_id = '${uid('ana@example.com')}'`)).toBe('0');
     expect(mails('ana@example.com', /Welcome/)[0].text).toContain('twelve monthly resources');
   });
@@ -214,6 +217,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
 
   it('a chargeback revokes its month and the subscription’s access', async () => {
     const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'dee@example.com' });
+    expect(r.body).toMatchObject({ url: expect.any(String) });
     const sid = [...stripe.sessions.values()].find((s) => s.url === r.body.url)!.id as string;
     await deliver(stripe.completeCheckout(sid, { email: 'dee@example.com' }));
     const sub = [...stripe.subs.values()].find((s) => s.metadata.email === 'dee@example.com')!;
@@ -271,9 +275,9 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   it('mailing queue: one order per paid delivery month, readiness tracked, manual review to mailed', async () => {
     const orders = sql(`select count(*) from public.club_fulfillment_orders where resource_month = '2026-12-01' and status <> 'canceled'`);
     expect(Number(orders)).toBe(1); // Mia's paid December
-    // Every payment earns a month whose list was still open: nothing from an invoice is late.
-    const late = sql(`select string_agg(distinct late::text, ',') from public.club_fulfillment_orders where user_id = '${uid('mia.new@example.com')}'`);
-    expect(late).toBe('false');
+    // November paid before the founding deadline: regular batch. Each renewal is paid after its month's list closed: catch-up.
+    const batches = sql(`select string_agg(to_char(resource_month, 'YYYY-MM') || ':' || late, ',' order by resource_month) from public.club_fulfillment_orders where user_id = '${uid('mia.new@example.com')}' and fulfillment_type = 'monthly_resource'`);
+    expect(batches).toBe('2026-11:false,2026-12:true,2027-01:true');
   });
 
   it('emails batches go once per member: resource ready, profile reminder', async () => {
@@ -284,6 +288,37 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(mails('mia.new@example.com', /December 2026 is ready/)).toHaveLength(1);
     expect((await post(admin, { action: 'send_emails', kind: 'resource_ready' }, 'tok_owner')).body.error).toBe('invalid_month');
     expect(sql(`select count(*) from public.admin_audit_log where action like 'club.%'`)).not.toBe('0');
+  });
+
+  it('December first-time member: the welcome print is her December; personalize, approve twice, retries change nothing', async () => {
+    stripe.clock = Math.floor(Date.UTC(2026, 11, 5, 15) / 1000);
+    const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'noel@example.com' });
+    expect(r.body).toMatchObject({ url: expect.any(String) });
+    const sid = [...stripe.sessions.values()].find((s) => s.url === r.body.url)!.id as string;
+    const events = stripe.completeCheckout(sid, { email: 'noel@example.com' });
+    await deliver(events, { times: 2 });
+    const noel = uid('noel@example.com');
+    expect(sql(`select string_agg(to_char(resource_month, 'YYYY-MM') || ':' || kind || ':' || fulfilled_by, ',' order by kind) from public.club_entitlements where user_id = '${noel}' and revoked_at is null`))
+      .toBe('2026-12:digital:welcome_vision,2026-12:physical:welcome_vision');
+    expect(sql(`select string_agg(fulfillment_type || ':' || coalesce(satisfies_month::text, '-'), ',') from public.club_fulfillment_orders where user_id = '${noel}'`))
+      .toBe('welcome_vision:2026-12-01'); // one order, no Christmas mailing
+    expect(mails('noel@example.com', /Welcome/)).toHaveLength(1);
+    expect(mails('noel@example.com', /Welcome/)[0].text).toContain('it’s your December resource');
+    signIn('noel@example.com');
+    expect(() => asMember('noel@example.com', `select public.club_resource_get('2026-12-christmas-mission') as j`)).toThrow(/not_found/);
+    expect(() => asMember('noel@example.com', `select public.club_welcome_approve() as j`)).toThrow(/incomplete/);
+    asMember('noel@example.com', `select public.club_welcome_save('{"family_name":"The Noels","value":"Wonder"}') as j`);
+    const a1 = asMember<{ j: { approved: boolean; readiness: string } }>('noel@example.com', 'select public.club_welcome_approve() as j');
+    const a2 = asMember<{ j: { approved: boolean } }>('noel@example.com', 'select public.club_welcome_approve() as j');
+    expect(a1.j.approved && a2.j.approved).toBe(true);
+    expect(a1.j.readiness).toBe('needs_pdf'); // Checkout gave her address; the welcome print doesn't wait for a cutoff
+    await deliver(events); // a late retry of every event
+    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${noel}'`)).toBe('1');
+    // Her January payment: January's resource, its catch-up batch (January's list closed Sunday Dec 13).
+    const jan = stripe.renew([...stripe.subs.values()].find((s) => s.metadata.email === 'noel@example.com')!.id);
+    await deliver(jan.events);
+    expect(sql(`select string_agg(to_char(resource_month, 'YYYY-MM') || ':' || fulfillment_type || ':' || late, ',' order by resource_month, fulfillment_type) from public.club_fulfillment_orders where user_id = '${noel}'`))
+      .toBe('2026-12:welcome_vision:false,2027-01:monthly_resource:true');
   });
 });
 

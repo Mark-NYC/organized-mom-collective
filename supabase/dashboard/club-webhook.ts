@@ -270,13 +270,15 @@ function renderClubEmail(kind, to, d, siteUrl) {
         eyebrow: d.plan === "annual" ? "Annual membership" : "Monthly membership",
         title: "Welcome. You’re in.",
         blocks: [
-          p(d.plan === "annual" ? "Thank you for joining for the year. Your full collection of twelve monthly resources is unlocked in your account, and a printed mailing comes each month." : `Thank you for joining. ${d.monthLabel ? `Your ${d.monthLabel} resource is unlocked,` : "Your first month is unlocked,"} and each paid month adds the next one, with a printed mailing.`),
+          p(d.plan === "annual" ? "Thank you for joining for the year. Your twelve monthly resources are in your account, with a printed mailing each month." : "Thank you for joining. Each paid month brings that month’s resource, prepared for your family, with a printed copy in the mail."),
+          // A December first month is fulfilled by the welcome print (club_invoice_apply), not the Christmas resource.
+          p(d.monthLabel?.startsWith("December") ? `Your first gift is a personalized Family Vision print for your wall. Since you joined in ${d.monthLabel}, it’s your December resource. Choose your family’s word, approve it, and we’ll print and mail it right away.` : "Your first gift is a personalized Family Vision print for your wall. Choose your family’s word, approve it, and we’ll print and mail it right away."),
           panel(C.sage, C.sageRule, [
             panelTitle("Two minutes to get started"),
             steps([
               "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
               "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
-              "Check your mailing address, then open this month’s resource."
+              "Check your mailing address, then personalize your Family Vision print."
             ]),
             button("Sign in to your account", login)
           ]),

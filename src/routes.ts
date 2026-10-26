@@ -75,6 +75,7 @@ export const routes = {
   clubLogin: '/club/login',
   clubWelcome: '/club/welcome',
   clubDashboard: '/club/dashboard',
+  clubFamilyVision: '/club/family-vision',
   /** A member's personalized month (src/data/club/resources.ts). */
   clubResource: (slug: string) => `/club/resources/${slug}`,
   adminClub: '/admin/club',

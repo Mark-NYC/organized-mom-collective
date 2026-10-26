@@ -1,0 +1,425 @@
+---
+/**
+ * The Family Vision welcome print: family name, one watercolor, one value word, a framed live preview and a
+ * letter-size print. One design for two pages: the public design preview (/club/family-vision-preview) and the
+ * member's own welcome print (/club/family-vision, member: true), where FamilyVisionAccess sets her saved choices
+ * (omc:vision-set), locks it once it's approved for print (omc:vision-lock), and saves what she changes
+ * (omc:vision-change). The choices are the database's list (public.club_vision_valid).
+ */
+interface Props { member?: boolean }
+const { member = false } = Astro.props;
+// Bundle illustrations from the repository assets directory into the published site.
+const visionModules = import.meta.glob('../../../assets/icons/ofc/vision/*.{jpeg,jpg}', { eager: true, query: '?url', import: 'default' });
+const visionImages: Record<string, string> = Object.fromEntries(Object.entries(visionModules).map(([path, url]) => [path.split('/').pop()!, url as string]));
+---
+<main class="fvp">
+  {!member && <header class="fvp-top"><a href="/club">← Organized Family Club</a><span>WELCOME PRINT · DESIGN PREVIEW</span></header>}
+
+  <div class="fvp-grid">
+    <section class="fvp-editor" aria-labelledby="personalize-heading">
+  <section class="fvp-intro"><p class="eyebrow">ORGANIZED FAMILY CLUB · WELCOME PRINT</p><h1>Our Family <em>Vision.</em></h1><p>One watercolor and one word that feels like your family.</p></section>
+      <div class="fvp-editor-summary"><span class="eyebrow">YOUR PREPARED FAMILY PRINT</span><strong>Ready for your wall.</strong><p class="fvp-summary-explainer">Just your family name, one illustration, and one word.</p><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Change name or artwork</button></div>
+      <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
+      <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose one watercolor.</p>
+      <div class="fvp-step"><label for="fvp-name"><b>01</b> What do you call your family?</label><p>It'll appear on the finished print.</p><input id="fvp-name" maxlength="45" autocomplete="off" value={member ? "" : "The Johnson Family"} placeholder="The Johnson Family" /></div>
+      <fieldset class="fvp-step"><legend><b>02</b> Choose one family value</legend><p>Choose the one illustration and value that best represents your family.</p><div class="fvp-values" id="fvp-values"><button type="button" data-value="Love" class="fvp-value selected" aria-pressed="true"><img src={visionImages["love-vision.jpeg"]} alt="" loading="lazy"><span>Love</span></button><button type="button" data-value="Faith" class="fvp-value" aria-pressed="false"><img src={visionImages["faith-vision.jpeg"]} alt="" loading="lazy"><span>Faith</span></button><button type="button" data-value="Joy" class="fvp-value" aria-pressed="false"><img src={visionImages["joy-vision.jpeg"]} alt="" loading="lazy"><span>Joy</span></button><button type="button" data-value="Peace" class="fvp-value" aria-pressed="false"><img src={visionImages["peace-vision.jpeg"]} alt="" loading="lazy"><span>Peace</span></button><button type="button" data-value="Adventure" class="fvp-value" aria-pressed="false"><img src={visionImages["adventure-vision.jpeg"]} alt="" loading="lazy"><span>Adventure</span></button><button type="button" data-value="Kindness" class="fvp-value" aria-pressed="false"><img src={visionImages["kindness-vision.jpeg"]} alt="" loading="lazy"><span>Kindness</span></button><button type="button" data-value="Courage" class="fvp-value" aria-pressed="false"><img src={visionImages["courage-vision.jpeg"]} alt="" loading="lazy"><span>Courage</span></button><button type="button" data-value="Gratitude" class="fvp-value" aria-pressed="false"><img src={visionImages["gratitude-vision.jpeg"]} alt="" loading="lazy"><span>Gratitude</span></button><button type="button" data-value="Togetherness" class="fvp-value" aria-pressed="false"><img src={visionImages["togetherness.jpg"]} alt="" loading="lazy"><span>Togetherness</span></button><button type="button" data-value="Hospitality" class="fvp-value" aria-pressed="false"><img src={visionImages["hospitality-vision.jpeg"]} alt="" loading="lazy"><span>Hospitality</span></button><button type="button" data-value="Growth" class="fvp-value" aria-pressed="false"><img src={visionImages["growth-vision.jpeg"]} alt="" loading="lazy"><span>Growth</span></button><button type="button" data-value="Creativity" class="fvp-value" aria-pressed="false"><img src={visionImages["creativity-vision.jpeg"]} alt="" loading="lazy"><span>Creativity</span></button><button type="button" data-value="Generosity" class="fvp-value" aria-pressed="false"><img src={visionImages["generosity-vision.jpeg"]} alt="" loading="lazy"><span>Generosity</span></button><button type="button" data-value="Wonder" class="fvp-value" aria-pressed="false"><img src={visionImages["wonder-vision.jpg"]} alt="" loading="lazy"><span>Wonder</span></button><button type="button" data-value="Perseverance" class="fvp-value" aria-pressed="false"><img src={visionImages["perseverance-vision.jpeg"]} alt="" loading="lazy"><span>Perseverance</span></button><button type="button" data-value="Rest" class="fvp-value" aria-pressed="false"><img src={visionImages["rest-vision.jpg"]} alt="" loading="lazy"><span>Rest</span></button><button type="button" data-value="Hope" class="fvp-value" aria-pressed="false"><img src={visionImages["hope-vision.jpeg"]} alt="" loading="lazy"><span>Hope</span></button><button type="button" data-value="Home" class="fvp-value" aria-pressed="false"><img src={visionImages["home-vision.jpg"]} alt="" loading="lazy"><span>Home</span></button><button type="button" data-value="Service" class="fvp-value" aria-pressed="false"><img src={visionImages["service-vision.jpeg"]} alt="" loading="lazy"><span>Service</span></button><button type="button" data-value="Playfulness" class="fvp-value" aria-pressed="false"><img src={visionImages["playfulness-vision.jpg"]} alt="" loading="lazy"><span>Playfulness</span></button></div><p class="fvp-selection-hint" id="fvp-selection-hint" aria-live="polite">Love selected. Pick another to replace it.</p></fieldset>
+      <div class="fvp-dialog-done"><button type="button" id="fvp-done-editor">Done · See my print</button></div></dialog>
+      <div class="fvp-ready"><strong>Your print is ready.</strong><p>Your design updates automatically. See it framed or print the finished artwork.</p><button type="button" id="fvp-print">Print / Save PDF</button>{!member && <button type="button" class="fvp-reset" id="fvp-reset">Start over</button>}</div>
+    </section>
+    <section class="fvp-visual" aria-label="Live family vision print preview"><button type="button" class="fvp-floating-edit" id="fvp-floating-edit">✎ Customize your print</button>
+      <div class="fvp-visual-head"><div><p class="eyebrow">MADE FOR YOUR HOME</p><h2>Made for your home.</h2></div><span>LIVE PREVIEW</span></div>
+      <div class="fvp-scenes" role="group" aria-label="Choose display scene"><button type="button" class="selected" data-scene="wall" aria-pressed="true">On the wall</button><button type="button" data-scene="paper" aria-pressed="false">Just the print</button></div>
+      <div class="fvp-room wall fvp-photo-room" id="fvp-room">
+
+        <div class="fvp-frame"><div class="fvp-mat"><article class="fvp-art" id="fvp-art">
+          <div id="fvp-symbol" class="fvp-symbol" aria-hidden="true"></div>
+          <p class="fvp-word" id="fvp-art-word">Love</p>
+          <h3 id="fvp-art-name">The Johnson Family</h3>
+        </article></div></div>
+      </div>
+      <p class="fvp-caption" id="fvp-caption">See your personalized family artwork in a real wooden frame. Frame and decor are not included.</p>
+      <div class="fvp-note"><span>✉</span><div><strong>Something lovely for your mailbox.</strong><p>{member ? "We print your finished family vision on quality paper and mail it to you as your welcome keepsake, as soon as you approve it. It doesn’t wait for the monthly mailing." : "The plan is to print your finished family vision on quality paper and send it as a welcome keepsake. This page is a design prototype; ordering and mailing aren't active yet."}</p></div></div>
+    </section>
+  </div>
+</main>
+<style is:global>
+.fvp,.fvp *{box-sizing:border-box}.fvp{font-family:Montserrat,Arial,sans-serif;color:#454a43;max-width:1510px;margin:auto;padding:24px clamp(16px,4vw,60px) 90px}.fvp-top{display:flex;justify-content:space-between;gap:15px;align-items:center;border-bottom:1px solid #e2e5df;padding-bottom:20px;font-size:11px;color:#697767;letter-spacing:.08em}.fvp-top a{color:#526b50;text-decoration:none}.fvp-intro{max-width:740px;margin:48px 0}.fvp .eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:#78906f}.fvp-intro h1{font:400 clamp(44px,5vw,70px)/1.08 Georgia,serif;margin:14px 0;color:#303a31}.fvp-intro h1 em{color:#71896a}.fvp-intro>p:last-child{font-size:16px;line-height:1.8;max-width:580px}.fvp-grid{display:grid;grid-template-columns:minmax(295px,390px) minmax(0,1fr);gap:clamp(24px,5vw,85px);align-items:start}.fvp-editor{border-top:7px solid #d4dfc4;padding-top:18px}.fvp-editor>h2{font:400 31px Georgia,serif;margin:10px 0}.fvp-editor>p{line-height:1.7;font-size:13px;color:#667164;margin-bottom:28px}.fvp-step{display:block;border:0;border-top:1px solid #dde3d9;margin:0;padding:24px 0;min-width:0}.fvp-step>label,.fvp-step>legend{font:400 21px Georgia,serif;color:#3e4e3e;display:flex;gap:10px;align-items:center;padding:0}.fvp-step b{font:600 12px Montserrat,Arial,sans-serif;background:#d4dfc4;color:#435b3f;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.fvp-step>p{font-size:12px;color:#778274;line-height:1.6;margin:10px 0 16px}.fvp-step input{display:block;width:100%;border:1px solid #bbc8b7;background:#fff;padding:14px;font:14px Montserrat,Arial,sans-serif;min-height:50px;border-radius:4px;color:#344333}.fvp-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.fvp-choices button,.fvp-scenes button{font:600 12px Montserrat,Arial,sans-serif;border:1px solid #cbd6c6;background:#fff;min-height:45px;padding:10px;color:#4a5847;cursor:pointer}.fvp-choices .selected,.fvp-scenes .selected{background:#657e60;border-color:#657e60;color:white}.fvp-icons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.fvp-icons button{display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:center;border:1px solid #cbd6c6;background:#fff;padding:10px 2px;font-size:10px;color:#4a5847;cursor:pointer;min-width:0}.fvp-icons button span{font:32px Georgia,serif}.fvp-icons .selected{border:2px solid #657e60;background:#f2f7ee}.fvp button:focus-visible,.fvp input:focus-visible{outline:3px solid #8ba581;outline-offset:3px}.fvp-ready{background:#edf3e9;padding:22px;margin-top:10px}.fvp-ready strong{font:23px Georgia,serif;color:#466143}.fvp-ready p{font-size:12px;line-height:1.7}.fvp-ready button#fvp-print{width:100%;min-height:47px;background:#4d6548;color:white;border:0;font-size:12px;font-weight:700;cursor:pointer}.fvp-reset{display:block;margin:12px auto 0;border:0;background:none;text-decoration:underline;color:#53664e;cursor:pointer;font-size:12px}.fvp-visual{min-width:0}.fvp-visual-head{display:flex;justify-content:space-between;gap:15px;align-items:end}.fvp-visual-head h2{font:400 clamp(24px,3vw,34px) Georgia,serif;margin:10px 0 21px}.fvp-visual-head>span{font-size:10px;letter-spacing:.12em;color:#7a8e75;margin-bottom:23px}.fvp-scenes{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}.fvp-scenes button{min-height:38px;padding:8px 14px}.fvp-room{height:min(65vw,690px);min-height:460px;max-height:690px;position:relative;overflow:hidden;background:linear-gradient(110deg,#eae6df,#f6f0e9 57%,#e8e1d7);display:flex;align-items:center;justify-content:center}.fvp-wainscot{position:absolute;bottom:0;height:35%;width:100%;border-top:3px solid #d4c7b6;background:linear-gradient(#e0d6c9,#eee5da)}.fvp-table{position:absolute;bottom:0;width:100%;height:17%;border-top:13px solid #b9926d;background:linear-gradient(90deg,#a87e5c,#d3b08a,#ab8160);box-shadow:0 -8px 20px #66543b20}.fvp-books{position:absolute;bottom:100%;left:8%;width:21%;height:15px;background:#e7dfd2;box-shadow:0 -13px 0 #b6c4b0,0 -26px 0 #e9e0d4}.fvp-vase{position:absolute;bottom:100%;right:9%;height:90px;width:55px;border-radius:40% 40% 35% 35%;background:#d7c6b3}.fvp-vase i{position:absolute;bottom:85%;left:50%;height:85px;border-left:2px solid #6c8062;transform-origin:bottom}.fvp-vase i:nth-child(1){transform:rotate(-28deg)}.fvp-vase i:nth-child(2){transform:rotate(10deg)}.fvp-vase i:nth-child(3){transform:rotate(34deg)}.fvp-frame{position:relative;z-index:2;background:linear-gradient(125deg,#b18b60,#e6c39a 36%,#a27449 70%,#c69d6f);padding:11px;box-shadow:15px 20px 28px #31281e3b,-3px -2px 10px #fff9;max-height:86%;aspect-ratio:8.5/11;display:flex}.fvp-mat{background:#faf6ee;padding:7%;box-shadow:inset 0 0 0 2px #d4c6b5;flex:1;min-width:0;display:flex}.fvp-art{background:#fffdf8;border:1px solid #e7dfd2;width:100%;height:100%;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:flex-start;padding:8% 7% 5%;color:#443e36;overflow:hidden}.fvp-art-top{font-size:clamp(6px,.75vw,11px);letter-spacing:.35em}.fvp-art-rule{height:1px;width:19%;background:#ad9d89;margin:5% 0 6%}.fvp-symbol{height:19%;width:42%;display:flex;align-items:center;justify-content:center;color:#6b8667}.fvp-symbol svg{width:100%;height:100%}.fvp-art h3{font:400 clamp(15px,2.4vw,35px)/1.1 Georgia,serif;overflow-wrap:anywhere;margin:4% 0;max-width:100%}.fvp-art-tiny-rule{width:15%;height:1px;background:#bcaa95;margin:3% 0 5%}.fvp-we{font-size:clamp(6px,.7vw,10px);letter-spacing:.28em;margin:0}.fvp-word{font:italic clamp(18px,3vw,42px)/1.12 Georgia,serif;margin:4% 0;color:#536a4e}.fvp-phrase{font:clamp(9px,1.2vw,17px)/1.5 Georgia,serif;max-width:91%;margin:3% 0}.fvp-art-leaf{margin:auto 0 2%;font:clamp(16px,2.5vw,33px) Georgia,serif;color:#93a58b}.fvp-art-footer{font-size:clamp(5px,.58vw,8px);letter-spacing:.22em;margin:0}.fvp-caption{font-size:11px;line-height:1.6;color:#798374;margin:12px 0 24px}.fvp-note{border-top:1px solid #d9e3d3;border-bottom:1px solid #d9e3d3;padding:20px 0;display:flex;gap:17px}.fvp-note>span{font-size:32px;color:#849a7f}.fvp-note strong{font:21px Georgia,serif}.fvp-note p{font-size:12px;line-height:1.7;color:#667164}.fvp-room.table{align-items:flex-end}.fvp-room.table .fvp-frame{max-height:72%;margin-bottom:14%;transform:rotate(-2deg)}.fvp-room.table .fvp-table{height:21%}.fvp-room.paper{background:#edece8}.fvp-room.paper .fvp-frame{background:#fffdf8;padding:0;box-shadow:0 12px 32px #0002;max-height:91%}.fvp-room.paper .fvp-mat{padding:0;box-shadow:none}.fvp-room.paper .fvp-art{border:none}.fvp-room.paper .fvp-table,.fvp-room.paper .fvp-wainscot{display:none}
+@media(max-width:850px){.fvp-grid{grid-template-columns:1fr}.fvp-intro{margin:30px 0}.fvp-visual{margin-top:10px}.fvp-room{height:72vw;min-height:420px}.fvp-art h3{font-size:clamp(17px,4.3vw,34px)}.fvp-word{font-size:clamp(22px,5vw,39px)}.fvp-phrase{font-size:clamp(11px,2vw,17px)}.fvp-art-top{font-size:9px}.fvp-we{font-size:9px}.fvp-art-footer{font-size:7px}}
+@media(max-width:490px){.fvp-room{min-height:370px;height:103vw}.fvp-frame{max-height:84%}.fvp-art h3{font-size:20px}.fvp-phrase{font-size:10px}.fvp-word{font-size:23px}.fvp-top>span{font-size:9px}.fvp-visual-head>span{display:none}}
+@media print{@page{size:letter portrait;margin:0}body{margin:0!important;background:white!important}.fvp-top,.fvp-intro,.fvp-editor,.fvp-visual-head,.fvp-scenes,.fvp-caption,.fvp-note,.fvp-table,.fvp-wainscot{display:none!important}.fvp,.fvp-grid,.fvp-visual,.fvp-room,.fvp-mat{display:block!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:white!important;border:0!important;box-shadow:none!important}.fvp-frame{display:block!important;position:static!important;width:8.5in!important;height:11in!important;max-height:none!important;aspect-ratio:auto!important;padding:0!important;margin:0!important;transform:none!important;background:white!important;box-shadow:none!important}.fvp-art{width:100%!important;height:100%!important;padding:1.1in .9in .8in!important;border:0!important}.fvp-art-top{font-size:13px!important}.fvp-art-rule{margin:6% 0}.fvp-symbol{height:20%}.fvp-art h3{font-size:47px!important}.fvp-we{font-size:12px!important}.fvp-word{font-size:52px!important}.fvp-phrase{font-size:24px!important}.fvp-art-leaf{font-size:42px!important}.fvp-art-footer{font-size:10px!important}}
+</style>
+<style is:global>
+.fvp{background:#fbfaf6}.fvp-grid{grid-template-columns:minmax(310px,420px) minmax(0,1fr);gap:clamp(25px,4vw,65px)}
+.fvp-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.fvp-value{border:1px solid #d5d9cf;background:#fffdf9;border-radius:5px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;cursor:pointer;color:#43513f;font:600 11px Montserrat,Arial,sans-serif}
+.fvp-value img{width:100%;max-width:98px;aspect-ratio:1;object-fit:contain;border-radius:3px}
+.fvp-value span{text-align:center;overflow-wrap:anywhere}
+.fvp-value.selected{background:#eef3e8;border:2px solid #657e60;padding:7px 5px}
+.fvp-selection-hint{font-size:11px!important;color:#586f55!important}
+.fvp-symbol{height:30%;width:82%;gap:8px;flex-shrink:0;margin-top:1%}
+.fvp-symbol img{height:100%;max-width:100%;min-width:0;object-fit:contain;mix-blend-mode:multiply}
+.fvp-symbol.two img{width:48%}
+.fvp-word{font-size:clamp(18px,2.5vw,38px)}.fvp-phrase{font-size:clamp(9px,1.05vw,15px)}
+@media(max-width:850px){.fvp-grid{grid-template-columns:1fr}.fvp-visual{order:-1}.fvp-symbol{height:29%}.fvp-word{font-size:clamp(21px,4.7vw,38px)}}
+@media(max-width:490px){.fvp-room{min-height:390px}.fvp-symbol{height:27%}.fvp-word{font-size:20px}}
+@media print{.fvp-symbol{height:31%!important;width:80%!important;gap:.15in!important}.fvp-symbol img{max-width:100%!important;mix-blend-mode:normal!important}.fvp-symbol.two img{width:48%!important}.fvp-word{font-size:43px!important}.fvp-phrase{font-size:21px!important}}
+.fvp-photo-room{aspect-ratio:1264/848;height:auto;min-height:0;max-height:none;display:block;background:#eee9df url('/images/club/family-vision-frame.webp') center/100% 100% no-repeat;container-type:inline-size}
+.fvp-photo-room .fvp-frame{position:absolute;left:34.02%;top:16.85%;width:32.44%;height:65.10%;max-height:none;aspect-ratio:auto;padding:0;box-shadow:none;background:transparent;display:flex}
+.fvp-photo-room .fvp-mat{padding:0;box-shadow:none;background:#fff;min-height:0}
+.fvp-photo-room .fvp-art{border:0;padding:6% 6% 4%;background:#fff;min-height:0}
+.fvp-photo-room .fvp-art h3{font-size:clamp(11px,2.4cqw,31px)}
+.fvp-photo-room .fvp-word{font-size:clamp(12px,2.45cqw,34px)}
+.fvp-photo-room .fvp-phrase{font-size:clamp(7px,1.08cqw,15px)}
+.fvp-photo-room .fvp-art-top{font-size:clamp(5px,.7cqw,10px)}
+.fvp-photo-room .fvp-we{font-size:clamp(5px,.65cqw,10px)}
+.fvp-photo-room .fvp-art-footer{font-size:clamp(4px,.51cqw,7px)}
+.fvp-photo-room .fvp-symbol{height:29%;margin-top:0}
+.fvp-photo-room .fvp-art-leaf{font-size:clamp(12px,2cqw,27px)}
+.fvp-room.paper{aspect-ratio:auto;height:min(65vw,690px);min-height:460px;max-height:690px;display:flex}
+@media(max-width:850px){.fvp-photo-room{height:auto;min-height:0}.fvp-room.paper{height:72vw;min-height:420px}}
+@media(max-width:490px){.fvp-photo-room{height:auto;min-height:0}.fvp-room.paper{height:103vw;min-height:390px}}
+@media print{.fvp-photo-room{background:white!important;aspect-ratio:auto!important;container-type:normal!important}.fvp-photo-room .fvp-frame{position:static!important;left:auto!important;top:auto!important;width:8.5in!important;height:11in!important}.fvp-photo-room .fvp-art{padding:1.1in .9in .8in!important}.fvp-photo-room .fvp-art h3{font-size:47px!important}.fvp-photo-room .fvp-word{font-size:43px!important}.fvp-photo-room .fvp-phrase{font-size:21px!important}.fvp-photo-room .fvp-art-top{font-size:13px!important}.fvp-photo-room .fvp-we{font-size:12px!important}.fvp-photo-room .fvp-art-footer{font-size:10px!important}.fvp-photo-room .fvp-art-leaf{font-size:42px!important}}
+
+.fvp-floating-edit{position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;display:inline-flex;align-items:center;gap:9px;min-height:50px;padding:12px 19px;border:0;border-radius:999px;background:#454545;color:white;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+@media(max-width:1100px){.fvp-floating-edit{position:sticky;top:8px;float:right;margin-bottom:10px;right:auto;bottom:auto;z-index:10}}
+@media(max-width:700px){.fvp-floating-edit{position:fixed;bottom:76px;right:15px;top:auto;min-height:42px;padding:10px 14px;font-size:11px}}
+@media print{.fvp-floating-edit{display:none!important}}
+/* Match the June prepared-plan workspace: small fixed editing sidebar and large scrollable preview. */
+.fvp{max-width:none;margin:0;padding:0;background:#faf9f7}
+.fvp-top{padding:12px clamp(18px,3vw,45px);background:#fff;border-bottom:1px solid #e4e3df;min-height:49px}
+.fvp-grid{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+.fvp-editor{display:flex;flex-direction:column;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:17px clamp(17px,2vw,26px);min-width:0}
+.fvp-intro{margin:0 0 15px;max-width:none}
+.fvp-intro h1{font-size:clamp(29px,2.7vw,38px);margin:9px 0}
+.fvp-intro>p:last-child{font-size:12px;line-height:1.6;margin:0}
+.fvp-editor-summary{padding:17px;background:white;border:1px solid #e5e8e0;flex:1;min-height:0}
+.fvp-editor-summary strong{display:block;font:400 25px Georgia,serif;color:#53694e;margin:16px 0 8px;overflow-wrap:anywhere}
+.fvp-editor-summary>p{font:italic 19px Georgia,serif;color:#708767;margin:0 0 18px}
+.fvp-edit-trigger{width:100%;min-height:45px;border:1px solid #b5c6ad;background:#eff5ea;color:#4b6246;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;border-radius:4px}
+.fvp-ready{margin-top:auto;padding:15px 0 0;background:transparent}
+.fvp-ready strong{font-size:19px}
+.fvp-ready p{margin:7px 0 12px}
+.fvp-ready button#fvp-print{min-height:46px}
+.fvp-visual{background:#f5f3f2;padding:18px clamp(18px,3vw,45px) 40px;min-width:0}
+.fvp-visual-head h2{margin:5px 0 13px;font-size:27px}
+.fvp-scenes{margin-bottom:12px}
+.fvp-room.paper{height:min(75vw,800px);max-height:800px;min-height:500px}
+.fvp-caption{margin:9px 0 17px}
+.fvp-note{padding:13px 0}
+.fvp-note strong{font-size:18px}
+.fvp-note p{margin:6px 0}
+.fvp-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(635px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;padding:24px;border:1px solid #dce2d7;border-radius:10px;background:#fff;box-shadow:0 20px 65px #0003;color:#454a43;font-family:Montserrat,Arial,sans-serif}
+.fvp-dialog::backdrop{background:rgba(33,40,36,.52)}
+.fvp-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.fvp-dialog-header button{display:grid;place-items:center;width:37px;height:37px;border:0;border-radius:50%;background:#eff2e9;color:#53694e;font-size:25px;cursor:pointer}
+.fvp-dialog>h2{font:400 29px Georgia,serif;color:#53694e;margin:8px 0}
+.fvp-dialog>p{font-size:13px;line-height:1.6}
+.fvp-dialog .fvp-values{grid-template-columns:repeat(4,minmax(0,1fr))}
+.fvp-dialog-done{position:sticky;bottom:-24px;padding:14px 0 0;background:white}
+.fvp-dialog-done button{width:100%;min-height:47px;border:0;background:#596e50;color:white;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+@media screen and (min-width:1101px){
+ html:has(.fvp),body:has(.fvp){height:100%;overflow:hidden}
+ .fvp{position:fixed;top:0;bottom:0;left:0;right:0;display:flex;flex-direction:column;overflow:hidden;height:100%}
+ .fvp-grid{flex:1;min-height:0}
+ .fvp-editor{height:100%;overflow-y:auto}
+ .fvp-visual{height:100%;overflow-y:auto;overscroll-behavior:contain}
+}
+@media screen and (max-width:1100px){
+ .fvp-grid{display:flex;flex-direction:column}
+ .fvp-visual{order:0;padding:20px 18px}
+ .fvp-editor{order:1;border:0;padding:20px}
+ .fvp-room.paper{height:85vw;min-height:440px}
+ .fvp-editor-summary{flex:auto}
+}
+@media screen and (max-width:700px){
+ .fvp{padding-bottom:92px}
+ .fvp-top{min-height:45px;padding:10px 16px}
+ .fvp-editor{padding:17px 18px}
+ .fvp-visual{padding:14px}
+ .fvp-visual-head h2{font-size:23px}
+ .fvp-ready{position:fixed;bottom:0;left:0;right:0;z-index:20;margin:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:#faf9f7;border-top:1px solid #dce2d7;box-shadow:0 -5px 20px #0001}
+ .fvp-ready>strong,.fvp-ready>p{display:none}
+ .fvp-ready button#fvp-print{min-height:45px}
+ .fvp-ready .fvp-reset{display:none}
+ .fvp-dialog{padding:17px;max-height:calc(100dvh - 25px)}
+ .fvp-dialog .fvp-values{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media print{
+ html:has(.fvp),body:has(.fvp){overflow:visible!important;height:auto!important}
+ .fvp{position:static!important;display:block!important;height:auto!important;overflow:visible!important;padding:0!important}
+ .fvp-grid{display:block!important}
+ .fvp-visual{display:block!important;height:auto!important;overflow:visible!important;padding:0!important}
+ .fvp-dialog,.fvp-editor-summary{display:none!important}
+ .fvp-room.paper{height:auto!important}
+}
+
+/* Unified Club proof styling: warm editorial, one watercolor, prepared-plan controls. */
+.fvp{color:#484941;background:#faf9f7}
+.fvp-top{border-bottom:1px solid #e5e0e1;background:#faf9f7}
+.fvp-editor{background:#faf9f7;border-right-color:#e5e0e1}
+.fvp-intro{border-top:5px solid #e8d8aa;padding-top:12px;margin-bottom:19px}
+.fvp-intro h1{font:400 clamp(28px,2.5vw,34px)/1.14 Georgia,serif;color:#657455;margin:10px 0}
+.fvp-intro h1 em{color:#87976e}
+.fvp-intro>p:last-child{color:#666c61;line-height:1.65}
+.fvp-editor-summary{padding:16px;background:#fff;border:1px solid #e5e8e0;flex:1 1 auto}
+.fvp-editor-summary>strong{font:400 24px Georgia,serif;color:#657455;margin:8px 0 9px}
+.fvp-editor-summary .fvp-summary-explainer{font:12px/1.65 Montserrat,Arial,sans-serif;color:#62675e;margin:0 0 14px}
+.fvp-summary-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-top:1px solid #e7eae4;padding:11px 0;font:12px/1.4 Montserrat,Arial,sans-serif}
+.fvp-summary-row span{color:#656c60}
+.fvp-summary-row b{color:#596e50;max-width:60%;text-align:right;overflow-wrap:anywhere}
+.fvp-edit-trigger{border:0;background:none;text-decoration:underline;text-underline-offset:3px;text-align:left;padding:10px 0;min-height:40px;font:700 12px Montserrat,Arial,sans-serif;color:#596e50}
+.fvp-ready{background:#faf9f7}
+.fvp-ready button#fvp-print{background:#596e50}
+.fvp-visual{background:#f5f3f2}
+.fvp-visual-head h2{font:400 27px Georgia,serif;color:#657455}
+.fvp-scenes button{min-height:40px;border:1px solid #d4ddd0;border-radius:4px;background:white;color:#596e50}
+.fvp-scenes button.selected{background:#596e50;border-color:#596e50;color:white}
+.fvp-room.paper{background:#eae9e6}
+.fvp-room.paper .fvp-frame{aspect-ratio:8.5/11;width:auto;height:96%;max-height:96%;border:1px solid #dfe1da;box-shadow:0 8px 26px #0002}
+.fvp-art{background:#fff}
+.fvp-symbol{width:78%;height:34%;margin-top:2%;flex-shrink:0}
+.fvp-symbol img{max-width:100%;width:100%;height:100%;object-fit:contain;mix-blend-mode:normal;background:#fff}
+.fvp-photo-room .fvp-symbol{height:38%;width:83%}
+.fvp-dialog .fvp-values{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fvp-value{background:#fff;border:1px solid #e0e4dc;padding:8px;border-radius:5px}
+.fvp-value img{background:#fff;border-radius:3px}
+.fvp-value.selected{background:#f4f8f0;border:2px solid #859c7a;padding:7px}
+.fvp-dialog>h2{color:#657455}
+.fvp-dialog-done button{background:#596e50}
+@media(max-width:700px){.fvp-dialog .fvp-values{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media print{
+ .fvp-symbol{width:75%!important;height:38%!important}
+ .fvp-symbol img{background:white!important}
+ .fvp-room.paper .fvp-frame{height:11in!important;width:8.5in!important;max-height:none!important}
+}
+
+.fvp-art{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:7%!important;background:#fff!important;padding:9% 7%!important}
+.fvp-art h3{flex:none!important;width:100%;margin:0!important;font:400 clamp(18px,2.3vw,34px)/1.15 Georgia,serif!important;color:#49463f}
+.fvp-art .fvp-symbol{flex:none!important;width:80%!important;height:40%!important;margin:0!important}
+.fvp-art .fvp-symbol img{width:100%;height:100%;object-fit:contain;background:white;mix-blend-mode:normal}
+.fvp-art .fvp-word{flex:none!important;margin:0!important;font:italic clamp(20px,2.5vw,38px)/1.12 Georgia,serif!important;color:#60785c}
+.fvp-photo-room .fvp-art{gap:7%!important;padding:8% 6%!important}
+.fvp-photo-room .fvp-art h3{font-size:clamp(10px,2.3cqw,31px)!important}
+.fvp-photo-room .fvp-art .fvp-symbol{height:41%!important;width:84%!important}
+.fvp-photo-room .fvp-art .fvp-word{font-size:clamp(12px,2.45cqw,34px)!important}
+@media print{
+ .fvp-art,.fvp-photo-room .fvp-art{padding:1in .75in!important;gap:.58in!important;justify-content:center!important}
+ .fvp-art h3,.fvp-photo-room .fvp-art h3{font-size:43px!important}
+ .fvp-art .fvp-symbol,.fvp-photo-room .fvp-art .fvp-symbol{height:3.65in!important;width:5.7in!important}
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{font-size:46px!important}
+}
+
+/* Family Vision: understated uppercase value, central watercolor, serif family signature. */
+.fvp-art .fvp-word{
+  order:0;
+  width:100%;
+  max-width:100%;
+  font-family:Montserrat,Arial,sans-serif!important;
+  font-style:normal!important;
+  font-weight:700!important;
+  font-size:clamp(10px,1.05vw,16px)!important;
+  line-height:1.4!important;
+  letter-spacing:clamp(2px,1.15vw,13px)!important;
+  text-transform:uppercase;
+  color:#929a8a!important;
+  text-align:center;
+  padding-left:clamp(2px,1.15vw,13px);
+  overflow-wrap:normal;
+}
+.fvp-art .fvp-symbol{order:1}
+.fvp-art h3{order:2}
+.fvp-photo-room .fvp-art .fvp-word{
+  font-size:clamp(5px,1.06cqw,14px)!important;
+  letter-spacing:clamp(1px,1.14cqw,12px)!important;
+  padding-left:clamp(1px,1.14cqw,12px);
+}
+@media print{
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{
+  font-family:Montserrat,Arial,sans-serif!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  font-size:17px!important;
+  letter-spacing:20px!important;
+  line-height:1.4!important;
+  padding-left:20px!important;
+  color:#929a8a!important;
+ }
+}
+
+/* Fine-art typography pass: small type, composed as one group around the original-size image. */
+.fvp-art,.fvp-photo-room .fvp-art{
+  gap:3.5%!important;
+  padding:11% 7%!important;
+}
+.fvp-art h3{
+  font-size:clamp(12px,1.52vw,23px)!important;
+  font-weight:400!important;
+  line-height:1.3!important;
+}
+.fvp-photo-room .fvp-art h3{
+  font-size:clamp(9px,1.55cqw,21px)!important;
+}
+.fvp-art .fvp-word{
+  font-size:clamp(8px,.77vw,12px)!important;
+  letter-spacing:clamp(2px,.65vw,8px)!important;
+  padding-left:clamp(2px,.65vw,8px)!important;
+  font-weight:700!important;
+}
+.fvp-photo-room .fvp-art .fvp-word{
+  font-size:clamp(5px,.74cqw,10px)!important;
+  letter-spacing:clamp(1px,.63cqw,8px)!important;
+  padding-left:clamp(1px,.63cqw,8px)!important;
+}
+@media print{
+ .fvp-art,.fvp-photo-room .fvp-art{
+   gap:.26in!important;
+   padding:1in .75in!important;
+ }
+ .fvp-art h3,.fvp-photo-room .fvp-art h3{font-size:29px!important}
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{
+   font-size:12px!important;
+   letter-spacing:8px!important;
+   padding-left:8px!important;
+ }
+}
+
+/* Family signature uses the same serif size, now italic. */
+.fvp-art h3,.fvp-photo-room .fvp-art h3{font-style:italic!important}
+
+/* Reduce value label by 40%, retaining spacing, weight and color. */
+.fvp-art .fvp-word{font-size:clamp(4.8px,.462vw,7.2px)!important}
+.fvp-photo-room .fvp-art .fvp-word{font-size:clamp(3px,.444cqw,6px)!important}
+@media print{
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{font-size:7.2px!important}
+}
+
+/* Artwork first, value beneath, then a full extra line before the family signature. */
+.fvp-art .fvp-symbol{order:0!important}
+.fvp-art .fvp-word{order:1!important}
+.fvp-art h3{order:2!important;margin-top:1.3em!important}
+.fvp-photo-room .fvp-art h3{margin-top:1.3em!important}
+@media print{
+ .fvp-art h3,.fvp-photo-room .fvp-art h3{margin-top:1.3em!important}
+}
+
+/* Gallery-print hierarchy: watercolor, expressive value, discreet family signature.
+   Preserve illustration geometry and its native print scale. */
+.fvp-art,.fvp-photo-room .fvp-art{
+ gap:2.5%!important;
+}
+.fvp-art .fvp-word{
+ order:1!important;
+ width:100%;
+ padding:0!important;
+ margin:0!important;
+ font-family:Georgia,'Times New Roman',serif!important;
+ font-style:italic!important;
+ font-weight:400!important;
+ text-transform:none!important;
+ letter-spacing:normal!important;
+ line-height:1.15!important;
+ font-size:clamp(22px,2.45vw,37px)!important;
+ color:#65785f!important;
+ overflow-wrap:break-word;
+}
+.fvp-art h3{
+ order:2!important;
+ width:100%;
+ padding:0!important;
+ margin:.75em 0 0!important;
+ font-family:Montserrat,Arial,sans-serif!important;
+ font-style:normal!important;
+ font-weight:600!important;
+ font-size:clamp(8px,.85vw,13px)!important;
+ line-height:1.55!important;
+ letter-spacing:clamp(1px,.21vw,3px)!important;
+ text-transform:uppercase!important;
+ color:#777a74!important;
+ overflow-wrap:anywhere;
+}
+.fvp-photo-room .fvp-art .fvp-word{
+ font-size:clamp(13px,2.35cqw,32px)!important;
+ letter-spacing:normal!important;
+ padding:0!important;
+}
+.fvp-photo-room .fvp-art h3{
+ font-size:clamp(6px,.84cqw,12px)!important;
+ letter-spacing:clamp(.5px,.20cqw,2.5px)!important;
+ margin:.75em 0 0!important;
+}
+.fvp-art[data-long-value="true"] .fvp-word{
+ font-size:clamp(19px,2.05vw,31px)!important;
+}
+.fvp-photo-room .fvp-art[data-long-value="true"] .fvp-word{
+ font-size:clamp(12px,1.95cqw,27px)!important;
+}
+@media print{
+ .fvp-art,.fvp-photo-room .fvp-art{gap:.17in!important}
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{
+  font-family:Georgia,'Times New Roman',serif!important;
+  font-style:italic!important;
+  font-weight:400!important;
+  text-transform:none!important;
+  letter-spacing:normal!important;
+  padding:0!important;
+  font-size:34px!important;
+  color:#65785f!important;
+ }
+ .fvp-art[data-long-value="true"] .fvp-word,
+ .fvp-photo-room .fvp-art[data-long-value="true"] .fvp-word{font-size:29px!important}
+ .fvp-art h3,.fvp-photo-room .fvp-art h3{
+  font-family:Montserrat,Arial,sans-serif!important;
+  font-style:normal!important;
+  font-weight:600!important;
+  text-transform:uppercase!important;
+  font-size:10px!important;
+  letter-spacing:3px!important;
+  line-height:1.5!important;
+  color:#777a74!important;
+  margin:.23in 0 0!important;
+ }
+}
+</style>
+<script>
+const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
+const byId=(id:string)=>document.getElementById(id);
+let selectedValue='Love';
+function render(){
+ const name=(byId('fvp-name') as HTMLInputElement).value.trim()||'Your Family';
+ byId('fvp-art-name')!.textContent=name;
+ byId('fvp-summary-name')!.textContent=name;
+ byId('fvp-summary-values')!.textContent=selectedValue;
+ byId('fvp-art-word')!.textContent=selectedValue;
+ byId('fvp-art')!.dataset.longValue=String(selectedValue.length>=12);
+ const symbol=byId('fvp-symbol')!;
+ const image=symbol.querySelector('img')??document.createElement('img');
+ image.src=valueImages[selectedValue];
+ image.alt='';
+ if(!image.parentElement)symbol.append(image);
+ for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]')){
+  const yes=b.dataset.value===selectedValue;
+  b.classList.toggle('selected',yes);
+  b.setAttribute('aria-pressed',String(yes));
+ }
+ byId('fvp-selection-hint')!.textContent=selectedValue+' selected. Choose a different image to replace it.';
+}
+
+const editorDialog=byId('fvp-dialog') as HTMLDialogElement;
+byId('fvp-open-editor')?.addEventListener('click',()=>editorDialog.showModal());
+byId('fvp-floating-edit')?.addEventListener('click',()=>editorDialog.showModal());
+byId('fvp-close-editor')?.addEventListener('click',()=>editorDialog.close());
+byId('fvp-done-editor')?.addEventListener('click',()=>editorDialog.close());
+editorDialog.addEventListener('click',(event)=>{if(event.target===editorDialog)editorDialog.close();});
+byId('fvp-name')?.addEventListener('input',render);
+for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]'))b.addEventListener('click',()=>{selectedValue=b.dataset.value!;render();});
+for(const b of document.querySelectorAll<HTMLButtonElement>('[data-scene]'))b.addEventListener('click',()=>{const scene=b.dataset.scene!;byId('fvp-room')!.className='fvp-room '+scene+(scene==='wall'?' fvp-photo-room':'');document.querySelectorAll('[data-scene]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});byId('fvp-caption')!.textContent=scene==='paper'?'Actual printable layout. US Letter, 8.5 × 11 inches.':'Styled wall preview. Frame and decor are not included.';});
+byId('fvp-print')?.addEventListener('click',()=>window.print());
+byId('fvp-reset')?.addEventListener('click',()=>{(byId('fvp-name') as HTMLInputElement).value='The Johnson Family';selectedValue='Love';document.querySelector<HTMLButtonElement>('[data-scene="wall"]')?.click();render();});
+// Member page: her saved choices in, her changes out, and no changes once it's approved for print.
+const changed=()=>window.dispatchEvent(new CustomEvent('omc:vision-change',{detail:{family_name:(byId('fvp-name') as HTMLInputElement).value.trim(),value:selectedValue}}));
+byId('fvp-name')?.addEventListener('input',changed);
+for(const b of document.querySelectorAll<HTMLButtonElement>('[data-value]'))b.addEventListener('click',changed);
+window.addEventListener('omc:vision-set',(e)=>{const d=(e as CustomEvent<{family_name?:string;value?:string}>).detail;if(d.family_name)(byId('fvp-name') as HTMLInputElement).value=d.family_name;if(d.value&&valueImages[d.value])selectedValue=d.value;render();});
+window.addEventListener('omc:vision-lock',(e)=>{const locked=(e as CustomEvent<{locked:boolean}>).detail.locked;for(const id of ['fvp-open-editor','fvp-floating-edit'])(byId(id) as HTMLButtonElement|null)?.toggleAttribute('hidden',locked);});
+render();
+</script>

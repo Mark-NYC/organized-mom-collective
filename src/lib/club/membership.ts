@@ -78,7 +78,8 @@ export async function changeEmail(email: string): Promise<'sent' | 'invalid' | '
 
 // ------------------------------------------------------------------ her membership
 
-export type MonthState = 'available' | 'preparing' | 'locked' | 'before_enrollment';
+/** A month she bought: its resource is open, still being finished, or (a first December) her welcome print. */
+export type MonthState = 'available' | 'preparing' | 'welcome_vision';
 
 export interface MembershipMonth {
   month: string;
@@ -89,7 +90,19 @@ export interface MembershipMonth {
   state: MonthState;
   membership_year: number | null;
   plan: string | null;
-  mailing: { status: string; readiness: string; late: boolean; approved: boolean; mailed_at: string | null } | null;
+  fulfilled_by: 'monthly_resource' | 'welcome_vision';
+  /** Its printed copy. batch: 'regular' (paid by the month's cutoff) or 'catch_up' (paid after it, mailed after). */
+  mailing: { status: string; readiness: string; late: boolean; batch?: string; approved: boolean; mailed_at: string | null } | null;
+}
+
+/** Her Family Vision welcome print. satisfies_month: the first December it stands in for. */
+export interface WelcomePrint {
+  status: string;
+  readiness: string;
+  approved: boolean;
+  personalized: boolean;
+  satisfies_month: string | null;
+  mailed_at: string | null;
 }
 
 export interface Membership {
@@ -109,6 +122,10 @@ export interface Membership {
   first_paid_month: string | null;
   current_month: string;
   membership_year: number | null;
+  welcome: WelcomePrint | null;
+  /** The next month she'd receive, paid for on payment_on (only while the membership continues). */
+  next: { month: string; payment_on: string | null; slug: string | null; title: string | null; regular_cutoff_at: string | null } | null;
+  /** Only the months she has bought. */
   months: MembershipMonth[];
 }
 
@@ -148,6 +165,37 @@ export const loadResource = (slug: string) => accountRpc<ResourceVersion>('club_
 export const saveResource = (slug: string, state: ResourceVersion['state'], revision: number) =>
   accountRpc<number>('club_resource_save', { p_kit: slug, p_state: state, p_revision: revision });
 export const approveResource = (slug: string) => accountRpc<boolean>('club_fulfillment_approve', { p_kit: slug });
+
+export interface Vision { family_name: string; value: string }
+export interface WelcomeOrder {
+  status: string;
+  readiness: string;
+  personalization: Vision | null;
+  approved: boolean;
+  satisfies_month: string | null;
+  printed_at: string | null;
+  mailed_at: string | null;
+  editable: boolean;
+  display_name: string | null;
+}
+export const loadWelcome = () => accountRpc<WelcomeOrder | null>('club_welcome_get');
+export const saveWelcome = (v: Vision) => accountRpc<WelcomeOrder>('club_welcome_save', { p: v });
+export const approveWelcome = () => accountRpc<WelcomeOrder>('club_welcome_approve');
+
+/** Her welcome print's status, in plain words. */
+export function welcomeText(w: Pick<WelcomeOrder, 'status' | 'readiness' | 'approved'>): string {
+  if (w.status === 'mailed') return 'Mailed';
+  if (w.status === 'printed') return 'Printed, mailing soon';
+  if (w.status === 'approved') return 'Approved for printing';
+  if (w.status === 'returned') return 'Returned to us: check your address';
+  return ({
+    needs_vision: w.approved ? 'Waiting for your approval' : 'Choose your family’s word and approve it',
+    needs_address: 'Add your mailing address so we can mail it',
+    mail_paused: 'Printed mailings paused',
+    needs_pdf: 'You approved it. We’re preparing it for print',
+    ready: 'You approved it. We’re preparing it for print',
+  } as Record<string, string>)[w.readiness] ?? 'Being prepared';
+}
 
 // ------------------------------------------------------------------ her printable's state, mirrored to the server
 
