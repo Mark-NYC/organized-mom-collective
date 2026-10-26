@@ -368,7 +368,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
  };
  const save=()=>{try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom],customOwnerLabels,textEdits}))}catch{}};
- const clean=(el:HTMLElement,limit:number)=> (el.textContent??'').replace(/\\s+/g,' ').trim().slice(0,limit);
+ const clean=(el:HTMLElement,limit:number)=> (el.textContent??'').replace(/\s+/g,' ').trim().slice(0,limit);
  root.querySelectorAll<HTMLElement>('[data-march-edit]').forEach(el=>{
   const task=el.dataset.task!,field=el.dataset.marchEdit as TaskCopyKey;
   el.addEventListener('input',()=>{(textEdits[task]??={})[field]=clean(el,field==='title'?60:180);save()});
