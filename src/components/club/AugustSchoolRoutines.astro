@@ -9,8 +9,8 @@ const {storageKey='omc:club:august-school-routines:v1'}=Astro.props;
 const morning=routineTypes.morning.steps;
 const after=routineTypes.afterschool.steps;
 const icons={
- lunch:'/assets/icons/ofc/updatedicons/png/lunch-box.png',
- water:'/images/club/icon-library/water-bottle.png',
+ lunch:'/images/club/icon-library/lunch-box.png',
+ water:'/images/club/icon-library/water-bottle.svg',
  quiet:'/images/club/icon-library/quiet-time.png',
  play:'/images/club/icon-library/free-afternoon.png',
  wake:'/images/club/icon-library/morning-start.png',
@@ -47,7 +47,7 @@ const initial=[
   <aside class="asr-editor"><div class="asr-editor-head"><p class="asr-eyebrow">ORGANIZED FAMILY CLUB · AUGUST 2027</p><h2>Fewer reminders. <em>Smoother school days.</em></h2><button type="button" class="asr-edit-link" data-open-vision>Why this matters</button></div><div class="asr-prepared" id="august-edit-controls"><span class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINES</span><strong>My School Day</strong><p>Two ready-made picture routines for before and after school.</p><button type="button" class="asr-edit-link" data-open-editor>Edit routines <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div><div class="asr-actions"><div class="asr-primary-actions"><a class="asr-jump" href="#august-edit-controls">Make changes</a><button class="asr-primary" data-asr-print type="button">Print / Save PDF</button></div><button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button><button class="asr-reset" data-asr-reset type="button">Restore original steps</button></div></aside>
   <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
   <dialog class="asr-dialog" data-asr-editor aria-labelledby="asr-editor-title"><div class="asr-dialog-head"><h2 id="asr-editor-title">Edit school routines</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Review the prepared steps and adjust what doesn't fit your family.</p><div class="asr-dialog-fields">   <label>Routine for <select data-asr-child><option value="family">Our family</option></select></label>
-   <label>Routine detail <select data-asr-mode><option value="standard">Five timed steps per routine</option><option value="simple">Four essentials per routine</option></select></label>
+   <label>Routine detail <select data-asr-mode><option value="standard">Recommended steps</option><option value="simple">Shorter routine</option></select></label>
    <div class="asr-customize"><h3>Customize each routine</h3><p>Add, edit, remove or reorder steps for the selected child. Changes save automatically.</p><div data-asr-options></div></div>
    <div class="asr-parent-note"><strong>One small handoff</strong><p>Show your child where this sheet lives, walk through it once, then invite them to check what's next. Adults continue to own school travel, medications, and safety decisions.</p></div>
 </div><button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button></dialog>
@@ -110,7 +110,7 @@ const initial=[
 .asr-row img{width:58px;height:47px;object-fit:contain}
 .asr-row strong{font:600 16px/1.24 Montserrat,Arial,sans-serif;overflow-wrap:normal}
 .asr-row .asr-remove{right:5px;top:50%;transform:translateY(-50%)}
-.asr-row strong{padding-right:11px}.asr-option input{width:100%;min-height:38px;border:1px solid #c6d4c8;padding:8px;font:12px Montserrat,Arial,sans-serif}.asr-add-label{display:block;margin:14px 0 20px;font-size:12px;font-weight:700}.asr-add-label select{width:100%;min-height:44px;display:block;margin-top:7px;border:1px solid #b8c5bd;background:white;padding:9px}.asr-rows:has(.asr-row:nth-child(6)) .asr-row{min-height:45px;padding-top:1px;padding-bottom:1px}.asr-rows:has(.asr-row:nth-child(6)) .asr-row img{height:38px}.asr-rows:has(.asr-row:nth-child(8)) .asr-row{min-height:34px}.asr-rows:has(.asr-row:nth-child(8)) .asr-row img{height:28px}
+.asr-row strong{padding-right:11px}.asr-option input{width:100%;min-height:38px;border:1px solid #c6d4c8;padding:8px;font:12px Montserrat,Arial,sans-serif}.asr-add-label{display:block;margin:14px 0 20px;font-size:12px;font-weight:700}.asr-add-label select{width:100%;min-height:44px;display:block;margin-top:7px;border:1px solid #b8c5bd;background:white;padding:9px}.asr-rows:has(.asr-row:nth-child(6)) .asr-row{min-height:45px;padding-top:1px;padding-bottom:1px}.asr-rows:has(.asr-row:nth-child(6)) .asr-row img{height:38px}.asr-rows:has(.asr-row:nth-child(8)) .asr-row{min-height:34px}.asr-rows:has(.asr-row:nth-child(8)) .asr-row img{height:28px}.asr-panel:has(.asr-row:nth-child(7)){padding-top:8px;padding-bottom:8px;margin-top:9px}.asr-panel:has(.asr-row:nth-child(7)) .asr-row{min-height:38px}.asr-panel:has(.asr-row:nth-child(7)) .asr-rows{gap:3px}
 .asr-paper-foot{padding-top:10px}
 .asr-paper-foot strong{font-size:18px}
 .asr-paper-foot span{margin-top:8px}
@@ -154,7 +154,7 @@ type Group='morning'|'after';
 type Step={id:string;time:string;label:string;icon:string;group:Group;removed?:boolean};
 type Board={steps:Step[];mode:'standard'|'simple';footer:string;child:string};
 type Child={id:string;firstName:string;birthYear?:number;birthMonth?:number};
-const iconPaths:Record<string,string>={lunch:"/assets/icons/ofc/updatedicons/png/lunch-box.png",water:"/images/club/icon-library/water-bottle.png",quiet:"/images/club/icon-library/quiet-time.png",play:"/images/club/icon-library/free-afternoon.png",wake:"/images/club/icon-library/morning-start.png",clothes:"/images/club/icon-library/getting-dressed.png",breakfast:"/images/club/icon-library/breakfast-bowl.png",teeth:"/images/club/icon-library/toothbrush.png",bag:"/images/club/icon-library/backpack.png",shoes:"/images/club/icon-library/sneakers.png",hands:"/images/club/icon-library/washing-hands.png",snack:"/images/club/icon-library/yogurt-cup.png",book:"/images/club/icon-library/doing-homework.png"};
+const iconPaths:Record<string,string>={lunch:"/images/club/icon-library/lunch-box.png",water:"/images/club/icon-library/water-bottle.svg",quiet:"/images/club/icon-library/quiet-time.png",play:"/images/club/icon-library/free-afternoon.png",wake:"/images/club/icon-library/morning-start.png",clothes:"/images/club/icon-library/getting-dressed.png",breakfast:"/images/club/icon-library/breakfast-bowl.png",teeth:"/images/club/icon-library/toothbrush.png",bag:"/images/club/icon-library/backpack.png",shoes:"/images/club/icon-library/sneakers.png",hands:"/images/club/icon-library/washing-hands.png",snack:"/images/club/icon-library/yogurt-cup.png",book:"/images/club/icon-library/doing-homework.png"};
 const seeds:Step[]=[
  {id:'wake',time:'07:00',label:'Wake up & stretch',icon:'wake',group:'morning'},
  {id:'dress',time:'07:15',label:'Get dressed',icon:'clothes',group:'morning'},
