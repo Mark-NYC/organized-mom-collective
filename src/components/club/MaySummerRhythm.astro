@@ -271,6 +271,17 @@ const blocks=[
 .msr .msr-sheet [contenteditable="true"]:focus::after{opacity:0}
 @media print{.msr .msr-sheet [contenteditable="true"]::after{display:none!important}}
 .msr.msr-exporting .msr-sheet [contenteditable="true"]::after{display:none!important}
+
+.msr-time-popover{position:fixed;z-index:10000;width:318px;max-width:calc(100vw - 16px);padding:15px;border:1px solid #cbd8c6;border-radius:12px;background:#fff;box-shadow:0 15px 45px #24392438;color:#455644;font:12px Montserrat,Arial,sans-serif;text-align:left}
+.msr-time-popover>strong{display:block;margin-bottom:12px;font-size:12px}
+.msr-time-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.msr-time-choice{border:1px solid #d5dfd1;border-radius:7px;background:#f8faf7;color:#4f654b;min-height:40px;padding:6px 2px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.msr-time-choice:hover,.msr-time-choice:focus-visible{background:#e7f1e3;border-color:#74906b}
+.msr-time-choice[aria-pressed=true]{background:#4f654b;border-color:#4f654b;color:#fff}
+.msr-time-actions{display:flex;gap:8px;border-top:1px solid #e3e9df;margin-top:12px;padding-top:12px}
+.msr-time-actions button{flex:1;min-height:38px;padding:5px;border:1px solid #a4b69e;border-radius:6px;background:#edf3e9;color:#4f654b;font:700 11px Montserrat,Arial,sans-serif;cursor:pointer}
+.msr-time-actions input[type=time]{flex:1;min-width:0;border:1px solid #a4b69e;border-radius:6px;padding:5px}
+@media print{.msr-time-popover{display:none!important}}
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
@@ -488,31 +499,54 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }
   const time=node.querySelector<HTMLElement>('[data-time]');
   const editTime=()=>{
-   if(!time||time.querySelector('input, select'))return;
-   const input=document.createElement('select');
+   if(!time||time.hidden)return;
+   root.querySelector('.msr-time-popover')?.remove();
    const current=resolved(key).time;
-   const choices=[current,...[-1,-.5,0,.5,1].map(delta=>hhmm((current?Number(current.slice(0,2))+Number(current.slice(3))/60:options.start)+delta)),''].filter((v,i,a)=>a.indexOf(v)===i);
-   for(const value of choices){const option=document.createElement('option');option.value=value;option.textContent=value?clock(value):'No set time';input.append(option)}
-   const custom=document.createElement('option');custom.value='custom';custom.textContent='Choose a custom time…';input.append(custom);input.value=current;
-   input.setAttribute('aria-label','Set '+labels[key]+' time');
-    input.addEventListener('click',event=>event.stopPropagation());
-    input.addEventListener('pointerdown',event=>event.stopPropagation());
-   time.replaceChildren(input);time.setAttribute('role','group');
-   const finish=()=>{const value=input.value;edits[key]={...(edits[key]??{}),time:value};time.setAttribute('role','button');update()};
-   input.addEventListener('change',()=>{
-    if(input.value==='custom'){
-     const picker=document.createElement('input');picker.type='time';picker.value=current||hhmm(options.start);picker.addEventListener('click',event=>event.stopPropagation());picker.addEventListener('pointerdown',event=>event.stopPropagation());time.replaceChildren(picker);picker.focus();
-     picker.addEventListener('change',()=>{edits[key]={...(edits[key]??{}),time:picker.value};time.setAttribute('role','button');update()},{once:true});
-     return;
-    }
-    finish();
+   const pop=document.createElement('div');pop.className='msr-time-popover';
+   pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Choose '+labels[key]+' time');
+   const title=document.createElement('strong');title.textContent=labels[key]+' · Choose a time';
+   const grid=document.createElement('div');grid.className='msr-time-grid';
+   const hour=current?Number(current.slice(0,2))+Number(current.slice(3))/60:options.start;
+   const center=Math.round(hour*2)/2;
+   const choices=Array.from({length:9},(_,i)=>hhmm(Math.max(0,Math.min(23.5,center+(i-4)/2)))).filter((v,i,a)=>a.indexOf(v)===i);
+   const position=()=>{
+    const rect=time.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
+    pop.style.left=Math.max(8,Math.min(window.innerWidth-w-8,rect.right-w))+'px';
+    pop.style.top=(rect.bottom+h+8>window.innerHeight?Math.max(8,rect.top-h-8):rect.bottom+8)+'px';
+   };
+   const dismiss=(focus=false)=>{
+    pop.remove();document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',keysDown,true);
+    window.removeEventListener('resize',position);root.querySelector('.msr-preview')?.removeEventListener('scroll',position);
+    if(focus)time.focus();
+   };
+   const outside=(e:PointerEvent)=>{if(!pop.contains(e.target as Node)&&!time.contains(e.target as Node))dismiss()};
+   const keysDown=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();dismiss(true)}};
+   const apply=(value:string)=>{dismiss();edits[key]={...(edits[key]??{}),time:value};update()};
+   for(const value of choices){
+    const button=document.createElement('button');button.type='button';button.className='msr-time-choice';
+    button.textContent=clock(value);button.setAttribute('aria-pressed',String(current===value));
+    button.addEventListener('click',()=>apply(value));grid.append(button);
+   }
+   const actions=document.createElement('div');actions.className='msr-time-actions';
+   const none=document.createElement('button');none.type='button';none.textContent='No set time';none.addEventListener('click',()=>apply(''));
+   const custom=document.createElement('button');custom.type='button';custom.textContent='Custom time…';
+   custom.addEventListener('click',()=>{
+    actions.replaceChildren();
+    const input=document.createElement('input');input.type='time';input.value=current||hhmm(options.start);
+    input.setAttribute('aria-label','Custom time for '+labels[key]);
+    const save=document.createElement('button');save.type='button';save.textContent='Set time';
+    save.addEventListener('click',()=>{if(input.value)apply(input.value)});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save.click()}});
+    actions.append(input,save);input.focus();position();
    });
-   input.addEventListener('blur',()=>{setTimeout(()=>{if(time.contains(input)&&!time.contains(document.activeElement))render()},0)},{once:true});
-   input.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();time.setAttribute('role','button');render()}});
-   input.focus();
+   actions.append(none,custom);pop.append(title,grid,actions);root.append(pop);
+   position();document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',keysDown,true);
+   window.addEventListener('resize',position);root.querySelector('.msr-preview')?.addEventListener('scroll',position);
+   (grid.querySelector('[aria-pressed="true"]')||grid.querySelector('button'))?.focus();
   };
   time?.addEventListener('click',editTime);
   time?.addEventListener('keydown',e=>{if(e.target===time&&(e.key==='Enter'||e.key===' ')){e.preventDefault();editTime()}});
+
  }
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
  const download=root.querySelector<HTMLButtonElement>('[data-download]');
