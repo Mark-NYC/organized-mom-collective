@@ -212,7 +212,7 @@ const library:Record<Tier,Idea[]>={
   {id:'sort',label:'Sort blocks by color',icon:'blocks',maxAge:5},
   {id:'doodle',label:'Draw a funny animal',icon:'draw',maxAge:8},
   {id:'read',label:'Read a book',icon:'book',minAge:6},
-  {id:'draw',label:'Draw a superhero',icon:'scissors',minAge:6},
+  {id:'draw',label:'Draw a superhero',icon:'draw',minAge:6},
   {id:'build',label:'Build with blocks',icon:'blocks'},
   {id:'stretch',label:'Have a dance party',icon:'dance',minAge:6},
   {id:'look',label:'Find five things in nature',icon:'hunt',minAge:6},
@@ -226,7 +226,7 @@ const library:Record<Tier,Idea[]>={
   {id:'picture-art',label:'Make a big picture',icon:'draw',maxAge:5},
   {id:'puzzle',label:'Finish a puzzle',icon:'puzzle',minAge:6},
   {id:'outdoor',label:'Find five things in nature',icon:'hunt',minAge:6},
-  {id:'craft',label:'Make a paper craft',icon:'scissors',minAge:6},
+  {id:'craft',label:'Make a paper craft',icon:'craft',minAge:6},
   {id:'bike',label:'Ride my bike (ask first)',icon:'bike',minAge:6},
   {id:'tower',label:'Build a giant tower',icon:'blocks'},
   {id:'reading',label:'Read a whole chapter',icon:'book',minAge:9},
@@ -348,7 +348,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  root.querySelector('[data-activity-save]')?.addEventListener('click',()=>{
   for(const tier of ['quick','busy','project'] as Tier[]){
    const picked=activityDraft[tier].filter(x=>!x.removed).slice(0,3);
-   const placeholders=Array.from({length:3-picked.length},(_,i)=>({...state[tier][i]??library[tier][0],removed:true}));
+   const placeholders=Array.from({length:3-picked.length},(_,i)=>({...(state[tier][i]??library[tier][0]),removed:true}));
    state[tier]=[...picked.map(x=>({...x,removed:false})),...placeholders];
   }
   save();draw();options();activityDialog?.close();
