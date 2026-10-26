@@ -165,7 +165,7 @@ if(root){
   store=detail.sample?sampleStore(detail.sample):accountStore;storeKind=detail.sample?'sample':'account';
   render();status('Loading saved family activities…');
   try{
-   const docs=await store.documents(slug);if(loadSequence!==token)return;
+   const activeStore=store;if(!activeStore)throw new Error('No Club store');const docs=await activeStore.documents(slug);if(loadSequence!==token)return;
    const doc=docs.documents[documentId];revision=doc?.revision??0;
    const value=(doc?.edits as {activities?:unknown}|undefined)?.activities;
    activities=Array.isArray(value)?value.filter(validateActivity):[];
