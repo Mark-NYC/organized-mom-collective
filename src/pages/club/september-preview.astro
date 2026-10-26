@@ -1,10 +1,56 @@
 ---
-/** Unlisted September 2027 family reset prototype. */
+/** September preview: original room reset plus the existing family activity calendar. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
 import SeptemberRoomReset from '../../components/club/SeptemberRoomReset.astro';
 ---
-<PublicLayout fullTitle="September 5-Minute Reset Preview | Organized Family Club" description="A prepared daily reset with visual jobs and a clear finish line." indexable={false} chrome={false} width="full" tracking={false}>
+<PublicLayout fullTitle="September Preview | Organized Family Club" description="September's family resources." indexable={false} chrome={false} width="full" tracking={false}>
  <ClubPrototypeNav client:only="react" month="september" />
- <main id="club-month-content"><SeptemberRoomReset storageKey="omc:preview:september-room-reset:v2" /></main>
+ <main id="club-month-content">
+  <nav class="september-tabs" aria-label="September resources">
+   <button type="button" data-september-tab="reset" aria-selected="true">September Reset</button>
+   <button type="button" data-september-tab="calendar" aria-selected="false">Activity Calendar</button>
+  </nav>
+  <div data-september-panel="reset"><SeptemberRoomReset storageKey="omc:preview:september-room-reset:v2" /></div>
+  <div data-september-panel="calendar" hidden>
+   <iframe title="September Family Activity Calendar" src="/try-the-calendar/?club=september" class="september-calendar-frame" loading="lazy"></iframe>
+  </div>
+ </main>
 </PublicLayout>
+<style>
+ .september-tabs{display:flex;justify-content:center;gap:8px;padding:18px;background:#faf9f6;border-bottom:1px solid #e2e5dd}
+ .september-tabs button{border:1px solid #cbd7ca;background:#fff;color:#415747;padding:12px 20px;border-radius:5px;font:600 14px Arial,sans-serif;cursor:pointer}
+ .september-tabs button[aria-selected="true"]{background:#e7eee4;border-color:#7f9b81}
+ [data-september-panel][hidden]{display:none!important}
+ .september-calendar-frame{display:block;width:100%;height:2200px;border:0;background:#fff}
+ @media(max-width:700px){.september-tabs button{padding:11px;font-size:12px}.september-calendar-frame{height:2450px}}
+</style>
+<script>
+ const tabs=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-september-tab]'));
+ tabs.forEach(button=>button.addEventListener('click',()=>{
+  const selected=button.dataset.septemberTab;
+  tabs.forEach(tab=>tab.setAttribute('aria-selected',String(tab===button)));
+  document.querySelectorAll<HTMLElement>('[data-september-panel]').forEach(panel=>{panel.hidden=panel.dataset.septemberPanel!==selected});
+ }));
+ const iframe=document.querySelector<HTMLIFrameElement>('.september-calendar-frame');
+ type Member={firstName?:string;kind?:string;role?:string;archived?:boolean;isAccountHolder?:boolean};
+ let householdMembers:Member[]=[];
+ const fillNames=()=>{
+  const doc=iframe?.contentDocument;if(!doc)return;
+  const active=householdMembers.filter(member=>!member.archived&&member.firstName?.trim());
+  if(!active.length)return;
+  const adults=active.filter(member=>member.kind==='adult');
+  const children=active.filter(member=>member.kind==='child');
+  const names=[adults.find(member=>member.role==='mom'||member.role==='mother')?.firstName||adults.find(member=>member.isAccountHolder)?.firstName||adults[0]?.firstName||'Mom',
+               adults.find(member=>member.role==='dad'||member.role==='father')?.firstName||adults.find(member=>!member.isAccountHolder)?.firstName||adults[1]?.firstName||'Dad',
+               ...children.map(child=>child.firstName!)].slice(0,5);
+  names.forEach((name,i)=>{const input=doc.querySelector<HTMLInputElement>(`[data-fc-member="${i}"]`);if(input&&input.value!==name){input.value=name;input.dispatchEvent(new Event('input',{bubbles:true}))}});
+ };
+ iframe?.addEventListener('load',fillNames);
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
+  const detail=(event as CustomEvent<{household?:{members?:Member[]}}>).detail;
+  householdMembers=detail?.household?.members||[];fillNames();
+ });
+ const cached=(window as Window&{__ofcPreviewHousehold?:{household?:{members?:Member[]}}}).__ofcPreviewHousehold;
+ if(cached?.household?.members){householdMembers=cached.household.members;fillNames()}
+</script>
