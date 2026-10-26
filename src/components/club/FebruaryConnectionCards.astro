@@ -55,11 +55,11 @@ const examples=[
        <div class="fbc-card-top"><span>AN INVITATION FOR SOMEONE YOU LOVE</span><span>0{i+1}</span></div>
        <div class="fbc-illustration" aria-hidden="true"><img src={['board-game','parent-child-reading','family-playing-game','kindness-note'].map(n=>'/images/club/icon-library/'+n+'.png')[i]} alt="" width="65" height="64" /></div>
        <p class="fbc-overline">A LITTLE TIME TOGETHER</p>
-       <h3 data-out="headline">{item.headline}</h3>
-       <p class="fbc-to"><span>TO</span> <strong data-out="recipient">{item.recipient}</strong></p>
-       <div class="fbc-invitation" data-out="invite">{item.invite}</div>
-       <p class="fbc-how" data-out="idea">{item.idea}</p>
-       <p class="fbc-signoff">WITH LOVE, <strong data-out="owner">{item.owner}</strong></p>
+       <h3 data-out="headline" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit invitation headline">{item.headline}</h3>
+       <p class="fbc-to"><span>TO</span> <strong data-out="recipient" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit invitation recipient">{item.recipient}</strong></p>
+       <div class="fbc-invitation" data-out="invite" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit invitation invite">{item.invite}</div>
+       <p class="fbc-how" data-out="idea" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit invitation idea">{item.idea}</p>
+       <p class="fbc-signoff">WITH LOVE, <strong data-out="owner" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit invitation owner">{item.owner}</strong></p>
        <div class="fbc-card-foot">GIVE THIS TO SOMEONE YOU LOVE.</div>
       </article>)}
      </div>
@@ -188,6 +188,17 @@ const examples=[
  #club-month-content .fbc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{#club-month-content .fbc-dialog,#club-month-content .fbc-floating-edit,#club-month-content .fbc-actions{display:none!important}}
+
+/* June-standard direct editing: persistent muted SVG pencil, removed from final artwork. */
+.fbc .fbc-paper [contenteditable="true"]{position:relative;cursor:text;outline-offset:2px;overflow-wrap:anywhere}
+.fbc .fbc-paper [contenteditable="true"]:hover{outline:1px dashed #a6b69d}
+.fbc .fbc-paper [contenteditable="true"]:focus{outline:2px solid #94ae8e;background:#f5faf2}
+.fbc .fbc-paper [contenteditable="true"]::after{content:"";display:inline-block;width:12px;height:12px;margin-left:6px;vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");opacity:.7;pointer-events:none}
+.fbc .fbc-paper [contenteditable="true"]:hover::after{opacity:1}
+.fbc .fbc-paper [contenteditable="true"]:focus::after{opacity:0}
+@media print{.fbc .fbc-paper [contenteditable="true"]::after{display:none!important}.fbc .fbc-paper [contenteditable="true"]{outline:none!important;background:transparent!important}}
+.fbc.fbc-image-export .fbc-paper [contenteditable="true"]::after{display:none!important}
+.fbc.fbc-image-export .fbc-paper [contenteditable="true"]{outline:none!important;background:transparent!important}
 </style>
 <script>
 type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
@@ -218,18 +229,28 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
  const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
  const draw=()=>{
-  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
-  cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;out.textContent=values[i][field]||' ';}));
+  // Directly edit printed invitation fields without losing the selection or caret.
+ cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{
+  const field=out.dataset.out as keyof Card;
+  const max=field==='idea'?180:field==='invite'?88:field==='headline'?44:32;
+  const capture=()=>{values[i][field]=(out.textContent??'').replace(/\\s+/g,' ').slice(0,max);save()};
+  out.addEventListener('input',capture);
+  out.addEventListener('blur',()=>{values[i][field]=(out.textContent??'').replace(/\\s+/g,' ').trim().slice(0,max);save();draw()});
+  out.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();out.blur()}});
+ }));
+ editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
+  cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;if(document.activeElement!==out)out.textContent=values[i][field]||' ';}));
 
  };
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;const previous=values[i].recipient;const oldInvite=values[i].invite;values[i][field]=input.value.slice(0,180);if(field==='recipient'&&previous&&oldInvite.startsWith(previous+','))values[i].invite=values[i].recipient+oldInvite.slice(previous.length);save();draw()})));
 
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
- root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
   const sheet=root.querySelector<HTMLElement>(".fbc-paper");
   if(!button||!sheet)return;
+  (document.activeElement as HTMLElement|null)?.blur();
   button.disabled=true;const old=button.textContent;button.textContent='Preparing image…';
   root.classList.add('fbc-image-export');
   try{
