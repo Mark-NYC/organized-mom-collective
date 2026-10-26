@@ -1,0 +1,71 @@
+---
+/** September's mailed flagship. Activity calendar is digital only. */
+---
+<section class="ofc-september" data-ofc-september>
+ <header class="ofc-september-heading"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h1>A Week Everyone Can See</h1><p>One weekly rhythm. Everyone knows the plan and helps get ready.</p></header>
+ <div class="ofc-preview-tabs" role="tablist" aria-label="September resources">
+  <button type="button" role="tab" id="ofc-reset-tab" aria-controls="ofc-reset-panel" aria-selected="true" tabindex="0" data-ofc-tab="reset">Sunday Reset <span>Included by mail</span></button>
+  <button type="button" role="tab" id="ofc-calendar-tab" aria-controls="ofc-calendar-panel" aria-selected="false" tabindex="-1" data-ofc-tab="calendar">Family Activity Calendar <span>Digital companion</span></button>
+ </div>
+ <div id="ofc-reset-panel" role="tabpanel" aria-labelledby="ofc-reset-tab" data-ofc-panel="reset" tabindex="0">
+  <div class="ofc-reset-tools"><div><strong>Your prepared Sunday Reset</strong><p>Review your family's guide. It works whether or not you use the activity calendar.</p></div><label>When we gather <select data-ofc-time><option>Sunday after lunch</option><option>Sunday after breakfast</option><option>Sunday after church</option><option>Sunday evening</option><option>Saturday evening</option></select></label><button type="button" data-ofc-print>Print / Save PDF</button><span data-ofc-reset-status role="status" aria-live="polite">Preview only. No mailing or purchase is initiated.</span></div>
+  <div class="ofc-reset-pages">
+   <article class="ofc-reset-paper">
+    <header><span>ORGANIZED FAMILY CLUB · SEPTEMBER</span><h2>Our Family <em>Sunday Reset</em></h2><p data-ofc-family>Our family</p><p class="ofc-reset-sub">A little planning together makes the whole week easier.</p></header>
+    <div class="ofc-reset-time"><small>WHEN WE GATHER</small><strong data-ofc-print-time>Sunday after lunch</strong><p>Bring your family calendar. Spend about 15 minutes looking ahead together.</p></div>
+    <h3>Look ahead. Get ready. Share the work.</h3>
+    <ol class="ofc-reset-steps"><li><b>Gather</b><span>Everyone joins, even the little ones. One person leads.</span></li><li><b>Look ahead</b><span>Each person shares what is coming up. Add missing plans to the calendar.</span></li><li><b>Get ready</b><span>What needs packing, buying, arranging, or remembering?</span></li><li><b>Share responsibility</b><span>Choose who owns each preparation, including rides and supplies.</span></li><li><b>Confirm</b><span>Everyone says what they own and when it needs to happen.</span></li></ol>
+    <div class="ofc-reset-rule"><strong>Our family rule</strong><p>Check the family plan before asking Mom. Everyone helps make the week work.</p></div>
+    <footer>ONE FAMILY · EVERYONE KNOWS THE PLAN</footer>
+   </article>
+   <article class="ofc-reset-paper ofc-reset-back">
+    <header><span>ORGANIZED FAMILY CLUB · SEPTEMBER</span><h2>Everyone Has <em>a Part</em></h2><p data-ofc-family-back>Our family</p></header>
+    <h3>Our weekly preparation team</h3><p>Start with one small job each. People can trade roles when the week changes.</p>
+    <div data-ofc-roles class="ofc-reset-roles"><p>Preparing family roles…</p></div>
+    <div class="ofc-reset-prompts"><h3>Five questions for any Sunday</h3><p>What's happening this week?</p><p>What changed since last week?</p><p>What needs to be ready ahead of time?</p><p>Who is taking care of each part?</p><p>Where can we leave some breathing room?</p></div>
+    <div class="ofc-reset-note"><strong>A note from Megan</strong><p>Start with a few minutes together and let everyone share what they see. The goal isn't a perfect week. It's a family that starts noticing, planning, and preparing together.</p></div>
+    <footer>KEEP THIS GUIDE BESIDE YOUR FAMILY CALENDAR</footer>
+   </article>
+  </div>
+ </div>
+ <div id="ofc-calendar-panel" role="tabpanel" aria-labelledby="ofc-calendar-tab" data-ofc-panel="calendar" tabindex="0" hidden>
+  <slot />
+ </div>
+</section>
+<style is:global>
+.ofc-september{font-family:Montserrat,Arial,sans-serif;background:#f6f5f2;color:#454b45;padding:32px clamp(12px,3vw,40px) 70px}
+.ofc-september-heading{text-align:center;margin:0 auto 22px;max-width:700px}.ofc-september-heading>p:first-child{font-size:11px;letter-spacing:.15em;color:#738773;font-weight:700}.ofc-september-heading h1{font:400 clamp(31px,4vw,49px)/1.14 Georgia,serif;color:#55715e;margin:8px}.ofc-september-heading>p:last-child{font-size:14px;line-height:1.6}
+.ofc-preview-tabs{display:grid;grid-template-columns:1fr 1fr;max-width:900px;margin:auto auto 24px;gap:7px}.ofc-preview-tabs button{padding:15px 10px;border:1px solid #c9d7cb;background:white;border-radius:7px;font-size:15px;font-weight:700;color:#587260;cursor:pointer}.ofc-preview-tabs button span{display:block;font-size:10px;font-weight:500;margin-top:4px;color:#69786f}.ofc-preview-tabs button[aria-selected=true]{background:#dce9df;border-color:#76977f;box-shadow:inset 0 -3px #587c62}.ofc-preview-tabs button:focus-visible{outline:3px solid #7ba78a;outline-offset:2px}
+.ofc-reset-tools{max-width:900px;margin:auto auto 23px;padding:16px 20px;background:white;border:1px solid #e0e5dd;border-radius:8px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:space-between}.ofc-reset-tools strong{color:#51715b}.ofc-reset-tools p{font-size:12px;margin:6px 0 0}.ofc-reset-tools label{font-size:12px}.ofc-reset-tools select{display:block;margin-top:6px;padding:10px;min-height:42px;border:1px solid #b6c9ba;border-radius:4px;background:white}.ofc-reset-tools button{border:0;border-radius:4px;background:#59745f;color:white;min-height:44px;padding:10px 16px;font-weight:700;cursor:pointer}.ofc-reset-tools [role=status]{flex-basis:100%;font-size:11px;color:#6e776b}
+.ofc-reset-pages{display:flex;gap:25px;justify-content:center;flex-wrap:wrap}.ofc-reset-paper{width:min(100%,510px);aspect-ratio:8.5/11;background:#fff;box-shadow:0 6px 24px #0002;border:1px solid #e3e8e0;display:flex;flex-direction:column;padding:35px 35px 25px;min-height:650px}.ofc-reset-paper header{text-align:center;border-top:7px solid #d9e9df;padding-top:17px}.ofc-reset-paper header>span{font-size:10px;color:#68806d;letter-spacing:.12em;font-weight:700}.ofc-reset-paper header h2{font:400 clamp(28px,3vw,40px)/1.13 Georgia,serif;color:#50715c;margin:13px 0 7px}.ofc-reset-paper h2 em{font-style:italic}.ofc-reset-paper header>p{font:italic 17px Georgia,serif;color:#829486;margin:5px 0}.ofc-reset-paper header .ofc-reset-sub{font:12px/1.5 Montserrat,Arial,sans-serif;margin:8px 0 0}
+.ofc-reset-time{background:#e9f2eb;text-align:center;padding:17px 10px;margin:19px 0}.ofc-reset-time small{display:block;font-size:9px;letter-spacing:.1em;color:#597360}.ofc-reset-time strong{display:block;font:400 22px Georgia,serif;color:#526f5a;margin:5px}.ofc-reset-time p{font-size:11px;margin:6px}
+.ofc-reset-paper h3{font:400 21px Georgia,serif;color:#55745c;margin:12px 0}.ofc-reset-steps{list-style:none;counter-reset:ofcstep;padding:0;margin:0}.ofc-reset-steps li{counter-increment:ofcstep;display:flex;align-items:flex-start;gap:13px;padding:9px 0;border-bottom:1px solid #e3eae3;font-size:11px;line-height:1.4}.ofc-reset-steps li:before{content:counter(ofcstep,decimal-leading-zero);font:400 20px Georgia,serif;color:#809985}.ofc-reset-steps b{min-width:90px;color:#42674d}.ofc-reset-steps span{flex:1}
+.ofc-reset-rule,.ofc-reset-note{background:#f4eee7;padding:15px;margin-top:17px}.ofc-reset-rule strong,.ofc-reset-note strong{font:400 18px Georgia,serif;color:#5e775e}.ofc-reset-rule p,.ofc-reset-note p{font-size:11px;line-height:1.6;margin:6px 0}
+.ofc-reset-paper footer{margin-top:auto;text-align:center;font-size:9px;letter-spacing:.14em;color:#829486;padding-top:18px}
+.ofc-reset-back>p{font-size:12px}.ofc-reset-roles{display:grid;gap:9px;margin-bottom:15px}.ofc-reset-role{padding:9px 12px;background:#e9f2eb;display:grid;grid-template-columns:1fr 2fr;gap:12px;font-size:11px}.ofc-reset-role strong{color:#4f705b}.ofc-reset-prompts{background:#f6f7f3;padding:14px 17px}.ofc-reset-prompts h3{margin:0 0 8px}.ofc-reset-prompts p{margin:7px 0;font-size:11px;border-bottom:1px solid #e4ebe3;padding-bottom:6px}
+#ofc-calendar-panel{max-width:1260px;margin:auto}
+@media(max-width:600px){.ofc-september{padding:22px 10px 50px}.ofc-preview-tabs button{font-size:13px;padding:12px 5px}.ofc-preview-tabs button span{font-size:9px}.ofc-reset-paper{padding:25px 20px;min-height:0}.ofc-reset-steps li{gap:6px}.ofc-reset-steps b{min-width:75px}.ofc-reset-tools{padding:13px}}
+@media print{@page{size:letter portrait;margin:0}body:has(.ofc-september-print) *{visibility:hidden!important}body:has(.ofc-september-print) .ofc-reset-paper,body:has(.ofc-september-print) .ofc-reset-paper *{visibility:visible!important}body:has(.ofc-september-print) .ofc-reset-pages{display:block!important;position:absolute;left:0;top:0;width:8.5in}body:has(.ofc-september-print) .ofc-reset-paper{display:flex!important;width:8.5in!important;height:11in!important;min-height:11in!important;aspect-ratio:auto!important;padding:.42in!important;box-shadow:none!important;border:0!important;break-after:page!important;page-break-after:always!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body:has(.ofc-september-print) .ofc-reset-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
+</style>
+<script>
+const root=document.querySelector<HTMLElement>('[data-ofc-september]');
+if(root){
+ const tabs=Array.from(root.querySelectorAll<HTMLButtonElement>('[data-ofc-tab]'));
+ const activate=(name:string)=>{tabs.forEach(t=>{const active=t.dataset.ofcTab===name;t.setAttribute('aria-selected',String(active));t.tabIndex=active?0:-1});root.querySelectorAll<HTMLElement>('[data-ofc-panel]').forEach(p=>{p.hidden=p.dataset.ofcPanel!==name})};
+ tabs.forEach((button,i)=>{button.addEventListener('click',()=>activate(button.dataset.ofcTab!));button.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const next=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];activate(next.dataset.ofcTab!);next.focus()}if(e.key==='Home'||e.key==='End'){e.preventDefault();const next=tabs[e.key==='Home'?0:tabs.length-1];activate(next.dataset.ofcTab!);next.focus()}})});
+ const time=root.querySelector<HTMLSelectElement>('[data-ofc-time]')!;
+ time.addEventListener('change',()=>{root.querySelector('[data-ofc-print-time]')!.textContent=time.value;try{sessionStorage.setItem('omc:club:september:sunday-time:v1',time.value)}catch{}});
+ try{const saved=sessionStorage.getItem('omc:club:september:sunday-time:v1');if(saved&&Array.from(time.options).some(o=>o.value===saved)){time.value=saved;time.dispatchEvent(new Event('change'))}}catch{}
+ const apply=(h:{displayName?:string;members:{firstName:string;kind:string;archived?:boolean;role?:string;isAccountHolder?:boolean}[]}|null)=>{
+  if(!h)return;
+  const family=h.displayName?.trim()||'Our family';root.querySelector('[data-ofc-family]')!.textContent=family;root.querySelector('[data-ofc-family-back]')!.textContent=family;
+  const roles=root.querySelector('[data-ofc-roles]')!;roles.replaceChildren();
+  const active=h.members.filter(m=>!m.archived);
+  const labels=['Look for missing events','Check rides and adult logistics','Get my own things ready','Share one important activity','Help check the plan'];
+  active.forEach((m,i)=>{const row=document.createElement('div');row.className='ofc-reset-role';const strong=document.createElement('strong');strong.textContent=m.firstName;const span=document.createElement('span');span.textContent=m.kind==='child'?labels[2+i%2]:labels[i%2];row.append(strong,span);roles.append(row)});
+ };
+ window.addEventListener('omc:club-preview-household',(e:Event)=>apply((e as CustomEvent<{household:Parameters<typeof apply>[0]}>).detail.household));
+ const cached=(window as Window&{__ofcPreviewHousehold?:{household:Parameters<typeof apply>[0]}}).__ofcPreviewHousehold;if(cached)apply(cached.household);
+ root.querySelector('[data-ofc-print]')!.addEventListener('click',()=>{root.classList.add('ofc-september-print');window.print();setTimeout(()=>root.classList.remove('ofc-september-print'),400)});
+}
+</script>
