@@ -732,6 +732,12 @@ const jsonLd = [
       margin: 1px auto;
     }
   }
+  /* The October tab hosts the original interactive calendar without the standalone page chrome. */
+  body:has(.family-calendar-container) .family-calendar-container { width:100%; }
+  body:has(.family-calendar-container) .family-calendar-container .fc-sheet { flex-shrink:0; }
+  html:has(.family-calendar-container) {scrollbar-width:thin}
+  html:has(.family-calendar-container) body:has(.family-calendar-container) {overflow-x:hidden}
+  html:has(.family-calendar-container) body:has(.family-calendar-container):has(.fc-embedded) {margin:0}
 </style>
 
 <script>
@@ -777,6 +783,24 @@ const jsonLd = [
     return fresh;
   }
   const state = load();
+  const clubEmbed = new URLSearchParams(location.search).has('clubEmbed');
+  if(clubEmbed){
+    document.querySelector<HTMLElement>('.public-intro')?.remove();
+    document.querySelector<HTMLElement>('header.site-header')?.remove();
+    document.querySelector<HTMLElement>('footer.site-footer')?.remove();
+    document.querySelector<HTMLElement>('.fc-footnote')?.remove();
+    const container=document.querySelector<HTMLElement>('.family-calendar-container');
+    if(container){container.classList.add('fc-embedded');container.style.padding='8px 0 32px';}
+  }
+  if (clubEmbed) {
+    window.addEventListener('message', (event: MessageEvent) => {
+      if(event.origin!==window.location.origin || event.data?.type!=='omc:october-calendar-members' || !Array.isArray(event.data.names))return;
+      const names=event.data.names.filter((n:unknown):n is string=>typeof n==='string'&&n.trim().length>0).slice(0,5);
+      if(!names.length)return;
+      state.members=Array.from({length:5},(_,i)=>names[i]??'');
+      renderMembers();render();save();
+    });
+  }
   function save() {
     try {
       localStorage.setItem(KEY, JSON.stringify(state));
