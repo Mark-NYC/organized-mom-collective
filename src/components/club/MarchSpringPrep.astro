@@ -28,7 +28,7 @@ const taskTypes:Record<string,string>={
  'mar-donate':'Children can suggest items. A grown-up approves what leaves the home.'
 };
 ---
-<div class="msc" data-msc-key={storageKey} style={`--msc-month:${monthColors[2].hex}`}>
+<div class="msc" data-msc-key={storageKey} data-task-copy={JSON.stringify(Object.fromEntries(project.tasks.map(t=>[t.id,{title:t.label,supplies:handoffs[t.id].supplies,ready:handoffs[t.id].ready,doJob:handoffs[t.id].doJob,done:handoffs[t.id].done}])))} style={`--msc-month:${monthColors[2].hex}`}>
  <div class="msc-intro"><a href="/club" class="msc-back">← Organized Family Club</a><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH 2027</p><h1>Spring prep. <em>Everyone has a part.</em></h1>
  <p>The same five optional jobs from your cleaning companion, now prepared for independent ownership. Each person sees what to gather, what to do, and how to know the job is finished.</p></div>
  <div class="msc-workspace">
@@ -306,7 +306,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  let customOwnerLabels:Record<string,string>={};
  type TaskCopyKey='title'|'supplies'|'ready'|'doJob'|'done';
  let textEdits:Record<string,Partial<Record<TaskCopyKey,string>>>={};
- const copyDefaults:Record<string,Record<TaskCopyKey,string>>=Object.fromEntries(project.tasks.map(t=>[t.id,{title:t.label,supplies:({ 'mar-baseboards':'Soft cloth + water','mar-vents':'Microfiber duster + cloth','mar-winter-gear':'Storage bin + label','mar-curtains':'Laundry supplies or duster','mar-donate':'Donation bag'} as Record<string,string>)[t.id]??'',ready:({ 'mar-baseboards':'Take a soft cloth and dampen it with water. Choose one room.','mar-vents':'Turn fans off. Gather a microfiber duster.','mar-winter-gear':'Gather hats, gloves and scarves. Get a storage bin.','mar-curtains':'Check fabric care labels and gather supplies.','mar-donate':'Get a bag. Choose one small area.'} as Record<string,string>)[t.id]??'',doJob:({ 'mar-baseboards':'Wipe reachable baseboards and corners.','mar-vents':'An adult dusts accessible vents and fan blades safely.','mar-winter-gear':'Sort items; set aside anything still needed.','mar-curtains':'An adult cleans one set and handles taking down/rehanging.','mar-donate':'Suggest unused items; ask before adding anyone else’s.'} as Record<string,string>)[t.id]??'',done:({ 'mar-baseboards':'No visible dust; cloth rinsed and put away.','mar-vents':'Visible dust is gone; tools put away.','mar-winter-gear':'Stored items are clean and dry; labeled bin put away.','mar-curtains':'Curtains are clean, dry and rehung properly.','mar-donate':'Adult approves contents; bag goes to donation spot.'} as Record<string,string>)[t.id]??''}])) as Record<string,Record<TaskCopyKey,string>>;
+ const copyDefaults=JSON.parse(root.dataset.taskCopy??'{}') as Record<string,Record<TaskCopyKey,string>>;
  let sampleKey='';
  const pick=(task:string,people:Member[]):Member|undefined=>{
   const adults=people.filter(m=>m.kind==='adult');
