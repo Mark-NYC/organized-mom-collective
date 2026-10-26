@@ -31,11 +31,11 @@ const {storageKey='omc:club:november:ownership-printable:v1'}=Astro.props;
      <section class="nvp-hero"><span>ONE WHOLE JOB · ONE CLEAR OWNER</span><strong data-edit="planTitle" contenteditable="true" role="textbox" aria-label="Edit plan title">Our School-Night Reset</strong><p data-edit="goal" contenteditable="true" role="textbox" aria-label="Edit plan goal">Tomorrow is ready without Mom managing every step.</p></section>
      <div class="nvp-section-heading"><h3>Everyone has a part</h3><span>START IT · OWN IT · FINISH IT</span></div>
      <section class="nvp-owners" data-people>
-      <div class="nvp-person"><span>01</span><div><small>EXISTING CONTRIBUTION</small><h4>Mom</h4><p>Family calendar and weekly schedule</p></div></div>
-      <div class="nvp-person"><span>02</span><div><small>ADULT HANDOFF</small><h4>Dad</h4><p>Own school communications and forms</p></div></div>
+      <div class="nvp-person"><span>01</span><div><small>ADULT RESPONSIBILITY</small><h4>Mom</h4><p>Family calendar and weekly schedule</p></div></div>
+      <div class="nvp-person"><span>02</span><div><small>ADULT RESPONSIBILITY</small><h4>Dad</h4><p>Own school communications and forms</p></div></div>
       <div class="nvp-person"><span>03</span><div><small>KID HANDOFF</small><h4>Child</h4><p>Prepare tomorrow's clothes</p></div></div>
      </section>
-     <section class="nvp-finish"><strong>WE'RE READY WHEN…</strong><p data-edit="readyWhen" contenteditable="true" role="textbox" aria-label="Edit finish line">Each person has finished their job without Mom checking every step.</p></section>
+     <section class="nvp-finish"><strong>WE'RE READY WHEN…</strong><p data-edit="readyWhen" contenteditable="true" role="textbox" aria-label="Edit finish line">Tomorrow's bags, clothes, supplies, and plans are ready.</p></section>
      <footer class="nvp-foot"><strong>We all know our part.</strong><span>ONE FAMILY · SHARED OWNERSHIP</span></footer>
     </article>
     <article class="nvp-sheet nvp-back" data-back>
@@ -173,12 +173,12 @@ const {storageKey='omc:club:november:ownership-printable:v1'}=Astro.props;
 type Person={id:string;name:string;kind:'adult'|'child';label:string;job:string;when:string;done:string};
 type State={family:string;familyLine:string;planTitle:string;goal:string;readyWhen:string;guideIntro:string;familyRule:string;people:Person[]};
 const samplePeople=():Person[]=>[
- {id:'mom',name:'Mom',kind:'adult',label:'EXISTING CONTRIBUTION',job:'Keep our family calendar and weekly schedule up to date',when:'Throughout the week',done:'Everyone can see the schedule and the plans are current.'},
- {id:'dad',name:'Dad',kind:'adult',label:'ADULT HANDOFF',job:'Own school messages, forms and deadlines',when:'Check each weekday afternoon',done:'Messages checked, forms handled, deadlines added to our calendar.'},
- {id:'child1',name:'Andrew',kind:'child',label:'KID HANDOFF',job:"Lay out tomorrow's clothes and supplies",when:'Before bedtime',done:'Clothes ready and needed supplies in their place.'},
- {id:'child2',name:'Philip',kind:'child',label:'KID HANDOFF',job:'Pack my school bag',when:'Before bedtime',done:'Folder, water bottle and supplies packed; bag by the door.'}
+ {id:'mom',name:'Mom',kind:'adult',label:'ADULT RESPONSIBILITY',job:'Prepare tomorrow's lunch items',when:'After dinner',done:'Lunch items that can be prepared tonight are ready.'},
+ {id:'dad',name:'Dad',kind:'adult',label:'ADULT RESPONSIBILITY',job:'Own school messages, forms and deadlines',when:'Check each weekday afternoon',done:'Messages checked, forms handled, deadlines added to our calendar.'},
+ {id:'child1',name:'Andrew',kind:'child',label:'CHILD RESPONSIBILITY',job:"Lay out tomorrow's clothes and supplies",when:'Before bedtime',done:'Clothes ready and needed supplies in their place.'},
+ {id:'child2',name:'Philip',kind:'child',label:'CHILD RESPONSIBILITY',job:'Pack my school bag',when:'Before bedtime',done:'Folder, water bottle and supplies packed; bag by the door.'}
 ];
-const makeState=(family='Our family'):State=>({family,familyLine:'A ready-to-use plan for '+family,planTitle:'Our School-Night Reset',goal:'Tomorrow is ready without Mom managing every step.',readyWhen:'Each person has finished their job without Mom checking every step.',guideIntro:"The person who owns the job notices when it's time, does their part, and checks that it's finished. Mom doesn't have to direct every step.",familyRule:'Ask the owner what comes next. Let the owner finish the job.',people:samplePeople()});
+const makeState=(family='Our family'):State=>({family,familyLine:'A ready-to-use plan for '+family,planTitle:'Our School-Night Reset',goal:'Tomorrow is ready without Mom managing every step.',readyWhen:'Tomorrow's bags, clothes, supplies, and plans are ready.',guideIntro:"The person who owns the job notices when it's time, does their part, and checks that it's finished. Mom doesn't have to direct every step.",familyRule:'Ask the owner what comes next. Let the owner finish the job.',people:samplePeople()});
 const ageOf=(person:{birthYear?:number;birthMonth?:number})=>person.birthYear?Math.max(2,2027-person.birthYear-((person.birthMonth??1)>11?1:0)):8;
 for(const root of document.querySelectorAll<HTMLElement>('.nvp')){
  const key=root.dataset.nvpKey??'omc:club:november:ownership-printable:v1';
@@ -208,11 +208,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.nvp')){
   for(const field of ['familyLine','planTitle','goal','readyWhen','guideIntro','familyRule'] as const)update('[data-edit="'+field+'"]',state[field]);
   update('[data-sidebar-title]',state.planTitle);
   update('[data-summary-family]',state.family);
-  update('[data-summary-adult]',state.people.find(p=>p.label==='ADULT HANDOFF')?.job??'Shared adult responsibility');
+  update('[data-summary-adult]',state.people.find(p=>p.kind==='adult')?.job??'Shared adult responsibility');
   update('[data-summary-kids]',state.people.filter(p=>p.kind==='child').length+' prepared handoffs');
   const front=root.querySelector<HTMLElement>('[data-people]');
   const back=root.querySelector<HTMLElement>('[data-details]');
-  if(front){front.replaceChildren();state.people.slice(0,5).forEach((p,i)=>{
+  if(front){front.replaceChildren();state.people.forEach((p,i)=>{
    const row=document.createElement('div');row.className='nvp-person';
    const num=document.createElement('span');num.textContent=String(i+1).padStart(2,'0');
    const div=document.createElement('div');const category=document.createElement('small');category.textContent=p.label;
@@ -220,7 +220,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.nvp')){
    const job=document.createElement('p');job.textContent=p.job;job.contentEditable='true';job.dataset.personField='job';job.dataset.personId=p.id;job.setAttribute('role','textbox');job.setAttribute('aria-label','Edit owner job');
    div.append(category,name,job);row.append(num,div);front.append(row);
   })}
-  if(back){back.replaceChildren();state.people.slice(0,5).forEach(p=>{
+  if(back){back.replaceChildren();state.people.forEach(p=>{
    const row=document.createElement('div');row.className='nvp-detail';
    const name=document.createElement('strong');name.textContent=p.name;
    const rest=document.createElement('div');
@@ -284,8 +284,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.nvp')){
   if(members.length){
    const adults=members.filter(m=>m.kind==='adult');const kids=members.filter(m=>m.kind==='child');
    state.people=[];
-   adults.slice(0,2).forEach((m,i)=>state.people.push({id:m.id,name:i===0?'Mom':'Dad',kind:'adult',label:i===0?'EXISTING CONTRIBUTION':'ADULT HANDOFF',job:i===0?'Keep our family calendar and weekly schedule current':'Own school messages, forms and deadlines',when:i===0?'Throughout the week':'Check each weekday afternoon',done:i===0?'The family calendar reflects current plans.':'Messages checked, forms handled and dates placed on the calendar.'}));
-   kids.slice(0,3).forEach((m,i)=>{const age=ageOf(m);const jobs=age<=5?[['Put away my toys','After playtime','My toys are in their basket.'],['Put shoes in their home','When we come inside','Shoes are in their place.']]:age<=9?[["Lay out tomorrow's clothes",'Before bedtime','Clothes ready for the morning.'],['Pack my school bag','Before bedtime','Folder, water bottle and supplies packed.']]:[['Prepare my school and activity gear','Each evening','My bag, clothes and gear are ready.'],['Own my laundry reset','After laundry is finished','Clothes sorted, folded and put away.']];const job=jobs[i%jobs.length];state.people.push({id:m.id,name:m.firstName,kind:'child',label:'KID HANDOFF',job:job[0],when:job[1],done:job[2]})});
+   adults.forEach((m,i)=>state.people.push({id:m.id,name:m.role==='mom'?'Mom':m.role==='dad'?'Dad':m.firstName,kind:'adult',label:'ADULT RESPONSIBILITY',job:i%2===0?"Prepare tomorrow's lunch items":"Check school messages, handle forms and prepare tomorrow's requirements",when:i%2===0?'After dinner':'Each weekday evening',done:i%2===0?'Lunch items that can be prepared tonight are ready.':'Forms handled, requirements understood and dates on the calendar.'}));
+   kids.forEach((m,i)=>{const age=ageOf(m);const jobs=age<=5?[['Put toys away and lay out clothes with help','Before bedtime','Toys are away and tomorrow’s clothes are ready.'],['Put my shoes and backpack by the door','Before bedtime','Shoes and backpack are waiting by the door.']]:age<=9?[["Lay out tomorrow's clothes",'Before bedtime','Clothes ready for the morning.'],['Pack my school bag','Before bedtime','Folder, water bottle and supplies packed; bag by the door.']]:[['Prepare my school and activity gear','Each evening','My bag, clothes and gear are ready.'],['Prepare tomorrow’s lunch and water bottle','After dinner','Lunch and water bottle are ready for tomorrow.']];const job=jobs[i%jobs.length];state.people.push({id:m.id,name:m.firstName,kind:'child',label:'CHILD RESPONSIBILITY',job:job[0],when:job[1],done:job[2]})});
   }
   try{const previous=JSON.parse(sessionStorage.getItem(key)??'null');if(previous?.familyKey===id&&previous.state?.people&&Array.isArray(previous.state.people))state=previous.state}catch{}
   save();draw();
