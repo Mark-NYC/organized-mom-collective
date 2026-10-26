@@ -376,7 +376,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   snackDraft.fridge=snackDraft.fridge.filter(item=>!excluded(item.id));snackDraft.pantry=snackDraft.pantry.filter(item=>!excluded(item.id));renderSnacks();
  });
  root.querySelector('[data-snack-add]')?.addEventListener('click',()=>{
-  const input=root.querySelector<HTMLInputElement>('[data-snack-custom]');const name=(input?.value??'').trim().replace(/\\s+/g,' ').slice(0,45);
+  const input=root.querySelector<HTMLInputElement>('[data-snack-custom]');const name=(input?.value??'').trim().replace(/\s+/g,' ').slice(0,45);
   if(!name){snackMessage('Enter a snack name.');return}
   if([...snackDraft.fridge,...snackDraft.pantry].some(item=>item.id==='custom')){snackMessage('Only one custom food per station. Remove the current one first.');return}
   if(snackDraft[activeSnackZone].length>=4){snackMessage('Remove one food before adding another.');return}
