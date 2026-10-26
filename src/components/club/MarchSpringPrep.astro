@@ -274,6 +274,20 @@ const taskTypes:Record<string,string>={
 .msc-sheet [contenteditable="true"]:focus{outline:2px solid #6f9866;background:#f7faf5}
 .msc-task-person [data-printed-owner]{display:inline-block;max-width:100%;overflow-wrap:anywhere;text-decoration:underline dotted #7a9b86;text-underline-offset:3px}
 @media print{.msc-sheet [contenteditable="true"]{outline:none!important;background:transparent!important;text-decoration:none!important}}
+
+/* June reference: visible pencil indicates inline-editable text before hover.
+   A CSS pseudo-element keeps the cue out of saved text and the text cursor. */
+.msc .msc-sheet [contenteditable="true"]{position:relative}
+.msc .msc-sheet [contenteditable="true"]::after{
+ content:"";display:inline-block;width:12px;height:12px;margin-left:6px;
+ vertical-align:baseline;
+ background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");
+ opacity:.7;pointer-events:none;transition:opacity .12s ease;
+}
+.msc .msc-sheet [contenteditable="true"]:hover::after{opacity:1}
+.msc .msc-sheet [contenteditable="true"]:focus::after{opacity:0}
+@media print{.msc .msc-sheet [contenteditable="true"]::after{display:none!important}}
+.msc.msc-image-export .msc-sheet [contenteditable="true"]::after{display:none!important}
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
