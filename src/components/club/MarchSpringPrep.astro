@@ -76,8 +76,8 @@ const taskTypes:Record<string,string>={
     <div class="msc-sheet-tasks">
     {project.tasks.map((t,i)=><section class="msc-task" data-printed-task={t.id}>
       <div class="msc-task-num">0{i+1}</div>
-      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="73" height="73" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p class="msc-supplies">SUPPLIES · {handoffs[t.id].supplies}</p><p class="msc-steps"><b>GET READY</b> {handoffs[t.id].ready}<br/><b>DO THE JOB</b> {handoffs[t.id].doJob}<br/><b>CHECK IT'S DONE</b> {handoffs[t.id].done}</p></div></div>
-      <div class="msc-task-person"><span>THIS JOB IS MINE</span><strong data-printed-owner={t.id} tabindex="0" role="button" aria-label={`Change owner for ${t.label}`} title="Tap to change who owns this job">Our family</strong></div>
+      <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="73" height="73" alt="" class="msc-task-icon"/><div><h3 data-march-edit="title" data-task={t.id} contenteditable="true" role="textbox" spellcheck="true" aria-label={`Edit ${t.label} title`}>{t.label}</h3><p class="msc-supplies">SUPPLIES · <span data-march-edit="supplies" data-task={t.id} contenteditable="true" role="textbox" spellcheck="true" aria-label={`Edit supplies for ${t.label}`}>{handoffs[t.id].supplies}</span></p><p class="msc-steps"><b>GET READY</b> <span data-march-edit="ready" data-task={t.id} contenteditable="true" role="textbox" spellcheck="true" aria-label={`Edit getting ready for ${t.label}`}>{handoffs[t.id].ready}</span><br/><b>DO THE JOB</b> <span data-march-edit="doJob" data-task={t.id} contenteditable="true" role="textbox" spellcheck="true" aria-label={`Edit job instructions for ${t.label}`}>{handoffs[t.id].doJob}</span><br/><b>CHECK IT'S DONE</b> <span data-march-edit="done" data-task={t.id} contenteditable="true" role="textbox" spellcheck="true" aria-label={`Edit finish line for ${t.label}`}>{handoffs[t.id].done}</span></p></div></div>
+      <div class="msc-task-person"><span>THIS JOB IS MINE</span><strong data-printed-owner={t.id} contenteditable="true" role="textbox" spellcheck="false" aria-label={`Edit owner for ${t.label}`} title="Click and type to change the owner">Our family</strong></div>
       <div class="msc-check" aria-hidden="true"></div>
     </section>)}
     </div>
@@ -268,14 +268,12 @@ const taskTypes:Record<string,string>={
  .msc-floating-edit:hover{background:#303030}
  .msc-floating-edit:focus-visible{outline:3px solid #9caf9a;outline-offset:3px}
 }
-/* The actual owner names are the edit controls, following June's on-paper pattern. */
-.msc-task-person{position:relative;min-width:0}
-.msc-task-person [data-printed-owner]{display:inline-block;max-width:100%;cursor:pointer;text-decoration:underline dotted #7a9b86;text-underline-offset:3px;border-radius:2px}
-.msc-task-person [data-printed-owner]:hover,.msc-task-person [data-printed-owner]:focus-visible{outline:1px dashed #668d74;outline-offset:3px;background:#f3faf5}
-.msc-task-person .msc-inline-owner{display:block;width:100%;min-width:0;margin-top:2px;border:1px solid #719782;border-radius:3px;background:#fff;color:#365b46;font:600 13px/1.25 'MSC Gelasio',Georgia,serif;padding:4px 2px;cursor:pointer}
-.msc-task-person .msc-inline-owner:focus{outline:2px solid #668d74;outline-offset:1px}
-@media print{.msc-floating-edit{display:none!important}.msc-task-person [data-printed-owner]{text-decoration:none!important;outline:0!important;background:none!important}.msc-inline-owner{display:none!important}}
-
+/* June-style in-place editing: the printed words are real editable HTML. */
+.msc-sheet [contenteditable="true"]{cursor:text;outline-offset:2px;border-radius:2px;min-width:0}
+.msc-sheet [contenteditable="true"]:hover{outline:1px dashed #8daf94}
+.msc-sheet [contenteditable="true"]:focus{outline:2px solid #6f9866;background:#f7faf5}
+.msc-task-person [data-printed-owner]{display:inline-block;max-width:100%;overflow-wrap:anywhere;text-decoration:underline dotted #7a9b86;text-underline-offset:3px}
+@media print{.msc-sheet [contenteditable="true"]{outline:none!important;background:transparent!important;text-decoration:none!important}}
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
@@ -305,6 +303,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  let family='Our Family';
  let chosen:Record<string,string>={};
  let custom=new Set<string>();
+ let customOwnerLabels:Record<string,string>={};
+ type TaskCopyKey='title'|'supplies'|'ready'|'doJob'|'done';
+ let textEdits:Record<string,Partial<Record<TaskCopyKey,string>>>={};
+ const copyDefaults:Record<string,Record<TaskCopyKey,string>>=Object.fromEntries(project.tasks.map(t=>[t.id,{title:t.label,supplies:({ 'mar-baseboards':'Soft cloth + water','mar-vents':'Microfiber duster + cloth','mar-winter-gear':'Storage bin + label','mar-curtains':'Laundry supplies or duster','mar-donate':'Donation bag'} as Record<string,string>)[t.id]??'',ready:({ 'mar-baseboards':'Take a soft cloth and dampen it with water. Choose one room.','mar-vents':'Turn fans off. Gather a microfiber duster.','mar-winter-gear':'Gather hats, gloves and scarves. Get a storage bin.','mar-curtains':'Check fabric care labels and gather supplies.','mar-donate':'Get a bag. Choose one small area.'} as Record<string,string>)[t.id]??'',doJob:({ 'mar-baseboards':'Wipe reachable baseboards and corners.','mar-vents':'An adult dusts accessible vents and fan blades safely.','mar-winter-gear':'Sort items; set aside anything still needed.','mar-curtains':'An adult cleans one set and handles taking down/rehanging.','mar-donate':'Suggest unused items; ask before adding anyone else’s.'} as Record<string,string>)[t.id]??'',done:({ 'mar-baseboards':'No visible dust; cloth rinsed and put away.','mar-vents':'Visible dust is gone; tools put away.','mar-winter-gear':'Stored items are clean and dry; labeled bin put away.','mar-curtains':'Curtains are clean, dry and rehung properly.','mar-donate':'Adult approves contents; bag goes to donation spot.'} as Record<string,string>)[t.id]??''}])) as Record<string,Record<TaskCopyKey,string>>;
  let sampleKey='';
  const pick=(task:string,people:Member[]):Member|undefined=>{
   const adults=people.filter(m=>m.kind==='adult');
@@ -351,52 +353,48 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
    }
    select.value=live.some(m=>m.id===current&&( !adultOnly.has(task.id)||m.kind==='adult'))?current:'';
    const selected=live.find(m=>m.id===select.value);
-   printed.textContent=selected?ownerLabel(selected,live):'Optional · unassigned';
-   const summary=root.querySelector<HTMLElement>(`[data-summary-owner="${task.id}"]`);if(summary)summary.textContent=printed.textContent;
+   const customName=customOwnerLabels[task.id];
+   if(customName && !adultOnly.has(task.id)){
+    const option=document.createElement('option');option.value='custom:'+task.id;option.textContent='Custom: '+customName;select.append(option);select.value=option.value;
+   }
+   if(document.activeElement!==printed)printed.textContent=(customName && !adultOnly.has(task.id))?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
+   const summary=root.querySelector<HTMLElement>(`[data-summary-owner="${task.id}"]`);if(summary)summary.textContent=(customName && !adultOnly.has(task.id))?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
   }
+  root.querySelectorAll<HTMLElement>('[data-march-edit]').forEach(el=>{
+   if(document.activeElement===el)return;
+   const task=el.dataset.task!,field=el.dataset.marchEdit as TaskCopyKey;
+   el.textContent=textEdits[task]?.[field]??copyDefaults[task]?.[field]??'';
+  });
   const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
  };
- // Edit an owner directly where the name appears on the printed sheet.
- // Keep the same select values and safety restrictions as Make Changes.
- const beginInlineOwner=(printed:HTMLElement,taskId:string)=>{
-  if(root.querySelector('.msc-inline-owner'))return;
-  const field=root.querySelector<HTMLSelectElement>(`[data-owner="${taskId}"]`);
-  if(!field)return;
-  const picker=field.cloneNode(true) as HTMLSelectElement;
-  picker.className='msc-inline-owner';
-  picker.removeAttribute('data-owner');
-  picker.setAttribute('aria-label','Change '+(project.tasks.find(t=>t.id===taskId)?.label??'job')+' owner');
-  picker.value=field.value;
-  printed.hidden=true;
-  printed.insertAdjacentElement('afterend',picker);
-  let closed=false;
-  const finish=(commit:boolean)=>{
-   if(closed)return;
-   closed=true;
-   if(commit){
-    field.value=picker.value;
-    field.dispatchEvent(new Event('change',{bubbles:true}));
-   }
-   picker.remove();
-   printed.hidden=false;
-   if(commit)printed.focus({preventScroll:true});
-  };
-  picker.addEventListener('change',()=>finish(true));
-  picker.addEventListener('blur',()=>finish(false));
-  picker.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();finish(false)}});
-  picker.focus({preventScroll:true});
- };
- root.querySelectorAll<HTMLElement>('[data-printed-owner]').forEach(printed=>{
-  const taskId=printed.dataset.printedOwner!;
-  printed.addEventListener('click',()=>beginInlineOwner(printed,taskId));
-  printed.addEventListener('keydown',event=>{
-   if(event.key==='Enter'||event.key===' '){event.preventDefault();beginInlineOwner(printed,taskId)}
-  });
+ const save=()=>{try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom],customOwnerLabels,textEdits}))}catch{}};
+ const clean=(el:HTMLElement,limit:number)=> (el.textContent??'').replace(/\\s+/g,' ').trim().slice(0,limit);
+ root.querySelectorAll<HTMLElement>('[data-march-edit]').forEach(el=>{
+  const task=el.dataset.task!,field=el.dataset.marchEdit as TaskCopyKey;
+  el.addEventListener('input',()=>{(textEdits[task]??={})[field]=clean(el,field==='title'?60:180);save()});
+  el.addEventListener('blur',()=>{(textEdits[task]??={})[field]=clean(el,field==='title'?60:180)||copyDefaults[task][field];save();draw()});
+  el.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
  });
- const save=()=>{try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom]}))}catch{}};
- root.querySelectorAll<HTMLSelectElement>('[data-owner]').forEach(select=>select.addEventListener('change',()=>{const task=select.dataset.owner!;chosen[task]=select.value;custom.add(task);save();draw()}));
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{custom.clear();for(const t of project.tasks)chosen[t.id]=pick(t.id,members)?.id??'';save();draw()});
- root.querySelector('[data-print]')?.addEventListener('click',()=>{root.querySelector<HTMLSelectElement>('.msc-inline-owner')?.blur();window.print()});
+ root.querySelectorAll<HTMLElement>('[data-printed-owner]').forEach(el=>{
+  const task=el.dataset.printedOwner!;
+  el.addEventListener('input',()=>{const value=clean(el,32);if(!adultOnly.has(task))customOwnerLabels[task]=value;save()});
+  el.addEventListener('blur',()=>{
+   const value=clean(el,32);const people=members.filter(m=>!m.archived&&(!adultOnly.has(task)||m.kind==='adult'));
+   const match=people.find(m=>ownerLabel(m,members).toLowerCase()===value.toLowerCase()||m.firstName.toLowerCase()===value.toLowerCase());
+   if(match){chosen[task]=match.id;delete customOwnerLabels[task];custom.add(task)}
+   else if(!adultOnly.has(task)&&value&&value!=='Optional · unassigned'){
+    customOwnerLabels[task]=value;chosen[task]='';custom.add(task);
+   }else if(!value||value==='Optional · unassigned'){
+    chosen[task]='';delete customOwnerLabels[task];custom.add(task);
+   }
+   // Adult-only tasks must stay assigned to a known adult, never an unknown typed name.
+   save();draw();
+  });
+  el.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
+ });
+ root.querySelectorAll<HTMLSelectElement>('[data-owner]').forEach(select=>select.addEventListener('change',()=>{const task=select.dataset.owner!;chosen[task]=select.value.startsWith('custom:')?'':select.value;if(!select.value.startsWith('custom:'))delete customOwnerLabels[task];custom.add(task);save();draw()}));
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{custom.clear();customOwnerLabels={};textEdits={};for(const t of project.tasks)chosen[t.id]=pick(t.id,members)?.id??'';save();draw()});
+ root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
   const sheet=root.querySelector<HTMLElement>("[data-sheet]");
@@ -419,10 +417,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   const changed=id!==sampleKey;
   members=h.members.filter(m=>!m.archived);
   family=h.displayName??'Our Family';
-  if(changed){chosen={};custom.clear();sampleKey=id;
-   try{const saved=JSON.parse(store.getItem(key)??'null');if(saved?.sampleKey===id){chosen=saved.chosen??{};custom=new Set(Array.isArray(saved.custom)?saved.custom:[])}}catch{}
+  if(changed){chosen={};custom.clear();customOwnerLabels={};textEdits={};sampleKey=id;
+   try{const saved=JSON.parse(store.getItem(key)??'null');if(saved?.sampleKey===id){chosen=saved.chosen??{};custom=new Set(Array.isArray(saved.custom)?saved.custom:[]);customOwnerLabels=saved.customOwnerLabels??{};textEdits=saved.textEdits??{}}}catch{}
   }
-  for(const task of project.tasks)if(!custom.has(task.id)||!members.some(m=>m.id===chosen[task.id]&&(!adultOnly.has(task.id)||m.kind==='adult')))chosen[task.id]=pick(task.id,members)?.id??'';
+  for(const task of project.tasks)if(!custom.has(task.id)||(!customOwnerLabels[task.id]&&!members.some(m=>m.id===chosen[task.id]&&(!adultOnly.has(task.id)||m.kind==='adult'))))chosen[task.id]=pick(task.id,members)?.id??'';
   save();draw();
  };
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail));
