@@ -19,19 +19,19 @@ const defaults = [
   <div class="jhc-intro">
     <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · JANUARY</p>
     <h2>Your family’s habits. <em>Already prepared.</em></h2>
-    <p>Four small reminders, tied to things your family already does. Change anything, or print the suggestions as they are. Start with one or two.</p>
+    <p>One small habit, chosen for your family. Keep the prepared suggestion or find a habit that makes everyday life easier.</p>
   </div>
   <div class="jhc-workspace"><div class="jhc-config" aria-label="Customize your family habit cards">
     <div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
-    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>Four little habits. Ready to use.</h3><p>Each card connects one familiar moment to a simple next action. Start with one or two.</p><div class="jhc-summary-row"><span>Cards included</span><strong>4 reminders</strong></div><div class="jhc-summary-row"><span>Format</span><strong>One cut-out sheet</strong></div><button type="button" class="jhc-edit-trigger" data-jhc-open>Make changes</button></div>
-    <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>The four cards are ready to print. Edit the reminders that need to fit your family.</p>    <div class="jhc-forms">
-      {defaults.map((item, i) => (
+    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>One habit. A real difference.</h3><p>Your family has a prepared starting habit. You can use it as is, or answer three quick questions to find a better fit.</p><div class="jhc-summary-row"><span>Recommended habit</span><strong data-jhc-habit-label>Clear dishes after breakfast</strong></div><div class="jhc-summary-row"><span>Focus</span><strong>Just one habit this month</strong></div><button type="button" class="jhc-finder-launch" data-jhc-finder-open>Help me find our habit</button><button type="button" class="jhc-edit-trigger" data-jhc-open>Edit this habit</button></div>
+    <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>Make this one habit fit your family. Only your first habit card will print.</p>    <div class="jhc-forms">
+      {defaults.slice(0,1).map((item, i) => (
         <fieldset class="jhc-editor" data-jhc-editor={i}>
           <legend><span class="jhc-editor-num">0{i+1}</span> Habit card {i+1}</legend>
-          <label><span>Whose card?</span><input data-field="name" maxlength="42" value={item.name}/></label>
-          <label><span>After I already...</span><input data-field="anchor" maxlength="85" value={item.anchor}/></label>
-          <label><span>Then I will...</span><textarea data-field="action" maxlength="105" rows="2">{item.action}</textarea></label>
-          <label><span>Put the reminder...</span><input data-field="place" maxlength="70" value={item.place}/></label>
+          <label><span>Who will practice this habit?</span><input data-field="name" maxlength="42" value={item.name}/></label>
+          <label><span>When this happens</span><input data-field="anchor" maxlength="85" value={item.anchor}/></label>
+          <label><span>Here's what we do next</span><textarea data-field="action" maxlength="105" rows="2">{item.action}</textarea></label>
+          <label><span>Place this reminder</span><input data-field="place" maxlength="70" value={item.place}/></label>
         </fieldset>
       ))}
     </div>
@@ -45,12 +45,13 @@ const defaults = [
     <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
   </div>
 
+  <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's starting habit</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">A few quick choices. We'll suggest one small habit worth practicing first.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current habit</button></div></dialog>
   <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>MAKE CHANGES</button>
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
       <div class="jhc-card-grid">
-        {defaults.map((item, i) => (
+        {defaults.slice(0,1).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
             <div class="jhc-card-top">
               <span class="jhc-brand">ORGANIZED FAMILY CLUB</span>
@@ -71,7 +72,7 @@ const defaults = [
           </article>
         ))}
       </div>
-      <div class="jhc-sheet-footer"><span>One habit at a time. The card is the reminder.</span><span>✂ CUT ALONG THE DOTTED LINES</span></div>
+      <div class="jhc-sheet-footer"><span>Start with one. Practice until it feels normal.</span><span>PLACE THIS REMINDER WHERE THE HABIT HAPPENS</span></div>
     </div></div>
   </div>
   </div>
@@ -313,6 +314,28 @@ const defaults = [
 .jhc.jhc-image-export .jhc-page [contenteditable="true"]::after{display:none!important}
 .jhc.jhc-image-export .jhc-page [contenteditable="true"]{outline:none!important;background:transparent!important}
 </style>
+<style is:global>
+.jhc-finder-launch{display:block;width:100%;padding:13px;margin:16px 0 4px;background:#527468;border:0;color:#fff;font:600 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.jhc-finder-dialog{position:fixed;inset:0;margin:auto;width:min(540px,calc(100vw - 28px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #d6e2d8;border-radius:10px;padding:24px;background:#fbfaf7;color:#454545;box-shadow:0 18px 55px #0003;z-index:100}
+.jhc-finder-dialog::backdrop{background:#1d2825a6}
+.jhc-finder-dialog .jhc-dialog-head{display:flex;justify-content:space-between;align-items:start;gap:15px}
+.jhc-finder-dialog .jhc-dialog-head h2{font:400 29px/1.2 Georgia,serif;color:#527468;margin:0}
+.jhc-finder-dialog .jhc-dialog-head button{border:0;background:transparent;font-size:27px;cursor:pointer}
+.jhc-finder-intro,.jhc-finder-dialog p{font:13px/1.6 Montserrat,Arial,sans-serif}
+.jhc-finder-dialog h3{font:400 24px/1.3 Georgia,serif;color:#527468;margin:18px 0}
+.jhc-finder-choice{display:block;width:100%;padding:14px;margin:8px 0;border:1px solid #d5ded3;text-align:left;background:white;color:#454545;font:600 13px Montserrat,Arial,sans-serif;cursor:pointer}
+.jhc-finder-choice:hover,.jhc-finder-choice:focus-visible{background:#eaf1eb;outline:2px solid #527468}
+.jhc-finder-actions{display:flex;justify-content:space-between;gap:8px;margin-top:18px}.jhc-finder-actions button{padding:10px;border:0;background:transparent;color:#527468;text-decoration:underline;cursor:pointer}
+.jhc-finder-apply{background:#527468!important;color:white!important;text-decoration:none!important;width:100%;padding:15px!important;margin-top:14px;font-weight:700}
+@media print{.jhc-finder-dialog{display:none!important}}
+.jhc-card-grid{display:flex!important;align-items:center;justify-content:center;border:0!important}
+.jhc-card-grid .jhc-card{width:min(100%,510px);height:810px;max-height:100%;border:1px dashed #bdbdbd!important;padding:42px 43px!important}
+.jhc-card-grid .jhc-card-icon{width:88px!important;height:88px!important;margin:35px auto 20px!important}
+.jhc-card-grid .jhc-card-icon img{width:88px;height:88px}
+.jhc-card-grid .jhc-card-name{font-size:35px}
+.jhc-card-grid .jhc-anchor{font-size:22px}
+.jhc-card-grid .jhc-action{font-size:26px}
+</style>
 <script>
 const defaults = [
   {name:'My morning',anchor:'After I finish breakfast',action:'I put my dishes away.',place:'By the breakfast table'},
@@ -332,10 +355,41 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  // Family names never go into persistent localStorage on signed-in Club pages.
  const storage = key.startsWith('omc:club:') ? sessionStorage : localStorage;
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-editor]'));
+ const finder=root.querySelector<HTMLDialogElement>('[data-jhc-finder-dialog]');
+ const finderBody=root.querySelector<HTMLElement>('[data-jhc-finder-body]');
+ let finderStep=0;
+ const finderAnswers:string[]=[];
+ const finderQuestions=[
+  {question:'Where does your family feel the most friction?',options:['Getting out the door','Keeping things picked up','Meals and the kitchen','Bedtime and evenings','Remembering what comes next']},
+  {question:'What keeps making that difficult?',options:['Someone needs repeated reminders','Things are not ready when needed','Nobody knows who owns it','We start but do not finish','We do not have a consistent cue']},
+  {question:'Who could practice one small change?',options:['Children together','One child','One adult','Everyone together']}
+ ];
+ const suggestions:Record<string,{name:string;anchor:string;action:string;place:string}>={
+  'Getting out the door':{name:'Tomorrow is ready',anchor:'After dinner',action:'We put tomorrow’s backpacks and essentials by the door.',place:'Beside our backpacks'},
+  'Keeping things picked up':{name:'Put it back',anchor:'Before starting something new',action:'We put away what we just used.',place:'Near our play area'},
+  'Meals and the kitchen':{name:'Clear our dishes',anchor:'After we finish eating',action:'We bring our own dishes to the kitchen.',place:'By the kitchen table'},
+  'Bedtime and evenings':{name:'Ready for tomorrow',anchor:'Before bedtime',action:'We set out tomorrow’s clothes.',place:'Near our bedrooms'},
+  'Remembering what comes next':{name:'Check our plan',anchor:'Before asking what happens next',action:'We look at our family schedule.',place:'Beside our family calendar'}
+ };
+ const renderFinder=()=>{
+  if(!finderBody)return;
+  finderBody.replaceChildren();
+  const make=(tag:string,content:string,cls?:string)=>{const el=document.createElement(tag);el.textContent=content;if(cls)el.className=cls;finderBody.append(el);return el};
+  make('p',finderStep<3?`Question ${finderStep+1} of 3`:'Your suggested starting habit');
+  if(finderStep<3){const q=finderQuestions[finderStep];make('h3',q.question);q.options.forEach(option=>{const btn=make('button',option,'jhc-finder-choice') as HTMLButtonElement;btn.type='button';btn.addEventListener('click',()=>{finderAnswers[finderStep]=option;finderStep++;renderFinder()})})}
+  else {const suggestion=suggestions[finderAnswers[0]];const ownership=finderAnswers[2]==='One child'?'My habit':finderAnswers[2]==='One adult'?'My responsibility':finderAnswers[2]==='Everyone together'?'Our family':'Our kids';make('h3',suggestion.name);make('p',`Who: ${ownership} · When: ${suggestion.anchor}`);make('p',suggestion.action);make('p',`Put the reminder: ${suggestion.place}`);make('p','Why this habit? One small action at a predictable moment can prevent repeated reminders and last-minute work.');const btn=make('button','Use this habit','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;btn.type='button';btn.addEventListener('click',()=>{values[0]={...suggestion,name:ownership==='Our kids'?suggestion.name:suggestion.name};save();paint();finder?.close()})}
+  const back=root.querySelector<HTMLButtonElement>('[data-jhc-finder-back]');if(back)back.hidden=finderStep===0;
+ };
+ root.querySelector('[data-jhc-finder-open]')?.addEventListener('click',()=>{finderStep=0;finderAnswers.length=0;renderFinder();finder?.showModal()});
+ root.querySelectorAll('[data-jhc-finder-close]').forEach(b=>b.addEventListener('click',()=>finder?.close()));
+ root.querySelector('[data-jhc-finder-back]')?.addEventListener('click',()=>{finderStep=Math.max(0,finderStep-1);renderFinder()});
+ finder?.addEventListener('click',e=>{if(e.target===finder)finder.close()});
  const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-card]'));
  let values=defaults.map(x=>({...x}));
  try {const saved=JSON.parse(storage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
+ const save=()=>{try{storage.setItem(key,JSON.stringify(values))}catch{}};
  const paint=()=>{
+  const habitLabel=root.querySelector<HTMLElement>('[data-jhc-habit-label]');if(habitLabel)habitLabel.textContent=values[0].name;
   editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
   cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];if(document.activeElement!==target)target.textContent=values[i][field] || ' ';}));
  };
