@@ -253,7 +253,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  const stage=root.querySelector<HTMLElement>('[data-osr-stage]');
  const pages=root.querySelector<HTMLElement>('[data-osr-pages]');
  const sheets=Array.from(root.querySelectorAll<HTMLElement>('.osr-paper'));
- const fit=()=>{if(!stage||!pages)return;const scale=Math.min(1,Math.max(180,stage.clientWidth-2)/816);pages.style.gap=22*scale+'px';for(const sheet of sheets){sheet.style.setProperty('--osr-scale',String(scale));sheet.style.marginBottom=-(1056*(1-scale))+'px';sheet.style.marginRight=-(816*(1-scale))+'px')}};
+ const fit=()=>{if(!stage||!pages)return;const scale=Math.min(1,Math.max(180,stage.clientWidth-2)/816);pages.style.gap=22*scale+'px';for(const sheet of sheets){sheet.style.setProperty('--osr-scale',String(scale));sheet.style.marginBottom=-(1056*(1-scale))+'px';sheet.style.marginRight=-(816*(1-scale))+'px';}};
  fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-osr-vision]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-osr-editor]');
