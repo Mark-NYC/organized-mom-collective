@@ -1,0 +1,101 @@
+---
+/** November-only family activity calendar. Independent of /try-the-calendar/. */
+---
+<div class="nac" data-nac>
+  <aside class="nac-controls">
+    <p class="nac-kicker">ORGANIZED FAMILY CLUB · NOVEMBER</p>
+    <h2>Everyone knows <em>what's next.</em></h2>
+    <p class="nac-lede">Your family is already here. Add the recurring activities that matter, then everyone can find their own plans.</p>
+    <div class="nac-family">
+      <strong data-nac-family>Our family</strong>
+      <div class="nac-chips" data-nac-members><span>Mom</span><span>Dad</span><span>Andrew</span><span>Philip</span></div>
+    </div>
+    <form class="nac-form" data-nac-form>
+      <h3>Add an activity</h3>
+      <label>Who is it for?<select data-nac-person required></select></label>
+      <label>What's the activity?<input data-nac-activity required maxlength="38" placeholder="Soccer, preschool, piano…" autocomplete="off" /></label>
+      <label>Which day?<select data-nac-day required>
+        <option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option>
+        <option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option>
+      </select></label>
+      <button type="submit" class="nac-add">+ Add recurring activity</button>
+    </form>
+    <div class="nac-saved">
+      <h3>Activities in your guide</h3>
+      <div data-nac-entries class="nac-entries"></div>
+      <p data-nac-empty class="nac-muted">Add a recurring activity to see it on your family's calendar.</p>
+    </div>
+    <p class="nac-small">This is a November concept preview. Your entries are saved in this browser. No mailing or purchase is initiated here.</p>
+    <a class="nac-secondary" href="/try-the-calendar/" target="_blank" rel="noopener noreferrer">Explore the full free monthly calendar ↗</a>
+  </aside>
+  <section class="nac-view" aria-label="Family activity calendar preview">
+    <div class="nac-preview-top"><span>YOUR PERSONALIZED WEEKLY ACTIVITY GUIDE</span><button type="button" data-nac-print>Print preview</button></div>
+    <article class="nac-paper" data-nac-paper>
+      <p class="nac-paper-kicker">ORGANIZED FAMILY CLUB · NOVEMBER</p>
+      <h2>Everyone Knows <em>What's Next</em></h2>
+      <p class="nac-paper-sub" data-nac-family-sub>Our family's usual week</p>
+      <div class="nac-process" aria-label="Activity preparation: look, get ready, ask">
+        <div><span class="nac-symbol">▦</span><strong>LOOK</strong><small>What do I have?</small></div>
+        <div><span class="nac-symbol">▤</span><strong>GET READY</strong><small>What do I need?</small></div>
+        <div><span class="nac-symbol">✳</span><strong>ASK</strong><small>Do I need help?</small></div>
+      </div>
+      <h3>Our family's usual week</h3>
+      <p class="nac-hint">Check the family calendar for exact dates, times and changes.</p>
+      <div class="nac-grid-wrap">
+        <table class="nac-grid"><thead><tr><th scope="col">Person</th><th scope="col">Mon</th><th scope="col">Tue</th><th scope="col">Wed</th><th scope="col">Thu</th><th scope="col">Fri</th><th scope="col">Sat</th><th scope="col">Sun</th></tr></thead><tbody data-nac-grid></tbody></table>
+      </div>
+      <div class="nac-rule"><strong>After dinner:</strong> Everyone checks what's coming tomorrow and gets ready for their own activities.</div>
+      <footer>ONE FAMILY · EVERYONE KNOWS THE PLAN</footer>
+    </article>
+  </section>
+</div>
+<style is:global>
+.nac,.nac *{box-sizing:border-box}.nac{display:grid;grid-template-columns:clamp(290px,29vw,405px) minmax(0,1fr);color:#484941;font-family:Montserrat,Arial,sans-serif;min-height:650px}
+.nac-controls{padding:23px 24px;background:#faf9f7;border-right:1px solid #e4e6e0}.nac-kicker{font-size:10px;letter-spacing:.14em;color:#738773;font-weight:700}.nac-controls h2{font:400 30px/1.18 Georgia,serif;color:#55725e;margin:12px 0}.nac-controls h2 em{font-style:italic}.nac-lede{font-size:13px;line-height:1.6;margin:0 0 20px}
+.nac-family{background:#fff;border:1px solid #dfe7de;padding:15px}.nac-family strong{font:400 19px Georgia,serif;color:#52705a}.nac-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.nac-chips span{padding:6px 11px;background:#e9f1eb;border-radius:20px;font-size:11px}
+.nac-form h3,.nac-saved h3{font:400 21px Georgia,serif;color:#55725e;margin:22px 0 10px}.nac-form label{display:block;font-size:12px;font-weight:700;margin:12px 0}.nac-form input,.nac-form select{display:block;margin-top:6px;width:100%;height:42px;border:1px solid #bbcdbd;border-radius:4px;padding:8px 10px;background:#fff;color:#484941;font:13px Montserrat,Arial,sans-serif}.nac-add{width:100%;border:0;background:#5f7767;color:#fff;min-height:44px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.nac-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #e4e8e0;font-size:12px}.nac-entry button{border:1px solid #d3d9d0;background:#fff;color:#526d59;cursor:pointer;min-width:32px;min-height:32px}.nac-muted,.nac-small{font-size:11px;line-height:1.6;color:#777}.nac-secondary{display:block;margin-top:15px;color:#50725b;text-decoration:underline;text-underline-offset:3px;font-size:12px}
+.nac-view{background:#f5f3f2;min-width:0;padding:24px 25px 40px;overflow:auto}.nac-preview-top{display:flex;justify-content:space-between;align-items:center;gap:10px;max-width:816px;margin:0 auto 12px;color:#667869;letter-spacing:.1em;font-size:10px;font-weight:700}.nac-preview-top button{background:#fff;color:#50725b;border:1px solid #b8ccbd;padding:9px 15px;font-size:12px;letter-spacing:0;cursor:pointer}
+.nac-paper{width:816px;min-height:1056px;background:#fff;margin:0 auto;padding:52px 43px 31px;box-shadow:0 8px 26px #0002;border:1px solid #e6e6e0;display:flex;flex-direction:column}.nac-paper-kicker{text-align:center;border-top:7px solid #dce9e2;padding-top:17px;color:#7b917e;letter-spacing:.16em;font-size:10px;font-weight:700}.nac-paper h2{font:400 43px/1.12 Georgia,serif;color:#52725e;text-align:center;margin:13px 0 7px}.nac-paper h2 em{font-style:italic}.nac-paper-sub{text-align:center;font:italic 18px Georgia,serif;color:#839486}.nac-process{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:23px 0 25px}.nac-process>div{background:#e7f0e8;text-align:center;padding:15px 8px;min-height:125px}.nac-process>div:nth-child(2){background:#f6eee4}.nac-process>div:nth-child(3){background:#edf0f2}.nac-symbol{display:block;font-size:28px;color:#58735f}.nac-process strong{display:block;font-size:13px;letter-spacing:.05em;color:#4a6653;margin:5px 0}.nac-process small{font-size:11px;line-height:1.5;color:#5c625c}
+.nac-paper h3{font:400 25px Georgia,serif;color:#52725e;margin:10px 0 0}.nac-hint{font-size:11px;color:#687c6e;margin:7px 0 15px}.nac-grid{border-collapse:collapse;width:100%;table-layout:fixed}.nac-grid th,.nac-grid td{border:1px solid #dbe4da;padding:11px 5px;vertical-align:top;text-align:center;font-size:10px;overflow-wrap:anywhere}.nac-grid th{background:#e6efe7;color:#52725e;font-size:10px}.nac-grid th:first-child{width:95px}.nac-grid td:first-child{text-align:left;font-weight:700;color:#4b6b54;background:#f5f8f4}.nac-cell-item{padding:5px 2px;margin-bottom:4px;background:#f3eee6;border-radius:2px;font-size:9px;line-height:1.35}.nac-empty-cell{color:#d0d8cd}.nac-rule{padding:15px;background:#edf4ed;color:#4e6e57;font:12px/1.6 Montserrat,Arial,sans-serif;margin-top:22px}.nac-paper footer{margin-top:auto;padding-top:13px;border-top:1px solid #cddfd0;text-align:right;color:#829484;font-weight:700;letter-spacing:.13em;font-size:9px}
+@media(max-width:1100px){.nac{display:flex;flex-direction:column}.nac-view{order:0}.nac-controls{order:1;border-right:0}.nac-paper{transform-origin:top left}}
+@media(max-width:870px){.nac-view{padding:16px 10px}.nac-paper{width:100%;min-height:0;padding:5% 3%;box-shadow:0 5px 18px #0001}.nac-paper h2{font-size:clamp(21px,5vw,43px)}.nac-process{gap:4px;margin:12px 0}.nac-process>div{min-height:0;padding:10px 3px}.nac-symbol{font-size:20px}.nac-process strong{font-size:clamp(9px,2vw,13px)}.nac-process small{font-size:9px}.nac-grid th,.nac-grid td{padding:7px 2px;font-size:clamp(7px,1.6vw,10px)}.nac-grid th:first-child{width:17%}.nac-cell-item{font-size:clamp(7px,1.6vw,10px)}.nac-paper-sub{font-size:14px}}
+@media print{body:has(.nac-printing) *{visibility:hidden!important}body:has(.nac-printing) .nac-paper,body:has(.nac-printing) .nac-paper *{visibility:visible!important}.nac-printing .nac-paper{position:absolute;top:0;left:0;width:8.5in;min-height:11in;box-shadow:none;border:0;transform:none;padding:.4in!important}.nac-printing .nac-controls,.nac-printing .nac-preview-top{display:none!important}}
+</style>
+<script>
+type ActivityEntry={id:string;personId:string;day:number;name:string};
+type Member={id:string;name:string};
+for(const root of document.querySelectorAll<HTMLElement>('[data-nac]')){
+ const $=<T extends Element=HTMLElement>(s:string)=>root.querySelector<T>(s);
+ let householdId='sample',family='Our family';
+ let members:Member[]=[{id:'mom',name:'Mom'},{id:'dad',name:'Dad'},{id:'andrew',name:'Andrew'},{id:'philip',name:'Philip'}];
+ let entries:ActivityEntry[]=[];
+ const storageKey=()=> 'omc:club:november:activity-calendar:v1:'+householdId;
+ const save=()=>{try{localStorage.setItem(storageKey(),JSON.stringify(entries))}catch{}};
+ const load=()=>{try{const raw=JSON.parse(localStorage.getItem(storageKey())||'[]');entries=Array.isArray(raw)?raw.filter(x=>x&&typeof x.name==='string'&&typeof x.day==='number'&&typeof x.personId==='string'):[]}catch{entries=[]}};
+ const render=()=>{
+  const person=$<HTMLSelectElement>('[data-nac-person]');
+  if(person){const previous=person.value;person.replaceChildren();members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;person.append(o)});if(members.some(m=>m.id===previous))person.value=previous}
+  const chips=$('[data-nac-members]');if(chips){chips.replaceChildren();members.forEach(m=>{const span=document.createElement('span');span.textContent=m.name;chips.append(span)})}
+  const f=$('[data-nac-family]');if(f)f.textContent=family;
+  const fs=$('[data-nac-family-sub]');if(fs)fs.textContent=family+"'s usual week";
+  const rows=$('[data-nac-grid]');if(rows){rows.replaceChildren();members.forEach(m=>{const tr=document.createElement('tr');const th=document.createElement('td');th.textContent=m.name;tr.append(th);for(let day=0;day<7;day++){const td=document.createElement('td');const relevant=entries.filter(e=>e.personId===m.id&&e.day===day);if(relevant.length){relevant.forEach(e=>{const item=document.createElement('div');item.className='nac-cell-item';item.textContent=e.name;td.append(item)})}else{const empty=document.createElement('span');empty.className='nac-empty-cell';empty.textContent='·';td.append(empty)}tr.append(td)}rows.append(tr)})}
+  const list=$('[data-nac-entries]');if(list){list.replaceChildren();entries.forEach(e=>{const line=document.createElement('div');line.className='nac-entry';const text=document.createElement('span');text.textContent=(members.find(m=>m.id===e.personId)?.name??'Family member')+' · '+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][e.day]+' · '+e.name;const del=document.createElement('button');del.type='button';del.setAttribute('aria-label','Remove '+e.name);del.textContent='×';del.addEventListener('click',()=>{entries=entries.filter(x=>x.id!==e.id);save();render()});line.append(text,del);list.append(line)})}
+  const empty=$<HTMLElement>('[data-nac-empty]');if(empty)empty.hidden=entries.length>0;
+ };
+ $<HTMLFormElement>('[data-nac-form]')?.addEventListener('submit',e=>{e.preventDefault();const person=$<HTMLSelectElement>('[data-nac-person]');const day=$<HTMLSelectElement>('[data-nac-day]');const activity=$<HTMLInputElement>('[data-nac-activity]');if(!person||!day||!activity)return;const name=activity.value.trim();if(!name)return;entries.push({id:crypto.randomUUID(),personId:person.value,day:Number(day.value),name});activity.value='';save();render()});
+ const apply=(detail:{household?:{id:string;displayName?:string;members?:Array<{id:string;firstName:string;kind:string;role?:string}>};sample?:string})=>{
+  if(!detail?.household)return;
+  const id=(detail.sample??'account')+':'+detail.household.id;
+  if(id===householdId)return;
+  householdId=id;family=detail.household.displayName?.trim()||'Our family';
+  const people=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
+  if(people.length)members=people.map(m=>({id:m.id,name:m.kind==='adult'&&m.role==='mom'?'Mom':m.kind==='adult'&&m.role==='dad'?'Dad':m.firstName}));
+  load();render();
+ };
+ window.addEventListener('omc:club-preview-household',e=>apply((e as CustomEvent<Parameters<typeof apply>[0]>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:Parameters<typeof apply>[0]}).__ofcPreviewHousehold;
+ if(cached)apply(cached);else{load();render()}
+ $<HTMLButtonElement>('[data-nac-print]')?.addEventListener('click',()=>{root.classList.add('nac-printing');window.print();root.classList.remove('nac-printing')});
+}
+</script>
