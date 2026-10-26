@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/AppLayout.astro';
+import { sampleHouseholds } from '../../data/club/samples';
+import { ageInMonth } from '../../lib/club/profile';
+const family = sampleHouseholds.find(s => s.id === 'rivera')!.household;
+const month = '2026-10';
+---
+<Layout title="Account" description="Family profile preview and app preferences.">
+<div class="mx-auto max-w-2xl">
+<header><p class="label text-[#71866c]">ACCOUNT & FAMILY</p><h1 class="mt-3 font-serif text-[2.4rem]">The people <em>behind the plan.</em></h1><p class="mt-3 leading-relaxed text-warm-soft">Here is how the existing Club family profile fits into your app.</p></header>
+<div class="mt-7 rounded-2xl border border-[#d8c9a6] bg-[#fff8e9] px-5 py-4"><strong class="text-sm">Sample family · Preview only</strong><p class="mt-1 text-sm leading-relaxed">The people shown here are fictional. They are not your account, your purchase history, or saved customer details. Account activation is not part of Phase 1.</p></div>
+<section class="mt-6 rounded-2xl border border-warm-rule bg-white p-6"><p class="label text-[#71866c]">FAMILY PROFILE</p><h2 class="mt-3 font-serif text-[1.8rem]">{family.displayName}</h2><ul class="mt-5 divide-y divide-warm-rule">{family.members.filter(m => !m.archived).map(m => <li class="flex min-h-14 items-center justify-between gap-3 py-3"><span class="font-semibold">{m.firstName}</span><span class="text-sm text-warm-soft">{m.kind === 'child' ? 'Child · ' + ageInMonth(m.birthYear!,m.birthMonth,month) + ' years' : m.role === 'partner' ? 'Parent' : 'Parent'}</span></li>)}</ul><p class="mt-4 text-xs text-warm-soft">Uses the existing Club Household and FamilyMember model. Sample profile is read-only.</p></section>
+<section class="mt-5 rounded-2xl border border-warm-rule bg-white p-6"><h2 class="font-serif text-[1.5rem]">Cleaning preferences</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Cleaning progress is stored locally on this device, not linked to the sample family.</p><a href="/app/settings" class="mt-4 inline-flex min-h-12 items-center text-sm font-semibold text-[#536e4e] underline underline-offset-4">Open existing cleaning settings →</a></section>
+<section class="mt-5 rounded-2xl border border-warm-rule bg-white p-6"><h2 class="font-serif text-[1.5rem]">Need some help?</h2><p class="mt-2 text-sm text-warm-soft">Questions about the calendar or companion? We're here.</p><a href="/support" class="mt-4 inline-flex min-h-12 items-center text-sm font-semibold text-[#536e4e] underline underline-offset-4">Contact support →</a></section>
+</div>
+</Layout>
