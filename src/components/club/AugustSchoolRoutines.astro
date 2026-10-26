@@ -58,7 +58,7 @@ const initial=[
      <header class="asr-paper-head"><h2>My School Day</h2><span data-asr-name>Our morning & after-school routine</span></header>
      <div class="asr-panel asr-panel-am"><header><span class="asr-circle">01</span><div><h3>Before School</h3><p>First things first. I can do this!</p></div><span class="asr-accent">MORNING</span></header><div class="asr-rows" data-asr-group="morning">
       {initial.filter(x=>x.group==='morning').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="morning">
-        <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
+        <time data-asr-time role="button" tabindex="0" aria-label={'Edit time for '+item.label}>{item.time}</time>
         <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
         <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
         <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
@@ -66,7 +66,7 @@ const initial=[
      </div></div>
      <div class="asr-panel asr-panel-pm"><header><span class="asr-circle">02</span><div><h3>After School</h3><p>Come home. Reset. Enjoy the afternoon.</p></div><span class="asr-accent">AFTERNOON</span></header><div class="asr-rows" data-asr-group="after">
       {initial.filter(x=>x.group==='after').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="after">
-        <time data-asr-time contenteditable="true" role="textbox" aria-label={'Edit time for '+item.label}>{item.time}</time>
+        <time data-asr-time role="button" tabindex="0" aria-label={'Edit time for '+item.label}>{item.time}</time>
         <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
         <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
         <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
@@ -106,7 +106,7 @@ const initial=[
 .asr-panel h3{font-size:27px}
 .asr-rows{display:flex;flex-direction:column;gap:clamp(3px,0.5vh,6px)}
 .asr-row{display:grid;grid-template-columns:82px 62px minmax(0,1fr);grid-template-rows:minmax(48px,auto);align-items:center;text-align:left;column-gap:18px;row-gap:0;min-height:58px;padding:3px 15px;border-radius:7px}.asr-row>time{grid-column:1;grid-row:1}.asr-row>img{grid-column:2;grid-row:1}.asr-row>strong{grid-column:3;grid-row:1;min-width:0}.asr-row>.asr-remove{grid-column:3;grid-row:1}
-.asr-row time{font:700 18px/1.15 Montserrat,Arial,sans-serif;color:#536558;white-space:nowrap;font-variant-numeric:tabular-nums}
+.asr-row time{cursor:pointer;border-radius:4px;outline-offset:3px}.asr-row time:hover{outline:1px dashed #9bb4a1}.asr-row time:focus-visible{outline:2px solid #6d9980}.asr-row time{font:700 18px/1.15 Montserrat,Arial,sans-serif;color:#536558;white-space:nowrap;font-variant-numeric:tabular-nums}
 .asr-row img{width:58px;height:47px;object-fit:contain}
 .asr-row strong{font:600 16px/1.24 Montserrat,Arial,sans-serif;overflow-wrap:normal}
 .asr-row .asr-remove{right:5px;top:50%;transform:translateY(-50%)}
@@ -140,7 +140,20 @@ const initial=[
  .asr-primary-actions{display:flex;gap:9px}.asr-jump{display:flex;flex:1;align-items:center;justify-content:center;border:1px solid #506d60;border-radius:4px;background:#fff;color:#506d60;padding:8px;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}.asr-primary-actions .asr-primary{flex:1.3;min-width:0;font-size:12px}
  .asr-actions .asr-secondary{min-height:30px}.asr-actions .asr-reset{min-height:25px}.asr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
-@media print{.asr-editor,.asr-actions,.asr-dialog,.asr-float{display:none!important}.asr-preview{padding:0!important}}
+@media print{.asr-time-popover{display:none!important}.asr-editor,.asr-actions,.asr-dialog,.asr-float{display:none!important}.asr-preview{padding:0!important}}
+.asr-time-popover{position:fixed;z-index:10000;width:325px;max-width:calc(100vw - 16px);padding:15px;border:1px solid #cadbd0;border-radius:12px;background:#fff;box-shadow:0 16px 45px #24392438;color:#506255;font:12px Montserrat,Arial,sans-serif;text-align:left}
+.asr-time-popover>strong{display:block;margin-bottom:12px;font-size:13px}
+.asr-time-interval{display:flex;gap:6px;margin-bottom:11px}
+.asr-time-interval button{flex:1;border:1px solid #cbd8d0;border-radius:6px;background:#fff;min-height:34px;color:#506d60;font-weight:700;cursor:pointer}
+.asr-time-interval button[aria-pressed="true"]{background:#506d60;color:white}
+.asr-time-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.asr-time-grid button{border:1px solid #d6dfd8;border-radius:6px;min-height:40px;background:#f8faf8;color:#506d60;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-time-grid button[aria-pressed="true"]{background:#506d60;border-color:#506d60;color:white}
+.asr-time-grid button:hover,.asr-time-grid button:focus-visible{outline:2px solid #91ad9c}
+.asr-time-actions{display:flex;gap:8px;border-top:1px solid #e4ebe6;margin-top:12px;padding-top:12px}
+.asr-time-actions button{flex:1;min-height:38px;padding:6px;border:1px solid #a4baa9;border-radius:6px;background:#eef4ef;color:#506d60;font-weight:700;cursor:pointer}
+.asr-time-actions input{flex:1;min-width:0;border:1px solid #b9c9be;padding:5px}
+@media print{.asr-time-popover{display:none!important}}
 /* June-style always-visible inline editing pencil (not part of editable text). */
 .asr .asr-sheet [contenteditable="true"]{position:relative;cursor:text;outline-offset:2px}
 .asr .asr-sheet [contenteditable="true"]::after{content:"";display:inline-block;width:12px;height:12px;margin-left:6px;vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");opacity:.7;pointer-events:none}
@@ -207,6 +220,34 @@ const choices:Record<Group,{id:string;label:string;icon:string}[]>={
     {id:'homework',label:'Homework',icon:'book'},
     {id:'snack-free',label:'Snack & Free Time',icon:'snack'}]
   };
+  const formatTime=(value:string)=>{const [h,m]=value.split(':').map(Number);if(!Number.isFinite(h)||!Number.isFinite(m))return value;return String(h%12||12)+':'+String(m).padStart(2,'0')+(h<12?' AM':' PM')};
+  const validTime=(value:string)=>/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value);
+  const openTimePicker=(target:HTMLElement,step:Step)=>{
+   root.querySelector('.asr-time-popover')?.remove();
+   const pop=document.createElement('div');pop.className='asr-time-popover';pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Choose time for '+step.label);
+   const title=document.createElement('strong');title.textContent=step.label+' · Choose a time';
+   const intervals=document.createElement('div');intervals.className='asr-time-interval';
+   const grid=document.createElement('div');grid.className='asr-time-grid';
+   const actions=document.createElement('div');actions.className='asr-time-actions';
+   const position=()=>{const rect=target.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(window.innerWidth-w-8,rect.right-w))+'px';pop.style.top=(rect.bottom+h+8>window.innerHeight?Math.max(8,rect.top-h-8):rect.bottom+8)+'px'};
+   const outside=(e:PointerEvent)=>{if(!pop.contains(e.target as Node)&&!target.contains(e.target as Node))dismiss()};
+   const keyboard=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();dismiss(true)}};
+   const dismiss=(focus=false)=>{pop.remove();document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',keyboard,true);window.removeEventListener('resize',position);root.querySelector('.asr-preview')?.removeEventListener('scroll',position);if(focus)target.focus()};
+   const apply=(value:string)=>{if(!validTime(value))return;step.time=value;remember();dismiss();draw();makeOptions()};
+   const base=validTime(step.time)?Number(step.time.slice(0,2))*60+Number(step.time.slice(3)):450;
+   const options=(interval:5|10)=>{
+    intervals.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.value)===interval)));
+    grid.replaceChildren();
+    const center=Math.round(base/interval)*interval;
+    for(let n=-4;n<=4;n++){const minute=center+n*interval;if(minute<0||minute>=1440)continue;const value=String(Math.floor(minute/60)).padStart(2,'0')+':'+String(minute%60).padStart(2,'0');const button=document.createElement('button');button.type='button';button.textContent=formatTime(value);button.setAttribute('aria-pressed',String(value===step.time));button.addEventListener('click',()=>apply(value));grid.append(button)}
+    position();
+   };
+   for(const interval of [10,5] as const){const button=document.createElement('button');button.type='button';button.value=String(interval);button.textContent=interval+' min';button.addEventListener('click',()=>options(interval));intervals.append(button)}
+   const custom=document.createElement('button');custom.type='button';custom.textContent='Custom time…';custom.addEventListener('click',()=>{actions.replaceChildren();const input=document.createElement('input');input.type='time';input.step='300';input.value=validTime(step.time)?step.time:'07:30';input.setAttribute('aria-label','Custom time for '+step.label);const save=document.createElement('button');save.type='button';save.textContent='Set time';save.addEventListener('click',()=>apply(input.value));input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save.click()}});actions.append(input,save);input.focus();position()});
+   actions.append(custom);pop.append(title,intervals,grid,actions);root.append(pop);options(10);position();
+   document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',keyboard,true);window.addEventListener('resize',position);root.querySelector('.asr-preview')?.addEventListener('scroll',position);
+   (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]')??grid.querySelector<HTMLButtonElement>('button'))?.focus();
+  };
   const draw=()=>{
    for(const group of ['morning','after'] as Group[]){
     const holder=root.querySelector<HTMLElement>('[data-asr-group="'+group+'"]');if(!holder)continue;
@@ -214,13 +255,13 @@ const choices:Record<Group,{id:string;label:string;icon:string}[]>={
     const steps=board.steps.filter(s=>s.group===group&&!s.removed&&!(board.mode==='simple'&&((group==='morning'&&s.id==='wake')||(group==='after'&&s.id==='wash'))));
     for(const step of steps){
      const row=document.createElement('div');row.className='asr-row';row.dataset.asrId=step.id;row.dataset.asrSection=group;
-     const clock=document.createElement('time');clock.dataset.asrTime='';clock.contentEditable='true';clock.setAttribute('role','textbox');clock.setAttribute('aria-label','Edit time for '+step.label);clock.textContent=step.time;
+     const clock=document.createElement('time');clock.dataset.asrTime='';clock.setAttribute('role','button');clock.tabIndex=0;clock.setAttribute('aria-label','Change time for '+step.label);clock.title='Choose a time';clock.textContent=formatTime(step.time);
      const img=document.createElement('img');img.src=iconPaths[step.icon]??iconPaths.bag;img.alt='';img.width=76;img.height=76;
      const label=document.createElement('strong');label.dataset.asrText='';label.contentEditable='true';label.setAttribute('role','textbox');label.setAttribute('aria-label','Edit '+step.label);label.textContent=step.label;
      const remove=document.createElement('button');remove.type='button';remove.className='asr-remove';remove.dataset.asrRemove='';remove.textContent='×';remove.setAttribute('aria-label','Remove '+step.label);
-     clock.addEventListener('input',()=>{step.time=(clock.textContent??'').trim().slice(0,16);remember()});
+     clock.addEventListener('click',()=>openTimePicker(clock,step));clock.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTimePicker(clock,step)}});
      label.addEventListener('input',()=>{step.label=(label.textContent??'').replace(/\\s+/g,' ').slice(0,55);remember()});
-     for(const field of [clock,label])field.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();field.blur()}});
+     label.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();label.blur()}});
      label.addEventListener('blur',()=>{step.label=step.label.trim()||'My Step';remember();makeOptions()});
      remove.addEventListener('click',()=>{step.removed=true;remember();draw();makeOptions()});
      row.append(clock,img,label,remove);holder.append(row);
