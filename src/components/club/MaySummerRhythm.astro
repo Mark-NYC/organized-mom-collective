@@ -8,6 +8,7 @@ const blocks=[
  {key:'lunch',title:'Lunch & Reset',time:'12:00',desc:'Eat · Clear dishes · Tidy up',icon:'/images/club/icon-library/lunch-reset.png',tint:'#DDEBDB'},
  {key:'quiet',title:'Quiet Time',time:'1:00',desc:'Read · Puzzles · Quiet play',icon:'/images/club/icon-library/quiet-time.png',tint:'#D1E5D6'},
  {key:'free',title:'Free Afternoon',time:'2:00',desc:'Friends · Outings · Free play',icon:'/images/club/icon-library/free-afternoon.png',tint:'#C3DDCF'},
+ {key:'snack',title:'Snack & Reset',time:'4:00',desc:'Have a snack · Put things away · Reset your space',icon:'/images/club/icon-library/lunch-reset.png',tint:'#E4E9D5'},
  {key:'evening',title:'Evening Reset',time:'Evening',desc:'Pick up · Wash up · Wind down',icon:'/images/club/icon-library/evening-reset.png',tint:'#D1D7EA'},
 ];
 ---
@@ -19,7 +20,7 @@ const blocks=[
    <div class="msr-prepared" id="may-edit-controls">
     <span class="msr-label">YOUR FAMILY'S PREPARED RHYTHM</span>
     <strong>Our Summer Day</strong>
-    <p>Seven familiar anchors your kids can check without asking Mom what comes next.</p>
+    <p>A few realistic anchors your kids can check without asking Mom what comes next.</p>
     <div class="msr-summary-line"><span>Day type</span><b data-summary-days>Mostly at home</b></div>
     <div class="msr-summary-line"><span>Structure</span><b data-summary-structure>Balanced</b></div>
     <div class="msr-summary-line"><span>Morning start</span><b data-summary-start>8:00 AM</b></div>
@@ -41,7 +42,7 @@ const blocks=[
   <dialog class="msr-dialog msr-edit-dialog" data-editor-dialog aria-labelledby="msr-edit-title">
    <div class="msr-dialog-top"><div><span class="msr-label">MAKE IT YOURS · MAY</span><h2 id="msr-edit-title">Edit your summer rhythm</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>The rhythm is ready to use. Change only what needs to fit your family.</p>
-   <div class="msr-dialog-form">   <label>Kind of summer day<select data-days><option value="home">Mostly at home</option><option value="camp">Camp or a program</option></select></label>
+   <div class="msr-dialog-form">   <label>Kind of summer day<select data-days><option value="home">Mostly at home</option><option value="mixed">A mix of home days and outings</option><option value="camp">Camp or scheduled programs</option></select></label>
    <fieldset class="msr-structure"><legend>How much structure?</legend>
     <label><input type="radio" name="msr-structure" value="relaxed" /> Relaxed <small>Five broad anchors; no set times</small></label>
     <label><input type="radio" name="msr-structure" value="balanced" checked /> Balanced <small>Seven blocks with flexible times</small></label>
@@ -49,6 +50,7 @@ const blocks=[
    </fieldset>
    <label>Morning starts<select data-start><option value="7">7:00 AM</option><option value="7.5">7:30 AM</option><option value="8" selected>8:00 AM</option><option value="8.5">8:30 AM</option><option value="9">9:00 AM</option><option value="9.5">9:30 AM</option></select></label>
    <label>Quiet time<select data-quiet><option value="independent">Independent play and reading</option><option value="rest">Rest or nap</option><option value="older">Independent recharge</option></select></label>
+   <label class="msr-snack-choice"><input type="checkbox" data-snack checked /> Include late-afternoon Snack & Reset</label>
    <label>Favorite kind of play<select data-play><option value="outdoors">Outdoor play</option><option value="active">Sports and movement</option><option value="creative">Making and creativity</option><option value="mixed">A mix of everything</option></select></label>
    <details class="msr-customize" data-customize>
     <summary>Edit activities on mobile <span>Optional</span></summary>
@@ -275,22 +277,23 @@ type Person={firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?
 type Quiet='independent'|'rest'|'older';
 type Play='outdoors'|'active'|'creative'|'mixed';
 type Structure='relaxed'|'balanced'|'structured';
-type Days='home'|'camp';
-type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'evening';
+type Days='home'|'mixed'|'camp';
+type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'snack'|'evening';
 type Edit={title?:string;desc?:string;time?:string};
-type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days};
-const keys:Key[]=['morning','move','create','lunch','quiet','free','evening'];
-const labels:Record<Key,string>={morning:'Morning Start',move:'Move & Play',create:'Create & Explore',lunch:'Lunch & Reset',quiet:'Quiet Time',free:'Free Afternoon',evening:'Evening Reset'};
+type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days;snack:boolean};
+const keys:Key[]=['morning','move','create','lunch','quiet','free','snack','evening'];
+const labels:Record<Key,string>={morning:'Morning Start',move:'Move & Play',create:'Create & Explore',lunch:'Lunch & Reset',quiet:'Quiet Time',free:'Flexible Afternoon',snack:'Snack & Reset',evening:'Evening Reset'};
 const baseDesc:Record<Key,string>={
  morning:'Breakfast · Get dressed · Make beds',
  move:'Outside · Bikes · Park · Backyard',
  create:'Read · Build · Draw · Make',
  lunch:'Eat · Clear dishes · Tidy up',
  quiet:'Read · Puzzles · Quiet play',
- free:'Friends · Outings · Free play',
+ free:'Friends · Park · Outing · Home play',
+ snack:'Have a snack · Put things away · Reset your space',
  evening:'Pick up · Wash up · Wind down'
 };
-const defaults:Options={start:8,quiet:'independent',play:'outdoors',structure:'balanced',days:'home'};
+const defaults:Options={start:8,quiet:'independent',play:'outdoors',structure:'balanced',days:'home',snack:true};
 const hhmm=(n:number)=>{const normalized=(n+24)%24;const h=Math.floor(normalized);const min=Math.round((normalized-h)*60);return String(h).padStart(2,'0')+':'+String(min).padStart(2,'0')};
 const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.split(':').map(Number);return String(hour%12||12)+':'+String(min).padStart(2,'0')+(hour<12?' AM':' PM')};
 for(const root of document.querySelectorAll<HTMLElement>('.msr')){
@@ -331,7 +334,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const starter=(key:Key):Required<Edit>=>{
   let title=labels[key],desc=baseDesc[key];
   const idx=keys.indexOf(key);
-  const offset=[0,1,2.5,4,5,6,10][idx];
+  const offset=[0,1,2.5,4,5,6,8,10][idx];
   let time=key==='evening'?'':hhmm(options.start+offset);
   if(options.days==='camp'){
    const names:Partial<Record<Key,[string,string]>>={
@@ -339,15 +342,20 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
     create:['Camp or Program','Play · Learn · Explore · Friends'],
     lunch:['Lunch & Reset','Lunch · Pack things · Tidy up'],
     quiet:['Recharge','Snack · Quiet time · Rest'],
-    free:['After-Camp Play','Outside · Friends · Free time']
+    free:['Free Time','Friends · Outside · Home play'],
+    snack:['Home & Snack','Have a snack · Unpack · Reset your space']
    };
    if(names[key]){title=names[key]![0];desc=names[key]![1]}
-   const campOffsets=[0,.5,1,4,7.5,8.5,10];
+   const campOffsets=[0,.5,1,4,7.5,8.5,9,10];
    time=key==='evening'?'':hhmm(options.start+campOffsets[idx]);
   }else{
+   if(options.days==='mixed'){
+    const mixed:Partial<Record<Key,[string,string]>>={move:['Home Play or Outing','Outside · Park · Friends · Home play'],create:['Choose & Explore','Read · Build · Draw · Make'],free:['Flexible Afternoon','Friends · Park · Outing · Home play']};
+    if(mixed[key]){title=mixed[key]![0];desc=mixed[key]![1]}
+   }
    if(key==='quiet')desc=options.quiet==='rest'?'Nap · Rest · Quiet books':options.quiet==='older'?'Read · Recharge · Independent time':'Read · Puzzles · Quiet play';
    if(key==='move')desc=options.play==='active'?'Ball games · Movement · Outdoors':options.play==='creative'?'Explore · Move · Make something':options.play==='mixed'?'Get moving · Choose how to play':baseDesc.move;
-   if(key==='free')desc=options.play==='creative'?'Art · Make · Friends · Free play':options.play==='active'?'Friends · Sports · Free play':baseDesc.free;
+   if(key==='free'&&options.days==='home')desc=options.play==='creative'?'Art · Make · Friends · Home play':options.play==='active'?'Friends · Sports · Park · Home play':baseDesc.free;
   }
   return {title,desc,time};
  };
@@ -358,7 +366,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
- const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
+ const save=()=>{try{localStorage.setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
  const renderEditor=()=>{
   if(!editor)return;
   editor.replaceChildren();
@@ -421,8 +429,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   root.dataset.msrStructure=options.structure;
   root.dataset.msrDays=options.days;
   const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
-  const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':'A DAY AT HOME';
-  const visible=options.structure==='relaxed'?order.filter(k=>k!=='create'&&k!=='free'):order;
+  const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':options.days==='mixed'?'HOME OR OUTING DAY':'A DAY AT HOME';
+  const visible=order.filter(k=>(options.snack||k!=='snack')&&(options.structure!=='relaxed'||(k!=='create'&&k!=='move'))&&(options.days!=='camp'||k!=='lunch'));
   for(const key of order){
    const node=nodes.get(key);if(!node||!list)continue;
    list.append(node);
@@ -436,12 +444,13 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    node.querySelector<HTMLButtonElement>('[data-move-down]')?.toggleAttribute('disabled',order.indexOf(key)===order.length-1);
    node.querySelector<HTMLButtonElement>('[data-remove]')?.toggleAttribute('disabled',order.length<=1);
   }
-  const summaries:[string,string][]=[['days',options.days==='camp'?'Camp or program':'Mostly at home'],['structure',options.structure==='relaxed'?'Relaxed':options.structure==='structured'?'More structured':'Balanced'],['start',clock(hhmm(options.start))],['quiet',options.quiet==='rest'?'Rest or nap':options.quiet==='older'?'Independent recharge':'Independent play']];
+  const summaries:[string,string][]=[['days',options.days==='camp'?'Camp or program':options.days==='mixed'?'Home + outings':'Mostly at home'],['structure',options.structure==='relaxed'?'Relaxed':options.structure==='structured'?'More structured':'Balanced'],['start',clock(hhmm(options.start))],['quiet',options.quiet==='rest'?'Rest or nap':options.quiet==='older'?'Independent recharge':'Independent play']];
   for(const [kind,value] of summaries){const el=root.querySelector<HTMLElement>('[data-summary-'+kind+']');if(el)el.textContent=value}
   const day=root.querySelector<HTMLSelectElement>('[data-days]');if(day)day.value=options.days;
   const start=root.querySelector<HTMLSelectElement>('[data-start]');if(start)start.value=String(options.start);
   const quiet=root.querySelector<HTMLSelectElement>('[data-quiet]');if(quiet)quiet.value=options.quiet;
   const play=root.querySelector<HTMLSelectElement>('[data-play]');if(play)play.value=options.play;
+  const snack=root.querySelector<HTMLInputElement>('[data-snack]');if(snack)snack.checked=options.snack;
   root.querySelectorAll<HTMLInputElement>('input[name="msr-structure"]').forEach(el=>{el.checked=el.value===options.structure});
   for(const key of keys){const node=nodes.get(key);if(node&&!order.includes(key))node.hidden=true}
   renderRemoved();
@@ -458,6 +467,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  }));
  root.querySelector<HTMLSelectElement>('[data-start]')?.addEventListener('change',e=>{options.start=Number((e.target as HTMLSelectElement).value);update()});
  root.querySelector<HTMLSelectElement>('[data-quiet]')?.addEventListener('change',e=>{options.quiet=(e.target as HTMLSelectElement).value as Quiet;update()});
+ root.querySelector<HTMLInputElement>('[data-snack]')?.addEventListener('change',e=>{options.snack=(e.target as HTMLInputElement).checked;update()});
  root.querySelector<HTMLSelectElement>('[data-play]')?.addEventListener('change',e=>{options.play=(e.target as HTMLSelectElement).value as Play;update()});
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{ageDefaults();update()});
  for(const key of keys){
@@ -478,12 +488,23 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   const time=node.querySelector<HTMLElement>('[data-time]');
   const editTime=()=>{
    if(!time||time.querySelector('input'))return;
-   const input=document.createElement('input');input.type='time';input.value=resolved(key).time;
+   const input=document.createElement('select');
+   const current=resolved(key).time;
+   const choices=[current,...[-1,-.5,0,.5,1].map(delta=>hhmm((current?Number(current.slice(0,2))+Number(current.slice(3))/60:options.start)+delta)),''].filter((v,i,a)=>a.indexOf(v)===i);
+   for(const value of choices){const option=document.createElement('option');option.value=value;option.textContent=value?clock(value):'No set time';input.append(option)}
+   const custom=document.createElement('option');custom.value='custom';custom.textContent='Choose a custom time…';input.append(custom);input.value=current;
    input.setAttribute('aria-label','Set '+labels[key]+' time');
    time.replaceChildren(input);time.setAttribute('role','group');
    const finish=()=>{const value=input.value;edits[key]={...(edits[key]??{}),time:value};time.setAttribute('role','button');update()};
-   input.addEventListener('change',finish,{once:true});
-   input.addEventListener('blur',()=>{if(time.contains(input))finish()},{once:true});
+   input.addEventListener('change',()=>{
+    if(input.value==='custom'){
+     const picker=document.createElement('input');picker.type='time';picker.value=current||hhmm(options.start);time.replaceChildren(picker);picker.focus();
+     picker.addEventListener('change',()=>{edits[key]={...(edits[key]??{}),time:picker.value};time.setAttribute('role','button');update()},{once:true});
+     return;
+    }
+    finish();
+   });
+   input.addEventListener('blur',()=>{if(time.contains(input))render()},{once:true});
    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}if(e.key==='Escape'){e.preventDefault();time.setAttribute('role','button');render()}});
    input.focus();
   };
@@ -516,13 +537,14 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   if(changed){
    ageDefaults();
    try{
-    const stored=JSON.parse(sessionStorage.getItem(storageKey)??'null');
+    const stored=JSON.parse(localStorage.getItem(storageKey)??'null');
     if(stored?.profile===profile&&stored.options){
      const o=stored.options;
      if([7,7.5,8,8.5,9,9.5].includes(o.start))options.start=o.start;
      if(['independent','rest','older'].includes(o.quiet))options.quiet=o.quiet;
      if(['outdoors','active','creative','mixed'].includes(o.play))options.play=o.play;
-     if(['home','camp'].includes(o.days))options.days=o.days;
+     if(['home','mixed','camp'].includes(o.days))options.days=o.days;
+     if(typeof o.snack==='boolean')options.snack=o.snack;
      if(['relaxed','balanced','structured'].includes(o.structure))options.structure=o.structure;
      const savedOrder=stored.order;
      if(Array.isArray(savedOrder)&&savedOrder.length>=1&&savedOrder.length<=keys.length&&new Set(savedOrder).size===savedOrder.length&&savedOrder.every(k=>keys.includes(k)))order=savedOrder;
