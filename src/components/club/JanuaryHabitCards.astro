@@ -19,13 +19,13 @@ const defaults = [
   <div class="jhc-intro">
     <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · JANUARY</p>
     <h2>Your family’s habits. <em>Already prepared.</em></h2>
-    <p>One small habit, chosen for your family. Keep the prepared suggestion or find a habit that makes everyday life easier.</p>
+    <p>Up to two small habits, chosen for your family. Keep the prepared suggestion or find a habit that makes everyday life easier.</p>
   </div>
   <div class="jhc-workspace"><div class="jhc-config" aria-label="Customize your family habit cards">
     <div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
-    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>One habit. A real difference.</h3><p>Your family has a prepared starting habit. You can use it as is, or answer three quick questions to find a better fit.</p><div class="jhc-summary-row"><span>Recommended habit</span><strong data-jhc-habit-label>Clear dishes after breakfast</strong></div><div class="jhc-summary-row"><span>Focus</span><strong>Just one habit this month</strong></div><button type="button" class="jhc-finder-launch" data-jhc-finder-open>Help me find our habit</button><button type="button" class="jhc-edit-trigger" data-jhc-open>Edit this habit</button></div>
-    <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>Make this one habit fit your family. Only your first habit card will print.</p>    <div class="jhc-forms">
-      {defaults.slice(0,1).map((item, i) => (
+    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>Two small habits. A real difference.</h3><p>We've prepared two starting ideas. Keep them, or answer a few easy questions to choose habits that would help your family.</p><div class="jhc-summary-row"><span>Recommended habit</span><strong data-jhc-habit-label>Clear dishes after breakfast</strong></div><div class="jhc-summary-row"><span>Focus</span><strong>Up to two habits this month</strong></div><button type="button" class="jhc-finder-launch" data-jhc-finder-open>Help me find our habits</button><button type="button" class="jhc-edit-trigger" data-jhc-open>Edit our cards</button></div>
+    <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>Make these two habit cards fit your family. Both cards will print on one page.</p>    <div class="jhc-forms">
+      {defaults.slice(0,2).map((item, i) => (
         <fieldset class="jhc-editor" data-jhc-editor={i}>
           <legend><span class="jhc-editor-num">0{i+1}</span> Habit card {i+1}</legend>
           <label><span>Who will practice this habit?</span><input data-field="name" maxlength="42" value={item.name}/></label>
@@ -37,7 +37,7 @@ const defaults = [
     </div>
 <button type="button" class="jhc-dialog-done" data-jhc-close>Done · See our cards</button></dialog>
     <div class="jhc-actions">
-      <a href="#january-edit-controls" class="jhc-jump-edit">Make changes</a>
+      <button type="button" class="jhc-jump-edit" data-jhc-finder-open>HELP ME FIND OUR HABITS</button>
       <button class="jhc-print" type="button" data-print>Print cards / Save PDF</button>
       <button type="button" class="jhc-png" data-single-page-png>Download image (PNG)</button>
    <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
@@ -45,13 +45,13 @@ const defaults = [
     <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
   </div>
 
-  <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's starting habit</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">A few quick choices. We'll suggest one small habit worth practicing first.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current habit</button></div></dialog>
-  <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>MAKE CHANGES</button>
+  <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">Pick what would make your day easier. We'll help you choose up to two habits.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current habit</button></div></dialog>
+  <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
       <div class="jhc-card-grid">
-        {defaults.slice(0,1).map((item, i) => (
+        {defaults.slice(0,2).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
             <div class="jhc-card-top">
               <span class="jhc-brand">ORGANIZED FAMILY CLUB</span>
@@ -72,7 +72,7 @@ const defaults = [
           </article>
         ))}
       </div>
-      <div class="jhc-sheet-footer"><span>Start with one. Practice until it feels normal.</span><span>PLACE THIS REMINDER WHERE THE HABIT HAPPENS</span></div>
+      <div class="jhc-sheet-footer"><span>Choose one or two. Put each card where it helps.</span><span>PLACE THIS REMINDER WHERE THE HABIT HAPPENS</span></div>
     </div></div>
   </div>
   </div>
@@ -359,28 +359,52 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  const finderBody=root.querySelector<HTMLElement>('[data-jhc-finder-body]');
  let finderStep=0;
  const finderAnswers:string[]=[];
+ let selectedHabits:string[]=[];
  const finderQuestions=[
-  {question:'Where does your family feel the most friction?',options:['Getting out the door','Keeping things picked up','Meals and the kitchen','Bedtime and evenings','Remembering what comes next']},
-  {question:'What keeps making that difficult?',options:['Someone needs repeated reminders','Things are not ready when needed','Nobody knows who owns it','We start but do not finish','We do not have a consistent cue']},
-  {question:'Who could practice one small change?',options:['Children together','One child','One adult','Everyone together']}
+  {question:'What do you keep reminding everyone to do?',options:['Get ready to leave','Put things away','Clear up after meals','Get ready for bed','Start homework','Check what comes next']},
+  {question:'What would you love them to do without being asked?',options:['Have their things ready','Put things back when finished','Take dishes to the kitchen','Get clothes ready for tomorrow','Begin homework at the same time','Look at the family plan first']},
+  {question:'Who will practice these habits?',options:['The kids','One child','Mom and Dad','Everyone']}
  ];
  const suggestions:Record<string,{name:string;anchor:string;action:string;place:string}>={
-  'Getting out the door':{name:'Tomorrow is ready',anchor:'After dinner',action:'We put tomorrow’s backpacks and essentials by the door.',place:'Beside our backpacks'},
-  'Keeping things picked up':{name:'Put it back',anchor:'Before starting something new',action:'We put away what we just used.',place:'Near our play area'},
-  'Meals and the kitchen':{name:'Clear our dishes',anchor:'After we finish eating',action:'We bring our own dishes to the kitchen.',place:'By the kitchen table'},
-  'Bedtime and evenings':{name:'Ready for tomorrow',anchor:'Before bedtime',action:'We set out tomorrow’s clothes.',place:'Near our bedrooms'},
-  'Remembering what comes next':{name:'Check our plan',anchor:'Before asking what happens next',action:'We look at our family schedule.',place:'Beside our family calendar'}
+  'Get ready to leave':{name:'Ready to go',anchor:'Before going to bed',action:'We put our shoes and backpacks by the door.',place:'By the front door'},
+  'Put things away':{name:'Put it back',anchor:'When we finish playing',action:'We put away what we used.',place:'Near the toys'},
+  'Clear up after meals':{name:'Clear our place',anchor:'After eating',action:'We take our dishes to the kitchen.',place:'By the dining table'},
+  'Get ready for bed':{name:'Ready for tomorrow',anchor:'After brushing our teeth',action:'We lay out tomorrow’s clothes.',place:'On the dresser'},
+  'Start homework':{name:'Homework first',anchor:'After our afternoon snack',action:'We get out our homework and start.',place:'At the homework spot'},
+  'Check what comes next':{name:'Check our plan',anchor:'Before asking what’s next',action:'We look at our family calendar.',place:'Beside our calendar'}
+ };
+ const otherSuggestion:Record<string,string>={
+  'Have their things ready':'Get ready to leave','Put things back when finished':'Put things away',
+  'Take dishes to the kitchen':'Clear up after meals','Get clothes ready for tomorrow':'Get ready for bed',
+  'Begin homework at the same time':'Start homework','Look at the family plan first':'Check what comes next'
  };
  const renderFinder=()=>{
   if(!finderBody)return;
   finderBody.replaceChildren();
   const make=(tag:string,content:string,cls?:string)=>{const el=document.createElement(tag);el.textContent=content;if(cls)el.className=cls;finderBody.append(el);return el};
-  make('p',finderStep<3?`Question ${finderStep+1} of 3`:'Your suggested starting habit');
-  if(finderStep<3){const q=finderQuestions[finderStep];make('h3',q.question);q.options.forEach(option=>{const btn=make('button',option,'jhc-finder-choice') as HTMLButtonElement;btn.type='button';btn.addEventListener('click',()=>{finderAnswers[finderStep]=option;finderStep++;renderFinder()})})}
-  else {const base=suggestions[finderAnswers[0]];const ownership=finderAnswers[2]==='One child'?'One child':finderAnswers[2]==='One adult'?'One adult':finderAnswers[2]==='Everyone together'?'Whole family':'The kids';const challenge=finderAnswers[1];const suggestion={...base};if(challenge==='Things are not ready when needed'&&finderAnswers[0]!=='Getting out the door'){suggestion.anchor='The evening before we need it';suggestion.action='We get one important item ready for tomorrow.';suggestion.place='Near the place we keep tomorrow’s things'}else if(challenge==='Nobody knows who owns it'){suggestion.action='The person responsible '+(finderAnswers[0]==='Meals and the kitchen'?'clears their dishes after eating.':'does this job and checks that it is finished.')}else if(challenge==='We start but do not finish'){suggestion.action='We finish the job and put everything away before moving on.'}else if(challenge==='We do not have a consistent cue'){suggestion.anchor=finderAnswers[0]==='Bedtime and evenings'?'After brushing our teeth':finderAnswers[0]==='Meals and the kitchen'?'After eating':finderAnswers[0]==='Getting out the door'?'After dinner':'Before starting the next activity'};if(ownership==='One child'){suggestion.name='My '+suggestion.name.toLowerCase()}else if(ownership==='One adult'){suggestion.name='My '+suggestion.name.toLowerCase()}make('h3',suggestion.name);make('p',`Who: ${ownership} · When: ${suggestion.anchor}`);make('p',suggestion.action);make('p',`Put the reminder: ${suggestion.place}`);make('p',`Why this habit? You chose ${finderAnswers[0].toLowerCase()} and said ${challenge.toLowerCase()}. This gives ${ownership.toLowerCase()} one predictable action to practice.`);const btn=make('button','Use this habit','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;btn.type='button';btn.addEventListener('click',()=>{values[0]={...suggestion};save();paint();finder?.close()})}
+  make('p',finderStep<3?`Step ${finderStep+1} of 3`:'Your two habit cards');
+  if(finderStep<3){
+   const q=finderQuestions[finderStep];make('h3',q.question);
+   if(finderStep===0)make('p','Choose one or two. Start with the parts of the day that need the most reminders.');
+   if(finderStep===1)make('p','Pick the change that would help most. We’ll suggest simple starting habits.');
+   q.options.forEach(option=>{
+    const btn=make('button',option,'jhc-finder-choice') as HTMLButtonElement;btn.type='button';
+    if(finderStep===0){btn.setAttribute('aria-pressed',String(selectedHabits.includes(option)));btn.addEventListener('click',()=>{selectedHabits=selectedHabits.includes(option)?selectedHabits.filter(x=>x!==option):selectedHabits.length<2?[...selectedHabits,option]:[selectedHabits[1],option];renderFinder()})}
+    else btn.addEventListener('click',()=>{finderAnswers[finderStep]=option;finderStep++;renderFinder()});
+   });
+   if(finderStep===0){const next=make('button','Next: Choose what would help','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;next.type='button';next.disabled=selectedHabits.length===0;next.addEventListener('click',()=>{finderStep=1;renderFinder()})}
+  }else{
+   const picks=[...selectedHabits];
+   const second=otherSuggestion[finderAnswers[1]];
+   if(picks.length===1&&second&&second!==picks[0])picks.push(second);
+   const who=finderAnswers[2]||'Everyone';
+   picks.slice(0,2).forEach((choice,i)=>{const suggestion=suggestions[choice];make('h3',`Card ${i+1}: ${suggestion.name}`);make('p',`Who: ${who}`);make('p',`When: ${suggestion.anchor}`);make('p',suggestion.action)});
+   const btn=make('button','Use these habits','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;btn.type='button';
+   btn.addEventListener('click',()=>{picks.slice(0,2).forEach((choice,i)=>{values[i]={...values[i],...suggestions[choice],name:suggestions[choice].name+' · '+who}});save();paint();finder?.close()});
+  }
   const back=root.querySelector<HTMLButtonElement>('[data-jhc-finder-back]');if(back)back.hidden=finderStep===0;
  };
- root.querySelector('[data-jhc-finder-open]')?.addEventListener('click',()=>{finderStep=0;finderAnswers.length=0;renderFinder();finder?.showModal()});
+ root.querySelectorAll('[data-jhc-finder-open]').forEach(button=>button.addEventListener('click',()=>{finderStep=0;finderAnswers.length=0;selectedHabits=[];renderFinder();finder?.showModal()}));
  root.querySelectorAll('[data-jhc-finder-close]').forEach(b=>b.addEventListener('click',()=>finder?.close()));
  root.querySelector('[data-jhc-finder-back]')?.addEventListener('click',()=>{finderStep=Math.max(0,finderStep-1);renderFinder()});
  finder?.addEventListener('click',e=>{if(e.target===finder)finder.close()});
