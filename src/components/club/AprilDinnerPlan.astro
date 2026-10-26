@@ -72,31 +72,31 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
    <article class="adc-sheet adc-front">
     <div class="adc-sheet-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight, <em>we've got dinner.</em></h2><span>ONE DINNER PLANNED. EVERYONE HAS A PART.</span></div>
     <div class="adc-sheet-inner">
-     <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal>{initial.name}</h3></div><div class="adc-time"><span data-out-time>{initial.time}</span><small data-out-servings>{initial.servings}</small></div></div>
+     <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal contenteditable="true" role="textbox" aria-label="Edit dinner name">{initial.name}</h3></div><div class="adc-time"><span data-out-time contenteditable="true" role="textbox" aria-label="Edit dinner time">{initial.time}</span><small data-out-servings contenteditable="true" role="textbox" aria-label="Edit servings">{initial.servings}</small></div></div>
      <div class="adc-section-label">OUR DINNER TEAM</div>
      <div class="adc-team-grid">
-      <div><span>DINNER CAPTAIN</span><strong data-out-role="captain">Dad</strong><p>Owns the whole plan</p></div>
-      <div><span>INGREDIENTS CHECKER</span><strong data-out-role="checker">Sofia</strong><p>Checks and gathers</p></div>
-      <div><span>TABLE CAPTAIN</span><strong data-out-role="table">Mateo</strong><p>Gets the table ready</p></div>
-      <div><span>COOKING LEAD</span><strong data-out-role="cook">Mom</strong><p>Handles adult cooking</p></div>
+      <div><span>DINNER CAPTAIN</span><strong data-out-role="captain" contenteditable="true" role="textbox" aria-label="Edit captain assignment">Dad</strong><p>Owns the whole plan</p></div>
+      <div><span>INGREDIENTS CHECKER</span><strong data-out-role="checker" contenteditable="true" role="textbox" aria-label="Edit checker assignment">Sofia</strong><p>Checks and gathers</p></div>
+      <div><span>TABLE CAPTAIN</span><strong data-out-role="table" contenteditable="true" role="textbox" aria-label="Edit table assignment">Mateo</strong><p>Gets the table ready</p></div>
+      <div><span>COOKING LEAD</span><strong data-out-role="cook" contenteditable="true" role="textbox" aria-label="Edit cook assignment">Mom</strong><p>Handles adult cooking</p></div>
      </div>
      <div class="adc-section-label">CHECK THE INGREDIENTS · ABOUT FOUR SERVINGS</div>
-     <div class="adc-ingredients">{initial.ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient>{x}</span></div>)}</div>
+     <div class="adc-ingredients">{initial.ingredients.map(x=><div class="adc-ingredient"><i></i><span data-ingredient contenteditable="true" role="textbox" aria-label="Edit ingredient">{x}</span></div>)}</div>
      <div class="adc-section-label">OUR DINNER PLAN</div>
      <div class="adc-steps">
-      {steps.map((step,i)=><div class="adc-step"><span>{String(i+1).padStart(2,'0')}</span><img src={"/images/club/icon-library/"+stepIcons[i]+".png"} width="30" height="30" alt="" class="adc-step-icon"/><strong>{step}</strong><i></i></div>)}
+      {steps.map((step,i)=><div class="adc-step"><span>{String(i+1).padStart(2,'0')}</span><img src={"/images/club/icon-library/"+stepIcons[i]+".png"} width="30" height="30" alt="" class="adc-step-icon"/><strong data-out-plan-step={i} contenteditable="true" role="textbox" aria-label={`Edit plan step ${i+1}`}>{step}</strong><i></i></div>)}
      </div>
-     <div class="adc-rule"><span>OUR FAMILY RULE</span><p>Ask the Dinner Captain what’s next, not Mom. The captain leads the plan and finishes with the team.</p></div>
+     <div class="adc-rule"><span>OUR FAMILY RULE</span><p data-out-rule contenteditable="true" role="textbox" aria-label="Edit family dinner rule">Ask the Dinner Captain what’s next, not Mom. The captain leads the plan and finishes with the team.</p></div>
     </div>
     <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · FRONT</span></footer>
    </article>
    <article class="adc-sheet adc-back">
     <div class="adc-sheet-head adc-back-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight's dinner. <em>Tomorrow's team.</em></h2><span>COOK THIS MEAL. KEEP THE TEAM FOR NEXT TIME.</span></div>
     <div class="adc-sheet-inner adc-back-inner">
-      <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title>{initial.name}</h3></div><span data-out-recipe-time>{initial.time}</span></div>
-      <p class="adc-recipe-intro">Follow these directions for tonight’s meal. The Cooking Lead handles hot or sharp tasks; everyone else does their part.</p>
+      <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title contenteditable="true" role="textbox" aria-label="Edit recipe name">{initial.name}</h3></div><span data-out-recipe-time contenteditable="true" role="textbox" aria-label="Edit recipe time">{initial.time}</span></div>
+      <p class="adc-recipe-intro" data-out-intro contenteditable="true" role="textbox" aria-label="Edit cooking introduction">Follow these directions for tonight’s meal. The Cooking Lead handles hot or sharp tasks; everyone else does their part.</p>
       <div class="adc-recipe-steps">
-        {initial.instructions.map((instruction,i)=><div class="adc-recipe-step"><span>{String(i+1).padStart(2,'0')}</span><p data-out-instruction={i}>{instruction}</p></div>)}
+        {initial.instructions.map((instruction,i)=><div class="adc-recipe-step"><span>{String(i+1).padStart(2,'0')}</span><p data-out-instruction={i} contenteditable="true" role="textbox" aria-label={`Edit recipe instruction ${i+1}`}>{instruction}</p></div>)}
       </div>
       <section class="adc-repeat" aria-label="Reusable family dinner team guide">
         <div class="adc-repeat-heading"><div><span class="adc-tiny">SAVE THIS FOR ANOTHER NIGHT</span><h3>Our Dinner Team</h3></div><span class="adc-repeat-tag">USE AGAIN</span></div>
@@ -308,6 +308,11 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
  .adc-floating-edit:focus-visible{outline:3px solid #9caf9a;outline-offset:3px}
 }
 @media print{.adc-floating-edit{display:none!important}}
+.adc-sheet [contenteditable="true"]{cursor:text;outline-offset:2px;border-radius:2px}
+.adc-sheet [contenteditable="true"]:hover{outline:1px dashed #a99db9}
+.adc-sheet [contenteditable="true"]:focus{outline:2px solid #84719a;background:#fbf9ff}
+@media print{.adc-sheet [contenteditable="true"]{outline:none!important;background:transparent!important}}
+
 </style>
 <script>
 import {ageInMonth} from '../../lib/club/profile';
@@ -326,6 +331,14 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
  let meal='tacos-b';
  let assignments:Record<Role,string>={captain:'',checker:'',table:'',cook:''};
  let customized=new Set<Role>();
+ let textEdits:Record<string,string>={};
+ const defaultPlan=['Check ingredients & assign helpers','Cook safely using the directions on the back','Set out the food and call the family','Eat together; captain leads the cleanup'];
+ const defaultRule='Ask the Dinner Captain what’s next, not Mom. The captain leads the plan and finishes with the team.';
+ const defaultIntro='Follow these directions for tonight’s meal. The Cooking Lead handles hot or sharp tasks; everyone else does their part.';
+ const clean=(el:HTMLElement,max:number)=>(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);
+ const valueFor=(key:string,defaultText:string)=>textEdits[key]??defaultText;
+ const drawText=(selector:string,value:string)=>root.querySelectorAll<HTMLElement>(selector).forEach(el=>{if(document.activeElement!==el)el.textContent=value});
+
  const stage=root.querySelector<HTMLElement>('[data-adc-stage]');
  const view=root.querySelector<HTMLElement>('.adc-view');
  const pages=root.querySelector<HTMLElement>('[data-adc-pages]');
@@ -370,7 +383,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   const index=parents.findIndex(m=>m.id===member.id);
   return index===0?'Mom':index===1?'Dad':member.firstName;
  };
- const save=()=>{try{storage.setItem(key,JSON.stringify({profile,effort,category,meal,assignments,customized:[...customized]}))}catch{}};
+ const save=()=>{try{storage.setItem(key,JSON.stringify({profile,effort,category,meal,assignments,customized:[...customized],textEdits}))}catch{}};
  const dinnerDialog=root.querySelector<HTMLDialogElement>('[data-dinner-dialog]');
  const teamDialog=root.querySelector<HTMLDialogElement>('[data-team-dialog]');
  root.querySelectorAll('[data-open-dinner]').forEach(button=>button.addEventListener('click',()=>dinnerDialog?.showModal()));
@@ -387,15 +400,18 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
   if(mealSelect){mealSelect.replaceChildren();for(const option of filtered){const el=document.createElement('option');el.value=option.id;el.textContent=option.name;mealSelect.append(el)}mealSelect.value=meal;}
   const count=root.querySelector<HTMLElement>('[data-filter-count]');
   if(count)count.textContent=filtered.length+' ready-to-lead '+(effort==='minimal'?'minimal-effort':effort)+' dinner option'+(filtered.length===1?'':'s')+' in this family. Each prints as one complete dinner plan.';
-  const mealText=root.querySelector<HTMLElement>('[data-out-meal]');if(mealText)mealText.textContent=selection.name;
-  const timeText=root.querySelector<HTMLElement>('[data-out-time]');if(timeText)timeText.textContent=selection.time;
-  const servings=root.querySelector<HTMLElement>('[data-out-servings]');if(servings)servings.textContent=selection.servings;
-  const summaryMeal=root.querySelector<HTMLElement>('[data-summary-meal]');if(summaryMeal)summaryMeal.textContent=selection.name;
-  const summaryTime=root.querySelector<HTMLElement>('[data-summary-time]');if(summaryTime)summaryTime.textContent=selection.time+' · '+selection.servings;
-  const backTitle=root.querySelector<HTMLElement>('[data-out-recipe-title]');if(backTitle)backTitle.textContent=selection.name;
-  const backTime=root.querySelector<HTMLElement>('[data-out-recipe-time]');if(backTime)backTime.textContent=selection.time;
-  root.querySelectorAll<HTMLElement>('[data-out-instruction]').forEach((el,i)=>{el.textContent=selection.instructions[i]??''});
-  root.querySelectorAll<HTMLElement>('[data-ingredient]').forEach((span,i)=>{span.textContent=selection.ingredients[i]??''});
+  const mealText=root.querySelector<HTMLElement>('[data-out-meal]');if(mealText&&document.activeElement!==mealText)mealText.textContent=valueFor('meal',selection.name);
+  const timeText=root.querySelector<HTMLElement>('[data-out-time]');if(timeText&&document.activeElement!==timeText)timeText.textContent=valueFor('time',selection.time);
+  const servings=root.querySelector<HTMLElement>('[data-out-servings]');if(servings&&document.activeElement!==servings)servings.textContent=valueFor('servings',selection.servings);
+  const summaryMeal=root.querySelector<HTMLElement>('[data-summary-meal]');if(summaryMeal)summaryMeal.textContent=valueFor('meal',selection.name);
+  const summaryTime=root.querySelector<HTMLElement>('[data-summary-time]');if(summaryTime)summaryTime.textContent=valueFor('time',selection.time)+' · '+valueFor('servings',selection.servings);
+  const backTitle=root.querySelector<HTMLElement>('[data-out-recipe-title]');if(backTitle&&document.activeElement!==backTitle)backTitle.textContent=valueFor('meal',selection.name);
+  const backTime=root.querySelector<HTMLElement>('[data-out-recipe-time]');if(backTime&&document.activeElement!==backTime)backTime.textContent=valueFor('time',selection.time);
+  root.querySelectorAll<HTMLElement>('[data-out-instruction]').forEach((el,i)=>{if(document.activeElement!==el)el.textContent=valueFor('instruction:'+i,selection.instructions[i]??'')});
+  root.querySelectorAll<HTMLElement>('[data-ingredient]').forEach((span,i)=>{if(document.activeElement!==span)span.textContent=valueFor('ingredient:'+i,selection.ingredients[i]??'')});
+  root.querySelectorAll<HTMLElement>('[data-out-plan-step]').forEach((el,i)=>{if(document.activeElement!==el)el.textContent=valueFor('step:'+i,defaultPlan[i]??'')});
+  drawText('[data-out-rule]',valueFor('rule',defaultRule));
+  drawText('[data-out-intro]',valueFor('intro',defaultIntro));
   for(const role of roles){
    const select=root.querySelector<HTMLSelectElement>('[data-role="'+role+'"]');
    const text=root.querySelector<HTMLElement>('[data-out-role="'+role+'"]');
@@ -407,32 +423,64 @@ for(const root of document.querySelectorAll<HTMLElement>('.adc')){
     const opt=document.createElement('option');opt.value=m.id;opt.textContent=displayName(m);select.append(opt);
    }
    select.value=members.some(m=>m.id===chosen&&eligible(role,m))?chosen:'';
-   text.textContent=members.find(m=>m.id===select.value)?displayName(members.find(m=>m.id===select.value)!):'Our family';
-   const summaryRole=root.querySelector<HTMLElement>('[data-summary-role="'+role+'"]');if(summaryRole)summaryRole.textContent=text.textContent;
+   if(document.activeElement!==text)text.textContent=members.find(m=>m.id===select.value)?displayName(members.find(m=>m.id===select.value)!):'Our family';
+   const summaryRole=root.querySelector<HTMLElement>('[data-summary-role="'+role+'"]');if(summaryRole)summaryRole.textContent=members.find(m=>m.id===select.value)?displayName(members.find(m=>m.id===select.value)!):'Our family';
   }
  };
- root.querySelector<HTMLSelectElement>('[data-effort]')?.addEventListener('change',e=>{effort=(e.target as HTMLSelectElement).value as DinnerEffort;const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
- root.querySelector<HTMLSelectElement>('[data-category]')?.addEventListener('change',e=>{category=(e.target as HTMLSelectElement).value;const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
- root.querySelector<HTMLSelectElement>('[data-meal]')?.addEventListener('change',e=>{meal=(e.target as HTMLSelectElement).value;save();draw()});
+
+ // Same interaction as June: contenteditable text stays on the printable page.
+ const editingKey=(el:HTMLElement):string=>{
+  if(el.hasAttribute('data-out-meal')||el.hasAttribute('data-out-recipe-title'))return 'meal';
+  if(el.hasAttribute('data-out-time')||el.hasAttribute('data-out-recipe-time'))return 'time';
+  if(el.hasAttribute('data-out-servings'))return 'servings';
+  if(el.hasAttribute('data-out-rule'))return 'rule';
+  if(el.hasAttribute('data-out-intro'))return 'intro';
+  if(el.hasAttribute('data-ingredient'))return 'ingredient:'+Array.from(root.querySelectorAll('[data-ingredient]')).indexOf(el);
+  if(el.hasAttribute('data-out-instruction'))return 'instruction:'+el.dataset.outInstruction;
+  if(el.hasAttribute('data-out-plan-step'))return 'step:'+el.dataset.outPlanStep;
+  return '';
+ };
+ root.querySelectorAll<HTMLElement>('[contenteditable="true"]:not([data-out-role])').forEach(el=>{
+  const editKey=editingKey(el);if(!editKey)return;
+  const limit=editKey.startsWith('instruction:')?260:editKey.startsWith('ingredient:')?95:editKey==='meal'?90:180;
+  const capture=()=>{textEdits[editKey]=clean(el,limit);save()};
+  el.addEventListener('input',capture);
+  el.addEventListener('blur',()=>{capture();draw()});
+  el.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
+ });
+ root.querySelectorAll<HTMLElement>('[data-out-role]').forEach(el=>{
+  const role=el.dataset.outRole as Role;
+  el.addEventListener('blur',()=>{
+   const typed=clean(el,36).toLowerCase();
+   const person=members.find(m=>eligible(role,m)&&(displayName(m).toLowerCase()===typed||m.firstName.toLowerCase()===typed));
+   if(person){assignments[role]=person.id;customized.add(role);save()}
+   draw();
+  });
+  el.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
+ });
+ root.querySelector<HTMLSelectElement>('[data-effort]')?.addEventListener('change',e=>{effort=(e.target as HTMLSelectElement).value as DinnerEffort;textEdits={};const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
+ root.querySelector<HTMLSelectElement>('[data-category]')?.addEventListener('change',e=>{category=(e.target as HTMLSelectElement).value;textEdits={};const first=choices.find(m=>m.category===category&&m.effort===effort);meal=first?.id??'tacos-b';save();draw()});
+ root.querySelector<HTMLSelectElement>('[data-meal]')?.addEventListener('change',e=>{meal=(e.target as HTMLSelectElement).value;textEdits={};save();draw()});
  for(const role of roles)root.querySelector<HTMLSelectElement>('[data-role="'+role+'"]')?.addEventListener('change',e=>{assignments[role]=(e.target as HTMLSelectElement).value;customized.add(role);save();draw()});
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{
-   effort='quick';category='tacos';meal='tacos-b';customized.clear();
+   effort='quick';category='tacos';meal='tacos-b';textEdits={};customized.clear();
    for(const role of roles)assignments[role]=suggested(role);
    save();draw();
  });
- root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  const applyHousehold=(detail:{household:{id:string;members:Member[]}|null;sample?:string})=>{
   if(!detail?.household)return;
   const nextProfile=(detail.sample??'account')+':'+detail.household.id;
   const switched=nextProfile!==profile;
   profile=nextProfile;members=detail.household.members.filter(m=>!m.archived);
   if(switched){
-   effort='quick';category='tacos';meal='tacos-b';customized.clear();assignments={captain:'',checker:'',table:'',cook:''};
+   effort='quick';category='tacos';meal='tacos-b';textEdits={};customized.clear();assignments={captain:'',checker:'',table:'',cook:''};
    try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.profile===profile){
      const savedMeal=choices.find(x=>x.id===saved.meal);
      if(savedMeal){effort=savedMeal.effort;category=savedMeal.category;meal=savedMeal.id}
      else {effort='quick';category='tacos';meal='tacos-b'}
      customized=new Set(roles.filter(r=>saved.customized?.includes(r)));
+     textEdits=saved.textEdits&&typeof saved.textEdits==='object'?saved.textEdits:{};
      for(const role of roles)assignments[role]=typeof saved.assignments?.[role]==='string'?saved.assignments[role]:'';
    }}catch{}
   }
