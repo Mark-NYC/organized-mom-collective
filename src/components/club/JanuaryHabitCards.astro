@@ -58,15 +58,15 @@ const defaults = [
             </div>
             <div class="jhc-card-icon" aria-hidden="true"><img src={['dishes-in-sink','backpack','pajamas','table-after-meal'].map(n=>'/images/club/icon-library/'+n+'.png')[i]} alt="" width="58" height="58" /></div>
             <p class="jhc-small-title">ONE LITTLE HABIT</p>
-            <h3 class="jhc-card-name" data-print-field="name">{item.name}</h3>
+            <h3 class="jhc-card-name" data-print-field="name" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit name">{item.name}</h3>
             <div class="jhc-card-rule"></div>
             <p class="jhc-anchor-label">WHEN THIS HAPPENS</p>
-            <p class="jhc-anchor" data-print-field="anchor">{item.anchor}</p>
+            <p class="jhc-anchor" data-print-field="anchor" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit anchor">{item.anchor}</p>
             <p class="jhc-action-label">HERE’S WHAT I DO NEXT</p>
-            <p class="jhc-action" data-print-field="action">{item.action}</p>
+            <p class="jhc-action" data-print-field="action" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit action">{item.action}</p>
             <div class="jhc-card-bottom">
               <span>PLACE THIS CARD</span>
-              <p data-print-field="place">{item.place}</p>
+              <p data-print-field="place" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit place">{item.place}</p>
             </div>
           </article>
         ))}
@@ -301,6 +301,17 @@ const defaults = [
  #club-month-content .jhc-jump-edit{display:flex;justify-content:center;align-items:center}
  #club-month-content .jhc-actions .jhc-png,#club-month-content .jhc-actions .jhc-reset{grid-column:1/-1}
 }
+
+/* June-standard direct editing: persistent muted SVG pencil, removed from final artwork. */
+.jhc .jhc-page [contenteditable="true"]{position:relative;cursor:text;outline-offset:2px;overflow-wrap:anywhere}
+.jhc .jhc-page [contenteditable="true"]:hover{outline:1px dashed #a6b69d}
+.jhc .jhc-page [contenteditable="true"]:focus{outline:2px solid #94ae8e;background:#f5faf2}
+.jhc .jhc-page [contenteditable="true"]::after{content:"";display:inline-block;width:12px;height:12px;margin-left:6px;vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");opacity:.7;pointer-events:none}
+.jhc .jhc-page [contenteditable="true"]:hover::after{opacity:1}
+.jhc .jhc-page [contenteditable="true"]:focus::after{opacity:0}
+@media print{.jhc .jhc-page [contenteditable="true"]::after{display:none!important}.jhc .jhc-page [contenteditable="true"]{outline:none!important;background:transparent!important}}
+.jhc.jhc-image-export .jhc-page [contenteditable="true"]::after{display:none!important}
+.jhc.jhc-image-export .jhc-page [contenteditable="true"]{outline:none!important;background:transparent!important}
 </style>
 <script>
 const defaults = [
@@ -326,8 +337,17 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  try {const saved=JSON.parse(storage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
  const paint=()=>{
   editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
-  cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];target.textContent=values[i][field] || ' ';}));
+  cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];if(document.activeElement!==target)target.textContent=values[i][field] || ' ';}));
  };
+ // Click directly on printed words; keep caret in place and save to the existing card state.
+ cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{
+  const field=target.dataset.printField as keyof typeof defaults[number];
+  const max=field==='name'?42:field==='anchor'?85:field==='action'?105:70;
+  const capture=()=>{values[i][field]=(target.textContent??'').replace(/\\s+/g,' ').slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}};
+  target.addEventListener('input',capture);
+  target.addEventListener('blur',()=>{values[i][field]=(target.textContent??'').replace(/\\s+/g,' ').trim().slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}paint()});
+  target.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();target.blur()}});
+ }));
  editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
   const field=input.dataset.field as keyof typeof defaults[number];values[i][field]=input.value.slice(0,105);
   try{storage.setItem(key,JSON.stringify(values))}catch{}
@@ -360,11 +380,12 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   try{storage.setItem(key,JSON.stringify(values));storage.setItem(key+':automatic-names',JSON.stringify(nextNames))}catch{}
   paint();
  });
- root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
   const sheet=root.querySelector<HTMLElement>("[data-jhc-page]");
   if(!button||!sheet)return;
+  (document.activeElement as HTMLElement|null)?.blur();
   button.disabled=true;const old=button.textContent;button.textContent='Preparing image…';
   root.classList.add('jhc-image-export');
   try{
