@@ -3,6 +3,20 @@
 interface Props {storageKey?:string}
 const {storageKey='omc:club:june-snack-station:v1'}=Astro.props;
 const foods=[
+ {id:'ranch',name:'Ranch dip',zone:'fridge'},
+ {id:'peanut-butter',name:'Peanut butter',zone:'fridge'},
+ {id:'yogurt-tube',name:'Yogurt tube',zone:'fridge'},
+ {id:'strawberries',name:'Strawberries',zone:'fridge'},
+ {id:'blueberries',name:'Blueberries',zone:'fridge'},
+ {id:'other-fruit',name:'Other fruit',zone:'fridge'},
+ {id:'cream-cheese',name:'Cream cheese',zone:'fridge'},
+ {id:'muffin',name:'Muffin',zone:'pantry'},
+ {id:'other-baked',name:'Other baked good',zone:'pantry'},
+ {id:'applesauce',name:'Applesauce pouch',zone:'pantry'},
+ {id:'carrots-ranch',name:'Carrots + ranch',zone:'fridge'},
+ {id:'carrots-hummus',name:'Carrots + hummus',zone:'fridge'},
+ {id:'apples-peanut',name:'Apples + peanut butter',zone:'fridge'},
+ {id:'bagel-cream',name:'Bagel + cream cheese',zone:'pantry'},
  {id:'yogurt',name:'Yogurt cup',zone:'fridge'},
  {id:'cheese-stick',name:'Cheese stick',zone:'fridge'},
  {id:'apple',name:'Apple slices',zone:'fridge'},
@@ -20,6 +34,19 @@ const foods=[
 ] as const;
 const snackIcons:Record<string,string>={
  'yogurt':'/images/club/icon-library/yogurt-cup.png',
+ 'yogurt-tube':'/images/club/icon-library/yogurt-cup.png',
+ 'strawberries':'/images/club/icon-library/fruit.png',
+ 'blueberries':'/images/club/icon-library/fruit.png',
+ 'other-fruit':'/images/club/icon-library/fruit.png',
+ 'ranch':'/images/club/icon-library/hummus-cup.png',
+ 'cream-cheese':'/images/club/icon-library/cheese-wedge.png',
+ 'muffin':'/images/club/icon-library/bread.png',
+ 'other-baked':'/images/club/icon-library/bread.png',
+ 'applesauce':'/images/club/icon-library/fruit.png',
+ 'carrots-ranch':'/images/club/icon-library/carrot-sticks.png',
+ 'carrots-hummus':'/images/club/icon-library/carrot-sticks.png',
+ 'apples-peanut':'/images/club/icon-library/fruit.png',
+ 'bagel-cream':'/images/club/icon-library/mini-bagels.png',
  'cheese-stick':'/images/club/icon-library/cheese-wedge.png',
  'apple':'/images/club/icon-library/fruit.png',
  'carrot-big':'/images/club/icon-library/carrot-sticks.png',
@@ -64,19 +91,22 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
    <div class="jss-dialog-fields">   <div class="jss-controls">
     <label>Snack rule
      <select data-rule>
-      <option value="two">Choose one from each side</option>
-      <option value="one">Choose any one snack</option>
+      <option value="standard">Standard: 1 fridge + 1 pantry</option>
+      <option value="big">Big Appetite: 2 fridge + 1 pantry</option>
+      <option value="fridge">Fridge Only</option>
+      <option value="pantry">Pantry Only</option>
      </select>
     </label>
     <label>After-snack reminder
      <select data-reset>
+      <option value="When you're done, bring your snack and dishes back to the kitchen counter.">Bring snack and dishes to the kitchen counter</option>
       <option value="Put food away · Bring dishes to the sink">Put food away + dishes to the sink</option>
       <option value="Put food away · Throw wrappers away">Put food away + wrappers in trash</option>
       <option value="Put food away · Wipe your spot">Put food away + wipe your spot</option>
      </select>
     </label>
    </div>
-   <details class="jss-customize"><summary>Change the food choices <span>Optional</span></summary><p>Swap a food, or remove a row you don't need. On the chart, click any words to edit them directly.</p><div data-jss-choices></div></details>
+   <details class="jss-customize" open><summary>Change your snack choices <span>Optional</span></summary><p>Choose a replacement, edit its label, or remove what your kids won't eat. Only the selected foods print.</p><label class="jss-allergy"><input type="checkbox" data-exclude-peanuts /> Exclude peanuts from choices</label><div data-jss-choices></div></details>
 </div>
       <div class="jss-caution"><strong>A quick parent check</strong><p>These are example foods, not allergy- or age-screened recommendations. Before children use the station, choose foods that are safe for each child, prepare anything that needs cutting, and decide what requires adult help. Young children should be supervised when eating.</p></div>
 
@@ -90,7 +120,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
      <div class="jss-sheet-head"><span>ORGANIZED FAMILY CLUB · JUNE 2027</span><h2>I can make <em data-jss-edit="headline" contenteditable="true" role="textbox" aria-label="Edit snack station heading">my own snack!</em></h2><p data-jss-edit="subtitle" contenteditable="true" role="textbox" aria-label="Edit subtitle">Pick it. Enjoy it. Put it away.</p></div>
      <div class="jss-family" data-jss-family>OUR FAMILY'S SNACK STATION</div>
      <div class="jss-instruction"><span>MY SNACK RULE</span><strong data-jss-rule-text data-jss-edit="rule" contenteditable="true" role="textbox" aria-label="Edit snack rule">Choose one from each side.</strong></div>
-     <div class="jss-columns">
+     <h3 class="jss-options-heading">Our Snack Options</h3><div class="jss-columns">
       <section class="jss-zone jss-fridge"><div class="jss-zone-title"><span>01</span><div><h3 data-jss-edit="fridgeTitle" contenteditable="true" role="textbox" aria-label="Edit fridge heading">From the fridge</h3><p>Choose one</p></div></div>
        <div class="jss-foods">
         {initialFridge.map((id,i)=>{const f=foods.find(x=>x.id===id)!;return <div class="jss-food" data-zone="fridge" data-slot={i}><img src={snackIcons[f.id] ?? '/images/tools/lunch/'+f.id+'.png'} alt="" width="75" height="75" /><strong contenteditable="true" role="textbox" aria-label={'Edit '+f.name} spellcheck="true" data-food-text>{f.name}</strong><button type="button" class="jss-remove" data-jss-remove aria-label={'Remove '+f.name} title="Remove this row">×</button></div>})}
@@ -124,7 +154,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 .jss-stage{position:relative}.jss-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;transform:scale(var(--jss-scale,.8));transform-origin:top left;padding:40px 47px 28px;background:white;border:1px solid #e5e7e0;box-shadow:0 8px 26px #0002;display:flex;flex-direction:column;overflow:hidden}
 .jss-sheet-head{background:#f6eaca;border-top:8px solid #ebd7a4;padding:21px 27px 18px;min-height:161px}.jss-sheet-head>span{display:block;font-size:10px;font-weight:700;letter-spacing:.15em;color:#777452}.jss-sheet-head h2{font:400 46px/1.08 Georgia,serif;color:#575c43;margin:12px 0 8px}.jss-sheet-head h2 em{font-style:italic;color:#78865f}.jss-sheet-head p{font:italic 17px Georgia,serif;color:#7d7d65;margin:0}
 .jss-family{font-size:11px;letter-spacing:.13em;font-weight:700;color:#737e69;margin:21px 0 13px}.jss-instruction{border:1px solid #e2e9dc;background:#f6faf2;border-radius:5px;padding:11px 15px;display:flex;align-items:baseline;gap:15px}.jss-instruction span,.jss-done span{font-size:10px;font-weight:700;letter-spacing:.08em;color:#7e8f73}.jss-instruction strong{font:22px Georgia,serif;color:#445b3e}
-.jss-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.jss-zone{border:1px solid #e5e4da;border-radius:9px;overflow:hidden;background:#fff}.jss-zone-title{padding:16px 14px 12px;display:flex;gap:12px;align-items:center;background:#e6eee3}.jss-zone-title>span{font:italic 32px Georgia,serif;color:#8fa389}.jss-zone-title h3{font:400 24px Georgia,serif;margin:0;color:#4b6046}.jss-zone-title p{font-size:11px;margin:4px 0 0;color:#687760}.jss-pantry .jss-zone-title{background:#f5e5cb}.jss-pantry .jss-zone-title>span{color:#b69c75}.jss-pantry .jss-zone-title h3{color:#7a6045}
+.jss-options-heading{font:400 25px Georgia,serif;color:#4b6046;margin:15px 0 0;text-align:center}.jss-zone[hidden]{display:none!important}.jss-columns:has(.jss-zone[hidden]){grid-template-columns:1fr;max-width:440px;margin-left:auto;margin-right:auto}.jss-customize input[type=text]{width:100%;min-height:40px;padding:8px;border:1px solid #b8c3ae;font:12px Montserrat,Arial,sans-serif}.jss-allergy{display:flex!important;align-items:center;gap:8px;margin:12px 0;font-size:12px!important}.jss-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.jss-zone{border:1px solid #e5e4da;border-radius:9px;overflow:hidden;background:#fff}.jss-zone-title{padding:16px 14px 12px;display:flex;gap:12px;align-items:center;background:#e6eee3}.jss-zone-title>span{font:italic 32px Georgia,serif;color:#8fa389}.jss-zone-title h3{font:400 24px Georgia,serif;margin:0;color:#4b6046}.jss-zone-title p{font-size:11px;margin:4px 0 0;color:#687760}.jss-pantry .jss-zone-title{background:#f5e5cb}.jss-pantry .jss-zone-title>span{color:#b69c75}.jss-pantry .jss-zone-title h3{color:#7a6045}
 .jss-foods{padding:6px 11px 11px}.jss-food{min-height:104px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #e8eae5}.jss-food:last-child{border-bottom:0}.jss-food[hidden]{display:none!important}.jss-food img{width:68px;height:68px;object-fit:contain;flex:none}.jss-food strong{font:400 19px/1.25 Montserrat,Arial,sans-serif;color:#57594f;min-width:0;outline-offset:4px;overflow-wrap:anywhere}
 .jss-food{position:relative}.jss-remove{position:absolute;right:2px;top:3px;border:1px solid #cad7c5;border-radius:50%;width:27px;height:27px;background:#fff;color:#577057;font-size:19px;cursor:pointer;opacity:0}
 .jss-food:hover .jss-remove,.jss-food:focus-within .jss-remove{opacity:1}
@@ -230,8 +260,15 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 type Zone='fridge'|'pantry';
 type Food={id:string;name:string;zone:Zone};
 type Item={id:string;label:string;removed?:boolean};
-type State={fridge:Item[];pantry:Item[];rule:'one'|'two';reset:string;text:Record<string,string>};
+type State={fridge:Item[];pantry:Item[];rule:'standard'|'big'|'fridge'|'pantry';reset:string;text:Record<string,string>;excludePeanuts:boolean};
 const foods:Food[]=[
+ {id:'ranch',name:'Ranch dip',zone:'fridge'},{id:'peanut-butter',name:'Peanut butter',zone:'fridge'},
+ {id:'yogurt-tube',name:'Yogurt tube',zone:'fridge'},{id:'strawberries',name:'Strawberries',zone:'fridge'},
+ {id:'blueberries',name:'Blueberries',zone:'fridge'},{id:'other-fruit',name:'Other fruit',zone:'fridge'},
+ {id:'cream-cheese',name:'Cream cheese',zone:'fridge'},{id:'muffin',name:'Muffin',zone:'pantry'},
+ {id:'other-baked',name:'Other baked good',zone:'pantry'},{id:'applesauce',name:'Applesauce pouch',zone:'pantry'},
+ {id:'carrots-ranch',name:'Carrots + ranch',zone:'fridge'},{id:'carrots-hummus',name:'Carrots + hummus',zone:'fridge'},
+ {id:'apples-peanut',name:'Apples + peanut butter',zone:'fridge'},{id:'bagel-cream',name:'Bagel + cream cheese',zone:'pantry'},
  {id:'yogurt',name:'Yogurt cup',zone:'fridge'},{id:'cheese-stick',name:'Cheese stick',zone:'fridge'},
  {id:'apple',name:'Apple slices',zone:'fridge'},{id:'carrot-big',name:'Carrot sticks',zone:'fridge'},
  {id:'cucumber',name:'Cucumber sticks',zone:'fridge'},{id:'hummus',name:'Hummus cup',zone:'fridge'},
@@ -243,7 +280,7 @@ const foods:Food[]=[
 const starter=():State=>({
  fridge:['yogurt','cheese-stick','apple','cucumber'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
  pantry:['crackers','granola-bar','dried-fruit','bagel'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
- rule:'two',reset:'Put food away · Bring dishes to the sink',text:{}
+ rule:'standard',reset:"When you're done, bring your snack and dishes back to the kitchen counter.",text:{},excludePeanuts:false
 });
 for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  const snackIconPaths:Record<string,string>=JSON.parse(root.dataset.jssIcons??'{}');
@@ -263,25 +300,31 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editDialog?.showModal()));
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+ const rules={standard:'Choose 1 from the fridge + 1 from the pantry.',big:'Choose 2 from the fridge + 1 from the pantry.',fridge:'Choose from the fridge.',pantry:'Choose from the pantry.'};
+ const forbidden=(id:string)=>state.excludePeanuts&&['nut-butter','peanut-butter','apples-peanut'].includes(id);
+ const fallback='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 75"><rect x="13" y="15" width="49" height="45" rx="8" fill="#f2f1e9" stroke="#748569" stroke-width="2"/><path d="M24 38h27M37 25v26" stroke="#748569" stroke-width="2"/></svg>');
  const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({profile,state}))}catch{}};
  const draw=()=>{
   root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
    const zone=el.dataset.zone as Zone;const index=Number(el.dataset.slot);const item=state[zone]?.[index];if(!item)return;
-   el.hidden=!!item.removed;
-   const img=el.querySelector<HTMLImageElement>('img');if(img)img.src=snackIconPaths[item.id]??'/images/tools/lunch/'+item.id+'.png';
+   el.hidden=!!item.removed||forbidden(item.id);
+   const img=el.querySelector<HTMLImageElement>('img');if(img){img.src=item.id==='custom'?fallback:(snackIconPaths[item.id]||'/images/tools/lunch/'+item.id+'.png');img.onerror=()=>{img.onerror=null;img.src=fallback}}
    const title=el.querySelector<HTMLElement>('[data-food-text]');if(title&&document.activeElement!==title)title.textContent=item.label;
   });
-  const rule=root.querySelector<HTMLElement>('[data-jss-rule-text]');if(rule&&document.activeElement!==rule)rule.textContent=state.text.rule??(state.rule==='two'?'Choose one from each side.':'Choose one snack from either side.');
-  root.querySelectorAll<HTMLElement>('.jss-zone-title p').forEach(el=>el.textContent=state.rule==='two'?'Choose one':'Pick one you like');
+  const rule=root.querySelector<HTMLElement>('[data-jss-rule-text]');if(rule&&document.activeElement!==rule)rule.textContent=state.text.rule??rules[state.rule];
+  root.querySelectorAll<HTMLElement>('.jss-zone-title p').forEach((el,i)=>el.textContent=i===0&&state.rule==='big'?'Choose two':'Choose one');
+  root.querySelector<HTMLElement>('.jss-fridge')?.toggleAttribute('hidden',state.rule==='pantry');
+  root.querySelector<HTMLElement>('.jss-pantry')?.toggleAttribute('hidden',state.rule==='fridge');
   const reset=root.querySelector<HTMLElement>('[data-jss-reset-text]');if(reset&&document.activeElement!==reset)reset.textContent=state.text.cleanup??state.reset;
   const initial:Record<string,string>={headline:'my own snack!',subtitle:'Pick it. Enjoy it. Put it away.',fridgeTitle:'From the fridge',pantryTitle:'From the pantry'};
   for(const [key,value] of Object.entries(initial)){const node=root.querySelector<HTMLElement>('[data-jss-edit="'+key+'"]');if(node&&document.activeElement!==node)node.textContent=state.text[key]??value}
   const fam=root.querySelector<HTMLElement>('[data-jss-family]');if(fam)fam.textContent=family;
   const visible=[...state.fridge,...state.pantry].filter(item=>!item.removed).length;
   const total=root.querySelector<HTMLElement>('[data-jss-summary-count]');if(total)total.textContent=visible+' foods';
-  const summaryRule=root.querySelector<HTMLElement>('[data-jss-summary-rule]');if(summaryRule)summaryRule.textContent=state.rule==='two'?'One from each side':'Any one snack';
+  const summaryRule=root.querySelector<HTMLElement>('[data-jss-summary-rule]');if(summaryRule)summaryRule.textContent=({standard:'1 fridge + 1 pantry',big:'2 fridge + 1 pantry',fridge:'Fridge only',pantry:'Pantry only'})[state.rule];
   const summaryReset=root.querySelector<HTMLElement>('[data-jss-summary-reset]');if(summaryReset)summaryReset.textContent=state.reset.replace('Put food away · ','Food away + ').replace('Bring dishes to the sink','dishes to sink').replace('Throw wrappers away','wrappers in trash').replace('Wipe your spot','wipe your spot');
   const ruleSelect=root.querySelector<HTMLSelectElement>('[data-rule]');if(ruleSelect)ruleSelect.value=state.rule;
+  const peanut=root.querySelector<HTMLInputElement>('[data-exclude-peanuts]');if(peanut)peanut.checked=state.excludePeanuts;
   const resetSelect=root.querySelector<HTMLSelectElement>('[data-reset]');if(resetSelect)resetSelect.value=state.reset;
  };
  const makeChoices=()=>{
@@ -291,15 +334,21 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
     const field=document.createElement('div');field.className='jss-choice';
     const label=document.createElement('label');label.textContent=(zone==='fridge'?'Fridge':'Pantry')+' · choice '+(i+1);
     const select=document.createElement('select');select.setAttribute('aria-label',label.textContent);
-    for(const food of foods.filter(f=>f.zone===zone)){
+    for(const food of foods.filter(f=>f.zone===zone&&!forbidden(f.id))){
      const opt=document.createElement('option');opt.value=food.id;opt.textContent=food.name;select.append(opt);
     }
-    select.value=state[zone][i].id;
+    const custom=document.createElement('option');custom.value='custom';custom.textContent='My custom food';select.append(custom);
+    select.value=forbidden(state[zone][i].id)?'custom':state[zone][i].id;
     select.addEventListener('change',()=>{
-     const food=foods.find(f=>f.id===select.value&&f.zone===zone);if(!food)return;
-     state[zone][i]={id:food.id,label:food.name,removed:state[zone][i].removed};save();draw();
+     const food=foods.find(f=>f.id===select.value&&f.zone===zone);
+     state[zone][i]={id:select.value,label:food?.name??'My snack',removed:false};save();draw();makeChoices();
     });
     label.append(select);field.append(label);
+    const labelEdit=document.createElement('label');labelEdit.textContent='Change displayed label';
+    const input=document.createElement('input');input.type='text';input.maxLength=45;input.value=state[zone][i].label;
+    input.setAttribute('aria-label','Change '+zone+' choice '+(i+1)+' label');
+    input.addEventListener('input',()=>{state[zone][i].label=input.value.slice(0,45);save();draw()});
+    labelEdit.append(input);field.append(labelEdit);
     const toggle=document.createElement('button');toggle.type='button';toggle.className='jss-toggle';toggle.textContent=state[zone][i].removed?'＋ Restore row':'× Remove row';
     toggle.setAttribute('aria-label',(state[zone][i].removed?'Restore ':'Remove ')+state[zone][i].label);
     toggle.addEventListener('click',()=>{state[zone][i].removed=!state[zone][i].removed;save();draw();makeChoices()});
@@ -324,6 +373,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  });
  root.querySelector<HTMLSelectElement>('[data-rule]')?.addEventListener('change',e=>{state.rule=(e.target as HTMLSelectElement).value as State['rule'];delete state.text.rule;save();draw()});
  root.querySelector<HTMLSelectElement>('[data-reset]')?.addEventListener('change',e=>{state.reset=(e.target as HTMLSelectElement).value;delete state.text.cleanup;save();draw()});
+ root.querySelector<HTMLInputElement>('[data-exclude-peanuts]')?.addEventListener('change',e=>{
+  state.excludePeanuts=(e.target as HTMLInputElement).checked;
+  for(const zone of ['fridge','pantry'] as Zone[])for(const item of state[zone])if(forbidden(item.id)){item.id='custom';item.label='Choose a safe snack';item.removed=true}
+  save();draw();makeChoices();
+ });
  root.querySelector('[data-jss-restore]')?.addEventListener('click',()=>{state=starter();save();draw();makeChoices()});
  root.querySelector('[data-jss-print]')?.addEventListener('click',()=>window.print());
  const download=root.querySelector<HTMLButtonElement>('[data-jss-download]');
@@ -348,18 +402,18 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
     const saved=JSON.parse(sessionStorage.getItem(key)??'null');
     if(saved?.profile===profile&&saved.state){
      const s=saved.state;
-     if(['one','two'].includes(s.rule))state.rule=s.rule;
+     if(['standard','big','fridge','pantry'].includes(s.rule))state.rule=s.rule;else if(s.rule==='two')state.rule='standard';state.excludePeanuts=s.excludePeanuts===true;
      if(s.text&&typeof s.text==='object'){
       for(const field of ['headline','subtitle','rule','cleanup','fridgeTitle','pantryTitle']){
        if(typeof s.text[field]==='string')state.text[field]=s.text[field].slice(0,110);
       }
      }
-     if(['Put food away · Bring dishes to the sink','Put food away · Throw wrappers away','Put food away · Wipe your spot'].includes(s.reset))state.reset=s.reset;
+     if(["When you're done, bring your snack and dishes back to the kitchen counter.",'Put food away · Bring dishes to the sink','Put food away · Throw wrappers away','Put food away · Wipe your spot'].includes(s.reset))state.reset=s.reset;
      for(const zone of ['fridge','pantry'] as Zone[]){
       if(Array.isArray(s[zone])&&s[zone].length===4){
        for(let i=0;i<4;i++){
-        const item=s[zone][i];if(!item||!foods.some(f=>f.id===item.id&&f.zone===zone))continue;
-        state[zone][i]={id:item.id,label:typeof item.label==='string'?(item.label.slice(0,36)):foods.find(f=>f.id===item.id)!.name,removed:item.removed===true};
+        const item=s[zone][i];if(!item||(item.id!=='custom'&&!foods.some(f=>f.id===item.id&&f.zone===zone)))continue;
+        state[zone][i]={id:item.id,label:typeof item.label==='string'?(item.label.slice(0,36)):(foods.find(f=>f.id===item.id)?.name??'My snack'),removed:item.removed===true};
        }
       }
      }
