@@ -156,6 +156,20 @@ const tiers=[
  .jab-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{.jab-dialog,.jab-actions,.jab-floating-edit,.jab-editor{display:none!important}.jab-preview{padding:0!important}}
+
+/* June reference: visible pencil indicates inline-editable text before hover.
+   A CSS pseudo-element keeps the cue out of saved text and the text cursor. */
+.jab .jab-sheet [contenteditable="true"]{position:relative}
+.jab .jab-sheet [contenteditable="true"]::after{
+ content:"";display:inline-block;width:12px;height:12px;margin-left:6px;
+ vertical-align:baseline;
+ background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");
+ opacity:.7;pointer-events:none;transition:opacity .12s ease;
+}
+.jab .jab-sheet [contenteditable="true"]:hover::after{opacity:1}
+.jab .jab-sheet [contenteditable="true"]:focus::after{opacity:0}
+@media print{.jab .jab-sheet [contenteditable="true"]::after{display:none!important}}
+.jab.jab-exporting .jab-sheet [contenteditable="true"]::after{display:none!important}
 </style>
 <script>
 type Tier='quick'|'busy'|'project';
