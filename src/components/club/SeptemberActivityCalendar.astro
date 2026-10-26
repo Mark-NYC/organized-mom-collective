@@ -94,7 +94,7 @@ if(root){
  let month=new Date(2027,8,1);
  let store:ClubStore|null=null;
  let identity='',revision=0,profileVersion=1,loadSequence=0;
- let ready=false,canEdit=false,editingId:string|null=null,queue:Promise<void>=Promise.resolve();
+ let ready=false,canEdit=false,editingId:string|null=null,queue:Promise<void>=Promise.resolve();let storeKind:'sample'|'account'='sample';
  const status=(message:string)=>{$('[data-ofc-status]').textContent=message};
  const resetEditor=()=>{editingId=null;input.value='';checks.forEach(c=>c.checked=false);submit.textContent='Add activity';cancel.hidden=true};
  const controls=()=>{submit.disabled=!ready||!canEdit;input.disabled=!ready||!canEdit;person.disabled=!ready||!canEdit;checks.forEach(c=>c.disabled=!ready||!canEdit)};
@@ -151,7 +151,7 @@ if(root){
    if(identity!==targetIdentity)return;
    const next=await target.saveDocument(slug,documentId,{edits:{activities:snapshot},palette:defaultToolPalette,engineVersion:1,profileVersion:targetVersion},revision);
    revision=next;
-  }).then(()=>{if(identity===targetIdentity)status('Saved to your Club account. Changes are not a mailing approval.')}).catch((e:unknown)=>{
+  }).then(()=>{if(identity===targetIdentity)status(storeKind==='sample'?'Saved in this browser tab only. No mailing is initiated.':'Saved to your Club account across signed-in devices. No mailing is initiated.')}).catch((e:unknown)=>{
    if(identity!==targetIdentity)return;
    canEdit=false;render();status(e instanceof Error&&e.message==='conflict'?'Another device changed this calendar. Reload before editing.':'Save failed. Your changes are visible here but not safely stored. Reload to try again.')
   })
@@ -162,14 +162,14 @@ if(root){
   if(identity===next){members=calendarMembers(h);profileVersion=h.profileVersion??1;render();return}
   identity=next;const token=++loadSequence;
   ready=false;canEdit=false;resetEditor();members=calendarMembers(h);activities=[];profileVersion=h.profileVersion??1;revision=0;
-  store=detail.sample?sampleStore(detail.sample):accountStore;
+  store=detail.sample?sampleStore(detail.sample):accountStore;storeKind=detail.sample?'sample':'account';
   render();status('Loading saved family activities…');
   try{
    const docs=await store.documents(slug);if(loadSequence!==token)return;
    const doc=docs.documents[documentId];revision=doc?.revision??0;
    const value=(doc?.edits as {activities?:unknown}|undefined)?.activities;
    activities=Array.isArray(value)?value.filter(validateActivity):[];
-   canEdit=docs.can==='edit';ready=true;render();status(canEdit?'Saved in your Club profile. Available across signed-in devices. No mailing is initiated.':'Read-only calendar.');
+   canEdit=docs.can==='edit';ready=true;render();status(canEdit?(storeKind==='sample'?'Preview data stays in this browser tab. No mailing is initiated.':'Saved to your Club account, available on signed-in devices. No mailing is initiated.'):'Read-only calendar.');
   }catch{
    if(loadSequence!==token)return;
    ready=false;canEdit=false;render();status('Could not load saved activities. Please reload the page to retry.')
