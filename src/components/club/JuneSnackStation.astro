@@ -73,10 +73,10 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
     <div class="jss-summary-row"><span>Snack choices</span><b data-jss-summary-count>8 foods</b></div>
     <div class="jss-summary-row"><span>Snack rule</span><b data-jss-summary-rule>One from each side</b></div>
     <div class="jss-summary-row"><span>After snack</span><b data-jss-summary-reset>Food away + dishes to sink</b></div>
-    <button type="button" class="jss-text-button" data-open-editor>Edit snack station <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+    <button type="button" class="jss-text-button" data-open-editor>Change rule & cleanup <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
    <p class="jss-safety-note">Parent check required: choose foods safe for your children, and supervise younger eaters.</p>
-   <div class="jss-actions"><div class="jss-primary-actions"><a class="jss-jump-edit" href="#june-edit-controls">Make changes <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button type="button" class="jss-primary" data-jss-print>Print / Save PDF</button></div>
+   <div class="jss-actions"><button type="button" class="jss-options-button" data-open-snacks>✎ CHANGE SNACK OPTIONS</button><div class="jss-primary-actions"><button type="button" class="jss-jump-edit" data-open-snacks>Change snacks <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button><button type="button" class="jss-primary" data-jss-print>Print / Save PDF</button></div>
     <button type="button" class="jss-download" data-jss-download>Download image (PNG)</button>
     <button type="button" class="jss-restore" data-jss-restore>Restore starter choices</button>
    </div>
@@ -85,6 +85,16 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
    <div class="jss-dialog-top"><div><span class="jss-overline">ORGANIZED FAMILY CLUB · JUNE</span><h2 id="jss-vision-title">Why this matters</h2></div><button type="button" class="jss-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>Kids need to know which snacks they can get without asking Mom each time. This station gives them clearly pictured choices and a simple cleanup reminder, so Mom doesn't have to be the snack decision-maker all day.</p>
    <button type="button" class="jss-dialog-done" data-close-dialog>Back to our plan</button>
+  </dialog>
+  <dialog class="jss-dialog jss-snack-dialog" data-snack-dialog aria-labelledby="jss-snack-title">
+   <div class="jss-dialog-top"><div><span class="jss-overline">MAKE IT YOURS · JUNE</span><h2 id="jss-snack-title">Choose Your Snacks</h2></div><button type="button" class="jss-dialog-close" data-close-dialog aria-label="Close">×</button></div>
+   <p>Choose up to four foods from each category. Your family’s starter choices are already selected.</p>
+   <div class="jss-snack-tabs" role="tablist" aria-label="Food category"><button type="button" data-snack-tab="fridge" role="tab" aria-selected="true">From the Fridge</button><button type="button" data-snack-tab="pantry" role="tab" aria-selected="false">From the Pantry</button></div>
+   <p class="jss-snack-count" data-snack-count aria-live="polite"></p>
+   <div class="jss-snack-grid" data-snack-grid></div>
+   <label class="jss-peanut-check"><input type="checkbox" data-snack-peanuts /> Exclude foods containing peanuts</label>
+   <div class="jss-custom-food"><label for="jss-custom-name">Add one custom snack</label><div><input id="jss-custom-name" data-snack-custom type="text" maxlength="45" placeholder="e.g. Rice cakes" /><button type="button" data-snack-add>Add</button></div><p data-snack-message role="status"></p></div>
+   <div class="jss-snack-buttons"><button type="button" data-snack-cancel>Cancel</button><button type="button" class="jss-dialog-done" data-snack-save>Save Snack Options</button></div>
   </dialog>
   <dialog class="jss-dialog jss-edit-dialog" data-editor-dialog aria-labelledby="jss-editor-title">
    <div class="jss-dialog-top"><div><span class="jss-overline">MAKE IT YOURS · JUNE</span><h2 id="jss-editor-title">Edit snack station</h2></div><button type="button" class="jss-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -107,14 +117,14 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
      </select>
     </label>
    </div>
-   <details class="jss-customize" open><summary>Change your snack choices <span>Optional</span></summary><p>Choose a replacement, edit its label, or remove what your kids won't eat. Only the selected foods print.</p><label class="jss-allergy"><input type="checkbox" data-exclude-peanuts /> Exclude peanuts from choices</label><div data-jss-choices></div></details>
+   <button type="button" class="jss-options-button" data-open-snacks>✎ CHANGE SNACK OPTIONS</button>
 </div>
       <div class="jss-caution"><strong>A quick parent check</strong><p>These are example foods, not allergy- or age-screened recommendations. Before children use the station, choose foods that are safe for each child, prepare anything that needs cutting, and decide what requires adult help. Young children should be supervised when eating.</p></div>
 
    <button type="button" class="jss-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
   <section class="jss-preview" aria-label="June snack station printable preview">
-   <button type="button" class="jss-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+   <button type="button" class="jss-floating-edit" data-open-snacks><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>CHANGE SNACK OPTIONS</span></button>
 
    <div class="jss-stage" data-jss-stage>
     <article class="jss-sheet" data-jss-sheet>
@@ -155,6 +165,29 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 .jss-stage{position:relative}.jss-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;transform:scale(var(--jss-scale,.8));transform-origin:top left;padding:40px 47px 28px;background:white;border:1px solid #e5e7e0;box-shadow:0 8px 26px #0002;display:flex;flex-direction:column;overflow:hidden}
 .jss-sheet-head{background:#f6eaca;border-top:8px solid #ebd7a4;padding:21px 27px 18px;min-height:161px}.jss-sheet-head>span{display:block;font-size:10px;font-weight:700;letter-spacing:.15em;color:#777452}.jss-sheet-head h2{font:400 46px/1.08 Georgia,serif;color:#575c43;margin:12px 0 8px}.jss-sheet-head h2 em{font-style:italic;color:#78865f}.jss-sheet-head p{font:italic 17px Georgia,serif;color:#7d7d65;margin:0}
 .jss-family{font-size:11px;letter-spacing:.13em;font-weight:700;color:#737e69;margin:21px 0 13px}.jss-instruction{border:1px solid #e2e9dc;background:#f6faf2;border-radius:5px;padding:11px 15px;display:flex;align-items:baseline;gap:15px}.jss-instruction span,.jss-done span{font-size:10px;font-weight:700;letter-spacing:.08em;color:#7e8f73}.jss-instruction strong{font:22px Georgia,serif;color:#445b3e}
+.jss-options-button{display:block;width:100%;min-height:46px;margin:8px 0;padding:10px;border:1px solid #d6bd82;border-radius:5px;background:#e8d8aa;color:#48483d;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
+.jss-snack-dialog{width:min(670px,calc(100vw - 32px));max-height:calc(100dvh - 40px)}
+.jss-snack-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#f2f1eb;border-radius:5px}
+.jss-snack-tabs button{min-height:43px;border:0;background:transparent;border-radius:4px;cursor:pointer;color:#53604f;font:700 12px Montserrat,Arial,sans-serif}
+.jss-snack-tabs button[aria-selected=true]{background:#e5eddf;color:#425d3a}
+.jss-snack-count{font:700 12px Montserrat,Arial,sans-serif!important;color:#5e7754;text-align:right;margin:11px 0!important}
+.jss-snack-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:9px 0 15px}
+.jss-snack-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:117px;padding:9px 6px;border:1px solid #e0e6dd;border-radius:6px;background:#fff;color:#50564b;font:600 11px/1.3 Montserrat,Arial,sans-serif;text-align:center;cursor:pointer}
+.jss-snack-tile img{width:62px;height:62px;object-fit:contain}
+.jss-snack-tile[aria-pressed=true]{border:2px solid #859c7a;background:#f4f8f0;padding:8px 5px}
+.jss-snack-tile[aria-pressed=true]:after{content:"✓";position:absolute;top:4px;right:7px;font-size:17px;color:#476943}
+.jss-snack-tile:disabled{opacity:.43;cursor:not-allowed}
+.jss-peanut-check{display:flex;align-items:center;gap:8px;font-size:12px;margin:13px 0}
+.jss-custom-food{border-top:1px solid #e4e8dd;padding:13px 0}
+.jss-custom-food label{font-size:12px;font-weight:700}
+.jss-custom-food>div{display:flex;gap:7px;margin-top:8px}
+.jss-custom-food input{flex:1;min-width:0;border:1px solid #becab7;border-radius:4px;padding:10px;font-size:13px}
+.jss-custom-food button{padding:9px 12px;border:1px solid #8ca482;background:#f2f7ed;border-radius:4px;cursor:pointer}
+.jss-custom-food p{font-size:11px;min-height:14px;margin:7px 0}
+.jss-snack-buttons{display:flex;gap:9px;position:sticky;bottom:-24px;background:#fff;padding:12px 0 3px}
+.jss-snack-buttons>button:first-child{background:#fff;border:1px solid #c8d3c2;color:#53624f;padding:9px 17px;cursor:pointer}
+.jss-snack-buttons .jss-dialog-done{flex:1}
+@media(max-width:480px){.jss-snack-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.jss-snack-dialog{padding:15px}}
 .jss-options-heading{font:400 25px Georgia,serif;color:#4b6046;margin:15px 0 0;text-align:center}.jss-zone[hidden]{display:none!important}.jss-columns:has(.jss-zone[hidden]){grid-template-columns:1fr;max-width:440px;margin-left:auto;margin-right:auto}.jss-customize input[type=text]{width:100%;min-height:40px;padding:8px;border:1px solid #b8c3ae;font:12px Montserrat,Arial,sans-serif}.jss-allergy{display:flex!important;align-items:center;gap:8px;margin:12px 0;font-size:12px!important}.jss-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.jss-zone{border:1px solid #e5e4da;border-radius:9px;overflow:hidden;background:#fff}.jss-zone-title{padding:16px 14px 12px;display:flex;gap:12px;align-items:center;background:#e6eee3}.jss-zone-title>span{font:italic 32px Georgia,serif;color:#8fa389}.jss-zone-title h3{font:400 24px Georgia,serif;margin:0;color:#4b6046}.jss-zone-title p{font-size:11px;margin:4px 0 0;color:#687760}.jss-pantry .jss-zone-title{background:#f5e5cb}.jss-pantry .jss-zone-title>span{color:#b69c75}.jss-pantry .jss-zone-title h3{color:#7a6045}
 .jss-foods{padding:6px 11px 11px}.jss-food{min-height:104px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #e8eae5}.jss-food:last-child{border-bottom:0}.jss-food[hidden]{display:none!important}.jss-food img{width:68px;height:68px;object-fit:contain;flex:none}.jss-food strong{font:400 19px/1.25 Montserrat,Arial,sans-serif;color:#57594f;min-width:0;outline-offset:4px;overflow-wrap:anywhere}
 .jss-food{position:relative}.jss-remove{position:absolute;right:2px;top:3px;border:1px solid #cad7c5;border-radius:50%;width:27px;height:27px;background:#fff;color:#577057;font-size:19px;cursor:pointer;opacity:0}
@@ -297,13 +330,66 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  fit();const parent=stage?.parentElement;if(parent&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(parent);window.addEventListener('resize',fit);
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
  const editDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
+ const snackDialog=root.querySelector<HTMLDialogElement>('[data-snack-dialog]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editDialog?.showModal()));
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
- for(const dialog of [visionDialog,editDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+ for(const dialog of [visionDialog,editDialog,snackDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
  const rules={standard:'Choose 1 from the fridge + 1 from the pantry.',big:'Choose 2 from the fridge + 1 from the pantry.',fridge:'Choose from the fridge.',pantry:'Choose from the pantry.'};
  const forbidden=(id:string)=>state.excludePeanuts&&['nut-butter','peanut-butter','apples-peanut'].includes(id);
  const fallback='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75 75"><rect x="13" y="15" width="49" height="45" rx="8" fill="#f2f1e9" stroke="#748569" stroke-width="2"/><path d="M24 38h27M37 25v26" stroke="#748569" stroke-width="2"/></svg>');
+
+ let activeSnackZone:Zone='fridge';
+ let snackDraft:{fridge:Item[];pantry:Item[];excludePeanuts:boolean}={fridge:[],pantry:[],excludePeanuts:false};
+ const excluded=(id:string)=>snackDraft.excludePeanuts&&['nut-butter','peanut-butter','apples-peanut'].includes(id);
+ const snackMessage=(message:string)=>{const el=root.querySelector<HTMLElement>('[data-snack-message]');if(el)el.textContent=message};
+ const renderSnacks=()=>{
+  const grid=root.querySelector<HTMLElement>('[data-snack-grid]');if(!grid)return;grid.replaceChildren();
+  const selected=snackDraft[activeSnackZone];
+  const counter=root.querySelector<HTMLElement>('[data-snack-count]');if(counter)counter.textContent=selected.length+' of 4 selected';
+  root.querySelectorAll<HTMLButtonElement>('[data-snack-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.snackTab===activeSnackZone)));
+  const choices=foods.filter(f=>f.zone===activeSnackZone&&!excluded(f.id));
+  for(const f of choices){
+   const on=selected.some(item=>item.id===f.id);
+   const button=document.createElement('button');button.type='button';button.className='jss-snack-tile';button.setAttribute('aria-pressed',String(on));button.disabled=!on&&selected.length>=4;
+   const img=document.createElement('img');img.src=snackIconPaths[f.id]||'/images/tools/lunch/'+f.id+'.png';img.alt='';img.onerror=()=>{img.onerror=null;img.src=fallback};
+   const label=document.createElement('span');label.textContent=f.name;button.append(img,label);
+   button.addEventListener('click',()=>{if(on)snackDraft[activeSnackZone]=selected.filter(item=>item.id!==f.id);else if(selected.length<4)selected.push({id:f.id,label:f.name});snackMessage('');renderSnacks()});grid.append(button);
+  }
+  for(const custom of selected.filter(item=>item.id==='custom')){
+   const button=document.createElement('button');button.type='button';button.className='jss-snack-tile';button.setAttribute('aria-pressed','true');
+   const img=document.createElement('img');img.src=fallback;img.alt='';const label=document.createElement('span');label.textContent=custom.label;button.append(img,label);
+   button.addEventListener('click',()=>{snackDraft[activeSnackZone]=selected.filter(item=>item!==custom);renderSnacks()});grid.append(button);
+  }
+ };
+ const openSnacks=()=>{
+  snackDraft={fridge:state.fridge.filter(item=>!item.removed&&!forbidden(item.id)).map(item=>({...item})),pantry:state.pantry.filter(item=>!item.removed&&!forbidden(item.id)).map(item=>({...item})),excludePeanuts:state.excludePeanuts};
+  activeSnackZone='fridge';
+  const checkbox=root.querySelector<HTMLInputElement>('[data-snack-peanuts]');if(checkbox)checkbox.checked=snackDraft.excludePeanuts;
+  const input=root.querySelector<HTMLInputElement>('[data-snack-custom]');if(input)input.value='';
+  snackMessage('');renderSnacks();snackDialog?.showModal();
+ };
+ root.querySelectorAll('[data-open-snacks]').forEach(b=>b.addEventListener('click',openSnacks));
+ root.querySelectorAll<HTMLButtonElement>('[data-snack-tab]').forEach(b=>b.addEventListener('click',()=>{activeSnackZone=b.dataset.snackTab as Zone;snackMessage('');renderSnacks()}));
+ root.querySelector<HTMLInputElement>('[data-snack-peanuts]')?.addEventListener('change',e=>{
+  snackDraft.excludePeanuts=(e.target as HTMLInputElement).checked;
+  snackDraft.fridge=snackDraft.fridge.filter(item=>!excluded(item.id));snackDraft.pantry=snackDraft.pantry.filter(item=>!excluded(item.id));renderSnacks();
+ });
+ root.querySelector('[data-snack-add]')?.addEventListener('click',()=>{
+  const input=root.querySelector<HTMLInputElement>('[data-snack-custom]');const name=(input?.value??'').trim().replace(/\\s+/g,' ').slice(0,45);
+  if(!name){snackMessage('Enter a snack name.');return}
+  if([...snackDraft.fridge,...snackDraft.pantry].some(item=>item.id==='custom')){snackMessage('Only one custom food per station. Remove the current one first.');return}
+  if(snackDraft[activeSnackZone].length>=4){snackMessage('Remove one food before adding another.');return}
+  snackDraft[activeSnackZone].push({id:'custom',label:name});if(input)input.value='';snackMessage('Custom food added.');renderSnacks();
+ });
+ root.querySelector('[data-snack-cancel]')?.addEventListener('click',()=>snackDialog?.close());
+ root.querySelector('[data-snack-save]')?.addEventListener('click',()=>{
+  for(const zone of ['fridge','pantry'] as Zone[]){
+   const selected=snackDraft[zone].slice(0,4);
+   state[zone]=[...selected.map(item=>({...item,removed:false})),...Array.from({length:4-selected.length},()=>({id:'custom',label:'My snack',removed:true}))];
+  }
+  state.excludePeanuts=snackDraft.excludePeanuts;save();draw();snackDialog?.close();
+ });
  const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({profile,state}))}catch{}};
  const draw=()=>{
   root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
@@ -320,7 +406,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   const initial:Record<string,string>={headline:'my own snack!',subtitle:'Pick it. Enjoy it. Put it away.',fridgeTitle:'From the fridge',pantryTitle:'From the pantry'};
   for(const [key,value] of Object.entries(initial)){const node=root.querySelector<HTMLElement>('[data-jss-edit="'+key+'"]');if(node&&document.activeElement!==node)node.textContent=state.text[key]??value}
   const fam=root.querySelector<HTMLElement>('[data-jss-family]');if(fam)fam.textContent=family;
-  const visible=[...state.fridge,...state.pantry].filter(item=>!item.removed).length;
+  const visible=[...state.fridge,...state.pantry].filter(item=>!item.removed&&!forbidden(item.id)).length;
   const total=root.querySelector<HTMLElement>('[data-jss-summary-count]');if(total)total.textContent=visible+' foods';
   const summaryRule=root.querySelector<HTMLElement>('[data-jss-summary-rule]');if(summaryRule)summaryRule.textContent=({standard:'1 fridge + 1 pantry',big:'2 fridge + 1 pantry',fridge:'Fridge only',pantry:'Pantry only'})[state.rule];
   const summaryReset=root.querySelector<HTMLElement>('[data-jss-summary-reset]');if(summaryReset)summaryReset.textContent=state.reset.replace('Put food away · ','Food away + ').replace('Bring dishes to the sink','dishes to sink').replace('Throw wrappers away','wrappers in trash').replace('Wipe your spot','wipe your spot');
@@ -363,7 +449,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   remove?.addEventListener('click',()=>{state[zone][index].removed=true;save();draw();makeChoices()});
   const title=el.querySelector<HTMLElement>('[data-food-text]');if(!title)return;
   title.addEventListener('input',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').slice(0,36);save()});
-  title.addEventListener('blur',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').trim().slice(0,36)||foods.find(f=>f.id===state[zone][index].id)!.name;save();draw()});
+  title.addEventListener('blur',()=>{state[zone][index].label=(title.textContent??'').replace(/\s+/g,' ').trim().slice(0,36)||(foods.find(f=>f.id===state[zone][index].id)?.name??'My snack');save();draw()});
   title.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();title.blur()}});
  });
  root.querySelectorAll<HTMLElement>('[data-jss-edit]').forEach(el=>{
