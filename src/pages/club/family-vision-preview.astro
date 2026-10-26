@@ -276,6 +276,9 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
    padding-left:8px!important;
  }
 }
+
+/* Family signature uses the same serif size, now italic. */
+.fvp-art h3,.fvp-photo-room .fvp-art h3{font-style:italic!important}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
