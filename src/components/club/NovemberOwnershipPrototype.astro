@@ -66,6 +66,7 @@ const first=JOB_PRESETS[0];
     </div>
     <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview"><button type="button" class="ws-floating-edit" data-ws-open><span>✎</span> MAKE CHANGES</button>
       
+      <p class="ws-tap-hint">Tap a dotted area on your plan to edit it, or choose Make Changes.</p>
       <div class="ws-pages" id="ws-pages" aria-busy="true">
         <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
         <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
@@ -230,9 +231,94 @@ const first=JOB_PRESETS[0];
       if (!metrics) return;
       layoutWorksheet(metrics, data).forEach((page, i) => {
         sheets[i].innerHTML = renderSvg(page, i ? 'Back of the worksheet' : 'Front of the worksheet');
+        addPreviewHotspots(sheets[i], i);
       });
     });
   }
+
+
+  // Invisible-to-print, tap-friendly controls sit over the real PDF-matched SVG.
+  // The original form remains the one source of truth for preview, dialog and PDF.
+  type PreviewField = { page:number; id:string; label:string; x:number; y:number; w:number; h:number; kind?:'job'|'text' };
+  const previewFields:PreviewField[] = [
+    {page:0,id:'ws-family',label:'Family name',x:5.5,y:10.3,w:48,h:3.2},
+    {page:0,id:'ws-adult-job',label:'Dad’s responsibility',x:33,y:24.4,w:61,h:5.7,kind:'job'},
+    {page:0,id:'ws-adult-when',label:'When Dad does it',x:5.5,y:29.5,w:89,h:3.2},
+    {page:0,id:'ws-adult-steps',label:'What finished means for Dad',x:8,y:33.3,w:87,h:11},
+    {page:0,id:'ws-owner',label:'First child’s name',x:5.5,y:47.3,w:24,h:3.8},
+    {page:0,id:'ws-job',label:'First child’s job',x:33,y:46.1,w:61,h:5.3,kind:'job'},
+    {page:0,id:'ws-when',label:'When the first child does it',x:5.5,y:51.2,w:89,h:3.2},
+    {page:0,id:'ws-done',label:'What finished means for the first child',x:8,y:54.8,w:87,h:10.5},
+    {page:0,id:'ws-child2',label:'Second child’s name',x:5.5,y:68.7,w:24,h:3.8},
+    {page:0,id:'ws-child2-job',label:'Second child’s job',x:33,y:67.8,w:61,h:5.3,kind:'job'},
+    {page:0,id:'ws-child2-when',label:'When the second child does it',x:5.5,y:72.7,w:89,h:3.2},
+    {page:0,id:'ws-child2-done',label:'What finished means for the second child',x:8,y:76.4,w:87,h:9.9},
+    {page:0,id:'ws-mom-owns-input',label:'What Mom already owns',x:32,y:88.6,w:62,h:4.5},
+    {page:1,id:'ws-mom-relief-input',label:'What Mom no longer needs to manage',x:5.5,y:76.4,w:89,h:5.1}
+  ];
+  let editingPopup:HTMLDivElement|null=null;
+  function closePreviewPopup(){
+    editingPopup?.remove(); editingPopup=null;
+  }
+  function setPreviewValue(field:PreviewField,value:string){
+    const original=$<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(field.id);
+    if(field.kind==='job'){
+      const selector=original as HTMLSelectElement;
+      const matching=Array.from(selector.options).find(option=>option.value!=='custom' && (
+        field.id==='ws-job'||field.id==='ws-child2-job'
+          ? JOB_PRESETS[Number(option.value)]?.job===value
+          : option.value===value
+      ));
+      if(matching){selector.value=matching.value;}
+      else {selector.value='custom'; const customId=field.id==='ws-adult-job'?'ws-adult-custom':field.id==='ws-job'?'ws-custom':'ws-child2-custom';$<HTMLInputElement>(customId).value=value;}
+      // Preserve custom timing and completion details when changing only the title.
+      const keep=[...(['ws-adult-when','ws-adult-steps','ws-when','ws-done','ws-child2-when','ws-child2-done'] as const)].map(id=>[id,$<HTMLInputElement|HTMLTextAreaElement>(id).value] as const);
+      selector.dispatchEvent(new Event('change',{bubbles:true}));
+      if(selector.value==='custom')keep.forEach(([id,old])=>{$<HTMLInputElement|HTMLTextAreaElement>(id).value=old});
+      if(field.id==='ws-adult-job')adultCustom.hidden=selector.value!=='custom';
+      if(field.id==='ws-job')$('ws-custom-wrap').hidden=selector.value!=='custom';
+      if(field.id==='ws-child2-job')child2Custom.hidden=selector.value!=='custom';
+    }else{
+      original.value=value.slice(0,original.maxLength>0?original.maxLength:260);
+      original.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    refreshPlanTheme();update();
+  }
+  function openPreviewPopup(button:HTMLButtonElement,field:PreviewField){
+    closePreviewPopup();
+    const source=$<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(field.id);
+    const current=field.kind==='job'? (field.id==='ws-adult-job'?(source.value==='custom'?adultCustom.value:source.value):field.id==='ws-job'?(source.value==='custom'?custom.value:JOB_PRESETS[Number(source.value)].job):(source.value==='custom'?child2Custom.value:JOB_PRESETS[Number(source.value)].job)):source.value;
+    const popup=document.createElement('div');
+    popup.className='ws-preview-popup';popup.setAttribute('role','dialog');popup.setAttribute('aria-label','Edit '+field.label);
+    const heading=document.createElement('label');heading.textContent=field.label;
+    const id='ws-preview-edit-value';heading.htmlFor=id;
+    const editor=document.createElement(field.id.includes('done')||field.id.includes('steps')||field.id.includes('relief')?'textarea':'input') as HTMLInputElement|HTMLTextAreaElement;
+    editor.id=id;editor.value=current;editor.maxLength=field.kind==='job'?90:source.maxLength>0?source.maxLength:260;
+    editor.setAttribute('aria-label',field.label);
+    const actions=document.createElement('div');actions.className='ws-preview-popup-actions';
+    const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';
+    const apply=document.createElement('button');apply.type='button';apply.textContent='Apply change';
+    actions.append(cancel,apply);popup.append(heading,editor,actions);document.body.append(popup);editingPopup=popup;
+    const rect=button.getBoundingClientRect();
+    popup.style.left=Math.max(12,Math.min(rect.left,window.innerWidth-340))+'px';
+    popup.style.top=Math.max(12,Math.min(rect.bottom+8,window.innerHeight-260))+'px';
+    cancel.addEventListener('click',closePreviewPopup);
+    apply.addEventListener('click',()=>{setPreviewValue(field,editor.value.trim());closePreviewPopup()});
+    editor.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closePreviewPopup()}if(event.key==='Enter' && !(editor instanceof HTMLTextAreaElement)){event.preventDefault();apply.click()}});
+    editor.focus();editor.select();
+  }
+  function addPreviewHotspots(sheet:HTMLElement,page:number){
+    for(const field of previewFields.filter(item=>item.page===page)){
+      const button=document.createElement('button');
+      button.type='button';button.className='ws-preview-hotspot';button.setAttribute('aria-label','Edit '+field.label);
+      button.title='Tap to edit '+field.label;
+      button.style.left=field.x+'%';button.style.top=field.y+'%';button.style.width=field.w+'%';button.style.height=field.h+'%';
+      button.addEventListener('click',()=>openPreviewPopup(button,field));
+      sheet.appendChild(button);
+    }
+  }
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closePreviewPopup()});
+  document.addEventListener('pointerdown',event=>{if(editingPopup && !editingPopup.contains(event.target as Node) && !(event.target as Element).closest?.('.ws-preview-hotspot'))closePreviewPopup()});
 
   // A preset fills "when" and "finished", unless they've been changed from the last preset's wording.
   let last: { when: string; done: string } = { when: when.value, done: done.value };
@@ -397,6 +483,20 @@ const first=JOB_PRESETS[0];
   start();
 </script>
 <style is:global>
+#club-month-content .ws-tap-hint{margin:0 auto 12px;max-width:816px;color:#5f7767;font:600 12px/1.5 Montserrat,Arial,sans-serif;text-align:center}
+#club-month-content .ws-preview-hotspot{position:absolute;z-index:3;display:block;padding:0;cursor:pointer;border:1px dashed transparent;border-radius:3px;background:transparent;touch-action:manipulation}
+#club-month-content .ws-preview-hotspot:hover,#club-month-content .ws-preview-hotspot:focus-visible{border-color:#5f7767;background:rgba(215,230,218,.24);outline:2px solid #5f7767;outline-offset:1px}
+#club-month-content .ws-preview-hotspot:focus-visible{outline-offset:2px}
+.ws-preview-popup{position:fixed;z-index:10000;box-sizing:border-box;width:min(320px,calc(100vw - 24px));padding:16px;background:#fff;border:1px solid #b8cbbd;border-radius:9px;box-shadow:0 12px 38px #0003;font-family:Montserrat,Arial,sans-serif}
+.ws-preview-popup label{display:block;margin-bottom:9px;font-size:12px;font-weight:700;color:#4b6654}
+.ws-preview-popup input,.ws-preview-popup textarea{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #95a99a;border-radius:4px;background:white;color:#333;font:16px/1.4 Montserrat,Arial,sans-serif}
+.ws-preview-popup textarea{min-height:95px;resize:vertical}
+.ws-preview-popup-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.ws-preview-popup-actions button{padding:10px 13px;min-height:42px;border:1px solid #5f7767;background:#fff;color:#5f7767;border-radius:3px;font-weight:700;cursor:pointer}
+.ws-preview-popup-actions button:last-child{background:#5f7767;color:#fff}
+@media (hover:none){#club-month-content .ws-preview-hotspot{border-color:rgba(95,119,103,.48);background:rgba(215,230,218,.09)}}
+@media print{#club-month-content .ws-preview-hotspot,#club-month-content .ws-tap-hint,.ws-preview-popup{display:none!important}}
+
 @font-face{font-family:'WS Gelasio';font-weight:400;font-style:normal;font-display:block;src:url(/fonts/worksheet/gelasio-400.ttf) format('truetype')}
 @font-face{font-family:'WS Gelasio';font-weight:400;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-400-italic.ttf) format('truetype')}
 @font-face{font-family:'WS Gelasio';font-weight:600;font-style:italic;font-display:block;src:url(/fonts/worksheet/gelasio-600-italic.ttf) format('truetype')}
