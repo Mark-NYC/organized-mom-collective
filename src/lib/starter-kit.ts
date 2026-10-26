@@ -4,9 +4,10 @@
  * Settings and steps: src/data/starter-kit.ts.
  */
 import { normalizeEmail, validEmail } from './tool-email';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 
-const SUPABASE = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const SUPABASE = SUPABASE_URL;
+const ANON = SUPABASE_ANON_KEY;
 
 /** This browser has signed up (no email kept): /starter-kit offers "Open your kit". */
 export const ACCESS_KEY = 'omc:starter-kit:access:v1';

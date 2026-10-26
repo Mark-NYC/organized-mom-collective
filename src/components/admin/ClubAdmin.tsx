@@ -9,9 +9,10 @@ import AdminGate, { adminInput, type AdminContext } from './AdminGate';
 import { adminRpc, adminSelect } from '../../lib/admin/session';
 import { routes } from '../../routes';
 import { clubResourceBySlug } from '../../data/club/resources';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase-config';
 
-const SUPABASE = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const SUPABASE = SUPABASE_URL;
+const ANON = SUPABASE_ANON_KEY;
 
 async function clubAdmin<T = Record<string, unknown>>(token: string, body: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${SUPABASE}/functions/v1/club-admin`, {

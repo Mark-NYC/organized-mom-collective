@@ -5,9 +5,10 @@
  * Plan: docs/operations/ADMIN_DASHBOARD_PLAN.md.
  */
 import { ADMIN_IDLE_MS } from '../../data/admin';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
 
-const URL_ = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const URL_ = SUPABASE_URL;
+const KEY = SUPABASE_ANON_KEY;
 export const adminConfigured = () => Boolean(URL_ && KEY);
 
 const SESSION_KEY = 'omc:v1:admin';

@@ -6,9 +6,10 @@
  */
 import { accountRpc, getSession } from '../account';
 import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
 
-const URL_ = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const URL_ = SUPABASE_URL;
+const KEY = SUPABASE_ANON_KEY;
 
 /** Shows the join page's plans (the server still decides whether checkout is open). */
 export const clubCheckoutEnabled = () => import.meta.env.PUBLIC_CLUB_CHECKOUT_ENABLED === 'true';

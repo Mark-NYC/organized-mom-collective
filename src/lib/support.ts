@@ -4,9 +4,10 @@
  * sent to analytics. Fields, topics and limits: src/data/support.ts.
  */
 import { LIMITS, normalizeSupport, validateSupport, type SupportField, type SupportInput } from '../data/support';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 
-const SUPABASE = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const SUPABASE = SUPABASE_URL;
+const ANON = SUPABASE_ANON_KEY;
 
 export const supportConfigured = () => Boolean(SUPABASE && ANON);
 
