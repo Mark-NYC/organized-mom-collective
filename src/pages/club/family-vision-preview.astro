@@ -295,6 +295,84 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 @media print{
  .fvp-art h3,.fvp-photo-room .fvp-art h3{margin-top:1.3em!important}
 }
+
+/* Gallery-print hierarchy: watercolor, expressive value, discreet family signature.
+   Preserve illustration geometry and its native print scale. */
+.fvp-art,.fvp-photo-room .fvp-art{
+ gap:2.5%!important;
+}
+.fvp-art .fvp-word{
+ order:1!important;
+ width:100%;
+ padding:0!important;
+ margin:0!important;
+ font-family:Georgia,'Times New Roman',serif!important;
+ font-style:italic!important;
+ font-weight:400!important;
+ text-transform:none!important;
+ letter-spacing:normal!important;
+ line-height:1.15!important;
+ font-size:clamp(22px,2.45vw,37px)!important;
+ color:#65785f!important;
+ overflow-wrap:break-word;
+}
+.fvp-art h3{
+ order:2!important;
+ width:100%;
+ padding:0!important;
+ margin:.75em 0 0!important;
+ font-family:Montserrat,Arial,sans-serif!important;
+ font-style:normal!important;
+ font-weight:600!important;
+ font-size:clamp(8px,.85vw,13px)!important;
+ line-height:1.55!important;
+ letter-spacing:clamp(1px,.21vw,3px)!important;
+ text-transform:uppercase!important;
+ color:#777a74!important;
+ overflow-wrap:anywhere;
+}
+.fvp-photo-room .fvp-art .fvp-word{
+ font-size:clamp(13px,2.35cqw,32px)!important;
+ letter-spacing:normal!important;
+ padding:0!important;
+}
+.fvp-photo-room .fvp-art h3{
+ font-size:clamp(6px,.84cqw,12px)!important;
+ letter-spacing:clamp(.5px,.20cqw,2.5px)!important;
+ margin:.75em 0 0!important;
+}
+.fvp-art[data-long-value="true"] .fvp-word{
+ font-size:clamp(19px,2.05vw,31px)!important;
+}
+.fvp-photo-room .fvp-art[data-long-value="true"] .fvp-word{
+ font-size:clamp(12px,1.95cqw,27px)!important;
+}
+@media print{
+ .fvp-art,.fvp-photo-room .fvp-art{gap:.17in!important}
+ .fvp-art .fvp-word,.fvp-photo-room .fvp-art .fvp-word{
+  font-family:Georgia,'Times New Roman',serif!important;
+  font-style:italic!important;
+  font-weight:400!important;
+  text-transform:none!important;
+  letter-spacing:normal!important;
+  padding:0!important;
+  font-size:34px!important;
+  color:#65785f!important;
+ }
+ .fvp-art[data-long-value="true"] .fvp-word,
+ .fvp-photo-room .fvp-art[data-long-value="true"] .fvp-word{font-size:29px!important}
+ .fvp-art h3,.fvp-photo-room .fvp-art h3{
+  font-family:Montserrat,Arial,sans-serif!important;
+  font-style:normal!important;
+  font-weight:600!important;
+  text-transform:uppercase!important;
+  font-size:10px!important;
+  letter-spacing:3px!important;
+  line-height:1.5!important;
+  color:#777a74!important;
+  margin:.23in 0 0!important;
+ }
+}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
@@ -306,6 +384,7 @@ function render(){
  byId('fvp-summary-name')!.textContent=name;
  byId('fvp-summary-values')!.textContent=selectedValue;
  byId('fvp-art-word')!.textContent=selectedValue;
+ byId('fvp-art')!.dataset.longValue=String(selectedValue.length>=12);
  const symbol=byId('fvp-symbol')!;
  const image=symbol.querySelector('img')??document.createElement('img');
  image.src=valueImages[selectedValue];
