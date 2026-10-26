@@ -16,10 +16,20 @@ const first=JOB_PRESETS[0];
       <div class="ws-ready" id="november-edit-controls">
         <p class="ws-eyebrow">NOVEMBER · PREPARED PLAN</p>
         <h2>Less reminding. <em>More ownership.</em></h2>
-        <p>We made a ready-to-use ownership plan for <span id="ws-ready-family">the Goering Family</span>. Each person has a part with a clear finish line.</p><button class="ws-open-editor" type="button" data-ws-open>Edit responsibilities</button>
+        <p class="ws-ready-explainer">A complete family handoff, already prepared. Everyone knows what they own and what finished looks like.</p>
+        <div class="ws-preview-summary" aria-label="Prepared November ownership plan">
+          <span class="ws-summary-kicker">YOUR FAMILY'S PREPARED PLAN</span>
+          <strong class="ws-summary-title" id="ws-ready-plan">Our School-Night Reset</strong>
+          <p class="ws-summary-purpose" id="ws-ready-goal">Tomorrow is ready without one person managing every step.</p>
+          <div class="ws-summary-row"><span>Prepared for</span><b id="ws-ready-family">Goering Family</b></div>
+          <div class="ws-summary-row"><span>Adult handoff</span><b id="ws-ready-adult">Dad</b></div>
+          <div class="ws-summary-row"><span>Kids' responsibilities</span><b id="ws-ready-kids">Andrew &amp; Philip</b></div>
+          <button class="ws-open-editor" type="button" data-ws-open>Edit responsibilities <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+        </div>
+        <p class="ws-ready-note">One plan to put into action—not another list for Mom to manage.</p>
         <div class="ws-field" hidden><label for="ws-sample">Explore a sample household</label><select id="ws-sample" aria-label="Choose a sample household"><option value="goering">Goering · Two school-age children</option><option value="rivera">Rivera · Preschool and early elementary</option><option value="bennett">Bennett · Two teenagers</option></select></div><p class="ws-demo">Sample plans only · No account, payment, or mailing</p>
       </div>
-      <div class="ws-actions"><div class="ws-mobile-actions"><button type="button" class="ws-mobile-edit" data-ws-open>Make changes</button><button type="submit" form="ws-form" class="ws-download ws-mobile-print" disabled>Download PDF</button></div><button type="button" class="ws-download" id="ws-approve">Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
+      <div class="ws-actions"><div class="ws-mobile-actions"><button type="button" class="ws-mobile-edit" data-ws-open>Make changes</button><button type="submit" form="ws-form" class="ws-download ws-mobile-print" disabled>Download PDF</button></div><button type="submit" form="ws-form" class="ws-download ws-prepared-download" id="ws-main-download" disabled>Download printable PDF</button><button type="button" class="ws-download" id="ws-approve" hidden>Looks good. Approve plan</button><button type="button" class="ws-secondary" id="ws-review">Change a responsibility</button><p id="ws-approval-note" class="ws-status" role="status" aria-live="polite">This is a demo. Approval does not send anything or initiate a mailing.</p></div>
     <dialog class="ws-edit-dialog" id="ws-edit-dialog" aria-labelledby="ws-dialog-title"><div class="ws-dialog-top"><div><span class="ws-eyebrow">MAKE IT YOURS · NOVEMBER</span><h2 id="ws-dialog-title">Edit family ownership</h2></div><button type="button" class="ws-close-dialog" data-ws-close aria-label="Close editor">×</button></div><p>We have prepared real responsibilities for your family. Adjust only what needs to change.</p>      <div class="ws-rec-head"><p id="ws-plan-heading" class="ws-plan-heading">Our School-Night Reset</p><p id="ws-plan-goal-line">Tomorrow is ready without one person managing every step.</p><h2>Everyone has a part.</h2><p>Each person knows what they own and what finished looks like. Change a handoff only if it doesn’t fit your family.</p></div>
       <div id="ws-recommendations"><article class="ws-rec" data-role="existing"><div class="ws-rec-top"><span>ALREADY OWNED</span><button class="ws-edit" type="button" data-edit="mom">Edit</button></div><h3 id="ws-mom-title">Mom</h3><p class="ws-rec-job" id="ws-mom-owns">Family calendar</p></article>
         <article class="ws-rec" data-role="adult"><div class="ws-rec-top"><span>ADULT HANDOFF</span><button class="ws-edit" type="button" data-edit="adult">Edit</button></div><h3 id="ws-adult-title">Dad</h3><p class="ws-rec-job" id="ws-adult-summary">School communications and forms</p><p id="ws-adult-desc">Check messages, handle forms, track deadlines and put dates on the family calendar.</p></article>
@@ -66,7 +76,8 @@ const first=JOB_PRESETS[0];
     </div>
     <section class="ws-preview" id="ws-preview" aria-label="Worksheet preview"><button type="button" class="ws-floating-edit" data-ws-open><span>✎</span> MAKE CHANGES</button>
       
-      <p class="ws-tap-hint">Tap the underlined words on your plan to edit them, or choose Make Changes.</p>
+      <div class="ws-preview-context"><span>YOUR PRINTABLE FAMILY HANDOFF</span><p>Two sides. One family plan. Use the editable words to make it yours.</p></div>
+      <p class="ws-tap-hint">Select the underlined words to edit them, or use Edit responsibilities.</p>
       <div class="ws-pages" id="ws-pages" aria-busy="true">
         <figure class="ws-page"><div class="ws-sheet" data-page="0"><p class="ws-loading">Loading preview…</p></div><figcaption>Front</figcaption></figure>
         <figure class="ws-page"><div class="ws-sheet" data-page="1"></div><figcaption>Back</figcaption></figure>
@@ -216,6 +227,10 @@ const first=JOB_PRESETS[0];
       hints(data);
       const set = (id:string,value:string) => { const e=document.getElementById(id); if(e)e.textContent=value; };
       set('ws-ready-family',(data.familyName??'your family').replace(/^The /,'the '));
+      set('ws-ready-plan',data.planTitle??'Our Family Ownership Plan');
+      set('ws-ready-goal',data.planGoal??'Everyone owns a whole responsibility.');
+      set('ws-ready-adult',data.adultOwner??'Dad');
+      set('ws-ready-kids',[data.owner,data.secondChild].filter(Boolean).join(' & ')||'Our kids');
       set('ws-plan-heading',data.planTitle??'Our Family Ownership Plan');
       set('ws-plan-goal-line',data.planGoal??'');
       set('ws-mom-title','Mom');set('ws-mom-owns',data.momOwns??'Existing contribution');
@@ -581,7 +596,8 @@ const first=JOB_PRESETS[0];
 @font-face{font-family:'WS Montserrat';font-weight:500;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-500.ttf) format('truetype')}
 @font-face{font-family:'WS Montserrat';font-weight:600;font-style:normal;font-display:block;src:url(/fonts/worksheet/montserrat-600.ttf) format('truetype')}
 
-/* November's member worksheet engine is shared. Layout changes apply only to Club preview. */
+
+* November's member worksheet engine is shared. Layout changes apply only to Club preview. */
 #club-month-content .ws-shell{max-width:none;margin:0;padding:0}
 #club-month-content .ws-top,#club-month-content .ws-intro{display:none}
 #club-month-content .ws-workspace{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
@@ -640,6 +656,41 @@ const first=JOB_PRESETS[0];
  #club-month-content .ws-mobile-print{flex:1.3;min-width:0;font-size:12px;letter-spacing:0;text-transform:none;min-height:45px}
  #club-month-content .ws-actions #ws-approve,#club-month-content .ws-actions #ws-review,#club-month-content .ws-actions #ws-approval-note{display:none}
 }
+
+/* November preview redesign: October's prepared-plan hierarchy and page proof.
+   Only affects the Club preview; shared worksheet and PDF engine stay intact. */
+#club-month-content .ws-ready{background:transparent;border-bottom:0;padding:10px 0 0}
+#club-month-content .ws-ready>.ws-eyebrow{padding:0;color:#718569}
+#club-month-content .ws-ready h2{padding:0;margin:9px 0 13px}
+#club-month-content .ws-ready-explainer{font:12px/1.6 Montserrat,Arial,sans-serif;color:#60675f;margin:0 0 15px;padding:0!important}
+#club-month-content .ws-preview-summary{background:#fff;border:1px solid #e0e6da;padding:16px 16px 9px;margin:0}
+#club-month-content .ws-summary-kicker{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.13em;color:#668075}
+#club-month-content .ws-summary-title{display:block;font:400 23px/1.2 Georgia,serif;color:#4d6654;margin:9px 0}
+#club-month-content .ws-summary-purpose{font:12px/1.55 Montserrat,Arial,sans-serif;color:#6d716a;margin:0 0 14px}
+#club-month-content .ws-summary-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid #e7eae4;padding:10px 0;font:12px Montserrat,Arial,sans-serif}
+#club-month-content .ws-summary-row b{font-size:12px;text-align:right;color:#4f705b;max-width:57%;overflow-wrap:anywhere}
+#club-month-content .ws-open-editor{display:inline-flex;align-items:center;gap:7px;margin:2px 0 0;padding:9px 0;color:#52735b;font-size:12px;min-height:38px}
+#club-month-content .ws-ready-note{padding:0!important;margin:12px 0;color:#74796f;font:11px/1.55 Montserrat,Arial,sans-serif}
+#club-month-content .ws-prepared-download{display:block;width:100%;min-height:46px;background:#5f7767;color:white;border:0;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+#club-month-content .ws-prepared-download:disabled{opacity:.55;cursor:wait}
+#club-month-content #ws-approve{display:none!important}
+#club-month-content .ws-actions{gap:5px}
+#club-month-content .ws-preview{background:#f5f3f2}
+#club-month-content .ws-preview-context{width:min(100%,816px);margin:0 auto 12px;color:#738276}
+#club-month-content .ws-preview-context span{display:block;font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.16em;color:#738976}
+#club-month-content .ws-preview-context p{font:12px/1.5 Montserrat,Arial,sans-serif;color:#777c73;margin:5px 0}
+#club-month-content .ws-tap-hint{max-width:816px;text-align:left;margin:0 auto 16px;font-weight:400;color:#67746a}
+#club-month-content .ws-pages{display:flex;flex-direction:column;align-items:center;gap:24px}
+#club-month-content .ws-page{display:block;width:min(100%,816px);margin:0 auto}
+#club-month-content .ws-sheet{width:100%;aspect-ratio:8.5/11;border:1px solid #e6e6e0;box-shadow:0 8px 26px #0002;background:white}
+#club-month-content .ws-page figcaption{margin:11px 0 5px;font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.12em;color:#829087}
+@media screen and (max-width:700px){
+ #club-month-content .ws-prepared-download{display:none}
+ #club-month-content .ws-preview-context{padding:0 3px}
+ #club-month-content .ws-preview-summary{padding:14px}
+}
+@media print{#club-month-content .ws-preview-context,#club-month-content .ws-tap-hint{display:none!important}}
+
 </style>
 <style>
 .ws-shell{max-width:1440px;margin:auto;padding:24px clamp(16px,3vw,52px) 72px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}
