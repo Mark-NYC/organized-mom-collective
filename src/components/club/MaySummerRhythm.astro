@@ -27,6 +27,7 @@ const blocks=[
     <div class="msr-summary-line"><span>Quiet time</span><b data-summary-quiet>Independent play</b></div>
     <button type="button" class="msr-edit-trigger" data-open-editor>Make changes <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></button>
    </div>
+   <p class="msr-subnote">May is a preview prototype. Mailing approval and print deadlines are not yet connected to fulfillment.</p>
    <p class="msr-subnote">A reusable rhythm, not a rigid schedule. Trips, camps and appointments fit around the anchors that work for your family.</p>
    <div class="msr-actions">
     <div class="msr-primary-actions"><a class="msr-jump-edit" href="#may-edit-controls">Make changes <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button type="button" data-print>Print / Save PDF</button></div>
@@ -45,8 +46,8 @@ const blocks=[
    <div class="msr-dialog-form">   <label>Kind of summer day<select data-days><option value="home">Mostly at home</option><option value="mixed">A mix of home days and outings</option><option value="camp">Camp or scheduled programs</option></select></label>
    <fieldset class="msr-structure"><legend>How much structure?</legend>
     <label><input type="radio" name="msr-structure" value="relaxed" /> Relaxed <small>Five broad anchors; no set times</small></label>
-    <label><input type="radio" name="msr-structure" value="balanced" checked /> Balanced <small>Seven blocks with flexible times</small></label>
-    <label><input type="radio" name="msr-structure" value="structured" /> More structured <small>Seven blocks with specific times</small></label>
+    <label><input type="radio" name="msr-structure" value="balanced" checked /> Balanced <small>A few reusable anchors with flexible times</small></label>
+    <label><input type="radio" name="msr-structure" value="structured" /> More structured <small>Daily anchors with suggested times</small></label>
    </fieldset>
    <label>Morning starts<select data-start><option value="7">7:00 AM</option><option value="7.5">7:30 AM</option><option value="8" selected>8:00 AM</option><option value="8.5">8:30 AM</option><option value="9">9:00 AM</option><option value="9.5">9:30 AM</option></select></label>
    <label>Quiet time<select data-quiet><option value="independent">Independent play and reading</option><option value="rest">Rest or nap</option><option value="older">Independent recharge</option></select></label>
@@ -430,7 +431,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   root.dataset.msrDays=options.days;
   const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
   const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':options.days==='mixed'?'HOME OR OUTING DAY':'A DAY AT HOME';
-  const visible=order.filter(k=>(options.snack||k!=='snack')&&(options.structure!=='relaxed'||(k!=='create'&&k!=='move'))&&(options.days!=='camp'||k!=='lunch'));
+  const visible=order.filter(k=>(options.snack||k!=='snack')&&(options.structure!=='relaxed'||(k!=='create'&&k!=='move'))&&(options.days==='camp'?k!=='lunch'&&k!=='quiet':k!=='create'));
   for(const key of order){
    const node=nodes.get(key);if(!node||!list)continue;
    list.append(node);
