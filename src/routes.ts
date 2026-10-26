@@ -141,6 +141,9 @@ export const routes = {
   adminOrders: '/admin/orders',
   start: '/start',
   today: '/app',
+  cleaning: '/app/cleaning',
+  appClub: '/app/club',
+  appAccount: '/app/account',
   week: '/app/week',
   /** Old name for the Week page; redirects to `week`. */
   tidy: '/app/tidy',
@@ -148,7 +151,7 @@ export const routes = {
   settings: '/app/settings',
   monthlyFocus: '/app/week#monthly-focus',
   /** A specific weekday of the current week, e.g. /app?day=monday */
-  day: (dow: number) => `/app?day=${DAY_PARAMS[dow]}`,
+  day: (dow: number) => `/app/cleaning?day=${DAY_PARAMS[dow]}`,
 } as const;
 
 /** True for paths inside the companion app. */

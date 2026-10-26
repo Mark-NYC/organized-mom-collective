@@ -168,7 +168,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
               {today.toLocaleDateString('en-US', { weekday: 'long' })}
             </p>
           </div>
-          <a href={routes.today} className="text-link inline-flex min-h-11 shrink-0 items-center">
+          <a href={routes.cleaning} className="text-link inline-flex min-h-11 shrink-0 items-center">
             Back to today
           </a>
         </div>

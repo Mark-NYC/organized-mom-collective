@@ -1,78 +1,25 @@
 ---
-import { Wordmark } from './marks';
-import { routes } from '../routes';
-
-const items = [
-  { href: routes.today, label: 'Today' },
-  { href: routes.week, label: 'Week' },
-  { href: routes.reorder, label: 'Reorder' },
-];
-
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const isActive = (href: string) => (href === routes.today ? path === routes.today : path.startsWith(href));
-const settingsActive = path.startsWith(routes.settings);
+const items = [
+  { href: '/app', label: 'Home', glyph: '⌂' },
+  { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
+  { href: '/app/club', label: 'Club', glyph: '▦' },
+  { href: '/app/account', label: 'Account', glyph: '◯' },
+];
+const active = (href: string) => href === '/app' ? path === href : path === href || path.startsWith(href + '/');
 ---
-
-<header data-chrome class="border-b border-rule">
-  <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:h-16 sm:px-8">
-    <a href={routes.today} aria-label="Organized Mom — Today"><Wordmark /></a>
-    <nav aria-label="Main" class="hidden sm:block">
-      <ul class="flex items-center gap-8">
-        {
-          items.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-current={isActive(item.href) ? 'page' : undefined}
-                class:list={[
-                  'relative inline-flex min-h-11 items-center text-[0.7rem] font-semibold tracking-[0.18em] uppercase transition-colors',
-                  isActive(item.href) ? 'text-ink' : 'text-muted hover:text-ink',
-                ]}
-              >
-                {item.label}
-                {isActive(item.href) && <span aria-hidden="true" class="absolute inset-x-0 bottom-1 h-[3px] bg-month" />}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-    <a
-      href={routes.settings}
-      aria-current={settingsActive ? 'page' : undefined}
-      class:list={[
-        '-mr-2 inline-flex min-h-11 items-center px-2 text-[0.64rem] font-semibold tracking-[0.18em] uppercase transition-colors',
-        settingsActive ? 'text-ink' : 'text-muted hover:text-ink',
-      ]}
-    >
-      Settings
-    </a>
+<header data-chrome class="border-b border-warm-rule bg-ivory">
+  <div class="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
+    <a href="/app" class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
+    <nav aria-label="Desktop app navigation" class="hidden sm:block"><ul class="flex items-center gap-6">
+      {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['inline-flex min-h-12 items-center border-b-2 px-1 text-[0.8rem] font-semibold',active(item.href) ? 'border-sage text-warm-ink' : 'border-transparent text-warm-soft hover:text-warm-ink']}>{item.label}</a></li>)}
+    </ul></nav>
   </div>
 </header>
-
-<!-- Phone: thin ruled bottom navigation -->
-<nav
-  data-chrome
-  aria-label="Main"
-  class="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-band pb-[env(safe-area-inset-bottom)] sm:hidden"
->
-  <ul class="grid grid-cols-3">
-    {
-      items.map((item) => (
-        <li>
-          <a
-            href={item.href}
-            aria-current={isActive(item.href) ? 'page' : undefined}
-            class:list={[
-              'relative flex h-14 items-center justify-center text-[0.74rem] tracking-[0.2em] uppercase transition-colors',
-              isActive(item.href) ? 'font-bold text-ink' : 'font-semibold text-muted',
-            ]}
-          >
-            {isActive(item.href) && <span aria-hidden="true" class="absolute inset-x-6 -top-px h-[3px] bg-month" />}
-            {item.label}
-          </a>
-        </li>
-      ))
-    }
+<nav data-chrome aria-label="App navigation" class="fixed inset-x-0 bottom-0 z-40 border-t border-warm-rule bg-ivory/95 shadow-[0_-8px_25px_rgba(67,65,55,0.05)] backdrop-blur-md pb-[env(safe-area-inset-bottom)] sm:hidden">
+  <ul class="grid grid-cols-4">
+    {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['flex min-h-[64px] flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-semibold tracking-wide transition-colors', active(item.href) ? 'text-[#536e4e]' : 'text-warm-soft']}>
+      <span aria-hidden="true" class:list={['flex h-7 w-10 items-center justify-center rounded-full text-[1.4rem] leading-none',active(item.href) ? 'bg-sage-wash' : '']}>{item.glyph}</span><span>{item.label}</span>
+    </a></li>)}
   </ul>
 </nav>

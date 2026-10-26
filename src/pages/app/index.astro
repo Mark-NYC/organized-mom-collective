@@ -1,14 +1,18 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
-import TodayApp from '../../components/TodayApp';
+import HomeStatus from '../../components/HomeStatus';
+import { dailyEssentials, weeklySchedule } from '../../data/cleaning';
+const now = new Date();
+const today = new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric'}).format(now);
+const zone = weeklySchedule.find(d => Number(d.day) === now.getDay());
 ---
-
-<Layout description="What to clean today: the Daily Reset plus today’s zone from your calendar.">
-  <TodayApp client:only="react">
-    <div slot="fallback" aria-busy="true">
-      <div class="h-40"></div>
-      <div class="h-80"></div>
-      <div class="h-80"></div>
+<Layout title="Home" description="Your family, your rhythm, one place.">
+  <div class="mx-auto max-w-3xl space-y-8">
+    <header><p class="label text-[#71866c]">YOUR FAMILY HOME · {today}</p><h1 class="mt-3 font-serif text-[2.35rem] leading-tight text-warm-ink sm:text-5xl">A little more calm <em class="text-[#71866c]">today.</em></h1><p class="mt-3 text-[1rem] leading-relaxed text-warm-soft">One place for the plan, the daily reset, and your family's tools.</p></header>
+    <section class="rounded-2xl bg-sage-wash p-6 sm:p-8" aria-label="Today's cleaning"><div class="flex items-center justify-between gap-3"><p class="label text-[#5c7357]">TODAY'S RESET</p><span class="rounded-full bg-white px-3 py-1 text-xs text-[#536e4e]">10–15 minutes</span></div><h2 class="mt-4 font-serif text-[1.7rem] text-warm-ink">{zone?.zone ?? 'A fresh start for home'}</h2><p class="mt-2 text-[0.95rem] leading-relaxed text-warm-soft">Your {dailyEssentials.tasks.length} daily essentials and today's cleaning zone. Your existing checkmarks are ready whenever you are.</p><HomeStatus client:only="react" />\n<a href="/app/cleaning" class="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#536e4e] px-6 text-sm font-semibold text-white">Open today's cleaning <span aria-hidden="true" class="ml-2">→</span></a></section>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <a href="/app/club" class="block rounded-2xl border border-warm-rule bg-white p-6 transition-colors hover:bg-sage-wash"><p class="label text-[#71866c]">FAMILY CLUB</p><h2 class="mt-3 font-serif text-[1.5rem]">Good things, done together.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Explore your monthly family kits, including the October Sunday Reset preview.</p><span class="mt-5 inline-block text-sm font-semibold text-[#536e4e]">Explore Club →</span></a>
+      <a href="/app/account" class="block rounded-2xl border border-warm-rule bg-white p-6 transition-colors hover:bg-sage-wash"><p class="label text-[#71866c]">YOUR FAMILY</p><h2 class="mt-3 font-serif text-[1.5rem]">Everyone has a part.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">See how your family's details will connect with prepared monthly tools.</p><span class="mt-5 inline-block text-sm font-semibold text-[#536e4e]">View family →</span></a>
     </div>
-  </TodayApp>
+  </div>
 </Layout>
