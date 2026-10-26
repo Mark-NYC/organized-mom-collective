@@ -36,7 +36,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <script is:inline define:vars={{ ONBOARDED_KEY }}>
       // First visit to Today: hide app chrome until the onboarding screen renders.
       try {
-        if (/^\/app\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
+        if (/^\/app\/cleaning\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
           document.documentElement.classList.add('needs-onboarding');
         }
       } catch (e) {}
