@@ -404,9 +404,22 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   try{
    await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
    const {toPng}=await import('html-to-image');
-   const png=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',margin:'0',boxShadow:'none'}});
-   const link=document.createElement('a');link.href=png;link.download="march-family-spring-prep.png";link.click();
-  }catch(error){console.error('Single-page image export failed',error);alert('Image download failed. Please use Print / Save PDF instead.')}
+   const options={pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',cacheBust:true,style:{transform:'none',margin:'0',boxShadow:'none'}};
+   let png:string;
+   try{
+    png=await toPng(sheet,options);
+   }catch(firstError){
+    // Font embedding can fail on some browser/CSS combinations. Retry with
+    // the fonts already loaded in the page instead of embedding external CSS.
+    console.warn('March PNG first rendering attempt failed; retrying without font embedding',firstError);
+    png=await toPng(sheet,{...options,fontEmbedCSS:''});
+   }
+   const link=document.createElement('a');link.href=png;link.download="march-family-spring-prep.png";document.body.append(link);link.click();link.remove();
+  }catch(error){
+   console.error('Single-page image export failed',error);
+   const detail=error instanceof Error?error.message:String(error);
+   alert('PNG export failed: '+detail.slice(0,220)+'\\nYou can still use Print / Save PDF.');
+  }
   finally{root.classList.remove('msc-image-export');button.disabled=false;button.textContent=old}
  });
  
