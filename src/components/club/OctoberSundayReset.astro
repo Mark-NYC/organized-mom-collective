@@ -70,10 +70,25 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
      </article>
      <article class="osr-paper osr-back" data-osr-back>
       <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Let's Try It: <em>Fall Readiness</em></h2><span>Our first Sunday Reset, prepared for our family.</span></header>
-      <section class="osr-fall-intro"><strong>01 · LOOK AHEAD</strong><p>Cooler days are coming. What does everyone need? Use your wall calendar, then try this prepared fall project together.</p></section>
-      <p class="osr-sheet-caption">02 · GET READY: CHECK → KEEP → STORE OR DONATE</p>
-      <div class="osr-fall-sections" data-osr-fall-sections></div>
-      <section class="osr-own"><span>03 · SHARE THE WORK</span><h3>Everyone handles their part</h3><p>Children can gather, try on, and sort. Adults help with purchases and make final donation decisions. Ask for help early.</p></section>
+      <p class="osr-sheet-caption">Our first Sunday Reset, step by step.</p>
+      <div class="osr-three osr-example-steps">
+       <div class="osr-example-step">
+        <img src="/images/club/october/what-is-coming.webp" alt="" width="74" height="74"/>
+        <span>01</span><strong>Look Ahead</strong>
+        <p>Cooler weather is coming. Check our calendar and think about what each person will need.</p>
+       </div>
+       <div class="osr-example-step osr-example-with-jobs">
+        <img src="/images/club/october/what-will-I-need.webp" alt="" width="74" height="74"/>
+        <span>02</span><strong>Prepare Early</strong>
+        <p>Check what fits, keep what is useful, and store or donate what is outgrown.</p>
+        <div class="osr-fall-sections" data-osr-fall-sections></div>
+       </div>
+       <div class="osr-example-step">
+        <img src="/images/club/october/what-can-I-prepare.webp" alt="" width="74" height="74"/>
+        <span>03</span><strong>Share the Work</strong>
+        <p>Everyone owns their job. Children gather and sort; adults help with purchases and donation decisions.</p>
+       </div>
+      </div>
       <div class="osr-notes"><h3>Next Sunday, try it again</h3><p>Turn to the front and use the same three steps with whatever is coming up on your family's wall calendar. Your fall jobs are done once, not every week.</p></div>
       <footer class="osr-foot"><strong>We learn to think ahead together.</strong><span>ONE SUNDAY RESET · ONE FIRST EXAMPLE</span></footer>
      </article>
@@ -232,6 +247,21 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
 .osr-guided-job .osr-job-remove{border:0;background:transparent;color:#8c514c;cursor:pointer;font:600 11px 'OSR Montserrat',sans-serif;padding:7px 0}
 .osr-fall-sections .osr-person-task{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}
 .osr-fall-sections .osr-task-owner{font:600 italic 14px 'OSR Gelasio',Georgia,serif;color:#426c55;margin:0 0 3px}
+
+/* Mirror the front's three-step hierarchy on October's worked example. */
+.osr-example-steps{margin-bottom:10px}
+.osr-example-steps>.osr-example-step{grid-template-columns:25px 54px minmax(0,1fr);grid-template-rows:auto auto;column-gap:11px}
+.osr-example-steps>.osr-example-step>strong{font:400 19px 'OSR Gelasio',Georgia,serif;line-height:1.2}
+.osr-example-steps>.osr-example-step>p{font-size:11px;line-height:1.45}
+.osr-example-steps .osr-fall-sections{grid-column:3;grid-row:3;margin:8px 0 0;display:grid;gap:0}
+.osr-example-steps .osr-fall-sections section,
+.osr-example-steps .osr-fall-sections section:nth-child(2),
+.osr-example-steps .osr-fall-sections section:nth-child(3){display:grid;grid-template-columns:49px minmax(0,1fr);gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--osr-accent)}
+.osr-example-steps .osr-fall-sections img{width:45px;height:45px;object-fit:contain}
+.osr-example-steps .osr-fall-sections h3{font:400 17px/1.2 'OSR Gelasio',Georgia,serif;margin:0 0 3px}
+.osr-example-steps .osr-fall-sections .osr-task-owner{font:600 italic 12px/1.2 'OSR Gelasio',Georgia,serif;margin:0 0 2px}
+.osr-example-steps .osr-fall-sections p{font-size:10px;line-height:1.35;margin:0}
+.osr-back .osr-notes{border-top:1px solid var(--osr-accent);margin-top:4px;padding-top:9px}
 </style>
 <script>
 type Member={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number;role?:string;isAccountHolder?:boolean};
