@@ -22,3 +22,15 @@ verify_jwt = false
 # rate limits in support_submit (supabase/SUPPORT.md).
 [functions.support-request]
 verify_jwt = false
+
+# Organized Family Club (docs/club/MEMBERSHIP.md). Each checks its own callers: the Stripe signature (club-webhook),
+# the member's access token where an action needs one (club-billing; checkout also runs for guests), and an owner
+# admin's access token against Supabase Auth plus admin_users (club-admin).
+[functions.club-billing]
+verify_jwt = false
+
+[functions.club-webhook]
+verify_jwt = false
+
+[functions.club-admin]
+verify_jwt = false

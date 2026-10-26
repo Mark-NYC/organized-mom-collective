@@ -1,6 +1,7 @@
 /**
  * A minimal Stripe client over fetch (no SDK), plus webhook signature checks.
- * Only the calls the shop makes: Checkout Sessions, refunds, charges, tax rates.
+ * Only the calls the shop and the Club make: Checkout Sessions, refunds, charges, tax rates,
+ * subscriptions, invoices, prices and the Billing Portal.
  */
 import { safeEqual } from './http.ts';
 
@@ -34,7 +35,7 @@ export function formEncode(params: Record<string, Param>): string {
 
 export interface StripeClient {
   mode: StripeMode;
-  request<T = Record<string, unknown>>(method: 'GET' | 'POST', path: string, params?: Record<string, Param>, idempotencyKey?: string): Promise<T>;
+  request<T = Record<string, unknown>>(method: 'GET' | 'POST' | 'DELETE', path: string, params?: Record<string, Param>, idempotencyKey?: string): Promise<T>;
 }
 
 export function createStripe(opts: { secretKey: string; apiVersion: string; apiBase?: string; fetch?: typeof fetch }): StripeClient {
@@ -42,7 +43,7 @@ export function createStripe(opts: { secretKey: string; apiVersion: string; apiB
   const fetchFn = opts.fetch ?? fetch;
   return {
     mode: stripeMode(opts.secretKey),
-    async request<T>(method: 'GET' | 'POST', path: string, params: Record<string, Param> = {}, idempotencyKey?: string) {
+    async request<T>(method: 'GET' | 'POST' | 'DELETE', path: string, params: Record<string, Param> = {}, idempotencyKey?: string) {
       const body = formEncode(params);
       const headers: Record<string, string> = {
         Authorization: `Bearer ${opts.secretKey}`,
@@ -50,7 +51,7 @@ export function createStripe(opts: { secretKey: string; apiVersion: string; apiB
       };
       if (method === 'POST') headers['Content-Type'] = 'application/x-www-form-urlencoded';
       if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
-      const url = method === 'GET' && body ? `${base}${path}?${body}` : `${base}${path}`;
+      const url = method !== 'POST' && body ? `${base}${path}?${body}` : `${base}${path}`;
       const res = await fetchFn(url, { method, headers, body: method === 'POST' ? body : undefined });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

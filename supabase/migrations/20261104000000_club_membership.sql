@@ -461,7 +461,7 @@ begin
   returning * into inv;
 
   if inv.status <> 'paid' or inv.amount_refunded_cents >= greatest(inv.amount_paid_cents, 1) and inv.amount_paid_cents > 0
-     or inv.disputed or sub.access_revoked_at is not null or sub.user_id is null then
+     or inv.disputed or sub.access_revoked_at is not null or sub.user_id is null or 'duplicate' = any (sub.flags) then
     return jsonb_build_object('granted', 0, 'status', inv.status, 'first_paid', false, 'months', '[]'::jsonb);
   end if;
 
@@ -507,6 +507,12 @@ begin
   return jsonb_build_object('granted', granted, 'status', inv.status, 'first_paid', first_paid and granted > 0,
     'months', to_jsonb(months), 'user_id', sub.user_id, 'household_id', hh.id);
 end $$;
+
+-- Marks a subscription (e.g. 'duplicate': a second checkout we canceled and refunded; it never grants anything).
+create function public.club_subscription_flag(p_sub text, p_flag text) returns void
+language sql security definer set search_path = '' as $$
+  update public.club_subscriptions set flags = array(select distinct unnest(flags || array[p_flag])) where stripe_subscription_id = p_sub;
+$$;
 
 -- Refund totals from Stripe. A full refund revokes exactly what the invoice granted and cancels its unmailed
 -- mailings; a partial (goodwill) refund changes no access. Idempotent.
@@ -707,7 +713,7 @@ begin
 end $$;
 
 revoke execute on function public.club_user_by_email(text), public.club_member_link(uuid, text, text, boolean),
-  public.club_subscription_sync(jsonb), public.club_invoice_apply(jsonb, jsonb), public.club_invoice_refund(text, int),
+  public.club_subscription_sync(jsonb), public.club_subscription_flag(text, text), public.club_invoice_apply(jsonb, jsonb), public.club_invoice_refund(text, int),
   public.club_invoice_dispute(text), public.club_revoke_invoice(text, text), public.club_stripe_event_begin(text, text),
   public.club_stripe_event_done(text), public.club_email_begin(text, text, uuid, text), public.club_email_finish(text, text, text, text),
   public.club_checkout_state(uuid, text), public.club_checkout_open_session(text, text), public.club_checkout_record(jsonb),
@@ -715,13 +721,48 @@ revoke execute on function public.club_user_by_email(text), public.club_member_l
   public.club_admin_entitlement_service(uuid, uuid, date, text, text, text)
   from public, anon, authenticated;
 grant execute on function public.club_user_by_email(text), public.club_member_link(uuid, text, text, boolean),
-  public.club_subscription_sync(jsonb), public.club_invoice_apply(jsonb, jsonb), public.club_invoice_refund(text, int),
+  public.club_subscription_sync(jsonb), public.club_subscription_flag(text, text), public.club_invoice_apply(jsonb, jsonb), public.club_invoice_refund(text, int),
   public.club_invoice_dispute(text), public.club_revoke_invoice(text, text), public.club_stripe_event_begin(text, text),
   public.club_stripe_event_done(text), public.club_email_begin(text, text, uuid, text), public.club_email_finish(text, text, text, text),
   public.club_checkout_state(uuid, text), public.club_checkout_open_session(text, text), public.club_checkout_record(jsonb),
   public.club_checkout_ended(text, text), public.club_customer_email(uuid, text), public.club_email_audience(text, date),
   public.club_admin_entitlement_service(uuid, uuid, date, text, text, text)
   to service_role;
+
+-- The shipping address she typed into Stripe Checkout, kept only if she has none yet (her own edits win).
+create function public.club_address_from_checkout(p_user uuid, p jsonb) returns boolean
+language plpgsql security definer set search_path = '' as $$
+begin
+  if p is null or coalesce(p ->> 'country', 'US') <> 'US' then return false; end if;
+  insert into public.club_mailing_addresses (user_id, name, line1, line2, city, state, postal_code)
+  values (p_user, left(btrim(p ->> 'name'), 80), left(btrim(p ->> 'line1'), 120), nullif(left(btrim(coalesce(p ->> 'line2', '')), 120), ''),
+          left(btrim(p ->> 'city'), 80), upper(btrim(p ->> 'state')), btrim(p ->> 'postal_code'))
+  on conflict (user_id) do nothing;
+  return found;
+exception
+  when check_violation or not_null_violation then return false;
+end $$;
+
+create function public.club_settings_set_portal(p_id text) returns void
+language sql security definer set search_path = '' as $$
+  update public.club_settings set portal_configuration_id = p_id, updated_at = now();
+$$;
+
+create function public.club_secret_set(p_name text, p_value text) returns void
+language sql security definer set search_path = '' as $$
+  insert into public.club_secret (name, value) values (p_name, p_value) on conflict (name) do update set value = excluded.value, created_at = now();
+$$;
+
+-- Guest checkouts per connection (each one makes a Stripe customer): 10 an hour, on the shop's throttle table.
+create function public.club_allow_checkout(p_ip text) returns boolean
+language sql security definer set search_path = '' as $$
+  select public.shop_allow('club:' || md5(coalesce(p_ip, 'unknown')), 'club_checkout', 10, interval '1 hour');
+$$;
+
+revoke execute on function public.club_address_from_checkout(uuid, jsonb), public.club_settings_set_portal(text), public.club_secret_set(text, text),
+  public.club_allow_checkout(text) from public, anon, authenticated;
+grant execute on function public.club_address_from_checkout(uuid, jsonb), public.club_settings_set_portal(text), public.club_secret_set(text, text),
+  public.club_allow_checkout(text) to service_role;
 
 -- ---------------------------------------------------------------- what the member's browser may call
 
