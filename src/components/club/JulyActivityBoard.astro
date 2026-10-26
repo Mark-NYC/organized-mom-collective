@@ -186,7 +186,9 @@ const library:Record<Tier,Idea[]>={
   {id:'draw',label:'Draw a superhero',icon:'scissors',minAge:6},
   {id:'build',label:'Build with blocks',icon:'blocks'},
   {id:'stretch',label:'Have a dance party',icon:'rope',minAge:6},
-  {id:'look',label:'Find five things in nature',icon:'tree',minAge:6}
+  {id:'look',label:'Find five things in nature',icon:'tree',minAge:6},
+  {id:'friend-draw',label:'Draw funny portraits together',icon:'scissors',minAge:5},
+  {id:'sibling-build',label:'Build a LEGO tower together',icon:'blocks',minAge:5}
  ],
  busy:[
   {id:'pretend',label:'Set up pretend play',icon:'blocks',maxAge:5},
@@ -197,7 +199,9 @@ const library:Record<Tier,Idea[]>={
   {id:'craft',label:'Make a paper craft',icon:'scissors',minAge:6},
   {id:'bike',label:'Ride my bike (ask first)',icon:'bike',minAge:6},
   {id:'tower',label:'Build a giant tower',icon:'blocks'},
-  {id:'reading',label:'Read a whole chapter',icon:'book',minAge:9}
+  {id:'reading',label:'Read a whole chapter',icon:'book',minAge:9},
+  {id:'sibling-puzzle',label:'Solve a puzzle together',icon:'puzzle',minAge:5},
+  {id:'friend-game',label:'Play a favorite board game',icon:'friends',minAge:5}
  ],
  project:[
   {id:'small-town',label:'Build a pretend town',icon:'blocks',maxAge:5},
@@ -208,7 +212,9 @@ const library:Record<Tier,Idea[]>={
   {id:'course',label:'Design a safe obstacle course',icon:'rope',minAge:6},
   {id:'comic',label:'Draw a comic strip',icon:'scissors',minAge:6},
   {id:'garden',label:'Observe a plant growing',icon:'tree',minAge:6},
-  {id:'mural',label:'Make a big art project',icon:'scissors',minAge:6}
+  {id:'mural',label:'Make a big art project',icon:'scissors',minAge:6},
+  {id:'sibling-town',label:'Build a pretend town together',icon:'blocks',minAge:5},
+  {id:'friend-story',label:'Invent a pretend-play story',icon:'friends',minAge:5}
  ]
 };
 const interestIds:Record<string,string[]>={mixed:[],art:['doodle','draw','craft','comic','picture-art','big-art','mural'],building:['build','tower','city','small-town'],movement:['stretch','course','bike','look'],stories:['read','picture','story','pretend','picture-story'],games:['puzzle','easy-puzzle','course']};
@@ -233,7 +239,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  let boards:Record<string,State>={};
  const selectedAge=(child=state.child)=>{const kid=kids.find(k=>k.id===child);if(!kid?.birthYear)return 8;
   return Math.max(2,Math.min(18,2027-kid.birthYear-(kid.birthMonth&&kid.birthMonth>7?1:0)))};
- const validIdeas=(tier:Tier)=>library[tier].filter(idea=>eligible(idea,selectedAge()));
+ const validIdeas=(tier:Tier)=>library[tier].filter(idea=>eligible(idea,selectedAge()) && (state.participation==='solo'? !idea.id.startsWith('friend-')&&!idea.id.startsWith('sibling-'):true));
  const stage=root.querySelector<HTMLElement>('[data-jab-stage]');const sheet=root.querySelector<HTMLElement>('[data-jab-sheet]');
  const fit=()=>{if(!stage||!sheet)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';sheet.style.setProperty('--jab-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
@@ -276,13 +282,28 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
     });
     const toggle=document.createElement('button');toggle.type='button';toggle.textContent=item.removed?'＋ Restore idea':'× Remove idea';
     toggle.addEventListener('click',()=>{state[tier][i].removed=!state[tier][i].removed;save();draw();options()});
-    label.append(select);wrap.append(label,toggle);parent.append(wrap);
+    const custom=document.createElement('input');custom.type='text';custom.maxLength=55;custom.placeholder='Or type your own activity';custom.value=item.label;
+    custom.setAttribute('aria-label','Custom activity name');
+    custom.addEventListener('change',()=>{state[tier][i]={...state[tier][i],label:custom.value.trim().slice(0,55)||item.label};save();draw()});
+    label.append(select);wrap.append(label,custom,toggle);parent.append(wrap);
    }
   }
  };
  root.querySelector<HTMLSelectElement>('[data-jab-participation]')?.addEventListener('change',e=>{
    const value=(e.target as HTMLSelectElement).value as State['participation'];
    state.participation=value==='sibling'&&kids.length<2?'solo':value;
+   if(state.participation!=='solo'){
+     const selections=state.participation==='sibling'
+       ?{quick:'sibling-build',busy:'sibling-puzzle',project:'sibling-town'}
+       :{quick:'friend-draw',busy:'friend-game',project:'friend-story'};
+     for(const tier of ['quick','busy','project'] as Tier[]){
+       const found=library[tier].find(x=>x.id===selections[tier]);
+       if(found&&eligible(found,selectedAge()))state[tier][0]={...found};
+     }
+   }else{
+     const defaults=defaultsFor(selectedAge(),state.child);
+     for(const tier of ['quick','busy','project'] as Tier[])state[tier][0]={...defaults[tier][0]};
+   }
    save();draw();options();
  });
  root.querySelector<HTMLSelectElement>('[data-jab-interest]')?.addEventListener('change',e=>{
