@@ -2,14 +2,14 @@
 /** July Club printed prototype: child-led activity decision board, one letter-size page. */
 interface Props {storageKey?:string}
 const {storageKey='omc:club:july-activities:v1'}=Astro.props;
-const icons={"book":"/images/club/july/book.png","blocks":"/images/club/july/building-blocks.png","puzzle":"/images/club/july/puzzele-piece.png","tree":"/images/club/july/tree.png","scissors":"/images/club/july/drawing-pencil-paper.png","bike":"/images/club/july/bicycle.png","rope":"/images/club/july/building-a-course.png","friends":"/images/club/july/friends-activity.png","lightbulb":"/images/club/july/star.png","draw":"/images/club/july/drawing-pencil-paper.png","craft":"/images/club/july/crafts-scissors-paper-and-glue.png","comic":"/images/club/july/comic-book-making.png","dance":"/images/club/july/dance-party.png","game":"/images/club/july/board-game.png","bracelet":"/images/club/july/bracelet-making.png","dough":"/images/club/july/play-doh-modeling-dough.png","pretend":"/images/club/july/pretend-play-puppet-and-mask.png","hunt":"/images/club/july/scavenger-hunt.png","sibling":"/images/club/july/sibling-activity.png","solo":"/images/club/july/solo-activity.png","car":"/images/club/july/toy-race-car.png","video":"/images/club/july/movement-video-screen.png"};
+const icons={"book":"/images/club/july/book.png","blocks":"/images/club/july/building-blocks.png","legoCity":"/images/club/july/lego-city-blocks.png","puzzle":"/images/club/july/puzzele-piece.png","tree":"/images/club/july/tree.png","scissors":"/images/club/july/drawing-pencil-paper.png","bike":"/images/club/july/bicycle.png","rope":"/images/club/july/building-a-course.png","friends":"/images/club/july/friends-activity.png","lightbulb":"/images/club/july/star.png","draw":"/images/club/july/drawing-pencil-paper.png","craft":"/images/club/july/crafts-scissors-paper-and-glue.png","comic":"/images/club/july/comic-book-making.png","dance":"/images/club/july/dance-party.png","game":"/images/club/july/board-game.png","bracelet":"/images/club/july/bracelet-making.png","dough":"/images/club/july/play-doh-modeling-dough.png","pretend":"/images/club/july/pretend-play-puppet-and-mask.png","hunt":"/images/club/july/scavenger-hunt.png","sibling":"/images/club/july/sibling-activity.png","solo":"/images/club/july/solo-activity.png","car":"/images/club/july/toy-race-car.png","video":"/images/club/july/movement-video-screen.png"};
 const tiers=[
  {id:'quick',num:'01',title:'Start Playing',subtitle:'I can start right now.',hint:'NO SETUP · BY MYSELF',color:'#E3EEDC',
   items:[{id:'read',label:'Read a book',icon:'book'},{id:'draw',label:'Draw a superhero',icon:'draw'},{id:'build',label:'Build with blocks',icon:'blocks'}]},
  {id:'busy',num:'02',title:'Make & Imagine',subtitle:'I want to get into something.',hint:'A LITTLE SETUP · KEEP GOING',color:'#F6E8BE',
   items:[{id:'puzzle',label:'Finish a puzzle',icon:'puzzle'},{id:'outdoor',label:'Explore outside',icon:'tree'},{id:'craft',label:'Make a paper craft',icon:'craft'}]},
  {id:'project',num:'03',title:'Keep Going',subtitle:'I can work on this again tomorrow.',hint:'BUILD IT OVER TIME · MY IDEA',color:'#DFE7F1',
-  items:[{id:'city',label:'Build a LEGO city',icon:'blocks'},{id:'story',label:'Write & draw a story',icon:'book'},{id:'course',label:'Design an obstacle course',icon:'rope'}]}
+  items:[{id:'city',label:'Build a LEGO city',icon:'legoCity'},{id:'story',label:'Write & draw a story',icon:'book'},{id:'course',label:'Design an obstacle course',icon:'rope'}]}
 ];
 ---
 <div class="jab" data-jab-key={storageKey} data-jab-icons={JSON.stringify(icons)}>
@@ -254,7 +254,7 @@ const library:Record<Tier,Idea[]>={
   {id:'small-town',label:'Build a pretend town',icon:'blocks',maxAge:5},
   {id:'picture-story',label:'Make a picture story',icon:'book',maxAge:5},
   {id:'big-art',label:'Add to a big drawing',icon:'draw',maxAge:5},
-  {id:'city',label:'Build a LEGO city',icon:'blocks',minAge:6},
+  {id:'city',label:'Build a LEGO city',icon:'legoCity',minAge:6},
   {id:'story',label:'Write & draw a story',icon:'book',minAge:9},
   {id:'course',label:'Design a safe obstacle course',icon:'rope',minAge:6},
   {id:'comic',label:'Draw a comic strip',icon:'comic',minAge:6},
