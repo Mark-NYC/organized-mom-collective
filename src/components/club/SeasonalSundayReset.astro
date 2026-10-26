@@ -1,0 +1,66 @@
+---
+/** One seasonal application of the same Sunday Reset, not a second weekly meeting. */
+interface Props {month:'october'|'november'}
+const {month}=Astro.props;
+const october=month==='october';
+const heading=october?'A Home That Works Together':'The Busy Season Sunday Reset';
+const printTitle=october?'Our Fall Home Reset':'Our Busy Season Plan';
+const jobs=october?[
+ ['Sort coats and shoes','Keep what fits and set aside what no longer works.'],
+ ['Ready the entryway','Give jackets, shoes and school bags a clear home.'],
+ ['Check supplies','Notice what is running low before it becomes urgent.'],
+ ['Reset one cluttered spot','Put things away and make the space usable.'],
+ ['Own one ongoing job','Name a clear owner and what finished looks like.']
+]:[
+ ['Gatherings and hosting','Check who is coming, what to bring, and who prepares.'],
+ ['School breaks and changes','Spot days without the usual school or activity schedule.'],
+ ['Travel and transportation','Confirm rides, timing, packing, and who handles each part.'],
+ ['Shared preparation','Hand off supplies, meals, cleanup, and other real jobs.'],
+ ['Protect our margin','Choose some space to leave open, not another commitment.']
+];
+---
+<section class="ofc-season" data-ofc-season={month}>
+ <header class="ofc-season-heading"><p>ORGANIZED FAMILY CLUB · {month.toUpperCase()} 2027</p><h1>{heading}</h1><p>{october?'Five practical fall jobs. Real owners. No new family meeting.':'Use your familiar Sunday Reset when school breaks, gatherings, and holiday plans make life busier.'}</p></header>
+ <div class="ofc-season-edit"><div><strong>Your prepared family plan</strong><p>Bring this sheet to your Sunday Reset. Change only what doesn't fit.</p></div><button type="button" data-ofc-season-print>Print / Save PDF</button><p role="status">Preview only. Nothing is approved or mailed from this page.</p></div>
+ <div class="ofc-season-pages">
+  <article class="ofc-season-paper">
+   <header><p>ORGANIZED FAMILY CLUB · {month.toUpperCase()}</p><h2>{printTitle}</h2><span data-ofc-season-family>Our family</span><p>{october?'A little preparation now makes home easier later.':'The same family rhythm, for a busier season.'}</p></header>
+   <div class="ofc-season-rhythm"><b>AT OUR SUNDAY RESET</b><span>Look ahead → See what needs preparing → Share responsibility → Protect time together</span></div>
+   <h3>{october?'Five jobs to share this fall':'Five things to look ahead for'}</h3>
+   <div class="ofc-season-items">{jobs.map(([name,description],i)=><div class="ofc-season-item"><span class="ofc-season-num">{String(i+1).padStart(2,'0')}</span><div><strong>{name}</strong><p>{description}</p><label>Owner <select data-ofc-owner={i} aria-label={'Owner for '+name}><option value="">Our family together</option></select></label></div></div>)}</div>
+   <footer>ONE FAMILY · EVERYONE PLAYS A PART</footer>
+  </article>
+  <article class="ofc-season-paper">
+   <header><p>ORGANIZED FAMILY CLUB · {month.toUpperCase()}</p><h2>{october?'From Helping to Owning':'Plan Ahead, Not More'}</h2><span data-ofc-season-family-back>Our family</span></header>
+   {october?<div class="ofc-season-back-body"><h3>One familiar rhythm</h3><p>During your Sunday Reset, take five minutes to look at one seasonal need. Decide who will notice it, who will do the work, and what done looks like.</p><h3>Ownership means</h3><div class="ofc-season-ownership"><b>Notice</b><p>I can see when this needs doing.</p><b>Prepare</b><p>I get what I need before I begin.</p><b>Finish</b><p>I know what done looks like.</p></div><h3>A small win is enough</h3><p>Choose one meaningful thing that no longer depends on Mom remembering it. You don't need another chart or another weekly meeting.</p></div>:<div class="ofc-season-back-body"><h3>Ask these at your Sunday Reset</h3><div class="ofc-season-prompts"><p>Who's coming, hosting, or traveling this week?</p><p>What changes because of school breaks or events?</p><p>Who owns rides, supplies, and getting ready?</p><p>What can we prepare before the busiest day?</p><p>What can we leave off the calendar?</p></div><h3>Keep some breathing room</h3><p>Don't fill every open day. Choose one simple meal, one uncommitted afternoon, or one thing the family can skip.</p><h3>Each person owns their part</h3><p>Kids can check their gear. Adults can coordinate rides, meals, and hosting. The calendar is everyone's, not Mom's private reminder list.</p></div>}
+   <div class="ofc-season-note"><strong>A note from Megan</strong><p>{october?'A home that works together starts with someone besides Mom noticing what needs doing. Pick a few real jobs and let each person take care of their part.':'November can fill up fast. Keep using the same few minutes together to see what is coming and decide who will prepare. You do not have to coordinate every detail alone.'}</p></div>
+   <footer>KEEP THIS NEAR YOUR FAMILY CALENDAR</footer>
+  </article>
+ </div>
+</section>
+<style is:global>
+.ofc-season{font-family:Montserrat,Arial,sans-serif;background:#f6f5f2;color:#4d554d;padding:35px 16px 65px}.ofc-season-heading{text-align:center;margin:auto auto 24px;max-width:680px}.ofc-season-heading>p:first-child{font-size:10px;letter-spacing:.14em;font-weight:700;color:#6c866d}.ofc-season-heading h1{font:400 clamp(30px,4vw,47px) Georgia,serif;color:#55745b;margin:10px}.ofc-season-heading>p:last-child{font-size:14px;line-height:1.6}
+.ofc-season-edit{max-width:1050px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:white;border:1px solid #dce5dd;padding:15px 21px;margin:auto auto 23px;border-radius:8px}.ofc-season-edit strong{color:#53715c}.ofc-season-edit p{margin:4px 0;font-size:11px}.ofc-season-edit button{background:#5b7661;color:white;border:0;border-radius:5px;padding:12px 17px;font-weight:700;cursor:pointer;min-height:44px}
+.ofc-season-pages{display:flex;flex-wrap:wrap;justify-content:center;gap:22px}.ofc-season-paper{width:min(100%,510px);aspect-ratio:8.5/11;min-height:650px;padding:33px 37px 26px;background:white;border:1px solid #e2e6df;box-shadow:0 7px 25px #0002;display:flex;flex-direction:column}.ofc-season-paper header{text-align:center;border-top:7px solid #dce9e1;padding-top:15px}.ofc-season-paper header>p:first-child{font-size:9px;font-weight:700;letter-spacing:.14em;color:#6d8571}.ofc-season-paper header h2{font:400 36px Georgia,serif;color:#55735e;margin:12px 0 6px}.ofc-season-paper header>span{font:italic 17px Georgia,serif;color:#819686}.ofc-season-paper header>p:last-child{font-size:11px;margin:9px 0}.ofc-season-rhythm{padding:15px;background:#e6f0e8;text-align:center;margin:17px 0}.ofc-season-rhythm b{font-size:10px;display:block;color:#52705c;letter-spacing:.1em}.ofc-season-rhythm span{font-size:11px;line-height:1.5;display:block;margin-top:7px}
+.ofc-season-paper h3{font:400 22px Georgia,serif;color:#54735c;margin:10px 0 14px}.ofc-season-items{display:grid;gap:6px}.ofc-season-item{display:grid;grid-template-columns:33px 1fr;gap:12px;align-items:start;border-bottom:1px solid #e5ebe5;padding:9px 0}.ofc-season-num{font:400 21px Georgia,serif;color:#88a08c}.ofc-season-item strong{font-size:12px;color:#48684f}.ofc-season-item p{font-size:10px;line-height:1.45;margin:4px 0}.ofc-season-item label{font-size:10px}.ofc-season-item select{max-width:190px;background:#f6faf6;border:1px solid #c9daca;border-radius:3px;padding:4px;font-size:10px;margin-left:5px}.ofc-season-paper footer{margin-top:auto;text-align:center;font-size:9px;letter-spacing:.11em;color:#819587;padding-top:14px}
+.ofc-season-back-body{font-size:12px;line-height:1.6}.ofc-season-back-body>p{margin:8px 0 15px}.ofc-season-ownership{display:grid;grid-template-columns:85px 1fr;gap:7px;background:#e8f1e9;padding:13px}.ofc-season-ownership p{margin:0}.ofc-season-ownership b{color:#56745f}.ofc-season-prompts{background:#eaf2ea;padding:12px 16px}.ofc-season-prompts p{border-bottom:1px solid #d3e3d3;margin:0;padding:9px 0;font-size:12px}.ofc-season-note{padding:13px;background:#f7f0e6;margin-top:auto}.ofc-season-note strong{font:400 18px Georgia,serif;color:#59745e}.ofc-season-note p{font-size:11px;line-height:1.6}
+@media(max-width:600px){.ofc-season-paper{padding:24px 20px;min-height:0}.ofc-season-paper header h2{font-size:29px}.ofc-season-edit{padding:14px}}
+@media print{@page{size:letter portrait;margin:0}body:has(.ofc-season-printing) *{visibility:hidden!important}body:has(.ofc-season-printing) .ofc-season-paper,body:has(.ofc-season-printing) .ofc-season-paper *{visibility:visible!important}body:has(.ofc-season-printing) .ofc-season-pages{position:absolute;top:0;left:0;width:8.5in;display:block!important}body:has(.ofc-season-printing) .ofc-season-paper{width:8.5in!important;height:11in!important;min-height:11in!important;padding:.43in!important;box-shadow:none!important;border:0!important;break-after:page!important;page-break-after:always!important;aspect-ratio:auto!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body:has(.ofc-season-printing) .ofc-season-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
+</style>
+<script>
+const roots=document.querySelectorAll<HTMLElement>('[data-ofc-season]');
+roots.forEach(root=>{
+ const month=root.dataset.ofcSeason!;
+ const selects=Array.from(root.querySelectorAll<HTMLSelectElement>('[data-ofc-owner]'));
+ const savedKey='omc:club:'+month+':owners:v1';
+ let saved:string[]=[];try{const x=JSON.parse(sessionStorage.getItem(savedKey)||'[]');if(Array.isArray(x))saved=x}catch{}
+ const apply=(household:{displayName?:string;members:{id:string;firstName:string;archived?:boolean}[]}|null)=>{
+  if(!household)return;const family=household.displayName||'Our family';root.querySelector('[data-ofc-season-family]')!.textContent=family;root.querySelector('[data-ofc-season-family-back]')!.textContent=family;
+  selects.forEach((select,i)=>{const prior=select.value||saved[i]||'';select.replaceChildren();const together=document.createElement('option');together.value='';together.textContent='Our family together';select.append(together);household.members.filter(m=>!m.archived).forEach(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=m.firstName;select.append(option)});if(Array.from(select.options).some(o=>o.value===prior))select.value=prior});
+ };
+ selects.forEach((select,i)=>select.addEventListener('change',()=>{saved[i]=select.value;try{sessionStorage.setItem(savedKey,JSON.stringify(saved))}catch{}}));
+ window.addEventListener('omc:club-preview-household',(e:Event)=>apply((e as CustomEvent<{household:Parameters<typeof apply>[0]}>).detail.household));
+ const cached=(window as Window&{__ofcPreviewHousehold?:{household:Parameters<typeof apply>[0]}}).__ofcPreviewHousehold;if(cached)apply(cached.household);
+ root.querySelector('[data-ofc-season-print]')!.addEventListener('click',()=>{root.classList.add('ofc-season-printing');window.print();setTimeout(()=>root.classList.remove('ofc-season-printing'),400)});
+});
+</script>
