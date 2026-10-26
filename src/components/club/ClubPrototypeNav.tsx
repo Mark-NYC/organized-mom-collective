@@ -10,7 +10,7 @@ import {sampleStore} from '../../lib/club/store';
 import type {Household} from '../../lib/club/profile';
 
 const months=[
- {slug:'november',label:'November',url:'/club/worksheet-generator/'},
+ {slug:'november',label:'November',url:'/club/november-preview/'},
  {slug:'december',label:'December',url:'/club/december-preview/'},
  {slug:'january',label:'January',url:'/preview/january-habit-cards'},
  {slug:'february',label:'February',url:'/club/february-preview/'},
