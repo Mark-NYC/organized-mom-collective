@@ -485,6 +485,16 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}}).__ofcPreviewHousehold;
  if(cached)applyHousehold(cached);
+ // Keep the illustrated choices synchronized when preferences change within the popup.
+ for(const select of root.querySelectorAll<HTMLSelectElement>('.jab-picker-filters select')){
+  select.addEventListener('change',()=>{
+   queueMicrotask(()=>{
+    if(!activityDialog?.open)return;
+    activityDraft={quick:structuredClone(state.quick.filter(x=>!x.removed)),busy:structuredClone(state.busy.filter(x=>!x.removed)),project:structuredClone(state.project.filter(x=>!x.removed))};
+    pickerMessage('');renderActivityPicker();
+   });
+  });
+ }
  updateFamily();draw();options();
 }
 </script>
