@@ -132,13 +132,33 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 .jss [data-jss-edit]{cursor:text;outline-offset:3px}
 .jss [data-jss-edit]:hover{outline:1px dashed #a6b69d}
 .jss [data-jss-edit]:focus{outline:2px solid #94ae8e;background:#f5faf2}
+
+/* Pencil experiment: a visual cue on the editable words themselves.
+   Pseudo-elements do not enter textContent, saved choices, or the caret. */
+.jss-sheet [contenteditable="true"]{position:relative}
+.jss-sheet [contenteditable="true"]::after{
+ content:"";display:inline-block;width:12px;height:12px;margin-left:6px;
+ vertical-align:baseline;background: center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");
+ opacity:0;pointer-events:none;transition:opacity .12s ease;
+}
+.jss-sheet [contenteditable="true"]:hover::after,
+.jss-sheet [contenteditable="true"]:focus-visible::after{opacity:.75}
+.jss-sheet [contenteditable="true"]:focus::after{opacity:0}
+@media(hover:none){
+ .jss-sheet [data-jss-edit]::after{opacity:.75}
+ .jss-sheet [data-food-text]::after{opacity:.55}
+ .jss-sheet [contenteditable="true"]:focus::after{opacity:0}
+}
+@media print{.jss-sheet [contenteditable="true"]::after{display:none!important}}
+.jss.jss-export .jss-sheet [contenteditable="true"]::after{display:none!important}
+
 @media print{.jss-remove{display:none!important}.jss [data-jss-edit]{outline:none!important;background:transparent!important}}
 .jss.jss-export .jss-remove{display:none!important}
 .jss-food strong[contenteditable]:hover{outline:1px dashed #a6b69d}.jss-food strong[contenteditable]:focus{outline:2px solid #94ae8e;background:#f5faf2}
 .jss-done{margin-top:19px;background:#eaf1e7;border-radius:6px;padding:17px;text-align:center}.jss-done span{display:block;margin-bottom:9px}.jss-done strong{font:400 20px Georgia,serif;color:#4a6044}
 .jss-footer{margin-top:auto;display:flex;justify-content:space-between;border-top:1px solid #dfe5dc;padding-top:9px;font-size:9px;letter-spacing:.1em;color:#78816f;font-weight:700}
 .jss.jss-export .jss-stage{height:1056px!important;width:816px!important}.jss.jss-export .jss-sheet{transform:none!important;box-shadow:none!important}
-@media(max-width:1080px){.jss-layout{display:flex;flex-direction:column}.jss-preview{order:0;width:100%}.jss-editor{order:1;max-width:720px;width:100%}.jss-food strong[contenteditable]{pointer-events:none}.jss-remove{opacity:1;width:29px;height:29px;top:3px}.jss [data-jss-edit]{pointer-events:none}}
+@media(max-width:1080px){.jss-layout{display:flex;flex-direction:column}.jss-preview{order:0;width:100%}.jss-editor{order:1;max-width:720px;width:100%}.jss-remove{opacity:1;width:29px;height:29px;top:3px}}
 @page{size:letter portrait;margin:0}
 @media print{html,body{padding:0!important;margin:0!important;background:white!important}body *{visibility:hidden!important}.jss-stage,.jss-sheet,.jss-sheet *{visibility:visible!important}.jss-stage{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important}.jss-sheet{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.jss-food strong[contenteditable]{outline:none!important;background:transparent!important}}
 
