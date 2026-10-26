@@ -21,7 +21,7 @@ const tiers=[
     <div class="jab-summary-row"><span>Prepared for</span><b data-jab-summary-child>Whole family</b></div>
     <div class="jab-summary-row"><span>Activity style</span><b data-jab-summary-focus>A little of everything</b></div>
     <div class="jab-summary-row"><span>Ideas included</span><b data-jab-summary-count>9 activities</b></div>
-    <button type="button" class="jab-edit-link" data-open-editor>Edit activity choices <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
+    <button type="button" class="jab-edit-link" data-open-activities>Choose activities <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
    <p class="jab-guidance-compact">Use activities your child can safely start with materials you already have. Supervise where needed.</p>
    <div class="jab-actions"><div class="jab-primary-actions"><a class="jab-jump-edit" href="#july-edit-controls">Make changes <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a><button class="jab-primary" type="button" data-jab-print>Print / Save PDF</button></div>
@@ -42,11 +42,20 @@ const tiers=[
    <label>Activity style<select data-jab-focus>
      <option value="mixed">A little of everything</option><option value="inside">Mostly indoors</option><option value="outside">Mostly outdoors</option>
    </select></label>
-   <details class="jab-customize"><summary>Change activity choices <span>Optional</span></summary><p>Only if you want: swap or restore an idea here. On the board, edit activity names directly or use × to remove.</p><div data-jab-options></div></details>
+   <button type="button" class="jab-choose-button" data-open-activities>Choose activities with pictures</button><p class="jab-choice-tip">Tap the pictures to choose up to three activities in each section.</p>
 </div>
       <div class="jab-guidance"><strong>Make this work at home</strong><p>Only keep activities your child can safely start with supplies already available. Supervise activities when needed. For little ones, adult help and shorter attention spans are normal.</p></div>
 
    <button type="button" class="jab-dialog-done" data-close-dialog>Done · See our board</button>
+  </dialog>
+  <dialog class="jab-dialog jab-activity-dialog" data-activity-dialog aria-labelledby="jab-activity-title">
+   <div class="jab-dialog-head"><div><span class="jab-eyebrow">MAKE IT YOURS · JULY</span><h2 id="jab-activity-title">Choose Your Activities</h2></div><button type="button" class="jab-dialog-close" data-activity-cancel aria-label="Close">×</button></div>
+   <p>We've picked activities for your family. Tap a picture to add or remove it. Choose up to three in each group.</p>
+   <div class="jab-activity-tabs" role="tablist" aria-label="Activity category"><button type="button" role="tab" data-activity-tab="quick" aria-selected="true">Start Playing</button><button type="button" role="tab" data-activity-tab="busy" aria-selected="false">Make & Imagine</button><button type="button" role="tab" data-activity-tab="project" aria-selected="false">Keep Going</button></div>
+   <div class="jab-activity-status"><span data-activity-count>3 of 3 selected</span><span data-activity-age></span></div>
+   <div class="jab-activity-grid" data-activity-grid></div>
+   <p class="jab-activity-help" data-activity-message role="status" aria-live="polite"></p>
+   <div class="jab-activity-footer"><button type="button" data-activity-cancel>Cancel</button><button type="button" class="jab-dialog-done" data-activity-save>Save My Activities</button></div>
   </dialog>
   <section class="jab-preview" aria-label="July illustrated activity board">
    <button type="button" class="jab-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
@@ -159,6 +168,26 @@ const tiers=[
 }
 @media print{.jab-dialog,.jab-actions,.jab-floating-edit,.jab-editor{display:none!important}.jab-preview{padding:0!important}}
 
+
+.jab-choose-button{width:100%;min-height:47px;margin:14px 0 5px;background:#607755;color:white;border:0;border-radius:4px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.jab-choice-tip{font:12px/1.6 Montserrat,Arial,sans-serif;color:#697467}
+.jab-activity-dialog{width:min(740px,calc(100vw - 32px));max-height:calc(100dvh - 42px)}
+.jab-activity-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:17px 0}
+.jab-activity-tabs button{border:1px solid #d5ded0;border-radius:5px;background:#f7f8f5;color:#61745b;padding:12px 6px;font:700 11px/1.35 Montserrat,Arial,sans-serif;cursor:pointer}
+.jab-activity-tabs button[aria-selected="true"]{background:#607755;border-color:#607755;color:#fff}
+.jab-activity-status{display:flex;justify-content:space-between;gap:12px;color:#73836b;font:700 11px Montserrat,Arial,sans-serif;margin:12px 0}
+.jab-activity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.jab-activity-card{min-height:168px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;border:2px solid #e0e5dc;border-radius:9px;background:#fff;padding:13px 9px;cursor:pointer;color:#4c5949;font:600 12px/1.35 Montserrat,Arial,sans-serif;text-align:center}
+.jab-activity-card img{width:100%;height:98px;object-fit:contain}
+.jab-activity-card[aria-pressed="true"]{border-color:#607755;background:#f1f6ee}
+.jab-activity-check{position:absolute;top:7px;right:7px;width:25px;height:25px;border-radius:50%;background:#e3e9df;color:#58714f;display:grid;place-items:center;font-size:17px}
+.jab-activity-card[aria-pressed="true"] .jab-activity-check{background:#607755;color:#fff}
+.jab-activity-help{min-height:18px!important;margin:10px 0!important;font:12px/1.5 Montserrat,Arial,sans-serif!important;color:#805b43}
+.jab-activity-footer{display:flex;gap:10px;align-items:center;position:sticky;bottom:-24px;background:#fff;padding:12px 0}
+.jab-activity-footer button:first-child{flex:1;background:#fff;border:1px solid #aabca4;padding:12px;cursor:pointer;color:#536c4d}
+.jab-activity-footer .jab-dialog-done{flex:2;width:auto;margin:0}
+@media(max-width:480px){.jab-activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.jab-activity-card{min-height:145px}.jab-activity-card img{height:82px}}
+
 /* June reference: visible pencil indicates inline-editable text before hover.
    A CSS pseudo-element keeps the cue out of saved text and the text cursor. */
 .jab .jab-sheet [contenteditable="true"]{position:relative}
@@ -250,10 +279,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
+ const activityDialog=root.querySelector<HTMLDialogElement>('[data-activity-dialog]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
- for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+ for(const dialog of [visionDialog,editorDialog,activityDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
  const save=()=>{boards[state.child]=structuredClone(state);try{localStorage.setItem(key,JSON.stringify({profile,state,boards}))}catch{}};
  const draw=()=>{
   for(const tier of ['quick','busy','project'] as Tier[])for(const row of root.querySelectorAll<HTMLElement>('[data-jab-item="'+tier+'"]')){
@@ -273,6 +303,57 @@ for(const root of document.querySelectorAll<HTMLElement>('.jab')){
   const participation=root.querySelector<HTMLSelectElement>('[data-jab-participation]');if(participation)participation.value=state.participation;
   const interest=root.querySelector<HTMLSelectElement>('[data-jab-interest]');if(interest)interest.value=state.interest;
  };
+
+ // Draft choices, matching June's visual selector. Cancel never mutates the printed page.
+ let activeActivityTier:Tier='quick';
+ let activityDraft:Record<Tier,Idea[]>={quick:[],busy:[],project:[]};
+ const pickerMessage=(message:string)=>{const el=root.querySelector<HTMLElement>('[data-activity-message]');if(el)el.textContent=message};
+ const renderActivityPicker=()=>{
+  const grid=root.querySelector<HTMLElement>('[data-activity-grid]');if(!grid)return;
+  grid.replaceChildren();
+  const selected=activityDraft[activeActivityTier].filter(x=>!x.removed);
+  const count=root.querySelector<HTMLElement>('[data-activity-count]');if(count)count.textContent=selected.length+' of 3 selected';
+  const age=root.querySelector<HTMLElement>('[data-activity-age]');if(age)age.textContent='Age '+selectedAge()+' suggestions';
+  for(const tab of root.querySelectorAll<HTMLButtonElement>('[data-activity-tab]')){
+   const on=tab.dataset.activityTab===activeActivityTier;tab.setAttribute('aria-selected',String(on));tab.tabIndex=on?0:-1;
+  }
+  const candidates=library[activeActivityTier].filter(x=>eligible(x,selectedAge())&&
+   (state.participation!=='solo'||(!x.id.startsWith('sibling-')&&!x.id.startsWith('friend-')))&&
+   (state.participation!=='sibling'||!x.id.startsWith('friend-'))&&
+   (state.participation!=='friends'||!x.id.startsWith('sibling-')));
+  for(const idea of candidates){
+   const on=selected.some(x=>x.id===idea.id);
+   const button=document.createElement('button');button.type='button';button.className='jab-activity-card';
+   button.setAttribute('aria-pressed',String(on));button.setAttribute('aria-label',idea.label+(on?', selected':''));
+   const img=document.createElement('img');img.src=icons[idea.icon]??icons.lightbulb;img.alt='';img.loading='lazy';
+   const label=document.createElement('span');label.textContent=idea.label;
+   const mark=document.createElement('span');mark.className='jab-activity-check';mark.textContent=on?'✓':'+';
+   button.append(img,label,mark);
+   button.addEventListener('click',()=>{
+    const picked=activityDraft[activeActivityTier];
+    if(on)activityDraft[activeActivityTier]=picked.filter(x=>x.id!==idea.id);
+    else if(selected.length<3)picked.push({...idea});
+    else{pickerMessage('Choose up to three. Deselect one first.');return}
+    pickerMessage('');renderActivityPicker();
+   });grid.append(button);
+  }
+ };
+ const openActivityPicker=()=>{
+  activityDraft={quick:structuredClone(state.quick.filter(x=>!x.removed)),busy:structuredClone(state.busy.filter(x=>!x.removed)),project:structuredClone(state.project.filter(x=>!x.removed))};
+  activeActivityTier='quick';pickerMessage('');renderActivityPicker();editorDialog?.close();activityDialog?.showModal();
+ };
+ root.querySelectorAll('[data-open-activities]').forEach(b=>b.addEventListener('click',openActivityPicker));
+ root.querySelectorAll('[data-activity-cancel]').forEach(b=>b.addEventListener('click',()=>activityDialog?.close()));
+ root.querySelectorAll<HTMLButtonElement>('[data-activity-tab]').forEach(b=>b.addEventListener('click',()=>{activeActivityTier=b.dataset.activityTab as Tier;pickerMessage('');renderActivityPicker()}));
+ root.querySelector('[data-activity-save]')?.addEventListener('click',()=>{
+  for(const tier of ['quick','busy','project'] as Tier[]){
+   const picked=activityDraft[tier].filter(x=>!x.removed).slice(0,3);
+   const placeholders=Array.from({length:3-picked.length},(_,i)=>({...state[tier][i]??library[tier][0],removed:true}));
+   state[tier]=[...picked.map(x=>({...x,removed:false})),...placeholders];
+  }
+  save();draw();options();activityDialog?.close();
+ });
+
  const options=()=>{
   const parent=root.querySelector<HTMLElement>('[data-jab-options]');if(!parent)return;parent.replaceChildren();
   for(const tier of ['quick','busy','project'] as Tier[]){
