@@ -75,7 +75,7 @@ if(root){
   identity=next;const request=++loading;store=detail.sample?sampleStore(detail.sample):accountStore;revision=0;canEdit=false;version=h.profileVersion??1;time.disabled=true;
   timeStatus('Loading your Sunday Reset…');
   try{
-   const docs=await store.documents('2027-09-a-week-everyone-can-see');if(loading!==request)return;
+   const activeStore=store;if(!activeStore)throw new Error('No Club store');const docs=await activeStore.documents('2027-09-a-week-everyone-can-see');if(loading!==request)return;
    const saved=docs.documents['sunday-reset-settings'];revision=saved?.revision??0;
    const option=(saved?.edits as {gatherTime?:unknown}|undefined)?.gatherTime;
    time.value=typeof option==='string'&&Array.from(time.options).some(o=>o.value===option)?option:'Sunday after lunch';
