@@ -77,7 +77,7 @@ const taskTypes:Record<string,string>={
     {project.tasks.map((t,i)=><section class="msc-task" data-printed-task={t.id}>
       <div class="msc-task-num">0{i+1}</div>
       <div class="msc-task-text"><img src={"/images/club/icon-library/"+(taskIcons[t.id]??"check-look")+".png"} width="73" height="73" alt="" class="msc-task-icon"/><div><h3>{t.label}</h3><p class="msc-supplies">SUPPLIES · {handoffs[t.id].supplies}</p><p class="msc-steps"><b>GET READY</b> {handoffs[t.id].ready}<br/><b>DO THE JOB</b> {handoffs[t.id].doJob}<br/><b>CHECK IT'S DONE</b> {handoffs[t.id].done}</p></div></div>
-      <div class="msc-task-person"><span>THIS JOB IS MINE</span><strong data-printed-owner={t.id}>Our family</strong></div>
+      <div class="msc-task-person"><span>THIS JOB IS MINE</span><strong data-printed-owner={t.id} tabindex="0" role="button" aria-label={`Change owner for ${t.label}`} title="Tap to change who owns this job">Our family</strong></div>
       <div class="msc-check" aria-hidden="true"></div>
     </section>)}
     </div>
@@ -268,7 +268,14 @@ const taskTypes:Record<string,string>={
  .msc-floating-edit:hover{background:#303030}
  .msc-floating-edit:focus-visible{outline:3px solid #9caf9a;outline-offset:3px}
 }
-@media print{.msc-floating-edit{display:none!important}}
+/* The actual owner names are the edit controls, following June's on-paper pattern. */
+.msc-task-person{position:relative;min-width:0}
+.msc-task-person [data-printed-owner]{display:inline-block;max-width:100%;cursor:pointer;text-decoration:underline dotted #7a9b86;text-underline-offset:3px;border-radius:2px}
+.msc-task-person [data-printed-owner]:hover,.msc-task-person [data-printed-owner]:focus-visible{outline:1px dashed #668d74;outline-offset:3px;background:#f3faf5}
+.msc-task-person .msc-inline-owner{display:block;width:100%;min-width:0;margin-top:2px;border:1px solid #719782;border-radius:3px;background:#fff;color:#365b46;font:600 13px/1.25 'MSC Gelasio',Georgia,serif;padding:4px 2px;cursor:pointer}
+.msc-task-person .msc-inline-owner:focus{outline:2px solid #668d74;outline-offset:1px}
+@media print{.msc-floating-edit{display:none!important}.msc-task-person [data-printed-owner]{text-decoration:none!important;outline:0!important;background:none!important}.msc-inline-owner{display:none!important}}
+
 </style>
 <script>
 import {monthlyDeepClean} from '../../data/cleaning';
@@ -349,10 +356,47 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   }
   const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
  };
+ // Edit an owner directly where the name appears on the printed sheet.
+ // Keep the same select values and safety restrictions as Make Changes.
+ const beginInlineOwner=(printed:HTMLElement,taskId:string)=>{
+  if(root.querySelector('.msc-inline-owner'))return;
+  const field=root.querySelector<HTMLSelectElement>(`[data-owner="${taskId}"]`);
+  if(!field)return;
+  const picker=field.cloneNode(true) as HTMLSelectElement;
+  picker.className='msc-inline-owner';
+  picker.removeAttribute('data-owner');
+  picker.setAttribute('aria-label','Change '+(project.tasks.find(t=>t.id===taskId)?.label??'job')+' owner');
+  picker.value=field.value;
+  printed.hidden=true;
+  printed.insertAdjacentElement('afterend',picker);
+  let closed=false;
+  const finish=(commit:boolean)=>{
+   if(closed)return;
+   closed=true;
+   if(commit){
+    field.value=picker.value;
+    field.dispatchEvent(new Event('change',{bubbles:true}));
+   }
+   picker.remove();
+   printed.hidden=false;
+   if(commit)printed.focus({preventScroll:true});
+  };
+  picker.addEventListener('change',()=>finish(true));
+  picker.addEventListener('blur',()=>finish(false));
+  picker.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();finish(false)}});
+  picker.focus({preventScroll:true});
+ };
+ root.querySelectorAll<HTMLElement>('[data-printed-owner]').forEach(printed=>{
+  const taskId=printed.dataset.printedOwner!;
+  printed.addEventListener('click',()=>beginInlineOwner(printed,taskId));
+  printed.addEventListener('keydown',event=>{
+   if(event.key==='Enter'||event.key===' '){event.preventDefault();beginInlineOwner(printed,taskId)}
+  });
+ });
  const save=()=>{try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom]}))}catch{}};
  root.querySelectorAll<HTMLSelectElement>('[data-owner]').forEach(select=>select.addEventListener('change',()=>{const task=select.dataset.owner!;chosen[task]=select.value;custom.add(task);save();draw()}));
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{custom.clear();for(const t of project.tasks)chosen[t.id]=pick(t.id,members)?.id??'';save();draw()});
- root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector('[data-print]')?.addEventListener('click',()=>{root.querySelector<HTMLSelectElement>('.msc-inline-owner')?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
   const sheet=root.querySelector<HTMLElement>("[data-sheet]");
