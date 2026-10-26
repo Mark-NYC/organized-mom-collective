@@ -11,7 +11,7 @@ describe('September Club family calendar',()=>{
  });
  it('applies weekly rules to the selected weekdays',()=>{
   expect(occursOn(weekly,new Date(2027,8,6))).toBe(true);
-  expect(occursOn(weekly,new Date(2027,8,10))).toBe(true);
+  expect(occursOn(weekly,new Date(2027,8,9))).toBe(true);
   expect(occursOn(weekly,new Date(2027,8,7))).toBe(false);
  });
  it('supports one-time and monthly activities without timezone parsing',()=>{
