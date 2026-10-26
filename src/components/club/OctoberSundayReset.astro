@@ -19,7 +19,7 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
     <button type="button" class="osr-edit-link" data-open-editor>Edit Sunday Reset <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
    <p class="osr-compact-note">Keep this sheet beside your wall calendar. Everyone learns to prepare, not just Mom.</p>
-   <div class="osr-actions"><div class="osr-primary-actions"><a class="osr-jump-edit" href="#october-edit-controls">Make changes</a><button class="osr-primary" type="button" data-osr-print>Print / Save PDF</button></div><button class="osr-secondary" type="button" data-osr-png>Download Sunday Reset (PNG)</button><button class="osr-reset" type="button" data-osr-restore>Restore prepared version</button></div>
+   <div class="osr-actions"><div class="osr-primary-actions"><button class="osr-jump-edit" type="button" data-open-editor>Make changes</button><button class="osr-primary" type="button" data-osr-print>Print / Save PDF</button></div><button class="osr-secondary" type="button" data-osr-png>Download Sunday Reset (PNG)</button><button class="osr-reset" type="button" data-osr-restore>Restore prepared version</button></div>
   </aside>
   <dialog class="osr-dialog" data-osr-vision aria-labelledby="osr-vision-title"><div class="osr-dialog-head"><h2 id="osr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Mom shouldn't be the only one noticing what's coming. The Sunday Reset gives the whole family a way to use the wall calendar, anticipate needs, and own preparations. The fall example is simply the first time to practice.</p><button type="button" class="osr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
   <dialog class="osr-dialog osr-guided-dialog" data-osr-editor aria-labelledby="osr-editor-title">
@@ -197,6 +197,7 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
 .osr.osr-export .osr-paper [contenteditable="true"]::after{display:none!important}
 
 /* Guided October editor aligned with August and September. */
+.osr-jump-edit{cursor:pointer;font-family:inherit}
 .osr-guided-dialog{width:min(620px,calc(100vw - 32px));padding:26px 30px}
 .osr-guide-kicker{display:block;font:700 10px 'OSR Montserrat',Montserrat,sans-serif;color:#809484;letter-spacing:.14em;margin-bottom:9px}
 .osr-guided-dialog .osr-dialog-head h2{margin:0 0 11px;font-family:'OSR Gelasio',Georgia,serif}
@@ -262,7 +263,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({current,state}))}catch{}};
  const nameOf=(m:Member)=>{if(m.kind==='child')return state.names?.[m.id]??m.firstName;const parents=members.filter(x=>x.kind==='adult'&&(x.role==='parent'||x.role==='partner'));const ix=parents.findIndex(x=>x.id===m.id);return state.names?.[m.id]??(ix===0?'Mom':ix===1?'Dad':m.firstName)};
- const defaultFallJobs=():FallJob[]=>{const children=members.filter(m=>m.kind==='child');const adults=members.filter(m=>m.kind==='adult');return fallTemplates.map((item,i)=>({...item,ownerId:(i===2?adults[0]?.id:children[i]?.id??adults[i%Math.max(1,adults.length)]?.id)??members[i%Math.max(1,members.length)]?.id??''}))};
+ const defaultFallJobs=():FallJob[]=>{const children=members.filter(m=>m.kind==='child');const adults=members.filter(m=>m.kind==='adult');const otherAdult=adults.find(m=>!m.isAccountHolder)??adults[0];return fallTemplates.map((item,i)=>({...item,ownerId:(i===2?otherAdult?.id:children[i]?.id??adults[i%Math.max(1,adults.length)]?.id)??members[i%Math.max(1,members.length)]?.id??''}))};
  const setup=()=>{members.forEach((m,i)=>{if(state.assignments[m.id]===undefined)state.assignments[m.id]=weeklyRole(m,i)});if(!state.fallJobs?.length)state.fallJobs=defaultFallJobs()};
  const clean=(el:HTMLElement,max:number)=>(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);
  const write=(id:string,value:string)=>{const el=root.querySelector<HTMLElement>('[data-osr-'+id+']');if(el&&document.activeElement!==el)el.textContent=state.text?.[id]??value};
