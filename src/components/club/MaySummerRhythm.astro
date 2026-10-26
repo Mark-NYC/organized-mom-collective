@@ -488,25 +488,27 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }
   const time=node.querySelector<HTMLElement>('[data-time]');
   const editTime=()=>{
-   if(!time||time.querySelector('input'))return;
+   if(!time||time.querySelector('input, select'))return;
    const input=document.createElement('select');
    const current=resolved(key).time;
    const choices=[current,...[-1,-.5,0,.5,1].map(delta=>hhmm((current?Number(current.slice(0,2))+Number(current.slice(3))/60:options.start)+delta)),''].filter((v,i,a)=>a.indexOf(v)===i);
    for(const value of choices){const option=document.createElement('option');option.value=value;option.textContent=value?clock(value):'No set time';input.append(option)}
    const custom=document.createElement('option');custom.value='custom';custom.textContent='Choose a custom time…';input.append(custom);input.value=current;
    input.setAttribute('aria-label','Set '+labels[key]+' time');
+    input.addEventListener('click',event=>event.stopPropagation());
+    input.addEventListener('pointerdown',event=>event.stopPropagation());
    time.replaceChildren(input);time.setAttribute('role','group');
    const finish=()=>{const value=input.value;edits[key]={...(edits[key]??{}),time:value};time.setAttribute('role','button');update()};
    input.addEventListener('change',()=>{
     if(input.value==='custom'){
-     const picker=document.createElement('input');picker.type='time';picker.value=current||hhmm(options.start);time.replaceChildren(picker);picker.focus();
+     const picker=document.createElement('input');picker.type='time';picker.value=current||hhmm(options.start);picker.addEventListener('click',event=>event.stopPropagation());picker.addEventListener('pointerdown',event=>event.stopPropagation());time.replaceChildren(picker);picker.focus();
      picker.addEventListener('change',()=>{edits[key]={...(edits[key]??{}),time:picker.value};time.setAttribute('role','button');update()},{once:true});
      return;
     }
     finish();
    });
-   input.addEventListener('blur',()=>{if(time.contains(input))render()},{once:true});
-   input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}if(e.key==='Escape'){e.preventDefault();time.setAttribute('role','button');render()}});
+   input.addEventListener('blur',()=>{setTimeout(()=>{if(time.contains(input)&&!time.contains(document.activeElement))render()},0)},{once:true});
+   input.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();time.setAttribute('role','button');render()}});
    input.focus();
   };
   time?.addEventListener('click',editTime);
