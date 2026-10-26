@@ -247,7 +247,24 @@ async function transparentClubPng(input){
   .png().toFile(input+'.transparent-tmp.png').then(async()=>{const {rename}=await import('node:fs/promises');await rename(input+'.transparent-tmp.png',input)});
  return changed;
 }
-const transparencyDirs=[destination,previewDir,snackDir,sharedDir,iconLibraryOutput];
+// September preview: publish the six approved, month-specific PNG illustrations.
+// Keep the original source files intact; the same public copies are used by the
+// guided editor and the printable page.
+const septemberNames=[
+ 'bedroom','clothes-in-hamper','living-room',
+ 'personal-belongings-put-away','playroom','whole-house'
+];
+const septemberSource=join(pngRoot,'september');
+const septemberOutput=join(root,'public/images/club/september');
+await mkdir(septemberOutput,{recursive:true});
+for(const name of septemberNames){
+ const source=join(septemberSource,name+'.png');
+ if(!(await exists(source)))throw Error('Missing required September icon: '+source);
+ await copyFile(source,join(septemberOutput,name+'.png'));
+}
+console.log('Published '+septemberNames.length+' approved September icons.');
+
+const transparencyDirs=[destination,previewDir,snackDir,sharedDir,iconLibraryOutput,septemberOutput];
 let transparentFiles=0;
 for(const dir of transparencyDirs){
  for(const filename of (await readdir(dir)).filter(n=>n.toLowerCase().endsWith('.png'))){
