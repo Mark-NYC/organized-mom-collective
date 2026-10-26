@@ -2,6 +2,7 @@
 /** October's two-sided, age-tailored family-ready printout. */
 interface Props {storageKey?:string}
 const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
+import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 ---
 <div class="osr" data-osr-key={storageKey}>
  <header class="osr-intro">
@@ -102,7 +103,7 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
    </div>
    </div>
    <div id="osr-panel-calendar" role="tabpanel" aria-labelledby="osr-tab-calendar" data-osr-panel="calendar" hidden>
-    <iframe title="Interactive family wall calendar" data-osr-calendar src="/try-the-calendar/?clubEmbed=1" loading="lazy"></iframe>
+    <FamilyActivityCalendar embedded />
    </div>
   </section>
  </div>
@@ -278,7 +279,7 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
 .osr-tabs button[aria-selected="true"]{background:#fff;color:#3f6853;box-shadow:0 2px 8px #304b351b}
 .osr-tabs button:focus-visible{outline:3px solid #64876f;outline-offset:2px}
 .osr [data-osr-panel][hidden],.osr .osr-floating-edit[hidden]{display:none!important}
-.osr [data-osr-calendar]{display:block;width:100%;min-height:1550px;border:0;border-radius:8px;background:#fafafa}
+
 @media print{.osr-tabs,#osr-panel-calendar{display:none!important}#osr-panel-reset{display:block!important}}
 </style>
 <script>
@@ -295,17 +296,12 @@ const fallTemplates=[
  {id:'gear',title:'Check seasonal gear',description:'Check coats, boots, hats, and gloves where needed. Flag anything missing or outgrown.',icon:'/images/club/october/a-home-for-everything.webp'}
 ];
 for(const root of document.querySelectorAll<HTMLElement>('.osr')){
- const calendarFrame=root.querySelector<HTMLIFrameElement>('[data-osr-calendar]');
- let calendarNames:string[]=[];
- const syncCalendar=()=>{if(calendarFrame?.contentWindow&&calendarNames.length)calendarFrame.contentWindow.postMessage({type:'omc:october-calendar-members',names:calendarNames},window.location.origin)};
- calendarFrame?.addEventListener('load',syncCalendar);
  root.querySelectorAll<HTMLButtonElement>('[data-osr-tab]').forEach(button=>{
   button.addEventListener('click',()=>{
    const selected=button.dataset.osrTab;
    root.querySelectorAll<HTMLButtonElement>('[data-osr-tab]').forEach(b=>{const active=b===button;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1});
    root.querySelectorAll<HTMLElement>('[data-osr-panel]').forEach(panel=>{panel.hidden=panel.dataset.osrPanel!==selected});
    root.querySelector<HTMLElement>('.osr-floating-edit')?.toggleAttribute('hidden',selected!=='reset');
-   if(selected==='calendar')syncCalendar();
   });
  });
  const storageKey=root.dataset.osrKey??'omc:preview:october-sunday-reset:v2';
@@ -387,7 +383,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  root.querySelector('[data-osr-restore]')?.addEventListener('click',()=>{state={trigger:defaultTrigger,assignments:{},fallJobs:[]};setup();save();paint()});
  root.querySelector('[data-osr-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  const png=root.querySelector<HTMLButtonElement>('[data-osr-png]');png?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-osr-front]');if(!front)return;png.disabled=true;const original=png.textContent;png.textContent='Preparing image…';root.classList.add('osr-export');try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const uri=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.download='our-family-sunday-reset.png';link.href=uri;link.click()}catch(error){console.error(error);alert('Image download failed. Please use Print / Save PDF instead.')}finally{root.classList.remove('osr-export');png.disabled=false;png.textContent=original}});
- const applyHousehold=(detail:{household:Household;sample:string})=>{if(!detail?.household)return;const key=detail.sample+':'+detail.household.id;members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');calendarNames=members.map(m=>m.kind==='child'?m.firstName:(m.role==='parent'||m.role==='partner')?(members.filter(x=>x.kind==='adult'&&(x.role==='parent'||x.role==='partner')).findIndex(x=>x.id===m.id)===0?'Mom':'Dad'):m.firstName).slice(0,5);syncCalendar();
+ const applyHousehold=(detail:{household:Household;sample:string})=>{if(!detail?.household)return;const key=detail.sample+':'+detail.household.id;members=(detail.household.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
   if(key!==current){current=key;state={trigger:defaultTrigger,assignments:{},fallJobs:[]};try{const previous=JSON.parse(sessionStorage.getItem(storageKey)??'null');if(previous?.current===key&&previous.state&&typeof previous.state.trigger==='string'&&previous.state.assignments&&Array.isArray(previous.state.fallJobs))state=previous.state}catch{}}setup();save();paint()};
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string}}).__ofcPreviewHousehold;if(cached)applyHousehold(cached);
