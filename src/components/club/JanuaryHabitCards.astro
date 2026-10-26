@@ -340,18 +340,36 @@ const defaults = [
 .jhc-card-grid .jhc-anchor{font-size:22px}
 .jhc-card-grid .jhc-action{font-size:26px}
 
-/* January: two separate cards side by side on a portrait Letter sheet. */
-.jhc-card-owner{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.08em;text-align:center;color:#527384;margin:6px 0 12px}
-.jhc-card-grid[data-jhc-card-grid]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:1fr!important;align-items:stretch!important;justify-content:stretch!important;gap:0!important;border:1px dashed #bdbdbd!important;margin:70px 26px 90px!important;flex:1!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card{width:auto!important;min-width:0!important;height:auto!important;max-height:none!important;padding:35px 27px 28px!important;border:0!important;overflow:hidden!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card:first-child{border-right:1px dashed #bdbdbd!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon{width:66px!important;height:66px!important;margin:25px auto 15px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon img{width:66px!important;height:66px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-name{font-size:28px!important;overflow-wrap:anywhere}
-.jhc-card-grid[data-jhc-card-grid] .jhc-anchor{font-size:18px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-action{font-size:21px!important}
-.jhc-card-grid[data-jhc-card-grid].jhc-one-card{grid-template-columns:minmax(0,1fr)!important;max-width:390px;margin-left:auto!important;margin-right:auto!important}
-.jhc-card-grid[data-jhc-card-grid].jhc-one-card .jhc-card:first-child{border-right:0!important}
+/* January: two full-width horizontal cut-out cards, stacked on one portrait Letter sheet. */
+.jhc-card-owner{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.08em;text-align:center;color:#527384;margin:4px 0 8px}
+.jhc-card-grid[data-jhc-card-grid]{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:repeat(2,minmax(0,1fr))!important;
+ align-items:stretch!important;justify-content:stretch!important;
+ gap:0!important;border:1px dashed #bdbdbd!important;
+ margin:20px 8px 28px!important;flex:1!important;min-height:0!important;
+}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card{
+ width:100%!important;min-width:0!important;height:100%!important;max-height:none!important;
+ padding:15px 35px 12px!important;border:0!important;overflow:hidden!important;
+}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card:first-child{
+ border-right:0!important;border-bottom:1px dashed #bdbdbd!important;
+}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon{
+ width:48px!important;height:48px!important;margin:5px auto 5px!important;
+}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon img{width:48px!important;height:48px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-name{font-size:25px!important;margin:3px 0!important;overflow-wrap:anywhere}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-rule{margin:3px auto 8px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-anchor{font-size:17px!important;margin-bottom:8px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-action{font-size:20px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-bottom{margin-top:auto!important}
+.jhc-card-grid[data-jhc-card-grid].jhc-one-card{
+ grid-template-rows:minmax(0,1fr)!important;flex:0 0 415px!important;
+ max-width:none!important;margin-left:8px!important;margin-right:8px!important;
+}
+.jhc-card-grid[data-jhc-card-grid].jhc-one-card .jhc-card:first-child{border-bottom:0!important}
 .jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
 </style>
 <script>
