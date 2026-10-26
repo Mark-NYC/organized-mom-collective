@@ -1,0 +1,76 @@
+---
+/** Digital companion. Reuses the public calendar's month/week/member-row format, not November's separate weekly grid. */
+---
+<div class="ofc-calendar" data-ofc-calendar>
+ <div class="ofc-calendar-intro"><h3>Our Family Activity Calendar</h3><p>Everyone is already here. Add recurring activities so each person can see what's coming.</p></div>
+ <div class="ofc-calendar-controls">
+  <div><strong>Our family</strong><div data-ofc-people class="ofc-people">Loading family…</div></div>
+  <form data-ofc-add class="ofc-calendar-form">
+   <label>Activity <input required maxlength="60" name="activity" placeholder="Soccer practice" /></label>
+   <label>For <select required name="member" data-ofc-member></select></label>
+   <label>Repeats on <select required name="day"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option></select></label>
+   <button type="submit">+ Add activity</button>
+  </form>
+  <div data-ofc-list class="ofc-activity-list" aria-label="Saved activities"></div>
+  <p role="status" aria-live="polite" data-ofc-status class="ofc-calendar-status"></p>
+ </div>
+ <div class="ofc-calendar-sheet-wrap">
+  <div class="ofc-calendar-nav"><button type="button" data-ofc-prev aria-label="Previous month">←</button><strong data-ofc-month>September 2027</strong><button type="button" data-ofc-next aria-label="Next month">→</button></div>
+  <div class="ofc-calendar-sheet" aria-label="Monthly family calendar"><div class="ofc-sheet-header"><span>Big Things / Deadlines</span><h3 data-ofc-heading>September</h3><span>Our Family Calendar</span></div><div data-ofc-weeks></div></div>
+  <p class="ofc-calendar-note">The calendar is a digital companion. September's mailed resource is your Sunday Reset guide.</p>
+ </div>
+</div>
+<style is:global>
+.ofc-calendar{--ofc-mint:#59c2a5;max-width:1260px;margin:auto;color:#4b5563;font-family:Montserrat,Arial,sans-serif}
+.ofc-calendar-intro h3{font:400 29px Georgia,serif;color:#526e59;margin:0 0 7px}.ofc-calendar-intro p{font-size:14px;margin:0 0 22px}
+.ofc-calendar-controls{background:#faf9f6;border:1px solid #e1e5dc;border-radius:9px;padding:20px;margin-bottom:24px}
+.ofc-people{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 20px}.ofc-people span{padding:8px 12px;border-radius:4px;font-size:13px}
+.ofc-calendar-form{display:grid;grid-template-columns:2fr 1fr 1fr auto;align-items:end;gap:10px}
+.ofc-calendar-form label{font-size:12px;font-weight:700}.ofc-calendar-form input,.ofc-calendar-form select{display:block;width:100%;margin-top:6px;padding:12px;border:1px solid #bbcdbd;border-radius:5px;background:white;min-height:44px}
+.ofc-calendar-form button{background:#53745d;color:#fff;border:0;border-radius:5px;padding:12px 16px;min-height:44px;font-weight:700;cursor:pointer}
+.ofc-activity-list{margin-top:14px;display:grid;gap:7px}.ofc-activity-item{display:flex;align-items:center;justify-content:space-between;gap:9px;border-bottom:1px solid #e1e5dc;padding:7px 0;font-size:12px}.ofc-activity-item button{border:1px solid #ced9cd;background:white;border-radius:4px;padding:7px 9px;cursor:pointer}
+.ofc-calendar-status{font-size:12px;color:#496b54;min-height:18px}
+.ofc-calendar-sheet-wrap{max-width:900px;margin:auto}.ofc-calendar-nav{display:flex;justify-content:center;gap:22px;align-items:center;margin-bottom:14px}.ofc-calendar-nav button{padding:7px 14px;background:white;border:1px solid #c4d5cb;border-radius:4px;cursor:pointer}
+.ofc-calendar-sheet{background:white;border:1px solid #ddd;box-shadow:0 6px 23px #0001;padding:20px;overflow-x:auto}.ofc-sheet-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #b7e2d0;margin-bottom:10px;padding-bottom:15px;gap:8px}.ofc-sheet-header span{font-size:10px;max-width:25%}.ofc-sheet-header h3{font:400 27px Georgia,serif;color:#506b5b}
+.ofc-week{width:100%;min-width:620px;border-collapse:collapse;table-layout:fixed;margin-bottom:12px}.ofc-week th,.ofc-week td{border:1px solid #ddd;padding:5px 4px;font-size:10px;text-align:center}.ofc-week th{font-weight:600;background:#f6f9f7}.ofc-week .ofc-side{width:15%;text-align:left}.ofc-week .ofc-dayname{display:block;font-size:9px}.ofc-week .ofc-outside{color:#aaa}.ofc-week td{height:29px;overflow-wrap:anywhere}.ofc-week .ofc-person{text-align:left;font-weight:700;font-size:11px}.ofc-week .ofc-item{display:block;line-height:1.2;margin:2px 0}.ofc-calendar-note{text-align:center;font-size:12px;margin:14px;color:#69756b}
+@media(max-width:760px){.ofc-calendar-form{grid-template-columns:1fr 1fr}.ofc-calendar-form label:first-child{grid-column:1/-1}.ofc-calendar-form button{grid-column:1/-1}.ofc-calendar-controls{padding:15px}.ofc-calendar-sheet{padding:10px}.ofc-sheet-header h3{font-size:23px}.ofc-calendar-sheet-wrap{min-width:0}}
+@media(max-width:390px){.ofc-calendar-form{grid-template-columns:1fr}.ofc-calendar-form label,.ofc-calendar-form button{grid-column:1/-1}}
+@media print{.ofc-calendar{display:none!important}}
+</style>
+<script>
+import {weeksOf,occursOn,calendarMembers,validateActivity,DAY_NAMES,type CalendarActivity,type CalendarMember} from '../../lib/family-calendar/core';
+type PreviewProfile={household:{id:string;displayName?:string;members:{id:string;firstName:string;archived?:boolean}[]}|null;sample:string};
+const root=document.querySelector<HTMLElement>('[data-ofc-calendar]');
+if(root){
+ const $=<T extends Element=HTMLElement>(selector:string)=>root.querySelector<T>(selector)!;
+ let members:CalendarMember[]=[];let activities:CalendarActivity[]=[];let familyId='sample';let month=new Date(2027,8,1);
+ const key=()=> 'omc:club:calendar:preview:v1:'+familyId;
+ const setStatus=(s:string)=>{$('[data-ofc-status]').textContent=s};
+ const save=()=>{try{sessionStorage.setItem(key(),JSON.stringify(activities));setStatus('Saved in this preview session. No mailing is initiated.')}catch{setStatus('Unable to save changes in this browser.')}};
+ const load=()=>{try{let v:unknown=JSON.parse(sessionStorage.getItem(key())||'[]');activities=Array.isArray(v)?v.filter(validateActivity):[]}catch{activities=[]}};
+ const render=()=>{
+  const personSelect=$<HTMLSelectElement>('[data-ofc-member]');const previous=personSelect.value;personSelect.replaceChildren();
+  members.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;personSelect.append(o)});if(members.some(m=>m.id===previous))personSelect.value=previous;
+  const chips=$('[data-ofc-people]');chips.replaceChildren();members.forEach(m=>{const span=document.createElement('span');span.style.backgroundColor=m.color;span.textContent=m.name;chips.append(span)});
+  const title=month.toLocaleDateString('en-US',{month:'long',year:'numeric'});$('[data-ofc-month]').textContent=title;$('[data-ofc-heading]').textContent=month.toLocaleDateString('en-US',{month:'long'});
+  const weeks=$('[data-ofc-weeks]');weeks.replaceChildren();
+  weeksOf(month).forEach((week,w)=>{
+   const table=document.createElement('table');table.className='ofc-week';const head=document.createElement('thead');const tr=document.createElement('tr');
+   const leading=document.createElement('th');leading.className='ofc-side';tr.append(leading);
+   week.forEach((d,i)=>{const th=document.createElement('th');if(w===0){const label=document.createElement('span');label.className='ofc-dayname';label.textContent=DAY_NAMES[i];th.append(label)}const day=document.createElement('span');day.textContent=String(d.getDate());if(d.getMonth()!==month.getMonth())day.className='ofc-outside';th.append(day);tr.append(th)});
+   const trailing=document.createElement('th');trailing.className='ofc-side';tr.append(trailing);head.append(tr);table.append(head);
+   const body=document.createElement('tbody');members.forEach(m=>{const row=document.createElement('tr');const name=document.createElement('td');name.className='ofc-person ofc-side';name.style.backgroundColor=m.color;name.textContent=m.name;row.append(name);
+    week.forEach(d=>{const cell=document.createElement('td');cell.style.backgroundColor=m.color;const matches=activities.filter(a=>a.memberId===m.id&&occursOn(a,d));matches.forEach(a=>{const span=document.createElement('span');span.className='ofc-item';span.textContent=a.name;cell.append(span)});row.append(cell)});
+    const last=document.createElement('td');last.className='ofc-side';last.style.backgroundColor=m.color;row.append(last);body.append(row)});table.append(body);weeks.append(table);
+  });
+  const list=$('[data-ofc-list]');list.replaceChildren();activities.forEach(a=>{const m=members.find(m=>m.id===a.memberId);if(!m)return;const el=document.createElement('div');el.className='ofc-activity-item';const label=document.createElement('span');label.textContent=m.name+' · '+a.name+' · '+(a.kind==='weekly'?(a.days??[]).map(d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', '):a.date??'');const buttons=document.createElement('div');
+   const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const name=prompt('Activity',a.name);if(name===null)return;if(!name.trim()||name.trim().length>60)return;const day=prompt('Day (Sun, Mon, Tue, Wed, Thu, Fri, Sat)',(a.days??[1]).map(d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', '));if(day===null)return;const found=day.split(',').map(s=>['sun','mon','tue','wed','thu','fri','sat'].indexOf(s.trim().slice(0,3).toLowerCase())).filter(d=>d>=0);if(!found.length){setStatus('Choose a valid weekday.');return}a.name=name.trim();a.kind='weekly';a.days=found;save();render()});
+   const del=document.createElement('button');del.type='button';del.textContent='Remove';del.addEventListener('click',()=>{activities=activities.filter(x=>x.id!==a.id);save();render()});buttons.append(edit,del);el.append(label,buttons);list.append(el)});
+ };
+ const apply=(detail:PreviewProfile)=>{const h=detail?.household;if(!h)return;const next=h.id+'-'+detail.sample;if(next!==familyId){familyId=next;load()}members=calendarMembers(h);render()};
+ window.addEventListener('omc:club-preview-household',(e:Event)=>apply((e as CustomEvent<PreviewProfile>).detail));
+ const cached=(window as Window&{__ofcPreviewHousehold?:PreviewProfile}).__ofcPreviewHousehold;if(cached)apply(cached);
+ $<HTMLFormElement>('[data-ofc-add]').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget as HTMLFormElement;const input=f.elements.namedItem('activity') as HTMLInputElement;const select=f.elements.namedItem('member') as HTMLSelectElement;const day=f.elements.namedItem('day') as HTMLSelectElement;const name=input.value.trim();if(!name||!select.value)return;activities.push({id:crypto.randomUUID(),kind:'weekly',memberId:select.value,name,days:[Number(day.value)]});input.value='';save();render()});
+ $('[data-ofc-prev]').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);render()});$('[data-ofc-next]').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);render()});
+}
+</script>
