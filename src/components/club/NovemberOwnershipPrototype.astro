@@ -279,7 +279,8 @@ const first=JOB_PRESETS[0];
       if(field.id==='ws-job')$('ws-custom-wrap').hidden=selector.value!=='custom';
       if(field.id==='ws-child2-job')child2Custom.hidden=selector.value!=='custom';
     }else{
-      original.value=value.slice(0,original.maxLength>0?original.maxLength:260);
+      const textControl=original as HTMLInputElement|HTMLTextAreaElement;
+      textControl.value=value.slice(0,textControl.maxLength>0?textControl.maxLength:260);
       original.dispatchEvent(new Event('input',{bubbles:true}));
     }
     refreshPlanTheme();update();
@@ -293,7 +294,8 @@ const first=JOB_PRESETS[0];
     const heading=document.createElement('label');heading.textContent=field.label;
     const id='ws-preview-edit-value';heading.htmlFor=id;
     const editor=document.createElement(field.id.includes('done')||field.id.includes('steps')||field.id.includes('relief')?'textarea':'input') as HTMLInputElement|HTMLTextAreaElement;
-    editor.id=id;editor.value=current;editor.maxLength=field.kind==='job'?90:source.maxLength>0?source.maxLength:260;
+    const textSource=source as HTMLInputElement|HTMLTextAreaElement;
+    editor.id=id;editor.value=current;editor.maxLength=field.kind==='job'?90:textSource.maxLength>0?textSource.maxLength:260;
     editor.setAttribute('aria-label',field.label);
     const actions=document.createElement('div');actions.className='ws-preview-popup-actions';
     const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel';
@@ -304,7 +306,7 @@ const first=JOB_PRESETS[0];
     popup.style.top=Math.max(12,Math.min(rect.bottom+8,window.innerHeight-260))+'px';
     cancel.addEventListener('click',closePreviewPopup);
     apply.addEventListener('click',()=>{setPreviewValue(field,editor.value.trim());closePreviewPopup()});
-    editor.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closePreviewPopup()}if(event.key==='Enter' && !(editor instanceof HTMLTextAreaElement)){event.preventDefault();apply.click()}});
+    editor.addEventListener('keydown',(event:Event)=>{const keyEvent=event as KeyboardEvent;if(keyEvent.key==='Escape'){event.preventDefault();closePreviewPopup()}if(keyEvent.key==='Enter' && !(editor instanceof HTMLTextAreaElement)){event.preventDefault();apply.click()}});
     editor.focus();editor.select();
   }
   function addPreviewHotspots(sheet:HTMLElement,page:number){
