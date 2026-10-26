@@ -748,7 +748,8 @@ const jsonLd = [
     activities: Activity[];
   }
 
-  const KEY = 'omc:family-calendar:v1';
+  const clubSeptember = new URLSearchParams(window.location.search).get('club') === 'september';
+  const KEY = clubSeptember ? 'omc:club:september-activity-calendar:v1' : 'omc:family-calendar:v1';
   const DEFAULT_MEMBERS = ['Mom', 'Dad', 'Andrew', 'Philip', 'Jackson'];
   const MEMBER_COLORS = ['#f4f4f4', '#e3efee', '#f4e9e4', '#f9e5e1', '#fef6f5'];
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -786,7 +787,7 @@ const jsonLd = [
   }
 
   const today = new Date();
-  let month = new Date(today.getFullYear(), today.getMonth(), 1);
+  let month = clubSeptember ? new Date(2027, 8, 1) : new Date(today.getFullYear(), today.getMonth(), 1);
   const memberName = (i: number) => state.members[i]?.trim() || DEFAULT_MEMBERS[i];
 
   function occursOn(a: Activity, d: Date) {
