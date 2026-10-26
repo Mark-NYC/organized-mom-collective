@@ -45,12 +45,12 @@ const defaults = [
     <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
   </div>
 
-  <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">Pick what would make your day easier. We'll help you choose up to two habits.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current habit</button></div></dialog>
+  <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">Pick what would make your day easier. We'll help you choose up to two habits.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current cards</button></div></dialog>
   <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
-      <div class="jhc-card-grid">
+      <div class="jhc-card-grid" data-jhc-card-grid>
         {defaults.slice(0,2).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
             <div class="jhc-card-top">
@@ -335,6 +335,19 @@ const defaults = [
 .jhc-card-grid .jhc-card-name{font-size:35px}
 .jhc-card-grid .jhc-anchor{font-size:22px}
 .jhc-card-grid .jhc-action{font-size:26px}
+
+/* January: two separate, landscape-proportioned cards side by side on a portrait Letter sheet. */
+.jhc-card-grid[data-jhc-card-grid]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:1fr!important;align-items:stretch!important;justify-content:stretch!important;gap:0!important;border:1px dashed #bdbdbd!important;margin:70px 26px 90px!important;flex:1!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card{width:auto!important;min-width:0!important;height:auto!important;max-height:none!important;padding:35px 27px 28px!important;border:0!important;overflow:hidden!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card:first-child{border-right:1px dashed #bdbdbd!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon{width:66px!important;height:66px!important;margin:25px auto 15px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon img{width:66px!important;height:66px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-card-name{font-size:28px!important;overflow-wrap:anywhere}
+.jhc-card-grid[data-jhc-card-grid] .jhc-anchor{font-size:18px!important}
+.jhc-card-grid[data-jhc-card-grid] .jhc-action{font-size:21px!important}
+.jhc-card-grid[data-jhc-card-grid].jhc-one-card{grid-template-columns:minmax(0,1fr)!important;max-width:390px;margin-left:auto!important;margin-right:auto!important}
+.jhc-card-grid[data-jhc-card-grid].jhc-one-card .jhc-card:first-child{border-right:0!important}
+.jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
 </style>
 <script>
 const defaults = [
@@ -382,11 +395,11 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   if(!finderBody)return;
   finderBody.replaceChildren();
   const make=(tag:string,content:string,cls?:string)=>{const el=document.createElement(tag);el.textContent=content;if(cls)el.className=cls;finderBody.append(el);return el};
-  make('p',finderStep<3?`Step ${finderStep+1} of 3`:'Your two habit cards');
+  make('p',finderStep<3?`Step ${finderStep+1} of 3`:'Your habit cards');
   if(finderStep<3){
    const q=finderQuestions[finderStep];make('h3',q.question);
    if(finderStep===0)make('p','Choose one or two. Start with the parts of the day that need the most reminders.');
-   if(finderStep===1)make('p','Pick the change that would help most. We’ll suggest simple starting habits.');
+   if(finderStep===1)make('p','Pick what would help most. Your chosen habits will appear on the cards.');
    q.options.forEach(option=>{
     const btn=make('button',option,'jhc-finder-choice') as HTMLButtonElement;btn.type='button';
     if(finderStep===0){btn.setAttribute('aria-pressed',String(selectedHabits.includes(option)));btn.addEventListener('click',()=>{selectedHabits=selectedHabits.includes(option)?selectedHabits.filter(x=>x!==option):selectedHabits.length<2?[...selectedHabits,option]:[selectedHabits[1],option];renderFinder()})}
@@ -395,12 +408,11 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
    if(finderStep===0){const next=make('button','Next: Choose what would help','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;next.type='button';next.disabled=selectedHabits.length===0;next.addEventListener('click',()=>{finderStep=1;renderFinder()})}
   }else{
    const picks=[...selectedHabits];
-   const second=otherSuggestion[finderAnswers[1]];
-   if(picks.length===1&&second&&second!==picks[0])picks.push(second);
+   // Respect the family's choice of one or two habits. Never add a second without asking.
    const who=finderAnswers[2]||'Everyone';
-   picks.slice(0,2).forEach((choice,i)=>{const suggestion=suggestions[choice];make('h3',`Card ${i+1}: ${suggestion.name}`);make('p',`Who: ${who}`);make('p',`When: ${suggestion.anchor}`);make('p',suggestion.action)});
+   picks.slice(0,2).forEach((choice,i)=>{const suggestion=suggestions[choice];make('h3',`Card ${i+1}: ${suggestion.name}`);make('p',`For: ${who}`);make('p',`When: ${suggestion.anchor}`);make('p',suggestion.action)});
    const btn=make('button','Use these habits','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;btn.type='button';
-   btn.addEventListener('click',()=>{picks.slice(0,2).forEach((choice,i)=>{values[i]={...values[i],...suggestions[choice],name:suggestions[choice].name+' · '+who}});save();paint();finder?.close()});
+   btn.addEventListener('click',()=>{picks.slice(0,2).forEach((choice,i)=>{values[i]={...values[i],...suggestions[choice],name:suggestions[choice].name,who}});activeCount=picks.length;save();paint();finder?.close()});
   }
   const back=root.querySelector<HTMLButtonElement>('[data-jhc-finder-back]');if(back)back.hidden=finderStep===0;
  };
@@ -410,9 +422,14 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  finder?.addEventListener('click',e=>{if(e.target===finder)finder.close()});
  const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-card]'));
  let values=defaults.map(x=>({...x}));
+ let activeCount=2;
+ try{const count=Number(storage.getItem(key+':count'));if(count===1||count===2)activeCount=count}catch{}
  try {const saved=JSON.parse(storage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
- const save=()=>{try{storage.setItem(key,JSON.stringify(values))}catch{}};
+ const save=()=>{try{storage.setItem(key,JSON.stringify(values));storage.setItem(key+':count',String(activeCount))}catch{}};
  const paint=()=>{
+  cards.forEach((card,i)=>{card.hidden=i>=activeCount});
+  editors.forEach((editor,i)=>{editor.hidden=i>=activeCount});
+  root.querySelector<HTMLElement>('[data-jhc-card-grid]')?.classList.toggle('jhc-one-card',activeCount===1);
   const habitLabel=root.querySelector<HTMLElement>('[data-jhc-habit-label]');if(habitLabel)habitLabel.textContent=values[0].name;
   editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
   cards.forEach((el,i)=>el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];if(document.activeElement!==target)target.textContent=values[i][field] || ' ';}));
@@ -432,7 +449,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   paint();
  })));
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{
-  values=defaults.map(x=>({...x}));try{storage.removeItem(key);storage.removeItem(key+':automatic-names')}catch{}paint();
+  values=defaults.map(x=>({...x}));try{storage.removeItem(key);storage.removeItem(key+':count');storage.removeItem(key+':automatic-names');activeCount=2}catch{}paint();
   const status=root.querySelector<HTMLElement>('[data-status]');if(status)status.textContent='Original suggestions restored. Print at 100% / actual size on US Letter paper.';
  });
  // Keep the four actual printable cards, but derive the starting owners from
