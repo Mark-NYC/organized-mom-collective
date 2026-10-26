@@ -17,6 +17,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { id: 'orders', label: 'Shop & Orders', href: '/admin/orders' },
   { id: 'products', label: 'Products & Inventory', href: '/admin/orders?tab=inventory' },
   { id: 'analytics', label: 'Analytics', pending: 'Needs GA4 Data API access (Phase 5). Use GA4 itself meanwhile.' },
+  { id: 'club', label: 'Family Club', href: '/admin/club' },
   { id: 'customers', label: 'Customers', pending: 'Phase 7.' },
   { id: 'support', label: 'Customer Service', pending: 'Phase 6. Use the support inbox and Supabase Table Editor → support_requests meanwhile.' },
   { id: 'marketing', label: 'Marketing', pending: 'Phase 10.' },

@@ -9,6 +9,9 @@ import PublicLayout from '../../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../../config';
 import { monthColors } from '../../theme';
 
+// Enrollment shows only in builds with PUBLIC_CLUB_CHECKOUT_ENABLED (the server still decides whether anyone can pay).
+const joinOpen = import.meta.env.PUBLIC_CLUB_CHECKOUT_ENABLED === 'true';
+
 const ready = [
   {
     month: 'November', year: '2026', number: '01', color: monthColors[10].hex,
@@ -54,7 +57,9 @@ const faqs = [
   ['What happens online?', 'The digital companion lets you see the month’s tool and, where supported, adjust or reprint it. The printable is the product—not another online program to complete.'],
   ['How does this differ from the wall calendar?', 'The wall calendar shows schedules, meals and the week’s plan. The Club offers one ready-to-use tool each month to help the family share responsibility for making that plan happen. You can use either on its own.'],
   ['Do I have to start in November or complete the months in order?', 'No. Each month is meant to be useful on its own. There are no lessons to catch up on and no required progress tracking.'],
-  ['Can I sign up now?', 'Not yet. We are testing the printed product, mail fulfillment and subscription economics before opening enrollment. The $5 monthly price is planned, not an active checkout offer.'],
+  joinOpen
+    ? ['How do I join?', 'Choose monthly ($5 a month) or annual ($60 a year) and check out securely with Stripe. Monthly members get each month they pay for; annual members get their year’s twelve resources right away, with a printed mailing each month. Cancel any time; what you received stays yours.']
+    : ['Can I sign up now?', 'Not yet. We are testing the printed product, mail fulfillment and subscription economics before opening enrollment. The $5 monthly price is planned, not an active checkout offer.'],
 ] as const;
 ---
 <PublicLayout
@@ -68,7 +73,7 @@ const faqs = [
 <div class="ofc">
   <header class="ofc-nav">
     <a href="/" aria-label="Organized Mom Collective home" class="ofc-logo"><img src="/brand/omc-badge.png" alt="" width="52" height="52" /><span>Organized Family Club</span></a>
-    <nav aria-label="Page navigation"><a href="#months">The months</a><a href="#how">How it works</a><a href="#faq">Questions</a><a href="/club/dashboard" class="ofc-member-link">Member kits ↗</a></nav>
+    <nav aria-label="Page navigation"><a href="#months">The months</a><a href="#how">How it works</a><a href="#faq">Questions</a><a href="/club/login" class="ofc-member-link">Member log in ↗</a></nav>
   </header>
 
   <section class="ofc-hero" aria-labelledby="ofc-heading">
@@ -78,8 +83,17 @@ const faqs = [
       <p class="ofc-lead">One useful tool for your family, prepared for you and delivered to your door every month.</p>
       <p>No big binders. No homework. No new system for you to run. Just one thoughtfully prepared resource that helps everyone play a part.</p>
       <div class="ofc-hero-cta">
-        <a href="#months" class="ofc-button">See the first three months <span aria-hidden="true">→</span></a>
-        <p><strong>$5 / month planned</strong><span> · Enrollment not yet open</span></p>
+        {joinOpen ? (
+          <>
+            <a href="/club/join" class="ofc-button" data-cta="club-join-hero">Join the Club <span aria-hidden="true">→</span></a>
+            <p><strong>$5 / month</strong><span> · or $60 / year</span></p>
+          </>
+        ) : (
+          <>
+            <a href="#months" class="ofc-button">See the first three months <span aria-hidden="true">→</span></a>
+            <p><strong>$5 / month planned</strong><span> · Enrollment not yet open</span></p>
+          </>
+        )}
       </div>
     </div>
     <div class="ofc-hero-art" aria-label="Illustration of a flat envelope holding personalized family planning pages">
@@ -181,9 +195,19 @@ const faqs = [
     <p class="ofc-eyebrow">ORGANIZED FAMILY CLUB</p>
     <h2 id="ofc-close-heading">One useful tool. <em>Every month.</em></h2>
     <p class="ofc-close-lead">Prepared for your family and delivered to your door.</p>
-    <p class="ofc-price">$5 <span>/ month · planned</span></p>
-    <p class="ofc-notice">Enrollment isn’t open yet. We’re validating print quality, personalized fulfillment, billing, and the final mailing cost before taking subscriptions.</p>
-    <div class="ofc-close-actions"><a href="#months" class="ofc-button">Explore the working monthly designs →</a><a class="ofc-text-link" href="/support">Ask us a question →</a></div>
+    {joinOpen ? (
+      <>
+        <p class="ofc-price">$5 <span>/ month · or $60 / year</span></p>
+        <p class="ofc-notice">Cancel any time. Every resource you receive stays in your account.</p>
+        <div class="ofc-close-actions"><a href="/club/join" class="ofc-button" data-cta="club-join-close">Join the Club →</a><a class="ofc-text-link" href="/support">Ask us a question →</a></div>
+      </>
+    ) : (
+      <>
+        <p class="ofc-price">$5 <span>/ month · planned</span></p>
+        <p class="ofc-notice">Enrollment isn’t open yet. We’re validating print quality, personalized fulfillment, billing, and the final mailing cost before taking subscriptions.</p>
+        <div class="ofc-close-actions"><a href="#months" class="ofc-button">Explore the working monthly designs →</a><a class="ofc-text-link" href="/support">Ask us a question →</a></div>
+      </>
+    )}
   </section>
 
   <footer class="ofc-footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>

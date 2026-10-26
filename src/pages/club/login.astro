@@ -1,0 +1,9 @@
+---
+/** /club/login: passwordless sign-in (6-digit emailed code), then her dashboard. ?email= fills the address in (links in Club emails). Noindex; behind PUBLIC_CLUB_ENABLED. */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import ClubLogin from '../../components/club/ClubLogin';
+---
+
+<ClubLayout title="Log in">
+  <ClubLogin client:only="react" />
+</ClubLayout>

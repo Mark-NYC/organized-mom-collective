@@ -19,9 +19,9 @@ export interface ClubContext {
   href: (path: string) => string;
 }
 
-type Page = 'dashboard' | 'family' | 'kit' | 'start' | 'tool';
+type Page = 'dashboard' | 'family' | 'kit' | 'start' | 'tool' | 'login' | 'welcome' | 'resource';
 
-export default function ClubGate({ page, children }: { page: Page; children: (ctx: ClubContext) => ReactNode }) {
+export default function ClubGate({ page, children, signInIntro }: { page: Page; children: (ctx: ClubContext) => ReactNode; signInIntro?: ReactNode }) {
   const [sample] = useState(() => (typeof location === 'undefined' ? null : sampleFromUrl(clubNav().search())));
   const [session, setSession] = useState<AccountSession | null | undefined>(sample ? null : undefined);
 
@@ -45,7 +45,7 @@ export default function ClubGate({ page, children }: { page: Page; children: (ct
       <MemberHeader page={page} href={href} signedIn={Boolean(session)} />
       {sample && store && <SampleBanner id={sample} label={store.label} />}
       <main className={`mx-auto w-full max-w-5xl px-4 pt-6 sm:px-8 sm:pt-10 ${page === 'tool' ? 'pb-2' : 'pb-28'}`}>
-        {store ? children({ store, sample, href }) : clubAccountsEnabled() ? <ClubSignIn onSignedIn={setSession} /> : <NoSignIn />}
+        {store ? children({ store, sample, href }) : clubAccountsEnabled() ? <ClubSignIn onSignedIn={setSession} intro={signInIntro} /> : <NoSignIn />}
       </main>
     </>
   );
@@ -62,7 +62,7 @@ function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) 
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8">
         <a href={href(routes.clubDashboard)} className="font-serif text-[1.05rem] text-warm-ink">{CLUB_NAME}</a>
         <nav aria-label="Club" className="-mr-2 flex items-center gap-1">
-          {link('dashboard', routes.clubDashboard, 'Kits')}
+          {link('dashboard', routes.clubDashboard, 'Your months')}
           {link('family', routes.clubFamily, 'Family')}
           {signedIn && (
             <button type="button" className="px-2.5 py-2 text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => signOut().then(() => clubNav().reload())}>
@@ -117,9 +117,12 @@ function NoSignIn() {
 
 type Submit = { preventDefault(): void };
 
-/** The account's emailed-code sign-in (src/lib/account.ts), in the Club's words. */
-function ClubSignIn({ onSignedIn }: { onSignedIn: (s: AccountSession) => void }) {
-  const [email, setEmail] = useState('');
+/**
+ * The account's emailed-code sign-in (src/lib/account.ts), in the Club's words. No password. A link from a Club
+ * email carries ?email=, so she only taps "Email me a code". An expired or used code just asks for a new one.
+ */
+function ClubSignIn({ onSignedIn, intro }: { onSignedIn: (s: AccountSession) => void; intro?: ReactNode }) {
+  const [email, setEmail] = useState(() => (typeof location === 'undefined' ? '' : new URLSearchParams(location.search).get('email') ?? ''));
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [busy, setBusy] = useState(false);
@@ -141,13 +144,17 @@ function ClubSignIn({ onSignedIn }: { onSignedIn: (s: AccountSession) => void })
     const r = await verifyCode(email, code);
     setBusy(false);
     if (r.ok) onSignedIn(r.session);
-    else setError(r.error === 'wrong_code' ? 'That code didn’t work. Check the newest email, or send a new code.' : 'Something went wrong. Please try again.');
+    else setError(r.error === 'wrong_code' ? 'That code didn’t work or has expired. Check the newest email, or send a new code.' : r.error === 'rate_limited' ? 'Too many tries. Wait a few minutes, then send a new code.' : 'Something went wrong. Please try again.');
   };
 
   return (
     <div className="max-w-md">
-      <h1 className="font-serif text-[2rem] leading-tight text-warm-ink">Welcome back</h1>
-      <p className="mt-3 leading-relaxed text-warm-soft">Sign in with your email. We’ll send a 6-digit code; there’s no password.</p>
+      {intro ?? (
+        <>
+          <h1 className="font-serif text-[2rem] leading-tight text-warm-ink">Welcome back</h1>
+          <p className="mt-3 leading-relaxed text-warm-soft">Sign in with the email you joined with. We’ll send a 6-digit code; there’s no password.</p>
+        </>
+      )}
       {step === 'email' ? (
         <form onSubmit={send} className="mt-6" noValidate>
           <label htmlFor="club-email" className="label text-warm-soft">Email</label>

@@ -228,7 +228,13 @@ var DAY_PARAMS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 var routes = {
   /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
   clubStart: "/club/start",
+  clubJoin: "/club/join",
+  clubLogin: "/club/login",
+  clubWelcome: "/club/welcome",
   clubDashboard: "/club/dashboard",
+  /** A member's personalized month (src/data/club/resources.ts). */
+  clubResource: (slug) => `/club/resources/${slug}`,
+  adminClub: "/admin/club",
   clubFamily: "/club/family",
   clubKit: (slug) => `/club/kits/${slug}`,
   /** A site tool hosted inside the Club (src/data/club/tools.ts). */

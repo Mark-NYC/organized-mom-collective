@@ -1,0 +1,56 @@
+---
+/**
+ * /club/resources/<slug>: a member's personalized month (src/data/club/resources.ts). The printable is the same
+ * component as the month's public sample preview, given a member storage key; it starts hidden and shows only after
+ * the database confirms her entitlement and hands it her household (ClubResourceAccess). The static HTML holds no
+ * family data. Noindex, no tracking; a "not available" notice unless PUBLIC_CLUB_ENABLED.
+ */
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import ClubResourceAccess from '../../../components/club/ClubResourceAccess';
+import NovemberOwnershipPrintable from '../../../components/club/NovemberOwnershipPrintable.astro';
+import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
+import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
+import FebruaryConnectionCards from '../../../components/club/FebruaryConnectionCards.astro';
+import MarchSpringPrep from '../../../components/club/MarchSpringPrep.astro';
+import AprilDinnerPlan from '../../../components/club/AprilDinnerPlan.astro';
+import MaySummerRhythm from '../../../components/club/MaySummerRhythm.astro';
+import JuneSnackStation from '../../../components/club/JuneSnackStation.astro';
+import JulyActivityBoard from '../../../components/club/JulyActivityBoard.astro';
+import AugustSchoolRoutines from '../../../components/club/AugustSchoolRoutines.astro';
+import SeptemberRoomReset from '../../../components/club/SeptemberRoomReset.astro';
+import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astro';
+import { clubResources, memberStorageKey, type ClubResource } from '../../../data/club/resources';
+import { clubEnabled, CLUB_NAME } from '../../../data/club/config';
+
+export function getStaticPaths() {
+  return clubResources.map((r) => ({ params: { slug: r.slug }, props: { resource: r } }));
+}
+
+const { resource } = Astro.props as { resource: ClubResource };
+const key = memberStorageKey(resource.slug);
+const c = resource.component;
+const enabled = clubEnabled();
+---
+<PublicLayout fullTitle={`${resource.title} · ${CLUB_NAME}`} description={`${CLUB_NAME} member resource.`} indexable={false} chrome={false} width="full" tracking={false}>
+  {enabled ? (
+    <>
+      <ClubResourceAccess client:only="react" slug={resource.slug} />
+      <div id="club-month-content" hidden>
+        {c === 'november' && <NovemberOwnershipPrintable storageKey={key} />}
+        {c === 'december' && <DecemberMissionPrototype />}
+        {c === 'january' && <JanuaryHabitCards storageKey={key} />}
+        {c === 'february' && <FebruaryConnectionCards storageKey={key} />}
+        {c === 'march' && <MarchSpringPrep storageKey={key} />}
+        {c === 'april' && <AprilDinnerPlan storageKey={key} />}
+        {c === 'may' && <MaySummerRhythm storageKey={key} />}
+        {c === 'june' && <JuneSnackStation storageKey={key} />}
+        {c === 'july' && <JulyActivityBoard storageKey={key} />}
+        {c === 'august' && <AugustSchoolRoutines storageKey={key} />}
+        {c === 'september' && <SeptemberRoomReset storageKey={key} />}
+        {c === 'october' && <OctoberSundayReset storageKey={key} />}
+      </div>
+    </>
+  ) : (
+    <main class="mx-auto max-w-xl px-4 py-24 sm:px-8"><h1 class="font-serif text-[1.8rem] leading-tight">This page isn’t available.</h1></main>
+  )}
+</PublicLayout>
