@@ -277,7 +277,7 @@ const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
 .osr-tabs button{position:relative;z-index:1;min-height:43px;padding:9px 12px;border:0;border-radius:999px;background:transparent;color:#64766a;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
 .osr-tabs button[aria-selected="true"]{background:#fff;color:#3f6853;box-shadow:0 2px 8px #304b351b}
 .osr-tabs button:focus-visible{outline:3px solid #64876f;outline-offset:2px}
-.osr [data-osr-panel][hidden]{display:none!important}
+.osr [data-osr-panel][hidden],.osr .osr-floating-edit[hidden]{display:none!important}
 .osr [data-osr-calendar]{display:block;width:100%;min-height:1550px;border:0;border-radius:8px;background:#fafafa}
 @media print{.osr-tabs,#osr-panel-calendar{display:none!important}#osr-panel-reset{display:block!important}}
 </style>
