@@ -10,7 +10,7 @@ const morning=routineTypes.morning.steps;
 const after=routineTypes.afterschool.steps;
 const icons={
  lunch:'/images/club/icon-library/lunch-box.png',
- water:'/images/club/icon-library/water-bottle.svg',
+ water:'/images/club/icon-library/water-bottle.png',
  quiet:'/images/club/icon-library/quiet-time.png',
  play:'/images/club/icon-library/free-afternoon.png',
  wake:'/images/club/icon-library/morning-start.png',
@@ -167,7 +167,7 @@ type Group='morning'|'after';
 type Step={id:string;time:string;label:string;icon:string;group:Group;removed?:boolean};
 type Board={steps:Step[];mode:'standard'|'simple';footer:string;child:string};
 type Child={id:string;firstName:string;birthYear?:number;birthMonth?:number};
-const iconPaths:Record<string,string>={lunch:"/images/club/icon-library/lunch-box.png",water:"/images/club/icon-library/water-bottle.svg",quiet:"/images/club/icon-library/quiet-time.png",play:"/images/club/icon-library/free-afternoon.png",wake:"/images/club/icon-library/morning-start.png",clothes:"/images/club/icon-library/getting-dressed.png",breakfast:"/images/club/icon-library/breakfast-bowl.png",teeth:"/images/club/icon-library/toothbrush.png",bag:"/images/club/icon-library/backpack.png",shoes:"/images/club/icon-library/sneakers.png",hands:"/images/club/icon-library/washing-hands.png",snack:"/images/club/icon-library/yogurt-cup.png",book:"/images/club/icon-library/doing-homework.png"};
+const iconPaths:Record<string,string>={lunch:"/images/club/icon-library/lunch-box.png",water:"/images/club/icon-library/water-bottle.png",quiet:"/images/club/icon-library/quiet-time.png",play:"/images/club/icon-library/free-afternoon.png",wake:"/images/club/icon-library/morning-start.png",clothes:"/images/club/icon-library/getting-dressed.png",breakfast:"/images/club/icon-library/breakfast-bowl.png",teeth:"/images/club/icon-library/toothbrush.png",bag:"/images/club/icon-library/backpack.png",shoes:"/images/club/icon-library/sneakers.png",hands:"/images/club/icon-library/washing-hands.png",snack:"/images/club/icon-library/yogurt-cup.png",book:"/images/club/icon-library/doing-homework.png"};
 const seeds:Step[]=[
  {id:'wake',time:'07:00',label:'Wake up & stretch',icon:'wake',group:'morning'},
  {id:'dress',time:'07:15',label:'Get dressed',icon:'clothes',group:'morning'},
