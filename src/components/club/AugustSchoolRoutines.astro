@@ -297,6 +297,23 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
     {id:'homework',label:'Homework',icon:'book'},
     {id:'snack-free',label:'Snack & Free Time',icon:'snack'}]
   };
+const choices:Record<Group,{id:string;label:string;icon:string}[]>={
+   morning:[
+    {id:'lunch',label:'Grab My Lunch Box',icon:'lunch'},
+    {id:'pack-lunch',label:'Pack My Lunch',icon:'lunch'},
+    {id:'stow-lunch',label:'Put Lunch Box in Backpack',icon:'lunch'},
+    {id:'water',label:'Grab My Water Bottle',icon:'water'},
+    {id:'fill-water',label:'Fill My Water Bottle',icon:'water'},
+    {id:'stow-water',label:'Put Water Bottle in Backpack',icon:'water'},
+    {id:'read-early',label:'Ready Early? Read or Draw.',icon:'book'}],
+   after:[
+    {id:'put-backpack',label:'Put My Backpack Away',icon:'bag'},
+    {id:'snack',label:'Have a Snack',icon:'snack'},
+    {id:'quiet',label:'Quiet Time',icon:'quiet'},
+    {id:'free',label:'Free Time',icon:'play'},
+    {id:'homework',label:'Homework',icon:'book'},
+    {id:'snack-free',label:'Snack & Free Time',icon:'snack'}]
+  };
   const draw=()=>{
    for(const group of ['morning','after'] as Group[]){
     const holder=root.querySelector<HTMLElement>('[data-asr-group="'+group+'"]');if(!holder)continue;
@@ -356,3 +373,4 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
    }
   };
 >
+</script>
