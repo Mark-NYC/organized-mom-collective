@@ -54,22 +54,22 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
       <header class="srr-paper-head">
        <p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p>
        <h2>Our Daily Reset</h2>
-       <span data-srr-owner>Our kids' bedroom reset</span>
+       <span data-srr-owner contenteditable="true" role="textbox" aria-label="Edit owner">Our kids' bedroom reset</span>
       </header>
       <section class="srr-trigger-box">
        <span>WHEN DO WE START?</span>
-       <h3 data-srr-cue>After our afternoon snack</h3>
-       <p data-srr-duration>We put our things away before moving on.</p>
+       <h3 data-srr-cue contenteditable="true" role="textbox" aria-label="Edit cue">After our afternoon snack</h3>
+       <p data-srr-duration contenteditable="true" role="textbox" aria-label="Edit duration">We put our things away before moving on.</p>
       </section>
-      <h3 class="srr-section-title" data-srr-count>Three things. Then we’re done.</h3>
+      <h3 class="srr-section-title" data-srr-count contenteditable="true" role="textbox" aria-label="Edit count">Three things. Then we’re done.</h3>
       <div class="srr-jobs" data-srr-jobs>
-       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="0" src="/images/club/icon-library/toys-in-toy-basket.png" alt="" width="112" height="112" /></div><span class="srr-number">01</span><strong data-srr-job-label="0">Toys in their homes</strong></div>
-       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/stack-of-clothes.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1">Clothes in the hamper</strong></div>
-       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/clear-floor.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2">Floor clear to walk</strong></div>
-      </div><p class="srr-start" data-srr-start>Start with the toys nearest your feet.</p>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="0" src="/images/club/icon-library/toys-in-toy-basket.png" alt="" width="112" height="112" /></div><span class="srr-number">01</span><strong data-srr-job-label="0" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Toys in their homes</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="1" src="/images/club/icon-library/stack-of-clothes.png" alt="" width="112" height="112" /></div><span class="srr-number">02</span><strong data-srr-job-label="1" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Clothes in the hamper</strong></div>
+       <div class="srr-job"><div class="srr-icon"><img data-srr-icon="2" src="/images/club/icon-library/clear-floor.png" alt="" width="112" height="112" /></div><span class="srr-number">03</span><strong data-srr-job-label="2" contenteditable="true" role="textbox" aria-label="Edit cleanup job">Floor clear to walk</strong></div>
+      </div><p class="srr-start" data-srr-start contenteditable="true" role="textbox" aria-label="Edit start">Start with the toys nearest your feet.</p>
       <section class="srr-done">
        <h3>How do we know it's finished?</h3>
-       <p data-srr-finish>Everything has a home. Nothing is left on the floor.</p>
+       <p data-srr-finish contenteditable="true" role="textbox" aria-label="Edit finish">Everything has a home. Nothing is left on the floor.</p>
        <div class="srr-checks" data-srr-checks><span>✓ Toys away</span><span>✓ Clothes away</span><span>✓ Clear floor</span></div>
       </section>
       <footer class="srr-paper-foot"><strong>Notice the cue. Reset. Then play.</strong><span>NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</span></footer>
@@ -156,10 +156,17 @@ const {storageKey='omc:preview:september-room-reset:v2'}=Astro.props;
  .srr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{.srr-editor,.srr-actions,.srr-dialog,.srr-floating-edit{display:none!important}.srr-preview{padding:0!important}}
+.srr .srr-sheet [contenteditable="true"]{cursor:text;position:relative;outline-offset:2px}
+.srr .srr-sheet [contenteditable="true"]:focus{outline:2px solid #6f9866;background:#f7faf5}
+.srr .srr-sheet [contenteditable="true"]::after{content:"";display:inline-block;width:12px;height:12px;margin-left:6px;vertical-align:baseline;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z'/%3E%3C/svg%3E");opacity:.7;pointer-events:none}
+.srr .srr-sheet [contenteditable="true"]:hover::after{opacity:1}
+.srr .srr-sheet [contenteditable="true"]:focus::after{opacity:0}
+@media print{.srr .srr-sheet [contenteditable="true"]::after{display:none!important}}
+.srr.srr-export .srr-sheet [contenteditable="true"]::after{display:none!important}
 </style>
 <script>
 type Child={id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number};
-type State={owner:string;area:string;trigger:string;jobs:string[];custom?:boolean};
+type State={owner:string;area:string;trigger:string;jobs:string[];custom?:boolean;text?:Record<string,string>};
 const ageOf=(child?:Child)=>child?.birthYear?Math.max(2,2027-child.birthYear-((child.birthMonth??1)>9?1:0)):8;
 const areaJobs:Record<string,string[]>={bedroom:['Toys in their homes','Clothes in the hamper','Floor clear to walk'],playroom:['Toys into bins','Books on their shelf','Playroom floor clear'],living:['Toys in their basket','Books and games away','Floor and couch clear']};
 const areaIcons:Record<string,string[]>={bedroom:['toys-in-toy-basket','stack-of-clothes','clear-floor'],playroom:['blocks','book','home'],living:['basket','book','home']};
@@ -184,19 +191,20 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const remember=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({familyKey,state}))}catch{}};
+ const setText=(id:string,value:string)=>{const el=root.querySelector<HTMLElement>('[data-srr-'+id+']');if(el&&document.activeElement!==el)el.textContent=state.text?.[id]??value};
  const render=()=>{
   const years=age(),count=years<=5?2:3;
   const selected=children.find(c=>c.id===state.owner);
-  const owner=root.querySelector<HTMLElement>('[data-srr-owner]');
+  setText('owner',r=root.querySelector<HTMLElement>('[data-srr-owner]'));
   if(owner)owner.textContent=selected?selected.firstName+"'s "+descriptions[state.area]:"Our kids' "+descriptions[state.area];
-  const cue=root.querySelector<HTMLElement>('[data-srr-cue]');if(cue)cue.textContent=state.trigger;
-  const duration=root.querySelector<HTMLElement>('[data-srr-duration]');if(duration)duration.textContent=years<=5?'A small reset. A grown-up helps me start.':years>=10?'I own this reset and check my own work.':'A few minutes to put our things away.';
-  const heading=root.querySelector<HTMLElement>('[data-srr-count]');if(heading)heading.textContent=count===2?'Two little jobs. Then we’re done.':'Three things. Then we’re done.';
+  setText('cue',state.trigger);
+  setText('duration',years<=5?'A small reset. A grown-up helps me start.':years>=10?'I own this reset and check my own work.':'A few minutes to put our things away.');
+  setText('count',count===2?'Two little jobs. Then we’re done.':'Three things. Then we’re done.');
   const grid=root.querySelector<HTMLElement>('[data-srr-jobs]');grid?.classList.toggle('srr-two',count===2);
   const cards=Array.from(root.querySelectorAll<HTMLElement>('.srr-job'));
-  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src='/images/club/icon-library/'+(areaIcons[state.area]??areaIcons.bedroom)[i]+'.png'});
-  const finish=root.querySelector<HTMLElement>('[data-srr-finish]');if(finish)finish.textContent=years<=5?'Everything is back in its place. A grown-up helps check.':years>=10?'All things put away and the whole space checked.':'Everything is in its home. The walking space is clear.';
-  const first=root.querySelector<HTMLElement>('[data-srr-start]');if(first)first.textContent=years<=5?'Start with just one toy.':years>=10?'Start by scanning the floor and putting away what you see.':'Start with the toys nearest your feet.';
+  cards.forEach((card,i)=>{card.hidden=i>=count;const label=card.querySelector<HTMLElement>('[data-srr-job-label]');if(label&&document.activeElement!==label)label.textContent=state.jobs[i]??'';const img=card.querySelector<HTMLImageElement>('[data-srr-icon]');if(img)img.src='/images/club/icon-library/'+(areaIcons[state.area]??areaIcons.bedroom)[i]+'.png'});
+  setText('finish',years<=5?'Everything is back in its place. A grown-up helps check.':years>=10?'All things put away and the whole space checked.':'Everything is in its home. The walking space is clear.');
+  setText('start',years<=5?'Start with just one toy.':years>=10?'Start by scanning the floor and putting away what you see.':'Start with the toys nearest your feet.');
   const checks=root.querySelector<HTMLElement>('[data-srr-checks]');if(checks)checks.replaceChildren(...state.jobs.slice(0,count).map(label=>{const chip=document.createElement('span');chip.textContent='✓ '+label;return chip}));
   const summaries:[string,string][]=[['owner',selected?.firstName??'Our kids together'],['area',state.area==='bedroom'?'Bedroom floor':state.area==='playroom'?'Playroom':'Living room toys'],['trigger',state.trigger]];
   for(const [k,value] of summaries){const el=root.querySelector<HTMLElement>('[data-srr-summary-'+k+']');if(el)el.textContent=value}
@@ -205,12 +213,25 @@ for(const root of document.querySelectorAll<HTMLElement>('.srr')){
   const trigger=root.querySelector<HTMLSelectElement>('[data-srr-trigger]');if(trigger)trigger.value=state.trigger;
   root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>{const i=Number(input.dataset.srrJob);input.value=state.jobs[i]??'';if(input.parentElement)input.parentElement.hidden=i>=count});
  };
+ root.querySelectorAll<HTMLElement>('.srr-sheet [contenteditable="true"]').forEach(el=>{
+  const index=el.dataset.srrJobLabel;
+  const id=index!==undefined?'job':['owner','cue','duration','count','start','finish'].find(k=>el.hasAttribute('data-srr-'+k))??'';
+  if(!id)return;
+  const updateText=()=>{const v=(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,160);
+   if(id==='job'){state.jobs[Number(index)]=v;state.custom=true}
+   else {(state.text??={})[id]=v;if(id==='cue')state.trigger=v}
+   remember();
+  };
+  el.addEventListener('input',updateText);
+  el.addEventListener('blur',()=>{updateText();render()});
+  el.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
+ });
  root.querySelector<HTMLSelectElement>('[data-srr-child]')?.addEventListener('change',e=>{state.owner=(e.target as HTMLSelectElement).value;if(!state.custom)prepareState();remember();render()});
- root.querySelector<HTMLSelectElement>('[data-srr-area]')?.addEventListener('change',e=>{state.area=(e.target as HTMLSelectElement).value;prepareState();remember();render()});
- root.querySelector<HTMLSelectElement>('[data-srr-trigger]')?.addEventListener('change',e=>{state.trigger=(e.target as HTMLSelectElement).value;remember();render()});
+ root.querySelector<HTMLSelectElement>('[data-srr-area]')?.addEventListener('change',e=>{state.area=(e.target as HTMLSelectElement).value;state.text={};prepareState();remember();render()});
+ root.querySelector<HTMLSelectElement>('[data-srr-trigger]')?.addEventListener('change',e=>{state.trigger=(e.target as HTMLSelectElement).value;if(state.text)delete state.text.cue;remember();render()});
  root.querySelectorAll<HTMLInputElement>('[data-srr-job]').forEach(input=>input.addEventListener('input',()=>{state.jobs[Number(input.dataset.srrJob)]=input.value.slice(0,60);state.custom=true;remember();render()}));
  root.querySelector('[data-srr-reset]')?.addEventListener('click',()=>{state={...defaults,jobs:[...defaults.jobs]};prepareState();remember();render()});
- root.querySelector('[data-srr-print]')?.addEventListener('click',()=>window.print());
+ root.querySelector('[data-srr-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  const pngButton=root.querySelector<HTMLButtonElement>('[data-srr-png]');
  pngButton?.addEventListener('click',async()=>{const front=root.querySelector<HTMLElement>('[data-srr-front]');if(!front)return;pngButton.disabled=true;root.classList.add('srr-export');const prev=pngButton.textContent;pngButton.textContent='Preparing image…';try{await Promise.all(Array.from(front.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));const {toPng}=await import('html-to-image');const url=await toPng(front,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',marginBottom:'0px',marginRight:'0px'}});const link=document.createElement('a');link.href=url;link.download='september-5-minute-room-reset.png';link.click()}catch(err){console.error(err);alert('Image export failed. Use Print / Save PDF instead.')}finally{root.classList.remove('srr-export');pngButton.textContent=prev;pngButton.disabled=false}});
  const applyHousehold=(detail:{household:{id:string;members?:Child[]};sample:string})=>{if(!detail?.household)return;const next=detail.sample+':'+detail.household.id;children=(detail.household.members??[]).filter(x=>x.kind==='child');const childSelect=root.querySelector<HTMLSelectElement>('[data-srr-child]');if(childSelect){childSelect.replaceChildren();const opt=document.createElement('option');opt.value='family';opt.textContent='Our kids together';childSelect.append(opt);for(const c of children){const option=document.createElement('option');option.value=c.id;option.textContent=c.firstName;childSelect.append(option)}}
