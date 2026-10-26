@@ -190,113 +190,6 @@ for(const root of document.querySelectorAll<HTMLElement>('.asr')){
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  const remember=()=>{saved[board.child]=structuredClone(board);try{localStorage.setItem(key,JSON.stringify({profile,boards:saved,active:board.child}))}catch{}};
- const draw=()=>{
-  for(const group of ['morning','after'] as Group[]){
-   const holder=root.querySelector<HTMLElement>('[data-asr-group="'+group+'"]');if(!holder)continue;
-   const byId=new Map(Array.from(holder.querySelectorAll<HTMLElement>('[data-asr-id]')).map(x=>[x.dataset.asrId,x]));
-   const steps=board.steps.filter(s=>s.group===group);
-   for(const step of steps){const row=byId.get(step.id);if(!row)continue;row.hidden=!!step.removed||(board.mode==='simple'&&((group==='morning'&&step.id==='wake')||(group==='after'&&step.id==='wash')));
-    const image=row.querySelector<HTMLImageElement>('img');if(image)image.src=iconPaths[step.icon]??iconPaths.bag;
-    const clock=row.querySelector<HTMLElement>('[data-asr-time]');if(clock&&document.activeElement!==clock)clock.textContent=step.time;
-    const label=row.querySelector<HTMLElement>('[data-asr-text]');if(label&&document.activeElement!==label)label.textContent=step.label;
-    holder.append(row);
-   }
-  }
-  const person=kids.find(k=>k.id===board.child);const heading=root.querySelector<HTMLElement>('[data-asr-name]');
-  if(heading)heading.textContent=person?person.firstName+"'s morning & after-school routines":'Our morning & after-school routines';
-  const foot=root.querySelector<HTMLElement>('[data-asr-footer]');if(foot&&document.activeElement!==foot)foot.textContent=board.footer;
-  const child=root.querySelector<HTMLSelectElement>('[data-asr-child]');if(child)child.value=board.child;
-  const mode=root.querySelector<HTMLSelectElement>('[data-asr-mode]');if(mode)mode.value=board.mode;
- };
- const makeOptions=()=>{
-  const holder=root.querySelector<HTMLElement>('[data-asr-options]');if(!holder)return;holder.replaceChildren();
-  for(const group of ['morning','after'] as Group[]){
-   const title=document.createElement('h3');title.textContent=group==='morning'?'Before school':'After school';holder.append(title);
-   const groupSteps=board.steps.filter(x=>x.group===group);
-   for(const step of groupSteps){
-    const wrapper=document.createElement('div');wrapper.className='asr-option';
-    const label=document.createElement('strong');label.textContent=step.label;wrapper.append(label);
-    const toggle=document.createElement('button');toggle.type='button';toggle.textContent=step.removed?'＋ Restore':'× Remove';
-    toggle.addEventListener('click',()=>{step.removed=!step.removed;remember();draw();makeOptions()});wrapper.append(toggle);
-    for(const dir of [-1,1]){
-     const btn=document.createElement('button');btn.type='button';btn.textContent=dir===-1?'↑ Up':'↓ Down';
-     const idx=groupSteps.indexOf(step);btn.disabled=(dir===-1&&idx===0)||(dir===1&&idx===groupSteps.length-1);
-     btn.addEventListener('click',()=>{const current=board.steps.indexOf(step),other=board.steps.indexOf(groupSteps[idx+dir]);if(other<0)return;
-      [board.steps[current],board.steps[other]]=[board.steps[other],board.steps[current]];remember();draw();makeOptions()});
-     wrapper.append(btn);
-    }
-    holder.append(wrapper);
-   }
-  }
- };
- root.querySelector<HTMLSelectElement>('[data-asr-child]')?.addEventListener('change',e=>{
-  remember();const target=(e.target as HTMLSelectElement).value;board=saved[target]?structuredClone(saved[target]):initial(target,age(target));remember();draw();makeOptions();
- });
- root.querySelector<HTMLSelectElement>('[data-asr-mode]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLSelectElement).value as Board['mode'];remember();draw()});
- root.querySelectorAll<HTMLElement>('[data-asr-id]').forEach(row=>{
-  const id=row.dataset.asrId!,label=row.querySelector<HTMLElement>('[data-asr-text]');
-  const clock=row.querySelector<HTMLElement>('[data-asr-time]');
-  clock?.addEventListener('input',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.time=(clock.textContent??'').trim().slice(0,16);remember()}});
-  clock?.addEventListener('blur',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.time=(clock.textContent??'').trim().slice(0,16);remember();draw()}});
-  clock?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clock.blur()}});
-  label?.addEventListener('input',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.label=(label.textContent??'').replace(/\s+/g,' ').slice(0,55);remember()}});
-  label?.addEventListener('blur',()=>{const s=board.steps.find(s=>s.id===id);if(s){s.label=(label.textContent??'').replace(/\s+/g,' ').trim().slice(0,55)||seeds.find(v=>v.id===id)!.label;remember();draw();makeOptions()}});
-  label?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();label.blur()}});
-  row.querySelector('[data-asr-remove]')?.addEventListener('click',()=>{const s=board.steps.find(x=>x.id===id);if(s){s.removed=true;remember();draw();makeOptions()}});
- });
- const footer=root.querySelector<HTMLElement>('[data-asr-footer]');
- footer?.addEventListener('input',()=>{board.footer=(footer.textContent??'').replace(/\s+/g,' ').slice(0,120);remember()});
- footer?.addEventListener('blur',()=>{board.footer=(footer.textContent??'').trim().slice(0,120);remember();draw()});
- footer?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();footer.blur()}});
- root.querySelector('[data-asr-reset]')?.addEventListener('click',()=>{board=initial(board.child,age());remember();draw();makeOptions()});
- root.querySelector('[data-asr-print]')?.addEventListener('click',()=>window.print());
- const dl=root.querySelector<HTMLButtonElement>('[data-asr-png]');
- dl?.addEventListener('click',async()=>{
-  if(!paper||!dl)return;dl.disabled=true;const old=dl.textContent;dl.textContent='Preparing image…';root.classList.add('asr-export');
-  try{await Promise.all(Array.from(paper.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
-   const {toPng}=await import('html-to-image');const png=await toPng(paper,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});
-   const a=document.createElement('a');a.href=png;a.download='my-school-day-routines.png';a.click();
-  }catch(error){console.error('August export failed',error);alert('Image download failed. Use Print / Save PDF instead.')}
-  finally{root.classList.remove('asr-export');dl.disabled=false;dl.textContent=old}
- });
- const applyHousehold=(detail:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string})=>{
-  const {household,sample}=detail??{};
-  if(!household)return;const next=sample+':'+household.id;
-  kids=(household.members??[]).filter(x=>x.kind==='child');
-  const select=root.querySelector<HTMLSelectElement>('[data-asr-child]');
-  if(select){select.replaceChildren();const option=document.createElement('option');option.value='family';option.textContent='Our family';select.append(option);
-   for(const kid of kids){const opt=document.createElement('option');opt.value=kid.id;opt.textContent=kid.firstName;select.append(opt)}}
-  if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=initial();
-   try{const s=JSON.parse(localStorage.getItem(key)??'null');if(s?.profile===profile&&s.boards){
-     for(const [id,value] of Object.entries(s.boards))if(value&&typeof value==='object'&&Array.isArray((value as Board).steps))saved[id]=value as Board;
-     board=saved[s?.active]??saved.family??(kids[0]?initial(kids[0].id,age(kids[0].id)):board);
-   }}catch{}
-  }
-  if(board.child!=='family'&&!kids.some(x=>x.id===board.child))board=initial();
-  remember();draw();makeOptions();
- };
- window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}>).detail));
- const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}}).__ofcPreviewHousehold;
- if(cached)applyHousehold(cached);
- draw();makeOptions();
-}
-</script  const choices:Record<Group,{id:string;label:string;icon:string}[]>={
-   morning:[
-    {id:'lunch',label:'Grab My Lunch Box',icon:'lunch'},
-    {id:'pack-lunch',label:'Pack My Lunch',icon:'lunch'},
-    {id:'stow-lunch',label:'Put Lunch Box in Backpack',icon:'lunch'},
-    {id:'water',label:'Grab My Water Bottle',icon:'water'},
-    {id:'fill-water',label:'Fill My Water Bottle',icon:'water'},
-    {id:'stow-water',label:'Put Water Bottle in Backpack',icon:'water'},
-    {id:'read-early',label:'Ready Early? Read or Draw.',icon:'book'}],
-   after:[
-    {id:'put-backpack',label:'Put My Backpack Away',icon:'bag'},
-    {id:'snack',label:'Have a Snack',icon:'snack'},
-    {id:'quiet',label:'Quiet Time',icon:'quiet'},
-    {id:'free',label:'Free Time',icon:'play'},
-    {id:'homework',label:'Homework',icon:'book'},
-    {id:'snack-free',label:'Snack & Free Time',icon:'snack'}]
-  };
 const choices:Record<Group,{id:string;label:string;icon:string}[]>={
    morning:[
     {id:'lunch',label:'Grab My Lunch Box',icon:'lunch'},
@@ -372,5 +265,45 @@ const choices:Record<Group,{id:string;label:string;icon:string}[]>={
     addLabel.append(select);holder.append(addLabel);
    }
   };
->
+
+ root.querySelector<HTMLSelectElement>('[data-asr-child]')?.addEventListener('change',e=>{
+  remember();const target=(e.target as HTMLSelectElement).value;board=saved[target]?structuredClone(saved[target]):initial(target,age(target));remember();draw();makeOptions();
+ });
+ root.querySelector<HTMLSelectElement>('[data-asr-mode]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLSelectElement).value as Board['mode'];remember();draw()});
+ const footer=root.querySelector<HTMLElement>('[data-asr-footer]');
+ footer?.addEventListener('input',()=>{board.footer=(footer.textContent??'').replace(/\s+/g,' ').slice(0,120);remember()});
+ footer?.addEventListener('blur',()=>{board.footer=(footer.textContent??'').trim().slice(0,120);remember();draw()});
+ footer?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();footer.blur()}});
+ root.querySelector('[data-asr-reset]')?.addEventListener('click',()=>{board=initial(board.child,age());remember();draw();makeOptions()});
+ root.querySelector('[data-asr-print]')?.addEventListener('click',()=>window.print());
+ const dl=root.querySelector<HTMLButtonElement>('[data-asr-png]');
+ dl?.addEventListener('click',async()=>{
+  if(!paper||!dl)return;dl.disabled=true;const old=dl.textContent;dl.textContent='Preparing image…';root.classList.add('asr-export');
+  try{await Promise.all(Array.from(paper.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
+   const {toPng}=await import('html-to-image');const png=await toPng(paper,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});
+   const a=document.createElement('a');a.href=png;a.download='my-school-day-routines.png';a.click();
+  }catch(error){console.error('August export failed',error);alert('Image download failed. Use Print / Save PDF instead.')}
+  finally{root.classList.remove('asr-export');dl.disabled=false;dl.textContent=old}
+ });
+ const applyHousehold=(detail:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string})=>{
+  const {household,sample}=detail??{};
+  if(!household)return;const next=sample+':'+household.id;
+  kids=(household.members??[]).filter(x=>x.kind==='child');
+  const select=root.querySelector<HTMLSelectElement>('[data-asr-child]');
+  if(select){select.replaceChildren();const option=document.createElement('option');option.value='family';option.textContent='Our family';select.append(option);
+   for(const kid of kids){const opt=document.createElement('option');opt.value=kid.id;opt.textContent=kid.firstName;select.append(opt)}}
+  if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=initial();
+   try{const s=JSON.parse(localStorage.getItem(key)??'null');if(s?.profile===profile&&s.boards){
+     for(const [id,value] of Object.entries(s.boards))if(value&&typeof value==='object'&&Array.isArray((value as Board).steps))saved[id]=value as Board;
+     board=saved[s?.active]??saved.family??(kids[0]?initial(kids[0].id,age(kids[0].id)):board);
+   }}catch{}
+  }
+  if(board.child!=='family'&&!kids.some(x=>x.id===board.child))board=initial();
+  remember();draw();makeOptions();
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}}).__ofcPreviewHousehold;
+ if(cached)applyHousehold(cached);
+ draw();makeOptions();
+}
 </script>
