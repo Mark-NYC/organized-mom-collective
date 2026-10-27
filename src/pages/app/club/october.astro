@@ -7,10 +7,10 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
   <div class="club-mobile-kit">
     <div class="kit-desktop-rail">
     <header class="kit-header">
-      <a href="/app/club" class="kit-back">← All Club kits</a>
+      <a href="/app/club" class="kit-back">← Back to Club</a>
       <p class="kit-eyebrow">OCTOBER · KIT PREVIEW</p>
       <h1>Our Family <em>Sunday Reset</em></h1>
-      <p class="kit-subtitle">Your prepared tool, ready to look over. Only change what you want.</p>
+      <p class="kit-subtitle">A ready-made Sunday rhythm for your family. Take a look, then change anything that doesn’t fit.</p>
     </header>
     <div class="kit-action-bar">
       <button type="button" class="kit-edit" data-kit-edit>Make changes</button>
@@ -104,6 +104,73 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
   .club-mobile-kit .osr-pages{align-items:center}
   .club-mobile-kit .osr-paper{box-shadow:0 12px 34px rgba(50,47,38,.12)}
 }
+
+/* Brand alignment: use the same type, palette, rules and editorial restraint
+   as the homepage and docs/editorial/BLOG_EDITORIAL_STYLE.md.
+   Limit adjustments to the Club workspace; printed page art is untouched. */
+.club-mobile-kit{
+  --kit-ink:var(--color-warm-ink);
+  --kit-soft:var(--color-warm-soft);
+  --kit-rule:var(--color-warm-rule);
+  --kit-sage:var(--color-sage);
+  font-family:var(--font-sans);
+  color:var(--kit-ink);
+}
+.club-mobile-kit .kit-header h1{
+  font-family:var(--font-serif);
+  font-weight:400;
+  letter-spacing:-.02em;
+  color:var(--kit-ink);
+}
+.club-mobile-kit .kit-header h1 em{color:var(--kit-ink)}
+.club-mobile-kit .kit-eyebrow{
+  font-size:.7rem;letter-spacing:.2em;font-weight:600;
+  color:var(--kit-soft);
+}
+.club-mobile-kit .kit-subtitle{
+  color:var(--kit-soft);font-size:1rem;line-height:1.7;
+}
+.club-mobile-kit .kit-back{
+  color:var(--kit-ink);font-size:.7rem;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;
+  text-decoration-color:var(--kit-rule);
+  text-underline-offset:6px;
+}
+.club-mobile-kit .kit-action-bar button{
+  border-radius:3px;min-height:48px;padding:12px 20px;
+  font-family:var(--font-sans);font-size:.75rem;
+  font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+}
+.club-mobile-kit .kit-edit{
+  color:var(--kit-ink);background:transparent;border:1px solid var(--kit-ink);
+}
+.club-mobile-kit .kit-edit:hover{background:var(--kit-ink);color:white}
+.club-mobile-kit .kit-approve{background:var(--color-warm-button);color:white;border:1px solid var(--color-warm-button)}
+.club-mobile-kit .kit-approve:hover{background:#3a302f}
+.club-mobile-kit .kit-action-bar p{
+  font-size:.78rem;color:var(--kit-soft);line-height:1.65;
+}
+@media (min-width:1100px){
+  .club-mobile-kit{background:var(--color-ivory)}
+  .club-mobile-kit .kit-desktop-rail{
+    background:var(--color-ivory);border-right:1px solid var(--kit-rule);
+    padding-top:clamp(40px,6vh,70px);
+  }
+  .club-mobile-kit .kit-header{
+    padding-bottom:30px;margin-bottom:28px;border-bottom:1px solid var(--kit-rule);
+  }
+  .club-mobile-kit .kit-header h1{
+    font-size:clamp(34px,3vw,42px);line-height:1.12;margin-top:18px;margin-bottom:19px;
+  }
+  .club-mobile-kit .kit-artwork{
+    background:#f1f2f2;
+    padding:clamp(32px,4vw,62px) clamp(28px,5vw,82px) 84px;
+    scrollbar-color:#b7b7b2 transparent;
+  }
+  .club-mobile-kit .osr-paper{box-shadow:0 8px 28px rgba(61,56,52,.09)}
+  .club-mobile-kit .kit-action-bar{gap:12px}
+}
+
 /* On phones, keep preview-first: controls below the artwork. */
 @media(max-width:1099px){
   .club-mobile-kit{display:flex;flex-direction:column}
