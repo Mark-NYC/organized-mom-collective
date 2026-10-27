@@ -15,6 +15,7 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
     <div class="kit-action-bar">
       <button type="button" class="kit-edit" data-kit-edit>Make changes</button>
       <button type="button" class="kit-approve" data-kit-approve>Approve preview</button>
+      <button type="button" class="kit-download-link" data-kit-download>Download And Print</button>
       <p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p>
     </div>
     </div>
@@ -181,6 +182,17 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
   .club-mobile-kit .kit-action-bar{gap:12px}
 }
 
+.club-mobile-kit .kit-action-bar .kit-download-link{
+  display:inline-flex;align-self:center;align-items:center;justify-content:center;
+  width:auto;min-height:44px;padding:5px 8px;
+  border:0;border-radius:0;background:transparent;
+  color:var(--color-warm-ink);font:600 .75rem var(--font-sans);
+  letter-spacing:.13em;text-transform:uppercase;
+  text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--color-warm-rule);
+}
+.club-mobile-kit .kit-action-bar .kit-download-link:hover{text-decoration-color:currentColor}
+.club-mobile-kit .kit-action-bar .kit-download-link:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(min-width:1100px){.club-mobile-kit .kit-action-bar .kit-download-link{align-self:flex-start}}
 /* On phones, keep preview-first: controls below the artwork. */
 @media(max-width:1099px){
   .club-mobile-kit{display:flex;flex-direction:column}
@@ -202,6 +214,11 @@ if(kit){
   kit.querySelectorAll<HTMLButtonElement>('[data-side]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.side==='back'?'back':'front')));
   show('front');
   kit.querySelector<HTMLButtonElement>('[data-kit-edit]')?.addEventListener('click',()=>kit.querySelector<HTMLButtonElement>('[data-open-editor]')?.click());
+  kit.querySelector<HTMLButtonElement>('[data-kit-download]')?.addEventListener('click',()=>{
+    (document.activeElement as HTMLElement | null)?.blur();
+    // Reuse the existing two-sided printable and native Print / Save as PDF dialog.
+    kit.querySelector<HTMLButtonElement>('[data-osr-print]')?.click();
+  });
   kit.querySelector<HTMLButtonElement>('[data-kit-approve]')?.addEventListener('click',()=>{
     const note=kit.querySelector<HTMLElement>('[data-approval-note]');
     if(note)note.textContent='Preview acknowledged on this screen only. Nothing was submitted or scheduled for mailing.';
