@@ -26,9 +26,9 @@ export default function HomeStatus() {
   const done = dailyEssentials.tasks.filter(t => checkedDaily.has(t.id)).length + zone.filter(t => checkedZone.has(t.id)).length;
   const total = dailyEssentials.tasks.length + zone.length;
   return <div data-revision={revision} className="space-y-4">
-    <p className="text-sm text-[#536e4e]">{name ? name + ' · Sample family' : 'Family preview'} </p>
+    <p className="text-sm text-warm-soft">{name ? name + ' · Sample family' : 'Family preview'} </p>
     <div className="flex items-end justify-between gap-3"><span className="text-sm font-semibold">{done} of {total} cleaning tasks done today</span><span className="text-xs text-warm-soft">{total ? Math.round(done / total * 100) : 0}%</span></div>
-    <div role="progressbar" aria-label="Today's cleaning progress" aria-valuenow={done} aria-valuemin={0} aria-valuemax={total} className="h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-[#71866c] transition-all" style={{width: (total ? done / total * 100 : 0) + '%'}} /></div>
+    <div role="progressbar" aria-label="Today's cleaning progress" aria-valuenow={done} aria-valuemin={0} aria-valuemax={total} className="family-progress-track overflow-hidden"><div className="family-progress-fill transition-all" style={{width: (total ? done / total * 100 : 0) + '%'}} /></div>
     <p className="text-sm text-warm-soft">{done === total ? 'You finished your daily routine.' : done ? 'Every checked task counts.' : 'Start with one small task.'}</p>
   </div>;
 }

@@ -1,0 +1,37 @@
+/* Organized Family branded surfaces.
+   Scoped to the non-cleaning Home / Club / Account pages only.
+   Source of truth: homepage, global.css and public-design.css. */
+.family-brand{
+  --family-paper:var(--color-ivory,#fffdfa);
+  --family-ink:var(--color-warm-ink,#4d4544);
+  --family-soft:var(--color-warm-soft,#6e6461);
+  --family-rule:var(--color-warm-rule,#e7ddd4);
+  --family-sage:var(--color-sage,#9aab8f);
+  color:var(--family-ink);
+  font-family:var(--font-sans);
+}
+.family-brand .label{color:var(--family-soft);letter-spacing:.2em;font-size:.7rem}
+.family-brand .family-title{font-family:var(--font-serif);font-weight:400;line-height:1.1;letter-spacing:-.02em;color:var(--family-ink);font-size:clamp(2.3rem,5vw,3.35rem);text-wrap:balance}
+.family-brand .family-title em{color:var(--family-ink)}
+.family-brand .family-lede{font-size:clamp(.98rem,1.5vw,1.08rem);line-height:1.7;color:var(--family-soft);max-width:40rem}
+.family-brand .family-feature{border-radius:0;background:#e7ece5;padding:clamp(24px,4vw,48px)}
+.family-brand .family-panel{border:1px solid var(--family-rule);border-radius:0;background:#fff;padding:clamp(22px,3vw,32px)}
+.family-brand .family-panel-title{font-family:var(--font-serif);font-size:clamp(1.45rem,3vw,2rem);font-weight:400;line-height:1.17;color:var(--family-ink)}
+.family-brand .family-action{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 22px;border-radius:3px;background:var(--color-warm-button,#4a3f3e);color:#fff;font-size:.73rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;text-decoration:none}
+.family-brand .family-action:hover{background:#3a302f}
+.family-brand .family-link{display:inline-flex;align-items:center;min-height:44px;color:var(--family-ink);font-size:.73rem;letter-spacing:.13em;font-weight:600;text-transform:uppercase;text-decoration:underline;text-decoration-color:var(--family-rule);text-underline-offset:6px}
+.family-brand .family-link:hover{text-decoration-color:currentColor}
+.family-brand .family-note{border-left:3px solid var(--family-sage);background:#f1f2f2;padding:16px 20px;color:var(--family-soft);font-size:.875rem;line-height:1.65}
+.family-brand .family-rule{border-color:var(--family-rule)}
+.family-brand .family-preview-pill{display:inline-block;background:#fff;border:1px solid var(--family-rule);border-radius:0;padding:8px 12px;font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--family-ink)}
+.family-brand .family-progress-track{height:5px;border-radius:0;background:#fff}
+.family-brand .family-progress-fill{height:100%;border-radius:0;background:var(--family-sage)}
+.family-brand .family-profile-row{border-bottom:1px solid var(--family-rule)}
+.family-brand .family-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.family-brand .family-card-grid > *{min-width:0}
+@media(max-width:639px){
+ .family-brand .family-card-grid{grid-template-columns:1fr;gap:12px}
+ .family-brand .family-feature{margin-inline:-4px;padding:24px}
+ .family-brand .family-title{font-size:2.35rem}
+ .family-brand .family-lede{font-size:1rem}
+}
