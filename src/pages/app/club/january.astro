@@ -5,10 +5,13 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
 import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const januaryKit=kits.find(k=>k.month==='2027-01');
+if(!januaryKit)throw new Error('January kit not found');
 const deadline=clubEditingDeadline('2027-01');
 ---
 <AppLayout title="January Family Habit Cards">
-  <main class="january-app family-brand" data-jan-app data-deadline={deadline}>
+  <main class="january-app family-brand" data-jan-app data-deadline={deadline} data-kit-slug={januaryKit.slug} data-jan-state="loading">\n    <div class="jan-gate" data-jan-gate aria-live="polite">Preparing your family’s January plan…</div>
     <section class="jan-plan" aria-labelledby="jan-title">
       <p class="jan-kicker">JANUARY 2027 · ORGANIZED FAMILY CLUB</p>
       <h1 id="jan-title">Little habits. <em>Less reminding.</em></h1>
@@ -54,7 +57,7 @@ const deadline=clubEditingDeadline('2027-01');
 @media screen and (max-width:1099px){
  body:has(.january-app) #main{padding-top:22px;padding-bottom:calc(180px + env(safe-area-inset-bottom))}
  .january-app{max-width:680px;margin:auto}
- .jan-plan{display:block}
+ .jan-plan{display:block}\n .january-app:not([data-jan-state="ready"]) .jan-plan,.january-app:not([data-jan-state="ready"]) .jan-toolbar,.january-app:not([data-jan-state="ready"]) .jan-paper-shell{display:none}\n .jan-gate{display:none;padding:28px 16px;background:#f5f4f0;line-height:1.6}\n .january-app:not([data-jan-state="ready"]) .jan-gate{display:block}\n .jan-gate a{display:inline-block;margin-top:14px;text-decoration:underline}
  .jan-kicker{color:#71866c;letter-spacing:.14em;font-size:11px;font-weight:700}
  .jan-plan h1{font:400 clamp(32px,7vw,40px)/1.16 Georgia,serif;letter-spacing:-.02em;margin:12px 0 10px;color:#4d4544}
  .jan-plan h1 em{font-weight:400;color:#71866c}
@@ -110,6 +113,33 @@ const deadline=clubEditingDeadline('2027-01');
 const jan=document.querySelector<HTMLElement>('[data-jan-app]');
 if(jan){
  const jhc=jan.querySelector<HTMLElement>('.jhc');
+ const gate=jan.querySelector<HTMLElement>('[data-jan-gate]');
+ loadKitHousehold(jan.dataset.kitSlug??'',location.search,{
+   accountsEnabled:clubAccountsEnabled,
+   hasSession:async()=>Boolean(await getSession()),
+   accountStore,sampleStore
+ }).then(result=>{
+   if(result.status==='ready'){
+     const detail={household:result.household,sample:result.sample};
+     window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail}));
+     const intro=jan.querySelector<HTMLElement>('.jan-intro');
+     if(intro)intro.textContent=(result.source==='sample'?'Sample family: '+result.sampleLabel.replace(/^Sample:\s*/,'')+'. ':'Prepared for '+(result.household.displayName??'your family')+'. ')+
+       'Two small habits, already prepared. Keep what works and change only what your family needs.';
+     jan.dataset.janState='ready';
+     window.dispatchEvent(new Event('resize'));
+   }else{
+     jan.dataset.janState=result.status;
+     const settings:Record<string,[string,string]>={
+       empty:['Add your family to prepare January','/app/account'],
+       'signed-out':['Sign in to see your January plan','/app/account'],
+       denied:['January is not available on this account','/app/club'],
+       error:['Could not load your family. Reload to try again.','']
+     };
+     const pair=settings[result.status]??settings.error;
+     if(gate){gate.replaceChildren();const p=document.createElement('p');p.textContent=pair[0];gate.append(p);if(pair[1]){const a=document.createElement('a');a.href=pair[1];a.textContent='Continue';gate.append(a)}}
+   }
+ }).catch(()=>{jan.dataset.janState='error';if(gate)gate.textContent='Could not load your family. Reload to try again.'});
+
  const read=()=>{
    const cards=Array.from(jhc?.querySelectorAll<HTMLElement>('[data-jhc-card]')??[]);
    cards.forEach((card,i)=>{
