@@ -323,7 +323,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   if(!stage||!pages)return;
   const desktop=Boolean(root.closest('.club-mobile-kit') && window.matchMedia('(min-width: 1100px)').matches);
   const available=Math.max(1,stage.clientWidth-2);
-  const scale=Math.min(1,available/816);
+  const viewer=root.closest<HTMLElement>('.kit-artwork');
+  // Fit a full letter page on desktop (width AND height), not merely its width.
+  // Allow room for the viewer's padding so paper never appears cut off on load.
+  const viewportHeight=viewer?.clientHeight ?? window.innerHeight;
+  const verticalSpace=Math.max(220,viewportHeight-130);
+  const scale=desktop?Math.min(1,available/816,verticalSpace/1056):Math.min(1,available/816);
   pages.style.gap=desktop?'28px':22*scale+'px';
   for(const [index,sheet] of sheets.entries()){
    sheet.style.setProperty('--osr-scale',String(scale));
@@ -339,7 +344,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
    }
   }
  };
- fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
+ fit();if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(fit);if(stage)observer.observe(stage);const viewer=root.closest<HTMLElement>('.club-mobile-kit')?.querySelector<HTMLElement>('.kit-artwork');if(viewer)observer.observe(viewer);}window.addEventListener('resize',fit);
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-osr-vision]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-osr-editor]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
