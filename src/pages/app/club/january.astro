@@ -11,7 +11,7 @@ if(!januaryKit)throw new Error('January kit not found');
 const deadline=clubEditingDeadline('2027-01');
 ---
 <AppLayout title="January Family Habit Cards">
-  <main class="january-app family-brand" data-jan-app data-deadline={deadline} data-kit-slug={januaryKit.slug} data-jan-state="loading">\n    <div class="jan-gate" data-jan-gate aria-live="polite">Preparing your family’s January plan…</div>
+  <div class="january-app family-brand" data-jan-app data-deadline={deadline} data-kit-slug={januaryKit.slug} data-jan-state="loading">\n    <div class="jan-gate" data-jan-gate aria-live="polite">Preparing your family’s January plan…</div>
     <section class="jan-plan" aria-labelledby="jan-title">
       <p class="jan-kicker">JANUARY 2027 · ORGANIZED FAMILY CLUB</p>
       <h1 id="jan-title">Little habits. <em>Less reminding.</em></h1>
@@ -45,7 +45,7 @@ const deadline=clubEditingDeadline('2027-01');
       <button type="button" class="jan-close" data-jan-close hidden>← Back to my plan</button>
       <JanuaryHabitCards storageKey="omc:preview:january-habit-cards:v2" />
     </div>
-  </main>
+  </div>
 </AppLayout>
 <style is:global>
 /* January-specific app shell; no changes to the existing January artwork or desktop preview. */
