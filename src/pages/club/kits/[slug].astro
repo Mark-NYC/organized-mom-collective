@@ -18,13 +18,16 @@ import MaySummerRhythm from '../../../components/club/MaySummerRhythm.astro';
 import JuneSnackStation from '../../../components/club/JuneSnackStation.astro';
 import JulyActivityBoard from '../../../components/club/JulyActivityBoard.astro';
 import AugustSchoolRoutines from '../../../components/club/AugustSchoolRoutines.astro';
+import SeptemberSundayReset from '../../../components/club/SeptemberSundayReset.astro';
+import SeptemberActivityCalendar from '../../../components/club/SeptemberActivityCalendar.astro';
+import SeasonalSundayReset from '../../../components/club/SeasonalSundayReset.astro';
 
 export function getStaticPaths() {
   return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
 }
 
 const { slug, theme } = Astro.props;
-const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : slug === "2027-06-summer-with-a-plan" ? "june" : slug === "2027-07-ready-to-go" ? "july" : slug === "2027-08-school-year" ? "august" : null;
+const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : slug === "2027-06-summer-with-a-plan" ? "june" : slug === "2027-07-ready-to-go" ? "july" : slug === "2027-08-school-year" ? "august" : slug === "2027-09-a-week-everyone-can-see" ? "september" : slug === "2027-10-home-works-together" ? "october" : slug === "2027-11-busy-season-sunday-reset" ? "november2027" : null;
 ---
 
 <ClubLayout title={theme}>
@@ -41,6 +44,9 @@ const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-
          month === "may" ? <MaySummerRhythm storageKey="omc:club:may-summer-rhythm:v1" /> :
          month === "june" ? <JuneSnackStation storageKey="omc:club:june-snack-station:v1" /> :
          month === "july" ? <JulyActivityBoard storageKey="omc:club:july-activities:v1" /> :
+         month === "september" ? <SeptemberSundayReset><SeptemberActivityCalendar /></SeptemberSundayReset> :
+         month === "october" ? <SeasonalSundayReset month="october" /> :
+         month === "november2027" ? <SeasonalSundayReset month="november" /> :
          <AugustSchoolRoutines storageKey="omc:club:august-school-routines:v1" />}
       </div>
     </>

@@ -1,0 +1,9 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
+import SeasonalSundayReset from '../../components/club/SeasonalSundayReset.astro';
+---
+<PublicLayout fullTitle="November Busy Season Sunday Reset | Organized Family Club" description="Use your family's Sunday Reset to share preparation for gatherings, school breaks and holiday plans." indexable={false} chrome={false} width="full" tracking={false}>
+ <ClubPrototypeNav client:only="react" month="november" />
+ <main id="club-month-content"><SeasonalSundayReset month="november" /></main>
+</PublicLayout>

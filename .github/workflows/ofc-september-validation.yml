@@ -1,0 +1,26 @@
+name: September Club Validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/components/club/September*.astro"
+      - "src/lib/family-calendar/**"
+      - "src/pages/club/september-preview.astro"
+      - "src/pages/club/kits/**"
+      - "tests/club-fall-2027.test.ts"
+      - ".github/workflows/ofc-september-validation.yml"
+  workflow_dispatch:
+jobs:
+  check-build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - run: npm test -- --run tests/club-fall-2027.test.ts

@@ -1,10 +1,9 @@
 ---
-/** Unlisted October 2027 Club proof: one Sunday Reset tool with a guided fall example. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
-import OctoberSundayReset from '../../components/club/OctoberSundayReset.astro';
+import SeasonalSundayReset from '../../components/club/SeasonalSundayReset.astro';
 ---
-<PublicLayout fullTitle="October Family Sunday Reset | Organized Family Club" description="One prepared family Sunday Reset, with fall readiness as the first guided example, on one double-sided sheet." indexable={false} chrome={false} width="full" tracking={false}>
+<PublicLayout fullTitle="October Fall Home Reset | Organized Family Club" description="A prepared fall family responsibility plan that works inside your Sunday Reset." indexable={false} chrome={false} width="full" tracking={false}>
  <ClubPrototypeNav client:only="react" month="october" />
- <main id="club-month-content"><OctoberSundayReset storageKey="omc:preview:october-sunday-reset:v2" /></main>
+ <main id="club-month-content"><SeasonalSundayReset month="october" /></main>
 </PublicLayout>
