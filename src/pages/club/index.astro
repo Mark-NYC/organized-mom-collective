@@ -3,152 +3,135 @@ import PublicLayout from '../../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../../config';
 const monthIcons = import.meta.glob('../../../assets/icons/ofc/month-icons/*-OFC-icon.png', { eager: true, query: '?url', import: 'default' });
 const months = [{"month":"January","title":"Mornings Without the Nagging","responsibility":"Following routines","how":"A ready-made morning or evening plan shows each person what to do next.","url":"/club/january-preview/"},{"month":"February","title":"Connection You Don't Have to Plan","responsibility":"Initiating connection","how":"Four simple invitations help kids take the lead in spending time together.","url":"/club/february-preview/"},{"month":"March","title":"Cleaning Without Managing Everyone","responsibility":"Finishing a job","how":"Each person gets a clear cleaning job, supplies, steps, and a definition of done.","url":"/club/march-preview/"},{"month":"April","title":"Dinner Isn't All on You","responsibility":"Sharing meal ownership","how":"A prepared dinner plan gives family members roles from gathering ingredients through cleanup.","url":"/club/april-preview/"},{"month":"May","title":"Summer Days Without Constant Questions","responsibility":"Managing their day","how":"A flexible daily rhythm and activity menu help kids choose what comes next.","url":"/club/may-preview/"},{"month":"June","title":"Less Screen-Time Negotiating","responsibility":"Respecting shared boundaries","how":"Clear expectations for screens, responsibilities, and free time help everyone follow the same plan.","url":"/club/june-preview/"},{"month":"July","title":"No More Packing for Everyone","responsibility":"Preparing independently","how":"Personal packing lists show each person what to pack, check, and put away.","url":"/club/july-preview/"},{"month":"August","title":"Back to School Without the Scramble","responsibility":"Taking initiative","how":"A personalized countdown gives everyone their own school-ready responsibilities.","url":"/club/august-preview/"},{"month":"September","title":"Stop Being the Family's Calendar","responsibility":"Planning together","how":"A short weekly family meeting helps everyone know the schedule and own their commitments.","url":"/club/september-preview/"},{"month":"October","title":"Get Ahead of the Last-Minute Scramble","responsibility":"Noticing what is needed","how":"Seasonal checks assign family members the job of spotting and handling needs early.","url":"/club/october-preview/"},{"month":"November","title":"Stop Being Everyone's Reminder","responsibility":"Owning a whole responsibility","how":"Each ready family member gets a job with a clear owner, timing, and finish line.","url":"/club/november-preview/"},{"month":"December","title":"Christmas Without Doing It All","responsibility":"Contributing to family traditions","how":"A prepared holiday plan shares the work of gifts, traditions, and celebrations.","url":"/club/december-preview/"}].map(m => ({...m, icon: monthIcons[`../../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`]}));
+
 const faqs = [
- ['What exactly comes in the mail?', 'Our planned subscription includes one personalized 8.5 × 11 family organization tool each month, with a short note from Megan. We are still testing the final paper and mailing format.'],
- ['Will I have to put the plan together?', 'No. We want to prepare the plan using a few details about your household. You can review suggested assignments or make changes, but the default should be ready to use. Automated fulfillment is still being tested.'],
- ['What ages is this for?', 'The tools are designed to adjust to the ages and abilities of the people in your household, including participating adults.'],
- ['Is this different from the wall calendar?', 'Yes. The calendar shows the week’s plan. The Club helps family members share responsibility for carrying it out. Either can be used on its own.'],
- ['What if we miss a month?', 'Nothing to catch up on. Each month’s tool is meant to stand alone.'],
- ['Can I subscribe today?', 'Not yet. We are testing personalized printing, mailing, and billing before opening enrollment. You can contact us about early access.']
+ ['Will this be another job for me?', 'No new system to design. We suggest the plan, the assignments, and the next steps. You will introduce the tool to your family, but you do not have to build it yourself.'],
+ ['What comes in the mail?', 'The planned membership includes one personalized 8.5 × 11 family tool per month, with a short note from Megan and a digital version. Printing and mailing are still being tested.'],
+ ['Is this the actual Club product?', 'This Daily Reset is a free interactive example of how we can prepare a family plan for you. The monthly Club tools are separate resources, and the example is not a promised mailing.'],
+ ['What ages does this work for?', 'Assignments adjust by age, from small jobs younger children can do with help to more independent responsibilities for older children.'],
+ ['Do I need to own your wall calendar?', 'No. The Club works on its own. The calendar helps you see the schedule; the Club helps everyone take responsibility.'],
+ ['Can I subscribe now?', 'Enrollment is not open yet. We are testing the printed product, fulfillment, and billing. You can ask about early access.']
 ];
 ---
-
-<PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="Less for Mom to manage. More for the family to own. One personalized family organization tool, prepared for you and delivered monthly." indexable={false} chrome={false} width="full" tracking={false}>
-<div class="ofc">
- <header class="ofc-nav">
-  <a href="/" aria-label="Organized Mom Collective home" class="ofc-logo"><img src="/brand/omc-badge.png" alt="" width="52" height="52"/><span>Organized Family Club</span></a>
-  <nav aria-label="Page navigation"><a href="#inside">What you get</a><a href="#how">How it works</a><a href="#questions">Questions</a><a href="/club/dashboard" class="ofc-member-link">Member kits ↗</a></nav>
- </header>
- <section class="ofc-hero" aria-labelledby="ofc-heading">
-  <div class="ofc-hero-copy">
-   <p class="ofc-eyebrow">ORGANIZED FAMILY CLUB · MONTHLY FAMILY MAIL</p>
-   <h1 id="ofc-heading">Less for Mom to manage. <em>More for the family to own.</em></h1>
-   <p class="ofc-lead">We make the plan. Your family makes it happen.</p>
-   <p>One beautifully prepared, personalized family tool delivered to your mailbox each month. So everyone can start taking more responsibility without you having to figure it all out.</p>
-   <div class="ofc-hero-cta"><a href="#inside" class="ofc-button">See what comes in the mail <span aria-hidden="true">→</span></a></div>
-   <p class="ofc-availability">Enrollment is not open yet. <a href="/support">Ask about early access →</a></p>
-  </div>
-  <div class="ofc-hero-art" aria-label="Illustration of a flat envelope holding the monthly family plan">
-   <div class="ofc-postmark">ONE FAMILY. ONE USEFUL TOOL.</div>
-   <div class="ofc-mail-back"></div>
-   <div class="ofc-paper ofc-paper-back"><span>PERSONALIZED FOR YOUR FAMILY</span><i></i><i></i><i></i></div>
-   <div class="ofc-paper ofc-paper-front"><small>ORGANIZED FAMILY CLUB · NOVEMBER</small><strong>Our family.<br /><em>Our team.</em></strong><div class="ofc-paper-line">ONE JOB · ONE OWNER</div><div class="ofc-paper-line">A READY-TO-USE PLAN</div><div class="ofc-paper-line">MADE FOR YOUR FAMILY</div><span>PREPARED FOR YOU</span></div>
-   <div class="ofc-envelope"><span>GOOD THINGS COME IN THE MAIL.</span></div>
-  </div>
- </section>
- <section class="ofc-intro" aria-labelledby="ofc-problem">
-  <p class="ofc-eyebrow">SOUND FAMILIAR?</p>
-  <h2 id="ofc-problem">Everyone helps. <em>But you're still managing everything.</em></h2>
-  <p>You remember what needs to happen. You make the plans. You assign the jobs. You remind everyone to follow through.</p>
-  <p>Even when your family pitches in, you're the one keeping it all running. And most organization tools give you one more thing to set up.</p>
-  <p><strong>What if someone did that part for you?</strong></p>
- </section>
- <section class="ofc-solution" aria-labelledby="ofc-solution-heading">
-  <div class="ofc-solution-copy">
-   <p class="ofc-eyebrow">ONE LITTLE ENVELOPE. ONE LESS THING TO FIGURE OUT.</p>
-   <h2 id="ofc-solution-heading">We make the plan. <em>Your family makes it happen.</em></h2>
-   <p>Every month, we tackle one real family challenge with a practical tool prepared for your household.</p>
-   <p>Not a blank worksheet. Not another complicated system. Names, realistic responsibilities, and clear next steps already worked out.</p>
-   <p><strong>Open it. Put it to use. Let your family take it from there.</strong></p>
-  </div>
-  <figure class="ofc-solution-photo"><img src="/images/club/club-dad-son-dishes.webp" alt="Father and son sharing responsibility for dishes at the kitchen sink" loading="lazy" width="1200" height="800"/></figure>
- </section>
- <section class="ofc-demo" aria-labelledby="ofc-demo-heading">
-  <p class="ofc-eyebrow">WHAT SHARING THE LOAD CAN LOOK LIKE</p>
-  <h2 id="ofc-demo-heading">Less reminding. <em>More ownership.</em></h2>
-  <div class="ofc-demo-grid">
-   <div class="ofc-demo-panel"><span>BEFORE</span><p>“Can someone unload the dishwasher?”</p><p>“Did you finish cleaning up?”</p><p>“Who's supposed to do this?”</p></div>
-   <div class="ofc-demo-panel ofc-demo-after"><span>WITH A PREPARED FAMILY PLAN</span><p><strong>Andrew:</strong> Unload the dishwasher after breakfast.</p><p><strong>Philip:</strong> Clear the dinner table.</p><p><strong>Dad:</strong> Own Wednesday dinner, start to finish.</p></div>
-  </div>
-  <p class="ofc-demo-caption">Illustrative household example. Actual assignments are tailored to the family.</p>
- </section>
- <section class="ofc-months" id="inside" aria-labelledby="ofc-months-heading">
-  <div class="ofc-section-head"><p class="ofc-eyebrow">12 MONTHS OF SHARING THE LOAD</p><h2 id="ofc-months-heading">12 months. <em>12 things you shouldn’t have to carry alone.</em></h2><p>Each month takes aim at one thing Mom usually has to manage, with a ready-to-use tool that helps the family take ownership.</p></div>
-  <div class="ofc-month-grid">
-   {months.map(m => <article class="ofc-month">
-    <div class="ofc-month-icon"><img src={m.icon} alt="" loading="lazy" width="112" height="112" /></div>
-    <div class="ofc-month-copy">
-     <p class="ofc-month-eyebrow">{m.month}</p>
-     <h3>{m.title}</h3>
-     <p class="ofc-responsibility"><strong>Builds:</strong> {m.responsibility}</p>
-     <p class="ofc-how"><strong>How:</strong> {m.how}</p>
-     <a href={m.url} class="ofc-text-link">Preview the tool →</a>
+<PublicLayout fullTitle={\`Organized Family Club · \${BRAND_NAME}\`} description="Help your kids take responsibility without another job for Mom. Try a personalized family Daily Reset in seconds." indexable={false} chrome={false} width="full" tracking={false}>
+<div class="club">
+<header class="topbar">
+ <a class="brand" href="/"><img src="/brand/omc-badge.png" alt="" width="46" height="46" /><span>Organized Family Club</span></a>
+ <nav aria-label="Club navigation"><a href="#how">How it works</a><a href="#months">Monthly tools</a><a href="#faq">Questions</a><a class="member" href="/club/dashboard">Member access ↗</a></nav>
+</header>
+<main>
+<section class="hero" id="start">
+ <div class="hero-inner">
+  <div class="hero-copy">
+   <p class="eyebrow">ORGANIZED FAMILY CLUB · MADE FOR YOUR FAMILY</p>
+   <h1>Raise kids who take responsibility. <em>Without another job for Mom.</em></h1>
+   <p class="promise">We make the plan. Your family makes it happen.</p>
+   <p class="supporting">Don't take our word for it. Tell us who's in your family, and see a personalized Daily Reset come together in seconds. No homework, no account.</p>
+   <form id="family-form" class="form" autocomplete="off">
+    <h2>Let's make your family's plan.</h2>
+    <p>Just names and ages. We'll take it from there.</p>
+    <div class="name-fields">
+     <label>Mom's first name<input name="mom" id="mom" placeholder="Megan" maxlength="40" required /></label>
+     <label>Dad's first name<input name="dad" id="dad" placeholder="Mark" maxlength="40" required /></label>
     </div>
-   </article>)}
+    <div class="children-head"><strong>Your kids</strong><span>First names only</span></div>
+    <div id="children-fields"></div>
+    <button type="button" class="add" id="add-child">+ Add a child</button>
+    <button type="submit" class="primary form-submit">Make My Family's Plan <span aria-hidden="true">→</span></button>
+    <small>No sign-in. Your family's details stay in this browser.</small>
+   </form>
   </div>
-  <p class="ofc-disclaimer">Previews show sample households. Monthly tools are designed to be personalized; printing and fulfillment are still being tested.</p>
- </section>
- <section class="ofc-method" id="how" aria-labelledby="ofc-how-heading">
-  <div class="ofc-method-copy"><p class="ofc-eyebrow">SIMPLE FROM THE START</p><h2 id="ofc-how-heading">We do the prep work. <em>You get the good part.</em></h2>
-   <div class="ofc-method-steps">
-    <div><span>01</span><div><h3>Tell us about your family once.</h3><p>Just a few details like names and ages, so each resource fits your household.</p></div></div>
-    <div><span>02</span><div><h3>We prepare your monthly tool.</h3><p>We suggest practical plans and age-appropriate responsibilities. Review or adjust them only if you want.</p></div></div>
-    <div><span>03</span><div><h3>Happy mail arrives.</h3><p>Your personalized printed plan arrives ready to use, with a digital version for reviewing or reprinting.</p></div></div>
-   </div><p><strong>No printer needed. No blank pages. No monthly homework.</strong></p>
-  </div>
-  <figure class="ofc-method-photo"><img src="/images/site/calendar-cutout-720.webp" alt="Organized Mom Collective weekly wall calendar" loading="lazy" width="720" height="1058"/><figcaption>One small step toward a home that runs together.</figcaption></figure>
- </section>
- <section class="ofc-calendar" aria-labelledby="ofc-calendar-heading">
-  <img src="/images/site/calendar-cutout-720.webp" width="720" height="1058" loading="lazy" alt="Organized Mom Collective wall calendar"/>
-  <div><p class="ofc-eyebrow">GREAT TOGETHER. USEFUL APART.</p><h2 id="ofc-calendar-heading">The calendar shows the plan. <em>The Club helps your family own it.</em></h2><p>The wall calendar helps everyone see what's happening. The Club helps everyone share responsibility for getting it done.</p><p>They work beautifully together, but you don't need the calendar to enjoy the Club.</p><a href="/calendar" class="ofc-text-link">Explore the wall calendar →</a></div>
- </section>
- <section class="ofc-offer" aria-labelledby="ofc-offer-heading">
-  <p class="ofc-eyebrow">YOUR MONTHLY FAMILY MAIL</p>
-  <h2 id="ofc-offer-heading">A little less on your shoulders. <em>Every month.</em></h2>
-  <p>One personalized printed family tool, delivered to your home, plus a digital version to review or reprint. One monthly problem. One useful solution.</p>
-  <p class="ofc-offer-price">$6.39 <span>/ month</span> <small>or $59/year</small></p>
-  <p class="ofc-offer-note">Proposed pricing, subject to fulfillment testing. Enrollment has not opened.</p>
-  <a href="/support" class="ofc-button">Ask about early access →</a>
- </section>
- <section class="ofc-family" aria-labelledby="ofc-family-heading">
-  <img src="/images/site/mark-megan-family-story-1200.webp" width="1200" height="1200" alt="The Organized Mom Collective founding family outdoors" loading="lazy"/>
-  <div><p class="ofc-eyebrow">FROM OUR FAMILY TO YOURS</p><h2 id="ofc-family-heading">Organized moms <em>shouldn't have to do it all.</em></h2><p>We believe an organized home isn't one where Mom has everything under control. It's one where the whole family learns to notice, pitch in, and care for each other.</p><p>That's why we created the Club. Not to give Mom another system to manage, but to do some of the planning and preparation for her.</p><p><strong>Organized moms raise organized families.</strong></p><p><em>Mark &amp; Megan</em></p></div>
- </section>
- <section class="ofc-faq" id="questions" aria-labelledby="ofc-faq-heading"><p class="ofc-eyebrow">GOOD QUESTIONS</p><h2 id="ofc-faq-heading">Before you join</h2><div>{faqs.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
- <section class="ofc-close" aria-labelledby="ofc-close-heading"><p class="ofc-eyebrow">ORGANIZED FAMILY CLUB</p><h2 id="ofc-close-heading">You don't have to organize <em>everything yourself.</em></h2><p class="ofc-close-lead">A little help from us. A little more ownership from your family.</p><p class="ofc-notice">We're getting ready to open enrollment. Personalized printing and mailing are still in testing.</p><div class="ofc-close-actions"><a class="ofc-button" href="/support">Ask about early access →</a><a class="ofc-text-link" href="#inside">See the monthly tools →</a></div></section>
- <footer class="ofc-footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
+  <aside class="demo-side">
+   <div class="sample-stamp">A LITTLE MORE OWNERSHIP, EVERY DAY</div>
+   <div class="sheet-outer"><div class="sheet" id="hero-sheet">
+    <div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div>
+    <h2 id="sheet-heading">Our Family's<br/><em>Daily Reset</em></h2>
+    <p class="sheet-lede">A few minutes together. A fresh start tomorrow.</p>
+    <div class="sheet-rule"></div>
+    <div class="sheet-section-label">EVERYONE HAS A PART</div>
+    <div id="sheet-assignments" class="sheet-assignments">
+      <div class="assignment"><span class="tick"></span><div><b>Emma, 8</b><p>Backpack and shoes in their places</p></div></div>
+      <div class="assignment"><span class="tick"></span><div><b>Leo, 5</b><p>Toys and books back on the shelf</p></div></div>
+      <div class="assignment"><span class="tick"></span><div><b>Dad</b><p>Clear and wipe the dinner table</p></div></div>
+      <div class="assignment"><span class="tick"></span><div><b>Mom</b><p>Get tomorrow's essentials ready</p></div></div>
+    </div>
+    <div class="sheet-footer">A RESET WE DO TOGETHER <span>♡</span></div>
+   </div></div>
+   <p class="sample-note" id="sample-label">Example preview. Enter your family to see your own plan.</p>
+  </aside>
+ </div>
+</section>
+<section class="result" id="result" hidden aria-live="polite">
+ <div class="container result-layout">
+  <div><p class="eyebrow">YOUR FAMILY'S PLAN IS READY</p><h2>See? You didn't have to plan a thing.</h2><p>Everyone has a part. Nobody has to guess. That's the kind of preparation we want to do for your family every month.</p><p class="result-emphasis">One useful tool. Already thought through. Already made for your family.</p><div class="result-actions"><a href="#offer" class="primary">See How the Club Works →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div>
+  <div class="result-card"><span>WHAT YOU JUST EXPERIENCED</span><h3>Mom gives us her family.<br/>We do the thinking.</h3><p>This is a free example, not the mailed September tool. Each month of the Club brings a different ready-made family resource.</p></div>
+ </div>
+</section>
+<section class="benefits container" id="how">
+ <p class="eyebrow">A HOME THAT WORKS TOGETHER</p><h2>Less reminding. <em>More taking responsibility.</em></h2>
+ <div class="benefit-grid">
+  <article><span class="benefit-number">01</span><h3>Raise capable kids.</h3><p>Give your children practical ways to notice what needs doing and follow through.</p></article>
+  <article><span class="benefit-number">02</span><h3>Skip the planning.</h3><p>We prepare the assignments, structure, and next steps. You don't start with a blank page.</p></article>
+  <article><span class="benefit-number">03</span><h3>Open it. Use it.</h3><p>One personal, practical family tool prepared for your home every month.</p></article>
+ </div>
+</section>
+<section class="offer-band" id="offer"><div class="container offer-layout">
+ <div class="offer-copy"><p class="eyebrow">ONE TOOL. ONE REAL FAMILY CHALLENGE. EVERY MONTH.</p><h2>What if someone made a plan like this <em>for your family every month?</em></h2><p>The Organized Family Club prepares a new family tool for you, personalizes it for your household, and plans to deliver it to your mailbox.</p><div class="offer-details"><span>✓ Personalized for your family</span><span>✓ Printed and mailed to your home</span><span>✓ A digital version to review or reprint</span></div></div>
+ <div class="price-card"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h3>Make responsibility a family habit.</h3><div class="price">$6.39 <span>/ month</span></div><p class="annual">or $59 per year</p><p class="fineprint">Proposed pricing. Enrollment is not yet open while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask about early access.</small></div>
+ </div></section>
+<section class="months container" id="months"><div class="section-intro"><p class="eyebrow">MORE THAN A CHORE CHART</p><h2>One useful family win. <em>Month after month.</em></h2><p>Different challenges. The same simple idea: everyone takes a little more ownership, and Mom doesn't have to figure it all out.</p></div>
+ <div class="month-feature-grid">{[months[0], months[2], months[3]].map(m => <a class="month-feature" href={m.url}><img src={m.icon} alt="" loading="lazy" width="100" height="100"/><span>{m.month}</span><h3>{m.title}</h3><p>{m.how}</p><strong>See the tool →</strong></a>)}</div>
+ <details class="all-months"><summary>Explore all 12 monthly tools <span>+</span></summary><div class="month-grid">{months.map(m => <a href={m.url}><img src={m.icon} alt="" loading="lazy" width="54" height="54"/><div><small>{m.month}</small><b>{m.title}</b><span>Preview →</span></div></a>)}</div></details>
+ <p class="caption">The Daily Reset above is a free demo. Club monthly content and sample previews are separate. Mail fulfillment is still being tested.</p>
+</section>
+<section class="proof container"><div class="proof-quote"><p class="eyebrow">FROM AN ORGANIZED MOM COLLECTIVE CUSTOMER</p><blockquote>“This calendar is life changing. Quite literally!”</blockquote><p>Raquel · 5-star Etsy review of our wall calendar</p><small>This review is for the wall calendar, not the Family Club.</small></div><div class="proof-about"><img src="/images/site/mark-megan-family-story-1200.webp" alt="Mark and Megan with their family" loading="lazy" width="250" height="250"/><div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2>We believe a family works better <em>when everyone pitches in.</em></h2><p>That's why we created the Club. Not another system for Mom to manage, but practical help making the whole family part of the plan.</p><p><strong>Mark &amp; Megan</strong></p></div></div></section>
+<section class="faq" id="faq"><div class="container faq-layout"><div><p class="eyebrow">GOOD QUESTIONS</p><h2>Before you join.</h2></div><div class="faq-items">{faqs.map(([question,answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></div></section>
+<section class="closing"><div class="container"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h2>You don't have to raise responsible kids <em>all by yourself.</em></h2><p>We make the plan. Your family makes it happen.</p><a href="/support" class="primary">Ask About Early Access →</a></div></section>
+</main>
+<footer class="footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
 </div>
+<script>
+ const form = document.querySelector('#family-form');
+ const childrenFields = document.querySelector('#children-fields');
+ const addButton = document.querySelector('#add-child');
+ const sheetHeading = document.querySelector('#sheet-heading');
+ const assignments = document.querySelector('#sheet-assignments');
+ const result = document.querySelector('#result');
+ const sampleLabel = document.querySelector('#sample-label');
+ const KEY = 'ofc-club-sales-demo-v1';
+ const safe = value => String(value || '').trim().slice(0,40);
+ const escapeHtml = value => safe(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const jobs = age => age <= 3 ? 'Put a few toys in the basket (with help)' : age <= 5 ? 'Toys and books back in their places' : age <= 8 ? 'Put shoes, backpack, and belongings away' : age <= 11 ? 'Clear dishes and reset personal things' : age <= 14 ? 'Tidy the entryway and personal space' : 'Help reset the kitchen and shared spaces';
+ function addChild(name='',age='7') {
+   if(childrenFields.children.length >= 8) return;
+   const row = document.createElement('div'); row.className='child-row';
+   row.innerHTML = '<label><span class="sr-only">Child name</span><input name="child-name" required maxlength="40" placeholder="Child’s name"></label><label><span class="sr-only">Child age</span><select name="child-age">'+Array.from({length:18},(_,i)=>'<option value="'+(i+1)+'">Age '+(i+1)+'</option>').join('')+'</select></label><button type="button" class="remove" aria-label="Remove child">×</button>';
+   row.querySelector('input').value=name; row.querySelector('select').value=age;
+   row.querySelector('button').addEventListener('click',()=>{if(childrenFields.children.length>1)row.remove();addButton.disabled=childrenFields.children.length>=8});
+   childrenFields.append(row);addButton.disabled=childrenFields.children.length>=8;
+ }
+ function getData(){return {mom:safe(form.elements.namedItem('mom').value),dad:safe(form.elements.namedItem('dad').value),children:[...childrenFields.querySelectorAll('.child-row')].map(row=>({name:safe(row.querySelector('input').value),age:Number(row.querySelector('select').value)}))}}
+ function showPlan(data,scroll=false){
+   sheetHeading.innerHTML='Our Family’s<br/><em>Daily Reset</em>';
+   const people=[...data.children.map(c=>({name:c.name,task:jobs(c.age)})),{name:data.dad,task:'Clear and wipe the dinner table'},{name:data.mom,task:'Help everyone get ready for tomorrow'}];
+   assignments.innerHTML=people.map(p=>'<div class="assignment"><span class="tick"></span><div><b>'+escapeHtml(p.name)+'</b><p>'+escapeHtml(p.task)+'</p></div></div>').join('');
+   sampleLabel.textContent='Your personalized example. Actual Club monthly mailings are separate.';
+   result.hidden=false;
+   try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}
+   if(scroll)result.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ addButton.addEventListener('click',()=>addChild());
+ form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity())return;showPlan(getData(),true)});
+ document.querySelector('#edit-family').addEventListener('click',()=>form.scrollIntoView({behavior:'smooth',block:'center'}));
+ document.querySelector('#clear-family').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch{};form.reset();childrenFields.replaceChildren();addChild();addChild('','5');result.hidden=true;assignments.innerHTML='';sampleLabel.textContent='Example preview. Enter your family to see your own plan.';form.scrollIntoView({behavior:'smooth'})});
+ let saved=null;try{saved=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
+ if(saved&&typeof saved.mom==='string'&&typeof saved.dad==='string'&&Array.isArray(saved.children)&&saved.children.length&&saved.children.length<=8){form.elements.namedItem('mom').value=safe(saved.mom);form.elements.namedItem('dad').value=safe(saved.dad);saved.children.forEach(c=>addChild(safe(c.name),String(Math.max(1,Math.min(18,Number(c.age)||7)))));if(saved.mom&&saved.dad&&saved.children.every(c=>c.name))showPlan(saved)}else{addChild();addChild('','5')}
+</script>
 <style>
-.ofc{--ink:#454545;--soft:#686868;--line:#d8d9d6;color:var(--ink);font-family:'Montserrat Variable',Montserrat,Arial,sans-serif;line-height:1.6}
-.ofc *{box-sizing:border-box}.ofc p{margin:0}.ofc a{color:inherit}.ofc h1,.ofc h2,.ofc h3{font-family:Georgia,serif;font-weight:400;letter-spacing:-.025em;line-height:1.12;margin:0}
-.ofc h1{font-size:clamp(2.5rem,5vw,5.1rem)}.ofc h2{font-size:clamp(2.1rem,3.65vw,3.85rem)}.ofc h3{font-size:clamp(1.45rem,2vw,1.9rem)}.ofc h1 em,.ofc h2 em{font-weight:700;font-style:italic;color:#527468}
-.ofc-eyebrow{font-size:.69rem;font-weight:700;letter-spacing:.17em;line-height:1.4}.ofc-text-link{text-decoration:underline;text-underline-offset:5px;font-size:.92rem;font-weight:650}.ofc-text-link:hover{color:#527468}
-.ofc-nav{max-width:1450px;margin:auto;padding:18px clamp(20px,4vw,58px);display:flex;align-items:center;justify-content:space-between;gap:20px}.ofc-logo{display:flex;gap:13px;align-items:center;text-decoration:none;font-family:Georgia,serif;font-size:1.12rem}.ofc-logo img{width:47px;height:47px;object-fit:contain}.ofc-nav nav{display:flex;align-items:center;gap:23px;flex-wrap:wrap}.ofc-nav nav a{font-size:.81rem;text-decoration:none}.ofc-nav nav a:hover{text-decoration:underline}.ofc-member-link{border-bottom:1px solid var(--ink);padding-bottom:3px}
-.ofc-hero{margin:0 clamp(14px,2.5vw,36px);min-height:645px;display:grid;grid-template-columns:1fr 1fr;background:#f1f2f2;overflow:hidden}.ofc-hero-copy{padding:clamp(38px,5.2vw,84px);align-self:center;max-width:780px}.ofc-hero h1{margin:18px 0 25px}.ofc-lead{font-family:Georgia,serif;font-size:clamp(1.24rem,1.65vw,1.65rem);line-height:1.4!important;margin:0 0 19px!important;color:#343434}.ofc-hero-copy>p:not(.ofc-eyebrow):not(.ofc-lead){font-size:1rem}.ofc-hero-cta{margin-top:32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}.ofc-hero-cta p{font-size:.82rem}.ofc-hero-cta span{color:#676767}
-.ofc-button{display:inline-flex;justify-content:center;align-items:center;gap:16px;min-height:52px;background:#454545;color:#fff!important;text-decoration:none;padding:14px 24px;font-size:.83rem;font-weight:700;letter-spacing:.025em}.ofc-button:hover{background:#303030}
-.ofc-hero-art{position:relative;min-height:580px;background:#e7ece5;display:grid;place-items:center;overflow:hidden}.ofc-postmark{position:absolute;top:25px;left:30px;font-size:.63rem;letter-spacing:.16em;font-weight:700}.ofc-mail-back{width:72%;height:50%;background:#dfd1bc;position:absolute;top:39%;transform:rotate(-8deg);box-shadow:10px 17px 30px #41414124}.ofc-paper{position:absolute;width:57%;height:67%;top:13%;background:#fff;padding:clamp(18px,3vw,38px);box-shadow:7px 16px 28px #0003;display:flex;flex-direction:column;gap:14px}.ofc-paper-back{background:#cddde1;transform:translate(-12%,-5%) rotate(-12deg)}.ofc-paper-back span,.ofc-paper-front small,.ofc-paper-front>span{font-size:clamp(.55rem,.75vw,.76rem);letter-spacing:.13em}.ofc-paper-back i{display:block;height:1px;background:#849baa;margin-top:23px}.ofc-paper-front{transform:rotate(3deg)}.ofc-paper-front strong{font:400 clamp(1.15rem,2.3vw,2.5rem)/1.1 Georgia,serif;margin:13px 0}.ofc-paper-front strong em{color:#527468}.ofc-paper-line{border-top:1px solid #c7d1ca;padding:12px 0 0;font-size:clamp(.45rem,.7vw,.65rem);letter-spacing:.13em}.ofc-paper-front>span{margin-top:auto}.ofc-envelope{position:absolute;bottom:7%;left:15%;height:24%;width:73%;background:#f3e9d8;transform:rotate(-8deg);box-shadow:9px 16px 21px #0002;display:flex;align-items:end;padding:20px;font-size:.65rem;letter-spacing:.12em;font-weight:700}
-.ofc-intro{max-width:800px;margin:auto;padding:105px 25px}.ofc-intro h2{margin:17px 0 28px}.ofc-intro>p:not(.ofc-eyebrow){font-size:1.1rem;line-height:1.8;margin-bottom:15px}.ofc-section-head{max-width:830px;margin:0 auto 48px;text-align:center}.ofc-section-head h2{margin:15px 0 22px}.ofc-section-head>p:last-child{font-size:1.07rem;line-height:1.8}
-.ofc-months{max-width:1360px;margin:auto;padding:55px 25px 115px;scroll-margin-top:25px}.ofc-month-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-.ofc-month{border:1px solid #dcdcdc;min-width:0;background:#fff;display:flex;flex-direction:column}.ofc-month-art{height:410px;position:relative;background:var(--month-color);padding:24px;overflow:hidden}.ofc-month-art-meta{display:flex;justify-content:space-between;gap:10px;font-size:.62rem;font-weight:700;letter-spacing:.13em}.ofc-art-sheet{position:absolute;top:83px;left:12%;width:76%;height:310px;background:#fff;box-shadow:7px 12px 25px #0002;padding:28px;transform:rotate(-2deg)}.ofc-art-sheet>p{font:400 1.35rem/1.18 Georgia,serif;margin-bottom:26px}.ofc-art-sheet>p em{display:block;font-weight:700;color:#527468}.ofc-art-ownership>div{border-top:1px solid #d7cbbf;display:flex;flex-direction:column;padding:11px 0;gap:5px;font-size:.55rem;letter-spacing:.09em}.ofc-art-ownership>div span{font-size:.5rem}.ofc-art-christmas ol{padding:0 0 0 20px;font:13px/2 Georgia,serif}.ofc-christmas-note{border-top:1px solid #cbdad1;padding-top:20px;margin-top:24px;font:italic 1rem Georgia,serif;color:#527468}.ofc-art-habits{display:flex;flex-direction:column;gap:9px;padding:22px}.ofc-art-habits>p{font-size:1rem;margin:0 0 5px}.ofc-mini-card{display:flex;flex-direction:column;gap:6px;background:#eff5f7;padding:12px 15px;border:1px dashed #a6bfc9}.ofc-mini-card>span{font-size:.48rem;letter-spacing:.1em}.ofc-mini-card>strong{font:italic 1rem Georgia,serif;color:#527384}.ofc-art-caption{position:absolute;bottom:9px;right:22px;font-size:.52rem;letter-spacing:.14em}
-.ofc-month-copy{padding:27px 25px 30px;display:flex;flex-direction:column;flex:1}.ofc-month-eyebrow{font-size:.65rem;letter-spacing:.13em;font-weight:700;color:#527468}.ofc-month-copy h3{margin:14px 0 16px}.ofc-month-copy>p:not(.ofc-month-eyebrow){font-size:.93rem;line-height:1.7}.ofc-outcome{margin-top:15px!important;border-top:1px solid #ddd;padding-top:13px;font-family:Georgia,serif;font-style:italic;color:#527468}.ofc-month-copy a{margin-top:auto;padding-top:25px;align-self:flex-start}.ofc-disclaimer{text-align:center;color:#656565;font-size:.79rem;line-height:1.55;max-width:790px;margin:27px auto 0!important}
-.ofc-method{margin:0 clamp(14px,2.5vw,36px);padding:clamp(36px,5vw,75px);background:#f7f7f5;display:grid;grid-template-columns:1fr .85fr;gap:clamp(30px,5vw,100px);align-items:center}.ofc-method h2{margin:17px 0 35px}.ofc-method-steps>div{border-top:1px solid #ccc;display:grid;grid-template-columns:45px 1fr;gap:18px;padding:20px 0}.ofc-method-steps>div>span{font:700 italic 1.5rem Georgia,serif;color:#527468}.ofc-method-steps h3{font-size:1.3rem;margin:0 0 8px}.ofc-method-steps p{font-size:.93rem}.ofc-testing{border-top:1px solid #ccc;margin-top:12px!important;padding-top:19px;color:#656565;font-size:.8rem}.ofc-method-photo{margin:0}.ofc-method-photo img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}.ofc-method-photo figcaption{font:italic 1.2rem Georgia,serif;color:#527468;margin-top:18px}
-.ofc-next{max-width:1180px;margin:auto;padding:115px 25px}.ofc-next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:28px;row-gap:22px}.ofc-next-item{border-top:1px solid #c9d4cf;padding:17px 0;display:grid;gap:9px}.ofc-next-item>span{font-size:.66rem;letter-spacing:.13em;font-weight:700;color:#527468}.ofc-next-item h3{font-size:1.32rem;margin-bottom:8px}.ofc-next-item p{font-size:.85rem;color:#656565}.ofc-next-item a{display:inline-block;margin-top:11px;font-size:.79rem}
-.ofc-calendar{margin:0 clamp(14px,2.5vw,36px);padding:clamp(45px,6vw,90px);background:#e7ece5;display:grid;grid-template-columns:.65fr 1fr;gap:clamp(35px,6vw,100px);align-items:center}.ofc-calendar img{width:100%;max-height:500px;object-fit:contain}.ofc-calendar h2{margin:18px 0 30px}.ofc-calendar p:not(.ofc-eyebrow){margin-bottom:15px;font-size:1rem}
-.ofc-family{max-width:1160px;margin:0 auto;padding:110px 25px;display:grid;grid-template-columns:.8fr 1fr;gap:clamp(35px,6vw,95px);align-items:center}.ofc-family img{width:100%;aspect-ratio:1;object-fit:cover}.ofc-family h2{margin:17px 0 28px}.ofc-family p:not(.ofc-eyebrow){margin-bottom:16px}
-.ofc-faq{max-width:820px;margin:0 auto;padding:0 25px 110px;scroll-margin-top:25px}.ofc-faq h2{margin:17px 0 29px}.ofc-faq details{border-bottom:1px solid #d7d7d7}.ofc-faq details:first-child{border-top:1px solid #d7d7d7}.ofc-faq summary{cursor:pointer;padding:22px 0;font-weight:600;font-size:.94rem;display:flex;justify-content:space-between;gap:18px;list-style:none}.ofc-faq summary::-webkit-details-marker{display:none}.ofc-faq details[open] summary span{transform:rotate(45deg)}.ofc-faq details p{padding:0 24px 22px 0;font-size:.94rem;color:#606060}
-.ofc-close{text-align:center;margin:0 clamp(14px,2.5vw,36px);padding:80px 24px;background:#cddde1}.ofc-close h2{margin:15px 0 20px}.ofc-close-lead{font-family:Georgia,serif;font-size:1.35rem}.ofc-price{font:400 3.2rem Georgia,serif;margin:25px 0 7px!important}.ofc-price span{font:400 .9rem Montserrat,Arial,sans-serif}.ofc-notice{font-size:.86rem;line-height:1.7;max-width:580px;margin:0 auto 25px!important}.ofc-close-actions{display:flex;gap:22px;align-items:center;justify-content:center;flex-wrap:wrap}
-.ofc-footer{max-width:1450px;margin:auto;padding:37px clamp(20px,4vw,58px);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.8rem}
-@media(max-width:1070px){.ofc-month-grid{grid-template-columns:1fr 1fr}.ofc-month:last-child{grid-column:1/-1;max-width:580px;width:100%;margin:auto}.ofc-hero{grid-template-columns:1fr}.ofc-hero-art{min-height:440px}.ofc-paper{width:35%;height:75%;top:9%}.ofc-method{grid-template-columns:1fr}.ofc-method-photo{max-width:650px}.ofc-method-photo img{aspect-ratio:3/2}.ofc-next-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:720px){.ofc-nav{align-items:flex-start}.ofc-nav nav{gap:11px 18px;justify-content:flex-end}.ofc-nav nav a{font-size:.75rem}.ofc-hero-copy{padding:45px 25px}.ofc-hero-art{min-height:365px}.ofc-paper{width:52%;height:75%;padding:19px}.ofc-paper-front strong{font-size:1.5rem}.ofc-month-grid{grid-template-columns:1fr}.ofc-month:last-child{grid-column:auto;max-width:none}.ofc-method{padding:45px 24px}.ofc-next-grid{grid-template-columns:1fr}.ofc-calendar,.ofc-family{grid-template-columns:1fr}.ofc-calendar{padding:48px 24px}.ofc-calendar img{max-height:340px}.ofc-family{padding:75px 25px}.ofc-intro{padding:75px 25px}.ofc-months{padding:35px 18px 75px}.ofc-next{padding:75px 24px}.ofc-faq{padding-bottom:75px}.ofc-close{padding:65px 22px}}
-@media(max-width:460px){.ofc-nav{flex-direction:column;gap:12px}.ofc-nav nav{justify-content:flex-start}.ofc-hero h1{font-size:2.65rem}.ofc-hero-art{min-height:320px}.ofc-paper{width:58%;height:75%;padding:14px;gap:9px}.ofc-paper-front strong{font-size:1.25rem}.ofc-art-sheet{height:300px}.ofc-month-art{height:392px}.ofc-section-head{text-align:left}.ofc-close-actions .ofc-button{width:100%}}
-
-.ofc-availability{font-size:.82rem!important;margin-top:13px!important;color:#666}.ofc-availability a{font-weight:700;text-underline-offset:3px}
-.ofc-solution{margin:0 clamp(14px,2.5vw,36px);display:grid;grid-template-columns:1fr 1fr;align-items:center;background:#e7ece5;gap:clamp(25px,5vw,90px)}.ofc-solution-copy{padding:clamp(35px,6vw,90px)}.ofc-solution-copy h2{margin:17px 0 30px}.ofc-solution-copy p:not(.ofc-eyebrow){margin-bottom:17px;font-size:1.05rem}.ofc-solution-photo{margin:0;height:100%}.ofc-solution-photo img{width:100%;height:100%;min-height:460px;object-fit:cover}
-.ofc-demo{text-align:center;max-width:1010px;margin:auto;padding:100px 25px}.ofc-demo h2{margin:14px 0 42px}.ofc-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;text-align:left}.ofc-demo-panel{padding:34px 36px;background:#f3f3f1}.ofc-demo-panel>span{font-size:.69rem;letter-spacing:.13em;font-weight:700}.ofc-demo-panel p{font-family:Georgia,serif;font-size:1.1rem;margin-top:22px}.ofc-demo-after{background:#dce8e2}.ofc-demo-caption{font-size:.76rem;color:#686868;margin-top:18px!important}
-.ofc-month-summary{text-align:center;max-width:730px;margin:34px auto 0!important;font:italic 1.25rem/1.6 Georgia,serif}.ofc-offer{text-align:center;background:#cddde1;margin:0 clamp(14px,2.5vw,36px);padding:85px 25px}.ofc-offer h2{max-width:900px;margin:18px auto 22px}.ofc-offer>p:not(.ofc-eyebrow){max-width:620px;margin:0 auto 22px;font-size:1.05rem}.ofc-offer .ofc-offer-price{font:400 3.2rem Georgia,serif!important;margin:24px auto 7px!important}.ofc-offer-price span{font:400 .95rem Montserrat,Arial,sans-serif}.ofc-offer-price small{font:400 1.2rem Georgia,serif;display:block;margin-top:10px}.ofc-offer .ofc-offer-note{font-size:.82rem!important;color:#525d60;margin-bottom:26px!important}
-@media(max-width:720px){.ofc-solution{grid-template-columns:1fr}.ofc-solution-copy{padding:44px 24px}.ofc-solution-photo img{min-height:280px;max-height:420px}.ofc-demo{padding:70px 20px}.ofc-demo-grid{grid-template-columns:1fr}.ofc-demo-panel{padding:25px}.ofc-offer{padding:65px 22px}}
-
-/* Monthly responsibility directory */
-.ofc-month-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.ofc-month{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:start;gap:20px;padding:24px;background:#fff;border:1px solid #d9dfd9}
-.ofc-month-icon{width:112px;height:112px;display:grid;place-items:center;background:transparent;border:0;border-radius:0}
-.ofc-month-icon img{width:90px;height:90px;object-fit:contain}
-.ofc-month-copy{padding:0;min-width:0}
-.ofc-month-copy h3{margin:7px 0 14px;font-size:1.45rem}
-.ofc-month-copy .ofc-responsibility,.ofc-month-copy .ofc-how{font-size:.88rem;line-height:1.55;margin:0 0 9px}
-.ofc-month-copy .ofc-responsibility strong,.ofc-month-copy .ofc-how strong{color:#355b4d}
-.ofc-month-copy a{margin-top:6px;padding-top:8px}
-@media(max-width:900px){.ofc-month-grid{grid-template-columns:1fr}.ofc-month:last-child{grid-column:auto;max-width:none}}
-@media(max-width:460px){.ofc-month{grid-template-columns:76px minmax(0,1fr);gap:14px;padding:16px}.ofc-month-icon{width:76px;height:76px}.ofc-month-icon img{width:66px;height:66px}.ofc-month-copy h3{font-size:1.25rem}}
+.club{--forest:#254d3c;--sage:#547964;--cream:#fbf8f1;--ink:#303831;--muted:#66716a;--line:#d9dfd7;color:var(--ink);font-family:'Montserrat Variable',Montserrat,sans-serif;line-height:1.55;background:#fff}
+.club *{box-sizing:border-box}.club h1,.club h2,.club h3,.club blockquote{font-family:Georgia,serif;line-height:1.12;letter-spacing:-.025em;font-weight:400;margin:0}.club h1{font-size:clamp(2.5rem,4.1vw,4.9rem)}.club h2{font-size:clamp(2rem,3vw,3.5rem)}.club h3{font-size:1.55rem}.club h1 em,.club h2 em{font-weight:600;color:var(--sage)}.club p{margin:0}.club a{color:inherit}.container{max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px}.eyebrow{font-size:.72rem;letter-spacing:.16em;font-weight:750;color:var(--sage);margin-bottom:14px!important}.topbar{max-width:1360px;margin:auto;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;font-weight:800;text-decoration:none;color:var(--forest)!important}.brand img{object-fit:contain}.topbar nav{display:flex;align-items:center;gap:24px}.topbar nav a{font-size:.8rem;font-weight:650;text-decoration:none}.topbar nav a:hover{text-decoration:underline}.topbar nav .member{color:var(--forest)}.hero{background:linear-gradient(125deg,#fff 30%,#f6f6ee 100%);padding:65px 24px 75px}.hero-inner{max-width:1260px;margin:auto;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start;gap:clamp(32px,6vw,90px)}.hero-copy{max-width:610px}.promise{font-family:Georgia,serif;font-size:clamp(1.2rem,2vw,1.65rem);font-weight:600;margin:20px 0 8px!important;color:var(--forest)}.supporting{font-size:1.02rem;color:var(--muted);max-width:540px}.form{margin-top:27px;background:#fff;border:1px solid #dde4dc;border-radius:18px;padding:25px;box-shadow:0 14px 35px rgba(44,68,51,.08)}.form h2{font-family:Georgia,serif;font-size:1.7rem}.form>p{color:var(--muted);font-size:.89rem;margin:7px 0 17px!important}.name-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form label{font-size:.79rem;font-weight:700;display:block}.form input,.form select{margin-top:6px;display:block;width:100%;min-width:0;background:#fff;border:1px solid #cbd5cc;border-radius:9px;padding:12px 11px;font:inherit;font-size:.92rem;color:var(--ink)}.form input:focus,.form select:focus{outline:2px solid #7da88b;outline-offset:1px}.children-head{display:flex;justify-content:space-between;align-items:center;margin:17px 0 7px;font-size:.85rem}.children-head span{font-size:.74rem;color:var(--muted)}.child-row{display:grid;grid-template-columns:1fr 112px 28px;align-items:end;gap:10px;margin-bottom:8px}.child-row .remove{border:0;background:none;font-size:1.5rem;line-height:44px;cursor:pointer;color:#66736a}.add,.text-button{border:0;background:none;padding:5px 0;color:var(--forest);font-size:.83rem;font-weight:750;cursor:pointer}.add:disabled{opacity:.4}.primary{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:15px 24px;border:0;border-radius:10px;background:var(--forest);color:#fff!important;text-align:center;text-decoration:none;font-size:.93rem;font-weight:800;cursor:pointer;transition:background .15s}.primary:hover{background:#163b2c}.form-submit{width:100%;margin-top:17px}.form small,.price-card small{display:block;margin-top:10px;text-align:center;color:var(--muted);font-size:.72rem}.demo-side{padding-top:30px;position:relative}.sample-stamp{text-align:center;letter-spacing:.17em;color:var(--sage);font-size:.69rem;font-weight:750;margin-bottom:20px}.sheet-outer{background:#e5e7db;border-radius:22px;padding:27px;box-shadow:0 24px 50px rgba(51,66,49,.09);transform:rotate(1deg)}.sheet{background:#fffefa;box-shadow:0 8px 20px rgba(45,45,35,.09);border:1px solid #e8e0d1;padding:clamp(20px,3.3vw,46px);min-height:600px}.paper-top{display:flex;justify-content:space-between;color:var(--sage);font-size:.65rem;letter-spacing:.1em;font-weight:750}.paper-top span{font-size:1.5rem}.sheet h2{font-family:Georgia,serif;font-size:clamp(2.2rem,3.5vw,3.8rem);margin:35px 0 12px;color:#324e3d}.sheet h2 em{color:#7e9878}.sheet-lede{font-family:Georgia,serif;font-size:1.02rem;color:#697366}.sheet-rule{border-top:1px solid #c8d2c4;margin:28px 0 22px}.sheet-section-label{font-size:.65rem;letter-spacing:.14em;font-weight:800;color:#8a937c;margin-bottom:13px}.assignment{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #eee9df;align-items:start}.assignment .tick{flex-shrink:0;width:18px;height:18px;border:1.5px solid #a6b6a7;border-radius:3px;margin-top:3px}.assignment b{font-size:.9rem;color:#385546}.assignment p{font-size:.82rem;color:#646f62}.sheet-footer{font-size:.61rem;letter-spacing:.12em;color:#8a937c;margin-top:32px;display:flex;justify-content:space-between}.sheet-footer span{font-size:1.5rem}.sample-note{font-size:.77rem;color:var(--muted);text-align:center;margin-top:16px!important}.result{background:#eaf2eb;padding:55px 0;scroll-margin-top:20px}.result[hidden]{display:none}.result-layout{display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:55px}.result-layout h2{max-width:600px;margin-bottom:15px}.result-layout p{font-size:1rem;color:#4e6052;max-width:640px}.result-emphasis{font-weight:800;margin-top:15px!important;color:var(--forest)!important}.result-actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-top:24px}.result-card{border:1px solid #bacfbd;border-radius:18px;padding:27px;background:#fff}.result-card span{font-size:.69rem;letter-spacing:.13em;color:var(--sage);font-weight:800}.result-card h3{margin:16px 0;color:var(--forest)}.benefits{padding-top:105px;padding-bottom:100px}.benefits>h2{max-width:650px}.benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:40px}.benefit-grid article{padding:28px 24px;border-top:3px solid #88a38b;background:#f7f8f3;border-radius:0 0 14px 14px}.benefit-number{font-weight:800;color:var(--sage);font-size:.72rem}.benefit-grid h3{margin:14px 0}.benefit-grid p{color:var(--muted);font-size:.94rem}.offer-band{background:#f4f0e7;padding:95px 0}.offer-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(30px,7vw,100px);align-items:center}.offer-copy h2{max-width:700px;margin-bottom:20px}.offer-copy>p:not(.eyebrow){color:var(--muted);font-size:1.04rem}.offer-details{display:grid;gap:11px;margin-top:28px;font-size:.91rem;font-weight:650;color:var(--forest)}.price-card{background:#fff;padding:35px;border:1px solid #e1dfd5;border-radius:20px;box-shadow:0 14px 40px rgba(56,64,51,.07)}.price-card h3{margin:5px 0 24px}.price{font-family:Georgia,serif;font-size:3.3rem;line-height:1;color:var(--forest)}.price span{font-family:Montserrat,Arial,sans-serif;font-size:.87rem;color:var(--muted)}.annual{font-size:.96rem;font-weight:750;margin-top:10px!important}.fineprint{font-size:.77rem;color:var(--muted);margin:22px 0!important}.price-card .primary{width:100%}.months{padding-top:100px;padding-bottom:95px}.section-intro{text-align:center;max-width:790px;margin:0 auto 40px}.section-intro h2{margin-bottom:18px}.section-intro>p:last-child{color:var(--muted)}.month-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.month-feature{text-decoration:none;border:1px solid var(--line);border-radius:18px;padding:28px 25px;background:#fdfcf9;transition:transform .16s}.month-feature:hover{transform:translateY(-3px)}.month-feature img{width:82px;height:82px;object-fit:contain}.month-feature>span{display:block;color:var(--sage);font-weight:800;font-size:.73rem;letter-spacing:.12em;margin:14px 0 8px;text-transform:uppercase}.month-feature h3{font-size:1.5rem}.month-feature p{color:var(--muted);font-size:.87rem;margin:12px 0!important}.month-feature strong{font-size:.82rem;text-decoration:underline;color:var(--forest)}.all-months{margin-top:28px;border:1px solid var(--line);border-radius:14px;padding:18px 22px}.all-months>summary{cursor:pointer;font-weight:800;color:var(--forest);display:flex;justify-content:space-between;list-style:none}.all-months>summary::-webkit-details-marker{display:none}.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:23px}.month-grid a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:14px;background:#f8f8f3;border-radius:10px}.month-grid img{object-fit:contain;width:48px;height:48px}.month-grid a div{display:grid;gap:3px}.month-grid small{font-size:.68rem;color:var(--sage)}.month-grid b{font-size:.79rem}.month-grid span{font-size:.7rem;text-decoration:underline}.caption{font-size:.76rem;color:var(--muted);margin-top:18px!important}.proof{padding-top:35px;padding-bottom:105px}.proof-quote{max-width:730px;margin:0 auto 95px;text-align:center;padding:40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.proof-quote blockquote{font-size:clamp(1.8rem,3vw,2.8rem);margin:12px 0 20px}.proof-quote>p:not(.eyebrow){font-weight:750;font-size:.86rem}.proof-quote small{color:var(--muted);font-size:.72rem}.proof-about{display:grid;grid-template-columns:240px 1fr;gap:35px;max-width:850px;margin:auto;align-items:center}.proof-about img{width:240px;height:240px;object-fit:cover;border-radius:18px}.proof-about h2{font-size:2.35rem;margin-bottom:16px}.proof-about p:not(.eyebrow){margin-bottom:15px!important;color:var(--muted)}.faq{background:#f7f8f4;padding:95px 0}.faq-layout{display:grid;grid-template-columns:.65fr 1.35fr;gap:70px}.faq-items details{border-bottom:1px solid #d5dfd5;padding:20px 0}.faq-items summary{display:flex;justify-content:space-between;gap:20px;cursor:pointer;font-weight:750;list-style:none}.faq-items summary::-webkit-details-marker{display:none}.faq-items details p{color:var(--muted);font-size:.94rem;padding-top:14px}.closing{padding:100px 0;text-align:center}.closing h2{max-width:800px;margin:auto}.closing p:not(.eyebrow){font-family:Georgia,serif;font-size:1.35rem;color:var(--forest);margin:20px auto 26px!important}.footer{background:#254d3c;color:white;padding:24px;display:flex;justify-content:space-between;gap:20px;font-size:.78rem}.footer a{color:white}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(max-width:900px){.hero-inner,.offer-layout{gap:30px}.hero-inner{grid-template-columns:1fr 1fr}.sheet{min-height:0}.month-grid{grid-template-columns:repeat(2,1fr)}.topbar nav{gap:12px}.topbar nav a{font-size:.73rem}}
+@media(max-width:700px){.topbar{padding:12px 18px}.topbar nav a:not(.member){display:none}.brand{font-size:.85rem}.brand img{width:38px;height:38px}.hero{padding:40px 16px 60px}.hero-inner,.result-layout,.offer-layout,.faq-layout,.proof-about{grid-template-columns:1fr}.hero h1{font-size:clamp(2.45rem,10vw,3.3rem)}.hero-copy{max-width:none}.form{padding:20px;margin-top:24px}.demo-side{padding-top:15px;max-width:480px;width:100%;margin:0 auto}.sheet-outer{padding:17px;transform:none}.sheet{padding:25px}.sheet h2{font-size:2.5rem}.benefits,.months,.proof{padding-top:65px;padding-bottom:65px}.benefit-grid,.month-feature-grid{grid-template-columns:1fr;gap:13px}.benefit-grid{margin-top:24px}.offer-band,.faq,.closing{padding:65px 0}.price-card{padding:25px}.month-grid{grid-template-columns:1fr}.proof-quote{margin-bottom:55px;padding:30px 6px}.proof-about img{width:170px;height:170px}.proof-about{gap:25px}.result-layout{gap:24px}.footer{flex-direction:column;text-align:center;align-items:center}.child-row{grid-template-columns:minmax(0,1fr) 110px 24px;gap:7px}.name-fields{gap:8px}}
+@media(prefers-reduced-motion:reduce){.club *{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </PublicLayout>
