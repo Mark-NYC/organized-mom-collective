@@ -1,0 +1,25 @@
+---
+/** Mobile November review reuses the exact Club prototype and printable renderer.
+ * This is a sample experience, not a member entitlement or mailing action.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+import NovemberOwnershipPrototype from '../../components/club/NovemberOwnershipPrototype.astro';
+import '@fontsource/kalam/latin-700.css';
+import '../../styles/club.css';
+---
+<AppLayout title="November Family Ownership" description="Review, adjust and preview the November ownership plan.">
+  <div id="club-month-content" class="november-app">
+    <p class="mx-auto max-w-3xl rounded-xl border border-[#d8c9a6] bg-[#fff8e9] p-4 text-sm leading-relaxed">
+      <strong>Sample preview.</strong> Changes here do not update your account or create a mailed order.
+    </p>
+    <NovemberOwnershipPrototype />
+  </div>
+</AppLayout>
+<style is:global>
+  @media screen and (max-width:767px){
+    .november-app{min-width:0;max-width:100%;overflow-x:clip}
+    .november-app .ws-shell{padding-bottom:30px!important}
+    .november-app .ws-mobile-steps{top:0}
+    .november-app .ws-top .ws-back{display:none}
+  }
+</style>

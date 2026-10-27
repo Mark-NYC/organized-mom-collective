@@ -5,6 +5,13 @@ import { monthColors } from '../../theme';
 const first=JOB_PRESETS[0];
 ---
 <main class="ws-shell" style={`--ws-month-color: ${monthColors[10].hex}`}>
+  <nav class="ws-mobile-steps" aria-label="November plan steps">
+    <button type="button" data-ws-step="review" aria-current="step"><span>1</span> Review</button>
+    <button type="button" data-ws-step="adjust"><span>2</span> Adjust</button>
+    <button type="button" data-ws-step="preview"><span>3</span> Preview</button>
+    <button type="button" data-ws-step="approve"><span>4</span> Approve</button>
+  </nav>
+  <p class="ws-mobile-guide" id="ws-mobile-guide" role="status" aria-live="polite">Review the prepared family plan. You can keep it exactly as it is.</p>
   <div class="ws-top"><a class="ws-back" href="/club">← Organized Family Club</a><span class="ws-eyebrow">ORGANIZED FAMILY CLUB · NOVEMBER 2027</span></div>
   <div class="ws-intro">
     <p class="ws-eyebrow">ONE WHOLE JOB · HANDED OFF</p>
@@ -158,6 +165,31 @@ const first=JOB_PRESETS[0];
     update();
   });
 
+  // Mobile guidance only. The same form, normalization, SVG renderer and dialog
+  // remain the source of truth on mobile and desktop.
+  const stepButtons = [...document.querySelectorAll<HTMLButtonElement>('.ws-mobile-steps [data-ws-step]')];
+  const guide = document.getElementById('ws-mobile-guide');
+  const focusStep = (step:string) => {
+    stepButtons.forEach(button => {
+      if (button.dataset.wsStep === step) button.setAttribute('aria-current','step');
+      else button.removeAttribute('aria-current');
+    });
+    if (step === 'adjust') {
+      guide!.textContent = 'Change only the responsibilities that need adjusting.';
+      document.querySelector<HTMLButtonElement>('#club-month-content [data-ws-open]')?.click();
+    } else if (step === 'preview') {
+      guide!.textContent = 'This is the same two-page printable you will see on desktop.';
+      document.getElementById('ws-preview')?.scrollIntoView({behavior:'smooth',block:'start'});
+    } else if (step === 'approve') {
+      guide!.textContent = 'Check the plan below. Approval here is a demo and does not mail or order anything.';
+      document.getElementById('ws-approve')?.click();
+      document.getElementById('ws-approval-note')?.scrollIntoView({behavior:'smooth',block:'center'});
+    } else {
+      guide!.textContent = 'Review the prepared family plan. You can keep it exactly as it is.';
+      document.getElementById('november-edit-controls')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  };
+  stepButtons.forEach(button => button.addEventListener('click',()=>focusStep(button.dataset.wsStep!)));
   $('ws-approve').addEventListener('click',()=>{const error=planIssue();$('ws-approval-note').textContent=error??'Approved in this preview only. No mailing was scheduled, and nothing was saved.';});
   $('ws-review').addEventListener('click',()=>{editorDialog?.showModal();toggleInlineEditor('adult')});
   const editorDialog=document.querySelector<HTMLDialogElement>('#club-month-content #ws-edit-dialog');
@@ -691,6 +723,25 @@ const first=JOB_PRESETS[0];
 }
 @media print{#club-month-content .ws-preview-context,#club-month-content .ws-tap-hint{display:none!important}}
 
+/* App-sized screens use a compact guide; desktop's side-by-side proof is untouched. */
+.ws-mobile-steps,.ws-mobile-guide{display:none}
+@media screen and (max-width:767px){
+  #club-month-content .ws-shell{width:100%;max-width:100%;min-width:0;padding:14px 14px calc(112px + env(safe-area-inset-bottom))}
+  #club-month-content .ws-mobile-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;position:sticky;top:0;z-index:35;background:#fffdfa;padding:8px 0;border-bottom:1px solid #e0e6dc}
+  #club-month-content .ws-mobile-steps button{min-width:0;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 2px;font:600 11px Montserrat,Arial,sans-serif;color:#617368;background:transparent;border:0;border-bottom:2px solid transparent;cursor:pointer}
+  #club-month-content .ws-mobile-steps button span{display:grid;place-items:center;width:22px;height:22px;border-radius:100%;background:#e7eee5}
+  #club-month-content .ws-mobile-steps button[aria-current="step"]{color:#3f624b;border-color:#5f7767}
+  #club-month-content .ws-mobile-guide{display:block;font:12px/1.5 Montserrat,Arial,sans-serif;color:#657467;margin:12px 0}
+  #club-month-content .ws-workspace{display:flex;flex-direction:column;gap:18px;min-width:0}
+  #club-month-content .ws-left{order:0;width:100%;max-width:100%;min-width:0}
+  #club-month-content .ws-preview{order:1;width:100%;max-width:100%;min-width:0;overflow:hidden;scroll-margin-top:85px}
+  #club-month-content .ws-pages,#club-month-content .ws-page,#club-month-content .ws-sheet{max-width:100%;min-width:0}
+  #club-month-content .ws-intro{padding:16px 0}
+  #club-month-content .ws-intro h1{font-size:clamp(29px,9vw,38px)}
+  #club-month-content .ws-edit-dialog{max-width:calc(100vw - 20px);max-height:calc(100dvh - 95px);overflow-y:auto}
+  #club-month-content .ws-edit-dialog input,#club-month-content .ws-edit-dialog textarea,#club-month-content .ws-edit-dialog select{font-size:16px}
+  #club-month-content .ws-ready,#club-month-content .ws-disclaimer{overflow-wrap:anywhere}
+}
 </style>
 <style>
 .ws-shell{max-width:1440px;margin:auto;padding:24px clamp(16px,3vw,52px) 72px;color:#545454;font-family:'Montserrat Variable',Montserrat,sans-serif}

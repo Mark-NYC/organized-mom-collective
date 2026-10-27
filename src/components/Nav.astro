@@ -11,12 +11,12 @@ const active = (href: string) => href === '/app' ? path === href : path === href
 <header data-chrome class="border-b border-warm-rule bg-ivory">
   <div class="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
     <a href="/app" class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
-    <nav aria-label="Desktop app navigation" class="hidden sm:block"><ul class="flex items-center gap-6">
+    <nav aria-label="Desktop app navigation" class="hidden md:block"><ul class="flex items-center gap-6">
       {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['inline-flex min-h-12 items-center border-b-2 px-1 text-[0.8rem] font-semibold',active(item.href) ? 'border-sage text-warm-ink' : 'border-transparent text-warm-soft hover:text-warm-ink']}>{item.label}</a></li>)}
     </ul></nav>
   </div>
 </header>
-<nav data-chrome aria-label="App navigation" class="fixed inset-x-0 bottom-0 z-40 border-t border-warm-rule bg-ivory/95 shadow-[0_-8px_25px_rgba(67,65,55,0.05)] backdrop-blur-md pb-[env(safe-area-inset-bottom)] sm:hidden">
+<nav data-chrome aria-label="App navigation" class="fixed inset-x-0 bottom-0 z-40 border-t border-warm-rule bg-ivory/95 shadow-[0_-8px_25px_rgba(67,65,55,0.05)] backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden">
   <ul class="grid grid-cols-4">
     {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['flex min-h-[64px] flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-semibold tracking-wide transition-colors', active(item.href) ? 'text-[#536e4e]' : 'text-warm-soft']}>
       <span aria-hidden="true" class:list={['flex h-7 w-10 items-center justify-center rounded-full text-[1.4rem] leading-none',active(item.href) ? 'bg-sage-wash' : '']}>{item.glyph}</span><span>{item.label}</span>
