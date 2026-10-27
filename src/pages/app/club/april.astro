@@ -1,0 +1,66 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import AprilDinnerPlan from '../../../components/club/AprilDinnerPlan.astro';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find(k => k.month === '2027-04');
+if (!kit) throw new Error('April kit missing');
+---
+<AppLayout title="April Dinner Team">
+  <div class="april-app" data-slug={kit.slug}>
+    <div class="april-gate" data-gate role="status">Preparing your family’s dinner plan…</div>
+    <div class="april-content" hidden>
+      <p class="april-family" data-family></p>
+      <AprilDinnerPlan storageKey="omc:club:april-app:v1" />
+    </div>
+  </div>
+</AppLayout>
+<style is:global>
+.april-gate { padding: 30px; }
+.april-gate h2 { font: 28px Georgia, serif; }
+.april-gate a, .april-gate button { display: inline-block; margin-top: 14px; text-decoration: underline; }
+.april-family { margin: 0; padding: 8px 20px; font-size: 12px; background: #faf9f7; }
+@media screen and (min-width: 1101px) {
+  html:has(.april-app), body:has(.april-app) { height: 100%; overflow: hidden; }
+  body:has(.april-app) #main { width: 100%; max-width: none; height: calc(100dvh - 64px); margin: 0; padding: 0; overflow: hidden; }
+  .april-app, .april-content:not([hidden]) { height: 100%; min-height: 0; }
+  .april-content:not([hidden]) { display: flex; flex-direction: column; }
+  .april-content .adc { flex: 1; min-height: 0; }
+}
+@media print { .april-gate, .april-family, body:has(.april-app) [data-chrome] { display: none !important; } }
+</style>
+<script>
+import { clubAccountsEnabled } from '../../../data/club/config';
+import { getSession } from '../../../lib/account';
+import { loadKitHousehold } from '../../../lib/club/kit-household';
+import { accountStore, clubHref, sampleStore } from '../../../lib/club/store';
+import { routes } from '../../../routes';
+const app = document.querySelector<HTMLElement>('.april-app');
+if (app) {
+ const gate = app.querySelector<HTMLElement>('[data-gate]')!;
+ const content = app.querySelector<HTMLElement>('.april-content')!;
+ loadKitHousehold(app.dataset.slug!, location.search, { accountsEnabled: clubAccountsEnabled, hasSession: async () => Boolean(await getSession()), accountStore, sampleStore }).then(result => {
+  if (result.status !== 'ready') {
+   const sample = 'sample' in result ? result.sample : null;
+   const messages = {
+    empty: ['Add your family first', 'Add family members to prepare your dinner plan.', clubHref(routes.clubFamily, sample)],
+    denied: ['April isn’t open for your account', 'This kit is not available to your account.', clubHref(routes.clubDashboard, sample)],
+    'signed-out': ['Sign in to see your plan', 'Sign in to see your family’s dinner plan.', routes.clubDashboard],
+    error: ['We couldn’t load your plan', 'Check your connection and try again.', ''],
+   } as const;
+   const [title, description, href] = messages[result.status];
+   gate.replaceChildren();
+   const h = document.createElement('h2'); h.textContent = title;
+   const p = document.createElement('p'); p.textContent = description;
+   const action = document.createElement(href ? 'a' : 'button'); action.textContent = href ? 'Continue' : 'Try again';
+   if (action instanceof HTMLAnchorElement) action.href = href; else action.addEventListener('click', () => location.reload());
+   gate.append(h, p, action); return;
+  }
+  const detail = { household: result.household, sample: result.sample ?? undefined };
+  (window as Window & { __ofcPreviewHousehold?: typeof detail }).__ofcPreviewHousehold = detail;
+  window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail }));
+  app.querySelector<HTMLElement>('[data-family]')!.textContent = result.source === 'sample' ? result.sampleLabel + ' · Sample family' : 'Prepared for ' + (result.household.displayName ?? 'your family');
+  gate.hidden = true; content.hidden = false;
+  window.dispatchEvent(new Event('resize'));
+ });
+}
+</script>

@@ -33,7 +33,7 @@ const months = [
     "title": "Dinner Isn't All on You",
     "responsibility": "Sharing meal ownership",
     "how": "A prepared dinner plan gives family members roles from ingredients to cleanup.",
-    "url": "/club/april-preview/"
+    "url": "/app/club/april/"
   },
   {
     "month": "May",
