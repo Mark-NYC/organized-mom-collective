@@ -23,7 +23,9 @@ function MemberMonth({ctx,slug}:{ctx:ClubContext;slug:string}){
    if(!h||!me.kits.some(k=>k.slug===slug)){setState('denied');return;}
    setHousehold(h);
    // Dispatch before revealing content, so the print view has current household names.
-   window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:h,sample:ctx.sample}}));
+   const detail={household:h,sample:ctx.sample};
+   (window as Window & {__ofcPreviewHousehold?:typeof detail}).__ofcPreviewHousehold=detail;
+   window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail}));
    if(host)host.hidden=false;
    setState('ready');
   }).catch(()=>{if(active)setState('failed')});
