@@ -101,7 +101,17 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
   }
   .club-mobile-kit .osr,.club-mobile-kit .osr-layout,.club-mobile-kit .osr-preview,
   .club-mobile-kit #osr-panel-reset{width:100%;min-width:0}
-  .club-mobile-kit .osr-pages{align-items:center}
+  .club-mobile-kit .osr-pages{align-items:center;width:100%!important;gap:28px!important}
+  .club-mobile-kit .osr-document-frame{
+    position:relative;display:block;flex:none;max-width:100%;
+    background:#fff;box-shadow:0 8px 28px rgba(61,56,52,.12);
+  }
+  .club-mobile-kit .osr-document-frame .osr-paper{
+    position:absolute;top:0;left:0;margin:0!important;
+    box-shadow:none!important;
+  }
+  .club-mobile-kit .osr-stage{width:100%;max-width:none;margin:0 auto}
+
   .club-mobile-kit .osr-paper{box-shadow:0 12px 34px rgba(50,47,38,.12)}
 }
 
