@@ -283,7 +283,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 @media print{.osr-tabs,#osr-panel-calendar{display:none!important}#osr-panel-reset{display:block!important}}
 </style>
 <script>
-import {DEFAULT_TAGLINE,DEFAULT_TRIGGER,TRIGGER_CHOICES,applyDefaults,defaultFallJobs,displayName,emptyState,planKey,planMembers,readSavedPlan,type PlanMember as Member,type PlanState as State} from '../../lib/club/engines/october-sunday-reset';
+import {DEFAULT_TAGLINE,DEFAULT_TRIGGER,TRIGGER_CHOICES,applyDefaults,defaultFallJobs,displayName,emptyState,planKey,planMembers,readSavedPlan,type PlanMember as Member,type PlanState as State,type OsrPlan} from '../../lib/club/engines/october-sunday-reset';
 type Household={id:string;displayName?:string;members?:Member[]};
 for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  root.querySelectorAll<HTMLButtonElement>('[data-osr-tab]').forEach(button=>{
@@ -295,7 +295,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   });
  });
  const storageKey=root.dataset.osrKey??'omc:preview:october-sunday-reset:v2';
- let current='',members:Member[]=[];
+ let current='',members:Member[]=[],persist=true;
  let state:State=emptyState();
  const stage=root.querySelector<HTMLElement>('[data-osr-stage]');
  const pages=root.querySelector<HTMLElement>('[data-osr-pages]');
@@ -339,7 +339,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
- const save=()=>{try{sessionStorage.setItem(storageKey,JSON.stringify({current,state}))}catch{}};
+ const save=()=>{if(!persist)return;try{sessionStorage.setItem(storageKey,JSON.stringify({current,state}))}catch{}};
  const nameOf=(m:Member)=>displayName(m,members,state.names);
  const setup=()=>applyDefaults(state,members);
  const clean=(el:HTMLElement,max:number)=>(el.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);
@@ -388,6 +388,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
    row.append(name,job);people.append(row);
   }if(!members.length){const row=document.createElement('div');row.className='osr-person';row.textContent='Choose a preview family to see prepared roles.';people.append(row)}}
   drawFall();drawEditor();
+  if(current)root.dispatchEvent(new CustomEvent('osr:change',{bubbles:true}));
  };
  root.querySelectorAll<HTMLElement>('.osr-paper [contenteditable="true"]').forEach(el=>{if(!el.hasAttribute('data-osr-family')&&!el.hasAttribute('data-osr-cue'))return;const id=el.hasAttribute('data-osr-cue')?'cue':'family';
   const saveField=()=>{(state.text??={})[id]=clean(el,130);if(id==='cue')state.trigger=clean(el,85);save()};
@@ -408,5 +409,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string|null}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string|null}}).__ofcPreviewHousehold;if(cached)applyHousehold(cached);
  paint();
+ const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()}};
+ (root as HTMLElement & {osrPlan?:OsrPlan}).osrPlan=plan;
+ root.dispatchEvent(new CustomEvent('osr:ready',{bubbles:true}));
 }
 </script>
