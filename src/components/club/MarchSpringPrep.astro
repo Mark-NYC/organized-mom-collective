@@ -176,9 +176,9 @@ const taskTypes:Record<string,string>={
 @media screen and (min-width:1101px){
  html:has(#club-month-content:not([hidden]) .msc),body:has(#club-month-content:not([hidden]) .msc){height:100%;overflow:hidden}
  #club-month-content:not([hidden]):has(.msc){position:fixed;top:var(--msc-nav-height,180px);bottom:0;left:0;right:0;overflow:hidden}
- .msc{max-width:none;height:100%;margin:0;padding:0}
+ .msc:not([data-msc-managed="true"]){max-width:none;height:100%;margin:0;padding:0}
  .msc-intro{display:none}
- .msc-workspace{height:100%;display:grid;grid-template-columns:clamp(320px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+ .msc:not([data-msc-managed="true"]) .msc-workspace{height:100%;display:grid;grid-template-columns:clamp(320px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
  .msc-editor{display:flex;flex-direction:column;height:100%;overflow:hidden;padding:clamp(12px,1.4vh,19px) clamp(16px,2vw,27px);background:#faf9f7;border-right:1px solid #e5e0e7;max-width:none}
  .msc-editor-head{border-top-width:5px;padding-top:8px}
  .msc-editor-head h2{font-size:clamp(23px,2.9vh,30px)}
@@ -188,7 +188,7 @@ const taskTypes:Record<string,string>={
  .msc-summary-row{padding:clamp(4px,.7vh,9px) 0}
  .msc-optional{margin:clamp(6px,1vh,12px) 0}
  .msc-actions{padding-top:4px}
- .msc-preview{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;background:#f5f3f2;padding:14px clamp(18px,3vw,46px) 38px}
+ .msc:not([data-msc-managed="true"]) .msc-preview{height:100%;min-width:0;overflow-y:auto;overscroll-behavior:contain;background:#f5f3f2;padding:14px clamp(18px,3vw,46px) 38px}
 
  .msc-print-scroll{justify-content:center}
 }
