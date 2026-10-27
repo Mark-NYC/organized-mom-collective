@@ -344,7 +344,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
    }
   }
  };
- fit();if(stage&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);
+ fit();if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(fit);if(stage)observer.observe(stage);const viewer=root.closest<HTMLElement>('.club-mobile-kit')?.querySelector<HTMLElement>('.kit-artwork');if(viewer)observer.observe(viewer);}window.addEventListener('resize',fit);
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-osr-vision]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-osr-editor]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
