@@ -25,13 +25,24 @@ const faqs = [
  <div class="club-float-surface">
  <div class="hero-inner">
   <div class="hero-copy">
-   <p class="eyebrow">ORGANIZED FAMILY CLUB · MONTHLY FAMILY MAIL</p>
-   <h1>A personalized family tool. <em>Delivered every month.</em></h1>
-   <p class="product-definition">The Organized Family Club is a monthly membership that sends you one printed family activity or responsibility tool, personalized for your household.</p>
-   <p class="promise">Raise kids who take responsibility. Without another job for Mom.</p>
-   <p class="supporting">Habit cards for mornings. A cleanup plan with everyone’s jobs assigned. A family dinner where everyone has a part. <strong>We make the plan. Your family makes it happen.</strong></p>
-   <div class="what-arrives"><span>✓ One new tool each month</span><span>✓ Personalized and printed</span><span>✓ Planned delivery to your mailbox</span></div>
-   <form id="family-form" class="form" autocomplete="off">
+   <p class="eyebrow">ORGANIZED FAMILY CLUB · MONTHLY MAIL FOR YOUR FAMILY</p>
+   <h1>Less nagging. <em>More kids taking responsibility.</em></h1>
+   <p class="product-definition">One personalized, ready-to-use family activity or responsibility plan <strong>printed and mailed to your home each month.</strong></p>
+   <p class="promise">We make the plan. Your family makes it happen.</p>
+   <p class="supporting">Mornings, cleanup, family dinners and more. Every month brings one practical way for your family to work together.</p>
+   
+   <div class="hero-actions"><a class="primary hero-action" href="#demo">See a plan for your family →</a><a class="hero-secondary" href="#months">See actual monthly tools</a></div>
+   <p class="hero-trust">One monthly mailing · Personalized for your household · Digital copy included</p>
+
+  </div>
+  <aside class="hero-photo-wrap">
+ <figure class="hero-photo"><img src={clubHeroUrl} alt="A family gathered around the table looking at their personalized family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
+
+ </aside>
+ </div>
+ </div>
+</section>
+<section class="club-demo" id="demo"><div class="club-demo-inner"><div class="club-demo-heading"><p class="eyebrow">TRY THE EXPERIENCE</p><h2>What would this look like <em>for your family?</em></h2><p>Give us a few first names and ages. See a sample family cleanup plan with jobs already assigned. No account or email needed.</p><p class="demo-disclaimer">This interactive example is not the actual monthly printable. Explore the real monthly tools below.</p></div>   <form id="family-form" class="form" autocomplete="off">
     <p class="form-kicker">TRY A REAL EXAMPLE</p><h2>See what we'd make for your family.</h2>
     <p>Enter your family's names and your kids' ages. We'll prepare a sample Daily Reset for you.</p>
     <div class="name-fields">
@@ -43,15 +54,8 @@ const faqs = [
     <button type="button" class="add" id="add-child">+ Add a child</button>
     <button type="submit" class="primary form-submit">See My Family's Daily Reset <span aria-hidden="true">→</span></button>
     <small>No sign-in. Your family's details stay in this browser.</small>
-   </form>
-  </div>
-  <aside class="hero-photo-wrap">
- <figure class="hero-photo"><img src={clubHeroUrl} alt="A family gathered around the table looking at their personalized family plan" width="1200" height="900" loading="eager" fetchpriority="high" /><figcaption>Small moments. Shared responsibility. A home that works together.</figcaption></figure>
- <div class="photo-caption">FAMILY LIFE, A LITTLE LIGHTER.</div>
- </aside>
- </div>
- </div>
-</section>
+   </form></div></section>
+
 <section class="result" id="result" hidden aria-live="polite">
  <div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PLAN IS READY</p><h2>This is what done-for-you looks like.</h2><p>Everyone has a part. Nobody has to guess. That's the kind of preparation we want to do for your family every month.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div>
  <div class="result-card"><span>YOUR FAMILY'S DAILY RESET</span><h3>Made for your household.</h3><p>A sample of the preparation we do, with names and age-appropriate responsibilities.</p><button type="button" class="primary" id="open-preview">View your family's plan →</button></div></div>
@@ -61,7 +65,7 @@ const faqs = [
  <p class="modal-intro">A sample cleanup plan, prepared using your family's names and ages. The Club delivers a different family tool each month.</p>
  <div class="modal-paper"><div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div><h3>Our Family's <em>Daily Reset</em></h3><p>A few minutes together. A fresh start tomorrow.</p><div class="sheet-section-label">EVERYONE HAS A PART</div><div id="modal-assignments" class="sheet-assignments"></div><div class="modal-paper-end">NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</div></div>
  <p class="modal-note">This is a personalized sample. The Club's actual mailed resources have their own printed designs.</p>
- <div class="modal-actions"><a href="#offer" id="modal-club" class="primary">Learn About the Club →</a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div>
+ <div class="modal-actions"><a href="#offer" id="modal-club" class="primary">See What the Club Includes →</a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div>
 </dialog>
 <section class="benefits container" id="how">
  <p class="eyebrow">A HOME THAT WORKS TOGETHER</p><h2>Less reminding. <em>More taking responsibility.</em></h2>
@@ -75,10 +79,10 @@ const faqs = [
  <div class="offer-copy"><p class="eyebrow">ONE TOOL. ONE REAL FAMILY CHALLENGE. EVERY MONTH.</p><h2>A new family tool, <em>already prepared for you.</em></h2><p>Each month brings a different printed family activity or responsibility tool, personalized for your household. From routines and cleaning to family dinners and connection, every mailing helps your family share the load.</p><div class="offer-details"><span>✓ Personalized for your family</span><span>✓ Printed and mailed to your home</span><span>✓ A digital version to review or reprint</span></div></div>
  <div class="price-card"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h3>One personalized tool, every month.</h3><div class="price">$6.39 <span>/ month</span></div><p class="annual">or $59 per year</p><p class="fineprint">Proposed pricing. Enrollment is not yet open while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask about early access.</small></div>
  </div></div></section>
-<section class="months container" id="months"><div class="section-intro"><p class="eyebrow">MORE THAN A CHORE CHART</p><h2>See what comes <em>in the mail.</em></h2><p>Here are three examples from the twelve monthly resources. Every tool starts with a plan prepared for your family.</p></div>
+<section class="months container" id="months"><div class="section-intro"><p class="eyebrow">REAL MONTHLY TOOL PREVIEWS</p><h2>Different family challenges. <em>One ready-made plan each month.</em></h2><p>Explore the actual designs for January, March and April. These are real monthly resources, not mockups of the demo above.</p></div>
  <div class="month-feature-grid">{[months[0], months[2], months[3]].map(m => <a class="month-feature" href={m.url}><img src={m.icon} alt="" loading="lazy" width="100" height="100"/><span>{m.month}</span><h3>{m.title}</h3><p>{m.how}</p><strong>See the tool →</strong></a>)}</div>
  <details class="all-months"><summary>Explore all 12 monthly tools <span>+</span></summary><div class="month-grid">{months.map(m => <a href={m.url}><img src={m.icon} alt="" loading="lazy" width="54" height="54"/><div><small>{m.month}</small><b>{m.title}</b><span>Preview →</span></div></a>)}</div></details>
- <p class="caption">The Daily Reset above is a free demo. Club monthly content and sample previews are separate. Mail fulfillment is still being tested.</p>
+ <p class="caption">The Daily Reset is a free illustrative demo, not a monthly mailing. Club printing and fulfillment are still being tested.</p>
 </section>
 <section class="proof container"><div class="proof-quote"><p class="eyebrow">FROM AN ORGANIZED MOM COLLECTIVE CUSTOMER</p><blockquote>“This calendar is life changing. Quite literally!”</blockquote><p>Raquel · 5-star Etsy review of our wall calendar</p><small>This review is for the wall calendar, not the Family Club.</small></div><div class="proof-about"><img src="/images/site/mark-megan-family-story-1200.webp" alt="Mark and Megan with their family" loading="lazy" width="250" height="250"/><div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2>We believe a family works better <em>when everyone pitches in.</em></h2><p>That's why we created the Club. Not another system for Mom to manage, but practical help making the whole family part of the plan.</p><p><strong>Mark &amp; Megan</strong></p></div></div></section>
 <section class="faq" id="faq"><div class="container faq-layout"><div><p class="eyebrow">GOOD QUESTIONS</p><h2>Before you join.</h2></div><div class="faq-items">{faqs.map(([question,answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></div></section>
@@ -156,5 +160,37 @@ const faqs = [
 @media(max-width:700px){.club .hero-inner{padding:24px 18px}.club .hero-photo-wrap{order:-1}.club .hero-photo figcaption{padding-inline:8px}.club .form{margin-top:24px}.club .home-style-inset{padding-inline:12px}}
 .club .hero-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center center}
 @media(max-width:700px){.club .hero-photo img{aspect-ratio:4/3;object-position:center center}}
+
+/* Conversion layout: one promise, one clear product definition, one primary CTA. */
+.club .hero-inner{display:grid;grid-template-columns:minmax(0,.91fr) minmax(0,1.09fr);align-items:center;min-height:540px;padding:clamp(30px,5vw,80px);gap:clamp(32px,5vw,86px)}
+.club .hero-copy{max-width:615px}
+.club .hero h1{font-size:clamp(2.8rem,4.45vw,5.4rem);line-height:1.065;margin:14px 0 20px}
+.club .hero .product-definition{font-size:clamp(1.1rem,1.55vw,1.38rem);line-height:1.56;max-width:560px;margin:0 0 18px!important;font-weight:450}
+.club .hero .promise{font-size:1.16rem;line-height:1.45;font-weight:650;margin:0 0 14px!important}
+.club .hero .supporting{font-size:.98rem;line-height:1.65;margin:0!important;color:#6e6461}
+.club .hero-photo-wrap{align-self:stretch;display:flex;align-items:center;min-width:0}
+.club .hero-photo{width:100%;margin:0}.club .hero-photo img{width:100%;height:auto;max-height:650px;aspect-ratio:4/3;object-fit:cover;object-position:center;display:block}
+.club .hero-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:26px}
+.club .hero-actions .primary{min-height:52px;padding:14px 24px;display:inline-flex;align-items:center;justify-content:center}
+.club .hero-secondary{font-size:.86rem;font-weight:700;color:#4d4544;text-decoration:underline;text-underline-offset:4px}
+.club .hero-trust{font-size:.72rem;line-height:1.5;color:#6e6461;margin:17px 0 0!important}
+.club .club-demo{padding:88px 24px;background:#fff;scroll-margin-top:24px}
+.club .club-demo-inner{max-width:1060px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(36px,7vw,110px);align-items:center}
+.club .club-demo-heading h2{font:400 clamp(2.1rem,3.4vw,3.6rem)/1.11 Georgia,serif;margin:12px 0 20px;letter-spacing:-.025em}
+.club .club-demo-heading h2 em{color:#71846e}
+.club .club-demo-heading>p{font-size:1.05rem;line-height:1.7}
+.club .club-demo-heading .demo-disclaimer{font-size:.78rem;color:#6e6461;margin-top:18px}
+.club .club-demo .form{margin:0!important;padding:clamp(24px,3vw,38px);box-shadow:0 18px 44px -33px rgba(77,69,68,.4);background:#f1f2f2;border:0;border-radius:4px}
+.club .club-demo .form input,.club .club-demo .form select{background:#fff}
+.club .club-demo .form h2{font-size:1.5rem}
+.club .club-demo .form .form-submit{min-height:50px}
+.club .benefits{padding-top:72px;padding-bottom:90px}
+.club .benefits h2{max-width:750px;font-size:clamp(2rem,3vw,3.1rem)}
+.club .benefit-grid p,.club .offer-copy>p:not(.eyebrow),.club .month-feature p{font-size:.96rem;line-height:1.72}
+.club .offer-layout{gap:60px}
+.club .offer-copy h2{font-size:clamp(2.3rem,3.5vw,4rem)}
+.club .month-feature h3{font-size:1.5rem}
+@media(max-width:850px){.club .hero-inner{grid-template-columns:1fr;gap:28px;min-height:0;padding:36px 28px}.club .hero-photo-wrap{order:-1}.club .hero-photo img{max-height:440px}.club .club-demo-inner{grid-template-columns:1fr;gap:26px;max-width:580px}.club .club-demo{padding:62px 20px}}
+@media(max-width:700px){.club .hero-inner{padding:22px 18px 34px}.club .hero h1{font-size:clamp(2.45rem,10vw,3.35rem)}.club .hero-actions{align-items:stretch;flex-direction:column;gap:15px}.club .hero-actions .primary{width:100%}.club .hero-secondary{text-align:center}.club .club-demo{padding:48px 18px}.club .club-demo .form{padding:22px}}
 </style>
 </PublicLayout>
