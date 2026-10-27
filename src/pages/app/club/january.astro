@@ -1,0 +1,184 @@
+---
+/** January's app-native plan preview. October remains the reference for mobile UX;
+ * January's one-page two-card artwork and editor remain the source of truth. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const januaryKit=kits.find(k=>k.month==='2027-01');
+if(!januaryKit)throw new Error('January kit not found');
+const deadline=clubEditingDeadline('2027-01');
+---
+<AppLayout title="January Family Habit Cards">
+  <div class="january-app family-brand" data-jan-app data-deadline={deadline} data-kit-slug={januaryKit.slug} data-jan-state="loading">\n    <div class="jan-gate" data-jan-gate aria-live="polite">Preparing your family’s January plan…</div>
+    <section class="jan-plan" aria-labelledby="jan-title">
+      <p class="jan-kicker">JANUARY 2027 · ORGANIZED FAMILY CLUB</p>
+      <h1 id="jan-title">Little habits. <em>Less reminding.</em></h1>
+      <p class="jan-intro">Two simple habit cards, already prepared. Keep what works and change only what your family needs.</p>
+      <p class="jan-window" data-jan-window>Changes close on the second Sunday of January.</p>
+      <button type="button" class="jan-proof-link" data-jan-proof>
+        <span class="jan-proof-symbol" aria-hidden="true">▤</span>
+        <span><strong>Your printable</strong><small>Two cut-apart cards on one US Letter sheet</small></span><span aria-hidden="true">View ›</span>
+      </button>
+      <h2>Our first two habits</h2>
+      <p class="jan-caption">One small cue and one next step. Place each card where the habit happens.</p>
+      <div class="jan-habits">
+        {[0,1].map((i)=><button type="button" class="jan-habit" data-jan-edit={i}>
+          <span class="jan-habit-count">0{i+1}</span>
+          <span class="jan-habit-body">
+            <strong data-jan-title={i}>{i===0?'My morning':'My backpack'}</strong>
+            <small data-jan-anchor={i}>{i===0?'After I finish breakfast':'After I put on my shoes'}</small>
+            <span data-jan-action={i}>{i===0?'I put my dishes away.':'I grab my backpack.'}</span>
+            <small class="jan-placement" data-jan-place={i}></small>
+          </span><span class="jan-change">Change ›</span>
+        </button>)}
+      </div>
+      <button type="button" class="jan-find" data-jan-find>Not sure which habits? Let us help you choose.</button>
+      <p class="jan-honest">Preview only: edits stay in this browser, and nothing is mailed or submitted from this screen.</p>
+    </section>
+    <div class="jan-toolbar" aria-label="January resource actions">
+      <button type="button" class="jan-approve" data-jan-approve>Looks good</button>
+      <button type="button" class="jan-print" data-jan-print aria-label="Print or save January habit cards" title="Print or save PDF"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg></button>
+    </div>
+    <div class="jan-paper-shell">
+      <button type="button" class="jan-close" data-jan-close hidden>← Back to my plan</button>
+      <JanuaryHabitCards storageKey="omc:preview:january-habit-cards:v2" />
+    </div>
+  </div>
+</AppLayout>
+<style is:global>
+/* January-specific app shell; no changes to the existing January artwork or desktop preview. */
+.january-app{position:relative}
+.jan-plan,.jan-toolbar,.jan-close{display:none}
+@media (max-width:1099px) and (min-width:640px){
+ body:has(.january-app) #main{max-width:720px}
+}
+@media screen and (max-width:1099px){
+ body:has(.january-app) #main{padding-top:22px;padding-bottom:calc(180px + env(safe-area-inset-bottom))}
+ .january-app{max-width:680px;margin:auto}
+ .jan-plan{display:block}\n .january-app:not([data-jan-state="ready"]) .jan-plan,.january-app:not([data-jan-state="ready"]) .jan-toolbar,.january-app:not([data-jan-state="ready"]) .jan-paper-shell{display:none}\n .jan-gate{display:none;padding:28px 16px;background:#f5f4f0;line-height:1.6}\n .january-app:not([data-jan-state="ready"]) .jan-gate{display:block}\n .jan-gate a{display:inline-block;margin-top:14px;text-decoration:underline}
+ .jan-kicker{color:#71866c;letter-spacing:.14em;font-size:11px;font-weight:700}
+ .jan-plan h1{font:400 clamp(32px,7vw,40px)/1.16 Georgia,serif;letter-spacing:-.02em;margin:12px 0 10px;color:#4d4544}
+ .jan-plan h1 em{font-weight:400;color:#71866c}
+ .jan-intro{font-size:14px;line-height:1.65;color:#6c6660}
+ .jan-window{margin:19px 0;padding:12px 14px;background:#eef3ef;border-left:3px solid #71866c;font-size:12px;line-height:1.6;color:#45564a}
+ .jan-proof-link{display:flex;align-items:center;gap:13px;width:100%;min-height:90px;text-align:left;padding:13px 15px;border:1px solid #dddcd5;background:#fffdfa;color:#4d4544}
+ .jan-proof-symbol{display:grid;place-items:center;width:54px;height:62px;background:#eef3ef;color:#5d755e;font-size:30px}
+ .jan-proof-link>span:nth-child(2){flex:1;display:grid;gap:6px}
+ .jan-proof-link strong{font-size:15px}
+ .jan-proof-link small{font-size:12px;line-height:1.4;color:#756d68}
+ .jan-proof-link>span:last-child{font-size:12px;color:#5e795e}
+ .jan-plan h2{font:400 25px Georgia,serif;margin:29px 0 4px}
+ .jan-caption{font-size:13px;color:#756e66;line-height:1.55;margin-bottom:14px}
+ .jan-habits{border:1px solid #dedbd5;background:#fff}
+ .jan-habit{width:100%;display:flex;text-align:left;align-items:flex-start;gap:13px;padding:18px 14px;background:#fff;color:#4d4544;border:0;border-bottom:1px solid #e5e1db;min-height:116px}
+ .jan-habit:last-child{border-bottom:0}
+ .jan-habit-count{font-size:12px;color:#71866c;font-weight:700;padding-top:3px}
+ .jan-habit-body{flex:1;min-width:0;display:grid;gap:6px}
+ .jan-habit-body strong{font:400 21px Georgia,serif}
+ .jan-habit-body small{color:#766f68;font-size:12px}
+ .jan-habit-body>span:not(.jan-placement){font-size:14px;line-height:1.45}
+ .jan-habit-body .jan-placement{font-size:11px;color:#65806a}
+ .jan-change{font-size:11px;color:#617c63;white-space:nowrap;padding-top:5px}
+ .jan-find{display:block;text-decoration:underline;text-underline-offset:4px;font-size:13px;color:#4d4544;margin:20px 0;background:transparent;border:0;text-align:left;min-height:44px}
+ .jan-honest{font-size:12px;color:#78716a;line-height:1.6;margin:16px 0 32px}
+ .jan-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;position:fixed;z-index:38;bottom:calc(64px + env(safe-area-inset-bottom));left:0;right:0;padding:10px max(20px,calc((100vw - 680px)/2));background:rgba(255,253,250,.98);border-top:1px solid #dfded8}
+ .jan-toolbar button{min-height:52px;border:1px solid #4d4544}
+ .jan-approve{background:#4d4544;color:#fff;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+ .jan-print{display:grid;place-items:center;color:#4d4544;background:#fff}
+ .jan-paper-shell .jhc{padding:0}
+ .jan-paper-shell .jhc-intro{display:none}
+ .jan-paper-shell .jhc-workspace{display:block}
+ .jan-paper-shell .jhc-config{display:contents}\n .jan-paper-shell .jhc-config-heading,.jan-paper-shell .jhc-prepared,.jan-paper-shell .jhc-actions,.jan-paper-shell .jhc-help{display:none}
+ .jan-paper-shell .jhc-preview-panel{display:none}\n .jan-paper-shell .jhc-dialog,.jan-paper-shell .jhc-finder-dialog{max-width:calc(100vw - 28px)}
+ .january-app.jan-show-proof .jan-plan,.january-app.jan-show-proof .jan-toolbar{display:none}
+ .january-app.jan-show-proof .jan-close{display:block;margin:2px 0 16px;font-size:13px;font-weight:700;min-height:44px;color:#4d4544}
+ .january-app.jan-show-proof .jhc-preview-panel{display:block}
+ .january-app.jan-show-proof .jhc-floating-edit{display:none}
+ .january-app.jan-show-proof .jhc-print-scroll{max-height:calc(100dvh - 235px);overflow:auto}
+ .january-app.jan-show-proof .jhc-stage{margin:0 auto}
+ .january-app.jan-show-proof .jhc-page [contenteditable]{pointer-events:none}
+}
+@media print{
+ body:has(.january-app) #main{padding:0;margin:0;max-width:none}
+ .january-app .jan-plan,.january-app .jan-toolbar,.january-app .jan-close{display:none}
+ .january-app .jan-paper-shell,.january-app .jhc-workspace,.january-app .jhc-preview-panel,.january-app .jhc-print-scroll{display:block;overflow:visible}
+ .january-app .jhc-config{display:none}
+ .january-app .jhc-stage{width:816px!important;height:1056px!important;transform:none!important}
+ .january-app .jhc-page{display:flex;transform:none!important;position:absolute!important;top:0;left:0}
+}
+</style>
+<script>
+import { clubAccountsEnabled } from '../../../data/club/config';
+import { getSession } from '../../../lib/account';
+import { loadKitHousehold } from '../../../lib/club/kit-household';
+import { accountStore, sampleStore } from '../../../lib/club/store';
+const jan=document.querySelector<HTMLElement>('[data-jan-app]');
+if(jan){
+ const jhc=jan.querySelector<HTMLElement>('.jhc');
+ const gate=jan.querySelector<HTMLElement>('[data-jan-gate]');
+ loadKitHousehold(jan.dataset.kitSlug??'',location.search,{
+   accountsEnabled:clubAccountsEnabled,
+   hasSession:async()=>Boolean(await getSession()),
+   accountStore,sampleStore
+ }).then(result=>{
+   if(result.status==='ready'){
+     const detail={household:result.household,sample:result.sample};
+     window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail}));
+     const intro=jan.querySelector<HTMLElement>('.jan-intro');
+     if(intro)intro.textContent=(result.source==='sample'?'Sample family: '+result.sampleLabel.replace(/^Sample:\s*/,'')+'. ':'Prepared for '+(result.household.displayName??'your family')+'. ')+
+       'Two small habits, already prepared. Keep what works and change only what your family needs.';
+     jan.dataset.janState='ready';
+     window.dispatchEvent(new Event('resize'));
+   }else{
+     jan.dataset.janState=result.status;
+     const settings:Record<string,[string,string]>={
+       empty:['Add your family to prepare January','/app/account'],
+       'signed-out':['Sign in to see your January plan','/app/account'],
+       denied:['January is not available on this account','/app/club'],
+       error:['Could not load your family. Reload to try again.','']
+     };
+     const pair=settings[result.status]??settings.error;
+     if(gate){gate.replaceChildren();const p=document.createElement('p');p.textContent=pair[0];gate.append(p);if(pair[1]){const a=document.createElement('a');a.href=pair[1];a.textContent='Continue';gate.append(a)}}
+   }
+ }).catch(()=>{jan.dataset.janState='error';if(gate)gate.textContent='Could not load your family. Reload to try again.'});
+
+ const read=()=>{
+   const cards=Array.from(jhc?.querySelectorAll<HTMLElement>('[data-jhc-card]')??[]);
+   cards.forEach((card,i)=>{
+     for(const [field,dest] of [['name','title'],['anchor','anchor'],['action','action'],['place','place']]){
+       const src=card.querySelector<HTMLElement>('[data-print-field="'+field+'"]');
+       const target=jan.querySelector<HTMLElement>('[data-jan-'+dest+'="'+i+'"]');
+       if(target&&src)target.textContent=src.textContent?.trim()||'';
+     }
+   });
+ };
+ let lastFingerprint='';
+ const fingerprint=()=>Array.from(jhc?.querySelectorAll<HTMLElement>('[data-jhc-card] [data-print-field]')??[]).map(e=>e.textContent).join('|');
+ const approve=jan.querySelector<HTMLButtonElement>('[data-jan-approve]');
+ const refresh=()=>{
+   read();
+   if(approve&&lastFingerprint&&fingerprint()!==lastFingerprint)approve.textContent='Review changes';
+ };
+ jan.querySelectorAll<HTMLButtonElement>('[data-jan-edit]').forEach(button=>button.addEventListener('click',()=>{
+   const idx=Number(button.dataset.janEdit);
+   jhc?.querySelector<HTMLButtonElement>('[data-jhc-open]')?.click();
+   window.setTimeout(()=>jhc?.querySelector<HTMLElement>('[data-jhc-editor="'+idx+'"] [data-field="name"]')?.focus(),50);
+ }));
+ jan.querySelector<HTMLButtonElement>('[data-jan-find]')?.addEventListener('click',()=>jhc?.querySelector<HTMLButtonElement>('[data-jhc-finder-open]')?.click());
+ jan.querySelector<HTMLButtonElement>('[data-jan-proof]')?.addEventListener('click',()=>{jan.classList.add('jan-show-proof');window.dispatchEvent(new Event('resize'));});
+ jan.querySelector<HTMLButtonElement>('[data-jan-close]')?.addEventListener('click',()=>{jan.classList.remove('jan-show-proof');window.dispatchEvent(new Event('resize'));});
+ jan.querySelector<HTMLButtonElement>('[data-jan-print]')?.addEventListener('click',()=>jhc?.querySelector<HTMLButtonElement>('[data-print]')?.click());
+ approve?.addEventListener('click',()=>{lastFingerprint=fingerprint();approve.textContent='Reviewed ✓';});
+ jhc?.querySelectorAll<HTMLDialogElement>('dialog').forEach(dialog=>dialog.addEventListener('close',refresh));
+ const node=jhc?.querySelector('[data-jhc-card-grid]');
+ if(node)new MutationObserver(refresh).observe(node,{childList:true,subtree:true,characterData:true});
+ const deadline=new Date(jan.dataset.deadline||'').getTime();
+ const windowLabel=jan.querySelector<HTMLElement>('[data-jan-window]');
+ if(windowLabel&&Number.isFinite(deadline)){
+   windowLabel.textContent='Changes open through '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',timeZone:'America/New_York'}).format(deadline)+' at 11:59 PM Eastern.';
+ }
+ refresh();
+}
+</script>
