@@ -40,7 +40,7 @@ const months = [
     "title": "Summer Days Without Constant Questions",
     "responsibility": "Managing their day",
     "how": "A flexible daily rhythm and activity menu help kids choose what comes next.",
-    "url": "/club/may-preview/"
+    "url": "/app/club/may/"
   },
   {
     "month": "June",

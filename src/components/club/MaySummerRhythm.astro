@@ -1,6 +1,6 @@
 ---
-interface Props {storageKey?:string}
-const {storageKey='omc:club:may-summer-rhythm:v1'}=Astro.props;
+interface Props {storageKey?:string; planMode?:boolean}
+const {storageKey='omc:club:may-summer-rhythm:v1', planMode=false}=Astro.props;
 const blocks=[
  {key:'morning',title:'Morning Start',time:'8:00',desc:'Breakfast · Get dressed · Make beds',icon:'/images/club/icon-library/morning-start.png',tint:'#F8E8B5'},
  {key:'move',title:'Move & Play',time:'9:00',desc:'Outside · Bikes · Park · Backyard',icon:'/images/club/icon-library/move-play.png',tint:'#F4DEA3'},
@@ -12,7 +12,7 @@ const blocks=[
  {key:'evening',title:'Evening Reset',time:'Evening',desc:'Pick up · Wash up · Wind down',icon:'/images/club/icon-library/evening-reset.png',tint:'#D1D7EA'},
 ];
 ---
-<div class="msr" data-msr-key={storageKey}>
+<div class="msr" data-msr-key={storageKey} data-msr-plan={planMode ? "true" : undefined}>
  <header class="msr-intro"><a href="/club">← Organized Family Club</a><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>
  <div class="msr-layout">
   <aside class="msr-editor" aria-label="Prepared May summer rhythm">
@@ -65,7 +65,7 @@ const blocks=[
   <section class="msr-preview" aria-label="May illustrated rhythm board preview">
    <button type="button" class="msr-floating-edit" data-open-editor aria-label="Make changes to your plan"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
    
-   <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet>
+   <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
     <div class="msr-sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
     <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span data-day-label>A DAY AT HOME</span></div>
     <div class="msr-rows" data-print-rows>
@@ -284,6 +284,8 @@ const blocks=[
 @media print{.msr-time-popover{display:none!important}}
 </style>
 <script>
+import { PLAN_CHANGE } from "../../lib/club/plan/resource";
+import type { MayState, MayPlan } from "../../lib/club/engines/may-summer-rhythm";
 import {ageInMonth} from '../../lib/club/profile';
 type Person={firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;archived?:boolean};
 type Quiet='independent'|'rest'|'older';
@@ -310,6 +312,8 @@ const hhmm=(n:number)=>{const normalized=(n+24)%24;const h=Math.floor(normalized
 const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.split(':').map(Number);return String(hour%12||12)+':'+String(min).padStart(2,'0')+(hour<12?' AM':' PM')};
 for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const storageKey=root.dataset.msrKey??'omc:preview:may:v2';
+ const planMode=root.dataset.msrPlan==='true';
+ let persist=true;
  let profile='';
  let options:Options={...defaults};
  let edits:Partial<Record<Key,Edit>>={};
@@ -378,7 +382,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
- const save=()=>{try{localStorage.setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
+ const save=()=>{if(!persist)return;try{(planMode?sessionStorage:localStorage).setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
  const renderEditor=()=>{
   if(!editor)return;
   editor.replaceChildren();
@@ -451,12 +455,13 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   if(minute<1080)return interpolate('#DEEDDB','#B9D8C7',(minute-720)/360);
   return interpolate('#DBDFF0','#B4BBD9',(minute-1080)/359);
  };
+ const visibleKeys=()=>order.filter(k=>(options.snack||k!=='snack')&&(options.structure!=='relaxed'||(k!=='create'&&k!=='move'))&&(options.days==='camp'?k!=='lunch'&&k!=='quiet':k!=='create'));
  const render=(buildEditor=false)=>{
   root.dataset.msrStructure=options.structure;
   root.dataset.msrDays=options.days;
   const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
   const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':options.days==='mixed'?'HOME OR OUTING DAY':'A DAY AT HOME';
-  const visible=order.filter(k=>(options.snack||k!=='snack')&&(options.structure!=='relaxed'||(k!=='create'&&k!=='move'))&&(options.days==='camp'?k!=='lunch'&&k!=='quiet':k!=='create'));
+  const visible=visibleKeys();
   for(const key of order){
    const node=nodes.get(key);if(!node||!list)continue;
    list.append(node);
@@ -482,6 +487,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   for(const key of keys){const node=nodes.get(key);if(node&&!order.includes(key))node.hidden=true}
   renderRemoved();
   if(buildEditor)renderEditor();
+  if(planMode) root.dispatchEvent(new Event(PLAN_CHANGE,{bubbles:true}));
  };
  const update=()=>{save();render(true)};
  root.querySelector<HTMLSelectElement>('[data-days]')?.addEventListener('change',e=>{
@@ -589,7 +595,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   if(changed){
    ageDefaults();
    try{
-    const stored=JSON.parse(localStorage.getItem(storageKey)??'null');
+    const stored=JSON.parse((planMode?sessionStorage:localStorage).getItem(storageKey)??'null');
     if(stored?.profile===profile&&stored.options){
      const o=stored.options;
      if([7,7.5,8,8.5,9,9.5].includes(o.start))options.start=o.start;
@@ -617,6 +623,16 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }
   update();
  };
+ if(planMode){
+  const snapshot=():MayState=>({options:structuredClone(options),edits:structuredClone(edits),order:[...order],removed:[...removed],rows:visibleKeys().map(key=>({key,...resolved(key)})),familyLabel});
+  const replace=(s:MayState)=>{options=structuredClone(s.options);edits=structuredClone(s.edits);order=[...s.order];removed=[...s.removed];save();render(true)};
+  (root as HTMLElement & {clubPlan?:MayPlan}).clubPlan={
+   ready:()=>Boolean(profile),state:snapshot,
+   update:fn=>{const s=snapshot();fn(s);replace(s)},replace,
+   setPersist:on=>{persist=on;if(on)save()},
+   fingerprint:()=>JSON.stringify({familyLabel,days:options.days,structure:options.structure,rows:visibleKeys().map(key=>({key,...resolved(key)}))}),
+  };
+ }
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string;members:Person[]};sample?:string}}).__ofcPreviewHousehold;
  if(cached)applyHousehold(cached);

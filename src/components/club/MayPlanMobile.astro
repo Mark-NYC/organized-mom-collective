@@ -1,0 +1,71 @@
+---
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="May · Organized Family Club" sheets={['sheet']} previewNote="One reusable Letter-size rhythm">
+  <Fragment slot="title">Our <em>Summer Day</em></Fragment>
+  <section class="cp-section">
+    <h2>Your summer rhythm</h2>
+    <p class="cp-intro">A little structure, plenty of freedom. Your kids can check what comes next.</p>
+    <ul class="cp-group" data-may-rows></ul>
+    <button type="button" class="cp-link" data-may-settings>Adjust the day <span>Change suggestions</span></button>
+    <div data-may-removed></div>
+  </section>
+</ClubPlanScreen>
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import type { MayState, MayKey, MayOptions, MayPlan } from '../../lib/club/engines/may-summer-rhythm';
+const root = document.querySelector<HTMLElement>('.may-plan');
+const host = root?.querySelector<HTMLElement & {clubPlan?: MayPlan}>('.msr');
+if (root && host) {
+ const q = <T extends HTMLElement>(sel:string) => root.querySelector<T>(sel)!;
+ let ui:PlanScreen<MayState> | null = null;
+ const labels:Record<MayKey,string>={morning:'Morning Start',move:'Move & Play',create:'Create & Explore',lunch:'Lunch & Reset',quiet:'Quiet Time',free:'Free Afternoon',snack:'Snack & Reset',evening:'Evening Reset'};
+ const render = (_ui:PlanScreen<MayState>, s:MayState, locked:boolean) => {
+  q<HTMLElement>('[data-may-rows]').replaceChildren(...s.rows.map(row=>{
+   const b=el('button',{type:'button',class:'cp-row',disabled:locked},el('span',{class:'cp-avatar'},row.time ? row.time.slice(0,2) : '•'),el('span',{class:'cp-row-text'},el('strong',{},row.title),el('span',{},row.desc),el('span',{},row.time || 'No set time')),el('span',{class:'cp-chev','aria-hidden':'true'}));
+   b.addEventListener('click',()=>openRow(row.key));
+   return el('li',{},b);
+  }));
+  q<HTMLButtonElement>('[data-may-settings]').hidden=locked;
+  const removed=q<HTMLElement>('[data-may-removed]'); removed.replaceChildren();
+  if(!locked && s.removed.length){
+   const heading=el('p',{class:'cp-intro'},'Add a removed block back:'); removed.append(heading);
+   for(const key of s.removed){const b=el('button',{type:'button',class:'cp-link'},`+ ${labels[key]}`);b.addEventListener('click',()=>ui?.resource().update(x=>{x.removed=x.removed.filter(k=>k!==key);x.order.push(key)}));removed.append(b)}
+  }
+ };
+ const openRow=(key:MayKey)=>{
+  if(!ui)return; const row=ui.resource().state().rows.find(r=>r.key===key);if(!row)return;
+  const field=(label:string, name:'title'|'desc'|'time',limit:number)=>{
+   const input=el('input',{type:name==='time'?'time':'text',value:row[name],maxlength:String(limit)});
+   input.addEventListener('input',()=>ui?.resource().update(s=>{s.edits[key]={...s.edits[key],[name]:input.value.slice(0,limit)}}));
+   return el('label',{class:'cp-field'},label,input);
+  };
+  const move=(direction:number)=>{ui?.resource().update(s=>{const i=s.order.indexOf(key),j=i+direction;if(j>=0&&j<s.order.length)[s.order[i],s.order[j]]=[s.order[j],s.order[i]]});ui?.closeSheet()};
+  const earlier=el('button',{type:'button',class:'cp-btn'},'Move earlier');earlier.addEventListener('click',()=>move(-1));
+  const later=el('button',{type:'button',class:'cp-btn'},'Move later');later.addEventListener('click',()=>move(1));
+  const body:Node[]=[field('Block name','title',38),field('Activities','desc',78),field('Start time','time',5),el('div',{class:'cp-sheet-actions'},earlier,later),el('div',{class:'cp-sheet-actions'},ui.doneButton())];
+  if(ui.resource().state().order.length>1){const remove=el('button',{type:'button',class:'cp-text-btn'},'Remove this block');remove.addEventListener('click',()=>{ui?.resource().update(s=>{s.order=s.order.filter(k=>k!==key);s.removed.push(key)});ui?.closeSheet()});body.push(remove)}
+  ui.openSheet(row.title,...body);
+ };
+ const openSettings=()=>{
+  if(!ui)return;const s=ui.resource().state();
+  const select=(label:string,key:keyof MayOptions,choices:Array<[string,string]>)=>{
+   const input=el('select',{});for(const [value,text] of choices){const option=el('option',{value},text);input.append(option)}
+   input.value=String(s.options[key]);input.addEventListener('change',()=>ui?.resource().update(state=>{(state.options as unknown as Record<string,unknown>)[key]=key==='start'?Number(input.value):key==='snack'?input.value==='true':input.value}));
+   return el('label',{class:'cp-field'},label,input);
+  };
+  ui.openSheet('Adjust your summer day',
+   select('Kind of day','days',[['home','Mostly at home'],['mixed','Home and outings'],['camp','Camp or scheduled programs']]),
+   select('Structure','structure',[['relaxed','Relaxed'],['balanced','Balanced'],['structured','More structured']]),
+   select('Morning starts','start',[['7','7:00 AM'],['7.5','7:30 AM'],['8','8:00 AM'],['8.5','8:30 AM'],['9','9:00 AM'],['9.5','9:30 AM']]),
+   select('Quiet time','quiet',[['independent','Independent play and reading'],['rest','Rest or nap'],['older','Independent recharge']]),
+   select('Favorite play','play',[['outdoors','Outdoor play'],['active','Sports and movement'],['creative','Making and creativity'],['mixed','A mix of everything']]),
+   select('Late afternoon snack','snack',[['true','Include'],['false','Leave out']]),el('div',{class:'cp-sheet-actions'},ui.doneButton()));
+ };
+ ui=mountPlanScreen({root,host,approvalKey:'omc:preview:may-summer-rhythm:approval',render});
+ q<HTMLButtonElement>('[data-may-settings]').addEventListener('click',openSettings);
+}
+</script>
