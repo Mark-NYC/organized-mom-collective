@@ -13,7 +13,6 @@ const editDeadline = clubEditingDeadline('2027-10');
       <a href="/app/club" class="kit-back">← Back to Club</a>
       <p class="kit-eyebrow">OCTOBER · KIT PREVIEW</p>
       <h1>Our Family <em>Sunday Reset</em></h1>
-      <div class="kit-instructions"><p>Keep this two-sided sheet beside your family wall calendar. Each Sunday, take 10–15 minutes to look at the week ahead, prepare what you need, and give everyone a part.</p><p>The back is a one-time fall example to try together. Review the prepared roles, change anything that doesn’t fit, and use the front again each Sunday.</p></div>
     </header>
     <section class="kit-deadline" data-edit-deadline={editDeadline} aria-label="Editing deadline"><p class="kit-deadline-eyebrow">YOUR EDITING WINDOW</p><p data-deadline-status role="status">Checking deadline…</p><div class="kit-countdown" data-countdown hidden role="timer"><span><strong data-days>–</strong><small>Days</small></span><span><strong data-hours>–</strong><small>Hours</small></span><span><strong data-minutes>–</strong><small>Minutes</small></span></div><p class="kit-deadline-detail" data-deadline-detail></p></section>
     <div class="kit-action-bar">
@@ -22,6 +21,7 @@ const editDeadline = clubEditingDeadline('2027-10');
       <button type="button" class="kit-download-link" data-kit-download>Download And Print</button>
       <p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p>
     </div>
+    <div class="kit-instructions"><p>Keep this two-sided sheet beside your family wall calendar. Each Sunday, take 10–15 minutes to look at the week ahead, prepare what you need, and give everyone a part.</p><p>The back is a one-time fall example to try together. Review the prepared roles, change anything that doesn’t fit, and use the front again each Sunday.</p></div>
     </div>
     <div class="kit-page-switch" role="group" aria-label="Printable side">
       <button type="button" data-side="front" aria-pressed="true">Front</button>
@@ -207,6 +207,14 @@ const editDeadline = clubEditingDeadline('2027-10');
 .club-mobile-kit .kit-countdown small{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase}
 .club-mobile-kit .kit-deadline-detail{font-size:.74rem;line-height:1.5}
 @media(max-width:1099px){.club-mobile-kit .kit-deadline{order:3;width:100%;margin-top:18px;padding:16px 0;border-top:1px solid var(--color-warm-rule);border-bottom:0}.club-mobile-kit .kit-action-bar{order:4!important}}
+/* Keep the timer and primary actions near the top; usage notes come last. */
+@media(min-width:1100px){
+ .club-mobile-kit .kit-header{margin-bottom:20px;padding-bottom:20px}
+ .club-mobile-kit .kit-header h1{margin-bottom:0}
+ .club-mobile-kit .kit-deadline{margin-bottom:18px;padding-bottom:16px}
+ .club-mobile-kit .kit-instructions{margin-top:28px;padding-top:20px;border-top:1px solid var(--color-warm-rule);font-size:.84rem;line-height:1.65}
+}
+@media(max-width:1099px){.club-mobile-kit .kit-instructions{order:5;width:100%;margin-top:24px;padding-top:20px;border-top:1px solid var(--color-warm-rule)}}
 /* On phones, keep preview-first: controls below the artwork. */
 @media(max-width:1099px){
   .club-mobile-kit{display:flex;flex-direction:column}
