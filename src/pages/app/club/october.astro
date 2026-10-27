@@ -364,6 +364,15 @@ const storageKey = 'omc:preview:october-sunday-reset:v2';
     -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
   }
   .club-mobile-kit .osr-back{break-after:auto!important;page-break-after:auto!important}
+  /* WebKit (Safari on iPhone, iPad and Mac) cuts printed pages by aspect ratio: a page holds
+     document width x printable height / printable width CSS px, after its own header and footer (always
+     printed on iOS). An 8.5in-wide document left the 11in sheets no room, so each side spilled onto a
+     near-blank page (WebCore PrintContext). Side padding widens the document so every page has headroom;
+     the sheets stay centered and print uniformly smaller, never cropped. Covers printable areas at least
+     1.128x as tall as wide; tests/club-october-print.test.ts models it. Only WebKit has hanging-punctuation. */
+  @supports (hanging-punctuation: first){
+    html:has(.club-mobile-kit[data-plan-state="ready"]){box-sizing:content-box!important;width:8.5in!important;padding:0 .625in!important}
+  }
   .club-mobile-kit .osr-paper *{visibility:visible!important}
 }
 </style>
