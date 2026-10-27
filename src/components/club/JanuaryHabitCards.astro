@@ -48,7 +48,7 @@ const defaults = [
   <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">We'll help you choose one simple habit at a time. You can add a second when the first is ready.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current cards</button></div></dialog>
   <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>
   <div class="jhc-print-scroll">
-    <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page>
+    <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page data-plan-sheet="sheet" data-plan-sheet-end>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
       <div class="jhc-card-grid" data-jhc-card-grid>
         {defaults.slice(0,2).map((item, i) => (
@@ -373,12 +373,16 @@ const defaults = [
 .jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
 </style>
 <script>
-const defaults = [
-  {name:'My morning',anchor:'After I finish breakfast',action:'I put my dishes away.',place:'By the breakfast table',who:'THE FAMILY'},
-  {name:'My backpack',anchor:'After I put on my shoes',action:'I grab my backpack.',place:'Next to my shoes',who:'THE FAMILY'},
-  {name:'My bedroom',anchor:'After I get dressed',action:'I put my pajamas away.',place:'On my dresser',who:'THE FAMILY'},
-  {name:'Our kitchen',anchor:'After we finish dinner',action:'We clear the table together.',place:'By the kitchen table',who:'THE FAMILY'}
-];
+import {
+  HABIT_LIMITS, FINDER_PROBLEMS, FINDER_WHO, applyFamilyNames, applyFinder, clip, finderActions, freshHabitState,
+  habitFingerprint, isHabitState, ownerLine, suggestionFor, type Habit, type HabitChoice, type HabitState, type JhcPlan,
+} from '../../lib/club/engines/january-habit-cards';
+import type { PlanMember } from '../../lib/club/engines/october-sunday-reset';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
+
+type Household = { id: string; members?: (PlanMember & { archived?: boolean })[] };
+
 for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-jhc-dialog]');
  root.querySelectorAll('[data-jhc-open]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
@@ -387,30 +391,50 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  const stage=root.querySelector<HTMLElement>('[data-jhc-stage]');
  const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--jhc-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
- const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v1';
- // Family names never go into persistent localStorage on signed-in Club pages.
- const storage = key.startsWith('omc:club:') ? sessionStorage : localStorage;
+
+ // Plan state: one family at a time, in this tab only (never localStorage).
+ const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v2';
+ for (const legacy of [key, key+':count', key+':automatic-names']) { try { localStorage.removeItem(legacy); } catch { /* none */ } }
+ let current='', members:PlanMember[]=[], persist=true;
+ let state:HabitState=readScoped(tabStorage.get(key),current,isHabitState)??freshHabitState();
+ const save=()=>{if(persist)tabStorage.set(key,JSON.stringify({current,state}))};
+
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-editor]'));
+ const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-card]'));
+ const paint=()=>{
+  cards.forEach((card,i)=>{card.hidden=i>=state.count});
+  editors.forEach((editor,i)=>{editor.hidden=i>=state.count});
+  root.querySelector<HTMLElement>('[data-jhc-card-grid]')?.classList.toggle('jhc-one-card',state.count===1);
+  const habitLabel=root.querySelector<HTMLElement>('[data-jhc-habit-label]');if(habitLabel)habitLabel.textContent=state.habits[0].name;
+  editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Habit;if(document.activeElement!==input)input.value=state.habits[i][field]})});
+  cards.forEach((el,i)=>{
+   const owner=el.querySelector<HTMLElement>('[data-jhc-owner]');if(owner)owner.textContent=ownerLine(state.habits[i].who);
+   el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof Habit;if(document.activeElement!==target)target.textContent=state.habits[i][field]});
+  });
+  if(current)root.dispatchEvent(new CustomEvent(PLAN_CHANGE,{bubbles:true}));
+ };
+ const change=(mutate:(s:HabitState)=>void)=>{mutate(state);save();paint()};
+
+ // Click directly on printed words; keep caret in place and save to the same card state.
+ cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{
+  const field=target.dataset.printField as keyof Habit;
+  target.addEventListener('input',()=>{state.habits[i][field]=clip(field,target.textContent??'');save();if(current)root.dispatchEvent(new CustomEvent(PLAN_CHANGE,{bubbles:true}))});
+  target.addEventListener('blur',()=>change(s=>{s.habits[i][field]=clip(field,target.textContent??'').trim()}));
+  target.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();target.blur()}});
+ }));
+ editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
+  const field=input.dataset.field as keyof Habit;
+  change(s=>{s.habits[i][field]=input.value.slice(0,HABIT_LIMITS[field])});
+ })));
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{
+  change(s=>{const fresh=applyFamilyNames(freshHabitState(),members);Object.assign(s,fresh)});
+  const status=root.querySelector<HTMLElement>('[data-status]');if(status)status.textContent='Original suggestions restored. Print at 100% / actual size on US Letter paper.';
+ });
+
+ // The habit finder (desktop dialog). Same suggestions as the mobile plan (january-habit-cards.ts).
  const finder=root.querySelector<HTMLDialogElement>('[data-jhc-finder-dialog]');
  const finderBody=root.querySelector<HTMLElement>('[data-jhc-finder-body]');
- let finderStep=0;
- let habitIndex=0;
- type HabitChoice={problem:string;action:number;who:string};
- let drafts:HabitChoice[]=[];
- const suggestions:Record<string,{name:string;anchor:string;action:string;place:string;alternates:string[]}>={
-  'Getting out the door':{name:'Ready to go',anchor:'Before going to bed',action:'We put our shoes and backpacks by the door.',place:'By the front door',alternates:['We put everything we need for tomorrow by the door.','We check our bags before bedtime.']},
-  'Putting things away':{name:'Put it back',anchor:'When we finish using something',action:'We put it back where it belongs.',place:'Near the play area',alternates:['We put toys away before starting something else.','We hang up coats and put shoes away when we get home.']},
-  'Cleaning up after meals':{name:'Clear our place',anchor:'After eating',action:'We take our own dishes to the kitchen.',place:'By the dining table',alternates:['We put our plates in the sink after eating.','We wipe our place at the table after eating.']},
-  'Getting ready for bed':{name:'Ready for tomorrow',anchor:'After brushing our teeth',action:'We lay out tomorrow’s clothes.',place:'On the dresser',alternates:['We put dirty clothes in the hamper before bed.','We put pajamas on after brushing our teeth.']},
-  'Starting homework':{name:'Homework first',anchor:'After our afternoon snack',action:'We get out our homework and begin.',place:'At the homework spot',alternates:['We put our homework on the table after school.','We pack completed homework into our backpacks.']},
-  'Knowing what comes next':{name:'Check our plan',anchor:'Before asking what’s next',action:'We look at our family calendar.',place:'Beside our calendar',alternates:['We look at our routine card before asking for help.','We check what comes next after breakfast.']}
- };
- const problemChoices=Object.keys(suggestions);
- const whoChoices=['The kids','One child','Mom','Dad','Mom and Dad','Everyone'];
- const suggestionFor=(draft:HabitChoice)=>{
-  const base=suggestions[draft.problem];
-  return {...base,action:[base.action,...base.alternates][draft.action]??base.action};
- };
+ let finderStep=0, habitIndex=0, drafts:HabitChoice[]=[];
  const renderFinder=()=>{
   if(!finderBody)return;
   finderBody.replaceChildren();
@@ -426,21 +450,20 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   if(finderStep===0){
    make('h3',`What keeps needing reminders?`);
    make('p',`Choose one thing to make easier. We’ll finish this habit before choosing another.`);
-   problemChoices.filter(problem=>habitIndex===0||problem!==drafts[0]?.problem).forEach(problem=>choose(problem,draft?.problem===problem,()=>{
+   FINDER_PROBLEMS.filter(problem=>habitIndex===0||problem!==drafts[0]?.problem).forEach(problem=>choose(problem,draft?.problem===problem,()=>{
     drafts[habitIndex]={problem,action:0,who:draft?.who||'Everyone'};
     finderStep=1;renderFinder();
    }));
   }else if(finderStep===1&&draft){
    make('h3','What would you like to happen instead?');
    make('p','Choose one small thing your family could do without being reminded.');
-   const base=suggestions[draft.problem];
-   [base.action,...base.alternates].forEach((action,i)=>choose(action,draft.action===i,()=>{
+   finderActions(draft.problem).forEach((action,i)=>choose(action,draft.action===i,()=>{
     draft.action=i;finderStep=2;renderFinder();
    }));
   }else if(finderStep===2&&draft){
    make('h3','Who will practice this habit?');
    make('p','Choose who will use this card. You can change the name on the card afterward.');
-   whoChoices.forEach(who=>choose(who,draft.who===who,()=>{
+   FINDER_WHO.forEach(who=>choose(who,draft.who===who,()=>{
     draft.who=who;finderStep=3;renderFinder();
    }));
   }else if(finderStep===3&&draft){
@@ -457,13 +480,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
    }
    const done=make('button',habitIndex===0?'Use this one habit':'Use both habits','jhc-finder-choice jhc-finder-apply') as HTMLButtonElement;
    done.type='button';
-   done.addEventListener('click',()=>{
-    drafts.slice(0,habitIndex+1).forEach((item,i)=>{
-     const suggestion=suggestionFor(item);
-     values[i]={...values[i],name:suggestion.name,anchor:suggestion.anchor,action:suggestion.action,place:suggestion.place,who:item.who};
-    });
-    activeCount=habitIndex+1;save();paint();finder?.close();
-   });
+   done.addEventListener('click',()=>{change(s=>applyFinder(s,drafts.slice(0,habitIndex+1)));finder?.close()});
   }
   const back=root.querySelector<HTMLButtonElement>('[data-jhc-finder-back]');
   if(back)back.hidden=habitIndex===0&&finderStep===0;
@@ -482,61 +499,19 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   renderFinder();
  });
  finder?.addEventListener('click',event=>{if(event.target===finder)finder.close()});
- const cards=Array.from(root.querySelectorAll<HTMLElement>('[data-jhc-card]'));
- let values=defaults.map(x=>({...x}));
- let activeCount=2;
- try{const count=Number(storage.getItem(key+':count'));if(count===1||count===2)activeCount=count}catch{}
- try {const saved=JSON.parse(storage.getItem(key)??'null');if(Array.isArray(saved)&&saved.length===4) values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,typeof saved[i]?.[k]==='string'?saved[i][k].slice(0,105):v])) as typeof d)}catch{}
- const save=()=>{try{storage.setItem(key,JSON.stringify(values));storage.setItem(key+':count',String(activeCount))}catch{}};
- const paint=()=>{
-  cards.forEach((card,i)=>{card.hidden=i>=activeCount});
-  editors.forEach((editor,i)=>{editor.hidden=i>=activeCount});
-  root.querySelector<HTMLElement>('[data-jhc-card-grid]')?.classList.toggle('jhc-one-card',activeCount===1);
-  const habitLabel=root.querySelector<HTMLElement>('[data-jhc-habit-label]');if(habitLabel)habitLabel.textContent=values[0].name;
-  editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof typeof defaults[number];if(document.activeElement!==input)input.value=values[i][field]})});
-  cards.forEach((el,i)=>{const owner=el.querySelector<HTMLElement>('[data-jhc-owner]');if(owner)owner.textContent='FOR '+((values[i] as typeof values[number] & {who?:string}).who||'THE FAMILY').toUpperCase();el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof typeof defaults[number];if(document.activeElement!==target)target.textContent=values[i][field] || ' ';});});
- };
- // Click directly on printed words; keep caret in place and save to the existing card state.
- cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{
-  const field=target.dataset.printField as keyof typeof defaults[number];
-  const max=field==='name'?42:field==='anchor'?85:field==='action'?105:70;
-  const capture=()=>{values[i][field]=(target.textContent??'').replace(/\s+/g,' ').slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}};
-  target.addEventListener('input',capture);
-  target.addEventListener('blur',()=>{values[i][field]=(target.textContent??'').replace(/\s+/g,' ').trim().slice(0,max);try{storage.setItem(key,JSON.stringify(values))}catch{}paint()});
-  target.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();target.blur()}});
- }));
- editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
-  const field=input.dataset.field as keyof typeof defaults[number];values[i][field]=input.value.slice(0,105);
-  try{storage.setItem(key,JSON.stringify(values))}catch{}
-  paint();
- })));
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{
-  values=defaults.map(x=>({...x}));try{storage.removeItem(key);storage.removeItem(key+':count');storage.removeItem(key+':automatic-names');activeCount=2}catch{}paint();
-  const status=root.querySelector<HTMLElement>('[data-status]');if(status)status.textContent='Original suggestions restored. Print at 100% / actual size on US Letter paper.';
- });
- // Keep the four actual printable cards, but derive the starting owners from
- // the shared Club family settings. Never replace custom card names on profile edits.
- let suggestedNames=defaults.map(d=>d.name);
- try {
-  const previous=JSON.parse(storage.getItem(key+':automatic-names')??'null');
-  if(Array.isArray(previous)&&previous.length===4)suggestedNames=previous.filter((v:unknown)=>typeof v==='string') as string[];
- } catch { /* No previous family suggestion. */ }
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
-  const household=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean}[]} | null}>).detail?.household;
+
+ // The family: card names from the shared Club household, never replacing names she typed.
+ const applyHousehold=(detail?:{household:Household|null;sample?:string|null})=>{
+  const household=detail?.household;
   if(!household)return;
-  const kids=household.members.filter(m=>m.kind==='child'&&!m.archived);
-  const adults=household.members.filter(m=>m.kind==='adult'&&!m.archived);
-  const nextNames=[
-   kids[0]?kids[0].firstName+'’s morning':'My morning',
-   kids[1]?kids[1].firstName+'’s backpack':kids[0]?kids[0].firstName+'’s backpack':'My backpack',
-   kids[2]?kids[2].firstName+'’s bedroom':kids[0]?kids[0].firstName+'’s bedroom':'My bedroom',
-   adults.length>1?'Our kitchen':'Our kitchen'
-  ];
-  values.forEach((item,i)=>{if(item.name===suggestedNames[i]||item.name===defaults[i].name)item.name=nextNames[i]});
-  suggestedNames=nextNames;
-  try{storage.setItem(key,JSON.stringify(values));storage.setItem(key+':automatic-names',JSON.stringify(nextNames))}catch{}
-  paint();
- });
+  members=(household.members??[]).filter(m=>(m.kind==='adult'||m.kind==='child')&&!m.archived);
+  const next=planKey(detail?.sample,household.id);
+  if(next!==current){current=next;state=readScoped(tabStorage.get(key),current,isHabitState)??freshHabitState()}
+  applyFamilyNames(state,members);save();paint();
+ };
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household|null;sample?:string|null}>).detail));
+ applyHousehold((window as Window & {__ofcPreviewHousehold?:{household:Household|null;sample?:string|null}}).__ofcPreviewHousehold);
+
  root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
@@ -553,7 +528,9 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   }catch(error){console.error('Single-page image export failed',error);alert('Image download failed. Please use Print / Save PDF instead.')}
   finally{root.classList.remove('jhc-image-export');button.disabled=false;button.textContent=old}
  });
- 
+
+ const plan:JhcPlan={ready:()=>Boolean(current),state:()=>state,members:()=>members,update:change,replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>habitFingerprint(state)};
+ (root as HTMLElement & {clubPlan?:JhcPlan}).clubPlan=plan;
  paint();
 }
 </script>

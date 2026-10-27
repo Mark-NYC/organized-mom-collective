@@ -1,0 +1,23 @@
+---
+/** The fixed action bar above the app tab bar: the primary action (approve / print a copy / print this copy)
+ * and a separate square print button. States are set by mountPlanScreen (src/lib/club/plan/screen.ts). */
+---
+<div class="cp-bar" data-cp-bar>
+  <div class="cp-bar-inner">
+    <button type="button" class="cp-primary" data-plan-primary>Approve this plan</button>
+    <button type="button" class="cp-square" data-plan-print data-cp-print aria-label="Print or save as PDF" title="Print or save as PDF"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM18 12h.01"/></svg></button>
+    <button type="button" class="cp-square cp-done" data-cp-copy-done hidden>Done</button>
+  </div>
+</div>
+<style is:global>
+@media screen and (max-width:1099px){
+/* Above the app tab bar when it shows (it carries the safe area); otherwise at the bottom edge. */
+.cp-bar{position:fixed;left:0;right:0;bottom:var(--cp-nav,0px);z-index:38;background:rgba(255,253,250,.97);border-top:1px solid var(--cp-line);box-shadow:0 -6px 18px #3d38340d;padding:10px 20px calc(10px + var(--cp-safe,0px))}
+.cp-bar-inner{max-width:640px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.cp-primary{min-height:52px;padding:10px 14px;border:1px solid var(--color-warm-button);border-radius:3px;background:var(--color-warm-button);color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.cp-primary[aria-disabled="true"]{background:var(--cp-wash);border-color:var(--color-sage);color:var(--cp-sage);cursor:default}
+.cp-square{display:grid;place-items:center;min-width:52px;height:52px;padding:0 14px;border:1px solid var(--cp-ink);border-radius:3px;background:#fff;cursor:pointer}
+.cp-square[hidden]{display:none}
+.cp-done{font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+}
+</style>

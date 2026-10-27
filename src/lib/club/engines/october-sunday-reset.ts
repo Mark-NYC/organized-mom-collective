@@ -40,6 +40,11 @@ export interface SavedPlan {
   state: PlanState;
 }
 
+import type { PlanResource } from '../plan/resource';
+import { planKey } from '../plan/storage';
+
+export { planKey };
+
 export const DEFAULT_TRIGGER = 'Sunday after lunch';
 export const DEFAULT_TAGLINE = 'Look ahead. Get ready. Share the work.';
 export const TRIGGER_CHOICES = ['Sunday after breakfast', 'Sunday after church', 'Sunday after lunch', 'Sunday evening'] as const;
@@ -103,9 +108,6 @@ export const applyDefaults = (state: PlanState, members: readonly PlanMember[]):
 };
 
 export const preparedState = (members: readonly PlanMember[]) => applyDefaults(emptyState(), members);
-
-/** Which family a saved plan belongs to: never restore one family's edits onto another. */
-export const planKey = (sample: string | null | undefined, householdId: string) => `${sample}:${householdId}`;
 
 /** The saved plan for this family, if the stored JSON is one and is well-formed. */
 export const readSavedPlan = (raw: string | null, key: string): PlanState | null => {
@@ -189,17 +191,11 @@ export const planFingerprint = (s: PlanState) =>
   ]);
 
 /**
- * The live plan on a page, published by the printable (OctoberSundayReset.astro) as `.osr` element's `osrPlan`.
- * It fires `osr:change` (bubbling) after every repaint once a family is loaded.
+ * The live plan on a page, published by the printable (OctoberSundayReset.astro) on its `.osr` root as
+ * `clubPlan`: the shared PlanResource (src/lib/club/plan/resource.ts) plus October's family helpers.
+ * It fires PLAN_CHANGE (bubbling) after every repaint once a family is loaded.
  */
-export interface OsrPlan {
-  ready: () => boolean;
+export interface OsrPlan extends PlanResource<PlanState> {
   members: () => PlanMember[];
-  state: () => PlanState;
   nameOf: (m: PlanMember) => string;
-  /** Change the plan; it repaints the printable and saves to this tab (unless paused). */
-  update: (change: (s: PlanState) => void) => void;
-  replace: (s: PlanState) => void;
-  /** Pause saving (a one-time copy) or resume it (saves the current plan). */
-  setPersist: (on: boolean) => void;
 }

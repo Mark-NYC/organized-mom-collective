@@ -6,8 +6,8 @@
  */
 import {monthlyDeepClean} from '../../data/cleaning';
 import {monthColors} from '../../theme';
-interface Props{storageKey?:string}
-const {storageKey='omc:club:march-spring-prep:v1'}=Astro.props;
+interface Props{storageKey?:string; managed?:boolean}
+const {storageKey='omc:club:march-spring-prep:v1',managed=false}=Astro.props;
 const project=monthlyDeepClean.find(x=>x.month===2)!;
 const taskIcons:Record<string,string>={
  'mar-baseboards':'spray-bottle-and-cloth','mar-vents':'duster','mar-winter-gear':'sorting-clothes',
@@ -28,7 +28,7 @@ const taskTypes:Record<string,string>={
  'mar-donate':'Children can suggest items. A grown-up approves what leaves the home.'
 };
 ---
-<div class="msc" data-msc-key={storageKey} data-task-copy={JSON.stringify(Object.fromEntries(project.tasks.map(t=>[t.id,{title:t.label,supplies:handoffs[t.id].supplies,ready:handoffs[t.id].ready,doJob:handoffs[t.id].doJob,done:handoffs[t.id].done}])))} style={`--msc-month:${monthColors[2].hex}`}>
+<div class="msc" data-msc-managed={managed ? "true" : "false"} data-msc-key={storageKey} data-task-copy={JSON.stringify(Object.fromEntries(project.tasks.map(t=>[t.id,{title:t.label,supplies:handoffs[t.id].supplies,ready:handoffs[t.id].ready,doJob:handoffs[t.id].doJob,done:handoffs[t.id].done}])))} style={`--msc-month:${monthColors[2].hex}`}>
  <div class="msc-intro"><a href="/club" class="msc-back">← Organized Family Club</a><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH 2027</p><h1>Spring prep. <em>Everyone has a part.</em></h1>
  <p>The same five optional jobs from your cleaning companion, now prepared for independent ownership. Each person sees what to gather, what to do, and how to know the job is finished.</p></div>
  <div class="msc-workspace">
@@ -311,7 +311,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  const previewObserver=typeof ResizeObserver!=='undefined'?new ResizeObserver(fitPreview):null;
  if(previewObserver && preview) previewObserver.observe(preview);
  window.addEventListener('resize',fitPreview);
- const key=root.dataset.mscKey??'omc:preview:march:v1';
+ const managed=root.dataset.mscManaged==='true';
+ let key=root.dataset.mscKey??'omc:preview:march:v1';
  const store=sessionStorage; // Do not persist family member names beyond this tab.
  let members:Member[]=[];
  let family='Our Family';
@@ -322,6 +323,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  let textEdits:Record<string,Partial<Record<TaskCopyKey,string>>>={};
  const copyDefaults=JSON.parse(root.dataset.taskCopy??'{}') as Record<string,Record<TaskCopyKey,string>>;
  let sampleKey='';
+ const eligible=(task:string,m:Member)=>m.kind==='adult'||(!adultOnly.has(task)&&m.birthYear!==undefined&&2027-m.birthYear-(m.birthMonth&&m.birthMonth>3?1:0)>=5);
  const pick=(task:string,people:Member[]):Member|undefined=>{
   const adults=people.filter(m=>m.kind==='adult');
   const kids=people.filter(m=>m.kind==='child'&&m.birthYear!==undefined&&2027-m.birthYear-(m.birthMonth&&m.birthMonth>3?1:0)>=5);
@@ -362,17 +364,17 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
    select.replaceChildren();
    const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Choose a family member';select.append(placeholder);
    for(const m of live){
-    if(adultOnly.has(task.id)&&m.kind!=='adult')continue;
+    if(managed?!eligible(task.id,m):adultOnly.has(task.id)&&m.kind!=='adult')continue;
     const option=document.createElement('option');option.value=m.id;option.textContent=ownerLabel(m,live);select.append(option);
    }
-   select.value=live.some(m=>m.id===current&&( !adultOnly.has(task.id)||m.kind==='adult'))?current:'';
+   select.value=live.some(m=>m.id===current&&(managed?eligible(task.id,m):(!adultOnly.has(task.id)||m.kind==='adult')))?current:'';
    const selected=live.find(m=>m.id===select.value);
    const customName=customOwnerLabels[task.id];
-   if(customName && !adultOnly.has(task.id)){
+   if(customName && !adultOnly.has(task.id) && !managed){
     const option=document.createElement('option');option.value='custom:'+task.id;option.textContent='Custom: '+customName;select.append(option);select.value=option.value;
    }
-   if(document.activeElement!==printed)printed.textContent=(customName && !adultOnly.has(task.id))?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
-   const summary=root.querySelector<HTMLElement>(`[data-summary-owner="${task.id}"]`);if(summary)summary.textContent=(customName && !adultOnly.has(task.id))?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
+   if(document.activeElement!==printed)printed.textContent=(customName && !adultOnly.has(task.id) && !managed)?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
+   const summary=root.querySelector<HTMLElement>(`[data-summary-owner="${task.id}"]`);if(summary)summary.textContent=(customName && !adultOnly.has(task.id) && !managed)?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
   }
   root.querySelectorAll<HTMLElement>('[data-march-edit]').forEach(el=>{
    if(document.activeElement===el)return;
@@ -380,8 +382,9 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
    el.textContent=textEdits[task]?.[field]??copyDefaults[task]?.[field]??'';
   });
   const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
+  if(managed)root.dispatchEvent(new CustomEvent('msc-state',{detail:{family,members:live.map(m=>({...m})),tasks:project.tasks.map(task=>{const selected=live.find(m=>m.id===chosen[task.id]);return {id:task.id,ownerId:chosen[task.id]??'',owner:customOwnerLabels[task.id]&&!adultOnly.has(task.id)&&!managed?customOwnerLabels[task.id]:selected?ownerLabel(selected,live):'Optional · unassigned',adultOnly:adultOnly.has(task.id),...copyDefaults[task.id],...textEdits[task.id]}})}}));
  };
- const save=()=>{try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom],customOwnerLabels,textEdits}))}catch{}};
+ const save=()=>{if(managed&&!sampleKey)return;try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom],customOwnerLabels,textEdits}))}catch{}};
  const clean=(el:HTMLElement,limit:number)=> (el.textContent??'').replace(/\s+/g,' ').trim().slice(0,limit);
  root.querySelectorAll<HTMLElement>('[data-march-edit]').forEach(el=>{
   const task=el.dataset.task!,field=el.dataset.marchEdit as TaskCopyKey;
@@ -391,12 +394,12 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  });
  root.querySelectorAll<HTMLElement>('[data-printed-owner]').forEach(el=>{
   const task=el.dataset.printedOwner!;
-  el.addEventListener('input',()=>{const value=clean(el,32);if(!adultOnly.has(task))customOwnerLabels[task]=value;save()});
+  el.addEventListener('input',()=>{const value=clean(el,32);if(!managed&&!adultOnly.has(task))customOwnerLabels[task]=value;save()});
   el.addEventListener('blur',()=>{
-   const value=clean(el,32);const people=members.filter(m=>!m.archived&&(!adultOnly.has(task)||m.kind==='adult'));
+   const value=clean(el,32);const people=members.filter(m=>!m.archived&&(managed?eligible(task,m):(!adultOnly.has(task)||m.kind==='adult')));
    const match=people.find(m=>ownerLabel(m,members).toLowerCase()===value.toLowerCase()||m.firstName.toLowerCase()===value.toLowerCase());
    if(match){chosen[task]=match.id;delete customOwnerLabels[task];custom.add(task)}
-   else if(!adultOnly.has(task)&&value&&value!=='Optional · unassigned'){
+   else if(!managed&&!adultOnly.has(task)&&value&&value!=='Optional · unassigned'){
     customOwnerLabels[task]=value;chosen[task]='';custom.add(task);
    }else if(!value||value==='Optional · unassigned'){
     chosen[task]='';delete customOwnerLabels[task];custom.add(task);
@@ -437,22 +440,35 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   finally{root.classList.remove('msc-image-export');button.disabled=false;button.textContent=old}
  });
  
- const applyHousehold=(detail:{household:{displayName?:string;members:Member[]}|null;sample?:string|null})=>{
+ const applyHousehold=(detail:{household:{id?:string;displayName?:string;members:Member[]}|null;sample?:string|null})=>{
   if(!detail?.household)return;
   const h=detail.household;
-  const id=(detail.sample??'account')+':'+(h.displayName??'');
+  const id=(detail.sample??'account')+':'+(managed?h.id??'':h.displayName??'');
+  if(managed&&!h.id)return;
+  if(managed)key=(root.dataset.mscKey??'omc:club:march:v1')+':'+encodeURIComponent(id);
   const changed=id!==sampleKey;
   members=h.members.filter(m=>!m.archived);
   family=h.displayName??'Our Family';
   if(changed){chosen={};custom.clear();customOwnerLabels={};textEdits={};sampleKey=id;
    try{const saved=JSON.parse(store.getItem(key)??'null');if(saved?.sampleKey===id){chosen=saved.chosen??{};custom=new Set(Array.isArray(saved.custom)?saved.custom:[]);customOwnerLabels=saved.customOwnerLabels??{};textEdits=saved.textEdits??{}}}catch{}
   }
-  for(const task of project.tasks)if(!custom.has(task.id)||(!customOwnerLabels[task.id]&&!members.some(m=>m.id===chosen[task.id]&&(!adultOnly.has(task.id)||m.kind==='adult'))))chosen[task.id]=pick(task.id,members)?.id??'';
+  for(const task of project.tasks){const current=chosen[task.id]??'';const valid=members.some(m=>m.id===current&&(managed?eligible(task.id,m):(!adultOnly.has(task.id)||m.kind==='adult')));if(!custom.has(task.id)||(managed?(!valid&&current!==''):(!customOwnerLabels[task.id]&&!valid)))chosen[task.id]=pick(task.id,members)?.id??'';}
   save();draw();
  };
- window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail));
+ if(managed){
+  root.addEventListener('msc-household',(event:Event)=>applyHousehold((event as CustomEvent).detail));
+  root.addEventListener('msc-request',()=>draw());
+  root.addEventListener('msc-edit',(event:Event)=>{
+   const detail=(event as CustomEvent<{task:string;owner?:string;field?:TaskCopyKey;value?:string}>).detail;
+   if(!detail||!project.tasks.some(t=>t.id===detail.task))return;
+   if(detail.owner!==undefined){const candidate=members.find(m=>m.id===detail.owner&&!m.archived);if(detail.owner!==''&&(!candidate||!eligible(detail.task,candidate)))return;chosen[detail.task]=detail.owner;delete customOwnerLabels[detail.task];custom.add(detail.task)}
+   if(detail.field&&['title','supplies','ready','doJob','done'].includes(detail.field)){(textEdits[detail.task]??={})[detail.field]=(detail.value??'').slice(0,detail.field==='title'?60:180)}
+   save();draw();
+  });
+ }
+ if(!managed)window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{displayName?:string;members:Member[]}|null;sample?:string|null}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:{displayName?:string;members:Member[]}|null;sample?:string|null}}).__ofcPreviewHousehold;
- if(cached)applyHousehold(cached);
+ if(!managed&&cached)applyHousehold(cached);
  draw();
 }
 </script>

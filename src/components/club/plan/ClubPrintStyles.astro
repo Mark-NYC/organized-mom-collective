@@ -1,0 +1,48 @@
+---
+/**
+ * Printing for every Club plan page: exactly one US Letter page per sheet, whatever the screen was showing.
+ * Only the sheets (data-plan-sheet) and the elements that contain them take part in print layout; everything
+ * else is removed, so nothing on the page can add a blank page. The last sheet carries data-plan-sheet-end.
+ * Tested by tests/club-plan-print.test.ts (WebKit pagination model) and the browser checks in the PR.
+ */
+---
+<style is:global>
+@media print{
+  @page{size:letter portrait;margin:0}
+  html:has(.club-plan),html:has(.club-plan) body{width:8.5in!important;height:auto!important;overflow:visible!important;margin:0!important;padding:0!important;background:#fff!important}
+  body:has(.club-plan) #main{position:static!important;width:8.5in!important;max-width:none!important;height:auto!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important}
+  .club-plan:not([data-plan-state="ready"]){display:none!important}
+  /* :not(#plan-print) adds id-level specificity, so a printable's own id-scoped !important rules can't
+     keep its editor panels in the print layout. */
+  .club-plan[data-plan-state="ready"] :not(#plan-print):not([data-plan-sheet]):not([data-plan-sheet] *):not(:has([data-plan-sheet])){display:none!important}
+  .club-plan[data-plan-state="ready"]:not(#plan-print),.club-plan[data-plan-state="ready"] :not(#plan-print):has([data-plan-sheet]){
+    display:block!important;position:static!important;float:none!important;
+    width:8.5in!important;max-width:none!important;height:auto!important;
+    min-height:0!important;max-height:none!important;
+    margin:0!important;padding:0!important;gap:0!important;
+    border:0!important;background:#fff!important;
+    overflow:visible!important;transform:none!important;
+    box-shadow:none!important;scrollbar-width:none!important;
+  }
+  .club-plan[data-plan-state="ready"] [data-plan-sheet]:not(#plan-print){
+    visibility:visible!important;position:relative!important;
+    top:auto!important;left:auto!important;
+    width:8.5in!important;height:11in!important;max-width:none!important;
+    flex:none!important;margin:0!important;border:0!important;
+    transform:none!important;box-shadow:none!important;overflow:hidden!important;
+    break-after:page!important;page-break-after:always!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+  }
+  .club-plan[data-plan-state="ready"] [data-plan-sheet-end]{break-after:auto!important;page-break-after:auto!important}
+  .club-plan[data-plan-state="ready"] [data-plan-sheet] *{visibility:visible!important}
+  /* WebKit (Safari on iPhone, iPad and Mac) cuts printed pages by aspect ratio: a page holds
+     document width x printable height / printable width CSS px, after its own header and footer (always
+     printed on iOS). An 8.5in-wide document left the 11in sheets no room, so each sheet spilled onto a
+     near-blank page (WebCore PrintContext). Side padding widens the document so every page has headroom;
+     the sheets stay centered and print uniformly smaller, never cropped. Covers printable areas at least
+     1.128x as tall as wide; tests/club-plan-print.test.ts models it. Only WebKit has hanging-punctuation. */
+  @supports (hanging-punctuation: first){
+    html:has(.club-plan[data-plan-state="ready"]){box-sizing:content-box!important;width:8.5in!important;padding:0 .625in!important}
+  }
+}
+</style>

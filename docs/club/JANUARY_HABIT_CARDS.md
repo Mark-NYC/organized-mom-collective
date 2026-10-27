@@ -26,6 +26,8 @@ Use `docs/brand/TOOL-OUTPUT-DESIGN.md`, `docs/brand/PUBLIC-VISUAL-DESIGN.md`, an
 
 - Actual four-card print sheet: `src/components/club/JanuaryHabitCards.astro`.
 - Ungated, noindex review: `/preview/january-habit-cards`.
+- Cleaning companion website preview: `/app/club/january`, on the shared plan shell (`docs/club/PLAN_ARCHITECTURE.md`). Below 1100px a plan screen edits the same state the sheet prints (one or two cards); edits stay in this browser tab.
+- The sheet now keeps its edits in this tab only (sessionStorage) on every page that uses it; older localStorage copies are removed.
 - Club's January tool: `/club/tools/habit-builder` reuses that sheet pending route rename and member-data handoff.
 - January kit's older five-step `Action` page and `docs/club/mailers/2027-01-fresh-start-together.md` are **not yet updated** to the card-first mailed product. Do not present the earlier letter/checklist as the final January physical mailer.
 - This is a design prototype, not production-validated personalized printing. Must proof size, cut usability, legibility and actual print/mail vendor quality before fulfillment.

@@ -1,5 +1,6 @@
 /**
- * October Sunday Reset: two printed pages in WebKit (Safari on iPhone, iPad and Mac).
+ * Club plan printables (October: two sheets; January: one sheet) print one US Letter page per sheet in WebKit
+ * (Safari on iPhone, iPad and Mac). The rules live in src/components/club/plan/ClubPrintStyles.astro.
  *
  * Chromium's PDF output can't stand in for Safari: WebKit paginates differently. This models WebCore's
  * PrintContext (computePageRects) and FrameView::forceLayoutForPagination for this document: a page holds
@@ -30,10 +31,10 @@ function webkitPageCount(documentWidthPx: number, setup: PrintSetup, sheets = 2)
 
 /** The printed document width WebKit sees, from the page's own WebKit-only print rule. */
 function webkitDocumentWidth() {
-  const page = readFileSync(new URL('../src/pages/app/club/october.astro', import.meta.url), 'utf8');
-  const print = page.slice(page.lastIndexOf('@media print{'));
-  const rule = /@supports \(hanging-punctuation: first\)\{\s*html:has\(\.club-mobile-kit\[data-plan-state="ready"\]\)\{([^}]*)\}/.exec(print);
-  expect(rule, 'WebKit print rule in the page’s print block').not.toBeNull();
+  const page = readFileSync(new URL('../src/components/club/plan/ClubPrintStyles.astro', import.meta.url), 'utf8');
+  const print = page.slice(page.indexOf('@media print{'));
+  const rule = /@supports \(hanging-punctuation: first\)\{\s*html:has\(\.club-plan\[data-plan-state="ready"\]\)\{([^}]*)\}/.exec(print);
+  expect(rule, 'WebKit print rule in the shared print block').not.toBeNull();
   const decl = rule![1];
   expect(decl).toMatch(/box-sizing:content-box/);
   const width = Number(/width:([\d.]+)in/.exec(decl)?.[1]);
@@ -47,7 +48,7 @@ for (const side of [0, 18, 36]) for (const vertical of [0, 18, 36]) for (const h
   if (vertical <= side + 18) setups.push({ side, vertical, header, footer });
 }
 
-describe('October printable in WebKit', () => {
+describe('Club plan printables in WebKit', () => {
   it('reproduces the iPhone bug with an 8.5in document: front, spill, back, spill', () => {
     const iosFooter = { side: 0, vertical: 0, header: 0, footer: 24 };
     expect(webkitPageCount(SHEET.width, iosFooter)).toBe(4);
@@ -55,11 +56,22 @@ describe('October printable in WebKit', () => {
     expect(webkitPageCount(SHEET.width, { side: 0, vertical: 0, header: 0, footer: 0 })).toBeLessThanOrEqual(2);
   });
 
-  it('prints exactly two pages for every plausible Safari header, footer and margin', () => {
+  it('prints one page per sheet for every plausible Safari header, footer and margin', () => {
     const width = webkitDocumentWidth();
     expect(width).toBeGreaterThan(SHEET.width);
-    const failing = setups.filter((s) => webkitPageCount(width, s) !== 2);
-    expect(failing).toEqual([]);
+    expect(setups.filter((s) => webkitPageCount(width, s, 2) !== 2)).toEqual([]); // October: front and back
+    expect(setups.filter((s) => webkitPageCount(width, s, 1) !== 1)).toEqual([]); // January: one sheet
+  });
+
+  it('reproduces the one-sheet risk too: an 8.5in document spills January onto a second page', () => {
+    expect(webkitPageCount(SHEET.width, { side: 0, vertical: 0, header: 0, footer: 24 }, 1)).toBe(2);
+  });
+
+  it('marks the last sheet of every Club plan printable, so nothing breaks after it', () => {
+    for (const file of ['OctoberSundayReset.astro', 'JanuaryHabitCards.astro']) {
+      const src = readFileSync(new URL(`../src/components/club/${file}`, import.meta.url), 'utf8');
+      expect(src.match(/data-plan-sheet-end/g)?.length, file).toBe(1);
+    }
   });
 
   it('keeps the sheet at least 85% of its full-width size (scaled, never cropped)', () => {

@@ -1,0 +1,113 @@
+---
+/**
+ * The Club's mobile plan screen (below 1100px), shared by every month: who it's for, approval and the editing
+ * window, a compact preview of the real printable, the month's own sections (default slot), a one-time copy,
+ * one honest footnote, the action bar, one edit sheet and a toast. Wired by mountPlanScreen
+ * (src/lib/club/plan/screen.ts). Architecture: docs/club/PLAN_ARCHITECTURE.md.
+ */
+import ClubActionBar from './ClubActionBar.astro';
+import ClubEditSheet from './ClubEditSheet.astro';
+import ClubPlanStatus from './ClubPlanStatus.astro';
+
+interface Props {
+  /** clubEditingDeadline(month), an ISO timestamp. */
+  deadline: string;
+  /** e.g. "October · Organized Family Club" (styled as the one uppercase label). */
+  kicker: string;
+  /** The printable's sheets to preview, by their data-plan-sheet value. */
+  sheets: string[];
+  previewNote: string;
+}
+const { deadline, kicker, sheets, previewNote } = Astro.props;
+---
+<section class="cp" data-plan-screen data-deadline={deadline} aria-labelledby="cp-title">
+  <header class="cp-head">
+    <p class="cp-kicker">{kicker}</p>
+    <h1 id="cp-title" class="cp-title"><slot name="title" /></h1>
+    <p class="cp-for"><span data-cp-for>Prepared for your family</span><span class="cp-tag" data-cp-sample hidden>Sample family</span></p>
+  </header>
+
+  <div class="cp-copy-banner" data-cp-copy-banner hidden>
+    <strong>One-time copy</strong>
+    <p>Changes here are for printing only. Your plan stays as it is, and this copy isn’t saved.</p>
+  </div>
+
+  <ClubPlanStatus />
+
+  <button type="button" class="cp-preview" data-plan-open-proof>
+    <span class="cp-thumbs" aria-hidden="true" inert>{sheets.map((side) => <span class="cp-thumb" data-cp-thumb={side}></span>)}</span>
+    <span class="cp-preview-text"><strong>Your printable</strong><span data-cp-preview-note>{previewNote}</span></span>
+    <span class="cp-go" aria-hidden="true">View</span>
+  </button>
+
+  <slot />
+
+  <p class="cp-more"><button type="button" class="cp-link" data-plan-copy>Need a different version? <span>Make a one-time copy</span></button></p>
+  <p class="cp-foot" data-cp-foot></p>
+
+  <ClubActionBar />
+  <ClubEditSheet />
+  <div class="cp-toast" data-cp-toast role="status" aria-live="polite" hidden><span data-cp-toast-text></span><button type="button" data-cp-toast-undo hidden>Undo</button></div>
+</section>
+
+<style is:global>
+.cp{display:none}
+@media screen and (max-width:1099px){
+.club-plan > .cp{display:block}
+.cp{--cp-sage:#536e4e;--cp-wash:#eef2ea;--cp-line:var(--color-warm-rule);--cp-soft:var(--color-warm-soft);--cp-ink:var(--color-warm-ink);
+ max-width:640px;margin:0 auto;padding-bottom:64px;color:var(--cp-ink);font-family:var(--font-sans)}
+:where(.cp) button{font:inherit;color:inherit}
+.cp-head{margin:0 0 18px}
+.cp-kicker{font-size:.69rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--cp-soft)}
+.cp-title{font:400 clamp(32px,8.6vw,42px)/1.08 var(--font-serif);letter-spacing:-.02em;margin:10px 0 8px}
+.cp-for{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.98rem;color:var(--cp-soft)}
+.cp-tag{border:1px solid var(--cp-line);background:#fff;padding:2px 8px;font-size:.75rem;font-weight:600;color:var(--cp-ink)}
+.cp-tag[hidden]{display:none}
+
+.cp-preview{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:10px 14px 10px 10px;margin:0 0 22px;border:1px solid var(--cp-line);background:#fff;text-align:left;cursor:pointer}
+.cp-thumbs{display:flex;gap:5px;flex:none}
+.cp-thumb{position:relative;display:block;width:46px;height:60px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px #e3e0da,0 2px 6px #0000000f}
+.cp .cp-thumb > *{position:absolute;top:0;left:0;margin:0;box-shadow:none;border:0;transform-origin:top left}
+.cp-preview-text{display:grid;gap:2px;flex:1;min-width:0}
+.cp-preview-text strong{font-size:.95rem;font-weight:600}
+.cp-preview-text span{font-size:.82rem;color:var(--cp-soft)}
+.cp-go{font-size:.82rem;font-weight:600;color:var(--cp-sage);text-decoration:underline;text-underline-offset:4px}
+
+/* Shared section vocabulary for the month's own content. */
+.cp-section{margin:0 0 30px}
+.cp-section h2{font:400 clamp(24px,6.4vw,28px)/1.15 var(--font-serif);margin:0 0 4px}
+.cp-intro{font-size:.9rem;line-height:1.55;color:var(--cp-soft);margin:0 0 12px}
+.cp-group{list-style:none;margin:0;padding:0;border:1px solid var(--cp-line);background:#fff}
+.cp-group > li + li{border-top:1px solid var(--cp-line)}
+.cp-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;width:100%;min-height:64px;padding:13px 14px 13px 16px;border:0;background:transparent;text-align:left;cursor:pointer}
+.cp-row:disabled{cursor:default}
+.cp-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--cp-wash);color:var(--cp-sage);font:400 1.15rem var(--font-serif)}
+.cp-row-text{display:grid;gap:2px;min-width:0}
+.cp-row-text strong{font-size:1rem;font-weight:600}
+.cp-row-text span{font-size:.88rem;line-height:1.45;color:var(--cp-soft)}
+.cp-row img{width:42px;height:42px;object-fit:contain}
+.cp-row-text .cp-owner{justify-self:start;margin-top:3px;padding:2px 8px;background:var(--cp-wash);color:var(--cp-sage);font-size:.8rem;font-weight:600}
+.cp-chev{width:9px;height:9px;border:solid #a39b97;border-width:1.5px 1.5px 0 0;transform:rotate(45deg);margin-right:4px}
+.cp-row:disabled .cp-chev{display:none}
+.cp-removed{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 14px 8px 16px;font-size:.88rem;color:var(--cp-soft)}
+.cp-removed s{text-decoration-color:#b9b1ad}
+.cp-link{min-height:44px;border:0;background:none;padding:0;cursor:pointer;color:var(--cp-soft);font-size:.9rem;text-align:left}
+.cp-link span,.cp-removed button{color:var(--cp-sage);font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.cp-removed button{min-height:44px;border:0;background:none;cursor:pointer;font-size:.88rem}
+.cp-more{margin:-8px 0 12px}
+.cp-foot{font-size:.8rem;line-height:1.6;color:var(--cp-soft);border-top:1px solid var(--cp-line);padding-top:14px}
+
+.cp-copy-banner{border-left:3px solid var(--color-sage);background:#f1f2f2;padding:12px 16px;margin:0 0 16px}
+.cp-copy-banner[hidden]{display:none}
+.cp-copy-banner strong{font-size:.92rem}
+.cp-copy-banner p{font-size:.86rem;line-height:1.5;color:var(--cp-soft);margin-top:2px}
+.cp[data-mode="copy"] .cp-more{display:none}
+.cp :focus-visible{outline:2px solid var(--cp-sage);outline-offset:2px}
+
+.cp-toast{position:fixed;left:50%;bottom:calc(var(--cp-nav,0px) + 86px);z-index:39;transform:translateX(-50%);display:flex;align-items:center;gap:14px;width:max-content;max-width:calc(100vw - 32px);padding:11px 16px;background:var(--cp-ink);color:#fff;font-size:.88rem;line-height:1.4;box-shadow:0 8px 24px #0002}
+.cp-toast[hidden]{display:none}
+.cp-toast button{min-height:36px;border:0;background:none;color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.cp-toast button[hidden]{display:none}
+}
+@media print{.cp{display:none}}
+</style>

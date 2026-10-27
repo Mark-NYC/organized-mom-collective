@@ -1,11 +1,8 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../../config';
-const samples = [
- {month:'NOVEMBER', title:'Our Family Ownership Plan', benefit:'Less reminding. More ownership.', detail:'Hand off one whole job with a clear owner, a time, and a definition of finished.', url:'/club/worksheet-generator/', label:'See the November plan', shade:'#e7ece5', number:'01'},
- {month:'JANUARY', title:'Our Family Habit Cards', benefit:'Smoother mornings, fewer reminders.', detail:'Simple cues that help children know what to do next without another chart for Mom to manage.',url:'/preview/january-habit-cards', label:'See the January cards',shade:'#cddde1',number:'02'},
- {month:'MAY', title:'Our Family Summer Rhythm', benefit:'More freedom. Less directing.',detail:'A flexible summer rhythm and practical activity ideas children can follow when school ends.',url:'/club/may-preview/',label:'See the May rhythm',shade:'#f1ede4',number:'03'}
-];
+const monthIcons = import.meta.glob('../../../assets/icons/ofc/month-icons/*-OFC-icon.png', { eager: true, query: '?url', import: 'default' });
+const months = [{"month":"January","title":"Mornings Without the Nagging","responsibility":"Following routines","how":"A ready-made morning or evening plan shows each person what to do next.","url":"/club/january-preview/"},{"month":"February","title":"Connection You Don't Have to Plan","responsibility":"Initiating connection","how":"Four simple invitations help kids take the lead in spending time together.","url":"/club/february-preview/"},{"month":"March","title":"Cleaning Without Managing Everyone","responsibility":"Finishing a job","how":"Each person gets a clear cleaning job, supplies, steps, and a definition of done.","url":"/club/march-preview/"},{"month":"April","title":"Dinner Isn't All on You","responsibility":"Sharing meal ownership","how":"A prepared dinner plan gives family members roles from gathering ingredients through cleanup.","url":"/club/april-preview/"},{"month":"May","title":"Summer Days Without Constant Questions","responsibility":"Managing their day","how":"A flexible daily rhythm and activity menu help kids choose what comes next.","url":"/club/may-preview/"},{"month":"June","title":"Less Screen-Time Negotiating","responsibility":"Respecting shared boundaries","how":"Clear expectations for screens, responsibilities, and free time help everyone follow the same plan.","url":"/club/june-preview/"},{"month":"July","title":"No More Packing for Everyone","responsibility":"Preparing independently","how":"Personal packing lists show each person what to pack, check, and put away.","url":"/club/july-preview/"},{"month":"August","title":"Back to School Without the Scramble","responsibility":"Taking initiative","how":"A personalized countdown gives everyone their own school-ready responsibilities.","url":"/club/august-preview/"},{"month":"September","title":"Stop Being the Family's Calendar","responsibility":"Planning together","how":"A short weekly family meeting helps everyone know the schedule and own their commitments.","url":"/club/september-preview/"},{"month":"October","title":"Get Ahead of the Last-Minute Scramble","responsibility":"Noticing what is needed","how":"Seasonal checks assign family members the job of spotting and handling needs early.","url":"/club/october-preview/"},{"month":"November","title":"Stop Being Everyone's Reminder","responsibility":"Owning a whole responsibility","how":"Each ready family member gets a job with a clear owner, timing, and finish line.","url":"/club/november-preview/"},{"month":"December","title":"Christmas Without Doing It All","responsibility":"Contributing to family traditions","how":"A prepared holiday plan shares the work of gifts, traditions, and celebrations.","url":"/club/december-preview/"}].map(m => ({...m, icon: monthIcons[`../../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`]}));
 const faqs = [
  ['What exactly comes in the mail?', 'Our planned subscription includes one personalized 8.5 × 11 family organization tool each month, with a short note from Megan. We are still testing the final paper and mailing format.'],
  ['Will I have to put the plan together?', 'No. We want to prepare the plan using a few details about your household. You can review suggested assignments or make changes, but the default should be ready to use. Automated fulfillment is still being tested.'],
@@ -66,15 +63,20 @@ const faqs = [
   <p class="ofc-demo-caption">Illustrative household example. Actual assignments are tailored to the family.</p>
  </section>
  <section class="ofc-months" id="inside" aria-labelledby="ofc-months-heading">
-  <div class="ofc-section-head"><p class="ofc-eyebrow">A PEEK INSIDE THE CLUB</p><h2 id="ofc-months-heading">Real solutions for <em>real family life.</em></h2><p>One useful tool for each month's everyday challenge. Here are three examples of what we're building.</p></div>
+  <div class="ofc-section-head"><p class="ofc-eyebrow">12 MONTHS OF SHARING THE LOAD</p><h2 id="ofc-months-heading">12 months. <em>12 things you shouldn’t have to carry alone.</em></h2><p>Each month takes aim at one thing Mom usually has to manage, with a ready-to-use tool that helps the family take ownership.</p></div>
   <div class="ofc-month-grid">
-   {samples.map((m)=><article class="ofc-month" style={`--month-color:${m.shade}`}>
-    <div class="ofc-month-art"><div class="ofc-month-art-meta"><span>{m.month}</span><span>ORGANIZED FAMILY CLUB</span></div><div class="ofc-art-sheet ofc-art-ownership"><p>OUR FAMILY <em>{m.title.replace('Our Family ','').toUpperCase()}</em></p><div><strong>{m.benefit}</strong><span>PREPARED FOR YOUR FAMILY</span></div><div><strong>ONE USEFUL TOOL</strong><span>READY TO USE</span></div></div><div class="ofc-art-caption">ILLUSTRATIVE PREVIEW</div></div>
-    <div class="ofc-month-copy"><p class="ofc-month-eyebrow">{m.benefit}</p><h3>{m.title}</h3><p>{m.detail}</p><a href={m.url} class="ofc-text-link">{m.label} →</a></div>
+   {months.map(m => <article class="ofc-month">
+    <div class="ofc-month-icon"><img src={m.icon} alt="" loading="lazy" width="112" height="112" /></div>
+    <div class="ofc-month-copy">
+     <p class="ofc-month-eyebrow">{m.month}</p>
+     <h3>{m.title}</h3>
+     <p class="ofc-responsibility"><strong>Builds:</strong> {m.responsibility}</p>
+     <p class="ofc-how"><strong>How:</strong> {m.how}</p>
+     <a href={m.url} class="ofc-text-link">Preview the tool →</a>
+    </div>
    </article>)}
   </div>
-  <p class="ofc-disclaimer">These are working product previews using sample households. Printing and fulfillment are still being validated.</p>
-  <p class="ofc-month-summary">And that's just the beginning. From school mornings to family dinners, each month offers a fresh way to share the load. No catching up and no extra homework.</p>
+  <p class="ofc-disclaimer">Previews show sample households. Monthly tools are designed to be personalized; printing and fulfillment are still being tested.</p>
  </section>
  <section class="ofc-method" id="how" aria-labelledby="ofc-how-heading">
   <div class="ofc-method-copy"><p class="ofc-eyebrow">SIMPLE FROM THE START</p><h2 id="ofc-how-heading">We do the prep work. <em>You get the good part.</em></h2>
@@ -135,5 +137,18 @@ const faqs = [
 .ofc-demo{text-align:center;max-width:1010px;margin:auto;padding:100px 25px}.ofc-demo h2{margin:14px 0 42px}.ofc-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;text-align:left}.ofc-demo-panel{padding:34px 36px;background:#f3f3f1}.ofc-demo-panel>span{font-size:.69rem;letter-spacing:.13em;font-weight:700}.ofc-demo-panel p{font-family:Georgia,serif;font-size:1.1rem;margin-top:22px}.ofc-demo-after{background:#dce8e2}.ofc-demo-caption{font-size:.76rem;color:#686868;margin-top:18px!important}
 .ofc-month-summary{text-align:center;max-width:730px;margin:34px auto 0!important;font:italic 1.25rem/1.6 Georgia,serif}.ofc-offer{text-align:center;background:#cddde1;margin:0 clamp(14px,2.5vw,36px);padding:85px 25px}.ofc-offer h2{max-width:900px;margin:18px auto 22px}.ofc-offer>p:not(.ofc-eyebrow){max-width:620px;margin:0 auto 22px;font-size:1.05rem}.ofc-offer .ofc-offer-price{font:400 3.2rem Georgia,serif!important;margin:24px auto 7px!important}.ofc-offer-price span{font:400 .95rem Montserrat,Arial,sans-serif}.ofc-offer-price small{font:400 1.2rem Georgia,serif;display:block;margin-top:10px}.ofc-offer .ofc-offer-note{font-size:.82rem!important;color:#525d60;margin-bottom:26px!important}
 @media(max-width:720px){.ofc-solution{grid-template-columns:1fr}.ofc-solution-copy{padding:44px 24px}.ofc-solution-photo img{min-height:280px;max-height:420px}.ofc-demo{padding:70px 20px}.ofc-demo-grid{grid-template-columns:1fr}.ofc-demo-panel{padding:25px}.ofc-offer{padding:65px 22px}}
+
+/* Monthly responsibility directory */
+.ofc-month-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.ofc-month{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:start;gap:20px;padding:24px;background:#fff;border:1px solid #d9dfd9}
+.ofc-month-icon{width:112px;height:112px;display:grid;place-items:center;background:#f4f5f1;border-radius:4px}
+.ofc-month-icon img{width:90px;height:90px;object-fit:contain}
+.ofc-month-copy{padding:0;min-width:0}
+.ofc-month-copy h3{margin:7px 0 14px;font-size:1.45rem}
+.ofc-month-copy .ofc-responsibility,.ofc-month-copy .ofc-how{font-size:.88rem;line-height:1.55;margin:0 0 9px}
+.ofc-month-copy .ofc-responsibility strong,.ofc-month-copy .ofc-how strong{color:#355b4d}
+.ofc-month-copy a{margin-top:6px;padding-top:8px}
+@media(max-width:900px){.ofc-month-grid{grid-template-columns:1fr}.ofc-month:last-child{grid-column:auto;max-width:none}}
+@media(max-width:460px){.ofc-month{grid-template-columns:76px minmax(0,1fr);gap:14px;padding:16px}.ofc-month-icon{width:76px;height:76px}.ofc-month-icon img{width:66px;height:66px}.ofc-month-copy h3{font-size:1.25rem}}
 </style>
 </PublicLayout>

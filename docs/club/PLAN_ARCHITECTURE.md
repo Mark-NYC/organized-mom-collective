@@ -1,0 +1,135 @@
+# Club plan pages: shared architecture
+
+How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
+October (Sunday Reset, two sheets) and January (Habit Cards, one sheet) use it. Every remaining month should too,
+without copying page code.
+
+## The split
+
+| Layer | Shared or per month | Where |
+| --- | --- | --- |
+| Page shell: family loading, gates, proof, print rules | Shared | `src/components/club/plan/ClubPlanShell.astro` |
+| Plan screen below 1100px: header, approval status, editing deadline, preview card, action bar, edit sheet, toast, copy mode | Shared | `src/components/club/plan/ClubPlanScreen.astro` + `src/lib/club/plan/screen.ts` |
+| Rules: state shape, defaults, family-derived names, limits, what prints, fingerprint | **Per month** (engine) | `src/lib/club/engines/<month-resource>.ts` |
+| The printable artwork and its desktop editor | **Per month** | `src/components/club/<MonthResource>.astro` |
+| The month's rows and edit sheets on the plan screen | **Per month** (adapter) | `src/components/club/<Month>PlanMobile.astro` |
+| Desktop experience at 1100px and wider | **Per month**, unchanged | the month's page and printable |
+
+The month owns content and personalization. The shared layer owns everything a family sees around it.
+
+## Files
+
+`src/lib/club/plan/`
+
+- `resource.ts`: the `PlanResource<S>` contract and the `club:plan-change` event (`PLAN_CHANGE`).
+- `family.ts`: `startPlanFamily(root)` loads the family through `loadKitHousehold` (sample or signed-in household, never a sample in her place), fills the gate otherwise, and sends `omc:club-preview-household` to the printable. `onPlanFamily(root, cb)` runs now if the family is known, else once it is.
+- `storage.ts`: `planKey(sample, householdId)`, `readScoped(raw, key, valid)` and `tabStorage` (sessionStorage).
+- `proof.ts`: `mountPrintableProof(root)` (full-screen printable, Front/Back switch, Esc, focus containment via `inert`) and `printPlan()`.
+- `screen.ts`: `mountPlanScreen({ root, host, approvalKey, render })` returns `{ resource, readOnly, copying, openSheet, closeSheet, doneButton, toast, refresh }`.
+- `dom.ts`: `el(tag, props, ...children)` for building rows and sheets.
+
+`src/components/club/plan/`
+
+| Component | What it renders |
+| --- | --- |
+| `ClubPlanShell` | The `.club-plan` root, `ClubFamilyGate`, slot `desktop`, `ClubPrintableProof` around slot `printable`, slot `mobile`, `ClubPrintStyles` |
+| `ClubFamilyGate` | Loading, empty, signed-out, denied and error states; nothing else shows until the family is ready |
+| `ClubPlanScreen` | The plan screen; slot `title` and the default slot for the month's sections |
+| `ClubPlanStatus` | Approval line and editing deadline |
+| `ClubActionBar` | Primary button (approve / approved / approve changes / print a copy), print button, copy-mode Done |
+| `ClubEditSheet` | The focused editing sheet (`<dialog>`), plus the chip, field and choice styles sheets use |
+| `ClubPrintableProof` | The proof overlay below 1100px; `display: contents` on desktop |
+| `ClubPrintStyles` | Print rules for every plan page |
+
+## Markers
+
+| Marker | On | Meaning |
+| --- | --- | --- |
+| `data-plan-state` | `.club-plan` | `loading`, `ready`, `empty`, `signed-out`, `denied`, `error` |
+| `data-plan-for` | `.club-plan` | `<sample>:<householdId>`, the family this tab's plan belongs to |
+| `data-plan-sheet="front\|back\|sheet"` | each printed page in the printable | What prints, and what the thumbnails clone |
+| `data-plan-sheet-end` | the last sheet only | No page break after it (no blank page) |
+| `data-plan-proof-body`, `data-plan-proof-scroll` | the printable's wrappers | The proof's frame and scroller |
+| `data-plan-open-proof`, `data-plan-print`, `data-plan-primary`, `data-plan-copy` | buttons anywhere | Delegated by `proof.ts` and `screen.ts` |
+| `data-plan-source` | any element | Filled by the page with "Sample family…" / "Prepared for…" |
+
+## The PlanResource contract
+
+The printable publishes a controller on its root element as `clubPlan`, and dispatches a bubbling `club:plan-change`
+after every change. The plan screen reads and writes only through it, so the screen and the printed sheet come from
+one state and can't disagree.
+
+```ts
+interface PlanResource<S> {
+  ready(): boolean;               // the family is applied
+  state(): S;                     // the current plan
+  update(change: (s: S) => void): void;  // edit, save, repaint, dispatch
+  replace(s: S): void;            // used when a copy is finished
+  setPersist(on: boolean): void;  // off during "print a copy"
+  fingerprint(): string;          // what prints; approval is checked against it
+}
+```
+
+Months extend it for their own needs (`OsrPlan` adds `members` and `nameOf`; `JhcPlan` adds `members`). The fingerprint
+covers **only what prints**: January's covers the active cards, so a hidden second card never invalidates an approval.
+
+## Storage (until account persistence exists)
+
+- Plan: sessionStorage at the month's `storageKey`, as `{ current: '<sample>:<householdId>', state }`. A different family
+  in the same tab starts fresh instead of seeing another family's plan. One family per printable per tab.
+- Approval (prototype): sessionStorage at `omc:preview:<resource>:approval`, holding the fingerprint and date.
+- Nothing is written to localStorage. January removes its old localStorage keys (`key`, `key:count`,
+  `key:automatic-names`) on load.
+- Keys in use: `omc:preview:october-sunday-reset:v2`, `omc:preview:january-habit-cards:v3`, plus `…:approval` for each.
+  The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
+  `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
+
+## Printing
+
+`ClubPrintStyles` prints the `[data-plan-sheet]` pages and the elements that contain them, nothing else, each sheet
+8.5 × 11 in with a page break after every sheet except `data-plan-sheet-end`. The rules use `:not(#plan-print)` to
+outrank a printable's own id-scoped `!important` print rules without new override layers. `@page` is the
+printable's own.
+
+**Safari / WebKit.** WebKit sizes print pages from the document width: page height = document width × printable
+height ÷ printable width (after the header and footer iOS always prints), with a minimum shrink of 1.25. An 8.5in
+document on a Letter page slices each sheet across two pages. The shell pads `html` by 0.625in each side in WebKit only
+(`@supports (hanging-punctuation: first)`), a 9.75in document, so each 11in sheet fits one page whenever the printable
+area is at least 1.128 times as tall as it is wide (Letter and A4 with default margins). Modeled in
+`tests/club-plan-print.test.ts` for one-sheet and two-sheet printables. Not yet confirmed on an iPhone.
+
+## Editing deadline and approval
+
+- Deadline: `clubEditingDeadline(kit.month)` (second Sunday, 11:59:59 PM ET), passed to `ClubPlanScreen`. Shows the date
+  until 72 hours remain, then the weekday, "tonight" on the day, then read-only. In dev, `?preview-date=` overrides now.
+- Approval is a **prototype in this tab**. The screen says "preview only"; nothing is mailed or saved to an account.
+
+## Adding a month
+
+1. **Engine** `src/lib/club/engines/<resource>.ts`: state type, `fresh…State`, an `is…State` guard, defaults read from the
+   kit or content data (never retyped), family-derived names that don't overwrite her edits, field limits, a
+   fingerprint over what prints, and a `…Plan extends PlanResource<State>` type. Unit test it beside the file.
+2. **Printable** `src/components/club/<MonthResource>.astro`: keep the artwork and desktop editor as they are. Mark each
+   printed page `data-plan-sheet` and the last `data-plan-sheet-end`. Read state through the engine; store it with
+   `readScoped`/`tabStorage` scoped by `planKey`; listen for `omc:club-preview-household` (and read
+   `window.__ofcPreviewHousehold` if it already came); publish `clubPlan`; dispatch `PLAN_CHANGE` after each change.
+3. **Adapter** `src/components/club/<Month>PlanMobile.astro`: `<ClubPlanScreen deadline kicker sheets previewNote>`
+   with a `title` slot and the month's sections, built from `cp-*` rows. Its script calls `mountPlanScreen` with the
+   month's approval key and a `render(state)` that draws the rows; tapping a row calls `ui.openSheet(title, …)` with
+   `cp-chip`/`cp-field` controls that call `ui.resource.update(…)`. Respect `ui.readOnly`.
+4. **Page** `src/pages/app/club/<month>.astro`: `<ClubPlanShell kitSlug month sides? storageKey>` with the desktop
+   experience in slot `desktop` (or the printable's own desktop layout), the printable in slot `printable` inside a
+   `data-plan-proof-body` / `data-plan-proof-scroll` pair, and the adapter in slot `mobile`.
+5. **Check** at 375, 390 and 768 (plan, every sheet, proof, approve, changes after approval, copy, empty family,
+   another sample family) and 1100 / 1440 desktop; print from the proof, the viewport and desktop; page count equals
+   sheet count; `npx vitest run tests/club-plan-print.test.ts` covers the new printable's sheet markers.
+6. Add the route and storage keys to `README.md`.
+
+## Not built yet (decided, separate work)
+
+- Account persistence (`saveDocument`, an `approved_revision` per household and edition), a server-side cutoff lock,
+  and the edition freeze at the cutoff.
+- Up to three saved variations per resource. Today "print a copy" is a one-off that isn't saved.
+- Mail by default: the plan mails as shown whether or not she approves. When that's live the status "Not approved yet"
+  should read like "Mails as shown. Approve when you've checked it." Mailing, billing and fulfillment are not connected.
+- Unlimited printing is already the behavior.

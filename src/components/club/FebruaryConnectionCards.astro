@@ -4,8 +4,8 @@
  * The card is an invitation anyone can initiate, not an activity for Mom to coordinate.
  */
 import {monthColors} from '../../theme';
-interface Props { storageKey?: string }
-const {storageKey='omc:club:february-connection:v3'}=Astro.props;
+interface Props { storageKey?: string; managed?: boolean }
+const {storageKey='omc:club:february-connection:v3', managed=false}=Astro.props;
 const examples=[
  {owner:"Sofia",recipient:"Dad",headline:"Game night?",invite:"Dad, will you play a game with me tonight?",idea:"I'll get the game ready!"},
  {owner:"Mateo",recipient:"Mom",headline:"Just us two",invite:"Mom, will you read a book with me after dinner?",idea:"I'll pick the book!"},
@@ -13,7 +13,7 @@ const examples=[
  {owner:"Ana",recipient:"Mateo",headline:"Let's have fun!",invite:"Mateo, will you make a blanket fort with me?",idea:"I'll bring the blankets!"}
 ];
 ---
-<div class="fbc" data-fbc-key={storageKey} style={`--feb-accent:${monthColors[1].hex}`}>
+<div class="fbc" data-fbc-managed={managed ? "true" : "false"} data-fbc-key={storageKey} style={`--feb-accent:${monthColors[1].hex}`}>
  <header class="fbc-intro">
   <a href="/club" class="fbc-back">← Organized Family Club</a>
   <p class="fbc-kicker">ORGANIZED FAMILY CLUB · FEBRUARY 2027</p>
@@ -216,6 +216,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  const stage=root.querySelector<HTMLElement>('[data-fbc-stage]');
  const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--fbc-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
+ const managed=root.dataset.fbcManaged==='true';
  const key=root.dataset.fbcKey??'omc:preview:february:v1';
  const storage=key.startsWith('omc:club:')?sessionStorage:localStorage;
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-editor]'));
@@ -224,10 +225,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  let values=defaults.map(x=>({...x}));
 
  let automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));
- try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);}}
+ try{const saved=JSON.parse(managed?'null':storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);}}
  catch{}
- try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
- const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
+ try{const saved=JSON.parse(managed?'null':storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
+ const save=()=>{if(managed){root.dispatchEvent(new CustomEvent('fbc-change',{detail:{cards:values.map(v=>({...v}))}}));return}try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
  const draw=()=>{
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
   cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;if(document.activeElement!==out)out.textContent=values[i][field]||' ';}));
@@ -244,7 +245,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  }));
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;const previous=values[i].recipient;const oldInvite=values[i].invite;values[i][field]=input.value.slice(0,180);if(field==='recipient'&&previous&&oldInvite.startsWith(previous+','))values[i].invite=values[i].recipient+oldInvite.slice(previous.length);save();draw()})));
 
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{if(managed){root.dispatchEvent(new CustomEvent('fbc-reset'));return}values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
@@ -262,7 +263,14 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
   finally{root.classList.remove('fbc-image-export');button.disabled=false;button.textContent=old}
  });
  
- window.addEventListener('omc:club-preview-household',(event:Event)=>{
+ if(managed){
+  root.addEventListener('fbc-set',(event:Event)=>{
+   const incoming=(event as CustomEvent<Card[]>).detail;
+   if(!Array.isArray(incoming)||incoming.length!==4)return;
+   values=incoming.map(card=>({...card}));draw();
+  });
+ }
+ if(!managed) window.addEventListener('omc:club-preview-household',(event:Event)=>{
   const h=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean;role?:string}[]} | null}>).detail?.household;
   if(!h)return;
   const members=h.members.filter(m=>!m.archived);
