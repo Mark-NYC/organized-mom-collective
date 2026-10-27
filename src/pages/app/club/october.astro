@@ -1,10 +1,11 @@
 ---
 /** Mobile-first Club kit experience. Desktop October proof remains unchanged. */
 import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
 import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astro';
 ---
 <AppLayout title="October Sunday Reset">
-  <div class="club-mobile-kit">
+  <div class="club-mobile-kit family-brand">
     <div class="kit-desktop-rail">
     <header class="kit-header">
       <a href="/app/club" class="kit-back">← Back to Club</a>
@@ -39,9 +40,9 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
 .kit-header h1 em{color:#71866c}
 .kit-subtitle{font-size:14px;line-height:1.6;color:#6e6461}
 .kit-page-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:500px;margin:0 auto 16px}
-.kit-page-switch button{min-height:46px;border:1px solid #d5dfd2;border-radius:10px;color:#536e4e;font-weight:700;font-size:13px}
-.kit-page-switch button[aria-pressed="true"]{background:#536e4e;color:white;border-color:#536e4e}
-.club-mobile-kit .kit-artwork{min-width:0;background:#f3f1eb;border-radius:16px;padding:12px;overflow:hidden}
+.kit-page-switch button{min-height:46px;border:1px solid #d5dfd2;border-radius:3px;color:var(--color-warm-ink);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.kit-page-switch button[aria-pressed="true"]{background:var(--color-warm-button);color:white;border-color:var(--color-warm-button)}
+.club-mobile-kit .kit-artwork{min-width:0;background:#f1f2f2;border-radius:0;padding:12px;overflow:hidden}
 .club-mobile-kit .osr{padding:0!important;max-width:none!important}
 .club-mobile-kit .osr-intro,.club-mobile-kit .osr-editor,.club-mobile-kit .osr-tabs,.club-mobile-kit .osr-floating-edit{display:none!important}
 .club-mobile-kit .osr-layout{display:block!important}
