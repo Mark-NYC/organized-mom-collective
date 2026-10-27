@@ -10,6 +10,6 @@ export default function AppKitLibrary() {
   return <div className="family-card-grid mt-6">{me.kits.map(({slug})=>{
     const k=kitBySlug(slug);
     if(!k) return null;
-    return <article key={slug} className="family-panel"><p className="label">{monthLabel(k.month)}</p><h3 className="family-panel-title mt-4">{k.theme}</h3><p className="mt-2 text-sm text-warm-soft">{k.shift}</p><span className="label mt-5 inline-block">PREVIEW ONLY</span></article>;
+    return <article key={slug} className="family-panel"><p className="label">{monthLabel(k.month)}</p><h3 className="family-panel-title mt-4">{k.theme}</h3><p className="mt-2 text-sm text-warm-soft">{k.shift}</p>{k.month === "2027-02" ? <a className="family-action mt-5" href="/app/club/february/">Preview February →</a> : k.month === "2027-03" ? <a className="family-action mt-5" href="/app/club/march/">Preview March →</a> : <span className="label mt-5 inline-block">PREVIEW ONLY</span>}</article>;
   })}</div>;
 }
