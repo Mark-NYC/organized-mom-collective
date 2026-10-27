@@ -41,35 +41,26 @@ const faqs = [
     <small>No sign-in. Your family's details stay in this browser.</small>
    </form>
   </div>
-  <aside class="demo-side">
-   <div class="sample-stamp">A LITTLE MORE OWNERSHIP, EVERY DAY</div>
-   <div class="sheet-outer"><div class="sheet" id="hero-sheet">
-    <div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div>
-    <h2 id="sheet-heading">Our Family's<br/><em>Daily Reset</em></h2>
-    <p class="sheet-lede">A few minutes together. A fresh start tomorrow.</p>
-    <div class="sheet-rule"></div>
-    <div class="sheet-section-label">EVERYONE HAS A PART</div>
-    <div id="sheet-assignments" class="sheet-assignments">
-      <div class="assignment"><span class="tick"></span><div><b>Emma, 8</b><p>Backpack and shoes in their places</p></div></div>
-      <div class="assignment"><span class="tick"></span><div><b>Leo, 5</b><p>Toys and books back on the shelf</p></div></div>
-      <div class="assignment"><span class="tick"></span><div><b>Dad</b><p>Clear and wipe the dinner table</p></div></div>
-      <div class="assignment"><span class="tick"></span><div><b>Mom</b><p>Get tomorrow's essentials ready</p></div></div>
-    </div>
-    <div class="sheet-footer">A RESET WE DO TOGETHER <span>♡</span></div>
-   </div></div>
-   <p class="sample-note" id="sample-label">Example preview. Enter your family to see your own plan.</p>
-  </aside>
+  <aside class="hero-photo-wrap">
+ <figure class="hero-photo"><img src="/images/club/club-dad-son-dishes.webp" alt="A father and child sharing responsibility at home" width="1200" height="800" /><figcaption>Small moments. Shared responsibility. A home that works together.</figcaption></figure>
+ <div class="photo-caption">FAMILY LIFE, A LITTLE LIGHTER.</div>
+ </aside>
  </div>
 </section>
 <section class="result" id="result" hidden aria-live="polite">
- <div class="container result-layout">
-  <div><p class="eyebrow">YOUR FAMILY'S PLAN IS READY</p><h2>See? You didn't have to plan a thing.</h2><p>Everyone has a part. Nobody has to guess. That's the kind of preparation we want to do for your family every month.</p><p class="result-emphasis">One useful tool. Already thought through. Already made for your family.</p><div class="result-actions"><a href="#offer" class="primary">See How the Club Works →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div>
-  <div class="result-card"><span>WHAT YOU JUST EXPERIENCED</span><h3>Mom gives us her family.<br/>We do the thinking.</h3><p>This is a free example, not the mailed September tool. Each month of the Club brings a different ready-made family resource.</p></div>
- </div>
+ <div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PLAN IS READY</p><h2>See? You didn't have to plan a thing.</h2><p>Everyone has a part. Nobody has to guess. That's the kind of preparation we want to do for your family every month.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div>
+ <div class="result-card"><span>YOUR FAMILY'S DAILY RESET</span><h3>Made for your household.</h3><p>A sample of the preparation we do, with names and age-appropriate responsibilities.</p><button type="button" class="primary" id="open-preview">View your family's plan →</button></div></div>
 </section>
+<dialog id="club-preview-modal" class="club-preview-modal" aria-labelledby="club-modal-title">
+ <div class="modal-top"><div><span class="eyebrow">YOUR FAMILY'S PLAN</span><h2 id="club-modal-title">Your Daily Reset is ready.</h2></div><button type="button" id="close-preview" class="modal-close" aria-label="Close preview">×</button></div>
+ <p class="modal-intro">A little less reminding. More taking responsibility, together.</p>
+ <div class="modal-paper"><div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div><h3>Our Family's <em>Daily Reset</em></h3><p>A few minutes together. A fresh start tomorrow.</p><div class="sheet-section-label">EVERYONE HAS A PART</div><div id="modal-assignments" class="sheet-assignments"></div><div class="modal-paper-end">NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</div></div>
+ <p class="modal-note">This is a personalized sample. The Club's actual mailed resources have their own printed designs.</p>
+ <div class="modal-actions"><a href="#offer" id="modal-club" class="primary">Learn About the Club →</a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div>
+</dialog>
 <section class="benefits container" id="how">
  <p class="eyebrow">A HOME THAT WORKS TOGETHER</p><h2>Less reminding. <em>More taking responsibility.</em></h2>
- <div class="benefit-grid">
+ <div class="benefit-grid editorial-benefits">
   <article><span class="benefit-number">01</span><h3>Raise capable kids.</h3><p>Give your children practical ways to notice what needs doing and follow through.</p></article>
   <article><span class="benefit-number">02</span><h3>Skip the planning.</h3><p>We prepare the assignments, structure, and next steps. You don't start with a blank page.</p></article>
   <article><span class="benefit-number">03</span><h3>Open it. Use it.</h3><p>One personal, practical family tool prepared for your home every month.</p></article>
@@ -97,7 +88,9 @@ const faqs = [
  const sheetHeading = document.querySelector('#sheet-heading');
  const assignments = document.querySelector('#sheet-assignments');
  const result = document.querySelector('#result');
- const sampleLabel = document.querySelector('#sample-label');
+ const sampleLabel = null;
+ const modal = document.querySelector('#club-preview-modal');
+ const modalAssignments = document.querySelector('#modal-assignments');
  const KEY = 'ofc-club-sales-demo-v1';
  const safe = value => String(value || '').trim().slice(0,40);
  const escapeHtml = value => safe(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -115,15 +108,20 @@ const faqs = [
    sheetHeading.innerHTML='Our Family’s<br/><em>Daily Reset</em>';
    const people=[...data.children.map(c=>({name:c.name,task:jobs(c.age)})),{name:data.dad,task:'Clear and wipe the dinner table'},{name:data.mom,task:'Help everyone get ready for tomorrow'}];
    assignments.innerHTML=people.map(p=>'<div class="assignment"><span class="tick"></span><div><b>'+escapeHtml(p.name)+'</b><p>'+escapeHtml(p.task)+'</p></div></div>').join('');
-   sampleLabel.textContent='Your personalized example. Actual Club monthly mailings are separate.';
+   modalAssignments.innerHTML=assignments.innerHTML;
    result.hidden=false;
    try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}
-   if(scroll)result.scrollIntoView({behavior:'smooth',block:'start'});
+   if(scroll && typeof modal.showModal==='function')modal.showModal();
  }
  addButton.addEventListener('click',()=>addChild());
  form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity())return;showPlan(getData(),true)});
+ document.querySelector('#open-preview').addEventListener('click',()=>modal.showModal());
+ document.querySelector('#close-preview').addEventListener('click',()=>modal.close());
+ document.querySelector('#modal-more').addEventListener('click',()=>{modal.close();document.querySelector('#how').scrollIntoView({behavior:'smooth'})});
+ document.querySelector('#modal-club').addEventListener('click',()=>modal.close());
+ modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
  document.querySelector('#edit-family').addEventListener('click',()=>form.scrollIntoView({behavior:'smooth',block:'center'}));
- document.querySelector('#clear-family').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch{};form.reset();childrenFields.replaceChildren();addChild();addChild('','5');result.hidden=true;assignments.innerHTML='';sampleLabel.textContent='Example preview. Enter your family to see your own plan.';form.scrollIntoView({behavior:'smooth'})});
+ document.querySelector('#clear-family').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch{};form.reset();childrenFields.replaceChildren();addChild();addChild('','5');result.hidden=true;assignments.innerHTML='';modalAssignments.replaceChildren();form.scrollIntoView({behavior:'smooth'})});
  let saved=null;try{saved=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
  if(saved&&typeof saved.mom==='string'&&typeof saved.dad==='string'&&Array.isArray(saved.children)&&saved.children.length&&saved.children.length<=8){form.elements.namedItem('mom').value=safe(saved.mom);form.elements.namedItem('dad').value=safe(saved.dad);saved.children.forEach(c=>addChild(safe(c.name),String(Math.max(1,Math.min(18,Number(c.age)||7)))));if(saved.mom&&saved.dad&&saved.children.every(c=>c.name))showPlan(saved)}else{addChild();addChild('','5')}
 </script>
@@ -133,5 +131,10 @@ const faqs = [
 @media(max-width:900px){.hero-inner,.offer-layout{gap:30px}.hero-inner{grid-template-columns:1fr 1fr}.sheet{min-height:0}.month-grid{grid-template-columns:repeat(2,1fr)}.topbar nav{gap:12px}.topbar nav a{font-size:.73rem}}
 @media(max-width:700px){.topbar{padding:12px 18px}.topbar nav a:not(.member){display:none}.brand{font-size:.85rem}.brand img{width:38px;height:38px}.hero{padding:40px 16px 60px}.hero-inner,.result-layout,.offer-layout,.faq-layout,.proof-about{grid-template-columns:1fr}.hero h1{font-size:clamp(2.45rem,10vw,3.3rem)}.hero-copy{max-width:none}.form{padding:20px;margin-top:24px}.demo-side{padding-top:15px;max-width:480px;width:100%;margin:0 auto}.sheet-outer{padding:17px;transform:none}.sheet{padding:25px}.sheet h2{font-size:2.5rem}.benefits,.months,.proof{padding-top:65px;padding-bottom:65px}.benefit-grid,.month-feature-grid{grid-template-columns:1fr;gap:13px}.benefit-grid{margin-top:24px}.offer-band,.faq,.closing{padding:65px 0}.price-card{padding:25px}.month-grid{grid-template-columns:1fr}.proof-quote{margin-bottom:55px;padding:30px 6px}.proof-about img{width:170px;height:170px}.proof-about{gap:25px}.result-layout{gap:24px}.footer{flex-direction:column;text-align:center;align-items:center}.child-row{grid-template-columns:minmax(0,1fr) 110px 24px;gap:7px}.name-fields{gap:8px}}
 @media(prefers-reduced-motion:reduce){.club *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Editorial Club art direction, built on the existing Organized Mom Collective print palette. */
+.club{--forest:#545454;--sage:#9aab8f;--cream:#fbf7f1;--ink:#4d4544;--muted:#6e6461;--line:#e7ddd4;background:#fff;color:var(--ink)}
+.club h1,.club h2,.club h3,.club blockquote{font-family:"Georgia Pro",Georgia,serif;font-weight:400;letter-spacing:-.025em}.club h1 em,.club h2 em{color:#697d65;font-style:italic;font-weight:400}.club .eyebrow{color:#71846e;letter-spacing:.11em;font-size:.68rem}.topbar{max-width:1320px;border-bottom:1px solid #e9e5df;padding-top:22px;padding-bottom:22px}.brand{color:#545454!important}.topbar nav a{font-weight:600}.hero{background:white;padding:68px 28px 94px}.hero-inner{max-width:1320px;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(34px,5vw,90px);align-items:center}.hero-copy{max-width:575px}.hero h1{font-size:clamp(2.8rem,4.1vw,5rem);line-height:1.085}.promise{color:#4d4544;font-weight:400}.supporting{line-height:1.75}.hero-photo-wrap{min-width:0}.hero-photo{margin:0;position:relative}.hero-photo img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;box-shadow:0 12px 36px #4d45441a}.hero-photo figcaption{font-family:Georgia,serif;font-style:italic;color:#6e6461;text-align:center;font-size:1rem;padding:15px 0}.photo-caption{text-align:center;font-size:.64rem;letter-spacing:.17em;color:#7b8975;font-weight:700}.form{border:1px solid #e7ddd4;box-shadow:none;background:#fffdfa;border-radius:3px;margin-top:31px;padding:24px}.form h2{font-size:1.5rem}.form input,.form select{border-radius:2px;border-color:#d8d4cf;background:#fff;padding:13px 11px}.primary{background:#545454;border-radius:2px;text-transform:none;letter-spacing:.01em}.primary:hover{background:#3d3834}.form-submit{margin-top:18px}.club .add,.club .text-button{color:#526b54}.result{background:#f1f4ec}.result-card{border-radius:3px;box-shadow:none;border-color:#d9dfd4}.benefits{padding-top:115px;padding-bottom:115px}.benefit-grid{gap:38px}.benefit-grid article{border:0;border-top:1px solid #9aab8f;border-radius:0;padding:27px 0 0;background:none}.benefit-number{font:italic 25px Georgia,serif;color:#9aab8f}.benefit-grid h3{font-size:1.8rem}.benefit-grid p{line-height:1.8}.offer-band{background:#fbf7f1}.price-card{border:1px solid #e7ddd4;border-radius:2px;box-shadow:none}.price{color:#545454}.offer-details{color:#545454}.months{padding-top:115px}.month-feature-grid{gap:30px}.month-feature{border:0;border-top:1px solid #e7ddd4;border-radius:0;background:#fff;padding:26px 5px 10px;box-shadow:none}.month-feature:hover{transform:none}.month-feature img{width:105px;height:105px}.month-feature h3{font-size:1.75rem}.all-months{border-radius:2px}.proof-quote{max-width:830px}.proof-quote blockquote{font-style:italic;font-size:clamp(2rem,3.8vw,3.8rem)}.proof-about img{border-radius:2px}.faq{background:#fbf7f1}.closing{background:#fff}.footer{background:#545454}.club-preview-modal{width:min(850px,calc(100% - 28px));max-height:calc(100dvh - 32px);overflow:auto;position:fixed;border:1px solid #e7ddd4;padding:clamp(20px,4vw,42px);background:#fffdfa;box-shadow:0 20px 80px #24242450;color:#4d4544}.club-preview-modal::backdrop{background:#262d29a9}.modal-top{display:flex;justify-content:space-between;gap:16px;align-items:start}.modal-top .eyebrow{display:block}.modal-top h2{font:400 clamp(1.8rem,3vw,2.8rem) Georgia,serif}.modal-close{font-size:2rem;line-height:1;width:42px;height:42px;border:1px solid #e7ddd4;background:white;cursor:pointer}.modal-intro{color:#6e6461;margin:10px 0 20px!important}.modal-paper{max-width:540px;margin:24px auto;background:#fff;border:1px solid #dfdfd7;padding:clamp(24px,4vw,48px);box-shadow:0 7px 25px #00000012}.modal-paper h3{font:400 2.2rem Georgia,serif;color:#545454;margin:24px 0 10px}.modal-paper h3 em{color:#81967c}.modal-paper>p{font:italic 1rem Georgia,serif;color:#6e6461;margin-bottom:24px!important}.modal-paper .sheet-assignments{border-top:1px solid #e7ddd4}.modal-paper-end{margin-top:32px;border-top:1px solid #e7ddd4;padding-top:18px;font-size:.64rem;letter-spacing:.12em;color:#71846e;text-align:center}.modal-note{text-align:center;color:#6e6461;font-size:.78rem;max-width:580px;margin:0 auto 20px!important}.modal-actions{display:flex;gap:22px;justify-content:center;align-items:center;flex-wrap:wrap}.modal-actions .primary{min-width:240px}.club-preview-modal .assignment b{color:#545454}.club-preview-modal .assignment p{color:#6e6461}
+@media(max-width:700px){.hero{padding:40px 17px 60px}.hero-inner{grid-template-columns:1fr;gap:30px}.hero-photo-wrap{order:-1}.hero-photo figcaption{font-size:.85rem}.hero h1{font-size:clamp(2.5rem,9vw,3.4rem)}.benefit-grid{gap:22px}.club-preview-modal{padding:20px}.modal-paper{padding:20px}.modal-actions{flex-direction:column}.modal-actions .primary{width:100%}}
 </style>
 </PublicLayout>
