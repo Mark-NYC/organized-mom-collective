@@ -19,8 +19,8 @@ const editDeadline = clubEditingDeadline('2027-10');
       <button type="button" class="kit-edit" data-kit-edit>Make changes</button>
       <button type="button" class="kit-approve" data-kit-approve>Approve preview</button>
       <button type="button" class="kit-download-link" data-kit-download aria-label="Download and print" title="Download and print"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM18 12h.01"/></svg><span class="kit-download-label">Download And Print</span></button>
-      <p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p>
     </div>
+    <div class="kit-approval-message"><p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p></div>
     <div class="kit-instructions"><p>Keep this two-sided sheet beside your family wall calendar. Each Sunday, take 10–15 minutes to look at the week ahead, prepare what you need, and give everyone a part.</p><p>The back is a one-time fall example to try together. Review the prepared roles, change anything that doesn’t fit, and use the front again each Sunday.</p></div>
     </div>
     <div class="kit-page-switch" role="group" aria-label="Printable side">
@@ -400,6 +400,60 @@ const editDeadline = clubEditingDeadline('2027-10');
   .club-mobile-kit .kit-download-link svg{display:none}
 }
 @media print{.club-mobile-kit .kit-viewer-wrap{display:contents!important}}
+
+/* Small-screen app: the bottom Club tab already provides the return route.
+   Keep month context in the shared header, without changing Nav or Cleaning. */
+@media screen and (max-width:639px){
+  body:has(.club-mobile-kit) header[data-chrome] > div{gap:10px}
+  body:has(.club-mobile-kit) header[data-chrome] > div::after{
+    content:"OCTOBER";
+    color:var(--color-warm-soft);
+    font:600 .69rem var(--font-sans);
+    letter-spacing:.16em;
+    white-space:nowrap;
+  }
+  body:has(.club-mobile-kit) #main{
+    padding-top:12px!important;
+    padding-bottom:calc(205px + env(safe-area-inset-bottom,0px))!important;
+  }
+  .club-mobile-kit .kit-header{display:none!important}
+  .club-mobile-kit{padding-bottom:0!important;row-gap:8px!important}
+  .club-mobile-kit .kit-page-switch{margin-top:2px!important}
+  .club-mobile-kit .kit-artwork{height:clamp(330px,57dvh,570px)!important}
+  .club-mobile-kit .kit-action-bar{
+    position:fixed!important;
+    inset:auto 14px calc(72px + env(safe-area-inset-bottom,0px)) 14px!important;
+    width:auto!important;
+    z-index:39!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) 52px!important;
+    align-items:center;
+    gap:7px!important;
+    margin:0!important;
+    padding:8px!important;
+    border:1px solid var(--color-warm-rule)!important;
+    border-radius:7px!important;
+    background:rgba(255,253,250,.98)!important;
+    box-shadow:0 6px 24px rgba(61,56,52,.16)!important;
+    backdrop-filter:blur(10px);
+  }
+  .club-mobile-kit .kit-approval-message{
+    grid-column:1/-1;order:5!important;
+    color:var(--color-warm-soft);font-size:.74rem;line-height:1.5;
+  }
+  .club-mobile-kit .kit-approval-message [data-approval-note]{margin:0}
+  .club-mobile-kit .kit-instructions{order:6!important}
+  .club-mobile-kit.kit-expanded .kit-action-bar{visibility:hidden!important}
+}
+@media(min-width:640px){
+ .club-mobile-kit .kit-approval-message{color:var(--color-warm-soft);font-size:.75rem;line-height:1.5}
+}
+@media(min-width:1100px){
+ .club-mobile-kit .kit-approval-message{margin-top:8px}
+}
+@media print{
+ .club-mobile-kit .kit-action-bar{position:static!important;box-shadow:none!important}
+}
 </style>
 <script>
 const kit=document.querySelector<HTMLElement>('.club-mobile-kit');
