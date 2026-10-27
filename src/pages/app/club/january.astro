@@ -110,6 +110,10 @@ const deadline=clubEditingDeadline('2027-01');
 }
 </style>
 <script>
+import { clubAccountsEnabled } from '../../../data/club/config';
+import { getSession } from '../../../lib/account';
+import { loadKitHousehold } from '../../../lib/club/kit-household';
+import { accountStore, sampleStore } from '../../../lib/club/store';
 const jan=document.querySelector<HTMLElement>('[data-jan-app]');
 if(jan){
  const jhc=jan.querySelector<HTMLElement>('.jhc');
