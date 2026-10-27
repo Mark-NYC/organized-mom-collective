@@ -1,4 +1,4 @@
-/** Pantry gallery: image paths mapped to uploaded originals; hold for visual QA. */
+/** Pantry gallery: image paths mapped to uploaded originals; 39 images linked; published. */
 import type { InspirationGallery } from './inspiration-galleries';
 export const pantryOrganizationGallery: InspirationGallery = {
   "slug": "pantry-organization-ideas",
@@ -7,7 +7,7 @@ export const pantryOrganizationGallery: InspirationGallery = {
   "description": "Discover 39 pantry organization ideas with bold colors, creative shelves, small pantry solutions, and simple storage zones the whole family can use.",
   "deck": "39 beautiful pantry spaces, from moody green cabinets to bold wallpaper and small-space storage. Take the ideas, not the renovation budget.",
   "disclosure": "These images are AI-generated design concepts for inspiration, not photographs of actual homes or exact products.",
-  "published": false,
+  "published": true,
   "sections": [
     {
       "start": 0,
