@@ -20,7 +20,8 @@ const faqs = [
  <nav aria-label="Club navigation"><a href="#how">How it works</a><a href="#months">Monthly tools</a><a href="#faq">Questions</a><a class="member" href="/club/dashboard">Member access ↗</a></nav>
 </header>
 <main>
-<section class="hero" id="start">
+<section class="hero home-style-inset" id="start">
+ <div class="club-float-surface">
  <div class="hero-inner">
   <div class="hero-copy">
    <p class="eyebrow">ORGANIZED FAMILY CLUB · MONTHLY FAMILY MAIL</p>
@@ -48,6 +49,7 @@ const faqs = [
  <div class="photo-caption">FAMILY LIFE, A LITTLE LIGHTER.</div>
  </aside>
  </div>
+ </div>
 </section>
 <section class="result" id="result" hidden aria-live="polite">
  <div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PLAN IS READY</p><h2>This is what done-for-you looks like.</h2><p>Everyone has a part. Nobody has to guess. That's the kind of preparation we want to do for your family every month.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div>
@@ -68,10 +70,10 @@ const faqs = [
   <article><span class="benefit-number">03</span><h3>Open it. Use it.</h3><p>One personal, practical family tool prepared for your home every month.</p></article>
  </div>
 </section>
-<section class="offer-band" id="offer"><div class="container offer-layout">
+<section class="offer-band home-style-inset" id="offer"><div class="club-offer-surface"><div class="container offer-layout">
  <div class="offer-copy"><p class="eyebrow">ONE TOOL. ONE REAL FAMILY CHALLENGE. EVERY MONTH.</p><h2>A new family tool, <em>already prepared for you.</em></h2><p>Each month brings a different printed family activity or responsibility tool, personalized for your household. From routines and cleaning to family dinners and connection, every mailing helps your family share the load.</p><div class="offer-details"><span>✓ Personalized for your family</span><span>✓ Printed and mailed to your home</span><span>✓ A digital version to review or reprint</span></div></div>
  <div class="price-card"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h3>One personalized tool, every month.</h3><div class="price">$6.39 <span>/ month</span></div><p class="annual">or $59 per year</p><p class="fineprint">Proposed pricing. Enrollment is not yet open while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask about early access.</small></div>
- </div></section>
+ </div></div></section>
 <section class="months container" id="months"><div class="section-intro"><p class="eyebrow">MORE THAN A CHORE CHART</p><h2>See what comes <em>in the mail.</em></h2><p>Here are three examples from the twelve monthly resources. Every tool starts with a plan prepared for your family.</p></div>
  <div class="month-feature-grid">{[months[0], months[2], months[3]].map(m => <a class="month-feature" href={m.url}><img src={m.icon} alt="" loading="lazy" width="100" height="100"/><span>{m.month}</span><h3>{m.title}</h3><p>{m.how}</p><strong>See the tool →</strong></a>)}</div>
  <details class="all-months"><summary>Explore all 12 monthly tools <span>+</span></summary><div class="month-grid">{months.map(m => <a href={m.url}><img src={m.icon} alt="" loading="lazy" width="54" height="54"/><div><small>{m.month}</small><b>{m.title}</b><span>Preview →</span></div></a>)}</div></details>
@@ -79,7 +81,7 @@ const faqs = [
 </section>
 <section class="proof container"><div class="proof-quote"><p class="eyebrow">FROM AN ORGANIZED MOM COLLECTIVE CUSTOMER</p><blockquote>“This calendar is life changing. Quite literally!”</blockquote><p>Raquel · 5-star Etsy review of our wall calendar</p><small>This review is for the wall calendar, not the Family Club.</small></div><div class="proof-about"><img src="/images/site/mark-megan-family-story-1200.webp" alt="Mark and Megan with their family" loading="lazy" width="250" height="250"/><div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2>We believe a family works better <em>when everyone pitches in.</em></h2><p>That's why we created the Club. Not another system for Mom to manage, but practical help making the whole family part of the plan.</p><p><strong>Mark &amp; Megan</strong></p></div></div></section>
 <section class="faq" id="faq"><div class="container faq-layout"><div><p class="eyebrow">GOOD QUESTIONS</p><h2>Before you join.</h2></div><div class="faq-items">{faqs.map(([question,answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></div></section>
-<section class="closing"><div class="container"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h2>You don't have to raise responsible kids <em>all by yourself.</em></h2><p>We make the plan. Your family makes it happen.</p><a href="/support" class="primary">Ask About Early Access →</a></div></section>
+<section class="closing home-style-inset"><div class="club-close-surface"><div class="container"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h2>You don't have to raise responsible kids <em>all by yourself.</em></h2><p>We make the plan. Your family makes it happen.</p><a href="/support" class="primary">Ask About Early Access →</a></div></div></section>
 </main>
 <footer class="footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
 </div>
@@ -134,5 +136,22 @@ const faqs = [
 .club h1,.club h2,.club h3,.club blockquote{font-family:"Georgia Pro",Georgia,serif;font-weight:400;letter-spacing:-.025em}.club h1 em,.club h2 em{color:#697d65;font-style:italic;font-weight:400}.club .eyebrow{color:#71846e;letter-spacing:.11em;font-size:.68rem}.topbar{max-width:1320px;border-bottom:1px solid #e9e5df;padding-top:22px;padding-bottom:22px}.brand{color:#545454!important}.topbar nav a{font-weight:600}.hero{background:white;padding:68px 28px 94px}.hero-inner{max-width:1320px;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(34px,5vw,90px);align-items:center}.hero-copy{max-width:575px}.hero h1{font-size:clamp(2.8rem,4.1vw,5rem);line-height:1.085}.promise{color:#4d4544;font-weight:400}.supporting{line-height:1.75}.hero-photo-wrap{min-width:0}.hero-photo{margin:0;position:relative}.hero-photo img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;box-shadow:0 12px 36px #4d45441a}.hero-photo figcaption{font-family:Georgia,serif;font-style:italic;color:#6e6461;text-align:center;font-size:1rem;padding:15px 0}.photo-caption{text-align:center;font-size:.64rem;letter-spacing:.17em;color:#7b8975;font-weight:700}.form{border:1px solid #e7ddd4;box-shadow:none;background:#fffdfa;border-radius:3px;margin-top:31px;padding:24px}.form h2{font-size:1.5rem}.form input,.form select{border-radius:2px;border-color:#d8d4cf;background:#fff;padding:13px 11px}.primary{background:#545454;border-radius:2px;text-transform:none;letter-spacing:.01em}.primary:hover{background:#3d3834}.form-submit{margin-top:18px}.club .add,.club .text-button{color:#526b54}.result{background:#f1f4ec}.result-card{border-radius:3px;box-shadow:none;border-color:#d9dfd4}.benefits{padding-top:115px;padding-bottom:115px}.benefit-grid{gap:38px}.benefit-grid article{border:0;border-top:1px solid #9aab8f;border-radius:0;padding:27px 0 0;background:none}.benefit-number{font:italic 25px Georgia,serif;color:#9aab8f}.benefit-grid h3{font-size:1.8rem}.benefit-grid p{line-height:1.8}.offer-band{background:#fbf7f1}.price-card{border:1px solid #e7ddd4;border-radius:2px;box-shadow:none}.price{color:#545454}.offer-details{color:#545454}.months{padding-top:115px}.month-feature-grid{gap:30px}.month-feature{border:0;border-top:1px solid #e7ddd4;border-radius:0;background:#fff;padding:26px 5px 10px;box-shadow:none}.month-feature:hover{transform:none}.month-feature img{width:105px;height:105px}.month-feature h3{font-size:1.75rem}.all-months{border-radius:2px}.proof-quote{max-width:830px}.proof-quote blockquote{font-style:italic;font-size:clamp(2rem,3.8vw,3.8rem)}.proof-about img{border-radius:2px}.faq{background:#fbf7f1}.closing{background:#fff}.footer{background:#545454}.club-preview-modal{width:min(850px,calc(100% - 28px));max-height:calc(100dvh - 32px);overflow:auto;position:fixed;border:1px solid #e7ddd4;padding:clamp(20px,4vw,42px);background:#fffdfa;box-shadow:0 20px 80px #24242450;color:#4d4544}.club-preview-modal::backdrop{background:#262d29a9}.modal-top{display:flex;justify-content:space-between;gap:16px;align-items:start}.modal-top .eyebrow{display:block}.modal-top h2{font:400 clamp(1.8rem,3vw,2.8rem) Georgia,serif}.modal-close{font-size:2rem;line-height:1;width:42px;height:42px;border:1px solid #e7ddd4;background:white;cursor:pointer}.modal-intro{color:#6e6461;margin:10px 0 20px!important}.modal-paper{max-width:540px;margin:24px auto;background:#fff;border:1px solid #dfdfd7;padding:clamp(24px,4vw,48px);box-shadow:0 7px 25px #00000012}.modal-paper h3{font:400 2.2rem Georgia,serif;color:#545454;margin:24px 0 10px}.modal-paper h3 em{color:#81967c}.modal-paper>p{font:italic 1rem Georgia,serif;color:#6e6461;margin-bottom:24px!important}.modal-paper .sheet-assignments{border-top:1px solid #e7ddd4}.modal-paper-end{margin-top:32px;border-top:1px solid #e7ddd4;padding-top:18px;font-size:.64rem;letter-spacing:.12em;color:#71846e;text-align:center}.modal-note{text-align:center;color:#6e6461;font-size:.78rem;max-width:580px;margin:0 auto 20px!important}.modal-actions{display:flex;gap:22px;justify-content:center;align-items:center;flex-wrap:wrap}.modal-actions .primary{min-width:240px}.club-preview-modal .assignment b{color:#545454}.club-preview-modal .assignment p{color:#6e6461}
 @media(max-width:700px){.hero{padding:40px 17px 60px}.hero-inner{grid-template-columns:1fr;gap:30px}.hero-photo-wrap{order:-1}.hero-photo figcaption{font-size:.85rem}.hero h1{font-size:clamp(2.5rem,9vw,3.4rem)}.benefit-grid{gap:22px}.club-preview-modal{padding:20px}.modal-paper{padding:20px}.modal-actions{flex-direction:column}.modal-actions .primary{width:100%}}
 .hero .product-definition{font-size:clamp(1.08rem,1.5vw,1.24rem);line-height:1.6;color:#4d4544;font-weight:550;margin:19px 0 6px!important}.hero .promise{margin:16px 0 9px!important;font-size:clamp(1.2rem,1.8vw,1.55rem)}.hero .supporting{font-size:.92rem;line-height:1.7}.what-arrives{display:flex;flex-wrap:wrap;gap:8px 17px;margin-top:17px;font-size:.72rem;font-weight:700;color:#526b54}.form-kicker{font-size:.68rem!important;font-weight:800;letter-spacing:.12em;color:#71846e!important;margin:0 0 8px!important}.hero .form{margin-top:24px}.hero .form h2{line-height:1.2}
+
+/* Homepage-inspired floating gray surfaces (#f1f2f2) and inset white framing. */
+.club .home-style-inset{background:#fff;padding:28px clamp(16px,2.4vw,36px) 46px}
+.club .club-float-surface,.club .club-offer-surface,.club .club-close-surface{max-width:1504px;margin-inline:auto;background:#f1f2f2;position:relative;isolation:isolate;overflow:hidden}
+.club .hero{background:#fff}
+.club .hero-inner{max-width:none;padding:clamp(32px,4.2vw,70px);gap:clamp(30px,4.5vw,78px)}
+.club .hero-photo img{box-shadow:none;aspect-ratio:4/3}
+.club .hero-photo figcaption{padding-bottom:8px}
+.club .form{background:#fff;border:1px solid #e0e1df;box-shadow:0 20px 45px -38px rgba(77,69,68,.45);border-radius:4px}
+.club .offer-band{background:#fff}
+.club .club-offer-surface{padding:clamp(36px,5vw,80px) clamp(22px,4vw,64px)}
+.club .offer-layout{max-width:1250px}
+.club .price-card{box-shadow:0 22px 45px -37px rgba(77,69,68,.42);background:#fff;border-color:#e2e2df;border-radius:4px}
+.club .closing{background:white}
+.club .club-close-surface{padding:clamp(40px,5vw,88px) 24px;background:#f1f2f2}
+@media(max-width:900px){.club .home-style-inset{padding:16px 16px 38px}.club .hero-inner{padding:28px 24px}.club .club-offer-surface{padding:40px 18px}.club .club-close-surface{padding:42px 24px}}
+@media(max-width:700px){.club .hero-inner{padding:24px 18px}.club .hero-photo-wrap{order:-1}.club .hero-photo figcaption{padding-inline:8px}.club .form{margin-top:24px}.club .home-style-inset{padding-inline:12px}}
 </style>
 </PublicLayout>
