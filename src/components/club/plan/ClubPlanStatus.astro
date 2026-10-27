@@ -1,0 +1,20 @@
+---
+/** Approval and the editing window, as two quiet lines. Filled by mountPlanScreen (src/lib/club/plan/screen.ts). */
+---
+<div class="cp-status" data-cp-status>
+  <p class="cp-approval"><span class="cp-mark" aria-hidden="true"></span><span data-cp-approval-text>Not approved yet</span></p>
+  <p class="cp-window" data-cp-window></p>
+</div>
+<style is:global>
+@media screen and (max-width:1099px){
+.cp-status{display:grid;gap:3px;border-top:1px solid var(--cp-line);border-bottom:1px solid var(--cp-line);padding:12px 0;margin:0 0 16px}
+.cp-approval{display:flex;align-items:center;gap:9px;font-size:.92rem;font-weight:600}
+.cp-mark{flex:none;width:16px;height:16px;border:1.5px solid var(--color-sage);border-radius:50%;display:grid;place-items:center}
+.cp[data-approval="approved"] .cp-mark{background:var(--cp-sage);border-color:var(--cp-sage)}
+.cp[data-approval="approved"] .cp-mark::after{content:"";width:7px;height:4px;border:solid #fff;border-width:0 0 1.5px 1.5px;transform:translateY(-1px) rotate(-45deg)}
+.cp[data-approval="changed"] .cp-mark{border-style:dashed}
+.cp-window{padding-left:25px;font-size:.85rem;color:var(--cp-soft)}
+.cp[data-window="soon"] .cp-window,.cp[data-window="today"] .cp-window{color:var(--cp-sage);font-weight:600}
+.cp[data-mode="copy"] .cp-status{display:none}
+}
+</style>

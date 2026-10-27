@@ -1,0 +1,46 @@
+---
+/**
+ * The real printable, full-screen on request below 1100px (opened by any data-plan-open-proof, see
+ * src/lib/club/plan/proof.ts). On desktop it is layout-transparent (display: contents), so each month keeps its
+ * own desktop document view. The slot holds the month's printable inside two marked wrappers:
+ * data-plan-proof-body (fills the screen under the bar) and data-plan-proof-scroll (scrolls the paper).
+ */
+interface Props { sides?: string[] }
+const { sides = [] } = Astro.props;
+---
+<div class="plan-proof" data-plan-proof>
+  <div class="plan-proof-bar">
+    <button type="button" class="plan-proof-close" data-plan-close-proof aria-label="Close printable">×</button>
+    {sides.length > 1 ? (
+      <div class="plan-sides" role="group" aria-label="Printable side">
+        {sides.map((side, i) => <button type="button" data-side={side} aria-pressed={i === 0 ? 'true' : 'false'}>{side.charAt(0).toUpperCase() + side.slice(1)}</button>)}
+      </div>
+    ) : <p class="plan-proof-title">Your printable</p>}
+    <button type="button" class="plan-proof-print" data-plan-print aria-label="Print or save as PDF" title="Print or save as PDF"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM18 12h.01"/></svg></button>
+  </div>
+  <slot />
+</div>
+<style is:global>
+.plan-proof{display:contents}
+.plan-proof-bar{display:none}
+@media screen and (max-width:1099px){
+  .club-plan .plan-proof{display:none}
+  .club-plan.plan-proof-open .plan-proof{display:block;position:fixed;inset:0;z-index:70;background:#f1f2f2}
+  .club-plan.plan-proof-open .plan-proof-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;height:64px;padding:10px 12px;background:var(--color-ivory);border-bottom:1px solid var(--color-warm-rule)}
+  .plan-proof-close,.plan-proof-print{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:3px;color:var(--color-warm-ink)}
+  .plan-proof-close{font-size:1.7rem;line-height:1}
+  .plan-proof-print{border:1px solid var(--color-warm-ink);background:#fff}
+  .plan-proof-title{font:600 .76rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--color-warm-ink)}
+  .plan-sides{display:flex;gap:4px}
+  .plan-sides button{min-height:44px;padding:8px 18px;border:1px solid #d5dfd2;border-radius:3px;color:var(--color-warm-ink);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+  .plan-sides button[aria-pressed="true"]{background:var(--color-warm-button);color:white;border-color:var(--color-warm-button)}
+  .club-plan.plan-proof-open [data-plan-proof-body]{position:absolute;inset:64px 0 0}
+  .club-plan.plan-proof-open [data-plan-proof-scroll]{height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:18px 14px 40px}
+  .club-plan .plan-proof :focus-visible{outline:2px solid #536e4e;outline-offset:2px}
+  /* View-only here: details change through the plan's sheets, not by typing on the scaled paper. */
+  .club-plan .plan-proof [data-plan-sheet]{pointer-events:none;user-select:none}
+  .club-plan .plan-proof [data-plan-sheet] [contenteditable]::after{display:none}
+  /* The Front/Back switch is a screen view only; print always has every sheet (ClubPrintStyles). */
+  .club-plan[data-plan-side="front"] [data-plan-sheet="back"],.club-plan[data-plan-side="back"] [data-plan-sheet="front"]{display:none}
+}
+</style>

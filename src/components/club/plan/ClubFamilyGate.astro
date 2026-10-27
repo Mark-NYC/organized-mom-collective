@@ -1,0 +1,17 @@
+---
+/** What the plan page shows until the family is known: loading, then empty profile, signed out, no access or
+ * error (filled by startPlanFamily, src/lib/club/plan/family.ts). Never an empty or unrelated plan. */
+---
+<section class="plan-gate" data-plan-gate aria-live="polite">
+  <p class="plan-gate-text">Preparing your family’s plan…</p>
+</section>
+<style is:global>
+/* Until the family has loaded, show only the status: never an empty plan. */
+.plan-gate{display:none}
+.club-plan:not([data-plan-state="ready"]){display:block}
+.club-plan:not([data-plan-state="ready"]) > *{display:none}
+.club-plan:not([data-plan-state="ready"]) > .plan-gate{display:block;max-width:540px;margin:clamp(24px,8vh,80px) auto;padding:0 20px;color:var(--color-warm-ink)}
+.plan-gate h2{font:400 clamp(26px,6vw,32px)/1.15 var(--font-serif);margin:0 0 12px}
+.plan-gate p{color:var(--color-warm-soft);line-height:1.65}
+.plan-gate-action{display:inline-flex;align-items:center;min-height:48px;margin-top:18px;padding:12px 20px;border-radius:3px;background:var(--color-warm-button);color:white;font:600 .75rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase}
+</style>

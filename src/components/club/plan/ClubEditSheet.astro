@@ -1,0 +1,44 @@
+---
+/** One focused bottom sheet for editing a single detail. Months fill it through PlanScreen.openSheet;
+ * the classes below (chips, fields, choices, buttons) are the shared sheet vocabulary. */
+---
+<dialog class="cp-sheet" data-cp-sheet aria-labelledby="cp-sheet-title">
+  <div class="cp-sheet-head"><h2 id="cp-sheet-title" data-cp-sheet-title></h2><button type="button" class="cp-close" data-cp-sheet-close aria-label="Close">×</button></div>
+  <div class="cp-sheet-body" data-cp-sheet-body></div>
+</dialog>
+<style is:global>
+@media screen and (max-width:1099px){
+.cp-sheet{position:fixed;inset:auto 0 0 0;width:100%;max-width:640px;max-height:88dvh;margin:auto auto 0;padding:0;border:0;border-radius:10px 10px 0 0;background:var(--color-ivory);color:var(--cp-ink);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 -10px 40px #0003}
+.cp-sheet::backdrop{background:rgba(45,40,38,.45)}
+.cp-sheet-head{position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:22px 20px 10px;background:var(--color-ivory)}
+.cp-sheet-head::before{content:"";position:absolute;top:8px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:#d9d2cb}
+.cp-sheet-head h2{font:400 clamp(22px,6vw,26px)/1.2 var(--font-serif);margin:0}
+.cp-close{flex:none;width:44px;height:44px;margin:-8px -10px 0 0;border:0;background:none;font-size:1.6rem;line-height:1;color:var(--cp-soft);cursor:pointer}
+.cp-sheet-body{display:grid;gap:16px;padding:6px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.cp-sheet-hint{font-size:.9rem;line-height:1.5;color:var(--cp-soft);margin-top:-8px}
+.cp-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cp-chips.cp-people-chips{display:flex;flex-wrap:wrap}
+.cp-chip{min-height:52px;padding:10px 14px;border:1px solid #d6ddd2;border-radius:3px;background:#fff;text-align:left;font-size:.95rem;font-weight:600;cursor:pointer}
+.cp-people-chips .cp-chip{min-height:44px;padding:8px 16px;text-align:center}
+.cp-chip[aria-pressed="true"]{border:2px solid var(--cp-sage);background:var(--cp-wash);padding:9px 13px;color:#3f5b3c}
+.cp-people-chips .cp-chip[aria-pressed="true"]{padding:7px 15px}
+.cp-field{display:grid;gap:6px;font-size:.85rem;font-weight:600}
+.cp-field input,.cp-field textarea,.cp-own textarea{width:100%;min-height:48px;padding:11px 12px;border:1px solid #cfc6bf;border-radius:3px;background:#fff;font:400 1rem/1.45 var(--font-sans);color:var(--cp-ink)}
+.cp-field textarea,.cp-own textarea{min-height:76px;resize:vertical}
+.cp-choices{display:grid;gap:8px;border:0;margin:0;padding:0}
+.cp-choice{display:grid;grid-template-columns:22px 1fr;gap:12px;align-items:start;padding:13px 14px;border:1px solid #d6ddd2;border-radius:3px;background:#fff;font-size:.95rem;line-height:1.45;cursor:pointer}
+.cp-choice:has(input:checked){border:2px solid var(--cp-sage);background:var(--cp-wash);padding:12px 13px}
+.cp-choice input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--cp-sage)}
+.cp-own{display:grid;gap:8px}
+.cp-sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.cp-sheet-actions > :only-child{grid-column:1/-1}
+.cp-btn{min-height:50px;padding:10px 14px;border:1px solid var(--cp-ink);border-radius:3px;background:#fff;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.cp-btn-dark{background:var(--color-warm-button);border-color:var(--color-warm-button);color:#fff}
+.cp-text-btn{justify-self:start;min-height:44px;border:0;background:none;padding:0;color:#8c514c;font-size:.9rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.cp-sheet :focus-visible{outline:2px solid var(--cp-sage);outline-offset:2px}
+}
+@media screen and (max-width:1099px) and (prefers-reduced-motion:no-preference){
+ .cp-sheet[open]{animation:cp-up .2s ease-out}
+ @keyframes cp-up{from{transform:translateY(24px);opacity:.6}}
+}
+</style>
