@@ -1,0 +1,75 @@
+---
+/** Mobile-first Club kit experience. Desktop October proof remains unchanged. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astro';
+---
+<AppLayout title="October Sunday Reset">
+  <div class="club-mobile-kit">
+    <header class="kit-header">
+      <a href="/app/club" class="kit-back">← All Club kits</a>
+      <p class="kit-eyebrow">OCTOBER · KIT PREVIEW</p>
+      <h1>Our Family <em>Sunday Reset</em></h1>
+      <p class="kit-subtitle">Your prepared tool, ready to look over. Only change what you want.</p>
+    </header>
+    <div class="kit-page-switch" role="group" aria-label="Printable side">
+      <button type="button" data-side="front" aria-pressed="true">Front</button>
+      <button type="button" data-side="back" aria-pressed="false">Back</button>
+    </div>
+    <div class="kit-artwork">
+      <OctoberSundayReset storageKey="omc:preview:october-sunday-reset:v2" />
+    </div>
+    <div class="kit-action-bar">
+      <button type="button" class="kit-edit" data-kit-edit>Make changes</button>
+      <button type="button" class="kit-approve" data-kit-approve>Approve preview</button>
+      <p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p>
+    </div>
+  </div>
+</AppLayout>
+<style is:global>
+/* Scope all presentation overrides to this customer-facing route. Do not modify the desktop proof. */
+.club-mobile-kit{max-width:820px;margin:0 auto;color:#4d4544}
+.kit-header{max-width:700px;margin:0 auto 22px}
+.kit-back{display:inline-flex;align-items:center;min-height:44px;color:#536e4e;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:4px;margin-bottom:14px}
+.kit-eyebrow{font-size:11px;font-weight:700;color:#71866c;letter-spacing:.15em}
+.kit-header h1{font:400 clamp(30px,6vw,43px)/1.15 Georgia,serif;margin:11px 0 8px}
+.kit-header h1 em{color:#71866c}
+.kit-subtitle{font-size:14px;line-height:1.6;color:#6e6461}
+.kit-page-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:500px;margin:0 auto 16px}
+.kit-page-switch button{min-height:46px;border:1px solid #d5dfd2;border-radius:10px;color:#536e4e;font-weight:700;font-size:13px}
+.kit-page-switch button[aria-pressed="true"]{background:#536e4e;color:white;border-color:#536e4e}
+.club-mobile-kit .kit-artwork{min-width:0;background:#f3f1eb;border-radius:16px;padding:12px;overflow:hidden}
+.club-mobile-kit .osr{padding:0!important;max-width:none!important}
+.club-mobile-kit .osr-intro,.club-mobile-kit .osr-editor,.club-mobile-kit .osr-tabs,.club-mobile-kit .osr-floating-edit{display:none!important}
+.club-mobile-kit .osr-layout{display:block!important}
+.club-mobile-kit .osr-preview{width:100%!important;padding:0!important;margin:0!important;min-width:0!important}
+.club-mobile-kit .osr-stage{width:100%!important;max-width:none!important;overflow:hidden}
+.club-mobile-kit .osr-pages{display:block!important;width:100%!important}
+.club-mobile-kit .osr-paper{max-width:none}
+.club-mobile-kit[data-kit-side="front"] .osr-back,.club-mobile-kit[data-kit-side="back"] .osr-front{display:none!important}
+.club-mobile-kit [data-osr-panel="calendar"]{display:none!important}
+.club-mobile-kit .osr-dialog{z-index:100}
+.kit-action-bar{max-width:500px;margin:18px auto 0;display:grid;gap:10px}
+.kit-action-bar button{min-height:51px;border-radius:12px;font-size:14px;font-weight:700}
+.kit-edit{color:#536e4e;border:1px solid #9aab8f;background:white}
+.kit-approve{color:white;background:#536e4e}
+.kit-action-bar p{font-size:11px;color:#6e6461;line-height:1.5;text-align:center;padding:0 8px}
+@media(min-width:768px){.club-mobile-kit .kit-artwork{padding:22px}.kit-action-bar{grid-template-columns:1fr 1fr}.kit-action-bar p{grid-column:1/-1}}
+@media print{.kit-header,.kit-page-switch,.kit-action-bar{display:none!important}.club-mobile-kit .kit-artwork{padding:0;background:white}.club-mobile-kit .osr-back{display:block!important}}
+</style>
+<script>
+const kit=document.querySelector<HTMLElement>('.club-mobile-kit');
+if(kit){
+  const show=(side:'front'|'back')=>{
+    kit.dataset.kitSide=side;
+    kit.querySelectorAll<HTMLButtonElement>('[data-side]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.side===side)));
+    window.dispatchEvent(new Event('resize'));
+  };
+  kit.querySelectorAll<HTMLButtonElement>('[data-side]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.side==='back'?'back':'front')));
+  show('front');
+  kit.querySelector<HTMLButtonElement>('[data-kit-edit]')?.addEventListener('click',()=>kit.querySelector<HTMLButtonElement>('[data-open-editor]')?.click());
+  kit.querySelector<HTMLButtonElement>('[data-kit-approve]')?.addEventListener('click',()=>{
+    const note=kit.querySelector<HTMLElement>('[data-approval-note]');
+    if(note)note.textContent='Preview acknowledged on this screen only. Nothing was submitted or scheduled for mailing.';
+  });
+}
+</script>
