@@ -5,12 +5,19 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
 ---
 <AppLayout title="October Sunday Reset">
   <div class="club-mobile-kit">
+    <div class="kit-desktop-rail">
     <header class="kit-header">
       <a href="/app/club" class="kit-back">← All Club kits</a>
       <p class="kit-eyebrow">OCTOBER · KIT PREVIEW</p>
       <h1>Our Family <em>Sunday Reset</em></h1>
       <p class="kit-subtitle">Your prepared tool, ready to look over. Only change what you want.</p>
     </header>
+    <div class="kit-action-bar">
+      <button type="button" class="kit-edit" data-kit-edit>Make changes</button>
+      <button type="button" class="kit-approve" data-kit-approve>Approve preview</button>
+      <p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p>
+    </div>
+    </div>
     <div class="kit-page-switch" role="group" aria-label="Printable side">
       <button type="button" data-side="front" aria-pressed="true">Front</button>
       <button type="button" data-side="back" aria-pressed="false">Back</button>
@@ -18,11 +25,7 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
     <div class="kit-artwork">
       <OctoberSundayReset storageKey="omc:preview:october-sunday-reset:v2" />
     </div>
-    <div class="kit-action-bar">
-      <button type="button" class="kit-edit" data-kit-edit>Make changes</button>
-      <button type="button" class="kit-approve" data-kit-approve>Approve preview</button>
-      <p data-approval-note role="status">Prototype only. Approval does not submit, purchase, or mail anything.</p>
-    </div>
+
   </div>
 </AppLayout>
 <style is:global>
@@ -55,6 +58,31 @@ import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astr
 .kit-action-bar p{font-size:11px;color:#6e6461;line-height:1.5;text-align:center;padding:0 8px}
 @media(min-width:768px){.club-mobile-kit .kit-artwork{padding:22px}.kit-action-bar{grid-template-columns:1fr 1fr}.kit-action-bar p{grid-column:1/-1}}
 @media print{.kit-header,.kit-page-switch,.kit-action-bar{display:none!important}.club-mobile-kit .kit-artwork{padding:0;background:white}.club-mobile-kit .osr-back{display:block!important}}
+
+/* Desktop: familiar fixed left controls, independently scrolling right printable proof. */
+@media(min-width:1100px){
+  body:has(.club-mobile-kit) #main{max-width:1560px;padding-left:clamp(20px,3vw,54px);padding-right:clamp(20px,3vw,54px)}
+  .club-mobile-kit{max-width:none;display:grid;grid-template-columns:minmax(290px,345px) minmax(0,1fr);align-items:start;gap:clamp(24px,3.7vw,60px)}
+  .club-mobile-kit .kit-desktop-rail{position:sticky;top:22px;align-self:start;max-height:calc(100vh - 44px);overflow-y:auto;overscroll-behavior:contain;padding:12px 8px 24px 0;scrollbar-width:thin}
+  .club-mobile-kit .kit-header{margin:0 0 28px}
+  .club-mobile-kit .kit-header h1{font-size:39px}
+  .club-mobile-kit .kit-page-switch{display:none}
+  .club-mobile-kit .kit-artwork{padding:24px;min-width:0;overflow:visible}
+  .club-mobile-kit .osr-stage{overflow:visible}
+  .club-mobile-kit .osr-pages{display:flex!important;flex-direction:column;gap:22px}
+  .club-mobile-kit[data-kit-side="front"] .osr-back,.club-mobile-kit[data-kit-side="back"] .osr-front{display:block!important}
+  .club-mobile-kit .kit-action-bar{display:flex;flex-direction:column;max-width:none;margin:0;gap:13px}
+  .club-mobile-kit .kit-action-bar p{text-align:left;padding:0}
+}
+/* On phones, keep preview-first: controls below the artwork. */
+@media(max-width:1099px){
+  .club-mobile-kit{display:flex;flex-direction:column}
+  .club-mobile-kit .kit-desktop-rail{display:contents}
+  .club-mobile-kit .kit-header{order:0;width:100%}
+  .club-mobile-kit .kit-page-switch{order:1;width:100%}
+  .club-mobile-kit .kit-artwork{order:2;width:100%}
+  .club-mobile-kit .kit-action-bar{order:3;width:100%}
+}
 </style>
 <script>
 const kit=document.querySelector<HTMLElement>('.club-mobile-kit');
