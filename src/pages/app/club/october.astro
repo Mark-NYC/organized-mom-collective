@@ -8,6 +8,41 @@ const editDeadline = clubEditingDeadline('2027-10');
 ---
 <AppLayout title="October Sunday Reset">
   <div class="club-mobile-kit family-brand">
+    <section class="kit-mobile-flow" data-mobile-flow aria-label="October Sunday Reset review">
+      <div class="kit-mobile-review" data-flow-panel="review">
+        <p class="kit-flow-eyebrow">YOUR PREPARED OCTOBER KIT</p>
+        <h1>Our Family <em>Sunday Reset</em></h1>
+        <p class="kit-flow-lede">Look over your family's prepared rhythm. Change only what doesn't fit.</p>
+        <div class="kit-review-card">
+          <button type="button" data-flow-edit><span><small>WEEKLY RHYTHM</small><strong data-flow-trigger>Sunday after lunch</strong></span><span aria-hidden="true">✎</span></button>
+          <button type="button" data-flow-edit><span><small>THREE SIMPLE STEPS</small><strong>Look ahead · Prepare early · Share the work</strong></span><span aria-hidden="true">✎</span></button>
+          <button type="button" data-flow-edit><span><small>OUR FAMILY ROLES</small><strong data-flow-roles>Prepared for your family</strong></span><span aria-hidden="true">✎</span></button>
+          <button type="button" data-flow-edit><span><small>FIRST EXAMPLE</small><strong data-flow-example>Getting Ready for Fall</strong></span><span aria-hidden="true">✎</span></button>
+        </div>
+        <button class="kit-flow-primary" type="button" data-flow-proof>Review Print Preview →</button>
+        <button class="kit-flow-secondary" type="button" data-flow-print>Print a Copy</button>
+        <p class="kit-flow-note">Your kit is already prepared. Printing a different version won't change an approved mailing.</p>
+      </div>
+      <div class="kit-mobile-proof" data-flow-panel="proof" hidden>
+        <button class="kit-flow-back" type="button" data-flow-review>← Back to your plan</button>
+        <h1>Print Preview</h1>
+        <p class="kit-flow-lede">Review both sides of the actual printable before approving.</p>
+        <div class="kit-mobile-proof-slot" data-proof-slot></div>
+        <button class="kit-flow-primary" type="button" data-flow-approve>Approve This Version</button>
+        <button class="kit-flow-secondary" type="button" data-flow-print>Print / Save PDF</button>
+        <p class="kit-flow-note">Approval is a preview acknowledgment only. Nothing is submitted or mailed yet.</p>
+      </div>
+      <div class="kit-mobile-done" data-flow-panel="done" hidden>
+        <div class="kit-done-mark" aria-hidden="true">✓</div>
+        <h1>Version Reviewed</h1>
+        <p class="kit-flow-lede">Your October printable has been reviewed in this preview. Mailing is not yet connected.</p>
+        <h2>Keep Using This Tool</h2>
+        <button class="kit-flow-option" type="button" data-flow-print>▤ <span>Print Another Copy</span> ›</button>
+        <button class="kit-flow-option" type="button" data-flow-variation>▣ <span>Create a New Version</span> ›</button>
+        <button class="kit-flow-option" type="button" data-flow-proof>▤ <span>Review Printable Again</span> ›</button>
+        <p class="kit-flow-note">A new version can be edited and printed without changing the version you reviewed.</p>
+      </div>
+    </section>
     <div class="kit-desktop-rail">
     <header class="kit-header">
       <a href="/app/club" class="kit-back">← Back to Club</a>
@@ -498,6 +533,52 @@ const editDeadline = clubEditingDeadline('2027-10');
   .club-mobile-kit .osr-paper:last-child{break-after:auto!important;page-break-after:auto!important}
   .club-mobile-kit .osr-paper *{visibility:visible!important}
 }
+
+/* Native mobile review → printed proof → reviewed flow.
+   Desktop proof and all native print rules stay intact. */
+.kit-mobile-flow{display:none}
+@media screen and (max-width:639px){
+ body:has(.club-mobile-kit) #main{padding-top:18px!important;padding-bottom:calc(110px + env(safe-area-inset-bottom))!important}
+ .club-mobile-kit{display:block!important;padding:0!important}
+ .kit-mobile-flow{display:block!important;max-width:540px;margin:0 auto;font-family:var(--font-sans);color:var(--color-warm-ink)}
+ .kit-mobile-flow [hidden]{display:none!important}
+ .kit-mobile-flow h1{font:400 clamp(32px,8vw,43px)/1.12 var(--font-serif);margin:10px 0 10px;letter-spacing:-.025em}
+ .kit-mobile-flow h1 em{font-style:italic}
+ .kit-mobile-flow h2{font:400 27px var(--font-serif);margin:26px 0 14px}
+ .kit-flow-eyebrow{font-size:10px;font-weight:600;letter-spacing:.2em;color:var(--color-warm-soft)}
+ .kit-flow-lede{font-size:14px;line-height:1.65;color:var(--color-warm-soft);margin-bottom:22px}
+ .kit-review-card{border:1px solid var(--color-warm-rule);background:white;margin:18px 0}
+ .kit-review-card button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:15px;padding:17px 16px;text-align:left;border:0;border-bottom:1px solid var(--color-warm-rule);background:white;color:var(--color-warm-ink)}
+ .kit-review-card button:last-child{border-bottom:0}
+ .kit-review-card button span:first-child{display:grid;gap:7px;min-width:0}
+ .kit-review-card small{font-size:10px;letter-spacing:.13em;color:var(--color-warm-soft);font-weight:600}
+ .kit-review-card strong{font-size:15px;font-weight:500;line-height:1.4}
+ .kit-review-card button span:last-child{font-size:19px;color:#70856b}
+ .kit-flow-primary,.kit-flow-secondary{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:3px;padding:12px 16px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-top:9px}
+ .kit-flow-primary{background:var(--color-warm-button);color:white;border:1px solid var(--color-warm-button)}
+ .kit-flow-secondary{background:transparent;color:var(--color-warm-ink);border:1px solid var(--color-warm-ink)}
+ .kit-flow-note{font-size:12px;line-height:1.6;color:var(--color-warm-soft);margin:15px 0}
+ .kit-flow-back{min-height:44px;display:flex;align-items:center;color:var(--color-warm-ink);font-size:12px;font-weight:600;letter-spacing:.04em}
+ .kit-mobile-proof-slot{background:#f5f3f2;margin:10px 0 16px;padding:12px 8px 18px}
+ .kit-mobile-proof-slot .kit-page-switch{display:grid!important;grid-template-columns:1fr 1fr!important;margin:0 0 12px!important;width:100%!important;max-width:none!important}
+ .kit-mobile-proof-slot .kit-page-switch button{width:100%!important}
+ .kit-mobile-proof-slot .kit-viewer-wrap{display:block!important}
+ .kit-mobile-proof-slot .kit-artwork{height:min(57dvh,530px)!important;overflow-y:auto!important;position:static!important}
+ .kit-mobile-proof-slot .kit-enlarge{display:block!important}
+ .kit-done-mark{width:52px;height:52px;display:grid;place-items:center;border-radius:50%;background:#dce9df;color:#365944;font-size:26px;margin:22px 0}
+ .kit-flow-option{display:flex;align-items:center;gap:14px;width:100%;min-height:60px;padding:16px 12px;border:1px solid var(--color-warm-rule);border-bottom:0;text-align:left;font-size:14px;color:var(--color-warm-ink);background:white}
+ .kit-flow-option span{flex:1}
+ .kit-flow-option:last-of-type{border-bottom:1px solid var(--color-warm-rule)}
+ .club-mobile-kit .kit-desktop-rail{display:none!important}
+ .club-mobile-kit > .kit-page-switch,.club-mobile-kit > .kit-viewer-wrap,.club-mobile-kit > .kit-viewer-close{display:none!important}
+ .club-mobile-kit .kit-action-bar{display:none!important}
+}
+@media print{
+ .kit-mobile-flow{display:none!important}
+ .club-mobile-kit .kit-desktop-rail{display:none!important}
+ .club-mobile-kit > .kit-viewer-wrap{display:block!important}
+ .club-mobile-kit > .kit-viewer-wrap .kit-artwork{display:block!important}
+}
 </style>
 <script>
 const kit=document.querySelector<HTMLElement>('.club-mobile-kit');
@@ -522,6 +603,78 @@ if(kit){
   close?.addEventListener('click',()=>toggle(false));
   window.addEventListener('keydown',event=>{if(event.key==='Escape'&&kit.classList.contains('kit-expanded'))toggle(false)});
   window.addEventListener('pagehide',()=>{document.body.style.overflow=''}, {once:true});
+
+  const mobileFlow=kit.querySelector<HTMLElement>('[data-mobile-flow]');
+  if(mobileFlow){
+    const panels=Array.from(mobileFlow.querySelectorAll<HTMLElement>('[data-flow-panel]'));
+    const originalSwitch=kit.querySelector<HTMLElement>(':scope > .kit-page-switch');
+    const originalViewer=kit.querySelector<HTMLElement>(':scope > .kit-viewer-wrap');
+    const proofSlot=mobileFlow.querySelector<HTMLElement>('[data-proof-slot]');
+    const isMobile=()=>window.matchMedia('(max-width:639px)').matches;
+    const parentSwitch=originalSwitch?.parentElement;
+    const parentViewer=originalViewer?.parentElement;
+    const originalClose=kit.querySelector<HTMLElement>(':scope > .kit-viewer-close');
+    const showPanel=(name:string)=>{
+      panels.forEach(panel=>panel.hidden=panel.dataset.flowPanel!==name);
+      if(name==='proof'&&proofSlot){
+        if(originalSwitch)proofSlot.appendChild(originalSwitch);
+        if(originalViewer)proofSlot.appendChild(originalViewer);
+        window.dispatchEvent(new Event('resize'));
+      }else{
+        if(originalSwitch&&parentSwitch)parentSwitch.appendChild(originalSwitch);
+        if(originalViewer&&parentViewer)parentViewer.insertBefore(originalViewer,originalClose);
+      }
+      window.scrollTo({top:0,behavior:'instant'});
+    };
+    const updateReview=()=>{
+      const trigger=kit.querySelector<HTMLElement>('[data-osr-summary-trigger]')?.textContent?.trim();
+      const elem=mobileFlow.querySelector<HTMLElement>('[data-flow-trigger]');
+      if(elem&&trigger)elem.textContent=trigger;
+      const roles=kit.querySelectorAll<HTMLElement>('[data-osr-people] .osr-person');
+      const roleLabel=mobileFlow.querySelector<HTMLElement>('[data-flow-roles]');
+      if(roleLabel)roleLabel.textContent=roles.length?Array.from(roles).slice(0,3).map(e=>e.querySelector('strong')?.textContent?.trim()).filter(Boolean).join(' · ')||'Prepared family assignments':'Prepared family assignments';
+    };
+    const openEditor=()=>{showPanel('proof');kit.querySelector<HTMLButtonElement>('[data-open-editor]')?.click()};
+    mobileFlow.querySelectorAll<HTMLButtonElement>('[data-flow-edit]').forEach(b=>b.addEventListener('click',openEditor));
+    mobileFlow.querySelectorAll<HTMLButtonElement>('[data-flow-print]').forEach(b=>b.addEventListener('click',()=>{
+      kit.querySelector<HTMLButtonElement>('[data-osr-print]')?.click();
+    }));
+    mobileFlow.querySelectorAll<HTMLButtonElement>('[data-flow-proof]').forEach(b=>b.addEventListener('click',()=>{updateReview();showPanel('proof')}));
+    mobileFlow.querySelector<HTMLButtonElement>('[data-flow-review]')?.addEventListener('click',()=>{updateReview();showPanel('review')});
+    mobileFlow.querySelector<HTMLButtonElement>('[data-flow-approve]')?.addEventListener('click',()=>{
+      try{sessionStorage.setItem('omc:october:reviewed-preview',new Date().toISOString())}catch{}
+      showPanel('done');
+    });
+    mobileFlow.querySelector<HTMLButtonElement>('[data-flow-variation]')?.addEventListener('click',()=>{
+      // Draft edits reuse the current October personalization engine;
+      // a reviewed version is never automatically replaced or mailed.
+      showPanel('review');
+      openEditor();
+    });
+    kit.querySelector<HTMLDialogElement>('[data-osr-editor]')?.addEventListener('close',()=>{updateReview();if(isMobile())showPanel('review')});
+    window.addEventListener('resize',()=>{if(!isMobile()&&originalSwitch&&parentSwitch&&originalSwitch.parentElement===proofSlot){
+      parentSwitch.appendChild(originalSwitch);
+      if(originalViewer&&parentViewer)parentViewer.insertBefore(originalViewer,originalClose);
+      panels.forEach(panel=>panel.hidden=panel.dataset.flowPanel!=='review');
+    }});
+    // The original full-size printable must be in its normal print container,
+    // regardless of which mobile panel is currently shown.
+    let restoreProof=false;
+    window.addEventListener('beforeprint',()=>{
+      restoreProof=originalViewer?.parentElement===proofSlot;
+      if(originalSwitch&&parentSwitch)parentSwitch.appendChild(originalSwitch);
+      if(originalViewer&&parentViewer)parentViewer.insertBefore(originalViewer,originalClose);
+    });
+    window.addEventListener('afterprint',()=>{
+      if(restoreProof&&isMobile()&&proofSlot){
+        if(originalSwitch)proofSlot.appendChild(originalSwitch);
+        if(originalViewer)proofSlot.appendChild(originalViewer);
+      }
+      restoreProof=false;
+      window.dispatchEvent(new Event('resize'));
+    });
+    updateReview();
+  }
   const section=kit.querySelector<HTMLElement>('[data-edit-deadline]');
   if(section){
     const raw=section.dataset.editDeadline ?? '';
