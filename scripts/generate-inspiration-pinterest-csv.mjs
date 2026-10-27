@@ -7,7 +7,7 @@ if (!input || !output) { console.error('Usage: node scripts/generate-inspiration
 const m=JSON.parse(readFileSync(resolve(input),'utf8'));
 const fields=['Title','Media URL','Pinterest board','Thumbnail','Description','Link','Publish date','Keywords'];
 const q=v=>{ const s=String(v??''); return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
-const ids=new Set(), images=new Set(), links=new Set();
+const ids=new Set(), images=new Set();
 const list=m.pins.map((p,i)=>{
   if(!p.id||ids.has(p.id))throw Error('Missing/duplicate pin ID at row '+(i+1));
   ids.add(p.id);
@@ -16,8 +16,7 @@ const list=m.pins.map((p,i)=>{
   const media=new URL(p.image,'https://www.organizedmomcollective.com').href;
   if (!/^https:\/\//.test(media)||!/\.(jpe?g|png|webp)$/i.test(new URL(media).pathname)) throw Error('Invalid media URL: '+media);
   const link=p.link;
-  if(!/^https:\/\//.test(link)||links.has(link))throw Error('Invalid/duplicate link at row '+(i+1));
-  links.add(link);
+  if(!/^https:\/\//.test(link))throw Error('Invalid link at row '+(i+1));
   if(!p.title||p.title.length>100||!p.board||!p.description||p.description.length>500)throw Error('Invalid title/board/description at row '+(i+1));
   return [p.title,media,p.board,'',p.description,link,p.publish_date||'',p.keywords||''];
 });
