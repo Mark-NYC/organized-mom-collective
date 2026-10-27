@@ -1,15 +1,118 @@
-import { useEffect, useState } from 'react';
-import { appPreviewStore } from '../lib/app-family';
-import { kitBySlug } from '../data/club/kits';
-import { monthLabel } from '../data/club/labels';
-import type { ClubMe } from '../lib/club/store';
+// The app Club library mirrors the benefit-first public Club month descriptions.
+// Keep icons linked to the original artwork in assets/icons/ofc/month-icons.
+const icons = import.meta.glob('../assets/icons/ofc/month-icons/*-OFC-icon.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>;
+
+const months = [
+  {
+    "month": "January",
+    "title": "Mornings Without the Nagging",
+    "responsibility": "Following routines",
+    "how": "A ready-made morning or evening plan shows everyone what to do next.",
+    "url": "/app/club/january/"
+  },
+  {
+    "month": "February",
+    "title": "Connection You Don't Have to Plan",
+    "responsibility": "Initiating connection",
+    "how": "Four simple invitations help kids take the lead in spending time together.",
+    "url": "/app/club/february/"
+  },
+  {
+    "month": "March",
+    "title": "Cleaning Without Managing Everyone",
+    "responsibility": "Finishing a job",
+    "how": "Each person gets a clear job, the steps, supplies, and what finished looks like.",
+    "url": "/app/club/march/"
+  },
+  {
+    "month": "April",
+    "title": "Dinner Isn't All on You",
+    "responsibility": "Sharing meal ownership",
+    "how": "A prepared dinner plan gives family members roles from ingredients to cleanup.",
+    "url": "/club/april-preview/"
+  },
+  {
+    "month": "May",
+    "title": "Summer Days Without Constant Questions",
+    "responsibility": "Managing their day",
+    "how": "A flexible daily rhythm and activity menu help kids choose what comes next.",
+    "url": "/club/may-preview/"
+  },
+  {
+    "month": "June",
+    "title": "Less Screen-Time Negotiating",
+    "responsibility": "Respecting shared boundaries",
+    "how": "Shared screen-time expectations and responsibilities make summer rules clear.",
+    "url": "/club/june-preview/"
+  },
+  {
+    "month": "July",
+    "title": "No More Packing for Everyone",
+    "responsibility": "Preparing independently",
+    "how": "Personal packing lists show each person what to pack, check, and put away.",
+    "url": "/club/july-preview/"
+  },
+  {
+    "month": "August",
+    "title": "Back to School Without the Scramble",
+    "responsibility": "Taking initiative",
+    "how": "A personalized countdown gives everyone their own school-ready responsibilities.",
+    "url": "/club/august-preview/"
+  },
+  {
+    "month": "September",
+    "title": "Stop Being the Family's Calendar",
+    "responsibility": "Planning together",
+    "how": "A short weekly meeting helps everyone know the plan and own their commitments.",
+    "url": "/club/september-preview/"
+  },
+  {
+    "month": "October",
+    "title": "Get Ahead of the Last-Minute Scramble",
+    "responsibility": "Noticing what is needed",
+    "how": "A seasonal readiness plan helps family members spot and handle needs early.",
+    "url": "/app/club/october/"
+  },
+  {
+    "month": "November",
+    "title": "Stop Being Everyone's Reminder",
+    "responsibility": "Owning a whole responsibility",
+    "how": "Each family member gets a whole job with a clear owner, timing, and finish line.",
+    "url": "/club/worksheet-generator/"
+  },
+  {
+    "month": "December",
+    "title": "Christmas Without Doing It All",
+    "responsibility": "Contributing to family traditions",
+    "how": "A prepared holiday plan shares responsibility for gifts, traditions, and celebrations.",
+    "url": "/club/december-preview/"
+  }
+];
+
 export default function AppKitLibrary() {
-  const [me,setMe] = useState<ClubMe | null>(null);
-  useEffect(() => { appPreviewStore()?.me().then(setMe).catch(() => setMe(null)); },[]);
-  if (!me) return <p role="status" className="mt-6 text-sm text-warm-soft">Loading preview library…</p>;
-  return <div className="family-card-grid mt-6">{me.kits.map(({slug})=>{
-    const k=kitBySlug(slug);
-    if(!k) return null;
-    return <article key={slug} className="family-panel"><p className="label">{monthLabel(k.month)}</p><h3 className="family-panel-title mt-4">{k.theme}</h3><p className="mt-2 text-sm text-warm-soft">{k.shift}</p>{k.month === "2027-02" ? <a className="family-action mt-5" href="/app/club/february/">Preview February →</a> : k.month === "2027-03" ? <a className="family-action mt-5" href="/app/club/march/">Preview March →</a> : <span className="label mt-5 inline-block">PREVIEW ONLY</span>}</article>;
-  })}</div>;
+  return (
+    <div className="ofc-app-month-grid">
+      {months.map((m) => {
+        const src = icons[`../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
+        return (
+          <article className="ofc-app-month" key={m.month}>
+            <div className="ofc-app-month-icon">
+              {src ? <img src={src} alt="" loading="lazy" width="88" height="88" /> : null}
+            </div>
+            <div className="ofc-app-month-detail">
+              <p className="ofc-app-month-name">{m.month}</p>
+              <h3>{m.title}</h3>
+              <p><strong>Builds:</strong> {m.responsibility}</p>
+              <p><strong>How:</strong> {m.how}</p>
+              <a href={m.url}>Preview the tool <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
 }
