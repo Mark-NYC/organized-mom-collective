@@ -1,6 +1,6 @@
 // The app Club library mirrors the benefit-first public Club month descriptions.
 // Keep icons linked to the original artwork in assets/icons/ofc/month-icons.
-const icons = import.meta.glob('../assets/icons/ofc/month-icons/*-OFC-icon.png', {
+const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.png', {
   eager: true,
   query: '?url',
   import: 'default',
@@ -97,7 +97,7 @@ export default function AppKitLibrary() {
   return (
     <div className="ofc-app-month-grid">
       {months.map((m) => {
-        const src = icons[`../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
+        const src = icons[`../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
         return (
           <article className="ofc-app-month" key={m.month}>
             <div className="ofc-app-month-icon">
