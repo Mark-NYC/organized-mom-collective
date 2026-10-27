@@ -17,7 +17,8 @@ const {
 const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
 ---
 
-<BaseLayout title={fullTitle} description={description} robots="noindex">\n  <style is:global>body { background: #fffdfa; color: #4d4544; }</style>
+<BaseLayout title={fullTitle} description={description} robots="noindex">
+  <style is:global>body { background: #fffdfa; color: #4d4544; }</style>
   <Fragment slot="head">
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
