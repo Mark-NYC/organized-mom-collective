@@ -85,10 +85,7 @@ const faqs = [
  const form = document.querySelector('#family-form');
  const childrenFields = document.querySelector('#children-fields');
  const addButton = document.querySelector('#add-child');
- const sheetHeading = document.querySelector('#sheet-heading');
- const assignments = document.querySelector('#sheet-assignments');
  const result = document.querySelector('#result');
- const sampleLabel = null;
  const modal = document.querySelector('#club-preview-modal');
  const modalAssignments = document.querySelector('#modal-assignments');
  const KEY = 'ofc-club-sales-demo-v1';
@@ -105,10 +102,8 @@ const faqs = [
  }
  function getData(){return {mom:safe(form.elements.namedItem('mom').value),dad:safe(form.elements.namedItem('dad').value),children:[...childrenFields.querySelectorAll('.child-row')].map(row=>({name:safe(row.querySelector('input').value),age:Number(row.querySelector('select').value)}))}}
  function showPlan(data,scroll=false){
-   sheetHeading.innerHTML='Our Family’s<br/><em>Daily Reset</em>';
    const people=[...data.children.map(c=>({name:c.name,task:jobs(c.age)})),{name:data.dad,task:'Clear and wipe the dinner table'},{name:data.mom,task:'Help everyone get ready for tomorrow'}];
-   assignments.innerHTML=people.map(p=>'<div class="assignment"><span class="tick"></span><div><b>'+escapeHtml(p.name)+'</b><p>'+escapeHtml(p.task)+'</p></div></div>').join('');
-   modalAssignments.innerHTML=assignments.innerHTML;
+   modalAssignments.innerHTML=people.map(p=>'<div class="assignment"><span class="tick"></span><div><b>'+escapeHtml(p.name)+'</b><p>'+escapeHtml(p.task)+'</p></div></div>').join('');
    result.hidden=false;
    try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}
    if(scroll && typeof modal.showModal==='function')modal.showModal();
@@ -121,7 +116,7 @@ const faqs = [
  document.querySelector('#modal-club').addEventListener('click',()=>modal.close());
  modal.addEventListener('click',e=>{if(e.target===modal)modal.close()});
  document.querySelector('#edit-family').addEventListener('click',()=>form.scrollIntoView({behavior:'smooth',block:'center'}));
- document.querySelector('#clear-family').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch{};form.reset();childrenFields.replaceChildren();addChild();addChild('','5');result.hidden=true;assignments.innerHTML='';modalAssignments.replaceChildren();form.scrollIntoView({behavior:'smooth'})});
+ document.querySelector('#clear-family').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch{};form.reset();childrenFields.replaceChildren();addChild();addChild('','5');result.hidden=true;modalAssignments.replaceChildren();form.scrollIntoView({behavior:'smooth'})});
  let saved=null;try{saved=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
  if(saved&&typeof saved.mom==='string'&&typeof saved.dad==='string'&&Array.isArray(saved.children)&&saved.children.length&&saved.children.length<=8){form.elements.namedItem('mom').value=safe(saved.mom);form.elements.namedItem('dad').value=safe(saved.dad);saved.children.forEach(c=>addChild(safe(c.name),String(Math.max(1,Math.min(18,Number(c.age)||7)))));if(saved.mom&&saved.dad&&saved.children.every(c=>c.name))showPlan(saved)}else{addChild();addChild('','5')}
 </script>
