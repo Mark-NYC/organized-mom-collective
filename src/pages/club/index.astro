@@ -1,192 +1,110 @@
 ---
-/**
- * Organized Family Club marketing /club homepage.
- * Current physical-first $5/mo strategy (Oct 24 2026). Enrollment is not live.
- * Monthly physical prototype previews are separate unlisted routes with the shared
- * Kits / Family sample-profile navigation.
- */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../../config';
-import { monthColors } from '../../theme';
-
-const ready = [
-  {
-    month: 'November', year: '2026', number: '01', color: monthColors[10].hex,
-    eyebrow: 'SHARE THE LOAD', title: 'Our Family Ownership Plan',
-    description: 'A prepared handoff for real responsibilities. Each person knows what they own, when it happens and what finished looks like.',
-    outcome: 'Fewer jobs that Mom has to plan, assign and follow up on.',
-    url: '/club/worksheet-generator/', link: 'Explore the November plan',
-    kind: 'ownership',
-  },
-  {
-    month: 'December', year: '2026', number: '02', color: monthColors[11].hex,
-    eyebrow: 'KIDS TAKE THE LEAD', title: 'Your Christmas Mission',
-    description: 'A kindness mission addressed to the kids, with two ready-to-use Christmas cards. They choose someone to encourage and take the lead.',
-    outcome: 'A meaningful family moment Mom doesn’t need to invent.',
-    url: '/club/december-preview/', link: 'Explore the December mission',
-    kind: 'christmas',
-  },
-  {
-    month: 'January', year: '2027', number: '03', color: monthColors[0].hex,
-    eyebrow: 'LESS REMINDING', title: 'Our Family Habit Cards',
-    description: 'Simple, individual cues that connect a new responsibility to something your child already does. Put the card where the next action happens.',
-    outcome: 'More independence without another chart for Mom to manage.',
-    url: '/preview/january-habit-cards', link: 'Explore the January cards',
-    kind: 'habits',
-  },
-] as const;
-
-const upcoming = [
-  ['February','Family Connection Made Easy','A realistic way to make room for meaningful time together.'],
-  ['March','Spring Cleaning as a Family','One manageable project, with age-appropriate parts for everyone.'],
-  ['April','Dinner Isn’t Just Mom’s Job','Clear ownership of preparation, meals and cleanup.'],
-  ['May','Our Family Summer Rhythm','A repeatable day rhythm kids can follow when school structure disappears.'],
-  ['June','My Family’s Snack Station','A picture-led snack station lets kids choose approved snacks and clean up without Mom managing every request.'],
-  ['July','What Can I Do Right Now?','Three tiers of specific ideas kids can choose and start independently.'],
-  ['August','My School Day Routines','A prepared picture-led morning and after-school routine that kids can follow without constant reminders.'],
-  ['September','The Family Weekly Rhythm','A simple way everyone stays on the same page.'],
-  ['October','A Home That Runs Together','Revisit the systems that help everyone own their part.'],
-] as const;
-
+const samples = [
+ {month:'NOVEMBER', title:'Our Family Ownership Plan', benefit:'Less reminding. More ownership.', detail:'Hand off one whole job with a clear owner, a time, and a definition of finished.', url:'/club/worksheet-generator/', label:'See the November plan', shade:'#e7ece5', number:'01'},
+ {month:'JANUARY', title:'Our Family Habit Cards', benefit:'Smoother mornings, fewer reminders.', detail:'Simple cues that help children know what to do next without another chart for Mom to manage.',url:'/preview/january-habit-cards', label:'See the January cards',shade:'#cddde1',number:'02'},
+ {month:'MAY', title:'Our Family Summer Rhythm', benefit:'More freedom. Less directing.',detail:'A flexible summer rhythm and practical activity ideas children can follow when school ends.',url:'/club/may-preview/',label:'See the May rhythm',shade:'#f1ede4',number:'03'}
+];
 const faqs = [
-  ['What exactly comes in the mail?', 'The planned subscription includes one personalized family organization tool printed on a premium 8.5 × 11 sheet, plus a short note from Megan integrated into the mailing. Each month tackles a different everyday challenge. Exact print specifications are still being tested.'],
-  ['Will I have to build the tool myself?', 'That is the problem we want to eliminate. The goal is to prepare the tool from your family information before mailing. You can review it and make small changes when needed. The early prototypes still demonstrate parts of that process; automated personalization is being validated.'],
-  ['What happens online?', 'The digital companion lets you see the month’s tool and, where supported, adjust or reprint it. The printable is the product—not another online program to complete.'],
-  ['How does this differ from the wall calendar?', 'The wall calendar shows schedules, meals and the week’s plan. The Club offers one ready-to-use tool each month to help the family share responsibility for making that plan happen. You can use either on its own.'],
-  ['Do I have to start in November or complete the months in order?', 'No. Each month is meant to be useful on its own. There are no lessons to catch up on and no required progress tracking.'],
-  ['Can I sign up now?', 'Not yet. We are testing the printed product, mail fulfillment and subscription economics before opening enrollment. The $5 monthly price is planned, not an active checkout offer.'],
-] as const;
+ ['What exactly comes in the mail?', 'Our planned subscription includes one personalized 8.5 × 11 family organization tool each month, with a short note from Megan. We are still testing the final paper and mailing format.'],
+ ['Will I have to put the plan together?', 'No. We want to prepare the plan using a few details about your household. You can review suggested assignments or make changes, but the default should be ready to use. Automated fulfillment is still being tested.'],
+ ['What ages is this for?', 'The tools are designed to adjust to the ages and abilities of the people in your household, including participating adults.'],
+ ['Is this different from the wall calendar?', 'Yes. The calendar shows the week’s plan. The Club helps family members share responsibility for carrying it out. Either can be used on its own.'],
+ ['What if we miss a month?', 'Nothing to catch up on. Each month’s tool is meant to stand alone.'],
+ ['Can I subscribe today?', 'Not yet. We are testing personalized printing, mailing, and billing before opening enrollment. You can contact us about early access.']
+];
 ---
-<PublicLayout
-  fullTitle={`Organized Family Club · ${BRAND_NAME}`}
-  description="One useful personalized family organization tool, prepared for your household and delivered to your mailbox each month. Planned at $5/month."
-  indexable={false}
-  chrome={false}
-  width="full"
-  tracking={false}
->
+
+<PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="Less for Mom to manage. More for the family to own. One personalized family organization tool, prepared for you and delivered monthly." indexable={false} chrome={false} width="full" tracking={false}>
 <div class="ofc">
-  <header class="ofc-nav">
-    <a href="/" aria-label="Organized Mom Collective home" class="ofc-logo"><img src="/brand/omc-badge.png" alt="" width="52" height="52" /><span>Organized Family Club</span></a>
-    <nav aria-label="Page navigation"><a href="#months">The months</a><a href="#how">How it works</a><a href="#faq">Questions</a><a href="/club/dashboard" class="ofc-member-link">Member kits ↗</a></nav>
-  </header>
-
-  <section class="ofc-hero" aria-labelledby="ofc-heading">
-    <div class="ofc-hero-copy">
-      <p class="ofc-eyebrow">THE ORGANIZED FAMILY CLUB · A NEW MONTHLY MAIL SUBSCRIPTION</p>
-      <h1 id="ofc-heading">Less for Mom to manage. <em>More for the family to own.</em></h1>
-      <p class="ofc-lead">One useful tool for your family, prepared for you and delivered to your door every month.</p>
-      <p>No big binders. No homework. No new system for you to run. Just one thoughtfully prepared resource that helps everyone play a part.</p>
-      <div class="ofc-hero-cta">
-        <a href="#months" class="ofc-button">See the first three months <span aria-hidden="true">→</span></a>
-        <p><strong>$5 / month planned</strong><span> · Enrollment not yet open</span></p>
-      </div>
-    </div>
-    <div class="ofc-hero-art" aria-label="Illustration of a flat envelope holding personalized family planning pages">
-      <div class="ofc-postmark">ONE FAMILY. ONE USEFUL TOOL.</div>
-      <div class="ofc-mail-back"></div>
-      <div class="ofc-paper ofc-paper-back"><span>JANUARY · OUR FAMILY HABITS</span><i></i><i></i><i></i></div>
-      <div class="ofc-paper ofc-paper-front"><small>ORGANIZED FAMILY CLUB · NOVEMBER</small><strong>Our family.<br /><em>Our team.</em></strong><div class="ofc-paper-line">ONE JOB · ONE OWNER</div><div class="ofc-paper-line">A READY-TO-USE PLAN</div><div class="ofc-paper-line">MADE FOR YOUR FAMILY</div><span>PREPARED FOR YOU</span></div>
-      <div class="ofc-envelope"><span>GOOD THINGS COME IN THE MAIL.</span></div>
-    </div>
-  </section>
-
-  <section class="ofc-intro" aria-labelledby="ofc-problem">
-    <p class="ofc-eyebrow">A DIFFERENT KIND OF FAMILY ORGANIZATION</p>
-    <h2 id="ofc-problem">Mom shouldn’t have to manage the <em>organization system itself.</em></h2>
-    <p>Finding the charts, writing the instructions, assigning the jobs, remembering to remind everyone—it all becomes one more responsibility.</p>
-    <p>We prepare something useful before it ever reaches your door. Your family can start with a plan instead of asking Mom to create one.</p>
-  </section>
-
-  <section class="ofc-months" id="months" aria-labelledby="ofc-months-heading">
-    <div class="ofc-section-head">
-      <p class="ofc-eyebrow">THE FIRST THREE MONTHS</p>
-      <h2 id="ofc-months-heading">Different challenges. <em>One simple idea.</em></h2>
-      <p>Each month solves a real problem with one practical printed tool. These three designs are available to explore while we test the subscription.</p>
-    </div>
-    <div class="ofc-month-grid">
-      {ready.map((m) => (
-        <article class="ofc-month" style={`--month-color:${m.color}`}>
-          <div class="ofc-month-art">
-            <div class="ofc-month-art-meta"><span>{m.month.toUpperCase()} {m.year}</span><span>ORGANIZED FAMILY CLUB</span></div>
-            {m.kind === 'ownership' ? (
-              <div class="ofc-art-sheet ofc-art-ownership">
-                <p>OUR FAMILY <em>OWNERSHIP PLAN</em></p>
-                <div><strong>ONE WHOLE JOB</strong><span>ONE CLEAR OWNER</span></div>
-                <div><strong>WHEN IT HAPPENS</strong><span>WHAT FINISHED MEANS</span></div>
-                <div><strong>EVERYONE HAS A PART</strong><span>WITHOUT MORE REMINDING</span></div>
-              </div>
-            ) : m.kind === 'christmas' ? (
-              <div class="ofc-art-sheet ofc-art-christmas">
-                <p>YOUR CHRISTMAS <em>MISSION</em></p>
-                <ol><li>Choose someone to surprise</li><li>Make a card</li><li>Deliver your kindness</li></ol>
-                <div class="ofc-christmas-note">A little Christmas kindness ♡</div>
-              </div>
-            ) : (
-              <div class="ofc-art-sheet ofc-art-habits">
-                <p>OUR FAMILY <em>HABITS</em></p>
-                <div class="ofc-mini-card"><span>WHEN THIS HAPPENS</span><strong>After breakfast…</strong><span>HERE’S WHAT I DO NEXT</span><strong>I put my dishes away.</strong></div>
-                <div class="ofc-mini-card"><span>WHEN THIS HAPPENS</span><strong>After I get dressed…</strong><span>HERE’S WHAT I DO NEXT</span><strong>I put my pajamas away.</strong></div>
-              </div>
-            )}
-            <div class="ofc-art-caption">ILLUSTRATIVE PRODUCT PREVIEW</div>
-          </div>
-          <div class="ofc-month-copy">
-            <p class="ofc-month-eyebrow">{m.eyebrow}</p>
-            <h3>{m.title}</h3>
-            <p>{m.description}</p>
-            <p class="ofc-outcome">{m.outcome}</p>
-            <a href={m.url} class="ofc-text-link" data-cta={`club-preview-${m.kind}`}>{m.link} <span aria-hidden="true">→</span></a>
-          </div>
-        </article>
-      ))}
-    </div>
-    <p class="ofc-disclaimer">Explore the working previews using sample households. They are product prototypes, not evidence that an order has been mailed or a subscription is available.</p>
-  </section>
-
-  <section class="ofc-method" id="how" aria-labelledby="ofc-how-heading">
-    <div class="ofc-method-copy">
-      <p class="ofc-eyebrow">A PHYSICAL TOOL FIRST</p>
-      <h2 id="ofc-how-heading">Prepared for your family. <em>Already done.</em></h2>
-      <div class="ofc-method-steps">
-        <div><span>01</span><div><h3>Tell us about your family once.</h3><p>Names, children’s ages, and a few details that actually make the tools more useful.</p></div></div>
-        <div><span>02</span><div><h3>We prepare one useful tool.</h3><p>A clear, practical resource for that month’s real-life challenge—not a blank worksheet to finish yourself.</p></div></div>
-        <div><span>03</span><div><h3>It arrives ready to use.</h3><p>The planned subscription brings one premium printed tool to your mailbox, with a short note from Megan.</p></div></div>
-        <div><span>04</span><div><h3>Adjust it only when you want.</h3><p>Your digital version can help you make small changes or reprint. It isn’t another assignment.</p></div></div>
-      </div>
-      <p class="ofc-testing">We’re currently validating the printing, personalization and mailing process. Fully automated production is the goal, not a capability we’re claiming is live today.</p>
-    </div>
-    <figure class="ofc-method-photo"><img src="/images/club/club-dad-son-dishes.webp" alt="A father helping his young son wash dishes together at the kitchen sink" loading="lazy" width="1200" height="800" /><figcaption>A home where everyone knows the plan and plays a part.</figcaption></figure>
-  </section>
-
-  <section class="ofc-next" aria-labelledby="ofc-next-heading">
-    <div class="ofc-section-head"><p class="ofc-eyebrow">A LOOK AT WHAT’S AHEAD</p><h2 id="ofc-next-heading">One small improvement <em>each month.</em></h2><p>No catch-up. No coursework. Join in any month and use what helps your family right now.</p></div>
-    <div class="ofc-next-grid">{upcoming.map(([month,title,description],i)=><div class="ofc-next-item"><span>{String(i+4).padStart(2,'0')} · {month}</span><div><h3>{title}</h3><p>{description}</p>{month === "February" && <a href="/club/february-preview/" class="ofc-text-link">Preview February’s connection cards →</a>}{month === "March" && <a href="/club/march-preview/" class="ofc-text-link">Preview March’s spring prep plan →</a>}{month === "April" && <a href="/club/april-preview/" class="ofc-text-link">Preview April’s dinner captain plan →</a>}{month === "May" && <a href="/club/may-preview/" class="ofc-text-link">Preview May’s illustrated summer rhythm →</a>}{month === "June" && <a href="/club/june-preview/" class="ofc-text-link">Preview June’s snack station →</a>}{month === "July" && <a href="/club/july-preview/" class="ofc-text-link">Preview July’s activity board →</a>}{month === "August" && <a href="/club/august-preview/" class="ofc-text-link">Preview August’s school routines →</a>}</div></div>)}</div>
-    <p class="ofc-disclaimer">Future topics are a working roadmap, not finalized mailer designs. We’ll refine them based on what actually helps families.</p>
-  </section>
-
-  <section class="ofc-calendar" aria-labelledby="ofc-calendar-heading">
-    <img src="/images/site/calendar-cutout-720.webp" width="720" height="1058" loading="lazy" alt="Organized Mom Collective weekly wall calendar" />
-    <div><p class="ofc-eyebrow">TWO PLACES. ONE FAMILY SYSTEM.</p><h2 id="ofc-calendar-heading">The calendar shows the plan. <em>The Club helps the family own it.</em></h2><p><strong>The wall calendar</strong> helps everyone see the week—appointments, meals, and family plans.</p><p><strong>The Club</strong> helps everyone share the doing with a ready-to-use, personalized resource each month.</p><p>They work beautifully together. Neither requires the other.</p><a href="/calendar" class="ofc-text-link">Explore the wall calendar →</a></div>
-  </section>
-
-  <section class="ofc-family" aria-labelledby="ofc-family-heading">
-    <img src="/images/site/mark-megan-family-story-1200.webp" width="1200" height="1200" alt="The Organized Mom Collective founding family outdoors" loading="lazy" />
-    <div><p class="ofc-eyebrow">FROM OUR FAMILY TO YOURS</p><h2 id="ofc-family-heading">More hands helping. <em>Less to carry.</em></h2><p>We started making family organization tools because the work of remembering, planning, and following up kept falling on one person.</p><p>Mark builds the systems. Megan makes sure they are realistic for busy families. Our aim is to make the next helpful step ready before Mom needs to figure it out.</p><p><strong>Organized moms raise organized families.</strong> Not because they do it all, but because everyone learns to carry their part.</p><a href="/our-story" class="ofc-text-link">Read our story →</a></div>
-  </section>
-
-  <section class="ofc-faq" id="faq" aria-labelledby="ofc-faq-heading"><p class="ofc-eyebrow">GOOD QUESTIONS</p><h2 id="ofc-faq-heading">Before you join</h2><div>{faqs.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
-
-  <section class="ofc-close" aria-labelledby="ofc-close-heading">
-    <p class="ofc-eyebrow">ORGANIZED FAMILY CLUB</p>
-    <h2 id="ofc-close-heading">One useful tool. <em>Every month.</em></h2>
-    <p class="ofc-close-lead">Prepared for your family and delivered to your door.</p>
-    <p class="ofc-price">$5 <span>/ month · planned</span></p>
-    <p class="ofc-notice">Enrollment isn’t open yet. We’re validating print quality, personalized fulfillment, billing, and the final mailing cost before taking subscriptions.</p>
-    <div class="ofc-close-actions"><a href="#months" class="ofc-button">Explore the working monthly designs →</a><a class="ofc-text-link" href="/support">Ask us a question →</a></div>
-  </section>
-
-  <footer class="ofc-footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
+ <header class="ofc-nav">
+  <a href="/" aria-label="Organized Mom Collective home" class="ofc-logo"><img src="/brand/omc-badge.png" alt="" width="52" height="52"/><span>Organized Family Club</span></a>
+  <nav aria-label="Page navigation"><a href="#inside">What you get</a><a href="#how">How it works</a><a href="#questions">Questions</a><a href="/club/dashboard" class="ofc-member-link">Member kits ↗</a></nav>
+ </header>
+ <section class="ofc-hero" aria-labelledby="ofc-heading">
+  <div class="ofc-hero-copy">
+   <p class="ofc-eyebrow">ORGANIZED FAMILY CLUB · MONTHLY FAMILY MAIL</p>
+   <h1 id="ofc-heading">Less for Mom to manage. <em>More for the family to own.</em></h1>
+   <p class="ofc-lead">We make the plan. Your family makes it happen.</p>
+   <p>One beautifully prepared, personalized family tool delivered to your mailbox each month. So everyone can start taking more responsibility without you having to figure it all out.</p>
+   <div class="ofc-hero-cta"><a href="#inside" class="ofc-button">See what comes in the mail <span aria-hidden="true">→</span></a></div>
+   <p class="ofc-availability">Enrollment is not open yet. <a href="/support">Ask about early access →</a></p>
+  </div>
+  <div class="ofc-hero-art" aria-label="Illustration of a flat envelope holding the monthly family plan">
+   <div class="ofc-postmark">ONE FAMILY. ONE USEFUL TOOL.</div>
+   <div class="ofc-mail-back"></div>
+   <div class="ofc-paper ofc-paper-back"><span>PERSONALIZED FOR YOUR FAMILY</span><i></i><i></i><i></i></div>
+   <div class="ofc-paper ofc-paper-front"><small>ORGANIZED FAMILY CLUB · NOVEMBER</small><strong>Our family.<br /><em>Our team.</em></strong><div class="ofc-paper-line">ONE JOB · ONE OWNER</div><div class="ofc-paper-line">A READY-TO-USE PLAN</div><div class="ofc-paper-line">MADE FOR YOUR FAMILY</div><span>PREPARED FOR YOU</span></div>
+   <div class="ofc-envelope"><span>GOOD THINGS COME IN THE MAIL.</span></div>
+  </div>
+ </section>
+ <section class="ofc-intro" aria-labelledby="ofc-problem">
+  <p class="ofc-eyebrow">SOUND FAMILIAR?</p>
+  <h2 id="ofc-problem">Everyone helps. <em>But you're still managing everything.</em></h2>
+  <p>You remember what needs to happen. You make the plans. You assign the jobs. You remind everyone to follow through.</p>
+  <p>Even when your family pitches in, you're the one keeping it all running. And most organization tools give you one more thing to set up.</p>
+  <p><strong>What if someone did that part for you?</strong></p>
+ </section>
+ <section class="ofc-solution" aria-labelledby="ofc-solution-heading">
+  <div class="ofc-solution-copy">
+   <p class="ofc-eyebrow">ONE LITTLE ENVELOPE. ONE LESS THING TO FIGURE OUT.</p>
+   <h2 id="ofc-solution-heading">We make the plan. <em>Your family makes it happen.</em></h2>
+   <p>Every month, we tackle one real family challenge with a practical tool prepared for your household.</p>
+   <p>Not a blank worksheet. Not another complicated system. Names, realistic responsibilities, and clear next steps already worked out.</p>
+   <p><strong>Open it. Put it to use. Let your family take it from there.</strong></p>
+  </div>
+  <figure class="ofc-solution-photo"><img src="/images/club/club-dad-son-dishes.webp" alt="Father and son sharing responsibility for dishes at the kitchen sink" loading="lazy" width="1200" height="800"/></figure>
+ </section>
+ <section class="ofc-demo" aria-labelledby="ofc-demo-heading">
+  <p class="ofc-eyebrow">WHAT SHARING THE LOAD CAN LOOK LIKE</p>
+  <h2 id="ofc-demo-heading">Less reminding. <em>More ownership.</em></h2>
+  <div class="ofc-demo-grid">
+   <div class="ofc-demo-panel"><span>BEFORE</span><p>“Can someone unload the dishwasher?”</p><p>“Did you finish cleaning up?”</p><p>“Who's supposed to do this?”</p></div>
+   <div class="ofc-demo-panel ofc-demo-after"><span>WITH A PREPARED FAMILY PLAN</span><p><strong>Andrew:</strong> Unload the dishwasher after breakfast.</p><p><strong>Philip:</strong> Clear the dinner table.</p><p><strong>Dad:</strong> Own Wednesday dinner, start to finish.</p></div>
+  </div>
+  <p class="ofc-demo-caption">Illustrative household example. Actual assignments are tailored to the family.</p>
+ </section>
+ <section class="ofc-months" id="inside" aria-labelledby="ofc-months-heading">
+  <div class="ofc-section-head"><p class="ofc-eyebrow">A PEEK INSIDE THE CLUB</p><h2 id="ofc-months-heading">Real solutions for <em>real family life.</em></h2><p>One useful tool for each month's everyday challenge. Here are three examples of what we're building.</p></div>
+  <div class="ofc-month-grid">
+   {samples.map((m)=><article class="ofc-month" style={`--month-color:${m.shade}`}>
+    <div class="ofc-month-art"><div class="ofc-month-art-meta"><span>{m.month}</span><span>ORGANIZED FAMILY CLUB</span></div><div class="ofc-art-sheet ofc-art-ownership"><p>OUR FAMILY <em>{m.title.replace('Our Family ','').toUpperCase()}</em></p><div><strong>{m.benefit}</strong><span>PREPARED FOR YOUR FAMILY</span></div><div><strong>ONE USEFUL TOOL</strong><span>READY TO USE</span></div></div><div class="ofc-art-caption">ILLUSTRATIVE PREVIEW</div></div>
+    <div class="ofc-month-copy"><p class="ofc-month-eyebrow">{m.benefit}</p><h3>{m.title}</h3><p>{m.detail}</p><a href={m.url} class="ofc-text-link">{m.label} →</a></div>
+   </article>)}
+  </div>
+  <p class="ofc-disclaimer">These are working product previews using sample households. Printing and fulfillment are still being validated.</p>
+  <p class="ofc-month-summary">And that's just the beginning. From school mornings to family dinners, each month offers a fresh way to share the load. No catching up and no extra homework.</p>
+ </section>
+ <section class="ofc-method" id="how" aria-labelledby="ofc-how-heading">
+  <div class="ofc-method-copy"><p class="ofc-eyebrow">SIMPLE FROM THE START</p><h2 id="ofc-how-heading">We do the prep work. <em>You get the good part.</em></h2>
+   <div class="ofc-method-steps">
+    <div><span>01</span><div><h3>Tell us about your family once.</h3><p>Just a few details like names and ages, so each resource fits your household.</p></div></div>
+    <div><span>02</span><div><h3>We prepare your monthly tool.</h3><p>We suggest practical plans and age-appropriate responsibilities. Review or adjust them only if you want.</p></div></div>
+    <div><span>03</span><div><h3>Happy mail arrives.</h3><p>Your personalized printed plan arrives ready to use, with a digital version for reviewing or reprinting.</p></div></div>
+   </div><p><strong>No printer needed. No blank pages. No monthly homework.</strong></p>
+  </div>
+  <figure class="ofc-method-photo"><img src="/images/site/calendar-cutout-720.webp" alt="Organized Mom Collective weekly wall calendar" loading="lazy" width="720" height="1058"/><figcaption>One small step toward a home that runs together.</figcaption></figure>
+ </section>
+ <section class="ofc-calendar" aria-labelledby="ofc-calendar-heading">
+  <img src="/images/site/calendar-cutout-720.webp" width="720" height="1058" loading="lazy" alt="Organized Mom Collective wall calendar"/>
+  <div><p class="ofc-eyebrow">GREAT TOGETHER. USEFUL APART.</p><h2 id="ofc-calendar-heading">The calendar shows the plan. <em>The Club helps your family own it.</em></h2><p>The wall calendar helps everyone see what's happening. The Club helps everyone share responsibility for getting it done.</p><p>They work beautifully together, but you don't need the calendar to enjoy the Club.</p><a href="/calendar" class="ofc-text-link">Explore the wall calendar →</a></div>
+ </section>
+ <section class="ofc-offer" aria-labelledby="ofc-offer-heading">
+  <p class="ofc-eyebrow">YOUR MONTHLY FAMILY MAIL</p>
+  <h2 id="ofc-offer-heading">A little less on your shoulders. <em>Every month.</em></h2>
+  <p>One personalized printed family tool, delivered to your home, plus a digital version to review or reprint. One monthly problem. One useful solution.</p>
+  <p class="ofc-offer-price">$6.39 <span>/ month</span> <small>or $59/year</small></p>
+  <p class="ofc-offer-note">Proposed pricing, subject to fulfillment testing. Enrollment has not opened.</p>
+  <a href="/support" class="ofc-button">Ask about early access →</a>
+ </section>
+ <section class="ofc-family" aria-labelledby="ofc-family-heading">
+  <img src="/images/site/mark-megan-family-story-1200.webp" width="1200" height="1200" alt="The Organized Mom Collective founding family outdoors" loading="lazy"/>
+  <div><p class="ofc-eyebrow">FROM OUR FAMILY TO YOURS</p><h2 id="ofc-family-heading">Organized moms <em>shouldn't have to do it all.</em></h2><p>We believe an organized home isn't one where Mom has everything under control. It's one where the whole family learns to notice, pitch in, and care for each other.</p><p>That's why we created the Club. Not to give Mom another system to manage, but to do some of the planning and preparation for her.</p><p><strong>Organized moms raise organized families.</strong></p><p><em>Mark &amp; Megan</em></p></div>
+ </section>
+ <section class="ofc-faq" id="questions" aria-labelledby="ofc-faq-heading"><p class="ofc-eyebrow">GOOD QUESTIONS</p><h2 id="ofc-faq-heading">Before you join</h2><div>{faqs.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
+ <section class="ofc-close" aria-labelledby="ofc-close-heading"><p class="ofc-eyebrow">ORGANIZED FAMILY CLUB</p><h2 id="ofc-close-heading">You don't have to organize <em>everything yourself.</em></h2><p class="ofc-close-lead">A little help from us. A little more ownership from your family.</p><p class="ofc-notice">We're getting ready to open enrollment. Personalized printing and mailing are still in testing.</p><div class="ofc-close-actions"><a class="ofc-button" href="/support">Ask about early access →</a><a class="ofc-text-link" href="#inside">See the monthly tools →</a></div></section>
+ <footer class="ofc-footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
 </div>
 <style>
 .ofc{--ink:#454545;--soft:#686868;--line:#d8d9d6;color:var(--ink);font-family:'Montserrat Variable',Montserrat,Arial,sans-serif;line-height:1.6}
@@ -211,5 +129,11 @@ const faqs = [
 @media(max-width:1070px){.ofc-month-grid{grid-template-columns:1fr 1fr}.ofc-month:last-child{grid-column:1/-1;max-width:580px;width:100%;margin:auto}.ofc-hero{grid-template-columns:1fr}.ofc-hero-art{min-height:440px}.ofc-paper{width:35%;height:75%;top:9%}.ofc-method{grid-template-columns:1fr}.ofc-method-photo{max-width:650px}.ofc-method-photo img{aspect-ratio:3/2}.ofc-next-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.ofc-nav{align-items:flex-start}.ofc-nav nav{gap:11px 18px;justify-content:flex-end}.ofc-nav nav a{font-size:.75rem}.ofc-hero-copy{padding:45px 25px}.ofc-hero-art{min-height:365px}.ofc-paper{width:52%;height:75%;padding:19px}.ofc-paper-front strong{font-size:1.5rem}.ofc-month-grid{grid-template-columns:1fr}.ofc-month:last-child{grid-column:auto;max-width:none}.ofc-method{padding:45px 24px}.ofc-next-grid{grid-template-columns:1fr}.ofc-calendar,.ofc-family{grid-template-columns:1fr}.ofc-calendar{padding:48px 24px}.ofc-calendar img{max-height:340px}.ofc-family{padding:75px 25px}.ofc-intro{padding:75px 25px}.ofc-months{padding:35px 18px 75px}.ofc-next{padding:75px 24px}.ofc-faq{padding-bottom:75px}.ofc-close{padding:65px 22px}}
 @media(max-width:460px){.ofc-nav{flex-direction:column;gap:12px}.ofc-nav nav{justify-content:flex-start}.ofc-hero h1{font-size:2.65rem}.ofc-hero-art{min-height:320px}.ofc-paper{width:58%;height:75%;padding:14px;gap:9px}.ofc-paper-front strong{font-size:1.25rem}.ofc-art-sheet{height:300px}.ofc-month-art{height:392px}.ofc-section-head{text-align:left}.ofc-close-actions .ofc-button{width:100%}}
+
+.ofc-availability{font-size:.82rem!important;margin-top:13px!important;color:#666}.ofc-availability a{font-weight:700;text-underline-offset:3px}
+.ofc-solution{margin:0 clamp(14px,2.5vw,36px);display:grid;grid-template-columns:1fr 1fr;align-items:center;background:#e7ece5;gap:clamp(25px,5vw,90px)}.ofc-solution-copy{padding:clamp(35px,6vw,90px)}.ofc-solution-copy h2{margin:17px 0 30px}.ofc-solution-copy p:not(.ofc-eyebrow){margin-bottom:17px;font-size:1.05rem}.ofc-solution-photo{margin:0;height:100%}.ofc-solution-photo img{width:100%;height:100%;min-height:460px;object-fit:cover}
+.ofc-demo{text-align:center;max-width:1010px;margin:auto;padding:100px 25px}.ofc-demo h2{margin:14px 0 42px}.ofc-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;text-align:left}.ofc-demo-panel{padding:34px 36px;background:#f3f3f1}.ofc-demo-panel>span{font-size:.69rem;letter-spacing:.13em;font-weight:700}.ofc-demo-panel p{font-family:Georgia,serif;font-size:1.1rem;margin-top:22px}.ofc-demo-after{background:#dce8e2}.ofc-demo-caption{font-size:.76rem;color:#686868;margin-top:18px!important}
+.ofc-month-summary{text-align:center;max-width:730px;margin:34px auto 0!important;font:italic 1.25rem/1.6 Georgia,serif}.ofc-offer{text-align:center;background:#cddde1;margin:0 clamp(14px,2.5vw,36px);padding:85px 25px}.ofc-offer h2{max-width:900px;margin:18px auto 22px}.ofc-offer>p:not(.ofc-eyebrow){max-width:620px;margin:0 auto 22px;font-size:1.05rem}.ofc-offer .ofc-offer-price{font:400 3.2rem Georgia,serif!important;margin:24px auto 7px!important}.ofc-offer-price span{font:400 .95rem Montserrat,Arial,sans-serif}.ofc-offer-price small{font:400 1.2rem Georgia,serif;display:block;margin-top:10px}.ofc-offer .ofc-offer-note{font-size:.82rem!important;color:#525d60;margin-bottom:26px!important}
+@media(max-width:720px){.ofc-solution{grid-template-columns:1fr}.ofc-solution-copy{padding:44px 24px}.ofc-solution-photo img{min-height:280px;max-height:420px}.ofc-demo{padding:70px 20px}.ofc-demo-grid{grid-template-columns:1fr}.ofc-demo-panel{padding:25px}.ofc-offer{padding:65px 22px}}
 </style>
 </PublicLayout>
