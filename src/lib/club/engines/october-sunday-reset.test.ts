@@ -65,3 +65,40 @@ describe('October Sunday Reset plan', () => {
     expect(hasChanges(t, members)).toBe(true);
   });
 });
+
+import { planFingerprint, roleSuggestions, setFallJob, setName, setRole, setTrigger } from './october-sunday-reset';
+
+describe('October plan edits from the mobile sheets', () => {
+  const members = planMembers(family);
+  it('suggests the prepared role first, then two that fit the age', () => {
+    const s = roleSuggestions(members[2], 2);
+    expect(s[0]).toBe(preparedState(members).assignments.sofia);
+    expect(s).toHaveLength(3);
+    expect(new Set(s).size).toBe(3);
+    expect(roleSuggestions({ id: 't', firstName: 'Tot', kind: 'child', birthYear: 2024 }, 0)[0]).toMatch(/picture calendar/);
+  });
+  it('changes the rhythm and drops any typed cue', () => {
+    const s = setTrigger({ ...preparedState(members), text: { cue: 'old' } }, '  Sunday   evening ');
+    expect(s.trigger).toBe('Sunday evening');
+    expect(s.text?.cue).toBeUndefined();
+    expect(setTrigger(preparedState(members), '   ').trigger).toBe(DEFAULT_TRIGGER);
+  });
+  it('renames, clears a rename, reassigns and removes', () => {
+    const s = preparedState(members);
+    setName(s, 'luis', 'Papa');
+    expect(displayName(members[1], members, s.names)).toBe('Papa');
+    setName(s, 'luis', ' ');
+    expect(displayName(members[1], members, s.names)).toBe('Dad');
+    setRole(s, 'sofia', 'Pack my violin');
+    setFallJob(s, 'gear', { ownerId: 'sofia', removed: true });
+    expect(s.assignments.sofia).toBe('Pack my violin');
+    expect(s.fallJobs.find((j) => j.id === 'gear')).toMatchObject({ ownerId: 'sofia', removed: true });
+  });
+  it('fingerprints what prints, regardless of key order', () => {
+    const a = preparedState(members);
+    const b = structuredClone(a);
+    b.assignments = Object.fromEntries(Object.entries(b.assignments).reverse());
+    expect(planFingerprint(a)).toBe(planFingerprint(b));
+    expect(planFingerprint(setTrigger(b, 'Sunday evening'))).not.toBe(planFingerprint(a));
+  });
+});

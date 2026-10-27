@@ -132,3 +132,74 @@ export const hasChanges = (state: PlanState, members: readonly PlanMember[]) => 
   const fall = (jobs: FallJob[]) => JSON.stringify(jobs.map(({ id, title, description, ownerId, removed }) => [id, title, description, ownerId, Boolean(removed)]));
   return fall(state.fallJobs) !== fall(prepared.fallJobs);
 };
+
+/** The three Sunday steps, as printed on the front (fixed content: shown, never edited). */
+export const SUNDAY_STEPS = [
+  { title: 'Look ahead', text: 'What’s coming up this week? Look at our wall calendar.', icon: '/images/club/october/what-is-coming.webp' },
+  { title: 'Prepare early', text: 'What can we pack, check, or prepare before we need it?', icon: '/images/club/october/what-will-I-need.webp' },
+  { title: 'Share the work', text: 'Who owns each step? Ask for help when needed.', icon: '/images/club/october/what-can-I-prepare.webp' },
+] as const;
+
+/** Sensible weekly parts for this person: the prepared one first, then two more that fit their age. */
+export const roleSuggestions = (m: PlanMember, i: number): string[] => {
+  const age = ageOf(m);
+  const more =
+    m.kind === 'adult'
+      ? m.isAccountHolder
+        ? ['Lead our Sunday check-in and make sure everyone has a part.', 'Look ahead for appointments, school events, and deadlines.']
+        : ['Check the week’s activities and plan rides and gear.', 'Help the kids get their bags and belongings ready.']
+      : age <= 5
+        ? ['Choose my clothes for the week with a grown-up.', 'Put my shoes and bag by the door.']
+        : age <= 10
+          ? ['Check school and activity days; spot what I need.', 'Prepare my clothes, bag, and belongings for the week.', 'Pack my bag the night before and ask for help early.']
+          : ['Plan my week and pack what I need.', 'Tell someone early what I need help with.'];
+  return [...new Set([weeklyRole(m, i), ...more])].slice(0, 3);
+};
+
+/** Edits from the mobile sheets. Each returns the same state object, changed. */
+export const setTrigger = (s: PlanState, trigger: string) => {
+  s.trigger = trigger.replace(/\s+/g, ' ').trim().slice(0, 85) || DEFAULT_TRIGGER;
+  if (s.text) delete s.text.cue;
+  return s;
+};
+export const setRole = (s: PlanState, memberId: string, role: string) => {
+  s.assignments[memberId] = role.replace(/\s+/g, ' ').slice(0, 105);
+  return s;
+};
+export const setName = (s: PlanState, memberId: string, name: string) => {
+  const clean = name.replace(/\s+/g, ' ').trim().slice(0, 35);
+  if (clean) (s.names ??= {})[memberId] = clean;
+  else if (s.names) delete s.names[memberId];
+  return s;
+};
+export const setFallJob = (s: PlanState, jobId: string, patch: Partial<Pick<FallJob, 'title' | 'description' | 'ownerId' | 'removed'>>) => {
+  const job = s.fallJobs.find((j) => j.id === jobId);
+  if (job) Object.assign(job, patch);
+  return s;
+};
+
+/** What she approves: everything that prints. Same plan, same fingerprint. */
+export const planFingerprint = (s: PlanState) =>
+  JSON.stringify([
+    s.trigger,
+    Object.entries(s.assignments).sort(),
+    s.fallJobs.map(({ id, title, description, ownerId, removed }) => [id, title, description, ownerId, Boolean(removed)]),
+    Object.entries(s.text ?? {}).sort(),
+    Object.entries(s.names ?? {}).sort(),
+  ]);
+
+/**
+ * The live plan on a page, published by the printable (OctoberSundayReset.astro) as `.osr` element's `osrPlan`.
+ * It fires `osr:change` (bubbling) after every repaint once a family is loaded.
+ */
+export interface OsrPlan {
+  ready: () => boolean;
+  members: () => PlanMember[];
+  state: () => PlanState;
+  nameOf: (m: PlanMember) => string;
+  /** Change the plan; it repaints the printable and saves to this tab (unless paused). */
+  update: (change: (s: PlanState) => void) => void;
+  replace: (s: PlanState) => void;
+  /** Pause saving (a one-time copy) or resume it (saves the current plan). */
+  setPersist: (on: boolean) => void;
+}
