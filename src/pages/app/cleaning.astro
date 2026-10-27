@@ -1,0 +1,10 @@
+---
+import Layout from '../../layouts/AppLayout.astro';
+import TodayApp from '../../components/TodayApp';
+---
+<Layout title="Cleaning" description="Your existing Daily Reset and cleaning companion.">
+  <div class="mx-auto max-w-3xl">
+    <div class="mb-7"><p class="label text-[#71866c]">CLEANING COMPANION</p><p class="mt-2 text-sm text-warm-soft">Same daily rhythm. Your saved progress stays on this device.</p></div>
+    <TodayApp client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></TodayApp>
+  </div>
+</Layout>
