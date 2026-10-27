@@ -4,7 +4,7 @@ import { kitBySlug } from '../data/club/kits';
 import { monthLabel } from '../data/club/labels';
 import type { ClubMe } from '../lib/club/store';
 const previewByMonth: Record<string, string> = {
-  '2026-11': '/club/worksheet-generator/',
+  '2026-11': '/app/november/',
   '2026-12': '/club/december-preview/',
   '2027-01': '/preview/january-habit-cards',
   '2027-02': '/club/february-preview/',
@@ -24,6 +24,6 @@ export default function AppKitLibrary() {
   return <div className="mt-5 grid gap-3 sm:grid-cols-2">{me.kits.map(({slug})=>{
     const k=kitBySlug(slug);
     if(!k) return null;
-    return <article key={slug} className="rounded-2xl border border-warm-rule bg-white p-5"><p className="label text-[#71866c]">{monthLabel(k.month)}</p><h3 className="mt-2 font-serif text-[1.25rem] leading-snug">{k.theme}</h3><p className="mt-2 text-sm text-warm-soft">{k.shift}</p>{previewByMonth[k.month] ? <a href={previewByMonth[k.month]} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#536e4e] underline underline-offset-4">Open monthly preview →</a> : <span className="mt-4 inline-block text-xs font-semibold text-[#71866c]">PREVIEW COMING SOON</span>}</article>;
+    return <article key={slug} className="rounded-2xl border border-warm-rule bg-white p-5"><p className="label text-[#71866c]">{monthLabel(k.month)}</p><h3 className="mt-2 font-serif text-[1.25rem] leading-snug">{k.theme}</h3><p className="mt-2 text-sm text-warm-soft">{k.shift}</p>{previewByMonth[k.month] ? <a href={previewByMonth[k.month]} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#536e4e] underline underline-offset-4">Review monthly plan →</a> : <span className="mt-4 inline-block text-xs font-semibold text-[#71866c]">PREVIEW COMING SOON</span>}</article>;
   })}</div>;
 }
