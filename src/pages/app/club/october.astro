@@ -634,7 +634,7 @@ if(kit){
       const roleLabel=mobileFlow.querySelector<HTMLElement>('[data-flow-roles]');
       if(roleLabel)roleLabel.textContent=roles.length?Array.from(roles).slice(0,3).map(e=>e.querySelector('strong')?.textContent?.trim()).filter(Boolean).join(' · ')||'Prepared family assignments':'Prepared family assignments';
     };
-    const openEditor=()=>kit.querySelector<HTMLButtonElement>('[data-open-editor]')?.click();
+    const openEditor=()=>{showPanel('proof');kit.querySelector<HTMLButtonElement>('[data-open-editor]')?.click()};
     mobileFlow.querySelectorAll<HTMLButtonElement>('[data-flow-edit]').forEach(b=>b.addEventListener('click',openEditor));
     mobileFlow.querySelectorAll<HTMLButtonElement>('[data-flow-print]').forEach(b=>b.addEventListener('click',()=>{
       kit.querySelector<HTMLButtonElement>('[data-osr-print]')?.click();
@@ -651,12 +651,28 @@ if(kit){
       showPanel('review');
       openEditor();
     });
-    kit.querySelector<HTMLDialogElement>('[data-osr-editor]')?.addEventListener('close',updateReview);
+    kit.querySelector<HTMLDialogElement>('[data-osr-editor]')?.addEventListener('close',()=>{updateReview();if(isMobile())showPanel('review')});
     window.addEventListener('resize',()=>{if(!isMobile()&&originalSwitch&&parentSwitch&&originalSwitch.parentElement===proofSlot){
       parentSwitch.appendChild(originalSwitch);
       if(originalViewer&&parentViewer)parentViewer.insertBefore(originalViewer,originalClose);
       panels.forEach(panel=>panel.hidden=panel.dataset.flowPanel!=='review');
     }});
+    // The original full-size printable must be in its normal print container,
+    // regardless of which mobile panel is currently shown.
+    let restoreProof=false;
+    window.addEventListener('beforeprint',()=>{
+      restoreProof=originalViewer?.parentElement===proofSlot;
+      if(originalSwitch&&parentSwitch)parentSwitch.appendChild(originalSwitch);
+      if(originalViewer&&parentViewer)parentViewer.insertBefore(originalViewer,originalClose);
+    });
+    window.addEventListener('afterprint',()=>{
+      if(restoreProof&&isMobile()&&proofSlot){
+        if(originalSwitch)proofSlot.appendChild(originalSwitch);
+        if(originalViewer)proofSlot.appendChild(originalViewer);
+      }
+      restoreProof=false;
+      window.dispatchEvent(new Event('resize'));
+    });
     updateReview();
   }
   const section=kit.querySelector<HTMLElement>('[data-edit-deadline]');
