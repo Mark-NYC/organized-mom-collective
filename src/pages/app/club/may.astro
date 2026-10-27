@@ -1,0 +1,63 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import MaySummerRhythm from '../../../components/club/MaySummerRhythm.astro';
+import MayPlanMobile from '../../../components/club/MayPlanMobile.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const kit=kits.find(k=>k.month==='2027-05');
+if(!kit) throw new Error('May kit missing');
+const deadline=clubEditingDeadline(kit.month);
+const storageKey='omc:club:may-app:v1';
+---
+<AppLayout title="May Summer Day Rhythm">
+ <ClubPlanShell class="may-plan family-brand" kitSlug={kit.slug} month="May" storageKey={storageKey}>
+  <aside class="may-rail" slot="desktop">
+   <a href="/app/club">← Back to Club</a>
+   <p class="may-kicker">MAY · KIT PREVIEW</p>
+   <h1>Our <em>Summer Day</em></h1>
+   <p>A little structure. Plenty of freedom. Give your kids a place to check what comes next.</p>
+   <p class="may-source" data-plan-source></p>
+   <p class="may-deadline" data-deadline={deadline}>Editing window</p>
+   <button type="button" data-may-edit>Make changes</button>
+   <button type="button" data-plan-print>Download and print</button>
+   <p>Preview only. Changes stay in this browser tab. Nothing is submitted or mailed yet.</p>
+  </aside>
+  <div class="may-proof" slot="printable" data-plan-proof-body>
+   <div class="may-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+    <MaySummerRhythm storageKey={storageKey} planMode={true}/>
+   </div>
+  </div>
+  <MayPlanMobile slot="mobile" deadline={deadline}/>
+ </ClubPlanShell>
+</AppLayout>
+<style is:global>
+.may-rail{display:none}.may-plan .msr{padding:0;max-width:none}.may-plan .msr-intro,.may-plan .msr-editor,.may-plan .msr-floating-edit{display:none!important}.may-plan .msr-layout{display:block}.may-plan .msr-preview{padding:0}.may-plan .msr-dialog{z-index:100}.may-plan .msr-stage{margin:auto}
+@media screen and (min-width:1100px){
+ html:has(.may-plan),body:has(.may-plan){height:100%;overflow:hidden}
+ body:has(.may-plan) #main{width:100%;max-width:none;height:calc(100dvh - 64px);min-height:0;margin:0;padding:0;overflow:hidden}
+ .may-plan{display:grid;grid-template-columns:minmax(310px,375px) minmax(0,1fr);height:100%;min-height:0;background:#f0eee9;overflow:hidden}
+ .may-plan .may-rail{display:block;overflow-y:auto;min-height:0;background:#fffdfa;border-right:1px solid #dedbd2;padding:clamp(26px,4vh,48px) clamp(22px,2.7vw,42px) 40px}
+ .may-rail a{font-size:13px;color:#536e4e;font-weight:700}.may-kicker{margin-top:30px;font-size:11px;font-weight:700;letter-spacing:.15em;color:#71866c}.may-rail h1{font:400 39px/1.15 Georgia,serif;margin:12px 0 20px}.may-rail h1 em{color:#71866c}.may-rail p{font-size:13px;line-height:1.6}.may-source{margin:24px 0}.may-rail button{width:100%;min-height:51px;margin:0 0 12px;border:1px solid #9aab8f;background:white;color:#536e4e;border-radius:12px;font-weight:700;cursor:pointer}.may-rail button[data-plan-print]{background:#536e4e;color:white}
+ .may-plan .may-proof{height:100%;min-width:0;overflow:hidden}.may-plan .may-scroll{height:100%;overflow:auto;padding:32px;overscroll-behavior:contain}
+}
+@media print{.may-rail{display:none!important}}
+</style>
+<script>
+import { editingWindow } from '../../../lib/club/edition-status';
+import { onPlanFamily } from '../../../lib/club/plan/family';
+const root=document.querySelector<HTMLElement>('.may-plan');
+if(root){
+ onPlanFamily(root,result=>{const n=root.querySelector<HTMLElement>('[data-plan-source]');if(n)n.textContent=result.source==='sample' ? `Sample family: ${result.sampleLabel.replace('Sample: ','')}.` : `Prepared for ${result.household.displayName ?? 'your family'}.`});
+ const deadlineNode=root.querySelector<HTMLElement>('[data-deadline]');
+ const windowState=editingWindow(deadlineNode?.dataset.deadline ?? '',new Date());
+ if(deadlineNode) deadlineNode.textContent=windowState.text;
+ if(windowState.phase==='closed'){
+  const edit=root.querySelector<HTMLButtonElement>('[data-may-edit]');if(edit){edit.disabled=true;edit.textContent='Editing window closed'}
+  root.querySelectorAll<HTMLElement>('.msr [contenteditable]').forEach(el=>el.setAttribute('contenteditable','false'));
+  root.querySelectorAll<HTMLElement>('.msr [data-time], .msr [data-move-up], .msr [data-move-down], .msr [data-remove]').forEach(el=>{el.style.pointerEvents='none';el.setAttribute('tabindex','-1')});
+ }
+ root.querySelector('[data-may-edit]')?.addEventListener('click',()=>root.querySelector<HTMLButtonElement>('.msr [data-open-editor]')?.click());
+}
+</script>
