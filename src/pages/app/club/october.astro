@@ -454,6 +454,50 @@ const editDeadline = clubEditingDeadline('2027-10');
 @media print{
  .club-mobile-kit .kit-action-bar{position:static!important;box-shadow:none!important}
 }
+
+/* Printing must never inherit mobile preview clipping, tabs, grid sizing,
+   sticky controls or the desktop-only scaled page frames. Both sides use
+   the same native 816 x 1056 letter-sized print artwork on every device. */
+@media print {
+  @page { size:letter portrait; margin:0; }
+  html,body{width:8.5in!important;height:auto!important;overflow:visible!important;margin:0!important;padding:0!important;background:#fff!important}
+  body:has(.club-mobile-kit) #main{position:static!important;width:8.5in!important;max-width:none!important;height:auto!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important}
+  .club-mobile-kit,.club-mobile-kit .kit-viewer-wrap,
+  .club-mobile-kit .kit-artwork,.club-mobile-kit .osr,
+  .club-mobile-kit .osr-layout,.club-mobile-kit .osr-preview,
+  .club-mobile-kit .osr-stage,.club-mobile-kit .osr-pages,
+  .club-mobile-kit #osr-panel-reset{
+    display:block!important;position:static!important;float:none!important;
+    width:8.5in!important;max-width:none!important;height:auto!important;
+    min-height:0!important;max-height:none!important;
+    margin:0!important;padding:0!important;gap:0!important;
+    border:0!important;background:#fff!important;
+    overflow:visible!important;transform:none!important;
+    box-shadow:none!important;scrollbar-width:none!important;
+  }
+  .club-mobile-kit .kit-desktop-rail,.club-mobile-kit .kit-header,
+  .club-mobile-kit .kit-deadline,.club-mobile-kit .kit-action-bar,
+  .club-mobile-kit .kit-instructions,.club-mobile-kit .kit-approval-message,
+  .club-mobile-kit .kit-page-switch,.club-mobile-kit .kit-enlarge,
+  .club-mobile-kit .kit-viewer-close{display:none!important}
+  .club-mobile-kit .osr-front,.club-mobile-kit .osr-back{
+    display:flex!important;visibility:visible!important;
+  }
+  .club-mobile-kit .osr-paper{
+    display:flex!important;position:relative!important;
+    top:auto!important;left:auto!important;
+    width:8.5in!important;height:11in!important;max-width:none!important;
+    flex:none!important;margin:0!important;border:0!important;
+    padding:24px 51px 22px!important;
+    transform:none!important;
+    transform-origin:top left!important;
+    box-shadow:none!important;overflow:hidden!important;
+    break-after:page!important;page-break-after:always!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+  }
+  .club-mobile-kit .osr-paper:last-child{break-after:auto!important;page-break-after:auto!important}
+  .club-mobile-kit .osr-paper *{visibility:visible!important}
+}
 </style>
 <script>
 const kit=document.querySelector<HTMLElement>('.club-mobile-kit');
