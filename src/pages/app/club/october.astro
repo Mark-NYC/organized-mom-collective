@@ -3,7 +3,8 @@
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astro';
-const editDeadline = import.meta.env.PUBLIC_CLUB_OCTOBER_EDIT_DEADLINE ?? '';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+const editDeadline = clubEditingDeadline('2027-10');
 ---
 <AppLayout title="October Sunday Reset">
   <div class="club-mobile-kit family-brand">
@@ -244,7 +245,7 @@ if(kit){
       const minutes=Math.max(0,Math.ceil((deadline-Date.now())/60000));
       if(!minutes){
         if(status)status.textContent='Scheduled editing window ended.';
-        if(detail)detail.textContent='This preview does not automatically send PDFs or lock edits.';
+        if(detail)detail.textContent='PDF sending and automatic edit locking are not yet active.';
         if(box)box.hidden=true;
         return;
       }
