@@ -1,0 +1,39 @@
+---
+/**
+ * A Club plan page: the family gate, the month's desktop view, its printable (full-screen on request below
+ * 1100px) and its mobile plan screen, with shared printing. The month supplies four slots:
+ *   desktop  — the month's own desktop view (or nothing, if the printable component brings its own)
+ *   printable — the printable inside data-plan-proof-body / data-plan-proof-scroll wrappers
+ *   mobile   — a ClubPlanScreen with the month's sections
+ * Architecture: docs/club/PLAN_ARCHITECTURE.md.
+ */
+import ClubFamilyGate from './ClubFamilyGate.astro';
+import ClubPrintableProof from './ClubPrintableProof.astro';
+import ClubPrintStyles from './ClubPrintStyles.astro';
+
+interface Props {
+  kitSlug: string;
+  /** "October": used in the gate's messages. */
+  month: string;
+  /** The printable's sides for the full-screen Front/Back switch (none for a single sheet). */
+  sides?: string[];
+  storageKey?: string;
+  class?: string;
+}
+const { kitSlug, month, sides, storageKey, class: cls = '' } = Astro.props;
+---
+<div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={kitSlug} data-plan-month={month} data-plan-key={storageKey}>
+  <ClubFamilyGate />
+  <slot name="desktop" />
+  <ClubPrintableProof sides={sides}><slot name="printable" /></ClubPrintableProof>
+  <slot name="mobile" />
+</div>
+<ClubPrintStyles />
+<script>
+import { startPlanFamily } from '../../../lib/club/plan/family';
+import { mountPrintableProof } from '../../../lib/club/plan/proof';
+for (const root of document.querySelectorAll<HTMLElement>('.club-plan')) {
+  mountPrintableProof(root);
+  startPlanFamily(root);
+}
+</script>

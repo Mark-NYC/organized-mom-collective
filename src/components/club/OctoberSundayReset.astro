@@ -62,7 +62,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
    
    <div class="osr-stage" data-osr-stage>
     <div class="osr-pages" data-osr-pages>
-     <article class="osr-paper osr-front" data-osr-front>
+     <article class="osr-paper osr-front" data-osr-front data-plan-sheet="front">
       <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Sunday Reset</em></h2><span data-osr-family contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit family">Look ahead. Get ready. Share the work.</span></header>
       <section class="osr-cue"><span>OUR WEEKLY FAMILY RHYTHM</span><strong data-osr-cue contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit cue" >Sunday after lunch</strong><p>Spend 10–15 minutes with our wall calendar. Everyone looks ahead and prepares their part.</p></section>
       <p class="osr-sheet-caption">Every Sunday, three simple steps.</p><div class="osr-three">
@@ -75,7 +75,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
       <div class="osr-finish"><strong>WE'RE READY WHEN…</strong><p>Something needed Tuesday? Put it in your bag Monday night. Ask for help early when you need it.</p></div>
       <footer class="osr-foot"><strong>Notice. Prepare. Take ownership.</strong><span>START ON THE BACK WITH OUR FALL EXAMPLE</span></footer>
      </article>
-     <article class="osr-paper osr-back" data-osr-back>
+     <article class="osr-paper osr-back" data-osr-back data-plan-sheet="back" data-plan-sheet-end>
       <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Let's Try It: <em>Fall Readiness</em></h2><span>Our first Sunday Reset, prepared for our family.</span></header>
       <p class="osr-sheet-caption">Our first Sunday Reset, step by step.</p>
       <div class="osr-three osr-example-steps">
@@ -283,7 +283,8 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 @media print{.osr-tabs,#osr-panel-calendar{display:none!important}#osr-panel-reset{display:block!important}}
 </style>
 <script>
-import {DEFAULT_TAGLINE,DEFAULT_TRIGGER,TRIGGER_CHOICES,applyDefaults,defaultFallJobs,displayName,emptyState,planKey,planMembers,readSavedPlan,type PlanMember as Member,type PlanState as State,type OsrPlan} from '../../lib/club/engines/october-sunday-reset';
+import {planFingerprint,DEFAULT_TAGLINE,DEFAULT_TRIGGER,TRIGGER_CHOICES,applyDefaults,defaultFallJobs,displayName,emptyState,planKey,planMembers,readSavedPlan,type PlanMember as Member,type PlanState as State,type OsrPlan} from '../../lib/club/engines/october-sunday-reset';
+import {PLAN_CHANGE} from '../../lib/club/plan/resource';
 type Household={id:string;displayName?:string;members?:Member[]};
 for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  root.querySelectorAll<HTMLButtonElement>('[data-osr-tab]').forEach(button=>{
@@ -388,7 +389,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
    row.append(name,job);people.append(row);
   }if(!members.length){const row=document.createElement('div');row.className='osr-person';row.textContent='Choose a preview family to see prepared roles.';people.append(row)}}
   drawFall();drawEditor();
-  if(current)root.dispatchEvent(new CustomEvent('osr:change',{bubbles:true}));
+  if(current)root.dispatchEvent(new CustomEvent(PLAN_CHANGE,{bubbles:true}));
  };
  root.querySelectorAll<HTMLElement>('.osr-paper [contenteditable="true"]').forEach(el=>{if(!el.hasAttribute('data-osr-family')&&!el.hasAttribute('data-osr-cue'))return;const id=el.hasAttribute('data-osr-cue')?'cue':'family';
   const saveField=()=>{(state.text??={})[id]=clean(el,130);if(id==='cue')state.trigger=clean(el,85);save()};
@@ -409,8 +410,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string|null}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string|null}}).__ofcPreviewHousehold;if(cached)applyHousehold(cached);
  paint();
- const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()}};
- (root as HTMLElement & {osrPlan?:OsrPlan}).osrPlan=plan;
- root.dispatchEvent(new CustomEvent('osr:ready',{bubbles:true}));
+ const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>planFingerprint(state)};
+ (root as HTMLElement & {clubPlan?:OsrPlan}).clubPlan=plan;
 }
 </script>

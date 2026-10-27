@@ -1,0 +1,212 @@
+---
+/**
+ * January Habit Cards on phones and tablets (below 1100px): the month's own sections inside the shared
+ * ClubPlanScreen — the family's one or two habit cards, a focused sheet per card, and the habit finder as a
+ * guided sheet. It reads and changes the cards only through the printable's controller (`.jhc` root's
+ * `clubPlan`, src/lib/club/engines/january-habit-cards.ts), so the screen and the sheet always match.
+ * Status, approval, copy, print and sheets are shared (docs/club/PLAN_ARCHITECTURE.md).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="January · Organized Family Club" sheets={['sheet']} previewNote="Two cut-apart cards on one Letter sheet">
+  <Fragment slot="title">Our Family <em>Habit Cards</em></Fragment>
+
+  <section class="cp-section" aria-labelledby="jan-habits-title">
+    <h2 id="jan-habits-title">This month’s habits</h2>
+    <p class="cp-intro">Build the habit. Lose the reminder. Put each card where the habit happens.</p>
+    <ol class="jan-habits" data-jan-habits></ol>
+    <button type="button" class="jan-add" data-jan-add hidden>Add a second habit card</button>
+    <button type="button" class="cp-link jan-find" data-jan-find>Not sure which habits? <span>Help me choose</span></button>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.jan-habits{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.jan-habit{position:relative;display:grid;gap:4px;width:100%;padding:16px 18px 16px;border:1px solid var(--cp-line);background:#fff;text-align:left;cursor:pointer}
+.jan-habit:disabled{cursor:default}
+.jan-habit-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.jan-num{font-size:.78rem;font-weight:600;color:var(--cp-sage)}
+.jan-owner{padding:2px 8px;background:var(--cp-wash);color:var(--cp-sage);font-size:.78rem;font-weight:600}
+.jan-change{margin-left:auto;font-size:.82rem;font-weight:600;color:var(--cp-sage);text-decoration:underline;text-underline-offset:4px}
+.jan-habit:disabled .jan-change{display:none}
+.jan-name{font:italic 400 clamp(24px,6.6vw,28px)/1.15 var(--font-serif);color:var(--cp-ink);margin:0 0 6px}
+.jan-line{display:grid;gap:1px;padding:6px 0;border-top:1px solid var(--cp-line)}
+.jan-line small{font-size:.78rem;font-weight:600;color:var(--cp-soft)}
+.jan-line span{font-size:1rem;line-height:1.4}
+.jan-line em{font:italic 400 1.08rem/1.35 var(--font-serif);color:var(--cp-ink)}
+.jan-place{padding-top:8px;border-top:1px solid var(--cp-line);font-size:.86rem;color:var(--cp-soft)}
+.jan-add{display:block;width:100%;min-height:56px;margin-top:12px;border:1px dashed #b9b1ad;background:transparent;color:var(--cp-sage);font-size:.92rem;font-weight:600;cursor:pointer}
+.jan-add[hidden],.jan-find[hidden]{display:none}
+.jan-find{display:block;margin-top:14px}
+.jan-options{display:grid;gap:8px}
+.jan-options .cp-chip{width:100%}
+.jan-step{font-size:.78rem;font-weight:600;color:var(--cp-soft);margin:-10px 0 0}
+.jan-summary{display:grid;gap:4px;padding:14px 16px;border:1px solid var(--cp-line);background:#fff}
+.jan-summary strong{font:italic 400 1.4rem/1.2 var(--font-serif)}
+.jan-summary span{font-size:.92rem;line-height:1.45;color:var(--cp-soft)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import { displayName } from '../../lib/club/engines/october-sunday-reset';
+import {
+  FINDER_PROBLEMS, FINDER_WHO, applyFinder, finderActions, setCount, setHabit, suggestionFor,
+  type Habit, type HabitChoice, type HabitState, type JhcPlan,
+} from '../../lib/club/engines/january-habit-cards';
+
+const APPROVAL_KEY = 'omc:preview:january-habit-cards:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has(.jhc)');
+const jhc = root?.querySelector<HTMLElement & { clubPlan?: JhcPlan }>('.jhc');
+if (root && jhc) {
+  const plan = () => jhc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<HabitState>;
+  /** "For the family", "For the kids", "For Sofia", "For Mom". */
+  const forWho = (who: string) => {
+    const w = who.trim() || 'THE FAMILY';
+    return 'For ' + (w === w.toUpperCase() ? w.toLowerCase() : w).replace(/^(The|One|Everyone)\b/, (m) => m.toLowerCase());
+  };
+
+  const render = (_screen: PlanScreen<HabitState>, s: HabitState, locked: boolean) => {
+    q('[data-cp-preview-note]').textContent = s.count === 2 ? 'Two cut-apart cards on one Letter sheet' : 'One cut-apart card on one Letter sheet';
+    q('[data-jan-habits]').replaceChildren(...s.habits.slice(0, s.count).map((h, i) => {
+      const change = el('span', { class: 'jan-change' }, 'Change');
+      change.setAttribute('aria-hidden', 'true');
+      const card = el('button', { type: 'button', class: 'jan-habit', disabled: locked },
+        el('span', { class: 'jan-habit-top' }, el('span', { class: 'jan-num' }, `0${i + 1}`), el('span', { class: 'jan-owner' }, forWho(h.who)), change),
+        el('strong', { class: 'jan-name' }, h.name),
+        el('span', { class: 'jan-line' }, el('small', {}, 'When this happens'), el('span', {}, h.anchor)),
+        el('span', { class: 'jan-line' }, el('small', {}, 'Here’s what I do next'), el('em', {}, h.action)),
+        el('span', { class: 'jan-place' }, `Place this card: ${h.place}`));
+      card.dataset.janHabit = String(i);
+      card.setAttribute('aria-label', `Habit card ${i + 1}, ${h.name}, ${forWho(h.who).toLowerCase()}: ${h.anchor}, ${h.action} Change`);
+      card.addEventListener('click', () => openHabit(i));
+      return el('li', {}, card);
+    }));
+    q<HTMLButtonElement>('[data-jan-add]').hidden = locked || s.count === 2;
+    q<HTMLButtonElement>('[data-jan-find]').hidden = locked;
+  };
+
+  // Who a card is for: the family, the kids, or one person, from the household.
+  const whoChoices = () => {
+    const members = plan().members();
+    const kids = members.filter((m) => m.kind === 'child');
+    return ['The family', ...(kids.length > 1 ? ['The kids'] : []), ...members.map((m) => displayName(m, members))];
+  };
+
+  const openHabit = (i: number) => {
+    const p = plan();
+    const h = p.state().habits[i];
+    const chips = el('div', { class: 'cp-chips cp-people-chips', role: 'group' });
+    chips.setAttribute('aria-label', 'Who is this card for?');
+    for (const who of whoChoices()) {
+      const chip = el('button', { type: 'button', class: 'cp-chip' }, who);
+      chip.setAttribute('aria-pressed', String(who.toUpperCase() === (h.who.trim() || 'THE FAMILY').toUpperCase()));
+      chip.addEventListener('click', () => {
+        p.update((s) => setHabit(s, i, { who: who === 'The family' ? 'THE FAMILY' : who }));
+        chips.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === chip)));
+      });
+      chips.append(chip);
+    }
+    const field = (label: string, key: keyof Habit, multiline = false) => {
+      const input = multiline ? el('textarea', { value: h[key] }) : el('input', { type: 'text', value: h[key], autocomplete: 'off' });
+      input.addEventListener('input', () => p.update((s) => setHabit(s, i, { [key]: input.value })));
+      return el('label', { class: 'cp-field' }, label, input);
+    };
+    const actions = el('div', { class: 'cp-sheet-actions' }, ui.doneButton());
+    const count = p.state().count;
+    if (i === 0 && count === 2) {
+      const next = el('button', { type: 'button', class: 'cp-btn' }, 'Next: card 2 ›');
+      next.addEventListener('click', () => openHabit(1));
+      actions.append(next);
+    }
+    const body: Node[] = [
+      el('div', { class: 'cp-field' }, el('span', {}, 'Who is this card for?'), chips),
+      field('Card title', 'name'),
+      field('When this happens', 'anchor'),
+      field('Here’s what I do next', 'action', true),
+      field('Where the card goes', 'place'),
+    ];
+    if (i === 1 && count === 2) {
+      const one = el('button', { type: 'button', class: 'cp-text-btn' }, 'Print only the first card');
+      one.addEventListener('click', () => {
+        p.update((s) => setCount(s, 1));
+        ui.closeSheet();
+        ui.toast('Your sheet now has one card.', () => p.update((s) => setCount(s, 2)));
+      });
+      body.push(one);
+    }
+    ui.openSheet(h.name || `Habit card ${i + 1}`, ...body, actions);
+  };
+
+  // The habit finder, one question at a time, using January's own suggestions.
+  const openFinder = () => {
+    let step = 0;
+    let index = 0;
+    const drafts: HabitChoice[] = [];
+    const options = (labels: string[], selected: (label: string, i: number) => boolean, pick: (label: string, i: number) => void, people = false) => {
+      const box = el('div', { class: people ? 'cp-chips cp-people-chips' : 'jan-options', role: 'group' });
+      labels.forEach((label, i) => {
+        const b = el('button', { type: 'button', class: 'cp-chip' }, label);
+        b.setAttribute('aria-pressed', String(selected(label, i)));
+        b.addEventListener('click', () => pick(label, i));
+        box.append(b);
+      });
+      return box;
+    };
+    const back = () => {
+      const b = el('button', { type: 'button', class: 'cp-btn' }, '‹ Back');
+      b.addEventListener('click', () => { if (step > 0) step--; else if (index > 0) { index--; step = 3; } show(); });
+      return b;
+    };
+    const show = () => {
+      const draft = drafts[index];
+      const label = el('p', { class: 'jan-step' }, `Habit ${index + 1} of up to 2`);
+      if (step === 0) {
+        const problems = FINDER_PROBLEMS.filter((p) => index === 0 || p !== drafts[0]?.problem);
+        const body: Node[] = [label, el('p', { class: 'cp-sheet-hint' }, 'Choose one thing to make easier.'),
+          options(problems, (p) => draft?.problem === p, (problem) => { drafts[index] = { problem, action: 0, who: draft?.who || 'Everyone' }; step = 1; show(); })];
+        if (index > 0) body.push(el('div', { class: 'cp-sheet-actions' }, back()));
+        ui.openSheet('What keeps needing reminders?', ...body);
+      } else if (step === 1 && draft) {
+        ui.openSheet('What would you like to happen instead?', label,
+          options(finderActions(draft.problem), (_l, i) => draft.action === i, (_l, i) => { draft.action = i; step = 2; show(); }),
+          el('div', { class: 'cp-sheet-actions' }, back()));
+      } else if (step === 2 && draft) {
+        ui.openSheet('Who will practice this habit?', label,
+          options(FINDER_WHO, (who) => draft.who === who, (who) => { draft.who = who; step = 3; show(); }, true),
+          el('div', { class: 'cp-sheet-actions' }, back()));
+      } else if (step === 3 && draft) {
+        const r = suggestionFor(draft);
+        const use = el('button', { type: 'button', class: 'cp-btn cp-btn-dark' }, index === 0 ? 'Use this habit' : 'Use both habits');
+        use.addEventListener('click', () => {
+          plan().update((s) => applyFinder(s, drafts.slice(0, index + 1)));
+          ui.closeSheet();
+          ui.toast(index === 0 ? 'Your sheet now has this habit card.' : 'Your sheet now has both habit cards.');
+        });
+        const body: Node[] = [label,
+          el('div', { class: 'jan-summary' }, el('strong', {}, r.name), el('span', {}, `${forWho(draft.who)} · ${r.anchor}`), el('span', {}, r.action), el('span', {}, `Place this card: ${r.place}`)),
+          el('div', { class: 'cp-sheet-actions' }, back(), use)];
+        if (index === 0) {
+          const second = el('button', { type: 'button', class: 'cp-link' }, el('span', {}, 'Add a second habit'));
+          second.addEventListener('click', () => { index = 1; step = 0; show(); });
+          body.push(second);
+        }
+        ui.openSheet(`Habit ${index + 1}: ${r.name}`, ...body);
+      }
+    };
+    show();
+  };
+
+  q('[data-jan-find]').addEventListener('click', openFinder);
+  q('[data-jan-add]').addEventListener('click', () => { plan().update((s) => setCount(s, 2)); openHabit(1); });
+
+  const mounted = mountPlanScreen<HabitState>({ root, host: jhc, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

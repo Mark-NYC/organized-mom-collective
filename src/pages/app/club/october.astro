@@ -1,11 +1,13 @@
 ---
-/** October Club kit in the app. Desktop (>= 1100px): fixed left controls, scrolling document proof.
- * Below 1100px: the family's plan as an app screen (OctoberPlanMobile), with the printable full-screen on request. The printable, its editor and its rules live in OctoberSundayReset
- * and src/lib/club/engines/october-sunday-reset.ts; this page loads the family and states what is real. */
+/** October Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): October's own fixed left rail and scrolling document
+ * proof, below. Below 1100px: the shared plan screen with October's sections (OctoberPlanMobile). The printable,
+ * its editor and its rules live in OctoberSundayReset and src/lib/club/engines/october-sunday-reset.ts. */
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import OctoberSundayReset from '../../../components/club/OctoberSundayReset.astro';
 import OctoberPlanMobile from '../../../components/club/OctoberPlanMobile.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
 import { clubEditingDeadline } from '../../../lib/club/deadline';
 import { kits } from '../../../data/club/kits';
 const kit = kits.find((k) => k.month === '2027-10');
@@ -14,11 +16,8 @@ const editDeadline = clubEditingDeadline(kit.month);
 const storageKey = 'omc:preview:october-sunday-reset:v2';
 ---
 <AppLayout title="October Sunday Reset">
-  <div class="club-mobile-kit family-brand" data-plan-state="loading" data-kit-slug={kit.slug} data-plan-key={storageKey}>
-    <section class="kit-gate" data-plan-gate aria-live="polite">
-      <p class="kit-gate-text" data-gate-text>Preparing your family’s plan…</p>
-    </section>
-    <div class="kit-desktop-rail">
+  <ClubPlanShell class="club-mobile-kit family-brand" kitSlug={kit.slug} month="October" sides={['front', 'back']} storageKey={storageKey}>
+    <div class="kit-desktop-rail" slot="desktop">
     <header class="kit-header">
       <a href="/app/club" class="kit-back">← Back to Club</a>
       <p class="kit-eyebrow">OCTOBER · KIT PREVIEW</p>
@@ -33,23 +32,13 @@ const storageKey = 'omc:preview:october-sunday-reset:v2';
     <div class="kit-approval-message"><p data-plan-source></p><p data-approval-note role="status">Preview only: approving doesn’t save, submit or mail anything. Mailing isn’t active yet.</p></div>
     <div class="kit-instructions"><p>Keep this two-sided sheet beside your family wall calendar. Each Sunday, take 10–15 minutes to look at the week ahead, prepare what you need, and give everyone a part.</p><p>The back is a one-time fall example to try together. Review the prepared roles, change anything that doesn’t fit, and use the front again each Sunday.</p></div>
     </div>
-    <div class="kit-proof" data-kit-proof>
-      <div class="kit-proof-bar">
-        <button type="button" class="kit-proof-close" data-kit-close-proof aria-label="Close printable">×</button>
-        <div class="kit-page-switch" role="group" aria-label="Printable side">
-          <button type="button" data-side="front" aria-pressed="true">Front</button>
-          <button type="button" data-side="back" aria-pressed="false">Back</button>
-        </div>
-        <button type="button" class="kit-proof-print" data-kit-print aria-label="Print or save as PDF" title="Print or save as PDF"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM18 12h.01"/></svg></button>
-      </div>
-      <div class="kit-viewer-wrap">
-        <div class="kit-artwork" data-kit-viewer tabindex="0" role="region" aria-label="Printable preview">
-          <OctoberSundayReset storageKey={storageKey} />
-        </div>
+    <div class="kit-viewer-wrap" slot="printable" data-plan-proof-body>
+      <div class="kit-artwork" data-kit-viewer data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <OctoberSundayReset storageKey={storageKey} />
       </div>
     </div>
-    <OctoberPlanMobile deadline={editDeadline} />
-  </div>
+    <OctoberPlanMobile slot="mobile" deadline={editDeadline} />
+  </ClubPlanShell>
 </AppLayout>
 <style is:global>
 /* Scope all presentation overrides to this customer-facing route. Do not modify the desktop proof. */
@@ -60,9 +49,6 @@ const storageKey = 'omc:preview:october-sunday-reset:v2';
 .kit-header h1{font:400 clamp(30px,6vw,43px)/1.15 Georgia,serif;margin:11px 0 8px}
 .kit-header h1 em{color:#71866c}
 .kit-subtitle{font-size:14px;line-height:1.6;color:#6e6461}
-.kit-page-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:500px;margin:0 auto 16px}
-.kit-page-switch button{min-height:46px;border:1px solid #d5dfd2;border-radius:3px;color:var(--color-warm-ink);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
-.kit-page-switch button[aria-pressed="true"]{background:var(--color-warm-button);color:white;border-color:var(--color-warm-button)}
 .club-mobile-kit .kit-artwork{min-width:0;background:#f1f2f2;border-radius:0;padding:12px;overflow:hidden}
 .club-mobile-kit .osr{padding:0!important;max-width:none!important}
 .club-mobile-kit .osr-intro,.club-mobile-kit .osr-editor,.club-mobile-kit .osr-tabs,.club-mobile-kit .osr-floating-edit{display:none!important}
@@ -87,11 +73,9 @@ const storageKey = 'omc:preview:october-sunday-reset:v2';
   .club-mobile-kit .kit-desktop-rail{position:sticky;top:22px;align-self:start;max-height:calc(100vh - 44px);overflow-y:auto;overscroll-behavior:contain;padding:12px 8px 24px 0;scrollbar-width:thin}
   .club-mobile-kit .kit-header{margin:0 0 28px}
   .club-mobile-kit .kit-header h1{font-size:39px}
-  .club-mobile-kit .kit-page-switch{display:none}
   .club-mobile-kit .kit-artwork{padding:24px;min-width:0;overflow:visible}
   .club-mobile-kit .osr-stage{overflow:visible}
   .club-mobile-kit .osr-pages{display:flex!important;flex-direction:column;gap:22px}
-  .club-mobile-kit[data-kit-side="front"] .osr-back,.club-mobile-kit[data-kit-side="back"] .osr-front{display:block!important}
   .club-mobile-kit .kit-action-bar{display:flex;flex-direction:column;max-width:none;margin:0;gap:13px}
   .club-mobile-kit .kit-action-bar p{text-align:left;padding:0}
 }
@@ -297,144 +281,20 @@ const storageKey = 'omc:preview:october-sunday-reset:v2';
  .club-mobile-kit .kit-approval-message{margin-top:8px}
 }
 
-/* Below 1100px the plan screen (OctoberPlanMobile) is the page. The printable stays where it is and opens
-   full-screen on request; the Front/Back filter is for that screen view only, never for printing. */
-@media screen{
-  .club-mobile-kit[data-kit-side="front"] .osr-pages .osr-back,.club-mobile-kit[data-kit-side="back"] .osr-pages .osr-front{display:none}
-}
-.kit-proof{display:contents}
-.kit-proof-bar{display:none}
+/* Below 1100px the shared plan screen is the page; proof, gate and printing are shared (ClubPlanShell). */
 @media screen and (max-width:1099px){
   .club-mobile-kit{display:block;max-width:none}
-  .club-mobile-kit .kit-desktop-rail,.club-mobile-kit .kit-proof{display:none}
-  .club-mobile-kit.kit-proof-open .kit-proof{display:block;position:fixed;inset:0;z-index:70;background:#f1f2f2}
-  .club-mobile-kit.kit-proof-open .kit-proof-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;height:64px;padding:10px 12px;background:var(--color-ivory);border-bottom:1px solid var(--color-warm-rule)}
-  .kit-proof-close,.kit-proof-print{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:3px;color:var(--color-warm-ink)}
-  .kit-proof-close{font-size:1.7rem;line-height:1}
-  .kit-proof-print{border:1px solid var(--color-warm-ink);background:#fff}
-  .kit-proof-bar .kit-page-switch{display:flex;gap:4px;width:auto;max-width:none;margin:0}
-  .kit-proof-bar .kit-page-switch button{min-height:44px;padding:8px 18px}
-  .club-mobile-kit.kit-proof-open .kit-viewer-wrap{position:absolute;inset:64px 0 0}
-  .club-mobile-kit.kit-proof-open .kit-artwork{height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:18px 14px 40px}
-  .club-mobile-kit .kit-proof :focus-visible{outline:2px solid #536e4e;outline-offset:2px}
-  /* View-only here: details change through the plan's sheets, not by typing on the scaled paper. */
-  .club-mobile-kit .kit-proof .osr-pages{pointer-events:none;user-select:none}
-  .club-mobile-kit .kit-proof .osr-paper [contenteditable]::after{display:none}
-}
-
-/* Until the family has loaded, show only the status: never an empty plan. */
-.kit-gate{display:none}
-.club-mobile-kit:not([data-plan-state="ready"]){display:block}
-.club-mobile-kit:not([data-plan-state="ready"]) > *{display:none}
-.club-mobile-kit:not([data-plan-state="ready"]) > .kit-gate{display:block;max-width:540px;margin:clamp(24px,8vh,80px) auto;padding:0 20px;color:var(--color-warm-ink)}
-.kit-gate h2{font:400 clamp(26px,6vw,32px)/1.15 var(--font-serif);margin:0 0 12px}
-.kit-gate p{color:var(--color-warm-soft);line-height:1.65}
-.kit-gate-action{display:inline-flex;align-items:center;min-height:48px;margin-top:18px;padding:12px 20px;border-radius:3px;background:var(--color-warm-button);color:white;font:600 .75rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase}
-
-/* Printing: exactly two letter pages (front, back) on every device, whatever side is on screen.
-   Overrides the scaled screen preview, inline fit() margins and the desktop page frames. */
-@media print{
-  @page{size:letter portrait;margin:0}
-  html,body{width:8.5in!important;height:auto!important;overflow:visible!important;margin:0!important;padding:0!important;background:#fff!important}
-  body:has(.club-mobile-kit) #main{position:static!important;width:8.5in!important;max-width:none!important;height:auto!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important}
-  .club-mobile-kit[data-plan-state="ready"],.club-mobile-kit[data-plan-state="ready"] .kit-proof,
-  .club-mobile-kit[data-plan-state="ready"] .kit-viewer-wrap,
-  .club-mobile-kit[data-plan-state="ready"] .kit-artwork,.club-mobile-kit[data-plan-state="ready"] .osr,
-  .club-mobile-kit[data-plan-state="ready"] .osr-layout,.club-mobile-kit[data-plan-state="ready"] .osr-preview,
-  .club-mobile-kit[data-plan-state="ready"] .osr-stage,.club-mobile-kit[data-plan-state="ready"] .osr-pages,
-  .club-mobile-kit[data-plan-state="ready"] #osr-panel-reset{
-    display:block!important;position:static!important;float:none!important;
-    width:8.5in!important;max-width:none!important;height:auto!important;
-    min-height:0!important;max-height:none!important;
-    margin:0!important;padding:0!important;gap:0!important;
-    border:0!important;background:#fff!important;
-    overflow:visible!important;transform:none!important;
-    box-shadow:none!important;scrollbar-width:none!important;
-  }
-  .club-mobile-kit .kit-gate,.club-mobile-kit .kit-desktop-rail,.club-mobile-kit .kit-proof-bar{display:none!important}
-  .club-mobile-kit .osr-document-frame{display:contents!important}
-  .club-mobile-kit .osr-paper{
-    display:flex!important;visibility:visible!important;position:relative!important;
-    top:auto!important;left:auto!important;
-    width:8.5in!important;height:11in!important;max-width:none!important;
-    flex:none!important;margin:0!important;border:0!important;
-    padding:24px 51px 22px!important;
-    transform:none!important;box-shadow:none!important;overflow:hidden!important;
-    break-after:page!important;page-break-after:always!important;
-    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
-  }
-  .club-mobile-kit .osr-back{break-after:auto!important;page-break-after:auto!important}
-  /* WebKit (Safari on iPhone, iPad and Mac) cuts printed pages by aspect ratio: a page holds
-     document width x printable height / printable width CSS px, after its own header and footer (always
-     printed on iOS). An 8.5in-wide document left the 11in sheets no room, so each side spilled onto a
-     near-blank page (WebCore PrintContext). Side padding widens the document so every page has headroom;
-     the sheets stay centered and print uniformly smaller, never cropped. Covers printable areas at least
-     1.128x as tall as wide; tests/club-october-print.test.ts models it. Only WebKit has hanging-punctuation. */
-  @supports (hanging-punctuation: first){
-    html:has(.club-mobile-kit[data-plan-state="ready"]){box-sizing:content-box!important;width:8.5in!important;padding:0 .625in!important}
-  }
-  .club-mobile-kit .osr-paper *{visibility:visible!important}
+  .club-mobile-kit .kit-desktop-rail{display:none}
 }
 </style>
 <script>
-import { clubAccountsEnabled } from '../../../data/club/config';
-import { getSession } from '../../../lib/account';
-import { loadKitHousehold, type KitHousehold } from '../../../lib/club/kit-household';
-import { accountStore, clubHref, sampleStore } from '../../../lib/club/store';
+import { onPlanFamily } from '../../../lib/club/plan/family';
 import { hasChanges, planKey, planMembers, readSavedPlan } from '../../../lib/club/engines/october-sunday-reset';
-import { routes } from '../../../routes';
 
 const kit=document.querySelector<HTMLElement>('.club-mobile-kit');
 if(kit){
-  const show=(side:'front'|'back')=>{
-    kit.dataset.kitSide=side;
-    kit.querySelectorAll<HTMLButtonElement>('[data-side]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.side===side)));
-    window.dispatchEvent(new Event('resize'));
-  };
-  kit.querySelectorAll<HTMLButtonElement>('[data-side]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.side==='back'?'back':'front')));
-  show('front');
-  // The printable, full-screen on small screens. Opened by any [data-kit-open-proof]; the print DOM never moves.
-  const proof=kit.querySelector<HTMLElement>('[data-kit-proof]');
-  let opener:HTMLElement|null=null;
-  const behind=()=>[document.querySelector('body > header[data-chrome]'),document.querySelector('nav[data-chrome]'),kit.querySelector('.omp')].filter((e):e is HTMLElement=>e instanceof HTMLElement);
-  const setProof=(open:boolean)=>{
-    if(!proof||open===kit.classList.contains('kit-proof-open'))return;
-    kit.classList.toggle('kit-proof-open',open);
-    if(open){proof.setAttribute('role','dialog');proof.setAttribute('aria-modal','true');proof.setAttribute('aria-label','Your printable');}
-    else{for(const a of ['role','aria-modal','aria-label'])proof.removeAttribute(a);}
-    behind().forEach(e=>{e.inert=open});
-    document.body.style.overflow=open?'hidden':'';
-    window.dispatchEvent(new Event('resize'));
-    if(open)proof.querySelector<HTMLElement>('[data-kit-close-proof]')?.focus();else opener?.focus();
-  };
-  kit.addEventListener('click',event=>{const t=(event.target as HTMLElement).closest<HTMLElement>('[data-kit-open-proof]');if(t){opener=t;setProof(true)}});
-  kit.querySelector('[data-kit-close-proof]')?.addEventListener('click',()=>setProof(false));
-  window.addEventListener('keydown',event=>{if(event.key==='Escape')setProof(false)});
-  window.matchMedia('(min-width:1100px)').addEventListener('change',e=>{if(e.matches)setProof(false)});
-  window.addEventListener('pagehide',()=>{document.body.style.overflow=''}, {once:true});
-  kit.querySelectorAll<HTMLButtonElement>('[data-kit-print]').forEach(b=>b.addEventListener('click',()=>{
-    (document.activeElement as HTMLElement | null)?.blur();
-    kit.querySelector<HTMLButtonElement>('[data-osr-print]')?.click();
-  }));
-
-  // The family the plan is prepared for. The printable listens for this same event (ClubMonthAccess sends it too).
-  const gate=kit.querySelector<HTMLElement>('[data-plan-gate]');
-  const gateMessage=(result:Exclude<KitHousehold,{status:'ready'}>)=>{
-    const sample='sample' in result?result.sample:null;
-    const copy={
-      empty:['Add your family first','Your October plan is prepared from your family profile: who lives at home and the children’s ages. Add them and the names and roles fill in for you.','Add your family',clubHref(routes.clubFamily,sample)],
-      'signed-out':['Sign in to see your plan','Your October plan is prepared from your family profile. Sign in to see it.','Sign in',routes.clubDashboard],
-      denied:['October isn’t open for your account','This month’s kit isn’t available to your account.','See your kits',clubHref(routes.clubDashboard,sample)],
-      error:['We couldn’t load your family’s plan','Check your connection and try again. Nothing you changed earlier in this tab is lost.','Try again',''],
-    }[result.status];
-    const [title,text,action,href]=copy;
-    const h=document.createElement('h2');h.textContent=title;
-    const p=document.createElement('p');p.textContent=text;
-    const a=document.createElement(href?'a':'button');a.className='kit-gate-action';a.textContent=action;
-    if(a instanceof HTMLAnchorElement)a.href=href;else{(a as HTMLButtonElement).type='button';a.addEventListener('click',()=>location.reload())}
-    gate?.replaceChildren(h,p,a);
-  };
-  const ready=(result:Extract<KitHousehold,{status:'ready'}>)=>{
+  // Desktop rail: whose family it is, and whether earlier changes in this tab are showing.
+  onPlanFamily(kit,(result)=>{
     const members=planMembers(result.household.members);
     let saved:string|null=null;try{saved=sessionStorage.getItem(kit.dataset.planKey??'')}catch{}
     const previous=readSavedPlan(saved,planKey(result.sample,result.household.id));
@@ -445,24 +305,6 @@ if(kit){
     const where=result.source==='sample'?' Changes stay in this browser tab.':' Changes stay in this browser tab; saving to your account isn’t available yet.';
     const source=kit.querySelector<HTMLElement>('[data-plan-source]');
     if(source)source.textContent=who+where+(restored?' Showing changes made earlier in this tab.':'');
-    kit.dataset.planFor=planKey(result.sample,result.household.id);
-    kit.dataset.planSource=result.source;
-    const sampleName=result.sampleLabel.replace('Sample: ','');
-    kit.dataset.planLabel=result.source==='sample'?sampleName:result.household.displayName??'your family';
-    const detail={household:result.household,sample:result.sample};
-    (window as Window & {__ofcPreviewHousehold?:typeof detail}).__ofcPreviewHousehold=detail;
-    window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail}));
-    kit.dataset.planState='ready';
-    window.dispatchEvent(new Event('resize'));
-  };
-  loadKitHousehold(kit.dataset.kitSlug??'',location.search,{
-    accountsEnabled:clubAccountsEnabled,
-    hasSession:async()=>Boolean(await getSession()),
-    accountStore,
-    sampleStore,
-  }).then(result=>{
-    if(result.status==='ready')ready(result);
-    else{gateMessage(result);kit.dataset.planState=result.status;}
   });
 
   const section=kit.querySelector<HTMLElement>('[data-edit-deadline]');
