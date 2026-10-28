@@ -1,102 +1,108 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
-import FebruaryConnectionCards from '../../../components/club/FebruaryConnectionCards.astro';
-import { clubEditingDeadline } from '../../../lib/club/deadline';
-import { kits } from '../../../data/club/kits';
-const kit = kits.find(k => k.month === '2027-02');
-if (!kit) throw new Error('February kit missing');
-const deadline = clubEditingDeadline(kit.month);
 ---
-<AppLayout title="February Connection Cards">
- <div class="feb-app family-brand" data-slug={kit.slug} data-deadline={deadline} data-state="loading">
-  <div class="feb-gate" data-gate role="status">Preparing your family’s invitations…</div>
-  <div class="feb-content" hidden>
-   <div class="feb-mobile">
-    <header><a class="feb-back" href="/app/club/">← Back to Club</a><p class="feb-kicker">FEBRUARY · ORGANIZED FAMILY CLUB</p><h1>More connection. <em>Less coordinating.</em></h1><p data-family></p><span class="feb-sample" data-sample hidden>Sample family</span></header>
-    <div class="feb-status"><strong data-review>Preview only · Review is optional</strong><p data-window></p></div>
-    <button class="feb-proof-link" type="button" data-show-proof><span><strong>Your printable</strong><small>Four invitations on one page</small></span><span>View →</span></button>
-    <section><h2>Four little invitations</h2><p>Give each card to the person named. They can invite someone to spend time together.</p><div class="feb-list" data-cards></div></section>
-    <button type="button" class="feb-reset" data-reset-mobile>Restore suggested cards</button><p class="feb-note">Preview only. Changes stay in this browser tab and aren’t saved to your account. Mailing and approval aren’t active yet.</p>
-    <div class="feb-actions"><button class="feb-primary" type="button" data-review-button>Mark as reviewed</button><button class="feb-print" type="button" data-print-app aria-label="Print or save as PDF">Print</button></div>
-   </div>
-   <aside class="feb-desktop-rail" aria-label="February kit controls">
-    <header class="feb-desktop-header"><a class="feb-desktop-back" href="/app/club/">← Back to Club</a><p class="feb-desktop-kicker">FEBRUARY · KIT PREVIEW</p><h1>More connection. <em>Less coordinating.</em></h1></header>
-    <section class="feb-desktop-deadline" aria-label="Editing deadline"><p class="feb-desktop-kicker">YOUR EDITING WINDOW</p><p data-desktop-window>Checking deadline…</p></section>
-    <div class="feb-desktop-actions"><button type="button" data-desktop-edit>Make changes</button><button type="button" data-desktop-review>Mark as reviewed</button><button type="button" class="feb-desktop-print" data-print-app>Download and print</button></div>
-    <p class="feb-desktop-source" data-desktop-family></p><p class="feb-desktop-source" data-desktop-review-note>Preview only. Review does not save, submit or mail anything.</p>
-    <div class="feb-desktop-instructions"><p>Four personal invitations, prepared for your family. Print the page, cut out the cards, and let everyone invite someone to spend time together.</p><p>Change the names or ideas to fit your family. Kids can give an invitation themselves.</p><button type="button" data-desktop-reset>Restore suggested cards</button></div>
-   </aside>
-   <div class="feb-proof" data-proof><div class="feb-proof-bar"><button type="button" data-close-proof>← Back</button><strong>Your printable</strong><button type="button" data-print-app>Print</button></div><FebruaryConnectionCards storageKey="omc:club:february-mobile:v1" managed={true} /></div>
-  </div>
-  <dialog class="feb-dialog" data-dialog aria-labelledby="feb-dialog-title"><form method="dialog"><div class="feb-dialog-head"><h2 id="feb-dialog-title">Edit invitation</h2><button type="submit" aria-label="Close">×</button></div></form><p>Changes appear on your printable as you type.</p><div data-fields></div><button type="button" class="feb-done" data-done>Done</button></dialog>
- </div>
+<AppLayout title="February · Kids Laundry Ownership">
+<div class="laundry-page family-brand" data-laundry-app>
+  <aside class="laundry-rail">
+    <a href="/app/club/" class="laundry-back">← Back to Club</a>
+    <p class="laundry-kicker">FEBRUARY · KIT PREVIEW</p>
+    <h1>My Laundry,<br/><em>My Job.</em></h1>
+    <p class="laundry-intro">A simple handoff for the clothes your kids wear. Everyone knows their part, and Mom doesn't have to chase the laundry.</p>
+    <section class="laundry-controls" aria-label="Customize February plan">
+      <p class="laundry-kicker">YOUR FAMILY'S PREPARED PLAN</p>
+      <label>Family name<input data-family maxlength="36" value="Rivera" /></label>
+      <div class="laundry-child"><label>Child 1<input data-name="0" maxlength="24" value="Sofia" /></label><label>Ownership level<select data-level="0"><option value="helper">Laundry helper</option><option value="clothes" selected>Clothes owner</option><option value="apprentice">Laundry apprentice</option><option value="full">Laundry owner</option></select></label></div>
+      <div class="laundry-child"><label>Child 2<input data-name="1" maxlength="24" value="Mateo" /></label><label>Ownership level<select data-level="1"><option value="helper">Laundry helper</option><option value="clothes" selected>Clothes owner</option><option value="apprentice">Laundry apprentice</option><option value="full">Laundry owner</option></select></label></div>
+      <label>Laundry day<select data-day><option>Saturday</option><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>As needed</option></select></label>
+      <label>Machine operator<input data-operator maxlength="28" value="Dad" /></label>
+      <p class="laundry-hint">Suggested levels are starting points. Choose what each child can safely do. Adults supervise machine use until a child is trained.</p>
+    </section>
+    <div class="laundry-actions"><button type="button" class="laundry-main" data-print>Download and print</button><button type="button" data-reset>Restore sample plan</button></div>
+    <p class="laundry-disclaimer">Prototype preview only. Changes are saved in this browser, not submitted for mailing or approval.</p>
+  </aside>
+  <main class="laundry-preview" aria-label="February two-sided printable preview">
+    <div class="laundry-preview-head"><span>Your February printable</span><span>Front + back · Letter size</span></div>
+    <div class="laundry-paper-stack">
+      <article class="laundry-paper" aria-label="Front of February printable">
+        <header class="paper-header"><span>ORGANIZED FAMILY CLUB · FEBRUARY</span><span>01 / FRONT</span></header>
+        <div class="paper-top"><div><span class="paper-eyebrow">THE <b data-family-print>RIVERA</b> FAMILY</span><h2>My Laundry,<br/><em>My Job.</em></h2><p>Everybody wears clothes. Everybody can help care for them.</p></div><div class="icon-placeholder hero-icon">LAUNDRY<br/>BASKET<br/>ICON</div></div>
+        <div class="paper-rule"></div><h3 class="paper-section-title">Here's what each of us owns.</h3>
+        <div data-print-children>
+          <section class="ownership-card"><div class="ownership-icon icon-placeholder">SHIRT<br/>ICON</div><div><h3>Sofia <span>· Clothes owner</span></h3><ol><li>Put dirty clothes in my hamper.</li><li>Bring my hamper on laundry day.</li><li>Put clean clothes into my drawers.</li></ol></div></section>
+          <section class="ownership-card"><div class="ownership-icon icon-placeholder">SHIRT<br/>ICON</div><div><h3>Mateo <span>· Clothes owner</span></h3><ol><li>Put dirty clothes in my hamper.</li><li>Bring my hamper on laundry day.</li><li>Put clean clothes into my drawers.</li></ol></div></section>
+        </div>
+        <div class="operator"><div class="icon-placeholder operator-icon">WASHER<br/>ICON</div><p><strong><span data-operator-print>Dad</span> owns the machines.</strong><br/>Wash and dry the loads on <span data-day-print>Saturday</span>. Help kids learn safely.</p></div>
+        <div class="paper-callout"><span>OUR FAMILY LAUNDRY RULE</span><strong>Dirty clothes in. Clean clothes away.</strong><p>The job isn't finished until the clothes are put away.</p></div>
+        <footer class="paper-footer"><span>ORGANIZED FAMILY CLUB</span><span>OUR LAUNDRY PLAN · FEBRUARY</span></footer>
+      </article>
+      <article class="laundry-paper laundry-back-paper" aria-label="Back of February printable">
+        <header class="paper-header"><span>ORGANIZED FAMILY CLUB · FEBRUARY</span><span>02 / BACK</span></header>
+        <div class="back-intro"><span class="paper-eyebrow">FOLLOW THE CLOTHES</span><h2>From hamper <em>to drawer.</em></h2><p>One simple path. The whole family can follow it.</p></div>
+        <div class="laundry-steps">
+          <div class="laundry-step"><div class="icon-placeholder">HAMPER<br/>ICON</div><div><span>01</span><h3>Collect</h3><p>Dirty clothes belong in the hamper.</p></div></div>
+          <div class="laundry-step"><div class="icon-placeholder">WASHER<br/>ICON</div><div><span>02</span><h3>Wash</h3><p>The machine operator starts the load.</p></div></div>
+          <div class="laundry-step"><div class="icon-placeholder">DRYER<br/>ICON</div><div><span>03</span><h3>Dry</h3><p>Move clothes to the dryer or drying rack.</p></div></div>
+          <div class="laundry-step"><div class="icon-placeholder">FOLDED<br/>SHIRT ICON</div><div><span>04</span><h3>Fold or hang</h3><p>Get each item ready to put away.</p></div></div>
+          <div class="laundry-step"><div class="icon-placeholder">DRESSER<br/>ICON</div><div><span>05</span><h3>Put away</h3><p>Clothes return to drawers or closets.</p></div></div>
+        </div>
+        <div class="megan-note"><span>A NOTE FROM MEGAN</span><p>Start small. Show your kids what done looks like, then give them room to own it. A little practice now means fewer reminders later.</p><strong>You've got this, Megan</strong></div>
+        <footer class="paper-footer"><span>ORGANIZED FAMILY CLUB</span><span>MY LAUNDRY, MY JOB · FEBRUARY</span></footer>
+      </article>
+    </div>
+  </main>
+</div>
 </AppLayout>
 <style is:global>
-.feb-app{color:#4d4544;max-width:680px;margin:auto}.feb-app[ data-state="loading"] .feb-content{display:none}.feb-gate{padding:30px 0}.feb-gate h2{font:28px Georgia,serif}.feb-gate a,.feb-gate button{display:inline-block;margin-top:14px;text-decoration:underline}.feb-mobile h1{font:400 clamp(32px,8vw,42px)/1.1 var(--font-serif);margin:10px 0}.feb-mobile h1 em{color:#9b6477}.feb-back{display:inline-block;padding:10px 0;color:#536e4e}.feb-kicker{font-size:11px;letter-spacing:.15em;font-weight:700;color:#756d67}.feb-sample{display:inline-block;border:1px solid #dedbd2;padding:3px 8px;font-size:12px}.feb-status{border-block:1px solid #dedbd2;margin:20px 0 16px;padding:14px 0;font-size:14px}.feb-status p{margin:4px 0 0;color:#756d67}.feb-proof-link{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;border:1px solid #e2d7d9;background:#fbf6f6;padding:18px;min-height:74px}.feb-proof-link small{display:block;margin-top:4px;color:#756d67}.feb-mobile section{margin:28px 0}.feb-mobile h2{font:27px var(--font-serif);margin:0 0 8px}.feb-mobile section>p,.feb-note{font-size:13px;line-height:1.6;color:#756d67}.feb-list{border-top:1px solid #dedbd2;margin-top:16px}.feb-card{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #dedbd2;background:transparent;padding:16px 4px;min-height:70px}.feb-card strong,.feb-card span{display:block}.feb-card strong{font:20px var(--font-serif)}.feb-card span{font-size:13px;color:#756d67;margin-top:4px}.feb-card:disabled{opacity:1}.feb-actions{position:fixed;z-index:35;bottom:calc(60px + env(safe-area-inset-bottom));left:0;right:0;display:flex;gap:8px;padding:10px max(20px,calc((100vw - 640px)/2));background:#fffdfa;border-top:1px solid #dedbd2}.feb-actions button,.feb-done{min-height:48px;padding:0 20px}.feb-primary,.feb-done{background:#536e4e;color:white;flex:1}.feb-print{border:1px solid #536e4e;background:white}.feb-reset{min-height:44px;text-decoration:underline;text-underline-offset:3px;color:#536e4e}.feb-note{margin:0 0 85px}.feb-proof{display:none}.feb-app.proof-open .feb-proof{display:block;position:fixed;inset:0;background:#f1f0ec;z-index:80;overflow:auto}.feb-proof-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;background:#fff;padding:10px 18px}.feb-proof-bar button{min-height:44px}.feb-proof .fbc-intro,.feb-proof .fbc-editor-pane,.feb-proof .fbc-floating-edit{display:none!important}.feb-proof .fbc{padding:20px}.feb-proof .fbc-workspace{display:block!important}.feb-proof .fbc-scroll{padding:0}.feb-dialog{border:0;margin:auto auto 0;max-width:640px;width:100%;max-height:90dvh;padding:22px;background:#fffdfa;overflow:auto}.feb-dialog::backdrop{background:#0008}.feb-dialog-head{display:flex;justify-content:space-between;align-items:center}.feb-dialog-head h2{font:26px Georgia,serif}.feb-dialog-head button{font-size:30px;min-width:44px;min-height:44px}.feb-dialog label{display:block;font-size:12px;font-weight:700;margin:15px 0}.feb-dialog input,.feb-dialog textarea{display:block;width:100%;padding:11px;border:1px solid #bcbcbc;background:#fff;margin-top:6px;min-height:44px;font-size:16px}.feb-done{width:100%;margin-top:12px}.feb-app button:focus-visible,.feb-app input:focus-visible,.feb-app textarea:focus-visible{outline:2px solid #905d70;outline-offset:2px}
-/* Match October's desktop workspace: independent control rail and printable pane. */
-.feb-desktop-rail{display:none}
-@media screen and (min-width:1100px){
- html:has(.feb-app),body:has(.feb-app){height:100%;overflow:hidden}
- body:has(.feb-app) #main{position:relative;width:100%;max-width:none;height:calc(100dvh - 64px);min-height:0;margin:0;padding:0;overflow:hidden}
- .feb-app{width:100%;height:100%;max-width:none;margin:0;overflow:hidden;background:var(--color-ivory)}
- .feb-content:not([hidden]){display:grid;grid-template-columns:minmax(310px,375px) minmax(0,1fr);width:100%;height:100%;min-height:0}
- .feb-mobile{display:none}
- .feb-desktop-rail{display:block;min-width:0;height:100%;overflow-y:auto;overscroll-behavior:contain;background:var(--color-ivory);border-right:1px solid var(--color-warm-rule);padding:clamp(40px,6vh,70px) clamp(22px,2.7vw,42px) 40px;scrollbar-width:thin}
- .feb-desktop-header{padding-bottom:30px;margin-bottom:28px;border-bottom:1px solid var(--color-warm-rule)}
- .feb-desktop-back{display:inline-flex;align-items:center;min-height:44px;margin-bottom:14px;color:var(--color-warm-ink);font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-decoration-color:var(--color-warm-rule);text-underline-offset:6px}
- .feb-desktop-kicker{font-size:.7rem;letter-spacing:.2em;font-weight:600;color:var(--color-warm-soft)}
- .feb-desktop-header h1{font:400 clamp(34px,3vw,42px)/1.12 var(--font-serif);letter-spacing:-.02em;margin:18px 0 19px;color:var(--color-warm-ink)}
- .feb-desktop-deadline{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--color-warm-rule);font-size:.83rem;line-height:1.6;color:var(--color-warm-soft)}
- .feb-desktop-deadline .feb-desktop-kicker{margin-bottom:10px}
- .feb-desktop-actions{display:flex;flex-direction:column;gap:12px}
- .feb-desktop-actions button{min-height:48px;padding:12px 20px;border:1px solid var(--color-warm-ink);border-radius:3px;background:transparent;color:var(--color-warm-ink);font:600 .75rem var(--font-sans);letter-spacing:.13em;text-transform:uppercase}
- .feb-desktop-actions [data-desktop-review]{background:var(--color-warm-button);border-color:var(--color-warm-button);color:white}
- .feb-desktop-actions .feb-desktop-print{align-self:flex-start;width:auto;min-height:44px;padding:5px 8px;border:0;text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--color-warm-rule)}
- .feb-desktop-source,.feb-desktop-instructions{color:var(--color-warm-soft);font-size:.78rem;line-height:1.65}
- .feb-desktop-source{margin-top:14px}.feb-desktop-instructions{border-top:1px solid var(--color-warm-rule);margin-top:24px;padding-top:20px}.feb-desktop-instructions p+p{margin-top:12px}.feb-desktop-instructions button{min-height:44px;margin-top:12px;text-decoration:underline;text-underline-offset:4px}
- .feb-proof{display:block;min-width:0;height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-gutter:stable;background:#f1f2f2;padding:clamp(32px,4vw,62px) clamp(28px,5vw,82px) 84px;scrollbar-color:#b7b7b2 transparent}
- .feb-proof-bar{display:none}.feb-proof .fbc{padding:0;max-width:none;margin:0}.feb-proof .fbc-intro,.feb-proof .fbc-floating-edit,.feb-proof .fbc-editor-pane> :not(.fbc-dialog){display:none!important}
- .feb-proof .fbc-workspace{display:block!important}.feb-proof .fbc-editor-pane{display:contents!important}.feb-proof .fbc-preview-pane{width:100%;min-width:0}.feb-proof .fbc-scroll{display:flex;justify-content:center;padding:0;overflow:visible!important;height:auto!important}
- .feb-proof .fbc-paper{box-shadow:0 8px 28px rgba(61,56,52,.09)}
- .feb-proof .fbc-dialog{z-index:100}
-}
-@media print{.feb-mobile,.feb-desktop-rail,.feb-proof-bar,.feb-gate,.feb-dialog,body:has(.feb-app) [data-chrome]{display:none!important}.feb-app.proof-open .feb-proof,.feb-proof{display:block!important;position:static!important;overflow:visible!important}.feb-content{display:block!important}}
+.laundry-page{--ink:#49403d;--soft:#827b72;--sage:#55735d;--rule:#ddd9d0;--rose:#9a6876;font-family:var(--font-sans,Arial,sans-serif);color:var(--ink);background:#fffdfa;min-height:100vh}
+.laundry-rail{padding:32px 22px 48px;background:#fffdfa}
+.laundry-back{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:underline;text-underline-offset:6px;margin-bottom:30px}
+.laundry-kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--soft)}
+.laundry-rail h1{font:400 43px/1.1 var(--font-serif,Georgia,serif);letter-spacing:-.025em;margin:15px 0}.laundry-rail h1 em,.laundry-paper h2 em{color:var(--rose);font-weight:400}
+.laundry-intro{font-size:14px;line-height:1.75;color:var(--soft);margin-bottom:28px}
+.laundry-controls{border-top:1px solid var(--rule);padding-top:20px}.laundry-controls .laundry-kicker{margin:0 0 18px}
+.laundry-controls label{display:block;font-size:12px;font-weight:700;margin:15px 0;color:var(--ink)}
+.laundry-controls input,.laundry-controls select{display:block;width:100%;min-height:43px;border:1px solid #d7d3cc;background:#fff;border-radius:3px;padding:10px;font:400 14px var(--font-sans,Arial,sans-serif);margin-top:7px;color:var(--ink)}
+.laundry-child{border-top:1px solid #eae6e0;margin-top:18px;padding-top:3px}.laundry-hint,.laundry-disclaimer{font-size:12px;line-height:1.65;color:var(--soft)}
+.laundry-actions{display:grid;gap:9px;margin:22px 0}.laundry-actions button{min-height:48px;border:1px solid var(--ink);border-radius:3px;padding:12px 14px;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}.laundry-actions .laundry-main{background:#514541;color:white}
+.laundry-preview{background:#ebeae6;padding:28px 16px 80px;min-width:0}.laundry-preview-head{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#716e68;max-width:820px;margin:0 auto 18px}
+.laundry-paper-stack{display:flex;flex-direction:column;align-items:center;gap:26px}.laundry-paper{width:816px;height:1056px;flex:none;position:relative;overflow:hidden;background:#fffefa;box-shadow:0 10px 34px #3d383122;padding:52px 59px 46px;font-family:var(--font-sans,Arial,sans-serif);color:#514b45}
+.paper-header,.paper-footer{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.16em;font-weight:700;color:#7b8175}.paper-header{border-bottom:1px solid #d5d9cf;padding-bottom:16px}.paper-footer{position:absolute;bottom:36px;left:59px;right:59px;border-top:1px solid #d5d9cf;padding-top:14px;font-size:9px}
+.paper-top{display:flex;justify-content:space-between;align-items:center;gap:25px;margin-top:42px}.paper-eyebrow{font-size:11px;letter-spacing:.16em;color:#71806f;font-weight:700}.paper-top h2,.back-intro h2{font:400 53px/1.05 var(--font-serif,Georgia,serif);letter-spacing:-.03em;margin:15px 0}.paper-top p,.back-intro p{font-size:14px;color:#80766e;line-height:1.65;max-width:380px}
+.icon-placeholder{border:1.5px dashed #adada4;background:#f7f5f0;color:#98948c;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;line-height:1.35;letter-spacing:.06em;font-weight:700;flex:none}
+.hero-icon{width:150px;height:150px;border-radius:50%}.paper-rule{border-top:1px solid #d8d7d0;margin:34px 0 24px}.paper-section-title{font:400 24px var(--font-serif,Georgia,serif);margin-bottom:20px}
+.ownership-card{display:flex;gap:20px;border:1px solid #e2e1d8;background:#faf9f5;padding:23px;margin-bottom:16px;min-height:180px}.ownership-icon{width:86px;height:86px;border-radius:50%}.ownership-card h3{font:400 26px var(--font-serif,Georgia,serif);margin:0 0 11px}.ownership-card h3 span{font:500 12px var(--font-sans,Arial,sans-serif);color:#777f72}.ownership-card ol{padding-left:18px;margin:0}.ownership-card li{font-size:13px;line-height:1.7}
+.operator{display:flex;align-items:center;gap:18px;margin:23px 0}.operator-icon{height:68px;width:68px}.operator p{font-size:13px;line-height:1.7;margin:0}.paper-callout{background:#e5eee5;padding:22px 25px;margin-top:20px}.paper-callout span,.megan-note span{display:block;color:#57715e;font-size:10px;letter-spacing:.16em;font-weight:800;margin-bottom:8px}.paper-callout strong{font:400 23px var(--font-serif,Georgia,serif)}.paper-callout p{font-size:12px;margin:6px 0 0}
+.back-intro{margin:43px 0 29px}.back-intro h2{font-size:48px}.laundry-steps{display:grid;gap:10px}.laundry-step{display:grid;grid-template-columns:94px 35px 1fr;align-items:center;gap:20px;border-bottom:1px solid #e1e0da;padding:10px 0}.laundry-step .icon-placeholder{width:88px;height:88px}.laundry-step span{font:400 27px var(--font-serif,Georgia,serif);color:#8b9a89}.laundry-step h3{font:400 22px var(--font-serif,Georgia,serif);margin:0 0 5px}.laundry-step p{font-size:12px;color:#7c736b;margin:0}.megan-note{background:#f6edef;padding:22px 27px;margin-top:30px}.megan-note span{color:#9a6876}.megan-note p{font:italic 17px/1.55 var(--font-serif,Georgia,serif);margin:5px 0 9px}.megan-note strong{font:400 15px var(--font-serif,Georgia,serif)}
+@media(min-width:1100px){html:has(.laundry-page),body:has(.laundry-page){height:100%;overflow:hidden}body:has(.laundry-page) #main{max-width:none!important;width:100%;height:calc(100dvh - 64px);min-height:0;overflow:hidden;padding:0!important;margin:0!important}.laundry-page{height:100%;min-height:0;display:grid;grid-template-columns:minmax(310px,375px) minmax(0,1fr);overflow:hidden}.laundry-rail{height:100%;overflow-y:auto;border-right:1px solid #dedbd2;padding:clamp(36px,5vh,56px) clamp(24px,2.6vw,42px) 40px}.laundry-preview{height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:clamp(32px,4vw,58px) 24px 90px}.laundry-preview-head{max-width:816px}}
+@media screen and (max-width:1099px){.laundry-paper-stack{transform-origin:top center}.laundry-preview{overflow:hidden}.laundry-paper{transform-origin:top center;margin-bottom:0}}
+@media print{@page{size:letter;margin:0}html,body{margin:0!important;padding:0!important;background:#fff!important}.laundry-page{display:block!important;background:white!important}.laundry-rail,.laundry-preview-head,body:has(.laundry-page) [data-chrome]{display:none!important}.laundry-preview{display:block!important;background:#fff!important;overflow:visible!important;padding:0!important;margin:0!important;height:auto!important}.laundry-paper-stack{display:block!important;transform:none!important}.laundry-paper{width:8.5in!important;height:11in!important;padding:52px 59px 46px!important;transform:none!important;box-shadow:none!important;margin:0!important;break-after:page;page-break-after:always}.laundry-paper:last-child{break-after:auto;page-break-after:auto}}
 </style>
 <script>
-import { clubAccountsEnabled } from '../../../data/club/config';
-import { getSession } from '../../../lib/account';
-import { loadKitHousehold } from '../../../lib/club/kit-household';
-import { accountStore, clubHref, sampleStore } from '../../../lib/club/store';
-import { routes } from '../../../routes';
-import type { Household } from '../../../lib/club/profile';
-type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
-const app=document.querySelector<HTMLElement>('.feb-app');
-if(app){
- const root=app.querySelector<HTMLElement>('.fbc')!;const content=app.querySelector<HTMLElement>('.feb-content')!;const gate=app.querySelector<HTMLElement>('[data-gate]')!;const dialog=app.querySelector<HTMLDialogElement>('[data-dialog]')!;
- const now=Date.now();const locked=now>Date.parse(app.dataset.deadline!);let cards:Card[]=[];let suggested:Card[]=[];let key='';let fingerprint='';let reviewed=false;
- const defaults=(h:Household):Card[]=>{
-  const all=h.members.filter(m=>!m.archived&&m.firstName.trim());const children=all.filter(m=>m.kind==='child');const adults=all.filter(m=>m.kind==='adult');const parents=adults.filter(m=>m.role==='parent'||m.role==='partner');
-  const ideas=[['Game night?','will you play a game with me tonight?',"I'll get the game ready!"],['Just us two','will you read a book with me after dinner?',"I'll pick the book!"],['I picked you!','want to build something with me this weekend?','You choose what we build.'],["Let's have fun!",'will you make a blanket fort with me?',"I'll bring the blankets!"]];
-  return ideas.map(([headline,body,idea],i)=>{const sender=(i<2?children[i%Math.max(children.length,1)]??adults[0]:adults[(i-2)%Math.max(adults.length,1)]??children[0]);const target=(i<2?parents[(i===0&&parents.length>1)?1:0]:children[(i-2)%Math.max(children.length,1)]);const recipient=(target&&target.id!==sender?.id?target:all.find(m=>m.id!==sender?.id));const idx=parents.findIndex(m=>m.id===recipient?.id);const to=sender?.kind==='child'&&idx>=0&&idx<2?(idx===0?'Mom':'Dad'):(recipient?.firstName??'');return {owner:sender?.firstName??'',recipient:to,headline,invite:to?`${to}, ${body}`:body[0].toUpperCase()+body.slice(1),idea};});
+type Level='helper'|'clothes'|'apprentice'|'full';
+type State={family:string;children:{name:string;level:Level}[];day:string;operator:string};
+const root=document.querySelector<HTMLElement>('[data-laundry-app]');
+if(root){
+ const defaults:State={family:'Rivera',children:[{name:'Sofia',level:'clothes'},{name:'Mateo',level:'clothes'}],day:'Saturday',operator:'Dad'};
+ const key='omc:club:february-laundry:v1';
+ const q=<T extends HTMLElement>(s:string)=>root.querySelector<T>(s)!;
+ let state:State=structuredClone(defaults);
+ try{const raw=localStorage.getItem(key);if(raw){const parsed=JSON.parse(raw);if(parsed?.children?.length===2)state={...defaults,...parsed}}}catch{}
+ const steps:Record<Level,string[]>={helper:['Put dirty clothes in my hamper.','Match socks with a grown-up.','Put away my simple clothes.'],clothes:['Put dirty clothes in my hamper.','Bring my hamper on laundry day.','Put clean clothes into my drawers.'],apprentice:['Collect and sort my dirty clothes.','Help a grown-up start the machines.','Fold or hang and put away my clothes.'],full:['Check if my clothes need washing.','Wash and dry safely after training.','Fold, hang, and put everything away.']};
+ const levels:Record<Level,string>={helper:'Laundry helper',clothes:'Clothes owner',apprentice:'Laundry apprentice',full:'Laundry owner'};
+ const update=()=>{q<HTMLInputElement>('[data-family]').value=state.family;q<HTMLElement>('[data-family-print]').textContent=state.family.toUpperCase();q<HTMLElement>('[data-operator-print]').textContent=state.operator;q<HTMLElement>('[data-day-print]').textContent=state.day;q<HTMLInputElement>('[data-operator]').value=state.operator;q<HTMLSelectElement>('[data-day]').value=state.day;
+  const cards=q<HTMLElement>('[data-print-children]');cards.replaceChildren();
+  state.children.forEach((c,i)=>{q<HTMLInputElement>(`[data-name="${i}"]`).value=c.name;q<HTMLSelectElement>(`[data-level="${i}"]`).value=c.level;const section=document.createElement('section');section.className='ownership-card';const icon=document.createElement('div');icon.className='ownership-icon icon-placeholder';icon.textContent='SHIRT ICON';const info=document.createElement('div');const h=document.createElement('h3');h.append(document.createTextNode(c.name+' '));const sub=document.createElement('span');sub.textContent='· '+levels[c.level];h.append(sub);const list=document.createElement('ol');steps[c.level].forEach(s=>{const li=document.createElement('li');li.textContent=s;list.append(li)});info.append(h,list);section.append(icon,info);cards.append(section)});
+  try{localStorage.setItem(key,JSON.stringify(state))}catch{}
  };
- const clone=(x:Card[])=>x.map(v=>({...v}));
- const paint=()=>{root.dispatchEvent(new CustomEvent('fbc-set',{detail:clone(cards)}));const list=app.querySelector<HTMLElement>('[data-cards]')!;list.replaceChildren();cards.forEach((card,i)=>{const b=document.createElement('button');b.type='button';b.className='feb-card';b.disabled=locked;b.setAttribute('aria-label',`${locked?'Invitation':'Edit invitation'} ${i+1}: ${card.headline}`);const title=document.createElement('strong');title.textContent=card.headline;const line=document.createElement('span');line.textContent=`${card.owner||'Choose a sender'} → ${card.recipient||'Choose a recipient'}${locked?'':' · Edit'}`;b.append(title,line);b.addEventListener('click',()=>open(i));list.append(b)});};
- const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({fingerprint,cards}))}catch{} reviewed=false;app.querySelector<HTMLElement>('[data-review]')!.textContent='Preview only · Review is optional';app.querySelector<HTMLElement>('[data-review-button]')!.textContent='Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review]')!.textContent='Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review-note]')!.textContent='Preview only. Review does not save, submit or mail anything.';};
- const open=(i:number)=>{const fields=app.querySelector<HTMLElement>('[data-fields]')!;fields.replaceChildren();app.querySelector<HTMLElement>('#feb-dialog-title')!.textContent=`Edit invitation ${i+1}`;for(const [field,label,max] of [['owner','From',32],['recipient','To',32],['headline','Invitation title',44],['invite','Personal invitation',88],['idea','A little extra note',180]] as const){const l=document.createElement('label');l.textContent=label;const el=field==='idea'?document.createElement('textarea'):document.createElement('input');el.maxLength=max;el.value=cards[i][field];el.addEventListener('input',()=>{const before=cards[i].recipient;cards[i][field]=el.value;if(field==='recipient'&&before&&cards[i].invite.startsWith(before+','))cards[i].invite=el.value+cards[i].invite.slice(before.length);save();paint();if(field==='recipient'){const invite=fields.querySelector<HTMLTextAreaElement|HTMLInputElement>('[data-name="invite"]');if(invite)invite.value=cards[i].invite}});el.dataset.name=field;l.append(el);fields.append(l)}dialog.showModal();};
- app.querySelector('[data-desktop-edit]')?.addEventListener('click',()=>root.querySelector<HTMLButtonElement>('[data-fbc-open]')?.click());
- app.querySelector('[data-desktop-reset]')?.addEventListener('click',()=>root.querySelector<HTMLButtonElement>('[data-reset]')?.click());
- app.querySelector('[data-desktop-review]')?.addEventListener('click',()=>app.querySelector<HTMLButtonElement>('[data-review-button]')?.click());
- app.querySelector('[data-reset-mobile]')?.addEventListener('click',()=>root.querySelector<HTMLButtonElement>('[data-reset]')?.click());
- app.querySelector('[data-done]')?.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
- root.addEventListener('fbc-change',(e:Event)=>{cards=clone((e as CustomEvent<{cards:Card[]}>).detail.cards);save();paint()});
- app.querySelector('[data-review-button]')?.addEventListener('click',()=>{reviewed=!reviewed;app.querySelector<HTMLElement>('[data-review]')!.textContent=reviewed?'Reviewed on this screen · No mailing submitted':'Preview only · Review is optional';app.querySelector<HTMLElement>('[data-review-button]')!.textContent=reviewed?'Undo review':'Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review]')!.textContent=reviewed?'Undo review':'Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review-note]')!.textContent=reviewed?'Reviewed on this screen. Nothing was saved, submitted or mailed.':'Preview only. Review does not save, submit or mail anything.'});
- let opener:HTMLElement|null=null;const proof=(open:boolean)=>{app.classList.toggle('proof-open',open);document.querySelectorAll<HTMLElement>('.feb-app .feb-mobile, body > header[data-chrome], nav[data-chrome]').forEach(el=>el.inert=open);if(open){opener=document.activeElement as HTMLElement;app.querySelector<HTMLButtonElement>('[data-close-proof]')?.focus()}else opener?.focus();window.dispatchEvent(new Event('resize'))};
- app.querySelector('[data-show-proof]')?.addEventListener('click',()=>proof(true));app.querySelector('[data-close-proof]')?.addEventListener('click',()=>proof(false));window.addEventListener('keydown',e=>{if(e.key==='Escape'&&app.classList.contains('proof-open'))proof(false)});app.querySelectorAll('[data-print-app]').forEach(b=>b.addEventListener('click',()=>{(document.activeElement as HTMLElement)?.blur();window.print()}));
- loadKitHousehold(app.dataset.slug!,location.search,{accountsEnabled:clubAccountsEnabled,hasSession:async()=>Boolean(await getSession()),accountStore,sampleStore}).then(result=>{
-  if(result.status!=='ready'){const sample='sample' in result?result.sample:null;const messages={empty:['Add your family first','Add family members to prepare your invitations.',clubHref(routes.clubFamily,sample)],denied:['February isn’t open for your account','This kit is not available to your account.',clubHref(routes.clubDashboard,sample)],'signed-out':['Sign in to see your invitations','Sign in to see your family’s cards.',routes.clubDashboard],error:['We couldn’t load your invitations','Check your connection and try again.','']} as const;const [title,description,href]=messages[result.status];gate.replaceChildren();const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=description;const a=document.createElement(href?'a':'button');a.textContent=href?'Continue':'Try again';if(a instanceof HTMLAnchorElement)a.href=href;else a.addEventListener('click',()=>location.reload());gate.append(h,p,a);app.dataset.state=result.status;return}
-  suggested=defaults(result.household);cards=clone(suggested);fingerprint=result.household.members.filter(m=>!m.archived).map(m=>`${m.id}:${m.firstName}:${m.kind}:${m.role}`).join('|');key='omc:club:february-mobile:v1:'+encodeURIComponent((result.sample?'sample:'+result.sample:'account:')+result.household.id);try{const data=JSON.parse(sessionStorage.getItem(key)??'null');if(data?.fingerprint===fingerprint&&Array.isArray(data.cards)&&data.cards.length===4&&data.cards.every((c:Card)=>['owner','recipient','headline','invite','idea'].every(k=>typeof c[k as keyof Card]==='string')))cards=clone(data.cards)}catch{}
-  root.addEventListener('fbc-reset',()=>{if(window.confirm('Restore all four suggested cards? Your changes to these cards will be removed.')){cards=clone(suggested);save();paint()}});app.querySelector<HTMLElement>('[data-family]')!.textContent=result.source==='sample'?result.sampleLabel:'Prepared for '+(result.household.displayName??'your family');app.querySelector<HTMLElement>('[data-sample]')!.hidden=result.source!=='sample';app.querySelector<HTMLElement>('[data-window]')!.textContent=locked?'Editing window closed. You can still print.':'Edit until '+new Intl.DateTimeFormat('en-US',{dateStyle:'long',timeZone:'America/New_York'}).format(new Date(app.dataset.deadline!))+' at 11:59 p.m. ET.';app.querySelector<HTMLElement>('[data-desktop-family]')!.textContent=(result.source==='sample'?result.sampleLabel:'Prepared for '+(result.household.displayName??'your family'))+'. Changes stay in this browser tab.';app.querySelector<HTMLElement>('[data-desktop-window]')!.textContent=app.querySelector<HTMLElement>('[data-window]')!.textContent;if(locked){(app.querySelector<HTMLButtonElement>('[data-desktop-edit]')!).disabled=true;(app.querySelector<HTMLButtonElement>('[data-desktop-reset]')!).disabled=true;(app.querySelector<HTMLButtonElement>('[data-reset-mobile]')!).hidden=true;root.querySelectorAll<HTMLElement>('[contenteditable]').forEach(e=>e.removeAttribute('contenteditable'));root.querySelectorAll<HTMLButtonElement>('[data-fbc-open],[data-reset]').forEach(e=>e.disabled=true)}paint();gate.hidden=true;content.hidden=false;app.dataset.state='ready';window.dispatchEvent(new Event('resize'));
- });
+ q<HTMLInputElement>('[data-family]').addEventListener('input',e=>{state.family=(e.currentTarget as HTMLInputElement).value;update()});
+ q<HTMLInputElement>('[data-operator]').addEventListener('input',e=>{state.operator=(e.currentTarget as HTMLInputElement).value;update()});
+ q<HTMLSelectElement>('[data-day]').addEventListener('change',e=>{state.day=(e.currentTarget as HTMLSelectElement).value;update()});
+ [0,1].forEach(i=>{q<HTMLInputElement>(`[data-name="${i}"]`).addEventListener('input',e=>{state.children[i].name=(e.currentTarget as HTMLInputElement).value;update()});q<HTMLSelectElement>(`[data-level="${i}"]`).addEventListener('change',e=>{state.children[i].level=(e.currentTarget as HTMLSelectElement).value as Level;update()})});
+ q<HTMLButtonElement>('[data-reset]').addEventListener('click',()=>{state=structuredClone(defaults);update()});
+ q<HTMLButtonElement>('[data-print]').addEventListener('click',()=>window.print());
+ const resize=()=>{if(window.innerWidth>=1100){root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='';p.style.marginBottom='' });return}const w=q<HTMLElement>('.laundry-preview').clientWidth-32;const s=Math.min(1,w/816);root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform=`scale(${s})`;p.style.marginBottom=`${1056*(s-1)}px`});};
+ update();resize();window.addEventListener('resize',resize);
+ window.addEventListener('beforeprint',()=>root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='';p.style.marginBottom=''}));window.addEventListener('afterprint',resize);
 }
 </script>
