@@ -410,7 +410,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string|null}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string|null}}).__ofcPreviewHousehold;if(cached)applyHousehold(cached);
  paint();
- const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>planFingerprint(state)};
+ // Past the editing cutoff (the Club plan page's rail): no typing on the sheet, no editor.
+ let locked=false;
+ const setLocked=(on:boolean)=>{locked=on;root.querySelectorAll<HTMLElement>('.osr-paper [contenteditable]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true'));if(on)editorDialog?.close()};
+ const openEditor=()=>{if(!locked&&editorDialog&&!editorDialog.open)editorDialog.showModal()};
+ const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>planFingerprint(state),setLocked,openEditor};
  (root as HTMLElement & {clubPlan?:OsrPlan}).clubPlan=plan;
 }
 </script>

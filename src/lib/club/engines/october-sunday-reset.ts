@@ -198,4 +198,8 @@ export const planFingerprint = (s: PlanState) =>
 export interface OsrPlan extends PlanResource<PlanState> {
   members: () => PlanMember[];
   nameOf: (m: PlanMember) => string;
+  /** Past the editing cutoff: the sheet stops taking typed edits and the editor stays closed. */
+  setLocked: (on: boolean) => void;
+  /** The desktop editor. */
+  openEditor: () => void;
 }

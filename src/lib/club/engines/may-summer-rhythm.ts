@@ -18,4 +18,9 @@ export interface MayState {
   rows: Array<{key: MayKey; title: string; desc: string; time: string}>;
   familyLabel: string;
 }
-export type MayPlan = PlanResource<MayState>;
+export interface MayPlan extends PlanResource<MayState> {
+  /** Past the editing cutoff: the sheet stops taking edits and the editor stays closed. */
+  setLocked: (on: boolean) => void;
+  /** The desktop editor for the day. */
+  openEditor: () => void;
+}
