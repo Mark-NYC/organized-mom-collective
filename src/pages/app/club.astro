@@ -6,10 +6,15 @@ import AppKitLibrary from '../../components/AppKitLibrary';
 ---
 <Layout title="Club" description="Monthly family tools and kit previews.">
 <div class="family-brand mx-auto max-w-4xl">
-<header><p class="label text-[#71866c]">ORGANIZED FAMILY CLUB</p><h1 class="family-title mt-4">One small win <em>each month.</em></h1><p class="family-lede mt-4">Practical, prepared tools that help everyone share the work. This is a preview library, not an active membership.</p></header>
+<header class="ofc-club-intro"><p class="label text-[#71866c]">ORGANIZED FAMILY CLUB</p><h1 class="family-title mt-4">One small win <em class="ofc-rose-emphasis">each month.</em></h1><p class="family-lede mt-4">Practical, prepared tools that help everyone share the work. This is a preview library, not an active membership.</p></header>
 <section class="mt-9"><h2 class="family-panel-title">12 months. 12 things you shouldn’t have to carry alone.</h2><p class="mt-2 text-sm text-warm-soft">Every month helps your family own one more part of everyday life. Preview each personalized tool below.</p><AppKitLibrary client:only="react" /></section>
 </div>
 <style is:global>
+/* Club landing palette accents. Calendar month cards retain their own canonical colors. */
+.family-brand .ofc-club-intro{background:#eaf2eb;border:1px solid #dde4dc;border-radius:18px;padding:clamp(20px,3vw,32px)}
+.family-brand .ofc-rose-emphasis{background:linear-gradient(transparent 73%,#f3d9de 73%,#f3d9de 93%,transparent 93%);-webkit-box-decoration-break:clone;box-decoration-break:clone;padding-inline:.05em}
+@media(max-width:639px){.family-brand .ofc-club-intro{padding:20px;border-radius:14px}}
+
 .ofc-app-month-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}
 .family-brand .ofc-app-month{display:block!important;min-width:0;overflow:hidden;background:#fff;border:1px solid #dadfd7;border-radius:12px}
 .family-brand .ofc-app-month-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:148px;padding:22px 20px}
