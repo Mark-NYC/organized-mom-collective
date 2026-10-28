@@ -92,7 +92,7 @@ const faqs = [
  function addChild(name='',age='7') {
    if(childrenFields.children.length >= 8) return;
    const row = document.createElement('div'); row.className='child-row';
-   row.innerHTML = '<label><span>Child’s first name</span><input name="child-name" required maxlength="40" placeholder="Child’s name"></label><label><span>Age</span><select name="child-age" aria-label="Select child’s age">'+Array.from({length:18},(_,i)=>'<option value="'+(i+1)+'">Age '+(i+1)+'</option>').join('')+'</select></label><button type="button" class="remove" aria-label="Remove child">×</button>';
+   row.innerHTML = `<label><span>Child's first name</span><input name="child-name" required maxlength="40" placeholder="Child's name"></label><label><span>Age</span><select name="child-age" aria-label="Select child's age">${Array.from({length:18},(_,i)=>`<option value="${i+1}">Age ${i+1}</option>`).join('')}</select></label><button type="button" class="remove" aria-label="Remove child">×</button>`;
    row.querySelector('input').value=name; row.querySelector('select').value=age;
    row.querySelector('button').addEventListener('click',()=>{if(childrenFields.children.length>1)row.remove();addButton.disabled=childrenFields.children.length>=8});
    childrenFields.append(row);addButton.disabled=childrenFields.children.length>=8;
