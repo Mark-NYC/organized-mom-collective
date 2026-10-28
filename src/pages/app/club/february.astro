@@ -1,59 +1,36 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find(k => k.month === '2027-02');
+if (!kit) throw new Error('February kit missing');
 ---
 <AppLayout title="February · Kids Laundry Ownership">
-<div class="laundry-page family-brand" data-laundry-app>
+<div class="laundry-page family-brand club-plan" data-laundry-app data-plan-state="loading" data-kit-slug={kit.slug} data-plan-month="February">
+  <div data-plan-gate class="laundry-gate">Preparing your family's laundry plan…</div>
   <aside class="laundry-rail">
     <a href="/app/club/" class="laundry-back">← Back to Club</a>
     <p class="laundry-kicker">FEBRUARY · KIT PREVIEW</p>
     <h1>My Laundry,<br/><em>My Job.</em></h1>
-    <p class="laundry-intro">A simple handoff for the clothes your kids wear. Everyone knows their part, and Mom doesn't have to chase the laundry.</p>
-    <section class="laundry-controls" aria-label="Customize February plan">
+    <p class="laundry-intro">A guide for every skill level in your household. Children sharing a level share one printable.</p>
+    <section class="laundry-controls">
       <p class="laundry-kicker">YOUR FAMILY'S PREPARED PLAN</p>
-      <label>Family name<input data-family maxlength="36" value="Rivera" /></label>
-      <div class="laundry-child"><label>Child 1<input data-name="0" maxlength="24" value="Sofia" /></label><label>Ownership level<select data-level="0"><option value="helper">Laundry helper</option><option value="clothes" selected>Clothes owner</option><option value="apprentice">Laundry apprentice</option><option value="full">Laundry owner</option></select></label></div>
-      <div class="laundry-child"><label>Child 2<input data-name="1" maxlength="24" value="Mateo" /></label><label>Ownership level<select data-level="1"><option value="helper">Laundry helper</option><option value="clothes" selected>Clothes owner</option><option value="apprentice">Laundry apprentice</option><option value="full">Laundry owner</option></select></label></div>
+      <p class="laundry-hint" data-family-summary>Loading family profile…</p>
+      <div data-child-controls></div>
       <label>Laundry day<select data-day><option>Saturday</option><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>As needed</option></select></label>
-      <label>Machine operator<input data-operator maxlength="28" value="Dad" /></label>
-      <p class="laundry-hint">Suggested levels are starting points. Choose what each child can safely do. Adults supervise machine use until a child is trained.</p>
+      <label>Machine operator<select data-operator></select></label>
+      <p class="laundry-hint">Age suggests a starting point. Change a child's level if their readiness is different. Machine operation requires training and supervision as appropriate.</p>
     </section>
-    <div class="laundry-actions"><button type="button" class="laundry-main" data-print>Download and print</button><button type="button" data-reset>Restore sample plan</button></div>
-    <p class="laundry-disclaimer">Prototype preview only. Changes are saved in this browser, not submitted for mailing or approval.</p>
+    <p class="laundry-hint" data-guide-summary></p>
+    <div class="laundry-actions"><button class="laundry-main" type="button" data-print>Download and print</button><button type="button" data-reset>Restore suggested plan</button></div>
+    <p class="laundry-disclaimer">Preview only. Edits stay in this browser tab; approval and mailing are not active.</p>
   </aside>
-  <main class="laundry-preview" aria-label="February two-sided printable preview">
-    <div class="laundry-preview-head"><span>Your February printable</span><span>Front + back · Letter size</span></div>
-    <div class="laundry-paper-stack">
-      <article class="laundry-paper" aria-label="Front of February printable">
-        <header class="paper-header"><span>ORGANIZED FAMILY CLUB · FEBRUARY</span><span>01 / FRONT</span></header>
-        <div class="paper-top"><div><span class="paper-eyebrow">THE <b data-family-print>RIVERA</b> FAMILY</span><h2>My Laundry,<br/><em>My Job.</em></h2><p>Everybody wears clothes. Everybody can help care for them.</p></div><div class="icon-placeholder hero-icon">LAUNDRY<br/>BASKET<br/>ICON</div></div>
-        <div class="paper-rule"></div><h3 class="paper-section-title">Here's what each of us owns.</h3>
-        <div data-print-children>
-          <section class="ownership-card"><div class="ownership-icon icon-placeholder">SHIRT<br/>ICON</div><div><h3>Sofia <span>· Clothes owner</span></h3><ol><li>Put dirty clothes in my hamper.</li><li>Bring my hamper on laundry day.</li><li>Put clean clothes into my drawers.</li></ol></div></section>
-          <section class="ownership-card"><div class="ownership-icon icon-placeholder">SHIRT<br/>ICON</div><div><h3>Mateo <span>· Clothes owner</span></h3><ol><li>Put dirty clothes in my hamper.</li><li>Bring my hamper on laundry day.</li><li>Put clean clothes into my drawers.</li></ol></div></section>
-        </div>
-        <div class="operator"><div class="icon-placeholder operator-icon">WASHER<br/>ICON</div><p><strong><span data-operator-print>Dad</span> owns the machines.</strong><br/>Wash and dry the loads on <span data-day-print>Saturday</span>. Help kids learn safely.</p></div>
-        <div class="paper-callout"><span>OUR FAMILY LAUNDRY RULE</span><strong>Dirty clothes in. Clean clothes away.</strong><p>The job isn't finished until the clothes are put away.</p></div>
-        <footer class="paper-footer"><span>ORGANIZED FAMILY CLUB</span><span>OUR LAUNDRY PLAN · FEBRUARY</span></footer>
-      </article>
-      <article class="laundry-paper laundry-back-paper" aria-label="Back of February printable">
-        <header class="paper-header"><span>ORGANIZED FAMILY CLUB · FEBRUARY</span><span>02 / BACK</span></header>
-        <div class="back-intro"><span class="paper-eyebrow">FOLLOW THE CLOTHES</span><h2>From hamper <em>to drawer.</em></h2><p>One simple path. The whole family can follow it.</p></div>
-        <div class="laundry-steps">
-          <div class="laundry-step"><div class="icon-placeholder">HAMPER<br/>ICON</div><div><span>01</span><h3>Collect</h3><p>Dirty clothes belong in the hamper.</p></div></div>
-          <div class="laundry-step"><div class="icon-placeholder">WASHER<br/>ICON</div><div><span>02</span><h3>Wash</h3><p>The machine operator starts the load.</p></div></div>
-          <div class="laundry-step"><div class="icon-placeholder">DRYER<br/>ICON</div><div><span>03</span><h3>Dry</h3><p>Move clothes to the dryer or drying rack.</p></div></div>
-          <div class="laundry-step"><div class="icon-placeholder">FOLDED<br/>SHIRT ICON</div><div><span>04</span><h3>Fold or hang</h3><p>Get each item ready to put away.</p></div></div>
-          <div class="laundry-step"><div class="icon-placeholder">DRESSER<br/>ICON</div><div><span>05</span><h3>Put away</h3><p>Clothes return to drawers or closets.</p></div></div>
-        </div>
-        <div class="megan-note"><span>A NOTE FROM MEGAN</span><p>Start small. Show your kids what done looks like, then give them room to own it. A little practice now means fewer reminders later.</p><strong>You've got this, Megan</strong></div>
-        <footer class="paper-footer"><span>ORGANIZED FAMILY CLUB</span><span>MY LAUNDRY, MY JOB · FEBRUARY</span></footer>
-      </article>
-    </div>
+  <main class="laundry-preview" aria-label="Personalized February printable preview">
+    <div class="laundry-preview-head"><span>Your February printable</span><span data-page-count>Preparing pages…</span></div>
+    <div class="laundry-paper-stack" data-pages></div>
   </main>
 </div>
-</AppLayout>
-<style is:global>
+</AppLayout><style is:global>
 .laundry-page{--ink:#49403d;--soft:#827b72;--sage:#55735d;--rule:#ddd9d0;--rose:#9a6876;font-family:var(--font-sans,Arial,sans-serif);color:var(--ink);background:#fffdfa;min-height:100vh}
 .laundry-rail{padding:32px 22px 48px;background:#fffdfa}
 .laundry-back{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:underline;text-underline-offset:6px;margin-bottom:30px}
@@ -77,32 +54,122 @@ import '../../../styles/family-app-brand.css';
 @media(min-width:1100px){html:has(.laundry-page),body:has(.laundry-page){height:100%;overflow:hidden}body:has(.laundry-page) #main{max-width:none!important;width:100%;height:calc(100dvh - 64px);min-height:0;overflow:hidden;padding:0!important;margin:0!important}.laundry-page{height:100%;min-height:0;display:grid;grid-template-columns:minmax(310px,375px) minmax(0,1fr);overflow:hidden}.laundry-rail{height:100%;overflow-y:auto;border-right:1px solid #dedbd2;padding:clamp(36px,5vh,56px) clamp(24px,2.6vw,42px) 40px}.laundry-preview{height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:clamp(32px,4vw,58px) 24px 90px}.laundry-preview-head{max-width:816px}}
 @media screen and (max-width:1099px){.laundry-paper-stack{transform-origin:top center}.laundry-preview{overflow:hidden}.laundry-paper{transform-origin:top center;margin-bottom:0}}
 @media print{@page{size:letter;margin:0}html,body{margin:0!important;padding:0!important;background:#fff!important}.laundry-page{display:block!important;background:white!important}.laundry-rail,.laundry-preview-head,body:has(.laundry-page) [data-chrome]{display:none!important}.laundry-preview{display:block!important;background:#fff!important;overflow:visible!important;padding:0!important;margin:0!important;height:auto!important}.laundry-paper-stack{display:block!important;transform:none!important}.laundry-paper{width:8.5in!important;height:11in!important;padding:52px 59px 46px!important;transform:none!important;box-shadow:none!important;margin:0!important;break-after:page;page-break-after:always}.laundry-paper:last-child{break-after:auto;page-break-after:auto}}
-</style>
-<script>
-type Level='helper'|'clothes'|'apprentice'|'full';
-type State={family:string;children:{name:string;level:Level}[];day:string;operator:string};
+
+.laundry-page[data-plan-state="loading"] .laundry-rail,.laundry-page[data-plan-state="loading"] .laundry-preview,
+.laundry-page:not([data-plan-state="ready"]):not([data-plan-state="loading"]) .laundry-rail,.laundry-page:not([data-plan-state="ready"]):not([data-plan-state="loading"]) .laundry-preview{display:none!important}
+.laundry-page[data-plan-state="ready"] [data-plan-gate]{display:none}
+.laundry-gate{padding:50px;max-width:550px;font-size:16px;line-height:1.7}
+.laundry-child{padding-bottom:8px}
+.laundry-child .laundry-age{color:#81796f;font-size:11px;font-weight:400}
+.laundry-paper .paper-top{margin-top:26px}
+.laundry-paper .paper-top h2{font-size:44px}
+.laundry-paper .ownership-card{min-height:0;margin-bottom:11px;padding:16px 20px}
+.laundry-paper .ownership-card ol{padding-left:18px}
+.laundry-paper .paper-callout{margin-top:16px}
+.laundry-page .laundry-instructions{margin:30px 0 22px;display:grid;gap:10px}
+.laundry-page .laundry-instruction{display:grid;grid-template-columns:70px 1fr;gap:16px;align-items:center;border-bottom:1px solid #e0ded7;padding:8px 0}
+.laundry-page .laundry-instruction .icon-placeholder{width:62px;height:62px}
+.laundry-page .laundry-instruction h3{font:400 19px var(--font-serif,Georgia,serif);margin:0 0 3px}
+.laundry-page .laundry-instruction p{font-size:12px;line-height:1.45;margin:0;color:#777269}
+.laundry-page .laundry-instruction small{font-size:10px;color:#6a826d;letter-spacing:.13em}
+.laundry-page .laundry-paper .megan-note{margin-top:22px;padding:16px 20px}
+.laundry-page .laundry-paper .megan-note p{font-size:14px}
+@media print{.laundry-page .laundry-paper{break-after:page!important;page-break-after:always!important}.laundry-page .laundry-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
+</style><script>
+import { clubAccountsEnabled } from '../../../data/club/config';
+import { getSession } from '../../../lib/account';
+import { loadKitHousehold } from '../../../lib/club/kit-household';
+import { accountStore, sampleStore, clubHref } from '../../../lib/club/store';
+import { ageInMonth } from '../../../lib/club/profile';
+import type { Household } from '../../../lib/club/profile';
+type Level='young'|'older';
+type Kid={id:string;name:string;age:number;level:Level};
+type State={children:Kid[];day:string;operator:string};
 const root=document.querySelector<HTMLElement>('[data-laundry-app]');
 if(root){
- const defaults:State={family:'Rivera',children:[{name:'Sofia',level:'clothes'},{name:'Mateo',level:'clothes'}],day:'Saturday',operator:'Dad'};
- const key='omc:club:february-laundry:v1';
  const q=<T extends HTMLElement>(s:string)=>root.querySelector<T>(s)!;
- let state:State=structuredClone(defaults);
- try{const raw=localStorage.getItem(key);if(raw){const parsed=JSON.parse(raw);if(parsed?.children?.length===2)state={...defaults,...parsed}}}catch{}
- const steps:Record<Level,string[]>={helper:['Put dirty clothes in my hamper.','Match socks with a grown-up.','Put away my simple clothes.'],clothes:['Put dirty clothes in my hamper.','Bring my hamper on laundry day.','Put clean clothes into my drawers.'],apprentice:['Collect and sort my dirty clothes.','Help a grown-up start the machines.','Fold or hang and put away my clothes.'],full:['Check if my clothes need washing.','Wash and dry safely after training.','Fold, hang, and put everything away.']};
- const levels:Record<Level,string>={helper:'Laundry helper',clothes:'Clothes owner',apprentice:'Laundry apprentice',full:'Laundry owner'};
- const update=()=>{q<HTMLInputElement>('[data-family]').value=state.family;q<HTMLElement>('[data-family-print]').textContent=state.family.toUpperCase();q<HTMLElement>('[data-operator-print]').textContent=state.operator;q<HTMLElement>('[data-day-print]').textContent=state.day;q<HTMLInputElement>('[data-operator]').value=state.operator;q<HTMLSelectElement>('[data-day]').value=state.day;
-  const cards=q<HTMLElement>('[data-print-children]');cards.replaceChildren();
-  state.children.forEach((c,i)=>{q<HTMLInputElement>(`[data-name="${i}"]`).value=c.name;q<HTMLSelectElement>(`[data-level="${i}"]`).value=c.level;const section=document.createElement('section');section.className='ownership-card';const icon=document.createElement('div');icon.className='ownership-icon icon-placeholder';icon.textContent='SHIRT ICON';const info=document.createElement('div');const h=document.createElement('h3');h.append(document.createTextNode(c.name+' '));const sub=document.createElement('span');sub.textContent='· '+levels[c.level];h.append(sub);const list=document.createElement('ol');steps[c.level].forEach(s=>{const li=document.createElement('li');li.textContent=s;list.append(li)});info.append(h,list);section.append(icon,info);cards.append(section)});
-  try{localStorage.setItem(key,JSON.stringify(state))}catch{}
+ const key='omc:club:february-laundry:v2';
+ let suggested:State|null=null;
+ let state:State|null=null;
+ let label='Our';
+ const escapeText=(s:string)=>s;
+ const element=(tag:string,cls?:string,value?:string)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(value!==undefined)el.textContent=value;return el};
+ const icon=(name:string,cls='')=>element('div','icon-placeholder '+cls,name.toUpperCase()+' ICON');
+ const steps={
+  young:[
+   ['Hamper','Put worn clothes in your hamper, not on the floor.'],
+   ['Gather','Bring the hamper to the laundry spot on laundry day.'],
+   ['Sort','Help separate clothes when a grown-up asks.'],
+   ['Put away','Put your own clean clothes in their drawers or closet.']
+  ],
+  older:[
+   ['Check pockets','Empty pockets and check clothing care labels.'],
+   ['Sort','Separate items by care instructions and colors as needed.'],
+   ['Load washer','Add clothes without overfilling the washer.'],
+   ['Detergent','Use the right amount of the family detergent. Ask before handling concentrated products.'],
+   ['Choose cycle','Follow garment labels and the machine instructions. Ask about unfamiliar settings.'],
+   ['Transfer','Move clothes promptly. Check lint filter before using a dryer.'],
+   ['Dry','Use the right setting or hang delicate items to dry.'],
+   ['Fold and put away','Fold or hang everything and return it to its place.']
+  ]
  };
- q<HTMLInputElement>('[data-family]').addEventListener('input',e=>{state.family=(e.currentTarget as HTMLInputElement).value;update()});
- q<HTMLInputElement>('[data-operator]').addEventListener('input',e=>{state.operator=(e.currentTarget as HTMLInputElement).value;update()});
- q<HTMLSelectElement>('[data-day]').addEventListener('change',e=>{state.day=(e.currentTarget as HTMLSelectElement).value;update()});
- [0,1].forEach(i=>{q<HTMLInputElement>(`[data-name="${i}"]`).addEventListener('input',e=>{state.children[i].name=(e.currentTarget as HTMLInputElement).value;update()});q<HTMLSelectElement>(`[data-level="${i}"]`).addEventListener('change',e=>{state.children[i].level=(e.currentTarget as HTMLSelectElement).value as Level;update()})});
- q<HTMLButtonElement>('[data-reset]').addEventListener('click',()=>{state=structuredClone(defaults);update()});
- q<HTMLButtonElement>('[data-print]').addEventListener('click',()=>window.print());
- const resize=()=>{if(window.innerWidth>=1100){root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='';p.style.marginBottom='' });return}const w=q<HTMLElement>('.laundry-preview').clientWidth-32;const s=Math.min(1,w/816);root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform=`scale(${s})`;p.style.marginBottom=`${1056*(s-1)}px`});};
- update();resize();window.addEventListener('resize',resize);
- window.addEventListener('beforeprint',()=>root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='';p.style.marginBottom=''}));window.addEventListener('afterprint',resize);
+ const createPage=(level:Level,children:Kid[])=>{
+  const paper=element('article','laundry-paper');
+  paper.setAttribute('aria-label',level==='young'?'Younger kids laundry guide':'Older kids laundry guide');
+  const header=element('header','paper-header');header.append(element('span','', 'ORGANIZED FAMILY CLUB · FEBRUARY'),element('span','',level==='young'?'MY CLOTHES':'MY LAUNDRY'));paper.append(header);
+  const top=element('div','paper-top');const head=element('div');head.append(element('span','paper-eyebrow',label.toUpperCase()+' FAMILY'));
+  const h2=element('h2');h2.append(document.createTextNode(level==='young'?'My Clothes, ':'I Can Do '));const em=element('em','',level==='young'?'My Job.':'My Laundry.');h2.append(em);head.append(h2);
+  head.append(element('p','',level==='young'?'Care for what you wear. Every day.':'From dirty clothes to clean drawers. Follow the steps and ask for help when needed.'));
+  top.append(head,icon(level==='young'?'laundry hamper':'washing machine','hero-icon'));paper.append(top);
+  const rule=element('div','paper-rule');paper.append(rule);
+  const names=element('h3','paper-section-title',children.map(c=>c.name).join(' · '));paper.append(names);
+  const sub=element('p','',level==='young'?'Your jobs, every laundry day:':'Your laundry checklist:');sub.style.fontSize='13px';paper.append(sub);
+  const list=element('div','laundry-instructions');
+  steps[level].forEach(([name,desc],i)=>{const row=element('div','laundry-instruction');row.append(icon(name));const info=element('div');info.append(element('small','',String(i+1).padStart(2,'0')),element('h3','',name),element('p','',desc));row.append(info);list.append(row)});
+  paper.append(list);
+  const call=element('div','paper-callout');call.append(element('span','',level==='young'?'YOUR FINISH LINE':'DONE MEANS DONE'),element('strong','',level==='young'?'Clean clothes go home.':'Washed. Dried. Put away.'),element('p','',level==='young'?'Grown-ups handle the machines until you are ready.':'Only operate machines after training. Ask an adult about anything unfamiliar.'));paper.append(call);
+  const note=element('div','megan-note');note.append(element('span','','A NOTE FROM MEGAN'),element('p','',level==='young'?'Even small jobs count. When everyone cares for their clothes, the whole family has less to manage.':'Learning to handle your own laundry takes practice. Keep the steps nearby until they become second nature.'));paper.append(note);
+  const foot=element('footer','paper-footer');foot.append(element('span','','ORGANIZED FAMILY CLUB'),element('span','','FEBRUARY · LAUNDRY OWNERSHIP'));paper.append(foot);
+  return paper;
+ };
+ const save=()=>{if(!state)return;try{sessionStorage.setItem(key,JSON.stringify({familyId:householdId,profileVersion,edits:state}))}catch{}};
+ let householdId='',profileVersion=0;
+ const render=()=>{
+  if(!state)return;
+  const controls=q<HTMLElement>('[data-child-controls]');controls.replaceChildren();
+  state.children.forEach(k=>{const wrapper=element('div','laundry-child');const l=element('label');l.append(document.createTextNode(k.name+' '));l.append(element('span','laundry-age','Age '+k.age));const sel=document.createElement('select');sel.setAttribute('aria-label',k.name+' laundry level');
+   for(const [value,title] of [['young','My clothes, my responsibility'],['older','I can do my own laundry']]){const o=document.createElement('option');o.value=value;o.textContent=title;sel.append(o)}
+   sel.value=k.level;sel.addEventListener('change',()=>{k.level=sel.value as Level;save();render()});l.append(sel);wrapper.append(l);controls.append(wrapper)});
+  q<HTMLSelectElement>('[data-day]').value=state.day;
+  const op=q<HTMLSelectElement>('[data-operator]');op.value=state.operator;
+  const levels:Level[]=['young','older'];const used=levels.filter(l=>state!.children.some(k=>k.level===l));
+  const pages=q<HTMLElement>('[data-pages]');pages.replaceChildren(...used.map(l=>createPage(l,state!.children.filter(k=>k.level===l))));
+  q<HTMLElement>('[data-page-count]').textContent=used.length+' '+(used.length===1?'page':'pages')+' · Letter size';
+  q<HTMLElement>('[data-guide-summary]').textContent=used.length===1?'One guide for '+state.children.length+' '+(state.children.length===1?'child':'children')+'.':'Two guides, one for each readiness group. No duplicate pages.';
+  resize();
+ };
+ const resize=()=>{if(window.innerWidth>=1100){root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='';p.style.marginBottom=''});return}const w=q<HTMLElement>('.laundry-preview').clientWidth-32;const s=Math.min(1,w/816);root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='scale('+s+')';p.style.marginBottom=(1056*(s-1))+'px'})};
+ const showError=(title:string,message:string,url:string='/app/club/')=>{root.dataset.planState='error';const gate=q<HTMLElement>('[data-plan-gate]');gate.replaceChildren(element('h2','',title),element('p','',message));const link=element('a','', 'Back to Club');(link as HTMLAnchorElement).href=url;gate.append(link)};
+ const loaded=await loadKitHousehold(root.dataset.kitSlug??'',location.search,{accountsEnabled:clubAccountsEnabled,hasSession:async()=>Boolean(await getSession()),accountStore,sampleStore});
+ if(loaded.status!=='ready'){showError(loaded.status==='signed-out'?'Sign in to view February':loaded.status==='empty'?'Add your family first':'February plan unavailable',loaded.status==='signed-out'?'Your plan is prepared using your saved family profile.':'A household profile and February access are required.');}
+ else {
+  const h:Household=loaded.household;householdId=h.id;profileVersion=h.profileVersion;
+  label=(h.displayName||loaded.sampleLabel.replace(/^Sample:\s*/,'')||'Our').replace(/\s+family$/i,'');
+  const kids=h.members.filter(m=>m.kind==='child'&&!m.archived&&m.firstName.trim()).map(m=>{const age=m.birthYear?ageInMonth(m.birthYear,m.birthMonth,'2027-02'):0;return{id:m.id,name:m.firstName,age,level:(age>=9?'older':'young') as Level}});
+  if(!kids.length){showError('No children in this household','Add children to your profile to prepare their laundry guides.');}
+  else {
+   const adults=h.members.filter(m=>m.kind==='adult'&&!m.archived);const operator=adults.find(m=>!m.isAccountHolder)?.firstName||adults[0]?.firstName||'Adult';
+   const op=q<HTMLSelectElement>('[data-operator]');adults.forEach(a=>{const o=document.createElement('option');o.value=a.firstName;o.textContent=a.firstName;op.append(o)});
+   suggested={children:kids,day:'Saturday',operator};state=structuredClone(suggested);
+   try{const saved=JSON.parse(sessionStorage.getItem(key)||'null');if(saved?.familyId===h.id&&saved.profileVersion===h.profileVersion){const edits=saved.edits as State;state.day=edits.day||'Saturday';state.operator=adults.some(a=>a.firstName===edits.operator)?edits.operator:operator;state.children.forEach(k=>{const match=edits.children?.find(c=>c.id===k.id);if(match&&(match.level==='young'||match.level==='older'))k.level=match.level})}}catch{}
+   q<HTMLElement>('[data-family-summary]').textContent=label+' family · '+kids.length+' '+(kids.length===1?'child':'children')+(loaded.source==='sample'?' · Sample preview':'');
+   q<HTMLSelectElement>('[data-day]').addEventListener('change',e=>{state!.day=(e.currentTarget as HTMLSelectElement).value;save();render()});
+   op.addEventListener('change',()=>{state!.operator=op.value;save();render()});
+   q<HTMLButtonElement>('[data-reset]').addEventListener('click',()=>{state=structuredClone(suggested!);save();render()});
+   q<HTMLButtonElement>('[data-print]').addEventListener('click',()=>window.print());
+   root.dataset.planState='ready';render();window.addEventListener('resize',resize);
+   window.addEventListener('beforeprint',()=>root.querySelectorAll<HTMLElement>('.laundry-paper').forEach(p=>{p.style.transform='';p.style.marginBottom=''}));window.addEventListener('afterprint',resize);
+  }
+ }
 }
 </script>
