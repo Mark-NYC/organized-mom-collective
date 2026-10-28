@@ -101,7 +101,7 @@ export default function AppKitLibrary() {
         const src = icons[`../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
         const calendarColor = monthColors[index].hex;
         return (
-          <article className="ofc-app-month" key={m.month}>
+          <article className="ofc-app-month" key={m.month} style={{ display: 'block' }}>
             <div className="ofc-app-month-header" style={{ backgroundColor: calendarColor }}>
               <div className="ofc-app-month-header-text">
                 <p className="ofc-app-month-name">{m.month}</p>
