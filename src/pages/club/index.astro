@@ -92,7 +92,7 @@ const faqs = [
  function addChild(name='',age='7') {
    if(childrenFields.children.length >= 8) return;
    const row = document.createElement('div'); row.className='child-row';
-   row.innerHTML = `<label><span>Child's first name</span><input name="child-name" required maxlength="40" placeholder="Child's name"></label><label><span>Age</span><select name="child-age" aria-label="Select child's age">${Array.from({length:18},(_,i)=>`<option value="${i+1}">Age ${i+1}</option>`).join('')}</select></label><button type="button" class="remove" aria-label="Remove child">×</button>`;
+   row.innerHTML = `<label class="child-name-field"><span>Child's first name</span><input type="text" name="child-name" required maxlength="40" placeholder="Enter child's name" autocomplete="off"></label><label class="child-age-field"><span>Age</span><select name="child-age" aria-label="Select child's age">${Array.from({length:18},(_,i)=>`<option value="${i+1}">${i+1} years</option>`).join('')}</select></label><button type="button" class="remove" aria-label="Remove child" title="Remove child">×</button>`;
    row.querySelector('input').value=name; row.querySelector('select').value=age;
    row.querySelector('button').addEventListener('click',()=>{if(childrenFields.children.length>1)row.remove();addButton.disabled=childrenFields.children.length>=8});
    childrenFields.append(row);addButton.disabled=childrenFields.children.length>=8;
@@ -580,6 +580,54 @@ const faqs = [
 @media(max-width:370px){
  .club .preview-page-content{padding:17px 14px 32px}
  .club .preview-page-header{padding:10px 12px}
+}
+</style>
+
+<style is:global>
+/* Dynamically created child fields do not receive Astro's scoped style attribute.
+   Apply these explicitly global rules only within the Club sales demo form. */
+#family-form #children-fields{display:grid;gap:12px;margin-top:12px}
+#family-form #children-fields .child-row{
+ display:grid;grid-template-columns:minmax(0,1fr) 118px 36px;
+ align-items:end;gap:12px;min-width:0;margin:0;
+}
+#family-form #children-fields .child-row label{
+ display:flex;flex-direction:column;min-width:0;gap:7px;
+ font-size:12px;font-weight:750;line-height:1.35;color:#4d4544;
+}
+#family-form #children-fields .child-row label span{
+ display:block;margin:0;white-space:normal;
+}
+#family-form #children-fields .child-row input,
+#family-form #children-fields .child-row select{
+ display:block;box-sizing:border-box;width:100%;min-width:0;
+ height:50px;margin:0;padding:11px 12px;
+ border:2px solid #aaa7a2;border-radius:7px;
+ background:#fff;color:#303831;
+ box-shadow:0 2px 0 rgba(77,69,68,.06);
+ font:600 16px/1.2 inherit;
+ font-size:16px;
+}
+#family-form #children-fields .child-row input::placeholder{color:#827d77;font-weight:400;opacity:1}
+#family-form #children-fields .child-row select{
+ appearance:auto;-webkit-appearance:menulist;cursor:pointer;padding-right:6px;
+}
+#family-form #children-fields .child-row input:focus,
+#family-form #children-fields .child-row select:focus{
+ border-color:#955b63;outline:3px solid rgba(194,246,170,.75);outline-offset:1px;
+}
+#family-form #children-fields .child-row .remove{
+ display:flex;align-items:center;justify-content:center;
+ width:36px;height:50px;margin:0;padding:0;
+ border:0;background:transparent;color:#88616a;
+ font-size:25px;line-height:1;cursor:pointer;
+}
+#family-form #children-fields .child-row .remove:hover{color:#5c3d45}
+@media(max-width:420px){
+ #family-form #children-fields .child-row{
+  grid-template-columns:minmax(0,1fr) 100px 30px;gap:8px;
+ }
+ #family-form #children-fields .child-row .remove{width:30px}
 }
 </style>
 </PublicLayout>
