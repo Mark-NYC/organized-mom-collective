@@ -75,6 +75,7 @@ if (!kit) throw new Error('February kit missing');
 .laundry-page .laundry-paper .megan-note{margin-top:22px;padding:16px 20px}
 .laundry-page .laundry-paper .megan-note p{font-size:14px}
 @media print{.laundry-page .laundry-paper{break-after:page!important;page-break-after:always!important}.laundry-page .laundry-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
+.laundry-older-paper .paper-top{margin-top:17px}.laundry-older-paper .paper-top h2{font-size:38px;margin:8px 0}.laundry-older-paper .paper-top p{font-size:12px;line-height:1.4}.laundry-older-paper .hero-icon{width:105px;height:105px}.laundry-older-paper .paper-rule{margin:18px 0 12px}.laundry-older-paper .paper-section-title{font-size:21px;margin-bottom:6px}.laundry-older-paper .laundry-instructions{gap:2px;margin:12px 0}.laundry-older-paper .laundry-instruction{grid-template-columns:52px 1fr;gap:11px;padding:5px 0}.laundry-older-paper .laundry-instruction .icon-placeholder{width:48px;height:48px;font-size:8px}.laundry-older-paper .laundry-instruction h3{font-size:16px;margin-bottom:0}.laundry-older-paper .laundry-instruction p{font-size:10px;line-height:1.35}.laundry-older-paper .laundry-instruction small{font-size:8px}.laundry-older-paper .paper-callout{margin-top:11px;padding:12px 16px}.laundry-older-paper .paper-callout strong{font-size:18px}.laundry-older-paper .megan-note{margin-top:11px;padding:11px 15px}.laundry-older-paper .megan-note p{font-size:12px;line-height:1.3}
 </style><script>
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
@@ -92,7 +93,6 @@ if(root){
  let suggested:State|null=null;
  let state:State|null=null;
  let label='Our';
- const escapeText=(s:string)=>s;
  const element=(tag:string,cls?:string,value?:string)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(value!==undefined)el.textContent=value;return el};
  const icon=(name:string,cls='')=>element('div','icon-placeholder '+cls,name.toUpperCase()+' ICON');
  const steps={
@@ -114,7 +114,7 @@ if(root){
   ]
  };
  const createPage=(level:Level,children:Kid[])=>{
-  const paper=element('article','laundry-paper');
+  const paper=element('article','laundry-paper '+(level==='older'?'laundry-older-paper':'laundry-young-paper'));
   paper.setAttribute('aria-label',level==='young'?'Younger kids laundry guide':'Older kids laundry guide');
   const header=element('header','paper-header');header.append(element('span','', 'ORGANIZED FAMILY CLUB · FEBRUARY'),element('span','',level==='young'?'MY CLOTHES':'MY LAUNDRY'));paper.append(header);
   const top=element('div','paper-top');const head=element('div');head.append(element('span','paper-eyebrow',label.toUpperCase()+' FAMILY'));
