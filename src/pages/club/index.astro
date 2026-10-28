@@ -46,7 +46,7 @@ const faqs = [
 {[months[3],months[4],months[10]].map(m=><article class="story-card"><div class="story-top"><img src={m.icon} alt="" loading="lazy" width="90" height="90"/><span class="ready-label">READY TO USE</span></div><p class="story-month">{m.month}</p><h3>{m.title}</h3><p>{m.how}</p><a href={m.url}>See the actual tool →</a></article>)}
 </div><details class="all-months"><summary>Explore all 12 monthly tools <span>+</span></summary><div class="month-grid">{months.map(m=><a href={m.url}><img src={m.icon} alt="" width="54" height="54" loading="lazy"/><div><small>{m.month}</small><b>{m.title}</b><span>Preview →</span></div></a>)}</div></details></div></div></section>
 <section class="club-demo" id="demo"><div class="club-demo-inner"><div class="club-demo-heading"><p class="eyebrow">SEE IT FOR YOUR OWN FAMILY</p><h2>The plan is <span class="lime-highlight">already made.</span> <em>The guesswork is already gone.</em></h2><p>Give us a few first names and ages. We'll show you a sample Daily Reset with responsibilities already suggested for your household.</p><p class="demo-disclaimer">This is a free interactive example, not an actual monthly mailing. No payment or account needed.</p></div>
-<form id="family-form" class="form" autocomplete="off"><p class="form-kicker">YOUR FREE PERSONALIZED EXAMPLE</p><h2>Let's make your family's plan.</h2><p>First names and children's ages are all we need for this sample.</p><div class="name-fields"><label>Mom's first name<input name="mom" id="mom" placeholder="Megan" maxlength="40" required /></label><label>Dad's first name<input name="dad" id="dad" placeholder="Mark" maxlength="40" required /></label></div><div class="children-head"><strong>Your kids</strong><span>First names only</span></div><div id="children-fields"></div><button type="button" class="add" id="add-child">+ Add a child</button><button type="submit" class="primary form-submit">Create My Family's Preview <span class="lime-arrow" aria-hidden="true">→</span></button><small>No sign-in. Your details stay in this browser.</small></form></div></section>
+<form id="family-form" class="form" autocomplete="off"><p class="form-kicker">YOUR FREE PERSONALIZED EXAMPLE</p><h2>Let's make your family's plan.</h2><p>Enter your family's names and choose each child's age below.</p><div class="name-fields"><label>Mom's first name<input name="mom" id="mom" placeholder="Enter name" autocomplete="off" maxlength="40" required /></label><label>Dad's first name<input name="dad" id="dad" placeholder="Enter name" autocomplete="off" maxlength="40" required /></label></div><div class="children-head"><strong>Your kids</strong><span>Tap a field to edit</span></div><div id="children-fields"></div><button type="button" class="add" id="add-child">+ Add a child</button><button type="submit" class="primary form-submit">Create My Family's Preview <span class="lime-arrow" aria-hidden="true">→</span></button><small>No sign-in. Your details stay in this browser.</small></form></div></section>
 <section class="result" id="result" hidden aria-live="polite"><div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PREVIEW IS READY</p><h2>This is what done-for-you can look like.</h2><p>Everyone has a part. Nobody has to guess. Your monthly Club tools would tackle different challenges using the same personalized approach.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div><div class="result-card"><span>YOUR FAMILY'S DAILY RESET</span><h3>Made for your household.</h3><p>A free example using names and age-appropriate responsibilities.</p><button type="button" class="primary" id="open-preview">View your family's plan →</button></div></div></section>
 <dialog id="club-preview-modal" class="club-preview-modal" aria-labelledby="club-modal-title"><div class="modal-top"><div><span class="eyebrow">YOUR FAMILY'S PLAN</span><h2 id="club-modal-title">Your Daily Reset is ready.</h2></div><button type="button" id="close-preview" class="modal-close" aria-label="Close preview">×</button></div><p class="modal-intro">A sample cleanup plan, prepared using your family's names and ages. Actual Club mailings feature different monthly tools.</p><div class="modal-paper"><div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div><h3>Our Family's <em>Daily Reset</em></h3><p>A few minutes together. A fresh start tomorrow.</p><div class="sheet-section-label">EVERYONE HAS A PART</div><div id="modal-assignments" class="sheet-assignments"></div><div class="modal-paper-end">NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</div></div><p class="modal-note">This is a personalized sample, not a physical product order.</p><div class="modal-actions"><a href="#offer" id="modal-club" class="primary">Get Monthly Plans Delivered →</a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div></dialog>
 <section class="how container" id="how"><p class="eyebrow">THREE SIMPLE STEPS</p><h2>We do the preparation. <em>Your family gets started.</em></h2><div class="step-grid"><article><b>1</b><h3>Tell us about your family.</h3><p>A few household details help us make practical recommendations.</p></article><article><b>2</b><h3>We prepare your plan.</h3><p>Each month focuses on one everyday challenge. Review and adjust it if you want.</p></article><article><b>3</b><h3>Find it in your mailbox.</h3><p>It's printed and ready to put on the fridge and talk through together.</p></article></div><p class="how-note">No elaborate setup. No new app everyone has to learn.</p></section>
@@ -70,7 +70,7 @@ const faqs = [
  function addChild(name='',age='7') {
    if(childrenFields.children.length >= 8) return;
    const row = document.createElement('div'); row.className='child-row';
-   row.innerHTML = '<label><span class="sr-only">Child name</span><input name="child-name" required maxlength="40" placeholder="Child’s name"></label><label><span class="sr-only">Child age</span><select name="child-age">'+Array.from({length:18},(_,i)=>'<option value="'+(i+1)+'">Age '+(i+1)+'</option>').join('')+'</select></label><button type="button" class="remove" aria-label="Remove child">×</button>';
+   row.innerHTML = '<label><span>Child's first name</span><input name="child-name" required maxlength="40" placeholder="Child’s name"></label><label><span>Age</span><select name="child-age" aria-label="Select child's age">'+Array.from({length:18},(_,i)=>'<option value="'+(i+1)+'">Age '+(i+1)+'</option>').join('')+'</select></label><button type="button" class="remove" aria-label="Remove child">×</button>';
    row.querySelector('input').value=name; row.querySelector('select').value=age;
    row.querySelector('button').addEventListener('click',()=>{if(childrenFields.children.length>1)row.remove();addButton.disabled=childrenFields.children.length>=8});
    childrenFields.append(row);addButton.disabled=childrenFields.children.length>=8;
@@ -427,6 +427,48 @@ const faqs = [
 }
 @media(max-width:390px){
  .club .features-layout .feature-grid{grid-template-columns:1fr;gap:18px}
+}
+
+/* Clear, tappable family inputs: visible controls rather than subtle text fields. */
+.club .club-demo .form label{color:#4d4544;font-size:.8rem;font-weight:750}
+.club .club-demo .form label>span{display:block;margin-bottom:4px}
+.club .club-demo .form input,
+.club .club-demo .form select{
+ min-height:49px;
+ padding:12px 14px;
+ background:#fff;
+ border:2px solid #aaa7a2;
+ border-radius:7px;
+ box-shadow:0 2px 0 rgba(77,69,68,.06);
+ color:#303831;
+ font-size:1rem;
+ cursor:text;
+ transition:border-color .15s,box-shadow .15s;
+}
+.club .club-demo .form input::placeholder{color:#77716c;opacity:1}
+.club .club-demo .form select{
+ cursor:pointer;
+ appearance:none;
+ -webkit-appearance:none;
+ padding-right:34px;
+ background-color:#fff;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234d4544' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+ background-position:right 12px center;
+ background-repeat:no-repeat;
+}
+.club .club-demo .form input:hover,
+.club .club-demo .form select:hover{border-color:#786f6a}
+.club .club-demo .form input:focus,
+.club .club-demo .form select:focus{
+ border-color:#955b63;
+ outline:3px solid rgba(194,246,170,.7);
+ outline-offset:1px;
+ box-shadow:0 0 0 1px #955b63;
+}
+.club .club-demo .children-head{margin-bottom:11px}
+.club .club-demo .children-head span{color:#6e6461}
+@media(max-width:700px){
+ .club .club-demo .form input,.club .club-demo .form select{font-size:16px;min-height:50px}
 }
 </style>
 </PublicLayout>
