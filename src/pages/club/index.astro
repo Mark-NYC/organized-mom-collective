@@ -181,6 +181,10 @@ const faqs = [
 @media(max-width:850px){.club .tangible,.club .founder-layout{grid-template-columns:1fr}.club .feature-grid{grid-template-columns:repeat(2,1fr)}.club .story-grid{grid-template-columns:1fr}.club .story-shell{padding:45px 0}}
 @media(max-width:700px){.club .pain,.club .comparison,.club .features,.club .how,.club .proof{padding-top:60px;padding-bottom:60px}.club .pain-questions,.club .compare-grid,.club .step-grid,.club .feature-grid{grid-template-columns:1fr}.club .tangible,.club .founder-layout{padding-top:42px;padding-bottom:42px;gap:30px}.club .print-paper{transform:none;padding:24px}.club .hero-photo{order:-1}.club .compare-grid article{padding:25px}}
 
+/* Keep the desktop headline close to three lines without shrinking mobile typography. */
+@media (min-width: 851px) {
+ .club .hero h1 { font-size: clamp(2.35rem, 3.15vw, 3.8rem); line-height: 1.1; }
+}
 /* Book-spread hero: editorial copy on the left, full-bleed photo on the right. */
 @media(min-width:851px){
  .club .hero .hero-inner{
