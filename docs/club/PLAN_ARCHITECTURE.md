@@ -2,11 +2,12 @@
 
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
 October (Sunday Reset, two sheets), January (Habit Cards, one sheet), February (Connection Cards, one sheet),
-March (Spring Prep, one sheet), April (Dinner Team, two sheets) and May (Summer Day Rhythm, one sheet) use it. Every remaining month should too, without copying page code.
+March (Spring Prep, one sheet), April (Dinner Team, two sheets), May (Summer Day Rhythm, one sheet) and June (Snack
+Station, one sheet) use it. Every remaining month should too, without copying page code.
 
 **Status (2026-10-28).** October is the approved reference, and its desktop layout is now the shared rail
-(`ClubPlanDesktop`): every app month page (January–May and October) uses it, with one approval shared by the rail and
-the plan screen. October's page still carries viewer rules for its printable's own document frame. June–September,
+(`ClubPlanDesktop`): every app month page (January–June and October) uses it, with one approval shared by the rail and
+the plan screen. October's page still carries viewer rules for its printable's own document frame. July–September,
 November and December have no `/app/club/<month>` page yet (the Club hub links their `/club/<month>-preview` pages).
 
 ## The split
@@ -96,7 +97,9 @@ covers **only what prints**: January's covers the active cards, so a hidden seco
   `omc:club:february-app:v1` with `omc:preview:february-connection-cards:approval` (February reads the earlier
   page's name-based `omc:club:february-mobile:v1:<family>` once and maps names back to people); `omc:club:march-app:v1` with `omc:preview:march-spring-prep:approval` (March reads the earlier page's
   `omc:club:march-mobile:v1:<family>` once); `omc:club:april-app:v1` with `omc:preview:april-dinner:approval` (April reads the earlier April page's
-  `{ profile, meal, … }` shape once, for the same family); `omc:club:may-app:v1` with `omc:preview:may-summer-rhythm:approval`.
+  `{ profile, meal, … }` shape once, for the same family); `omc:club:may-app:v1` with `omc:preview:may-summer-rhythm:approval`; `omc:club:june-app:v1` with
+  `omc:preview:june-snack-station:approval` (June reads the earlier `{ profile, state }` shape once and maps its
+  index-and-name levels to members).
   The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
   `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
 

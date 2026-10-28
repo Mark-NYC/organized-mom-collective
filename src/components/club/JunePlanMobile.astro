@@ -1,0 +1,193 @@
+---
+/**
+ * June Snack Station on phones and tablets (below 1100px): the month's sections inside the shared ClubPlanScreen —
+ * the snacks on each side, the snack rule and reminder, who needs help, and the words on the sheet — and their sheets.
+ * It reads and changes the plan only through the printable's controller (`.jss` root's `clubPlan`,
+ * src/lib/club/engines/june-snack-station.ts). Status, approval, copy, print and the sheet itself are shared.
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="June · Organized Family Club" sheets={['sheet']} previewNote="One fridge poster, ready to print">
+  <Fragment slot="title">The snacks are handled. <em>By the kids.</em></Fragment>
+  <section class="cp-section" aria-labelledby="jpm-snacks-title">
+    <h2 id="jpm-snacks-title">Snack options</h2>
+    <p class="cp-intro">Up to four foods on each side. Kids choose without asking every time.</p>
+    <ul class="cp-group" data-jpm-snacks></ul>
+    <p class="jpm-note">Parent check: these are examples, not allergy- or age-screened recommendations. Choose foods that are safe for each child and supervise younger eaters.</p>
+    <p class="jpm-restore" data-jpm-restore-foods hidden><button type="button" class="cp-link"><span>Restore starter snacks</span></button><span>Puts back the eight starter foods and allows peanut foods again. Your rule and wording stay.</span></p>
+  </section>
+  <section class="cp-section" aria-labelledby="jpm-rule-title">
+    <h2 id="jpm-rule-title">How snack time works</h2>
+    <ul class="cp-group" data-jpm-rules></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="jpm-kids-title">
+    <h2 id="jpm-kids-title">Who needs help</h2>
+    <p class="cp-intro">Suggested from age: 7 and under ask for help. Change it for anyone.</p>
+    <ul class="cp-group" data-jpm-kids></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="jpm-words-title">
+    <h2 id="jpm-words-title">Words on your printable</h2>
+    <ul class="cp-group" data-jpm-words></ul>
+    <p class="jpm-restore" data-jpm-restore-words hidden><button type="button" class="cp-link"><span>Restore original wording</span></button><span>Puts back the original headings and lines. Your snacks stay.</span></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.jpm-restore{display:grid;margin:6px 0 0;font-size:.85rem;line-height:1.45;color:var(--cp-soft)}
+.jpm-restore[hidden]{display:none}
+.jpm-note{margin:10px 0 0;font-size:.82rem;line-height:1.5;color:var(--cp-soft)}
+.jpm-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+.jpm-custom{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.jpm-check{display:flex;gap:10px;align-items:center;min-height:44px;font-size:.95rem}
+.jpm-check input{width:20px;height:20px;accent-color:var(--cp-sage)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  FOODS, LABEL_LIMIT, LEVEL_TEXT, PEANUT, RESETS, RULES, SLOTS, TEXT_LIMIT, addCustom, foodsChanged, relabel, restoreFoods,
+  restoreWording, setLevel, setPeanuts, setReset, setRule, setText, toggleFood, wordingChanged,
+  type JunePlan, type JuneState, type Level, type Rule, type TextKey, type Zone,
+} from '../../lib/club/engines/june-snack-station';
+
+const APPROVAL_KEY = 'omc:preview:june-snack-station:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has(.jss)');
+const jss = root?.querySelector<HTMLElement & { clubPlan?: JunePlan }>('.jss');
+if (root && jss) {
+  const plan = () => jss.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<JuneState>;
+  const ZONE_LABEL: Record<Zone, string> = { fridge: 'From the fridge', pantry: 'From the pantry' };
+
+  const row = (label: string, title: string, detail: string, open: () => void, locked: boolean, lead: Node = el('span')) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, lead,
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'jpm-label' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${label}: ${title}.${locked ? '' : ' Change'}`);
+    b.addEventListener('click', open);
+    return el('li', {}, b);
+  };
+
+  const render = (_ui: PlanScreen<JuneState>, s: JuneState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-jpm-snacks]').replaceChildren(...(['fridge', 'pantry'] as Zone[]).map((z) =>
+      row(ZONE_LABEL[z], v[z].length ? v[z].map((i) => i.label).join(', ') : 'No foods yet', `${v[z].length} of ${SLOTS}${s.excludePeanuts ? ' · no peanut foods' : ''}`, () => openZone(z), locked)));
+    q('[data-jpm-rules]').replaceChildren(
+      row('My snack rule', v.rule, RULES[s.rule].label, openRule, locked),
+      row('And when I’m done', v.cleanup, '', openReset, locked));
+    q('[data-jpm-kids]').replaceChildren(...(v.kids.length
+      ? v.kids.map((k) => row(k.name, k.level ? LEVEL_TEXT[k.level] : 'No age on profile', k.chosen ? 'Your choice' : 'Suggested from age', () => openKid(k.id), locked, el('span', { class: 'cp-avatar' }, k.name.charAt(0))))
+      : [el('li', { class: 'cp-removed' }, 'Add children to your family profile to name who needs help.')]));
+    q('[data-jpm-words]').replaceChildren(row('Heading and lines', `I can make ${v.headline}`, v.subtitle, openWords, locked));
+    q('[data-jpm-restore-foods]').hidden = locked || !foodsChanged(s);
+    q('[data-jpm-restore-words]').hidden = locked || !wordingChanged(s);
+  };
+
+  const openZone = (zone: Zone) => {
+    const p = plan();
+    const s = p.state();
+    const chips = el('div', { class: 'cp-chips', role: 'group' });
+    chips.setAttribute('aria-label', ZONE_LABEL[zone]);
+    for (const f of FOODS.filter((x) => x.zone === zone && !(s.excludePeanuts && PEANUT.has(x.id)))) {
+      const on = s[zone].some((i) => i.id === f.id);
+      const chip = el('button', { type: 'button', class: 'cp-chip', disabled: !on && s[zone].length >= SLOTS }, f.name);
+      chip.setAttribute('aria-pressed', String(on));
+      chip.addEventListener('click', () => { p.update((st) => toggleFood(st, zone, f.id)); openZone(zone); });
+      chips.append(chip);
+    }
+    const custom = el('input', { type: 'text', maxLength: 45, placeholder: 'e.g. Rice cakes' });
+    const add = el('button', { type: 'button', class: 'cp-btn' }, 'Add');
+    const hasCustom = [...s.fridge, ...s.pantry].some((i) => i.id === 'custom');
+    add.disabled = hasCustom || s[zone].length >= SLOTS;
+    add.addEventListener('click', () => { if (custom.value.trim()) { p.update((st) => addCustom(st, zone, custom.value)); openZone(zone); } });
+    const peanuts = el('input', { type: 'checkbox', checked: s.excludePeanuts });
+    peanuts.addEventListener('change', () => { p.update((st) => setPeanuts(st, peanuts.checked)); openZone(zone); });
+    const names = s[zone].map((item, i) => {
+      const input = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: item.label });
+      input.addEventListener('change', () => p.update((st) => relabel(st, zone, i, input.value)));
+      return el('label', { class: 'cp-field' }, `Name on the sheet: ${item.id === 'custom' ? 'your own food' : FOODS.find((f) => f.id === item.id)?.name}`, input);
+    });
+    ui.openSheet(ZONE_LABEL[zone],
+      el('p', { class: 'cp-sheet-hint' }, `Choose up to ${SLOTS}. ${s[zone].length} chosen.`),
+      chips,
+      el('label', { class: 'jpm-check' }, peanuts, 'Leave out foods with peanuts'),
+      el('div', { class: 'cp-field' }, el('span', {}, hasCustom ? 'Your own food is already on the station (one per station).' : 'Add one food of your own'), el('div', { class: 'jpm-custom' }, custom, add)),
+      ...names,
+      el('p', { class: 'cp-sheet-hint' }, 'Parent check: choose foods that are safe for each child.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+
+  const choices = <T extends string>(name: string, items: readonly { value: T; label: string }[], current: T, pick: (v: T) => void) => {
+    const set = el('fieldset', { class: 'cp-choices' });
+    for (const item of items) {
+      const r = el('input', { type: 'radio', name, value: item.value, checked: item.value === current });
+      r.addEventListener('change', () => pick(item.value));
+      set.append(el('label', { class: 'cp-choice' }, r, el('span', {}, item.label)));
+    }
+    return set;
+  };
+  const openRule = () => {
+    const p = plan();
+    ui.openSheet('My snack rule',
+      el('p', { class: 'cp-sheet-hint' }, 'A different rule replaces your own wording of the rule line.'),
+      choices('jpm-rule', (Object.keys(RULES) as Rule[]).map((value) => ({ value, label: RULES[value].label })), p.state().rule, (v) => p.update((s) => setRule(s, v))),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openReset = () => {
+    const p = plan();
+    ui.openSheet('And when I’m done',
+      choices('jpm-reset', RESETS, p.state().reset, (v) => p.update((s) => setReset(s, v))),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openKid = (id: string) => {
+    const p = plan();
+    const k = p.view().kids.find((x) => x.id === id)!;
+    const chips = el('div', { class: 'cp-chips', role: 'group' });
+    chips.setAttribute('aria-label', `${k.name} at snack time`);
+    for (const level of ['help', 'independent'] as Level[]) {
+      const chip = el('button', { type: 'button', class: 'cp-chip' }, LEVEL_TEXT[level]);
+      chip.setAttribute('aria-pressed', String(k.level === level));
+      chip.addEventListener('click', () => { p.update((s) => setLevel(s, id, level)); openKid(id); });
+      chips.append(chip);
+    }
+    const body: Node[] = [chips];
+    if (k.chosen) {
+      const back = el('button', { type: 'button', class: 'cp-text-btn' }, 'Use the suggestion from age');
+      back.addEventListener('click', () => { p.update((s) => setLevel(s, id, null)); openKid(id); });
+      body.push(back);
+    }
+    ui.openSheet(`${k.name} at snack time`, ...body, el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openWords = () => {
+    const p = plan();
+    const v = p.view();
+    const field = (key: TextKey, label: string, value: string) => {
+      const input = el('input', { type: 'text', maxLength: TEXT_LIMIT, value });
+      input.addEventListener('input', () => p.update((s) => setText(s, key, input.value)));
+      return el('label', { class: 'cp-field' }, label, input);
+    };
+    ui.openSheet('Words on your printable',
+      field('headline', 'I can make…', v.headline), field('subtitle', 'Under the heading', v.subtitle),
+      field('rule', 'My snack rule', v.rule), field('fridgeTitle', 'Fridge heading', v.fridgeTitle),
+      field('pantryTitle', 'Pantry heading', v.pantryTitle), field('cleanup', 'And when I’m done', v.cleanup),
+      el('p', { class: 'cp-sheet-hint' }, 'Blank goes back to the original wording.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+
+  const restore = (sel: string, change: (s: JuneState) => void, text: string) => q(`${sel} button`).addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update(change);
+    ui.toast(text, () => plan().replace(before));
+  });
+  restore('[data-jpm-restore-foods]', restoreFoods, 'Starter snacks restored. Your rule and wording stayed.');
+  restore('[data-jpm-restore-words]', restoreWording, 'Original wording restored. Your snacks stayed.');
+
+  const mounted = mountPlanScreen<JuneState>({ root, host: jss, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>
