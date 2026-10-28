@@ -1,12 +1,13 @@
 ---
 /** January Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
- * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): January's own two-panel view from JanuaryHabitCards
- * (its #club-month-content layout), with one line saying whose family it is. Below 1100px: the shared plan screen
- * with January's habit cards (JanuaryPlanMobile). Both read the printable's state (january-habit-cards.ts). */
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with the
+ * habit cards, beside the one-page printable. Below 1100px: the shared plan screen with January's habit cards
+ * (JanuaryPlanMobile). Both read the printable's state (JanuaryHabitCards, january-habit-cards.ts). */
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
 import JanuaryPlanMobile from '../../../components/club/JanuaryPlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
 import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
 import { clubEditingDeadline } from '../../../lib/club/deadline';
 import { kits } from '../../../data/club/kits';
@@ -17,52 +18,80 @@ const storageKey = 'omc:preview:january-habit-cards:v3';
 ---
 <AppLayout title="January Family Habit Cards">
   <ClubPlanShell class="jan-plan family-brand" kitSlug={kit.slug} month="January" storageKey={storageKey}>
-    <p class="jan-desk-note" slot="desktop" data-plan-source></p>
-    <div class="jan-proof-body" slot="printable" data-plan-proof-body>
-      <div id="club-month-content" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
-        <JanuaryHabitCards storageKey={storageKey} />
+    <ClubPlanDesktop slot="desktop" deadline={editDeadline} kicker="January · Kit preview" instructions={[
+      'Print the page at actual size and cut along the fine dotted lines. Put each card where the habit happens.',
+      'One or two small habits, no tracking, points or daily checkboxes. Keep the prepared ones or find habits that make everyday life easier.',
+    ]}>
+      <Fragment slot="title">Our Family <em>Habit Cards</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="jan-d-cards">
+          <p class="cpd-label" id="jan-d-cards">On the sheet</p>
+          <ol class="jan-d-list" data-jan-cards></ol>
+          <div class="jan-d-count" role="group" aria-label="Cards on the sheet"><button type="button" data-jan-count="1">One card</button><button type="button" data-jan-count="2">Two cards</button></div>
+          <button type="button" class="cpd-link" data-jan-open="cards">Edit card wording</button>
+          <button type="button" class="cpd-link" data-jan-open="finder">Help me find our habits</button>
+          <button type="button" class="cpd-link" data-jan-restore hidden>Restore suggested cards</button>
+          <p class="cpd-hint" data-jan-restore-hint hidden>Puts back the two prepared habits and their wording, with your family’s names.</p>
+          <p class="cpd-hint" data-jan-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="jan-proof" slot="printable" data-plan-proof-body>
+      <div class="jan-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <JanuaryHabitCards storageKey={storageKey} planMode={true} />
       </div>
     </div>
     <JanuaryPlanMobile slot="mobile" deadline={editDeadline} />
   </ClubPlanShell>
 </AppLayout>
 <style is:global>
-/* Desktop: January's own view fills the screen under the app header and this note (--adc-nav-height). */
-.jan-desk-note{display:none}
-@media screen and (min-width:1100px){
-  .jan-desk-note{display:block;position:fixed;left:0;right:0;top:var(--jan-note-top,64px);z-index:5;margin:0;padding:8px clamp(17px,2vw,26px);background:#fdf6e6;border-bottom:1px solid #e8d9b8;color:var(--color-warm-ink);font-size:.82rem;line-height:1.4}
-}
-/* Below 1100px January's printable only appears in the full-screen proof: no editor panel, no extra padding.
-   JanuaryHabitCards forces its config panel visible with an id-level !important, so hiding it needs the same. */
-@media screen and (max-width:1099px){
-  .jan-plan #club-month-content .jhc-config{display:none!important}
-  .jan-plan #club-month-content .jhc{padding:0}
-  .jan-plan #club-month-content .jhc-workspace{display:block}
-  .jan-plan #club-month-content .jhc-preview-panel{padding:0;background:transparent}
-}
+.jan-d-list{margin:4px 0 8px;padding:0 0 0 18px;display:grid;gap:8px;font-size:.82rem;line-height:1.45;color:var(--color-warm-soft)}
+.jan-d-list strong{display:block;font-size:.88rem;font-weight:600;color:var(--color-warm-ink)}
+.jan-d-count{display:flex;gap:6px;margin:6px 0 2px}
+.jan-d-count button{min-height:44px;padding:6px 14px;border:1px solid var(--color-warm-rule);border-radius:3px;background:#fff;font:600 .72rem var(--font-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--color-warm-ink);cursor:pointer}
+.jan-d-count button[aria-pressed="true"]{background:var(--color-warm-button);border-color:var(--color-warm-button);color:#fff}
+.jan-d-count button:disabled{cursor:default;opacity:.6}
 </style>
 <script>
-import { onPlanFamily } from '../../../lib/club/plan/family';
+import { applyFamilyNames, freshHabitState, habitFingerprint, setCount, type HabitState, type JhcPlan } from '../../../lib/club/engines/january-habit-cards';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
 
 const root = document.querySelector<HTMLElement>('.jan-plan');
-if (root) {
-  onPlanFamily(root, (result) => {
-    const note = root.querySelector<HTMLElement>('[data-plan-source]');
-    if (note) note.textContent = (result.source === 'sample'
-      ? `Sample family: ${result.sampleLabel.replace('Sample: ', '')}, made up for this preview.`
-      : `Prepared for ${result.household.displayName ?? 'your family'}.`)
-      + ' Changes stay in this browser tab. Nothing is saved to an account or mailed yet.';
+const jhc = root?.querySelector<HTMLElement & { clubPlan?: JhcPlan }>('.jhc');
+if (root && jhc) {
+  const plan = () => jhc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-jan-restored]');
+  const prepared = () => applyFamilyNames(freshHabitState(), plan().members());
+  let undo: HabitState | null = null;
+
+  mountPlanDesktop<HabitState>({
+    root,
+    host: jhc,
+    approvalKey: 'omc:preview:january-habit-cards:approval',
+    edit: () => plan().openEditor('cards'),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const s = plan().state();
+      q('[data-jan-cards]').replaceChildren(...s.habits.slice(0, s.count).map((h) => el('li', {}, el('strong', {}, `${h.name} · for ${h.who.toLowerCase()}`), `${h.anchor}: ${h.action}`)));
+      root.querySelectorAll<HTMLButtonElement>('[data-jan-count]').forEach((b) => { b.setAttribute('aria-pressed', String(Number(b.dataset.janCount) === s.count)); b.disabled = locked; });
+      root.querySelectorAll<HTMLButtonElement>('[data-jan-open]').forEach((b) => { b.disabled = locked; });
+      const changed = !locked && habitFingerprint(s) !== habitFingerprint(prepared());
+      q('[data-jan-restore]').hidden = !changed;
+      q('[data-jan-restore-hint]').hidden = !changed;
+    },
   });
-  // January's desktop view is fixed below the app header and the note; keep it measured.
-  const header = document.querySelector<HTMLElement>('body > header[data-chrome]');
-  const note = root.querySelector<HTMLElement>('.jan-desk-note');
-  const place = () => {
-    const top = header?.getBoundingClientRect().bottom ?? 64;
-    root.style.setProperty('--jan-note-top', `${top}px`);
-    document.documentElement.style.setProperty('--adc-nav-height', `${top + (note?.offsetHeight ?? 0)}px`);
-  };
-  place();
-  window.addEventListener('resize', place);
-  if (note && typeof ResizeObserver !== 'undefined') new ResizeObserver(place).observe(note);
+
+  root.querySelectorAll<HTMLButtonElement>('[data-jan-count]').forEach((b) => b.addEventListener('click', () => plan().update((s) => setCount(s, b.dataset.janCount === '1' ? 1 : 2))));
+  root.querySelectorAll<HTMLButtonElement>('[data-jan-open]').forEach((b) => b.addEventListener('click', () => plan().openEditor(b.dataset.janOpen === 'finder' ? 'finder' : 'cards')));
+  q('[data-jan-restore]').addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    plan().replace(prepared());
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('Suggested cards restored. ', u);
+    restored.focus();
+  });
 }
 </script>
