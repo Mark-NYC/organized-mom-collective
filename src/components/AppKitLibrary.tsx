@@ -62,7 +62,7 @@ const months = [
     "title": "Back to School Without the Scramble",
     "responsibility": "Taking initiative",
     "how": "A personalized countdown gives everyone their own school-ready responsibilities.",
-    "url": "/club/august-preview/"
+    "url": "/app/club/august/"
   },
   {
     "month": "September",
