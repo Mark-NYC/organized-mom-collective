@@ -78,6 +78,7 @@ export const routes = {
   calendar: '/calendar',
   /** Every product, one card each, linking to its own page. */
   shop: '/shop',
+  scheduler: '/family-schedule-calendar-2027',
   /** The calendar page's options and Etsy buttons. */
   buy: '/calendar#buy',
   companion: '/companion',
