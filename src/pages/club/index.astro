@@ -20,7 +20,7 @@ const faqs = [
 <main>
 <section class="hero home-style-inset" id="start"><div class="club-float-surface"><div class="hero-inner">
  <div class="hero-copy"><p class="eyebrow">MOMS WITH SCHOOL-AGED KIDS</p>
- <h1>Your family shouldn't depend on you <em>for everything.</em></h1>
+ <h1>Your family shouldn't depend<span class="mobile-headline-break"></span> on you <em>for everything.</em></h1>
  <p class="product-definition">Stop being the one who remembers, plans, and reminds everyone.</p>
  <p class="supporting">Get one personalized family plan printed and mailed to your door every month, helping everyone share the load.</p>
  <div class="hero-actions"><a class="primary" href="#demo">Show Me My Family's Plan →</a><a class="hero-secondary" href="#what-arrives">See what arrives</a></div>
@@ -226,6 +226,45 @@ const faqs = [
  .club .hero .hero-copy{padding:clamp(24px,5vw,40px);order:1}
  .club .hero .hero-photo{order:0;width:100%;margin:0}
  .club .hero .hero-photo img{display:block;width:100%;height:auto;max-height:none;aspect-ratio:4/3;object-fit:cover}
+}
+
+/* Mobile conversion hero: short facial crop, two-line headline and CTA first. */
+.club .mobile-headline-break{display:none}
+@media(max-width:700px){
+ .club .hero.home-style-inset{padding:8px 12px 20px}
+ .club .hero .hero-inner{display:flex;flex-direction:column;gap:0;padding:0}
+ .club .hero .hero-photo{order:0;width:100%;height:clamp(160px,24vh,205px);overflow:hidden}
+ .club .hero .hero-photo img{
+   display:block;width:100%;height:100%;max-height:none;
+   aspect-ratio:auto;object-fit:cover;object-position:center 68%;
+ }
+ .club .hero .hero-copy{
+   order:1;display:flex;flex-direction:column;
+   padding:17px 18px 19px;max-width:none;
+ }
+ .club .hero .eyebrow{font-size:.59rem;letter-spacing:.095em;margin:0 0 9px!important}
+ .club .hero h1{
+   font-size:clamp(21px,6.15vw,24px);
+   line-height:1.12;letter-spacing:-.032em;
+   margin:0 0 12px;
+ }
+ .club .mobile-headline-break{display:block}
+ .club .hero .product-definition{
+   font-size:.93rem;line-height:1.43;font-weight:450;
+   margin:0 0 13px!important;
+ }
+ .club .hero .hero-actions{order:3;display:block;margin:0}
+ .club .hero .hero-actions .primary{
+   display:flex;width:100%;min-height:46px;padding:11px 12px;font-size:.86rem;
+ }
+ .club .hero .hero-secondary{display:none}
+ .club .hero .supporting{order:4;font-size:.83rem;line-height:1.45;margin:12px 0 0!important}
+ .club .hero .hero-trust{order:5;font-size:.66rem;line-height:1.4;margin:10px 0 0!important}
+}
+@media(max-width:355px){
+ .club .hero h1{font-size:20px}
+ .club .hero .hero-photo{height:155px}
+ .club .hero .hero-copy{padding-inline:15px}
 }
 </style>
 </PublicLayout>
