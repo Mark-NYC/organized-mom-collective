@@ -1,0 +1,125 @@
+---
+/**
+ * February Connection Cards on phones and tablets (below 1100px): the four invitations inside the shared
+ * ClubPlanScreen, each with its own sheet. It reads and changes the plan only through the printable's controller
+ * (`.fbc` root's `clubPlan`, src/lib/club/engines/february-connection-cards.ts). Status, approval, copy, print and the
+ * sheet itself are shared (src/components/club/plan/, docs/club/PLAN_ARCHITECTURE.md).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="February · Organized Family Club" sheets={['sheet']} previewNote="Four invitations on one page">
+  <Fragment slot="title">More connection. <em>Less coordinating.</em></Fragment>
+  <section class="cp-section" aria-labelledby="fpm-cards-title">
+    <h2 id="fpm-cards-title">Four little invitations</h2>
+    <p class="cp-intro">Print, cut apart and give each card to the person who sends it. They invite someone to spend time together.</p>
+    <ul class="cp-group" data-fpm-cards></ul>
+    <p class="fpm-restore" data-fpm-restore hidden><button type="button" class="cp-link"><span>Restore all four suggested cards</span></button><span>Puts back the prepared people and wording on every card.</span></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.fpm-restore{display:grid;margin:6px 0 0;font-size:.85rem;line-height:1.45;color:var(--cp-soft)}
+.fpm-restore[hidden]{display:none}
+.fpm-route{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+.fpm-notice{margin:0;padding:10px 12px;background:var(--cp-wash);color:var(--cp-ink)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  CARD_COUNT, LIMITS, cardChanged, restoreAll, restoreCard, setPerson, setText, type FebPlan, type FebState, type TextField,
+} from '../../lib/club/engines/february-connection-cards';
+
+const APPROVAL_KEY = 'omc:preview:february-connection-cards:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has(.fbc)');
+const fbc = root?.querySelector<HTMLElement & { clubPlan?: FebPlan }>('.fbc');
+if (root && fbc) {
+  const plan = () => fbc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<FebState>;
+
+  const render = (_ui: PlanScreen<FebState>, s: FebState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-fpm-cards]').replaceChildren(...v.map((c, i) => {
+      const b = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+        el('span', { class: 'cp-avatar' }, c.owner.charAt(0) || '·'),
+        el('span', { class: 'cp-row-text' }, el('span', { class: 'fpm-route' }, `${c.owner || 'Someone'} → ${c.recipient || 'someone'}`), el('strong', {}, c.headline), el('span', {}, c.invite)),
+        el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+      b.setAttribute('aria-label', `Invitation ${i + 1}, from ${c.owner} to ${c.recipient}: ${c.headline}.${locked ? '' : ' Change'}`);
+      b.addEventListener('click', () => openCard(i));
+      return el('li', {}, b);
+    }));
+    q('[data-fpm-restore]').hidden = locked || !v.some((_, i) => cardChanged(s, i, plan().members()));
+  };
+
+  const openCard = (i: number, notice?: Node) => {
+    const p = plan();
+    const members = p.members();
+    const card = p.state().cards[i];
+    const v = p.view()[i];
+    const people = (side: 'from' | 'to', label: string) => {
+      const group = el('div', { class: 'cp-chips cp-people-chips', role: 'group' });
+      group.setAttribute('aria-label', label);
+      for (const m of members) {
+        if (side === 'to' && m.id === card.from) continue;
+        const chip = el('button', { type: 'button', class: 'cp-chip' }, m.firstName);
+        chip.setAttribute('aria-pressed', String(m.id === card[side]));
+        chip.addEventListener('click', () => { p.update((s) => setPerson(s, i, side, m.id, p.members())); openCard(i); });
+        group.append(chip);
+      }
+      return el('div', { class: 'cp-field' }, el('span', {}, label), group);
+    };
+    const field = (key: TextField, label: string, max: number, value: string, long = false) => {
+      const input = long ? el('textarea', { maxLength: max, value }) : el('input', { type: 'text', maxLength: max, value });
+      input.addEventListener('input', () => p.update((s) => setText(s, i, key, input.value, p.members())));
+      return el('label', { class: 'cp-field' }, label, input);
+    };
+    const nameField = field('toName', `What ${v.owner || 'they'} calls ${v.to?.firstName ?? 'them'}`, LIMITS.name, v.recipient);
+    nameField.addEventListener('change', () => openCard(i));
+    const actions = el('div', { class: 'cp-sheet-actions' }, ui.doneButton());
+    if (i + 1 < CARD_COUNT) {
+      const next = el('button', { type: 'button', class: 'cp-btn' }, 'Next card ›');
+      next.addEventListener('click', () => openCard(i + 1));
+      actions.append(next);
+    }
+    const body: Node[] = [
+      ...(notice ? [notice] : []),
+      people('from', 'From'),
+      people('to', 'To'),
+      nameField,
+      el('p', { class: 'cp-sheet-hint' }, 'Children’s cards call parents Mom and Dad. Change it to what your family says; the invitation starts with it.'),
+      field('fromName', 'Signed', LIMITS.name, v.owner),
+      field('headline', 'Invitation title', LIMITS.headline, v.headline),
+      field('invite', 'Personal invitation', LIMITS.invite, v.invite, true),
+      field('idea', 'A little extra note', LIMITS.idea, v.idea, true),
+    ];
+    if (cardChanged(p.state(), i, members)) {
+      const restore = el('button', { type: 'button', class: 'cp-text-btn' }, 'Restore this card');
+      restore.addEventListener('click', () => {
+        const before = structuredClone(p.state());
+        p.update((s) => restoreCard(s, i, p.members()));
+        const undo = el('button', { type: 'button', class: 'cp-text-btn' }, 'Undo');
+        undo.addEventListener('click', () => { p.replace(before); openCard(i); });
+        openCard(i, el('p', { class: 'cp-sheet-hint fpm-notice', role: 'status' }, 'This card is back to its prepared people and wording. ', undo));
+      });
+      body.push(restore, el('p', { class: 'cp-sheet-hint' }, 'Puts back this card’s prepared people and wording. Your other cards stay.'));
+    }
+    body.push(actions);
+    ui.openSheet(`Invitation ${i + 1} of ${CARD_COUNT}`, ...body);
+  };
+
+  q('[data-fpm-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => restoreAll(s, plan().members()));
+    ui.toast('All four cards are back to the prepared ones.', () => plan().replace(before));
+  });
+
+  const mounted = mountPlanScreen<FebState>({ root, host: fbc, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

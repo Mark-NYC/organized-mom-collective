@@ -2,10 +2,13 @@
 /** February 2027: four personalized invitations to connection, designed to be handed directly to someone loved.
  * One US Letter four-up cut sheet. Same Gelasio/Montserrat editorial system as Nov–Jan.
  * The card is an invitation anyone can initiate, not an activity for Mom to coordinate.
+ * planMode: inside a Club plan page (/app/club/february) the page brings the layout, rail and mobile screen; this keeps
+ * the sheet, marked data-plan-sheet, a one-card desktop editor, and publishes the plan as `clubPlan`
+ * (rules src/lib/club/engines/february-connection-cards.ts, docs/club/PLAN_ARCHITECTURE.md).
  */
 import {monthColors} from '../../theme';
-interface Props { storageKey?: string; managed?: boolean }
-const {storageKey='omc:club:february-connection:v3', managed=false}=Astro.props;
+interface Props { storageKey?: string; planMode?: boolean }
+const {storageKey='omc:club:february-connection:v3', planMode=false}=Astro.props;
 const examples=[
  {owner:"Sofia",recipient:"Dad",headline:"Game night?",invite:"Dad, will you play a game with me tonight?",idea:"I'll get the game ready!"},
  {owner:"Mateo",recipient:"Mom",headline:"Just us two",invite:"Mom, will you read a book with me after dinner?",idea:"I'll pick the book!"},
@@ -13,14 +16,17 @@ const examples=[
  {owner:"Ana",recipient:"Mateo",headline:"Let's have fun!",invite:"Mateo, will you make a blanket fort with me?",idea:"I'll bring the blankets!"}
 ];
 ---
-<div class="fbc" data-fbc-managed={managed ? "true" : "false"} data-fbc-key={storageKey} style={`--feb-accent:${monthColors[1].hex}`}>
+<div class="fbc" data-fbc-plan={planMode ? "" : undefined} data-fbc-key={storageKey} style={`--feb-accent:${monthColors[1].hex}`}>
+ {!planMode && (
  <header class="fbc-intro">
   <a href="/club" class="fbc-back">← Organized Family Club</a>
   <p class="fbc-kicker">ORGANIZED FAMILY CLUB · FEBRUARY 2027</p>
   <h1>More connection. <em>Less coordinating.</em></h1>
   <p>Four personal invitations, already prepared for your family. Each one helps someone give the gift of time together. No scheduling or reminders from Mom.</p>
  </header>
- <div class="fbc-workspace">
+ )}
+ <div class={planMode ? "fbc-plan" : "fbc-workspace"}>
+  {!planMode && (
   <section class="fbc-editor-pane" aria-label="Customize the connection cards">
    <div class="fbc-editor-heading">
     <p class="fbc-kicker">FEBRUARY · YOUR PREPARED CARDS</p>
@@ -42,13 +48,17 @@ const examples=[
    <div class="fbc-actions"><a class="fbc-jump-edit" href="#february-edit-controls">Make changes</a>
    <button class="fbc-download" type="button" data-print>Print four invitations / Save PDF</button>
    <button type="button" class="fbc-png" data-single-page-png>Download image (PNG)</button>
-   <button class="fbc-reset" type="button" data-reset>Restore suggested cards</button>
+   <button class="fbc-reset" type="button" data-reset aria-describedby="fbc-reset-note">Restore suggested cards</button><p class="fbc-status" id="fbc-reset-note">Puts back all four prepared cards: names and wording.</p>
    <p class="fbc-status" role="status" aria-live="polite" data-status>US Letter · Print at actual size, with background graphics enabled. Cut along the dotted lines.</p></div>
   </section>
-  <section class="fbc-preview-pane" aria-label="Printable connection card preview"><button type="button" class="fbc-floating-edit" data-fbc-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+  )}
+  {planMode && (
+   <dialog class="fbc-dialog" data-fbc-dialog aria-labelledby="fbc-dialog-title"><div class="fbc-dialog-heading"><div><span class="fbc-kicker">MAKE IT YOURS · FEBRUARY</span><h2 id="fbc-dialog-title">Edit invitation</h2></div><button type="button" data-fbc-close aria-label="Close">×</button></div><p>Changes appear on your printable as you type.</p><div class="fbc-editor-list" data-fbc-plan-fields></div><div class="fbc-plan-nav"><button type="button" data-fbc-step="-1">‹ Previous card</button><button type="button" data-fbc-step="1">Next card ›</button></div><button type="button" class="fbc-dialog-done" data-fbc-close>Done · See our cards</button></dialog>
+  )}
+  <section class={planMode ? "fbc-plan-view" : "fbc-preview-pane"} data-fbc-view aria-label="Printable connection card preview">{!planMode && <button type="button" class="fbc-floating-edit" data-fbc-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>}
 
    <div class="fbc-scroll">
-    <div class="fbc-stage" data-fbc-stage><div class="fbc-paper">
+    <div class="fbc-stage" data-fbc-stage><div class="fbc-paper" data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
      <div class="fbc-paper-top"><span>ORGANIZED FAMILY CLUB · FEBRUARY 2027</span><span>BETTER TOGETHER</span></div>
      <div class="fbc-grid">
       {examples.map((item,i)=><article class="fbc-card" data-card={i}>
@@ -75,7 +85,7 @@ const examples=[
 @font-face{font-family:'FBC Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
 @font-face{font-family:'FBC Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'FBC Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf') format('truetype');font-weight:600;font-display:swap}
-.fbc,.fbc *{box-sizing:border-box}.fbc{max-width:1440px;margin:0 auto;padding:25px clamp(17px,3.5vw,54px) 85px;color:#454545;font-family:'FBC Montserrat',Montserrat,sans-serif}
+.fbc,.fbc *{box-sizing:border-box}.fbc:not([data-fbc-plan]){max-width:1440px;margin:0 auto;padding:25px clamp(17px,3.5vw,54px) 85px}.fbc{color:#454545;font-family:'FBC Montserrat',Montserrat,sans-serif}
 .fbc-back{font-size:12px;text-decoration:underline;text-underline-offset:4px;display:inline-block;margin-bottom:32px}
 .fbc-kicker,.fbc-overline{font:600 10px 'FBC Montserrat',sans-serif;letter-spacing:.17em;color:#555}
 .fbc-intro{max-width:800px;margin-bottom:42px}.fbc-intro h1{font:400 clamp(36px,4.6vw,58px)/1.1 'FBC Gelasio',Georgia,serif;letter-spacing:-.03em;margin:14px 0 18px;color:#3b3b3b}
@@ -83,7 +93,7 @@ const examples=[
 .fbc-workspace{display:grid;grid-template-columns:minmax(290px,355px) minmax(0,1fr);gap:clamp(25px,3vw,48px);align-items:start}
 .fbc-editor-pane{min-width:0}.fbc-editor-heading{border-top:9px solid var(--feb-accent);padding-top:21px}.fbc-editor-heading h2{font:600 italic 28px 'FBC Gelasio',Georgia,serif;color:#9b6477;margin:12px 0}.fbc-editor-heading>p:last-child{font-size:13px;line-height:1.65}
 .fbc-editor-list{margin-top:20px}.fbc-editor-list fieldset{border:0;border-top:1px solid #e8d2d6;margin:0;padding:17px 0 21px;min-width:0}.fbc-editor-list legend{font:400 19px 'FBC Gelasio',Georgia,serif;padding:0 10px 0 0}.fbc-editor-list legend span{font:600 12px 'FBC Montserrat',sans-serif;color:#9b6477;margin-right:10px}.fbc-editor-list label{display:block;margin-top:13px;font:600 10px/1.4 'FBC Montserrat',sans-serif;letter-spacing:.06em;text-transform:uppercase}
-.fbc-editor-list input,.fbc-editor-list textarea{display:block;width:100%;margin-top:7px;padding:11px 12px;background:white;border:1px solid #bcbcbc;border-radius:0;min-height:44px;font:14px/1.45 'FBC Montserrat',sans-serif;color:#333;resize:vertical}
+.fbc-editor-list input,.fbc-editor-list textarea,.fbc-editor-list select{display:block;width:100%;margin-top:7px;padding:11px 12px;background:white;border:1px solid #bcbcbc;border-radius:0;min-height:44px;font:14px/1.45 'FBC Montserrat',sans-serif;color:#333;resize:vertical}
 .fbc-editor-list textarea{min-height:85px}.fbc input:focus-visible,.fbc textarea:focus-visible,.fbc select:focus-visible,.fbc button:focus-visible{outline:2px solid #905d70;outline-offset:2px}
 .fbc-download{display:block;width:100%;background:#454545;border:0;color:#fff;cursor:pointer;min-height:52px;margin-top:22px;font:600 12px 'FBC Montserrat',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:14px}
 .fbc-reset{display:block;cursor:pointer;margin:12px auto;border:0;background:none;text-decoration:underline;text-underline-offset:4px;min-height:44px;font:600 12px 'FBC Montserrat',sans-serif;color:#454545}
@@ -113,12 +123,13 @@ const examples=[
 @media(min-width:1130px){.fbc-paper{transform:scale(.85);transform-origin:top left;margin:0}.fbc-scroll{height:925px}}
 @media(max-width:1129px){.fbc-workspace{grid-template-columns:1fr}.fbc-editor-pane{max-width:700px}}
 @page{size:letter portrait;margin:0}
+/* Printing outside a Club plan page; on one, ClubPrintStyles prints the data-plan-sheet page. */
 @media print{
  html,body{margin:0!important;padding:0!important;background:white!important}
- body *{visibility:hidden!important}
- .fbc-paper,.fbc-paper *{visibility:visible!important}
- .fbc-paper{position:absolute!important;left:0!important;top:0!important;transform:none!important;width:8.5in!important;height:11in!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
- .fbc-scroll{overflow:visible!important;height:auto!important}
+ body:has(.fbc:not([data-fbc-plan])) *{visibility:hidden!important}
+ .fbc:not([data-fbc-plan]) :is(.fbc-paper,.fbc-paper *){visibility:visible!important}
+ .fbc:not([data-fbc-plan]) .fbc-paper{position:absolute!important;left:0!important;top:0!important;transform:none!important;width:8.5in!important;height:11in!important;box-shadow:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ .fbc:not([data-fbc-plan]) .fbc-scroll{overflow:visible!important;height:auto!important}
  .fbc-card{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
 }
 /* Same responsive single-page preview behavior as June. */
@@ -126,7 +137,7 @@ const examples=[
 .fbc-stage .fbc-paper{position:absolute;left:0;top:0;margin:0!important;transform:scale(var(--fbc-scale,1))!important;transform-origin:top left}
 .fbc-scroll{overflow:visible!important;height:auto!important}
 @media(max-width:1080px){.fbc-workspace{display:flex!important;flex-direction:column!important}.fbc-preview-pane{order:0;width:100%}.fbc-editor-pane{order:1;width:100%;max-width:720px}}
-@media print{.fbc-stage{position:static!important;width:8.5in!important;height:11in!important}.fbc-stage .fbc-paper{position:absolute!important;transform:none!important}}
+@media print{.fbc:not([data-fbc-plan]) .fbc-stage{position:static!important;width:8.5in!important;height:11in!important}.fbc:not([data-fbc-plan]) .fbc-stage .fbc-paper{position:absolute!important;transform:none!important}}
 
 .fbc-png{display:block;width:100%;min-height:46px;margin-top:10px;padding:12px;border:1px solid #aaa;background:white;color:#454545;font:600 12px Montserrat,sans-serif;cursor:pointer}
 .fbc-png:disabled{opacity:.55;cursor:wait}
@@ -154,14 +165,14 @@ const examples=[
 #club-month-content .fbc-preview-pane{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}
 #club-month-content .fbc-stage{margin:0 auto}
 #club-month-content .fbc-floating-edit,#club-month-content .fbc-jump-edit{display:none}
-#club-month-content .fbc-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(660px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px;border:1px solid #e3d4d9;border-radius:10px;background:white;color:#454545;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
-#club-month-content .fbc-dialog::backdrop{background:rgba(33,40,36,.52)}
-#club-month-content .fbc-dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-#club-month-content .fbc-dialog-heading h2{font:400 29px Georgia,serif;color:#9b6477;margin:8px 0}
-#club-month-content .fbc-dialog-heading button{flex:0 0 36px;width:36px;height:36px;border:0;border-radius:50%;background:#f8eff1;color:#9b6477;font-size:24px;cursor:pointer}
-#club-month-content .fbc-dialog>p{font:13px/1.6 Montserrat,Arial,sans-serif}
-#club-month-content .fbc-dialog .fbc-editor-list{margin-top:15px}
-#club-month-content .fbc-dialog-done{width:100%;min-height:46px;border:0;background:#9b6477;color:white;font-weight:700;cursor:pointer;margin-top:15px}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(660px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px;border:1px solid #e3d4d9;border-radius:10px;background:white;color:#454545;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog::backdrop{background:rgba(33,40,36,.52)}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog-heading h2{font:400 29px Georgia,serif;color:#9b6477;margin:8px 0}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog-heading button{flex:0 0 36px;width:36px;height:36px;border:0;border-radius:50%;background:#f8eff1;color:#9b6477;font-size:24px;cursor:pointer}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog>p{font:13px/1.6 Montserrat,Arial,sans-serif}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog .fbc-editor-list{margin-top:15px}
+:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog-done{width:100%;min-height:46px;border:0;background:#9b6477;color:white;font-weight:700;cursor:pointer;margin-top:15px}
 @media screen and (min-width:1101px){
  html:has(#club-month-content .fbc),body:has(#club-month-content .fbc){height:100%;overflow:hidden}
  #club-month-content:has(.fbc){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
@@ -185,9 +196,9 @@ const examples=[
  #club-month-content .fbc-jump-edit{display:flex;align-items:center;justify-content:center;min-height:45px;border:1px solid #9b6477;background:#fff;color:#9b6477;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}
  #club-month-content .fbc-actions .fbc-download{min-width:0;font-size:12px;text-transform:none;letter-spacing:0}
  #club-month-content .fbc-actions .fbc-png,#club-month-content .fbc-actions .fbc-reset{grid-column:1/-1}
- #club-month-content .fbc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+ :is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
-@media print{#club-month-content .fbc-dialog,#club-month-content .fbc-floating-edit,#club-month-content .fbc-actions{display:none!important}}
+@media print{:is(#club-month-content,.fbc[data-fbc-plan]) .fbc-dialog,#club-month-content .fbc-floating-edit,#club-month-content .fbc-actions{display:none!important}}
 
 /* June-standard direct editing: persistent muted SVG pencil, removed from final artwork. */
 .fbc .fbc-paper [contenteditable="true"]{position:relative;cursor:text;outline-offset:2px;overflow-wrap:anywhere}
@@ -199,8 +210,21 @@ const examples=[
 @media print{.fbc .fbc-paper [contenteditable="true"]::after{display:none!important}.fbc .fbc-paper [contenteditable="true"]{outline:none!important;background:transparent!important}}
 .fbc.fbc-image-export .fbc-paper [contenteditable="true"]::after{display:none!important}
 .fbc.fbc-image-export .fbc-paper [contenteditable="true"]{outline:none!important;background:transparent!important}
+/* Plan mode: the Club plan page places the sheet; one card at a time in the editor. */
+.fbc-plan-view .fbc-stage{margin:0 auto}
+.fbc-plan-nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+.fbc-plan-nav button{min-height:44px;border:0;background:none;padding:0;color:#9b6477;font:700 12px Montserrat,Arial,sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.fbc-plan-nav button:disabled{visibility:hidden}
+.fbc-editor-list label small{display:block;font-size:11px;font-weight:400;color:#666;margin-top:4px}
+.fbc-plan-restore{min-height:44px;border:0;background:none;padding:0;color:#9b6477;font:700 12px Montserrat,Arial,sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
 </style>
 <script>
+import {
+  CARD_COUNT, LIMITS, applyFamily, febFingerprint, febView, freshState, fromLegacy, isFebState, planMembers, setPerson, setText,
+  type FebMember, type FebPlan, type FebState, type TextField,
+} from '../../lib/club/engines/february-connection-cards';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
 type Card={owner:string;recipient:string;headline:string;invite:string;idea:string};
 const defaults:Card[]=[
  {owner:"Sofia",recipient:"Dad",headline:"Game night?",invite:"Dad, will you play a game with me tonight?",idea:"I'll get the game ready!"},
@@ -216,7 +240,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  const stage=root.querySelector<HTMLElement>('[data-fbc-stage]');
  const fit=()=>{if(!stage)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';stage.style.setProperty('--fbc-scale',String(scale))};
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
- const managed=root.dataset.fbcManaged==='true';
+ if(root.hasAttribute('data-fbc-plan')){mountPlan(root as HTMLElement & {clubPlan?:FebPlan});continue;}
  const key=root.dataset.fbcKey??'omc:preview:february:v1';
  const storage=key.startsWith('omc:club:')?sessionStorage:localStorage;
  const editors=Array.from(root.querySelectorAll<HTMLElement>('[data-editor]'));
@@ -225,10 +249,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  let values=defaults.map(x=>({...x}));
 
  let automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));
- try{const saved=JSON.parse(managed?'null':storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);}}
+ try{const saved=JSON.parse(storage.getItem(key)??'null');if(saved?.cards?.length===4){values=defaults.map((d,i)=>Object.fromEntries(Object.entries(d).map(([field,v])=>[field,typeof saved.cards[i]?.[field]==='string'?saved.cards[i][field].slice(0,180):v])) as Card);}}
  catch{}
- try{const saved=JSON.parse(managed?'null':storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
- const save=()=>{if(managed){root.dispatchEvent(new CustomEvent('fbc-change',{detail:{cards:values.map(v=>({...v}))}}));return}try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
+ try{const saved=JSON.parse(storage.getItem(key+':automatic')??'null');if(Array.isArray(saved)&&saved.length===4&&saved.every(x=>x&&typeof x.owner==="string"&&typeof x.recipient==="string"))automatic=saved;}catch{}
+ const save=()=>{try{storage.setItem(key,JSON.stringify({cards:values}));storage.setItem(key+':automatic',JSON.stringify(automatic));}catch{}};
  const draw=()=>{
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Card;if(document.activeElement!==input)input.value=values[i][field]}));
   cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-out]').forEach(out=>{const field=out.dataset.out as keyof Card;if(document.activeElement!==out)out.textContent=values[i][field]||' ';}));
@@ -245,7 +269,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
  }));
  editors.forEach((editor,i)=>editor.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{const field=input.dataset.field as keyof Card;const previous=values[i].recipient;const oldInvite=values[i].invite;values[i][field]=input.value.slice(0,180);if(field==='recipient'&&previous&&oldInvite.startsWith(previous+','))values[i].invite=values[i].recipient+oldInvite.slice(previous.length);save();draw()})));
 
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{if(managed){root.dispatchEvent(new CustomEvent('fbc-reset'));return}values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{values=defaults.map(x=>({...x}));automatic=defaults.map(x=>({owner:x.owner,recipient:x.recipient}));try{storage.removeItem(key);storage.removeItem(key+':automatic')}catch{}draw()});
  root.querySelector('[data-print]')?.addEventListener('click',()=>{(document.activeElement as HTMLElement|null)?.blur();window.print()});
  root.querySelector<HTMLButtonElement>('[data-single-page-png]')?.addEventListener('click',async()=>{
   const button=root.querySelector<HTMLButtonElement>('[data-single-page-png]');
@@ -263,14 +287,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
   finally{root.classList.remove('fbc-image-export');button.disabled=false;button.textContent=old}
  });
  
- if(managed){
-  root.addEventListener('fbc-set',(event:Event)=>{
-   const incoming=(event as CustomEvent<Card[]>).detail;
-   if(!Array.isArray(incoming)||incoming.length!==4)return;
-   values=incoming.map(card=>({...card}));draw();
-  });
- }
- if(!managed) window.addEventListener('omc:club-preview-household',(event:Event)=>{
+ window.addEventListener('omc:club-preview-household',(event:Event)=>{
   const h=(event as CustomEvent<{household:{members:{firstName:string;kind:string;archived?:boolean;isAccountHolder?:boolean;role?:string}[]} | null}>).detail?.household;
   if(!h)return;
   const members=h.members.filter(m=>!m.archived);
@@ -303,5 +320,123 @@ for(const root of document.querySelectorAll<HTMLElement>('.fbc')){
   automatic=next;save();draw();
  });
  draw();
+}
+type Detail = { household: { id: string; members: FebMember[] } | null; sample?: string | null };
+
+/** The printable on a Club plan page: one state from the engine, shared with the rail and the mobile plan screen. */
+function mountPlan(root: HTMLElement & { clubPlan?: FebPlan }) {
+  const key = root.dataset.fbcKey ?? 'omc:club:february-app:v1';
+  let members: FebMember[] = [];
+  let current = '';
+  let legacyKey = '';
+  let state: FebState = freshState();
+  let persist = true;
+  let locked = false;
+  let editing = 0;
+  const cards = [...root.querySelectorAll<HTMLElement>('[data-card]')];
+  const dialog = root.querySelector<HTMLDialogElement>('[data-fbc-dialog]');
+  const fields = root.querySelector<HTMLElement>('[data-fbc-plan-fields]');
+  const outField: Record<string, TextField> = { owner: 'fromName', recipient: 'toName', headline: 'headline', invite: 'invite', idea: 'idea' };
+
+  const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
+  const draw = () => {
+    const v = febView(state, members);
+    cards.forEach((card, i) => card.querySelectorAll<HTMLElement>('[data-out]').forEach((out) => {
+      if (document.activeElement !== out) out.textContent = (v[i] as unknown as Record<string, string>)[out.dataset.out!] || ' ';
+    }));
+  };
+  const changed = () => { save(); draw(); if (current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true })); };
+  const update = (change: (s: FebState) => void) => { change(state); changed(); };
+
+  // Typing on the printed cards (desktop): the same edits as the editor and the mobile sheets.
+  cards.forEach((card, i) => card.querySelectorAll<HTMLElement>('[data-out]').forEach((out) => {
+    const field = outField[out.dataset.out!];
+    const capture = () => { if (!locked) update((s) => setText(s, i, field, out.textContent ?? '', members)); };
+    out.addEventListener('blur', () => { capture(); draw(); });
+    out.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); out.blur(); } });
+  }));
+
+  // The desktop editor: one card at a time, people by name from the family profile.
+  const paintEditor = () => {
+    if (!fields || !dialog) return;
+    const v = febView(state, members)[editing];
+    const live = planMembers(members);
+    const title = dialog.querySelector<HTMLElement>('#fbc-dialog-title');
+    if (title) title.textContent = `Invitation ${editing + 1} of ${CARD_COUNT}`;
+    const select = (side: 'from' | 'to', label: string) => {
+      const el = document.createElement('select');
+      el.dataset.field = side;
+      for (const m of live) el.append(Object.assign(document.createElement('option'), { value: m.id, textContent: m.firstName, disabled: side === 'to' && m.id === state.cards[editing].from }));
+      el.value = state.cards[editing][side];
+      el.addEventListener('change', () => { update((s) => setPerson(s, editing, side, el.value, members)); paintEditor(); });
+      const l = document.createElement('label');
+      l.append(label, el);
+      return l;
+    };
+    const text = (field: TextField, label: string, max: number, value: string, hint?: string, area = false) => {
+      const el = document.createElement(area ? 'textarea' : 'input');
+      el.maxLength = max;
+      el.value = value;
+      el.dataset.field = field;
+      el.addEventListener('input', () => update((s) => setText(s, editing, field, el.value, members)));
+      el.addEventListener('change', paintEditor);
+      const l = document.createElement('label');
+      l.append(label);
+      if (hint) l.append(Object.assign(document.createElement('small'), { textContent: hint }));
+      l.append(el);
+      return l;
+    };
+    const set = document.createElement('fieldset');
+    set.append(
+      select('from', 'From'),
+      select('to', 'To'),
+      text('toName', 'What they call them', LIMITS.name, v.recipient, 'Printed after “To” and at the start of the invitation.'),
+      text('fromName', 'Signed', LIMITS.name, v.owner),
+      text('headline', 'Invitation title', LIMITS.headline, v.headline),
+      text('invite', 'Personal invitation', LIMITS.invite, v.invite),
+      text('idea', 'A little extra note', LIMITS.idea, v.idea, undefined, true),
+    );
+    fields.replaceChildren(set);
+    dialog.querySelectorAll<HTMLButtonElement>('[data-fbc-step]').forEach((b) => { b.disabled = editing + Number(b.dataset.fbcStep) < 0 || editing + Number(b.dataset.fbcStep) >= CARD_COUNT; });
+  };
+  dialog?.querySelectorAll<HTMLButtonElement>('[data-fbc-step]').forEach((b) => b.addEventListener('click', () => { editing = Math.min(CARD_COUNT - 1, Math.max(0, editing + Number(b.dataset.fbcStep))); paintEditor(); }));
+  dialog?.querySelectorAll<HTMLButtonElement>('[data-fbc-close]').forEach((b) => b.addEventListener('click', () => dialog.close()));
+  dialog?.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+
+  const setLocked = (on: boolean) => {
+    locked = on;
+    root.querySelectorAll<HTMLElement>('.fbc-paper [data-out]').forEach((el) => el.setAttribute('contenteditable', on ? 'false' : 'true'));
+    if (on) dialog?.close();
+  };
+
+  const applyHousehold = (detail: Detail) => {
+    if (!detail?.household) return;
+    const next = planKey(detail.sample ?? null, detail.household.id);
+    members = detail.household.members;
+    if (next !== current) {
+      current = next;
+      // The earlier February page kept names in its own key per family; read it once if there's no plan yet.
+      legacyKey = `omc:club:february-mobile:v1:${encodeURIComponent((detail.sample ? `sample:${detail.sample}` : 'account:') + detail.household.id)}`;
+      state = readScoped(tabStorage.get(key), current, isFebState) ?? fromLegacy(tabStorage.get(legacyKey), members) ?? freshState();
+    }
+    applyFamily(state, members);
+    changed();
+  };
+
+  root.clubPlan = {
+    ready: () => Boolean(current),
+    state: () => state,
+    update,
+    replace: (s) => { state = structuredClone(s); changed(); },
+    setPersist: (on) => { persist = on; if (on) save(); },
+    fingerprint: () => febFingerprint(state, members),
+    members: () => planMembers(members),
+    view: () => febView(state, members),
+    setLocked,
+    openEditor: (card = 0) => { if (locked || !dialog) return; editing = card; paintEditor(); if (!dialog.open) dialog.showModal(); },
+  };
+  window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
+  const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
+  if (cached) applyHousehold(cached);
 }
 </script>
