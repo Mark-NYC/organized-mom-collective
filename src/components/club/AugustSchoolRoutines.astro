@@ -183,7 +183,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 /* Plan mode: the Club plan page places the sheet. */
 .asr-plan-view .asr-stage{margin:0 auto}
 /* The phone proof is a preview: steps are edited on the plan screen. */
-.plan-proof .asr-remove{display:none!important}
+@media screen and (max-width:1099px){.plan-proof .asr-remove{display:none!important}}
 @media(max-width:600px){.asr-guided-dialog{padding:18px;max-height:calc(100dvh - 28px)}.asr-gallery-grid{grid-template-columns:1fr 1fr}}
 </style>
 <script>
