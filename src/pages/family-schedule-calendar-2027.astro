@@ -1,0 +1,55 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { BRAND_NAME } from '../config';
+import { routes } from '../routes';
+
+const etsyUrl = 'https://www.etsy.com/listing/4585109839/family-wall-calendar-2027-large-family';
+const photo = 'https://i.etsystatic.com/29608155/r/il/de7ac8/8645639709/il_794xN.8645639709_cqeg.jpg';
+const features = [
+  'January through December 2027, one page per month',
+  '11 × 16.5 inches (A3), with five rows for family members or activities',
+  'Monday-to-Sunday layout with space to write in each day',
+  'Dedicated to-do checklist area',
+  '13 premium paper sheets including the cover',
+  'Wire-bound with a hanging loop, ready for your wall',
+];
+---
+<PublicLayout
+  title="2027 Family Schedule Wall Calendar"
+  description="Keep everyone’s 2027 schedule visible in one place. A large 11 × 16.5-inch monthly wall calendar with five planning rows, to-do lists and sturdy wire binding."
+  width="full"
+>
+  <section class="bg-cream public-panel public-intro">
+    <div class="mx-auto grid max-w-6xl items-center gap-9 px-5 py-12 sm:px-8 md:grid-cols-2 md:gap-14 md:py-20">
+      <div class="order-2 md:order-1">
+        <p class="label text-warm-soft">2027 · Printed Family Planner</p>
+        <h1 class="serif-hero mt-4 text-warm-ink">Everyone’s Schedule. One Place to See It.</h1>
+        <p class="lede mt-5 text-warm-ink">School events, appointments, sports, and the little things you don’t want to forget. Give every family member a row so the whole month is easy to see.</p>
+        <p class="mt-6 font-serif text-[2rem] text-warm-ink">$30.99</p>
+        <p class="mt-1 text-[0.9rem] text-warm-soft">Printed calendar · Free shipping through Etsy</p>
+        <a href={etsyUrl} target="_blank" rel="noopener noreferrer" data-cta="scheduler-buy" class="mt-6 inline-flex min-h-14 items-center justify-center rounded-md bg-warm-ink px-8 text-center font-semibold text-white transition-opacity hover:opacity-90">Buy the 2027 Schedule Calendar</a>
+        <p class="mt-3 text-sm text-warm-soft">Secure checkout on Etsy. Shipping and delivery details shown there.</p>
+      </div>
+      <figure class="order-1 overflow-hidden rounded-lg bg-paper md:order-2">
+        <img src={photo} alt="2027 monthly family wall calendar with five family schedule rows and a checklist." width="794" height="1050" class="mx-auto h-auto max-h-[650px] w-full object-contain" fetchpriority="high" />
+      </figure>
+    </div>
+  </section>
+  <section class="bg-paper">
+    <div class="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
+      <h2 class="serif-title text-center">A Whole Month, Without the Mental Juggling.</h2>
+      <p class="lede mx-auto mt-4 max-w-2xl text-center text-warm-soft">Hang it where everyone passes by. Write the commitments down once, then let the family check their own schedule.</p>
+      <ul class="mt-10 grid gap-4 sm:grid-cols-2">
+        {features.map((feature) => <li class="rounded-lg border border-warm-rule bg-cream px-5 py-4 text-warm-ink"><span class="mr-2 text-rose-deep" aria-hidden="true">✓</span>{feature}</li>)}
+      </ul>
+    </div>
+  </section>
+  <section class="bg-sage-wash">
+    <div class="mx-auto max-w-3xl px-5 py-14 text-center sm:py-20">
+      <h2 class="serif-title">Make the Family Plan Visible.</h2>
+      <p class="lede mt-4">Twelve monthly pages. Five planning rows. One spot for the things everyone needs to remember.</p>
+      <a href={etsyUrl} target="_blank" rel="noopener noreferrer" data-cta="scheduler-bottom" class="mt-7 inline-flex min-h-14 items-center justify-center rounded-md bg-warm-ink px-8 font-semibold text-white">Get the 2027 Calendar · $30.99</a>
+      <p class="mt-5 text-sm text-warm-soft">Want a weekly layout with meals and cleaning instead? <a class="underline underline-offset-2" href={routes.calendar}>See our weekly Family Wall Calendar.</a></p>
+    </div>
+  </section>
+</PublicLayout>
