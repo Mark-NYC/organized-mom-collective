@@ -1,0 +1,92 @@
+---
+/** August Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with whose
+ * routine and its before- and after-school steps, beside the one-page printable. Below 1100px: the shared plan screen
+ * with August's sections (AugustPlanMobile). The printable, its editor and its rules live in AugustSchoolRoutines and
+ * src/lib/club/engines/august-school-routines.ts. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import AugustSchoolRoutines from '../../../components/club/AugustSchoolRoutines.astro';
+import AugustPlanMobile from '../../../components/club/AugustPlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find((k) => k.month === '2027-08');
+if (!kit) throw new Error('August 2027 kit missing from the registry');
+const deadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:august-app:v1';
+---
+<AppLayout title="August School Day Routines">
+  <ClubPlanShell class="aug-plan family-brand" kitSlug={kit.slug} month="August" storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="August · Kit preview" instructions={[
+      'School mornings and afternoons shouldn’t depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.',
+    ]}>
+      <Fragment slot="title">Fewer reminders. <em>Smoother school days.</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="aug-d-routine">
+          <p class="cpd-label" id="aug-d-routine">On the routine</p>
+          <dl class="cpd-rows" data-aug-d-rows></dl>
+          <button type="button" class="cpd-link" data-aug-d-open>Edit steps and whose routine</button>
+          <p>Or click a time, step or the line at the bottom of the sheet to change it.</p>
+          <button type="button" class="cpd-link" data-aug-d-restore hidden>Restore this routine</button>
+          <p class="cpd-hint" data-aug-d-hint hidden></p>
+          <p class="cpd-hint" data-aug-d-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="aug-proof" slot="printable" data-plan-proof-body>
+      <div class="aug-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <AugustSchoolRoutines storageKey={storageKey} planMode={true} />
+      </div>
+    </div>
+    <AugustPlanMobile slot="mobile" deadline={deadline} />
+  </ClubPlanShell>
+</AppLayout>
+<style is:global>
+.aug-plan .asr-dialog{z-index:100}
+</style>
+<script>
+import { GROUPS, GROUP_INFO, restoreRoutine, routineChanged, type AugPlan, type AugState } from '../../../lib/club/engines/august-school-routines';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.aug-plan');
+const asr = root?.querySelector<HTMLElement & { clubPlan?: AugPlan }>('.asr');
+if (root && asr) {
+  const plan = () => asr.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-aug-d-restored]');
+  const row = (dt: string, dd: string) => el('div', {}, el('dt', {}, dt), el('dd', {}, dd));
+  let undo: AugState | null = null;
+  mountPlanDesktop<AugState>({
+    root,
+    host: asr,
+    approvalKey: 'omc:preview:august-school-routines:approval',
+    edit: () => plan().openEditor(),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const v = plan().view();
+      q('[data-aug-d-rows]').replaceChildren(
+        row('Routine for', v.child === 'family' ? `${v.childName}` : `${v.childName} (age ${v.age})`),
+        ...GROUPS.map((g) => { const s = v.groups[g]; return row(GROUP_INFO[g].title, s.length ? `${s.length} steps, ${s[0].clock} to ${s.at(-1)!.clock}` : 'No steps'); }),
+        row('Shorter routine', v.routine.mode === 'simple' ? 'On' : 'Off'));
+      q<HTMLButtonElement>('[data-aug-d-open]').disabled = locked;
+      const changed = !locked && routineChanged(plan().state(), plan().members());
+      q('[data-aug-d-restore]').hidden = !changed;
+      const hint = q('[data-aug-d-hint]');
+      hint.hidden = !changed;
+      hint.textContent = `Puts back the prepared steps, times and wording on ${v.childName === 'Our family' ? 'the family' : `${v.childName}’s`} routine. Other routines stay.`;
+    },
+  });
+  q('[data-aug-d-open]').addEventListener('click', () => plan().openEditor());
+  q('[data-aug-d-restore]').addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    plan().update((s) => restoreRoutine(s, plan().members()));
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('Routine restored. ', u);
+    restored.focus();
+  });
+}
+</script>

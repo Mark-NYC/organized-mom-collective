@@ -1,0 +1,184 @@
+---
+/**
+ * August School Day Routines on phones and tablets (below 1100px): whose routine, the before- and after-school steps
+ * and the words on the sheet, inside the shared ClubPlanScreen. It reads and changes the plan only through the
+ * printable's controller (`.asr` root's `clubPlan`, src/lib/club/engines/august-school-routines.ts).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="August · Organized Family Club" sheets={['sheet']} previewNote="One school-day routine, ready to print">
+  <Fragment slot="title">Fewer reminders. <em>Smoother school days.</em></Fragment>
+  <section class="cp-section" aria-labelledby="aum-who-title">
+    <h2 id="aum-who-title">Whose routine</h2>
+    <p class="cp-intro">Each child keeps their own routine, prepared for their age. The sheet prints the one you choose.</p>
+    <ul class="cp-group" data-aum-who></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="aum-steps-title">
+    <h2 id="aum-steps-title">The routines</h2>
+    <p class="cp-intro">Picture steps with times, so kids can see what comes next instead of asking.</p>
+    <ul class="cp-group" data-aum-groups></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="aum-words-title">
+    <h2 id="aum-words-title">Words on your printable</h2>
+    <ul class="cp-group" data-aum-words></ul>
+    <p class="aum-restore" data-aum-restore hidden><button type="button" class="cp-link"><span>Restore this routine</span></button><span data-aum-restore-note></span></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.aum-restore{display:grid;margin:6px 0 0;font-size:.85rem;line-height:1.45;color:var(--cp-soft)}
+.aum-restore[hidden]{display:none}
+.aum-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+.aum-steps{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.aum-step{display:grid;gap:8px;padding:12px;border:1px solid #dfe5dc;border-radius:8px;background:#fff}
+.aum-step-head{display:flex;align-items:center;gap:10px}
+.aum-step-head>span{margin-left:auto;white-space:nowrap;font-size:.9rem;color:var(--cp-soft)}
+.aum-step-head img{width:40px;height:40px;object-fit:contain;flex:0 0 40px}
+.aum-step-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,8.5rem);gap:8px}
+.aum-step-fields input{min-width:0}
+.aum-step-fields .cp-field{margin:0}
+.aum-step-actions{display:flex;flex-wrap:wrap;gap:6px}
+.aum-step-actions .cp-chip{min-height:40px}
+.aum-check{display:flex;gap:10px;align-items:flex-start;margin:4px 0 0;font-size:.92rem;line-height:1.45}
+.aum-check input{width:20px;height:20px;margin-top:2px;flex:0 0 20px}
+.aum-step[data-removed]{background:#f6f6f3}
+.aum-step[data-removed] strong{color:var(--cp-soft);text-decoration:line-through}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  CHOICES, FOOTER_LIMIT, GROUPS, GROUP_INFO, ICONS, LABEL_LIMIT, addStep, clock, move, restoreRoutine, routineChanged, routineOf,
+  setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, validTime, type AugPlan, type AugState, type Group,
+} from '../../lib/club/engines/august-school-routines';
+
+const APPROVAL_KEY = 'omc:preview:august-school-routines:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has(.asr)');
+const asr = root?.querySelector<HTMLElement & { clubPlan?: AugPlan }>('.asr');
+if (root && asr) {
+  const plan = () => asr.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<AugState>;
+
+  const row = (label: string, title: string, detail: string, open: () => void, locked: boolean, lead: Node = el('span')) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, lead,
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'aum-label' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${label}: ${title}.${locked ? '' : ' Change'}`);
+    b.addEventListener('click', open);
+    return el('li', {}, b);
+  };
+
+  const render = (_ui: PlanScreen<AugState>, s: AugState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-aum-who]').replaceChildren(
+      row('Routine for', v.childName, `Prepared for age ${v.age}`, openChild, locked, el('span', { class: 'cp-avatar' }, v.childName.charAt(0))));
+    q('[data-aum-groups]').replaceChildren(...GROUPS.map((g) => {
+      const steps = v.groups[g];
+      const span = steps.length ? `${steps[0].clock} to ${steps.at(-1)!.clock}` : 'No steps yet';
+      return row(GROUP_INFO[g].title, `${steps.length} ${steps.length === 1 ? 'step' : 'steps'} · ${span}`, steps.map((x) => x.label).join(', '), () => openGroup(g), locked);
+    }));
+    q('[data-aum-words]').replaceChildren(
+      row('At the bottom', v.footer, v.routine.mode === 'simple' ? 'Shorter routine is on' : '', openWords, locked));
+    q('[data-aum-restore]').hidden = locked || !routineChanged(s, plan().members());
+    q('[data-aum-restore-note]').textContent = `Puts back the prepared steps, times and wording on ${v.childName === 'Our family' ? 'the family' : `${v.childName}’s`} routine. Other routines stay.`;
+  };
+
+  const chips = (label: string, items: { value: string; text: string }[], current: string, pick: (v: string) => void) => {
+    const g = el('div', { class: 'cp-chips', role: 'group' });
+    g.setAttribute('aria-label', label);
+    for (const it of items) {
+      const c = el('button', { type: 'button', class: 'cp-chip' }, it.text);
+      c.setAttribute('aria-pressed', String(it.value === current));
+      c.addEventListener('click', () => pick(it.value));
+      g.append(c);
+    }
+    return el('div', { class: 'cp-field' }, el('span', {}, label), g);
+  };
+  const openChild = () => {
+    const p = plan();
+    const v = p.view();
+    ui.openSheet('Whose routine?',
+      chips('Routine for', [{ value: 'family', text: 'Our family' }, ...v.kids.map((k) => ({ value: k.id, text: k.name }))], v.child, (id) => { p.update((s) => setChild(s, id, p.members())); openChild(); }),
+      el('p', { class: 'cp-sheet-hint' }, 'Switching keeps each child’s routine as you left it.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openGroup = (g: Group) => {
+    const p = plan();
+    const members = p.members();
+    const r = routineOf(p.state(), members);
+    const visible = shown(r, g);
+    const again = () => openGroup(g);
+    const steps = el('ul', { class: 'aum-steps' }, ...r.steps.filter((x) => x.group === g).map((step) => {
+      const off = Boolean(step.removed) || !visible.includes(step);
+      const li = el('li', { class: 'aum-step' });
+      if (off) li.setAttribute('data-removed', '');
+      li.append(el('div', { class: 'aum-step-head' }, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), el('strong', {}, step.label), off ? '' : el('span', {}, clock(step.time))));
+      const actions = el('div', { class: 'aum-step-actions' });
+      if (step.removed) {
+        const b = el('button', { type: 'button', class: 'cp-chip' }, 'Put back');
+        b.setAttribute('aria-label', `Put back ${step.label}`);
+        b.addEventListener('click', () => { p.update((s) => setRemoved(s, step.id, false, p.members())); again(); });
+        actions.append(b);
+      } else if (!off) {
+        const name = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: step.label });
+        name.addEventListener('change', () => { p.update((s) => setLabel(s, step.id, name.value, p.members())); again(); });
+        const time = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
+        time.addEventListener('change', () => { if (validTime(time.value)) { p.update((s) => setTime(s, step.id, time.value, p.members())); again(); } });
+        li.append(el('div', { class: 'aum-step-fields' }, el('label', { class: 'cp-field' }, 'Step', name), el('label', { class: 'cp-field' }, 'Time', time)));
+        for (const [dir, text] of [[-1, 'Earlier'], [1, 'Later']] as const) {
+          const b = el('button', { type: 'button', class: 'cp-chip', disabled: !visible[visible.indexOf(step) + dir] }, text);
+          b.setAttribute('aria-label', `Move ${step.label} ${text.toLowerCase()}`);
+          b.addEventListener('click', () => { p.update((s) => move(s, step.id, dir, p.members())); again(); });
+          actions.append(b);
+        }
+        const rm = el('button', { type: 'button', class: 'cp-chip' }, 'Remove');
+        rm.setAttribute('aria-label', `Remove ${step.label}`);
+        rm.addEventListener('click', () => { p.update((s) => setRemoved(s, step.id, true, p.members())); again(); });
+        actions.append(rm);
+      } else {
+        actions.append(el('span', { class: 'cp-sheet-hint' }, 'Hidden by the shorter routine'));
+      }
+      li.append(actions);
+      return li;
+    }));
+    const present = new Set(r.steps.filter((x) => x.group === g && !x.removed).map((x) => x.id));
+    const add = el('div', { class: 'cp-chips', role: 'group' }, ...CHOICES[g].filter((c) => !present.has(c.id)).map((c) => {
+      const b = el('button', { type: 'button', class: 'cp-chip' }, `＋ ${c.label}`);
+      b.addEventListener('click', () => { p.update((s) => addStep(s, g, c.id, p.members())); again(); });
+      return b;
+    }));
+    add.setAttribute('aria-label', 'Add a step');
+    const other = GROUPS.find((x) => x !== g)!;
+    const next = el('button', { type: 'button', class: 'cp-btn' }, `${GROUP_INFO[other].title} ›`);
+    next.addEventListener('click', () => openGroup(other));
+    ui.openSheet(GROUP_INFO[g].title, el('p', { class: 'cp-sheet-hint' }, 'Rename, retime, reorder or remove steps. Removed steps can be put back.'), steps,
+      el('div', { class: 'cp-field' }, el('span', {}, 'Add a step'), add), el('div', { class: 'cp-sheet-actions' }, ui.doneButton(), next));
+  };
+  const openWords = () => {
+    const p = plan();
+    const v = p.view();
+    const input = el('textarea', { maxLength: FOOTER_LIMIT, value: v.footer });
+    input.addEventListener('input', () => p.update((s) => setFooter(s, input.value, p.members())));
+    const shorter = el('input', { type: 'checkbox', checked: v.routine.mode === 'simple' });
+    shorter.addEventListener('change', () => p.update((s) => setMode(s, shorter.checked, p.members())));
+    ui.openSheet('Words on your printable', el('label', { class: 'cp-field' }, 'At the bottom', input),
+      el('p', { class: 'cp-sheet-hint' }, 'Blank goes back to the original wording.'),
+      el('label', { class: 'aum-check' }, shorter, ' Use a shorter routine (hides “Wake up” and “Wash hands” without deleting them)'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  q('[data-aum-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => restoreRoutine(s, plan().members()));
+    ui.toast('This routine is back to its prepared steps.', () => plan().replace(before));
+  });
+
+  const mounted = mountPlanScreen<AugState>({ root, host: asr, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>
