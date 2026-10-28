@@ -3,14 +3,13 @@
  * the compact printable preview, the action bar, one focused edit sheet, a one-time copy and a toast. A month
  * supplies only its sections (`render`) and its sheets; everything else is here, tested once.
  *
- * Approval is a prototype: kept in this tab against the printable's fingerprint (production: approved_revision).
- * Mail by default: approval means "I've checked it", never a condition for receiving the resource.
+ * Approval (status.ts) is shared with the desktop rail (desktop.ts): one approval per page and family.
  */
 import { editingWindow } from '../edition-status';
 import { el } from './dom';
 import { printPlan } from './proof';
-import { PLAN_CHANGE, type PlanResource, type PlanResourceHost } from './resource';
-import { tabStorage } from './storage';
+import { PLAN_APPROVAL, PLAN_CHANGE, type PlanResource, type PlanResourceHost } from './resource';
+import { approvalDay, approvalState, planNow, readApproval, writeApproval } from './status';
 
 export interface PlanScreen<S> {
   resource(): PlanResource<S>;
@@ -34,8 +33,6 @@ export interface PlanScreenOptions<S> {
   render(screen: PlanScreen<S>, state: S, locked: boolean): void;
 }
 
-type Approval = { for: string; print: string; at: string };
-
 export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | null {
   const screen = o.root.querySelector<HTMLElement>('[data-plan-screen]');
   if (!screen) return null;
@@ -47,19 +44,12 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
   let toastTimer = 0;
   let thumbTimer = 0;
 
-  const readApproval = (): Approval | null => {
-    try {
-      const a = JSON.parse(tabStorage.get(o.approvalKey) ?? 'null') as Approval | null;
-      return a && a.for === root.dataset.planFor ? a : null;
-    } catch { return null; }
+  const approval = () => readApproval(o.approvalKey, root.dataset.planFor);
+  const setApproval = (a: Parameters<typeof writeApproval>[1]) => {
+    writeApproval(o.approvalKey, a);
+    root.dispatchEvent(new Event(PLAN_APPROVAL));
   };
-  const writeApproval = (a: Approval | null) => (a ? tabStorage.set(o.approvalKey, JSON.stringify(a)) : tabStorage.remove(o.approvalKey));
-
-  const now = () => {
-    const d = import.meta.env.DEV ? new URLSearchParams(location.search).get('preview-date') : null;
-    return d ? new Date(d) : new Date();
-  };
-  const windowState = () => editingWindow(screen.dataset.deadline ?? '', now());
+  const windowState = () => editingWindow(screen.dataset.deadline ?? '', planNow());
   const readOnly = () => windowState().phase === 'closed' && !copySnapshot;
 
   const toast = (text: string, undo?: () => void) => {
@@ -123,15 +113,14 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
     const w = windowState();
     screen.dataset.window = w.phase;
     $('[data-cp-window]').textContent = w.phase === 'closed' ? `${w.text}. You can still print a copy.` : w.text;
-    const a = readApproval();
-    const approval = !a ? 'none' : a.print === r.fingerprint() ? 'approved' : 'changed';
-    screen.dataset.approval = approval;
-    const day = a ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(a.at)) : '';
+    const a = approval();
+    const state = approvalState(a, r.fingerprint());
+    screen.dataset.approval = state;
     $('[data-cp-approval-text]').textContent =
-      approval === 'approved' ? `Approved ${day} · preview only` : approval === 'changed' ? 'Changed since you approved' : 'Not approved yet';
+      state === 'approved' ? `Approved ${approvalDay(a)} · preview only` : state === 'changed' ? 'Changed since you approved' : 'Not approved yet';
     const primary = $<HTMLButtonElement>('[data-plan-primary]');
-    primary.textContent = copy ? 'Print this copy' : locked ? 'Print a copy' : approval === 'approved' ? '✓ Approved' : approval === 'changed' ? 'Approve changes' : 'Approve this plan';
-    primary.setAttribute('aria-disabled', String(!copy && !locked && approval === 'approved'));
+    primary.textContent = copy ? 'Print this copy' : locked ? 'Print a copy' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve this plan';
+    primary.setAttribute('aria-disabled', String(!copy && !locked && state === 'approved'));
     $<HTMLButtonElement>('[data-cp-print]').hidden = copy || locked;
     $<HTMLButtonElement>('[data-cp-copy-done]').hidden = !copy;
     $('[data-cp-copy-banner]').hidden = !copy;
@@ -149,12 +138,11 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
 
   $('[data-plan-primary]').addEventListener('click', () => {
     if (copySnapshot || readOnly()) return printPlan();
-    const a = readApproval();
+    const a = approval();
     const print = resource().fingerprint();
     if (a && a.print === print) return;
-    writeApproval({ for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
-    render();
-    toast('Approved in this preview. Nothing is mailed yet.', () => { writeApproval(a); render(); });
+    setApproval({ for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
+    toast('Approved in this preview. Nothing is mailed yet.', () => setApproval(a));
   });
   $('[data-plan-copy]').addEventListener('click', () => {
     copySnapshot = structuredClone(resource().state());
@@ -184,6 +172,7 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
   window.addEventListener('resize', fitBar);
 
   host.addEventListener(PLAN_CHANGE, render);
+  root.addEventListener(PLAN_APPROVAL, render);
   render();
   return api;
 }
