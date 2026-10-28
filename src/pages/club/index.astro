@@ -109,6 +109,9 @@ const faqs = [
    const people=[...data.children.map(c=>({name:c.name||'',task:c.age==null||c.age===''?'':jobs(Number(c.age))})),{name:data.dad||'',task:'Clear and wipe the dinner table'},{name:data.mom||'',task:'Help everyone get ready for tomorrow'}];
    modalAssignments.innerHTML=people.map(p=>'<div class="assignment"><span class="tick"></span><div><b>'+escapeHtml(p.name)+'</b><p>'+escapeHtml(p.task)+'</p></div></div>').join('');
    result.hidden=false;
+   const householdDetail={household:{id:'landing-demo',children:data.children.map(c=>({name:c.name,age:c.age}))},sample:'landing'};
+   window.__ofcPreviewHousehold=householdDetail;
+   window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:householdDetail}));
    try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}
    if(scroll && typeof modal.showModal==='function'){modal.showModal();requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')))}
  }
