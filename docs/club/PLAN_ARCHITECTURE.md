@@ -4,9 +4,9 @@ How a month's personalized printable becomes a plan page in the cleaning compani
 October (Sunday Reset, two sheets), January (Habit Cards, one sheet), February (Connection Cards, one sheet),
 March (Spring Prep, one sheet), April (Dinner Team, two sheets) and May (Summer Day Rhythm, one sheet) use it. Every remaining month should too, without copying page code.
 
-**Status (2026-10-28).** October is the approved reference. January, February, March and April use the shared desktop rail (`ClubPlanDesktop`),
-which reproduces October's desktop layout. October and May still carry their own copies of that rail's markup and
-CSS, and their desktop "Approve" only changes a note. Moving those two onto `ClubPlanDesktop` is separate work. Every app month page January–May and October is on the shell. June–September,
+**Status (2026-10-28).** October is the approved reference, and its desktop layout is now the shared rail
+(`ClubPlanDesktop`): every app month page (January–May and October) uses it, with one approval shared by the rail and
+the plan screen. October's page still carries viewer rules for its printable's own document frame. June–September,
 November and December have no `/app/club/<month>` page yet (the Club hub links their `/club/<month>-preview` pages).
 
 ## The split
