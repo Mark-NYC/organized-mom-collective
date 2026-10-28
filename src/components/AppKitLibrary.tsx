@@ -1,3 +1,4 @@
+import { monthColors } from '../theme';
 // The app Club library mirrors the benefit-first public Club month descriptions.
 // Keep icons linked to the original artwork in assets/icons/ofc/month-icons.
 const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.png', {
@@ -96,11 +97,12 @@ const months = [
 export default function AppKitLibrary() {
   return (
     <div className="ofc-app-month-grid">
-      {months.map((m) => {
+      {months.map((m, index) => {
         const src = icons[`../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
+        const calendarColor = monthColors[index].hex;
         return (
-          <article className="ofc-app-month" key={m.month}>
-            <div className="ofc-app-month-header">
+          <article className="ofc-app-month" key={m.month} style={{ display: 'block' }}>
+            <div className="ofc-app-month-header" style={{ backgroundColor: calendarColor }}>
               <div className="ofc-app-month-header-text">
                 <p className="ofc-app-month-name">{m.month}</p>
                 <h3>{m.title}</h3>
