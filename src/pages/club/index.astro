@@ -40,7 +40,7 @@ const faqs = [
 <section class="comparison container"><p class="eyebrow">NOT ANOTHER JOB FOR MOM</p><h2>This isn't another printable <em>you have to figure out.</em></h2><div class="compare-grid"><article><h3>Typical family printables</h3><ul><li>You download and print.</li><li>You decide who does what.</li><li>You fill in the assignments.</li><li>You explain the system.</li><li>You keep reminding everyone.</li></ul></article><article class="compare-good"><h3>Organized Family Club</h3><ul><li>We prepare a plan for your household.</li><li>We recommend age-appropriate jobs.</li><li>Names and assignments are already on the page.</li><li>We print it and mail it to you.</li><li>Your family has something clear to follow.</li></ul></article></div><p class="comparison-end">Less work setting it up. More help putting it into practice.</p></section>
 <section class="features container"><p class="eyebrow">WHAT COMES IN THE MAIL</p><h2>One beautiful tool. <em>Ready to use.</em></h2><div class="feature-grid"><article><span>01</span><h3>A finished family plan</h3><p>One real problem with practical steps and clear responsibilities worked out in advance.</p></article><article><span>02</span><h3>Personal touches</h3><p>Your family's names, ages, and household needs shape the recommendations.</p></article><article><span>03</span><h3>A note from Megan</h3><p>Warm encouragement and a simple way to introduce the plan.</p></article><article><span>04</span><h3>A digital copy</h3><p>Review your plan, make a few changes when needed, and access it again later.</p></article></div></section>
 <section class="month-stories home-style-inset" id="months"><div class="club-float-surface story-shell"><div class="container"><p class="eyebrow">HERE'S WHAT IT LOOKS LIKE IN REAL LIFE</p><h2>Different family challenges. <em>One ready-made plan each month.</em></h2><div class="story-grid">
-{[months[3],months[4],months[10]].map(m=><article class="story-card"><img src={m.icon} alt="" loading="lazy" width="90" height="90"/><p class="story-month">{m.month}</p><h3>{m.title}</h3><p>{m.how}</p><a href={m.url}>See the actual tool →</a></article>)}
+{[months[3],months[4],months[10]].map(m=><article class="story-card"><div class="story-top"><img src={m.icon} alt="" loading="lazy" width="90" height="90"/><span class="ready-label">READY TO USE</span></div><p class="story-month">{m.month}</p><h3>{m.title}</h3><p>{m.how}</p><a href={m.url}>See the actual tool →</a></article>)}
 </div><details class="all-months"><summary>Explore all 12 monthly tools <span>+</span></summary><div class="month-grid">{months.map(m=><a href={m.url}><img src={m.icon} alt="" width="54" height="54" loading="lazy"/><div><small>{m.month}</small><b>{m.title}</b><span>Preview →</span></div></a>)}</div></details></div></div></section>
 <section class="club-demo" id="demo"><div class="club-demo-inner"><div class="club-demo-heading"><p class="eyebrow">SEE IT FOR YOUR OWN FAMILY</p><h2>The plan is <span class="lime-highlight">already made.</span> <em>The guesswork is already gone.</em></h2><p>Give us a few first names and ages. We'll show you a sample Daily Reset with responsibilities already suggested for your household.</p><p class="demo-disclaimer">This is a free interactive example, not an actual monthly mailing. No payment or account needed.</p></div>
 <form id="family-form" class="form" autocomplete="off"><p class="form-kicker">YOUR FREE PERSONALIZED EXAMPLE</p><h2>Let's make your family's plan.</h2><p>First names and children's ages are all we need for this sample.</p><div class="name-fields"><label>Mom's first name<input name="mom" id="mom" placeholder="Megan" maxlength="40" required /></label><label>Dad's first name<input name="dad" id="dad" placeholder="Mark" maxlength="40" required /></label></div><div class="children-head"><strong>Your kids</strong><span>First names only</span></div><div id="children-fields"></div><button type="button" class="add" id="add-child">+ Add a child</button><button type="submit" class="primary form-submit">Create My Family's Preview <span class="lime-arrow" aria-hidden="true">→</span></button><small>No sign-in. Your details stay in this browser.</small></form></div></section>
@@ -347,6 +347,27 @@ const faqs = [
 .club .lime-highlight{
  background:linear-gradient(transparent 68%,var(--club-lime) 68%,var(--club-lime) 87%,transparent 87%);
  box-decoration-break:clone;-webkit-box-decoration-break:clone;
+}
+
+/* A stronger lime focal point, with restrained product labels. */
+.club .hero-actions .primary{
+ background:var(--club-lime);
+ color:#303831!important;
+}
+.club .hero-actions .primary:hover,
+.club .hero-actions .primary:focus-visible{background:#a9e991;color:#303831!important}
+.club .hero-actions .primary .lime-arrow{color:#303831}
+.club .story-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.club .ready-label{
+ flex-shrink:0;display:inline-block;
+ padding:5px 8px;
+ background:var(--club-lime);
+ color:#34513d;
+ font-size:.59rem;
+ font-weight:800;
+ letter-spacing:.06em;
+ line-height:1.2;
+ border-radius:3px;
 }
 </style>
 </PublicLayout>
