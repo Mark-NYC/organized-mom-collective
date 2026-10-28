@@ -2,6 +2,7 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../../config';
 import clubHeroUrl from '../../../assets/icons/ofc/hero-family-pointing.jpeg?url';
+import clubBadgeUrl from '../../../assets/icons/ofc/OFC-logo.webp?url';
 const monthIcons = import.meta.glob('../../../assets/icons/ofc/month-icons/*-OFC-icon.png', { eager: true, query: '?url', import: 'default' });
 const months = [{"month":"January","title":"Mornings Without the Nagging","responsibility":"Following routines","how":"A ready-made morning or evening plan shows each person what to do next.","url":"/club/january-preview/"},{"month":"February","title":"Connection You Don't Have to Plan","responsibility":"Initiating connection","how":"Four simple invitations help kids take the lead in spending time together.","url":"/club/february-preview/"},{"month":"March","title":"Cleaning Without Managing Everyone","responsibility":"Finishing a job","how":"Each person gets a clear cleaning job, supplies, steps, and a definition of done.","url":"/club/march-preview/"},{"month":"April","title":"Dinner Isn't All on You","responsibility":"Sharing meal ownership","how":"A prepared dinner plan gives family members roles from gathering ingredients through cleanup.","url":"/club/april-preview/"},{"month":"May","title":"Summer Days Without Constant Questions","responsibility":"Managing their day","how":"A flexible daily rhythm and activity menu help kids choose what comes next.","url":"/club/may-preview/"},{"month":"June","title":"Less Screen-Time Negotiating","responsibility":"Respecting shared boundaries","how":"Clear expectations for screens, responsibilities, and free time help everyone follow the same plan.","url":"/club/june-preview/"},{"month":"July","title":"No More Packing for Everyone","responsibility":"Preparing independently","how":"Personal packing lists show each person what to pack, check, and put away.","url":"/club/july-preview/"},{"month":"August","title":"Back to School Without the Scramble","responsibility":"Taking initiative","how":"A personalized countdown gives everyone their own school-ready responsibilities.","url":"/club/august-preview/"},{"month":"September","title":"Stop Being the Family's Calendar","responsibility":"Planning together","how":"A short weekly family meeting helps everyone know the schedule and own their commitments.","url":"/club/september-preview/"},{"month":"October","title":"Get Ahead of the Last-Minute Scramble","responsibility":"Noticing what is needed","how":"Seasonal checks assign family members the job of spotting and handling needs early.","url":"/club/october-preview/"},{"month":"November","title":"Stop Being Everyone's Reminder","responsibility":"Owning a whole responsibility","how":"Each ready family member gets a job with a clear owner, timing, and finish line.","url":"/club/november-preview/"},{"month":"December","title":"Christmas Without Doing It All","responsibility":"Contributing to family traditions","how":"A prepared holiday plan shares the work of gifts, traditions, and celebrations.","url":"/club/december-preview/"}].map(m => ({...m, icon: monthIcons[`../../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`]}));
 
@@ -26,6 +27,7 @@ const faqs = [
  <div class="hero-actions"><a class="primary" href="#demo">Show Me My Family's Plan →</a><a class="hero-secondary" href="#what-arrives">See what arrives</a></div>
  <p class="hero-trust">Personalized for your household · One printed tool each month · Digital version included</p></div>
  <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
+ <div class="hero-seam-badge" aria-hidden="true"><img src={clubBadgeUrl} alt="" width="120" height="120" loading="eager" /></div>
 </div></div></section>
 <section class="pain container"><p class="eyebrow">SOUND FAMILIAR?</p><h2>You love taking care of your family. <em>You just don't want to manage every little thing.</em></h2>
 <div class="pain-questions"><p>Who remembers what goes in the backpacks?</p><p>Who figures out dinner?</p><p>Who reminds everyone to clean up?</p><p>Who knows what happens next?</p></div>
@@ -264,6 +266,34 @@ const faqs = [
  .club .hero h1{font-size:27px}
  .club .hero .hero-photo{height:215px}
  .club .hero .hero-copy{padding-inline:19px}
+}
+
+/* Desktop editorial seam badge, centered across the image and copy panels. */
+.club .hero-seam-badge{display:none}
+@media (min-width:851px){
+ .club .hero .hero-inner{position:relative}
+ .club .hero-seam-badge{
+  display:flex;
+  position:absolute;
+  z-index:5;
+  left:50%;
+  top:24px;
+  transform:translateX(-50%);
+  width:124px;
+  height:124px;
+  padding:7px;
+  border-radius:50%;
+  background:#f1f2f2;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+ }
+ .club .hero-seam-badge img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:50%;
+ }
 }
 </style>
 </PublicLayout>
