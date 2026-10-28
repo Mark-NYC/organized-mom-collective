@@ -222,6 +222,8 @@ const tiers=[
 .jab.jab-export .jab-sheet [contenteditable="true"]::after{display:none!important}
 /* Plan mode: the Club plan page places the sheet. */
 .jab-plan-view .jab-stage{margin:0 auto}
+/* The phone proof is a preview: activities are edited on the plan screen. */
+@media screen and (max-width:1099px){.plan-proof .jab-remove{display:none!important}}
 </style>
 <script>
 import {
