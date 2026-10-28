@@ -1,0 +1,111 @@
+---
+/**
+ * March Spring Prep on phones and tablets (below 1100px): the five optional jobs inside the shared ClubPlanScreen,
+ * each with its own sheet (owner and wording). It reads and changes the plan only through the printable's controller
+ * (`.msc` root's `clubPlan`, src/lib/club/engines/march-spring-prep.ts). Status, approval, copy, print and the sheet
+ * itself are shared (src/components/club/plan/, docs/club/PLAN_ARCHITECTURE.md).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['sheet']} previewNote="One page, ready to print">
+  <Fragment slot="title">Our Family <em>Spring Prep</em></Fragment>
+  <section class="cp-section" aria-labelledby="mpm-jobs-title">
+    <h2 id="mpm-jobs-title">Everyone has a part</h2>
+    <p class="cp-intro">Five optional jobs from your cleaning companion, each with a clear finish line. Do one, a few, or none this month.</p>
+    <ul class="cp-group" data-mpm-jobs></ul>
+    <p class="mpm-restore" data-mpm-restore-owners hidden><button type="button" class="cp-link"><span>Restore suggested owners</span></button><span>Puts the suggested people back on every job. Your wording stays.</span></p>
+    <p class="mpm-restore" data-mpm-restore-words hidden><button type="button" class="cp-link"><span>Restore original wording</span></button><span>Puts back the original job steps. Owners stay.</span></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.mpm-restore{display:grid;margin:6px 0 0;font-size:.85rem;line-height:1.45;color:var(--cp-soft)}
+.mpm-restore[hidden]{display:none}
+.mpm-icon{width:42px;height:42px;object-fit:contain}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  FIELDS, HANDOFFS, TASK_ICONS, TASK_TYPES, eligible, ownerLabel, ownersChanged, restoreOwners, restoreWording, setOwner,
+  setText, wordingChanged, type MarPlan, type MarState,
+} from '../../lib/club/engines/march-spring-prep';
+
+const APPROVAL_KEY = 'omc:preview:march-spring-prep:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has(.msc)');
+const msc = root?.querySelector<HTMLElement & { clubPlan?: MarPlan }>('.msc');
+if (root && msc) {
+  const plan = () => msc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<MarState>;
+
+  const render = (_ui: PlanScreen<MarState>, s: MarState, locked: boolean) => {
+    q('[data-mpm-jobs]').replaceChildren(...plan().view().tasks.map((t) => {
+      const b = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+        el('img', { class: 'mpm-icon', src: `/images/club/icon-library/${TASK_ICONS[t.id] ?? 'check-look'}.png`, alt: '', width: 42, height: 42 }),
+        el('span', { class: 'cp-row-text' }, el('strong', {}, t.title), el('span', {}, t.done), el('span', { class: 'cp-owner' }, t.owner)),
+        el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+      b.setAttribute('aria-label', `${t.title}, ${t.owner}.${locked ? '' : ' Change'}`);
+      b.addEventListener('click', () => openJob(t.id));
+      return el('li', {}, b);
+    }));
+    q('[data-mpm-restore-owners]').hidden = locked || !ownersChanged(s);
+    q('[data-mpm-restore-words]').hidden = locked || !wordingChanged(s);
+  };
+
+  const openJob = (task: string) => {
+    const p = plan();
+    const members = p.members();
+    const t = p.view().tasks.find((x) => x.id === task)!;
+    const people = el('div', { class: 'cp-chips cp-people-chips', role: 'group' });
+    people.setAttribute('aria-label', 'Who owns this job?');
+    const chip = (id: string, label: string) => {
+      const c = el('button', { type: 'button', class: 'cp-chip' }, label);
+      c.setAttribute('aria-pressed', String(id === t.ownerId));
+      c.addEventListener('click', () => {
+        p.update((s) => setOwner(s, task, id, p.members()));
+        people.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === c)));
+      });
+      people.append(c);
+    };
+    for (const m of members.filter((x) => eligible(task, x))) chip(m.id, ownerLabel(m, members));
+    chip('', 'No one this month');
+    const fields = FIELDS.map((f) => {
+      const value = t[f.id];
+      const input = f.id === 'title' ? el('input', { type: 'text', maxLength: f.limit, value }) : el('textarea', { maxLength: f.limit, value });
+      input.addEventListener('input', () => p.update((s) => setText(s, task, f.id, input.value)));
+      return el('label', { class: 'cp-field' }, f.label, input);
+    });
+    const tasks = p.view().tasks;
+    const next = tasks[tasks.findIndex((x) => x.id === task) + 1];
+    const actions = el('div', { class: 'cp-sheet-actions' }, ui.doneButton());
+    if (next) {
+      const b = el('button', { type: 'button', class: 'cp-btn' }, 'Next job ›');
+      b.addEventListener('click', () => openJob(next.id));
+      actions.append(b);
+    }
+    ui.openSheet(t.title,
+      el('p', { class: 'cp-sheet-hint' }, `${HANDOFFS[task].childRole} ${TASK_TYPES[task]}`),
+      el('div', { class: 'cp-field' }, el('span', {}, 'Who owns this job?'), people),
+      ...fields,
+      el('p', { class: 'cp-sheet-hint' }, 'Blank goes back to the original wording.'),
+      actions);
+  };
+
+  const restore = (sel: string, change: (s: MarState) => void, text: string) => q(`${sel} button`).addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update(change);
+    ui.toast(text, () => plan().replace(before));
+  });
+  restore('[data-mpm-restore-owners]', (s) => restoreOwners(s, plan().members()), 'Suggested owners restored. Your wording stayed.');
+  restore('[data-mpm-restore-words]', (s) => restoreWording(s), 'Original wording restored. Owners stayed.');
+
+  const mounted = mountPlanScreen<MarState>({ root, host: msc, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>
