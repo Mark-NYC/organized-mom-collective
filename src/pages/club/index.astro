@@ -295,5 +295,43 @@ const faqs = [
   border-radius:50%;
  }
 }
+
+/* Mobile book-cover composition: image, overlapping round seal, then readable copy. */
+@media (max-width:700px){
+ .club .hero .hero-inner{position:relative}
+ .club .hero .hero-photo{height:clamp(175px,45vw,215px)}
+ .club .hero .hero-photo img{object-position:center 53%}
+ .club .hero .hero-copy{padding:25px 20px 25px}
+ .club .hero .hero-seam-badge{
+   display:flex;
+   position:absolute;
+   z-index:5;
+   left:50%;
+   top:clamp(175px,45vw,215px);
+   transform:translate(-50%,-50%);
+   width:76px;
+   height:76px;
+   padding:0;
+   border-radius:50%;
+   background:#f1f2f2;
+   align-items:center;
+   justify-content:center;
+   pointer-events:none;
+ }
+ .club .hero .hero-seam-badge img{
+   width:82%;
+   height:82%;
+   object-fit:contain;
+   border-radius:50%;
+ }
+ .club .hero .eyebrow{margin-bottom:14px!important}
+ .club .hero h1{font-size:clamp(29px,7.5vw,34px);line-height:1.12;margin-bottom:17px}
+ .club .hero .product-definition{margin-bottom:19px!important}
+ .club .hero .hero-actions .primary{min-height:52px}
+}
+@media (max-width:355px){
+ .club .hero .hero-photo{height:175px}
+ .club .hero .hero-seam-badge{top:175px}
+}
 </style>
 </PublicLayout>
