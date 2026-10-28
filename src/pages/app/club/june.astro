@@ -1,0 +1,101 @@
+---
+/** June Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with the
+ * station's snacks, rule and helpers, beside the one-page printable. Below 1100px: the shared plan screen with June's
+ * sections (JunePlanMobile). The printable, its dialogs and its rules live in JuneSnackStation and
+ * src/lib/club/engines/june-snack-station.ts. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import JuneSnackStation from '../../../components/club/JuneSnackStation.astro';
+import JunePlanMobile from '../../../components/club/JunePlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find((k) => k.month === '2027-06');
+if (!kit) throw new Error('June 2027 kit missing from the registry');
+const deadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:june-app:v1';
+---
+<AppLayout title="June Snack Station">
+  <ClubPlanShell class="jun-plan family-brand" kitSlug={kit.slug} month="June" storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="June · Kit preview" instructions={[
+      'Hang the poster where snacks live. Kids pick from each side, enjoy it, and put it away without asking every time.',
+      'Parent check: these are example foods, not allergy- or age-screened recommendations. Choose foods that are safe for each child, prepare anything that needs cutting, and supervise younger eaters.',
+    ]}>
+      <Fragment slot="title">The snacks are handled. <em>By the kids.</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="jun-d-snacks">
+          <p class="cpd-label" id="jun-d-snacks">Snack options</p>
+          <dl class="cpd-rows" data-jun-d-snacks></dl>
+          <button type="button" class="cpd-link" data-jun-d-open="snacks">Change snacks</button>
+          <button type="button" class="cpd-link" data-jun-d-restore="foods" hidden>Restore starter snacks</button>
+          <p class="cpd-hint" data-jun-d-hint="foods" hidden>Puts back the eight starter foods and allows peanut foods again. Your rule and wording stay.</p>
+        </section>
+        <section class="cpd-block" aria-labelledby="jun-d-rule">
+          <p class="cpd-label" id="jun-d-rule">The rule and who needs help</p>
+          <dl class="cpd-rows" data-jun-d-rule></dl>
+          <button type="button" class="cpd-link" data-jun-d-open="station">Change rule, reminder and helpers</button>
+          <p>Or click any wording on the sheet with a pencil to change it.</p>
+          <button type="button" class="cpd-link" data-jun-d-restore="words" hidden>Restore original wording</button>
+          <p class="cpd-hint" data-jun-d-hint="words" hidden>Puts back the original headings and lines. Your snacks stay.</p>
+          <p class="cpd-hint" data-jun-d-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="jun-proof" slot="printable" data-plan-proof-body>
+      <div class="jun-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <JuneSnackStation storageKey={storageKey} planMode={true} />
+      </div>
+    </div>
+    <JunePlanMobile slot="mobile" deadline={deadline} />
+  </ClubPlanShell>
+</AppLayout>
+<style is:global>
+.jun-plan .jss-dialog{z-index:100}
+</style>
+<script>
+import { LEVEL_TEXT, foodsChanged, restoreFoods, restoreWording, wordingChanged, type JunePlan, type JuneState } from '../../../lib/club/engines/june-snack-station';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.jun-plan');
+const jss = root?.querySelector<HTMLElement & { clubPlan?: JunePlan }>('.jss');
+if (root && jss) {
+  const plan = () => jss.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-jun-d-restored]');
+  const row = (dt: string, dd: string) => el('div', {}, el('dt', {}, dt), el('dd', {}, dd));
+  let undo: JuneState | null = null;
+
+  mountPlanDesktop<JuneState>({
+    root,
+    host: jss,
+    approvalKey: 'omc:preview:june-snack-station:approval',
+    edit: () => plan().openEditor('snacks'),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const s = plan().state();
+      const v = plan().view();
+      q('[data-jun-d-snacks]').replaceChildren(row('Fridge', `${v.fridge.length} foods`), row('Pantry', `${v.pantry.length} foods`), ...(s.excludePeanuts ? [row('Peanut foods', 'Left out')] : []));
+      q('[data-jun-d-rule]').replaceChildren(row('Rule', v.rule), row('When done', v.cleanup), ...v.kids.map((k) => row(k.name, k.level ? LEVEL_TEXT[k.level] : '—')));
+      root.querySelectorAll<HTMLButtonElement>('[data-jun-d-open]').forEach((b) => { b.disabled = locked; });
+      for (const [which, changed] of [['foods', foodsChanged(s)], ['words', wordingChanged(s)]] as const) {
+        q(`[data-jun-d-restore="${which}"]`).hidden = locked || !changed;
+        q(`[data-jun-d-hint="${which}"]`).hidden = locked || !changed;
+      }
+    },
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('[data-jun-d-open]').forEach((b) => b.addEventListener('click', () => plan().openEditor(b.dataset.junDOpen === 'station' ? 'station' : 'snacks')));
+  root.querySelectorAll<HTMLButtonElement>('[data-jun-d-restore]').forEach((b) => b.addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    const foods = b.dataset.junDRestore === 'foods';
+    plan().update(foods ? restoreFoods : restoreWording);
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren(foods ? 'Starter snacks restored. ' : 'Original wording restored. ', u);
+    restored.focus();
+  }));
+}
+</script>

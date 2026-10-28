@@ -48,7 +48,7 @@ const months = [
     "title": "Less Screen-Time Negotiating",
     "responsibility": "Respecting shared boundaries",
     "how": "Shared screen-time expectations and responsibilities make summer rules clear.",
-    "url": "/club/june-preview/"
+    "url": "/app/club/june/"
   },
   {
     "month": "July",
