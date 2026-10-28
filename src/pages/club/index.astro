@@ -48,7 +48,29 @@ const faqs = [
 <section class="club-demo" id="demo"><div class="club-demo-inner"><div class="club-demo-heading"><p class="eyebrow">SEE IT FOR YOUR OWN FAMILY</p><h2>The plan is <span class="lime-highlight">already made.</span> <em>The guesswork is already gone.</em></h2><p>Give us a few first names and ages. We'll show you a sample Daily Reset with responsibilities already suggested for your household.</p><p class="demo-disclaimer">This is a free interactive example, not an actual monthly mailing. No payment or account needed.</p></div>
 <form id="family-form" class="form" autocomplete="off"><p class="form-kicker">YOUR FREE PERSONALIZED EXAMPLE</p><h2>Let's make your family's plan.</h2><p>Enter your family's names and choose each child's age below.</p><div class="name-fields"><label>Mom's first name<input name="mom" id="mom" placeholder="Enter name" autocomplete="off" maxlength="40" required /></label><label>Dad's first name<input name="dad" id="dad" placeholder="Enter name" autocomplete="off" maxlength="40" required /></label></div><div class="children-head"><strong>Your kids</strong><span>Tap a field to edit</span></div><div id="children-fields"></div><button type="button" class="add" id="add-child">+ Add a child</button><button type="submit" class="primary form-submit">Create My Family's Preview <span class="lime-arrow" aria-hidden="true">→</span></button><small>No sign-in. Your details stay in this browser.</small></form></div></section>
 <section class="result" id="result" hidden aria-live="polite"><div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PREVIEW IS READY</p><h2>This is what done-for-you can look like.</h2><p>Everyone has a part. Nobody has to guess. Your monthly Club tools would tackle different challenges using the same personalized approach.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div><div class="result-card"><span>YOUR FAMILY'S DAILY RESET</span><h3>Made for your household.</h3><p>A free example using names and age-appropriate responsibilities.</p><button type="button" class="primary" id="open-preview">View your family's plan →</button></div></div></section>
-<dialog id="club-preview-modal" class="club-preview-modal" aria-labelledby="club-modal-title"><div class="modal-top"><div><span class="eyebrow">YOUR FAMILY'S PLAN</span><h2 id="club-modal-title">Your Daily Reset is ready.</h2></div><button type="button" id="close-preview" class="modal-close" aria-label="Close preview">×</button></div><p class="modal-intro">A sample cleanup plan, prepared using your family's names and ages. Actual Club mailings feature different monthly tools.</p><div class="modal-paper"><div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div><h3>Our Family's <em>Daily Reset</em></h3><p>A few minutes together. A fresh start tomorrow.</p><div class="sheet-section-label">EVERYONE HAS A PART</div><div id="modal-assignments" class="sheet-assignments"></div><div class="modal-paper-end">NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</div></div><p class="modal-note">This is a personalized sample, not a physical product order.</p><div class="modal-actions"><a href="#offer" id="modal-club" class="primary">Get Monthly Plans Delivered →</a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div></dialog>
+<dialog id="club-preview-modal" class="club-preview-modal" aria-labelledby="club-modal-title">
+ <div class="preview-page-shell">
+  <header class="preview-page-header"><span>ORGANIZED FAMILY CLUB <span aria-hidden="true">·</span> PERSONALIZED PREVIEW</span><button type="button" id="close-preview" class="modal-close" aria-label="Close preview">×</button></header>
+  <div class="preview-page-content">
+   <div class="preview-deliverable">
+    <div class="modal-paper"><div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div><h3>Our Family's <em>Daily Reset</em></h3><p>A few minutes together. A fresh start tomorrow.</p><div class="sheet-section-label">EVERYONE HAS A PART</div><div id="modal-assignments" class="sheet-assignments"></div><div class="modal-paper-end">NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</div></div>
+    <p class="modal-note">A free personalized example, not an actual mailed Club product.</p>
+   </div>
+   <div class="preview-offer">
+    <p class="eyebrow">MADE FOR YOUR FAMILY</p>
+    <h2 id="club-modal-title">Your family's preview <em>is ready.</em></h2>
+    <p class="preview-lead">See what it feels like when the plan is already prepared and everyone knows their part.</p>
+    <div class="preview-offer-divider"></div>
+    <p class="eyebrow">NOW IMAGINE THIS EVERY MONTH</p>
+    <h3>One useful family tool, prepared for you and delivered to your door.</h3>
+    <p>Each month, the Club tackles a different everyday challenge. We personalize the plan, print it, and mail it to you, so you aren't starting with another blank worksheet.</p>
+    <p class="preview-offer-note">This Daily Reset is a free example of how personalization works. The monthly tools are different.</p>
+    <div class="modal-actions"><a href="#offer" id="modal-club" class="primary">See How the Monthly Club Works <span class="lime-arrow" aria-hidden="true">→</span></a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div>
+    <p class="preview-enrollment">Enrollment isn't open yet. No payment or account is required for this preview.</p>
+   </div>
+  </div>
+ </div>
+</dialog>
 <section class="how container" id="how"><p class="eyebrow">THREE SIMPLE STEPS</p><h2>We do the preparation. <em>Your family gets started.</em></h2><div class="step-grid"><article><b>1</b><h3>Tell us about your family.</h3><p>A few household details help us make practical recommendations.</p></article><article><b>2</b><h3>We prepare your plan.</h3><p>Each month focuses on one everyday challenge. Review and adjust it if you want.</p></article><article><b>3</b><h3>Find it in your mailbox.</h3><p>It's printed and ready to put on the fridge and talk through together.</p></article></div><p class="how-note">No elaborate setup. No new app everyone has to learn.</p></section>
 <section class="founder home-style-inset"><div class="club-offer-surface"><div class="container founder-layout"><img src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" loading="lazy" width="460" height="460"/><div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2>Created by a family <em>who gets it.</em></h2><p>Hi, I'm Megan. I know how much it takes to keep a family running, and how easy it is to become the person everyone depends on for the next reminder, answer, or instruction.</p><p>We created Organized Family Club to help put simple, practical tools in your family's hands, not to give you more to do.</p><p>One month. One small change. One more thing you don't have to carry alone.</p><strong>Megan</strong></div></div></div></section>
 <section class="proof container"><p class="eyebrow">FROM AN ORGANIZED MOM COLLECTIVE CUSTOMER</p><blockquote>“This calendar is life changing. Quite literally!”</blockquote><p>Raquel · 5-star Etsy review of our wall calendar</p><small>This is a review of our wall calendar, not an Organized Family Club membership.</small></section>
@@ -469,6 +491,95 @@ const faqs = [
 .club .club-demo .children-head span{color:#6e6461}
 @media(max-width:700px){
  .club .club-demo .form input,.club .club-demo .form select{font-size:16px;min-height:50px}
+}
+
+/* Immersive Club preview: near-full-screen floating gray surface. */
+.club .club-preview-modal{
+ position:fixed;
+ inset:0;
+ box-sizing:border-box;
+ width:calc(100% - 32px);
+ max-width:1600px;
+ height:calc(100% - 32px);
+ max-height:calc(100dvh - 32px);
+ margin:auto;
+ padding:0;
+ overflow:auto;
+ overscroll-behavior:contain;
+ border:0;
+ border-radius:5px;
+ background:#f1f2f2;
+ color:#4d4544;
+ box-shadow:0 28px 90px rgba(30,29,27,.24);
+}
+.club .club-preview-modal::backdrop{background:rgba(31,32,30,.58)}
+.club .preview-page-shell{min-height:100%;background:#f1f2f2}
+.club .preview-page-header{
+ position:sticky;top:0;z-index:10;display:flex;align-items:center;
+ justify-content:space-between;gap:14px;
+ padding:14px clamp(20px,3vw,52px);
+ background:#f1f2f2;border-bottom:1px solid #dededb;
+ color:#955b63;font-size:.68rem;font-weight:800;letter-spacing:.1em;
+}
+.club .preview-page-header .modal-close{
+ flex:0 0 42px;display:flex;align-items:center;justify-content:center;
+ font-size:1.8rem;color:#4d4544;border:1px solid #d6d6d2;
+ background:#fff;border-radius:50%;
+}
+.club .preview-page-header .modal-close:hover{background:#fff8f7}
+.club .preview-page-content{
+ display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+ align-items:center;gap:clamp(30px,5vw,90px);
+ max-width:1380px;margin:0 auto;padding:clamp(26px,4vw,65px);
+}
+.club .preview-deliverable{min-width:0}
+.club .preview-deliverable .modal-paper{
+ width:100%;max-width:620px;margin:0 auto;
+ padding:clamp(26px,3.6vw,52px);
+ background:#fffdfa;box-shadow:0 18px 45px rgba(77,69,68,.11);
+}
+.club .preview-deliverable .modal-paper h3{font-size:clamp(2rem,3.1vw,3.4rem)}
+.club .preview-deliverable .modal-note{
+ text-align:center;margin:15px auto 0!important;max-width:460px;
+ font-size:.76rem;color:#6e6461;
+}
+.club .preview-offer{min-width:0;padding:12px 0}
+.club .preview-offer .eyebrow{display:block;margin:0 0 12px!important}
+.club .preview-offer h2{
+ font:400 clamp(2.1rem,3.4vw,3.9rem)/1.1 Georgia,serif;
+ letter-spacing:-.025em;margin:0 0 20px;
+}
+.club .preview-offer h2 em{color:#955b63;font-style:italic}
+.club .preview-offer .preview-lead{font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.65}
+.club .preview-offer-divider{height:1px;background:#d7d7d2;margin:clamp(24px,3vw,40px) 0}
+.club .preview-offer h3{
+ font:400 clamp(1.55rem,2.25vw,2.4rem)/1.18 Georgia,serif;
+ letter-spacing:-.02em;margin:0 0 16px;
+}
+.club .preview-offer>p:not(.eyebrow){line-height:1.7}
+.club .preview-offer-note{font-size:.85rem;margin:15px 0 0!important;color:#665f59}
+.club .preview-offer .modal-actions{
+ margin-top:26px;display:flex;flex-direction:column;align-items:stretch;gap:16px;
+}
+.club .preview-offer .modal-actions .primary{width:100%;max-width:470px;min-height:52px}
+.club .preview-offer .modal-actions .text-button{text-align:left;align-self:flex-start}
+.club .preview-enrollment{font-size:.74rem;color:#6e6461;margin:16px 0 0!important}
+@media(max-width:800px){
+ .club .club-preview-modal{
+  width:calc(100% - 20px);height:calc(100% - 20px);
+  max-height:calc(100dvh - 20px);border-radius:4px;
+ }
+ .club .preview-page-header{padding:12px 16px;font-size:.57rem}
+ .club .preview-page-header .modal-close{width:38px;height:38px;flex-basis:38px}
+ .club .preview-page-content{grid-template-columns:1fr;gap:29px;padding:22px 20px 40px}
+ .club .preview-deliverable .modal-paper{padding:clamp(20px,5vw,32px)}
+ .club .preview-offer{padding:0 0 12px}
+ .club .preview-offer h2{font-size:clamp(2rem,7vw,2.8rem)}
+ .club .preview-offer .modal-actions .primary{max-width:none}
+}
+@media(max-width:370px){
+ .club .preview-page-content{padding:17px 14px 32px}
+ .club .preview-page-header{padding:10px 12px}
 }
 </style>
 </PublicLayout>
