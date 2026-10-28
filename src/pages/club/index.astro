@@ -1,5 +1,6 @@
 ---
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import JuneSnackStation from '../../components/club/JuneSnackStation.astro';
 import { BRAND_NAME } from '../../config';
 import clubHeroUrl from '../../../assets/icons/ofc/hero-family-pointing.jpeg?url';
 import clubBadgeUrl from '../../../assets/icons/ofc/OFC-logo.webp?url';
@@ -47,28 +48,32 @@ const faqs = [
 <article class="story-card"><div class="story-top"><img src={months[2].icon} alt="" loading="lazy" width="90" height="90"/><span class="ready-label">VIEW REAL TOOL</span></div><p class="story-month">MARCH · CLEANING</p><h3>From “Clean your room!” to a job they can finish.</h3><p>Steps, supplies, and what “done” means are written out. Kids have a clearer way to complete the job without Mom explaining it again.</p><a href="/club/march-preview/">Inspect March's plan →</a></article>
 <article class="story-card"><div class="story-top"><img src={months[4].icon} alt="" loading="lazy" width="90" height="90"/><span class="ready-label">VIEW REAL TOOL</span></div><p class="story-month">MAY · SUMMER DAYS</p><h3>From “What do I do now?” to checking the day's rhythm.</h3><p>Flexible daily anchors and activity choices give kids a next step to look at instead of asking Mom to invent the day's schedule.</p><a href="/club/may-preview/">Inspect May's plan →</a></article>
 </div><details class="all-months"><summary>Explore all 12 monthly tools <span>+</span></summary><div class="month-grid">{months.map(m=><a href={m.url}><img src={m.icon} alt="" width="54" height="54" loading="lazy"/><div><small>{m.month}</small><b>{m.title}</b><span>Preview →</span></div></a>)}</div></details></div></div></section>
-<section class="club-demo" id="demo"><div class="club-demo-inner"><div class="club-demo-heading"><p class="eyebrow">SEE IT FOR YOUR OWN FAMILY</p><h2>The plan is <span class="lime-highlight">already made.</span> <em>The guesswork is already gone.</em></h2><p>Give us a few first names and ages. We'll show you a sample Daily Reset with responsibilities already suggested for your household.</p><p class="demo-disclaimer">This is a free interactive example, not an actual monthly mailing. No payment or account needed.</p></div>
-<form id="family-form" class="form" autocomplete="off"><p class="form-kicker">YOUR FREE PERSONALIZED EXAMPLE</p><h2>Let's make your family's plan.</h2><p>Enter as much or as little as you'd like. Anything you leave empty stays blank in the sample.</p><div class="name-fields"><label>Mom's first name<input name="mom" id="mom" placeholder="Enter name" autocomplete="off" maxlength="40" /></label><label>Dad's first name<input name="dad" id="dad" placeholder="Enter name" autocomplete="off" maxlength="40" /></label></div><div class="children-head"><strong>Your kids</strong><span>Tap a field to edit</span></div><div id="children-fields"></div><button type="button" class="add" id="add-child">+ Add a child</button><button type="submit" class="primary form-submit">Create My Family's Preview <span class="lime-arrow" aria-hidden="true">→</span></button><small>No sign-in. Your details stay in this browser.</small></form></div></section>
-<section class="result" id="result" hidden aria-live="polite"><div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PREVIEW IS READY</p><h2>This is what done-for-you can look like.</h2><p>Everyone has a part. Nobody has to guess. Your monthly Club tools would tackle different challenges using the same personalized approach.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div><div class="result-card"><span>YOUR FAMILY'S DAILY RESET</span><h3>Made for your household.</h3><p>A free example using names and age-appropriate responsibilities.</p><button type="button" class="primary" id="open-preview">View your family's plan →</button></div></div></section>
+<section class="club-demo" id="demo"><div class="club-demo-inner"><div class="club-demo-heading"><p class="eyebrow">SEE IT FOR YOUR OWN FAMILY</p><h2>The plan is <span class="lime-highlight">already made.</span> <em>The guesswork is already gone.</em></h2><p>See how a Club tool works. Try June's prepared snack station and change the food choices to fit your household.</p><p class="demo-disclaimer">Names and ages are optional. The snack sample is free to explore; no payment or account needed.</p></div>
+<form id="family-form" class="form" autocomplete="off"><p class="form-kicker">YOUR FREE INTERACTIVE EXAMPLE</p><h2>Try a plan made for real family life.</h2><p>Enter as much or as little as you'd like. Anything you leave empty stays blank in the sample.</p><div class="name-fields"><label>Mom's first name<input name="mom" id="mom" placeholder="Enter name" autocomplete="off" maxlength="40" /></label><label>Dad's first name<input name="dad" id="dad" placeholder="Enter name" autocomplete="off" maxlength="40" /></label></div><div class="children-head"><strong>Your kids</strong><span>Tap a field to edit</span></div><div id="children-fields"></div><button type="button" class="add" id="add-child">+ Add a child</button><button type="submit" class="primary form-submit">Show Me the Snack Plan <span class="lime-arrow" aria-hidden="true">→</span></button><small>No sign-in. Your details stay in this browser.</small></form></div></section>
+<section class="result" id="result" hidden aria-live="polite"><div class="container result-layout"><div><p class="eyebrow">YOUR FAMILY'S PREVIEW IS READY</p><h2>Your family's snack station is ready to explore.</h2><p>Try changing the illustrated snack choices in June's example tool. Each month, the Club prepares a different family plan designed to make everyday responsibilities clearer.</p><div class="result-actions"><a href="#offer" class="primary">Explore the Club →</a><button class="text-button" id="edit-family" type="button">Edit family details</button><button class="text-button" type="button" id="clear-family">Clear my details</button></div></div><div class="result-card"><span>INTERACTIVE JUNE SAMPLE</span><h3>Snacks your kids can choose.</h3><p>Explore the prepared snack station and change the options to fit your household.</p><button type="button" class="primary" id="open-preview">View your family's plan →</button></div></div></section>
 <dialog id="club-preview-modal" class="club-preview-modal" aria-labelledby="club-modal-title">
  <div class="preview-page-shell">
-  <header class="preview-page-header"><span>ORGANIZED FAMILY CLUB <span aria-hidden="true">·</span> PERSONALIZED PREVIEW</span><button type="button" id="close-preview" class="modal-close" aria-label="Close preview">×</button></header>
-  <div class="preview-page-content">
-   <div class="preview-deliverable">
-    <div class="modal-paper"><div class="paper-top"><small>ORGANIZED FAMILY CLUB · FAMILY DEMO</small><span>✳</span></div><h3>Our Family's <em>Daily Reset</em></h3><p>A few minutes together. A fresh start tomorrow.</p><div class="sheet-section-label">EVERYONE HAS A PART</div><div id="modal-assignments" class="sheet-assignments"></div><div class="modal-paper-end">NOTICE THE MOMENT · DO MY PART · FINISH THE JOB</div></div>
-    <p class="modal-note">A free personalized example, not an actual mailed Club product.</p>
+  <header class="preview-page-header"><span>ORGANIZED FAMILY CLUB <span aria-hidden="true">·</span> INTERACTIVE SAMPLE</span><button type="button" id="close-preview" class="modal-close" aria-label="Close preview">×</button></header>
+  <div class="preview-page-content preview-snack-layout">
+   <div class="preview-deliverable preview-snack-deliverable">
+    <p class="eyebrow">JUNE SAMPLE · TRY IT FOR YOUR FAMILY</p>
+    <JuneSnackStation storageKey="omc:club:landing-snack-demo:v1" />
+    <div id="modal-assignments" hidden aria-hidden="true"></div>
+    <p class="preview-snack-safety">Review the foods for allergies, choking risks, and your children's ages before using any snack plan. Supervise younger children.</p>
+    <p class="modal-note">Interactive demonstration of a June Club tool. This is not a physical order.</p>
    </div>
    <div class="preview-offer">
-    <p class="eyebrow">MADE FOR YOUR FAMILY</p>
-    <h2 id="club-modal-title">Your family's preview <em>is ready.</em></h2>
-    <p class="preview-lead">See what it feels like when the plan is already prepared and everyone knows their part.</p>
+    <p class="eyebrow">ONE LESS DECISION FOR MOM</p>
+    <h2 id="club-modal-title">The snacks are handled. <em>By the kids.</em></h2>
+    <p class="preview-lead">Imagine your children checking their own approved snack options instead of asking you what they can eat all afternoon.</p>
     <div class="preview-offer-divider"></div>
-    <p class="eyebrow">NOW IMAGINE THIS EVERY MONTH</p>
-    <h3>One useful family tool, prepared for you and delivered to your door.</h3>
-    <p>Each month, the Club tackles a different everyday challenge. We personalize the plan, print it, and mail it to you, so you aren't starting with another blank worksheet.</p>
-    <p class="preview-offer-note">This Daily Reset is a free example of how personalization works. The monthly tools are different.</p>
-    <div class="modal-actions"><a href="#offer" id="modal-club" class="primary">See How the Monthly Club Works <span class="lime-arrow" aria-hidden="true">→</span></a><button type="button" id="modal-more" class="text-button">I'd like to learn more first</button></div>
-    <p class="preview-enrollment">Enrollment isn't open yet. No payment or account is required for this preview.</p>
+    <p class="eyebrow">GIVE IT A TRY</p>
+    <h3>See the choices. Swap out foods. Make it work for your kitchen.</h3>
+    <p>The snack station on the left is the actual interactive June prototype. Choose foods that fit your household and see the fridge-ready plan change.</p>
+    <p>Every month, Organized Family Club prepares one different family tool to help everyone take more responsibility — personalized, printed, and mailed to your door.</p>
+    <p class="preview-offer-note">June's snack plan is an example, not what every monthly delivery contains. Enrollment isn't open yet.</p>
+    <div class="modal-actions"><a href="#offer" id="modal-club" class="primary">Explore the Monthly Club <span class="lime-arrow" aria-hidden="true">→</span></a><button type="button" id="modal-more" class="text-button">Learn how the Club works</button></div>
+    <p class="preview-enrollment">No payment or account required to try this sample.</p>
    </div>
   </div>
  </div>
@@ -105,11 +110,11 @@ const faqs = [
    modalAssignments.innerHTML=people.map(p=>'<div class="assignment"><span class="tick"></span><div><b>'+escapeHtml(p.name)+'</b><p>'+escapeHtml(p.task)+'</p></div></div>').join('');
    result.hidden=false;
    try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}
-   if(scroll && typeof modal.showModal==='function')modal.showModal();
+   if(scroll && typeof modal.showModal==='function'){modal.showModal();requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')))}
  }
  addButton.addEventListener('click',()=>addChild());
  form.addEventListener('submit',event=>{event.preventDefault();showPlan(getData(),true)});
- document.querySelector('#open-preview').addEventListener('click',()=>modal.showModal());
+ document.querySelector('#open-preview').addEventListener('click',()=>{modal.showModal();requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')))});
  document.querySelector('#close-preview').addEventListener('click',()=>modal.close());
  document.querySelector('#modal-more').addEventListener('click',()=>{modal.close();document.querySelector('#how').scrollIntoView({behavior:'smooth'})});
  document.querySelector('#modal-club').addEventListener('click',()=>modal.close());
@@ -605,6 +610,33 @@ const faqs = [
 .club .evidence-grid small{display:block;font-size:.72rem;line-height:1.5;color:#746d68}
 .club .evidence-disclosure{max-width:920px;font-size:.75rem;line-height:1.6;color:#746d68;margin-top:20px!important}
 @media(max-width:800px){.club .evidence-grid{grid-template-columns:1fr;gap:14px}.club .evidence-grid article{padding:22px}.club .ownership-grid h3{font-size:1.55rem}}
+
+/* Landing-page June sample: reuse June's full interactive printable, without June's editor column. */
+.club .preview-snack-layout{grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr);align-items:start;gap:clamp(26px,3vw,56px)}
+.club .preview-snack-deliverable{min-width:0}
+.club .preview-snack-deliverable>.eyebrow{margin:0 0 14px!important}
+.club .preview-snack-deliverable .jss{max-width:none!important;margin:0!important;padding:0!important;min-width:0}
+.club .preview-snack-deliverable .jss-intro,
+.club .preview-snack-deliverable .jss-editor{display:none!important}
+.club .preview-snack-deliverable .jss-layout{display:block!important}
+.club .preview-snack-deliverable .jss-preview{width:100%;min-width:0!important;padding:0!important}
+.club .preview-snack-deliverable .jss-floating-edit{
+ position:relative!important;inset:auto!important;display:inline-flex!important;
+ margin:0 0 12px!important;max-width:100%;
+ background:#c2f6aa!important;color:#303831!important;
+ border:0!important;padding:12px 16px!important;
+ border-radius:5px!important;box-shadow:none!important;
+ font-weight:750!important;cursor:pointer;
+}
+.club .preview-snack-deliverable .jss-stage{max-width:100%}
+.club .preview-snack-safety{font-size:.75rem;line-height:1.65;color:#6b5d53;margin:13px 0 0!important}
+.club .preview-snack-deliverable .modal-note{margin:10px 0 0!important;text-align:left;max-width:none}
+.club .preview-snack-layout .preview-offer{padding-top:45px}
+@media(max-width:800px){
+ .club .preview-snack-layout{grid-template-columns:1fr;gap:30px}
+ .club .preview-snack-layout .preview-offer{padding-top:0}
+ .club .preview-snack-deliverable .jss-floating-edit{font-size:12px}
+}
 </style>
 
 <style is:global>
