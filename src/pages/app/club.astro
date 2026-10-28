@@ -10,19 +10,130 @@ import AppKitLibrary from '../../components/AppKitLibrary';
 <section class="mt-9"><h2 class="family-panel-title">12 months. 12 things you shouldn’t have to carry alone.</h2><p class="mt-2 text-sm text-warm-soft">Every month helps your family own one more part of everyday life. Preview each personalized tool below.</p><AppKitLibrary client:only="react" /></section>
 </div>
 <style is:global>
-.ofc-app-month-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}
-.family-brand .ofc-app-month{display:block!important;min-width:0;overflow:hidden;background:#fff;border:1px solid #dadfd7;border-radius:12px}
-.family-brand .ofc-app-month-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:148px;padding:22px 20px}
-.ofc-app-month-header-text{min-width:0;flex:1}
-.ofc-app-month-name{text-transform:uppercase;font-size:11px;font-weight:750;letter-spacing:.12em;color:#354f42;margin:0}
-.ofc-app-month-header h3{font-family:Georgia,serif;font-size:1.35rem;line-height:1.2;margin:9px 0 0;color:#303d35}
-.ofc-app-month-icon{width:92px;height:92px;display:grid;place-items:center;flex:0 0 92px;background:transparent;border:0}
-.family-brand .ofc-app-month-icon img{display:block;background:transparent;width:88px;height:88px;object-fit:contain;mix-blend-mode:multiply}
-.family-brand .ofc-app-month-detail{display:block;width:100%;padding:19px 20px 20px;min-width:0}
-.ofc-app-month-detail p{font-size:13px;line-height:1.55;color:#555f57;margin:0 0 8px}
-.ofc-app-month-detail strong{color:#315d49}
-.ofc-app-month-detail a{display:inline-block;margin-top:9px;font-size:13px;font-weight:700;color:#315d49;text-decoration:underline;text-underline-offset:3px}
-@media(max-width:780px){.ofc-app-month-grid{grid-template-columns:1fr}}
-@media(max-width:430px){.ofc-app-month-header{min-height:124px;padding:16px 14px;gap:9px}.ofc-app-month-icon{width:72px;height:72px;flex-basis:72px}.ofc-app-month-icon img{width:70px;height:70px}.ofc-app-month-header h3{font-size:1.2rem}.ofc-app-month-detail{padding:14px}}
+/* Scoped to the Club library to avoid changing the other app tabs. */
+.family-brand .ofc-app-month-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:18px;
+  margin-top:24px;
+}
+.family-brand .ofc-app-month{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  overflow:hidden;
+  background:#fffdfa!important;
+  border:1px solid #e5e3dc!important;
+  border-radius:18px!important;
+  box-shadow:0 3px 12px rgba(47,63,52,.035);
+}
+.family-brand .ofc-app-month-header{
+  display:flex!important;
+  flex-direction:row!important;
+  width:100%!important;
+  flex:none!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  min-width:0!important;
+  gap:14px!important;
+  padding:22px!important;
+  min-height:154px!important;
+  background:#e5f1e9!important;
+}
+.family-brand .ofc-app-month:nth-child(4n+2) .ofc-app-month-header{background:#f7e9ec!important}
+.family-brand .ofc-app-month:nth-child(4n+3) .ofc-app-month-header{background:#f2efe4!important}
+.family-brand .ofc-app-month:nth-child(4n+4) .ofc-app-month-header{background:#e8eef0!important}
+.family-brand .ofc-app-month-header-text{flex:1 1 0!important;min-width:0!important;width:auto!important}
+.family-brand .ofc-app-month-name{
+  display:block;
+  margin:0!important;
+  font-size:11px!important;
+  line-height:1.4!important;
+  text-transform:uppercase;
+  font-weight:750;
+  letter-spacing:.14em;
+  color:#476c5b;
+}
+.family-brand .ofc-app-month:nth-child(4n+2) .ofc-app-month-name{color:#92616c}
+.family-brand .ofc-app-month-header h3{
+  font-family:Georgia,serif!important;
+  font-size:clamp(1.2rem,2.2vw,1.5rem)!important;
+  line-height:1.19!important;
+  font-weight:400!important;
+  color:#443f3d!important;
+  margin:9px 0 0!important;
+  overflow-wrap:normal!important;
+}
+.family-brand .ofc-app-month-icon{
+  display:grid!important;
+  flex:0 0 82px!important;
+  width:82px!important;
+  height:82px!important;
+  place-items:center;
+  background:rgba(255,255,255,.65)!important;
+  border-radius:50%!important;
+}
+.family-brand .ofc-app-month-icon img{
+  display:block;
+  width:72px!important;
+  height:72px!important;
+  object-fit:contain;
+  background:transparent!important;
+  mix-blend-mode:multiply;
+}
+.family-brand .ofc-app-month-detail{
+  display:flex!important;
+  flex-direction:column!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:20px 22px 22px!important;
+  background:transparent!important;
+}
+.family-brand .ofc-app-month-detail p{
+  margin:0 0 10px!important;
+  font-size:14px!important;
+  line-height:1.55!important;
+  color:#625f5b!important;
+}
+.family-brand .ofc-app-month-detail strong{color:#315d49}
+.family-brand .ofc-app-month-detail a{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  margin-top:auto!important;
+  padding:12px 14px!important;
+  min-height:44px;
+  background:#315d49!important;
+  border-radius:8px;
+  color:#fff!important;
+  font-size:13px!important;
+  font-weight:700!important;
+  text-decoration:none!important;
+}
+.family-brand .ofc-app-month-detail a:hover{background:#254a39!important}
+@media(max-width:780px){
+  .family-brand .ofc-app-month-grid{grid-template-columns:1fr!important;gap:14px}
+}
+@media(max-width:639px){
+  .family-brand .family-title{font-size:clamp(2rem,8vw,2.6rem)!important;line-height:1.1}
+  .family-brand .family-lede{font-size:.99rem!important;line-height:1.55!important}
+  .family-brand .ofc-app-month-header{
+    min-height:0!important;
+    padding:18px!important;
+    gap:14px!important;
+  }
+  .family-brand .ofc-app-month-header h3{font-size:1.4rem!important}
+  .family-brand .ofc-app-month-icon{flex:0 0 76px!important;width:76px!important;height:76px!important}
+  .family-brand .ofc-app-month-icon img{width:66px!important;height:66px!important}
+  .family-brand .ofc-app-month-detail{padding:17px 18px 18px!important}
+  .family-brand .ofc-app-month-detail p{font-size:14px!important}
+}
+@media(max-width:350px){
+  .family-brand .ofc-app-month-header h3{font-size:1.22rem!important}
+  .family-brand .ofc-app-month-icon{flex-basis:62px!important;width:62px!important;height:62px!important}
+  .family-brand .ofc-app-month-icon img{width:56px!important;height:56px!important}
+}
 </style>
 </Layout>
