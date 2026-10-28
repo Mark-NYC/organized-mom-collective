@@ -12,6 +12,7 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 import { calendarOptions, formatPrice } from '../lib/reorder';
 import { weeklyReset, weeklyResetAssets } from '../data/weekly-reset';
 import { mug, mugImage } from '../data/mug';
+import { scheduler } from '../data/scheduler';
 import { routes } from '../routes';
 import { BRAND_NAME, PRICES_AS_OF } from '../config';
 
@@ -32,7 +33,7 @@ const products = [
     blurb: 'See everyone’s month at a glance. Five family rows, space for to-dos, and a sturdy wire-bound 11 × 16.5-inch wall format.',
     price: '$30.99',
     href: routes.scheduler,
-    soon: false,
+    soon: !scheduler.buyUrl,
     img: { src: 'https://i.etsystatic.com/29608155/r/il/de7ac8/8645639709/il_794xN.8645639709_cqeg.jpg', width: 794, height: 1050, alt: '2027 family schedule wall calendar with monthly planning rows and a to-do column.' },
   },
   {
