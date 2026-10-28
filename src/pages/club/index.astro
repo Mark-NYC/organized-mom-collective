@@ -183,5 +183,48 @@ const faqs = [
 .club .closing-caption{font-size:.78rem!important;margin-top:24px!important}
 @media(max-width:850px){.club .tangible,.club .founder-layout{grid-template-columns:1fr}.club .feature-grid{grid-template-columns:repeat(2,1fr)}.club .story-grid{grid-template-columns:1fr}.club .story-shell{padding:45px 0}}
 @media(max-width:700px){.club .pain,.club .comparison,.club .features,.club .how,.club .proof{padding-top:60px;padding-bottom:60px}.club .pain-questions,.club .compare-grid,.club .step-grid,.club .feature-grid{grid-template-columns:1fr}.club .tangible,.club .founder-layout{padding-top:42px;padding-bottom:42px;gap:30px}.club .print-paper{transform:none;padding:24px}.club .hero-photo{order:-1}.club .compare-grid article{padding:25px}}
+
+/* Book-spread hero: editorial copy on the left, full-bleed photo on the right. */
+@media(min-width:851px){
+ .club .hero .hero-inner{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:0;
+  padding:0;
+  align-items:stretch;
+  min-height:clamp(540px,43vw,720px);
+ }
+ .club .hero .hero-copy{
+  max-width:none;
+  align-self:center;
+  padding:clamp(38px,5.4vw,90px);
+ }
+ .club .hero .hero-photo{
+  position:relative;
+  align-self:stretch;
+  width:100%;
+  height:100%;
+  min-height:100%;
+  overflow:hidden;
+  margin:0;
+ }
+ .club .hero .hero-photo img{
+  position:absolute;
+  inset:0;
+  height:100%;
+  width:100%;
+  max-height:none;
+  aspect-ratio:auto;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+ }
+}
+@media(max-width:850px){
+ .club .hero .hero-inner{display:flex;flex-direction:column;gap:0;padding:0}
+ .club .hero .hero-copy{padding:clamp(24px,5vw,40px);order:1}
+ .club .hero .hero-photo{order:0;width:100%;margin:0}
+ .club .hero .hero-photo img{display:block;width:100%;height:auto;max-height:none;aspect-ratio:4/3;object-fit:cover}
+}
 </style>
 </PublicLayout>
