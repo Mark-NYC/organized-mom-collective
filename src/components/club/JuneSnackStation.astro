@@ -100,6 +100,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
   <dialog class="jss-dialog jss-edit-dialog" data-editor-dialog aria-labelledby="jss-editor-title">
    <div class="jss-dialog-top"><div><span class="jss-overline">MAKE IT YOURS · JUNE</span><h2 id="jss-editor-title">Edit snack station</h2></div><button type="button" class="jss-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>We've prepared eight choices. Confirm which foods your children can safely get, then change anything that doesn't fit.</p>
+   <div class="jss-level-editor"><strong>Who needs help choosing?</strong><p>Suggested from ages when available. You can change each child’s level.</p><div data-jss-level-controls></div></div>
    <div class="jss-dialog-fields">   <div class="jss-controls">
     <label>Snack rule
      <select data-rule>
@@ -131,6 +132,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
     <article class="jss-sheet" data-jss-sheet>
      <div class="jss-sheet-head"><span>ORGANIZED FAMILY CLUB · JUNE 2027</span><h2>I can make <em data-jss-edit="headline" contenteditable="true" role="textbox" aria-label="Edit snack station heading">my own snack!</em></h2><p data-jss-edit="subtitle" contenteditable="true" role="textbox" aria-label="Edit subtitle">Pick it. Enjoy it. Put it away.</p></div>
      <div class="jss-family" data-jss-family>OUR FAMILY'S SNACK STATION</div>
+     <div class="jss-level-lines" data-jss-level-lines aria-label="Snack responsibilities"></div>
      <div class="jss-instruction"><span>MY SNACK RULE</span><strong data-jss-rule-text data-jss-edit="rule" contenteditable="true" role="textbox" aria-label="Edit snack rule">Choose one from each side.</strong></div>
      <h3 class="jss-options-heading">Our Snack Options</h3><div class="jss-columns">
       <section class="jss-zone jss-fridge"><div class="jss-zone-title"><span>01</span><div><h3 data-jss-edit="fridgeTitle" contenteditable="true" role="textbox" aria-label="Edit fridge heading">From the fridge</h3><p>Choose one</p></div></div>
@@ -166,7 +168,7 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 .jss-stage{position:relative}.jss-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;transform:scale(var(--jss-scale,.8));transform-origin:top left;padding:40px 47px 28px;background:white;border:1px solid #e5e7e0;box-shadow:0 8px 26px #0002;display:flex;flex-direction:column;overflow:hidden}
 .jss-sheet-head{background:#f6eaca;border-top:8px solid #ebd7a4;padding:21px 27px 18px;min-height:161px}.jss-sheet-head>span{display:block;font-size:10px;font-weight:700;letter-spacing:.15em;color:#777452}.jss-sheet-head h2{font:400 46px/1.08 Georgia,serif;color:#575c43;margin:12px 0 8px}.jss-sheet-head h2 em{font-style:italic;color:#78865f}.jss-sheet-head p{font:italic 17px Georgia,serif;color:#7d7d65;margin:0}
 .jss-family{font-size:11px;letter-spacing:.13em;font-weight:700;color:#737e69;margin:21px 0 13px}.jss-instruction{border:1px solid #e2e9dc;background:#f6faf2;border-radius:5px;padding:11px 15px;display:flex;align-items:baseline;gap:15px}.jss-instruction span,.jss-done span{font-size:10px;font-weight:700;letter-spacing:.08em;color:#7e8f73}.jss-instruction strong{font:22px Georgia,serif;color:#445b3e}
-.jss-options-button{display:block;width:100%;min-height:46px;margin:8px 0;padding:10px;border:1px solid #d6bd82;border-radius:5px;background:#e8d8aa;color:#48483d;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
+.jss-level-lines{display:grid;gap:5px;margin:0 0 9px;min-height:30px}.jss-level-line{display:flex;align-items:center;gap:9px;font:600 14px/1.4 Montserrat,Arial,sans-serif;color:#4d6048;min-width:0}.jss-level-line svg{width:18px;height:18px;flex:none;stroke:#647d5b;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.jss-level-names{font-weight:750;overflow-wrap:anywhere}.jss-level-editor{border-bottom:1px solid #e4e8dd;padding-bottom:16px;margin-bottom:14px}.jss-level-editor>strong{font:19px Georgia,serif;color:#4b6046}.jss-level-editor>p{font:12px/1.6 Montserrat,Arial,sans-serif;color:#6d7667;margin:5px 0 12px}.jss-level-control{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:7px 0}.jss-level-control span{font-size:12px;font-weight:700}.jss-level-control select{width:min(240px,65%);min-height:40px;border:1px solid #bac8b2;background:white;padding:8px;color:#475a42;font-size:12px}.jss-level-control small{font-size:11px;color:#727b70}.jss-options-button{display:block;width:100%;min-height:46px;margin:8px 0;padding:10px;border:1px solid #d6bd82;border-radius:5px;background:#e8d8aa;color:#48483d;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
 .jss-snack-dialog{width:min(670px,calc(100vw - 32px));max-height:calc(100dvh - 40px)}
 .jss-snack-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#f2f1eb;border-radius:5px}
 .jss-snack-tabs button{min-height:43px;border:0;background:transparent;border-radius:4px;cursor:pointer;color:#53604f;font:700 12px Montserrat,Arial,sans-serif}
@@ -295,7 +297,9 @@ const initialPantry=['crackers','granola-bar','dried-fruit','bagel'];
 type Zone='fridge'|'pantry';
 type Food={id:string;name:string;zone:Zone};
 type Item={id:string;label:string;removed?:boolean};
-type State={fridge:Item[];pantry:Item[];rule:'standard'|'big'|'fridge'|'pantry';reset:string;text:Record<string,string>;excludePeanuts:boolean};
+type Level='help'|'independent';
+type Child={name?:string;age?:number|null};
+type State={levels:Record<string,Level>;fridge:Item[];pantry:Item[];rule:'standard'|'big'|'fridge'|'pantry';reset:string;text:Record<string,string>;excludePeanuts:boolean};
 const foods:Food[]=[
  {id:'ranch',name:'Ranch dip',zone:'fridge'},{id:'peanut-butter',name:'Peanut butter',zone:'fridge'},
  {id:'yogurt-tube',name:'Yogurt tube',zone:'fridge'},{id:'strawberries',name:'Strawberries',zone:'fridge'},
@@ -315,12 +319,12 @@ const foods:Food[]=[
 const starter=():State=>({
  fridge:['yogurt','cheese-stick','apple','cucumber'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
  pantry:['crackers','granola-bar','dried-fruit','bagel'].map(id=>({id,label:foods.find(f=>f.id===id)!.name})),
- rule:'standard',reset:"When you're done, bring your snack and dishes back to the kitchen counter.",text:{},excludePeanuts:false
+ levels:{},rule:'standard',reset:"When you're done, bring your snack and dishes back to the kitchen counter.",text:{},excludePeanuts:false
 });
 for(const root of document.querySelectorAll<HTMLElement>('.jss')){
  const snackIconPaths:Record<string,string>=JSON.parse(root.dataset.jssIcons??'{}');
  const key=root.dataset.jssKey??'omc:preview:june-snack-station:v1';
- let profile='';let state=starter();let family="OUR FAMILY'S SNACK STATION";
+ let profile='';let state=starter();let children:Child[]=[];let family="OUR FAMILY'S SNACK STATION";
  const stage=root.querySelector<HTMLElement>('[data-jss-stage]');
  const sheet=root.querySelector<HTMLElement>('[data-jss-sheet]');
  const fit=()=>{
@@ -392,6 +396,47 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   state.excludePeanuts=snackDraft.excludePeanuts;save();draw();snackDialog?.close();
  });
  const save=()=>{try{sessionStorage.setItem(key,JSON.stringify({profile,state}))}catch{}};
+ const levelFor=(child:Child,index:number):Level|null=>{
+  const id=String(index)+':'+(child.name??'').trim().toLowerCase();
+  if(state.levels?.[id])return state.levels[id];
+  const age=child.age;
+  return typeof age==='number'&&Number.isFinite(age)&&age>=0?(age<=7?'help':'independent'):null;
+ };
+ const renderLevels=()=>{
+  const sheetLines=root.querySelector<HTMLElement>('[data-jss-level-lines]');
+  const controls=root.querySelector<HTMLElement>('[data-jss-level-controls]');
+  if(!sheetLines||!controls)return;
+  sheetLines.replaceChildren();controls.replaceChildren();
+  const groups:{level:Level;names:string[]}[]=[{level:'help',names:[]},{level:'independent',names:[]}];
+  children.forEach((child,index)=>{
+   const level=levelFor(child,index);
+   if(level)groups.find(g=>g.level===level)!.names.push((child.name??'').trim().split(/\\s+/)[0]);
+   const row=document.createElement('label');row.className='jss-level-control';
+   const name=document.createElement('span');name.textContent=(child.name??'').trim()||'Child '+(index+1);
+   const select=document.createElement('select');select.setAttribute('aria-label','Snack responsibility for '+name.textContent);
+   for(const [value,label] of [['','Not assigned (age unknown)'],['help','Ask for help'],['independent','Choose. Prepare. Clean up.']]){
+    const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);
+   }
+   select.value=level??'';
+   select.addEventListener('change',()=>{
+    const id=String(index)+':'+(child.name??'').trim().toLowerCase();
+    if(select.value==='help'||select.value==='independent')state.levels[id]=select.value;
+    else delete state.levels[id];
+    save();renderLevels();
+   });
+   row.append(name,select);controls.append(row);
+  });
+  if(!children.length){const note=document.createElement('small');note.textContent='Add family details to get individual suggestions. The sample works without them.';controls.append(note)}
+  const svg=(level:Level)=>level==='help'?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 13V8a2 2 0 0 1 4 0v4-7a2 2 0 0 1 4 0v6-3a2 2 0 0 1 4 0v8c0 4-3 6-7 6h-1c-2 0-4-1-5-3l-3-5a2 2 0 0 1 3-2l2 2"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m7.5 12 3 3 6-6"/></svg>';
+  const populated=groups.filter(g=>g.names.length);
+  if(!populated.length){const row=document.createElement('div');row.className='jss-level-line';row.innerHTML=svg('help');row.append(document.createTextNode('Ask for help.'));sheetLines.append(row);return}
+  for(const group of populated){
+   const line=document.createElement('div');line.className='jss-level-line';line.innerHTML=svg(group.level);
+   const named=group.names.filter(Boolean);if(named.length){const label=document.createElement('span');label.className='jss-level-names';label.textContent=named.join(', ')+' ·';line.append(label)}
+   line.append(document.createTextNode(group.level==='help'?'Ask for help.':'Choose. Prepare. Clean up.'));
+   sheetLines.append(line);
+  }
+ };
  const draw=()=>{
   root.querySelectorAll<HTMLElement>('.jss-food').forEach(el=>{
    const zone=el.dataset.zone as Zone;const index=Number(el.dataset.slot);const item=state[zone]?.[index];if(!item)return;
@@ -407,6 +452,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   const initial:Record<string,string>={headline:'my own snack!',subtitle:'Pick it. Enjoy it. Put it away.',fridgeTitle:'From the fridge',pantryTitle:'From the pantry'};
   for(const [key,value] of Object.entries(initial)){const node=root.querySelector<HTMLElement>('[data-jss-edit="'+key+'"]');if(node&&document.activeElement!==node)node.textContent=state.text[key]??value}
   const fam=root.querySelector<HTMLElement>('[data-jss-family]');if(fam)fam.textContent=family;
+  renderLevels();
   const visible=[...state.fridge,...state.pantry].filter(item=>!item.removed&&!forbidden(item.id)).length;
   const total=root.querySelector<HTMLElement>('[data-jss-summary-count]');if(total)total.textContent=visible+' foods';
   const summaryRule=root.querySelector<HTMLElement>('[data-jss-summary-rule]');if(summaryRule)summaryRule.textContent=({standard:'1 fridge + 1 pantry',big:'2 fridge + 1 pantry',fridge:'Fridge only',pantry:'Pantry only'})[state.rule];
@@ -480,9 +526,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   }catch(err){console.error('Snack station image export error',err);alert('Image download failed. Please try Print / Save PDF instead.')}
   finally{root.classList.remove('jss-export');download.disabled=false;download.textContent=label}
  });
- const applyHousehold=(detail:{household:{id:string;displayName?:string};sample?:string})=>{
+ const applyHousehold=(detail:{household:{id:string;displayName?:string;children?:Child[]};sample?:string})=>{
   if(!detail?.household)return;
   const next=(detail.sample??'account')+':'+detail.household.id;const changed=profile!==next;profile=next;
+  children=Array.isArray(detail.household.children)?detail.household.children.slice(0,8).map(c=>({name:typeof c.name==='string'?c.name.slice(0,40):'',age:typeof c.age==='number'&&Number.isFinite(c.age)?c.age:null})):[];
   const display=detail.household.displayName?.trim();family=display?display.toUpperCase()+' · SNACK STATION':"OUR FAMILY'S SNACK STATION";
   if(changed){
    state=starter();
@@ -490,6 +537,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
     const saved=JSON.parse(sessionStorage.getItem(key)??'null');
     if(saved?.profile===profile&&saved.state){
      const s=saved.state;
+     if(s.levels&&typeof s.levels==='object')for(const [id,level] of Object.entries(s.levels))if(level==='help'||level==='independent')state.levels[id]=level;
      if(['standard','big','fridge','pantry'].includes(s.rule))state.rule=s.rule;else if(s.rule==='two')state.rule='standard';state.excludePeanuts=s.excludePeanuts===true;
      if(s.text&&typeof s.text==='object'){
       for(const field of ['headline','subtitle','rule','cleanup','fridgeTitle','pantryTitle']){
@@ -510,8 +558,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.jss')){
   }
   save();draw();makeChoices();
  };
- window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string};sample?:string}>).detail));
- const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string};sample?:string}}).__ofcPreviewHousehold;
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string;children?:Child[]};sample?:string}>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string;children?:Child[]};sample?:string}}).__ofcPreviewHousehold;
  if(cached)applyHousehold(cached);
  draw();makeChoices();
 }
