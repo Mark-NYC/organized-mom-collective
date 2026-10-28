@@ -1,6 +1,9 @@
 -- Add the separate monthly 2027 family schedule wall calendar to direct checkout.
 -- Run in Supabase SQL Editor after core shop migrations. Do not overwrite existing inventory.
--- Stock deliberately starts at zero until physical stock and fulfillment are confirmed.
+-- Stock deliberately starts at zero until Gelato API integration and test order are confirmed.
+-- This is print-on-demand: do NOT use a manually counted warehouse inventory as the source of truth.
+-- Existing shop checkout requires positive stock, so launch needs a Gelato-specific availability strategy
+-- and server-side fulfillment after the verified Stripe payment webhook.
 insert into public.shop_products (
   slug, name, description, details, price_cents, images, active, stock,
   max_per_order, includes_companion, ship_units, kind, tax_code, sort
