@@ -1,0 +1,91 @@
+---
+/** July Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with the
+ * board's child, play style and activities, beside the one-page printable. Below 1100px: the shared plan screen with
+ * July's sections (JulyPlanMobile). The printable, its picker and its rules live in JulyActivityBoard and
+ * src/lib/club/engines/july-activity-board.ts. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import JulyActivityBoard from '../../../components/club/JulyActivityBoard.astro';
+import JulyPlanMobile from '../../../components/club/JulyPlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find((k) => k.month === '2027-07');
+if (!kit) throw new Error('July 2027 kit missing from the registry');
+const deadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:july-app:v1';
+---
+<AppLayout title="July Activity Board">
+  <ClubPlanShell class="jul-plan family-brand" kitSlug={kit.slug} month="July" storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="July · Kit preview" instructions={[
+      'Summer free time shouldn’t mean Mom has to plan and direct every activity. This picture-led board gives kids realistic choices they can start themselves, from something quick to a project they can return to later.',
+      'Keep activities your child can safely start with supplies you already have. Supervise where needed.',
+    ]}>
+      <Fragment slot="title">I’m Bored! <em>What Can I Do?</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="jul-d-board">
+          <p class="cpd-label" id="jul-d-board">On the board</p>
+          <dl class="cpd-rows" data-jul-d-rows></dl>
+          <button type="button" class="cpd-link" data-jul-d-open>Choose activities and who it’s for</button>
+          <p>Or click any activity or line on the sheet with a pencil to rename it.</p>
+          <button type="button" class="cpd-link" data-jul-d-restore hidden>Restore this board</button>
+          <p class="cpd-hint" data-jul-d-hint hidden></p>
+          <p class="cpd-hint" data-jul-d-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="jul-proof" slot="printable" data-plan-proof-body>
+      <div class="jul-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <JulyActivityBoard storageKey={storageKey} planMode={true} />
+      </div>
+    </div>
+    <JulyPlanMobile slot="mobile" deadline={deadline} />
+  </ClubPlanShell>
+</AppLayout>
+<style is:global>
+.jul-plan .jab-dialog{z-index:100}
+</style>
+<script>
+import { FOCUS, INTERESTS, PARTICIPATION, TIERS, TIER_INFO, boardChanged, restoreBoard, type JulyPlan, type JulyState } from '../../../lib/club/engines/july-activity-board';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.jul-plan');
+const jab = root?.querySelector<HTMLElement & { clubPlan?: JulyPlan }>('.jab');
+if (root && jab) {
+  const plan = () => jab.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-jul-d-restored]');
+  const row = (dt: string, dd: string) => el('div', {}, el('dt', {}, dt), el('dd', {}, dd));
+  let undo: JulyState | null = null;
+  mountPlanDesktop<JulyState>({
+    root,
+    host: jab,
+    approvalKey: 'omc:preview:july-activity-board:approval',
+    edit: () => plan().openEditor(),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const v = plan().view();
+      const b = v.board;
+      q('[data-jul-d-rows]').replaceChildren(row('Board for', `${v.childName} (age ${v.age})`), row('Plays', PARTICIPATION[b.participation].summary), row('Enjoys', INTERESTS[b.interest] ?? '—'), row('Style', FOCUS[b.focus]), ...TIERS.map((t) => row(TIER_INFO[t].title, `${v.tiers[t].length} activities`)));
+      q<HTMLButtonElement>('[data-jul-d-open]').disabled = locked;
+      const changed = !locked && boardChanged(plan().state(), plan().members());
+      q('[data-jul-d-restore]').hidden = !changed;
+      const hint = q('[data-jul-d-hint]');
+      hint.hidden = !changed;
+      hint.textContent = `Puts back the prepared activities and wording on ${v.childName === 'My children' ? 'the family' : `${v.childName}’s`} board. Other boards stay.`;
+    },
+  });
+  q('[data-jul-d-open]').addEventListener('click', () => plan().openEditor());
+  q('[data-jul-d-restore]').addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    plan().update((s) => restoreBoard(s, plan().members()));
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('Board restored. ', u);
+    restored.focus();
+  });
+}
+</script>

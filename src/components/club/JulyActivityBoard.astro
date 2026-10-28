@@ -1,7 +1,10 @@
 ---
-/** July Club printed prototype: child-led activity decision board, one letter-size page. */
-interface Props {storageKey?:string}
-const {storageKey='omc:club:july-activities:v1'}=Astro.props;
+/** July Club printed prototype: child-led activity decision board, one letter-size page.
+ * Activities and rules: src/lib/club/engines/july-activity-board.ts.
+ * planMode: inside a Club plan page (/app/club/july) the page brings the layout, rail and mobile screen; this keeps
+ * the activity picker and the sheet, marked data-plan-sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). */
+interface Props {storageKey?:string; planMode?:boolean}
+const {storageKey='omc:club:july-activities:v1',planMode=false}=Astro.props;
 const icons={"book":"/images/club/july/book.png","blocks":"/images/club/july/building-blocks.png","legoCity":"/images/club/july/lego-city-blocks.png","puzzle":"/images/club/july/puzzele-piece.png","tree":"/images/club/july/tree.png","scissors":"/images/club/july/drawing-pencil-paper.png","bike":"/images/club/july/bicycle.png","rope":"/images/club/july/building-a-course.png","friends":"/images/club/july/friends-activity.png","lightbulb":"/images/club/july/star.png","draw":"/images/club/july/drawing-pencil-paper.png","craft":"/images/club/july/crafts-scissors-paper-and-glue.png","comic":"/images/club/july/comic-book-making.png","dance":"/images/club/july/dance-party.png","game":"/images/club/july/board-game.png","bracelet":"/images/club/july/bracelet-making.png","dough":"/images/club/july/play-doh-modeling-dough.png","pretend":"/images/club/july/pretend-play-puppet-and-mask.png","hunt":"/images/club/july/scavenger-hunt.png","sibling":"/images/club/july/sibling-activity.png","solo":"/images/club/july/solo-activity.png","car":"/images/club/july/toy-race-car.png","video":"/images/club/july/movement-video-screen.png"};
 const tiers=[
  {id:'quick',num:'01',title:'Start Playing',subtitle:'I can start right now.',hint:'NO SETUP · BY MYSELF',color:'#E3EEDC',
@@ -12,10 +15,10 @@ const tiers=[
   items:[{id:'city',label:'Build a LEGO city',icon:'legoCity'},{id:'story',label:'Write & draw a story',icon:'book'},{id:'course',label:'Design an obstacle course',icon:'rope'}]}
 ];
 ---
-<div class="jab" data-jab-key={storageKey} data-jab-icons={JSON.stringify(icons)}>
- <header class="jab-intro"><a href="/club">← Organized Family Club</a><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h1>I'm Bored! <em>What Can I Do?</em></h1><p>Fun things kids can start without asking Mom or Dad to entertain them.</p></header>
- <div class="jab-layout">
-  <aside class="jab-editor" aria-label="Prepared July activity board">
+<div class="jab" data-jab-key={storageKey} data-jab-icons={JSON.stringify(icons)} data-jab-plan={planMode ? "" : undefined}>
+ {!planMode && <header class="jab-intro"><a href="/club">← Organized Family Club</a><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h1>I'm Bored! <em>What Can I Do?</em></h1><p>Fun things kids can start without asking Mom or Dad to entertain them.</p></header>}
+ <div class={planMode ? "jab-plan" : "jab-layout"}>
+  {!planMode && <aside class="jab-editor" aria-label="Prepared July activity board">
    <div class="jab-editor-head"><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h2>I'm Bored! <em>What Can I Do?</em></h2><button type="button" class="jab-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
    <div class="jab-prepared" id="july-edit-controls"><span class="jab-eyebrow">YOUR FAMILY'S PREPARED BOARD</span><strong>What Can I Do Right Now?</strong><p>Nine illustrated activities, prepared for your children's ages and interests.</p>
     <div class="jab-summary-row"><span>Prepared for</span><b data-jab-summary-child>Whole family</b></div>
@@ -26,7 +29,7 @@ const tiers=[
    <div class="jab-actions"><button class="jab-primary jab-main-choose" type="button" data-open-activities>Choose Activities</button><div class="jab-primary-actions"><button class="jab-secondary" type="button" data-jab-print>Print / Save PDF</button></div>
     <button class="jab-secondary" type="button" data-jab-download>Download image (PNG)</button>
     <button class="jab-clear" type="button" data-jab-reset>Restore starter board</button></div>
-  </aside>
+  </aside>}
   <dialog class="jab-dialog" data-vision-dialog aria-labelledby="jab-vision-title">
    <div class="jab-dialog-head"><div><span class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY</span><h2 id="jab-vision-title">Why this matters</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>Summer free time shouldn't mean Mom has to plan and direct every activity. This picture-led board gives kids realistic choices they can start themselves, from something quick to a project they can return to later.</p>
@@ -55,11 +58,11 @@ const tiers=[
    <p class="jab-activity-help" data-activity-message role="status" aria-live="polite"></p>
    <div class="jab-activity-footer"><button type="button" data-activity-cancel>Cancel</button><button type="button" class="jab-dialog-done" data-activity-save>Save My Activities</button></div>
   </dialog>
-  <section class="jab-preview" aria-label="July illustrated activity board">
-   <button type="button" class="jab-floating-edit" data-open-activities><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>CHOOSE ACTIVITIES</span></button>
+  <section class={planMode ? "jab-plan-view" : "jab-preview"} data-jab-view aria-label="July illustrated activity board">
+   {!planMode && <button type="button" class="jab-floating-edit" data-open-activities><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>CHOOSE ACTIVITIES</span></button>}
    
    <div class="jab-stage" data-jab-stage>
-    <article class="jab-sheet" data-jab-sheet>
+    <article class="jab-sheet" data-jab-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
      <header class="jab-sheet-header"><h2>I'm Bored! <em>What Can I Do?</em></h2><div class="jab-for" data-jab-for>Our activity ideas</div><div class="jab-for" data-jab-mode>BY MYSELF</div></header>
      <p class="jab-sub" data-jab-edit="intro" contenteditable="true" role="textbox" aria-label="Edit board introduction">Fun things I can do without asking Mom or Dad.</p>
      <div class="jab-tiers">
@@ -82,7 +85,7 @@ const tiers=[
  </div>
 </div>
 <style is:global>
-.jab,.jab *{box-sizing:border-box}.jab{max-width:1480px;margin:0 auto;padding:26px clamp(18px,3.5vw,52px) 70px;font-family:Montserrat,Arial,sans-serif;color:#484941}
+.jab,.jab *{box-sizing:border-box}.jab:not([data-jab-plan]){max-width:1480px;margin:0 auto;padding:26px clamp(18px,3.5vw,52px) 70px}.jab{font-family:Montserrat,Arial,sans-serif;color:#484941}
 .jab-intro{max-width:790px;margin-bottom:35px}.jab-intro>a{display:inline-block;font-size:12px;color:#47483e;margin-bottom:24px}.jab-eyebrow{font-size:10px!important;letter-spacing:.16em;color:#738569;font-weight:700}.jab-intro h1{font:400 clamp(37px,4.5vw,60px)/1.12 Georgia,serif;margin:13px 0}.jab-intro h1 em{color:#7C946E}.jab-intro>p:last-child{font-size:15px;line-height:1.75}
 .jab-layout{display:grid;grid-template-columns:minmax(285px,350px) minmax(0,1fr);gap:clamp(28px,4vw,60px);align-items:start}.jab-editor{border-top:8px solid #E1EBCF;padding-top:16px}.jab-editor h2{font:italic 30px Georgia,serif;color:#728364;margin:12px 0}.jab-editor>p:nth-of-type(2){font-size:13px;line-height:1.7}
 .jab-editor>label{display:block;font-size:12px;font-weight:700;margin:16px 0}.jab-editor select,.jab-option select{display:block;width:100%;min-height:44px;background:#fff;border:1px solid #b9c5b5;color:#414d3d;font:12px Montserrat,Arial,sans-serif;padding:8px;margin-top:7px}.jab-customize{border:1px solid #d4decf;padding:0 13px;border-radius:6px;margin:16px 0}.jab-customize summary{padding:15px 0;cursor:pointer;font-size:13px;font-weight:700}.jab-customize summary span{font-size:11px;font-weight:400;color:#7e8d74}.jab-customize>p,.jab-guidance p{font-size:11px;line-height:1.7}.jab-option{border-top:1px solid #e5e8df;padding:10px 0}.jab-option label{font-size:11px;font-weight:700}.jab-option button{border:1px solid #b9c7b4;background:#fff;border-radius:4px;padding:7px 11px;margin-top:7px;font-size:11px;color:#53724d;cursor:pointer}.jab-guidance{padding:17px;background:#f5f2e9;margin:19px 0}.jab-guidance strong{font:20px Georgia,serif}.jab-guidance p{margin:7px 0 0}.jab-primary,.jab-secondary{width:100%;min-height:49px;cursor:pointer;font-size:12px;font-weight:700}.jab-primary{background:#607755;color:#fff;border:0}.jab-secondary{background:#fff;border:1px solid #afc0aa;color:#607755;margin-top:9px}.jab-clear{display:block;border:0;background:none;margin:11px auto;min-height:35px;text-decoration:underline;color:#536d4b;font-size:12px;cursor:pointer}.jab-note{font-size:11px;line-height:1.65;color:#81877d}
@@ -94,10 +97,11 @@ const tiers=[
 .jab.jab-export .jab-stage{width:816px!important;height:1056px!important}.jab.jab-export .jab-sheet{transform:none!important;box-shadow:none!important}.jab.jab-export .jab-remove{display:none!important}
 @media(max-width:1050px){.jab-layout{display:flex;flex-direction:column}.jab-preview{order:0;width:100%}.jab-editor{order:1;max-width:730px;width:100%}.jab-remove{opacity:1}.jab [contenteditable]{pointer-events:auto}}
 @page{size:letter portrait;margin:0}
-@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.jab-stage,.jab-sheet,.jab-sheet *{visibility:visible!important}.jab-stage{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important}.jab-sheet{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.jab-remove{display:none!important}.jab [contenteditable]{outline:none!important;background:transparent!important}}
+/* Printing outside a Club plan page; on one, ClubPrintStyles prints the data-plan-sheet page. */
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body:has(.jab:not([data-jab-plan])) *{visibility:hidden!important}.jab:not([data-jab-plan]) :is(.jab-stage,.jab-sheet,.jab-sheet *){visibility:visible!important}.jab:not([data-jab-plan]) .jab-stage{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important}.jab:not([data-jab-plan]) .jab-sheet{position:absolute!important;left:0!important;top:0!important;width:8.5in!important;height:11in!important;transform:none!important;box-shadow:none!important;border:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.jab-remove{display:none!important}.jab [contenteditable]{outline:none!important;background:transparent!important}}
 
 /* July matches the prepared-plan layout established for March–June. */
-.jab{padding:0;max-width:none}.jab-intro{display:none}
+.jab:not([data-jab-plan]){padding:0;max-width:none}.jab-intro{display:none}
 .jab-layout{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
 .jab-editor{display:flex;flex-direction:column;min-width:0;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:15px clamp(17px,2vw,26px)}
 .jab-editor-head{border-top:5px solid #e1ebcf;padding-top:10px;flex:0 0 auto}
@@ -131,7 +135,7 @@ const tiers=[
 @media screen and (min-width:1101px){
  html:has(#club-month-content:not([hidden]) .jab),body:has(#club-month-content:not([hidden]) .jab){height:100%;overflow:hidden}
  #club-month-content:not([hidden]):has(.jab){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
- .jab,.jab-layout{height:100%;margin:0}
+ .jab:not([data-jab-plan]),.jab-layout{height:100%;margin:0}
  .jab-editor{height:100%;overflow:hidden}
  .jab-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
  .jab-floating-edit{position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:13px 19px;min-height:52px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
@@ -146,14 +150,14 @@ const tiers=[
  .jab-actions .jab-secondary{min-height:30px}.jab-actions .jab-clear{min-height:26px}
 }
 @media screen and (max-width:1100px){
- .jab{padding:0 0 40px}
+ .jab:not([data-jab-plan]){padding:0 0 40px}
  .jab-layout{display:flex;flex-direction:column;gap:0}
  .jab-preview{order:0;width:100%;padding:14px 14px 28px}
  .jab-editor{order:1;width:100%;max-width:none;border:0;padding:20px}
  .jab-prepared{flex:auto;overflow:visible;max-width:620px}
 }
 @media screen and (max-width:700px){
- .jab{padding-bottom:calc(138px + env(safe-area-inset-bottom,0px))}
+ .jab:not([data-jab-plan]){padding-bottom:calc(138px + env(safe-area-inset-bottom,0px))}
  .jab-editor{padding:17px 18px}
  .jab-prepared{scroll-margin-top:12px}
  .jab-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid #dce2d7;background:rgba(250,249,247,.98);box-shadow:0 -5px 20px #0001}
@@ -216,285 +220,200 @@ const tiers=[
 .jab .jab-sheet [contenteditable="true"]:focus::after{opacity:0}
 @media print{.jab .jab-sheet [contenteditable="true"]::after{display:none!important}}
 .jab.jab-export .jab-sheet [contenteditable="true"]::after{display:none!important}
+/* Plan mode: the Club plan page places the sheet. */
+.jab-plan-view .jab-stage{margin:0 auto}
 </style>
 <script>
-type Tier='quick'|'busy'|'project';
-type Idea={id:string;label:string;icon:string;removed?:boolean;minAge?:number;maxAge?:number};
-type State={quick:Idea[];busy:Idea[];project:Idea[];focus:'mixed'|'inside'|'outside';child:string;participation:'solo'|'sibling'|'friends';interest:string;intro:string;rule:string};
-const library:Record<Tier,Idea[]>={
- quick:[
-  {id:'picture',label:'Look at a picture book',icon:'book',maxAge:5},
-  {id:'sort',label:'Sort blocks by color',icon:'blocks',maxAge:5},
-  {id:'doodle',label:'Draw a funny animal',icon:'draw',maxAge:8},
-  {id:'read',label:'Read a book',icon:'book',minAge:6},
-  {id:'draw',label:'Draw a superhero',icon:'draw',minAge:6},
-  {id:'build',label:'Build with blocks',icon:'blocks'},
-  {id:'stretch',label:'Have a dance party',icon:'dance',minAge:6},
-  {id:'look',label:'Find five things in nature',icon:'hunt',minAge:6},
-  {id:'friend-draw',label:'Draw funny portraits together',icon:'draw',minAge:5},
-  {id:'sibling-build',label:'Build a LEGO tower together',icon:'sibling',minAge:5},
-  {id:'cars',label:'Make a Hot Wheels race track',icon:'car',minAge:5}
- ],
- busy:[
-  {id:'pretend',label:'Set up pretend play',icon:'pretend',maxAge:5},
-  {id:'easy-puzzle',label:'Work on a picture puzzle',icon:'puzzle',maxAge:5},
-  {id:'picture-art',label:'Make a big picture',icon:'draw',maxAge:5},
-  {id:'puzzle',label:'Finish a puzzle',icon:'puzzle',minAge:6},
-  {id:'outdoor',label:'Find five things in nature',icon:'hunt',minAge:6},
-  {id:'craft',label:'Make a paper craft',icon:'craft',minAge:6},
-  {id:'bike',label:'Ride my bike (ask first)',icon:'bike',minAge:6},
-  {id:'tower',label:'Build a giant tower',icon:'blocks'},
-  {id:'reading',label:'Read a whole chapter',icon:'book',minAge:9},
-  {id:'sibling-puzzle',label:'Solve a puzzle together',icon:'sibling',minAge:5},
-  {id:'friend-game',label:'Play a favorite board game',icon:'game',minAge:5},
-  {id:'dough',label:'Build a scene with Play-Doh',icon:'dough',maxAge:10},
-  {id:'board-game',label:'Play a favorite board game',icon:'game',minAge:6}
- ],
- project:[
-  {id:'small-town',label:'Build a pretend town',icon:'blocks',maxAge:5},
-  {id:'picture-story',label:'Make a picture story',icon:'book',maxAge:5},
-  {id:'big-art',label:'Add to a big drawing',icon:'draw',maxAge:5},
-  {id:'city',label:'Build a LEGO city',icon:'legoCity',minAge:6},
-  {id:'story',label:'Write & draw a story',icon:'book',minAge:9},
-  {id:'course',label:'Design a safe obstacle course',icon:'rope',minAge:6},
-  {id:'comic',label:'Draw a comic strip',icon:'comic',minAge:6},
-  {id:'garden',label:'Observe a plant growing',icon:'tree',minAge:6},
-  {id:'mural',label:'Make a big art project',icon:'craft',minAge:6},
-  {id:'sibling-town',label:'Build a pretend town together',icon:'sibling',minAge:5},
-  {id:'friend-story',label:'Invent a pretend-play story',icon:'pretend',minAge:5},
-  {id:'bracelet',label:'Make a friendship bracelet',icon:'bracelet',minAge:7},
-  {id:'puppet',label:'Put on a puppet show',icon:'pretend',minAge:5}
- ]
-};
-const interestIds:Record<string,string[]>={mixed:[],art:['doodle','draw','craft','comic','picture-art','big-art','mural','bracelet','dough'],building:['build','tower','city','small-town','cars','dough'],movement:['stretch','course','bike','look'],stories:['read','picture','story','pretend','picture-story'],games:['puzzle','easy-puzzle','course','board-game']};
-const ageGroups={
- little:{quick:['picture','sort','build'],busy:['pretend','easy-puzzle','picture-art'],project:['small-town','picture-story','big-art']},
- middle:{quick:['read','draw','build'],busy:['puzzle','outdoor','craft'],project:['city','comic','course']},
- older:{quick:['read','draw','stretch'],busy:['puzzle','reading','craft'],project:['city','story','garden']}
-} satisfies Record<string,Record<Tier,string[]>>;
-const eligible=(idea:Idea,age:number)=> (idea.minAge??0)<=age&&(idea.maxAge??99)>=age;
-const defaultsFor=(age:number,child='family'):State=>{
- const preset=age<=5?ageGroups.little:age>=10?ageGroups.older:ageGroups.middle;
- const select=(tier:Tier)=>preset[tier].map(id=>({...library[tier].find(x=>x.id===id)!}));
- return {quick:select('quick'),busy:select('busy'),project:select('project'),focus:'mixed',child,participation:'solo',interest:'mixed',
-  intro:'Fun things I can do without asking Mom or Dad.',
-  rule:"Before asking: Pick one · Get what you need · Have fun · Put things away."};
-};
-const fresh=():State=>defaultsFor(8);
-for(const root of document.querySelectorAll<HTMLElement>('.jab')){
- const key=root.dataset.jabKey??'omc:club:july-activities:v1';
- const icons=JSON.parse(root.dataset.jabIcons??'{}') as Record<string,string>;
- let state=fresh();let profile='';let family='My own ideas for summer';let kids:{id:string;firstName:string;birthYear?:number;birthMonth?:number}[]=[];
- let boards:Record<string,State>={};
- const selectedAge=(child=state.child)=>{const kid=kids.find(k=>k.id===child);if(!kid?.birthYear)return 8;
-  return Math.max(2,Math.min(18,2027-kid.birthYear-(kid.birthMonth&&kid.birthMonth>7?1:0)))};
- const validIdeas=(tier:Tier)=>library[tier].filter(idea=>eligible(idea,selectedAge()) && (state.participation==='solo'? !idea.id.startsWith('friend-')&&!idea.id.startsWith('sibling-'):true));
- const stage=root.querySelector<HTMLElement>('[data-jab-stage]');const sheet=root.querySelector<HTMLElement>('[data-jab-sheet]');
- const fit=()=>{if(!stage||!sheet)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4);const scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';sheet.style.setProperty('--jab-scale',String(scale))};
- fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
- const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
- const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
- const activityDialog=root.querySelector<HTMLDialogElement>('[data-activity-dialog]');
- root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
- root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
- root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
- for(const dialog of [visionDialog,editorDialog,activityDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
- const save=()=>{boards[state.child]=structuredClone(state);try{localStorage.setItem(key,JSON.stringify({profile,state,boards}))}catch{}};
- const draw=()=>{
-  for(const tier of ['quick','busy','project'] as Tier[])for(const row of root.querySelectorAll<HTMLElement>('[data-jab-item="'+tier+'"]')){
-   const item=state[tier][Number(row.dataset.jabSlot)];if(!item)continue;row.hidden=!!item.removed;
-   const img=row.querySelector<HTMLImageElement>('img');if(img){img.src=icons[item.icon]??icons.lightbulb;img.alt=item.label;}
-   const txt=row.querySelector<HTMLElement>('[data-jab-label]');if(txt&&document.activeElement!==txt)txt.textContent=item.label;
-  }
-  const title=root.querySelector<HTMLElement>('[data-jab-for]');if(title)title.textContent=family;
-  const mode=root.querySelector<HTMLElement>('[data-jab-mode]');if(mode)mode.textContent=({solo:'BY MYSELF',sibling:'WITH A SIBLING',friends:'WITH FRIENDS ALREADY HERE'}[state.participation]);
-  for(const name of ['intro','rule'] as const){const el=root.querySelector<HTMLElement>('[data-jab-edit="'+name+'"]');if(el&&document.activeElement!==el)el.textContent=state[name]}
-  const kid=kids.find(k=>k.id===state.child);
-  const summaryChild=root.querySelector<HTMLElement>('[data-jab-summary-child]');if(summaryChild)summaryChild.textContent=(kid?.firstName??'My children')+' · '+({solo:'By myself',sibling:'With a sibling',friends:'With friends'}[state.participation]);
-  const summaryFocus=root.querySelector<HTMLElement>('[data-jab-summary-focus]');if(summaryFocus)summaryFocus.textContent=state.interest==='mixed'?'A bit of everything':state.interest;
-  const count=root.querySelector<HTMLElement>('[data-jab-summary-count]');if(count)count.textContent=([...state.quick,...state.busy,...state.project].filter(x=>!x.removed).length)+' activities';
-  const child=root.querySelector<HTMLSelectElement>('[data-jab-child]');if(child)child.value=state.child;
-  const focus=root.querySelector<HTMLSelectElement>('[data-jab-focus]');if(focus)focus.value=state.focus;
-  const participation=root.querySelector<HTMLSelectElement>('[data-jab-participation]');if(participation)participation.value=state.participation;
-  const interest=root.querySelector<HTMLSelectElement>('[data-jab-interest]');if(interest)interest.value=state.interest;
- };
+import {
+  PARTICIPATION, PER_TIER, TIERS, applyFamily, available, ageFor, boardOf, freshState, fromLegacy, isJulyState, julyFingerprint,
+  julyView, relabel, removeActivity, restoreBoard, setActivities, setChild, setFocus, setInterest, setParticipation, setText,
+  type Focus, type JulyMember, type JulyPlan, type JulyState, type Participation, type Tier,
+} from '../../lib/club/engines/july-activity-board';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
 
- // Draft choices, matching June's visual selector. Cancel never mutates the printed page.
- let activeActivityTier:Tier='quick';
- let activityDraft:Record<Tier,Idea[]>={quick:[],busy:[],project:[]};
- const pickerMessage=(message:string)=>{const el=root.querySelector<HTMLElement>('[data-activity-message]');if(el)el.textContent=message};
- const renderActivityPicker=()=>{
-  const grid=root.querySelector<HTMLElement>('[data-activity-grid]');if(!grid)return;
-  grid.replaceChildren();
-  const selected=activityDraft[activeActivityTier].filter(x=>!x.removed);
-  const count=root.querySelector<HTMLElement>('[data-activity-count]');if(count)count.textContent=selected.length+' of 3 selected';
-  const age=root.querySelector<HTMLElement>('[data-activity-age]');if(age)age.textContent='Age '+selectedAge()+' suggestions';
-  for(const tab of root.querySelectorAll<HTMLButtonElement>('[data-activity-tab]')){
-   const on=tab.dataset.activityTab===activeActivityTier;tab.setAttribute('aria-selected',String(on));tab.tabIndex=on?0:-1;
-  }
-  const candidates=library[activeActivityTier].filter(x=>eligible(x,selectedAge())&&
-   (state.participation!=='solo'||(!x.id.startsWith('sibling-')&&!x.id.startsWith('friend-')))&&
-   (state.participation!=='sibling'||!x.id.startsWith('friend-'))&&
-   (state.participation!=='friends'||!x.id.startsWith('sibling-')));
-  for(const idea of candidates){
-   const on=selected.some(x=>x.id===idea.id);
-   const button=document.createElement('button');button.type='button';button.className='jab-activity-card';
-   button.setAttribute('aria-pressed',String(on));button.setAttribute('aria-label',idea.label+(on?', selected':''));
-   const img=document.createElement('img');img.src=icons[idea.icon]??icons.lightbulb;img.alt='';img.loading='lazy';
-   const label=document.createElement('span');label.textContent=idea.label;
-   const mark=document.createElement('span');mark.className='jab-activity-check';mark.textContent=on?'✓':'+';
-   button.append(img,label,mark);
-   button.addEventListener('click',()=>{
-    const picked=activityDraft[activeActivityTier];
-    if(on)activityDraft[activeActivityTier]=picked.filter(x=>x.id!==idea.id);
-    else if(selected.length<3)picked.push({...idea});
-    else{pickerMessage('Choose up to three. Deselect one first.');return}
-    pickerMessage('');renderActivityPicker();
-   });grid.append(button);
-  }
- };
- const openActivityPicker=()=>{
-  activityDraft={quick:structuredClone(state.quick.filter(x=>!x.removed)),busy:structuredClone(state.busy.filter(x=>!x.removed)),project:structuredClone(state.project.filter(x=>!x.removed))};
-  activeActivityTier='quick';pickerMessage('');renderActivityPicker();activityDialog?.showModal();
- };
- root.querySelectorAll('[data-open-activities]').forEach(b=>b.addEventListener('click',openActivityPicker));
- root.querySelectorAll('[data-activity-cancel]').forEach(b=>b.addEventListener('click',()=>activityDialog?.close()));
- root.querySelectorAll<HTMLButtonElement>('[data-activity-tab]').forEach(b=>b.addEventListener('click',()=>{activeActivityTier=b.dataset.activityTab as Tier;pickerMessage('');renderActivityPicker()}));
- root.querySelector('[data-activity-save]')?.addEventListener('click',()=>{
-  for(const tier of ['quick','busy','project'] as Tier[]){
-   const picked=activityDraft[tier].filter(x=>!x.removed).slice(0,3);
-   const placeholders=Array.from({length:3-picked.length},(_,i)=>({...(state[tier][i]??library[tier][0]),removed:true}));
-   state[tier]=[...picked.map(x=>({...x,removed:false})),...placeholders];
-  }
-  save();draw();options();activityDialog?.close();
- });
+type Detail = { household: { id: string; members?: JulyMember[] } | null; sample?: string | null };
 
- const options=()=>{
-  const parent=root.querySelector<HTMLElement>('[data-jab-options]');if(!parent)return;parent.replaceChildren();
-  for(const tier of ['quick','busy','project'] as Tier[]){
-   for(let i=0;i<3;i++){
-    const item=state[tier][i];const wrap=document.createElement('div');wrap.className='jab-option';const label=document.createElement('label');
-    label.textContent=({quick:'5-Minute',busy:'Keep Me Busy',project:'My Project'} as Record<Tier,string>)[tier]+' · '+(i+1);
-    const select=document.createElement('select');select.setAttribute('aria-label',label.textContent);
-    for(const suggestion of validIdeas(tier)){const opt=document.createElement('option');opt.value=suggestion.id;opt.textContent=suggestion.label;select.append(opt)}
-    if(!validIdeas(tier).some(x=>x.id===item.id)){const opt=document.createElement('option');opt.value=item.id;opt.textContent=item.label+' (custom)';select.append(opt)}
-    select.value=item.id;select.addEventListener('change',()=>{
-     const replacement=library[tier].find(x=>x.id===select.value);if(!replacement)return;
-     state[tier][i]={...replacement,removed:item.removed};save();draw();
-    });
-    const toggle=document.createElement('button');toggle.type='button';toggle.textContent=item.removed?'＋ Restore idea':'× Remove idea';
-    toggle.addEventListener('click',()=>{state[tier][i].removed=!state[tier][i].removed;save();draw();options()});
-    const custom=document.createElement('input');custom.type='text';custom.maxLength=55;custom.placeholder='Or type your own activity';custom.value=item.label;
-    custom.setAttribute('aria-label','Custom activity name');
-    custom.addEventListener('change',()=>{state[tier][i]={...state[tier][i],label:custom.value.trim().slice(0,55)||item.label};save();draw()});
-    label.append(select);wrap.append(label,custom,toggle);parent.append(wrap);
-   }
-  }
- };
- root.querySelector<HTMLSelectElement>('[data-jab-participation]')?.addEventListener('change',e=>{
-   const value=(e.target as HTMLSelectElement).value as State['participation'];
-   state.participation=value==='sibling'&&kids.length<2?'solo':value;
-   if(state.participation!=='solo'){
-     const selections=state.participation==='sibling'
-       ?{quick:'sibling-build',busy:'sibling-puzzle',project:'sibling-town'}
-       :{quick:'friend-draw',busy:'friend-game',project:'friend-story'};
-     for(const tier of ['quick','busy','project'] as Tier[]){
-       const found=library[tier].find(x=>x.id===selections[tier]);
-       if(found&&eligible(found,selectedAge()))state[tier][0]={...found};
-     }
-   }else{
-     const defaults=defaultsFor(selectedAge(),state.child);
-     for(const tier of ['quick','busy','project'] as Tier[])state[tier][0]={...defaults[tier][0]};
-   }
-   save();draw();options();
- });
- root.querySelector<HTMLSelectElement>('[data-jab-interest]')?.addEventListener('change',e=>{
-   state.interest=(e.target as HTMLSelectElement).value;
-   const ids=interestIds[state.interest]??[];
-   if(ids.length)for(const tier of ['quick','busy','project'] as Tier[]){
-     const age=selectedAge();const matches=library[tier].filter(x=>ids.includes(x.id)&&eligible(x,age));
-     matches.slice(0,3).forEach((x,i)=>{state[tier][i]={...x}});
-   }
-   save();draw();options();
- });
- const updateFamily=()=>{const kid=kids.find(k=>k.id===state.child);family=kid?kid.firstName+"'s activity ideas":'Our activity ideas'};
- const childSelect=root.querySelector<HTMLSelectElement>('[data-jab-child]');
- childSelect?.addEventListener('change',()=>{
-  save();
-  const id=childSelect.value;
-  state=boards[id]?structuredClone(boards[id]):defaultsFor(selectedAge(id),id);
-  updateFamily();save();draw();options();
- });
- root.querySelector<HTMLSelectElement>('[data-jab-focus]')?.addEventListener('change',event=>{
-  const focus=(event.target as HTMLSelectElement).value as State['focus'];state.focus=focus;
-  // Only suggest activities appropriate to the selected child's age.
-  const age=selectedAge();
-  const choose=(tier:Tier,slot:number,ids:string[])=>{
-   const candidate=ids.map(id=>library[tier].find(x=>x.id===id)).find((x):x is Idea=>!!x&&eligible(x,age));
-   if(candidate)state[tier][slot]={...candidate};
+for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: JulyPlan }>('.jab')) {
+  const key = root.dataset.jabKey ?? 'omc:club:july-activities:v1';
+  const planMode = root.hasAttribute('data-jab-plan');
+  const icons = JSON.parse(root.dataset.jabIcons ?? '{}') as Record<string, string>;
+  let current = '';
+  let members: JulyMember[] = [];
+  let state: JulyState = freshState([]);
+  let persist = true;
+  let locked = false;
+  const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel);
+  const $$ = <T extends HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];
+
+  const stage = $('[data-jab-stage]');
+  const sheet = $('[data-jab-sheet]');
+  const fit = () => {
+    if (!stage || !sheet) return;
+    const width = Math.max(180, (stage.parentElement?.clientWidth ?? 816) - 4);
+    const scale = Math.min(1, width / 816);
+    stage.style.width = `${816 * scale}px`;
+    stage.style.height = `${1056 * scale}px`;
+    sheet.style.setProperty('--jab-scale', String(scale));
   };
-  if(focus==='inside'){choose('busy',1,['tower','easy-puzzle']);choose('project',2,['comic','big-art'])}
-  else if(focus==='outside'){choose('quick',1,['look','sort']);choose('busy',1,['bike','pretend']);choose('project',2,['garden','big-art'])}
-  else{choose('quick',1,['draw','sort']);choose('busy',1,['outdoor','easy-puzzle']);choose('project',2,['course','big-art'])}
-  save();draw();options();
- });
- root.querySelectorAll<HTMLElement>('[data-jab-item]').forEach(row=>{
-  const tier=row.dataset.jabItem as Tier,index=Number(row.dataset.jabSlot);const txt=row.querySelector<HTMLElement>('[data-jab-label]');
-  txt?.addEventListener('input',()=>{state[tier][index].label=(txt.textContent??'').replace(/\s+/g,' ').slice(0,55);save()});
-  txt?.addEventListener('blur',()=>{const s=state[tier][index];s.label=(txt.textContent??'').replace(/\s+/g,' ').trim().slice(0,55)||library[tier].find(x=>x.id===s.id)!.label;save();draw()});
-  txt?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();txt.blur()}});
-  row.querySelector('[data-jab-remove]')?.addEventListener('click',()=>{state[tier][index].removed=true;save();draw();options()});
- });
- for(const name of ['intro','rule'] as const){const el=root.querySelector<HTMLElement>('[data-jab-edit="'+name+'"]');el?.addEventListener('input',()=>{state[name]=(el.textContent??'').replace(/\s+/g,' ').slice(0,130);save()});el?.addEventListener('blur',()=>{state[name]=(el.textContent??'').trim().slice(0,130);save();draw()});el?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur()}})}
- root.querySelector('[data-jab-reset]')?.addEventListener('click',()=>{const child=state.child;state=defaultsFor(selectedAge(child),child);updateFamily();save();draw();options()});
- root.querySelector('[data-jab-print]')?.addEventListener('click',()=>window.print());
- const dl=root.querySelector<HTMLButtonElement>('[data-jab-download]');
- dl?.addEventListener('click',async()=>{
-  if(!dl||!sheet)return;dl.disabled=true;const label=dl.textContent;dl.textContent='Preparing image…';root.classList.add('jab-export');
-  try{await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
-   const {toPng}=await import('html-to-image');const image=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});
-   const link=document.createElement('a');link.href=image;link.download='july-what-can-i-do.png';link.click();
-  }catch(err){console.error('July image export failed',err);alert('Image download failed; please use Print / Save PDF.')}
-  finally{root.classList.remove('jab-export');dl.disabled=false;dl.textContent=label}
- });
- const applyHousehold=(detail:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string})=>{
-  if(!detail?.household)return;const next=(detail.sample??'account')+':'+detail.household.id;
-  kids=(detail.household.members??[]).filter(x=>x.kind==='child');
-  const select=root.querySelector<HTMLSelectElement>('[data-jab-child]');
-  if(select){select.replaceChildren();const familyOption=document.createElement('option');familyOption.value='family';familyOption.textContent='My children';select.append(familyOption);
-   for(const kid of kids){const option=document.createElement('option');option.value=kid.id;option.textContent=kid.firstName;select.append(option)}}
-  if(profile!==next){profile=next;state=fresh();boards={};
-   try{const record=JSON.parse(localStorage.getItem(key)??'null');if(record?.profile===profile&&record.state){
-    const s=record.state;
-    if(record.boards&&typeof record.boards==='object')boards=record.boards;
-    state=defaultsFor(selectedAge(typeof s.child==='string'?s.child:'family'),typeof s.child==='string'?s.child:'family');
-    state.focus=['mixed','inside','outside'].includes(s.focus)?s.focus:'mixed';
-    state.participation=['solo','sibling','friends'].includes(s.participation)?s.participation:'solo';
-    state.interest=typeof s.interest==='string'&&s.interest in interestIds?s.interest:'mixed';
-    for(const name of ['intro','rule'] as const)if(typeof s[name]==='string')state[name]=s[name].slice(0,130);
-    for(const tier of ['quick','busy','project'] as Tier[])if(Array.isArray(s[tier])&&s[tier].length===3){
-     state[tier]=s[tier].map((a:Idea,i:number)=>{const found=library[tier].find(x=>x.id===a?.id);return found?{...found,label:typeof a.label==='string'?a.label.slice(0,55):found.label,removed:a.removed===true}:state[tier][i]});
+  fit();
+  if (stage?.parentElement && typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(stage.parentElement);
+  window.addEventListener('resize', fit);
+
+  const visionDialog = $<HTMLDialogElement>('[data-vision-dialog]');
+  const editorDialog = $<HTMLDialogElement>('[data-editor-dialog]');
+  const picker = $<HTMLDialogElement>('[data-activity-dialog]');
+  $('[data-open-vision]')?.addEventListener('click', () => visionDialog?.showModal());
+  $$('[data-close-dialog]').forEach((b) => b.addEventListener('click', () => b.closest('dialog')?.close()));
+  for (const d of [visionDialog, editorDialog, picker]) d?.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+
+  const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
+  const text = (el: HTMLElement | null, value: string) => { if (el && document.activeElement !== el) el.textContent = value; };
+
+  const draw = () => {
+    const v = julyView(state, members);
+    for (const tier of TIERS) {
+      $$(`[data-jab-item="${tier}"]`).forEach((row) => {
+        const it = v.tiers[tier][Number(row.dataset.jabSlot)];
+        row.hidden = !it;
+        if (!it) return;
+        const img = row.querySelector<HTMLImageElement>('img');
+        if (img) { img.src = icons[it.icon] ?? icons.lightbulb; img.alt = ''; }
+        text(row.querySelector<HTMLElement>('[data-jab-label]'), it.label);
+        row.querySelector('[data-jab-remove]')?.setAttribute('aria-label', `Remove ${it.label}`);
+      });
     }
-   }}catch{}
-  }
-  if(state.child!=='family'&&!kids.some(x=>x.id===state.child))state.child='family';
-  if(state.child==='family'&&profile===next&&!boards.family&&kids.length){state=defaultsFor(selectedAge(kids[0].id),kids[0].id)}
-  if(kids.length<2&&state.participation==='sibling')state.participation='solo';
-  updateFamily();save();draw();options();
- };
- window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}>).detail));
- const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample?:string}}).__ofcPreviewHousehold;
- if(cached)applyHousehold(cached);
- // Keep the illustrated choices synchronized when preferences change within the popup.
- for(const select of root.querySelectorAll<HTMLSelectElement>('.jab-picker-filters select')){
-  select.addEventListener('change',()=>{
-   queueMicrotask(()=>{
-    if(!activityDialog?.open)return;
-    activityDraft={quick:structuredClone(state.quick.filter(x=>!x.removed)),busy:structuredClone(state.busy.filter(x=>!x.removed)),project:structuredClone(state.project.filter(x=>!x.removed))};
-    pickerMessage('');renderActivityPicker();
-   });
+    const title = $('[data-jab-for]'); if (title) title.textContent = v.title;
+    const mode = $('[data-jab-mode]'); if (mode) mode.textContent = v.mode;
+    text($('[data-jab-edit="intro"]'), v.intro);
+    text($('[data-jab-edit="rule"]'), v.rule);
+    // The picker's personalization.
+    const child = $<HTMLSelectElement>('[data-jab-child]');
+    if (child) {
+      child.replaceChildren(Object.assign(document.createElement('option'), { value: 'family', textContent: 'My children' }), ...v.kids.map((k) => Object.assign(document.createElement('option'), { value: k.id, textContent: k.name })));
+      child.value = state.child;
+    }
+    const b = v.board;
+    const part = $<HTMLSelectElement>('[data-jab-participation]');
+    if (part) { part.value = b.participation; const sib = part.querySelector<HTMLOptionElement>('option[value="sibling"]'); if (sib) sib.disabled = v.kids.length < 2; }
+    const interest = $<HTMLSelectElement>('[data-jab-interest]'); if (interest) interest.value = b.interest;
+    const focus = $<HTMLSelectElement>('[data-jab-focus]'); if (focus) focus.value = b.focus;
+    const sc = $('[data-jab-summary-child]'); if (sc) sc.textContent = `${v.childName} · ${PARTICIPATION[b.participation].summary}`;
+    const sf = $('[data-jab-summary-focus]'); if (sf) sf.textContent = b.interest === 'mixed' ? 'A bit of everything' : b.interest;
+    const count = $('[data-jab-summary-count]'); if (count) count.textContent = `${TIERS.reduce((n, t) => n + v.tiers[t].length, 0)} activities`;
+  };
+  const changed = () => { save(); draw(); if (picker?.open) renderPicker(); if (planMode && current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true })); };
+  const update = (change: (s: JulyState) => void) => { change(state); changed(); };
+
+  // Typing on the sheet.
+  $$('[data-jab-item]').forEach((row) => {
+    const tier = row.dataset.jabItem as Tier;
+    const slot = Number(row.dataset.jabSlot);
+    const label = row.querySelector<HTMLElement>('[data-jab-label]');
+    label?.addEventListener('blur', () => { if (!locked) update((s) => relabel(s, tier, slot, label.textContent ?? '', members)); draw(); });
+    label?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); label.blur(); } });
+    row.querySelector('[data-jab-remove]')?.addEventListener('click', () => { if (!locked) update((s) => removeActivity(s, tier, slot, members)); });
   });
- }
- updateFamily();draw();options();
+  for (const k of ['intro', 'rule'] as const) {
+    const el = $(`[data-jab-edit="${k}"]`);
+    el?.addEventListener('blur', () => { if (!locked) update((s) => setText(s, k, el.textContent ?? '', members)); draw(); });
+    el?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+  }
+
+  // The activity picker: personalization applies to the board at once; picks are a draft until saved.
+  let tier: Tier = 'quick';
+  let draft: Record<Tier, string[]> = { quick: [], busy: [], project: [] };
+  const message = (m: string) => { const el = $('[data-activity-message]'); if (el) el.textContent = m; };
+  const resetDraft = () => { const b = boardOf(state, members); draft = { quick: b.quick.map((x) => x.id), busy: b.busy.map((x) => x.id), project: b.project.map((x) => x.id) }; };
+  const renderPicker = () => {
+    const grid = $('[data-activity-grid]');
+    if (!grid) return;
+    const picked = draft[tier];
+    const count = $('[data-activity-count]'); if (count) count.textContent = `${picked.length} of ${PER_TIER} selected`;
+    const age = $('[data-activity-age]'); if (age) age.textContent = `Age ${ageFor(state.child, members)} suggestions`;
+    $$<HTMLButtonElement>('[data-activity-tab]').forEach((t) => { const on = t.dataset.activityTab === tier; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
+    grid.replaceChildren(...available(tier, boardOf(state, members), ageFor(state.child, members)).map((idea) => {
+      const on = picked.includes(idea.id);
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'jab-activity-card';
+      b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', idea.label + (on ? ', selected' : ''));
+      b.append(Object.assign(document.createElement('img'), { src: icons[idea.icon] ?? icons.lightbulb, alt: '', loading: 'lazy' }), Object.assign(document.createElement('span'), { textContent: idea.label }), Object.assign(document.createElement('span'), { className: 'jab-activity-check', textContent: on ? '✓' : '+' }));
+      b.addEventListener('click', () => {
+        if (on) draft[tier] = picked.filter((x) => x !== idea.id);
+        else if (picked.length < PER_TIER) draft[tier] = [...picked, idea.id];
+        else return message('Choose up to three. Deselect one first.');
+        message('');
+        renderPicker();
+      });
+      return b;
+    }));
+  };
+  const openPicker = () => { if (locked || !picker) return; resetDraft(); tier = 'quick'; message(''); renderPicker(); if (!picker.open) picker.showModal(); };
+  $$('[data-open-activities]').forEach((b) => b.addEventListener('click', openPicker));
+  $$('[data-activity-cancel]').forEach((b) => b.addEventListener('click', () => picker?.close()));
+  $$<HTMLButtonElement>('[data-activity-tab]').forEach((b) => b.addEventListener('click', () => { tier = b.dataset.activityTab as Tier; message(''); renderPicker(); }));
+  $('[data-activity-save]')?.addEventListener('click', () => { update((s) => { for (const t of TIERS) setActivities(s, t, draft[t], members); }); picker?.close(); });
+  const personalize = (change: (s: JulyState) => void) => { update(change); resetDraft(); renderPicker(); };
+  $<HTMLSelectElement>('[data-jab-child]')?.addEventListener('change', (e) => personalize((s) => setChild(s, (e.target as HTMLSelectElement).value, members)));
+  $<HTMLSelectElement>('[data-jab-participation]')?.addEventListener('change', (e) => personalize((s) => setParticipation(s, (e.target as HTMLSelectElement).value as Participation, members)));
+  $<HTMLSelectElement>('[data-jab-interest]')?.addEventListener('change', (e) => personalize((s) => setInterest(s, (e.target as HTMLSelectElement).value, members)));
+  $<HTMLSelectElement>('[data-jab-focus]')?.addEventListener('change', (e) => personalize((s) => setFocus(s, (e.target as HTMLSelectElement).value as Focus, members)));
+
+  // Standalone page controls.
+  $('[data-jab-reset]')?.addEventListener('click', () => update((s) => restoreBoard(s, members)));
+  $('[data-jab-print]')?.addEventListener('click', () => window.print());
+  const dl = $<HTMLButtonElement>('[data-jab-download]');
+  dl?.addEventListener('click', async () => {
+    if (!dl || !sheet) return;
+    dl.disabled = true; const label = dl.textContent; dl.textContent = 'Preparing image…'; root.classList.add('jab-export');
+    try {
+      await Promise.all([...sheet.querySelectorAll('img')].map((img) => (img.complete ? null : img.decode().catch(() => null))));
+      const { toPng } = await import('html-to-image');
+      const image = await toPng(sheet, { pixelRatio: 2, width: 816, height: 1056, backgroundColor: '#fff' });
+      const a = document.createElement('a'); a.href = image; a.download = 'july-what-can-i-do.png'; a.click();
+    } catch (err) { console.error('July image export failed', err); alert('Image download failed; please use Print / Save PDF.'); }
+    finally { root.classList.remove('jab-export'); dl.disabled = false; dl.textContent = label; }
+  });
+
+  const setLocked = (on: boolean) => {
+    locked = on;
+    $$('.jab-sheet [contenteditable]').forEach((el) => el.setAttribute('contenteditable', on ? 'false' : 'true'));
+    $$<HTMLButtonElement>('.jab-sheet [data-jab-remove]').forEach((b) => { b.hidden = on; });
+    if (on) picker?.close();
+  };
+
+  const applyHousehold = (detail: Detail) => {
+    if (!detail?.household) return;
+    const next = planKey(detail.sample ?? null, detail.household.id);
+    members = detail.household.members ?? [];
+    if (next !== current) {
+      current = next;
+      // The earlier July page kept family names in localStorage: read it once for this family, then remove it.
+      let legacy: string | null = null;
+      try { legacy = localStorage.getItem(key); } catch { /* blocked */ }
+      const old = fromLegacy(legacy, `${detail.sample ?? 'account'}:${detail.household.id}`, members);
+      if (old) try { localStorage.removeItem(key); } catch { /* blocked */ }
+      state = readScoped(tabStorage.get(key), current, isJulyState) ?? old ?? freshState(members);
+    }
+    applyFamily(state, members);
+    changed();
+  };
+
+  root.clubPlan = {
+    ready: () => Boolean(current),
+    state: () => state,
+    update,
+    replace: (s) => { state = structuredClone(s); changed(); },
+    setPersist: (on) => { persist = on; if (on) save(); },
+    fingerprint: () => julyFingerprint(state, members),
+    members: () => members,
+    view: () => julyView(state, members),
+    setLocked,
+    openEditor: openPicker,
+  };
+  window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
+  const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
+  if (cached) applyHousehold(cached);
+  draw();
 }
 </script>

@@ -55,7 +55,7 @@ const months = [
     "title": "No More Packing for Everyone",
     "responsibility": "Preparing independently",
     "how": "Personal packing lists show each person what to pack, check, and put away.",
-    "url": "/club/july-preview/"
+    "url": "/app/club/july/"
   },
   {
     "month": "August",
