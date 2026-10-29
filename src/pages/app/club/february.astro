@@ -3,6 +3,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import { kits } from '../../../data/club/kits';
 import { getImage } from 'astro:assets';
+import febDirtyLaundry from '../../../../assets/icons/ofc/february/dirty-laundry.png';
 import febIcon0 from '../../../../assets/icons/ofc/february/adding-detergent.png';
 import febIcon1 from '../../../../assets/icons/ofc/february/checking-care-label.png';
 import febIcon2 from '../../../../assets/icons/ofc/february/checking-lint-trap.png';
@@ -20,7 +21,7 @@ import febIcon13 from '../../../../assets/icons/ofc/february/selecting-wash-cycl
 import febIcon14 from '../../../../assets/icons/ofc/february/sorting-clothes.png';
 import febIcon15 from '../../../../assets/icons/ofc/february/transfering-clothes.png';
 import febIcon16 from '../../../../assets/icons/ofc/february/washing-machine.png';
-const februaryIconSources = { 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16 };
+const februaryIconSources = { 'dirty-laundry': febDirtyLaundry, 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16 };
 // Astro builds compressed WebP files; PNG masters remain untouched in assets/.
 const februaryIcons = Object.fromEntries(await Promise.all(
   Object.entries(februaryIconSources).map(async ([name, src]) => {
@@ -165,7 +166,7 @@ if(root){
  const element=(tag:string,cls?:string,value?:string)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(value!==undefined)el.textContent=value;return el};
  const assets:Record<string,string>=JSON.parse(root.dataset.icons||'{}');
  const aliases:Record<string,string>={
- 'hamper':'laundry-hamper','gather':'laundry-basket','sort':'sorting-clothes','put away':'putting-clothes-away',
+ 'hamper':'laundry-hamper','gather':'dirty-laundry','sort':'sorting-clothes','put away':'putting-clothes-away',
  'check pockets':'checking-pockets','load washer':'loading-washer','detergent':'adding-detergent',
  'choose cycle':'selecting-wash-cycle','transfer':'transfering-clothes','dry':'clothes-dryer',
  'fold and put away':'folding-clothes','lint filter':'checking-lint-trap'
