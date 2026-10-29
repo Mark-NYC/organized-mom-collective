@@ -173,29 +173,21 @@ select pg_temp.expect(pg_temp.fails($$select * from public.club_subscriptions$$)
 select pg_temp.expect(pg_temp.fails($$select public.account_delete()$$, 'active_membership'), 'account deletion waits while a paid membership is live');
 reset role;
 
--- Lapsed with the join grant: earned kit stays read-only.
+-- Lapsed with an entitlement: the month she bought stays read-only (full lifecycle: club-membership.sql).
 update public.club_access_grants set revoked_at = now() where user_id = :A;
 update public.club_subscriptions set status = 'canceled', ended_at = now() where user_id = :A;
 select pg_temp.as_user('authenticated', :A);
 select pg_temp.expect(pg_temp.fails($$select public.club_document_get('2026-11-family-ownership')$$, 'not_found'), 'lapsed, nothing earned: closed');
 reset role;
-insert into public.club_kit_entitlements (user_id, kit_id, subscription_id, source)
-values (:A, (select id from public.club_kits where slug = :KIT), '00000000-0000-0000-0000-000000c1ba05', 'join');
+select public.club_admin_entitlement_service(:OWNER, :A, '2026-11-01', 'digital', 'grant', 'access tests');
 select pg_temp.as_user('authenticated', :A);
-select pg_temp.expect(public.club_document_get(:KIT) ->> 'can' = 'read', 'lapsed with the join grant: read-only');
+select pg_temp.expect(public.club_document_get(:KIT) ->> 'can' = 'read', 'lapsed with an entitlement: read-only');
 select pg_temp.expect(pg_temp.fails($$select public.club_document_save('2026-11-family-ownership', 'ownership-chart', '{}', 'warm-neutrals', 1, 2, 2)$$, 'read_only'), 'and can''t edit');
 reset role;
-
--- Mailing eligibility is separate from digital access.
 update public.club_subscriptions set status = 'active', ended_at = null where user_id = :A;
-insert into public.club_mailing_addresses (user_id, name, line1, city, state, postal_code) values (:A, 'Mia A', '1 Main St', 'Town', 'NY', '10001');
-insert into public.club_invoices values ('in_1', '00000000-0000-0000-0000-000000c1ba05', 'open', 'subscription_create', 500, 0, 0, now() - interval '2 days', now() + interval '28 days', null, false, now());
-update public.club_kits set mailer_cutoff_at = now() + interval '5 days' where slug = :KIT;
-select pg_temp.expect(public.club_mailing_eligible('00000000-0000-0000-0000-000000c1ba05', (select id from public.club_kits where slug = :KIT)) is null, 'unpaid invoice: no mailer, even with digital access');
-update public.club_invoices set status = 'paid', amount_paid_cents = 500, paid_at = now();
-select pg_temp.expect(public.club_mailing_eligible('00000000-0000-0000-0000-000000c1ba05', (select id from public.club_kits where slug = :KIT)) = 'in_1', 'paid invoice covering the cutoff: mailer');
-update public.club_invoices set amount_refunded_cents = 500;
-select pg_temp.expect(public.club_mailing_eligible('00000000-0000-0000-0000-000000c1ba05', (select id from public.club_kits where slug = :KIT)) is null, 'refunded invoice: no mailer');
+select pg_temp.as_user('authenticated', :A);
+select pg_temp.expect(public.club_document_get(:KIT) ->> 'can' = 'edit', 'live membership with the entitlement: edit');
+reset role;
 
 -- ---------------------------------------------------------------- accounts integration
 

@@ -16,6 +16,7 @@
     "test:shop": "bash scripts/test-shop.sh",
     "build:functions": "node scripts/build-dashboard-functions.mjs",
     "test:admin-sql": "bash scripts/test-admin-sql.sh",
+    "test:club": "bash scripts/test-club.sh",
     "inventory": "node scripts/page-inventory.mjs",
     "check:article-photos": "node scripts/check-article-photos.mjs"
   },

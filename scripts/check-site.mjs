@@ -84,8 +84,9 @@ for (const file of htmlFiles) {
         continue;
       }
       if (!ref.startsWith('/')) continue;
-      // The Club isn't launched: no page outside it may link in (docs/club/IMPLEMENTATION_PLAN.md).
-      if (/^\/club(\/|\?|#|$)/.test(ref) && !(path === '/club' || path.startsWith('/club/'))) fail(rel, `links to the unlaunched Club page ${ref}`);
+      // The Club's sales page (/club) may be linked from anywhere; its member pages (/club/…) only from the Club
+      // itself, which links in through /club (docs/club/MEMBERSHIP.md).
+      if (/^\/club\/[^?#]/.test(ref) && !(path === '/club' || path.startsWith('/club/'))) fail(rel, `links to the Club member page ${ref}`);
       const target = resolve(ref);
       if (!target) {
         fail(rel, `broken link ${ref}`);

@@ -74,7 +74,7 @@ const result = await build({
   jsxFactory: 'React.createElement',
   jsxFragment: 'React.Fragment',
   define: {
-    'import.meta.env': JSON.stringify({ PUBLIC_CLUB_ENABLED: 'true', PUBLIC_ACCOUNTS_ENABLED: 'false', PUBLIC_SUPABASE_URL: '', PUBLIC_SUPABASE_ANON_KEY: '', DEV: false }),
+    'import.meta.env': JSON.stringify({ PUBLIC_CLUB_ENABLED: 'true', PUBLIC_ACCOUNTS_ENABLED: 'false', PUBLIC_SUPABASE_DISABLED: 'true', DEV: false }),
   },
   plugins: [{
     name: 'umd-globals',

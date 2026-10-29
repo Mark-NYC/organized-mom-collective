@@ -189,7 +189,7 @@ function createStripe(opts) {
       };
       if (method === "POST") headers["Content-Type"] = "application/x-www-form-urlencoded";
       if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
-      const url = method === "GET" && body ? `${base}${path}?${body}` : `${base}${path}`;
+      const url = method !== "POST" && body ? `${base}${path}?${body}` : `${base}${path}`;
       const res = await fetchFn(url, { method, headers, body: method === "POST" ? body : void 0 });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

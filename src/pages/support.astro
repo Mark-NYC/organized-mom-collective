@@ -11,8 +11,9 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { ETSY, FAQS, LIMITS, RESPONSE_TIME, SUPPORT_EMAIL, SUPPORT_TOPICS } from '../data/support';
 import { routes } from '../routes';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../lib/supabase-config';
 
-const formOn = Boolean(import.meta.env.PUBLIC_SUPABASE_URL && import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+const formOn = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 const a = 'underline decoration-warm-rule decoration-1 underline-offset-4 hover:decoration-warm-ink';
 const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Help with my order')}`;
 

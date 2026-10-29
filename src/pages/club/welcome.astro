@@ -1,0 +1,9 @@
+---
+/** /club/welcome: after Stripe Checkout (and from the welcome email): sign in, family, address. Noindex; behind PUBLIC_CLUB_ENABLED. */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import ClubWelcome from '../../components/club/ClubWelcome';
+---
+
+<ClubLayout title="Welcome">
+  <ClubWelcome client:only="react" />
+</ClubLayout>

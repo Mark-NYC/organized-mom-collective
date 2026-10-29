@@ -22,6 +22,9 @@ export const DASHBOARD_FUNCTIONS = [
   { name: 'shop-download', handler: 'createDownloadHandler', module: 'download' },
   { name: 'starter-kit-signup', handler: 'createStarterKitHandler', module: 'starter-kit' },
   { name: 'support-request', handler: 'createSupportHandler', module: 'support' },
+  { name: 'club-billing', handler: 'createClubBillingHandler', module: 'club-billing', club: true },
+  { name: 'club-webhook', handler: 'createClubWebhookHandler', module: 'club-webhook', club: true },
+  { name: 'club-admin', handler: 'createClubAdminHandler', module: 'club-admin', club: true },
 ];
 
 const header = (name) => `// Supabase Edge Function "${name}" — ONE FILE, ready to paste into the dashboard editor.
@@ -36,7 +39,12 @@ const header = (name) => `// Supabase Edge Function "${name}" — ONE FILE, read
 export async function bundle(fn) {
   const result = await build({
     stdin: {
-      contents: `import { depsFromEnv } from './functions/_shared/deps.ts';
+      contents: fn.club
+        ? `import { clubDepsFromEnv } from './functions/_shared/club/deps.ts';
+import { ${fn.handler} } from './functions/_shared/handlers/${fn.module}.ts';
+Deno.serve(${fn.handler}(clubDepsFromEnv((key) => Deno.env.get(key))));
+`
+        : `import { depsFromEnv } from './functions/_shared/deps.ts';
 import { ${fn.handler} } from './functions/_shared/handlers/${fn.module}.ts';
 Deno.serve(${fn.handler}(depsFromEnv((key) => Deno.env.get(key))));
 `,

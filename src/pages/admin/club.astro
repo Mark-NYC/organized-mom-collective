@@ -1,0 +1,9 @@
+---
+/** Organized Family Club: members, entitlements, fulfillment queue, resources, setup (owner admins, noindex). */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import ClubAdmin from '../../components/admin/ClubAdmin';
+---
+
+<AdminLayout title="Family Club" section="club">
+  <ClubAdmin client:only="react" />
+</AdminLayout>

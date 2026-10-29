@@ -1,0 +1,18 @@
+---
+/** /club/join: the $5.90 monthly membership → Stripe Checkout (annual isn’t offered yet). Noindex; behind PUBLIC_CLUB_ENABLED, and the plans show only with PUBLIC_CLUB_CHECKOUT_ENABLED (the server still decides). */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import ClubJoin from '../../components/club/ClubJoin';
+import { clubCheckoutEnabled } from '../../lib/club/membership';
+const open = clubCheckoutEnabled() || import.meta.env.DEV;
+---
+
+<ClubLayout title="Join">
+  <main class="mx-auto w-full max-w-5xl px-4 pb-28 pt-10 sm:px-8">
+    {open ? <ClubJoin client:only="react" /> : (
+      <div class="max-w-xl">
+        <h1 class="font-serif text-[2rem] leading-tight">Enrollment isn’t open yet.</h1>
+        <p class="mt-3 text-warm-soft"><a class="underline underline-offset-4" href="/club">About the Organized Family Club</a> · <a class="underline underline-offset-4" href="/club/login">Member log in</a></p>
+      </div>
+    )}
+  </main>
+</ClubLayout>

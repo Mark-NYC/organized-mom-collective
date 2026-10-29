@@ -1,6 +1,7 @@
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 /** Printable download signup (chore chart, IF-03's responsibility chart). No emails or chart contents enter analytics/storage. */
-const url = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const url = SUPABASE_URL;
+const key = SUPABASE_ANON_KEY;
 export const toolEmailGateEnabled = import.meta.env.PUBLIC_TOOL_EMAIL_GATE_ENABLED === 'true' && Boolean(url && key);
 /** Its own switch: the database accepts this tool id only after 20261021000000_tool_email_responsibility_chart.sql. */
 export const responsibilityChartGateEnabled = toolEmailGateEnabled && import.meta.env.PUBLIC_RESPONSIBILITY_CHART_GATE_ENABLED === 'true';
