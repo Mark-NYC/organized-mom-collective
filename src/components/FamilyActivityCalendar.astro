@@ -10,6 +10,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   <div class:list={["family-calendar-container", embedded && "fc-embedded"]} data-club-calendar={embedded ? "true" : undefined}>
     <div class="fc-actions">
       <button type="button" class="fc-download-btn" data-fc-download>Download PNG</button>
+      <button type="button" class="fc-clear-btn" data-fc-jump>+ Add activities</button>
       <button type="button" class="fc-clear-btn" data-fc-reset>Reset calendar</button>
     </div>
 
@@ -52,7 +53,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
         </label>
       </div>
 
-      <h3 class="fc-subtitle">Family activities <small>(one per person per day)</small></h3>
+      <h3 class="fc-subtitle" id={embedded ? "fc-activities-club" : "fc-activities"} data-fc-activities tabindex="-1">Family activities <small>(one per person per day)</small></h3>
       <div class="fc-quick">
         {
           quickActivities.map((name, i) => (
@@ -108,13 +109,14 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
           }
         </div>
 
-        <p class="fc-prompt"><strong>Who?</strong> <span data-fc-who-count>0 people selected</span></p>
+        <p class="fc-prompt"><strong>Who? <button type="button" class="fc-all" data-fc-all>Everyone</button></strong> <span data-fc-who-count>0 people selected</span></p>
         <div class="fc-who-btns" data-fc-who></div>
 
         <div class="fc-dialog-actions">
           <button type="button" class="fc-btn" data-fc-dialog-cancel>Cancel</button>
-          <button type="submit" class="fc-btn fc-btn-primary">Add activity</button>
+          <button type="submit" class="fc-btn fc-btn-primary" data-fc-dialog-add disabled>Add activity</button>
         </div>
+        <p class="fc-dialog-hint" data-fc-dialog-hint>Pick at least one day and one person.</p>
       </form>
     </dialog>
   </div>
@@ -216,6 +218,10 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     font-weight: 600;
     margin: 4px 0 10px;
     color: #2f3e3e;
+    scroll-margin-top: 24px;
+  }
+  .fc-subtitle:focus {
+    outline: none;
   }
   .fc-subtitle small {
     font-weight: 400;
@@ -553,6 +559,12 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
 
   /* Quick-add dialog. */
   .fc-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
     width: min(420px, calc(100% - 32px));
     padding: 22px 20px;
     border: none;
@@ -586,8 +598,36 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
   .fc-day-btns {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 4px;
+  }
+  .fc-day-btns .fc-toggle {
+    padding: 9px 0;
+  }
+  .fc-all {
+    margin-left: 6px;
+    padding: 2px 4px;
+    border: 0;
+    background: none;
+    color: #2f7d67;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .fc-dialog-actions .fc-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .fc-dialog-hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    text-align: center;
+    color: #6b7280;
+  }
+  .fc-dialog-hint[hidden] {
+    display: none;
   }
   .fc-who-btns {
     display: grid;
@@ -835,14 +875,21 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
       list.innerHTML = '<div class="fc-empty">No activities yet</div>';
       return;
     }
-    list.innerHTML = [...state.activities]
-      .sort((a, b) => a.member - b.member)
-      .map(
-        (a) => `<div class="fc-item">
-          <div><strong>${esc(a.name)}</strong> · ${esc(memberName(a.member))}<br><small>${esc(describe(a))}</small></div>
-          <button type="button" data-fc-delete="${a.id}" aria-label="Remove ${esc(a.name)} for ${esc(memberName(a.member))}">✕</button>
-        </div>`,
-      )
+    // One line per activity and schedule, with everyone it's for: "Family Dinner · Mom, Dad, Sofia".
+    const groups = new Map<string, Activity[]>();
+    for (const a of state.activities) {
+      const key = `${a.name}\u0000${describe(a)}`;
+      groups.set(key, [...(groups.get(key) ?? []), a]);
+    }
+    list.innerHTML = [...groups.values()]
+      .sort((x, y) => Math.min(...x.map((a) => a.member)) - Math.min(...y.map((a) => a.member)))
+      .map((g) => {
+        const who = [...g].sort((a, b) => a.member - b.member).map((a) => memberName(a.member) || `Row ${a.member + 1}`).join(', ');
+        return `<div class="fc-item">
+          <div><strong>${esc(g[0].name)}</strong> · ${esc(who)}<br><small>${esc(describe(g[0]))}</small></div>
+          <button type="button" data-fc-delete="${g.map((a) => a.id).join(' ')}" aria-label="Remove ${esc(g[0].name)} for ${esc(who)}">✕</button>
+        </div>`;
+      })
       .join('');
   }
 
@@ -858,7 +905,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
   function renderMemberOptions() {
     $('[data-fc-member-select]').innerHTML =
-      '<option value="">Who is it for?</option>' + DEFAULT_MEMBERS.map((_, i) => `<option value="${i}">${esc(memberName(i))}</option>`).join('');
+      '<option value="">Who is it for?</option>' + DEFAULT_MEMBERS.map((_, i) => (memberName(i) ? `<option value="${i}">${esc(memberName(i))}</option>` : '')).join('');
   }
 
   let statusTimer: number | undefined;
@@ -939,6 +986,13 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     render();
   });
 
+  // Jump from the top buttons to the activity pickers (they sit below the month).
+  $('[data-fc-jump]').addEventListener('click', () => {
+    const target = $('[data-fc-activities]');
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    target.focus({ preventScroll: true });
+  });
+
   // Quick add: pick days and people in a dialog.
   const dialog = $<HTMLDialogElement>('[data-fc-dialog]');
   let quickName = '';
@@ -949,15 +1003,21 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     const who = pressed('[data-fc-person]').length;
     $('[data-fc-days-count]').textContent = `${days} day${days === 1 ? '' : 's'} selected`;
     $('[data-fc-who-count]').textContent = `${who} ${who === 1 ? 'person' : 'people'} selected`;
+    const ready = days > 0 && who > 0;
+    $<HTMLButtonElement>('[data-fc-dialog-add]').disabled = !ready;
+    $('[data-fc-dialog-hint]').hidden = ready;
   }
   document.querySelectorAll<HTMLButtonElement>('[data-fc-quick]').forEach((btn) =>
     btn.addEventListener('click', () => {
       quickName = btn.dataset.fcQuick!;
       $('[data-fc-dialog-title]').textContent = quickName;
       dialog.querySelectorAll('[data-fc-day]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-      $('[data-fc-who]').innerHTML = DEFAULT_MEMBERS.map(
-        (_, i) => `<button type="button" class="fc-toggle" data-fc-person="${i}" aria-pressed="false"
-          style="background:${MEMBER_COLORS[i]};border-color:${MEMBER_COLORS[i]}">${esc(memberName(i))}</button>`,
+      // Only rows with a name: a family of three gets three buttons, not two blank ones.
+      $('[data-fc-who]').innerHTML = DEFAULT_MEMBERS.map((_, i) =>
+        memberName(i)
+          ? `<button type="button" class="fc-toggle" data-fc-person="${i}" aria-pressed="false"
+          style="background:${MEMBER_COLORS[i]};border-color:${MEMBER_COLORS[i]}">${esc(memberName(i))}</button>`
+          : '',
       ).join('');
       updateCounts();
       dialog.showModal();
@@ -967,6 +1027,12 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     const toggle = (e.target as HTMLElement).closest<HTMLButtonElement>('.fc-toggle');
     if (toggle) {
       toggle.setAttribute('aria-pressed', String(toggle.getAttribute('aria-pressed') !== 'true'));
+      updateCounts();
+    }
+    if ((e.target as HTMLElement).closest('[data-fc-all]')) {
+      const people = Array.from(dialog.querySelectorAll<HTMLButtonElement>('[data-fc-person]'));
+      const all = people.every((b) => b.getAttribute('aria-pressed') === 'true');
+      people.forEach((b) => b.setAttribute('aria-pressed', String(!all)));
       updateCounts();
     }
     if ((e.target as HTMLElement).closest('[data-fc-dialog-cancel]')) dialog.close();
@@ -990,7 +1056,8 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   $('[data-fc-autofill]').addEventListener('click', () => {
     for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-fc-quick]')) {
       const days = shuffle([0, 1, 2, 3, 4, 5, 6]).slice(0, 1 + Math.floor(Math.random() * 3));
-      const members = shuffle([0, 1, 2, 3, 4]).slice(0, 1 + Math.floor(Math.random() * 3));
+      const named = [0, 1, 2, 3, 4].filter((i) => memberName(i));
+      const members = shuffle(named).slice(0, 1 + Math.floor(Math.random() * Math.min(3, named.length)));
       addWeekly(btn.dataset.fcQuick!, members, days);
     }
     render();
@@ -1003,7 +1070,10 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   showForm.addEventListener('click', () => {
     form.hidden = false;
     showForm.hidden = true;
-    (form.elements.namedItem('date') as HTMLInputElement).value = ymd(new Date());
+    // Start on a date in the month being shown, so the new activity appears on this sheet.
+    const now = new Date();
+    const shown = now.getFullYear() === month.getFullYear() && now.getMonth() === month.getMonth();
+    (form.elements.namedItem('date') as HTMLInputElement).value = ymd(shown ? now : month);
     (form.elements.namedItem('name') as HTMLInputElement).focus();
   });
   function closeForm() {
@@ -1035,7 +1105,8 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   $('[data-fc-list]').addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-fc-delete]');
     if (!btn) return;
-    state.activities = state.activities.filter((a) => a.id !== btn.dataset.fcDelete);
+    const ids = new Set((btn.dataset.fcDelete ?? '').split(' '));
+    state.activities = state.activities.filter((a) => !ids.has(a.id));
     render();
   });
 
