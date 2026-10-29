@@ -35,6 +35,7 @@ interface Sub {
   metadata: Record<string, string>;
   items: { data: { current_period_start: number; current_period_end: number; price: { id: string; recurring: { interval: string } } }[] };
   latest_invoice: string | null;
+  default_payment_method?: string | null;
 }
 
 interface Inv {
@@ -67,6 +68,9 @@ export class FakeClubStripe {
   disputes = new Map<string, { id: string; payment_intent: string }>();
   refunds: { id: string; payment_intent: string; amount: number; reason?: string }[] = [];
   portals: string[] = [];
+  paymentMethods = new Map<string, { id: string; card: { fingerprint: string } }>();
+  /** Events Stripe sends on its own after an API call (a trial ended early): delivered by the test. */
+  outbox: Ev[] = [];
   portalConfigs = new Map<string, { id: string; features: Record<string, any> }>();
   endpoints: { id: string; url: string; secret: string; events: string[] }[] = [];
   requests: { method: string; path: string }[] = [];
@@ -175,9 +179,24 @@ export class FakeClubStripe {
         s.status = 'canceled';
         s.canceled_at = s.ended_at = this.clock;
       }
+      if (method === 'POST' && p.trial_end !== undefined && s.status === 'trialing') {
+        const item = s.items.data[0];
+        if (p.trial_end === 'now') {
+          // The trial ends at once: a full period starts and is invoiced now.
+          item.current_period_start = this.clock;
+          item.current_period_end = this.clock + 30 * DAY;
+          s.status = 'active';
+          const inv = this.bill(s, 'subscription_update', true);
+          this.outbox.push(this.evt('customer.subscription.updated', s.id), this.evt('invoice.paid', inv.id));
+        } else {
+          item.current_period_end = Number(p.trial_end);
+          this.outbox.push(this.evt('customer.subscription.updated', s.id));
+        }
+      }
       return s;
     }
     if (kind === 'invoices') return this.invoices.get(id) ?? this.err(404, 'No such invoice');
+    if (kind === 'payment_methods') return this.paymentMethods.get(id) ?? this.err(404, 'No such payment_method');
     if (kind === 'invoice_payments') {
       const inv = q.get('invoice');
       const pi = q.get('payment[payment_intent]');
@@ -265,7 +284,7 @@ export class FakeClubStripe {
    * one-time items now; the recurring line is 0 for the trial period (Stripe: one-time prices with a trial are paid
    * upfront, recurring billing begins when the trial ends).
    */
-  private completeTrialCheckout(s: Record<string, any>, opts: { email: string; address?: Record<string, string> | null }): Ev[] {
+  private completeTrialCheckout(s: Record<string, any>, opts: { email: string; address?: Record<string, string> | null; card?: string }): Ev[] {
     const price = this.priceOf(s.price);
     const sub: Sub = {
       id: `sub_${rand()}`, customer: s.customer, status: 'trialing', livemode: false,
@@ -274,6 +293,10 @@ export class FakeClubStripe {
       items: { data: [{ current_period_start: this.clock, current_period_end: s.trial_end, price: { id: price.id, recurring: { interval: price.interval! } } }] },
       latest_invoice: null,
     };
+    // Checkout saves her card on the subscription (a trial charges nothing now).
+    const pm = { id: `pm_${rand()}`, card: { fingerprint: opts.card ?? `fp_${rand()}` } };
+    this.paymentMethods.set(pm.id, pm);
+    sub.default_payment_method = pm.id;
     this.subs.set(sub.id, sub);
     const ones = (s.extra as string[]).map((id) => this.priceOf(id));
     const total = ones.reduce((t, x) => t + x.unit_amount, 0);
@@ -289,9 +312,12 @@ export class FakeClubStripe {
       payment_intent: `pi_${rand()}`,
     };
     this.invoices.set(inv.id, inv);
-    const charge = `ch_${rand()}`;
-    this.intents.set(inv.payment_intent, { id: inv.payment_intent, invoice: inv.id, status: 'succeeded', latest_charge: charge, last_payment_error: null });
-    this.charges.set(charge, { id: charge, payment_intent: inv.payment_intent, amount: total, amount_refunded: 0 });
+    // A 0 invoice has no payment.
+    if (total > 0) {
+      const charge = `ch_${rand()}`;
+      this.intents.set(inv.payment_intent, { id: inv.payment_intent, invoice: inv.id, status: 'succeeded', latest_charge: charge, last_payment_error: null });
+      this.charges.set(charge, { id: charge, payment_intent: inv.payment_intent, amount: total, amount_refunded: 0 });
+    }
     sub.latest_invoice = inv.id;
     const cust = this.customers.get(s.customer)!;
     if (!cust.email) cust.email = opts.email;
@@ -308,7 +334,7 @@ export class FakeClubStripe {
   }
 
   /** She pays on the Checkout page. Returns the events in the order Stripe tends to send them. */
-  completeCheckout(sessionId: string, opts: { email: string; address?: Record<string, string> | null; declined?: boolean }): Ev[] {
+  completeCheckout(sessionId: string, opts: { email: string; address?: Record<string, string> | null; declined?: boolean; card?: string }): Ev[] {
     const s = this.sessions.get(sessionId)! as Record<string, any>;
     if (s.trial_end && !opts.declined) return this.completeTrialCheckout(s, opts);
     const price = this.priceOf(s.price);
@@ -376,6 +402,14 @@ export class FakeClubStripe {
     s.cancel_at_period_end = true;
     s.canceled_at = this.clock;
     return [this.evt('customer.subscription.updated', subId)];
+  }
+
+  /** Cancelled at once (an admin, or Stripe ending a trial): it ends now, not at period end. */
+  cancelNow(subId: string): Ev[] {
+    const s = this.subs.get(subId)!;
+    s.status = 'canceled';
+    s.canceled_at = s.ended_at = this.clock;
+    return [this.evt('customer.subscription.deleted', subId)];
   }
 
   endPeriod(subId: string): Ev[] {

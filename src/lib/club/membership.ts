@@ -7,7 +7,7 @@
 import { accountRpc, getSession } from '../account';
 import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
-import { CLUB_PROGRAM_START } from '../../data/club/config';
+import { CLUB_OFFER, CLUB_OFFER_LINE, CLUB_PROGRAM_START, clubFoundingOpen, rollingFirstCharge } from '../../data/club/config';
 
 const URL_ = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
@@ -28,17 +28,35 @@ export const PLANS: Record<OfferedPlan, { price: string; per: string; summary: s
   },
 };
 
-/** The same plan for a founding member (before the program starts): what she pays today and from when. */
-export const FOUNDING_PLAN: (typeof PLANS)['monthly'] = {
-  price: '$5.90',
-  per: 'today',
-  summary: `Your personalized Family Vision print, mailed right away. Monthly plans begin in ${CLUB_PROGRAM_START.label}.`,
-  points: [
-    '$5.90 today: your Family Vision welcome print, personalized and mailed',
-    `Then $5.90 a month from ${CLUB_PROGRAM_START.firstDay}: each month’s plan, prepared for your family and mailed`,
-    `Cancel any time; cancel before ${CLUB_PROGRAM_START.firstDay} and you aren’t charged again`,
-  ],
-};
+/**
+ * The monthly plan as a new household sees it: Your First Month FREE, nothing charged today, and the exact first
+ * charge date (a founding member: February 1, 2027; later: one month after she joins). club-billing decides.
+ */
+export function introPlan(now = new Date()): (typeof PLANS)['monthly'] & { label: string } {
+  const founding = clubFoundingOpen(now.getTime());
+  const first = founding ? CLUB_PROGRAM_START.foundingFirstCharge : rollingFirstCharge(now);
+  return {
+    label: CLUB_OFFER,
+    price: '$0',
+    per: 'today',
+    summary: CLUB_OFFER_LINE,
+    points: founding
+      ? [
+          'Now: your personalized Family Vision welcome print, mailed free',
+          `${CLUB_PROGRAM_START.label}: your first monthly plan, printed and mailed free`,
+          `First charge: $5.90 on ${first}, then $5.90/month`,
+          `Cancel before ${first} and you pay nothing`,
+          'One free first month per household',
+        ]
+      : [
+          'This month’s personalized plan, printed and mailed free',
+          'Your personalized Family Vision welcome print, free',
+          `First charge: $5.90 on ${first}, then $5.90/month`,
+          `Cancel before ${first} and you pay nothing`,
+          'One free first month per household',
+        ],
+  };
+}
 
 async function billing<T>(action: string, body: Record<string, unknown> = {}, signedIn = true): Promise<T> {
   const s = signedIn ? await getSession() : null;
@@ -93,6 +111,8 @@ export type MonthState = 'available' | 'preparing' | 'welcome_vision';
 
 export interface MembershipMonth {
   month: string;
+  /** Her free first month (Your First Month FREE). */
+  free?: boolean;
   slug: string | null;
   title: string | null;
   published: boolean;
@@ -137,6 +157,8 @@ export interface Membership {
   next: { month: string; payment_on: string | null; slug: string | null; title: string | null; regular_cutoff_at: string | null } | null;
   /** Only the months she has bought. */
   months: MembershipMonth[];
+  /** Her free first month and, while it's still free, when the first charge is. */
+  intro?: { month: string; trial_ends: string | null } | null;
 }
 
 export const loadMembership = () => accountRpc<Membership>('club_me');
@@ -245,7 +267,8 @@ export function bridgeResourceState(opts: {
 /** "November 2026" */
 export const monthName = (iso: string) =>
   new Date(`${iso.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-export const shortDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+/** Billing and mailing dates are New York days (a February 1 midnight charge is February 1 everywhere). */
+export const shortDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
 
 /** The mailing line under a month: what's happening to her printed copy. */
 export function mailingText(m: MembershipMonth['mailing']): string | null {

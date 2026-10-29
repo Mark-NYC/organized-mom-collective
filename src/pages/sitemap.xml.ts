@@ -6,7 +6,7 @@
 import type { APIRoute } from 'astro';
 import { getArticles, isoDate } from '../lib/articles';
 import { pillars } from '../data/pillars';
-import { routes } from '../routes';
+import { privacyPublished, routes } from '../routes';
 import { weeklyReset } from '../data/weekly-reset';
 import { mug } from '../data/mug';
 
@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.companion },
     { path: routes.support },
     { path: routes.returns },
-    { path: routes.privacy },
+    ...(privacyPublished() ? [{ path: routes.privacy }] : []),
     { path: routes.planner },
     { path: routes.pantry },
     { path: routes.tryCalendar },

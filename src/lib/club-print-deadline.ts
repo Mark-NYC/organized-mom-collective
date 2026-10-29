@@ -25,15 +25,28 @@ export function nextClubPrintDeadline(now = new Date()) {
  const current = cutoff(year, month);
  return now < current ? current : cutoff(year, month + 1);
 }
-export function clubPrintMessages(now = new Date()) {
- const end = nextClubPrintDeadline(now);
+/** The monthly program's first print run, January 2027, closes on December 13, 2026; nothing prints monthly before it. */
+const FIRST_PRINT_RUN_DEADLINE = cutoff(2026, 11);
+/** The next deadline that prints a monthly plan: never one before the program's first print run. */
+export function nextProgramPrintDeadline(now = new Date()) {
+ const next = nextClubPrintDeadline(now);
+ return next < FIRST_PRINT_RUN_DEADLINE ? FIRST_PRINT_RUN_DEADLINE : next;
+}
+/** The month a deadline prints: the one after the month its second Sunday falls in. */
+function printMonth(lastDay: Date) {
+ const { year, month } = localDate(lastDay);
+ return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long' }).format(new Date(Date.UTC(year, month + 1, 15)));
+}
+/** Each deadline closes the list for the month after it ("January print deadline: Dec 13"). offer: enrollment is open. */
+export function clubPrintMessages(now = new Date(), offer = false) {
+ const end = nextProgramPrintDeadline(now);
  const lastDay = new Date(end.getTime() - 1);
  const date = new Intl.DateTimeFormat('en-US', { timeZone: CLUB_TIME_ZONE, month: 'short', day: 'numeric' }).format(lastDay);
  const minutes = Math.max(1, Math.ceil((end.getTime() - now.getTime()) / 60000));
  const days = Math.floor(minutes / 1440), hours = Math.floor(minutes % 1440 / 60);
  const remaining = days ? `${days}d ${hours}h left` : hours ? `${hours}h ${minutes % 60}m left` : `${minutes}m left`;
  return [
-  `Next Club print deadline: ${date} · ${remaining} · Closes 11:59 p.m. ET →`,
-  'Personalized printed tools, mailed monthly · $5.90/month · Explore the Club →',
+  `${printMonth(lastDay)} print deadline: ${date} · ${remaining} · Closes 11:59 p.m. ET →`,
+  offer ? 'Your First Month FREE · Then $5.90/month · Explore the Club →' : 'Personalized printed tools, mailed monthly · $5.90/month · Explore the Club →',
  ];
 }

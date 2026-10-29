@@ -1,13 +1,13 @@
 /**
- * /club/join: the monthly membership ($5.90; annual isn't offered yet): give an email (or use her signed-in one), go to Stripe's secure Checkout.
+ * /club/join: Your First Month FREE, then $5.90/month (annual isn't offered): give an email (or use her signed-in one), go to Stripe's secure Checkout.
  * Her account is made after payment and opens only once she signs in with that email's code. The server decides
  * whether checkout is open (club_settings.checkout_mode) and refuses a second membership.
  */
 import { useEffect, useState } from 'react';
 import { getSession, type AccountSession } from '../../lib/account';
-import { billingErrorText, FOUNDING_PLAN, PLANS, startCheckout, type OfferedPlan } from '../../lib/club/membership';
+import { billingErrorText, introPlan, PLANS, startCheckout, type OfferedPlan } from '../../lib/club/membership';
 import { routes } from '../../routes';
-import { CLUB_NAME, clubFoundingOpen } from '../../data/club/config';
+import { CLUB_NAME } from '../../data/club/config';
 
 export default function ClubJoin() {
   const [session, setSession] = useState<AccountSession | null | undefined>(undefined);
@@ -16,8 +16,8 @@ export default function ClubJoin() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const canceled = typeof location !== 'undefined' && new URLSearchParams(location.search).has('canceled');
-  // Before the 2027 program starts, the same plan reads as what she pays today and from when (club-billing decides).
-  const shown = (p: OfferedPlan) => (p === 'monthly' && clubFoundingOpen() ? FOUNDING_PLAN : PLANS[p]);
+  // Your First Month FREE: what she pays today (nothing) and the exact first charge date (club-billing decides).
+  const shown = (_p: OfferedPlan) => introPlan();
 
   useEffect(() => {
     getSession().then(setSession, () => setSession(null));
@@ -51,7 +51,7 @@ export default function ClubJoin() {
             <label key={p} className={`block cursor-pointer bg-white p-6 ring-1 ${plan === p ? 'ring-2 ring-warm-ink' : 'ring-warm-rule'}`}>
               <span className="flex items-center gap-3">
                 <input type="radio" name="plan" value={p} checked={plan === p} onChange={() => setPlan(p)} className="h-5 w-5" />
-                <span className="label text-warm-soft">{p === 'monthly' ? (clubFoundingOpen() ? 'Founding member' : 'Monthly') : 'Annual'}</span>
+                <span className="label text-warm-soft">{shown(p).label}</span>
               </span>
               <span className="mt-3 block font-serif text-[2.4rem] leading-none text-warm-ink">{shown(p).price} <span className="font-sans text-[0.95rem] text-warm-soft">{shown(p).per}</span></span>
               <span className="mt-3 block text-[0.95rem] leading-relaxed text-warm-ink">{shown(p).summary}</span>
@@ -76,7 +76,7 @@ export default function ClubJoin() {
           </p>
         )}
         <button type="submit" disabled={busy || session === undefined} className="btn-primary mt-7 w-full sm:w-auto">{busy ? 'Opening secure checkout…' : 'Continue to secure checkout'}</button>
-        <p className="mt-3 max-w-xl text-[0.85rem] leading-relaxed text-warm-soft">Payment is handled by Stripe. You’ll enter your mailing address there. Cancel any time from your account; resources you’ve received stay yours.</p>
+        <p className="mt-3 max-w-xl text-[0.85rem] leading-relaxed text-warm-soft">Stripe saves your card securely; nothing is charged today. You’ll enter your mailing address there. Cancel any time from your account; resources you’ve received stay yours.</p>
       </form>
       <p className="mt-10 text-[0.95rem]">Already a member? <a className="font-semibold underline underline-offset-4" href={routes.clubLogin}>Log in</a></p>
     </div>

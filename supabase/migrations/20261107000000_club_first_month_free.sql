@@ -1,39 +1,89 @@
--- Organized Family Club: founding enrollment before the 2027 program. Plan: docs/club/MEMBERSHIP.md → Founding members.
--- Tests: tests/club-billing-e2e.test.ts (founding scenarios), supabase/tests/club-membership.sql.
+-- Organized Family Club: Your First Month FREE, and joining before the 2027 program. Plan: docs/club/MEMBERSHIP.md
+-- → First month free. Tests: tests/club-billing-e2e.test.ts (first-month-free scenarios), supabase/tests/club-membership.sql.
 --
--- The monthly resources are the 2027 program (January–December 2027). Members can join before it starts:
---   * club_settings.program_start_month (2027-01-01): no paid period before it buys a month or a mailing, so a 2026
---     payment can never be handed a 2027 resource. Null = no program start (every paid month is granted).
---   * club-billing, before that month: checkout charges the one-time Family Vision welcome print ($5.90) now and
---     starts the $5.90/month subscription in a trial that ends at midnight New York on the program's first day.
---     The first membership invoice (January 1, 2027) buys January 2027.
---   * The welcome print and membership start with her first paid invoice even when it buys no month.
---   * January's mailing list stays open through January 1 (launch exception), so founding members' January 1
---     payments land in January's regular batch.
+-- The offer: a new household's first monthly resource is free, printed and mailed; then $5.90/month.
+--   * Checkout collects a card and charges nothing: the subscription is a Stripe trial until the first charge.
+--   * Joining before the program (club_settings.program_start_month, 2027-01-01, "founding"): the free month is
+--     January 2027 and the first charge is February 1, 2027 (midnight New York). Joining once it runs ("rolling"):
+--     the free month is the month she joins and the first charge is one month after she joins.
+--   * club_intro_grant (club-webhook, at checkout.session.completed) grants the free month like a paid one, a
+--     digital and a physical entitlement (source 'intro') and its monthly mailing in that month's regular or
+--     catch-up batch by the second-Sunday cutoff, plus the welcome print, at once. The first paid invoice continues
+--     with the next month (the intro rows end where the trial ends).
+--   * One free month per household: refused when the account, its email, its mailing address or its card already
+--     had one, or the account had a subscription before. Checkout then bills normally (before the program: from
+--     its first day, so nothing is charged for a month without a plan).
+--   * A membership that ends early loses its unmailed future free months (club_intro_end); one cancelled at period
+--     end keeps the free month it runs through. A paid period before the program buys nothing (backstop).
+--   * The monthly print cutoff stays the rule (second Sunday, 23:59 New York): the launch exceptions are cleared.
 --   * Adds the November 2027 kit (draft), which the 2027 program was missing.
 
 begin;
 
 alter table public.club_settings
-  add column program_start_month date check (extract(day from program_start_month) = 1);
+  add column program_start_month date check (extract(day from program_start_month) = 1),
+  -- The first-month-free offer for new households (off: checkout bills from the first day, or the program's).
+  add column intro_offer boolean not null default true;
 
 -- pg-safeupdate: one-row table, so `where id`.
 update public.club_settings
-   set program_start_month = '2027-01-01',
-       launch_exception_month = '2027-01-01',
-       launch_exception_cutoff_at = '2027-01-02 04:59:59+00',
-       updated_at = now()
+   set program_start_month = '2027-01-01', launch_exception_month = null, launch_exception_cutoff_at = null, updated_at = now()
  where id;
+
+alter table public.club_entitlements drop constraint club_entitlements_source_check;
+alter table public.club_entitlements add constraint club_entitlements_source_check check (source in ('invoice', 'admin', 'intro'));
+alter table public.club_entitlements drop constraint club_entitlements_revoked_reason_check;
+alter table public.club_entitlements add constraint club_entitlements_revoked_reason_check check (revoked_reason in ('refunded', 'disputed', 'admin', 'ended'));
+
+-- Who had a free first month. Kept (without the account) after an account is deleted, so the offer stays one per
+-- household: the email and address only as one-way hashes, the card as Stripe's fingerprint (never the number).
+create table public.club_intro_claims (
+  id uuid primary key default gen_random_uuid(),
+  subscription_id uuid not null unique references public.club_subscriptions (id) on delete cascade,
+  user_id uuid references auth.users (id) on delete set null,
+  household_id uuid references public.club_households (id) on delete set null,
+  email_hash text not null,
+  address_hash text,
+  card_fingerprint text,
+  intro_month date not null check (extract(day from intro_month) = 1),
+  claimed_at timestamptz not null default now(),
+  revoked_at timestamptz
+);
+create index club_intro_claims_email on public.club_intro_claims (email_hash);
+create index club_intro_claims_address on public.club_intro_claims (address_hash);
+create index club_intro_claims_card on public.club_intro_claims (card_fingerprint);
+alter table public.club_intro_claims enable row level security;
+revoke all on public.club_intro_claims from public, anon, authenticated;
+grant all on public.club_intro_claims to service_role;
+
+create function public.club_email_hash(p text) returns text
+language sql immutable set search_path = '' as $$ select md5('club-email:' || lower(btrim(p))) $$;
+create function public.club_address_hash(p_line1 text, p_postal text) returns text
+language sql immutable set search_path = '' as $$
+  select md5('club-address:' || lower(regexp_replace(coalesce(p_line1, ''), '[^A-Za-z0-9]', '', 'g')) || ':' || left(coalesce(p_postal, ''), 5))
+$$;
 
 insert into public.club_kits (slug, month, title, status, release_at, mailer_cutoff_at)
 values ('2027-11-family-ownership', '2027-11-01', 'Our Family, Our Team', 'draft', '2027-11-01 04:00:00+00', public.club_cutoff_at('2027-11-01'))
 on conflict (slug) do nothing;
 
--- Kits' printed-list deadlines follow the rule (as club_admin_settings does on save); orders use the exception.
+-- Kits' printed-list deadlines follow the rule (as club_admin_settings does on save).
 update public.club_kits set mailer_cutoff_at = public.club_cutoff_at(month) where mailer_cutoff_at is distinct from public.club_cutoff_at(month);
+
+-- ---------------------------------------------------------------- checkout: the free month, or when billing starts
 
 create or replace function public.club_checkout_state(p_user uuid, p_email text) returns jsonb
 language sql stable security definer set search_path = '' as $$
+  with who as (select coalesce(p_user, public.club_user_by_email(p_email)) as uid, lower(btrim(p_email)) as email),
+  p as (
+    select st.*, st.program_start_month > public.club_month_of(now()) as founding,
+      st.intro_offer
+      -- New to the Club: never subscribed (this account or this email's Stripe customer), no free month claimed.
+      and not exists (select 1 from public.club_subscriptions s, who where s.user_id = who.uid and s.status not in ('incomplete', 'incomplete_expired'))
+      and not exists (select 1 from public.club_subscriptions s join public.club_customers c on c.stripe_customer_id = s.stripe_customer_id, who
+                       where lower(c.email) = who.email and s.status not in ('incomplete', 'incomplete_expired'))
+      and not exists (select 1 from public.club_intro_claims i, who where i.user_id = who.uid or i.email_hash = public.club_email_hash(who.email)) as intro
+    from public.club_settings st)
   select jsonb_build_object(
     'live_subscription', exists (select 1 from public.club_subscriptions s
        where s.user_id = coalesce(p_user, public.club_user_by_email(p_email))
@@ -41,12 +91,141 @@ language sql stable security definer set search_path = '' as $$
     'customer', coalesce(
       (select c.stripe_customer_id from public.club_customers c where c.user_id = coalesce(p_user, public.club_user_by_email(p_email)) limit 1),
       (select c.stripe_customer_id from public.club_customers c where lower(c.email) = lower(btrim(p_email)) order by c.created_at limit 1)),
-    'settings', (select jsonb_build_object('checkout_mode', s.checkout_mode, 'portal_configuration_id', s.portal_configuration_id,
-                   -- Before the program starts: when membership billing begins (midnight New York on its first day).
-                   'billing_starts_at', case when s.program_start_month > public.club_month_of(now())
-                                             then s.program_start_month::timestamp at time zone 'America/New_York' end)
-                   from public.club_settings s));
+    'settings', jsonb_build_object('checkout_mode', p.checkout_mode, 'portal_configuration_id', p.portal_configuration_id),
+    -- Her free month (null: no free month for her).
+    'intro_month', case when p.intro then case when p.founding then p.program_start_month else public.club_month_of(now()) end end,
+    -- When the first charge happens (null: today).
+    'trial_end', case
+      when p.intro and p.founding then (p.program_start_month + interval '1 month')::timestamp at time zone 'America/New_York'
+      when p.intro then now() + interval '1 month'
+      when p.founding then p.program_start_month::timestamp at time zone 'America/New_York' end)
+  from p;
 $$;
+
+-- ---------------------------------------------------------------- the free month
+
+-- Grants her free month and the welcome print (club-webhook, once her trial subscription exists). Replays return
+-- the first answer. Refused (granted false) when the household already had a free month; fallback_trial_end then
+-- says when billing should start instead (the program's first day before it starts, else null = now).
+create function public.club_intro_grant(p_sub text, p_card text default null) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  sub public.club_subscriptions%rowtype;
+  hh public.club_households%rowtype;
+  st public.club_settings%rowtype;
+  claim public.club_intro_claims%rowtype;
+  m date;
+  v_email text;
+  v_addr text;
+  by_ text;
+  ent uuid;
+  welcome uuid;
+begin
+  select * into st from public.club_settings;
+  select * into sub from public.club_subscriptions where stripe_subscription_id = p_sub;
+  if not found then raise exception 'unknown_subscription'; end if;
+  select * into claim from public.club_intro_claims where subscription_id = sub.id;
+  if found then
+    return jsonb_build_object('granted', claim.revoked_at is null, 'month', claim.intro_month, 'first_charge_at', sub.current_period_end, 'replay', true);
+  end if;
+  if sub.status <> 'trialing' or sub.user_id is null or 'duplicate' = any (sub.flags) or sub.access_revoked_at is not null then
+    return jsonb_build_object('granted', false, 'reason', 'not_trialing');
+  end if;
+  select * into hh from public.club_households where owner_user_id = sub.user_id for update;
+  if not found then raise exception 'no_household'; end if;
+  m := case when st.program_start_month > public.club_month_of(sub.started_at) then st.program_start_month else public.club_month_of(sub.started_at) end;
+  select public.club_email_hash(u.email) into v_email from auth.users u where u.id = sub.user_id;
+  select public.club_address_hash(a.line1, a.postal_code) into v_addr from public.club_mailing_addresses a where a.user_id = sub.user_id;
+
+  -- One free month per household: this account, its email, its mailing address, its card; or a member before.
+  if exists (select 1 from public.club_intro_claims i
+              where i.household_id = hh.id or i.user_id = sub.user_id or i.email_hash = v_email
+                 or (v_addr is not null and i.address_hash = v_addr) or (p_card is not null and i.card_fingerprint = p_card))
+     or exists (select 1 from public.club_subscriptions s where s.user_id = sub.user_id and s.id <> sub.id
+                 and s.status not in ('incomplete', 'incomplete_expired')) then
+    return jsonb_build_object('granted', false, 'reason', 'already_claimed',
+      'fallback_trial_end', case when st.program_start_month > public.club_month_of(now())
+                                 then st.program_start_month::timestamp at time zone 'America/New_York' end);
+  end if;
+
+  insert into public.club_intro_claims (subscription_id, user_id, household_id, email_hash, address_hash, card_fingerprint, intro_month)
+  values (sub.id, sub.user_id, hh.id, v_email, v_addr, p_card, m);
+  update public.club_households set enrolled_at = coalesce(enrolled_at, now()),
+         first_paid_month = least(coalesce(first_paid_month, m), m), updated_at = now()
+   where id = hh.id returning * into hh;
+
+  -- The welcome print: free, right away, once per household.
+  insert into public.club_fulfillment_orders (user_id, household_id, resource_month, fulfillment_type, invoice_id, provider, personalization)
+  values (sub.user_id, hh.id, public.club_month_of(now()), 'welcome_vision', null, 'manual', null)
+  on conflict (household_id) where status <> 'canceled' and fulfillment_type = 'welcome_vision' do nothing;
+  select o.id into welcome from public.club_fulfillment_orders o
+   where o.household_id = hh.id and o.fulfillment_type = 'welcome_vision' and o.status <> 'canceled';
+
+  -- The free month, like a paid one. A first month that's a December is the welcome print (no Christmas mailing).
+  by_ := case when extract(month from m) = 12 and m = hh.first_paid_month then 'welcome_vision' else 'monthly_resource' end;
+  insert into public.club_entitlements (user_id, household_id, resource_month, kit_id, kind, membership_year, plan, source,
+    invoice_id, subscription_id, period_start, period_end, fulfilled_by)
+  values (sub.user_id, hh.id, m, case when by_ = 'monthly_resource' then (select k.id from public.club_kits k where k.month = m) end,
+    'digital', public.club_membership_year(hh.first_paid_month, m), coalesce(sub.plan, 'monthly'), 'intro', null, sub.id,
+    sub.current_period_start, sub.current_period_end, by_)
+  on conflict (user_id, resource_month, kind) where revoked_at is null do nothing;
+  if m >= st.first_mailing_month then
+    insert into public.club_entitlements (user_id, household_id, resource_month, kit_id, kind, membership_year, plan, source,
+      invoice_id, subscription_id, period_start, period_end, fulfilled_by)
+    values (sub.user_id, hh.id, m, case when by_ = 'monthly_resource' then (select k.id from public.club_kits k where k.month = m) end,
+      'physical', public.club_membership_year(hh.first_paid_month, m), coalesce(sub.plan, 'monthly'), 'intro', null, sub.id,
+      sub.current_period_start, sub.current_period_end, by_)
+    on conflict (user_id, resource_month, kind) where revoked_at is null do nothing
+    returning id into ent;
+    if ent is not null and by_ = 'welcome_vision' then
+      update public.club_fulfillment_orders set entitlement_id = ent, satisfies_month = m, updated_at = now() where id = welcome and entitlement_id is null;
+    elsif ent is not null then
+      -- Its regular batch when she joined by that month's second-Sunday cutoff, else its catch-up batch.
+      insert into public.club_fulfillment_orders (entitlement_id, user_id, household_id, resource_month, kit_id, late, cutoff_at, provider)
+      values (ent, sub.user_id, hh.id, m, (select k.id from public.club_kits k where k.month = m),
+        now() > public.club_mailing_cutoff_at(m), public.club_mailing_cutoff_at(m), 'manual')
+      on conflict do nothing;
+    end if;
+  end if;
+  return jsonb_build_object('granted', true, 'month', m, 'first_charge_at', sub.current_period_end, 'welcome_order', welcome);
+end $$;
+
+-- A membership that ended (status canceled) keeps no free month after the month it ended in: unmailed ones are
+-- revoked and their mailings cancelled. One cancelled at period end ends when the trial does, so she keeps the
+-- free month she was promised. Paid months are untouched (club_revoke_invoice handles refunds).
+create function public.club_intro_end(p_sub text) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  sub public.club_subscriptions%rowtype;
+  n int;
+  c int;
+begin
+  select * into sub from public.club_subscriptions where stripe_subscription_id = p_sub;
+  if not found or sub.status <> 'canceled' then return jsonb_build_object('revoked', 0, 'canceled', 0); end if;
+  with r as (
+    update public.club_entitlements e set revoked_at = now(), revoked_reason = 'ended'
+     where e.subscription_id = sub.id and e.source = 'intro' and e.revoked_at is null
+       and e.resource_month > public.club_month_of(coalesce(sub.ended_at, sub.canceled_at, now()))
+    returning e.id)
+  select count(*) into n from r;
+  with o as (
+    update public.club_fulfillment_orders f set status = 'canceled', updated_at = now(),
+           note = left(coalesce(f.note || ' · ', '') || 'canceled: membership ended before its free month', 300)
+     where f.status in ('pending', 'approved', 'on_hold') and f.fulfillment_type = 'monthly_resource'
+       and exists (select 1 from public.club_entitlements e where e.id = f.entitlement_id and e.subscription_id = sub.id and e.revoked_reason = 'ended')
+    returning f.id)
+  select count(*) into c from o;
+  update public.club_intro_claims set revoked_at = coalesce(revoked_at, now())
+   where subscription_id = sub.id and n > 0 and revoked_at is null;
+  return jsonb_build_object('revoked', n, 'canceled', c);
+end $$;
+
+revoke execute on function public.club_intro_grant(text, text), public.club_intro_end(text),
+  public.club_email_hash(text), public.club_address_hash(text, text) from public, anon, authenticated;
+grant execute on function public.club_intro_grant(text, text), public.club_intro_end(text),
+  public.club_email_hash(text), public.club_address_hash(text, text) to service_role;
+
+-- ---------------------------------------------------------------- paid invoices and the member's view
 
 create or replace function public.club_invoice_apply(p jsonb, p_periods jsonb default '[]') returns jsonb
 language plpgsql security definer set search_path = '' as $$
@@ -220,9 +399,12 @@ begin
   next_month := coalesce((last_owned + interval '1 month')::date, public.club_month_of(s.current_period_end));
   return jsonb_build_object(
     'access', public.club_has_access(uid),
+    -- Her free first month (one per household), and when it ends.
+    'intro', (select jsonb_build_object('month', i.intro_month, 'trial_ends', case when s.status = 'trialing' then s.current_period_end end)
+                from public.club_intro_claims i where i.user_id = uid and i.revoked_at is null order by i.claimed_at desc limit 1),
     'grant', (select g.reason from public.club_access_grants g
                where g.user_id = uid and g.revoked_at is null and (g.expires_at is null or g.expires_at > now())),
-    'member', h.enrolled_at is not null,
+    'member', h.enrolled_at is not null or coalesce(s.status in ('trialing', 'active', 'past_due'), false),
     'plan', s.plan,
     'status', s.status,
     'payment_problem', s.status in ('past_due', 'unpaid', 'incomplete'),
@@ -257,6 +439,7 @@ begin
         select jsonb_build_object(
           'month', d.resource_month,
           'fulfilled_by', d.fulfilled_by,
+          'free', d.source = 'intro',
           'slug', k.slug, 'title', k.title,
           'published', coalesce(k.status in ('scheduled', 'retired'), false),
           'can', case when k.id is null or d.fulfilled_by <> 'monthly_resource' then 'none' else public.club_can_open(uid, k.id) end,

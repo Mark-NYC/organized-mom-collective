@@ -50,9 +50,11 @@ insert into public.admin_users (user_id, role) values ('00000000-0000-0000-0000-
 \set X '''00000000-0000-0000-0000-00000000f003'''
 \set OWNER '''00000000-0000-0000-0000-00000000f004'''
 
--- The founding migration (20261107000000) as shipped: the 2027 program, January's list open through January 1.
-select pg_temp.expect((select (program_start_month, launch_exception_month, launch_exception_cutoff_at)
-  = ('2027-01-01'::date, '2027-01-01'::date, '2027-01-02 04:59:59+00'::timestamptz) from public.club_settings), 'the program starts January 2027; January''s list stays open through January 1');
+-- The first-month-free migration (20261107000000) as shipped: the 2027 program, the offer on, the plain second-Sunday rule.
+select pg_temp.expect((select program_start_month = '2027-01-01' and intro_offer and launch_exception_month is null
+  and launch_exception_cutoff_at is null from public.club_settings), 'the program starts January 2027, the free first month is on, no cutoff exceptions');
+select pg_temp.expect(not has_table_privilege('authenticated', 'public.club_intro_claims', 'select') and not has_table_privilege('anon', 'public.club_intro_claims', 'select')
+  and not has_function_privilege('authenticated', 'public.club_intro_grant(text, text)', 'execute'), 'free-month claims and grants are server-side only');
 select pg_temp.expect((select count(*) = 12 from public.club_kits where month between '2027-01-01' and '2027-12-01'), 'the 2027 program has twelve kits');
 -- These scenarios run as after the program has started, with the November 2026 founding-batch exception they were
 -- written for. Founding enrollment (paid before the program) is tested in tests/club-billing-e2e.test.ts.

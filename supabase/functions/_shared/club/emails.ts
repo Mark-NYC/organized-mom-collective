@@ -19,8 +19,9 @@ export interface ClubEmailData {
   /** "December 2, 2026" */
   endsOn?: string | null;
   ended?: boolean;
-  /** Welcome for a founding member (joined before the program): its first month, "2027-01-01". */
-  programStart?: string | null;
+  /** Welcome on a trial: her free month ("January 2027"), if she has one, and the first charge ("February 1, 2027"). */
+  freeMonth?: string | null;
+  firstCharge?: string | null;
   test?: boolean;
 }
 
@@ -49,18 +50,22 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
   let b: Body;
   switch (kind) {
     case 'welcome':
-      if (d.programStart) {
-        // Founding member: she paid for the welcome print; the monthly plans and their billing start with the program.
-        const starts = monthLabel(d.programStart);
-        const firstDay = new Date(`${d.programStart.slice(0, 10)}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+      if (d.firstCharge) {
+        // Nothing charged yet: what's free, and exactly when the first $5.90 is.
+        const december = d.freeMonth?.startsWith('December');
         b = {
           subject: 'Welcome to the Organized Family Club',
-          preheader: `Your Family Vision print comes first. Monthly plans begin in ${starts}.`,
-          eyebrow: 'Founding member',
+          preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
+          eyebrow: d.freeMonth ? 'Your first month is free' : 'Monthly membership',
           title: 'Welcome. You’re in.',
           blocks: [
-            p('Thank you for joining as a founding member. Your first gift is a personalized Family Vision print for your wall. Choose your family’s word, approve it, and we’ll print and mail it right away.'),
-            p(`Your monthly plans begin in ${starts}. Your $5.90 monthly membership payments start on ${firstDay}; you won’t be charged again before then. Each paid month brings that month’s plan, prepared for your family, with a printed copy in the mail.`),
+            p(d.freeMonth && !december
+              ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.`
+              : 'Thank you for joining.'),
+            p(december
+              ? `Your first gift is a personalized Family Vision print for your wall, and it’s your free ${d.freeMonth} resource. Choose your family’s word, approve it, and we’ll print and mail it right away.`
+              : 'Your first gift is a personalized Family Vision print for your wall, free. Choose your family’s word, approve it, and we’ll print and mail it right away.'),
+            p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
             panel(C.sage, C.sageRule, [
               panelTitle('Two minutes to get started'),
               steps([
@@ -70,7 +75,7 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
               ]),
               button('Sign in to your account', login),
             ]),
-            small(`Stripe emails your receipt separately. You can cancel any time from your account; cancel before ${firstDay} and you won’t be charged for the monthly plans.`),
+            small('Stripe emails your receipts. You can manage or cancel your membership any time from your account.'),
           ],
         };
         break;

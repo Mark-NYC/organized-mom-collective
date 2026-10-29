@@ -219,7 +219,6 @@ var CLUB_PRICES = {
   monthly: { lookupKey: "club_monthly_v2", amount: 590, interval: "month", nickname: "Organized Family Club · Monthly" },
   annual: { lookupKey: "club_annual_v1", amount: 6e3, interval: "year", nickname: "Organized Family Club · Annual" }
 };
-var CLUB_WELCOME_PRICE = { lookupKey: "club_welcome_v1", amount: 590, nickname: "Family Vision welcome print" };
 var CLUB_LEGACY_LOOKUP_KEYS = ["club_monthly_v1", "club_annual_v1"];
 var OFFERED_PLANS = ["monthly"];
 var CLUB_PRODUCT_TAG = "organized-family-club";
@@ -268,17 +267,17 @@ function renderClubEmail(kind, to, d, siteUrl) {
   let b;
   switch (kind) {
     case "welcome":
-      if (d.programStart) {
-        const starts = monthLabel(d.programStart);
-        const firstDay = (/* @__PURE__ */ new Date(`${d.programStart.slice(0, 10)}T12:00:00Z`)).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+      if (d.firstCharge) {
+        const december = d.freeMonth?.startsWith("December");
         b = {
           subject: "Welcome to the Organized Family Club",
-          preheader: `Your Family Vision print comes first. Monthly plans begin in ${starts}.`,
-          eyebrow: "Founding member",
+          preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
+          eyebrow: d.freeMonth ? "Your first month is free" : "Monthly membership",
           title: "Welcome. You’re in.",
           blocks: [
-            p("Thank you for joining as a founding member. Your first gift is a personalized Family Vision print for your wall. Choose your family’s word, approve it, and we’ll print and mail it right away."),
-            p(`Your monthly plans begin in ${starts}. Your $5.90 monthly membership payments start on ${firstDay}; you won’t be charged again before then. Each paid month brings that month’s plan, prepared for your family, with a printed copy in the mail.`),
+            p(d.freeMonth && !december ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.` : "Thank you for joining."),
+            p(december ? `Your first gift is a personalized Family Vision print for your wall, and it’s your free ${d.freeMonth} resource. Choose your family’s word, approve it, and we’ll print and mail it right away.` : "Your first gift is a personalized Family Vision print for your wall, free. Choose your family’s word, approve it, and we’ll print and mail it right away."),
+            p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
             panel(C.sage, C.sageRule, [
               panelTitle("Two minutes to get started"),
               steps([
@@ -288,7 +287,7 @@ function renderClubEmail(kind, to, d, siteUrl) {
               ]),
               button("Sign in to your account", login)
             ]),
-            small(`Stripe emails your receipt separately. You can cancel any time from your account; cancel before ${firstDay} and you won’t be charged for the monthly plans.`)
+            small("Stripe emails your receipts. You can manage or cancel your membership any time from your account.")
           ]
         };
         break;
@@ -531,15 +530,11 @@ function invoiceRow(inv, payment) {
 }
 
 // supabase/functions/_shared/handlers/club-billing.ts
+var MIN_TRIAL_SECONDS = 49 * 60 * 60;
 async function clubPrice(deps, plan) {
-  return priceByLookup(deps, CLUB_PRICES[plan].lookupKey);
-}
-var welcomePrice = (deps) => priceByLookup(deps, CLUB_WELCOME_PRICE.lookupKey);
-async function priceByLookup(deps, lookupKey) {
-  const r = await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": lookupKey, active: true, limit: 1 });
+  const r = await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": CLUB_PRICES[plan].lookupKey, active: true, limit: 1 });
   return r.data[0]?.id ?? null;
 }
-var MIN_TRIAL_SECONDS = 49 * 60 * 60;
 
 // supabase/functions/_shared/handlers/club-webhook.ts
 var CLUB_EVENTS = [
@@ -586,6 +581,7 @@ async function syncSubscription(deps, subId, eventAt) {
     await cancelDuplicate(deps, sub, member.userId);
     return null;
   }
+  if (row.status === "canceled") await deps.db.rpc("club_intro_end", { p_sub: sub.id });
   const key = `canceled:${sub.id}`;
   if (r.cancel_at_period_end && r.previous_cancel_at_period_end !== true && row.status !== "canceled") {
     await sendClubEmail(deps, key, "canceled", member.userId, member.email, { ended: false, endsOn: row.current_period_end ? longDate(row.current_period_end) : null });
@@ -649,9 +645,7 @@ async function applyInvoice(deps, invoiceId, eventAt, failed) {
     const first = [...r.months].sort()[0];
     await sendClubEmail(deps, `welcome:${member.userId}`, "welcome", member.userId, member.email, {
       plan: paidPeriods(inv)[0]?.plan ?? null,
-      monthLabel: first ? monthLabel(first) : void 0,
-      // Paid before the program starts (a founding member's welcome print): no month yet.
-      programStart: first ? null : r.program_start ?? null
+      monthLabel: first ? monthLabel(first) : void 0
     });
   }
   if (failed && inv.status !== "paid") {
@@ -735,7 +729,6 @@ async function status(deps) {
   if (!blocked) {
     prices = {};
     for (const plan of OFFERED_PLANS) prices[plan] = Boolean(await clubPrice(deps, plan));
-    prices.welcome = Boolean(await welcomePrice(deps));
   }
   return {
     stripe_key: deps.env.clubStripeSecretKey ? deps.stripe.mode : null,
@@ -790,19 +783,6 @@ async function stripeSetup(deps) {
       priceIds[plan] = pr.id;
       done.push(`price_${plan}`);
     }
-  }
-  if (!await lookup(CLUB_WELCOME_PRICE.lookupKey)) {
-    const pr = await deps.stripe.request("POST", "/v1/prices", {
-      product,
-      currency: "usd",
-      unit_amount: CLUB_WELCOME_PRICE.amount,
-      lookup_key: CLUB_WELCOME_PRICE.lookupKey,
-      nickname: CLUB_WELCOME_PRICE.nickname,
-      tax_behavior: "unspecified",
-      metadata: { club: CLUB_PRODUCT_TAG, kind: "welcome_print" }
-    }, `club-price-${CLUB_WELCOME_PRICE.lookupKey}-${deps.stripe.mode}`);
-    priceIds.welcome = pr.id;
-    done.push("price_welcome");
   }
   const [settings] = await deps.db.select("club_settings", "select=portal_configuration_id");
   if (!settings?.portal_configuration_id) {

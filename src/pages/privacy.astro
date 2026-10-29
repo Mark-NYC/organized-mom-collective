@@ -3,11 +3,15 @@
  * /privacy — Privacy Policy. From docs/operations/PRIVACY_POLICY_DRAFT.md (owner-reviewed text goes there first),
  * with the Organized Family Club's section on family and children's information. Every statement describes what
  * the code does: change this page when the code changes. Required before customer accounts or the Club open
- * (supabase/ACCOUNTS.md, docs/club/MEMBERSHIP.md). Not legal advice; the owner has it reviewed before it ships.
+ * (supabase/ACCOUNTS.md, docs/club/MEMBERSHIP.md). Not legal advice; the owner has it reviewed before it ships:
+ * until PUBLIC_PRIVACY_POLICY_PUBLISHED=true (set it on a Preview to review the page), it builds as a noindex notice
+ * and nothing links to it (privacyPublished in src/routes.ts).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { SUPPORT_EMAIL } from '../data/support';
-import { routes } from '../routes';
+import { privacyPublished, routes } from '../routes';
+
+const published = privacyPublished();
 
 const UPDATED = '2026-10-29';
 const updated = new Date(`${UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
@@ -28,6 +32,14 @@ const sections = [
 ];
 ---
 
+{!published ? (
+<PublicLayout title="Privacy Policy" description="Our privacy policy." indexable={false} width="full">
+  <section class="mx-auto max-w-3xl px-5 py-16 sm:px-8">
+    <h1 class="serif-hero">Privacy Policy</h1>
+    <p class={p}>Our privacy policy is being finalized. Questions about your information: <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a>.</p>
+  </section>
+</PublicLayout>
+) : (
 <PublicLayout
   title="Privacy Policy"
   description="What Organized Mom Collective collects, why, who we share it with, how we handle family and children's information in the Organized Family Club, and your choices."
@@ -71,6 +83,7 @@ const sections = [
       <li><strong>What you make:</strong> your Family Vision print (the family name and the word you choose) and the changes you make to each month’s plan.</li>
       <li><strong>Your mailing address,</strong> collected at checkout and editable in your account, so we can mail your printed plans.</li>
       <li><strong>Your membership:</strong> its status, renewal and payment dates and which months you’ve received. Stripe handles payment; we never see or store your card number.</li>
+      <li><strong>Your free first month:</strong> to keep it to one per household, we record that it was used, with a one-way code made from your email and mailing address and Stripe’s fingerprint of your card (not the card number). We keep that record even after an account is deleted, only for this purpose.</li>
     </ul>
     <p class={p}>We don’t collect last names for children, photos, schools, gender or full birth dates.</p>
     <h3 class={h3}>Who sees it</h3>
@@ -97,3 +110,4 @@ const sections = [
     <p class={p}><a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a></p>
   </article>
 </PublicLayout>
+)}

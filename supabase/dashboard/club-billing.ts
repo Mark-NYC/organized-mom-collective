@@ -206,7 +206,6 @@ var CLUB_PRICES = {
   monthly: { lookupKey: "club_monthly_v2", amount: 590, interval: "month", nickname: "Organized Family Club · Monthly" },
   annual: { lookupKey: "club_annual_v1", amount: 6e3, interval: "year", nickname: "Organized Family Club · Annual" }
 };
-var CLUB_WELCOME_PRICE = { lookupKey: "club_welcome_v1", amount: 590, nickname: "Family Vision welcome print" };
 var OFFERED_PLANS = ["monthly"];
 var isPlan = (v) => OFFERED_PLANS.includes(v);
 function readClubEnv(get) {
@@ -259,16 +258,12 @@ var LIVE_STATUSES = ["trialing", "active", "past_due", "unpaid", "paused", "inco
 var EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 
 // supabase/functions/_shared/handlers/club-billing.ts
+var MIN_TRIAL_SECONDS = 49 * 60 * 60;
 var SESSION = /^cs_(test|live)_[A-Za-z0-9]{10,200}$/;
 async function clubPrice(deps, plan) {
-  return priceByLookup(deps, CLUB_PRICES[plan].lookupKey);
-}
-var welcomePrice = (deps) => priceByLookup(deps, CLUB_WELCOME_PRICE.lookupKey);
-async function priceByLookup(deps, lookupKey) {
-  const r = await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": lookupKey, active: true, limit: 1 });
+  const r = await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": CLUB_PRICES[plan].lookupKey, active: true, limit: 1 });
   return r.data[0]?.id ?? null;
 }
-var MIN_TRIAL_SECONDS = 49 * 60 * 60;
 function createClubBillingHandler(deps) {
   return async (req) => {
     const cors = corsHeaders(req, deps.env.allowedOrigins);
@@ -327,9 +322,6 @@ async function checkout(deps, req, body) {
   }
   const price = await clubPrice(deps, plan);
   if (!price) throw new Refusal("not_configured", 503);
-  const startsAt = state.settings.billing_starts_at ? Math.floor(Date.parse(state.settings.billing_starts_at) / 1e3) : null;
-  const welcome = startsAt ? await welcomePrice(deps) : null;
-  if (startsAt && !welcome) throw new Refusal("not_configured", 503);
   let customer = state.customer;
   if (customer) {
     const subs = await deps.stripe.request("GET", "/v1/subscriptions", { customer, status: "all", limit: 20 });
@@ -344,24 +336,30 @@ async function checkout(deps, req, body) {
     customer = c.id;
     if (user) await deps.db.rpc("club_member_link", { p_user: user.id, p_email: email, p_customer: customer, p_livemode: deps.stripe.mode === "live" });
   }
-  const meta = { club: "organized-family-club", plan, email, ...user ? { user_id: user.id } : {}, ...startsAt ? { founding: "true" } : {} };
+  const trialEnd = state.trial_end ? Math.max(Math.floor(Date.parse(state.trial_end) / 1e3), deps.now() + MIN_TRIAL_SECONDS) : null;
+  const meta = { club: "organized-family-club", plan, email, ...user ? { user_id: user.id } : {}, ...state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {} };
   const expiresAt = deps.now() + 60 * 60;
   const site = returnBase(deps, req);
   const session = await deps.stripe.request("POST", "/v1/checkout/sessions", {
     mode: "subscription",
     customer,
     client_reference_id: user?.id,
-    line_items: [{ price, quantity: 1 }, ...welcome ? [{ price: welcome, quantity: 1 }] : []],
+    line_items: [{ price, quantity: 1 }],
     shipping_address_collection: { allowed_countries: ["US"] },
     customer_update: { shipping: "auto", address: "auto" },
     billing_address_collection: "auto",
     allow_promotion_codes: true,
     expires_at: expiresAt,
     metadata: meta,
-    subscription_data: { metadata: meta, ...startsAt ? { trial_end: Math.max(startsAt, deps.now() + MIN_TRIAL_SECONDS) } : {} },
+    // A trial: the card is saved now and nothing is charged until trial_end (cancelled if no card made it through).
+    ...trialEnd ? { payment_method_collection: "always" } : {},
+    subscription_data: {
+      metadata: meta,
+      ...trialEnd ? { trial_end: trialEnd, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } } : {}
+    },
     success_url: `${site}/club/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${site}/club/join?canceled=1`
-  }, `club-checkout:${customer}:${plan}${startsAt ? ":founding" : ""}:${Math.floor(deps.now() / 600)}`);
+  }, `club-checkout:${customer}:${plan}:${state.intro_month ? "intro" : trialEnd ? "trial" : "pay"}:${Math.floor(deps.now() / 600)}`);
   await deps.db.rpc("club_checkout_record", {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1e3).toISOString() }
   });

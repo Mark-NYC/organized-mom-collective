@@ -148,6 +148,47 @@ async function checkoutCompleted(deps: ClubDeps, sessionId: string, eventAt: num
   const sub = await syncSubscription(deps, subId, eventAt);
   const latest = sub && idOf((sub as unknown as { latest_invoice?: unknown }).latest_invoice);
   if (latest) await applyInvoice(deps, latest, eventAt, false);
+  if (sub?.status === 'trialing') await trialStarted(deps, sub, member);
+}
+
+/**
+ * Her trial began: Your First Month FREE, or (no free month) billing that starts with the program. Grants the free
+ * month the checkout offered unless her household already had one; then billing starts on the program's first day
+ * before the program runs, else today. Then the welcome email: what's free and when the first $5.90 is charged.
+ */
+async function trialStarted(deps: ClubDeps, sub: StripeSubscription, member: { userId: string; email: string }) {
+  let freeMonth: string | null = null;
+  let firstCharge = sub.items.data[0]?.current_period_end ?? null;
+  if (sub.metadata?.intro_month) {
+    const g = await deps.db.rpc<{ granted: boolean; month?: string; reason?: string; fallback_trial_end?: string | null }>(
+      'club_intro_grant', { p_sub: sub.id, p_card: await cardFingerprint(deps, sub) });
+    if (g.granted) {
+      freeMonth = g.month!;
+    } else if (g.reason === 'already_claimed') {
+      const at = g.fallback_trial_end ? Math.floor(Date.parse(g.fallback_trial_end) / 1000) : null;
+      await deps.stripe.request('POST', `/v1/subscriptions/${sub.id}`, { trial_end: at ?? 'now', proration_behavior: 'none' }, `club-intro-refused:${sub.id}`);
+      await syncSubscription(deps, sub.id, null);
+      // Charged today: its paid invoice sends the regular welcome.
+      if (!at) return;
+      firstCharge = at;
+    }
+  }
+  await sendClubEmail(deps, `welcome:${member.userId}`, 'welcome', member.userId, member.email, {
+    plan: 'monthly',
+    freeMonth: freeMonth ? monthLabel(freeMonth) : null,
+    firstCharge: firstCharge ? longDate(new Date(firstCharge * 1000).toISOString()) : null,
+  });
+}
+
+/** The card's fingerprint (the same card on another account), when Checkout saved a card. */
+async function cardFingerprint(deps: ClubDeps, sub: StripeSubscription): Promise<string | null> {
+  const pm = idOf((sub as { default_payment_method?: string | { id: string } | null }).default_payment_method ?? null);
+  if (!pm) return null;
+  try {
+    return (await deps.stripe.request<{ card?: { fingerprint?: string } }>('GET', `/v1/payment_methods/${pm}`)).card?.fingerprint ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Re-reads a subscription and writes Stripe's current state. Returns it (null: not a Club subscription). */
@@ -162,6 +203,8 @@ export async function syncSubscription(deps: ClubDeps, subId: string, eventAt: n
     await cancelDuplicate(deps, sub, member.userId);
     return null;
   }
+  // Ended (not just set to end): no free month after the month it ended in.
+  if (row.status === 'canceled') await deps.db.rpc('club_intro_end', { p_sub: sub.id });
   const key = `canceled:${sub.id}`;
   if (r.cancel_at_period_end && r.previous_cancel_at_period_end !== true && row.status !== 'canceled') {
     await sendClubEmail(deps, key, 'canceled', member.userId, member.email, { ended: false, endsOn: row.current_period_end ? longDate(row.current_period_end) : null });
@@ -217,7 +260,7 @@ export async function applyInvoice(deps: ClubDeps, invoiceId: string, eventAt: n
     if (!known) return;
   }
   const payment = inv.status === 'paid' || failed ? await paymentFor(deps, inv.id) : { paymentIntent: null, charge: null, failure: null };
-  const r = await deps.db.rpc<{ granted: number; first_paid: boolean; months: string[]; program_start?: string | null; user_id?: string }>('club_invoice_apply', {
+  const r = await deps.db.rpc<{ granted: number; first_paid: boolean; months: string[]; user_id?: string }>('club_invoice_apply', {
     p: invoiceRow(inv, payment),
     p_periods: inv.status === 'paid' ? paidPeriods(inv) : [],
   });
@@ -227,8 +270,6 @@ export async function applyInvoice(deps: ClubDeps, invoiceId: string, eventAt: n
     await sendClubEmail(deps, `welcome:${member.userId}`, 'welcome', member.userId, member.email, {
       plan: paidPeriods(inv)[0]?.plan ?? null,
       monthLabel: first ? monthLabel(first) : undefined,
-      // Paid before the program starts (a founding member's welcome print): no month yet.
-      programStart: first ? null : r.program_start ?? null,
     });
   }
   if (failed && inv.status !== 'paid') {

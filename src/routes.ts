@@ -169,3 +169,6 @@ export const routes = {
 
 /** True for paths inside the companion app. */
 export const isAppPath = (path: string) => path === '/app' || path.startsWith('/app/');
+
+/** The privacy policy is live (owner-approved); until then /privacy is a noindex notice and nothing links to it. */
+export const privacyPublished = () => import.meta.env.PUBLIC_PRIVACY_POLICY_PUBLISHED === 'true' || Boolean(import.meta.env.DEV);
