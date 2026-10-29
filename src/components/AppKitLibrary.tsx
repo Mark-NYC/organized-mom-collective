@@ -1,6 +1,8 @@
 import { monthColors } from '../theme';
 // The app Club library mirrors the benefit-first public Club month descriptions.
-// Keep icons linked to the original artwork in assets/icons/ofc/month-icons.
+// Reuse the original month artwork, with resource-specific icons for laundry and snacks.
+import laundryIcon from '../../assets/icons/ofc/february/laundry-basket.webp?url';
+import snackIcon from '../../assets/icons/ofc/updatedicons/june/strawberries.png?url';
 const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.png', {
   eager: true,
   query: '?url',
@@ -24,9 +26,9 @@ const months = [
   },
   {
     "month": "March",
-    "title": "Cleaning Without Managing Everyone",
-    "responsibility": "Finishing a job",
-    "how": "Each person gets a clear job, the steps, supplies, and what finished looks like.",
+    "title": "Chores Without Chasing Everyone",
+    "responsibility": "Owning their chores",
+    "how": "A family chore chart shows who does what, with a cleaning plan that explains the steps and what finished looks like.",
     "url": "/app/club/march/"
   },
   {
@@ -45,9 +47,9 @@ const months = [
   },
   {
     "month": "June",
-    "title": "Less Screen-Time Negotiating",
-    "responsibility": "Respecting shared boundaries",
-    "how": "Shared screen-time expectations and responsibilities make summer rules clear.",
+    "title": "Snack Time Without Calling Mom",
+    "responsibility": "Making their own snacks",
+    "how": "An I Can Make My Own Snack guide gives kids simple snack choices and picture steps to practice making snacks themselves.",
     "url": "/app/club/june/"
   },
   {
@@ -98,7 +100,9 @@ export default function AppKitLibrary() {
   return (
     <div className="ofc-app-month-grid">
       {months.map((m, index) => {
-        const src = icons[`../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
+        const src = m.month === 'February' ? laundryIcon
+          : m.month === 'June' ? snackIcon
+          : icons[`../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
         const calendarColor = monthColors[index].hex;
         return (
           <article className="ofc-app-month" key={m.month} style={{ display: 'block' }}>
