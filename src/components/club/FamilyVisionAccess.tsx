@@ -9,6 +9,7 @@
  * print the PDF, through the audited club_admin_fulfillment_bundle.
  */
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import ClubGate, { type ClubContext } from './ClubGate';
 import { approveWelcome, loadWelcome, monthName, saveWelcome, welcomeText, type Vision, type WelcomeOrder } from '../../lib/club/membership';
 import { routes } from '../../routes';
@@ -105,8 +106,11 @@ function Member({ ctx }: { ctx: ClubContext }) {
     );
   }
   const month = w.satisfies_month ? monthName(w.satisfies_month).split(' ')[0] : null;
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 text-[0.92rem]" data-club-chrome>
+  // Inside the print's own "Ready for your approval" box (FamilyVisionPrint), where the full-screen desktop layout
+  // can't cover it; inline only if that slot is missing.
+  const slot = document.getElementById('fvp-member-actions');
+  const bar = (
+    <div className={slot ? 'mt-3 flex flex-col items-start gap-2 text-[0.92rem]' : 'flex flex-wrap items-center justify-between gap-3 pb-3 text-[0.92rem]'} data-club-chrome>
       <div>
         <a className="underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>← Your account</a>
         <p className="mt-1 font-semibold text-warm-ink">Your welcome print · {welcomeText(w)}</p>
@@ -120,6 +124,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
       )}
     </div>
   );
+  return slot ? createPortal(bar, slot) : bar;
 }
 
 interface Bundle {
@@ -145,7 +150,9 @@ function FulfillmentView({ order }: { order: string }) {
   if (err) return <p role="alert" className="p-6">{err}</p>;
   if (!b) return <p className="p-6">Loading the print…</p>;
   const a = b.order.address;
-  return (
+  // In the print's own box, like the member's controls: the desktop layout covers anything outside it.
+  const slot = document.getElementById('fvp-member-actions');
+  const bar = (
     <div data-club-chrome className="border-b border-[#e8d9b8] bg-[#fdf6e6] px-4 py-3 text-[0.9rem] print:hidden">
       <strong>Welcome print · {b.order.display_name ?? b.order.email}</strong> · {b.order.personalization?.family_name} · {b.order.personalization?.value}
       {b.order.satisfies_month && <> · their {b.order.satisfies_month.slice(0, 7)} resource</>} · status {b.order.status} ({b.order.readiness})
@@ -158,4 +165,5 @@ function FulfillmentView({ order }: { order: string }) {
       }}>{marked ? 'PDF marked ready ✓' : 'Mark PDF ready'}</button>
     </div>
   );
+  return slot ? createPortal(bar, slot) : bar;
 }

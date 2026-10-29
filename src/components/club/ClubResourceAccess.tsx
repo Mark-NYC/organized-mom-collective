@@ -7,7 +7,7 @@
  * ?fulfillment=<order id> (owner admins, from /admin/club): the same page with that one household's profile and
  * saved version, through the audited club_admin_fulfillment_bundle, to print the mailing's PDF.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import ClubGate, { type ClubContext } from './ClubGate';
 import type { Household } from '../../lib/club/profile';
 import { fromDb } from '../../lib/club/store';
@@ -21,6 +21,31 @@ const show = (household: Household, sample: string | null) => {
   const host = document.getElementById('club-month-content');
   if (host) host.hidden = false;
 };
+
+/**
+ * On desktop each printable fills the screen below a bar (position: fixed, top: --adc-nav-height or
+ * --msc-nav-height, which ClubPrototypeNav sets on the preview pages). Here that bar is hers (or the admin's), so set
+ * them from it; otherwise the printable covers her "Looks good, print it".
+ */
+function useLayoutBelow(bar: RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+    const sync = () => {
+      const bottom = `${Math.ceil(el.getBoundingClientRect().bottom)}px`;
+      document.documentElement.style.setProperty('--adc-nav-height', bottom);
+      document.documentElement.style.setProperty('--msc-nav-height', bottom);
+    };
+    sync();
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(sync) : null;
+    observer?.observe(el);
+    window.addEventListener('resize', sync);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  });
+}
 
 /** Another household's copy (a shared device, the admin printing one family after another) never leaks into this one. */
 function clearMemberStorage() {
@@ -45,6 +70,8 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
   const [saving, setSaving] = useState<'' | 'saving' | 'saved' | 'conflict' | 'printed' | 'error'>('');
   const [approved, setApproved] = useState(false);
   const rev = useRef(0);
+  const bar = useRef<HTMLDivElement>(null);
+  useLayoutBelow(bar);
 
   useEffect(() => {
     let undo = () => {};
@@ -100,7 +127,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
     return (
       <div className="max-w-xl py-6">
         <p role="alert" className="text-warm-ink">This month isn’t part of your membership.</p>
-        <p className="mt-2 text-warm-soft">Monthly members receive each month they pay for; annual members get their year’s collection.</p>
+        <p className="mt-2 text-warm-soft">Members receive each month they pay for.</p>
         <a className="mt-4 inline-block font-semibold underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>See your months</a>
       </div>
     );
@@ -109,7 +136,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
 
   const pending = v?.mailing && v.mailing.status === 'pending';
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 text-[0.92rem]" data-club-chrome>
+    <div ref={bar} className="flex flex-wrap items-center justify-between gap-3 pb-3 text-[0.92rem]" data-club-chrome>
       <a className="underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>← Your months</a>
       <span className="text-warm-soft" role="status">
         {v?.can === 'read' ? 'Your copy to view and print (your membership has ended, so changes aren’t saved).'
@@ -143,6 +170,8 @@ function FulfillmentView({ slug, order }: { slug: string; order: string }) {
   const [b, setB] = useState<Bundle | null>(null);
   const [err, setErr] = useState('');
   const [marked, setMarked] = useState(false);
+  const bar = useRef<HTMLDivElement>(null);
+  useLayoutBelow(bar);
   useEffect(() => {
     const s = loadAdminSession();
     if (!s) return setErr('Sign in to /admin first, then open this mailing from /admin/club.');
@@ -159,7 +188,7 @@ function FulfillmentView({ slug, order }: { slug: string; order: string }) {
   if (!b) return <p className="p-6">Loading the mailing…</p>;
   const a = b.order.address;
   return (
-    <div data-club-chrome className="border-b border-[#e8d9b8] bg-[#fdf6e6] px-4 py-3 text-[0.9rem] print:hidden">
+    <div ref={bar} data-club-chrome className="border-b border-[#e8d9b8] bg-[#fdf6e6] px-4 py-3 text-[0.9rem] print:hidden">
       <strong>Fulfillment · {b.order.display_name ?? b.order.email}</strong> · {b.order.resource_month.slice(0, 7)} · {slug} · status {b.order.status} ({b.order.readiness})
       {a && <> · {a.name}, {a.line1}{a.line2 ? ` ${a.line2}` : ''}, {a.city}, {a.state} {a.postal_code}</>}
       <span className="ml-3">Print → Save as PDF, then</span>
