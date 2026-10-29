@@ -3,12 +3,12 @@
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
 October (Sunday Reset, two sheets), January (Habit Cards, one sheet), February (Connection Cards, one sheet),
 March (Spring Prep, one sheet), April (Dinner Team, two sheets), May (Summer Day Rhythm, one sheet), June (Snack
-Station, one sheet), July (Activity Board, one sheet) and August (School Day Routines, one sheet) use it. Every remaining month should too, without copying page code.
+Station, one sheet), July (Activity Board, one sheet), August (School Day Routines, one sheet) and December 2026 (Christmas Mission, two sheets drawn as SVG by the worksheet layout) use it. Every remaining month should too, without copying page code.
 
 **Status (2026-10-28).** October is the approved reference, and its desktop layout is now the shared rail
-(`ClubPlanDesktop`): every app month page (January–August and October) uses it, with one approval shared by the rail and
-the plan screen. October's page still carries viewer rules for its printable's own document frame. September,
-November and December have no `/app/club/<month>` page yet (the Club hub links their `/club/<month>-preview` pages).
+(`ClubPlanDesktop`): every app month page (December–August and October) uses it, with one approval shared by the rail and
+the plan screen. October's page still carries viewer rules for its printable's own document frame. September and
+November have no `/app/club/<month>` page yet (the Club hub links their `/club/<month>-preview` pages).
 
 ## The split
 
@@ -102,7 +102,8 @@ covers **only what prints**: January's covers the active cards, so a hidden seco
   index-and-name levels to members); `omc:club:july-app:v1` with `omc:preview:july-activity-board:approval`
   (July reads the earlier page's localStorage plan once for the same family, then removes it); `omc:club:august-app:v1`
   with `omc:preview:august-school-routines:approval` (August reads the earlier `{ profile, boards, active }` localStorage
-  routines once for the same family, then removes them).
+  routines once for the same family, then removes them); `omc:club:december-app:v1` with
+  `omc:preview:december-christmas-mission:approval` (the earlier December page stored nothing).
   The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
   `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
 

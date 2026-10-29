@@ -1,9 +1,25 @@
 ---
-/** Shared December physical mission prototype, rendered in both preview and member kit. */
+/** Shared December physical mission prototype, rendered in the preview and the member kit.
+ * Who it's for and who helps deliver: src/lib/club/engines/december-christmas-mission.ts; pages: src/lib/december/layout.ts.
+ * planMode: inside a Club plan page (/app/club/december) the page brings the layout, rail and mobile screen; this keeps
+ * the editor and the two sheets, marked data-plan-sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). */
 import { monthColors } from '../../theme';
 import {families} from '../../lib/december/traditions';
+interface Props {storageKey?:string; planMode?:boolean}
+const {storageKey='omc:club:december-app:v1',planMode=false}=Astro.props;
 ---
-<main class="dec" style={`--accent:${monthColors[11].hex}`}>
+{planMode ? <div class="dec-plan" data-dec-plan data-dec-key={storageKey}>
+  <dialog class="dec-dialog dec-plan-dialog" data-dec-editor aria-labelledby="dec-plan-edit-title"><div class="dec-dialog-header"><h2 id="dec-plan-edit-title">Make it your family’s mission</h2><button type="button" data-dec-close aria-label="Close">×</button></div>
+   <p class="dec-field-label">The mission is for</p><div class="dec-chips" data-dec-kids role="group" aria-label="The mission is for"></div>
+   <p class="dec-field-hint">At least one child. Their names go on the mission and on both cards.</p>
+   <p class="dec-field-label">Who helps deliver the cards</p><div class="dec-chips" data-dec-helpers role="group" aria-label="Who helps deliver the cards"></div>
+   <p class="dec-field-hint">Printed as what the children call them: “Ask <span data-dec-helper-line>Dad</span> to help you give your card…”</p>
+   <button type="button" class="dec-dialog-done" data-dec-close>Done · See our mission</button></dialog>
+  <div class="dec-plan-sheets">
+   <figure><div class="dec-stage" data-dec-stage><div class="dec-paper" data-dec-page="0" data-plan-sheet="mission"></div></div><figcaption>Personalized mission</figcaption></figure>
+   <figure><div class="dec-stage" data-dec-stage><div class="dec-paper" data-dec-page="1" data-plan-sheet="cards" data-plan-sheet-end></div></div><figcaption>Two one-sided cards · cut and fold</figcaption></figure>
+  </div>
+ </div> : <main class="dec" style={`--accent:${monthColors[11].hex}`}>
   
   <header><p class="eyebrow">ORGANIZED FAMILY CLUB · DECEMBER</p><h1>Your Christmas Mission Has Arrived!</h1><p>A surprise addressed to the children. One kindness mission and two Christmas cards, ready to give.</p></header>
   <div class="workspace">
@@ -24,8 +40,7 @@ import {families} from '../../lib/december/traditions';
     <dialog class="dec-dialog" id="dec-edit-dialog" aria-labelledby="dec-edit-title"><div class="dec-dialog-header"><h2 id="dec-edit-title">Make it your family’s mission</h2><button type="button" data-dec-close aria-label="Close">×</button></div><p>The mission and cards are prepared for the family selected in the top navigation. To personalize names, use the family selector above. You can also explore another sample below.</p><label for="family">Explore a sample family</label><select id="family">{families.map(f=><option value={f.id}>{f.label}</option>)}</select><p class="demo">Sample preview only · Nothing is saved or mailed.</p><button type="button" class="dec-dialog-done" data-dec-close>Done · See our mission</button></dialog>
     <section class="preview" aria-label="Actual print preview"><button type="button" class="dec-float" data-dec-edit><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>MAKE CHANGES</button><div class="sheets"><figure><div class="sheet" id="front">Loading preview…</div><figcaption>Personalized mission</figcaption></figure><figure><div class="sheet" id="reverse"></div><figcaption>Two one-sided cards · cut and fold</figcaption></figure></div></section>
   </div>
-</main>
-
+</main>}
 
 <script>
 import {families, type Family} from '../../lib/december/traditions';
@@ -35,72 +50,154 @@ import {renderSvg} from '../../lib/worksheet/svg';
 import {renderPdf} from '../../lib/worksheet/pdf';
 import {createMetrics,FONT_FILES,FONT_URL,type FontBytes} from '../../lib/worksheet/fonts';
 import type {FontKey,Metrics} from '../../lib/worksheet/types';
-const get=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
-const family=get<HTMLSelectElement>('family');
-const button=get<HTMLButtonElement>('download'),message=get<HTMLElement>('message');
+import {
+  applyFamily, decFingerprint, decView, freshState, isDecState, setHelper, toggleKid,
+  type DecMember, type DecPlan, type DecState,
+} from '../../lib/club/engines/december-christmas-mission';
+import { el } from '../../lib/club/plan/dom';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
+
+type Detail = { household: Household | null; sample?: string | null };
 let bytes:FontBytes|null=null,metrics:Metrics|null=null;
-let clubHousehold:Household|null=null;
-function current():Family {
- if(clubHousehold){
-  const adults=clubHousehold.members.filter(m=>m.kind==='adult'&&!m.archived);
-  const children=clubHousehold.members.filter(m=>m.kind==='child'&&!m.archived);
-  // The mission speaks to children, so its helper should be someone they naturally address.
-  // Keep saved first names unchanged; only the printed child-facing instruction uses a title.
-  const parents=adults.filter(m=>m.role==='parent'||m.role==='partner');
-  const helper=parents.length>1?'Dad':parents.length===1?'Mom':adults[0]?.firstName??'a grown-up';
-  const members=[adults[0]?.firstName??'A parent',helper,...children.map(m=>m.firstName)];
-  const ages=[0,0,...children.map(m=>m.birthYear?2026-m.birthYear:8)];
-  return {id:'rivera',label:'Family profile',family:clubHousehold.displayName??'Our Family',members,ages,recommended:'kindness'};
- }
- return families.find(f=>f.id===family.value)??families[0];
-}
-const applyHousehold=(detail:{household:Household|null})=>{clubHousehold=detail?.household??null;show()};
-window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household|null}>).detail));
-const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household|null}}).__ofcPreviewHousehold;
-if(cached)applyHousehold(cached);
-const editDialog=document.querySelector<HTMLDialogElement>('#dec-edit-dialog');
-const whyDialog=document.querySelector<HTMLDialogElement>('#dec-why-dialog');
-document.querySelectorAll('[data-dec-edit]').forEach(el=>el.addEventListener('click',()=>editDialog?.showModal()));
-document.querySelector('[data-dec-why]')?.addEventListener('click',()=>whyDialog?.showModal());
-document.querySelectorAll('[data-dec-close]').forEach(el=>el.addEventListener('click',()=>el.closest('dialog')?.close()));
-for(const dialog of [editDialog,whyDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
-function show(){
- const f=current();
- const children=f.members.slice(2);
- const names=children.join(' & ');
- get<HTMLElement>('mission-title').textContent=names+', your Christmas mission is ready.';
- if(metrics){const pages=decemberPages(metrics,f);
- get<HTMLElement>('front').innerHTML=renderSvg(pages[0],'Personalized Christmas mission');
- get<HTMLElement>('reverse').innerHTML=renderSvg(pages[1],'Two Christmas kindness cards, one-sided');}
-}
-family.addEventListener('change',show);
-button.addEventListener('click',async()=>{
- if(!metrics||!bytes)return;
- button.disabled=true;message.textContent='Preparing your mission and cards…';
- try{
- const f=current();const pdf=await renderPdf(decemberPages(metrics,f),bytes,{title:'December Christmas Mission · '+f.family,subject:'Personalized kids Christmas mission and two one-sided cards',duplex:false});
- const url=URL.createObjectURL(new Blob([pdf as BlobPart],{type:'application/pdf'}));
- const link=document.createElement('a');link.href=url;link.download='december-christmas-mission-'+f.id+'.pdf';document.body.appendChild(link);link.click();link.remove();
- setTimeout(()=>URL.revokeObjectURL(url),60000);
- message.textContent='Downloaded. Print each PDF page on a separate sheet, single-sided. This demo does not mail anything.';
- }catch(e){console.error(e);message.textContent='Could not generate the PDF. Please try again.';}
- finally{button.disabled=false;}
-});
+const onFonts:(()=>void)[]=[];
 async function start(){
- try{
  const keys=Object.keys(FONT_FILES) as FontKey[];
  const files=await Promise.all(keys.map(async key=>{
- const response=await fetch(FONT_URL+FONT_FILES[key]);if(!response.ok)throw Error('Font loading failed');
- return new Uint8Array(await response.arrayBuffer());
+  const response=await fetch(FONT_URL+FONT_FILES[key]);if(!response.ok)throw Error('Font loading failed');
+  return new Uint8Array(await response.arrayBuffer());
  }));
  bytes=Object.fromEntries(keys.map((k,i)=>[k,files[i]])) as FontBytes;
  metrics=createMetrics(bytes);
  await Promise.all(['400 12px "WS Gelasio"','italic 400 12px "WS Gelasio"','italic 600 12px "WS Gelasio"','400 12px "WS Montserrat"','600 12px "WS Montserrat"'].map(f=>document.fonts.load(f)));
- button.disabled=false;show();
- }catch(e){console.error(e);message.textContent='Preview could not load. Please refresh.';}
+ onFonts.forEach(f=>f());
 }
-show();start();
+const cachedDetail=()=>(window as Window & {__ofcPreviewHousehold?:Detail}).__ofcPreviewHousehold;
+
+const plan=document.querySelector<HTMLElement & {clubPlan?:DecPlan}>('[data-dec-plan]');
+if(plan){
+ // Plan mode: the Club plan page (/app/club/december).
+ const root=plan;
+ const key=root.dataset.decKey??'omc:club:december-app:v1';
+ let current='',members:DecMember[]=[],state:DecState=freshState([]),persist=true,locked=false;
+ const $=<T extends HTMLElement>(sel:string)=>root.querySelector<T>(sel);
+ const editor=$<HTMLDialogElement>('[data-dec-editor]');
+ root.querySelectorAll('[data-dec-close]').forEach(b=>b.addEventListener('click',()=>editor?.close()));
+ editor?.addEventListener('click',e=>{if(e.target===editor)editor.close()});
+ const fit=()=>root.querySelectorAll<HTMLElement>('[data-dec-stage]').forEach(stage=>{
+  const scale=Math.min(1,Math.max(180,(stage.parentElement?.clientWidth??816)-4)/816);
+  stage.style.width=`${816*scale}px`;stage.style.height=`${1056*scale}px`;
+  stage.querySelector<HTMLElement>('.dec-paper')?.style.setProperty('--dec-scale',String(scale));
+ });
+ fit();
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(root);
+ window.addEventListener('resize',fit);
+ const save=()=>{if(persist&&current)tabStorage.set(key,JSON.stringify({current,state}))};
+ let drawn='';
+ const draw=()=>{
+  const v=decView(state,members);
+  const helperLine=$('[data-dec-helper-line]');if(helperLine)helperLine.textContent=v.helper;
+  if(!metrics)return;
+  const print=JSON.stringify(v.layout.members);
+  if(print===drawn)return;
+  drawn=print;
+  const pages=decemberPages(metrics,v.layout);
+  root.querySelectorAll<HTMLElement>('[data-dec-page]').forEach(p=>{p.innerHTML=renderSvg(pages[Number(p.dataset.decPage)],p.dataset.decPage==='0'?'Personalized Christmas mission':'Two Christmas kindness cards, one-sided')});
+ };
+ const options=()=>{
+  const v=decView(state,members);
+  $('[data-dec-kids]')?.replaceChildren(...v.kids.map(k=>{
+   const c=el('button',{type:'button',class:'dec-chip',disabled:k.on&&v.kids.filter(x=>x.on).length===1},k.name);
+   c.setAttribute('aria-pressed',String(k.on));
+   c.addEventListener('click',()=>update(s=>toggleKid(s,k.id,members)));
+   return c;
+  }));
+  $('[data-dec-helpers]')?.replaceChildren(...v.helpers.map(h=>{
+   const c=el('button',{type:'button',class:'dec-chip'},h.firstName&&h.firstName!==h.name?`${h.name} (${h.firstName})`:h.name);
+   c.setAttribute('aria-pressed',String(state.helper===h.id));
+   c.addEventListener('click',()=>update(s=>setHelper(s,h.id,members)));
+   return c;
+  }));
+ };
+ const changed=()=>{save();draw();options();if(current)root.dispatchEvent(new Event(PLAN_CHANGE,{bubbles:true}))};
+ const update=(change:(s:DecState)=>void)=>{change(state);changed()};
+ const openEditor=()=>{if(locked||!editor)return;options();if(!editor.open)editor.showModal()};
+ const applyHousehold=(detail:Detail)=>{
+  if(!detail?.household)return;
+  const next=planKey(detail.sample??null,detail.household.id);
+  members=detail.household.members??[];
+  if(next!==current){current=next;state=readScoped(tabStorage.get(key),current,isDecState)??freshState(members)}
+  applyFamily(state,members);
+  changed();
+ };
+ root.clubPlan={
+  ready:()=>Boolean(current),
+  state:()=>state,
+  update,
+  replace:(s)=>{state=structuredClone(s);changed()},
+  setPersist:(on)=>{persist=on;if(on)save()},
+  fingerprint:()=>decFingerprint(state,members),
+  members:()=>members,
+  view:()=>decView(state,members),
+  setLocked:(on)=>{locked=on;if(on)editor?.close()},
+  openEditor,
+ };
+ onFonts.push(()=>{drawn='';changed()});
+ window.addEventListener('omc:club-preview-household',e=>applyHousehold((e as CustomEvent<Detail>).detail));
+ const cached=cachedDetail();
+ if(cached)applyHousehold(cached);
+ start().catch(e=>{console.error(e);root.querySelectorAll('[data-dec-page]').forEach(p=>{p.textContent='Preview could not load. Please refresh.'})});
+}else if(document.getElementById('family')){
+ // The standalone preview and the member kit.
+ const get=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
+ const family=get<HTMLSelectElement>('family');
+ const button=get<HTMLButtonElement>('download'),message=get<HTMLElement>('message');
+ let clubHousehold:Household|null=null;
+ function current():Pick<Family,'id'|'family'|'members'> {
+  if(clubHousehold){
+   const v=decView(applyFamily(freshState(clubHousehold.members),clubHousehold.members),clubHousehold.members);
+   return {id:'rivera',family:clubHousehold.displayName??'Our Family',members:v.layout.members};
+  }
+  return families.find(f=>f.id===family.value)??families[0];
+ }
+ const applyHousehold=(detail:Detail)=>{clubHousehold=detail?.household??null;show()};
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<Detail>).detail));
+ const cached=cachedDetail();
+ if(cached)applyHousehold(cached);
+ const editDialog=document.querySelector<HTMLDialogElement>('#dec-edit-dialog');
+ const whyDialog=document.querySelector<HTMLDialogElement>('#dec-why-dialog');
+ document.querySelectorAll('[data-dec-edit]').forEach(el=>el.addEventListener('click',()=>editDialog?.showModal()));
+ document.querySelector('[data-dec-why]')?.addEventListener('click',()=>whyDialog?.showModal());
+ document.querySelectorAll('[data-dec-close]').forEach(el=>el.addEventListener('click',()=>el.closest('dialog')?.close()));
+ for(const dialog of [editDialog,whyDialog])dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+ function show(){
+  const f=current();
+  const children=f.members.slice(2);
+  const names=children.join(' & ');
+  get<HTMLElement>('mission-title').textContent=names+', your Christmas mission is ready.';
+  if(metrics){const pages=decemberPages(metrics,f);
+  get<HTMLElement>('front').innerHTML=renderSvg(pages[0],'Personalized Christmas mission');
+  get<HTMLElement>('reverse').innerHTML=renderSvg(pages[1],'Two Christmas kindness cards, one-sided');}
+ }
+ family.addEventListener('change',show);
+ button.addEventListener('click',async()=>{
+  if(!metrics||!bytes)return;
+  button.disabled=true;message.textContent='Preparing your mission and cards…';
+  try{
+  const f=current();const pdf=await renderPdf(decemberPages(metrics,f),bytes,{title:'December Christmas Mission · '+f.family,subject:'Personalized kids Christmas mission and two one-sided cards',duplex:false});
+  const url=URL.createObjectURL(new Blob([pdf as BlobPart],{type:'application/pdf'}));
+  const link=document.createElement('a');link.href=url;link.download='december-christmas-mission-'+f.id+'.pdf';document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  message.textContent='Downloaded. Print each PDF page on a separate sheet, single-sided. This demo does not mail anything.';
+  }catch(e){console.error(e);message.textContent='Could not generate the PDF. Please try again.';}
+  finally{button.disabled=false;}
+ });
+ onFonts.push(()=>{button.disabled=false;show()});
+ show();
+ start().catch(e=>{console.error(e);message.textContent='Preview could not load. Please refresh.'});
+}
 </script>
+
 <style is:global>
 @font-face{font-family:'WS Gelasio';src:url('/fonts/worksheet/gelasio-400.ttf');font-weight:400}
 @font-face{font-family:'WS Gelasio';src:url('/fonts/worksheet/gelasio-400-italic.ttf');font-weight:400;font-style:italic}
@@ -166,6 +263,26 @@ show();start();
  #club-month-content .dec-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{#club-month-content .dec-float,#club-month-content .dec-dialog,#club-month-content .dec-actions{display:none!important}}
+/* Plan mode: the Club plan page places the two sheets. */
+.dec-plan{font-family:Montserrat,Arial,sans-serif;color:#454545}
+.dec-plan-sheets{display:flex;flex-direction:column;align-items:center;gap:28px}
+.dec-plan-sheets figure{width:min(100%,816px);margin:0}
+.dec-plan-sheets figcaption{text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-top:10px;color:#686868}
+.dec-stage{position:relative;margin:0 auto}
+.dec-paper{position:absolute;left:0;top:0;width:816px;height:1056px;transform:scale(var(--dec-scale,1));transform-origin:top left;background:#fff;border:1px solid #e3e3e3;box-shadow:0 12px 32px #0002;overflow:hidden}
+.dec-paper svg{display:block;width:100%;height:100%}
+.dec-plan-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(540px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow-y:auto;padding:24px;background:#fff;border:1px solid #dce2d7;border-radius:10px;box-shadow:0 20px 65px #0003;color:#454545;font-family:Montserrat,Arial,sans-serif;z-index:100}
+.dec-plan-dialog::backdrop{background:rgba(33,40,36,.52)}
+.dec-plan-dialog .dec-dialog-header{display:flex;align-items:start;justify-content:space-between;gap:15px}
+.dec-plan-dialog .dec-dialog-header h2{font:400 28px Georgia,serif;color:#527468;margin:0 0 14px}
+.dec-plan-dialog .dec-dialog-header button{width:36px;height:36px;border:0;border-radius:50%;background:#edf2ec;font-size:24px;cursor:pointer}
+.dec-field-label{font:700 12px Montserrat,Arial,sans-serif;color:#465d50;margin:18px 0 10px}
+.dec-field-hint{font:12px/1.5 Montserrat,Arial,sans-serif;color:#6b7068;margin:9px 0 0}
+.dec-chips{display:flex;flex-wrap:wrap;gap:7px}
+.dec-chip{border:1px solid #cbd8cb;background:#fff;color:#516b5b;border-radius:99px;padding:10px 16px;min-height:44px;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.dec-chip[aria-pressed=true]{background:#527468;color:#fff;border-color:#527468}
+.dec-chip:disabled{cursor:default;opacity:.85}
+.dec-plan-dialog .dec-dialog-done{width:100%;min-height:46px;border:0;background:#527468;color:#fff;font-weight:700;cursor:pointer;margin-top:22px}
 </style>
 <style>
 .dec{max-width:1440px;margin:auto;padding:28px clamp(18px,3.5vw,54px) 90px;color:#454545}
