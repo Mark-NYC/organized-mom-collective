@@ -6,7 +6,7 @@
  * Saved per family in this tab only (src/lib/club/plan/storage.ts): { current: '<sample>:<householdId>', state }.
  */
 import type { PlanResource } from '../plan/resource';
-import type { PlanMember } from './october-sunday-reset';
+import type { PlanMember } from './sunday-reset';
 
 export interface Habit {
   name: string;

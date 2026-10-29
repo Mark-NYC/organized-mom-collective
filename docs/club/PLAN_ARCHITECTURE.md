@@ -1,8 +1,9 @@
 # Club plan pages: shared architecture
 
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
-October (Sunday Reset, two sheets), January (Habit Cards, one sheet) and February (laundry guides: one sheet per
-readiness level in use, so one or two) use it. Every remaining month should too, without copying page code.
+September (Sunday Reset, two sheets, plus the activity calendar demo in a second tab), October (Daily Reset, two
+sheets), January (Habit Cards, one sheet) and February (laundry guides: one sheet per readiness level in use, so one
+or two) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
 
 ## The split
 
@@ -14,7 +15,7 @@ readiness level in use, so one or two) use it. Every remaining month should too,
 | The printable artwork and its desktop editor | **Per month** | `src/components/club/<MonthResource>.astro` |
 | The month's rows and edit sheets on the plan screen | **Per month** (adapter) | `src/components/club/<Month>PlanMobile.astro` |
 | Desktop experience at 1100px and wider | **Per month**, unchanged | the month's page and printable |
-| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by February (October still renders its own copy of the same rail) | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
+| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by September, October and February | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
 
 The month owns content and personalization. The shared layer owns everything a family sees around it.
 
@@ -81,7 +82,10 @@ covers **only what prints**: January's covers the active cards, so a hidden seco
 - Approval (prototype): sessionStorage at `omc:preview:<resource>:approval`, holding the fingerprint and date.
 - Nothing is written to localStorage. January removes its old localStorage keys (`key`, `key:count`,
   `key:automatic-names`) on load.
-- Keys in use: `omc:preview:october-sunday-reset:v2`, `omc:preview:january-habit-cards:v3`, plus `…:approval` for each.
+- Keys in use: `omc:club:september-sunday-reset:v1` (`omc:preview:september-sunday-reset:approval`),
+  `omc:club:september-calendar:v1` (the calendar demo, per family), `omc:club:october-daily-reset:v1`
+  (`omc:preview:october-daily-reset:approval`; reads the earlier September page's `omc:preview:september-room-reset:v2`
+  once for the same family), `omc:preview:january-habit-cards:v3` plus its `…:approval`.
   The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
   `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
 
@@ -145,3 +149,17 @@ Laundry days (one or more, or "As needed") print on every guide; a named machine
 (Mom/Dad for the first two parents, other grown-ups by name; the default keeps the original wording). Tab-only
 `omc:club:february-laundry-app:v1` with `omc:preview:february-laundry:approval`; the earlier page's
 `omc:club:february-laundry:v2` edits are read once for the same family, then removed.
+
+## September and October
+
+`/app/club/september`: the Sunday Reset (`SeptemberSundayReset.astro`, `SeptemberPlanMobile.astro`, rules
+`src/lib/club/engines/sunday-reset.ts`, ages as of September 2027) with a second tab, Try the Wall Calendar: the free
+`/try-the-calendar` tool (`FamilyActivityCalendar.astro`, design unchanged) embedded with the family's names (Mom/Dad
+for the first two parents, others by name, archived members left off), starting on September 2027, kept in this
+tab per family, PNG download as on the public page. Printing always prints the Sunday Reset's two sheets; the
+inactive Sunday Reset panel is hidden with a class, because Tailwind's layered `[hidden]` rule would beat the print
+rule. On phones a section opens the calendar full screen.
+
+`/app/club/october`: the Daily Reset (`OctoberDailyReset.astro` with `planMode`, `OctoberPlanMobile.astro`, rules
+`src/lib/club/engines/daily-reset.ts`, ages as of October 2027): one cue, two or three jobs by the youngest child's age,
+a person for each job, front for the kids and back for the parent.

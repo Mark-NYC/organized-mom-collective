@@ -1,10 +1,11 @@
 ---
-/** Unlisted September 2027 family reset prototype. */
+/** Unlisted September 2027 Club proof: the family Sunday Reset (moved from October) with the monthly activity
+ * calendar demo in its second tab. The app page is /app/club/september. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
-import SeptemberRoomReset from '../../components/club/SeptemberRoomReset.astro';
+import SeptemberSundayReset from '../../components/club/SeptemberSundayReset.astro';
 ---
-<PublicLayout fullTitle="September 5-Minute Reset Preview | Organized Family Club" description="A prepared daily reset with visual jobs and a clear finish line." indexable={false} chrome={false} width="full" tracking={false}>
+<PublicLayout fullTitle="September Family Sunday Reset | Organized Family Club" description="One prepared family Sunday Reset, with fall readiness as the first guided example, and a monthly family activity calendar to try." indexable={false} chrome={false} width="full" tracking={false}>
  <ClubPrototypeNav client:only="react" month="september" />
- <main id="club-month-content"><SeptemberRoomReset storageKey="omc:preview:september-room-reset:v2" /></main>
+ <main id="club-month-content"><SeptemberSundayReset storageKey="omc:preview:september-sunday-reset:v1" /></main>
 </PublicLayout>

@@ -1,0 +1,239 @@
+---
+/**
+ * September Sunday Reset on phones and tablets (below 1100px): the month's own sections inside the shared
+ * ClubPlanScreen — the Sunday rhythm, the three steps, everyone's part and the fall jobs — and their sheets.
+ * It reads and changes the plan only through the printable's controller (`.osr` root's `clubPlan`, see
+ * src/lib/club/engines/sunday-reset.ts). Status, approval, copy, print and sheets are shared
+ * (src/components/club/plan/, docs/club/PLAN_ARCHITECTURE.md). Design: docs/club/OCTOBER_PHASE2_DESIGN.md.
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import { SUNDAY_STEPS } from '../../lib/club/engines/sunday-reset';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="September · Organized Family Club" sheets={['front', 'back']} previewNote="Front and back, ready to print">
+  <Fragment slot="title">Our Family <em>Sunday Reset</em></Fragment>
+
+  <button type="button" class="omp-rhythm" data-omp-edit="rhythm" aria-describedby="omp-rhythm-note">
+    <span class="omp-rhythm-label" data-omp-rhythm-label>Every Sunday</span>
+    <span class="omp-rhythm-time" data-omp-trigger>After lunch</span>
+    <span class="omp-rhythm-note" id="omp-rhythm-note">10–15 minutes together with our wall calendar.</span>
+    <span class="omp-change" aria-hidden="true">Change</span>
+  </button>
+  <ol class="omp-steps" aria-label="Every Sunday, three simple steps">
+    {SUNDAY_STEPS.map((step) => (
+      <li><img src={step.icon} alt="" width="44" height="44" loading="lazy" /><span><strong>{step.title}</strong>{step.text}</span></li>
+    ))}
+  </ol>
+
+  <section class="cp-section" aria-labelledby="omp-people-title">
+    <h2 id="omp-people-title">Everyone has a part</h2>
+    <p class="cp-intro">The same small job every Sunday, so it isn’t all on you.</p>
+    <ul class="cp-group" data-omp-people></ul>
+  </section>
+
+  <section class="cp-section" aria-labelledby="omp-fall-title">
+    <h2 id="omp-fall-title">First, try it: fall readiness</h2>
+    <p class="cp-intro">Do these once, together. Next Sunday, use the same three steps for whatever’s coming up.</p>
+    <ul class="cp-group" data-omp-jobs></ul>
+  </section>
+
+  <section class="cp-section" aria-labelledby="omp-cal-title">
+    <h2 id="omp-cal-title">Try the Wall Calendar</h2>
+    <p class="cp-intro">Your family’s names are already in. Add each person’s recurring activities once and see the whole month by person, ready for Sunday planning. Download it as an image any time.</p>
+    <button type="button" class="omp-cal" data-omp-calendar><span>Open the monthly calendar</span><span class="cp-chev" aria-hidden="true"></span></button>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.omp-rhythm{position:relative;display:grid;gap:6px;width:100%;padding:20px 20px 18px;border:0;background:var(--cp-wash);text-align:left;cursor:pointer}
+.omp-rhythm-label{font-size:.8rem;font-weight:600;color:var(--cp-sage)}
+.omp-rhythm-time{font:400 clamp(28px,7.6vw,34px)/1.1 var(--font-serif);letter-spacing:-.01em}
+.omp-rhythm-note{font-size:.9rem;line-height:1.55;color:var(--cp-soft);max-width:30ch}
+.omp-change{position:absolute;top:18px;right:18px;font-size:.82rem;font-weight:600;color:var(--cp-sage);text-decoration:underline;text-underline-offset:4px}
+.cp[data-readonly] .omp-change{display:none}
+.omp-cal{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:14px 18px;border:1px solid var(--cp-line);background:#fff;color:var(--cp-ink);font:600 1rem var(--font-sans);text-align:left;cursor:pointer}
+.omp-steps{list-style:none;margin:0 0 30px;padding:6px 0 0;display:grid}
+.omp-steps li{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--cp-line)}
+.omp-steps img{width:44px;height:44px;object-fit:contain}
+.omp-steps span{font-size:.88rem;line-height:1.45;color:var(--cp-soft)}
+.omp-steps strong{display:block;font-size:.98rem;font-weight:600;color:var(--cp-ink);margin-bottom:1px}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  TRIGGER_CHOICES, roleSuggestions, setFallJob, setName, setRole, setTrigger,
+  type OsrPlan, type PlanState,
+} from '../../lib/club/engines/sunday-reset';
+
+const APPROVAL_KEY = 'omc:preview:september-sunday-reset:approval';
+const CHOICE_LABEL: Record<string, string> = { 'Sunday after breakfast': 'After breakfast', 'Sunday after church': 'After church', 'Sunday after lunch': 'After lunch', 'Sunday evening': 'Sunday evening' };
+
+const root = document.querySelector<HTMLElement>('.club-plan:has(.osr)');
+const osr = root?.querySelector<HTMLElement & { clubPlan?: OsrPlan }>('.osr');
+if (root && osr) {
+  const plan = () => osr.clubPlan!;
+  const shortTrigger = (t: string) => {
+    const rest = t.replace(/^sunday\s+/i, '');
+    return rest === t ? t : rest.charAt(0).toUpperCase() + rest.slice(1);
+  };
+  let ui: PlanScreen<PlanState>;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+
+  const render = (_screen: PlanScreen<PlanState>, s: PlanState, locked: boolean) => {
+    const p = plan();
+    const members = p.members();
+    q<HTMLButtonElement>('[data-omp-edit="rhythm"]').disabled = locked;
+    const sunday = /^sunday\b/i.test(s.trigger);
+    q('[data-omp-rhythm-label]').textContent = sunday ? 'Every Sunday' : 'Our weekly reset';
+    q('[data-omp-trigger]').textContent = sunday ? shortTrigger(s.trigger) : s.trigger;
+    q('[data-omp-edit="rhythm"]').setAttribute('aria-label', `When you reset: ${s.trigger}. Change`);
+
+    q('[data-omp-people]').replaceChildren(...members.map((m) => {
+      const name = p.nameOf(m);
+      const row = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+        el('span', { class: 'cp-avatar' }, name.charAt(0)),
+        el('span', { class: 'cp-row-text' }, el('strong', {}, name), el('span', {}, s.assignments[m.id] || 'No part yet')),
+        el('span', { class: 'cp-chev' }));
+      row.setAttribute('aria-label', `${name}: ${s.assignments[m.id] || 'no part yet'}. Change`);
+      row.addEventListener('click', () => openPerson(m.id));
+      return el('li', {}, row);
+    }));
+
+    const jobs = q('[data-omp-jobs]');
+    jobs.replaceChildren(...s.fallJobs.map((j) => {
+      if (j.removed) {
+        const restore = el('button', { type: 'button', disabled: locked }, 'Restore');
+        restore.setAttribute('aria-label', `Restore ${j.title}`);
+        restore.addEventListener('click', () => p.update((st) => setFallJob(st, j.id, { removed: false })));
+        return el('li', { class: 'cp-removed' }, el('s', {}, j.title), locked ? '' : restore);
+      }
+      const owner = members.find((m) => m.id === j.ownerId);
+      const who = owner ? p.nameOf(owner) : 'Everyone';
+      const row = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+        el('img', { src: j.icon, alt: '', width: 42, height: 42 }),
+        el('span', { class: 'cp-row-text' }, el('strong', {}, j.title), el('span', { class: 'cp-owner' }, who)),
+        el('span', { class: 'cp-chev' }));
+      row.setAttribute('aria-label', `${j.title}, ${who}. Change`);
+      row.addEventListener('click', () => openJob(j.id));
+      return el('li', {}, row);
+    }));
+    if (!s.fallJobs.some((j) => !j.removed)) jobs.prepend(el('li', { class: 'cp-removed' }, 'No fall jobs this month.'));
+  };
+
+  const openRhythm = () => {
+    const p = plan();
+    const current = p.state().trigger;
+    const chips = el('div', { class: 'cp-chips', role: 'group' });
+    chips.setAttribute('aria-label', 'Reset time');
+    for (const choice of TRIGGER_CHOICES) {
+      const chip = el('button', { type: 'button', class: 'cp-chip' }, CHOICE_LABEL[choice] ?? choice);
+      chip.setAttribute('aria-pressed', String(choice === current));
+      chip.addEventListener('click', () => {
+        p.update((s) => setTrigger(s, choice));
+        chips.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === chip)));
+        window.setTimeout(ui.closeSheet, 220);
+      });
+      chips.append(chip);
+    }
+    const custom = !(TRIGGER_CHOICES as readonly string[]).includes(current);
+    const input = el('input', { type: 'text', maxLength: 85, value: custom ? current : '', placeholder: 'e.g. Sunday at 4 PM' });
+    const field = el('label', { class: 'cp-field' }, 'Something else', input);
+    const save = el('button', { type: 'button', class: 'cp-btn cp-btn-dark' }, 'Use this time');
+    save.addEventListener('click', () => { if (input.value.trim()) p.update((s) => setTrigger(s, input.value)); ui.closeSheet(); });
+    const other = el('div', { class: 'cp-own' }, field, save);
+    other.hidden = !custom;
+    const reveal = el('button', { type: 'button', class: 'cp-link' }, el('span', {}, 'Something else…'));
+    reveal.hidden = custom;
+    reveal.addEventListener('click', () => { other.hidden = false; reveal.hidden = true; input.focus(); });
+    ui.openSheet('When does your family reset?', el('p', { class: 'cp-sheet-hint' }, 'Pick a time that already happens every Sunday.'), chips, reveal, other);
+  };
+
+  const openPerson = (id: string) => {
+    const p = plan();
+    const members = p.members();
+    const index = members.findIndex((m) => m.id === id);
+    const m = members[index];
+    if (!m) return;
+    const s = p.state();
+    const name = p.nameOf(m);
+    const options = roleSuggestions(m, index);
+    const currentRole = s.assignments[m.id] ?? '';
+    const own = !options.includes(currentRole);
+    const group = el('fieldset', { class: 'cp-choices' });
+    group.append(el('legend', { class: 'sr-only' }, `${name}’s weekly part`));
+    const radio = (value: string, checked: boolean) => el('input', { type: 'radio', name: 'omp-role', value, checked });
+    for (const o of options) {
+      const r = radio(o, o === currentRole);
+      r.addEventListener('change', () => p.update((st) => setRole(st, m.id, o)));
+      group.append(el('label', { class: 'cp-choice' }, r, el('span', {}, o)));
+    }
+    const ownRadio = radio('own', own);
+    const ownText = el('textarea', { maxLength: 105, value: own ? currentRole : '', placeholder: 'Their weekly part, in a short sentence' });
+    ownText.setAttribute('aria-label', 'In your own words');
+    ownRadio.addEventListener('change', () => { ownText.focus(); if (ownText.value.trim()) p.update((st) => setRole(st, m.id, ownText.value)); });
+    ownText.addEventListener('focus', () => { ownRadio.checked = true; });
+    ownText.addEventListener('input', () => { ownRadio.checked = true; p.update((st) => setRole(st, m.id, ownText.value)); });
+    group.append(el('label', { class: 'cp-choice' }, ownRadio, el('span', { class: 'cp-own' }, 'In your own words', ownText)));
+    const nameInput = el('input', { type: 'text', maxLength: 35, value: name, autocomplete: 'off' });
+    nameInput.addEventListener('input', () => p.update((st) => setName(st, m.id, nameInput.value === (m.kind === 'child' ? m.firstName : '') ? '' : nameInput.value)));
+    const actions = el('div', { class: 'cp-sheet-actions' }, ui.doneButton());
+    const next = members[index + 1];
+    if (next) {
+      const b = el('button', { type: 'button', class: 'cp-btn' }, `Next: ${p.nameOf(next)} ›`);
+      b.addEventListener('click', () => openPerson(next.id));
+      actions.append(b);
+    }
+    ui.openSheet(`${name}’s part each Sunday`, group, el('label', { class: 'cp-field' }, 'Name on the printable', nameInput), actions);
+  };
+
+  const openJob = (jobId: string) => {
+    const p = plan();
+    const job = p.state().fallJobs.find((j) => j.id === jobId);
+    if (!job) return;
+    const people = el('div', { class: 'cp-chips cp-people-chips', role: 'group' });
+    people.setAttribute('aria-label', 'Who’s doing this?');
+    for (const m of p.members()) {
+      const chip = el('button', { type: 'button', class: 'cp-chip' }, p.nameOf(m));
+      chip.setAttribute('aria-pressed', String(m.id === job.ownerId));
+      chip.addEventListener('click', () => {
+        p.update((s) => setFallJob(s, jobId, { ownerId: m.id }));
+        people.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === chip)));
+      });
+      people.append(chip);
+    }
+    const title = el('input', { type: 'text', maxLength: 65, value: job.title });
+    title.addEventListener('input', () => p.update((s) => setFallJob(s, jobId, { title: title.value })));
+    const desc = el('textarea', { maxLength: 180, value: job.description });
+    desc.addEventListener('input', () => p.update((s) => setFallJob(s, jobId, { description: desc.value })));
+    const remove = el('button', { type: 'button', class: 'cp-text-btn' }, 'Remove from this month');
+    remove.addEventListener('click', () => {
+      p.update((s) => setFallJob(s, jobId, { removed: true }));
+      ui.closeSheet();
+      ui.toast(`Removed “${job.title}”.`, () => p.update((s) => setFallJob(s, jobId, { removed: false })));
+    });
+    ui.openSheet(job.title,
+      el('div', { class: 'cp-field' }, el('span', {}, 'Who’s doing this?'), people),
+      el('label', { class: 'cp-field' }, 'Job', title),
+      el('label', { class: 'cp-field' }, 'What done looks like', desc),
+      remove,
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  q('[data-omp-edit="rhythm"]').addEventListener('click', openRhythm);
+
+  const mounted = mountPlanScreen<PlanState>({ root, host: osr, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+// The calendar demo lives in the printable's second tab: open the full-screen printable on it.
+// The printable card opens it on the Sunday Reset.
+const tab = (name: string) => document.querySelector<HTMLButtonElement>(`.osr [data-osr-tab="${name}"]`)?.click();
+document.querySelector('.cp [data-plan-open-proof]')?.addEventListener('click', () => tab('reset'));
+document.querySelector('[data-omp-calendar]')?.addEventListener('click', () => {
+  document.querySelector<HTMLButtonElement>('.cp [data-plan-open-proof]')?.click();
+  tab('calendar');
+});
+</script>

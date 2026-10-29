@@ -1,5 +1,7 @@
 ---
-/** One canonical activity calendar for the public tool and October Club preview. */
+/** One canonical activity calendar for the public tool (/try-the-calendar) and the September Club plan page.
+ * Embedded (Club): starts on September 2027, rows prefilled from the family profile, and what's added stays in this
+ * browser tab for that family only (src/lib/club/plan/storage.ts), never mixed with another family's. */
 interface Props { embedded?: boolean }
 const { embedded = false } = Astro.props;
 const quickActivities = ['Family Dinner', 'Laundry Day', 'Grocery Run', 'Sports Practice', 'Piano Lesson', 'Date Night', 'Meal Prep', 'Weekly Clean-Up'];
@@ -683,6 +685,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
 
 <script>
   import { downloadPng } from '../lib/printable';
+  import { planKey, readScoped, tabStorage } from '../lib/club/plan/storage';
 
   /** An activity is a rule, not a list of dates: weekly on some weekdays, or from a date with an optional repeat. */
   type Activity =
@@ -696,7 +699,11 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
 
   const clubCalendar = document.querySelector<HTMLElement>('.family-calendar-container')?.dataset.clubCalendar === 'true';
-  const KEY = clubCalendar ? 'omc:october-family-calendar:v1' : 'omc:family-calendar:v1';
+  const KEY = 'omc:family-calendar:v1';
+  /** The Club demo's key: tab-only, scoped to one family. */
+  const CLUB_KEY = 'omc:club:september-calendar:v1';
+  /** The earlier Club demo kept family names in localStorage; removed on sight. */
+  const OLD_CLUB_KEY = 'omc:october-family-calendar:v1';
   const DEFAULT_MEMBERS = ['Mom', 'Dad', 'Andrew', 'Philip', 'Jackson'];
   const MEMBER_COLORS = ['#f4f4f4', '#e3efee', '#f4e9e4', '#f9e5e1', '#fef6f5'];
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -716,6 +723,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
 
   function load(): State {
     const fresh: State = { members: [...DEFAULT_MEMBERS], word: 'Family', bigThings: 'Vacation, Deadline', activities: [] };
+    if (clubCalendar) return fresh;
     try {
       const saved = JSON.parse(localStorage.getItem(KEY) ?? 'null');
       if (saved && Array.isArray(saved.members) && Array.isArray(saved.activities)) return { ...fresh, ...saved };
@@ -725,7 +733,13 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     return fresh;
   }
   const state = load();
+  /** The Club family this calendar belongs to (sample + household), once known. */
+  let clubFamily = '';
   function save() {
+    if (clubCalendar) {
+      if (clubFamily) tabStorage.set(CLUB_KEY, JSON.stringify({ current: clubFamily, state }));
+      return;
+    }
     try {
       localStorage.setItem(KEY, JSON.stringify(state));
     } catch {
@@ -734,8 +748,10 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
 
   const today = new Date();
-  let month = clubCalendar ? new Date(2027, 9, 1) : new Date(today.getFullYear(), today.getMonth(), 1);
-  const memberName = (i: number) => state.members[i]?.trim() ?? DEFAULT_MEMBERS[i];
+  let month = clubCalendar ? new Date(2027, 8, 1) : new Date(today.getFullYear(), today.getMonth(), 1);
+  /** What each row goes back to: the example names, or (in the Club) the family's own. */
+  let memberDefaults = [...DEFAULT_MEMBERS];
+  const memberName = (i: number) => state.members[i]?.trim() ?? memberDefaults[i];
 
   function occursOn(a: Activity, d: Date) {
     if (a.kind === 'weekly') return a.days.includes(d.getDay());
@@ -831,11 +847,11 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
 
   function renderMembers() {
-    $('[data-fc-members]').innerHTML = DEFAULT_MEMBERS.map(
+    $('[data-fc-members]').innerHTML = memberDefaults.map(
       (def, i) => `<div class="fc-member">
-        <input type="text" value="${esc(state.members[i] ?? def)}" placeholder="${def}" data-fc-member="${i}"
+        <input type="text" value="${esc(state.members[i] ?? def)}" placeholder="${esc(def)}" data-fc-member="${i}"
           aria-label="Family member ${i + 1}" style="background:${MEMBER_COLORS[i]}" />
-        <button type="button" data-fc-member-reset="${i}" title="Reset name" aria-label="Reset name to ${def}">↻</button>
+        <button type="button" data-fc-member-reset="${i}" title="Reset name" aria-label="Reset name to ${esc(def || `row ${i + 1}`)}">↻</button>
       </div>`,
     ).join('');
     renderMemberOptions();
@@ -894,7 +910,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-fc-member-reset]');
     if (!btn) return;
     const i = Number(btn.dataset.fcMemberReset);
-    state.members[i] = DEFAULT_MEMBERS[i];
+    state.members[i] = memberDefaults[i];
     renderMembers();
     render();
   });
@@ -1048,19 +1064,28 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   renderMembers();
   render();
   if(clubCalendar){
-    type HouseholdMember = { id:string; firstName:string; kind:string; role?:string };
-    type FamilyDetail = { household?: { members?: HouseholdMember[] } };
+    type HouseholdMember = { id:string; firstName:string; kind:string; role?:string; archived?:boolean };
+    type FamilyDetail = { household?: { id:string; members?: HouseholdMember[] } | null; sample?: string | null };
+    try { localStorage.removeItem(OLD_CLUB_KEY); } catch { /* blocked */ }
+    const isState=(x:unknown):x is State=>{const v=x as Partial<State>|null;return Boolean(v&&Array.isArray(v.members)&&Array.isArray(v.activities)&&typeof v.word==='string'&&typeof v.bigThings==='string')};
     const adoptHousehold=(detail: FamilyDetail)=>{
-      const all=(detail.household?.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
-      if(!all.length)return;
+      if(!detail?.household)return;
+      const family=planKey(detail.sample??null,detail.household.id);
+      if(family===clubFamily)return;
+      clubFamily=family;
+      // This family's calendar from earlier in this tab, or a fresh one with their names (archived members never show).
+      const all=(detail.household.members??[]).filter(m=>(m.kind==='adult'||m.kind==='child')&&!m.archived);
       const parents=all.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner'));
       const names=all.map(m=>{
         if(m.kind==='child')return m.firstName;
         const i=parents.findIndex(p=>p.id===m.id);
         return i===0?'Mom':i===1?'Dad':m.firstName;
       }).slice(0,5);
-      state.members=Array.from({length:5},(_,i)=>names[i]??'');
-      renderMembers();render();
+      memberDefaults=Array.from({length:5},(_,i)=>names[i]??'');
+      const saved=readScoped(tabStorage.get(CLUB_KEY),family,isState);
+      if(saved){Object.assign(state,saved);renderMembers();render();return;}
+      Object.assign(state,{members:[...memberDefaults],word:'Family',bigThings:'Vacation, Deadline',activities:[]});
+      save();renderMembers();render();
     };
     window.addEventListener('omc:club-preview-household',(event:Event)=>adoptHousehold((event as CustomEvent<FamilyDetail>).detail));
     const cached=(window as Window & { __ofcPreviewHousehold?: FamilyDetail }).__ofcPreviewHousehold;

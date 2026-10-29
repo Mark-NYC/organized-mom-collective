@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_TRIGGER, applyDefaults, defaultFallJobs, displayName, emptyState, hasChanges, planKey, planMembers, preparedState, readSavedPlan,
   type PlanMember,
-} from './october-sunday-reset';
+} from './sunday-reset';
 
 const family: PlanMember[] = [
   { id: 'ana', firstName: 'Ana', kind: 'adult', role: 'parent', isAccountHolder: true },
@@ -13,7 +13,7 @@ const family: PlanMember[] = [
   { id: 'pet', firstName: 'Rex', kind: 'pet' },
 ];
 
-describe('October Sunday Reset plan', () => {
+describe('Sunday Reset plan (September)', () => {
   it('puts only current adults and children on the sheet', () => {
     expect(planMembers(family).map((m) => m.id)).toEqual(['ana', 'luis', 'sofia', 'mateo']);
   });
@@ -66,9 +66,9 @@ describe('October Sunday Reset plan', () => {
   });
 });
 
-import { planFingerprint, roleSuggestions, setFallJob, setName, setRole, setTrigger } from './october-sunday-reset';
+import { planFingerprint, roleSuggestions, setFallJob, setName, setRole, setTrigger } from './sunday-reset';
 
-describe('October plan edits from the mobile sheets', () => {
+describe('Sunday Reset edits from the mobile sheets', () => {
   const members = planMembers(family);
   it('suggests the prepared role first, then two that fit the age', () => {
     const s = roleSuggestions(members[2], 2);

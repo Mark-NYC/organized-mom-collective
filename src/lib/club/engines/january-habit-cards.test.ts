@@ -3,7 +3,7 @@ import {
   HABIT_DEFAULTS, applyFamilyNames, applyFinder, familyCardNames, freshHabitState, habitFingerprint, isHabitState, ownerLine,
   setCount, setHabit, suggestionFor,
 } from './january-habit-cards';
-import type { PlanMember } from './october-sunday-reset';
+import type { PlanMember } from './sunday-reset';
 
 const rivera: PlanMember[] = [
   { id: 'ana', firstName: 'Ana', kind: 'adult', role: 'parent', isAccountHolder: true },

@@ -68,14 +68,14 @@ const months = [
     "month": "September",
     "title": "Stop Being the Family's Calendar",
     "responsibility": "Planning together",
-    "how": "A short weekly meeting helps everyone know the plan and own their commitments.",
-    "url": "/club/september-preview/"
+    "how": "A Sunday Reset around the wall calendar, plus a monthly activity calendar that shows everyone's recurring activities.",
+    "url": "/app/club/september/"
   },
   {
     "month": "October",
-    "title": "Get Ahead of the Last-Minute Scramble",
-    "responsibility": "Noticing what is needed",
-    "how": "A seasonal readiness plan helps family members spot and handle needs early.",
+    "title": "Less Asking. More Doing.",
+    "responsibility": "Caring for shared spaces",
+    "how": "A daily reset with one familiar cue, picture jobs and a clear finish line kids can recognize.",
     "url": "/app/club/october/"
   },
   {
