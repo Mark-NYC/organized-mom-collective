@@ -25,6 +25,20 @@ const kitPreviews = [
  ['December', 'December', 'Shared Christmas preparations'],
 ].map(([month, file, description]) => ({ month, description, title: months.find(m => m.month === month)!.title, color: monthColors.find(m => m.name === month)!.hex, image: kitImages[`../../../assets/icons/ofc/monthly-kits/${file}.webp`] as string }));
 
+const kitDetails: Record<string, { relief: string; personal: string }> = {
+ January: { relief: "You shouldn't have to repeat the same reminders every morning and night. Small habit cards put one clear next step right where your family needs it.", personal: "Your cards will use your family's names, with small actions matched to each person's age, abilities, and the routines your household needs help with." },
+ February: { relief: "Laundry doesn't have to begin and end with you. Picture guides give kids a clear part of the process they can learn to handle themselves.", personal: "Your guides will use your children's names and match the steps to their ages and abilities, from putting clothes in the hamper to handling more of their own laundry." },
+ March: { relief: "Spend less time chasing people through their chores. A shared chart makes assignments visible, while the cleaning plan explains the steps and what finished looks like.", personal: "Your chart will include your family's names, with jobs and instructions suited to each person's age, abilities, and your home's needs." },
+ April: { relief: "Dinner takes more than cooking. This plan shares the preparation and cleanup so you aren't the only person thinking through what needs doing.", personal: "Your plan will use your family's names and give each person a role that fits their age, abilities, and your household's dinner routine." },
+ May: { relief: "When school structure disappears, you shouldn't have to invent the next activity all day. A flexible summer rhythm gives kids a familiar plan to check.", personal: "Your summer rhythm will include your family's names and reflect your children's ages, independence, and your household's daily needs." },
+ June: { relief: "Fewer calls of 'Mom, can I have a snack?' A simple picture guide helps kids choose and prepare snacks they can manage.", personal: "Your guide will use your children's names, with snack choices and preparation steps matched to their ages, abilities, and the food needs you share. You review what they can safely do themselves." },
+ July: { relief: "You don't have to come up with something every time someone says 'I'm bored.' An activity menu gives kids practical ideas to choose and start.", personal: "Your activity board will use your children's names and offer choices suited to their ages, interests, abilities, and the level of help they need." },
+ August: { relief: "School days run more smoothly when everyone can see what comes next. A clear school-day rhythm helps you spend less time directing every transition.", personal: "Your plan will include your children's names and fit their ages, abilities, school routine, and the parts of the day your family needs help with." },
+ September: { relief: "You shouldn't have to keep the whole family's week in your head. A shared calendar and weekly reset give everyone a place to see the plan and prepare together.", personal: "Your plan will include your family's names, with activities and preparation roles matched to your children's ages, abilities, and your household's schedule." },
+ October: { relief: "A short daily reset gives everyone a clear way to help care for home. Familiar cues and picture jobs mean less explaining the same tasks over and over.", personal: "Your reset will use your family's names, with jobs and a clear finish line matched to each person's age, abilities, and the spaces your household needs to reset." },
+ December: { relief: "Christmas shouldn't depend on you remembering and arranging every detail. A shared preparation plan gives the family specific ways to help make it happen.", personal: "Your Christmas plan will include your family's names, with contributions suited to each person's age, abilities, and your family's traditions and needs." },
+};
+
 const faqs = [
  ['Will this work with young kids?', 'We suggest jobs based on each child’s age. Younger children may need help at first. That’s okay: the goal is to build independence over time.'],
  ['What if our family has a different schedule?', 'Your plan begins with recommendations informed by your household. You can review and adjust before printing.'],
@@ -55,11 +69,39 @@ const faqs = [
  <h2 id="kit-gallery-title">Less for you to manage. <em>One month at a time.</em></h2>
  <p class="kit-gallery-intro">From daily habits and laundry to summer days and school routines, each month brings a personalized tool to help your family share the load.</p>
  <div class="kit-gallery-grid">{kitPreviews.map(kit => <figure class="kit-gallery-item">
+  <button class="kit-gallery-open" type="button" data-kit-open={kit.month} aria-label={`View ${kit.month}: ${kit.title}`} aria-haspopup="dialog"><span class="kit-gallery-zoom" aria-hidden="true">View preview +</span></button>
   <figcaption><span class="kit-gallery-month" style={{ backgroundColor: kit.color }}>{kit.month}</span><h3>{kit.title}</h3></figcaption>
   <img src={kit.image} alt={`${kit.month}: ${kit.description}, Organized Family Club printed tool preview`} width="1080" height="1080" loading="lazy" decoding="async" />
  </figure>)}</div>
  <p class="kit-gallery-note">Examples of the monthly tools. Your family receives one personalized plan each month.</p>
 </section>
+{kitPreviews.map(kit => <dialog class="kit-fullscreen" id={`kit-preview-${kit.month}`} aria-labelledby={`kit-title-${kit.month}`}>
+ <button class="kit-fullscreen-close" type="button" aria-label="Close resource preview">×</button>
+ <div class="kit-fullscreen-content">
+  <p class="kit-fullscreen-month" style={{ backgroundColor: kit.color }}>{kit.month}</p>
+  <h2 id={`kit-title-${kit.month}`}>{kit.title}</h2>
+  <img class="kit-fullscreen-image" src={kit.image} alt={`${kit.month}: ${kit.description}`} width="1080" height="1080" loading="lazy" decoding="async" />
+  <div class="kit-fullscreen-copy"><p>{kitDetails[kit.month].relief}</p><h3>Made for your family.</h3><p>{kitDetails[kit.month].personal}</p></div>
+ </div>
+</dialog>)}
+<script>
+ const previews = document.querySelectorAll<HTMLDialogElement>('.kit-fullscreen');
+ let previousOverflow = '';
+ document.querySelectorAll<HTMLButtonElement>('[data-kit-open]').forEach(button => {
+  button.addEventListener('click', () => {
+   const dialog = document.getElementById(`kit-preview-${button.dataset.kitOpen}`) as HTMLDialogElement | null;
+   if (!dialog) return;
+   previousOverflow = document.body.style.overflow;
+   document.body.style.overflow = 'hidden';
+   dialog.showModal();
+   dialog.scrollTop = 0;
+  });
+ });
+ previews.forEach(dialog => {
+  dialog.querySelector('button')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => { document.body.style.overflow = previousOverflow; });
+ });
+</script>
 <section class="pain container"><p class="eyebrow">SOUND FAMILIAR?</p><h2>You love taking care of your family. <em>You just don't want to manage every little thing.</em></h2>
 <div class="pain-questions"><p>Who remembers what goes in the backpacks?</p><p>Who figures out dinner?</p><p>Who reminds everyone to clean up?</p><p>Who knows what happens next?</p></div>
 <p class="pain-finish">Even when everyone wants to help, you're still the one keeping it all moving. <strong>What if your family could start taking more responsibility themselves?</strong> Not perfectly. Not overnight. One little piece at a time.</p></section>
@@ -754,4 +796,21 @@ const faqs = [
 .kit-gallery-note { margin: 28px auto 0 !important; font-size: .78rem; line-height: 1.6; color: #6e6461; }
 @media (max-width: 1000px) { .kit-gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .kit-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; } .kit-gallery-intro { font-size: .88rem; } }
+</style>
+
+<style>
+.kit-gallery-item { position: relative; }
+.kit-gallery-open { position: absolute; inset: 0; z-index: 1; width: 100%; border: 0; background: transparent; cursor: zoom-in; border-radius: 4px; }
+.kit-gallery-open:focus-visible { outline: 3px solid #354f42; outline-offset: 5px; }
+.kit-gallery-zoom { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #fff; padding: 5px 8px; border: 1px solid #ddd; color: #545454; font-size: .65rem; border-radius: 3px; }
+.kit-fullscreen { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: #fff; color: #303030; overflow-y: auto; overscroll-behavior: contain; }
+.kit-fullscreen::backdrop { background: #fff; }
+.kit-fullscreen-close { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); z-index: 2; display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid #ddd; border-radius: 50%; background: #fff; color: #303030; font: 32px/1 Arial, sans-serif; cursor: pointer; }
+.kit-fullscreen-content { max-width: 880px; margin: 0 auto; padding: 76px 24px 56px; text-align: center; }
+.kit-fullscreen-month { display: inline-block; padding: 7px 15px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #354f42; }
+.kit-fullscreen h2 { font: 400 clamp(1.65rem, 4vw, 2.5rem)/1.2 Georgia, serif; margin: 18px auto 12px; max-width: 740px; }
+.kit-fullscreen-image { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; object-fit: contain; }
+.kit-fullscreen-copy { max-width: 620px; margin: 24px auto 0; text-align: left; font-size: 1rem; line-height: 1.75; color: #545454; }
+.kit-fullscreen-copy h3 { font: 400 1.5rem/1.3 Georgia, serif; margin: 22px 0 8px; color: #303030; }
+@media(max-width:600px) { .kit-fullscreen-content { padding: 76px 16px 40px; } }
 </style>
