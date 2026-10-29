@@ -181,6 +181,20 @@ if (!kit) throw new Error('February kit missing');
 .laundry-page .laundry-older-paper .laundry-finish-card h3{font-size:17px}
 .laundry-page .laundry-older-paper .paper-callout{margin-top:7px;padding:7px 12px}
 .laundry-page .laundry-older-paper .megan-note{margin-top:7px;padding:6px 12px}
+
+/* Each older-kid phase is a single horizontal row, not a two-column grid. */
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instructions{grid-template-columns:repeat(5,minmax(0,1fr))}
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instructions{grid-template-columns:repeat(3,minmax(0,1fr))}
+.laundry-page .laundry-older-paper .laundry-phase-finish .laundry-instructions{grid-template-columns:1fr}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction{min-width:0;padding:10px 5px 8px;gap:4px}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction .laundry-icon,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction .laundry-icon{width:56px;height:56px}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction h3,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction h3{font-size:14px;line-height:1.12}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction p,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction p{font-size:9.5px;line-height:1.28;overflow-wrap:break-word}
+.laundry-page .laundry-older-paper .laundry-phase-finish .laundry-instruction{min-height:75px}
 </style><script>
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
