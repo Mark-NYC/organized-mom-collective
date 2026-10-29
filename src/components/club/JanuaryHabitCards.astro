@@ -44,7 +44,7 @@ const defaults = [
       <button type="button" class="jhc-png" data-single-page-png>Download image (PNG)</button>
    <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
     </div>
-    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Keep the sheet visible, or cut out a reminder for its spot. No tracking, points or daily checkboxes.</p></Fragment>}
+    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the dotted lines. Put each card where its habit happens. No tracking, points or daily checkboxes.</p></Fragment>}
   </div>
 
   <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">We'll help you choose one simple habit at a time. You can add a second when the first is ready.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current cards</button></div></dialog>
@@ -52,10 +52,11 @@ const defaults = [
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page data-plan-sheet="sheet" data-plan-sheet-end>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>ONE SMALL STEP AT A TIME</span></div>
-      <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Two everyday moments your family can begin to handle together.</p></header>
+      <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Cut out each reminder. Place it where the habit happens.</p></header>
       <div class="jhc-card-grid" data-jhc-card-grid>
         {defaults.slice(0,2).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
+            <svg class="jhc-cut-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.2 8.2 12.8 12.8M8.2 15.8 21 3"/></svg>
             <div class="jhc-card-top">
               <span class="jhc-brand" data-jhc-owner>MY DAILY REMINDER</span>
               <span class="jhc-card-number">0{i+1}</span>
@@ -76,7 +77,7 @@ const defaults = [
           </article>
         ))}
       </div>
-      <aside class="jhc-start"><p class="jhc-start-label">START WITH ONE HABIT</p><h3>A small start. Something you can repeat.</h3><div class="jhc-start-steps"><p><strong>01 · Show it</strong>Walk through the action together. Make “done” clear.</p><p><strong>02 · Put it in sight</strong>Keep this sheet visible, or cut out a reminder for its spot.</p><p><strong>03 · Practice it</strong>Use the same everyday cue. If it’s too much, make the action smaller.</p></div><p class="jhc-start-note">Missed it today? Try again at the next cue. Add the second habit when you’re ready.</p></aside><div class="jhc-sheet-footer"><span>OUR FAMILY HABIT CARDS</span><span>Small actions. Shared responsibility.</span></div>
+      <aside class="jhc-start"><p class="jhc-start-label">START WITH ONE HABIT</p><h3>A small start. Something you can repeat.</h3><div class="jhc-start-steps"><p><strong>01 · Show it</strong>Walk through the action together. Make “done” clear.</p><p><strong>02 · Put it in sight</strong>Cut along the dotted lines. Put each card where its habit happens.</p><p><strong>03 · Practice it</strong>Use the same everyday cue. If it’s too much, make the action smaller.</p></div><p class="jhc-start-note">Missed it today? Try again at the next cue. Add the second habit when you’re ready.</p></aside><div class="jhc-sheet-footer"><span>OUR FAMILY HABIT CARDS</span><span>Small actions. Shared responsibility.</span></div>
     </div></div>
   </div>
   </div>
@@ -349,6 +350,12 @@ const defaults = [
 .jhc .jhc-sheet-footer{border-top:1px solid #e4e1dc;padding-top:11px;height:25px;font-size:7px;letter-spacing:.09em}
 .jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
 @media print{body:has(.jhc):not(:has(.club-plan)) .jhc-page{position:fixed!important}.jhc .jhc-page{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
+</style>
+<style is:global>
+/* Visible cutting guides, shared by preview, print and image export. */
+.jhc .jhc-card-grid .jhc-card{border:1.5px dotted #8c9799!important}
+.jhc .jhc-card-grid .jhc-card:nth-child(2){border-color:#99978e!important}
+.jhc-cut-scissors{position:absolute;top:7px;right:46px;width:17px;height:17px;color:#697477;pointer-events:none}
 </style>
 <script>
 import {
