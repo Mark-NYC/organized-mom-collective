@@ -1,3 +1,4 @@
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 /**
  * Customer accounts, step 1 (supabase/ACCOUNTS.md): sign in with a 6-digit emailed code, keep what
  * she makes in the browser in sync with her account, list what she bought.
@@ -14,8 +15,8 @@
  * Off unless PUBLIC_ACCOUNTS_ENABLED is 'true'.
  */
 
-const URL_ = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const URL_ = SUPABASE_URL;
+const KEY = SUPABASE_ANON_KEY;
 export const accountsEnabled = () => import.meta.env.PUBLIC_ACCOUNTS_ENABLED === 'true' && Boolean(URL_ && KEY);
 
 const SESSION_KEY = 'omc:account:session';

@@ -10,9 +10,10 @@
  */
 import { toCsv } from './csv';
 import { cleanAnswers, otherKey, surveyQuestions, type SurveyAnswers, type SurveySource } from '../data/survey';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 
-const URL_ = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const URL_ = SUPABASE_URL;
+const KEY = SUPABASE_ANON_KEY;
 
 export const surveyConfigured = () => Boolean(URL_ && KEY);
 

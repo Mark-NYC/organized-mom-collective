@@ -12,9 +12,10 @@
  * security as a signed-in admin. Server side: supabase/functions/, supabase/SHOP.md.
  */
 import { toCsv } from './csv';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 
-const SUPABASE = (import.meta.env.PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-const ANON = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const SUPABASE = SUPABASE_URL;
+const ANON = SUPABASE_ANON_KEY;
 const STRIPE_PK = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '';
 
 export const shopEnabled = () => import.meta.env.PUBLIC_SHOP_ENABLED === 'true';

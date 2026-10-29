@@ -193,7 +193,7 @@ function createStripe(opts) {
       };
       if (method === "POST") headers["Content-Type"] = "application/x-www-form-urlencoded";
       if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
-      const url = method === "GET" && body ? `${base}${path}?${body}` : `${base}${path}`;
+      const url = method !== "POST" && body ? `${base}${path}?${body}` : `${base}${path}`;
       const res = await fetchFn(url, { method, headers, body: method === "POST" ? body : void 0 });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -228,7 +228,14 @@ var DAY_PARAMS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 var routes = {
   /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
   clubStart: "/club/start",
+  clubJoin: "/club/join",
+  clubLogin: "/club/login",
+  clubWelcome: "/club/welcome",
   clubDashboard: "/club/dashboard",
+  clubFamilyVision: "/club/family-vision",
+  /** A member's personalized month (src/data/club/resources.ts). */
+  clubResource: (slug) => `/club/resources/${slug}`,
+  adminClub: "/admin/club",
   clubFamily: "/club/family",
   clubKit: (slug) => `/club/kits/${slug}`,
   /** A site tool hosted inside the Club (src/data/club/tools.ts). */
@@ -238,6 +245,7 @@ var routes = {
   calendar: "/calendar",
   /** Every product, one card each, linking to its own page. */
   shop: "/shop",
+  scheduler: "/family-schedule-calendar-2027",
   /** The calendar page's options and Etsy buttons. */
   buy: "/calendar#buy",
   companion: "/companion",
@@ -301,6 +309,9 @@ var routes = {
   adminOrders: "/admin/orders",
   start: "/start",
   today: "/app",
+  cleaning: "/app/cleaning",
+  appClub: "/app/club",
+  appAccount: "/app/account",
   week: "/app/week",
   /** Old name for the Week page; redirects to `week`. */
   tidy: "/app/tidy",
@@ -308,7 +319,7 @@ var routes = {
   settings: "/app/settings",
   monthlyFocus: "/app/week#monthly-focus",
   /** A specific weekday of the current week, e.g. /app?day=monday */
-  day: (dow) => `/app?day=${DAY_PARAMS[dow]}`
+  day: (dow) => `/app/cleaning?day=${DAY_PARAMS[dow]}`
 };
 
 // src/data/support.ts

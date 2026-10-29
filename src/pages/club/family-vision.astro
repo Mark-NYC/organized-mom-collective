@@ -1,0 +1,25 @@
+---
+/**
+ * /club/family-vision: a member's personalized Family Vision welcome print (FamilyVisionAccess). The print starts
+ * hidden and shows once the database hands over her welcome order; the static HTML holds no family data.
+ * Noindex, no tracking; a "not available" notice unless PUBLIC_CLUB_ENABLED.
+ */
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import FamilyVisionAccess from '../../components/club/FamilyVisionAccess';
+import FamilyVisionPrint from '../../components/club/FamilyVisionPrint.astro';
+import { clubEnabled, CLUB_NAME } from '../../data/club/config';
+
+const enabled = clubEnabled();
+---
+<PublicLayout fullTitle={`Your Family Vision print · ${CLUB_NAME}`} description={`${CLUB_NAME} welcome print.`} indexable={false} chrome={false} width="full" tracking={false}>
+  {enabled ? (
+    <>
+      <FamilyVisionAccess client:only="react" />
+      <div id="club-vision-content" hidden>
+        <FamilyVisionPrint member />
+      </div>
+    </>
+  ) : (
+    <main class="mx-auto max-w-xl px-4 py-24 sm:px-8"><h1 class="font-serif text-[1.8rem] leading-tight">This page isn’t available.</h1></main>
+  )}
+</PublicLayout>

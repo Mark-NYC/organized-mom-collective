@@ -75,6 +75,8 @@ async function handleEvent(deps: ShopDeps, event: StripeEvent) {
       const session = await deps.stripe.request<StripeSession>('GET', `/v1/checkout/sessions/${obj.id}`, {
         expand: ['shipping_cost.shipping_rate', 'total_details.breakdown'],
       });
+      // Organized Family Club subscriptions have their own endpoint (club-webhook); never treat one as a shop order.
+      if ((session as { mode?: string }).mode === 'subscription') return;
       // Delayed methods complete "unpaid" first; async_payment_succeeded follows.
       if (!isPaidSession(session)) return;
       const r = await deps.db.rpc<{ found: boolean; order_id?: string }>('shop_mark_paid', { p_session: session.id, p: paidOrderData(session) });

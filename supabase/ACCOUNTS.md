@@ -2,7 +2,7 @@
 
 Mom signs in with a 6-digit emailed code (no password). Her account keeps what she makes on the site (builder lists, chore charts, planners, pickers, checklists) in sync across devices, and lists everything she bought from the website shop, with permanent downloads.
 
-**Status (2026-10-21): built and tested, switched off.** Nothing changes for visitors until `PUBLIC_ACCOUNTS_ENABLED=true`.
+**Status (2026-10-26): migration applied to production (with the Club's), still switched off.** Earlier: built and tested 2026-10-21. Nothing changes for visitors until `PUBLIC_ACCOUNTS_ENABLED=true`.
 
 ## What's in it
 
@@ -25,7 +25,7 @@ Mom signs in with a 6-digit emailed code (no password). Her account keeps what s
 
 **Deleting.** `/account` → Delete my account removes her saves and sign-in, unlinks her entitlements and turns off marketing email. Orders stay (business and tax records). Admin accounts can't delete themselves there.
 
-**Club changes (`20261023000000_club_core.sql`, not applied yet).** That migration also revokes anon's execute on the `account_*` functions (this migration revoked them from PUBLIC only, and Supabase grants new functions to anon directly), makes `account_delete` refuse while a paid Club membership is live, and refuses `omc:club…` keys in `account_saves`.
+**Club changes (`20261023000000_club_core.sql`, applied 2026-10-26).** That migration also revokes anon's execute on the `account_*` functions (this migration revoked them from PUBLIC only, and Supabase grants new functions to anon directly), makes `account_delete` refuse while a paid Club membership is live, and refuses `omc:club…` keys in `account_saves`.
 
 **Security.** Customers are ordinary Supabase Auth users. Admin rights come only from `admin_users` / `shop_admins` / `survey_admins`; every admin function and policy checks those (verified 2026-10-21, and the admin access tests still pass with this migration). She can read and delete only her own saves; writes go through `account_put` (64 KB per save, 200 saves, key shape checked, server time stamped).
 

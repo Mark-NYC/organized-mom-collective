@@ -55,8 +55,11 @@
  *           /admin/pages        Pages & Funnels (page inventory)
  *           /admin/orders       order, inventory and shipping dashboard
  *           /admin/settings     admin access, integrations, page inventory token, audit log
- *   CLUB    /club/start, /club/dashboard, /club/family, /club/kits/<slug>, /club/tools/<tool>   Organized Family Club member pages
- *                               (noindex, not linked; a "not available" notice unless PUBLIC_CLUB_ENABLED; docs/club/)
+ *   CLUB    /club/join (plans → Stripe Checkout), /club/login, /club/welcome (after checkout: sign in, family, address),
+ *           /club/dashboard, /club/family, /club/resources/<slug> (her month), /club/kits/<slug>, /club/tools/<tool>
+ *                               Organized Family Club member pages (noindex; a "not available" notice unless
+ *                               PUBLIC_CLUB_ENABLED; docs/club/MEMBERSHIP.md)
+ *           /admin/club         members, entitlements, fulfillment queue (owner admins)
  *   QR      /start             permanent entry point printed on calendars → APP
  *   APP     /app, /app/week, /app/reorder, /app/settings   (noindex)
  *           /app/tidy → /app/week (old name, kept so earlier links still work)
@@ -68,7 +71,14 @@ import { DAY_PARAMS } from './lib/dates';
 export const routes = {
   /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
   clubStart: '/club/start',
+  clubJoin: '/club/join',
+  clubLogin: '/club/login',
+  clubWelcome: '/club/welcome',
   clubDashboard: '/club/dashboard',
+  clubFamilyVision: '/club/family-vision',
+  /** A member's personalized month (src/data/club/resources.ts). */
+  clubResource: (slug: string) => `/club/resources/${slug}`,
+  adminClub: '/admin/club',
   clubFamily: '/club/family',
   clubKit: (slug: string) => `/club/kits/${slug}`,
   /** A site tool hosted inside the Club (src/data/club/tools.ts). */
