@@ -26,8 +26,8 @@ export interface HabitState {
 }
 
 export const HABIT_DEFAULTS: readonly Habit[] = [
-  { name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my dishes away.', place: 'By the breakfast table', who: 'THE FAMILY' },
-  { name: 'My backpack', anchor: 'After I put on my shoes', action: 'I grab my backpack.', place: 'Next to my shoes', who: 'THE FAMILY' },
+  { name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my bowl by the sink.', place: 'By the breakfast table', who: 'THE FAMILY' },
+  { name: 'My backpack', anchor: 'After I put on my shoes', action: 'I put my backpack on.', place: 'Next to my shoes', who: 'THE FAMILY' },
   { name: 'My bedroom', anchor: 'After I get dressed', action: 'I put my pajamas away.', place: 'On my dresser', who: 'THE FAMILY' },
   { name: 'Our kitchen', anchor: 'After we finish dinner', action: 'We clear the table together.', place: 'By the kitchen table', who: 'THE FAMILY' },
 ];

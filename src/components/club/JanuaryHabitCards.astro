@@ -11,8 +11,8 @@ import { monthColors } from '../../theme';
 interface Props { storageKey?: string; planMode?: boolean }
 const {storageKey='omc:club:january-habit-cards:v1', planMode=false} = Astro.props;
 const defaults = [
-  {name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my dishes away.', place: 'By the breakfast table', kind:'home'},
-  {name: 'My backpack', anchor: 'After I put on my shoes', action: 'I grab my backpack.', place: 'Next to my shoes', kind:'school'},
+  {name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my bowl by the sink.', place: 'By the breakfast table', kind:'home'},
+  {name: 'My backpack', anchor: 'After I put on my shoes', action: 'I put my backpack on.', place: 'Next to my shoes', kind:'school'},
   {name: 'My bedroom', anchor: 'After I get dressed', action: 'I put my pajamas away.', place: 'On my dresser', kind:'bed'},
   {name: 'Our kitchen', anchor: 'After we finish dinner', action: 'We clear the table together.', place: 'By the kitchen table', kind:'table'},
 ];
@@ -44,38 +44,39 @@ const defaults = [
       <button type="button" class="jhc-png" data-single-page-png>Download image (PNG)</button>
    <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
     </div>
-    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p></Fragment>}
+    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Keep the sheet visible, or cut out a reminder for its spot. No tracking, points or daily checkboxes.</p></Fragment>}
   </div>
 
   <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">We'll help you choose one simple habit at a time. You can add a second when the first is ready.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current cards</button></div></dialog>
   <div class={planMode ? "jhc-plan-view" : "jhc-preview-panel"} data-jhc-view>{!planMode && <button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>}
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page data-plan-sheet="sheet" data-plan-sheet-end>
-      <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
+      <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>ONE SMALL STEP AT A TIME</span></div>
+      <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Two everyday moments your family can begin to handle together.</p></header>
       <div class="jhc-card-grid" data-jhc-card-grid>
         {defaults.slice(0,2).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
             <div class="jhc-card-top">
-              <span class="jhc-brand">ORGANIZED FAMILY CLUB</span>
+              <span class="jhc-brand" data-jhc-owner>MY DAILY REMINDER</span>
               <span class="jhc-card-number">0{i+1}</span>
             </div>
             <div class="jhc-card-icon" aria-hidden="true"><img src={['dishes-in-sink','backpack','pajamas','table-after-meal'].map(n=>'/images/club/icon-library/'+n+'.png')[i]} alt="" width="58" height="58" /></div>
-            <p class="jhc-small-title">ONE LITTLE HABIT</p>
-            <p class="jhc-card-owner" data-jhc-owner>FOR THE FAMILY</p>
+            
+            
             <h3 class="jhc-card-name" data-print-field="name" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit name">{item.name}</h3>
             <div class="jhc-card-rule"></div>
-            <p class="jhc-anchor-label">WHEN THIS HAPPENS</p>
+            <p class="jhc-anchor-label">AFTER THIS</p>
             <p class="jhc-anchor" data-print-field="anchor" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit anchor">{item.anchor}</p>
-            <p class="jhc-action-label">HERE’S WHAT I DO NEXT</p>
+            <p class="jhc-action-label">I DO THIS</p>
             <p class="jhc-action" data-print-field="action" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit action">{item.action}</p>
             <div class="jhc-card-bottom">
-              <span>PLACE THIS CARD</span>
+              <span>KEEP THE REMINDER</span>
               <p data-print-field="place" contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit habit place">{item.place}</p>
             </div>
           </article>
         ))}
       </div>
-      <div class="jhc-sheet-footer"><span>Choose one or two. Put each card where it helps.</span><span>PLACE THIS REMINDER WHERE THE HABIT HAPPENS</span></div>
+      <aside class="jhc-start"><p class="jhc-start-label">START WITH ONE HABIT</p><h3>A small start. Something you can repeat.</h3><div class="jhc-start-steps"><p><strong>01 · Show it</strong>Walk through the action together. Make “done” clear.</p><p><strong>02 · Put it in sight</strong>Keep this sheet visible, or cut out a reminder for its spot.</p><p><strong>03 · Practice it</strong>Use the same everyday cue. If it’s too much, make the action smaller.</p></div><p class="jhc-start-note">Missed it today? Try again at the next cue. Add the second habit when you’re ready.</p></aside><div class="jhc-sheet-footer"><span>OUR FAMILY HABIT CARDS</span><span>Small actions. Shared responsibility.</span></div>
     </div></div>
   </div>
   </div>
@@ -233,33 +234,6 @@ const defaults = [
 </style>
 
 <style is:global>
-/* January frost-blue tonal treatment. Kept flat and lightweight for dependable print. */
-.jhc-card{
-  --jhc-wash:#eef5f7;
-  --jhc-icon-wash:#dfedf1;
-  background:linear-gradient(to bottom,var(--jhc-wash) 0,var(--jhc-wash) 153px,#fff 153px,#fff 100%)!important;
-}
-.jhc-card:nth-child(2){--jhc-wash:#e8f1f4;--jhc-icon-wash:#d8e8ee}
-.jhc-card:nth-child(3){--jhc-wash:#f1f6f7;--jhc-icon-wash:#e3eef1}
-.jhc-card:nth-child(4){--jhc-wash:#eaf3f6;--jhc-icon-wash:#dcebf0}
-.jhc-card-icon,
-.jhc-card:nth-child(2) .jhc-card-icon,
-.jhc-card:nth-child(3) .jhc-card-icon,
-.jhc-card:nth-child(4) .jhc-card-icon{
-  background:var(--jhc-icon-wash)!important;
-  border-radius:50%!important;
-}
-.jhc-card-rule{background:var(--jhc-month)!important}
-@media print{
-  .jhc-card,
-  .jhc-card:nth-child(2),
-  .jhc-card:nth-child(3),
-  .jhc-card:nth-child(4),
-  .jhc-card-icon{
-    print-color-adjust:exact!important;
-    -webkit-print-color-adjust:exact!important;
-  }
-}
 /* June-style responsive single-sheet preview. */
 .jhc-stage{position:relative;flex:0 0 auto}
 .jhc-stage .jhc-page{position:absolute;top:0;left:0;margin:0!important;transform:scale(var(--jhc-scale,1))!important;transform-origin:top left}
@@ -334,47 +308,47 @@ const defaults = [
 .jhc-finder-actions{display:flex;justify-content:space-between;gap:8px;margin-top:18px}.jhc-finder-actions button{padding:10px;border:0;background:transparent;color:#527468;text-decoration:underline;cursor:pointer}
 .jhc-finder-apply{background:#527468!important;color:white!important;text-decoration:none!important;width:100%;padding:15px!important;margin-top:14px;font-weight:700}
 @media print{.jhc-finder-dialog{display:none!important}}
-.jhc-card-grid{display:flex!important;align-items:center;justify-content:center;border:0!important}
-.jhc-card-grid .jhc-card{width:min(100%,510px);height:810px;max-height:100%;border:1px dashed #bdbdbd!important;padding:42px 43px!important}
-.jhc-card-grid .jhc-card-icon{width:88px!important;height:88px!important;margin:35px auto 20px!important}
-.jhc-card-grid .jhc-card-icon img{width:88px;height:88px}
-.jhc-card-grid .jhc-card-name{font-size:35px}
-.jhc-card-grid .jhc-anchor{font-size:22px}
-.jhc-card-grid .jhc-action{font-size:26px}
-
-/* January: two full-width horizontal cut-out cards, stacked on one portrait Letter sheet. */
-.jhc-card-owner{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.08em;text-align:center;color:#527384;margin:4px 0 8px}
-.jhc-card-grid[data-jhc-card-grid]{
- display:grid!important;grid-template-columns:minmax(0,1fr)!important;
- grid-template-rows:repeat(2,minmax(0,1fr))!important;
- align-items:stretch!important;justify-content:stretch!important;
- gap:0!important;border:1px dashed #bdbdbd!important;
- margin:20px 8px 28px!important;flex:1!important;min-height:0!important;
-}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card{
- width:100%!important;min-width:0!important;height:100%!important;max-height:none!important;
- padding:15px 35px 12px!important;border:0!important;overflow:hidden!important;
-}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card:first-child{
- border-right:0!important;border-bottom:1px dashed #bdbdbd!important;
-}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon{
- width:48px!important;height:48px!important;margin:5px auto 5px!important;
-}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-icon img{width:48px!important;height:48px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-name{font-size:25px!important;margin:3px 0!important;overflow-wrap:anywhere}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-rule{margin:3px auto 8px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-anchor{font-size:17px!important;margin-bottom:8px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-action{font-size:20px!important}
-.jhc-card-grid[data-jhc-card-grid] .jhc-card-bottom{margin-top:auto!important}
-.jhc-card-grid[data-jhc-card-grid].jhc-one-card{
- grid-template-rows:minmax(0,1fr)!important;flex:0 0 415px!important;
- max-width:none!important;margin-left:8px!important;margin-right:8px!important;
-}
-.jhc-card-grid[data-jhc-card-grid].jhc-one-card .jhc-card:first-child{border-bottom:0!important}
-.jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
 /* Plan mode: the Club plan page places the sheet. */
 .jhc-plan-view .jhc-stage{margin:0 auto}
+</style>
+<style is:global>
+/* January output: fixed Letter canvas, two compact cue cards and a shared launch guide. */
+.jhc .jhc-page{padding:36px 44px 30px;background:#fff;gap:0}
+.jhc .jhc-sheet-label{height:30px;border-top:5px solid var(--jhc-month);padding-top:10px;font-size:8px;letter-spacing:.12em}
+.jhc-sheet-heading{padding:22px 0 24px;display:flex;align-items:end;gap:30px}
+.jhc-sheet-heading h2{font:400 36px/1.06 Georgia,serif;letter-spacing:-.025em;margin:0;color:#3d3834;flex:1}
+.jhc-sheet-heading h2 em{color:#527384;font-weight:400}
+.jhc-sheet-heading>p{width:218px;margin:0 0 2px;font:12px/1.6 Montserrat,Arial,sans-serif;color:#66615b}
+.jhc .jhc-card-grid[data-jhc-card-grid]{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(2,264px)!important;gap:18px!important;flex:none!important;margin:0!important;border:0!important}
+.jhc .jhc-card-grid[data-jhc-card-grid].jhc-one-card{grid-template-rows:264px!important}
+.jhc .jhc-card-grid .jhc-card{display:grid;grid-template-columns:142px minmax(0,1fr);grid-template-rows:20px 32px 21px auto 20px 1fr 33px;column-gap:22px;width:100%;height:264px;max-height:none;padding:19px 24px!important;border:1px solid #c8dadd!important;border-radius:12px;background:#f5f9fa!important;overflow:hidden}
+.jhc .jhc-card-grid .jhc-card:nth-child(2){background:#faf9f5!important;border-color:#dedbcf!important}
+.jhc .jhc-card-top{grid-column:1/-1;grid-row:1;font-size:8px}
+.jhc .jhc-brand{font-size:8px;letter-spacing:.12em}
+.jhc .jhc-card-grid .jhc-card-icon{grid-column:1;grid-row:2/7;width:132px!important;height:132px!important;align-self:center;margin:0!important;border-radius:50%;background:#e5eff2!important;transform:none}
+.jhc .jhc-card-grid .jhc-card:nth-child(2) .jhc-card-icon{background:#eeece2!important}
+.jhc .jhc-card-grid .jhc-card-icon img{width:112px!important;height:112px!important;object-fit:contain}
+.jhc .jhc-card-owner{display:none}.jhc .jhc-card-icon:has(img[hidden]){visibility:hidden}
+.jhc .jhc-card-grid .jhc-card-name{grid-column:2;grid-row:2;text-align:left;font:400 21px/1.2 Georgia,serif!important;color:#527384;margin:0!important}
+.jhc .jhc-card-rule{display:none}
+.jhc .jhc-anchor-label,.jhc .jhc-action-label{grid-column:2;font-size:8px;letter-spacing:.13em;margin:4px 0 0;color:#66615b}
+.jhc .jhc-anchor-label{grid-row:3}.jhc .jhc-action-label{grid-row:5}
+.jhc .jhc-card-grid .jhc-anchor{grid-column:2;grid-row:4;font:400 18px/1.25 Georgia,serif!important;margin:0!important}
+.jhc .jhc-card-grid .jhc-action{grid-column:2;grid-row:6;font:700 26px/1.13 Georgia,serif!important;color:#343a38;margin:0!important}
+.jhc .jhc-card-grid .jhc-card-bottom{grid-column:1/-1;grid-row:7;display:flex;align-items:center;gap:12px;border-top:1px solid #d4dfe0;margin:4px 0 0!important;padding-top:8px}
+.jhc .jhc-card-grid .jhc-card.jhc-long .jhc-card-name{font-size:17px!important}.jhc .jhc-card-grid .jhc-card.jhc-long .jhc-anchor{font-size:14px!important}.jhc .jhc-card-grid .jhc-card.jhc-long .jhc-action{font-size:19px!important}
+.jhc .jhc-card-bottom span{font-size:7px;flex:none;letter-spacing:.1em}
+.jhc .jhc-card-bottom p{font:italic 12px/1.2 Georgia,serif;margin:0}
+.jhc-start{margin-top:auto;padding:23px 0 18px;border-top:2px solid #cddde1;color:#484740}
+.jhc-start-label{font:700 8px Montserrat,Arial,sans-serif;letter-spacing:.14em;margin:0 0 8px;color:#527384}
+.jhc-start h3{font:400 23px/1.2 Georgia,serif;margin:0 0 16px}
+.jhc-start-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.jhc-start-steps p{font:11px/1.55 Montserrat,Arial,sans-serif;margin:0}
+.jhc-start-steps strong{display:block;font-size:10px;margin-bottom:6px;color:#527384}
+.jhc-start-note{font:italic 12px/1.5 Georgia,serif;margin:16px 0 0;color:#68635c}
+.jhc .jhc-sheet-footer{border-top:1px solid #e4e1dc;padding-top:11px;height:25px;font-size:7px;letter-spacing:.09em}
+.jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
+@media print{body:has(.jhc):not(:has(.club-plan)) .jhc-page{position:fixed!important}.jhc .jhc-page{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
 </style>
 <script>
 import {
@@ -412,7 +386,13 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   const habitLabel=root.querySelector<HTMLElement>('[data-jhc-habit-label]');if(habitLabel)habitLabel.textContent=state.habits[0].name;
   editors.forEach((el,i)=>{el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>{const field=input.dataset.field as keyof Habit;if(document.activeElement!==input)input.value=state.habits[i][field]})});
   cards.forEach((el,i)=>{
-   const owner=el.querySelector<HTMLElement>('[data-jhc-owner]');if(owner)owner.textContent=ownerLine(state.habits[i].who);
+   const habit=state.habits[i];
+   el.classList.toggle('jhc-long',habit.action.length>65||habit.anchor.length>55||habit.name.length>28);
+   const words=(habit.name+' '+habit.action).toLowerCase();
+   const icon=/backpack|bag|shoes|door/.test(words)?'backpack':/pajama|clothes|dresser|bed/.test(words)?'pajamas':/dinner|table/.test(words)?'table-after-meal':/dish|bowl|plate|sink|breakfast/.test(words)?'dishes-in-sink':null;
+   const picture=el.querySelector<HTMLImageElement>('.jhc-card-icon img');
+   if(picture){picture.hidden=!icon;if(icon)picture.src='/images/club/icon-library/'+icon+'.png'}
+   const owner=el.querySelector<HTMLElement>('[data-jhc-owner]');if(owner)owner.textContent=state.habits[i].who.toUpperCase()==='THE FAMILY'?'MY DAILY REMINDER':ownerLine(state.habits[i].who);
    el.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{const field=target.dataset.printField as keyof Habit;if(document.activeElement!==target)target.textContent=state.habits[i][field]});
   });
   if(current)root.dispatchEvent(new CustomEvent(PLAN_CHANGE,{bubbles:true}));
