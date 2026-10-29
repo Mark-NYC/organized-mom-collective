@@ -9,6 +9,21 @@ import routineClubExampleUrl from '../../../assets/icons/ofc/routine-club-exampl
 const monthIcons = import.meta.glob('../../../assets/icons/ofc/month-icons/*-OFC-icon.png', { eager: true, query: '?url', import: 'default' });
 const months = [{"month":"January","title":"Mornings Without the Nagging","responsibility":"Following routines","how":"A ready-made morning or evening plan shows each person what to do next.","url":"/club/january-preview/"},{"month":"February","title":"Laundry That Isn't All on You","responsibility":"Caring for their own things","how":"A picture laundry guide for each child, matched to their age: My Clothes, My Job or I Can Do My Own Laundry.","url":"/app/club/february/"},{"month":"March","title":"Cleaning Without Managing Everyone","responsibility":"Finishing a job","how":"Each person gets a clear cleaning job, supplies, steps, and a definition of done.","url":"/club/march-preview/"},{"month":"April","title":"Dinner Isn't All on You","responsibility":"Sharing meal ownership","how":"A prepared dinner plan gives family members roles from gathering ingredients through cleanup.","url":"/club/april-preview/"},{"month":"May","title":"Summer Days Without Constant Questions","responsibility":"Managing their day","how":"A flexible daily rhythm and activity menu help kids choose what comes next.","url":"/club/may-preview/"},{"month":"June","title":"Less Screen-Time Negotiating","responsibility":"Respecting shared boundaries","how":"Clear expectations for screens, responsibilities, and free time help everyone follow the same plan.","url":"/club/june-preview/"},{"month":"July","title":"No More Packing for Everyone","responsibility":"Preparing independently","how":"Personal packing lists show each person what to pack, check, and put away.","url":"/club/july-preview/"},{"month":"August","title":"Back to School Without the Scramble","responsibility":"Taking initiative","how":"A personalized countdown gives everyone their own school-ready responsibilities.","url":"/club/august-preview/"},{"month":"September","title":"Stop Being the Family's Calendar","responsibility":"Planning together","how":"A Sunday Reset around the wall calendar, plus a monthly activity calendar that shows everyone's recurring activities.","url":"/club/september-preview/"},{"month":"October","title":"Less Asking. More Doing.","responsibility":"Caring for shared spaces","how":"A daily reset with one familiar cue, picture jobs and a clear finish line kids can recognize.","url":"/club/october-preview/"},{"month":"November","title":"Stop Being Everyone's Reminder","responsibility":"Owning a whole responsibility","how":"Each ready family member gets a job with a clear owner, timing, and finish line.","url":"/club/november-preview/"},{"month":"December","title":"Christmas Without Doing It All","responsibility":"Contributing to family traditions","how":"A prepared holiday plan shares the work of gifts, traditions, and celebrations.","url":"/club/december-preview/"}].map(m => ({...m, icon: monthIcons[`../../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`]}));
 
+const kitImages = import.meta.glob('../../../assets/icons/ofc/monthly-kits/*.webp', { eager: true, query: '?url', import: 'default' });
+const kitPreviews = [
+ ['January', 'January', 'Personalized habit cards'],
+ ['February', 'February', 'Family laundry guides'],
+ ['March', 'March', 'Family chore charts'],
+ ['April', 'April', 'Dinner responsibilities'],
+ ['May', 'May', 'Summer day rhythm'],
+ ['June', 'June', 'Independent snack choices'],
+ ['July', 'July', 'Ideas for independent play'],
+ ['August', 'July (2)', 'School-day rhythm'],
+ ['September', 'September', 'Family calendar and weekly reset'],
+ ['October', 'October', 'Daily family reset'],
+ ['December', 'December', 'Shared Christmas preparations'],
+].map(([month, file, description]) => ({ month, description, image: kitImages[`../../../assets/icons/ofc/monthly-kits/${file}.webp`] as string }));
+
 const faqs = [
  ['Will this work with young kids?', 'We suggest jobs based on each child’s age. Younger children may need help at first. That’s okay: the goal is to build independence over time.'],
  ['What if our family has a different schedule?', 'Your plan begins with recommendations informed by your household. You can review and adjust before printing.'],
@@ -34,6 +49,16 @@ const faqs = [
  <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
  <div class="hero-seam-badge" aria-hidden="true"><img src={clubBadgeUrl} alt="" width="120" height="120" loading="eager" /></div>
 </div></div></section>
+<section class="kit-gallery container" aria-labelledby="kit-gallery-title">
+ <p class="eyebrow">A LOOK INSIDE THE CLUB</p>
+ <h2 id="kit-gallery-title">Less for you to manage. <em>One month at a time.</em></h2>
+ <p class="kit-gallery-intro">From daily habits and laundry to summer days and school routines, each month brings a personalized tool to help your family share the load.</p>
+ <div class="kit-gallery-grid">{kitPreviews.map(kit => <figure class="kit-gallery-item">
+  <img src={kit.image} alt={`${kit.month}: ${kit.description}, Organized Family Club printed tool preview`} width="1080" height="1080" loading="lazy" decoding="async" />
+  <figcaption>{kit.month}</figcaption>
+ </figure>)}</div>
+ <p class="kit-gallery-note">Examples of the monthly tools. Your family receives one personalized plan each month.</p>
+</section>
 <section class="pain container"><p class="eyebrow">SOUND FAMILIAR?</p><h2>You love taking care of your family. <em>You just don't want to manage every little thing.</em></h2>
 <div class="pain-questions"><p>Who remembers what goes in the backpacks?</p><p>Who figures out dinner?</p><p>Who reminds everyone to clean up?</p><p>Who knows what happens next?</p></div>
 <p class="pain-finish">Even when everyone wants to help, you're still the one keeping it all moving. <strong>What if your family could start taking more responsibility themselves?</strong> Not perfectly. Not overnight. One little piece at a time.</p></section>
@@ -714,3 +739,16 @@ const faqs = [
 #club-preview-modal .preview-snack-deliverable .jss-sheet{background:white}
 </style>
 </PublicLayout>
+
+<style>
+.kit-gallery { padding-top: clamp(48px, 6vw, 80px); padding-bottom: clamp(40px, 5vw, 72px); text-align: center; }
+.kit-gallery h2 { max-width: 850px; margin-inline: auto; }
+.kit-gallery-intro { max-width: 720px; margin: 18px auto 30px !important; color: #6e6461; line-height: 1.7; }
+.kit-gallery-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 14px; }
+.kit-gallery-item { margin: 0; min-width: 0; }
+.kit-gallery-item img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+.kit-gallery-item figcaption { margin-top: 8px; font-size: .67rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #6e6461; }
+.kit-gallery-note { margin: 28px auto 0 !important; font-size: .78rem; line-height: 1.6; color: #6e6461; }
+@media (max-width: 1000px) { .kit-gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .kit-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; } .kit-gallery-intro { font-size: .88rem; } }
+</style>
