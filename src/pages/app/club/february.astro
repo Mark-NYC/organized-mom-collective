@@ -196,6 +196,13 @@ if (!kit) throw new Error('February kit missing');
 .laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction p,
 .laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction p{font-size:9.5px;line-height:1.28;overflow-wrap:break-word}
 .laundry-page .laundry-older-paper .laundry-phase-finish .laundry-instruction{min-height:75px}
+
+/* Enlarge only page two, step two's sorting-dirty-laundry artwork by 1.5x.
+   Keep its card dimensions unchanged to preserve the five-column row. */
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-sort-step .laundry-icon img{
+ transform:scale(1.5);
+ transform-origin:center;
+}
 </style><script>
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
@@ -260,7 +267,7 @@ if(root){
   const rule=element('div','paper-rule');paper.append(rule);
   const names=element('h3','paper-section-title',children.map(c=>c.name).join(' · '));paper.append(names);
   const sub=element('p','',level==='young'?'Your jobs, every laundry day:':'Your laundry checklist:');sub.style.fontSize='13px';paper.append(sub);
-  const makeStep=([name,desc]:string[],i:number)=>{const row=element('div','laundry-instruction');row.append(icon(level==='older' && i===1 ? 'sorting-dirty-laundry' : name));const info=element('div');info.append(element('small','',String(i+1).padStart(2,'0')),element('h3','',name),element('p','',desc));row.append(info);return row};
+  const makeStep=([name,desc]:string[],i:number)=>{const row=element('div','laundry-instruction');if(level==='older' && i===1)row.classList.add('laundry-sort-step');row.append(icon(level==='older' && i===1 ? 'sorting-dirty-laundry' : name));const info=element('div');info.append(element('small','',String(i+1).padStart(2,'0')),element('h3','',name),element('p','',desc));row.append(info);return row};
   if(level==='older'){
     const phases=[
       {name:'GET READY',hint:'Before you start the washer',tone:'ready',start:0,end:5},
