@@ -43,7 +43,7 @@ if (!kit) throw new Error('February kit missing');
       <p class="laundry-kicker">YOUR FAMILY'S PREPARED PLAN</p>
       <p class="laundry-hint" data-family-summary>Loading family profile…</p>
       <div data-child-controls></div>
-      <label>Laundry day<select data-day><option>Saturday</option><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>As needed</option></select></label>
+      <fieldset class="laundry-days"><legend>Laundry day(s)</legend><div data-days-controls></div></fieldset>
       <label>Machine operator<select data-operator></select></label>
       <p class="laundry-hint">Age suggests a starting point. Change a child's level if their readiness is different. Machine operation requires training and supervision as appropriate.</p>
     </section>
@@ -144,6 +144,7 @@ if (!kit) throw new Error('February kit missing');
 .laundry-page .laundry-older-paper .megan-note p{font-size:11px;line-height:1.25}
 .laundry-page .laundry-young-paper .laundry-instruction{min-height:225px}
 .laundry-page .laundry-young-paper .laundry-instruction .laundry-icon{width:130px;height:130px}
+.laundry-days{border:0;padding:0;margin:18px 0}.laundry-days legend{font-size:12px;font-weight:700;margin-bottom:8px}.laundry-days [data-days-controls]{display:grid;grid-template-columns:1fr 1fr;gap:5px}.laundry-days .laundry-day-option{display:flex;align-items:center;gap:7px;margin:0;padding:7px 3px;font-size:12px;font-weight:500}.laundry-days input{width:16px;height:16px;min-height:16px;margin:0;accent-color:#55735d}.laundry-day-banner{margin:15px 0 4px;padding:12px 16px;background:#e8efe7;display:flex;align-items:center;justify-content:space-between;gap:14px}.laundry-day-banner span{font-size:10px;letter-spacing:.12em;font-weight:700;color:#64765e}.laundry-day-banner strong{font-size:14px;font-weight:700;color:#425b46;text-align:right}.laundry-older-paper .laundry-day-banner{margin:8px 0 2px;padding:8px 12px}.laundry-older-paper .laundry-day-banner strong{font-size:12px}
 </style><script>
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
@@ -153,7 +154,7 @@ import { ageInMonth } from '../../../lib/club/profile';
 import type { Household } from '../../../lib/club/profile';
 type Level='young'|'older';
 type Kid={id:string;name:string;age:number;level:Level};
-type State={children:Kid[];day:string;operator:string};
+type State={children:Kid[];days:string[];operator:string};
 const root=document.querySelector<HTMLElement>('[data-laundry-app]');
 if(root){
  const q=<T extends HTMLElement>(s:string)=>root.querySelector<T>(s)!;
@@ -204,6 +205,7 @@ if(root){
   const h2=element('h2');h2.append(document.createTextNode(level==='young'?'My Clothes, ':'I Can Do '));const em=element('em','',level==='young'?'My Job.':'My Laundry.');h2.append(em);head.append(h2);
   head.append(element('p','',level==='young'?'Care for what you wear. Every day.':'From dirty clothes to clean drawers. Follow the steps and ask for help when needed.'));
   top.append(head,icon(level==='young'?'laundry-basket':'washing-machine','hero-icon'));paper.append(top);
+  const dayLabel=element('div','laundry-day-banner');dayLabel.append(element('span','','OUR LAUNDRY DAYS'),element('strong','',state?.days.length ? state.days.join(' · ') : 'As needed'));paper.append(dayLabel);
   const rule=element('div','paper-rule');paper.append(rule);
   const names=element('h3','paper-section-title',children.map(c=>c.name).join(' · '));paper.append(names);
   const sub=element('p','',level==='young'?'Your jobs, every laundry day:':'Your laundry checklist:');sub.style.fontSize='13px';paper.append(sub);
@@ -223,7 +225,8 @@ if(root){
   state.children.forEach(k=>{const wrapper=element('div','laundry-child');const l=element('label');l.append(document.createTextNode(k.name+' '));l.append(element('span','laundry-age','Age '+k.age));const sel=document.createElement('select');sel.setAttribute('aria-label',k.name+' laundry level');
    for(const [value,title] of [['young','My clothes, my responsibility'],['older','I can do my own laundry']]){const o=document.createElement('option');o.value=value;o.textContent=title;sel.append(o)}
    sel.value=k.level;sel.addEventListener('change',()=>{k.level=sel.value as Level;save();render()});l.append(sel);wrapper.append(l);controls.append(wrapper)});
-  q<HTMLSelectElement>('[data-day]').value=state.day;
+  const dayControls=q<HTMLElement>('[data-days-controls]');dayControls.replaceChildren();
+  ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','As needed'].forEach(day=>{const label=element('label','laundry-day-option');const check=document.createElement('input');check.type='checkbox';check.checked=state!.days.includes(day);check.addEventListener('change',()=>{if(!state)return;state.days=check.checked?(day==='As needed'?['As needed']:[...state.days.filter(d=>d!=='As needed'),day]):state.days.filter(d=>d!==day);if(!state.days.length)state.days=['As needed'];save();render()});label.append(check,document.createTextNode(day));dayControls.append(label)});
   const op=q<HTMLSelectElement>('[data-operator]');op.value=state.operator;
   const levels:Level[]=['young','older'];const used=levels.filter(l=>state!.children.some(k=>k.level===l));
   const pages=q<HTMLElement>('[data-pages]');pages.replaceChildren(...used.map(l=>createPage(l,state!.children.filter(k=>k.level===l))));
@@ -243,10 +246,9 @@ if(root){
   else {
    const adults=h.members.filter(m=>m.kind==='adult'&&!m.archived);const operator=adults.find(m=>!m.isAccountHolder)?.firstName||adults[0]?.firstName||'Adult';
    const op=q<HTMLSelectElement>('[data-operator]');adults.forEach(a=>{const o=document.createElement('option');o.value=a.firstName;o.textContent=a.firstName;op.append(o)});
-   suggested={children:kids,day:'Saturday',operator};state=structuredClone(suggested);
-   try{const saved=JSON.parse(sessionStorage.getItem(key)||'null');if(saved?.familyId===h.id&&saved.profileVersion===h.profileVersion){const edits=saved.edits as State;state.day=edits.day||'Saturday';state.operator=adults.some(a=>a.firstName===edits.operator)?edits.operator:operator;state.children.forEach(k=>{const match=edits.children?.find(c=>c.id===k.id);if(match&&(match.level==='young'||match.level==='older'))k.level=match.level})}}catch{}
+   suggested={children:kids,days:['Saturday'],operator};state=structuredClone(suggested);
+   try{const saved=JSON.parse(sessionStorage.getItem(key)||'null');if(saved?.familyId===h.id&&saved.profileVersion===h.profileVersion){const edits=saved.edits as State;state.days=Array.isArray(edits.days)?edits.days.filter(d=>['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','As needed'].includes(d)):(edits.day?[edits.day]:['Saturday']);if(!state.days.length)state.days=['As needed'];state.operator=adults.some(a=>a.firstName===edits.operator)?edits.operator:operator;state.children.forEach(k=>{const match=edits.children?.find(c=>c.id===k.id);if(match&&(match.level==='young'||match.level==='older'))k.level=match.level})}}catch{}
    q<HTMLElement>('[data-family-summary]').textContent=label+' family · '+kids.length+' '+(kids.length===1?'child':'children')+(loaded.source==='sample'?' · Sample preview':'');
-   q<HTMLSelectElement>('[data-day]').addEventListener('change',e=>{state!.day=(e.currentTarget as HTMLSelectElement).value;save();render()});
    op.addEventListener('change',()=>{state!.operator=op.value;save();render()});
    q<HTMLButtonElement>('[data-reset]').addEventListener('click',()=>{state=structuredClone(suggested!);save();render()});
    q<HTMLButtonElement>('[data-print]').addEventListener('click',()=>window.print());
