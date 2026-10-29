@@ -1,76 +1,38 @@
 ---
-/** One canonical activity calendar for the public tool and October Club preview. */
+/** One canonical activity calendar for the public tool (/try-the-calendar) and the September Club plan page.
+ * Embedded (Club): starts on September 2027, rows prefilled from the family profile, and what's added stays in this
+ * browser tab for that family only (src/lib/club/plan/storage.ts), never mixed with another family's. */
 interface Props { embedded?: boolean }
 const { embedded = false } = Astro.props;
 const quickActivities = ['Family Dinner', 'Laundry Day', 'Grocery Run', 'Sports Practice', 'Piano Lesson', 'Date Night', 'Meal Prep', 'Weekly Clean-Up'];
 const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed' },{ day:4,short:'Thu' },{ day:5,short:'Fri' },{ day:6,short:'Sat' },{ day:0,short:'Sun' }];
 ---
   <div class:list={["family-calendar-container", embedded && "fc-embedded"]} data-club-calendar={embedded ? "true" : undefined}>
-    <div class="fc-actions">
-      <button type="button" class="fc-download-btn" data-fc-download>Download PNG</button>
-      <button type="button" class="fc-clear-btn" data-fc-reset>Reset calendar</button>
-    </div>
+    <section class="fc-controls" aria-label="Make your calendar">
+      <div class="fc-block">
+        <p class="fc-label">Your family</p>
+        <div class="fc-members" data-fc-members></div>
+      </div>
 
-    <div class="fc-panel">
-      <h2 class="fc-panel-title">Your family</h2>
-      <div class="fc-members" data-fc-members></div>
-    </div>
-
-    <div class="fc-nav">
-      <button type="button" class="fc-btn" data-fc-prev>← Previous</button>
-      <span class="fc-nav-label" data-fc-nav-label aria-live="polite"></span>
-      <button type="button" class="fc-btn" data-fc-next>Next →</button>
-    </div>
-
-    <div class="fc-sheet" id="family-calendar">
-      <div class="fc-header">
-        <div class="fc-box">
-          <div class="fc-box-title">Big Things / Deadlines</div>
-          <div class="fc-box-content" data-fc-big-display></div>
+      <div class="fc-block">
+        <div class="fc-add-head">
+          <div>
+            <h2 class="fc-heading" id={embedded ? "fc-activities-club" : "fc-activities"} data-fc-activities tabindex="-1">Add activities</h2>
+            <p class="fc-sub">Pick an activity, then choose the days and who it’s for. One activity per person per day.</p>
+          </div>
+          <button type="button" class="fc-text-link" data-fc-autofill>Fill in an example month</button>
         </div>
-        <div class="fc-month" data-fc-month></div>
-        <div class="fc-box">
-          <div class="fc-box-title">Word of the Month</div>
-          <div class="fc-box-content" data-fc-word-display></div>
+        <div class="fc-quick">
+          {
+            quickActivities.map((name) => (
+              <button type="button" class="fc-quick-btn" data-fc-quick={name}>
+                {name}
+              </button>
+            ))
+          }
+          <button type="button" class="fc-quick-btn fc-quick-own" data-fc-show-form>+ Your own activity</button>
         </div>
-      </div>
-      <div class="fc-weeks" data-fc-weeks></div>
-    </div>
-
-    <div class="fc-panel">
-      <h2 class="fc-panel-title">Calendar details</h2>
-      <div class="fc-grid-2">
-        <label class="fc-field">
-          <span>Word of the Month</span>
-          <input type="text" data-fc-word placeholder="A word or theme" />
-        </label>
-        <label class="fc-field">
-          <span>Big Things / Deadlines</span>
-          <input type="text" data-fc-big placeholder="Important events or deadlines" />
-        </label>
-      </div>
-
-      <h3 class="fc-subtitle">Family activities <small>(one per person per day)</small></h3>
-      <div class="fc-quick">
-        {
-          quickActivities.map((name, i) => (
-            <button type="button" class={`fc-quick-btn fc-quick-${i + 1}`} data-fc-quick={name}>
-              {name}
-            </button>
-          ))
-        }
-      </div>
-
-      <p class="fc-status" data-fc-status role="status"></p>
-
-      <div class="fc-fill-row">
-        <button type="button" class="fc-fill-btn" data-fc-autofill>Fill in an example month</button>
-      </div>
-
-      <div class="fc-list" data-fc-list></div>
-
-      <button type="button" class="fc-btn fc-btn-primary" data-fc-show-form>+ Add your own activity</button>
-      <form class="fc-form" data-fc-form hidden>
+        <form class="fc-form" data-fc-form hidden>
         <div class="fc-form-grid">
           <input type="text" name="name" placeholder="Activity name" aria-label="Activity name" required />
           <select name="member" aria-label="Family member" required data-fc-member-select></select>
@@ -87,6 +49,47 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
           <button type="button" class="fc-btn" data-fc-cancel>Cancel</button>
         </div>
       </form>
+        <p class="fc-status" data-fc-status role="status"></p>
+        <p class="fc-label fc-list-label">On the calendar</p>
+        <div class="fc-list" data-fc-list></div>
+      </div>
+
+      <div class="fc-block fc-grid-2">
+        <label class="fc-field">
+          <span>Word of the month</span>
+          <input type="text" data-fc-word placeholder="A word or theme" />
+        </label>
+        <label class="fc-field">
+          <span>Big things / deadlines</span>
+          <input type="text" data-fc-big placeholder="Important events or deadlines" />
+        </label>
+      </div>
+    </section>
+
+    <div class="fc-actions">
+      <button type="button" class="fc-download-btn" data-fc-download>Download PNG</button>
+      <button type="button" class="fc-clear-btn" data-fc-reset>Reset calendar</button>
+    </div>
+
+    <div class="fc-nav">
+      <button type="button" class="fc-nav-btn" data-fc-prev aria-label="Previous month">← Previous</button>
+      <span class="fc-nav-label" data-fc-nav-label aria-live="polite"></span>
+      <button type="button" class="fc-nav-btn" data-fc-next aria-label="Next month">Next →</button>
+    </div>
+
+    <div class="fc-sheet" id="family-calendar">
+      <div class="fc-header">
+        <div class="fc-box">
+          <div class="fc-box-title">Big Things / Deadlines</div>
+          <div class="fc-box-content" data-fc-big-display></div>
+        </div>
+        <div class="fc-month" data-fc-month></div>
+        <div class="fc-box">
+          <div class="fc-box-title">Word of the Month</div>
+          <div class="fc-box-content" data-fc-word-display></div>
+        </div>
+      </div>
+      <div class="fc-weeks" data-fc-weeks></div>
     </div>
 
     { !embedded && <p class="fc-footnote">This free monthly version is different from the <a href="/calendar" class="text-link">printed weekly family wall calendar</a>.</p> }
@@ -106,13 +109,14 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
           }
         </div>
 
-        <p class="fc-prompt"><strong>Who?</strong> <span data-fc-who-count>0 people selected</span></p>
+        <p class="fc-prompt"><strong>Who? <button type="button" class="fc-all" data-fc-all>Everyone</button></strong> <span data-fc-who-count>0 people selected</span></p>
         <div class="fc-who-btns" data-fc-who></div>
 
         <div class="fc-dialog-actions">
           <button type="button" class="fc-btn" data-fc-dialog-cancel>Cancel</button>
-          <button type="submit" class="fc-btn fc-btn-primary">Add activity</button>
+          <button type="submit" class="fc-btn fc-btn-primary" data-fc-dialog-add disabled>Add activity</button>
         </div>
+        <p class="fc-dialog-hint" data-fc-dialog-hint>Pick at least one day and one person.</p>
       </form>
     </dialog>
   </div>
@@ -123,8 +127,8 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     --fc-mint-wash: #f4f9f7;
     --fc-text: #4b5563;
     --fc-line: #ddd;
-    background-color: #fafafa;
-    padding: 24px 20px 56px;
+    background-color: var(--color-ivory, #fffdfa);
+    padding: 28px 20px 56px;
     color: var(--fc-text);
   }
   .family-calendar-container *,
@@ -133,281 +137,315 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     box-sizing: border-box;
   }
 
-  /* Buttons, matching /planner and /pantry. */
-  .fc-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 0 auto 20px;
-  }
-  .fc-download-btn,
-  .fc-clear-btn {
-    border-radius: 6px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .fc-download-btn {
-    background-color: var(--fc-mint-soft);
-    color: #000;
-    border: 2px solid var(--fc-mint);
-  }
-  .fc-download-btn:hover {
-    background-color: #a8d9c3;
-    border-color: #4db393;
-  }
-  .fc-download-btn:disabled {
-    opacity: 0.6;
-    cursor: wait;
-  }
-  .fc-clear-btn {
-    background: #e5f3f0;
-    color: #2f3e3e;
-    border: 2px solid var(--fc-mint-soft);
-  }
-  .fc-clear-btn:hover {
-    background: #d1ebe5;
-  }
-  .fc-btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid var(--fc-mint-soft);
-    background: #fff;
-    color: #2f3e3e;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  .fc-btn:hover {
-    background: var(--fc-mint-wash);
-  }
-  .fc-btn-primary {
-    background: var(--fc-mint);
-    border-color: var(--fc-mint);
-    color: #fff;
-  }
-  .fc-btn-primary:hover {
-    background: #4db393;
-  }
-
-  /* Control panels around the sheet. */
-  .fc-panel {
+  /* Controls around the sheet: the site's tool design (docs/brand/TOOL-OUTPUT-DESIGN.md, the chore chart):
+     uppercase labels, square fields, quiet tiles, one charcoal primary action. The sheet keeps its own colors. */
+  .fc-controls {
     max-width: 816px;
-    margin: 0 auto 20px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid var(--fc-mint-soft);
-    border-radius: 8px;
+    margin: 0 auto;
   }
-  .fc-panel-title {
-    font-size: 16px;
+  .fc-block {
+    padding: 0 0 22px;
+    margin: 0 0 22px;
+    border-bottom: 1px solid var(--color-warm-rule);
+  }
+  .fc-label {
+    margin: 0 0 8px;
+    font-size: 0.7rem;
     font-weight: 600;
-    margin-bottom: 12px;
-    color: #2f3e3e;
-  }
-  .fc-subtitle {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 4px 0 10px;
-    color: #2f3e3e;
-  }
-  .fc-subtitle small {
-    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--color-warm-soft);
   }
+  .fc-heading {
+    margin: 0;
+    font: 400 1.35rem/1.2 var(--font-serif);
+    color: var(--color-warm-ink);
+    scroll-margin-top: 24px;
+  }
+  .fc-heading:focus {
+    outline: none;
+  }
+  .fc-sub {
+    margin: 4px 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--color-warm-soft);
+  }
+  .fc-add-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .fc-text-link {
+    flex: none;
+    min-height: 44px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--color-warm-ink);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--color-warm-rule);
+    text-underline-offset: 5px;
+    cursor: pointer;
+  }
+  .fc-text-link:hover {
+    text-decoration-color: currentColor;
+  }
+
   .fc-members {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 8px;
   }
   .fc-member {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
+    min-width: 0;
   }
   .fc-member input {
     flex: 1;
     min-width: 0;
+    min-height: 44px;
     padding: 10px 12px;
-    border: 2px solid transparent;
-    border-radius: 6px;
-    font: inherit;
-    font-size: 15px;
-    font-weight: 500;
-    color: #2f3e3e;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-size: 0.95rem;
+    color: var(--color-warm-ink);
   }
   .fc-member input:focus {
-    outline: none;
-    border-color: var(--fc-mint);
+    outline: 2px solid var(--color-warm-button);
+    outline-offset: 1px;
   }
   .fc-member button {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    border: 1px solid var(--fc-mint-soft);
-    border-radius: 50%;
-    background: #fff;
-    color: var(--fc-text);
+    flex: none;
+    width: 36px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-warm-soft);
+    font-size: 16px;
     cursor: pointer;
   }
   .fc-member button:hover {
-    background: var(--fc-mint-wash);
+    color: var(--color-warm-ink);
   }
-  .fc-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .fc-field span {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  .fc-field input,
-  .fc-form input,
-  .fc-form select {
-    width: 100%;
-    min-width: 0;
-    padding: 8px 10px;
-    border: 1px solid var(--fc-mint-soft);
-    border-radius: 6px;
-    font: inherit;
-    font-size: 14px;
-    color: #2f3e3e;
-    background: #fff;
-  }
+
   .fc-quick {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 8px;
   }
   .fc-quick-btn {
-    min-height: 46px;
-    padding: 10px 8px;
-    border-radius: 6px;
-    border: 2px solid;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.2;
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-ink);
+    font-size: 0.88rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: border-color 0.15s;
   }
-  .fc-quick-btn:active {
-    transform: scale(0.98);
+  .fc-quick-btn:hover {
+    border-color: var(--color-warm-button);
   }
-  .fc-quick-1 { background: #e8f5e8; color: #2e7d32; border-color: #c8e6c9; }
-  .fc-quick-2 { background: #e1f5fe; color: #0277bd; border-color: #b3e5fc; }
-  .fc-quick-3 { background: #fff3e0; color: #c25e00; border-color: #ffe0b2; }
-  .fc-quick-4 { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
-  .fc-quick-5 { background: #f3e5f5; color: #7b1fa2; border-color: #e1bee7; }
-  .fc-quick-6 { background: #e0f2f1; color: #00695c; border-color: #b2dfdb; }
-  .fc-quick-7 { background: #f1f8e9; color: #558b2f; border-color: #dcedc8; }
-  .fc-quick-8 { background: #fff8e1; color: #9a6b00; border-color: #fff59d; }
-  .fc-status {
-    min-height: 1.5em;
-    margin: 10px 0;
-    text-align: center;
-    font-size: 14px;
+  .fc-quick-own {
+    border-style: dashed;
     font-weight: 600;
-    color: var(--fc-mint);
+  }
+  .fc-quick-btn[hidden] {
+    display: none;
+  }
+  .fc-status {
+    min-height: 1.4em;
+    margin: 10px 0 4px;
+    font-size: 0.85rem;
+    color: #536e4e;
   }
   .fc-status.fc-warn {
-    color: #c62828;
+    color: #a1503f;
   }
-  .fc-fill-row {
-    margin-bottom: 16px;
-  }
-  .fc-fill-btn {
-    width: 100%;
-    padding: 14px;
-    border: 2px solid var(--fc-mint);
-    border-radius: 8px;
-    background: var(--fc-mint-soft);
-    color: #000;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .fc-fill-btn:hover {
-    background: #a8d9c3;
+  .fc-list-label {
+    margin-top: 6px;
   }
   .fc-list {
-    max-height: 240px;
+    display: grid;
+    max-height: 280px;
     overflow-y: auto;
-    margin-bottom: 12px;
+    border-top: 1px solid var(--color-warm-rule);
   }
   .fc-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    font-size: 14px;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-warm-rule);
+    font-size: 0.9rem;
+    color: var(--color-warm-ink);
   }
   .fc-item small {
     color: var(--color-warm-soft);
   }
   .fc-item button {
-    flex-shrink: 0;
-    width: 30px;
-    height: 30px;
-    border: 1px solid #f3c4c4;
-    border-radius: 6px;
-    background: #fff;
-    color: #c62828;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--color-warm-soft);
+    font-size: 15px;
     cursor: pointer;
   }
+  .fc-item button:hover {
+    color: #a1503f;
+  }
   .fc-empty {
-    padding: 8px;
-    font-size: 14px;
-    color: #999;
+    padding: 10px 0;
+    font-size: 0.88rem;
+    color: var(--color-warm-soft);
+  }
+
+  .fc-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .fc-field span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .fc-field input,
+  .fc-form input,
+  .fc-form select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d7d3cc;
+    border-radius: 3px;
+    background: #fff;
+    font-size: 0.95rem;
+    color: var(--color-warm-ink);
+  }
+  .fc-field input:focus,
+  .fc-form input:focus,
+  .fc-form select:focus {
+    outline: 2px solid var(--color-warm-button);
+    outline-offset: 1px;
   }
   .fc-form {
     margin-top: 12px;
     padding: 14px;
-    border: 1px solid var(--fc-mint-soft);
-    border-radius: 6px;
-    background: var(--fc-mint-wash);
+    background: #fff;
+    border: 1px solid var(--color-warm-rule);
+  }
+  .fc-form[hidden] {
+    display: none;
   }
   .fc-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
   }
   .fc-form-actions,
   .fc-dialog-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 12px;
   }
-  .fc-dialog-actions {
-    margin-top: 20px;
+
+  /* Buttons: one solid charcoal primary, outlined secondary, as on the chore chart. */
+  .fc-btn,
+  .fc-download-btn,
+  .fc-clear-btn {
+    min-height: 48px;
+    padding: 0 22px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
   }
-  .fc-dialog-actions .fc-btn {
-    flex: 1;
+  .fc-btn:hover,
+  .fc-clear-btn:hover {
+    background: #f5f1ed;
+  }
+  .fc-btn-primary,
+  .fc-download-btn {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .fc-btn-primary:hover,
+  .fc-download-btn:hover {
+    background: #362e2d;
+  }
+  .fc-download-btn:disabled,
+  .fc-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .fc-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 4px auto 22px;
+  }
+  .fc-btn:focus-visible,
+  .fc-download-btn:focus-visible,
+  .fc-clear-btn:focus-visible,
+  .fc-quick-btn:focus-visible,
+  .fc-text-link:focus-visible,
+  .fc-nav-btn:focus-visible,
+  .fc-toggle:focus-visible {
+    outline: 2px solid var(--color-warm-button);
+    outline-offset: 2px;
   }
 
   .fc-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 16px;
-    margin: 0 auto 16px;
+    gap: 12px;
+    margin: 0 auto 14px;
+  }
+  .fc-nav-btn {
+    min-height: 44px;
+    padding: 0 8px;
+    border: 0;
+    background: none;
+    color: var(--color-warm-ink);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--color-warm-rule);
+    text-underline-offset: 5px;
+    cursor: pointer;
+  }
+  .fc-nav-btn:hover {
+    text-decoration-color: currentColor;
   }
   .fc-nav-label {
     min-width: 9em;
     text-align: center;
-    font-weight: 600;
-    color: #2f3e3e;
+    font: 400 1.25rem var(--font-serif);
+    color: var(--color-warm-ink);
   }
 
   /* The sheet: US Letter portrait (8.5 × 11 in at 96 px/in). */
@@ -549,72 +587,127 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     color: var(--color-warm-soft);
   }
 
-  /* Quick-add dialog. */
+  /* Quick-add dialog. Centered: Tailwind's reset removes the browser's own margin:auto. */
   .fc-dialog {
-    width: min(420px, calc(100% - 32px));
-    padding: 22px 20px;
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-    color: var(--fc-text);
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    width: min(440px, calc(100% - 32px));
+    padding: 24px 22px;
+    border: 1px solid var(--color-warm-rule);
+    border-radius: 3px;
+    background: var(--color-ivory, #fffdfa);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    color: var(--color-warm-ink);
   }
   .fc-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(33, 30, 29, 0.45);
   }
   .fc-dialog-title {
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
-    color: #2f3e3e;
-    margin-bottom: 14px;
+    margin: 0 0 6px;
+    font: 400 1.6rem/1.2 var(--font-serif);
+    color: var(--color-warm-ink);
   }
   .fc-prompt {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 14px;
-    margin: 12px 0 8px;
+    margin: 14px 0 8px;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-warm-soft);
+  }
+  .fc-prompt strong {
+    font-weight: 600;
   }
   .fc-prompt span {
-    padding: 2px 10px;
-    border: 1px solid var(--fc-mint);
-    border-radius: 20px;
-    background: var(--fc-mint-wash);
-    font-size: 12px;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+    text-transform: none;
   }
   .fc-day-btns {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 4px;
+  }
+  .fc-day-btns .fc-toggle {
+    padding: 0;
+  }
+  .fc-all {
+    margin-left: 8px;
+    padding: 2px 2px;
+    border: 0;
+    background: none;
+    color: var(--color-warm-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .fc-dialog-actions .fc-btn {
+    flex: 1;
+    padding: 0 10px;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+  .fc-dialog-hint {
+    margin: 8px 0 0;
+    font-size: 0.78rem;
+    text-align: center;
+    color: var(--color-warm-soft);
+  }
+  .fc-dialog-hint[hidden] {
+    display: none;
   }
   .fc-who-btns {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4px;
   }
-  .fc-who-btns .fc-toggle:last-child {
+  .fc-who-btns .fc-toggle:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
+  /* People keep their calendar row colors; a picked toggle gets a charcoal outline and check. */
   .fc-toggle {
-    padding: 9px 4px;
-    border: 2px solid var(--fc-line);
-    border-radius: 6px;
+    position: relative;
+    min-height: 44px;
+    padding: 0 8px;
+    border: 2px solid var(--color-warm-rule);
+    border-radius: 3px;
     background: #fff;
-    color: #333;
-    font-size: 12px;
-    font-weight: 700;
+    color: var(--color-warm-ink);
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .fc-toggle:hover {
-    border-color: var(--fc-mint);
+    border-color: #b9ada4;
   }
-  .fc-toggle[aria-pressed='true'] {
-    background: var(--fc-mint) !important;
-    border-color: var(--fc-mint) !important;
+  .fc-day-btns .fc-toggle[aria-pressed='true'] {
+    background: var(--color-warm-button);
+    border-color: var(--color-warm-button);
     color: #fff;
+  }
+  .fc-who-btns .fc-toggle[aria-pressed='true'] {
+    border-color: var(--color-warm-button) !important;
+  }
+  .fc-who-btns .fc-toggle[aria-pressed='true']::after {
+    content: '✓';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
   }
 
   /* Phones and small tablets: the sheet keeps its Letter shape and shrinks. The PNG is always 816 × 1056. */
@@ -625,6 +718,18 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     .fc-grid-2,
     .fc-form-grid {
       grid-template-columns: 1fr;
+    }
+    .fc-add-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .fc-members,
+    .fc-quick {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .fc-actions .fc-download-btn {
+      flex: 1 1 100%;
     }
     .family-calendar-container:not(.fc-exporting) .fc-sheet {
       width: 100%;
@@ -683,6 +788,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
 
 <script>
   import { downloadPng } from '../lib/printable';
+  import { planKey, readScoped, tabStorage } from '../lib/club/plan/storage';
 
   /** An activity is a rule, not a list of dates: weekly on some weekdays, or from a date with an optional repeat. */
   type Activity =
@@ -696,7 +802,11 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
 
   const clubCalendar = document.querySelector<HTMLElement>('.family-calendar-container')?.dataset.clubCalendar === 'true';
-  const KEY = clubCalendar ? 'omc:october-family-calendar:v1' : 'omc:family-calendar:v1';
+  const KEY = 'omc:family-calendar:v1';
+  /** The Club demo's key: tab-only, scoped to one family. */
+  const CLUB_KEY = 'omc:club:september-calendar:v1';
+  /** The earlier Club demo kept family names in localStorage; removed on sight. */
+  const OLD_CLUB_KEY = 'omc:october-family-calendar:v1';
   const DEFAULT_MEMBERS = ['Mom', 'Dad', 'Andrew', 'Philip', 'Jackson'];
   const MEMBER_COLORS = ['#f4f4f4', '#e3efee', '#f4e9e4', '#f9e5e1', '#fef6f5'];
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -716,6 +826,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
 
   function load(): State {
     const fresh: State = { members: [...DEFAULT_MEMBERS], word: 'Family', bigThings: 'Vacation, Deadline', activities: [] };
+    if (clubCalendar) return fresh;
     try {
       const saved = JSON.parse(localStorage.getItem(KEY) ?? 'null');
       if (saved && Array.isArray(saved.members) && Array.isArray(saved.activities)) return { ...fresh, ...saved };
@@ -725,7 +836,13 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     return fresh;
   }
   const state = load();
+  /** The Club family this calendar belongs to (sample + household), once known. */
+  let clubFamily = '';
   function save() {
+    if (clubCalendar) {
+      if (clubFamily) tabStorage.set(CLUB_KEY, JSON.stringify({ current: clubFamily, state }));
+      return;
+    }
     try {
       localStorage.setItem(KEY, JSON.stringify(state));
     } catch {
@@ -734,8 +851,10 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   }
 
   const today = new Date();
-  let month = clubCalendar ? new Date(2027, 9, 1) : new Date(today.getFullYear(), today.getMonth(), 1);
-  const memberName = (i: number) => state.members[i]?.trim() ?? DEFAULT_MEMBERS[i];
+  let month = clubCalendar ? new Date(2027, 8, 1) : new Date(today.getFullYear(), today.getMonth(), 1);
+  /** What each row goes back to: the example names, or (in the Club) the family's own. */
+  let memberDefaults = [...DEFAULT_MEMBERS];
+  const memberName = (i: number) => state.members[i]?.trim() ?? memberDefaults[i];
 
   function occursOn(a: Activity, d: Date) {
     if (a.kind === 'weekly') return a.days.includes(d.getDay());
@@ -819,30 +938,37 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
       list.innerHTML = '<div class="fc-empty">No activities yet</div>';
       return;
     }
-    list.innerHTML = [...state.activities]
-      .sort((a, b) => a.member - b.member)
-      .map(
-        (a) => `<div class="fc-item">
-          <div><strong>${esc(a.name)}</strong> · ${esc(memberName(a.member))}<br><small>${esc(describe(a))}</small></div>
-          <button type="button" data-fc-delete="${a.id}" aria-label="Remove ${esc(a.name)} for ${esc(memberName(a.member))}">✕</button>
-        </div>`,
-      )
+    // One line per activity and schedule, with everyone it's for: "Family Dinner · Mom, Dad, Sofia".
+    const groups = new Map<string, Activity[]>();
+    for (const a of state.activities) {
+      const key = `${a.name}\u0000${describe(a)}`;
+      groups.set(key, [...(groups.get(key) ?? []), a]);
+    }
+    list.innerHTML = [...groups.values()]
+      .sort((x, y) => Math.min(...x.map((a) => a.member)) - Math.min(...y.map((a) => a.member)))
+      .map((g) => {
+        const who = [...g].sort((a, b) => a.member - b.member).map((a) => memberName(a.member) || `Row ${a.member + 1}`).join(', ');
+        return `<div class="fc-item">
+          <div><strong>${esc(g[0].name)}</strong> · ${esc(who)}<br><small>${esc(describe(g[0]))}</small></div>
+          <button type="button" data-fc-delete="${g.map((a) => a.id).join(' ')}" aria-label="Remove ${esc(g[0].name)} for ${esc(who)}">✕</button>
+        </div>`;
+      })
       .join('');
   }
 
   function renderMembers() {
-    $('[data-fc-members]').innerHTML = DEFAULT_MEMBERS.map(
+    $('[data-fc-members]').innerHTML = memberDefaults.map(
       (def, i) => `<div class="fc-member">
-        <input type="text" value="${esc(state.members[i] ?? def)}" placeholder="${def}" data-fc-member="${i}"
+        <input type="text" value="${esc(state.members[i] ?? def)}" placeholder="${esc(def)}" data-fc-member="${i}"
           aria-label="Family member ${i + 1}" style="background:${MEMBER_COLORS[i]}" />
-        <button type="button" data-fc-member-reset="${i}" title="Reset name" aria-label="Reset name to ${def}">↻</button>
+        <button type="button" data-fc-member-reset="${i}" title="Reset name" aria-label="Reset name to ${esc(def || `row ${i + 1}`)}">↻</button>
       </div>`,
     ).join('');
     renderMemberOptions();
   }
   function renderMemberOptions() {
     $('[data-fc-member-select]').innerHTML =
-      '<option value="">Who is it for?</option>' + DEFAULT_MEMBERS.map((_, i) => `<option value="${i}">${esc(memberName(i))}</option>`).join('');
+      '<option value="">Who is it for?</option>' + DEFAULT_MEMBERS.map((_, i) => (memberName(i) ? `<option value="${i}">${esc(memberName(i))}</option>` : '')).join('');
   }
 
   let statusTimer: number | undefined;
@@ -894,7 +1020,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-fc-member-reset]');
     if (!btn) return;
     const i = Number(btn.dataset.fcMemberReset);
-    state.members[i] = DEFAULT_MEMBERS[i];
+    state.members[i] = memberDefaults[i];
     renderMembers();
     render();
   });
@@ -933,15 +1059,21 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     const who = pressed('[data-fc-person]').length;
     $('[data-fc-days-count]').textContent = `${days} day${days === 1 ? '' : 's'} selected`;
     $('[data-fc-who-count]').textContent = `${who} ${who === 1 ? 'person' : 'people'} selected`;
+    const ready = days > 0 && who > 0;
+    $<HTMLButtonElement>('[data-fc-dialog-add]').disabled = !ready;
+    $('[data-fc-dialog-hint]').hidden = ready;
   }
   document.querySelectorAll<HTMLButtonElement>('[data-fc-quick]').forEach((btn) =>
     btn.addEventListener('click', () => {
       quickName = btn.dataset.fcQuick!;
       $('[data-fc-dialog-title]').textContent = quickName;
       dialog.querySelectorAll('[data-fc-day]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-      $('[data-fc-who]').innerHTML = DEFAULT_MEMBERS.map(
-        (_, i) => `<button type="button" class="fc-toggle" data-fc-person="${i}" aria-pressed="false"
-          style="background:${MEMBER_COLORS[i]};border-color:${MEMBER_COLORS[i]}">${esc(memberName(i))}</button>`,
+      // Only rows with a name: a family of three gets three buttons, not two blank ones.
+      $('[data-fc-who]').innerHTML = DEFAULT_MEMBERS.map((_, i) =>
+        memberName(i)
+          ? `<button type="button" class="fc-toggle" data-fc-person="${i}" aria-pressed="false"
+          style="background:${MEMBER_COLORS[i]};border-color:${MEMBER_COLORS[i]}">${esc(memberName(i))}</button>`
+          : '',
       ).join('');
       updateCounts();
       dialog.showModal();
@@ -951,6 +1083,12 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
     const toggle = (e.target as HTMLElement).closest<HTMLButtonElement>('.fc-toggle');
     if (toggle) {
       toggle.setAttribute('aria-pressed', String(toggle.getAttribute('aria-pressed') !== 'true'));
+      updateCounts();
+    }
+    if ((e.target as HTMLElement).closest('[data-fc-all]')) {
+      const people = Array.from(dialog.querySelectorAll<HTMLButtonElement>('[data-fc-person]'));
+      const all = people.every((b) => b.getAttribute('aria-pressed') === 'true');
+      people.forEach((b) => b.setAttribute('aria-pressed', String(!all)));
       updateCounts();
     }
     if ((e.target as HTMLElement).closest('[data-fc-dialog-cancel]')) dialog.close();
@@ -974,7 +1112,8 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   $('[data-fc-autofill]').addEventListener('click', () => {
     for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-fc-quick]')) {
       const days = shuffle([0, 1, 2, 3, 4, 5, 6]).slice(0, 1 + Math.floor(Math.random() * 3));
-      const members = shuffle([0, 1, 2, 3, 4]).slice(0, 1 + Math.floor(Math.random() * 3));
+      const named = [0, 1, 2, 3, 4].filter((i) => memberName(i));
+      const members = shuffle(named).slice(0, 1 + Math.floor(Math.random() * Math.min(3, named.length)));
       addWeekly(btn.dataset.fcQuick!, members, days);
     }
     render();
@@ -987,7 +1126,10 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   showForm.addEventListener('click', () => {
     form.hidden = false;
     showForm.hidden = true;
-    (form.elements.namedItem('date') as HTMLInputElement).value = ymd(new Date());
+    // Start on a date in the month being shown, so the new activity appears on this sheet.
+    const now = new Date();
+    const shown = now.getFullYear() === month.getFullYear() && now.getMonth() === month.getMonth();
+    (form.elements.namedItem('date') as HTMLInputElement).value = ymd(shown ? now : month);
     (form.elements.namedItem('name') as HTMLInputElement).focus();
   });
   function closeForm() {
@@ -1019,7 +1161,8 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   $('[data-fc-list]').addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-fc-delete]');
     if (!btn) return;
-    state.activities = state.activities.filter((a) => a.id !== btn.dataset.fcDelete);
+    const ids = new Set((btn.dataset.fcDelete ?? '').split(' '));
+    state.activities = state.activities.filter((a) => !ids.has(a.id));
     render();
   });
 
@@ -1048,19 +1191,28 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   renderMembers();
   render();
   if(clubCalendar){
-    type HouseholdMember = { id:string; firstName:string; kind:string; role?:string };
-    type FamilyDetail = { household?: { members?: HouseholdMember[] } };
+    type HouseholdMember = { id:string; firstName:string; kind:string; role?:string; archived?:boolean };
+    type FamilyDetail = { household?: { id:string; members?: HouseholdMember[] } | null; sample?: string | null };
+    try { localStorage.removeItem(OLD_CLUB_KEY); } catch { /* blocked */ }
+    const isState=(x:unknown):x is State=>{const v=x as Partial<State>|null;return Boolean(v&&Array.isArray(v.members)&&Array.isArray(v.activities)&&typeof v.word==='string'&&typeof v.bigThings==='string')};
     const adoptHousehold=(detail: FamilyDetail)=>{
-      const all=(detail.household?.members??[]).filter(m=>m.kind==='adult'||m.kind==='child');
-      if(!all.length)return;
+      if(!detail?.household)return;
+      const family=planKey(detail.sample??null,detail.household.id);
+      if(family===clubFamily)return;
+      clubFamily=family;
+      // This family's calendar from earlier in this tab, or a fresh one with their names (archived members never show).
+      const all=(detail.household.members??[]).filter(m=>(m.kind==='adult'||m.kind==='child')&&!m.archived);
       const parents=all.filter(m=>m.kind==='adult'&&(m.role==='parent'||m.role==='partner'));
       const names=all.map(m=>{
         if(m.kind==='child')return m.firstName;
         const i=parents.findIndex(p=>p.id===m.id);
         return i===0?'Mom':i===1?'Dad':m.firstName;
       }).slice(0,5);
-      state.members=Array.from({length:5},(_,i)=>names[i]??'');
-      renderMembers();render();
+      memberDefaults=Array.from({length:5},(_,i)=>names[i]??'');
+      const saved=readScoped(tabStorage.get(CLUB_KEY),family,isState);
+      if(saved){Object.assign(state,saved);renderMembers();render();return;}
+      Object.assign(state,{members:[...memberDefaults],word:'Family',bigThings:'Vacation, Deadline',activities:[]});
+      save();renderMembers();render();
     };
     window.addEventListener('omc:club-preview-household',(event:Event)=>adoptHousehold((event as CustomEvent<FamilyDetail>).detail));
     const cached=(window as Window & { __ofcPreviewHousehold?: FamilyDetail }).__ofcPreviewHousehold;

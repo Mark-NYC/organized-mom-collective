@@ -72,7 +72,9 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
       for (const n of [copy, ...copy.querySelectorAll('*')]) {
         for (const a of [...n.attributes]) if (/^data-(osr|plan)/.test(a.name) || ['contenteditable', 'role', 'aria-label', 'spellcheck', 'id', 'tabindex'].includes(a.name)) n.removeAttribute(a.name);
       }
-      copy.style.cssText = `--osr-scale:${box.clientWidth / 816};transform:scale(${box.clientWidth / 816})`;
+      // Sheets are 816px wide (portrait) unless they say otherwise (March's landscape charts: data-plan-width).
+      const scale = box.clientWidth / (Number(src.dataset.planWidth) || 816);
+      copy.style.cssText = `--osr-scale:${scale};transform:scale(${scale})`;
       box.replaceChildren(copy);
     });
   };

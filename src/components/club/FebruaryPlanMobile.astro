@@ -1,0 +1,115 @@
+---
+/**
+ * February laundry ownership on phones and tablets (below 1100px): each child's laundry level, laundry days and who
+ * runs the machines, inside the shared ClubPlanScreen. It reads and changes the plan only through the printable's
+ * controller (`[data-lg]` root's `clubPlan`, src/lib/club/engines/february-laundry.ts).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="February · Organized Family Club" sheets={['young', 'older']} previewNote="Laundry guides for your family, ready to print">
+  <Fragment slot="title">My Laundry, <em>My Job.</em></Fragment>
+  <section class="cp-section" aria-labelledby="fpm-kids-title">
+    <h2 id="fpm-kids-title">Each child’s level</h2>
+    <p class="cp-intro">Age suggests a starting point. Children at the same level share one guide.</p>
+    <ul class="cp-group" data-fpm-kids></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="fpm-routine-title">
+    <h2 id="fpm-routine-title">Laundry routine</h2>
+    <ul class="cp-group" data-fpm-routine></ul>
+    <p class="fpm-restore" data-fpm-restore hidden><button type="button" class="cp-link"><span>Restore suggested plan</span></button></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.cp .cp-thumb.laundry-page{min-height:0;background:#fff}
+.cp .cp-thumb[hidden]{display:none}
+.fpm-restore{margin:6px 0 0}
+.fpm-restore[hidden]{display:none}
+.fpm-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  AS_NEEDED, LEVEL_INFO, LEVELS, WEEKDAYS, planChanged, restoreSuggested, setLevel, setOperator, toggleDay,
+  type LaundryPlan, type LaundryState,
+} from '../../lib/club/engines/february-laundry';
+
+const APPROVAL_KEY = 'omc:preview:february-laundry:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-lg])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: LaundryPlan }>('[data-lg]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<LaundryState>;
+
+  const row = (label: string, title: string, detail: string, open: () => void, locked: boolean, lead: Node = el('span')) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, lead,
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'fpm-label' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${label}: ${title}.${locked ? '' : ' Change'}`);
+    b.addEventListener('click', open);
+    return el('li', {}, b);
+  };
+  const render = (_ui: PlanScreen<LaundryState>, s: LaundryState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-fpm-kids]').replaceChildren(...(v.kids.length ? v.kids.map((k) => row(k.age === null ? 'Age not set' : `Age ${k.age}`, k.name, LEVEL_INFO[k.level].guide + (k.level === k.suggested ? '' : ' · changed'), () => openKid(k.id), locked, el('span', { class: 'cp-avatar' }, k.name.charAt(0)))) : [el('li', { class: 'cp-intro' }, 'Add children to your family profile to prepare their guides.')]));
+    q('[data-fpm-routine]').replaceChildren(
+      row('Laundry days', v.daysLine, '', openDays, locked),
+      row('Machine operator', v.operator === 'grown-up' ? 'Any grown-up' : v.operatorName, 'Machine operation requires training and supervision as appropriate.', openOperator, locked));
+    q('[data-fpm-restore]').hidden = locked || !planChanged(s, plan().members());
+    // Only the guides this family needs print; hide the other thumbnail.
+    // Thumbnails copy the sheets, whose styles are scoped to .laundry-page.
+    root.querySelectorAll<HTMLElement>('[data-cp-thumb]').forEach((t) => { t.hidden = !v.guides.some((g) => g.level === t.dataset.cpThumb); t.classList.add('laundry-page'); });
+  };
+  const chips = (label: string, items: { value: string; text: string; on: boolean }[], pick: (v: string) => void) => {
+    const g = el('div', { class: 'cp-chips', role: 'group' });
+    g.setAttribute('aria-label', label);
+    for (const it of items) {
+      const c = el('button', { type: 'button', class: 'cp-chip' }, it.text);
+      c.setAttribute('aria-pressed', String(it.on));
+      c.addEventListener('click', () => pick(it.value));
+      g.append(c);
+    }
+    return el('div', { class: 'cp-field' }, el('span', {}, label), g);
+  };
+  const openKid = (id: string) => {
+    const p = plan();
+    const k = p.view().kids.find((x) => x.id === id);
+    if (!k) return;
+    ui.openSheet(`${k.name}’s laundry level`,
+      chips('Guide', LEVELS.map((l) => ({ value: l, text: LEVEL_INFO[l].guide + (l === k.suggested ? ' (suggested)' : ''), on: k.level === l })), (l) => { p.update((s) => setLevel(s, id, l as 'young' | 'older', p.members())); openKid(id); }),
+      el('p', { class: 'cp-sheet-hint' }, 'Age suggests a starting point. Change it if their readiness is different. Children at the same level share one guide.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openDays = () => {
+    const p = plan();
+    const v = p.view();
+    ui.openSheet('Laundry days',
+      chips('Days', [...WEEKDAYS, AS_NEEDED].map((d) => ({ value: d, text: d, on: v.days.includes(d) })), (d) => { p.update((s) => toggleDay(s, d)); openDays(); }),
+      el('p', { class: 'cp-sheet-hint' }, 'Choose one or more days, or “As needed”. The days print on every guide.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openOperator = () => {
+    const p = plan();
+    const v = p.view();
+    ui.openSheet('Machine operator',
+      chips('Runs the machines', v.operators.map((o) => ({ value: o.id, text: o.firstName && o.firstName !== o.name ? `${o.name} (${o.firstName})` : o.name, on: v.operator === o.id })), (id) => { p.update((s) => setOperator(s, id, p.members())); openOperator(); }),
+      el('p', { class: 'cp-sheet-hint' }, 'Printed as what the children call them. Machine operation requires training and supervision as appropriate.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  q('[data-fpm-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => restoreSuggested(s));
+    ui.toast('Back to the suggested plan.', () => plan().replace(before));
+  });
+
+  const mounted = mountPlanScreen<LaundryState>({ root, host, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

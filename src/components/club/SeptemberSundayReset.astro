@@ -1,20 +1,21 @@
 ---
-/** October's two-sided, age-tailored family-ready printout. */
+/** September's two-sided, age-tailored family Sunday Reset, with the monthly activity calendar demo beside it.
+ * Rules: src/lib/club/engines/sunday-reset.ts (moved from October in Oct 2026). */
 interface Props {storageKey?:string}
-const {storageKey='omc:preview:october-sunday-reset:v1'}=Astro.props;
+const {storageKey='omc:preview:september-sunday-reset:v1'}=Astro.props;
 import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 ---
 <div class="osr" data-osr-key={storageKey}>
  <header class="osr-intro">
   <a href="/club">← Organized Family Club</a>
-  <p class="osr-kicker">ORGANIZED FAMILY CLUB · OCTOBER 2027</p>
+  <p class="osr-kicker">ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p>
   <h1>Our Family <em>Sunday Reset.</em></h1>
   <p>One weekly rhythm using your family wall calendar, with a ready-made fall project to help everyone practice.</p>
  </header>
  <div class="osr-layout">
-  <aside class="osr-editor" aria-label="Prepared October Sunday Reset">
-   <div class="osr-editor-head"><p class="osr-kicker">ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Sunday Reset.</em></h2><button type="button" class="osr-edit-link" data-open-vision>Why this matters</button></div>
-   <div class="osr-prepared" id="october-edit-controls"><span class="osr-kicker">YOUR FAMILY'S PREPARED SUNDAY RESET</span><strong>Our Sunday Reset</strong><p>Look ahead, get ready, share the work. Your first practice: getting ready for fall.</p>
+  <aside class="osr-editor" aria-label="Prepared September Sunday Reset">
+   <div class="osr-editor-head"><p class="osr-kicker">ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Our Family <em>Sunday Reset.</em></h2><button type="button" class="osr-edit-link" data-open-vision>Why this matters</button></div>
+   <div class="osr-prepared" id="september-edit-controls"><span class="osr-kicker">YOUR FAMILY'S PREPARED SUNDAY RESET</span><strong>Our Sunday Reset</strong><p>Look ahead, get ready, share the work. Your first practice: getting ready for fall.</p>
     <div class="osr-summary-row"><span>Weekly rhythm</span><b data-osr-summary-trigger>Sunday after lunch</b></div>
     <div class="osr-summary-row"><span>First example</span><b data-osr-summary-lead>Getting Ready for Fall</b></div>
     <button type="button" class="osr-edit-link" data-open-editor>Edit Sunday Reset <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
@@ -24,7 +25,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
   </aside>
   <dialog class="osr-dialog" data-osr-vision aria-labelledby="osr-vision-title"><div class="osr-dialog-head"><h2 id="osr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>Mom shouldn't be the only one noticing what's coming. The Sunday Reset gives the whole family a way to use the wall calendar, anticipate needs, and own preparations. The fall example is simply the first time to practice.</p><button type="button" class="osr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
   <dialog class="osr-dialog osr-guided-dialog" data-osr-editor aria-labelledby="osr-editor-title">
-    <div class="osr-dialog-head"><div><span class="osr-guide-kicker">MAKE IT YOURS · OCTOBER</span><h2 id="osr-editor-title">Our Family Sunday Reset</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
+    <div class="osr-dialog-head"><div><span class="osr-guide-kicker">MAKE IT YOURS · SEPTEMBER</span><h2 id="osr-editor-title">Our Family Sunday Reset</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
     <p class="osr-guide-intro">Your weekly rhythm and first fall example are prepared. Change only what doesn't fit.</p>
     <section class="osr-guide-section"><h3>1. When will you reset each Sunday?</h3>
       <div class="osr-choice-grid" data-osr-trigger-choices>
@@ -53,7 +54,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
     <button type="button" class="osr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
   <section class="osr-preview">
-   <div class="osr-tabs" role="tablist" aria-label="October preview">
+   <div class="osr-tabs" role="tablist" aria-label="September preview">
     <button type="button" role="tab" aria-selected="true" aria-controls="osr-panel-reset" id="osr-tab-reset" data-osr-tab="reset">Sunday Reset</button>
     <button type="button" role="tab" aria-selected="false" aria-controls="osr-panel-calendar" id="osr-tab-calendar" tabindex="-1" data-osr-tab="calendar">Try the Wall Calendar</button>
    </div>
@@ -63,7 +64,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
    <div class="osr-stage" data-osr-stage>
     <div class="osr-pages" data-osr-pages>
      <article class="osr-paper osr-front" data-osr-front data-plan-sheet="front">
-      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Our Family <em>Sunday Reset</em></h2><span data-osr-family contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit family">Look ahead. Get ready. Share the work.</span></header>
+      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Our Family <em>Sunday Reset</em></h2><span data-osr-family contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit family">Look ahead. Get ready. Share the work.</span></header>
       <section class="osr-cue"><span>OUR WEEKLY FAMILY RHYTHM</span><strong data-osr-cue contenteditable="true" role="textbox" spellcheck="true" aria-label="Edit cue" >Sunday after lunch</strong><p>Spend 10–15 minutes with our wall calendar. Everyone looks ahead and prepares their part.</p></section>
       <p class="osr-sheet-caption">Every Sunday, three simple steps.</p><div class="osr-three">
        <div><img src="/images/club/october/what-is-coming.webp" alt="" width="74" height="74"/><span>01</span><strong>Look Ahead</strong><p>What's coming up this week? Look at our wall calendar.</p></div>
@@ -76,7 +77,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
       <footer class="osr-foot"><strong>Notice. Prepare. Take ownership.</strong><span>START ON THE BACK WITH OUR FALL EXAMPLE</span></footer>
      </article>
      <article class="osr-paper osr-back" data-osr-back data-plan-sheet="back" data-plan-sheet-end>
-      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · OCTOBER 2027</p><h2>Let's Try It: <em>Fall Readiness</em></h2><span>Our first Sunday Reset, prepared for our family.</span></header>
+      <header class="osr-paper-head"><p>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</p><h2>Let's Try It: <em>Fall Readiness</em></h2><span>Our first Sunday Reset, prepared for our family.</span></header>
       <p class="osr-sheet-caption">Our first Sunday Reset, step by step.</p>
       <div class="osr-three osr-example-steps">
        <div class="osr-example-step">
@@ -222,7 +223,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 @media print{.osr .osr-paper [contenteditable="true"]::after{display:none!important}}
 .osr.osr-export .osr-paper [contenteditable="true"]::after{display:none!important}
 
-/* Guided October editor aligned with August and September. */
+/* Guided Sunday Reset editor aligned with August. */
 .osr-jump-edit{cursor:pointer;font-family:inherit}
 .osr-guided-dialog{width:min(620px,calc(100vw - 32px));padding:26px 30px}
 .osr-guide-kicker{display:block;font:700 10px 'OSR Montserrat',Montserrat,sans-serif;color:#809484;letter-spacing:.14em;margin-bottom:9px}
@@ -259,7 +260,7 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 .osr-fall-sections .osr-person-task{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}
 .osr-fall-sections .osr-task-owner{font:600 italic 14px 'OSR Gelasio',Georgia,serif;color:#426c55;margin:0 0 3px}
 
-/* Mirror the front's three-step hierarchy on October's worked example. */
+/* Mirror the front's three-step hierarchy on the worked fall example. */
 .osr-example-steps{margin-bottom:10px}
 .osr-example-steps>.osr-example-step{grid-template-columns:25px 54px minmax(0,1fr);grid-template-rows:auto auto;column-gap:11px}
 .osr-example-steps>.osr-example-step>strong{font:400 19px 'OSR Gelasio',Georgia,serif;line-height:1.2}
@@ -274,16 +275,19 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
 .osr-example-steps .osr-fall-sections p{font-size:10px;line-height:1.35;margin:0}
 .osr-back .osr-notes{border-top:1px solid var(--osr-accent);margin-top:4px;padding-top:9px}
 /* Preview-only segmented tabs. The left editor is untouched. */
-.osr-tabs{display:grid;grid-template-columns:1fr 1fr;position:relative;gap:3px;max-width:510px;margin:0 auto 18px;padding:4px;border:1px solid #d9e2d8;border-radius:999px;background:#e9ede7}
-.osr-tabs button{position:relative;z-index:1;min-height:43px;padding:9px 12px;border:0;border-radius:999px;background:transparent;color:#64766a;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
-.osr-tabs button[aria-selected="true"]{background:#fff;color:#3f6853;box-shadow:0 2px 8px #304b351b}
-.osr-tabs button:focus-visible{outline:3px solid #64876f;outline-offset:2px}
+/* Text tabs with an underline on the selected one (docs/brand/TOOL-OUTPUT-DESIGN.md). */
+.osr-tabs{display:flex;justify-content:center;gap:28px;max-width:816px;margin:0 auto 18px;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.osr-tabs button{position:relative;min-height:46px;margin-bottom:-1px;padding:10px 2px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--color-warm-soft,#6e6461);font:600 .75rem var(--font-sans,Montserrat,Arial,sans-serif);letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:color .2s,border-color .2s}
+.osr-tabs button:hover{color:var(--color-warm-ink,#4d4544)}
+.osr-tabs button[aria-selected="true"]{color:var(--color-warm-ink,#4d4544);border-bottom-color:var(--color-warm-button,#4a3f3e)}
+.osr-tabs button:focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
 .osr [data-osr-panel][hidden],.osr .osr-floating-edit[hidden]{display:none!important}
 
+.osr-panel-off{display:none}
 @media print{.osr-tabs,#osr-panel-calendar{display:none!important}#osr-panel-reset{display:block!important}}
 </style>
 <script>
-import {planFingerprint,DEFAULT_TAGLINE,DEFAULT_TRIGGER,TRIGGER_CHOICES,applyDefaults,defaultFallJobs,displayName,emptyState,planKey,planMembers,readSavedPlan,type PlanMember as Member,type PlanState as State,type OsrPlan} from '../../lib/club/engines/october-sunday-reset';
+import {planFingerprint,DEFAULT_TAGLINE,DEFAULT_TRIGGER,TRIGGER_CHOICES,applyDefaults,defaultFallJobs,displayName,emptyState,planKey,planMembers,readSavedPlan,type PlanMember as Member,type PlanState as State,type OsrPlan} from '../../lib/club/engines/sunday-reset';
 import {PLAN_CHANGE} from '../../lib/club/plan/resource';
 type Household={id:string;displayName?:string;members?:Member[]};
 for(const root of document.querySelectorAll<HTMLElement>('.osr')){
@@ -291,11 +295,13 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   button.addEventListener('click',()=>{
    const selected=button.dataset.osrTab;
    root.querySelectorAll<HTMLButtonElement>('[data-osr-tab]').forEach(b=>{const active=b===button;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1});
-   root.querySelectorAll<HTMLElement>('[data-osr-panel]').forEach(panel=>{panel.hidden=panel.dataset.osrPanel!==selected});
+   // The Sunday Reset panel is hidden with a class, not `hidden`: Tailwind's layered [hidden]{display:none!important}
+   // would beat the print rule, and the sheets must print whichever tab is showing.
+   root.querySelectorAll<HTMLElement>('[data-osr-panel]').forEach(panel=>{const off=panel.dataset.osrPanel!==selected;if(panel.dataset.osrPanel==='reset')panel.classList.toggle('osr-panel-off',off);else panel.hidden=off});
    root.querySelector<HTMLElement>('.osr-floating-edit')?.toggleAttribute('hidden',selected!=='reset');
   });
  });
- const storageKey=root.dataset.osrKey??'omc:preview:october-sunday-reset:v2';
+ const storageKey=root.dataset.osrKey??'omc:preview:september-sunday-reset:v1';
  let current='',members:Member[]=[],persist=true;
  let state:State=emptyState();
  const stage=root.querySelector<HTMLElement>('[data-osr-stage]');
@@ -410,7 +416,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:Household;sample:string|null}>).detail));
  const cached=(window as Window & {__ofcPreviewHousehold?:{household:Household;sample:string|null}}).__ofcPreviewHousehold;if(cached)applyHousehold(cached);
  paint();
- const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>planFingerprint(state)};
+ // Past the editing cutoff (the Club plan page's rail): no typing on the sheet, no editor.
+ let locked=false;
+ const setLocked=(on:boolean)=>{locked=on;root.querySelectorAll<HTMLElement>('.osr-paper [contenteditable]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true'));if(on)editorDialog?.close()};
+ const openEditor=()=>{if(!locked&&editorDialog&&!editorDialog.open)editorDialog.showModal()};
+ const plan:OsrPlan={ready:()=>Boolean(current),members:()=>members,state:()=>state,nameOf,update:change=>{change(state);save();paint()},replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>planFingerprint(state),setLocked,openEditor};
  (root as HTMLElement & {clubPlan?:OsrPlan}).clubPlan=plan;
 }
 </script>

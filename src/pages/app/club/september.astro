@@ -1,0 +1,113 @@
+---
+/** September Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md): the family Sunday Reset (moved from October in Oct 2026) and, in a second tab,
+ * the monthly activity calendar demo (the free /try-the-calendar tool, prefilled with the family's names).
+ * Desktop (>= 1100px): the shared rail (ClubPlanDesktop, October's layout) and the scrolling document proof. Below
+ * 1100px: the shared plan screen with September's sections (SeptemberPlanMobile). The printable, its editor and its
+ * rules live in SeptemberSundayReset and src/lib/club/engines/sunday-reset.ts. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import SeptemberSundayReset from '../../../components/club/SeptemberSundayReset.astro';
+import SeptemberPlanMobile from '../../../components/club/SeptemberPlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find((k) => k.month === '2027-09');
+if (!kit) throw new Error('September 2027 kit missing from the registry');
+const editDeadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:september-sunday-reset:v1';
+---
+<AppLayout title="September Sunday Reset">
+  <ClubPlanShell class="club-mobile-kit family-brand" kitSlug={kit.slug} month="September" sides={['front', 'back']} storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={editDeadline} kicker="September · Kit preview" instructions={[
+      'Keep this two-sided sheet beside your family wall calendar. Each Sunday, take 10–15 minutes to look at the week ahead, prepare what you need, and give everyone a part.',
+      'The back is a one-time fall example to try together. Review the prepared roles, change anything that doesn’t fit, and use the front again each Sunday.',
+      'Try the Wall Calendar: add each person’s recurring activities once and see the whole month by person, ready for your Sunday planning.',
+    ]}>
+      <Fragment slot="title">Our Family <em>Sunday Reset</em></Fragment>
+    </ClubPlanDesktop>
+    <div class="kit-viewer-wrap" slot="printable" data-plan-proof-body>
+      <div class="kit-artwork" data-kit-viewer data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <SeptemberSundayReset storageKey={storageKey} />
+      </div>
+    </div>
+    <SeptemberPlanMobile slot="mobile" deadline={editDeadline} />
+  </ClubPlanShell>
+</AppLayout>
+<style is:global>
+/* The Sunday Reset inside the plan page: its own intro and editor panel give way to the shared rail and plan
+   screen; its two tabs (Sunday Reset, Try the Wall Calendar) stay. The rail, the column layout and the scrolling
+   preview are ClubPlanDesktop's. */
+.club-mobile-kit .osr{padding:0!important;max-width:none!important}
+.club-mobile-kit .osr-intro,.club-mobile-kit .osr-editor,.club-mobile-kit .osr-floating-edit{display:none!important}
+.club-mobile-kit .osr-layout{display:block!important}
+.club-mobile-kit .osr-preview{width:100%!important;padding:0!important;margin:0!important;min-width:0!important}
+.club-mobile-kit .osr-stage{width:100%!important;max-width:none!important;overflow:hidden}
+.club-mobile-kit .osr-pages{display:block!important;width:100%!important}
+.club-mobile-kit .osr-paper{max-width:none}
+.club-mobile-kit .osr-dialog{z-index:100}
+/* The calendar tab has its own Download PNG; the Sunday Reset's side switch and print don't apply to it. */
+.club-mobile-kit:has([data-osr-panel="calendar"]:not([hidden])) :is(.plan-sides,.plan-proof-print){visibility:hidden}
+
+/* Desktop: the January-style document viewer, centered letter-sized pages at proportional scale. */
+@media screen and (min-width:1100px){
+  .club-mobile-kit .osr,.club-mobile-kit .osr-layout,.club-mobile-kit .osr-preview,
+  .club-mobile-kit #osr-panel-reset{width:100%;min-width:0}
+  .club-mobile-kit .osr-preview,
+  .club-mobile-kit #osr-panel-reset,
+  .club-mobile-kit .osr-stage,
+  .club-mobile-kit .osr-layout{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    min-height:0!important;
+  }
+  .club-mobile-kit .osr-stage{
+    width:100%!important;
+    max-width:816px!important;
+    margin:0 auto!important;
+  }
+  .club-mobile-kit .osr-pages{
+    display:flex!important;
+    width:100%!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    gap:28px!important;
+  }
+  .club-mobile-kit .osr-document-frame{
+    flex:none!important;
+    position:relative!important;
+    max-width:100%;
+    margin:0 auto!important;
+    background:#fff;
+    box-shadow:0 12px 32px #0002;
+    overflow:visible;
+  }
+  .club-mobile-kit .osr-document-frame .osr-paper{
+    position:absolute!important;
+    top:0!important;
+    left:0!important;
+    margin:0!important;
+    transform:scale(var(--osr-scale,1))!important;
+    transform-origin:top left!important;
+    box-shadow:none!important;
+  }
+}
+</style>
+<script>
+import type { OsrPlan, PlanState } from '../../../lib/club/engines/sunday-reset';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+
+const kit = document.querySelector<HTMLElement>('.club-mobile-kit');
+const osr = kit?.querySelector<HTMLElement & { clubPlan?: OsrPlan }>('.osr');
+if (kit && osr) {
+  mountPlanDesktop<PlanState>({
+    root: kit,
+    host: osr,
+    approvalKey: 'omc:preview:september-sunday-reset:approval',
+    edit: () => osr.clubPlan?.openEditor(),
+    lock: (on) => osr.clubPlan?.setLocked(on),
+  });
+}
+</script>

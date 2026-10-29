@@ -25,7 +25,7 @@ describe('one routine chart', () => {
   });
 
   it('every page with a chore chart uses the same component, and the public page keeps its email step', () => {
-    const users = files('src/pages').filter((f) => /ChoreChart/.test(readFileSync(f, 'utf8')));
+    const users = files('src/pages').filter((f) => /\bChoreChart\b/.test(readFileSync(f, 'utf8')));
     expect(users.sort()).toEqual(['src/pages/chore-chart.astro', 'src/pages/club/tools/chore-chart.astro']);
     for (const f of users) expect(readFileSync(f, 'utf8'), f).toMatch(/import ChoreChart from '(\.\.\/)+components\/site\/ChoreChart\.astro'/);
     expect(readFileSync('src/components/site/ChoreChart.astro', 'utf8')).toMatch(/import \{ initChoreChart \} from '\.\/chore-chart'/);

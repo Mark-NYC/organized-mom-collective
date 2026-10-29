@@ -1,7 +1,7 @@
 /**
- * October 2027 Sunday Reset: the personalization rules behind the two-sided printable
- * (src/components/club/OctoberSundayReset.astro). Pure functions only, so the printable, the
- * /app/club/october page and later mobile screens all read the same plan.
+ * September 2027 Sunday Reset (October 2027 until Oct 2026): the personalization rules behind the two-sided printable
+ * (src/components/club/SeptemberSundayReset.astro). Pure functions only, so the printable, the
+ * /app/club/september page and later mobile screens all read the same plan.
  *
  * Saved shape and key are unchanged from the original inline script: sessionStorage[storageKey] =
  * { current: '<sample>:<householdId>', state }. That is this browser tab only, never an account.
@@ -49,7 +49,7 @@ export const DEFAULT_TRIGGER = 'Sunday after lunch';
 export const DEFAULT_TAGLINE = 'Look ahead. Get ready. Share the work.';
 export const TRIGGER_CHOICES = ['Sunday after breakfast', 'Sunday after church', 'Sunday after lunch', 'Sunday evening'] as const;
 
-/** The kit's year: ages on the sheet are as of October 2027. */
+/** The kit's year: ages on the sheet are as of September 2027. */
 const KIT_YEAR = 2027;
 
 export const FALL_TEMPLATES: readonly Omit<FallJob, 'ownerId'>[] = [
@@ -63,7 +63,7 @@ export const planMembers = <M extends PlanMember>(members: readonly M[]): M[] =>
   members.filter((m) => (m.kind === 'adult' || m.kind === 'child') && !m.archived);
 
 export const ageOf = (m: PlanMember) =>
-  m.birthYear ? Math.max(1, KIT_YEAR - m.birthYear - ((m.birthMonth ?? 1) > 10 ? 1 : 0)) : 8;
+  m.birthYear ? Math.max(1, KIT_YEAR - m.birthYear - ((m.birthMonth ?? 1) > 9 ? 1 : 0)) : 8;
 
 export const weeklyRole = (m: PlanMember, i: number) =>
   m.kind === 'adult'
@@ -191,11 +191,15 @@ export const planFingerprint = (s: PlanState) =>
   ]);
 
 /**
- * The live plan on a page, published by the printable (OctoberSundayReset.astro) on its `.osr` root as
- * `clubPlan`: the shared PlanResource (src/lib/club/plan/resource.ts) plus October's family helpers.
+ * The live plan on a page, published by the printable (SeptemberSundayReset.astro) on its `.osr` root as
+ * `clubPlan`: the shared PlanResource (src/lib/club/plan/resource.ts) plus the Sunday Reset's family helpers.
  * It fires PLAN_CHANGE (bubbling) after every repaint once a family is loaded.
  */
 export interface OsrPlan extends PlanResource<PlanState> {
   members: () => PlanMember[];
   nameOf: (m: PlanMember) => string;
+  /** Past the editing cutoff: the sheet stops taking typed edits and the editor stays closed. */
+  setLocked: (on: boolean) => void;
+  /** The desktop editor. */
+  openEditor: () => void;
 }
