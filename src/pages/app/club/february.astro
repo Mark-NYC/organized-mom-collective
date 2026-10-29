@@ -2,33 +2,29 @@
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import { kits } from '../../../data/club/kits';
-import { getImage } from 'astro:assets';
-import febDirtyLaundry from '../../../../assets/icons/ofc/february/dirty-laundry.png';
-import febIcon0 from '../../../../assets/icons/ofc/february/adding-detergent.png';
-import febIcon1 from '../../../../assets/icons/ofc/february/checking-care-label.png';
-import febIcon2 from '../../../../assets/icons/ofc/february/checking-lint-trap.png';
-import febIcon3 from '../../../../assets/icons/ofc/february/checking-pockets.png';
-import febIcon4 from '../../../../assets/icons/ofc/february/clothes-dryer.png';
-import febIcon5 from '../../../../assets/icons/ofc/february/clothes-hanger.png';
-import febIcon6 from '../../../../assets/icons/ofc/february/dresser.png';
-import febIcon7 from '../../../../assets/icons/ofc/february/folded-shirt.png';
-import febIcon8 from '../../../../assets/icons/ofc/february/folding-clothes.png';
-import febIcon9 from '../../../../assets/icons/ofc/february/laundry-basket.png';
-import febIcon10 from '../../../../assets/icons/ofc/february/laundry-hamper.png';
-import febIcon11 from '../../../../assets/icons/ofc/february/loading-washer.png';
-import febIcon12 from '../../../../assets/icons/ofc/february/putting-clothes-away.png';
-import febIcon13 from '../../../../assets/icons/ofc/february/selecting-wash-cycle.png';
-import febIcon14 from '../../../../assets/icons/ofc/february/sorting-clothes.png';
-import febIcon15 from '../../../../assets/icons/ofc/february/transfering-clothes.png';
-import febIcon16 from '../../../../assets/icons/ofc/february/washing-machine.png';
-const februaryIconSources = { 'dirty-laundry': febDirtyLaundry, 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16 };
-// Astro builds compressed WebP files; PNG masters remain untouched in assets/.
-const februaryIcons = Object.fromEntries(await Promise.all(
-  Object.entries(februaryIconSources).map(async ([name, src]) => {
-    const optimized = await getImage({ src, format: 'webp', quality: 82, width: 240 });
-    return [name, optimized.src] as const;
-  })
-));
+import febIcon0 from '../../../../assets/icons/ofc/february/adding-detergent.webp';
+import febIcon1 from '../../../../assets/icons/ofc/february/checking-care-label.webp';
+import febIcon2 from '../../../../assets/icons/ofc/february/checking-lint-trap.webp';
+import febIcon3 from '../../../../assets/icons/ofc/february/checking-pockets.webp';
+import febIcon4 from '../../../../assets/icons/ofc/february/clothes-dryer.webp';
+import febIcon5 from '../../../../assets/icons/ofc/february/clothes-hanger.webp';
+import febIcon6 from '../../../../assets/icons/ofc/february/dresser.webp';
+import febIcon7 from '../../../../assets/icons/ofc/february/folded-shirt.webp';
+import febIcon8 from '../../../../assets/icons/ofc/february/folding-clothes.webp';
+import febIcon9 from '../../../../assets/icons/ofc/february/laundry-basket.webp';
+import febIcon10 from '../../../../assets/icons/ofc/february/laundry-hamper.webp';
+import febIcon11 from '../../../../assets/icons/ofc/february/loading-washer.webp';
+import febIcon12 from '../../../../assets/icons/ofc/february/putting-clothes-away.webp';
+import febIcon13 from '../../../../assets/icons/ofc/february/selecting-wash-cycle.webp';
+import febIcon14 from '../../../../assets/icons/ofc/february/sorting-clothes.webp';
+import febIcon15 from '../../../../assets/icons/ofc/february/transfering-clothes.webp';
+import febIcon16 from '../../../../assets/icons/ofc/february/washing-machine.webp';
+import febIcon17 from '../../../../assets/icons/ofc/february/dirty-laundry.webp';
+const februaryIconSources = { 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16, 'dirty-laundry': febIcon17 };
+// Lossless transparent WebPs retain the PNG masters' full resolution for print.
+const februaryIcons = Object.fromEntries(
+  Object.entries(februaryIconSources).map(([name, src]) => [name, src.src])
+);
 const kit = kits.find(k => k.month === '2027-02');
 if (!kit) throw new Error('February kit missing');
 ---
