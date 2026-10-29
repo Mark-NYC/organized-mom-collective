@@ -20,7 +20,8 @@ import febIcon14 from '../../../../assets/icons/ofc/february/sorting-clothes.web
 import febIcon15 from '../../../../assets/icons/ofc/february/transfering-clothes.webp';
 import febIcon16 from '../../../../assets/icons/ofc/february/washing-machine.webp';
 import febIcon17 from '../../../../assets/icons/ofc/february/dirty-laundry.webp';
-const februaryIconSources = { 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16, 'dirty-laundry': febIcon17 };
+import febSortingDirty from '../../../../assets/icons/ofc/february/sorting-dirty-laundry.webp';
+const februaryIconSources = { 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16, 'dirty-laundry': febIcon17, 'sorting-dirty-laundry': febSortingDirty };
 // Lossless transparent WebPs retain the PNG masters' full resolution for print.
 const februaryIcons = Object.fromEntries(
   Object.entries(februaryIconSources).map(([name, src]) => [name, src.src])
@@ -259,7 +260,7 @@ if(root){
   const rule=element('div','paper-rule');paper.append(rule);
   const names=element('h3','paper-section-title',children.map(c=>c.name).join(' · '));paper.append(names);
   const sub=element('p','',level==='young'?'Your jobs, every laundry day:':'Your laundry checklist:');sub.style.fontSize='13px';paper.append(sub);
-  const makeStep=([name,desc]:string[],i:number)=>{const row=element('div','laundry-instruction');row.append(icon(name));const info=element('div');info.append(element('small','',String(i+1).padStart(2,'0')),element('h3','',name),element('p','',desc));row.append(info);return row};
+  const makeStep=([name,desc]:string[],i:number)=>{const row=element('div','laundry-instruction');row.append(icon(level==='older' && i===1 ? 'sorting-dirty-laundry' : name));const info=element('div');info.append(element('small','',String(i+1).padStart(2,'0')),element('h3','',name),element('p','',desc));row.append(info);return row};
   if(level==='older'){
     const phases=[
       {name:'GET READY',hint:'Before you start the washer',tone:'ready',start:0,end:5},
