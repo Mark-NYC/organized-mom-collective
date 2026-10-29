@@ -83,13 +83,13 @@ const faqs = [
   <img class="kit-fullscreen-image" src={kit.image} alt={`${kit.month}: ${kit.description}`} width="1080" height="1080" loading="lazy" decoding="async" />
   <div class="kit-fullscreen-copy"><p>{kitDetails[kit.month].relief}</p>
    <section class="kit-personal" style={{ '--kit-tint': `${kit.color}40`, '--kit-accent': kit.color }} aria-labelledby={`kit-personal-title-${kit.month}`}>
+    <p class="kit-personal-example">{kitDetails[kit.month].example}</p>
     <h3 id={`kit-personal-title-${kit.month}`}>Made for your family.<br/><span>Less planning for you.</span></h3>
     <dl class="kit-personal-benefits">
      <div><dt>Their names</dt><dd>Everyone sees their own part.</dd></div>
      <div><dt>Their abilities</dt><dd>Steps fit their ages and what they can handle.</dd></div>
      <div><dt>Your needs</dt><dd>The plan fits the routine you need help with.</dd></div>
     </dl>
-    <p class="kit-personal-example">{kitDetails[kit.month].example}</p>
     <p class="kit-personal-caption">Illustrative example. Your plan is prepared for your household.</p>
    </section>
   </div>
@@ -834,7 +834,7 @@ const faqs = [
 .kit-personal-benefits div { display: grid; grid-template-columns: 112px 1fr; gap: 14px; font-size: .9rem; line-height: 1.5; }
 .kit-personal-benefits dt { font-weight: 700; color: #303030; }
 .kit-personal-benefits dd { margin: 0; }
-.kit-personal-example { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid #30303020; font-size: .9rem; line-height: 1.6; }
+.kit-personal-example { margin: 0 0 26px; padding: 0 0 24px; border-bottom: 1px solid #30303020; font-family: Georgia, serif; font-size: clamp(1.35rem, 3.2vw, 1.8rem); line-height: 1.4; color: #303030; }
 .kit-personal-caption { margin: 9px 0 0; font-size: .7rem; line-height: 1.5; color: #696969; }
 @media(max-width:400px) { .kit-personal-benefits div { grid-template-columns: 1fr; gap: 2px; } }
 </style>
