@@ -1,0 +1,98 @@
+---
+/**
+ * December Christmas Mission on phones and tablets (below 1100px): who the mission is for and who helps deliver the
+ * cards, inside the shared ClubPlanScreen. It reads and changes the plan only through the printable's controller
+ * (`[data-dec-plan]` root's `clubPlan`, src/lib/club/engines/december-christmas-mission.ts).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="December · Organized Family Club" sheets={['mission', 'cards']} previewNote="A mission and two Christmas cards, ready to print">
+  <Fragment slot="title">Your Christmas Mission <em>Has Arrived!</em></Fragment>
+  <section class="cp-section" aria-labelledby="dpm-who-title">
+    <h2 id="dpm-who-title">The mission</h2>
+    <p class="cp-intro">A surprise addressed to the children: one kindness mission they lead, and two cards to give.</p>
+    <ul class="cp-group" data-dpm-rows></ul>
+    <p class="dpm-restore" data-dpm-restore hidden><button type="button" class="cp-link"><span>Restore the prepared mission</span></button></p>
+  </section>
+  <section class="cp-section" aria-labelledby="dpm-print-title">
+    <h2 id="dpm-print-title">Printing</h2>
+    <p class="cp-intro">Print each page single-sided. Cut the card sheet across the middle and fold each card with the printed side out. Supplies: just a pen.</p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.dpm-restore{margin:6px 0 0}
+.dpm-restore[hidden]{display:none}
+.dpm-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import { missionChanged, restoreMission, setHelper, toggleKid, type DecPlan, type DecState } from '../../lib/club/engines/december-christmas-mission';
+
+const APPROVAL_KEY = 'omc:preview:december-christmas-mission:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-dec-plan])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: DecPlan }>('[data-dec-plan]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<DecState>;
+
+  const row = (label: string, title: string, detail: string, open: () => void, locked: boolean, lead: Node = el('span')) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, lead,
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'dpm-label' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${label}: ${title}.${locked ? '' : ' Change'}`);
+    b.addEventListener('click', open);
+    return el('li', {}, b);
+  };
+  const render = (_ui: PlanScreen<DecState>, s: DecState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-dpm-rows]').replaceChildren(
+      row('Mission for', v.forLine, 'Their names go on the mission and both cards', openKids, locked, el('span', { class: 'cp-avatar' }, v.forLine.charAt(0))),
+      row('Helps deliver the cards', v.helper === 'a grown-up' ? 'Any grown-up' : v.helper, `“Ask ${v.helper} to help you give your card…”`, openHelper, locked));
+    q('[data-dpm-restore]').hidden = locked || !missionChanged(s, plan().members());
+  };
+  const chip = (text: string, on: boolean, pick: () => void, disabled = false) => {
+    const c = el('button', { type: 'button', class: 'cp-chip', disabled }, text);
+    c.setAttribute('aria-pressed', String(on));
+    c.addEventListener('click', pick);
+    return c;
+  };
+  const group = (label: string, ...chips: HTMLElement[]) => {
+    const g = el('div', { class: 'cp-chips', role: 'group' }, ...chips);
+    g.setAttribute('aria-label', label);
+    return el('div', { class: 'cp-field' }, el('span', {}, label), g);
+  };
+  const openKids = () => {
+    const p = plan();
+    const v = p.view();
+    const count = v.kids.filter((k) => k.on).length;
+    ui.openSheet('Who the mission is for',
+      group('Mission for', ...v.kids.map((k) => chip(k.name, k.on, () => { p.update((s) => toggleKid(s, k.id, p.members())); openKids(); }, k.on && count === 1))),
+      el('p', { class: 'cp-sheet-hint' }, 'At least one child. The mission speaks to them; a grown-up only helps with delivery.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openHelper = () => {
+    const p = plan();
+    const v = p.view();
+    ui.openSheet('Who helps deliver',
+      group('Helps deliver', ...v.helpers.map((h) => chip(h.firstName && h.firstName !== h.name ? `${h.name} (${h.firstName})` : h.name, p.state().helper === h.id, () => { p.update((s) => setHelper(s, h.id, p.members())); openHelper(); }))),
+      el('p', { class: 'cp-sheet-hint' }, 'Printed as what the children call them.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  q('[data-dpm-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => restoreMission(s, plan().members()));
+    ui.toast('The mission is back to how it was prepared.', () => plan().replace(before));
+  });
+
+  const mounted = mountPlanScreen<DecState>({ root, host, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

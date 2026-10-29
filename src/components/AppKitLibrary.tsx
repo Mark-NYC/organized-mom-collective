@@ -90,7 +90,7 @@ const months = [
     "title": "Christmas Without Doing It All",
     "responsibility": "Contributing to family traditions",
     "how": "A prepared holiday plan shares responsibility for gifts, traditions, and celebrations.",
-    "url": "/club/december-preview/"
+    "url": "/app/club/december/"
   }
 ];
 

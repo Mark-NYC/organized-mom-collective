@@ -29,7 +29,7 @@ class Pen{
  }
 }
 const sheet=(ops:Op[]):Page=>({width:612,height:792,ops});
-export function decemberPages(m:Metrics,f:Family):[Page,Page]{
+export function decemberPages(m:Metrics,f:Pick<Family,'members'>):[Page,Page]{
  const [,second,...kids]=f.members;
  const names=kids.length===1?kids[0]:kids.length===2?kids.join(' & '):kids.slice(0,-1).join(', ')+' & '+kids[kids.length-1];
  const helper=second||'a grown-up';

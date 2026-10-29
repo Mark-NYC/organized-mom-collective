@@ -1,0 +1,81 @@
+---
+/** December Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with who the
+ * mission is for and who helps deliver, beside the two printable sheets. Below 1100px: the shared plan screen with
+ * December's sections (DecemberPlanMobile). The sheets come from DecemberMissionPrototype (pages:
+ * src/lib/december/layout.ts) and the choices from src/lib/club/engines/december-christmas-mission.ts. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
+import DecemberPlanMobile from '../../../components/club/DecemberPlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
+import { kits } from '../../../data/club/kits';
+const kit = kits.find((k) => k.slug === '2026-12-christmas-mission');
+if (!kit) throw new Error('December 2026 kit missing from the registry');
+const deadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:december-app:v1';
+---
+<AppLayout title="December Christmas Mission">
+  <ClubPlanShell class="dec-plan-page family-brand" kitSlug={kit.slug} month="December" storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="December · Kit preview" instructions={[
+      'Children don’t have to wait for Mom to plan every meaningful Christmas activity. Their own kindness mission comes prepared with two cards so they can choose who to encourage, create something personal, and help deliver it.',
+      'Print each page single-sided. Cut the card sheet across the middle and fold each card with the printed side out.',
+    ]}>
+      <Fragment slot="title">Your Christmas Mission <em>Has Arrived!</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="dec-d-mission">
+          <p class="cpd-label" id="dec-d-mission">On the mission</p>
+          <dl class="cpd-rows" data-dec-d-rows></dl>
+          <button type="button" class="cpd-link" data-dec-d-open>Choose who it’s for and who helps</button>
+          <button type="button" class="cpd-link" data-dec-d-restore hidden>Restore the prepared mission</button>
+          <p class="cpd-hint" data-dec-d-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="dec-proof" slot="printable" data-plan-proof-body>
+      <div class="dec-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <DecemberMissionPrototype storageKey={storageKey} planMode={true} />
+      </div>
+    </div>
+    <DecemberPlanMobile slot="mobile" deadline={deadline} />
+  </ClubPlanShell>
+</AppLayout>
+<script>
+import { missionChanged, restoreMission, type DecPlan, type DecState } from '../../../lib/club/engines/december-christmas-mission';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.dec-plan-page');
+const host = root?.querySelector<HTMLElement & { clubPlan?: DecPlan }>('[data-dec-plan]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-dec-d-restored]');
+  const row = (dt: string, dd: string) => el('div', {}, el('dt', {}, dt), el('dd', {}, dd));
+  let undo: DecState | null = null;
+  mountPlanDesktop<DecState>({
+    root,
+    host,
+    approvalKey: 'omc:preview:december-christmas-mission:approval',
+    edit: () => plan().openEditor(),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const v = plan().view();
+      q('[data-dec-d-rows]').replaceChildren(row('Mission for', v.forLine), row('Helps deliver', v.helper === 'a grown-up' ? 'Any grown-up' : v.helper), row('Included', 'Kindness mission + 2 cards'), row('Supplies', 'Just a pen'));
+      q<HTMLButtonElement>('[data-dec-d-open]').disabled = locked;
+      q('[data-dec-d-restore]').hidden = locked || !missionChanged(plan().state(), plan().members());
+    },
+  });
+  q('[data-dec-d-open]').addEventListener('click', () => plan().openEditor());
+  q('[data-dec-d-restore]').addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    plan().update((s) => restoreMission(s, plan().members()));
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('Mission restored. ', u);
+    restored.focus();
+  });
+}
+</script>
