@@ -1,66 +1,106 @@
 ---
+/** April Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with April's
+ * dinner and team, beside the two-sided printable. Below 1100px: the shared plan screen with April's sections
+ * (AprilPlanMobile). The printable, its dialogs and its rules live in AprilDinnerPlan and
+ * src/lib/club/engines/april-dinner-plan.ts. */
 import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
 import AprilDinnerPlan from '../../../components/club/AprilDinnerPlan.astro';
+import AprilPlanMobile from '../../../components/club/AprilPlanMobile.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../lib/club/deadline';
 import { kits } from '../../../data/club/kits';
-const kit = kits.find(k => k.month === '2027-04');
-if (!kit) throw new Error('April kit missing');
+const kit = kits.find((k) => k.month === '2027-04');
+if (!kit) throw new Error('April 2027 kit missing from the registry');
+const deadline = clubEditingDeadline(kit.month);
+// Same key as the published April page, so a plan made earlier in this tab carries over (fromLegacy).
+const storageKey = 'omc:club:april-app:v1';
 ---
 <AppLayout title="April Dinner Team">
-  <div class="april-app" data-slug={kit.slug}>
-    <div class="april-gate" data-gate role="status">Preparing your family’s dinner plan…</div>
-    <div class="april-content" hidden>
-      <p class="april-family" data-family></p>
-      <AprilDinnerPlan storageKey="omc:club:april-app:v1" />
+  <ClubPlanShell class="apr-plan family-brand" kitSlug={kit.slug} month="April" sides={['front', 'back']} storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="April · Kit preview" instructions={[
+      'Cook this dinner together once, with the front on the counter and the directions on the back.',
+      'Keep the sheet afterward: the four jobs on the back work for any dinner. Choose another meal and use the same team next time.',
+    ]}>
+      <Fragment slot="title">Tonight, <em>we’ve got dinner.</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="apr-d-meal">
+          <p class="cpd-label" id="apr-d-meal">Tonight’s dinner</p>
+          <strong data-apr-meal></strong>
+          <p data-apr-meal-time></p>
+          <button type="button" class="cpd-link" data-apr-open="dinner">Change dinner</button>
+        </section>
+        <section class="cpd-block" aria-labelledby="apr-d-team">
+          <p class="cpd-label" id="apr-d-team">Your Dinner Team</p>
+          <dl class="cpd-rows" data-apr-team></dl>
+          <button type="button" class="cpd-link" data-apr-open="team">Change team</button>
+          <button type="button" class="cpd-link" data-apr-restore="team" hidden>Restore suggested team</button>
+          <p class="cpd-hint" data-apr-restore-hint="team" hidden>Puts the suggested people back in all four jobs. Your dinner and wording stay.</p>
+        </section>
+        <section class="cpd-block" aria-labelledby="apr-d-words">
+          <p class="cpd-label" id="apr-d-words">Words on the printable</p>
+          <p>Click any wording on the sheet with a pencil to change it.</p>
+          <button type="button" class="cpd-link" data-apr-restore="words" hidden>Restore original wording</button>
+          <p class="cpd-hint" data-apr-restore-hint="words" hidden>Puts back the original wording on both sides. Your dinner and team stay.</p>
+          <p class="cpd-hint" data-apr-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="apr-proof" slot="printable" data-plan-proof-body>
+      <div class="apr-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <AprilDinnerPlan storageKey={storageKey} planMode={true} />
+      </div>
     </div>
-  </div>
+    <AprilPlanMobile slot="mobile" deadline={deadline} />
+  </ClubPlanShell>
 </AppLayout>
-<style is:global>
-.april-gate { padding: 30px; }
-.april-gate h2 { font: 28px Georgia, serif; }
-.april-gate a, .april-gate button { display: inline-block; margin-top: 14px; text-decoration: underline; }
-.april-family { margin: 0; padding: 8px 20px; font-size: 12px; background: #faf9f7; }
-@media screen and (min-width: 1101px) {
-  html:has(.april-app), body:has(.april-app) { height: 100%; overflow: hidden; }
-  body:has(.april-app) #main { width: 100%; max-width: none; height: calc(100dvh - 64px); margin: 0; padding: 0; overflow: hidden; }
-  .april-app, .april-content:not([hidden]) { height: 100%; min-height: 0; }
-  .april-content:not([hidden]) { display: flex; flex-direction: column; }
-  .april-content .adc { flex: 1; min-height: 0; }
-}
-@media print { .april-gate, .april-family, body:has(.april-app) [data-chrome] { display: none !important; } }
-</style>
 <script>
-import { clubAccountsEnabled } from '../../../data/club/config';
-import { getSession } from '../../../lib/account';
-import { loadKitHousehold } from '../../../lib/club/kit-household';
-import { accountStore, clubHref, sampleStore } from '../../../lib/club/store';
-import { routes } from '../../../routes';
-const app = document.querySelector<HTMLElement>('.april-app');
-if (app) {
- const gate = app.querySelector<HTMLElement>('[data-gate]')!;
- const content = app.querySelector<HTMLElement>('.april-content')!;
- loadKitHousehold(app.dataset.slug!, location.search, { accountsEnabled: clubAccountsEnabled, hasSession: async () => Boolean(await getSession()), accountStore, sampleStore }).then(result => {
-  if (result.status !== 'ready') {
-   const sample = 'sample' in result ? result.sample : null;
-   const messages = {
-    empty: ['Add your family first', 'Add family members to prepare your dinner plan.', clubHref(routes.clubFamily, sample)],
-    denied: ['April isn’t open for your account', 'This kit is not available to your account.', clubHref(routes.clubDashboard, sample)],
-    'signed-out': ['Sign in to see your plan', 'Sign in to see your family’s dinner plan.', routes.clubDashboard],
-    error: ['We couldn’t load your plan', 'Check your connection and try again.', ''],
-   } as const;
-   const [title, description, href] = messages[result.status];
-   gate.replaceChildren();
-   const h = document.createElement('h2'); h.textContent = title;
-   const p = document.createElement('p'); p.textContent = description;
-   const action = document.createElement(href ? 'a' : 'button'); action.textContent = href ? 'Continue' : 'Try again';
-   if (action instanceof HTMLAnchorElement) action.href = href; else action.addEventListener('click', () => location.reload());
-   gate.append(h, p, action); return;
-  }
-  const detail = { household: result.household, sample: result.sample ?? undefined };
-  (window as Window & { __ofcPreviewHousehold?: typeof detail }).__ofcPreviewHousehold = detail;
-  window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail }));
-  app.querySelector<HTMLElement>('[data-family]')!.textContent = result.source === 'sample' ? result.sampleLabel + ' · Sample family' : 'Prepared for ' + (result.household.displayName ?? 'your family');
-  gate.hidden = true; content.hidden = false;
-  window.dispatchEvent(new Event('resize'));
- });
+import { ROLES, ROLE_INFO, restoreTeam, restoreWording, teamChanged, wordingChanged, type AprilPlan, type AprilState } from '../../../lib/club/engines/april-dinner-plan';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.apr-plan');
+const adc = root?.querySelector<HTMLElement & { clubPlan?: AprilPlan }>('.adc');
+if (root && adc) {
+  const plan = () => adc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-apr-restored]');
+  let undo: AprilState | null = null;
+
+  mountPlanDesktop<AprilState>({
+    root,
+    host: adc,
+    approvalKey: 'omc:preview:april-dinner:approval',
+    edit: () => plan().openEditor('dinner'),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const s = plan().state();
+      const v = plan().view();
+      q('[data-apr-meal]').textContent = v.name;
+      q('[data-apr-meal-time]').textContent = `${v.time} · ${v.servings}`;
+      q('[data-apr-team]').replaceChildren(...ROLES.map((r) => el('div', {}, el('dt', {}, ROLE_INFO[r].title), el('dd', {}, v.roles[r].name))));
+      root.querySelectorAll<HTMLButtonElement>('[data-apr-open]').forEach((b) => { b.disabled = locked; });
+      for (const [which, changed] of [['team', teamChanged(s)], ['words', wordingChanged(s)]] as const) {
+        q(`[data-apr-restore="${which}"]`).hidden = locked || !changed;
+        q(`[data-apr-restore-hint="${which}"]`).hidden = locked || !changed;
+      }
+    },
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('[data-apr-open]').forEach((b) => b.addEventListener('click', () => plan().openEditor(b.dataset.aprOpen === 'team' ? 'team' : 'dinner')));
+  root.querySelectorAll<HTMLButtonElement>('[data-apr-restore]').forEach((b) => b.addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    const team = b.dataset.aprRestore === 'team';
+    plan().update((s) => (team ? restoreTeam(s, plan().members()) : restoreWording(s)));
+    restored.replaceChildren(team ? 'Suggested team restored. ' : 'Original wording restored. ', undoButton());
+    restored.focus();
+  }));
+  const undoButton = () => {
+    const b = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    b.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    return b;
+  };
 }
 </script>

@@ -2,8 +2,8 @@
 
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
 September (Sunday Reset, two sheets, plus the activity calendar demo in a second tab), October (Daily Reset, two
-sheets), January (Habit Cards, one sheet) and February (laundry guides: one sheet per readiness level in use, so one
-or two) and March (family chore charts: one sheet per child) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
+sheets), January (Habit Cards, one sheet), February (laundry guides: one sheet per readiness level in use, so one
+or two), March (family chore charts: one sheet per child), April (Dinner Team, two sheets) and May (Summer Day Rhythm, one sheet) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
 
 ## The split
 
@@ -12,10 +12,10 @@ or two) and March (family chore charts: one sheet per child) use it. (Until Oct 
 | Page shell: family loading, gates, proof, print rules | Shared | `src/components/club/plan/ClubPlanShell.astro` |
 | Plan screen below 1100px: header, approval status, editing deadline, preview card, action bar, edit sheet, toast, copy mode | Shared | `src/components/club/plan/ClubPlanScreen.astro` + `src/lib/club/plan/screen.ts` |
 | Rules: state shape, defaults, family-derived names, limits, what prints, fingerprint | **Per month** (engine) | `src/lib/club/engines/<month-resource>.ts` |
-| The printable artwork and its desktop editor | **Per month** | `src/components/club/<MonthResource>.astro` |
+| The printable artwork and its desktop editor (dialogs, typing on the sheet) | **Per month** | `src/components/club/<MonthResource>.astro` |
 | The month's rows and edit sheets on the plan screen | **Per month** (adapter) | `src/components/club/<Month>PlanMobile.astro` |
-| Desktop experience at 1100px and wider | **Per month**, unchanged | the month's page and printable |
-| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by September, October, February and March | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
+| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by September, October, February, March and April | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
+| The month's details in the desktop rail (default slot) and what Make changes opens | **Per month** | the month's page |
 
 The month owns content and personalization. The shared layer owns everything a family sees around it.
 
@@ -28,6 +28,11 @@ The month owns content and personalization. The shared layer owns everything a f
 - `storage.ts`: `planKey(sample, householdId)`, `readScoped(raw, key, valid)` and `tabStorage` (sessionStorage).
 - `proof.ts`: `mountPrintableProof(root)` (full-screen printable, Front/Back switch, Esc, focus containment via `inert`) and `printPlan()`.
 - `screen.ts`: `mountPlanScreen({ root, host, approvalKey, render })` returns `{ resource, readOnly, copying, openSheet, closeSheet, doneButton, toast, refresh }`.
+- `desktop.ts`: `mountPlanDesktop({ root, host, approvalKey, edit, render?, lock? })` for the rail: countdown, Make changes
+  (`edit`), approval, whose family and how changes are kept; `lock(true)` past the cutoff stops typing on the printable.
+- `status.ts`: the prototype approval (`readApproval`, `writeApproval`, `approvalState`) and `planNow()` (dev
+  `?preview-date=`), shared by `screen.ts` and `desktop.ts`. A change fires `PLAN_APPROVAL` on the page root, so the rail
+  and the plan screen always agree.
 - `dom.ts`: `el(tag, props, ...children)` for building rows and sheets.
 
 `src/components/club/plan/`
@@ -35,6 +40,7 @@ The month owns content and personalization. The shared layer owns everything a f
 | Component | What it renders |
 | --- | --- |
 | `ClubPlanShell` | The `.club-plan` root, `ClubFamilyGate`, slot `desktop`, `ClubPrintableProof` around slot `printable`, slot `mobile`, `ClubPrintStyles` |
+| `ClubPlanDesktop` | October's desktop rail, for slot `desktop`; with it the root becomes the rail + printable grid at 1100px and wider. Props `deadline`, `kicker`, `instructions`; slot `title`; default slot for the month's details (`cpd-details`, `cpd-block`, `cpd-rows`, `cpd-link`, `cpd-hint`) |
 | `ClubFamilyGate` | Loading, empty, signed-out, denied and error states; nothing else shows until the family is ready |
 | `ClubPlanScreen` | The plan screen; slot `title` and the default slot for the month's sections |
 | `ClubPlanStatus` | Approval line and editing deadline |
@@ -86,7 +92,9 @@ covers **only what prints**: January's covers the active cards, so a hidden seco
   `omc:club:september-calendar:v1` (the calendar demo, per family), `omc:club:october-daily-reset:v1`
   (`omc:preview:october-daily-reset:approval`; reads the earlier September page's `omc:preview:september-room-reset:v2`
   once for the same family), `omc:club:march-chore-charts:v2` (`omc:preview:march-chore-charts:approval`),
-  `omc:preview:january-habit-cards:v3` plus its `…:approval`.
+  `omc:preview:january-habit-cards:v3` plus its `…:approval`,
+  `omc:club:april-app:v1` with `omc:preview:april-dinner:approval` (April reads the earlier April page's
+  `{ profile, meal, … }` shape once, for the same family); `omc:club:may-app:v1` with `omc:preview:may-summer-rhythm:approval`.
   The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
   `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
 
@@ -123,9 +131,13 @@ area is at least 1.128 times as tall as it is wide (Letter and A4 with default m
    with a `title` slot and the month's sections, built from `cp-*` rows. Its script calls `mountPlanScreen` with the
    month's approval key and a `render(state)` that draws the rows; tapping a row calls `ui.openSheet(title, …)` with
    `cp-chip`/`cp-field` controls that call `ui.resource.update(…)`. Respect `ui.readOnly`.
-4. **Page** `src/pages/app/club/<month>.astro`: `<ClubPlanShell kitSlug month sides? storageKey>` with the desktop
-   experience in slot `desktop` (or the printable's own desktop layout), the printable in slot `printable` inside a
-   `data-plan-proof-body` / `data-plan-proof-scroll` pair, and the adapter in slot `mobile`.
+4. **Page** `src/pages/app/club/<month>.astro`: `<ClubPlanShell kitSlug month sides? storageKey>` with
+   `<ClubPlanDesktop slot="desktop">` (the month's details in its default slot), the printable in slot `printable` inside a
+   `data-plan-proof-body` / `data-plan-proof-scroll` pair, and the adapter in slot `mobile`. Its script calls
+   `mountPlanDesktop` with the same approval key as the adapter. The printable takes a `planMode` prop that leaves out
+   its own page chrome (intro, controls, floating buttons) and scopes its standalone layout and print rules to
+   `:not([data-adc-plan])`-style selectors at the source, so no page-level overrides are needed. Restores are scoped
+   (one part of the plan, explained beside the button, with undo), never a silent reset of everything.
 5. **Check** at 375, 390 and 768 (plan, every sheet, proof, approve, changes after approval, copy, empty family,
    another sample family) and 1100 / 1440 desktop; print from the proof, the viewport and desktop; page count equals
    sheet count; `npx vitest run tests/club-plan-print.test.ts` covers the new printable's sheet markers.
