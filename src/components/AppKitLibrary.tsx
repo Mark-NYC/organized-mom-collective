@@ -90,9 +90,9 @@ const months = [
   },
   {
     "month": "December",
-    "title": "Christmas Without Doing It All",
-    "responsibility": "Contributing to family traditions",
-    "how": "A prepared holiday plan shares responsibility for gifts, traditions, and celebrations.",
+    "title": "Raise Kids Who Love to Give",
+    "responsibility": "Being a blessing to others",
+    "how": "Two cards give kids space to draw a picture, write a poem, or share a letter, then send it to someone like a grandparent or teacher.",
     "url": "/app/club/december/"
   }
 ];
