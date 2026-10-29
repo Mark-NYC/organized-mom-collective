@@ -149,7 +149,7 @@ if (!kit) throw new Error('February kit missing');
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
 import { loadKitHousehold } from '../../../lib/club/kit-household';
-import { accountStore, sampleStore, clubHref } from '../../../lib/club/store';
+import { accountStore, sampleStore } from '../../../lib/club/store';
 import { ageInMonth } from '../../../lib/club/profile';
 import type { Household } from '../../../lib/club/profile';
 type Level='young'|'older';
@@ -247,7 +247,7 @@ if(root){
    const adults=h.members.filter(m=>m.kind==='adult'&&!m.archived);const operator=adults.find(m=>!m.isAccountHolder)?.firstName||adults[0]?.firstName||'Adult';
    const op=q<HTMLSelectElement>('[data-operator]');adults.forEach(a=>{const o=document.createElement('option');o.value=a.firstName;o.textContent=a.firstName;op.append(o)});
    suggested={children:kids,days:['Saturday'],operator};state=structuredClone(suggested);
-   try{const saved=JSON.parse(sessionStorage.getItem(key)||'null');if(saved?.familyId===h.id&&saved.profileVersion===h.profileVersion){const edits=saved.edits as State;state.days=Array.isArray(edits.days)?edits.days.filter(d=>['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','As needed'].includes(d)):(edits.day?[edits.day]:['Saturday']);if(!state.days.length)state.days=['As needed'];state.operator=adults.some(a=>a.firstName===edits.operator)?edits.operator:operator;state.children.forEach(k=>{const match=edits.children?.find(c=>c.id===k.id);if(match&&(match.level==='young'||match.level==='older'))k.level=match.level})}}catch{}
+   try{const saved=JSON.parse(sessionStorage.getItem(key)||'null');if(saved?.familyId===h.id&&saved.profileVersion===h.profileVersion){const edits=saved.edits as State & {day?:string};state.days=Array.isArray(edits.days)?edits.days.filter(d=>['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','As needed'].includes(d)):(edits.day?[edits.day]:['Saturday']);if(!state.days.length)state.days=['As needed'];state.operator=adults.some(a=>a.firstName===edits.operator)?edits.operator:operator;state.children.forEach(k=>{const match=edits.children?.find(c=>c.id===k.id);if(match&&(match.level==='young'||match.level==='older'))k.level=match.level})}}catch{}
    q<HTMLElement>('[data-family-summary]').textContent=label+' family · '+kids.length+' '+(kids.length===1?'child':'children')+(loaded.source==='sample'?' · Sample preview':'');
    op.addEventListener('change',()=>{state!.operator=op.value;save();render()});
    q<HTMLButtonElement>('[data-reset]').addEventListener('click',()=>{state=structuredClone(suggested!);save();render()});
