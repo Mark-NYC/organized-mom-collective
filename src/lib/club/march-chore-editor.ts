@@ -5,8 +5,8 @@
  */
 import { el } from './plan/dom';
 import {
-  DAILY_CHORES, DAILY_MAX, TEXT_LIMIT, ZONE_CHORES, REWARD_STEPS, addDaily, ageOf, kidsOf, removeDaily, renameJob,
-  setPalette, setReward, setRewards, setWeekly, type ChorePlan,
+  DAILY_CHORES, DAILY_MAX, TEXT_LIMIT, ZONE_CHORES, addDaily, ageOf, kidsOf, removeDaily, renameJob, setPalette,
+  setWeekly, type ChorePlan,
 } from './engines/march-chore-charts';
 import { toolPalettes } from '../../data/tool-palettes';
 
@@ -22,7 +22,7 @@ const group = (label: string, ...kids: Node[]) => {
   return g;
 };
 
-/** One child's chart: daily chores (rename, remove, add), a chore for each weekday, rewards. */
+/** One child's chart: daily chores (rename, remove, add) and a chore or a day off for each weekday. */
 export function kidEditor(plan: ChorePlan, kidId: string, redraw: () => void): HTMLElement {
   const p = plan;
   const m = () => p.members();
@@ -60,32 +60,23 @@ export function kidEditor(plan: ChorePlan, kidId: string, redraw: () => void): H
 
   const parts: Node[] = [
     el('h3', { class: 'mcc-ed-h' }, 'Daily chores'),
-    el('p', { class: 'mcc-ed-hint' }, `Prepared for age ${age}. Fewer is fine; empty rows print blank to write in.`),
+    el('p', { class: 'mcc-ed-hint' }, `Prepared for age ${age}. Only the chores listed here print, so fewer is fine.`),
     daily,
     el('p', { class: 'mcc-ed-label' }, full ? `${DAILY_MAX} is the most that fit. Remove one to add another.` : 'Add a daily chore'),
     adds, own,
     el('h3', { class: 'mcc-ed-h' }, 'Weekly chores'),
-    el('p', { class: 'mcc-ed-hint' }, 'One a day, matched to that day’s cleaning zone on your wall calendar.'),
+    el('p', { class: 'mcc-ed-hint' }, 'One a day, matched to that day’s cleaning zone on your wall calendar, or a day off.'),
     weekly,
   ];
-  if (p.view().rewards) {
-    parts.push(el('h3', { class: 'mcc-ed-h' }, 'Rewards'), el('div', { class: 'mcc-ed-rewards' }, ...chart.rewardLines.map((r, i) => {
-      const input = el('input', { type: 'text', value: r, maxLength: TEXT_LIMIT });
-      input.addEventListener('change', () => change(() => p.update((s) => setReward(s, kidId, i, input.value, m(), p.pets()))));
-      return el('label', { class: 'mcc-ed-field' }, el('span', {}, `Complete ${REWARD_STEPS[i]}`), input);
-    })));
-  }
   return el('div', { class: 'mcc-ed' }, ...parts);
 }
 
-/** The whole family's choices: rewards on or off, colors. */
+/** The whole family's choice: the charts' colors. */
 export function familyEditor(plan: ChorePlan, redraw: () => void): HTMLElement {
   const p = plan;
   const v = p.view();
   const change = (fn: () => void) => { fn(); redraw(); };
   return el('div', { class: 'mcc-ed' },
-    el('h3', { class: 'mcc-ed-h' }, 'Rewards'),
-    group('Rewards', chip('Show rewards', v.rewards, () => change(() => p.update((s) => setRewards(s, true)))), chip('No rewards', !v.rewards, () => change(() => p.update((s) => setRewards(s, false))))),
     el('h3', { class: 'mcc-ed-h' }, 'Colors'),
     group('Colors', ...Object.entries(toolPalettes).map(([id, pal]) => chip(pal.label, v.palette === id, () => change(() => p.update((s) => setPalette(s, id)))))));
 }

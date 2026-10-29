@@ -4,29 +4,32 @@
  * profile. Pure functions only, so the printable, the desktop rail and the mobile plan screen (MarchPlanMobile.astro)
  * read one plan. Children by member ID; archived children never print; grown-ups have no chart.
  *
- * - Daily chores: age-right jobs from the illustrated responsibility library, a few more as the child grows. The chart
- *   has the free chart's eight rows; unused rows stay blank to write in.
+ * - Daily chores: age-right jobs, a few more as the child grows, up to eight. Only the child's own jobs print: no blank
+ *   rows.
  * - Weekly chores: one per weekday, chosen from the job that suits that day's cleaning zone on the wall calendar
- *   (src/data/cleaning.ts). The zone stays in the editor; the chart only says the day and the job.
- * - Rewards: optional, the free chart's three (complete 50%, 75%, 100%), starting from its age suggestions.
+ *   (src/data/cleaning.ts), or a day off. The zone stays in the editor; the chart only says the day and the job.
+ * - No rewards, stars, points or thresholds: the chart is the child's own jobs, done start to finish. Charts saved
+ *   before rewards were removed keep their chores; the old reward fields are dropped (`applyFamily`).
+ * - Icons: src/data/club/march-chore-icons.ts. A listed chore keeps its icon until it's renamed; typed chores have none.
  */
-import { choreSets, ageGroupFor, DAILY_ROWS } from '../../../data/chore-chart';
 import { weeklySchedule, weekend } from '../../../data/cleaning';
-import { responsibilityById, responsibilityImage, responsibilityColor } from '../../../data/responsibilities';
+import { marchIconArt, MARCH_CHORE_ICONS } from '../../../data/club/march-chore-icons';
+import { responsibilityById } from '../../../data/responsibilities';
 import { defaultToolPalette, resolveToolPalette, type ToolPaletteId } from '../../../data/tool-palettes';
 import { ageInMonth } from '../profile';
 import type { PlanResource } from '../plan/resource';
 
 export const KIT_MONTH = '2027-03';
-export const DAILY_MAX = DAILY_ROWS;
+/** The most daily chores a chart holds (the free chart's eight rows). */
+export const DAILY_MAX = 8;
 export const TEXT_LIMIT = 34;
 
-/** A job the chart can hold: from the illustrated library (`lib`, with its picture) or a plain line. */
-export interface ChoreDef { id: string; title: string; minAge: number; lib?: string }
+/** A job the chart can hold: titled from the responsibility library (`lib`) or a plain line. */
+export interface ChoreDef { id: string; title: string; minAge: number }
 const lib = (id: string): ChoreDef => {
   const r = responsibilityById(id);
   if (!r) throw new Error(`Unknown responsibility ${id}`);
-  return { id, title: r.title, minAge: r.minAge, lib: id };
+  return { id, title: r.title, minAge: r.minAge };
 };
 const line = (id: string, title: string, minAge: number): ChoreDef => ({ id, title, minAge });
 
@@ -50,24 +53,22 @@ export const ZONE_CHORES: Record<number, readonly ChoreDef[]> = {
 export const WEEK: readonly { day: number; label: string; zone: string }[] = [...weeklySchedule, ...weekend.days]
   .map((d) => ({ day: d.day, label: d.dayLabel, zone: d.zone }))
   .sort((a, b) => ((a.day + 6) % 7) - ((b.day + 6) % 7));
-export const REWARD_STEPS = ['50%', '75%', '100%'] as const;
 
 export interface ChoreMember { id: string; firstName: string; kind: string; birthYear?: number; birthMonth?: number; archived?: boolean }
-export interface Job { id: string; title: string; lib?: string }
+export interface Job { id: string; title: string }
 export interface KidPlan {
   daily?: Job[];
-  /** By weekday number (0–6); null = no job that day. */
+  /** By weekday number (0–6); null = a day off. */
   weekly?: Record<string, Job | null>;
-  rewards?: [string, string, string];
 }
-export interface ChoreState { palette: ToolPaletteId; rewards: boolean; kids: Record<string, KidPlan> }
+export interface ChoreState { palette: ToolPaletteId; kids: Record<string, KidPlan> }
 
 export const kidsOf = <M extends ChoreMember>(members: readonly M[]) => members.filter((m) => m.kind === 'child' && !m.archived && m.firstName.trim());
 /** Age in March 2027, at least 2; 8 when no birth year is saved. */
 export const ageOf = (m: ChoreMember) => (m.birthYear ? Math.max(2, ageInMonth(m.birthYear, m.birthMonth, KIT_MONTH)) : 8);
-const toJob = (d: ChoreDef): Job => ({ id: d.id, title: d.title, lib: d.lib });
+const toJob = (d: ChoreDef): Job => ({ id: d.id, title: d.title });
 
-export const freshState = (): ChoreState => ({ palette: defaultToolPalette, rewards: true, kids: {} });
+export const freshState = (): ChoreState => ({ palette: defaultToolPalette, kids: {} });
 
 /** A few daily chores a child this age can do: 3 for the youngest, up to 6; pets first when the family has them. */
 export const preparedDaily = (age: number, pets: boolean): Job[] => {
@@ -83,23 +84,22 @@ export const preparedWeekly = (age: number): Record<string, Job | null> =>
     const able = ZONE_CHORES[w.day].filter((d) => d.minAge <= age);
     return [String(w.day), toJob(able.at(-1) ?? ZONE_CHORES[w.day][0])];
   }));
-export const preparedRewards = (age: number): [string, string, string] => [...choreSets[ageGroupFor(age)].rewards];
 
 export const kidChart = (s: ChoreState, kid: ChoreMember, pets: boolean) => {
   const age = ageOf(kid);
   const k = s.kids[kid.id] ?? {};
-  return { daily: k.daily ?? preparedDaily(age, pets), weekly: k.weekly ?? preparedWeekly(age), rewards: k.rewards ?? preparedRewards(age) };
+  return { daily: k.daily ?? preparedDaily(age, pets), weekly: k.weekly ?? preparedWeekly(age) };
 };
 
-/** The library illustration on its category color, as on the free chart; plain lines have no picture. */
-const imageFor = (j: Job) => {
-  const r = j.lib ? responsibilityById(j.lib) : undefined;
-  return r ? { src: responsibilityImage(r, 128), color: responsibilityColor(r) } : null;
+const LISTED = new Map([...DAILY_CHORES, ...Object.values(ZONE_CHORES).flat()].map((d) => [d.id, d]));
+/** A listed chore's icon while it still says what the list says; renamed and typed chores have none. */
+const iconFor = (j: Job) => {
+  const name = MARCH_CHORE_ICONS[j.id];
+  return name && LISTED.get(j.id)?.title.toLowerCase() === j.title.toLowerCase() ? marchIconArt(name) : null;
 };
 
 export const choreView = (s: ChoreState, members: readonly ChoreMember[], pets = false) => ({
   palette: s.palette,
-  rewards: s.rewards,
   charts: kidsOf(members).map((kid) => {
     const c = kidChart(s, kid, pets);
     return {
@@ -107,12 +107,11 @@ export const choreView = (s: ChoreState, members: readonly ChoreMember[], pets =
       name: kid.firstName,
       age: ageOf(kid),
       changed: Boolean(s.kids[kid.id]),
-      daily: c.daily.map((j) => ({ ...j, image: imageFor(j) })),
+      daily: c.daily.map((j) => ({ ...j, icon: iconFor(j) })),
       weekly: WEEK.map((w) => {
         const j = c.weekly[String(w.day)] ?? null;
-        return { day: w.day, label: w.label, zone: w.zone, job: j ? { ...j, image: imageFor(j) } : null };
+        return { day: w.day, label: w.label, zone: w.zone, job: j ? { ...j, icon: iconFor(j) } : null };
       }),
-      rewardLines: c.rewards,
     };
   }),
 });
@@ -121,7 +120,7 @@ export type ChartView = ChoreView['charts'][number];
 
 export const choreFingerprint = (s: ChoreState, members: readonly ChoreMember[], pets = false) => {
   const v = choreView(s, members, pets);
-  return JSON.stringify([v.palette, v.rewards, v.charts.map((c) => [c.name, c.daily.map((j) => j.title), c.weekly.map((w) => w.job?.title ?? null), v.rewards && c.rewardLines])]);
+  return JSON.stringify([v.palette, v.charts.map((c) => [c.name, c.daily.map((j) => j.title), c.weekly.map((w) => w.job?.title ?? null)])]);
 };
 
 // Edits. Each changes `s` in place and returns it.
@@ -129,7 +128,7 @@ const own = (s: ChoreState, kidId: string, members: readonly ChoreMember[], pets
   const kid = kidsOf(members).find((k) => k.id === kidId);
   if (!kid) return null;
   const c = kidChart(s, kid, pets);
-  return (s.kids[kidId] = { daily: structuredClone(c.daily), weekly: structuredClone(c.weekly), rewards: [...c.rewards] as [string, string, string] });
+  return (s.kids[kidId] = { daily: structuredClone(c.daily), weekly: structuredClone(c.weekly) });
 };
 const tidy = (text: string) => text.replace(/\s+/g, ' ').trim().slice(0, TEXT_LIMIT);
 export const removeDaily = (s: ChoreState, kidId: string, i: number, members: readonly ChoreMember[], pets = false) => {
@@ -152,7 +151,7 @@ export const renameJob = (s: ChoreState, kidId: string, where: { daily: number }
   const clean = tidy(title);
   if (!k || !clean) return s;
   const j = 'daily' in where ? k.daily[where.daily] : k.weekly[String(where.day)];
-  if (j) { j.title = clean; if (j.lib && responsibilityById(j.lib)?.title !== clean) delete j.lib; }
+  if (j) j.title = clean;
   return s;
 };
 /** Choose a weekday's chore from that day's list, or none. */
@@ -164,21 +163,20 @@ export const setWeekly = (s: ChoreState, kidId: string, day: number, id: string 
   k.weekly[String(day)] = def ? toJob(def) : null;
   return s;
 };
-export const setReward = (s: ChoreState, kidId: string, i: number, text: string, members: readonly ChoreMember[], pets = false) => {
-  const k = own(s, kidId, members, pets);
-  if (k && i >= 0 && i < 3) k.rewards[i] = tidy(text);
-  return s;
-};
-export const setRewards = (s: ChoreState, on: boolean) => { s.rewards = on; return s; };
 export const setPalette = (s: ChoreState, id: string) => { s.palette = resolveToolPalette(id); return s; };
 export const restoreKid = (s: ChoreState, kidId: string) => { delete s.kids[kidId]; return s; };
 export const restoreAll = (s: ChoreState) => Object.assign(s, freshState());
 export const planChanged = (s: ChoreState) => JSON.stringify(s) !== JSON.stringify(freshState());
 
-/** Keep the plan to this family: charts only for children who are here. */
+/** Keep the plan to this family: charts only for children who are here. Also drops the reward fields charts saved
+ * before rewards were removed (`rewards` on the plan and on each child), keeping their chores. */
 export const applyFamily = (s: ChoreState, members: readonly ChoreMember[]) => {
   const ids = new Set(kidsOf(members).map((k) => k.id));
-  for (const id of Object.keys(s.kids)) if (!ids.has(id)) delete s.kids[id];
+  delete (s as { rewards?: unknown }).rewards;
+  for (const [id, k] of Object.entries(s.kids)) {
+    delete (k as { rewards?: unknown }).rewards;
+    if (!ids.has(id) || (!k.daily && !k.weekly)) delete s.kids[id];
+  }
   s.palette = resolveToolPalette(s.palette);
   return s;
 };
@@ -189,7 +187,7 @@ const isJob = (x: unknown): x is Job => {
 };
 export const isChoreState = (x: unknown): x is ChoreState => {
   const s = x as Partial<ChoreState> | null;
-  return Boolean(s && typeof s.palette === 'string' && typeof s.rewards === 'boolean' && s.kids && typeof s.kids === 'object'
+  return Boolean(s && typeof s.palette === 'string' && s.kids && typeof s.kids === 'object'
     && Object.values(s.kids).every((k) => (!k.daily || (Array.isArray(k.daily) && k.daily.every(isJob))) && (!k.weekly || Object.values(k.weekly).every((j) => j === null || isJob(j)))));
 };
 
