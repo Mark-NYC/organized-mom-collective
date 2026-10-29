@@ -1,51 +1,27 @@
 ---
-/** August Club one-page school routine preview.
- * Seeded from the canonical /routine-chart morning + afterschool routines.
- * The Club preview is pre-filled; the existing public generator remains intact.
- */
-import {routineTypes} from '../../data/routines';
-interface Props {storageKey?:string}
-const {storageKey='omc:club:august-school-routines:v1'}=Astro.props;
-const morning=routineTypes.morning.steps;
-const after=routineTypes.afterschool.steps;
-const icons={
- lunch:'/images/club/icon-library/lunch-box.png',
- water:'/images/club/icon-library/water-bottle.png',
- quiet:'/images/club/icon-library/quiet-time.png',
- play:'/images/club/icon-library/free-afternoon.png',
- wake:'/images/club/icon-library/morning-start.png',
- clothes:'/images/club/icon-library/getting-dressed.png',
- breakfast:'/images/club/icon-library/breakfast-bowl.png',
- teeth:'/images/club/icon-library/toothbrush.png',
- bag:'/images/club/icon-library/backpack.png',
- shoes:'/images/club/icon-library/putting-on-shoes.png',
- hands:'/images/club/icon-library/washing-hands.png',
- snack:'/images/club/icon-library/yogurt-cup.png',
- book:'/images/club/icon-library/doing-homework.png',
-};
-const initial=[
- {id:'wake',time:morning[0][0],label:morning[0][1],icon:'wake',group:'morning'},
- {id:'dress',time:morning[2][0],label:morning[2][1],icon:'clothes',group:'morning'},
- {id:'eat',time:morning[3][0],label:morning[3][1],icon:'breakfast',group:'morning'},
- {id:'teeth',time:morning[4][0],label:morning[4][1],icon:'teeth',group:'morning'},
- {id:'backpack',time:morning[5][0],label:morning[5][1],icon:'bag',group:'morning'},
- {id:'shoes',time:after[0][0],label:after[0][1],icon:'shoes',group:'after'},
- {id:'unpack',time:after[1][0],label:after[1][1],icon:'bag',group:'after'},
- {id:'wash',time:after[2][0],label:after[2][1],icon:'hands',group:'after'},
- {id:'snack',time:after[3][0],label:after[3][1],icon:'snack',group:'after'},
- {id:'homework',time:after[4][0],label:after[4][1],icon:'book',group:'after'},
+/** August Club one-page school routine: "My School Day", a picture routine for before and after school.
+ * Steps, choices and rules: src/lib/club/engines/august-school-routines.ts.
+ * planMode: inside a Club plan page (/app/club/august) the page brings the layout, rail and mobile screen; this keeps
+ * the routine editor and the sheet, marked data-plan-sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). */
+import { ICONS, preparedRoutine, shown, clock } from '../../lib/club/engines/august-school-routines';
+interface Props {storageKey?:string; planMode?:boolean}
+const {storageKey='omc:club:august-school-routines:v1',planMode=false}=Astro.props;
+const prepared=preparedRoutine(8);
+const panels=[
+ {group:'morning' as const,num:'01',cls:'asr-panel-am',title:'Before School',line:'First things first. I can do this!',accent:'MORNING'},
+ {group:'after' as const,num:'02',cls:'asr-panel-pm',title:'After School',line:'Come home. Reset. Enjoy the afternoon.',accent:'AFTERNOON'},
 ];
+const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>';
 ---
-<div class="asr" data-asr-key={storageKey} data-asr-icons={JSON.stringify(icons)} data-asr-starters={JSON.stringify(initial)}>
- <header class="asr-intro">
+<div class="asr" data-asr-key={storageKey} data-asr-plan={planMode ? "" : undefined}>
+ {!planMode && <header class="asr-intro">
   <a href="/club">← Organized Family Club</a>
-  
   <h1>Fewer reminders. <em>Smoother school days.</em></h1>
   <p>A ready-made picture routine for mornings and after school. Kids can see the next step instead of asking Mom what to do.</p>
- </header>
- <div class="asr-layout">
-  <aside class="asr-editor"><div class="asr-editor-head"><h2>Fewer reminders. <em>Smoother school days.</em></h2><button type="button" class="asr-edit-link" data-open-vision>Why this matters</button></div><div class="asr-prepared" id="august-edit-controls"><span class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINES</span><strong>My School Day</strong><p>Two ready-made picture routines for before and after school.</p><button type="button" class="asr-edit-link" data-open-editor>Edit routines <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div><div class="asr-actions"><div class="asr-primary-actions"><a class="asr-jump" href="#august-edit-controls">Make changes</a><button class="asr-primary" data-asr-print type="button">Print / Save PDF</button></div><button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button><button class="asr-reset" data-asr-reset type="button">Restore original steps</button></div></aside>
-  <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>
+ </header>}
+ <div class={planMode ? "asr-plan" : "asr-layout"}>
+  {!planMode && <aside class="asr-editor"><div class="asr-editor-head"><h2>Fewer reminders. <em>Smoother school days.</em></h2><button type="button" class="asr-edit-link" data-open-vision>Why this matters</button></div><div class="asr-prepared" id="august-edit-controls"><span class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINES</span><strong>My School Day</strong><p>Two ready-made picture routines for before and after school.</p><button type="button" class="asr-edit-link" data-open-editor>Edit routines <Fragment set:html={pencil} /></button></div><div class="asr-actions"><div class="asr-primary-actions"><a class="asr-jump" href="#august-edit-controls">Make changes</a><button class="asr-primary" data-asr-print type="button">Print / Save PDF</button></div><button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button><button class="asr-reset" data-asr-reset type="button">Restore original steps</button></div></aside>}
+  {!planMode && <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>}
   <dialog class="asr-dialog asr-guided-dialog" data-asr-editor aria-labelledby="asr-editor-title">
    <div class="asr-dialog-head"><div><span class="asr-guide-kicker">MAKE IT YOURS · AUGUST</span><h2 id="asr-editor-title">Our school routines</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
    <p class="asr-guide-intro">We've prepared a starting routine. Just change what doesn't fit your child.</p>
@@ -56,39 +32,29 @@ const initial=[
     <div data-asr-gallery class="asr-guide-gallery" hidden></div>
    </div>
    <details class="asr-guide-more"><summary>More options</summary><label class="asr-mode-choice"><input type="checkbox" data-asr-shorter/> Use a shorter routine</label><p>Hides two optional steps without deleting them. Removed steps can be restored in the list above.</p></details>
-   <div class="asr-guide-saved">✓ Changes save automatically for each child</div>
+   <div class="asr-guide-saved">{planMode ? '✓ Each child keeps their own routine' : '✓ Changes save automatically for each child'}</div>
    <button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
-  <section class="asr-preview"><button type="button" class="asr-float" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
-   
+  <section class={planMode ? "asr-plan-view" : "asr-preview"}>{!planMode && <button type="button" class="asr-float" data-open-editor><Fragment set:html={pencil} /><span>MAKE CHANGES</span></button>}
    <div class="asr-stage" data-asr-stage>
-    <article class="asr-sheet" data-asr-sheet>
-     <header class="asr-paper-head"><h2>My School Day</h2><span data-asr-name>Our morning & after-school routine</span></header>
-     <div class="asr-panel asr-panel-am"><header><span class="asr-circle">01</span><div><h3>Before School</h3><p>First things first. I can do this!</p></div><span class="asr-accent">MORNING</span></header><div class="asr-rows" data-asr-group="morning">
-      {initial.filter(x=>x.group==='morning').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="morning">
-        <time data-asr-time role="button" tabindex="0" aria-label={'Edit time for '+item.label}>{item.time}</time>
-        <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
+    <article class="asr-sheet" data-asr-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
+     <header class="asr-paper-head"><h2>My School Day</h2><span data-asr-name>Our morning & after-school routines</span></header>
+     {panels.map((p)=><div class={'asr-panel '+p.cls}><header><span class="asr-circle">{p.num}</span><div><h3>{p.title}</h3><p>{p.line}</p></div><span class="asr-accent">{p.accent}</span></header><div class="asr-rows" data-asr-group={p.group}>
+      {shown(prepared,p.group).map((item)=><div class="asr-row" data-asr-id={item.id} data-asr-section={p.group}>
+        <time data-asr-time role="button" tabindex="0" aria-label={'Change time for '+item.label}>{clock(item.time)}</time>
+        <img src={ICONS[item.icon]} alt="" width="76" height="76"/>
         <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
         <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
        </div>)}
-     </div></div>
-     <div class="asr-panel asr-panel-pm"><header><span class="asr-circle">02</span><div><h3>After School</h3><p>Come home. Reset. Enjoy the afternoon.</p></div><span class="asr-accent">AFTERNOON</span></header><div class="asr-rows" data-asr-group="after">
-      {initial.filter(x=>x.group==='after').map((item,index)=><div class="asr-row" data-asr-id={item.id} data-asr-slot={index} data-asr-section="after">
-        <time data-asr-time role="button" tabindex="0" aria-label={'Edit time for '+item.label}>{item.time}</time>
-        <img src={icons[item.icon as keyof typeof icons]} alt="" width="76" height="76"/>
-        <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
-        <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
-       </div>)}
-     </div></div>
+     </div></div>)}
      <footer class="asr-paper-foot"><strong data-asr-footer contenteditable="true" role="textbox" aria-label="Edit reminder">Check my routine. Do my part. Then I'm ready!</strong><span>ORGANIZED FAMILY CLUB · AUGUST</span></footer>
     </article>
    </div>
-   
   </section>
  </div>
 </div>
 <style is:global>
-.asr,.asr *{box-sizing:border-box}.asr{max-width:1480px;margin:auto;padding:27px clamp(18px,3.5vw,52px) 70px;color:#484941;font-family:Montserrat,Arial,sans-serif}
+.asr,.asr *{box-sizing:border-box}.asr:not([data-asr-plan]){max-width:1480px;margin:auto;padding:27px clamp(18px,3.5vw,52px) 70px}.asr{color:#484941;font-family:Montserrat,Arial,sans-serif}
 .asr-intro{max-width:760px;margin-bottom:34px}.asr-intro>a{font-size:12px;color:#43493f;display:inline-block;margin-bottom:25px}.asr-eyebrow{font-size:10px!important;letter-spacing:.15em;font-weight:700;color:#718569}.asr-intro h1{font:400 clamp(38px,4.4vw,60px)/1.14 Georgia,serif;margin:12px 0}.asr-intro h1 em{color:#788e72}.asr-intro>p:last-child{font-size:15px;line-height:1.75}
 .asr-layout{display:grid;grid-template-columns:minmax(275px,350px) minmax(0,1fr);gap:clamp(25px,4vw,60px);align-items:start}
 .asr-editor{border-top:8px solid #d8e6df;padding-top:16px}.asr-editor h2{font:italic 30px Georgia,serif;color:#668075;margin:10px 0}.asr-editor>p:nth-of-type(2){font-size:13px;line-height:1.75}.asr-editor label{display:block;font-weight:700;font-size:12px;margin:18px 0}.asr-editor select,.asr-option select{display:block;width:100%;min-height:44px;padding:9px;border:1px solid #b8c5bd;background:#fff;color:#424c43;font:12px Montserrat,Arial,sans-serif;margin-top:8px}
@@ -103,7 +69,8 @@ const initial=[
 .asr.asr-export .asr-stage{width:816px!important;height:1056px!important}.asr.asr-export .asr-sheet{transform:none!important;box-shadow:none!important}.asr.asr-export .asr-remove{display:none!important}
 @media(max-width:1050px){.asr-layout{display:flex;flex-direction:column}.asr-preview{order:0;width:100%}.asr-editor{order:1;max-width:720px;width:100%}.asr-remove{opacity:1}}
 @page{size:letter portrait;margin:0}
-@media print{html,body{padding:0!important;margin:0!important;background:#fff!important}body *{visibility:hidden!important}.asr-stage,.asr-sheet,.asr-sheet *{visibility:visible!important}.asr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.asr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.asr-remove{display:none!important}.asr [contenteditable]{outline:none!important;background:transparent!important}}
+/* Printing outside a Club plan page; on one, ClubPrintStyles prints the data-plan-sheet page. */
+@media print{html,body{padding:0!important;margin:0!important;background:#fff!important}body:has(.asr:not([data-asr-plan])) *{visibility:hidden!important}.asr:not([data-asr-plan]) :is(.asr-stage,.asr-sheet,.asr-sheet *){visibility:visible!important}.asr:not([data-asr-plan]) .asr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.asr:not([data-asr-plan]) .asr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.asr-remove{display:none!important}.asr [contenteditable]{outline:none!important;background:transparent!important}}
 
 /* August is a sequential time-based routine, never a card grid. */
 .asr-sheet{padding:27px 46px 22px}
@@ -123,7 +90,7 @@ const initial=[
 .asr-paper-foot strong{font-size:18px}
 .asr-paper-foot span{margin-top:8px}
 
-.asr{max-width:none;padding:0}.asr-intro{display:none}.asr-layout{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
+.asr:not([data-asr-plan]){max-width:none;padding:0}.asr-intro{display:none}.asr-layout{grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);gap:0;align-items:stretch}
 .asr-editor{display:flex;flex-direction:column;min-width:0;border:0;border-right:1px solid #e5e0e1;background:#faf9f7;padding:16px 22px}
 .asr-editor-head{border-top:0;padding-top:0}.asr-editor-head h2{font:400 clamp(23px,2.5vw,31px)/1.12 Georgia,serif;color:#506d60;margin:10px 0}
 .asr-edit-link{display:inline-flex;align-items:center;gap:8px;border:0;background:none;color:#506d60;font:700 12px Montserrat,Arial,sans-serif;text-decoration:underline;min-height:36px;cursor:pointer}
@@ -131,6 +98,8 @@ const initial=[
 .asr-prepared>strong{display:block;font:400 23px Georgia,serif;color:#506d60;margin:8px 0}.asr-prepared>p{font:12px/1.6 Montserrat,Arial,sans-serif;margin:0 0 15px}
 .asr-actions{flex:0 0 auto;margin-top:auto;padding-top:12px;background:#faf9f7}.asr-actions .asr-primary{min-height:44px;padding:9px}.asr-actions .asr-secondary{min-height:34px;margin-top:7px}.asr-actions .asr-reset{min-height:28px;margin:5px auto}
 .asr-preview{min-width:0;background:#f5f3f2;padding:16px clamp(18px,3vw,45px) 38px}.asr-stage{margin:0 auto}
+/* Locked after the cutoff or approval: the sheet reads as print. */
+.asr-sheet[data-asr-locked] time{cursor:default;outline:none!important}
 .asr-float,.asr-jump{display:none}
 .asr-dialog{position:fixed;inset:0;margin:auto;width:min(540px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;padding:24px;background:#fff;border:1px solid #dce2d7;border-radius:10px;box-shadow:0 20px 65px #0003;color:#484941;font-family:Montserrat,Arial,sans-serif}
 .asr-dialog::backdrop{background:rgba(33,40,36,.52)}.asr-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.asr-dialog-head h2{font:400 28px Georgia,serif;color:#506d60;margin:0 0 14px}.asr-dialog-head button{border:0;background:#eef3ef;border-radius:50%;height:36px;width:36px;cursor:pointer;font-size:23px}
@@ -139,11 +108,11 @@ const initial=[
 @media screen and (min-width:1101px){
  html:has(#club-month-content:not([hidden]) .asr),body:has(#club-month-content:not([hidden]) .asr){height:100%;overflow:hidden}
  #club-month-content:not([hidden]):has(.asr){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
- .asr,.asr-layout{height:100%;margin:0}.asr-editor{height:100%;overflow:hidden}.asr-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
+ .asr:not([data-asr-plan]),.asr-layout{height:100%;margin:0}.asr-editor{height:100%;overflow:hidden}.asr-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
  .asr-float{display:flex;position:fixed;right:clamp(22px,3vw,48px);bottom:24px;z-index:25;align-items:center;gap:9px;min-height:52px;border:0;border-radius:999px;padding:13px 19px;background:#454545;color:#fff;box-shadow:0 8px 25px #0003;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
 }
-@media screen and (max-width:1100px){.asr{padding:0 0 40px}.asr-layout{display:flex;flex-direction:column;gap:0}.asr-preview{order:0;width:100%;padding:14px 14px 26px}.asr-editor{order:1;width:100%;max-width:none;border:0;padding:20px}.asr-prepared{overflow:visible;flex:auto}}
-@media screen and (max-width:700px){.asr{padding-bottom:135px}.asr-editor{padding:17px 18px}.asr-prepared{scroll-margin-top:12px}
+@media screen and (max-width:1100px){.asr:not([data-asr-plan]){padding:0 0 40px}.asr-layout{display:flex;flex-direction:column;gap:0}.asr-preview{order:0;width:100%;padding:14px 14px 26px}.asr-editor{order:1;width:100%;max-width:none;border:0;padding:20px}.asr-prepared{overflow:visible;flex:auto}}
+@media screen and (max-width:700px){.asr:not([data-asr-plan]){padding-bottom:135px}.asr-editor{padding:17px 18px}.asr-prepared{scroll-margin-top:12px}
  .asr-actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px));background:#faf9f7;border-top:1px solid #dce2d7;box-shadow:0 -5px 20px #0001}
  .asr-primary-actions{display:flex;gap:9px}.asr-jump{display:flex;flex:1;align-items:center;justify-content:center;border:1px solid #506d60;border-radius:4px;background:#fff;color:#506d60;padding:8px;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}.asr-primary-actions .asr-primary{flex:1.3;min-width:0;font-size:12px}
  .asr-actions .asr-secondary{min-height:30px}.asr-actions .asr-reset{min-height:25px}.asr-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
@@ -211,216 +180,330 @@ const initial=[
 .asr-guide-more p{font-size:11px;line-height:1.5;color:#748176}
 .asr-mode-choice{display:flex;gap:9px;align-items:center;margin-top:14px}
 .asr-guide-saved{font-size:11px;color:#67856e;text-align:center;margin:18px 0 12px}
+/* Plan mode: the Club plan page places the sheet. */
+.asr-plan-view .asr-stage{margin:0 auto}
+/* The phone proof is a preview: steps are edited on the plan screen. */
+@media screen and (max-width:1099px){.plan-proof .asr-remove{display:none!important}}
 @media(max-width:600px){.asr-guided-dialog{padding:18px;max-height:calc(100dvh - 28px)}.asr-gallery-grid{grid-template-columns:1fr 1fr}}
 </style>
 <script>
-type Group='morning'|'after';
-type Step={id:string;time:string;label:string;icon:string;group:Group;removed?:boolean};
-type Board={steps:Step[];mode:'standard'|'simple';footer:string;child:string};
-type Child={id:string;firstName:string;birthYear?:number;birthMonth?:number};
-const iconPaths:Record<string,string>={lunch:"/images/club/icon-library/lunch-box.png",water:"/images/club/icon-library/water-bottle.png",quiet:"/images/club/icon-library/quiet-time.png",play:"/images/club/icon-library/free-afternoon.png",wake:"/images/club/icon-library/morning-start.png",clothes:"/images/club/icon-library/getting-dressed.png",breakfast:"/images/club/icon-library/breakfast-bowl.png",teeth:"/images/club/icon-library/toothbrush.png",bag:"/images/club/icon-library/backpack.png",shoes:"/images/club/icon-library/sneakers.png",hands:"/images/club/icon-library/washing-hands.png",snack:"/images/club/icon-library/yogurt-cup.png",book:"/images/club/icon-library/doing-homework.png"};
-const seeds:Step[]=[
- {id:'wake',time:'07:00',label:'Wake up & stretch',icon:'wake',group:'morning'},
- {id:'dress',time:'07:15',label:'Get dressed',icon:'clothes',group:'morning'},
- {id:'eat',time:'07:25',label:'Eat breakfast',icon:'breakfast',group:'morning'},
- {id:'teeth',time:'07:45',label:'Brush teeth',icon:'teeth',group:'morning'},
- {id:'lunch',time:'07:48',label:'Grab My Lunch Box',icon:'lunch',group:'morning'},
- {id:'water',time:'07:49',label:'Grab My Water Bottle',icon:'water',group:'morning'},
- {id:'backpack',time:'07:50',label:'Grab backpack & shoes',icon:'bag',group:'morning'},
- {id:'shoes',time:'15:30',label:'Shoes & coat away',icon:'shoes',group:'after'},
- {id:'unpack',time:'15:35',label:'Unpack backpack & lunch box',icon:'bag',group:'after'},
- {id:'wash',time:'15:40',label:'Wash hands',icon:'hands',group:'after'},
- {id:'snack',time:'15:45',label:'Snack',icon:'snack',group:'after'},
- {id:'homework',time:'16:00',label:'Homework & reading',icon:'book',group:'after'},
-];
-const initial=(child='family',age=8):Board=>{
- const steps=seeds.map(x=>({...x}));
- if(age<=5){steps.find(s=>s.id==='homework')!.label='Look at a book';steps.find(s=>s.id==='backpack')!.label='Get my school bag'}
- if(age>=11){steps.find(s=>s.id==='backpack')!.label='Check bag & school supplies';steps.find(s=>s.id==='homework')!.label='Homework & study time'}
- return {steps,mode:'standard',footer:"Check my routine. Do my part. Then I'm ready!",child};
-};
-for(const root of document.querySelectorAll<HTMLElement>('.asr')){
- const key=root.dataset.asrKey??'omc:club:august-school-routines:v1';
- let board=initial(),profile='',kids:Child[]=[];
- const saved:Record<string,Board>={};
- const stage=root.querySelector<HTMLElement>('[data-asr-stage]'),paper=root.querySelector<HTMLElement>('[data-asr-sheet]');
- const fit=()=>{if(!stage||!paper)return;const width=Math.max(180,(stage.parentElement?.clientWidth??816)-4),scale=Math.min(1,width/816);stage.style.width=816*scale+'px';stage.style.height=1056*scale+'px';paper.style.setProperty('--asr-scale',String(scale))};
- fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
- const age=(id=board.child)=>{const k=kids.find(k=>k.id===id);return k?.birthYear?Math.max(3,2027-k.birthYear-((k.birthMonth??1)>8?1:0)):8};
- const visionDialog=root.querySelector<HTMLDialogElement>('[data-asr-vision]');
- const editorDialog=root.querySelector<HTMLDialogElement>('[data-asr-editor]');
- root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
- root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
- root.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
- for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
- const remember=()=>{saved[board.child]=structuredClone(board);try{localStorage.setItem(key,JSON.stringify({profile,boards:saved,active:board.child}))}catch{}};
-const choices:Record<Group,{id:string;label:string;icon:string}[]>={
-   morning:[
-    {id:'lunch',label:'Grab My Lunch Box',icon:'lunch'},
-    {id:'pack-lunch',label:'Pack My Lunch',icon:'lunch'},
-    {id:'stow-lunch',label:'Put Lunch Box in Backpack',icon:'lunch'},
-    {id:'water',label:'Grab My Water Bottle',icon:'water'},
-    {id:'fill-water',label:'Fill My Water Bottle',icon:'water'},
-    {id:'stow-water',label:'Put Water Bottle in Backpack',icon:'water'},
-    {id:'read-early',label:'Ready Early? Read or Draw.',icon:'book'}],
-   after:[
-    {id:'put-backpack',label:'Put My Backpack Away',icon:'bag'},
-    {id:'snack',label:'Have a Snack',icon:'snack'},
-    {id:'quiet',label:'Quiet Time',icon:'quiet'},
-    {id:'free',label:'Free Time',icon:'play'},
-    {id:'homework',label:'Homework',icon:'book'},
-    {id:'snack-free',label:'Snack & Free Time',icon:'snack'}]
+import {
+  CHOICES, ICONS, LABEL_LIMIT, addCustom, addStep, applyFamily, augFingerprint, augView, clock, freshState, fromLegacy, isAugState,
+  move, restoreRoutine, routineOf, setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, validTime,
+  type AugMember, type AugPlan, type AugState, type Group,
+} from '../../lib/club/engines/august-school-routines';
+import { el } from '../../lib/club/plan/dom';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
+
+type Detail = { household: { id: string; members?: AugMember[] } | null; sample?: string | null };
+
+for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan }>('.asr')) {
+  const key = root.dataset.asrKey ?? 'omc:club:august-school-routines:v1';
+  const planMode = root.hasAttribute('data-asr-plan');
+  let current = '';
+  let members: AugMember[] = [];
+  let state: AugState = freshState([]);
+  let persist = true;
+  let locked = false;
+  const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel);
+  const $$ = <T extends HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];
+
+  const stage = $('[data-asr-stage]');
+  const paper = $('[data-asr-sheet]');
+  const fit = () => {
+    if (!stage || !paper) return;
+    const width = Math.max(180, (stage.parentElement?.clientWidth ?? 816) - 4);
+    const scale = Math.min(1, width / 816);
+    stage.style.width = `${816 * scale}px`;
+    stage.style.height = `${1056 * scale}px`;
+    paper.style.setProperty('--asr-scale', String(scale));
   };
-  const formatTime=(value:string)=>{const [h,m]=value.split(':').map(Number);if(!Number.isFinite(h)||!Number.isFinite(m))return value;return String(h%12||12)+':'+String(m).padStart(2,'0')+(h<12?' AM':' PM')};
-  const validTime=(value:string)=>/^([01]\d|2[0-3]):[0-5]\d$/.test(value);
-  const openTimePicker=(target:HTMLElement,step:Step)=>{
-   root.querySelector('.asr-time-popover')?.remove();
-   const pop=document.createElement('div');pop.className='asr-time-popover';pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Choose time for '+step.label);
-   const title=document.createElement('strong');title.textContent=step.label+' · Choose a time';
-   const intervals=document.createElement('div');intervals.className='asr-time-interval';
-   const grid=document.createElement('div');grid.className='asr-time-grid';
-   const actions=document.createElement('div');actions.className='asr-time-actions';
-   const position=()=>{const rect=target.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(window.innerWidth-w-8,rect.right-w))+'px';pop.style.top=(rect.bottom+h+8>window.innerHeight?Math.max(8,rect.top-h-8):rect.bottom+8)+'px'};
-   const outside=(e:PointerEvent)=>{if(!pop.contains(e.target as Node)&&!target.contains(e.target as Node))dismiss()};
-   const keyboard=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();dismiss(true)}};
-   const dismiss=(focus=false)=>{pop.remove();document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',keyboard,true);window.removeEventListener('resize',position);root.querySelector('.asr-preview')?.removeEventListener('scroll',position);if(focus)target.focus()};
-   const apply=(value:string)=>{if(!validTime(value))return;step.time=value;remember();dismiss();draw();makeOptions()};
-   const base=validTime(step.time)?Number(step.time.slice(0,2))*60+Number(step.time.slice(3)):450;
-   const options=(interval:5|10)=>{
-    intervals.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.value)===interval)));
-    grid.replaceChildren();
-    const center=Math.round(base/interval)*interval;
-    for(let n=-4;n<=4;n++){const minute=center+n*interval;if(minute<0||minute>=1440)continue;const value=String(Math.floor(minute/60)).padStart(2,'0')+':'+String(minute%60).padStart(2,'0');const button=document.createElement('button');button.type='button';button.textContent=formatTime(value);button.setAttribute('aria-pressed',String(value===step.time));button.addEventListener('click',()=>apply(value));grid.append(button)}
-    position();
-   };
-   for(const interval of [10,5] as const){const button=document.createElement('button');button.type='button';button.value=String(interval);button.textContent=interval+' min';button.addEventListener('click',()=>options(interval));intervals.append(button)}
-   const custom=document.createElement('button');custom.type='button';custom.textContent='Custom time…';custom.addEventListener('click',()=>{actions.replaceChildren();const input=document.createElement('input');input.type='time';input.step='300';input.value=validTime(step.time)?step.time:'07:30';input.setAttribute('aria-label','Custom time for '+step.label);const save=document.createElement('button');save.type='button';save.textContent='Set time';save.addEventListener('click',()=>apply(input.value));input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save.click()}});actions.append(input,save);input.focus();position()});
-   actions.append(custom);pop.append(title,intervals,grid,actions);root.append(pop);options(10);position();
-   document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',keyboard,true);window.addEventListener('resize',position);root.querySelector('.asr-preview')?.addEventListener('scroll',position);
-   (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]')??grid.querySelector<HTMLButtonElement>('button'))?.focus();
+  fit();
+  if (stage?.parentElement && typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(stage.parentElement);
+  window.addEventListener('resize', fit);
+
+  const visionDialog = $<HTMLDialogElement>('[data-asr-vision]');
+  const editorDialog = $<HTMLDialogElement>('[data-asr-editor]');
+  const openEditor = () => { if (locked || !editorDialog) return; makeOptions(); if (!editorDialog.open) editorDialog.showModal(); };
+  $('[data-open-vision]')?.addEventListener('click', () => visionDialog?.showModal());
+  $$('[data-open-editor]').forEach((b) => b.addEventListener('click', openEditor));
+  $$('[data-close-dialog]').forEach((b) => b.addEventListener('click', () => b.closest('dialog')?.close()));
+  for (const d of [visionDialog, editorDialog]) d?.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+
+  const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
+  // `options` false while typing in the editor, so its fields keep focus.
+  const changed = (options = true) => {
+    save();
+    draw();
+    if (options && editorDialog?.open) makeOptions();
+    if (planMode && current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true }));
   };
-  const draw=()=>{
-   for(const group of ['morning','after'] as Group[]){
-    const holder=root.querySelector<HTMLElement>('[data-asr-group="'+group+'"]');if(!holder)continue;
-    holder.replaceChildren();
-    const steps=board.steps.filter(s=>s.group===group&&!s.removed&&!(board.mode==='simple'&&((group==='morning'&&s.id==='wake')||(group==='after'&&s.id==='wash'))));
-    for(const step of steps){
-     const row=document.createElement('div');row.className='asr-row';row.dataset.asrId=step.id;row.dataset.asrSection=group;
-     const clock=document.createElement('time');clock.dataset.asrTime='';clock.setAttribute('role','button');clock.tabIndex=0;clock.setAttribute('aria-label','Change time for '+step.label);clock.title='Choose a time';clock.textContent=formatTime(step.time);
-     const img=document.createElement('img');img.src=iconPaths[step.icon]??iconPaths.bag;img.alt='';img.width=76;img.height=76;
-     const label=document.createElement('strong');label.dataset.asrText='';label.contentEditable='true';label.setAttribute('role','textbox');label.setAttribute('aria-label','Edit '+step.label);label.textContent=step.label;
-     const remove=document.createElement('button');remove.type='button';remove.className='asr-remove';remove.dataset.asrRemove='';remove.textContent='×';remove.setAttribute('aria-label','Remove '+step.label);
-     clock.addEventListener('click',()=>openTimePicker(clock,step));clock.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTimePicker(clock,step)}});
-     label.addEventListener('input',()=>{step.label=(label.textContent??'').replace(/\\s+/g,' ').slice(0,55);remember()});
-     label.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();label.blur()}});
-     label.addEventListener('blur',()=>{step.label=step.label.trim()||'My Step';remember();makeOptions()});
-     remove.addEventListener('click',()=>{step.removed=true;remember();draw();makeOptions()});
-     row.append(clock,img,label,remove);holder.append(row);
+  const update = (change: (s: AugState) => void, options = true) => { change(state); changed(options); };
+
+  // The time picker beside a time on the sheet.
+  const scroller = root.closest<HTMLElement>('[data-plan-proof-scroll]') ?? $('.asr-preview');
+  const openTimePicker = (target: HTMLElement, id: string) => {
+    const step = routineOf(state, members).steps.find((x) => x.id === id);
+    if (locked || !step) return;
+    root.querySelector('.asr-time-popover')?.remove();
+    const pop = el('div', { className: 'asr-time-popover' });
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-label', `Choose time for ${step.label}`);
+    const intervals = el('div', { className: 'asr-time-interval' });
+    const grid = el('div', { className: 'asr-time-grid' });
+    const actions = el('div', { className: 'asr-time-actions' });
+    const position = () => {
+      const rect = target.getBoundingClientRect();
+      const w = pop.offsetWidth, h = pop.offsetHeight;
+      pop.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, rect.right - w))}px`;
+      pop.style.top = `${rect.bottom + h + 8 > window.innerHeight ? Math.max(8, rect.top - h - 8) : rect.bottom + 8}px`;
+    };
+    const outside = (e: PointerEvent) => { if (!pop.contains(e.target as Node) && !target.contains(e.target as Node)) dismiss(); };
+    const keyboard = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); dismiss(true); } };
+    const dismiss = (focus = false) => {
+      pop.remove();
+      document.removeEventListener('pointerdown', outside, true);
+      document.removeEventListener('keydown', keyboard, true);
+      window.removeEventListener('resize', position);
+      scroller?.removeEventListener('scroll', position);
+      if (focus) $<HTMLElement>(`[data-asr-id="${CSS.escape(id)}"] [data-asr-time]`)?.focus();
+    };
+    const apply = (value: string) => { if (!validTime(value)) return; dismiss(); update((s) => setTime(s, id, value, members)); };
+    const base = validTime(step.time) ? Number(step.time.slice(0, 2)) * 60 + Number(step.time.slice(3)) : 450;
+    const options = (interval: 5 | 10) => {
+      intervals.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.value) === interval)));
+      grid.replaceChildren();
+      const center = Math.round(base / interval) * interval;
+      for (let n = -4; n <= 4; n++) {
+        const minute = center + n * interval;
+        if (minute < 0 || minute >= 1440) continue;
+        const value = `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+        const b = el('button', { type: 'button', textContent: clock(value) });
+        b.setAttribute('aria-pressed', String(value === step.time));
+        b.addEventListener('click', () => apply(value));
+        grid.append(b);
+      }
+      position();
+    };
+    for (const interval of [10, 5] as const) {
+      const b = el('button', { type: 'button', value: String(interval), textContent: `${interval} min` });
+      b.addEventListener('click', () => options(interval));
+      intervals.append(b);
     }
-    holder.style.setProperty('--asr-count',String(steps.length));
-   }
-   const person=kids.find(k=>k.id===board.child);const heading=root.querySelector<HTMLElement>('[data-asr-name]');
-   if(heading)heading.textContent=person?person.firstName+"'s morning & after-school routines":'Our morning & after-school routines';
-   const foot=root.querySelector<HTMLElement>('[data-asr-footer]');if(foot&&document.activeElement!==foot)foot.textContent=board.footer;
- 
+    const custom = el('button', { type: 'button', textContent: 'Custom time…' });
+    custom.addEventListener('click', () => {
+      actions.replaceChildren();
+      const input = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
+      input.setAttribute('aria-label', `Custom time for ${step.label}`);
+      const set = el('button', { type: 'button', textContent: 'Set time' });
+      set.addEventListener('click', () => apply(input.value));
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); set.click(); } });
+      actions.append(input, set);
+      input.focus();
+      position();
+    });
+    actions.append(custom);
+    pop.append(el('strong', { textContent: `${step.label} · Choose a time` }), intervals, grid, actions);
+    root.append(pop);
+    options(10);
+    document.addEventListener('pointerdown', outside, true);
+    document.addEventListener('keydown', keyboard, true);
+    window.addEventListener('resize', position);
+    scroller?.addEventListener('scroll', position);
+    (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]') ?? grid.querySelector<HTMLButtonElement>('button'))?.focus();
   };
-  let activeTab:Group='morning',expandedId='',galleryOpen=false;
-  const changeChild=(id:string)=>{if(id===board.child)return;remember();board=saved[id]?structuredClone(saved[id]):initial(id,age(id));expandedId='';galleryOpen=false;remember();draw();makeOptions()};
-  const addStep=(item:{id:string;label:string;icon:string})=>{
-   const group=activeTab;
-   const prior=board.steps.find(s=>s.id===item.id&&s.group===group);
-   if(group==='morning'){
-    const siblingIds=item.id.includes('lunch')?['lunch','pack-lunch','stow-lunch']:item.id.includes('water')?['water','fill-water','stow-water']:[];
-    for(const other of board.steps)if(siblingIds.includes(other.id)&&other.id!==item.id)other.removed=true;
-   }
-   if(prior){prior.removed=false;prior.label=item.label}
-   else{const previous=board.steps.filter(s=>s.group===group).at(-1);board.steps.push({id:item.id,time:previous?.time??(group==='morning'?'07:50':'16:00'),label:item.label,icon:item.icon,group})}
-   galleryOpen=false;expandedId=item.id;remember();draw();makeOptions();
-  };
-  const makeOptions=()=>{
-   const holder=root.querySelector<HTMLElement>('[data-asr-options]');if(!holder)return;holder.replaceChildren();
-   const people=root.querySelector<HTMLElement>('[data-asr-children]');
-   if(people){people.replaceChildren();for(const person of [{id:'family',firstName:'Our family'},...kids]){
-    const chip=document.createElement('button');chip.type='button';chip.textContent=person.firstName;chip.setAttribute('aria-pressed',String(board.child===person.id));chip.addEventListener('click',()=>changeChild(person.id));people.append(chip)
-   }}
-   root.querySelectorAll<HTMLButtonElement>('[data-asr-tab]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.asrTab===activeTab)));
-   const title=root.querySelector<HTMLElement>('[data-asr-guided-title]');
-   if(title)title.textContent=(kids.find(k=>k.id===board.child)?.firstName??'Our family')+(activeTab==='morning'?"'s morning":' · After school');
-   const visible=board.steps.filter(s=>s.group===activeTab&&!s.removed);
-   for(const step of board.steps.filter(s=>s.group===activeTab)){
-    const removed=Boolean(step.removed),expanded=expandedId===step.id;
-    const card=document.createElement('div');card.className='asr-step-card';card.dataset.expanded=String(expanded);
-    const head=document.createElement('button');head.type='button';head.className='asr-step-main';head.setAttribute('aria-expanded',String(expanded));
-    const image=document.createElement('img');image.src=iconPaths[step.icon]??iconPaths.bag;image.alt='';
-    const copy=document.createElement('span');copy.className='asr-step-copy';
-    const name=document.createElement('strong');name.textContent=step.label+(removed?' · Removed':'');
-    const time=document.createElement('small');time.textContent=removed?'Tap to restore':formatTime(step.time);
-    const chevron=document.createElement('span');chevron.className='asr-step-chevron';chevron.textContent=expanded?'⌃':'›';
-    copy.append(name,time);head.append(image,copy,chevron);
-    head.addEventListener('click',()=>{expandedId=expanded?'':step.id;makeOptions()});card.append(head);
-    if(expanded){
-     const details=document.createElement('div');details.className='asr-step-detail';
-     if(!removed){
-      const label=document.createElement('label');label.textContent='Activity name';const input=document.createElement('input');input.type='text';input.maxLength=55;input.value=step.label;input.addEventListener('input',()=>{step.label=input.value;name.textContent=input.value;remember();draw()});label.append(input);
-      const timeLabel=document.createElement('label');timeLabel.textContent='Time (5-minute choices or custom)';const timeInput=document.createElement('input');timeInput.type='time';timeInput.step='300';timeInput.value=validTime(step.time)?step.time:'07:30';timeInput.addEventListener('change',()=>{if(!validTime(timeInput.value))return;step.time=timeInput.value;remember();draw();time.textContent=formatTime(step.time)});timeLabel.append(timeInput);
-      details.append(label,timeLabel);
-     }
-     const actions=document.createElement('div');actions.className='asr-step-actions';
-     const toggle=document.createElement('button');toggle.type='button';toggle.textContent=removed?'＋ Restore step':'Remove step';toggle.addEventListener('click',()=>{step.removed=!removed;remember();draw();makeOptions()});actions.append(toggle);
-     if(!removed){for(const dir of [-1,1]){
-      const button=document.createElement('button');button.type='button';button.textContent=dir<0?'↑ Earlier':'↓ Later';
-      const idx=visible.indexOf(step),near=visible[idx+dir];button.disabled=!near;
-      button.addEventListener('click',()=>{if(!near)return;const a=board.steps.indexOf(step),b=board.steps.indexOf(near);[board.steps[a],board.steps[b]]=[board.steps[b],board.steps[a]];remember();draw();makeOptions()});actions.append(button);
-     }}
-     details.append(actions);card.append(details);
+
+  // The sheet.
+  const draw = () => {
+    const v = augView(state, members);
+    for (const group of ['morning', 'after'] as Group[]) {
+      const holder = $(`[data-asr-group="${group}"]`);
+      if (!holder) continue;
+      holder.replaceChildren(...v.groups[group].map((step) => {
+        const row = el('div', { className: 'asr-row' });
+        row.dataset.asrId = step.id;
+        row.dataset.asrSection = group;
+        const time = el('time', { textContent: step.clock });
+        time.dataset.asrTime = '';
+        if (!locked) {
+          time.setAttribute('role', 'button');
+          time.tabIndex = 0;
+          time.title = 'Choose a time';
+          time.setAttribute('aria-label', `Change time for ${step.label}`);
+          time.addEventListener('click', () => openTimePicker(time, step.id));
+          time.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(time, step.id); } });
+        }
+        const label = el('strong', { textContent: step.label });
+        label.dataset.asrText = '';
+        label.setAttribute('contenteditable', locked ? 'false' : 'true');
+        if (!locked) {
+          label.setAttribute('role', 'textbox');
+          label.setAttribute('aria-label', `Edit ${step.label}`);
+          label.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); label.blur(); } });
+          label.addEventListener('blur', () => { if (!locked) update((s) => setLabel(s, step.id, label.textContent ?? '', members)); });
+        }
+        row.append(time, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '', width: 76, height: 76 }), label);
+        if (!locked) {
+          const remove = el('button', { type: 'button', className: 'asr-remove', textContent: '×', title: 'Remove step' });
+          remove.dataset.asrRemove = '';
+          remove.setAttribute('aria-label', `Remove ${step.label}`);
+          remove.addEventListener('click', () => update((s) => setRemoved(s, step.id, true, members)));
+          row.append(remove);
+        }
+        return row;
+      }));
     }
-    holder.append(card);
-   }
-   const gallery=root.querySelector<HTMLElement>('[data-asr-gallery]');
-   const add=root.querySelector<HTMLButtonElement>('[data-asr-add]');
-   if(add){add.textContent=galleryOpen?'× Close activity choices':'＋ Add a step';add.setAttribute('aria-expanded',String(galleryOpen))}
-   if(gallery){gallery.hidden=!galleryOpen;gallery.replaceChildren();if(galleryOpen){
-    const heading=document.createElement('strong');heading.textContent='Choose an activity';const grid=document.createElement('div');grid.className='asr-gallery-grid';
-    for(const item of choices[activeTab]){const button=document.createElement('button');button.type='button';const img=document.createElement('img');img.src=iconPaths[item.icon]??iconPaths.bag;img.alt='';const label=document.createElement('span');label.textContent=item.label;button.append(img,label);button.addEventListener('click',()=>addStep(item));grid.append(button)}
-    const custom=document.createElement('button');custom.type='button';custom.textContent='＋ Custom activity';custom.addEventListener('click',()=>addStep({id:'custom-'+Date.now(),label:'My new step',icon:activeTab==='morning'?'bag':'book'}));grid.append(custom);
-    gallery.append(heading,grid);
-   }}
-   const shorter=root.querySelector<HTMLInputElement>('[data-asr-shorter]');if(shorter)shorter.checked=board.mode==='simple';
+    const name = $('[data-asr-name]');
+    if (name) name.textContent = v.title;
+    const foot = $('[data-asr-footer]');
+    if (foot && document.activeElement !== foot) foot.textContent = v.footer;
   };
-  root.querySelectorAll<HTMLButtonElement>('[data-asr-tab]').forEach(button=>button.addEventListener('click',()=>{activeTab=button.dataset.asrTab as Group;expandedId='';galleryOpen=false;makeOptions()}));
-  root.querySelector('[data-asr-add]')?.addEventListener('click',()=>{galleryOpen=!galleryOpen;expandedId='';makeOptions()});
-  root.querySelector<HTMLInputElement>('[data-asr-shorter]')?.addEventListener('change',e=>{board.mode=(e.target as HTMLInputElement).checked?'simple':'standard';remember();draw();makeOptions()});
- const footer=root.querySelector<HTMLElement>('[data-asr-footer]');
- footer?.addEventListener('input',()=>{board.footer=(footer.textContent??'').replace(/\s+/g,' ').slice(0,120);remember()});
- footer?.addEventListener('blur',()=>{board.footer=(footer.textContent??'').trim().slice(0,120);remember();draw()});
- footer?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();footer.blur()}});
- root.querySelector('[data-asr-reset]')?.addEventListener('click',()=>{board=initial(board.child,age());remember();draw();makeOptions()});
- root.querySelector('[data-asr-print]')?.addEventListener('click',()=>window.print());
- const dl=root.querySelector<HTMLButtonElement>('[data-asr-png]');
- dl?.addEventListener('click',async()=>{
-  if(!paper||!dl)return;dl.disabled=true;const old=dl.textContent;dl.textContent='Preparing image…';root.classList.add('asr-export');
-  try{await Promise.all(Array.from(paper.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
-   const {toPng}=await import('html-to-image');const png=await toPng(paper,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff'});
-   const a=document.createElement('a');a.href=png;a.download='my-school-day-routines.png';a.click();
-  }catch(error){console.error('August export failed',error);alert('Image download failed. Use Print / Save PDF instead.')}
-  finally{root.classList.remove('asr-export');dl.disabled=false;dl.textContent=old}
- });
- const applyHousehold=(detail:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string})=>{
-  const {household,sample}=detail??{};
-  if(!household)return;const next=sample+':'+household.id;
-  kids=(household.members??[]).filter(x=>x.kind==='child');
-  if(profile!==next){profile=next;for(const k of Object.keys(saved))delete saved[k];board=kids[0]?initial(kids[0].id,age(kids[0].id)):initial();
-   try{const s=JSON.parse(localStorage.getItem(key)??'null');if(s?.profile===profile&&s.boards){
-     for(const [id,value] of Object.entries(s.boards))if(value&&typeof value==='object'&&Array.isArray((value as Board).steps))saved[id]=value as Board;
-     board=saved[s?.active]??saved.family??(kids[0]?initial(kids[0].id,age(kids[0].id)):board);
-   }}catch{}
-  }
-  if(board.child!=='family'&&!kids.some(x=>x.id===board.child))board=initial();
-  remember();draw();makeOptions();
- };
- window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}>).detail));
- const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;members?:{id:string;firstName:string;kind:string;birthYear?:number;birthMonth?:number}[]};sample:string}}).__ofcPreviewHousehold;
- if(cached)applyHousehold(cached);
- draw();makeOptions();
+  const footer = $('[data-asr-footer]');
+  footer?.addEventListener('blur', () => { if (!locked) update((s) => setFooter(s, footer.textContent ?? '', members)); draw(); });
+  footer?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); footer.blur(); } });
+
+  // The routine editor.
+  let tab: Group = 'morning';
+  let expanded = '';
+  let galleryOpen = false;
+  const makeOptions = () => {
+    const v = augView(state, members);
+    const r = v.routine;
+    const people = $('[data-asr-children]');
+    people?.replaceChildren(...[{ id: 'family', name: 'Our family' }, ...v.kids].map((k) => {
+      const chip = el('button', { type: 'button', textContent: k.name });
+      chip.setAttribute('aria-pressed', String(state.child === k.id));
+      chip.addEventListener('click', () => { if (k.id === state.child) return; expanded = ''; galleryOpen = false; update((s) => setChild(s, k.id, members)); });
+      return chip;
+    }));
+    $$('[data-asr-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.asrTab === tab)));
+    const title = $('[data-asr-guided-title]');
+    if (title) title.textContent = `${v.childName}${tab === 'morning' ? '’s morning' : ' · After school'}`;
+    const visible = shown(r, tab);
+    $('[data-asr-options]')?.replaceChildren(...r.steps.filter((x) => x.group === tab).map((step) => {
+      const removed = Boolean(step.removed), open = expanded === step.id;
+      const card = el('div', { className: 'asr-step-card' });
+      card.dataset.expanded = String(open);
+      const head = el('button', { type: 'button', className: 'asr-step-main' });
+      head.setAttribute('aria-expanded', String(open));
+      const name = el('strong', { textContent: step.label + (removed ? ' · Removed' : '') });
+      const time = el('small', { textContent: removed ? 'Tap to restore' : clock(step.time) });
+      const copy = el('span', { className: 'asr-step-copy' });
+      copy.append(name, time);
+      head.append(el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), copy, el('span', { className: 'asr-step-chevron', textContent: open ? '⌃' : '›' }));
+      head.addEventListener('click', () => { expanded = open ? '' : step.id; makeOptions(); });
+      card.append(head);
+      if (open) {
+        const detail = el('div', { className: 'asr-step-detail' });
+        if (!removed) {
+          const input = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: step.label });
+          input.addEventListener('input', () => { name.textContent = input.value; update((s) => setLabel(s, step.id, input.value, members), false); });
+          const timeInput = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
+          timeInput.addEventListener('change', () => { if (!validTime(timeInput.value)) return; time.textContent = clock(timeInput.value); update((s) => setTime(s, step.id, timeInput.value, members), false); });
+          const l1 = el('label', { textContent: 'Activity name' }); l1.append(input);
+          const l2 = el('label', { textContent: 'Time (5-minute choices or custom)' }); l2.append(timeInput);
+          detail.append(l1, l2);
+        }
+        const actions = el('div', { className: 'asr-step-actions' });
+        const toggle = el('button', { type: 'button', textContent: removed ? '＋ Restore step' : 'Remove step' });
+        toggle.addEventListener('click', () => update((s) => setRemoved(s, step.id, !removed, members)));
+        actions.append(toggle);
+        if (!removed) for (const dir of [-1, 1] as const) {
+          const b = el('button', { type: 'button', textContent: dir < 0 ? '↑ Earlier' : '↓ Later', disabled: !visible[visible.indexOf(step) + dir] });
+          b.addEventListener('click', () => update((s) => move(s, step.id, dir, members)));
+          actions.append(b);
+        }
+        detail.append(actions);
+        card.append(detail);
+      }
+      return card;
+    }) ?? []);
+    const add = $('[data-asr-add]');
+    if (add) { add.textContent = galleryOpen ? '× Close activity choices' : '＋ Add a step'; add.setAttribute('aria-expanded', String(galleryOpen)); }
+    const gallery = $('[data-asr-gallery]');
+    if (gallery) {
+      gallery.hidden = !galleryOpen;
+      gallery.replaceChildren();
+      if (galleryOpen) {
+        const grid = el('div', { className: 'asr-gallery-grid' });
+        for (const item of CHOICES[tab]) {
+          const b = el('button', { type: 'button' });
+          b.append(el('img', { src: ICONS[item.icon] ?? ICONS.bag, alt: '' }), el('span', { textContent: item.label }));
+          b.addEventListener('click', () => { galleryOpen = false; expanded = item.id; update((s) => addStep(s, tab, item.id, members)); });
+          grid.append(b);
+        }
+        const custom = el('button', { type: 'button', textContent: '＋ Custom activity' });
+        custom.addEventListener('click', () => { const id = `custom-${Date.now()}`; galleryOpen = false; expanded = id; update((s) => addCustom(s, tab, 'My new step', id, members)); });
+        grid.append(custom);
+        gallery.append(el('strong', { textContent: 'Choose an activity' }), grid);
+      }
+    }
+    const shorter = $<HTMLInputElement>('[data-asr-shorter]');
+    if (shorter) shorter.checked = r.mode === 'simple';
+  };
+  $$('[data-asr-tab]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.asrTab as Group; expanded = ''; galleryOpen = false; makeOptions(); }));
+  $('[data-asr-add]')?.addEventListener('click', () => { galleryOpen = !galleryOpen; expanded = ''; makeOptions(); });
+  $<HTMLInputElement>('[data-asr-shorter]')?.addEventListener('change', (e) => update((s) => setMode(s, (e.target as HTMLInputElement).checked, members)));
+
+  // Standalone page controls.
+  $('[data-asr-reset]')?.addEventListener('click', () => update((s) => restoreRoutine(s, members)));
+  $('[data-asr-print]')?.addEventListener('click', () => window.print());
+  const dl = $<HTMLButtonElement>('[data-asr-png]');
+  dl?.addEventListener('click', async () => {
+    if (!paper || !dl) return;
+    dl.disabled = true; const old = dl.textContent; dl.textContent = 'Preparing image…'; root.classList.add('asr-export');
+    try {
+      await Promise.all([...paper.querySelectorAll('img')].map((img) => (img.complete ? null : img.decode().catch(() => null))));
+      const { toPng } = await import('html-to-image');
+      const png = await toPng(paper, { pixelRatio: 2, width: 816, height: 1056, backgroundColor: '#fff' });
+      const a = document.createElement('a'); a.href = png; a.download = 'my-school-day-routines.png'; a.click();
+    } catch (error) { console.error('August export failed', error); alert('Image download failed. Use Print / Save PDF instead.'); }
+    finally { root.classList.remove('asr-export'); dl.disabled = false; dl.textContent = old; }
+  });
+
+  const setLocked = (on: boolean) => {
+    locked = on;
+    paper?.toggleAttribute('data-asr-locked', on);
+    footer?.setAttribute('contenteditable', on ? 'false' : 'true');
+    if (on) { editorDialog?.close(); root.querySelector('.asr-time-popover')?.remove(); }
+    draw();
+  };
+
+  const applyHousehold = (detail: Detail) => {
+    if (!detail?.household) return;
+    const next = planKey(detail.sample ?? null, detail.household.id);
+    members = detail.household.members ?? [];
+    if (next !== current) {
+      current = next;
+      expanded = '';
+      galleryOpen = false;
+      // The earlier August page kept family names in localStorage: read it once for this family, then remove it.
+      let legacy: string | null = null;
+      try { legacy = localStorage.getItem(key); } catch { /* blocked */ }
+      const old = fromLegacy(legacy, `${detail.sample}:${detail.household.id}`, members);
+      if (old) try { localStorage.removeItem(key); } catch { /* blocked */ }
+      state = readScoped(tabStorage.get(key), current, isAugState) ?? old ?? freshState(members);
+    }
+    applyFamily(state, members);
+    changed();
+  };
+
+  root.clubPlan = {
+    ready: () => Boolean(current),
+    state: () => state,
+    update,
+    replace: (s) => { state = structuredClone(s); changed(); },
+    setPersist: (on) => { persist = on; if (on) save(); },
+    fingerprint: () => augFingerprint(state, members),
+    members: () => members,
+    view: () => augView(state, members),
+    setLocked,
+    openEditor,
+  };
+  window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
+  const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
+  if (cached) applyHousehold(cached);
+  draw();
 }
 </script>

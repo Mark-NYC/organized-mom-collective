@@ -1,0 +1,199 @@
+---
+/**
+ * April Dinner Team on phones and tablets (below 1100px): the month's sections inside the shared ClubPlanScreen —
+ * tonight's dinner, the Dinner Team and the words on the printable — and their sheets. It reads and changes the plan
+ * only through the printable's controller (`.adc` root's `clubPlan`, src/lib/club/engines/april-dinner-plan.ts).
+ * Status, approval, copy, print and the sheet itself are shared (src/components/club/plan/, docs/club/PLAN_ARCHITECTURE.md).
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="April · Organized Family Club" sheets={['front', 'back']} previewNote="Front and back, ready to print">
+  <Fragment slot="title">Tonight, <em>we’ve got dinner.</em></Fragment>
+
+  <section class="cp-section" aria-labelledby="apm-dinner-title">
+    <h2 id="apm-dinner-title">Tonight’s dinner</h2>
+    <p class="cp-intro">Already planned: ingredients on the front, cooking directions on the back.</p>
+    <ul class="cp-group" data-apm-dinner></ul>
+  </section>
+
+  <section class="cp-section" aria-labelledby="apm-team-title">
+    <h2 id="apm-team-title">Your Dinner Team</h2>
+    <p class="cp-intro">Four jobs, so dinner isn’t all on you. Keep the same team for next time.</p>
+    <ul class="cp-group" data-apm-team></ul>
+    <p class="apm-restore" data-apm-restore-team hidden><button type="button" class="cp-link"><span>Restore suggested team</span></button><span>Puts the suggested people back in all four jobs. Your dinner and wording stay.</span></p>
+  </section>
+
+  <section class="cp-section" aria-labelledby="apm-words-title">
+    <h2 id="apm-words-title">Words on your printable</h2>
+    <p class="cp-intro">Change any wording to fit your family. It prints exactly as you write it.</p>
+    <ul class="cp-group" data-apm-words></ul>
+    <p class="apm-restore" data-apm-restore-words hidden><button type="button" class="cp-link"><span>Restore original wording</span></button><span>Puts back the original wording on both sides. Your dinner and team stay.</span></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.apm-restore{display:grid;margin:6px 0 0;font-size:.85rem;line-height:1.45;color:var(--cp-soft)}
+.apm-restore[hidden]{display:none}
+.apm-notice{margin:0;padding:10px 12px;background:var(--cp-wash);color:var(--cp-ink)}
+.apm-role{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+}
+</style>
+
+<script>
+import { dinnerCategories } from '../../data/club/april-dinners';
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import {
+  EFFORTS, ROLES, ROLE_INFO, assign, chooseMeal, displayName, eligible, isRecipeText, limitFor, mealById, mealsFor,
+  restoreTeam, restoreWording, setText, teamChanged, wordingChanged, type AprilPlan, type AprilState, type Role,
+} from '../../lib/club/engines/april-dinner-plan';
+
+const APPROVAL_KEY = 'omc:preview:april-dinner:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has(.adc)');
+const adc = root?.querySelector<HTMLElement & { clubPlan?: AprilPlan }>('.adc');
+if (root && adc) {
+  const plan = () => adc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<AprilState>;
+
+  const row = (label: string, title: string, detail: string, onOpen: () => void, locked: boolean, lead?: Node) => {
+    // `lead`: what sits left of the text; a person's initial unless the month passes something else.
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+      lead ?? el('span', { class: 'cp-avatar' }, title.charAt(0)),
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'apm-role' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${label}: ${title}. ${locked ? '' : 'Change'}`.trim());
+    b.addEventListener('click', onOpen);
+    return el('li', {}, b);
+  };
+  const snapshot = () => structuredClone(plan().state());
+  const undoTo = (before: AprilState) => () => plan().replace(before);
+
+  const render = (_ui: PlanScreen<AprilState>, s: AprilState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-apm-dinner]').replaceChildren(row('Ready to cook', v.name, `${v.time} · ${v.servings}`, () => openDinner(), locked));
+    q('[data-apm-team]').replaceChildren(...ROLES.map((r) => row(ROLE_INFO[r].title, v.roles[r].name, ROLE_INFO[r].note, () => openRole(r), locked)));
+    const preview = (xs: string[]) => xs.filter(Boolean).join(' · ');
+    q('[data-apm-words]').replaceChildren(
+      row('Front', 'Ingredients', preview(v.ingredients), () => openList('Ingredients', 'ingredient', v.ingredients.length, 'One item per line on the sheet. Check for allergies and preferences.'), locked, el('span')),
+      row('Front', 'Our dinner plan', preview(v.steps), () => openList('Our dinner plan', 'step', v.steps.length, 'The four steps the captain leads.'), locked, el('span')),
+      row('Front', 'Our family rule', v.rule, () => openFields('Our family rule', [['rule', 'Family rule', true]]), locked, el('span')),
+      row('Back', 'Cooking directions', v.intro, () => openFields('Cooking directions', [['intro', 'Introduction', true], ...v.instructions.map((_, i) => [`instruction:${i}`, `Step ${i + 1}`, true] as [string, string, boolean])], 'An adult handles heat, knives and food safety.'), locked, el('span')),
+    );
+    q('[data-apm-restore-team]').hidden = locked || !teamChanged(s);
+    q('[data-apm-restore-words]').hidden = locked || !wordingChanged(s);
+  };
+
+  // A text field that edits one key of the sheet's wording, live.
+  // Blank goes back to the original wording.
+  const field = (key: string, label: string, long = false) => {
+    const value = shown(key, plan().view());
+    const input = long
+      ? el('textarea', { maxLength: limitFor(key), value })
+      : el('input', { type: 'text', maxLength: limitFor(key), value });
+    input.addEventListener('input', () => plan().update((s) => setText(s, key, input.value)));
+    return el('label', { class: 'cp-field' }, label, input);
+  };
+  const shown = (key: string, v: ReturnType<AprilPlan['view']>) => {
+    const [name, at] = key.split(':');
+    const i = Number(at);
+    return ({ meal: v.name, time: v.time, servings: v.servings, rule: v.rule, intro: v.intro } as Record<string, string>)[name]
+      ?? (name === 'ingredient' ? v.ingredients[i] : name === 'instruction' ? v.instructions[i] : name === 'step' ? v.steps[i] : '') ?? '';
+  };
+  const openFields = (title: string, fields: [string, string, boolean][], hint?: string) => {
+    ui.openSheet(title, ...(hint ? [el('p', { class: 'cp-sheet-hint' }, hint)] : []), ...fields.map(([k, l, long]) => field(k, l, long)), el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+  const openList = (title: string, name: string, count: number, hint: string) =>
+    openFields(title, Array.from({ length: count }, (_, i) => [`${name}:${i}`, `${name === 'step' ? 'Step' : 'Item'} ${i + 1}`, false] as [string, string, boolean]), hint);
+
+  // `replaced`: the plan before a dinner change that dropped her recipe wording, offered back inside the sheet
+  // (a toast would sit under the open sheet).
+  const openDinner = (replaced?: AprilState) => {
+    const s = plan().state();
+    const meal = mealById(s.meal);
+    const chips = <T extends string>(label: string, items: readonly { id: T; label: string }[], current: T, pick: (id: T) => void) => {
+      const group = el('div', { class: 'cp-chips', role: 'group' });
+      group.setAttribute('aria-label', label);
+      for (const item of items) {
+        const chip = el('button', { type: 'button', class: 'cp-chip' }, item.label);
+        chip.setAttribute('aria-pressed', String(item.id === current));
+        chip.addEventListener('click', () => pick(item.id));
+        group.append(chip);
+      }
+      return el('div', { class: 'cp-field' }, el('span', {}, label), group);
+    };
+    const pickMeal = (id: string | undefined) => {
+      if (!id || id === plan().state().meal) return;
+      const before = snapshot();
+      const lost = Object.keys(before.text).some(isRecipeText);
+      plan().update((st) => chooseMeal(st, id));
+      openDinner(lost ? before : undefined);
+    };
+    const recipes = el('fieldset', { class: 'cp-choices' });
+    recipes.append(el('legend', { class: 'cp-field' }, 'Tonight’s recipe'));
+    for (const m of mealsFor(meal.effort, meal.category)) {
+      const r = el('input', { type: 'radio', name: 'apm-meal', value: m.id, checked: m.id === meal.id });
+      r.addEventListener('change', () => pickMeal(m.id));
+      recipes.append(el('label', { class: 'cp-choice' }, r, el('span', {}, `${m.name} · ${m.time}`)));
+    }
+    const notice: Node[] = [];
+    if (replaced) {
+      const undo = el('button', { type: 'button', class: 'cp-text-btn' }, 'Undo');
+      undo.addEventListener('click', () => { plan().replace(replaced); openDinner(); });
+      notice.push(el('p', { class: 'cp-sheet-hint apm-notice', role: 'status' }, 'Your wording for the old recipe was replaced. ', undo));
+    }
+    ui.openSheet('Choose your dinner', ...notice,
+      el('p', { class: 'cp-sheet-hint' }, 'Every dinner comes with ingredients, directions and the same four jobs. A different dinner replaces the recipe text on both sides; your team, dinner plan and family rule stay.'),
+      chips('What kind of night is it?', EFFORTS.map((e) => ({ id: e.id, label: e.label.split(' · ')[0] })), meal.effort, (e) => pickMeal(mealsFor(e, meal.category)[0]?.id)),
+      chips('Dinner family', dinnerCategories.map((c) => ({ id: c.id, label: c.name })), meal.category, (c) => pickMeal(mealsFor(meal.effort, c)[0]?.id)),
+      recipes,
+      field('meal', 'Name on the printable'),
+      field('time', 'Time'),
+      field('servings', 'Servings'),
+      el('p', { class: 'cp-sheet-hint' }, 'Recipes serve about four. Check ingredients for allergies and preferences.'),
+      el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+  };
+
+  const openRole = (role: Role) => {
+    const p = plan();
+    const members = p.members();
+    const current = p.view().roles[role].id;
+    const people = el('div', { class: 'cp-chips cp-people-chips', role: 'group' });
+    people.setAttribute('aria-label', `Who is ${ROLE_INFO[role].title.toLowerCase()}?`);
+    for (const m of members.filter((x) => eligible(role, x))) {
+      const chip = el('button', { type: 'button', class: 'cp-chip' }, displayName(m, members));
+      chip.setAttribute('aria-pressed', String(m.id === current));
+      chip.addEventListener('click', () => {
+        p.update((s) => assign(s, role, m.id, members));
+        people.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === chip)));
+      });
+      people.append(chip);
+    }
+    const actions = el('div', { class: 'cp-sheet-actions' }, ui.doneButton());
+    const next = ROLES[ROLES.indexOf(role) + 1];
+    if (next) {
+      const b = el('button', { type: 'button', class: 'cp-btn' }, `Next: ${ROLE_INFO[next].title} ›`);
+      b.addEventListener('click', () => openRole(next));
+      actions.append(b);
+    }
+    ui.openSheet(ROLE_INFO[role].title, el('p', { class: 'cp-sheet-hint' }, ROLE_INFO[role].rule), people, actions);
+  };
+
+  q('[data-apm-restore-team] button').addEventListener('click', () => {
+    const before = snapshot();
+    plan().update((s) => restoreTeam(s, plan().members()));
+    ui.toast('Suggested team restored. Your dinner and wording stayed.', undoTo(before));
+  });
+  q('[data-apm-restore-words] button').addEventListener('click', () => {
+    const before = snapshot();
+    plan().update((s) => restoreWording(s));
+    ui.toast('Original wording restored. Your dinner and team stayed.', undoTo(before));
+  });
+
+  const mounted = mountPlanScreen<AprilState>({ root, host: adc, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

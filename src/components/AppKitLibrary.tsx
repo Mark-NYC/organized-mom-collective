@@ -17,9 +17,9 @@ const months = [
   },
   {
     "month": "February",
-    "title": "Connection You Don't Have to Plan",
-    "responsibility": "Initiating connection",
-    "how": "Four simple invitations help kids take the lead in spending time together.",
+    "title": "Laundry That Isn't All on You",
+    "responsibility": "Caring for their own things",
+    "how": "A picture laundry guide for each child, matched to their age: My Clothes, My Job or I Can Do My Own Laundry.",
     "url": "/app/club/february/"
   },
   {
@@ -48,21 +48,21 @@ const months = [
     "title": "Less Screen-Time Negotiating",
     "responsibility": "Respecting shared boundaries",
     "how": "Shared screen-time expectations and responsibilities make summer rules clear.",
-    "url": "/club/june-preview/"
+    "url": "/app/club/june/"
   },
   {
     "month": "July",
     "title": "No More Packing for Everyone",
     "responsibility": "Preparing independently",
     "how": "Personal packing lists show each person what to pack, check, and put away.",
-    "url": "/club/july-preview/"
+    "url": "/app/club/july/"
   },
   {
     "month": "August",
     "title": "Back to School Without the Scramble",
     "responsibility": "Taking initiative",
     "how": "A personalized countdown gives everyone their own school-ready responsibilities.",
-    "url": "/club/august-preview/"
+    "url": "/app/club/august/"
   },
   {
     "month": "September",
@@ -90,7 +90,7 @@ const months = [
     "title": "Christmas Without Doing It All",
     "responsibility": "Contributing to family traditions",
     "how": "A prepared holiday plan shares responsibility for gifts, traditions, and celebrations.",
-    "url": "/club/december-preview/"
+    "url": "/app/club/december/"
   }
 ];
 

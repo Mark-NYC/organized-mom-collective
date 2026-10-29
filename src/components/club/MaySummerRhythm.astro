@@ -13,9 +13,10 @@ const blocks=[
 ];
 ---
 <div class="msr" data-msr-key={storageKey} data-msr-plan={planMode ? "true" : undefined}>
- <header class="msr-intro"><a href="/club">← Organized Family Club</a><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>
- <div class="msr-layout">
-  <aside class="msr-editor" aria-label="Prepared May summer rhythm">
+ {/* planMode: the Club plan page (/app/club/may) brings the layout and rail; this keeps the dialogs and the sheet. */}
+ {!planMode && <header class="msr-intro"><a href="/club">← Organized Family Club</a><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>}
+ <div class={planMode ? "msr-plan" : "msr-layout"}>
+  {!planMode && <aside class="msr-editor" aria-label="Prepared May summer rhythm">
    <div class="msr-editor-head"><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h2>Less reminding. <em>More summer freedom.</em></h2><button type="button" class="msr-vision-button" data-open-vision>Why this matters <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></button></div>
    <div class="msr-prepared" id="may-edit-controls">
     <span class="msr-label">YOUR FAMILY'S PREPARED RHYTHM</span>
@@ -34,7 +35,7 @@ const blocks=[
     <button type="button" class="msr-download" data-download>Download image (PNG)</button>
     <button type="button" data-reset class="msr-reset">Restore suggested rhythm</button>
    </div>
-  </aside>
+  </aside>}
   <dialog class="msr-dialog msr-vision-dialog" data-vision-dialog aria-labelledby="msr-vision-title">
    <div class="msr-dialog-top"><div><span class="msr-label">ORGANIZED FAMILY CLUB · MAY</span><h2 id="msr-vision-title">Why this matters</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>When school ends, the daily structure disappears, and Mom becomes the one everyone asks what to do next. This illustrated rhythm gives children a simple place to look for their next activity while keeping the day flexible. We've prepared realistic anchors and activity ideas, so Mom doesn't have to invent and announce the plan all summer long.</p>
@@ -62,8 +63,8 @@ const blocks=[
 </div>
    <button type="button" class="msr-dialog-done" data-close-modal>Done · See our plan</button>
   </dialog>
-  <section class="msr-preview" aria-label="May illustrated rhythm board preview">
-   <button type="button" class="msr-floating-edit" data-open-editor aria-label="Make changes to your plan"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>
+  <section class={planMode ? "msr-plan-view" : "msr-preview"} data-msr-view aria-label="May illustrated rhythm board preview">
+   {!planMode && <button type="button" class="msr-floating-edit" data-open-editor aria-label="Make changes to your plan"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>}
    
    <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
     <div class="msr-sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
@@ -84,7 +85,7 @@ const blocks=[
  </div>
 </div>
 <style is:global>
-.msr,.msr *{box-sizing:border-box}.msr{font-family:Montserrat,Arial,sans-serif;color:#454a43;max-width:1480px;margin:0 auto;padding:25px clamp(18px,3.5vw,52px) 65px}.msr-intro{max-width:760px;margin:0 0 38px}.msr-intro>a{display:inline-block;font-size:12px;color:inherit;margin-bottom:28px}.msr-label{font-size:10px;font-weight:700;letter-spacing:.16em;color:#62765e}.msr-intro h1{font:400 clamp(37px,4.5vw,60px)/1.12 Georgia,serif;margin:12px 0 16px}.msr-intro h1 em{color:#6b8464}.msr-intro>p:last-child{font-size:15px;line-height:1.7}.msr-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:clamp(22px,4vw,64px)}.msr-editor{border-top:8px solid #d4dfc4;padding-top:19px}.msr-editor h2{font:italic 29px Georgia,serif;color:#5a7154;margin:12px 0}.msr-editor>p:nth-of-type(2){font-size:13px;line-height:1.65;margin-bottom:23px}.msr-editor label{display:block;border-top:1px solid #dfe5d9;margin-top:16px;padding-top:15px;font-size:12px;font-weight:700}.msr-editor select{display:block;width:100%;min-height:45px;margin-top:8px;padding:8px;border:1px solid #aab6a3;background:white;color:#464d42;font:13px Montserrat,Arial,sans-serif}.msr-message{background:#f1f5ee;margin:25px 0 20px;padding:19px}.msr-message strong{font:400 20px Georgia,serif;color:#506849}.msr-message p{font-size:12px;line-height:1.7;margin:10px 0 0}.msr-editor button[data-print]{display:block;width:100%;border:0;background:#4f654b;color:#fff;padding:16px;cursor:pointer;font-size:12px;font-weight:700}.msr-download{display:block;width:100%;margin-top:10px;background:#fff;color:#4f654b;border:1px solid #9aaf94;min-height:45px;cursor:pointer;font-weight:700;font-size:12px}.msr-download:disabled{opacity:.6;cursor:wait}.msr-reset{display:block;margin:10px auto;background:none;border:0;color:#4c6046;text-decoration:underline;min-height:40px;cursor:pointer;font-size:12px}.msr-note{font-size:11px;line-height:1.6;color:#777}.msr-preview{min-width:0}.msr-preview-head{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:baseline;border-bottom:1px solid #dfe5d9;margin-bottom:20px}.msr-preview-head h2{font:400 26px Georgia,serif}.msr-preview-head span{font-size:12px;color:#777}.msr-stage{position:relative}.msr-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;padding:38px 48px 23px;border:1px solid #e2e7df;box-shadow:0 8px 30px #0002;background:white;color:#464e44;transform:scale(var(--msr-scale,.8));transform-origin:top left;display:flex;flex-direction:column;overflow:hidden}.msr-sheet-head{background:#e4eddc;border-top:9px solid #cbdcbf;min-height:153px;padding:19px 28px}.msr-sheet-head>span{font-size:10px;letter-spacing:.15em;font-weight:700;color:#526849}.msr-sheet-head h2{font:400 50px/1.1 Georgia,serif;color:#3f5a40;margin:10px 0 6px}.msr-sheet-head p{font:italic 17px Georgia,serif;color:#587052;margin:0}.msr-family{display:flex;justify-content:space-between;gap:18px;margin:19px 0 12px;font-size:10px;font-weight:700;letter-spacing:.12em;color:#687866}.msr-rows{display:flex;flex-direction:column;gap:8px}.msr-row{display:grid;grid-template-columns:80px minmax(0,1fr) 144px;align-items:center;gap:12px;min-height:86px;padding:5px 16px 5px 7px;border:1px solid #e4e8e0;border-radius:9px;background:linear-gradient(90deg,var(--msr-tint) 0%,#fff 88%)}.msr-icon-box{width:70px;height:70px;border-radius:8px;background:var(--msr-tint);display:flex;align-items:center;justify-content:center}.msr-icon{width:60px;height:60px;object-fit:contain;display:block;mix-blend-mode:multiply}.msr-row-copy h3{font:400 24px/1.1 Georgia,serif;color:#455644;margin:0 0 7px}.msr-row-copy p{font:12px/1.45 Montserrat,Arial,sans-serif;color:#5d685b;margin:0}.msr-time{font-size:29.4px;font-weight:700;line-height:1;letter-spacing:-.055em;color:#577350;white-space:nowrap;text-align:right;min-width:130px;font-variant-numeric:tabular-nums}.msr-rule{background:#edf3e9;border-radius:7px;margin-top:16px;padding:14px 15px;text-align:center}.msr-rule span{display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#687c61}.msr-rule strong{display:block;font:400 22px Georgia,serif;color:#3e5e3f;margin:5px 0}.msr-rule p{margin:0;font-size:11px;color:#647960}.msr-foot{display:flex;justify-content:space-between;border-top:1px solid #dfe6dc;margin-top:auto;padding-top:9px;font-size:9px;letter-spacing:.1em;font-weight:700;color:#687964}
+.msr,.msr *{box-sizing:border-box}.msr{font-family:Montserrat,Arial,sans-serif;color:#454a43}.msr:not([data-msr-plan]){max-width:1480px;margin:0 auto;padding:25px clamp(18px,3.5vw,52px) 65px}.msr-intro{max-width:760px;margin:0 0 38px}.msr-intro>a{display:inline-block;font-size:12px;color:inherit;margin-bottom:28px}.msr-label{font-size:10px;font-weight:700;letter-spacing:.16em;color:#62765e}.msr-intro h1{font:400 clamp(37px,4.5vw,60px)/1.12 Georgia,serif;margin:12px 0 16px}.msr-intro h1 em{color:#6b8464}.msr-intro>p:last-child{font-size:15px;line-height:1.7}.msr-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:clamp(22px,4vw,64px)}.msr-editor{border-top:8px solid #d4dfc4;padding-top:19px}.msr-editor h2{font:italic 29px Georgia,serif;color:#5a7154;margin:12px 0}.msr-editor>p:nth-of-type(2){font-size:13px;line-height:1.65;margin-bottom:23px}.msr-editor label{display:block;border-top:1px solid #dfe5d9;margin-top:16px;padding-top:15px;font-size:12px;font-weight:700}.msr-editor select{display:block;width:100%;min-height:45px;margin-top:8px;padding:8px;border:1px solid #aab6a3;background:white;color:#464d42;font:13px Montserrat,Arial,sans-serif}.msr-message{background:#f1f5ee;margin:25px 0 20px;padding:19px}.msr-message strong{font:400 20px Georgia,serif;color:#506849}.msr-message p{font-size:12px;line-height:1.7;margin:10px 0 0}.msr-editor button[data-print]{display:block;width:100%;border:0;background:#4f654b;color:#fff;padding:16px;cursor:pointer;font-size:12px;font-weight:700}.msr-download{display:block;width:100%;margin-top:10px;background:#fff;color:#4f654b;border:1px solid #9aaf94;min-height:45px;cursor:pointer;font-weight:700;font-size:12px}.msr-download:disabled{opacity:.6;cursor:wait}.msr-reset{display:block;margin:10px auto;background:none;border:0;color:#4c6046;text-decoration:underline;min-height:40px;cursor:pointer;font-size:12px}.msr-note{font-size:11px;line-height:1.6;color:#777}.msr-preview{min-width:0}.msr-preview-head{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:baseline;border-bottom:1px solid #dfe5d9;margin-bottom:20px}.msr-preview-head h2{font:400 26px Georgia,serif}.msr-preview-head span{font-size:12px;color:#777}.msr-stage{position:relative}.msr-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;padding:38px 48px 23px;border:1px solid #e2e7df;box-shadow:0 8px 30px #0002;background:white;color:#464e44;transform:scale(var(--msr-scale,.8));transform-origin:top left;display:flex;flex-direction:column;overflow:hidden}.msr-sheet-head{background:#e4eddc;border-top:9px solid #cbdcbf;min-height:153px;padding:19px 28px}.msr-sheet-head>span{font-size:10px;letter-spacing:.15em;font-weight:700;color:#526849}.msr-sheet-head h2{font:400 50px/1.1 Georgia,serif;color:#3f5a40;margin:10px 0 6px}.msr-sheet-head p{font:italic 17px Georgia,serif;color:#587052;margin:0}.msr-family{display:flex;justify-content:space-between;gap:18px;margin:19px 0 12px;font-size:10px;font-weight:700;letter-spacing:.12em;color:#687866}.msr-rows{display:flex;flex-direction:column;gap:8px}.msr-row{display:grid;grid-template-columns:80px minmax(0,1fr) 144px;align-items:center;gap:12px;min-height:86px;padding:5px 16px 5px 7px;border:1px solid #e4e8e0;border-radius:9px;background:linear-gradient(90deg,var(--msr-tint) 0%,#fff 88%)}.msr-icon-box{width:70px;height:70px;border-radius:8px;background:var(--msr-tint);display:flex;align-items:center;justify-content:center}.msr-icon{width:60px;height:60px;object-fit:contain;display:block;mix-blend-mode:multiply}.msr-row-copy h3{font:400 24px/1.1 Georgia,serif;color:#455644;margin:0 0 7px}.msr-row-copy p{font:12px/1.45 Montserrat,Arial,sans-serif;color:#5d685b;margin:0}.msr-time{font-size:29.4px;font-weight:700;line-height:1;letter-spacing:-.055em;color:#577350;white-space:nowrap;text-align:right;min-width:130px;font-variant-numeric:tabular-nums}.msr-rule{background:#edf3e9;border-radius:7px;margin-top:16px;padding:14px 15px;text-align:center}.msr-rule span{display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#687c61}.msr-rule strong{display:block;font:400 22px Georgia,serif;color:#3e5e3f;margin:5px 0}.msr-rule p{margin:0;font-size:11px;color:#647960}.msr-foot{display:flex;justify-content:space-between;border-top:1px solid #dfe6dc;margin-top:auto;padding-top:9px;font-size:9px;letter-spacing:.1em;font-weight:700;color:#687964}
 
 
 /* Direct editing belongs to the digital preview, never the mailed printable. */
@@ -147,7 +148,8 @@ const blocks=[
 
 @media(max-width:1080px){.msr-layout{grid-template-columns:1fr}.msr-editor{max-width:720px}}
 @page{size:letter portrait;margin:0}
-@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body *{visibility:hidden!important}.msr-stage,.msr-sheet,.msr-sheet *{visibility:visible!important}.msr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.msr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msr-icon{mix-blend-mode:normal!important}}
+/* Printing outside a Club plan page; on one, ClubPrintStyles prints the data-plan-sheet page. */
+@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body:has(.msr:not([data-msr-plan])) *{visibility:hidden!important}.msr:not([data-msr-plan]) :is(.msr-stage,.msr-sheet,.msr-sheet *){visibility:visible!important}.msr:not([data-msr-plan]) .msr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.msr:not([data-msr-plan]) .msr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}.msr-icon{mix-blend-mode:normal!important}}
 
 /* Prepared-plan shell shared in spirit with March and April. */
 .msr{padding:0;max-width:none}
@@ -187,14 +189,14 @@ const blocks=[
 @media screen and (min-width:1101px){
  html:has(#club-month-content:not([hidden]) .msr),body:has(#club-month-content:not([hidden]) .msr){height:100%;overflow:hidden}
  #club-month-content:not([hidden]):has(.msr){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden}
- .msr,.msr-layout{height:100%;margin:0}
+ .msr:not([data-msr-plan]),.msr-layout{height:100%;margin:0}
  .msr-editor{height:100%;overflow:hidden}
  .msr-prepared{margin-top:clamp(8px,2vh,17px);padding:clamp(10px,1.4vh,15px)}
  .msr-summary-line{padding:clamp(5px,1vh,10px) 0}
  .msr-preview{height:100%;overflow-y:auto;overscroll-behavior:contain}
 }
 @media screen and (max-width:1100px){
- .msr{padding:0 0 45px}
+ .msr:not([data-msr-plan]){padding:0 0 45px}
  .msr-layout{display:flex;flex-direction:column;gap:0}
  .msr-preview{order:0;padding:15px 14px 26px}
  .msr-editor{order:1;max-width:none;width:100%;border:0;padding:22px}
@@ -282,6 +284,8 @@ const blocks=[
 .msr-time-actions button{flex:1;min-height:38px;padding:5px;border:1px solid #a4b69e;border-radius:6px;background:#edf3e9;color:#4f654b;font:700 11px Montserrat,Arial,sans-serif;cursor:pointer}
 .msr-time-actions input[type=time]{flex:1;min-width:0;border:1px solid #a4b69e;border-radius:6px;padding:5px}
 @media print{.msr-time-popover{display:none!important}}
+/* Plan mode: the Club plan page places the sheet. */
+.msr-plan-view .msr-stage{margin:0 auto}
 </style>
 <script>
 import { PLAN_CHANGE } from "../../lib/club/plan/resource";
@@ -313,6 +317,9 @@ const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.spli
 for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const storageKey=root.dataset.msrKey??'omc:preview:may:v2';
  const planMode=root.dataset.msrPlan==='true';
+ let locked=false;
+ // What scrolls the sheet: the plan page's printable column, or the standalone preview.
+ const scroller=()=>root.closest<HTMLElement>('[data-plan-proof-scroll]')??root.querySelector<HTMLElement>('.msr-preview');
  let persist=true;
  let profile='';
  let options:Options={...defaults};
@@ -537,7 +544,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    };
    const dismiss=(focus=false)=>{
     pop.remove();document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',keysDown,true);
-    window.removeEventListener('resize',position);root.querySelector('.msr-preview')?.removeEventListener('scroll',position);
+    window.removeEventListener('resize',position);scroller()?.removeEventListener('scroll',position);
     if(focus)time.focus();
    };
    const outside=(e:PointerEvent)=>{if(!pop.contains(e.target as Node)&&!time.contains(e.target as Node))dismiss()};
@@ -562,7 +569,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    });
    actions.append(none,custom);pop.append(title,grid,actions);root.append(pop);
    position();document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',keysDown,true);
-   window.addEventListener('resize',position);root.querySelector('.msr-preview')?.addEventListener('scroll',position);
+   window.addEventListener('resize',position);scroller()?.addEventListener('scroll',position);
    (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]')||grid.querySelector<HTMLButtonElement>('button'))?.focus();
   };
   time?.addEventListener('click',editTime);
@@ -631,6 +638,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    update:fn=>{const s=snapshot();fn(s);replace(s)},replace,
    setPersist:on=>{persist=on;if(on)save()},
    fingerprint:()=>JSON.stringify({familyLabel,days:options.days,structure:options.structure,rows:visibleKeys().map(key=>({key,...resolved(key)}))}),
+   setLocked:on=>{locked=on;root.querySelectorAll<HTMLElement>('.msr-sheet [contenteditable]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true'));root.querySelectorAll<HTMLElement>('.msr-sheet [data-time], .msr-sheet [data-move-up], .msr-sheet [data-move-down], .msr-sheet [data-remove]').forEach(el=>{el.style.pointerEvents=on?'none':'';el.tabIndex=on?-1:0});if(on)editorDialog?.close()},
+   openEditor:()=>{if(!locked&&editorDialog&&!editorDialog.open)editorDialog.showModal()},
   };
  }
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail));

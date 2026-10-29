@@ -2,8 +2,10 @@
 
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
 September (Sunday Reset, two sheets, plus the activity calendar demo in a second tab), October (Daily Reset, two
-sheets), January (Habit Cards, one sheet) and February (laundry guides: one sheet per readiness level in use, so one
-or two) and March (family chore charts: one sheet per child) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
+sheets), January (Habit Cards, one sheet), February (laundry guides: one sheet per readiness level in use, so one
+or two) March (family chore charts: one sheet per child), April (Dinner Team, two sheets), May (Summer Day Rhythm, one
+sheet), June (Snack Station, one sheet), July (Activity Board, one sheet), August (School Day Routines, one sheet) and
+December 2026 (Christmas Mission, two sheets drawn as SVG by the worksheet layout) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
 
 ## The split
 
@@ -15,7 +17,7 @@ or two) and March (family chore charts: one sheet per child) use it. (Until Oct 
 | The printable artwork and its desktop editor | **Per month** | `src/components/club/<MonthResource>.astro` |
 | The month's rows and edit sheets on the plan screen | **Per month** (adapter) | `src/components/club/<Month>PlanMobile.astro` |
 | Desktop experience at 1100px and wider | **Per month**, unchanged | the month's page and printable |
-| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by September, October, February and March | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
+| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by every app month page | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
 
 The month owns content and personalization. The shared layer owns everything a family sees around it.
 
@@ -86,7 +88,10 @@ covers **only what prints**: January's covers the active cards, so a hidden seco
   `omc:club:september-calendar:v1` (the calendar demo, per family), `omc:club:october-daily-reset:v1`
   (`omc:preview:october-daily-reset:approval`; reads the earlier September page's `omc:preview:september-room-reset:v2`
   once for the same family), `omc:club:march-chore-charts:v2` (`omc:preview:march-chore-charts:approval`),
-  `omc:preview:january-habit-cards:v3` plus its `…:approval`.
+  `omc:preview:january-habit-cards:v3` plus its `…:approval`; `omc:club:<month>-app:v1` for April, May, June, July,
+  August and December, each with `omc:preview:<resource>:approval` (`april-dinner`, `may-summer-rhythm`,
+  `june-snack-station`, `july-activity-board`, `august-school-routines`, `december-christmas-mission`). Each reads
+  its earlier page's key once for the same family.
   The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
   `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
 
