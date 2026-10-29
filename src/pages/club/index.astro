@@ -838,3 +838,14 @@ const faqs = [
 .kit-personal-caption { margin: 9px 0 0; font-size: .7rem; line-height: 1.5; color: #696969; }
 @media(max-width:400px) { .kit-personal-benefits div { grid-template-columns: 1fr; gap: 2px; } }
 </style>
+
+<style>
+@media (min-width: 960px) {
+ .kit-fullscreen-content { max-width: 1440px; padding: 64px 48px 56px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: clamp(32px, 4vw, 64px); align-items: start; }
+ .kit-fullscreen-month { grid-column: 1 / -1; justify-self: center; margin: 0; }
+ .kit-fullscreen-content > h2 { grid-column: 1 / -1; margin: 18px auto 32px; }
+ .kit-fullscreen-image { grid-column: 1; grid-row: 3; min-width: 0; }
+ .kit-fullscreen-copy { grid-column: 2; grid-row: 3; min-width: 0; max-width: none; margin: 0; }
+ .kit-fullscreen-copy > p:first-child { margin-top: 0; }
+}
+</style>
