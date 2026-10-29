@@ -1,0 +1,105 @@
+---
+/**
+ * March family chore charts on phones and tablets (below 1100px): a row per child and the whole-family choices
+ * (turns, rewards, colors), inside the shared ClubPlanScreen. Each row opens the shared chart editor
+ * (src/lib/club/march-chore-editor.ts) in an edit sheet. Plan changes go through the printable's `clubPlan`.
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import MarchTabs from './MarchTabs.astro';
+interface Props { deadline: string }
+const { deadline } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['k0', 'k1', 'k2']} previewNote="A chore chart for each child, ready to print">
+  <Fragment slot="title">Our Family <em>Chore Charts</em></Fragment>
+  <MarchTabs current="charts" />
+  <section class="cp-section" aria-labelledby="mpm-kids-title">
+    <h2 id="mpm-kids-title">A chart for each child</h2>
+    <p class="cp-intro">Prepared for their age. Every job shows a level: learning it, with a check, or I own it.</p>
+    <ul class="cp-group" data-mpm-kids></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mpm-family-title">
+    <h2 id="mpm-family-title">For the whole family</h2>
+    <ul class="cp-group" data-mpm-family></ul>
+    <p class="mpm-restore" data-mpm-restore hidden><button type="button" class="cp-link"><span>Restore the prepared charts</span></button></p>
+  </section>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.mpm-restore{margin:6px 0 0}
+.mpm-restore[hidden]{display:none}
+.mpm-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+.cp .cp-thumb[hidden]{display:none}
+.cp .cp-thumb.mcc{--mcc-ink:#4a423f}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import { planChanged, restoreAll, type ChorePlan, type ChoreState } from '../../lib/club/engines/march-chore-charts';
+import { familyEditor, kidEditor } from '../../lib/club/march-chore-editor';
+import { toolPalettes } from '../../data/tool-palettes';
+
+const APPROVAL_KEY = 'omc:preview:march-chore-charts:approval';
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-mcc])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: ChorePlan }>('[data-mcc]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  let ui: PlanScreen<ChoreState>;
+
+  const row = (label: string, title: string, detail: string, open: () => void, locked: boolean, lead: Node = el('span')) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, lead,
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'mpm-label' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${label}: ${title}.${locked ? '' : ' Change'}`);
+    b.addEventListener('click', open);
+    return el('li', {}, b);
+  };
+  const render = (_ui: PlanScreen<ChoreState>, s: ChoreState, locked: boolean) => {
+    const v = plan().view();
+    q('[data-mpm-kids]').replaceChildren(...(v.charts.length ? v.charts.map((c) => row(`Age ${c.age}`, c.name,
+      `${c.daily.length} daily jobs · one a day with the calendar${c.turns.length ? ` · takes turns with ${c.turns.length}` : ''}`,
+      () => openKid(c.id), locked, el('span', { class: 'cp-avatar' }, c.name.charAt(0)))) : [el('li', { class: 'cp-intro' }, 'Add children to your family profile to prepare their charts.')]));
+    const shared = v.sharedOptions.filter((o) => o.who.length >= 2).map((o) => o.title);
+    q('[data-mpm-family]').replaceChildren(
+      row('We take turns', shared.length ? shared.join(', ') : 'Not sharing any jobs', 'Week by week of the month', openFamily, locked),
+      row('Rewards and colors', v.rewards ? 'Rewards on' : 'No rewards', toolPalettes[v.palette].label, openFamily, locked));
+    q('[data-mpm-restore]').hidden = locked || !planChanged(s);
+    // Only the charts this family has; their styles are scoped to .mcc (with this family's colors).
+    const colors = toolPalettes[v.palette].colors;
+    root.querySelectorAll<HTMLElement>('[data-cp-thumb]').forEach((t, i) => {
+      t.hidden = i >= v.charts.length;
+      t.classList.add('mcc');
+      ['--mcc-a', '--mcc-b', '--mcc-c'].forEach((k, n) => t.style.setProperty(k, colors[n]));
+    });
+  };
+  // Redrawing after each change keeps the sheet where she was, not back at the top.
+  const keepScroll = (draw: () => void) => () => {
+    const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
+    const top = sheet?.open ? sheet.scrollTop : 0;
+    draw();
+    if (sheet) sheet.scrollTop = top;
+  };
+  const openKid = (id: string) => {
+    const name = plan().view().charts.find((c) => c.id === id)?.name ?? 'Chart';
+    const show: () => void = keepScroll(() => ui.openSheet(`${name}’s chart`, kidEditor(plan(), id, show), el('div', { class: 'cp-sheet-actions' }, ui.doneButton())));
+    root.querySelector<HTMLDialogElement>('[data-cp-sheet]')?.close();
+    show();
+  };
+  const openFamily = () => {
+    const show: () => void = keepScroll(() => ui.openSheet('For the whole family', familyEditor(plan(), show), el('div', { class: 'cp-sheet-actions' }, ui.doneButton())));
+    root.querySelector<HTMLDialogElement>('[data-cp-sheet]')?.close();
+    show();
+  };
+  q('[data-mpm-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => restoreAll(s));
+    ui.toast('The prepared charts are back.', () => plan().replace(before));
+  });
+
+  const mounted = mountPlanScreen<ChoreState>({ root, host, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

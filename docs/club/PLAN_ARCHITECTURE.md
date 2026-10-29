@@ -3,7 +3,7 @@
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
 September (Sunday Reset, two sheets, plus the activity calendar demo in a second tab), October (Daily Reset, two
 sheets), January (Habit Cards, one sheet) and February (laundry guides: one sheet per readiness level in use, so one
-or two) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
+or two) and March (family chore charts: one sheet per child) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
 
 ## The split
 
@@ -15,7 +15,7 @@ or two) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Res
 | The printable artwork and its desktop editor | **Per month** | `src/components/club/<MonthResource>.astro` |
 | The month's rows and edit sheets on the plan screen | **Per month** (adapter) | `src/components/club/<Month>PlanMobile.astro` |
 | Desktop experience at 1100px and wider | **Per month**, unchanged | the month's page and printable |
-| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by September, October and February | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
+| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by September, October, February and March | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
 
 The month owns content and personalization. The shared layer owns everything a family sees around it.
 
@@ -85,7 +85,8 @@ covers **only what prints**: January's covers the active cards, so a hidden seco
 - Keys in use: `omc:club:september-sunday-reset:v1` (`omc:preview:september-sunday-reset:approval`),
   `omc:club:september-calendar:v1` (the calendar demo, per family), `omc:club:october-daily-reset:v1`
   (`omc:preview:october-daily-reset:approval`; reads the earlier September page's `omc:preview:september-room-reset:v2`
-  once for the same family), `omc:preview:january-habit-cards:v3` plus its `…:approval`.
+  once for the same family), `omc:club:march-chore-charts:v1` (`omc:preview:march-chore-charts:approval`),
+  `omc:preview:january-habit-cards:v3` plus its `…:approval`.
   The January printable is also used outside a plan page (`/preview/january-habit-cards`, `/club/tools/habit-builder`,
   `/club/kits/<slug>`): there it keeps its own key, tab-only as well, with no family scope.
 
@@ -149,6 +150,19 @@ Laundry days (one or more, or "As needed") print on every guide; a named machine
 (Mom/Dad for the first two parents, other grown-ups by name; the default keeps the original wording). Tab-only
 `omc:club:february-laundry-app:v1` with `omc:preview:february-laundry:approval`; the earlier page's
 `omc:club:february-laundry:v2` edits are read once for the same family, then removed.
+
+## March
+
+`/app/club/march`: family chore charts (`MarchChoreCharts.astro`: one portrait chart per child, Kalam headings, and
+the desktop editor; `MarchPlanMobile.astro`; rules `src/lib/club/engines/march-chore-charts.ts`; the editor panels
+shared by the desktop dialog and the phone sheets in `src/lib/club/march-chore-editor.ts`). Ages as of March 2027
+prepare each chart: two to five daily jobs from `src/data/responsibilities.ts` by age (pets first when the family
+has them), one job a day matched to the wall calendar's cleaning zones in `src/data/cleaning.ts`, a level per job
+(Learning it, With a check, I own it), shared jobs rotated by week between children old enough ("We take turns"),
+and optional rewards from `src/data/chore-chart.ts` plus the three tool palettes. Children only: no grown-up rows.
+Tab-only `omc:club:march-chore-charts:v1` with `omc:preview:march-chore-charts:approval`. The earlier March page,
+Spring Prep (`MarchSpringPrep.astro`, unchanged), stays at `/app/club/march/spring-prep`; `MarchTabs.astro` links
+the two and keeps `?sample`. The kit page and `/club/march-preview` still describe Spring Prep.
 
 ## September and October
 

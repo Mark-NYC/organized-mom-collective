@@ -1,0 +1,22 @@
+---
+/** March has two resources: the family chore charts (/app/club/march) and Spring Prep, kept as a second tab
+ * (/app/club/march/spring-prep). Each is its own page with its own editing and printing; this switches between them. */
+interface Props { current: 'charts' | 'spring' }
+const { current } = Astro.props;
+---
+<nav class="mar-tabs" aria-label="March resources">
+  <a href="/app/club/march" aria-current={current === 'charts' ? 'page' : undefined}>Chore charts</a>
+  <a href="/app/club/march/spring-prep" aria-current={current === 'spring' ? 'page' : undefined}>Spring Prep</a>
+</nav>
+<style is:global>
+.mar-tabs{display:flex;justify-content:center;gap:28px;max-width:816px;margin:0 auto 18px;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.mar-tabs a{display:inline-flex;align-items:center;min-height:46px;margin-bottom:-1px;padding:10px 2px;border-bottom:2px solid transparent;color:var(--color-warm-soft,#6e6461);font:600 .75rem var(--font-sans);letter-spacing:.16em;text-transform:uppercase;text-decoration:none}
+.mar-tabs a:hover{color:var(--color-warm-ink,#4d4544)}
+.mar-tabs a[aria-current="page"]{color:var(--color-warm-ink,#4d4544);border-bottom-color:var(--color-warm-button,#4a3f3e)}
+.mar-tabs a:focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
+@media print{.mar-tabs{display:none!important}}
+</style>
+<script>
+// Keep the family (?sample=…) and any preview settings when switching between March's two resources.
+for (const a of document.querySelectorAll<HTMLAnchorElement>('.mar-tabs a')) a.search = location.search;
+</script>

@@ -1,82 +1,91 @@
 ---
+/** March Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
+ * docs/club/PLAN_ARCHITECTURE.md): the family chore charts, one per child (Spring Prep, March's earlier resource, is
+ * its second tab at /app/club/march/spring-prep). Desktop (>= 1100px): the shared rail (ClubPlanDesktop) beside the
+ * charts. Below 1100px: the shared plan screen with March's sections (MarchPlanMobile). The charts and their editor
+ * live in MarchChoreCharts; the rules in src/lib/club/engines/march-chore-charts.ts. */
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
-import MarchSpringPrep from '../../../components/club/MarchSpringPrep.astro';
+import MarchChoreCharts from '../../../components/club/MarchChoreCharts.astro';
+import MarchPlanMobile from '../../../components/club/MarchPlanMobile.astro';
+import MarchTabs from '../../../components/club/MarchTabs.astro';
+import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
 import { clubEditingDeadline } from '../../../lib/club/deadline';
 import { kits } from '../../../data/club/kits';
-const kit=kits.find(k=>k.month==='2027-03');
-if(!kit)throw new Error('March kit missing');
-const deadline=clubEditingDeadline(kit.month);
+const kit = kits.find((k) => k.month === '2027-03');
+if (!kit) throw new Error('March kit missing');
+const deadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:march-chore-charts:v1';
 ---
-<AppLayout title="March Spring Prep">
- <div class="mar-app family-brand" data-slug={kit.slug} data-deadline={deadline}>
-  <div class="mar-gate" data-gate role="status">Preparing your family’s plan…</div>
-  <div class="mar-content" hidden>
-   <section class="mar-mobile">
-    <header><a href="/app/club/" class="mar-back">← Back to Club</a><p class="mar-kicker">MARCH · ORGANIZED FAMILY CLUB</p><h1>Our Family <em>Spring Prep</em></h1><p data-family-label></p><span class="mar-sample" data-sample hidden>Sample family</span></header>
-    <div class="mar-status"><strong data-review-status>Preview only · Review is optional</strong><p data-window></p></div>
-    <button type="button" class="mar-proof-link" data-open-proof><span><strong>Your printable</strong><small>One page, ready to print</small></span><span>View →</span></button>
-    <section><h2>Everyone has a part</h2><p>Five optional jobs, each with a clear finish line. Choose what fits your family.</p><div data-jobs class="mar-jobs"></div></section>
-    <button type="button" class="mar-reset" data-mobile-reset>Restore suggested owners</button><p class="mar-note">Preview only. Changes stay in this browser tab and aren’t saved to your account. Mailing and approval aren’t active yet.</p>
-    <div class="mar-actions"><button type="button" data-review>Mark as reviewed</button><button type="button" data-print-app>Print</button></div>
-   </section>
-   <aside class="mar-rail"><header><a class="mar-back" href="/app/club/">← Back to Club</a><p class="mar-kicker">MARCH · KIT PREVIEW</p><h1>Our Family <em>Spring Prep</em></h1></header><section class="mar-rail-window"><p class="mar-kicker">YOUR EDITING WINDOW</p><p data-desktop-window></p></section><div class="mar-rail-actions"><button type="button" data-desktop-edit>Make changes</button><button type="button" data-desktop-review>Mark as reviewed</button><button type="button" data-print-app>Download and print</button></div><p class="mar-note" data-desktop-family></p><p class="mar-note" data-desktop-review-note>Preview only. Review does not save, submit or mail anything.</p><div class="mar-rail-info"><p>Five optional jobs with owners, supplies, and clear steps. Choose what fits your family, and let each person take responsibility for their job.</p><button type="button" data-desktop-reset>Restore suggested owners</button></div></aside>
-   <div class="mar-proof" data-proof><div class="mar-proof-bar"><button type="button" data-close-proof>← Back</button><strong>Your printable</strong><button type="button" data-print-app>Print</button></div><MarchSpringPrep storageKey="omc:club:march-mobile:v1" managed={true}/></div>
-  </div>
-  <dialog class="mar-dialog" data-editor aria-labelledby="mar-editor-title"><div class="mar-dialog-head"><h2 id="mar-editor-title">Edit job</h2><button type="button" data-close-editor aria-label="Close">×</button></div><p>Changes appear on your printable as you type.</p><div data-fields></div><button type="button" class="mar-done" data-close-editor>Done</button></dialog>
- </div>
+<AppLayout title="March Family Chore Charts">
+  <ClubPlanShell class="mch-plan family-brand" kitSlug={kit.slug} month="March" storageKey={storageKey}>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="March · Kit preview" instructions={[
+      'One chart for each child, prepared for their age: daily jobs, one job a day that matches your wall calendar’s cleaning zone, family jobs they take turns with, and a growth level on every job.',
+      'Hang each chart where it gets seen. As a job moves from Learning it to I own it, change the level and print a fresh copy.',
+    ]}>
+      <Fragment slot="title">Our Family <em>Chore Charts</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="mch-d-kids">
+          <p class="cpd-label" id="mch-d-kids">The charts</p>
+          <dl class="cpd-rows" data-mch-d-kids></dl>
+          <button type="button" class="cpd-link" data-mch-d-open>Change jobs, levels and turns</button>
+          <button type="button" class="cpd-link" data-mch-d-restore hidden>Restore the prepared charts</button>
+          <p class="cpd-hint" data-mch-d-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="mch-proof" slot="printable" data-plan-proof-body>
+      <div class="mch-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <div class="mch-tabs-desktop"><MarchTabs current="charts" /></div>
+        <MarchChoreCharts storageKey={storageKey} />
+      </div>
+    </div>
+    <MarchPlanMobile slot="mobile" deadline={deadline} />
+  </ClubPlanShell>
 </AppLayout>
 <style is:global>
-.mar-app{max-width:680px;margin:auto;color:var(--color-warm-ink)}.mar-gate{padding:30px 0}.mar-gate h2{font:28px var(--font-serif)}.mar-gate a,.mar-gate button{text-decoration:underline;display:inline-block;margin-top:14px}.mar-back{display:inline-flex;align-items:center;min-height:44px;color:#536e4e}.mar-kicker{font-size:.7rem;letter-spacing:.16em;font-weight:600;color:var(--color-warm-soft)}.mar-mobile h1{font:400 clamp(32px,8vw,42px)/1.1 var(--font-serif);margin:10px 0}.mar-sample{display:inline-block;border:1px solid var(--color-warm-rule);padding:3px 8px;font-size:12px}.mar-status{border-block:1px solid var(--color-warm-rule);margin:20px 0 16px;padding:14px 0;font-size:14px}.mar-status p{margin-top:4px;color:var(--color-warm-soft)}.mar-proof-link{display:flex;width:100%;justify-content:space-between;text-align:left;align-items:center;min-height:74px;padding:18px;border:1px solid #d5dfd2;background:#eef2ea}.mar-proof-link small{display:block;color:var(--color-warm-soft);margin-top:4px}.mar-mobile section{margin:28px 0}.mar-mobile h2{font:27px var(--font-serif)}.mar-mobile section>p,.mar-note{font-size:13px;line-height:1.6;color:var(--color-warm-soft)}.mar-jobs{margin-top:16px;border-top:1px solid var(--color-warm-rule)}.mar-job{display:block;text-align:left;width:100%;min-height:74px;padding:14px 4px;border-bottom:1px solid var(--color-warm-rule)}.mar-job strong,.mar-job span{display:block}.mar-job strong{font:20px var(--font-serif)}.mar-job span{font-size:13px;color:var(--color-warm-soft);margin-top:4px}.mar-job:disabled{opacity:1}.mar-reset{min-height:44px;text-decoration:underline;text-underline-offset:4px;color:#536e4e}.mar-mobile>.mar-note{margin:0 0 85px}.mar-actions{position:fixed;z-index:35;bottom:calc(60px + env(safe-area-inset-bottom));left:0;right:0;display:flex;gap:8px;padding:10px max(20px,calc((100vw - 640px)/2));background:#fffdfa;border-top:1px solid var(--color-warm-rule)}.mar-actions button{min-height:48px;padding:0 20px;border:1px solid #536e4e}.mar-actions button:first-child{background:#536e4e;color:white;flex:1}.mar-proof,.mar-rail{display:none}.mar-app.proof-open .mar-proof{display:block;position:fixed;inset:0;background:#f1f2f2;z-index:80;overflow:auto}.mar-proof-bar{position:sticky;top:0;z-index:2;background:white;display:flex;align-items:center;justify-content:space-between;padding:10px 18px}.mar-proof-bar button{min-height:44px}.mar-proof .msc-intro,.mar-proof .msc-editor,.mar-proof .msc-floating-edit,.mar-proof .msc-preview-note{display:none!important}.mar-proof .msc{padding:20px}.mar-proof .msc-workspace{display:block!important}.mar-dialog{border:0;margin:auto auto 0;width:100%;max-width:640px;max-height:90dvh;overflow:auto;padding:22px;background:#fffdfa}.mar-dialog::backdrop{background:#0008}.mar-dialog-head{display:flex;justify-content:space-between;align-items:center}.mar-dialog-head h2{font:26px var(--font-serif)}.mar-dialog-head button{font-size:30px;min-width:44px;min-height:44px}.mar-dialog label{display:block;font-size:12px;font-weight:700;margin:15px 0}.mar-dialog input,.mar-dialog textarea,.mar-dialog select{display:block;width:100%;padding:11px;border:1px solid #bcbcbc;background:white;margin-top:6px;min-height:44px;font-size:16px}.mar-done{width:100%;min-height:48px;background:#536e4e;color:white}.mar-app button:focus-visible,.mar-app input:focus-visible,.mar-app textarea:focus-visible,.mar-app select:focus-visible{outline:2px solid #536e4e;outline-offset:2px}
-@media screen and (min-width:1100px){html:has(.mar-app),body:has(.mar-app){height:100%;overflow:hidden}body:has(.mar-app) #main{position:relative;width:100%;max-width:none;height:calc(100dvh - 64px);min-height:0;margin:0;padding:0;overflow:hidden}.mar-app{width:100%;height:100%;max-width:none;margin:0;overflow:hidden}.mar-content:not([hidden]){display:grid;grid-template-columns:minmax(310px,375px) minmax(0,1fr);height:100%;min-height:0}.mar-mobile{display:none}.mar-rail{display:block;min-width:0;height:100%;overflow-y:auto;overscroll-behavior:contain;background:var(--color-ivory);border-right:1px solid var(--color-warm-rule);padding:clamp(40px,6vh,70px) clamp(22px,2.7vw,42px) 40px}.mar-rail header{border-bottom:1px solid var(--color-warm-rule);padding-bottom:30px;margin-bottom:28px}.mar-rail .mar-back{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:6px;margin-bottom:14px;color:var(--color-warm-ink)}.mar-rail h1{font:400 clamp(34px,3vw,42px)/1.12 var(--font-serif);letter-spacing:-.02em;margin:18px 0 19px}.mar-rail-window{border-bottom:1px solid var(--color-warm-rule);padding-bottom:20px;margin-bottom:20px;font-size:.83rem;line-height:1.6;color:var(--color-warm-soft)}.mar-rail-window .mar-kicker{margin-bottom:10px}.mar-rail-actions{display:flex;flex-direction:column;gap:12px}.mar-rail-actions button{min-height:48px;border:1px solid var(--color-warm-ink);padding:12px 20px;font:600 .75rem var(--font-sans);letter-spacing:.13em;text-transform:uppercase}.mar-rail-actions [data-desktop-review]{background:var(--color-warm-button);color:white}.mar-rail-actions [data-print-app]{border:0;align-self:flex-start;text-decoration:underline;text-underline-offset:6px;padding:5px 8px;min-height:44px}.mar-rail>.mar-note{margin-top:14px}.mar-rail-info{border-top:1px solid var(--color-warm-rule);margin-top:24px;padding-top:20px;font-size:.78rem;line-height:1.65;color:var(--color-warm-soft)}.mar-rail-info button{min-height:44px;text-decoration:underline;text-underline-offset:4px}.mar-proof{display:block;min-width:0;height:100%;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;background:#f1f2f2;padding:clamp(32px,4vw,62px) clamp(28px,5vw,82px) 84px}.mar-proof-bar{display:none}.mar-proof .msc{padding:0;max-width:none;width:100%;height:auto;margin:0}.mar-proof .msc-workspace{display:block!important;width:100%;height:auto}.mar-proof .msc-preview{width:100%;height:auto;min-width:0;overflow:visible;background:transparent;padding:0}.mar-proof .msc-print-scroll{width:100%;height:auto;overflow:visible;padding:0;justify-content:center}.mar-proof .msc-sheet{box-shadow:0 8px 28px rgba(61,56,52,.09)}}
-@page { size: letter portrait; margin: 0; }
-@media print {
-  .mar-mobile,.mar-rail,.mar-proof-bar,.mar-gate,.mar-dialog,body:has(.mar-app) [data-chrome] { display:none!important; }
-  html:has(.mar-app),body:has(.mar-app),body:has(.mar-app) #main,
-  .mar-app,.mar-content,.mar-app .mar-proof,.mar-app .msc,
-  .mar-app .msc-workspace,.mar-app .msc-preview,.mar-app .msc-print-scroll {
-    position:static!important; display:block!important; box-sizing:border-box!important;
-    width:8.5in!important; min-width:0!important; max-width:none!important;
-    height:auto!important; min-height:0!important; max-height:none!important;
-    margin:0!important; padding:0!important; overflow:visible!important;
-    transform:none!important; background:transparent!important;
-  }
-  .mar-app .msc-sheet-stage {
-    position:static!important; display:block!important; box-sizing:border-box!important;
-    width:8.5in!important; height:11in!important; margin:0!important; padding:0!important;
-    overflow:visible!important; transform:none!important;
-  }
-  .mar-app .msc-sheet-stage .msc-sheet {
-    position:static!important; display:flex!important; box-sizing:border-box!important;
-    width:8.5in!important; height:11in!important; max-height:11in!important;
-    margin:0!important; transform:none!important; box-shadow:none!important;
-    break-inside:avoid!important; page-break-inside:avoid!important;
-  }
-}
+.mch-tabs-desktop{display:none}
+@media screen and (min-width:1100px){.mch-tabs-desktop{display:block}}
 </style>
 <script>
-import { clubAccountsEnabled } from '../../../data/club/config';
-import { getSession } from '../../../lib/account';
-import { loadKitHousehold } from '../../../lib/club/kit-household';
-import { accountStore,clubHref,sampleStore } from '../../../lib/club/store';
-import { routes } from '../../../routes';
-type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;isAccountHolder?:boolean};
-type Job={id:string;ownerId:string;owner:string;adultOnly:boolean;title:string;supplies:string;ready:string;doJob:string;done:string};
-type Plan={family:string;members:Member[];tasks:Job[]};
-const app=document.querySelector<HTMLElement>('.mar-app');
-if(app){
- const root=app.querySelector<HTMLElement>('.msc')!;const content=app.querySelector<HTMLElement>('.mar-content')!;const gate=app.querySelector<HTMLElement>('[data-gate]')!;const dialog=app.querySelector<HTMLDialogElement>('[data-editor]')!;const locked=Date.now()>Date.parse(app.dataset.deadline!);let plan:Plan|null=null;let reviewed=false;
- const paint=()=>{if(!plan)return;const list=app.querySelector<HTMLElement>('[data-jobs]')!;list.replaceChildren();for(const task of plan.tasks){const b=document.createElement('button');b.type='button';b.className='mar-job';b.disabled=locked;b.setAttribute('aria-label',`${locked?'Job':'Edit job'}: ${task.title}`);const title=document.createElement('strong');title.textContent=task.title;const owner=document.createElement('span');owner.textContent=`${task.owner}${locked?'':' · Edit'}`;b.append(title,owner);b.addEventListener('click',()=>edit(task));list.append(b)}};
- const edit=(task:Job)=>{if(!plan||locked)return;app.querySelector<HTMLElement>('#mar-editor-title')!.textContent=task.title;const fields=app.querySelector<HTMLElement>('[data-fields]')!;fields.replaceChildren();const label=document.createElement('label');label.textContent='Who owns this job?';const select=document.createElement('select');const empty=document.createElement('option');empty.value='';empty.textContent='Optional · unassigned';select.append(empty);const adults=plan.members.filter(m=>m.kind==='adult');for(const member of plan.members){if(member.kind==='child'&&(task.adultOnly||member.birthYear===undefined||2027-member.birthYear-(member.birthMonth&&member.birthMonth>3?1:0)<5))continue;const option=document.createElement('option');option.value=member.id;const idx=adults.findIndex(m=>m.id===member.id);const holder=adults.find(m=>m.isAccountHolder)??adults[0];option.textContent=member.kind==='adult'?(member.id===holder?.id?'Mom':idx<2?'Dad':member.firstName):member.firstName;select.append(option)}select.value=task.ownerId;select.addEventListener('change',()=>{root.dispatchEvent(new CustomEvent('msc-edit',{detail:{task:task.id,owner:select.value}}));changed()});label.append(select);fields.append(label);for(const [field,title,max] of [['title','Job',60],['supplies','Supplies',180],['ready','Get ready',180],['doJob','Do the job',180],['done',"Check it’s done",180]] as const){const l=document.createElement('label');l.textContent=title;const input=field==='title'?document.createElement('input'):document.createElement('textarea');input.maxLength=max;input.value=task[field];input.addEventListener('input',()=>{root.dispatchEvent(new CustomEvent('msc-edit',{detail:{task:task.id,field,value:input.value}}));changed()});l.append(input);fields.append(l)}dialog.showModal()};
- const changed=()=>{reviewed=false;app.querySelector<HTMLElement>('[data-review-status]')!.textContent='Preview only · Review is optional';app.querySelector<HTMLElement>('[data-review]')!.textContent='Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review]')!.textContent='Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review-note]')!.textContent='Preview only. Review does not save, submit or mail anything.'};
- root.addEventListener('msc-state',(event:Event)=>{plan=(event as CustomEvent<Plan>).detail;paint()});root.addEventListener('input',changed);root.addEventListener('change',changed);
- app.querySelectorAll('[data-close-editor]').forEach(b=>b.addEventListener('click',()=>dialog.close()));dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
- app.querySelector('[data-mobile-reset]')?.addEventListener('click',()=>app.querySelector<HTMLButtonElement>('[data-desktop-reset]')?.click());
- app.querySelector('[data-desktop-edit]')?.addEventListener('click',()=>root.querySelector<HTMLButtonElement>('[data-open-owners]')?.click());app.querySelector('[data-desktop-reset]')?.addEventListener('click',()=>{if(confirm('Restore the suggested owners and original job wording? Your changes will be removed.')){root.querySelector<HTMLButtonElement>('[data-reset]')?.click();changed()}});
- const review=()=>{reviewed=!reviewed;app.querySelector<HTMLElement>('[data-review-status]')!.textContent=reviewed?'Reviewed on this screen · No mailing submitted':'Preview only · Review is optional';app.querySelector<HTMLElement>('[data-review]')!.textContent=reviewed?'Undo review':'Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review]')!.textContent=reviewed?'Undo review':'Mark as reviewed';app.querySelector<HTMLElement>('[data-desktop-review-note]')!.textContent=reviewed?'Reviewed on this screen. Nothing was saved, submitted or mailed.':'Preview only. Review does not save, submit or mail anything.'};app.querySelector('[data-review]')?.addEventListener('click',review);app.querySelector('[data-desktop-review]')?.addEventListener('click',review);
- let opener:HTMLElement|null=null;const proof=(open:boolean)=>{app.classList.toggle('proof-open',open);document.querySelectorAll<HTMLElement>('.mar-mobile,body > header[data-chrome],nav[data-chrome]').forEach(el=>el.inert=open);if(open){opener=document.activeElement as HTMLElement;app.querySelector<HTMLButtonElement>('[data-close-proof]')?.focus()}else opener?.focus();window.dispatchEvent(new Event('resize'))};app.querySelector('[data-open-proof]')?.addEventListener('click',()=>proof(true));app.querySelector('[data-close-proof]')?.addEventListener('click',()=>proof(false));window.addEventListener('keydown',e=>{if(e.key==='Escape'&&app.classList.contains('proof-open'))proof(false)});app.querySelectorAll('[data-print-app]').forEach(b=>b.addEventListener('click',()=>{(document.activeElement as HTMLElement)?.blur();window.print()}));
- loadKitHousehold(app.dataset.slug!,location.search,{accountsEnabled:clubAccountsEnabled,hasSession:async()=>Boolean(await getSession()),accountStore,sampleStore}).then(result=>{if(result.status!=='ready'){const sample='sample' in result?result.sample:null;const messages={empty:['Add your family first','Add family members to prepare your plan.',clubHref(routes.clubFamily,sample)],denied:['March isn’t open for your account','This kit is not available to your account.',clubHref(routes.clubDashboard,sample)],'signed-out':['Sign in to see your plan','Sign in to see your family’s plan.',routes.clubDashboard],error:['We couldn’t load your plan','Check your connection and try again.','']} as const;const [title,description,href]=messages[result.status];gate.replaceChildren();const h=document.createElement('h2');h.textContent=title;const p=document.createElement('p');p.textContent=description;const a=document.createElement(href?'a':'button');a.textContent=href?'Continue':'Try again';if(a instanceof HTMLAnchorElement)a.href=href;else a.addEventListener('click',()=>location.reload());gate.append(h,p,a);return}
- root.dispatchEvent(new CustomEvent('msc-household',{detail:{household:result.household,sample:result.sample}}));app.querySelector<HTMLElement>('[data-family-label]')!.textContent=result.source==='sample'?result.sampleLabel:'Prepared for '+(result.household.displayName??'your family');app.querySelector<HTMLElement>('[data-sample]')!.hidden=result.source!=='sample';app.querySelector<HTMLElement>('[data-desktop-family]')!.textContent=(result.source==='sample'?result.sampleLabel:'Prepared for '+(result.household.displayName??'your family'))+'. Changes stay in this browser tab.';const windowText=locked?'Editing window closed. You can still print.':'Edit until '+new Intl.DateTimeFormat('en-US',{dateStyle:'long',timeZone:'America/New_York'}).format(new Date(app.dataset.deadline!))+' at 11:59 p.m. ET.';app.querySelector<HTMLElement>('[data-window]')!.textContent=windowText;app.querySelector<HTMLElement>('[data-desktop-window]')!.textContent=windowText;if(locked){app.querySelectorAll<HTMLButtonElement>('[data-desktop-edit],[data-desktop-reset],[data-mobile-reset]').forEach(b=>b.disabled=true);root.querySelectorAll<HTMLElement>('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'))}gate.hidden=true;content.hidden=false;window.dispatchEvent(new Event('resize'));
- });
+import { restoreAll, planChanged, type ChorePlan, type ChoreState } from '../../../lib/club/engines/march-chore-charts';
+import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.mch-plan');
+const host = root?.querySelector<HTMLElement & { clubPlan?: ChorePlan }>('[data-mcc]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-mch-d-restored]');
+  let undo: ChoreState | null = null;
+  mountPlanDesktop<ChoreState>({
+    root,
+    host,
+    approvalKey: 'omc:preview:march-chore-charts:approval',
+    edit: () => plan().openEditor(),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const v = plan().view();
+      const rows = v.charts.map((c) => {
+        const b = el('button', { type: 'button', class: 'cpd-link', disabled: locked }, `${c.name} (${c.age})`);
+        b.addEventListener('click', () => plan().openEditor(c.id));
+        return el('div', {}, el('dt', {}, b), el('dd', {}, `${c.daily.length} daily · ${c.weekly.filter((w) => w.job).length} weekly${c.turns.length ? ` · ${c.turns.length} shared` : ''}`));
+      });
+      q('[data-mch-d-kids]').replaceChildren(...(rows.length ? rows : [el('div', {}, el('dt', {}, 'Children'), el('dd', {}, 'None yet'))]));
+      q<HTMLButtonElement>('[data-mch-d-open]').disabled = locked;
+      q('[data-mch-d-restore]').hidden = locked || !planChanged(plan().state());
+    },
+  });
+  q('[data-mch-d-open]').addEventListener('click', () => plan().openEditor());
+  q('[data-mch-d-restore]').addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    plan().update((s) => restoreAll(s));
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('Charts restored. ', u);
+    restored.focus();
+  });
 }
 </script>

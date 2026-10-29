@@ -68,7 +68,7 @@ describe('Club plan printables in WebKit', () => {
   });
 
   it('marks the last sheet of every Club plan printable, so nothing breaks after it', () => {
-    for (const file of ['SeptemberSundayReset.astro', 'OctoberDailyReset.astro', 'JanuaryHabitCards.astro', 'FebruaryLaundryGuides.astro']) {
+    for (const file of ['SeptemberSundayReset.astro', 'OctoberDailyReset.astro', 'JanuaryHabitCards.astro', 'FebruaryLaundryGuides.astro', 'MarchChoreCharts.astro']) {
       const src = readFileSync(new URL(`../src/components/club/${file}`, import.meta.url), 'utf8');
       expect(src.match(/data-plan-sheet-end/g)?.length, file).toBe(1);
     }
