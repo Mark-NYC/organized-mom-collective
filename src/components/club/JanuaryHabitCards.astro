@@ -52,7 +52,7 @@ const defaults = [
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page data-plan-sheet="sheet" data-plan-sheet-end>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>ONE SMALL STEP AT A TIME</span></div>
-      <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Cut out each reminder. Place it where the habit happens.</p></header>
+      <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Two quarter-sheet reminders. Cut along the dotted lines and place each one where its habit happens.</p></header>
       <div class="jhc-card-grid" data-jhc-card-grid>
         {defaults.slice(0,2).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
@@ -314,40 +314,40 @@ const defaults = [
 </style>
 <style is:global>
 /* January output: fixed Letter canvas, two compact cue cards and a shared launch guide. */
-.jhc .jhc-page{padding:36px 44px 30px;background:#fff;gap:0}
-.jhc .jhc-sheet-label{height:30px;border-top:5px solid var(--jhc-month);padding-top:10px;font-size:8px;letter-spacing:.12em}
-.jhc-sheet-heading{padding:22px 0 24px;display:flex;align-items:end;gap:30px}
+.jhc .jhc-page{padding:36px 0 30px;background:#fff;gap:0}
+.jhc .jhc-sheet-label{margin:0 44px;height:30px;border-top:5px solid var(--jhc-month);padding-top:10px;font-size:8px;letter-spacing:.12em}
+.jhc-sheet-heading{margin:0 44px;padding:22px 0 24px;display:flex;align-items:end;gap:30px}
 .jhc-sheet-heading h2{font:400 36px/1.06 Georgia,serif;letter-spacing:-.025em;margin:0;color:#3d3834;flex:1}
 .jhc-sheet-heading h2 em{color:#527384;font-weight:400}
 .jhc-sheet-heading>p{width:218px;margin:0 0 2px;font:12px/1.6 Montserrat,Arial,sans-serif;color:#66615b}
-.jhc .jhc-card-grid[data-jhc-card-grid]{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(2,264px)!important;gap:18px!important;flex:none!important;margin:0!important;border:0!important}
-.jhc .jhc-card-grid[data-jhc-card-grid].jhc-one-card{grid-template-rows:264px!important}
-.jhc .jhc-card-grid .jhc-card{display:grid;grid-template-columns:142px minmax(0,1fr);grid-template-rows:20px 32px 21px auto 20px 1fr 33px;column-gap:22px;width:100%;height:264px;max-height:none;padding:19px 24px!important;border:1px solid #c8dadd!important;border-radius:12px;background:#f5f9fa!important;overflow:hidden}
+.jhc .jhc-card-grid[data-jhc-card-grid]{display:grid!important;grid-template-columns:repeat(2,408px)!important;grid-template-rows:528px!important;gap:0!important;flex:none!important;margin:0!important;border:0!important}
+.jhc .jhc-card-grid[data-jhc-card-grid].jhc-one-card{grid-template-rows:528px!important}
+.jhc .jhc-card-grid .jhc-card{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:20px 130px 54px 22px auto 24px 1fr 42px;column-gap:0;width:408px;height:528px;max-height:none;padding:20px 28px!important;border:1px solid #c8dadd!important;border-radius:0;background:#f5f9fa!important;overflow:hidden}
 .jhc .jhc-card-grid .jhc-card:nth-child(2){background:#faf9f5!important;border-color:#dedbcf!important}
 .jhc .jhc-card-top{grid-column:1/-1;grid-row:1;font-size:8px}
 .jhc .jhc-brand{font-size:8px;letter-spacing:.12em}
-.jhc .jhc-card-grid .jhc-card-icon{grid-column:1;grid-row:2/7;width:132px!important;height:132px!important;align-self:center;margin:0!important;border-radius:50%;background:#e5eff2!important;transform:none}
+.jhc .jhc-card-grid .jhc-card-icon{grid-column:1;grid-row:2;justify-self:center;width:132px!important;height:132px!important;align-self:center;margin:0!important;border-radius:50%;background:#e5eff2!important;transform:none}
 .jhc .jhc-card-grid .jhc-card:nth-child(2) .jhc-card-icon{background:#eeece2!important}
 .jhc .jhc-card-grid .jhc-card-icon img{width:112px!important;height:112px!important;object-fit:contain}
 .jhc .jhc-card-owner{display:none}.jhc .jhc-card-icon:has(img[hidden]){visibility:hidden}
-.jhc .jhc-card-grid .jhc-card-name{grid-column:2;grid-row:2;text-align:left;font:400 21px/1.2 Georgia,serif!important;color:#527384;margin:0!important}
+.jhc .jhc-card-grid .jhc-card-name{grid-column:1;grid-row:3;text-align:center;font:400 21px/1.2 Georgia,serif!important;color:#527384;margin:0!important}
 .jhc .jhc-card-rule{display:none}
-.jhc .jhc-anchor-label,.jhc .jhc-action-label{grid-column:2;font-size:8px;letter-spacing:.13em;margin:4px 0 0;color:#66615b}
-.jhc .jhc-anchor-label{grid-row:3}.jhc .jhc-action-label{grid-row:5}
-.jhc .jhc-card-grid .jhc-anchor{grid-column:2;grid-row:4;font:400 18px/1.25 Georgia,serif!important;margin:0!important}
-.jhc .jhc-card-grid .jhc-action{grid-column:2;grid-row:6;font:700 26px/1.13 Georgia,serif!important;color:#343a38;margin:0!important}
-.jhc .jhc-card-grid .jhc-card-bottom{grid-column:1/-1;grid-row:7;display:flex;align-items:center;gap:12px;border-top:1px solid #d4dfe0;margin:4px 0 0!important;padding-top:8px}
+.jhc .jhc-anchor-label,.jhc .jhc-action-label{grid-column:1;text-align:center;font-size:8px;letter-spacing:.13em;margin:4px 0 0;color:#66615b}
+.jhc .jhc-anchor-label{grid-row:4}.jhc .jhc-action-label{grid-row:6}
+.jhc .jhc-card-grid .jhc-anchor{grid-column:1;grid-row:5;text-align:center;font:400 18px/1.25 Georgia,serif!important;margin:0!important}
+.jhc .jhc-card-grid .jhc-action{grid-column:1;grid-row:7;text-align:center;font:700 26px/1.13 Georgia,serif!important;color:#343a38;margin:0!important}
+.jhc .jhc-card-grid .jhc-card-bottom{grid-column:1/-1;grid-row:8;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;border-top:1px solid #d4dfe0;margin:4px 0 0!important;padding-top:8px}
 .jhc .jhc-card-grid .jhc-card.jhc-long .jhc-card-name{font-size:17px!important}.jhc .jhc-card-grid .jhc-card.jhc-long .jhc-anchor{font-size:14px!important}.jhc .jhc-card-grid .jhc-card.jhc-long .jhc-action{font-size:19px!important}
 .jhc .jhc-card-bottom span{font-size:7px;flex:none;letter-spacing:.1em}
 .jhc .jhc-card-bottom p{font:italic 12px/1.2 Georgia,serif;margin:0}
-.jhc-start{margin-top:auto;padding:23px 0 18px;border-top:2px solid #cddde1;color:#484740}
+.jhc-start{margin:24px 44px 0;padding:23px 0 18px;border-top:2px solid #cddde1;color:#484740}
 .jhc-start-label{font:700 8px Montserrat,Arial,sans-serif;letter-spacing:.14em;margin:0 0 8px;color:#527384}
 .jhc-start h3{font:400 23px/1.2 Georgia,serif;margin:0 0 16px}
 .jhc-start-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .jhc-start-steps p{font:11px/1.55 Montserrat,Arial,sans-serif;margin:0}
 .jhc-start-steps strong{display:block;font-size:10px;margin-bottom:6px;color:#527384}
 .jhc-start-note{font:italic 12px/1.5 Georgia,serif;margin:16px 0 0;color:#68635c}
-.jhc .jhc-sheet-footer{border-top:1px solid #e4e1dc;padding-top:11px;height:25px;font-size:7px;letter-spacing:.09em}
+.jhc .jhc-sheet-footer{margin:0 44px;margin-top:auto;border-top:1px solid #e4e1dc;padding-top:11px;height:25px;font-size:7px;letter-spacing:.09em}
 .jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
 @media print{body:has(.jhc):not(:has(.club-plan)) .jhc-page{position:fixed!important}.jhc .jhc-page{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
 </style>
