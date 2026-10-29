@@ -3,12 +3,11 @@ import { sampleHouseholds } from '../../../data/club/samples';
 import { weeklySchedule } from '../../../data/cleaning';
 import {
   DAILY_MAX, addDaily, applyFamily, choreFingerprint, choreView, freshState, isChoreState, planChanged, removeDaily, renameJob, restoreAll,
-  restoreKid, setDailyLevel, setPalette, setReward, setRewards, setWeekly, toggleTurn, type ChoreMember,
+  restoreKid, setPalette, setReward, setRewards, setWeekly, type ChoreMember,
 } from './march-chore-charts';
 
 const fam = (id: string) => sampleHouseholds.find((s) => s.id === id)!.household;
 const rivera = fam('rivera').members as ChoreMember[];
-const brooks = fam('brooks').members as ChoreMember[];
 const id = (n: string, m = rivera) => m.find((x) => x.firstName === n)!.id;
 const chart = (s: ReturnType<typeof freshState>, n: string, m = rivera, pets = true) => choreView(s, m, pets).charts.find((c) => c.name === n)!;
 
@@ -19,100 +18,77 @@ describe('March family chore charts', () => {
     expect(choreView(freshState(), archived, true).charts.map((c) => c.name)).toEqual(['Sofia', 'Elena']);
   });
 
-  it('daily jobs fit the age: more and harder as children grow, toys away only for younger ones', () => {
+  it('daily chores fit the age, a few more as children grow, never more than the chart’s rows', () => {
     const s = freshState();
-    expect(chart(s, 'Elena').daily.map((j) => j.title)).toEqual(['Put Toys Away', 'Make My Bed', 'Set the Table']);
-    expect(chart(s, 'Sofia').daily).toHaveLength(5);
+    expect(chart(s, 'Elena').daily.map((j) => j.title)).toEqual(['Feed the pets', 'Put Toys Away', 'Make My Bed', 'Set the Table']);
+    expect(chart(s, 'Elena', rivera, false).daily.map((j) => j.title)).not.toContain('Feed the pets');
+    expect(chart(s, 'Sofia').daily).toHaveLength(6);
     expect(chart(s, 'Sofia').daily.map((j) => j.title)).not.toContain('Put Toys Away');
-    const chen = fam('chen').members as ChoreMember[];
-    expect(chart(s, 'Grace', chen).daily.map((j) => j.title)).toContain('Kitchen cleanup after dinner');
+    for (const c of choreView(s, rivera, true).charts) expect(c.daily.length).toBeLessThanOrEqual(DAILY_MAX);
   });
 
-  it('weekly jobs follow the wall calendar’s cleaning zones, Monday first', () => {
+  it('weekly chores: one a day, Monday first, from that day’s cleaning zone on the calendar', () => {
     const v = chart(freshState(), 'Mateo');
     expect(v.weekly.map((w) => w.label)).toEqual(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
     expect(v.weekly.slice(0, 4).map((w) => w.zone)).toEqual(weeklySchedule.map((d) => d.zone));
-    expect(v.weekly.find((w) => w.label === 'Wednesday')!.job!.title).toBe('Empty the bathroom trash');
-    expect(chart(freshState(), 'Elena').weekly.find((w) => w.label === 'Wednesday')!.job!.title).toBe('Put my shoes and coat away');
+    expect(v.weekly.find((w) => w.label === 'Wednesday')!.job!.title).toBe('Empty bathroom trash');
+    expect(chart(freshState(), 'Elena').weekly.find((w) => w.label === 'Wednesday')!.job!.title).toBe('Put shoes away');
   });
 
-  it('levels: age suggests, Mom changes', () => {
+  it('library chores carry their illustration, typed ones none', () => {
     const s = freshState();
-    expect(chart(s, 'Elena').daily.map((j) => j.level)).toEqual(['owns', 'with-check', 'with-check']);
-    setDailyLevel(s, id('Elena'), 0, 'learning', rivera, true);
-    expect(chart(s, 'Elena').daily[0].level).toBe('learning');
-    expect(planChanged(s)).toBe(true);
-    restoreKid(s, id('Elena'));
-    expect(chart(s, 'Elena').daily[0].level).toBe('owns');
+    expect(chart(s, 'Elena').daily.find((j) => j.title === 'Make My Bed')!.image?.src).toBeTruthy();
+    addDaily(s, id('Elena'), 'own-x', rivera, true, 'Water the plants');
+    expect(chart(s, 'Elena').daily.at(-1)).toMatchObject({ title: 'Water the plants', image: null });
   });
 
-  it('siblings take turns week by week; each chart shows the turns it shares', () => {
+  it('add, rename and remove daily chores, up to the chart’s rows', () => {
     const s = freshState();
-    expect(chart(s, 'Sofia').turns.map((t) => [t.title, t.line])).toEqual([
-      ['Clear the Table', 'Sofia: weeks 1 & 4 · Mateo: weeks 2 & 5 · Elena: week 3'],
-      ['Take Out the Trash', 'Sofia: weeks 1, 3 & 5 · Mateo: weeks 2 & 4'],
-      ['Feed the pets', 'Sofia: weeks 1 & 4 · Mateo: weeks 2 & 5 · Elena: week 3'],
-    ]);
-    expect(chart(s, 'Elena').turns.map((t) => t.title)).toEqual(['Clear the Table', 'Feed the pets']);
-    toggleTurn(s, 'take-out-the-trash', id('Mateo'), rivera, true);
-    expect(chart(s, 'Sofia').turns.map((t) => t.title)).not.toContain('Take Out the Trash');
-    toggleTurn(s, 'take-out-the-trash', id('Elena'), rivera, true);
-    expect(s.turns['take-out-the-trash']).toEqual([id('Sofia')]);
+    renameJob(s, id('Mateo'), { daily: 0 }, '  Feed   Biscuit ', rivera, true);
+    expect(chart(s, 'Mateo').daily[0].title).toBe('Feed Biscuit');
+    removeDaily(s, id('Mateo'), 0, rivera, true);
+    expect(chart(s, 'Mateo').daily.map((j) => j.title)).not.toContain('Feed Biscuit');
+    for (let i = 0; i < 12; i++) addDaily(s, id('Mateo'), `own-${i}`, rivera, true, `Job ${i}`);
+    expect(chart(s, 'Mateo').daily).toHaveLength(DAILY_MAX);
+    expect(chart(s, 'Sofia').changed).toBe(false);
   });
 
-  it('no pets, no pet job; one child, no turns', () => {
-    expect(choreView(freshState(), brooks, false).sharedOptions.map((o) => o.id)).toEqual(['clear-the-table', 'take-out-the-trash']);
-    const okafor = fam('okafor').members as ChoreMember[];
-    expect(choreView(freshState(), okafor, false).charts[0].turns).toEqual([]);
-  });
-
-  it('add, rename, remove daily jobs; at most five', () => {
+  it('weekly choice and a day off', () => {
     const s = freshState();
-    addDaily(s, id('Elena'), 'own-1', rivera, true, '  Water the plants ');
-    expect(chart(s, 'Elena').daily.at(-1)!.title).toBe('Water the plants');
-    renameJob(s, id('Elena'), { daily: 0 }, 'Toys back in the bin', rivera, true);
-    expect(chart(s, 'Elena').daily[0]).toMatchObject({ title: 'Toys back in the bin' });
-    expect(chart(s, 'Elena').daily[0].lib).toBeUndefined();
-    addDaily(s, id('Elena'), 'tidy-my-desk', rivera, true);
-    addDaily(s, id('Elena'), 'wipe-the-counters', rivera, true);
-    expect(chart(s, 'Elena').daily).toHaveLength(DAILY_MAX);
-    removeDaily(s, id('Elena'), 0, rivera, true);
-    expect(chart(s, 'Elena').daily).toHaveLength(4);
-  });
-
-  it('weekly job choice and a day off', () => {
-    const s = freshState();
-    setWeekly(s, id('Mateo'), 3, 'sink', rivera, true);
-    setWeekly(s, id('Mateo'), 5, null, rivera, true);
-    setWeekly(s, id('Mateo'), 2, 'not-a-job', rivera, true);
-    const v = chart(s, 'Mateo');
+    setWeekly(s, id('Sofia'), 3, 'sink', rivera, true);
+    setWeekly(s, id('Sofia'), 6, null, rivera, true);
+    const v = chart(s, 'Sofia');
     expect(v.weekly.find((w) => w.day === 3)!.job!.title).toBe('Wipe the bathroom sink');
-    expect(v.weekly.find((w) => w.day === 5)!.job).toBeNull();
-    expect(v.weekly.find((w) => w.day === 2)!.job!.title).toBe('Clean My Floor');
+    expect(v.weekly.find((w) => w.day === 6)!.job).toBeNull();
+    setWeekly(s, id('Sofia'), 3, 'not-a-job', rivera, true);
+    expect(chart(s, 'Sofia').weekly.find((w) => w.day === 3)!.job!.title).toBe('Wipe the bathroom sink');
   });
 
-  it('rewards on or off, colors, fingerprint, restore', () => {
+  it('rewards, colors, fingerprint and restore', () => {
     const s = freshState();
     const before = choreFingerprint(s, rivera, true);
-    setReward(s, id('Sofia'), 0, 'Pick Friday’s movie', rivera, true);
-    expect(chart(s, 'Sofia').rewardLines[0]).toBe('Pick Friday’s movie');
+    setReward(s, id('Elena'), 2, 'Park picnic', rivera, true);
+    expect(chart(s, 'Elena').rewardLines[2]).toBe('Park picnic');
     setRewards(s, false);
     setPalette(s, 'blue-green');
-    setPalette(s, 'neon');
-    expect(s.palette).toBe('warm-neutrals');
     expect(choreFingerprint(s, rivera, true)).not.toBe(before);
+    setPalette(s, 'nope');
+    expect(s.palette).not.toBe('nope');
+    restoreKid(s, id('Elena'));
+    expect(chart(s, 'Elena').changed).toBe(false);
     restoreAll(s);
     expect(planChanged(s)).toBe(false);
+    expect(choreFingerprint(s, rivera, true)).toBe(before);
   });
 
-  it('another family keeps nothing from this one', () => {
+  it('keeps the plan to this family and checks stored state', () => {
     const s = freshState();
-    setDailyLevel(s, id('Sofia'), 0, 'learning', rivera, true);
-    toggleTurn(s, 'clear-the-table', id('Elena'), rivera, true);
-    applyFamily(s, brooks);
-    expect(s.kids).toEqual({});
-    expect(JSON.stringify(choreView(s, brooks, false))).not.toMatch(/Sofia|Mateo|Elena/);
+    setReward(s, id('Elena'), 0, 'Hi', rivera, true);
+    s.kids['someone-else'] = {};
+    applyFamily(s, rivera);
+    expect(Object.keys(s.kids)).toEqual([id('Elena')]);
     expect(isChoreState(s)).toBe(true);
-    expect(isChoreState({ palette: 'x', rewards: true, kids: { a: { daily: [{ id: 1 }] } }, turns: {} })).toBe(false);
+    expect(isChoreState({ palette: 'x', rewards: true })).toBe(false);
+    expect(isChoreState({ ...s, kids: { a: { daily: [{ title: 1 }] } } })).toBe(false);
   });
 });

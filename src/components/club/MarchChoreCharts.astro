@@ -1,10 +1,13 @@
 ---
 /**
- * March 2027 family chore charts: one portrait US Letter chart per child, in the free chore chart's style (Kalam
- * headings, tool palettes, the illustrated responsibility library), prepared from the family profile. Rules:
+ * March 2027 family chore charts: the free chore chart (/chore-chart, src/components/site/ChoreChart.astro) for each
+ * child, in its landscape layout (11 × 8.5 in: name, Weekly Chore Chart, daily chores with a box per day, one weekly
+ * chore per weekday, three reward stars), prepared from the family profile. Rules:
  * src/lib/club/engines/march-chore-charts.ts; editor: src/lib/club/march-chore-editor.ts. On the Club plan page
  * (/app/club/march) the page brings the layout, rail and mobile screen; this keeps the editor dialog and the sheets,
  * marked data-plan-sheet ("k0", "k1", …), and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md).
+ * The shared print rules print portrait pages, so each landscape chart is turned a quarter on its page: the paper
+ * comes out as the same landscape chart.
  */
 import '@fontsource/kalam/latin-700.css';
 interface Props { storageKey: string }
@@ -25,58 +28,51 @@ const { storageKey } = Astro.props;
 </div>
 
 <style is:global>
-.mcc{--mcc-ink:#4a423f;--mcc-soft:#7d726c;--mcc-rule:#e6ded6;--mcc-a:#EFEBE7;--mcc-b:#E6EEEA;--mcc-c:#F6F1E7}
+.mcc{--mcc-ink:#4d4544;--mcc-rose-deep:#96666b;--mcc-a:#EFEBE7;--mcc-b:#E6EEEA;--mcc-c:#F6F1E7}
 .mcc-sheets{display:flex;flex-direction:column;align-items:center;gap:26px}
 .mcc-stage{position:relative;margin:0 auto;flex:none}
-.mcc-sheet{position:absolute;left:0;top:0;width:816px;height:1056px;box-sizing:border-box;transform:scale(var(--mcc-scale,1));transform-origin:top left;overflow:hidden;background:#fff;box-shadow:0 10px 30px #3d38311f;padding:44px 52px 36px;display:flex;flex-direction:column;font-family:var(--font-sans,Montserrat,Arial,sans-serif);color:var(--mcc-ink)}
-.mcc-empty{max-width:520px;margin:40px auto;text-align:center;font-size:15px;line-height:1.7;color:var(--mcc-soft)}
+.mcc-sheet{position:absolute;left:0;top:0;width:1056px;height:816px;transform:scale(var(--mcc-scale,1));transform-origin:top left;overflow:hidden;background:#fff;box-shadow:0 10px 30px #3d38311f}
+.mcc-empty{max-width:520px;margin:40px auto;text-align:center;font-size:15px;line-height:1.7;color:#7d726c}
 .mcc-empty[hidden]{display:none}
 
-/* The chart: the free chore chart's look in portrait. */
-.mcc-head{text-align:center;margin-bottom:6px}
-.mcc-kicker{margin:0;font-size:9px;letter-spacing:.2em;font-weight:700;color:var(--mcc-soft)}
-.mcc-title{margin:6px 0 0;font:700 38px/1.15 Kalam,cursive;color:var(--mcc-ink)}
-.mcc-swipe{background:linear-gradient(transparent 66%,var(--mcc-a) 66%,var(--mcc-a) 94%,transparent 94%);padding:0 6px}
-.mcc-motto{margin:0;font:italic 15px Georgia,serif;color:var(--mcc-soft)}
-.mcc-section{margin-top:10px}
-.mcc-section-title{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:700 20px/1.2 Kalam,cursive;color:var(--mcc-ink)}
-.mcc-section-title small{font:600 9px var(--font-sans,Montserrat,Arial,sans-serif);letter-spacing:.14em;text-transform:uppercase;color:var(--mcc-soft)}
-.mcc-grid{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,30px);gap:5px;align-items:center}
-.mcc-days span{font-size:10px;font-weight:700;text-align:center;color:var(--mcc-soft)}
-.mcc-row{min-height:42px;padding:2px 0;border-bottom:1px solid var(--mcc-rule)}
-.mcc-job{display:flex;align-items:center;gap:10px;min-width:0}
-.mcc-icon{flex:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--mcc-b)}
-.mcc-icon img{width:34px;height:34px;object-fit:contain}
-.mcc-icon-zone img{width:26px;height:26px}
-.mcc-icon-plain::after{content:"";width:10px;height:10px;border-radius:50%;background:#fff}
-.mcc-job-text{min-width:0;display:flex;flex-direction:column;gap:2px}
-.mcc-job-text strong{font-size:13.5px;font-weight:600;line-height:1.2}
-.mcc-level{align-self:flex-start;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--mcc-c);color:var(--mcc-ink)}
-.mcc-level[data-level="owns"]{background:var(--mcc-a)}
-.mcc-level[data-level="with-check"]{background:var(--mcc-b)}
-.mcc-box{width:24px;height:24px;margin:auto;border:1.5px solid #cfc5bc;border-radius:5px}
-.mcc-week-row{display:grid;grid-template-columns:96px minmax(0,1fr) 30px;gap:10px;align-items:center;min-height:39px;padding:1px 0;border-bottom:1px solid var(--mcc-rule)}
-.mcc-weekday{display:flex;flex-direction:column}
-.mcc-weekday strong{font:700 15px/1.05 Kalam,cursive}
-.mcc-weekday span{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mcc-soft)}
-.mcc-none{font-size:12px;color:var(--mcc-soft);font-style:italic}
-.mcc-turns{display:grid;gap:4px}
-.mcc-turn{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;padding:2px 0;border-bottom:1px solid var(--mcc-rule)}
-.mcc-turn strong{font-size:13px}
-.mcc-turn p{margin:1px 0 0;font-size:11px;color:var(--mcc-soft)}
-.mcc-rewards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mcc-reward{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 8px;border-radius:12px;background:var(--mcc-c);text-align:center}
-.mcc-reward span{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mcc-soft)}
-.mcc-reward strong{font-size:12.5px;font-weight:600}
-.mcc-foot{margin-top:auto;padding-top:10px;display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--mcc-rule);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mcc-soft)}
-.mcc-sheet[data-crowded]{padding-top:34px;padding-bottom:28px}
-.mcc-sheet[data-crowded] .mcc-row{min-height:37px}
-.mcc-sheet[data-crowded] .mcc-week-row{min-height:35px}
-.mcc-sheet[data-crowded] .mcc-turn{padding:1px 0}
-.mcc-sheet[data-crowded] .mcc-icon{width:31px;height:31px}
-.mcc-sheet[data-crowded] .mcc-icon img{width:28px;height:28px}
-.mcc-sheet[data-crowded] .mcc-icon-zone img{width:22px;height:22px}
-.mcc-sheet[data-crowded] .mcc-section{margin-top:7px}
+/* The chart: the free chore chart's sheet (ChoreChart.astro), as printed text instead of fields. */
+.mcc-paper{position:absolute;left:0;top:0;width:1056px;height:816px;box-sizing:border-box;display:flex;flex-direction:column;padding:30px 34px;font-family:var(--font-serif);color:var(--mcc-ink)}
+.mcc-paper *{box-sizing:border-box}
+.mcc-head{text-align:center;padding-bottom:12px;margin-bottom:18px}
+.mcc-for{min-height:34px;font:700 26px/1.3 Kalam,var(--font-serif);letter-spacing:.04em}
+.mcc-title{font:700 28px/1.1 var(--font-sans);letter-spacing:.13em;text-transform:uppercase}
+.mcc-motto{margin:7px 0 0;font-size:17px;font-style:italic;color:var(--mcc-rose-deep)}
+.mcc-main{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start}
+.mcc-daily,.mcc-weekly{min-width:0;padding:14px 12px 10px;border:2px solid var(--mcc-a);border-radius:14px}
+.mcc-weekly{border-color:var(--mcc-b)}
+.mcc-section-title{margin-bottom:10px;font:700 32px/1.2 Kalam,var(--font-serif);letter-spacing:.06em;text-align:center}
+.mcc-grid{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,32px);gap:4px;align-items:center;margin-bottom:4px}
+.mcc-day{padding:4px 0;border-radius:8px;background:var(--mcc-c);font:700 11px var(--font-sans);text-align:center}
+.mcc-chore{position:relative;display:flex;align-items:center;min-width:0;height:44px;padding:0 10px;border-radius:999px;background:linear-gradient(transparent 22%,var(--mcc-hl) 22%,var(--mcc-hl) 86%,transparent 86%);font:400 13px var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcc-chore:has(.mcc-icon){padding-left:40px}
+.mcc-chore:empty{background:none;border-bottom:1px solid #e7ddd4;border-radius:0;height:32px;margin-top:12px}
+.mcc-row:nth-child(3n+1) .mcc-chore,.mcc-week-row:nth-child(3n+1) .mcc-chore{--mcc-hl:var(--mcc-b)}
+.mcc-row:nth-child(3n+2) .mcc-chore,.mcc-week-row:nth-child(3n+2) .mcc-chore{--mcc-hl:var(--mcc-c)}
+.mcc-row:nth-child(3n) .mcc-chore,.mcc-week-row:nth-child(3n) .mcc-chore{--mcc-hl:var(--mcc-a)}
+.mcc-icon{position:absolute;top:50%;left:4px;width:30px;height:30px;padding:2px;border-radius:50%;transform:translateY(-50%)}
+.mcc-box{height:32px;border:1.5px solid #b6aaa4;border-radius:6px;background:#fff}
+.mcc-week-row{display:grid;grid-template-columns:80px minmax(0,1fr) 32px;gap:6px;align-items:center;margin-bottom:4px}
+.mcc-weekday{display:flex;align-items:center;justify-content:center;height:44px;font:700 17px Kalam,var(--font-serif)}
+.mcc-dayoff{color:#9a8f8a;font-style:italic}
+.mcc-rewards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:auto;padding-top:20px}
+.mcc-reward{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:2px solid var(--mcc-a);border-radius:14px}
+.mcc-reward:nth-child(2){border-color:var(--mcc-b)}
+.mcc-reward:nth-child(3){border-color:var(--mcc-c)}
+.mcc-star{width:30px;height:30px;fill:var(--mcc-a);stroke:var(--mcc-ink);stroke-width:1.5;stroke-linejoin:round}
+.mcc-reward:nth-child(2) .mcc-star{fill:var(--mcc-b)}
+.mcc-reward:nth-child(3) .mcc-star{fill:var(--mcc-c)}
+.mcc-threshold{font:700 20px Kalam,var(--font-serif);letter-spacing:.02em}
+.mcc-reward-text{min-height:20px;font:400 13px var(--font-sans);text-align:center}
+@media print{
+  .mcc-dialog,.mcc-empty{display:none!important}
+  /* A landscape chart on the shared portrait page: turned a quarter, it fills the sheet. */
+  .club-plan[data-plan-state="ready"] .mcc-paper{transform:translateX(8.5in) rotate(90deg)!important;transform-origin:top left!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 
 /* The editor dialog (desktop) and edit sheets (phones) share these. */
 .mcc-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow-y:auto;padding:24px 26px;background:var(--color-ivory,#fffdfa);border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:3px;box-shadow:0 20px 65px #0003;color:var(--color-warm-ink,#4d4544);z-index:100}
@@ -96,8 +92,8 @@ const { storageKey } = Astro.props;
 .mcc-ed-label{margin:6px 0 0;font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
 .mcc-ed-list{display:grid;border-top:1px solid var(--color-warm-rule,#e7ddd4)}
 .mcc-ed-job{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
-.mcc-ed-job-head{display:flex;gap:8px;align-items:center}
-.mcc-ed-job-head input{flex:1;min-width:0}
+.mcc-ed-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.mcc-ed-row input{flex:1;min-width:0}
 .mcc-ed input[type="text"]{min-height:44px;padding:10px 12px;border:1px solid #d7d3cc;border-radius:3px;background:#fff;font:400 1rem var(--font-sans);color:var(--color-warm-ink,#4d4544);width:100%;box-sizing:border-box}
 .mcc-ed-remove{flex:none;min-height:44px;padding:0 6px;border:0;background:none;color:var(--color-warm-soft,#6e6461);font-size:.85rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
 .mcc-ed-day{margin:0;font-size:.85rem;color:var(--color-warm-soft,#6e6461)}
@@ -110,12 +106,11 @@ const { storageKey } = Astro.props;
 .mcc-ed-field{display:grid;gap:4px}
 .mcc-ed-field span{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
 .mcc-dialog :focus-visible,.cp-sheet .mcc-ed :focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
-@media print{.mcc-dialog,.mcc-empty{display:none!important}}
 </style>
 
 <script>
 import {
-  applyFamily, choreFingerprint, choreView, freshState, isChoreState, LEVEL_TEXT,
+  applyFamily, choreFingerprint, choreView, freshState, isChoreState, DAILY_MAX, REWARD_STEPS,
   type ChartView, type ChoreMember, type ChorePlan, type ChoreState,
 } from '../../lib/club/engines/march-chore-charts';
 import { familyEditor, kidEditor } from '../../lib/club/march-chore-editor';
@@ -128,50 +123,59 @@ type Detail = { household: { id: string; members?: ChoreMember[]; preferences?: 
 const root = document.querySelector<HTMLElement & { clubPlan?: ChorePlan }>('[data-mcc]');
 if (root) {
   const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
-  const key = root.dataset.mccKey ?? 'omc:club:march-chore-charts:v1';
+  const key = root.dataset.mccKey ?? 'omc:club:march-chore-charts:v2';
   let current = '', members: ChoreMember[] = [], pets = false, state: ChoreState = freshState(), persist = true, locked = false;
   const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
 
   const fit = () => root.querySelectorAll<HTMLElement>('.mcc-stage').forEach((stage) => {
-    const scale = Math.min(1, Math.max(180, (q('[data-mcc-pages]').clientWidth || 816) - 4) / 816);
-    stage.style.width = `${816 * scale}px`;
-    stage.style.height = `${1056 * scale}px`;
+    const scale = Math.min(1, Math.max(240, (q('[data-mcc-pages]').clientWidth || 1056) - 4) / 1056);
+    stage.style.width = `${1056 * scale}px`;
+    stage.style.height = `${816 * scale}px`;
     stage.querySelector<HTMLElement>('.mcc-sheet')?.style.setProperty('--mcc-scale', String(scale));
   });
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(q('[data-mcc-pages]'));
   window.addEventListener('resize', fit);
 
-  // Library jobs show their illustration on its category color; other jobs the calendar's zone icon.
-  const icon = (image: { src: string | null; color: string; zone: boolean } | null) => {
-    if (!image?.src) return el('span', { class: 'mcc-icon mcc-icon-plain', 'aria-hidden': 'true' });
-    const wrap = el('span', { class: image.zone ? 'mcc-icon mcc-icon-zone' : 'mcc-icon' }, el('img', { src: image.src, alt: '', width: 34, height: 34 }));
-    if (image.color) wrap.style.background = image.color;
-    return wrap;
+  const chore = (j: { title: string; image: { src: string | null; color: string } | null } | null) => {
+    const cell = el('span', { class: 'mcc-chore' });
+    if (!j) return cell;
+    if (j.image?.src) {
+      const img = el('img', { class: 'mcc-icon', src: j.image.src, alt: '', width: 30, height: 30 });
+      img.style.background = `color-mix(in srgb, ${j.image.color} 60%, #fff)`;
+      cell.append(img);
+    }
+    cell.append(j.title);
+    return cell;
   };
-  const level = (l: keyof typeof LEVEL_TEXT) => { const tag = el('span', { class: 'mcc-level' }, LEVEL_TEXT[l]); tag.dataset.level = l; return tag; };
+  const star = () => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'mcc-star'); svg.setAttribute('viewBox', '0 0 40 40'); svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'm20 4 4.5 10.5L36 16l-8.5 8 2 12L20 30l-10 6 2-12-8-8 11.5-1.5Z');
+    svg.append(path);
+    return svg;
+  };
   const sheet = (c: ChartView, i: number, last: boolean, rewards: boolean) => {
-    const paper = el('article', { class: 'mcc-sheet' });
-    paper.dataset.planSheet = `k${i}`;
-    if (last) paper.setAttribute('data-plan-sheet-end', '');
-    paper.setAttribute('aria-label', `${c.name}’s chore chart`);
-    const title = el('h2', { class: 'mcc-title' }, el('span', { class: 'mcc-swipe' }, `${c.name}’s`), ' Chore Chart');
-    paper.append(el('header', { class: 'mcc-head' }, el('p', { class: 'mcc-kicker' }, 'ORGANIZED FAMILY CLUB · MARCH 2027'), title, el('p', { class: 'mcc-motto' }, 'My jobs, start to finish.')));
-    const days = el('div', { class: 'mcc-grid mcc-days', 'aria-hidden': 'true' }, el('span'), ...['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => el('span', {}, d)));
-    paper.append(el('section', { class: 'mcc-section' }, el('h3', { class: 'mcc-section-title' }, 'Every day', el('small', {}, 'Check each one when it’s done')), days,
-      ...c.daily.map((j) => el('div', { class: 'mcc-grid mcc-row' }, el('div', { class: 'mcc-job' }, icon(j.image), el('div', { class: 'mcc-job-text' }, el('strong', {}, j.title), level(j.level))), ...Array.from({ length: 7 }, () => el('span', { class: 'mcc-box' }))))));
-    paper.append(el('section', { class: 'mcc-section' }, el('h3', { class: 'mcc-section-title' }, 'One job a day', el('small', {}, 'With our wall calendar’s cleaning zones')),
-      ...c.weekly.map((w) => el('div', { class: 'mcc-week-row' }, el('div', { class: 'mcc-weekday' }, el('strong', {}, w.label), el('span', {}, w.zone)),
-        w.job ? el('div', { class: 'mcc-job' }, icon(w.job.image), el('div', { class: 'mcc-job-text' }, el('strong', {}, w.job.title), level(w.job.level))) : el('span', { class: 'mcc-none' }, 'A day off'),
-        w.job ? el('span', { class: 'mcc-box' }) : el('span')))));
-    if (c.turns.length) paper.append(el('section', { class: 'mcc-section' }, el('h3', { class: 'mcc-section-title' }, 'We take turns', el('small', {}, 'Weeks of the month')),
-      el('div', { class: 'mcc-turns' }, ...c.turns.map((t) => el('div', { class: 'mcc-turn' }, icon(t.image), el('div', {}, el('strong', {}, t.title), el('p', {}, t.line)))))));
-    if (rewards) paper.append(el('section', { class: 'mcc-section' }, el('h3', { class: 'mcc-section-title' }, 'When I do my part'),
-      el('div', { class: 'mcc-rewards' }, ...c.rewardLines.map((r, n) => el('div', { class: 'mcc-reward' }, el('span', {}, ['Half the week', 'Most of the week', 'The whole week'][n]), el('strong', {}, r || '—'))))));
-    paper.append(el('footer', { class: 'mcc-foot' }, el('span', {}, 'Learning it → With a check → I own it'), el('span', {}, 'Organized Family Club')));
-    // A full chart (five daily jobs, shared jobs and rewards) tightens so it stays on its page.
-    if (c.daily.length + c.turns.length + (rewards ? 2 : 0) >= 9) paper.setAttribute('data-crowded', '');
-    const stage = el('div', { class: 'mcc-stage' }, paper);
-    return stage;
+    const page = el('article', { class: 'mcc-sheet' });
+    page.dataset.planSheet = `k${i}`;
+    page.dataset.planWidth = '1056';
+    if (last) page.setAttribute('data-plan-sheet-end', '');
+    page.setAttribute('aria-label', `${c.name}’s chore chart`);
+    const rows = Array.from({ length: DAILY_MAX }, (_, n) => c.daily[n] ?? null);
+    const paper = el('div', { class: 'mcc-paper' },
+      el('div', { class: 'mcc-head' }, el('div', { class: 'mcc-for' }, `${c.name}’s`), el('div', { class: 'mcc-title' }, 'Weekly Chore Chart'), el('p', { class: 'mcc-motto' }, 'My jobs, start to finish.')),
+      el('div', { class: 'mcc-main' },
+        el('section', { class: 'mcc-daily' }, el('div', { class: 'mcc-section-title' }, 'Daily chores'),
+          el('div', { class: 'mcc-grid', 'aria-hidden': 'true' }, el('span'), ...['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => el('span', { class: 'mcc-day' }, d))),
+          ...rows.map((j) => el('div', { class: 'mcc-grid mcc-row' }, chore(j), ...Array.from({ length: 7 }, () => el('span', { class: 'mcc-box' }))))),
+        el('section', { class: 'mcc-weekly' }, el('div', { class: 'mcc-section-title' }, 'Weekly chores'),
+          ...c.weekly.map((w) => el('div', { class: 'mcc-week-row' }, el('span', { class: 'mcc-weekday' }, w.label),
+            w.job ? chore(w.job) : el('span', { class: 'mcc-chore mcc-dayoff' }, 'Day off'),
+            w.job ? el('span', { class: 'mcc-box' }) : el('span'))))));
+    if (rewards) paper.append(el('div', { class: 'mcc-rewards' }, ...c.rewardLines.map((r, n) =>
+      el('div', { class: 'mcc-reward' }, star(), el('span', { class: 'mcc-threshold' }, `Complete ${REWARD_STEPS[n]}`), el('span', { class: 'mcc-reward-text' }, r)))));
+    page.append(paper);
+    return el('div', { class: 'mcc-stage' }, page);
   };
   const draw = () => {
     const v = choreView(state, members, pets);
