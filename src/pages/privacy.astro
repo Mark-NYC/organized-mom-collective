@@ -1,0 +1,99 @@
+---
+/**
+ * /privacy — Privacy Policy. From docs/operations/PRIVACY_POLICY_DRAFT.md (owner-reviewed text goes there first),
+ * with the Organized Family Club's section on family and children's information. Every statement describes what
+ * the code does: change this page when the code changes. Required before customer accounts or the Club open
+ * (supabase/ACCOUNTS.md, docs/club/MEMBERSHIP.md). Not legal advice; the owner has it reviewed before it ships.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { SUPPORT_EMAIL } from '../data/support';
+import { routes } from '../routes';
+
+const UPDATED = '2026-10-29';
+const updated = new Date(`${UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const h2 = 'serif-title mt-12 text-[1.5rem] sm:text-[1.75rem]';
+const h3 = 'mt-8 text-[1.1rem] font-semibold text-warm-ink';
+const p = 'mt-3 text-[1rem] leading-relaxed text-warm-ink';
+const a = 'underline decoration-warm-rule decoration-1 underline-offset-4 hover:decoration-warm-ink';
+const list = 'mt-3 list-disc space-y-2 pl-6 text-[1rem] leading-relaxed text-warm-ink';
+const sections = [
+  { id: 'collect', label: 'What we collect' },
+  { id: 'club', label: 'Organized Family Club and your children' },
+  { id: 'use', label: 'How we use it' },
+  { id: 'share', label: 'Who we share it with' },
+  { id: 'children', label: 'Children' },
+  { id: 'delete', label: 'Keeping and deleting your data' },
+  { id: 'rights', label: 'Your rights' },
+  { id: 'contact', label: 'Contact' },
+];
+---
+
+<PublicLayout
+  title="Privacy Policy"
+  description="What Organized Mom Collective collects, why, who we share it with, how we handle family and children's information in the Organized Family Club, and your choices."
+  width="full"
+>
+  <section aria-labelledby="privacy-h" class="public-panel public-intro">
+    <div class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+      <p class="label text-warm-soft">Policies</p>
+      <h1 id="privacy-h" class="serif-hero mt-3">Privacy Policy</h1>
+      <p class="lede mt-5 text-warm-ink">Organized Mom Collective makes a printed family wall calendar, free tools for families and the Organized Family Club. This policy explains what we collect, why, and your choices.</p>
+      <p class="mt-6 text-[0.9rem] text-warm-soft">Last updated <time datetime={UPDATED}>{updated}</time>.</p>
+    </div>
+  </section>
+
+  <article class="mx-auto max-w-3xl px-5 pt-10 pb-16 sm:px-8 sm:pb-24">
+    <nav aria-labelledby="toc-h" class="border-y border-warm-rule py-5">
+      <h2 id="toc-h" class="label text-warm-soft">On this page</h2>
+      <ul class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+        {sections.map((s) => <li><a href={`#${s.id}`} class={`${a} text-[0.98rem] text-warm-ink`}>{s.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <h2 id="collect" class={h2}>What we collect</h2>
+    <ul class={list}>
+      <li><strong>When you buy from our website:</strong> your name, email, shipping address and phone (for physical orders), and what you bought. Payments are handled by Stripe; we never see or store your card number.</li>
+      <li><strong>When you create an account:</strong> your email address. We email you a one-time code to sign in; there’s no password.</li>
+      <li><strong>What you save to your account:</strong> the things you make with our free tools and articles, such as chore charts, weekly plans, routine charts and lists. These can include whatever you type, including your children’s first names and their chores. We store them only so you can open them on your other devices.</li>
+      <li><strong>When you download a free printable</strong> and we ask for your email: your email and which tool you used.</li>
+      <li><strong>If you contact support:</strong> your message and the details you include.</li>
+      <li><strong>Usage data:</strong> pages visited and buttons used, through Google Analytics. We don’t send what you type into tools to analytics, and the Organized Family Club’s member pages don’t use analytics at all.</li>
+    </ul>
+    <p class={p}>Without an account, what you make with our tools stays in your own browser and never reaches us.</p>
+
+    <h2 id="club" class={h2}>Organized Family Club and your children</h2>
+    <p class={p}>The Organized Family Club prepares a printed family plan each month with your family’s names on it. To do that, you, the parent, tell us about your family. Children don’t have accounts and never sign in, and we don’t collect anything from them directly.</p>
+    <h3 class={h3}>What we keep about your family</h3>
+    <ul class={list}>
+      <li><strong>Each family member:</strong> a first name or nickname, whether they’re an adult or a child, and their role (parent, partner, grandparent, caregiver or child).</li>
+      <li><strong>For children only:</strong> birth year and month, never the day, so the plans fit their age.</li>
+      <li><strong>Optional household details you choose to add:</strong> a family name for your printables (such as “The Rivera Family”), your preferred colors, the day your week starts, whether to include faith-based content, whether you have pets, your school type, your usual dinner time and the topics you’d like help with.</li>
+      <li><strong>What you make:</strong> your Family Vision print (the family name and the word you choose) and the changes you make to each month’s plan.</li>
+      <li><strong>Your mailing address,</strong> collected at checkout and editable in your account, so we can mail your printed plans.</li>
+      <li><strong>Your membership:</strong> its status, renewal and payment dates and which months you’ve received. Stripe handles payment; we never see or store your card number.</li>
+    </ul>
+    <p class={p}>We don’t collect last names for children, photos, schools, gender or full birth dates.</p>
+    <h3 class={h3}>Who sees it</h3>
+    <p class={p}>Only you, through your own account. Our team can’t browse your family’s names. To print and mail your plan, the owner opens one household’s printable at a time, and each time it’s opened is recorded. The printed plan and your mailing address go to the printing and mailing service we use for that month’s mailing, only to print and deliver it.</p>
+    <h3 class={h3}>Your choices</h3>
+    <p class={p}>You can view and change your family’s details any time, and remove a family member. To delete everything about your family, cancel your membership from your account, then delete your account (or email us and we’ll do it). Your household, family members, saved plans and address are deleted with your account. We keep payment and membership records as required for tax and accounting, without your family’s details.</p>
+
+    <h2 id="use" class={h2}>How we use it</h2>
+    <p class={p}>To fulfil orders and your membership and send the emails that go with them; to sign you in and keep your saved things in sync; to prepare and mail your family’s printed plans; to answer support requests; to improve the site. <strong>Marketing emails only if you opt in</strong>, separately from signing in or joining, and you can unsubscribe anytime from any email or your account page.</p>
+
+    <h2 id="share" class={h2}>Who we share it with</h2>
+    <p class={p}>Only the services that run the site and deliver what you order: Supabase (database and sign-in), Stripe (payments), Resend (email), Cloudflare (hosting), Google Analytics (usage on our public pages), shipping carriers for physical orders, and the printing and mailing service for Organized Family Club mailings. We don’t sell your information.</p>
+
+    <h2 id="children" class={h2}>Children</h2>
+    <p class={p}>Our site and the Organized Family Club are for parents. We don’t knowingly collect information from children. Children’s first names, ages and chores that a parent enters are stored only for that parent’s account, are used only to prepare that family’s plans, and can be changed or deleted by the parent at any time.</p>
+
+    <h2 id="delete" class={h2}>Keeping and deleting your data</h2>
+    <p class={p}>You can delete your account anytime at <a href={routes.account} class={a}>your account page</a>: your saved things and sign-in are removed and marketing emails stop. If you have an active Organized Family Club membership, cancel it first so you aren’t charged again. We keep order and payment records as required for tax and accounting. To ask for a copy or deletion of anything else, email <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a>.</p>
+
+    <h2 id="rights" class={h2}>Your rights</h2>
+    <p class={p}>Depending on where you live (for example California or the EU/UK), you may have rights to access, correct, delete or port your data, and to opt out of marketing. Email us and we’ll respond within 30 days.</p>
+
+    <h2 id="contact" class={h2}>Contact</h2>
+    <p class={p}><a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a></p>
+  </article>
+</PublicLayout>

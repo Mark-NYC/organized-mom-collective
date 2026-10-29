@@ -23,6 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.companion },
     { path: routes.support },
     { path: routes.returns },
+    { path: routes.privacy },
     { path: routes.planner },
     { path: routes.pantry },
     { path: routes.tryCalendar },

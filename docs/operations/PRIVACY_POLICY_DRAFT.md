@@ -1,6 +1,6 @@
 # Privacy policy: draft for owner review
 
-**Status: draft, 2026-10-21. Not legal advice and not published.** Have it reviewed (an attorney or a reputable policy generator checked against these facts), then publish it at `/privacy` before switching on customer accounts (`supabase/ACCOUNTS.md`). Every statement below describes what the code does today; change the policy if the code changes.
+**Status (2026-10-29): prepared as the `/privacy` page (`src/pages/privacy.astro`), with the Organized Family Club's family and children's information section and Cloudflare as the host; it publishes when that change is merged. Not legal advice: have it reviewed before merging.** The text below is the original 2026-10-21 draft; the page is the current wording. Have it reviewed (an attorney or a reputable policy generator checked against these facts), then publish it at `/privacy` before switching on customer accounts (`supabase/ACCOUNTS.md`). Every statement below describes what the code does today; change the policy if the code changes.
 
 ---
 
