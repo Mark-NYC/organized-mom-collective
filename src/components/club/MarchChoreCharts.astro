@@ -1,13 +1,17 @@
 ---
 /**
- * March 2027 family chore charts: the free chore chart (/chore-chart, src/components/site/ChoreChart.astro) for each
- * child, in its landscape layout (11 × 8.5 in: name, Weekly Chore Chart, daily chores with a box per day, one weekly
- * chore per weekday, three reward stars), prepared from the family profile. Rules:
- * src/lib/club/engines/march-chore-charts.ts; editor: src/lib/club/march-chore-editor.ts. On the Club plan page
- * (/app/club/march) the page brings the layout, rail and mobile screen; this keeps the editor dialog and the sheets,
- * marked data-plan-sheet ("k0", "k1", …), and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md).
- * The shared print rules print portrait pages, so each landscape chart is turned a quarter on its page: the paper
- * comes out as the same landscape chart.
+ * March 2027 family chore charts: one landscape chart per child (11 × 8.5 in), prepared from the family profile:
+ * the child's name, Weekly Chore Chart, "My jobs, start to finish.", their daily chores with a box per day (only the
+ * chores they have, no blank rows), one weekly job per weekday with one box (or a day off), and one ownership line.
+ * No rewards. Rules: src/lib/club/engines/march-chore-charts.ts; editor: src/lib/club/march-chore-editor.ts; icons:
+ * src/data/club/march-chore-icons.ts. On the Club plan page (/app/club/march) the page brings the layout, rail and
+ * mobile screen; this keeps the editor dialog and the sheets, marked data-plan-sheet ("k0", "k1", …), and publishes
+ * the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md).
+ *
+ * Printing: the shared rules (ClubPrintStyles.astro) print portrait Letter pages for every month. Where the browser
+ * has named pages (`page`: Chrome, Edge, Firefox) the charts print on their own landscape Letter pages instead,
+ * upright in a saved PDF; the script adds that @page. Elsewhere (Safari) each chart is turned a quarter on the shared
+ * portrait page, so the paper still comes out landscape.
  */
 import '@fontsource/kalam/latin-700.css';
 interface Props { storageKey: string }
@@ -28,50 +32,80 @@ const { storageKey } = Astro.props;
 </div>
 
 <style is:global>
-.mcc{--mcc-ink:#4d4544;--mcc-rose-deep:#96666b;--mcc-a:#EFEBE7;--mcc-b:#E6EEEA;--mcc-c:#F6F1E7}
+.mcc{--mcc-ink:#4d4544;--mcc-soft:#7d726c;--mcc-rose-deep:#96666b;--mcc-rule:#b6aaa4;--mcc-a:#EFEBE7;--mcc-b:#E6EEEA;--mcc-c:#F6F1E7}
 .mcc-sheets{display:flex;flex-direction:column;align-items:center;gap:26px}
 .mcc-stage{position:relative;margin:0 auto;flex:none}
 .mcc-sheet{position:absolute;left:0;top:0;width:1056px;height:816px;transform:scale(var(--mcc-scale,1));transform-origin:top left;overflow:hidden;background:#fff;box-shadow:0 10px 30px #3d38311f}
 .mcc-empty{max-width:520px;margin:40px auto;text-align:center;font-size:15px;line-height:1.7;color:#7d726c}
 .mcc-empty[hidden]{display:none}
 
-/* The chart: the free chore chart's sheet (ChoreChart.astro), as printed text instead of fields. */
-.mcc-paper{position:absolute;left:0;top:0;width:1056px;height:816px;box-sizing:border-box;display:flex;flex-direction:column;padding:30px 34px;font-family:var(--font-serif);color:var(--mcc-ink)}
+/* The chart (1056 × 816 px = 11 × 8.5 in). Daily sizes come from the number of daily chores (--mcc-row, --mcc-row-max,
+   --mcc-box, --mcc-icon, --mcc-text, set by the script): a short list gets larger rows, boxes, pictures and words,
+   rows grow only to their maximum, and the rows sit together in the middle of the card. */
+.mcc-paper{position:absolute;left:0;top:0;width:1056px;height:816px;box-sizing:border-box;display:flex;flex-direction:column;padding:34px 36px 24px;font-family:var(--font-sans);color:var(--mcc-ink)}
 .mcc-paper *{box-sizing:border-box}
-.mcc-head{text-align:center;padding-bottom:12px;margin-bottom:18px}
-.mcc-for{min-height:34px;font:700 26px/1.3 Kalam,var(--font-serif);letter-spacing:.04em}
-.mcc-title{font:700 28px/1.1 var(--font-sans);letter-spacing:.13em;text-transform:uppercase}
-.mcc-motto{margin:7px 0 0;font-size:17px;font-style:italic;color:var(--mcc-rose-deep)}
-.mcc-main{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start}
-.mcc-daily,.mcc-weekly{min-width:0;padding:14px 12px 10px;border:2px solid var(--mcc-a);border-radius:14px}
+.mcc-head{flex:none;margin-bottom:16px;text-align:center}
+.mcc-for{font:700 30px/1.15 Kalam,var(--font-serif);letter-spacing:.03em}
+.mcc-title{margin-top:2px;font:700 24px/1.15 var(--font-sans);letter-spacing:.14em;text-transform:uppercase}
+.mcc-motto{margin:6px 0 0;font:italic 400 17px/1.3 var(--font-serif);color:var(--mcc-rose-deep)}
+.mcc-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:20px}
+.mcc-main.mcc-solo{grid-template-columns:minmax(0,420px);justify-content:center}
+.mcc-daily,.mcc-weekly{display:flex;flex-direction:column;min-width:0;min-height:0;padding:12px 18px 16px;border:2px solid var(--mcc-a);border-radius:16px}
 .mcc-weekly{border-color:var(--mcc-b)}
-.mcc-section-title{margin-bottom:10px;font:700 32px/1.2 Kalam,var(--font-serif);letter-spacing:.06em;text-align:center}
-.mcc-grid{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,32px);gap:4px;align-items:center;margin-bottom:4px}
-.mcc-day{padding:4px 0;border-radius:8px;background:var(--mcc-c);font:700 11px var(--font-sans);text-align:center}
-.mcc-chore{position:relative;display:flex;align-items:center;min-width:0;height:44px;padding:0 10px;border-radius:999px;background:linear-gradient(transparent 22%,var(--mcc-hl) 22%,var(--mcc-hl) 86%,transparent 86%);font:400 13px var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mcc-chore:has(.mcc-icon){padding-left:40px}
-.mcc-chore:empty{background:none;border-bottom:1px solid #e7ddd4;border-radius:0;height:32px;margin-top:12px}
-.mcc-row:nth-child(3n+1) .mcc-chore,.mcc-week-row:nth-child(3n+1) .mcc-chore{--mcc-hl:var(--mcc-b)}
-.mcc-row:nth-child(3n+2) .mcc-chore,.mcc-week-row:nth-child(3n+2) .mcc-chore{--mcc-hl:var(--mcc-c)}
-.mcc-row:nth-child(3n) .mcc-chore,.mcc-week-row:nth-child(3n) .mcc-chore{--mcc-hl:var(--mcc-a)}
-.mcc-icon{position:absolute;top:50%;left:4px;width:30px;height:30px;padding:2px;border-radius:50%;transform:translateY(-50%)}
-.mcc-box{height:32px;border:1.5px solid #b6aaa4;border-radius:6px;background:#fff}
-.mcc-week-row{display:grid;grid-template-columns:80px minmax(0,1fr) 32px;gap:6px;align-items:center;margin-bottom:4px}
-.mcc-weekday{display:flex;align-items:center;justify-content:center;height:44px;font:700 17px Kalam,var(--font-serif)}
-.mcc-dayoff{color:#9a8f8a;font-style:italic}
-.mcc-rewards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:auto;padding-top:20px}
-.mcc-reward{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:2px solid var(--mcc-a);border-radius:14px}
-.mcc-reward:nth-child(2){border-color:var(--mcc-b)}
-.mcc-reward:nth-child(3){border-color:var(--mcc-c)}
-.mcc-star{width:30px;height:30px;fill:var(--mcc-a);stroke:var(--mcc-ink);stroke-width:1.5;stroke-linejoin:round}
-.mcc-reward:nth-child(2) .mcc-star{fill:var(--mcc-b)}
-.mcc-reward:nth-child(3) .mcc-star{fill:var(--mcc-c)}
-.mcc-threshold{font:700 20px Kalam,var(--font-serif);letter-spacing:.02em}
-.mcc-reward-text{min-height:20px;font:400 13px var(--font-sans);text-align:center}
+.mcc-section-title{flex:none;margin-bottom:8px;font:700 28px/1.2 Kalam,var(--font-serif);letter-spacing:.04em;text-align:center}
+.mcc-table{flex:1;min-height:0;display:grid;row-gap:6px;align-content:center}
+.mcc-daily .mcc-table{grid-template-rows:auto;grid-auto-rows:minmax(var(--mcc-row),var(--mcc-row-max))}
+.mcc-weekly .mcc-table{grid-auto-rows:minmax(56px,70px)}
+.mcc-days,.mcc-row{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,var(--mcc-box));column-gap:6px;align-items:center}
+.mcc-days{margin-bottom:2px}
+.mcc-day{padding:5px 0;border-radius:7px;background:var(--mcc-c);font:700 12px/1 var(--font-sans);letter-spacing:.04em;text-align:center}
+.mcc-chore{display:flex;align-items:center;gap:10px;min-width:0;height:100%;padding:4px 14px 4px 8px;border-radius:12px;background:var(--mcc-hl);font:500 var(--mcc-text)/1.2 var(--font-sans)}
+.mcc-chore:not(:has(.mcc-slot)){padding-left:16px}
+.mcc-chore.mcc-long{font-size:calc(var(--mcc-text) - 2px)}
+.mcc-chore-text{min-width:0;overflow-wrap:break-word}
+.mcc-row:nth-child(3n+2) .mcc-chore,.mcc-week-row:nth-child(3n+1) .mcc-chore{--mcc-hl:var(--mcc-b)}
+.mcc-row:nth-child(3n+3) .mcc-chore,.mcc-week-row:nth-child(3n+2) .mcc-chore{--mcc-hl:var(--mcc-c)}
+.mcc-row:nth-child(3n+4) .mcc-chore,.mcc-week-row:nth-child(3n+3) .mcc-chore{--mcc-hl:var(--mcc-a)}
+/* The icon slot is a fixed square whatever the artwork's own size: transparent art, contained, no backdrop. */
+.mcc-slot{flex:none;width:var(--mcc-icon);height:var(--mcc-icon)}
+.mcc-icon{display:block;width:100%;height:100%;object-fit:contain}
+.mcc-box{width:var(--mcc-box);height:var(--mcc-box);border:1.5px solid var(--mcc-rule);border-radius:8px;background:#fff}
+/* Weekly: the day is a small label inside each job, so the job has room to read. */
+.mcc-weekly{--mcc-icon:40px;--mcc-text:15px;--mcc-box:36px}
+.mcc-week-row{display:grid;grid-template-columns:minmax(0,1fr) var(--mcc-box);column-gap:10px;align-items:center}
+.mcc-weekday{display:block;margin-bottom:2px;font:700 10.5px/1.2 var(--font-sans);letter-spacing:.13em;text-transform:uppercase;color:var(--mcc-soft)}
+.mcc-off{grid-column:1/-1;display:flex;flex-direction:column;justify-content:center;height:100%;padding:4px 16px;border:1.5px dashed #d6ccc6;border-radius:12px}
+.mcc-off-text{font:700 19px/1.1 Kalam,var(--font-serif);letter-spacing:.03em;color:#968b86}
+/* One to three daily chores (the youngest): the daily chores across the top, larger, and the week as seven tiles
+   below, so a short list fills the sheet without stretched rows. */
+.mcc-main.mcc-few{display:flex;flex-direction:column;justify-content:center;gap:14px}
+.mcc-few .mcc-daily{flex:none}
+.mcc-few .mcc-daily .mcc-table{flex:none;width:min(100%,800px);margin:0 auto}
+.mcc-few .mcc-weekly{flex:none;padding-bottom:14px;--mcc-icon:42px;--mcc-text:14px}
+.mcc-few .mcc-weekly .mcc-table{grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:auto;column-gap:10px}
+.mcc-few .mcc-week-row{display:flex;flex-direction:column;align-items:center;gap:6px}
+.mcc-few .mcc-week-row .mcc-chore{flex:1;width:100%;flex-direction:column;justify-content:flex-start;gap:4px;padding:8px 6px;text-align:center}
+.mcc-few .mcc-weekly .mcc-chore.mcc-long{font-size:13px}
+.mcc-few .mcc-weekly .mcc-chore-text{display:contents}
+.mcc-few .mcc-weekly .mcc-weekday{order:-1;margin:0 0 auto;letter-spacing:.1em}
+.mcc-few .mcc-weekly .mcc-chore-name{margin-bottom:auto}
+.mcc-few .mcc-off{flex:1;width:100%;align-items:center;justify-content:flex-start;padding:8px 6px}
+.mcc-few .mcc-off-text{margin:auto 0}
+.mcc-foot{flex:none;margin:12px 0 0;font:500 13px/1.4 var(--font-sans);letter-spacing:.02em;text-align:center;color:var(--mcc-soft)}
 @media print{
   .mcc-dialog,.mcc-empty{display:none!important}
-  /* A landscape chart on the shared portrait page: turned a quarter, it fills the sheet. */
-  .club-plan[data-plan-state="ready"] .mcc-paper{transform:translateX(8.5in) rotate(90deg)!important;transform-origin:top left!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .mcc-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+/* Printing. With named pages (Chrome, Edge, Firefox) the script sets html[data-mcc-print="landscape"] and adds the
+   landscape @page: the charts get landscape Letter pages, upright on paper and in a saved PDF. Each rule adds to the
+   shared print rule it widens, so it wins without touching the other months. Without (Safari, or before the
+   script runs): a landscape chart on the shared portrait page, turned a quarter to fill the sheet. */
+@media print{
+  html:not([data-mcc-print="landscape"]) .club-plan[data-plan-state="ready"] .mcc-paper{transform:translateX(8.5in) rotate(90deg)!important;transform-origin:top left!important}
+  html[data-mcc-print="landscape"]:has(.club-plan[data-plan-state="ready"] .mcc),html[data-mcc-print="landscape"]:has(.club-plan[data-plan-state="ready"] .mcc) body{width:11in!important}
+  html[data-mcc-print="landscape"] body:has(.club-plan[data-plan-state="ready"] .mcc) #main{width:11in!important}
+  html[data-mcc-print="landscape"] .club-plan[data-plan-state="ready"]:not(#plan-print),html[data-mcc-print="landscape"] .club-plan[data-plan-state="ready"] :not(#plan-print):has([data-plan-sheet]){width:11in!important}
+  html[data-mcc-print="landscape"] .club-plan[data-plan-state="ready"] [data-plan-sheet]:not(#plan-print){width:11in!important;height:8.5in!important;page:mcc-chart}
 }
 
 /* The editor dialog (desktop) and edit sheets (phones) share these. */
@@ -102,17 +136,15 @@ const { storageKey } = Astro.props;
 .mcc-ed-chip{min-height:44px;padding:8px 12px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:3px;background:#fff;color:var(--color-warm-ink,#4d4544);font:500 .85rem var(--font-sans);cursor:pointer;text-align:left}
 .mcc-ed-chip[aria-pressed="true"]{background:var(--color-warm-button,#4a3f3e);border-color:var(--color-warm-button,#4a3f3e);color:#fff}
 .mcc-ed-chip:disabled{opacity:.45;cursor:not-allowed}
-.mcc-ed-rewards{display:grid;gap:8px}
-.mcc-ed-field{display:grid;gap:4px}
-.mcc-ed-field span{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
 .mcc-dialog :focus-visible,.cp-sheet .mcc-ed :focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
 </style>
 
 <script>
 import {
-  applyFamily, choreFingerprint, choreView, freshState, isChoreState, DAILY_MAX, REWARD_STEPS,
-  type ChartView, type ChoreMember, type ChorePlan, type ChoreState,
+  applyFamily, choreFingerprint, choreView, freshState, isChoreState,
+  type ChartView, type ChoreMember, type ChorePlan, type ChoreState, type Job,
 } from '../../lib/club/engines/march-chore-charts';
+import type { MarchIconArt } from '../../data/club/march-chore-icons';
 import { familyEditor, kidEditor } from '../../lib/club/march-chore-editor';
 import { el } from '../../lib/club/plan/dom';
 import { PLAN_CHANGE } from '../../lib/club/plan/resource';
@@ -136,44 +168,48 @@ if (root) {
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(q('[data-mcc-pages]'));
   window.addEventListener('resize', fit);
 
-  const chore = (j: { title: string; image: { src: string | null; color: string } | null } | null) => {
-    const cell = el('span', { class: 'mcc-chore' });
-    if (!j) return cell;
-    if (j.image?.src) {
-      const img = el('img', { class: 'mcc-icon', src: j.image.src, alt: '', width: 30, height: 30 });
-      img.style.background = `color-mix(in srgb, ${j.image.color} 60%, #fff)`;
-      cell.append(img);
+  // Sizes for the number of daily chores: a short list gets larger rows, boxes, pictures and words.
+  const density = (n: number) => (n <= 3 ? [{ row: 104, 'row-max': 104, box: 56, icon: 68, text: 24 }, { row: 96, 'row-max': 96, box: 54, icon: 64, text: 22 }, { row: 84, 'row-max': 84, box: 52, icon: 58, text: 21 }][Math.max(0, n - 1)]
+    : n <= 5 ? { row: 70, 'row-max': 96, box: 44, icon: 50, text: 18 }
+      : n <= 6 ? { row: 64, 'row-max': 84, box: 42, icon: 46, text: 17 } : { row: 54, 'row-max': 62, box: 40, icon: 42, text: 16 });
+  // A chore with a picture has a fixed-size slot for it; one without starts its words at the edge, no placeholder.
+  const chore = (j: Job & { icon: MarchIconArt | null }, long: number, day?: string) => {
+    const cell = el('span', { class: `mcc-chore${j.title.length > long ? ' mcc-long' : ''}` });
+    if (j.icon) {
+      const img = el('img', { class: 'mcc-icon', src: j.icon.src, alt: '', decoding: 'async' });
+      img.dataset.icon = j.icon.name;
+      const slot = el('span', { class: 'mcc-slot' }, img);
+      // A file that fails to load takes its slot with it: never a broken image.
+      img.addEventListener('error', () => slot.remove(), { once: true });
+      cell.append(slot);
     }
-    cell.append(j.title);
+    cell.append(el('span', { class: 'mcc-chore-text' }, ...(day ? [el('span', { class: 'mcc-weekday' }, day)] : []), el('span', { class: 'mcc-chore-name' }, j.title)));
     return cell;
   };
-  const star = () => {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'mcc-star'); svg.setAttribute('viewBox', '0 0 40 40'); svg.setAttribute('aria-hidden', 'true');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'm20 4 4.5 10.5L36 16l-8.5 8 2 12L20 30l-10 6 2-12-8-8 11.5-1.5Z');
-    svg.append(path);
-    return svg;
-  };
-  const sheet = (c: ChartView, i: number, last: boolean, rewards: boolean) => {
+  const sheet = (c: ChartView, i: number, last: boolean) => {
     const page = el('article', { class: 'mcc-sheet' });
     page.dataset.planSheet = `k${i}`;
     page.dataset.planWidth = '1056';
     if (last) page.setAttribute('data-plan-sheet-end', '');
     page.setAttribute('aria-label', `${c.name}’s chore chart`);
-    const rows = Array.from({ length: DAILY_MAX }, (_, n) => c.daily[n] ?? null);
+    const d = density(c.daily.length);
+    const daily = c.daily.length ? el('section', { class: 'mcc-daily' }, el('div', { class: 'mcc-section-title' }, 'Daily chores'),
+      el('div', { class: 'mcc-table' },
+        el('div', { class: 'mcc-days' }, el('span'), ...['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((x) => {
+          const day = el('span', { class: 'mcc-day' }, x.charAt(0));
+          day.title = x;
+          return day;
+        })),
+        ...c.daily.map((j) => el('div', { class: 'mcc-row' }, chore(j, 24), ...Array.from({ length: 7 }, () => el('span', { class: 'mcc-box' })))))) : null;
+    const weekly = el('section', { class: 'mcc-weekly' }, el('div', { class: 'mcc-section-title' }, 'Weekly chores'),
+      el('div', { class: 'mcc-table' }, ...c.weekly.map((w) => el('div', { class: 'mcc-week-row' },
+        ...(w.job ? [chore(w.job, 22, w.label), el('span', { class: 'mcc-box' })]
+          : [el('span', { class: 'mcc-off' }, el('span', { class: 'mcc-weekday' }, w.label), el('span', { class: 'mcc-off-text' }, 'Day off'))])))));
     const paper = el('div', { class: 'mcc-paper' },
       el('div', { class: 'mcc-head' }, el('div', { class: 'mcc-for' }, `${c.name}’s`), el('div', { class: 'mcc-title' }, 'Weekly Chore Chart'), el('p', { class: 'mcc-motto' }, 'My jobs, start to finish.')),
-      el('div', { class: 'mcc-main' },
-        el('section', { class: 'mcc-daily' }, el('div', { class: 'mcc-section-title' }, 'Daily chores'),
-          el('div', { class: 'mcc-grid', 'aria-hidden': 'true' }, el('span'), ...['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => el('span', { class: 'mcc-day' }, d))),
-          ...rows.map((j) => el('div', { class: 'mcc-grid mcc-row' }, chore(j), ...Array.from({ length: 7 }, () => el('span', { class: 'mcc-box' }))))),
-        el('section', { class: 'mcc-weekly' }, el('div', { class: 'mcc-section-title' }, 'Weekly chores'),
-          ...c.weekly.map((w) => el('div', { class: 'mcc-week-row' }, el('span', { class: 'mcc-weekday' }, w.label),
-            w.job ? chore(w.job) : el('span', { class: 'mcc-chore mcc-dayoff' }, 'Day off'),
-            w.job ? el('span', { class: 'mcc-box' }) : el('span'))))));
-    if (rewards) paper.append(el('div', { class: 'mcc-rewards' }, ...c.rewardLines.map((r, n) =>
-      el('div', { class: 'mcc-reward' }, star(), el('span', { class: 'mcc-threshold' }, `Complete ${REWARD_STEPS[n]}`), el('span', { class: 'mcc-reward-text' }, r)))));
+      el('div', { class: `mcc-main${!daily ? ' mcc-solo' : c.daily.length <= 3 ? ' mcc-few' : ''}` }, ...(daily ? [daily] : []), weekly),
+      el('p', { class: 'mcc-foot' }, 'My jobs are finished when I’ve done the work and put everything away.'));
+    Object.entries(d).forEach(([k, v]) => paper.style.setProperty(`--mcc-${k}`, `${v}px`));
     page.append(paper);
     return el('div', { class: 'mcc-stage' }, page);
   };
@@ -183,7 +219,7 @@ if (root) {
     root.style.setProperty('--mcc-a', colors[0]);
     root.style.setProperty('--mcc-b', colors[1]);
     root.style.setProperty('--mcc-c', colors[2]);
-    q('[data-mcc-pages]').replaceChildren(...v.charts.map((c, i) => sheet(c, i, i === v.charts.length - 1, v.rewards)));
+    q('[data-mcc-pages]').replaceChildren(...v.charts.map((c, i) => sheet(c, i, i === v.charts.length - 1)));
     q('[data-mcc-empty]').hidden = v.charts.length > 0;
     fit();
   };
@@ -241,6 +277,12 @@ if (root) {
     },
   };
   root.clubPlan = plan;
+  // Landscape print pages where the browser has named pages. The @page goes in its own stylesheet at the end of the
+  // head: in Chromium a later stylesheet's plain @page size (the shared portrait rule) beats an earlier named page.
+  if (typeof CSS !== 'undefined' && CSS.supports('page', 'auto')) {
+    document.head.append(el('style', {}, '@media print{@page mcc-chart{size:letter landscape;margin:0}}'));
+    document.documentElement.dataset.mccPrint = 'landscape';
+  }
   window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
   const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
   if (cached) applyHousehold(cached);

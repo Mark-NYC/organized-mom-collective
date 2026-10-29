@@ -158,20 +158,31 @@ Laundry days (one or more, or "As needed") print on every guide; a named machine
 
 ## March
 
-`/app/club/march`: family chore charts, one per child, in the free chore chart's landscape layout
-(`/chore-chart`, `src/components/site/ChoreChart.astro`): the child's name, Weekly Chore Chart, up to eight daily
-chores with a box per day (unused rows blank to write in), one weekly chore per weekday, three reward stars. Kids
-read it at a glance; nothing else prints on it. `MarchChoreCharts.astro` (the sheets and the desktop editor),
-`MarchPlanMobile.astro`, rules `src/lib/club/engines/march-chore-charts.ts`, editor panels shared by the desktop dialog
-and the phone sheets in `src/lib/club/march-chore-editor.ts`. Ages as of March 2027 prepare each chart: three to six
-daily chores from `src/data/responsibilities.ts` (pets first when the family has them), weekly chores matched to the
-wall calendar's cleaning zone for that day in `src/data/cleaning.ts` (the zone shows in the editor, not on the
-chart), rewards from `src/data/chore-chart.ts` (optional), and the three tool palettes. Children only. The sheets are
-landscape (1056 × 816, `data-plan-width="1056"` so the plan screen's thumbnails scale them); the shared print rules
-print portrait pages, so each chart is turned a quarter on its page and the paper comes out landscape. Tab-only
-`omc:club:march-chore-charts:v2` with `omc:preview:march-chore-charts:approval`. The earlier March page, Spring Prep
-(`MarchSpringPrep.astro`, unchanged), stays at `/app/club/march/spring-prep`; `MarchTabs.astro` links the two and
-keeps `?sample`. The kit page and `/club/march-preview` still describe Spring Prep.
+`/app/club/march`: family chore charts, one landscape chart per child (11 × 8.5 in): the child's name, Weekly Chore
+Chart, "My jobs, start to finish.", only the child's own daily chores (up to eight, no blank rows) with a box per
+day, one weekly job per weekday with one box or a dashed "Day off", and one ownership line ("My jobs are finished
+when I've done the work and put everything away."). **No rewards, stars, points or thresholds**; charts saved with
+the old reward fields keep their chores and drop the rewards (`applyFamily`). Sizes follow the number of daily
+chores; one to three chores (the youngest) switch to a stacked layout with larger rows and the week as seven
+tiles. Icons: `src/data/club/march-chore-icons.ts` maps every chore to one of 24 files in
+`assets/icons/ofc/march/` (see the README there); until a file exists the chore shows its responsibility-library
+illustration if it has one, otherwise no picture. Renamed and typed chores have no icon. `MarchChoreCharts.astro`
+(the sheets and the desktop editor), `MarchPlanMobile.astro`, rules `src/lib/club/engines/march-chore-charts.ts`,
+editor panels shared by the desktop dialog and the phone sheets in `src/lib/club/march-chore-editor.ts`. Ages as of
+March 2027 prepare each chart: daily chores by age (pets first when the family has them), weekly chores matched to
+the wall calendar's cleaning zone for that day in `src/data/cleaning.ts` (the zone shows in the editor, not on the
+chart), and the three tool palettes. Children only. The free chore chart (`/chore-chart`) is separate and unchanged.
+
+Printing: the sheets are landscape (1056 × 816, `data-plan-width="1056"` so the plan screen's thumbnails scale
+them). Where the browser supports named pages (`page`: Chrome, Edge, Firefox), the script adds
+`@page mcc-chart { size: letter landscape }` as the last stylesheet and sets `html[data-mcc-print="landscape"]`; the
+charts then print one per landscape Letter page, upright in a saved PDF. (It must be the last stylesheet: in
+Chromium a later stylesheet's plain `@page` size, the shared portrait rule, beats an earlier named page.)
+Elsewhere (Safari) each chart is turned a quarter on the shared portrait page, so the paper still comes out
+landscape. The shared print rules are unchanged. Tab-only `omc:club:march-chore-charts:v2` with
+`omc:preview:march-chore-charts:approval`. The earlier March page, Spring Prep (`MarchSpringPrep.astro`,
+unchanged), stays at `/app/club/march/spring-prep`; `MarchTabs.astro` links the two and keeps `?sample`. The kit
+page and `/club/march-preview` still describe Spring Prep.
 
 ## September and October
 

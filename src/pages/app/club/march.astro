@@ -21,7 +21,7 @@ const storageKey = 'omc:club:march-chore-charts:v2';
 <AppLayout title="March Family Chore Charts">
   <ClubPlanShell class="mch-plan family-brand" kitSlug={kit.slug} month="March" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="March · Kit preview" instructions={[
-      'One chart for each child, the same chart as our free chore chart: daily chores with a box for each day, one weekly chore a day that matches your wall calendar’s cleaning zone, and three rewards.',
+      'One chart for each child with only their own jobs: daily chores with a box for each day, and one weekly job a day that matches your wall calendar’s cleaning zone.',
       'Hang each chart at their height. They check off their own boxes; print a fresh one each week.',
     ]}>
       <Fragment slot="title">Our Family <em>Chore Charts</em></Fragment>
@@ -29,7 +29,7 @@ const storageKey = 'omc:club:march-chore-charts:v2';
         <section class="cpd-block" aria-labelledby="mch-d-kids">
           <p class="cpd-label" id="mch-d-kids">The charts</p>
           <dl class="cpd-rows" data-mch-d-kids></dl>
-          <button type="button" class="cpd-link" data-mch-d-open>Change chores and rewards</button>
+          <button type="button" class="cpd-link" data-mch-d-open>Change chores and colors</button>
           <button type="button" class="cpd-link" data-mch-d-restore hidden>Restore the prepared charts</button>
           <p class="cpd-hint" data-mch-d-restored role="status" tabindex="-1"></p>
         </section>

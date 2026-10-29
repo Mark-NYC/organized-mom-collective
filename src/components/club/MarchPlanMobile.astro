@@ -1,7 +1,7 @@
 ---
 /**
- * March family chore charts on phones and tablets (below 1100px): a row per child and the whole-family choices
- * (rewards, colors), inside the shared ClubPlanScreen. Each row opens the shared chart editor
+ * March family chore charts on phones and tablets (below 1100px): a row per child and the whole-family choice
+ * (colors), inside the shared ClubPlanScreen. Each row opens the shared chart editor
  * (src/lib/club/march-chore-editor.ts) in an edit sheet. Plan changes go through the printable's `clubPlan`.
  */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
@@ -63,7 +63,7 @@ if (root && host) {
       `${c.daily.length} daily chores · ${c.weekly.filter((w) => w.job).length} weekly`,
       () => openKid(c.id), locked, el('span', { class: 'cp-avatar' }, c.name.charAt(0)))) : [el('li', { class: 'cp-intro' }, 'Add children to your family profile to prepare their charts.')]));
     q('[data-mpm-family]').replaceChildren(
-      row('Rewards and colors', v.rewards ? 'Rewards on' : 'No rewards', toolPalettes[v.palette].label, openFamily, locked));
+      row('Colors', toolPalettes[v.palette].label, '', openFamily, locked));
     q('[data-mpm-restore]').hidden = locked || !planChanged(s);
     // Only the charts this family has; their styles are scoped to .mcc (with this family's colors).
     const colors = toolPalettes[v.palette].colors;
