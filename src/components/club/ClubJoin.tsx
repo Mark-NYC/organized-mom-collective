@@ -5,9 +5,9 @@
  */
 import { useEffect, useState } from 'react';
 import { getSession, type AccountSession } from '../../lib/account';
-import { billingErrorText, PLANS, startCheckout, type OfferedPlan } from '../../lib/club/membership';
+import { billingErrorText, FOUNDING_PLAN, PLANS, startCheckout, type OfferedPlan } from '../../lib/club/membership';
 import { routes } from '../../routes';
-import { CLUB_NAME } from '../../data/club/config';
+import { CLUB_NAME, clubFoundingOpen } from '../../data/club/config';
 
 export default function ClubJoin() {
   const [session, setSession] = useState<AccountSession | null | undefined>(undefined);
@@ -16,6 +16,8 @@ export default function ClubJoin() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const canceled = typeof location !== 'undefined' && new URLSearchParams(location.search).has('canceled');
+  // Before the 2027 program starts, the same plan reads as what she pays today and from when (club-billing decides).
+  const shown = (p: OfferedPlan) => (p === 'monthly' && clubFoundingOpen() ? FOUNDING_PLAN : PLANS[p]);
 
   useEffect(() => {
     getSession().then(setSession, () => setSession(null));
@@ -49,11 +51,11 @@ export default function ClubJoin() {
             <label key={p} className={`block cursor-pointer bg-white p-6 ring-1 ${plan === p ? 'ring-2 ring-warm-ink' : 'ring-warm-rule'}`}>
               <span className="flex items-center gap-3">
                 <input type="radio" name="plan" value={p} checked={plan === p} onChange={() => setPlan(p)} className="h-5 w-5" />
-                <span className="label text-warm-soft">{p === 'monthly' ? 'Monthly' : 'Annual'}</span>
+                <span className="label text-warm-soft">{p === 'monthly' ? (clubFoundingOpen() ? 'Founding member' : 'Monthly') : 'Annual'}</span>
               </span>
-              <span className="mt-3 block font-serif text-[2.4rem] leading-none text-warm-ink">{PLANS[p].price} <span className="font-sans text-[0.95rem] text-warm-soft">{PLANS[p].per}</span></span>
-              <span className="mt-3 block text-[0.95rem] leading-relaxed text-warm-ink">{PLANS[p].summary}</span>
-              <ul className="mt-3 space-y-1 text-[0.9rem] text-warm-soft">{PLANS[p].points.map((t) => <li key={t}>· {t}</li>)}</ul>
+              <span className="mt-3 block font-serif text-[2.4rem] leading-none text-warm-ink">{shown(p).price} <span className="font-sans text-[0.95rem] text-warm-soft">{shown(p).per}</span></span>
+              <span className="mt-3 block text-[0.95rem] leading-relaxed text-warm-ink">{shown(p).summary}</span>
+              <ul className="mt-3 space-y-1 text-[0.9rem] text-warm-soft">{shown(p).points.map((t) => <li key={t}>· {t}</li>)}</ul>
             </label>
           ))}
         </fieldset>

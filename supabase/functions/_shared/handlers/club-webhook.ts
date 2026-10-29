@@ -217,7 +217,7 @@ export async function applyInvoice(deps: ClubDeps, invoiceId: string, eventAt: n
     if (!known) return;
   }
   const payment = inv.status === 'paid' || failed ? await paymentFor(deps, inv.id) : { paymentIntent: null, charge: null, failure: null };
-  const r = await deps.db.rpc<{ granted: number; first_paid: boolean; months: string[]; user_id?: string }>('club_invoice_apply', {
+  const r = await deps.db.rpc<{ granted: number; first_paid: boolean; months: string[]; program_start?: string | null; user_id?: string }>('club_invoice_apply', {
     p: invoiceRow(inv, payment),
     p_periods: inv.status === 'paid' ? paidPeriods(inv) : [],
   });
@@ -227,6 +227,8 @@ export async function applyInvoice(deps: ClubDeps, invoiceId: string, eventAt: n
     await sendClubEmail(deps, `welcome:${member.userId}`, 'welcome', member.userId, member.email, {
       plan: paidPeriods(inv)[0]?.plan ?? null,
       monthLabel: first ? monthLabel(first) : undefined,
+      // Paid before the program starts (a founding member's welcome print): no month yet.
+      programStart: first ? null : r.program_start ?? null,
     });
   }
   if (failed && inv.status !== 'paid') {

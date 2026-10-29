@@ -1,6 +1,6 @@
 # Organized Family Club: paid membership (operations and setup)
 
-**Status (2026-10-29):** built, tested, database applied to production. **Nothing can be bought yet**: Stripe is in test mode only (`club_settings.checkout_mode = test`; a test-mode portal and webhook secret exist, from the first setup at $5/$60), and the site flags are off. **Launch price: $5.90/month, monthly only** (owner, 2026-10-29); annual is built but not offered. The deployed Edge Functions predate that change: redeploy them from `main` (step 6) and press **Set up Stripe (test mode)** again (step 7). Live payments need the owner's explicit approval.
+**Status (2026-10-29):** built, tested, database applied to production; `club-billing`, `club-webhook` and `club-admin` redeployed from `main` (PR #254). **Nothing can be bought yet**: Stripe is in test mode only (`club_settings.checkout_mode = test`) and the site flags are off. **Launch price: $5.90/month, monthly only**; annual is built but not offered. **Founding enrollment** (members joining before the 2027 program; below) is in `supabase/migrations/20261107000000_club_founding.sql`, pending the owner's approval of its billing behavior. Live payments need the owner's explicit approval.
 
 Guiding principle: **One family. One monthly problem. One tailored plan. Delivered ready to use.**
 
@@ -19,6 +19,20 @@ Guiding principle: **One family. One monthly problem. One tailored plan. Deliver
 | Plan change (not offered: the portal allows no switching) | Monthly → annual: charged now; the twelve paid months start with the first month she doesn't already have (a month is never sold twice). Annual → monthly: takes effect at the end of the paid year | |
 
 No automatic discount. Pausing isn't offered (a paused or unpaid subscription pays no invoice, so it grants nothing).
+
+## Founding members (joining before the 2027 program)
+
+The monthly resources are the 2027 program (January–December 2027). Members can join before it starts, from November 2026:
+
+| | Founding member (joins before January 1, 2027) | Joins in 2027 or later |
+| --- | --- | --- |
+| Pays at checkout | **$5.90 for the Family Vision welcome print** (one-time price `club_welcome_v1`) | $5.90, the first month (`club_monthly_v2`) |
+| Gets right away | The personalized Family Vision print, mailed as soon as she approves it | That month's plan, plus the welcome print |
+| Monthly billing | Starts **January 1, 2027** (midnight New York): the subscription is in a Stripe trial until then, then $5.90 on the 1st of each month | From her signup date, monthly |
+| First monthly plan | January 2027, in January's regular mailing (the launch exception keeps January's list open through January 1) | The month she pays for |
+| Cancels before January 1 | Not charged again; the welcome print still goes out | — |
+
+Why: every payment buys something that ships, nobody pays for a month without a plan, and November or December 2026 never receive a 2027 resource. The database enforces it: with `club_settings.program_start_month = 2027-01-01`, a paid period before the program buys no month and no mailing, whatever Stripe sends. Founding checkout switches off by itself on January 1 (`club_checkout_state` → `billing_starts_at`). The pages say the same thing through `CLUB_PROGRAM_START` in `src/data/club/config.ts`; the landing page is static, so rebuild it after January 1 (any deploy does) to drop the founding wording.
 
 ## How access works (why it's safe)
 
@@ -66,8 +80,8 @@ Supabase API connections load pg-safeupdate: every UPDATE/DELETE in a database f
 6. Recommended: redeploy the three functions from the repo once (`supabase functions deploy club-billing club-webhook club-admin --no-verify-jwt`) so the deployed code is byte-for-byte the reviewed source. Today's deploy was made from the same build through the Supabase connector.
 
 ### Stripe (test mode first)
-7. In `/admin/club → Setup`, press **Set up Stripe (test mode)**. It creates, once: the product, `club_monthly_v2` ($5.90/month), the Billing Portal configuration (no plan switching), and the webhook endpoint `…/functions/v1/club-webhook` (its signing secret is stored server-side). On the test account the first setup already made (product, `club_monthly_v1` $5, `club_annual_v1` $60, a portal that allowed switching, the webhook), pressing it again keeps the product and webhook, adds the $5.90 price and turns plan switching off. The old $5 and $60 prices are never used; archive them in the Stripe Dashboard if you like.
-8. Stripe Dashboard → Billing → **Revenue recovery:** Smart Retries on, end within ~2 weeks, then **cancel** the subscription. Turn on Stripe's customer emails for receipts and failed payments.
+7. In `/admin/club → Setup`, press **Set up Stripe (test mode)**. It creates, once: the product, `club_monthly_v2` ($5.90/month), `club_welcome_v1` (the $5.90 one-time welcome print founding members pay), the Billing Portal configuration (no plan switching), and the webhook endpoint `…/functions/v1/club-webhook` (its signing secret is stored server-side). On the test account the first setup already made (product, `club_monthly_v1` $5, `club_annual_v1` $60, a portal that allowed switching, the webhook), pressing it again keeps the product and webhook, adds the $5.90 price and turns plan switching off. The old $5 and $60 prices are never used; archive them in the Stripe Dashboard if you like.
+8. Stripe Dashboard → Billing → **Revenue recovery:** Smart Retries on, end within ~2 weeks, then **cancel** the subscription. Turn on Stripe's customer emails for receipts and failed payments, and the **trial ending reminder** (Billing → Subscriptions and emails): founding members' subscriptions are trials until January 1, and Stripe's reminder tells them before the first monthly charge.
 9. Decide sales tax for a subscription with a printed component (accountant), as for the shop.
 
 ### Cloudflare Pages (Preview first)

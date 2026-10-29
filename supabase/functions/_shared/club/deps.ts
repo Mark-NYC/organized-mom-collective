@@ -38,6 +38,11 @@ export const CLUB_PRICES = {
   monthly: { lookupKey: 'club_monthly_v2', amount: 590, interval: 'month' as const, nickname: 'Organized Family Club · Monthly' },
   annual: { lookupKey: 'club_annual_v1', amount: 6000, interval: 'year' as const, nickname: 'Organized Family Club · Annual' },
 };
+/**
+ * The Family Vision welcome print, one time. Founding members (joining before the 2027 program starts) pay it at
+ * checkout; their monthly billing starts with the program (club_settings.program_start_month).
+ */
+export const CLUB_WELCOME_PRICE = { lookupKey: 'club_welcome_v1', amount: 590, nickname: 'Family Vision welcome print' };
 /** Older lookup keys: only so stripe_setup finds the existing Club product instead of making a second one. */
 export const CLUB_LEGACY_LOOKUP_KEYS = ['club_monthly_v1', 'club_annual_v1'];
 export type ClubPlan = keyof typeof CLUB_PRICES;

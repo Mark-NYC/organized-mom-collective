@@ -56,7 +56,8 @@ interface Inv {
 
 export class FakeClubStripe {
   customers = new Map<string, { id: string; email: string; metadata: Record<string, string> }>();
-  prices = new Map<string, { id: string; product: string; lookup_key: string; unit_amount: number; interval: string }>();
+  // interval null: a one-time price (the welcome print).
+  prices = new Map<string, { id: string; product: string; lookup_key: string; unit_amount: number; interval: string | null }>();
   products: string[] = [];
   sessions = new Map<string, Record<string, unknown>>();
   subs = new Map<string, Sub>();
@@ -110,7 +111,7 @@ export class FakeClubStripe {
       return { id: pid };
     }
     if (method === 'POST' && kind === 'prices') {
-      const pr = { id: `price_${rand()}`, product: p.product, lookup_key: p.lookup_key, unit_amount: Number(p.unit_amount), interval: p.recurring.interval };
+      const pr = { id: `price_${rand()}`, product: p.product, lookup_key: p.lookup_key, unit_amount: Number(p.unit_amount), interval: p.recurring?.interval ?? null };
       this.prices.set(pr.id, pr);
       return { id: pr.id };
     }
@@ -153,7 +154,9 @@ export class FakeClubStripe {
           id: `cs_test_${rand(16)}`, mode: p.mode, status: 'open', payment_status: 'unpaid', livemode: false,
           customer: p.customer, subscription: null, client_reference_id: p.client_reference_id ?? null,
           metadata: p.metadata ?? {}, subscription_metadata: p.subscription_data?.metadata ?? {},
-          price: p.line_items?.[0]?.price, expires_at: Number(p.expires_at), url: `https://checkout.stripe.test/${rand()}`,
+          price: p.line_items?.[0]?.price, extra: Object.values(p.line_items ?? {}).slice(1).map((x: any) => x.price),
+          trial_end: p.subscription_data?.trial_end ? Number(p.subscription_data.trial_end) : null,
+          expires_at: Number(p.expires_at), url: `https://checkout.stripe.test/${rand()}`,
           customer_details: null, collected_information: null,
         };
         this.sessions.set(s.id, s);
@@ -257,16 +260,64 @@ export class FakeClubStripe {
     return inv;
   }
 
+  /**
+   * A trial (founding checkout): the subscription is trialing until trial_end, and its first invoice charges only the
+   * one-time items now; the recurring line is 0 for the trial period (Stripe: one-time prices with a trial are paid
+   * upfront, recurring billing begins when the trial ends).
+   */
+  private completeTrialCheckout(s: Record<string, any>, opts: { email: string; address?: Record<string, string> | null }): Ev[] {
+    const price = this.priceOf(s.price);
+    const sub: Sub = {
+      id: `sub_${rand()}`, customer: s.customer, status: 'trialing', livemode: false,
+      cancel_at_period_end: false, canceled_at: null, ended_at: null, start_date: this.clock, pause_collection: null,
+      metadata: s.subscription_metadata,
+      items: { data: [{ current_period_start: this.clock, current_period_end: s.trial_end, price: { id: price.id, recurring: { interval: price.interval! } } }] },
+      latest_invoice: null,
+    };
+    this.subs.set(sub.id, sub);
+    const ones = (s.extra as string[]).map((id) => this.priceOf(id));
+    const total = ones.reduce((t, x) => t + x.unit_amount, 0);
+    const inv: Inv = {
+      id: `in_${rand()}`, status: 'paid', livemode: false, billing_reason: 'subscription_create',
+      amount_due: total, amount_paid: total, attempt_count: 1, period_start: this.clock, period_end: this.clock,
+      customer: sub.customer, status_transitions: { paid_at: this.clock },
+      parent: { subscription_details: { subscription: sub.id } },
+      lines: { data: [
+        ...ones.map((x) => ({ amount: x.unit_amount, period: { start: this.clock, end: this.clock }, parent: { subscription_item_details: { proration: false } }, pricing: { price_details: { price: x.id } } })),
+        { amount: 0, period: { start: this.clock, end: s.trial_end }, parent: { subscription_item_details: { proration: false } }, pricing: { price_details: { price: price.id } } },
+      ] },
+      payment_intent: `pi_${rand()}`,
+    };
+    this.invoices.set(inv.id, inv);
+    const charge = `ch_${rand()}`;
+    this.intents.set(inv.payment_intent, { id: inv.payment_intent, invoice: inv.id, status: 'succeeded', latest_charge: charge, last_payment_error: null });
+    this.charges.set(charge, { id: charge, payment_intent: inv.payment_intent, amount: total, amount_refunded: 0 });
+    sub.latest_invoice = inv.id;
+    const cust = this.customers.get(s.customer)!;
+    if (!cust.email) cust.email = opts.email;
+    Object.assign(s, {
+      status: 'complete', payment_status: 'paid', subscription: sub.id, customer_details: { email: opts.email },
+      collected_information: opts.address === null ? null : { shipping_details: { name: 'Mia Rivera', address: opts.address ?? { line1: '12 Oak Ln', city: 'Albany', state: 'NY', postal_code: '12203', country: 'US' } } },
+    });
+    return [
+      this.evt('customer.subscription.created', sub.id),
+      this.evt('invoice.paid', inv.id),
+      this.evt('checkout.session.completed', s.id),
+      this.evt('customer.subscription.updated', sub.id),
+    ];
+  }
+
   /** She pays on the Checkout page. Returns the events in the order Stripe tends to send them. */
   completeCheckout(sessionId: string, opts: { email: string; address?: Record<string, string> | null; declined?: boolean }): Ev[] {
     const s = this.sessions.get(sessionId)! as Record<string, any>;
+    if (s.trial_end && !opts.declined) return this.completeTrialCheckout(s, opts);
     const price = this.priceOf(s.price);
     const days = price.interval === 'year' ? 365 : 30;
     const sub: Sub = {
       id: `sub_${rand()}`, customer: s.customer, status: opts.declined ? 'incomplete' : 'active', livemode: false,
       cancel_at_period_end: false, canceled_at: null, ended_at: null, start_date: this.clock, pause_collection: null,
       metadata: s.subscription_metadata,
-      items: { data: [{ current_period_start: this.clock, current_period_end: this.clock + days * DAY, price: { id: price.id, recurring: { interval: price.interval } } }] },
+      items: { data: [{ current_period_start: this.clock, current_period_end: this.clock + days * DAY, price: { id: price.id, recurring: { interval: price.interval! } } }] },
       latest_invoice: null,
     };
     this.subs.set(sub.id, sub);
@@ -291,8 +342,9 @@ export class FakeClubStripe {
   renew(subId: string, opts: { declined?: boolean } = {}): { events: Ev[]; invoice: string } {
     const sub = this.subs.get(subId)!;
     const item = sub.items.data[0];
-    const len = item.current_period_end - item.current_period_start;
-    this.clock = item.current_period_end + 60;
+    // The end of a trial starts the first full billing period (Stripe charges about an hour later).
+    const len = sub.status === 'trialing' ? (item.price.recurring.interval === 'year' ? 365 : 30) * DAY : item.current_period_end - item.current_period_start;
+    this.clock = item.current_period_end + (sub.status === 'trialing' ? 3600 : 60);
     item.current_period_start = item.current_period_end;
     item.current_period_end = item.current_period_start + len;
     const inv = this.bill(sub, 'subscription_cycle', !opts.declined);

@@ -18,3 +18,12 @@ export const clubEnabled = () => import.meta.env.PUBLIC_CLUB_ENABLED === 'true' 
 export const clubAccountsEnabled = () => clubEnabled() && accountsEnabled();
 
 export const CLUB_NAME = 'Organized Family Club';
+
+/**
+ * The monthly resources are the 2027 program. Members who join before it (founding members) pay for the Family
+ * Vision welcome print at checkout, and their $5.90 monthly billing starts at midnight New York on its first day.
+ * The server decides from club_settings.program_start_month (supabase/migrations/20261107000000_club_founding.sql);
+ * keep these in step with it. They only choose which words the pages show.
+ */
+export const CLUB_PROGRAM_START = { label: 'January 2027', firstDay: 'January 1, 2027', at: '2027-01-01T05:00:00Z' };
+export const clubFoundingOpen = (now = Date.now()) => now < Date.parse(CLUB_PROGRAM_START.at);

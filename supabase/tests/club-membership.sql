@@ -50,6 +50,15 @@ insert into public.admin_users (user_id, role) values ('00000000-0000-0000-0000-
 \set X '''00000000-0000-0000-0000-00000000f003'''
 \set OWNER '''00000000-0000-0000-0000-00000000f004'''
 
+-- The founding migration (20261107000000) as shipped: the 2027 program, January's list open through January 1.
+select pg_temp.expect((select (program_start_month, launch_exception_month, launch_exception_cutoff_at)
+  = ('2027-01-01'::date, '2027-01-01'::date, '2027-01-02 04:59:59+00'::timestamptz) from public.club_settings), 'the program starts January 2027; January''s list stays open through January 1');
+select pg_temp.expect((select count(*) = 12 from public.club_kits where month between '2027-01-01' and '2027-12-01'), 'the 2027 program has twelve kits');
+-- These scenarios run as after the program has started, with the November 2026 founding-batch exception they were
+-- written for. Founding enrollment (paid before the program) is tested in tests/club-billing-e2e.test.ts.
+update public.club_settings set program_start_month = '2026-10-01', launch_exception_month = '2026-11-01',
+  launch_exception_cutoff_at = '2026-11-08 23:59:59-05' where id;
+
 -- Publish November and December (drafts open for nobody, paid or not); January stays a draft.
 update public.club_kits set status = 'scheduled' where slug in ('2026-11-family-ownership', '2026-12-christmas-mission');
 select pg_temp.expect((select first_mailing_month from public.club_settings) = '2026-11-01', 'first mailing month is a setting (November 2026)');

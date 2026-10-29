@@ -7,6 +7,7 @@
 import { accountRpc, getSession } from '../account';
 import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
+import { CLUB_PROGRAM_START } from '../../data/club/config';
 
 const URL_ = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
@@ -25,6 +26,18 @@ export const PLANS: Record<OfferedPlan, { price: string; per: string; summary: s
     summary: 'One personalized resource and one printed mailing for each month you’re a member.',
     points: ['This month’s resource, prepared for your family', 'A printed mailing each paid month', 'Cancel any time; what you received stays yours'],
   },
+};
+
+/** The same plan for a founding member (before the program starts): what she pays today and from when. */
+export const FOUNDING_PLAN: (typeof PLANS)['monthly'] = {
+  price: '$5.90',
+  per: 'today',
+  summary: `Your personalized Family Vision print, mailed right away. Monthly plans begin in ${CLUB_PROGRAM_START.label}.`,
+  points: [
+    '$5.90 today: your Family Vision welcome print, personalized and mailed',
+    `Then $5.90 a month from ${CLUB_PROGRAM_START.firstDay}: each month’s plan, prepared for your family and mailed`,
+    `Cancel any time; cancel before ${CLUB_PROGRAM_START.firstDay} and you aren’t charged again`,
+  ],
 };
 
 async function billing<T>(action: string, body: Record<string, unknown> = {}, signedIn = true): Promise<T> {

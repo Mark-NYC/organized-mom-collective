@@ -19,6 +19,8 @@ export interface ClubEmailData {
   /** "December 2, 2026" */
   endsOn?: string | null;
   ended?: boolean;
+  /** Welcome for a founding member (joined before the program): its first month, "2027-01-01". */
+  programStart?: string | null;
   test?: boolean;
 }
 
@@ -47,6 +49,32 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
   let b: Body;
   switch (kind) {
     case 'welcome':
+      if (d.programStart) {
+        // Founding member: she paid for the welcome print; the monthly plans and their billing start with the program.
+        const starts = monthLabel(d.programStart);
+        const firstDay = new Date(`${d.programStart.slice(0, 10)}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+        b = {
+          subject: 'Welcome to the Organized Family Club',
+          preheader: `Your Family Vision print comes first. Monthly plans begin in ${starts}.`,
+          eyebrow: 'Founding member',
+          title: 'Welcome. You’re in.',
+          blocks: [
+            p('Thank you for joining as a founding member. Your first gift is a personalized Family Vision print for your wall. Choose your family’s word, approve it, and we’ll print and mail it right away.'),
+            p(`Your monthly plans begin in ${starts}. Your $5.90 monthly membership payments start on ${firstDay}; you won’t be charged again before then. Each paid month brings that month’s plan, prepared for your family, with a printed copy in the mail.`),
+            panel(C.sage, C.sageRule, [
+              panelTitle('Two minutes to get started'),
+              steps([
+                'Sign in with this email address. We’ll send a 6-digit code; there’s no password.',
+                'Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.',
+                'Check your mailing address, then personalize your Family Vision print.',
+              ]),
+              button('Sign in to your account', login),
+            ]),
+            small(`Stripe emails your receipt separately. You can cancel any time from your account; cancel before ${firstDay} and you won’t be charged for the monthly plans.`),
+          ],
+        };
+        break;
+      }
       b = {
         subject: 'Welcome to the Organized Family Club',
         preheader: d.plan === 'annual' ? 'Your year of family resources is ready.' : 'Your first month is ready for your family.',

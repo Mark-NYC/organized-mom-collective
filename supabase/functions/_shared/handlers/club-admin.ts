@@ -6,6 +6,7 @@
  *
  *   status         → which keys, switches, prices, portal and webhook are in place (never a secret value)
  *   stripe_setup   → creates, once: the Product, the Price of each offered plan ($5.90/month; lookup keys), the
+ *                    one-time Family Vision welcome print ($5.90, founding checkouts), the
  *                    Billing Portal configuration (no plan switching) and the webhook endpoint (its signing secret is
  *                    stored server-side, not returned). An existing portal that still allows plan switching is
  *                    updated to stop it.
@@ -13,10 +14,10 @@
  *   send_emails    { kind: 'profile_reminder'|'resource_ready'|'review', month? } → counts (each email once per key)
  *   refund         { invoice } → full refund in Stripe; the webhook then revokes that invoice's months
  */
-import { clubStripeBlocked, CLUB_LEGACY_LOOKUP_KEYS, CLUB_PRICES, CLUB_PRODUCT_TAG, OFFERED_PLANS, type ClubDeps, type ClubPlan } from '../club/deps.ts';
+import { clubStripeBlocked, CLUB_LEGACY_LOOKUP_KEYS, CLUB_PRICES, CLUB_PRODUCT_TAG, CLUB_WELCOME_PRICE, OFFERED_PLANS, type ClubDeps, type ClubPlan } from '../club/deps.ts';
 import { monthLabel, sendClubEmail, type ClubEmailKind } from '../club/emails.ts';
 import { corsHeaders, json, readJson, type Handler } from '../http.ts';
-import { clubPrice } from './club-billing.ts';
+import { clubPrice, welcomePrice } from './club-billing.ts';
 import { applyInvoice, CLUB_EVENTS, syncSubscription, webhookSecret } from './club-webhook.ts';
 import { userFromRequest } from '../club/members.ts';
 
@@ -86,10 +87,11 @@ export function createClubAdminHandler(deps: ClubDeps): Handler {
 async function status(deps: ClubDeps) {
   const [settings] = await deps.db.select<Record<string, unknown>>('club_settings', 'select=checkout_mode,first_mailing_month,cutoff_ordinal,cutoff_weekday,launch_exception_month,launch_exception_cutoff_at,member_review,portal_configuration_id');
   const blocked = clubStripeBlocked(deps);
-  let prices: Partial<Record<ClubPlan, boolean>> | null = null;
+  let prices: Partial<Record<ClubPlan | 'welcome', boolean>> | null = null;
   if (!blocked) {
     prices = {};
     for (const plan of OFFERED_PLANS) prices[plan] = Boolean(await clubPrice(deps, plan));
+    prices.welcome = Boolean(await welcomePrice(deps));
   }
   return {
     stripe_key: deps.env.clubStripeSecretKey ? deps.stripe.mode : null,
@@ -105,7 +107,7 @@ async function status(deps: ClubDeps) {
 
 async function stripeSetup(deps: ClubDeps) {
   const done: string[] = [];
-  const priceIds: Partial<Record<ClubPlan, string>> = {};
+  const priceIds: Partial<Record<ClubPlan | 'welcome', string>> = {};
   let product: string | null = null;
   const lookup = async (key: string) =>
     (await deps.stripe.request<{ data: { id: string; product: string }[] }>('GET', '/v1/prices', { 'lookup_keys[]': key, limit: 1 })).data[0] ?? null;
@@ -141,6 +143,16 @@ async function stripeSetup(deps: ClubDeps) {
       priceIds[plan] = pr.id;
       done.push(`price_${plan}`);
     }
+  }
+
+  // The one-time welcome print founding members pay at checkout (same product).
+  if (!(await lookup(CLUB_WELCOME_PRICE.lookupKey))) {
+    const pr = await deps.stripe.request<{ id: string }>('POST', '/v1/prices', {
+      product, currency: 'usd', unit_amount: CLUB_WELCOME_PRICE.amount, lookup_key: CLUB_WELCOME_PRICE.lookupKey,
+      nickname: CLUB_WELCOME_PRICE.nickname, tax_behavior: 'unspecified', metadata: { club: CLUB_PRODUCT_TAG, kind: 'welcome_print' },
+    }, `club-price-${CLUB_WELCOME_PRICE.lookupKey}-${deps.stripe.mode}`);
+    priceIds.welcome = pr.id;
+    done.push('price_welcome');
   }
 
   // One plan, so nothing to switch between: the portal updates the card, shows invoices and cancels.

@@ -6,6 +6,8 @@
  *                   Signed in: her verified email. Signed out: the email she typed (her account is created after
  *                   payment and opens only once she proves the inbox). Refuses a second live membership, reuses her
  *                   Stripe customer and any open Checkout for the same plan, so repeated clicks can't double-subscribe.
+ *                   Before the program starts (club_settings.program_start_month, founding members): the one-time
+ *                   Family Vision welcome print is charged now and the subscription bills from the program's first day.
  *   checkout_status { session_id } → { paid, email } for /club/welcome (the session id is the bearer: it's only in
  *                   her own return URL)
  *   portal          (signed in) → { url } Stripe Billing Portal: card, invoices, cancel
@@ -15,7 +17,7 @@
  * Gate: CLUB_STRIPE_SECRET_KEY set, club_settings.checkout_mode 'test' (test keys) or 'live' (live keys, plus
  * CLUB_LIVE_CHECKOUT=enabled). The browser never sees a Stripe secret or decides access.
  */
-import { clubStripeBlocked, CLUB_PRICES, isPlan, type ClubDeps, type ClubPlan } from '../club/deps.ts';
+import { clubStripeBlocked, CLUB_PRICES, CLUB_WELCOME_PRICE, isPlan, type ClubDeps, type ClubPlan } from '../club/deps.ts';
 import { userFromRequest } from '../club/members.ts';
 import { EMAIL_RE, LIVE_STATUSES } from '../club/stripe-map.ts';
 import { clientIp, corsHeaders, json, readJson, type Handler } from '../http.ts';
@@ -23,16 +25,26 @@ import { clientIp, corsHeaders, json, readJson, type Handler } from '../http.ts'
 interface CheckoutState {
   live_subscription: boolean;
   customer: string | null;
-  settings: { checkout_mode: 'off' | 'test' | 'live'; portal_configuration_id: string | null };
+  settings: { checkout_mode: 'off' | 'test' | 'live'; portal_configuration_id: string | null; billing_starts_at: string | null };
 }
 
 const SESSION = /^cs_(test|live)_[A-Za-z0-9]{10,200}$/;
 
 /** A Club price by lookup key, or null when stripe_setup hasn't made it yet. */
 export async function clubPrice(deps: ClubDeps, plan: ClubPlan): Promise<string | null> {
-  const r = await deps.stripe.request<{ data: { id: string }[] }>('GET', '/v1/prices', { 'lookup_keys[]': CLUB_PRICES[plan].lookupKey, active: true, limit: 1 });
+  return priceByLookup(deps, CLUB_PRICES[plan].lookupKey);
+}
+
+/** The one-time Family Vision welcome print price, or null when stripe_setup hasn't made it yet. */
+export const welcomePrice = (deps: ClubDeps) => priceByLookup(deps, CLUB_WELCOME_PRICE.lookupKey);
+
+async function priceByLookup(deps: ClubDeps, lookupKey: string): Promise<string | null> {
+  const r = await deps.stripe.request<{ data: { id: string }[] }>('GET', '/v1/prices', { 'lookup_keys[]': lookupKey, active: true, limit: 1 });
   return r.data[0]?.id ?? null;
 }
+
+// Checkout requires a trial to end at least 48 hours after the session is created.
+const MIN_TRIAL_SECONDS = 49 * 60 * 60;
 
 export function createClubBillingHandler(deps: ClubDeps): Handler {
   return async (req) => {
@@ -97,6 +109,11 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
 
   const price = await clubPrice(deps, plan);
   if (!price) throw new Refusal('not_configured', 503);
+  // Founding member (before the 2027 program starts): the welcome print now, monthly billing from the program's
+  // first day (a trial until then), so no payment ever buys a month without a monthly resource.
+  const startsAt = state.settings.billing_starts_at ? Math.floor(Date.parse(state.settings.billing_starts_at) / 1000) : null;
+  const welcome = startsAt ? await welcomePrice(deps) : null;
+  if (startsAt && !welcome) throw new Refusal('not_configured', 503);
 
   let customer = state.customer;
   if (customer) {
@@ -115,24 +132,24 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     if (user) await deps.db.rpc('club_member_link', { p_user: user.id, p_email: email, p_customer: customer, p_livemode: deps.stripe.mode === 'live' });
   }
 
-  const meta = { club: 'organized-family-club', plan, email, ...(user ? { user_id: user.id } : {}) };
+  const meta = { club: 'organized-family-club', plan, email, ...(user ? { user_id: user.id } : {}), ...(startsAt ? { founding: 'true' } : {}) };
   const expiresAt = deps.now() + 60 * 60;
   const site = returnBase(deps, req);
   const session = await deps.stripe.request<{ id: string; url: string; livemode: boolean; expires_at: number }>('POST', '/v1/checkout/sessions', {
     mode: 'subscription',
     customer,
     client_reference_id: user?.id,
-    line_items: [{ price, quantity: 1 }],
+    line_items: [{ price, quantity: 1 }, ...(welcome ? [{ price: welcome, quantity: 1 }] : [])],
     shipping_address_collection: { allowed_countries: ['US'] },
     customer_update: { shipping: 'auto', address: 'auto' },
     billing_address_collection: 'auto',
     allow_promotion_codes: true,
     expires_at: expiresAt,
     metadata: meta,
-    subscription_data: { metadata: meta },
+    subscription_data: { metadata: meta, ...(startsAt ? { trial_end: Math.max(startsAt, deps.now() + MIN_TRIAL_SECONDS) } : {}) },
     success_url: `${site}/club/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${site}/club/join?canceled=1`,
-  }, `club-checkout:${customer}:${plan}:${Math.floor(deps.now() / 600)}`);
+  }, `club-checkout:${customer}:${plan}${startsAt ? ':founding' : ''}:${Math.floor(deps.now() / 600)}`);
   await deps.db.rpc('club_checkout_record', {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1000).toISOString() },
   });
