@@ -2,11 +2,29 @@
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import { kits } from '../../../data/club/kits';
+import febIcon0 from '../../../../assets/icons/ofc/february/adding-detergent.png';
+import febIcon1 from '../../../../assets/icons/ofc/february/checking-care-label.png';
+import febIcon2 from '../../../../assets/icons/ofc/february/checking-lint-trap.png';
+import febIcon3 from '../../../../assets/icons/ofc/february/checking-pockets.png';
+import febIcon4 from '../../../../assets/icons/ofc/february/clothes-dryer.png';
+import febIcon5 from '../../../../assets/icons/ofc/february/clothes-hanger.png';
+import febIcon6 from '../../../../assets/icons/ofc/february/dresser.png';
+import febIcon7 from '../../../../assets/icons/ofc/february/folded-shirt.png';
+import febIcon8 from '../../../../assets/icons/ofc/february/folding-clothes.png';
+import febIcon9 from '../../../../assets/icons/ofc/february/laundry-basket.png';
+import febIcon10 from '../../../../assets/icons/ofc/february/laundry-hamper.png';
+import febIcon11 from '../../../../assets/icons/ofc/february/loading-washer.png';
+import febIcon12 from '../../../../assets/icons/ofc/february/putting-clothes-away.png';
+import febIcon13 from '../../../../assets/icons/ofc/february/selecting-wash-cycle.png';
+import febIcon14 from '../../../../assets/icons/ofc/february/sorting-clothes.png';
+import febIcon15 from '../../../../assets/icons/ofc/february/transfering-clothes.png';
+import febIcon16 from '../../../../assets/icons/ofc/february/washing-machine.png';
+const februaryIcons = { 'adding-detergent': febIcon0.src, 'checking-care-label': febIcon1.src, 'checking-lint-trap': febIcon2.src, 'checking-pockets': febIcon3.src, 'clothes-dryer': febIcon4.src, 'clothes-hanger': febIcon5.src, 'dresser': febIcon6.src, 'folded-shirt': febIcon7.src, 'folding-clothes': febIcon8.src, 'laundry-basket': febIcon9.src, 'laundry-hamper': febIcon10.src, 'loading-washer': febIcon11.src, 'putting-clothes-away': febIcon12.src, 'selecting-wash-cycle': febIcon13.src, 'sorting-clothes': febIcon14.src, 'transfering-clothes': febIcon15.src, 'washing-machine': febIcon16.src };
 const kit = kits.find(k => k.month === '2027-02');
 if (!kit) throw new Error('February kit missing');
 ---
 <AppLayout title="February · Kids Laundry Ownership">
-<div class="laundry-page family-brand club-plan" data-laundry-app data-plan-state="loading" data-kit-slug={kit.slug} data-plan-month="February">
+<div class="laundry-page family-brand club-plan" data-laundry-app data-icons={JSON.stringify(februaryIcons)} data-plan-state="loading" data-kit-slug={kit.slug} data-plan-month="February">
   <div data-plan-gate class="laundry-gate">Preparing your family's laundry plan…</div>
   <aside class="laundry-rail">
     <a href="/app/club/" class="laundry-back">← Back to Club</a>
@@ -76,6 +94,7 @@ if (!kit) throw new Error('February kit missing');
 .laundry-page .laundry-paper .megan-note p{font-size:14px}
 @media print{.laundry-page .laundry-paper{break-after:page!important;page-break-after:always!important}.laundry-page .laundry-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
 .laundry-older-paper .paper-top{margin-top:17px}.laundry-older-paper .paper-top h2{font-size:38px;margin:8px 0}.laundry-older-paper .paper-top p{font-size:12px;line-height:1.4}.laundry-older-paper .hero-icon{width:105px;height:105px}.laundry-older-paper .paper-rule{margin:18px 0 12px}.laundry-older-paper .paper-section-title{font-size:21px;margin-bottom:6px}.laundry-older-paper .laundry-instructions{gap:2px;margin:12px 0}.laundry-older-paper .laundry-instruction{grid-template-columns:52px 1fr;gap:11px;padding:5px 0}.laundry-older-paper .laundry-instruction .icon-placeholder{width:48px;height:48px;font-size:8px}.laundry-older-paper .laundry-instruction h3{font-size:16px;margin-bottom:0}.laundry-older-paper .laundry-instruction p{font-size:10px;line-height:1.35}.laundry-older-paper .laundry-instruction small{font-size:8px}.laundry-older-paper .paper-callout{margin-top:11px;padding:12px 16px}.laundry-older-paper .paper-callout strong{font-size:18px}.laundry-older-paper .megan-note{margin-top:11px;padding:11px 15px}.laundry-older-paper .megan-note p{font-size:12px;line-height:1.3}
+.laundry-icon{display:flex;align-items:center;justify-content:center;flex:none;background:transparent}.laundry-icon img{display:block;width:100%;height:100%;object-fit:contain}.laundry-older-paper .laundry-instruction{padding:3px 0}.laundry-older-paper .laundry-instructions{gap:0;margin:8px 0}.laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}.laundry-page .laundry-instruction .laundry-icon{width:62px;height:62px}.laundry-page .laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}
 </style><script>
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
@@ -94,7 +113,21 @@ if(root){
  let state:State|null=null;
  let label='Our';
  const element=(tag:string,cls?:string,value?:string)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(value!==undefined)el.textContent=value;return el};
- const icon=(name:string,cls='')=>element('div','icon-placeholder '+cls,name.toUpperCase()+' ICON');
+ const assets:Record<string,string>=JSON.parse(root.dataset.icons||'{}');
+ const aliases:Record<string,string>={
+ 'hamper':'laundry-hamper','gather':'laundry-basket','sort':'sorting-clothes','put away':'putting-clothes-away',
+ 'check pockets':'checking-pockets','load washer':'loading-washer','detergent':'adding-detergent',
+ 'choose cycle':'selecting-wash-cycle','transfer':'transfering-clothes','dry':'clothes-dryer',
+ 'fold and put away':'folding-clothes','lint filter':'checking-lint-trap'
+ };
+ const icon=(name:string,cls='')=>{
+   const file=aliases[name.toLowerCase()]||name.toLowerCase().replaceAll(' ','-');
+   const wrap=element('div','laundry-icon '+cls);
+   const url=assets[file];
+   if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='eager';wrap.append(img)}
+   else {wrap.classList.add('icon-placeholder');wrap.textContent=name.toUpperCase()+' ICON'}
+   return wrap;
+ };
  const steps={
   young:[
    ['Hamper','Put worn clothes in your hamper, not on the floor.'],
@@ -108,7 +141,8 @@ if(root){
    ['Load washer','Add clothes without overfilling the washer.'],
    ['Detergent','Use the right amount of the family detergent. Ask before handling concentrated products.'],
    ['Choose cycle','Follow garment labels and the machine instructions. Ask about unfamiliar settings.'],
-   ['Transfer','Move clothes promptly. Check lint filter before using a dryer.'],
+   ['Transfer','Move clothes promptly from washer to dryer or drying rack.'],
+   ['Lint filter','Clean the lint filter before starting the dryer.'],
    ['Dry','Use the right setting or hang delicate items to dry.'],
    ['Fold and put away','Fold or hang everything and return it to its place.']
   ]
@@ -120,7 +154,7 @@ if(root){
   const top=element('div','paper-top');const head=element('div');head.append(element('span','paper-eyebrow',label.toUpperCase()+' FAMILY'));
   const h2=element('h2');h2.append(document.createTextNode(level==='young'?'My Clothes, ':'I Can Do '));const em=element('em','',level==='young'?'My Job.':'My Laundry.');h2.append(em);head.append(h2);
   head.append(element('p','',level==='young'?'Care for what you wear. Every day.':'From dirty clothes to clean drawers. Follow the steps and ask for help when needed.'));
-  top.append(head,icon(level==='young'?'laundry hamper':'washing machine','hero-icon'));paper.append(top);
+  top.append(head,icon(level==='young'?'laundry-basket':'washing-machine','hero-icon'));paper.append(top);
   const rule=element('div','paper-rule');paper.append(rule);
   const names=element('h3','paper-section-title',children.map(c=>c.name).join(' · '));paper.append(names);
   const sub=element('p','',level==='young'?'Your jobs, every laundry day:':'Your laundry checklist:');sub.style.fontSize='13px';paper.append(sub);
