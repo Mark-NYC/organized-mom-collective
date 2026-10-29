@@ -1,41 +1,46 @@
 ---
-/**
- * Top bar on every public page with chrome, linking to the calendar's buy section. Copy and
- * phases (announce, Christmas order cutoff, days to the new year, gone) are in src/lib/countdown.ts.
- * The site is static, so the copy is set at build time and refreshed in the browser on load.
- */
-import { routes } from '../../routes';
-import { countdownCopy } from '../../lib/countdown';
-
-const copy = countdownCopy(new Date());
+import { clubPrintMessages } from '../../lib/club-print-deadline';
+const onClub = Astro.url.pathname.replace(/\/$/, '') === '/club';
+const href = onClub ? '#offer' : '/club';
+const messages = clubPrintMessages();
 ---
-
-{
-  copy && (
-    <a
-      href={routes.buy}
-      data-cta="countdown-bar"
-      data-countdown
-      class="flex min-h-10 items-center justify-center gap-2 bg-warm-button px-4 py-2 text-center text-[0.68rem] font-semibold tracking-[0.18em] text-paper uppercase hover:underline"
-    >
-      <span data-countdown-count hidden={!copy.count} class="text-[0.9rem] tracking-normal tabular-nums">{copy.count}</span>
-      <span data-countdown-text>{copy.text}</span>
-    </a>
-  )
-}
-
+<div class="club-announcement" data-club-announcement>
+ <a href={href} data-cta="club-deadline-bar"><span data-club-announcement-text>{messages[0]}</span></a>
+ <button type="button" data-club-announcement-pause aria-label="Pause announcements" aria-pressed="false"><span aria-hidden="true">Ⅱ</span></button>
+</div>
 <script>
-  import { countdownCopy } from '../../lib/countdown';
-
-  const bar = document.querySelector<HTMLElement>('[data-countdown]');
-  if (bar) {
-    const copy = countdownCopy(new Date());
-    if (!copy) bar.remove();
-    else {
-      const count = bar.querySelector<HTMLElement>('[data-countdown-count]')!;
-      count.textContent = copy.count ?? '';
-      count.hidden = !copy.count;
-      bar.querySelector('[data-countdown-text]')!.textContent = copy.text;
-    }
-  }
+ import { clubPrintMessages } from '../../lib/club-print-deadline';
+ document.querySelectorAll<HTMLElement>('[data-club-announcement]').forEach(bar => {
+  const label = bar.querySelector<HTMLElement>('[data-club-announcement-text]')!;
+  const pause = bar.querySelector<HTMLButtonElement>('[data-club-announcement-pause]')!;
+  let index = 0, paused = false, hovering = false, focused = false;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const render = () => { label.textContent = clubPrintMessages()[index]; };
+  render();
+  bar.addEventListener('mouseenter', () => { hovering = true; });
+  bar.addEventListener('mouseleave', () => { hovering = false; });
+  bar.addEventListener('focusin', () => { focused = true; });
+  bar.addEventListener('focusout', event => { focused = bar.contains(event.relatedTarget as Node); });
+  pause.addEventListener('click', () => {
+   paused = !paused;
+   pause.setAttribute('aria-pressed', String(paused));
+   pause.setAttribute('aria-label', paused ? 'Resume announcements' : 'Pause announcements');
+   pause.querySelector('span')!.textContent = paused ? '▶' : 'Ⅱ';
+  });
+  const rotation = window.setInterval(() => {
+   if (paused || hovering || focused || document.hidden || reducedMotion.matches) return;
+   index = 1 - index; render();
+  }, 8000);
+  const refresh = window.setInterval(render, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+  document.addEventListener('astro:before-swap', () => { clearInterval(rotation); clearInterval(refresh); }, { once: true });
+ });
 </script>
+<style>
+.club-announcement { display: flex; align-items: center; justify-content: center; background: #545454; color: #fff; min-height: 44px; padding: 0 12px; }
+.club-announcement a { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 12px; text-align: center; font-size: .76rem; font-weight: 600; line-height: 1.5; letter-spacing: .02em; color: inherit; text-decoration: none; }
+.club-announcement a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.club-announcement button { flex: 0 0 32px; min-height: 36px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: .8rem; }
+.club-announcement :focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+@media(max-width:600px) { .club-announcement { padding: 0 6px; } .club-announcement a { font-size: .66rem; padding-inline: 4px; } }
+</style>

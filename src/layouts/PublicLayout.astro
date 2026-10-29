@@ -84,7 +84,7 @@ const mainClass =
     <meta name="twitter:card" content="summary_large_image" />
     <slot name="head" />
   </Fragment>
-  {chrome && <CountdownBar />}
+  {(chrome || path === '/club') && <CountdownBar />}
   {chrome && <SiteHeader />}
   <main id="main" class:list={['omc-public', mainClass]}>
     <slot />
