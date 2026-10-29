@@ -54,9 +54,10 @@ const defaults = [
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>ONE SMALL STEP AT A TIME</span></div>
       <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Two quarter-sheet reminders. Cut along the dotted lines and place each one where its habit happens.</p></header>
       <div class="jhc-card-grid" data-jhc-card-grid>
+        <svg class="jhc-cut-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.2 8.2 12.8 12.8M8.2 15.8 21 3"/></svg>
+        <svg class="jhc-cut-scissors jhc-cut-scissors-second" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.2 8.2 12.8 12.8M8.2 15.8 21 3"/></svg>
         {defaults.slice(0,2).map((item, i) => (
           <article class="jhc-card" data-jhc-card={i}>
-            <svg class="jhc-cut-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.2 8.2 12.8 12.8M8.2 15.8 21 3"/></svg>
             <div class="jhc-card-top">
               <span class="jhc-brand" data-jhc-owner>MY DAILY REMINDER</span>
               <span class="jhc-card-number">0{i+1}</span>
@@ -355,7 +356,10 @@ const defaults = [
 /* Visible cutting guides, shared by preview, print and image export. */
 .jhc .jhc-card-grid .jhc-card{border:1.5px dotted #8c9799!important}
 .jhc .jhc-card-grid .jhc-card:nth-child(2){border-color:#99978e!important}
-.jhc-cut-scissors{position:absolute;top:7px;right:46px;width:17px;height:17px;color:#697477;pointer-events:none}
+.jhc .jhc-card-grid[data-jhc-card-grid]{position:relative}
+.jhc-cut-scissors{position:absolute;top:-20px;left:20px;width:17px;height:17px;color:#697477;pointer-events:none}
+.jhc-cut-scissors-second{left:428px}
+.jhc-one-card .jhc-cut-scissors-second{display:none}
 </style>
 <script>
 import {
