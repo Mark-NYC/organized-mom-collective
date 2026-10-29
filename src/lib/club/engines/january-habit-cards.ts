@@ -128,4 +128,8 @@ export function applyFinder(state: HabitState, choices: HabitChoice[]): HabitSta
 /** The printable's controller, published on its `.jhc` root as `clubPlan` (src/lib/club/plan/resource.ts). */
 export interface JhcPlan extends PlanResource<HabitState> {
   members: () => PlanMember[];
+  /** Past the editing cutoff: the sheet stops taking typed edits and the dialogs stay closed. */
+  setLocked: (on: boolean) => void;
+  /** The desktop editors: the card wording, or the habit finder. */
+  openEditor: (which: 'cards' | 'finder') => void;
 }

@@ -4,10 +4,12 @@
  * A standalone printable, not a routine chart or a tracker. The printed sheet is 2x2
  * physical cards, and every card names a pre-existing anchor and one next action.
  * Kept reusable in the Club and the unlisted owner review preview.
+ * planMode: inside a Club plan page (/app/club/january) the page brings the layout, rail and mobile screen; this keeps
+ * the editor and finder dialogs and the sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md).
  */
 import { monthColors } from '../../theme';
-interface Props { storageKey?: string; }
-const {storageKey='omc:club:january-habit-cards:v1'} = Astro.props;
+interface Props { storageKey?: string; planMode?: boolean }
+const {storageKey='omc:club:january-habit-cards:v1', planMode=false} = Astro.props;
 const defaults = [
   {name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my dishes away.', place: 'By the breakfast table', kind:'home'},
   {name: 'My backpack', anchor: 'After I put on my shoes', action: 'I grab my backpack.', place: 'Next to my shoes', kind:'school'},
@@ -15,15 +17,15 @@ const defaults = [
   {name: 'Our kitchen', anchor: 'After we finish dinner', action: 'We clear the table together.', place: 'By the kitchen table', kind:'table'},
 ];
 ---
-<div class="jhc" data-jhc-storage={storageKey} style={`--jhc-month:${monthColors[0].hex}`}>
-  <div class="jhc-intro">
+<div class="jhc" data-jhc-plan={planMode ? "" : undefined} data-jhc-storage={storageKey} style={`--jhc-month:${monthColors[0].hex}`}>
+  {!planMode && <div class="jhc-intro">
     <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · JANUARY</p>
     <h2>Your family’s habits. <em>Already prepared.</em></h2>
     <p>Up to two small habits, chosen for your family. Keep the prepared suggestion or find a habit that makes everyday life easier.</p>
-  </div>
-  <div class="jhc-workspace"><div class="jhc-config" aria-label="Customize your family habit cards">
-    <div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
-    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>Two small habits. A real difference.</h3><p>We've prepared two starting ideas. Keep them, or answer a few easy questions to choose habits that would help your family.</p><div class="jhc-summary-row"><span>Recommended habit</span><strong data-jhc-habit-label>Clear dishes after breakfast</strong></div><div class="jhc-summary-row"><span>Focus</span><strong>Up to two habits this month</strong></div><button type="button" class="jhc-finder-launch" data-jhc-finder-open>Help me find our habits</button><button type="button" class="jhc-edit-trigger" data-jhc-open>Edit our cards</button></div>
+  </div>}
+  <div class={planMode ? "jhc-plan" : "jhc-workspace"}><div class={planMode ? "jhc-plan-editor" : "jhc-config"} aria-label="Customize your family habit cards">
+    {!planMode && <Fragment><div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
+    <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>Two small habits. A real difference.</h3><p>We've prepared two starting ideas. Keep them, or answer a few easy questions to choose habits that would help your family.</p><div class="jhc-summary-row"><span>Recommended habit</span><strong data-jhc-habit-label>Clear dishes after breakfast</strong></div><div class="jhc-summary-row"><span>Focus</span><strong>Up to two habits this month</strong></div><button type="button" class="jhc-finder-launch" data-jhc-finder-open>Help me find our habits</button><button type="button" class="jhc-edit-trigger" data-jhc-open>Edit our cards</button></div></Fragment>}
     <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>Make these two habit cards fit your family. Both cards will print on one page.</p>    <div class="jhc-forms">
       {defaults.slice(0,2).map((item, i) => (
         <fieldset class="jhc-editor" data-jhc-editor={i}>
@@ -36,17 +38,17 @@ const defaults = [
       ))}
     </div>
 <button type="button" class="jhc-dialog-done" data-jhc-close>Done · See our cards</button></dialog>
-    <div class="jhc-actions">
+    {!planMode && <Fragment><div class="jhc-actions">
       <button type="button" class="jhc-jump-edit" data-jhc-finder-open>HELP ME FIND OUR HABITS</button>
       <button class="jhc-print" type="button" data-print>Print cards / Save PDF</button>
       <button type="button" class="jhc-png" data-single-page-png>Download image (PNG)</button>
    <button class="jhc-reset" type="button" data-reset>Restore suggested cards</button>
     </div>
-    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p>
+    <p class="jhc-help" aria-live="polite" data-status>Print at 100% / actual size on US Letter paper. Cut along the fine dotted lines. No tracking, points or daily checkboxes.</p></Fragment>}
   </div>
 
   <dialog class="jhc-finder-dialog" data-jhc-finder-dialog aria-labelledby="jhc-finder-title"><div class="jhc-dialog-head"><h2 id="jhc-finder-title">Find your family's habits</h2><button type="button" data-jhc-finder-close aria-label="Close habit finder">×</button></div><p class="jhc-finder-intro">We'll help you choose one simple habit at a time. You can add a second when the first is ready.</p><div data-jhc-finder-body aria-live="polite"></div><div class="jhc-finder-actions"><button type="button" data-jhc-finder-back>Back</button><button type="button" data-jhc-finder-close>Keep my current cards</button></div></dialog>
-  <div class="jhc-preview-panel"><button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>
+  <div class={planMode ? "jhc-plan-view" : "jhc-preview-panel"} data-jhc-view>{!planMode && <button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>}
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page data-plan-sheet="sheet" data-plan-sheet-end>
       <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>OUR FAMILY HABIT CARDS</span></div>
@@ -80,7 +82,7 @@ const defaults = [
   </div>
 </div>
 <style is:global>
-.jhc{color:#494741;font-family:Montserrat,Arial,sans-serif;max-width:1080px;margin:0 auto;padding:0 14px 64px}
+.jhc{color:#494741;font-family:Montserrat,Arial,sans-serif}.jhc:not([data-jhc-plan]){max-width:1080px;margin:0 auto;padding:0 14px 64px}
 .jhc *{box-sizing:border-box}.jhc-overline,.jhc-small-title,.jhc-brand,.jhc-card-number,.jhc-sheet-label,.jhc-sheet-footer,.jhc-card-bottom span,.jhc-anchor-label,.jhc-action-label{font-family:Montserrat,Arial,sans-serif;font-size:10px;letter-spacing:.15em;font-weight:700}
 .jhc-overline{color:#7b8e7b}.jhc-intro{max-width:750px;margin-bottom:30px}.jhc-intro h2{font-family:Georgia,serif;font-size:clamp(30px,4vw,44px);font-weight:400;line-height:1.14;margin:9px 0 16px}.jhc-intro>p:last-child{font-family:Georgia,serif;font-size:18px;line-height:1.55;color:#6b6860}
 .jhc-config{background:#f5f4f0;padding:24px 28px 22px;margin-bottom:32px}.jhc-config-heading h3,.jhc-preview-heading h3{font-family:Georgia,serif;font-size:26px;font-weight:400}.jhc-config-heading p,.jhc-preview-heading p{font-size:14px;color:#777269;margin-top:5px}
@@ -133,14 +135,14 @@ const defaults = [
 #club-month-content .jhc-print-scroll{overflow-x:hidden}
 #club-month-content .jhc-stage{margin:0 auto}
 #club-month-content .jhc-floating-edit,#club-month-content .jhc-jump-edit{display:none}
-#club-month-content .jhc-dialog{position:fixed;inset:0;margin:auto;width:min(650px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px;box-sizing:border-box;border:1px solid #dce2d7;border-radius:10px;background:#fff;color:#484941;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
-#club-month-content .jhc-dialog::backdrop{background:rgba(33,40,36,.52)}
-#club-month-content .jhc-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-#club-month-content .jhc-dialog-head h2{font:400 28px Georgia,serif;color:#527468;margin:0 0 15px}
-#club-month-content .jhc-dialog-head button{height:36px;width:36px;border:0;border-radius:50%;background:#edf2ec;font-size:24px;cursor:pointer}
-#club-month-content .jhc-dialog>p{font:13px/1.6 Montserrat,Arial,sans-serif}
-#club-month-content .jhc-dialog .jhc-forms{grid-template-columns:1fr 1fr}
-#club-month-content .jhc-dialog-done{width:100%;min-height:46px;border:0;background:#527468;color:#fff;font-weight:700;cursor:pointer;margin-top:18px}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog{position:fixed;inset:0;margin:auto;width:min(650px,calc(100vw - 64px));max-height:calc(100dvh - 80px);overflow-y:auto;overscroll-behavior:contain;padding:24px;box-sizing:border-box;border:1px solid #dce2d7;border-radius:10px;background:#fff;color:#484941;box-shadow:0 20px 65px #0003;font-family:Montserrat,Arial,sans-serif}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog::backdrop{background:rgba(33,40,36,.52)}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog-head h2{font:400 28px Georgia,serif;color:#527468;margin:0 0 15px}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog-head button{height:36px;width:36px;border:0;border-radius:50%;background:#edf2ec;font-size:24px;cursor:pointer}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog>p{font:13px/1.6 Montserrat,Arial,sans-serif}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog .jhc-forms{grid-template-columns:1fr 1fr}
+:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog-done{width:100%;min-height:46px;border:0;background:#527468;color:#fff;font-weight:700;cursor:pointer;margin-top:18px}
 @media screen and (min-width:1101px){
  html:has(#club-month-content .jhc),body:has(#club-month-content .jhc){height:100%;overflow:hidden}
  #club-month-content:has(.jhc){position:fixed;top:var(--adc-nav-height,118px);bottom:0;left:0;right:0;overflow:hidden;padding:0!important}
@@ -164,10 +166,10 @@ const defaults = [
  #club-month-content .jhc-jump-edit{display:flex;align-items:center;justify-content:center;min-height:45px;border:1px solid #527468;color:#527468;background:#fff;text-decoration:none;font:700 12px Montserrat,Arial,sans-serif}
  #club-month-content .jhc-actions .jhc-print{min-width:0;font-size:12px}
  #club-month-content .jhc-actions .jhc-png,#club-month-content .jhc-actions .jhc-reset{grid-column:1/-1}
- #club-month-content .jhc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
- #club-month-content .jhc-dialog .jhc-forms{grid-template-columns:1fr}
+ :is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
+ :is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog .jhc-forms{grid-template-columns:1fr}
 }
-@media print{#club-month-content .jhc-dialog,#club-month-content .jhc-floating-edit,#club-month-content .jhc-actions{display:none!important}}
+@media print{:is(#club-month-content,.jhc[data-jhc-plan]) .jhc-dialog,#club-month-content .jhc-floating-edit,#club-month-content .jhc-actions{display:none!important}}
 </style>
 
 <style is:global>
@@ -176,7 +178,7 @@ const defaults = [
 @font-face{font-family:'JHC Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
 @font-face{font-family:'JHC Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'JHC Montserrat';src:url('/fonts/worksheet/montserrat-600.ttf') format('truetype');font-weight:600;font-display:swap}
-.jhc{max-width:1440px;padding:0 clamp(16px,3vw,48px) 65px;margin:0 auto;color:#454545;font-family:'JHC Montserrat',Montserrat,sans-serif}
+.jhc:not([data-jhc-plan]){max-width:1440px;padding:0 clamp(16px,3vw,48px) 65px;margin:0 auto}.jhc{color:#454545;font-family:'JHC Montserrat',Montserrat,sans-serif}
 .jhc-intro{max-width:790px!important;margin:0 0 38px!important}
 .jhc-back{display:inline-block;margin-bottom:30px;font-size:12px;text-decoration:underline;text-underline-offset:4px}
 .jhc-overline{font:600 10px 'JHC Montserrat',sans-serif!important;letter-spacing:.17em!important;color:#545454!important}
@@ -371,6 +373,8 @@ const defaults = [
 }
 .jhc-card-grid[data-jhc-card-grid].jhc-one-card .jhc-card:first-child{border-bottom:0!important}
 .jhc-card[hidden],.jhc-editor[hidden]{display:none!important}
+/* Plan mode: the Club plan page places the sheet. */
+.jhc-plan-view .jhc-stage{margin:0 auto}
 </style>
 <script>
 import {
@@ -395,7 +399,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  // Plan state: one family at a time, in this tab only (never localStorage).
  const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v2';
  for (const legacy of [key, key+':count', key+':automatic-names']) { try { localStorage.removeItem(legacy); } catch { /* none */ } }
- let current='', members:PlanMember[]=[], persist=true;
+ let current='', members:PlanMember[]=[], persist=true, locked=false;
  let state:HabitState=readScoped(tabStorage.get(key),current,isHabitState)??freshHabitState();
  const save=()=>{if(persist)tabStorage.set(key,JSON.stringify({current,state}))};
 
@@ -419,7 +423,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  cards.forEach((card,i)=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(target=>{
   const field=target.dataset.printField as keyof Habit;
   target.addEventListener('input',()=>{state.habits[i][field]=clip(field,target.textContent??'');save();if(current)root.dispatchEvent(new CustomEvent(PLAN_CHANGE,{bubbles:true}))});
-  target.addEventListener('blur',()=>change(s=>{s.habits[i][field]=clip(field,target.textContent??'').trim()}));
+  target.addEventListener('blur',()=>{if(!locked)change(s=>{s.habits[i][field]=clip(field,target.textContent??'').trim()});else paint()});
   target.addEventListener('keydown',(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();target.blur()}});
  }));
  editors.forEach((el,i)=>el.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('[data-field]').forEach(input=>input.addEventListener('input',()=>{
@@ -529,7 +533,10 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
   finally{root.classList.remove('jhc-image-export');button.disabled=false;button.textContent=old}
  });
 
- const plan:JhcPlan={ready:()=>Boolean(current),state:()=>state,members:()=>members,update:change,replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>habitFingerprint(state)};
+
+ const setLocked=(on:boolean)=>{locked=on;cards.forEach(card=>card.querySelectorAll<HTMLElement>('[data-print-field]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true')));if(on){editorDialog?.close();finder?.close()}};
+ const openEditor=(which:'cards'|'finder')=>{if(locked)return;if(which==='finder'){finderStep=0;habitIndex=0;drafts=[];renderFinder();if(finder&&!finder.open)finder.showModal()}else if(editorDialog&&!editorDialog.open)editorDialog.showModal()};
+ const plan:JhcPlan={ready:()=>Boolean(current),state:()=>state,members:()=>members,update:change,replace:next=>{state=structuredClone(next);save();paint()},setPersist:on=>{persist=on;if(on)save()},fingerprint:()=>habitFingerprint(state),setLocked,openEditor};
  (root as HTMLElement & {clubPlan?:JhcPlan}).clubPlan=plan;
  paint();
 }
