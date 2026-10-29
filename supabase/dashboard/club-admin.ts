@@ -216,9 +216,11 @@ function createStripe(opts) {
 
 // supabase/functions/_shared/club/deps.ts
 var CLUB_PRICES = {
-  monthly: { lookupKey: "club_monthly_v1", amount: 500, interval: "month", nickname: "Organized Family Club · Monthly" },
+  monthly: { lookupKey: "club_monthly_v2", amount: 590, interval: "month", nickname: "Organized Family Club · Monthly" },
   annual: { lookupKey: "club_annual_v1", amount: 6e3, interval: "year", nickname: "Organized Family Club · Annual" }
 };
+var CLUB_LEGACY_LOOKUP_KEYS = ["club_monthly_v1", "club_annual_v1"];
+var OFFERED_PLANS = ["monthly"];
 var CLUB_PRODUCT_TAG = "organized-family-club";
 function readClubEnv(get) {
   const v = (k) => (get(k) ?? "").trim();
@@ -698,7 +700,8 @@ async function status(deps) {
   const blocked = clubStripeBlocked(deps);
   let prices = null;
   if (!blocked) {
-    prices = { monthly: Boolean(await clubPrice(deps, "monthly")), annual: Boolean(await clubPrice(deps, "annual")) };
+    prices = {};
+    for (const plan of OFFERED_PLANS) prices[plan] = Boolean(await clubPrice(deps, plan));
   }
   return {
     stripe_key: deps.env.clubStripeSecretKey ? deps.stripe.mode : null,
@@ -715,14 +718,19 @@ async function stripeSetup(deps) {
   const done = [];
   const priceIds = {};
   let product = null;
-  for (const plan of ["monthly", "annual"]) {
-    const existing = await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": CLUB_PRICES[plan].lookupKey, limit: 1 });
-    if (existing.data[0]) {
-      priceIds[plan] = existing.data[0].id;
-      product ??= existing.data[0].product;
+  const lookup = async (key) => (await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": key, limit: 1 })).data[0] ?? null;
+  for (const plan of OFFERED_PLANS) {
+    const existing = await lookup(CLUB_PRICES[plan].lookupKey);
+    if (existing) {
+      priceIds[plan] = existing.id;
+      product ??= existing.product;
     }
   }
-  if (!priceIds.monthly || !priceIds.annual) {
+  for (const key of CLUB_LEGACY_LOOKUP_KEYS) {
+    if (product) break;
+    product = (await lookup(key))?.product ?? null;
+  }
+  if (OFFERED_PLANS.some((plan) => !priceIds[plan])) {
     if (!product) {
       const p2 = await deps.stripe.request("POST", "/v1/products", {
         name: "Organized Family Club",
@@ -732,7 +740,7 @@ async function stripeSetup(deps) {
       product = p2.id;
       done.push("product");
     }
-    for (const plan of ["monthly", "annual"]) {
+    for (const plan of OFFERED_PLANS) {
       if (priceIds[plan]) continue;
       const c = CLUB_PRICES[plan];
       const pr = await deps.stripe.request("POST", "/v1/prices", {
@@ -760,19 +768,19 @@ async function stripeSetup(deps) {
         // Her email is her sign-in: it changes in her account, not here.
         customer_update: { enabled: true, allowed_updates: ["shipping", "address"] },
         subscription_cancel: { enabled: true, mode: "at_period_end", cancellation_reason: { enabled: true, options: ["too_expensive", "unused", "other"] } },
-        subscription_update: {
-          enabled: true,
-          default_allowed_updates: ["price"],
-          products: [{ product, prices: [priceIds.monthly, priceIds.annual] }],
-          // Monthly → annual: charged now, the year starts now. Annual → monthly: at the end of the paid year.
-          proration_behavior: "always_invoice",
-          schedule_at_period_end: { conditions: [{ type: "shortening_interval" }] }
-        }
+        subscription_update: { enabled: false }
       },
       metadata: { club: CLUB_PRODUCT_TAG }
-    }, `club-portal-v1-${deps.stripe.mode}`);
+    }, `club-portal-v2-${deps.stripe.mode}`);
     await deps.db.rpc("club_settings_set_portal", { p_id: cfg.id });
     done.push("portal");
+  } else {
+    const id = settings.portal_configuration_id;
+    const cfg = await deps.stripe.request("GET", `/v1/billing_portal/configurations/${id}`);
+    if (cfg.features?.subscription_update?.enabled) {
+      await deps.stripe.request("POST", `/v1/billing_portal/configurations/${id}`, { features: { subscription_update: { enabled: false } } }, `club-portal-no-switch-${id}`);
+      done.push("portal_updated");
+    }
   }
   if (!await webhookSecret(deps)) {
     const url = `${deps.env.supabaseUrl}/functions/v1/club-webhook`;

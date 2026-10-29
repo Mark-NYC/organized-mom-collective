@@ -142,7 +142,7 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
 function Status({ me, sample }: { me: Membership; sample: boolean }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const plan = me.plan === 'annual' ? 'Annual membership · $60/year' : me.plan === 'monthly' ? 'Monthly membership · $5/month' : me.grant ? 'Preview access' : 'Membership';
+  const plan = me.plan === 'annual' ? 'Annual membership' : me.plan === 'monthly' ? 'Monthly membership · $5.90/month' : me.grant ? 'Preview access' : 'Membership';
   const line = me.revoked
     ? 'This membership was closed after a payment dispute. Reply to any of our emails if that’s a mistake.'
     : me.payment_problem

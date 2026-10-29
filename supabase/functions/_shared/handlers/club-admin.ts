@@ -5,13 +5,15 @@
  * Stripe or Resend.
  *
  *   status         → which keys, switches, prices, portal and webhook are in place (never a secret value)
- *   stripe_setup   → creates, once: the Product, the $5/month and $60/year Prices (lookup keys), the Billing Portal
- *                    configuration and the webhook endpoint (its signing secret is stored server-side, not returned)
+ *   stripe_setup   → creates, once: the Product, the Price of each offered plan ($5.90/month; lookup keys), the
+ *                    Billing Portal configuration (no plan switching) and the webhook endpoint (its signing secret is
+ *                    stored server-side, not returned). An existing portal that still allows plan switching is
+ *                    updated to stop it.
  *   resync         { subscription } → re-reads a subscription and its latest invoice from Stripe
  *   send_emails    { kind: 'profile_reminder'|'resource_ready'|'review', month? } → counts (each email once per key)
  *   refund         { invoice } → full refund in Stripe; the webhook then revokes that invoice's months
  */
-import { clubStripeBlocked, CLUB_PRICES, CLUB_PRODUCT_TAG, type ClubDeps, type ClubPlan } from '../club/deps.ts';
+import { clubStripeBlocked, CLUB_LEGACY_LOOKUP_KEYS, CLUB_PRICES, CLUB_PRODUCT_TAG, OFFERED_PLANS, type ClubDeps, type ClubPlan } from '../club/deps.ts';
 import { monthLabel, sendClubEmail, type ClubEmailKind } from '../club/emails.ts';
 import { corsHeaders, json, readJson, type Handler } from '../http.ts';
 import { clubPrice } from './club-billing.ts';
@@ -84,9 +86,10 @@ export function createClubAdminHandler(deps: ClubDeps): Handler {
 async function status(deps: ClubDeps) {
   const [settings] = await deps.db.select<Record<string, unknown>>('club_settings', 'select=checkout_mode,first_mailing_month,cutoff_ordinal,cutoff_weekday,launch_exception_month,launch_exception_cutoff_at,member_review,portal_configuration_id');
   const blocked = clubStripeBlocked(deps);
-  let prices: Record<ClubPlan, boolean> | null = null;
+  let prices: Partial<Record<ClubPlan, boolean>> | null = null;
   if (!blocked) {
-    prices = { monthly: Boolean(await clubPrice(deps, 'monthly')), annual: Boolean(await clubPrice(deps, 'annual')) };
+    prices = {};
+    for (const plan of OFFERED_PLANS) prices[plan] = Boolean(await clubPrice(deps, plan));
   }
   return {
     stripe_key: deps.env.clubStripeSecretKey ? deps.stripe.mode : null,
@@ -104,14 +107,21 @@ async function stripeSetup(deps: ClubDeps) {
   const done: string[] = [];
   const priceIds: Partial<Record<ClubPlan, string>> = {};
   let product: string | null = null;
-  for (const plan of ['monthly', 'annual'] as ClubPlan[]) {
-    const existing = await deps.stripe.request<{ data: { id: string; product: string }[] }>('GET', '/v1/prices', { 'lookup_keys[]': CLUB_PRICES[plan].lookupKey, limit: 1 });
-    if (existing.data[0]) {
-      priceIds[plan] = existing.data[0].id;
-      product ??= existing.data[0].product;
+  const lookup = async (key: string) =>
+    (await deps.stripe.request<{ data: { id: string; product: string }[] }>('GET', '/v1/prices', { 'lookup_keys[]': key, limit: 1 })).data[0] ?? null;
+  for (const plan of OFFERED_PLANS) {
+    const existing = await lookup(CLUB_PRICES[plan].lookupKey);
+    if (existing) {
+      priceIds[plan] = existing.id;
+      product ??= existing.product;
     }
   }
-  if (!priceIds.monthly || !priceIds.annual) {
+  // A new price for an existing Club: keep the product its earlier prices belong to.
+  for (const key of CLUB_LEGACY_LOOKUP_KEYS) {
+    if (product) break;
+    product = (await lookup(key))?.product ?? null;
+  }
+  if (OFFERED_PLANS.some((plan) => !priceIds[plan])) {
     if (!product) {
       const p = await deps.stripe.request<{ id: string }>('POST', '/v1/products', {
         name: 'Organized Family Club',
@@ -121,7 +131,7 @@ async function stripeSetup(deps: ClubDeps) {
       product = p.id;
       done.push('product');
     }
-    for (const plan of ['monthly', 'annual'] as ClubPlan[]) {
+    for (const plan of OFFERED_PLANS) {
       if (priceIds[plan]) continue;
       const c = CLUB_PRICES[plan];
       const pr = await deps.stripe.request<{ id: string }>('POST', '/v1/prices', {
@@ -133,6 +143,7 @@ async function stripeSetup(deps: ClubDeps) {
     }
   }
 
+  // One plan, so nothing to switch between: the portal updates the card, shows invoices and cancels.
   const [settings] = await deps.db.select<{ portal_configuration_id: string | null }>('club_settings', 'select=portal_configuration_id');
   if (!settings?.portal_configuration_id) {
     const cfg = await deps.stripe.request<{ id: string }>('POST', '/v1/billing_portal/configurations', {
@@ -144,19 +155,20 @@ async function stripeSetup(deps: ClubDeps) {
         // Her email is her sign-in: it changes in her account, not here.
         customer_update: { enabled: true, allowed_updates: ['shipping', 'address'] },
         subscription_cancel: { enabled: true, mode: 'at_period_end', cancellation_reason: { enabled: true, options: ['too_expensive', 'unused', 'other'] } },
-        subscription_update: {
-          enabled: true,
-          default_allowed_updates: ['price'],
-          products: [{ product, prices: [priceIds.monthly, priceIds.annual] }],
-          // Monthly → annual: charged now, the year starts now. Annual → monthly: at the end of the paid year.
-          proration_behavior: 'always_invoice',
-          schedule_at_period_end: { conditions: [{ type: 'shortening_interval' }] },
-        },
+        subscription_update: { enabled: false },
       },
       metadata: { club: CLUB_PRODUCT_TAG },
-    }, `club-portal-v1-${deps.stripe.mode}`);
+    }, `club-portal-v2-${deps.stripe.mode}`);
     await deps.db.rpc('club_settings_set_portal', { p_id: cfg.id });
     done.push('portal');
+  } else {
+    // The first setup allowed monthly ↔ annual switching; turn it off so annual can't be bought from the portal.
+    const id = settings.portal_configuration_id;
+    const cfg = await deps.stripe.request<{ features?: { subscription_update?: { enabled?: boolean } } }>('GET', `/v1/billing_portal/configurations/${id}`);
+    if (cfg.features?.subscription_update?.enabled) {
+      await deps.stripe.request('POST', `/v1/billing_portal/configurations/${id}`, { features: { subscription_update: { enabled: false } } }, `club-portal-no-switch-${id}`);
+      done.push('portal_updated');
+    }
   }
 
   if (!(await webhookSecret(deps))) {

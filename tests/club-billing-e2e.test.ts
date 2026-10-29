@@ -75,18 +75,54 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect((await post(admin, { action: 'stripe_setup' }, 'tok_nobody')).status).toBe(403);
   });
 
-  it('stripe_setup creates the product, both prices, the portal and the webhook endpoint, once', async () => {
+  let annualPrice = '';
+  it('stripe_setup on the first setup ($5 and $60 prices, a portal that switches plans): adds $5.90, stops switching, once', async () => {
+    // The test-mode account as the first setup left it.
+    const v1 = stripe.seedPrice('club_monthly_v1', 500, 'month');
+    annualPrice = stripe.seedPrice('club_annual_v1', 6000, 'year', v1.product).id;
+    const portal = stripe.seedPortal({ subscription_update: { enabled: true, default_allowed_updates: ['price'] } });
+    sql(`update public.club_settings set portal_configuration_id = '${portal}'`);
+
     const r = await post(admin, { action: 'stripe_setup' }, 'tok_owner');
     expect(r.status).toBe(200);
-    expect(r.body.created).toEqual(['product', 'price_monthly', 'price_annual', 'portal', 'webhook']);
-    expect([...stripe.prices.values()].map((p) => [p.lookup_key, p.unit_amount, p.interval])).toEqual([['club_monthly_v1', 500, 'month'], ['club_annual_v1', 6000, 'year']]);
+    expect(r.body.created).toEqual(['price_monthly', 'portal_updated', 'webhook']);
+    expect(stripe.products).toEqual([v1.product]); // no second Club product
+    const v2 = [...stripe.prices.values()].find((p) => p.lookup_key === 'club_monthly_v2')!;
+    expect([v2.unit_amount, v2.interval, v2.product]).toEqual([590, 'month', v1.product]);
+    expect([...stripe.prices.values()].filter((p) => p.interval === 'year')).toHaveLength(1); // no new annual price
+    expect(stripe.portalConfigs.get(portal)!.features.subscription_update.enabled).toBe(false);
     expect(stripe.endpoints[0].url).toBe('https://proj.supabase.test/functions/v1/club-webhook');
     expect(JSON.stringify(r.body)).not.toContain('whsec_');
     secret = stripe.endpoints[0].secret;
     expect((await post(admin, { action: 'stripe_setup' }, 'tok_owner')).body.created).toEqual([]);
     const st = await post(admin, { action: 'status' }, 'tok_owner');
-    expect(st.body).toMatchObject({ stripe_key: 'test', webhook_secret: true, prices: { monthly: true, annual: true } });
+    expect(st.body).toMatchObject({ stripe_key: 'test', webhook_secret: true, prices: { monthly: true } });
+    expect(st.body.prices).not.toHaveProperty('annual');
     sql(`update public.club_settings set checkout_mode = 'test'`);
+  });
+
+  it('a fresh account gets one product, the $5.90 price and a portal without plan switching', async () => {
+    const fresh = new FakeClubStripe();
+    const freshDeps = makeDeps({ stripe: fresh, tokens, inbox });
+    const keep = sql(`select coalesce(portal_configuration_id, '') from public.club_settings`);
+    sql(`update public.club_settings set portal_configuration_id = null`);
+    try {
+      const r = await post(createClubAdminHandler(freshDeps), { action: 'stripe_setup' }, 'tok_owner');
+      expect(r.body.created.slice(0, 3)).toEqual(['product', 'price_monthly', 'portal']);
+      expect([...fresh.prices.values()].map((p) => [p.lookup_key, p.unit_amount, p.interval])).toEqual([['club_monthly_v2', 590, 'month']]);
+      expect(fresh.portalConfigs.get(fresh.portals[0])!.features.subscription_update.enabled).toBe(false);
+    } finally {
+      sql(`update public.club_settings set portal_configuration_id = '${keep}'`);
+    }
+  });
+
+  it('checkout sells monthly only: annual and unknown plans are refused before anything is made', async () => {
+    const before = [stripe.customers.size, stripe.sessions.size];
+    for (const plan of ['annual', 'weekly', undefined]) {
+      const r = await post(billing, { action: 'checkout', plan, email: 'annual@example.com' });
+      expect([r.status, r.body.error]).toEqual([400, 'invalid_plan']);
+    }
+    expect([stripe.customers.size, stripe.sessions.size]).toEqual(before);
   });
 
   let monthlySub = '';
@@ -102,6 +138,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(stripe.customers.size).toBe(1);
     firstSession = [...stripe.sessions.keys()][0];
     expect(stripe.sessions.get(firstSession)).toMatchObject({ mode: 'subscription' });
+    expect(stripe.prices.get(stripe.sessions.get(firstSession)!.price as string)).toMatchObject({ lookup_key: 'club_monthly_v2', unit_amount: 590 });
 
     const events = stripe.completeCheckout(firstSession, { email: 'mia@example.com' });
     // Out of order and duplicated: invoice.paid before anything else, every event twice.
@@ -143,7 +180,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   it('an existing member is refused a second checkout, signed in or not', async () => {
-    expect((await post(billing, { action: 'checkout', plan: 'annual', email: 'mia@example.com' })).body.error).toBe('already_member');
+    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'mia@example.com' })).body.error).toBe('already_member');
     expect((await post(billing, { action: 'checkout', plan: 'monthly' }, 'tok_mia@example.com')).body.error).toBe('already_member');
   });
 
@@ -190,9 +227,10 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   let annualSub = '';
-  it('new annual subscriber: twelve months and twelve mailings at once', async () => {
-    const r = await post(billing, { action: 'checkout', plan: 'annual', email: 'ana@example.com' });
-    const sid = [...stripe.sessions.values()].find((s) => s.url === r.body.url)!.id as string;
+  // Annual isn't sold (checkout refuses it), but the webhook and database must stay right for an annual
+  // subscription, so these start from a Checkout made outside club-billing.
+  it('an annual subscription (not offered at checkout): twelve months and twelve mailings at once', async () => {
+    const sid = stripe.seedCheckout('ana@example.com', annualPrice, 'annual');
     await deliver(stripe.completeCheckout(sid, { email: 'ana@example.com', address: null }));
     annualSub = [...stripe.subs.values()].find((s) => s.metadata.email === 'ana@example.com')!.id;
     expect(months('ana@example.com').split(',')).toHaveLength(12);
@@ -228,10 +266,10 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
 
   it('two checkouts that both finish: the second subscription is canceled and refunded', async () => {
     const a = await post(billing, { action: 'checkout', plan: 'monthly', email: 'twin@example.com' });
-    const b = await post(billing, { action: 'checkout', plan: 'annual', email: 'twin@example.com' });
-    expect(a.body.url).not.toBe(b.body.url);
+    // A second click gets the same Checkout; a second one that still slips through (a race) is the backstop's job.
+    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'twin@example.com' })).body.url).toBe(a.body.url);
     const sa = [...stripe.sessions.values()].find((s) => s.url === a.body.url)!.id as string;
-    const sb = [...stripe.sessions.values()].find((s) => s.url === b.body.url)!.id as string;
+    const sb = stripe.seedCheckout('twin@example.com', stripe.sessions.get(sa)!.price as string, 'monthly', stripe.sessions.get(sa)!.customer as string);
     await deliver(stripe.completeCheckout(sa, { email: 'twin@example.com' }));
     await deliver(stripe.completeCheckout(sb, { email: 'twin@example.com' }));
     const subs = [...stripe.subs.values()].filter((s) => s.metadata.email === 'twin@example.com');
@@ -250,7 +288,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(months('decline@example.com')).toBe('');
     // She can try again (the incomplete subscription doesn't count as a membership).
     expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'decline@example.com' })).status).toBe(200);
-    const abandoned = await post(billing, { action: 'checkout', plan: 'annual', email: 'walkaway@example.com' });
+    const abandoned = await post(billing, { action: 'checkout', plan: 'monthly', email: 'walkaway@example.com' });
     expect(abandoned.status).toBe(200);
     expect(sql(`select count(*) from auth.users where email = 'walkaway@example.com'`)).toBe('0');
   });

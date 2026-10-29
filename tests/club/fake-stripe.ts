@@ -10,6 +10,9 @@ import { parseForm } from '../shop/fakes';
 
 const rand = (n = 12) => randomBytes(n).toString('hex').slice(0, n * 2);
 const DAY = 86400;
+/** Form values arrive as strings; Stripe stores and returns booleans. */
+const bools = (v: any): any =>
+  v === 'true' ? true : v === 'false' ? false : v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, bools(x)])) : v;
 
 export interface Ev {
   id: string;
@@ -63,6 +66,7 @@ export class FakeClubStripe {
   disputes = new Map<string, { id: string; payment_intent: string }>();
   refunds: { id: string; payment_intent: string; amount: number; reason?: string }[] = [];
   portals: string[] = [];
+  portalConfigs = new Map<string, { id: string; features: Record<string, any> }>();
   endpoints: { id: string; url: string; secret: string; events: string[] }[] = [];
   requests: { method: string; path: string }[] = [];
   private idem = new Map<string, unknown>();
@@ -113,7 +117,14 @@ export class FakeClubStripe {
     if (method === 'POST' && path === '/v1/billing_portal/configurations') {
       const cid = `bpc_${rand()}`;
       this.portals.push(cid);
+      this.portalConfigs.set(cid, { id: cid, features: bools(p.features ?? {}) });
       return { id: cid };
+    }
+    if (path.startsWith('/v1/billing_portal/configurations/')) {
+      const cfg = this.portalConfigs.get(seg[2]);
+      if (!cfg) return this.err(404, 'No such configuration');
+      if (method === 'POST') for (const [k, v] of Object.entries(p.features ?? {})) cfg.features[k] = { ...cfg.features[k], ...bools(v) };
+      return cfg;
     }
     if (method === 'POST' && path === '/v1/billing_portal/sessions') {
       if (!this.customers.has(p.customer)) return this.err(400, 'No such customer');
@@ -187,6 +198,37 @@ export class FakeClubStripe {
   }
 
   // ---------------------------------------------------------------- simulation
+
+  /** Account state made outside the functions (the Dashboard, or an earlier setup). */
+  seedPrice(lookupKey: string, unitAmount: number, interval: 'month' | 'year', product = this.products[0] ?? `prod_${rand()}`) {
+    if (!this.products.includes(product)) this.products.push(product);
+    const pr = { id: `price_${rand()}`, product, lookup_key: lookupKey, unit_amount: unitAmount, interval };
+    this.prices.set(pr.id, pr);
+    return pr;
+  }
+  seedPortal(features: Record<string, any>) {
+    const cid = `bpc_${rand()}`;
+    this.portals.push(cid);
+    this.portalConfigs.set(cid, { id: cid, features });
+    return cid;
+  }
+  /**
+   * A subscription Checkout opened without club-billing, as if the Club's metadata were set by hand: how the tests
+   * still exercise the webhook and database for an annual subscription now that checkout offers monthly only.
+   */
+  seedCheckout(email: string, priceId: string, plan: string, customer?: string) {
+    const c = (customer && this.customers.get(customer)) || { id: `cus_${rand()}`, email, metadata: { club: 'organized-family-club' } };
+    this.customers.set(c.id, c);
+    const meta = { club: 'organized-family-club', plan, email };
+    const s = {
+      id: `cs_test_${rand(16)}`, mode: 'subscription', status: 'open', payment_status: 'unpaid', livemode: false,
+      customer: c.id, subscription: null, client_reference_id: null, metadata: meta, subscription_metadata: meta,
+      price: priceId, expires_at: this.clock + 3600, url: `https://checkout.stripe.test/${rand()}`,
+      customer_details: null, collected_information: null,
+    };
+    this.sessions.set(s.id, s);
+    return s.id;
+  }
 
   private priceOf(id: string) {
     return this.prices.get(id)!;

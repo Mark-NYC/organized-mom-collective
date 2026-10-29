@@ -32,12 +32,21 @@ export interface ClubDeps {
   now: () => number;
 }
 
+// Stripe Prices can't change amount, so a new price is a new lookup key. v1 ($5/month, $60/year) was the first
+// test-mode setup and is never sold; v2 is $5.90/month.
 export const CLUB_PRICES = {
-  monthly: { lookupKey: 'club_monthly_v1', amount: 500, interval: 'month' as const, nickname: 'Organized Family Club · Monthly' },
+  monthly: { lookupKey: 'club_monthly_v2', amount: 590, interval: 'month' as const, nickname: 'Organized Family Club · Monthly' },
   annual: { lookupKey: 'club_annual_v1', amount: 6000, interval: 'year' as const, nickname: 'Organized Family Club · Annual' },
 };
+/** Older lookup keys: only so stripe_setup finds the existing Club product instead of making a second one. */
+export const CLUB_LEGACY_LOOKUP_KEYS = ['club_monthly_v1', 'club_annual_v1'];
 export type ClubPlan = keyof typeof CLUB_PRICES;
-export const isPlan = (v: unknown): v is ClubPlan => v === 'monthly' || v === 'annual';
+/**
+ * What can be bought. Annual isn't offered yet: checkout refuses it, stripe_setup creates no annual price and the
+ * Billing Portal allows no plan switching. The webhook and database still understand an annual subscription.
+ */
+export const OFFERED_PLANS: readonly ClubPlan[] = ['monthly'];
+export const isPlan = (v: unknown): v is ClubPlan => OFFERED_PLANS.includes(v as ClubPlan);
 
 export const CLUB_PRODUCT_TAG = 'organized-family-club';
 

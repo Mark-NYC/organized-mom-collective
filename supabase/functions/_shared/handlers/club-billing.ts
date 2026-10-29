@@ -1,14 +1,14 @@
 /**
  * POST /functions/v1/club-billing (the Club's pages).
  *
- *   checkout        { plan: 'monthly'|'annual', email? } (+ her access token if signed in)
+ *   checkout        { plan: 'monthly', email? } (+ her access token if signed in; annual isn't offered yet)
  *                   → { url } (Stripe-hosted Checkout) | { error: 'already_member' | 'checkout_closed' | … }
  *                   Signed in: her verified email. Signed out: the email she typed (her account is created after
  *                   payment and opens only once she proves the inbox). Refuses a second live membership, reuses her
  *                   Stripe customer and any open Checkout for the same plan, so repeated clicks can't double-subscribe.
  *   checkout_status { session_id } → { paid, email } for /club/welcome (the session id is the bearer: it's only in
  *                   her own return URL)
- *   portal          (signed in) → { url } Stripe Billing Portal: card, invoices, plan change, cancel
+ *   portal          (signed in) → { url } Stripe Billing Portal: card, invoices, cancel
  *   sync_email      (signed in) → { updated } after she changed her sign-in email in Supabase Auth: the Stripe
  *                   customer and receipts follow it
  *

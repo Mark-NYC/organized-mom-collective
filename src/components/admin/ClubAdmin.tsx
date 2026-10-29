@@ -447,7 +447,7 @@ interface Status {
   live_switch: boolean;
   webhook_secret: boolean;
   resend: boolean;
-  prices: { monthly: boolean; annual: boolean } | null;
+  prices: { monthly?: boolean } | null;
   settings: {
     checkout_mode: string;
     first_mailing_month: string;
@@ -556,7 +556,7 @@ function Setup({ session }: AdminContext) {
         <h2 className="label">Readiness</h2>
         <ul className="mt-2 space-y-1 text-[0.95rem]">
           <li>{yes(Boolean(st.stripe_key))} Club Stripe key (CLUB_STRIPE_SECRET_KEY): {st.stripe_key ?? 'not set'}{st.stripe_blocked ? ` · ${st.stripe_blocked}` : ''}</li>
-          <li>{yes(Boolean(st.prices?.monthly && st.prices?.annual))} Prices: $5/month and $60/year</li>
+          <li>{yes(Boolean(st.prices?.monthly))} Price: $5.90/month (annual isn’t offered)</li>
           <li>{yes(Boolean(st.settings.portal_configuration_id))} Billing Portal configuration</li>
           <li>{yes(st.webhook_secret)} Webhook endpoint ({st.webhook_url})</li>
           <li>{yes(st.resend)} Resend (RESEND_API_KEY)</li>

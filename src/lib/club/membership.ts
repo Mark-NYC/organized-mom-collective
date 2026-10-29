@@ -14,19 +14,16 @@ const KEY = SUPABASE_ANON_KEY;
 /** Shows the join page's plans (the server still decides whether checkout is open). */
 export const clubCheckoutEnabled = () => import.meta.env.PUBLIC_CLUB_CHECKOUT_ENABLED === 'true';
 
+/** Plans a membership can be on (an annual one is handled, but checkout sells monthly only). */
 export type Plan = 'monthly' | 'annual';
-export const PLANS: Record<Plan, { price: string; per: string; summary: string; points: string[] }> = {
+/** What the join page offers. Annual isn't offered yet (club-billing refuses it too). */
+export type OfferedPlan = 'monthly';
+export const PLANS: Record<OfferedPlan, { price: string; per: string; summary: string; points: string[] }> = {
   monthly: {
-    price: '$5',
+    price: '$5.90',
     per: 'a month',
     summary: 'One personalized resource and one printed mailing for each month you’re a member.',
     points: ['This month’s resource, prepared for your family', 'A printed mailing each paid month', 'Cancel any time; what you received stays yours'],
-  },
-  annual: {
-    price: '$60',
-    per: 'a year',
-    summary: 'All twelve monthly resources for your membership year, unlocked now, with a printed mailing every month.',
-    points: ['The full twelve-month collection, right away', 'Twelve monthly printed mailings', 'Renews yearly; cancel any time before'],
   },
 };
 
@@ -42,7 +39,7 @@ async function billing<T>(action: string, body: Record<string, unknown> = {}, si
   return data;
 }
 
-export const startCheckout = (plan: Plan, email?: string) => billing<{ url: string }>('checkout', { plan, ...(email ? { email } : {}) });
+export const startCheckout = (plan: OfferedPlan, email?: string) => billing<{ url: string }>('checkout', { plan, ...(email ? { email } : {}) });
 export const checkoutStatus = (sessionId: string) => billing<{ paid: boolean; open: boolean; email: string }>('checkout_status', { session_id: sessionId }, false);
 export const openPortal = () => billing<{ url: string }>('portal');
 export const syncEmail = () => billing<{ updated: boolean }>('sync_email');
@@ -53,7 +50,7 @@ export const billingErrorText = (code: string) =>
     already_member: 'This email already has a membership. Log in to see your resources.',
     checkout_closed: 'Enrollment isn’t open yet. Please check back soon.',
     invalid_email: 'Check the email address and try again.',
-    invalid_plan: 'Choose monthly or annual.',
+    invalid_plan: 'Choose the monthly membership.',
     rate_limited: 'Too many tries from this connection. Wait a few minutes and try again.',
     not_signed_in: 'Please sign in again.',
     no_membership: 'We couldn’t find a membership for this account.',

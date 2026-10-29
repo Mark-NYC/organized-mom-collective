@@ -1,12 +1,14 @@
 # Organized Family Club: paid membership (operations and setup)
 
-**Status (2026-10-26):** built, tested, database applied to production, Edge Functions deployed. **Nothing can be bought yet**: the Club has no Stripe key, checkout is `off`, and the site flags are off. Live payments need the owner's explicit approval.
+**Status (2026-10-29):** built, tested, database applied to production. **Nothing can be bought yet**: Stripe is in test mode only (`club_settings.checkout_mode = test`; a test-mode portal and webhook secret exist, from the first setup at $5/$60), and the site flags are off. **Launch price: $5.90/month, monthly only** (owner, 2026-10-29); annual is built but not offered. The deployed Edge Functions predate that change: redeploy them from `main` (step 6) and press **Set up Stripe (test mode)** again (step 7). Live payments need the owner's explicit approval.
 
 Guiding principle: **One family. One monthly problem. One tailored plan. Delivered ready to use.**
 
-## The two plans
+## The plans
 
-| | Monthly · $5/month | Annual · $60/year |
+**Only monthly is sold** ($5.90/month, `club_monthly_v2`). Annual stays in the code and the database so an annual subscription would still be handled correctly, but `club-billing` refuses it, `stripe_setup` creates no annual price, and the Billing Portal allows no plan switching. Offering it later: add it to `OFFERED_PLANS` (`supabase/functions/_shared/club/deps.ts`) and `PLANS` (`src/lib/club/membership.ts`), and re-enable plan switching in the portal.
+
+| | Monthly · $5.90/month (offered) | Annual (not offered) |
 | --- | --- | --- |
 | Digital | The month each paid invoice covers (a November 2 joiner gets November; December's payment unlocks December) | The twelve consecutive months starting with the month paid, unlocked at once |
 | Printed mailing | That same month's resource, one per paid month (from `first_mailing_month`). Paid by the month's cutoff → regular batch; paid after (every monthly renewal, late joiners) → that month's catch-up batch | Twelve, one per month, same months |
@@ -14,7 +16,7 @@ Guiding principle: **One family. One monthly problem. One tailored plan. Deliver
 | Failed payment | Nothing new until it's paid; months already received stay | Same |
 | Cancel | At period end (Billing Portal); everything received stays, read and print only | Same |
 | Refund (full) / chargeback | Revokes exactly the months that invoice granted, cancels their unmailed mailings | Same |
-| Plan change | Monthly → annual: charged now; the twelve paid months start with the first month she doesn't already have (a month is never sold twice). Annual → monthly: takes effect at the end of the paid year | |
+| Plan change (not offered: the portal allows no switching) | Monthly → annual: charged now; the twelve paid months start with the first month she doesn't already have (a month is never sold twice). Annual → monthly: takes effect at the end of the paid year | |
 
 No automatic discount. Pausing isn't offered (a paused or unpaid subscription pays no invoice, so it grants nothing).
 
@@ -64,7 +66,7 @@ Supabase API connections load pg-safeupdate: every UPDATE/DELETE in a database f
 6. Recommended: redeploy the three functions from the repo once (`supabase functions deploy club-billing club-webhook club-admin --no-verify-jwt`) so the deployed code is byte-for-byte the reviewed source. Today's deploy was made from the same build through the Supabase connector.
 
 ### Stripe (test mode first)
-7. In `/admin/club → Setup`, press **Set up Stripe (test mode)**. It creates, once: the product, `club_monthly_v1` ($5/month) and `club_annual_v1` ($60/year), the Billing Portal configuration, and the webhook endpoint `…/functions/v1/club-webhook` (its signing secret is stored server-side).
+7. In `/admin/club → Setup`, press **Set up Stripe (test mode)**. It creates, once: the product, `club_monthly_v2` ($5.90/month), the Billing Portal configuration (no plan switching), and the webhook endpoint `…/functions/v1/club-webhook` (its signing secret is stored server-side). On the test account the first setup already made (product, `club_monthly_v1` $5, `club_annual_v1` $60, a portal that allowed switching, the webhook), pressing it again keeps the product and webhook, adds the $5.90 price and turns plan switching off. The old $5 and $60 prices are never used; archive them in the Stripe Dashboard if you like.
 8. Stripe Dashboard → Billing → **Revenue recovery:** Smart Retries on, end within ~2 weeks, then **cancel** the subscription. Turn on Stripe's customer emails for receipts and failed payments.
 9. Decide sales tax for a subscription with a printed component (accountant), as for the shop.
 
@@ -73,7 +75,7 @@ Supabase API connections load pg-safeupdate: every UPDATE/DELETE in a database f
 11. Supabase function secret `CLUB_ALLOWED_ORIGINS` = the preview's stable branch URL (e.g. `https://claude-vibrant-wozniak-kjitd.organized-mom-collective.pages.dev`). It lets the Club functions answer that page (CORS) and sends Stripe Checkout and the Billing Portal back to it; it doesn't touch the shop's `SHOP_ALLOWED_ORIGINS`.
 
 ### Test on the preview (30 minutes)
-11. Setup → checkout **test**. Buy monthly with card `4242 4242 4242 4242` → welcome page → code → family → address → dashboard shows November. Admin → Members shows her. Buy again with the same email → "already a member". Billing Portal → switch to annual → twelve months. Cancel → "set to end" email. Use a Stripe **test clock** for renewal and a declined renewal (`4000 0000 0000 0341`). Refund an invoice from Stripe → its months disappear.
+11. Setup → checkout **test**. Buy monthly with card `4242 4242 4242 4242` → welcome page → code → family → address → dashboard shows November. Admin → Members shows her. Buy again with the same email → "already a member". Billing Portal → card, invoices and cancel only (no plan switch). Cancel → "set to end" email. Use a Stripe **test clock** for renewal and a declined renewal (`4000 0000 0000 0341`). Refund an invoice from Stripe → its months disappear.
 12. Publish November (and December) in **Monthly resources** once their content is final.
 
 ### Going live (needs your explicit approval)

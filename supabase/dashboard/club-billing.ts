@@ -203,10 +203,11 @@ function createStripe(opts) {
 
 // supabase/functions/_shared/club/deps.ts
 var CLUB_PRICES = {
-  monthly: { lookupKey: "club_monthly_v1", amount: 500, interval: "month", nickname: "Organized Family Club · Monthly" },
+  monthly: { lookupKey: "club_monthly_v2", amount: 590, interval: "month", nickname: "Organized Family Club · Monthly" },
   annual: { lookupKey: "club_annual_v1", amount: 6e3, interval: "year", nickname: "Organized Family Club · Annual" }
 };
-var isPlan = (v) => v === "monthly" || v === "annual";
+var OFFERED_PLANS = ["monthly"];
+var isPlan = (v) => OFFERED_PLANS.includes(v);
 function readClubEnv(get) {
   const v = (k) => (get(k) ?? "").trim();
   const shop = readEnv(get);

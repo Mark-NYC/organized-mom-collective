@@ -1,17 +1,17 @@
 /**
- * /club/join: choose monthly or annual, give an email (or use her signed-in one), go to Stripe's secure Checkout.
+ * /club/join: the monthly membership ($5.90; annual isn't offered yet): give an email (or use her signed-in one), go to Stripe's secure Checkout.
  * Her account is made after payment and opens only once she signs in with that email's code. The server decides
  * whether checkout is open (club_settings.checkout_mode) and refuses a second membership.
  */
 import { useEffect, useState } from 'react';
 import { getSession, type AccountSession } from '../../lib/account';
-import { billingErrorText, PLANS, startCheckout, type Plan } from '../../lib/club/membership';
+import { billingErrorText, PLANS, startCheckout, type OfferedPlan } from '../../lib/club/membership';
 import { routes } from '../../routes';
 import { CLUB_NAME } from '../../data/club/config';
 
 export default function ClubJoin() {
   const [session, setSession] = useState<AccountSession | null | undefined>(undefined);
-  const [plan, setPlan] = useState<Plan>('monthly');
+  const [plan, setPlan] = useState<OfferedPlan>('monthly');
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -43,9 +43,9 @@ export default function ClubJoin() {
       {canceled && <p role="status" className="mt-6 border-l-[3px] border-sage bg-sage-wash px-4 py-3">No problem. Nothing was charged. Pick a plan whenever you’re ready.</p>}
 
       <form onSubmit={go} className="mt-8" noValidate>
-        <fieldset className="grid gap-4 sm:grid-cols-2">
-          <legend className="sr-only">Choose a plan</legend>
-          {(Object.keys(PLANS) as Plan[]).map((p) => (
+        <fieldset className={`grid gap-4 ${Object.keys(PLANS).length > 1 ? 'sm:grid-cols-2' : 'max-w-md'}`}>
+          <legend className="sr-only">Your membership</legend>
+          {(Object.keys(PLANS) as OfferedPlan[]).map((p) => (
             <label key={p} className={`block cursor-pointer bg-white p-6 ring-1 ${plan === p ? 'ring-2 ring-warm-ink' : 'ring-warm-rule'}`}>
               <span className="flex items-center gap-3">
                 <input type="radio" name="plan" value={p} checked={plan === p} onChange={() => setPlan(p)} className="h-5 w-5" />

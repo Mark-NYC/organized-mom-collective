@@ -68,9 +68,9 @@ Kept for reference only, not planned. Don't build or mention in customer copy.
 
 ## Proposed: Organized Family Club (planning, not launched)
 
-**Status (2026-10-26): membership infrastructure built and tested in Stripe test mode ($5/month, $60/year); not for sale, live payments not approved, not to be mentioned in customer copy until launch** ([../club/MEMBERSHIP.md](../club/MEMBERSHIP.md)). Owner proposal, October 22, 2026; architecture and plan in [../club/IMPLEMENTATION_PLAN.md](../club/IMPLEMENTATION_PLAN.md), curriculum in [../club/YEAR_ONE_CALENDAR.md](../club/YEAR_ONE_CALENDAR.md).
+**Status (2026-10-26): membership infrastructure built and tested in Stripe test mode (launch price $5.90/month, monthly only; owner, 2026-10-29); not for sale, live payments not approved, not to be mentioned in customer copy until launch** ([../club/MEMBERSHIP.md](../club/MEMBERSHIP.md)). Owner proposal, October 22, 2026; architecture and plan in [../club/IMPLEMENTATION_PLAN.md](../club/IMPLEMENTATION_PLAN.md), curriculum in [../club/YEAR_ONE_CALENDAR.md](../club/YEAR_ONE_CALENDAR.md).
 
-- A monthly membership (working hypothesis: $5/month including the printed mailer, until fulfillment quotes are in) adding to the calendar business, not replacing it.
+- A monthly membership ($5.90/month including the printed mailer and U.S. shipping; owner, 2026-10-29) adding to the calendar business, not replacing it.
 - **One letter, one action, one tool** (owner direction, 2026-10-23): each month a small printed letter (the centerpiece: Megan's letter, one practical action, short guidance, a QR code), one family action that's useful on paper, and one optional personalized tool online. The wall calendar stays the family's plan; the Club is never a second planner or homework for Mom. She saves her family once (first names, ages, roles; children never get accounts). January through October and December 2027 are built this way (June with two optional tools); November still has the earlier, larger shape and moves to this one later.
 - Twelve themes, November to October, each moving one area of family life onto someone else's row ([YEAR_ONE_CALENDAR.md](../club/YEAR_ONE_CALENDAR.md)).
 - **Depends on:** customer accounts step 1 being live (and `/privacy` published), Stripe subscriptions (none exist today), a mail house, and the decisions listed in the plan.
