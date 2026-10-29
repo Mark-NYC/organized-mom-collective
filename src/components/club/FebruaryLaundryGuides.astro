@@ -1,0 +1,402 @@
+---
+/**
+ * February 2027 laundry ownership guides: "My Clothes, My Job" for younger children and "I Can Do My Own Laundry"
+ * for older children, one US Letter page per readiness level in use (children at the same level share a page).
+ * Levels, laundry days and the machine operator: src/lib/club/engines/february-laundry.ts.
+ * On the Club plan page (/app/club/february) the page brings the layout, rail and mobile screen; this keeps the
+ * editor and the sheets, marked data-plan-sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md).
+ * Artwork: assets/icons/ofc/february/ (hand-drawn, transparent lossless WebP).
+ */
+import febIcon0 from '../../../assets/icons/ofc/february/adding-detergent.webp';
+import febIcon1 from '../../../assets/icons/ofc/february/checking-care-label.webp';
+import febIcon2 from '../../../assets/icons/ofc/february/checking-lint-trap.webp';
+import febIcon3 from '../../../assets/icons/ofc/february/checking-pockets.webp';
+import febIcon4 from '../../../assets/icons/ofc/february/clothes-dryer.webp';
+import febIcon5 from '../../../assets/icons/ofc/february/clothes-hanger.webp';
+import febIcon6 from '../../../assets/icons/ofc/february/dresser.webp';
+import febIcon7 from '../../../assets/icons/ofc/february/folded-shirt.webp';
+import febIcon8 from '../../../assets/icons/ofc/february/folding-clothes.webp';
+import febIcon9 from '../../../assets/icons/ofc/february/laundry-basket.webp';
+import febIcon10 from '../../../assets/icons/ofc/february/laundry-hamper.webp';
+import febIcon11 from '../../../assets/icons/ofc/february/loading-washer.webp';
+import febIcon12 from '../../../assets/icons/ofc/february/putting-clothes-away.webp';
+import febIcon13 from '../../../assets/icons/ofc/february/selecting-wash-cycle.webp';
+import febIcon14 from '../../../assets/icons/ofc/february/sorting-clothes.webp';
+import febIcon15 from '../../../assets/icons/ofc/february/transfering-clothes.webp';
+import febIcon16 from '../../../assets/icons/ofc/february/washing-machine.webp';
+import febIcon17 from '../../../assets/icons/ofc/february/dirty-laundry.webp';
+import febSortingDirty from '../../../assets/icons/ofc/february/sorting-dirty-laundry.webp';
+const februaryIconSources = { 'adding-detergent': febIcon0, 'checking-care-label': febIcon1, 'checking-lint-trap': febIcon2, 'checking-pockets': febIcon3, 'clothes-dryer': febIcon4, 'clothes-hanger': febIcon5, 'dresser': febIcon6, 'folded-shirt': febIcon7, 'folding-clothes': febIcon8, 'laundry-basket': febIcon9, 'laundry-hamper': febIcon10, 'loading-washer': febIcon11, 'putting-clothes-away': febIcon12, 'selecting-wash-cycle': febIcon13, 'sorting-clothes': febIcon14, 'transfering-clothes': febIcon15, 'washing-machine': febIcon16, 'dirty-laundry': febIcon17, 'sorting-dirty-laundry': febSortingDirty };
+// Lossless transparent WebPs retain the PNG masters' full resolution for print.
+const februaryIcons = Object.fromEntries(
+  Object.entries(februaryIconSources).map(([name, src]) => [name, src.src])
+);
+interface Props { storageKey: string }
+const { storageKey } = Astro.props;
+---
+<div class="laundry-page lg" data-lg data-lg-key={storageKey} data-icons={JSON.stringify(februaryIcons)}>
+  <dialog class="lg-dialog" data-lg-editor aria-labelledby="lg-editor-title">
+    <div class="lg-dialog-head"><div><p class="laundry-kicker">Make it yours · February</p><h2 id="lg-editor-title">Your family’s laundry plan</h2></div><button type="button" class="lg-close" data-lg-close aria-label="Close">×</button></div>
+    <section class="laundry-controls">
+      <p class="laundry-kicker">Each child’s laundry level</p>
+      <div data-child-controls></div>
+      <fieldset class="laundry-days"><legend>Laundry day(s)</legend><div data-days-controls></div></fieldset>
+      <label>Machine operator<select data-operator></select></label>
+      <p class="laundry-hint">Age suggests a starting point. Change a child's level if their readiness is different. Machine operation requires training and supervision as appropriate.</p>
+    </section>
+    <p class="laundry-hint" data-guide-summary></p>
+    <div class="lg-dialog-actions"><button type="button" class="lg-restore" data-reset>Restore suggested plan</button><button type="button" class="lg-done" data-lg-close>Done · See our guides</button></div>
+  </dialog>
+  <div class="lg-sheets" data-pages></div>
+  <p class="lg-empty" data-lg-empty hidden>Add your children to your family profile and their laundry guides are prepared here.</p>
+</div>
+<style is:global>
+.laundry-page{--ink:#49403d;--soft:#827b72;--sage:#55735d;--rule:#ddd9d0;--rose:#9a6876;font-family:var(--font-sans,Arial,sans-serif);color:var(--ink);background:#fffdfa;min-height:100vh}
+.laundry-kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--soft)}
+.laundry-rail h1{font:400 43px/1.1 var(--font-serif,Georgia,serif);letter-spacing:-.025em;margin:15px 0}.laundry-rail h1 em,.laundry-paper h2 em{color:var(--rose);font-weight:400}
+.laundry-controls{border-top:1px solid var(--rule);padding-top:20px}.laundry-controls .laundry-kicker{margin:0 0 18px}
+.laundry-controls label{display:block;font-size:12px;font-weight:700;margin:15px 0;color:var(--ink)}
+.laundry-controls input,.laundry-controls select{display:block;width:100%;min-height:43px;border:1px solid #d7d3cc;background:#fff;border-radius:3px;padding:10px;font:400 14px var(--font-sans,Arial,sans-serif);margin-top:7px;color:var(--ink)}
+.laundry-child{border-top:1px solid #eae6e0;margin-top:18px;padding-top:3px}.laundry-hint,.laundry-disclaimer{font-size:12px;line-height:1.65;color:var(--soft)}
+.laundry-paper-stack{display:flex;flex-direction:column;align-items:center;gap:26px}.laundry-paper{width:816px;height:1056px;flex:none;position:relative;overflow:hidden;background:#fffefa;box-shadow:0 10px 34px #3d383122;padding:52px 59px 46px;font-family:var(--font-sans,Arial,sans-serif);color:#514b45}
+.paper-header,.paper-footer{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.16em;font-weight:700;color:#7b8175}.paper-header{border-bottom:1px solid #d5d9cf;padding-bottom:16px}.paper-footer{position:absolute;bottom:24px;left:59px;right:59px;border-top:1px solid #d5d9cf;padding-top:14px;font-size:9px}
+.paper-top{display:flex;justify-content:space-between;align-items:center;gap:25px;margin-top:42px}.paper-eyebrow{font-size:11px;letter-spacing:.16em;color:#71806f;font-weight:700}.paper-top h2,.back-intro h2{font:400 53px/1.05 var(--font-serif,Georgia,serif);letter-spacing:-.03em;margin:15px 0}.paper-top p,.back-intro p{font-size:14px;color:#80766e;line-height:1.65;max-width:380px}
+.icon-placeholder{border:1.5px dashed #adada4;background:#f7f5f0;color:#98948c;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;line-height:1.35;letter-spacing:.06em;font-weight:700;flex:none}
+.hero-icon{width:150px;height:150px;border-radius:50%}.paper-rule{border-top:1px solid #d8d7d0;margin:34px 0 24px}.paper-section-title{font:400 24px var(--font-serif,Georgia,serif);margin-bottom:20px}
+.ownership-card{display:flex;gap:20px;border:1px solid #e2e1d8;background:#faf9f5;padding:23px;margin-bottom:16px;min-height:180px}.ownership-icon{width:86px;height:86px;border-radius:50%}.ownership-card h3{font:400 26px var(--font-serif,Georgia,serif);margin:0 0 11px}.ownership-card h3 span{font:500 12px var(--font-sans,Arial,sans-serif);color:#777f72}.ownership-card ol{padding-left:18px;margin:0}.ownership-card li{font-size:13px;line-height:1.7}
+.operator{display:flex;align-items:center;gap:18px;margin:23px 0}.operator-icon{height:68px;width:68px}.operator p{font-size:13px;line-height:1.7;margin:0}.paper-callout{background:#e5eee5;padding:22px 25px;margin-top:20px}.paper-callout span,.megan-note span{display:block;color:#57715e;font-size:10px;letter-spacing:.16em;font-weight:800;margin-bottom:8px}.paper-callout strong{font:400 23px var(--font-serif,Georgia,serif)}.paper-callout p{font-size:12px;margin:6px 0 0}
+.back-intro{margin:43px 0 29px}.back-intro h2{font-size:48px}.laundry-steps{display:grid;gap:10px}.laundry-step{display:grid;grid-template-columns:94px 35px 1fr;align-items:center;gap:20px;border-bottom:1px solid #e1e0da;padding:10px 0}.laundry-step .icon-placeholder{width:88px;height:88px}.laundry-step span{font:400 27px var(--font-serif,Georgia,serif);color:#8b9a89}.laundry-step h3{font:400 22px var(--font-serif,Georgia,serif);margin:0 0 5px}.laundry-step p{font-size:12px;color:#7c736b;margin:0}.megan-note{background:#f6edef;padding:22px 27px;margin-top:30px}.megan-note span{color:#9a6876}.megan-note p{font:italic 17px/1.55 var(--font-serif,Georgia,serif);margin:5px 0 9px}.megan-note strong{font:400 15px var(--font-serif,Georgia,serif)}
+
+.laundry-child{padding-bottom:8px}
+.laundry-child .laundry-age{color:#81796f;font-size:11px;font-weight:400}
+.laundry-paper .paper-top{margin-top:26px}
+.laundry-paper .paper-top h2{font-size:44px}
+.laundry-paper .ownership-card{min-height:0;margin-bottom:11px;padding:16px 20px}
+.laundry-paper .ownership-card ol{padding-left:18px}
+.laundry-paper .paper-callout{margin-top:16px}
+.laundry-page .laundry-instructions{margin:30px 0 22px;display:grid;gap:10px}
+.laundry-page .laundry-instruction{display:grid;grid-template-columns:70px 1fr;gap:16px;align-items:center;border-bottom:1px solid #e0ded7;padding:8px 0}
+.laundry-page .laundry-instruction .icon-placeholder{width:62px;height:62px}
+.laundry-page .laundry-instruction h3{font:400 19px var(--font-serif,Georgia,serif);margin:0 0 3px}
+.laundry-page .laundry-instruction p{font-size:12px;line-height:1.45;margin:0;color:#777269}
+.laundry-page .laundry-instruction small{font-size:10px;color:#6a826d;letter-spacing:.13em}
+.laundry-page .laundry-paper .megan-note{margin-top:22px;padding:16px 20px}
+.laundry-page .laundry-paper .megan-note p{font-size:14px}
+.laundry-older-paper .paper-top{margin-top:17px}.laundry-older-paper .paper-top h2{font-size:38px;margin:8px 0}.laundry-older-paper .paper-top p{font-size:12px;line-height:1.4}.laundry-older-paper .hero-icon{width:105px;height:105px}.laundry-older-paper .paper-rule{margin:18px 0 12px}.laundry-older-paper .paper-section-title{font-size:21px;margin-bottom:6px}.laundry-older-paper .laundry-instructions{gap:2px;margin:12px 0}.laundry-older-paper .laundry-instruction{grid-template-columns:52px 1fr;gap:11px;padding:5px 0}.laundry-older-paper .laundry-instruction .icon-placeholder{width:48px;height:48px;font-size:8px}.laundry-older-paper .laundry-instruction h3{font-size:16px;margin-bottom:0}.laundry-older-paper .laundry-instruction p{font-size:10px;line-height:1.35}.laundry-older-paper .laundry-instruction small{font-size:8px}.laundry-older-paper .paper-callout{margin-top:11px;padding:12px 16px}.laundry-older-paper .paper-callout strong{font-size:18px}.laundry-older-paper .megan-note{margin-top:11px;padding:11px 15px}.laundry-older-paper .megan-note p{font-size:12px;line-height:1.3}
+.laundry-icon{display:flex;align-items:center;justify-content:center;flex:none;background:transparent}.laundry-icon img{display:block;width:100%;height:100%;object-fit:contain}.laundry-older-paper .laundry-instruction{padding:3px 0}.laundry-older-paper .laundry-instructions{gap:0;margin:8px 0}.laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}.laundry-page .laundry-instruction .laundry-icon{width:62px;height:62px}.laundry-page .laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}
+
+/* February illustrated instructions: two generously sized cards per row.
+   Overrides the original compressed, single-column instruction list. */
+.laundry-page .laundry-paper .laundry-instructions{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;
+ margin:20px 0 18px;
+}
+.laundry-page .laundry-paper .laundry-instruction{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ min-width:0;gap:7px;padding:15px 13px 13px;
+ border:1px solid #e5e2db;background:#fbfaf6;text-align:center;
+}
+.laundry-page .laundry-paper .laundry-instruction .laundry-icon{
+ width:105px;height:105px;flex:none;
+}
+.laundry-page .laundry-paper .laundry-instruction small{
+ display:block;font-size:10px;letter-spacing:.16em;margin-bottom:3px;
+}
+.laundry-page .laundry-paper .laundry-instruction h3{
+ font:400 19px/1.15 var(--font-serif,Georgia,serif);margin:0 0 5px;
+}
+.laundry-page .laundry-paper .laundry-instruction p{
+ font-size:11px;line-height:1.38;margin:0;color:#716a63;
+}
+.laundry-page .laundry-older-paper .paper-top{margin-top:14px}
+.laundry-page .laundry-older-paper .paper-top h2{font-size:36px}
+.laundry-page .laundry-older-paper .hero-icon{width:82px;height:82px}
+.laundry-page .laundry-older-paper .paper-rule{margin:11px 0 8px}
+.laundry-page .laundry-older-paper .paper-section-title{font-size:19px;margin-bottom:3px}
+.laundry-page .laundry-older-paper .laundry-instructions{gap:7px;margin:8px 0 9px}
+.laundry-page .laundry-older-paper .laundry-instruction{padding:7px 10px 8px;gap:2px}
+.laundry-page .laundry-older-paper .laundry-instruction .laundry-icon{width:60px;height:60px}
+.laundry-page .laundry-older-paper .laundry-instruction small{font-size:8px;margin-bottom:0}
+.laundry-page .laundry-older-paper .laundry-instruction h3{font-size:15px;margin-bottom:2px}
+.laundry-page .laundry-older-paper .laundry-instruction p{font-size:9px;line-height:1.25}
+.laundry-page .laundry-older-paper .paper-callout{margin-top:9px;padding:10px 15px}
+.laundry-page .laundry-older-paper .paper-callout p{font-size:10px}
+.laundry-page .laundry-older-paper .megan-note{margin-top:9px;padding:8px 14px}
+.laundry-page .laundry-older-paper .megan-note p{font-size:11px;line-height:1.25}
+.laundry-page .laundry-young-paper .laundry-instruction{min-height:225px}
+.laundry-page .laundry-young-paper .laundry-instruction .laundry-icon{width:130px;height:130px}
+.laundry-days{border:0;padding:0;margin:18px 0}.laundry-days legend{font-size:12px;font-weight:700;margin-bottom:8px}.laundry-days [data-days-controls]{display:grid;grid-template-columns:1fr 1fr;gap:5px}.laundry-days .laundry-day-option{display:flex;align-items:center;gap:7px;margin:0;padding:7px 3px;font-size:12px;font-weight:500}.laundry-days input{width:16px;height:16px;min-height:16px;margin:0;accent-color:#55735d}.laundry-day-banner{margin:15px 0 4px;padding:12px 16px;background:#e8efe7;display:flex;align-items:center;justify-content:space-between;gap:14px}.laundry-day-banner span{font-size:10px;letter-spacing:.12em;font-weight:700;color:#64765e}.laundry-day-banner strong{font-size:14px;font-weight:700;color:#425b46;text-align:right}.laundry-older-paper .laundry-day-banner{margin:8px 0 2px;padding:8px 12px}.laundry-older-paper .laundry-day-banner strong{font-size:12px}
+/* Keep both illustrated guides inside the Letter page above the footer. */
+.laundry-page .laundry-young-paper .paper-top{margin-top:14px}
+.laundry-page .laundry-young-paper .hero-icon{width:105px;height:105px}
+.laundry-page .laundry-young-paper .paper-rule{margin:20px 0 18px}
+.laundry-page .laundry-young-paper .laundry-instruction{min-height:180px;padding:10px;gap:4px}
+.laundry-page .laundry-young-paper .laundry-instruction .laundry-icon{width:105px;height:105px}
+.laundry-page .laundry-paper .paper-callout{padding:12px 18px}
+.laundry-page .laundry-paper .megan-note{margin-top:12px;padding:10px 18px}
+.laundry-page .laundry-paper .megan-note p{font-size:12px;line-height:1.35}
+.laundry-page .laundry-older-paper .laundry-instruction{padding:3px 10px;gap:2px}
+.laundry-page .laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}
+.laundry-page .laundry-paper .paper-header{padding-bottom:6px}
+.laundry-page .laundry-paper > p{margin:6px 0}
+.laundry-page .laundry-older-paper .laundry-instructions{gap:4px}
+.laundry-page .laundry-older-paper .paper-callout{padding:8px 18px}
+.laundry-page .laundry-older-paper .megan-note{margin-top:8px;padding:8px 18px}
+.laundry-page .laundry-older-paper .megan-note p{font-size:11px}
+
+/* Three scannable phases on the older-children's single-sheet guide. */
+.laundry-page .laundry-older-paper .laundry-phase{margin:8px 0 0}
+.laundry-page .laundry-older-paper .laundry-phase-heading{
+ display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+ padding:7px 12px;background:#e7eee5;color:#405e46;
+}
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-phase-heading{background:#f3e7e4;color:#765c59}
+.laundry-page .laundry-older-paper .laundry-phase-finish .laundry-phase-heading{background:#f5efdf;color:#6d5c3d}
+.laundry-page .laundry-older-paper .laundry-phase-heading strong{font-size:11px;letter-spacing:.10em;white-space:nowrap}
+.laundry-page .laundry-older-paper .laundry-phase-heading span{font-size:10px;line-height:1.25;text-align:right}
+.laundry-page .laundry-older-paper .laundry-phase .laundry-instructions{margin:5px 0 0;gap:5px}
+.laundry-page .laundry-older-paper .laundry-phase .laundry-instruction{padding:3px 9px;gap:1px}
+.laundry-page .laundry-older-paper .laundry-phase .laundry-instruction .laundry-icon{width:43px;height:43px}
+.laundry-page .laundry-older-paper .laundry-phase .laundry-instruction h3{font-size:14px}
+.laundry-page .laundry-older-paper .laundry-phase .laundry-instruction p{font-size:9px;line-height:1.2}
+.laundry-page .laundry-older-paper .laundry-phase-finish .laundry-instructions{grid-template-columns:1fr}
+.laundry-page .laundry-older-paper .laundry-finish-card{flex-direction:row;justify-content:center;gap:18px;text-align:left}
+.laundry-page .laundry-older-paper .laundry-finish-card .laundry-icon{width:58px!important;height:58px!important}
+.laundry-page .laundry-older-paper .laundry-finish-card h3{font-size:17px}
+.laundry-page .laundry-older-paper .paper-callout{margin-top:7px;padding:7px 12px}
+.laundry-page .laundry-older-paper .megan-note{margin-top:7px;padding:6px 12px}
+
+/* Each older-kid phase is a single horizontal row, not a two-column grid. */
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instructions{grid-template-columns:repeat(5,minmax(0,1fr))}
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instructions{grid-template-columns:repeat(3,minmax(0,1fr))}
+.laundry-page .laundry-older-paper .laundry-phase-finish .laundry-instructions{grid-template-columns:1fr}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction{min-width:0;padding:10px 5px 8px;gap:4px}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction .laundry-icon,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction .laundry-icon{width:56px;height:56px}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction h3,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction h3{font-size:14px;line-height:1.12}
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-instruction p,
+.laundry-page .laundry-older-paper .laundry-phase-wash .laundry-instruction p{font-size:9.5px;line-height:1.28;overflow-wrap:break-word}
+.laundry-page .laundry-older-paper .laundry-phase-finish .laundry-instruction{min-height:75px}
+
+/* Enlarge only page two, step two's sorting-dirty-laundry artwork by 1.5x.
+   Keep its card dimensions unchanged to preserve the five-column row. */
+.laundry-page .laundry-older-paper .laundry-phase-ready .laundry-sort-step .laundry-icon img{
+ transform:scale(1.5);
+ transform-origin:center;
+}
+
+/* On the Club plan page: the page places the sheets; each sheet is scaled to fit its column on screen. */
+.lg.laundry-page{min-height:0;background:transparent}
+.lg-sheets{display:flex;flex-direction:column;align-items:center;gap:26px}
+.lg-stage{position:relative;margin:0 auto;flex:none}
+.lg-stage > .laundry-paper{position:absolute;left:0;top:0;box-sizing:border-box;transform:scale(var(--lg-scale,1));transform-origin:top left}
+.lg-empty{max-width:520px;margin:40px auto;font-size:15px;line-height:1.7;text-align:center;color:var(--soft)}
+.lg-empty[hidden]{display:none}
+.lg-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(540px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow-y:auto;padding:24px 26px;background:#fffdfa;border:1px solid #dedbd2;border-radius:8px;box-shadow:0 20px 65px #0003;color:var(--ink);font-family:var(--font-sans,Arial,sans-serif);z-index:100}
+.lg-dialog::backdrop{background:rgba(33,40,36,.52)}
+.lg-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:12px}
+.lg-dialog-head h2{font:400 28px/1.15 var(--font-serif,Georgia,serif);margin:8px 0 0}
+.lg-dialog-head .laundry-kicker{margin:0}
+.lg-close{width:40px;height:40px;flex:none;border:0;border-radius:50%;background:#eeeae4;font-size:24px;cursor:pointer}
+.lg-dialog-actions{display:grid;gap:9px;margin-top:18px}
+.lg-dialog-actions button{min-height:48px;border:1px solid var(--ink);border-radius:3px;padding:12px 14px;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:#fff;color:var(--ink);cursor:pointer}
+.lg-dialog-actions .lg-done{background:#514541;color:#fff}
+@media print{.lg-dialog,.lg-empty{display:none!important}}
+</style>
+<script>
+import {
+  AS_NEEDED, LEVEL_INFO, WEEKDAYS, applyFamily, freshState, fromLegacy, isLaundryState, laundryFingerprint, laundryView, machineLine,
+  restoreSuggested, setLevel, setOperator, toggleDay, type LaundryMember, type LaundryPlan, type LaundryState, type LaundryView, type Level,
+} from '../../lib/club/engines/february-laundry';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
+
+type Detail = { household: { id: string; displayName?: string; members?: LaundryMember[] } | null; sample?: string | null };
+const LEGACY_KEY = 'omc:club:february-laundry:v2';
+const root = document.querySelector<HTMLElement & { clubPlan?: LaundryPlan }>('[data-lg]');
+if (root) {
+ const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+ const key = root.dataset.lgKey ?? 'omc:club:february-app:v1';
+ let current = '', members: LaundryMember[] = [], state: LaundryState = freshState(), persist = true, locked = false;
+ let label = 'Our';
+ const element=(tag:string,cls?:string,value?:string)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(value!==undefined)el.textContent=value;return el};
+ const assets:Record<string,string>=JSON.parse(root.dataset.icons||'{}');
+ const aliases:Record<string,string>={
+ 'hamper':'laundry-hamper','gather':'dirty-laundry','sort':'sorting-clothes','put away':'putting-clothes-away',
+ 'check pockets':'checking-pockets','load washer':'loading-washer','detergent':'adding-detergent',
+ 'choose cycle':'selecting-wash-cycle','transfer':'transfering-clothes','dry':'clothes-dryer',
+ 'fold and put away':'folding-clothes','lint filter':'checking-lint-trap'
+ };
+ const icon=(name:string,cls='')=>{
+   const file=aliases[name.toLowerCase()]||name.toLowerCase().replaceAll(' ','-');
+   const wrap=element('div','laundry-icon '+cls);
+   const url=assets[file];
+   if(url){const img=document.createElement('img');img.src=url;img.alt='';img.loading='eager';wrap.append(img)}
+   else {wrap.classList.add('icon-placeholder');wrap.textContent=name.toUpperCase()+' ICON'}
+   return wrap;
+ };
+ const steps={
+  young:[
+   ['Hamper','Put worn clothes in your hamper, not on the floor.'],
+   ['Gather','Bring the hamper to the laundry spot on laundry day.'],
+   ['Sort','Help separate clothes when a grown-up asks.'],
+   ['Put away','Put your own clean clothes in their drawers or closet.']
+  ],
+  older:[
+   ['Check pockets','Empty pockets and check clothing care labels.'],
+   ['Sort','Separate items by care instructions and colors as needed.'],
+   ['Load washer','Add clothes without overfilling the washer.'],
+   ['Detergent','Use the right amount of the family detergent. Ask before handling concentrated products.'],
+   ['Choose cycle','Follow garment labels and the machine instructions. Ask about unfamiliar settings.'],
+   ['Transfer','Move clothes promptly from washer to dryer or drying rack.'],
+   ['Lint filter','Clean the lint filter before starting the dryer.'],
+   ['Dry','Use the right setting or hang delicate items to dry.'],
+   ['Fold and put away','Fold or hang everything and return it to its place.']
+  ]
+ };
+ const createPage=(level:Level,names:string[],view:LaundryView)=>{
+  const paper=element('article','laundry-paper '+(level==='older'?'laundry-older-paper':'laundry-young-paper'));
+  paper.setAttribute('aria-label',level==='young'?'Younger kids laundry guide':'Older kids laundry guide');
+  const header=element('header','paper-header');header.append(element('span','', 'ORGANIZED FAMILY CLUB · FEBRUARY'),element('span','',level==='young'?'MY CLOTHES':'MY LAUNDRY'));paper.append(header);
+  const top=element('div','paper-top');const head=element('div');head.append(element('span','paper-eyebrow',label.toUpperCase()+' FAMILY'));
+  const h2=element('h2');h2.append(document.createTextNode(level==='young'?'My Clothes, ':'I Can Do '));const em=element('em','',level==='young'?'My Job.':'My Laundry.');h2.append(em);head.append(h2);
+  head.append(element('p','',level==='young'?'Care for what you wear. Every day.':'From dirty clothes to clean drawers. Follow the steps and ask for help when needed.'));
+  top.append(head,icon(level==='young'?'laundry-basket':'washing-machine','hero-icon'));paper.append(top);
+  const dayLabel=element('div','laundry-day-banner');dayLabel.append(element('span','','OUR LAUNDRY DAYS'),element('strong','',view.daysLine));paper.append(dayLabel);
+  const rule=element('div','paper-rule');paper.append(rule);
+  paper.append(element('h3','paper-section-title',names.join(' · ')));
+  const sub=element('p','',level==='young'?'Your jobs, every laundry day:':'Your laundry checklist:');sub.style.fontSize='13px';paper.append(sub);
+  const makeStep=([name,desc]:string[],i:number)=>{const row=element('div','laundry-instruction');if(level==='older' && i===1)row.classList.add('laundry-sort-step');row.append(icon(level==='older' && i===1 ? 'sorting-dirty-laundry' : name));const info=element('div');info.append(element('small','',String(i+1).padStart(2,'0')),element('h3','',name),element('p','',desc));row.append(info);return row};
+  if(level==='older'){
+    const phases=[
+      {name:'GET READY',hint:'Before you start the washer',tone:'ready',start:0,end:5},
+      {name:'WASH & DRY',hint:'Move clothes through the machines',tone:'wash',start:5,end:8},
+      {name:'FINISH THE JOB',hint:'Laundry is done when clothes are put away',tone:'finish',start:8,end:9}
+    ];
+    phases.forEach((phase,index)=>{
+      const section=element('section','laundry-phase laundry-phase-'+phase.tone);
+      const heading=element('div','laundry-phase-heading');
+      heading.append(element('strong','',String(index+1).padStart(2,'0')+' · '+phase.name),element('span','',phase.hint));
+      section.append(heading);
+      const list=element('div','laundry-instructions');
+      steps.older.slice(phase.start,phase.end).forEach((step,i)=>{const card=makeStep(step,phase.start+i);if(phase.tone==='finish')card.classList.add('laundry-finish-card');list.append(card)});
+      section.append(list);paper.append(section);
+    });
+  }else{
+    const list=element('div','laundry-instructions');
+    steps.young.forEach((step,i)=>list.append(makeStep(step,i)));
+    paper.append(list);
+  }
+  const call=element('div','paper-callout');call.append(element('span','',level==='young'?'YOUR FINISH LINE':'DONE MEANS DONE'),element('strong','',level==='young'?'Clean clothes go home.':'Washed. Dried. Put away.'),element('p','',machineLine(level,view.operatorName)));paper.append(call);
+  const note=element('div','megan-note');note.append(element('span','','A NOTE FROM MEGAN'),element('p','',level==='young'?'Even small jobs count. When everyone cares for their clothes, the whole family has less to manage.':'Learning to handle your own laundry takes practice. Keep the steps nearby until they become second nature.'));paper.append(note);
+  const foot=element('footer','paper-footer');foot.append(element('span','','ORGANIZED FAMILY CLUB'),element('span','','FEBRUARY · LAUNDRY OWNERSHIP'));paper.append(foot);
+  return paper;
+ };
+ const editor = q<HTMLDialogElement>('[data-lg-editor]');
+ root.querySelectorAll('[data-lg-close]').forEach((b) => b.addEventListener('click', () => editor.close()));
+ editor.addEventListener('click', (e) => { if (e.target === editor) editor.close(); });
+ const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
+
+ // Each sheet sits in a stage sized to its scaled width, so the column never clips it.
+ const fit = () => root.querySelectorAll<HTMLElement>('.lg-stage').forEach((stage) => {
+  const scale = Math.min(1, Math.max(180, (root.querySelector<HTMLElement>('[data-pages]')?.clientWidth ?? 816) - 4) / 816);
+  stage.style.width = `${816 * scale}px`;
+  stage.style.height = `${1056 * scale}px`;
+  stage.querySelector<HTMLElement>('.laundry-paper')?.style.setProperty('--lg-scale', String(scale));
+ });
+ if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(q('[data-pages]'));
+ window.addEventListener('resize', fit);
+
+ const drawPages = (v: LaundryView) => {
+  const pages = v.guides.map((g, i) => {
+   const paper = createPage(g.level, g.names, v);
+   paper.dataset.planSheet = g.level;
+   if (i === v.guides.length - 1) paper.setAttribute('data-plan-sheet-end', '');
+   const stage = element('div', 'lg-stage');
+   stage.append(paper);
+   return stage;
+  });
+  q('[data-pages]').replaceChildren(...pages);
+  q('[data-lg-empty]').hidden = Boolean(v.guides.length);
+  fit();
+ };
+ const drawControls = (v: LaundryView) => {
+  q('[data-child-controls]').replaceChildren(...v.kids.map((k) => {
+   const wrapper = element('div', 'laundry-child');
+   const l = element('label');
+   l.append(document.createTextNode(k.name + ' '), element('span', 'laundry-age', k.age === null ? 'Age not set' : 'Age ' + k.age));
+   const sel = document.createElement('select');
+   sel.setAttribute('aria-label', k.name + ' laundry level');
+   for (const value of ['young', 'older'] as Level[]) {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = LEVEL_INFO[value].short + (value === k.suggested ? ' (suggested)' : '');
+    sel.append(o);
+   }
+   sel.value = k.level;
+   sel.disabled = locked;
+   sel.addEventListener('change', () => update((s) => setLevel(s, k.id, sel.value as Level, members)));
+   l.append(sel);
+   wrapper.append(l);
+   return wrapper;
+  }));
+  q('[data-days-controls]').replaceChildren(...[...WEEKDAYS, AS_NEEDED].map((day) => {
+   const l = element('label', 'laundry-day-option');
+   const check = document.createElement('input');
+   check.type = 'checkbox';
+   check.checked = v.days.includes(day);
+   check.disabled = locked;
+   check.addEventListener('change', () => update((s) => toggleDay(s, day)));
+   l.append(check, document.createTextNode(day));
+   return l;
+  }));
+  const op = q<HTMLSelectElement>('[data-operator]');
+  op.replaceChildren(...v.operators.map((o) => Object.assign(document.createElement('option'), { value: o.id, textContent: o.firstName && o.firstName !== o.name ? `${o.name} (${o.firstName})` : o.name })));
+  op.value = v.operator;
+  op.disabled = locked;
+  q('[data-guide-summary]').textContent = v.guides.length === 1
+   ? `One guide for ${v.kids.length} ${v.kids.length === 1 ? 'child' : 'children'}.`
+   : v.guides.length ? 'Two guides, one for each readiness group. No duplicate pages.' : '';
+ };
+ q<HTMLSelectElement>('[data-operator]').addEventListener('change', (e) => update((s) => setOperator(s, (e.target as HTMLSelectElement).value, members)));
+ q('[data-reset]').addEventListener('click', () => update((s) => restoreSuggested(s)));
+
+ const draw = () => { const v = laundryView(state, members); drawPages(v); drawControls(v); };
+ const changed = () => { save(); draw(); if (current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true })); };
+ const update = (change: (s: LaundryState) => void) => { if (locked) return; change(state); applyFamily(state, members); changed(); };
+
+ const applyHousehold = (detail: Detail) => {
+  if (!detail?.household) return;
+  const next = planKey(detail.sample ?? null, detail.household.id);
+  members = detail.household.members ?? [];
+  label = (detail.household.displayName || 'Our').replace(/\s+family$/i, '');
+  if (next !== current) {
+   current = next;
+   // The earlier February page kept its edits in this tab under another key: read once for this family, then remove.
+   const old = fromLegacy(tabStorage.get(LEGACY_KEY), detail.household.id, members);
+   if (old) tabStorage.remove(LEGACY_KEY);
+   state = readScoped(tabStorage.get(key), current, isLaundryState) ?? old ?? freshState();
+  }
+  applyFamily(state, members);
+  changed();
+ };
+
+ root.clubPlan = {
+  ready: () => Boolean(current),
+  state: () => state,
+  update,
+  replace: (s) => { state = structuredClone(s); applyFamily(state, members); changed(); },
+  setPersist: (on) => { persist = on; if (on) save(); },
+  fingerprint: () => laundryFingerprint(state, members),
+  members: () => members,
+  view: () => laundryView(state, members),
+  setLocked: (on) => { locked = on; if (on) editor.close(); draw(); },
+  openEditor: () => { if (!locked && !editor.open) { draw(); editor.showModal(); } },
+ };
+ window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
+ const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
+ if (cached) applyHousehold(cached);
+}
+</script>

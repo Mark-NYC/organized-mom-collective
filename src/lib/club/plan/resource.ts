@@ -20,5 +20,7 @@ export interface PlanResource<S> {
 }
 
 export const PLAN_CHANGE = 'club:plan-change';
+/** Fired on the page root (`.club-plan`) when approval changes, so the desktop rail and the plan screen agree. */
+export const PLAN_APPROVAL = 'club:plan-approval';
 
 export type PlanResourceHost<S> = HTMLElement & { clubPlan?: PlanResource<S> };

@@ -1,8 +1,8 @@
 # Club plan pages: shared architecture
 
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
-October (Sunday Reset, two sheets) and January (Habit Cards, one sheet) use it. Every remaining month should too,
-without copying page code.
+October (Sunday Reset, two sheets), January (Habit Cards, one sheet) and February (laundry guides: one sheet per
+readiness level in use, so one or two) use it. Every remaining month should too, without copying page code.
 
 ## The split
 
@@ -14,6 +14,7 @@ without copying page code.
 | The printable artwork and its desktop editor | **Per month** | `src/components/club/<MonthResource>.astro` |
 | The month's rows and edit sheets on the plan screen | **Per month** (adapter) | `src/components/club/<Month>PlanMobile.astro` |
 | Desktop experience at 1100px and wider | **Per month**, unchanged | the month's page and printable |
+| Desktop rail at 1100px and wider (October's layout: back link, title, editing window, Make changes / Approve / Download and print, whose family, the month's details, how to use it), one approval shared with the plan screen | Shared, used by February (October still renders its own copy of the same rail) | `src/components/club/plan/ClubPlanDesktop.astro` + `src/lib/club/plan/desktop.ts`, approval in `src/lib/club/plan/status.ts` |
 
 The month owns content and personalization. The shared layer owns everything a family sees around it.
 
@@ -133,3 +134,14 @@ area is at least 1.128 times as tall as it is wide (Letter and A4 with default m
 - Mail by default: the plan mails as shown whether or not she approves. When that's live the status "Not approved yet"
   should read like "Mails as shown. Approve when you've checked it." Mailing, billing and fulfillment are not connected.
 - Unlimited printing is already the behavior.
+
+## February
+
+`/app/club/february`: `FebruaryLaundryGuides.astro` (the approved guide artwork from `assets/icons/ofc/february/`, its
+desktop editor and the sheets), `FebruaryPlanMobile.astro`, rules in `src/lib/club/engines/february-laundry.ts`. Age in
+February 2027 suggests each child's guide (9 and up: "I Can Do My Own Laundry"; younger: "My Clothes, My Job");
+Mom can change any child's level. One page per level in use, children at the same level named together on it.
+Laundry days (one or more, or "As needed") print on every guide; a named machine operator prints in the callout
+(Mom/Dad for the first two parents, other grown-ups by name; the default keeps the original wording). Tab-only
+`omc:club:february-laundry-app:v1` with `omc:preview:february-laundry:approval`; the earlier page's
+`omc:club:february-laundry:v2` edits are read once for the same family, then removed.

@@ -1,5 +1,5 @@
 /**
- * Club plan printables (October: two sheets; January: one sheet) print one US Letter page per sheet in WebKit
+ * Club plan printables (October: two sheets; January: one sheet; February: one or two, one per readiness level in use) print one US Letter page per sheet in WebKit
  * (Safari on iPhone, iPad and Mac). The rules live in src/components/club/plan/ClubPrintStyles.astro.
  *
  * Chromium's PDF output can't stand in for Safari: WebKit paginates differently. This models WebCore's
@@ -68,7 +68,7 @@ describe('Club plan printables in WebKit', () => {
   });
 
   it('marks the last sheet of every Club plan printable, so nothing breaks after it', () => {
-    for (const file of ['OctoberSundayReset.astro', 'JanuaryHabitCards.astro']) {
+    for (const file of ['OctoberSundayReset.astro', 'JanuaryHabitCards.astro', 'FebruaryLaundryGuides.astro']) {
       const src = readFileSync(new URL(`../src/components/club/${file}`, import.meta.url), 'utf8');
       expect(src.match(/data-plan-sheet-end/g)?.length, file).toBe(1);
     }
