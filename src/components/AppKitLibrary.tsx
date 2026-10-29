@@ -1,8 +1,9 @@
 import { monthColors } from '../theme';
 // The app Club library mirrors the benefit-first public Club month descriptions.
-// Reuse the original month artwork, with resource-specific icons for laundry and snacks.
+// Reuse the original month artwork, with resource-specific icons for laundry, snacks, and independent play.
 import laundryIcon from '../../assets/icons/ofc/february/laundry-basket.webp?url';
 import snackIcon from '../../assets/icons/ofc/updatedicons/june/strawberries.png?url';
+import playIcon from '../../assets/icons/ofc/updatedicons/july/building-blocks.png?url';
 const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.png', {
   eager: true,
   query: '?url',
@@ -54,9 +55,9 @@ const months = [
   },
   {
     "month": "July",
-    "title": "No More Packing for Everyone",
-    "responsibility": "Preparing independently",
-    "how": "Personal packing lists show each person what to pack, check, and put away.",
+    "title": "Less ‘I’m Bored.’ More Independent Play.",
+    "responsibility": "Choosing something to do",
+    "how": "An I’m Bored! What Can I Do? activity board gives kids ideas they can choose themselves, so you don’t have to come up with something every time.",
     "url": "/app/club/july/"
   },
   {
@@ -102,6 +103,7 @@ export default function AppKitLibrary() {
       {months.map((m, index) => {
         const src = m.month === 'February' ? laundryIcon
           : m.month === 'June' ? snackIcon
+          : m.month === 'July' ? playIcon
           : icons[`../../assets/icons/ofc/month-icons/${m.month}-OFC-icon.png`];
         const calendarColor = monthColors[index].hex;
         return (
