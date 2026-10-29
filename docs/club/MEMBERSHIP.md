@@ -1,6 +1,6 @@
 # Organized Family Club: paid membership (operations and setup)
 
-**Status (2026-10-29):** built, tested, database applied to production. **Nothing can be bought yet**: Stripe is in test mode only (`club_settings.checkout_mode = test`; a test-mode portal and webhook secret exist, from the first setup at $5/$60), and the site flags are off. **Launch price: $5.90/month, monthly only** (owner, 2026-10-29); annual is built but not offered. The deployed Edge Functions predate that change: redeploy them from `main` (step 6) and press **Set up Stripe (test mode)** again (step 7). Live payments need the owner's explicit approval.
+**Status (2026-10-29):** built, tested, database applied to production; `club-billing`, `club-webhook` and `club-admin` redeployed from `main` (PR #254). **Nothing can be bought yet**: Stripe is in test mode only (`club_settings.checkout_mode = test`) and the site flags are off. **Launch price: $5.90/month, monthly only**; annual is built but not offered. **Your First Month FREE** (below) is in `supabase/migrations/20261107000000_club_first_month_free.sql`. Live payments need the owner's explicit approval.
 
 Guiding principle: **One family. One monthly problem. One tailored plan. Delivered ready to use.**
 
@@ -19,6 +19,27 @@ Guiding principle: **One family. One monthly problem. One tailored plan. Deliver
 | Plan change (not offered: the portal allows no switching) | Monthly → annual: charged now; the twelve paid months start with the first month she doesn't already have (a month is never sold twice). Annual → monthly: takes effect at the end of the paid year | |
 
 No automatic discount. Pausing isn't offered (a paused or unpaid subscription pays no invoice, so it grants nothing).
+
+## Your First Month FREE (the launch offer)
+
+**Your First Month FREE. Then $5.90/month.** A new household's first monthly resource is free, printed and mailed. The Family Vision welcome print is free too. Checkout saves a card and charges nothing; the subscription is a Stripe trial until the first charge. No signup fee, no annual plan.
+
+| | Founding member (joins before January 1, 2027) | Joins once the program runs (2027 onward) |
+| --- | --- | --- |
+| At checkout | $0. Card saved. | $0. Card saved. |
+| Right away | Family Vision welcome print, free; dashboard access | Family Vision welcome print, free; dashboard access |
+| Free month | **January 2027**: personalized, printed and mailed | **The month she joins** (e.g. joins March 14 → March) |
+| Its mailing | January's regular batch if she joined by Sunday December 13, 11:59 pm ET; else January's catch-up batch | That month's catch-up batch (its second-Sunday cutoff was the month before) |
+| First $5.90 charge | **February 1, 2027** (midnight New York) | **One month after she joins** (March 14 → April 14) |
+| That payment buys | February, mailed on the usual schedule (February's list closes Sunday January 10, so a February 1 payment is in February's catch-up batch) | The next month (April), in its batch by the same rule |
+| Then | $5.90 on the 1st of each month | $5.90 on her monthly date |
+| Cancels before the first charge | Pays nothing. A cancellation takes effect at the end of the free period, so the free January she was promised still goes out. | Same |
+| Membership ends early (admin, Stripe) | Future free months not yet mailed are withdrawn (`club_intro_end`); the welcome print stays | Same |
+| First charge fails | No February access or mailing until it's paid (Stripe retries; "payment didn't go through" email) | Same |
+
+**One free first month per household.** The checkout offers it only to an email that never had a membership or a free month. When the subscription starts, `club_intro_grant` refuses it if the account, its email, its mailing address (normalized) or its card (Stripe fingerprint) already had one. Then billing starts on the program's first day (before the program) or at once, and the welcome email says when she's charged. Claims are kept as hashes after an account is deleted (`club_intro_claims`; disclosed in the privacy policy).
+
+The rules live in `supabase/migrations/20261107000000_club_first_month_free.sql` (`club_settings.program_start_month`, `intro_offer` to switch the offer off) and `club-billing` / `club-webhook`. The pages say the same through `CLUB_OFFER` and `CLUB_PROGRAM_START` in `src/data/club/config.ts`; rebuild the site after January 1, 2027 to drop the founding wording. The announcement bar counts down to the next deadline that prints a monthly plan: before the program, January's (Sunday December 13).
 
 ## How access works (why it's safe)
 
@@ -67,7 +88,7 @@ Supabase API connections load pg-safeupdate: every UPDATE/DELETE in a database f
 
 ### Stripe (test mode first)
 7. In `/admin/club → Setup`, press **Set up Stripe (test mode)**. It creates, once: the product, `club_monthly_v2` ($5.90/month), the Billing Portal configuration (no plan switching), and the webhook endpoint `…/functions/v1/club-webhook` (its signing secret is stored server-side). On the test account the first setup already made (product, `club_monthly_v1` $5, `club_annual_v1` $60, a portal that allowed switching, the webhook), pressing it again keeps the product and webhook, adds the $5.90 price and turns plan switching off. The old $5 and $60 prices are never used; archive them in the Stripe Dashboard if you like.
-8. Stripe Dashboard → Billing → **Revenue recovery:** Smart Retries on, end within ~2 weeks, then **cancel** the subscription. Turn on Stripe's customer emails for receipts and failed payments.
+8. Stripe Dashboard → Billing → **Revenue recovery:** Smart Retries on, end within ~2 weeks, then **cancel** the subscription. Turn on Stripe's customer emails for receipts and failed payments, and the **trial ending reminder** (Billing → Subscriptions and emails): every new member's subscription is a free-month trial, and Stripe's reminder tells her before the first $5.90 charge.
 9. Decide sales tax for a subscription with a printed component (accountant), as for the shop.
 
 ### Cloudflare Pages (Preview first)

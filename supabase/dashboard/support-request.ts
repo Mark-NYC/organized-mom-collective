@@ -300,6 +300,7 @@ var routes = {
   supportContact: "/support#contact",
   /** Returns & Refunds policy, linked from the footer, /calendar and the checkout. The old /refunds redirects here. */
   returns: "/returns",
+  privacy: "/privacy",
   /** Direct website checkout: the offer pages, the calendar options and (once on sale) the mug page link here, in shop-enabled builds. */
   checkout: "/checkout",
   checkoutComplete: "/checkout/complete",

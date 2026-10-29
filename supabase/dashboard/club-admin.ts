@@ -267,6 +267,31 @@ function renderClubEmail(kind, to, d, siteUrl) {
   let b;
   switch (kind) {
     case "welcome":
+      if (d.firstCharge) {
+        const december = d.freeMonth?.startsWith("December");
+        b = {
+          subject: "Welcome to the Organized Family Club",
+          preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
+          eyebrow: d.freeMonth ? "Your first month is free" : "Monthly membership",
+          title: "Welcome. You’re in.",
+          blocks: [
+            p(d.freeMonth && !december ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.` : "Thank you for joining."),
+            p(december ? `Your first gift is a personalized Family Vision print for your wall, and it’s your free ${d.freeMonth} resource. Choose your family’s word, approve it, and we’ll print and mail it right away.` : "Your first gift is a personalized Family Vision print for your wall, free. Choose your family’s word, approve it, and we’ll print and mail it right away."),
+            p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
+            panel(C.sage, C.sageRule, [
+              panelTitle("Two minutes to get started"),
+              steps([
+                "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
+                "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
+                "Check your mailing address, then personalize your Family Vision print."
+              ]),
+              button("Sign in to your account", login)
+            ]),
+            small("Stripe emails your receipts. You can manage or cancel your membership any time from your account.")
+          ]
+        };
+        break;
+      }
       b = {
         subject: "Welcome to the Organized Family Club",
         preheader: d.plan === "annual" ? "Your year of family resources is ready." : "Your first month is ready for your family.",
@@ -505,6 +530,7 @@ function invoiceRow(inv, payment) {
 }
 
 // supabase/functions/_shared/handlers/club-billing.ts
+var MIN_TRIAL_SECONDS = 49 * 60 * 60;
 async function clubPrice(deps, plan) {
   const r = await deps.stripe.request("GET", "/v1/prices", { "lookup_keys[]": CLUB_PRICES[plan].lookupKey, active: true, limit: 1 });
   return r.data[0]?.id ?? null;
@@ -555,6 +581,7 @@ async function syncSubscription(deps, subId, eventAt) {
     await cancelDuplicate(deps, sub, member.userId);
     return null;
   }
+  if (row.status === "canceled") await deps.db.rpc("club_intro_end", { p_sub: sub.id });
   const key = `canceled:${sub.id}`;
   if (r.cancel_at_period_end && r.previous_cancel_at_period_end !== true && row.status !== "canceled") {
     await sendClubEmail(deps, key, "canceled", member.userId, member.email, { ended: false, endsOn: row.current_period_end ? longDate(row.current_period_end) : null });

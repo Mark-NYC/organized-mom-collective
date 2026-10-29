@@ -19,6 +19,9 @@ export interface ClubEmailData {
   /** "December 2, 2026" */
   endsOn?: string | null;
   ended?: boolean;
+  /** Welcome on a trial: her free month ("January 2027"), if she has one, and the first charge ("February 1, 2027"). */
+  freeMonth?: string | null;
+  firstCharge?: string | null;
   test?: boolean;
 }
 
@@ -47,6 +50,36 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
   let b: Body;
   switch (kind) {
     case 'welcome':
+      if (d.firstCharge) {
+        // Nothing charged yet: what's free, and exactly when the first $5.90 is.
+        const december = d.freeMonth?.startsWith('December');
+        b = {
+          subject: 'Welcome to the Organized Family Club',
+          preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
+          eyebrow: d.freeMonth ? 'Your first month is free' : 'Monthly membership',
+          title: 'Welcome. You’re in.',
+          blocks: [
+            p(d.freeMonth && !december
+              ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.`
+              : 'Thank you for joining.'),
+            p(december
+              ? `Your first gift is a personalized Family Vision print for your wall, and it’s your free ${d.freeMonth} resource. Choose your family’s word, approve it, and we’ll print and mail it right away.`
+              : 'Your first gift is a personalized Family Vision print for your wall, free. Choose your family’s word, approve it, and we’ll print and mail it right away.'),
+            p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
+            panel(C.sage, C.sageRule, [
+              panelTitle('Two minutes to get started'),
+              steps([
+                'Sign in with this email address. We’ll send a 6-digit code; there’s no password.',
+                'Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.',
+                'Check your mailing address, then personalize your Family Vision print.',
+              ]),
+              button('Sign in to your account', login),
+            ]),
+            small('Stripe emails your receipts. You can manage or cancel your membership any time from your account.'),
+          ],
+        };
+        break;
+      }
       b = {
         subject: 'Welcome to the Organized Family Club',
         preheader: d.plan === 'annual' ? 'Your year of family resources is ready.' : 'Your first month is ready for your family.',

@@ -1,10 +1,14 @@
 ---
 import { clubPrintMessages } from '../../lib/club-print-deadline';
+import { clubEnabled } from '../../data/club/config';
+import { clubCheckoutEnabled } from '../../lib/club/membership';
+// Your First Month FREE shows only where enrollment is open (as on /club).
+const offer = clubEnabled() && clubCheckoutEnabled();
 const onClub = Astro.url.pathname.replace(/\/$/, '') === '/club';
 const href = onClub ? '#offer' : '/club';
-const messages = clubPrintMessages();
+const messages = clubPrintMessages(new Date(), offer);
 ---
-<div class="club-announcement" data-club-announcement>
+<div class="club-announcement" data-club-announcement data-offer={offer ? '1' : undefined}>
  <a href={href} data-cta="club-deadline-bar"><span data-club-announcement-text>{messages[0]}</span></a>
 </div>
 <script>
@@ -13,7 +17,7 @@ const messages = clubPrintMessages();
   const label = bar.querySelector<HTMLElement>('[data-club-announcement-text]')!;
   let index = 0, hovering = false, focused = false;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const render = () => { label.textContent = clubPrintMessages()[index]; };
+  const render = () => { label.textContent = clubPrintMessages(new Date(), bar.dataset.offer === '1')[index]; };
   render();
   bar.addEventListener('mouseenter', () => { hovering = true; });
   bar.addEventListener('mouseleave', () => { hovering = false; });

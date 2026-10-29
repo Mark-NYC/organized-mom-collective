@@ -264,6 +264,31 @@ function renderClubEmail(kind, to, d, siteUrl) {
   let b;
   switch (kind) {
     case "welcome":
+      if (d.firstCharge) {
+        const december = d.freeMonth?.startsWith("December");
+        b = {
+          subject: "Welcome to the Organized Family Club",
+          preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
+          eyebrow: d.freeMonth ? "Your first month is free" : "Monthly membership",
+          title: "Welcome. You’re in.",
+          blocks: [
+            p(d.freeMonth && !december ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.` : "Thank you for joining."),
+            p(december ? `Your first gift is a personalized Family Vision print for your wall, and it’s your free ${d.freeMonth} resource. Choose your family’s word, approve it, and we’ll print and mail it right away.` : "Your first gift is a personalized Family Vision print for your wall, free. Choose your family’s word, approve it, and we’ll print and mail it right away."),
+            p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
+            panel(C.sage, C.sageRule, [
+              panelTitle("Two minutes to get started"),
+              steps([
+                "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
+                "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
+                "Check your mailing address, then personalize your Family Vision print."
+              ]),
+              button("Sign in to your account", login)
+            ]),
+            small("Stripe emails your receipts. You can manage or cancel your membership any time from your account.")
+          ]
+        };
+        break;
+      }
       b = {
         subject: "Welcome to the Organized Family Club",
         preheader: d.plan === "annual" ? "Your year of family resources is ready." : "Your first month is ready for your family.",
@@ -586,6 +611,40 @@ async function checkoutCompleted(deps, sessionId, eventAt) {
   const sub = await syncSubscription(deps, subId, eventAt);
   const latest = sub && idOf(sub.latest_invoice);
   if (latest) await applyInvoice(deps, latest, eventAt, false);
+  if (sub?.status === "trialing") await trialStarted(deps, sub, member);
+}
+async function trialStarted(deps, sub, member) {
+  let freeMonth = null;
+  let firstCharge = sub.items.data[0]?.current_period_end ?? null;
+  if (sub.metadata?.intro_month) {
+    const g = await deps.db.rpc(
+      "club_intro_grant",
+      { p_sub: sub.id, p_card: await cardFingerprint(deps, sub) }
+    );
+    if (g.granted) {
+      freeMonth = g.month;
+    } else if (g.reason === "already_claimed") {
+      const at = g.fallback_trial_end ? Math.floor(Date.parse(g.fallback_trial_end) / 1e3) : null;
+      await deps.stripe.request("POST", `/v1/subscriptions/${sub.id}`, { trial_end: at ?? "now", proration_behavior: "none" }, `club-intro-refused:${sub.id}`);
+      await syncSubscription(deps, sub.id, null);
+      if (!at) return;
+      firstCharge = at;
+    }
+  }
+  await sendClubEmail(deps, `welcome:${member.userId}`, "welcome", member.userId, member.email, {
+    plan: "monthly",
+    freeMonth: freeMonth ? monthLabel(freeMonth) : null,
+    firstCharge: firstCharge ? longDate(new Date(firstCharge * 1e3).toISOString()) : null
+  });
+}
+async function cardFingerprint(deps, sub) {
+  const pm = idOf(sub.default_payment_method ?? null);
+  if (!pm) return null;
+  try {
+    return (await deps.stripe.request("GET", `/v1/payment_methods/${pm}`)).card?.fingerprint ?? null;
+  } catch {
+    return null;
+  }
 }
 async function syncSubscription(deps, subId, eventAt) {
   const sub = await deps.stripe.request("GET", `/v1/subscriptions/${subId}`);
@@ -600,6 +659,7 @@ async function syncSubscription(deps, subId, eventAt) {
     await cancelDuplicate(deps, sub, member.userId);
     return null;
   }
+  if (row.status === "canceled") await deps.db.rpc("club_intro_end", { p_sub: sub.id });
   const key = `canceled:${sub.id}`;
   if (r.cancel_at_period_end && r.previous_cancel_at_period_end !== true && row.status !== "canceled") {
     await sendClubEmail(deps, key, "canceled", member.userId, member.email, { ended: false, endsOn: row.current_period_end ? longDate(row.current_period_end) : null });

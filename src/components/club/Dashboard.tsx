@@ -149,7 +149,9 @@ function Status({ me, sample }: { me: Membership; sample: boolean }) {
       ? 'Your last payment didn’t go through. Update your card to keep your membership.'
       : me.ends
         ? `Ends ${shortDate(me.ends)}. You keep every resource you received.`
-        : me.renews
+        : me.status === 'trialing' && me.renews
+          ? `${me.intro ? `Your first month (${monthName(me.intro.month)}) is free. ` : ''}First charge: $5.90 on ${shortDate(me.renews)}, then $5.90/month. Cancel before then and you pay nothing.`
+          : me.renews
           ? `Renews ${shortDate(me.renews)}${me.membership_year ? ` · Year ${me.membership_year}` : ''}`
           : !me.access
             ? 'Your membership has ended. The resources you received stay here to view and print.'
@@ -227,7 +229,7 @@ function MonthCard({ m, href }: { m: MembershipMonth; href: string | null }) {
   const open = m.state === 'available' && href && r;
   return (
     <article className="bg-white p-5 ring-1 ring-warm-rule">
-      <p className="label text-warm-soft">{monthName(m.month)}</p>
+      <p className="label text-warm-soft">{monthName(m.month)}{m.free ? ' · Free month' : ''}</p>
       <h3 className="mt-1 font-serif text-[1.3rem] leading-snug text-warm-ink">{r?.title ?? m.title ?? 'Monthly resource'}</h3>
       {mailingText(m.mailing) && <p className="mt-1 text-[0.88rem] text-warm-soft">Printed copy: {mailingText(m.mailing)}</p>}
       {open ? (
