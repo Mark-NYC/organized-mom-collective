@@ -103,6 +103,47 @@ if (!kit) throw new Error('February kit missing');
 @media print{.laundry-page .laundry-paper{break-after:page!important;page-break-after:always!important}.laundry-page .laundry-paper:last-child{break-after:auto!important;page-break-after:auto!important}}
 .laundry-older-paper .paper-top{margin-top:17px}.laundry-older-paper .paper-top h2{font-size:38px;margin:8px 0}.laundry-older-paper .paper-top p{font-size:12px;line-height:1.4}.laundry-older-paper .hero-icon{width:105px;height:105px}.laundry-older-paper .paper-rule{margin:18px 0 12px}.laundry-older-paper .paper-section-title{font-size:21px;margin-bottom:6px}.laundry-older-paper .laundry-instructions{gap:2px;margin:12px 0}.laundry-older-paper .laundry-instruction{grid-template-columns:52px 1fr;gap:11px;padding:5px 0}.laundry-older-paper .laundry-instruction .icon-placeholder{width:48px;height:48px;font-size:8px}.laundry-older-paper .laundry-instruction h3{font-size:16px;margin-bottom:0}.laundry-older-paper .laundry-instruction p{font-size:10px;line-height:1.35}.laundry-older-paper .laundry-instruction small{font-size:8px}.laundry-older-paper .paper-callout{margin-top:11px;padding:12px 16px}.laundry-older-paper .paper-callout strong{font-size:18px}.laundry-older-paper .megan-note{margin-top:11px;padding:11px 15px}.laundry-older-paper .megan-note p{font-size:12px;line-height:1.3}
 .laundry-icon{display:flex;align-items:center;justify-content:center;flex:none;background:transparent}.laundry-icon img{display:block;width:100%;height:100%;object-fit:contain}.laundry-older-paper .laundry-instruction{padding:3px 0}.laundry-older-paper .laundry-instructions{gap:0;margin:8px 0}.laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}.laundry-page .laundry-instruction .laundry-icon{width:62px;height:62px}.laundry-page .laundry-older-paper .laundry-instruction .laundry-icon{width:43px;height:43px}
+
+/* February illustrated instructions: two generously sized cards per row.
+   Overrides the original compressed, single-column instruction list. */
+.laundry-page .laundry-paper .laundry-instructions{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;
+ margin:20px 0 18px;
+}
+.laundry-page .laundry-paper .laundry-instruction{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ min-width:0;gap:7px;padding:15px 13px 13px;
+ border:1px solid #e5e2db;background:#fbfaf6;text-align:center;
+}
+.laundry-page .laundry-paper .laundry-instruction .laundry-icon{
+ width:105px;height:105px;flex:none;
+}
+.laundry-page .laundry-paper .laundry-instruction small{
+ display:block;font-size:10px;letter-spacing:.16em;margin-bottom:3px;
+}
+.laundry-page .laundry-paper .laundry-instruction h3{
+ font:400 19px/1.15 var(--font-serif,Georgia,serif);margin:0 0 5px;
+}
+.laundry-page .laundry-paper .laundry-instruction p{
+ font-size:11px;line-height:1.38;margin:0;color:#716a63;
+}
+.laundry-page .laundry-older-paper .paper-top{margin-top:14px}
+.laundry-page .laundry-older-paper .paper-top h2{font-size:36px}
+.laundry-page .laundry-older-paper .hero-icon{width:82px;height:82px}
+.laundry-page .laundry-older-paper .paper-rule{margin:11px 0 8px}
+.laundry-page .laundry-older-paper .paper-section-title{font-size:19px;margin-bottom:3px}
+.laundry-page .laundry-older-paper .laundry-instructions{gap:7px;margin:8px 0 9px}
+.laundry-page .laundry-older-paper .laundry-instruction{padding:7px 10px 8px;gap:2px}
+.laundry-page .laundry-older-paper .laundry-instruction .laundry-icon{width:60px;height:60px}
+.laundry-page .laundry-older-paper .laundry-instruction small{font-size:8px;margin-bottom:0}
+.laundry-page .laundry-older-paper .laundry-instruction h3{font-size:15px;margin-bottom:2px}
+.laundry-page .laundry-older-paper .laundry-instruction p{font-size:9px;line-height:1.25}
+.laundry-page .laundry-older-paper .paper-callout{margin-top:9px;padding:10px 15px}
+.laundry-page .laundry-older-paper .paper-callout p{font-size:10px}
+.laundry-page .laundry-older-paper .megan-note{margin-top:9px;padding:8px 14px}
+.laundry-page .laundry-older-paper .megan-note p{font-size:11px;line-height:1.25}
+.laundry-page .laundry-young-paper .laundry-instruction{min-height:225px}
+.laundry-page .laundry-young-paper .laundry-instruction .laundry-icon{width:130px;height:130px}
 </style><script>
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { getSession } from '../../../lib/account';
