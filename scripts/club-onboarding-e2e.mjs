@@ -374,10 +374,17 @@ async function journey(browser, label, vp) {
   await shot(page, `${label}-2b-week`, true);
   await page.click('button:has-text("Next")');
   await page.waitForSelector('text=What does everyone already take care of?');
-  await page.click('button[aria-label^="Ana, Meals and kitchen"]');
-  await page.click('button[aria-label^="Sofia, Laundry"]');
-  await page.click('button[aria-label^="Sofia, Laundry"]');
-  check('who does what: tap once owns, twice helps', await page.isVisible('button[aria-label^="Sofia, Laundry: helps when asked"]'));
+  await page.click('button[aria-expanded]:has-text("Meals and kitchen")');
+  await page.click('button[aria-label="Ana owns it: Meals and kitchen"]');
+  await page.click('button[aria-expanded]:has-text("Laundry")');
+  await page.click('button[aria-label="Sofia owns it: Laundry"]');
+  await page.click('button[aria-label="Sofia helps with it: Laundry"]');
+  check('who does what: “Owns it” and “Helps with it”, one or the other per person',
+    await page.getAttribute('button[aria-label="Sofia helps with it: Laundry"]', 'aria-pressed') === 'true'
+    && await page.getAttribute('button[aria-label="Sofia owns it: Laundry"]', 'aria-pressed') === 'false');
+  check('who does what: the card says who', await page.isVisible('text=Owns it: Ana') && await page.isVisible('text=Helps: Sofia'));
+  check('no sideways scrolling (who does what)', await noSideScroll(page));
+  await shot(page, `${label}-2b2-ownership`, true);
   await page.click('button:has-text("Next")');
   await page.waitForSelector('text=What would you like your kids to take on?');
   await page.reload({ waitUntil: 'networkidle' });

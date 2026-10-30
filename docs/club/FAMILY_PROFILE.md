@@ -8,7 +8,7 @@ What the Club knows about a family so monthly printed resources, and later the M
 | --- | --- | --- | --- |
 | 1 | Who's in your family (first names, kids' ages, adult roles) | `club_households`, `club_family_members` (unchanged, `club_household_save`) | Yes: gates the Welcome Kit (`onboarded_at`) |
 | 2 | Typical week (category tiles; optional name, who, days, time) | `club_activities` | No |
-| 3 | Who already takes care of what (owns vs helps when asked) | `club_responsibilities`, `status = 'existing'` | No |
+| 3 | Who already takes care of what (per area: “Owns it” / “Helps with it”) | `club_responsibilities`, `status = 'existing'` | No |
 | 4 | What the kids could take on (choices + custom, optional per kid) | `club_responsibilities`, `status = 'desired'` | No |
 | 5 | Where it's hard to stay on the same page | `club_households.challenges`, `challenge_note` | No |
 | 6 | One thing to stop managing alone: the family's first priority | `club_households.priority`, `priority_note` | No |
@@ -35,6 +35,10 @@ Migration: `supabase/migrations/20261109000000_club_family_profile.sql` (additiv
 - These answers don't bump `profile_version`, so saved kit documents never show "New suggestions" because of them. No existing kit reads them yet.
 - Same access model as `club_core`: RLS on, grants revoked, customers read only their own rows and write only through `club_activities_save`, `club_responsibilities_save`, `club_focus_save`; `club_family_profile` reads. Member ids are checked against the household. Admins have no read policy (like children's names).
 - Kids never get accounts. No daily tracking, scores or badges.
+
+The retired "What matters most right now?" question (family form, `preferences.priorities`) is no longer asked; step 6 replaces it. Stored answers are kept and passed through on every family save. Nothing reads them for suggestions.
+
+Before applying to production: `bash scripts/verify-family-profile-upgrade.sh` replays production's migration state with households shaped like the live ones and checks the upgrade (Supabase branching needs the Pro plan).
 
 Tests: `supabase/tests/club-profile.sql` (via `npm run test:admin-sql`), `tests/club-family-profile.test.ts`, browser flow in `scripts/club-onboarding-e2e.mjs`.
 

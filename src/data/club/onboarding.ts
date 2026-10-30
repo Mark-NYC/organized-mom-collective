@@ -1,7 +1,6 @@
 /**
  * The family form's choices (/club/start, /club/family). Ids are stored in club_households.preferences, so they're
- * stable; labels can change. Priorities are hers to name what matters; they don't change the suggested jobs
- * (the engine uses ages, roles and pets only), and the form says so.
+ * stable; labels can change. The suggested jobs use ages, roles and pets only.
  */
 import type { MemberRole } from '../../lib/club/profile';
 
@@ -13,7 +12,12 @@ export const ADULT_ROLES: { id: Exclude<MemberRole, 'child'>; label: string }[] 
   { id: 'other', label: 'Other grown-up' },
 ];
 
-export const PRIORITIES: { id: string; label: string }[] = [
+/**
+ * Retired question ("What matters most right now?", replaced by the profile's step 6, src/data/club/family-profile.ts).
+ * No longer asked. Households that answered it keep `preferences.priorities` (the family form passes it through on
+ * save); nothing reads it for suggestions. Labels kept so stored ids stay readable.
+ */
+export const LEGACY_PRIORITIES: { id: string; label: string }[] = [
   { id: 'mornings', label: 'Smoother mornings' },
   { id: 'evenings', label: 'Calmer evenings and dinner' },
   { id: 'tidy-home', label: 'A home everyone keeps up' },

@@ -106,7 +106,7 @@ const HEADINGS: Record<SetupStep, string> = {
 };
 const INTROS: Record<SetupStep, string> = {
   week: 'Tap what’s part of your week. Add days and times only if you want to; you can change this anytime.',
-  responsibilities: 'Tap a name once if they take care of it without being asked, twice if they help when asked. Leave anything blank.',
+  responsibilities: 'Open an area and pick who owns it and who helps with it. Skip anything that doesn’t apply.',
   growth: 'Pick any. We’ll suggest ways to hand these over a little at a time.',
   challenges: 'Pick any that sound like your house.',
   priority: 'We’ll start here. It becomes your family’s first focus, and you can change it later.',
@@ -282,20 +282,29 @@ export function clock(hhmm: string): string {
 
 // ------------------------------------------------------------------ step 3: who already takes care of what
 
-type Role = 'owns' | 'helps' | null;
+type Role = 'owns' | 'helps';
+const ROLES: { id: Role; label: string; hint: string; icon: string }[] = [
+  { id: 'owns', label: 'Owns it', hint: 'Takes care of it without being asked', icon: PROFILE_ICONS.owns },
+  { id: 'helps', label: 'Helps with it', hint: 'Pitches in when asked', icon: PROFILE_ICONS.shared },
+];
 
+/**
+ * One card per area. Open it, then pick names under "Owns it" and "Helps with it". A person is in one list at most:
+ * picking them in one takes them out of the other. Areas left closed or empty aren't saved.
+ */
 function OwnershipStep({ members, initial, nav, onSave }: { members: FamilyMember[]; initial: Responsibility[]; nav: Nav; onSave: (list: Responsibility[]) => void }) {
-  const [rows, setRows] = useState<Record<string, { ownerIds: string[]; helperIds: string[]; label?: string; id?: string }>>(() =>
+  type Row = { ownerIds: string[]; helperIds: string[]; label?: string; id?: string };
+  const [rows, setRows] = useState<Record<string, Row>>(() =>
     Object.fromEntries(initial.map((r) => [r.category, { ownerIds: r.ownerIds, helperIds: r.helperIds, label: r.label, id: r.id }])));
-  const roleOf = (cat: string, id: string): Role => (rows[cat]?.ownerIds.includes(id) ? 'owns' : rows[cat]?.helperIds.includes(id) ? 'helps' : null);
-  // none → owns → helps → none
-  const cycle = (cat: string, id: string) => {
+  const [open, setOpen] = useState<string[]>(() => initial.map((r) => r.category));
+  const pick = (cat: string, role: Role, id: string) => {
     const r = rows[cat] ?? { ownerIds: [], helperIds: [] };
-    const now = roleOf(cat, id);
-    const ownerIds = now === null ? [...r.ownerIds, id] : r.ownerIds.filter((x) => x !== id);
-    const helperIds = now === 'owns' ? [...r.helperIds, id] : r.helperIds.filter((x) => x !== id);
-    setRows({ ...rows, [cat]: { ...r, ownerIds, helperIds } });
+    const [mine, other] = role === 'owns' ? [r.ownerIds, r.helperIds] : [r.helperIds, r.ownerIds];
+    const nextMine = toggle(mine, id);
+    const nextOther = other.filter((x) => x !== id);
+    setRows({ ...rows, [cat]: { ...r, ...(role === 'owns' ? { ownerIds: nextMine, helperIds: nextOther } : { helperIds: nextMine, ownerIds: nextOther }) } });
   };
+  const name = (id: string) => members.find((m) => m.id === id)?.firstName ?? '';
   const result = (): Responsibility[] =>
     RESPONSIBILITY_CATEGORIES.flatMap((c) => {
       const r = rows[c.id];
@@ -306,33 +315,53 @@ function OwnershipStep({ members, initial, nav, onSave }: { members: FamilyMembe
 
   return (
     <>
-      <div className="flex flex-wrap gap-x-6 gap-y-2 text-[0.88rem] text-warm-soft">
-        <span className="inline-flex items-center gap-2"><span className="inline-block h-3.5 w-3.5 rounded-full bg-warm-ink" />Takes care of it</span>
-        <span className="inline-flex items-center gap-2"><span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-warm-ink bg-white" />Helps when asked</span>
-      </div>
-      <ul className="mt-4 divide-y divide-warm-rule rounded-[6px] border border-warm-rule bg-white">
-        {RESPONSIBILITY_CATEGORIES.map((c) => (
-          <li key={c.id} className="p-3 sm:p-4">
-            <p className="text-[0.98rem] font-semibold text-warm-ink">{c.label}</p>
-            {c.id === 'other' && (
-              <input className={`${input} mt-2`} value={rows.other?.label ?? ''} maxLength={MAX_LABEL} placeholder="What is it?" aria-label="Another responsibility"
-                onChange={(e) => setRows({ ...rows, other: { ...(rows.other ?? { ownerIds: [], helperIds: [] }), label: e.target.value } })} />
-            )}
-            <div className="mt-2 flex flex-wrap gap-2">
-              {members.map((m) => {
-                const role = roleOf(c.id, m.id);
-                return (
-                  <button key={m.id} type="button" onClick={() => cycle(c.id, m.id)}
-                    aria-label={`${m.firstName}, ${c.label}: ${role === 'owns' ? 'takes care of it' : role === 'helps' ? 'helps when asked' : 'not set'}. Tap to change.`}
-                    className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 px-4 text-[0.92rem] ${role === 'owns' ? 'border-warm-ink bg-warm-ink text-white' : role === 'helps' ? 'border-warm-ink bg-white text-warm-ink' : 'border-warm-rule bg-white text-warm-soft'}`}>
-                    {m.firstName}
-                    {role && <span className="text-[0.8rem]">· {role === 'owns' ? 'owns' : 'helps'}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </li>
-        ))}
+      <ul className="space-y-2.5">
+        {RESPONSIBILITY_CATEGORIES.map((c) => {
+          const r = rows[c.id];
+          const isOpen = open.includes(c.id);
+          const line = [r?.ownerIds.length ? `Owns it: ${r.ownerIds.map(name).join(', ')}` : '', r?.helperIds.length ? `Helps: ${r.helperIds.map(name).join(', ')}` : ''].filter(Boolean).join(' · ');
+          return (
+            <li key={c.id} className={`rounded-[6px] border bg-white ${line ? 'border-warm-ink' : 'border-warm-rule'}`}>
+              <button type="button" aria-expanded={isOpen} aria-controls={`resp-${c.id}`} onClick={() => setOpen(toggle(open, c.id))}
+                className="flex min-h-14 w-full items-center gap-3 px-3 py-2.5 text-left sm:px-4">
+                <span className="flex-1">
+                  <span className="block text-[0.98rem] font-semibold text-warm-ink">{c.label}</span>
+                  <span className="block text-[0.85rem] text-warm-soft">{line || 'Not set (optional)'}</span>
+                </span>
+                <span aria-hidden="true" className="text-[1.3rem] leading-none text-warm-soft">{isOpen ? '−' : '+'}</span>
+              </button>
+              {isOpen && (
+                <div id={`resp-${c.id}`} className="space-y-4 border-t border-warm-rule px-3 pb-4 pt-3 sm:px-4">
+                  {c.id === 'other' && (
+                    <input className={input} value={rows.other?.label ?? ''} maxLength={MAX_LABEL} placeholder="What is it?" aria-label="Another responsibility"
+                      onChange={(e) => setRows({ ...rows, other: { ...(rows.other ?? { ownerIds: [], helperIds: [] }), label: e.target.value } })} />
+                  )}
+                  {ROLES.map((role) => {
+                    const ids = role.id === 'owns' ? r?.ownerIds ?? [] : r?.helperIds ?? [];
+                    return (
+                      <fieldset key={role.id}>
+                        <legend className="flex items-center gap-2">
+                          <img src={role.icon} alt="" width={32} height={32} className="h-8 w-8" />
+                          <span>
+                            <span className="block text-[0.95rem] font-semibold text-warm-ink">{role.label}</span>
+                            <span className="block text-[0.82rem] text-warm-soft">{role.hint}</span>
+                          </span>
+                        </legend>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {members.map((m) => (
+                            <Chip key={m.id} on={ids.includes(m.id)} onClick={() => pick(c.id, role.id, m.id)} label={`${m.firstName} ${role.label.toLowerCase()}: ${c.label}`}>
+                              {ids.includes(m.id) && <span aria-hidden="true">✓</span>}{m.firstName}
+                            </Chip>
+                          ))}
+                        </div>
+                      </fieldset>
+                    );
+                  })}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
       <Actions nav={nav} onNext={() => onSave(result())} onSkip={() => onSave(initial)} />
     </>

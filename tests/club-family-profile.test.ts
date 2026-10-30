@@ -121,3 +121,18 @@ describe('family profile: the sample store behaves like the database', () => {
     expect((await store.profile())!.activities).toHaveLength(1);
   });
 });
+
+describe('the retired “What matters most right now?” question', () => {
+  it('is gone from the family form, and a save keeps what a household already answered', async () => {
+    const { draftsFrom, toInput } = await import('../src/components/club/FamilyForm');
+    const src = readFileSync('src/components/club/FamilyForm.tsx', 'utf8');
+    expect(src).not.toMatch(/<legend[^>]*>What matters most/);
+    expect(src).not.toMatch(/PRIORITIES/);
+    const h = { id: 'h', preferences: { palette: 'blue-green' as const, pets: true, priorities: ['mornings', 'shared-load'] }, profileVersion: 3,
+      members: [{ id: 'a', firstName: 'Ana', kind: 'adult' as const, role: 'parent' as const, isAccountHolder: true }] };
+    const d = draftsFrom(h, '2026-11');
+    const kept = toInput(d.me, d.adults, d.kids, { displayName: 'Team', pets: true }, h.preferences, '2026-11');
+    expect(kept.preferences).toEqual({ palette: 'blue-green', pets: true, priorities: ['mornings', 'shared-load'] });
+    expect(toInput(d.me, d.adults, d.kids, { displayName: '', pets: false }, {}, '2026-11').preferences).toEqual({});
+  });
+});
