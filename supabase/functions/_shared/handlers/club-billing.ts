@@ -1,11 +1,14 @@
 /**
  * POST /functions/v1/club-billing (the Club's pages).
  *
- *   checkout        { plan: 'monthly', email? } (+ her access token if signed in; annual isn't offered yet)
+ *   checkout        { plan: 'monthly' } (+ her access token if signed in; annual isn't offered yet)
  *                   → { url } (Stripe-hosted Checkout) | { error: 'already_member' | 'checkout_closed' | … }
- *                   Signed in: her verified email. Signed out: the email she typed (her account is created after
- *                   payment and opens only once she proves the inbox). Refuses a second live membership, reuses her
- *                   Stripe customer and any open Checkout for the same plan, so repeated clicks can't double-subscribe.
+ *                   Signed in: her verified email; refuses a second live membership and reuses her Stripe customer
+ *                   and any open Checkout for the same plan, so repeated clicks can't double-subscribe. Signed out
+ *                   (the /club offer button): no email on our site; a new Stripe customer without one, and Stripe
+ *                   Checkout collects and sets it. Her account is created from it after payment and opens only once
+ *                   she proves the inbox. A second membership for that email is caught by club-webhook (the one-live-
+ *                   subscription index), which cancels and refunds it. An optional `email` is still validated.
  *                   Your First Month FREE (club_checkout_state decides): a new household's checkout collects a card
  *                   and charges nothing; the subscription is a trial until the first charge (founding members,
  *                   joining before the 2027 program: February 1, 2027; later: one month after joining). Her free
@@ -93,7 +96,7 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   const plan = body.plan;
   const user = await userFromRequest(deps, req);
   const email = user?.email ?? (typeof body.email === 'string' ? body.email.trim().toLowerCase() : '');
-  // Guests enter their email in Stripe Checkout. Signed-in members retain their verified address.
+  // Signed out: Stripe Checkout collects the email. Signed in: her verified address.
   if (email && (!EMAIL_RE.test(email) || email.length > 254)) throw new Refusal('invalid_email');
 
   const state = await deps.db.rpc<CheckoutState>('club_checkout_state', { p_user: user?.id ?? null, p_email: email });
@@ -152,7 +155,7 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     success_url: `${site}/club/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${site}/club/#offer`,
   }, `club-checkout:${customer}:${plan}:${state.intro_month ? 'intro' : trialEnd ? 'trial' : 'pay'}:${Math.floor(deps.now() / 600)}`);
-  // The empty guest email is replaced by Stripe's verified Checkout email during webhook fulfillment.
+  // A guest's row has no email: club-webhook reads the one she gave Stripe from the session and customer.
   await deps.db.rpc('club_checkout_record', {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1000).toISOString() },
   });
@@ -181,7 +184,12 @@ async function signedIn(deps: ClubDeps, req: Request) {
 async function portal(deps: ClubDeps, req: Request) {
   const user = await signedIn(deps, req);
   const state = await deps.db.rpc<CheckoutState>('club_checkout_state', { p_user: user.id, p_email: user.email });
-  const [own] = await deps.db.select<{ stripe_customer_id: string }>('club_customers', `user_id=eq.${user.id}&select=stripe_customer_id`);
+  // The Stripe customer that holds her membership (live first, else the latest): rejoining signed out, Checkout
+  // made her a new customer, so her first one may hold only an ended subscription.
+  const subs = await deps.db.select<{ stripe_customer_id: string; status: string; flags: string[] | null }>(
+    'club_subscriptions', `user_id=eq.${user.id}&select=stripe_customer_id,status,flags&order=started_at.desc`);
+  const sub = subs.find((s) => LIVE_STATUSES.includes(s.status) && !s.flags?.includes('duplicate')) ?? subs[0];
+  const [own] = sub ? [sub] : await deps.db.select<{ stripe_customer_id: string }>('club_customers', `user_id=eq.${user.id}&select=stripe_customer_id`);
   if (!own) throw new Refusal('no_membership', 404);
   const session = await deps.stripe.request<{ url: string }>('POST', '/v1/billing_portal/sessions', {
     customer: own.stripe_customer_id,
