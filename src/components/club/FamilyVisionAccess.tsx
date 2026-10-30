@@ -107,7 +107,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
   }
   const slot = document.getElementById('fvp-member-actions');
   const approved = w.approved || w.status !== 'pending' || !w.editable;
-  const nextHref = ctx.href(routes.clubDashboard);
+  const nextHref = '/club/';
   const bar = (
     <div className="fvp-member-flow" data-club-chrome>
       {!approved ? (
@@ -124,7 +124,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
           <strong>It's yours!</strong>
           <p>Your family print is approved. We're getting it ready to mail.</p>
           <a className="fvp-next-cta" href={nextHref}>See how the Club works <span aria-hidden="true">→</span></a>
-          <a className="fvp-next-secondary" href={ctx.href('/app/club/')}>Explore this month's resource</a>
+          <a className="fvp-next-secondary" href="/app/club/">Explore this month's resource</a>
         </div>
       )}
     </div>
