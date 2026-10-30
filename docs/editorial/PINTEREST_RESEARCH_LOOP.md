@@ -35,3 +35,8 @@ Use **6 proven keyword ideas, 3 specific-audience/situation ideas, and 1 creativ
 
 ## Production QA
 For every next batch show its ten master IDs, lanes, evidence, direct destinations, genuinely different image concepts and missing-content blockers before Gemini generation. For each pin, retain its original ID throughout Gemini, Claude import and final reconciliation. Separate **planned**, **created**, **approved**, **scheduled**, **published** and **performance** counts. Actual research and account data outrank the proposed split.
+
+
+## Seasonal and conversion gate (2026-10-30)
+
+Read [SEASONAL_ACQUISITION_PLAN.md](SEASONAL_ACQUISITION_PLAN.md) before each new 10-pin batch. For each candidate record the content lane (inspiration / useful / product), seasonal need month, Pinterest first-publication window (usually 60–90 days ahead of need), verified destination and next visitor action, relevant specific Club kit or calendar, and whether its enrollment deadline/delivery supports the claim. Preserve permanent master IDs and proposed versus actual schedule distinction; add seasonal context without overwriting existing approvals. Reconcile performance and decisions at 30/60/90 days rather than treating 500 created pins as success.
