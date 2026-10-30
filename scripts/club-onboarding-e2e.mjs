@@ -9,12 +9,13 @@
  *   PUBLIC_CLUB_ENABLED=true PUBLIC_ACCOUNTS_ENABLED=true npx astro build && npx astro preview --port 4329
  *   node scripts/club-onboarding-e2e.mjs [http://localhost:4329] [--shots=dir]
  *
- * --only=months opens every month's member copy (edit, save, reload, phone, print); not part of the default run.
+ * --only=months opens every monthly tool at /app/club/<month> as her (edit, saved to her account, a new browser, sign
+ * out and in, meeting, phone, print); not part of the default run.
  *
  * Exits 1 when any check fails.
  */
 import { createRequire } from 'node:module';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
@@ -482,7 +483,7 @@ async function journey(browser, label, vp) {
   const club = await page.locator('main').innerText();
   check('her Club (/app/club): no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /We’re preparing your Welcome Kit/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
   const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
-  check('her Club: January marked hers, opening her family’s version', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === `/club/resources/${JAN}`);
+  check('her Club: January marked hers, opening her family’s plan in the app (saved to her account)', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === '/app/club/january');
   check('her Club: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
   check('her Club: February shows when her next payment opens it', /Next · February 2027/i.test(club) && /Opens with your February 1, 2027 payment/.test(club));
   check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
@@ -566,86 +567,176 @@ scenarios.resume = async (browser) => {
   await page.context().close();
 };
 
-// Every month in the member registry (src/data/club/resources.ts), opened as her own copy: her family on it, an edit
-// saved to her account and back after a reload, phone and desktop without sideways scrolling, every image loaded, and
-// a Letter print with no blank page. Run with --only=months (it isn't part of the default run: twelve months are slow).
-const RESOURCES = [...readFileSync(new URL('../src/data/club/resources.ts', import.meta.url), 'utf8')
-  .matchAll(/slug: '(\d{4}-\d{2}-[a-z0-9-]+)', month: '(\d{4}-\d{2})'/g)].map(([, slug, month]) => ({ slug, month }));
-/** Types a marker into the first thing on her copy she can edit in place; null when there's nothing to type into. */
-const editInPlace = (page, marker) => page.evaluate((marker) => {
-  const host = document.getElementById('club-month-content');
-  const seen = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
-  const el = [...host.querySelectorAll('[contenteditable="true"], textarea, input[type="text"]:not([readonly])')].find(seen);
-  if (!el) return null;
-  el.focus();
-  if (el.isContentEditable) {
-    el.textContent = marker;
-    el.dispatchEvent(new InputEvent('input', { bubbles: true }));
-  } else {
-    el.value = marker;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-  el.blur();
-  el.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-  return el.tagName.toLowerCase() + (el.isContentEditable ? '[contenteditable]' : '');
-}, marker);
+// Every monthly tool at /app/club/<month> as a signed-in member (src/lib/club/plan/account.ts): her family on it, a real
+// edit saved to her account, the same plan back in a new browser (closed browser, another device) and after signing
+// out and in, the Family Meeting reading without writing, phone and desktop without sideways scrolling, every image
+// loaded, and a Letter print with no blank page. Run with --only=months (not part of the default run: it's slow).
+const MONTH_PAGES = [
+  ['january', '2027-01-fresh-start-together', 'omc:club:january-weekly-meeting:v1'],
+  ['february', '2027-02-better-together', 'omc:club:february-laundry-app:v1'],
+  ['march', '2027-03-spring-clean-together', 'omc:club:march-chore-charts:v2'],
+  ['april', '2027-04-everybody-helps-at-mealtime', 'omc:club:april-app:v1'],
+  ['may', '2027-05-finish-the-school-year', 'omc:club:may-app:v1'],
+  ['june', '2027-06-summer-with-a-plan', 'omc:club:june-app:v1'],
+  ['july', '2027-07-ready-to-go', 'omc:club:july-app:v1'],
+  ['august', '2027-08-school-year', 'omc:club:august-app:v1'],
+  ['september', '2027-09-a-week-everyone-can-see', 'omc:preview:september-habit-cards:v3'],
+  ['october', '2027-10-home-works-together', 'omc:club:october-daily-reset:v1'],
+  ['december', '2026-12-christmas-mission', 'omc:club:december-app:v1'],
+];
+const NOV = '2026-11-family-ownership';
 const pageTexts = (pdf) => execFileSync('pdftotext', ['-layout', pdf, '-']).toString().split('\f').slice(0, -1);
+/** Her saved version's entry for a key (null when none). */
+const savedEntry = (slug, key) => sql(`select v.state -> ${lit(key)} ->> 'v' from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id
+  join public.club_households h on h.id = v.household_id where k.slug = ${lit(slug)} and h.owner_user_id = '${USER.id}'`) || null;
+const tabValue = (page, key) => page.evaluate((k) => sessionStorage.getItem(k), key);
+async function openPlan(page, month) {
+  await page.goto(`${BASE}/app/club/${month}`, { waitUntil: 'networkidle' });
+  const ready = await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).then(() => true, () => false);
+  await page.waitForTimeout(900);
+  return ready;
+}
+/** A real edit with her mouse and keyboard: text on the sheet where the tool has it, else its own editor. */
+async function editPlan(page, month, marker) {
+  if (month === 'february') {
+    await page.click('[data-cpd-edit]');
+    await page.locator('dialog[open] input[type="checkbox"]').first().click();
+    await page.keyboard.press('Escape');
+    return 'unticked a step in its editor';
+  }
+  if (month === 'march') {
+    await page.click('[data-cpd-edit]');
+    const input = page.locator('dialog[open] input[type="text"], dialog[open] input:not([type])').first();
+    await input.fill(marker);
+    await input.press('Tab');
+    await page.keyboard.press('Escape');
+    return 'renamed a chore in its editor';
+  }
+  if (month === 'december') {
+    await page.click('[data-cpd-edit]');
+    await page.locator('dialog[open] button[aria-pressed="false"]').first().click();
+    await page.keyboard.press('Escape');
+    return 'picked another grown-up helper';
+  }
+  const target = page.locator('.club-plan [data-plan-sheet] [contenteditable="true"]').first();
+  await target.click();
+  await page.keyboard.press('Control+A');
+  await page.keyboard.type(marker);
+  await page.keyboard.press('Tab');
+  await page.mouse.click(5, 5);
+  return 'typed on the sheet';
+}
 scenarios.months = async (browser) => {
-  console.log('Every month: her own copy, edit → save → reload, phone and desktop, print');
-  check('the registry lists twelve months', RESOURCES.length === 12, RESOURCES.map((r) => r.month).join(' '));
+  console.log('Every monthly tool at /app/club: her plan saved to her account, back in a new browser, meeting, phone, print');
   freshDb();
   as.family();
   sql(`update public.club_kits set status = 'scheduled'`);
   sql(`insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
-       select '${USER.id}', h.id, m::date, 'digital', 1, 'admin', 'admin', 'QA: every month'
-         from public.club_households h, unnest(array[${RESOURCES.map((r) => lit(`${r.month}-01`)).join(', ')}]) m
-        where h.owner_user_id = '${USER.id}'
+       select '${USER.id}', h.id, k.month, 'digital', 1, 'admin', 'admin', 'QA: every month'
+         from public.club_households h, public.club_kits k
+        where h.owner_user_id = '${USER.id}' and k.slug in (${[...MONTH_PAGES.map((m) => m[1]), NOV].map(lit).join(', ')})
        on conflict do nothing`);
-  for (const { slug, month } of RESOURCES) {
-    const name = `${month} ${slug.slice(8)}`;
+  // A plan she saved earlier on her copy of January (a different tool there): it must stay exactly as it is.
+  const legacy = '{"legacy":"habit cards she saved earlier"}';
+  sql(`insert into public.club_resource_versions (household_id, kit_id, state, profile_version)
+       select h.id, k.id, jsonb_build_object('omc:club:member:${MONTH_PAGES[0][1]}:v1', jsonb_build_object('s', 'l', 'v', ${lit(legacy)})), h.profile_version
+         from public.club_households h, public.club_kits k where h.owner_user_id = '${USER.id}' and k.slug = '${MONTH_PAGES[0][1]}'`);
+
+  // QA_MONTHS=june,july limits the months (the sign-out check and the Club home links still run).
+  const pick = process.env.QA_MONTHS?.split(',');
+  for (const [month, slug, key] of MONTH_PAGES.filter(([m]) => !pick || pick.includes(m) || m === 'june')) {
     const page = await newPage(browser, DESKTOP);
-    await page.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
-    const open = await page.waitForFunction(() => document.getElementById('club-month-content')?.hidden === false, null, { timeout: 15000 }).then(() => true, () => false);
-    check(`${name}: opens for her`, open, open ? '' : (await page.locator('main').innerText()).slice(0, 160));
-    if (!open) { await page.context().close(); continue; }
-    await page.waitForTimeout(800);
-    const text = await page.locator('#club-month-content').innerText();
-    check(`${name}: prepared with her family`, /Sofia|Mateo|Rivera/i.test(text));
-    const imgs = await page.evaluate(() => [...document.querySelectorAll('#club-month-content img')].filter((i) => i.getClientRects().length && !(i.complete && i.naturalWidth > 0)).map((i) => i.getAttribute('src')));
-    check(`${name}: every image loads`, imgs.length === 0, imgs.join(' '));
-    check(`${name}: desktop, no sideways scrolling`, await noSideScroll(page));
-    const marker = `QA${month.replace('-', '')}`;
-    const how = await editInPlace(page, marker);
-    if (how) {
-      await page.waitForFunction(() => /Saved|save to your account|Changes save/.test(document.body.innerText), null, { timeout: 5000 }).catch(() => undefined);
-      await page.waitForTimeout(2500);
-      const saved = sql(`select coalesce(max(revision), 0) || ':' || coalesce(bool_or(v.state::text like '%${marker}%'), false) from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}'`);
-      check(`${name}: an edit (${how}) saves to her account`, saved.endsWith(':true'), saved);
-      await page.reload({ waitUntil: 'networkidle' });
-      await page.waitForFunction(() => document.getElementById('club-month-content')?.hidden === false, null, { timeout: 15000 }).catch(() => undefined);
-      await page.waitForTimeout(800);
-      check(`${name}: still there after a reload`, (await page.locator('#club-month-content').innerText()).includes(marker));
-    } else {
-      check(`${name}: nothing to type into in place (its editor opens from a button; covered by its own QA)`, true);
+    const ready = await openPlan(page, month);
+    check(`${month}: her tool opens`, ready, ready ? '' : (await page.locator('.club-plan').innerText().catch(() => '')).slice(0, 160));
+    if (!ready) { await page.context().close(); continue; }
+    const text = await page.locator('.club-plan').innerText();
+    check(`${month}: prepared with her family`, /Sofia|Mateo|Rivera/i.test(text));
+    check(`${month}: says it saves to her account`, /Changes save to your account/.test(text));
+    const before = savedEntry(slug, key);
+    check(`${month}: opening saves nothing`, before === null, String(before).slice(0, 60));
+    const imgs = await page.evaluate(() => [...document.querySelectorAll('.club-plan img')].filter((i) => i.getClientRects().length && !(i.complete && i.naturalWidth > 0)).map((i) => i.getAttribute('src')));
+    check(`${month}: every image loads`, imgs.length === 0, imgs.join(' '));
+    check(`${month}: desktop, no sideways scrolling`, await noSideScroll(page));
+
+    const marker = `Q${month.slice(0, 3)}${Date.now() % 1000}`;
+    const how = await editPlan(page, month, marker);
+    await page.waitForTimeout(2500);
+    const value = await tabValue(page, key);
+    const saved = savedEntry(slug, key);
+    check(`${month}: an edit (${how}) saves to her account`, Boolean(value) && saved === value, `${String(saved).slice(0, 50)} vs ${String(value).slice(0, 50)}`);
+    if (month === 'january') {
+      check('january: the plan she saved earlier on her copy is untouched', sql(`select v.state -> 'omc:club:member:${slug}:v1' ->> 'v' from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}'`) === legacy);
+      check('january: and linked from the tool', await page.isVisible('a:has-text("Open the copy you saved earlier")'));
     }
-    check(`${name}: no script errors`, page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
-    const pages = await printPdf(page, `months-${month}`);
-    const texts = pageTexts(`${SHOTS ?? '/tmp'}/months-${month}.pdf`);
-    const blank = texts.map((t, i) => (t.trim() ? null : i + 1)).filter(Boolean);
-    check(`${name}: prints ${pages} Letter page(s), none blank`, pages > 0 && blank.length === 0, blank.length ? `blank: ${blank.join(',')}` : '');
+    check(`${month}: no script errors`, page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
+    const revision = sql(`select revision from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}'`);
+
+    // The Family Meeting beside it reads her family and writes nothing.
+    await page.locator('[data-fm-view="meeting"]').first().click();
+    await page.waitForTimeout(600);
+    check(`${month}: Family Meeting shows her family`, /Sofia|Mateo/.test(await page.locator('[data-meeting-sheet]').first().innerText().catch(() => '')));
+    await page.locator('[data-fm-view="tool"]').first().click();
+    await page.waitForTimeout(600);
+    check(`${month}: back to the tool, her change still there`, (await tabValue(page, key)) === value);
+    check(`${month}: the meeting changed nothing saved`, sql(`select revision from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}'`) === revision && savedEntry(slug, key) === value);
+
+    const pages = await printPdf(page, `app-${month}`);
+    const blank = pageTexts(`${SHOTS ?? '/tmp'}/app-${month}.pdf`).map((t, i) => (t.trim() ? null : i + 1)).filter(Boolean);
+    check(`${month}: prints ${pages} Letter page(s), none blank`, pages > 0 && blank.length === 0, blank.length ? `blank: ${blank.join(',')}` : '');
     await page.context().close();
 
+    // A new browser (closed browser, another device): the same plan, and it isn't saved again just by opening.
+    const again = await newPage(browser, DESKTOP);
+    await openPlan(again, month);
+    check(`${month}: same plan in a new browser`, (await tabValue(again, key)) === value);
+    if (how === 'typed on the sheet' || month === 'march') check(`${month}: her words are on the sheet`, (await again.locator('.club-plan').innerText()).includes(marker) || Boolean(await again.evaluate((m) => [...document.querySelectorAll('.club-plan input')].some((i) => i.value === m), marker)));
+    check(`${month}: reopening doesn't save again`, sql(`select revision from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}'`) === revision);
+    await again.context().close();
+
     const phone = await newPage(browser, MOBILE);
-    await phone.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
-    const ok = await phone.waitForFunction(() => document.getElementById('club-month-content')?.hidden === false, null, { timeout: 15000 }).then(() => true, () => false);
-    await phone.waitForTimeout(800);
-    check(`${name}: phone opens with her family`, ok && /Sofia|Mateo|Rivera/i.test(await phone.locator('#club-month-content').innerText()));
-    const wide = await phone.evaluate(() => [document.documentElement.scrollWidth, [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 1 && getComputedStyle(e).position !== 'fixed').slice(0, 3).map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(' ')[0]}`)]);
-    check(`${name}: phone, no sideways scrolling`, await noSideScroll(phone), `page ${wide[0]}px wide: ${wide[1].join(' ')}`);
-    await shot(phone, `months-${month}-phone`);
+    const ok = await openPlan(phone, month);
+    check(`${month}: phone opens with her family`, ok && /Sofia|Mateo|Rivera/i.test(await phone.locator('.club-plan').innerText()));
+    const wide = await phone.evaluate(() => document.documentElement.scrollWidth);
+    check(`${month}: phone, no sideways scrolling`, await noSideScroll(phone), `page ${wide}px wide`);
+    await shot(phone, `app-${month}-phone`);
     await phone.context().close();
   }
+
+  // Sign out, sign back in with her emailed code: June is still her plan.
+  const out = await newPage(browser, MOBILE, { auth: false });
+  await out.goto(`${BASE}/club/login`, { waitUntil: 'networkidle' });
+  await out.evaluate((s) => localStorage.setItem('omc:account:session', JSON.stringify(s)),
+    { access_token: 'member-token', refresh_token: 'member-refresh', expires_at: Date.now() + 3600_000, email: USER.email, user_id: USER.id });
+  await out.goto(`${BASE}/club/dashboard`, { waitUntil: 'networkidle' });
+  await out.click('text=Sign out');
+  await out.waitForTimeout(800);
+  check('signed out: no session left', !(await out.evaluate(() => localStorage.getItem('omc:account:session'))));
+  await out.goto(`${BASE}/app/club/june`, { waitUntil: 'networkidle' });
+  await out.waitForTimeout(800);
+  check('signed out: her plan asks her to sign in', (await out.locator('.club-plan').getAttribute('data-plan-state')) === 'signed-out');
+  await out.context().close();
+  const back = await newPage(browser, MOBILE, { auth: false });
+  await back.goto(`${BASE}/club/login?email=${encodeURIComponent(USER.email)}`, { waitUntil: 'networkidle' });
+  await back.click('text=Email me a code');
+  await back.fill('#club-code', '123456');
+  await back.click('button:has-text("Sign in")');
+  await back.waitForURL((u) => !u.pathname.startsWith('/club/login'), { timeout: 15000 }).catch(() => undefined);
+  check('signed back in with her emailed code', !back.url().includes('/club/login'), back.url());
+  const backReady = await openPlan(back, 'june');
+  if (!backReady) console.log(`       (june: ${await back.locator('.club-plan').getAttribute('data-plan-state')} ${(await back.locator('main').innerText()).replace(/\s+/g, ' ').slice(0, 200)})`);
+  check('signed back in: June is her saved plan', (await tabValue(back, 'omc:club:june-app:v1')) === savedEntry('2027-06-summer-with-a-plan', 'omc:club:june-app:v1'));
+  // Her family page opens for editing (also where the profile functions aren't on the database yet).
+  await back.goto(`${BASE}/club/family`, { waitUntil: 'networkidle' });
+  await back.waitForSelector('button:has-text("Save our family"), [role="alert"]', { timeout: 10000 }).catch(() => undefined);
+  check('her family page opens for editing', await back.locator('button:has-text("Save our family")').isVisible().catch(() => false) && !(await back.isVisible('text=We couldn’t load your family')),
+    (await back.locator('main').innerText()).replace(/\s+/g, ' ').slice(0, 160));
+  // Her Club home opens the app tools (November stays on its own page: it's the only place its tool lives).
+  await back.goto(`${BASE}/app/club`, { waitUntil: 'networkidle' });
+  await back.waitForSelector('text=Open your June plan', { timeout: 10000 }).catch(() => undefined);
+  const links = await back.evaluate(() => Object.fromEntries([...document.querySelectorAll('a')].filter((a) => /^Open your/.test(a.textContent ?? '')).map((a) => [a.textContent.replace(/\s*→\s*$/, ''), a.getAttribute('href')])));
+  check('Club home: “Open your June plan” → /app/club/june', links['Open your June plan'] === '/app/club/june', JSON.stringify(links));
+  check('Club home: every month she holds opens its tool', Object.entries(links).every(([t, h]) => (/November/.test(t) ? h === `/club/resources/${NOV}` : /^\/app\/club\/[a-z]+$/.test(h))) && Object.keys(links).length === 12, `${Object.keys(links).length} links`);
+  await back.context().close();
 };
 
 const names = ONLY ? ONLY.split(',') : Object.keys(scenarios).filter((n) => n !== 'months');
