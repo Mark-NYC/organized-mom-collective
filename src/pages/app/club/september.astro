@@ -1,14 +1,12 @@
 ---
 /** September Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
- * docs/club/PLAN_ARCHITECTURE.md): the family Sunday Reset (moved from October in Oct 2026) and, in a second tab,
- * the monthly activity calendar demo (the free /try-the-calendar tool, prefilled with the family's names).
- * Desktop (>= 1100px): the shared rail (ClubPlanDesktop, October's layout) and the scrolling document proof. Below
- * 1100px: the shared plan screen with September's sections (SeptemberPlanMobile). The printable, its editor and its
- * rules live in SeptemberSundayReset and src/lib/club/engines/sunday-reset.ts. */
+ * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with the
+ * habit cards, beside the one-page printable. Below 1100px: the shared plan screen with September's habit cards
+ * (JanuaryPlanMobile). Both read the printable's state (JanuaryHabitCards, january-habit-cards.ts). */
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
-import SeptemberSundayReset from '../../../components/club/SeptemberSundayReset.astro';
-import SeptemberPlanMobile from '../../../components/club/SeptemberPlanMobile.astro';
+import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
+import JanuaryPlanMobile from '../../../components/club/JanuaryPlanMobile.astro';
 import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
 import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
 import { clubEditingDeadline } from '../../../lib/club/deadline';
@@ -16,98 +14,84 @@ import { kits } from '../../../data/club/kits';
 const kit = kits.find((k) => k.month === '2027-09');
 if (!kit) throw new Error('September 2027 kit missing from the registry');
 const editDeadline = clubEditingDeadline(kit.month);
-const storageKey = 'omc:club:september-sunday-reset:v1';
+const storageKey = 'omc:preview:september-habit-cards:v3';
 ---
-<AppLayout title="September Sunday Reset">
-  <ClubPlanShell class="club-mobile-kit family-brand" kitSlug={kit.slug} month="September" sides={['front', 'back']} storageKey={storageKey}>
+<AppLayout title="September Family Habit Cards">
+  <ClubPlanShell class="jan-plan family-brand" kitSlug={kit.slug} month="September" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={editDeadline} kicker="September · Kit preview" instructions={[
-      'Keep this two-sided sheet beside your family wall calendar. Each Sunday, take 10–15 minutes to look at the week ahead, prepare what you need, and give everyone a part.',
-      'The back is a one-time fall example to try together. Review the prepared roles, change anything that doesn’t fit, and use the front again each Sunday.',
-      'Try the Wall Calendar: add each person’s recurring activities once and see the whole month by person, ready for your Sunday planning.',
+      'Print at actual size. Keep the sheet visible, or cut out a reminder to place where the habit happens.',
+      'One or two small habits, no tracking, points or daily checkboxes. Keep the prepared ones or find habits that make everyday life easier.',
     ]}>
-      <Fragment slot="title">Our Family <em>Sunday Reset</em></Fragment>
+      <Fragment slot="title">Our Family <em>Habit Cards</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="jan-d-cards">
+          <p class="cpd-label" id="jan-d-cards">On the sheet</p>
+          <ol class="jan-d-list" data-jan-cards></ol>
+          <div class="jan-d-count" role="group" aria-label="Cards on the sheet"><button type="button" data-jan-count="1">One card</button><button type="button" data-jan-count="2">Two cards</button></div>
+          <button type="button" class="cpd-link" data-jan-open="cards">Edit card wording</button>
+          <button type="button" class="cpd-link" data-jan-open="finder">Help me find our habits</button>
+          <button type="button" class="cpd-link" data-jan-restore hidden>Restore suggested cards</button>
+          <p class="cpd-hint" data-jan-restore-hint hidden>Puts back the two prepared habits and their wording, with your family’s names.</p>
+          <p class="cpd-hint" data-jan-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
     </ClubPlanDesktop>
-    <div class="kit-viewer-wrap" slot="printable" data-plan-proof-body>
-      <div class="kit-artwork" data-kit-viewer data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
-        <SeptemberSundayReset storageKey={storageKey} />
+    <div class="jan-proof" slot="printable" data-plan-proof-body>
+      <div class="jan-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <JanuaryHabitCards storageKey={storageKey} planMode={true} />
       </div>
     </div>
-    <SeptemberPlanMobile slot="mobile" deadline={editDeadline} />
+    <JanuaryPlanMobile slot="mobile" deadline={editDeadline} />
   </ClubPlanShell>
 </AppLayout>
 <style is:global>
-/* The Sunday Reset inside the plan page: its own intro and editor panel give way to the shared rail and plan
-   screen; its two tabs (Sunday Reset, Try the Wall Calendar) stay. The rail, the column layout and the scrolling
-   preview are ClubPlanDesktop's. */
-.club-mobile-kit .osr{padding:0!important;max-width:none!important}
-.club-mobile-kit .osr-intro,.club-mobile-kit .osr-editor,.club-mobile-kit .osr-floating-edit{display:none!important}
-.club-mobile-kit .osr-layout{display:block!important}
-.club-mobile-kit .osr-preview{width:100%!important;padding:0!important;margin:0!important;min-width:0!important}
-.club-mobile-kit .osr-stage{width:100%!important;max-width:none!important;overflow:hidden}
-.club-mobile-kit .osr-pages{display:block!important;width:100%!important}
-.club-mobile-kit .osr-paper{max-width:none}
-.club-mobile-kit .osr-dialog{z-index:100}
-/* The calendar tab has its own Download PNG; the Sunday Reset's side switch and print don't apply to it. */
-.club-mobile-kit:has([data-osr-panel="calendar"]:not([hidden])) :is(.plan-sides,.plan-proof-print){visibility:hidden}
-
-/* Desktop: the January-style document viewer, centered letter-sized pages at proportional scale. */
-@media screen and (min-width:1100px){
-  .club-mobile-kit .osr,.club-mobile-kit .osr-layout,.club-mobile-kit .osr-preview,
-  .club-mobile-kit #osr-panel-reset{width:100%;min-width:0}
-  .club-mobile-kit .osr-preview,
-  .club-mobile-kit #osr-panel-reset,
-  .club-mobile-kit .osr-stage,
-  .club-mobile-kit .osr-layout{
-    height:auto!important;
-    max-height:none!important;
-    overflow:visible!important;
-    min-height:0!important;
-  }
-  .club-mobile-kit .osr-stage{
-    width:100%!important;
-    max-width:816px!important;
-    margin:0 auto!important;
-  }
-  .club-mobile-kit .osr-pages{
-    display:flex!important;
-    width:100%!important;
-    flex-direction:column!important;
-    align-items:center!important;
-    gap:28px!important;
-  }
-  .club-mobile-kit .osr-document-frame{
-    flex:none!important;
-    position:relative!important;
-    max-width:100%;
-    margin:0 auto!important;
-    background:#fff;
-    box-shadow:0 12px 32px #0002;
-    overflow:visible;
-  }
-  .club-mobile-kit .osr-document-frame .osr-paper{
-    position:absolute!important;
-    top:0!important;
-    left:0!important;
-    margin:0!important;
-    transform:scale(var(--osr-scale,1))!important;
-    transform-origin:top left!important;
-    box-shadow:none!important;
-  }
-}
+.jan-d-list{margin:4px 0 8px;padding:0 0 0 18px;display:grid;gap:8px;font-size:.82rem;line-height:1.45;color:var(--color-warm-soft)}
+.jan-d-list strong{display:block;font-size:.88rem;font-weight:600;color:var(--color-warm-ink)}
+.jan-d-count{display:flex;gap:6px;margin:6px 0 2px}
+.jan-d-count button{min-height:44px;padding:6px 14px;border:1px solid var(--color-warm-rule);border-radius:3px;background:#fff;font:600 .72rem var(--font-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--color-warm-ink);cursor:pointer}
+.jan-d-count button[aria-pressed="true"]{background:var(--color-warm-button);border-color:var(--color-warm-button);color:#fff}
+.jan-d-count button:disabled{cursor:default;opacity:.6}
 </style>
 <script>
-import type { OsrPlan, PlanState } from '../../../lib/club/engines/sunday-reset';
+import { applyFamilyNames, freshHabitState, habitFingerprint, setCount, type HabitState, type JhcPlan } from '../../../lib/club/engines/january-habit-cards';
 import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
+import { el } from '../../../lib/club/plan/dom';
 
-const kit = document.querySelector<HTMLElement>('.club-mobile-kit');
-const osr = kit?.querySelector<HTMLElement & { clubPlan?: OsrPlan }>('.osr');
-if (kit && osr) {
-  mountPlanDesktop<PlanState>({
-    root: kit,
-    host: osr,
-    approvalKey: 'omc:preview:september-sunday-reset:approval',
-    edit: () => osr.clubPlan?.openEditor(),
-    lock: (on) => osr.clubPlan?.setLocked(on),
+const root = document.querySelector<HTMLElement>('.jan-plan');
+const jhc = root?.querySelector<HTMLElement & { clubPlan?: JhcPlan }>('.jhc');
+if (root && jhc) {
+  const plan = () => jhc.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-jan-restored]');
+  const prepared = () => applyFamilyNames(freshHabitState(), plan().members());
+  let undo: HabitState | null = null;
+
+  mountPlanDesktop<HabitState>({
+    root,
+    host: jhc,
+    approvalKey: 'omc:preview:september-habit-cards:approval',
+    edit: () => plan().openEditor('cards'),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const s = plan().state();
+      q('[data-jan-cards]').replaceChildren(...s.habits.slice(0, s.count).map((h) => el('li', {}, el('strong', {}, `${h.name} · for ${h.who.toLowerCase()}`), `${h.anchor}: ${h.action}`)));
+      root.querySelectorAll<HTMLButtonElement>('[data-jan-count]').forEach((b) => { b.setAttribute('aria-pressed', String(Number(b.dataset.janCount) === s.count)); b.disabled = locked; });
+      root.querySelectorAll<HTMLButtonElement>('[data-jan-open]').forEach((b) => { b.disabled = locked; });
+      const changed = !locked && habitFingerprint(s) !== habitFingerprint(prepared());
+      q('[data-jan-restore]').hidden = !changed;
+      q('[data-jan-restore-hint]').hidden = !changed;
+    },
+  });
+
+  root.querySelectorAll<HTMLButtonElement>('[data-jan-count]').forEach((b) => b.addEventListener('click', () => plan().update((s) => setCount(s, b.dataset.janCount === '1' ? 1 : 2))));
+  root.querySelectorAll<HTMLButtonElement>('[data-jan-open]').forEach((b) => b.addEventListener('click', () => plan().openEditor(b.dataset.janOpen === 'finder' ? 'finder' : 'cards')));
+  q('[data-jan-restore]').addEventListener('click', () => {
+    undo = structuredClone(plan().state());
+    plan().replace(prepared());
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('Suggested cards restored. ', u);
+    restored.focus();
   });
 }
 </script>
