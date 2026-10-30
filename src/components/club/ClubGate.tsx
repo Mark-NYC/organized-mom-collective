@@ -66,9 +66,11 @@ function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) 
   return (
     <header data-club-chrome className="border-b border-warm-rule bg-ivory">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8">
-        <a href={href(routes.clubDashboard)} className="font-serif text-[1.05rem] text-warm-ink">{CLUB_NAME}</a>
+        <a href={signedIn ? routes.appClub : href(routes.clubDashboard)} className="font-serif text-[1.05rem] text-warm-ink">{CLUB_NAME}</a>
         <nav aria-label="Club" className="-mr-2 flex items-center gap-1">
-          {link('dashboard', routes.clubDashboard, 'Your months')}
+          {/* Her Club home is the month library (/app/club); her account page holds billing, family and address. */}
+          {signedIn ? <a href={routes.appClub} className="rounded-[3px] px-2.5 py-2 text-[0.82rem] font-semibold text-warm-ink">Your Club</a> : link('dashboard', routes.clubDashboard, 'Your months')}
+          {signedIn && link('dashboard', routes.clubDashboard, 'Account')}
           {link('family', routes.clubFamily, 'Family')}
           {signedIn && (
             <button type="button" className="px-2.5 py-2 text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => signOut().then(() => clubNav().reload())}>

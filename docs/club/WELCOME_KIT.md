@@ -34,7 +34,10 @@ queue pairs them:
    **"See your first family resource"**.
 3. **Her first resource** (`/club/resources/<slug>?welcome=1`): the month's title and problem, prepared for her kids by
    name, what comes in the kit, how it helps, her first step, the printable itself to correct, then one final
-   **"Looks good. Prepare my Welcome Kit"** → "It's all set!"
+   **"Looks good. Prepare my Welcome Kit"** → "It's all set!" → **"See your Club"**: `/app/club`, the month library,
+   now showing her months as hers (her Welcome Kit while it's on its way, each month she holds opening her family's
+   version, the month her next payment brings). Signed out, `/app/club` is still the preview. Her account (billing,
+   family, address) is `/club/dashboard`, linked from there; log-ins and Club emails land on her next step or `/app/club`.
 
 Leaving at any point and coming back (refresh, the welcome email's sign-in, `/club/login`) lands on the same step: it's
 derived from the database every time, never stored in the browser.

@@ -204,7 +204,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
             <div role="status">
               <h1 id="kit-first" className="font-serif text-[1.7rem] leading-tight text-warm-ink sm:text-[2rem]"><span aria-hidden="true">✓ </span>It’s all set!</h1>
               <p className="mt-2 max-w-2xl text-warm-ink">Your Welcome Kit is being prepared: your Family Vision print and your {r?.title ?? 'first resource'}, printed together and mailed to you in one package. You’ll see when it ships in your account.</p>
-              <a className="btn-primary mt-4" href={ctx.href(routes.clubDashboard)}>Go to my account</a>
+              <a className="btn-primary mt-4" href={routes.appClub}>See your Club</a>
             </div>
           )}
         </section>

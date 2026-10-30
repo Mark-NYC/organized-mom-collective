@@ -427,7 +427,18 @@ async function journey(browser, label, vp) {
   await page.waitForSelector('text=It’s all set!');
   await page.waitForTimeout(2000);
   check('revisiting her resource doesn’t undo her confirmation', firstConfirmed(), kitOrders());
-  await page.click('a:has-text("Go to my account")');
+  await page.click('a:has-text("See your Club")');
+  await page.waitForURL(/\/app\/club/);
+  await page.waitForSelector('text=Your year in the Club');
+  const club = await page.locator('main').innerText();
+  check('her Club (/app/club): no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /We’re preparing your Welcome Kit/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
+  const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
+  check('her Club: January marked hers, opening her family’s version', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a').getAttribute('href')) === `/club/resources/${JAN}`);
+  check('her Club: February shows when her next payment opens it', /Next · February 2027/i.test(club) && /Opens with your February 1, 2027 payment/.test(club));
+  check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a').innerText()).startsWith('Preview the tool'));
+  check('no sideways scrolling (her Club)', await noSideScroll(page));
+  await shot(page, `${label}-7-club`, true);
+  await page.click('a:has-text("billing, family and mailing address")');
   await page.waitForURL(/\/club\/dashboard/);
   await page.waitForSelector('text=Your first mailing, together');
   const dash = await page.locator('main').innerText();
@@ -435,7 +446,7 @@ async function journey(browser, label, vp) {
   check('dashboard: January isn’t called “This month” in October', /January 2027 · Your first month/i.test(dash) && !/January 2027 · This month/i.test(dash));
   check('dashboard: January’s printed copy “Coming in your Welcome Kit”', /Coming in your Welcome Kit/.test(dash));
   check('no sideways scrolling (dashboard)', await noSideScroll(page));
-  await shot(page, `${label}-7-dashboard`, true);
+  await shot(page, `${label}-8-account`, true);
   check('one welcome order and one January order, never more', sql(`select count(*) from public.club_fulfillment_orders where user_id = '${USER.id}'`) === '2'
     && sql(`select count(*) from public.club_entitlements where user_id = '${USER.id}' and revoked_at is null`) === '2');
   check(`${label}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
@@ -447,8 +458,9 @@ async function journey(browser, label, vp) {
   await back.click('text=Email me a code');
   await back.fill('#club-code', '123456');
   await back.click('button:has-text("Sign in")');
-  await back.waitForURL(/\/club\/dashboard/);
-  check('returning approved member: lands on her account', true);
+  await back.waitForURL(/\/app\/club/);
+  await back.waitForSelector('text=Your year in the Club');
+  check('returning approved member: lands on her Club (/app/club)', true);
   await back.goto(`${BASE}/club/family-vision`, { waitUntil: 'networkidle' });
   await back.waitForSelector('.fvp-approved-state');
   const again = await back.locator('.fvp-approved-state').innerText();
@@ -458,6 +470,17 @@ async function journey(browser, label, vp) {
 
 scenarios.desktop = (browser) => journey(browser, 'desktop', DESKTOP);
 scenarios.mobile = (browser) => journey(browser, 'mobile', MOBILE);
+
+scenarios.preview = async (browser) => {
+  console.log('\n/app/club signed out: still the preview library');
+  const page = await newPage(browser, MOBILE, { auth: false });
+  await page.goto(`${BASE}/app/club`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('article.ofc-app-month');
+  const text = await page.locator('main').innerText();
+  check('signed out: the preview line and twelve preview cards, nothing of anyone’s', /preview library, not an active membership/i.test(text) && (await page.locator('a:has-text("Preview the tool")').count()) === 12 && !/Yours/.test(text));
+  check('signed out: no script errors', page.errors.length === 0, page.errors.join(' | '));
+  await page.context().close();
+};
 
 scenarios.resume = async (browser) => {
   console.log('\nComing back midway: the welcome email’s sign-in lands on her next step');
@@ -481,7 +504,7 @@ scenarios.resume = async (browser) => {
   as.approvePrint();
   check('print approved → her first resource', new RegExp(`/club/resources/${JAN}\\?welcome=1`).test(await signInTo(/\/club\/resources\//)));
   sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
-  check('three days later (prepared resource confirmed for her) → her account', /\/club\/dashboard/.test(await signInTo(/\/club\/dashboard/)));
+  check('three days later (prepared resource confirmed for her) → her Club', /\/app\/club/.test(await signInTo(/\/app\/club/)));
 
   // Her January isn't editable once the kit is approved for print; a preparing month never says "not yours".
   const page = await newPage(browser, DESKTOP);
