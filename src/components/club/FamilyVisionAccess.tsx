@@ -175,7 +175,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
           ) : (
             <>
               {open && me && <p className="fvp-approved-next">{kitText(me)}</p>}
-              <a className="fvp-next-cta" href={ctx.href(routes.clubDashboard)}>Go to my account <span aria-hidden="true">→</span></a>
+              <a className="fvp-next-cta" href={routes.appClub}>See your Club <span aria-hidden="true">→</span></a>
             </>
           )}
           {open && <button type="button" className="fvp-edit-after-cta" onClick={() => document.getElementById('fvp-open-editor')?.click()}>Change my print</button>}

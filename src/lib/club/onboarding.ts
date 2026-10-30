@@ -38,7 +38,8 @@ export function stepHref(me: Membership, step = nextStep(me)): string {
     case 'first_resource':
       return `${routes.clubResource(firstMonth(me)!.slug!)}?welcome=1`;
     default:
-      return routes.clubDashboard;
+      // Her Club home (the month library, hers when she's signed in); billing, family and address are on /club/dashboard.
+      return routes.appClub;
   }
 }
 
