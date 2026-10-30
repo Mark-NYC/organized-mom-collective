@@ -87,3 +87,8 @@ Read [docs/brand/TOOL-OUTPUT-DESIGN.md](docs/brand/TOOL-OUTPUT-DESIGN.md) before
 ## Standing Pinterest 500-pin operating standard
 
 For any 500-pin batch, reconciliation or Gemini instructions, **first** read [docs/editorial/pinterest/MASTER_TRACKER_README.md](docs/editorial/pinterest/MASTER_TRACKER_README.md), [docs/editorial/PINTEREST_RESEARCH_LOOP.md](docs/editorial/PINTEREST_RESEARCH_LOOP.md) and the master CSV. Research and preserve permanent IDs, verified keywords, audience intent, source competitor reference, distinctive visual execution and actual conversion goal. Use proposed 6/3/1 lane mix only for upcoming 10-pin batches, never reinterpret historical completed work. Research observations need sources and dates; never claim assumed performance or publish stale deep links.
+
+
+## Seasonal Pinterest and Club acquisition (approved 2026-10-30)
+
+**Before creating pins, publishing seasonal articles, writing offer CTAs, or changing a Pinterest schedule, read [docs/editorial/SEASONAL_ACQUISITION_PLAN.md](docs/editorial/SEASONAL_ACQUISITION_PLAN.md).** Run separate lanes for image-first inspiration, useful/save-worthy guides and generators, and seasonal pain-point/product creative. Publish seasonal pins typically 60–90 days BEFORE the need, prepare 90–120 days ahead; align Club sales copy with the real monthly print cutoff and mail timing. Match article CTAs to the actual relevant monthly Club kit, physical calendar, or free tool rather than blindly defaulting to the calendar. Preserve original 500-pin IDs and approved assets, do not treat planned dates as published, and use 30/60/90-day evidence-based decisions. The 6/3/1 keyword research split remains compatible and separate.
