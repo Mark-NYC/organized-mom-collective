@@ -134,6 +134,24 @@ const ACTIVITY_NOUN: Record<Activity['category'], string> = {
   clubs: 'Club time', appointments: 'An appointment', other: 'A regular commitment',
 };
 
+/** "soccer" mid-sentence: her own name for it as typed, or the category in lower case. */
+const activityMid = (a: Activity, homeschool: boolean) =>
+  a.name?.trim() || (homeschool && a.category === 'school' ? 'homeschool' : ACTIVITY_NOUN[a.category].replace(/^(A|An) /, '').toLowerCase());
+
+/** " on Monday evening" / " on Mon and Wed evenings" / " the evening before": before her activity's days, or "". */
+function eveningBefore(days: readonly number[]): string {
+  // Most days of the week: "the evening before" reads better than a list of five evenings.
+  if (days.length > 3) return ' the evening before';
+  const before = [...new Set(days.map((d) => (d + 6) % 7))];
+  const names = WEEK_DAYS.filter((d) => before.includes(d.day));
+  if (!names.length) return '';
+  return names.length === 1 ? ` on ${names[0].label} evening` : ` on ${joinNames(names.map((d) => d.label.slice(0, 3)))} evenings`;
+}
+
+/** Her activities for the month, the most specific first (days and people known, a few days rather than every day). */
+const detailFirst = (list: Activity[]) =>
+  list.map((a, i) => ({ a, i, score: (a.days.length ? 2 : 0) + (a.memberIds.length ? 1 : 0) + (a.days.length && a.days.length <= 3 ? 1 : 0) })).sort((x, y) => y.score - x.score || x.i - y.i).map((x) => x.a);
+
 /** Does this profile responsibility belong to the month? */
 const inMonth = (m: MeetingMonth, c: ResponsibilityCategory) => m.categories === 'all' || m.categories.includes(c);
 
@@ -160,7 +178,7 @@ export function buildFamilyMeeting(input: MeetingInput): FamilyMeeting {
   const base = { school, kids: kidNames.length ? joinNames(kidNames) : 'the kids' };
 
   // ------------------------------------------------------------ the family's own data for this month
-  const monthActivities = profile.activities.filter((a) => month.activities.includes(a.category));
+  const monthActivities = detailFirst(profile.activities.filter((a) => month.activities.includes(a.category)));
   if (!profile.activities.length) missing.add('activities');
   const related = profile.responsibilities.filter((r) => inMonth(month, r.category));
   const connection = fill(month.connection, base);
@@ -199,6 +217,7 @@ export function buildFamilyMeeting(input: MeetingInput): FamilyMeeting {
     questions.push({
       text: fill(month.questions.schedule.withActivity, {
         ...base, activity: capitalize(act.name?.trim() || (homeschool && act.category === 'school' ? 'Homeschool' : ACTIVITY_NOUN[act.category])),
+        activityMid: activityMid(act, homeschool), eveningBefore: eveningBefore(act.days),
         days: daysText(act.days), who: who.length ? joinNames(who) : 'everyone',
       }),
       basis: 'activity', audience: 'everyone',
@@ -259,13 +278,17 @@ export function buildFamilyMeeting(input: MeetingInput): FamilyMeeting {
     }
     // Already owns this month's kind of job: keep it, nothing new on top.
     if (part.existing.some((e) => e.involvement === 'owns') || part.confirmed.length) return part;
-    const ex = pickExample(month, m, a, m === holder, input.household.preferences.pets === true || profile.responsibilities.some((r) => r.category === 'pet-care'), desired);
+    const theirs = (e: MeetingExample) => (e.forActivity ? detailFirst(profile.activities).find((x) => e.forActivity!.includes(x.category) && x.memberIds.includes(m.id)) : undefined);
+    const ex = pickExample(month, m, a, m === holder, input.household.preferences.pets === true || profile.responsibilities.some((r) => r.category === 'pet-care'), desired, (e) => Boolean(theirs(e)));
     if (ex) {
+      const own = theirs(ex);
+      const tokens = own ? { ...base, activity: activityMid(own, homeschool) } : base;
       part.suggested.push({
-        memberId: m.id, description: fill(ex.description, base), status: 'suggested', involvement: 'owns', scope: 'individual',
-        ...(m.kind === 'child' ? whenFor(ex, profile.activities, m.id, base) : {}),
-        finished: fill(ex.finished, base), connection, source: 'month', sourceId: ex.id, category: ex.category,
+        memberId: m.id, description: fill(ex.description, tokens), status: 'suggested', involvement: 'owns', scope: 'individual',
+        ...(m.kind !== 'child' ? {} : own ? { when: capitalize(eveningBefore(own.days).trim().replace(/^on /, '')) || 'The evening before' } : whenFor(ex, profile.activities, m.id, base)),
+        finished: fill(ex.finished, tokens), connection, source: 'month', sourceId: ex.id, category: ex.category,
       });
+      if (own) used.add('activities');
     }
     return part;
   });
@@ -312,12 +335,13 @@ function fromProfile(r: Responsibility, memberId: string, involvement: 'owns' | 
 
 /**
  * The one example for this person: a growth item the family picked (for this child, or for the kids generally) if an
- * example fits their age, else the first that fits. Grown-ups: 'any' examples, or 'other' for those who don't hold
+ * example fits their age, then one tied to an activity she said this child takes part in, else the first that fits. Grown-ups: 'any' examples, or 'other' for those who don't hold
  * the account. Never a pet job for a family that didn't mention a pet.
  */
-function pickExample(month: MeetingMonth, m: FamilyMember, age: number | null, isHolder: boolean, pets: boolean, desired: Responsibility[]): MeetingExample | undefined {
+function pickExample(month: MeetingMonth, m: FamilyMember, age: number | null, isHolder: boolean, pets: boolean, desired: Responsibility[], hasActivity: (e: MeetingExample) => boolean): MeetingExample | undefined {
   const fits = (e: MeetingExample) => {
     if (e.requiresPets && !pets) return false;
+    if (e.forActivity && !hasActivity(e)) return false;
     if (m.kind === 'adult') return e.adult === 'any' || (e.adult === 'other' && !isHolder);
     if (e.adult || age === null || e.minAge === undefined) return false;
     return age >= e.minAge && (e.maxAge === undefined || age <= e.maxAge);
@@ -327,6 +351,8 @@ function pickExample(month: MeetingMonth, m: FamilyMember, age: number | null, i
     const wanted = desired.filter((d) => !d.ownerIds.length || d.ownerIds.includes(m.id)).map((d) => d.item);
     const match = options.find((e) => e.growth && wanted.includes(e.growth));
     if (match) return match;
+    const own = options.find((e) => e.forActivity);
+    if (own) return own;
   }
   if (m.kind === 'adult' && !isHolder) return options.find((e) => e.adult === 'other') ?? options[0];
   return options[0];

@@ -100,12 +100,12 @@ describe('family profile: database shape', () => {
 });
 
 describe('family profile: the sample store behaves like the database', () => {
-  beforeEach(() => resetSample('rivera'));
+  beforeEach(() => resetSample('brooks'));
 
   it('saves each step, keeps existing and desired apart, and completes', async () => {
-    const store = sampleStore('rivera')!;
+    const store = sampleStore('brooks')!;
     const h = (await store.household())!;
-    const [ana, , sofia] = h.members;
+    const [ana, sofia] = h.members;
     expect((await store.profile())!.setupDone).toEqual([]);
     await store.saveActivities([{ category: 'school', memberIds: [sofia.id], days: [1, 2, 3, 4, 5] }]);
     await store.saveResponsibilities('existing', [{ status: 'existing', category: 'laundry', ownerIds: [ana.id], helperIds: [ana.id, sofia.id] }]);

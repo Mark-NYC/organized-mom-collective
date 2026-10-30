@@ -36,7 +36,7 @@ The month owns content and personalization. The shared layer owns everything a f
 
 | Component | What it renders |
 | --- | --- |
-| `ClubPlanShell` | The `.club-plan` root, `ClubFamilyGate`, slot `desktop`, `ClubPrintableProof` around slot `printable`, slot `mobile`, `ClubPrintStyles` |
+| `ClubPlanShell` | The `.club-plan` root, `ClubFamilyGate`, `ClubFamilyMeeting` (the Monthly Tool / Family Meeting switch and the month's meeting, docs/club/FAMILY_MEETING.md), slot `desktop`, `ClubPrintableProof` around slot `printable`, slot `mobile`, `ClubPrintStyles` |
 | `ClubFamilyGate` | Loading, empty, signed-out, denied and error states; nothing else shows until the family is ready |
 | `ClubPlanScreen` | The plan screen; slot `title` and the default slot for the month's sections |
 | `ClubPlanStatus` | Approval line and editing deadline |
@@ -51,6 +51,8 @@ The month owns content and personalization. The shared layer owns everything a f
 | --- | --- | --- |
 | `data-plan-state` | `.club-plan` | `loading`, `ready`, `empty`, `signed-out`, `denied`, `error` |
 | `data-plan-for` | `.club-plan` | `<sample>:<householdId>`, the family this tab's plan belongs to |
+| `data-plan-view` | `.club-plan` | `tool` (default) or `meeting`; printing follows it |
+| `data-meeting-sheet` | the meeting's printed guide | Printed only in the meeting view, never with the tool's sheets |
 | `data-plan-sheet="front\|back\|sheet"` | each printed page in the printable | What prints, and what the thumbnails clone |
 | `data-plan-sheet-end` | the last sheet only | No page break after it (no blank page) |
 | `data-plan-proof-body`, `data-plan-proof-scroll` | the printable's wrappers | The proof's frame and scroller |

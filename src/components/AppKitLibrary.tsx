@@ -165,6 +165,8 @@ export default function AppKitLibrary() {
                 <p><strong>Builds:</strong> {m.responsibility}</p>
                 <p><strong>How:</strong> {m.how}</p>
                 <MonthLink m={m} held={held} />
+                {/* Every month's ten-minute Family Meeting, beside its tool (ClubFamilyMeeting on /app/club/<month>). */}
+                <a className="ofc-app-month-meeting" href={routes.clubMeeting(m.month.toLowerCase())}>Our family meeting <span aria-hidden="true">→</span></a>
                 {coming && coming.payment_on && <p>Opens with your {shortDate(coming.payment_on)} payment.</p>}
               </div>
             </article>

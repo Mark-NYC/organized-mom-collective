@@ -241,6 +241,8 @@ export function sampleStore(id: string): ClubStore | null {
   };
   const save = (s: SampleState) => tab.set(key, JSON.stringify(s));
   const onboarded = (h: Household) => h.members.some((m) => !m.archived);
+  /** The sample's made-up profile answers (src/data/club/samples.ts), or none. */
+  const startProfile = (): FamilyProfile => structuredClone(sample.profile ?? emptyProfile());
 
   return {
     kind: 'sample',
@@ -297,7 +299,7 @@ export function sampleStore(id: string): ClubStore | null {
     },
     async profile() {
       const s = load();
-      return onboarded(s.household) ? s.profile ?? emptyProfile() : null;
+      return onboarded(s.household) ? s.profile ?? startProfile() : null;
     },
     async saveActivities(list) {
       return update('week', (p) => ({ ...p, activities: list.map((a, i) => ({ ...a, id: a.id ?? `${sample.id}-a${Date.now()}-${i}` })) }));
@@ -327,7 +329,7 @@ export function sampleStore(id: string): ClubStore | null {
   function update(step: SetupStep, change: (p: FamilyProfile) => FamilyProfile): FamilyProfile {
     const s = load();
     if (!onboarded(s.household)) throw new Error('no_household');
-    s.profile = markStep(change(s.profile ?? emptyProfile()), step);
+    s.profile = markStep(change(s.profile ?? startProfile()), step);
     save(s);
     return s.profile;
   }

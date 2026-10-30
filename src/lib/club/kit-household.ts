@@ -9,12 +9,17 @@
  */
 import { sampleById } from '../../data/club/samples';
 import type { Household } from './profile';
+import type { FamilyProfile } from './family-profile';
 import type { ClubStore } from './store';
 
 export const DEFAULT_PREVIEW_SAMPLE = 'rivera';
 
 export type KitHousehold =
-  | { status: 'ready'; source: 'sample' | 'account'; sample: string | null; sampleLabel: string; household: Household }
+  | {
+      status: 'ready'; source: 'sample' | 'account'; sample: string | null; sampleLabel: string; household: Household;
+      /** The family profile beyond the people (onboarding steps 2–6); null before she answers, or if it can't load. */
+      profile: FamilyProfile | null;
+    }
   | { status: 'empty'; source: 'sample' | 'account'; sample: string | null }
   | { status: 'denied'; source: 'sample' | 'account'; sample: string | null }
   | { status: 'signed-out' }
@@ -48,7 +53,9 @@ export async function loadKitHousehold(slug: string, search: string, env: KitHou
     if (!me.kits.some((k) => k.slug === slug)) return { status: 'denied', source, sample };
     const household = await store.household();
     if (!household || !onSheet(household)) return { status: 'empty', source, sample };
-    return { status: 'ready', source, sample, sampleLabel: store.label, household };
+    // The profile only personalizes; a page still works without it.
+    const profile = await store.profile().catch(() => null);
+    return { status: 'ready', source, sample, sampleLabel: store.label, household, profile };
   } catch {
     return { status: 'error' };
   }

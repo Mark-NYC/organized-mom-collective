@@ -1,0 +1,25 @@
+---
+/** November's Family Meeting in the app. November's tool (Our Family Ownership Plan) isn't on the shared plan shell:
+ * members open it at /club/resources/<slug>, previews at the worksheet generator, so this page is the meeting alone,
+ * with the same family loading, gate, switch and one-page print as every other month (ClubFamilyMeeting). */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import ClubFamilyGate from '../../../components/club/plan/ClubFamilyGate.astro';
+import ClubFamilyMeeting from '../../../components/club/plan/ClubFamilyMeeting.astro';
+import ClubPrintStyles from '../../../components/club/plan/ClubPrintStyles.astro';
+import { kits } from '../../../data/club/kits';
+import { routes } from '../../../routes';
+const kit = kits.find((k) => k.month === '2026-11');
+if (!kit) throw new Error('November 2026 kit missing from the registry');
+---
+<AppLayout title="November Family Meeting">
+  <div class="club-plan nov-meeting family-brand" data-plan-state="loading" data-kit-slug={kit.slug} data-plan-month="November">
+    <ClubFamilyGate />
+    <ClubFamilyMeeting kitMonth={kit.month} toolHref={routes.clubWorksheetGenerator} memberToolHref={routes.clubResource(kit.slug)} />
+  </div>
+  <ClubPrintStyles />
+</AppLayout>
+<script>
+import { startPlanFamily } from '../../../lib/club/plan/family';
+for (const root of document.querySelectorAll<HTMLElement>('.club-plan')) startPlanFamily(root);
+</script>
