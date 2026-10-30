@@ -93,7 +93,8 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   const plan = body.plan;
   const user = await userFromRequest(deps, req);
   const email = user?.email ?? (typeof body.email === 'string' ? body.email.trim().toLowerCase() : '');
-  // Guests enter their email in Stripe Checkout. Signed-in members retain their verified address.\n  if (email && (!EMAIL_RE.test(email) || email.length > 254)) throw new Refusal('invalid_email');
+  // Guests enter their email in Stripe Checkout. Signed-in members retain their verified address.
+  if (email && (!EMAIL_RE.test(email) || email.length > 254)) throw new Refusal('invalid_email');
 
   const state = await deps.db.rpc<CheckoutState>('club_checkout_state', { p_user: user?.id ?? null, p_email: email });
   const mode = state.settings.checkout_mode;
@@ -120,9 +121,9 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     if (open?.url) return { url: open.url, reused: true };
   } else {
     const c = await deps.stripe.request<{ id: string }>('POST', '/v1/customers', {
-      email,
+      ...(email ? { email } : {}),
       metadata: { club: 'organized-family-club', ...(user ? { user_id: user.id } : {}) },
-    }, `club-customer:${email}`);
+    }, email ? `club-customer:${email}` : `club-guest-customer:${crypto.randomUUID()}`);
     customer = c.id;
     if (user) await deps.db.rpc('club_member_link', { p_user: user.id, p_email: email, p_customer: customer, p_livemode: deps.stripe.mode === 'live' });
   }
@@ -151,7 +152,8 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     success_url: `${site}/club/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${site}/club/#offer`,
   }, `club-checkout:${customer}:${plan}:${state.intro_month ? 'intro' : trialEnd ? 'trial' : 'pay'}:${Math.floor(deps.now() / 600)}`);
-  // The empty guest email is replaced by Stripe's verified Checkout email during webhook fulfillment.\n  await deps.db.rpc('club_checkout_record', {
+  // The empty guest email is replaced by Stripe's verified Checkout email during webhook fulfillment.
+  await deps.db.rpc('club_checkout_record', {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1000).toISOString() },
   });
   return { url: session.url };
