@@ -19,8 +19,10 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
   {member && <div class="fvp-brandline"><span>ORGANIZED FAMILY CLUB</span><span>WELCOME PRINT</span></div>}
   <div class="fvp-grid">
     <section class="fvp-editor" aria-labelledby="personalize-heading">
-  {member && <nav class="fvp-progress" aria-label="Welcome steps"><span class="done"><i>✓</i>Your family</span><span class="active" aria-current="step"><i>2</i>Welcome gift</span><span><i>3</i>Explore the Club</span></nav>}
-  <section class="fvp-intro"><p class="eyebrow">YOUR WELCOME GIFT</p><h1>A little gift,<br/><em>just for your family.</em></h1><p>We turned your family name and a value into a keepsake to remind you what matters most.</p></section>
+  {member && <div id="fvp-progress-slot" class="fvp-progress-slot"></div>}
+  {member
+    ? <section class="fvp-intro"><p class="eyebrow">YOUR WELCOME GIFT</p><h1>A little gift,<br/><em>just for your family.</em></h1><p>Your family name and the value you’re growing together, in watercolor. It’s our gift, and it comes in your Welcome Kit with your first family resource.</p></section>
+    : <section class="fvp-intro"><p class="eyebrow">ORGANIZED FAMILY CLUB · WELCOME PRINT</p><h1>Our Family <em>Vision.</em></h1><p>One watercolor and one word that feels like your family.</p></section>}
       <div class="fvp-editor-summary"><span class="eyebrow">YOUR PERSONALIZED PRINT</span><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Customize artwork</button></div>
       <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
       <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose one watercolor.</p>
@@ -480,6 +482,27 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
  .fvp-next-choice{border:0;border-top:1px solid #d7d8cf;padding:18px 0 0}
 }
 @media print{.fvp-brandline,.fvp-progress,.fvp-next-panel,.fvp-edit-after-cta{display:none!important}}
+
+/* Welcome Kit (screen only): on a phone the gift comes first (headline → artwork → her answer → the summary), the
+   editor's Done button is charcoal like every primary button, and the progress steps sit where the static ones were. */
+@media screen{
+ .fvp-member .fvp-progress-slot .kit-steps{margin:0 0 22px}
+ .fvp-member .fvp-dialog-done button{background:#545454;border-radius:24px}
+ .fvp-mail-line{font:11px/1.6 Montserrat,Arial,sans-serif;color:#787b75;text-align:center;margin:8px 0 0}
+ .fvp-mail-line button{border:0;background:none;padding:0 2px;color:#545454;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+ .fvp-approved-next{font:12px/1.65 Montserrat,Arial,sans-serif;color:#606b5f;margin:0 0 16px}
+}
+@media screen and (max-width:850px){
+ .fvp-member .fvp-grid{display:flex;flex-direction:column}
+ .fvp-member .fvp-editor{display:contents}
+ .fvp-member .fvp-progress-slot{order:1}
+ .fvp-member .fvp-intro{order:2;margin-bottom:4px}
+ .fvp-member .fvp-visual{order:3}
+ .fvp-member .fvp-ready{order:4}
+ .fvp-member .fvp-editor-summary{order:5;margin-top:18px;width:100%}
+}
+/* Club chrome (her header, the admin's bar) never prints: only the artwork goes on paper. */
+@media print{[data-club-chrome],.fvp-progress-slot{display:none!important}}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));

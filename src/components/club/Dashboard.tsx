@@ -29,6 +29,7 @@ import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
 import AddressForm from './AddressForm';
 import { clubNav } from '../../lib/club/nav';
+import { firstMonth, kitText, nextStep, stepHref } from '../../lib/club/onboarding';
 
 export default function DashboardPage() {
   return <ClubGate page="dashboard">{(ctx) => <Dashboard ctx={ctx} />}</ClubGate>;
@@ -56,7 +57,8 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
     const sample = ctx.store.kind === 'sample';
     Promise.all([sample ? Promise.resolve(sampleMembership()) : loadMembership(), ctx.store.household(), sample ? null : getSession()])
       .then(([m, h, s]) => {
-        if (!sample && m.member && !m.onboarded) return clubNav().go(ctx.href(routes.clubWelcome), { replace: true });
+        // Family and address come first (/club/welcome); her Welcome Kit's other steps wait for her on the card below.
+        if (!sample && ['family', 'address'].includes(nextStep(m))) return clubNav().go(ctx.href(routes.clubWelcome), { replace: true });
         if (!h && sample) return clubNav().go(ctx.href(routes.clubStart), { replace: true });
         setMe(m);
         setHousehold(h);
@@ -95,9 +97,9 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
         <p className="mt-5 max-w-2xl border-l-[3px] border-rose bg-rose-wash px-4 py-3">Add your mailing address below so we can mail your printed resources.</p>
       )}
 
-      {me.welcome && <WelcomeCard w={me.welcome} href={ctx.href(routes.clubFamilyVision)} />}
+      {me.welcome && <WelcomeKitCard me={me} href={ctx.href} />}
 
-      {current && <CurrentCard m={current} href={ctx.href(routes.clubResource(current.slug!))} />}
+      {current && <CurrentCard m={current} tag={current.month === me.current_month ? 'This month' : current.month === me.first_paid_month && current.month > me.current_month ? 'Your first month' : null} href={ctx.href(routes.clubResource(current.slug!))} />}
 
       {years.map((y) => (
         <section key={y} className="mt-12">
@@ -181,21 +183,28 @@ function Status({ me, sample }: { me: Membership; sample: boolean }) {
   );
 }
 
-function WelcomeCard({ w, href }: { w: NonNullable<Membership['welcome']>; href: string }) {
-  const todo = w.status === 'pending' && (!w.approved || !w.personalized);
+/** Her Welcome Kit: her welcome print and her first month, one package, one status, and the step that's hers. */
+function WelcomeKitCard({ me, href }: { me: Membership; href: (p: string) => string }) {
+  const w = me.welcome!;
+  const step = nextStep(me);
+  const first = firstMonth(me);
+  const todo = step === 'print' || step === 'first_resource';
+  // A first December from before 20261108 was fulfilled by the print itself: it ships alone.
+  const legacy = Boolean(w.satisfies_month);
   return (
     <article className={`mt-8 max-w-3xl p-6 sm:p-9 ${todo ? 'bg-sage-wash' : 'bg-white ring-1 ring-warm-rule'}`}>
-      <p className="label text-warm-soft">Your welcome print{w.satisfies_month ? ` · Your ${monthName(w.satisfies_month).split(' ')[0]} resource` : ''}</p>
-      <h2 className="mt-2 font-serif text-[1.8rem] leading-[1.15] text-warm-ink sm:text-[2.2rem]">Our Family Vision</h2>
-      {w.satisfies_month && (
-        <p className="mt-2 max-w-xl text-[0.98rem] leading-relaxed text-warm-ink">
-          You joined in {monthName(w.satisfies_month)}, so this personalized print is your {monthName(w.satisfies_month).split(' ')[0]} resource. Your monthly resources start with your next payment.
-        </p>
+      <p className="label text-warm-soft">{legacy ? `Your welcome print · Your ${monthName(w.satisfies_month!).split(' ')[0]} resource` : 'Your Welcome Kit'}</p>
+      <h2 className="mt-2 font-serif text-[1.8rem] leading-[1.15] text-warm-ink sm:text-[2.2rem]">{legacy ? 'Our Family Vision' : 'Your first mailing, together'}</h2>
+      {!legacy && (
+        <ul className="mt-3 space-y-1 text-[0.98rem] text-warm-ink">
+          <li>Your Family Vision watercolor print, our gift</li>
+          {first && <li>{monthName(first.month).split(' ')[0]}: {clubResourceBySlug(first.slug)?.title ?? first.title ?? 'your first family resource'}</li>}
+        </ul>
       )}
-      <p className="mt-2 text-[0.95rem] text-warm-soft">{welcomeText(w)}</p>
-      <a href={href} className={`${todo ? 'btn-primary' : 'text-[0.95rem] font-semibold underline underline-offset-4'} mt-5 inline-block`}>
-        {todo ? 'Personalize your print' : 'See your print'}
-      </a>
+      <p className="mt-3 text-[0.95rem] text-warm-soft">{legacy ? welcomeText(w) : kitText(me)}</p>
+      {step === 'print' ? <a href={href(routes.clubFamilyVision)} className="btn-primary mt-5">Approve your welcome print</a>
+        : step === 'first_resource' ? <a href={href(stepHref(me, 'first_resource'))} className="btn-primary mt-5">See your first family resource</a>
+        : <a href={href(routes.clubFamilyVision)} className="mt-5 inline-block text-[0.95rem] font-semibold underline underline-offset-4">See your print</a>}
     </article>
   );
 }
@@ -211,11 +220,11 @@ function WelcomeMonthCard({ m, href }: { m: MembershipMonth; href: string }) {
   );
 }
 
-function CurrentCard({ m, href }: { m: MembershipMonth; href: string }) {
+function CurrentCard({ m, tag, href }: { m: MembershipMonth; tag: string | null; href: string }) {
   const r = clubResourceBySlug(m.slug);
   return (
     <article className="mt-8 max-w-3xl bg-sage-wash p-6 sm:p-9">
-      <p className="label text-warm-soft">{monthName(m.month)} · This month</p>
+      <p className="label text-warm-soft">{monthName(m.month)}{tag ? ` · ${tag}` : ''}</p>
       <h2 className="mt-2 font-serif text-[1.8rem] leading-[1.15] text-warm-ink sm:text-[2.2rem]">{r?.title ?? m.title}</h2>
       {r && <p className="mt-2 max-w-xl font-serif text-[1.15rem] italic text-rose-deep">{r.problem}</p>}
       {mailingText(m.mailing) && <p className="mt-3 text-[0.92rem] text-warm-soft">Printed copy: {mailingText(m.mailing)}</p>}

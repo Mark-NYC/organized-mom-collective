@@ -20,7 +20,8 @@
 --     skipped). club_admin_set_fulfillment refuses to move one half of an unshipped kit alone. PDFs stay per item.
 --   * Kit orders are left out of the monthly lists, the mail-house CSV and the "review before printing" email, so a
 --     package can come from one place only. (The welcome print also stops appearing in the month she paid.)
---   * Her first resource locks once the kit is approved for print, like the welcome print.
+--   * Her first resource locks once the kit is approved for print, like the welcome print. Saving the state it already
+--     has (a printable writes back what it loaded) changes nothing, so opening her resource never undoes her approval.
 --   * December: a new household whose first month is a December now gets that December's resource like any other
 --     month, and the welcome print as the bonus beside it (the substitution is retired for new grants; rows it
 --     already made keep working, and a welcome print that stands in for a December still ships alone).
@@ -246,6 +247,11 @@ begin
               and q.fulfillment_type = 'monthly_resource'
               and (q.status in ('printed', 'mailed') or (q.in_welcome_kit and q.status = 'approved'))) then
     raise exception 'already_printed';
+  end if;
+  -- Opening a printable writes back what it loaded: the same state changes nothing, and keeps her approval.
+  if p_revision <> 0 and exists (select 1 from public.club_resource_versions v where v.household_id = h.id and v.kit_id = k.id
+                                    and v.revision = p_revision and v.state = p_state) then
+    return p_revision;
   end if;
   if p_revision = 0 then
     insert into public.club_resource_versions (household_id, kit_id, state, profile_version)

@@ -116,6 +116,7 @@ async function backend(page, { fail = {}, calls = [] } = {}) {
       return reply(200, JSON.parse(asUser(uid, `select coalesce(json_agg(json_build_object('name', name, 'line1', line1, 'line2', line2, 'city', city,
         'state', state, 'postal_code', postal_code, 'paused', paused)), '[]')::text from public.club_mailing_addresses`)));
     }
+    if (p === '/rest/v1/account_saves') return reply(200, []); // her saved site tools (account sync): none here
     if (p === '/rest/v1/club_kits') {
       return reply(200, JSON.parse(asUser(uid, `select coalesce(json_agg(json_build_object('slug', slug, 'month', month, 'title', title, 'status', status, 'mailer_cutoff_at', mailer_cutoff_at) order by month), '[]')::text from public.club_kits`)));
     }
@@ -156,6 +157,7 @@ const signedIn = (page) => page.addInitScript(([s]) => {
 async function newPage(browser, viewport, { auth = true, db = true, fail } = {}) {
   const ctx = await browser.newContext({ viewport });
   const page = await ctx.newPage();
+  page.setDefaultTimeout(10000);
   page.errors = [];
   page.on('pageerror', (e) => page.errors.push(e.message));
   page.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'Test note' : undefined));
@@ -321,13 +323,183 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   await page.context().close();
 };
 
+const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+const kitOrders = () => `${order('welcome_vision')} / ${order('monthly_resource')}`;
+const firstConfirmed = () => sql(`select member_approved_at is not null from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'monthly_resource'`) === 't';
+
+/** A new member from Stripe's return URL to her confirmed Welcome Kit, refreshing at every step. */
+async function journey(browser, label, vp) {
+  console.log(`\nNew member, ${label}: checkout → sign in → family → print → first resource → one confirmation`);
+  freshDb();
+  const page = await newPage(browser, vp, { auth: false });
+  await page.goto(`${BASE}/club/welcome?session_id=cs_test_a1b2c3d4e5f6g7h8`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('text=You’re in.');
+  check('“You’re in.” after checkout, email filled in from the checkout', (await page.inputValue('#club-email')) === USER.email);
+  await shot(page, `${label}-1-youre-in`, true);
+  await page.click('text=Email me a code');
+  await page.fill('#club-code', '123456');
+  await page.click('button:has-text("Sign in")');
+  await page.waitForSelector('text=Tell us about your family');
+  check('step 1 of the kit shows', await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your family")'));
+  check('family name prefilled from the checkout name (“Ana Rivera”)', (await page.inputValue('input[autocomplete="family-name"]')) === 'The Rivera Family');
+  check('optional details are tucked away', !(await page.isVisible('text=We have a pet')));
+  check('a blank first child is ready to fill in', (await page.locator('li', { has: page.locator('select') }).count()) === 1);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('text=Tell us about your family');
+  check('refresh before saving: still her family step, still signed in', true);
+  await page.fill('input[autocomplete="given-name"]', 'Ana');
+  const kidRow = page.locator('li', { has: page.locator('select') });
+  await kidRow.nth(0).locator('input').fill('Sofia');
+  await kidRow.nth(0).locator('select').first().selectOption('8');
+  await page.click('text=+ Add a child');
+  await kidRow.nth(1).locator('input').fill('Mateo');
+  await kidRow.nth(1).locator('select').first().selectOption('6');
+  check('no sideways scrolling (family)', await noSideScroll(page));
+  await shot(page, `${label}-2-family`, true);
+  await page.click('button:has-text("See my welcome gift")');
+  await page.waitForURL(/\/club\/family-vision/);
+  await page.waitForSelector('.fvp-approve-cta');
+  let a = await art(page);
+  check('the gift: her family name, a watercolor, a value', a.name === 'The Rivera Family' && Boolean(a.img) && a.imgLoaded && a.word === 'Love', JSON.stringify(a));
+  check('the gift: progress shows family done, print current', await page.isVisible('#fvp-progress-slot [data-state="done"]:has-text("Your family")') && await page.isVisible('#fvp-progress-slot [aria-current="step"]:has-text("Your print")'));
+  check('the gift: her mailing city is shown', await page.isVisible('text=Mailing to Austin, TX.'));
+  check('the gift: Club header visible (account, sign out)', await page.isVisible('header[data-club-chrome] >> text=Sign out'));
+  check('the gift: no next-step panel or links before she approves', (await page.locator('a[href="/club/"], a[href="/app/club/"], .fvp-next-panel').count()) === 0);
+  const pos = await page.evaluate(() => ({ h1: document.querySelector('.fvp-intro h1').getBoundingClientRect().top, art: document.querySelector('#fvp-room').getBoundingClientRect().top,
+    cta: document.querySelector('.fvp-approve-cta').getBoundingClientRect().top, band: document.querySelector('.fvp').getBoundingClientRect().top, ctaBg: getComputedStyle(document.querySelector('.fvp-approve-cta')).backgroundColor }));
+  check('the gift: charcoal #545454 primary button', pos.ctaBg === 'rgb(84, 84, 84)', pos.ctaBg);
+  check('the gift: no empty band above the page', pos.band < 120, `page starts at ${Math.round(pos.band)}px`);
+  if (vp.width < 850) check('mobile: headline, then artwork, then the button', pos.h1 < pos.art && pos.art < pos.cta, JSON.stringify(pos));
+  else check('desktop: headline and button beside the artwork, above the fold', pos.cta < vp.height, JSON.stringify(pos));
+  check('no sideways scrolling (gift)', await noSideScroll(page));
+  await shot(page, `${label}-3-gift`, vp.width < 850);
+  // Customize: Joy, saved; refresh keeps it.
+  await page.click('.fvp-edit-after-cta');
+  await page.click('[data-value="Joy"]');
+  await page.click('text=Done · See my print');
+  await page.waitForSelector('text=Saved to your account');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('.fvp-approve-cta');
+  a = await art(page);
+  check('refresh after customizing: Joy kept, Joy watercolor shown', a.word === 'Joy' && a.selected === 'Joy' && Boolean(a.img?.startsWith('joy')), JSON.stringify(a));
+  // A dropped approve: honest message, nothing approved, then it works.
+  await page.unroute(`${SUPABASE}/**`);
+  await backend(page, { fail: { club_welcome_approve: 1 } });
+  await page.click('.fvp-approve-cta');
+  await page.waitForSelector('text=Couldn’t approve it');
+  check('a failed approve says so and approves nothing', order('welcome_vision').endsWith('needs_vision'));
+  await page.click('.fvp-approve-cta');
+  await page.waitForSelector('text=It’s yours!');
+  check('approved: one welcome order, approved once', sql(`select count(*) || ':' || count(member_approved_at) from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`) === '1:1');
+  const next = page.locator('a.fvp-next-cta');
+  check('approved: primary CTA is “See your first family resource”', (await next.innerText()).startsWith('See your first family resource'));
+  check('approved: it goes to her January (her entitlement), never a sales page', (await next.getAttribute('href')) === `/club/resources/${JAN}?welcome=1`);
+  await shot(page, `${label}-4-approved`, vp.width < 850);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('text=It’s yours!');
+  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("See your first family resource")'));
+  await next.click();
+  await page.waitForURL(/\/club\/resources\//);
+  await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
+  const panel = await page.locator('.kit-first').innerText();
+  check('first resource: titled, for her kids, with what comes and her first step', /Our Family Habit Cards/.test(panel) && /Sofia and Mateo/.test(panel) && /In your Welcome Kit/i.test(panel) && /first step/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 220));
+  check('first resource: her cards below are prepared with her kids’ names', /Sofia|Mateo/.test(await page.locator('#club-month-content').innerText()));
+  check('first resource: no separate monthly “Looks good, print it”', !(await page.isVisible('button:has-text("Looks good, print it")')));
+  check('no sideways scrolling (first resource)', await noSideScroll(page));
+  await shot(page, `${label}-5-first-resource`, vp.width < 850);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await shot(page, `${label}-5b-first-resource-view`);
+  const cta = await page.evaluate(() => {
+    const b = document.querySelector('.kit-first .btn-primary').getBoundingClientRect();
+    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return { top: Math.round(b.top), clear: Boolean(hit?.closest('.kit-first')) };
+  });
+  check('first resource: the confirm button isn’t covered by the printable’s toolbar', cta.clear || cta.top > vp.height, JSON.stringify(cta));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
+  await page.waitForTimeout(1500);
+  check('refresh on the resource: still waiting for her one confirmation', order('monthly_resource').endsWith('needs_confirmation'), kitOrders());
+  await page.click('text=Looks good. Prepare my Welcome Kit');
+  await page.waitForSelector('text=It’s all set!');
+  check('confirmed: both items prepared together (kit needs only its PDFs)', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
+  await shot(page, `${label}-6-all-set`, vp.width < 850);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('text=It’s all set!');
+  await page.waitForTimeout(2000);
+  check('revisiting her resource doesn’t undo her confirmation', firstConfirmed(), kitOrders());
+  await page.click('a:has-text("Go to my account")');
+  await page.waitForURL(/\/club\/dashboard/);
+  await page.waitForSelector('text=Your first mailing, together');
+  const dash = await page.locator('main').innerText();
+  check('dashboard: one Welcome Kit card with both items and its status', /Family Vision watercolor print/.test(dash) && /January: Our Family Habit Cards/.test(dash) && /We’re preparing your Welcome Kit/.test(dash), dash.replace(/\s+/g, ' ').slice(0, 300));
+  check('dashboard: January isn’t called “This month” in October', /January 2027 · Your first month/i.test(dash) && !/January 2027 · This month/i.test(dash));
+  check('dashboard: January’s printed copy “Coming in your Welcome Kit”', /Coming in your Welcome Kit/.test(dash));
+  check('no sideways scrolling (dashboard)', await noSideScroll(page));
+  await shot(page, `${label}-7-dashboard`, true);
+  check('one welcome order and one January order, never more', sql(`select count(*) from public.club_fulfillment_orders where user_id = '${USER.id}'`) === '2'
+    && sql(`select count(*) from public.club_entitlements where user_id = '${USER.id}' and revoked_at is null`) === '2');
+  check(`${label}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
+  await page.context().close();
+
+  // Returning, all done: sign-in lands on her account.
+  const back = await newPage(browser, vp, { auth: false });
+  await back.goto(`${BASE}/club/login?email=${encodeURIComponent(USER.email)}`, { waitUntil: 'networkidle' });
+  await back.click('text=Email me a code');
+  await back.fill('#club-code', '123456');
+  await back.click('button:has-text("Sign in")');
+  await back.waitForURL(/\/club\/dashboard/);
+  check('returning approved member: lands on her account', true);
+  await back.goto(`${BASE}/club/family-vision`, { waitUntil: 'networkidle' });
+  await back.waitForSelector('.fvp-approved-state');
+  const again = await back.locator('.fvp-approved-state').innerText();
+  check('returning to her print: approved, kit status, no sales links', /Your print is approved/.test(again) && (await back.locator('a[href="/club/"], a[href="/app/club/"]').count()) === 0, again.replace(/\s+/g, ' '));
+  await back.context().close();
+}
+
+scenarios.desktop = (browser) => journey(browser, 'desktop', DESKTOP);
+scenarios.mobile = (browser) => journey(browser, 'mobile', MOBILE);
+
+scenarios.resume = async (browser) => {
+  console.log('\nComing back midway: the welcome email’s sign-in lands on her next step');
+  const signInTo = async (pattern) => {
+    const page = await newPage(browser, MOBILE, { auth: false });
+    await page.goto(`${BASE}/club/login?email=${encodeURIComponent(USER.email)}`, { waitUntil: 'networkidle' });
+    await page.click('text=Email me a code');
+    await page.fill('#club-code', '123456');
+    await page.click('button:has-text("Sign in")');
+    await page.waitForURL(pattern, { timeout: 15000 }).catch(() => undefined);
+    const url = page.url();
+    await page.context().close();
+    return url;
+  };
+  freshDb();
+  check('no family yet → her family step', /\/club\/welcome/.test(await signInTo(/\/club\/welcome/)));
+  as.family();
+  check('family saved → her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
+  as.vision('The Rivera Family', 'Hope');
+  check('print saved but not approved → still her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
+  as.approvePrint();
+  check('print approved → her first resource', new RegExp(`/club/resources/${JAN}\\?welcome=1`).test(await signInTo(/\/club\/resources\//)));
+  sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
+  check('three days later (prepared resource confirmed for her) → her account', /\/club\/dashboard/.test(await signInTo(/\/club\/dashboard/)));
+
+  // Her January isn't editable once the kit is approved for print; a preparing month never says "not yours".
+  const page = await newPage(browser, DESKTOP);
+  sql(`update public.club_kits set status = 'draft' where slug = '${JAN}'`);
+  await page.goto(`${BASE}/club/resources/${JAN}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('text=is yours');
+  check('a month that’s hers but not published: “yours, we’re finishing it”', !(await page.isVisible('text=isn’t part of your membership')));
+  sql(`update public.club_kits set status = 'scheduled' where slug = '${JAN}'`);
+  await page.context().close();
+};
+
 const names = ONLY ? ONLY.split(',') : Object.keys(scenarios);
 const browser = await chromium.launch();
 try {
   for (const n of names) await scenarios[n](browser);
 } catch (e) {
   failures++;
-  console.log(`  FAIL (crashed) ${e.message.split('\n')[0]}`);
+  console.log(`  FAIL (crashed) ${e.message.split('\n').slice(0, 6).join(' | ')}`);
 } finally {
   await browser.close();
 }
