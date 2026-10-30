@@ -263,20 +263,6 @@ if(plan){
  #club-month-content .dec-dialog{width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:19px}
 }
 @media print{#club-month-content .dec-float,#club-month-content .dec-dialog,#club-month-content .dec-actions{display:none!important}}
-/* Her copy (/club/resources/<slug>, also the admin's ?fulfillment= print for the mailing): only the two sheets, one
-   Letter page each. That page carries every month's printable CSS, and several hide everything but their own sheets
-   in print, which left December's copy blank. */
-@media print{
-  @page{size:letter portrait;margin:0}
-  html:has(#club-month-content main.dec),body:has(#club-month-content main.dec){margin:0!important;padding:0!important;background:#fff!important}
-  body:has(#club-month-content main.dec) *{visibility:hidden!important}
-  #club-month-content main.dec :is(.sheets,.sheet,.sheet *){visibility:visible!important}
-  #club-month-content main.dec .sheets{display:block!important;position:absolute!important;top:0!important;left:0!important;width:8.5in!important;gap:0!important}
-  #club-month-content main.dec .sheets figure{margin:0!important;width:8.5in!important}
-  #club-month-content main.dec .sheets figcaption{display:none!important}
-  #club-month-content main.dec .sheet{width:8.5in!important;height:11in!important;aspect-ratio:auto!important;border:0!important;box-shadow:none!important;break-after:page!important;page-break-after:always!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  #club-month-content main.dec figure:last-child .sheet{break-after:auto!important;page-break-after:auto!important}
-}
 /* Plan mode: the Club plan page places the two sheets. */
 .dec-plan{font-family:Montserrat,Arial,sans-serif;color:#454545}
 .dec-plan-sheets{display:flex;flex-direction:column;align-items:center;gap:28px}
