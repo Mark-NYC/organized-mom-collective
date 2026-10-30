@@ -10,7 +10,7 @@ import ClubResourceAccess from '../../../components/club/ClubResourceAccess';
 import NovemberOwnershipPrintable from '../../../components/club/NovemberOwnershipPrintable.astro';
 import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
 import JanuaryHabitCards from '../../../components/club/JanuaryHabitCards.astro';
-import FebruaryConnectionCards from '../../../components/club/FebruaryConnectionCards.astro';
+import FebruaryLaundryGuides from '../../../components/club/FebruaryLaundryGuides.astro';
 import MarchSpringPrep from '../../../components/club/MarchSpringPrep.astro';
 import AprilDinnerPlan from '../../../components/club/AprilDinnerPlan.astro';
 import MaySummerRhythm from '../../../components/club/MaySummerRhythm.astro';
@@ -40,7 +40,7 @@ const enabled = clubEnabled();
         {c === 'november' && <NovemberOwnershipPrintable storageKey={key} />}
         {c === 'december' && <DecemberMissionPrototype />}
         {c === 'january' && <JanuaryHabitCards storageKey={key} />}
-        {c === 'february' && <FebruaryConnectionCards storageKey={key} />}
+        {c === 'february' && <FebruaryLaundryGuides storageKey={key} />}
         {c === 'march' && <MarchSpringPrep storageKey={key} />}
         {c === 'april' && <AprilDinnerPlan storageKey={key} />}
         {c === 'may' && <MaySummerRhythm storageKey={key} />}
@@ -59,6 +59,11 @@ const enabled = clubEnabled();
 <script>
 // Print exactly the printable's sheets, one Letter page each (ClubPrintStyles → data-plan-print-root), when it marks
 // them; a printable without sheet markers keeps its own print rules, unchanged.
+// Some printables (February's laundry guides) draw their sheets only once her household arrives, so keep watching.
 const scope = document.querySelector<HTMLElement>('[data-plan-print-scope]');
-if (scope?.querySelector('[data-plan-sheet]')) scope.setAttribute('data-plan-print-root', '');
+const mark = () => Boolean(scope?.querySelector('[data-plan-sheet]')) && (scope!.setAttribute('data-plan-print-root', ''), true);
+if (scope && !mark()) {
+  const watch = new MutationObserver(() => mark() && watch.disconnect());
+  watch.observe(scope, { childList: true, subtree: true });
+}
 </script>

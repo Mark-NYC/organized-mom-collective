@@ -21,6 +21,7 @@ const { chromium } = require('playwright');
 const BASE = process.argv.find((a) => a.startsWith('http')) ?? 'http://localhost:4330';
 const OUT = process.argv.find((a) => a.startsWith('--out='))?.slice(6) ?? '/tmp/club-resource-pdfs';
 const ONLY = (process.argv.find((a) => a.startsWith('--months='))?.slice(9) ?? '01,02,03,09').split(',');
+const SHOTS_MOBILE = !process.argv.includes('--no-mobile');
 mkdirSync(OUT, { recursive: true });
 const SUPABASE = 'https://uvqhmlqwmgnohhduttip.supabase.co';
 const PG = { PGHOST: process.env.PGHOST ?? 'localhost', PGUSER: process.env.PGUSER ?? 'postgres', PGPASSWORD: process.env.PGPASSWORD ?? 'postgres' };
@@ -129,6 +130,39 @@ try {
     await page.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
     await page.waitForSelector('#club-month-content:not([hidden])', { timeout: 20000 }).catch(() => errors.push('member page never showed the resource'));
     await page.waitForTimeout(800);
+    if (mm === '02') {
+      // February's member copy is the laundry guides: her editor opens from her copy, a change saves to her account,
+      // and comes back after a reload.
+      const before = await page.locator('.laundry-day-banner strong').first().textContent();
+      await page.click('button:has-text("Change your plan")');
+      const open = await page.isVisible('[data-lg-editor][open]');
+      await page.locator('[data-days-controls] input').nth(2).click(); // Wednesday
+      await page.locator('[data-lg-editor] [data-lg-close]').last().click();
+      // Saves are debounced (bridgeResourceState): wait for this change's own save, not the page's first one.
+      await page.waitForSelector('text=Saving…', { timeout: 5000 }).catch(() => undefined);
+      await page.waitForSelector('text=Saved to your account', { timeout: 10000 }).catch(() => errors.push('edit never saved'));
+      const changed = await page.locator('.laundry-day-banner strong').first().textContent();
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForSelector('#club-month-content:not([hidden])');
+      await page.waitForTimeout(800);
+      const after = await page.locator('.laundry-day-banner strong').first().textContent();
+      const saved = sql(`select count(*) from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}' and v.state::text like '%omc:club:member:${slug}:v1%'`);
+      report.push({ month: name, check: 'member edit', editorOpened: open, before, changed, afterReload: after, savedVersions: Number(saved),
+        ok: open && changed !== before && after === changed && Number(saved) === 1 });
+      if (SHOTS_MOBILE) {
+        const mobile = await browser.newContext({ viewport: { width: 390, height: 844 } });
+        const mp = await mobile.newPage();
+        await backend(mp);
+        await mp.addInitScript(([s]) => localStorage.setItem('omc:account:session', JSON.stringify(s)), [{ access_token: 'member-token', refresh_token: 'r', expires_at: Date.now() + 3600_000, email: USER.email, user_id: USER.id }]);
+        await mp.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
+        await mp.waitForSelector('#club-month-content:not([hidden])');
+        await mp.waitForTimeout(800);
+        report.push({ month: name, check: 'mobile', sideScroll: await mp.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1) });
+        await mp.screenshot({ path: `${OUT}/member-${name}-mobile.png`, fullPage: true });
+        await mobile.close();
+      }
+      await page.screenshot({ path: `${OUT}/member-${name}-desktop.png` });
+    }
     const file = `${OUT}/member-${name}.pdf`;
     await page.pdf({ path: file, preferCSSPageSize: true, printBackground: true });
     report.push({ month: name, path: `/club/resources/${slug}`, ...pdfReport(file), errors });

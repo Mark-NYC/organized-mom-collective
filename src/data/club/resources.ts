@@ -6,17 +6,17 @@
  *
  * `component` picks the printable in that page. Year 2 editions (e.g. December 2027) are listed once they have one.
  *
- * Known gap (Oct 30 2026, waiting on the owner; docs/club/RESOURCE_CONSISTENCY.md): the app's month pages, the kit
- * registry's January and September themes and the Monthly Family Meeting moved on; four entries here didn't.
+ * Known gap (Oct 30 2026, docs/club/RESOURCE_CONSISTENCY.md): the app's month pages, the kit registry's January and
+ * September themes and the Monthly Family Meeting moved on; four entries here didn't. February is now decided.
  *   January   renders JanuaryHabitCards (now headed "September 2027"); the app's January is the Weekly Meeting.
- *   February  renders FebruaryConnectionCards; the app's February is the laundry guides (FebruaryLaundryGuides).
+ *   February  decided Oct 30 2026: the laundry guides (FebruaryLaundryGuides), as on the app page.
  *   March     renders MarchSpringPrep; the app's March is the chore charts (MarchChoreCharts, landscape, one per child).
  *   September renders SeptemberSundayReset (now headed "Our Family Weekly Meeting · January 2027"); the app's
  *             September is the Habit Cards.
  * This page is what members approve, what the admin's ?fulfillment= view prints for the mailing, and the Welcome
  * Kit's first resource (January for founding members; four January orders are pending). Repointing changes what is
- * mailed and the page count, and February's and March's current printables only run inside the plan shell, so it
- * waits for the owner's decision. `sameAsApp: false` marks them.
+ * mailed and the page count, and March's chore charts only run inside the plan shell today, so it
+ * waits for the owner's decision. `sameAsApp: false` marks the ones still open.
  */
 export interface ClubResource {
   slug: string;
@@ -50,7 +50,9 @@ export const clubResources: readonly ClubResource[] = [
       helps: 'Each card ties one small job to something that already happens, and it sits right where the job happens, so the reminder doesn’t have to come from you.',
       firstStep: 'Show the kids their cards and let each one choose where theirs goes.',
     } },
-  { slug: '2027-02-better-together', month: '2027-02', title: 'Family Connection Cards', problem: 'Making room for time together', component: 'february', preview: '/club/february-preview', sameAsApp: false },
+  // February is the laundry guides (owner's decision, Oct 30 2026): the same printable as /app/club/february, one page
+  // per readiness level in use. Until then this rendered the Family Connection Cards.
+  { slug: '2027-02-better-together', month: '2027-02', title: 'Family Laundry Guides', problem: 'Laundry that isn’t all on you', component: 'february', preview: '/app/club/february', sameAsApp: true },
   { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Spring Prep as a Family', problem: 'One project with a part for everyone', component: 'march', preview: '/club/march-preview', sameAsApp: false },
   { slug: '2027-04-everybody-helps-at-mealtime', month: '2027-04', title: 'Our Dinner Team', problem: 'Dinner isn’t just Mom’s job', component: 'april', preview: '/club/april-preview', sameAsApp: true },
   { slug: '2027-05-finish-the-school-year', month: '2027-05', title: 'Our Summer Day Rhythm', problem: 'A rhythm kids can follow when school ends', component: 'may', preview: '/club/may-preview', sameAsApp: true },

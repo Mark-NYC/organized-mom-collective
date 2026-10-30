@@ -220,6 +220,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
           : saving === 'error' ? 'Couldn’t save. Check your connection.'
           : ctx.store.kind === 'sample' ? 'Sample family: changes stay in this tab.' : 'Changes save to your account.'}
       </span>
+      {v?.can === 'edit' && saving !== 'printed' && <PlanEditorButton />}
       {pending && v?.can === 'edit' && !kit && (
         approved
           ? <span className="font-semibold text-warm-ink">Approved for printing ✓</span>
@@ -228,6 +229,30 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Printables whose editor opens only through their plan controller (clubPlan.openEditor, docs/club/PLAN_ARCHITECTURE.md),
+ * because on their app page the shared rail opens it: today February's laundry guides ([data-lg]). Her copy gets the
+ * same button the rail has, calling the same controller; printables with their own edit controls don't need it.
+ */
+function PlanEditorButton() {
+  const [open, setOpen] = useState<(() => void) | null>(null);
+  useEffect(() => {
+    const find = () => {
+      const host = document.querySelector<HTMLElement & { clubPlan?: { openEditor?: () => void } }>('#club-month-content [data-lg]');
+      const fn = host?.clubPlan?.openEditor;
+      if (fn) setOpen(() => fn);
+      return Boolean(fn);
+    };
+    if (find()) return;
+    // The printable publishes its controller when its script runs; stop looking after a few seconds.
+    let tries = 0;
+    const t = setInterval(() => (find() || ++tries > 20) && clearInterval(t), 300);
+    return () => clearInterval(t);
+  }, []);
+  if (!open) return null;
+  return <button type="button" className="font-semibold underline underline-offset-4" onClick={() => open()}>Change your plan</button>;
 }
 
 function clubNavToWelcome(ctx: ClubContext) {
