@@ -35,7 +35,9 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
         setHousehold(h);
         setFirstKit(me.kits[0]?.slug ?? null);
         if (h && mode === 'edit') {
-          return ctx.store.profile().then((p) => {
+          // The profile beyond the people is optional here, as on the welcome and plan pages: if it can't load, she can
+          // still edit her family.
+          return ctx.store.profile().catch(() => null).then((p) => {
             setProfile(p);
             if (p && !p.setupCompleted && new URLSearchParams(location.search).get('setup') === '1') setEditing({ mode: 'wizard' });
           });
