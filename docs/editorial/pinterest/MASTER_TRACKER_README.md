@@ -35,3 +35,8 @@ Report three counts separately: **planned (500)**, **confirmed unique created**,
 ## Tony Hill-inspired 6/3/1 research fields
 
 Before assigning another ten master IDs, read [PINTEREST_RESEARCH_LOOP.md](../PINTEREST_RESEARCH_LOOP.md). The master includes seven **new, non-destructive research columns**. Slots 1–6 are proposed proven keyword, 7–9 specific audience/situation, and 10 experimental. This is a future testing allocation, not proof of past creative types. Blank verified-keyword, competitor, audience, format, conversion, or evidence cells mean **not yet researched**. Don't backfill guesses. Preserve all prior master rows, statuses, IDs, and reconciliation data.
+
+
+## Seasonal acquisition overlay (2026-10-30)
+
+Read [SEASONAL_ACQUISITION_PLAN.md](../../SEASONAL_ACQUISITION_PLAN.md) alongside the master and [PINTEREST_RESEARCH_LOOP.md](../PINTEREST_RESEARCH_LOOP.md). New companion planning columns classify the three content lanes, season of need, recommended publication window and contextual downstream offer/action. These are **not** evidence of research, a moved schedule, publishing, or measured conversions. Preserve all 500 permanent IDs, the 50-day original schedule and historic statuses. Seasonal adjustments for not-yet-published pins must be separately reviewed against the real Pinterest account, landing-page readiness and Club enrollment cutoff. Do not silently rewrite existing proposed dates or reschedule published pins.
