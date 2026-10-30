@@ -16,10 +16,12 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 <main class:list={["fvp", { "fvp-member": member }]} >
   {!member && <header class="fvp-top"><a href="/club">← Organized Family Club</a><span>WELCOME PRINT · DESIGN PREVIEW</span></header>}
 
+  {member && <div class="fvp-brandline"><span>ORGANIZED FAMILY CLUB</span><span>WELCOME PRINT</span></div>}
   <div class="fvp-grid">
     <section class="fvp-editor" aria-labelledby="personalize-heading">
-  <section class="fvp-intro"><p class="eyebrow">YOUR WELCOME GIFT</p><h1>{member ? "A little gift, just for your family." : "A little gift, just for your family."}</h1><p>We made something special for <span id="fvp-greeting-name">your family</span>.</p></section>
-      <div class="fvp-editor-summary"><span class="eyebrow">MADE JUST FOR YOU</span><strong>A reminder of what matters most.</strong><p class="fvp-summary-explainer">Your own family keepsake, ready to hang.</p><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Change name or artwork</button></div>
+  {member && <nav class="fvp-progress" aria-label="Welcome steps"><span class="done"><i>✓</i>Your family</span><span class="active" aria-current="step"><i>2</i>Welcome gift</span><span><i>3</i>Explore the Club</span></nav>}
+  <section class="fvp-intro"><p class="eyebrow">YOUR WELCOME GIFT</p><h1>A little gift,<br/><em>just for your family.</em></h1><p>We turned your family name and a value into a keepsake to remind you what matters most.</p></section>
+      <div class="fvp-editor-summary"><span class="eyebrow">YOUR PERSONALIZED PRINT</span><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Customize artwork</button></div>
       <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
       <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose one watercolor.</p>
       <div class="fvp-step"><label for="fvp-name"><b>01</b> What do you call your family?</label><p>It'll appear on the finished print.</p><input id="fvp-name" maxlength="45" autocomplete="off" value={member ? "" : "The Johnson Family"} placeholder="The Johnson Family" /></div>
@@ -42,6 +44,7 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
       
     </section>
   </div>
+  {member && <aside class="fvp-next-panel" aria-label="What comes next"><div class="fvp-next-intro"><p class="eyebrow">NEXT IN THE CLUB</p><h2>What happens next?</h2><p>We’ll mail your welcome print, then help your family put what matters into practice with simple monthly tools.</p></div><div class="fvp-next-choice"><span class="fvp-next-icon" aria-hidden="true">✦</span><div><h3>See how the Club works</h3><p>A quick look at the resources coming your way.</p><a href="/club/">Explore the Club →</a></div></div><div class="fvp-next-choice"><span class="fvp-next-icon" aria-hidden="true">◫</span><div><h3>See this month’s resource</h3><p>Preview the practical tool for your family.</p><a href="/app/club/">View this month’s resource →</a></div></div></aside>}
 </main>
 <style is:global>
 /* Member page (/club/family-vision): above 1100px the print fills the screen, so the Club header would sit hidden
@@ -420,6 +423,69 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
  .fvp-member .fvp-ready{margin-top:12px}
  .fvp-member .fvp-scenes{justify-content:flex-start}
 }
+
+/* Onboarding reveal, matching the site's charcoal #545454 and warm brand palette. */
+@media screen{
+ .fvp-member{position:static!important;height:auto!important;min-height:100dvh;overflow:visible!important;padding:18px clamp(20px,3vw,52px) 35px!important;background:#fbf7f1!important;max-width:none}
+ html:has(.fvp-member),body:has(.fvp-member){height:auto!important;overflow:auto!important}
+ .fvp-brandline{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:0 0 22px;font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.22em;color:#677a62}
+ .fvp-brandline span:last-child{color:#898c85;font-weight:500}
+ .fvp-member .fvp-grid{display:grid;grid-template-columns:minmax(290px,32%) minmax(0,1fr);gap:clamp(25px,3vw,52px);align-items:start;min-height:0}
+ .fvp-member .fvp-editor{order:0;display:block;height:auto;overflow:visible;border:0;background:transparent;padding:0}
+ .fvp-member .fvp-visual{order:1;height:auto;overflow:visible;padding:0;background:transparent}
+ .fvp-progress{display:flex;justify-content:space-between;gap:6px;margin:0 0 25px;max-width:410px}
+ .fvp-progress>span{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#838981;font:500 10px Montserrat,Arial,sans-serif}
+ .fvp-progress i{display:grid;place-items:center;width:25px;height:25px;border:1px solid #cdd3cb;border-radius:50%;font:600 11px Montserrat,Arial,sans-serif;font-style:normal;background:white;color:#7e877b}
+ .fvp-progress .done i,.fvp-progress .active i{background:#596e50;color:white;border-color:#596e50}
+ .fvp-progress .active{color:#596e50;font-weight:700}
+ .fvp-member .fvp-intro{border:0;padding:0;margin:0 0 23px}
+ .fvp-member .fvp-intro>.eyebrow{display:none}
+ .fvp-member .fvp-intro h1{font:400 clamp(37px,3.7vw,58px)/1.12 Georgia,serif!important;letter-spacing:-.025em;color:#596e50!important;margin:0 0 14px!important}
+ .fvp-member .fvp-intro h1 em{font-weight:400;color:#596e50}
+ .fvp-member .fvp-intro>p{font:13px/1.75 Montserrat,Arial,sans-serif;color:#72766f;max-width:390px}
+ .fvp-member .fvp-editor-summary{border:1px solid #e5e1d9;background:#fffdfa;padding:16px 20px;margin:0}
+ .fvp-member .fvp-summary-row{padding:12px 0;font:12px Montserrat,Arial,sans-serif}
+ .fvp-member .fvp-summary-row b{font:400 17px Georgia,serif;color:#454545}
+ .fvp-member .fvp-editor-summary .fvp-edit-trigger{display:none}
+ .fvp-member .fvp-ready{margin:18px 0 0!important;padding:0;background:transparent}
+ .fvp-member .fvp-ready>strong{display:none}
+ .fvp-member .fvp-approve-cta,.fvp-member .fvp-next-cta{background:#545454!important;border-radius:24px!important;box-shadow:0 5px 13px #00000012;color:#fff!important;font-size:13px;min-height:52px}
+ .fvp-member .fvp-mail-hint{font-size:11px;color:#787b75}
+ .fvp-member .fvp-edit-after-cta{display:block;width:max-content;max-width:100%;margin:10px auto 0;color:#545454;font:600 12px Montserrat,Arial,sans-serif;text-decoration:underline;text-underline-offset:4px;background:transparent;border:0;cursor:pointer;padding:9px}
+ .fvp-member .fvp-photo-room{border-radius:9px;overflow:hidden}
+ .fvp-member .fvp-visual-head{display:none}
+ .fvp-member .fvp-scenes{margin:0 0 10px;justify-content:flex-end}
+ .fvp-member .fvp-scenes button{border-radius:20px;min-height:34px;padding:7px 15px}
+ .fvp-member .fvp-scenes button.selected{background:#545454;border-color:#545454}
+ .fvp-member .fvp-caption{margin:8px 0 0}
+ .fvp-next-panel{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:28px;background:#f1f0e9;border:1px solid #eeede5;border-radius:12px;padding:24px 30px;margin:26px auto 0;max-width:1500px}
+ .fvp-next-intro h2{font:400 29px Georgia,serif;color:#596e50;margin:6px 0}
+ .fvp-next-intro>p:last-child{font:12px/1.75 Montserrat,Arial,sans-serif;color:#73786d;max-width:360px}
+ .fvp-next-choice{display:flex;align-items:start;gap:14px;border-left:1px solid #d7d8cf;padding-left:24px}
+ .fvp-next-icon{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;background:#d4dfc4;color:#596e50;border-radius:11px;font-size:23px}
+ .fvp-next-choice h3{font:400 19px Georgia,serif;color:#545454;margin:3px 0 7px}
+ .fvp-next-choice p{font:11px/1.65 Montserrat,Arial,sans-serif;color:#77796f;margin:0 0 15px}
+ .fvp-next-choice a{display:inline-block;padding:9px 12px;border:1px solid #a9bba3;border-radius:6px;text-decoration:none;color:#545454;font:700 10px Montserrat,Arial,sans-serif;background:#fffdf8}
+ .fvp-member .fvp-art,.fvp-member .fvp-photo-room .fvp-art{padding:8% 6%!important}
+}
+@media screen and (max-width:850px){
+ .fvp-member .fvp-grid{grid-template-columns:1fr;gap:22px}
+ .fvp-member .fvp-editor{order:0}
+ .fvp-member .fvp-visual{order:1}
+ .fvp-next-panel{grid-template-columns:1fr 1fr}
+ .fvp-next-intro{grid-column:1/-1}
+ .fvp-next-choice:first-of-type{border-left:0;padding-left:0}
+}
+@media screen and (max-width:550px){
+ .fvp-member{padding:16px 15px 30px!important}
+ .fvp-member .fvp-brandline{font-size:8px;margin-bottom:16px}
+ .fvp-member .fvp-intro h1{font-size:37px!important}
+ .fvp-member .fvp-intro>p{font-size:12px}
+ .fvp-next-panel{grid-template-columns:1fr;padding:20px;gap:20px}
+ .fvp-next-intro{grid-column:auto}
+ .fvp-next-choice{border:0;border-top:1px solid #d7d8cf;padding:18px 0 0}
+}
+@media print{.fvp-brandline,.fvp-progress,.fvp-next-panel,.fvp-edit-after-cta{display:none!important}}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
