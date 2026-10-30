@@ -163,6 +163,27 @@ try {
       }
       await page.screenshot({ path: `${OUT}/member-${name}-desktop.png` });
     }
+    if (mm === '03') {
+      // March's member copy is the chore charts: one landscape chart per child, editor from her copy.
+      await page.click('button:has-text("Change your plan")');
+      const open = await page.isVisible('[data-mcc-editor][open]');
+      await page.locator('[data-mcc-editor] [data-mcc-close]').last().click();
+      const charts = await page.locator('#club-month-content [data-plan-sheet]').count();
+      report.push({ month: name, check: 'member editor', editorOpened: open, charts, ok: open && charts === 3 });
+      if (SHOTS_MOBILE) {
+        const mobile = await browser.newContext({ viewport: { width: 390, height: 844 } });
+        const mp = await mobile.newPage();
+        await backend(mp);
+        await mp.addInitScript(([s]) => localStorage.setItem('omc:account:session', JSON.stringify(s)), [{ access_token: 'member-token', refresh_token: 'r', expires_at: Date.now() + 3600_000, email: USER.email, user_id: USER.id }]);
+        await mp.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
+        await mp.waitForSelector('#club-month-content:not([hidden])');
+        await mp.waitForTimeout(800);
+        report.push({ month: name, check: 'mobile', sideScroll: await mp.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1) });
+        await mp.screenshot({ path: `${OUT}/member-${name}-mobile.png`, fullPage: true });
+        await mobile.close();
+      }
+      await page.screenshot({ path: `${OUT}/member-${name}-desktop.png` });
+    }
     const file = `${OUT}/member-${name}.pdf`;
     await page.pdf({ path: file, preferCSSPageSize: true, printBackground: true });
     report.push({ month: name, path: `/club/resources/${slug}`, ...pdfReport(file), errors });

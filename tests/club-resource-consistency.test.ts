@@ -38,7 +38,7 @@ describe('monthly resources: one product per month', () => {
       if (!same) differ.push(month);
     }
     // Decision pending (docs/club/RESOURCE_CONSISTENCY.md). Update this list only together with that decision.
-    expect(differ).toEqual(['january', 'march', 'september']);
+    expect(differ).toEqual(['january', 'september']);
   });
 
   it('where they match, the meeting names the same product the member approves and receives', () => {

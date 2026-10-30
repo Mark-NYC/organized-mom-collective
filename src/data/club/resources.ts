@@ -7,15 +7,15 @@
  * `component` picks the printable in that page. Year 2 editions (e.g. December 2027) are listed once they have one.
  *
  * Known gap (Oct 30 2026, docs/club/RESOURCE_CONSISTENCY.md): the app's month pages, the kit registry's January and
- * September themes and the Monthly Family Meeting moved on; four entries here didn't. February is now decided.
+ * September themes and the Monthly Family Meeting moved on; four entries here didn't. February and March are now decided.
  *   January   renders JanuaryHabitCards (now headed "September 2027"); the app's January is the Weekly Meeting.
  *   February  decided Oct 30 2026: the laundry guides (FebruaryLaundryGuides), as on the app page.
- *   March     renders MarchSpringPrep; the app's March is the chore charts (MarchChoreCharts, landscape, one per child).
+ *   March     decided Oct 30 2026: the chore charts (MarchChoreCharts, landscape, one per child), as on the app page.
  *   September renders SeptemberSundayReset (now headed "Our Family Weekly Meeting · January 2027"); the app's
  *             September is the Habit Cards.
  * This page is what members approve, what the admin's ?fulfillment= view prints for the mailing, and the Welcome
  * Kit's first resource (January for founding members; four January orders are pending). Repointing changes what is
- * mailed and the page count, and March's chore charts only run inside the plan shell today, so it
+ * mailed and the page count, so it
  * waits for the owner's decision. `sameAsApp: false` marks the ones still open.
  */
 export interface ClubResource {
@@ -53,7 +53,9 @@ export const clubResources: readonly ClubResource[] = [
   // February is the laundry guides (owner's decision, Oct 30 2026): the same printable as /app/club/february, one page
   // per readiness level in use. Until then this rendered the Family Connection Cards.
   { slug: '2027-02-better-together', month: '2027-02', title: 'Family Laundry Guides', problem: 'Laundry that isn’t all on you', component: 'february', preview: '/app/club/february', sameAsApp: true },
-  { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Spring Prep as a Family', problem: 'One project with a part for everyone', component: 'march', preview: '/club/march-preview', sameAsApp: false },
+  // March is the family chore charts (owner's decision, Oct 30 2026): the same printable as /app/club/march, one
+  // landscape Letter page per child. Until then this rendered Spring Prep as a Family.
+  { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Our Family Chore Charts', problem: 'Chores with a clear finish line', component: 'march', preview: '/app/club/march', sameAsApp: true },
   { slug: '2027-04-everybody-helps-at-mealtime', month: '2027-04', title: 'Our Dinner Team', problem: 'Dinner isn’t just Mom’s job', component: 'april', preview: '/club/april-preview', sameAsApp: true },
   { slug: '2027-05-finish-the-school-year', month: '2027-05', title: 'Our Summer Day Rhythm', problem: 'A rhythm kids can follow when school ends', component: 'may', preview: '/club/may-preview', sameAsApp: true },
   { slug: '2027-06-summer-with-a-plan', month: '2027-06', title: 'My Family’s Snack Station', problem: 'Snacks without a request every hour', component: 'june', preview: '/club/june-preview', sameAsApp: true },

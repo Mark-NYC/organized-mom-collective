@@ -233,14 +233,15 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
 
 /**
  * Printables whose editor opens only through their plan controller (clubPlan.openEditor, docs/club/PLAN_ARCHITECTURE.md),
- * because on their app page the shared rail opens it: today February's laundry guides ([data-lg]). Her copy gets the
+ * because on their app page the shared rail opens it: today February's laundry guides ([data-lg]) and March's chore
+ * charts ([data-mcc]). Her copy gets the
  * same button the rail has, calling the same controller; printables with their own edit controls don't need it.
  */
 function PlanEditorButton() {
   const [open, setOpen] = useState<(() => void) | null>(null);
   useEffect(() => {
     const find = () => {
-      const host = document.querySelector<HTMLElement & { clubPlan?: { openEditor?: () => void } }>('#club-month-content [data-lg]');
+      const host = document.querySelector<HTMLElement & { clubPlan?: { openEditor?: () => void } }>('#club-month-content :is([data-lg], [data-mcc])');
       const fn = host?.clubPlan?.openEditor;
       if (fn) setOpen(() => fn);
       return Boolean(fn);
