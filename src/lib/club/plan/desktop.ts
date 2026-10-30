@@ -6,6 +6,7 @@
  * Past the editing cutoff the printable is locked through `lock` and the rail offers printing only.
  */
 import { editingWindow } from '../edition-status';
+import { earlierCopyLink, PLAN_SAVE, saveText, type PlanSaveStatus } from './account';
 import { onPlanFamily } from './family';
 import { PLAN_APPROVAL, PLAN_CHANGE, type PlanResource, type PlanResourceHost } from './resource';
 import { approvalDay, approvalState, planNow, readApproval, writeApproval, type Approval } from './status';
@@ -74,8 +75,13 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     approve.hidden = locked;
     approve.textContent = state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve preview';
     approve.setAttribute('aria-disabled', String(state === 'approved'));
-    if (state === 'approved') note.textContent = `Approved ${approvalDay(a)} in this preview. Approval is optional: it only says you’ve checked it. Nothing is saved to an account, submitted or mailed.`;
+    // A member's plan saves to her account (./account.ts); approval here is still this tab's check mark only.
+    const member = root.dataset.planSource === 'account';
+    if (state === 'approved') note.textContent = member
+      ? `Approved ${approvalDay(a)} on this device. Approval is optional: it only says you’ve checked it. Nothing is submitted or mailed from here.`
+      : `Approved ${approvalDay(a)} in this preview. Approval is optional: it only says you’ve checked it. Nothing is saved to an account, submitted or mailed.`;
     else if (state === 'changed') note.textContent = 'Changed since you approved. Approve again when you’ve checked it, or leave it: approval is optional.';
+    else if (member) note.textContent = locked ? 'Printing is unlimited. Nothing is mailed from this page.' : 'Approval is optional: it only says you’ve checked it, and doesn’t submit or mail anything.';
     else note.textContent = locked ? 'Printing is unlimited. Nothing is saved to an account or mailed from this preview.' : 'Approval is optional and preview only: it doesn’t save, submit or mail anything. Mailing isn’t active yet.';
     undo.hidden = !previous || state !== 'approved';
     o.render?.(r, locked);
@@ -85,8 +91,12 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     const who = family.source === 'sample'
       ? `Sample family: ${family.sampleLabel.replace(/^Sample:\s*/, '')}, made up for this preview.`
       : `Prepared for ${family.household.displayName ?? 'your family'}.`;
-    const where = family.source === 'sample' ? ' Changes stay in this browser tab.' : ' Changes stay in this browser tab; saving to your account isn’t available yet.';
-    $('[data-cpd-source]').textContent = who + where;
+    const source = () => {
+      const where = family.source === 'sample' ? 'Changes stay in this browser tab.' : saveText(root.dataset.planSave as PlanSaveStatus | undefined);
+      $('[data-cpd-source]').replaceChildren(`${who} ${where}`, ...earlierCopyLink(root));
+    };
+    source();
+    root.addEventListener(PLAN_SAVE, source);
     paint();
   });
 
@@ -115,3 +125,4 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
   window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
   return { refresh: paint };
 }
+

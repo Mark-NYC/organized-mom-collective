@@ -11,11 +11,15 @@ import { clubAccountsEnabled } from '../../../data/club/config';
 import { routes } from '../../../routes';
 import { getSession } from '../../account';
 import { loadKitHousehold, type KitHousehold } from '../kit-household';
+import { loadResource, saveResource } from '../membership';
 import { accountStore, clubHref, sampleStore } from '../store';
+import { connectPlanAccount, PLAN_SAVE } from './account';
 import { planKey } from './storage';
 
 export type ReadyFamily = Extract<KitHousehold, { status: 'ready' }>;
 export const PLAN_FAMILY_READY = 'club:plan-family-ready';
+/** What counts as her acting on the page (only then does a change save to her account). */
+const ACTIONS = ['pointerdown', 'keydown', 'input', 'change'] as const;
 
 type FamilyRoot = HTMLElement & { planFamily?: ReadyFamily };
 
@@ -62,11 +66,31 @@ export function startPlanFamily(root: HTMLElement) {
     hasSession: async () => Boolean(await getSession()),
     accountStore,
     sampleStore,
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.status !== 'ready') {
       if (gate) gateMessage(gate, month, result);
       root.dataset.planState = result.status;
       return result;
+    }
+    // A member's own plan: her saved version goes into the tab before the tool reads it, and her changes save to
+    // her account (./account.ts). Samples and previews stay in this tab.
+    const slug = root.dataset.kitSlug;
+    const key = root.dataset.planKey;
+    if (result.source === 'account' && slug && key) {
+      const account = await connectPlanAccount(slug, key, {
+        load: loadResource,
+        save: saveResource,
+        storage: sessionStorage,
+        onUserAction: (cb) => {
+          const once = () => { cb(); for (const t of ACTIONS) document.removeEventListener(t, once, true); };
+          for (const t of ACTIONS) document.addEventListener(t, once, true);
+        },
+        onStatus: (status) => {
+          root.dataset.planSave = status;
+          root.dispatchEvent(new Event(PLAN_SAVE));
+        },
+      });
+      if (account.earlierCopy) root.dataset.planEarlier = routes.clubResource(slug);
     }
     root.dataset.planFor = planKey(result.sample, result.household.id);
     root.dataset.planSource = result.source;

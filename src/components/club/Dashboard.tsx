@@ -26,6 +26,7 @@ import {
 } from '../../lib/club/membership';
 import { clubResourceBySlug, clubResources } from '../../data/club/resources';
 import { routes } from '../../routes';
+import { memberPlanHref } from '../../lib/club/plan/account';
 import ClubGate, { type ClubContext } from './ClubGate';
 import AddressForm from './AddressForm';
 import { clubNav } from '../../lib/club/nav';
@@ -102,7 +103,7 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
 
       {me.welcome && <WelcomeKitCard me={me} href={ctx.href} />}
 
-      {current && <CurrentCard m={current} tag={current.month === me.current_month ? 'This month' : current.month === me.first_paid_month && current.month > me.current_month ? 'Your first month' : null} href={ctx.href(routes.clubResource(current.slug!))} />}
+      {current && <CurrentCard m={current} tag={current.month === me.current_month ? 'This month' : current.month === me.first_paid_month && current.month > me.current_month ? 'Your first month' : null} href={ctx.href(memberPlanHref(current.slug!))} />}
 
       {years.map((y) => (
         <section key={y} className="mt-12">
@@ -111,7 +112,7 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
             {mine.filter((m) => (m.membership_year ?? 1) === y).map((m) => (
               m.state === 'welcome_vision'
                 ? <WelcomeMonthCard key={m.month} m={m} href={ctx.href(routes.clubFamilyVision)} />
-                : <MonthCard key={m.month} m={m} href={m.slug ? ctx.href(routes.clubResource(m.slug)) : null} />
+                : <MonthCard key={m.month} m={m} href={m.slug ? ctx.href(memberPlanHref(m.slug)) : null} />
             ))}
           </div>
         </section>
