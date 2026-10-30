@@ -19,6 +19,8 @@ export default defineConfig({
     '/command-center-reset-where-did-my-time-go-how-to-spot-and-stop-energy-leaks-in-your-week': '/resources/where-does-my-time-go',
     // Short address for IF-03 (Pins, print). One page, one canonical: the article.
     '/chores-for-kids-by-age': '/resources/chores-for-kids-by-age',
+    // The Club's old join page: its offer button now opens Stripe Checkout directly.
+    '/club/join': '/club#offer',
   },
   vite: {
     plugins: [tailwindcss()],

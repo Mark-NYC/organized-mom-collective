@@ -75,6 +75,8 @@ export class FakeClubStripe {
   endpoints: { id: string; url: string; secret: string; events: string[] }[] = [];
   requests: { method: string; path: string }[] = [];
   private idem = new Map<string, unknown>();
+  /** The customer of each Billing Portal session, in order. */
+  portalCustomers: string[] = [];
   private n = 0;
   clock = Math.floor(Date.UTC(2026, 10, 2, 15) / 1000);
 
@@ -133,6 +135,7 @@ export class FakeClubStripe {
     }
     if (method === 'POST' && path === '/v1/billing_portal/sessions') {
       if (!this.customers.has(p.customer)) return this.err(400, 'No such customer');
+      this.portalCustomers.push(p.customer);
       return { url: `https://billing.stripe.test/p/${rand()}` };
     }
     if (method === 'POST' && kind === 'webhook_endpoints') {
