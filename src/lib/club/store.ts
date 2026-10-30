@@ -15,6 +15,10 @@ import { kits } from '../../data/club/kits';
 import { sampleById } from '../../data/club/samples';
 import { accountRpc } from '../account';
 import type { FamilyMember, Household, HouseholdPreferences, MemberKind, MemberRole } from './profile';
+import {
+  activitiesToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
+  type Activity, type DbProfile, type FamilyProfile, type Responsibility, type SetupStep,
+} from './family-profile';
 
 export type KitAccess = 'edit' | 'read';
 
@@ -55,6 +59,14 @@ export interface HouseholdInput {
   members: MemberInput[];
 }
 
+/** Steps 5 and 6: both answers travel together; `step` says which one she just answered or skipped. */
+export interface FocusInput {
+  challenges: string[];
+  challengeNote?: string;
+  priority?: string;
+  priorityNote?: string;
+}
+
 /** Someone else (another tab or device) saved first: reload before saving again. */
 export class ConflictError extends Error {
   constructor() {
@@ -72,6 +84,12 @@ export interface ClubStore {
   documents(slug: string): Promise<KitDocuments>;
   /** Returns the new revision. `revision` is the one she loaded (0 for a first save). */
   saveDocument(slug: string, doc: string, saved: Omit<SavedDocument, 'revision'>, revision: number): Promise<number>;
+  /** The profile beyond the people (src/lib/club/family-profile.ts); null before the family step. */
+  profile(): Promise<FamilyProfile | null>;
+  /** Each save replaces that whole answer and marks its setup step done (an empty answer is "skip for now"). */
+  saveActivities(list: Activity[]): Promise<FamilyProfile>;
+  saveResponsibilities(status: 'existing' | 'desired', list: Responsibility[]): Promise<FamilyProfile>;
+  saveFocus(step: 'challenges' | 'priority', focus: FocusInput): Promise<FamilyProfile>;
 }
 
 // ------------------------------------------------------------------ the database, as her
@@ -160,6 +178,22 @@ export const accountStore: ClubStore = {
       throw e;
     }
   },
+  async profile() {
+    const r = await accountRpc<DbProfile | null>('club_family_profile');
+    return r ? profileFromDb(r) : null;
+  },
+  async saveActivities(list) {
+    return profileFromDb(await accountRpc<DbProfile>('club_activities_save', { p_activities: activitiesToDb(list) }));
+  },
+  async saveResponsibilities(status, list) {
+    return profileFromDb(await accountRpc<DbProfile>('club_responsibilities_save', { p_status: status, p_items: responsibilitiesToDb(list) }));
+  },
+  async saveFocus(step, f) {
+    return profileFromDb(await accountRpc<DbProfile>('club_focus_save', {
+      p_step: step, p_challenges: f.challenges, p_challenge_note: f.challengeNote ?? null,
+      p_priority: f.priority ?? null, p_priority_note: f.priorityNote ?? null,
+    }));
+  },
 };
 
 // ------------------------------------------------------------------ sample households (this tab only)
@@ -167,6 +201,8 @@ export const accountStore: ClubStore = {
 interface SampleState {
   household: Household;
   documents: Record<string, Record<string, SavedDocument>>;
+  /** Missing in tabs saved before the profile steps existed: starts empty. */
+  profile?: FamilyProfile;
 }
 
 const memory = new Map<string, string>();
@@ -259,7 +295,42 @@ export function sampleStore(id: string): ClubStore | null {
       save(s);
       return next;
     },
+    async profile() {
+      const s = load();
+      return onboarded(s.household) ? s.profile ?? emptyProfile() : null;
+    },
+    async saveActivities(list) {
+      return update('week', (p) => ({ ...p, activities: list.map((a, i) => ({ ...a, id: a.id ?? `${sample.id}-a${Date.now()}-${i}` })) }));
+    },
+    async saveResponsibilities(status, list) {
+      return update(status === 'existing' ? 'responsibilities' : 'growth', (p) => ({
+        ...p,
+        responsibilities: [
+          ...p.responsibilities.filter((r) => r.status !== status),
+          ...list.map((r, i) => {
+            const helperIds = r.helperIds.filter((h) => !r.ownerIds.includes(h));
+            const scope = scopeOf(r.ownerIds);
+            return { ...r, status, helperIds, id: r.id ?? `${sample.id}-r${Date.now()}-${i}`, ...(scope ? { scope } : { scope: undefined }) };
+          }),
+        ],
+      }));
+    },
+    async saveFocus(step, f) {
+      return update(step, (p) => ({
+        ...p, challenges: [...new Set(f.challenges)],
+        challengeNote: f.challengeNote?.trim() || undefined, priority: f.priority || undefined, priorityNote: f.priorityNote?.trim() || undefined,
+      }));
+    },
   };
+
+  /** Like the database: replace one answer, mark its step. */
+  function update(step: SetupStep, change: (p: FamilyProfile) => FamilyProfile): FamilyProfile {
+    const s = load();
+    if (!onboarded(s.household)) throw new Error('no_household');
+    s.profile = markStep(change(s.profile ?? emptyProfile()), step);
+    save(s);
+    return s.profile;
+  }
 }
 
 /** Start the sample over (the banner's "Reset sample"). */

@@ -80,7 +80,9 @@ function asUser(uid, q) {
 function rpc(uid, name, body) {
   const { names, types, ret } = signature(name);
   const args = names.map((n, i) => (n in body ? `${n} => ${body[n] === null ? `null::${types[i]}`
-    : types[i] === 'jsonb' || types[i] === 'json' ? `${lit(JSON.stringify(body[n]))}::${types[i]}` : `${lit(body[n])}::${types[i]}`}` : null)).filter(Boolean);
+    : types[i] === 'jsonb' || types[i] === 'json' ? `${lit(JSON.stringify(body[n]))}::${types[i]}`
+    : types[i].endsWith('[]') ? `(select coalesce(array_agg(x), '{}') from jsonb_array_elements_text(${lit(JSON.stringify(body[n]))}::jsonb) x)::${types[i]}`
+    : `${lit(body[n])}::${types[i]}`}` : null)).filter(Boolean);
   const call = `public.${name}(${args.join(', ')})`;
   const out = asUser(uid, ret === 'void' ? `select ${call}` : `select coalesce(to_jsonb(${call})::text, 'null')`);
   return ret === 'void' || !out ? null : JSON.parse(out);
@@ -356,8 +358,46 @@ async function journey(browser, label, vp) {
   await kidRow.nth(1).locator('select').first().selectOption('6');
   check('no sideways scrolling (family)', await noSideScroll(page));
   await shot(page, `${label}-2-family`, true);
-  await page.click('button:has-text("See my welcome gift")');
+  check('progress: step 1 of 6', await page.isVisible('text=Step 1 of 6'));
+  await page.click('button:has-text("Next")');
+  // The rest of her family profile: steps 2–6, each saved as she leaves it.
+  await page.waitForSelector('text=What does a typical week look like?');
+  check('profile: step 2 of 6 with a progress bar', await page.isVisible('text=Step 2 of 6') && await page.isVisible('[role="progressbar"]'));
+  check('profile: activity icons load', await page.evaluate(() => [...document.querySelectorAll('button[aria-pressed] img')].every((i) => i.complete && i.naturalWidth > 0)));
+  await page.click('button[aria-pressed]:has-text("School or homeschool")');
+  await page.click('button[aria-pressed]:has-text("Sports and practices")');
+  await page.click('text=Add details (optional) >> nth=1');
+  await page.fill('input[placeholder="Soccer practice"]', 'Soccer');
+  await page.click('button[aria-label="Tuesday"]');
+  await page.click('button[aria-label="Thursday"]');
+  check('no sideways scrolling (week)', await noSideScroll(page));
+  await shot(page, `${label}-2b-week`, true);
+  await page.click('button:has-text("Next")');
+  await page.waitForSelector('text=What does everyone already take care of?');
+  await page.click('button[aria-label^="Ana, Meals and kitchen"]');
+  await page.click('button[aria-label^="Sofia, Laundry"]');
+  await page.click('button[aria-label^="Sofia, Laundry"]');
+  check('who does what: tap once owns, twice helps', await page.isVisible('button[aria-label^="Sofia, Laundry: helps when asked"]'));
+  await page.click('button:has-text("Next")');
+  await page.waitForSelector('text=What would you like your kids to take on?');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('text=What would you like your kids to take on?');
+  check('interrupted setup resumes at the first open step', await page.isVisible('text=Step 4 of 6'));
+  const saved = JSON.parse(asUser(USER.id, `select public.club_family_profile()::text`));
+  check('week and who-does-what saved before the interruption', saved.activities.length === 2 && saved.activities.some((x) => x.name === 'Soccer' && x.days.join() === '2,4')
+    && saved.responsibilities.some((r) => r.category === 'laundry' && r.helper_ids.length === 1 && r.owner_ids.length === 0), JSON.stringify(saved));
+  await page.click('button:has-text("Skip for now")');
+  await page.waitForSelector('text=Where is it hard to stay on the same page?');
+  await page.click('button:has-text("Morning and evening routines")');
+  await page.click('button:has-text("Next")');
+  await page.waitForSelector('text=What’s one thing you’d love to stop managing alone?');
+  await page.click('button:has-text("The morning rush")');
+  await page.fill('input[maxlength="120"]', 'Shoes, bags, out the door');
+  await shot(page, `${label}-2c-priority`, true);
+  await page.click('button:has-text("Finish")');
   await page.waitForURL(/\/club\/family-vision/);
+  const done = JSON.parse(asUser(USER.id, `select public.club_family_profile()::text`));
+  check('profile complete: priority and challenges saved', done.setup_completed && done.priority === 'mornings' && done.challenges.join() === 'routines', JSON.stringify(done));
   await page.waitForSelector('.fvp-approve-cta');
   let a = await art(page);
   check('the gift: her family name, a watercolor, a value', a.name === 'The Rivera Family' && Boolean(a.img) && a.imgLoaded && a.word === 'Love', JSON.stringify(a));

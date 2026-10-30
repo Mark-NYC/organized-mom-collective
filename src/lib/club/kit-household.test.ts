@@ -11,6 +11,10 @@ const account = (over: Partial<ClubStore> = {}): ClubStore => ({
   saveHousehold: async () => { throw new Error('unused'); },
   documents: async () => ({ can: 'edit', documents: {} }),
   saveDocument: async () => 1,
+  profile: async () => null,
+  saveActivities: async () => { throw new Error('unused'); },
+  saveResponsibilities: async () => { throw new Error('unused'); },
+  saveFocus: async () => { throw new Error('unused'); },
   ...over,
 });
 const env = (over: Partial<KitHouseholdEnv> = {}): KitHouseholdEnv => ({
