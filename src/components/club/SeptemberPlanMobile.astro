@@ -1,7 +1,7 @@
 ---
 /**
- * September Sunday Reset on phones and tablets (below 1100px): the month's own sections inside the shared
- * ClubPlanScreen — the Sunday rhythm, the three steps, everyone's part and the fall jobs — and their sheets.
+ * January Weekly Meeting on phones and tablets (below 1100px): the month's own sections inside the shared
+ * ClubPlanScreen — the weekly rhythm, the three steps, everyone's part and the preparation jobs — and their sheets.
  * It reads and changes the plan only through the printable's controller (`.osr` root's `clubPlan`, see
  * src/lib/club/engines/sunday-reset.ts). Status, approval, copy, print and sheets are shared
  * (src/components/club/plan/, docs/club/PLAN_ARCHITECTURE.md). Design: docs/club/OCTOBER_PHASE2_DESIGN.md.
@@ -11,16 +11,16 @@ import { SUNDAY_STEPS } from '../../lib/club/engines/sunday-reset';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="September · Organized Family Club" sheets={['front', 'back']} previewNote="Front and back, ready to print">
-  <Fragment slot="title">Our Family <em>Sunday Reset</em></Fragment>
+<ClubPlanScreen deadline={deadline} kicker="January · Organized Family Club" sheets={['front', 'back']} previewNote="Front and back, ready to print">
+  <Fragment slot="title">Our Family <em>Weekly Meeting</em></Fragment>
 
   <button type="button" class="omp-rhythm" data-omp-edit="rhythm" aria-describedby="omp-rhythm-note">
-    <span class="omp-rhythm-label" data-omp-rhythm-label>Every Sunday</span>
+    <span class="omp-rhythm-label" data-omp-rhythm-label>Every week</span>
     <span class="omp-rhythm-time" data-omp-trigger>After lunch</span>
     <span class="omp-rhythm-note" id="omp-rhythm-note">10–15 minutes together with our wall calendar.</span>
     <span class="omp-change" aria-hidden="true">Change</span>
   </button>
-  <ol class="omp-steps" aria-label="Every Sunday, three simple steps">
+  <ol class="omp-steps" aria-label="Every week, three simple steps">
     {SUNDAY_STEPS.map((step) => (
       <li><img src={step.icon} alt="" width="44" height="44" loading="lazy" /><span><strong>{step.title}</strong>{step.text}</span></li>
     ))}
@@ -28,19 +28,19 @@ const { deadline } = Astro.props;
 
   <section class="cp-section" aria-labelledby="omp-people-title">
     <h2 id="omp-people-title">Everyone has a part</h2>
-    <p class="cp-intro">The same small job every Sunday, so it isn’t all on you.</p>
+    <p class="cp-intro">The same small job every week, so it isn’t all on you.</p>
     <ul class="cp-group" data-omp-people></ul>
   </section>
 
   <section class="cp-section" aria-labelledby="omp-fall-title">
-    <h2 id="omp-fall-title">First, try it: fall readiness</h2>
-    <p class="cp-intro">Do these once, together. Next Sunday, use the same three steps for whatever’s coming up.</p>
+    <h2 id="omp-fall-title">First, try it: weekly preparation</h2>
+    <p class="cp-intro">Do these once, together. Next week, use the same three steps for whatever’s coming up.</p>
     <ul class="cp-group" data-omp-jobs></ul>
   </section>
 
   <section class="cp-section" aria-labelledby="omp-cal-title">
     <h2 id="omp-cal-title">Try the Wall Calendar</h2>
-    <p class="cp-intro">Your family’s names are already in. Add each person’s recurring activities once and see the whole month by person, ready for Sunday planning. Download it as an image any time.</p>
+    <p class="cp-intro">Your family’s names are already in. Add each person’s recurring activities once and see the whole month by person, ready for weekly planning. Download it as an image any time.</p>
     <button type="button" class="omp-cal" data-omp-calendar><span>Open the monthly calendar</span><span class="cp-chev" aria-hidden="true"></span></button>
   </section>
 </ClubPlanScreen>
@@ -70,8 +70,8 @@ import {
   type OsrPlan, type PlanState,
 } from '../../lib/club/engines/sunday-reset';
 
-const APPROVAL_KEY = 'omc:preview:september-sunday-reset:approval';
-const CHOICE_LABEL: Record<string, string> = { 'Sunday after breakfast': 'After breakfast', 'Sunday after church': 'After church', 'Sunday after lunch': 'After lunch', 'Sunday evening': 'Sunday evening' };
+const APPROVAL_KEY = 'omc:preview:january-weekly-meeting:approval';
+const CHOICE_LABEL: Record<string, string> = { 'Sunday after breakfast': 'After breakfast', 'Sunday after church': 'After church', 'Sunday after lunch': 'After lunch', 'Sunday evening': 'Sunday evening', 'Friday after dinner': 'Friday after dinner', 'Saturday morning': 'Saturday morning', 'Wednesday evening': 'Wednesday evening' };
 
 const root = document.querySelector<HTMLElement>('.club-plan:has(.osr)');
 const osr = root?.querySelector<HTMLElement & { clubPlan?: OsrPlan }>('.osr');
@@ -89,7 +89,7 @@ if (root && osr) {
     const members = p.members();
     q<HTMLButtonElement>('[data-omp-edit="rhythm"]').disabled = locked;
     const sunday = /^sunday\b/i.test(s.trigger);
-    q('[data-omp-rhythm-label]').textContent = sunday ? 'Every Sunday' : 'Our weekly reset';
+    q('[data-omp-rhythm-label]').textContent = sunday ? 'Every week' : 'Our weekly reset';
     q('[data-omp-trigger]').textContent = sunday ? shortTrigger(s.trigger) : s.trigger;
     q('[data-omp-edit="rhythm"]').setAttribute('aria-label', `When you reset: ${s.trigger}. Change`);
 
@@ -122,7 +122,7 @@ if (root && osr) {
       row.addEventListener('click', () => openJob(j.id));
       return el('li', {}, row);
     }));
-    if (!s.fallJobs.some((j) => !j.removed)) jobs.prepend(el('li', { class: 'cp-removed' }, 'No fall jobs this month.'));
+    if (!s.fallJobs.some((j) => !j.removed)) jobs.prepend(el('li', { class: 'cp-removed' }, 'No preparation jobs this month.'));
   };
 
   const openRhythm = () => {
@@ -141,7 +141,7 @@ if (root && osr) {
       chips.append(chip);
     }
     const custom = !(TRIGGER_CHOICES as readonly string[]).includes(current);
-    const input = el('input', { type: 'text', maxLength: 85, value: custom ? current : '', placeholder: 'e.g. Sunday at 4 PM' });
+    const input = el('input', { type: 'text', maxLength: 85, value: custom ? current : '', placeholder: 'e.g. Saturday at 10 AM' });
     const field = el('label', { class: 'cp-field' }, 'Something else', input);
     const save = el('button', { type: 'button', class: 'cp-btn cp-btn-dark' }, 'Use this time');
     save.addEventListener('click', () => { if (input.value.trim()) p.update((s) => setTrigger(s, input.value)); ui.closeSheet(); });
@@ -150,7 +150,7 @@ if (root && osr) {
     const reveal = el('button', { type: 'button', class: 'cp-link' }, el('span', {}, 'Something else…'));
     reveal.hidden = custom;
     reveal.addEventListener('click', () => { other.hidden = false; reveal.hidden = true; input.focus(); });
-    ui.openSheet('When does your family reset?', el('p', { class: 'cp-sheet-hint' }, 'Pick a time that already happens every Sunday.'), chips, reveal, other);
+    ui.openSheet('When does your family reset?', el('p', { class: 'cp-sheet-hint' }, 'Pick a time that already happens every week.'), chips, reveal, other);
   };
 
   const openPerson = (id: string) => {
@@ -188,7 +188,7 @@ if (root && osr) {
       b.addEventListener('click', () => openPerson(next.id));
       actions.append(b);
     }
-    ui.openSheet(`${name}’s part each Sunday`, group, el('label', { class: 'cp-field' }, 'Name on the printable', nameInput), actions);
+    ui.openSheet(`${name}’s part each week`, group, el('label', { class: 'cp-field' }, 'Name on the printable', nameInput), actions);
   };
 
   const openJob = (jobId: string) => {
@@ -229,7 +229,7 @@ if (root && osr) {
   if (mounted) ui = mounted;
 }
 // The calendar demo lives in the printable's second tab: open the full-screen printable on it.
-// The printable card opens it on the Sunday Reset.
+// The printable card opens it on the Weekly Meeting.
 const tab = (name: string) => document.querySelector<HTMLButtonElement>(`.osr [data-osr-tab="${name}"]`)?.click();
 document.querySelector('.cp [data-plan-open-proof]')?.addEventListener('click', () => tab('reset'));
 document.querySelector('[data-omp-calendar]')?.addEventListener('click', () => {

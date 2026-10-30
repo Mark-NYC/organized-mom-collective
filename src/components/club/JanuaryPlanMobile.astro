@@ -1,6 +1,6 @@
 ---
 /**
- * January Habit Cards on phones and tablets (below 1100px): the month's own sections inside the shared
+ * September Habit Cards on phones and tablets (below 1100px): the month's own sections inside the shared
  * ClubPlanScreen — the family's one or two habit cards, a focused sheet per card, and the habit finder as a
  * guided sheet. It reads and changes the cards only through the printable's controller (`.jhc` root's
  * `clubPlan`, src/lib/club/engines/january-habit-cards.ts), so the screen and the sheet always match.
@@ -10,7 +10,7 @@ import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="January · Organized Family Club" sheets={['sheet']} previewNote="Two cut-apart cards on one Letter sheet">
+<ClubPlanScreen deadline={deadline} kicker="September · Organized Family Club" sheets={['sheet']} previewNote="Two cut-apart cards on one Letter sheet">
   <Fragment slot="title">Our Family <em>Habit Cards</em></Fragment>
 
   <section class="cp-section" aria-labelledby="jan-habits-title">
@@ -59,7 +59,7 @@ import {
   type Habit, type HabitChoice, type HabitState, type JhcPlan,
 } from '../../lib/club/engines/january-habit-cards';
 
-const APPROVAL_KEY = 'omc:preview:january-habit-cards:approval';
+const APPROVAL_KEY = 'omc:preview:september-habit-cards:approval';
 const root = document.querySelector<HTMLElement>('.club-plan:has(.jhc)');
 const jhc = root?.querySelector<HTMLElement & { clubPlan?: JhcPlan }>('.jhc');
 if (root && jhc) {
@@ -144,7 +144,7 @@ if (root && jhc) {
     ui.openSheet(h.name || `Habit card ${i + 1}`, ...body, actions);
   };
 
-  // The habit finder, one question at a time, using January's own suggestions.
+  // The habit finder, one question at a time, using September's own suggestions.
   const openFinder = () => {
     let step = 0;
     let index = 0;

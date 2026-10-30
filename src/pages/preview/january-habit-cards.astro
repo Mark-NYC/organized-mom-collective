@@ -1,19 +1,19 @@
 ---
-/** Unlisted, noindex January product review. Uses the same actual printable as the member tool. */
+/** Unlisted, noindex September product review. Uses the same actual printable as the member tool. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
-import JanuaryHabitCards from '../../components/club/JanuaryHabitCards.astro';
+import SeptemberHabitCards from '../../components/club/SeptemberHabitCards.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
 ---
 <PublicLayout
-  fullTitle="January Habit Cards Preview | Organized Family Club"
-  description="Unlisted January family habit card prototype."
+  fullTitle="September Habit Cards Preview | Organized Family Club"
+  description="Unlisted September family habit card prototype."
   indexable={false}
   chrome={false}
   width="full"
   tracking={false}
 >
-  <ClubPrototypeNav client:only="react" month="january" />
+  <ClubPrototypeNav client:only="react" month="september" />
   <main id="club-month-content" class="mx-auto w-full py-8">
-    <JanuaryHabitCards storageKey="omc:preview:january-habit-cards:v2" />
+    <SeptemberHabitCards storageKey="omc:preview:september-habit-cards:v2" />
   </main>
 </PublicLayout>

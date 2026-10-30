@@ -1,11 +1,11 @@
 ---
-/** Unlisted September 2027 Club proof: the family Sunday Reset (moved from October) with the monthly activity
+/** Unlisted September 2027 Club proof: the family Habit Cards (moved from October) with the monthly activity
  * calendar demo in its second tab. The app page is /app/club/september. */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
-import SeptemberSundayReset from '../../components/club/SeptemberSundayReset.astro';
+import JanuaryHabitCards from '../../components/club/JanuaryHabitCards.astro';
 ---
-<PublicLayout fullTitle="September Family Sunday Reset | Organized Family Club" description="One prepared family Sunday Reset, with fall readiness as the first guided example, and a monthly family activity calendar to try." indexable={false} chrome={false} width="full" tracking={false}>
+<PublicLayout fullTitle="September Family Habit Cards | Organized Family Club" description="One prepared family Habit Cards, with two age-appropriate habit reminders to try." indexable={false} chrome={false} width="full" tracking={false}>
  <ClubPrototypeNav client:only="react" month="september" />
- <main id="club-month-content"><SeptemberSundayReset storageKey="omc:preview:september-sunday-reset:v1" /></main>
+ <main id="club-month-content"><JanuaryHabitCards storageKey="omc:preview:september-habit-cards:v1" /></main>
 </PublicLayout>
