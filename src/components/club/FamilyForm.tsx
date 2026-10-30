@@ -4,7 +4,7 @@
  * and removed; removing someone archives them (their jobs keep pointing at them and say "Needs a new owner").
  * No mailing address, no last names, nothing else.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { ADULT_ROLES, CHILD_AGES, MONTH_NAMES, PRIORITIES } from '../../data/club/onboarding';
 import { ageNow, birthFromAge, monthOf, validateHousehold, type Household, type MemberRole } from '../../lib/club/profile';
 import type { HouseholdInput, MemberInput } from '../../lib/club/store';
@@ -70,19 +70,23 @@ interface Props {
   readOnly?: boolean;
   /** The save button's words (the start page names the kit it opens). */
   submitLabel: string;
+  /** Start only: "The Rivera Family" from the name she gave at checkout, used only when she has no family name yet. */
+  suggestedName?: string;
   onSave: (input: HouseholdInput) => Promise<void>;
 }
 
 const input = 'block min-h-12 w-full rounded-[4px] border border-warm-rule bg-white px-3 text-[1rem] text-warm-ink focus:border-warm-ink focus:outline-none';
 const select = `${input} pr-8`;
 
-export default function FamilyForm({ household, mode, readOnly, submitLabel, onSave }: Props) {
+export default function FamilyForm({ household, mode, readOnly, submitLabel, suggestedName, onSave }: Props) {
   const today = useMemo(() => monthOf(new Date()), []);
   const initial = useMemo(() => draftsFrom(household, today), [household, today]);
   const [me, setMe] = useState<Draft>(initial.me);
   const [adults, setAdults] = useState<Draft[]>(initial.adults);
-  const [kids, setKids] = useState<Draft[]>(initial.kids.length || household ? initial.kids : [{ key: newKey(), firstName: '', kind: 'child', role: 'child', age: '', birthMonth: '' }]);
-  const [displayName, setDisplayName] = useState(household?.displayName ?? '');
+  // A blank first child to fill in, unless she already saved her family (the household row exists, empty, from checkout).
+  const [kids, setKids] = useState<Draft[]>(initial.kids.length || household?.members.length ? initial.kids : [{ key: newKey(), firstName: '', kind: 'child', role: 'child', age: '', birthMonth: '' }]);
+  // Never over a name she already chose; the suggestion only fills an empty one, and she can change it.
+  const [displayName, setDisplayName] = useState(household?.displayName ?? (mode === 'start' ? suggestedName ?? '' : ''));
   const [pets, setPets] = useState(Boolean(household?.preferences.pets));
   const [priorities, setPriorities] = useState<string[]>(household?.preferences.priorities ?? []);
   const [busy, setBusy] = useState(false);
@@ -98,6 +102,8 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, onS
     setTried(true);
     setError('');
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
+    // Her welcome print and printed resources carry it, so the welcome flow asks for it.
+    if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
     const data = toInput(me, adults, filledKids, { displayName, pets, priorities }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
@@ -118,10 +124,9 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, onS
     <form onSubmit={submit} noValidate className="max-w-2xl">
       {mode === 'start' ? (
         <>
-          <p className="label text-warm-soft">Welcome</p>
-          <h1 className="mt-2 font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.6rem]">Who’s on your family team?</h1>
+          <h1 className="font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.6rem]">Tell us about your family</h1>
           <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-warm-soft">
-            First names and ages are all we need. Your kit uses them to suggest who owns what, and you can change every suggestion.
+            First names and ages are all we need. We use them to prepare your welcome gift and your monthly family resources.
           </p>
         </>
       ) : (
@@ -134,6 +139,15 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, onS
       )}
 
       <fieldset disabled={readOnly} className="mt-8 space-y-9">
+        {mode === 'start' && (
+          <section>
+            <label className="block">
+              <span className="text-[0.95rem] font-semibold text-warm-ink">What do you call your family?</span>
+              <span className="block text-[0.88rem] text-warm-soft">It goes on your welcome print. “The Rivera Family”, “Team Rivera”.</span>
+              <input className={`${input} mt-1.5 ${tried && !displayName.trim() ? 'border-rose' : ''}`} value={displayName} maxLength={45} autoComplete="family-name" onChange={(e) => setDisplayName(e.target.value)} />
+            </label>
+          </section>
+        )}
         <section>
           <h2 className="label text-warm-soft">You</h2>
           <label className="mt-3 block">
@@ -204,7 +218,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, onS
           </button>
         </section>
 
-        <section>
+        <Optional collapsed={mode === 'start'}>
           <h2 className="label text-warm-soft">Your household <span className="normal-case tracking-normal">(optional)</span></h2>
           <label className="mt-3 flex min-h-11 items-center gap-3 text-[0.98rem] text-warm-ink">
             <input type="checkbox" checked={pets} onChange={(e) => setPets(e.target.checked)} className="h-5 w-5 accent-[var(--color-warm-ink)]" />
@@ -225,12 +239,14 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, onS
               })}
             </div>
           </fieldset>
-          <label className="mt-5 block">
-            <span className="text-[0.95rem] font-semibold text-warm-ink">A name for your team</span>
-            <span className="block text-[0.88rem] text-warm-soft">It goes at the top of your printed chart. “The Rivera Family”, “Team Rivera”.</span>
-            <input className={`${input} mt-1.5`} value={displayName} maxLength={60} onChange={(e) => setDisplayName(e.target.value)} />
-          </label>
-        </section>
+          {mode === 'edit' && (
+            <label className="mt-5 block">
+              <span className="text-[0.95rem] font-semibold text-warm-ink">A name for your team</span>
+              <span className="block text-[0.88rem] text-warm-soft">It goes at the top of your printed chart. “The Rivera Family”, “Team Rivera”.</span>
+              <input className={`${input} mt-1.5`} value={displayName} maxLength={60} onChange={(e) => setDisplayName(e.target.value)} />
+            </label>
+          )}
+        </Optional>
       </fieldset>
 
       {error && <p role="alert" className="mt-6 border-l-[3px] border-rose bg-rose-wash px-4 py-3 text-warm-ink">{error}</p>}
@@ -243,5 +259,16 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, onS
         </div>
       )}
     </form>
+  );
+}
+
+/** The optional household details: open on the family page, a closed "More about your household" in the welcome flow. */
+function Optional({ collapsed, children }: { collapsed: boolean; children: ReactNode }) {
+  if (!collapsed) return <section>{children}</section>;
+  return (
+    <details className="group">
+      <summary className="min-h-11 cursor-pointer text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4">More about your household (optional)</summary>
+      <div className="mt-4">{children}</div>
+    </details>
   );
 }

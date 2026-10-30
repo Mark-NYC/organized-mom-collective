@@ -134,8 +134,9 @@ select pg_temp.expect((select j ->> 'plan' from me) = 'monthly' and (select (j -
 select pg_temp.expect((select r ->> 'state' from me, jsonb_array_elements(j -> 'months') r where r ->> 'month' = '2026-11-01') = 'available', 'November available');
 select pg_temp.expect(not exists (select 1 from me, jsonb_array_elements(j -> 'months') r where r ->> 'month' = '2026-12-01'), 'December isn''t listed until she pays for it');
 select pg_temp.expect((select j -> 'next' ->> 'month' from me) = '2026-12-01' and (select (j -> 'next' ->> 'payment_on')::timestamptz from me) = '2026-12-02 15:00:00+00', 'next: December, with her Dec 2 payment');
-select pg_temp.expect((select j -> 'welcome' ->> 'readiness' from me) = 'needs_vision', 'her welcome print waits for her personalization');
-select pg_temp.expect((select r -> 'mailing' ->> 'readiness' from me, jsonb_array_elements(j -> 'months') r where r ->> 'month' = '2026-11-01') = 'needs_profile', 'mailing waits for her family profile');
+select pg_temp.expect((select j -> 'welcome' ->> 'readiness' from me) = 'needs_profile', 'her Welcome Kit (welcome print + November) waits for her family profile first');
+select pg_temp.expect((select r -> 'mailing' ->> 'readiness' from me, jsonb_array_elements(j -> 'months') r where r ->> 'month' = '2026-11-01') = 'needs_profile', 'her first month''s mailing shares that readiness');
+select pg_temp.expect((select r -> 'mailing' ->> 'batch' from me, jsonb_array_elements(j -> 'months') r where r ->> 'month' = '2026-11-01') = 'welcome_kit', 'and ships in the Welcome Kit, not the November batch');
 select pg_temp.expect((select (j ->> 'onboarded')::boolean from me) = false, 'account without completed onboarding is reported as such');
 drop table me;
 reset role;
@@ -351,37 +352,39 @@ select pg_temp.expect((pg_temp.welcome(4)).satisfies_month is null and (pg_temp.
 -- Annual, either side of January's cutoff (Sunday Dec 13): a December first month either way.
 select pg_temp.join_(1, 'annual', '2026-12-13 23:59:59-05');
 select pg_temp.join_(2, 'annual', '2026-12-14 00:00:00-05');
-select pg_temp.expect(split_part(pg_temp.mail(1), ',', 1) = '2027-01:regular', 'paid one second before January''s list closes: January in the regular batch');
-select pg_temp.expect(split_part(pg_temp.mail(2), ',', 1) = '2027-01:catch_up', 'one second after: January in its catch-up batch');
-select pg_temp.expect(split_part(pg_temp.mail(2), ',', 2) = '2027-02:regular', 'and February regular again');
+select pg_temp.expect(split_part(pg_temp.mail(1), ',', 1) like '2026-12:%', 'a December first month is mailed as December''s own resource (20261108: no substitution)');
+select pg_temp.expect(split_part(pg_temp.mail(1), ',', 2) = '2027-01:regular', 'paid one second before January''s list closes: January in the regular batch');
+select pg_temp.expect(split_part(pg_temp.mail(2), ',', 2) = '2027-01:catch_up', 'one second after: January in its catch-up batch');
+select pg_temp.expect(split_part(pg_temp.mail(2), ',', 3) = '2027-02:regular', 'and February regular again');
 
--- December first-time members: the welcome print IS December.
+-- December first-time members (20261108): December's own resource, with the welcome print beside it in one Welcome Kit.
 select pg_temp.join_(6, 'monthly', '2026-12-05 15:00:00+00');
-select pg_temp.expect(pg_temp.months(6) = '2026-12:welcome', 'a December joiner''s December is fulfilled by the welcome print');
-select pg_temp.expect((select kit_id from public.club_entitlements where user_id = pg_temp.u(6) and resource_month = '2026-12-01' and kind = 'digital') is null, 'and names no Christmas kit');
-select pg_temp.expect(pg_temp.mail(6) is null, 'no December monthly mailing');
-select pg_temp.expect((pg_temp.welcome(6)).satisfies_month = '2026-12-01'
-  and (pg_temp.welcome(6)).entitlement_id = (select id from public.club_entitlements where user_id = pg_temp.u(6) and resource_month = '2026-12-01' and kind = 'physical' and revoked_at is null),
-  'the welcome order is December''s paid printed obligation (one order, not two)');
+select pg_temp.expect(pg_temp.months(6) = '2026-12', 'a December joiner''s December is December''s resource, not the welcome print');
+select pg_temp.expect((select kit_id from public.club_entitlements where user_id = pg_temp.u(6) and resource_month = '2026-12-01' and kind = 'digital')
+  = (select id from public.club_kits where slug = '2026-12-christmas-mission'), 'and names the Christmas kit');
+select pg_temp.expect(pg_temp.mail(6) = '2026-12:catch_up', 'one December mailing (recorded as paid after December''s cutoff)');
+select pg_temp.expect((pg_temp.welcome(6)).satisfies_month is null and (pg_temp.welcome(6)).entitlement_id is null, 'the welcome print stands in for nothing: it''s the bonus');
+select pg_temp.expect((select bool_and(in_welcome_kit) and count(*) = 2 and bool_and(batch = 'welcome_kit') from public.club_fulfillment_queue where user_id = pg_temp.u(6)),
+  'both are one Welcome Kit');
+select pg_temp.expect((select count(*) from public.club_entitlements where user_id = pg_temp.u(6) and resource_month = '2026-12-01' and revoked_at is null) = 2, 'one digital and one physical December, no more');
 select pg_temp.as_user('authenticated', pg_temp.u(6)::text);
-select pg_temp.expect(pg_temp.fails($$select public.club_resource_get('2026-12-christmas-mission')$$, 'not_found'), 'she doesn''t also get the Christmas activity');
-select pg_temp.expect((select r ->> 'state' from jsonb_array_elements(public.club_me() -> 'months') r where r ->> 'month' = '2026-12-01') = 'welcome_vision', 'her dashboard shows the print as her December');
+select pg_temp.expect((select r ->> 'fulfilled_by' from jsonb_array_elements(public.club_me() -> 'months') r where r ->> 'month' = '2026-12-01') = 'monthly_resource', 'her dashboard shows December as December''s resource');
 select pg_temp.expect(jsonb_array_length(public.club_me() -> 'months') = 1, 'and only the months she bought');
 select pg_temp.expect(public.club_me() -> 'next' ->> 'month' = '2027-01-01', 'next: January, with her January payment');
 reset role;
-select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_email_audience('resource_ready', '2026-12-01')) x where x ->> 'user_id' = pg_temp.u(6)::text), 'no "December is ready" email for the Christmas activity');
 select pg_temp.pay(6, 2, 'monthly', '2027-01-05 15:00:00+00');
-select pg_temp.expect(pg_temp.months(6) = '2026-12:welcome,2027-01' and pg_temp.mail(6) = '2027-01:catch_up', 'her January payment: January''s resource, catch-up batch (paid after Dec 13)');
+select pg_temp.expect(pg_temp.months(6) = '2026-12,2027-01' and pg_temp.mail(6) = '2026-12:catch_up,2027-01:catch_up', 'her January payment: January''s resource, catch-up batch (paid after Dec 13)');
+select pg_temp.expect(not (select in_welcome_kit from public.club_fulfillment_queue where user_id = pg_temp.u(6) and resource_month = '2027-01-01' and fulfillment_type = 'monthly_resource'), 'January follows the normal monthly schedule, outside the kit');
 select pg_temp.expect((select count(*) from public.club_fulfillment_orders where user_id = pg_temp.u(6) and fulfillment_type = 'welcome_vision') = 1, 'no second welcome print on renewal');
 
 select pg_temp.join_(7, 'annual', '2026-12-05 15:00:00+00');
-select pg_temp.expect(pg_temp.months(7) = '2026-12:welcome,2027-01,2027-02,2027-03,2027-04,2027-05,2027-06,2027-07,2027-08,2027-09,2027-10,2027-11', 'annual from December: twelve obligations, December by the welcome print');
-select pg_temp.expect((select count(*) from public.club_fulfillment_orders where user_id = pg_temp.u(7) and fulfillment_type = 'monthly_resource' and status <> 'canceled') = 11
-  and (pg_temp.welcome(7)).satisfies_month = '2026-12-01', 'eleven monthly mailings plus the welcome print: twelve, never thirteen');
+select pg_temp.expect(pg_temp.months(7) = '2026-12,2027-01,2027-02,2027-03,2027-04,2027-05,2027-06,2027-07,2027-08,2027-09,2027-10,2027-11', 'annual from December: twelve months, December''s resource first');
+select pg_temp.expect((select count(*) from public.club_fulfillment_orders where user_id = pg_temp.u(7) and fulfillment_type = 'monthly_resource' and status <> 'canceled') = 12
+  and (pg_temp.welcome(7)).satisfies_month is null, 'twelve monthly mailings, one per paid month, plus the bonus welcome print');
 select pg_temp.pay(7, 2, 'annual', '2027-12-05 15:00:00+00');
 select pg_temp.expect((select fulfilled_by = 'monthly_resource' and kit_id = (select id from public.club_kits where slug = '2027-12-christmas-family-affair')
                          from public.club_entitlements where user_id = pg_temp.u(7) and resource_month = '2027-12-01' and kind = 'digital' and revoked_at is null),
-  'a year later her December is the Christmas resource: only the original first month is substituted');
+  'a year later her December is the Christmas resource');
 select pg_temp.expect((select count(*) from public.club_fulfillment_orders where user_id = pg_temp.u(7) and fulfillment_type = 'welcome_vision') = 1, 'and still one welcome print');
 
 -- An existing member (joined November) gets the December Christmas resource.
@@ -436,39 +439,104 @@ select pg_temp.expect((public.club_invoice_refund('in_c6x2', 500) ->> 'revoked')
 select pg_temp.sub('sub_c8', 'cus_c8', pg_temp.u(8), 'canceled', 'monthly', '2027-12-15 15:00:00+00', '2028-01-15 15:00:00+00');
 select pg_temp.expect(array_length(string_to_array(pg_temp.months(8), ','), 1) = 12 and (pg_temp.welcome(8)).id is not null, 'cancelling keeps her twelve months and her welcome print');
 
--- Personalizing and approving the welcome print (now, or days later: the order waits, pending).
+-- The Welcome Kit (20261108): her welcome print and her first month's resource, approved and shipped as one package.
+-- Household 6 joined December 5: the kit is her welcome print + December's resource.
+create temp table kit6 as select
+  (select id from public.club_fulfillment_orders where user_id = pg_temp.u(6) and fulfillment_type = 'welcome_vision') as w,
+  (select id from public.club_fulfillment_orders where user_id = pg_temp.u(6) and fulfillment_type = 'monthly_resource' and resource_month = '2026-12-01') as m;
+grant select on kit6 to authenticated;
+create function pg_temp.kit6() returns text language sql security definer as $$
+  select string_agg(q.fulfillment_type || ':' || q.status || ':' || q.readiness, ',' order by q.fulfillment_type)
+    from public.club_fulfillment_queue q, kit6 where q.id in (kit6.w, kit6.m);
+$$;
+select pg_temp.expect((select kit_partner_id from public.club_fulfillment_queue, kit6 where id = kit6.w) = (select m from kit6)
+  and (select kit_partner_id from public.club_fulfillment_queue, kit6 where id = kit6.m) = (select w from kit6), 'the two orders are paired, each naming the other');
 select pg_temp.as_user('authenticated', pg_temp.u(6)::text);
-select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_vision', 'a month after joining, her welcome print still waits for her');
-select pg_temp.expect(pg_temp.fails($$select public.club_welcome_approve()$$, 'incomplete'), 'it can''t be approved before she personalizes it');
+select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_profile', 'a month after joining, her kit still waits for her: family first');
+select pg_temp.expect(pg_temp.fails($$select public.club_welcome_approve()$$, 'incomplete'), 'the print can''t be approved before she personalizes it');
 select pg_temp.expect(pg_temp.fails($$select public.club_welcome_save('{"family_name": "The Decembers", "value": "Money"}')$$, 'invalid'), 'only the print''s own choices');
 select pg_temp.expect(pg_temp.fails($$select public.club_welcome_save('{"family_name": " ", "value": "Joy"}')$$, 'invalid'), 'and a family name');
 select pg_temp.expect(public.club_welcome_save('{"family_name": "  The Decembers ", "value": "Joy", "extra": 1}') -> 'personalization' = '{"family_name": "The Decembers", "value": "Joy"}', 'her family name and value are saved, trimmed, nothing else');
-select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_vision', 'still waiting for her approval');
+select public.club_household_save('The Decembers', '{}', '[{"first_name":"Dee","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Kit","kind":"child","role":"child","birth_year":2018,"birth_month":3}]');
+select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_address', 'family saved: then her mailing address');
+select public.club_address_save('{"name":"Dee Dec","line1":"5 Pine Rd","city":"Town","state":"NJ","postal_code":"07001"}');
+select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_vision'
+  and (select r -> 'mailing' ->> 'readiness' from jsonb_array_elements(public.club_me() -> 'months') r where r ->> 'month' = '2026-12-01') = 'needs_vision', 'then her print, the same answer on both orders');
+select pg_temp.expect(pg_temp.fails($$select count(*) from public.club_fulfillment_queue$$), 'she can''t read the fulfillment queue itself');
 select pg_temp.expect((public.club_welcome_approve() ->> 'approved')::boolean, 'she approves the print');
 create temp table w1 as select member_approved_at from public.club_fulfillment_orders where user_id = pg_temp.u(6) and fulfillment_type = 'welcome_vision';
 select public.club_welcome_approve();
 select pg_temp.expect((select member_approved_at from public.club_fulfillment_orders where user_id = pg_temp.u(6) and fulfillment_type = 'welcome_vision') = (select member_approved_at from w1), 'a second click changes nothing');
-select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_address', 'it goes to the queue as soon as we have her address');
-select public.club_address_save('{"name":"Dee Dec","line1":"5 Pine Rd","city":"Town","state":"NJ","postal_code":"07001"}');
-select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_pdf', 'then it needs only its print-ready PDF, whatever the date');
-select public.club_welcome_save('{"family_name": "The Decembers", "value": "Hope"}');
-select pg_temp.expect((public.club_welcome_get() ->> 'approved')::boolean = false, 'changing it after approval asks her to approve again');
-select public.club_welcome_approve();
+select pg_temp.expect(public.club_welcome_get() ->> 'readiness' = 'needs_confirmation', 'then her first resource, which she hasn''t confirmed yet');
 reset role;
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text), 'no reminder on the day she approved her print');
+update public.club_fulfillment_orders set member_approved_at = now() - interval '2 days 1 hour' where id = (select w from kit6);
+select pg_temp.expect((select x ->> 'kit_slug' from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text) = '2026-12-christmas-mission', 'two days later: one reminder to confirm December');
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_email_audience('review', '2026-12-01')) x where x ->> 'user_id' = pg_temp.u(6)::text), 'and never the monthly "review before printing" email for a kit order');
+update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where id = (select w from kit6);
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:needs_pdf,welcome_vision:pending:needs_pdf', 'three days after the print: her prepared resource counts as confirmed, the kit needs its PDFs');
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text), 'and no reminder after that');
+-- Never auto-confirmed on invalid details: a paused mailing address holds the kit, whatever the date.
+update public.club_mailing_addresses set paused = true where user_id = pg_temp.u(6);
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:mail_paused,welcome_vision:pending:mail_paused', 'mailing paused: the kit waits, nothing is confirmed for her');
+update public.club_mailing_addresses set paused = false where user_id = pg_temp.u(6);
+update public.club_kits set status = 'draft' where slug = '2026-12-christmas-mission';
+select pg_temp.expect(pg_temp.kit6() like '%needs_resource%needs_resource', 'her month still a draft: the kit waits for it');
+update public.club_kits set status = 'scheduled' where slug = '2026-12-christmas-mission';
+
+-- The admin: one row per package, both items, moved together.
 select pg_temp.as_user('authenticated', :OWNER);
 create temp table wq as select x from jsonb_array_elements(public.club_admin_welcome_queue()) x where x ->> 'email' = 'c6@example.com';
-select pg_temp.expect((select x ->> 'vision_value' from wq) = 'Hope' and (select x ->> 'batch' from wq) = 'welcome' and (select x ->> 'satisfies_month' from wq) = '2026-12-01', 'the admin welcome queue: her choice, and that it''s her December');
-select public.club_admin_set_fulfillment(((select x ->> 'id' from wq))::uuid, null, null, 'ready');
-select pg_temp.expect(public.club_admin_set_fulfillment(((select x ->> 'id' from wq))::uuid, 'approved') ->> 'address' like '%5 Pine Rd%', 'PDF ready → approved for print, address frozen');
-select pg_temp.expect(public.club_admin_member_months(pg_temp.u(6)) -> 'months' -> 0 ->> 'fulfilled_by' = 'welcome_vision', 'the admin sees which resource fulfills each paid month');
+select pg_temp.expect((select x ->> 'vision_value' from wq) = 'Joy' and (select x ->> 'batch' from wq) = 'welcome_kit'
+  and (select x -> 'first_month' ->> 'kit_slug' from wq) = '2026-12-christmas-mission', 'the Welcome Kits list: her print and December, one row');
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_admin_fulfillment('2026-12-01')) x where x ->> 'email' = 'c6@example.com'), 'December''s monthly list leaves her kit order out (it ships in the kit)');
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_admin_fulfillment('2026-12-01')) x where x ->> 'fulfillment_type' = 'welcome_vision'), 'and no welcome print is ever on a monthly list');
+select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_welcome_kit((select w from kit6), 'approved')$$, 'not_ready'), 'the kit can''t be approved before both PDFs are ready');
+select public.club_admin_set_fulfillment((select w from kit6), null, null, 'ready');
+select pg_temp.expect(pg_temp.kit6() like '%needs_pdf%needs_pdf', 'one PDF isn''t enough');
+select public.club_admin_set_fulfillment((select m from kit6), null, null, 'ready');
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:ready,welcome_vision:pending:ready', 'both PDFs: the kit is ready');
+select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_fulfillment((select w from kit6), 'approved')$$, 'use_welcome_kit'), 'half a kit can''t be approved alone');
+select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_fulfillment((select m from kit6), 'approved')$$, 'use_welcome_kit'), 'either half');
+select public.club_admin_set_welcome_kit((select m from kit6), 'approved');
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:approved:ready,welcome_vision:approved:ready', 'approved together (from either order)');
+select pg_temp.expect((select bool_and(address ->> 'line1' = '5 Pine Rd') from public.club_fulfillment_orders, kit6 where id in (kit6.w, kit6.m)), 'both addresses frozen');
+select pg_temp.expect((select member_approved_at is not null and note like '%confirmed automatically%' from public.club_fulfillment_orders, kit6 where id = kit6.m), 'her first resource is recorded as confirmed by the three-day rule');
 reset role;
 select pg_temp.as_user('authenticated', pg_temp.u(6)::text);
-select pg_temp.expect(pg_temp.fails($$select public.club_welcome_save('{"family_name": "The Decembers", "value": "Joy"}')$$, 'locked'), 'once it''s approved for print it can''t change');
+select pg_temp.expect(pg_temp.fails($$select public.club_welcome_save('{"family_name": "The Decembers", "value": "Hope"}')$$, 'locked'), 'once it''s approved for print the print can''t change');
+select pg_temp.expect(pg_temp.fails($$select public.club_resource_save('2026-12-christmas-mission', '{}', 0)$$, 'already_printed'), 'and neither can her first resource');
+reset role;
+select pg_temp.as_user('authenticated', :OWNER);
+select public.club_admin_set_welcome_kit((select w from kit6), 'printed');
+select public.club_admin_set_welcome_kit((select w from kit6), 'mailed');
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:mailed:mailed,welcome_vision:mailed:mailed', 'printed, then mailed: one package');
+select pg_temp.expect((select count(distinct mailed_at) = 1 from public.club_fulfillment_orders, kit6 where id in (kit6.w, kit6.m)), 'both with the same mailed time');
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_admin_welcome_queue()) x where x ->> 'email' = 'c6@example.com'), 'and off the Welcome Kits list');
+select public.club_admin_set_welcome_kit((select w from kit6), 'returned');
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:returned:returned,welcome_vision:returned:returned', 'a returned package returns both');
+select pg_temp.expect(public.club_admin_member_months(pg_temp.u(6)) -> 'months' -> 0 ->> 'fulfilled_by' = 'monthly_resource', 'the admin sees December fulfilled by its own resource');
 reset role;
 select pg_temp.as_user('authenticated', :X);
 select pg_temp.expect(pg_temp.fails($$select public.club_welcome_save('{"family_name": "Mine", "value": "Joy"}')$$, 'not_found'), 'a non-member has no welcome print to change');
 select pg_temp.expect(pg_temp.fails($$select public.club_admin_welcome_queue()$$), 'or the admin queue');
+select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_welcome_kit((select w from kit6), 'approved')$$), 'or the kit action');
 reset role;
+
+-- Eligibility: a refunded first payment ships nothing; a first month that was withdrawn holds the kit for the owner.
+select pg_temp.join_(13, 'monthly', '2027-03-10 15:00:00+00');
+select public.club_invoice_refund('in_c13x1', 500);
+select pg_temp.expect(not exists (select 1 from public.club_fulfillment_orders where user_id = pg_temp.u(13) and status <> 'canceled'), 'refunded first payment: both kit orders canceled, nothing ships');
+select pg_temp.join_(14, 'monthly', '2027-03-12 15:00:00+00');
+-- As club_intro_end does when a membership ends before its free month: the month is withdrawn and its order canceled.
+update public.club_entitlements set revoked_at = now(), revoked_reason = 'ended' where user_id = pg_temp.u(14);
+update public.club_fulfillment_orders set status = 'canceled' where user_id = pg_temp.u(14) and fulfillment_type = 'monthly_resource';
+select pg_temp.expect((select readiness from public.club_fulfillment_queue where user_id = pg_temp.u(14) and fulfillment_type = 'welcome_vision') = 'first_month_canceled', 'first month withdrawn: the kit is held, never shipped automatically');
+select pg_temp.as_user('authenticated', :OWNER);
+select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_welcome_kit((select id from public.club_fulfillment_orders where user_id = pg_temp.u(14) and fulfillment_type = 'welcome_vision'), 'approved')$$, 'note_required'),
+  'sending the print alone needs the owner''s note');
+reset role;
+select pg_temp.expect((select (x ->> 'in_welcome_kit')::boolean from jsonb_array_elements(public.club_admin_fulfillment('2027-04-01')) x limit 1) is not true, 'later months are never kit orders');
 
 -- Across every household: exactly one regular resource obligation per paid month, December substitution applied.
 select pg_temp.expect(not exists (select 1 from public.club_entitlements where revoked_at is null group by user_id, resource_month, kind having count(*) > 1), 'one live right per member, month and kind');

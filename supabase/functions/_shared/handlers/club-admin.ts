@@ -10,7 +10,7 @@
  *                    stored server-side, not returned). An existing portal that still allows plan switching is
  *                    updated to stop it.
  *   resync         { subscription } → re-reads a subscription and its latest invoice from Stripe
- *   send_emails    { kind: 'profile_reminder'|'resource_ready'|'review', month? } → counts (each email once per key)
+ *   send_emails    { kind: 'profile_reminder'|'resource_ready'|'review'|'kit_reminder', month? } → counts (each email once per key)
  *   refund         { invoice } → full refund in Stripe; the webhook then revokes that invoice's months
  */
 import { clubStripeBlocked, CLUB_LEGACY_LOOKUP_KEYS, CLUB_PRICES, CLUB_PRODUCT_TAG, OFFERED_PLANS, type ClubDeps, type ClubPlan } from '../club/deps.ts';
@@ -184,14 +184,18 @@ async function stripeSetup(deps: ClubDeps) {
 }
 
 async function sendBatch(deps: ClubDeps, kind: string, month: string | null) {
-  if (!['profile_reminder', 'resource_ready', 'review'].includes(kind)) throw new HttpError(400, 'invalid');
-  if (kind !== 'profile_reminder' && (!month || !MONTH.test(month))) throw new HttpError(400, 'invalid_month');
+  if (!['profile_reminder', 'resource_ready', 'review', 'kit_reminder'].includes(kind)) throw new HttpError(400, 'invalid');
+  const monthless = kind === 'profile_reminder' || kind === 'kit_reminder';
+  if (!monthless && (!month || !MONTH.test(month))) throw new HttpError(400, 'invalid_month');
   const audience = await deps.db.rpc<{ user_id: string; email: string; kit_slug: string | null; order_id: string | null }[]>(
     'club_email_audience', { p_kind: kind, p_month: month });
   const counts: Record<string, number> = { sent: 0, skipped: 0, failed: 0, duplicate: 0 };
   for (const a of audience) {
-    const key = kind === 'profile_reminder' ? `profile_reminder:${a.user_id}` : kind === 'resource_ready' ? `ready:${a.user_id}:${month}` : `review:${a.order_id}`;
-    const outcome = await sendClubEmail(deps, key, kind as ClubEmailKind, a.user_id, a.email, { kitSlug: a.kit_slug, monthLabel: month ? monthLabel(month) : undefined });
+    const key = kind === 'profile_reminder' ? `profile_reminder:${a.user_id}` : kind === 'resource_ready' ? `ready:${a.user_id}:${month}`
+      : kind === 'kit_reminder' ? `kit_reminder:${a.order_id}` : `review:${a.order_id}`;
+    // A kit reminder names her first month, from its resource's slug ('2027-01-…').
+    const label = month ? monthLabel(month) : kind === 'kit_reminder' && a.kit_slug ? monthLabel(`${a.kit_slug.slice(0, 7)}-01`) : undefined;
+    const outcome = await sendClubEmail(deps, key, kind as ClubEmailKind, a.user_id, a.email, { kitSlug: a.kit_slug, monthLabel: label });
     counts[outcome]++;
   }
   return { audience: audience.length, ...counts };

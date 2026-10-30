@@ -68,15 +68,20 @@ interface Order {
   note: string | null;
   address: Record<string, string> | null;
   fulfillment_type: 'monthly_resource' | 'welcome_vision';
-  batch: 'regular' | 'catch_up' | 'welcome';
+  batch: 'regular' | 'catch_up' | 'welcome' | 'welcome_kit';
   satisfies_month: string | null;
   first_paid_month: string | null;
   enrolled_at: string | null;
   vision_value?: string | null;
   family_name?: string | null;
+  /** Ships in a Welcome Kit (her welcome print + her first month's resource, one package). */
+  in_welcome_kit?: boolean;
+  kit_auto_approve_at?: string | null;
+  /** On the Welcome Kits list: the kit's first-month order (null: withdrawn, so the kit is held). */
+  first_month?: { id: string; resource_month: string; kit_slug: string | null; kit_title: string | null; status: string; pdf_status: string; member_approved_at: string | null } | null;
 }
 
-const BATCH: Record<Order['batch'], string> = { regular: 'Regular batch', catch_up: 'Catch-up (paid after the cutoff)', welcome: 'Welcome print' };
+const BATCH: Record<Order['batch'], string> = { regular: 'Regular batch', catch_up: 'Catch-up (paid after the cutoff)', welcome: 'Welcome print', welcome_kit: 'Welcome Kit' };
 const printHref = (o: Pick<Order, 'id' | 'kit_slug' | 'fulfillment_type'>) =>
   o.fulfillment_type === 'welcome_vision' ? `${routes.clubFamilyVision}?fulfillment=${o.id}`
     : o.kit_slug && clubResourceBySlug(o.kit_slug) ? `${routes.clubResource(o.kit_slug)}?fulfillment=${o.id}` : null;
@@ -279,45 +284,92 @@ function MemberMonths({ member, session }: { member: Member; session: AdminConte
   );
 }
 
-/** Welcome prints go out as soon as the family approves them: no monthly cutoff. */
-function WelcomeQueue({ session }: AdminContext) {
+/** A Welcome Kit's readiness in the owner's words. */
+const KIT_READINESS: Record<string, string> = {
+  needs_profile: 'Waiting for her family details',
+  needs_address: 'Needs a mailing address',
+  mail_paused: 'Held: she paused printed mailings',
+  needs_vision: 'Waiting for her to approve her print',
+  needs_resource: 'Her first month isn’t published yet',
+  needs_confirmation: 'Waiting for her to confirm her first resource',
+  needs_pdf: 'Make the PDFs',
+  ready: 'Ready to approve',
+  first_month_canceled: 'Held: her first month was withdrawn (refund, dispute or ended early)',
+};
+
+/**
+ * Welcome Kits: one package per new member, her Family Vision print and her first month's resource, approved, printed
+ * and mailed together (club_admin_set_welcome_kit), outside the monthly cutoff. PDFs stay one per item.
+ */
+function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order[]) => void }) {
   const [rows, setRows] = useState<Order[] | null>(null);
   const [err, setErr] = useState('');
-  const load = () => adminRpc<Order[]>(session, 'club_admin_welcome_queue').then(setRows, (e: Error) => setErr(e.message));
+  const load = () => adminRpc<Order[]>(session, 'club_admin_welcome_queue').then((r) => { setRows(r); onLoad?.(r); }, (e: Error) => setErr(e.message));
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const set = async (o: Order, status: string) => {
-    const note = status === 'skipped' || status === 'on_hold' || status === 'returned' ? prompt('Note (why):') ?? '' : null;
+  const set = async (o: Order, status: string, alone = false) => {
+    const note = alone ? prompt('Send the print without her first month. Why?') ?? ''
+      : status === 'skipped' || status === 'on_hold' || status === 'returned' ? prompt('Note (why):') ?? '' : null;
+    if (alone && !note?.trim()) return;
     try {
-      await adminRpc(session, 'club_admin_set_fulfillment', { p_order: o.id, p_status: status, p_note: note || null, p_pdf: null });
+      await adminRpc(session, 'club_admin_set_welcome_kit', { p_order: o.id, p_status: status, p_note: note || null });
       load();
     } catch (e) {
-      alert((e as Error).message === 'not_ready' ? 'Not ready: the family approves it, we have an address, and its PDF is marked ready.' : (e as Error).message);
+      const m = (e as Error).message;
+      alert(m === 'not_ready' ? 'Not ready: both items need her approval (or the three-day rule), an address and a ready PDF.' : m === 'note_required' ? 'Add a note saying why the print goes alone.' : m);
     }
+  };
+  const csv = () => {
+    const ready = (rows ?? []).filter((o) => o.status === 'approved');
+    const head = ['kit_order_id', 'first_month_order_id', 'contents', 'name', 'address_line1', 'address_line2', 'city', 'state', 'postal_code'];
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = [head.join(','), ...ready.map((o) => [o.id, o.first_month?.id, contents(o), o.address?.name, o.address?.line1, o.address?.line2, o.address?.city, o.address?.state, o.address?.postal_code].map(esc).join(','))];
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+    a.download = `club-welcome-kits-${thisMonth().slice(0, 10)}.csv`;
+    a.click();
   };
   return (
     <section className="mb-10">
-      <h2 className="label">Welcome prints ({rows?.length ?? '…'})</h2>
-      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One per household, from the first payment. Family personalizes and approves it → Print view → Save as PDF → Mark PDF ready → Approve → Printed → Mailed. A December joiner’s print is also her December resource.</p>
+      <div className="flex flex-wrap items-baseline gap-4">
+        <h2 className="label">Welcome Kits ({rows?.length ?? '…'})</h2>
+        <button type="button" className="underline" onClick={csv}>Download approved kits (CSV, one row per package)</button>
+      </div>
+      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One package per new member: her Family Vision print and her first month’s resource, approved, printed and mailed together, outside the monthly cutoff. She approves her print; her first resource counts as confirmed three days later if she hasn’t confirmed it and her details are complete. Make both PDFs → Approve kit → Printed → Mailed.</p>
       {err && <p role="alert">{err}</p>}
       {rows && rows.length > 0 && (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left text-[0.9rem]">
-            <thead><tr className="border-b border-rule"><th className="py-2">Household</th><th>Joined</th><th>Print</th><th>Readiness</th><th>Status</th><th>Print view</th><th>Move to</th></tr></thead>
+          <table className="w-full min-w-[980px] text-left text-[0.9rem] [&_td]:pr-4">
+            <thead><tr className="border-b border-rule"><th className="py-2">Household</th><th>In the package</th><th>Readiness</th><th>Status</th><th>Address</th><th>Move kit to</th></tr></thead>
             <tbody>
-              {rows.map((o) => (
-                <tr key={o.id} className="border-b border-rule align-top">
-                  <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span></td>
-                  <td>{day(o.enrolled_at)}<br /><span className="text-soft">first month {o.first_paid_month ? month(o.first_paid_month) : '–'}</span></td>
-                  <td>{o.family_name ? `${o.family_name} · ${o.vision_value}` : <span className="text-soft">not personalized</span>}{o.satisfies_month && <><br /><strong>Their {month(o.satisfies_month)} resource</strong></>}</td>
-                  <td>{o.readiness}{o.pdf_status === 'ready' ? ' · PDF ✓' : ''}</td>
-                  <td>{o.status}{o.member_approved_at ? <><br /><span className="text-soft">approved {day(o.member_approved_at)}</span></> : null}</td>
-                  <td>{o.family_name ? <a className="underline" href={printHref(o)!}>Print view</a> : '–'}</td>
-                  <td className="space-x-2">{(NEXT[o.status] ?? []).map((st) => <button key={st} type="button" className="underline" onClick={() => set(o, st)}>{st}</button>)}</td>
-                </tr>
-              ))}
+              {rows.map((o) => {
+                const fm = o.first_month;
+                const held = o.readiness === 'first_month_canceled';
+                return (
+                  <tr key={o.id} className="border-b border-rule align-top">
+                    <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span><br /><span className="text-soft">joined {day(o.enrolled_at)}</span></td>
+                    <td>
+                      <p><strong>Family Vision print</strong> · {o.family_name ? `${o.family_name} · ${o.vision_value}` : <span className="text-soft">not personalized</span>}
+                        {' · '}{o.member_approved_at ? `approved ${day(o.member_approved_at)}` : 'not approved'}
+                        {' · '}{o.pdf_status === 'ready' ? 'PDF ✓' : o.family_name ? <a className="underline" href={printHref(o)!}>Print view</a> : 'PDF –'}</p>
+                      {fm ? (
+                        <p className="mt-1"><strong>{monthName(fm.resource_month)}</strong> · {clubResourceBySlug(fm.kit_slug)?.title ?? fm.kit_title ?? 'Monthly resource'}
+                          {' · '}{fm.member_approved_at ? `confirmed ${day(fm.member_approved_at)}` : o.kit_auto_approve_at ? `not confirmed · counts as confirmed ${day(o.kit_auto_approve_at)}` : 'not confirmed'}
+                          {' · '}{fm.pdf_status === 'ready' ? 'PDF ✓' : printHref({ id: fm.id, kit_slug: fm.kit_slug, fulfillment_type: 'monthly_resource' }) ? <a className="underline" href={printHref({ id: fm.id, kit_slug: fm.kit_slug, fulfillment_type: 'monthly_resource' })!}>Print view</a> : 'PDF –'}</p>
+                      ) : <p className="mt-1 text-soft">No first month (withdrawn)</p>}
+                    </td>
+                    <td>{KIT_READINESS[o.readiness] ?? o.readiness}</td>
+                    <td>{o.status}{o.note && <><br /><span className="text-soft">{o.note}</span></>}</td>
+                    <td>{o.address ? <>{o.address.name}<br />{o.address.city}, {o.address.state}</> : '–'}</td>
+                    <td className="space-x-2">
+                      {(NEXT[o.status] ?? []).filter((st) => !held || st !== 'approved').map((st) => <button key={st} type="button" className="underline" onClick={() => set(o, st)}>{st === 'approved' ? 'approve kit' : st}</button>)}
+                      {held && o.status === 'pending' && <button type="button" className="underline" onClick={() => set(o, 'approved', true)}>send print alone…</button>}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -326,16 +378,21 @@ function WelcomeQueue({ session }: AdminContext) {
   );
 }
 
+/** What's in one package, for the mail-house CSV. */
+const contents = (o: Order) =>
+  [`Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? `${month(o.first_month.resource_month)} ${clubResourceBySlug(o.first_month.kit_slug)?.title ?? o.first_month.kit_title ?? ''}`.trim() : null].filter(Boolean).join(' + ');
+
 function Fulfillment(ctx: AdminContext) {
+  const [kits, setKits] = useState<Order[] | null>(null);
   return (
     <>
-      <WelcomeQueue {...ctx} />
-      <MonthlyFulfillment {...ctx} />
+      <WelcomeKits {...ctx} onLoad={setKits} />
+      <MonthlyFulfillment {...ctx} kits={kits} />
     </>
   );
 }
 
-function MonthlyFulfillment({ session, signOut }: AdminContext) {
+function MonthlyFulfillment({ session, signOut, kits }: AdminContext & { kits: Order[] | null }) {
   const [m, setM] = useState(thisMonth().slice(0, 7));
   const [rows, setRows] = useState<Order[] | null>(null);
   const [err, setErr] = useState('');
@@ -379,6 +436,10 @@ function MonthlyFulfillment({ session, signOut }: AdminContext) {
           {cutoff.launch_exception_cutoff_at && <> · launch exception open until <strong>{deadline(cutoff.launch_exception_cutoff_at)}</strong></>}
         </p>
       )}
+      {(() => {
+        const inKits = (kits ?? []).filter((k) => k.first_month?.resource_month.slice(0, 7) === m).length;
+        return inKits > 0 && <p className="mt-2 text-[0.95rem]">Plus <strong>{inKits}</strong> {monthName(`${m}-01`)} {inKits === 1 ? 'resource ships' : 'resources ship'} in Welcome Kits (above), not in this list.</p>;
+      })()}
       <p className="mt-2 max-w-3xl text-[0.85rem] text-soft">Pipeline: paid month → family profile → address → published resource → print view, Save as PDF, mark PDF ready → Approve (freezes the address) → Printed → Mailed. Each paid month mails that month’s own resource. Paid by the month’s cutoff → its regular batch; paid after (monthly renewals, late joiners) → its catch-up batch, prepared once the payment lands. Never moved to another month.</p>
       {err && <p role="alert" className="mt-4">{err}</p>}
       {rows && (
@@ -586,6 +647,7 @@ function Setup({ session }: AdminContext) {
         <h2 className="label">Emails (each member gets each one once)</h2>
         <div className="mt-2 flex flex-wrap items-end gap-3">
           <button type="button" className="underline" onClick={() => run({ action: 'send_emails', kind: 'profile_reminder' }, 'Remind members who paid but haven’t added their family?')}>Profile reminders</button>
+          <button type="button" className="underline" onClick={() => run({ action: 'send_emails', kind: 'kit_reminder' }, 'Remind new members to confirm their first resource (two days after approving their print)? Run it daily.')}>Welcome Kit reminders</button>
           <input type="month" className={adminInput} value={emailMonth} onChange={(e) => setEmailMonth(e.target.value)} />
           <button type="button" className="underline" onClick={() => run({ action: 'send_emails', kind: 'resource_ready', month: `${emailMonth}-01` }, `Tell every member with ${emailMonth} that it's ready?`)}>“Resource ready”</button>
           <button type="button" className="underline" onClick={() => run({ action: 'send_emails', kind: 'review', month: `${emailMonth}-01` }, `Ask ${emailMonth} mailing households to review before printing?`)}>“Review before printing”</button>

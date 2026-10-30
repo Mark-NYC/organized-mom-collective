@@ -21,7 +21,11 @@ export interface ClubContext {
 
 type Page = 'dashboard' | 'family' | 'kit' | 'start' | 'tool' | 'login' | 'welcome' | 'resource';
 
-export default function ClubGate({ page, children, signInIntro }: { page: Page; children: (ctx: ClubContext) => ReactNode; signInIntro?: ReactNode }) {
+/**
+ * `bare`: the page draws its own layout and the member UI portals into it (the welcome print), so once she's signed in
+ * the children render without the padded <main> (which would otherwise sit empty above the page).
+ */
+export default function ClubGate({ page, children, signInIntro, bare = false }: { page: Page; children: (ctx: ClubContext) => ReactNode; signInIntro?: ReactNode; bare?: boolean }) {
   const [sample] = useState(() => (typeof location === 'undefined' ? null : sampleFromUrl(clubNav().search())));
   const [session, setSession] = useState<AccountSession | null | undefined>(sample ? null : undefined);
 
@@ -44,9 +48,11 @@ export default function ClubGate({ page, children, signInIntro }: { page: Page; 
     <>
       <MemberHeader page={page} href={href} signedIn={Boolean(session)} />
       {sample && store && <SampleBanner id={sample} label={store.label} />}
-      <main className={`mx-auto w-full max-w-5xl px-4 pt-6 sm:px-8 sm:pt-10 ${page === 'tool' ? 'pb-2' : 'pb-28'}`}>
-        {store ? children({ store, sample, href }) : clubAccountsEnabled() ? <ClubSignIn onSignedIn={setSession} intro={signInIntro} /> : <NoSignIn />}
-      </main>
+      {store && bare ? children({ store, sample, href }) : (
+        <main className={`mx-auto w-full max-w-5xl px-4 pt-6 sm:px-8 sm:pt-10 ${page === 'tool' ? 'pb-2' : 'pb-28'}`}>
+          {store ? children({ store, sample, href }) : clubAccountsEnabled() ? <ClubSignIn onSignedIn={setSession} intro={signInIntro} /> : <NoSignIn />}
+        </main>
+      )}
     </>
   );
 }

@@ -274,6 +274,7 @@ export function mailingText(m: MembershipMonth['mailing']): string | null {
   if (m.status === 'returned') return 'Returned to us: check your address';
   if (m.status === 'skipped') return 'Not mailed this month';
   if (m.status === 'canceled') return null;
+  if (m.batch === 'welcome_kit') return 'Coming in your Welcome Kit';
   if (m.status === 'approved') return 'Approved for printing';
   return ({
     needs_profile: 'Waiting for your family details',

@@ -105,6 +105,39 @@
   .btn-primary {
     @apply inline-flex min-h-12 items-center justify-center rounded-[3px] bg-ink px-7 text-[0.75rem] font-semibold tracking-[0.18em] text-white uppercase transition-colors hover:bg-[#3f3f3f];
   }
+  /* The Welcome Kit's three steps (src/components/club/KitSteps.tsx). */
+  .kit-steps {
+    @apply m-0 mb-6 flex max-w-md list-none gap-2 p-0 text-[0.72rem] font-medium text-warm-soft;
+  }
+  .kit-steps li {
+    @apply flex flex-1 flex-col items-center gap-1.5 text-center;
+  }
+  .kit-steps li > span:first-child {
+    @apply grid h-6 w-6 place-items-center rounded-full border border-warm-rule bg-white text-[0.7rem] font-semibold;
+  }
+  .kit-steps li[data-state='done'] > span:first-child,
+  .kit-steps li[data-state='current'] > span:first-child {
+    @apply border-ink bg-ink text-white;
+  }
+  .kit-steps li[data-state='current'] {
+    @apply font-semibold text-warm-ink;
+  }
+  /* Her Welcome Kit's first resource, above the printable (src/components/club/ClubResourceAccess.tsx). */
+  .kit-first {
+    @apply mb-4 border-b border-warm-rule bg-[#fbf7f1] px-4 py-5 sm:px-6;
+  }
+  .kit-first-facts {
+    @apply mt-4 grid max-w-4xl gap-3 sm:grid-cols-3;
+  }
+  .kit-first-facts > div {
+    @apply min-w-0 border-t border-warm-rule pt-2;
+  }
+  .kit-first-facts dt {
+    @apply text-[0.7rem] font-semibold tracking-[0.2em] text-warm-soft uppercase;
+  }
+  .kit-first-facts dd {
+    @apply m-0 mt-1 leading-relaxed text-warm-ink;
+  }
   .btn-secondary {
     @apply inline-flex min-h-11 items-center justify-center rounded-[3px] border border-ink px-4 text-[0.7rem] font-semibold tracking-[0.16em] text-ink uppercase transition-colors hover:bg-ink hover:text-white;
   }

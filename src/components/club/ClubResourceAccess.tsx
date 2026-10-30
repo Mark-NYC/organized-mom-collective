@@ -11,8 +11,10 @@ import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 're
 import ClubGate, { type ClubContext } from './ClubGate';
 import type { Household } from '../../lib/club/profile';
 import { fromDb } from '../../lib/club/store';
-import { approveResource, bridgeResourceState, loadResource, saveResource, type ResourceVersion } from '../../lib/club/membership';
-import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
+import { approveResource, bridgeResourceState, loadMembership, loadResource, monthName, saveResource, type Membership, type ResourceVersion } from '../../lib/club/membership';
+import { firstMonth, kitProgress } from '../../lib/club/onboarding';
+import KitSteps from './KitSteps';
+import { clubResourceBySlug, MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { routes } from '../../routes';
 import { adminRpc, loadSession as loadAdminSession } from '../../lib/admin/session';
 
@@ -65,10 +67,13 @@ export default function ClubResourceAccess({ slug }: { slug: string }) {
 }
 
 function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
-  const [state, setState] = useState<'loading' | 'denied' | 'ready' | 'failed'>('loading');
+  const [state, setState] = useState<'loading' | 'denied' | 'preparing' | 'ready' | 'failed'>('loading');
   const [v, setV] = useState<ResourceVersion | null>(null);
   const [saving, setSaving] = useState<'' | 'saving' | 'saved' | 'conflict' | 'printed' | 'error'>('');
   const [approved, setApproved] = useState(false);
+  const [me, setMe] = useState<Membership | null>(null);
+  const [household, setHousehold] = useState<Household | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const rev = useRef(0);
   const bar = useRef<HTMLDivElement>(null);
   useLayoutBelow(bar);
@@ -85,9 +90,11 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
       });
       return;
     }
-    Promise.all([loadResource(slug), ctx.store.household()])
-      .then(([res, h]) => {
+    Promise.all([loadResource(slug), ctx.store.household(), loadMembership().catch(() => null)])
+      .then(([res, h, m]) => {
         if (!h) return clubNavToWelcome(ctx);
+        setMe(m);
+        setHousehold(h);
         setV(res);
         setApproved(Boolean(res.mailing?.approved));
         rev.current = res.revision;
@@ -101,6 +108,8 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
                 rev.current = await saveResource(slug, next, rev.current);
                 setApproved(false);
                 setSaving('saved');
+                // A change asks her to confirm her Welcome Kit's first resource again.
+                setMe(await loadMembership().catch(() => null));
               } catch (e) {
                 const m = (e as Error).message;
                 setSaving(m === 'conflict' ? 'conflict' : m === 'already_printed' ? 'printed' : 'error');
@@ -115,7 +124,13 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
         show(h, null);
         setState('ready');
       })
-      .catch((e: Error) => setState(e.message === 'not_found' ? 'denied' : 'failed'));
+      .catch(async (e: Error) => {
+        if (e.message !== 'not_found') return setState('failed');
+        // Hers, but not published yet: say so, never "not part of your membership".
+        const m = await loadMembership().catch(() => null);
+        setMe(m);
+        setState(m?.months.some((x) => x.slug === slug && x.state === 'preparing') ? 'preparing' : 'denied');
+      });
     return () => {
       undo();
       if (host) host.hidden = true;
@@ -132,11 +147,69 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
       </div>
     );
   }
+  if (state === 'preparing') {
+    const r = clubResourceBySlug(slug);
+    return (
+      <div className="max-w-xl py-6">
+        <p className="text-warm-ink"><strong>{r?.title ?? 'This month'}</strong> is yours. We’re finishing it; it opens here as soon as it’s ready.</p>
+        {r && <a className="mt-3 inline-block underline underline-offset-4" href={r.preview}>See a sample of what’s coming</a>}
+        <a className="mt-4 block font-semibold underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>See your months</a>
+      </div>
+    );
+  }
   if (state === 'failed') return <p role="alert" className="py-6">We couldn’t load this month. Refresh and try again.</p>;
 
   const pending = v?.mailing && v.mailing.status === 'pending';
+  // Her Welcome Kit carries this month: one confirmation for the package instead of the monthly "Looks good, print it".
+  const kit = me?.welcome && ['pending', 'on_hold'].includes(me.welcome.status) && firstMonth(me)?.slug === slug && v?.can === 'edit' ? me.welcome : null;
+  const confirm = async () => {
+    setConfirming(true);
+    try {
+      await approveResource(slug);
+      setMe(await loadMembership());
+    } catch {
+      setSaving('error');
+    } finally {
+      setConfirming(false);
+    }
+  };
+  const r = clubResourceBySlug(slug);
+  const kids = (household?.members ?? []).filter((x) => x.kind === 'child' && !x.archived).map((x) => x.firstName);
+  const forKids = kids.length ? ` for ${kids.length > 1 ? `${kids.slice(0, -1).join(', ')} and ${kids.at(-1)}` : kids[0]}` : '';
   return (
-    <div ref={bar} className="flex flex-wrap items-center justify-between gap-3 pb-3 text-[0.92rem]" data-club-chrome>
+    <div ref={bar} className="pb-3 text-[0.92rem]" data-club-chrome>
+      {kit && (
+        <section aria-labelledby="kit-first" className="kit-first">
+          {kit.readiness === 'needs_confirmation' ? (
+            // On a phone the printable's own toolbar covers the bottom of the screen: the button comes before the details there.
+            <div className="flex flex-col">
+              <KitSteps steps={kitProgress('first_resource')} />
+              <p className="label text-warm-soft">Your first family resource · {monthName(`${r?.month ?? ''}-01`)}</p>
+              <h1 id="kit-first" className="mt-1 font-serif text-[1.7rem] leading-tight text-warm-ink sm:text-[2rem]">{r?.title ?? 'Your first resource'}</h1>
+              {r && <p className="mt-1 font-serif text-[1.1rem] italic text-warm-soft">{r.problem}. Already prepared{forKids}.</p>}
+              <dl className="kit-first-facts max-sm:order-last">
+                <div><dt>In your Welcome Kit</dt><dd>Your printed {r?.title ?? 'resource'}, mailed together with your Family Vision print in one package.</dd></div>
+                {r?.welcome && <div><dt>How it helps</dt><dd>{r.welcome.helps}</dd></div>}
+                <div><dt>Your first step</dt><dd>{r?.welcome?.firstStep ?? 'Look it over with the kids this week and pick one thing to start with.'}</dd></div>
+              </dl>
+              <p className="mt-3 text-warm-soft">Everything below is filled in with your family’s names. Change anything that doesn’t fit; it saves as you go.</p>
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <button type="button" className="btn-primary" disabled={confirming} onClick={confirm}>{confirming ? 'Saving…' : 'Looks good. Prepare my Welcome Kit'}</button>
+                <a className="underline underline-offset-4" href={ctx.href(routes.clubFamilyVision)}>Back to my print</a>
+              </div>
+            </div>
+          ) : kit.readiness === 'needs_vision' ? (
+            <p className="text-warm-ink">This comes in your Welcome Kit with your Family Vision print. <a className="font-semibold underline underline-offset-4" href={ctx.href(routes.clubFamilyVision)}>Approve your print first</a></p>
+          ) : (
+            <div role="status">
+              <h1 id="kit-first" className="font-serif text-[1.7rem] leading-tight text-warm-ink sm:text-[2rem]"><span aria-hidden="true">✓ </span>It’s all set!</h1>
+              <p className="mt-2 max-w-2xl text-warm-ink">Your Welcome Kit is being prepared: your Family Vision print and your {r?.title ?? 'first resource'}, printed together and mailed to you in one package. You’ll see when it ships in your account.</p>
+              <a className="btn-primary mt-4" href={ctx.href(routes.clubDashboard)}>Go to my account</a>
+            </div>
+          )}
+        </section>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-3">
       <a className="underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>← Your months</a>
       <span className="text-warm-soft" role="status">
         {v?.can === 'read' ? 'Your copy to view and print (your membership has ended, so changes aren’t saved).'
@@ -147,11 +220,12 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
           : saving === 'error' ? 'Couldn’t save. Check your connection.'
           : ctx.store.kind === 'sample' ? 'Sample family: changes stay in this tab.' : 'Changes save to your account.'}
       </span>
-      {pending && v?.can === 'edit' && (
+      {pending && v?.can === 'edit' && !kit && (
         approved
           ? <span className="font-semibold text-warm-ink">Approved for printing ✓</span>
           : <button type="button" className="btn-primary" onClick={() => approveResource(slug).then((ok) => setApproved(ok), () => setSaving('error'))}>Looks good, print it</button>
       )}
+      </div>
     </div>
   );
 }
