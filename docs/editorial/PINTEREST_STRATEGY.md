@@ -225,3 +225,8 @@ Use the comprehensive [PINTEREST_QA_CHECKLIST.md](PINTEREST_QA_CHECKLIST.md) for
 ## Ongoing Pinterest opportunity research
 
 Use [PINTEREST_RESEARCH_LOOP.md](PINTEREST_RESEARCH_LOOP.md) with the 500-pin master tracker. Research proven search phrases, precise mom/family situations, and a bounded creative experiment (proposed daily 6/3/1). Check competitor pins for useful patterns without copying artwork or inventing performance metrics. Document verified search evidence, differentiated imagery, and a trustworthy landing-page conversion action before commissioning new assets. Existing three strategic concepts and six-variation article planning remain compatible; the 6/3/1 ratio is for batches of ten master-plan pins, **not** a replacement for the per-article plan.
+
+
+## Seasonal acquisition coordination (approved 2026-10-30)
+
+**Required for all new Pinterest batches:** Read [SEASONAL_ACQUISITION_PLAN.md](SEASONAL_ACQUISITION_PLAN.md). Its 60–90-day seasonal prepublication window, 90–120-day preparation window, three content lanes, Club cutoff alignment, and 30/60/90-day decision rules govern planning. The original 500-pin dates remain historical proposals, not proof of posting. Do not change confirmed scheduled/published records or approved ID mappings merely to match the new timing. Every pin needs a live specific destination and a clearly defined next customer action. The three content lanes are not the same as the 6/3/1 research distribution.
