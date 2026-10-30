@@ -1,6 +1,6 @@
 ---
 /**
- * January 2027 prototype: real, individual habit cue cards on one Letter-sized cut sheet.
+ * September 2027 prototype: real, individual habit cue cards on one Letter-sized cut sheet.
  * A standalone printable, not a routine chart or a tracker. The printed sheet is 2x2
  * physical cards, and every card names a pre-existing anchor and one next action.
  * Kept reusable in the Club and the unlisted owner review preview.
@@ -9,7 +9,7 @@
  */
 import { monthColors } from '../../theme';
 interface Props { storageKey?: string; planMode?: boolean }
-const {storageKey='omc:club:january-habit-cards:v1', planMode=false} = Astro.props;
+const {storageKey='omc:club:september-habit-cards:v1', planMode=false} = Astro.props;
 const defaults = [
   {name: 'My morning', anchor: 'After I finish breakfast', action: 'I put my bowl by the sink.', place: 'By the breakfast table', kind:'home'},
   {name: 'My backpack', anchor: 'After I put on my shoes', action: 'I put my backpack on.', place: 'Next to my shoes', kind:'school'},
@@ -19,12 +19,12 @@ const defaults = [
 ---
 <div class="jhc" data-jhc-plan={planMode ? "" : undefined} data-jhc-storage={storageKey} style={`--jhc-month:${monthColors[0].hex}`}>
   {!planMode && <div class="jhc-intro">
-    <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · JANUARY</p>
+    <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · SEPTEMBER</p>
     <h2>Your family’s habits. <em>Already prepared.</em></h2>
     <p>Up to two small habits, chosen for your family. Keep the prepared suggestion or find a habit that makes everyday life easier.</p>
   </div>}
   <div class={planMode ? "jhc-plan" : "jhc-workspace"}><div class={planMode ? "jhc-plan-editor" : "jhc-config"} aria-label="Customize your family habit cards">
-    {!planMode && <Fragment><div class="jhc-config-heading"><p class="jhc-overline">JANUARY · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
+    {!planMode && <Fragment><div class="jhc-config-heading"><p class="jhc-overline">SEPTEMBER · PREPARED PLAN</p><h3>Ready for your family.</h3><p>Already filled in. Edit only what you need.</p></div>
     <div class="jhc-prepared" id="january-edit-controls"><p class="jhc-overline">YOUR FAMILY'S PREPARED HABITS</p><h3>Two small habits. A real difference.</h3><p>We've prepared two starting ideas. Keep them, or answer a few easy questions to choose habits that would help your family.</p><div class="jhc-summary-row"><span>Recommended habit</span><strong data-jhc-habit-label>Clear dishes after breakfast</strong></div><div class="jhc-summary-row"><span>Focus</span><strong>Up to two habits this month</strong></div><button type="button" class="jhc-finder-launch" data-jhc-finder-open>Help me find our habits</button><button type="button" class="jhc-edit-trigger" data-jhc-open>Edit our cards</button></div></Fragment>}
     <dialog class="jhc-dialog" data-jhc-dialog aria-labelledby="jhc-dialog-title"><div class="jhc-dialog-head"><h2 id="jhc-dialog-title">Edit your family habit cards</h2><button type="button" data-jhc-close aria-label="Close">×</button></div><p>Make these two habit cards fit your family. Both cards will print on one page.</p>    <div class="jhc-forms">
       {defaults.slice(0,2).map((item, i) => (
@@ -51,7 +51,7 @@ const defaults = [
   <div class={planMode ? "jhc-plan-view" : "jhc-preview-panel"} data-jhc-view>{!planMode && <button type="button" class="jhc-floating-edit" data-jhc-finder-open><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>HELP ME FIND OUR HABITS</button>}
   <div class="jhc-print-scroll">
     <div class="jhc-stage" data-jhc-stage><div class="jhc-page" data-jhc-page data-plan-sheet="sheet" data-plan-sheet-end>
-      <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · JANUARY 2027</span><span>ONE SMALL STEP AT A TIME</span></div>
+      <div class="jhc-sheet-label"><span>ORGANIZED FAMILY CLUB · SEPTEMBER 2027</span><span>ONE SMALL STEP AT A TIME</span></div>
       <header class="jhc-sheet-heading"><h2>Little habits.<br/><em>More independence.</em></h2><p>Two quarter-sheet reminders. Cut along the dotted lines and place each one where its habit happens.</p></header>
       <div class="jhc-card-grid" data-jhc-card-grid>
         <svg class="jhc-cut-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.2 8.2 12.8 12.8M8.2 15.8 21 3"/></svg>
@@ -176,7 +176,7 @@ const defaults = [
 </style>
 
 <style is:global>
-/* January: match the actual December preview and November worksheet typography/layout. */
+/* September: match the actual December preview and November worksheet typography/layout. */
 @font-face{font-family:'JHC Gelasio';src:url('/fonts/worksheet/gelasio-400.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'JHC Gelasio';src:url('/fonts/worksheet/gelasio-600-italic.ttf') format('truetype');font-weight:600;font-style:italic;font-display:swap}
 @font-face{font-family:'JHC Montserrat';src:url('/fonts/worksheet/montserrat-400.ttf') format('truetype');font-weight:400;font-display:swap}
@@ -247,7 +247,7 @@ const defaults = [
 .jhc-png:disabled{opacity:.55;cursor:wait}
 .jhc.jhc-image-export [data-jhc-page]{transform:none!important;box-shadow:none!important;margin:0!important}
 
-/* January preview: restore standardized sidebar after legacy global !important styles. */
+/* September preview: restore standardized sidebar after legacy global !important styles. */
 #club-month-content .jhc-workspace{display:grid;grid-template-columns:clamp(315px,28vw,410px) minmax(0,1fr);align-items:stretch;gap:0}
 #club-month-content .jhc-config{
  display:flex!important;flex-direction:column!important;min-width:0;max-width:none!important;
@@ -314,7 +314,7 @@ const defaults = [
 .jhc-plan-view .jhc-stage{margin:0 auto}
 </style>
 <style is:global>
-/* January output: fixed Letter canvas, two compact cue cards and a shared launch guide. */
+/* September output: fixed Letter canvas, two compact cue cards and a shared launch guide. */
 .jhc .jhc-page{padding:36px 0 30px;background:#fff;gap:0}
 .jhc .jhc-sheet-label{margin:0 44px;height:30px;border-top:5px solid var(--jhc-month);padding-top:10px;font-size:8px;letter-spacing:.12em}
 .jhc-sheet-heading{margin:0 44px;padding:22px 0 24px;display:flex;align-items:end;gap:30px}
@@ -382,7 +382,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
  fit();if(stage?.parentElement&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage.parentElement);window.addEventListener('resize',fit);
 
  // Plan state: one family at a time, in this tab only (never localStorage).
- const key = root.dataset.jhcStorage ?? 'omc:club:january-habit-cards:v2';
+ const key = root.dataset.jhcStorage ?? 'omc:club:september-habit-cards:v2';
  for (const legacy of [key, key+':count', key+':automatic-names']) { try { localStorage.removeItem(legacy); } catch { /* none */ } }
  let current='', members:PlanMember[]=[], persist=true, locked=false;
  let state:HabitState=readScoped(tabStorage.get(key),current,isHabitState)??freshHabitState();
@@ -519,7 +519,7 @@ for (const root of document.querySelectorAll<HTMLElement>('.jhc')) {
    await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.complete?null:img.decode().catch(()=>null)));
    const {toPng}=await import('html-to-image');
    const png=await toPng(sheet,{pixelRatio:2,width:816,height:1056,backgroundColor:'#fff',style:{transform:'none',margin:'0',boxShadow:'none'}});
-   const link=document.createElement('a');link.href=png;link.download="january-family-habit-cards.png";link.click();
+   const link=document.createElement('a');link.href=png;link.download="september-family-habit-cards.png";link.click();
   }catch(error){console.error('Single-page image export failed',error);alert('Image download failed. Please use Print / Save PDF instead.')}
   finally{root.classList.remove('jhc-image-export');button.disabled=false;button.textContent=old}
  });
