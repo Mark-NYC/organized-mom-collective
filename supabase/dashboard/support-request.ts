@@ -228,7 +228,8 @@ var DAY_PARAMS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 var routes = {
   /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
   clubStart: "/club/start",
-  clubJoin: "/club/join",
+  /** The offer on the Club landing page: its button opens Stripe Checkout. */
+  clubJoin: "/club#offer",
   clubLogin: "/club/login",
   clubWelcome: "/club/welcome",
   clubDashboard: "/club/dashboard",

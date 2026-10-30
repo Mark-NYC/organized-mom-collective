@@ -490,6 +490,63 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(sql(`select count(*) from public.club_intro_claims where user_id in ('${uid('copycat@example.com')}', '${uid('neighbor@example.com')}')`)).toBe('0');
   }, 30_000);
 
+  // The /club offer button: signed out, no email on our site. Stripe Checkout collects it.
+  const guestJoin = async () => {
+    sql(`delete from public.shop_throttle where kind = 'club_checkout'`);
+    const r = await post(billing, { action: 'checkout', plan: 'monthly' });
+    expect(r.status).toBe(200);
+    return [...stripe.sessions.values()].find((x) => x.url === r.body.url)! as Record<string, any>;
+  };
+  const subsOf = (email: string) => [...stripe.subs.values()].filter((x) => stripe.customers.get(x.customer as string)?.email === email);
+
+  it('signed out with no email: Stripe Checkout collects it, then the account, free month, address and welcome follow', async () => {
+    stripe.clock = Math.floor(Date.UTC(2026, 10, 4, 15) / 1000);
+    const s = await guestJoin();
+    expect(s).toMatchObject({ mode: 'subscription', trial_end: FEB1 });
+    expect(stripe.customers.get(s.customer)!.email).toBeFalsy(); // Checkout asks for it
+    expect(s.metadata.email).toBeUndefined();
+    expect(s.subscription_metadata.intro_month).toBe('2027-01-01');
+    expect(sql(`select email from public.club_checkout_sessions where stripe_session_id = '${s.id}'`)).toBe('');
+
+    const events = stripe.completeCheckout(s.id, { email: 'guest@example.com', address: at(7), card: 'fp_guest' });
+    await deliver([events[1], events[3], events[0], events[2]], { times: 2 });
+    expect(stripe.customers.get(s.customer)!.email).toBe('guest@example.com');
+    expect(sql(`select email from public.club_customers where stripe_customer_id = '${s.customer}'`)).toBe('guest@example.com');
+    expect(sql(`select status from public.club_subscriptions where user_id = '${uid('guest@example.com')}'`)).toBe('trialing');
+    expect(paid('guest@example.com')).toBe('0');
+    expect(months('guest@example.com', 'physical')).toBe('2027-01');
+    expect(sql(`select line1 from public.club_mailing_addresses where user_id = '${uid('guest@example.com')}'`)).toBe('7 Birch Rd');
+    expect(sql(`select status from public.club_checkout_sessions where stripe_session_id = '${s.id}'`)).toBe('complete');
+    const welcome = mails('guest@example.com', /Welcome to the Organized Family Club/);
+    expect(welcome).toHaveLength(1);
+    expect(welcome[0].text).toContain('Your first $5.90 payment is on February 1, 2027');
+    // The welcome page reads her email from Stripe.
+    expect((await post(billing, { action: 'checkout_status', session_id: s.id })).body).toMatchObject({ paid: true, email: 'guest@example.com' });
+  });
+
+  it('a member who checks out again signed out keeps one membership; the second is canceled, and her portal opens the first', async () => {
+    const first = subsOf('guest@example.com')[0];
+    const s = await guestJoin();
+    await deliver(stripe.completeCheckout(s.id, { email: 'guest@example.com', address: at(7), card: 'fp_guest' }));
+    await deliver(stripe.outbox.splice(0));
+    const u = uid('guest@example.com');
+    expect(sql(`select count(*) from public.club_subscriptions where user_id = '${u}' and status in ('trialing', 'active', 'past_due', 'unpaid', 'paused')`)).toBe('1');
+    expect(sql(`select stripe_subscription_id from public.club_subscriptions where user_id = '${u}' and status = 'trialing'`)).toBe(first.id);
+    const second = subsOf('guest@example.com').find((x) => x.id !== first.id)!;
+    expect(second.status).toBe('canceled');
+    expect(sql(`select 'duplicate' = any (flags) from public.club_subscriptions where stripe_subscription_id = '${second.id}'`)).toBe('t');
+    expect(paid('guest@example.com')).toBe('0,0'); // two $0 trial invoices: nothing charged
+    expect(months('guest@example.com', 'physical')).toBe('2027-01'); // the duplicate granted nothing
+    expect(sql(`select count(*) from public.club_intro_claims where user_id = '${u}'`)).toBe('1');
+    expect(mails('guest@example.com', /Welcome/)).toHaveLength(1);
+
+    signIn('guest@example.com');
+    expect((await post(billing, { action: 'portal' }, 'tok_guest@example.com')).body.url).toMatch(/^https:\/\/billing\.stripe\.test\//);
+    expect(stripe.portalCustomers.at(-1)).toBe(first.customer);
+    // Signed in, she's refused before Stripe.
+    expect((await post(billing, { action: 'checkout', plan: 'monthly' }, 'tok_guest@example.com')).body.error).toBe('already_member');
+  });
+
   it('joining once the program runs (rolling): the month she joins is free, the first charge is one month later', async () => {
     // The program has started (this test runs in its first month, so mailing starts then too).
     sql(`update public.club_settings set program_start_month = '2026-10-01', first_mailing_month = '2026-10-01' where id`);

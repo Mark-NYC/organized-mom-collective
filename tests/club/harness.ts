@@ -60,13 +60,17 @@ export const psqlDb: Db = {
     const params = new URLSearchParams(query);
     const cols = (params.get('select') ?? '*').split(',').map((c) => (c === '*' ? '*' : `"${c.replace(/"/g, '')}"`)).join(', ');
     const where: string[] = [];
+    let tail = '';
     for (const [k, v] of params) {
       if (k === 'select') continue;
+      // PostgREST's order=col.desc and limit=n.
+      if (k === 'order' && /^\w+\.(asc|desc)$/.test(v)) { tail += ` order by "${v.split('.')[0]}" ${v.split('.')[1]}`; continue; }
+      if (k === 'limit' && /^\d+$/.test(v)) { tail += ` limit ${v}`; continue; }
       const m = v.match(/^eq\.(.*)$/);
       if (!m) throw new Error(`fake select: unsupported filter ${k}=${v}`);
       where.push(`"${k}" = ${lit(decodeURIComponent(m[1]))}`);
     }
-    return JSON.parse(sql(`select coalesce(json_agg(t), '[]') from (select ${cols} from public.${table}${where.length ? ` where ${where.join(' and ')}` : ''}) t`, 'service_role')) as T[];
+    return JSON.parse(sql(`select coalesce(json_agg(t), '[]') from (select ${cols} from public.${table}${where.length ? ` where ${where.join(' and ')}` : ''}${tail}) t`, 'service_role')) as T[];
   },
 };
 
