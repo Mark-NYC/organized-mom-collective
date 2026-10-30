@@ -13,22 +13,22 @@ const { member = false } = Astro.props;
 const visionModules = import.meta.glob('../../../assets/icons/ofc/vision/*.{jpeg,jpg}', { eager: true, query: '?url', import: 'default' });
 const visionImages: Record<string, string> = Object.fromEntries(Object.entries(visionModules).map(([path, url]) => [path.split('/').pop()!, url as string]));
 ---
-<main class="fvp">
+<main class:list={["fvp", { "fvp-member": member }]} >
   {!member && <header class="fvp-top"><a href="/club">← Organized Family Club</a><span>WELCOME PRINT · DESIGN PREVIEW</span></header>}
 
   <div class="fvp-grid">
     <section class="fvp-editor" aria-labelledby="personalize-heading">
-  <section class="fvp-intro"><p class="eyebrow">ORGANIZED FAMILY CLUB · WELCOME PRINT</p><h1>Our Family <em>Vision.</em></h1><p>One watercolor and one word that feels like your family.</p></section>
-      <div class="fvp-editor-summary"><span class="eyebrow">YOUR PREPARED FAMILY PRINT</span><strong>Ready for your wall.</strong><p class="fvp-summary-explainer">Just your family name, one illustration, and one word.</p><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Change name or artwork</button></div>
+  <section class="fvp-intro"><p class="eyebrow">YOUR WELCOME GIFT</p><h1>{member ? "A little gift, just for your family." : "A little gift, just for your family."}</h1><p>We made something special for <span id="fvp-greeting-name">your family</span>.</p></section>
+      <div class="fvp-editor-summary"><span class="eyebrow">MADE JUST FOR YOU</span><strong>A reminder of what matters most.</strong><p class="fvp-summary-explainer">Your own family keepsake, ready to hang.</p><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Change name or artwork</button></div>
       <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
       <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose one watercolor.</p>
       <div class="fvp-step"><label for="fvp-name"><b>01</b> What do you call your family?</label><p>It'll appear on the finished print.</p><input id="fvp-name" maxlength="45" autocomplete="off" value={member ? "" : "The Johnson Family"} placeholder="The Johnson Family" /></div>
       <fieldset class="fvp-step"><legend><b>02</b> Choose one family value</legend><p>Choose the one illustration and value that best represents your family.</p><div class="fvp-values" id="fvp-values"><button type="button" data-value="Love" class="fvp-value selected" aria-pressed="true"><img src={visionImages["love-vision.jpeg"]} alt="" loading="lazy"><span>Love</span></button><button type="button" data-value="Faith" class="fvp-value" aria-pressed="false"><img src={visionImages["faith-vision.jpeg"]} alt="" loading="lazy"><span>Faith</span></button><button type="button" data-value="Joy" class="fvp-value" aria-pressed="false"><img src={visionImages["joy-vision.jpeg"]} alt="" loading="lazy"><span>Joy</span></button><button type="button" data-value="Peace" class="fvp-value" aria-pressed="false"><img src={visionImages["peace-vision.jpeg"]} alt="" loading="lazy"><span>Peace</span></button><button type="button" data-value="Adventure" class="fvp-value" aria-pressed="false"><img src={visionImages["adventure-vision.jpeg"]} alt="" loading="lazy"><span>Adventure</span></button><button type="button" data-value="Kindness" class="fvp-value" aria-pressed="false"><img src={visionImages["kindness-vision.jpeg"]} alt="" loading="lazy"><span>Kindness</span></button><button type="button" data-value="Courage" class="fvp-value" aria-pressed="false"><img src={visionImages["courage-vision.jpeg"]} alt="" loading="lazy"><span>Courage</span></button><button type="button" data-value="Gratitude" class="fvp-value" aria-pressed="false"><img src={visionImages["gratitude-vision.jpeg"]} alt="" loading="lazy"><span>Gratitude</span></button><button type="button" data-value="Togetherness" class="fvp-value" aria-pressed="false"><img src={visionImages["togetherness.jpg"]} alt="" loading="lazy"><span>Togetherness</span></button><button type="button" data-value="Hospitality" class="fvp-value" aria-pressed="false"><img src={visionImages["hospitality-vision.jpeg"]} alt="" loading="lazy"><span>Hospitality</span></button><button type="button" data-value="Growth" class="fvp-value" aria-pressed="false"><img src={visionImages["growth-vision.jpeg"]} alt="" loading="lazy"><span>Growth</span></button><button type="button" data-value="Creativity" class="fvp-value" aria-pressed="false"><img src={visionImages["creativity-vision.jpeg"]} alt="" loading="lazy"><span>Creativity</span></button><button type="button" data-value="Generosity" class="fvp-value" aria-pressed="false"><img src={visionImages["generosity-vision.jpeg"]} alt="" loading="lazy"><span>Generosity</span></button><button type="button" data-value="Wonder" class="fvp-value" aria-pressed="false"><img src={visionImages["wonder-vision.jpg"]} alt="" loading="lazy"><span>Wonder</span></button><button type="button" data-value="Perseverance" class="fvp-value" aria-pressed="false"><img src={visionImages["perseverance-vision.jpeg"]} alt="" loading="lazy"><span>Perseverance</span></button><button type="button" data-value="Rest" class="fvp-value" aria-pressed="false"><img src={visionImages["rest-vision.jpg"]} alt="" loading="lazy"><span>Rest</span></button><button type="button" data-value="Hope" class="fvp-value" aria-pressed="false"><img src={visionImages["hope-vision.jpeg"]} alt="" loading="lazy"><span>Hope</span></button><button type="button" data-value="Home" class="fvp-value" aria-pressed="false"><img src={visionImages["home-vision.jpg"]} alt="" loading="lazy"><span>Home</span></button><button type="button" data-value="Service" class="fvp-value" aria-pressed="false"><img src={visionImages["service-vision.jpeg"]} alt="" loading="lazy"><span>Service</span></button><button type="button" data-value="Playfulness" class="fvp-value" aria-pressed="false"><img src={visionImages["playfulness-vision.jpg"]} alt="" loading="lazy"><span>Playfulness</span></button></div><p class="fvp-selection-hint" id="fvp-selection-hint" aria-live="polite">Love selected. Pick another to replace it.</p></fieldset>
       <div class="fvp-dialog-done"><button type="button" id="fvp-done-editor">Done · See my print</button></div></dialog>
-      <div class="fvp-ready"><strong>Ready for your approval.</strong><p>{member ? "Preview your family vision here. When it looks right, approve it here and we’ll print it and send it by mail. No downloads." : "Preview your family vision here. When ordering opens, you’ll approve the final design and we’ll print it and send it by mail. No downloads."}</p>{member && <div id="fvp-member-actions"></div>}{!member && <button type="button" class="fvp-reset" id="fvp-reset">Start over</button>}</div>
+      <div class="fvp-ready"><strong>{member ? "Love it? It’s yours." : "Made for your family."}</strong>{member && <div id="fvp-member-actions"></div>}{!member && <p>Customize your family keepsake to preview how it looks.</p>}{!member && <button type="button" class="fvp-reset" id="fvp-reset">Start over</button>}</div>
     </section>
-    <section class="fvp-visual" aria-label="Live family vision print preview"><button type="button" class="fvp-floating-edit" id="fvp-floating-edit">✎ Customize your print</button>
-      <div class="fvp-visual-head"><div><p class="eyebrow">MADE FOR YOUR HOME</p><h2>Made for your home.</h2></div><span>LIVE PREVIEW</span></div>
+    <section class="fvp-visual" aria-label="Live family vision print preview">
+      <div class="fvp-visual-head"><div><p class="eyebrow">A PERSONALIZED KEEPSAKE</p><h2>Made for your home.</h2></div></div>
       <div class="fvp-scenes" role="group" aria-label="Choose display scene"><button type="button" class="selected" data-scene="wall" aria-pressed="true">On the wall</button><button type="button" data-scene="paper" aria-pressed="false">Just the print</button></div>
       <div class="fvp-room wall fvp-photo-room" id="fvp-room">
 
@@ -39,7 +39,7 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
         </article></div></div>
       </div>
       <p class="fvp-caption" id="fvp-caption">See your personalized family artwork in a real wooden frame. Frame and decor are not included.</p>
-      <div class="fvp-note"><span>✉</span><div><strong>Something lovely for your mailbox.</strong><p>{member ? "We print your finished family vision on quality paper and mail it to you as your welcome keepsake, as soon as you approve it. It doesn’t wait for the monthly mailing." : "Once ordering is available, you’ll approve your family vision and we’ll print it on quality paper and mail it to you. This is a design preview; approval and mailing aren't active yet."}</p></div></div>
+      
     </section>
   </div>
 </main>
@@ -385,6 +385,41 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
   margin:.23in 0 0!important;
  }
 }
+
+/* Welcome gift: one decision, followed by a clear next step. Screen only. */
+@media screen {
+ .fvp-member .fvp-intro h1{font:400 clamp(27px,2.6vw,38px)/1.13 Georgia,serif;color:#596e50}
+ .fvp-member .fvp-editor-summary{flex:0 0 auto;padding:14px 17px}
+ .fvp-member .fvp-editor-summary>strong{font-size:21px;margin:8px 0}
+ .fvp-member .fvp-summary-explainer{margin-bottom:7px}
+ .fvp-member .fvp-summary-row{padding:8px 0}
+ .fvp-member .fvp-ready{margin-top:22px}
+ .fvp-member .fvp-ready>strong{font:400 24px Georgia,serif;color:#596e50}
+ .fvp-member .fvp-visual-head{display:none}
+ .fvp-member .fvp-scenes{justify-content:flex-end;margin:0 0 10px}
+ .fvp-member .fvp-scenes button{font-size:11px;min-height:34px}
+ .fvp-member .fvp-note,.fvp-member .fvp-floating-edit{display:none!important}
+ .fvp-member-flow{margin-top:14px}
+ .fvp-approve-cta,.fvp-next-cta{display:block;width:100%;min-height:52px;border:0;border-radius:5px;background:#596e50;color:#fff!important;text-align:center;padding:16px 18px;font:700 13px Montserrat,Arial,sans-serif;cursor:pointer;text-decoration:none}
+ .fvp-approve-cta:disabled{opacity:.65;cursor:wait}
+ .fvp-mail-hint{font:11px/1.6 Montserrat,Arial,sans-serif;color:#70796d;text-align:center;margin:11px 0 0}
+ .fvp-save-state{display:block;font:11px Montserrat,Arial,sans-serif;color:#69756b;min-height:14px;margin-top:8px}
+ .fvp-approved-state{text-align:center;padding-top:4px}
+ .fvp-approved-check{display:grid;place-items:center;margin:4px auto 11px;width:43px;height:43px;border-radius:50%;background:#d4dfc4;color:#445c40;font-size:24px}
+ .fvp-approved-state>strong{font:400 27px Georgia,serif;color:#596e50}
+ .fvp-approved-state>p{font:12px/1.65 Montserrat,Arial,sans-serif;color:#606b5f;margin:9px 0 20px}
+ .fvp-next-cta{margin-top:10px}
+ .fvp-next-secondary{display:inline-block;margin-top:15px;color:#596e50;font:600 12px Montserrat,Arial,sans-serif;text-underline-offset:4px}
+ .fvp-member .fvp-caption{font-size:10px;margin:8px 0}
+ .fvp-member .fvp-edit-trigger{padding:7px 0}
+}
+@media screen and (max-width:1100px){
+ .fvp-member .fvp-editor{order:0}
+ .fvp-member .fvp-visual{order:1}
+ .fvp-member .fvp-editor-summary{margin-top:8px}
+ .fvp-member .fvp-ready{margin-top:12px}
+ .fvp-member .fvp-scenes{justify-content:flex-start}
+}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));
@@ -394,6 +429,7 @@ function render(){
  const name=(byId('fvp-name') as HTMLInputElement).value.trim()||'Your Family';
  byId('fvp-art-name')!.textContent=name;
  byId('fvp-summary-name')!.textContent=name;
+ byId('fvp-greeting-name')!.textContent=name;
  byId('fvp-summary-values')!.textContent=selectedValue;
  byId('fvp-art-word')!.textContent=selectedValue;
  byId('fvp-art')!.dataset.longValue=String(selectedValue.length>=12);
