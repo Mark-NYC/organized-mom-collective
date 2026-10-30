@@ -4,7 +4,7 @@
  * A standalone printable, not a routine chart or a tracker. The printed sheet is 2x2
  * physical cards, and every card names a pre-existing anchor and one next action.
  * Kept reusable in the Club and the unlisted owner review preview.
- * planMode: inside a Club plan page (/app/club/january) the page brings the layout, rail and mobile screen; this keeps
+ * planMode: inside a Club plan page (/app/club/september) the page brings the layout, rail and mobile screen; this keeps
  * the editor and finder dialogs and the sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md).
  */
 import { monthColors } from '../../theme';
@@ -17,7 +17,7 @@ const defaults = [
   {name: 'Our kitchen', anchor: 'After we finish dinner', action: 'We clear the table together.', place: 'By the kitchen table', kind:'table'},
 ];
 ---
-<div class="jhc" data-jhc-plan={planMode ? "" : undefined} data-jhc-storage={storageKey} style={`--jhc-month:${monthColors[0].hex}`}>
+<div class="jhc" data-jhc-plan={planMode ? "" : undefined} data-jhc-storage={storageKey} style={`--jhc-month:${monthColors[8].hex}`}>
   {!planMode && <div class="jhc-intro">
     <a class="jhc-back" href="/club">← Organized Family Club</a><p class="jhc-overline">ORGANIZED FAMILY CLUB · SEPTEMBER</p>
     <h2>Your family’s habits. <em>Already prepared.</em></h2>
