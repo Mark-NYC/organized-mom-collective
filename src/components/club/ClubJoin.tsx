@@ -37,13 +37,16 @@ export default function ClubJoin() {
   };
 
   return (
-    <div className="max-w-xl lg:max-w-none lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">\n      <div>
+    <div className="max-w-xl lg:max-w-none lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
+      <div>
       <p className="label text-warm-soft">{CLUB_NAME}</p>
       <h1 className="mt-2 text-balance font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.7rem]">One family. One monthly problem. One tailored plan.</h1>
       <p className="mt-3 text-[1rem] leading-[1.6] text-warm-soft sm:text-[1.08rem]">Personalized, ready-to-use family tools that help your kids build habits, take responsibility, and share the load. Printed and mailed to your door every month.</p>
       {canceled && <p role="status" className="mt-5 border-l-[3px] border-sage bg-sage-wash px-4 py-3">No problem. Nothing was charged. Start whenever you’re ready.</p>}
 
-      </div>\n      <div>\n      <form onSubmit={go} className="mt-5 sm:mt-8 lg:mt-0" noValidate>
+      </div>
+      <div>
+      <form onSubmit={go} className="mt-5 sm:mt-8 lg:mt-0" noValidate>
         <section aria-labelledby="club-offer" className="join-offer">
           <p id="club-offer" className="label text-[#55684b]">{offer.label}</p>
           <p className="mt-1.5 font-serif text-[2.6rem] leading-none text-warm-ink">{offer.price} <span className="font-sans text-[1rem] text-warm-soft">{offer.per}</span></p>
@@ -79,7 +82,8 @@ export default function ClubJoin() {
         <button type="submit" disabled={busy || session === undefined} className="btn-primary mt-5 w-full">{busy ? 'Opening secure checkout…' : 'Continue to secure checkout'}</button>
         <p className="mt-3 text-center text-[0.9rem] leading-relaxed text-warm-soft">Secure checkout with Stripe. Nothing charged today. Cancel anytime.<br />You’ll add your mailing address at checkout.</p>
       </form>
-      <p className="mt-8 text-[0.95rem]">Already a member? <a className="font-semibold underline underline-offset-4" href={routes.clubLogin}>Log in</a></p>\n      </div>
+      <p className="mt-8 text-[0.95rem]">Already a member? <a className="font-semibold underline underline-offset-4" href={routes.clubLogin}>Log in</a></p>
+      </div>
     </div>
   );
 }
