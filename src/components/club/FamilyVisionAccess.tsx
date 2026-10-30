@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ClubGate, { type ClubContext } from './ClubGate';
-import { approveWelcome, loadWelcome, monthName, saveWelcome, welcomeText, type Vision, type WelcomeOrder } from '../../lib/club/membership';
+import { approveWelcome, loadWelcome, saveWelcome, type Vision, type WelcomeOrder } from '../../lib/club/membership';
 import { routes } from '../../routes';
 import { adminRpc, loadSession as loadAdminSession } from '../../lib/admin/session';
 
@@ -107,7 +107,6 @@ function Member({ ctx }: { ctx: ClubContext }) {
   }
   const slot = document.getElementById('fvp-member-actions');
   const approved = w.approved || w.status !== 'pending' || !w.editable;
-  const nextHref = '/club/';
   const bar = (
     <div className="fvp-member-flow" data-club-chrome>
       {!approved ? (
@@ -124,8 +123,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
           <span className="fvp-approved-check" aria-hidden="true">✓</span>
           <strong>It's yours!</strong>
           <p>Your family print is approved. We're getting it ready to mail.</p>
-          <a className="fvp-next-cta" href={nextHref}>See how the Club works <span aria-hidden="true">→</span></a>
-          <a className="fvp-next-secondary" href="/app/club/">Explore this month's resource</a>
+          <a className="fvp-next-cta" href={ctx.href(routes.clubDashboard)}>Go to your account <span aria-hidden="true">→</span></a>
         </div>
       )}
     </div>
