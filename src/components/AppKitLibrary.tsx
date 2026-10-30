@@ -6,6 +6,7 @@ import { loadMembership, monthName, shortDate, type Membership, type MembershipM
 import { firstMonth, kitText, nextStep, stepHref } from '../lib/club/onboarding';
 import { clubResourceBySlug } from '../data/club/resources';
 import { routes } from '../routes';
+import { memberPlanHref } from '../lib/club/plan/account';
 // The app Club library mirrors the benefit-first public Club month descriptions.
 // Reuse the original month artwork, with resource-specific icons for laundry, snacks, and independent play.
 import laundryIcon from '../../assets/icons/ofc/february/laundry-basket.webp?url';
@@ -183,7 +184,7 @@ export default function AppKitLibrary() {
 }
 
 function MonthLink({ m, held }: { m: (typeof months)[number]; held: MembershipMonth | null }) {
-  if (held?.state === 'available' && held.slug) return <a href={routes.clubResource(held.slug)}>Open your {m.month} plan <span aria-hidden="true">→</span></a>;
+  if (held?.state === 'available' && held.slug) return <a href={memberPlanHref(held.slug)}>Open your {m.month} plan <span aria-hidden="true">→</span></a>;
   if (held?.state === 'welcome_vision') return <a href={routes.clubFamilyVision}>See your print <span aria-hidden="true">→</span></a>;
   if (held) return <><p>Yours. We’re finishing it; it opens here when it’s ready.</p><a href={m.url}>Preview the tool <span aria-hidden="true">→</span></a></>;
   return <a href={m.url}>Preview the tool <span aria-hidden="true">→</span></a>;

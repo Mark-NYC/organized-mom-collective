@@ -79,10 +79,19 @@ interface PlanResource<S> {
 Months extend it for their own needs (`OsrPlan` adds `members` and `nameOf`; `JhcPlan` adds `members`). The fingerprint
 covers **only what prints**: January's covers the active cards, so a hidden second card never invalidates an approval.
 
-## Storage (until account persistence exists)
+## Storage
 
 - Plan: sessionStorage at the month's `storageKey`, as `{ current: '<sample>:<householdId>', state }`. A different family
   in the same tab starts fresh instead of seeing another family's plan. One family per printable per tab.
+- **A signed-in member's plan is also saved to her account** (`src/lib/club/plan/account.ts`, started by
+  `startPlanFamily`): her saved version of the month (`club_resource_versions` through `club_resource_get` /
+  `club_resource_save`, the same row her copy at `/club/resources/<slug>` and the mailing read) holds this page's
+  `storageKey` entry beside any entry her copy saved. Before the printable reads its family, her saved entry goes into
+  the tab (none yet: her copy's entry for the same tool, if any, and the printable's own validation decides); after she
+  clicks or types, every change the printable writes to that key saves (debounced, revision-checked; a conflict stops
+  saving and says so). Opening a page never saves. Printables don't change. Samples and previews stay tab-only.
+  Like a change on her copy, a saved change clears that month's approval for printing (`club_resource_save`).
+  Tests: `tests/club-plan-account.test.ts`, `node scripts/club-onboarding-e2e.mjs --only=months`.
 - Approval (prototype): sessionStorage at `omc:preview:<resource>:approval`, holding the fingerprint and date.
 - Nothing is written to localStorage. January removes its old localStorage keys (`key`, `key:count`,
   `key:automatic-names`) on load.
@@ -115,7 +124,7 @@ area is at least 1.128 times as tall as it is wide (Letter and A4 with default m
 
 - Deadline: `clubEditingDeadline(kit.month)` (second Sunday, 11:59:59 PM ET), passed to `ClubPlanScreen`. Shows the date
   until 72 hours remain, then the weekday, "tonight" on the day, then read-only. In dev, `?preview-date=` overrides now.
-- Approval is a **prototype in this tab**. The screen says "preview only"; nothing is mailed or saved to an account.
+- Approval is a **prototype in this tab**. The screen says "preview only" ("on this device" for a member); nothing is mailed. A member's plan itself saves to her account (Storage, above).
 
 ## Adding a month
 

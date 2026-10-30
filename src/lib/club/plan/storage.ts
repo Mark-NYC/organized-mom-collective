@@ -1,6 +1,6 @@
 /**
- * Tab-scoped plan storage until account persistence exists: sessionStorage, one entry per printable,
- * `{ current: '<sample>:<householdId>', state }`, so one family's plan is never shown to another.
+ * Tab-scoped plan storage: sessionStorage, one entry per printable, `{ current: '<sample>:<householdId>', state }`, so
+ * one family's plan is never shown to another. A signed-in member's entry is also saved to her account by ./account.ts.
  * Family data never goes into localStorage (src/lib/club/store.ts).
  */
 export const planKey = (sample: string | null | undefined, householdId: string) => `${sample}:${householdId}`;

@@ -8,6 +8,7 @@
 import { editingWindow } from '../edition-status';
 import { el } from './dom';
 import { printPlan } from './proof';
+import { earlierCopyLink, PLAN_SAVE, saveText, type PlanSaveStatus } from './account';
 import { PLAN_APPROVAL, PLAN_CHANGE, type PlanResource, type PlanResourceHost } from './resource';
 import { approvalDay, approvalState, planNow, readApproval, writeApproval } from './status';
 
@@ -119,7 +120,7 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
     const state = approvalState(a, r.fingerprint());
     screen.dataset.approval = state;
     $('[data-cp-approval-text]').textContent =
-      state === 'approved' ? `Approved ${approvalDay(a)} · preview only` : state === 'changed' ? 'Changed since you approved' : 'Not approved yet';
+      state === 'approved' ? `Approved ${approvalDay(a)} · ${root.dataset.planSource === 'account' ? 'on this device' : 'preview only'}` : state === 'changed' ? 'Changed since you approved' : 'Not approved yet';
     const primary = $<HTMLButtonElement>('[data-plan-primary]');
     primary.textContent = copy ? 'Print this copy' : locked ? 'Print a copy' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve this plan';
     primary.setAttribute('aria-disabled', String(!copy && !locked && state === 'approved'));
@@ -128,8 +129,11 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
     $('[data-cp-copy-banner]').hidden = !copy;
 
     const sample = root.dataset.planSource === 'sample';
-    $('[data-cp-foot]').textContent = (sample ? `${root.dataset.planLabel?.replace(/^the /, 'The ') ?? 'This family'} is a made-up sample family for this preview. ` : '')
-      + 'Changes and approval stay in this browser tab for now. Nothing is saved to an account or mailed yet.';
+    // A member's plan saves to her account (./account.ts); approval is still this tab's check mark only.
+    $('[data-cp-foot]').replaceChildren(root.dataset.planSource === 'account'
+      ? `${saveText(root.dataset.planSave as PlanSaveStatus | undefined)} Approval stays on this device; nothing is mailed from here.`
+      : (sample ? `${root.dataset.planLabel?.replace(/^the /, 'The ') ?? 'This family'} is a made-up sample family for this preview. ` : '')
+        + 'Changes and approval stay in this browser tab for now. Nothing is saved to an account or mailed yet.', ...earlierCopyLink(root));
 
     clearTimeout(thumbTimer);
     thumbTimer = window.setTimeout(paintThumbs, 120);
@@ -174,6 +178,7 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
   window.addEventListener('resize', fitBar);
 
   host.addEventListener(PLAN_CHANGE, render);
+  root.addEventListener(PLAN_SAVE, render);
   root.addEventListener(PLAN_APPROVAL, render);
   render();
   return api;

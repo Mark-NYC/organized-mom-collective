@@ -55,7 +55,7 @@ const {storageKey='omc:preview:october-daily-reset:v1',planMode=false}=Astro.pro
    </section>
    <section class="srr-guide-section"><div class="srr-guide-caption"><h3>Your family's cleanup jobs</h3><span>Prepared for you</span></div><p class="srr-guide-tip">Choose a different job or person only if needed.</p><div class="srr-guide-jobs" data-srr-guided-jobs></div></section>
    <details class="srr-guide-more"><summary>More options</summary><label>Other cleanup time <select data-srr-other-trigger><option value="">Choose another cue</option><option value="After our afternoon snack">After our afternoon snack</option><option value="When our daily cleanup alarm rings">When our daily cleanup alarm rings</option><option value="When screen time ends">When screen time ends</option></select></label><p>A familiar daily event works better than another exact time to remember.</p></details>
-   <p class="srr-guide-saved">{planMode ? "✓ Changes show on the sheet right away and stay in this browser tab." : "✓ Changes save automatically for your family"}</p>
+   <p class="srr-guide-saved">{planMode ? "✓ Changes show on the sheet right away." : "✓ Changes save automatically for your family"}</p>
    <button type="button" class="srr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
   <section class={planMode ? "srr-plan-view" : "srr-preview"}>{!planMode && <button type="button" class="srr-floating-edit" data-open-editor><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>}
