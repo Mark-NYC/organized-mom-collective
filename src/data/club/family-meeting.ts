@@ -162,7 +162,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 3,
     theme: 'Chore charts and understanding what finished looks like',
-    resourceTitle: 'Family Chore Charts',
+    resourceTitle: 'Our Family Chore Charts',
     route: '/app/club/march',
     challenge: 'Chores that get finished, because everyone knows what finished looks like.',
     principle: 'A job isn’t done until it looks done. If we can see the finish line, nobody has to check.',
@@ -287,7 +287,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 7,
     theme: 'Independent activities and responding to boredom',
-    resourceTitle: 'What Can I Do Right Now? Activity Board',
+    resourceTitle: 'What Can I Do Right Now?',
     route: '/app/club/july',
     challenge: 'Kids who can answer “I’m bored” themselves.',
     principle: 'Bored is a starting point. Check your board, pick one, and start.',
@@ -382,7 +382,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 10,
     theme: 'Daily home reset and shared spaces',
-    resourceTitle: 'Our 5-Minute Reset',
+    resourceTitle: 'Our Daily Reset',
     route: '/app/club/october',
     challenge: 'Shared spaces that get reset every day, by everyone, in five minutes.',
     principle: 'Same cue, same jobs, same finish line. Everyone resets, every day.',
@@ -392,7 +392,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
     categories: ['cleaning', 'belongings'],
     activities: [],
     growth: ['tidy-room', 'own-belongings'],
-    connection: 'Your 5-Minute Reset sheet has one cue, two or three picture jobs and a finish line.',
+    connection: 'Your Daily Reset sheet has one cue, two or three picture jobs and a finish line.',
     questions: {
       schedule: { withActivity: '{activity} is part of our week{days}. What time of day works for a reset on those days?', generic: 'When should our reset happen: before dinner, after dinner or before bed?' },
       tool: { young: 'Where do your toys live when we’re done playing?', older: 'Which shared space needs a reset the most?', adults: 'Which shared space would make the biggest difference if it were reset every day?' },
@@ -445,7 +445,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 12,
     theme: 'Encouraging and blessing others',
-    resourceTitle: 'Our Christmas Mission',
+    resourceTitle: 'Your Christmas Mission',
     route: '/app/club/december',
     challenge: 'A kindness mission the kids lead, making something to encourage someone else.',
     principle: 'We can bless someone else with what we make. Kids can lead it.',
