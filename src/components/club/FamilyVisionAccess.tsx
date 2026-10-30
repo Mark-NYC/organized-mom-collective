@@ -105,22 +105,27 @@ function Member({ ctx }: { ctx: ClubContext }) {
       </div>
     );
   }
-  const month = w.satisfies_month ? monthName(w.satisfies_month).split(' ')[0] : null;
-  // Inside the print's own "Ready for your approval" box (FamilyVisionPrint), where the full-screen desktop layout
-  // can't cover it; inline only if that slot is missing.
   const slot = document.getElementById('fvp-member-actions');
+  const approved = w.approved || w.status !== 'pending' || !w.editable;
+  const nextHref = ctx.href(routes.clubDashboard);
   const bar = (
-    <div className={slot ? 'mt-3 flex flex-col items-start gap-2 text-[0.92rem]' : 'flex flex-wrap items-center justify-between gap-3 pb-3 text-[0.92rem]'} data-club-chrome>
-      <div>
-        <a className="underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>← Your account</a>
-        <p className="mt-1 font-semibold text-warm-ink">Your welcome print · {welcomeText(w)}</p>
-        {month && <p className="mt-1 max-w-xl text-warm-soft">You joined in {month}: this print is your {month} resource.</p>}
-      </div>
-      <span className="text-warm-soft" role="status">{msg}</span>
-      {w.editable && w.status === 'pending' && (
-        w.approved
-          ? <span className="font-semibold text-warm-ink">Approved for printing ✓</span>
-          : <button type="button" className="btn-primary" disabled={busy} onClick={approve}>{busy ? 'Approving…' : 'Looks good, print it'}</button>
+    <div className="fvp-member-flow" data-club-chrome>
+      {!approved ? (
+        <>
+          <button type="button" className="fvp-approve-cta" disabled={busy} onClick={approve}>
+            {busy ? 'Getting your gift ready…' : 'Yes! Send me my print'}
+          </button>
+          <p className="fvp-mail-hint">Printed and mailed to your door. Included in your membership.</p>
+          <span className="fvp-save-state" role="status" aria-live="polite">{msg}</span>
+        </>
+      ) : (
+        <div className="fvp-approved-state" role="status">
+          <span className="fvp-approved-check" aria-hidden="true">✓</span>
+          <strong>It's yours!</strong>
+          <p>Your family print is approved. We're getting it ready to mail.</p>
+          <a className="fvp-next-cta" href={nextHref}>See how the Club works <span aria-hidden="true">→</span></a>
+          <a className="fvp-next-secondary" href={ctx.href('/app/club/')}>Explore this month's resource</a>
+        </div>
       )}
     </div>
   );
