@@ -481,7 +481,10 @@ async function journey(browser, label, vp) {
   check('her Club (/app/club): no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /We’re preparing your Welcome Kit/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
   const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
   check('her Club: January marked hers, opening her family’s version', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === `/club/resources/${JAN}`);
-  check('her Club: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
+  // Her January copy is still a different tool from the app's January (docs/club/RESOURCE_CONSISTENCY.md), so her
+  // January card doesn't send her to a meeting about the other one; every other month links its meeting.
+  check('her Club: each month links its Family Meeting, except her January (a different tool until decided)', (await page.locator('a.ofc-app-month-meeting').count()) === 11 && (await jan.locator('a.ofc-app-month-meeting').count()) === 0
+    && (await page.locator('article.ofc-app-month', { hasText: 'April' }).locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/april?view=meeting');
   check('her Club: February shows when her next payment opens it', /Next · February 2027/i.test(club) && /Opens with your February 1, 2027 payment/.test(club));
   check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
   check('no sideways scrolling (her Club)', await noSideScroll(page));

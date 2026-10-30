@@ -56,4 +56,4 @@ The app pages (`src/pages/app/club/<month>.astro`) are the source: January Weekl
 - Accepting a suggestion would write `club_responsibilities` with status `confirmed` (PR #264's table already supports `suggested` and `confirmed`, `confirmed_at`). No schema change is needed for the engine.
 - Adapters from each month's engine state to `resource` assignments (e.g. April roles, March chart jobs), so Everyone's Part can quote the month's own prepared jobs.
 - Confirming suggestions (see Agreement).
-- `src/data/club/resources.ts` (member resource pages, fulfillment) still uses the earlier January, February, March and September printables; see its header.
+- `src/data/club/resources.ts` (member resource pages, fulfillment) still uses the earlier January, February, March and September printables: decisions in [RESOURCE_CONSISTENCY.md](RESOURCE_CONSISTENCY.md). Members holding those months aren't linked from their copy to a meeting about the other tool.

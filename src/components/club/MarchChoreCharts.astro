@@ -99,13 +99,14 @@ const { storageKey } = Astro.props;
 /* Printing. With named pages (Chrome, Edge, Firefox) the script sets html[data-mcc-print="landscape"] and adds the
    landscape @page: the charts get landscape Letter pages, upright on paper and in a saved PDF. Each rule adds to the
    shared print rule it widens, so it wins without touching the other months. Without (Safari, or before the
-   script runs): a landscape chart on the shared portrait page, turned a quarter to fill the sheet. */
+   script runs): a landscape chart on the shared portrait page, turned a quarter to fill the sheet. The same rules
+   apply on the member's copy (/club/resources/<slug>, the fulfillment print), whose print root is data-plan-print-root. */
 @media print{
-  html:not([data-mcc-print="landscape"]) .club-plan[data-plan-state="ready"] .mcc-paper{transform:translateX(8.5in) rotate(90deg)!important;transform-origin:top left!important}
-  html[data-mcc-print="landscape"]:has(.club-plan[data-plan-state="ready"] .mcc),html[data-mcc-print="landscape"]:has(.club-plan[data-plan-state="ready"] .mcc) body{width:11in!important}
-  html[data-mcc-print="landscape"] body:has(.club-plan[data-plan-state="ready"] .mcc) #main{width:11in!important}
-  html[data-mcc-print="landscape"] .club-plan[data-plan-state="ready"]:not(#plan-print),html[data-mcc-print="landscape"] .club-plan[data-plan-state="ready"] :not(#plan-print):has([data-plan-sheet]){width:11in!important}
-  html[data-mcc-print="landscape"] .club-plan[data-plan-state="ready"] [data-plan-sheet]:not(#plan-print){width:11in!important;height:8.5in!important;page:mcc-chart}
+  html:not([data-mcc-print="landscape"]) :is(.club-plan[data-plan-state="ready"],[data-plan-print-root]) .mcc-paper{transform:translateX(8.5in) rotate(90deg)!important;transform-origin:top left!important}
+  html[data-mcc-print="landscape"]:has(:is(.club-plan[data-plan-state="ready"],[data-plan-print-root]) .mcc),html[data-mcc-print="landscape"]:has(:is(.club-plan[data-plan-state="ready"],[data-plan-print-root]) .mcc) body{width:11in!important}
+  html[data-mcc-print="landscape"] body:has(:is(.club-plan[data-plan-state="ready"],[data-plan-print-root]) .mcc) #main{width:11in!important}
+  html[data-mcc-print="landscape"] :is(.club-plan[data-plan-state="ready"],[data-plan-print-root]):not(#plan-print),html[data-mcc-print="landscape"] :is(.club-plan[data-plan-state="ready"],[data-plan-print-root]) :not(#plan-print):has([data-plan-sheet]){width:11in!important}
+  html[data-mcc-print="landscape"] :is(.club-plan[data-plan-state="ready"],[data-plan-print-root]) [data-plan-sheet]:not(#plan-print){width:11in!important;height:8.5in!important;page:mcc-chart}
 }
 
 /* The editor dialog (desktop) and edit sheets (phones) share these. */

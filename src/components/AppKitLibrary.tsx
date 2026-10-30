@@ -71,7 +71,7 @@ const months = [
     "month": "August",
     "title": "Back to School Without the Scramble",
     "responsibility": "Taking initiative",
-    "how": "A personalized countdown gives everyone their own school-ready responsibilities.",
+    "how": "A My School Day sheet for each child shows their before-school and after-school routine in pictures, so they can see their next step without a reminder.",
     "url": "/app/club/august/"
   },
   {
@@ -165,8 +165,11 @@ export default function AppKitLibrary() {
                 <p><strong>Builds:</strong> {m.responsibility}</p>
                 <p><strong>How:</strong> {m.how}</p>
                 <MonthLink m={m} held={held} />
-                {/* Every month's ten-minute Family Meeting, beside its tool (ClubFamilyMeeting on /app/club/<month>). */}
-                <a className="ofc-app-month-meeting" href={routes.clubMeeting(m.month.toLowerCase())}>Our family meeting <span aria-hidden="true">→</span></a>
+                {/* Every month's ten-minute Family Meeting, beside its tool (ClubFamilyMeeting on /app/club/<month>). Not from
+                    her own copy while it's a different tool from the app's (resources.ts → sameAsApp). */}
+                {!(held && clubResourceBySlug(held.slug)?.sameAsApp === false) && (
+                  <a className="ofc-app-month-meeting" href={routes.clubMeeting(m.month.toLowerCase())}>Our family meeting <span aria-hidden="true">→</span></a>
+                )}
                 {coming && coming.payment_on && <p>Opens with your {shortDate(coming.payment_on)} payment.</p>}
               </div>
             </article>

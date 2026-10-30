@@ -55,6 +55,36 @@
     -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
   }
   .club-plan[data-plan-state="ready"][data-plan-view="meeting"] [data-meeting-sheet] *{visibility:visible!important}
+  /* The member's own copy (/club/resources/<slug>, also the admin's ?fulfillment= print view that becomes the mailing
+     PDF). data-plan-print-scope (#club-month-content): nothing outside the printable takes part in print layout. Before,
+     the member panel above it stayed in the layout, invisible, pushing the sheets down: a blank page, a repeated
+     page, or a sheet's last lines alone on a page. data-plan-print-root (set by the page only when the printable marks
+     its sheets): the same one-sheet-per-page rules as a plan page. A printable without markers keeps its own rules. */
+  html:has([data-plan-print-scope]),html:has([data-plan-print-scope]) body{height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:#fff!important}
+  body:has([data-plan-print-scope]) :not(#plan-print):not([data-plan-print-scope]):not([data-plan-print-scope] *):not(:has([data-plan-print-scope])){display:none!important}
+  body:has([data-plan-print-scope]) :not(#plan-print):has([data-plan-print-scope]),[data-plan-print-scope]:not(#plan-print){margin:0!important;padding:0!important;min-height:0!important;border:0!important;box-shadow:none!important}
+  html:has([data-plan-print-root]),html:has([data-plan-print-root]) body{width:8.5in!important;overflow:visible!important}
+  [data-plan-print-root] :not(#plan-print):not([data-plan-sheet]):not([data-plan-sheet] *):not(:has([data-plan-sheet])){display:none!important}
+  body:has([data-plan-print-root]) :not(#plan-print):has([data-plan-print-root]),[data-plan-print-root]:not(#plan-print),[data-plan-print-root] :not(#plan-print):has([data-plan-sheet]){
+    display:block!important;position:static!important;float:none!important;
+    width:8.5in!important;max-width:none!important;height:auto!important;
+    min-height:0!important;max-height:none!important;
+    margin:0!important;padding:0!important;gap:0!important;
+    border:0!important;background:#fff!important;
+    overflow:visible!important;transform:none!important;
+    box-shadow:none!important;scrollbar-width:none!important;
+  }
+  [data-plan-print-root] [data-plan-sheet]:not(#plan-print){
+    visibility:visible!important;position:relative!important;
+    top:auto!important;left:auto!important;
+    width:8.5in!important;height:11in!important;max-width:none!important;
+    flex:none!important;margin:0!important;border:0!important;
+    transform:none!important;box-shadow:none!important;overflow:hidden!important;
+    break-after:page!important;page-break-after:always!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+  }
+  [data-plan-print-root] [data-plan-sheet-end]{break-after:auto!important;page-break-after:auto!important}
+  [data-plan-print-root] [data-plan-sheet] *{visibility:visible!important}
   /* WebKit (Safari on iPhone, iPad and Mac) cuts printed pages by aspect ratio: a page holds
      document width x printable height / printable width CSS px, after its own header and footer (always
      printed on iOS). An 8.5in-wide document left the 11in sheets no room, so each sheet spilled onto a
@@ -63,6 +93,7 @@
      1.128x as tall as wide; tests/club-plan-print.test.ts models it. Only WebKit has hanging-punctuation. */
   @supports (hanging-punctuation: first){
     html:has(.club-plan[data-plan-state="ready"]){box-sizing:content-box!important;width:8.5in!important;padding:0 .625in!important}
+    html:has([data-plan-print-root]){box-sizing:content-box!important;width:8.5in!important;padding:0 .625in!important}
   }
 }
 </style>
