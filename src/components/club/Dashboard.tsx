@@ -50,6 +50,8 @@ function sampleMembership(): Membership {
 function Dashboard({ ctx }: { ctx: ClubContext }) {
   const [me, setMe] = useState<Membership | null>(null);
   const [household, setHousehold] = useState<Household | null>(null);
+  // Family profile steps 2–6 still open: a quiet invitation, never a blocker.
+  const [profileOpen, setProfileOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
@@ -65,6 +67,7 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
         setEmail(s?.email ?? '');
         // After she changes her sign-in email, Stripe's receipts follow it.
         if (!sample && m.member) syncEmail().catch(() => undefined);
+        if (h) ctx.store.profile().then((p) => setProfileOpen(Boolean(p && !p.setupCompleted)), () => undefined);
       })
       .catch(() => setError('We couldn’t load your account. Check your connection and reload the page.'));
   }, []);
@@ -133,6 +136,12 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
             <a href={ctx.href(routes.clubFamily)} className="text-[0.92rem] font-semibold text-warm-ink underline underline-offset-4">Edit</a>
           </div>
           <p className="mt-2 text-[1.02rem] text-warm-ink">{household?.members.filter((m) => !m.archived).map((m) => m.firstName).join(' · ')}</p>
+          {profileOpen && (
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-warm-soft">
+              Tell us about your week so your resources fit your family.{' '}
+              <a href={ctx.href(`${routes.clubFamily}?setup=1`)} className="font-semibold text-warm-ink underline underline-offset-4">Finish your family profile</a> (about 2 minutes)
+            </p>
+          )}
         </div>
         {ctx.store.kind === 'account' && <MailingAddress />}
       </section>

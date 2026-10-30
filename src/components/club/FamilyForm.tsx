@@ -5,7 +5,7 @@
  * No mailing address, no last names, nothing else.
  */
 import { useMemo, useState, type ReactNode } from 'react';
-import { ADULT_ROLES, CHILD_AGES, MONTH_NAMES, PRIORITIES } from '../../data/club/onboarding';
+import { ADULT_ROLES, CHILD_AGES, MONTH_NAMES } from '../../data/club/onboarding';
 import { ageNow, birthFromAge, monthOf, validateHousehold, type Household, type MemberRole } from '../../lib/club/profile';
 import type { HouseholdInput, MemberInput } from '../../lib/club/store';
 
@@ -43,8 +43,12 @@ export function draftsFrom(h: Household | null, today: string): { me: Draft; adu
   };
 }
 
-/** The drafts as the store wants them. Exported for tests. */
-export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { displayName: string; pets: boolean; priorities: string[] }, base: Household['preferences'], today: string): HouseholdInput {
+/**
+ * The drafts as the store wants them. Exported for tests. Preferences she doesn't edit here (palette, week start,
+ * and `priorities` from the retired "What matters most right now?" question) are passed through untouched, so a
+ * save never drops them; the family's priority is now step 6 of the profile (club_households.priority).
+ */
+export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { displayName: string; pets: boolean }, base: Household['preferences'], today: string): HouseholdInput {
   const member = (d: Draft, holder = false): MemberInput => {
     const common = { ...(d.id ? { id: d.id } : {}), firstName: d.firstName.trim(), kind: d.kind, role: d.role, ...(holder ? { isAccountHolder: true } : {}) };
     if (d.kind === 'adult') return common;
@@ -56,10 +60,10 @@ export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { dis
     }
     return Number.isNaN(age) ? common : { ...common, ...birthFromAge(age, today, month) };
   };
-  const { priorities: _p, pets: _pets, ...keep } = base;
+  const { pets: _pets, ...keep } = base;
   return {
     ...(extras.displayName.trim() ? { displayName: extras.displayName.trim() } : {}),
-    preferences: { ...keep, ...(extras.pets ? { pets: true } : {}), ...(extras.priorities.length ? { priorities: extras.priorities } : {}) },
+    preferences: { ...keep, ...(extras.pets ? { pets: true } : {}) },
     members: [member(me, true), ...adults.map((a) => member(a)), ...kids.map((k) => member(k))],
   };
 }
@@ -88,7 +92,6 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
   // Never over a name she already chose; the suggestion only fills an empty one, and she can change it.
   const [displayName, setDisplayName] = useState(household?.displayName ?? (mode === 'start' ? suggestedName ?? '' : ''));
   const [pets, setPets] = useState(Boolean(household?.preferences.pets));
-  const [priorities, setPriorities] = useState<string[]>(household?.preferences.priorities ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [tried, setTried] = useState(false);
@@ -104,7 +107,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
     // Her welcome print and printed resources carry it, so the welcome flow asks for it.
     if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
-    const data = toInput(me, adults, filledKids, { displayName, pets, priorities }, household?.preferences ?? {}, today);
+    const data = toInput(me, adults, filledKids, { displayName, pets }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
     setBusy(true);
@@ -224,21 +227,6 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
             <input type="checkbox" checked={pets} onChange={(e) => setPets(e.target.checked)} className="h-5 w-5 accent-[var(--color-warm-ink)]" />
             We have a pet (adds feeding to the jobs)
           </label>
-          <fieldset className="mt-4">
-            <legend className="text-[0.95rem] font-semibold text-warm-ink">What matters most right now?</legend>
-            <p className="text-[0.88rem] text-warm-soft">Pick any. It’s for you; your suggestions come from ages and roles.</p>
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              {PRIORITIES.map((p) => {
-                const on = priorities.includes(p.id);
-                return (
-                  <label key={p.id} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-[0.92rem] ${on ? 'border-warm-ink bg-sage-wash text-warm-ink' : 'border-warm-rule bg-white text-warm-soft'}`}>
-                    <input type="checkbox" className="sr-only" checked={on} onChange={() => setPriorities(on ? priorities.filter((x) => x !== p.id) : [...priorities, p.id])} />
-                    {p.label}
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
           {mode === 'edit' && (
             <label className="mt-5 block">
               <span className="text-[0.95rem] font-semibold text-warm-ink">A name for your team</span>
