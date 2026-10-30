@@ -9,7 +9,7 @@
 import { button, C, esc, eyebrowStyle, p, panel, panelTitle, SANS, SERIF, small, type Block, type EmailMessage } from '../email.ts';
 import type { ClubDeps } from './deps.ts';
 
-export type ClubEmailKind = 'welcome' | 'profile_reminder' | 'resource_ready' | 'review' | 'payment_failed' | 'canceled';
+export type ClubEmailKind = 'welcome' | 'profile_reminder' | 'resource_ready' | 'review' | 'payment_failed' | 'canceled' | 'kit_reminder';
 
 export interface ClubEmailData {
   plan?: 'monthly' | 'annual' | null;
@@ -29,6 +29,9 @@ export const monthLabel = (isoMonth: string) =>
   new Date(`${isoMonth.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 export const longDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
+
+/** Her first mailing: her first month's resource and the welcome print in one package. No dates: none are promised. */
+const WELCOME_KIT = 'Your first mailing is your Welcome Kit: your family’s first resource, plus a personalized Family Vision watercolor print for your wall, our gift. We prepare them together and mail them to your door in one package.';
 
 const steps = (items: string[]): Block => ({
   html: `<ol style="margin:0 0 18px;padding-left:22px">${items.map((t) => `<li style="margin:0 0 8px">${esc(t)}</li>`).join('')}</ol>`,
@@ -52,26 +55,23 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
     case 'welcome':
       if (d.firstCharge) {
         // Nothing charged yet: what's free, and exactly when the first $5.90 is.
-        const december = d.freeMonth?.startsWith('December');
         b = {
           subject: 'Welcome to the Organized Family Club',
           preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
           eyebrow: d.freeMonth ? 'Your first month is free' : 'Monthly membership',
           title: 'Welcome. You’re in.',
           blocks: [
-            p(d.freeMonth && !december
+            p(d.freeMonth
               ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.`
               : 'Thank you for joining.'),
-            p(december
-              ? `Your first gift is a personalized Family Vision print for your wall, and it’s your free ${d.freeMonth} resource. Choose your family’s word, approve it, and we’ll print and mail it right away.`
-              : 'Your first gift is a personalized Family Vision print for your wall, free. Choose your family’s word, approve it, and we’ll print and mail it right away.'),
+            p(WELCOME_KIT),
             p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
             panel(C.sage, C.sageRule, [
               panelTitle('Two minutes to get started'),
               steps([
                 'Sign in with this email address. We’ll send a 6-digit code; there’s no password.',
                 'Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.',
-                'Check your mailing address, then personalize your Family Vision print.',
+                'Approve your Family Vision print, look over your first resource, and we’ll prepare your Welcome Kit.',
               ]),
               button('Sign in to your account', login),
             ]),
@@ -89,16 +89,13 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
           p(d.plan === 'annual'
             ? 'Thank you for joining for the year. Your twelve monthly resources are in your account, with a printed mailing each month.'
             : 'Thank you for joining. Each paid month brings that month’s resource, prepared for your family, with a printed copy in the mail.'),
-          // A December first month is fulfilled by the welcome print (club_invoice_apply), not the Christmas resource.
-          p(d.monthLabel?.startsWith('December')
-            ? `Your first gift is a personalized Family Vision print for your wall. Since you joined in ${d.monthLabel}, it’s your December resource. Choose your family’s word, approve it, and we’ll print and mail it right away.`
-            : 'Your first gift is a personalized Family Vision print for your wall. Choose your family’s word, approve it, and we’ll print and mail it right away.'),
+          p(WELCOME_KIT),
           panel(C.sage, C.sageRule, [
             panelTitle('Two minutes to get started'),
             steps([
               'Sign in with this email address. We’ll send a 6-digit code; there’s no password.',
               'Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.',
-              'Check your mailing address, then personalize your Family Vision print.',
+              'Approve your Family Vision print, look over your first resource, and we’ll prepare your Welcome Kit.',
             ]),
             button('Sign in to your account', login),
           ]),
@@ -141,6 +138,20 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
           p(`Your ${d.monthLabel ?? ''} printable is prepared with your family’s names. Take a quick look, change anything you’d like, then tap “Looks good, print it”.`.replace('  ', ' ')),
           button('Review it', resource),
           small('No time? That’s fine. If we don’t hear from you, we’ll print it as it is.'),
+        ],
+      };
+      break;
+    case 'kit_reminder':
+      // Two days after she approved her print; the third day confirms her prepared resource for her (club_fulfillment_queue).
+      b = {
+        subject: 'One quick look before we prepare your Welcome Kit',
+        preheader: 'Your first family resource is ready for a quick look before we print it.',
+        eyebrow: 'Your Welcome Kit',
+        title: 'Does your first resource look right?',
+        blocks: [
+          p(`Your Family Vision print is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? 'first'} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
+          button('Take a look', resource),
+          small('No time? That’s fine. If we don’t hear from you within a day, we’ll prepare it as it is.'),
         ],
       };
       break;
