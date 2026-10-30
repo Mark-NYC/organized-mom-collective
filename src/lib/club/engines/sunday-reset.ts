@@ -47,14 +47,14 @@ export { planKey };
 
 export const DEFAULT_TRIGGER = 'Sunday after lunch';
 export const DEFAULT_TAGLINE = 'Look ahead. Get ready. Share the work.';
-export const TRIGGER_CHOICES = ['Sunday after breakfast', 'Sunday after church', 'Sunday after lunch', 'Sunday evening'] as const;
+export const TRIGGER_CHOICES = ['Sunday after breakfast', 'Sunday after church', 'Sunday after lunch', 'Sunday evening', 'Friday after dinner', 'Saturday morning', 'Wednesday evening'] as const;
 
-/** The kit's year: ages on the sheet are as of September 2027. */
+/** The kit's year: ages on the sheet are as of January 2027. */
 const KIT_YEAR = 2027;
 
 export const FALL_TEMPLATES: readonly Omit<FallJob, 'ownerId'>[] = [
-  { id: 'warm', title: 'Check warmer clothes', description: 'Try on long sleeves, pants, sweaters, and jackets. Set aside what no longer fits.', icon: '/images/club/october/clothes-for-cooler-mornings.webp' },
-  { id: 'summer', title: 'Sort summer clothes', description: 'Gather summer clothes. Keep what may fit next year, store it, and set aside outgrown items for adult review.', icon: '/images/club/october/school-and-activity-gear.webp' },
+  { id: 'warm', title: 'Check winter clothes', description: 'Try on winter layers and coats. Set aside anything outgrown and note what needs replacing.', icon: '/images/club/october/clothes-for-cooler-mornings.webp' },
+  { id: 'summer', title: 'Check clothing for the season', description: 'Check everyday clothes for the coming weeks. Put away anything outgrown and flag what is missing.', icon: '/images/club/october/school-and-activity-gear.webp' },
   { id: 'gear', title: 'Check seasonal gear', description: 'Check coats, boots, hats, and gloves where needed. Flag anything missing or outgrown.', icon: '/images/club/october/a-home-for-everything.webp' },
 ];
 
@@ -63,7 +63,7 @@ export const planMembers = <M extends PlanMember>(members: readonly M[]): M[] =>
   members.filter((m) => (m.kind === 'adult' || m.kind === 'child') && !m.archived);
 
 export const ageOf = (m: PlanMember) =>
-  m.birthYear ? Math.max(1, KIT_YEAR - m.birthYear - ((m.birthMonth ?? 1) > 9 ? 1 : 0)) : 8;
+  m.birthYear ? Math.max(1, KIT_YEAR - m.birthYear - ((m.birthMonth ?? 1) > 1 ? 1 : 0)) : 8;
 
 export const weeklyRole = (m: PlanMember, i: number) =>
   m.kind === 'adult'
@@ -148,7 +148,7 @@ export const roleSuggestions = (m: PlanMember, i: number): string[] => {
   const more =
     m.kind === 'adult'
       ? m.isAccountHolder
-        ? ['Lead our Sunday check-in and make sure everyone has a part.', 'Look ahead for appointments, school events, and deadlines.']
+        ? ['Lead our weekly check-in and make sure everyone has a part.', 'Look ahead for appointments, school events, and deadlines.']
         : ['Check the week’s activities and plan rides and gear.', 'Help the kids get their bags and belongings ready.']
       : age <= 5
         ? ['Choose my clothes for the week with a grown-up.', 'Put my shoes and bag by the door.']
