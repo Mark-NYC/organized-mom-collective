@@ -19,7 +19,7 @@ export default function ClubCheckoutButton() {
   };
   return (
     <>
-      <button type="button" className="primary" onClick={go} disabled={busy}>
+      <button type="button" className="primary" onClick={go} disabled={busy} style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '15px 24px', border: 0, borderRadius: 10, background: '#244b38', color: '#fff', textAlign: 'center', fontSize: '.93rem', fontWeight: 800, cursor: busy ? 'wait' : 'pointer' }}>
         {busy ? 'Opening secure checkout…' : 'Get My First Month Free →'}
       </button>
       {error && <p role="alert" className="mt-2 text-sm">{error}</p>}
