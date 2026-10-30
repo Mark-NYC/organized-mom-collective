@@ -35,126 +35,69 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? '  ok  ' : '  FAIL'} ${name}${detail ? ` · ${detail}` : ''}`);
 };
 
-// ------------------------------------------------------------------ the fake backend
+// ------------------------------------------------------------------ the backend: a local Postgres with every migration
 
+// scripts/club-dev-db.sh builds club_dev_template (every migration + supabase/tests/club-dev-seed.sql); each scenario
+// gets a fresh copy. Pages' database calls run there as the signed-in member (or the owner), like PostgREST would.
+const PG = { PGHOST: process.env.PGHOST ?? 'localhost', PGUSER: process.env.PGUSER ?? 'postgres', PGPASSWORD: process.env.PGPASSWORD ?? 'postgres' };
+const DB = 'club_dev';
 const USER = { id: '11111111-1111-4111-8111-111111111111', email: 'ana@example.com' };
+const OWNER = '22222222-2222-4222-8222-222222222222';
 const JAN = '2027-01-fresh-start-together';
 
-/** A new founding member right after checkout: free January, no family yet, the address from Stripe Checkout. */
-export function newMember(over = {}) {
-  return {
-    household: null,
-    address: { name: 'Ana Rivera', line1: '14 Oak St', line2: '', city: 'Austin', state: 'TX', postal_code: '78701', paused: false },
-    welcome: { status: 'pending', personalization: null, member_approved_at: null, mailed_at: null, printed_at: null, pdf: 'not_ready' },
-    months: [{ month: '2027-01-01', slug: JAN, title: 'A Fresh Start, Together', published: true, free: true, mailing: { status: 'pending', readiness: 'needs_profile', late: false, batch: 'regular', approved: false, mailed_at: null } }],
-    member: true,
-    calls: [],
-    fail: {},
-    ...over,
-  };
-}
-
-const visionValid = (p) => p && typeof p.family_name === 'string' && p.family_name.trim().length >= 1 && p.family_name.trim().length <= 45 && VALUES.includes(p.value);
-
-function welcomeView(st) {
-  const w = st.welcome;
-  if (!w) return null;
-  const readiness = !['pending', 'approved', 'on_hold'].includes(w.status) ? w.status
-    : !visionValid(w.personalization) || !w.member_approved_at ? 'needs_vision'
-    : !st.address ? 'needs_address' : st.address.paused ? 'mail_paused' : w.pdf !== 'ready' ? 'needs_pdf' : 'ready';
-  return { status: w.status, readiness, personalization: w.personalization, approved: Boolean(w.member_approved_at), satisfies_month: null,
-    printed_at: w.printed_at, mailed_at: w.mailed_at, editable: ['pending', 'on_hold'].includes(w.status), display_name: st.household?.display_name ?? null };
-}
-
-function clubMe(st) {
-  const onboarded = Boolean(st.household);
-  const w = welcomeView(st);
-  return {
-    access: st.member, grant: null, member: st.member, plan: 'monthly', status: st.member ? 'trialing' : null, payment_problem: false,
-    renews: st.member ? '2027-02-01T05:00:00+00:00' : null, ends: null, ended_at: null, revoked: false, onboarded,
-    has_address: Boolean(st.address), enrolled_at: st.member ? '2026-10-30T12:00:00+00:00' : null, first_paid_month: '2027-01-01',
-    current_month: '2026-10-01', membership_year: 1,
-    welcome: w && { status: w.status, readiness: w.readiness, approved: w.approved, personalized: visionValid(w.personalization), satisfies_month: null, mailed_at: w.mailed_at },
-    next: st.member ? { month: '2027-02-01', payment_on: '2027-02-01T05:00:00+00:00', slug: '2027-02-better-together', title: 'Better Together', regular_cutoff_at: null } : null,
-    intro: st.member ? { month: '2027-01-01', trial_ends: '2027-02-01T05:00:00+00:00' } : null,
-    kits: st.months.filter((m) => m.published).map((m) => ({ slug: m.slug, title: m.title, month: m.month, can: 'edit' })),
-    months: st.member ? st.months.map((m) => ({ month: m.month, fulfilled_by: 'monthly_resource', free: m.free, slug: m.slug, title: m.title, published: m.published,
-      can: m.published ? 'edit' : 'none', state: m.published ? 'available' : 'preparing', membership_year: 1, plan: 'monthly',
-      mailing: { ...m.mailing, readiness: onboarded ? (st.address ? 'needs_pdf' : 'needs_address') : 'needs_profile' } })) : [],
-  };
+const psql = (db, input) => execFileSync('psql', ['-X', '-q', '-At', '-v', 'ON_ERROR_STOP=1', '-d', db], { input, env: { ...process.env, ...PG }, stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+/** SQL as the database owner (setup, time travel, checks). */
+export const sql = (q) => psql(DB, q);
+function freshDb() {
+  psql('postgres', `drop database if exists ${DB} with (force);\ncreate database ${DB} template club_dev_template;`);
 }
 
 class RpcError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
 }
-
-function rpc(st, name, body) {
-  switch (name) {
-    case 'club_me':
-      return clubMe(st);
-    case 'club_household':
-      return st.household;
-    case 'club_household_save': {
-      const prev = st.household;
-      st.household = {
-        id: 'hh-1', display_name: body.p_display_name ?? null, preferences: body.p_preferences ?? {}, profile_version: (prev?.profile_version ?? 0) + 1,
-        members: body.p_members.map((m, i) => ({ id: m.id ?? `m-${i + 1}`, first_name: m.first_name, kind: m.kind, role: m.role,
-          birth_year: m.birth_year ?? null, birth_month: m.birth_month ?? null, is_account_holder: Boolean(m.is_account_holder), archived: false })),
-      };
-      return st.household;
-    }
-    case 'club_address_save':
-      st.address = { ...body.p };
-      return st.address;
-    case 'club_welcome_get':
-      return welcomeView(st);
-    case 'club_welcome_save': {
-      const clean = { family_name: String(body.p?.family_name ?? '').trim(), value: body.p?.value };
-      if (!visionValid(clean)) throw new RpcError('invalid');
-      if (!st.welcome) throw new RpcError('not_found');
-      if (!['pending', 'on_hold'].includes(st.welcome.status)) throw new RpcError('locked');
-      if (JSON.stringify(st.welcome.personalization) !== JSON.stringify(clean)) {
-        st.welcome.personalization = clean;
-        st.welcome.member_approved_at = null;
-      }
-      return welcomeView(st);
-    }
-    case 'club_welcome_approve':
-      if (!st.welcome) throw new RpcError('not_found');
-      if (!visionValid(st.welcome.personalization)) throw new RpcError('incomplete');
-      if (st.welcome.status === 'pending' && !st.welcome.member_approved_at) st.welcome.member_approved_at = new Date().toISOString();
-      return welcomeView(st);
-    case 'club_resource_get': {
-      const m = st.months.find((x) => x.slug === body.p_kit);
-      if (!m || !m.published) throw new RpcError('not_found');
-      return { can: 'edit', month: m.month, state: {}, revision: 0, profile_version: 1, approved_at: null,
-        mailing: { status: 'pending', readiness: 'needs_pdf', approved: m.mailing.approved } };
-    }
-    case 'club_resource_save':
-      return (body.p_revision ?? 0) + 1;
-    case 'club_fulfillment_approve': {
-      const m = st.months.find((x) => x.slug === body.p_kit);
-      if (m) m.mailing.approved = true;
-      return true;
-    }
-    case 'club_admin_fulfillment_bundle':
-      return st.adminBundle;
-    case 'club_admin_set_fulfillment':
-      st.welcome.pdf = 'ready';
-      return true;
-    default:
-      throw new RpcError(`unmocked_${name}`, 404);
+const lit = (v) => `'${String(v).replace(/'/g, "''")}'`;
+const sigs = new Map();
+function signature(name) {
+  if (!sigs.has(name)) {
+    const row = sql(`select coalesce(array_to_json(proargnames)::text, '[]') || '|' || array_to_json(proargtypes::regtype[]::text[])::text || '|' || prorettype::regtype::text
+                      from pg_proc where proname = ${lit(name)} and pronamespace = 'public'::regnamespace limit 1`);
+    if (!row) throw new RpcError(`unknown_function_${name}`, 404);
+    const [names, types, ret] = row.split('|');
+    sigs.set(name, { names: JSON.parse(names), types: JSON.parse(types), ret });
+  }
+  return sigs.get(name);
+}
+/** Runs SQL as a signed-in user (RLS and grants apply, auth.uid() is theirs). Database errors become RpcError. */
+function asUser(uid, q) {
+  const claims = JSON.stringify({ sub: uid, role: 'authenticated' });
+  try {
+    return psql(DB, `begin;\nset local role authenticated;\nselect set_config('request.jwt.claims', ${lit(claims)}, true) \\g /dev/null\n${q};\ncommit;\n`);
+  } catch (e) {
+    const msg = /ERROR:\s+(.*)/.exec(String(e.stderr ?? ''))?.[1] ?? 'failed';
+    throw new RpcError(/permission denied/.test(msg) ? 'permission denied' : msg, /permission denied/.test(msg) ? 403 : 400);
   }
 }
+function rpc(uid, name, body) {
+  const { names, types, ret } = signature(name);
+  const args = names.map((n, i) => (n in body ? `${n} => ${body[n] === null ? `null::${types[i]}`
+    : types[i] === 'jsonb' || types[i] === 'json' ? `${lit(JSON.stringify(body[n]))}::${types[i]}` : `${lit(body[n])}::${types[i]}`}` : null)).filter(Boolean);
+  const call = `public.${name}(${args.join(', ')})`;
+  const out = asUser(uid, ret === 'void' ? `select ${call}` : `select coalesce(to_jsonb(${call})::text, 'null')`);
+  return ret === 'void' || !out ? null : JSON.parse(out);
+}
 
-/** Routes every Supabase request of a page to the fake. `st.fail[name] = n` fails the next n calls of that function. */
-async function fakeSupabase(page, st) {
+const TOKENS = { 'member-token': USER.id, 'admin-token': OWNER };
+
+/** Routes every Supabase request of a page to the local database. `fail[name] = n` drops the next n calls of that function. */
+async function backend(page, { fail = {}, calls = [] } = {}) {
+  page.calls = calls;
   await page.route(`${SUPABASE}/**`, async (route) => {
     const req = route.request();
     const url = new URL(req.url());
     const body = req.postData() ? JSON.parse(req.postData()) : {};
     const reply = (status, data) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) });
     const p = url.pathname;
+    const uid = TOKENS[(req.headers().authorization ?? '').replace(/^Bearer\s+/, '')] ?? null;
     if (p === '/auth/v1/otp') return reply(200, {});
     if (p === '/auth/v1/verify') {
       if (body.token !== '123456') return reply(400, { msg: 'Token has expired or is invalid' });
@@ -163,46 +106,67 @@ async function fakeSupabase(page, st) {
     if (p === '/auth/v1/token') return reply(200, { access_token: 'member-token', refresh_token: 'member-refresh', expires_in: 3600, user: USER });
     if (p === '/auth/v1/logout') return reply(204, {});
     if (p === '/functions/v1/club-billing') {
-      st.calls.push(`billing:${body.action}`);
+      calls.push(`billing:${body.action}`);
       if (body.action === 'checkout_status') return reply(200, { paid: true, open: false, email: USER.email });
       if (body.action === 'sync_email') return reply(200, { updated: false });
       return reply(200, { url: `${BASE}/club/dashboard` });
     }
-    if (p === '/rest/v1/club_mailing_addresses') return reply(200, st.address ? [st.address] : []);
+    if (!uid) return reply(401, { message: 'JWT expired' });
+    if (p === '/rest/v1/club_mailing_addresses') {
+      return reply(200, JSON.parse(asUser(uid, `select coalesce(json_agg(json_build_object('name', name, 'line1', line1, 'line2', line2, 'city', city,
+        'state', state, 'postal_code', postal_code, 'paused', paused)), '[]')::text from public.club_mailing_addresses`)));
+    }
+    if (p === '/rest/v1/club_kits') {
+      return reply(200, JSON.parse(asUser(uid, `select coalesce(json_agg(json_build_object('slug', slug, 'month', month, 'title', title, 'status', status, 'mailer_cutoff_at', mailer_cutoff_at) order by month), '[]')::text from public.club_kits`)));
+    }
     const m = p.match(/^\/rest\/v1\/rpc\/(\w+)$/);
     if (m) {
-      st.calls.push(m[1]);
-      if (st.fail[m[1]] > 0) {
-        st.fail[m[1]]--;
+      calls.push(m[1]);
+      if (fail[m[1]] > 0) {
+        fail[m[1]]--;
         return route.abort('failed');
       }
       try {
-        const out = rpc(st, m[1], body);
-        return reply(200, out ?? null);
+        return reply(200, rpc(uid, m[1], body));
       } catch (e) {
         if (!(e instanceof RpcError)) throw e;
-        if (e.status === 404) console.log(`       (unmocked call: ${m[1]})`);
         return reply(e.status, { message: e.message });
       }
     }
-    console.log(`       (unmocked request: ${req.method()} ${p})`);
+    console.log(`       (unhandled request: ${req.method()} ${p}${url.search})`);
     return reply(404, {});
   });
 }
+
+/** Her account as the webhook and her own clicks would leave it (SQL as her, through the same functions). */
+const as = {
+  family: (display = 'The Rivera Family') => asUser(USER.id, `select public.club_household_save(${lit(display)}, '{}',
+    '[{"first_name":"Ana","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Sofia","kind":"child","role":"child","birth_year":2018,"birth_month":4},{"first_name":"Mateo","kind":"child","role":"child","birth_year":2020,"birth_month":9}]') \\g /dev/null`),
+  vision: (name, value) => asUser(USER.id, `select public.club_welcome_save(${lit(JSON.stringify({ family_name: name, value }))}::jsonb) \\g /dev/null`),
+  approvePrint: () => asUser(USER.id, `select public.club_welcome_approve() \\g /dev/null`),
+};
+/** One order's status:readiness, for checks. */
+const order = (type) => sql(`select status || ':' || readiness from public.club_fulfillment_queue where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
+const orderId = (type) => sql(`select id from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
 
 const signedIn = (page) => page.addInitScript(([s]) => {
   if (!localStorage.getItem('omc:account:session')) localStorage.setItem('omc:account:session', JSON.stringify(s));
 }, [{ access_token: 'member-token', refresh_token: 'member-refresh', expires_at: Date.now() + 3600_000, email: USER.email, user_id: USER.id }]);
 
-async function newPage(browser, viewport, st, { auth = true } = {}) {
+async function newPage(browser, viewport, { auth = true, db = true, fail } = {}) {
   const ctx = await browser.newContext({ viewport });
   const page = await ctx.newPage();
   page.errors = [];
   page.on('pageerror', (e) => page.errors.push(e.message));
-  if (st) await fakeSupabase(page, st);
+  page.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'Test note' : undefined));
+  if (db) await backend(page, { fail });
   if (auth) await signedIn(page);
   return page;
 }
+const asAdmin = (page) => page.addInitScript(() => {
+  sessionStorage.setItem('omc:v1:admin', JSON.stringify({ access_token: 'admin-token', refresh_token: 'admin-refresh', expires_at: Date.now() + 3600_000, email: 'owner@example.com' }));
+  sessionStorage.setItem('omc:v1:admin:active', String(Date.now()));
+});
 
 const shot = (page, name, fullPage = false) => (SHOTS ? page.screenshot({ path: `${SHOTS}/${name}.png`, fullPage }) : null);
 
@@ -233,7 +197,7 @@ const scenarios = {};
 scenarios.artwork = async (browser) => {
   console.log('\nArtwork renders and follows her choices');
   for (const [label, vp] of [['desktop', DESKTOP], ['mobile', MOBILE]]) {
-    const page = await newPage(browser, vp, null, { auth: false });
+    const page = await newPage(browser, vp, { auth: false, db: false });
     await page.goto(`${BASE}/club/family-vision-preview`, { waitUntil: 'networkidle' });
     let a = await art(page);
     check(`preview ${label}: watercolor on load`, a.img === 'love-vision.jpeg' || a.img?.startsWith('love'), a.img ?? 'no image');
@@ -248,7 +212,7 @@ scenarios.artwork = async (browser) => {
     await page.context().close();
   }
   // Every value has a watercolor.
-  const page = await newPage(browser, DESKTOP, null, { auth: false });
+  const page = await newPage(browser, DESKTOP, { auth: false, db: false });
   await page.goto(`${BASE}/club/family-vision-preview`, { waitUntil: 'networkidle' });
   const missing = [];
   for (const v of VALUES) {
@@ -265,50 +229,105 @@ scenarios.artwork = async (browser) => {
 };
 
 scenarios.admin = async (browser) => {
-  console.log('\nAdmin print view (?fulfillment=)');
-  const st = newMember({
-    adminBundle: { order: { id: 'order-1', display_name: 'The Rivera Family', email: USER.email, status: 'pending', readiness: 'needs_pdf',
-      fulfillment_type: 'welcome_vision', satisfies_month: null, personalization: { family_name: 'The Rivera Family', value: 'Courage' },
-      address: { name: 'Ana Rivera', line1: '14 Oak St', line2: '', city: 'Austin', state: 'TX', postal_code: '78701' } } },
-  });
-  const ctx = await browser.newContext({ viewport: DESKTOP });
-  const page = await ctx.newPage();
-  page.errors = [];
-  page.on('pageerror', (e) => page.errors.push(e.message));
-  await fakeSupabase(page, st);
-  await page.addInitScript(() => {
-    sessionStorage.setItem('omc:v1:admin', JSON.stringify({ access_token: 'admin-token', refresh_token: 'admin-refresh', expires_at: Date.now() + 3600_000, email: 'owner@example.com' }));
-    sessionStorage.setItem('omc:v1:admin:active', String(Date.now()));
-  });
-  await page.goto(`${BASE}/club/family-vision?fulfillment=order-1`, { waitUntil: 'networkidle' });
-  await page.waitForSelector('text=Print / Save PDF');
-  const a = await art(page);
-  check('admin: her approved value and name are on the print', a.word === 'Courage' && a.name === 'The Rivera Family', JSON.stringify(a));
-  check('admin: watercolor is the Courage illustration', Boolean(a.img?.startsWith('courage')), a.img ?? 'none');
-  check('admin: editing is locked', await page.evaluate(() => document.getElementById('fvp-open-editor')?.hidden === true));
-  await shot(page, 'admin-screen');
-  const pages = await printPdf(page, 'admin-print');
-  check('admin print: exactly one Letter page', pages === 1, `${pages} pages`);
+  console.log('\nAdmin: Welcome Kits queue, both print views, one package (real database)');
+  freshDb();
+  as.family();
+  as.vision('The Rivera Family', 'Courage');
+  as.approvePrint();
+  check('kit waits for her first-resource confirmation after the print approval', order('welcome_vision') === 'pending:needs_confirmation' && order('monthly_resource') === 'pending:needs_confirmation', order('welcome_vision'));
+
+  const page = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(page);
+  await page.goto(`${BASE}/admin/club`, { waitUntil: 'networkidle' });
+  await page.click('button:has-text("Fulfillment")');
+  await page.waitForSelector('text=Welcome Kits (1)');
+  const row = page.locator('tr', { hasText: 'ana@example.com' });
+  check('one row for her package', (await row.count()) === 1);
+  const rowText = (await row.innerText()).replace(/\s+/g, ' ');
+  check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Habit Cards/.test(rowText), rowText.slice(0, 200));
+  check('and why it waits', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('counts as confirmed'), rowText.slice(0, 260));
+  await page.fill('input[type=month]', '2027-01');
+  await page.waitForTimeout(800);
+  const monthText = await page.locator('body').innerText();
+  check('January’s monthly list leaves her kit order out, and says so', monthText.includes('Plus 1 January 2027 resource ships in Welcome Kits') && monthText.includes('No mailings for this month.'));
+  await shot(page, 'admin-kits-waiting', true);
+
+  // Three days pass: her prepared January counts as confirmed (everything else is valid).
+  sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
+  check('after three days the kit only needs its PDFs', order('welcome_vision') === 'pending:needs_pdf', order('welcome_vision'));
+
+  // The welcome print's print view: her approved choices, the approved print, one page, Mark PDF ready.
+  const w = orderId('welcome_vision');
+  const pv = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(pv);
+  await pv.goto(`${BASE}/club/family-vision?fulfillment=${w}`, { waitUntil: 'networkidle' });
+  await pv.waitForSelector('text=Print / Save PDF');
+  const a = await art(pv);
+  check('print view: her approved value and name', a.word === 'Courage' && a.name === 'The Rivera Family', JSON.stringify(a));
+  check('print view: the Courage watercolor', Boolean(a.img?.startsWith('courage')), a.img ?? 'none');
+  check('print view: editing is locked', await pv.evaluate(() => document.getElementById('fvp-open-editor')?.hidden === true));
+  const pages = await printPdf(pv, 'admin-print');
+  check('welcome print PDF: exactly one Letter page', pages === 1, `${pages} pages`);
   const text = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/admin-print.pdf`, '-']).toString();
-  check('admin print: no admin bar, header or buttons on paper', !/Print \/ Save PDF|Welcome print ·|Organized Family Club\n/i.test(text) && /Courage/.test(text), JSON.stringify(text.trim().slice(0, 120)));
+  check('welcome print PDF: nothing but the artwork on paper', !/Print \/ Save PDF|Welcome print ·|Organized Family Club\n/i.test(text) && /Courage/.test(text), JSON.stringify(text.trim().slice(0, 120)));
   // The approved print, page 1 at 50 dpi (captured from the version before PRs #257/#258): pixel-identical or it fails.
   const diff = execFileSync('python3', ['-c', `from PIL import Image, ImageChops
 a = Image.open('tests/fixtures/family-vision-print-golden.png').convert('RGB'); b = Image.open('${SHOTS ?? '/tmp'}/admin-print.png').convert('RGB')
 print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).toString().trim();
-  check('admin print: identical to the approved print (tests/fixtures/family-vision-print-golden.png)', diff === 'None', diff);
+  check('welcome print PDF: identical to the approved print (tests/fixtures/family-vision-print-golden.png)', diff === 'None', diff);
   const imgs = execFileSync('pdfimages', ['-list', `${SHOTS ?? '/tmp'}/admin-print.pdf`]).toString().trim().split('\n').length - 2;
-  check('admin print: the watercolor is embedded in the PDF', imgs >= 1, `${imgs} image(s)`);
-  await page.click('text=Mark PDF ready');
-  await page.waitForSelector('text=PDF marked ready');
-  check('admin: Mark PDF ready calls the database', st.calls.includes('club_admin_set_fulfillment'));
+  check('welcome print PDF: the watercolor is embedded', imgs >= 1, `${imgs} image(s)`);
+  await pv.click('text=Mark PDF ready');
+  await pv.waitForSelector('text=PDF marked ready');
+  check('print view: no script errors', pv.errors.length === 0, pv.errors.join(' | '));
+  await pv.context().close();
+  check('one PDF isn’t enough for the kit', order('welcome_vision') === 'pending:needs_pdf');
+
+  // January's print view: her family's cards.
+  const m = orderId('monthly_resource');
+  const mv = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(mv);
+  await mv.goto(`${BASE}/club/resources/${JAN}?fulfillment=${m}`, { waitUntil: 'networkidle' });
+  await mv.waitForSelector('text=Mark PDF ready');
+  const cards = await mv.locator('#club-month-content').innerText();
+  check('January print view: prepared with her children’s names', /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
+  await shot(mv, 'admin-january-print-view');
+  await mv.click('text=Mark PDF ready');
+  await mv.waitForSelector('text=PDF marked ready');
+  await mv.context().close();
+  check('both PDFs: the kit is ready', order('welcome_vision') === 'pending:ready' && order('monthly_resource') === 'pending:ready', `${order('welcome_vision')} / ${order('monthly_resource')}`);
+
+  // Approve, print, mail: one set of buttons moves both.
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('button:has-text("Fulfillment")');
+  await page.waitForSelector('text=Ready to approve');
+  await page.locator('tr', { hasText: 'ana@example.com' }).locator('button:has-text("approve kit")').click();
+  await page.waitForFunction(() => document.body.innerText.includes('approved'));
+  await page.waitForTimeout(500);
+  check('approve kit: both orders approved', order('welcome_vision').startsWith('approved') && order('monthly_resource').startsWith('approved'), `${order('welcome_vision')} / ${order('monthly_resource')}`);
+  check('her January is recorded as confirmed by the three-day rule', sql(`select note from public.club_fulfillment_orders where id = '${m}'`).includes('confirmed automatically'));
+  const [download] = await Promise.all([page.waitForEvent('download'), page.click('text=Download approved kits')]);
+  const csv = execFileSync('cat', [await download.path()]).toString().trim().split('\n');
+  check('CSV: one row for the package', csv.length === 2, `${csv.length - 1} row(s)`);
+  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ 2027-01 Our Family Habit Cards/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
+  for (const st of ['printed', 'mailed']) {
+    await page.locator('tr', { hasText: 'ana@example.com' }).locator(`button:has-text("${st}")`).first().click();
+    await page.waitForTimeout(700);
+  }
+  check('printed, then mailed: one package', order('welcome_vision') === 'mailed:mailed' && order('monthly_resource') === 'mailed:mailed', `${order('welcome_vision')} / ${order('monthly_resource')}`);
+  check('one mailed time for both', sql(`select count(distinct mailed_at) from public.club_fulfillment_orders where user_id = '${USER.id}'`) === '1');
+  check('off the Welcome Kits list once mailed', await page.isVisible('text=Welcome Kits (0)'));
   check('admin: no script errors', page.errors.length === 0, page.errors.join(' | '));
-  await ctx.close();
+  await page.context().close();
 };
 
 const names = ONLY ? ONLY.split(',') : Object.keys(scenarios);
 const browser = await chromium.launch();
 try {
   for (const n of names) await scenarios[n](browser);
+} catch (e) {
+  failures++;
+  console.log(`  FAIL (crashed) ${e.message.split('\n')[0]}`);
 } finally {
   await browser.close();
 }
