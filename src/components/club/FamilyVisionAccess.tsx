@@ -116,6 +116,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
             {busy ? 'Getting your gift ready…' : 'Yes! Send me my print'}
           </button>
           <p className="fvp-mail-hint">Printed and mailed to your door. Included in your membership.</p>
+          <button type="button" className="fvp-edit-after-cta" onClick={() => document.getElementById("fvp-open-editor")?.click()}>✎ Customize artwork</button>
           <span className="fvp-save-state" role="status" aria-live="polite">{msg}</span>
         </>
       ) : (
