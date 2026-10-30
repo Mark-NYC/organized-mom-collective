@@ -1665,3 +1665,41 @@
   margin-top: 0.14in;
   margin-bottom: 0.12in;
 }
+
+/* /club/join: the free-month offer card. Warm white, a soft border, leaf-green checks with a charcoal tick. */
+.join-offer {
+  border: 1px solid var(--color-warm-rule);
+  border-radius: 6px;
+  background: #fff;
+  padding: 1.1rem 1.1rem 0;
+  box-shadow: 0 1px 2px rgb(77 69 68 / 0.04), 0 8px 24px -12px rgb(77 69 68 / 0.12);
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .join-offer { padding: 1.75rem 1.75rem 0; }
+}
+.join-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+/* A 1.5rem circle, centered on the first 1.45em line of its benefit. */
+.join-check::before {
+  content: '';
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: calc((1.45em - 1.5rem) / 2);
+  border-radius: 999px;
+  background: #d4dfc4 no-repeat center / 0.9rem
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23545454' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.2 8.4l3 3 6.6-6.8'/%3E%3C/svg%3E");
+}
+.join-billing {
+  margin: 1rem -1.1rem 0;
+  border-top: 1px solid var(--color-warm-rule);
+  background: var(--color-sage-wash);
+  padding: 0.85rem 1.1rem 0.95rem;
+}
+@media (min-width: 640px) {
+  .join-billing { margin: 1.5rem -1.75rem 0; padding: 1rem 1.75rem 1.1rem; }
+}

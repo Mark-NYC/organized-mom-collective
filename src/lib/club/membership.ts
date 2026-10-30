@@ -7,7 +7,7 @@
 import { accountRpc, getSession } from '../account';
 import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
-import { CLUB_OFFER, CLUB_OFFER_LINE, CLUB_PROGRAM_START, clubFoundingOpen, rollingFirstCharge } from '../../data/club/config';
+import { CLUB_OFFER, CLUB_PROGRAM_START, clubFoundingOpen, rollingFirstCharge } from '../../data/club/config';
 
 const URL_ = SUPABASE_URL;
 const KEY = SUPABASE_ANON_KEY;
@@ -31,30 +31,26 @@ export const PLANS: Record<OfferedPlan, { price: string; per: string; summary: s
 /**
  * The monthly plan as a new household sees it: Your First Month FREE, nothing charged today, and the exact first
  * charge date (a founding member: February 1, 2027; later: one month after she joins). club-billing decides.
+ * Three things stay separate: the welcome print now, the first monthly kit free, then $5.90/month.
  */
-export function introPlan(now = new Date()): (typeof PLANS)['monthly'] & { label: string } {
+export function introPlan(now = new Date()) {
   const founding = clubFoundingOpen(now.getTime());
   const first = founding ? CLUB_PROGRAM_START.foundingFirstCharge : rollingFirstCharge(now);
+  const firstShort = first.replace(/, \d{4}$/, '');
   return {
     label: CLUB_OFFER,
     price: '$0',
     per: 'today',
-    summary: CLUB_OFFER_LINE,
-    points: founding
-      ? [
-          'Now: your personalized Family Vision welcome print, mailed free',
-          `${CLUB_PROGRAM_START.label}: your first monthly plan, printed and mailed free`,
-          `First charge: $5.90 on ${first}, then $5.90/month`,
-          `Cancel before ${first} and you pay nothing`,
-          'One free first month per household',
-        ]
-      : [
-          'This month’s personalized plan, printed and mailed free',
-          'Your personalized Family Vision welcome print, free',
-          `First charge: $5.90 on ${first}, then $5.90/month`,
-          `Cancel before ${first} and you pay nothing`,
-          'One free first month per household',
-        ],
+    benefits: [
+      { lead: 'A personalized Family Vision print,', detail: 'mailed free when you join.' },
+      founding
+        ? { lead: `Your ${CLUB_PROGRAM_START.label.split(' ')[0]} Family Habits Kit,`, detail: 'personalized with your family’s names, printed and mailed free.' }
+        : { lead: 'This month’s family kit,', detail: 'personalized with your family’s names, printed and mailed free.' },
+      { lead: 'A fresh family resource every month,', detail: 'tackling one real-life challenge with practical tools that help kids develop independence and responsibility.' },
+      { lead: 'Your personalized tools online,', detail: 'ready to access anytime from your account.' },
+    ],
+    firstCharge: first,
+    cancelBy: firstShort,
   };
 }
 
