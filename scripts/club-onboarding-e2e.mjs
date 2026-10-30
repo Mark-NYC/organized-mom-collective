@@ -480,9 +480,10 @@ async function journey(browser, label, vp) {
   const club = await page.locator('main').innerText();
   check('her Club (/app/club): no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /We’re preparing your Welcome Kit/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
   const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
-  check('her Club: January marked hers, opening her family’s version', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a').getAttribute('href')) === `/club/resources/${JAN}`);
+  check('her Club: January marked hers, opening her family’s version', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === `/club/resources/${JAN}`);
+  check('her Club: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
   check('her Club: February shows when her next payment opens it', /Next · February 2027/i.test(club) && /Opens with your February 1, 2027 payment/.test(club));
-  check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a').innerText()).startsWith('Preview the tool'));
+  check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
   check('no sideways scrolling (her Club)', await noSideScroll(page));
   await shot(page, `${label}-7-club`, true);
   await page.click('a:has-text("billing, family and mailing address")');

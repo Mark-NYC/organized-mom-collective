@@ -5,9 +5,13 @@
  *   desktop  — the month's own desktop view (or nothing, if the printable component brings its own)
  *   printable — the printable inside data-plan-proof-body / data-plan-proof-scroll wrappers
  *   mobile   — a ClubPlanScreen with the month's sections
+ * Every plan page also gets the month's Family Meeting (ClubFamilyMeeting) behind a "Monthly Tool / Family Meeting"
+ * switch; the tool stays the default view.
  * Architecture: docs/club/PLAN_ARCHITECTURE.md.
  */
+import { kitBySlug } from '../../../data/club/kits';
 import ClubFamilyGate from './ClubFamilyGate.astro';
+import ClubFamilyMeeting from './ClubFamilyMeeting.astro';
 import ClubPrintableProof from './ClubPrintableProof.astro';
 import ClubPrintStyles from './ClubPrintStyles.astro';
 
@@ -21,9 +25,12 @@ interface Props {
   class?: string;
 }
 const { kitSlug, month, sides, storageKey, class: cls = '' } = Astro.props;
+const kit = kitBySlug(kitSlug);
+if (!kit) throw new Error(`Unknown kit ${kitSlug}`);
 ---
 <div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={kitSlug} data-plan-month={month} data-plan-key={storageKey}>
   <ClubFamilyGate />
+  <ClubFamilyMeeting kitMonth={kit.month} />
   <slot name="desktop" />
   <ClubPrintableProof sides={sides}><slot name="printable" /></ClubPrintableProof>
   <slot name="mobile" />

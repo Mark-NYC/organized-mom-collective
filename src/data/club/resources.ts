@@ -5,6 +5,14 @@
  * (src/pages/club/resources/[slug].astro); the dashboard links here.
  *
  * `component` picks the printable in that page. Year 2 editions (e.g. December 2027) are listed once they have one.
+ *
+ * Known gap (Oct 2026, needs the owner's decision): the app's month pages moved on and these four didn't.
+ * /app/club/january is the Weekly Meeting (SeptemberSundayReset) and /app/club/september the Habit Cards; February is
+ * the laundry guides (FebruaryLaundryGuides) and March the chore charts (MarchChoreCharts). This page, which members
+ * open, fulfillment prints and the Welcome Kit's first resource uses, still renders the earlier printables below.
+ * Repointing them changes what January members and Welcome Kits receive, and the February and March printables only
+ * run inside the plan shell today, so it's a separate change. The Monthly Family Meeting follows the app pages
+ * (src/data/club/family-meeting.ts).
  */
 export interface ClubResource {
   slug: string;

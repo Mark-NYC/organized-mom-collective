@@ -1,0 +1,241 @@
+---
+/**
+ * The Monthly Family Meeting beside a month's tool, shared by every Club plan page (ClubPlanShell renders it): a
+ * "Monthly Tool / Family Meeting" switch, and a ten-minute guide prepared from the family's profile by the meeting
+ * engine (src/lib/club/family-meeting.ts), with a one-page US Letter print. Desktop: October's layout, a rail beside
+ * the guide. Below 1100px: one column for reading together, with quick links to the four sections.
+ *
+ * Digital only: it isn't part of the mailed kit or the fulfillment PDF, and it never saves, assigns or confirms
+ * anything. Wired by mountFamilyMeeting (src/lib/club/plan/meeting.ts). Docs: docs/club/FAMILY_MEETING.md.
+ */
+import { meetingMonth } from '../../../data/club/family-meeting';
+import { monthColors } from '../../../theme';
+
+interface Props {
+  /** The kit's month, 'YYYY-MM'. */
+  kitMonth: string;
+  /** For a meeting-only page (November): where "Monthly Tool" goes for a sample, and for a member. Plan pages switch in place. */
+  toolHref?: string;
+  memberToolHref?: string;
+}
+const { kitMonth, toolHref, memberToolHref } = Astro.props;
+const n = Number(kitMonth.slice(5));
+const content = meetingMonth(n);
+if (!content) throw new Error(`No Family Meeting content for ${kitMonth}`);
+const color = monthColors[n - 1];
+// The public Club page pairs January with the calendar artwork and September with the checklist; same here.
+const iconFile = ({ January: 'September', September: 'January' } as Record<string, string>)[color.name] ?? color.name;
+const monthIcons = import.meta.glob('../../../../assets/icons/ofc/month-icons/*-OFC-icon.png', { eager: true, query: '?url', import: 'default' });
+const monthIcon = monthIcons[`../../../../assets/icons/ofc/month-icons/${iconFile}-OFC-icon.png`] as string;
+const icons = {
+  month: monthIcon,
+  focus: '/images/club/onboarding/family-members.webp',
+  talk: '/images/club/onboarding/family-meeting.webp',
+  parts: '/images/club/onboarding/shared-responsibility.webp',
+  practice: '/images/club/onboarding/individual-ownership.webp',
+};
+const sections = [['fm-focus', 'Our Focus', 2], ['fm-talk', 'Let’s Talk', 3], ['fm-parts', 'Everyone’s Part', 3], ['fm-practice', 'Let’s Practice', 2]] as const;
+---
+<nav class="fm-switch" aria-label={`${color.name}: tool or meeting`} style={`--fm-month:${color.hex}`}>
+  <button type="button" data-fm-view="tool" aria-pressed="true">Monthly Tool</button>
+  <button type="button" data-fm-view="meeting" aria-pressed="false">Family Meeting</button>
+</nav>
+<section class="fm" data-family-meeting data-fm-month={kitMonth} data-fm-icons={JSON.stringify(icons)} data-fm-tool-href={toolHref} data-fm-member-tool-href={memberToolHref} style={`--fm-month:${color.hex}`} aria-labelledby="fm-title">
+  <aside class="fm-rail">
+    <a href="/app/club" class="fm-back">← Back to Club</a>
+    <p class="fm-kicker">{color.name} · Family Meeting</p>
+    <h1 id="fm-title" class="fm-title" data-fm-title tabindex="-1">Our Family <em>Meeting</em></h1>
+    <p class="fm-intro">A ten-minute conversation that introduces <strong>{content.resourceTitle}</strong> and gives everyone a part. It’s prepared from your family profile, so there’s nothing to plan or fill in.</p>
+    <p class="fm-prepared" data-fm-for>Prepared for your family</p>
+    <div class="fm-rail-block">
+      <p class="fm-rail-label">Who leads</p>
+      <p data-fm-leader>Anyone can read the meeting.</p>
+    </div>
+    <nav class="fm-jump fm-jump--rail" aria-label="Meeting sections">
+      <p class="fm-rail-label">About 10 minutes</p>
+      <ol>{sections.map(([id, title, min], i) => <li><button type="button" data-fm-jump={id}><span>{i + 1}</span>{title}<small>{min} min</small></button></li>)}</ol>
+    </nav>
+    <div class="fm-rail-block fm-audio" data-fm-audio hidden></div>
+    <div class="fm-actions">
+      <button type="button" class="fm-print" data-fm-print>Print the meeting guide</button>
+      <button type="button" class="fm-to-tool" data-fm-view="tool">Open {content.resourceTitle}</button>
+    </div>
+    <p class="fm-honest">Suggestions are for talking over, not assignments. Nothing here is saved or agreed until your family decides; change who does what anytime on <span data-fm-family-link>your family page</span>.</p>
+  </aside>
+  <nav class="fm-jump fm-jump--bar" aria-label="Meeting sections">
+    <ol>{sections.map(([id, title], i) => <li><button type="button" data-fm-jump={id}><span>{i + 1}</span>{title}</button></li>)}</ol>
+  </nav>
+  <div class="fm-main">
+    <article class="fm-sheet fm-sheet--screen" data-fm-screen aria-live="polite"><p class="fm-note">Preparing your family’s meeting…</p></article>
+    <article class="fm-sheet fm-sheet--print" data-meeting-sheet aria-hidden="true"></article>
+  </div>
+</section>
+
+<style is:global>
+/* ---------------------------------------------------------------- the switch (both views) */
+.fm-switch{display:flex;gap:4px;width:max-content;max-width:100%;margin:0 auto 18px;padding:4px;border:1px solid var(--color-warm-rule);border-radius:999px;background:#fff;font-family:var(--font-sans)}
+.fm-switch button{min-height:44px;padding:0 20px;border:0;border-radius:999px;background:transparent;color:var(--color-warm-soft);font:600 .74rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.fm-switch button[aria-pressed="true"]{background:var(--color-warm-button);color:#fff}
+.fm-switch button:focus-visible{outline:2px solid #536e4e;outline-offset:2px}
+.club-plan:not([data-plan-state="ready"]) > .fm-switch{display:none}
+
+/* Tool view: the meeting is out of the way. Meeting view: only the switch and the meeting. Hiding keeps the
+   month's editor and its state exactly as they were. */
+.club-plan:not([data-plan-view="meeting"]) > .fm{display:none!important}
+.club-plan[data-plan-view="meeting"] > :not(.fm-switch):not(.fm):not(.plan-gate){display:none!important}
+
+/* ---------------------------------------------------------------- the guide, on screen */
+.fm{--fm-ink:var(--color-warm-ink);--fm-soft:var(--color-warm-soft);--fm-rule:var(--color-warm-rule);--fm-sage:#536e4e;color:var(--fm-ink);font-family:var(--font-sans)}
+.fm em{font-style:italic}
+.fm-back{display:inline-flex;align-items:center;min-height:44px;color:var(--fm-ink);font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-decoration-color:var(--fm-rule);text-underline-offset:6px}
+.fm-kicker,.fm-rail-label{font-size:.68rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--fm-soft)}
+.fm-kicker{margin-top:10px}
+.fm-title{font:400 clamp(32px,8vw,42px)/1.1 var(--font-serif);letter-spacing:-.02em;margin:12px 0 0;outline:none}
+.fm-intro{margin-top:14px;color:var(--fm-soft);line-height:1.65;font-size:.92rem}
+.fm-intro strong{color:var(--fm-ink);font-weight:600}
+.fm-prepared{display:inline-block;margin-top:14px;padding:5px 12px;border-radius:999px;background:color-mix(in srgb,var(--fm-month) 45%,#fff);font-size:.78rem;font-weight:600}
+.fm-rail-block{margin-top:20px;padding-top:16px;border-top:1px solid var(--fm-rule);font-size:.86rem;line-height:1.55}
+.fm-rail-block[hidden]{display:none}
+.fm-rail-label{margin-bottom:6px}
+.fm-audio audio{width:100%;margin-top:10px}
+.fm-jump{margin-top:20px;padding-top:16px;border-top:1px solid var(--fm-rule)}
+.fm-jump--bar{display:none}
+.fm-jump ol{display:grid;gap:2px;list-style:none;margin:6px 0 0;padding:0}
+.fm-jump button{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0;border:0;background:none;color:var(--fm-ink);font:600 .9rem var(--font-sans);text-align:left;cursor:pointer}
+.fm-jump button span{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--fm-month);font-size:.78rem}
+.fm-jump small{margin-left:auto;color:var(--fm-soft);font-weight:500;font-size:.76rem}
+.fm-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.fm-actions button{min-height:48px;padding:12px 18px;border:1px solid var(--fm-ink);border-radius:3px;background:transparent;color:var(--fm-ink);font:600 .74rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.fm-actions .fm-print{background:var(--color-warm-button);border-color:var(--color-warm-button);color:#fff}
+.fm-honest{margin-top:16px;color:var(--fm-soft);font-size:.78rem;line-height:1.55}
+.fm-honest a{color:var(--fm-sage);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.fm :focus-visible{outline:2px solid var(--fm-sage);outline-offset:3px}
+
+.fm-sheet--print{display:none}
+.fm-sheet--screen{background:#fff}
+.fm-sheet-head{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center;padding-bottom:18px;border-bottom:3px solid var(--fm-month)}
+.fm-month-icon{width:72px;height:auto}
+.fm-sheet-kicker{font-size:.68rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--fm-soft)}
+.fm-sheet-title{font:400 clamp(28px,6vw,36px)/1.1 var(--font-serif);letter-spacing:-.015em;margin:4px 0 0}
+.fm-sheet-sub{margin-top:4px;color:var(--fm-soft);font-size:.86rem}
+.fm-leader{grid-column:1/-1;font-size:.84rem;color:var(--fm-soft)}
+.fm-sec{padding:22px 0 20px;border-bottom:1px solid var(--fm-rule);scroll-margin-top:72px}
+.fm-sec:last-child{border-bottom:0}
+.fm-sec-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.fm-sec-icon{width:40px;height:40px;object-fit:contain}
+.fm-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--fm-month);font-weight:700;font-size:.85rem}
+.fm-sec-head h3{font:400 1.45rem/1.2 var(--font-serif);margin:0;outline:none}
+.fm-min{margin-left:auto;padding:3px 10px;border:1px solid var(--fm-rule);border-radius:999px;color:var(--fm-soft);font-size:.72rem;font-weight:600;letter-spacing:.06em;white-space:nowrap}
+.fm-challenge{font:400 1.2rem/1.45 var(--font-serif)}
+.fm-why{margin-top:10px;line-height:1.65}
+.fm-principle{margin-top:14px;padding:12px 16px;border-left:3px solid var(--fm-month);background:color-mix(in srgb,var(--fm-month) 22%,#fff);font-weight:600;line-height:1.55}
+.fm-for{margin-top:10px;color:var(--fm-soft);font-size:.86rem}
+.fm-questions{display:grid;gap:12px;margin:0;padding:0;list-style:none;counter-reset:q}
+.fm-questions li{counter-increment:q;position:relative;padding:12px 14px 12px 48px;border:1px solid var(--fm-rule);border-radius:6px;font:400 1.1rem/1.45 var(--font-serif)}
+.fm-questions li::before{content:counter(q);position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--fm-ink);display:flex;align-items:center;justify-content:center;font:700 .78rem var(--font-sans)}
+.fm-note{color:var(--fm-soft);font-size:.86rem;line-height:1.55;margin-bottom:14px}
+.fm-people{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.fm-person{padding:14px 14px 10px;border:1px solid var(--fm-rule);border-radius:6px;break-inside:avoid}
+.fm-person-name{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;overflow-wrap:anywhere}
+.fm-person-name strong{font:400 1.2rem/1.2 var(--font-serif)}
+.fm-person-name span{color:var(--fm-soft);font-size:.74rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.fm-item{padding:8px 0;border-top:1px dashed var(--fm-rule)}
+.fm-item:first-of-type{border-top:0}
+.fm-pill{display:inline-block;margin-bottom:4px;padding:2px 9px;border-radius:999px;border:1px solid var(--fm-ink);font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.fm-item[data-status="suggested"] .fm-pill{border-style:dashed;background:color-mix(in srgb,var(--fm-month) 35%,#fff)}
+.fm-item[data-status="confirmed"] .fm-pill{border-color:var(--fm-sage);background:#eef2ea;color:var(--fm-sage)}
+.fm-item[data-status="confirmed"] .fm-pill::before{content:'✓ '}
+.fm-item-text{font-weight:600;line-height:1.45;overflow-wrap:anywhere}
+.fm-item-meta{margin-top:2px;color:var(--fm-soft);font-size:.82rem}
+.fm-finished{margin-top:4px;font-size:.86rem;line-height:1.5}
+.fm-finished strong{font-weight:600;color:var(--fm-soft)}
+.fm-joins,.fm-more{color:var(--fm-soft);font-size:.86rem}
+.fm-more{margin-top:6px}
+.fm-practice-title{font:400 1.2rem/1.35 var(--font-serif)}
+.fm-steps{margin:10px 0 0;padding-left:1.4em;display:grid;gap:8px;line-height:1.55;list-style:decimal}
+.fm-steps li::marker{font-weight:700}
+.fm-then{margin-top:12px;font-weight:600}
+
+/* Below 1100px: one column for reading together. */
+@media screen and (max-width:1099px){
+  .club-plan[data-plan-state="ready"] > .fm-switch{margin:4px auto 20px}
+  .fm{max-width:680px;margin:0 auto;padding:0 2px 56px}
+  .fm-back{display:none}
+  .fm-rail{margin-bottom:8px}
+  .fm-jump--rail{display:none}
+  .fm-jump--bar{display:block;position:sticky;top:0;z-index:5;margin:16px -16px 0;padding:8px 16px;border-top:1px solid var(--fm-rule);border-bottom:1px solid var(--fm-rule);background:var(--color-ivory)}
+  .fm-jump--bar ol{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0}
+  .fm-jump--bar li{flex:none}
+  .fm-jump--bar button{width:auto;min-height:44px;padding:0 14px 0 8px;border:1px solid var(--fm-rule);border-radius:999px;background:#fff;font-size:.8rem;gap:8px}
+  .fm-jump--bar button span{width:26px;height:26px}
+  .fm-actions{flex-direction:row;flex-wrap:wrap}
+  .fm-actions button{flex:1 1 200px}
+  .fm-main{margin-top:8px}
+  .fm-sheet--screen{padding:20px 16px;border:1px solid var(--fm-rule);border-radius:8px}
+  .fm-people{grid-template-columns:1fr}
+}
+
+/* 1100px and wider: October's layout. A rail beside the guide; the guide scrolls on its own, full length. */
+@media screen and (min-width:1100px){
+  html:has(.club-plan[data-plan-view="meeting"][data-plan-state="ready"]),body:has(.club-plan[data-plan-view="meeting"][data-plan-state="ready"]){height:100%;overflow:hidden}
+  body:has(.club-plan[data-plan-view="meeting"][data-plan-state="ready"]) #main{position:relative;width:100%;max-width:none;height:calc(100dvh - 64px);min-height:0;margin:0;padding:0;overflow:hidden}
+  .club-plan[data-plan-state="ready"]:has(> .fm){display:grid;grid-template-columns:minmax(310px,375px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);width:100%;height:100%;min-height:0;overflow:hidden;background:var(--color-ivory)}
+  .club-plan[data-plan-state="ready"] > .fm-switch{grid-column:1/-1;margin:0;width:auto;justify-content:center;border:0;border-bottom:1px solid var(--color-warm-rule);border-radius:0;background:var(--color-ivory);padding:8px}
+  .club-plan[data-plan-view="meeting"] > .fm{display:contents}
+  .fm-rail{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;border-right:1px solid var(--color-warm-rule);padding:clamp(28px,4vh,52px) clamp(22px,2.7vw,42px) 40px}
+  .fm-main{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;background:#f5f3f2;padding:28px clamp(18px,3vw,45px) 48px;scrollbar-color:#b7b7b2 transparent}
+  .fm-sheet--screen{max-width:8.5in;margin:0 auto;padding:.6in .65in;box-shadow:0 1px 3px rgba(60,50,45,.12),0 8px 28px rgba(60,50,45,.06)}
+}
+
+/* ---------------------------------------------------------------- the one printed page */
+@media print{
+  /* Page size, what prints and the sheet's box: ClubPrintStyles. Here: the guide's print typography. */
+  .fm-sheet--print{font:9.6pt/1.38 var(--font-sans);color:#3f3836}
+  .fm-sheet--print .fm-sheet-head{grid-template-columns:auto 1fr auto;padding-bottom:.09in;border-bottom-width:2.5pt;gap:0 .16in}
+  .fm-sheet--print .fm-month-icon{width:.56in}
+  .fm-sheet--print .fm-sheet-kicker{font-size:7pt}
+  .fm-sheet--print .fm-sheet-title{font-size:20pt;margin:0}
+  .fm-sheet--print .fm-sheet-sub{font-size:8.6pt;margin-top:1pt}
+  .fm-sheet--print .fm-leader{grid-column:auto;align-self:end;max-width:1.9in;text-align:right;font-size:7.8pt}
+  .fm-sheet--print .fm-sec{padding:.08in 0 .06in}
+  .fm-sheet--print .fm-sec:has(.fm-people--dense){padding-bottom:.03in}
+  .fm-sheet--print .fm-sec-head{gap:6pt;margin-bottom:4pt}
+  /* On paper the numbered circles carry the sections; the month's illustration stays at the top. */
+  .fm-sheet--print .fm-sec-icon{display:none}
+  .fm-sheet--print .fm-num{width:15pt;height:15pt;font-size:8pt}
+  .fm-sheet--print .fm-sec-head h3{font-size:13pt}
+  .fm-sheet--print .fm-min{font-size:7pt;padding:1pt 6pt}
+  .fm-sheet--print .fm-challenge{font-size:11pt;line-height:1.35}
+  .fm-sheet--print .fm-why{margin-top:3pt}
+  .fm-sheet--print .fm-principle{margin-top:4pt;padding:4pt 8pt;background:none;border-left-width:2.5pt}
+  .fm-sheet--print .fm-for{margin-top:3pt;font-size:8.4pt}
+  .fm-sheet--print .fm-questions{gap:3pt}
+  .fm-sheet--print .fm-questions li{padding:0 0 0 20pt;border:0;font-size:10.4pt;line-height:1.35}
+  .fm-sheet--print .fm-questions li::before{left:0;top:0;width:13pt;height:13pt;font-size:7pt}
+  .fm-sheet--print .fm-note{font-size:7.8pt;margin-bottom:4pt}
+  /* Everyone's Part on paper: one row per person, name on the left, their items beside it. */
+  .fm-sheet--print .fm-people,.fm-sheet--print .fm-people--dense{display:block}
+  .fm-sheet--print .fm-people--dense{columns:3;column-gap:.2in}
+  .fm-sheet--print .fm-person{position:relative;min-height:13pt;padding:3pt 0 3pt 1.3in;border:0;border-top:.6pt solid #e7ddd4;border-radius:0;break-inside:avoid}
+  .fm-sheet--print .fm-people--dense .fm-person{padding-left:0}
+  .fm-sheet--print .fm-person:first-child{border-top:0}
+  .fm-sheet--print .fm-person-name{position:absolute;left:0;top:3pt;width:1.2in;display:block;margin:0}
+  .fm-sheet--print .fm-people--dense .fm-person-name{position:static;width:auto;display:flex;align-items:baseline;gap:4pt;margin-bottom:1pt}
+  .fm-sheet--print .fm-people--dense .fm-person-name strong,.fm-sheet--print .fm-people--dense .fm-person-name span{display:inline;margin:0}
+  .fm-sheet--print .fm-person-name strong{display:block;font-size:10pt;line-height:1.15}
+  .fm-sheet--print .fm-person-name span{display:block;font-size:6.4pt;margin-top:1pt}
+  .fm-sheet--print .fm-item{padding:0 0 2pt;border:0}
+  .fm-sheet--print .fm-pill{display:inline-block;margin:0 4pt 0 0;padding:0 4pt;font-size:6.4pt;line-height:1.45;vertical-align:1pt;background:none!important}
+  .fm-sheet--print .fm-item-text{display:inline;font-size:8.6pt;line-height:1.3}
+  .fm-sheet--print .fm-item-meta{display:inline;font-size:7.8pt;color:#6f6461;margin:0}
+  .fm-sheet--print .fm-item-meta::before{content:' · '}
+  .fm-sheet--print .fm-finished,.fm-sheet--print .fm-joins,.fm-sheet--print .fm-more{font-size:7.8pt;line-height:1.3;margin-top:0}
+  .fm-sheet--print .fm-practice-title{font-size:10.5pt}
+  .fm-sheet--print .fm-steps{gap:1pt;margin-top:2pt;line-height:1.35}
+  .fm-sheet--print .fm-then{margin-top:3pt}
+}
+</style>
+<script>
+import { mountFamilyMeeting } from '../../../lib/club/plan/meeting';
+for (const root of document.querySelectorAll<HTMLElement>('.club-plan')) mountFamilyMeeting(root);
+</script>

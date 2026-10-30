@@ -306,7 +306,7 @@ describe('family meeting: content rules', () => {
   const content = JSON.stringify(MEETING_MONTHS);
   it('no Mom, Dad or parents in any month', () => expect(content).not.toMatch(/\b(mom|dad|parents?)\b/i));
   it('only known tokens', () => {
-    for (const t of content.match(/\{(\w+)\}/g) ?? []) expect(['{activity}', '{days}', '{who}', '{kids}', '{kid}', '{task}', '{takes}', '{growth}', '{school}']).toContain(t);
+    for (const t of content.match(/\{(\w+)\}/g) ?? []) expect(['{activity}', '{activityMid}', '{eveningBefore}', '{days}', '{who}', '{kids}', '{kid}', '{task}', '{takes}', '{growth}', '{school}']).toContain(t);
   });
   it('children’s examples start at 3, and every month has an example for every age from 3 up and for grown-ups', () => {
     for (const m of MEETING_MONTHS) {

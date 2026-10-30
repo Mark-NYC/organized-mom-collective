@@ -13,6 +13,7 @@
  * and nothing involving a stove, knives or machines below the age the month's resource allows.
  *
  * Tokens filled by the engine, only from the family's own profile: {activity} (her activity's name, or its category),
+ * {activityMid} (the same, mid-sentence), {eveningBefore} (" on Monday evening", the evening before its days, or ""),
  * {who} (people who take part), {days} (" on Tue and Thu", or ""), {kids} (the children's names, or "the kids"),
  * {kid} (one child), {task} (an existing responsibility), {takes} ("takes" or "take", agreeing with {who}), {growth} (a growth item she picked), {school}
  * ("school" or, for homeschooling families, "lessons").
@@ -38,6 +39,11 @@ export interface MeetingExample {
   growth?: string;
   /** Only for families who told us they have a pet. */
   requiresPets?: boolean;
+  /**
+   * Only for a child she put on one of her activities in these categories. {activity} is that activity, and the cue is
+   * the evening before its days (never a time she didn't give).
+   */
+  forActivity?: readonly ActivityCategory[];
 }
 
 export interface MeetingMonth {
@@ -71,9 +77,14 @@ export interface MeetingMonth {
   };
   examples: readonly MeetingExample[];
   practice: { title: string; steps: readonly string[]; noKids: readonly string[] };
+  /**
+   * Megan's short audio introduction to the month's principle, once a real recording exists (a file in public/, e.g.
+   * '/audio/club/meeting-2027-01.mp3'). The meeting shows a player only when this is set; never autoplays.
+   */
+  audio?: { src: string; minutes: number };
 }
 
-const SCHEDULE_ACTIVITY = '{activity} is part of our week{days}. What does {who} need to be ready for it?';
+const SCHEDULE_ACTIVITY = 'What could {who} do{eveningBefore} to be ready for {activityMid}{days}?';
 
 export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
@@ -104,6 +115,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
       ownership: { withGrowth: '{growth} is something we want to grow in. What’s one small step {kids} could take this week?', withExisting: '{who} already {takes} care of {task}. What does finished look like?', generic: 'Who could be in charge of checking what they need for their own week?' },
     },
     examples: [
+      { id: 'jan-gear', minAge: 6, category: 'belongings', forActivity: ['sports', 'lessons', 'clubs'], description: 'Check and pack my things for {activity} before bed.', finished: 'Everything for {activity} is packed and by the door.' },
       { id: 'jan-clothes', minAge: 3, maxAge: 5, category: 'belongings', description: 'Look at the week with a grown-up and lay out clothes for the first day.', finished: 'Clothes for the first day are out and ready.', when: 'At our weekly meeting' },
       { id: 'jan-spot', minAge: 6, maxAge: 10, category: 'school-prep', growth: 'pack-school-bag', description: 'Check my days on the calendar and say one thing I need.', finished: 'I told the family one thing I need before the meeting ends.', when: 'At our weekly meeting' },
       { id: 'jan-own-week', minAge: 11, category: 'belongings', growth: 'own-belongings', description: 'Review my own week and ask for any help or rides early.', finished: 'My week is on the calendar and I asked for help before the meeting ended.', when: 'At our weekly meeting' },
