@@ -1,105 +1,119 @@
 /**
- * January kit: A Fresh Start, Together (docs/club/YEAR_ONE_CALENDAR.md → January; mailer in
+ * January kit: A Week Everyone Can See (docs/club/YEAR_ONE_CALENDAR.md → January; mailer in
  * docs/club/mailers/2027-01-fresh-start-together.md). Planning-phase content: not published, not for sale.
  *
- * The three-part shape, like August, October and December: one letter, one action, one optional tool.
- * - The letter (`mailer.letter`): you don't need a whole new routine. Choose one thing, not all of them.
- * - The action (`action`, a plain checklist, no dates): Our One-Thing Family Reset, five steps, with the family's one
- *   thing written above them (`action.focus`); online, a short plan on step 2 and an optional start day on step 4.
- * - The tool (`tool`): the Family Habit Builder, a site tool opened inside the Club with the family's first names and
- *   its one thing: one habit statement, tied to something they already do, and a seven-day practice card.
- * January improves one recurring rhythm. Not a decluttering month, not a responsibility overhaul, not a 30-day
- * program: no streaks, scores or reminders. The family calendar holds the start day and the check-in.
+ * The three-part shape, like the other three-part kits: one letter, one action, one optional tool.
+ * - The letter (`mailer.letter`): you don't have to remember everything; the family calendar is everyone's.
+ * - The action (`action`, a plain checklist): Our First 15-Minute Family Meeting, five steps with suggested minutes,
+ *   the meeting day and time written above them (`action.focus`).
+ * - The tool (`tool`): the Family Weekly Reset Builder, a site tool opened inside the Club with the family: a
+ *   personalized 15-minute meeting guide to keep by the wall calendar, with who leads.
+ * January makes the existing wall calendar collaborative. Not a weekly planner or a second calendar (the plan stays
+ * on the wall), and not the paid Weekly Reset System.
  */
 import type { KitConfig } from '../types';
-import { habitAreas } from '../../family-habits';
 
 const SLUG = '2027-01-fresh-start-together';
+const QUESTION = 'What’s one thing happening this week that everyone needs to know about?';
 
 export const kit: KitConfig = {
   slug: SLUG,
   month: '2027-01',
-  theme: 'Our Family Habit Cards',
-  subtitle: 'Build the habit. Lose the reminder.',
-  shift: 'Instead of Mom repeatedly prompting the same routine, the family attaches one useful action to something already happening and places a reminder where that action takes place.',
-  engine: 'routines',
+  theme: 'A Week Everyone Can See',
+  subtitle: 'One family. One calendar. Everyone knows the plan.',
+  shift: 'The family looks at the week together in a 15-minute meeting around the wall calendar, everyone owning their part, instead of Mom carrying the plan in her head.',
+  engine: 'planning',
   engineVersion: 1,
   items: [],
   action: {
     kind: 'checklist',
-    title: 'Our Family Habit Plan',
-    intro: 'One daily frustration. One existing cue. One small action.',
+    title: 'Our First 15-Minute Family Meeting',
+    intro: 'One short conversation. One shared plan.',
+    note: 'The minutes are a guide. With little ones, keep it shorter; a big household may need a little longer.',
     items: [
-      { text: 'Choose one frustration.', detail: 'What’s one part of everyday family life that isn’t working well?' },
-      { text: 'Use a habit that already happens.', detail: 'After breakfast, coming home, or brushing teeth: pick one reliable cue.' },
-      { text: 'Choose the next small action.', detail: 'Give each person a realistic part that follows that cue.' },
-      { text: 'Place the reminder where it happens.', detail: 'The child sees the card at the point of action, not on a chart Mom manages.' },
-      { text: 'Try it for seven days.', detail: 'No points or streaks. Keep the cue if it works, adjust if it does not.' },
+      { text: 'Gather around the calendar. (3 min)', detail: 'Everyone where they can see the wall calendar. Each person shares one important thing coming up.' },
+      { text: 'Look at the week ahead. (4 min)', detail: 'School, appointments, practices, family events. Add anything missing to the calendar.' },
+      { text: 'Decide who’s doing what. (3 min)', detail: 'Rides, getting ready for activities, important jobs. A whole job each, not reminders.' },
+      { text: 'Make the week easier. (3 min)', detail: 'On the busiest days: simple meals in the meal plan, the grocery list, what can be ready ahead.' },
+      { text: 'Ask who needs help. (2 min)', detail: 'Everyone says what they need. Make final changes to the calendar, and you’re done.' },
     ],
     focus: {
-      label: 'What is your family’s one thing?',
-      printLabel: 'Our one thing this month',
-      // The habit builder's own areas, so the tool opens on the one she chose.
-      suggestions: habitAreas.map((a) => ({ id: a.id, label: a.label })),
-      planAt: 1,
-      planLabel: 'Our simpler plan',
-      startAt: 3,
-      startLabel: 'Start day (optional)',
+      label: 'Our family meeting day and time',
+      printLabel: 'Our family meeting day and time',
+      // The builder's own meeting days, so the guide opens on the one she chose.
+      suggestions: [
+        { id: 'sunday', label: 'Sunday evening' },
+        { id: 'friday', label: 'Friday after dinner' },
+        { id: 'saturday', label: 'Saturday morning' },
+      ],
+      suggestionsLabel: 'Ideas',
     },
   },
   tool: {
-    tool: 'habit-builder',
-    title: 'Make Your Habit Reminder Card',
-    blurb: 'Tie one small action to something you already do, then place the reminder where it happens.',
-    cta: 'Make Our Habit Card',
-    note: 'Optional. The reset works without it.',
+    tool: 'family-reset',
+    // Placeholder copy in the brand voice (the brief's section on the digital kit didn't arrive): for the owner to confirm.
+    title: 'Make Your Family Weekly Reset',
+    blurb: 'Tell us who’s taking part, what makes your weeks busy, and when you’ll meet. We’ll make a 15-minute guide to keep by the calendar.',
+    cta: 'Build Our Weekly Reset',
+    note: 'Optional. The meeting below the letter works without it.',
   },
   printables: [
-    { id: 'one-thing-plan', title: 'Our Family Habit Plan', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
+    { id: 'family-meeting', title: 'Our First 15-Minute Family Meeting', page: 'letter-portrait', kind: 'flagship', component: 'Action' },
     { id: 'letter', title: 'Your January letter', page: 'letter-portrait', kind: 'worksheet', component: 'Letter' },
   ],
   mailer: {
     // A draft for Megan to approve or rewrite in her own words. No invented stories, numbers or quotes.
     letter: {
       draft: true,
-      title: 'You Don’t Need a Whole New Routine',
+      title: 'You Don’t Have to Remember Everything',
       greeting: 'Hi friend,',
       namedGreeting: 'Hi {name},',
       body: [
-        'January has a way of asking for everything at once. New schedules, new goals, a new system for the mail, the meals and the mornings. It can feel like the whole house needs fixing before February.',
-        'It doesn’t. Most families don’t need an overhaul. Sometimes one part of the day working better is enough to make the whole house feel calmer.',
-        'So this month, choose one thing. Maybe it’s the rush to get out the door, or backpacks and shoes all over the house, or a kitchen that stays messy after dinner. Maybe it’s bedtime, or reminding everyone about the same things every day. Not all of them. Just one.',
-        'Then ask your family to help solve it. The reset below is five small steps, and the last one is simply trying your plan for a week.',
-        'At dinner this week, ask everyone: “What’s one part of our day that we could make easier for everyone?”',
-        'One small change, made together, is a fresh start.',
+        'When life gets busy, it’s easy for one person to become the keeper of everyone’s schedule. Mom remembers the appointments, checks the school emails, knows who’s picking up whom, thinks about dinner, and reminds everyone what comes next.',
+        'Even with a calendar on the wall, she can still be the only one carrying the plan.',
+        'A family calendar works best when the whole family uses it, and a short weekly meeting is a simple way to start. Everyone sees what’s coming, adds what they know, and takes their part. Children learn to look ahead to their own activities and get their things ready. The grown-ups in the house own whole jobs instead of waiting to be told.',
+        'Mom doesn’t need to be the family’s walking calendar. The calendar can do that, for everyone.',
+        'The meeting below takes about fifteen minutes. Start this week.',
+        `At dinner this week, ask: “${QUESTION}”`,
       ].join('\n\n'),
       signoff: 'Megan',
     },
+    // Back of the letter: placeholder copy in the brand voice (the brief's back-page section didn't arrive).
     fieldGuide: {
-      title: 'Small Changes That Stick',
+      title: 'The Calendar Is Everyone’s',
       sections: [
-        { heading: 'Start with something small.', body: 'A five-minute habit the family actually practices is better than an ambitious plan nobody follows.' },
-        { heading: 'Connect it to something you already do.', body: 'Attach the new habit to a familiar part of the day, such as breakfast, arriving home, or finishing dinner.' },
-        { heading: 'Let everyone play a part.', body: 'The goal isn’t for Mom to supervise another routine. Give each person a clear responsibility that fits their ability.' },
+        { heading: 'Everyone brings something.', body: 'Each person adds what they know: a practice, a form, a late day at work.' },
+        { heading: 'Owners, not reminders.', body: 'A ride or a job belongs to someone, start to finish, so nobody has to chase it.' },
+        { heading: 'Short beats perfect.', body: 'Fifteen minutes most weeks does more than an hour now and then.' },
       ],
     },
-    story: {
-      title: 'The kitchen after dinner',
-      body: 'Every night the kitchen stays a mess, and one person cleans it after everyone else leaves the table. The family’s plan: after dinner, everyone spends five minutes resetting the kitchen. One clears plates, one wipes the table, one loads the dishwasher. After seven days, they check in and decide what to keep.',
+    ageGuide: {
+      title: 'Taking part, by age',
+      note: 'Starting points. Grown-ups make the calls that need a grown-up.',
+      rows: [
+        { ages: '3–5', jobs: 'Point to one thing on the calendar they’re looking forward to' },
+        { ages: '6–9', jobs: 'Name one thing to remember and get their own bag ready' },
+        { ages: '10–12', jobs: 'Read the week aloud, lead a step, pack for their activities' },
+        { ages: '13+', jobs: 'Add their own plans, flag clashes, say which rides they need' },
+      ],
+    },
+    tip: {
+      title: 'Take turns leading',
+      body: 'The meeting doesn’t have to be Mom’s. A young child can lead by asking the first question; a teen can guide the whole thing.',
     },
     conversation: {
       label: 'Ask at dinner this week',
-      question: 'What’s one part of our day that we could make easier for everyone?',
-      note: 'Everyone answers, grown-ups too. Then choose one together.',
+      question: QUESTION,
       placement: 'after-example',
     },
     invite: {
-      title: 'Build Your Family Habit',
-      body: 'Scan the code for this month’s kit and our Family Habit Builder. Choose the daily problem, an existing anchor and who participates. Print a habit reminder card and put it right where the action happens.',
+      title: 'Make Your Family Weekly Reset',
+      body: 'Tell us who’s taking part and what makes your weeks busy. We’ll make a one-page, 15-minute meeting guide to keep beside the calendar. Scan the code, then tap “Build Our Weekly Reset.”',
     },
-    calendarNote: 'Choose your start day and a day to check in together. Write both on your family calendar.',
-    screenNote: 'It comes in the mail with the same reset. Use that copy as it is, or print the one above with your one thing and plan on it. Either works; there’s nothing to keep in step.',
+    calendarNote: 'Keep the meeting guide beside the calendar. Write the week’s plans, meals, groceries and to-dos where everyone can see them.',
+    screenNote: 'It comes in the mail with the same meeting. Use that copy as it is, or print the one above with your meeting day on it. Either works; there’s nothing to keep in step.',
     letterLinkTop: true,
+    accent: 'calendar',
     qrPath: `/club/kits/${SLUG}?source=mailer`,
   },
 };
