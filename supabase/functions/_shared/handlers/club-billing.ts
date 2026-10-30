@@ -93,7 +93,8 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   const plan = body.plan;
   const user = await userFromRequest(deps, req);
   const email = user?.email ?? (typeof body.email === 'string' ? body.email.trim().toLowerCase() : '');
-  if (!EMAIL_RE.test(email) || email.length > 254) throw new Refusal('invalid_email');
+  // Guests enter their email in Stripe Checkout. Signed-in members retain their verified address.
+  if (email && (!EMAIL_RE.test(email) || email.length > 254)) throw new Refusal('invalid_email');
 
   const state = await deps.db.rpc<CheckoutState>('club_checkout_state', { p_user: user?.id ?? null, p_email: email });
   const mode = state.settings.checkout_mode;
@@ -110,7 +111,7 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   const price = await clubPrice(deps, plan);
   if (!price) throw new Refusal('not_configured', 503);
 
-  let customer = state.customer;
+  let customer = email ? state.customer : null;
   if (customer) {
     // Stripe is the authority: a live subscription there (e.g. a webhook still on its way) also refuses.
     const subs = await deps.stripe.request<{ data: { status: string }[] }>('GET', '/v1/subscriptions', { customer, status: 'all', limit: 20 });
@@ -120,15 +121,15 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     if (open?.url) return { url: open.url, reused: true };
   } else {
     const c = await deps.stripe.request<{ id: string }>('POST', '/v1/customers', {
-      email,
+      ...(email ? { email } : {}),
       metadata: { club: 'organized-family-club', ...(user ? { user_id: user.id } : {}) },
-    }, `club-customer:${email}`);
+    }, email ? `club-customer:${email}` : `club-guest-customer:${crypto.randomUUID()}`);
     customer = c.id;
     if (user) await deps.db.rpc('club_member_link', { p_user: user.id, p_email: email, p_customer: customer, p_livemode: deps.stripe.mode === 'live' });
   }
 
   const trialEnd = state.trial_end ? Math.max(Math.floor(Date.parse(state.trial_end) / 1000), deps.now() + MIN_TRIAL_SECONDS) : null;
-  const meta = { club: 'organized-family-club', plan, email, ...(user ? { user_id: user.id } : {}), ...(state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {}) };
+  const meta = { club: 'organized-family-club', plan, ...(email ? { email } : {}), ...(user ? { user_id: user.id } : {}), ...(state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {}) };
   const expiresAt = deps.now() + 60 * 60;
   const site = returnBase(deps, req);
   const session = await deps.stripe.request<{ id: string; url: string; livemode: boolean; expires_at: number }>('POST', '/v1/checkout/sessions', {
@@ -149,8 +150,9 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
       ...(trialEnd ? { trial_end: trialEnd, trial_settings: { end_behavior: { missing_payment_method: 'cancel' } } } : {}),
     },
     success_url: `${site}/club/welcome?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${site}/club/join?canceled=1`,
+    cancel_url: `${site}/club/#offer`,
   }, `club-checkout:${customer}:${plan}:${state.intro_month ? 'intro' : trialEnd ? 'trial' : 'pay'}:${Math.floor(deps.now() / 600)}`);
+  // The empty guest email is replaced by Stripe's verified Checkout email during webhook fulfillment.
   await deps.db.rpc('club_checkout_record', {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1000).toISOString() },
   });
