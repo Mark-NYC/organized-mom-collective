@@ -28,7 +28,7 @@ Production's migration history ends at `club_first_month_free` (20261107). Not a
 - `npm run test:admin-sql` (every migration; admin, accounts, Club access, membership, profile tests): pass.
 - `npm run test:club` (billing end to end, every migration): 34/34.
 
-**Deployment steps** (in this order; owner's go-ahead required):
+**Deployment steps:** superseded by the full runbook, [PRODUCTION_ROLLOUT.md](PRODUCTION_ROLLOUT.md) (backup, pre-flight fingerprint, verify and rollback scripts, rehearsal). Summary (owner's go-ahead required):
 1. Re-check production's list: Supabase → Database → Migrations (or `list_migrations`) still ends at `club_first_month_free`.
 2. Read-only snapshot for comparison: counts of `club_households`, `club_family_members`, `club_fulfillment_orders` by `fulfillment_type, status`, and `club_resource_versions`.
 3. Apply `20261108000000_club_welcome_kit.sql` (SQL editor or `apply_migration`, name `club_welcome_kit`). It runs in one transaction.

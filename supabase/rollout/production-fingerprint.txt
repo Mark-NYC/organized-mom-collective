@@ -1,0 +1,10 @@
+# Production's fingerprint (supabase/rollout/fingerprint.sql), captured read-only on Oct 30 2026 before the rollout.
+club_admin_fulfillment(date) 7fce43bc7b89f3303af1a57e45832cdb
+club_admin_set_fulfillment(uuid,text,text,text) 1298bae7f7b65a4b1bfe55518eb0cd4f
+club_admin_welcome_queue() b33232569027dce5327b57223ba01006
+club_email_audience(text,date) 7391cb0940befe261f065c733ae3bc9b
+club_intro_grant(text,text) 18db7d92d9a50e36bbaa151d668d7459
+club_invoice_apply(jsonb,jsonb) a07e28c223d675f82c6fa9e632953795
+club_resource_save(text,jsonb,integer) 5c62021e7d2f8043fb23309b1821c7a9
+table club_households columns 3d2e914ecf7e6a6d6083f8660d57b138
+view club_fulfillment_queue b0093d025473b92c4ca2e16b41fe9ab2
