@@ -309,7 +309,7 @@ async function checkout(deps, req, body) {
   const plan = body.plan;
   const user = await userFromRequest(deps, req);
   const email = user?.email ?? (typeof body.email === "string" ? body.email.trim().toLowerCase() : "");
-  if (!EMAIL_RE.test(email) || email.length > 254) throw new Refusal("invalid_email");
+  if (email && (!EMAIL_RE.test(email) || email.length > 254)) throw new Refusal("invalid_email");
   const state = await deps.db.rpc("club_checkout_state", { p_user: user?.id ?? null, p_email: email });
   const mode = state.settings.checkout_mode;
   if (mode === "off" || mode === "test" && deps.stripe.mode !== "test" || mode === "live" && deps.stripe.mode !== "live") {
@@ -322,7 +322,7 @@ async function checkout(deps, req, body) {
   }
   const price = await clubPrice(deps, plan);
   if (!price) throw new Refusal("not_configured", 503);
-  let customer = state.customer;
+  let customer = email ? state.customer : null;
   if (customer) {
     const subs = await deps.stripe.request("GET", "/v1/subscriptions", { customer, status: "all", limit: 20 });
     if (subs.data.some((s) => LIVE_STATUSES.includes(s.status) && s.status !== "incomplete")) throw new Refusal("already_member", 409);
@@ -330,14 +330,14 @@ async function checkout(deps, req, body) {
     if (open?.url) return { url: open.url, reused: true };
   } else {
     const c = await deps.stripe.request("POST", "/v1/customers", {
-      email,
+      ...email ? { email } : {},
       metadata: { club: "organized-family-club", ...user ? { user_id: user.id } : {} }
-    }, `club-customer:${email}`);
+    }, email ? `club-customer:${email}` : `club-guest-customer:${crypto.randomUUID()}`);
     customer = c.id;
     if (user) await deps.db.rpc("club_member_link", { p_user: user.id, p_email: email, p_customer: customer, p_livemode: deps.stripe.mode === "live" });
   }
   const trialEnd = state.trial_end ? Math.max(Math.floor(Date.parse(state.trial_end) / 1e3), deps.now() + MIN_TRIAL_SECONDS) : null;
-  const meta = { club: "organized-family-club", plan, email, ...user ? { user_id: user.id } : {}, ...state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {} };
+  const meta = { club: "organized-family-club", plan, ...email ? { email } : {}, ...user ? { user_id: user.id } : {}, ...state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {} };
   const expiresAt = deps.now() + 60 * 60;
   const site = returnBase(deps, req);
   const session = await deps.stripe.request("POST", "/v1/checkout/sessions", {
@@ -358,7 +358,7 @@ async function checkout(deps, req, body) {
       ...trialEnd ? { trial_end: trialEnd, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } } : {}
     },
     success_url: `${site}/club/welcome?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${site}/club/join?canceled=1`
+    cancel_url: `${site}/club/#offer`
   }, `club-checkout:${customer}:${plan}:${state.intro_month ? "intro" : trialEnd ? "trial" : "pay"}:${Math.floor(deps.now() / 600)}`);
   await deps.db.rpc("club_checkout_record", {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1e3).toISOString() }
@@ -387,7 +387,12 @@ async function signedIn(deps, req) {
 async function portal(deps, req) {
   const user = await signedIn(deps, req);
   const state = await deps.db.rpc("club_checkout_state", { p_user: user.id, p_email: user.email });
-  const [own] = await deps.db.select("club_customers", `user_id=eq.${user.id}&select=stripe_customer_id`);
+  const subs = await deps.db.select(
+    "club_subscriptions",
+    `user_id=eq.${user.id}&select=stripe_customer_id,status,flags&order=started_at.desc`
+  );
+  const sub = subs.find((s) => LIVE_STATUSES.includes(s.status) && !s.flags?.includes("duplicate")) ?? subs[0];
+  const [own] = sub ? [sub] : await deps.db.select("club_customers", `user_id=eq.${user.id}&select=stripe_customer_id`);
   if (!own) throw new Refusal("no_membership", 404);
   const session = await deps.stripe.request("POST", "/v1/billing_portal/sessions", {
     customer: own.stripe_customer_id,
