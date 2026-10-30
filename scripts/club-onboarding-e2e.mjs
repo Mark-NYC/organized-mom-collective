@@ -9,10 +9,12 @@
  *   PUBLIC_CLUB_ENABLED=true PUBLIC_ACCOUNTS_ENABLED=true npx astro build && npx astro preview --port 4329
  *   node scripts/club-onboarding-e2e.mjs [http://localhost:4329] [--shots=dir]
  *
+ * --only=months opens every month's member copy (edit, save, reload, phone, print); not part of the default run.
+ *
  * Exits 1 when any check fails.
  */
 import { createRequire } from 'node:module';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
@@ -564,7 +566,89 @@ scenarios.resume = async (browser) => {
   await page.context().close();
 };
 
-const names = ONLY ? ONLY.split(',') : Object.keys(scenarios);
+// Every month in the member registry (src/data/club/resources.ts), opened as her own copy: her family on it, an edit
+// saved to her account and back after a reload, phone and desktop without sideways scrolling, every image loaded, and
+// a Letter print with no blank page. Run with --only=months (it isn't part of the default run: twelve months are slow).
+const RESOURCES = [...readFileSync(new URL('../src/data/club/resources.ts', import.meta.url), 'utf8')
+  .matchAll(/slug: '(\d{4}-\d{2}-[a-z0-9-]+)', month: '(\d{4}-\d{2})'/g)].map(([, slug, month]) => ({ slug, month }));
+/** Types a marker into the first thing on her copy she can edit in place; null when there's nothing to type into. */
+const editInPlace = (page, marker) => page.evaluate((marker) => {
+  const host = document.getElementById('club-month-content');
+  const seen = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+  const el = [...host.querySelectorAll('[contenteditable="true"], textarea, input[type="text"]:not([readonly])')].find(seen);
+  if (!el) return null;
+  el.focus();
+  if (el.isContentEditable) {
+    el.textContent = marker;
+    el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+  } else {
+    el.value = marker;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  el.blur();
+  el.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+  return el.tagName.toLowerCase() + (el.isContentEditable ? '[contenteditable]' : '');
+}, marker);
+const pageTexts = (pdf) => execFileSync('pdftotext', ['-layout', pdf, '-']).toString().split('\f').slice(0, -1);
+scenarios.months = async (browser) => {
+  console.log('Every month: her own copy, edit → save → reload, phone and desktop, print');
+  check('the registry lists twelve months', RESOURCES.length === 12, RESOURCES.map((r) => r.month).join(' '));
+  freshDb();
+  as.family();
+  sql(`update public.club_kits set status = 'scheduled'`);
+  sql(`insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
+       select '${USER.id}', h.id, m::date, 'digital', 1, 'admin', 'admin', 'QA: every month'
+         from public.club_households h, unnest(array[${RESOURCES.map((r) => lit(`${r.month}-01`)).join(', ')}]) m
+        where h.owner_user_id = '${USER.id}'
+       on conflict do nothing`);
+  for (const { slug, month } of RESOURCES) {
+    const name = `${month} ${slug.slice(8)}`;
+    const page = await newPage(browser, DESKTOP);
+    await page.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
+    const open = await page.waitForFunction(() => document.getElementById('club-month-content')?.hidden === false, null, { timeout: 15000 }).then(() => true, () => false);
+    check(`${name}: opens for her`, open, open ? '' : (await page.locator('main').innerText()).slice(0, 160));
+    if (!open) { await page.context().close(); continue; }
+    await page.waitForTimeout(800);
+    const text = await page.locator('#club-month-content').innerText();
+    check(`${name}: prepared with her family`, /Sofia|Mateo|Rivera/i.test(text));
+    const imgs = await page.evaluate(() => [...document.querySelectorAll('#club-month-content img')].filter((i) => i.getClientRects().length && !(i.complete && i.naturalWidth > 0)).map((i) => i.getAttribute('src')));
+    check(`${name}: every image loads`, imgs.length === 0, imgs.join(' '));
+    check(`${name}: desktop, no sideways scrolling`, await noSideScroll(page));
+    const marker = `QA${month.replace('-', '')}`;
+    const how = await editInPlace(page, marker);
+    if (how) {
+      await page.waitForFunction(() => /Saved|save to your account|Changes save/.test(document.body.innerText), null, { timeout: 5000 }).catch(() => undefined);
+      await page.waitForTimeout(2500);
+      const saved = sql(`select coalesce(max(revision), 0) || ':' || coalesce(bool_or(v.state::text like '%${marker}%'), false) from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${slug}'`);
+      check(`${name}: an edit (${how}) saves to her account`, saved.endsWith(':true'), saved);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForFunction(() => document.getElementById('club-month-content')?.hidden === false, null, { timeout: 15000 }).catch(() => undefined);
+      await page.waitForTimeout(800);
+      check(`${name}: still there after a reload`, (await page.locator('#club-month-content').innerText()).includes(marker));
+    } else {
+      check(`${name}: nothing to type into in place (its editor opens from a button; covered by its own QA)`, true);
+    }
+    check(`${name}: no script errors`, page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
+    const pages = await printPdf(page, `months-${month}`);
+    const texts = pageTexts(`${SHOTS ?? '/tmp'}/months-${month}.pdf`);
+    const blank = texts.map((t, i) => (t.trim() ? null : i + 1)).filter(Boolean);
+    check(`${name}: prints ${pages} Letter page(s), none blank`, pages > 0 && blank.length === 0, blank.length ? `blank: ${blank.join(',')}` : '');
+    await page.context().close();
+
+    const phone = await newPage(browser, MOBILE);
+    await phone.goto(`${BASE}/club/resources/${slug}`, { waitUntil: 'networkidle' });
+    const ok = await phone.waitForFunction(() => document.getElementById('club-month-content')?.hidden === false, null, { timeout: 15000 }).then(() => true, () => false);
+    await phone.waitForTimeout(800);
+    check(`${name}: phone opens with her family`, ok && /Sofia|Mateo|Rivera/i.test(await phone.locator('#club-month-content').innerText()));
+    const wide = await phone.evaluate(() => [document.documentElement.scrollWidth, [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 1 && getComputedStyle(e).position !== 'fixed').slice(0, 3).map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(' ')[0]}`)]);
+    check(`${name}: phone, no sideways scrolling`, await noSideScroll(phone), `page ${wide[0]}px wide: ${wide[1].join(' ')}`);
+    await shot(phone, `months-${month}-phone`);
+    await phone.context().close();
+  }
+};
+
+const names = ONLY ? ONLY.split(',') : Object.keys(scenarios).filter((n) => n !== 'months');
 const browser = await chromium.launch();
 try {
   for (const n of names) await scenarios[n](browser);
