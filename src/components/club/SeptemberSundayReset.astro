@@ -15,9 +15,9 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
  <div class="osr-layout">
   <aside class="osr-editor" aria-label="Prepared January Weekly Meeting">
    <div class="osr-editor-head"><p class="osr-kicker">ORGANIZED FAMILY CLUB · JANUARY 2027</p><h2>Our Family <em>Weekly Meeting.</em></h2><button type="button" class="osr-edit-link" data-open-vision>Why this matters</button></div>
-   <div class="osr-prepared" id="september-edit-controls"><span class="osr-kicker">YOUR FAMILY'S PREPARED WEEKLY FAMILY MEETING</span><strong>Our Weekly Meeting</strong><p>Look ahead, get ready, share the work. Your first practice: getting ready for fall.</p>
+   <div class="osr-prepared" id="september-edit-controls"><span class="osr-kicker">YOUR FAMILY'S PREPARED WEEKLY MEETING</span><strong>Our Weekly Meeting</strong><p>Look ahead, get ready, share the work. Your first practice: getting ready for the week.</p>
     <div class="osr-summary-row"><span>Weekly rhythm</span><b data-osr-summary-trigger>Sunday after lunch</b></div>
-    <div class="osr-summary-row"><span>First example</span><b data-osr-summary-lead>Getting Ready for Fall</b></div>
+    <div class="osr-summary-row"><span>First example</span><b data-osr-summary-lead>Getting Ready for the Week</b></div>
     <button type="button" class="osr-edit-link" data-open-editor>Edit Weekly Meeting <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button>
    </div>
    <p class="osr-compact-note">Keep this sheet beside your wall calendar. Everyone learns to prepare, not just Mom.</p>
@@ -27,24 +27,26 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
   <dialog class="osr-dialog osr-guided-dialog" data-osr-editor aria-labelledby="osr-editor-title">
     <div class="osr-dialog-head"><div><span class="osr-guide-kicker">MAKE IT YOURS · JANUARY</span><h2 id="osr-editor-title">Our Family Weekly Meeting</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
     <p class="osr-guide-intro">Your weekly rhythm and first first-week example are prepared. Change only what doesn't fit.</p>
-    <section class="osr-guide-section"><h3>1. When will you reset each Sunday?</h3>
+    <section class="osr-guide-section"><h3>1. When will your family meet each week?</h3>
       <div class="osr-choice-grid" data-osr-trigger-choices>
        <button type="button" data-osr-trigger-choice="Sunday after breakfast">After breakfast</button>
        <button type="button" data-osr-trigger-choice="Sunday after church">After church</button>
        <button type="button" data-osr-trigger-choice="Sunday after lunch">After lunch</button>
        <button type="button" data-osr-trigger-choice="Sunday evening">Sunday evening</button>
+        <button type="button" data-osr-trigger-choice="Friday after dinner">Friday after dinner</button>
+        <button type="button" data-osr-trigger-choice="Saturday morning">Saturday morning</button>
       </div>
     </section>
     <section class="osr-guide-section">
       <div class="osr-guide-caption"><h3>2. Everyone's weekly Weekly Meeting role</h3><span>Keep and reuse</span></div>
-      <p class="osr-guide-tip">These are ongoing roles for checking the calendar and preparing ahead, not fall chores.</p>
+      <p class="osr-guide-tip">These are ongoing roles for checking the calendar and preparing ahead, not one-time preparation jobs.</p>
       <div class="osr-guide-jobs" data-osr-edit-assignments></div>
     </section>
     <section class="osr-guide-section">
-      <div class="osr-guide-caption"><h3>3. First example: Getting Ready for Fall</h3><span>Do once</span></div>
+      <div class="osr-guide-caption"><h3>3. First example: Getting Ready for the Week</h3><span>Do once</span></div>
       <p class="osr-guide-tip">We've assigned a few timely jobs. Adjust or remove anything that doesn't apply.</p>
       <div class="osr-guide-jobs" data-osr-fall-editor></div>
-      <button type="button" class="osr-guide-add" data-osr-restore-fall>Restore all fall jobs</button>
+      <button type="button" class="osr-guide-add" data-osr-restore-fall>Restore all preparation jobs</button>
     </section>
     <details class="osr-guide-more"><summary>More options</summary>
       <label>Weekly Meeting cue <input type="text" maxlength="85" data-osr-custom-trigger placeholder="E.g. Sunday at 4 PM" /></label>
@@ -97,8 +99,8 @@ import FamilyActivityCalendar from '../FamilyActivityCalendar.astro';
         <p>Everyone owns their job. Children gather and sort; adults help with purchases and donation decisions.</p>
        </div>
       </div>
-      <div class="osr-notes"><h3>Next week, try it again</h3><p>Turn to the front and use the same three steps with whatever is coming up on your family's wall calendar. Your fall jobs are done once, not every week.</p></div>
-      <footer class="osr-foot"><strong>We learn to think ahead together.</strong><span>ONE WEEKLY FAMILY MEETING · ONE FIRST EXAMPLE</span></footer>
+      <div class="osr-notes"><h3>Next week, try it again</h3><p>Turn to the front and use the same three steps with whatever is coming up on your family's wall calendar. Your preparation jobs are done once, not every week.</p></div>
+      <footer class="osr-foot"><strong>We learn to think ahead together.</strong><span>ONE WEEKLY MEETING · ONE FIRST EXAMPLE</span></footer>
      </article>
     </div>
    </div>
@@ -359,7 +361,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.osr')){
   const owner=document.createElement('p');owner.className='osr-task-owner';owner.textContent=nameOf(members.find(m=>m.id===item.ownerId)??members[0]??{id:'',firstName:'Our family',kind:'adult'});
   const description=document.createElement('p');description.textContent=item.description;
   details.append(heading,owner,description);section.append(img,details);container.append(section);
- }if(!container.children.length){const empty=document.createElement('p');empty.textContent='No fall jobs selected. Restore a task in Make Changes.';container.append(empty)}};
+ }if(!container.children.length){const empty=document.createElement('p');empty.textContent='No preparation jobs selected. Restore a task in Make Changes.';container.append(empty)}};
  const drawEditor=()=>{
   const weekly=root.querySelector<HTMLElement>('[data-osr-edit-assignments]');if(weekly){weekly.replaceChildren();for(const member of members){
    const card=document.createElement('div');card.className='osr-guided-job';
