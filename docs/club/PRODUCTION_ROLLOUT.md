@@ -11,7 +11,7 @@ are generic, the admin Welcome Kit queue fails, the Welcome Kit emails aren't se
 | --- | --- | --- | --- |
 | 0 | Rehearsal and read-only checks | done | — |
 | 1 | Merge PR #269 (site: account saving, links, `/club/family` fix) | owner | yes (merge) |
-| 2 | Back up the database | owner (needs the database password) | — |
+| 2 | Back up the database and verify it | owner runs the script (needs the database password); Claude cross-checks | — |
 | 3 | Apply the two migrations | owner or Claude | **yes** |
 | 4 | Deploy `club-admin` and `club-webhook` | owner or Claude | **yes** |
 | 5 | Production member-experience test (Stripe test mode) | together | — |
@@ -37,7 +37,7 @@ functions keep working with the migrated database in between (the return fields 
   `club-billing` (v8) matches it; `club-admin` (v9) and `club-webhook` (v7) were deployed Oct 29 from commit `163fb24`, before the Welcome Kit commits (`eaf68bd`, `08dee7d`:
   Welcome Kit admin actions, `kit_reminder` emails, Welcome Kit wording in the welcome email).
 - **Backups:** the project is on the Free plan, which has no automatic or downloadable backups (Supabase docs:
-  Platform → Database Backups). Stage 2 is a manual dump.
+  Platform → Database Backups). Stage 2 is a manual, self-verifying dump.
 
 ## Stage 1: merge PR #269
 
@@ -46,24 +46,34 @@ After the Cloudflare deploy finishes (a few minutes), on the live site:
 - `/club/family` signed in as a test-mode member: the family form opens (before the migrations, without the profile summary).
 - Nothing else changes for the public site.
 
-## Stage 2: back up (owner)
+## Stage 2: back up and verify (owner)
 
-The Supabase CLI needs Docker. Connection string: Supabase → **Connect** → session pooler (or direct), with the
-database password.
+The Free plan keeps no backups, so this is one `pg_dump` from your computer, checked on the spot:
+`scripts/backup-production-db.sh`. No Docker or Supabase CLI. It only reads; nothing on the server changes.
 
-```bash
-supabase db dump --db-url "$DB_URL" -f backup-2026-10-30-roles.sql --role-only
-```
+1. **Tools (once, Mac):** `brew install libpq`, then `export PATH="$(brew --prefix libpq)/bin:$PATH"`. Any pg_dump at
+   least as new as the server (Postgres 17) works; the script checks.
+2. **Connection string:** Supabase → **Connect** → **Session pooler** (works without IPv6), with the database password
+   filled in. Forgot it: Project Settings → Database → Reset database password (nothing in this repo uses it: the site uses the public key, the functions the service key; reset only if no other tool of yours connects with it).
+3. **Run** from the repo folder: `bash scripts/backup-production-db.sh`. Paste the connection string when asked (it isn't
+   shown or saved). Takes under a minute (the database is ~15 MB).
+4. **It verifies the backup itself:** the exact row count of every table in `public`, `auth`, `storage` and
+   `supabase_migrations` inside the dump equals the live count, and the dump has every public table, function, policy
+   and view. It ends with "Backup verified" and writes `~/omc-backups/<time>/` (`database.dump`, `SUMMARY.txt`).
+5. **Second check:** send Claude `SUMMARY.txt` only (table names, counts, a checksum; no customer data). Claude compares
+   the counts with production, read-only, at that moment.
+6. **Keep it safe:** copy the folder to an encrypted drive or your password manager's file storage. Never the repo, email
+   or a chat: `database.dump` holds customer names, emails and addresses.
 
-```bash
-supabase db dump --db-url "$DB_URL" -f backup-2026-10-30-schema.sql
-```
+Tested locally: the script's dump restores into an empty Postgres (with Supabase's `extensions` schema, as every
+Supabase project has) with all 51 tables at their exact row counts; a changed count is reported as a mismatch.
 
-```bash
-supabase db dump --db-url "$DB_URL" -f backup-2026-10-30-data.sql --use-copy --data-only
-```
+Not in a database backup: files in Supabase Storage (`shop-downloads`, 25 product files, 59 MB). The rollout doesn't
+touch them. To keep a copy anyway: Storage → `shop-downloads` → select all → Download.
 
-Keep the three files off-site (not in the repo: they hold customer data). Neither migration changes an existing row,
+Restoring, if ever needed (owner's decision): one table from the dump, e.g.
+`pg_restore --data-only -t club_households -n public -d "$DB_URL" database.dump` after emptying it; the whole project:
+Supabase docs → Platform → Migrating within Supabase → Backup and restore. Neither migration changes an existing row,
 and `supabase/rollout/rollback.sql` undoes the schema, so the dump is the safety net for the unexpected.
 
 ## Stage 3: apply the migrations (approval required)
