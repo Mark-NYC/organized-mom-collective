@@ -1,11 +1,14 @@
 # Seasonal Pinterest-to-product acquisition plan
 
-Approved direction: October 30, 2026. This file is the durable source of truth for coordinating the original 500-pin experiment, separate visual inspiration galleries, articles, free tools, the Organized Family Club, and the Weekly Reset calendar.
+Approved direction: October 30, 2026. Updated operating instructions: October 31, 2026. Use [PINTEREST_DAILY_PRODUCTION_DESK.md](PINTEREST_DAILY_PRODUCTION_DESK.md) for morning selection, creative allocation, recurring gallery triggers and Gemini prompt output. This file is the durable source of truth for coordinating the original 500-pin experiment, separate visual inspiration galleries, articles, free tools, the Organized Family Club, and the Weekly Reset calendar.
 
 ## Business and content jobs
 - **Visual inspiration:** image-first galleries (pantries, mudrooms, toy storage, rooms, lighting). Earn discovery and qualified visits. Follow with a related free resource when appropriate; do not force a Club pitch onto purely decorative searches. Separate OMC-V IDs and tracker.
 - **Useful/saveable content:** problem-solving mini-guides, charts, checklists, generator pins. Earn saves, tool usage and opt-in email leads; show a contextually relevant next step.
 - **Seasonal pain-point/product content:** specific parenting/family-responsibility friction, actual Club kit preview, or physical calendar. Earn checkout starts and purchases. Never claim unverified features or delivery timing.
+
+**New production hypothesis:** across the rolling last 100 new creatives, aim for 30 lifestyle gallery/inspiration, 30 editorial pain/value cards, 25 search-first guides/free tools and 15 actual Club product previews. Count by new creative, not daily quotas. Lifestyle article galleries are produced as occasional 39-photo + 10-extra-Pin sprints, typically assessed every 2–3 weeks; do not mechanically force 3 lifestyle outputs into each day. The intent is 100 Club sign-ups in the coming 12 months, measured separately from paid conversion and retention. See the daily production desk for the full workflow.
+
 These three *content lanes* are distinct from the master plan's 6/3/1 research mix (six observed search patterns, three specific audience situations, one creative test per ten future pins). Both classifications apply to each new pin.
 
 ## Timing rules
@@ -18,20 +21,21 @@ These three *content lanes* are distinct from the master plan's 6/3/1 research m
 - Dates in the original 500-row master are historical **proposed** slots, not guaranteed schedule or published evidence. Never change approved IDs, overwrite approved creative, or quietly reschedule a confirmed scheduled/published pin. Proposed adjustments require a separate approval/reconciliation decision.
 
 ## Seasonal planning schedule (initial hypothesis; validate with Pinterest Trends)
-| Need month | Need / campaign example | First seasonal Pinterest publishing |
+| Need month | Actual working Club kit / audience problem | Initial Pinterest publishing target |
 | --- | --- | --- |
-| Jan | family habits and morning routines | previous Oct |
-| Feb | laundry ownership | previous Nov |
-| Mar | chore responsibility and spring reset | previous Dec |
-| Apr | kids contributing to dinner | Jan |
-| May | end-of-school transition (exact kit TBD) | Feb |
-| Jun | snack independence and flexible summer routines | Mar |
-| Jul | kid-led activities / boredom | Apr |
-| Aug | back-to-school preparation (exact kit TBD) | May |
-| Sep | shared family activities and calendars (exact kit TBD) | Jun |
-| Oct | fall household routines (exact kit TBD) | Jul |
-| Nov | holiday workload sharing (exact kit TBD) | Aug |
-| Dec | generosity / kids blessing others (verify exact kit) | Sep |
+| Nov 2026 | Our Family, Our Team: kids sharing responsibility | Previous Aug; catch-up only where offer is eligible |
+| Dec 2026 | Give to Others: children bless others with cards | Previous Sep; respect holiday delivery constraints |
+| Jan 2027 | Habit Cards: morning and bedtime habits | Previous Oct |
+| Feb 2027 | Family Connection: child-initiated invitations | Previous Nov |
+| Mar 2027 | Spring Clean as a Team: chore chart, owners and finish criteria | Previous Dec |
+| Apr 2027 | Dinner Team: family roles for one dinner and future dinners | Jan |
+| May 2027 | Our Family Summer Rhythm: summer-day anchors | Feb |
+| Jun 2027 | I Can Make My Own Snack: independent snack routine | Mar |
+| Jul 2027 | I'm Bored! What Can I Do?: independent activities | Apr |
+| Aug 2027 | Back to School: verify final tool before claims | May |
+| Sep 2027 | A Week Everyone Can See: shared weekly plan | Jun |
+| Oct 2027 | Our Family Sunday Reset: visible family reset | Jul |
+
 This table is *campaign timing guidance*, not a claim of researched search peaks or a verified 12-kit catalog. Check the actual monthly product before claiming its deliverable.
 
 ## Five fields per new pin / campaign

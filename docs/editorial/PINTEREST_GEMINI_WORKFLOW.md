@@ -1,5 +1,7 @@
 # Gemini Pinterest workflow (supplement)
 
+**Daily 10-pin requests:** Use [PINTEREST_DAILY_PRODUCTION_DESK.md](PINTEREST_DAILY_PRODUCTION_DESK.md) as the production selector and output contract. Its standalone prompt requirements, exact hex palette, filename and season fields override the exploratory six-prompt default for this specific morning request. Do not treat 49-image gallery sprints as ten routine Pins.
+
 ## Authority
 Read [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md), [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md), [PINTEREST_CREATIVE_DIRECTION.md](PINTEREST_CREATIVE_DIRECTION.md), [PINTEREST_QA_CHECKLIST.md](PINTEREST_QA_CHECKLIST.md), [BRAND_VOICE.md](BRAND_VOICE.md), current brand guidance, and the actual article before working. Those rules take precedence. This is the **Gemini image-generation route**, not a replacement for the established per-article three-concept, six-variation production contract. Cross-article six-prompt exploratory batches are ideation; do not label them completed six-variation production packages.
 

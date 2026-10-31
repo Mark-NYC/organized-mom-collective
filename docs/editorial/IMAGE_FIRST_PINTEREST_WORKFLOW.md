@@ -1,5 +1,7 @@
 # Image-first Pinterest production lane
 
+**Premium long-gallery campaign:** When selected by [PINTEREST_DAILY_PRODUCTION_DESK.md](PINTEREST_DAILY_PRODUCTION_DESK.md), use the established 39 original gallery photographs + 10 additional promotional Pin images model (49 distinct Gemini prompts). This is a separate campaign variation from the legacy 15-photo workflow described below, not an amendment to past gallery records. The assistant chooses galleries based on inventory, season, demand and site readiness, usually assessing the need every 2–3 weeks. All prompts include the full brand hex palette and Georgia/Montserrat design direction, though the 39 gallery photos themselves have no text overlays. Keep OMC-V IDs distinct from the 500-pin master.
+
 **Separate from** the existing 500-pin `OMC-P0001–OMC-P0500` campaign. Gallery IDs: `OMC-VG001` onward. Pin IDs: `OMC-V00001` onward. IDs are permanent. Never copy rows from this lane into the 500-pin master or count them twice.
 
 ## Operating standard

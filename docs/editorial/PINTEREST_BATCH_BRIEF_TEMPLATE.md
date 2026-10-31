@@ -1,5 +1,7 @@
 # Next Gemini Pinterest batch brief
 
+**Morning command override:** For "What 10 pins do we need to make today?", read [PINTEREST_DAILY_PRODUCTION_DESK.md](PINTEREST_DAILY_PRODUCTION_DESK.md) and give the proposed actual production work, with complete self-contained Gemini prompts, names, hex palette, Georgia + Montserrat, current source/destination and creation gaps. A lifestyle-gallery sprint may replace daily ten-pin production. The six-prompt exploratory format below applies only to an explicitly requested small Gemini batch.
+
 ## One-line user request
 "Give me the next Gemini Pinterest batch."
 
