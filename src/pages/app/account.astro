@@ -8,10 +8,9 @@ import FamilySummary from '../../components/FamilySummary';
 ---
 <Layout title="Account" description="Family profile preview and app preferences.">
 <div class="family-brand mx-auto max-w-3xl">
-<header><p class="label text-[#71866c]">ACCOUNT & FAMILY</p><h1 class="family-title mt-4">The people <em>behind the plan.</em></h1><p class="family-lede mt-4">Here is how the existing Club family profile fits into your app.</p></header>
-<div class="family-note mt-8"><strong class="text-sm">Sample family · Preview only</strong><p class="mt-1 text-sm leading-relaxed">The people shown here are fictional. They are not your account, your purchase history, or saved customer details. Account activation is not part of Phase 1.</p></div>
+<header><p class="label text-[#71866c]">ACCOUNT & FAMILY</p><h1 class="family-title mt-4">The people <em>behind the plan.</em></h1><p class="family-lede mt-4">Your family, your Club account and your cleaning settings.</p></header>
 <FamilySummary client:only="react" />
-<section class="family-panel mt-5"><h2 class="family-panel-title">Cleaning preferences</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Cleaning progress is stored locally on this device, not linked to the sample family.</p><a href="/app/settings" class="family-link mt-4">Open existing cleaning settings →</a></section>
+<section class="family-panel mt-5"><h2 class="family-panel-title">Cleaning preferences</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Cleaning progress is stored locally on this device.</p><a href="/app/settings" class="family-link mt-4">Open existing cleaning settings →</a></section>
 <section class="family-panel mt-5"><h2 class="family-panel-title">Need some help?</h2><p class="mt-2 text-sm text-warm-soft">Questions about the calendar or companion? We're here.</p><a href="/support" class="family-link mt-4">Contact support →</a></section>
 </div>
 </Layout>

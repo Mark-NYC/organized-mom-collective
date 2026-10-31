@@ -19,12 +19,15 @@
  *   portal          (signed in) → { url } Stripe Billing Portal: card, invoices, cancel
  *   sync_email      (signed in) → { updated } after she changed her sign-in email in Supabase Auth: the Stripe
  *                   customer and receipts follow it
+ *   kit_submitted   (signed in) → { notified } once her Welcome Kit has both approvals: one email to the owner
+ *                   (SUPPORT_INBOX) per kit, with the packing list and the two-business-day target
  *
  * Gate: CLUB_STRIPE_SECRET_KEY set, club_settings.checkout_mode 'test' (test keys) or 'live' (live keys, plus
  * CLUB_LIVE_CHECKOUT=enabled). The browser never sees a Stripe secret or decides access.
  */
 import { clubStripeBlocked, CLUB_PRICES, isPlan, type ClubDeps, type ClubPlan } from '../club/deps.ts';
 import { userFromRequest } from '../club/members.ts';
+import { longDate, monthLabel, sendClubEmail } from '../club/emails.ts';
 import { EMAIL_RE, LIVE_STATUSES } from '../club/stripe-map.ts';
 import { clientIp, corsHeaders, json, readJson, type Handler } from '../http.ts';
 
@@ -68,6 +71,8 @@ export function createClubBillingHandler(deps: ClubDeps): Handler {
           return json(await portal(deps, req), 200, cors);
         case 'sync_email':
           return json(await syncEmail(deps, req), 200, cors);
+        case 'kit_submitted':
+          return json(await kitSubmitted(deps, req), 200, cors);
         default:
           return json({ error: 'unknown_action' }, 400, cors);
       }
@@ -134,6 +139,14 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   const trialEnd = state.trial_end ? Math.max(Math.floor(Date.parse(state.trial_end) / 1000), deps.now() + MIN_TRIAL_SECONDS) : null;
   const meta = { club: 'organized-family-club', plan, ...(email ? { email } : {}), ...(user ? { user_id: user.id } : {}), ...(state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {}) };
   const expiresAt = deps.now() + 60 * 60;
+  // The free month is one per household, checked after Checkout (her mailing address and card are only known then):
+  // say up front what happens if this household already had one (club-webhook: charged at once, or with the program).
+  const founding = Boolean(state.intro_month && state.intro_month.slice(0, 7) > new Date(deps.now() * 1000).toISOString().slice(0, 7));
+  const disclosure = state.intro_month
+    ? founding
+      ? 'One free first month per household. If this email, mailing address or card already had a free month, your membership starts with the first program month and $5.90 is charged on January 1, 2027.'
+      : 'One free first month per household. If this email, mailing address or card already had a free month, your membership starts today and $5.90 is charged now.'
+    : null;
   const site = returnBase(deps, req);
   const session = await deps.stripe.request<{ id: string; url: string; livemode: boolean; expires_at: number }>('POST', '/v1/checkout/sessions', {
     mode: 'subscription',
@@ -146,6 +159,7 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     allow_promotion_codes: true,
     expires_at: expiresAt,
     metadata: meta,
+    ...(disclosure ? { custom_text: { submit: { message: disclosure } } } : {}),
     // A trial: the card is saved now and nothing is charged until trial_end (cancelled if no card made it through).
     ...(trialEnd ? { payment_method_collection: 'always' } : {}),
     subscription_data: {
@@ -197,6 +211,25 @@ async function portal(deps: ClubDeps, req: Request) {
     ...(state.settings.portal_configuration_id ? { configuration: state.settings.portal_configuration_id } : {}),
   });
   return { url: session.url };
+}
+
+/**
+ * After she confirms her first resource: if her Welcome Kit is now submitted (both approvals in, read from the
+ * database, never from the request), email the owner once per kit with the packing list and the two-business-day
+ * target. Calling it again, or before she's done, sends nothing. Nothing is marked printed or mailed.
+ */
+async function kitSubmitted(deps: ClubDeps, req: Request) {
+  const user = await signedIn(deps, req);
+  const kit = await deps.db.rpc<{ order_id: string; email: string; family_name: string | null; first_month: string | null; ship_by: string | null } | null>(
+    'club_kit_submitted', { p_user: user.id });
+  if (!kit) return { notified: false };
+  const outcome = await sendClubEmail(deps, `kit_submitted:${kit.order_id}`, 'kit_submitted', null, deps.env.supportInbox, {
+    familyName: kit.family_name,
+    memberEmail: kit.email,
+    monthLabel: kit.first_month ? monthLabel(kit.first_month) : undefined,
+    shipBy: kit.ship_by ? longDate(`${kit.ship_by}T12:00:00Z`) : null,
+  });
+  return { notified: outcome === 'sent' || outcome === 'duplicate' };
 }
 
 async function syncEmail(deps: ClubDeps, req: Request) {

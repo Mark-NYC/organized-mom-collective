@@ -1,0 +1,14 @@
+---
+/**
+ * /club/family-meeting-guide: the standard Family Meeting guide in every Welcome Kit (src/data/club/meeting-guide.ts).
+ * A member in setup reviews it here (MeetingGuideStep, after her print, before her first resource); the owner prints it
+ * from /admin/club. Not personalized. Noindex, not linked publicly; behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import MeetingGuideSheet from '../../components/club/MeetingGuideSheet.astro';
+import MeetingGuideStep from '../../components/club/MeetingGuideStep';
+---
+<ClubLayout title="Family Meeting guide">
+  <MeetingGuideStep client:only="react" />
+  <MeetingGuideSheet />
+</ClubLayout>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { familyNameFrom, firstMonth, kitProgress, kitText, nextStep, stepHref } from '../src/lib/club/onboarding';
+import { familyNameFrom, firstMonth, kitProgress, kitText, nextStep, startsWithFirstPayment, stepHref, welcomeKitView } from '../src/lib/club/onboarding';
 import type { Membership } from '../src/lib/club/membership';
 
 /** A founding member right after checkout: free January, her Welcome Kit waiting for her family. */
@@ -21,7 +21,7 @@ describe('the Welcome Kit steps', () => {
     expect(nextStep(base({ onboarded: true, welcome: w('needs_vision', false) }))).toBe('print');
     const confirm = base({ onboarded: true, welcome: w('needs_confirmation', true) });
     expect(nextStep(confirm)).toBe('first_resource');
-    expect(stepHref(confirm)).toBe('/club/resources/2027-01-fresh-start-together?welcome=1');
+    expect(stepHref(confirm)).toBe('/app/club/january?welcome=1');
     expect(nextStep(base({ onboarded: true, welcome: w('needs_pdf', true) }))).toBe('home');
   });
 
@@ -41,11 +41,56 @@ describe('the Welcome Kit steps', () => {
     expect(firstMonth(base({ first_paid_month: '2027-02-01' }))).toBeNull();
   });
 
-  it('shows three steps and never says shipped before it is', () => {
-    expect(kitProgress('print').map((s) => s.state)).toEqual(['done', 'current', 'next']);
+  it('shows five steps and never says shipped before it is', () => {
+    expect(kitProgress('print').map((s) => s.state)).toEqual(['done', 'done', 'current', 'next', 'next']);
+    expect(kitProgress('address').map((s) => s.label)).toEqual(['Your family', 'Your address', 'Your print', 'Meeting guide', 'Your first resource']);
+    expect(kitProgress('done').every((s) => s.state === 'done')).toBe(true);
+    expect(kitText(base({ welcome: w('needs_pdf', true) }))).toMatch(/^Submitted\. We aim to print and mail/);
     expect(kitText(base({ welcome: w('ready', true, 'approved') }))).not.toMatch(/mail/i);
-    expect(kitText(base({ welcome: w('needs_pdf', true) }))).toBe('We’re preparing your Welcome Kit.');
     expect(kitText(base({ welcome: w('mailed', true, 'mailed') }))).toBe('Your Welcome Kit is in the mail.');
+  });
+});
+
+describe('the family profile in her setup', () => {
+  const profile = (setupCompleted: boolean) => ({ setupCompleted });
+  it('comes right after the family form, before the address and the print, until finished', () => {
+    const fam = base({ onboarded: true, has_address: false, welcome: w('needs_address', false) });
+    expect(nextStep(fam, { profile: profile(false) })).toBe('profile');
+    expect(stepHref(fam, 'profile')).toBe('/club/welcome');
+    expect(nextStep(fam, { profile: profile(true) })).toBe('address');
+    expect(nextStep(fam, { profile: profile(false), profileDeferred: true })).toBe('address');
+    expect(nextStep(base(), { profile: profile(false) })).toBe('family');
+  });
+  it('also for a member with no Welcome Kit yet (the case that skipped it)', () => {
+    const later = base({ onboarded: true, welcome: null, months: [], intro: null, next: { month: '2027-01-01', payment_on: '2027-01-01T05:00:00Z', slug: '2027-01-fresh-start-together', title: null, regular_cutoff_at: null } });
+    expect(nextStep(later, { profile: profile(false) })).toBe('profile');
+    expect(nextStep(later, { profile: profile(true) })).toBe('home');
+    expect(startsWithFirstPayment(later)).toBe(true);
+    expect(startsWithFirstPayment(base({ onboarded: true }))).toBe(false);
+  });
+});
+
+describe('the Family Meeting guide in her setup', () => {
+  it('comes after her print and before her first resource, only when she hasn’t seen it', () => {
+    const confirm = base({ onboarded: true, welcome: w('needs_confirmation', true) });
+    expect(nextStep(confirm, { meetingGuideSeen: false })).toBe('meeting_guide');
+    expect(stepHref(confirm, 'meeting_guide')).toBe('/club/family-meeting-guide');
+    expect(nextStep(confirm, { meetingGuideSeen: true })).toBe('first_resource');
+    expect(nextStep(confirm)).toBe('first_resource'); // unknown: never blocks
+    expect(nextStep(base({ onboarded: true, welcome: w('needs_vision', false) }), { meetingGuideSeen: false })).toBe('print');
+    expect(nextStep(base({ onboarded: true, welcome: w('needs_pdf', true) }), { meetingGuideSeen: false })).toBe('home'); // never holds a submitted kit
+  });
+});
+
+describe('her first month’s confirmation on the tool', () => {
+  const slug = '2027-01-fresh-start-together';
+  it('asks her only when her kit waits on it, and never for another month', () => {
+    expect(welcomeKitView(base({ onboarded: true, welcome: w('needs_confirmation', true) }), slug)).toBe('confirm');
+    expect(welcomeKitView(base({ onboarded: true, welcome: w('needs_vision', false) }), slug)).toBe('print_first');
+    expect(welcomeKitView(base({ onboarded: true, welcome: w('needs_pdf', true) }), slug)).toBe('none');
+    expect(welcomeKitView(base({ onboarded: true, welcome: w('needs_confirmation', true) }), '2027-02-better-together')).toBe('none');
+    expect(welcomeKitView(base({ onboarded: true, welcome: w('approved', true, 'approved') }), slug)).toBe('none');
+    expect(welcomeKitView(base({ onboarded: true, welcome: null, months: [] }), slug)).toBe('none');
   });
 });
 

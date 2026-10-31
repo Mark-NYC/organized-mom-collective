@@ -473,12 +473,26 @@ select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club
 update public.club_fulfillment_orders set member_approved_at = now() - interval '2 days 1 hour' where id = (select w from kit6);
 select pg_temp.expect((select x ->> 'kit_slug' from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text) = '2026-12-christmas-mission', 'two days later: one reminder to confirm December');
 select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_email_audience('review', '2026-12-01')) x where x ->> 'user_id' = pg_temp.u(6)::text), 'and never the monthly "review before printing" email for a kit order');
-update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where id = (select w from kit6);
-select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:needs_pdf,welcome_vision:pending:needs_pdf', 'three days after the print: her prepared resource counts as confirmed, the kit needs its PDFs');
-select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text), 'and no reminder after that');
+select pg_temp.expect((select (x ->> 'reminder')::int from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text) = 1, 'that is reminder 1');
+-- 20261110: nothing is ever confirmed for her. Days pass, the kit still waits for her click; a second reminder instead.
+update public.club_fulfillment_orders set member_approved_at = now() - interval '7 days 1 hour' where id = (select w from kit6);
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:needs_confirmation,welcome_vision:pending:needs_confirmation', 'a week after the print: still waiting for her own confirmation (no automatic one)');
+select pg_temp.expect((select (x ->> 'reminder')::int from jsonb_array_elements(public.club_email_audience('kit_reminder')) x where x ->> 'user_id' = pg_temp.u(6)::text) = 2, 'and reminder 2');
+select pg_temp.expect((select kit_submitted_at is null and kit_ship_by is null and kit_auto_approve_at is null from public.club_fulfillment_queue, kit6 where id = kit6.w), 'not submitted, no ship-by, no automatic date');
+select pg_temp.as_user('authenticated', pg_temp.u(6)::text);
+select pg_temp.expect(public.club_meeting_guide_seen() is null, 'the Family Meeting guide: not reviewed yet');
+create temp table g1 as select public.club_meeting_guide_mark() as t;
+select pg_temp.expect((select t from g1) is not null and public.club_meeting_guide_seen() = (select t from g1) and public.club_meeting_guide_mark() = (select t from g1), 'reviewing it is recorded once');
+select pg_temp.expect((public.club_fulfillment_approve('2026-12-christmas-mission'))::boolean, 'she confirms December herself');
+reset role;
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:needs_pdf,welcome_vision:pending:needs_pdf', 'both approvals in: the kit needs only its PDFs');
+select pg_temp.expect((select kit_submitted_at is not null and kit_ship_by = public.club_business_days_after(kit_submitted_at, 2) from public.club_fulfillment_queue, kit6 where id = kit6.w), 'submitted, ship by two business days later');
+select pg_temp.expect(public.club_business_days_after('2026-10-30 15:00-04', 2) = '2026-11-03' and public.club_business_days_after('2026-10-31 15:00-04', 2) = '2026-11-03', 'two business days skip the weekend (Friday or Saturday → Tuesday)');
+select pg_temp.expect((public.club_kit_submitted(pg_temp.u(6)) ->> 'order_id')::uuid = (select w from kit6), 'the owner notification finds her submitted kit');
+select pg_temp.expect(pg_temp.fails($$set local role anon; select public.club_meeting_guide_mark()$$), 'anon can''t mark the guide');
 -- Never auto-confirmed on invalid details: a paused mailing address holds the kit, whatever the date.
 update public.club_mailing_addresses set paused = true where user_id = pg_temp.u(6);
-select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:mail_paused,welcome_vision:pending:mail_paused', 'mailing paused: the kit waits, nothing is confirmed for her');
+select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:pending:mail_paused,welcome_vision:pending:mail_paused', 'mailing paused: the kit waits');
 update public.club_mailing_addresses set paused = false where user_id = pg_temp.u(6);
 update public.club_kits set status = 'draft' where slug = '2026-12-christmas-mission';
 select pg_temp.expect(pg_temp.kit6() like '%needs_resource%needs_resource', 'her month still a draft: the kit waits for it');
@@ -489,6 +503,8 @@ select pg_temp.as_user('authenticated', :OWNER);
 create temp table wq as select x from jsonb_array_elements(public.club_admin_welcome_queue()) x where x ->> 'email' = 'c6@example.com';
 select pg_temp.expect((select x ->> 'vision_value' from wq) = 'Joy' and (select x ->> 'batch' from wq) = 'welcome_kit'
   and (select x -> 'first_month' ->> 'kit_slug' from wq) = '2026-12-christmas-mission', 'the Welcome Kits list: her print and December, one row');
+select pg_temp.expect((select x -> 'packing_list' from wq) = '["Family Vision print (personalized)", "Family Meeting guide (standard insert)", "December 2026 resource (personalized)"]'::jsonb
+  and (select x ->> 'kit_ship_by' from wq) is not null, 'its packing list: the print, the Family Meeting guide, December; and its ship-by date');
 select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_admin_fulfillment('2026-12-01')) x where x ->> 'email' = 'c6@example.com'), 'December''s monthly list leaves her kit order out (it ships in the kit)');
 select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.club_admin_fulfillment('2026-12-01')) x where x ->> 'fulfillment_type' = 'welcome_vision'), 'and no welcome print is ever on a monthly list');
 select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_welcome_kit((select w from kit6), 'approved')$$, 'not_ready'), 'the kit can''t be approved before both PDFs are ready');
@@ -501,7 +517,7 @@ select pg_temp.expect(pg_temp.fails($$select public.club_admin_set_fulfillment((
 select public.club_admin_set_welcome_kit((select m from kit6), 'approved');
 select pg_temp.expect(pg_temp.kit6() = 'monthly_resource:approved:ready,welcome_vision:approved:ready', 'approved together (from either order)');
 select pg_temp.expect((select bool_and(address ->> 'line1' = '5 Pine Rd') from public.club_fulfillment_orders, kit6 where id in (kit6.w, kit6.m)), 'both addresses frozen');
-select pg_temp.expect((select member_approved_at is not null and note like '%confirmed automatically%' from public.club_fulfillment_orders, kit6 where id = kit6.m), 'her first resource is recorded as confirmed by the three-day rule');
+select pg_temp.expect((select member_approved_at is not null and coalesce(note, '') not like '%automatically%' from public.club_fulfillment_orders, kit6 where id = kit6.m), 'her first resource is recorded as confirmed by her, never automatically');
 reset role;
 select pg_temp.as_user('authenticated', pg_temp.u(6)::text);
 select pg_temp.expect(pg_temp.fails($$select public.club_welcome_save('{"family_name": "The Decembers", "value": "Hope"}')$$, 'locked'), 'once it''s approved for print the print can''t change');

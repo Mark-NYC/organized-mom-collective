@@ -78,6 +78,8 @@ export const routes = {
   clubWelcome: '/club/welcome',
   clubDashboard: '/club/dashboard',
   clubFamilyVision: '/club/family-vision',
+  /** The standard one-page Family Meeting guide in every Welcome Kit (her review step, and the owner's print). */
+  clubMeetingGuide: '/club/family-meeting-guide',
   /** A member's personalized month (src/data/club/resources.ts). */
   clubResource: (slug: string) => `/club/resources/${slug}`,
   adminClub: '/admin/club',

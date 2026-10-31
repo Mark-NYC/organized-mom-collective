@@ -16,7 +16,8 @@ export const DEFAULT_PREVIEW_SAMPLE = 'rivera';
 
 export type KitHousehold =
   | {
-      status: 'ready'; source: 'sample' | 'account'; sample: string | null; sampleLabel: string; household: Household;
+      /** 'fulfillment': the owner's print view of one member's saved plan (../plan/family.ts → startFulfillment). */
+      status: 'ready'; source: 'sample' | 'account' | 'fulfillment'; sample: string | null; sampleLabel: string; household: Household;
       /** The family profile beyond the people (onboarding steps 2–6); null before she answers, or if it can't load. */
       profile: FamilyProfile | null;
     }

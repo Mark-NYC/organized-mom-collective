@@ -150,7 +150,21 @@ const as = {
     '[{"first_name":"Ana","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Sofia","kind":"child","role":"child","birth_year":2018,"birth_month":4},{"first_name":"Mateo","kind":"child","role":"child","birth_year":2020,"birth_month":9}]') \\g /dev/null`),
   vision: (name, value) => asUser(USER.id, `select public.club_welcome_save(${lit(JSON.stringify({ family_name: name, value }))}::jsonb) \\g /dev/null`),
   approvePrint: () => asUser(USER.id, `select public.club_welcome_approve() \\g /dev/null`),
+  /** Family profile steps 2–6 answered (or skipped) to the end. */
+  profileDone: () => sql(`update public.club_households set setup_done = array['week','responsibilities','growth','challenges','priority'], setup_completed_at = now() where owner_user_id = '${USER.id}'`),
 };
+/**
+ * Her free month refused (one per household: an earlier claim had the same mailing address), like the production test
+ * account on Oct 31 2026: the webhook moved her trial to January 1, so no entitlement, no Welcome Kit orders yet.
+ */
+function refusedFreeMonth() {
+  sql(`delete from public.club_fulfillment_orders where user_id = '${USER.id}'; delete from public.club_entitlements where user_id = '${USER.id}';
+    delete from public.club_intro_claims; update public.club_subscriptions set current_period_end = '2027-01-01 05:00:00+00' where user_id = '${USER.id}'`);
+}
+/** The Club nav's links on the page, in order (ClubNav). */
+const clubNavLinks = (page) => page.evaluate(() => [...document.querySelectorAll('[data-club-nav] nav[aria-label="Club"] a')]
+  .filter((a) => a.getBoundingClientRect().width > 0).map((a) => `${a.getAttribute('aria-label')}=${a.getAttribute('href')}`));
+const CLUB_NAV = ['Club Home=/app/club', 'My Family=/club/family', 'Monthly Resources=/app/club#months', 'Account & Billing=/club/dashboard'];
 /** One order's status:readiness, for checks. */
 const order = (type) => sql(`select status || ':' || readiness from public.club_fulfillment_queue where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
 const orderId = (type) => sql(`select id from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
@@ -252,16 +266,23 @@ scenarios.admin = async (browser) => {
   check('one row for her package', (await row.count()) === 1);
   const rowText = (await row.innerText()).replace(/\s+/g, ' ');
   check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Habit Cards/.test(rowText), rowText.slice(0, 200));
-  check('and why it waits', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('counts as confirmed'), rowText.slice(0, 260));
+  check('and why it waits (nothing confirmed for her)', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('not confirmed yet') && !/counts as confirmed/.test(rowText), rowText.slice(0, 260));
+  check('the package lists the Family Meeting guide insert', /Family Meeting guide · standard insert/.test(rowText), rowText.slice(0, 300));
   await page.fill('input[type=month]', '2027-01');
   await page.waitForTimeout(800);
   const monthText = await page.locator('body').innerText();
   check('January’s monthly list leaves her kit order out, and says so', monthText.includes('Plus 1 January 2027 resource ships in Welcome Kits') && monthText.includes('No mailings for this month.'));
   await shot(page, 'admin-kits-waiting', true);
 
-  // Three days pass: her prepared January counts as confirmed (everything else is valid).
+  // Days pass: nothing is confirmed for her. Then she confirms January herself; the kit is submitted.
   sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
-  check('after three days the kit only needs its PDFs', order('welcome_vision') === 'pending:needs_pdf', order('welcome_vision'));
+  check('three days later: still waiting for her (no automatic confirmation)', order('welcome_vision') === 'pending:needs_confirmation', order('welcome_vision'));
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
+  check('she confirms January: the kit only needs its PDFs', order('welcome_vision') === 'pending:needs_pdf', order('welcome_vision'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('button:has-text("Fulfillment")');
+  await page.waitForSelector('[data-kit-ship-by]');
+  check('submitted: the row shows when, and the two-business-day mail-by date', /Submitted .* · mail by /.test(await page.locator('[data-kit-ship-by]').innerText()));
 
   // The welcome print's print view: her approved choices, the approved print, one page, Mark PDF ready.
   const w = orderId('welcome_vision');
@@ -294,10 +315,16 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   const m = orderId('monthly_resource');
   const mv = await newPage(browser, DESKTOP, { auth: false });
   await asAdmin(mv);
-  await mv.goto(`${BASE}/club/resources/${JAN}?fulfillment=${m}`, { waitUntil: 'networkidle' });
+  check('the admin opens January’s print view on its real tool', (await page.locator('tr', { hasText: 'ana@example.com' }).locator('a:has-text("Print view")').last().getAttribute('href')) === `/app/club/january?fulfillment=${m}`);
+  await mv.goto(`${BASE}/app/club/january?fulfillment=${m}`, { waitUntil: 'networkidle' });
   await mv.waitForSelector('text=Mark PDF ready');
-  const cards = await mv.locator('#club-month-content').innerText();
-  check('January print view: prepared with her children’s names', /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
+  await mv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+  const cards = await mv.locator('.club-plan').innerText();
+  check('January print view: the real tool, prepared with her children’s names', /Weekly Meeting/i.test(cards) && /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
+  check('January print view: no member chrome (Club nav, Welcome Kit panel)', !(await mv.isVisible('[data-club-nav]')) && !(await mv.isVisible('[data-welcome-kit-confirm]')));
+  const janPages = await printPdf(mv, 'admin-january-tool');
+  const janText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/admin-january-tool.pdf`, '-']).toString();
+  check('January PDF: her Weekly Meeting sheets only (2 Letter pages, no admin bar, no site chrome)', janPages === 2 && /Weekly Meeting/i.test(janText) && /Sofia/.test(janText) && !/Fulfillment ·|Mark PDF ready|Club Home|MONTHLY TOOL/i.test(janText), `${janPages} pages · ${janText.replace(/\s+/g, ' ').slice(0, 160)}`);
   await shot(mv, 'admin-january-print-view');
   await mv.click('text=Mark PDF ready');
   await mv.waitForSelector('text=PDF marked ready');
@@ -312,11 +339,11 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   await page.waitForFunction(() => document.body.innerText.includes('approved'));
   await page.waitForTimeout(500);
   check('approve kit: both orders approved', order('welcome_vision').startsWith('approved') && order('monthly_resource').startsWith('approved'), `${order('welcome_vision')} / ${order('monthly_resource')}`);
-  check('her January is recorded as confirmed by the three-day rule', sql(`select note from public.club_fulfillment_orders where id = '${m}'`).includes('confirmed automatically'));
+  check('her January is recorded as confirmed by her, never automatically', !sql(`select coalesce(note, '') from public.club_fulfillment_orders where id = '${m}'`).includes('automatically'));
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('text=Download approved kits')]);
   const csv = execFileSync('cat', [await download.path()]).toString().trim().split('\n');
   check('CSV: one row for the package', csv.length === 2, `${csv.length - 1} row(s)`);
-  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ 2027-01 Our Family Habit Cards/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
+  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ Family Meeting guide \+ 2027-01 Our Family Habit Cards/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
   for (const st of ['printed', 'mailed']) {
     await page.locator('tr', { hasText: 'ana@example.com' }).locator(`button:has-text("${st}")`).first().click();
     await page.waitForTimeout(700);
@@ -442,46 +469,85 @@ async function journey(browser, label, vp) {
   await page.waitForSelector('text=It’s yours!');
   check('approved: one welcome order, approved once', sql(`select count(*) || ':' || count(member_approved_at) from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`) === '1:1');
   const next = page.locator('a.fvp-next-cta');
-  check('approved: primary CTA is “See your first family resource”', (await next.innerText()).startsWith('See your first family resource'));
-  check('approved: it goes to her January (her entitlement), never a sales page', (await next.getAttribute('href')) === `/club/resources/${JAN}?welcome=1`);
+  check('approved: next is the Family Meeting guide', (await next.innerText()).startsWith('Next: your Family Meeting guide') && (await next.getAttribute('href')) === '/club/family-meeting-guide', await next.innerText());
   await shot(page, `${label}-4-approved`, vp.width < 850);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('text=It’s yours!');
-  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("See your first family resource")'));
+  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("Next: your Family Meeting guide")'));
   await next.click();
-  await page.waitForURL(/\/club\/resources\//);
+  await page.waitForURL(/\/club\/family-meeting-guide/);
+  await page.waitForSelector('[data-meeting-guide-step]');
+  const guide = await page.locator('main, body').first().innerText();
+  check('Family Meeting guide: the standard sheet, four parts, ten minutes', /Our Family Meeting/.test(guide) && /Our Focus/.test(guide) && /Let’s Practice/.test(guide) && /Nothing to change here/.test(guide), guide.replace(/\s+/g, ' ').slice(0, 200));
+  check('Family Meeting guide: progress shows the guide step current', await page.isVisible('[aria-current="step"]:has-text("Meeting guide")'));
+  check('no sideways scrolling (guide)', await noSideScroll(page));
+  await shot(page, `${label}-4b-meeting-guide`, true);
+  const guidePages = await printPdf(page, `${label}-meeting-guide`);
+  const guideText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/${label}-meeting-guide.pdf`, '-']).toString();
+  check('Family Meeting guide prints on one Letter page, the sheet only', guidePages === 1 && /Our Family Meeting/.test(guideText) && !/Next: your|Club Home|Sign out/.test(guideText), `${guidePages} pages`);
+  await page.click('button:has-text("Next: your January resource")');
+  await page.waitForURL(/\/app\/club\/january\?welcome=1/);
+  check('guide reviewed: recorded on her account', sql(`select meeting_guide_seen_at is not null from public.club_households where owner_user_id = '${USER.id}'`) === 't');
   await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
-  const panel = await page.locator('.kit-first').innerText();
-  check('first resource: titled, for her kids, with what comes and her first step', /Our Family Habit Cards/.test(panel) && /Sofia and Mateo/.test(panel) && /In your Welcome Kit/i.test(panel) && /first step/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 220));
-  check('first resource: her cards below are prepared with her kids’ names', /Sofia|Mateo/.test(await page.locator('#club-month-content').innerText()));
-  check('first resource: no separate monthly “Looks good, print it”', !(await page.isVisible('button:has-text("Looks good, print it")')));
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+  const panel = await page.locator('[data-welcome-kit-confirm]').innerText();
+  check('first resource: on the real January tool, with what comes and what to do', /Your January plan/.test(panel) && /In your Welcome Kit/i.test(panel) && /Family Vision print/.test(panel) && /Before you confirm/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 220));
+  check('first resource: progress shows the last step current', await page.isVisible('[data-welcome-kit-confirm] [aria-current="step"]:has-text("Your first resource")'));
+  check('first resource: the tool below is prepared with her kids’ names', /Sofia|Mateo/.test(await page.locator('.club-plan').innerText()));
+  check('first resource: the Club nav is on the tool', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV), JSON.stringify(await clubNavLinks(page)));
   check('no sideways scrolling (first resource)', await noSideScroll(page));
-  await shot(page, `${label}-5-first-resource`, vp.width < 850);
   await page.evaluate(() => window.scrollTo(0, 0));
-  await shot(page, `${label}-5b-first-resource-view`);
+  await shot(page, `${label}-5-first-resource`);
   const cta = await page.evaluate(() => {
-    const b = document.querySelector('.kit-first .btn-primary').getBoundingClientRect();
+    const b = document.querySelector('[data-welcome-kit-confirm] .btn-primary').getBoundingClientRect();
     const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
-    return { top: Math.round(b.top), clear: Boolean(hit?.closest('.kit-first')) };
+    return { top: Math.round(b.top), clear: Boolean(hit?.closest('[data-welcome-kit-confirm]')) };
   });
-  check('first resource: the confirm button isn’t covered by the printable’s toolbar', cta.clear || cta.top > vp.height, JSON.stringify(cta));
+  check('first resource: the confirm button isn’t covered', cta.clear || cta.top > vp.height, JSON.stringify(cta));
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
   await page.waitForTimeout(1500);
-  check('refresh on the resource: still waiting for her one confirmation', order('monthly_resource').endsWith('needs_confirmation'), kitOrders());
+  check('refresh on the tool: still waiting for her one confirmation (never confirmed for her)', order('monthly_resource').endsWith('needs_confirmation') && !firstConfirmed(), kitOrders());
+  // Her change on the real tool is what the owner prints.
+  const MARK = 'Rivera print check';
+  if (label === 'desktop') {
+    await editPlan(page, 'january', MARK);
+    await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planSave === 'saved', null, { timeout: 8000 }).catch(() => undefined);
+    await page.waitForTimeout(1500);
+  }
   await page.click('text=Looks good. Prepare my Welcome Kit');
-  await page.waitForSelector('text=It’s all set!');
+  await page.waitForSelector('text=Your Welcome Kit is submitted');
+  const submitted = await page.locator('[data-kit-submitted]').innerText();
+  check('submitted: three items, one package, the two-business-day aim', /Family Vision print/.test(submitted) && /Family Meeting guide/.test(submitted) && /January resource/.test(submitted) && /two business days/.test(submitted), submitted.replace(/\s+/g, ' '));
+  check('submitted: the owner is notified (club-billing kit_submitted)', page.calls.includes('billing:kit_submitted'), page.calls.filter((c) => c.startsWith('billing')).join(','));
+  if (label === 'desktop') {
+    const pv = await newPage(browser, DESKTOP, { auth: false });
+    await asAdmin(pv);
+    await pv.goto(`${BASE}/app/club/january?fulfillment=${orderId('monthly_resource')}`, { waitUntil: 'networkidle' });
+    await pv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+    await pv.waitForTimeout(800);
+    check('the owner’s print view shows her saved change (what prints is what she approved)', (await pv.locator('.club-plan').innerText()).includes(MARK), (await pv.locator('[data-plan-fulfillment-bar]').innerText()).replace(/\s+/g, ' '));
+    await pv.context().close();
+  }
   check('confirmed: both items prepared together (kit needs only its PDFs)', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
-  await shot(page, `${label}-6-all-set`, vp.width < 850);
+  await shot(page, `${label}-6-all-set`);
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForSelector('text=It’s all set!');
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
   await page.waitForTimeout(2000);
-  check('revisiting her resource doesn’t undo her confirmation', firstConfirmed(), kitOrders());
-  await page.click('a:has-text("See your Club")');
+  check('revisiting her tool doesn’t undo her confirmation, and the confirm panel is gone', firstConfirmed() && !(await page.isVisible('[data-welcome-kit-confirm]')), kitOrders());
+  await page.goto(`${BASE}/app/club/january?welcome=1`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  await page.goto(`${BASE}/club/resources/${JAN}?welcome=1`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('text=It’s all set!');
+  await page.click('a:has-text("Go to Club Home")');
   await page.waitForURL(/\/app\/club/);
-  await page.waitForSelector('text=Your year in the Club');
+  await page.waitForSelector('[data-club-home]');
   const club = await page.locator('main').innerText();
-  check('her Club (/app/club): no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /We’re preparing your Welcome Kit/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
+  check('Club Home: no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /Submitted\. We aim to print and mail your Welcome Kit within two business days/.test(club) && /Family Meeting guide/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
+  check('Club Home: her family name, members with ages and an edit link', /The Rivera Family/.test(club) && /Sofia · 8/.test(club) && /Mateo · 6/.test(club) && await page.isVisible('a[href="/club/family"]:has-text("Edit my family")'), club.replace(/\s+/g, ' ').slice(0, 200));
+  check('Club Home: next step opens January', await page.isVisible('.ofc-next-step a[href="/app/club/january"]'));
+  check('Club Home: coming up lists February with its payment date', /February 2027: .* opens with your February 1, 2027 payment/.test(club));
+  check('Club Home: the Club nav', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV), JSON.stringify(await clubNavLinks(page)));
   const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
   check('her Club: January marked hers, opening her family’s plan in the app (saved to her account)', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === '/app/club/january');
   check('her Club: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
@@ -489,13 +555,12 @@ async function journey(browser, label, vp) {
   check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
   check('no sideways scrolling (her Club)', await noSideScroll(page));
   await shot(page, `${label}-7-club`, true);
-  await page.click('a:has-text("billing, family and mailing address")');
+  await page.click('[data-club-nav] a[aria-label="Account & Billing"]');
   await page.waitForURL(/\/club\/dashboard/);
-  await page.waitForSelector('text=Your first mailing, together');
+  await page.waitForSelector('h1:has-text("Account & Billing")');
   const dash = await page.locator('main').innerText();
-  check('dashboard: one Welcome Kit card with both items and its status', /Family Vision watercolor print/.test(dash) && /January: Our Family Habit Cards/.test(dash) && /We’re preparing your Welcome Kit/.test(dash), dash.replace(/\s+/g, ' ').slice(0, 300));
-  check('dashboard: January isn’t called “This month” in October', /January 2027 · Your first month/i.test(dash) && !/January 2027 · This month/i.test(dash));
-  check('dashboard: January’s printed copy “Coming in your Welcome Kit”', /Coming in your Welcome Kit/.test(dash));
+  check('Account & Billing: her plan and billing, a link to Club Home, no second month list', /First charge: \$5\.90/.test(dash) && await page.isVisible('[data-club-home-link] a[href="/app/club"]') && !/Your resources/.test(dash), dash.replace(/\s+/g, ' ').slice(0, 300));
+  check('Account & Billing: the same Club nav, Account & Billing current', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && await page.isVisible('[data-club-nav] a[aria-current="page"][aria-label="Account & Billing"]'));
   check('no sideways scrolling (dashboard)', await noSideScroll(page));
   await shot(page, `${label}-8-account`, true);
   check('one welcome order and one January order, never more', sql(`select count(*) from public.club_fulfillment_orders where user_id = '${USER.id}'`) === '2'
@@ -510,14 +575,135 @@ async function journey(browser, label, vp) {
   await back.fill('#club-code', '123456');
   await back.click('button:has-text("Sign in")');
   await back.waitForURL(/\/app\/club/);
-  await back.waitForSelector('text=Your year in the Club');
-  check('returning approved member: lands on her Club (/app/club)', true);
+  await back.waitForSelector('[data-club-home]');
+  check('returning approved member: lands on Club Home (/app/club)', true);
   await back.goto(`${BASE}/club/family-vision`, { waitUntil: 'networkidle' });
   await back.waitForSelector('.fvp-approved-state');
   const again = await back.locator('.fvp-approved-state').innerText();
   check('returning to her print: approved, kit status, no sales links', /Your print is approved/.test(again) && (await back.locator('a[href="/club/"], a[href="/app/club/"]').count()) === 0, again.replace(/\s+/g, ' '));
   await back.context().close();
 }
+
+/**
+ * The P0 journey (Oct 31 2026 production test): her free month refused (same household), so no Welcome Kit yet.
+ * Family form → straight into steps 2–6 (never dropped into the library) → refresh mid-profile resumes → "Finish later"
+ * says what's left → address (required here) → "Your Club starts with January" → Club Home. January stays closed until
+ * her January 1 payment. Sign out and back in on another device resumes the open questions without re-entering family.
+ */
+async function postCheckout(browser, label, vp) {
+  console.log(`\nFree month refused, ${label}: checkout → sign in → family → profile → finish later → address → starts with January → Club Home`);
+  freshDb();
+  refusedFreeMonth();
+  sql(`delete from public.club_mailing_addresses where user_id = '${USER.id}'`);
+  const page = await newPage(browser, vp, { auth: false });
+  await page.goto(`${BASE}/club/welcome?session_id=cs_test_a1b2c3d4e5f6g7h8`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('text=You’re in.');
+  await page.click('text=Email me a code');
+  await page.fill('#club-code', '123456');
+  await page.click('button:has-text("Sign in")');
+  await page.waitForSelector('text=Tell us about your family');
+  check('kit progress: five steps, family current', (await page.locator('[aria-label="Your Welcome Kit"] li').count()) === 5 && await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your family")'));
+  await page.fill('input[autocomplete="family-name"]', 'The Rivera Family');
+  await page.fill('input[autocomplete="given-name"]', 'Ana');
+  const kidRow = page.locator('li', { has: page.locator('select') });
+  await kidRow.nth(0).locator('input').fill('Sofia');
+  await kidRow.nth(0).locator('select').first().selectOption('8');
+  await page.click('button:has-text("Next")');
+  await page.waitForSelector('text=What does a typical week look like?', { timeout: 10000 }).catch(() => undefined);
+  check('family form leads straight into step 2 of 6 (no Welcome Kit needed)', await page.isVisible('text=Step 2 of 6'), page.url());
+  check('not sent to the library midway', /\/club\/welcome/.test(page.url()), page.url());
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('text=What does a typical week look like?', { timeout: 10000 }).catch(() => undefined);
+  check('refresh after the family form: still her profile questions, family not asked again', await page.isVisible('text=Step 2 of 6') && !(await page.isVisible('text=Tell us about your family')));
+  await page.click('button:has-text("Skip for now")');
+  await page.waitForSelector('text=What does everyone already take care of?');
+  check('“Skip for now” skips one question', await page.isVisible('text=Step 3 of 6'));
+  await page.click('button:has-text("Finish later")');
+  await page.waitForSelector('text=Saved. Finish the rest anytime.');
+  const later = await page.locator('main').innerText();
+  check('“Finish later” says what’s left and where', /Still open:/.test(later) && /My Family/.test(later) && (await page.locator('main ul.list-disc li').count()) === 4, later.replace(/\s+/g, ' ').slice(0, 260));
+  await shot(page, `${label}-p0-finish-later`, true);
+  await page.click('button:has-text("Continue")');
+  await page.waitForSelector('text=Where should we mail your Welcome Kit?');
+  check('address required: asked next, address step current', await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your address")'));
+  await page.fill('input[autocomplete="name"]', 'Ana Rivera').catch(() => undefined);
+  await page.fill('input[autocomplete="address-line1"]', '14 Oak St');
+  await page.fill('input[autocomplete="address-level2"]', 'Austin');
+  await page.locator('select[autocomplete="address-level1"], input[autocomplete="address-level1"]').first().evaluate((el) => el.tagName).then(async (tag) => {
+    if (tag === 'SELECT') await page.selectOption('select[autocomplete="address-level1"]', 'TX');
+    else await page.fill('input[autocomplete="address-level1"]', 'TX');
+  });
+  await page.fill('input[autocomplete="postal-code"]', '78701');
+  await page.click('button:has-text("See my welcome gift")');
+  await page.waitForSelector('text=Your Club starts with January', { timeout: 10000 }).catch(() => undefined);
+  const starts = await page.locator('main').innerText();
+  check('no Welcome Kit yet: explained, with her first payment date', /Your Club starts with January/.test(starts) && /January 1, 2027/.test(starts) && /one per household/.test(starts), starts.replace(/\s+/g, ' ').slice(0, 300));
+  check('nothing granted early: no entitlement, no orders', sql(`select count(*) from public.club_entitlements where user_id = '${USER.id}'`) === '0' && sql(`select count(*) from public.club_fulfillment_orders where user_id = '${USER.id}'`) === '0');
+  check('no sideways scrolling (starts)', await noSideScroll(page));
+  await shot(page, `${label}-p0-starts`, true);
+  await page.click('a:has-text("Go to Club Home")');
+  await page.waitForSelector('[data-club-home]');
+  const home = await page.locator('main').innerText();
+  check('Club Home: family name and members', /The Rivera Family/.test(home) && /Ana/.test(home) && /Sofia · 8/.test(home), home.replace(/\s+/g, ' ').slice(0, 200));
+  check('Club Home: “starts with January” and the payment date', await page.isVisible('[data-club-starts]') && /January 1, 2027/.test(home));
+  check('Club Home: offers finishing the profile (4 open)', await page.isVisible('a[href="/club/family?setup=1"]'));
+  check('Club Home: coming up, January with its payment', /January 2027: .* opens with your January 1, 2027 payment/.test(home), home.replace(/\s+/g, ' ').slice(0, 400));
+  check('Club Home: Club nav, Club Home current', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && await page.isVisible('[data-club-nav] a[aria-current="page"][aria-label="Club Home"]'), JSON.stringify(await clubNavLinks(page)));
+  check('Club Home: months grid is #months', await page.isVisible('#months article.ofc-app-month'));
+  check('Club Home: no preview line, no month marked hers', !/preview library/i.test(home) && !/· Yours/.test(home));
+  check('no sideways scrolling (Club Home)', await noSideScroll(page));
+  await shot(page, `${label}-p0-club-home`, true);
+  await page.goto(`${BASE}/app/club/january`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => ['denied', 'ready'].includes(document.querySelector('.club-plan')?.dataset.planState ?? ''));
+  const gate = await page.locator('[data-plan-gate]').innerText();
+  check('January before her payment: closed, says when it opens', (await page.locator('.club-plan').getAttribute('data-plan-state')) === 'denied' && /January opens January 1, 2027/.test(gate), gate.replace(/\s+/g, ' '));
+  check('January gate: Club nav shown, no Welcome Kit confirmation', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && !(await page.isVisible('[data-welcome-kit-confirm]')));
+  // Navigation: the same four places on every Club page.
+  for (const [path, current] of [['/club/family', 'My Family'], ['/club/dashboard', 'Account & Billing']]) {
+    await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-club-nav]');
+    check(`nav on ${path}: the same Club nav, ${current} current`, JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && await page.isVisible(`[data-club-nav] a[aria-current="page"][aria-label="${current}"]`));
+  }
+  await page.goto(`${BASE}/app/account`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-account-family]');
+  check('/app/account: her real family, not the sample', (await page.getAttribute('[data-account-family]', 'data-account-family')) === 'member' && /The Rivera Family/.test(await page.locator('main').innerText()) && !(await page.isVisible('text=SAMPLE ONLY')));
+  check(`${label} P0: no script errors`, page.errors.length === 0, page.errors.join(' | '));
+  await page.context().close();
+
+  // Another device (no "Finish later" remembered): sign-in resumes the open questions, family kept.
+  const other = await newPage(browser, vp, { auth: false });
+  await other.goto(`${BASE}/club/login?email=${encodeURIComponent(USER.email)}`, { waitUntil: 'networkidle' });
+  await other.click('text=Email me a code');
+  await other.fill('#club-code', '123456');
+  await other.click('button:has-text("Sign in")');
+  await other.waitForSelector('text=What does everyone already take care of?', { timeout: 15000 }).catch(() => undefined);
+  check('sign in on another device: resumes at the first open question (step 3), family not re-entered', await other.isVisible('text=Step 3 of 6') && !(await other.isVisible('text=Tell us about your family')), other.url());
+  for (let i = 0; i < 4; i++) {
+    await other.click('button:has-text("Skip for now"), button:has-text("Finish")');
+    await other.waitForTimeout(600);
+  }
+  await other.waitForSelector('text=Your Club starts with January', { timeout: 15000 }).catch(() => undefined);
+  check('profile done (all skipped): told again when her Club starts', await other.isVisible('text=Your Club starts with January'), other.url());
+  await other.click('a:has-text("Go to Club Home")');
+  await other.waitForSelector('[data-club-home]', { timeout: 15000 }).catch(() => undefined);
+  check('profile done (all skipped): back on Club Home, no profile nudge', /\/app\/club/.test(other.url()) && !(await other.isVisible('a[href="/club/family?setup=1"]')), other.url());
+  check('every answer optional: setup counted complete', sql(`select setup_completed_at is not null from public.club_households where owner_user_id = '${USER.id}'`) === 't');
+  // Sign out from the Club nav, sign back in: Club Home.
+  await other.click('[data-club-nav] button:has-text("Sign out")');
+  await other.waitForTimeout(800);
+  check('sign out: session gone, Club Home back to the preview', !(await other.evaluate(() => localStorage.getItem('omc:account:session'))) && /preview library/i.test(await other.locator('main').innerText()));
+  await other.goto(`${BASE}/club/login?email=${encodeURIComponent(USER.email)}`, { waitUntil: 'networkidle' });
+  await other.click('text=Email me a code');
+  await other.fill('#club-code', '123456');
+  await other.click('button:has-text("Sign in")');
+  await other.waitForSelector('[data-club-home]', { timeout: 15000 }).catch(() => undefined);
+  check('sign back in: Club Home with her family', /The Rivera Family/.test(await other.locator('main').innerText()), other.url());
+  check(`${label} P0 return: no script errors`, other.errors.length === 0, other.errors.join(' | '));
+  await other.context().close();
+}
+
+scenarios.p0desktop = (browser) => postCheckout(browser, 'desktop', DESKTOP);
+scenarios.p0mobile = (browser) => postCheckout(browser, 'mobile', MOBILE);
 
 scenarios.desktop = (browser) => journey(browser, 'desktop', DESKTOP);
 scenarios.mobile = (browser) => journey(browser, 'mobile', MOBILE);
@@ -549,13 +735,19 @@ scenarios.resume = async (browser) => {
   freshDb();
   check('no family yet → her family step', /\/club\/welcome/.test(await signInTo(/\/club\/welcome/)));
   as.family();
-  check('family saved → her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
+  check('family saved, profile open → her profile questions (/club/welcome)', /\/club\/welcome/.test(await signInTo(/\/club\/welcome/)));
+  as.profileDone();
+  check('profile done → her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
   as.vision('The Rivera Family', 'Hope');
   check('print saved but not approved → still her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
   as.approvePrint();
-  check('print approved → her first resource', new RegExp(`/club/resources/${JAN}\\?welcome=1`).test(await signInTo(/\/club\/resources\//)));
+  check('print approved → the Family Meeting guide', /\/club\/family-meeting-guide/.test(await signInTo(/\/club\/family-meeting-guide/)));
+  sql(`update public.club_households set meeting_guide_seen_at = now() where owner_user_id = '${USER.id}'`);
+  check('guide reviewed → her first resource on its real tool', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
   sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
-  check('three days later (prepared resource confirmed for her) → her Club', /\/app\/club/.test(await signInTo(/\/app\/club/)));
+  check('three days later: still her first resource (never confirmed for her)', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
+  check('she confirms → Club Home', /\/app\/club$/.test(new URL(await signInTo(/\/app\/club$/)).pathname));
 
   // Her January isn't editable once the kit is approved for print; a preparing month never says "not yours".
   const page = await newPage(browser, DESKTOP);

@@ -187,15 +187,16 @@ async function sendBatch(deps: ClubDeps, kind: string, month: string | null) {
   if (!['profile_reminder', 'resource_ready', 'review', 'kit_reminder'].includes(kind)) throw new HttpError(400, 'invalid');
   const monthless = kind === 'profile_reminder' || kind === 'kit_reminder';
   if (!monthless && (!month || !MONTH.test(month))) throw new HttpError(400, 'invalid_month');
-  const audience = await deps.db.rpc<{ user_id: string; email: string; kit_slug: string | null; order_id: string | null }[]>(
+  const audience = await deps.db.rpc<{ user_id: string; email: string; kit_slug: string | null; order_id: string | null; reminder?: number | null }[]>(
     'club_email_audience', { p_kind: kind, p_month: month });
   const counts: Record<string, number> = { sent: 0, skipped: 0, failed: 0, duplicate: 0 };
   for (const a of audience) {
     const key = kind === 'profile_reminder' ? `profile_reminder:${a.user_id}` : kind === 'resource_ready' ? `ready:${a.user_id}:${month}`
-      : kind === 'kit_reminder' ? `kit_reminder:${a.order_id}` : `review:${a.order_id}`;
+      // Kit reminders: the first keeps its original key; the second (seven days) has its own, each sent once.
+      : kind === 'kit_reminder' ? `kit_reminder:${a.order_id}${a.reminder === 2 ? ':2' : ''}` : `review:${a.order_id}`;
     // A kit reminder names her first month, from its resource's slug ('2027-01-…').
     const label = month ? monthLabel(month) : kind === 'kit_reminder' && a.kit_slug ? monthLabel(`${a.kit_slug.slice(0, 7)}-01`) : undefined;
-    const outcome = await sendClubEmail(deps, key, kind as ClubEmailKind, a.user_id, a.email, { kitSlug: a.kit_slug, monthLabel: label });
+    const outcome = await sendClubEmail(deps, key, kind as ClubEmailKind, a.user_id, a.email, { kitSlug: a.kit_slug, monthLabel: label, reminder: a.reminder ?? 1 });
     counts[outcome]++;
   }
   return { audience: audience.length, ...counts };

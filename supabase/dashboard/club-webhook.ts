@@ -253,7 +253,12 @@ function clubStripeBlocked(deps) {
 // supabase/functions/_shared/club/emails.ts
 var monthLabel = (isoMonth) => (/* @__PURE__ */ new Date(`${isoMonth.slice(0, 7)}-15T12:00:00Z`)).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
 var longDate = (iso2) => new Date(iso2).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
-var WELCOME_KIT = "Your first mailing is your Welcome Kit: your family’s first resource, plus a personalized Family Vision watercolor print for your wall, our gift. We prepare them together and mail them to your door in one package.";
+var WELCOME_KIT = "Your first mailing is your Welcome Kit: a personalized Family Vision watercolor print for your wall, our gift, our one-page Family Meeting guide, and your family’s first monthly resource. Once you approve your print and your first resource, we print them together and mail them to your door in one package.";
+var MONTH_PAGES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+function toolUrl(siteUrl, slug, welcome = false) {
+  const month = MONTH_PAGES[Number(slug.slice(5, 7)) - 1];
+  return month && month !== "november" ? `${siteUrl}/app/club/${month}${welcome ? "?welcome=1" : ""}` : `${siteUrl}/club/resources/${slug}`;
+}
 var steps = (items) => ({
   html: `<ol style="margin:0 0 18px;padding-left:22px">${items.map((t) => `<li style="margin:0 0 8px">${esc(t)}</li>`).join("")}</ol>`,
   text: items.map((t, i) => `${i + 1}. ${t}`).join("\n")
@@ -350,14 +355,28 @@ function renderClubEmail(kind, to, d, siteUrl) {
       break;
     case "kit_reminder":
       b = {
-        subject: "One quick look before we prepare your Welcome Kit",
+        subject: d.reminder === 2 ? "Your Welcome Kit is waiting for one click" : "One quick look before we prepare your Welcome Kit",
         preheader: "Your first family resource is ready for a quick look before we print it.",
         eyebrow: "Your Welcome Kit",
         title: "Does your first resource look right?",
         blocks: [
           p(`Your Family Vision print is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? "first"} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
-          button("Take a look", resource),
-          small("No time? That’s fine. If we don’t hear from you within a day, we’ll prepare it as it is.")
+          button("Take a look", d.kitSlug ? toolUrl(siteUrl, d.kitSlug, true) : dash),
+          small("We print your Welcome Kit only after you confirm it, and aim to mail it within two business days.")
+        ]
+      };
+      break;
+    case "kit_submitted":
+      b = {
+        subject: `Welcome Kit ready to prepare: ${d.familyName ?? d.memberEmail ?? "a new member"}`,
+        preheader: d.shipBy ? `Target: mail by ${d.shipBy}.` : "Both approvals are in.",
+        eyebrow: "Welcome Kit submitted",
+        title: "A Welcome Kit is ready to prepare",
+        blocks: [
+          p(`${d.familyName ?? "A new member"}${d.memberEmail ? ` (${d.memberEmail})` : ""} approved her Family Vision print and her ${d.monthLabel ?? "first"} resource.`),
+          p(`Packing list: Family Vision print · Family Meeting guide (standard insert) · ${d.monthLabel ?? "first month"} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ""}`),
+          button("Open Welcome Kits", `${siteUrl}/admin/club`),
+          small("Make both PDFs, approve the kit, then mark it printed and mailed in /admin/club. Nothing is marked automatically.")
         ]
       };
       break;

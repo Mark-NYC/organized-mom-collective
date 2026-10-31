@@ -6,7 +6,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { CLUB_NAME, clubAccountsEnabled } from '../../data/club/config';
 import { sampleHouseholds } from '../../data/club/samples';
-import { getSession, requestCode, signOut, verifyCode, type AccountSession } from '../../lib/account';
+import { getSession, requestCode, verifyCode, type AccountSession } from '../../lib/account';
+import ClubNav from './ClubNav';
 import { accountStore, clubHref, resetSample, sampleFromUrl, sampleStore, type ClubStore } from '../../lib/club/store';
 import { routes } from '../../routes';
 import { clubNav } from '../../lib/club/nav';
@@ -57,7 +58,9 @@ export default function ClubGate({ page, children, signInIntro, bare = false }: 
   );
 }
 
+/** Signed in: the one Club nav (ClubNav). Signed out (or a sample): the sign-in pages' own short header. */
 function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) => string; signedIn: boolean }) {
+  if (signedIn) return <ClubNav current={page === 'dashboard' ? 'account' : page === 'family' ? 'family' : null} />;
   const link = (p: Page, to: string, label: string) => (
     <a href={href(to)} aria-current={page === p ? 'page' : undefined} className="rounded-[3px] px-2.5 py-2 text-[0.82rem] font-semibold text-warm-ink aria-[current=page]:underline aria-[current=page]:underline-offset-[6px]">
       {label}
@@ -66,17 +69,10 @@ function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) 
   return (
     <header data-club-chrome className="border-b border-warm-rule bg-ivory">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8">
-        <a href={signedIn ? routes.appClub : href(routes.clubDashboard)} className="font-serif text-[1.05rem] text-warm-ink">{CLUB_NAME}</a>
+        <a href={href(routes.clubDashboard)} className="font-serif text-[1.05rem] text-warm-ink">{CLUB_NAME}</a>
         <nav aria-label="Club" className="-mr-2 flex items-center gap-1">
-          {/* Her Club home is the month library (/app/club); her account page holds billing, family and address. */}
-          {signedIn ? <a href={routes.appClub} className="rounded-[3px] px-2.5 py-2 text-[0.82rem] font-semibold text-warm-ink">Your Club</a> : link('dashboard', routes.clubDashboard, 'Your months')}
-          {signedIn && link('dashboard', routes.clubDashboard, 'Account')}
+          {link('dashboard', routes.clubDashboard, 'Your months')}
           {link('family', routes.clubFamily, 'Family')}
-          {signedIn && (
-            <button type="button" className="px-2.5 py-2 text-[0.82rem] text-warm-soft underline underline-offset-4" onClick={() => signOut().then(() => clubNav().reload())}>
-              Sign out
-            </button>
-          )}
         </nav>
       </div>
     </header>

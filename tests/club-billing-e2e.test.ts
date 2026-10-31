@@ -358,6 +358,22 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     const a2 = asMember<{ j: { approved: boolean } }>('noel@example.com', 'select public.club_welcome_approve() as j');
     expect(a1.j.approved && a2.j.approved).toBe(true);
     expect(a1.j.readiness).toBe('needs_profile'); // the kit waits for her family; never for a monthly cutoff
+    // Not submitted yet (no family, first resource unconfirmed): the owner hears nothing.
+    expect((await post(billing, { action: 'kit_submitted' }, signIn('noel@example.com'))).body).toEqual({ notified: false });
+    asMember('noel@example.com', `select public.club_household_save('The Noels', '{}', '[{"first_name":"Noel","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Ivy","kind":"child","role":"child","birth_year":2019,"birth_month":2}]') as j`);
+    asMember('noel@example.com', `select public.club_address_save('{"name":"Noel N","line1":"9 Fir Ln","city":"Albany","state":"NY","postal_code":"12203"}') as j`);
+    expect(sql(`select string_agg(readiness, ',') from public.club_fulfillment_queue where user_id = '${noel}'`)).toBe('needs_confirmation,needs_confirmation');
+    asMember('noel@example.com', `select public.club_fulfillment_approve('2026-12-christmas-mission') as j`);
+    expect(sql(`select string_agg(readiness, ',') from public.club_fulfillment_queue where user_id = '${noel}'`)).toBe('needs_pdf,needs_pdf');
+    const owner = (await post(billing, { action: 'kit_submitted' }, signIn('noel@example.com'))).body;
+    expect(owner).toEqual({ notified: true });
+    expect((await post(billing, { action: 'kit_submitted' }, signIn('noel@example.com'))).body).toEqual({ notified: true });
+    const notice = inbox.filter((m) => /Welcome Kit ready to prepare/.test(m.subject));
+    expect(notice).toHaveLength(1); // once per kit
+    expect(notice[0].to).toBe(deps.env.supportInbox);
+    expect(notice[0].text).toContain('Family Meeting guide (standard insert)');
+    expect(notice[0].text).toMatch(/Target: mail by \w+ \d+, 2026/);
+    expect(sql(`select string_agg(status, ',') from public.club_fulfillment_orders where user_id = '${noel}'`)).toBe('pending,pending'); // nothing marked
     await deliver(events); // a late retry of every event
     expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${noel}'`)).toBe('2');
     // Her January payment: January's resource, its catch-up batch (January's list closed Sunday Dec 13).
@@ -365,7 +381,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     await deliver(jan.events);
     expect(sql(`select string_agg(to_char(resource_month, 'YYYY-MM') || ':' || fulfillment_type || ':' || late, ',' order by resource_month, fulfillment_type) from public.club_fulfillment_orders where user_id = '${noel}'`))
       .toBe('2026-12:monthly_resource:true,2026-12:welcome_vision:false,2027-01:monthly_resource:true');
-  });
+  }, 30000);
 
   // ---------------------------------------------------------------- Your First Month FREE
 
@@ -391,6 +407,8 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(s).toMatchObject({ mode: 'subscription', trial_end: FEB1, extra: [] });
     expect(stripe.prices.get(s.price)).toMatchObject({ lookup_key: 'club_monthly_v2', unit_amount: 590 });
     expect(s.subscription_metadata.intro_month).toBe('2027-01-01');
+    // Disclosed at checkout: one free month per household, and what happens otherwise.
+    expect(s.custom_text?.submit?.message).toContain('One free first month per household');
 
     const events = stripe.completeCheckout(s.id, { email: 'founder@example.com', address: at(1), card: 'fp_founder' });
     await deliver([events[1], events[3], events[0], events[2]], { times: 2 });
@@ -573,6 +591,24 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(months('rolling@example.com')).toBe(`${thisMonth.slice(0, 7)},${next}`);
     expect(paid('rolling@example.com')).toBe('0,590');
   });
+  it('once the program runs, a household that already had its free month is charged $5.90 at once and gets its Welcome Kit now', async () => {
+    // Same mailing address as rolling@ (written differently): refused after Checkout, charged immediately.
+    stripe.clock = Math.floor(Date.now() / 1000);
+    const s = await join('second@example.com');
+    expect(s.custom_text?.submit?.message).toContain('charged now');
+    await deliver(stripe.completeCheckout(s.id, { email: 'second@example.com', address: at(6, '6 BIRCH RD.') }));
+    await deliver(stripe.outbox.splice(0));
+    const thisMonth = sql(`select to_char(public.club_month_of(now()), 'YYYY-MM')`);
+    expect(paid('second@example.com')).toBe('0,590'); // the $0 trial-start invoice, then one $5.90 charge, now
+    expect(months('second@example.com')).toBe(thisMonth); // the current month, paid
+    // Her normal Welcome Kit: the print and this month, paired, outside the monthly list.
+    expect(sql(`select string_agg(fulfillment_type || ':' || batch, ',' order by fulfillment_type) from public.club_fulfillment_queue where user_id = '${uid('second@example.com')}'`))
+      .toBe('monthly_resource:welcome_kit,welcome_vision:welcome_kit');
+    expect(sql(`select count(*) from public.club_intro_claims where user_id = '${uid('second@example.com')}'`)).toBe('0'); // no second free month
+    await deliver(stripe.outbox.splice(0)); // replays change nothing
+    expect(paid('second@example.com')).toBe('0,590');
+    expect(sql(`select count(*) from public.club_fulfillment_orders where user_id = '${uid('second@example.com')}'`)).toBe('2');
+  }, 30_000);
 
   it('the 2027 program has all twelve kits, November 2027 included', () => {
     expect(sql(`select count(*) from public.club_kits where month between '2027-01-01' and '2027-12-01'`)).toBe('12');

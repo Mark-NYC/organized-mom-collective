@@ -1,4 +1,4 @@
-/** The Welcome Kit's three steps (src/lib/club/onboarding.ts → kitProgress): her family, her print, her first resource. */
+/** The Welcome Kit's four steps (src/lib/club/onboarding.ts → kitProgress): her family, her address, her print, her first resource. */
 import type { KitProgress } from '../../lib/club/onboarding';
 
 export default function KitSteps({ steps, className = '' }: { steps: KitProgress; className?: string }) {

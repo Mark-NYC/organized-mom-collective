@@ -163,6 +163,7 @@ export class FakeClubStripe {
           metadata: p.metadata ?? {}, subscription_metadata: p.subscription_data?.metadata ?? {},
           price: p.line_items?.[0]?.price, extra: Object.values(p.line_items ?? {}).slice(1).map((x: any) => x.price),
           trial_end: p.subscription_data?.trial_end ? Number(p.subscription_data.trial_end) : null,
+          custom_text: p.custom_text ?? null,
           expires_at: Number(p.expires_at), url: `https://checkout.stripe.test/${rand()}`,
           customer_details: null, collected_information: null,
         };

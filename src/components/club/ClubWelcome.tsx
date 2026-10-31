@@ -4,17 +4,20 @@
  * (this proves the inbox; nothing opens before it). 3. Wait for the webhook to finish her membership (seconds).
  * 4. Her family: first names, kids' ages and what she calls her family (prefilled from the name she gave Stripe, never
  * over a name she already chose). 4b. The rest of her family profile (FamilySetup: week, who does what, growth,
- * challenges, priority), each step skippable and saved as she goes; shown right after the family step, or to resume a
- * setup she started, never to someone who finished it or chose "Finish later" in this visit. 5. Mailing address, only if Checkout didn't give one. Then her Welcome Kit: her
- * welcome print (/club/family-vision), then her first resource. Each step comes from club_me (src/lib/club/onboarding.ts),
+ * challenges, priority), each step skippable and saved as she goes; shown right after the family step, and to anyone
+ * who hasn't finished it (it resumes at the first open step), unless she chose "Finish later" (then a summary of
+ * what's left, and on to her kit). 5. Mailing address, only if Checkout didn't give one. Then her Welcome Kit: her
+ * welcome print (/club/family-vision), then her first resource on its real tool (/app/club/<month>?welcome=1). A
+ * member with no month yet (her free month wasn't available) is told it starts with her first payment. Each step comes from club_me (src/lib/club/onboarding.ts),
  * so coming back later, or refreshing, picks up exactly where she left off.
  */
 import { useEffect, useRef, useState } from 'react';
 import type { Household } from '../../lib/club/profile';
-import { STEP_TITLES, TOTAL_STEPS, type FamilyProfile } from '../../lib/club/family-profile';
+import { SETUP_STEPS, STEP_TITLES, TOTAL_STEPS, type FamilyProfile } from '../../lib/club/family-profile';
 import FamilySetup from './FamilySetup';
-import { checkoutStatus, loadAddress, loadMembership, saveAddress, type Address } from '../../lib/club/membership';
-import { familyNameFrom, kitProgress, nextStep, stepHref } from '../../lib/club/onboarding';
+import { checkoutStatus, loadAddress, loadMembership, monthName, saveAddress, shortDate, type Address, type Membership } from '../../lib/club/membership';
+import { deferProfile, familyNameFrom, kitProgress, loadMeetingGuideSeen, nextStep, profileDeferred, startsWithFirstPayment, stepHref } from '../../lib/club/onboarding';
+import { getSession } from '../../lib/account';
 import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
 import FamilyForm from './FamilyForm';
@@ -66,55 +69,58 @@ export default function ClubWelcome() {
 }
 
 type Step = { kind: 'waiting' } | { kind: 'not_member' } | { kind: 'family'; household: Household | null; suggested: string }
-  | { kind: 'profile'; household: Household; profile: FamilyProfile } | { kind: 'address'; address: Address | null } | { kind: 'done'; to: string };
+  | { kind: 'profile'; household: Household; profile: FamilyProfile } | { kind: 'later'; profile: FamilyProfile }
+  | { kind: 'address'; address: Address | null } | { kind: 'starts'; me: Membership } | { kind: 'done'; to: string };
 
 function Setup({ ctx }: { ctx: ClubContext }) {
   const [step, setStep] = useState<Step>({ kind: 'waiting' });
   const [error, setError] = useState('');
-  // Set when she saves her family in this visit (show the profile steps next) or picks "Finish later" (don't).
-  const justSavedFamily = useRef(false);
-  const profileLater = useRef(false);
-
-  /** The profile steps, if this is the moment for them; false otherwise. */
-  const profileStep = async () => {
-    if (profileLater.current) return false;
-    const [household, profile] = await Promise.all([ctx.store.household(), ctx.store.profile().catch(() => null)]);
-    if (!household || !profile || profile.setupCompleted) return false;
-    if (!(justSavedFamily.current || profile.setupDone.length > 0)) return false;
-    setStep({ kind: 'profile', household, profile });
-    return true;
-  };
+  // She chose "Finish later" in this visit (also remembered on this device), and whether she did any step here.
+  const deferred = useRef(false);
+  const progressed = useRef(false);
+  const fail = () => setError('We couldn’t load your membership. Check your connection and reload the page.');
 
   const next = async () => {
+    const [household, profile, session] = await Promise.all([
+      ctx.store.household(),
+      ctx.store.profile().catch(() => null),
+      ctx.store.kind === 'account' ? getSession() : null,
+    ]);
+    const later = deferred.current || profileDeferred(session?.user_id);
     if (ctx.store.kind === 'sample') {
-      const h = await ctx.store.household();
-      if (h && (await profileStep())) return;
-      return setStep(h ? { kind: 'done', to: routes.clubDashboard } : { kind: 'family', household: null, suggested: '' });
+      if (!household) return setStep({ kind: 'family', household: null, suggested: '' });
+      if (profile && !profile.setupCompleted && !later) return setStep({ kind: 'profile', household, profile });
+      return setStep({ kind: 'done', to: routes.clubDashboard });
     }
     const me = await loadMembership();
-    const s = nextStep(me);
+    // The family form comes first; its steps 2–6 follow straight away, then the address, then the Welcome Kit.
+    const s = nextStep(me, { profile: household ? profile : null, profileDeferred: later, meetingGuideSeen: await loadMeetingGuideSeen(session?.user_id) });
     if (s === 'not_member') return setStep({ kind: 'not_member' });
     if (s === 'family') {
-      const [household, address] = await Promise.all([ctx.store.household(), loadAddress().catch(() => null)]);
+      const address = await loadAddress().catch(() => null);
       return setStep({ kind: 'family', household, suggested: familyNameFrom(address?.name) });
     }
-    // Still in her Welcome Kit steps: the profile questions come before the address and the print.
-    if (['address', 'print'].includes(s) && (await profileStep())) return;
+    if (s === 'profile' && household && profile) return setStep({ kind: 'profile', household, profile });
     if (s === 'address') return setStep({ kind: 'address', address: await loadAddress() });
+    // No Welcome Kit yet (her free month wasn't available): say what happens next instead of a silent jump.
+    if (s === 'home' && progressed.current && startsWithFirstPayment(me)) return setStep({ kind: 'starts', me });
     setStep({ kind: 'done', to: stepHref(me, s) });
+  };
+  const advance = () => {
+    progressed.current = true;
+    setStep({ kind: 'waiting' });
+    return next().catch(fail);
   };
 
   useEffect(() => {
     let tries = 0;
-    const attempt = () =>
-      next().catch(() => setError('We couldn’t load your membership. Check your connection and reload the page.'));
     // The checkout webhook usually lands within seconds; give it up to a minute.
     const wait = async () => {
       if (ctx.store.kind === 'account') {
         const me = await loadMembership().catch(() => null);
         if (me && !me.member && !me.grant && ++tries < 20) return void setTimeout(wait, 3000);
       }
-      attempt();
+      next().catch(fail);
     };
     wait();
   }, []);
@@ -143,37 +149,80 @@ function Setup({ ctx }: { ctx: ClubContext }) {
           <SetupProgress />
           <FamilyForm household={step.household} mode="start" suggestedName={step.suggested} submitLabel="Next" onSave={async (input) => {
             await ctx.store.saveHousehold(input);
-            justSavedFamily.current = true;
-            await next();
+            await advance();
           }} />
         </>
       );
-    case 'profile': {
-      const leave = () => {
-        profileLater.current = true;
-        setStep({ kind: 'waiting' });
-        next().catch(() => setError('We couldn’t load your membership. Check your connection and reload the page.'));
-      };
+    case 'profile':
       return (
         <>
           <KitSteps steps={kitProgress('family')} />
-          <FamilySetup store={ctx.store} members={step.household.members} profile={step.profile} mode="wizard" onDone={leave} onExit={leave} />
+          <FamilySetup store={ctx.store} members={step.household.members} profile={step.profile} mode="wizard" onDone={() => advance()}
+            onExit={(profile) => setStep({ kind: 'later', profile })} />
         </>
+      );
+    case 'later': {
+      const open = SETUP_STEPS.filter((s) => !step.profile.setupDone.includes(s));
+      return (
+        <div className="max-w-2xl">
+          <KitSteps steps={kitProgress('family')} />
+          <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink">Saved. Finish the rest anytime.</h1>
+          <p className="mt-3 leading-relaxed text-warm-soft">Everything you answered is saved to your account. {open.length ? 'Still open:' : ''}</p>
+          {open.length > 0 && (
+            <ul className="mt-2 list-disc pl-6 leading-relaxed text-warm-ink">{open.map((s) => <li key={s}>{STEP_TITLES[s]}</li>)}</ul>
+          )}
+          <p className="mt-3 leading-relaxed text-warm-soft">You’ll find them under <strong className="text-warm-ink">My Family</strong>. Next, your Welcome Kit.</p>
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <button type="button" className="btn-primary" onClick={async () => {
+              deferred.current = true;
+              deferProfile((await getSession())?.user_id);
+              await advance();
+            }}>Continue</button>
+            <button type="button" className="min-h-11 text-[0.95rem] text-warm-soft underline underline-offset-4"
+              onClick={() => ctx.store.household().then((h) => h && setStep({ kind: 'profile', household: h, profile: step.profile }))}>Keep going now</button>
+          </div>
+        </div>
       );
     }
     case 'address':
       return (
         <>
-          <KitSteps steps={kitProgress('family')} />
+          <KitSteps steps={kitProgress('address')} />
           <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink">Where should we mail your Welcome Kit?</h1>
           <p className="mt-3 mb-6 max-w-xl leading-relaxed text-warm-soft">Your Welcome Kit and your monthly printed resources come here.</p>
           <AddressForm address={step.address} submitLabel="See my welcome gift" onSave={async (a) => {
             await saveAddress(a);
-            await next();
+            await advance();
           }} />
         </>
       );
+    case 'starts':
+      return <StartsWithPayment me={step.me} />;
   }
+}
+
+/**
+ * Her family and address are set, but her membership has no month yet: the free first month is one per household and
+ * this one had it, so her first month, and her Welcome Kit with it, open with her first payment. Nothing is granted early.
+ */
+function StartsWithPayment({ me }: { me: Membership }) {
+  const n = me.next!;
+  const month = monthName(n.month).split(' ')[0];
+  return (
+    <div className="max-w-2xl">
+      <p className="label text-warm-soft">You’re all set</p>
+      <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink">Your Club starts with {month}</h1>
+      <p className="mt-3 leading-relaxed text-warm-soft">
+        Your family and mailing address are saved. The free first month is one per household, and this household has already had it, so your membership starts with your first payment on <strong className="text-warm-ink">{shortDate(n.payment_on!)}</strong>.
+      </p>
+      <ul className="mt-4 list-disc space-y-1 pl-6 leading-relaxed text-warm-ink">
+        <li>{month} opens in your Club that day, prepared with your family’s names.</li>
+        <li>Your Welcome Kit comes with it: you’ll approve your Family Vision print and {month}, and we mail them with our Family Meeting guide in one package.</li>
+      </ul>
+      <p className="mt-3 leading-relaxed text-warm-soft">Think that’s a mistake? Reply to your welcome email and we’ll look.</p>
+      <a href={routes.appClub} className="btn-primary mt-6 inline-block">Go to Club Home</a>
+    </div>
+  );
 }
 
 /** Step 1 of 6 on the family form, matching FamilySetup's bar. */

@@ -70,6 +70,8 @@ export const startCheckout = (plan: OfferedPlan, email?: string) => billing<{ ur
 export const checkoutStatus = (sessionId: string) => billing<{ paid: boolean; open: boolean; email: string }>('checkout_status', { session_id: sessionId }, false);
 export const openPortal = () => billing<{ url: string }>('portal');
 export const syncEmail = () => billing<{ updated: boolean }>('sync_email');
+/** After her last approval: tells the owner her Welcome Kit is submitted (club-billing checks it; once per kit). */
+export const notifyKitSubmitted = () => billing<{ notified: boolean }>('kit_submitted');
 
 /** Plain words for the errors checkout and billing can return. */
 export const billingErrorText = (code: string) =>

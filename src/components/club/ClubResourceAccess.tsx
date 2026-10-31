@@ -12,7 +12,8 @@ import ClubGate, { type ClubContext } from './ClubGate';
 import type { Household } from '../../lib/club/profile';
 import { fromDb } from '../../lib/club/store';
 import { approveResource, bridgeResourceState, loadMembership, loadResource, monthName, saveResource, type Membership, type ResourceVersion } from '../../lib/club/membership';
-import { firstMonth, kitProgress } from '../../lib/club/onboarding';
+import { firstMonth, kitProgress, welcomeKitView } from '../../lib/club/onboarding';
+import { memberPlanHref } from '../../lib/club/plan/account';
 import KitSteps from './KitSteps';
 import { clubResourceBySlug, MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { routes } from '../../routes';
@@ -93,6 +94,9 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
     Promise.all([loadResource(slug), ctx.store.household(), loadMembership().catch(() => null)])
       .then(([res, h, m]) => {
         if (!h) return clubNavToWelcome(ctx);
+        // Her Welcome Kit's first resource is looked over and confirmed on its real tool (/app/club/<month>).
+        const tool = memberPlanHref(slug);
+        if (m && tool !== routes.clubResource(slug) && welcomeKitView(m, slug) !== 'none') return location.replace(`${tool}?welcome=1`);
         setMe(m);
         setHousehold(h);
         setV(res);
@@ -204,7 +208,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
             <div role="status">
               <h1 id="kit-first" className="font-serif text-[1.7rem] leading-tight text-warm-ink sm:text-[2rem]"><span aria-hidden="true">✓ </span>It’s all set!</h1>
               <p className="mt-2 max-w-2xl text-warm-ink">Your Welcome Kit is being prepared: your Family Vision print and your {r?.title ?? 'first resource'}, printed together and mailed to you in one package. You’ll see when it ships in your account.</p>
-              <a className="btn-primary mt-4" href={routes.appClub}>See your Club</a>
+              <a className="btn-primary mt-4" href={routes.appClub}>Go to Club Home</a>
             </div>
           )}
         </section>

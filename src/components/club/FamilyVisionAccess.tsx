@@ -13,7 +13,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import ClubGate, { type ClubContext } from './ClubGate';
 import { approveWelcome, loadAddress, loadMembership, loadWelcome, saveAddress, saveWelcome, type Address, type Membership, type Vision, type WelcomeOrder } from '../../lib/club/membership';
-import { firstMonth, kitProgress, kitText, nextStep, stepHref } from '../../lib/club/onboarding';
+import { firstMonth, kitProgress, kitText, loadMeetingGuideSeen, nextStep, stepHref } from '../../lib/club/onboarding';
+import { getSession } from '../../lib/account';
 import { clubResourceBySlug } from '../../data/club/resources';
 import AddressForm from './AddressForm';
 import KitSteps from './KitSteps';
@@ -39,6 +40,7 @@ const Note = ({ children }: { children: ReactNode }) => <div className="mx-auto 
 function Member({ ctx }: { ctx: ClubContext }) {
   const [w, setW] = useState<WelcomeOrder | null | undefined>(undefined);
   const [me, setMe] = useState<Membership | null>(null);
+  const [guideSeen, setGuideSeen] = useState(true);
   const [address, setAddress] = useState<Address | null>(null);
   const [editAddress, setEditAddress] = useState(false);
   const [msg, setMsg] = useState('');
@@ -65,8 +67,9 @@ function Member({ ctx }: { ctx: ClubContext }) {
       reveal(true);
       return;
     }
-    Promise.all([loadWelcome(), ctx.store.household(), loadMembership(), loadAddress()])
-      .then(([order, h, m, a]) => {
+    Promise.all([loadWelcome(), ctx.store.household(), loadMembership(), loadAddress(), getSession().then((s) => loadMeetingGuideSeen(s?.user_id))])
+      .then(([order, h, m, a, seen]) => {
+        setGuideSeen(seen);
         setW(order);
         setMe(m);
         setAddress(a);
@@ -131,7 +134,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
   }
   const open = w.status === 'pending' || w.status === 'on_hold';
   const approved = !open || w.approved;
-  const step = me ? nextStep(me) : 'home';
+  const step = me ? nextStep(me, { meetingGuideSeen: guideSeen }) : 'home';
   const first = me ? firstMonth(me) : null;
   const firstTitle = first ? clubResourceBySlug(first.slug)?.title ?? first.title : null;
   const mailLine = address && (
@@ -167,15 +170,20 @@ function Member({ ctx }: { ctx: ClubContext }) {
           <span className="fvp-approved-check" aria-hidden="true">✓</span>
           <strong>{open ? 'It’s yours!' : 'Your welcome print'}</strong>
           <p>{open ? 'Your print is approved.' : kitText({ welcome: me?.welcome ?? null })}</p>
-          {step === 'first_resource' && first?.slug ? (
+          {step === 'meeting_guide' ? (
             <>
-              <p className="fvp-approved-next">Next, a quick look at your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first family resource'}. It’s already prepared for your family, and both arrive together in your Welcome Kit.</p>
+              <p className="fvp-approved-next">Next, a quick look at the Family Meeting guide that comes in your Welcome Kit, then your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first family resource'}. All three arrive together.</p>
+              <a className="fvp-next-cta" href={ctx.href(stepHref(me!, 'meeting_guide'))}>Next: your Family Meeting guide <span aria-hidden="true">→</span></a>
+            </>
+          ) : step === 'first_resource' && first?.slug ? (
+            <>
+              <p className="fvp-approved-next">Next, a quick look at your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first family resource'}. It’s already prepared for your family, and it arrives with your print in your Welcome Kit.</p>
               <a className="fvp-next-cta" href={ctx.href(stepHref(me!, 'first_resource'))}>See your first family resource <span aria-hidden="true">→</span></a>
             </>
           ) : (
             <>
               {open && me && <p className="fvp-approved-next">{kitText(me)}</p>}
-              <a className="fvp-next-cta" href={routes.appClub}>See your Club <span aria-hidden="true">→</span></a>
+              <a className="fvp-next-cta" href={routes.appClub}>Go to Club Home <span aria-hidden="true">→</span></a>
             </>
           )}
           {open && <button type="button" className="fvp-edit-after-cta" onClick={() => document.getElementById('fvp-open-editor')?.click()}>Change my print</button>}
@@ -190,7 +198,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
   const progress = document.getElementById('fvp-progress-slot');
   return (
     <>
-      {progress && open && createPortal(<KitSteps steps={kitProgress(approved ? 'first_resource' : 'print')} />, progress)}
+      {progress && open && createPortal(<KitSteps steps={kitProgress(!approved ? 'print' : step === 'meeting_guide' ? 'meeting_guide' : 'first_resource')} />, progress)}
       {slot ? createPortal(bar, slot) : bar}
     </>
   );
