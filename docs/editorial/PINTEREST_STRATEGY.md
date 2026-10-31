@@ -1,5 +1,7 @@
 # Pinterest strategy
 
+**Morning production command:** When the user asks "What 10 pins do we need to make today?", follow [PINTEREST_DAILY_PRODUCTION_DESK.md](PINTEREST_DAILY_PRODUCTION_DESK.md) to select work across existing campaigns, seasonal guides, Club product pins, and periodic 39+10 lifestyle gallery sprints. Return complete standalone Gemini prompts with exact brand hex codes and Georgia/Montserrat. The existing three strategic concepts and six-variation contract still govern article-based campaigns; they are not a daily content mix.
+
 **Two separate lanes:** The three-concept/six-variation approach below governs the original utility/routine article and 500-pin campaign. Editorial image-first inspiration galleries use [IMAGE_FIRST_PINTEREST_WORKFLOW.md](IMAGE_FIRST_PINTEREST_WORKFLOW.md), their own OMC-V IDs, a 15-photo/15-Pin batch, and a separate official-format bulk-import CSV. Do not add these to the 500-pin plan or invent progress.
 
 Every article has three strategic Pinterest concepts (search-driven, curiosity-driven, and save-worthy). The default production batch is six finished creative variations, normally two per concept. Existing three-pin plans remain valid; the six-variation batch is a separate production layer until the tracker and validator are updated. This document is the standard; the per-article plan uses [templates/pinterest-plan.md](templates/pinterest-plan.md) and is saved as `docs/editorial/pinterest/{ARTICLE_ID}.md`.
