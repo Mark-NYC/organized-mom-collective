@@ -52,6 +52,33 @@ const MONTHLY_OFFERS = [
  'Help your kids bless someone else. Get December’s Giving Cards',
 ] as const;
 
+/** Compact mobile copy keeps the resource name and the ordering deadline. */
+const MOBILE_OFFERS = [
+ 'January Habit Cards',
+ 'February Connection Cards',
+ 'March Chore Chart',
+ 'April Dinner Team Kit',
+ 'May Summer Day Planner',
+ 'June Snack Station Kit',
+ 'July Activity Kit',
+ 'August School Routine Kit',
+ 'September Weekly Plan',
+ 'October Sunday Reset',
+ 'November Family Ownership Kit',
+ 'December Giving Cards',
+] as const;
+
+export function clubPrintMobileMessages(now = new Date(), offer = false) {
+ const end = nextProgramPrintDeadline(now);
+ const lastDay = new Date(end.getTime() - 1);
+ const deadlineDate = new Intl.DateTimeFormat('en-US', { timeZone: CLUB_TIME_ZONE, month: 'short', day: 'numeric' }).format(lastDay);
+ const deadline = (end.getTime() - now.getTime()) / 86400000 <= 3 ? 'Order by Sunday' : `Order by ${deadlineDate}`;
+ return [
+  `${MOBILE_OFFERS[printMonth(lastDay)]} · ${deadline} →`,
+  offer ? 'First month FREE · Then $5.90/mo →' : 'Monthly family tools mailed to you · $5.90/mo →',
+ ];
+}
+
 /** Benefit-led monthly message; transitions automatically after the second-Sunday cutoff in New York. */
 export function clubPrintMessages(now = new Date(), offer = false) {
  const end = nextProgramPrintDeadline(now);
