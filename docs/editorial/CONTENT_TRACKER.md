@@ -75,3 +75,4 @@ Keep the table format as is: one row per article, these ten columns, in this ord
 | FP-26 | How to Get Kids Out the Door Without the Morning Chaos | `getting-kids-out-the-door` | Family Planning & Routines | Published | getting kids out the door | P Relevant published guides · N morning-routine-chart-generator | 2026-10-22 | Yes | planned / planned / planned |
 
 | IF-13 | 10 Simple Ways to Teach Kids Generosity This Christmas | `teaching-kids-generosity-at-christmas` | Intentional Family Life | Published | teaching kids generosity at Christmas | P IF-01 · S IF-08, FP-24 · N IF-08 | 2026-10-31 | Yes | planned / planned / planned |
+| FP-27 | Sunday Meal Planning: A 15-Minute Routine for Busy Families | `sunday-meal-planning-routine` | Family Planning & Routines | Published | Sunday meal planning routine | P FP-05 · S FP-04, IF-09 · N FP-06 | 2026-10-31 | Yes | planned / planned / planned |
