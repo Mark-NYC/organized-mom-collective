@@ -13,7 +13,7 @@ import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, clearFields, downloadPng } from '../../lib/printable';
 import { adultOneJob, choreSets, ageGroupFor, oneJobs, type AgeGroup, type ChoreSet } from '../../data/chore-chart';
 import { matchResponsibility, responsibilityById } from '../../data/responsibilities';
-import { choreLineIcon } from '../../data/chore-line-icons';
+import { choreLineIcon, choreLineIconForText } from '../../data/chore-line-icons';
 import type { ToolHandoff } from '../../lib/tool-handoff';
 import { hasSaved, orderPickerForAge } from './tool-handoff-ui';
 
@@ -49,7 +49,7 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
   function renderIcons() {
     iconImgs.forEach((img, i) => {
       const r = responsibilityById(iconFields[i].value);
-      const src = r ? choreLineIcon(r.id) : null;
+      const src = (r ? choreLineIcon(r.id) : null) ?? choreLineIconForText(rowFields[i].value);
       img.hidden = !src;
       if (r && src) {
         if (img.getAttribute('src') !== src) img.src = src;
