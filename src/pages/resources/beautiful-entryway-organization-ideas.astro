@@ -1,0 +1,19 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import InspirationGallery from '../../components/resources/InspirationGallery.astro';
+import { entrywayGallery as gallery } from '../../data/entryway-gallery';
+const ready = gallery.published && gallery.ideas.length === 39 && gallery.ideas.every(i=>Boolean(i.image));
+const origin = Astro.site?.origin ?? 'https://www.organizedmomcollective.com';
+const url = new URL('/resources/'+gallery.slug,origin).href;
+const jsonLd = ready ? [{
+  '@context':'https://schema.org','@type':'BlogPosting',
+  headline:gallery.title,description:gallery.description,
+  mainEntityOfPage:url,
+  image:gallery.ideas.map(i=>new URL(i.image,origin).href),
+  author:{'@type':'Organization',name:'Organized Mom Collective'},
+  publisher:{'@type':'Organization',name:'Organized Mom Collective'}
+}] : [];
+---
+<PublicLayout title={gallery.seoTitle} description={gallery.description} indexable={ready} width="wide" chrome jsonLd={jsonLd} ogImage={ready?gallery.ideas[0].image:undefined}>
+  <InspirationGallery gallery={gallery}/>
+</PublicLayout>
