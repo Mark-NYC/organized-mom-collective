@@ -81,3 +81,8 @@ Record each item as **pass**, **fail**, **not applicable** or **not verified**, 
 - [ ] Retry only pins verified as rejected or missing, checking the queue first. No duplicate re-uploads.
 
 **Incident evidence:** Oct 31, 2026: three `Duplicate Pin link` rejections in an eight-pin batch subsequently succeeded when isolated into a three-row CSV with unique destinations. This is an operational workaround, not an official Pinterest rule.
+
+
+## Required CSV split validation
+
+Follow the permanent CSV splitting rule in [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md): one pin per normalized destination URL per CSV; automatically split repeated destinations without changing original dates, times or content. Check duplicate image URLs/content hashes and normalized titles across the source batch. Record exact source-row/pin-to-output-file membership and verify each intended row appears exactly once. Flag duplicates instead of silently dropping rows. Keep originals as superseded history; import only the numbered splits after reconciling any prior successful uploads.
