@@ -72,3 +72,12 @@ Any one of these blocks production-ready delivery until fixed. Visual detection 
 ## Sign-off record
 
 Record each item as **pass**, **fail**, **not applicable** or **not verified**, with the exact final filename/version. Separate mechanical results, visual judgment and owner approval. An original-source hash does not certify shadows; a zero pixel difference does not certify realism; owner creative approval does not prove measured Pinterest performance.
+## Mandatory native Pinterest CSV gate (2026-10-31)
+
+- [ ] Each output CSV contains **at most one pin per normalized destination `Link` URL**. Split duplicate destinations across separately named CSV uploads; preserve the original links and publication dates.
+- [ ] Every input row appears in exactly one output CSV (no silent drops), with unique pin ID and image media URL; original records remain intact.
+- [ ] Media URLs, board names, date/time formatting and planned queue headroom checked before import.
+- [ ] After upload, reconcile Pinterest's confirmation/error email and visible queue against individual pin IDs. Keep unverified rows as `submitted`, not `confirmed`.
+- [ ] Retry only pins verified as rejected or missing, checking the queue first. No duplicate re-uploads.
+
+**Incident evidence:** Oct 31, 2026: three `Duplicate Pin link` rejections in an eight-pin batch subsequently succeeded when isolated into a three-row CSV with unique destinations. This is an operational workaround, not an official Pinterest rule.
