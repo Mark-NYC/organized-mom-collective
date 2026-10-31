@@ -238,3 +238,16 @@ Use [PINTEREST_RESEARCH_LOOP.md](PINTEREST_RESEARCH_LOOP.md) with the 500-pin ma
 **One normalized destination `Link` URL per Pinterest bulk-import CSV.** Do not put two pins linking to the same landing page in the same upload, even if they use different titles and images. On 2026-10-31, Pinterest rejected three rows as `Duplicate Pin link` from an eight-pin submission; re-uploading only those three (with distinct destination URLs inside the retry CSV) succeeded. This is a tested workaround, not a documented universal Pinterest policy. Multiple distinct pins may still point to the same legitimate article or generator **across separate CSV uploads**. Never fabricate query parameters or alter links to bypass duplicate checking.
 
 Before delivering any import-ready CSV: validate normalized destination URLs, unique media URLs and IDs, image accessibility, correct boards, exact publish dates and queue headroom. If a destination repeats, split the pins into separate, clearly named CSV files while retaining their original dates and content. Do not silently drop pins. After uploading, compare intended rows with Pinterest's confirmation/error emails and scheduled queue. Track each pin as `prepared`, `submitted`, `confirmed`, `rejected`, or `published`; do not interpret CSV generation or submission as successful scheduling. Retry only independently verified missing/rejected pins and check the current queue first to avoid double-posting. Keep the original CSVs as historical records. See [PINTEREST_PRODUCTION.md](PINTEREST_PRODUCTION.md) and [PINTEREST_QA_CHECKLIST.md](PINTEREST_QA_CHECKLIST.md).
+
+
+## Permanent CSV splitting rule (owner instruction, October 31, 2026)
+
+Applies to every future Pinterest import CSV, regardless of content lane or campaign:
+
+1. Include at most one pin per normalized destination Link URL per CSV. Automatically split repeating destinations into separate numbered files. Preserve actual URLs; never add query strings to manufacture uniqueness.
+2. Preserve every original scheduled date and time exactly when splitting, including timezone notation. Do not regroup by day, reschedule, omit rows or silently change any other field.
+3. Check duplicate images and normalized titles across the entire source batch, not only within each split. Compare media URLs and source content hashes when available; URL uniqueness alone is not proof of distinct image content. Flag duplicate titles or identical images for resolution; do not silently discard or rewrite them. Review near-duplicate creative visually.
+4. Save a batch record mapping each source row/permanent pin ID, exact image, title, destination and original timestamp to its output CSV. Validate that every intended source row occurs exactly once in the split outputs and that each output has unique destination URLs.
+5. Retain the original as a historical source marked superseded for upload. Deliver only numbered split files as import-ready. A prepared file is not confirmed scheduled/published. If some pins have already imported, reconcile confirmed results first and retry only verified missing/rejected rows.
+
+This is OMC's permanent operational rule based on the observed Duplicate Pin link incident, not a claim about a universal published Pinterest policy.
