@@ -1,0 +1,172 @@
+{
+  "source": "OMC_Pins_19-36.csv",
+  "source_sha256": "4d1e3b3a6030f82e0412a3d7e224f42c11b44329981a5abc974b4696c10124cb",
+  "status": "prepared; not proof of import or publication",
+  "schedule_preserved": true,
+  "duplicate_titles": 0,
+  "duplicate_media_urls": 0,
+  "csvs": [
+    {
+      "filename": "OMC_Pins_19-36_Part_1.csv",
+      "count": 6,
+      "pins": [
+        {
+          "pin_number": 19,
+          "source_row": 1,
+          "title": "Three Kinds of Dinner Night: A Flexible Family Meal Plan",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-19-three-kinds-dinner-night.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/weekly-meal-planning-for-families/",
+          "publish_date": "2026-11-03T18:00:00"
+        },
+        {
+          "pin_number": 25,
+          "source_row": 2,
+          "title": "School Forms: Finish the Handoff Back to the Backpack",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-25-signed-form-backpack.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/school-paperwork-organization/",
+          "publish_date": "2026-11-03T21:00:00"
+        },
+        {
+          "pin_number": 31,
+          "source_row": 3,
+          "title": "Bathroom Reset Checklist: What to Clean and What Can Wait",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-31-bathroom-leave-the-grout.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/bathroom-reset-checklist/",
+          "publish_date": "2026-11-04T09:00:00"
+        },
+        {
+          "pin_number": 22,
+          "source_row": 4,
+          "title": "Make a Grocery List Someone Else Can Shop From",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-22-grocery-list-no-follow-up-call.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/grocery-list-from-meal-plan/",
+          "publish_date": "2026-11-04T12:00:00"
+        },
+        {
+          "pin_number": 28,
+          "source_row": 5,
+          "title": "After-School Routine: Unpack More Than the Backpack",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-28-backpack-lunchbox-arrival.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/after-school-routine-for-kids/",
+          "publish_date": "2026-11-04T15:00:00"
+        },
+        {
+          "pin_number": 34,
+          "source_row": 6,
+          "title": "Teaching Independence: What to Say Before Taking the Job Back",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-34-before-ill-just-do-it.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/teaching-kids-independence/",
+          "publish_date": "2026-11-04T18:00:00"
+        }
+      ]
+    },
+    {
+      "filename": "OMC_Pins_19-36_Part_2.csv",
+      "count": 6,
+      "pins": [
+        {
+          "pin_number": 20,
+          "source_row": 7,
+          "title": "Sharing Dinner Duty: Four Decisions the Meal Owner Handles",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-20-handling-dinner-four-decisions.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/weekly-meal-planning-for-families/",
+          "publish_date": "2026-11-04T21:00:00"
+        },
+        {
+          "pin_number": 26,
+          "source_row": 8,
+          "title": "Keep School Artwork From Burying Permission Slips",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-26-artwork-permission-slips.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/school-paperwork-organization/",
+          "publish_date": "2026-11-05T09:00:00"
+        },
+        {
+          "pin_number": 32,
+          "source_row": 9,
+          "title": "Bathroom Cleaning Setup: One Basket and Two Cloths",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-32-bathroom-basket-two-cloths.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/bathroom-reset-checklist/",
+          "publish_date": "2026-11-05T12:00:00"
+        },
+        {
+          "pin_number": 23,
+          "source_row": 10,
+          "title": "Combine Dinner Ingredients Into One Grocery List",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-23-three-dinners-one-grocery-list.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/grocery-list-from-meal-plan/",
+          "publish_date": "2026-11-05T15:00:00"
+        },
+        {
+          "pin_number": 29,
+          "source_row": 11,
+          "title": "A Tiny Entryway Setup for Backpacks and School Stuff",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-29-tiny-entryway-school-stuff.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/after-school-routine-for-kids/",
+          "publish_date": "2026-11-05T18:00:00"
+        },
+        {
+          "pin_number": 35,
+          "source_row": 12,
+          "title": "Teach Kids to Pack a Backpack: A Practice Sequence",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-35-backpack-practice-sequence.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/teaching-kids-independence/",
+          "publish_date": "2026-11-05T21:00:00"
+        }
+      ]
+    },
+    {
+      "filename": "OMC_Pins_19-36_Part_3.csv",
+      "count": 6,
+      "pins": [
+        {
+          "pin_number": 21,
+          "source_row": 13,
+          "title": "Late Practice? How to Adjust the Family Meal Plan",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-21-late-practice-meal-plan.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/weekly-meal-planning-for-families/",
+          "publish_date": "2026-11-06T09:00:00"
+        },
+        {
+          "pin_number": 27,
+          "source_row": 14,
+          "title": "Missing School Form? Check These Three Places",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-27-missing-school-form.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/school-paperwork-organization/",
+          "publish_date": "2026-11-06T12:00:00"
+        },
+        {
+          "pin_number": 33,
+          "source_row": 15,
+          "title": "Short on Bathroom Cleaning Time? Choose Three Priorities",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-33-five-minute-bathroom-priorities.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/bathroom-reset-checklist/",
+          "publish_date": "2026-11-06T15:00:00"
+        },
+        {
+          "pin_number": 24,
+          "source_row": 16,
+          "title": "The Two-Dinner Grocery Plan for a Busy Week",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-24-two-dinner-grocery-plan.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/grocery-list-from-meal-plan/",
+          "publish_date": "2026-11-06T18:00:00"
+        },
+        {
+          "pin_number": 30,
+          "source_row": 17,
+          "title": "School Papers: A Clear Handoff Between Kids and Adults",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-30-school-papers-child-adult-roles.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/after-school-routine-for-kids/",
+          "publish_date": "2026-11-06T21:00:00"
+        },
+        {
+          "pin_number": 36,
+          "source_row": 18,
+          "title": "They Can Do the Chore but Still Forget: Practice the Cue",
+          "media_url": "https://raw.githubusercontent.com/Mark-NYC/organized-mom-collective/main/public/assets/pinterest/advice-pins-batch-02/omc-36-can-do-job-still-forget.jpeg",
+          "destination": "https://www.organizedmomcollective.com/resources/teaching-kids-independence/",
+          "publish_date": "2026-11-07T09:00:00"
+        }
+      ]
+    }
+  ]
+}
