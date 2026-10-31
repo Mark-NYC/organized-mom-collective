@@ -481,17 +481,6 @@ export const entrywayGallery: InspirationGallery = {
       "image": "",
       "pinDescription": "Low-labeled family baskets. Explore beautiful, practical entryway organization ideas for families, with storage inspiration for shoes, coats and backpacks.",
       "category": "Family routines"
-    },
-    {
-      "id": "idea-40",
-      "navLabel": "Five-minute evening entry reset",
-      "title": "Five-minute evening entry reset",
-      "tip": "Arrange shoes, bags and the next day's necessities in a clearly defined landing zone.",
-      "tryThis": "",
-      "alt": "AI-generated concept showing five-minute evening entry reset in a realistic family entryway.",
-      "image": "",
-      "pinDescription": "Five-minute evening entry reset. Explore beautiful, practical entryway organization ideas for families, with storage inspiration for shoes, coats and backpacks.",
-      "category": "Family routines"
     }
   ]
 };
