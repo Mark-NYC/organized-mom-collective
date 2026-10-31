@@ -16,7 +16,7 @@ const { storageKey, handoff = false } = Astro.props;
     <div class="cb-setup-actions"><button type="button" class="cb-primary" data-cb-generate>Create my child's chart</button><span>Start small. You can always add jobs later.</span></div>
   </section>
   <section class="cb-results" data-cb-results hidden>
-    <div class="cb-toolbar"><div><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2>Ready for your fridge.</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div><div class="cb-buttons"><button type="button" data-cb-back>Change setup</button><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download my chart</button></div></div>
+    <div class="cb-toolbar"><div><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2>Ready for your fridge.</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div><fieldset class="cb-style-switch" aria-label="Chart color style"><legend>Chart style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset><div class="cb-buttons"><button type="button" data-cb-back>Change setup</button><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download my chart</button></div></div>
     <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><label>Frequency<select data-cb-frequency><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
     <div class="cb-sheet" data-cb-sheet>
       <header class="cb-sheet-head"><span>ORGANIZED MOM COLLECTIVE</span><p class="cb-sheet-name" data-cb-sheet-name>My</p><h2>Chore Chart</h2><p>My jobs. Start to finish.</p></header>
@@ -33,13 +33,25 @@ const { storageKey, handoff = false } = Astro.props;
 </style>
 
 <style is:global>
-/* Larger recognizable illustrations with calm, category-based color. */
-.chore-builder .cb-icon-tile{width:70px;height:70px;min-width:70px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#D4DFC4}
-.chore-builder .cb-icon-tile[data-tone="frost"]{background:#CDDDE1}
-.chore-builder .cb-icon-tile[data-tone="apricot"]{background:#F1D8A8}
-.chore-builder .cb-icon-tile[data-tone="blush"]{background:#E8D2D6}
-.chore-builder .cb-icon-tile[data-tone="evergreen"]{background:#BBCBC4}
-.chore-builder .cb-icon-tile[data-tone="mushroom"]{background:#D5C5B8}
+/* Monochromatic sage tints, or ink-only grayscale for economical printing. */
+.chore-builder .cb-icon-tile{width:70px;height:70px;min-width:70px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#EAF0E9}
+.chore-builder .cb-icon-tile[data-tone="frost"]{background:#EFF3EE}
+.chore-builder .cb-icon-tile[data-tone="apricot"]{background:#E4EBE2}
+.chore-builder .cb-icon-tile[data-tone="blush"]{background:#DCE7DE}
+.chore-builder .cb-icon-tile[data-tone="evergreen"]{background:#D4E1D8}
+.chore-builder .cb-icon-tile[data-tone="mushroom"]{background:#E8EEE7}
+.chore-builder .cb-results[data-style="bw"] .cb-icon-tile,
+.chore-builder .cb-results[data-style="bw"] .cb-icon-tile[data-tone]{background:#F3F3F3!important}
+.chore-builder .cb-results[data-style="bw"] .cb-daily-section,
+.chore-builder .cb-results[data-style="bw"] .cb-weekly-section{border-color:#C4C4C4!important}
+.chore-builder .cb-style-switch{border:0;padding:0;margin:0;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.chore-builder .cb-style-switch legend{font-size:12px;font-weight:700;margin-bottom:4px}
+.chore-builder .cb-style-switch label{cursor:pointer;position:relative}
+.chore-builder .cb-style-switch input{position:absolute;opacity:0;width:1px;height:1px}
+.chore-builder .cb-style-switch span{display:inline-block;border:1px solid #BCB6AE;border-radius:8px;background:white;padding:10px 13px;font-size:12px;font-weight:700}
+.chore-builder .cb-style-switch input:checked+span{background:#D4E1D8;border-color:#7F9B8B;color:#283E32}
+.chore-builder .cb-style-switch input:focus-visible+span{outline:2px solid #545454;outline-offset:2px}
+.chore-builder .cb-results[data-style="bw"] .cb-style-switch input:checked+span{background:#E6E6E6;border-color:#666;color:#222}
 .chore-builder .cb-icon-tile img{width:62px;height:62px;object-fit:contain}
 .chore-builder .cb-daily-row,.chore-builder .cb-weekly-row{min-height:78px;margin-bottom:7px}
 .chore-builder .cb-job{gap:10px}
