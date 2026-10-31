@@ -49,19 +49,21 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
   function renderIcons() {
     iconImgs.forEach((img, i) => {
       const r = responsibilityById(iconFields[i].value);
-      const src = (r ? choreLineIcon(r.id) : null) ?? choreLineIconForText(rowFields[i].value);
+      const text = rowFields[i].value.trim();
+      const src = text ? (choreLineIconForText(text) ?? (r ? choreLineIcon(r.id) : null)) : null;
       img.hidden = !src;
-      if (r && src) {
+      if (src) {
         if (img.getAttribute('src') !== src) img.src = src;
-
-      } else img.removeAttribute('src');
+      } else {
+        img.removeAttribute('src');
+      }
     });
   }
   /** A row that means a library job gets its illustration; an emptied row loses it. */
   function syncIcon(i: number) {
     const text = rowFields[i].value.trim();
     if (!text) iconFields[i].value = '';
-    else iconFields[i].value = matchResponsibility(text) ?? iconFields[i].value;
+    else iconFields[i].value = matchResponsibility(text) ?? '';
   }
   const syncAllIcons = (reset = false) => rowFields.forEach((_, i) => { if (reset || !iconFields[i].value) { if (reset) iconFields[i].value = ''; syncIcon(i); } });
 
