@@ -16,7 +16,8 @@ export function initChoreBuilder(host: HTMLElement) {
   const weekly=$<HTMLElement>('[data-cb-weekly]');
   const picker=$<HTMLElement>('[data-cb-picker]');
   const status=$<HTMLElement>('[data-cb-status]');
-  const key=(host.dataset.storageKey||'omc:chore-chart')+storageSuffix;
+  const handoff=host.hasAttribute('data-handoff')?readToolHandoff('chore-chart'):null;
+  const key=(host.dataset.storageKey||'omc:chore-chart')+(handoff?.key?':'+handoff.key:'')+storageSuffix;
   let state:State={name:'',age:8,experienced:false,areas:['space','kitchen','home','laundry'],jobs:[]};
   const save=()=>{try{localStorage.setItem(key,JSON.stringify(state));}catch{}};
   const node=(tag:string,className:string)=>{const e=document.createElement(tag);e.className=className;return e};
@@ -80,7 +81,6 @@ export function initChoreBuilder(host: HTMLElement) {
     await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});
   });
   let saved:State|null=null;try{saved=JSON.parse(localStorage.getItem(key)||'null') as State|null;}catch{}
-  const handoff=host.hasAttribute('data-handoff')?readToolHandoff('chore-chart'):null;
   if(handoff?.name)name.value=handoff.name;
   if(handoff?.age!==undefined)age.value=String(Math.min(18,Math.max(2,handoff.age)));
   if(saved&&Array.isArray(saved.jobs)&&saved.jobs.length){state=saved;name.value=saved.name;age.value=String(saved.age);host.querySelector<HTMLInputElement>(`input[name="cb-level"][value="${saved.experienced?'experienced':'beginner'}"]`)!.checked=true;host.querySelectorAll<HTMLInputElement>('[data-cb-area]').forEach(el=>el.checked=saved!.areas.includes(el.value as ChoreArea));results.hidden=false;render();}
