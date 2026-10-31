@@ -46,7 +46,7 @@ const thresholds = ['50%', '75%', '100%'];
     <button type="button" class="cc-btn cc-btn-one" data-cc-one-job>Start with one job</button>
   </form>
 
-  <ResponsibilityPicker heading="Add illustrated chores" hint="Pick where it goes, then tap a chore.">
+  <ResponsibilityPicker monochrome heading="Add illustrated chores" hint="Pick where it goes, then tap a chore.">
     <label slot="target" class="cc-target">
       <span>Add to</span>
       <select data-cc-target>
@@ -541,7 +541,7 @@ const thresholds = ['50%', '75%', '100%'];
 .cc-target select { min-height: 44px; padding: 0 12px; border: 1px solid var(--cc-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--cc-ink); }
 .cc-target select:focus { outline: 2px solid var(--cc-ink); outline-offset: 1px; }
 .cc-chore-cell { position: relative; display: block; min-width: 0; }
-.cc-icon { position: absolute; top: 50%; left: 4px; width: 30px; height: 30px; padding: 2px; border-radius: 50%; background: color-mix(in srgb, var(--cc-cat) 60%, #fff); transform: translateY(-50%); pointer-events: none; }
+.cc-icon { position: absolute; top: 50%; left: 4px; width: 30px; height: 30px; padding: 1px; border-radius: 0; background: transparent; transform: translateY(-50%); pointer-events: none; }
 .cc-icon[hidden] { display: none; }
 .cc-chore-cell:has(.cc-icon:not([hidden])) .cc-chore { padding-left: 40px; }
 @media (max-width: 768px) {
