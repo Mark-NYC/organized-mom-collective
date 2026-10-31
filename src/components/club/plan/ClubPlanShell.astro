@@ -6,7 +6,8 @@
  *   printable — the printable inside data-plan-proof-body / data-plan-proof-scroll wrappers
  *   mobile   — a ClubPlanScreen with the month's sections
  * Every plan page also gets the month's Family Meeting (ClubFamilyMeeting) behind a "Monthly Tool / Family Meeting"
- * switch; the tool stays the default view.
+ * switch; the tool stays the default view. Above it, for a signed-in member: the Club nav (ClubNav) and, on her first
+ * month, her Welcome Kit confirmation (WelcomeKitConfirm).
  * Architecture: docs/club/PLAN_ARCHITECTURE.md.
  */
 import { kitBySlug } from '../../../data/club/kits';
@@ -14,6 +15,8 @@ import ClubFamilyGate from './ClubFamilyGate.astro';
 import ClubFamilyMeeting from './ClubFamilyMeeting.astro';
 import ClubPrintableProof from './ClubPrintableProof.astro';
 import ClubPrintStyles from './ClubPrintStyles.astro';
+import WelcomeKitConfirm from './WelcomeKitConfirm';
+import { ClubNavForMembers } from '../ClubNav';
 
 interface Props {
   kitSlug: string;
@@ -28,6 +31,9 @@ const { kitSlug, month, sides, storageKey, class: cls = '' } = Astro.props;
 const kit = kitBySlug(kitSlug);
 if (!kit) throw new Error(`Unknown kit ${kitSlug}`);
 ---
+<!-- A signed-in member: the Club nav, and her Welcome Kit confirmation when this is her first month (both render nothing otherwise). -->
+<ClubNavForMembers client:only="react" />
+<WelcomeKitConfirm client:only="react" kitSlug={kitSlug} />
 <div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={kitSlug} data-plan-month={month} data-plan-key={storageKey}>
   <ClubFamilyGate />
   <ClubFamilyMeeting kitMonth={kit.month} />

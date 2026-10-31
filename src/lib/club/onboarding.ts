@@ -6,8 +6,49 @@
  */
 import type { Membership, MembershipMonth } from './membership';
 import { routes } from '../../routes';
+import { memberPlanHref } from './plan/account';
 
-export type OnboardingStep = 'not_member' | 'family' | 'address' | 'print' | 'first_resource' | 'home';
+/**
+ * Her setup, in order: family (step 1 of the family profile), the rest of the profile (steps 2–6, each optional),
+ * mailing address, then her Welcome Kit: approve the print, then look over and confirm her first month's resource.
+ * 'profile' only when the caller passes her profile (club_me doesn't carry it) and she hasn't finished it or chosen
+ * "Finish later" on this device.
+ */
+export type OnboardingStep = 'not_member' | 'family' | 'profile' | 'address' | 'print' | 'first_resource' | 'home';
+
+/** What nextStep needs to know about her family profile (src/lib/club/family-profile.ts). */
+export interface StepOptions {
+  profile?: { setupCompleted: boolean } | null;
+  /** She picked "Finish later" (deferProfile) on this device. */
+  profileDeferred?: boolean;
+}
+
+const LATER = 'omc:club:profile-later:';
+/** "Finish later": remembered per account on this device, so she isn't sent back into the questions every visit. */
+export function profileDeferred(userId: string | null | undefined): boolean {
+  if (!userId) return false;
+  try {
+    return localStorage.getItem(LATER + userId) === '1';
+  } catch {
+    return false;
+  }
+}
+export function deferProfile(userId: string | null | undefined) {
+  if (!userId) return;
+  try {
+    localStorage.setItem(LATER + userId, '1');
+  } catch {
+    /* private mode: she's asked again next visit, nothing lost */
+  }
+}
+
+/**
+ * A member whose membership has no month yet: her free first month wasn't available (one per household) so it starts
+ * with her first payment, which brings that month and her Welcome Kit. Nothing is granted early.
+ */
+export function startsWithFirstPayment(me: Membership): boolean {
+  return Boolean(me.member && me.access && me.months.length === 0 && !me.welcome && me.next?.payment_on);
+}
 
 /** Her first month: the one her Welcome Kit carries (the household's first paid month). */
 export function firstMonth(me: Pick<Membership, 'months' | 'first_paid_month'>): MembershipMonth | null {
@@ -17,37 +58,53 @@ export function firstMonth(me: Pick<Membership, 'months' | 'first_paid_month'>):
 /** Her kit still asks something of her (print or first resource) and nothing has gone to print yet. */
 const open = (me: Membership) => Boolean(me.welcome && ['pending', 'on_hold'].includes(me.welcome.status));
 
-export function nextStep(me: Membership): OnboardingStep {
+export function nextStep(me: Membership, opts: StepOptions = {}): OnboardingStep {
   if (!me.member && !me.grant) return 'not_member';
   if (!me.onboarded) return 'family';
+  if (opts.profile && !opts.profile.setupCompleted && !opts.profileDeferred) return 'profile';
   if (!me.has_address) return 'address';
   if (open(me) && !me.welcome!.approved) return 'print';
   if (open(me) && me.welcome!.readiness === 'needs_confirmation' && firstMonth(me)?.slug) return 'first_resource';
   return 'home';
 }
 
+/** What her first month's tool shows about her Welcome Kit (WelcomeKitConfirm). 'done': she just confirmed it. */
+export type WelcomeKitView = 'none' | 'print_first' | 'confirm' | 'done';
+
+export function welcomeKitView(me: Membership, kitSlug: string): WelcomeKitView {
+  const first = firstMonth(me);
+  const w = me.welcome;
+  if (!w || !first || first.slug !== kitSlug || first.can !== 'edit' || w.satisfies_month) return 'none';
+  if (!['pending', 'on_hold'].includes(w.status)) return 'none';
+  if (!w.approved) return 'print_first';
+  return w.readiness === 'needs_confirmation' ? 'confirm' : 'none';
+}
+
 /** The page for a step. */
 export function stepHref(me: Membership, step = nextStep(me)): string {
   switch (step) {
     case 'family':
+    case 'profile':
     case 'address':
     case 'not_member':
       return routes.clubWelcome;
     case 'print':
       return routes.clubFamilyVision;
     case 'first_resource':
-      return `${routes.clubResource(firstMonth(me)!.slug!)}?welcome=1`;
+      // Her month's real tool (/app/club/<month>), where she looks it over and confirms it (WelcomeKitConfirm).
+      return `${memberPlanHref(firstMonth(me)!.slug!)}?welcome=1`;
     default:
-      // Her Club home (the month library, hers when she's signed in); billing, family and address are on /club/dashboard.
+      // Club Home (/app/club): her family, her Welcome Kit, her months. Billing and address: /club/dashboard.
       return routes.appClub;
   }
 }
 
-/** The three steps she sees: her family, her print, her first resource. */
+/** The four steps she sees: her family, her address, her print, her first resource. */
 export type KitProgress = { label: string; state: 'done' | 'current' | 'next' }[];
-export function kitProgress(current: 'family' | 'print' | 'first_resource'): KitProgress {
-  const order = ['family', 'print', 'first_resource'] as const;
-  const labels = { family: 'Your family', print: 'Your print', first_resource: 'Your first resource' };
+export type KitStage = 'family' | 'address' | 'print' | 'first_resource';
+export function kitProgress(current: KitStage): KitProgress {
+  const order = ['family', 'address', 'print', 'first_resource'] as const;
+  const labels = { family: 'Your family', address: 'Your address', print: 'Your print', first_resource: 'Your first resource' };
   const at = order.indexOf(current);
   return order.map((s, i) => ({ label: labels[s], state: i < at ? 'done' : i === at ? 'current' : 'next' }));
 }

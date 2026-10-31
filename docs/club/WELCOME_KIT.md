@@ -6,7 +6,7 @@ month follows the normal monthly schedule ([MEMBERSHIP.md](MEMBERSHIP.md)).
 
 Code: `supabase/migrations/20261108000000_club_welcome_kit.sql` (pairing, readiness, admin actions, December, the
 reminder email), `src/lib/club/onboarding.ts` (her next step), `/club/welcome`, `/club/family-vision`,
-`/club/resources/<first month>?welcome=1`, `/admin/club → Fulfillment → Welcome Kits`. Tests:
+`/app/club/<first month>?welcome=1` (the month's real tool; `/club/resources/<slug>` sends her there while her kit waits on it), `/admin/club → Fulfillment → Welcome Kits`. Tests:
 `supabase/tests/club-membership.sql` (Welcome Kit section), `tests/club-billing-e2e.test.ts`,
 `tests/club-onboarding.test.ts`, `scripts/club-onboarding-e2e.mjs` (pages against a local copy of the database).
 
@@ -32,12 +32,14 @@ queue pairs them:
 2. **Her print** (`/club/family-vision`): "A little gift, just for your family." Artwork first; **"Yes! Send me my
    print"** (explicit approval, always); "Customize artwork"; "Mailing to Austin, TX · Change". Then "It's yours!" with
    **"See your first family resource"**.
-3. **Her first resource** (`/club/resources/<slug>?welcome=1`): the month's title and problem, prepared for her kids by
-   name, what comes in the kit, how it helps, her first step, the printable itself to correct, then one final
-   **"Looks good. Prepare my Welcome Kit"** → "It's all set!" → **"See your Club"**: `/app/club`, the month library,
-   now showing her months as hers (her Welcome Kit while it's on its way, each month she holds opening her family's
-   version, the month her next payment brings). Signed out, `/app/club` is still the preview. Her account (billing,
-   family, address) is `/club/dashboard`, linked from there; log-ins and Club emails land on her next step or `/app/club`.
+3. **Her first resource** (`/app/club/<month>?welcome=1`, the month's real tool, `WelcomeKitConfirm`): above the tool,
+   prepared for her family, what comes in the kit and what to do, then one final **"Looks good. Prepare my Welcome
+   Kit"** (`club_fulfillment_approve`, her click only) → "It's all set!" → **"Go to Club Home"** (`/app/club`). An
+   edit after confirming asks her to confirm again. The old `/club/resources/<slug>` copy redirects there while her kit
+   waits on it (so the `kit_reminder` email's link lands on the tool). Club Home shows her family, her next step, her
+   Welcome Kit's progress, her current month, what's coming and every month; Account & Billing (`/club/dashboard`) is
+   her plan, address and email. Signed out, `/app/club` is still the preview. Full journey:
+   [POST_CHECKOUT_JOURNEY.md](POST_CHECKOUT_JOURNEY.md).
 
 Leaving at any point and coming back (refresh, the welcome email's sign-in, `/club/login`) lands on the same step: it's
 derived from the database every time, never stored in the browser.

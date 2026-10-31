@@ -1,8 +1,7 @@
 /**
- * /club/dashboard: her family, her plan and billing status, her Family Vision welcome print (personalize, approve,
- * its status), this month's resource, only the months she has bought (a first December shows the welcome print as
- * that month's resource), each month's printed mailing status, the next month and the payment that brings it,
- * family and address editing, billing and email. Everything comes from club_me (the database decides access); the
+ * /club/dashboard, "Account & Billing" in the Club nav: her plan and billing status, family summary, mailing address and
+ * sign-in email. Her months, Welcome Kit and next step are on Club Home (/app/club); a sample household (no Club Home)
+ * still sees them here, with each month's printed mailing status and the next month. Everything comes from club_me (the database decides access); the
  * resource pages check again on their own.
  */
 import { useEffect, useState } from 'react';
@@ -93,19 +92,26 @@ function Dashboard({ ctx }: { ctx: ClubContext }) {
 
   return (
     <>
-      <p className="label text-warm-soft">{household?.displayName ?? 'Your family'}</p>
-      <h1 className="mt-2 font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.6rem]">{you ? `Hi, ${you.firstName}.` : 'Your family club'}</h1>
+      <p className="label text-warm-soft">{household?.displayName ?? 'Your family'}{you ? ` · ${you.firstName}` : ''}</p>
+      <h1 className="mt-2 font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.6rem]">Account &amp; Billing</h1>
       <Status me={me} sample={ctx.store.kind === 'sample'} />
 
       {!me.has_address && ctx.store.kind === 'account' && (
         <p className="mt-5 max-w-2xl border-l-[3px] border-rose bg-rose-wash px-4 py-3">Add your mailing address below so we can mail your printed resources.</p>
       )}
 
-      {me.welcome && <WelcomeKitCard me={me} href={ctx.href} />}
+      {ctx.store.kind === 'account' && (
+        // Her months, her Welcome Kit and her next step live on Club Home; this page is her plan, address and email.
+        <p className="mt-6 max-w-3xl text-[0.98rem] text-warm-ink" data-club-home-link>
+          Your months, your Welcome Kit and your next step are on <a href={routes.appClub} className="font-semibold underline underline-offset-4">Club Home</a>.
+        </p>
+      )}
 
-      {current && <CurrentCard m={current} tag={current.month === me.current_month ? 'This month' : current.month === me.first_paid_month && current.month > me.current_month ? 'Your first month' : null} href={ctx.href(memberPlanHref(current.slug!))} />}
+      {ctx.store.kind === 'sample' && me.welcome && <WelcomeKitCard me={me} href={ctx.href} />}
 
-      {years.map((y) => (
+      {ctx.store.kind === 'sample' && current && <CurrentCard m={current} tag={current.month === me.current_month ? 'This month' : current.month === me.first_paid_month && current.month > me.current_month ? 'Your first month' : null} href={ctx.href(memberPlanHref(current.slug!))} />}
+
+      {ctx.store.kind === 'sample' && years.map((y) => (
         <section key={y} className="mt-12">
           <h2 className="label text-warm-soft">{me.plan === 'annual' || years.length > 1 ? `Your resources · Year ${y}` : 'Your resources'}</h2>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">

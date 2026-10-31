@@ -11,7 +11,7 @@ import { clubAccountsEnabled } from '../../../data/club/config';
 import { routes } from '../../../routes';
 import { getSession } from '../../account';
 import { loadKitHousehold, type KitHousehold } from '../kit-household';
-import { loadResource, saveResource } from '../membership';
+import { loadMembership, loadResource, saveResource, shortDate, type Membership } from '../membership';
 import { accountStore, clubHref, sampleStore } from '../store';
 import { connectPlanAccount, PLAN_SAVE } from './account';
 import { planKey } from './storage';
@@ -33,12 +33,23 @@ export function onPlanFamily(root: HTMLElement, callback: (family: ReadyFamily) 
 /** "the Rivera family" for a sample, or the household's own name. */
 export const familyLabel = (r: ReadyFamily) => (r.source === 'sample' ? r.sampleLabel.replace('Sample: ', '') : r.household.displayName ?? 'your family');
 
-function gateMessage(gate: HTMLElement, month: string, result: Exclude<KitHousehold, { status: 'ready' }>) {
+/** Why a member can't open this month yet, in her terms: the payment that brings it, or that it isn't part of hers. */
+export function deniedCopy(month: string, slug: string, me: Pick<Membership, 'next' | 'months' | 'access'> | null): [string, string, string, string] {
+  const base: [string, string, string, string] = [`${month} isn’t open for your account`, 'This month’s plan isn’t part of your membership.', 'Go to Club Home', routes.appClub];
+  if (!me) return base;
+  if (me.next?.slug === slug && me.next.payment_on) {
+    return [`${month} opens ${shortDate(me.next.payment_on)}`, `${month} comes with your ${shortDate(me.next.payment_on)} payment. It opens here that day, prepared with your family’s names.`, 'Go to Club Home', routes.appClub];
+  }
+  if (!me.access) return [`${month} isn’t open for your account`, 'Your membership has ended. The months you received stay in your Club to view and print.', 'Go to Club Home', routes.appClub];
+  return base;
+}
+
+function gateMessage(gate: HTMLElement, month: string, result: Exclude<KitHousehold, { status: 'ready' }>, denied?: [string, string, string, string]) {
   const sample = 'sample' in result ? result.sample : null;
   const copy = {
     empty: ['Add your family first', `Your ${month} plan is prepared from your family profile: who lives at home and the children’s ages. Add them and the names and roles fill in for you.`, 'Add your family', clubHref(routes.clubFamily, sample)],
     'signed-out': ['Sign in to see your plan', `Your ${month} plan is prepared from your family profile. Sign in to see it.`, 'Sign in', routes.clubDashboard],
-    denied: [`${month} isn’t open for your account`, 'This month’s kit isn’t available to your account.', 'See your kits', clubHref(routes.clubDashboard, sample)],
+    denied: denied ?? [`${month} isn’t open for your account`, 'This month’s kit isn’t available to your account.', 'See your kits', clubHref(routes.clubDashboard, sample)],
     error: ['We couldn’t load your family’s plan', 'Check your connection and try again. Nothing you changed earlier in this tab is lost.', 'Try again', ''],
   }[result.status];
   const [title, text, action, href] = copy;
@@ -68,7 +79,10 @@ export function startPlanFamily(root: HTMLElement) {
     sampleStore,
   }).then(async (result) => {
     if (result.status !== 'ready') {
-      if (gate) gateMessage(gate, month, result);
+      const denied = result.status === 'denied' && result.source === 'account'
+        ? deniedCopy(month, root.dataset.kitSlug ?? '', await loadMembership().catch(() => null))
+        : undefined;
+      if (gate) gateMessage(gate, month, result, denied);
       root.dataset.planState = result.status;
       return result;
     }
