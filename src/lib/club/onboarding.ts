@@ -7,6 +7,7 @@
 import type { Membership, MembershipMonth } from './membership';
 import { routes } from '../../routes';
 import { memberPlanHref } from './plan/account';
+import { accountRpc } from '../account';
 
 /**
  * Her setup, in order: family (step 1 of the family profile), the rest of the profile (steps 2–6, each optional),
@@ -14,13 +15,29 @@ import { memberPlanHref } from './plan/account';
  * 'profile' only when the caller passes her profile (club_me doesn't carry it) and she hasn't finished it or chosen
  * "Finish later" on this device.
  */
-export type OnboardingStep = 'not_member' | 'family' | 'profile' | 'address' | 'print' | 'first_resource' | 'home';
+export type OnboardingStep = 'not_member' | 'family' | 'profile' | 'address' | 'print' | 'meeting_guide' | 'first_resource' | 'home';
 
 /** What nextStep needs to know about her family profile (src/lib/club/family-profile.ts). */
 export interface StepOptions {
   profile?: { setupCompleted: boolean } | null;
   /** She picked "Finish later" (deferProfile) on this device. */
   profileDeferred?: boolean;
+  /** She has looked at the Family Meeting guide (loadMeetingGuideSeen). Only `false` adds the step; it never holds the kit. */
+  meetingGuideSeen?: boolean;
+}
+
+const GUIDE = 'omc:club:meeting-guide-seen:';
+/** Whether she has reviewed the Family Meeting guide: her account (20261110), else this device (before that migration). */
+export async function loadMeetingGuideSeen(userId: string | null | undefined): Promise<boolean> {
+  try {
+    return Boolean(await accountRpc<string | null>('club_meeting_guide_seen'));
+  } catch {
+    try { return Boolean(userId && localStorage.getItem(GUIDE + userId)); } catch { return false; }
+  }
+}
+export async function markMeetingGuideSeen(userId: string | null | undefined): Promise<void> {
+  try { if (userId) localStorage.setItem(GUIDE + userId, '1'); } catch { /* fine */ }
+  await accountRpc('club_meeting_guide_mark').catch(() => undefined);
 }
 
 const LATER = 'omc:club:profile-later:';
@@ -64,7 +81,9 @@ export function nextStep(me: Membership, opts: StepOptions = {}): OnboardingStep
   if (opts.profile && !opts.profile.setupCompleted && !opts.profileDeferred) return 'profile';
   if (!me.has_address) return 'address';
   if (open(me) && !me.welcome!.approved) return 'print';
-  if (open(me) && me.welcome!.readiness === 'needs_confirmation' && firstMonth(me)?.slug) return 'first_resource';
+  const confirm = open(me) && me.welcome!.readiness === 'needs_confirmation' && Boolean(firstMonth(me)?.slug);
+  if (confirm && opts.meetingGuideSeen === false) return 'meeting_guide';
+  if (confirm) return 'first_resource';
   return 'home';
 }
 
@@ -90,6 +109,8 @@ export function stepHref(me: Membership, step = nextStep(me)): string {
       return routes.clubWelcome;
     case 'print':
       return routes.clubFamilyVision;
+    case 'meeting_guide':
+      return routes.clubMeetingGuide;
     case 'first_resource':
       // Her month's real tool (/app/club/<month>), where she looks it over and confirms it (WelcomeKitConfirm).
       return `${memberPlanHref(firstMonth(me)!.slug!)}?welcome=1`;
@@ -99,12 +120,13 @@ export function stepHref(me: Membership, step = nextStep(me)): string {
   }
 }
 
-/** The four steps she sees: her family, her address, her print, her first resource. */
+/** The five steps she sees: family, address, print, the Family Meeting guide, her first resource. 'done': submitted. */
 export type KitProgress = { label: string; state: 'done' | 'current' | 'next' }[];
-export type KitStage = 'family' | 'address' | 'print' | 'first_resource';
+export type KitStage = 'family' | 'address' | 'print' | 'meeting_guide' | 'first_resource' | 'done';
 export function kitProgress(current: KitStage): KitProgress {
-  const order = ['family', 'address', 'print', 'first_resource'] as const;
-  const labels = { family: 'Your family', address: 'Your address', print: 'Your print', first_resource: 'Your first resource' };
+  const order = ['family', 'address', 'print', 'meeting_guide', 'first_resource'] as const;
+  const labels = { family: 'Your family', address: 'Your address', print: 'Your print', meeting_guide: 'Meeting guide', first_resource: 'Your first resource' };
+  if (current === 'done') return order.map((s) => ({ label: labels[s], state: 'done' as const }));
   const at = order.indexOf(current);
   return order.map((s, i) => ({ label: labels[s], state: i < at ? 'done' : i === at ? 'current' : 'next' }));
 }
@@ -126,9 +148,9 @@ export function kitText(me: Pick<Membership, 'welcome'>): string {
     mail_paused: 'Printed mailings are paused, so your Welcome Kit is waiting.',
     needs_vision: 'Your welcome print is ready for you to approve.',
     needs_resource: 'Your print is approved. We’re finishing your first resource.',
-    needs_confirmation: 'Your print is approved. Take a quick look at your first resource.',
-    needs_pdf: 'We’re preparing your Welcome Kit.',
-    ready: 'We’re preparing your Welcome Kit.',
+    needs_confirmation: 'Your print is approved. Take a quick look at your first resource and confirm it.',
+    needs_pdf: 'Submitted. We aim to print and mail your Welcome Kit within two business days.',
+    ready: 'Submitted. We aim to print and mail your Welcome Kit within two business days.',
     first_month_canceled: 'We’re looking at your Welcome Kit. Reply to any of our emails with questions.',
   } as Record<string, string>)[w.readiness] ?? 'We’re preparing your Welcome Kit.';
 }

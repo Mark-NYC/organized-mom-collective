@@ -46,7 +46,7 @@ export default function ClubNav({ current }: { current?: ClubNavItem | null }) {
 export function ClubNavForMembers({ current }: { current?: ClubNavItem | null }) {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    if (!clubAccountsEnabled() || new URLSearchParams(location.search).get('sample')) return;
+    if (!clubAccountsEnabled() || new URLSearchParams(location.search).get('sample') || new URLSearchParams(location.search).get('fulfillment')) return;
     getSession().then(async (s) => {
       if (!s) return;
       const me = await loadMembership();

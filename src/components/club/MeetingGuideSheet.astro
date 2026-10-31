@@ -1,0 +1,43 @@
+---
+/** The Family Meeting guide's printed page (one US Letter portrait sheet), from src/data/club/meeting-guide.ts. */
+import { MEETING_GUIDE as G } from '../../data/club/meeting-guide';
+import { CLUB_NAME } from '../../data/club/config';
+---
+<article class="mg-sheet" data-meeting-guide-sheet aria-labelledby="mg-title">
+  <p class="mg-kicker">{CLUB_NAME}</p>
+  <h1 id="mg-title" class="mg-title">{G.title}</h1>
+  <p class="mg-sub">{G.subtitle}</p>
+  <dl class="mg-rhythm">
+    {G.rhythm.map((r) => <div><dt>{r.label}</dt><dd>{r.text}</dd></div>)}
+  </dl>
+  <h2 class="mg-h2">The four parts</h2>
+  <ol class="mg-parts">
+    {G.parts.map((p) => <li><span class="mg-min">{p.minutes} min</span><strong>{p.title}</strong><span>{p.text}</span></li>)}
+  </ol>
+  <h2 class="mg-h2">Keep it going</h2>
+  <ul class="mg-habits">{G.habits.map((h) => <li>{h}</li>)}</ul>
+  <p class="mg-foot">{G.website}</p>
+</article>
+<style is:global>
+.mg-sheet{max-width:720px;margin:24px auto 64px;padding:clamp(24px,5vw,48px);background:#fff;border:1px solid #dde4dc;border-radius:4px;color:#303d35}
+.mg-kicker{font:700 11px/1 var(--font-sans);letter-spacing:.14em;text-transform:uppercase;color:#71866c;margin:0}
+.mg-title{font:400 clamp(30px,6vw,40px)/1.1 var(--font-serif);margin:10px 0 6px}
+.mg-sub{font:italic 18px/1.4 var(--font-serif);color:#5b6a5f;margin:0 0 22px}
+.mg-rhythm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:0 0 22px;padding:16px;background:#eaf2eb;border-radius:8px}
+.mg-rhythm dt{font:700 12px/1.2 var(--font-sans);text-transform:uppercase;letter-spacing:.08em;color:#315d49}
+.mg-rhythm dd{margin:4px 0 0;font-size:14px;line-height:1.5}
+.mg-h2{font:400 22px/1.2 var(--font-serif);margin:0 0 10px}
+.mg-parts{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:10px}
+.mg-parts li{display:grid;grid-template-columns:60px 1fr;gap:2px 12px;font-size:14px;line-height:1.5}
+.mg-parts .mg-min{grid-row:span 2;align-self:start;padding:6px 0;text-align:center;border-radius:999px;background:#f3d9de;font-weight:700;font-size:12px}
+.mg-habits{list-style:disc;margin:0 0 18px;padding-left:20px;font-size:14px;line-height:1.6}
+.mg-foot{margin:0;font-size:13px;color:#5b6a5f;border-top:1px solid #dde4dc;padding-top:12px}
+@media(max-width:560px){.mg-rhythm{grid-template-columns:1fr}}
+@page mg{size:letter portrait;margin:0.5in}
+@media print{
+  body *{visibility:hidden}
+  .mg-sheet,.mg-sheet *{visibility:visible}
+  .mg-sheet{page:mg;position:absolute;left:0;top:0;margin:0;border:0;max-width:none;width:100%;padding:0}
+  [data-club-chrome]{display:none!important}
+}
+</style>

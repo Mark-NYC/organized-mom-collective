@@ -9,7 +9,7 @@
 import { button, C, esc, eyebrowStyle, p, panel, panelTitle, SANS, SERIF, small, type Block, type EmailMessage } from '../email.ts';
 import type { ClubDeps } from './deps.ts';
 
-export type ClubEmailKind = 'welcome' | 'profile_reminder' | 'resource_ready' | 'review' | 'payment_failed' | 'canceled' | 'kit_reminder';
+export type ClubEmailKind = 'welcome' | 'profile_reminder' | 'resource_ready' | 'review' | 'payment_failed' | 'canceled' | 'kit_reminder' | 'kit_submitted';
 
 export interface ClubEmailData {
   plan?: 'monthly' | 'annual' | null;
@@ -22,6 +22,12 @@ export interface ClubEmailData {
   /** Welcome on a trial: her free month ("January 2027"), if she has one, and the first charge ("February 1, 2027"). */
   freeMonth?: string | null;
   firstCharge?: string | null;
+  /** kit_reminder: 1 (two days after her print) or 2 (seven days). */
+  reminder?: number;
+  /** kit_submitted (to the owner): whose kit, and the two-business-day target ("November 3, 2026"). */
+  familyName?: string | null;
+  memberEmail?: string | null;
+  shipBy?: string | null;
   test?: boolean;
 }
 
@@ -31,7 +37,14 @@ export const longDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
 
 /** Her first mailing: her first month's resource and the welcome print in one package. No dates: none are promised. */
-const WELCOME_KIT = 'Your first mailing is your Welcome Kit: your family’s first resource, plus a personalized Family Vision watercolor print for your wall, our gift. We prepare them together and mail them to your door in one package.';
+const WELCOME_KIT = 'Your first mailing is your Welcome Kit: a personalized Family Vision watercolor print for your wall, our gift, our one-page Family Meeting guide, and your family’s first monthly resource. Once you approve your print and your first resource, we print them together and mail them to your door in one package.';
+
+const MONTH_PAGES = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+/** Her month's tool on the site (/app/club/<month>; November's lives on its /club/resources page), from a kit slug. */
+export function toolUrl(siteUrl: string, slug: string, welcome = false): string {
+  const month = MONTH_PAGES[Number(slug.slice(5, 7)) - 1];
+  return month && month !== 'november' ? `${siteUrl}/app/club/${month}${welcome ? '?welcome=1' : ''}` : `${siteUrl}/club/resources/${slug}`;
+}
 
 const steps = (items: string[]): Block => ({
   html: `<ol style="margin:0 0 18px;padding-left:22px">${items.map((t) => `<li style="margin:0 0 8px">${esc(t)}</li>`).join('')}</ol>`,
@@ -142,16 +155,32 @@ export function renderClubEmail(kind: ClubEmailKind, to: string, d: ClubEmailDat
       };
       break;
     case 'kit_reminder':
-      // Two days after she approved her print; the third day confirms her prepared resource for her (club_fulfillment_queue).
+      // Two and seven days after she approved her print, while her first resource waits for her. Nothing is
+      // confirmed for her (20261110): the kit waits until she confirms.
       b = {
-        subject: 'One quick look before we prepare your Welcome Kit',
+        subject: d.reminder === 2 ? 'Your Welcome Kit is waiting for one click' : 'One quick look before we prepare your Welcome Kit',
         preheader: 'Your first family resource is ready for a quick look before we print it.',
         eyebrow: 'Your Welcome Kit',
         title: 'Does your first resource look right?',
         blocks: [
           p(`Your Family Vision print is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? 'first'} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
-          button('Take a look', resource),
-          small('No time? That’s fine. If we don’t hear from you within a day, we’ll prepare it as it is.'),
+          button('Take a look', d.kitSlug ? toolUrl(siteUrl, d.kitSlug, true) : dash),
+          small('We print your Welcome Kit only after you confirm it, and aim to mail it within two business days.'),
+        ],
+      };
+      break;
+    case 'kit_submitted':
+      // To the owner (SUPPORT_INBOX), once per kit: both of her approvals are in. Nothing is marked printed or mailed.
+      b = {
+        subject: `Welcome Kit ready to prepare: ${d.familyName ?? d.memberEmail ?? 'a new member'}`,
+        preheader: d.shipBy ? `Target: mail by ${d.shipBy}.` : 'Both approvals are in.',
+        eyebrow: 'Welcome Kit submitted',
+        title: 'A Welcome Kit is ready to prepare',
+        blocks: [
+          p(`${d.familyName ?? 'A new member'}${d.memberEmail ? ` (${d.memberEmail})` : ''} approved her Family Vision print and her ${d.monthLabel ?? 'first'} resource.`),
+          p(`Packing list: Family Vision print · Family Meeting guide (standard insert) · ${d.monthLabel ?? 'first month'} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ''}`),
+          button('Open Welcome Kits', `${siteUrl}/admin/club`),
+          small('Make both PDFs, approve the kit, then mark it printed and mailed in /admin/club. Nothing is marked automatically.'),
         ],
       };
       break;

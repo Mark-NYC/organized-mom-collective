@@ -3,7 +3,7 @@ import { monthColors } from '../theme';
 import { clubAccountsEnabled } from '../data/club/config';
 import { getSession } from '../lib/account';
 import { loadMembership, mailingText, monthName, shortDate, type Membership, type MembershipMonth } from '../lib/club/membership';
-import { firstMonth, kitProgress, kitText, nextStep, profileDeferred, startsWithFirstPayment, stepHref, type KitStage, type OnboardingStep } from '../lib/club/onboarding';
+import { firstMonth, kitProgress, kitText, loadMeetingGuideSeen, nextStep, profileDeferred, startsWithFirstPayment, stepHref, type KitStage, type OnboardingStep } from '../lib/club/onboarding';
 import { accountStore } from '../lib/club/store';
 import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { SETUP_STEPS, type FamilyProfile } from '../lib/club/family-profile';
@@ -128,11 +128,12 @@ export default function AppKitLibrary() {
       if (!s) return;
       const m = await loadMembership();
       if (!m.member && !m.grant) return;
-      const [household, profile] = await Promise.all([
+      const [household, profile, guideSeen] = await Promise.all([
         accountStore.household().catch(() => null),
         accountStore.profile().catch(() => null),
+        loadMeetingGuideSeen(s.user_id),
       ]);
-      setHome({ household, profile, deferred: profileDeferred(s.user_id) });
+      setHome({ household, profile, deferred: profileDeferred(s.user_id), guideSeen });
       setMe(m);
     }).catch(() => undefined);
   }, []);
@@ -197,12 +198,12 @@ function MonthLink({ m, held }: { m: (typeof months)[number]; held: MembershipMo
   return <a href={m.url}>Preview the tool <span aria-hidden="true">→</span></a>;
 }
 
-interface HomeData { household: Household | null; profile: FamilyProfile | null; deferred: boolean }
+interface HomeData { household: Household | null; profile: FamilyProfile | null; deferred: boolean; guideSeen: boolean }
 
 /** Where her Welcome Kit is, as the four steps (null once nothing is left for her to do). */
 function kitStage(step: OnboardingStep): KitStage | null {
   if (step === 'family' || step === 'profile') return 'family';
-  if (step === 'address' || step === 'print' || step === 'first_resource') return step;
+  if (step === 'address' || step === 'print' || step === 'meeting_guide' || step === 'first_resource') return step;
   return null;
 }
 
@@ -210,12 +211,13 @@ function kitStage(step: OnboardingStep): KitStage | null {
  * Club Home (/app/club, signed in): her family and an edit link, her one next step, her Welcome Kit's progress, her
  * current month, what's coming, then every month (#months). One page; billing is Account & Billing.
  */
-function ClubHome({ me, household, profile, deferred }: { me: Membership } & HomeData) {
-  const step = nextStep(me, { profile: household ? profile : null, profileDeferred: deferred });
+function ClubHome({ me, household, profile, deferred, guideSeen }: { me: Membership } & HomeData) {
+  const step = nextStep(me, { profile: household ? profile : null, profileDeferred: deferred, meetingGuideSeen: guideSeen });
   const first = firstMonth(me);
   const kitOpen = Boolean(me.welcome && !me.welcome.satisfies_month && !['mailed', 'canceled'].includes(me.welcome.status));
   const waiting = startsWithFirstPayment(me);
-  const stage = kitStage(step);
+  const submitted = Boolean(me.welcome && ['needs_pdf', 'ready'].includes(me.welcome.readiness) && me.welcome.approved);
+  const stage = kitStage(step) ?? (submitted ? 'done' : null);
   const people = household?.members.filter((m) => !m.archived) ?? [];
   const month = monthOf(new Date());
   const profileLeft = profile && !profile.setupCompleted ? SETUP_STEPS.filter((s) => !profile.setupDone.includes(s)).length : 0;
@@ -232,6 +234,7 @@ function ClubHome({ me, household, profile, deferred }: { me: Membership } & Hom
     step === 'family' || step === 'address' ? { text: 'Finish setting up your family and mailing address so we can prepare your Welcome Kit.', label: 'Continue setup', href: routes.clubWelcome }
     : step === 'profile' ? { text: `A few questions about your week are left (${profileLeft} of ${SETUP_STEPS.length}). Every one is optional.`, label: 'Continue your family profile', href: routes.clubWelcome }
     : step === 'print' ? { text: 'Your Family Vision print is ready. Make it yours and approve it.', label: 'Approve your welcome print', href: stepHref(me, 'print') }
+    : step === 'meeting_guide' ? { text: 'Your print is approved. Next, a quick look at the Family Meeting guide that comes in your Welcome Kit.', label: 'See the Family Meeting guide', href: stepHref(me, 'meeting_guide') }
     : step === 'first_resource' ? { text: `Your print is approved. Take a quick look at ${first ? short(first.month) : 'your first month'}, change anything, then confirm it.`, label: 'Review your first resource', href: stepHref(me, 'first_resource') }
     : waiting ? null
     : current?.slug ? { text: `${short(current.month)} is ready for your family.`, label: `Open your ${short(current.month)} plan`, href: memberPlanHref(current.slug) }
@@ -268,7 +271,7 @@ function ClubHome({ me, household, profile, deferred }: { me: Membership } & Hom
         <section className="ofc-member-kit" aria-labelledby="ofc-starts-title" data-club-starts>
           <p className="label text-[#71866c]">Your membership</p>
           <h2 id="ofc-starts-title" className="family-panel-title mt-1">Your Club starts with {short(me.next.month)}</h2>
-          <p className="ofc-kit-status">The free first month is one per household, and this household has already had it. Your membership starts with your first payment on <strong>{shortDate(me.next.payment_on!)}</strong>: {short(me.next.month)} opens here that day, and your Welcome Kit (your Family Vision print and {short(me.next.month)}) is prepared then, for you to approve.</p>
+          <p className="ofc-kit-status">The free first month is one per household, and this household has already had it. Your membership starts with your first payment on <strong>{shortDate(me.next.payment_on!)}</strong>: {short(me.next.month)} opens here that day, and your Welcome Kit (your Family Vision print, our Family Meeting guide and {short(me.next.month)}) is ready for you to approve then.</p>
           {profileLeft > 0 && <a className="ofc-member-cta" href={`${routes.clubFamily}?setup=1`}>Finish your family profile meanwhile</a>}
         </section>
       )}
@@ -280,9 +283,10 @@ function ClubHome({ me, household, profile, deferred }: { me: Membership } & Hom
           {stage && <KitSteps steps={kitProgress(stage)} className="mt-3" />}
           <ul>
             <li>Your Family Vision watercolor print, our gift</li>
+            <li>Our one-page Family Meeting guide</li>
             {first && <li>{short(first.month)}: {title(first.month)}</li>}
           </ul>
-          <p className="ofc-kit-status">{kitText(me)} Both come in one mailing.</p>
+          <p className="ofc-kit-status">{kitText(me)} All three come in one mailing.</p>
         </section>
       )}
 

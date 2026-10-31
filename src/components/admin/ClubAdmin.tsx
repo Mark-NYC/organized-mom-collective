@@ -9,6 +9,7 @@ import { Fragment, useEffect, useState } from 'react';
 import AdminGate, { adminInput, type AdminContext } from './AdminGate';
 import { adminRpc, adminSelect } from '../../lib/admin/session';
 import { routes } from '../../routes';
+import { memberPlanHref } from '../../lib/club/plan/account';
 import { clubResourceBySlug } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase-config';
 
@@ -77,6 +78,10 @@ interface Order {
   /** Ships in a Welcome Kit (her welcome print + her first month's resource, one package). */
   in_welcome_kit?: boolean;
   kit_auto_approve_at?: string | null;
+  /** Both of her approvals are in; the two-business-day target ("2026-11-03") runs from here. */
+  kit_submitted_at?: string | null;
+  kit_ship_by?: string | null;
+  packing_list?: string[];
   /** On the Welcome Kits list: the kit's first-month order (null: withdrawn, so the kit is held). */
   first_month?: { id: string; resource_month: string; kit_slug: string | null; kit_title: string | null; status: string; pdf_status: string; member_approved_at: string | null } | null;
 }
@@ -84,7 +89,8 @@ interface Order {
 const BATCH: Record<Order['batch'], string> = { regular: 'Regular batch', catch_up: 'Catch-up (paid after the cutoff)', welcome: 'Welcome print', welcome_kit: 'Welcome Kit' };
 const printHref = (o: Pick<Order, 'id' | 'kit_slug' | 'fulfillment_type'>) =>
   o.fulfillment_type === 'welcome_vision' ? `${routes.clubFamilyVision}?fulfillment=${o.id}`
-    : o.kit_slug && clubResourceBySlug(o.kit_slug) ? `${routes.clubResource(o.kit_slug)}?fulfillment=${o.id}` : null;
+    // Her month's real tool with her saved plan (/app/club/<month>; November's lives on its /club/resources page).
+    : o.kit_slug && clubResourceBySlug(o.kit_slug) ? `${memberPlanHref(o.kit_slug)}?fulfillment=${o.id}` : null;
 
 const NEXT: Record<string, string[]> = {
   pending: ['approved', 'on_hold', 'skipped'],
@@ -337,7 +343,7 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
         <h2 className="label">Welcome Kits ({rows?.length ?? '…'})</h2>
         <button type="button" className="underline" onClick={csv}>Download approved kits (CSV, one row per package)</button>
       </div>
-      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One package per new member: her Family Vision print and her first month’s resource, approved, printed and mailed together, outside the monthly cutoff. She approves her print; her first resource counts as confirmed three days later if she hasn’t confirmed it and her details are complete. Make both PDFs → Approve kit → Printed → Mailed.</p>
+      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One package per new member: her Family Vision print and her first month’s resource, approved, printed and mailed together, outside the monthly cutoff. Three items: her Family Vision print, the standard Family Meeting guide (<a className="underline" href={routes.clubMeetingGuide}>print it</a>), and her first month’s resource. She approves her print and confirms her first resource herself (nothing is confirmed for her; reminders go from Emails). Once both are in, the kit is submitted: mail within two business days. Make both PDFs → Approve kit → Printed → Mailed. Nothing is marked automatically.</p>
       {err && <p role="alert">{err}</p>}
       {rows && rows.length > 0 && (
         <div className="mt-3 overflow-x-auto">
@@ -356,11 +362,15 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
                         {' · '}{o.pdf_status === 'ready' ? 'PDF ✓' : o.family_name ? <a className="underline" href={printHref(o)!}>Print view</a> : 'PDF –'}</p>
                       {fm ? (
                         <p className="mt-1"><strong>{monthName(fm.resource_month)}</strong> · {clubResourceBySlug(fm.kit_slug)?.title ?? fm.kit_title ?? 'Monthly resource'}
-                          {' · '}{fm.member_approved_at ? `confirmed ${day(fm.member_approved_at)}` : o.kit_auto_approve_at ? `not confirmed · counts as confirmed ${day(o.kit_auto_approve_at)}` : 'not confirmed'}
+                          {' · '}{fm.member_approved_at ? `confirmed ${day(fm.member_approved_at)}` : 'not confirmed yet'}
                           {' · '}{fm.pdf_status === 'ready' ? 'PDF ✓' : printHref({ id: fm.id, kit_slug: fm.kit_slug, fulfillment_type: 'monthly_resource' }) ? <a className="underline" href={printHref({ id: fm.id, kit_slug: fm.kit_slug, fulfillment_type: 'monthly_resource' })!}>Print view</a> : 'PDF –'}</p>
                       ) : <p className="mt-1 text-soft">No first month (withdrawn)</p>}
+                      {fm && <p className="mt-1"><strong>Family Meeting guide</strong> · standard insert</p>}
                     </td>
-                    <td>{KIT_READINESS[o.readiness] ?? o.readiness}</td>
+                    <td>{KIT_READINESS[o.readiness] ?? o.readiness}
+                      {o.kit_submitted_at && <><br /><span data-kit-ship-by className={o.kit_ship_by && o.kit_ship_by < todayNy() && o.status !== 'mailed' ? 'font-semibold text-[#9a3b3b]' : 'text-soft'}>
+                        Submitted {day(o.kit_submitted_at)} · mail by {day(`${o.kit_ship_by}T12:00:00Z`)}{o.kit_ship_by && o.kit_ship_by < todayNy() && o.status !== 'mailed' ? ' (overdue)' : ''}</span></>}
+                    </td>
                     <td>{o.status}{o.note && <><br /><span className="text-soft">{o.note}</span></>}</td>
                     <td>{o.address ? <>{o.address.name}<br />{o.address.city}, {o.address.state}</> : '–'}</td>
                     <td className="space-x-2">
@@ -380,7 +390,10 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
 
 /** What's in one package, for the mail-house CSV. */
 const contents = (o: Order) =>
-  [`Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? `${month(o.first_month.resource_month)} ${clubResourceBySlug(o.first_month.kit_slug)?.title ?? o.first_month.kit_title ?? ''}`.trim() : null].filter(Boolean).join(' + ');
+  [`Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? 'Family Meeting guide' : null,
+    o.first_month ? `${month(o.first_month.resource_month)} ${clubResourceBySlug(o.first_month.kit_slug)?.title ?? o.first_month.kit_title ?? ''}`.trim() : null].filter(Boolean).join(' + ');
+/** Today's New York date ("2026-11-03"), to compare with a ship-by date. */
+const todayNy = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
 function Fulfillment(ctx: AdminContext) {
   const [kits, setKits] = useState<Order[] | null>(null);

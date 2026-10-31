@@ -12,7 +12,9 @@ import { routes } from '../../../routes';
 import { getSession } from '../../account';
 import { loadKitHousehold, type KitHousehold } from '../kit-household';
 import { loadMembership, loadResource, saveResource, shortDate, type Membership } from '../membership';
-import { accountStore, clubHref, sampleStore } from '../store';
+import { accountStore, clubHref, fromDb, sampleStore } from '../store';
+import { adminRpc, loadSession as loadAdminSession } from '../../admin/session';
+import { MEMBER_STORAGE_PREFIX } from '../../../data/club/resources';
 import { connectPlanAccount, PLAN_SAVE } from './account';
 import { planKey } from './storage';
 
@@ -68,10 +70,108 @@ function gateMessage(gate: HTMLElement, month: string, result: Exclude<KitHouseh
   gate.replaceChildren(h, p, a);
 }
 
+/** The order id when this page is the owner's fulfillment print view (?fulfillment=<order id>). */
+export const fulfillmentOrder = (search = typeof location === 'undefined' ? '' : location.search) => {
+  const id = new URLSearchParams(search).get('fulfillment');
+  return id && /^[0-9a-f-]{36}$/i.test(id) ? id : null;
+};
+
+interface Bundle {
+  order: { id: string; kit_slug: string | null; display_name: string | null; email: string; resource_month: string; status: string; readiness: string; pdf_status: string; in_welcome_kit?: boolean };
+  household: Parameters<typeof fromDb>[0];
+  state: Record<string, { s: 'l' | 's'; v: string }> | null;
+}
+
+/**
+ * The owner's print view of one member's plan (/admin/club → Welcome Kits or a month's list → Print view): her family
+ * and her SAVED version of this tool, exactly what she approved, restored before the tool reads it. Nothing saves
+ * back (no account connection); the owner prints to PDF and marks the PDF ready. Admin session only.
+ */
+async function startFulfillment(root: HTMLElement, order: string) {
+  const gate = root.querySelector<HTMLElement>('[data-plan-gate]');
+  const fail = (title: string, text: string) => {
+    if (gate) {
+      const h = document.createElement('h2');
+      h.textContent = title;
+      const p = document.createElement('p');
+      p.textContent = text;
+      gate.replaceChildren(h, p);
+    }
+    root.dataset.planState = 'error';
+  };
+  const session = loadAdminSession();
+  if (!session) return fail('Sign in to the admin first', 'Open this print view from /admin/club after signing in.');
+  let b: Bundle;
+  try {
+    b = await adminRpc<Bundle>(session, 'club_admin_fulfillment_bundle', { p_order: order });
+  } catch (e) {
+    return fail('We couldn’t load this mailing', (e as Error).message);
+  }
+  if (b.order.kit_slug !== root.dataset.kitSlug) return fail('This mailing is for another month', `Order ${order} is ${b.order.kit_slug ?? 'not a monthly resource'}.`);
+  // Her saved plan only: nothing from this browser's own tabs or previews.
+  for (const store of [sessionStorage, localStorage]) {
+    for (const k of Object.keys(store)) if (k.startsWith(MEMBER_STORAGE_PREFIX) || k === root.dataset.planKey) store.removeItem(k);
+  }
+  for (const [k, { s, v }] of Object.entries(b.state ?? {})) {
+    try { (s === 'l' ? localStorage : sessionStorage).setItem(k, v); } catch { /* fine */ }
+  }
+  const household = fromDb(b.household);
+  const result: ReadyFamily = { status: 'ready', source: 'fulfillment', sample: null, sampleLabel: '', household, profile: null };
+  root.dataset.planFor = planKey(null, household.id);
+  root.dataset.planSource = 'fulfillment';
+  root.dataset.planLabel = household.displayName ?? 'her family';
+  root.dataset.planFulfillment = order;
+  (root as FamilyRoot).planFamily = result;
+  root.dispatchEvent(new CustomEvent<ReadyFamily>(PLAN_FAMILY_READY, { detail: result }));
+  const detail = { household, sample: null };
+  (window as Window & { __ofcPreviewHousehold?: typeof detail }).__ofcPreviewHousehold = detail;
+  window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail }));
+  root.dataset.planState = 'ready';
+  fulfillmentBar(root, b, session);
+  window.dispatchEvent(new Event('resize'));
+  return result;
+}
+
+/** The owner's bar above the plan (never printed): whose mailing, Print, Mark PDF ready. */
+function fulfillmentBar(root: HTMLElement, b: Bundle, session: NonNullable<ReturnType<typeof loadAdminSession>>) {
+  const bar = document.createElement('div');
+  bar.dataset.clubChrome = '';
+  bar.dataset.planFulfillmentBar = '';
+  bar.className = 'print:hidden';
+  bar.style.cssText = 'background:#fdf6e6;border-bottom:1px solid #e8d9b8;padding:10px 16px;font-size:14px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center';
+  const who = document.createElement('strong');
+  who.textContent = `Fulfillment · ${b.order.display_name ?? b.order.email} · ${b.order.resource_month.slice(0, 7)}${b.order.in_welcome_kit ? ' · Welcome Kit' : ''}`;
+  const state = document.createElement('span');
+  state.textContent = `Her saved plan (${b.state && Object.keys(b.state).length ? 'with her changes' : 'as prepared, no changes saved'}) · ${b.order.status} (${b.order.readiness})`;
+  const print = document.createElement('button');
+  print.type = 'button';
+  print.textContent = 'Print / Save PDF';
+  print.style.cssText = 'text-decoration:underline';
+  print.addEventListener('click', () => window.print());
+  const ready = document.createElement('button');
+  ready.type = 'button';
+  ready.textContent = b.order.pdf_status === 'ready' ? 'PDF marked ready ✓' : 'Mark PDF ready';
+  ready.disabled = b.order.pdf_status === 'ready';
+  ready.style.cssText = 'text-decoration:underline';
+  ready.addEventListener('click', () => {
+    ready.disabled = true;
+    adminRpc(session, 'club_admin_set_fulfillment', { p_order: b.order.id, p_status: null, p_note: null, p_pdf: 'ready' })
+      .then(() => { ready.textContent = 'PDF marked ready ✓'; }, (e: Error) => { ready.disabled = false; state.textContent = e.message; });
+  });
+  bar.append(who, state, print, ready);
+  // Never on paper, and taking no space there (the plan's print rules hide by visibility, which keeps the box).
+  const style = document.createElement('style');
+  style.textContent = '@media print{[data-plan-fulfillment-bar]{display:none!important}}';
+  bar.append(style);
+  root.before(bar);
+}
+
 /** Load the family for a plan page root (`.club-plan` with data-kit-slug and data-plan-month). */
 export function startPlanFamily(root: HTMLElement) {
   const month = root.dataset.planMonth ?? 'This month';
   const gate = root.querySelector<HTMLElement>('[data-plan-gate]');
+  const order = fulfillmentOrder();
+  if (order) return startFulfillment(root, order);
   return loadKitHousehold(root.dataset.kitSlug ?? '', location.search, {
     accountsEnabled: clubAccountsEnabled,
     hasSession: async () => Boolean(await getSession()),

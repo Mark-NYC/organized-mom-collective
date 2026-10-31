@@ -266,16 +266,23 @@ scenarios.admin = async (browser) => {
   check('one row for her package', (await row.count()) === 1);
   const rowText = (await row.innerText()).replace(/\s+/g, ' ');
   check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Habit Cards/.test(rowText), rowText.slice(0, 200));
-  check('and why it waits', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('counts as confirmed'), rowText.slice(0, 260));
+  check('and why it waits (nothing confirmed for her)', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('not confirmed yet') && !/counts as confirmed/.test(rowText), rowText.slice(0, 260));
+  check('the package lists the Family Meeting guide insert', /Family Meeting guide · standard insert/.test(rowText), rowText.slice(0, 300));
   await page.fill('input[type=month]', '2027-01');
   await page.waitForTimeout(800);
   const monthText = await page.locator('body').innerText();
   check('January’s monthly list leaves her kit order out, and says so', monthText.includes('Plus 1 January 2027 resource ships in Welcome Kits') && monthText.includes('No mailings for this month.'));
   await shot(page, 'admin-kits-waiting', true);
 
-  // Three days pass: her prepared January counts as confirmed (everything else is valid).
+  // Days pass: nothing is confirmed for her. Then she confirms January herself; the kit is submitted.
   sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
-  check('after three days the kit only needs its PDFs', order('welcome_vision') === 'pending:needs_pdf', order('welcome_vision'));
+  check('three days later: still waiting for her (no automatic confirmation)', order('welcome_vision') === 'pending:needs_confirmation', order('welcome_vision'));
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
+  check('she confirms January: the kit only needs its PDFs', order('welcome_vision') === 'pending:needs_pdf', order('welcome_vision'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('button:has-text("Fulfillment")');
+  await page.waitForSelector('[data-kit-ship-by]');
+  check('submitted: the row shows when, and the two-business-day mail-by date', /Submitted .* · mail by /.test(await page.locator('[data-kit-ship-by]').innerText()));
 
   // The welcome print's print view: her approved choices, the approved print, one page, Mark PDF ready.
   const w = orderId('welcome_vision');
@@ -308,10 +315,16 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   const m = orderId('monthly_resource');
   const mv = await newPage(browser, DESKTOP, { auth: false });
   await asAdmin(mv);
-  await mv.goto(`${BASE}/club/resources/${JAN}?fulfillment=${m}`, { waitUntil: 'networkidle' });
+  check('the admin opens January’s print view on its real tool', (await page.locator('tr', { hasText: 'ana@example.com' }).locator('a:has-text("Print view")').last().getAttribute('href')) === `/app/club/january?fulfillment=${m}`);
+  await mv.goto(`${BASE}/app/club/january?fulfillment=${m}`, { waitUntil: 'networkidle' });
   await mv.waitForSelector('text=Mark PDF ready');
-  const cards = await mv.locator('#club-month-content').innerText();
-  check('January print view: prepared with her children’s names', /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
+  await mv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+  const cards = await mv.locator('.club-plan').innerText();
+  check('January print view: the real tool, prepared with her children’s names', /Weekly Meeting/i.test(cards) && /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
+  check('January print view: no member chrome (Club nav, Welcome Kit panel)', !(await mv.isVisible('[data-club-nav]')) && !(await mv.isVisible('[data-welcome-kit-confirm]')));
+  const janPages = await printPdf(mv, 'admin-january-tool');
+  const janText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/admin-january-tool.pdf`, '-']).toString();
+  check('January PDF: her Weekly Meeting sheets only (2 Letter pages, no admin bar, no site chrome)', janPages === 2 && /Weekly Meeting/i.test(janText) && /Sofia/.test(janText) && !/Fulfillment ·|Mark PDF ready|Club Home|MONTHLY TOOL/i.test(janText), `${janPages} pages · ${janText.replace(/\s+/g, ' ').slice(0, 160)}`);
   await shot(mv, 'admin-january-print-view');
   await mv.click('text=Mark PDF ready');
   await mv.waitForSelector('text=PDF marked ready');
@@ -326,11 +339,11 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   await page.waitForFunction(() => document.body.innerText.includes('approved'));
   await page.waitForTimeout(500);
   check('approve kit: both orders approved', order('welcome_vision').startsWith('approved') && order('monthly_resource').startsWith('approved'), `${order('welcome_vision')} / ${order('monthly_resource')}`);
-  check('her January is recorded as confirmed by the three-day rule', sql(`select note from public.club_fulfillment_orders where id = '${m}'`).includes('confirmed automatically'));
+  check('her January is recorded as confirmed by her, never automatically', !sql(`select coalesce(note, '') from public.club_fulfillment_orders where id = '${m}'`).includes('automatically'));
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('text=Download approved kits')]);
   const csv = execFileSync('cat', [await download.path()]).toString().trim().split('\n');
   check('CSV: one row for the package', csv.length === 2, `${csv.length - 1} row(s)`);
-  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ 2027-01 Our Family Habit Cards/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
+  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ Family Meeting guide \+ 2027-01 Our Family Habit Cards/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
   for (const st of ['printed', 'mailed']) {
     await page.locator('tr', { hasText: 'ana@example.com' }).locator(`button:has-text("${st}")`).first().click();
     await page.waitForTimeout(700);
@@ -456,14 +469,25 @@ async function journey(browser, label, vp) {
   await page.waitForSelector('text=It’s yours!');
   check('approved: one welcome order, approved once', sql(`select count(*) || ':' || count(member_approved_at) from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`) === '1:1');
   const next = page.locator('a.fvp-next-cta');
-  check('approved: primary CTA is “See your first family resource”', (await next.innerText()).startsWith('See your first family resource'));
-  check('approved: it goes to her January tool (/app/club/january), never a sales page', (await next.getAttribute('href')) === '/app/club/january?welcome=1');
+  check('approved: next is the Family Meeting guide', (await next.innerText()).startsWith('Next: your Family Meeting guide') && (await next.getAttribute('href')) === '/club/family-meeting-guide', await next.innerText());
   await shot(page, `${label}-4-approved`, vp.width < 850);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('text=It’s yours!');
-  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("See your first family resource")'));
+  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("Next: your Family Meeting guide")'));
   await next.click();
+  await page.waitForURL(/\/club\/family-meeting-guide/);
+  await page.waitForSelector('[data-meeting-guide-step]');
+  const guide = await page.locator('main, body').first().innerText();
+  check('Family Meeting guide: the standard sheet, four parts, ten minutes', /Our Family Meeting/.test(guide) && /Our Focus/.test(guide) && /Let’s Practice/.test(guide) && /Nothing to change here/.test(guide), guide.replace(/\s+/g, ' ').slice(0, 200));
+  check('Family Meeting guide: progress shows the guide step current', await page.isVisible('[aria-current="step"]:has-text("Meeting guide")'));
+  check('no sideways scrolling (guide)', await noSideScroll(page));
+  await shot(page, `${label}-4b-meeting-guide`, true);
+  const guidePages = await printPdf(page, `${label}-meeting-guide`);
+  const guideText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/${label}-meeting-guide.pdf`, '-']).toString();
+  check('Family Meeting guide prints on one Letter page, the sheet only', guidePages === 1 && /Our Family Meeting/.test(guideText) && !/Next: your|Club Home|Sign out/.test(guideText), `${guidePages} pages`);
+  await page.click('button:has-text("Next: your January resource")');
   await page.waitForURL(/\/app\/club\/january\?welcome=1/);
+  check('guide reviewed: recorded on her account', sql(`select meeting_guide_seen_at is not null from public.club_households where owner_user_id = '${USER.id}'`) === 't');
   await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
   await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
   const panel = await page.locator('[data-welcome-kit-confirm]').innerText();
@@ -484,8 +508,27 @@ async function journey(browser, label, vp) {
   await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
   await page.waitForTimeout(1500);
   check('refresh on the tool: still waiting for her one confirmation (never confirmed for her)', order('monthly_resource').endsWith('needs_confirmation') && !firstConfirmed(), kitOrders());
+  // Her change on the real tool is what the owner prints.
+  const MARK = 'Rivera print check';
+  if (label === 'desktop') {
+    await editPlan(page, 'january', MARK);
+    await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planSave === 'saved', null, { timeout: 8000 }).catch(() => undefined);
+    await page.waitForTimeout(1500);
+  }
   await page.click('text=Looks good. Prepare my Welcome Kit');
-  await page.waitForSelector('text=It’s all set!');
+  await page.waitForSelector('text=Your Welcome Kit is submitted');
+  const submitted = await page.locator('[data-kit-submitted]').innerText();
+  check('submitted: three items, one package, the two-business-day aim', /Family Vision print/.test(submitted) && /Family Meeting guide/.test(submitted) && /January resource/.test(submitted) && /two business days/.test(submitted), submitted.replace(/\s+/g, ' '));
+  check('submitted: the owner is notified (club-billing kit_submitted)', page.calls.includes('billing:kit_submitted'), page.calls.filter((c) => c.startsWith('billing')).join(','));
+  if (label === 'desktop') {
+    const pv = await newPage(browser, DESKTOP, { auth: false });
+    await asAdmin(pv);
+    await pv.goto(`${BASE}/app/club/january?fulfillment=${orderId('monthly_resource')}`, { waitUntil: 'networkidle' });
+    await pv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+    await pv.waitForTimeout(800);
+    check('the owner’s print view shows her saved change (what prints is what she approved)', (await pv.locator('.club-plan').innerText()).includes(MARK), (await pv.locator('[data-plan-fulfillment-bar]').innerText()).replace(/\s+/g, ' '));
+    await pv.context().close();
+  }
   check('confirmed: both items prepared together (kit needs only its PDFs)', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
   await shot(page, `${label}-6-all-set`);
   await page.reload({ waitUntil: 'networkidle' });
@@ -500,7 +543,7 @@ async function journey(browser, label, vp) {
   await page.waitForURL(/\/app\/club/);
   await page.waitForSelector('[data-club-home]');
   const club = await page.locator('main').innerText();
-  check('Club Home: no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /We’re preparing your Welcome Kit/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
+  check('Club Home: no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /Submitted\. We aim to print and mail your Welcome Kit within two business days/.test(club) && /Family Meeting guide/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
   check('Club Home: her family name, members with ages and an edit link', /The Rivera Family/.test(club) && /Sofia · 8/.test(club) && /Mateo · 6/.test(club) && await page.isVisible('a[href="/club/family"]:has-text("Edit my family")'), club.replace(/\s+/g, ' ').slice(0, 200));
   check('Club Home: next step opens January', await page.isVisible('.ofc-next-step a[href="/app/club/january"]'));
   check('Club Home: coming up lists February with its payment date', /February 2027: .* opens with your February 1, 2027 payment/.test(club));
@@ -559,7 +602,7 @@ async function postCheckout(browser, label, vp) {
   await page.fill('#club-code', '123456');
   await page.click('button:has-text("Sign in")');
   await page.waitForSelector('text=Tell us about your family');
-  check('kit progress: four steps, family current', (await page.locator('[aria-label="Your Welcome Kit"] li').count()) === 4 && await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your family")'));
+  check('kit progress: five steps, family current', (await page.locator('[aria-label="Your Welcome Kit"] li').count()) === 5 && await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your family")'));
   await page.fill('input[autocomplete="family-name"]', 'The Rivera Family');
   await page.fill('input[autocomplete="given-name"]', 'Ana');
   const kidRow = page.locator('li', { has: page.locator('select') });
@@ -698,9 +741,13 @@ scenarios.resume = async (browser) => {
   as.vision('The Rivera Family', 'Hope');
   check('print saved but not approved → still her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
   as.approvePrint();
-  check('print approved → her first resource on its real tool', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
+  check('print approved → the Family Meeting guide', /\/club\/family-meeting-guide/.test(await signInTo(/\/club\/family-meeting-guide/)));
+  sql(`update public.club_households set meeting_guide_seen_at = now() where owner_user_id = '${USER.id}'`);
+  check('guide reviewed → her first resource on its real tool', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
   sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
-  check('three days later (prepared resource confirmed for her) → her Club', /\/app\/club/.test(await signInTo(/\/app\/club/)));
+  check('three days later: still her first resource (never confirmed for her)', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
+  check('she confirms → Club Home', /\/app\/club$/.test(new URL(await signInTo(/\/app\/club$/)).pathname));
 
   // Her January isn't editable once the kit is approved for print; a preparing month never says "not yours".
   const page = await newPage(browser, DESKTOP);

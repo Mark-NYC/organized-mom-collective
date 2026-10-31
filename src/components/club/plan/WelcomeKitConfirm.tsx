@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { clubResourceBySlug } from '../../../data/club/resources';
 import { getSession } from '../../../lib/account';
-import { approveResource, loadMembership, monthName, type Membership } from '../../../lib/club/membership';
+import { approveResource, loadMembership, monthName, notifyKitSubmitted } from '../../../lib/club/membership';
 import { kitProgress, welcomeKitView, type WelcomeKitView as View } from '../../../lib/club/onboarding';
 import { routes } from '../../../routes';
 import KitSteps from '../KitSteps';
@@ -21,7 +21,7 @@ export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!clubAccountsEnabled() || new URLSearchParams(location.search).get('sample')) return;
+    if (!clubAccountsEnabled() || new URLSearchParams(location.search).get('sample') || new URLSearchParams(location.search).get('fulfillment')) return;
     let member = false;
     const refresh = () => loadMembership().then((me) => setView((was) => {
       const now = welcomeKitView(me, kitSlug);
@@ -48,7 +48,10 @@ export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
     try {
       await approveResource(kitSlug);
       const me = await loadMembership();
-      setView(welcomeKitView(me, kitSlug) === 'confirm' ? 'confirm' : 'done');
+      const now = welcomeKitView(me, kitSlug);
+      setView(now === 'confirm' ? 'confirm' : 'done');
+      // The owner hears once the kit is submitted (both approvals in); a failure here never blocks her.
+      if (now !== 'confirm') notifyKitSubmitted().catch(() => undefined);
     } catch {
       setError('We couldn’t save that just now. Nothing was sent to print. Please try again.');
     } finally {
@@ -88,9 +91,16 @@ export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
           </>
         )}
         {view === 'done' && (
-          <div role="status">
-            <h2 id="wk-confirm-title" className="font-serif text-[1.6rem] leading-tight text-warm-ink"><span aria-hidden="true">✓ </span>It’s all set!</h2>
-            <p className="mt-2 max-w-2xl text-warm-ink">Your Welcome Kit is being prepared: your Family Vision print and your {month} resource, printed together and mailed to you in one package. You’ll see when it ships on Club Home.</p>
+          <div role="status" data-kit-submitted>
+            <KitSteps steps={kitProgress('done')} />
+            <h2 id="wk-confirm-title" className="font-serif text-[1.6rem] leading-tight text-warm-ink"><span aria-hidden="true">✓ </span>Your Welcome Kit is submitted</h2>
+            <p className="mt-2 max-w-2xl text-warm-ink">We print three things together and mail them to you in one package:</p>
+            <ul className="mt-2 list-disc pl-6 text-warm-ink">
+              <li>Your Family Vision print</li>
+              <li>Our one-page Family Meeting guide</li>
+              <li>Your {month} resource, as you approved it</li>
+            </ul>
+            <p className="mt-2 max-w-2xl text-warm-soft">We aim to print and mail it within two business days. Club Home shows when it’s on its way. From next month, your monthly resource follows the regular Club schedule.</p>
             <a className="btn-primary mt-4 inline-block" href={routes.appClub}>Go to Club Home</a>
           </div>
         )}

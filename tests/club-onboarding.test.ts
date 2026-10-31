@@ -41,11 +41,12 @@ describe('the Welcome Kit steps', () => {
     expect(firstMonth(base({ first_paid_month: '2027-02-01' }))).toBeNull();
   });
 
-  it('shows four steps and never says shipped before it is', () => {
-    expect(kitProgress('print').map((s) => s.state)).toEqual(['done', 'done', 'current', 'next']);
-    expect(kitProgress('address').map((s) => s.label)).toEqual(['Your family', 'Your address', 'Your print', 'Your first resource']);
+  it('shows five steps and never says shipped before it is', () => {
+    expect(kitProgress('print').map((s) => s.state)).toEqual(['done', 'done', 'current', 'next', 'next']);
+    expect(kitProgress('address').map((s) => s.label)).toEqual(['Your family', 'Your address', 'Your print', 'Meeting guide', 'Your first resource']);
+    expect(kitProgress('done').every((s) => s.state === 'done')).toBe(true);
+    expect(kitText(base({ welcome: w('needs_pdf', true) }))).toMatch(/^Submitted\. We aim to print and mail/);
     expect(kitText(base({ welcome: w('ready', true, 'approved') }))).not.toMatch(/mail/i);
-    expect(kitText(base({ welcome: w('needs_pdf', true) }))).toBe('We’re preparing your Welcome Kit.');
     expect(kitText(base({ welcome: w('mailed', true, 'mailed') }))).toBe('Your Welcome Kit is in the mail.');
   });
 });
@@ -66,6 +67,18 @@ describe('the family profile in her setup', () => {
     expect(nextStep(later, { profile: profile(true) })).toBe('home');
     expect(startsWithFirstPayment(later)).toBe(true);
     expect(startsWithFirstPayment(base({ onboarded: true }))).toBe(false);
+  });
+});
+
+describe('the Family Meeting guide in her setup', () => {
+  it('comes after her print and before her first resource, only when she hasn’t seen it', () => {
+    const confirm = base({ onboarded: true, welcome: w('needs_confirmation', true) });
+    expect(nextStep(confirm, { meetingGuideSeen: false })).toBe('meeting_guide');
+    expect(stepHref(confirm, 'meeting_guide')).toBe('/club/family-meeting-guide');
+    expect(nextStep(confirm, { meetingGuideSeen: true })).toBe('first_resource');
+    expect(nextStep(confirm)).toBe('first_resource'); // unknown: never blocks
+    expect(nextStep(base({ onboarded: true, welcome: w('needs_vision', false) }), { meetingGuideSeen: false })).toBe('print');
+    expect(nextStep(base({ onboarded: true, welcome: w('needs_pdf', true) }), { meetingGuideSeen: false })).toBe('home'); // never holds a submitted kit
   });
 });
 

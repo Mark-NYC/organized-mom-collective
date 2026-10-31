@@ -1,7 +1,22 @@
-# Club post-checkout journey (P0, Oct 31 2026)
+# Club post-checkout journey (P0, Oct 31 2026; Welcome Kit revised the same day)
 
-Checkout → Sign in → Family → Family profile (steps 2–6) → Mailing address → Family Vision print → First monthly
-resource → Confirm → Club Home. One state machine (`src/lib/club/onboarding.ts`, from `club_me` plus her profile)
+Checkout → Sign in → Family questionnaire (family, then profile steps 2–6) → Mailing address → Personalize and approve
+the Family Vision print → Review the Family Meeting guide → Personalize and confirm the current month's resource →
+**Welcome Kit submitted** → Club Home. The kit (print + guide + first month) is mailed within two business days of her
+approvals ([WELCOME_KIT.md](WELCOME_KIT.md)).
+
+## Owner decisions (Oct 31 2026) and where they live
+
+| # | Decision | Implemented |
+| --- | --- | --- |
+| 1 | Before January 2027, January is the founding month; no November/December 2026 resources | Already the rule (`club_checkout_state`, `club_intro_grant`); unchanged |
+| 2 | A standard one-page Family Meeting guide in every kit, a packing-list insert | `src/data/club/meeting-guide.ts` (draft copy), `/club/family-meeting-guide`, admin packing list and CSV |
+| 3 | Explicit approval of both personalized items; no three-day rule; reminders | `20261110000000_club_welcome_kit_approvals.sql`, reminders at 2 and 7 days |
+| 4 | No free month → charged $5.90 at once with disclosure, normal kit | 2027 onward: already the behavior, now tested and disclosed (join page, Stripe Checkout). Founding window: proposal B |
+| 5 | Current program month, late-month joiners included | Already the rule: the month she joins, no cutoff for the kit |
+| 6 | One regular schedule after the kit, billing dates unchanged for now | [BILLING_SCHEDULE_PROPOSAL.md](BILLING_SCHEDULE_PROPOSAL.md) (1st/15th/30th, recommendation A) |
+| – | Two-business-day target and owner notification, nothing marked automatically | `kit_submitted_at`, `kit_ship_by`, club-billing `kit_submitted` email |
+| – | What prints is the saved tool | `/app/club/<month>?fulfillment=<order>` (`startFulfillment`) | One state machine (`src/lib/club/onboarding.ts`, from `club_me` plus her profile)
 decides every step; refreshing, signing out or switching devices lands on the same step.
 
 ## What the owner's production test showed (read-only, Oct 31 2026)
@@ -44,9 +59,9 @@ fulfillment rules and database functions are unchanged.
 
 ## Not fixed here (owner decisions)
 
-- **Fulfillment still prints the old member copy.** The admin print view renders `/club/resources/<slug>`; her edits on
-  the app tool are saved to the same `club_resource_versions` row but under the tool's own key, so the printed January
-  wouldn't show them (and is the Habit Cards copy). Decide in PR #268 before approving any Welcome Kit for print.
+- ~~Fulfillment prints the old member copy~~: fixed. The owner's print view is the real tool with her saved version
+  (checked: her edit appears in the print view; January prints its two Weekly Meeting sheets). PR #268's member-copy
+  print fixes still matter for November (its tool is that page) and for anyone opening an old copy.
 - Registry titles differ from some tools (January: "Our Family Habit Cards" vs the Weekly Meeting tool). Club Home uses
   the month card titles; the confirmation says "Your January plan". Also #268.
 - The tool's own "Approve this plan" button stays (device-only check mark); the kit panel says so.

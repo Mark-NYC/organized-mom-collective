@@ -16,7 +16,7 @@ import type { Household } from '../../lib/club/profile';
 import { SETUP_STEPS, STEP_TITLES, TOTAL_STEPS, type FamilyProfile } from '../../lib/club/family-profile';
 import FamilySetup from './FamilySetup';
 import { checkoutStatus, loadAddress, loadMembership, monthName, saveAddress, shortDate, type Address, type Membership } from '../../lib/club/membership';
-import { deferProfile, familyNameFrom, kitProgress, nextStep, profileDeferred, startsWithFirstPayment, stepHref } from '../../lib/club/onboarding';
+import { deferProfile, familyNameFrom, kitProgress, loadMeetingGuideSeen, nextStep, profileDeferred, startsWithFirstPayment, stepHref } from '../../lib/club/onboarding';
 import { getSession } from '../../lib/account';
 import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
@@ -94,7 +94,7 @@ function Setup({ ctx }: { ctx: ClubContext }) {
     }
     const me = await loadMembership();
     // The family form comes first; its steps 2–6 follow straight away, then the address, then the Welcome Kit.
-    const s = nextStep(me, { profile: household ? profile : null, profileDeferred: later });
+    const s = nextStep(me, { profile: household ? profile : null, profileDeferred: later, meetingGuideSeen: await loadMeetingGuideSeen(session?.user_id) });
     if (s === 'not_member') return setStep({ kind: 'not_member' });
     if (s === 'family') {
       const address = await loadAddress().catch(() => null);
@@ -217,7 +217,7 @@ function StartsWithPayment({ me }: { me: Membership }) {
       </p>
       <ul className="mt-4 list-disc space-y-1 pl-6 leading-relaxed text-warm-ink">
         <li>{month} opens in your Club that day, prepared with your family’s names.</li>
-        <li>Your Family Vision welcome print comes with it: you’ll approve it, look over {month}, and we mail both together in your Welcome Kit.</li>
+        <li>Your Welcome Kit comes with it: you’ll approve your Family Vision print and {month}, and we mail them with our Family Meeting guide in one package.</li>
       </ul>
       <p className="mt-3 leading-relaxed text-warm-soft">Think that’s a mistake? Reply to your welcome email and we’ll look.</p>
       <a href={routes.appClub} className="btn-primary mt-6 inline-block">Go to Club Home</a>

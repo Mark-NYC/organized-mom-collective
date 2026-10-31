@@ -68,6 +68,7 @@ function createResendMailer(opts) {
     }
   };
 }
+var esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 var C = {
   page: "#fbf7f1",
   // cream
@@ -85,7 +86,23 @@ var C = {
   button: "#4a3f3e"
 };
 var SANS = "Montserrat,'Helvetica Neue',Helvetica,Arial,sans-serif";
+var SERIF = "Georgia,'Times New Roman',serif";
+var p = (text, style = "") => ({ html: `<p style="margin:0 0 16px;${style}">${esc(text)}</p>`, text });
+var small = (text) => p(text, `font-size:13px;line-height:1.55;color:${C.muted}`);
 var eyebrowStyle = `margin:0 0 10px;font-family:${SANS};font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:${C.accent}`;
+var button = (label, href) => ({
+  html: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 18px"><tr><td bgcolor="${C.button}" style="border-radius:6px;background:${C.button}"><a href="${esc(href)}" style="display:inline-block;padding:13px 24px;font-family:${SANS};font-size:15px;font-weight:600;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:6px">${esc(label)}</a></td></tr></table>`,
+  text: `${label}: ${href}`
+});
+var panel = (bg, border, blocks) => ({
+  html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px;border-collapse:separate"><tr><td bgcolor="${bg}" style="background:${bg};border:1px solid ${border};border-radius:8px;padding:20px 20px 6px">${blocks.map((b) => b.html).join("")}</td></tr></table>`,
+  text: blocks.map((b) => b.text).join("\n")
+});
+var panelTitle = (text) => ({
+  html: `<p style="margin:0 0 8px;font-family:${SERIF};font-size:19px;line-height:1.3;color:${C.ink}">${esc(text)}</p>`,
+  text: `
+${text}`
+});
 
 // supabase/functions/_shared/env.ts
 var STRIPE_API_VERSION = "2025-03-31.basil";
@@ -253,6 +270,220 @@ async function userFromRequest(deps, req) {
   return { id: u.id, email: u.email.toLowerCase(), confirmed: Boolean(u.email_confirmed_at) };
 }
 
+// supabase/functions/_shared/club/emails.ts
+var monthLabel = (isoMonth) => (/* @__PURE__ */ new Date(`${isoMonth.slice(0, 7)}-15T12:00:00Z`)).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+var longDate = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
+var WELCOME_KIT = "Your first mailing is your Welcome Kit: a personalized Family Vision watercolor print for your wall, our gift, our one-page Family Meeting guide, and your family’s first monthly resource. Once you approve your print and your first resource, we print them together and mail them to your door in one package.";
+var MONTH_PAGES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+function toolUrl(siteUrl, slug, welcome = false) {
+  const month = MONTH_PAGES[Number(slug.slice(5, 7)) - 1];
+  return month && month !== "november" ? `${siteUrl}/app/club/${month}${welcome ? "?welcome=1" : ""}` : `${siteUrl}/club/resources/${slug}`;
+}
+var steps = (items) => ({
+  html: `<ol style="margin:0 0 18px;padding-left:22px">${items.map((t) => `<li style="margin:0 0 8px">${esc(t)}</li>`).join("")}</ol>`,
+  text: items.map((t, i) => `${i + 1}. ${t}`).join("\n")
+});
+function renderClubEmail(kind, to, d, siteUrl) {
+  const login = `${siteUrl}/club/login?email=${encodeURIComponent(to)}`;
+  const dash = `${siteUrl}/club/dashboard`;
+  const resource = d.kitSlug ? `${siteUrl}/club/resources/${d.kitSlug}` : dash;
+  let b;
+  switch (kind) {
+    case "welcome":
+      if (d.firstCharge) {
+        b = {
+          subject: "Welcome to the Organized Family Club",
+          preheader: d.freeMonth ? `${d.freeMonth} is on us. Your first $5.90 payment is ${d.firstCharge}.` : `Your first $5.90 payment is ${d.firstCharge}.`,
+          eyebrow: d.freeMonth ? "Your first month is free" : "Monthly membership",
+          title: "Welcome. You’re in.",
+          blocks: [
+            p(d.freeMonth ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.` : "Thank you for joining."),
+            p(WELCOME_KIT),
+            p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
+            panel(C.sage, C.sageRule, [
+              panelTitle("Two minutes to get started"),
+              steps([
+                "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
+                "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
+                "Approve your Family Vision print, look over your first resource, and we’ll prepare your Welcome Kit."
+              ]),
+              button("Sign in to your account", login)
+            ]),
+            small("Stripe emails your receipts. You can manage or cancel your membership any time from your account.")
+          ]
+        };
+        break;
+      }
+      b = {
+        subject: "Welcome to the Organized Family Club",
+        preheader: d.plan === "annual" ? "Your year of family resources is ready." : "Your first month is ready for your family.",
+        eyebrow: d.plan === "annual" ? "Annual membership" : "Monthly membership",
+        title: "Welcome. You’re in.",
+        blocks: [
+          p(d.plan === "annual" ? "Thank you for joining for the year. Your twelve monthly resources are in your account, with a printed mailing each month." : "Thank you for joining. Each paid month brings that month’s resource, prepared for your family, with a printed copy in the mail."),
+          p(WELCOME_KIT),
+          panel(C.sage, C.sageRule, [
+            panelTitle("Two minutes to get started"),
+            steps([
+              "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
+              "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
+              "Approve your Family Vision print, look over your first resource, and we’ll prepare your Welcome Kit."
+            ]),
+            button("Sign in to your account", login)
+          ]),
+          small("Stripe emails your receipt separately. You can manage or cancel your membership any time from your account.")
+        ]
+      };
+      break;
+    case "profile_reminder":
+      b = {
+        subject: "One quick step for your family’s plan",
+        preheader: "Add your family’s first names and ages so we can prepare your resources.",
+        eyebrow: "Organized Family Club",
+        title: "We just need your family",
+        blocks: [
+          p("Your membership is active, but we don’t have your family yet. Add first names and the kids’ ages (about two minutes) and we’ll prepare your resources and printed mailing with them."),
+          button("Add your family", login),
+          small("Already done it? Thank you, you can ignore this email.")
+        ]
+      };
+      break;
+    case "resource_ready":
+      b = {
+        subject: `${d.monthLabel ?? "This month"} is ready for your family`,
+        preheader: "Prepared with your family’s names. Open it, adjust anything, print it.",
+        eyebrow: d.monthLabel ?? "New this month",
+        title: "Your new resource is ready",
+        blocks: [
+          p(`Your ${d.monthLabel ?? ""} resource is in your account, already prepared with your family’s names. Open it, change anything that doesn’t fit, and print it if you’d like a copy now.`.replace("  ", " ")),
+          button("Open it", resource)
+        ]
+      };
+      break;
+    case "review":
+      b = {
+        subject: `Take a look before we print ${d.monthLabel ?? "your mailing"}`,
+        preheader: "A quick check of names and details before it goes in the mail.",
+        eyebrow: "Before we print",
+        title: "Does this look right?",
+        blocks: [
+          p(`Your ${d.monthLabel ?? ""} printable is prepared with your family’s names. Take a quick look, change anything you’d like, then tap “Looks good, print it”.`.replace("  ", " ")),
+          button("Review it", resource),
+          small("No time? That’s fine. If we don’t hear from you, we’ll print it as it is.")
+        ]
+      };
+      break;
+    case "kit_reminder":
+      b = {
+        subject: d.reminder === 2 ? "Your Welcome Kit is waiting for one click" : "One quick look before we prepare your Welcome Kit",
+        preheader: "Your first family resource is ready for a quick look before we print it.",
+        eyebrow: "Your Welcome Kit",
+        title: "Does your first resource look right?",
+        blocks: [
+          p(`Your Family Vision print is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? "first"} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
+          button("Take a look", d.kitSlug ? toolUrl(siteUrl, d.kitSlug, true) : dash),
+          small("We print your Welcome Kit only after you confirm it, and aim to mail it within two business days.")
+        ]
+      };
+      break;
+    case "kit_submitted":
+      b = {
+        subject: `Welcome Kit ready to prepare: ${d.familyName ?? d.memberEmail ?? "a new member"}`,
+        preheader: d.shipBy ? `Target: mail by ${d.shipBy}.` : "Both approvals are in.",
+        eyebrow: "Welcome Kit submitted",
+        title: "A Welcome Kit is ready to prepare",
+        blocks: [
+          p(`${d.familyName ?? "A new member"}${d.memberEmail ? ` (${d.memberEmail})` : ""} approved her Family Vision print and her ${d.monthLabel ?? "first"} resource.`),
+          p(`Packing list: Family Vision print · Family Meeting guide (standard insert) · ${d.monthLabel ?? "first month"} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ""}`),
+          button("Open Welcome Kits", `${siteUrl}/admin/club`),
+          small("Make both PDFs, approve the kit, then mark it printed and mailed in /admin/club. Nothing is marked automatically.")
+        ]
+      };
+      break;
+    case "payment_failed":
+      b = {
+        subject: "Your Organized Family Club payment didn’t go through",
+        preheader: "Update your card from your account. Months you already have stay yours.",
+        eyebrow: "Payment problem",
+        title: "Your payment didn’t go through",
+        blocks: [
+          p("We couldn’t take this month’s payment. Stripe will try again over the next few days. To fix it now, sign in and choose Manage billing to update your card."),
+          button("Update your card", dash),
+          small("Months you’ve already received stay in your account. This month opens, and its mailing is prepared, once the payment goes through.")
+        ]
+      };
+      break;
+    case "canceled":
+      b = d.ended ? {
+        subject: "Your Organized Family Club membership has ended",
+        preheader: "Everything you received stays in your account to view and print.",
+        eyebrow: "Membership ended",
+        title: "Thank you for being a member",
+        blocks: [
+          p("Your membership has ended and you won’t be charged again. Every resource you received stays in your account to view and print."),
+          button("Open your account", dash),
+          small("Changed your mind? You can join again any time from your account.")
+        ]
+      } : {
+        subject: "Your membership is set to end",
+        preheader: d.endsOn ? `It ends on ${d.endsOn}. Nothing else to do.` : "Nothing else to do.",
+        eyebrow: "Cancellation confirmed",
+        title: "Your cancellation is confirmed",
+        blocks: [
+          p(`Your membership ends${d.endsOn ? ` on ${d.endsOn}` : " at the end of the period you paid for"}, and you won’t be charged again. Until then nothing changes, and every resource you received stays in your account afterwards.`),
+          button("Open your account", dash),
+          small("Changed your mind? Choose Manage billing in your account before then to keep your membership.")
+        ]
+      };
+      break;
+  }
+  return layout(b, d.test === true, siteUrl);
+}
+function layout(b, test, site) {
+  const banner = test ? `<tr><td style="padding:0 0 14px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.rose}" style="background:${C.rose};border:1px dashed ${C.accent};border-radius:8px;padding:12px 16px;font-family:${SANS};font-size:13px;color:${C.ink}"><strong>Test</strong> · Stripe test mode. No real payment was taken.</td></tr></table></td></tr>` : "";
+  const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(b.subject)}</title></head>
+<body style="margin:0;padding:0;background:${C.page}">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(b.preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.page}" style="background:${C.page}"><tr><td align="center" style="padding:24px 12px 36px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
+<tr><td align="center" style="padding:4px 0 20px"><a href="${esc(site)}/club"><img src="${esc(site)}/email/omc-badge-144.png" width="72" height="72" alt="Organized Family Club" style="display:block;width:72px;height:72px;border:0"></a></td></tr>
+${banner}
+<tr><td bgcolor="${C.card}" style="background:${C.card};border:1px solid ${C.rule};border-radius:10px;padding:32px 24px 16px;font-family:${SANS};font-size:16px;line-height:1.6;color:${C.ink}">
+<p style="${eyebrowStyle}">${esc(b.eyebrow)}</p>
+<h1 style="margin:0 0 18px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:700;color:${C.ink}">${esc(b.title)}</h1>
+${b.blocks.map((x) => x.html).join("\n")}
+</td></tr>
+<tr><td align="center" style="padding:24px 12px 0;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">
+<p style="margin:0 0 10px">Questions? Reply to this email.</p>
+<p style="margin:0">Organized Family Club · <a href="${esc(site)}" style="color:${C.muted}">Organized Mom Collective</a></p>
+</td></tr></table></td></tr></table></body></html>`;
+  const text = [...test ? ["[TEST: Stripe test mode. No real payment was taken.]", ""] : [], b.title, "", ...b.blocks.map((x) => x.text), "", "Questions? Reply to this email.", `Organized Family Club · ${site}`].join("\n");
+  return { subject: test ? `[Test] ${b.subject}` : b.subject, html, text };
+}
+async function sendClubEmail(deps, key, kind, userId, to, data) {
+  try {
+    const state = await deps.db.rpc("club_email_begin", { p_key: key, p_kind: kind, p_user: userId, p_to: to });
+    if (state === "done") return "duplicate";
+    if (!deps.mailer.configured) {
+      await deps.db.rpc("club_email_finish", { p_key: key, p_status: "skipped", p_error: "RESEND_API_KEY not set" });
+      return "skipped";
+    }
+    const msg = renderClubEmail(kind, to, { ...data, test: data.test ?? deps.stripe.mode === "test" }, deps.env.siteUrl);
+    try {
+      const r = await deps.mailer.send(to, msg, `club:${key}`);
+      await deps.db.rpc("club_email_finish", { p_key: key, p_status: "sent", p_resend_id: r.id });
+      return "sent";
+    } catch (err) {
+      await deps.db.rpc("club_email_finish", { p_key: key, p_status: "failed", p_error: err instanceof Error ? err.message : String(err) });
+      return "failed";
+    }
+  } catch (err) {
+    console.error("club email", kind, err);
+    return "failed";
+  }
+}
+
 // supabase/functions/_shared/club/stripe-map.ts
 var LIVE_STATUSES = ["trialing", "active", "past_due", "unpaid", "paused", "incomplete"];
 var EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
@@ -283,6 +514,8 @@ function createClubBillingHandler(deps) {
           return json(await portal(deps, req), 200, cors);
         case "sync_email":
           return json(await syncEmail(deps, req), 200, cors);
+        case "kit_submitted":
+          return json(await kitSubmitted(deps, req), 200, cors);
         default:
           return json({ error: "unknown_action" }, 400, cors);
       }
@@ -339,6 +572,8 @@ async function checkout(deps, req, body) {
   const trialEnd = state.trial_end ? Math.max(Math.floor(Date.parse(state.trial_end) / 1e3), deps.now() + MIN_TRIAL_SECONDS) : null;
   const meta = { club: "organized-family-club", plan, ...email ? { email } : {}, ...user ? { user_id: user.id } : {}, ...state.intro_month ? { intro_month: state.intro_month.slice(0, 10) } : {} };
   const expiresAt = deps.now() + 60 * 60;
+  const founding = Boolean(state.intro_month && state.intro_month.slice(0, 7) > new Date(deps.now() * 1e3).toISOString().slice(0, 7));
+  const disclosure = state.intro_month ? founding ? "One free first month per household. If this email, mailing address or card already had a free month, your membership starts with the first program month and $5.90 is charged on January 1, 2027." : "One free first month per household. If this email, mailing address or card already had a free month, your membership starts today and $5.90 is charged now." : null;
   const site = returnBase(deps, req);
   const session = await deps.stripe.request("POST", "/v1/checkout/sessions", {
     mode: "subscription",
@@ -351,6 +586,7 @@ async function checkout(deps, req, body) {
     allow_promotion_codes: true,
     expires_at: expiresAt,
     metadata: meta,
+    ...disclosure ? { custom_text: { submit: { message: disclosure } } } : {},
     // A trial: the card is saved now and nothing is charged until trial_end (cancelled if no card made it through).
     ...trialEnd ? { payment_method_collection: "always" } : {},
     subscription_data: {
@@ -400,6 +636,21 @@ async function portal(deps, req) {
     ...state.settings.portal_configuration_id ? { configuration: state.settings.portal_configuration_id } : {}
   });
   return { url: session.url };
+}
+async function kitSubmitted(deps, req) {
+  const user = await signedIn(deps, req);
+  const kit = await deps.db.rpc(
+    "club_kit_submitted",
+    { p_user: user.id }
+  );
+  if (!kit) return { notified: false };
+  const outcome = await sendClubEmail(deps, `kit_submitted:${kit.order_id}`, "kit_submitted", null, deps.env.supportInbox, {
+    familyName: kit.family_name,
+    memberEmail: kit.email,
+    monthLabel: kit.first_month ? monthLabel(kit.first_month) : void 0,
+    shipBy: kit.ship_by ? longDate(`${kit.ship_by}T12:00:00Z`) : null
+  });
+  return { notified: outcome === "sent" || outcome === "duplicate" };
 }
 async function syncEmail(deps, req) {
   const user = await signedIn(deps, req);
