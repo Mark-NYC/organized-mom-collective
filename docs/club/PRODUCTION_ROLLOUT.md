@@ -134,6 +134,15 @@ What members see change (44 lines, `git diff 163fb24 HEAD -- supabase/dashboard/
 Rollback: paste the bundles from commit `163fb24` (what's deployed today: `git show 163fb24:supabase/dashboard/club-admin.ts`,
 same for `club-webhook.ts`).
 
+**Stage 4 result (Oct 31 2026): deployed and healthy.** Pre-checks: both migrations recorded and their functions
+installed; `supabase/dashboard/club-admin.ts` and `club-webhook.ts` identical to `main` and regenerated from source
+with no change; `npm run test:club` 34/34. Deployed `club-admin` v9 → **v10** and `club-webhook` v7 → **v8**, both Verify
+JWT off (`club-billing` v8 untouched). Safe probes, same as the pre-deploy baseline: webhook 405 on GET, 400
+`invalid_signature` on unsigned, forged and stale signatures (nothing recorded); admin 401 without or with a bad
+token, 405 on GET, CORS 204 for the site and 403 for other origins. No writes: Stripe events, email log, orders,
+subscriptions, saved plans, entitlements and admin audit log unchanged; checkout still `test`. Rollback: the v9/v7
+bundles are commit `163fb24`'s.
+
 ## Stage 5: production member-experience test (Stripe test mode)
 
 A fresh test email (a real inbox you can read; never a customer's). Stripe test card `4242 4242 4242 4242`, any future
