@@ -7,7 +7,9 @@ if (!input || !output) { console.error('Usage: node scripts/generate-inspiration
 const m=JSON.parse(readFileSync(resolve(input),'utf8'));
 const fields=['Title','Media URL','Pinterest board','Thumbnail','Description','Link','Publish date','Keywords'];
 const q=v=>{ const s=String(v??''); return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
-const ids=new Set(), images=new Set();
+const ids=new Set(), images=new Set(), destinations=new Map();
+// Workaround verified in OMC native uploads on 2026-10-31: only one pin per destination per CSV.
+const normalizeDestination = value => { const u = new URL(value); u.hostname = u.hostname.toLowerCase(); if (u.pathname !== '/') u.pathname = u.pathname.replace(/\/+$/, ''); u.hash = ''; return u.href; };
 const list=m.pins.map((p,i)=>{
   if(!p.id||ids.has(p.id))throw Error('Missing/duplicate pin ID at row '+(i+1));
   ids.add(p.id);
@@ -17,6 +19,9 @@ const list=m.pins.map((p,i)=>{
   if (!/^https:\/\//.test(media)||!/\.(jpe?g|png|webp)$/i.test(new URL(media).pathname)) throw Error('Invalid media URL: '+media);
   const link=p.link;
   if(!/^https:\/\//.test(link))throw Error('Invalid link at row '+(i+1));
+  const normalizedLink = normalizeDestination(link);
+  if(destinations.has(normalizedLink)) throw Error('Duplicate Pin link at rows '+destinations.get(normalizedLink)+' and '+(i+1)+': '+link+'. Put these pins in separate CSV uploads; do not drop rows or change destinations.');
+  destinations.set(normalizedLink,i+1);
   if(!p.title||p.title.length>100||!p.board||!p.description||p.description.length>500)throw Error('Invalid title/board/description at row '+(i+1));
   return [p.title,media,p.board,'',p.description,link,p.publish_date||'',p.keywords||''];
 });
