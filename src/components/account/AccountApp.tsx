@@ -107,7 +107,7 @@ function SignIn({ onSignedIn }: { onSignedIn: (s: AccountSession) => void }) {
   return (
     <div className="py-6">
       <h1 className="page-title">Your Account</h1>
-      <p className="lede mt-4">Keep your charts, plans and lists on every device, and find everything you’ve bought in one place. No password: we email you a 6-digit code.</p>
+      <p className="lede mt-4">Save your charts, plans, and lists so you can access them anytime, on any device. We'll email you a 6-digit code to securely save your designs.</p>
 
       {step === 'email' ? (
         <form onSubmit={send} className="mt-8 max-w-md" noValidate>
@@ -129,7 +129,7 @@ function SignIn({ onSignedIn }: { onSignedIn: (s: AccountSession) => void }) {
             <span>Also send me occasional ideas and offers from Organized Mom Collective. Unsubscribe anytime.</span>
           </label>
           <button type="submit" disabled={busy} className="btn-primary mt-6 w-full sm:w-auto">
-            {busy ? 'Sending…' : 'Email me a code'}
+            {busy ? 'Sending…' : 'Save my designs'}
           </button>
           <p className="mt-4 text-[0.88rem] leading-relaxed text-soft">
             Signing in only lets us save your things and show your orders. We never sell your email.
