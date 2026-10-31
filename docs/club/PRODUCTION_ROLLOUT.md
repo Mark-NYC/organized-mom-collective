@@ -99,6 +99,16 @@ and `supabase/rollout/rollback.sql` undoes the schema, so the dump is the safety
 it restores production's exact definitions of Oct 30 (rehearsed). It refuses and changes nothing if members have
 saved profile answers or a `kit_reminder` email is logged; then decide from the backup.
 
+**Stage 3 result (Oct 31 2026): both migrations installed and verified.** `20261108000000_club_welcome_kit` ran through
+the Supabase connector after its call had timed out (every object in one transaction, matching the expected
+fingerprint); `20261109000000_club_family_profile` ran in the SQL Editor. Verified read-only: all 26 objects of both
+migrations identical to a production replay's (functions, view, tables, columns, constraints, RLS policies,
+permissions); all 11 `verify.sql` checks; households, family members, orders, entitlements, saved plans,
+subscriptions, invoices, addresses, kits, settings and email log identical to the pre-migration snapshot (accounts:
+identical except one sign-in session refresh). Members can read their own profile only; `anon` is refused; internal
+helpers are refused. Migration history doesn't list either yet: `supabase/rollout/reconcile-history.sql` records both
+(owner's go-ahead; tested: records each once, refuses if an object is missing).
+
 ## Stage 4: deploy the Edge Functions (approval required)
 
 Deploy `club-admin` and `club-webhook` only (`club-billing` is already current). Source: the committed one-file builds
