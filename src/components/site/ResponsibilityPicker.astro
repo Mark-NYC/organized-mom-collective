@@ -9,15 +9,17 @@
  * Slots: `target` (beside the heading, e.g. the chore chart's "Add to" select), default (a note under the tiles).
  */
 import { responsibilities, responsibilityCategories, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
+import { choreLineIcon } from '../../data/chore-line-icons';
 
 interface Props {
   heading?: string;
   hint: string;
+  monochrome?: boolean;
 }
-const { heading = 'Pick illustrated steps', hint } = Astro.props;
+const { heading = 'Pick illustrated steps', hint, monochrome = false } = Astro.props;
 ---
 
-<section class="rp" data-rp aria-label={heading}>
+<section class:list={['rp', monochrome && 'rp-monochrome']} data-rp aria-label={heading}>
   <div class="rp-head">
     <div>
       <h2 class="rp-title">{heading}</h2>
@@ -39,7 +41,7 @@ const { heading = 'Pick illustrated steps', hint } = Astro.props;
   <ul class="rp-list">
     {
       responsibilities.map((r) => {
-        const src = responsibilityImage(r, 128);
+        const src = monochrome ? choreLineIcon(r.id) : responsibilityImage(r, 128);
         return (
           <li data-rp-cat={r.category} data-rp-routines={r.routines.join(' ')} data-rp-min={r.minAge}>
             <button type="button" class:list={['rp-tile', !src && 'rp-tile-text']} data-rp-pick={r.id} style={{ '--rp-cat': responsibilityColor(r) }}>
@@ -83,6 +85,8 @@ const { heading = 'Pick illustrated steps', hint } = Astro.props;
   .rp-filter:focus-visible, .rp-tile:focus-visible { outline: 2px solid var(--color-warm-ink); outline-offset: 3px; }
   .rp-art { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: color-mix(in srgb, var(--rp-cat) 55%, #fff); }
   .rp-art img { width: 56px; height: 56px; }
+  .rp-monochrome .rp-art { background: transparent; border-radius: 0; }
+  .rp-monochrome .rp-art img { object-fit: contain; }
   /* Jobs whose illustration isn't in yet: title only, category color along the top. */
   .rp-tile-text { justify-content: center; border-top: 4px solid var(--rp-cat); }
   .rp-name { font-size: 0.8rem; line-height: 1.25; text-align: center; }
