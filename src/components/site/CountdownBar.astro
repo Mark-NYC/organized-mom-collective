@@ -1,5 +1,5 @@
 ---
-import { clubPrintMessages } from '../../lib/club-print-deadline';
+import { clubPrintMessages, clubPrintMobileMessages } from '../../lib/club-print-deadline';
 import { clubEnabled } from '../../data/club/config';
 import { clubCheckoutEnabled } from '../../lib/club/membership';
 // Your First Month FREE shows only where enrollment is open (as on /club).
@@ -7,17 +7,24 @@ const offer = clubEnabled() && clubCheckoutEnabled();
 const onClub = Astro.url.pathname.replace(/\/$/, '') === '/club';
 const href = onClub ? '#offer' : '/club';
 const messages = clubPrintMessages(new Date(), offer);
+const mobileMessages = clubPrintMobileMessages(new Date(), offer);
 ---
 <div class="club-announcement" data-club-announcement data-offer={offer ? '1' : undefined}>
- <a href={href} data-cta="club-deadline-bar"><span data-club-announcement-text>{messages[0]}</span></a>
+ <a href={href} data-cta="club-deadline-bar"><span class="club-announcement-desktop" data-club-announcement-text>{messages[0]}</span><span class="club-announcement-mobile" data-club-announcement-mobile-text>{mobileMessages[0]}</span></a>
 </div>
 <script>
- import { clubPrintMessages } from '../../lib/club-print-deadline';
+ import { clubPrintMessages, clubPrintMobileMessages } from '../../lib/club-print-deadline';
  document.querySelectorAll<HTMLElement>('[data-club-announcement]').forEach(bar => {
   const label = bar.querySelector<HTMLElement>('[data-club-announcement-text]')!;
+  const mobileLabel = bar.querySelector<HTMLElement>('[data-club-announcement-mobile-text]')!;
   let index = 0, hovering = false, focused = false;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const render = () => { label.textContent = clubPrintMessages(new Date(), bar.dataset.offer === '1')[index]; };
+  const render = () => {
+   const now = new Date();
+   const offer = bar.dataset.offer === '1';
+   label.textContent = clubPrintMessages(now, offer)[index];
+   mobileLabel.textContent = clubPrintMobileMessages(now, offer)[index];
+  };
   render();
   bar.addEventListener('mouseenter', () => { hovering = true; });
   bar.addEventListener('mouseleave', () => { hovering = false; });
@@ -37,5 +44,6 @@ const messages = clubPrintMessages(new Date(), offer);
 .club-announcement a { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 12px; text-align: center; font-size: .76rem; font-weight: 600; line-height: 1.5; letter-spacing: .02em; color: inherit; text-decoration: none; }
 .club-announcement a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .club-announcement :focus-visible { outline: 2px solid #545454; outline-offset: -3px; }
-@media(max-width:600px) { .club-announcement { padding: 0 6px; } .club-announcement a { font-size: .66rem; padding-inline: 4px; } }
+.club-announcement-mobile { display: none; }
+@media(max-width:600px) { .club-announcement-desktop { display: none; } .club-announcement-mobile { display: inline; } .club-announcement { padding: 0 6px; } .club-announcement a { font-size: .66rem; padding-inline: 4px; } }
 </style>
