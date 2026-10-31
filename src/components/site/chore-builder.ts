@@ -28,7 +28,7 @@ export function initChoreBuilder(host: HTMLElement) {
     const input=document.createElement('input');input.value=job.title;input.maxLength=65;input.setAttribute('aria-label','Chore name');
     input.addEventListener('change',()=>{job.title=input.value.trim();save();render()});
     left.append(input);
-    const remove=node('button','cb-remove');remove.textContent='×';remove.type='button';remove.title='Remove chore';remove.addEventListener('click',()=>{state.jobs=state.jobs.filter(j=>j.id!==job.id);save();render()});left.append(remove);
+    const remove=document.createElement('button');remove.className='cb-remove';remove.textContent='×';remove.type='button';remove.title='Remove chore';remove.addEventListener('click',()=>{state.jobs=state.jobs.filter(j=>j.id!==job.id);save();render()});left.append(remove);
     row.append(left);
     if(job.frequency==='daily')for(let i=0;i<7;i++){const check=node('span','cb-day-check');row.append(check);}
     else {const select=document.createElement('select');select.setAttribute('aria-label','Optional weekly day');
@@ -51,7 +51,7 @@ export function initChoreBuilder(host: HTMLElement) {
     if(!age.value){age.focus();return;}
     const ageValue=Number(age.value);
     const areas=Array.from(host.querySelectorAll<HTMLInputElement>('[data-cb-area]:checked')).map(x=>x.value as ChoreArea);
-    if(!areas.length){status.textContent='Choose at least one area';host.querySelector<HTMLInputElement>('[data-cb-area]')?.focus();return;}
+    if(!areas.length){alert('Choose at least one household area.');host.querySelector<HTMLInputElement>('[data-cb-area]')?.focus();return;}
     const experienced=host.querySelector<HTMLInputElement>('input[name="cb-level"]:checked')?.value==='experienced';
     const suggested=recommendedChores(ageValue,experienced,areas);
     state={name:name.value.trim(),age:ageValue,experienced,areas,jobs:[...suggested.daily,...suggested.weekly].map(c=>({id:c.id,title:c.label,frequency:c.frequency,day:'Any day'}))};
