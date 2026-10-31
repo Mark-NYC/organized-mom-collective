@@ -12,7 +12,8 @@ import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
 import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, clearFields, downloadPng } from '../../lib/printable';
 import { adultOneJob, choreSets, ageGroupFor, oneJobs, type AgeGroup, type ChoreSet } from '../../data/chore-chart';
-import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
+import { matchResponsibility, responsibilityById } from '../../data/responsibilities';
+import { choreLineIcon } from '../../data/chore-line-icons';
 import type { ToolHandoff } from '../../lib/tool-handoff';
 import { hasSaved, orderPickerForAge } from './tool-handoff-ui';
 
@@ -48,11 +49,11 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
   function renderIcons() {
     iconImgs.forEach((img, i) => {
       const r = responsibilityById(iconFields[i].value);
-      const src = r ? responsibilityImage(r, 256) : null;
+      const src = r ? choreLineIcon(r.id) : null;
       img.hidden = !src;
       if (r && src) {
         if (img.getAttribute('src') !== src) img.src = src;
-        img.style.setProperty('--cc-cat', responsibilityColor(r));
+
       } else img.removeAttribute('src');
     });
   }
