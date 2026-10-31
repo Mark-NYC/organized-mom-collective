@@ -32,21 +32,37 @@ export function nextProgramPrintDeadline(now = new Date()) {
  const next = nextClubPrintDeadline(now);
  return next < FIRST_PRINT_RUN_DEADLINE ? FIRST_PRINT_RUN_DEADLINE : next;
 }
-/** The month a deadline prints: the one after the month its second Sunday falls in. */
+/** The cutoff month's following month is the resource delivered. */
 function printMonth(lastDay: Date) {
  const { year, month } = localDate(lastDay);
- return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'long' }).format(new Date(Date.UTC(year, month + 1, 15)));
+ return new Date(Date.UTC(year, month + 1, 15)).getUTCMonth();
 }
-/** Each deadline closes the list for the month after it ("January print deadline: Dec 13"). offer: enrollment is open. */
+const MONTHLY_OFFERS = [
+ 'Help your kids build better morning and bedtime habits. Get January’s Habit Cards',
+ 'Make more room for family connection. Get February’s Connection Cards',
+ 'Get the whole family helping with spring cleaning. Get March’s Chore Chart',
+ 'Make dinner a team effort. Get April’s Dinner Team Kit',
+ 'Give your family a simple summer rhythm. Get May’s Summer Day Planner',
+ 'Help your kids make their own snacks. Get June’s Snack Station Kit',
+ 'Give bored kids ideas they can use on their own. Get July’s Activity Kit',
+ 'Make back-to-school mornings easier. Get August’s School Routine Kit',
+ 'Put the whole family on the same page. Get September’s Weekly Plan',
+ 'Make Sundays easier with a shared family reset. Get October’s Sunday Reset',
+ 'Share responsibility at home. Get November’s Family Ownership Kit',
+ 'Help your kids bless someone else. Get December’s Giving Cards',
+] as const;
+
+/** Benefit-led monthly message; transitions automatically after the second-Sunday cutoff in New York. */
 export function clubPrintMessages(now = new Date(), offer = false) {
  const end = nextProgramPrintDeadline(now);
  const lastDay = new Date(end.getTime() - 1);
- const date = new Intl.DateTimeFormat('en-US', { timeZone: CLUB_TIME_ZONE, month: 'short', day: 'numeric' }).format(lastDay);
- const minutes = Math.max(1, Math.ceil((end.getTime() - now.getTime()) / 60000));
- const days = Math.floor(minutes / 1440), hours = Math.floor(minutes % 1440 / 60);
- const remaining = days ? `${days}d ${hours}h left` : hours ? `${hours}h ${minutes % 60}m left` : `${minutes}m left`;
+ const deadlineDate = new Intl.DateTimeFormat('en-US', { timeZone: CLUB_TIME_ZONE, month: 'short', day: 'numeric' }).format(lastDay);
+ const monthIndex = printMonth(lastDay);
+ const message = MONTHLY_OFFERS[monthIndex];
+ const remainingDays = (end.getTime() - now.getTime()) / 86400000;
+ const deadline = remainingDays <= 3 ? 'Order by Sunday' : `Order by ${deadlineDate}`;
  return [
-  `${printMonth(lastDay)} print deadline: ${date} · ${remaining} · Closes 11:59 p.m. ET →`,
+  `${message}. ${deadline} →`,
   offer ? 'Your First Month FREE · Then $5.90/month · Explore the Club →' : 'Personalized printed tools, mailed monthly · $5.90/month · Explore the Club →',
  ];
 }
