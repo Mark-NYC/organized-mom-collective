@@ -21,8 +21,11 @@ export function choreLineIconForText(text: string): string | null {
   const value = text.toLowerCase();
   const matches: Array<[RegExp, string]> = [
     [/toy|playroom/, 'toys-away'],
+    [/wash car/, 'car'],
+    [/room organized|room tidy|living space tidy|organize a space|household tasks|task for the family/, 'basket'],
+    [/school\/work responsibilities|work responsibilities/, 'calendar'],
     [/bed|sheet|linen/, 'made-bed'],
-    [/tooth|hygiene/, 'toothbrush'],
+    [/tooth|brush teeth|hygiene/, 'toothbrush'],
     [/backpack|school material|school supplies|school clothes/, 'backpack'],
     [/clothes|dressed|closet/, 'folded-clothes'],
     [/laundry|hamper/, 'laundry-basket-with-clothes'],
@@ -31,10 +34,10 @@ export function choreLineIconForText(text: string): string | null {
     [/vacuum|floor|mop/, 'vacuum-cleaner'],
     [/dust|wipe|sink|bathroom|clean/, 'spray-bottle-cloth'],
     [/meal|dinner|cook|grocer|snack/, 'cooking-pot'],
-    [/books|homework|study/, 'book'],
+    [/books|homework|study|schoolwork/, 'book'],
     [/plant|outdoor/, 'tree'],
     [/pet/, 'basket'],
-    [/schedule|plan|tomorrow|week/, 'calendar'],
+    [/schedule|plan|tomorrow|week|coordinate/, 'calendar'],
     [/morning|personal care/, 'morning-start'],
   ];
   for (const [test, name] of matches) {
