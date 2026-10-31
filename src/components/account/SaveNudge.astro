@@ -49,6 +49,35 @@ import { routes } from '../../routes';
     const go = root.querySelector<HTMLAnchorElement>('[data-nudge-go]')!;
     const next = safeNext(location.pathname);
     go.href = next ? `${accountPath}?next=${encodeURIComponent(next)}` : accountPath;
+    // Carry only a temporary picture of the printable into sign-in, never its editable data.
+    // The account sync continues to handle the real saved design.
+    go.addEventListener('click', async (event) => {
+      if (!next || go.textContent === 'Show it') return;
+      const selectors: Record<string, string> = {
+        '/chore-chart/': '#chore-chart',
+        '/planner/': '#planner',
+        '/meal-planner/': '#meal-planner',
+        '/lunch-and-snack-station/': '[data-lp-sheet="0"]',
+      };
+      const path = next.endsWith('/') ? next : next + '/';
+      const target = document.querySelector<HTMLElement>(selectors[path] ?? '');
+      if (!target) return;
+      event.preventDefault();
+      try {
+        const { toJpeg } = await import('html-to-image');
+        const data = await toJpeg(target, {
+          quality: 0.72,
+          pixelRatio: Math.min(1, 850 / Math.max(target.scrollWidth, 1)),
+          cacheBust: false,
+          backgroundColor: '#FBF7F1',
+        });
+        sessionStorage.setItem('omc:account:design-preview', JSON.stringify({ path: next, data }));
+      } catch {
+        // A failed preview must never block sign-in.
+        sessionStorage.removeItem('omc:account:design-preview');
+      }
+      location.assign(go.href);
+    });
     root.querySelector('[data-nudge-close]')!.addEventListener('click', () => {
       root.hidden = true;
       if (!loadSession()) dismissNudge();
