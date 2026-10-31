@@ -81,3 +81,9 @@ Use actual Pinterest and web analytics when available: new pins by lane (rolling
 - "Give me the 49 Gemini prompts for the next gallery" → the complete 49-image production specification; no generic suggestions.
 - "The images are uploaded; make the CSV" → verify actual files, site image URLs, board, link anchors, metadata and scheduling; write an import-ready CSV only if requirements are met.
 - "What should we make next month?" → rolling seasonal campaigns, article gaps, galleries, Club product creatives, and realistic capacity.
+
+## CSV creation and reconciliation rule (mandatory, 2026-10-31)
+
+When the owner says "make the CSV," verify image filenames/URLs, boards, links and the requested publication schedule, then group pins into **separate import CSVs with only one occurrence of each normalized destination `Link` per file**. Multiple pins may target the same landing page, but must be placed in different uploads. Preserve *all* rows and their exact planned dates; never omit a pin to get a valid CSV. Validate distinct media URLs and pin IDs too. Flag any file needing a separate import. This is the tested OMC workaround for Pinterest `Duplicate Pin link` errors (three rejected rows from an eight-pin CSV subsequently uploaded successfully in a separate CSV on Oct 31, 2026), not a universal Pinterest guarantee.
+
+Track `prepared` / `submitted` / `confirmed` / `rejected` / `published` per permanent pin ID, batch and CSV filename. Importing a CSV does **not** prove every row was scheduled. Reconcile against Pinterest processing emails and the visible queue. Produce a recovery CSV only for pins confirmed rejected/missing, after checking for existing scheduled pins. Do not modify the real destination URLs or falsely claim that the import succeeded.
