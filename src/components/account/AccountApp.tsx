@@ -55,6 +55,18 @@ export default function AccountApp() {
 // ------------------------------------------------------------------ sign in
 
 function SignIn({ onSignedIn }: { onSignedIn: (s: AccountSession) => void }) {
+  const [designPreview] = useState<string | null>(() => {
+    try {
+      const stored = sessionStorage.getItem('omc:account:design-preview');
+      sessionStorage.removeItem('omc:account:design-preview');
+      if (!stored) return null;
+      const { path, data } = JSON.parse(stored) as { path?: string; data?: string };
+      const next = safeNext(new URLSearchParams(location.search).get('next'));
+      return next && path === next && data?.startsWith('data:image/jpeg;base64,') ? data : null;
+    } catch {
+      return null;
+    }
+  });
   const [email, setEmail] = useState('');
   const [marketing, setMarketingChoice] = useState(false);
   const [code, setCode] = useState('');
@@ -106,7 +118,13 @@ function SignIn({ onSignedIn }: { onSignedIn: (s: AccountSession) => void }) {
 
   return (
     <div className="py-6">
-      <h1 className="page-title">Your Account</h1>
+      {designPreview ? (
+        <div className="max-w-md" aria-label="Preview of your design">
+          <img src={designPreview} alt="The design you just created" className="block w-full border border-rule object-contain" />
+        </div>
+      ) : (
+        <h1 className="page-title">Your Account</h1>
+      )}
       <p className="lede mt-4">Save your charts, plans, and lists so you can access them anytime, on any device. We'll email you a 6-digit code to securely save your designs.</p>
 
       {step === 'email' ? (
