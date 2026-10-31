@@ -25,7 +25,7 @@ export function initChoreBuilder(host: HTMLElement) {
     const row=node('div',job.frequency==='daily'?'cb-daily-row':'cb-weekly-row');
     const left=node('div','cb-job');
     const src=choreLineIconForText(job.title);
-    if(src){const img=document.createElement('img');img.src=src;img.alt='';left.append(img);}
+    if(src){const tile=node('span','cb-icon-tile');tile.dataset.tone=job.frequency==='daily'?'leaf':'frost';const img=document.createElement('img');img.src=src;img.alt='';tile.append(img);left.append(tile);}
     const input=document.createElement('input');input.value=job.title;input.maxLength=65;input.setAttribute('aria-label','Chore name');
     input.addEventListener('change',()=>{job.title=input.value.trim();save();render()});
     left.append(input);
