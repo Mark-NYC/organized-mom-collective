@@ -1,5 +1,15 @@
 # Pinterest strategy
 
+## Recurring educational graphic experiments (owner decision 2026-10-31)
+
+Process graphics, charts, and infographics are a **regular required format test**, not an occasional special project. Keep them within the existing editorial value-card and search lanes, not a fifth lane.
+
+- Initial hypothesis: at least 15 of every rolling 100 new creatives should be genuinely educational graphics, drawn primarily from the 30 editorial slots. On normal ten-pin production days consider 2–3 distinct educational visual treatments; gallery sprints and existing queue balance can override the daily number. Do not force weak creatives to hit a quota.
+- Rotate these formats: numbered processes, comparison charts, decision trees, checklists, timelines, age/job reference matrices, and illustrated mini-guides. Every pin should contain a complete, specific, useful takeaway backed by its linked page. No invented figures, steps, product screenshots, or fictional tools.
+- Prompts must specify Georgia headlines, Montserrat body, the full approved hex palette, 1000×1500 portrait, mobile legibility, and ORGANIZED MOM COLLECTIVE or the website at bottom. Make visual structures genuinely different, not mere recolors.
+- Track for each pin: creative format, visual hook, topic, destination, campaign/batch, publication date/cohort, and the test hypothesis. Distinguish these subformats from the four strategic content lanes.
+- Every 30 days assess age-matched saves/impression, outbound clicks/CTR, and attributable onsite conversion where tracking exists. Compare cohorts again after 60 and 90 days. Seek repeatable winners across multiple posts, not one outlier. Gradually increase successful formats while maintaining some exploration.
+
 **Morning production command:** When the user asks "What 10 pins do we need to make today?", follow [PINTEREST_DAILY_PRODUCTION_DESK.md](PINTEREST_DAILY_PRODUCTION_DESK.md) to select work across existing campaigns, seasonal guides, Club product pins, and periodic 39+10 lifestyle gallery sprints. Return complete standalone Gemini prompts with exact brand hex codes and Georgia/Montserrat. The existing three strategic concepts and six-variation contract still govern article-based campaigns; they are not a daily content mix.
 
 **Two separate lanes:** The three-concept/six-variation approach below governs the original utility/routine article and 500-pin campaign. Editorial image-first inspiration galleries use [IMAGE_FIRST_PINTEREST_WORKFLOW.md](IMAGE_FIRST_PINTEREST_WORKFLOW.md), their own OMC-V IDs, a 15-photo/15-Pin batch, and a separate official-format bulk-import CSV. Do not add these to the 500-pin plan or invent progress.
