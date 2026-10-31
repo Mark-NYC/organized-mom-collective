@@ -1,5 +1,7 @@
 # OMC 500-pin master tracker
 
+**Morning production:** [PINTEREST_DAILY_PRODUCTION_DESK.md](../PINTEREST_DAILY_PRODUCTION_DESK.md) defines the cross-lane daily selection, 30/30/25/15 rolling new-creative hypothesis and intermittent 39+10 long-gallery sprints. This 500-row CSV remains an immutable historical campaign inventory, not the complete combined daily production queue. Do not rewrite permanent IDs or original schedule to satisfy the new rolling mix; reconcile all new pin batches and separate gallery OMC-V records.
+
 **Source of truth:** [OMC_500_Pin_Content_Calendar.csv](OMC_500_Pin_Content_Calendar.csv). This is the original owner-approved planning spreadsheet recovered from the October 17, 2026 file. Do not regenerate it or reorder IDs when tracking production.
 
 ## Scope and important limitations
