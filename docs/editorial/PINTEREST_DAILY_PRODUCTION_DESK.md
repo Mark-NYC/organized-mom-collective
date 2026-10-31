@@ -10,6 +10,16 @@
 - Keep the separate **6/3/1 research mix** (six observed search patterns, three audience-specific situations, one creative experiment) as a *different classification*. Research evidence is not implied by a keyword label.
 - Preserve approved creatives, permanent 500-pin IDs, OMC-V inspiration IDs, historical proposed schedules, and existing bulk CSVs. No silent replacement, renumbering, double-counting, or claims of Pinterest publication without account evidence.
 
+## Recurring educational graphic experiments (owner decision 2026-10-31)
+
+Process graphics, charts, and infographics are a **regular required format test**, not an occasional special project. Keep them within the existing editorial value-card and search lanes, not a fifth lane.
+
+- Initial hypothesis: at least 15 of every rolling 100 new creatives should be genuinely educational graphics, drawn primarily from the 30 editorial slots. On normal ten-pin production days consider 2–3 distinct educational visual treatments; gallery sprints and existing queue balance can override the daily number. Do not force weak creatives to hit a quota.
+- Rotate these formats: numbered processes, comparison charts, decision trees, checklists, timelines, age/job reference matrices, and illustrated mini-guides. Every pin should contain a complete, specific, useful takeaway backed by its linked page. No invented figures, steps, product screenshots, or fictional tools.
+- Prompts must specify Georgia headlines, Montserrat body, the full approved hex palette, 1000×1500 portrait, mobile legibility, and ORGANIZED MOM COLLECTIVE or the website at bottom. Make visual structures genuinely different, not mere recolors.
+- Track for each pin: creative format, visual hook, topic, destination, campaign/batch, publication date/cohort, and the test hypothesis. Distinguish these subformats from the four strategic content lanes.
+- Every 30 days assess age-matched saves/impression, outbound clicks/CTR, and attributable onsite conversion where tracking exists. Compare cohorts again after 60 and 90 days. Seek repeatable winners across multiple posts, not one outlier. Gradually increase successful formats while maintaining some exploration.
+
 ## Morning decision order
 
 1. **Inventory first**: read this file, SEASONAL_ACQUISITION_PLAN.md, PINTEREST_STRATEGY.md, PINTEREST_RESEARCH_LOOP.md, IMAGE_FIRST_PINTEREST_WORKFLOW.md, PINTEREST_CREATIVE_DIRECTION.md, PINTEREST_BOARDS.md, MASTER_TRACKER_README.md and current CSVs, reconciliation, generated asset folders, approved batches, and current live site pages. Determine which pins are already created, scheduled, published, held, or merely proposed. If Pinterest account status is inaccessible, state that and do not guess.
