@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Convert chore JPGs to transparent WebP, removing only edge-connected white."""
+"""Convert chore JPGs to transparent WebP, removing only edge-connected white.
+
+Only pixels connected to the outer canvas are cleared; enclosed white remains.
+"""
 from collections import deque
 from pathlib import Path
 from PIL import Image
