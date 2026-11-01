@@ -85,6 +85,11 @@ export function initChoreBuilder(host: HTMLElement) {
   const filter=$<HTMLSelectElement>('[data-cb-filter]');
   const search=$<HTMLInputElement>('[data-cb-search]');
   function filterChoices(){const term=search.value.trim().toLowerCase();host.querySelectorAll<HTMLButtonElement>('[data-cb-choice]').forEach(b=>{b.hidden=b.dataset.frequency!==frequency.value||!!filter.value&&b.dataset.area!==filter.value||Number(b.dataset.age)>state.age||!!term&&!b.textContent?.toLowerCase().includes(term);})}
+  host.querySelectorAll<HTMLButtonElement>('[data-cb-frequency-tab]').forEach(button=>button.addEventListener('click',()=>{
+    frequency.value=button.dataset.cbFrequencyTab||'daily';
+    host.querySelectorAll<HTMLButtonElement>('[data-cb-frequency-tab]').forEach(tab=>tab.setAttribute('aria-pressed',String(tab===button)));
+    filterChoices();
+  }));
   frequency.addEventListener('change',filterChoices);filter.addEventListener('change',filterChoices);search.addEventListener('input',filterChoices);
   function addJob(title:string,freq:Frequency,id?:string){if(!title.trim())return;const count=state.jobs.filter(j=>j.frequency===freq).length;if(count>=4){status.textContent='Four '+freq+' jobs is the limit. Remove one first.';return;}
     state.jobs.push({id:(id||'custom')+'-'+Date.now(),title:title.trim(),frequency:freq,day:'Any day'});save();render();picker.hidden=true;
