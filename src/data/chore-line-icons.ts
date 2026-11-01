@@ -52,7 +52,7 @@ export function choreLineIconForText(text: string): string | null {
     [/meal|dinner|cook|grocer|snack/, 'cooking-pot'],
     [/books|homework|study|schoolwork/, 'book'],
     [/plant|outdoor/, 'tree'],
-    [/pet/, 'basket'],
+    [/pet|feed.*animal|animal.*care/, 'feed-pets'],
     [/schedule|plan|tomorrow|week|coordinate/, 'calendar'],
     [/morning|personal care/, 'morning-start'],
   ];
