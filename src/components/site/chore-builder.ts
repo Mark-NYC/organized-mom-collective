@@ -32,9 +32,16 @@ export function initChoreBuilder(host: HTMLElement) {
     const remove=document.createElement('button');remove.className='cb-remove';remove.textContent='×';remove.type='button';remove.title='Remove chore';remove.addEventListener('click',()=>{state.jobs=state.jobs.filter(j=>j.id!==job.id);save();render()});left.append(remove);
     row.append(left);
     if(job.frequency==='daily')for(let i=0;i<7;i++){const check=node('span','cb-day-check');row.append(check);}
-    else {const select=document.createElement('select');select.setAttribute('aria-label','Optional weekly day');
+    else {
+      const dayWrap=node('span','cb-weekday-wrap');
+      const select=document.createElement('select');select.setAttribute('aria-label','Optional weekly day');
       for(const day of dayNames){const opt=document.createElement('option');opt.value=day;opt.textContent=day;select.append(opt);}
-      select.value=job.day||'Any day';select.addEventListener('change',()=>{job.day=select.value;save()});row.append(select);
+      select.value=job.day||'Any day';
+      const printDay=node('span','cb-weekday-print');
+      const updateDay=()=>{printDay.textContent=select.value==='Any day'?'':select.value;};
+      updateDay();
+      select.addEventListener('change',()=>{job.day=select.value;updateDay();save()});
+      dayWrap.append(select,printDay);row.append(dayWrap);
       row.append(node('span','cb-day-check'));
     }
     return row;
