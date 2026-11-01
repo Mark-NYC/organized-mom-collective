@@ -46,7 +46,7 @@ for name in NAMES:
 
 # For these two illustrations, white inside the outlines must be transparent too.
 # Process the original jpg, preserving the exact drawing (no regeneration).
-for name in ("clothes-in-hamper", "tidy-living-room"):
+for name in ("clothes-in-hamper", "tidy-living-room", "sort-laundry"):
     original = np.asarray(Image.open(ROOT / (name + ".jpg")).convert("RGB"), dtype=np.float32)
     # Turn white/near-white pixels into alpha, including enclosed regions.
     # Keep dark ink fully opaque and fade antialiased light edges smoothly.
