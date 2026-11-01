@@ -43,3 +43,17 @@ for name in NAMES:
     target = ROOT / (name + ".webp")
     out.save(target, "WEBP", lossless=True, method=6)
     print(f"{source} -> {target}: {np.count_nonzero(exterior)} transparent pixels")
+
+# For these two illustrations, white inside the outlines must be transparent too.
+# Process the original jpg, preserving the exact drawing (no regeneration).
+for name in ("clothes-in-hamper", "tidy-living-room"):
+    original = np.asarray(Image.open(ROOT / (name + ".jpg")).convert("RGB"), dtype=np.float32)
+    # Turn white/near-white pixels into alpha, including enclosed regions.
+    # Keep dark ink fully opaque and fade antialiased light edges smoothly.
+    luminance = original.min(axis=2)
+    opacity = np.clip((235.0 - luminance) / 95.0, 0, 1)
+    neutral_ink = np.minimum(original, 140).astype(np.uint8)
+    rgba = np.dstack((neutral_ink, np.rint(opacity * 255).astype(np.uint8)))
+    target = ROOT / (name + ".webp")
+    Image.fromarray(rgba, "RGBA").save(target, "WEBP", lossless=True, method=6)
+    print(f"{target}: cleared all white, including enclosed regions")
