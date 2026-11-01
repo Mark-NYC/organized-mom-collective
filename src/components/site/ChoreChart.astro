@@ -19,9 +19,8 @@ const { storageKey, handoff = false } = Astro.props;
     <div class="cb-toolbar"><div><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2>Ready for your fridge.</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div><fieldset class="cb-style-switch" aria-label="Chart color style"><legend>Chart style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset><div class="cb-buttons"><button type="button" data-cb-back>Change setup</button><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download my chart</button></div></div>
     <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><label>Frequency<select data-cb-frequency><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
     <div class="cb-sheet" data-cb-sheet>
-      <header class="cb-sheet-head"><span>ORGANIZED MOM COLLECTIVE</span><p class="cb-sheet-name" data-cb-sheet-name>My</p><h2>Chore Chart</h2><p>My jobs. Start to finish.</p></header>
-      <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs</h3><p>One check when the job is finished.</p><div data-cb-weekly></div></section></div>
-      <footer class="cb-sheet-footer">Every job helps our family.</footer>
+      <header class="cb-sheet-head"><span>ORGANIZED MOM COLLECTIVE</span><h2 class="cb-sheet-title"><span data-cb-sheet-name>My</span> Chore Chart</h2><p class="cb-sheet-subtitle">My jobs. Start to finish.</p></header>
+      <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs</h3><div data-cb-weekly></div></section></div>
     </div>
     <p class="cb-print-note">The chart automatically leaves out unused rows. Your changes save on this device.</p>
     {toolEmailGateEnabled && <p class="cb-print-note">An email is required for your first download. No account needed.</p>}
@@ -79,5 +78,30 @@ const { storageKey, handoff = false } = Astro.props;
 @media print{
  .chore-builder .cb-icon-tile{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+</style>
+
+<style is:global>
+/* Chore chart printable polish: editorial title, quiet lines, clean printed controls. */
+.chore-builder .cb-sheet-head{padding:2px 0 20px;text-align:center}
+.chore-builder .cb-sheet-title{font:700 32px/1.2 Georgia,serif;letter-spacing:-.025em;margin:10px 0 6px;color:#545454}
+.chore-builder .cb-sheet-subtitle{margin:0;font:500 14px/1.4 Montserrat,sans-serif;color:#66615e}
+.chore-builder .cb-sheet-sections section{border-width:1.5px;border-color:#C9D5CB;border-radius:14px}
+.chore-builder .cb-results[data-style="bw"] .cb-sheet-sections section{border-color:#C9C9C9}
+.chore-builder .cb-job input{font-size:14px;line-height:1.35;border-bottom:0!important}
+.chore-builder .cb-weekly-section>p{display:none}
+.chore-builder .cb-weekday-wrap{min-width:78px;flex:0 0 auto;display:flex;justify-content:flex-end;align-items:center}
+.chore-builder .cb-weekday-wrap select{font-size:11px!important;padding:4px!important;border:0!important;max-width:90px!important;background:transparent!important}
+.chore-builder .cb-weekday-print{display:none;font:500 11px Montserrat,sans-serif;color:#68635f}
+.chore-builder .cb-results.cb-exporting .cb-weekday-wrap select{display:none!important}
+.chore-builder .cb-results.cb-exporting .cb-weekday-print{display:inline!important}
+.chore-builder .cb-results.cb-exporting .cb-job input{border:0!important;box-shadow:none!important;outline:0!important}
+.chore-builder .cb-results.cb-exporting .cb-remove{display:none!important}
+@media print{
+ .chore-builder .cb-weekday-wrap select{display:none!important}
+ .chore-builder .cb-weekday-print{display:inline!important}
+ .chore-builder .cb-job input{border:0!important;outline:0!important}
+ .chore-builder .cb-remove{display:none!important}
+}
+@media(max-width:800px){.chore-builder .cb-sheet-title{font-size:26px}.chore-builder .cb-job input{font-size:12px}}
 </style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
