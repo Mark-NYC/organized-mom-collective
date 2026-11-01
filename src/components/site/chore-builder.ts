@@ -119,6 +119,57 @@ export function initChoreBuilder(host: HTMLElement) {
   }
   host.querySelectorAll<HTMLButtonElement>('[data-cb-choice]').forEach(b=>b.addEventListener('click',()=>{const c=choreChoices.find(x=>x.id===b.dataset.cbChoice);if(c)addJob(c.label,frequency.value as Frequency,c.id)}));
   $<HTMLButtonElement>('[data-cb-custom-add]').addEventListener('click',()=>{const custom=$<HTMLInputElement>('[data-cb-custom]');addJob(custom.value,frequency.value as Frequency);custom.value=''});
+
+  const pickDialog=$<HTMLDialogElement>('[data-cb-pick-dialog]');
+  const pickGrid=$<HTMLElement>('[data-cb-pick-grid]');
+  const pickCount=$<HTMLElement>('[data-cb-pick-count]');
+  const pickError=$<HTMLElement>('[data-cb-pick-error]');
+  const pickTitle=$<HTMLElement>('[data-cb-pick-title]');
+  let pickFrequency:Frequency='daily';
+  let draft:Job[]=[];
+  const drawPick=()=>{
+    pickTitle.textContent=pickFrequency==='daily'?'Choose daily chores':'Choose weekly chores';
+    host.querySelectorAll<HTMLButtonElement>('[data-cb-pick-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.cbPickTab===pickFrequency)));
+    const active=draft.filter(j=>j.frequency===pickFrequency);
+    pickCount.textContent=active.length+' of 4 selected';
+    pickGrid.replaceChildren();
+    const eligible=choreChoices.filter(choice=>choice.frequency===pickFrequency&&choice.minAge<=state.age);
+    for(const choice of eligible){
+      const selected=active.some(j=>j.id===choice.id||j.id.startsWith(choice.id+'-'));
+      const button=document.createElement('button');button.type='button';button.className='cb-pick-card';button.setAttribute('aria-pressed',String(selected));
+      const src=choreLineIconForText(choice.label);
+      if(src){const img=document.createElement('img');img.src=src;img.alt='';button.append(img);}
+      const label=document.createElement('span');label.textContent=choice.label;button.append(label);
+      button.addEventListener('click',()=>{
+        pickError.textContent='';
+        if(selected)draft=draft.filter(j=>!(j.frequency===pickFrequency&&(j.id===choice.id||j.id.startsWith(choice.id+'-'))));
+        else if(active.length>=4){pickError.textContent='Choose up to four. Remove one before adding another.';return;}
+        else draft.push({id:choice.id+'-'+Date.now(),title:choice.label,frequency:pickFrequency,day:'Any day'});
+        drawPick();
+      });
+      pickGrid.append(button);
+    }
+    for(const job of active.filter(j=>!eligible.some(choice=>job.id===choice.id||job.id.startsWith(choice.id+'-')))){
+      const button=document.createElement('button');button.type='button';button.className='cb-pick-card';button.setAttribute('aria-pressed','true');
+      const src=choreLineIconForText(job.title);if(src){const img=document.createElement('img');img.src=src;img.alt='';button.append(img);}
+      const label=document.createElement('span');label.textContent=job.title;button.append(label);
+      button.addEventListener('click',()=>{draft=draft.filter(j=>j!==job);drawPick();});
+      pickGrid.append(button);
+    }
+  };
+  const openPick=(freq:Frequency)=>{pickFrequency=freq;draft=state.jobs.map(j=>({...j}));pickError.textContent='';drawPick();pickDialog.showModal();};
+  host.querySelectorAll<HTMLButtonElement>('[data-cb-pick]').forEach(b=>b.addEventListener('click',()=>openPick(b.dataset.cbPick as Frequency)));
+  host.querySelectorAll<HTMLButtonElement>('[data-cb-pick-tab]').forEach(b=>b.addEventListener('click',()=>{pickFrequency=b.dataset.cbPickTab as Frequency;pickError.textContent='';drawPick();}));
+  const closePick=()=>pickDialog.close();
+  $<HTMLButtonElement>('[data-cb-pick-close]').addEventListener('click',closePick);
+  $<HTMLButtonElement>('[data-cb-pick-cancel]').addEventListener('click',closePick);
+  $<HTMLButtonElement>('[data-cb-pick-save]').addEventListener('click',()=>{state.jobs=draft;save();render();closePick();});
+  $<HTMLButtonElement>('[data-cb-pick-custom-add]').addEventListener('click',()=>{
+    const input=$<HTMLInputElement>('[data-cb-pick-custom]');const title=input.value.trim();
+    if(!title)return;
+    if(draft.filter(j=>j.frequency===pickFrequency).length>=4){pickError.textContent='Choose up to four chores.';return;}
+    draft.push({id:'custom-'+Date.now(),title,frequency:pickFrequency,day:'Any day'});input.value='';pickError.textContent='';drawPick();
+  });
   downloadButtons.forEach(button=>button.addEventListener('click',async()=>{
     // Export the original full-size sheet, never the scaled mobile presentation.
     const previous=sheet.style.transform;
