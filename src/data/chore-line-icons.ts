@@ -1,5 +1,6 @@
 /** Hand-drawn monochrome artwork exclusively for the free chore chart. */
 const svgs = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.svg', { eager: true, query: '?url', import: 'default' });
+const transparent = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.webp', { eager: true, query: '?url', import: 'default' });
 const jpgs = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.jpg', { eager: true, query: '?url', import: 'default' });
 const march = import.meta.glob<string>('../../assets/icons/ofc/march/*.webp', { eager: true, query: '?url', import: 'default' });
 const icons: Record<string, string> = {
@@ -13,7 +14,8 @@ const icons: Record<string, string> = {
 export function choreLineIcon(id: string): string | null {
   const name = icons[id];
   if (!name) return null;
-  return jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
+  return transparent[`../../assets/icons/ofc/updatedicons/svg/${name}.webp`] ??
+    jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
     svgs[`../../assets/icons/ofc/updatedicons/svg/${name}.svg`] ??
     march[`../../assets/icons/ofc/march/${name}.webp`] ?? null;
 }
@@ -30,7 +32,7 @@ export function choreLineIconForText(text: string): string | null {
   ];
   for (const [pattern, name] of exact) {
     if (!pattern.test(value)) continue;
-    const asset = jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`];
+    const asset = transparent[`../../assets/icons/ofc/updatedicons/svg/${name}.webp`] ?? jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`];
     if (asset) return asset;
   }
   const matches: Array<[RegExp, string]> = [
@@ -56,7 +58,8 @@ export function choreLineIconForText(text: string): string | null {
   ];
   for (const [test, name] of matches) {
     if (!test.test(value)) continue;
-    const src = jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
+    const src = transparent[`../../assets/icons/ofc/updatedicons/svg/${name}.webp`] ??
+      jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
       svgs[`../../assets/icons/ofc/updatedicons/svg/${name}.svg`] ??
       march[`../../assets/icons/ofc/march/${name}.webp`];
     if (src) return src;
