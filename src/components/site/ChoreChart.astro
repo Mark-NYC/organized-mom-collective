@@ -554,4 +554,35 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-pick-dialog,.chore-builder .cb-mobile-dialog{width:calc(100vw - 20px)!important}
 }
 </style>
+
+<style is:global>
+/* Mobile chore picker: give the illustrated choices a real viewport-sized area.
+   The footer stays anchored; only the icon gallery scrolls. */
+@media(max-width:800px){
+ .chore-builder .cb-pick-dialog[open]{
+   height:calc(100dvh - 20px)!important;
+   max-height:calc(100dvh - 20px)!important;
+   min-height:0;
+   padding:12px!important;
+   gap:6px!important;
+   overflow:hidden!important;
+ }
+ .chore-builder .cb-pick-dialog .cb-pick-grid{
+   flex:1 1 0%!important;
+   min-height:0!important;
+   max-height:none!important;
+   overflow-y:auto!important;
+   -webkit-overflow-scrolling:touch;
+   overscroll-behavior:contain;
+   align-content:start;
+ }
+ .chore-builder .cb-pick-dialog .cb-pick-header,
+ .chore-builder .cb-pick-dialog .cb-pick-tabs,
+ .chore-builder .cb-pick-dialog .cb-pick-footer{flex:0 0 auto}
+ .chore-builder .cb-pick-dialog .cb-pick-card{min-height:90px}
+ .chore-builder .cb-pick-dialog .cb-pick-footer{margin-top:0}
+ .chore-builder .cb-pick-dialog .cb-pick-custom{margin:0}
+ .chore-builder .cb-pick-dialog>p{margin:0}
+}
+</style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
