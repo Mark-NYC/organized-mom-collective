@@ -44,12 +44,29 @@ const { storageKey, handoff = false } = Astro.props;
       <footer class="cb-brand-footer">ORGANIZED MOM COLLECTIVE</footer>
     </div>
     </div>
-    <button type="button" class="cb-mobile-download cb-primary" data-cb-mobile-download>↓ Download my chart</button>
+    <div class="cb-mobile-actions"><button type="button" data-cb-customize-open>Customize</button><button type="button" class="cb-primary" data-cb-mobile-download>↓ Download</button></div>
     </div>
 
     
     
   </section>
+  <dialog class="cb-mobile-dialog" data-cb-mobile-dialog aria-label="Customize chore chart">
+    <div class="cb-mobile-dialog-head"><h2>Customize chart</h2><button type="button" data-cb-mobile-dialog-close aria-label="Close customization">✕</button></div>
+    <div class="cb-mobile-dialog-fields">
+      <label>Child's name<input type="text" maxlength="24" data-cb-dialog-name placeholder="Child's name"/></label>
+      <label>Age<select data-cb-dialog-age><option value="">Choose age</option>{Array.from({length:17},(_,i)=>i+2).map(n=><option value={n}>{n}{n===18?'+':''}</option>)}</select></label>
+    </div>
+    <div class="cb-mobile-dialog-chores">
+      <button type="button" data-cb-dialog-pick="daily"><span><strong>Daily chores</strong><small data-cb-dialog-daily-count></small></span><span>›</span></button>
+      <button type="button" data-cb-dialog-pick="weekly"><span><strong>Weekly chores</strong><small data-cb-dialog-weekly-count></small></span><span>›</span></button>
+    </div>
+    <div class="cb-mobile-dialog-fields">
+      <label>Weekly chore day<select data-cb-dialog-weekday><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label>
+      <fieldset class="cb-mobile-dialog-style"><legend>Print style</legend><label><input type="radio" name="cb-dialog-style" value="color" checked/> Color</label><label><input type="radio" name="cb-dialog-style" value="bw"/> Black & White</label></fieldset>
+    </div>
+    <p class="cb-dialog-message" data-cb-dialog-message role="status"></p>
+    <button type="button" class="cb-primary cb-dialog-save" data-cb-dialog-save>Save and view chart</button>
+  </dialog>
   <dialog class="cb-pick-dialog" data-cb-pick-dialog aria-label="Choose chores"><div class="cb-pick-header"><h2 data-cb-pick-title>Choose chores</h2><button type="button" data-cb-pick-close aria-label="Close">✕</button></div><p>Tap up to four chores for this chart.</p><div class="cb-pick-tabs"><button type="button" data-cb-pick-tab="daily">Daily</button><button type="button" data-cb-pick-tab="weekly">Weekly</button></div><p data-cb-pick-count aria-live="polite"></p><div class="cb-pick-grid" data-cb-pick-grid></div><label class="cb-pick-custom">Add your own chore<input data-cb-pick-custom type="text" maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-pick-custom-add>Add custom chore</button><p data-cb-pick-error role="status"></p><div class="cb-pick-footer"><button type="button" data-cb-pick-cancel>Cancel</button><button type="button" class="cb-primary" data-cb-pick-save>Save chores</button></div></dialog>
   <button type="button" class="cb-mobile-create cb-primary" data-cb-mobile-create hidden>Create my chore chart</button>
   <div class="cb-zoom-overlay" data-cb-zoom-overlay hidden role="dialog" aria-modal="true" aria-label="Enlarged chore chart preview"><div class="cb-zoom-bar"><strong>Full-size preview</strong><button type="button" data-cb-zoom-close aria-label="Close enlarged preview">✕ Close</button></div><div class="cb-zoom-scroll" data-cb-zoom-scroll><div class="cb-zoom-stage" data-cb-zoom-stage></div></div><p>Swipe sideways to inspect the whole chart.</p></div>
@@ -411,4 +428,31 @@ const { storageKey, handoff = false } = Astro.props;
 .chore-builder .cb-pick-footer{justify-content:flex-end;margin-top:13px}
 .chore-builder .cb-toolbar-actions [data-cb-add]{display:none!important}
 @media(max-width:800px){.chore-builder .cb-illustrated-actions{grid-template-columns:1fr}.chore-builder .cb-control-panel .cb-toolbar-new .cb-illustrated-actions{order:-1}.chore-builder .cb-pick-dialog{padding:14px}.chore-builder .cb-pick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style><style is:global>
+.chore-builder .cb-mobile-actions{display:none}
+.chore-builder .cb-mobile-dialog{width:min(530px,calc(100vw - 24px));max-height:90dvh;overflow:auto;background:#FBF7F1;border:1px solid #DDD6CE;border-radius:16px;padding:20px;color:#545454}
+.chore-builder .cb-mobile-dialog::backdrop{background:rgba(25,30,26,.65)}
+.chore-builder .cb-mobile-dialog-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chore-builder .cb-mobile-dialog-head h2{font:700 26px Georgia,serif;margin:0}
+.chore-builder .cb-mobile-dialog-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.chore-builder .cb-mobile-dialog-fields>label{display:grid;gap:6px;font-size:13px;font-weight:700}
+.chore-builder .cb-mobile-dialog-chores{display:grid;gap:8px}
+.chore-builder .cb-mobile-dialog-chores button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;min-height:64px;background:#fff}
+.chore-builder .cb-mobile-dialog-chores strong,.chore-builder .cb-mobile-dialog-chores small{display:block}
+.chore-builder .cb-mobile-dialog-chores small{color:#777;font-size:12px;margin-top:3px}
+.chore-builder .cb-mobile-dialog-style{border:0;padding:0;margin:0;font-size:13px}
+.chore-builder .cb-mobile-dialog-style legend{font-weight:700;margin-bottom:7px}
+.chore-builder .cb-mobile-dialog-style label{display:block;margin:7px 0}
+.chore-builder .cb-dialog-message{font-size:12px;color:#944234}
+.chore-builder .cb-dialog-save{width:100%;min-height:48px}
+@media(max-width:800px){
+ .chore-builder .cb-mobile-basics,.chore-builder .cb-mobile-customize-toggle,.chore-builder .cb-mobile-create,.chore-builder .cb-control-panel .cb-setup,.chore-builder .cb-control-panel .cb-toolbar-new,.chore-builder .cb-control-panel .cb-picker{display:none!important}
+ .chore-builder .cb-preview-wrap .cb-mobile-download{display:none!important}
+ .chore-builder .cb-mobile-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 0}
+ .chore-builder .cb-mobile-actions button{min-height:48px}
+ .chore-builder .cb-mobile-dialog-fields{grid-template-columns:1fr}
+ .chore-builder .cb-results{order:0}
+ .chore-builder .cb-control-panel{display:none!important}
+}
+@media(min-width:801px){.chore-builder .cb-mobile-dialog{display:none!important}}
 </style><script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
