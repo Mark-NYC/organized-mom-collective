@@ -16,11 +16,11 @@ const { storageKey, handoff = false } = Astro.props;
     <div class="cb-setup-actions"><button type="button" class="cb-primary" data-cb-generate>Create my child's chart</button><span>Start small. You can always add jobs later.</span></div>
   </section>
   <section class="cb-results" data-cb-results hidden>
-    <div class="cb-toolbar"><div><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2>Ready for your fridge.</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div><fieldset class="cb-style-switch" aria-label="Chart color style"><legend>Chart style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset><div class="cb-buttons"><button type="button" data-cb-back>Change setup</button><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download my chart</button></div></div>
+    <div class="cb-toolbar"><div><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2>Ready for your fridge.</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div><label class="cb-weekly-day-control">Weekly chore day<select data-cb-weekly-day><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label><fieldset class="cb-style-switch" aria-label="Chart color style"><legend>Chart style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset><div class="cb-buttons"><button type="button" data-cb-back>Change setup</button><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download my chart</button></div></div>
     <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><label>Frequency<select data-cb-frequency><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
     <div class="cb-sheet" data-cb-sheet>
       <header class="cb-sheet-head"><span>ORGANIZED MOM COLLECTIVE</span><h2 class="cb-sheet-title"><span data-cb-sheet-name>My</span> Chore Chart</h2><p class="cb-sheet-subtitle">My jobs. Start to finish.</p></header>
-      <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs</h3><div class="cb-weekly-grid" data-cb-weekly></div></section></div>
+      <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs on <span data-cb-weekly-day-label>Saturday</span></h3><div class="cb-weekly-grid" data-cb-weekly></div></section></div>
     </div>
     <p class="cb-print-note">The chart automatically leaves out unused rows. Your changes save on this device.</p>
     {toolEmailGateEnabled && <p class="cb-print-note">An email is required for your first download. No account needed.</p>}
@@ -158,17 +158,14 @@ const { storageKey, handoff = false } = Astro.props;
 </style>
 
 <style is:global>
-/* Smaller, higher-contrast gradient circles with clearly overlapping artwork. */
-.chore-builder .cb-icon-tile::before{
- width:46.5px!important;height:46.5px!important;left:8px!important;top:12px!important;
- background:linear-gradient(135deg,#FFFFFF 0%,#D6E8D7 43%,#8EB39B 100%)!important;
-}
-.chore-builder .cb-icon-tile[data-tone="frost"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#D9EADC 42%,#93BAA0 100%)!important}
-.chore-builder .cb-icon-tile[data-tone="apricot"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#CFE4D4 43%,#86AA91 100%)!important}
-.chore-builder .cb-icon-tile[data-tone="blush"]::before{background:linear-gradient(135deg,#FBFFF9 0%,#D8E9D9 43%,#91B49A 100%)!important}
-.chore-builder .cb-icon-tile[data-tone="evergreen"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#CADFCE 43%,#80A78C 100%)!important}
-.chore-builder .cb-icon-tile[data-tone="mushroom"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#D6E5D7 43%,#8EB199 100%)!important}
-.chore-builder .cb-results[data-style="bw"] .cb-icon-tile::before{background:linear-gradient(135deg,#FFFFFF 0%,#E5E5E5 45%,#AFAFAF 100%)!important}
+/* Original softer gradient, retaining the smaller circle size. */
+.chore-builder .cb-icon-tile::before{width:46.5px!important;height:46.5px!important;left:8px!important;top:12px!important;background:linear-gradient(135deg,#F5F8F3 0%,#DCE7DE 100%)!important}
+.chore-builder .cb-icon-tile[data-tone="frost"]::before{background:linear-gradient(135deg,#F7F9F5,#E0E9E1)!important}
+.chore-builder .cb-icon-tile[data-tone="apricot"]::before{background:linear-gradient(135deg,#F3F7F0,#D7E4D9)!important}
+.chore-builder .cb-icon-tile[data-tone="blush"]::before{background:linear-gradient(135deg,#EFF5ED,#D4E1D8)!important}
+.chore-builder .cb-icon-tile[data-tone="evergreen"]::before{background:linear-gradient(135deg,#EDF4EA,#CDDED1)!important}
+.chore-builder .cb-icon-tile[data-tone="mushroom"]::before{background:linear-gradient(135deg,#F5F8F2,#DFE9DF)!important}
+.chore-builder .cb-results[data-style="bw"] .cb-icon-tile::before{background:linear-gradient(135deg,#FFFFFF,#E8E8E8)!important}
 /* Bigger pencil-friendly checkboxes, without enlarging the weekday columns. */
 .chore-builder .cb-day-check,.chore-builder .cb-results.cb-exporting .cb-day-check{width:36px!important;height:36px!important;border-width:1.5px!important;border-radius:5px!important}
 .chore-builder .cb-weekly-row .cb-day-check,.chore-builder .cb-results.cb-exporting .cb-weekly-row .cb-day-check{width:34.5px!important;height:34.5px!important;min-height:34.5px!important}
@@ -190,5 +187,16 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-day-check{width:36px!important;height:36px!important}
  .chore-builder .cb-weekly-row .cb-day-check{width:34.5px!important;height:34.5px!important}
 }
+</style>
+
+<style is:global>
+/* One optional day applies to all weekly jobs; no per-card controls. */
+.chore-builder .cb-weekly-day-control{display:grid;gap:4px;font-size:12px;font-weight:700;min-width:130px}
+.chore-builder .cb-weekly-day-control select{padding:10px 12px;border-radius:8px;border:1px solid #BCB6AE;background:white;color:#545454}
+.chore-builder .cb-weekly-row .cb-job{flex-direction:column!important;justify-content:center!important;gap:4px!important}
+.chore-builder .cb-weekly-row .cb-job input{width:100%!important;text-align:center!important;max-width:100%!important}
+.chore-builder .cb-weekly-row .cb-weekday-wrap,.chore-builder .cb-weekly-row .cb-weekday-print{display:none!important}
+.chore-builder .cb-weekly-section h3 span{white-space:nowrap}
+@media print{.chore-builder .cb-weekly-day-control{display:none!important}}
 </style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
