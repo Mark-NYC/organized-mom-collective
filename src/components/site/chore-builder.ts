@@ -150,7 +150,7 @@ export function initChoreBuilder(host: HTMLElement) {
       });
       pickGrid.append(button);
     }
-    for(const job of active.filter(j=>!eligible.some(choice=>job.id===choice.id||job.id.startsWith(choice.id+'-')))){
+    for(const job of active.filter((j: Job): boolean => !eligible.some((choice): boolean => j.id===choice.id || j.id.startsWith(choice.id+'-')))){
       const button=document.createElement('button');button.type='button';button.className='cb-pick-card';button.setAttribute('aria-pressed','true');
       const src=choreLineIconForText(job.title);if(src){const img=document.createElement('img');img.src=src;img.alt='';button.append(img);}
       const label=document.createElement('span');label.textContent=job.title;button.append(label);
