@@ -21,6 +21,18 @@ export function choreLineIcon(id: string): string | null {
 /** Match starter chores that are not part of the 16-card responsibility library. */
 export function choreLineIconForText(text: string): string | null {
   const value = text.toLowerCase();
+  // Specific actions must win over generic words such as "bedroom" or "clothes".
+  const exact: Array<[RegExp, string]> = [
+    [/dirty clothes.*hamper|clothes.*in (the )?hamper|put dirty clothes/, 'clothes-in-hamper'],
+    [/sort.*laundry|sort clean laundry/, 'sort-laundry'],
+    [/dust.*furniture|dust.*surface|dust.*bedroom/, 'dust-furniture'],
+    [/put away items in living room|tidy.*living room|living room.*tidy|living room.*reset/, 'tidy-living-room'],
+  ];
+  for (const [pattern, name] of exact) {
+    if (!pattern.test(value)) continue;
+    const asset = jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`];
+    if (asset) return asset;
+  }
   const matches: Array<[RegExp, string]> = [
     [/toy|playroom/, 'toys-away'],
     [/wash car/, 'car'],
@@ -44,7 +56,8 @@ export function choreLineIconForText(text: string): string | null {
   ];
   for (const [test, name] of matches) {
     if (!test.test(value)) continue;
-    const src = svgs[`../../assets/icons/ofc/updatedicons/svg/${name}.svg`] ??
+    const src = jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
+      svgs[`../../assets/icons/ofc/updatedicons/svg/${name}.svg`] ??
       march[`../../assets/icons/ofc/march/${name}.webp`];
     if (src) return src;
   }
