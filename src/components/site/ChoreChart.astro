@@ -201,4 +201,5 @@ const { storageKey, handoff = false } = Astro.props;
 @media print{.chore-builder .cb-weekly-day-control{display:none!important}}
 </style>
 <style is:global>.chore-builder .cb-brand-footer{text-align:center;margin-top:auto;padding-top:20px;font:500 10px Montserrat,sans-serif;letter-spacing:.2em;color:#B8B8B8}.chore-builder .cb-sheet{display:flex;flex-direction:column}</style>
+<style is:global>/* JPEG fallback while GitHub generates alpha-transparent WebP files. */.chore-builder .cb-icon-tile img[src$=".jpg"],.chore-builder .cb-icon-tile img[src*=".jpg?"]{mix-blend-mode:multiply}</style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
