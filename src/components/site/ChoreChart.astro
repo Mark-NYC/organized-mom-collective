@@ -585,4 +585,31 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-pick-dialog>p{margin:0}
 }
 </style>
+
+<style is:global>
+/* Picker cards: allow long chore names to wrap without clipping. */
+.chore-builder .cb-pick-grid{grid-auto-rows:auto;align-content:start}
+.chore-builder .cb-pick-card{
+  height:auto!important;
+  min-height:136px;
+  padding:12px 8px!important;
+  justify-content:center;
+  overflow:visible;
+}
+.chore-builder .cb-pick-card span{
+  display:block;
+  width:100%;
+  font:600 12px/1.4 Montserrat,sans-serif;
+  white-space:normal;
+  overflow-wrap:break-word;
+  text-wrap:balance;
+  flex-shrink:0;
+}
+@media(max-width:800px){
+ .chore-builder .cb-pick-grid{align-items:stretch}
+ .chore-builder .cb-pick-card{min-height:116px!important;padding:9px 7px!important;gap:5px}
+ .chore-builder .cb-pick-card img{height:50px;width:50px;flex-shrink:0}
+ .chore-builder .cb-pick-card span{font-size:11px;line-height:1.35}
+}
+</style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
