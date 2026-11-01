@@ -4,7 +4,7 @@ import { downloadPng } from '../../lib/printable';
 import { readToolHandoff } from '../../lib/tool-handoff';
 
 interface Job { id: string; title: string; frequency: Frequency; day: string }
-interface State { name: string; age: number; experienced: boolean; areas: ChoreArea[]; jobs: Job[]; style?: 'color' | 'bw' }
+interface State { name: string; age: number; experienced: boolean; areas: ChoreArea[]; jobs: Job[]; style?: 'color' | 'bw'; weeklyDay?: string }
 const storageSuffix = ':v2';
 const dayNames = ['Any day','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 export function initChoreBuilder(host: HTMLElement) {
@@ -18,7 +18,7 @@ export function initChoreBuilder(host: HTMLElement) {
   const status=$<HTMLElement>('[data-cb-status]');
   const handoff=host.hasAttribute('data-handoff')?readToolHandoff('chore-chart'):null;
   const key=(host.dataset.storageKey||'omc:chore-chart')+(handoff?.key?':'+handoff.key:'')+storageSuffix;
-  let state:State={name:'',age:8,experienced:false,areas:['space','kitchen','home','laundry'],jobs:[],style:'color'};
+  let state:State={name:'',age:8,experienced:false,areas:['space','kitchen','home','laundry'],jobs:[],style:'color',weeklyDay:'Saturday'};
   const save=()=>{try{localStorage.setItem(key,JSON.stringify(state));}catch{}};
   const node=(tag:string,className:string)=>{const e=document.createElement(tag);e.className=className;return e};
   function renderRow(job:Job) {
@@ -32,17 +32,7 @@ export function initChoreBuilder(host: HTMLElement) {
     const remove=document.createElement('button');remove.className='cb-remove';remove.textContent='×';remove.type='button';remove.title='Remove chore';remove.addEventListener('click',()=>{state.jobs=state.jobs.filter(j=>j.id!==job.id);save();render()});left.append(remove);
     row.append(left);
     if(job.frequency==='daily')for(let i=0;i<7;i++){const check=node('span','cb-day-check');row.append(check);}
-    else {
-      const dayWrap=node('span','cb-weekday-wrap');
-      const select=document.createElement('select');select.setAttribute('aria-label','Optional weekly day');
-      for(const day of dayNames){const opt=document.createElement('option');opt.value=day;opt.textContent=day;select.append(opt);}
-      select.value=job.day||'Any day';
-      const printDay=node('span','cb-weekday-print');
-      const updateDay=()=>{printDay.textContent=select.value==='Any day'?'':` (${select.value})`;};
-      updateDay();
-      select.addEventListener('change',()=>{job.day=select.value;updateDay();save()});
-      dayWrap.append(select,printDay);left.insertBefore(dayWrap,remove);
-      row.append(node('span','cb-day-check'));
+    else row.append(node('span','cb-day-check'));
     }
     return row;
   }
@@ -51,6 +41,9 @@ export function initChoreBuilder(host: HTMLElement) {
     host.querySelector<HTMLInputElement>(`input[name="cb-style"][value="${results.dataset.style}"]`)!.checked=true;
     daily.replaceChildren(...state.jobs.filter(j=>j.frequency==='daily').map(renderRow));
     weekly.replaceChildren(...state.jobs.filter(j=>j.frequency==='weekly').map(renderRow));
+    const day=state.weeklyDay||'Saturday';
+    $<HTMLElement>('[data-cb-weekly-day-label]').textContent=day;
+    $<HTMLSelectElement>('[data-cb-weekly-day]').value=day;
     $<HTMLElement>('[data-cb-sheet-name]').textContent=(state.name||'My')+(state.name?'\u2019s':'');
     status.textContent=`${state.jobs.filter(j=>j.frequency==='daily').length} daily and ${state.jobs.filter(j=>j.frequency==='weekly').length} weekly jobs. Edit any job or add another.`;
     $<HTMLElement>('.cb-daily-section').hidden=!daily.children.length;
@@ -64,7 +57,7 @@ export function initChoreBuilder(host: HTMLElement) {
     if(!areas.length){alert('Choose at least one household area.');host.querySelector<HTMLInputElement>('[data-cb-area]')?.focus();return;}
     const experienced=host.querySelector<HTMLInputElement>('input[name="cb-level"]:checked')?.value==='experienced';
     const suggested=recommendedChores(ageValue,experienced,areas);
-    state={name:name.value.trim(),age:ageValue,experienced,areas,style:state.style||'color',jobs:[...suggested.daily,...suggested.weekly].map(c=>({id:c.id,title:c.label,frequency:c.frequency,day:'Any day'}))};
+    state={name:name.value.trim(),age:ageValue,experienced,areas,style:state.style||'color',weeklyDay:state.weeklyDay||'Saturday',jobs:[...suggested.daily,...suggested.weekly].map(c=>({id:c.id,title:c.label,frequency:c.frequency,day:'Any day'}))};
     if(!state.jobs.length){status.textContent='Choose another household area for a starter chore';return;}
     save();showResults();
   }
@@ -73,6 +66,7 @@ export function initChoreBuilder(host: HTMLElement) {
     generate();
   });
   host.querySelectorAll<HTMLInputElement>('input[name="cb-style"]').forEach(input=>input.addEventListener('change',()=>{state.style=input.value==='bw'?'bw':'color';results.dataset.style=state.style;save();}));
+  $<HTMLSelectElement>('[data-cb-weekly-day]').addEventListener('change',e=>{state.weeklyDay=(e.currentTarget as HTMLSelectElement).value;save();render();});
   $<HTMLButtonElement>('[data-cb-back]').addEventListener('click',()=>host.querySelector('.cb-setup')?.scrollIntoView({behavior:'smooth',block:'start'}));
   $<HTMLButtonElement>('[data-cb-add]').addEventListener('click',()=>{picker.hidden=false;picker.scrollIntoView({behavior:'smooth',block:'nearest'});filterChoices()});
   $<HTMLButtonElement>('[data-cb-picker-close]').addEventListener('click',()=>picker.hidden=true);
