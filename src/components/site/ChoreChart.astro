@@ -486,4 +486,72 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-mobile-dialog .cb-mobile-dialog-style label{margin:3px 0}
  .chore-builder .cb-mobile-dialog .cb-mobile-dialog-head h2{font-size:23px}
 }
-</style><script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
+</style>
+<style is:global>
+/* Chore pop-ups use the public homepage's square-edged, charcoal editorial design. */
+.chore-builder .cb-pick-dialog,
+.chore-builder .cb-mobile-dialog{
+  border-radius:0!important;
+  border:1px solid #D9D8D4!important;
+  background:#FBF7F1!important;
+  box-shadow:0 18px 55px rgba(33,33,33,.19)!important;
+  color:#545454;
+}
+.chore-builder .cb-pick-dialog .cb-pick-header h2,
+.chore-builder .cb-mobile-dialog .cb-mobile-dialog-head h2{font-family:Georgia,serif;color:#545454;font-weight:700;letter-spacing:-.025em}
+.chore-builder .cb-pick-dialog button,
+.chore-builder .cb-mobile-dialog button,
+.chore-builder .cb-pick-dialog input,
+.chore-builder .cb-mobile-dialog input,
+.chore-builder .cb-mobile-dialog select{border-radius:0!important}
+.chore-builder .cb-pick-dialog .cb-pick-header button,
+.chore-builder .cb-mobile-dialog .cb-mobile-dialog-head button{
+  background:transparent!important;border:1px solid #C9C5BE!important;
+  color:#545454!important;min-width:40px;min-height:40px;
+}
+.chore-builder .cb-pick-tabs button{
+  background:#FFFFFF!important;
+  color:#545454!important;
+  border:1px solid #D0CDC5!important;
+  font-weight:600;
+}
+.chore-builder .cb-pick-tabs button[aria-pressed="true"]{
+  background:#545454!important;color:white!important;border-color:#545454!important;
+}
+.chore-builder .cb-pick-card{
+  border-radius:0!important;background:#fff!important;border:1px solid #DAD8D2!important;
+}
+.chore-builder .cb-pick-card[aria-pressed="true"]{
+  background:#EFF3EB!important;border:2px solid #78937D!important;
+}
+.chore-builder .cb-pick-dialog .cb-pick-footer .cb-primary,
+.chore-builder .cb-mobile-dialog .cb-dialog-save{
+  background:#545454!important;color:#fff!important;border:1px solid #545454!important;
+  border-radius:0!important;box-shadow:none!important;font-weight:700;
+}
+.chore-builder .cb-pick-dialog .cb-pick-footer button:not(.cb-primary){
+  background:transparent!important;color:#545454!important;border:1px solid #A9A59D!important;
+}
+.chore-builder .cb-mobile-dialog-chores button{
+  border-radius:0!important;
+  border:1px solid #D5D1C8!important;
+  background:#fff!important;color:#545454!important;
+}
+.chore-builder .cb-mobile-dialog-fields input,
+.chore-builder .cb-mobile-dialog-fields select{
+  background:white!important;border:1px solid #C9C5BE!important;
+}
+.chore-builder .cb-pick-dialog button:hover,
+.chore-builder .cb-mobile-dialog button:hover{filter:brightness(.95)}
+.chore-builder .cb-pick-dialog button:focus-visible,
+.chore-builder .cb-mobile-dialog button:focus-visible,
+.chore-builder .cb-pick-dialog input:focus-visible,
+.chore-builder .cb-mobile-dialog input:focus-visible,
+.chore-builder .cb-mobile-dialog select:focus-visible{
+  outline:2px solid #545454;outline-offset:2px;
+}
+@media(max-width:800px){
+ .chore-builder .cb-pick-dialog,.chore-builder .cb-mobile-dialog{width:calc(100vw - 20px)!important}
+}
+</style>
+<script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
