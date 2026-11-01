@@ -20,7 +20,7 @@ const { storageKey, handoff = false } = Astro.props;
     <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><label>Frequency<select data-cb-frequency><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
     <div class="cb-sheet" data-cb-sheet>
       <header class="cb-sheet-head"><span>ORGANIZED MOM COLLECTIVE</span><h2 class="cb-sheet-title"><span data-cb-sheet-name>My</span> Chore Chart</h2><p class="cb-sheet-subtitle">My jobs. Start to finish.</p></header>
-      <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs</h3><div data-cb-weekly></div></section></div>
+      <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs</h3><div class="cb-weekly-grid" data-cb-weekly></div></section></div>
     </div>
     <p class="cb-print-note">The chart automatically leaves out unused rows. Your changes save on this device.</p>
     {toolEmailGateEnabled && <p class="cb-print-note">An email is required for your first download. No account needed.</p>}
@@ -103,5 +103,57 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-remove{display:none!important}
 }
 @media(max-width:800px){.chore-builder .cb-sheet-title{font-size:26px}.chore-builder .cb-job input{font-size:12px}}
+</style>
+
+<style is:global>
+/* Single-column chart with large daily rows and compact weekly job cards. */
+.chore-builder .cb-sheet-sections,.chore-builder .cb-results.cb-exporting .cb-sheet-sections{display:flex!important;flex-direction:column!important;gap:20px!important}
+.chore-builder .cb-sheet-sections section{width:100%;border:0!important;border-radius:0!important;padding:0!important}
+.chore-builder .cb-daily-section{padding-top:10px!important;border-top:2px solid #D4E1D8!important}
+.chore-builder .cb-weekly-section{padding-top:12px!important;border-top:1px solid #C6D7CA!important}
+.chore-builder .cb-sheet-sections h3{text-align:left!important;font:700 22px/1.2 Georgia,serif!important;margin:0 0 12px!important}
+.chore-builder .cb-day-head,.chore-builder .cb-daily-row{grid-template-columns:minmax(0,44%) repeat(7,minmax(0,1fr))!important;gap:5px!important}
+.chore-builder .cb-daily-row{min-height:84px!important;border-bottom:1px solid #EBEEE9;align-items:center;margin:0!important;padding:4px 0}
+.chore-builder .cb-daily-row .cb-day-check{justify-self:center}
+.chore-builder .cb-job{gap:13px!important}
+.chore-builder .cb-job input{font-size:15px!important}
+.chore-builder .cb-icon-tile{position:relative;width:72px!important;height:72px!important;min-width:72px!important;background:transparent!important;overflow:visible!important;isolation:isolate;border-radius:0!important}
+.chore-builder .cb-icon-tile::before{content:"";position:absolute;width:62px;height:62px;left:1px;top:5px;border-radius:50%;background:linear-gradient(135deg,#F5F8F3 0%,#DCE7DE 100%);z-index:-1}
+.chore-builder .cb-icon-tile[data-tone="frost"]::before{background:linear-gradient(135deg,#F7F9F5,#E0E9E1)}
+.chore-builder .cb-icon-tile[data-tone="apricot"]::before{background:linear-gradient(135deg,#F3F7F0,#D7E4D9)}
+.chore-builder .cb-icon-tile[data-tone="blush"]::before{background:linear-gradient(135deg,#EFF5ED,#D4E1D8)}
+.chore-builder .cb-icon-tile[data-tone="evergreen"]::before{background:linear-gradient(135deg,#EDF4EA,#CDDED1)}
+.chore-builder .cb-icon-tile[data-tone="mushroom"]::before{background:linear-gradient(135deg,#F5F8F2,#DFE9DF)}
+.chore-builder .cb-icon-tile img{position:relative;width:64px!important;height:64px!important;transform:translate(8px,-6px);object-fit:contain;z-index:1}
+.chore-builder .cb-weekly-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.chore-builder .cb-weekly-grid:has(> :only-child){grid-template-columns:minmax(0,1fr);max-width:310px}
+.chore-builder .cb-weekly-grid:has(> :nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
+.chore-builder .cb-weekly-row{display:flex!important;flex-direction:column;justify-content:center;gap:5px!important;min-height:155px!important;border:0!important;background:#F8FAF7;padding:10px!important;border-radius:8px}
+.chore-builder .cb-weekly-row .cb-job{display:flex;flex-direction:column;justify-content:center;text-align:center;gap:4px!important;width:100%}
+.chore-builder .cb-weekly-row .cb-job input{text-align:center;font-size:13px!important;min-height:36px}
+.chore-builder .cb-weekly-row .cb-weekday-wrap{justify-content:center;min-height:20px}
+.chore-builder .cb-weekly-row .cb-day-check{width:23px!important;height:23px!important;min-height:23px;align-self:center}
+.chore-builder .cb-results[data-style="bw"] .cb-icon-tile::before{background:linear-gradient(135deg,#FFFFFF,#E8E8E8)!important}
+.chore-builder .cb-results[data-style="bw"] .cb-weekly-row{background:#F8F8F8}
+.chore-builder .cb-results.cb-exporting .cb-sheet{min-height:816px!important}
+.chore-builder .cb-results.cb-exporting .cb-icon-tile{width:72px!important;height:72px!important;min-width:72px!important}
+.chore-builder .cb-results.cb-exporting .cb-icon-tile img{width:64px!important;height:64px!important}
+.chore-builder .cb-results.cb-exporting .cb-daily-row{min-height:84px!important}
+.chore-builder .cb-results.cb-exporting .cb-weekly-row{min-height:155px!important}
+@media(max-width:800px){
+ .chore-builder .cb-day-head,.chore-builder .cb-daily-row{grid-template-columns:minmax(0,44%) repeat(7,minmax(0,1fr))!important;gap:2px!important}
+ .chore-builder .cb-daily-row .cb-day-check{width:17px!important;height:17px!important}
+ .chore-builder .cb-weekly-grid{gap:7px}
+ .chore-builder .cb-weekly-row{padding:8px 4px!important}
+ .chore-builder .cb-job{gap:5px!important}
+ .chore-builder .cb-job input{font-size:11px!important}
+ .chore-builder .cb-icon-tile{width:52px!important;height:52px!important;min-width:52px!important}
+ .chore-builder .cb-icon-tile::before{width:45px;height:45px;top:3px}
+ .chore-builder .cb-icon-tile img{width:48px!important;height:48px!important;transform:translate(5px,-4px)}
+}
+.cb-results.cb-exporting .cb-day-head,.cb-results.cb-exporting .cb-daily-row{grid-template-columns:minmax(0,44%) repeat(7,minmax(0,1fr))!important;gap:5px!important}
+.cb-results.cb-exporting .cb-daily-row .cb-day-check{width:24px!important;height:24px!important}
+.cb-results.cb-exporting .cb-job input{font-size:15px!important}
+@media print{.chore-builder .cb-icon-tile::before,.chore-builder .cb-weekly-row{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
