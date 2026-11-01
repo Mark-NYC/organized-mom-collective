@@ -33,7 +33,6 @@ export function initChoreBuilder(host: HTMLElement) {
     row.append(left);
     if(job.frequency==='daily')for(let i=0;i<7;i++){const check=node('span','cb-day-check');row.append(check);}
     else row.append(node('span','cb-day-check'));
-    }
     return row;
   }
   function render() {
