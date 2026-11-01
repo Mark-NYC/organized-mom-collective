@@ -11,13 +11,21 @@ const { storageKey, handoff = false } = Astro.props;
       <label>Child's first name<input data-cb-name type="text" maxlength="24" placeholder="e.g. Emma" autocomplete="off" /></label>
       <label>Child's age<select data-cb-age><option value="">Choose age</option>{Array.from({length:17},(_,i)=>i+2).map(n=><option value={n}>{n}{n===18?'+' : ''}</option>)}</select></label>
     </div>
-    <fieldset class="cb-level"><legend>How comfortable are they with chores?</legend><label><input type="radio" name="cb-level" value="beginner" checked /> Just getting started</label><label><input type="radio" name="cb-level" value="experienced" /> Already doing some jobs independently</label></fieldset>
-    <fieldset class="cb-areas"><legend>Where could your child help?</legend><p>Uncheck anything that doesn't fit your household.</p><div class="cb-area-grid">{Object.entries(choreAreas).map(([id,label])=><label><input type="checkbox" data-cb-area value={id} checked={id!=='pets' && id!=='outdoors'}/><span>{label}</span></label>)}</div></fieldset>
+    <fieldset class="cb-level"><legend>Experience with chores</legend><label><input type="radio" name="cb-level" value="beginner" checked /> Just getting started</label><label><input type="radio" name="cb-level" value="experienced" /> Already doing some jobs independently</label></fieldset>
+    <fieldset class="cb-areas"><legend>Where could your child help?</legend><p>Uncheck anything that doesn't fit your household.</p><div class="cb-area-grid">{Object.entries(choreAreas).map(([id,label])=><label><input type="checkbox" data-cb-area value={id} checked={id!=='pets' && id!=='outdoors'}/><span>{label}</span></label>)}</div></fieldset></details>
     <div class="cb-setup-actions"><button type="button" class="cb-primary" data-cb-generate>Create my child's chart</button><span>Start small. You can always add jobs later.</span></div>
   </section>
   <section class="cb-results" data-cb-results hidden>
-    <div class="cb-toolbar"><div><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2>Ready for your fridge.</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div><label class="cb-weekly-day-control">Weekly chore day<select data-cb-weekly-day><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label><fieldset class="cb-style-switch" aria-label="Chart color style"><legend>Chart style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset><div class="cb-buttons"><button type="button" data-cb-back>Change setup</button><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download my chart</button></div></div>
-    <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><label>Frequency<select data-cb-frequency><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
+    <div class="cb-toolbar cb-toolbar-new">
+      <div class="cb-toolbar-title"><p class="cb-eyebrow">YOUR PERSONALIZED CHART</p><h2><span data-cb-ready-name>Your</span> chart is ready</h2><p data-cb-status role="status" aria-live="polite">Edit any job or add another.</p></div>
+      <div class="cb-toolbar-settings">
+        <label class="cb-weekly-day-control">Weekly jobs day<select data-cb-weekly-day><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label>
+        <fieldset class="cb-style-switch" aria-label="Print style"><legend>Print style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset>
+      </div>
+      <div class="cb-toolbar-actions"><button type="button" data-cb-back class="cb-edit-details">Edit child details</button><div class="cb-buttons"><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download chart</button></div></div>
+      <p class="cb-save-note">✓ Changes save automatically on this device.</p>
+    </div>
+    <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><label class="cb-frequency-label">Add to<select data-cb-frequency><option value="daily">Daily jobs</option><option value="weekly">Weekly jobs</option></select></label><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><label class="cb-chore-search-label">Search chores<input type="search" data-cb-search placeholder="e.g. dishes, laundry, bed"/></label><p class="cb-picker-limit">Up to 4 daily and 4 weekly jobs.</p><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
     <div class="cb-sheet" data-cb-sheet>
       <header class="cb-sheet-head"><h2 class="cb-sheet-title"><span data-cb-sheet-name>My</span> Chore Chart</h2><p class="cb-sheet-subtitle">My jobs. Start to finish.</p></header>
       <div class="cb-sheet-sections"><section class="cb-daily-section"><h3>My daily jobs</h3><div class="cb-day-head"><span></span>{['M','T','W','T','F','S','S'].map(day=><span>{day}</span>)}</div><div data-cb-daily></div></section><section class="cb-weekly-section"><h3>My weekly jobs on <span data-cb-weekly-day-label>Saturday</span></h3><div class="cb-weekly-grid" data-cb-weekly></div></section></div>
@@ -219,5 +227,33 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-daily-row .cb-job input{font-size:13px!important}
  .chore-builder .cb-weekly-row .cb-job input{font-size:12px!important}
 }
+</style>
+
+<style is:global>
+/* Generator controls only. Printable sheet styles are intentionally unchanged. */
+.chore-builder .cb-areas-details{max-width:740px;margin:18px auto 0;border:1px solid #DAD5CC;border-radius:12px;background:white;overflow:hidden}
+.chore-builder .cb-areas-details summary{cursor:pointer;list-style:none;padding:16px 19px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chore-builder .cb-areas-details summary::-webkit-details-marker{display:none}
+.chore-builder .cb-areas-details summary:after{content:"⌄";font-size:21px;color:#68635F}
+.chore-builder .cb-areas-details[open] summary:after{content:"⌃"}
+.chore-builder .cb-areas-details summary span{font-size:12px;color:#777;font-weight:400}
+.chore-builder .cb-areas-details .cb-areas{margin:0;padding:0 18px 18px;max-width:none}
+.chore-builder .cb-level{max-width:740px;margin:20px auto 0}
+.chore-builder .cb-setup-actions{margin:22px auto 30px}
+.chore-builder .cb-setup-actions [hidden]{display:none!important}
+.chore-builder .cb-toolbar-new{display:grid!important;grid-template-columns:1fr;gap:15px!important;background:#FFF;border:1px solid #E4DFD7;border-radius:14px;padding:20px;margin-bottom:18px}
+.chore-builder .cb-toolbar-title h2{margin:2px 0 5px}
+.chore-builder .cb-toolbar-title p{margin:4px 0}
+.chore-builder .cb-toolbar-settings{display:flex;gap:16px;align-items:end;flex-wrap:wrap}
+.chore-builder .cb-toolbar-settings .cb-style-switch{display:flex;gap:5px}
+.chore-builder .cb-toolbar-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid #EEEAE5;padding-top:14px}
+.chore-builder .cb-toolbar-actions .cb-edit-details{background:transparent;border:0;text-decoration:underline;text-underline-offset:3px;padding:8px 0;font-weight:500}
+.chore-builder .cb-toolbar-actions .cb-buttons{margin:0}
+.chore-builder .cb-save-note{font-size:12px!important;color:#777!important;margin:0!important}
+.chore-builder .cb-chore-search-label{display:grid;gap:7px;font-size:13px;font-weight:700;margin:12px 0}
+.chore-builder [data-cb-search]{width:100%;border:1px solid #CCC5BC;border-radius:8px;background:white;padding:12px;font:inherit}
+.chore-builder .cb-picker-limit{font-size:12px;color:#777;margin:6px 0 12px}
+.chore-builder .cb-choice-list button[hidden]{display:none!important}
+@media(max-width:700px){.chore-builder .cb-areas-details summary{align-items:start;flex-direction:column;gap:4px}.chore-builder .cb-toolbar-actions .cb-buttons{width:100%}.chore-builder .cb-toolbar-actions .cb-buttons button{flex:1}}
 </style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
