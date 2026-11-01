@@ -11,6 +11,16 @@ export function initChoreBuilder(host: HTMLElement) {
   const $=<T extends HTMLElement>(selector:string)=>host.querySelector<T>(selector)!;
   const name=$<HTMLInputElement>('[data-cb-name]');
   const age=$<HTMLSelectElement>('[data-cb-age]');
+  const mobileName=$<HTMLInputElement>('[data-cb-mobile-name]');
+  const mobileAge=$<HTMLSelectElement>('[data-cb-mobile-age]');
+  const mobileCreate=$<HTMLButtonElement>('[data-cb-mobile-create]');
+  const customizeToggle=$<HTMLButtonElement>('[data-cb-customize-toggle]');
+  const syncMobile=()=>{mobileName.value=name.value;mobileAge.value=age.value;};
+  mobileName.addEventListener('input',()=>{name.value=mobileName.value;state.name=mobileName.value.trim();if(state.jobs.length){save();render();}});
+  mobileAge.addEventListener('change',()=>{age.value=mobileAge.value;if(state.jobs.length){state.age=Number(age.value);save();}});
+  name.addEventListener('input',syncMobile);
+  age.addEventListener('change',syncMobile);
+  customizeToggle.addEventListener('click',()=>{const open=host.dataset.mobileCustomize!=='true';host.dataset.mobileCustomize=String(open);customizeToggle.setAttribute('aria-expanded',String(open));});
   const results=$<HTMLElement>('[data-cb-results]');
   const daily=$<HTMLElement>('[data-cb-daily]');
   const weekly=$<HTMLElement>('[data-cb-weekly]');
@@ -25,7 +35,7 @@ export function initChoreBuilder(host: HTMLElement) {
   const status=$<HTMLElement>('[data-cb-status]');
   const panel=$<HTMLElement>('[data-cb-panel]');
   const toolbar=$<HTMLElement>('[data-cb-toolbar]');
-  const refreshPanel=()=>{const generated=state.jobs.length>0;panel.dataset.generated=String(generated);toolbar.hidden=!generated;if(!generated)delete panel.dataset.editing;};
+  const refreshPanel=()=>{const generated=state.jobs.length>0;panel.dataset.generated=String(generated);toolbar.hidden=!generated;mobileCreate.hidden=generated;customizeToggle.hidden=!generated;if(!generated)delete panel.dataset.editing;};
   const handoff=host.hasAttribute('data-handoff')?readToolHandoff('chore-chart'):null;
   const key=(host.dataset.storageKey||'omc:chore-chart')+(handoff?.key?':'+handoff.key:'')+storageSuffix;
   let state:State={name:'',age:8,experienced:false,areas:['space','kitchen','home','laundry'],jobs:[],style:'color',weeklyDay:'Saturday'};
@@ -57,6 +67,7 @@ export function initChoreBuilder(host: HTMLElement) {
     $<HTMLElement>('[data-cb-ready-name]').textContent=state.name?`${state.name}’s`:'Your';
     status.textContent=`${state.jobs.filter(j=>j.frequency==='daily').length} daily · ${state.jobs.filter(j=>j.frequency==='weekly').length} weekly jobs. Tap a chore to edit it.`;
     $<HTMLElement>('.cb-daily-section').hidden=!daily.children.length;
+    syncMobile();
     $<HTMLElement>('.cb-weekly-section').hidden=!weekly.children.length;
     schedulePreview();
   }
@@ -77,6 +88,7 @@ export function initChoreBuilder(host: HTMLElement) {
   const regenerateButton=$<HTMLButtonElement>('[data-cb-regenerate]');
   const setupHelp=$<HTMLElement>('[data-cb-setup-help]');
   const updateSetupMode=()=>{const existing=state.jobs.length>0;generateButton.hidden=existing;applyButton.hidden=!existing;regenerateButton.hidden=!existing;setupHelp.textContent=existing?'Save details without replacing your chores, or request a fresh set of suggestions.':'Start small. You can always add jobs later.';};
+  mobileCreate.addEventListener('click',()=>{if(!mobileAge.value){mobileAge.focus();return;}generate();updateSetupMode();});
   generateButton.addEventListener('click',()=>{
     generate();updateSetupMode();
   });
@@ -131,5 +143,5 @@ export function initChoreBuilder(host: HTMLElement) {
   if(handoff?.age!==undefined)age.value=String(Math.min(18,Math.max(2,handoff.age)));
   if(saved&&Array.isArray(saved.jobs)&&saved.jobs.length){state=saved;name.value=saved.name;age.value=String(saved.age);host.querySelector<HTMLInputElement>(`input[name="cb-level"][value="${saved.experienced?'experienced':'beginner'}"]`)!.checked=true;host.querySelectorAll<HTMLInputElement>('[data-cb-area]').forEach(el=>el.checked=saved!.areas.includes(el.value as ChoreArea));results.hidden=false;render();}
   else if(handoff?.age!==undefined){generate();}
-  updateSetupMode();refreshPanel();
+  updateSetupMode();refreshPanel();syncMobile();
 }
