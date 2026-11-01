@@ -202,4 +202,22 @@ const { storageKey, handoff = false } = Astro.props;
 </style>
 <style is:global>.chore-builder .cb-brand-footer{text-align:center;margin-top:auto;padding-top:20px;font:500 10px Montserrat,sans-serif;letter-spacing:.2em;color:#B8B8B8}.chore-builder .cb-sheet{display:flex;flex-direction:column}</style>
 <style is:global>/* JPEG fallback while GitHub generates alpha-transparent WebP files. */.chore-builder .cb-icon-tile img[src$=".jpg"],.chore-builder .cb-icon-tile img[src*=".jpg?"]{mix-blend-mode:multiply}</style>
+
+<style is:global>
+/* A small handwritten accent gives the personalized chart warmth without reducing readability. */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap');
+.chore-builder .cb-sheet-title [data-cb-sheet-name]{
+  font-family:'Kalam',cursive!important;font-weight:700!important;
+  font-size:1.18em;letter-spacing:-.035em;display:inline-block;line-height:1.1;
+  transform:rotate(-2deg);margin-right:.12em;color:#545454;
+}
+.chore-builder .cb-daily-row .cb-job input{font-family:Montserrat,sans-serif!important;font-size:17px!important;line-height:1.4!important}
+.chore-builder .cb-weekly-row .cb-job input{font-family:Montserrat,sans-serif!important;font-size:15px!important;line-height:1.4!important;min-height:38px!important}
+.chore-builder .cb-results.cb-exporting .cb-daily-row .cb-job input{font-size:17px!important}
+.chore-builder .cb-results.cb-exporting .cb-weekly-row .cb-job input{font-size:15px!important}
+@media(max-width:800px){
+ .chore-builder .cb-daily-row .cb-job input{font-size:13px!important}
+ .chore-builder .cb-weekly-row .cb-job input{font-size:12px!important}
+}
+</style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
