@@ -5,6 +5,10 @@ const { storageKey, handoff = false } = Astro.props;
 ---
 <div class="chore-builder" data-chore-builder data-storage-key={storageKey} data-handoff={handoff ? '' : undefined}>
   <div class="cb-control-panel" data-cb-panel>
+    <div class="cb-mobile-basics">
+      <label>Child's name<input type="text" data-cb-mobile-name maxlength="24" placeholder="Child's name" autocomplete="off" /></label>
+      <label>Age<select data-cb-mobile-age><option value="">Age</option>{Array.from({length:17},(_,i)=>i+2).map(n=><option value={n}>{n}{n===18 ? '+' : ''}</option>)}</select></label>
+    </div>
   <section class="cb-setup" aria-label="Customize your child's chore chart">
     
     <div class="cb-inputs">
@@ -17,6 +21,7 @@ const { storageKey, handoff = false } = Astro.props;
     </details>
     <div class="cb-setup-actions"><button type="button" class="cb-primary" data-cb-generate>Create my chore chart</button><button type="button" data-cb-apply hidden>Save child details</button><button type="button" data-cb-regenerate hidden>Get new chore suggestions</button><span data-cb-setup-help>Start small. You can always add jobs later.</span></div>
   </section>
+    <button type="button" class="cb-mobile-customize-toggle" data-cb-customize-toggle aria-expanded="false">Customize chart <span aria-hidden="true">⌄</span></button>
     <div class="cb-toolbar cb-toolbar-new" data-cb-toolbar hidden>
       <div class="cb-toolbar-title"><h2><span data-cb-ready-name>Your</span> chart</h2><p data-cb-status role="status" aria-live="polite">Edit chores directly on the chart below.</p></div>
       <div class="cb-toolbar-settings">
@@ -45,6 +50,7 @@ const { storageKey, handoff = false } = Astro.props;
     
     
   </section>
+  <button type="button" class="cb-mobile-create cb-primary" data-cb-mobile-create hidden>Create my chore chart</button>
   <div class="cb-zoom-overlay" data-cb-zoom-overlay hidden role="dialog" aria-modal="true" aria-label="Enlarged chore chart preview"><div class="cb-zoom-bar"><strong>Full-size preview</strong><button type="button" data-cb-zoom-close aria-label="Close enlarged preview">✕ Close</button></div><div class="cb-zoom-scroll" data-cb-zoom-scroll><div class="cb-zoom-stage" data-cb-zoom-stage></div></div><p>Swipe sideways to inspect the whole chart.</p></div>
   <slot name="footnote"/>
 </div>
@@ -349,5 +355,36 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-preview-frame .cb-weekly-row .cb-job input,.chore-builder .cb-zoom-stage .cb-weekly-row .cb-job input{text-align:center!important}
 }
 @media print{.chore-builder .cb-mobile-preview-head,.chore-builder .cb-mobile-download,.chore-builder .cb-zoom-overlay{display:none!important}.chore-builder .cb-preview-frame{height:auto!important;overflow:visible!important}.chore-builder .cb-preview-frame .cb-sheet{position:static!important;transform:none!important}}
+</style>
+
+<style is:global>
+.chore-builder .cb-mobile-basics,.chore-builder .cb-mobile-customize-toggle,.chore-builder .cb-mobile-create{display:none}
+@media(max-width:800px){
+ .chore-builder{display:flex;flex-direction:column}
+ .chore-builder .cb-control-panel{display:contents}
+ .chore-builder .cb-mobile-basics{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:10px;order:0;background:white;border:1px solid #E2DDD5;border-radius:12px;padding:14px;margin:0 0 14px}
+ .chore-builder .cb-mobile-basics label{display:grid;gap:6px;min-width:0;font-size:12px;font-weight:700}
+ .chore-builder .cb-mobile-basics input,.chore-builder .cb-mobile-basics select{min-width:0;width:100%;font-size:16px}
+ .chore-builder .cb-control-panel .cb-setup{order:3;display:none!important;background:white;border:1px solid #E2DDD5;border-radius:12px;padding:14px;margin:10px 0 0}
+ .chore-builder .cb-control-panel .cb-setup .cb-inputs{display:none!important}
+ .chore-builder .cb-control-panel .cb-setup .cb-setup-actions{margin-top:12px}
+ .chore-builder .cb-control-panel .cb-toolbar-new{order:4;display:none!important;background:white;border:1px solid #E2DDD5;border-radius:12px;padding:14px;margin:10px 0 0}
+ .chore-builder .cb-control-panel .cb-toolbar-new .cb-toolbar-title,.chore-builder .cb-control-panel .cb-save-note,.chore-builder .cb-control-panel .cb-edit-details{display:none!important}
+ .chore-builder .cb-control-panel .cb-toolbar-new .cb-toolbar-actions{justify-content:flex-start}
+ .chore-builder .cb-control-panel .cb-toolbar-new .cb-buttons{width:100%}
+ .chore-builder .cb-control-panel .cb-picker{order:5;margin:10px 0 0}
+ .chore-builder .cb-mobile-customize-toggle{display:flex;order:2;align-items:center;justify-content:space-between;width:100%;margin:12px 0 0;padding:14px 16px;background:white;border:1px solid #DAD5CC;border-radius:10px;font-size:15px;text-align:left}
+ .chore-builder .cb-mobile-customize-toggle span{font-size:23px;line-height:1}
+ .chore-builder[data-mobile-customize="true"] .cb-setup{display:block!important}
+ .chore-builder[data-mobile-customize="true"] .cb-toolbar-new:not([hidden]){display:grid!important}
+ .chore-builder[data-mobile-customize="true"] .cb-mobile-customize-toggle span{transform:rotate(180deg)}
+ .chore-builder .cb-results{order:1;width:100%}
+ .chore-builder .cb-preview-wrap{width:100%}
+ .chore-builder .cb-mobile-preview-head{margin-top:0}
+ .chore-builder .cb-control-panel .cb-setup-actions [data-cb-generate]{display:none!important}
+ .chore-builder .cb-mobile-create{display:block;order:1;width:100%;margin:0 0 18px;min-height:48px}
+ .chore-builder .cb-mobile-create[hidden]{display:none!important}
+ .chore-builder .cb-zoom-overlay{order:10}
+}
 </style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
