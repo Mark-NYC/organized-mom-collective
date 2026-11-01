@@ -1,12 +1,11 @@
 ---
 import { choreAreas, choreChoices } from '../../data/chore-recommendations';
-import { toolEmailGateEnabled } from '../../lib/tool-email';
 interface Props { storageKey: string; handoff?: boolean }
 const { storageKey, handoff = false } = Astro.props;
 ---
 <div class="chore-builder" data-chore-builder data-storage-key={storageKey} data-handoff={handoff ? '' : undefined}>
   <section class="cb-setup" aria-label="Customize your child's chore chart">
-    <div class="cb-intro"><p class="cb-eyebrow">YOUR FAMILY · YOUR PLAN</p><h2>Make their chore chart.</h2><p>Enter a name and age. You can change every chore before printing.</p></div>
+    
     <div class="cb-inputs">
       <label>Child's first name<input data-cb-name type="text" maxlength="24" placeholder="e.g. Emma" autocomplete="off" /></label>
       <label>Child's age<select data-cb-age><option value="">Choose age</option>{Array.from({length:17},(_,i)=>i+2).map(n=><option value={n}>{n}{n===18?'+' : ''}</option>)}</select></label>
@@ -33,8 +32,8 @@ const { storageKey, handoff = false } = Astro.props;
       <div class="cb-toolbar-actions"><button type="button" data-cb-back class="cb-edit-details">Edit child details</button><div class="cb-buttons"><button type="button" data-cb-add>+ Add a chore</button><button type="button" class="cb-primary" data-cb-download>Download chart</button></div></div>
       <p class="cb-save-note">✓ Changes save automatically on this device.</p>
     </div>
-    <p class="cb-print-note">The chart automatically leaves out unused rows. Your changes save on this device.</p>
-    {toolEmailGateEnabled && <p class="cb-print-note">An email is required for your first download. No account needed.</p>}
+    
+    
   </section>
   <slot name="footnote"/>
 </div>
