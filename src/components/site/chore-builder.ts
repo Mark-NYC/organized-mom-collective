@@ -16,6 +16,9 @@ export function initChoreBuilder(host: HTMLElement) {
   const weekly=$<HTMLElement>('[data-cb-weekly]');
   const picker=$<HTMLElement>('[data-cb-picker]');
   const status=$<HTMLElement>('[data-cb-status]');
+  const panel=$<HTMLElement>('[data-cb-panel]');
+  const toolbar=$<HTMLElement>('[data-cb-toolbar]');
+  const refreshPanel=()=>{const generated=state.jobs.length>0;panel.dataset.generated=String(generated);toolbar.hidden=!generated;if(!generated)delete panel.dataset.editing;};
   const handoff=host.hasAttribute('data-handoff')?readToolHandoff('chore-chart'):null;
   const key=(host.dataset.storageKey||'omc:chore-chart')+(handoff?.key?':'+handoff.key:'')+storageSuffix;
   let state:State={name:'',age:8,experienced:false,areas:['space','kitchen','home','laundry'],jobs:[],style:'color',weeklyDay:'Saturday'};
@@ -49,7 +52,7 @@ export function initChoreBuilder(host: HTMLElement) {
     $<HTMLElement>('.cb-daily-section').hidden=!daily.children.length;
     $<HTMLElement>('.cb-weekly-section').hidden=!weekly.children.length;
   }
-  function showResults(){results.hidden=false;render();results.scrollIntoView({behavior:'smooth',block:'start'})}
+  function showResults(){results.hidden=false;render();refreshPanel();delete panel.dataset.editing;panel.scrollIntoView({behavior:'smooth',block:'start'})}
   function generate() {
     if(!age.value){age.focus();return;}
     const ageValue=Number(age.value);
@@ -73,12 +76,12 @@ export function initChoreBuilder(host: HTMLElement) {
     if(!age.value){age.focus();return;}
     const areas=Array.from(host.querySelectorAll<HTMLInputElement>('[data-cb-area]:checked')).map(x=>x.value as ChoreArea);
     if(!areas.length){host.querySelector<HTMLDetailsElement>('.cb-areas-details')!.open=true;return;}
-    state.name=name.value.trim();state.age=Number(age.value);state.experienced=host.querySelector<HTMLInputElement>('input[name="cb-level"]:checked')?.value==='experienced';state.areas=areas;save();render();results.scrollIntoView({behavior:'smooth',block:'start'});
+    state.name=name.value.trim();state.age=Number(age.value);state.experienced=host.querySelector<HTMLInputElement>('input[name="cb-level"]:checked')?.value==='experienced';state.areas=areas;save();render();delete panel.dataset.editing;panel.scrollIntoView({behavior:'smooth',block:'start'});
   });
   regenerateButton.addEventListener('click',()=>{if(!confirm('Replace your customized chore list with new suggestions?'))return;generate();updateSetupMode();});
   host.querySelectorAll<HTMLInputElement>('input[name="cb-style"]').forEach(input=>input.addEventListener('change',()=>{state.style=input.value==='bw'?'bw':'color';results.dataset.style=state.style;save();}));
   $<HTMLSelectElement>('[data-cb-weekly-day]').addEventListener('change',e=>{state.weeklyDay=(e.currentTarget as HTMLSelectElement).value;save();render();});
-  $<HTMLButtonElement>('[data-cb-back]').addEventListener('click',()=>{updateSetupMode();host.querySelector('.cb-setup')?.scrollIntoView({behavior:'smooth',block:'start'});});
+  $<HTMLButtonElement>('[data-cb-back]').addEventListener('click',()=>{updateSetupMode();panel.dataset.editing=panel.dataset.editing==='true'?'false':'true';panel.scrollIntoView({behavior:'smooth',block:'start'});});
   $<HTMLButtonElement>('[data-cb-add]').addEventListener('click',()=>{picker.hidden=false;picker.scrollIntoView({behavior:'smooth',block:'nearest'});filterChoices()});
   $<HTMLButtonElement>('[data-cb-picker-close]').addEventListener('click',()=>picker.hidden=true);
   const frequency=$<HTMLSelectElement>('[data-cb-frequency]');
@@ -106,5 +109,5 @@ export function initChoreBuilder(host: HTMLElement) {
   if(handoff?.age!==undefined)age.value=String(Math.min(18,Math.max(2,handoff.age)));
   if(saved&&Array.isArray(saved.jobs)&&saved.jobs.length){state=saved;name.value=saved.name;age.value=String(saved.age);host.querySelector<HTMLInputElement>(`input[name="cb-level"][value="${saved.experienced?'experienced':'beginner'}"]`)!.checked=true;host.querySelectorAll<HTMLInputElement>('[data-cb-area]').forEach(el=>el.checked=saved!.areas.includes(el.value as ChoreArea));results.hidden=false;render();}
   else if(handoff?.age!==undefined){generate();}
-  updateSetupMode();
+  updateSetupMode();refreshPanel();
 }
