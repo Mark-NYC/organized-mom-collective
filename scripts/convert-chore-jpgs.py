@@ -57,3 +57,22 @@ for name in ("clothes-in-hamper", "tidy-living-room", "sort-laundry"):
     target = ROOT / (name + ".webp")
     Image.fromarray(rgba, "RGBA").save(target, "WEBP", lossless=True, method=6)
     print(f"{target}: cleared all white, including enclosed regions")
+
+# Make a separate transparent copy of March's feed-pets illustration.
+# Do not edit the March kit's source image.
+source = Path("assets/icons/ofc/march/feed-pets.webp")
+image = Image.open(source).convert("RGBA")
+pixels = np.asarray(image, dtype=np.float32)
+rgb = pixels[:, :, :3]
+existing_alpha = pixels[:, :, 3] / 255.0
+# Treat near-white as background, even inside closed shapes.
+# Multiply with existing transparency so previously clear pixels stay clear.
+whiteness = rgb.min(axis=2)
+ink_alpha = np.clip((242.0 - whiteness) / 108.0, 0, 1)
+out_alpha = np.rint(255 * existing_alpha * ink_alpha).astype(np.uint8)
+# Keep original line art colors, but remove white halos.
+out_rgb = np.minimum(rgb, 150).astype(np.uint8)
+result = Image.fromarray(np.dstack((out_rgb, out_alpha)), "RGBA")
+target = ROOT / "feed-pets.webp"
+result.save(target, "WEBP", lossless=True, method=6)
+print(f"{source} -> {target}: transparent copy, March original unchanged")
