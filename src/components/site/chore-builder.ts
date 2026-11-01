@@ -128,6 +128,8 @@ export function initChoreBuilder(host: HTMLElement) {
   const pickTitle=$<HTMLElement>('[data-cb-pick-title]');
   let pickFrequency:Frequency='daily';
   let draft:Job[]=[];
+  let originalJobs:Job[]=[];
+  const syncChosen=()=>{state.jobs=draft.map(j=>({...j}));save();render();};
   const drawPick=()=>{
     pickTitle.textContent=pickFrequency==='daily'?'Choose daily chores':'Choose weekly chores';
     host.querySelectorAll<HTMLButtonElement>('[data-cb-pick-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.cbPickTab===pickFrequency)));
@@ -146,7 +148,7 @@ export function initChoreBuilder(host: HTMLElement) {
         if(selected)draft=draft.filter(j=>!(j.frequency===pickFrequency&&(j.id===choice.id||j.id.startsWith(choice.id+'-'))));
         else if(active.length>=4){pickError.textContent='Choose up to four. Remove one before adding another.';return;}
         else draft.push({id:choice.id+'-'+Date.now(),title:choice.label,frequency:pickFrequency,day:'Any day'});
-        drawPick();
+        syncChosen();drawPick();
       });
       pickGrid.append(button);
     }
@@ -154,22 +156,24 @@ export function initChoreBuilder(host: HTMLElement) {
       const button=document.createElement('button');button.type='button';button.className='cb-pick-card';button.setAttribute('aria-pressed','true');
       const src=choreLineIconForText(job.title);if(src){const img=document.createElement('img');img.src=src;img.alt='';button.append(img);}
       const label=document.createElement('span');label.textContent=job.title;button.append(label);
-      button.addEventListener('click',()=>{draft=draft.filter(j=>j!==job);drawPick();});
+      button.addEventListener('click',()=>{draft=draft.filter(j=>j!==job);syncChosen();drawPick();});
       pickGrid.append(button);
     }
   };
-  const openPick=(freq:Frequency)=>{pickFrequency=freq;draft=state.jobs.map(j=>({...j}));pickError.textContent='';drawPick();pickDialog.showModal();};
+  const openPick=(freq:Frequency)=>{pickFrequency=freq;originalJobs=state.jobs.map(j=>({...j}));draft=state.jobs.map(j=>({...j}));pickError.textContent='';drawPick();pickDialog.showModal();};
   host.querySelectorAll<HTMLButtonElement>('[data-cb-pick]').forEach(b=>b.addEventListener('click',()=>openPick(b.dataset.cbPick as Frequency)));
   host.querySelectorAll<HTMLButtonElement>('[data-cb-pick-tab]').forEach(b=>b.addEventListener('click',()=>{pickFrequency=b.dataset.cbPickTab as Frequency;pickError.textContent='';drawPick();}));
   const closePick=()=>pickDialog.close();
-  $<HTMLButtonElement>('[data-cb-pick-close]').addEventListener('click',closePick);
-  $<HTMLButtonElement>('[data-cb-pick-cancel]').addEventListener('click',closePick);
-  $<HTMLButtonElement>('[data-cb-pick-save]').addEventListener('click',()=>{state.jobs=draft;save();render();closePick();});
+  const cancelPick=()=>{draft=originalJobs.map(j=>({...j}));syncChosen();closePick();};
+  $<HTMLButtonElement>('[data-cb-pick-close]').addEventListener('click',cancelPick);
+  $<HTMLButtonElement>('[data-cb-pick-cancel]').addEventListener('click',cancelPick);
+  $<HTMLButtonElement>('[data-cb-pick-save]').addEventListener('click',()=>{syncChosen();closePick();});
+  pickDialog.addEventListener('cancel',event=>{event.preventDefault();cancelPick();});
   $<HTMLButtonElement>('[data-cb-pick-custom-add]').addEventListener('click',()=>{
     const input=$<HTMLInputElement>('[data-cb-pick-custom]');const title=input.value.trim();
     if(!title)return;
     if(draft.filter(j=>j.frequency===pickFrequency).length>=4){pickError.textContent='Choose up to four chores.';return;}
-    draft.push({id:'custom-'+Date.now(),title,frequency:pickFrequency,day:'Any day'});input.value='';pickError.textContent='';drawPick();
+    draft.push({id:'custom-'+Date.now(),title,frequency:pickFrequency,day:'Any day'});input.value='';pickError.textContent='';syncChosen();drawPick();
   });
 
   const mobileDialog=$<HTMLDialogElement>('[data-cb-mobile-dialog]');
