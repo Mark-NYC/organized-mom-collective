@@ -38,10 +38,10 @@ export function initChoreBuilder(host: HTMLElement) {
       for(const day of dayNames){const opt=document.createElement('option');opt.value=day;opt.textContent=day;select.append(opt);}
       select.value=job.day||'Any day';
       const printDay=node('span','cb-weekday-print');
-      const updateDay=()=>{printDay.textContent=select.value==='Any day'?'':select.value;};
+      const updateDay=()=>{printDay.textContent=select.value==='Any day'?'':` (${select.value})`;};
       updateDay();
       select.addEventListener('change',()=>{job.day=select.value;updateDay();save()});
-      dayWrap.append(select,printDay);row.append(dayWrap);
+      dayWrap.append(select,printDay);left.insertBefore(dayWrap,remove);
       row.append(node('span','cb-day-check'));
     }
     return row;
