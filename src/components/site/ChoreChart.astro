@@ -156,4 +156,39 @@ const { storageKey, handoff = false } = Astro.props;
 .cb-results.cb-exporting .cb-job input{font-size:15px!important}
 @media print{.chore-builder .cb-icon-tile::before,.chore-builder .cb-weekly-row{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
+
+<style is:global>
+/* Smaller, higher-contrast gradient circles with clearly overlapping artwork. */
+.chore-builder .cb-icon-tile::before{
+ width:46.5px!important;height:46.5px!important;left:8px!important;top:12px!important;
+ background:linear-gradient(135deg,#FFFFFF 0%,#D6E8D7 43%,#8EB39B 100%)!important;
+}
+.chore-builder .cb-icon-tile[data-tone="frost"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#D9EADC 42%,#93BAA0 100%)!important}
+.chore-builder .cb-icon-tile[data-tone="apricot"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#CFE4D4 43%,#86AA91 100%)!important}
+.chore-builder .cb-icon-tile[data-tone="blush"]::before{background:linear-gradient(135deg,#FBFFF9 0%,#D8E9D9 43%,#91B49A 100%)!important}
+.chore-builder .cb-icon-tile[data-tone="evergreen"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#CADFCE 43%,#80A78C 100%)!important}
+.chore-builder .cb-icon-tile[data-tone="mushroom"]::before{background:linear-gradient(135deg,#FFFFFF 0%,#D6E5D7 43%,#8EB199 100%)!important}
+.chore-builder .cb-results[data-style="bw"] .cb-icon-tile::before{background:linear-gradient(135deg,#FFFFFF 0%,#E5E5E5 45%,#AFAFAF 100%)!important}
+/* Bigger pencil-friendly checkboxes, without enlarging the weekday columns. */
+.chore-builder .cb-day-check,.chore-builder .cb-results.cb-exporting .cb-day-check{width:36px!important;height:36px!important;border-width:1.5px!important;border-radius:5px!important}
+.chore-builder .cb-weekly-row .cb-day-check,.chore-builder .cb-results.cb-exporting .cb-weekly-row .cb-day-check{width:34.5px!important;height:34.5px!important;min-height:34.5px!important}
+.chore-builder .cb-day-head,.chore-builder .cb-daily-row,.chore-builder .cb-results.cb-exporting .cb-day-head,.chore-builder .cb-results.cb-exporting .cb-daily-row{grid-template-columns:minmax(0,42%) repeat(7,minmax(0,1fr))!important;gap:3px!important}
+.chore-builder .cb-daily-row .cb-day-check{justify-self:center}
+/* Weekday is an inline parenthetical suffix, never a detached row. */
+.chore-builder .cb-weekly-row .cb-job{display:flex!important;flex-direction:row!important;justify-content:center!important;align-items:center!important;flex-wrap:wrap!important;column-gap:3px!important;row-gap:2px!important}
+.chore-builder .cb-weekly-row .cb-job input{width:auto!important;max-width:100%;flex:0 1 auto;text-align:right!important;min-height:28px!important}
+.chore-builder .cb-weekly-row .cb-weekday-wrap{display:inline-flex!important;min-width:0!important;width:auto!important;min-height:0!important;flex:0 0 auto!important}
+.chore-builder .cb-weekly-row .cb-weekday-print{white-space:nowrap;font-size:12px}
+.chore-builder .cb-weekly-row .cb-weekday-wrap select{max-width:98px!important;font-size:11px!important}
+.chore-builder .cb-results.cb-exporting .cb-weekly-row .cb-weekday-print{display:inline!important}
+@media(max-width:800px){
+ .chore-builder .cb-day-check{width:20px!important;height:20px!important}
+ .chore-builder .cb-weekly-row .cb-day-check{width:27px!important;height:27px!important;min-height:27px!important}
+ .chore-builder .cb-icon-tile::before{width:34px!important;height:34px!important;left:6px!important;top:9px!important}
+}
+@media print{
+ .chore-builder .cb-day-check{width:36px!important;height:36px!important}
+ .chore-builder .cb-weekly-row .cb-day-check{width:34.5px!important;height:34.5px!important}
+}
+</style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
