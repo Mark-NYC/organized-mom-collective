@@ -44,7 +44,8 @@ export function initChoreBuilder(host: HTMLElement) {
     $<HTMLElement>('[data-cb-weekly-day-label]').textContent=day;
     $<HTMLSelectElement>('[data-cb-weekly-day]').value=day;
     $<HTMLElement>('[data-cb-sheet-name]').textContent=(state.name||'My')+(state.name?'\u2019s':'');
-    status.textContent=`${state.jobs.filter(j=>j.frequency==='daily').length} daily and ${state.jobs.filter(j=>j.frequency==='weekly').length} weekly jobs. Edit any job or add another.`;
+    $<HTMLElement>('[data-cb-ready-name]').textContent=state.name?`${state.name}’s`:'Your';
+    status.textContent=`${state.jobs.filter(j=>j.frequency==='daily').length} daily · ${state.jobs.filter(j=>j.frequency==='weekly').length} weekly jobs. Tap a chore to edit it.`;
     $<HTMLElement>('.cb-daily-section').hidden=!daily.children.length;
     $<HTMLElement>('.cb-weekly-section').hidden=!weekly.children.length;
   }
@@ -60,19 +61,31 @@ export function initChoreBuilder(host: HTMLElement) {
     if(!state.jobs.length){status.textContent='Choose another household area for a starter chore';return;}
     save();showResults();
   }
-  $<HTMLButtonElement>('[data-cb-generate]').addEventListener('click',()=>{
-    if(state.jobs.length&&!confirm('Replace your current chart with new suggested chores?'))return;
-    generate();
+  const generateButton=$<HTMLButtonElement>('[data-cb-generate]');
+  const applyButton=$<HTMLButtonElement>('[data-cb-apply]');
+  const regenerateButton=$<HTMLButtonElement>('[data-cb-regenerate]');
+  const setupHelp=$<HTMLElement>('[data-cb-setup-help]');
+  const updateSetupMode=()=>{const existing=state.jobs.length>0;generateButton.hidden=existing;applyButton.hidden=!existing;regenerateButton.hidden=!existing;setupHelp.textContent=existing?'Save details without replacing your chores, or request a fresh set of suggestions.':'Start small. You can always add jobs later.';};
+  generateButton.addEventListener('click',()=>{
+    generate();updateSetupMode();
   });
+  applyButton.addEventListener('click',()=>{
+    if(!age.value){age.focus();return;}
+    const areas=Array.from(host.querySelectorAll<HTMLInputElement>('[data-cb-area]:checked')).map(x=>x.value as ChoreArea);
+    if(!areas.length){host.querySelector<HTMLDetailsElement>('.cb-areas-details')!.open=true;return;}
+    state.name=name.value.trim();state.age=Number(age.value);state.experienced=host.querySelector<HTMLInputElement>('input[name="cb-level"]:checked')?.value==='experienced';state.areas=areas;save();render();results.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  regenerateButton.addEventListener('click',()=>{if(!confirm('Replace your customized chore list with new suggestions?'))return;generate();updateSetupMode();});
   host.querySelectorAll<HTMLInputElement>('input[name="cb-style"]').forEach(input=>input.addEventListener('change',()=>{state.style=input.value==='bw'?'bw':'color';results.dataset.style=state.style;save();}));
   $<HTMLSelectElement>('[data-cb-weekly-day]').addEventListener('change',e=>{state.weeklyDay=(e.currentTarget as HTMLSelectElement).value;save();render();});
-  $<HTMLButtonElement>('[data-cb-back]').addEventListener('click',()=>host.querySelector('.cb-setup')?.scrollIntoView({behavior:'smooth',block:'start'}));
+  $<HTMLButtonElement>('[data-cb-back]').addEventListener('click',()=>{updateSetupMode();host.querySelector('.cb-setup')?.scrollIntoView({behavior:'smooth',block:'start'});});
   $<HTMLButtonElement>('[data-cb-add]').addEventListener('click',()=>{picker.hidden=false;picker.scrollIntoView({behavior:'smooth',block:'nearest'});filterChoices()});
   $<HTMLButtonElement>('[data-cb-picker-close]').addEventListener('click',()=>picker.hidden=true);
   const frequency=$<HTMLSelectElement>('[data-cb-frequency]');
   const filter=$<HTMLSelectElement>('[data-cb-filter]');
-  function filterChoices(){host.querySelectorAll<HTMLButtonElement>('[data-cb-choice]').forEach(b=>{b.hidden=b.dataset.frequency!==frequency.value||!!filter.value&&b.dataset.area!==filter.value||Number(b.dataset.age)>state.age;})}
-  frequency.addEventListener('change',filterChoices);filter.addEventListener('change',filterChoices);
+  const search=$<HTMLInputElement>('[data-cb-search]');
+  function filterChoices(){const term=search.value.trim().toLowerCase();host.querySelectorAll<HTMLButtonElement>('[data-cb-choice]').forEach(b=>{b.hidden=b.dataset.frequency!==frequency.value||!!filter.value&&b.dataset.area!==filter.value||Number(b.dataset.age)>state.age||!!term&&!b.textContent?.toLowerCase().includes(term);})}
+  frequency.addEventListener('change',filterChoices);filter.addEventListener('change',filterChoices);search.addEventListener('input',filterChoices);
   function addJob(title:string,freq:Frequency,id?:string){if(!title.trim())return;const count=state.jobs.filter(j=>j.frequency===freq).length;if(count>=4){status.textContent='Four '+freq+' jobs is the limit. Remove one first.';return;}
     state.jobs.push({id:(id||'custom')+'-'+Date.now(),title:title.trim(),frequency:freq,day:'Any day'});save();render();picker.hidden=true;
   }
@@ -88,4 +101,5 @@ export function initChoreBuilder(host: HTMLElement) {
   if(handoff?.age!==undefined)age.value=String(Math.min(18,Math.max(2,handoff.age)));
   if(saved&&Array.isArray(saved.jobs)&&saved.jobs.length){state=saved;name.value=saved.name;age.value=String(saved.age);host.querySelector<HTMLInputElement>(`input[name="cb-level"][value="${saved.experienced?'experienced':'beginner'}"]`)!.checked=true;host.querySelectorAll<HTMLInputElement>('[data-cb-area]').forEach(el=>el.checked=saved!.areas.includes(el.value as ChoreArea));results.hidden=false;render();}
   else if(handoff?.age!==undefined){generate();}
+  updateSetupMode();
 }
