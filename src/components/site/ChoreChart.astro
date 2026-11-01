@@ -475,4 +475,15 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-pick-dialog .cb-pick-card img{height:48px;width:48px}
  .chore-builder .cb-pick-dialog .cb-pick-header h2,.chore-builder .cb-mobile-dialog .cb-mobile-dialog-head h2{font-size:21px}
 }
+</style><style is:global>
+/* Keep daily/weekly choices visible in the mobile customize dialog. */
+@media(max-width:800px){
+ .chore-builder .cb-mobile-dialog[open]{display:flex;flex-direction:column;overflow-y:auto;max-height:calc(100dvh - 20px);gap:8px}
+ .chore-builder .cb-mobile-dialog .cb-mobile-dialog-chores{flex:none;min-height:auto;overflow:visible;display:grid;gap:7px}
+ .chore-builder .cb-mobile-dialog .cb-mobile-dialog-chores button{flex:none;min-height:52px;padding:9px 12px}
+ .chore-builder .cb-mobile-dialog .cb-mobile-dialog-fields{margin:5px 0;gap:8px}
+ .chore-builder .cb-mobile-dialog .cb-dialog-save{position:sticky;bottom:0;flex:none;z-index:2;padding:12px;background:#545454;box-shadow:0 -6px 12px #FBF7F1}
+ .chore-builder .cb-mobile-dialog .cb-mobile-dialog-style label{margin:3px 0}
+ .chore-builder .cb-mobile-dialog .cb-mobile-dialog-head h2{font-size:23px}
+}
 </style><script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
