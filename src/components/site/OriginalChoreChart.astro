@@ -1,0 +1,561 @@
+---
+/**
+ * The chore chart by age (markup, styles, sheet): pick an age group for starter daily and weekly chores plus three
+ * rewards (or start with one job someone can own: `oneJobs`), edit anything on the chart, add illustrated chores from the responsibility library, download a PNG
+ * (US Letter landscape, 11 × 8.5 in at 96 px/in, drawn at 2×). Starter chores: src/data/chore-chart.ts.
+ * Behavior: chore-chart.ts beside it, one module for every page with this chart (/chore-chart and the Organized
+ * Family Club's /club/tools/chore-chart). Classes are prefixed `cc-`. Saves in this browser under `storageKey`.
+ * Illustrated chores: a row's illustration id saves as `daily-icon-{i}` / `weekly-icon-{i}`; rows whose text
+ * matches a library job get its illustration. Slot: `footnote` (under the chart).
+ */
+import '@fontsource/kalam/latin-700.css';
+import { toolEmailGateEnabled } from '../../lib/tool-email';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { choreSets, DAILY_ROWS, WEEKDAYS } from '../../data/chore-chart';
+import ResponsibilityPicker from './ResponsibilityPicker.astro';
+
+interface Props {
+  storageKey: string;
+  /**
+   * Opened for someone by another page (src/lib/tool-handoff.ts; the Organized Family Club): their own saved chart,
+   * their name and age group filled in, age-suited jobs first. Public pages never set it.
+   */
+  handoff?: boolean;
+}
+
+const { storageKey, handoff = false } = Astro.props;
+const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const dailyRows = Array.from({ length: DAILY_ROWS }, (_, i) => i);
+const thresholds = ['50%', '75%', '100%'];
+---
+
+<div class="chore-chart-container" data-cc-key={storageKey} data-cc-handoff={handoff ? '' : undefined}>
+  <form class="cc-form" data-cc-form>
+    <label class="cc-field">
+      <span>Child’s name</span>
+      <input type="text" data-cc-name placeholder="e.g. Emma" autocomplete="off" maxlength="24" />
+    </label>
+    <label class="cc-field">
+      <span>Age group</span>
+      <select data-cc-age>
+        <option value="">Choose an age group</option>
+        {Object.entries(choreSets).map(([id, set]) => <option value={id}>{set.label}</option>)}
+      </select>
+    </label>
+    <button type="submit" class="cc-btn cc-btn-primary">Use suggested chores</button>
+    <button type="button" class="cc-btn cc-btn-one" data-cc-one-job>Start with one job</button>
+  </form>
+
+  <ResponsibilityPicker monochrome heading="Add illustrated chores" hint="Pick where it goes, then tap a chore.">
+    <label slot="target" class="cc-target">
+      <span>Add to</span>
+      <select data-cc-target>
+        <option value="daily">Daily chores</option>
+        {WEEKDAYS.map((day, i) => <option value={String(i)}>{day}</option>)}
+      </select>
+    </label>
+  </ResponsibilityPicker>
+
+  <fieldset class="cc-palette-picker" data-cc-advanced>
+    <legend>Choose your colors</legend>
+    <div class="cc-palette-options">
+      {Object.entries(toolPalettes).map(([id, palette]) => (
+        <button type="button" class="cc-palette-option" data-cc-palette={id} aria-pressed={id === defaultToolPalette}>
+          <span class="cc-swatches" aria-hidden="true">{palette.colors.map(color => <span style={{ backgroundColor: color }} />)}</span>
+          <span>{palette.label}</span>
+        </button>
+      ))}
+    </div>
+  </fieldset>
+  <div class="cc-actions">
+    <button type="button" class="cc-btn cc-btn-primary" data-cc-download>Download chart</button>
+    <button type="button" class="cc-btn" data-cc-clear>Clear chart</button>
+  </div>
+  <button type="button" class="cc-customize-link" data-cc-customize aria-expanded="false">Customize colors</button>
+  <p class="cc-hint" data-cc-hint role="status" aria-live="polite">Choose an age to fill the chart. Tap anything to edit.</p>
+  {toolEmailGateEnabled && <p class="cc-hint">Free to customize. Email required for your first download. No account needed.</p>}
+
+  <div class="cc-sheet" id="chore-chart">
+    <input type="hidden" data-field="palette" value={defaultToolPalette} />
+    <input type="hidden" data-field="age" data-cc-age-field />
+    <input type="hidden" data-field="name" data-cc-name-field />
+    <div class="cc-age" data-cc-age-badge hidden></div>
+    <div class="cc-head">
+      <div class="cc-for" data-cc-for></div>
+      <div class="cc-title">Weekly Chore Chart</div><p class="cc-motto">My jobs, start to finish.</p>
+    </div>
+
+    <div class="cc-main">
+      <section class="cc-daily" aria-label="Daily chores">
+        <div class="cc-section-title">Daily chores</div>
+        <div class="cc-grid cc-days" aria-hidden="true">
+          <span></span>
+          {days.map((d) => <span class="cc-day">{d}</span>)}
+        </div>
+        {
+          dailyRows.map((i) => (
+            <div class="cc-grid">
+              <span class="cc-chore-cell">
+                <input type="hidden" data-field={`daily-icon-${i}`} data-cc-icon-field />
+                <img class="cc-icon" data-cc-icon alt="" width="30" height="30" decoding="async" hidden />
+                <input class="cc-chore" type="text" data-field={`daily-${i}`} data-cc-row aria-label={`Daily chore ${i + 1}`} />
+              </span>
+              {days.map(() => (
+                <span class="cc-box" aria-hidden="true" />
+              ))}
+            </div>
+          ))
+        }
+      </section>
+
+      <section class="cc-weekly" aria-label="Weekly chores">
+        <div class="cc-section-title cc-section-title-sage">Weekly chores</div>
+        {
+          WEEKDAYS.map((day, i) => (
+            <div class="cc-week-row">
+              <span class="cc-weekday">{day}</span>
+              <span class="cc-chore-cell">
+                <input type="hidden" data-field={`weekly-icon-${i}`} data-cc-icon-field />
+                <img class="cc-icon" data-cc-icon alt="" width="30" height="30" decoding="async" hidden />
+                <input class="cc-chore" type="text" data-field={`weekly-${i}`} data-cc-row aria-label={`${day} chore`} />
+              </span>
+              <span class="cc-box" aria-hidden="true" />
+            </div>
+          ))
+        }
+      </section>
+    </div>
+
+    <div class="cc-rewards">
+      {
+        thresholds.map((t, i) => (
+          <div class="cc-reward">
+            <svg class="cc-star" viewBox="0 0 40 40" aria-hidden="true"><path d="m20 4 4.5 10.5L36 16l-8.5 8 2 12L20 30l-10 6 2-12-8-8 11.5-1.5Z" /></svg><span class="cc-threshold">Complete {t}</span>
+            <input class="cc-reward-text" type="text" data-field={`reward-${i}`} aria-label={`Reward for completing ${t}`} placeholder="Reward" />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <slot name="footnote" />
+</div>
+
+<style is:global>
+  .chore-chart-container {
+    --cc-ink: var(--color-warm-ink);
+    --cc-soft: var(--color-warm-soft);
+    --cc-rule: var(--color-warm-rule);
+    --cc-rose: var(--color-rose);
+    --cc-rose-deep: var(--color-rose-deep);
+    --cc-rose-wash: var(--color-rose-wash);
+    --cc-sage: var(--color-sage);
+    --cc-sage-wash: var(--color-sage-wash);
+    background-color: var(--color-ivory);
+    padding: 28px 20px 56px;
+    color: var(--cc-ink);
+  }
+  .chore-chart-container *,
+  .chore-chart-container *::before,
+  .chore-chart-container *::after {
+    box-sizing: border-box;
+  }
+
+  /* Form and buttons */
+  .cc-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 14px;
+    max-width: 1056px;
+    margin: 0 auto 18px;
+  }
+  .cc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 220px;
+    max-width: 320px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cc-soft);
+  }
+  .cc-field input,
+  .cc-field select {
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--cc-rule);
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--cc-ink);
+  }
+  .cc-field input:focus,
+  .cc-field select:focus {
+    outline: 2px solid var(--cc-rose-deep);
+    outline-offset: 1px;
+  }
+  .cc-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 auto 8px;
+  }
+  .cc-btn {
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--color-warm-button);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-warm-button);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .cc-btn:hover {
+    background: var(--cc-rose-wash);
+  }
+  .cc-btn-primary {
+    background: var(--color-warm-button);
+    color: #fff;
+  }
+  .cc-btn-primary:hover {
+    background: #362e2d;
+  }
+  .cc-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .cc-hint {
+    margin: 0 auto 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--cc-soft);
+  }
+
+  /* The sheet: US Letter landscape (11 × 8.5 in at 96 px/in). */
+  .cc-sheet {
+    --cc-accent-1: #EFEBE7; --cc-accent-2: #E6EEEA; --cc-accent-3: #F6F1E7;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 1056px;
+    max-width: 100%;
+    min-height: 816px;
+    margin: 0 auto;
+    padding: 30px 34px;
+    background: #fff;
+    border: 1px solid var(--cc-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(77, 69, 68, 0.08);
+    font-family: var(--font-serif);
+  }
+  .cc-age {
+    position: absolute;
+    top: 30px;
+    right: 34px;
+    padding: 5px 12px;
+    border: 1px solid var(--cc-rose);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cc-rose-deep);
+  }
+  .cc-head {
+    text-align: center;
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid var(--cc-rose);
+  }
+  .cc-for {
+    min-height: 18px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cc-soft);
+  }
+  .cc-title {
+    font-size: 38px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--cc-ink);
+  }
+  .cc-main {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .cc-section-title {
+    margin-bottom: 10px;
+    padding: 7px;
+    border-radius: 3px;
+    background: var(--cc-rose-wash);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--cc-rose-deep);
+  }
+  .cc-section-title-sage {
+    background: var(--cc-sage-wash);
+    color: #5d6b55;
+  }
+  .cc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(7, 40px);
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .cc-day {
+    padding: 4px 0;
+    border-radius: 3px;
+    background: var(--color-warm-button);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    color: #fff;
+  }
+  .cc-chore,
+  .cc-reward-text {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--cc-rule);
+    border-radius: 3px;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: var(--cc-ink);
+  }
+  .cc-chore:focus,
+  .cc-reward-text:focus {
+    outline: none;
+    border-color: var(--cc-rose);
+    background: var(--cc-rose-wash);
+  }
+  .cc-box {
+    height: 44px;
+    border: 1.5px solid var(--cc-rose);
+    border-radius: 3px;
+    background: #fff;
+  }
+  .cc-week-row {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) 40px;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .cc-week-row .cc-box {
+    border-color: var(--cc-sage);
+  }
+  .cc-weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    border-radius: 3px;
+    background: var(--cc-sage-wash);
+    border: 1px solid var(--cc-sage);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5d6b55;
+  }
+  .cc-rewards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .cc-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border: 1px dashed var(--cc-rose);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .cc-threshold {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--cc-rose-deep);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .cc-reward-text {
+    height: 34px;
+    border-color: transparent;
+    text-align: center;
+  }
+  .cc-reward-text::placeholder {
+    color: #c4b8b2;
+  }
+  .cc-footnote {
+    margin: 28px auto 0;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--cc-soft);
+  }
+
+  @media (max-width:768px) {
+    .cc-form { display:grid; grid-template-columns:1fr; gap:12px; }
+    .cc-field { width:100%; max-width:none; }
+    .cc-form .cc-btn-primary { width:100%; border-radius:12px; font-size:.9rem; letter-spacing:0; text-transform:none; }
+    .cc-form .cc-btn-one { width:100%; border-radius:12px; font-size:.9rem; }
+    .cc-palette-picker { margin-top:20px; }
+    .cc-palette-picker legend { text-align:left; }
+    .cc-palette-options { justify-content:flex-start; gap:6px; }
+    .cc-palette-option { border-radius:12px; padding:8px; min-height:44px; }
+    .cc-actions { display:grid; grid-template-columns:1fr auto; }
+    .cc-actions .cc-btn { border-radius:12px; letter-spacing:0; text-transform:none; font-size:.85rem; }
+    .cc-hint { max-width:340px; font-size:.83rem; line-height:1.5; }
+  }
+  .cc-customize-link { display:none; }
+  @media (max-width:768px) {
+    .chore-chart-container:not(.cc-exporting) { display:flex; flex-direction:column; }
+    .chore-chart-container:not(.cc-exporting) .cc-form { order:1; }
+    .chore-chart-container:not(.cc-exporting) .cc-sheet { order:2; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions { order:3; margin-top:16px; }
+    .chore-chart-container:not(.cc-exporting) .cc-customize-link { display:block; order:4; align-self:center; min-height:44px; margin-top:8px; padding:8px 12px; text-decoration:underline; background:transparent; border:0; color:var(--cc-ink); }
+    .chore-chart-container:not(.cc-exporting) .cc-palette-picker { order:5; display:none; }
+    .chore-chart-container:not(.cc-exporting) .cc-palette-picker.cc-advanced-open { display:block; }
+    .chore-chart-container:not(.cc-exporting) .cc-hint { order:6; }
+    .chore-chart-container:not(.cc-exporting) .cc-footnote { order:7; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions { display:flex; justify-content:center; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions [data-cc-download] { flex:1; max-width:440px; min-height:52px; }
+    .chore-chart-container:not(.cc-exporting) .cc-actions [data-cc-clear] { font-size:.8rem; }
+    .chore-chart-container:not(.cc-exporting) .cc-form .cc-btn-primary { display:none; }
+  }
+  /* Phones and small tablets: one section under the other. The PNG is always the Letter layout. */
+  @media (max-width: 768px) {
+    .chore-chart-container:not(.cc-exporting) .cc-sheet {
+      min-height: 0;
+      padding: 18px 10px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-age {
+      position: static;
+      align-self: center;
+      margin-bottom: 10px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-title {
+      font-size: 28px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-main,
+    .chore-chart-container:not(.cc-exporting) .cc-rewards {
+      grid-template-columns: 1fr;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-grid {
+      grid-template-columns: minmax(0, 1fr) repeat(7, 22px);
+      gap: 3px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-week-row {
+      grid-template-columns: 82px minmax(0, 1fr) 30px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-box {
+      height: 30px;
+    }
+    .chore-chart-container:not(.cc-exporting) .cc-chore {
+      height: 36px;
+      padding: 0 6px;
+      font-size: 15px;
+    }
+  }
+
+.cc-title { font-family: var(--font-sans); font-size: 28px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+.cc-for { font-family: 'Kalam', var(--font-serif); font-size: 26px; text-transform: none; letter-spacing: .04em; min-height: 34px; }
+.cc-head { border-bottom: 0; }
+.cc-motto { margin-top: 7px; font-size: 17px; font-style: italic; color: var(--cc-rose-deep); }
+.cc-section-title, .cc-section-title-sage { background: transparent; font-family: 'Kalam', var(--font-serif); font-size: 32px; text-transform: none; color: var(--cc-ink); letter-spacing: .06em; padding: 0; }
+.cc-main { gap: 20px; }
+.cc-daily, .cc-weekly { min-width: 0; padding: 14px 12px 10px; border: 2px solid var(--cc-accent-1); border-radius: 14px; }
+.cc-weekly { border-color: var(--cc-accent-2); }
+.cc-grid { grid-template-columns: minmax(0,1fr) repeat(7,32px); }
+.cc-day { background: var(--cc-accent-3); color: var(--cc-ink); border-radius: 8px; }
+.cc-chore { border: 0; border-radius: 999px; background: linear-gradient(transparent 22%, var(--cc-accent-1) 22%, var(--cc-accent-1) 86%, transparent 86%); font-family: var(--font-sans); font-size: 13px; }
+.cc-grid:nth-child(3n + 1) .cc-chore, .cc-week-row:nth-child(3n + 1) .cc-chore { background: linear-gradient(transparent 22%, var(--cc-accent-2) 22%, var(--cc-accent-2) 86%, transparent 86%); }
+.cc-grid:nth-child(3n + 2) .cc-chore, .cc-week-row:nth-child(3n + 2) .cc-chore { background: linear-gradient(transparent 22%, var(--cc-accent-3) 22%, var(--cc-accent-3) 86%, transparent 86%); }
+.cc-chore:focus, .cc-reward-text:focus { outline: 2px solid var(--cc-rose); outline-offset: 1px; }
+.cc-box { height: 32px; border-radius: 6px; border-color: #b6aaa4; }
+.cc-week-row { grid-template-columns: 80px minmax(0,1fr) 32px; }
+.cc-weekday { border: 0; background: transparent; font-family: 'Kalam', var(--font-serif); font-size: 17px; text-transform: none; letter-spacing: 0; color: var(--cc-ink); }
+.cc-reward { border: 2px solid var(--cc-accent-1); border-radius: 14px; gap: 4px; padding: 8px 12px; }
+.cc-reward:nth-child(2) { border-color: var(--cc-accent-2); }
+.cc-reward:nth-child(3) { border-color: var(--cc-accent-3); }
+.cc-star { width: 30px; height: 30px; fill: var(--cc-accent-1); stroke: var(--cc-ink); stroke-width: 1.5; stroke-linejoin: round; }
+.cc-reward:nth-child(2) .cc-star { fill: var(--cc-accent-2); }
+.cc-reward:nth-child(3) .cc-star { fill: var(--cc-accent-3); }
+.cc-threshold { background: transparent; color: var(--cc-ink); font-family: 'Kalam', var(--font-serif); font-size: 20px; letter-spacing: .02em; text-transform: none; }
+.cc-reward-text { font-family: var(--font-sans); font-size: 13px; }
+@media (max-width: 768px) {
+.chore-chart-container:not(.cc-exporting) .cc-title { font-size: 22px; letter-spacing: .08em; }
+.chore-chart-container:not(.cc-exporting) .cc-daily, .chore-chart-container:not(.cc-exporting) .cc-weekly { padding: 12px 6px; }
+.chore-chart-container:not(.cc-exporting) .cc-chore { font-size: 13px; }
+.chore-chart-container:not(.cc-exporting) .cc-week-row { grid-template-columns: 66px minmax(0,1fr) 28px; }
+.chore-chart-container:not(.cc-exporting) .cc-weekday { font-size: 15px; }
+}
+
+.cc-palette-picker { border: 0; padding: 0; margin: 0 auto 20px; max-width: 1056px; text-align: center; }
+.cc-palette-picker legend { float: none; width: 100%; margin-bottom: 10px; font-size: .85rem; color: var(--cc-soft); }
+.cc-palette-options { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.cc-palette-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--cc-rule); border-radius: 10px; background: #fff; color: var(--cc-ink); font-size: .8rem; cursor: pointer; }
+.cc-palette-option[aria-pressed="true"] { border: 2px solid var(--cc-ink); padding: 9px 13px; background: var(--color-ivory); }
+.cc-palette-option:focus-visible { outline: 2px solid var(--cc-ink); outline-offset: 3px; }
+.cc-swatches { display: flex; gap: 3px; }
+.cc-swatches span { width: 15px; height: 15px; border: 1px solid #b8ada6; border-radius: 50%; }
+
+/* Illustrated chores: a small icon inside the row's highlight, tinted circle by category. */
+.chore-chart-container .rp { max-width: 1056px; }
+.cc-target { display: flex; align-items: center; gap: 10px; font-size: .8rem; color: var(--cc-soft); }
+.cc-target select { min-height: 44px; padding: 0 12px; border: 1px solid var(--cc-rule); border-radius: 3px; background: #fff; font-family: var(--font-serif); font-size: 1rem; color: var(--cc-ink); }
+.cc-target select:focus { outline: 2px solid var(--cc-ink); outline-offset: 1px; }
+.cc-chore-cell { position: relative; display: block; min-width: 0; }
+.cc-icon { position: absolute; top: 50%; left: 4px; width: 30px; height: 30px; padding: 1px; border-radius: 0; background: transparent; transform: translateY(-50%); pointer-events: none; }
+.cc-icon[hidden] { display: none; }
+.cc-chore-cell:has(.cc-icon:not([hidden])) .cc-chore { padding-left: 40px; }
+@media (max-width: 768px) {
+  .chore-chart-container:not(.cc-exporting) .rp { order: 1; width: 100%; }
+  .chore-chart-container:not(.cc-exporting) .cc-icon { width: 26px; height: 26px; left: 2px; }
+  .chore-chart-container:not(.cc-exporting) .cc-chore-cell:has(.cc-icon:not([hidden])) .cc-chore { padding-left: 32px; }
+}
+</style>
+
+<script>
+  import { initChoreChart } from './chore-chart';
+  import { readToolHandoff } from '../../lib/tool-handoff';
+
+  for (const host of document.querySelectorAll<HTMLElement>('.chore-chart-container')) {
+    initChoreChart(host, host.hasAttribute('data-cc-handoff') ? readToolHandoff('chore-chart') : null);
+  }
+</script>
