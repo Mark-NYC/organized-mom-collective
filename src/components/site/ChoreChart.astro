@@ -432,6 +432,7 @@ const { storageKey, handoff = false } = Astro.props;
 </style><style is:global>
 .chore-builder .cb-mobile-actions{display:none}
 .chore-builder .cb-mobile-dialog{width:min(530px,calc(100vw - 24px));max-height:90dvh;overflow:auto;background:#FBF7F1;border:1px solid #DDD6CE;border-radius:16px;padding:20px;color:#545454}
+.chore-builder .cb-mobile-dialog[open],.chore-builder .cb-pick-dialog[open]{position:fixed;inset:0;margin:auto}
 .chore-builder .cb-mobile-dialog::backdrop{background:rgba(25,30,26,.65)}
 .chore-builder .cb-mobile-dialog-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .chore-builder .cb-mobile-dialog-head h2{font:700 26px Georgia,serif;margin:0}
