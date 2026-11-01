@@ -50,6 +50,7 @@ const { storageKey, handoff = false } = Astro.props;
     
     
   </section>
+  <dialog class="cb-pick-dialog" data-cb-pick-dialog aria-label="Choose chores"><div class="cb-pick-header"><h2 data-cb-pick-title>Choose chores</h2><button type="button" data-cb-pick-close aria-label="Close">✕</button></div><p>Tap up to four chores for this chart.</p><div class="cb-pick-tabs"><button type="button" data-cb-pick-tab="daily">Daily</button><button type="button" data-cb-pick-tab="weekly">Weekly</button></div><p data-cb-pick-count aria-live="polite"></p><div class="cb-pick-grid" data-cb-pick-grid></div><label class="cb-pick-custom">Add your own chore<input data-cb-pick-custom type="text" maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-pick-custom-add>Add custom chore</button><p data-cb-pick-error role="status"></p><div class="cb-pick-footer"><button type="button" data-cb-pick-cancel>Cancel</button><button type="button" class="cb-primary" data-cb-pick-save>Save chores</button></div></dialog>
   <button type="button" class="cb-mobile-create cb-primary" data-cb-mobile-create hidden>Create my chore chart</button>
   <div class="cb-zoom-overlay" data-cb-zoom-overlay hidden role="dialog" aria-modal="true" aria-label="Enlarged chore chart preview"><div class="cb-zoom-bar"><strong>Full-size preview</strong><button type="button" data-cb-zoom-close aria-label="Close enlarged preview">✕ Close</button></div><div class="cb-zoom-scroll" data-cb-zoom-scroll><div class="cb-zoom-stage" data-cb-zoom-stage></div></div><p>Swipe sideways to inspect the whole chart.</p></div>
   <slot name="footnote"/>
@@ -390,4 +391,24 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-zoom-overlay{order:10}
 }
 </style>
-<script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
+<style is:global>
+.chore-builder .cb-illustrated-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.chore-builder .cb-illustrated-actions button{background:#F4F7F2;min-height:55px;border-color:#C5D2C5}
+.chore-builder .cb-pick-dialog{width:min(700px,calc(100vw - 24px));max-height:90dvh;overflow-y:auto;padding:20px;border:1px solid #DDD6CE;border-radius:16px;background:#FBF7F1;color:#545454}
+.chore-builder .cb-pick-dialog::backdrop{background:rgba(28,33,29,.65)}
+.chore-builder .cb-pick-header,.chore-builder .cb-pick-footer{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chore-builder .cb-pick-header h2{font:700 27px Georgia,serif;margin:0}
+.chore-builder .cb-pick-dialog p{font-size:13px;color:#706E6A}
+.chore-builder .cb-pick-tabs{display:flex;gap:7px;margin:12px 0}
+.chore-builder .cb-pick-tabs button{flex:1}
+.chore-builder .cb-pick-tabs button[aria-pressed="true"]{background:#D4DFC4;border-color:#879C86}
+.chore-builder .cb-pick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:44dvh;overflow:auto}
+.chore-builder .cb-pick-card{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;min-height:130px;padding:8px;background:white;border:2px solid #E1DDD5;border-radius:12px}
+.chore-builder .cb-pick-card[aria-pressed="true"]{border-color:#799B83;background:#EEF5EB}
+.chore-builder .cb-pick-card img{width:64px;height:64px;object-fit:contain}
+.chore-builder .cb-pick-card span{font-size:12px;line-height:1.3;text-align:center}
+.chore-builder .cb-pick-custom{display:grid;gap:6px;margin:15px 0 8px;font-size:13px;font-weight:700}
+.chore-builder .cb-pick-footer{justify-content:flex-end;margin-top:13px}
+.chore-builder .cb-toolbar-actions [data-cb-add]{display:none!important}
+@media(max-width:800px){.chore-builder .cb-illustrated-actions{grid-template-columns:1fr}.chore-builder .cb-control-panel .cb-toolbar-new .cb-illustrated-actions{order:-1}.chore-builder .cb-pick-dialog{padding:14px}.chore-builder .cb-pick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style><script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
