@@ -457,4 +457,22 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-control-panel{display:none!important}
 }
 @media(min-width:801px){.chore-builder .cb-mobile-dialog{display:none!important}}
+</style><style is:global>
+/* Dialog shells stay inside the viewport; only the choice grid scrolls. */
+.chore-builder .cb-pick-dialog[open],.chore-builder .cb-mobile-dialog[open]{position:fixed;inset:0;margin:auto;box-sizing:border-box;max-height:calc(100dvh - 28px);overflow:hidden;display:flex;flex-direction:column;gap:8px}
+.chore-builder .cb-pick-dialog .cb-pick-header,.chore-builder .cb-mobile-dialog .cb-mobile-dialog-head{flex:none}
+.chore-builder .cb-pick-dialog .cb-pick-grid{flex:1;min-height:75px;max-height:none;overflow-y:auto;overscroll-behavior:contain}
+.chore-builder .cb-pick-dialog .cb-pick-footer,.chore-builder .cb-mobile-dialog .cb-dialog-save{flex:none;position:sticky;bottom:0;background:#FBF7F1;box-shadow:0 -8px 13px #FBF7F1}
+.chore-builder .cb-pick-dialog .cb-pick-custom{flex:none;margin:5px 0 0}
+.chore-builder .cb-pick-dialog>p{flex:none;margin:3px 0}
+.chore-builder .cb-pick-dialog .cb-pick-tabs{flex:none;margin:2px 0}
+.chore-builder .cb-mobile-dialog .cb-mobile-dialog-fields{flex:none;margin:6px 0}
+.chore-builder .cb-mobile-dialog .cb-mobile-dialog-chores{flex:1;min-height:0;overflow-y:auto}
+.chore-builder .cb-mobile-dialog .cb-dialog-message{margin:0}
+@media(max-height:680px){
+ .chore-builder .cb-pick-dialog[open],.chore-builder .cb-mobile-dialog[open]{padding:10px;gap:4px;max-height:calc(100dvh - 12px)}
+ .chore-builder .cb-pick-dialog .cb-pick-card{min-height:100px}
+ .chore-builder .cb-pick-dialog .cb-pick-card img{height:48px;width:48px}
+ .chore-builder .cb-pick-dialog .cb-pick-header h2,.chore-builder .cb-mobile-dialog .cb-mobile-dialog-head h2{font-size:21px}
+}
 </style><script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
