@@ -24,7 +24,7 @@ const { storageKey, handoff = false } = Astro.props;
     <button type="button" class="cb-mobile-customize-toggle" data-cb-customize-toggle aria-expanded="false">Customize chart <span aria-hidden="true">⌄</span></button>
     <div class="cb-toolbar cb-toolbar-new" data-cb-toolbar hidden>
       <div class="cb-toolbar-title"><h2><span data-cb-ready-name>Your</span> chart</h2><p data-cb-status role="status" aria-live="polite">Edit chores directly on the chart below.</p></div>
-      <div class="cb-toolbar-settings">
+      <div class="cb-illustrated-actions"><button type="button" data-cb-pick="daily">Choose daily chores</button><button type="button" data-cb-pick="weekly">Choose weekly chores</button></div><div class="cb-toolbar-settings">
         <label class="cb-weekly-day-control">Weekly jobs day<select data-cb-weekly-day><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label>
         <fieldset class="cb-style-switch" aria-label="Print style"><legend>Print style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset>
       </div>
