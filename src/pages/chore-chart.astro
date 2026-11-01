@@ -7,6 +7,7 @@
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import ChoreChart from '../components/site/ChoreChart.astro';
+import OriginalChoreChart from '../components/site/OriginalChoreChart.astro';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
 
@@ -40,11 +41,44 @@ const jsonLd = [
     </div>
   </section>
 
-  <ChoreChart storageKey="omc:chore-chart:v1">
-    <p slot="footnote" class="cc-footnote">
-      Make a matching <a href={routes.routineChart} class="text-link">picture routine chart</a>, or pair it with the weekly
-      {' '}<a href={routes.planner} class="text-link">Planner</a> or the
-      {' '}<a href={routes.calendar} data-cta="chore-chart" class="text-link">Family Wall Calendar</a>
-    </p>
-  </ChoreChart>
+  <div class="cc-version-shell" data-cc-version-shell data-version="new">
+    <div class="cc-version-notice" data-chart-modern>
+      <span>Looking for the chore chart you saw on Pinterest?</span>
+      <a href="?version=original">Use the original chore chart →</a>
+    </div>
+    <div class="cc-version-notice" data-chart-original>
+      <span>You're using the original chore chart.</span>
+      <a href="/chore-chart/">Try the new chore chart →</a>
+    </div>
+    <div data-chart-modern>
+      <ChoreChart storageKey="omc:chore-chart:v1">
+        <p slot="footnote" class="cc-footnote">
+          Make a matching <a href={routes.routineChart} class="text-link">picture routine chart</a>, or pair it with the weekly
+          {' '}<a href={routes.planner} class="text-link">Planner</a> or the
+          {' '}<a href={routes.calendar} data-cta="chore-chart" class="text-link">Family Wall Calendar</a>
+        </p>
+      </ChoreChart>
+    </div>
+    <div data-chart-original>
+      <OriginalChoreChart storageKey="omc:chore-chart:v1">
+        <p slot="footnote" class="cc-footnote">
+          Make a matching <a href={routes.routineChart} class="text-link">picture routine chart</a>, or pair it with the weekly
+          {' '}<a href={routes.planner} class="text-link">Planner</a> or the
+          {' '}<a href={routes.calendar} data-cta="chore-chart" class="text-link">Family Wall Calendar</a>
+        </p>
+      </OriginalChoreChart>
+    </div>
+  </div>
+  <style>
+    .cc-version-shell[data-version="new"] [data-chart-original],
+    .cc-version-shell[data-version="original"] [data-chart-modern] { display:none!important; }
+    .cc-version-notice{display:flex;align-items:center;justify-content:center;gap:8px 16px;flex-wrap:wrap;text-align:center;padding:13px 18px;background:#FBF7F1;color:#77736F;font-size:13px}
+    .cc-version-notice a{color:#545454;text-underline-offset:3px;text-decoration:underline;font-weight:600}
+  </style>
+  <script is:inline>
+    (function () {
+      var root = document.querySelector('[data-cc-version-shell]');
+      if (root) root.setAttribute('data-version', new URLSearchParams(window.location.search).get('version') === 'original' ? 'original' : 'new');
+    })();
+  </script>
 </PublicLayout>
