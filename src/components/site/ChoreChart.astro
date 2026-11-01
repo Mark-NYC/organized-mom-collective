@@ -367,6 +367,8 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-mobile-basics input,.chore-builder .cb-mobile-basics select{min-width:0;width:100%;font-size:16px}
  .chore-builder .cb-control-panel .cb-setup{order:3;display:none!important;background:white;border:1px solid #E2DDD5;border-radius:12px;padding:14px;margin:10px 0 0}
  .chore-builder .cb-control-panel .cb-setup .cb-inputs{display:none!important}
+ .chore-builder .cb-control-panel .cb-setup .cb-setup-actions [data-cb-apply]{display:inline-block}
+ .chore-builder .cb-control-panel .cb-setup .cb-setup-actions [data-cb-regenerate]{display:inline-block}
  .chore-builder .cb-control-panel .cb-setup .cb-setup-actions{margin-top:12px}
  .chore-builder .cb-control-panel .cb-toolbar-new{order:4;display:none!important;background:white;border:1px solid #E2DDD5;border-radius:12px;padding:14px;margin:10px 0 0}
  .chore-builder .cb-control-panel .cb-toolbar-new .cb-toolbar-title,.chore-builder .cb-control-panel .cb-save-note,.chore-builder .cb-control-panel .cb-edit-details{display:none!important}
@@ -375,6 +377,7 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-control-panel .cb-picker{order:5;margin:10px 0 0}
  .chore-builder .cb-mobile-customize-toggle{display:flex;order:2;align-items:center;justify-content:space-between;width:100%;margin:12px 0 0;padding:14px 16px;background:white;border:1px solid #DAD5CC;border-radius:10px;font-size:15px;text-align:left}
  .chore-builder .cb-mobile-customize-toggle span{font-size:23px;line-height:1}
+ .chore-builder .cb-mobile-customize-toggle[hidden]{display:none!important}
  .chore-builder[data-mobile-customize="true"] .cb-setup{display:block!important}
  .chore-builder[data-mobile-customize="true"] .cb-toolbar-new:not([hidden]){display:grid!important}
  .chore-builder[data-mobile-customize="true"] .cb-mobile-customize-toggle span{transform:rotate(180deg)}
