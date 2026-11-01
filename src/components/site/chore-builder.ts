@@ -15,6 +15,13 @@ export function initChoreBuilder(host: HTMLElement) {
   const daily=$<HTMLElement>('[data-cb-daily]');
   const weekly=$<HTMLElement>('[data-cb-weekly]');
   const picker=$<HTMLElement>('[data-cb-picker]');
+  const sheet=$<HTMLElement>('[data-cb-sheet]');
+  const frame=$<HTMLElement>('[data-cb-preview-frame]');
+  const zoom=$<HTMLElement>('[data-cb-zoom-overlay]');
+  const zoomStage=$<HTMLElement>('[data-cb-zoom-stage]');
+  const downloadButtons=host.querySelectorAll<HTMLButtonElement>('[data-cb-download],[data-cb-mobile-download]');
+  const fitPreview=()=>{if(window.innerWidth>800){sheet.style.transform='';frame.style.height='';return;}const available=frame.clientWidth;if(!available)return;const scale=available/1056;sheet.style.transform=`scale(${scale})`;frame.style.height=`${Math.ceil(Math.max(816,sheet.scrollHeight)*scale)}px`;};
+  const schedulePreview=()=>requestAnimationFrame(fitPreview);
   const status=$<HTMLElement>('[data-cb-status]');
   const panel=$<HTMLElement>('[data-cb-panel]');
   const toolbar=$<HTMLElement>('[data-cb-toolbar]');
@@ -51,6 +58,7 @@ export function initChoreBuilder(host: HTMLElement) {
     status.textContent=`${state.jobs.filter(j=>j.frequency==='daily').length} daily · ${state.jobs.filter(j=>j.frequency==='weekly').length} weekly jobs. Tap a chore to edit it.`;
     $<HTMLElement>('.cb-daily-section').hidden=!daily.children.length;
     $<HTMLElement>('.cb-weekly-section').hidden=!weekly.children.length;
+    schedulePreview();
   }
   function showResults(){results.hidden=false;render();refreshPanel();delete panel.dataset.editing;panel.scrollIntoView({behavior:'smooth',block:'start'})}
   function generate() {
@@ -99,11 +107,25 @@ export function initChoreBuilder(host: HTMLElement) {
   }
   host.querySelectorAll<HTMLButtonElement>('[data-cb-choice]').forEach(b=>b.addEventListener('click',()=>{const c=choreChoices.find(x=>x.id===b.dataset.cbChoice);if(c)addJob(c.label,frequency.value as Frequency,c.id)}));
   $<HTMLButtonElement>('[data-cb-custom-add]').addEventListener('click',()=>{const custom=$<HTMLInputElement>('[data-cb-custom]');addJob(custom.value,frequency.value as Frequency);custom.value=''});
-  $<HTMLButtonElement>('[data-cb-download]').addEventListener('click',async()=>{
-    const sheet=$<HTMLElement>('[data-cb-sheet]');
-    const button=$<HTMLButtonElement>('[data-cb-download]');
-    await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});
+  downloadButtons.forEach(button=>button.addEventListener('click',async()=>{
+    // Export the original full-size sheet, never the scaled mobile presentation.
+    const previous=sheet.style.transform;
+    sheet.style.transform='none';
+    try{await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});}
+    finally{sheet.style.transform=previous;schedulePreview();}
+  }));
+  const closeZoom=()=>{zoom.hidden=true;zoomStage.replaceChildren();document.body.style.overflow='';$<HTMLButtonElement>('[data-cb-zoom-open]').focus();};
+  $<HTMLButtonElement>('[data-cb-zoom-open]').addEventListener('click',()=>{
+    const copy=sheet.cloneNode(true) as HTMLElement;
+    copy.removeAttribute('data-cb-sheet');copy.style.transform='';copy.querySelectorAll('input').forEach(input=>{input.readOnly=true;input.tabIndex=-1;});
+    copy.querySelectorAll('button').forEach(button=>button.remove());
+    zoomStage.replaceChildren(copy);zoom.hidden=false;document.body.style.overflow='hidden';
+    $<HTMLButtonElement>('[data-cb-zoom-close]').focus();
   });
+  $<HTMLButtonElement>('[data-cb-zoom-close]').addEventListener('click',closeZoom);
+  zoom.addEventListener('keydown',event=>{if(event.key==='Escape')closeZoom();});
+  window.addEventListener('resize',schedulePreview);
+  if(document.fonts)document.fonts.ready.then(schedulePreview);
   let saved:State|null=null;try{saved=JSON.parse(localStorage.getItem(key)||'null') as State|null;}catch{}
   if(handoff?.name)name.value=handoff.name;
   if(handoff?.age!==undefined)age.value=String(Math.min(18,Math.max(2,handoff.age)));
