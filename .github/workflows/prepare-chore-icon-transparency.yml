@@ -1,0 +1,33 @@
+name: Prepare transparent chore icons
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prepare-chore-icon-transparency.py'
+      - 'assets/icons/ofc/updatedicons/svg/*.jpg'
+      - '.github/workflows/prepare-chore-icon-transparency.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pillow numpy scipy
+      - run: python scripts/prepare-chore-icon-transparency.py
+      - name: Commit transparent WebP artwork
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/icons/ofc/updatedicons/svg/*.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate transparent chore icon WebPs"
+            git push
+          fi
