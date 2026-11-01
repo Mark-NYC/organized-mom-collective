@@ -56,6 +56,7 @@ export function initChoreBuilder(host: HTMLElement) {
     return row;
   }
   function render() {
+    const mobileButton=host.querySelector<HTMLButtonElement>('[data-cb-mobile-download]');if(mobileButton)mobileButton.disabled=!state.jobs.length;
     results.dataset.style=state.style==='bw'?'bw':'color';
     host.querySelector<HTMLInputElement>(`input[name="cb-style"][value="${results.dataset.style}"]`)!.checked=true;
     daily.replaceChildren(...state.jobs.filter(j=>j.frequency==='daily').map(renderRow));
@@ -170,6 +171,47 @@ export function initChoreBuilder(host: HTMLElement) {
     if(draft.filter(j=>j.frequency===pickFrequency).length>=4){pickError.textContent='Choose up to four chores.';return;}
     draft.push({id:'custom-'+Date.now(),title,frequency:pickFrequency,day:'Any day'});input.value='';pickError.textContent='';drawPick();
   });
+
+  const mobileDialog=$<HTMLDialogElement>('[data-cb-mobile-dialog]');
+  const dialogName=$<HTMLInputElement>('[data-cb-dialog-name]');
+  const dialogAge=$<HTMLSelectElement>('[data-cb-dialog-age]');
+  const dialogDay=$<HTMLSelectElement>('[data-cb-dialog-weekday]');
+  const dialogMessage=$<HTMLElement>('[data-cb-dialog-message]');
+  const mobileDownload=$<HTMLButtonElement>('[data-cb-mobile-download]');
+  const updateDialogCounts=()=>{
+    $<HTMLElement>('[data-cb-dialog-daily-count]').textContent=state.jobs.filter(j=>j.frequency==='daily').length+' selected';
+    $<HTMLElement>('[data-cb-dialog-weekly-count]').textContent=state.jobs.filter(j=>j.frequency==='weekly').length+' selected';
+  };
+  const openMobileDialog=()=>{
+    dialogName.value=name.value;dialogAge.value=age.value;dialogDay.value=state.weeklyDay||'Saturday';
+    host.querySelector<HTMLInputElement>('input[name="cb-dialog-style"][value="'+(state.style==='bw'?'bw':'color')+'"]')!.checked=true;
+    dialogMessage.textContent='';updateDialogCounts();mobileDialog.showModal();
+  };
+  $<HTMLButtonElement>('[data-cb-customize-open]').addEventListener('click',openMobileDialog);
+  $<HTMLButtonElement>('[data-cb-mobile-dialog-close]').addEventListener('click',()=>mobileDialog.close());
+  host.querySelectorAll<HTMLButtonElement>('[data-cb-dialog-pick]').forEach(b=>b.addEventListener('click',()=>{
+    if(!dialogAge.value){dialogMessage.textContent='Choose an age before selecting chores.';dialogAge.focus();return;}
+    // Save the pending name and age without replacing existing chores.
+    age.value=dialogAge.value;name.value=dialogName.value;state.age=Number(dialogAge.value);state.name=dialogName.value.trim();
+    if(!state.jobs.length){const suggested=recommendedChores(state.age,false,state.areas);state.jobs=[...suggested.daily,...suggested.weekly].map(c=>({id:c.id,title:c.label,frequency:c.frequency,day:'Any day'}));}
+    mobileDialog.close();
+    openPick(b.dataset.cbDialogPick as Frequency);
+  }));
+  let returnToMobile=false;
+  host.querySelectorAll<HTMLButtonElement>('[data-cb-dialog-pick]').forEach(b=>b.addEventListener('click',()=>{returnToMobile=true;}));
+  pickDialog.addEventListener('close',()=>{
+    if(returnToMobile){returnToMobile=false;updateDialogCounts();openMobileDialog();}
+  });
+  $<HTMLButtonElement>('[data-cb-dialog-save]').addEventListener('click',()=>{
+    if(!dialogAge.value){dialogMessage.textContent='Choose your child’s age to create the chart.';dialogAge.focus();return;}
+    name.value=dialogName.value;age.value=dialogAge.value;
+    if(!state.jobs.length){generate();updateSetupMode();}
+    else{state.name=dialogName.value.trim();state.age=Number(dialogAge.value);save();results.hidden=false;render();}
+    state.weeklyDay=dialogDay.value;
+    state.style=host.querySelector<HTMLInputElement>('input[name="cb-dialog-style"]:checked')?.value==='bw'?'bw':'color';
+    save();results.hidden=false;render();refreshPanel();mobileDialog.close();
+  });
+  mobileDownload.disabled=!state.jobs.length;
   downloadButtons.forEach(button=>button.addEventListener('click',async()=>{
     // Export the original full-size sheet, never the scaled mobile presentation.
     const previous=sheet.style.transform;
