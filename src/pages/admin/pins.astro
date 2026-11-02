@@ -1,0 +1,7 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import PinterestQueue from '../../components/admin/PinterestQueue';
+---
+<AdminLayout title="Pinterest Studio" section="pins">
+  <PinterestQueue client:only="react" />
+</AdminLayout>
