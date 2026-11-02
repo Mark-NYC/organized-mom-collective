@@ -41,6 +41,15 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const rows = sheet.querySelectorAll('[data-mr-step]').length;
   const stepFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-step]'));
   const iconFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-icon-field]'));
+  const editorFields = Array.from(host.querySelectorAll<HTMLInputElement>('[data-mr-editor-step]'));
+  const editorRows = Array.from(host.querySelectorAll<HTMLElement>('.mr-editor-row'));
+  let focusedEditor: HTMLInputElement | null = null;
+  function renderEditor() {
+    editorFields.forEach((input, i) => {
+      if (input !== focusedEditor && input.value !== stepFields[i].value) input.value = stepFields[i].value;
+      editorRows[i]?.toggleAttribute('data-filled', !!stepFields[i].value.trim());
+    });
+  }
   const iconSlots = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mr-icon]'));
   const anchorFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-anchor]'));
   const summerField = sheet.querySelector<HTMLInputElement>('[data-mr-summer-field]')!;
@@ -56,7 +65,9 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     let any = false;
     iconSlots.forEach((slot, i) => {
       const id = iconFields[i].value;
-      const src = choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value);
+      const filled = !!stepFields[i].value.trim();
+      slot.closest('.mr-step')?.toggleAttribute('data-mr-empty', !filled);
+      const src = filled ? (choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value)) : null;
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
       if (src) {
@@ -65,6 +76,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       } else img.removeAttribute('src');
     });
     sheet.classList.toggle('mr-has-icons', any);
+    renderEditor();
   }
   /** A step line that means a library job gets its illustration; an emptied line loses it. */
   function syncIcon(i: number) {
@@ -235,6 +247,43 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     });
   }
 
+  // The separate builder edits the exact same inputs that are saved and exported.
+  // Keep this synced without introducing a second state or changing existing localStorage.
+  for (const input of editorFields) {
+    input.addEventListener('focus', () => { focusedEditor = input; });
+    input.addEventListener('blur', () => { focusedEditor = null; renderEditor(); });
+    input.addEventListener('input', () => {
+      const i = Number(input.dataset.mrEditorStep);
+      if (!Number.isInteger(i) || !stepFields[i]) return;
+      stepFields[i].value = input.value;
+      syncIcon(i);
+      renderIcons();
+      action();
+      save();
+    });
+  }
+  host.querySelector<HTMLElement>('.mr-editor')?.addEventListener('click', (event) => {
+    const target = (event.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!target) return;
+    if (target.dataset.mrEditorClear !== undefined) {
+      const i = Number(target.dataset.mrEditorClear);
+      if (!stepFields[i]) return;
+      stepFields[i].value = '';
+      iconFields[i].value = '';
+      if (notes) field(`note-${i}`).value = '';
+      renderIcons();
+      action();
+      save();
+      editorFields[i]?.focus();
+    } else if (target.dataset.mrEditorMove !== undefined) {
+      const i = Number(target.dataset.mrEditorMove);
+      const dir = Number(target.dataset.mrDir);
+      const move = sheet.querySelectorAll<HTMLElement>('.mr-step')[i]?.querySelector<HTMLButtonElement>(`[data-mr-move="${dir}"]`);
+      move?.click(); // Reuse the existing complete step/icon/note reorder handler.
+      editorFields[i + dir]?.focus();
+    }
+  });
+
   // Suggestion chips fill the next empty step.
   chips.addEventListener('click', (e) => {
     const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-idea]');
@@ -276,6 +325,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     const before = iconFields[i].value;
     syncIcon(i);
     if (iconFields[i].value !== before) { renderIcons(); save(); }
+    else renderIcons();
   });
 
   // Arrows swap a step (with its note and illustration) with its neighbor; the times stay in order.
@@ -353,6 +403,8 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     hinted.forEach((el) => el.removeAttribute('placeholder'));
     const name = field('title').value.trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').toLowerCase();
     try {
+      // Refresh blank-row markers before exporting; no saved row or step is deleted.
+      renderIcons();
       await downloadPng(sheet, {
         filename: `${name || 'routine'}.png`,
         width: 816,
