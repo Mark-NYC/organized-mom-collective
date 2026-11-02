@@ -10,13 +10,15 @@
  */
 import { responsibilities, responsibilityCategories, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
 import { choreLineIcon } from '../../data/chore-line-icons';
+import { routineIconChoices, routineIconById } from '../../data/routine-line-icons';
 
 interface Props {
   heading?: string;
   hint: string;
   monochrome?: boolean;
+  routineExtras?: boolean;
 }
-const { heading = 'Pick illustrated steps', hint, monochrome = false } = Astro.props;
+const { heading = 'Pick illustrated steps', hint, monochrome = false, routineExtras = false } = Astro.props;
 ---
 
 <section class:list={['rp', monochrome && 'rp-monochrome']} data-rp aria-label={heading}>
@@ -56,6 +58,17 @@ const { heading = 'Pick illustrated steps', hint, monochrome = false } = Astro.p
         );
       })
     }
+    {routineExtras && routineIconChoices.map((activity) => {
+      const src = routineIconById(activity.id);
+      return (
+        <li data-rp-cat="routine" data-rp-routines={activity.routines.join(' ')}>
+          <button type="button" class="rp-tile" data-rp-pick={activity.id}>
+            {src && <span class="rp-art" aria-hidden="true"><img src={src} width="56" height="56" alt="" loading="lazy" decoding="async" /></span>}
+            <span class="rp-name">{activity.title}</span>
+          </button>
+        </li>
+      );
+    })}
   </ul>
   <p class="rp-status" data-rp-status role="status" aria-live="polite"></p>
   <slot />

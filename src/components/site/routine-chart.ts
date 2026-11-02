@@ -15,6 +15,7 @@ import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, downloadPng } from '../../lib/printable';
 import { matchResponsibility, responsibilityById } from '../../data/responsibilities';
 import { choreLineIcon, choreLineIconForText } from '../../data/chore-line-icons';
+import { routineActivityById, routineIconById, routineIconForText } from '../../data/routine-line-icons';
 import { routineTypes, type RoutineType } from '../../data/routines';
 import { ageStage, FOCI, summerRhythm, type SummerInput } from '../../data/summer-rhythm';
 import type { ToolHandoff } from '../../lib/tool-handoff';
@@ -74,7 +75,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const id = iconFields[i].value;
       const filled = !!stepFields[i].value.trim();
       slot.closest('.mr-step')?.toggleAttribute('data-mr-empty', !filled);
-      const src = filled ? (choreLineIconForText(stepFields[i].value) ?? choreLineIcon(id) ?? fallbackStepIcon) : null;
+      const src = filled ? (routineIconForText(stepFields[i].value) ?? routineIconById(id) ?? choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value) ?? fallbackStepIcon) : null;
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
       if (src) {
@@ -309,19 +310,22 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
 
   // Library tiles fill the next empty step with the job's title and illustration.
   picker.addEventListener('rp:pick', (e) => {
-    const r = responsibilityById((e as CustomEvent<{ id: string }>).detail.id);
-    if (!r) return;
+    const id = (e as CustomEvent<{ id: string }>).detail.id;
+    const r = responsibilityById(id);
+    const activity = routineActivityById(id);
+    if (!r && !activity) return;
     const i = stepFields.findIndex((el) => !el.value.trim());
     if (i < 0) {
       pickerStatus.textContent = 'The chart is full. Clear a step first, then tap again.';
       return;
     }
-    stepFields[i].value = r.title;
-    iconFields[i].value = r.id;
+    const title = r?.title ?? activity!.title;
+    stepFields[i].value = title;
+    iconFields[i].value = id;
     renderIcons();
     action();
     save();
-    pickerStatus.textContent = `Added “${r.title}” as step ${i + 1}.`;
+    pickerStatus.textContent = `Added “${title}” as step ${i + 1}.`;
   });
 
   // Typing a line that matches a library job adds its illustration; clearing a line removes it.
