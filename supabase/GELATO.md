@@ -2,26 +2,32 @@
 
 This is a SAFE pilot, not automatic fulfillment. The new Supabase Edge Function `shop-gelato-draft` creates **draft** orders only, and only when an existing shop administrator calls it with a paid physical shop order UUID. The existing Stripe webhook, checkout, and manual fulfillment remain unchanged. No Gelato order is automatically sent to production.
 
-## Deployment checklist
+## Deployment checklist (private print files)
 
-1. **Already done:** In the correct Supabase project, add `GELATO_API_KEY` in Edge Functions → Secrets. Never add the value to GitHub or client variables.
-2. Apply migration `20261101000000_shop_gelato.sql` in Supabase, after existing shop migrations.
-3. Verify the product's exact Gelato **productUid**, required file dimensions, file layout, pageCount and real sample. Do not assume an existing Printed.com product uses the same print specification.
-4. Upload a *publicly fetchable* Gelato-compatible PDF/X file with no sensitive information, then configure the matching shop product by UUID:
+1. Keep `GELATO_API_KEY` in Supabase Edge Function Secrets.
+2. Apply migrations in order: `20261101000000_shop_gelato.sql`, then `20261102000000_shop_gelato_private_storage.sql`. The second migration creates a **disabled** mapping for `family-schedule-calendar-2027`.
+3. In Supabase Storage, confirm bucket `gelato-print-files` is PRIVATE and contains the original `2027-family-wall-calendar.pdf` object.
+4. Deploy the **updated**, standalone `shop-gelato-draft` function from GitHub's `supabase/functions/shop-gelato-draft/index.ts` using the Dashboard editor. Previous live version still reads a public URL and MUST be replaced.
+5. Keep gateway Verify JWT off on that function, because it independently validates the Supabase admin user and `shop_is_admin_user`.
+6. Confirm `shop_gelato_products` has `enabled=false`, `storage_object_path='2027-family-wall-calendar.pdf'`, `page_count=13`, `print_file_url=null`, and the verified UID. The private bucket contains paid design artwork; NEVER expose its signed link in the UI, logs, GitHub, or browser requests.
+7. After independently validating exact file dimensions, print areas, Gelato's page-count and PDF compatibility requirements, perform a controlled test. Enabling the mapping does **not** submit an order, but an owner invoking `shop-gelato-draft` for a paid unfulfilled order will create a Gelato **draft**, not a production order.
+8. Confirm draft and eventual file ingestion in Gelato before approving production manually. The signing TTL is 7200 seconds (2 hours); whether this is adequate for later Gelato processing must be verified. If Gelato processes files only after converting the draft to production, generate a fresh signed URL at that later point instead of relying on this one.
+
+### Run in Supabase SQL Editor to check mapping (read-only)
 
 ```sql
-insert into public.shop_gelato_products(product_id, product_uid, print_file_url, page_count, enabled)
-values ('REAL_SHOP_PRODUCT_UUID', 'VERIFIED_GELATO_PRODUCT_UID',
-        'https://PUBLIC_HOST/print-ready.pdf', null, true)
-on conflict (product_id) do update
-set product_uid=excluded.product_uid, print_file_url=excluded.print_file_url,
-    page_count=excluded.page_count, enabled=excluded.enabled, updated_at=now();
+select p.slug, g.product_uid, g.storage_object_path, g.page_count, g.enabled,
+       g.print_file_url
+from public.shop_products p
+join public.shop_gelato_products g on g.product_id=p.id
+where p.slug='family-schedule-calendar-2027';
 ```
 
-For multipage products, provide the *confirmed* page count in place of null, including covers if applicable.
-5. Deploy the Supabase function `shop-gelato-draft` and verify it is accessible on the expected project. This PR does not deploy it.
-6. From an **authenticated shop admin session**, POST to `/functions/v1/shop-gelato-draft` with a JSON body `{"order_id":"PAID_SHOP_ORDER_UUID"}` and `Authorization: Bearer <ADMIN_SESSION_ACCESS_TOKEN>` and your project's public anon key as the `apikey` header. Do not run against arbitrary customer orders.
-7. Confirm the resulting *draft* appears in Gelato and the `shop_gelato_orders` record has status `draft`. Review pricing, production, shipping and file quality before approving manually in Gelato.
+### Private file technical details
+
+The function uses the Supabase Storage REST signing endpoint from the Edge Function's service-role environment. It builds a time-limited signed download URL on the server, sends it only in the Gelato create-draft request, and never stores it in database mappings or returns it to the admin client. All file signing happens **before** the duplicate-safe order claim. Errors in signing block submission entirely.
+
+This does not restore secrecy for the old GitHub commit history. The public PDF was removed from `main`, but historical Git objects and third-party caches may retain it. Consider the old copy exposed and arrange history cleanup where feasible.
 
 ## Safety behavior
 
