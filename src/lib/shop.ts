@@ -442,6 +442,19 @@ export const loadOrderEvents = (token: string, orderId: string) =>
 
 export const loadInventoryLog = (token: string) => select<InventoryLogRow>(token, 'shop_inventory_log', 'select=*&order=at.desc');
 
+/** Admin-only, read-only lookup of the configured Gelato calendar product. */
+export async function lookupGelatoCalendar(token: string): Promise<unknown> {
+  const res = await fetch(`${SUPABASE}/functions/v1/shop-gelato-product`, {
+    method: 'POST',
+    headers: { apikey: ANON, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  const body = await res.json().catch(() => ({}));
+  if (res.status === 401) throw new Error('expired');
+  if (!res.ok) throw new Error(`Gelato lookup: ${String(body.error || res.status)}${body.upstream_status ? ` (Gelato HTTP ${body.upstream_status})` : ''}`);
+  return body;
+}
+
 /** Every dashboard write goes through the shop-admin Edge Function, which re-checks the admin. */
 export async function adminAction<T = Record<string, unknown>>(token: string, body: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${SUPABASE}/functions/v1/shop-admin`, {
