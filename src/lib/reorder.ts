@@ -1,7 +1,6 @@
 /** Reorder page helpers. Options and prices live in src/config.ts. */
 import { BEST_VALUE_ID, CALENDAR_OPTIONS } from '../config';
 import { routes } from '../routes';
-import { shopConfigured, shopEnabled } from './shop';
 
 /**
  * The URL if it's a real Etsy listing (https, etsy.com, /listing/<id>), otherwise null.
@@ -57,12 +56,12 @@ export function calendarOptions() {
   return CALENDAR_OPTIONS.map((o) => {
     const sets = o.weeks / smallest.weeks;
     const bestValue = o.id === BEST_VALUE_ID;
-    const checkoutUrl = o.websiteProduct && shopEnabled() && shopConfigured() ? `${routes.checkout}?product=${o.websiteProduct}` : null;
+    const checkoutUrl = o.websiteProduct ? `${routes.checkout}?product=${o.websiteProduct}` : null;
     const url = etsyListingUrl(o.etsyUrl);
     return {
       ...o,
       url,
-      /** The website checkout for this option, in shop-enabled builds. Preferred over Etsy. */
+      /** The website checkout for this option, Preferred over Etsy; checkout checks live availability. */
       checkoutUrl,
       /** Where its buy button goes: the website checkout, else its Etsy listing, else nowhere yet. */
       buyUrl: checkoutUrl ?? url,
