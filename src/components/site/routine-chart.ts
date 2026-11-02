@@ -10,7 +10,7 @@
  * saved chart (the storage key plus `handoff.key`); a first chart starts from `handoff.variant` with `handoff.name`
  * in the title, and the picker puts jobs suited to `handoff.age` first. Without one, nothing changes.
  */
-import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
 import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, downloadPng } from '../../lib/printable';
 import { matchResponsibility, responsibilityById } from '../../data/responsibilities';
@@ -72,6 +72,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
       slot.toggleAttribute('data-grocery-shopping', !!src && src === routineIconById('grocery-shopping'));
+      slot.toggleAttribute('data-wake-up', !!src && src === routineIconById('wake-up'));
       if (src) {
         any = true;
         if (img.getAttribute('src') !== src) img.src = src;
@@ -90,7 +91,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   // Preserve the saved field for older charts, but always use the single current palette.
   function renderPalette() {
     const paletteField = field('palette');
-    const id = resolveToolPalette('default');
+    const id = defaultToolPalette;
     paletteField.value = id;
     toolPalettes[id].colors.forEach((color, i) => sheet.style.setProperty(`--mr-accent-${i + 1}`, color));
   }
