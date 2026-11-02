@@ -19,6 +19,7 @@ import {
   loadInventoryLog,
   loadOrderEvents,
   loadShopData,
+  lookupGelatoCalendar,
   money,
   orderLabel,
   ordersCsv,
@@ -71,6 +72,8 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
   });
   const [openId, setOpenId] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
+  const [gelatoResult, setGelatoResult] = useState<unknown>(null);
+  const [gelatoLoading, setGelatoLoading] = useState(false);
 
   const reload = async () => {
     setLoading(true);
@@ -144,6 +147,41 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
           </button>
         ))}
       </nav>
+
+      {tab === 'inventory' && (
+        <section className="mt-5 border border-rule rounded-[4px] p-4" aria-label="Gelato calendar">
+          <h2 className="font-bold text-lg">Gelato calendar integration</h2>
+          <p className="mt-2 text-sm text-soft">
+            Read the calendar product and its variants directly from Gelato. This does not submit any orders.
+          </p>
+          <button
+            type="button"
+            className="btn-secondary mt-3"
+            disabled={gelatoLoading}
+            onClick={async () => {
+              setGelatoLoading(true);
+              setNotice('');
+              setGelatoResult(null);
+              try {
+                setGelatoResult(await lookupGelatoCalendar(auth.access_token));
+              } catch (err) {
+                if ((err as Error).message === 'expired') onSignOut();
+                else setNotice((err as Error).message);
+              } finally {
+                setGelatoLoading(false);
+              }
+            }}
+          >
+            {gelatoLoading ? 'Checking Gelato…' : 'Get Gelato Product Details'}
+          </button>
+          {gelatoResult !== null && (
+            <div className="mt-4">
+              <p className="text-sm font-semibold">Gelato product response (read only)</p>
+              <pre className="mt-2 max-h-80 overflow-auto rounded bg-band p-3 text-xs whitespace-pre-wrap break-all">{JSON.stringify(gelatoResult, null, 2)}</pre>
+            </div>
+          )}
+        </section>
+      )}
 
       {notice && (
         <p role="status" className="mt-4 rounded-[3px] bg-band px-4 py-3 text-[0.95rem] font-semibold">
