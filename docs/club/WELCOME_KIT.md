@@ -56,6 +56,14 @@ queue pairs them:
    It calls the same `club_fulfillment_approve` (her click only) and `kit_submitted` (one email per kit) as before. Both
    are idempotent, so a double click or refresh never makes a second order. Then "Your Welcome Kit is getting ready!".
 
+**One process across the three pieces (Nov 2 2026).** Each piece page shows the same Welcome Kit step bar
+(`WelcomeKitBar`: the three pieces numbered, done / here / to do, each a link, "Back to my kit"; on phones "2 of 3"
+with dots), the same layout (a controls rail beside the printable on a grey desk) and one "Next" button: print →
+Family Meeting Guide → January → "Review my Welcome Kit" (`kitNext`, skipping done pieces, wrapping back to one she
+skipped). Both personalized pieces use the same words, **Approve for printing**. On the kit page the cards are
+numbered, the first that needs her says "Start here", a line counts "n of 3 ready", and coming back from a piece
+(`?done=`) shows "✓ … approved for printing" and highlights that card.
+
 Every kit step resumes on `/club/welcome-kit` (`stepHref`). Fulfillment, readiness, approvals and admin are unchanged.
 Known limit: the month's review is per device; on another device she reviews it once more before preparing the kit.
 

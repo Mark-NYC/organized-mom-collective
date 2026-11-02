@@ -7,12 +7,12 @@
  * (club_fulfillment_approve). A later change to the plan clears the review, so what she submits is what she saw.
  * Before her print is approved, the line points her to it instead. Never on samples, previews, print views or ?thumb.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clubAccountsEnabled } from '../../../data/club/config';
-import { clubResourceBySlug } from '../../../data/club/resources';
 import { getSession } from '../../../lib/account';
-import { loadMembership, monthName } from '../../../lib/club/membership';
-import { clearFirstResourceReviewed, firstResourceReviewed, markFirstResourceReviewed, welcomeKitView, type WelcomeKitView as View } from '../../../lib/club/onboarding';
+import { loadMembership } from '../../../lib/club/membership';
+import { clearFirstResourceReviewed, firstResourceReviewed, kitNext, markFirstResourceReviewed, welcomeKitView, type WelcomeKitView as View } from '../../../lib/club/onboarding';
+import WelcomeKitBar, { useKitFlow } from '../WelcomeKitBar';
 import { setJourney } from '../../../lib/club/journey';
 import { routes } from '../../../routes';
 import { PLAN_SAVE } from '../../../lib/club/plan/account';
@@ -21,6 +21,9 @@ import { PLAN_WELCOME, PLAN_WELCOME_APPROVE } from '../../../lib/club/plan/resou
 export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
   const [view, setView] = useState<View>('none');
   const [reviewed, setReviewed] = useState(false);
+  const flow = useKitFlow();
+  const flowRef = useRef(flow);
+  flowRef.current = flow;
 
   useEffect(() => {
     const q = new URLSearchParams(location.search);
@@ -35,12 +38,14 @@ export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
         setReviewed(false);
       }
     };
-    // The plan's own approve button, in Welcome Kit mode: her review for the kit, then back to the kit.
+    // The plan's own approve button, in Welcome Kit mode: her review for the kit, then the next piece that needs her,
+    // or her Welcome Kit with "✓ … approved for printing" when it was the last one.
     const onApproval = () => {
       if (!active) return;
       markFirstResourceReviewed(kitSlug, uid);
       setReviewed(true);
-      location.assign(routes.clubWelcomeKit);
+      const f = flowRef.current;
+      location.assign(f ? kitNext(f.me, 'first', { ...f.flags, reviewed: true }).href : `${routes.clubWelcomeKit}?done=first`);
     };
     getSession().then(async (s) => {
       if (!s) return;
@@ -48,7 +53,8 @@ export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
       const now = welcomeKitView(await loadMembership(), kitSlug);
       setView(now);
       setReviewed(firstResourceReviewed(kitSlug, uid));
-      active = now === 'confirm';
+      // She can look over and approve her month before or after her print; the kit itself still needs both.
+      active = now !== 'none';
       if (root) {
         if (active) root.dataset.planWelcome = '';
         else delete root.dataset.planWelcome;
@@ -66,18 +72,9 @@ export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
   }, [kitSlug]);
 
   if (view === 'none') return null;
-  const r = clubResourceBySlug(kitSlug);
-  const month = r ? monthName(`${r.month}-01`).split(' ')[0] : 'First';
   return (
-    <nav data-welcome-kit-confirm data-club-chrome aria-label="Welcome Kit" className="wkc print:hidden">
-      <p className="wkc-crumb"><a href={routes.clubWelcomeKit}>Welcome Kit</a> <span aria-hidden="true">/</span> <span aria-current="page">Your {month} Resource</span></p>
-      <p className="wkc-text">
-        {view === 'print_first'
-          ? <>Your {month} plan is mailed with your Family Vision Print. <a href={routes.clubFamilyVision}>Approve your print first</a>, then come back to this plan.</>
-          : reviewed
-            ? <>You approved this plan for printing. <a href={routes.clubWelcomeKit}>Back to my Welcome Kit</a></>
-            : <>Review your family’s plan. Make any changes, then approve it for printing.</>}
-      </p>
-    </nav>
+    <div data-welcome-kit-confirm data-club-chrome className="wkc-wrap print:hidden" data-reviewed={reviewed ? '' : undefined}>
+      <WelcomeKitBar current="first" flow={flow} />
+    </div>
   );
 }

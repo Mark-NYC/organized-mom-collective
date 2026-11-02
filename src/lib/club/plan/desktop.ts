@@ -83,7 +83,7 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     approve.setAttribute('aria-disabled', String(!welcome && state === 'approved'));
     // A member's plan saves to her account (./account.ts); approval here is still this tab's check mark only.
     const member = root.dataset.planSource === 'account';
-    if (welcome) note.textContent = 'Approving adds it to your Welcome Kit. You’ll confirm all three printed pieces together next.';
+    if (welcome) note.textContent = 'Review your family’s plan. Make any changes, then approve it for printing. You’ll confirm all three printed pieces together at the end.';
     else if (state === 'approved') note.textContent = member
       ? `Approved ${approvalDay(a)} on this device. Approval is optional: it only says you’ve checked it. Nothing is submitted or mailed from here.`
       : `Approved ${approvalDay(a)} in this preview. Approval is optional: it only says you’ve checked it. Nothing is saved to an account, submitted or mailed.`;

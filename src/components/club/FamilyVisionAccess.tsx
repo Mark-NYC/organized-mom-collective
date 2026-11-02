@@ -2,7 +2,7 @@
  * Opens a member's Family Vision welcome print on /club/family-vision: the print (FamilyVisionPrint.astro, the same
  * design as the public preview) starts hidden and shows once the database hands over her welcome order
  * (club_welcome_get). Her choices save to that order about a second after she changes them (club_welcome_save);
- * "Yes! Send me my print" approves it (club_welcome_approve, a second click changes nothing). It's the first half of
+ * "Approve for printing" approves it (club_welcome_approve, a second click changes nothing). It's the first half of
  * her Welcome Kit: next she looks over her first month's resource (src/lib/club/onboarding.ts), and both go out in
  * one package. She can change her print until we approve the kit for print; then it's locked.
  *
@@ -13,8 +13,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import ClubGate, { type ClubContext } from './ClubGate';
 import { approveWelcome, loadAddress, loadMembership, loadWelcome, saveAddress, saveWelcome, type Address, type Membership, type Vision, type WelcomeOrder } from '../../lib/club/membership';
-import { firstMonth, firstResourceHref, firstResourceReviewed, kitSubmitted, kitText, loadMeetingGuideSeen, nextStep } from '../../lib/club/onboarding';
+import { firstMonth, firstResourceReviewed, kitNext, kitSubmitted, kitText, loadMeetingGuideSeen } from '../../lib/club/onboarding';
 import { setJourney } from '../../lib/club/journey';
+import WelcomeKitBar, { type KitFlow } from './WelcomeKitBar';
 import { getSession } from '../../lib/account';
 import { clubResourceBySlug } from '../../data/club/resources';
 import AddressForm from './AddressForm';
@@ -33,8 +34,6 @@ export default function FamilyVisionAccess() {
   if (order) return <FulfillmentView order={order} />;
   return <ClubGate page="resource" bare>{(ctx) => <Member ctx={ctx} />}</ClubGate>;
 }
-
-const monthWord = (iso: string) => new Date(`${iso.slice(0, 7)}-15`).toLocaleString('en-US', { month: 'long' });
 
 /** Messages outside the print (loading, nothing to show yet), in the page's own gutter. */
 const Note = ({ children }: { children: ReactNode }) => <div className="mx-auto max-w-5xl px-4 py-8 text-warm-soft sm:px-8">{children}</div>;
@@ -146,7 +145,6 @@ function Member({ ctx }: { ctx: ClubContext }) {
   }
   const open = w.status === 'pending' || w.status === 'on_hold';
   const approved = !open || w.approved;
-  const step = me ? nextStep(me, { meetingGuideSeen: guideSeen }) : 'home';
   const first = me ? firstMonth(me) : null;
   const firstTitle = first ? clubResourceBySlug(first.slug)?.title ?? first.title : null;
   const mailLine = address && (
@@ -164,12 +162,16 @@ function Member({ ctx }: { ctx: ClubContext }) {
       }} />
     </div>
   );
+  // The kit's step bar and "Next", from what this page already knows (no second load).
+  const flags = { reviewed: firstResourceReviewed(first?.slug, uid), guideSeen };
+  const kitFlow: KitFlow | null = me ? { me, uid, flags, open: Boolean(open && me.welcome && !me.welcome.satisfies_month && !kitSubmitted(me)) } : null;
+  const next = me && approved ? kitNext(me, 'print', flags) : null;
   const bar = (
     <div className="fvp-member-flow" data-club-chrome>
       {!approved ? (
         <>
           <button type="button" className="fvp-approve-cta" disabled={busy} onClick={approve}>
-            {busy ? 'Saving your print…' : 'Yes! Send me my print'}
+            {busy ? 'Saving your print…' : 'Approve for printing'}
           </button>
           <p className="fvp-mail-hint">One of three printed pieces in your Welcome Kit, mailed together. Included in your membership.</p>
           <button type="button" className="fvp-edit-after-cta" onClick={() => document.getElementById('fvp-open-editor')?.click()}>✎ Customize artwork</button>
@@ -182,14 +184,11 @@ function Member({ ctx }: { ctx: ClubContext }) {
           <span className="fvp-approved-check" aria-hidden="true">✓</span>
           <strong>{open ? 'It’s yours!' : 'Your welcome print'}</strong>
           <p>{open ? 'Your print is approved.' : kitText({ welcome: me?.welcome ?? null })}</p>
-          {open && me && !kitSubmitted(me) && step === 'first_resource' && !firstResourceReviewed(first?.slug, uid) && firstResourceHref(me) ? (
+          {kitFlow?.open && next ? (
             <>
-              <p className="fvp-approved-next">Next, your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first monthly resource'}. It’s already prepared for your family, and it’s mailed with your print and the Family Meeting Guide.</p>
-              <a className="fvp-next-cta" href={ctx.href(firstResourceHref(me)!)}>Next: review your {first ? monthWord(first.month) : 'first'} resource <span aria-hidden="true">→</span></a>
-              <a className="fvp-back-kit" href={ctx.href(routes.clubWelcomeKit)}>Back to my Welcome Kit</a>
+              <p className="fvp-approved-next">{next.id === 'kit' ? 'All three pieces are ready. One last look, then we print them together.' : next.id === 'guide' ? 'Next, the one-page Family Meeting Guide that comes in your Welcome Kit.' : <>Next, your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first monthly resource'}, already prepared for your family.</>}</p>
+              <a className="fvp-next-cta" href={ctx.href(next.href)}>{next.label} <span aria-hidden="true">→</span></a>
             </>
-          ) : open && me && !kitSubmitted(me) ? (
-            <a className="fvp-next-cta" href={ctx.href(routes.clubWelcomeKit)}>Back to my Welcome Kit <span aria-hidden="true">→</span></a>
           ) : (
             <>
               {open && me && <p className="fvp-approved-next">{kitText(me)}</p>}
@@ -206,7 +205,12 @@ function Member({ ctx }: { ctx: ClubContext }) {
   );
   if (thumb) return null;
   const slot = document.getElementById('fvp-member-actions');
-  return slot ? createPortal(bar, slot) : bar;
+  return (
+    <>
+      <WelcomeKitBar current="print" flow={kitFlow} />
+      {slot ? createPortal(bar, slot) : bar}
+    </>
+  );
 }
 
 interface Bundle {

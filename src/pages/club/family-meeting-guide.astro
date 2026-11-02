@@ -10,5 +10,23 @@ import MeetingGuideStep from '../../components/club/MeetingGuideStep';
 ---
 <ClubLayout title="Family Meeting guide">
   <MeetingGuideStep client:only="react" />
-  <MeetingGuideSheet />
+  <!-- In her Welcome Kit: the rail (MeetingGuideStep renders into #mg-rail) beside the sheet on the grey desk, like the
+       other two pieces. Otherwise the sheet alone. -->
+  <div class="mg-layout">
+    <div id="mg-rail" class="mg-rail print:hidden"></div>
+    <div class="mg-desk"><MeetingGuideSheet /></div>
+  </div>
+  <style is:global>
+    @media screen {
+      .mg-layout:has(> .mg-rail:not(:empty)) .mg-desk { background: #f1efec; padding: 24px clamp(16px, 3vw, 45px) 48px; }
+      .mg-rail:empty { display: none; }
+      .mg-rail { padding: 22px 20px; background: var(--color-ivory); border-bottom: 1px solid var(--color-warm-rule); }
+      .mg-rail h1 { font: 400 clamp(26px, 2.3vw, 32px)/1.12 var(--font-serif); letter-spacing: -0.015em; color: var(--color-warm-ink); }
+    }
+    @media screen and (min-width: 1100px) {
+      .mg-layout:has(> .mg-rail:not(:empty)) { display: grid; grid-template-columns: clamp(320px, 30%, 440px) minmax(0, 1fr); min-height: calc(100dvh - 106px); }
+      .mg-rail { padding: 24px clamp(20px, 2.2vw, 34px) 36px; border-bottom: 0; border-right: 1px solid var(--color-warm-rule); }
+    }
+    @media print { .mg-rail { display: none !important; } }
+  </style>
 </ClubLayout>

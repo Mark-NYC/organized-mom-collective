@@ -35,6 +35,14 @@ function Hub({ ctx }: { ctx: ClubContext }) {
   const [editAddress, setEditAddress] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Back from a piece (?done=print|guide|first): a short "✓ … approved" note and that card highlighted, once.
+  const [done] = useState<'print' | 'guide' | 'first' | null>(() => {
+    const d = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('done');
+    return d === 'print' || d === 'guide' || d === 'first' ? d : null;
+  });
+  useEffect(() => {
+    if (done) history.replaceState(null, '', location.pathname);
+  }, []);
 
   useEffect(() => {
     if (ctx.store.kind === 'sample') return void clubNav().go(ctx.href(routes.clubDashboard), { replace: true });
@@ -94,6 +102,8 @@ function Hub({ ctx }: { ctx: ClubContext }) {
   const monthWord = items[2]?.name.replace(/ Resource$/, '') ?? 'first';
   const todo = items.filter((i) => i.status === 'needs_review');
   const next = nextItem(items);
+  const readyCount = items.filter((i) => i.status === 'approved' || i.status === 'ready').length;
+  const doneName = done === 'print' ? 'Family Vision Print approved for printing.' : done === 'first' ? `${monthWord} Resource approved for printing.` : done === 'guide' ? 'Family Meeting Guide: ready, nothing to change.' : null;
 
   if (submitted) {
     return (
@@ -116,7 +126,11 @@ function Hub({ ctx }: { ctx: ClubContext }) {
       <p className="label text-[#71866c]">Your Welcome Kit{month ? ` · ${monthWord} ${month.slice(0, 4)}` : ''}</p>
       <h1 className="wk-title">Let’s get your first family package ready.</h1>
       <p className="wk-lede">Three printed resources, made for your family and mailed together to your door.</p>
-      <WelcomeKitItems items={items} firstSlug={first?.slug ?? null} />
+      {doneName && (
+        <p className="wk-flash" role="status" data-kit-flash><span aria-hidden="true">✓</span> {doneName} {canSubmit || (allReady && !todo.length) ? 'Everything’s ready: confirm your kit below.' : next ? `Next: ${next.name}.` : ''}</p>
+      )}
+      <p className="wk-count" data-kit-count><strong>{readyCount} of 3 ready</strong>{todo.length ? ` · ${todo.length === 1 ? 'one piece needs' : `${todo.length} pieces need`} you` : ''}</p>
+      <WelcomeKitItems items={items} firstSlug={first?.slug ?? null} startHere={next?.id ?? null} justDone={done === 'guide' ? null : done} />
 
       <section className="wk-confirm" aria-labelledby="wk-confirm-title">
         <h2 id="wk-confirm-title" className="wk-h2">Confirm your Welcome Kit</h2>
