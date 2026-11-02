@@ -36,7 +36,12 @@ export function choreLineIconForText(text: string): string | null {
     if (asset) return asset;
   }
   const matches: Array<[RegExp, string]> = [
-    [/toy|playroom/, 'toys-away'],
+    [/free play|play time|play outside|playroom|toy/, 'toys-away'],
+    [/shoe|coat|jacket|out the door/, 'backpack'],
+    [/wake up|stretch|get up/, 'morning-start'],
+    [/pajama|lights out|go to sleep|bedtime/, 'pajamas'],
+    [/read|story|devotional/, 'book'],
+    [/breakfast|lunch|snack|dinner|eat/, 'cooking-pot'],
     [/wash car/, 'car'],
     [/room organized|room tidy|living space tidy|organize a space|household tasks|task for the family/, 'basket'],
     [/school\/work responsibilities|work responsibilities/, 'calendar'],
