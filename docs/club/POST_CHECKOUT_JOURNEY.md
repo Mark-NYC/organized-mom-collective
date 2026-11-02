@@ -11,10 +11,17 @@
 - **Editor (all months, `ClubPlanDesktop`):** about 30% rail / 70% printable, the page exactly one screen tall, a
   compact title and breadcrumb, a one-line print deadline. Phones: the printable at full width near the top
   (`ClubPlanScreen` hero), edits in the existing sheet, approval in the bar above the tab bar.
-- **Club Home (`AppKitLibrary` → `ClubHome`, `homeState`):** setup → "Your Welcome Kit is almost ready." (three pieces,
-  "Finish My Welcome Kit") → "…is getting ready!" → "…is on its way." (only once marked mailed, with the mailed date;
-  no delivery estimate; three weeks later it gives way) → ongoing: this month, coming up with its print deadline, her
-  printables, her family profile.
+- **Club Home (`AppKitLibrary` → `ClubHome`, `homeState`), Now → This week → Your year:**
+  - *Now:* setup, or "Your Welcome Kit is almost ready." (three pieces, "Finish My Welcome Kit"), or "…is getting
+    ready!" / "…is on its way." with a four-step tracker (Prepared, Printing, Mailed, At your door) moved only by the
+    kit's status, beside her three real printables stacked as a package. "At your door" is never marked done and no
+    delivery date is shown. Three weeks after mailing it gives way to her current month.
+  - *This week with your family:* one shared action, her first family meeting (the month's meeting view) and the
+    Meeting Guide.
+  - *Her month, once:* a real preview, "Made for <names>", printed-copy status, Open & edit.
+  - *Your year:* one strip of twelve months (Yours / Opens Feb 1 / Preview), linking to **Monthly Resources**
+    (`/app/club/months`, the full month cards, formerly `/app/club#months`).
+  - Her family, printables and Account & Billing at the end.
 - **Naming:** January 2027 is **Our Family Weekly Meeting** (what `/app/club/january` prints and fulfillment prints),
   card headline "Stop Being the Family's Calendar". Fixed in `src/data/club/resources.ts` (also September = Habit
   Cards, February = Family Laundry Guides, March = Family Chore Charts, matching their tools), the Club Home cards, the

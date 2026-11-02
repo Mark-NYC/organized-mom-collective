@@ -168,7 +168,7 @@ const clubNavLinks = async (page) => {
   return page.evaluate(() => [...document.querySelectorAll('[data-club-nav] nav[aria-label="Club"] a')]
     .filter((a) => a.getBoundingClientRect().width > 0).map((a) => `${a.getAttribute('aria-label')}=${a.getAttribute('href')}`));
 };
-const CLUB_NAV = ['Club Home=/app/club', 'My Family=/club/family', 'Monthly Resources=/app/club#months', 'Account & Billing=/club/dashboard'];
+const CLUB_NAV = ['Club Home=/app/club', 'My Family=/club/family', 'Monthly Resources=/app/club/months', 'Account & Billing=/club/dashboard'];
 /** One order's status:readiness, for checks. */
 const order = (type) => sql(`select status || ':' || readiness from public.club_fulfillment_queue where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
 const orderId = (type) => sql(`select id from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
@@ -625,20 +625,34 @@ async function journey(browser, label, vp) {
   await page.waitForURL(/\/app\/club/);
   await page.waitForSelector('[data-club-home]');
   const club = await page.locator('main').innerText();
-  check('Club Home: “getting ready”, her three pieces, no setup checklist', !/preview library, not an active membership/i.test(club) && /Your Welcome Kit is getting ready!/.test(club) && /Family Meeting Guide/.test(club) && !/Your next step/i.test(club), club.replace(/\s+/g, ' ').slice(0, 300));
+  check('Club Home now: getting ready, the tracker at Printing, the package, no setup checklist', !/preview library, not an active membership/i.test(club) && /Your Welcome Kit is getting ready!/.test(club)
+    && await page.isVisible('.ofc-tracker [aria-current="step"]:has-text("Printing")') && await page.isVisible('.ofc-package') && !/Your next step/i.test(club), club.replace(/\s+/g, ' ').slice(0, 300));
+  check('Club Home this week: hold your first family meeting, with the meeting and the guide', /Hold your first family meeting\./.test(club)
+    && await page.isVisible('[data-home-week] a[href="/app/club/january?view=meeting"]') && await page.isVisible('[data-home-week] a[href="/club/family-meeting-guide"]'));
+  check('Club Home: her January once, Our Family Weekly Meeting, made for her family', await page.isVisible('[data-home-current] a.ofc-member-cta[href="/app/club/january"]') && /Our Family Weekly Meeting/.test(await page.locator('[data-home-current]').innerText()) && /Made for Ana, Sofia and Mateo/.test(club));
   check('Club Home: her family name, members with ages and an edit link', /The Rivera Family/.test(club) && /Sofia · 8/.test(club) && /Mateo · 6/.test(club) && await page.isVisible('a[href="/club/family"]:has-text("Edit my family")'), club.replace(/\s+/g, ' ').slice(0, 200));
-  check('Club Home: this month opens January (Our Family Weekly Meeting)', await page.isVisible('[data-home-current] a[href="/app/club/january"]') && /Our Family Weekly Meeting/.test(await page.locator('[data-home-current]').innerText()));
-  check('Club Home: coming up lists February with its payment date', /February 2027: [\s\S]*Opens with your February 1, 2027 payment/.test(club), club.replace(/\s+/g, ' ').slice(0, 900));
+  const strip = await page.locator('[data-home-year]').innerText();
+  check('Club Home: her year in one strip, January hers, February opens Feb 1', await page.isVisible('[data-home-year] li[data-month="january"][data-held] a[href="/app/club/january"]') && /Opens Feb 1/.test(await page.locator('[data-home-year] li[data-month="february"]').innerText()) && (await page.locator('[data-home-year] li').count()) === 12, strip.replace(/\s+/g, ' ').slice(0, 300));
+  check('Club Home: no twelve-card catalog, a link to every month', (await page.locator('article.ofc-app-month').count()) === 0 && await page.isVisible('[data-home-year] a[href="/app/club/months"]'));
   check('Club Home: one header, the Club nav', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && !(await page.isVisible('body > header[data-chrome]')), JSON.stringify(await clubNavLinks(page)));
-  const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
-  check('her Club: January marked hers, opening her family’s plan in the app (saved to her account)', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === '/app/club/january');
-  check('her Club: January’s card is the weekly family meeting', /Stop Being the Family's Calendar/.test(await jan.innerText()));
-  check('her Club: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
-  check('her Club: February shows when her next payment opens it', /Next · February 2027/i.test(club) && /Opens with your February 1, 2027 payment/.test(club));
-  check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
-  check('Club Home: real previews of her three pieces', await page.waitForFunction(() => document.querySelectorAll('[data-kit-item] .kit-preview[data-state="ready"]').length === 3, null, { timeout: 30000 }).then(() => true, () => false));
+  check('Club Home: the real package (three printables)', await page.waitForFunction(() => document.querySelectorAll('.ofc-package .kit-preview[data-state="ready"]').length === 3, null, { timeout: 30000 }).then(() => true, () => false));
   check('no sideways scrolling (her Club)', await noSideScroll(page));
   await shot(page, `${label}-7-club`, true);
+  // Monthly Resources: every month's card, hers marked.
+  await page.goto(`${BASE}/app/club/months`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('article.ofc-app-month >> text=Yours');
+  const all = await page.locator('main').innerText();
+  const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
+  check('Monthly Resources: January marked hers, opening her family’s plan in the app', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === '/app/club/january');
+  check('Monthly Resources: January’s card is the weekly family meeting', /Stop Being the Family's Calendar/.test(await jan.innerText()));
+  check('Monthly Resources: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
+  check('Monthly Resources: February shows when her next payment opens it', /Next · February 2027/i.test(all) && /Opens with your February 1, 2027 payment/.test(all));
+  check('Monthly Resources: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
+  check('Monthly Resources: the Club nav with it current', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && await page.isVisible('[data-club-nav] a[aria-current="page"][aria-label="Monthly Resources"]'));
+  check('no sideways scrolling (Monthly Resources)', await noSideScroll(page));
+  await shot(page, `${label}-7d-months`, true);
+  await page.goto(`${BASE}/app/club`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-club-home]');
   // Mailed (the owner marks it): "on its way", with the mailed date and where to start, never a delivery promise.
   sql(`update public.club_fulfillment_orders set status = 'mailed', mailed_at = now(), printed_at = now() where user_id = '${USER.id}'`);
   await page.reload({ waitUntil: 'networkidle' });
@@ -748,7 +762,7 @@ async function postCheckout(browser, label, vp) {
   check('Club Home: offers finishing the profile (4 open)', await page.isVisible('a[href="/club/family?setup=1"]'));
   check('Club Home: when her Club starts, January with its payment', /Your Club starts with January/.test(home) && /January 1, 2027/.test(home), home.replace(/\s+/g, ' ').slice(0, 400));
   check('Club Home: Club nav, Club Home current', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && await page.isVisible('[data-club-nav] a[aria-current="page"][aria-label="Club Home"]'), JSON.stringify(await clubNavLinks(page)));
-  check('Club Home: months grid is #months', await page.isVisible('#months article.ofc-app-month'));
+  check('Club Home: her year strip, nothing hers yet', (await page.locator('[data-home-year] li').count()) === 12 && (await page.locator('[data-home-year] li[data-held]').count()) === 0);
   check('Club Home: no preview line, no month marked hers', !/preview library/i.test(home) && !/· Yours/.test(home));
   check('no sideways scrolling (Club Home)', await noSideScroll(page));
   await shot(page, `${label}-p0-club-home`, true);

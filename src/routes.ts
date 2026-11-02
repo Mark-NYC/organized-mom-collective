@@ -165,6 +165,7 @@ export const routes = {
   today: '/app',
   cleaning: '/app/cleaning',
   appClub: '/app/club',
+  appClubMonths: '/app/club/months',
   appAccount: '/app/account',
   week: '/app/week',
   /** Old name for the Week page; redirects to `week`. */
