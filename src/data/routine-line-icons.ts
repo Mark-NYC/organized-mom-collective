@@ -5,8 +5,7 @@
  * Some original file names use .jpg, while plan-the-week is a PNG.
  * The breakfast upload intentionally retains its original spelling.
  */
-const jpgs = import.meta.glob<string>('../../assets/icons/ofc/routines/*.jpg', { eager: true, query: '?url', import: 'default' });
-const pngs = import.meta.glob<string>('../../assets/icons/ofc/routines/*.png', { eager: true, query: '?url', import: 'default' });
+const webps = import.meta.glob<string>('../../assets/icons/ofc/tool-transparent/routine/*.webp', { eager: true, query: '?url', import: 'default' });
 
 export const routineIconChoices = [
   { id: 'shoes-and-coat-away', title: 'Shoes & Coat Away', routines: ['afterschool'] },
@@ -52,8 +51,7 @@ const filenames: Record<RoutineIconId, string> = {
 export const routineIconById = (id: string): string | null => {
   const name = filenames[id as RoutineIconId];
   if (!name) return null;
-  return jpgs[`../../assets/icons/ofc/routines/${name}`] ??
-    pngs[`../../assets/icons/ofc/routines/${name}`] ?? null;
+  return webps[`../../assets/icons/ofc/tool-transparent/routine/${name.replace(/\.(?:jpe?g|png)$/i, '.webp')}`] ?? null;
 };
 
 export const routineActivityById = (id: string) => routineIconChoices.find((item) => item.id === id);
