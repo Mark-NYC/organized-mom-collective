@@ -2,11 +2,6 @@
 const toolShared = import.meta.glob<string>('../../assets/icons/ofc/tool-transparent/shared/*.webp', { eager: true, query: '?url', import: 'default' });
 const toolMarch = import.meta.glob<string>('../../assets/icons/ofc/tool-transparent/march/*.webp', { eager: true, query: '?url', import: 'default' });
 const toolRoutine = import.meta.glob<string>('../../assets/icons/ofc/tool-transparent/routine/*.webp', { eager: true, query: '?url', import: 'default' });
-const svgs = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.svg', { eager: true, query: '?url', import: 'default' });
-const transparent = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.webp', { eager: true, query: '?url', import: 'default' });
-const jpgs = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.jpg', { eager: true, query: '?url', import: 'default' });
-const march = import.meta.glob<string>('../../assets/icons/ofc/march/*.webp', { eager: true, query: '?url', import: 'default' });
-const routineJpgs = import.meta.glob<string>('../../assets/icons/ofc/routines/*.jpg', { eager: true, query: '?url', import: 'default' });
 const icons: Record<string, string> = {
   'brush-my-teeth': 'toothbrush', 'get-dressed': 'shirt', 'wash-my-hands': 'washing-hands',
   'pack-my-backpack': 'backpack', 'get-ready-for-bed': 'pajamas', 'comb-my-hair': 'comb-my-hair',
@@ -23,11 +18,7 @@ export function choreLineIcon(id: string): string | null {
   }
   const name = icons[id];
   if (!name) return null;
-  return toolShared[`../../assets/icons/ofc/tool-transparent/shared/${name}.webp`] ??
-    toolMarch[`../../assets/icons/ofc/tool-transparent/march/${name}.webp`] ??
-    jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
-    svgs[`../../assets/icons/ofc/updatedicons/svg/${name}.svg`] ??
-    march[`../../assets/icons/ofc/march/${name}.webp`] ?? null;
+  return toolShared[`../../assets/icons/ofc/tool-transparent/shared/${name}.webp`] ?? toolMarch[`../../assets/icons/ofc/tool-transparent/march/${name}.webp`] ?? null;
 }
 
 /** Match starter chores that are not part of the 16-card responsibility library. */
@@ -43,7 +34,7 @@ export function choreLineIconForText(text: string): string | null {
   ];
   for (const [pattern, name] of exact) {
     if (!pattern.test(value)) continue;
-    const asset = toolShared[`../../assets/icons/ofc/tool-transparent/shared/${name}.webp`] ?? toolMarch[`../../assets/icons/ofc/tool-transparent/march/${name}.webp`] ?? jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`];
+    const asset = toolShared[`../../assets/icons/ofc/tool-transparent/shared/${name}.webp`] ?? toolMarch[`../../assets/icons/ofc/tool-transparent/march/${name}.webp`];
     if (asset) return asset;
   }
   const matches: Array<[RegExp, string]> = [
@@ -75,10 +66,7 @@ export function choreLineIconForText(text: string): string | null {
   for (const [test, name] of matches) {
     if (!test.test(value)) continue;
     const src = toolShared[`../../assets/icons/ofc/tool-transparent/shared/${name}.webp`] ??
-      toolMarch[`../../assets/icons/ofc/tool-transparent/march/${name}.webp`] ??
-      jpgs[`../../assets/icons/ofc/updatedicons/svg/${name}.jpg`] ??
-      svgs[`../../assets/icons/ofc/updatedicons/svg/${name}.svg`] ??
-      march[`../../assets/icons/ofc/march/${name}.webp`];
+      toolMarch[`../../assets/icons/ofc/tool-transparent/march/${name}.webp`] ;
     if (src) return src;
   }
   return null;
