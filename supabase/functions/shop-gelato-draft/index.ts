@@ -38,7 +38,27 @@ async function authorized(req:Request):Promise<boolean> {
 
 type Item={id:string;product_id:string;product_slug:string;quantity:number};
 type Order={id:string;payment_status:string;digital?:boolean;fulfillment_status:string;email:string|null;shipping_address:Record<string,string|null>|null;shipping_name:string|null;customer_name:string|null;shop_order_items:Item[]};
-type Mapping={product_id:string;product_uid:string;print_file_url:string;page_count:number|null};
+type Mapping={product_id:string;product_uid:string;storage_object_path:string|null;page_count:number|null};
+const BUCKET='gelato-print-files';
+const SIGNED_URL_TTL_SECONDS=7200;
+/** Signs only server-side, never exposes the signed URL to the browser. */
+async function signPrivatePrintFile(path:string):Promise<string> {
+  if(!path || path.startsWith('/') || path.includes('..') || /[?#]/.test(path) || !path.toLowerCase().endsWith('.pdf'))
+    throw new Error('invalid_private_print_path');
+  const encoded=path.split('/').map(encodeURIComponent).join('/');
+  const result=await fetch(supabaseUrl+'/storage/v1/object/sign/'+BUCKET+'/'+encoded,{
+    method:'POST',headers:dbHeaders,body:JSON.stringify({expiresIn:SIGNED_URL_TTL_SECONDS}),
+    signal:AbortSignal.timeout(15000)
+  });
+  if(!result.ok) throw new Error('private_print_sign_failed_'+result.status);
+  const response=await result.json() as {signedURL?:string;signedUrl?:string};
+  const relative=response.signedURL || response.signedUrl;
+  if(!relative) throw new Error('missing_signed_print_url');
+  const url=new URL(relative,supabaseUrl+'/storage/v1/');
+  if(url.origin !== new URL(supabaseUrl).origin || !url.pathname.startsWith('/storage/v1/object/sign/'+BUCKET+'/'))
+    throw new Error('unexpected_signed_print_url');
+  return url.toString();
+}
 Deno.serve(async(req)=>{
   if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors(req)});
   if(req.method!=='POST') return json(req,{error:'method_not_allowed'},405);
@@ -55,7 +75,7 @@ Deno.serve(async(req)=>{
       return json(req,{error:'missing_order_details'},422);
     const key=Deno.env.get('GELATO_API_KEY');
     if(!key) return json(req,{error:'gelato_not_configured'},503);
-    const mappings=await query<Mapping>('shop_gelato_products','select=product_id,product_uid,print_file_url,page_count&enabled=eq.true');
+    const mappings=await query<Mapping>('shop_gelato_products','select=product_id,product_uid,storage_object_path,page_count&enabled=eq.true');
     const byId=new Map(mappings.map(m=>[m.product_id,m]));
     const missing=order.shop_order_items.filter(item=>!byId.has(item.product_id));
     if(missing.length) return json(req,{error:'unmapped_products',product_slugs:missing.map(x=>x.product_slug)},422);
@@ -67,6 +87,21 @@ Deno.serve(async(req)=>{
       return json(req,{error:'incomplete_shipping_address'},422);
     if(['US','CA','AU'].includes(a.country.toUpperCase())&&!a.state)
       return json(req,{error:'missing_shipping_state'},422);
+    // All signed print URLs must exist before claiming the order. If a signed URL
+    // cannot be generated, no claim is made and Gelato is never contacted.
+    const signedByProduct=new Map<string,string>();
+    try {
+      for (const item of order.shop_order_items) {
+        if (!signedByProduct.has(item.product_id)) {
+          const privatePath=byId.get(item.product_id)?.storage_object_path;
+          if(!privatePath) return json(req,{error:'private_print_file_not_configured'},422);
+          signedByProduct.set(item.product_id,await signPrivatePrintFile(privatePath));
+        }
+      }
+    } catch(e) {
+      console.error('private print file signing failed', (e as Error).message);
+      return json(req,{error:'private_print_file_unavailable'},503);
+    }
     const claimed=await rpc<boolean>('shop_gelato_claim',{p_order:id});
     if(!claimed) return json(req,{error:'already_claimed_or_not_paid'},409);
     const payload={
@@ -74,7 +109,7 @@ Deno.serve(async(req)=>{
       items:order.shop_order_items.map(item=>{
         const m=byId.get(item.product_id)!;
         return {itemReferenceId:item.id,productUid:m.product_uid,quantity:item.quantity,
-          files:[{type:'default',url:m.print_file_url}],...(m.page_count?{pageCount:m.page_count}:{})};
+          files:[{type:'default',url:signedByProduct.get(item.product_id)!}],...(m.page_count?{pageCount:m.page_count}:{})};
       }),
       shippingAddress:{firstName,lastName,addressLine1:a.line1,addressLine2:a.line2||undefined,
         city:a.city,state:a.state||undefined,postCode:a.postal_code,
