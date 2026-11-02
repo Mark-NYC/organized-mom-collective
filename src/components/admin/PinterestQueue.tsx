@@ -38,12 +38,12 @@ function Queue({ctx}:{ctx:AdminContext}){
  const schedule=useMemo(()=>{const ds=dates(start,days,weekends);return choices.map((p,i)=>({...p,date:ds[Math.floor(i/perDay)]||start,time:hour+(i%perDay)*Math.floor(10/perDay)}));},[choices,start,days,weekends,perDay,hour]);
  const download=async()=>{
   if(!schedule.length)return;
-  if(schedule.some(p=>!isHttp(p.image_url)||!isHttp(p.destination_url)||!p.board.trim()||!p.title.trim())){setError('One or more pins lack a valid image URL, destination URL, board, or title.');return;}
-  if(schedule.some(p=>Date.parse(p.date+'T12:00:00Z')>Date.now()+30*86400000)){setError('Pinterest scheduling is limited to the next 30 days. Shorten this batch.');return;}
+  if(schedule.some(p=>!isHttp(p.image_url)||!isHttp(p.destination_url)||!p.board.trim()||!p.title.trim()||p.description.length>500)){setError('One or more pins lack a valid image URL, destination URL, board, or title.');return;}
+  if(schedule.length>200){setError('Pinterest allows at most 200 pins per upload. Reduce this batch.');return;}\n  if(schedule.some(p=>Date.parse(p.date+'T12:00:00Z')>Date.now()+30*86400000)){setError('Pinterest scheduling is limited to the next 30 days. Shorten this batch.');return;}
   setBusy(true);setError('');
   const batch=crypto.randomUUID();
   const header=['Title','Media URL','Pinterest board','Thumbnail','Description','Link','Publish date','Keywords'];
-  const rows=schedule.map(p=>[p.title,p.image_url,p.board,'',p.description,p.destination_url,utcForEastern(p.date,p.time).replace('T',' ').slice(0,16),p.keywords]);
+  const rows=schedule.map(p=>[p.title,p.image_url,p.board,'',p.description,p.destination_url,utcForEastern(p.date,p.time).slice(0,19),p.keywords]);
   const csv=[header,...rows].map(row=>row.map(escapeCsv).join(',')).join('\r\n');
   try{
    for(const p of schedule){await request('PATCH',p.id,{status:'exported',export_batch:batch,publish_at:utcForEastern(p.date,p.time)});}
