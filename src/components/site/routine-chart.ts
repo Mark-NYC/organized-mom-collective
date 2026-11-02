@@ -78,6 +78,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const src = filled ? (routineIconForText(stepFields[i].value) ?? routineIconById(id) ?? choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value) ?? fallbackStepIcon) : null;
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
+      slot.toggleAttribute('data-grocery-shopping', !!src && src === routineIconById('grocery-shopping'));
       if (src) {
         any = true;
         if (img.getAttribute('src') !== src) img.src = src;
