@@ -68,7 +68,8 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const id = iconFields[i].value;
       const filled = !!stepFields[i].value.trim();
       slot.closest('.mr-step')?.toggleAttribute('data-mr-empty', !filled);
-      const src = filled ? (routineIconForText(stepFields[i].value) ?? routineIconById(id) ?? choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value) ?? fallbackStepIcon) : null;
+      const washHands = /wash (my |your |the )?hands|washing hands|handwashing|hand washing/i.test(stepFields[i].value);
+      const src = filled ? ((washHands ? choreLineIcon('wash-my-hands') : null) ?? routineIconForText(stepFields[i].value) ?? routineIconById(id) ?? choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value) ?? fallbackStepIcon) : null;
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
       slot.toggleAttribute('data-grocery-shopping', !!src && src === routineIconById('grocery-shopping'));
