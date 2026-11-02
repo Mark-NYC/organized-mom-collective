@@ -1,0 +1,26 @@
+name: Transparent tool icons
+on:
+  pull_request:
+    paths:
+      - 'scripts/prepare-transparent-tool-icons.mjs'
+      - 'src/data/chore-line-icons.ts'
+      - 'src/data/routine-line-icons.ts'
+      - 'src/components/site/RoutineChart.astro'
+      - 'src/components/site/FamilyResponsibilityBuilder.astro'
+      - 'assets/icons/ofc/**'
+      - 'package.json'
+      - '.github/workflows/transparent-tool-icons.yml'
+jobs:
+  validate-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Convert all mapped icons and verify alpha
+        run: node scripts/prepare-transparent-tool-icons.mjs
+      - name: Build all Astro pages
+        run: npm run build
