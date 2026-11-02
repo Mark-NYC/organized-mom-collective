@@ -66,11 +66,21 @@ async function makeTransparent(source, output) {
   // Convert perfectly-white and black line-art to lossless alpha WebP.
   await sharp(data,{raw:{width,height,channels:4}})
     .webp({lossless:true,effort:5}).toFile(output);
-  const result=await sharp(output).stats();
-  if(result.channels.length<4 || result.channels[3].min>=255) {
-    throw new Error('Icon output is not transparent: '+output);
+  const {data:verified,info:verifiedInfo}=await sharp(output).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  let border=0,clearBorder=0,visible=0;
+  for(let y=0;y<verifiedInfo.height;y++)for(let x=0;x<verifiedInfo.width;x++){
+    const a=verified[(y*verifiedInfo.width+x)*4+3];
+    if(a>90) visible++;
+    if(x<3||y<3||x>=verifiedInfo.width-3||y>=verifiedInfo.height-3){
+      border++;
+      if(a<45)clearBorder++;
+    }
   }
-  return {width,height,transparency:result.channels[3].min,matte};
+  if(!visible || !border || clearBorder/border<0.70) {
+    throw new Error('Missing clear background or visible strokes in '+output+
+      ' (transparent border '+(100*clearBorder/Math.max(border,1)).toFixed(1)+'%)');
+  }
+  return {width,height,clearBorder:clearBorder/border,matte};
 }
 let converted=0;
 for(const [set,dir] of sets){
