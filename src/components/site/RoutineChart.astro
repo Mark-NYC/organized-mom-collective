@@ -40,6 +40,8 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
 <div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined} data-mr-handoff={handoff ? '' : undefined}>
   <div class="mr-builder-heading"><span class="mr-builder-kicker">MAKE IT YOURS</span><h2>Build your child’s routine</h2><p>Choose a starting routine, then customize the steps and download your chart.</p></div>
+  <div class="mr-workspace">
+  <div class="mr-controls">
   <div class="mr-types" role="group" aria-label="Routine">
     {
       Object.entries(routineTypes).map(([id, t]) => (
@@ -69,9 +71,26 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     <p class="mr-summer-status" data-mr-summer-status role="status" aria-live="polite"></p>
   </section>
 
-  <ResponsibilityPicker hint="Tap one to add it to the next open step. Use the arrows on the chart to change the order.">
+  <ResponsibilityPicker monochrome hint="Tap an illustration to add it. The exact same artwork appears on your printable.">
     <slot name="picker-note" />
   </ResponsibilityPicker>
+
+  <section class="mr-editor" aria-label="Edit your routine steps">
+    <div class="mr-editor-head"><h3>Edit your routine</h3><p>Rename, clear, or move activities here. Your preview updates as you go.</p></div>
+    <div class="mr-editor-list">
+      {rows.map(([,step],i) => (
+        <div class="mr-editor-row">
+          <span class="mr-editor-num">{i+1}</span>
+          <input type="text" data-mr-editor-step={i} value={step} placeholder="Add an activity" aria-label={`Edit activity ${i+1}`} />
+          <button type="button" class="mr-editor-remove" data-mr-editor-clear={i} aria-label={`Clear activity ${i+1}`} title="Clear activity">×</button>
+          <span class="mr-editor-moves">
+            <button type="button" data-mr-editor-move={i} data-mr-dir="-1" aria-label={`Move activity ${i+1} up`} disabled={i===0}>↑</button>
+            <button type="button" data-mr-editor-move={i} data-mr-dir="1" aria-label={`Move activity ${i+1} down`} disabled={i===ROUTINE_ROWS-1}>↓</button>
+          </span>
+        </div>
+      ))}
+    </div>
+  </section>
 
   <fieldset class="mr-palette-picker" data-mr-advanced>
     <legend>Choose your colors</legend>
@@ -84,10 +103,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       ))}
     </div>
   </fieldset>
-  <div class="mr-actions">
-    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download routine</button>
-    <button type="button" class="mr-btn" data-mr-reset>Reset routine</button>
-  </div>
+  <div class="mr-reset-area"><button type="button" class="mr-btn" data-mr-reset>Reset to starter routine</button></div>
 
   <button type="button" class="mr-customize-link" data-mr-customize aria-expanded="false">Customize steps and colors</button>
   <div class="mr-ideas">
@@ -98,6 +114,9 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     <p class="mr-hint">Or tap any line on the chart to type your own.</p>
   </div>
 
+  </div><!-- /mr-controls -->
+  <div class="mr-preview">
+    <div class="mr-preview-label"><span>LIVE PREVIEW</span><p>Tap the title, times, or steps to edit right on the chart.</p></div>
   <div class="mr-sheet" id="routine-chart">
     <input type="hidden" data-field="palette" value={defaultToolPalette} />
     <input type="hidden" data-field="type" value="morning" data-mr-type-field />
@@ -141,6 +160,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
     <div class="mr-foot">{brand}</div>
   </div>
+  <div class="mr-actions">
+    <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download My Routine Chart</button>
+  </div>
+  </div><!-- /mr-preview -->
+  </div><!-- /mr-workspace -->
 
   <div class="mr-after"><slot name="after-sheet" /></div>
 
@@ -719,6 +743,91 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container {background:white;padding:0}
     .mr-builder-heading {display:none}
     .mr-container .mr-sheet {box-shadow:none;border:0;border-radius:0}
+  }
+</style>
+
+
+<style is:global>
+  /* Two-column builder with an actual editing workspace and live print preview. */
+  .mr-container .mr-workspace {display:grid;grid-template-columns:minmax(340px,440px) minmax(0,816px);justify-content:center;align-items:start;gap:24px;max-width:1330px;margin:0 auto}
+  .mr-container .mr-controls {display:flex;flex-direction:column;min-width:0;gap:14px}
+  .mr-container .mr-preview {min-width:0;display:flex;flex-direction:column;align-items:center}
+  .mr-container .mr-preview-label {width:100%;padding:0 0 10px}
+  .mr-container .mr-preview-label span {font:700 11px Montserrat,sans-serif;letter-spacing:.14em;color:#777}
+  .mr-container .mr-preview-label p {font:400 12px/1.5 Montserrat,sans-serif;color:#777;margin:4px 0 0}
+  .mr-container .mr-types,.mr-container .rp,.mr-container .mr-summer,.mr-container .mr-palette-picker,.mr-container .mr-ideas {max-width:none;margin:0}
+  .mr-container .mr-types {gap:7px;padding:12px}
+  .mr-container .mr-type {flex:1 1 125px;min-height:60px;padding:10px}
+  .mr-container .rp {padding:16px}
+  .mr-container .rp-list {grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .mr-container .rp-tile {padding:8px 3px;min-width:0;border-color:#E2DDD5}
+  .mr-container .rp-tile:hover {background:#FBF7F1}
+  .mr-container .rp-art {background:transparent;border-radius:0;width:58px;height:58px}
+  .mr-container .rp-art img {width:54px;height:54px;object-fit:contain}
+  .mr-container .rp-name {font:500 10px/1.3 Montserrat,sans-serif}
+  .mr-container .rp-dot {display:none}
+  .mr-container .rp-filter {font-size:11px}
+  .mr-container .mr-editor {padding:17px;background:#fff;border:1px solid #E2DDD5;border-radius:14px}
+  .mr-container .mr-editor-head h3 {font:400 22px/1.2 Georgia,serif;margin:0 0 5px}
+  .mr-container .mr-editor-head p {font:400 12px/1.5 Montserrat,sans-serif;color:#777;margin:0 0 13px}
+  .mr-container .mr-editor-list {display:flex;flex-direction:column;gap:7px}
+  .mr-container .mr-editor-row {display:flex;align-items:center;gap:5px;min-width:0}
+  .mr-container .mr-editor-num {width:18px;flex:0 0 18px;font:700 12px Montserrat,sans-serif;color:#777;text-align:center}
+  .mr-container .mr-editor-row input {flex:1;min-width:0;height:39px;padding:7px 10px;border:1px solid #E2DDD5;border-radius:9px;background:#FBF7F1;font:500 12px Montserrat,sans-serif;color:#545454}
+  .mr-container .mr-editor-row input:focus-visible {outline:2px solid #AABF96;outline-offset:1px}
+  .mr-container .mr-editor-remove,.mr-container .mr-editor-moves button {width:27px;height:32px;border:0;background:transparent;color:#777;font-size:16px;cursor:pointer}
+  .mr-container .mr-editor-remove:hover,.mr-container .mr-editor-moves button:hover:not(:disabled) {color:#333;background:#F3F0EB;border-radius:6px}
+  .mr-container .mr-editor-moves {display:flex;flex-direction:column}
+  .mr-container .mr-editor-moves button {width:24px;height:19px;font-size:13px;line-height:16px}
+  .mr-container .mr-editor-moves button:disabled {opacity:.2;cursor:default}
+  .mr-container .mr-reset-area {text-align:left}
+  .mr-container .mr-reset-area .mr-btn {font-size:12px;border:0;background:transparent;padding:4px 0;min-height:30px;text-decoration:underline}
+  .mr-container .mr-customize-link {display:none!important}
+  .mr-container .mr-ideas {display:flex!important}
+  .mr-container .mr-palette-picker {display:block!important}
+  .mr-container .mr-preview .mr-sheet {width:816px;max-width:none;flex:0 0 auto}
+  .mr-container .mr-preview .mr-actions {width:100%;margin:14px 0 0;justify-content:center}
+  .mr-container .mr-preview .mr-btn-primary {width:min(100%,370px);min-height:52px;font-size:14px}
+  /* Updated downloadable sheet. Page size is unchanged for existing PNG export. */
+  .mr-container .mr-sheet .mr-title {font-family:Georgia,serif;font-size:36px;letter-spacing:-.02em;font-style:normal}
+  .mr-container .mr-sheet .mr-subtitle {font-family:Montserrat,sans-serif;font-size:16px;font-style:normal;color:#777}
+  .mr-container .mr-sheet .mr-text {font-family:Montserrat,sans-serif;font-size:19px;background:transparent;border-radius:0;font-weight:500}
+  .mr-container .mr-sheet .mr-time {background:#F3F5F2;color:#545454;border-radius:6px;font-size:13px}
+  .mr-container .mr-sheet .mr-step {border:1px solid #E6E2DC;border-radius:9px;box-shadow:none}
+  .mr-container .mr-sheet .mr-num {font-family:Georgia,serif;font-size:24px;color:#545454}
+  .mr-container .mr-sheet .mr-box {border:1.5px solid #A8A39B;border-radius:4px}
+  .mr-container .mr-sheet .mr-end-label {font-family:Georgia,serif;font-size:20px;letter-spacing:0;text-transform:none;font-style:normal}
+  .mr-container .mr-sheet .mr-icon {width:60px;height:60px}
+  .mr-container .mr-sheet .mr-icon img {width:58px;height:58px}
+  .mr-container.mr-exporting .mr-sheet .mr-step[data-mr-empty] {display:none}
+  .mr-container.mr-exporting .mr-sheet .mr-done {margin-top:40px}
+  @media(max-width:1310px) {
+    .mr-container .mr-workspace {grid-template-columns:minmax(290px,380px) minmax(0,1fr);gap:18px}
+    .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:.85}
+  }
+  @media(max-width:1080px) {
+    .mr-container .mr-workspace {grid-template-columns:minmax(0,816px)}
+    .mr-container .mr-preview {order:2}
+    .mr-container .mr-controls {order:1}
+    .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:1}
+  }
+  @media(max-width:850px) {
+    .mr-container .mr-workspace {display:flex;flex-direction:column;gap:16px}
+    .mr-container .mr-controls,.mr-container .mr-preview {width:100%}
+    .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:1;width:816px;max-width:none;transform:scale(min(1,calc((100vw - 32px)/816)));transform-origin:top left}
+    /* On mobile, the preview remains editable using the chart's existing responsive rules. */
+    .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {transform:none;width:100%;max-width:100%;height:auto;min-height:0}
+    .mr-container:not(.mr-exporting) .mr-types {display:flex!important;flex-wrap:nowrap;overflow-x:auto}
+    .mr-container:not(.mr-exporting) .rp-list {display:flex}
+    .mr-container .mr-editor {padding:13px}
+    .mr-container .mr-preview .mr-actions {margin-top:12px}
+    .mr-container:not(.mr-exporting) .mr-preview .mr-btn-primary {width:100%}
+  }
+  .mr-container.mr-exporting .mr-preview .mr-sheet {zoom:1!important;transform:none!important}
+  @media print {
+    .mr-controls,.mr-preview-label,.mr-preview .mr-actions {display:none!important}
+    .mr-container .mr-workspace {display:block}
+    .mr-container .mr-preview .mr-sheet {zoom:1!important;transform:none!important}
   }
 </style>
 
