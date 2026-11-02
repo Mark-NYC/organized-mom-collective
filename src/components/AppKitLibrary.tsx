@@ -3,12 +3,14 @@ import { monthColors } from '../theme';
 import { clubAccountsEnabled } from '../data/club/config';
 import { getSession } from '../lib/account';
 import { loadMembership, mailingText, monthName, shortDate, type Membership, type MembershipMonth } from '../lib/club/membership';
-import { firstMonth, kitProgress, kitText, loadMeetingGuideSeen, nextStep, profileDeferred, startsWithFirstPayment, stepHref, type KitStage, type OnboardingStep } from '../lib/club/onboarding';
+import { firstMonth, firstResourceReviewed, homeState, kitItems, kitText, loadMeetingGuideSeen, nextStep, profileDeferred } from '../lib/club/onboarding';
+import { clubResourceBySlug } from '../data/club/resources';
+import { clubEditingDeadline } from '../lib/club/deadline';
 import { accountStore } from '../lib/club/store';
 import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { SETUP_STEPS, type FamilyProfile } from '../lib/club/family-profile';
 import ClubNav from './club/ClubNav';
-import KitSteps from './club/KitSteps';
+import WelcomeKitItems from './club/WelcomeKitItems';
 import { routes } from '../routes';
 import { memberPlanHref } from '../lib/club/plan/account';
 // The app Club library mirrors the benefit-first public Club month descriptions.
@@ -25,9 +27,9 @@ const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.pn
 const months = [
   {
     "month": "January",
-    "title": "Mornings Without the Nagging",
-    "responsibility": "Following routines",
-    "how": "A ready-made morning or evening plan shows everyone what to do next.",
+    "title": "Stop Being the Family's Calendar",
+    "responsibility": "Planning together",
+    "how": "Our Family Weekly Meeting: a personalized weekly family meeting that helps everyone look ahead, prepare, and own their part.",
     "url": "/app/club/january/"
   },
   {
@@ -81,9 +83,9 @@ const months = [
   },
   {
     "month": "September",
-    "title": "Stop Being the Family's Calendar",
-    "responsibility": "Planning together",
-    "how": "A Sunday Reset around the wall calendar, plus a monthly activity calendar that shows everyone's recurring activities.",
+    "title": "School Routines Without the Nagging",
+    "responsibility": "Building independent routines",
+    "how": "Our Family Habit Cards: personalized reminder cards help kids practice one small school-day responsibility without constant reminders.",
     "url": "/app/club/september/"
   },
   {
@@ -133,7 +135,7 @@ export default function AppKitLibrary() {
         accountStore.profile().catch(() => null),
         loadMeetingGuideSeen(s.user_id),
       ]);
-      setHome({ household, profile, deferred: profileDeferred(s.user_id), guideSeen });
+      setHome({ household, profile, deferred: profileDeferred(s.user_id), guideSeen, uid: s.user_id });
       setMe(m);
     }).catch(() => undefined);
   }, []);
@@ -198,26 +200,22 @@ function MonthLink({ m, held }: { m: (typeof months)[number]; held: MembershipMo
   return <a href={m.url}>Preview the tool <span aria-hidden="true">→</span></a>;
 }
 
-interface HomeData { household: Household | null; profile: FamilyProfile | null; deferred: boolean; guideSeen: boolean }
+interface HomeData { household: Household | null; profile: FamilyProfile | null; deferred: boolean; guideSeen: boolean; uid: string | null }
 
-/** Where her Welcome Kit is, as the four steps (null once nothing is left for her to do). */
-function kitStage(step: OnboardingStep): KitStage | null {
-  if (step === 'family' || step === 'profile') return 'family';
-  if (step === 'address' || step === 'print' || step === 'meeting_guide' || step === 'first_resource') return step;
-  return null;
-}
+const DAY = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', timeZone: 'America/New_York' });
+const day = (iso: string | null | undefined) => (iso && Number.isFinite(Date.parse(iso)) ? DAY.format(Date.parse(iso)) : null);
 
 /**
- * Club Home (/app/club, signed in): her family and an edit link, her one next step, her Welcome Kit's progress, her
- * current month, what's coming, then every month (#months). One page; billing is Account & Billing.
+ * Club Home (/app/club, signed in): built around where she is, not a setup checklist. Setting up: one next step.
+ * Her Welcome Kit: almost ready (the three pieces with their statuses, "Finish My Welcome Kit"), getting ready, on its
+ * way (only once it's marked mailed; no delivery dates we don't have). After that, an ongoing membership: this month,
+ * what's next and its print deadline, her printables to open and print again, and her family. Every month (#months)
+ * stays below. Billing is Account & Billing.
  */
-function ClubHome({ me, household, profile, deferred, guideSeen }: { me: Membership } & HomeData) {
+function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Membership } & HomeData) {
   const step = nextStep(me, { profile: household ? profile : null, profileDeferred: deferred, meetingGuideSeen: guideSeen });
+  const state = homeState(me, step);
   const first = firstMonth(me);
-  const kitOpen = Boolean(me.welcome && !me.welcome.satisfies_month && !['mailed', 'canceled'].includes(me.welcome.status));
-  const waiting = startsWithFirstPayment(me);
-  const submitted = Boolean(me.welcome && ['needs_pdf', 'ready'].includes(me.welcome.readiness) && me.welcome.approved);
-  const stage = kitStage(step) ?? (submitted ? 'done' : null);
   const people = household?.members.filter((m) => !m.archived) ?? [];
   const month = monthOf(new Date());
   const profileLeft = profile && !profile.setupCompleted ? SETUP_STEPS.filter((s) => !profile.setupDone.includes(s)).length : 0;
@@ -225,27 +223,19 @@ function ClubHome({ me, household, profile, deferred, guideSeen }: { me: Members
     ?? [...me.months].reverse().find((m) => m.state === 'available' && m.month <= me.current_month)
     ?? me.months.find((m) => m.state === 'available');
   const upcoming = me.months.filter((m) => m !== current && m.month > me.current_month && m.fulfilled_by === 'monthly_resource');
-  // The same title as the month's card below (the resource registry's titles can differ from the tools, PR #268).
-  const title = (iso: string) => months[Number(iso.slice(5, 7)) - 1]?.title ?? 'Monthly resource';
+  const opened = me.months.filter((m) => m.state === 'available' && m.slug && m.fulfilled_by === 'monthly_resource');
+  // The printed resource's name (src/data/club/resources.ts: what prints), else the month card's headline.
+  const title = (m: { month: string; slug?: string | null }) => clubResourceBySlug(m.slug)?.title ?? months[Number(m.month.slice(5, 7)) - 1]?.title ?? 'Monthly resource';
   const short = (iso: string) => monthName(iso).split(' ')[0];
-
-  // Her one next step, in setup order.
-  const action: { text: string; label: string; href: string } | null =
-    step === 'family' || step === 'address' ? { text: 'Finish setting up your family and mailing address so we can prepare your Welcome Kit.', label: 'Continue setup', href: routes.clubWelcome }
-    : step === 'profile' ? { text: `A few questions about your week are left (${profileLeft} of ${SETUP_STEPS.length}). Every one is optional.`, label: 'Continue your family profile', href: routes.clubWelcome }
-    : step === 'print' ? { text: 'Your Family Vision print is ready. Make it yours and approve it.', label: 'Approve your welcome print', href: stepHref(me, 'print') }
-    : step === 'meeting_guide' ? { text: 'Your print is approved. Next, a quick look at the Family Meeting guide that comes in your Welcome Kit.', label: 'See the Family Meeting guide', href: stepHref(me, 'meeting_guide') }
-    : step === 'first_resource' ? { text: `Your print is approved. Take a quick look at ${first ? short(first.month) : 'your first month'}, change anything, then confirm it.`, label: 'Review your first resource', href: stepHref(me, 'first_resource') }
-    : waiting ? null
-    : current?.slug ? { text: `${short(current.month)} is ready for your family.`, label: `Open your ${short(current.month)} plan`, href: memberPlanHref(current.slug) }
-    : null;
+  const items = me.welcome ? kitItems(me, firstResourceReviewed(first?.slug, uid), (slug) => clubResourceBySlug(slug)?.title ?? null) : [];
+  const next = upcoming[0] ?? null;
+  const nextDeadline = next ? day(clubEditingDeadline(next.month.slice(0, 7))) : null;
 
   return (
     <>
-      <div className="ofc-club-nav-wrap"><ClubNav current="home" /></div>
-      <header className="ofc-club-intro" data-club-home>
-        <p className="label text-[#71866c]">ORGANIZED FAMILY CLUB · CLUB HOME</p>
-        <h1 className="family-title mt-4">{household?.displayName ?? 'Your family'}</h1>
+      <ClubNav current="home" />
+      <div className="ofc-home-family" data-club-home>
+        <p className="ofc-home-family-name">{household?.displayName ?? 'Your family'}</p>
         {people.length > 0 && (
           <ul className="ofc-family-people" aria-label="Your family">
             {people.map((m) => (
@@ -253,63 +243,105 @@ function ClubHome({ me, household, profile, deferred, guideSeen }: { me: Members
             ))}
           </ul>
         )}
-        <a className="ofc-home-link" href={routes.clubFamily}>Edit my family <span aria-hidden="true">→</span></a>
-      </header>
+        <a className="ofc-home-link" href={routes.clubFamily}>Edit my family</a>
+      </div>
 
-      {action && (
-        <section className="ofc-member-kit ofc-next-step" aria-labelledby="ofc-next-title">
-          <p className="label text-[#71866c]">Your next step</p>
-          <p id="ofc-next-title" className="ofc-kit-status">{action.text}</p>
-          <a className="ofc-member-cta" href={action.href}>{action.label}</a>
-          {step !== 'profile' && profileLeft > 0 && (
-            <p className="ofc-kit-status">Also open: <a href={`${routes.clubFamily}?setup=1`}>finish your family profile</a> ({profileLeft} optional {profileLeft === 1 ? 'question' : 'questions'}).</p>
-          )}
+      {state === 'setup' && (
+        <section className="ofc-home-hero" aria-labelledby="ofc-hero" data-home-state="setup">
+          <p className="label text-[#71866c]">Your Welcome Kit</p>
+          <h1 id="ofc-hero" className="ofc-home-title">Let’s finish setting up your family.</h1>
+          <p className="ofc-home-lede">{step === 'profile' ? `A few questions about your week are left (${profileLeft} of ${SETUP_STEPS.length}). Every one is optional.` : 'A few details about your family and where to mail your Welcome Kit, then you’ll see the three printed resources we make for you.'}</p>
+          <a className="ofc-member-cta" href={routes.clubWelcome}>Continue setup</a>
         </section>
       )}
 
-      {waiting && me.next && (
-        <section className="ofc-member-kit" aria-labelledby="ofc-starts-title" data-club-starts>
+      {state === 'starts' && me.next && (
+        <section className="ofc-home-hero" aria-labelledby="ofc-starts-title" data-club-starts data-home-state="starts">
           <p className="label text-[#71866c]">Your membership</p>
-          <h2 id="ofc-starts-title" className="family-panel-title mt-1">Your Club starts with {short(me.next.month)}</h2>
-          <p className="ofc-kit-status">The free first month is one per household, and this household has already had it. Your membership starts with your first payment on <strong>{shortDate(me.next.payment_on!)}</strong>: {short(me.next.month)} opens here that day, and your Welcome Kit (your Family Vision print, our Family Meeting guide and {short(me.next.month)}) is ready for you to approve then.</p>
+          <h1 id="ofc-starts-title" className="ofc-home-title">Your Club starts with {short(me.next.month)}</h1>
+          <p className="ofc-home-lede">The free first month is one per household, and this household has already had it. Your membership starts with your first payment on <strong>{shortDate(me.next.payment_on!)}</strong>: {short(me.next.month)} opens here that day, and your Welcome Kit (your Family Vision Print, the Family Meeting Guide and {short(me.next.month)}) is ready for you to make yours then.</p>
           {profileLeft > 0 && <a className="ofc-member-cta" href={`${routes.clubFamily}?setup=1`}>Finish your family profile meanwhile</a>}
         </section>
       )}
 
-      {kitOpen && (
-        <section className="ofc-member-kit" aria-labelledby="ofc-kit-title">
+      {state === 'kit_open' && (
+        <section className="ofc-home-hero" aria-labelledby="ofc-hero" data-home-state="kit_open">
           <p className="label text-[#71866c]">Your Welcome Kit</p>
-          <h2 id="ofc-kit-title" className="family-panel-title mt-1">Your first mailing, together</h2>
-          {stage && <KitSteps steps={kitProgress(stage)} className="mt-3" />}
-          <ul>
-            <li>Your Family Vision watercolor print, our gift</li>
-            <li>Our one-page Family Meeting guide</li>
-            {first && <li>{short(first.month)}: {title(first.month)}</li>}
-          </ul>
-          <p className="ofc-kit-status">{kitText(me)} All three come in one mailing.</p>
+          <h1 id="ofc-hero" className="ofc-home-title">Your Welcome Kit is almost ready.</h1>
+          <p className="ofc-home-lede">Three printed resources, made for your family and mailed together. {kitText(me)}</p>
+          <WelcomeKitItems items={items} firstSlug={first?.slug ?? null} compact />
+          <a className="ofc-member-cta" href={routes.clubWelcomeKit}>Finish My Welcome Kit</a>
         </section>
       )}
 
-      {current?.slug && action?.href !== memberPlanHref(current.slug) && (
-        <section className="ofc-member-kit" aria-labelledby="ofc-current-title">
-          <p className="label text-[#71866c]">{current.month === me.current_month ? 'This month' : 'Your month'} · {monthName(current.month)}</p>
-          <h2 id="ofc-current-title" className="family-panel-title mt-1">{title(current.month)}</h2>
-          {mailingText(current.mailing) && <p className="ofc-kit-status">Printed copy: {mailingText(current.mailing)}</p>}
-          <a className="ofc-member-cta" href={memberPlanHref(current.slug)}>Open your {short(current.month)} plan</a>
+      {state === 'kit_submitted' && (
+        <section className="ofc-home-hero" aria-labelledby="ofc-hero" data-home-state="kit_submitted">
+          <p className="label text-[#71866c]">Your Welcome Kit</p>
+          <h1 id="ofc-hero" className="ofc-home-title">Your Welcome Kit is getting ready!</h1>
+          <p className="ofc-home-lede">{['needs_pdf', 'ready'].includes(me.welcome?.readiness ?? '') && me.welcome?.status === 'pending' ? 'We’re preparing your three printed resources together and aim to mail them in one package within two business days.' : kitText(me)}</p>
+          <WelcomeKitItems items={items} firstSlug={first?.slug ?? null} compact />
         </section>
       )}
 
-      {(upcoming.length > 0 || me.next) && (
-        <section className="ofc-member-kit" aria-labelledby="ofc-upcoming-title">
-          <p className="label text-[#71866c]">Coming up</p>
-          <ul id="ofc-upcoming-title">
-            {upcoming.map((m) => <li key={m.month}>{monthName(m.month)}: {title(m.month)} · yours{m.state === 'available' ? '' : ', opens when it’s ready'}</li>)}
-            {me.next && <li>{monthName(me.next.month)}: {title(me.next.month)} · opens with your {me.next.payment_on ? shortDate(me.next.payment_on) : 'next'} payment</li>}
-          </ul>
+      {state === 'kit_mailed' && (
+        <section className="ofc-home-hero" aria-labelledby="ofc-hero" data-home-state="kit_mailed">
+          <p className="label text-[#71866c]">Your Welcome Kit</p>
+          <h1 id="ofc-hero" className="ofc-home-title">Your Welcome Kit is on its way.</h1>
+          <p className="ofc-home-lede">{day(me.welcome?.mailed_at) ? `We mailed it on ${day(me.welcome?.mailed_at)}.` : 'It’s in the mail.'} When it arrives, here’s where to start:</p>
+          <ol className="ofc-home-start">
+            <li><strong>Hang your Family Vision Print</strong> where everyone will see it.</li>
+            <li><strong>Hold your first family meeting.</strong> <a href={routes.clubMeetingGuide}>The Family Meeting Guide</a> is here too, if you’d like to read it first.</li>
+            {first?.slug && <li><strong>Start your {short(first.month)} plan together.</strong> <a href={memberPlanHref(first.slug)}>Open it here</a> anytime to change or print it.</li>}
+          </ol>
         </section>
       )}
 
-      <h2 className="family-panel-title mt-9">Monthly Resources</h2>
+      {(state === 'ongoing' || state === 'kit_mailed' || state === 'kit_submitted') && (
+        <div className="ofc-home-grid">
+          {current?.slug && (
+            <section className="ofc-member-kit" aria-labelledby="ofc-current-title" data-home-current>
+              <p className="label text-[#71866c]">{current.month === me.current_month ? 'This month' : 'Your month'} · {monthName(current.month)}</p>
+              <h2 id="ofc-current-title" className="family-panel-title mt-1">{title(current)}</h2>
+              {mailingText(current.mailing) && <p className="ofc-kit-status">Printed copy: {mailingText(current.mailing)}</p>}
+              <a className="ofc-member-cta" href={memberPlanHref(current.slug)}>Open your {short(current.month)} plan</a>
+            </section>
+          )}
+          {(next || me.next) && (
+            <section className="ofc-member-kit" aria-labelledby="ofc-upcoming-title" data-home-next>
+              <p className="label text-[#71866c]">Coming up</p>
+              {next ? (
+                <>
+                  <h2 id="ofc-upcoming-title" className="family-panel-title mt-1">{monthName(next.month)}: {title(next)}</h2>
+                  <p className="ofc-kit-status">{next.state === 'available' ? `Ready to preview and make yours.${nextDeadline ? ` Changes until ${nextDeadline}, then it goes to print.` : ''}` : 'Yours. It opens here when it’s ready.'}</p>
+                  {next.state === 'available' && next.slug && <a className="ofc-home-link" href={memberPlanHref(next.slug)}>Preview and edit {short(next.month)}</a>}
+                </>
+              ) : me.next && (
+                <>
+                  <h2 id="ofc-upcoming-title" className="family-panel-title mt-1">{monthName(me.next.month)}: {title(me.next)}</h2>
+                  <p className="ofc-kit-status">Opens with your {me.next.payment_on ? shortDate(me.next.payment_on) : 'next'} payment{me.next.regular_cutoff_at && day(me.next.regular_cutoff_at) ? `; print deadline ${day(me.next.regular_cutoff_at)}` : ''}.</p>
+                </>
+              )}
+            </section>
+          )}
+          <section className="ofc-member-kit" aria-labelledby="ofc-printables-title" data-home-printables>
+            <p className="label text-[#71866c]" id="ofc-printables-title">Your printables</p>
+            <ul className="ofc-home-list">
+              {opened.map((m) => <li key={m.month}><a href={memberPlanHref(m.slug!)}>{short(m.month)}: {title(m)}</a></li>)}
+              {me.welcome && <li><a href={routes.clubMeetingGuide}>Family Meeting Guide</a></li>}
+              {me.welcome && <li><a href={routes.clubFamilyVision}>Your Family Vision Print</a></li>}
+            </ul>
+          </section>
+          {profileLeft > 0 && (
+            <section className="ofc-member-kit" aria-labelledby="ofc-profile-title">
+              <p className="label text-[#71866c]" id="ofc-profile-title">Your family profile</p>
+              <p className="ofc-kit-status">{profileLeft} optional {profileLeft === 1 ? 'question' : 'questions'} left. The more we know, the better each month fits.</p>
+              <a className="ofc-home-link" href={`${routes.clubFamily}?setup=1`}>Finish your family profile</a>
+            </section>
+          )}
+        </div>
+      )}
+
+      <h2 className="family-panel-title mt-10">Monthly Resources</h2>
       <p className="mt-2 text-sm text-warm-soft">Months marked “Yours” open your family’s own version. The others are a preview of what’s coming.</p>
     </>
   );

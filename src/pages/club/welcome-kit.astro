@@ -1,0 +1,12 @@
+---
+/**
+ * /club/welcome-kit: her Welcome Kit, all three printed pieces together, then "Prepare My Welcome Kit"
+ * (WelcomeKitHub; docs/club/WELCOME_KIT.md). Noindex, no tracking; behind PUBLIC_CLUB_ENABLED.
+ */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import WelcomeKitHub from '../../components/club/WelcomeKitHub';
+---
+
+<ClubLayout title="Your Welcome Kit">
+  <WelcomeKitHub client:only="react" />
+</ClubLayout>

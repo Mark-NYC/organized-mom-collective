@@ -34,10 +34,14 @@ const { deadline, kicker, sheets, previewNote } = Astro.props;
 
   <ClubPlanStatus />
 
+  <!-- The real printable at the screen's width (a scaled copy of its first sheet); tap for full size. -->
+  <button type="button" class="cp-hero" data-plan-open-proof aria-label="See your printable full size">
+    <span class="cp-thumb cp-thumb--hero" data-cp-thumb={sheets[0]} aria-hidden="true" inert></span>
+  </button>
   <button type="button" class="cp-preview" data-plan-open-proof>
-    <span class="cp-thumbs" aria-hidden="true" inert>{sheets.map((side) => <span class="cp-thumb" data-cp-thumb={side}></span>)}</span>
+    {sheets.length > 1 && <span class="cp-thumbs" aria-hidden="true" inert>{sheets.map((side) => <span class="cp-thumb" data-cp-thumb={side}></span>)}</span>}
     <span class="cp-preview-text"><strong>Your printable</strong><span data-cp-preview-note>{previewNote}</span></span>
-    <span class="cp-go" aria-hidden="true">View</span>
+    <span class="cp-go" aria-hidden="true">Full size</span>
   </button>
 
   <slot />
@@ -64,7 +68,9 @@ const { deadline, kicker, sheets, previewNote } = Astro.props;
 .cp-tag{border:1px solid var(--cp-line);background:#fff;padding:2px 8px;font-size:.75rem;font-weight:600;color:var(--cp-ink)}
 .cp-tag[hidden]{display:none}
 
-.cp-preview{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:10px 14px 10px 10px;margin:0 0 22px;border:1px solid var(--cp-line);background:#fff;text-align:left;cursor:pointer}
+.cp-hero{display:block;width:100%;margin:0 0 10px;padding:0;border:0;background:transparent;cursor:zoom-in}
+.cp .cp-thumb--hero{width:100%;height:auto;box-shadow:0 0 0 1px #e3e0da,0 8px 22px #0000001a}
+.cp-preview{display:flex;align-items:center;gap:14px;width:100%;min-height:60px;padding:8px 14px 8px 10px;margin:0 0 22px;border:1px solid var(--cp-line);background:#fff;text-align:left;cursor:pointer}
 .cp-thumbs{display:flex;gap:5px;flex:none}
 .cp-thumb{position:relative;display:block;width:46px;height:60px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px #e3e0da,0 2px 6px #0000000f}
 .cp .cp-thumb > *{position:absolute;top:0;left:0;margin:0;box-shadow:none;border:0;transform-origin:top left}

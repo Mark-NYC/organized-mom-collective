@@ -21,7 +21,7 @@ export function mountPrintableProof(root: HTMLElement) {
 
   let opener: HTMLElement | null = null;
   const behind = () =>
-    [document.querySelector('body > header[data-chrome]'), document.querySelector('nav[data-chrome]'), root.querySelector('[data-plan-screen]')].filter((e): e is HTMLElement => e instanceof HTMLElement);
+    [document.querySelector('body > header[data-chrome]'), document.getElementById('club-header-slot'), document.querySelector('nav[data-chrome]'), root.querySelector('[data-plan-screen]')].filter((e): e is HTMLElement => e instanceof HTMLElement);
   const setProof = (open: boolean) => {
     if (!proof || open === root.classList.contains('plan-proof-open')) return;
     root.classList.toggle('plan-proof-open', open);

@@ -105,22 +105,65 @@
   .btn-primary {
     @apply inline-flex min-h-12 items-center justify-center rounded-[3px] bg-ink px-7 text-[0.75rem] font-semibold tracking-[0.18em] text-white uppercase transition-colors hover:bg-[#3f3f3f];
   }
-  /* The Welcome Kit's three steps (src/components/club/KitSteps.tsx). */
+  /* The one Club header (src/components/club/ClubNav.tsx): one row; on phones the links fold into a Menu. */
+  .club-header-links {
+    @apply flex items-center gap-1;
+  }
+  .club-header-links a,
+  .club-header-signout {
+    @apply inline-flex min-h-11 items-center rounded-[3px] px-2.5 text-[0.8rem] font-semibold whitespace-nowrap text-warm-ink;
+  }
+  .club-header-links a[aria-current='page'] {
+    @apply underline decoration-[#71866c] decoration-2 underline-offset-[7px];
+  }
+  .club-header-signout {
+    @apply ml-2 font-medium text-warm-soft underline underline-offset-4;
+  }
+  .club-header-menu {
+    @apply hidden;
+  }
+  @media (max-width: 767px) {
+    .club-header-menu {
+      @apply inline-flex min-h-11 items-center gap-1.5 rounded-[3px] border border-warm-rule bg-white px-3 text-[0.8rem] font-semibold text-warm-ink;
+    }
+    .club-header-panel {
+      @apply hidden;
+    }
+    [data-open] > .club-header-panel {
+      @apply absolute top-full right-4 z-50 mt-1 block w-60 rounded-[6px] border border-warm-rule bg-ivory p-2 shadow-[0_12px_30px_rgba(60,55,50,0.14)];
+    }
+    [data-open] .club-header-links {
+      @apply flex-col items-stretch gap-0;
+    }
+    [data-open] .club-header-signout {
+      @apply ml-0 border-t border-warm-rule;
+    }
+  }
+  /* Her Welcome Kit journey (src/components/club/KitSteps.tsx): three phases in one compact row. */
   .kit-steps {
-    @apply m-0 mb-6 flex max-w-md list-none gap-2 p-0 text-[0.72rem] font-medium text-warm-soft;
+    @apply m-0 flex min-w-0 list-none items-center gap-1 p-0 text-[0.74rem] font-medium text-warm-soft sm:gap-2;
   }
   .kit-steps li {
-    @apply flex flex-1 flex-col items-center gap-1.5 text-center;
+    @apply flex min-w-0 items-center gap-1.5 whitespace-nowrap;
+  }
+  .kit-steps li + li::before {
+    content: '';
+    @apply mr-1 inline-block h-px w-3 flex-none bg-warm-rule sm:mr-2 sm:w-6;
   }
   .kit-steps li > span:first-child {
-    @apply grid h-6 w-6 place-items-center rounded-full border border-warm-rule bg-white text-[0.7rem] font-semibold;
+    @apply grid h-5 w-5 flex-none place-items-center rounded-full border border-warm-rule bg-white text-[0.66rem] font-semibold;
   }
-  .kit-steps li[data-state='done'] > span:first-child,
+  .kit-steps li[data-state='done'] > span:first-child {
+    @apply border-[#71866c] bg-[#d4dfc4] text-[#354f42];
+  }
   .kit-steps li[data-state='current'] > span:first-child {
     @apply border-ink bg-ink text-white;
   }
   .kit-steps li[data-state='current'] {
     @apply font-semibold text-warm-ink;
+  }
+  .kit-steps li[data-state='next'] .kit-steps-label {
+    @apply max-sm:hidden;
   }
   /* Her Welcome Kit's first resource, above the printable (src/components/club/ClubResourceAccess.tsx). */
   .kit-first {
@@ -553,3 +596,315 @@
 .tool-email-error:empty { display: none; }
 .tool-email-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .tool-email-dialog button:focus-visible, .tool-email-dialog input:focus-visible { outline: 2px solid #4a3f3e; outline-offset: 3px; }
+
+/* A member's Club header replaces the companion's top bar on /app/club pages (src/components/club/ClubNav.tsx). */
+html[data-club-header] body > header[data-chrome] {
+  display: none;
+}
+/* Never in print: an empty block before a named landscape page (March's charts) would cost a blank page. */
+@media print {
+  #club-header-slot {
+    display: none !important;
+  }
+}
+
+/*
+ * ?thumb=1: a page drawn as a miniature inside the Welcome Kit (src/components/club/KitPreview.tsx): no header, nav,
+ * rails, tabs or member panels, nothing clickable. The printable itself is untouched.
+ */
+html.omc-thumb body {
+  overflow: hidden;
+  background: #fff;
+}
+html.omc-thumb :is([data-club-chrome], header[data-chrome], nav[data-chrome], .cpd, .fm-switch, .osr-tabs, .cp, .fvp-editor, .fvp-visual-head, .fvp-scenes, .fvp-caption, [data-welcome-kit-confirm]) {
+  display: none !important;
+}
+html.omc-thumb body * {
+  pointer-events: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Her Welcome Kit (src/components/club/WelcomeKitHub.tsx, WelcomeKitItems.tsx): three real printables side by side. */
+.wk {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.wk-title {
+  margin-top: 10px;
+  font: 400 clamp(1.9rem, 4.2vw, 2.6rem) / 1.12 var(--font-serif);
+  letter-spacing: -0.015em;
+  color: var(--color-warm-ink);
+}
+.wk-lede {
+  margin-top: 10px;
+  max-width: 40rem;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--color-warm-soft);
+}
+.wk-h2 {
+  font: 400 1.45rem / 1.2 var(--font-serif);
+  color: var(--color-warm-ink);
+}
+.wk-items {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.wk-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e6e1d8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.wk-item-thumb {
+  display: block;
+  background: #f4f1ec;
+  padding: 18px 18px 0;
+}
+.kit-preview {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(60, 55, 50, 0.12);
+}
+.kit-preview iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.kit-preview[data-state='ready'] iframe {
+  visibility: visible;
+}
+.kit-preview-wait,
+.kit-preview--empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--color-warm-soft);
+  background: #fbf9f6;
+}
+.kit-preview--empty {
+  position: static;
+  aspect-ratio: 8.5 / 11;
+}
+.wk-item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px 18px;
+}
+.wk-item-status {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #eef1f2;
+  color: #4a5a60;
+}
+.wk-item-status[data-status='approved'] {
+  background: #d4dfc4;
+  color: #354f42;
+}
+.wk-item-status[data-status='needs_review'] {
+  background: #f1d8a8;
+  color: #5c4520;
+}
+.wk-item-status[data-status='ready'] {
+  background: #cddde1;
+  color: #2f4a52;
+}
+.wk-item-name {
+  font: 400 1.22rem / 1.25 var(--font-serif);
+  color: var(--color-warm-ink);
+}
+.wk-item-about {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--color-warm-soft);
+}
+.wk-item-action {
+  margin-top: auto;
+  padding-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #315d49;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.wk-item-action[data-primary] {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 0 18px;
+  border-radius: 3px;
+  background: #545454;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.wk-confirm,
+.wk-next {
+  margin-top: 30px;
+  padding: 22px 0 0;
+  border-top: 1px solid #e6e1d8;
+}
+.wk-next p {
+  margin-top: 8px;
+  max-width: 42rem;
+  line-height: 1.6;
+  color: var(--color-warm-soft);
+}
+.wk-ship {
+  margin-top: 12px;
+}
+.wk-ship-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-warm-soft);
+}
+.wk-ship-to {
+  margin-top: 4px;
+  color: var(--color-warm-ink);
+}
+.wk-link {
+  min-height: 32px;
+  font-weight: 700;
+  color: #315d49;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.wk-submit {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+}
+.wk-submit .btn-primary:disabled {
+  background: #cfcac3;
+  cursor: not-allowed;
+}
+.wk-submit-note {
+  flex: 1 1 18rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-warm-soft);
+}
+@media (max-width: 760px) {
+  .wk-items {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .wk-item {
+    flex-direction: row;
+  }
+  .wk-item-thumb {
+    flex: 0 0 104px;
+    padding: 12px;
+  }
+  .wk-item-text {
+    padding: 12px 14px 12px 4px;
+    gap: 4px;
+  }
+  .wk-item-name {
+    font-size: 1.08rem;
+  }
+  .wk-item-about {
+    font-size: 0.82rem;
+  }
+  .wk-item-action[data-primary] {
+    padding: 0 14px;
+  }
+  .wk-submit .btn-primary {
+    width: 100%;
+  }
+}
+/* Club Home's smaller version. */
+.wk-items--compact {
+  margin-top: 16px;
+  gap: 12px;
+}
+.wk-items--compact .wk-item-thumb {
+  padding: 12px 12px 0;
+}
+.wk-items--compact .wk-item-about {
+  display: none;
+}
+
+/* Welcome Kit mode on her first month's tool (src/components/club/plan/WelcomeKitConfirm.tsx): one small line. */
+.wkc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  margin: 0 0 14px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--color-warm-soft);
+}
+.wkc-crumb {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-warm-ink);
+}
+.wkc a {
+  color: #315d49;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.wkc-crumb a {
+  color: var(--color-warm-soft);
+}
+@media screen and (min-width: 1100px) {
+  .wkc {
+    margin: 0;
+    padding: 9px clamp(20px, 2.2vw, 34px);
+    border-bottom: 1px solid var(--color-warm-rule);
+    background: #f6f1e8;
+  }
+}
+/* In Welcome Kit mode only this month's printable matters: no side tabs (January's wall calendar demo). */
+.club-plan[data-plan-welcome] :is(.osr-tabs, .mar-tabs),
+html:has(.club-plan[data-plan-welcome]) .mar-tabs {
+  display: none !important;
+}
+.club-plan[data-plan-welcome] .cpd-crumb {
+  display: none !important;
+}
+.club-plan[data-plan-welcome] > .fm-switch {
+  display: none !important;
+}

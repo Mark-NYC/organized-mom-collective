@@ -15,7 +15,7 @@
  * Exits 1 when any check fails.
  */
 import { createRequire } from 'node:module';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
@@ -162,8 +162,12 @@ function refusedFreeMonth() {
     delete from public.club_intro_claims; update public.club_subscriptions set current_period_end = '2027-01-01 05:00:00+00' where user_id = '${USER.id}'`);
 }
 /** The Club nav's links on the page, in order (ClubNav). */
-const clubNavLinks = (page) => page.evaluate(() => [...document.querySelectorAll('[data-club-nav] nav[aria-label="Club"] a')]
-  .filter((a) => a.getBoundingClientRect().width > 0).map((a) => `${a.getAttribute('aria-label')}=${a.getAttribute('href')}`));
+const clubNavLinks = async (page) => {
+  // On phones the four links fold into the header's Menu: open it first.
+  if (await page.isVisible('[data-club-nav] .club-header-menu') && !(await page.isVisible('[data-club-nav] nav[aria-label="Club"] a'))) await page.click('[data-club-nav] .club-header-menu');
+  return page.evaluate(() => [...document.querySelectorAll('[data-club-nav] nav[aria-label="Club"] a')]
+    .filter((a) => a.getBoundingClientRect().width > 0).map((a) => `${a.getAttribute('aria-label')}=${a.getAttribute('href')}`));
+};
 const CLUB_NAV = ['Club Home=/app/club', 'My Family=/club/family', 'Monthly Resources=/app/club#months', 'Account & Billing=/club/dashboard'];
 /** One order's status:readiness, for checks. */
 const order = (type) => sql(`select status || ':' || readiness from public.club_fulfillment_queue where user_id = '${USER.id}' and fulfillment_type = '${type}'`);
@@ -173,8 +177,16 @@ const signedIn = (page) => page.addInitScript(([s]) => {
   if (!localStorage.getItem('omc:account:session')) localStorage.setItem('omc:account:session', JSON.stringify(s));
 }, [{ access_token: 'member-token', refresh_token: 'member-refresh', expires_at: Date.now() + 3600_000, email: USER.email, user_id: USER.id }]);
 
+/** The production headers for /club/* (public/_headers), which `astro preview` doesn't send: framing rules included. */
+const CLUB_HEADERS = Object.fromEntries(readFileSync(new URL('../public/_headers', import.meta.url), 'utf8').split(/\n(?=\/)/)
+  .find((b) => b.startsWith('/club/*')).split('\n').slice(1).map((l) => l.trim()).filter(Boolean).map((l) => [l.slice(0, l.indexOf(':')).toLowerCase(), l.slice(l.indexOf(':') + 1).trim()]));
 async function newPage(browser, viewport, { auth = true, db = true, fail } = {}) {
   const ctx = await browser.newContext({ viewport });
+  await ctx.route(/\/club\//, async (route) => {
+    if (!route.request().url().startsWith(BASE) || route.request().resourceType() !== 'document') return route.fallback();
+    const res = await route.fetch();
+    return route.fulfill({ response: res, headers: { ...res.headers(), ...CLUB_HEADERS } });
+  });
   const page = await ctx.newPage();
   page.setDefaultTimeout(10000);
   page.errors = [];
@@ -265,7 +277,7 @@ scenarios.admin = async (browser) => {
   const row = page.locator('tr', { hasText: 'ana@example.com' });
   check('one row for her package', (await row.count()) === 1);
   const rowText = (await row.innerText()).replace(/\s+/g, ' ');
-  check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Habit Cards/.test(rowText), rowText.slice(0, 200));
+  check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Weekly Meeting/.test(rowText), rowText.slice(0, 200));
   check('and why it waits (nothing confirmed for her)', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('not confirmed yet') && !/counts as confirmed/.test(rowText), rowText.slice(0, 260));
   check('the package lists the Family Meeting guide insert', /Family Meeting guide · standard insert/.test(rowText), rowText.slice(0, 300));
   await page.fill('input[type=month]', '2027-01');
@@ -343,7 +355,7 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('text=Download approved kits')]);
   const csv = execFileSync('cat', [await download.path()]).toString().trim().split('\n');
   check('CSV: one row for the package', csv.length === 2, `${csv.length - 1} row(s)`);
-  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ Family Meeting guide \+ 2027-01 Our Family Habit Cards/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
+  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ Family Meeting guide \+ 2027-01 Our Family Weekly Meeting/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
   for (const st of ['printed', 'mailed']) {
     await page.locator('tr', { hasText: 'ana@example.com' }).locator(`button:has-text("${st}")`).first().click();
     await page.waitForTimeout(700);
@@ -371,13 +383,13 @@ async function journey(browser, label, vp) {
   await page.click('text=Email me a code');
   await page.fill('#club-code', '123456');
   await page.click('button:has-text("Sign in")');
-  await page.waitForSelector('text=Tell us about your family');
-  check('step 1 of the kit shows', await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your family")'));
+  await page.waitForSelector('h1:has-text("Tell us about your family")');
+  check('journey phase 1 shows in the header', await page.isVisible('[data-club-onboarding] [aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("family")'));
   check('family name prefilled from the checkout name (“Ana Rivera”)', (await page.inputValue('input[autocomplete="family-name"]')) === 'The Rivera Family');
   check('optional details are tucked away', !(await page.isVisible('text=We have a pet')));
   check('a blank first child is ready to fill in', (await page.locator('li', { has: page.locator('select') }).count()) === 1);
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForSelector('text=Tell us about your family');
+  await page.waitForSelector('h1:has-text("Tell us about your family")');
   check('refresh before saving: still her family step, still signed in', true);
   await page.fill('input[autocomplete="given-name"]', 'Ana');
   const kidRow = page.locator('li', { has: page.locator('select') });
@@ -432,15 +444,33 @@ async function journey(browser, label, vp) {
   await page.fill('input[maxlength="120"]', 'Shoes, bags, out the door');
   await shot(page, `${label}-2c-priority`, true);
   await page.click('button:has-text("Finish")');
-  await page.waitForURL(/\/club\/family-vision/);
+  await page.waitForURL(/\/club\/welcome-kit/);
   const done = JSON.parse(asUser(USER.id, `select public.club_family_profile()::text`));
   check('profile complete: priority and challenges saved', done.setup_completed && done.priority === 'mornings' && done.challenges.join() === 'routines', JSON.stringify(done));
+  // Her Welcome Kit: the three printed pieces together, each a miniature of the real printable.
+  await page.waitForSelector('h1:has-text("Let’s get your first family package ready.")');
+  const kit = await page.locator('[data-welcome-kit]').innerText();
+  check('Welcome Kit: what she gets, in one sentence', /Three printed resources, made for your family and mailed together to your door\./.test(kit), kit.replace(/\s+/g, ' ').slice(0, 200));
+  const statuses = () => page.evaluate(() => [...document.querySelectorAll('[data-kit-item]')].map((li) => `${li.dataset.kitItem}:${li.dataset.status}`).join(','));
+  check('Welcome Kit: print needs review, guide ready, January needs review', await statuses() === 'print:needs_review,guide:ready,first:needs_review', await statuses());
+  check('Welcome Kit: January is the Weekly Meeting', /January Resource/.test(kit) && /Our Family Weekly Meeting/.test(kit), kit.replace(/\s+/g, ' ').slice(0, 400));
+  check('Welcome Kit: “Prepare My Welcome Kit” waits until everything is ready', await page.isDisabled('[data-kit-prepare]'));
+  check('Welcome Kit: her address to confirm', /Mailing to/i.test(kit) && /14 Oak St/.test(kit));
+  check('header: one journey, “Make it yours” current, a way to finish later', await page.isVisible('[data-club-onboarding] [aria-current="step"]:has-text("Make it yours")') && await page.isVisible('[data-club-onboarding] a:has-text("Finish later")'));
+  check('header: no account links during onboarding', !(await page.isVisible('[data-club-nav] nav[aria-label="Club"]')));
+  const thumbs = await page.waitForFunction(() => document.querySelectorAll('[data-kit-item] .kit-preview[data-state="ready"]').length === 3, null, { timeout: 30000 }).then(() => true, () => false);
+  check('Welcome Kit: real previews of all three printables', thumbs, await page.evaluate(() => [...document.querySelectorAll('.kit-preview')].map((p) => p.dataset.state).join(',')));
+  check('Welcome Kit: the January preview shows her family', await page.evaluate(() => /Sofia|Mateo/.test(document.querySelector('[data-kit-item="first"] iframe')?.contentDocument?.querySelector('.club-plan')?.innerText ?? '')));
+  check('no sideways scrolling (Welcome Kit)', await noSideScroll(page));
+  await shot(page, `${label}-3a-welcome-kit`, true);
+  check('previews save nothing and confirm nothing', !firstConfirmed() && order('welcome_vision').endsWith('needs_vision'));
+  await page.click('[data-kit-item="print"] .wk-item-action');
+  await page.waitForURL(/\/club\/family-vision/);
   await page.waitForSelector('.fvp-approve-cta');
   let a = await art(page);
   check('the gift: her family name, a watercolor, a value', a.name === 'The Rivera Family' && Boolean(a.img) && a.imgLoaded && a.word === 'Love', JSON.stringify(a));
-  check('the gift: progress shows family done, print current', await page.isVisible('#fvp-progress-slot [data-state="done"]:has-text("Your family")') && await page.isVisible('#fvp-progress-slot [aria-current="step"]:has-text("Your print")'));
+  check('the gift: header shows “Make it yours” current', await page.isVisible('[data-club-onboarding] [aria-current="step"]:has-text("Make it yours")'));
   check('the gift: her mailing city is shown', await page.isVisible('text=Mailing to Austin, TX.'));
-  check('the gift: Club header visible (account, sign out)', await page.isVisible('header[data-club-chrome] >> text=Sign out'));
   check('the gift: no next-step panel or links before she approves', (await page.locator('a[href="/club/"], a[href="/app/club/"], .fvp-next-panel').count()) === 0);
   const pos = await page.evaluate(() => ({ h1: document.querySelector('.fvp-intro h1').getBoundingClientRect().top, art: document.querySelector('#fvp-room').getBoundingClientRect().top,
     cta: document.querySelector('.fvp-approve-cta').getBoundingClientRect().top, band: document.querySelector('.fvp').getBoundingClientRect().top, ctaBg: getComputedStyle(document.querySelector('.fvp-approve-cta')).backgroundColor }));
@@ -469,45 +499,64 @@ async function journey(browser, label, vp) {
   await page.waitForSelector('text=It’s yours!');
   check('approved: one welcome order, approved once', sql(`select count(*) || ':' || count(member_approved_at) from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`) === '1:1');
   const next = page.locator('a.fvp-next-cta');
-  check('approved: next is the Family Meeting guide', (await next.innerText()).startsWith('Next: your Family Meeting guide') && (await next.getAttribute('href')) === '/club/family-meeting-guide', await next.innerText());
+  check('approved: next is her January resource (the guide needs nothing)', (await next.innerText()).startsWith('Next: review your January resource') && (await next.getAttribute('href')) === '/app/club/january?welcome=1', await next.innerText());
+  check('approved: a way back to her Welcome Kit', (await page.getAttribute('a.fvp-back-kit', 'href')) === '/club/welcome-kit');
   await shot(page, `${label}-4-approved`, vp.width < 850);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('text=It’s yours!');
-  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("Next: your Family Meeting guide")'));
-  await next.click();
-  await page.waitForURL(/\/club\/family-meeting-guide/);
+  check('refresh after approving: still approved, same next step', await page.isVisible('a.fvp-next-cta:has-text("Next: review your January resource")'));
+  // The Family Meeting guide: a preview from her kit, nothing to approve.
+  await page.goto(`${BASE}/club/family-meeting-guide`, { waitUntil: 'networkidle' });
   await page.waitForSelector('[data-meeting-guide-step]');
-  const guide = await page.locator('main, body').first().innerText();
-  check('Family Meeting guide: the standard sheet, four parts, ten minutes', /Our Family Meeting/.test(guide) && /Our Focus/.test(guide) && /Let’s Practice/.test(guide) && /Nothing to change here/.test(guide), guide.replace(/\s+/g, ' ').slice(0, 200));
-  check('Family Meeting guide: progress shows the guide step current', await page.isVisible('[aria-current="step"]:has-text("Meeting guide")'));
+  const guide = await page.locator('body').innerText();
+  check('Family Meeting guide: the standard sheet, nothing to change, back to her kit', /Our Family Meeting/.test(guide) && /Our Focus/.test(guide) && /Let’s Practice/.test(guide) && /nothing to change/i.test(guide) && await page.isVisible('a.btn-primary[href="/club/welcome-kit"]'), guide.replace(/\s+/g, ' ').slice(0, 200));
+  check('Family Meeting guide: no approval button', (await page.locator('button:has-text("Approve"), button:has-text("Next: your")').count()) === 0);
   check('no sideways scrolling (guide)', await noSideScroll(page));
   await shot(page, `${label}-4b-meeting-guide`, true);
   const guidePages = await printPdf(page, `${label}-meeting-guide`);
   const guideText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/${label}-meeting-guide.pdf`, '-']).toString();
-  check('Family Meeting guide prints on one Letter page, the sheet only', guidePages === 1 && /Our Family Meeting/.test(guideText) && !/Next: your|Club Home|Sign out/.test(guideText), `${guidePages} pages`);
-  await page.click('button:has-text("Next: your January resource")');
-  await page.waitForURL(/\/app\/club\/january\?welcome=1/);
-  check('guide reviewed: recorded on her account', sql(`select meeting_guide_seen_at is not null from public.club_households where owner_user_id = '${USER.id}'`) === 't');
-  await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
+  check('Family Meeting guide prints on one Letter page, the sheet only', guidePages === 1 && /Our Family Meeting/.test(guideText) && !/Back to my|Club Home|Sign out|Finish later/.test(guideText), `${guidePages} pages`);
+  check('guide opened: noted on her account (never required)', sql(`select meeting_guide_seen_at is not null from public.club_households where owner_user_id = '${USER.id}'`) === 't');
+  // Her January resource, in Welcome Kit mode: the printable first, one small line, one approval.
+  await page.goto(`${BASE}/app/club/january?welcome=1`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
-  const panel = await page.locator('[data-welcome-kit-confirm]').innerText();
-  check('first resource: on the real January tool, with what comes and what to do', /Your January plan/.test(panel) && /In your Welcome Kit/i.test(panel) && /Family Vision print/.test(panel) && /Before you confirm/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 220));
-  check('first resource: progress shows the last step current', await page.isVisible('[data-welcome-kit-confirm] [aria-current="step"]:has-text("Your first resource")'));
-  check('first resource: the tool below is prepared with her kids’ names', /Sofia|Mateo/.test(await page.locator('.club-plan').innerText()));
-  check('first resource: the Club nav is on the tool', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV), JSON.stringify(await clubNavLinks(page)));
+  await page.waitForSelector('[data-welcome-kit-confirm]');
+  await page.waitForTimeout(600);
+  const crumb = await page.locator('[data-welcome-kit-confirm]').innerText();
+  check('January: a breadcrumb, not a banner', /Welcome Kit\s*\/\s*Your January Resource/i.test(crumb) && /Review your family’s plan\. Make any changes, then approve it for printing\./.test(crumb), crumb.replace(/\s+/g, ' '));
+  const crumbBox = await page.locator('[data-welcome-kit-confirm]').boundingBox();
+  check('January: the Welcome Kit line is small', crumbBox.height < (vp.width < 850 ? 110 : 60), JSON.stringify(crumbBox));
+  check('January: the tool is prepared with her kids’ names', /Sofia|Mateo/.test(await page.locator('.club-plan').innerText()));
+  check('January: one header (the Club’s), journey current', await page.isVisible('[data-club-onboarding] [aria-current="step"]:has-text("Make it yours")') && !(await page.isVisible('body > header[data-chrome]')));
+  check('January: no Family Meeting or wall calendar tabs in Welcome Kit mode', !(await page.isVisible('.fm-switch')) && !(await page.isVisible('.osr-tabs')));
+  if (vp.width >= 1100) {
+    const layout = await page.evaluate(() => {
+      const sheet = document.querySelector('.club-plan [data-plan-sheet="front"]').getBoundingClientRect();
+      const doc = document.querySelector('.club-plan [data-plan-proof-scroll]').getBoundingClientRect();
+      const rail = document.querySelector('.cpd').getBoundingClientRect();
+      return { sheetTop: Math.round(sheet.top), sheetW: Math.round(sheet.width), docW: Math.round(doc.width), railW: Math.round(rail.width), vw: innerWidth, vh: innerHeight, scroll: document.documentElement.scrollHeight };
+    });
+    check('desktop editor: the printable is visible at once, near the top', layout.sheetTop < 200, JSON.stringify(layout));
+    check('desktop editor: about 70% for the printable, 30% for the controls', layout.docW / layout.vw > 0.62 && layout.railW / layout.vw <= 0.31, JSON.stringify(layout));
+    check('desktop editor: the page itself doesn’t scroll (the document does)', layout.scroll <= layout.vh + 1, JSON.stringify(layout));
+    check('desktop editor: “Approve for printing” in the rail', (await page.innerText('[data-cpd-approve]')).toLowerCase() === 'approve for printing');
+    check('desktop editor: a small print deadline', /Print deadline/.test(await page.innerText('[data-cpd-status]')) && !(await page.isVisible('[data-cpd-countdown]')), await page.innerText('[data-cpd-status]'));
+  } else {
+    const m = await page.evaluate(() => {
+      const hero = document.querySelector('.cp-thumb--hero').getBoundingClientRect();
+      const bar = document.querySelector('[data-cp-bar]').getBoundingClientRect();
+      const nav = document.querySelector('nav[data-chrome]')?.getBoundingClientRect();
+      return { heroW: Math.round(hero.width), heroH: Math.round(hero.height), heroTop: Math.round(hero.top), vw: innerWidth, barBottom: Math.round(bar.bottom), navTop: nav ? Math.round(nav.top) : null, primary: document.querySelector('[data-plan-primary]').textContent };
+    });
+    check('mobile editor: the printable at the screen’s width, near the top', m.heroW >= m.vw - 48 && m.heroH > 300 && m.heroTop < 420, JSON.stringify(m));
+    check('mobile editor: “Approve for printing” in the action bar, above the tab bar', /approve for printing/i.test(m.primary) && (m.navTop == null || m.barBottom <= m.navTop + 1), JSON.stringify(m));
+  }
   check('no sideways scrolling (first resource)', await noSideScroll(page));
-  await page.evaluate(() => window.scrollTo(0, 0));
   await shot(page, `${label}-5-first-resource`);
-  const cta = await page.evaluate(() => {
-    const b = document.querySelector('[data-welcome-kit-confirm] .btn-primary').getBoundingClientRect();
-    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
-    return { top: Math.round(b.top), clear: Boolean(hit?.closest('[data-welcome-kit-confirm]')) };
-  });
-  check('first resource: the confirm button isn’t covered', cta.clear || cta.top > vp.height, JSON.stringify(cta));
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForSelector('text=Looks good. Prepare my Welcome Kit');
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
   await page.waitForTimeout(1500);
-  check('refresh on the tool: still waiting for her one confirmation (never confirmed for her)', order('monthly_resource').endsWith('needs_confirmation') && !firstConfirmed(), kitOrders());
+  check('refresh on the tool: nothing confirmed for her', order('monthly_resource').endsWith('needs_confirmation') && !firstConfirmed(), kitOrders());
   // Her change on the real tool is what the owner prints.
   const MARK = 'Rivera print check';
   if (label === 'desktop') {
@@ -515,46 +564,96 @@ async function journey(browser, label, vp) {
     await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planSave === 'saved', null, { timeout: 8000 }).catch(() => undefined);
     await page.waitForTimeout(1500);
   }
-  await page.click('text=Looks good. Prepare my Welcome Kit');
-  await page.waitForSelector('text=Your Welcome Kit is submitted');
+  const approveSel = vp.width >= 1100 ? '[data-cpd-approve]' : '[data-plan-primary]';
+  await page.click(approveSel);
+  await page.waitForURL(/\/club\/welcome-kit/);
+  await page.waitForSelector('[data-kit-item="first"][data-status="approved"]');
+  check('approved for printing → back to her Welcome Kit, January approved', await statuses() === 'print:approved,guide:ready,first:approved', await statuses());
+  check('her review alone submits nothing', order('monthly_resource').endsWith('needs_confirmation') && !firstConfirmed(), kitOrders());
+  check('header: “Confirm your Welcome Kit” current', await page.isVisible('[data-club-onboarding] [aria-current="step"]:has-text("Confirm your Welcome Kit")'));
+  check('“Prepare My Welcome Kit” is ready', await page.isEnabled('[data-kit-prepare]'));
+  if (label === 'desktop') {
+    // Going back and changing the plan asks her to look again; nothing she did is lost.
+    await page.goto(`${BASE}/app/club/january?welcome=1`, { waitUntil: 'networkidle' });
+    await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+    await page.waitForTimeout(900);
+    check('back on January: her earlier change is still there', (await page.locator('.club-plan').innerText()).includes(MARK));
+    await editPlan(page, 'january', `${MARK} 2`);
+    await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planSave === 'saved', null, { timeout: 8000 }).catch(() => undefined);
+    await page.waitForTimeout(1500);
+    await page.goto(`${BASE}/club/welcome-kit`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-kit-item="first"]');
+    check('a change after approving: January needs review again, the print stays approved', await statuses() === 'print:approved,guide:ready,first:needs_review' && await page.isDisabled('[data-kit-prepare]'), await statuses());
+    await page.click('[data-kit-item="first"] .wk-item-action');
+    await page.waitForURL(/\/app\/club\/january\?welcome=1/);
+    await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
+    await page.waitForSelector('[data-welcome-kit-confirm]');
+    await page.waitForTimeout(800);
+    await page.click(approveSel);
+    await page.waitForURL(/\/club\/welcome-kit/);
+    await page.waitForSelector('[data-kit-item="first"][data-status="approved"]');
+  }
+  await shot(page, `${label}-5b-ready`, true);
+  // One click, twice: one package.
+  await page.locator('[data-kit-prepare]').dblclick();
+  await page.waitForSelector('h1:has-text("Your Welcome Kit is getting ready!")');
   const submitted = await page.locator('[data-kit-submitted]').innerText();
-  check('submitted: three items, one package, the two-business-day aim', /Family Vision print/.test(submitted) && /Family Meeting guide/.test(submitted) && /January resource/.test(submitted) && /two business days/.test(submitted), submitted.replace(/\s+/g, ' '));
+  check('submitted: getting ready, three pieces, two business days, what’s next', /Family Vision Print/.test(submitted) && /Family Meeting Guide/.test(submitted) && /January Resource/.test(submitted) && /two business days/.test(submitted) && /Here’s what’s coming next/.test(submitted), submitted.replace(/\s+/g, ' ').slice(0, 300));
   check('submitted: the owner is notified (club-billing kit_submitted)', page.calls.includes('billing:kit_submitted'), page.calls.filter((c) => c.startsWith('billing')).join(','));
+  check('submitted: header back to the normal Club nav', await page.isVisible('[data-club-nav] nav[aria-label="Club"]') || vp.width < 768);
   if (label === 'desktop') {
     const pv = await newPage(browser, DESKTOP, { auth: false });
     await asAdmin(pv);
     await pv.goto(`${BASE}/app/club/january?fulfillment=${orderId('monthly_resource')}`, { waitUntil: 'networkidle' });
     await pv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
     await pv.waitForTimeout(800);
-    check('the owner’s print view shows her saved change (what prints is what she approved)', (await pv.locator('.club-plan').innerText()).includes(MARK), (await pv.locator('[data-plan-fulfillment-bar]').innerText()).replace(/\s+/g, ' '));
+    check('the owner’s print view shows her saved change (what prints is what she approved)', (await pv.locator('.club-plan').innerText()).includes(`${MARK} 2`), (await pv.locator('[data-plan-fulfillment-bar]').innerText()).replace(/\s+/g, ' '));
     await pv.context().close();
   }
   check('confirmed: both items prepared together (kit needs only its PDFs)', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
-  await shot(page, `${label}-6-all-set`);
+  await shot(page, `${label}-6-all-set`, true);
   await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('h1:has-text("Your Welcome Kit is getting ready!")');
+  check('refresh after submitting: still submitted, never a second order', sql(`select count(*) from public.club_fulfillment_orders where user_id = '${USER.id}'`) === '2');
+  await page.goto(`${BASE}/app/club/january?welcome=1`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
   await page.waitForTimeout(2000);
-  check('revisiting her tool doesn’t undo her confirmation, and the confirm panel is gone', firstConfirmed() && !(await page.isVisible('[data-welcome-kit-confirm]')), kitOrders());
-  await page.goto(`${BASE}/app/club/january?welcome=1`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1200);
+  check('revisiting her tool doesn’t undo her confirmation, and the Welcome Kit line is gone', firstConfirmed() && !(await page.isVisible('[data-welcome-kit-confirm]')), kitOrders());
   await page.goto(`${BASE}/club/resources/${JAN}?welcome=1`, { waitUntil: 'networkidle' });
   await page.waitForSelector('text=It’s all set!');
   await page.click('a:has-text("Go to Club Home")');
   await page.waitForURL(/\/app\/club/);
   await page.waitForSelector('[data-club-home]');
   const club = await page.locator('main').innerText();
-  check('Club Home: no “preview library” line, her Welcome Kit status', !/preview library, not an active membership/i.test(club) && /Your first mailing, together/.test(club) && /Submitted\. We aim to print and mail your Welcome Kit within two business days/.test(club) && /Family Meeting guide/.test(club), club.replace(/\s+/g, ' ').slice(0, 260));
+  check('Club Home: “getting ready”, her three pieces, no setup checklist', !/preview library, not an active membership/i.test(club) && /Your Welcome Kit is getting ready!/.test(club) && /Family Meeting Guide/.test(club) && !/Your next step/i.test(club), club.replace(/\s+/g, ' ').slice(0, 300));
   check('Club Home: her family name, members with ages and an edit link', /The Rivera Family/.test(club) && /Sofia · 8/.test(club) && /Mateo · 6/.test(club) && await page.isVisible('a[href="/club/family"]:has-text("Edit my family")'), club.replace(/\s+/g, ' ').slice(0, 200));
-  check('Club Home: next step opens January', await page.isVisible('.ofc-next-step a[href="/app/club/january"]'));
-  check('Club Home: coming up lists February with its payment date', /February 2027: .* opens with your February 1, 2027 payment/.test(club));
-  check('Club Home: the Club nav', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV), JSON.stringify(await clubNavLinks(page)));
+  check('Club Home: this month opens January (Our Family Weekly Meeting)', await page.isVisible('[data-home-current] a[href="/app/club/january"]') && /Our Family Weekly Meeting/.test(await page.locator('[data-home-current]').innerText()));
+  check('Club Home: coming up lists February with its payment date', /February 2027: [\s\S]*Opens with your February 1, 2027 payment/.test(club), club.replace(/\s+/g, ' ').slice(0, 900));
+  check('Club Home: one header, the Club nav', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && !(await page.isVisible('body > header[data-chrome]')), JSON.stringify(await clubNavLinks(page)));
   const jan = page.locator('article.ofc-app-month', { hasText: 'January' });
   check('her Club: January marked hers, opening her family’s plan in the app (saved to her account)', /January 2027 · Yours · Free/i.test(await jan.innerText()) && (await jan.locator('a:not(.ofc-app-month-meeting)').getAttribute('href')) === '/app/club/january');
+  check('her Club: January’s card is the weekly family meeting', /Stop Being the Family's Calendar/.test(await jan.innerText()));
   check('her Club: every month links its Family Meeting', (await page.locator('a.ofc-app-month-meeting').count()) === 12 && (await jan.locator('a.ofc-app-month-meeting').getAttribute('href')) === '/app/club/january?view=meeting');
   check('her Club: February shows when her next payment opens it', /Next · February 2027/i.test(club) && /Opens with your February 1, 2027 payment/.test(club));
   check('her Club: other months stay previews', (await page.locator('article.ofc-app-month', { hasText: 'March' }).locator('a:not(.ofc-app-month-meeting)').innerText()).startsWith('Preview the tool'));
+  check('Club Home: real previews of her three pieces', await page.waitForFunction(() => document.querySelectorAll('[data-kit-item] .kit-preview[data-state="ready"]').length === 3, null, { timeout: 30000 }).then(() => true, () => false));
   check('no sideways scrolling (her Club)', await noSideScroll(page));
   await shot(page, `${label}-7-club`, true);
+  // Mailed (the owner marks it): "on its way", with the mailed date and where to start, never a delivery promise.
+  sql(`update public.club_fulfillment_orders set status = 'mailed', mailed_at = now(), printed_at = now() where user_id = '${USER.id}'`);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-home-state="kit_mailed"]');
+  const mailed = await page.locator('[data-home-state="kit_mailed"]').innerText();
+  check('Club Home after mailing: on its way, where to start, no delivery estimate', /Your Welcome Kit is on its way\./.test(mailed) && /We mailed it on/.test(mailed) && /Family Meeting Guide/.test(mailed) && !/arrive(s)? (by|on)|deliver/i.test(mailed), mailed.replace(/\s+/g, ' '));
+  await shot(page, `${label}-7b-mailed`, true);
+  sql(`update public.club_fulfillment_orders set status = 'pending', mailed_at = null, printed_at = null where user_id = '${USER.id}'`);
+  await page.goto(`${BASE}/app/club`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-club-home]');
+  if (vp.width < 768) {
+    check('phone header: one row, the Club links folded into a small menu', !(await page.isVisible('[data-club-nav] nav[aria-label="Club"] a')) && (await page.locator('[data-club-nav]').boundingBox()).height < 64);
+    check('phone header: the menu has every Club link', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV), JSON.stringify(await clubNavLinks(page)));
+    await shot(page, `${label}-7c-menu`);
+  }
   await page.click('[data-club-nav] a[aria-label="Account & Billing"]');
   await page.waitForURL(/\/club\/dashboard/);
   await page.waitForSelector('h1:has-text("Account & Billing")');
@@ -601,8 +700,8 @@ async function postCheckout(browser, label, vp) {
   await page.click('text=Email me a code');
   await page.fill('#club-code', '123456');
   await page.click('button:has-text("Sign in")');
-  await page.waitForSelector('text=Tell us about your family');
-  check('kit progress: five steps, family current', (await page.locator('[aria-label="Your Welcome Kit"] li').count()) === 5 && await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your family")'));
+  await page.waitForSelector('h1:has-text("Tell us about your family")');
+  check('journey: three phases in the header, “Tell us about your family” current', (await page.locator('[data-club-onboarding] [aria-label="Your Welcome Kit"] li').count()) === 3 && await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("family")'));
   await page.fill('input[autocomplete="family-name"]', 'The Rivera Family');
   await page.fill('input[autocomplete="given-name"]', 'Ana');
   const kidRow = page.locator('li', { has: page.locator('select') });
@@ -614,7 +713,7 @@ async function postCheckout(browser, label, vp) {
   check('not sent to the library midway', /\/club\/welcome/.test(page.url()), page.url());
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('text=What does a typical week look like?', { timeout: 10000 }).catch(() => undefined);
-  check('refresh after the family form: still her profile questions, family not asked again', await page.isVisible('text=Step 2 of 6') && !(await page.isVisible('text=Tell us about your family')));
+  check('refresh after the family form: still her profile questions, family not asked again', await page.isVisible('text=Step 2 of 6') && !(await page.isVisible('h1:has-text("Tell us about your family")')));
   await page.click('button:has-text("Skip for now")');
   await page.waitForSelector('text=What does everyone already take care of?');
   check('“Skip for now” skips one question', await page.isVisible('text=Step 3 of 6'));
@@ -625,7 +724,7 @@ async function postCheckout(browser, label, vp) {
   await shot(page, `${label}-p0-finish-later`, true);
   await page.click('button:has-text("Continue")');
   await page.waitForSelector('text=Where should we mail your Welcome Kit?');
-  check('address required: asked next, address step current', await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("Your address")'));
+  check('address required: asked next, still phase 1 of the journey', await page.isVisible('[aria-label="Your Welcome Kit"] [aria-current="step"]:has-text("family")'));
   await page.fill('input[autocomplete="name"]', 'Ana Rivera').catch(() => undefined);
   await page.fill('input[autocomplete="address-line1"]', '14 Oak St');
   await page.fill('input[autocomplete="address-level2"]', 'Austin');
@@ -634,7 +733,7 @@ async function postCheckout(browser, label, vp) {
     else await page.fill('input[autocomplete="address-level1"]', 'TX');
   });
   await page.fill('input[autocomplete="postal-code"]', '78701');
-  await page.click('button:has-text("See my welcome gift")');
+  await page.click('button:has-text("Next: my Welcome Kit")');
   await page.waitForSelector('text=Your Club starts with January', { timeout: 10000 }).catch(() => undefined);
   const starts = await page.locator('main').innerText();
   check('no Welcome Kit yet: explained, with her first payment date', /Your Club starts with January/.test(starts) && /January 1, 2027/.test(starts) && /one per household/.test(starts), starts.replace(/\s+/g, ' ').slice(0, 300));
@@ -647,7 +746,7 @@ async function postCheckout(browser, label, vp) {
   check('Club Home: family name and members', /The Rivera Family/.test(home) && /Ana/.test(home) && /Sofia · 8/.test(home), home.replace(/\s+/g, ' ').slice(0, 200));
   check('Club Home: “starts with January” and the payment date', await page.isVisible('[data-club-starts]') && /January 1, 2027/.test(home));
   check('Club Home: offers finishing the profile (4 open)', await page.isVisible('a[href="/club/family?setup=1"]'));
-  check('Club Home: coming up, January with its payment', /January 2027: .* opens with your January 1, 2027 payment/.test(home), home.replace(/\s+/g, ' ').slice(0, 400));
+  check('Club Home: when her Club starts, January with its payment', /Your Club starts with January/.test(home) && /January 1, 2027/.test(home), home.replace(/\s+/g, ' ').slice(0, 400));
   check('Club Home: Club nav, Club Home current', JSON.stringify(await clubNavLinks(page)) === JSON.stringify(CLUB_NAV) && await page.isVisible('[data-club-nav] a[aria-current="page"][aria-label="Club Home"]'), JSON.stringify(await clubNavLinks(page)));
   check('Club Home: months grid is #months', await page.isVisible('#months article.ofc-app-month'));
   check('Club Home: no preview line, no month marked hers', !/preview library/i.test(home) && !/· Yours/.test(home));
@@ -677,7 +776,7 @@ async function postCheckout(browser, label, vp) {
   await other.fill('#club-code', '123456');
   await other.click('button:has-text("Sign in")');
   await other.waitForSelector('text=What does everyone already take care of?', { timeout: 15000 }).catch(() => undefined);
-  check('sign in on another device: resumes at the first open question (step 3), family not re-entered', await other.isVisible('text=Step 3 of 6') && !(await other.isVisible('text=Tell us about your family')), other.url());
+  check('sign in on another device: resumes at the first open question (step 3), family not re-entered', await other.isVisible('text=Step 3 of 6') && !(await other.isVisible('h1:has-text("Tell us about your family")')), other.url());
   for (let i = 0; i < 4; i++) {
     await other.click('button:has-text("Skip for now"), button:has-text("Finish")');
     await other.waitForTimeout(600);
@@ -689,6 +788,7 @@ async function postCheckout(browser, label, vp) {
   check('profile done (all skipped): back on Club Home, no profile nudge', /\/app\/club/.test(other.url()) && !(await other.isVisible('a[href="/club/family?setup=1"]')), other.url());
   check('every answer optional: setup counted complete', sql(`select setup_completed_at is not null from public.club_households where owner_user_id = '${USER.id}'`) === 't');
   // Sign out from the Club nav, sign back in: Club Home.
+  if (await other.isVisible('[data-club-nav] .club-header-menu')) await other.click('[data-club-nav] .club-header-menu');
   await other.click('[data-club-nav] button:has-text("Sign out")');
   await other.waitForTimeout(800);
   check('sign out: session gone, Club Home back to the preview', !(await other.evaluate(() => localStorage.getItem('omc:account:session'))) && /preview library/i.test(await other.locator('main').innerText()));
@@ -737,15 +837,13 @@ scenarios.resume = async (browser) => {
   as.family();
   check('family saved, profile open → her profile questions (/club/welcome)', /\/club\/welcome/.test(await signInTo(/\/club\/welcome/)));
   as.profileDone();
-  check('profile done → her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
+  check('profile done → her Welcome Kit', /\/club\/welcome-kit/.test(await signInTo(/\/club\/welcome-kit/)));
   as.vision('The Rivera Family', 'Hope');
-  check('print saved but not approved → still her print', /\/club\/family-vision/.test(await signInTo(/\/club\/family-vision/)));
+  check('print saved but not approved → still her Welcome Kit', /\/club\/welcome-kit/.test(await signInTo(/\/club\/welcome-kit/)));
   as.approvePrint();
-  check('print approved → the Family Meeting guide', /\/club\/family-meeting-guide/.test(await signInTo(/\/club\/family-meeting-guide/)));
-  sql(`update public.club_households set meeting_guide_seen_at = now() where owner_user_id = '${USER.id}'`);
-  check('guide reviewed → her first resource on its real tool', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
+  check('print approved (guide never required) → her Welcome Kit', /\/club\/welcome-kit/.test(await signInTo(/\/club\/welcome-kit/)));
   sql(`update public.club_fulfillment_orders set member_approved_at = now() - interval '3 days 1 hour' where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
-  check('three days later: still her first resource (never confirmed for her)', /\/app\/club\/january\?welcome=1/.test(await signInTo(/\/app\/club\/january/)));
+  check('three days later: still her Welcome Kit (never confirmed for her)', /\/club\/welcome-kit/.test(await signInTo(/\/club\/welcome-kit/)) && !firstConfirmed());
   asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
   check('she confirms → Club Home', /\/app\/club$/.test(new URL(await signInTo(/\/app\/club$/)).pathname));
 
@@ -900,7 +998,8 @@ scenarios.months = async (browser) => {
   await out.evaluate((s) => localStorage.setItem('omc:account:session', JSON.stringify(s)),
     { access_token: 'member-token', refresh_token: 'member-refresh', expires_at: Date.now() + 3600_000, email: USER.email, user_id: USER.id });
   await out.goto(`${BASE}/club/dashboard`, { waitUntil: 'networkidle' });
-  await out.click('text=Sign out');
+  if (await out.isVisible('[data-club-nav] .club-header-menu')) await out.click('[data-club-nav] .club-header-menu');
+  await out.click('[data-club-nav] button:has-text("Sign out")');
   await out.waitForTimeout(800);
   check('signed out: no session left', !(await out.evaluate(() => localStorage.getItem('omc:account:session'))));
   await out.goto(`${BASE}/app/club/june`, { waitUntil: 'networkidle' });

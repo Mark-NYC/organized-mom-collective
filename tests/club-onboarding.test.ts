@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { familyNameFrom, firstMonth, kitProgress, kitText, nextStep, startsWithFirstPayment, stepHref, welcomeKitView } from '../src/lib/club/onboarding';
+import { familyNameFrom, firstMonth, firstResourceHref, homeState, kitItems, kitProgress, kitSubmitted, kitText, nextStep, startsWithFirstPayment, stepHref, welcomeKitView } from '../src/lib/club/onboarding';
 import type { Membership } from '../src/lib/club/membership';
 
 /** A founding member right after checkout: free January, her Welcome Kit waiting for her family. */
@@ -21,7 +21,10 @@ describe('the Welcome Kit steps', () => {
     expect(nextStep(base({ onboarded: true, welcome: w('needs_vision', false) }))).toBe('print');
     const confirm = base({ onboarded: true, welcome: w('needs_confirmation', true) });
     expect(nextStep(confirm)).toBe('first_resource');
-    expect(stepHref(confirm)).toBe('/app/club/january?welcome=1');
+    // Every kit step resumes on the Welcome Kit page; the tool itself opens in Welcome Kit mode from there.
+    expect(stepHref(confirm)).toBe('/club/welcome-kit');
+    expect(stepHref(base({ onboarded: true, welcome: w('needs_vision', false) }))).toBe('/club/welcome-kit');
+    expect(firstResourceHref(confirm)).toBe('/app/club/january?welcome=1');
     expect(nextStep(base({ onboarded: true, welcome: w('needs_pdf', true) }))).toBe('home');
   });
 
@@ -41,13 +44,58 @@ describe('the Welcome Kit steps', () => {
     expect(firstMonth(base({ first_paid_month: '2027-02-01' }))).toBeNull();
   });
 
-  it('shows five steps and never says shipped before it is', () => {
-    expect(kitProgress('print').map((s) => s.state)).toEqual(['done', 'done', 'current', 'next', 'next']);
-    expect(kitProgress('address').map((s) => s.label)).toEqual(['Your family', 'Your address', 'Your print', 'Meeting guide', 'Your first resource']);
+  it('shows one journey in three phases and never says shipped before it is', () => {
+    expect(kitProgress('family').map((s) => s.label)).toEqual(['Tell us about your family', 'Make it yours', 'Confirm your Welcome Kit']);
+    expect(kitProgress('address').map((s) => s.state)).toEqual(['current', 'next', 'next']);
+    expect(kitProgress('print').map((s) => s.state)).toEqual(['done', 'current', 'next']);
+    expect(kitProgress('first_resource').map((s) => s.state)).toEqual(['done', 'current', 'next']);
+    expect(kitProgress('confirm').map((s) => s.state)).toEqual(['done', 'done', 'current']);
     expect(kitProgress('done').every((s) => s.state === 'done')).toBe(true);
-    expect(kitText(base({ welcome: w('needs_pdf', true) }))).toMatch(/^Submitted\. We aim to print and mail/);
+    expect(kitText(base({ welcome: w('needs_pdf', true) }))).toMatch(/^Your package is getting ready\. We aim to print and mail/);
     expect(kitText(base({ welcome: w('ready', true, 'approved') }))).not.toMatch(/mail/i);
-    expect(kitText(base({ welcome: w('mailed', true, 'mailed') }))).toBe('Your Welcome Kit is in the mail.');
+    expect(kitText(base({ welcome: w('mailed', true, 'mailed') }))).toBe('Your Welcome Kit is on its way.');
+  });
+});
+
+describe('her three printed pieces', () => {
+  const title = (slug: string | null) => (slug ? 'Our Family Weekly Meeting' : null);
+  it('print needs her approval; the guide is simply ready; her first month needs a review', () => {
+    const items = kitItems(base({ onboarded: true, welcome: w('needs_vision', false) }), false, title);
+    expect(items.map((i) => [i.id, i.status])).toEqual([['print', 'needs_review'], ['guide', 'ready'], ['first', 'needs_review']]);
+    expect(items[2].name).toBe('January Resource');
+    expect(items[2].about).toMatch(/^Our Family Weekly Meeting/);
+    expect(items[2].href).toBe('/app/club/january?welcome=1');
+    expect(items[1].href).toBe('/club/family-meeting-guide');
+  });
+  it('approved on its tool (this device) or once the kit is submitted', () => {
+    const open = base({ onboarded: true, welcome: w('needs_confirmation', true) });
+    expect(kitItems(open, true).map((i) => i.status)).toEqual(['approved', 'ready', 'approved']);
+    expect(kitSubmitted(open)).toBe(false);
+    const sent = base({ onboarded: true, welcome: w('needs_pdf', true) });
+    expect(kitSubmitted(sent)).toBe(true);
+    expect(kitItems(sent, false).map((i) => i.status)).toEqual(['approved', 'ready', 'approved']);
+    expect(kitItems(sent, false)[2].href).toBe('/app/club/january');
+  });
+  it('a first month that isn’t published yet is being finished, never “needs review”', () => {
+    expect(kitItems(base({ onboarded: true, welcome: w('needs_resource', true) }), false)[2].status).toBe('preparing');
+  });
+});
+
+describe('Club Home follows her membership', () => {
+  const at = Date.parse('2026-11-10T12:00:00Z');
+  it('setup, kit almost ready, getting ready, on its way, then ongoing', () => {
+    expect(homeState(base(), 'family', at)).toBe('setup');
+    expect(homeState(base({ onboarded: true, welcome: w('needs_vision', false) }), 'print', at)).toBe('kit_open');
+    expect(homeState(base({ onboarded: true, welcome: w('needs_confirmation', true) }), 'first_resource', at)).toBe('kit_open');
+    expect(homeState(base({ onboarded: true, welcome: w('needs_pdf', true) }), 'home', at)).toBe('kit_submitted');
+    expect(homeState(base({ onboarded: true, welcome: w('ready', true, 'printed') }), 'home', at)).toBe('kit_submitted');
+    const mailed = { ...w('mailed', true, 'mailed'), mailed_at: '2026-11-05T15:00:00Z' };
+    expect(homeState(base({ onboarded: true, welcome: mailed }), 'home', at)).toBe('kit_mailed');
+    expect(homeState(base({ onboarded: true, welcome: mailed }), 'home', Date.parse('2026-12-01T12:00:00Z'))).toBe('ongoing');
+    expect(homeState(base({ onboarded: true, welcome: null }), 'home', at)).toBe('ongoing');
+  });
+  it('never says it is on its way before it is marked mailed', () => {
+    expect(homeState(base({ onboarded: true, welcome: w('ready', true, 'approved') }), 'home', at)).toBe('kit_submitted');
   });
 });
 
@@ -70,15 +118,14 @@ describe('the family profile in her setup', () => {
   });
 });
 
-describe('the Family Meeting guide in her setup', () => {
-  it('comes after her print and before her first resource, only when she hasn’t seen it', () => {
+describe('the Family Meeting guide', () => {
+  it('is never a required step: the same sheet for every family, previewed from her Welcome Kit', () => {
     const confirm = base({ onboarded: true, welcome: w('needs_confirmation', true) });
-    expect(nextStep(confirm, { meetingGuideSeen: false })).toBe('meeting_guide');
-    expect(stepHref(confirm, 'meeting_guide')).toBe('/club/family-meeting-guide');
+    expect(nextStep(confirm, { meetingGuideSeen: false })).toBe('first_resource');
     expect(nextStep(confirm, { meetingGuideSeen: true })).toBe('first_resource');
-    expect(nextStep(confirm)).toBe('first_resource'); // unknown: never blocks
+    expect(stepHref(confirm, 'meeting_guide')).toBe('/club/welcome-kit');
     expect(nextStep(base({ onboarded: true, welcome: w('needs_vision', false) }), { meetingGuideSeen: false })).toBe('print');
-    expect(nextStep(base({ onboarded: true, welcome: w('needs_pdf', true) }), { meetingGuideSeen: false })).toBe('home'); // never holds a submitted kit
+    expect(nextStep(base({ onboarded: true, welcome: w('needs_pdf', true) }), { meetingGuideSeen: false })).toBe('home');
   });
 });
 
