@@ -122,6 +122,7 @@ export const routes = {
   backToSchool: '/back-to-school-checklist',
   screenTime: '/screen-time-contract',
   routineChart: '/routine-chart',
+  familyResponsibilityBuilder: '/family-responsibility-builder',
   homeschoolRhythm: '/homeschool-rhythm',
   springCleaning: '/spring-cleaning-checklist',
   fallCleaning: '/fall-cleaning-checklist',
