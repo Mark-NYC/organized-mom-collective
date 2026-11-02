@@ -14,7 +14,7 @@
  * Behavior: src/components/site/routine-chart.ts (shared by every page that shows this chart, the Club's included).
  */
 import '@fontsource/kalam/latin-700.css';
-import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
+import { defaultToolPalette } from '../../data/tool-palettes';
 import { BRAND_NAME } from '../../config';
 import { routineTypes, ROUTINE_ROWS } from '../../data/routines';
 import { dayOptions, focusOptions, stageOptions, structureOptions } from '../../data/summer-rhythm';
@@ -92,20 +92,8 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     </div>
   </section>
 
-  <fieldset class="mr-palette-picker" data-mr-advanced>
-    <legend>Choose your colors</legend>
-    <div class="mr-palette-options">
-      {Object.entries(toolPalettes).map(([id, palette]) => (
-        <button type="button" class="mr-palette-option" data-mr-palette={id} aria-pressed={id === defaultToolPalette}>
-          <span class="mr-swatches" aria-hidden="true">{palette.colors.map(color => <span style={{ backgroundColor: color }} />)}</span>
-          <span>{palette.label}</span>
-        </button>
-      ))}
-    </div>
-  </fieldset>
   <div class="mr-reset-area"><button type="button" class="mr-btn" data-mr-reset>Reset to starter routine</button></div>
 
-  <button type="button" class="mr-customize-link" data-mr-customize aria-expanded="false">Customize steps and colors</button>
   <div class="mr-ideas">
     <span class="mr-ideas-label">Add a step</span>
     <span class="mr-chips" data-mr-chips>
@@ -479,7 +467,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     color: var(--mr-soft);
   }
 
-  .mr-customize-link { display:none; }
   @media (max-width:768px) {
     .mr-container:not(.mr-exporting) { display:flex; flex-direction:column; }
     .mr-container:not(.mr-exporting) .mr-types { order:1; }
@@ -487,9 +474,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-actions { order:3; width:100%; margin-top:16px; }
     .mr-container:not(.mr-exporting) .mr-actions [data-mr-download] { width:100%; min-height:52px; }
     .mr-container:not(.mr-exporting) .mr-actions [data-mr-reset] { display:none; }
-    .mr-container:not(.mr-exporting) .mr-customize-link { order:4; display:block; align-self:center; min-height:44px; background:transparent; border:0; text-decoration:underline; padding:8px 12px; color:var(--mr-ink); }
-    .mr-container:not(.mr-exporting) .mr-palette-picker { order:5; display:none; }
-    .mr-container:not(.mr-exporting) .mr-palette-picker.mr-advanced-open { display:block; }
     .mr-container:not(.mr-exporting) .mr-ideas { order:6; }
     .mr-container:not(.mr-exporting) .mr-ideas:not(.mr-ideas-open) { display:none; }
     .mr-container:not(.mr-exporting) .mr-footnote { order:7; }
@@ -561,14 +545,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-sheet .mr-time { background: var(--mr-accent-2); color: var(--mr-ink); border-radius: 8px; }
   .mr-box { border-color: #b6aaa4; border-radius: 6px; }
   .mr-sheet .mr-end-label { font-family: 'Kalam', var(--font-serif); font-size: 22px; font-weight: 700; text-transform: none; letter-spacing: .02em; }
-  .mr-palette-picker { border: 0; padding: 0; margin: 0 auto 20px; text-align: center; }
-  .mr-palette-picker legend { width: 100%; margin-bottom: 10px; font-size: .85rem; color: var(--mr-soft); }
-  .mr-palette-options { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
-  .mr-palette-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--mr-rule); border-radius: 10px; background: #fff; color: var(--mr-ink); font-size: .8rem; cursor: pointer; }
-  .mr-palette-option[aria-pressed="true"] { border: 2px solid var(--mr-ink); padding: 9px 13px; background: var(--color-ivory); }
-  .mr-palette-option:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 3px; }
-  .mr-swatches { display: flex; gap: 3px; }
-  .mr-swatches span { width: 15px; height: 15px; border: 1px solid #b8ada6; border-radius: 50%; }
   @media (max-width: 768px) {
     .mr-container:not(.mr-exporting) .mr-sheet .mr-text { font-size: 17px; }
     .mr-container:not(.mr-exporting) .mr-sheet .mr-end-label { font-size: 18px; }
@@ -582,13 +558,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-type-label { font-size: 1rem; }
   .mr-type[aria-pressed='true'] .mr-type-label { font-weight: 700; }
   .mr-type-blurb { display: none; }
-  .mr-palette-picker { text-align: left; max-width: 816px; margin-bottom: 24px; }
-  .mr-palette-picker legend { font-size: .8rem; margin-bottom: 2px; }
-  .mr-palette-options { justify-content: flex-start; gap: 6px 24px; }
-  .mr-palette-option { padding: 8px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; }
-  .mr-palette-option[aria-pressed='true'] { padding: 8px 0; border: 0; border-bottom: 2px solid var(--mr-ink); background: transparent; }
-  .mr-palette-option:hover { color: #211b19; }
-  .mr-palette-option[aria-pressed='true'] > span:last-child { font-weight: 600; }
   .mr-actions { justify-content: flex-start; align-items: center; max-width: 816px; margin-left: auto; margin-right: auto; gap: 24px; }
   .mr-btn { border: 0; border-radius: 3px; background: transparent; font-size: .9rem; letter-spacing: 0; text-transform: none; }
   .mr-btn:not(.mr-btn-primary) { padding: 0; text-decoration: underline; text-underline-offset: 4px; }
@@ -688,13 +657,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-type-blurb {display:block;font:400 11px/1.45 Montserrat,sans-serif;color:#686868;margin-top:2px}
   .mr-container .mr-summer,
   .mr-container .rp,
-  .mr-container .mr-palette-picker,
   .mr-container .mr-ideas {
     max-width:1080px;width:100%;margin:0 auto 16px;padding:20px 24px;
     background:white;border:1px solid var(--mr-brand-border);border-radius:14px;
   }
-  .mr-container .mr-ideas-label,
-  .mr-container .mr-palette-picker legend {font:700 14px Montserrat,sans-serif;color:#545454}
+  .mr-container .mr-ideas-label {font:700 14px Montserrat,sans-serif;color:#545454}
   .mr-container .mr-chip {
     display:inline-flex;align-items:center;min-height:40px;
     border:1px solid var(--mr-brand-border);border-radius:10px;
@@ -712,7 +679,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-btn-primary {background:#545454;color:white;border-color:#545454}
   .mr-container .mr-btn-primary:hover {background:#3F3F3F;color:white}
   .mr-container .mr-btn:not(.mr-btn-primary) {padding:11px 18px;text-decoration:none}
-  .mr-container .mr-customize-link {color:#545454;font:600 13px Montserrat,sans-serif}
   .mr-container .mr-sheet {
     border:1px solid #E8E4DD;border-radius:12px;
     box-shadow:0 8px 30px rgba(47,41,34,.06);
@@ -720,8 +686,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   /* Printed illustrations must be monochrome with no category-colored discs. */
   .mr-container .mr-icon[data-on] {background:transparent}
   .mr-container .mr-icon img {object-fit:contain;mix-blend-mode:multiply}
-  .mr-container .mr-palette-option {border-radius:8px;padding:9px 10px}
-  .mr-container .mr-palette-option[aria-pressed='true'] {border-radius:8px;padding:9px 10px;background:#FBF7F1}
   @media(max-width:768px) {
     .mr-container {padding:18px 12px 40px}
     .mr-builder-heading {padding:0 4px;margin-bottom:12px}
@@ -735,9 +699,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-actions {gap:10px}
     .mr-container:not(.mr-exporting) .rp,
     .mr-container:not(.mr-exporting) .mr-ideas,
-    .mr-container:not(.mr-exporting) .mr-palette-picker,
     .mr-container:not(.mr-exporting) .mr-summer {padding:14px;border-radius:12px}
-    .mr-container:not(.mr-exporting) .mr-customize-link {padding:8px}
   }
   @media print {
     .mr-container {background:white;padding:0}
@@ -756,7 +718,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-preview-label {width:100%;padding:0 0 10px}
   .mr-container .mr-preview-label span {font:700 11px Montserrat,sans-serif;letter-spacing:.14em;color:#777}
   .mr-container .mr-preview-label p {font:400 12px/1.5 Montserrat,sans-serif;color:#777;margin:4px 0 0}
-  .mr-container .mr-types,.mr-container .rp,.mr-container .mr-summer,.mr-container .mr-palette-picker,.mr-container .mr-ideas {max-width:none;margin:0}
   .mr-container .mr-types {gap:7px;padding:12px}
   .mr-container .mr-type {flex:1 1 125px;min-height:60px;padding:10px}
   .mr-container .rp {padding:16px}
@@ -783,9 +744,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-editor-moves button:disabled {opacity:.2;cursor:default}
   .mr-container .mr-reset-area {text-align:left}
   .mr-container .mr-reset-area .mr-btn {font-size:12px;border:0;background:transparent;padding:4px 0;min-height:30px;text-decoration:underline}
-  .mr-container .mr-customize-link {display:none!important}
   .mr-container .mr-ideas {display:flex!important}
-  .mr-container .mr-palette-picker {display:block!important}
   .mr-container .mr-preview .mr-sheet {width:816px;max-width:none;flex:0 0 auto}
   .mr-container .mr-preview .mr-actions {width:100%;margin:14px 0 0;justify-content:center}
   .mr-container .mr-preview .mr-btn-primary {width:min(100%,370px);min-height:52px;font-size:14px}
@@ -800,6 +759,9 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-sheet .mr-end-label {font-family:Georgia,serif;font-size:20px;letter-spacing:0;text-transform:none;font-style:normal}
   .mr-container .mr-sheet .mr-icon {width:60px;height:60px}
   .mr-container .mr-sheet .mr-icon img {width:58px;height:58px}
+  /* Wake Up artwork has heavier strokes, so display it at 70% at both sizes. */
+  .mr-container .rp-tile[data-rp-pick='wake-up'] .rp-art img,
+  .mr-container .mr-sheet .mr-icon[data-wake-up] img {transform:scale(.7);transform-origin:center}
   /* Grocery Shopping artwork has heavier strokes than the rest of the set.
      Scale only the image, not its slot, so spacing and PNG dimensions stay intact. */
   .mr-container .rp-tile[data-rp-pick='grocery-shopping'] .rp-art img,
@@ -850,7 +812,6 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-controls .rp {order:2!important}
     .mr-container:not(.mr-exporting) .mr-controls .mr-editor {order:3!important}
     .mr-container:not(.mr-exporting) .mr-controls .mr-ideas {order:4!important}
-    .mr-container:not(.mr-exporting) .mr-controls .mr-palette-picker {order:5!important}
     .mr-container:not(.mr-exporting) .mr-controls .mr-reset-area {order:6!important}
     .mr-container .mr-controls,.mr-container .mr-preview {width:100%}
     .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:1;width:816px;max-width:none;transform:scale(min(1,calc((100vw - 32px)/816)));transform-origin:top left}

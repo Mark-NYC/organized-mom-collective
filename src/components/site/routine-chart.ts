@@ -10,7 +10,7 @@
  * saved chart (the storage key plus `handoff.key`); a first chart starts from `handoff.variant` with `handoff.name`
  * in the title, and the picker puts jobs suited to `handoff.age` first. Without one, nothing changes.
  */
-import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
+import { toolPalettes, defaultToolPalette } from '../../data/tool-palettes';
 import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, downloadPng } from '../../lib/printable';
 import { matchResponsibility, responsibilityById } from '../../data/responsibilities';
@@ -25,14 +25,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const types: Record<string, RoutineType> = routineTypes;
   const sheet = host.querySelector<HTMLElement>('.mr-sheet')!;
   const notes = host.hasAttribute('data-mr-notes');
-  const advanced=host.querySelector<HTMLElement>('[data-mr-advanced]')!;
   const ideas=host.querySelector<HTMLElement>('.mr-ideas')!;
-  host.querySelector<HTMLButtonElement>('[data-mr-customize]')?.addEventListener('click',e=>{
-    const button=e.currentTarget as HTMLButtonElement;
-    const open=advanced.classList.toggle('mr-advanced-open');
-    ideas.classList.toggle('mr-ideas-open',open);
-    button.setAttribute('aria-expanded',String(open));
-  });
   const toolId = notes ? 'routine-chart-plus' : 'routine-chart';
   let firstAction = false;
   const action = () => { if (!firstAction) { firstAction = true; toolEvent('tool_first_action', toolId); } };
@@ -79,6 +72,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
       slot.toggleAttribute('data-grocery-shopping', !!src && src === routineIconById('grocery-shopping'));
+      slot.toggleAttribute('data-wake-up', !!src && src === routineIconById('wake-up'));
       if (src) {
         any = true;
         if (img.getAttribute('src') !== src) img.src = src;
@@ -94,13 +88,12 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     else iconFields[i].value = matchResponsibility(text) ?? iconFields[i].value;
   }
 
-  const paletteField = field('palette');
-  const paletteButtons = Array.from(host.querySelectorAll<HTMLButtonElement>('[data-mr-palette]'));
+  // Preserve the saved field for older charts, but always use the single current palette.
   function renderPalette() {
-    const id = resolveToolPalette(paletteField.value);
+    const paletteField = field('palette');
+    const id = defaultToolPalette;
     paletteField.value = id;
     toolPalettes[id].colors.forEach((color, i) => sheet.style.setProperty(`--mr-accent-${i + 1}`, color));
-    paletteButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mrPalette === id)));
   }
   /**
    * Parts of the day: each heads the first step that has it; a chart with parts and no clock times shows the parts
@@ -188,12 +181,6 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const save = autosave(sheet, storageKey, () => {
     stepFields.forEach((_, i) => { if (!iconFields[i].value) syncIcon(i); });
     renderType();
-  });
-
-  for (const button of paletteButtons) button.addEventListener('click', () => {
-    paletteField.value = button.dataset.mrPalette!;
-    renderPalette();
-    save();
   });
 
   function load(id: string, quiet = false) {
