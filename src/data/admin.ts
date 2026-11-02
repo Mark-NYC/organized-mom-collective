@@ -21,6 +21,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { id: 'customers', label: 'Customers', pending: 'Phase 7.' },
   { id: 'support', label: 'Customer Service', pending: 'Phase 6. Use the support inbox and Supabase Table Editor → support_requests meanwhile.' },
   { id: 'marketing', label: 'Marketing', pending: 'Phase 10.' },
+  { id: 'pins', label: 'Pinterest Studio', href: '/admin/pins' },
   { id: 'survey', label: 'Survey', href: '/survey/admin' },
   { id: 'settings', label: 'Settings', href: '/admin/settings' },
 ];
