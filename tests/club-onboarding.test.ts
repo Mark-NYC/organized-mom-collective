@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { familyNameFrom, firstMonth, firstResourceHref, homeState, kitItems, kitProgress, kitSubmitted, kitText, nextStep, startsWithFirstPayment, stepHref, welcomeKitView } from '../src/lib/club/onboarding';
+import { familyNameFrom, firstMonth, firstResourceHref, homeState, kitItems, kitNext, kitProgress, kitSubmitted, kitText, nextStep, startsWithFirstPayment, stepHref, welcomeKitView } from '../src/lib/club/onboarding';
 import type { Membership } from '../src/lib/club/membership';
 
 /** A founding member right after checkout: free January, her Welcome Kit waiting for her family. */
@@ -147,5 +147,20 @@ describe('family name from the checkout name', () => {
     expect(familyNameFrom('  ana  maría  de la cruz ')).toBe('The Cruz Family');
     expect(familyNameFrom('Ana')).toBe('');
     expect(familyNameFrom(null)).toBe('');
+  });
+});
+
+describe('the three pieces as steps', () => {
+  const f = (guideSeen: boolean, reviewed: boolean) => ({ guideSeen, reviewed });
+  it('print → guide → January → her kit, skipping what is done', () => {
+    const open = base({ onboarded: true, welcome: w('needs_confirmation', true) });
+    expect(kitNext(open, 'print', f(false, false))).toMatchObject({ id: 'guide', href: '/club/family-meeting-guide', label: 'Next: Family Meeting Guide' });
+    expect(kitNext(open, 'guide', f(true, false))).toMatchObject({ id: 'first', href: '/app/club/january?welcome=1', label: 'Next: January Resource' });
+    expect(kitNext(open, 'first', f(true, true))).toMatchObject({ id: 'kit', href: '/club/welcome-kit?done=first', label: 'Review my Welcome Kit' });
+    expect(kitNext(open, 'print', f(true, true)).href).toBe('/club/welcome-kit?done=print');
+  });
+  it('wraps back to a piece she skipped (her print) before the kit', () => {
+    const noPrint = base({ onboarded: true, welcome: w('needs_vision', false) });
+    expect(kitNext(noPrint, 'first', f(true, true))).toMatchObject({ id: 'print', href: '/club/family-vision' });
   });
 });

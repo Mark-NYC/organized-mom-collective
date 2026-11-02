@@ -16,13 +16,21 @@ export function previewFor(item: KitItem, firstSlug: string | null): { src: stri
   return { src: memberPlanHref(firstSlug), target: '.club-plan[data-plan-state="ready"] [data-plan-sheet]' };
 }
 
-export default function WelcomeKitItems({ items, firstSlug, compact = false }: { items: KitItem[]; firstSlug: string | null; compact?: boolean }) {
+export default function WelcomeKitItems({ items, firstSlug, compact = false, startHere = null, justDone = null }: {
+  items: KitItem[]; firstSlug: string | null; compact?: boolean;
+  /** The first piece that needs her: tagged "Start here". */
+  startHere?: KitItem['id'] | null;
+  /** The piece she just approved (?done=): a short highlight. */
+  justDone?: KitItem['id'] | null;
+}) {
   return (
     <ol className={`wk-items${compact ? ' wk-items--compact' : ''}`} aria-label="Your Welcome Kit: three printed resources">
-      {items.map((item) => {
+      {items.map((item, i) => {
         const p = previewFor(item, firstSlug);
         return (
-          <li key={item.id} className="wk-item" data-kit-item={item.id} data-status={item.status}>
+          <li key={item.id} className="wk-item" data-kit-item={item.id} data-status={item.status} data-start={startHere === item.id ? '' : undefined} data-just-done={justDone === item.id ? '' : undefined}>
+            <span className="wk-item-num" aria-hidden="true">{item.status === 'approved' ? '✓' : i + 1}</span>
+            {startHere === item.id && <span className="wk-item-start">Start here</span>}
             <a className="wk-item-thumb" href={item.href} tabIndex={-1} aria-hidden="true">
               {p ? <KitPreview src={p.src} target={p.target} label={item.name} ratio="8.5 / 11" /> : <span className="kit-preview kit-preview--empty">{KIT_ITEM_STATUS.preparing}</span>}
             </a>

@@ -504,6 +504,21 @@ const visionImages: Record<string, string> = Object.fromEntries(Object.entries(v
 }
 /* Club chrome (her header, the admin's bar) never prints: only the artwork goes on paper. */
 @media print{[data-club-chrome],.fvp-progress-slot{display:none!important}}
+/* The Welcome Kit's piece pages share one layout (Nov 2026): a controls rail beside the piece on a grey desk, as on
+   her first month's editor (ClubPlanDesktop); one charcoal "Approve for printing" style. */
+@media screen and (min-width:851px){
+ .fvp-member{padding:0!important;min-height:0}
+ .fvp-member .fvp-brandline{display:none}
+ .fvp-member .fvp-grid{grid-template-columns:clamp(320px,30%,440px) minmax(0,1fr);gap:0;align-items:stretch;min-height:calc(100dvh - 106px)}
+ .fvp-member .fvp-editor{padding:24px clamp(20px,2.2vw,34px) 36px!important;border-right:1px solid var(--color-warm-rule)!important;background:var(--color-ivory)!important}
+ .fvp-member .fvp-visual{padding:24px clamp(18px,3vw,45px) 40px!important;background:#f1efec!important}
+ .fvp-member .fvp-intro{margin:0 0 18px}
+ .fvp-member .fvp-intro h1{font:400 clamp(26px,2.3vw,32px)/1.12 Georgia,serif!important;color:var(--color-warm-ink)!important;letter-spacing:-.015em;margin:0 0 10px!important}
+ .fvp-member .fvp-intro h1 em{color:inherit!important}
+}
+@media screen{
+ .fvp-member .fvp-approve-cta,.fvp-member .fvp-next-cta{border-radius:3px!important;box-shadow:none!important;font:600 .74rem Montserrat,Arial,sans-serif!important;letter-spacing:.13em;text-transform:uppercase;min-height:48px;background:#545454!important}
+}
 </style>
 <script>
 const valueImages:Record<string,string>=Object.fromEntries(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-value]')).map(b=>[b.dataset.value!,b.querySelector('img')!.src]));

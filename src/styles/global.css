@@ -908,3 +908,265 @@ html:has(.club-plan[data-plan-welcome]) .mar-tabs {
 .club-plan[data-plan-welcome] > .fm-switch {
   display: none !important;
 }
+
+/* The Welcome Kit step bar (src/components/club/WelcomeKitBar.tsx): the same on all three piece pages. */
+.wkbar {
+  background: #f6f1e8;
+  border-bottom: 1px solid var(--color-warm-rule);
+  font-family: var(--font-sans);
+}
+.wkbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px 22px;
+  max-width: 72rem;
+  min-height: 48px;
+  margin: 0 auto;
+  padding: 6px clamp(16px, 2.2vw, 34px);
+}
+.wkbar-home {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-warm-ink);
+  text-decoration: none;
+}
+.wkbar-steps {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wkbar-steps li + li::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: #d5cfc5;
+}
+.wkbar-steps li {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.wkbar-steps a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px 0 4px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-warm-soft);
+  text-decoration: none;
+}
+.wkbar-num {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid #cfc8bd;
+  background: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.wkbar-steps [data-state='done'] a {
+  color: #354f42;
+}
+.wkbar-steps [data-state='done'] .wkbar-num {
+  border-color: #71866c;
+  background: #71866c;
+  color: #fff;
+}
+.wkbar-steps [data-state='current'] a {
+  background: #fff;
+  color: var(--color-warm-ink);
+  box-shadow: 0 0 0 1px #e2dbcf;
+}
+.wkbar-steps [data-state='current'] .wkbar-num {
+  border-color: #545454;
+  background: #545454;
+  color: #fff;
+}
+.wkbar-back {
+  flex: none;
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #315d49;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.wkbar-phone {
+  display: none;
+}
+@media (max-width: 860px) {
+  .wkbar-steps {
+    display: none;
+  }
+  .wkbar-phone {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-warm-ink);
+  }
+  .wkbar-home {
+    display: none;
+  }
+  .wkbar-dots {
+    display: inline-flex;
+    gap: 5px;
+  }
+  .wkbar-dots i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d5cfc5;
+  }
+  .wkbar-dots i[data-state='done'] {
+    background: #71866c;
+  }
+  .wkbar-dots i[data-state='current'] {
+    background: #545454;
+  }
+}
+@media print {
+  .wkbar {
+    display: none !important;
+  }
+}
+/* The kit's one primary colour: brand charcoal on every approve and next button. */
+.cpd-actions .cpd-approve,
+.cp-primary {
+  background: #545454 !important;
+  border-color: #545454 !important;
+}
+.cpd-actions .cpd-approve[aria-disabled='true'],
+.cp-primary[aria-disabled='true'] {
+  background: #eef2ea !important;
+  border-color: var(--color-sage) !important;
+}
+/* On a phone or tablet the bar runs edge to edge above the plan screen (AppLayout's main is padded). */
+@media screen and (max-width: 1099px) {
+  .wkc-wrap {
+    margin: -28px -20px 18px;
+  }
+}
+@media screen and (min-width: 640px) and (max-width: 1099px) {
+  .wkc-wrap {
+    margin: -48px -32px 22px;
+  }
+}
+
+/* The kit page as a checklist: numbered pieces, "Start here", how many are ready, and a note when she comes back. */
+.wk-item {
+  position: relative;
+}
+.wk-item-num {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #545454;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.wk-item[data-status='approved'] .wk-item-num {
+  background: #71866c;
+}
+.wk-item[data-status='ready'] .wk-item-num {
+  background: #fff;
+  color: #2f4a52;
+  box-shadow: 0 0 0 1.5px #cddde1;
+}
+.wk-item-start {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  z-index: 2;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f1d8a8;
+  color: #5c4520;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.wk-item[data-start] {
+  border-color: #d8b79f;
+  box-shadow: 0 0 0 2px #f1d8a8;
+}
+.wk-item[data-just-done] {
+  animation: wk-just-done 1.6s ease-out 1;
+}
+@keyframes wk-just-done {
+  0% { box-shadow: 0 0 0 0 rgba(113, 134, 108, 0.55); border-color: #71866c; }
+  60% { box-shadow: 0 0 0 10px rgba(113, 134, 108, 0); border-color: #71866c; }
+  100% { box-shadow: 0 0 0 0 rgba(113, 134, 108, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wk-item[data-just-done] {
+    animation: none;
+    box-shadow: 0 0 0 2px #d4dfc4;
+  }
+}
+.wk-flash {
+  margin-top: 16px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  background: #eef2ea;
+  color: #354f42;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.wk-count {
+  margin-top: 18px;
+  font-size: 0.86rem;
+  color: var(--color-warm-soft);
+}
+.wk-count strong {
+  color: var(--color-warm-ink);
+}
+.wk-count + .wk-items {
+  margin-top: 10px;
+}
+@media (max-width: 760px) {
+  .wk-item-num {
+    top: 6px;
+    left: 6px;
+    width: 24px;
+    height: 24px;
+  }
+  .wk-item-start {
+    top: 8px;
+    right: 8px;
+    font-size: 0.6rem;
+  }
+  .wk-item[data-start] .wk-item-text {
+    padding-top: 30px;
+  }
+}

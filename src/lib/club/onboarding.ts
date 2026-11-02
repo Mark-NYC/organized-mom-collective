@@ -282,3 +282,44 @@ export function familyNameFrom(addressName: string | null | undefined): string {
   if (!last || last.length > 30) return '';
   return `The ${last.charAt(0).toUpperCase()}${last.slice(1)} Family`;
 }
+
+// ------------------------------------------------------------------ the three pieces as steps, in order
+
+/** Her Welcome Kit's pieces in the order she's walked through them: print, guide, first month, then the kit. */
+export type KitStepId = 'print' | 'guide' | 'first';
+export const KIT_ORDER: KitStepId[] = ['print', 'guide', 'first'];
+export interface KitFlags { reviewed: boolean; guideSeen: boolean }
+
+/** A piece is done: the print approved, the guide opened (it needs nothing else), the month approved for printing. */
+export function kitStepDone(me: Membership, id: KitStepId, f: KitFlags): boolean {
+  if (kitSubmitted(me)) return true;
+  if (id === 'print') return Boolean(me.welcome?.approved);
+  if (id === 'guide') return f.guideSeen;
+  // A month we're still finishing can't be reviewed yet: never send her there as a step.
+  return f.reviewed || !firstMonth(me)?.slug || me.welcome?.readiness === 'needs_resource';
+}
+
+export function kitStepHref(me: Membership, id: KitStepId): string {
+  if (id === 'print') return routes.clubFamilyVision;
+  if (id === 'guide') return routes.clubMeetingGuide;
+  return firstResourceHref(me) ?? routes.clubWelcomeKit;
+}
+
+export function kitStepName(me: Membership, id: KitStepId): string {
+  if (id === 'print') return 'Family Vision Print';
+  if (id === 'guide') return 'Family Meeting Guide';
+  const first = firstMonth(me);
+  return `${first ? monthWord(first.month) : 'First'} Resource`;
+}
+
+/**
+ * Where "Next" goes after a piece: the next piece in order that still needs her (wrapping to an earlier one she
+ * skipped), else her Welcome Kit to confirm it, carrying ?done=<piece> for the "✓ … approved" note there.
+ */
+export function kitNext(me: Membership, after: KitStepId, f: KitFlags): { href: string; label: string; id: KitStepId | 'kit' } {
+  const at = KIT_ORDER.indexOf(after);
+  const rest = [...KIT_ORDER.slice(at + 1), ...KIT_ORDER.slice(0, at)];
+  const next = rest.find((id) => !kitStepDone(me, id, f));
+  if (next) return { href: kitStepHref(me, next), label: `Next: ${kitStepName(me, next)}`, id: next };
+  return { href: `${routes.clubWelcomeKit}?done=${after}`, label: 'Review my Welcome Kit', id: 'kit' };
+}
