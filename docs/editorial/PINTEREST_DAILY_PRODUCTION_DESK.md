@@ -20,6 +20,34 @@ Process graphics, charts, and infographics are a **regular required format test*
 - Track for each pin: creative format, visual hook, topic, destination, campaign/batch, publication date/cohort, and the test hypothesis. Distinguish these subformats from the four strategic content lanes.
 - Every 30 days assess age-matched saves/impression, outbound clicks/CTR, and attributable onsite conversion where tracking exists. Compare cohorts again after 60 and 90 days. Seek repeatable winners across multiple posts, not one outlier. Gradually increase successful formats while maintaining some exploration.
 
+## HARD STOP: no repeated pins (owner correction 2026-11-02)
+
+The production inventory is authoritative; brainstorming from topic memory is **not** a substitute. **Never produce a new top-ten recommendation or Gemini prompts until an asset-level reconciliation is complete.** If evidence is unavailable, report the gap and provide an audit/recovery list, **not** ten speculative ideas.
+
+### Required de-duplication sources, in order
+
+1. `docs/editorial/pinterest/PRODUCTION_RECONCILIATION.csv` matched by permanent Pin ID, final asset filename, headline, and destination. `OMC_500_Pin_Content_Calendar.csv` is a plan, not evidence an asset is missing.
+2. Approved images/manifests and Gemini batch directories, including batches 01 onward; distinguish created/held/approved.
+3. Value-card (OMC-V), process/infographic, lifestyle gallery (including 39+10 runs), and all newer one-off pin batches, CSVs and media folders. These are **outside** the original 500-row ledger.
+4. Pending/rejected/accepted Pinterest import reconciliation, current bulk CSVs, and the `/admin/pins` Supabase queue. If Pinterest account or live queue cannot be read, say so explicitly. A rejected CSV row is **existing artwork needing upload repair**, not an uncreated Pin.
+5. Compare across title variants, not just exact titles: canonical destination (strip `www.`, trailing slash, tracking params, and fragments for content-topic comparison), visual concept, headline promise, subject, and related tool/article. **Sharing a topic or URL alone does not prove a duplicate**: multiple distinctly useful creative angles may be intentional. Mark ambiguous cases `needs_review`; don't quietly declare unique.
+
+### Non-negotiable output gate
+
+Before suggesting a new ten, assemble a compact audit showing: total candidate slots checked, exact IDs/paths already created or approved, published/queued/held/rejected where evidence exists, and **ten verified uncreated candidates** with IDs (or clearly temporary IDs if outside the 500-plan). Each proposed item must have its own *why this is not a duplicate* note and evidence of the inventory checked. Prefer the next untouched, seasonally relevant existing plan slots to new inventions. Do not copy a fresh headline onto an already existing creative concept to make it appear new.
+
+If any required source is inaccessible, **stop before calling the list verified**. Explain which source is missing, provide the confirmed inventory work and a next audit action. No "next ten" claims from incomplete evidence.
+
+### Single ownership across systems
+
+- **Planned** = idea, no completed asset proven.
+- **Created / held / approved** = asset exists; never recommend a new pin with the same concept until explicitly requested as a variant.
+- **Ready / exported / uploaded / confirmed** in `/admin/pins` = distribution pipeline states; **all count as created**.
+- **Rejected import** = fix CSV/destination/media or retry only after confirming absence in Pinterest; do not redesign.
+- **Published** = only with provider evidence.
+- Preserve canonical ID, original filename, variant lineage, and reason for revision. Never reset an existing Pin to "uncreated" to refill a batch.
+- The site queue is not the full production inventory until historical batches are imported and reconciled. Do not treat absence there as proof of originality.
+
 ## Morning decision order
 
 1. **Inventory first**: read this file, SEASONAL_ACQUISITION_PLAN.md, PINTEREST_STRATEGY.md, PINTEREST_RESEARCH_LOOP.md, IMAGE_FIRST_PINTEREST_WORKFLOW.md, PINTEREST_CREATIVE_DIRECTION.md, PINTEREST_BOARDS.md, MASTER_TRACKER_README.md and current CSVs, reconciliation, generated asset folders, approved batches, and current live site pages. Determine which pins are already created, scheduled, published, held, or merely proposed. If Pinterest account status is inaccessible, state that and do not guess.
