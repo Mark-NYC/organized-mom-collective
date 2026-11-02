@@ -13,7 +13,8 @@
 import { toolPalettes, resolveToolPalette } from '../../data/tool-palettes';
 import { toolEvent } from '../../lib/tool-engagement';
 import { autosave, downloadPng } from '../../lib/printable';
-import { matchResponsibility, responsibilityById, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
+import { matchResponsibility, responsibilityById } from '../../data/responsibilities';
+import { choreLineIcon, choreLineIconForText } from '../../data/chore-line-icons';
 import { routineTypes, type RoutineType } from '../../data/routines';
 import { ageStage, FOCI, summerRhythm, type SummerInput } from '../../data/summer-rhythm';
 import type { ToolHandoff } from '../../lib/tool-handoff';
@@ -47,17 +48,20 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const picker = host.querySelector<HTMLElement>('[data-rp]')!;
   const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
 
+  /** Use the same monochrome hand-drawn icons as the Chore Chart.
+   * Text fallback also illustrates custom and starter steps that lack a responsibility ID.
+   * Saved icon IDs remain untouched for compatibility with existing charts.
+   */
   function renderIcons() {
     let any = false;
     iconSlots.forEach((slot, i) => {
-      const r = responsibilityById(iconFields[i].value);
-      const src = r ? responsibilityImage(r, 256) : null;
+      const id = iconFields[i].value;
+      const src = choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value);
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
-      if (r && src) {
+      if (src) {
         any = true;
         if (img.getAttribute('src') !== src) img.src = src;
-        slot.style.setProperty('--mr-cat', responsibilityColor(r));
       } else img.removeAttribute('src');
     });
     sheet.classList.toggle('mr-has-icons', any);
