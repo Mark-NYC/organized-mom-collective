@@ -305,8 +305,8 @@ export default function Checkout() {
                       </p>
                     )}
 
-                    <button type="button" onClick={() => void pay()} disabled={phase === 'opening'} className="btn-primary mt-5 min-h-14 w-full">
-                      {phase === 'opening' ? 'Opening secure checkout…' : 'Continue to payment'}
+                    <button type="button" onClick={() => void pay()} className="btn-primary mt-5 min-h-14 w-full">
+                      Continue to payment
                     </button>
                     <p className="mt-3 flex items-center justify-center gap-2 text-[0.85rem] text-soft">
                       <LockIcon /> Secure payment by Stripe. Card, Apple Pay or Google Pay.
