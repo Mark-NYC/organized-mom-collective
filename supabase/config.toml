@@ -34,3 +34,7 @@ verify_jwt = false
 
 [functions.club-admin]
 verify_jwt = false
+
+# Gelato drafts are only created by an authenticated shop admin; no public submission.
+[functions.shop-gelato-draft]
+verify_jwt = false
