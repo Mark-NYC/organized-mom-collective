@@ -1,12 +1,7 @@
 ---
 /**
- * /shop: every product the public can buy, one card each, linking to its own page (the buying
- * happens there, through the website checkout in shop-enabled builds).
- * Linked from the header and footer. Prices come from each product's own settings, never retyped.
- *
- * Only products with a public page are listed. Take Back Control and Essential Routines are
- * post-purchase offers (noindex, reached from the checkout), so they stay off this page.
- * A product whose checkout isn't on yet says "Coming soon" instead of a price call to action.
+ * Curated brand storefront. Keep pricing and available links bound to the existing
+ * product data; product-page checkout and inventory rules are unchanged.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { calendarOptions, formatPrice } from '../lib/reorder';
@@ -14,78 +9,207 @@ import { weeklyReset, weeklyResetAssets } from '../data/weekly-reset';
 import { mug, mugImage } from '../data/mug';
 import { scheduler } from '../data/scheduler';
 import { routes } from '../routes';
-import { BRAND_NAME, PRICES_AS_OF } from '../config';
+import { BRAND_NAME } from '../config';
+import { shopStats, reviews, REVIEWS_DISCLAIMER, ETSY_SHOP_URL } from '../data/reviews';
 
 const options = calendarOptions();
-const from = Math.min(...options.map((o) => o.price));
+const calendarFrom = Math.min(...options.map((o) => o.price));
 
-const products = [
+const calendars = [
   {
-    name: 'Family Wall Calendar',
-    blurb: 'A weekly plan everyone can check: schedules, meals and jobs with clear owners. Includes the cleaning companion website.',
-    price: `From ${formatPrice(from)}`,
+    id: 'weekly-calendar',
+    name: 'Weekly Family Wall Calendar',
+    eyebrow: 'Weekly planning · Printed',
+    description: 'Make room for schedules, meals, cleaning and shared responsibilities. Includes the cleaning companion.',
+    price: `From ${formatPrice(calendarFrom)}`,
+    image: '/images/reorder/calendar-in-use-960.webp',
+    srcset: '/images/reorder/calendar-in-use-640.webp 640w, /images/reorder/calendar-in-use-960.webp 960w, /images/reorder/calendar-in-use-1280.webp 1280w',
+    alt: 'Weekly Family Wall Calendar filled in with family plans and responsibilities',
     href: routes.calendar,
     soon: false,
-    img: { src: '/images/reorder/calendar-in-use-960.webp', width: 960, height: 960, alt: 'The family wall calendar filled in for the week.' },
+    badge: 'Family favorite',
   },
   {
+    id: 'monthly-calendar',
     name: '2027 Family Schedule Wall Calendar',
-    blurb: 'See everyone’s month at a glance. Five family rows, space for to-dos, and a sturdy wire-bound 11 × 16.5-inch wall format.',
-    price: '$30.99',
+    eyebrow: 'Monthly planning · Printed',
+    description: 'Twelve months at a glance, with five color-coded family rows and weekly to-do lists.',
+    price: formatPrice(scheduler.price),
+    image: '/images/products/family-schedule-calendar-2027/il_1588xN.8645639709_cqeg.webp',
+    alt: '2027 Family Schedule Wall Calendar with monthly schedule rows and to-do checklists',
     href: routes.scheduler,
     soon: !scheduler.buyUrl,
-    img: { src: 'https://i.etsystatic.com/29608155/r/il/de7ac8/8645639709/il_794xN.8645639709_cqeg.jpg', width: 794, height: 1050, alt: '2027 family schedule wall calendar with monthly planning rows and a to-do column.' },
+    badge: '2027 edition',
   },
+];
+
+const more = [
   {
+    id: 'weekly-reset',
     name: weeklyReset.name,
-    blurb: 'A printable planner, tidy guide and coaching audio for a weekly check-in the family can share. Instant download.',
+    eyebrow: 'Digital download',
+    description: 'A printable planner, tidy guide and coaching audio to help you reset the week together.',
     price: formatPrice(weeklyReset.price),
+    image: weeklyResetAssets.bundle.src,
+    alt: weeklyResetAssets.bundle.alt,
     href: routes.weeklyReset,
     soon: !weeklyReset.buyUrl,
-    img: weeklyResetAssets.bundle,
+    badge: 'Instant download',
   },
   {
+    id: 'motherhood-mug',
     name: mug.name,
-    blurb: 'A 15oz glossy white ceramic mug. Microwave and dishwasher safe.',
+    eyebrow: 'Gift · 15 oz ceramic',
+    description: 'A little reminder to leave other people’s expectations at the door.',
     price: formatPrice(mug.price),
+    image: `${mugImage.src}-960.webp`,
+    alt: mugImage.alt,
     href: routes.mug,
     soon: !mug.buyUrl,
-    img: { src: `${mugImage.src}-960.webp`, width: 960, height: 960, alt: mugImage.alt },
+    badge: '',
   },
 ];
 ---
 
-<PublicLayout title="Shop" description={`The ${BRAND_NAME} shop: the family wall calendar, the Weekly Reset System and the Mind Your Own Motherhood mug.`} width="full">
-  <section aria-labelledby="shop-h" class="bg-cream public-panel public-intro">
-    <div class="mx-auto max-w-6xl px-5 pt-12 pb-8 text-center sm:px-8 sm:pt-16">
-      <p class="label text-warm-soft">{BRAND_NAME}</p>
-      <h1 id="shop-h" class="serif-title mt-3 text-warm-ink">Shop</h1>
-      <p class="lede mx-auto mt-4 max-w-xl text-warm-soft">Less on your mind. More hands helping.</p>
+<PublicLayout
+  title="Shop Family Calendars, Planners & Simple Home Tools"
+  description={`Shop ${BRAND_NAME} family wall calendars, printable planners and practical tools that help everyone share the load.`}
+  width="full"
+>
+  <header class="bg-cream public-panel public-intro">
+    <div class="mx-auto grid max-w-7xl gap-8 px-5 pb-12 pt-10 sm:px-8 lg:grid-cols-[.91fr_1.09fr] lg:items-center lg:gap-16 lg:py-16">
+      <div class="max-w-xl">
+        <p class="label text-warm-soft">{BRAND_NAME} · THE SHOP</p>
+        <h1 class="mt-5 font-serif text-[clamp(2.75rem,5vw,4.75rem)] leading-[1.08] tracking-[-.025em] text-warm-ink">Less for Mom to manage. More for everyone to own.</h1>
+        <p class="mt-6 max-w-lg text-[1.08rem] leading-[1.7] text-warm-soft">Beautifully simple calendars and planning tools that help your family see the plan, build routines and share the work.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#wall-calendars" class="inline-flex min-h-12 items-center justify-center rounded-md bg-warm-ink px-6 font-semibold text-white hover:opacity-90">Shop wall calendars</a>
+          <a href="#all-products" class="inline-flex min-h-12 items-center justify-center rounded-md border border-warm-rule px-6 font-semibold text-warm-ink hover:bg-paper">Browse everything</a>
+        </div>
+        <p class="mt-7 text-sm leading-6 text-warm-soft">Made by a family, for real family life. <a class="font-medium underline underline-offset-4" href={routes.ourStory}>Meet Mark &amp; Megan</a></p>
+      </div>
+      <div class="relative">
+        <img src="/images/reorder/calendar-in-use-1280.webp" srcset="/images/reorder/calendar-in-use-640.webp 640w, /images/reorder/calendar-in-use-960.webp 960w, /images/reorder/calendar-in-use-1280.webp 1280w" sizes="(min-width: 1024px) 49vw, 100vw" width="1280" height="1280" fetchpriority="high" alt="A real weekly family wall calendar in use" class="aspect-[5/4] w-full rounded-lg object-cover" />
+        <div class="absolute -bottom-4 left-4 max-w-[16rem] rounded-md bg-paper px-5 py-3 shadow-sm sm:left-8">
+          <span class="font-serif text-lg text-warm-ink">A plan everyone can see.</span>
+        </div>
+      </div>
     </div>
-  </section>
+  </header>
 
-  <section aria-label="Products" class="bg-paper">
-    <ul class="mx-auto grid max-w-6xl gap-6 px-5 pb-16 sm:grid-cols-2 sm:px-8 sm:pb-24 lg:grid-cols-3">
-      {
-        products.map((p) => (
+  <nav aria-label="Shop categories" class="border-b border-warm-rule bg-paper">
+    <div class="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 py-4 sm:px-8">
+      <a href="#wall-calendars" class="shrink-0 rounded-full border border-warm-rule bg-cream px-4 py-2 text-sm font-semibold text-warm-ink hover:border-warm-ink">Wall calendars</a>
+      <a href="#digital-planners" class="shrink-0 rounded-full border border-warm-rule px-4 py-2 text-sm font-semibold text-warm-ink hover:border-warm-ink">Digital tools</a>
+      <a href="#gifts" class="shrink-0 rounded-full border border-warm-rule px-4 py-2 text-sm font-semibold text-warm-ink hover:border-warm-ink">Gifts</a>
+      <a href="#customer-reviews" class="shrink-0 rounded-full border border-warm-rule px-4 py-2 text-sm font-semibold text-warm-ink hover:border-warm-ink">Customer reviews</a>
+    </div>
+  </nav>
+
+  <main id="all-products" class="bg-paper">
+    <section id="wall-calendars" aria-labelledby="calendars-h" class="scroll-mt-8 mx-auto max-w-7xl px-5 pb-10 pt-14 sm:px-8 sm:pt-20">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="label text-warm-soft">START WITH A SHARED PLAN</p>
+          <h2 id="calendars-h" class="mt-3 font-serif text-[clamp(2rem,3.5vw,3rem)] leading-tight text-warm-ink">Wall calendars for real life</h2>
+          <p class="mt-3 max-w-2xl text-warm-soft">Two ways to get the family on the same page. Choose weekly detail or a whole month at a glance.</p>
+        </div>
+      </div>
+      <ul class="mt-9 grid gap-6 md:grid-cols-2">
+        {calendars.map((p) => (
           <li>
-            <a href={p.href} data-cta={`shop-${p.href.slice(1)}`} class="group flex h-full flex-col overflow-hidden public-shop-card bg-paper">
-              <span class="block aspect-square overflow-hidden bg-paper">
-                <img src={p.img.src} width={p.img.width} height={p.img.height} alt={p.img.alt} loading="lazy" class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-              </span>
-              <span class="flex flex-1 flex-col p-5 sm:p-6">
-                <span class="font-serif text-[1.3rem] leading-snug text-warm-ink">{p.name}</span>
-                <span class="mt-2 flex-1 text-[0.95rem] leading-relaxed text-warm-soft">{p.blurb}</span>
-                <span class="mt-5 flex items-center justify-between gap-3 border-t border-warm-rule pt-4">
-                  <span class="font-semibold text-warm-ink tabular-nums">{p.price}</span>
-                  <span class="text-[0.7rem] font-semibold tracking-[0.16em] text-warm-soft uppercase">{p.soon ? 'Coming soon' : 'View ›'}</span>
-                </span>
-              </span>
+            <a href={p.href} data-cta={`shop-${p.id}`} class="group flex h-full flex-col overflow-hidden rounded-lg border border-warm-rule bg-cream transition-shadow hover:shadow-md">
+              <div class="relative aspect-[5/4] overflow-hidden bg-[#F4F0EA]">
+                <img src={p.image} srcset={'srcset' in p ? p.srcset : undefined} sizes="(min-width: 768px) 48vw, 100vw" width="960" height="960" alt={p.alt} loading="lazy" class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.025]" />
+                <span class="absolute left-4 top-4 rounded-full bg-paper px-3 py-1.5 text-xs font-semibold text-warm-ink">{p.badge}</span>
+              </div>
+              <div class="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-7">
+                <p class="label text-warm-soft">{p.eyebrow}</p>
+                <h3 class="mt-2 font-serif text-[1.65rem] leading-tight text-warm-ink">{p.name}</h3>
+                <p class="mt-3 flex-1 text-[.95rem] leading-7 text-warm-soft">{p.description}</p>
+                <div class="mt-6 flex items-center justify-between gap-4 border-t border-warm-rule pt-4">
+                  <span class="font-semibold text-warm-ink">{p.price}</span>
+                  <span class="text-sm font-semibold text-warm-ink">{p.soon ? 'View details' : 'Explore calendar'} <span aria-hidden="true">→</span></span>
+                </div>
+              </div>
             </a>
           </li>
-        ))
-      }
-    </ul>
-    <p class="mt-7 text-center text-[0.9rem] text-warm-soft">Prices in US dollars, as of {PRICES_AS_OF}.</p>
-  </section>
+        ))}
+      </ul>
+    </section>
+
+    <section id="digital-planners" aria-labelledby="more-h" class="scroll-mt-8 mx-auto max-w-7xl px-5 pb-16 pt-6 sm:px-8 sm:pb-20">
+      <div class="border-t border-warm-rule pt-12">
+        <p class="label text-warm-soft">MORE WAYS TO GET ORGANIZED</p>
+        <h2 id="more-h" class="mt-3 font-serif text-[clamp(2rem,3.5vw,3rem)] text-warm-ink">Little tools. Big difference.</h2>
+        <p class="mt-3 max-w-2xl text-warm-soft">Printable help for everyday routines and a thoughtful gift for Mom.</p>
+      </div>
+      <ul class="mt-9 grid gap-6 sm:grid-cols-2 lg:max-w-5xl">
+        {more.map((p) => (
+          <li id={p.id === 'motherhood-mug' ? 'gifts' : undefined} class="scroll-mt-8">
+            <a href={p.href} data-cta={`shop-${p.id}`} class="group flex h-full flex-col overflow-hidden rounded-lg border border-warm-rule bg-paper transition-shadow hover:shadow-md">
+              <div class="relative aspect-[5/4] overflow-hidden bg-cream">
+                <img src={p.image} width="960" height="960" alt={p.alt} loading="lazy" class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.025]" />
+                {p.badge && <span class="absolute left-4 top-4 rounded-full bg-paper px-3 py-1.5 text-xs font-semibold text-warm-ink">{p.badge}</span>}
+              </div>
+              <div class="flex flex-1 flex-col p-5 sm:p-6">
+                <p class="label text-warm-soft">{p.eyebrow}</p>
+                <h3 class="mt-2 font-serif text-[1.45rem] leading-snug text-warm-ink">{p.name}</h3>
+                <p class="mt-3 flex-1 text-sm leading-6 text-warm-soft">{p.description}</p>
+                <div class="mt-5 flex items-center justify-between gap-3 border-t border-warm-rule pt-4">
+                  <span class="font-semibold text-warm-ink">{p.price}</span>
+                  <span class="text-sm font-semibold text-warm-ink">{p.soon ? 'Coming soon' : 'View product'} <span aria-hidden="true">→</span></span>
+                </div>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="customer-reviews" aria-labelledby="reviews-h" class="scroll-mt-8 bg-sage-wash px-5 py-14 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-6xl">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p class="label text-warm-soft">FROM OUR ETSY SHOP</p>
+            <h2 id="reviews-h" class="mt-3 font-serif text-[clamp(2rem,3.5vw,3rem)] text-warm-ink">Real families. Real feedback.</h2>
+          </div>
+          <a href={ETSY_SHOP_URL} target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-warm-ink underline underline-offset-4">See our Etsy shop <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="mt-4 text-[.97rem] text-warm-ink"><span aria-label={`${shopStats.rating} out of 5 stars`}>★ {shopStats.rating}/5</span> · {shopStats.reviews} shop reviews · {shopStats.sales} sales <span class="text-warm-soft">(as of {shopStats.asOf})</span></p>
+        <ul class="mt-8 grid gap-4 md:grid-cols-3">
+          {reviews.map((r) => (
+            <li class="rounded-lg bg-paper p-6">
+              <p class="text-sm tracking-[.12em] text-warm-ink" aria-label="Customer review">★★★★★</p>
+              <blockquote class="mt-4 font-serif text-[1.3rem] leading-relaxed text-warm-ink">“{r.quote}”{r.excerpt ? '…' : ''}</blockquote>
+              <p class="mt-5 text-sm text-warm-soft">{r.name}</p>
+            </li>
+          ))}
+        </ul>
+        <p class="mt-5 text-xs leading-5 text-warm-soft">{REVIEWS_DISCLAIMER} Shop figures were last checked in {shopStats.asOf}.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="story-h" class="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[.72fr_1.28fr] lg:items-center lg:gap-16 lg:py-20">
+      <div class="overflow-hidden rounded-lg bg-cream">
+        <img src="/images/site/mark-megan-family-story-1200.webp" alt="Mark and Megan with their two sons" width="1200" height="1200" loading="lazy" class="aspect-[5/4] w-full object-cover" />
+      </div>
+      <div>
+        <p class="label text-warm-soft">A NOTE FROM OUR FAMILY</p>
+        <h2 id="story-h" class="mt-3 font-serif text-[clamp(2rem,3.5vw,3rem)] leading-tight text-warm-ink">We made these tools because our family needed them, too.</h2>
+        <p class="mt-5 max-w-xl text-[1.02rem] leading-7 text-warm-soft">We wanted a home where everyone could see what needed doing, and one person didn't have to carry it all. So we started making simple tools our own family could use.</p>
+        <a href={routes.ourStory} class="mt-6 inline-flex min-h-12 items-center justify-center rounded-md border border-warm-rule px-6 font-semibold text-warm-ink hover:bg-cream">Read our story <span class="ml-2" aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section aria-label="Shop help" class="border-t border-warm-rule bg-cream px-5 py-8 sm:px-8">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
+        <p class="text-sm text-warm-ink">Questions before you order? We're here to help.</p>
+        <div class="flex gap-6 text-sm font-semibold text-warm-ink">
+          <a href={routes.support} class="underline underline-offset-4">Contact us</a>
+          <a href={routes.returns} class="underline underline-offset-4">Returns & refunds</a>
+        </div>
+      </div>
+    </section>
+  </main>
 </PublicLayout>
