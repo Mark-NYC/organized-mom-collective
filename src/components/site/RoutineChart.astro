@@ -800,8 +800,31 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-sheet .mr-end-label {font-family:Georgia,serif;font-size:20px;letter-spacing:0;text-transform:none;font-style:normal}
   .mr-container .mr-sheet .mr-icon {width:60px;height:60px}
   .mr-container .mr-sheet .mr-icon img {width:58px;height:58px}
-  .mr-container.mr-exporting .mr-sheet .mr-step[data-mr-empty] {display:none}
-  .mr-container.mr-exporting .mr-sheet .mr-done {margin-top:40px}
+  /* Only meaningful activities appear on the chart. All eight editing slots remain
+     in the builder and saved data, including gaps between populated steps. */
+  .mr-container .mr-sheet .mr-step[data-mr-empty] {display:none!important}
+  .mr-container .mr-sheet .mr-steps {counter-reset:visible-routine-step;flex:1;justify-content:center;gap:13px}
+  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) {
+    counter-increment:visible-routine-step;
+    flex:1 1 0;
+    max-height:134px;
+    min-height:76px;
+  }
+  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) .mr-num {font-size:0}
+  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) .mr-num::after {
+    content:counter(visible-routine-step);font:400 26px Georgia,serif;
+  }
+  .mr-container .mr-sheet .mr-done {margin-top:20px;padding-top:22px}
+  .mr-container.mr-exporting .mr-sheet .mr-done {margin-top:20px}
+  .mr-container.mr-exporting .mr-sheet {
+    width:816px!important;height:1056px!important;min-height:1056px!important;
+    max-height:1056px!important;
+  }
+  .mr-container .mr-icon:not([data-on]) {background:transparent}
+  @media(max-width:850px) {
+    .mr-container:not(.mr-exporting) .mr-sheet .mr-steps {flex:none;justify-content:flex-start}
+    .mr-container:not(.mr-exporting) .mr-sheet .mr-step:not([data-mr-empty]) {flex:none;max-height:none;min-height:76px}
+  }
   @media(max-width:1310px) {
     .mr-container .mr-workspace {grid-template-columns:minmax(290px,380px) minmax(0,1fr);gap:18px}
     .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:.85}
