@@ -40,7 +40,7 @@ const faq = [
   description="A large 2027 family wall calendar with 12 monthly pages, five color-coded planning rows and to-do checklists. See all the photos and video."
   width="full"
 >
-  <div class="bg-cream">
+  <div class="bg-white">
     <div class="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-8 lg:pt-10">
       <nav class="mb-5 text-sm text-warm-soft" aria-label="Breadcrumb">
         <a class="underline-offset-4 hover:underline" href={routes.shop}>Shop</a>
@@ -99,7 +99,7 @@ const faq = [
           <p class="mt-5 font-serif text-[2rem] text-warm-ink">$30.99</p>
           <p class="mt-1 text-sm text-warm-soft">Printed calendar · Shipping calculated at checkout</p>
 
-          <div class="mt-6 rounded-lg border border-warm-rule bg-paper p-5">
+          <div class="mt-6 bg-white py-5">
             <p class="font-semibold text-warm-ink">Everyone's plans, in one place.</p>
             <p class="mt-2 text-sm leading-6 text-warm-soft">Give each person or activity a row. See school events, appointments, practices, and the week's to-dos without keeping it all in your head.</p>
             <a href={scheduler.buyUrl ?? routes.shop} aria-disabled={!scheduler.buyUrl} data-cta="scheduler-buy" class="mt-5 flex min-h-14 w-full items-center justify-center rounded-md bg-warm-ink px-5 text-center font-semibold text-white transition-opacity hover:opacity-90">
@@ -108,7 +108,7 @@ const faq = [
             <p class="mt-3 text-center text-xs text-warm-soft">Secure checkout with Stripe. Delivery options shown before payment.</p>
           </div>
 
-          <div class="mt-8 border-t border-warm-rule pt-6">
+          <div class="mt-9 pt-3">
             <h2 class="font-serif text-2xl text-warm-ink">Highlights</h2>
             <ul class="mt-4 space-y-3">
               {highlights.map((highlight) => (
@@ -116,14 +116,14 @@ const faq = [
               ))}
             </ul>
           </div>
-          <div class="mt-7 border-t border-warm-rule pt-6">
+          <div class="mt-9 pt-3">
             <h2 class="font-serif text-2xl text-warm-ink">Made for a family that shares the plan</h2>
             <p class="mt-3 text-[0.94rem] leading-7 text-warm-soft">Hang it in the kitchen, hallway, or family command center. The five rows make it easy for everyone to find what belongs to them and know what's coming.</p>
           </div>
         </section>
       </div>
 
-      <section class="mt-16 border-t border-warm-rule pt-12" aria-labelledby="details-title">
+      <section class="mt-16 pt-12" aria-labelledby="details-title">
         <div class="grid gap-12 lg:grid-cols-[1fr_1fr]">
           <div>
             <p class="label text-warm-soft">THE DETAILS</p>
@@ -133,7 +133,7 @@ const faq = [
           </div>
           <div class="space-y-3">
             {faq.map((item) => (
-              <details class="rounded-md border border-warm-rule bg-paper px-5 py-4">
+              <details class="rounded-md bg-[#FBF7F1] px-5 py-4">
                 <summary class="cursor-pointer font-semibold text-warm-ink">{item.title}</summary>
                 <p class="mt-3 text-sm leading-6 text-warm-soft">{item.body}</p>
               </details>
@@ -192,20 +192,20 @@ const faq = [
     .product-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:clamp(2rem,5vw,5rem);align-items:start}
     .gallery-layout{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:start}
     .thumbnail-strip{display:flex;flex-direction:column;gap:9px;max-height:690px;overflow-y:auto;scrollbar-width:thin}
-    .gallery-thumb{width:70px;height:83px;border:2px solid transparent;border-radius:7px;overflow:hidden;background:#fff;flex:none;transition:border-color .15s}
-    .gallery-thumb[aria-pressed=true]{border-color:#545454}
+    .gallery-thumb{width:70px;height:83px;border:0;border-radius:4px;overflow:hidden;background:#fff;flex:none;transition:opacity .15s;opacity:.72}
+    .gallery-thumb[aria-pressed=true]{opacity:1}
     .gallery-thumb:focus-visible,.gallery-arrow:focus-visible,.gallery-zoom:focus-visible{outline:3px solid #545454;outline-offset:2px}
     .gallery-thumb img{width:100%;height:100%;object-fit:cover}
     .video-thumb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;font-size:11px;color:#545454}
     .video-thumb span:first-child{font-size:20px}
-    .gallery-stage{background:#fff;border:1px solid #eee7e0;border-radius:10px;overflow:hidden;min-height:400px}
+    .gallery-stage{background:#fff;border:0;border-radius:0;overflow:hidden;min-height:400px}
     .gallery-slide[hidden]{display:none!important}
     .gallery-slide{height:100%;width:100%}
     .gallery-zoom{position:relative;width:100%;display:block;background:#fff;cursor:zoom-in}
     .gallery-zoom img{width:100%;height:auto;max-height:740px;aspect-ratio:4/5;object-fit:contain}
     .zoom-hint{position:absolute;bottom:14px;right:14px;background:#fffef9e8;padding:6px 10px;font-size:12px;border-radius:6px;color:#545454}
     .product-video{width:100%;aspect-ratio:4/5;background:#191919;object-fit:contain}
-    .gallery-arrow{display:grid;place-items:center;width:36px;height:36px;border:1px solid #d5c5b8;border-radius:50%;font-size:26px;color:#545454;background:#fff}
+    .gallery-arrow{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;font-size:26px;color:#545454;background:#FBF7F1}
     .purchase-column{position:sticky;top:24px;min-width:0}
     .calendar-lightbox{max-width:min(94vw,1100px);max-height:94vh;border:0;border-radius:10px;padding:44px 12px 12px;background:#fff}
     .calendar-lightbox::backdrop{background:rgba(20,20,20,.8)}
