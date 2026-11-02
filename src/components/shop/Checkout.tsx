@@ -15,10 +15,10 @@ import {
 import { routes } from '../../routes';
 
 /**
- * /checkout: pick the calendar and quantity, then pay in Stripe's embedded checkout
- * (cards, Apple Pay, Google Pay; email, US shipping address, shipping option, tax and
- * discount codes are all collected by Stripe). Prices and stock are checked on the
- * server; this page only sends a product and a quantity.
+ * /checkout?product=slug: open Stripe's embedded payment directly for that item.
+ * An unlinked /checkout still offers a manual product and quantity selector.
+ * Cards, Apple Pay, Google Pay, email, shipping, tax and discounts are collected by Stripe.
+ * Prices and stock are checked on the server; this page sends only slug and quantity.
  *
  * /checkout?product=<a digital product> (e.g. the Weekly Reset System) shows only the
  * downloads: no quantity, no shipping, and the link is emailed after payment. Calendars and
@@ -166,7 +166,12 @@ export default function Checkout() {
           Your order
         </h2>
 
-        {phase === 'paying' && product ? (
+        {phase === 'opening' ? (
+          <div role="status" className="mt-6 rounded-[3px] bg-band p-6 text-center">
+            <p className="font-semibold">Opening secure payment…</p>
+            <p className="mt-2 text-sm text-soft">Preparing your Stripe checkout.</p>
+          </div>
+        ) : phase === 'paying' && product ? (
           <div className="mt-4 flex gap-4 border-y border-rule py-4">
             <ProductImage product={product} className="size-20 shrink-0" />
             <div className="min-w-0 flex-1">
