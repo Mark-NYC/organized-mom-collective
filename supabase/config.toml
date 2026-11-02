@@ -38,3 +38,7 @@ verify_jwt = false
 # Gelato drafts are only created by an authenticated shop admin; no public submission.
 [functions.shop-gelato-draft]
 verify_jwt = false
+
+# Admin-only read of the configured Gelato calendar product variants.
+[functions.shop-gelato-product]
+verify_jwt = false

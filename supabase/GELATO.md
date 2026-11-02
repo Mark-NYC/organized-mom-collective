@@ -35,3 +35,26 @@ For multipage products, provide the *confirmed* page count in place of null, inc
 
 * https://dashboard.gelato.com/docs/orders/v4/create/
 * https://dashboard.gelato.com/docs/webhooks/
+
+
+## Read-only calendar product lookup
+
+This repository includes `shop-gelato-product`, a dedicated read-only admin endpoint for the existing Gelato Manual store product. It calls Gelato's documented ecommerce Get Product endpoint server-side, using the `GELATO_API_KEY` Supabase secret.
+
+- Store: `fc4a8fec-06f5-4823-815f-cec8937b4df4`
+- Gelato product: `a3755bc5-1a7e-4690-89df-6913d6bb6074`
+- The earlier UUID `d57a4f39-4bc3-40df-8e70-7e448487b38a` was identified as a template ID and is **not** the Product UID.
+- Current product variant shown in dashboard: Ledger (11x16.5 in), vertical, wire hanger. Do not assume its Product UID from the size.
+
+To activate:
+
+1. Deploy Supabase Edge Function `shop-gelato-product` in the same project where `GELATO_API_KEY` is set.
+2. Authenticate as a current shop administrator.
+3. POST `{}` to `https://<PROJECT_REF>.supabase.co/functions/v1/shop-gelato-product` with the admin session Bearer token and public Supabase anon-key header.
+4. The response includes `variants[].product_uid`. Verify which variant corresponds to the pictured Ledger wall calendar.
+5. Only then add the Gelato product UID and a verified print PDF URL to `shop_gelato_products` using the mapping instructions above.
+6. Before a paid draft submission, confirm Gelato's supported file type/page count, destination pricing, and that the shop UUID and Gelato item correspond to the same item.
+
+This endpoint does not modify products, create orders or release production. Keep it owner-only. The API key never appears in its response.
+
+Reference: https://dashboard.gelato.com/docs/ecommerce/products/get/
