@@ -39,7 +39,8 @@ function Queue({ctx}:{ctx:AdminContext}){
  const download=async()=>{
   if(!schedule.length)return;
   if(schedule.some(p=>!isHttp(p.image_url)||!isHttp(p.destination_url)||!p.board.trim()||!p.title.trim()||p.description.length>500)){setError('One or more pins lack a valid image URL, destination URL, board, or title.');return;}
-  if(schedule.length>200){setError('Pinterest allows at most 200 pins per upload. Reduce this batch.');return;}\n  if(schedule.some(p=>Date.parse(p.date+'T12:00:00Z')>Date.now()+30*86400000)){setError('Pinterest scheduling is limited to the next 30 days. Shorten this batch.');return;}
+  if(schedule.length>200){setError('Pinterest allows at most 200 pins per upload. Reduce this batch.');return;}
+  if(schedule.some(p=>Date.parse(p.date+'T12:00:00Z')>Date.now()+30*86400000)){setError('Pinterest scheduling is limited to the next 30 days. Shorten this batch.');return;}
   setBusy(true);setError('');
   const batch=crypto.randomUUID();
   const header=['Title','Media URL','Pinterest board','Thumbnail','Description','Link','Publish date','Keywords'];
