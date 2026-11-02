@@ -13,11 +13,11 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import ClubGate, { type ClubContext } from './ClubGate';
 import { approveWelcome, loadAddress, loadMembership, loadWelcome, saveAddress, saveWelcome, type Address, type Membership, type Vision, type WelcomeOrder } from '../../lib/club/membership';
-import { firstMonth, kitProgress, kitText, loadMeetingGuideSeen, nextStep, stepHref } from '../../lib/club/onboarding';
+import { firstMonth, firstResourceHref, firstResourceReviewed, kitSubmitted, kitText, loadMeetingGuideSeen, nextStep } from '../../lib/club/onboarding';
+import { setJourney } from '../../lib/club/journey';
 import { getSession } from '../../lib/account';
 import { clubResourceBySlug } from '../../data/club/resources';
 import AddressForm from './AddressForm';
-import KitSteps from './KitSteps';
 import { routes } from '../../routes';
 import { adminRpc, loadSession as loadAdminSession } from '../../lib/admin/session';
 
@@ -34,6 +34,8 @@ export default function FamilyVisionAccess() {
   return <ClubGate page="resource" bare>{(ctx) => <Member ctx={ctx} />}</ClubGate>;
 }
 
+const monthWord = (iso: string) => new Date(`${iso.slice(0, 7)}-15`).toLocaleString('en-US', { month: 'long' });
+
 /** Messages outside the print (loading, nothing to show yet), in the page's own gutter. */
 const Note = ({ children }: { children: ReactNode }) => <div className="mx-auto max-w-5xl px-4 py-8 text-warm-soft sm:px-8">{children}</div>;
 
@@ -45,6 +47,8 @@ function Member({ ctx }: { ctx: ClubContext }) {
   const [editAddress, setEditAddress] = useState(false);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [uid, setUid] = useState<string | null>(null);
+  const thumb = typeof location !== 'undefined' && new URLSearchParams(location.search).has('thumb');
   const latest = useRef<Vision | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -67,9 +71,10 @@ function Member({ ctx }: { ctx: ClubContext }) {
       reveal(true);
       return;
     }
-    Promise.all([loadWelcome(), ctx.store.household(), loadMembership(), loadAddress(), getSession().then((s) => loadMeetingGuideSeen(s?.user_id))])
-      .then(([order, h, m, a, seen]) => {
+    Promise.all([loadWelcome(), ctx.store.household(), loadMembership(), loadAddress(), getSession().then(async (s) => [s?.user_id ?? null, await loadMeetingGuideSeen(s?.user_id)] as const)])
+      .then(([order, h, m, a, [user, seen]]) => {
         setGuideSeen(seen);
+        setUid(user);
         setW(order);
         setMe(m);
         setAddress(a);
@@ -91,8 +96,15 @@ function Member({ ctx }: { ctx: ClubContext }) {
       window.removeEventListener('omc:vision-change', onChange);
       clearTimeout(timer.current);
       reveal(false);
+      setJourney(null);
     };
   }, []);
+
+  // Phase 2 of her journey ("Make it yours") while her Welcome Kit still waits on her; the normal Club header after.
+  useEffect(() => {
+    if (thumb || !w || !me) return;
+    setJourney(['pending', 'on_hold'].includes(w.status) && !kitSubmitted(me) ? 'print' : null);
+  }, [w, me]);
 
   const approve = async () => {
     if (!latest.current) return;
@@ -159,7 +171,7 @@ function Member({ ctx }: { ctx: ClubContext }) {
           <button type="button" className="fvp-approve-cta" disabled={busy} onClick={approve}>
             {busy ? 'Saving your print…' : 'Yes! Send me my print'}
           </button>
-          <p className="fvp-mail-hint">It comes in your Welcome Kit with your first family resource. Included in your membership.</p>
+          <p className="fvp-mail-hint">One of three printed pieces in your Welcome Kit, mailed together. Included in your membership.</p>
           <button type="button" className="fvp-edit-after-cta" onClick={() => document.getElementById('fvp-open-editor')?.click()}>✎ Customize artwork</button>
           {mailLine}
           {addressForm}
@@ -170,16 +182,14 @@ function Member({ ctx }: { ctx: ClubContext }) {
           <span className="fvp-approved-check" aria-hidden="true">✓</span>
           <strong>{open ? 'It’s yours!' : 'Your welcome print'}</strong>
           <p>{open ? 'Your print is approved.' : kitText({ welcome: me?.welcome ?? null })}</p>
-          {step === 'meeting_guide' ? (
+          {open && me && !kitSubmitted(me) && step === 'first_resource' && !firstResourceReviewed(first?.slug, uid) && firstResourceHref(me) ? (
             <>
-              <p className="fvp-approved-next">Next, a quick look at the Family Meeting guide that comes in your Welcome Kit, then your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first family resource'}. All three arrive together.</p>
-              <a className="fvp-next-cta" href={ctx.href(stepHref(me!, 'meeting_guide'))}>Next: your Family Meeting guide <span aria-hidden="true">→</span></a>
+              <p className="fvp-approved-next">Next, your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first monthly resource'}. It’s already prepared for your family, and it’s mailed with your print and the Family Meeting Guide.</p>
+              <a className="fvp-next-cta" href={ctx.href(firstResourceHref(me)!)}>Next: review your {first ? monthWord(first.month) : 'first'} resource <span aria-hidden="true">→</span></a>
+              <a className="fvp-back-kit" href={ctx.href(routes.clubWelcomeKit)}>Back to my Welcome Kit</a>
             </>
-          ) : step === 'first_resource' && first?.slug ? (
-            <>
-              <p className="fvp-approved-next">Next, a quick look at your {firstTitle ? <span className="font-semibold">{firstTitle}</span> : 'first family resource'}. It’s already prepared for your family, and it arrives with your print in your Welcome Kit.</p>
-              <a className="fvp-next-cta" href={ctx.href(stepHref(me!, 'first_resource'))}>See your first family resource <span aria-hidden="true">→</span></a>
-            </>
+          ) : open && me && !kitSubmitted(me) ? (
+            <a className="fvp-next-cta" href={ctx.href(routes.clubWelcomeKit)}>Back to my Welcome Kit <span aria-hidden="true">→</span></a>
           ) : (
             <>
               {open && me && <p className="fvp-approved-next">{kitText(me)}</p>}
@@ -194,14 +204,9 @@ function Member({ ctx }: { ctx: ClubContext }) {
       )}
     </div>
   );
+  if (thumb) return null;
   const slot = document.getElementById('fvp-member-actions');
-  const progress = document.getElementById('fvp-progress-slot');
-  return (
-    <>
-      {progress && open && createPortal(<KitSteps steps={kitProgress(!approved ? 'print' : step === 'meeting_guide' ? 'meeting_guide' : 'first_resource')} />, progress)}
-      {slot ? createPortal(bar, slot) : bar}
-    </>
-  );
+  return slot ? createPortal(bar, slot) : bar;
 }
 
 interface Bundle {

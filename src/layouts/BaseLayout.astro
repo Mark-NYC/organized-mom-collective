@@ -66,6 +66,8 @@ const monthHexes = monthColors.map((m) => m.hex);
     <script is:inline define:vars={{ monthHexes }}>
       // The current month's color (from src/theme.ts) is the accent.
       document.documentElement.style.setProperty('--month', monthHexes[new Date().getMonth()]);
+      // A Club printable drawn as a miniature inside her Welcome Kit (KitPreview.tsx, same origin, framed only).
+      try { if (window.self !== window.top && /[?&]thumb=1(&|$)/.test(location.search)) document.documentElement.classList.add('omc-thumb'); } catch (e) {}
     </script>
     <!-- Pinterest Tag -->
     {tracking && <script is:inline>

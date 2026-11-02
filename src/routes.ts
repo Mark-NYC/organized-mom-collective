@@ -76,6 +76,7 @@ export const routes = {
   clubJoin: '/club#offer',
   clubLogin: '/club/login',
   clubWelcome: '/club/welcome',
+  clubWelcomeKit: '/club/welcome-kit',
   clubDashboard: '/club/dashboard',
   clubFamilyVision: '/club/family-vision',
   /** The standard one-page Family Meeting guide in every Welcome Kit (her review step, and the owner's print). */

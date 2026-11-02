@@ -24,3 +24,11 @@ export const PLAN_CHANGE = 'club:plan-change';
 export const PLAN_APPROVAL = 'club:plan-approval';
 
 export type PlanResourceHost<S> = HTMLElement & { clubPlan?: PlanResource<S> };
+/**
+ * Welcome Kit mode (her first month, /app/club/<month>?welcome=1): WelcomeKitConfirm sets data-plan-welcome on the
+ * page root and fires PLAN_WELCOME; the rail and the phone bar then say "Approve for printing", and a click fires
+ * PLAN_WELCOME_APPROVE, which records her review and takes her back to her Welcome Kit.
+ */
+export const PLAN_WELCOME = 'club:plan-welcome';
+export const PLAN_WELCOME_APPROVE = 'club:plan-welcome-approve';
+export const inWelcomeKit = (root: HTMLElement) => root.hasAttribute('data-plan-welcome');

@@ -6,13 +6,14 @@
  *
  * `component` picks the printable in that page. Year 2 editions (e.g. December 2027) are listed once they have one.
  *
- * Known gap (Oct 2026, needs the owner's decision): the app's month pages moved on and these four didn't.
- * /app/club/january is the Weekly Meeting (SeptemberSundayReset) and /app/club/september the Habit Cards; February is
- * the laundry guides (FebruaryLaundryGuides) and March the chore charts (MarchChoreCharts). This page, which members
- * open, fulfillment prints and the Welcome Kit's first resource uses, still renders the earlier printables below.
- * Repointing them changes what January members and Welcome Kits receive, and the February and March printables only
- * run inside the plan shell today, so it's a separate change. The Monthly Family Meeting follows the app pages
- * (src/data/club/family-meeting.ts).
+ * `title` is the name of what prints, used everywhere a member or the owner sees the month (Welcome Kit, Club Home,
+ * the plan pages, admin fulfillment and CSV). It follows the app tool at /app/club/<month>, which is what members
+ * edit and fulfillment prints: January 2027 is "Our Family Weekly Meeting" and September "Our Family Habit Cards"
+ * (the same as src/data/club/family-meeting.ts → resourceTitle and the public Club page; fixed Nov 2026).
+ *
+ * Known gap: `component` is the older member copy at /club/resources/<slug>, which still renders the earlier printables
+ * for January (Habit Cards), February, March and September. Members are sent to the app tools instead (memberPlanHref);
+ * repointing those old pages is a separate change.
  */
 export interface ClubResource {
   slug: string;
@@ -34,20 +35,21 @@ export interface ClubResource {
 export const clubResources: readonly ClubResource[] = [
   { slug: '2026-11-family-ownership', month: '2026-11', title: 'Our Family Ownership Plan', problem: 'Who owns which jobs, start to finish', component: 'november', preview: '/club/worksheet-generator' },
   { slug: '2026-12-christmas-mission', month: '2026-12', title: 'Your Christmas Mission', problem: 'A kindness mission the kids lead', component: 'december', preview: '/club/december-preview' },
-  { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Habit Cards', problem: 'Less reminding, more independence', component: 'january', preview: '/preview/january-habit-cards',
-    // docs/club/JANUARY_HABIT_CARDS.md: one cue, one small next action, a card placed where it happens; start with one or two.
+  { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Weekly Meeting', problem: 'Looking at the week together, so the plan isn’t only in your head', component: 'january', preview: '/app/club/january?sample=rivera',
+    // The printed resource is the app tool /app/club/january (SeptemberSundayReset: the two-sided Weekly Meeting sheet),
+    // which fulfillment prints (?fulfillment=<order>). docs/club/WELCOME_KIT.md → Naming.
     welcome: {
-      helps: 'Each card ties one small job to something that already happens, and it sits right where the job happens, so the reminder doesn’t have to come from you.',
-      firstStep: 'Show the kids their cards and let each one choose where theirs goes.',
+      helps: 'Once a week, ten or fifteen minutes around the wall calendar: everyone sees what’s coming, gets ready for it and takes a part, so you aren’t the family’s only calendar.',
+      firstStep: 'Pick a time this week for your first meeting and let the kids know they each get a part.',
     } },
-  { slug: '2027-02-better-together', month: '2027-02', title: 'Family Connection Cards', problem: 'Making room for time together', component: 'february', preview: '/club/february-preview' },
-  { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Spring Prep as a Family', problem: 'One project with a part for everyone', component: 'march', preview: '/club/march-preview' },
+  { slug: '2027-02-better-together', month: '2027-02', title: 'Family Laundry Guides', problem: 'Laundry the kids can own, step by step', component: 'february', preview: '/club/february-preview' },
+  { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Family Chore Charts', problem: 'Chores without chasing everyone', component: 'march', preview: '/club/march-preview' },
   { slug: '2027-04-everybody-helps-at-mealtime', month: '2027-04', title: 'Our Dinner Team', problem: 'Dinner isn’t just Mom’s job', component: 'april', preview: '/club/april-preview' },
   { slug: '2027-05-finish-the-school-year', month: '2027-05', title: 'Our Summer Day Rhythm', problem: 'A rhythm kids can follow when school ends', component: 'may', preview: '/club/may-preview' },
   { slug: '2027-06-summer-with-a-plan', month: '2027-06', title: 'My Family’s Snack Station', problem: 'Snacks without a request every hour', component: 'june', preview: '/club/june-preview' },
   { slug: '2027-07-ready-to-go', month: '2027-07', title: 'What Can I Do Right Now?', problem: 'Ideas kids can start on their own', component: 'july', preview: '/club/july-preview' },
   { slug: '2027-08-school-year', month: '2027-08', title: 'My School Day Routines', problem: 'Mornings and afternoons without constant reminders', component: 'august', preview: '/club/august-preview' },
-  { slug: '2027-09-a-week-everyone-can-see', month: '2027-09', title: 'Our Family Sunday Reset', problem: 'Getting ready for the week, together', component: 'september', preview: '/club/september-preview' },
+  { slug: '2027-09-a-week-everyone-can-see', month: '2027-09', title: 'Our Family Habit Cards', problem: 'One small school-day habit, without the reminders', component: 'september', preview: '/club/september-preview' },
   { slug: '2027-10-home-works-together', month: '2027-10', title: 'Our 5-Minute Reset', problem: 'A daily reset with a clear finish line', component: 'october', preview: '/club/october-preview' },
 ];
 

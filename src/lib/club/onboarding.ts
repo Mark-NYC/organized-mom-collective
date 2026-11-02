@@ -81,14 +81,14 @@ export function nextStep(me: Membership, opts: StepOptions = {}): OnboardingStep
   if (opts.profile && !opts.profile.setupCompleted && !opts.profileDeferred) return 'profile';
   if (!me.has_address) return 'address';
   if (open(me) && !me.welcome!.approved) return 'print';
-  const confirm = open(me) && me.welcome!.readiness === 'needs_confirmation' && Boolean(firstMonth(me)?.slug);
-  if (confirm && opts.meetingGuideSeen === false) return 'meeting_guide';
-  if (confirm) return 'first_resource';
+  // The Family Meeting guide is the same sheet for everyone: she can preview it from her Welcome Kit, but it is never
+  // a step she has to take. ('meeting_guide' stays in the type for old links; nextStep no longer returns it.)
+  if (open(me) && me.welcome!.readiness === 'needs_confirmation' && Boolean(firstMonth(me)?.slug)) return 'first_resource';
   return 'home';
 }
 
-/** What her first month's tool shows about her Welcome Kit (WelcomeKitConfirm). 'done': she just confirmed it. */
-export type WelcomeKitView = 'none' | 'print_first' | 'confirm' | 'done';
+/** What her first month's tool shows about her Welcome Kit (WelcomeKitConfirm). */
+export type WelcomeKitView = 'none' | 'print_first' | 'confirm';
 
 export function welcomeKitView(me: Membership, kitSlug: string): WelcomeKitView {
   const first = firstMonth(me);
@@ -99,7 +99,13 @@ export function welcomeKitView(me: Membership, kitSlug: string): WelcomeKitView 
   return w.readiness === 'needs_confirmation' ? 'confirm' : 'none';
 }
 
-/** The page for a step. */
+/** Her first month's real tool in Welcome Kit mode (/app/club/<month>?welcome=1), where she reviews and approves it. */
+export function firstResourceHref(me: Pick<Membership, 'months' | 'first_paid_month'>): string | null {
+  const first = firstMonth(me);
+  return first?.slug ? `${memberPlanHref(first.slug)}?welcome=1` : null;
+}
+
+/** The page for a step. Every Welcome Kit step resumes on the Welcome Kit page, which shows all three pieces. */
 export function stepHref(me: Membership, step = nextStep(me)): string {
   switch (step) {
     case 'family':
@@ -108,27 +114,140 @@ export function stepHref(me: Membership, step = nextStep(me)): string {
     case 'not_member':
       return routes.clubWelcome;
     case 'print':
-      return routes.clubFamilyVision;
     case 'meeting_guide':
-      return routes.clubMeetingGuide;
     case 'first_resource':
-      // Her month's real tool (/app/club/<month>), where she looks it over and confirms it (WelcomeKitConfirm).
-      return `${memberPlanHref(firstMonth(me)!.slug!)}?welcome=1`;
+      return routes.clubWelcomeKit;
     default:
       // Club Home (/app/club): her family, her Welcome Kit, her months. Billing and address: /club/dashboard.
       return routes.appClub;
   }
 }
 
-/** The five steps she sees: family, address, print, the Family Meeting guide, her first resource. 'done': submitted. */
-export type KitProgress = { label: string; state: 'done' | 'current' | 'next' }[];
-export type KitStage = 'family' | 'address' | 'print' | 'meeting_guide' | 'first_resource' | 'done';
+// ------------------------------------------------------------------ one journey, three phases
+
+/**
+ * The one journey she sees, from checkout to a submitted Welcome Kit: 1. Tell us about your family (the questionnaire
+ * and mailing address), 2. Make it yours (her three printed pieces), 3. Confirm your Welcome Kit (all three together,
+ * the address, then "Prepare My Welcome Kit"). The questionnaire keeps its own "Step n of 6" inside phase 1.
+ */
+export const JOURNEY = [
+  { id: 'family', label: 'Tell us about your family', short: 'Your family' },
+  { id: 'make', label: 'Make it yours', short: 'Make it yours' },
+  { id: 'confirm', label: 'Confirm your Welcome Kit', short: 'Confirm' },
+] as const;
+export type KitProgress = { label: string; short: string; state: 'done' | 'current' | 'next' }[];
+/** Where she is: the setup steps are phase 1, the kit's pieces phase 2, the kit page with everything ready phase 3. */
+export type KitStage = 'family' | 'address' | 'print' | 'meeting_guide' | 'first_resource' | 'confirm' | 'done';
+export function journeyPhase(stage: KitStage): 0 | 1 | 2 | 3 {
+  if (stage === 'family' || stage === 'address') return 0;
+  if (stage === 'confirm') return 2;
+  if (stage === 'done') return 3;
+  return 1;
+}
 export function kitProgress(current: KitStage): KitProgress {
-  const order = ['family', 'address', 'print', 'meeting_guide', 'first_resource'] as const;
-  const labels = { family: 'Your family', address: 'Your address', print: 'Your print', meeting_guide: 'Meeting guide', first_resource: 'Your first resource' };
-  if (current === 'done') return order.map((s) => ({ label: labels[s], state: 'done' as const }));
-  const at = order.indexOf(current);
-  return order.map((s, i) => ({ label: labels[s], state: i < at ? 'done' : i === at ? 'current' : 'next' }));
+  const at = journeyPhase(current);
+  return JOURNEY.map((p, i) => ({ label: p.label, short: p.short, state: i < at ? 'done' : i === at ? 'current' : 'next' }));
+}
+
+// ------------------------------------------------------------------ her three printed pieces
+
+const REVIEWED = 'omc:club:kit-reviewed:';
+/**
+ * She approved her first month on its tool ("Approve for printing"): remembered on this device until she changes the
+ * plan again. The approval the database records is the Welcome Kit's one "Prepare My Welcome Kit"
+ * (club_fulfillment_approve), so nothing is approved twice, and on a new device she looks it over once more.
+ */
+export function markFirstResourceReviewed(slug: string, userId?: string | null) {
+  try { localStorage.setItem(`${REVIEWED}${userId ?? ''}:${slug}`, new Date().toISOString()); } catch { /* fine */ }
+}
+export function clearFirstResourceReviewed(slug: string, userId?: string | null) {
+  try { localStorage.removeItem(`${REVIEWED}${userId ?? ''}:${slug}`); } catch { /* fine */ }
+}
+export function firstResourceReviewed(slug: string | null | undefined, userId?: string | null): boolean {
+  if (!slug) return false;
+  try { return Boolean(localStorage.getItem(`${REVIEWED}${userId ?? ''}:${slug}`)); } catch { return false; }
+}
+
+export type KitItemStatus = 'ready' | 'needs_review' | 'approved' | 'preparing';
+export const KIT_ITEM_STATUS: Record<KitItemStatus, string> = {
+  ready: 'Ready',
+  needs_review: 'Needs review',
+  approved: 'Approved',
+  preparing: 'We’re finishing it',
+};
+export interface KitItem {
+  id: 'print' | 'guide' | 'first';
+  name: string;
+  about: string;
+  status: KitItemStatus;
+  /** The printable's own page: preview, edit or approve it there. */
+  href: string;
+  action: string;
+}
+
+/** Her Welcome Kit has gone in (both approvals received), from the queue's status and readiness. */
+export function kitSubmitted(me: Pick<Membership, 'welcome'>): boolean {
+  const w = me.welcome;
+  if (!w || !w.approved) return false;
+  if (['approved', 'printed', 'mailed'].includes(w.status)) return true;
+  return ['needs_pdf', 'ready'].includes(w.readiness);
+}
+
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthWord = (iso: string) => MONTHS_LONG[Number(iso.slice(5, 7)) - 1] ?? 'First';
+
+/**
+ * Her Welcome Kit's three printed pieces and what each needs from her. `reviewed`: she approved her first month on
+ * its tool on this device (firstResourceReviewed). `title`: the printed resource's name (src/data/club/resources.ts).
+ * The Family Meeting guide is the same for every family, so it is simply Ready.
+ */
+export function kitItems(me: Membership, reviewed: boolean, title: (slug: string | null) => string | null = () => null): KitItem[] {
+  const w = me.welcome;
+  const first = firstMonth(me);
+  const submitted = kitSubmitted(me);
+  const month = first ? monthWord(first.month) : 'First';
+  const firstHref = firstResourceHref(me);
+  const printApproved = Boolean(w?.approved);
+  const firstStatus: KitItemStatus = submitted ? 'approved'
+    : !first?.slug || w?.readiness === 'needs_resource' ? 'preparing'
+    : reviewed ? 'approved' : 'needs_review';
+  return [
+    {
+      id: 'print', name: 'Family Vision Print', about: 'A watercolor keepsake with your family name and the value you chose.',
+      status: printApproved ? 'approved' : 'needs_review', href: routes.clubFamilyVision,
+      action: printApproved ? (submitted ? 'View' : 'View or change') : 'Make it yours',
+    },
+    {
+      id: 'guide', name: 'Family Meeting Guide', about: 'A one-page guide to short, practical family meetings. The same for every family.',
+      status: 'ready', href: routes.clubMeetingGuide, action: 'Preview',
+    },
+    {
+      id: 'first', name: `${month} Resource`, about: `${title(first?.slug ?? null) ?? 'Your first monthly resource'}, prepared with your family’s names.`,
+      status: firstStatus,
+      href: !submitted && firstHref ? firstHref : first?.slug ? memberPlanHref(first.slug) : routes.appClub,
+      action: firstStatus === 'approved' ? (submitted ? 'View' : 'Review again') : firstStatus === 'needs_review' ? 'Review & edit' : 'Preview',
+    },
+  ];
+}
+
+/**
+ * Where her membership is, for Club Home: setting up, her Welcome Kit (almost ready, getting ready, on its way), or the
+ * ongoing membership. Never says shipped before the kit is marked mailed. Nothing here knows about delivery, so a
+ * mailed kit stays "on its way" for three weeks and then gives way to her months.
+ */
+export type HomeState = 'setup' | 'starts' | 'kit_open' | 'kit_submitted' | 'kit_mailed' | 'ongoing';
+export function homeState(me: Membership, step: OnboardingStep, now = Date.now()): HomeState {
+  if (step === 'family' || step === 'profile' || step === 'address') return 'setup';
+  if (startsWithFirstPayment(me)) return 'starts';
+  const w = me.welcome;
+  if (!w || w.satisfies_month || ['canceled', 'skipped', 'returned'].includes(w.status)) return 'ongoing';
+  if (w.status === 'mailed') {
+    const at = w.mailed_at ? Date.parse(w.mailed_at) : NaN;
+    return Number.isFinite(at) && now - at > 21 * 864e5 ? 'ongoing' : 'kit_mailed';
+  }
+  if (kitSubmitted(me)) return 'kit_submitted';
+  if (['pending', 'on_hold'].includes(w.status)) return 'kit_open';
+  return 'ongoing';
 }
 
 /**
@@ -138,9 +257,9 @@ export function kitProgress(current: KitStage): KitProgress {
 export function kitText(me: Pick<Membership, 'welcome'>): string {
   const w = me.welcome;
   if (!w) return '';
-  if (w.status === 'mailed') return 'Your Welcome Kit is in the mail.';
+  if (w.status === 'mailed') return 'Your Welcome Kit is on its way.';
   if (w.status === 'printed') return 'Your Welcome Kit is printed and getting ready to mail.';
-  if (w.status === 'approved') return 'Your Welcome Kit is approved for print.';
+  if (w.status === 'approved') return 'Your Welcome Kit is ready for printing.';
   if (w.status === 'returned') return 'Your Welcome Kit came back to us. Check your mailing address.';
   return ({
     needs_profile: 'Add your family to start your Welcome Kit.',
@@ -148,9 +267,9 @@ export function kitText(me: Pick<Membership, 'welcome'>): string {
     mail_paused: 'Printed mailings are paused, so your Welcome Kit is waiting.',
     needs_vision: 'Your welcome print is ready for you to approve.',
     needs_resource: 'Your print is approved. We’re finishing your first resource.',
-    needs_confirmation: 'Your print is approved. Take a quick look at your first resource and confirm it.',
-    needs_pdf: 'Submitted. We aim to print and mail your Welcome Kit within two business days.',
-    ready: 'Submitted. We aim to print and mail your Welcome Kit within two business days.',
+    needs_confirmation: 'Your print is approved. Review your first resource, then prepare your Welcome Kit.',
+    needs_pdf: 'Your package is getting ready. We aim to print and mail it within two business days.',
+    ready: 'Your package is getting ready. We aim to print and mail it within two business days.',
     first_month_canceled: 'We’re looking at your Welcome Kit. Reply to any of our emails with questions.',
   } as Record<string, string>)[w.readiness] ?? 'We’re preparing your Welcome Kit.';
 }

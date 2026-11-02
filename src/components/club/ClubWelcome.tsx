@@ -16,13 +16,13 @@ import type { Household } from '../../lib/club/profile';
 import { SETUP_STEPS, STEP_TITLES, TOTAL_STEPS, type FamilyProfile } from '../../lib/club/family-profile';
 import FamilySetup from './FamilySetup';
 import { checkoutStatus, loadAddress, loadMembership, monthName, saveAddress, shortDate, type Address, type Membership } from '../../lib/club/membership';
-import { deferProfile, familyNameFrom, kitProgress, loadMeetingGuideSeen, nextStep, profileDeferred, startsWithFirstPayment, stepHref } from '../../lib/club/onboarding';
+import { deferProfile, familyNameFrom, loadMeetingGuideSeen, nextStep, profileDeferred, startsWithFirstPayment, stepHref } from '../../lib/club/onboarding';
+import { setJourney } from '../../lib/club/journey';
 import { getSession } from '../../lib/account';
 import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
 import FamilyForm from './FamilyForm';
 import AddressForm from './AddressForm';
-import KitSteps from './KitSteps';
 import { clubNav } from '../../lib/club/nav';
 
 const SESSION = /^cs_(test|live)_[A-Za-z0-9]+$/;
@@ -127,7 +127,10 @@ function Setup({ ctx }: { ctx: ClubContext }) {
 
   useEffect(() => {
     if (step.kind === 'done') clubNav().go(ctx.href(step.to), { replace: true });
+    // Phase 1 of her journey in the header (ClubNav): the questionnaire and her mailing address.
+    if (ctx.store.kind === 'account') setJourney(['family', 'profile', 'later', 'address'].includes(step.kind) ? (step.kind === 'address' ? 'address' : 'family') : null);
   }, [step.kind]);
+  useEffect(() => () => setJourney(null), []);
 
   if (error) return <p role="alert">{error}</p>;
   switch (step.kind) {
@@ -145,7 +148,6 @@ function Setup({ ctx }: { ctx: ClubContext }) {
     case 'family':
       return (
         <>
-          <KitSteps steps={kitProgress('family')} />
           <SetupProgress />
           <FamilyForm household={step.household} mode="start" suggestedName={step.suggested} submitLabel="Next" onSave={async (input) => {
             await ctx.store.saveHousehold(input);
@@ -156,7 +158,6 @@ function Setup({ ctx }: { ctx: ClubContext }) {
     case 'profile':
       return (
         <>
-          <KitSteps steps={kitProgress('family')} />
           <FamilySetup store={ctx.store} members={step.household.members} profile={step.profile} mode="wizard" onDone={() => advance()}
             onExit={(profile) => setStep({ kind: 'later', profile })} />
         </>
@@ -165,13 +166,12 @@ function Setup({ ctx }: { ctx: ClubContext }) {
       const open = SETUP_STEPS.filter((s) => !step.profile.setupDone.includes(s));
       return (
         <div className="max-w-2xl">
-          <KitSteps steps={kitProgress('family')} />
           <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink">Saved. Finish the rest anytime.</h1>
           <p className="mt-3 leading-relaxed text-warm-soft">Everything you answered is saved to your account. {open.length ? 'Still open:' : ''}</p>
           {open.length > 0 && (
             <ul className="mt-2 list-disc pl-6 leading-relaxed text-warm-ink">{open.map((s) => <li key={s}>{STEP_TITLES[s]}</li>)}</ul>
           )}
-          <p className="mt-3 leading-relaxed text-warm-soft">You’ll find them under <strong className="text-warm-ink">My Family</strong>. Next, your Welcome Kit.</p>
+          <p className="mt-3 leading-relaxed text-warm-soft">You’ll find them under <strong className="text-warm-ink">My Family</strong>. Next, your Welcome Kit: three printed resources, made for your family.</p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <button type="button" className="btn-primary" onClick={async () => {
               deferred.current = true;
@@ -187,10 +187,9 @@ function Setup({ ctx }: { ctx: ClubContext }) {
     case 'address':
       return (
         <>
-          <KitSteps steps={kitProgress('address')} />
           <h1 className="mt-2 font-serif text-[2rem] leading-tight text-warm-ink">Where should we mail your Welcome Kit?</h1>
           <p className="mt-3 mb-6 max-w-xl leading-relaxed text-warm-soft">Your Welcome Kit and your monthly printed resources come here.</p>
-          <AddressForm address={step.address} submitLabel="See my welcome gift" onSave={async (a) => {
+          <AddressForm address={step.address} submitLabel="Next: my Welcome Kit" onSave={async (a) => {
             await saveAddress(a);
             await advance();
           }} />

@@ -8,7 +8,7 @@
 import { editingWindow } from '../edition-status';
 import { earlierCopyLink, PLAN_SAVE, saveText, type PlanSaveStatus } from './account';
 import { onPlanFamily } from './family';
-import { PLAN_APPROVAL, PLAN_CHANGE, type PlanResource, type PlanResourceHost } from './resource';
+import { inWelcomeKit, PLAN_APPROVAL, PLAN_CHANGE, PLAN_WELCOME, PLAN_WELCOME_APPROVE, type PlanResource, type PlanResourceHost } from './resource';
 import { approvalDay, approvalState, planNow, readApproval, writeApproval, type Approval } from './status';
 
 export interface PlanDesktopOptions<S> {
@@ -40,24 +40,29 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
 
   const isClosed = () => editingWindow(deadline, planNow()).phase === 'closed';
 
+  const DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'America/New_York' });
+  // One small line: the print deadline and how long is left (the exact cutoff in its title).
   const paintDeadline = () => {
     const ms = Date.parse(deadline) - planNow().getTime();
     const status = $('[data-cpd-status]');
     const detail = $('[data-cpd-detail]');
     const box = $('[data-cpd-countdown]');
+    box.hidden = true;
     if (!Number.isFinite(ms)) {
-      status.textContent = 'Editing cutoff not scheduled yet.';
+      status.textContent = 'Print deadline not scheduled yet';
       detail.textContent = '';
-      box.hidden = true;
       return;
     }
     const minutes = Math.max(0, Math.ceil(ms / 60000));
-    box.hidden = !minutes;
-    status.textContent = minutes ? 'Time left to make changes' : `${editingWindow(deadline, planNow()).text}. You can still print a copy.`;
-    $('[data-cpd-days]').textContent = String(Math.floor(minutes / 1440)).padStart(2, '0');
-    $('[data-cpd-hours]').textContent = String(Math.floor((minutes % 1440) / 60)).padStart(2, '0');
+    const days = Math.floor(minutes / 1440);
+    const hours = Math.floor((minutes % 1440) / 60);
+    const left = days >= 1 ? `${days} ${days === 1 ? 'day' : 'days'} left` : hours >= 1 ? `${hours} ${hours === 1 ? 'hour' : 'hours'} left` : `${minutes % 60} min left`;
+    status.textContent = minutes ? `Print deadline ${DAY.format(Date.parse(deadline))} · ${left}` : `${editingWindow(deadline, planNow()).text}. You can still print a copy.`;
+    $('[data-cpd-days]').textContent = String(days).padStart(2, '0');
+    $('[data-cpd-hours]').textContent = String(hours).padStart(2, '0');
     $('[data-cpd-minutes]').textContent = String(minutes % 60).padStart(2, '0');
-    detail.textContent = `Cutoff: ${ET.format(Date.parse(deadline))} ET.`;
+    detail.textContent = minutes ? `Changes save as you go until ${ET.format(Date.parse(deadline))} ET.` : '';
+    rail.dataset.deadlineSoon = String(minutes > 0 && minutes < 3 * 1440);
   };
 
   const paint = () => {
@@ -73,17 +78,19 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     const a = readApproval(o.approvalKey, root.dataset.planFor);
     const state = approvalState(a, r.fingerprint());
     approve.hidden = locked;
-    approve.textContent = state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve preview';
-    approve.setAttribute('aria-disabled', String(state === 'approved'));
+    const welcome = inWelcomeKit(root);
+    approve.textContent = welcome ? 'Approve for printing' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve preview';
+    approve.setAttribute('aria-disabled', String(!welcome && state === 'approved'));
     // A member's plan saves to her account (./account.ts); approval here is still this tab's check mark only.
     const member = root.dataset.planSource === 'account';
-    if (state === 'approved') note.textContent = member
+    if (welcome) note.textContent = 'Approving adds it to your Welcome Kit. You’ll confirm all three printed pieces together next.';
+    else if (state === 'approved') note.textContent = member
       ? `Approved ${approvalDay(a)} on this device. Approval is optional: it only says you’ve checked it. Nothing is submitted or mailed from here.`
       : `Approved ${approvalDay(a)} in this preview. Approval is optional: it only says you’ve checked it. Nothing is saved to an account, submitted or mailed.`;
     else if (state === 'changed') note.textContent = 'Changed since you approved. Approve again when you’ve checked it, or leave it: approval is optional.';
     else if (member) note.textContent = locked ? 'Printing is unlimited. Nothing is mailed from this page.' : 'Approval is optional: it only says you’ve checked it, and doesn’t submit or mail anything.';
     else note.textContent = locked ? 'Printing is unlimited. Nothing is saved to an account or mailed from this preview.' : 'Approval is optional and preview only: it doesn’t save, submit or mail anything. Mailing isn’t active yet.';
-    undo.hidden = !previous || state !== 'approved';
+    undo.hidden = welcome || !previous || state !== 'approved';
     o.render?.(r, locked);
   };
 
@@ -106,6 +113,11 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     if (!r?.ready() || locked) return;
     const a = readApproval(o.approvalKey, root.dataset.planFor);
     const print = r.fingerprint();
+    if (inWelcomeKit(root)) {
+      if (a?.print !== print) writeApproval(o.approvalKey, { for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
+      root.dispatchEvent(new Event(PLAN_WELCOME_APPROVE));
+      return;
+    }
     if (a?.print === print) return;
     previous = a;
     writeApproval(o.approvalKey, { for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
@@ -119,6 +131,7 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
 
   host.addEventListener(PLAN_CHANGE, paint);
   root.addEventListener(PLAN_APPROVAL, paint);
+  root.addEventListener(PLAN_WELCOME, paint);
   paintDeadline();
   paint();
   const timer = window.setInterval(() => { paintDeadline(); paint(); }, 15000);

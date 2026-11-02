@@ -38,6 +38,29 @@ queue pairs them:
 
 ## What she does
 
+**Revised Nov 2 2026 (one journey, three phases).** The header shows three phases instead of the old five steps:
+
+1. **Tell us about your family** (`/club/welcome`): the questionnaire (its own "Step n of 6") and, if needed, her address.
+2. **Make it yours** (`/club/welcome-kit`, `WelcomeKitHub`): "Let's get your first family package ready. Three printed
+   resources, made for your family and mailed together to your door." Three cards, each a miniature of the real
+   printable (`KitPreview` loads its page with `?thumb=1`), a status (Ready / Needs review / Approved) and one action:
+   - **Family Vision Print** → `/club/family-vision`, approved there as before (`club_welcome_approve`).
+   - **Family Meeting Guide** → `/club/family-meeting-guide`, preview only. It is the same for everyone, so it is
+     always "Ready" and never a step (`nextStep` no longer returns `meeting_guide`; opening it is still noted).
+   - **First month's resource** → `/app/club/<month>?welcome=1`, the real tool in Welcome Kit mode: a one-line
+     breadcrumb ("Welcome Kit / Your January Resource") and the plan's own approve button reading **"Approve for
+     printing"**. That records her review on this device (`markFirstResourceReviewed`) and returns her to the kit; a
+     later change clears it. It approves nothing on the server.
+3. **Confirm your Welcome Kit** (same page, once all three are ready): her address (Change inline) and **"Prepare My
+   Welcome Kit"**, enabled only when the print is approved, the month is reviewed and the kit is `needs_confirmation`.
+   It calls the same `club_fulfillment_approve` (her click only) and `kit_submitted` (one email per kit) as before. Both
+   are idempotent, so a double click or refresh never makes a second order. Then "Your Welcome Kit is getting ready!".
+
+Every kit step resumes on `/club/welcome-kit` (`stepHref`). Fulfillment, readiness, approvals and admin are unchanged.
+Known limit: the month's review is per device; on another device she reviews it once more before preparing the kit.
+
+The older description below is kept for the database side; where it describes pages, the above wins.
+
 Checkout → family questionnaire → mailing address (only if Checkout didn't collect one) → personalize and approve her
 print → review the Family Meeting guide → personalize and confirm her first month → **Welcome Kit submitted** → Club Home.
 

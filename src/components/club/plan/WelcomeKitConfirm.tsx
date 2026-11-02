@@ -1,110 +1,83 @@
 /**
- * Her Welcome Kit's last step, on her first month's real tool (/app/club/<month>, the page stepHref sends her to):
- * look the plan over, change anything (it saves to her account, ./account.ts), then confirm it herself with
- * "Looks good. Prepare my Welcome Kit" (club_fulfillment_approve, the same call /club/resources/<slug> makes).
- * Shown only to a signed-in member whose kit carries this month and still waits on her; nothing is confirmed for her.
- * Before her print is approved it points her back to it. Never on samples or previews.
+ * Her first month's real tool in Welcome Kit mode (/app/club/<month>?welcome=1, from the Welcome Kit page): one small
+ * line above the plan, "Welcome Kit / Your January Resource" and what to do, never a banner between her and the
+ * printable. The page root gets data-plan-welcome, which turns the plan's own approve button (desktop rail and phone
+ * action bar) into "Approve for printing": that marks her review on this device (markFirstResourceReviewed) and takes
+ * her back to her Welcome Kit, where "Prepare My Welcome Kit" makes the one approval the kit waits on
+ * (club_fulfillment_approve). A later change to the plan clears the review, so what she submits is what she saw.
+ * Before her print is approved, the line points her to it instead. Never on samples, previews, print views or ?thumb.
  */
 import { useEffect, useState } from 'react';
 import { clubAccountsEnabled } from '../../../data/club/config';
 import { clubResourceBySlug } from '../../../data/club/resources';
 import { getSession } from '../../../lib/account';
-import { approveResource, loadMembership, monthName, notifyKitSubmitted } from '../../../lib/club/membership';
-import { kitProgress, welcomeKitView, type WelcomeKitView as View } from '../../../lib/club/onboarding';
+import { loadMembership, monthName } from '../../../lib/club/membership';
+import { clearFirstResourceReviewed, firstResourceReviewed, markFirstResourceReviewed, welcomeKitView, type WelcomeKitView as View } from '../../../lib/club/onboarding';
+import { setJourney } from '../../../lib/club/journey';
 import { routes } from '../../../routes';
-import KitSteps from '../KitSteps';
 import { PLAN_SAVE } from '../../../lib/club/plan/account';
+import { PLAN_WELCOME, PLAN_WELCOME_APPROVE } from '../../../lib/club/plan/resource';
 
 export default function WelcomeKitConfirm({ kitSlug }: { kitSlug: string }) {
   const [view, setView] = useState<View>('none');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [reviewed, setReviewed] = useState(false);
 
   useEffect(() => {
-    if (!clubAccountsEnabled() || new URLSearchParams(location.search).get('sample') || new URLSearchParams(location.search).get('fulfillment')) return;
-    let member = false;
-    const refresh = () => loadMembership().then((me) => setView((was) => {
-      const now = welcomeKitView(me, kitSlug);
-      // A change after she confirmed asks her to confirm again (club_resource_save clears the approval).
-      return now === 'none' && was === 'done' ? 'done' : now;
-    }), () => undefined);
-    getSession().then((s) => {
-      if (!s) return;
-      member = true;
-      return refresh();
-    }).catch(() => undefined);
+    const q = new URLSearchParams(location.search);
+    if (!clubAccountsEnabled() || q.get('sample') || q.get('fulfillment') || q.has('thumb')) return;
     const root = document.querySelector<HTMLElement>(`.club-plan[data-kit-slug="${kitSlug}"]`);
-    const onSave = () => { if (member && root?.dataset.planSave === 'saved') refresh(); };
+    let uid: string | null = null;
+    let active = false;
+    const onSave = () => {
+      // A change after she approved it: she looks again before it goes in her kit.
+      if (active && root?.dataset.planSave === 'saved' && firstResourceReviewed(kitSlug, uid)) {
+        clearFirstResourceReviewed(kitSlug, uid);
+        setReviewed(false);
+      }
+    };
+    // The plan's own approve button, in Welcome Kit mode: her review for the kit, then back to the kit.
+    const onApproval = () => {
+      if (!active) return;
+      markFirstResourceReviewed(kitSlug, uid);
+      setReviewed(true);
+      location.assign(routes.clubWelcomeKit);
+    };
+    getSession().then(async (s) => {
+      if (!s) return;
+      uid = s.user_id;
+      const now = welcomeKitView(await loadMembership(), kitSlug);
+      setView(now);
+      setReviewed(firstResourceReviewed(kitSlug, uid));
+      active = now === 'confirm';
+      if (root) {
+        if (active) root.dataset.planWelcome = '';
+        else delete root.dataset.planWelcome;
+        root.dispatchEvent(new Event(PLAN_WELCOME));
+      }
+      if (now !== 'none') setJourney('first_resource');
+    }).catch(() => undefined);
     root?.addEventListener(PLAN_SAVE, onSave);
-    return () => root?.removeEventListener(PLAN_SAVE, onSave);
+    root?.addEventListener(PLAN_WELCOME_APPROVE, onApproval);
+    return () => {
+      root?.removeEventListener(PLAN_SAVE, onSave);
+      root?.removeEventListener(PLAN_WELCOME_APPROVE, onApproval);
+      setJourney(null);
+    };
   }, [kitSlug]);
 
   if (view === 'none') return null;
   const r = clubResourceBySlug(kitSlug);
-  const month = r ? monthName(`${r.month}-01`).split(' ')[0] : 'your first month';
-  const confirm = async () => {
-    setBusy(true);
-    setError('');
-    try {
-      await approveResource(kitSlug);
-      const me = await loadMembership();
-      const now = welcomeKitView(me, kitSlug);
-      setView(now === 'confirm' ? 'confirm' : 'done');
-      // The owner hears once the kit is submitted (both approvals in); a failure here never blocks her.
-      if (now !== 'confirm') notifyKitSubmitted().catch(() => undefined);
-    } catch {
-      setError('We couldn’t save that just now. Nothing was sent to print. Please try again.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
+  const month = r ? monthName(`${r.month}-01`).split(' ')[0] : 'First';
   return (
-    <section data-welcome-kit-confirm data-club-chrome aria-labelledby="wk-confirm-title" className="mx-auto mt-4 mb-2 max-w-5xl px-4 print:hidden sm:px-8">
-      <div className="rounded-[12px] border border-[#dde4dc] bg-[#eaf2eb] p-5 sm:p-7">
-        {view === 'print_first' && (
-          <>
-            <KitSteps steps={kitProgress('print')} />
-            <h2 id="wk-confirm-title" className="font-serif text-[1.5rem] leading-tight text-warm-ink">This comes in your Welcome Kit</h2>
-            <p className="mt-2 text-warm-soft">{month} is mailed together with your Family Vision print. Approve your print first, then come back here to confirm {month}.</p>
-            <a className="btn-primary mt-4 inline-block" href={routes.clubFamilyVision}>Approve your print</a>
-          </>
-        )}
-        {view === 'confirm' && (
-          <>
-            <KitSteps steps={kitProgress('first_resource')} />
-            <p className="label text-warm-soft">Your first family resource · {r ? monthName(`${r.month}-01`) : ''}</p>
-            {/* The plan below is the tool itself; its title is on it (the registry's title can differ, PR #268). */}
-            <h2 id="wk-confirm-title" className="mt-1 font-serif text-[1.6rem] leading-tight text-warm-ink sm:text-[1.9rem]">Your {month} plan</h2>
-            {/* On a phone the tool's own bar covers the bottom of the screen: the button comes before the details there. */}
-            <div className="flex flex-col">
-            <dl className="mt-3 grid gap-3 text-[0.95rem] max-sm:order-last sm:grid-cols-2">
-              <div><dt className="font-semibold text-warm-ink">In your Welcome Kit</dt><dd className="text-warm-soft">Your printed {month} resource and your Family Vision print, mailed together in one package.</dd></div>
-              <div><dt className="font-semibold text-warm-ink">Before you confirm</dt><dd className="text-warm-soft">Look over the plan below. It’s filled in with your family’s names; change anything that doesn’t fit. It saves as you go. The tool’s own “Approve this plan” only marks it on this device; this button is what prepares your Welcome Kit.</dd></div>
-            </dl>
-            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
-              <button type="button" className="btn-primary" disabled={busy} onClick={confirm}>{busy ? 'Saving…' : 'Looks good. Prepare my Welcome Kit'}</button>
-              <a className="underline underline-offset-4" href={routes.clubFamilyVision}>Back to my print</a>
-            </div>
-            </div>
-            {error && <p role="alert" className="mt-3 border-l-[3px] border-rose bg-rose-wash px-4 py-3 text-warm-ink">{error}</p>}
-          </>
-        )}
-        {view === 'done' && (
-          <div role="status" data-kit-submitted>
-            <KitSteps steps={kitProgress('done')} />
-            <h2 id="wk-confirm-title" className="font-serif text-[1.6rem] leading-tight text-warm-ink"><span aria-hidden="true">✓ </span>Your Welcome Kit is submitted</h2>
-            <p className="mt-2 max-w-2xl text-warm-ink">We print three things together and mail them to you in one package:</p>
-            <ul className="mt-2 list-disc pl-6 text-warm-ink">
-              <li>Your Family Vision print</li>
-              <li>Our one-page Family Meeting guide</li>
-              <li>Your {month} resource, as you approved it</li>
-            </ul>
-            <p className="mt-2 max-w-2xl text-warm-soft">We aim to print and mail it within two business days. Club Home shows when it’s on its way. From next month, your monthly resource follows the regular Club schedule.</p>
-            <a className="btn-primary mt-4 inline-block" href={routes.appClub}>Go to Club Home</a>
-          </div>
-        )}
-      </div>
-    </section>
+    <nav data-welcome-kit-confirm data-club-chrome aria-label="Welcome Kit" className="wkc print:hidden">
+      <p className="wkc-crumb"><a href={routes.clubWelcomeKit}>Welcome Kit</a> <span aria-hidden="true">/</span> <span aria-current="page">Your {month} Resource</span></p>
+      <p className="wkc-text">
+        {view === 'print_first'
+          ? <>Your {month} plan is mailed with your Family Vision Print. <a href={routes.clubFamilyVision}>Approve your print first</a>, then come back to this plan.</>
+          : reviewed
+            ? <>You approved this plan for printing. <a href={routes.clubWelcomeKit}>Back to my Welcome Kit</a></>
+            : <>Review your family’s plan. Make any changes, then approve it for printing.</>}
+      </p>
+    </nav>
   );
 }

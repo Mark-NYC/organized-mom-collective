@@ -9,7 +9,7 @@ import { editingWindow } from '../edition-status';
 import { el } from './dom';
 import { printPlan } from './proof';
 import { earlierCopyLink, PLAN_SAVE, saveText, type PlanSaveStatus } from './account';
-import { PLAN_APPROVAL, PLAN_CHANGE, type PlanResource, type PlanResourceHost } from './resource';
+import { inWelcomeKit, PLAN_APPROVAL, PLAN_CHANGE, PLAN_WELCOME, PLAN_WELCOME_APPROVE, type PlanResource, type PlanResourceHost } from './resource';
 import { approvalDay, approvalState, planNow, readApproval, writeApproval } from './status';
 
 export interface PlanScreen<S> {
@@ -74,8 +74,11 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
         for (const a of [...n.attributes]) if (/^data-(osr|plan)/.test(a.name) || ['contenteditable', 'role', 'aria-label', 'spellcheck', 'id', 'tabindex'].includes(a.name)) n.removeAttribute(a.name);
       }
       // Sheets are 816px wide (portrait) unless they say otherwise (March's landscape charts: data-plan-width).
-      const scale = box.clientWidth / (Number(src.dataset.planWidth) || 816);
+      const width = Number(src.dataset.planWidth) || 816;
+      const scale = box.clientWidth / width;
       copy.style.cssText = `--osr-scale:${scale};transform:scale(${scale})`;
+      // The full-width preview takes the sheet's own shape (Letter, portrait or landscape).
+      if (box.classList.contains('cp-thumb--hero')) box.style.height = `${Math.round((width > 900 ? 816 : 1056) * scale)}px`;
       box.replaceChildren(copy);
     });
   };
@@ -122,8 +125,10 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
     $('[data-cp-approval-text]').textContent =
       state === 'approved' ? `Approved ${approvalDay(a)} · ${root.dataset.planSource === 'account' ? 'on this device' : 'preview only'}` : state === 'changed' ? 'Changed since you approved' : 'Not approved yet';
     const primary = $<HTMLButtonElement>('[data-plan-primary]');
-    primary.textContent = copy ? 'Print this copy' : locked ? 'Print a copy' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve this plan';
-    primary.setAttribute('aria-disabled', String(!copy && !locked && state === 'approved'));
+    const welcome = inWelcomeKit(root) && !copy && !locked;
+    primary.textContent = copy ? 'Print this copy' : locked ? 'Print a copy' : welcome ? 'Approve for printing' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve this plan';
+    primary.setAttribute('aria-disabled', String(!welcome && !copy && !locked && state === 'approved'));
+    if (welcome) $('[data-cp-approval-text]').textContent = 'Approve it to add it to your Welcome Kit';
     $<HTMLButtonElement>('[data-cp-print]').hidden = copy || locked;
     $<HTMLButtonElement>('[data-cp-copy-done]').hidden = !copy;
     $('[data-cp-copy-banner]').hidden = !copy;
@@ -146,6 +151,11 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
     if (copySnapshot || readOnly()) return printPlan();
     const a = approval();
     const print = resource().fingerprint();
+    if (inWelcomeKit(root)) {
+      if (!a || a.print !== print) writeApproval(o.approvalKey, { for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
+      root.dispatchEvent(new Event(PLAN_WELCOME_APPROVE));
+      return;
+    }
     if (a && a.print === print) return;
     setApproval({ for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
     toast('Approved in this preview. Nothing is mailed yet.', () => setApproval(a));
@@ -180,6 +190,7 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
   host.addEventListener(PLAN_CHANGE, render);
   root.addEventListener(PLAN_SAVE, render);
   root.addEventListener(PLAN_APPROVAL, render);
+  root.addEventListener(PLAN_WELCOME, render);
   render();
   return api;
 }
