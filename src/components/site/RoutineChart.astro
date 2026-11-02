@@ -39,6 +39,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 ---
 
 <div class:list={['mr-container', notes && 'mr-with-notes']} data-mr-key={storageKey} data-mr-notes={notes ? '' : undefined} data-mr-handoff={handoff ? '' : undefined}>
+  <div class="mr-builder-heading"><span class="mr-builder-kicker">MAKE IT YOURS</span><h2>Build your child’s routine</h2><p>Choose a starting routine, then customize the steps and download your chart.</p></div>
   <div class="mr-types" role="group" aria-label="Routine">
     {
       Object.entries(routineTypes).map(([id, t]) => (
@@ -625,6 +626,100 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-opt[aria-pressed='true'] { border-bottom-color: var(--mr-ink); color: var(--mr-ink); font-weight: 600; }
   .mr-opt:focus-visible { outline: 2px solid var(--mr-ink); outline-offset: 3px; }
   .mr-summer-status { min-height: 1.3em; margin-top: 6px; font-size: 0.88rem; color: var(--mr-soft); }
+</style>
+
+
+<style is:global>
+  /* Match the free Chore Chart generator's warm, clean controls.
+     Keep exported sheet dimensions and all form/data hooks unchanged. */
+  .mr-container {
+    --mr-brand-ink: #545454;
+    --mr-brand-ivory: #FBF7F1;
+    --mr-brand-leaf: #D4DFC4;
+    --mr-brand-frost: #CDDDE1;
+    --mr-brand-border: #E2DDD5;
+    background: var(--mr-brand-ivory);
+    color: var(--mr-brand-ink);
+    padding: 30px max(20px, calc((100vw - 1140px)/2)) 64px;
+  }
+  .mr-builder-heading {max-width:1080px;margin:0 auto 16px}
+  .mr-builder-kicker {display:block;font:700 11px Montserrat,sans-serif;letter-spacing:.15em;color:#777;margin-bottom:8px}
+  .mr-builder-heading h2 {font:400 clamp(24px,3vw,32px)/1.2 Georgia,serif;margin:0 0 7px;color:#545454}
+  .mr-builder-heading p {font:400 14px/1.5 Montserrat,sans-serif;color:#777;margin:0}
+  .mr-container .mr-types {
+    max-width:1080px;width:100%;margin:0 auto 16px;
+    padding:16px;display:flex;flex-wrap:wrap;gap:10px;
+    background:white;border:1px solid var(--mr-brand-border);border-radius:14px;
+  }
+  .mr-container .mr-type {
+    flex:1 1 145px;min-height:64px;padding:12px 16px;
+    border:1px solid var(--mr-brand-border);border-radius:11px;
+    background:#fff;text-align:left;transition:background .15s,border-color .15s;
+  }
+  .mr-container .mr-type:hover {background:#FBF7F1;border-color:#C8C2B8}
+  .mr-container .mr-type[aria-pressed='true'] {
+    background:#D4DFC4;border:1px solid #AABF96;box-shadow:inset 0 0 0 1px #AABF96;
+  }
+  .mr-container .mr-type-label {display:block;font:700 14px/1.4 Montserrat,sans-serif;color:#545454}
+  .mr-container .mr-type-blurb {display:block;font:400 11px/1.45 Montserrat,sans-serif;color:#686868;margin-top:2px}
+  .mr-container .mr-summer,
+  .mr-container .rp,
+  .mr-container .mr-palette-picker,
+  .mr-container .mr-ideas {
+    max-width:1080px;width:100%;margin:0 auto 16px;padding:20px 24px;
+    background:white;border:1px solid var(--mr-brand-border);border-radius:14px;
+  }
+  .mr-container .mr-ideas-label,
+  .mr-container .mr-palette-picker legend {font:700 14px Montserrat,sans-serif;color:#545454}
+  .mr-container .mr-chip {
+    display:inline-flex;align-items:center;min-height:40px;
+    border:1px solid var(--mr-brand-border);border-radius:10px;
+    background:#FBF7F1;padding:8px 12px;margin:5px 6px 5px 0;
+    font:500 12px Montserrat,sans-serif;text-decoration:none;
+  }
+  .mr-container .mr-chip:hover {background:#D4DFC4;border-color:#AABF96;text-decoration:none}
+  .mr-container .mr-actions {max-width:1080px;width:100%;margin:0 auto 18px;gap:12px;flex-wrap:wrap}
+  .mr-container .mr-btn {
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:46px;padding:11px 22px;border-radius:10px;
+    border:1px solid #D5D0C8;background:#fff;
+    font:700 13px Montserrat,sans-serif;text-decoration:none;
+  }
+  .mr-container .mr-btn-primary {background:#545454;color:white;border-color:#545454}
+  .mr-container .mr-btn-primary:hover {background:#3F3F3F;color:white}
+  .mr-container .mr-btn:not(.mr-btn-primary) {padding:11px 18px;text-decoration:none}
+  .mr-container .mr-customize-link {color:#545454;font:600 13px Montserrat,sans-serif}
+  .mr-container .mr-sheet {
+    border:1px solid #E8E4DD;border-radius:12px;
+    box-shadow:0 8px 30px rgba(47,41,34,.06);
+  }
+  /* Printed illustrations must be monochrome with no category-colored discs. */
+  .mr-container .mr-icon[data-on] {background:transparent}
+  .mr-container .mr-icon img {object-fit:contain;mix-blend-mode:multiply}
+  .mr-container .mr-palette-option {border-radius:8px;padding:9px 10px}
+  .mr-container .mr-palette-option[aria-pressed='true'] {border-radius:8px;padding:9px 10px;background:#FBF7F1}
+  @media(max-width:768px) {
+    .mr-container {padding:18px 12px 40px}
+    .mr-builder-heading {padding:0 4px;margin-bottom:12px}
+    .mr-container:not(.mr-exporting) .mr-types {
+      order:1;flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;
+      gap:8px;padding:12px;border-radius:12px;
+    }
+    .mr-container:not(.mr-exporting) .mr-type {flex:0 0 130px;min-width:130px;min-height:56px;scroll-snap-align:start;padding:9px 11px}
+    .mr-container .mr-type-blurb {display:none}
+    .mr-container:not(.mr-exporting) .mr-sheet {border-radius:10px}
+    .mr-container:not(.mr-exporting) .mr-actions {gap:10px}
+    .mr-container:not(.mr-exporting) .rp,
+    .mr-container:not(.mr-exporting) .mr-ideas,
+    .mr-container:not(.mr-exporting) .mr-palette-picker,
+    .mr-container:not(.mr-exporting) .mr-summer {padding:14px;border-radius:12px}
+    .mr-container:not(.mr-exporting) .mr-customize-link {padding:8px}
+  }
+  @media print {
+    .mr-container {background:white;padding:0}
+    .mr-builder-heading {display:none}
+    .mr-container .mr-sheet {box-shadow:none;border:0;border-radius:0}
+  }
 </style>
 
 <script>
