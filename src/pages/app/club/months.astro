@@ -1,0 +1,13 @@
+---
+/** /app/club/months: Monthly Resources, every month's card; a member's own months open her family's version. */
+import Layout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import '../../../styles/club-app.css';
+import AppKitLibrary from '../../../components/AppKitLibrary';
+---
+<Layout title="Monthly Resources" description="Every month of the Organized Family Club.">
+<div class="family-brand mx-auto max-w-4xl">
+<header><p class="label text-[#71866c]">ORGANIZED FAMILY CLUB</p><h1 class="family-title mt-3">Monthly Resources</h1><p class="family-lede mt-3">One small win each month. Months marked “Yours” open your family’s own version; the others are a preview of what’s coming.</p></header>
+<section><AppKitLibrary client:only="react" view="months" /></section>
+</div>
+</Layout>

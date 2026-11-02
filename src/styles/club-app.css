@@ -1,0 +1,107 @@
+
+/* Club landing palette accents. Calendar month cards retain their own canonical colors. */
+.family-brand .ofc-club-intro{background:#eaf2eb;border:1px solid #dde4dc;border-radius:18px;padding:clamp(20px,3vw,32px)}
+.family-brand .ofc-rose-emphasis{background:linear-gradient(transparent 73%,#f3d9de 73%,#f3d9de 93%,transparent 93%);-webkit-box-decoration-break:clone;box-decoration-break:clone;padding-inline:.05em}
+@media(max-width:639px){.family-brand .ofc-club-intro{padding:20px;border-radius:14px}}
+
+.ofc-app-month-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}
+.family-brand .ofc-app-month{display:block!important;min-width:0;overflow:hidden;background:#fff;border:1px solid #dadfd7;border-radius:12px}
+.family-brand .ofc-app-month-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:148px;padding:22px 20px}
+.ofc-app-month-header-text{min-width:0;flex:1}
+.ofc-app-month-name{text-transform:uppercase;font-size:11px;font-weight:750;letter-spacing:.12em;color:#354f42;margin:0}
+.ofc-app-month-header h3{font-family:Georgia,serif;font-size:1.35rem;line-height:1.2;margin:9px 0 0;color:#303d35}
+.ofc-app-month-icon{width:92px;height:92px;display:grid;place-items:center;flex:0 0 92px;background:transparent;border:0}
+.family-brand .ofc-app-month-icon img{display:block;background:transparent;width:88px;height:88px;object-fit:contain;mix-blend-mode:multiply}
+.family-brand .ofc-app-month-detail{display:block;width:100%;padding:19px 20px 20px;min-width:0}
+.ofc-app-month-detail p{font-size:13px;line-height:1.55;color:#555f57;margin:0 0 8px}
+.ofc-app-month-detail strong{color:#315d49}
+.ofc-app-month-detail a{display:inline-block;margin-top:9px;font-size:13px;font-weight:700;color:#315d49;text-decoration:underline;text-underline-offset:3px}
+.ofc-app-month-detail a.ofc-app-month-meeting{display:block;width:max-content;min-height:44px;padding-top:12px;margin-top:0}
+@media(max-width:780px){.ofc-app-month-grid{grid-template-columns:1fr}}
+/* A member's Club: her Welcome Kit, her months marked as hers, her account. */
+.family-brand .ofc-member-kit{background:#fff;border:1px solid #dadfd7;border-radius:12px;padding:20px;margin-top:20px}
+.family-brand .ofc-member-kit ul{margin:10px 0 0;padding-left:18px;font-size:14px;line-height:1.6;color:#3d463f}
+.family-brand .ofc-member-kit .ofc-kit-status{font-size:14px;color:#555f57;margin:10px 0 0}
+.family-brand .ofc-member-cta{display:inline-flex;align-items:center;min-height:44px;margin-top:14px;padding:0 20px;border-radius:24px;background:#545454;color:#fff;font-size:13px;font-weight:700;text-decoration:none}
+.family-brand .ofc-app-month-tag{display:inline-block;margin:0 0 8px;padding:3px 9px;border-radius:999px;background:#eef3ea;color:#315d49;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.family-brand .ofc-family-people{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+.family-brand .ofc-family-people li{padding:4px 12px;border-radius:999px;background:#fff;border:1px solid #dde4dc;font-size:14px;color:#303d35}
+.family-brand .ofc-family-people li span{color:#71866c}
+.family-brand .ofc-home-link,.family-brand .ofc-member-kit .ofc-kit-status a{display:inline-block;margin-top:12px;font-size:14px;font-weight:700;color:#315d49;text-decoration:underline;text-underline-offset:3px}
+.family-brand .ofc-member-kit .ofc-kit-status a{margin-top:0}
+.family-brand #months{scroll-margin-top:24px}
+/* Club Home for a member (AppKitLibrary → ClubHome): her family in one line, then where she is and what's next. */
+.family-brand .ofc-home-family{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-bottom:14px;border-bottom:1px solid #e6e1d8}
+.family-brand .ofc-home-family-name{font-family:Georgia,serif;font-size:1.15rem;color:#303d35;margin:0}
+.family-brand .ofc-home-family .ofc-family-people{margin:0}
+.family-brand .ofc-home-family .ofc-family-people li{padding:2px 10px;font-size:13px}
+.family-brand .ofc-home-family .ofc-home-link{margin:0;font-size:13px}
+.family-brand .ofc-home-hero{margin-top:22px}
+.family-brand .ofc-home-title{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.9rem,4.4vw,2.6rem);line-height:1.12;letter-spacing:-.015em;color:#303d35;margin:8px 0 0}
+.family-brand .ofc-home-lede{margin:10px 0 0;max-width:44rem;font-size:1rem;line-height:1.6;color:#555f57}
+.family-brand .ofc-home-hero > .ofc-member-cta{margin-top:18px}
+.family-brand .ofc-home-start{margin:14px 0 0;padding-left:20px;display:grid;gap:8px;font-size:15px;line-height:1.55;color:#3d463f}
+.family-brand .ofc-home-start a,.family-brand .ofc-home-list a{color:#315d49;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.family-brand .ofc-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+.family-brand .ofc-home-grid .ofc-member-kit{margin-top:0}
+.family-brand .ofc-home-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;font-size:14px}
+@media(max-width:700px){.family-brand .ofc-home-grid{grid-template-columns:1fr}}
+.family-brand .ofc-member-account{margin-top:28px;font-size:14px;color:#555f57}
+.family-brand .ofc-member-account a{color:#315d49;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:430px){.ofc-app-month-header{min-height:124px;padding:16px 14px;gap:9px}.ofc-app-month-icon{width:72px;height:72px;flex-basis:72px}.ofc-app-month-icon img{width:70px;height:70px}.ofc-app-month-header h3{font-size:1.2rem}.ofc-app-month-detail{padding:14px}}
+
+/* ---------------------------------------------------------------- Club Home (AppKitLibrary → ClubHome) */
+.family-brand .ofc-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-top:16px}
+.family-brand .ofc-actions .ofc-member-cta{margin-top:0}
+.family-brand .ofc-actions .ofc-home-link{margin-top:0}
+/* Now: her Welcome Kit on its way, the tracker beside the package itself. */
+.family-brand .ofc-kit-band{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:center;margin-top:8px;padding:clamp(22px,3.5vw,40px);background:#f6f1e8;border-radius:16px}
+.family-brand .ofc-kit-band .ofc-home-title{margin-top:8px}
+.family-brand .ofc-tracker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:22px 0 4px;padding:0;list-style:none;font-size:12px;font-weight:600;color:#7a827b}
+.family-brand .ofc-tracker li{position:relative;display:flex;flex-direction:column;gap:7px;padding-top:0}
+.family-brand .ofc-tracker li > span:first-child{position:relative;z-index:1;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:2px solid #cfd6cb;background:#fbf7f1;font-size:11px;color:#fff}
+.family-brand .ofc-tracker li + li::before{content:'';position:absolute;top:10px;left:-100%;right:calc(100% - 4px);height:2px;background:#cfd6cb}
+.family-brand .ofc-tracker li[data-state="done"] > span:first-child{background:#71866c;border-color:#71866c}
+.family-brand .ofc-tracker li[data-state="done"]::before,.family-brand .ofc-tracker li[data-state="current"]::before{background:#71866c}
+.family-brand .ofc-tracker li[data-state="current"]{color:#303d35}
+.family-brand .ofc-tracker li[data-state="current"] > span:first-child{border-color:#71866c;box-shadow:0 0 0 4px #d4dfc4}
+.family-brand .ofc-tracker li[data-state="done"]{color:#354f42}
+.family-brand .ofc-package{position:relative;height:300px}
+.family-brand .ofc-package-sheet{position:absolute;top:18px;width:58%;box-shadow:0 10px 26px rgba(60,55,50,.16)}
+.family-brand .ofc-package-sheet .kit-preview{box-shadow:none}
+.family-brand .ofc-package-sheet[data-sheet="guide"]{left:0;transform:rotate(-7deg)}
+.family-brand .ofc-package-sheet[data-sheet="first"]{right:0;transform:rotate(6deg)}
+.family-brand .ofc-package-sheet[data-sheet="print"]{left:21%;top:8px;z-index:2}
+/* This week: one thing to do together. */
+.family-brand .ofc-this-week{margin-top:22px;padding:22px 24px;border-left:4px solid #d8b79f;background:#fff;border-radius:0 12px 12px 0}
+.family-brand .ofc-this-week-title{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.45rem,3vw,1.8rem);line-height:1.2;color:#303d35;margin:6px 0 0}
+.family-brand .ofc-this-week .ofc-home-lede{margin-top:6px}
+/* Her month, once, with a real preview. */
+.family-brand .ofc-month-feature{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;align-items:center;margin-top:22px;padding:22px;background:#fff;border:1px solid #e6e1d8;border-radius:14px}
+.family-brand .ofc-month-feature-preview{display:block;padding:12px;background:#f4f1ec;border-radius:6px}
+.family-brand .ofc-month-feature-title{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.6rem,3.4vw,2.1rem);line-height:1.15;color:#303d35;margin:6px 0 4px}
+/* Her year: one strip of months. */
+.family-brand .ofc-year{margin-top:34px}
+.family-brand .ofc-year-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.family-brand .ofc-year-head .ofc-home-link{margin-top:0}
+.family-brand .ofc-year-strip{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:10px;margin:12px 0 0;padding:0 0 10px;list-style:none;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin}
+.family-brand .ofc-year-strip li{scroll-snap-align:start;min-width:0}
+.family-brand .ofc-year-strip a{display:flex;flex-direction:column;gap:4px;height:100%;min-height:118px;padding:12px 13px;background:#fff;border:1px solid #e6e1d8;border-top:6px solid;border-radius:8px;color:#303d35;text-decoration:none}
+.family-brand .ofc-year-month{font-size:11px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:#354f42}
+.family-brand .ofc-year-title{font-family:Georgia,serif;font-size:14.5px;line-height:1.3}
+.family-brand .ofc-year-tag{margin-top:auto;align-self:flex-start;padding:2px 8px;border-radius:999px;background:#f1efec;font-size:11px;font-weight:700;color:#6b6460}
+.family-brand .ofc-year-strip [data-held] .ofc-year-tag{background:#d4dfc4;color:#354f42}
+.family-brand .ofc-year-strip [data-next] .ofc-year-tag{background:#f1d8a8;color:#5c4520}
+/* Her family and account, quietly at the end. */
+.family-brand .ofc-home-foot{margin-top:34px;padding-top:18px;border-top:1px solid #e6e1d8}
+.family-brand .ofc-home-foot .ofc-home-family{border:0;padding:0}
+.family-brand .ofc-home-foot-links{margin-top:12px;font-size:13px;color:#555f57}
+.family-brand .ofc-home-foot-links a{color:#315d49;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:760px){
+  .family-brand .ofc-kit-band{grid-template-columns:1fr;gap:8px}
+  .family-brand .ofc-package{height:180px;max-width:210px;width:100%;margin:0 auto}
+  .family-brand .ofc-tracker{font-size:10.5px}
+  .family-brand .ofc-month-feature{grid-template-columns:96px minmax(0,1fr);gap:16px;padding:14px}
+  .family-brand .ofc-month-feature-preview{padding:6px}
+  .family-brand .ofc-year-strip{grid-auto-columns:46%}
+}

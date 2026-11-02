@@ -27,7 +27,7 @@ export type ClubNavItem = 'home' | 'family' | 'months' | 'account';
 export const CLUB_NAV: { id: ClubNavItem; label: string; short: string; href: string }[] = [
   { id: 'home', label: 'Club Home', short: 'Home', href: routes.appClub },
   { id: 'family', label: 'My Family', short: 'My Family', href: routes.clubFamily },
-  { id: 'months', label: 'Monthly Resources', short: 'Resources', href: `${routes.appClub}#months` },
+  { id: 'months', label: 'Monthly Resources', short: 'Resources', href: routes.appClubMonths },
   { id: 'account', label: 'Account & Billing', short: 'Account', href: routes.clubDashboard },
 ];
 
