@@ -28,7 +28,7 @@ export function choreLineIconForText(text: string): string | null {
     [/dirty clothes.*hamper|clothes.*in (the )?hamper|put dirty clothes/, 'clothes-in-hamper'],
     [/sort.*laundry|sort clean laundry/, 'sort-laundry'],
     [/dust.*furniture|dust.*surface|dust.*bedroom/, 'dust-furniture'],
-    [/put away items in living room|tidy.*living room|living room.*tidy|living room.*reset/, 'tidy-living-room'],
+    [/tidy the house together|tidy.*house|whole.house.*tidy|family.*tidy|put away items in living room|tidy.*living room|living room.*tidy|living room.*reset/, 'tidy-living-room'],
   ];
   for (const [pattern, name] of exact) {
     if (!pattern.test(value)) continue;
