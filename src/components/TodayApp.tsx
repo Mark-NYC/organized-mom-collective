@@ -11,7 +11,7 @@ import { progressLine, weekActivity } from '../lib/progress';
 import { ProgressRing, WeekDots } from './Progress';
 import InstallInvite from './InstallInvite';
 import { currentPlatform, isStandalone, restoreHandoff, saveHandoff, shouldOfferInstall } from '../lib/install';
-import { routes } from '../routes';
+import { cleaningRoutes } from '../lib/companion';
 import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
 import { Tally, TaskList } from './TaskList';
@@ -168,7 +168,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
               {today.toLocaleDateString('en-US', { weekday: 'long' })}
             </p>
           </div>
-          <a href={routes.cleaning} className="text-link inline-flex min-h-11 shrink-0 items-center">
+          <a href={cleaningRoutes().cleaning} className="text-link inline-flex min-h-11 shrink-0 items-center">
             Back to today
           </a>
         </div>
@@ -244,10 +244,10 @@ function Today({ justStarted }: { justStarted: boolean }) {
       {plan.kind === 'weekday' && <MonthlyTeaser month={monthFocusFor(shown)} />}
 
       <nav aria-label="More" className="mt-8 border-t border-rule-strong">
-        <a href={routes.week} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
+        <a href={cleaningRoutes().week} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
           See your whole week <span aria-hidden="true">→</span>
         </a>
-        <a href={routes.reorder} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
+        <a href={cleaningRoutes().reorder} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
           Reorder your calendar <span aria-hidden="true">→</span>
         </a>
       </nav>
@@ -270,7 +270,7 @@ function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
       <h2 id="monthly-teaser-heading" className="label text-muted">
         Monthly home project
       </h2>
-      <a href={routes.monthlyFocus} className="group mt-2.5 block border-l-[3px] border-month pl-3.5">
+      <a href={cleaningRoutes().monthlyFocus} className="group mt-2.5 block border-l-[3px] border-month pl-3.5">
         <span className="month-title block text-[1.05rem] leading-none">{month.name}</span>
         <span className="project-title mt-1.5 block">{month.title}</span>
         <span className="mt-1 block text-[1rem] leading-snug text-muted">{month.description}</span>

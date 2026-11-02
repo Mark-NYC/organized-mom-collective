@@ -29,6 +29,7 @@ export default function offlinePrecache() {
           ...walk(join(root, 'icons')),
           ...walk(join(root, 'brand')),
           join(root, 'manifest.webmanifest'),
+          join(root, 'calendar.webmanifest'),
           join(root, 'favicon.ico'),
           join(root, 'favicon-32.png'),
         ].map(url);

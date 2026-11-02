@@ -8,9 +8,9 @@ import FamilySummary from '../../components/FamilySummary';
 ---
 <Layout title="Account" description="Family profile preview and app preferences.">
 <div class="family-brand mx-auto max-w-3xl">
-<header><p class="label text-[#71866c]">ACCOUNT & FAMILY</p><h1 class="family-title mt-4">The people <em>behind the plan.</em></h1><p class="family-lede mt-4">Your family, your Club account and your cleaning settings.</p></header>
+<header><p class="label text-[#71866c]">ACCOUNT & FAMILY</p><h1 class="family-title mt-4">The people <em>behind the plan.</em></h1><p class="family-lede mt-4">Your family and your Club account.</p></header>
 <FamilySummary client:only="react" />
-<section class="family-panel mt-5"><h2 class="family-panel-title">Cleaning preferences</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Cleaning progress is stored locally on this device.</p><a href="/app/settings" class="family-link mt-4">Open existing cleaning settings →</a></section>
+<section data-calendar-feature hidden class="family-panel mt-5"><h2 class="family-panel-title">Cleaning preferences</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Cleaning progress is stored locally on this device.</p><a href="/app/settings" class="family-link mt-4">Open existing cleaning settings →</a></section>
 <section class="family-panel mt-5"><h2 class="family-panel-title">Need some help?</h2><p class="mt-2 text-sm text-warm-soft">Questions about the calendar or companion? We're here.</p><a href="/support" class="family-link mt-4">Contact support →</a></section>
 </div>
 </Layout>

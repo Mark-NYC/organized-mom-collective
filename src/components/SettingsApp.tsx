@@ -5,9 +5,10 @@ import { resetAllProgress, resetDay, setOnboarded } from '../lib/storage';
 import ConfirmationDialog from './ConfirmationDialog';
 import { InstallSteps } from './InstallInvite';
 import { currentPlatform, isStandalone, saveHandoff } from '../lib/install';
-import { routes } from '../routes';
+import { cleaningRoutes } from '../lib/companion';
 
 export default function SettingsApp() {
+  const routes = cleaningRoutes();
   const [confirmAll, setConfirmAll] = useState(false);
   const [status, setStatus] = useState('');
   const [platform] = useState(currentPlatform);

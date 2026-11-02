@@ -3,7 +3,8 @@ import Layout from '../../layouts/AppLayout.astro';
 import MonthBrowser from '../../components/MonthBrowser';
 import { TimeMark, ZoneTag, shortTime } from '../../components/marks';
 import { dailyEssentials, weekend, weeklySchedule } from '../../data/cleaning';
-import { routes } from '../../routes';
+import { cleaningRoutes } from '../../lib/companion';
+const routes = cleaningRoutes(Astro.url.pathname);
 
 const week = [
   ...weeklySchedule.map((d) => ({ num: d.day as number, short: d.shortLabel, day: d.dayLabel, zone: d.zone, icon: d.icon, time: shortTime(d.minutes) })),

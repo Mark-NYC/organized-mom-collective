@@ -80,4 +80,4 @@ export const PRICES_AS_OF = 'October 2026';
  * change that. Change THIS to move calendar owners somewhere else later.
  * `source=calendar` marks the visit as coming from the physical calendar.
  */
-export const START_DESTINATION = '/app?source=calendar';
+export const START_DESTINATION = '/app/calendar?source=calendar';

@@ -2,6 +2,9 @@
 /** Companion app pages (/app/…): noindex, installable, app navigation. */
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
+import { calendarPath } from '../lib/companion';
+const calendar = calendarPath(Astro.url.pathname);
+const cleaningOnly = !calendar && /^\/app\/(cleaning|week|reorder|settings)\/?$/.test(Astro.url.pathname);
 import { SITE_NAME } from '../config';
 import { ONBOARDED_KEY } from '../lib/storage';
 
@@ -18,9 +21,9 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
 ---
 
 <BaseLayout title={fullTitle} description={description} robots="noindex">
-  <style is:global>body { background: #fffdfa; color: #4d4544; }</style>
+  <style is:global>[data-calendar-feature][hidden] { display: none !important; } body { background: #fffdfa; color: #4d4544; }</style>
   <Fragment slot="head">
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href={calendar ? "/calendar.webmanifest" : "/manifest.webmanifest"} />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
@@ -37,7 +40,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <script is:inline define:vars={{ ONBOARDED_KEY }}>
       // First visit to Today: hide app chrome until the onboarding screen renders.
       try {
-        if (/^\/app\/cleaning\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
+        if (/^\/app\/(?:cleaning|calendar)\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
           document.documentElement.classList.add('needs-onboarding');
         }
       } catch (e) {}
@@ -49,7 +52,11 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     >Skip to content</a
   >
   <Nav />
-  <main id="main" class="mx-auto max-w-5xl px-5 pt-7 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-12 sm:pb-20">
+  <script>
+    import { initCompanionAccess } from '../lib/companion-access';
+    void initCompanionAccess();
+  </script>
+  <main data-calendar-feature={cleaningOnly ? "" : undefined} hidden={cleaningOnly} id="main" class="mx-auto max-w-5xl px-5 pt-7 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-12 sm:pb-20">
     <slot />
   </main>
   <script is:inline>

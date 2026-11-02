@@ -102,7 +102,7 @@ self.addEventListener('fetch', (event) => {
             useCache().then((hit) => {
               if (settled) return;
               if (hit) return;
-              caches.match(OFFLINE_FALLBACK).then((fallback) => {
+              caches.match(url.pathname.startsWith('/app/calendar') ? '/app/calendar' : OFFLINE_FALLBACK).then((fallback) => {
                 settled = true;
                 fallback ? resolve(fallback) : reject(new Error('offline'));
               });

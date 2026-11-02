@@ -55,14 +55,14 @@ export function installGuide(platform: Platform): InstallGuide {
     case 'ios-other':
       return {
         steps: ['Tap the Share button in your browser.', 'Tap Add to Home Screen, then Add.'],
-        note: 'Don’t see it? Open organizedmomcollective.com/app in Safari and add it from there.',
+        note: 'Don’t see it? Open organizedmomcollective.com/start in Safari and add it from there.',
       };
     case 'android':
       return {
         steps: ['Tap your browser’s menu (⋮).', 'Tap Install app or Add to home screen.', 'Tap Install.'],
       };
     default:
-      return { steps: ['Open organizedmomcollective.com/app on your phone and add it to your Home Screen from there.'] };
+      return { steps: ['Open organizedmomcollective.com/start on your phone and add it to your Home Screen from there.'] };
   }
 }
 
