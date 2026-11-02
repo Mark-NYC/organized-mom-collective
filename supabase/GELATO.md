@@ -74,3 +74,32 @@ Both use the existing `GELATO_API_KEY` in Supabase Secrets, plus Supabase's stan
 The SQL migration `20261101000000_shop_gelato.sql` must be applied separately before creating any draft orders. Pasting a function does **not** deploy its migration.
 
 After the read-only lookup is deployed, call it with your existing authenticated admin's Supabase access token and inspect its product JSON for variant Product UIDs. Do not expose credentials in browser UI or GitHub. No production order is sent by this lookup.
+
+
+## Verified calendar variant (Gelato API readback, 2026-11-01)
+
+- Site product slug: `family-schedule-calendar-2027` (seeded in `20261028000000_shop_scheduler.sql`; seeded with zero stock, $30.99).
+- Gelato store ID: `fc4a8fec-06f5-4823-815f-cec8937b4df4`
+- Gelato ecommerce product ID: `a3755bc5-1a7e-4690-89df-6913d6bb6074`
+- Gelato variant ID: `69683d5c-b524-49db-b41e-ed3035c3ad2f`
+- Gelato variant title: Ledger (11x16.5″) - Vertical - Binding with wire hanger
+- **Verified Product UID**: `wall_calendar_product_pf_xl11x16-5-inch_pt_100-lb-cover-coated-silk_cl_4-4_bt_wire-with-hook-top_ct_none_prt_none_ver`
+- Variant connection status: `connected`. Product status was `created`, not published.
+
+**Not yet verified:** print-ready artwork/PDF URL, page count, physical sample, actual order cost and shipping, `shop_gelato_products` mapping in live Supabase, whether SQL migration applied, a Gelato draft order, and website product stock/availability. Do not set a guessed file URL or turn on sales just because the variant is connected. Preview S3 URLs expire and are not print files.
+
+When the correct permanent public printable PDF URL and page count are confirmed, configure the mapping with an existing shop product ID selected by slug:
+
+```sql
+insert into public.shop_gelato_products(product_id, product_uid, print_file_url, page_count, enabled)
+select id,
+  'wall_calendar_product_pf_xl11x16-5-inch_pt_100-lb-cover-coated-silk_cl_4-4_bt_wire-with-hook-top_ct_none_prt_none_ver',
+  'REPLACE_WITH_VERIFIED_HTTPS_PRINT_FILE_URL',
+  null, false
+from public.shop_products where slug = 'family-schedule-calendar-2027'
+on conflict (product_id) do update
+  set product_uid=excluded.product_uid, print_file_url=excluded.print_file_url,
+      page_count=excluded.page_count, enabled=false, updated_at=now();
+```
+
+Do not execute until a real URL is available. Set `enabled=true` only after print-file/page-count checks, and only create draft orders before final fulfillment approval.
