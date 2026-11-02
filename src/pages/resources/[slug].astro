@@ -253,6 +253,9 @@ const components = {
 </PublicLayout>
 
 <style>
+  /* Pinterest and article TOC deep links: leave headings visible beneath sticky navigation. */
+  .article-body :global(h2[id]), .article-body :global(h3[id]),
+  .article-body :global([id]), .article-shell :global([id]) { scroll-margin-top: 6rem; }
   .article-intro { max-width: 60rem; margin: 0 auto; background: #f1f2f2; }
   .article-intro-copy { padding: 28px 24px 32px; }
   .article-intro-photo { margin-top: 0; }
