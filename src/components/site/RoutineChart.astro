@@ -661,7 +661,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     max-width:1080px;width:100%;margin:0 auto 16px;padding:20px 24px;
     background:white;border:1px solid var(--mr-brand-border);border-radius:14px;
   }
-  .mr-container .mr-ideas-label,
+  .mr-container .mr-ideas-label {font:700 14px Montserrat,sans-serif;color:#545454}
   .mr-container .mr-chip {
     display:inline-flex;align-items:center;min-height:40px;
     border:1px solid var(--mr-brand-border);border-radius:10px;
@@ -759,6 +759,9 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-sheet .mr-end-label {font-family:Georgia,serif;font-size:20px;letter-spacing:0;text-transform:none;font-style:normal}
   .mr-container .mr-sheet .mr-icon {width:60px;height:60px}
   .mr-container .mr-sheet .mr-icon img {width:58px;height:58px}
+  /* Wake Up artwork has heavier strokes, so display it at 70% at both sizes. */
+  .mr-container .rp-tile[data-rp-pick='wake-up'] .rp-art img,
+  .mr-container .mr-sheet .mr-icon[data-wake-up] img {transform:scale(.7);transform-origin:center}
   /* Grocery Shopping artwork has heavier strokes than the rest of the set.
      Scale only the image, not its slot, so spacing and PNG dimensions stay intact. */
   .mr-container .rp-tile[data-rp-pick='grocery-shopping'] .rp-art img,
