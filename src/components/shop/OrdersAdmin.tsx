@@ -20,6 +20,8 @@ import {
   loadOrderEvents,
   loadShopData,
   lookupGelatoCalendar,
+  testGelatoConnection,
+  type GelatoHealthResult,
   money,
   orderLabel,
   ordersCsv,
@@ -74,6 +76,8 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
   const [notice, setNotice] = useState('');
   const [gelatoResult, setGelatoResult] = useState<unknown>(null);
   const [gelatoLoading, setGelatoLoading] = useState(false);
+  const [gelatoHealth, setGelatoHealth] = useState<GelatoHealthResult | null>(null);
+  const [gelatoHealthLoading, setGelatoHealthLoading] = useState(false);
 
   const reload = async () => {
     setLoading(true);
@@ -174,6 +178,44 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
           >
             {gelatoLoading ? 'Checking Gelato…' : 'Get Gelato Product Details'}
           </button>
+          <button
+            type="button"
+            className="btn-secondary mt-3 ml-0 sm:ml-3"
+            disabled={gelatoHealthLoading}
+            onClick={async () => {
+              setGelatoHealthLoading(true);
+              setGelatoHealth(null);
+              setNotice('');
+              try {
+                setGelatoHealth(await testGelatoConnection(auth.access_token));
+              } catch (err) {
+                if ((err as Error).message === 'expired') onSignOut();
+                else setNotice((err as Error).message);
+              } finally {
+                setGelatoHealthLoading(false);
+              }
+            }}
+          >
+            {gelatoHealthLoading ? 'Testing private PDF…' : 'Test Gelato Connection'}
+          </button>
+          {gelatoHealth && (
+            <div role="status" className="mt-4 rounded-[4px] border border-rule bg-band p-3 text-sm">
+              <p className="font-bold">{gelatoHealth.ok ? 'Private PDF connection passed' : 'Connection check needs attention'}</p>
+              {gelatoHealth.ok ? (
+                <p className="mt-1">
+                  Private bucket confirmed. Signed download works and the PDF header is valid.
+                  {' '}Calendar: {gelatoHealth.page_count} pages.
+                  {' '}Product {gelatoHealth.product_active ? 'active' : 'inactive'}, stock {gelatoHealth.stock},
+                  {' '}Gelato mapping {gelatoHealth.gelato_mapping_enabled ? 'enabled' : 'disabled'}.
+                  {' '}No order was created.
+                </p>
+              ) : (
+                <p className="mt-1">Step: {gelatoHealth.stage || 'connection'}.
+                  {' '}Issue: {gelatoHealth.error || 'unknown'}. No order was created.</p>
+              )}
+              <p className="mt-2 text-soft">This checks private file access only, not whether Gelato has ingested the artwork.</p>
+            </div>
+          )}
           {gelatoResult !== null && (
             <div className="mt-4">
               <p className="text-sm font-semibold">Gelato product response (read only)</p>
