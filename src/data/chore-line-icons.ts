@@ -1,8 +1,9 @@
-/** Hand-drawn monochrome artwork exclusively for the free chore chart. */
+/** Hand-drawn monochrome artwork shared by the chore and routine charts. */
 const svgs = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.svg', { eager: true, query: '?url', import: 'default' });
 const transparent = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.webp', { eager: true, query: '?url', import: 'default' });
 const jpgs = import.meta.glob<string>('../../assets/icons/ofc/updatedicons/svg/*.jpg', { eager: true, query: '?url', import: 'default' });
 const march = import.meta.glob<string>('../../assets/icons/ofc/march/*.webp', { eager: true, query: '?url', import: 'default' });
+const routineJpgs = import.meta.glob<string>('../../assets/icons/ofc/routines/*.jpg', { eager: true, query: '?url', import: 'default' });
 const icons: Record<string, string> = {
   'brush-my-teeth': 'toothbrush', 'get-dressed': 'shirt', 'wash-my-hands': 'washing-hands',
   'pack-my-backpack': 'backpack', 'get-ready-for-bed': 'pajamas', 'comb-my-hair': 'comb-my-hair',
@@ -12,6 +13,11 @@ const icons: Record<string, string> = {
   'wipe-the-counters': 'wipe-surface', 'take-out-the-trash': 'trash-bin',
 };
 export function choreLineIcon(id: string): string | null {
+  // Approved updated artwork for every Wash My Hands instance, including the shared picker.
+  if (id === 'wash-my-hands') {
+    const updated = routineJpgs['../../assets/icons/ofc/routines/wash-my-hands.jpg'];
+    if (updated) return updated;
+  }
   const name = icons[id];
   if (!name) return null;
   return transparent[`../../assets/icons/ofc/updatedicons/svg/${name}.webp`] ??
@@ -23,6 +29,7 @@ export function choreLineIcon(id: string): string | null {
 /** Match starter chores that are not part of the 16-card responsibility library. */
 export function choreLineIconForText(text: string): string | null {
   const value = text.toLowerCase();
+  if (/wash (my |your |the )?hands|washing hands|handwashing|hand washing/.test(value)) return choreLineIcon('wash-my-hands');
   // Specific actions must win over generic words such as "bedroom" or "clothes".
   const exact: Array<[RegExp, string]> = [
     [/dirty clothes.*hamper|clothes.*in (the )?hamper|put dirty clothes/, 'clothes-in-hamper'],
