@@ -14,6 +14,7 @@ const root = process.cwd();
 const sets = [
   ['shared', join(root, 'assets/icons/ofc/updatedicons/svg')],
   ['routine', join(root, 'assets/icons/ofc/routines')],
+  ['march', join(root, 'assets/icons/ofc/march')],
 ];
 const destination = join(root, 'assets/icons/ofc/tool-transparent');
 const extensions = ['.webp', '.svg', '.png', '.jpg', '.jpeg'];
