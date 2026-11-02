@@ -88,18 +88,12 @@ After the read-only lookup is deployed, call it with your existing authenticated
 
 **Not yet verified:** print-ready artwork/PDF URL, page count, physical sample, actual order cost and shipping, `shop_gelato_products` mapping in live Supabase, whether SQL migration applied, a Gelato draft order, and website product stock/availability. Do not set a guessed file URL or turn on sales just because the variant is connected. Preview S3 URLs expire and are not print files.
 
-When the correct permanent public printable PDF URL and page count are confirmed, configure the mapping with an existing shop product ID selected by slug:
+## Private print-file delivery (security decision, 2026-11-01)
 
-```sql
-insert into public.shop_gelato_products(product_id, product_uid, print_file_url, page_count, enabled)
-select id,
-  'wall_calendar_product_pf_xl11x16-5-inch_pt_100-lb-cover-coated-silk_cl_4-4_bt_wire-with-hook-top_ct_none_prt_none_ver',
-  'REPLACE_WITH_VERIFIED_HTTPS_PRINT_FILE_URL',
-  null, false
-from public.shop_products where slug = 'family-schedule-calendar-2027'
-on conflict (product_id) do update
-  set product_uid=excluded.product_uid, print_file_url=excluded.print_file_url,
-      page_count=excluded.page_count, enabled=false, updated_at=now();
-```
+**Never host the paid calendar PDF in public GitHub or the website's /public folder.** The previous public file was removed from main in commit 53a2933, but GitHub commit history/caches may still contain it. Contact GitHub Support or use a carefully reviewed history rewrite to address the historical blob; deleting the current file does not erase history.
 
-Do not execute until a real URL is available. Set `enabled=true` only after print-file/page-count checks, and only create draft orders before final fulfillment approval.
+Use a **private Supabase Storage bucket** (example: `gelato-print-files`) for the print-ready calendar. Restrict reads/writes to backend service-role only. Store just the bucket/object path in the product mapping, never a permanent public URL.
+
+When an authorized admin submits a draft order, the backend should create a limited-lifetime signed download URL server-side and pass it to Gelato. Confirm the expiry window is long enough for Gelato's file ingestion. Do not log or return the signed URL to frontend clients. Do not submit an order until the function is updated to support signed URLs and tested. Existing `shop-gelato-draft` is NOT compatible with private storage as written because it reads `print_file_url` directly.
+
+Keep mapping disabled and site product stock zero until private bucket upload, signed URL support, sample validation, and end-to-end tests are complete.
