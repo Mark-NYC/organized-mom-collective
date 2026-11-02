@@ -58,3 +58,19 @@ To activate:
 This endpoint does not modify products, create orders or release production. Keep it owner-only. The API key never appears in its response.
 
 Reference: https://dashboard.gelato.com/docs/ecommerce/products/get/
+
+
+## Deploy through Supabase Dashboard (no terminal)
+
+Both Gelato Edge Functions are now **self-contained** in their respective `index.ts` files. They do not import `../_shared/*`. This avoids the dashboard's "Module not found _shared/db.ts" bundling error.
+
+Open the Supabase project Dashboard → Edge Functions → each named function → Code. Replace the existing code with the **full raw index.ts** content from GitHub and deploy. Use the production branch after PR merge (or the PR branch's raw file if not yet merged).
+
+1. `shop-gelato-product`: read-only admin product lookup, no orders.
+2. `shop-gelato-draft`: authenticated manual draft order submission, never auto-triggered.
+
+Both use the existing `GELATO_API_KEY` in Supabase Secrets, plus Supabase's standard `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_ANON_KEY` variables. Disable the gateway's legacy JWT verification for these functions: they perform their own Supabase Auth admin check and enforce `shop_is_admin_user` before accessing Gelato.
+
+The SQL migration `20261101000000_shop_gelato.sql` must be applied separately before creating any draft orders. Pasting a function does **not** deploy its migration.
+
+After the read-only lookup is deployed, call it with your existing authenticated admin's Supabase access token and inspect its product JSON for variant Product UIDs. Do not expose credentials in browser UI or GitHub. No production order is sent by this lookup.
