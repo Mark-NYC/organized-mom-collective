@@ -8,6 +8,7 @@ type Pin = { id:string; created_at:string; title:string; description:string; ima
 const q = 'select=id,created_at,title,description,image_url,destination_url,board,category,keywords,status,publish_at,export_batch&order=created_at.asc,id.asc&limit=1000';
 const escapeCsv = (s: string) => '"' + s.replace(/"/g, '""') + '"';
 const isHttp = (s:string) => { try {const u=new URL(s); return u.protocol==='https:' || u.protocol==='http:';} catch {return false;} };
+const comparableUrl = (s:string) => { try { const u=new URL(s); return (u.hostname.replace(/^www\./,'')+u.pathname.replace(/\/$/,'')).toLowerCase(); } catch { return s.trim().toLowerCase(); } };
 function easternDate(d:Date){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);}
 function utcForEastern(day:string,hour:number){ // Determine correct EST/EDT offset for the selected date, including DST.
   const local = new Date(day+'T12:00:00Z');
@@ -31,7 +32,7 @@ function Queue({ctx}:{ctx:AdminContext}){
    if(!res.ok)throw new Error((await res.json().catch(()=>({message:'Database error'}))).message||'Save failed');
    return res.json();
  };
- const add=async(e:React.FormEvent)=>{e.preventDefault();if(!isHttp(image)||!isHttp(url)){setError('Image and destination must be complete http(s) URLs.');return;}setBusy(true);try{await request('POST',null,{title,image_url:image,destination_url:url,board,description,category});setTitle('');setImage('');setUrl('');setDescription('');await load();}catch(e){setError((e as Error).message)}finally{setBusy(false)}};
+ const add=async(e:React.FormEvent)=>{e.preventDefault();if(!isHttp(image)||!isHttp(url)){setError('Image and destination must be complete http(s) URLs.');return;}const duplicate=pins.find(p=>comparableUrl(p.image_url)===comparableUrl(image));if(duplicate){setError('This image is already in the queue as "'+duplicate.title+'" ('+duplicate.status+'). Use the existing record rather than creating it again.');return;}setBusy(true);try{await request('POST',null,{title,image_url:image,destination_url:url,board,description,category});setTitle('');setImage('');setUrl('');setDescription('');await load();}catch(e){setError((e as Error).message)}finally{setBusy(false)}};
  const ready=pins.filter(p=>p.status==='ready');
  const wanted=perDay*days;
  const choices=useMemo(()=>{const selected=ready.filter(p=>!exclude.includes(p.id)).slice(0,wanted);for(const p of ready){if(include.includes(p.id)&&!selected.some(x=>x.id===p.id)){if(selected.length>=wanted)selected.pop();selected.push(p)}}return selected.sort((a,b)=>a.created_at.localeCompare(b.created_at)||a.id.localeCompare(b.id));},[ready,exclude,include,wanted]);
