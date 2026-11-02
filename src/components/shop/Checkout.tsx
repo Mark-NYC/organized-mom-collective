@@ -52,7 +52,7 @@ export default function Checkout() {
         // visit continues to offer the usual catalog choices.
         const linked = c.products.find((p) => p.slug === wanted);
         const k = linked?.kind === 'digital' ? 'digital' : 'physical';
-        const one = linked ? linked.slug : '';
+        const one = wanted ?? ''; // Keep missing linked products isolated; never substitute another item.
         const list = inList(c.products, k, one);
         setKind(k);
         setSingle(one);
@@ -120,6 +120,11 @@ export default function Checkout() {
 
   if (loadError) return <Notice title="Checkout isn’t available right now" body="Please try again in a few minutes." />;
   if (!catalog) return <p className="py-10 text-center text-soft">Loading…</p>;
+
+  const requestedProduct = new URLSearchParams(location.search).get('product');
+  if (requestedProduct && !catalog.products.some((p) => p.slug === requestedProduct)) {
+    return <Notice title="This calendar isn’t available right now" body="Please check back soon or contact us for help with your order." />;
+  }
 
   const open = catalog.checkout_mode === 'live' || (catalog.checkout_mode === 'preview' && preview);
   if (!open || products.length === 0) {
