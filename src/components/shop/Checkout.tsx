@@ -29,7 +29,7 @@ export default function Checkout() {
   const [loadError, setLoadError] = useState(false);
   const [slug, setSlug] = useState('');
   const [kind, setKind] = useState<ShopProduct['kind']>('physical');
-  // A physical product that isn't a calendar (the mug) opens on its own, without the calendar choice.
+  // Linked product pages open just their selected product, without a second choice.
   const [single, setSingle] = useState('');
   const [qty, setQty] = useState(1);
   const [phase, setPhase] = useState<'choose' | 'opening' | 'paying'>('choose');
@@ -39,6 +39,8 @@ export default function Checkout() {
   const mountRef = useRef<HTMLDivElement>(null);
   // Guards a fast double tap before the button re-renders as disabled: one tap, one checkout.
   const opening = useRef(false);
+  // One automatic payment start per linked product, including React StrictMode effects.
+  const autoAttempted = useRef(false);
 
   const refresh = () =>
     loadCatalog()
@@ -46,16 +48,16 @@ export default function Checkout() {
         setCatalog(c);
         const params = new URLSearchParams(location.search);
         const wanted = params.get('product');
-        // A link to a download opens the downloads, a link to another physical item (the mug) opens
-        // just that item; anything else opens the calendars.
+        // A product-page link isolates that exact product. An unlinked checkout
+        // visit continues to offer the usual catalog choices.
         const linked = c.products.find((p) => p.slug === wanted);
         const k = linked?.kind === 'digital' ? 'digital' : 'physical';
-        const one = linked && k === 'physical' && !isCalendar(linked) ? linked.slug : '';
+        const one = linked ? linked.slug : '';
         const list = inList(c.products, k, one);
         setKind(k);
         setSingle(one);
-        const pick = list.find((p) => p.slug === wanted && p.available) ?? list.find((p) => p.available) ?? list[0];
-        setSlug((s) => (s && list.some((p) => p.slug === s && p.available) ? s : (pick?.slug ?? '')));
+        const pick = wanted && linked ? linked : list.find((p) => p.available) ?? list[0];
+        setSlug(wanted && linked ? linked.slug : (pick?.slug ?? ''));
       })
       .catch(() => setLoadError(true));
 
@@ -77,29 +79,17 @@ export default function Checkout() {
   const max = product ? Math.max(1, product.max_quantity) : 1;
   useEffect(() => setQty((q) => Math.min(q, max)), [max]);
 
-  if (loadError) return <Notice title="Checkout isn’t available right now" body="Please try again in a few minutes." />;
-  if (!catalog) return <p className="py-10 text-center text-soft">Loading…</p>;
-
-  const open = catalog.checkout_mode === 'live' || (catalog.checkout_mode === 'preview' && preview);
-  if (!open || products.length === 0) {
-    return digital || single ? (
-      <Notice title="Online checkout isn’t open yet" body="Please check back soon." />
-    ) : (
-      <Notice title="Online checkout isn’t open yet" body="For now, the calendar is available on Etsy." etsy />
-    );
-  }
-
-  const pay = async () => {
-    if (!product || opening.current) return;
+  const pay = async (selected: ShopProduct = product!, quantity = qty) => {
+    if (!selected || !selected.available || opening.current) return;
     opening.current = true;
     setError('');
     setPhase('opening');
-    const res = await startCheckout([{ slug: product.slug, quantity: qty }]).finally(() => {
+    const res = await startCheckout([{ slug: selected.slug, quantity }]).finally(() => {
       opening.current = false;
     });
     if ('error' in res) {
       setPhase('choose');
-      setError(errorText(res.error, product));
+      setError(errorText(res.error, selected));
       if (res.error === 'sold_out' || res.error === 'too_many' || res.error === 'unavailable') refresh();
       return;
     }
@@ -114,6 +104,32 @@ export default function Checkout() {
       setError('We couldn’t load the secure payment form. Check your connection and try again.');
     }
   };
+
+
+  // A product-page Buy button already identifies the product. Skip the second
+  // selection/continue screen and open Stripe's embedded payment immediately.
+  // Unlinked visits to /checkout still have the manual product picker.
+  useEffect(() => {
+    if (!catalog || !product || autoAttempted.current || !product.available || phase !== 'choose') return;
+    const requested = new URLSearchParams(location.search).get('product');
+    if (requested !== product.slug) return;
+    if (!(catalog.checkout_mode === 'live' || (catalog.checkout_mode === 'preview' && preview))) return;
+    autoAttempted.current = true;
+    void pay(product, 1);
+  }, [catalog, product?.slug, product?.available, phase, preview]);
+
+  if (loadError) return <Notice title="Checkout isn’t available right now" body="Please try again in a few minutes." />;
+  if (!catalog) return <p className="py-10 text-center text-soft">Loading…</p>;
+
+  const open = catalog.checkout_mode === 'live' || (catalog.checkout_mode === 'preview' && preview);
+  if (!open || products.length === 0) {
+    return digital || single ? (
+      <Notice title="Online checkout isn’t open yet" body="Please check back soon." />
+    ) : (
+      <Notice title="Online checkout isn’t open yet" body="For now, the calendar is available on Etsy." etsy />
+    );
+  }
+
 
   const change = () => {
     if (session.current) {
@@ -279,7 +295,7 @@ export default function Checkout() {
                       </p>
                     )}
 
-                    <button type="button" onClick={pay} disabled={phase === 'opening'} className="btn-primary mt-5 min-h-14 w-full">
+                    <button type="button" onClick={() => void pay()} disabled={phase === 'opening'} className="btn-primary mt-5 min-h-14 w-full">
                       {phase === 'opening' ? 'Opening secure checkout…' : 'Continue to payment'}
                     </button>
                     <p className="mt-3 flex items-center justify-center gap-2 text-[0.85rem] text-soft">
