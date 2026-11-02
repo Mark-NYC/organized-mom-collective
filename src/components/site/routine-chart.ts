@@ -57,6 +57,13 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const picker = host.querySelector<HTMLElement>('[data-rp]')!;
   const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
 
+  // An intentional generic line illustration for custom steps that have no matched icon.
+  // It is embedded so PNG export never depends on an unavailable external asset.
+  const fallbackStepIcon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#545454" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">' +
+    '<rect x="12" y="10" width="40" height="46" rx="6"/><path d="M24 10V7h16v3M23 25l4 4 8-9M23 42h19M23 47h15"/></svg>'
+  );
+
   /** Use the same monochrome hand-drawn icons as the Chore Chart.
    * Text fallback also illustrates custom and starter steps that lack a responsibility ID.
    * Saved icon IDs remain untouched for compatibility with existing charts.
@@ -67,7 +74,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const id = iconFields[i].value;
       const filled = !!stepFields[i].value.trim();
       slot.closest('.mr-step')?.toggleAttribute('data-mr-empty', !filled);
-      const src = filled ? (choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value)) : null;
+      const src = filled ? (choreLineIconForText(stepFields[i].value) ?? choreLineIcon(id) ?? fallbackStepIcon) : null;
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!src);
       if (src) {
