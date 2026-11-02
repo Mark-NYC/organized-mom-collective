@@ -180,7 +180,7 @@ const more = [
         <ul class="mt-8 grid gap-4 md:grid-cols-3">
           {reviews.map((r) => (
             <li class="rounded-lg bg-paper p-6">
-              <p class="text-sm tracking-[.12em] text-warm-ink" aria-label="Customer review">★★★★★</p>
+              <p class="label text-warm-soft">Customer feedback</p>
               <blockquote class="mt-4 font-serif text-[1.3rem] leading-relaxed text-warm-ink">“{r.quote}”{r.excerpt ? '…' : ''}</blockquote>
               <p class="mt-5 text-sm text-warm-soft">{r.name}</p>
             </li>
