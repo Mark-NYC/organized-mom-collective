@@ -25,7 +25,7 @@ const mustHave = {
   routine: ['shoes-and-coat-away','eat-breaktfast','eat-a-snack','homework-and-reading','free-play','bath-or-shower','lay-out-clothes','read-a-book','wake-up','grocery-shopping','screens-off','prayer-or-gratitude','practice-music','fill-water-bottle','ride-bike','quiet-time-rest','plan-the-week','wash-my-hands'],
 };
 
-async function makeTransparent(source, output) {
+async function makeTransparent(source, output, forceWhiteMatte = false) {
   // Constrain dimensions so the original line art remains crisp in the picker and PNG.
   const {data, info} = await sharp(source, {density: 144})
     .rotate()
@@ -53,7 +53,7 @@ async function makeTransparent(source, output) {
   const matte = borderPixels>0 && borderOpaqueWhite/borderPixels>0.72;
   // If the original already has genuine alpha and no white boundary, leave every
   // original pixel alone, including antialiasing and colored strokes.
-  if(matte || (minAlpha===255 && whiteOpaqueCount/total>0.16)) {
+  if(forceWhiteMatte || matte || (minAlpha===255 && whiteOpaqueCount/total>0.16)) {
     for(let i=0;i<data.length;i+=4){
       const r=data[i],g=data[i+1],b=data[i+2],oldA=data[i+3];
       // White-matte unmixing: a grey fringe becomes a partially transparent
@@ -105,7 +105,9 @@ for(const [set,dir] of sets){
     variants.sort((a,b)=>extensions.indexOf(extname(a).toLowerCase())-extensions.indexOf(extname(b).toLowerCase()));
     const source=join(dir,variants[0]);
     try {
-      const result=await makeTransparent(source,join(out,stem+'.webp'));
+      // feed-pets source contains a white interior matte despite its WebP format.
+      // Explicitly remove white pixels even when the file already has an alpha channel.
+      const result=await makeTransparent(source,join(out,stem+'.webp'),set==='march' && stem==='feed-pets');
       converted++;
       console.log('Transparent WebP '+set+'/'+stem+'.webp ('+result.width+'x'+result.height+', matte='+result.matte+')');
     }catch(e){throw new Error('Could not process '+source+': '+e.message)}
