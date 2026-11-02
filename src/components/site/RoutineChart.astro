@@ -800,6 +800,13 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   .mr-container .mr-sheet .mr-end-label {font-family:Georgia,serif;font-size:20px;letter-spacing:0;text-transform:none;font-style:normal}
   .mr-container .mr-sheet .mr-icon {width:60px;height:60px}
   .mr-container .mr-sheet .mr-icon img {width:58px;height:58px}
+  /* Grocery Shopping artwork has heavier strokes than the rest of the set.
+     Scale only the image, not its slot, so spacing and PNG dimensions stay intact. */
+  .mr-container .rp-tile[data-rp-pick='grocery-shopping'] .rp-art img,
+  .mr-container .mr-sheet .mr-icon[data-grocery-shopping] img {
+    transform: scale(.7);
+    transform-origin: center;
+  }
   /* Only meaningful activities appear on the chart. All eight editing slots remain
      in the builder and saved data, including gaps between populated steps. */
   .mr-container .mr-sheet .mr-step[data-mr-empty] {display:none!important}
