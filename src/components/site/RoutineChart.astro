@@ -749,6 +749,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
 <style is:global>
   /* Two-column builder with an actual editing workspace and live print preview. */
+  .mr-container {padding-left:24px;padding-right:24px}
   .mr-container .mr-workspace {display:grid;grid-template-columns:minmax(340px,440px) minmax(0,816px);justify-content:center;align-items:start;gap:24px;max-width:1330px;margin:0 auto}
   .mr-container .mr-controls {display:flex;flex-direction:column;min-width:0;gap:14px}
   .mr-container .mr-preview {min-width:0;display:flex;flex-direction:column;align-items:center}
@@ -812,7 +813,15 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:1}
   }
   @media(max-width:850px) {
+    .mr-container {padding-left:12px;padding-right:12px}
     .mr-container .mr-workspace {display:flex;flex-direction:column;gap:16px}
+    .mr-container:not(.mr-exporting) .mr-controls .mr-types {order:0!important}
+    .mr-container:not(.mr-exporting) .mr-controls .mr-summer {order:1!important}
+    .mr-container:not(.mr-exporting) .mr-controls .rp {order:2!important}
+    .mr-container:not(.mr-exporting) .mr-controls .mr-editor {order:3!important}
+    .mr-container:not(.mr-exporting) .mr-controls .mr-ideas {order:4!important}
+    .mr-container:not(.mr-exporting) .mr-controls .mr-palette-picker {order:5!important}
+    .mr-container:not(.mr-exporting) .mr-controls .mr-reset-area {order:6!important}
     .mr-container .mr-controls,.mr-container .mr-preview {width:100%}
     .mr-container:not(.mr-exporting) .mr-preview .mr-sheet {zoom:1;width:816px;max-width:none;transform:scale(min(1,calc((100vw - 32px)/816)));transform-origin:top left}
     /* On mobile, the preview remains editable using the chart's existing responsive rules. */
