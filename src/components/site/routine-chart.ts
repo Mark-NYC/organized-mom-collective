@@ -117,7 +117,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       slot.toggleAttribute('data-wake-up', !!src && src === routineIconById('wake-up'));
       if (src) {
         any = true;
-        if (img.getAttribute('src') !== selectedSrc) img.src = selectedSrc;
+        if (selectedSrc && img.getAttribute('src') !== selectedSrc) img.src = selectedSrc;
       } else img.removeAttribute('src');
     });
     sheet.classList.toggle('mr-has-icons', any);
