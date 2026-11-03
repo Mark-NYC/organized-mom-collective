@@ -7,6 +7,13 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { MEETING_GUIDE } from '../data/club/meeting-guide';
 const G = MEETING_GUIDE;
+// Match the exact hand-drawn illustrations used by the Club Family Meeting.
+const stepIcons = [
+  '/images/club/onboarding/family-members.webp',
+  '/images/club/onboarding/family-meeting.webp',
+  '/images/club/onboarding/shared-responsibility.webp',
+  '/images/club/onboarding/individual-ownership.webp',
+] as const;
 const prompts = [
   'Choose one thing to work on together this month. Say why it matters to your family.',
   'Ask what is going well, what is hard, and what would help. Let everyone speak, youngest first.',
@@ -33,7 +40,7 @@ const prompts = [
       <div class="fm-public-steps">
         {G.parts.map((part, i) => (
           <section class="fm-public-step">
-            <header><b class="fm-public-number">{i + 1}</b><h3>{part.title}</h3><span class="fm-public-time">{part.minutes} min</span></header>
+            <header class="fm-public-step-head"><img src={stepIcons[i]} alt="" aria-hidden="true" class="fm-public-icon" width="40" height="40" decoding="async" /><b class="fm-public-number">{i + 1}</b><h3>{part.title}</h3><span class="fm-public-time">{part.minutes} min</span></header>
             <p>{prompts[i]}</p>
             {i === 0 && <div class="fm-public-write"><span>Our focus this month</span><div class="fm-rule"></div></div>}
             {i === 1 && <div class="fm-public-write"><span>Something we heard</span><div class="fm-rule"></div></div>}
@@ -55,9 +62,9 @@ const prompts = [
 .fm-public-paper{box-sizing:border-box;max-width:816px;margin:0 auto;background:white;border:1px solid #d5c5b8;padding:44px 54px;box-shadow:0 8px 34px #54545412}
 .fm-public-brand{font-size:10px;letter-spacing:.19em;font-weight:700;color:#66755f}.fm-public-paper h2{font:400 40px/1.1 Georgia,serif;margin:10px 0 7px}.fm-public-sub{font:italic 16px/1.45 Georgia,serif;color:#727272;margin:0 0 20px}
 .fm-public-meta{display:flex;gap:22px;font-size:12px;margin-bottom:18px}.fm-public-meta>span{flex:1}.fm-line{display:inline-block;vertical-align:bottom;border-bottom:1px solid #bcbcbc;min-width:75px;flex:1}
-.fm-public-steps{border-top:2px solid #d4dfc4}.fm-public-step{padding:16px 0 14px;border-bottom:1px solid #d5c5b8;break-inside:avoid}.fm-public-step header{display:flex;gap:12px;align-items:center}.fm-public-number{background:#d4dfc4;border-radius:50%;width:28px;height:28px;flex-shrink:0;display:grid;place-items:center;font-size:13px}.fm-public-step h3{font:400 23px/1.3 Georgia,serif;margin:0;flex:1}.fm-public-time{font-size:11px;font-weight:700;background:#f1d8a8;padding:5px 10px;border-radius:99px}.fm-public-step p{font-size:12px;line-height:1.5;margin:7px 0 8px 40px}
+.fm-public-steps{border-top:2px solid #d4dfc4}.fm-public-step{padding:16px 0 14px;border-bottom:1px solid #d5c5b8;break-inside:avoid}.fm-public-step header{display:flex;gap:10px;align-items:center}.fm-public-icon{width:40px;height:40px;object-fit:contain;flex-shrink:0}.fm-public-number{background:#d4dfc4;border-radius:50%;width:28px;height:28px;flex-shrink:0;display:grid;place-items:center;font-size:13px}.fm-public-step h3{font:400 23px/1.3 Georgia,serif;margin:0;flex:1}.fm-public-time{font-size:11px;font-weight:700;background:#f1d8a8;padding:5px 10px;border-radius:99px}.fm-public-step p{font-size:12px;line-height:1.5;margin:7px 0 8px 40px}
 .fm-public-write{margin-left:40px;font-size:11px;color:#727272}.fm-rule{height:22px;border-bottom:1px solid #c8c8c8}.fm-public-two{display:flex;gap:22px;margin-top:8px}.fm-public-two span{display:flex;gap:7px;flex:1}.fm-public-bottom{font:italic 15px Georgia,serif;text-align:center;margin:20px 0 10px}.fm-public-footer{text-align:center;font-size:10px;letter-spacing:.09em;color:#727272}.fm-public-note{font-size:13px;line-height:1.7;color:#727272;max-width:700px;margin:20px auto}
-@media(max-width:650px){.fm-public-paper{padding:23px 20px}.fm-public-meta{flex-wrap:wrap}.fm-public-step p,.fm-public-write{margin-left:0}.fm-public-two{flex-wrap:wrap}.fm-public-paper h2{font-size:32px}}
+@media(max-width:650px){.fm-public-icon{width:32px;height:32px}.fm-public-paper{padding:23px 20px}.fm-public-meta{flex-wrap:wrap}.fm-public-step p,.fm-public-write{margin-left:0}.fm-public-two{flex-wrap:wrap}.fm-public-paper h2{font-size:32px}}
 @page{size:letter portrait;margin:.45in}
-@media print{body{background:white!important}.fm-public{padding:0;max-width:none}.fm-public-intro,.fm-public-note{display:none!important}.fm-public-paper{border:none;box-shadow:none;padding:0;margin:0;max-width:none;width:100%;break-inside:avoid}.fm-public-step{padding:14px 0 12px}.fm-public-step p{font-size:11px}.fm-public-write{font-size:10px}.fm-public-paper h2{font-size:36px}body > header,body > footer,body > nav, .site-header, .site-footer{display:none!important}}
+@media print{body{background:white!important}.fm-public{padding:0;max-width:none}.fm-public-intro,.fm-public-note{display:none!important}.fm-public-paper{border:none;box-shadow:none;padding:0;margin:0;max-width:none;width:100%;break-inside:avoid}.fm-public-step{padding:14px 0 12px}.fm-public-icon{width:32px;height:32px;print-color-adjust:exact;-webkit-print-color-adjust:exact}.fm-public-step p{font-size:11px}.fm-public-write{font-size:10px}.fm-public-paper h2{font-size:36px}body > header,body > footer,body > nav, .site-header, .site-footer{display:none!important}}
 </style>
