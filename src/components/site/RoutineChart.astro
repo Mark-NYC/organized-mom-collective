@@ -1312,6 +1312,32 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       width:26px!important;
     }
   }
+  /* iOS Safari renders time inputs against their top edge by default.
+     Center both the native time text and its WebKit editing wrapper. */
+  @media screen and (max-width:850px) {
+    .mr-container .mr-mobile-dialog-body .mr-editor-row > input.mr-editor-time {
+      text-align:center!important;
+      text-align-last:center!important;
+      align-content:center!important;
+      padding-top:0!important;padding-bottom:0!important;
+      line-height:normal!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-time::-webkit-date-and-time-value {
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      width:100%!important;
+      min-height:100%!important;
+      text-align:center!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-time::-webkit-datetime-edit {
+      display:inline-flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      padding:0!important;
+      min-height:100%!important;
+    }
+  }
   .mr-container.mr-exporting .mr-mobile-print-frame {
     width:816px!important;height:1056px!important;
     overflow:visible!important;
