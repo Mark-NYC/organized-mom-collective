@@ -68,9 +68,10 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   // Desktop restores those elements to their original positions.
   const mobileQuery = window.matchMedia('(max-width: 850px)');
   const mobileNodes = [
+    // The picture style choice belongs above the activity library in the picker.
+    { node: host.querySelector<HTMLElement>('.mr-icon-style')!, target: 'pick' },
     { node: picker, target: 'pick' },
     { node: host.querySelector<HTMLElement>('.mr-editor')!, target: 'edit' },
-    { node: host.querySelector<HTMLElement>('.mr-icon-style')!, target: 'edit' },
     { node: host.querySelector<HTMLElement>('.mr-ideas')!, target: 'edit' },
     { node: host.querySelector<HTMLElement>('.mr-reset-area')!, target: 'edit' },
   ].map(({ node, target }) => {
