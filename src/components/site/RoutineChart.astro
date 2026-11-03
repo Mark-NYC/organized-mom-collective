@@ -116,7 +116,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
   </div><!-- /mr-controls -->
   <div class="mr-preview">
-    <div class="mr-mobile-preview-title"><strong>Your printable routine</strong><span>Changes save automatically</span></div>
+    <div class="mr-mobile-preview-title"><strong>Your printable routine</strong><button type="button" data-mr-mobile-zoom-open>⤢ Enlarge</button></div>
     <div class="mr-preview-label"><span>LIVE PREVIEW</span><p>Tap the title, times, or steps to edit right on the chart.</p></div>
   <div class="mr-mobile-print-frame" data-mr-mobile-print-frame>
   <div class="mr-sheet" id="routine-chart">
@@ -169,6 +169,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   </div><!-- /mr-preview -->
   </div><!-- /mr-workspace -->
 
+  <dialog class="mr-mobile-zoom" data-mr-mobile-zoom aria-label="Enlarged routine chart preview">
+    <div class="mr-mobile-zoom-head"><strong>Full-size preview</strong><button type="button" data-mr-mobile-zoom-close aria-label="Close enlarged preview">✕ Close</button></div>
+    <div class="mr-mobile-zoom-scroll" data-mr-mobile-zoom-scroll></div>
+    <p>Swipe sideways to inspect your printable.</p>
+  </dialog>
   <dialog class="mr-mobile-dialog" data-mr-mobile-dialog="pick" aria-label="Choose routine activities">
     <div class="mr-mobile-dialog-head"><h2>Choose activities</h2><button type="button" data-mr-mobile-close aria-label="Close activity picker">✕</button></div>
     <div class="mr-mobile-dialog-body" data-mr-mobile-target="pick"></div>
@@ -988,6 +993,45 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-preview .mr-actions {
       position:sticky;bottom:8px;z-index:4;
       background:#FBF7F1;padding:8px 0 0;margin-top:10px!important;
+    }
+  }
+
+  .mr-mobile-zoom {display:none}
+  @media(max-width:850px) {
+    .mr-container .mr-mobile-preview-title button {
+      min-height:42px;border:1px solid #D5D0C8;border-radius:8px;
+      background:#fff;padding:8px 13px;font:600 13px Montserrat,sans-serif;color:#545454;
+    }
+    .mr-container .mr-mobile-zoom[open] {
+      display:flex;flex-direction:column;position:fixed;inset:0;margin:auto;
+      width:calc(100vw - 16px);height:calc(100dvh - 16px);
+      max-width:none;max-height:none;padding:0;
+      border:1px solid #ded8d0;border-radius:12px;
+      background:#FBF7F1;color:#545454;z-index:2200;
+    }
+    .mr-container .mr-mobile-zoom::backdrop {background:rgba(25,30,26,.7)}
+    .mr-container .mr-mobile-zoom-head {
+      display:flex;justify-content:space-between;align-items:center;
+      flex:none;padding:12px 16px;
+    }
+    .mr-container .mr-mobile-zoom-head button {
+      min-height:44px;padding:8px 12px;border:1px solid #D5D0C8;
+      background:#fff;border-radius:8px;color:#545454;
+    }
+    .mr-container .mr-mobile-zoom-scroll {
+      min-height:0;flex:1;overflow:auto;padding:0 12px 12px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .mr-container .mr-mobile-zoom-scroll .mr-mobile-print-frame {
+      width:816px!important;min-width:816px!important;max-width:none!important;
+      height:1056px!important;overflow:visible!important;
+    }
+    .mr-container .mr-mobile-zoom-scroll .mr-mobile-print-frame .mr-sheet {
+      transform:none!important;
+    }
+    .mr-container .mr-mobile-zoom p {
+      flex:none;padding:12px 16px;margin:0;
+      font:400 12px Montserrat,sans-serif;color:#777;
     }
   }
   .mr-container.mr-exporting .mr-mobile-print-frame {
