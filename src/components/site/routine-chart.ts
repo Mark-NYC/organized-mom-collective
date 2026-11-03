@@ -92,9 +92,14 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
    */
   function renderIcons() {
     let any = false;
+    let visibleStep = 0;
     iconSlots.forEach((slot, i) => {
       const id = iconFields[i].value;
       const filled = !!stepFields[i].value.trim();
+      // Display consecutive numbers even when an earlier step was cleared.
+      // DOM text is preserved reliably in printed PNG exports.
+      const number = slot.closest('.mr-step')?.querySelector<HTMLElement>('.mr-num');
+      if (number) number.textContent = String(filled ? ++visibleStep : i + 1);
       slot.closest('.mr-step')?.toggleAttribute('data-mr-empty', !filled);
       const washHands = /wash (my |your |the )?hands|washing hands|handwashing|hand washing/i.test(stepFields[i].value);
       const unpackBackpack = /unpack.*backpack|backpack.*lunch\s*box/i.test(stepFields[i].value);

@@ -785,17 +785,17 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   /* Only meaningful activities appear on the chart. All eight editing slots remain
      in the builder and saved data, including gaps between populated steps. */
   .mr-container .mr-sheet .mr-step[data-mr-empty] {display:none!important}
-  .mr-container .mr-sheet .mr-steps {counter-reset:visible-routine-step;flex:1;justify-content:center;gap:13px}
+  /* Use real DOM numbers for both screen and html-to-image exports.
+     CSS counters/pseudo elements can double-render alongside the span text in PNGs. */
+  .mr-container .mr-sheet .mr-steps {flex:1;justify-content:center;gap:13px;list-style:none!important}
+  .mr-container .mr-sheet .mr-step::marker {content:''}
   .mr-container .mr-sheet .mr-step:not([data-mr-empty]) {
-    counter-increment:visible-routine-step;
     flex:1 1 0;
     max-height:134px;
     min-height:76px;
   }
-  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) .mr-num {font-size:0}
-  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) .mr-num::after {
-    content:counter(visible-routine-step);font:400 26px Georgia,serif;
-  }
+  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) .mr-num {font:400 26px Georgia,serif}
+  .mr-container .mr-sheet .mr-step:not([data-mr-empty]) .mr-num::after {content:none!important}
   .mr-container .mr-sheet .mr-done {margin-top:20px;padding-top:22px}
   .mr-container.mr-exporting .mr-sheet .mr-done {margin-top:20px}
   .mr-container.mr-exporting .mr-sheet {
