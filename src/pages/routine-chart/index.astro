@@ -37,11 +37,12 @@ const jsonLd = [
     <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
       <p class="label text-warm-soft">Free routine charts</p>
       <h1 id="mr-h" class="serif-hero mt-3">Routines That Run Without You Repeating Yourself.</h1>
-      <p class="lede mt-4 max-w-2xl text-warm-ink">
+      <p class="lede mt-4 max-w-2xl text-warm-ink mr-hero-desktop">
         Pick a routine, tap the illustrated steps your child needs, and set the times once. Pictures mean even early readers can check
         what’s next without asking you. Change any line, then download it to print and hang where it happens. What you set stays saved in
         this browser.
       </p>
+      <p class="mr-hero-mobile">Choose a routine, make it yours, and download a picture chart your child can follow.</p>
     </div>
   </section>
 
@@ -62,3 +63,30 @@ const jsonLd = [
     </p>
   </RoutineChart>
 </PublicLayout>
+
+<style is:global>
+  .mr-hero-mobile {display:none}
+  @media screen and (max-width:850px) {
+    html,body {max-width:100%;overflow-x:clip}
+    .public-intro:has(#mr-h) {
+      width:100%;max-width:100%;overflow:hidden;
+      padding:0!important;margin:0!important;
+      background:#FBF7F1!important;
+    }
+    .public-intro:has(#mr-h)>div {
+      max-width:100%;padding:22px 20px 14px!important;
+      background:transparent!important;
+    }
+    .public-intro #mr-h {
+      font-size:clamp(30px,8.1vw,39px)!important;
+      line-height:1.08!important;max-width:600px;
+      margin:10px 0 0!important;
+      overflow-wrap:break-word;
+    }
+    .public-intro .mr-hero-desktop {display:none!important}
+    .public-intro .mr-hero-mobile {
+      display:block;margin:12px 0 0;max-width:36ch;
+      color:#706963;font:400 14px/1.55 Montserrat,sans-serif;
+    }
+  }
+</style>
