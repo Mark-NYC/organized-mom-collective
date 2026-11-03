@@ -72,17 +72,16 @@ Any one of these blocks production-ready delivery until fixed. Visual detection 
 ## Sign-off record
 
 Record each item as **pass**, **fail**, **not applicable** or **not verified**, with the exact final filename/version. Separate mechanical results, visual judgment and owner approval. An original-source hash does not certify shadows; a zero pixel difference does not certify realism; owner creative approval does not prove measured Pinterest performance.
-## Mandatory native Pinterest CSV gate (2026-10-31)
+## Mandatory native Pinterest CSV gate (updated 2026-11-02)
 
-- [ ] Each output CSV contains **at most one pin per normalized destination `Link` URL**. Split duplicate destinations across separately named CSV uploads; preserve the original links and publication dates.
-- [ ] Every input row appears in exactly one output CSV (no silent drops), with unique pin ID and image media URL; original records remain intact.
-- [ ] Media URLs, board names, date/time formatting and planned queue headroom checked before import.
-- [ ] After upload, reconcile Pinterest's confirmation/error email and visible queue against individual pin IDs. Keep unverified rows as `submitted`, not `confirmed`.
-- [ ] Retry only pins verified as rejected or missing, checking the queue first. No duplicate re-uploads.
+- [ ] Every pin has a verified canonical destination and a **unique full final Link URL** within the CSV; append `utm_source=pinterest&utm_medium=organic&utm_content=<unique-stable-pin-slug>`. Use permanent pin IDs/unique file identifiers and URL encoding; preserve meaningful pre-existing query parameters and fragments.
+- [ ] Multiple pins may target the same canonical page in one CSV when each has a unique UTM-tagged Link. Do **not** split solely because canonical destinations match.
+- [ ] Confirm the UTM-tagged links still land on the intended content. No fake destinations or meaningless randomized query variants.
+- [ ] Every intended input row appears exactly once, with stable pin ID, accessible distinct media URL and the exact planned date/time; no silent drops.
+- [ ] Check actual board names, Pinterest CSV format, image accessibility and queue headroom. Inspect image/title duplicates and creative near-duplicates separately from URL uniqueness.
+- [ ] After upload, reconcile provider confirmation/error messages and the queue against individual pin IDs. Mark rows `submitted`, not `confirmed`, until verified.
+- [ ] Retry only verified missing/rejected pins after checking the scheduled queue. If Pinterest still flags links, split the affected rows into separate numbered CSVs as a fallback; preserve dates/times and all source-row mappings. Never blindly re-upload accepted pins.
 
-**Incident evidence:** Oct 31, 2026: three `Duplicate Pin link` rejections in an eight-pin batch subsequently succeeded when isolated into a three-row CSV with unique destinations. This is an operational workaround, not an official Pinterest rule.
+**Evidence:** Oct 31: splitting a rejected subset with distinct URLs succeeded. Nov 2: owner confirmed all ten calendar pins for Nov 3 were accepted in one CSV using distinct `utm_content` tags on the same product page. This is an observed workflow success, not a universal Pinterest guarantee.
 
-
-## Required CSV split validation
-
-Follow the permanent CSV splitting rule in [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md): one pin per normalized destination URL per CSV; automatically split repeated destinations without changing original dates, times or content. Check duplicate image URLs/content hashes and normalized titles across the source batch. Record exact source-row/pin-to-output-file membership and verify each intended row appears exactly once. Flag duplicates instead of silently dropping rows. Keep originals as superseded history; import only the numbered splits after reconciling any prior successful uploads.
+Follow the current [PINTEREST_STRATEGY.md](PINTEREST_STRATEGY.md) destination rule if older batch notes conflict.
