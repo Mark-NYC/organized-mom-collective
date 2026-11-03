@@ -58,6 +58,43 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     '<rect x="12" y="10" width="40" height="46" rx="6"/><path d="M24 10V7h16v3M23 25l4 4 8-9M23 42h19M23 47h15"/></svg>'
   );
 
+  // The second style is strictly additive. The original assets and saved icon IDs
+  // remain the source of truth. Only reviewed B01 artwork is offered here.
+  // Later approved icons can be added to this map without changing stored charts.
+  const colorIconBase = '/assets/icons/ofc/v2/routines/';
+  const colorIconMatches: { slug: string; match: RegExp }[] = [
+    { slug: 'feed-pets', match: /feed (the |my |our )?(pets?|dog|cat)/i },
+    { slug: 'put-away-toys', match: /(put away|pick up|tidy).*toys?|toys?.*(away|up)/i },
+    { slug: 'unpack-backpack', match: /unpack.*backpack|backpack.*lunch\\s*box/i },
+    { slug: 'clear-dishes', match: /clear.*(dishes|table)|dishes.*(sink|away)/i },
+    { slug: 'comb-hair', match: /(comb|brush).*hair/i },
+    { slug: 'get-dressed', match: /get dressed|dress myself|put on clothes/i },
+    { slug: 'eat-breakfast', match: /eat breakfast|family breakfast|have breakfast/i },
+    { slug: 'take-out-trash', match: /(take out|empty).*trash|trash.*out/i },
+    { slug: 'set-table', match: /set (the )?table/i },
+    { slug: 'wipe-counter', match: /wipe.*(counter|worktop)|clean.*counter/i },
+  ];
+  const styleStorageKey = `${host.dataset.mrKey}:icon-style`;
+  let iconStyle: 'hand-drawn' | 'soft-color' = 'hand-drawn';
+  try { if (localStorage.getItem(styleStorageKey) === 'soft-color') iconStyle = 'soft-color'; } catch {}
+  const styleButtons = Array.from(host.querySelectorAll<HTMLButtonElement>('[data-mr-icon-style]'));
+  function updateStyleButtons() {
+    styleButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mrIconStyle === iconStyle)));
+  }
+  function colorIconFor(text: string, id: string): string | null {
+    const match = colorIconMatches.find(({ slug, match }) => slug === id || match.test(text));
+    return match ? `${colorIconBase}${match.slug}.png` : null;
+  }
+  updateStyleButtons();
+  styleButtons.forEach(b => b.addEventListener('click', () => {
+    const value = b.dataset.mrIconStyle;
+    if (value !== 'hand-drawn' && value !== 'soft-color') return;
+    iconStyle = value;
+    updateStyleButtons();
+    try { localStorage.setItem(styleStorageKey, value); } catch {}
+    renderIcons();
+  }));
+
   /** Use the same monochrome hand-drawn icons as the Chore Chart.
    * Text fallback also illustrates custom and starter steps that lack a responsibility ID.
    * Saved icon IDs remain untouched for compatibility with existing charts.
@@ -71,13 +108,16 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const washHands = /wash (my |your |the )?hands|washing hands|handwashing|hand washing/i.test(stepFields[i].value);
       const unpackBackpack = /unpack.*backpack|backpack.*lunch\s*box/i.test(stepFields[i].value);
       const src = filled ? ((washHands ? choreLineIcon('wash-my-hands') : null) ?? (unpackBackpack ? choreLineIcon('pack-my-backpack') : null) ?? routineIconForText(stepFields[i].value) ?? routineIconById(id) ?? choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value) ?? fallbackStepIcon) : null;
+      const selectedSrc = iconStyle === 'soft-color' && filled
+        ? colorIconFor(stepFields[i].value, id) ?? src
+        : src;
       const img = slot.querySelector('img')!;
-      slot.toggleAttribute('data-on', !!src);
+      slot.toggleAttribute('data-on', !!selectedSrc);
       slot.toggleAttribute('data-grocery-shopping', !!src && src === routineIconById('grocery-shopping'));
       slot.toggleAttribute('data-wake-up', !!src && src === routineIconById('wake-up'));
       if (src) {
         any = true;
-        if (img.getAttribute('src') !== src) img.src = src;
+        if (img.getAttribute('src') !== selectedSrc) img.src = selectedSrc;
       } else img.removeAttribute('src');
     });
     sheet.classList.toggle('mr-has-icons', any);
