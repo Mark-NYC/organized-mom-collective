@@ -38,11 +38,22 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const iconFields = Array.from(sheet.querySelectorAll<HTMLInputElement>('[data-mr-icon-field]'));
   const editorFields = Array.from(host.querySelectorAll<HTMLInputElement>('[data-mr-editor-step]'));
   const editorRows = Array.from(host.querySelectorAll<HTMLElement>('.mr-editor-row'));
+  const editorTimeFields = Array.from(host.querySelectorAll<HTMLInputElement>('[data-mr-editor-time]'));
+  const mobileDetailFields = Array.from(host.querySelectorAll<HTMLInputElement>('[data-mr-mobile-field]'));
   let focusedEditor: HTMLInputElement | null = null;
   function renderEditor() {
     editorFields.forEach((input, i) => {
       if (input !== focusedEditor && input.value !== stepFields[i].value) input.value = stepFields[i].value;
       editorRows[i]?.toggleAttribute('data-filled', !!stepFields[i].value.trim());
+      const sheetTime = sheet.querySelector<HTMLInputElement>(`[data-field="time-${i}"]`);
+      const editorTime = editorTimeFields[i];
+      if (editorTime && sheetTime && document.activeElement !== editorTime && editorTime.value !== sheetTime.value) {
+        editorTime.value = sheetTime.value;
+      }
+    });
+    mobileDetailFields.forEach(input => {
+      const original = sheet.querySelector<HTMLInputElement>(`[data-field="${input.dataset.mrMobileField}"]`);
+      if (original && document.activeElement !== input && input.value !== original.value) input.value = original.value;
     });
   }
   const iconSlots = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mr-icon]'));
@@ -372,6 +383,29 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       load(b.dataset.mrType!);
     });
   }
+
+  // All fields that were previously editable only on the full-size sheet
+  // remain accessible in the mobile editor now that its print preview is read-only.
+  const applyMobileField = (source: HTMLInputElement, target: HTMLInputElement) => {
+    if (target.value === source.value) return;
+    target.value = source.value;
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    target.dispatchEvent(new Event('change', { bubbles: true }));
+    action();
+    save();
+  };
+  mobileDetailFields.forEach(input => {
+    input.addEventListener('input', () => {
+      const target = field(input.dataset.mrMobileField!);
+      if (target) applyMobileField(input, target);
+    });
+  });
+  editorTimeFields.forEach((input, i) => {
+    input.addEventListener('input', () => {
+      const target = field(`time-${i}`);
+      if (target) applyMobileField(input, target);
+    });
+  });
 
   // The separate builder edits the exact same inputs that are saved and exported.
   // Keep this synced without introducing a second state or changing existing localStorage.
