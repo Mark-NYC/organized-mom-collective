@@ -1,0 +1,30 @@
+---
+/**
+ * An optional editorial illustration for a process that benefits from visual steps.
+ * Uses existing OFC artwork. Do not add one just to decorate an article.
+ */
+import wash from '../../../assets/icons/ofc/february/washing-machine.webp';
+import dry from '../../../assets/icons/ofc/february/clothes-dryer.webp';
+import fold from '../../../assets/icons/ofc/february/folded-shirt.webp';
+import putAway from '../../../assets/icons/ofc/february/putting-clothes-away.webp';
+
+const stages = [
+  { label: 'Wash', image: wash },
+  { label: 'Dry', image: dry },
+  { label: 'Fold', image: fold },
+  { label: 'Put away', image: putAway },
+];
+---
+
+<figure class="my-8 overflow-hidden rounded-xl border border-[#e8e1d7] bg-[#FBF7F1] px-4 py-6 sm:px-7 sm:py-8" aria-label="Four stages of a finished laundry load: wash, dry, fold, put away">
+  <ol class="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4 sm:gap-3">
+    {stages.map((stage, index) => (
+      <li class="relative flex min-w-0 flex-col items-center gap-2 text-center">
+        <img src={stage.image.src} width={stage.image.width} height={stage.image.height} alt="" loading="lazy" decoding="async" class="h-20 w-20 object-contain sm:h-24 sm:w-24" />
+        <span class="font-semibold text-sm tracking-wide text-[#545454]">{stage.label}</span>
+        {index < 3 && <span aria-hidden="true" class:list={['absolute text-[#89877f]', index === 1 ? 'hidden sm:block' : '', 'right-[-0.75rem] top-9 sm:right-[-0.6rem]']}>→</span>}
+      </li>
+    ))}
+  </ol>
+  <figcaption class="mt-5 border-t border-[#e8e1d7] pt-4 text-center text-sm text-[#545454]">A load is finished when the clothes are back where they belong.</figcaption>
+</figure>
