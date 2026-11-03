@@ -118,6 +118,31 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     sizePreview();
   }
 
+  // Chore Chart-style full-size inspection without modifying the live chart.
+  const zoomDialog = host.querySelector<HTMLDialogElement>('[data-mr-mobile-zoom]');
+  const zoomStage = host.querySelector<HTMLElement>('[data-mr-mobile-zoom-scroll]');
+  host.querySelector<HTMLButtonElement>('[data-mr-mobile-zoom-open]')?.addEventListener('click', () => {
+    if (!zoomDialog || !zoomStage || !printFrame) return;
+    const source = printFrame.querySelector<HTMLElement>('.mr-sheet');
+    if (!source) return;
+    const preview = printFrame.cloneNode(true) as HTMLElement;
+    preview.querySelector<HTMLElement>('#routine-chart')?.removeAttribute('id');
+    const originalInputs = Array.from(source.querySelectorAll<HTMLInputElement>('input'));
+    const copiedInputs = Array.from(preview.querySelectorAll<HTMLInputElement>('input'));
+    copiedInputs.forEach((input, i) => {
+      input.value = originalInputs[i]?.value ?? '';
+      input.readOnly = true;
+      input.tabIndex = -1;
+    });
+    zoomStage.replaceChildren(preview);
+    zoomStage.scrollTo(0, 0);
+    zoomDialog.showModal();
+  });
+  host.querySelector<HTMLButtonElement>('[data-mr-mobile-zoom-close]')?.addEventListener('click', () => {
+    zoomDialog?.close();
+  });
+  zoomDialog?.addEventListener('close', () => zoomStage?.replaceChildren());
+
   // An intentional generic line illustration for custom steps that have no matched icon.
   // It is embedded so PNG export never depends on an unavailable external asset.
   const fallbackStepIcon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
