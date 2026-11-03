@@ -48,6 +48,7 @@ export const GET: APIRoute = async ({ site }) => {
     { path: routes.decemberCountdown },
     { path: routes.mealPlanner },
     { path: routes.mentalLoad },
+    { path: routes.familyMeetingAgenda },
     // Noindex until it can be bought (buyUrl set).
     ...(weeklyReset.buyUrl ? [{ path: routes.weeklyReset }] : []),
     ...(mug.buyUrl ? [{ path: routes.mug }] : []),
