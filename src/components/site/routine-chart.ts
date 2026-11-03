@@ -70,6 +70,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const mobileNodes = [
     { node: picker, target: 'pick' },
     { node: host.querySelector<HTMLElement>('.mr-editor')!, target: 'edit' },
+    { node: host.querySelector<HTMLElement>('.mr-icon-style')!, target: 'edit' },
     { node: host.querySelector<HTMLElement>('.mr-ideas')!, target: 'edit' },
     { node: host.querySelector<HTMLElement>('.mr-reset-area')!, target: 'edit' },
   ].map(({ node, target }) => {
