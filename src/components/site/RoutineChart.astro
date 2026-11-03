@@ -90,10 +90,11 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   <section class="mr-editor" aria-label="Edit your routine steps">
     <div class="mr-editor-head"><h3>Edit your routine</h3><p>Rename, clear, or move activities here. Your preview updates as you go.</p></div>
     <div class="mr-editor-list">
-      {rows.map(([,step],i) => (
+      {rows.map(([time,step],i) => (
         <div class="mr-editor-row">
           <span class="mr-editor-num">{i+1}</span>
           <input type="text" data-mr-editor-step={i} value={step} placeholder="Add an activity" aria-label={`Edit activity ${i+1}`} />
+           <input class="mr-editor-time" type="time" data-mr-editor-time={i} value={time} aria-label={`Time for activity ${i+1}`} />
           <button type="button" class="mr-editor-remove" data-mr-editor-clear={i} aria-label={`Clear activity ${i+1}`} title="Clear activity">×</button>
           <span class="mr-editor-moves">
             <button type="button" data-mr-editor-move={i} data-mr-dir="-1" aria-label={`Move activity ${i+1} up`} disabled={i===0}>↑</button>
@@ -181,7 +182,17 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   </dialog>
   <dialog class="mr-mobile-dialog" data-mr-mobile-dialog="edit" aria-label="Edit routine">
     <div class="mr-mobile-dialog-head"><h2>Edit your routine</h2><button type="button" data-mr-mobile-close aria-label="Close routine editor">✕</button></div>
-    <div class="mr-mobile-dialog-body" data-mr-mobile-target="edit"></div>
+    <div class="mr-mobile-dialog-body">
+      <div class="mr-mobile-details">
+        <label>Chart title<input type="text" data-mr-mobile-field="title" maxlength="80" autocomplete="off" /></label>
+        <label>Subtitle<input type="text" data-mr-mobile-field="subtitle" maxlength="110" autocomplete="off" /></label>
+      </div>
+      <div data-mr-mobile-target="edit"></div>
+      <div class="mr-mobile-details">
+        <label>Finish line<input type="text" data-mr-mobile-field="end-label" maxlength="80" autocomplete="off" /></label>
+        <label>Finish time<input type="time" data-mr-mobile-field="end-time" /></label>
+      </div>
+    </div>
     <div class="mr-mobile-dialog-foot"><button type="button" data-mr-mobile-close>Save and view chart</button></div>
   </dialog>
 
@@ -749,6 +760,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 <style is:global>
   /* Two-column builder with an actual editing workspace and live print preview. */
   /* Mobile tools stay outside the printable and never affect PNG exports. */
+  .mr-editor-time {display:none}
   .mr-mobile-controls,.mr-mobile-preview-title,.mr-mobile-dialog {display:none}
   @media (max-width:850px) {
     .mr-container:not(.mr-exporting) .mr-mobile-controls {
@@ -794,6 +806,36 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container .mr-mobile-dialog-body .mr-editor,
     .mr-container .mr-mobile-dialog-body .mr-ideas {display:block!important;width:100%;margin:0 0 12px}
     .mr-container .mr-mobile-dialog-body .mr-ideas {display:flex!important}
+    .mr-container .mr-mobile-dialog-body .mr-editor-row {
+      display:grid;grid-template-columns:20px minmax(0,1fr) 110px 32px 27px;
+      gap:5px;align-items:center;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-row .mr-editor-time {
+      display:block!important;width:100%;min-width:0;height:42px;
+      padding:6px 4px;font-size:13px;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-row .mr-editor-remove {width:32px;min-height:42px}
+    .mr-container .mr-mobile-dialog-body .mr-editor-row .mr-editor-moves {width:27px}
+    .mr-container .mr-mobile-details {
+      display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px;
+    }
+    .mr-container .mr-mobile-details label {
+      display:grid;gap:6px;font:600 12px Montserrat,sans-serif;color:#545454;
+    }
+    .mr-container .mr-mobile-details input {
+      min-width:0;width:100%;height:46px;padding:9px 10px;
+      background:white;border:1px solid #D5D0C8;border-radius:8px;
+      font:500 16px Montserrat,sans-serif;color:#545454;
+    }
+    @media(max-width:410px){
+      .mr-container .mr-mobile-dialog-body .mr-editor-row {
+        grid-template-columns:16px minmax(0,1fr) 97px 27px;
+        gap:4px;
+      }
+      .mr-container .mr-mobile-dialog-body .mr-editor-row .mr-editor-moves {display:none}
+      .mr-container .mr-mobile-dialog-body .mr-editor-row .mr-editor-num {width:16px;flex-basis:16px}
+    }
+
     .mr-container .mr-mobile-dialog-body .rp-list {
       display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
       overflow:visible;gap:8px;
