@@ -1201,6 +1201,117 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       min-height:52px!important;
     }
   }
+  /* Focused phone dialogs. Only the middle body scrolls, with compact edit rows.
+     Do not apply these rules to the desktop editor or the printable sheet. */
+  @media screen and (max-width:850px) {
+    .mr-container .mr-mobile-dialog[open] {
+      box-sizing:border-box!important;
+      height:min(88dvh,760px)!important;
+      max-height:calc(100dvh - 24px)!important;
+      min-height:0!important;
+      overflow:hidden!important;
+    }
+    .mr-container .mr-mobile-dialog-head,
+    .mr-container .mr-mobile-dialog-foot {
+      flex:0 0 auto!important;
+      padding:12px 16px!important;
+    }
+    .mr-container .mr-mobile-dialog-head h2 {font-size:25px!important;line-height:1.1!important}
+    .mr-container .mr-mobile-dialog-head button {
+      width:44px!important;height:44px!important;flex:0 0 44px!important;
+      border:1px solid #d5d0c8!important;border-radius:8px!important;
+    }
+    .mr-container .mr-mobile-dialog-body {
+      display:block!important;
+      flex:1 1 auto!important;min-height:0!important;
+      overflow-y:auto!important;overflow-x:hidden!important;
+      overscroll-behavior-y:contain;
+      -webkit-overflow-scrolling:touch;
+      padding:14px 14px 22px!important;
+    }
+    .mr-container .mr-mobile-dialog-body [data-mr-mobile-target] {min-width:0;width:100%}
+    .mr-container .mr-mobile-dialog-body .mr-editor {
+      min-width:0!important;padding:14px!important;margin:0 0 16px!important;
+    }
+    /* Header is already displayed in the modal title. */
+    .mr-container .mr-mobile-dialog-body .mr-editor-head {display:none!important}
+    .mr-container .mr-mobile-dialog-body .mr-editor-list {
+      display:grid!important;gap:9px!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-row {
+      display:grid!important;
+      grid-template-columns:18px minmax(0,1fr) 106px 30px!important;
+      column-gap:7px!important;row-gap:0!important;
+      align-items:center!important;
+      width:100%!important;min-width:0!important;
+      padding:0!important;margin:0!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-num {
+      width:18px!important;min-width:0!important;flex:none!important;
+      text-align:center!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-row > input[data-mr-editor-step] {
+      box-sizing:border-box!important;display:block!important;
+      min-width:0!important;width:100%!important;max-width:100%!important;
+      height:44px!important;min-height:44px!important;
+      padding:8px 9px!important;flex:none!important;
+      border-radius:8px!important;font-size:13px!important;
+      line-height:1.25!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-row > input.mr-editor-time {
+      box-sizing:border-box!important;display:block!important;
+      min-width:0!important;width:106px!important;max-width:106px!important;
+      height:44px!important;min-height:44px!important;
+      padding:6px 5px!important;flex:none!important;
+      border-radius:8px!important;font-size:13px!important;
+      line-height:1!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-remove {
+      display:flex!important;align-items:center!important;justify-content:center!important;
+      width:30px!important;height:44px!important;min-height:44px!important;
+      padding:0!important;flex:none!important;font-size:19px!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-moves {
+      display:none!important;
+    }
+    /* Illustration style sits at the very top of Choose activities. */
+    .mr-container .mr-mobile-dialog-body .mr-icon-style {
+      display:flex!important;align-items:center!important;
+      justify-content:flex-start!important;flex-wrap:wrap!important;
+      gap:8px!important;width:100%!important;
+      padding:0 0 14px!important;margin:0 0 14px!important;
+      border-top:0!important;border-bottom:1px solid #ded8d0!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style-label {
+      flex:0 0 100%!important;margin:0!important;
+      font-size:13px!important;font-weight:700!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style button {
+      min-height:42px!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style-note {
+      flex-basis:100%!important;line-height:1.45!important;
+      margin-top:2px!important;
+    }
+    .mr-container .mr-mobile-dialog-body .rp {padding:12px!important;margin:0!important}
+    .mr-container .mr-mobile-dialog-body .rp-list {
+      display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:8px!important;overflow:visible!important;
+    }
+  }
+  @media screen and (max-width:390px) {
+    .mr-container .mr-mobile-dialog-body .mr-editor-row {
+      grid-template-columns:15px minmax(0,1fr) 96px 26px!important;
+      column-gap:4px!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-row > input.mr-editor-time {
+      width:96px!important;max-width:96px!important;
+      padding:5px 2px!important;font-size:12px!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor-remove {
+      width:26px!important;
+    }
+  }
   .mr-container.mr-exporting .mr-mobile-print-frame {
     width:816px!important;height:1056px!important;
     overflow:visible!important;
