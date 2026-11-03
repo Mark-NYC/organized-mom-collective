@@ -65,7 +65,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const colorIconMatches: { slug: string; match: RegExp }[] = [
     { slug: 'feed-pets', match: /feed (the |my |our )?(pets?|dog|cat)/i },
     { slug: 'put-away-toys', match: /(put away|pick up|tidy).*toys?|toys?.*(away|up)/i },
-    { slug: 'unpack-backpack', match: /unpack.*backpack|backpack.*lunch\\s*box/i },
+    { slug: 'unpack-backpack', match: /unpack.*backpack|backpack.*lunch\s*box/i },
     { slug: 'clear-dishes', match: /clear.*(dishes|table)|dishes.*(sink|away)/i },
     { slug: 'comb-hair', match: /(comb|brush).*hair/i },
     { slug: 'get-dressed', match: /get dressed|dress myself|put on clothes/i },
