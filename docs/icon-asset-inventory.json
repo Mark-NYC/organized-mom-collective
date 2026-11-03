@@ -1,0 +1,4024 @@
+{
+  "description": "Repository icon and illustration asset inventory. Inclusion is path-based, not a visual verification of hand-drawn style. Contains originals, exports and copies.",
+  "source_ref": "main",
+  "generated_date": "2026-11-03",
+  "total_files": 499,
+  "groups": {
+    "february": 37,
+    "july-clean": 9,
+    "march": 24,
+    "march/png": 25,
+    "month-icons": 12,
+    "monthly-kits": 22,
+    "onboarding": 15,
+    "primary": 7,
+    "routines": 21,
+    "supporting": 18,
+    "updatedicons/july": 15,
+    "updatedicons/june": 9,
+    "updatedicons/png": 59,
+    "updatedicons/png/october": 6,
+    "updatedicons/png/september": 6,
+    "updatedicons/svg": 91,
+    "utility": 12,
+    "v2/masters": 10,
+    "vision": 20,
+    "design-zone-icons": 6,
+    "published-zone-icons": 6,
+    "published-club-library": 69
+  },
+  "items": [
+    {
+      "path": "assets/icons/ofc/february/adding-detergent.png",
+      "group": "february",
+      "label": "adding detergent",
+      "format": "png",
+      "bytes": 200853,
+      "blob_sha": "049db7f7dc7728c1fb4814dce330fe20e3ebbb85"
+    },
+    {
+      "path": "assets/icons/ofc/february/adding-detergent.webp",
+      "group": "february",
+      "label": "adding detergent",
+      "format": "webp",
+      "bytes": 117672,
+      "blob_sha": "7e7bfd70da6333178d6dbd4d955895c817dbdcd4"
+    },
+    {
+      "path": "assets/icons/ofc/february/checking-care-label.png",
+      "group": "february",
+      "label": "checking care label",
+      "format": "png",
+      "bytes": 365468,
+      "blob_sha": "655384a340dd5afbfc98b40d3b2f99b892b4731b"
+    },
+    {
+      "path": "assets/icons/ofc/february/checking-care-label.webp",
+      "group": "february",
+      "label": "checking care label",
+      "format": "webp",
+      "bytes": 223872,
+      "blob_sha": "4f6f1124a34847120892739e55b9b8a49ec62f26"
+    },
+    {
+      "path": "assets/icons/ofc/february/checking-lint-trap.png",
+      "group": "february",
+      "label": "checking lint trap",
+      "format": "png",
+      "bytes": 443137,
+      "blob_sha": "356336d52ec20cb5700c33c693d83c6b4072167c"
+    },
+    {
+      "path": "assets/icons/ofc/february/checking-lint-trap.webp",
+      "group": "february",
+      "label": "checking lint trap",
+      "format": "webp",
+      "bytes": 295618,
+      "blob_sha": "46392ab9d121302c2e585a4115f994718168cbd0"
+    },
+    {
+      "path": "assets/icons/ofc/february/checking-pockets.png",
+      "group": "february",
+      "label": "checking pockets",
+      "format": "png",
+      "bytes": 263862,
+      "blob_sha": "88125766653b9d9a8eba913062845198b6771f53"
+    },
+    {
+      "path": "assets/icons/ofc/february/checking-pockets.webp",
+      "group": "february",
+      "label": "checking pockets",
+      "format": "webp",
+      "bytes": 155016,
+      "blob_sha": "d580017d2ee9b4064536f3831c6e486ef39d6826"
+    },
+    {
+      "path": "assets/icons/ofc/february/clothes-dryer.png",
+      "group": "february",
+      "label": "clothes dryer",
+      "format": "png",
+      "bytes": 256270,
+      "blob_sha": "e59cbc10468a64c33d2027c0295db479917e2689"
+    },
+    {
+      "path": "assets/icons/ofc/february/clothes-dryer.webp",
+      "group": "february",
+      "label": "clothes dryer",
+      "format": "webp",
+      "bytes": 148918,
+      "blob_sha": "bebab36c1488d53613a2b03cb0a30b46da2eb8ae"
+    },
+    {
+      "path": "assets/icons/ofc/february/clothes-hanger.png",
+      "group": "february",
+      "label": "clothes hanger",
+      "format": "png",
+      "bytes": 258127,
+      "blob_sha": "99ac97af8924b08c557e9a303fe51823e0bbf6ec"
+    },
+    {
+      "path": "assets/icons/ofc/february/clothes-hanger.webp",
+      "group": "february",
+      "label": "clothes hanger",
+      "format": "webp",
+      "bytes": 144356,
+      "blob_sha": "8dd7391b280afc22de2315649508f62ef1dab55c"
+    },
+    {
+      "path": "assets/icons/ofc/february/dirty-laundry.png",
+      "group": "february",
+      "label": "dirty laundry",
+      "format": "png",
+      "bytes": 1101244,
+      "blob_sha": "ef2dc5903b6375bdf0e44ba9aa141f4ab1594fdd"
+    },
+    {
+      "path": "assets/icons/ofc/february/dirty-laundry.webp",
+      "group": "february",
+      "label": "dirty laundry",
+      "format": "webp",
+      "bytes": 683144,
+      "blob_sha": "e4a05f929f2ba17b68520bab587d06cdf7a9ef42"
+    },
+    {
+      "path": "assets/icons/ofc/february/dresser.png",
+      "group": "february",
+      "label": "dresser",
+      "format": "png",
+      "bytes": 364564,
+      "blob_sha": "1cc43f04747c5ca32ab6eff00c192388fec3db1f"
+    },
+    {
+      "path": "assets/icons/ofc/february/dresser.webp",
+      "group": "february",
+      "label": "dresser",
+      "format": "webp",
+      "bytes": 224066,
+      "blob_sha": "75f5e78011c6f3a08f0434f2a879330dbc2b21c9"
+    },
+    {
+      "path": "assets/icons/ofc/february/folded-shirt.png",
+      "group": "february",
+      "label": "folded shirt",
+      "format": "png",
+      "bytes": 300872,
+      "blob_sha": "b7c524fb606ac9245e64399682e5d5aa7d60ef16"
+    },
+    {
+      "path": "assets/icons/ofc/february/folded-shirt.webp",
+      "group": "february",
+      "label": "folded shirt",
+      "format": "webp",
+      "bytes": 172500,
+      "blob_sha": "ef2caf356aac104ea9fa6e03c4d1097413ded95e"
+    },
+    {
+      "path": "assets/icons/ofc/february/folding-clothes.png",
+      "group": "february",
+      "label": "folding clothes",
+      "format": "png",
+      "bytes": 790713,
+      "blob_sha": "c96d5fb20a8d1283e998d631c3efef34d6dc2862"
+    },
+    {
+      "path": "assets/icons/ofc/february/folding-clothes.webp",
+      "group": "february",
+      "label": "folding clothes",
+      "format": "webp",
+      "bytes": 417020,
+      "blob_sha": "4212ba532330d3b2071709b906869e58fa6264e3"
+    },
+    {
+      "path": "assets/icons/ofc/february/laundry-basket.png",
+      "group": "february",
+      "label": "laundry basket",
+      "format": "png",
+      "bytes": 236266,
+      "blob_sha": "8f3483a2824adef65d8348f75b4697e06046fb28"
+    },
+    {
+      "path": "assets/icons/ofc/february/laundry-basket.webp",
+      "group": "february",
+      "label": "laundry basket",
+      "format": "webp",
+      "bytes": 160124,
+      "blob_sha": "fb9760f1e7d41c2f903b2fb79c33ad39d6dc079f"
+    },
+    {
+      "path": "assets/icons/ofc/february/laundry-hamper.png",
+      "group": "february",
+      "label": "laundry hamper",
+      "format": "png",
+      "bytes": 314298,
+      "blob_sha": "bc2901da524ad3a7c384d1da8133ce66a935cc49"
+    },
+    {
+      "path": "assets/icons/ofc/february/laundry-hamper.webp",
+      "group": "february",
+      "label": "laundry hamper",
+      "format": "webp",
+      "bytes": 193634,
+      "blob_sha": "202411abc5e5226fba3a741587154ae514113f66"
+    },
+    {
+      "path": "assets/icons/ofc/february/loading-washer.png",
+      "group": "february",
+      "label": "loading washer",
+      "format": "png",
+      "bytes": 372051,
+      "blob_sha": "a2ee5ab2f752ee0a610ba19ead8acfe950c2eac1"
+    },
+    {
+      "path": "assets/icons/ofc/february/loading-washer.webp",
+      "group": "february",
+      "label": "loading washer",
+      "format": "webp",
+      "bytes": 223706,
+      "blob_sha": "45e29914dd04add3a33524ce57551048d14d9807"
+    },
+    {
+      "path": "assets/icons/ofc/february/putting-clothes-away.png",
+      "group": "february",
+      "label": "putting clothes away",
+      "format": "png",
+      "bytes": 1017304,
+      "blob_sha": "32b1fa9c29ddcb5997ea1f1d903b5ba2ec11c687"
+    },
+    {
+      "path": "assets/icons/ofc/february/putting-clothes-away.webp",
+      "group": "february",
+      "label": "putting clothes away",
+      "format": "webp",
+      "bytes": 633388,
+      "blob_sha": "1413c575bb6805aaa5b0a929bed67365ddb86a71"
+    },
+    {
+      "path": "assets/icons/ofc/february/selecting-wash-cycle.png",
+      "group": "february",
+      "label": "selecting wash cycle",
+      "format": "png",
+      "bytes": 326097,
+      "blob_sha": "c6a6f17df650b55d254fe406ef4b7cae7b309755"
+    },
+    {
+      "path": "assets/icons/ofc/february/selecting-wash-cycle.webp",
+      "group": "february",
+      "label": "selecting wash cycle",
+      "format": "webp",
+      "bytes": 198984,
+      "blob_sha": "a6ceb2735d85656a6eb78d930f4fc0e75f29aa74"
+    },
+    {
+      "path": "assets/icons/ofc/february/sorting-clothes.png",
+      "group": "february",
+      "label": "sorting clothes",
+      "format": "png",
+      "bytes": 253513,
+      "blob_sha": "baeaaa5c15fb4b3e8ac8567fb011675b899ceae1"
+    },
+    {
+      "path": "assets/icons/ofc/february/sorting-clothes.webp",
+      "group": "february",
+      "label": "sorting clothes",
+      "format": "webp",
+      "bytes": 167426,
+      "blob_sha": "fed40f9f9c37a2fd8b1a74b65765194948f1132f"
+    },
+    {
+      "path": "assets/icons/ofc/february/sorting-dirty-laundry.webp",
+      "group": "february",
+      "label": "sorting dirty laundry",
+      "format": "webp",
+      "bytes": 113948,
+      "blob_sha": "3066f83de9e2916f22d40ef4ff2c81b36092a9ce"
+    },
+    {
+      "path": "assets/icons/ofc/february/transfering-clothes.png",
+      "group": "february",
+      "label": "transfering clothes",
+      "format": "png",
+      "bytes": 447015,
+      "blob_sha": "bad2711fa29615d1edee69adcbff694206493d26"
+    },
+    {
+      "path": "assets/icons/ofc/february/transfering-clothes.webp",
+      "group": "february",
+      "label": "transfering clothes",
+      "format": "webp",
+      "bytes": 306466,
+      "blob_sha": "62366c3ad12dd88a01e0829f99c6059609ee7627"
+    },
+    {
+      "path": "assets/icons/ofc/february/washing-machine.png",
+      "group": "february",
+      "label": "washing machine",
+      "format": "png",
+      "bytes": 270249,
+      "blob_sha": "f4cfbf5a4704c6eb8670cf38fd7792b1256e2480"
+    },
+    {
+      "path": "assets/icons/ofc/february/washing-machine.webp",
+      "group": "february",
+      "label": "washing machine",
+      "format": "webp",
+      "bytes": 158462,
+      "blob_sha": "2c63b2648e6545413568f7d2efe117034c73baaf"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/bike.svg",
+      "group": "july-clean",
+      "label": "bike",
+      "format": "svg",
+      "bytes": 7249,
+      "blob_sha": "20cc07bbfa059d6749f02e1f4dab96f33688b36b"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/blocks.svg",
+      "group": "july-clean",
+      "label": "blocks",
+      "format": "svg",
+      "bytes": 5525,
+      "blob_sha": "fd4515e77dc5c08cc836c01f3b13663f7c476e82"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/book.svg",
+      "group": "july-clean",
+      "label": "book",
+      "format": "svg",
+      "bytes": 7509,
+      "blob_sha": "e3a53e2cb1a8bd63722f9e2b961e7c5ab07ad0f8"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/friend-pair.svg",
+      "group": "july-clean",
+      "label": "friend pair",
+      "format": "svg",
+      "bytes": 8461,
+      "blob_sha": "1187556d7ee63647b38e76c1aa2e44c85c629d4f"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/jump-rope.svg",
+      "group": "july-clean",
+      "label": "jump rope",
+      "format": "svg",
+      "bytes": 6513,
+      "blob_sha": "eb50b728c258d14a90e301dd830b02052154ee39"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/lightbulb.svg",
+      "group": "july-clean",
+      "label": "lightbulb",
+      "format": "svg",
+      "bytes": 4733,
+      "blob_sha": "d7ec4f7b6faf8afb421651d6829a86aaebc3cbda"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/puzzle-piece.svg",
+      "group": "july-clean",
+      "label": "puzzle piece",
+      "format": "svg",
+      "bytes": 6745,
+      "blob_sha": "75acc25badd4e87cf9d250d5b727c850202cf23f"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/scissors.svg",
+      "group": "july-clean",
+      "label": "scissors",
+      "format": "svg",
+      "bytes": 7161,
+      "blob_sha": "cfc312e17ed1cde7843152e6393e5785a4506173"
+    },
+    {
+      "path": "assets/icons/ofc/july-clean/tree.svg",
+      "group": "july-clean",
+      "label": "tree",
+      "format": "svg",
+      "bytes": 5277,
+      "blob_sha": "d6ba2458b1b7753c0d089dc0d47dfc11a177adfc"
+    },
+    {
+      "path": "assets/icons/ofc/march/bathroom-trash.webp",
+      "group": "march",
+      "label": "bathroom trash",
+      "format": "webp",
+      "bytes": 128788,
+      "blob_sha": "bf98ae03a196cfcc7e72cf3e93e81fe130a18484"
+    },
+    {
+      "path": "assets/icons/ofc/march/change-sheets.webp",
+      "group": "march",
+      "label": "change sheets",
+      "format": "webp",
+      "bytes": 109994,
+      "blob_sha": "34faed270af3df3a33f9a55625853fab030e2a09"
+    },
+    {
+      "path": "assets/icons/ofc/march/clean-bathroom.webp",
+      "group": "march",
+      "label": "clean bathroom",
+      "format": "webp",
+      "bytes": 130090,
+      "blob_sha": "523545f5af2ecbe04899c37109e912a0339f8049"
+    },
+    {
+      "path": "assets/icons/ofc/march/clean-floor.webp",
+      "group": "march",
+      "label": "clean floor",
+      "format": "webp",
+      "bytes": 112708,
+      "blob_sha": "40c7fdddc3d600955b73984fd3183da807dbc9bd"
+    },
+    {
+      "path": "assets/icons/ofc/march/clean-fridge.webp",
+      "group": "march",
+      "label": "clean fridge",
+      "format": "webp",
+      "bytes": 165638,
+      "blob_sha": "38f7ad40478d9607cde764db6a54dd476d027f55"
+    },
+    {
+      "path": "assets/icons/ofc/march/clear-dishes.webp",
+      "group": "march",
+      "label": "clear dishes",
+      "format": "webp",
+      "bytes": 107676,
+      "blob_sha": "ad8ac7529a17c026532817a449713cdcd5d2039d"
+    },
+    {
+      "path": "assets/icons/ofc/march/clothes-away.webp",
+      "group": "march",
+      "label": "clothes away",
+      "format": "webp",
+      "bytes": 18940,
+      "blob_sha": "d35fc95ac32ca887f12afec8904e049324dc523a"
+    },
+    {
+      "path": "assets/icons/ofc/march/dust.webp",
+      "group": "march",
+      "label": "dust",
+      "format": "webp",
+      "bytes": 102020,
+      "blob_sha": "fb0b89deb0cc9f2aef4260671744bb2bd8e41462"
+    },
+    {
+      "path": "assets/icons/ofc/march/empty-dishwasher.webp",
+      "group": "march",
+      "label": "empty dishwasher",
+      "format": "webp",
+      "bytes": 155978,
+      "blob_sha": "2c2e63bedb7eb46bbd9a6ce92e9eb3b54caa2526"
+    },
+    {
+      "path": "assets/icons/ofc/march/feed-pets.webp",
+      "group": "march",
+      "label": "feed pets",
+      "format": "webp",
+      "bytes": 82230,
+      "blob_sha": "ae3c55e2ba2a84a38a61edd8afe049bfb0340ebc"
+    },
+    {
+      "path": "assets/icons/ofc/march/finish-missed-jobs.webp",
+      "group": "march",
+      "label": "finish missed jobs",
+      "format": "webp",
+      "bytes": 100260,
+      "blob_sha": "83aff050d13bc0cbf3526ee556b50973a0f56df8"
+    },
+    {
+      "path": "assets/icons/ofc/march/fluff-pillows.webp",
+      "group": "march",
+      "label": "fluff pillows",
+      "format": "webp",
+      "bytes": 38320,
+      "blob_sha": "0477c0c39575f1a7b86508d5a11dfeb5620f7c64"
+    },
+    {
+      "path": "assets/icons/ofc/march/home-project.webp",
+      "group": "march",
+      "label": "home project",
+      "format": "webp",
+      "bytes": 130326,
+      "blob_sha": "1351e0c28e79580d0d9794683b9c4878900fe263"
+    },
+    {
+      "path": "assets/icons/ofc/march/make-bed.webp",
+      "group": "march",
+      "label": "make bed",
+      "format": "webp",
+      "bytes": 91456,
+      "blob_sha": "3c371641a307cd480f6db66e4af3f8d478763a21"
+    },
+    {
+      "path": "assets/icons/ofc/march/make-dinner.webp",
+      "group": "march",
+      "label": "make dinner",
+      "format": "webp",
+      "bytes": 88976,
+      "blob_sha": "7e06dba48f73f962c0e334bc9a45234ed39aeb24"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/bathroom-trash.png",
+      "group": "march/png",
+      "label": "bathroom trash",
+      "format": "png",
+      "bytes": 149622,
+      "blob_sha": "ebdfeb76080c35e36cd553c979f84b3f81482f2b"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/change-sheets.png",
+      "group": "march/png",
+      "label": "change sheets",
+      "format": "png",
+      "bytes": 198782,
+      "blob_sha": "e1a00de821afdd52ef92e2929f6feef8fca4875f"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/clean-bathroom.png",
+      "group": "march/png",
+      "label": "clean bathroom",
+      "format": "png",
+      "bytes": 206581,
+      "blob_sha": "341f92cf17ae112b2daf4b4e12008764aa031671"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/clean-floor.png",
+      "group": "march/png",
+      "label": "clean floor",
+      "format": "png",
+      "bytes": 202262,
+      "blob_sha": "5af289888afeb8fdb20de16599d4646ea7410ab7"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/clean-fridge.png",
+      "group": "march/png",
+      "label": "clean fridge",
+      "format": "png",
+      "bytes": 277036,
+      "blob_sha": "4efb1b679a044e6f263b1f571b6332295835898e"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/clear dishes.png",
+      "group": "march/png",
+      "label": "clear dishes",
+      "format": "png",
+      "bytes": 205961,
+      "blob_sha": "9fa3403adeaaef2ffb27b483ce67d19740c01687"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/clothes-away.png",
+      "group": "march/png",
+      "label": "clothes away",
+      "format": "png",
+      "bytes": 270192,
+      "blob_sha": "353f99ae03004fe43f8ae155243f6ad8c5c49122"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/dust.png",
+      "group": "march/png",
+      "label": "dust",
+      "format": "png",
+      "bytes": 204319,
+      "blob_sha": "38d68d65fbee6f6456181549bb674691e6af8614"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/empty-dishwasher.png",
+      "group": "march/png",
+      "label": "empty dishwasher",
+      "format": "png",
+      "bytes": 235612,
+      "blob_sha": "cb12d76fb295739c4899ed529230f0802cf5d0e0"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/feed-pet.png",
+      "group": "march/png",
+      "label": "feed pet",
+      "format": "png",
+      "bytes": 197633,
+      "blob_sha": "c5e013a4f0397d784953086ea1237691e59032ba"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/finish-missed-jobs.png",
+      "group": "march/png",
+      "label": "finish missed jobs",
+      "format": "png",
+      "bytes": 193944,
+      "blob_sha": "232a6477d35e8c981ef7d9d03c9ef73c97ab7823"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/fluff-pillows.png",
+      "group": "march/png",
+      "label": "fluff pillows",
+      "format": "png",
+      "bytes": 216336,
+      "blob_sha": "891a22a476284ab3ea0da82bc46b4d414de132cc"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/fluff-pillows.webp",
+      "group": "march/png",
+      "label": "fluff pillows",
+      "format": "webp",
+      "bytes": 10346,
+      "blob_sha": "69708f0ef3802ed8e002356a416641169d1c2ef6"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/home-project.png",
+      "group": "march/png",
+      "label": "home project",
+      "format": "png",
+      "bytes": 233562,
+      "blob_sha": "7b0d17a94fefbbbca27c4620db17e545424aa8c2"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/make-bed.png",
+      "group": "march/png",
+      "label": "make bed",
+      "format": "png",
+      "bytes": 267168,
+      "blob_sha": "813a8ae14be3df20da42d389fed739bf257b3c13"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/make-dinner.png",
+      "group": "march/png",
+      "label": "make dinner",
+      "format": "png",
+      "bytes": 207286,
+      "blob_sha": "6a6fc487f2d44637dfc7b937ceb864fef808434e"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/shoes-away.png",
+      "group": "march/png",
+      "label": "shoes away",
+      "format": "png",
+      "bytes": 246087,
+      "blob_sha": "ea2a7519799a546876055461eb9a4f2b3d8f7001"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/sock-dusting.png",
+      "group": "march/png",
+      "label": "sock dusting",
+      "format": "png",
+      "bytes": 217530,
+      "blob_sha": "33dadcb816c445f0833d1d7c7e11b281ddb2d043"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/table-setting.png",
+      "group": "march/png",
+      "label": "table setting",
+      "format": "png",
+      "bytes": 219879,
+      "blob_sha": "529bd241c945aa18fdd71a482cb772c7fea12f36"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/take-out-trash.png",
+      "group": "march/png",
+      "label": "take out trash",
+      "format": "png",
+      "bytes": 172550,
+      "blob_sha": "1ddc90fc56fce1c144cccfa5091b299e1a477151"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/tidy-desk.png",
+      "group": "march/png",
+      "label": "tidy desk",
+      "format": "png",
+      "bytes": 262711,
+      "blob_sha": "d70dff25ecf6815be4dafa149af82c88ef2bd7eb"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/toys-away.png",
+      "group": "march/png",
+      "label": "toys away",
+      "format": "png",
+      "bytes": 237712,
+      "blob_sha": "f1a8cf4b3de60fcfed6e1a324e9ac62884f0d187"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/vacuum.png",
+      "group": "march/png",
+      "label": "vacuum",
+      "format": "png",
+      "bytes": 133906,
+      "blob_sha": "14010f830593b8e14973d7a8a22cb66e5cd1d171"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/wipe-sink.png",
+      "group": "march/png",
+      "label": "wipe sink",
+      "format": "png",
+      "bytes": 225090,
+      "blob_sha": "719a0a883ca53a9509c8674828d3c15765a91735"
+    },
+    {
+      "path": "assets/icons/ofc/march/png/wipe-surface.png",
+      "group": "march/png",
+      "label": "wipe surface",
+      "format": "png",
+      "bytes": 222158,
+      "blob_sha": "61c270cbc0b5f937932abe22488cbf54962ebbcf"
+    },
+    {
+      "path": "assets/icons/ofc/march/set-table.webp",
+      "group": "march",
+      "label": "set table",
+      "format": "webp",
+      "bytes": 112956,
+      "blob_sha": "5c23579ab86a29092689cf50bec11a36b1660458"
+    },
+    {
+      "path": "assets/icons/ofc/march/shoes-away.webp",
+      "group": "march",
+      "label": "shoes away",
+      "format": "webp",
+      "bytes": 165772,
+      "blob_sha": "ee29a4f38db42abdaab9848d55bbd4b0ccdef419"
+    },
+    {
+      "path": "assets/icons/ofc/march/sock-dusting.webp",
+      "group": "march",
+      "label": "sock dusting",
+      "format": "webp",
+      "bytes": 70164,
+      "blob_sha": "36e5f65d3306201f26601d29a1cafe61f048832a"
+    },
+    {
+      "path": "assets/icons/ofc/march/take-out-trash.webp",
+      "group": "march",
+      "label": "take out trash",
+      "format": "webp",
+      "bytes": 113400,
+      "blob_sha": "624276947d9e56d85cdd9ca494088969bcc73677"
+    },
+    {
+      "path": "assets/icons/ofc/march/tidy-desk.webp",
+      "group": "march",
+      "label": "tidy desk",
+      "format": "webp",
+      "bytes": 99476,
+      "blob_sha": "eb4f2838d9582bff69634910ffad6a190ba6be2c"
+    },
+    {
+      "path": "assets/icons/ofc/march/toys-away.webp",
+      "group": "march",
+      "label": "toys away",
+      "format": "webp",
+      "bytes": 135082,
+      "blob_sha": "84f1ca91da0dc93ab05c93b9624e8a55bea0c60c"
+    },
+    {
+      "path": "assets/icons/ofc/march/vacuum.webp",
+      "group": "march",
+      "label": "vacuum",
+      "format": "webp",
+      "bytes": 77598,
+      "blob_sha": "fc8052e6afce9fec585f56cecb42dd15a37e9241"
+    },
+    {
+      "path": "assets/icons/ofc/march/wipe-sink.webp",
+      "group": "march",
+      "label": "wipe sink",
+      "format": "webp",
+      "bytes": 110226,
+      "blob_sha": "a572539ed2a20c52f5c214109f06b3e7555b9b73"
+    },
+    {
+      "path": "assets/icons/ofc/march/wipe-surface.webp",
+      "group": "march",
+      "label": "wipe surface",
+      "format": "webp",
+      "bytes": 72622,
+      "blob_sha": "cefa253140e6bf3ab3ff69139150518c5e71b5a4"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/April-OFC-icon.png",
+      "group": "month-icons",
+      "label": "April OFC icon",
+      "format": "png",
+      "bytes": 152878,
+      "blob_sha": "b11d724b40c501d57aa1ef84f924fe049adbe00e"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/August-OFC-icon.png",
+      "group": "month-icons",
+      "label": "August OFC icon",
+      "format": "png",
+      "bytes": 234101,
+      "blob_sha": "e941b9ee30be4f3a8353473c2b69cd26e7a979d4"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/December-OFC-icon.png",
+      "group": "month-icons",
+      "label": "December OFC icon",
+      "format": "png",
+      "bytes": 336480,
+      "blob_sha": "baad00fc13f13cba358ca00e8dc7dffb5eb29b23"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/February-OFC-icon.png",
+      "group": "month-icons",
+      "label": "February OFC icon",
+      "format": "png",
+      "bytes": 146506,
+      "blob_sha": "1f9ad61f292c6255a10463d20de6193e78470cd3"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/January-OFC-icon.png",
+      "group": "month-icons",
+      "label": "January OFC icon",
+      "format": "png",
+      "bytes": 146963,
+      "blob_sha": "034ccbf7a73865a591e027a65cc6cfc565e32330"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/July-OFC-icon.png",
+      "group": "month-icons",
+      "label": "July OFC icon",
+      "format": "png",
+      "bytes": 219177,
+      "blob_sha": "b862980a21c642987064ed382c84fb89f0b2520c"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/June-OFC-icon.png",
+      "group": "month-icons",
+      "label": "June OFC icon",
+      "format": "png",
+      "bytes": 261790,
+      "blob_sha": "18233d79dbaa7002fe46eacece33518921e6da16"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/March-OFC-icon.png",
+      "group": "month-icons",
+      "label": "March OFC icon",
+      "format": "png",
+      "bytes": 168607,
+      "blob_sha": "ea767fde80176a7a27e481c0363903df7019199c"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/May-OFC-icon.png",
+      "group": "month-icons",
+      "label": "May OFC icon",
+      "format": "png",
+      "bytes": 225288,
+      "blob_sha": "c457a9663b27eca83cb322fddcc8946018489724"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/November-OFC-icon.png",
+      "group": "month-icons",
+      "label": "November OFC icon",
+      "format": "png",
+      "bytes": 270380,
+      "blob_sha": "20ba29117da9d48dfc0e9b0864658e6c0a25e031"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/October-OFC-icon.png",
+      "group": "month-icons",
+      "label": "October OFC icon",
+      "format": "png",
+      "bytes": 89055,
+      "blob_sha": "9e44031c628a883b6a5a5fbfda748f0685af1e9a"
+    },
+    {
+      "path": "assets/icons/ofc/month-icons/September-OFC-icon.png",
+      "group": "month-icons",
+      "label": "September OFC icon",
+      "format": "png",
+      "bytes": 101010,
+      "blob_sha": "a3535efa0704c848a04d3278583d83dee3ec133a"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/April.png",
+      "group": "monthly-kits",
+      "label": "April",
+      "format": "png",
+      "bytes": 334750,
+      "blob_sha": "592d4d6920c1c9fc24bc8f0af43b1a3524e20fe7"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/April.webp",
+      "group": "monthly-kits",
+      "label": "April",
+      "format": "webp",
+      "bytes": 80966,
+      "blob_sha": "31c9296fbb44593efd8c5eded931473dbed3fb75"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/December.png",
+      "group": "monthly-kits",
+      "label": "December",
+      "format": "png",
+      "bytes": 391867,
+      "blob_sha": "0074ad2fcec234fdaaa21fd444df5a6031336316"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/December.webp",
+      "group": "monthly-kits",
+      "label": "December",
+      "format": "webp",
+      "bytes": 56992,
+      "blob_sha": "f8a8ed0fd504227fac9d240bf14fcaceb2478bc4"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/February.png",
+      "group": "monthly-kits",
+      "label": "February",
+      "format": "png",
+      "bytes": 332793,
+      "blob_sha": "694878ee21c588625056fb438c46eb5ff9e26d05"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/February.webp",
+      "group": "monthly-kits",
+      "label": "February",
+      "format": "webp",
+      "bytes": 73142,
+      "blob_sha": "170ddf4c8a31dd051eeb9988f9836215590444dd"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/January.png",
+      "group": "monthly-kits",
+      "label": "January",
+      "format": "png",
+      "bytes": 276261,
+      "blob_sha": "24d386c5567095831d678800e89621183912a92f"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/January.webp",
+      "group": "monthly-kits",
+      "label": "January",
+      "format": "webp",
+      "bytes": 61456,
+      "blob_sha": "da45ad5103a04e96713caf909afb62640a6595c3"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/July (2).png",
+      "group": "monthly-kits",
+      "label": "July (2)",
+      "format": "png",
+      "bytes": 154432,
+      "blob_sha": "fcc2ce7545f8af3bf5c5633cab7aae17fbd22aea"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/July (2).webp",
+      "group": "monthly-kits",
+      "label": "July (2)",
+      "format": "webp",
+      "bytes": 39030,
+      "blob_sha": "77554de56d68057397f80f3376f2882468def5e1"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/July.png",
+      "group": "monthly-kits",
+      "label": "July",
+      "format": "png",
+      "bytes": 178633,
+      "blob_sha": "e3aa4a954508c2f69df0c741424496b949598d33"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/July.webp",
+      "group": "monthly-kits",
+      "label": "July",
+      "format": "webp",
+      "bytes": 42482,
+      "blob_sha": "c286047bee4fa52ed4eee45c7a2d0def053a06d4"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/June.png",
+      "group": "monthly-kits",
+      "label": "June",
+      "format": "png",
+      "bytes": 166280,
+      "blob_sha": "9cb16f1f26367927822d2c6a98eaf7a8e97791e2"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/June.webp",
+      "group": "monthly-kits",
+      "label": "June",
+      "format": "webp",
+      "bytes": 41508,
+      "blob_sha": "68c98973fde72fa22f015db2b8ea5b1d551fe9b9"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/March.png",
+      "group": "monthly-kits",
+      "label": "March",
+      "format": "png",
+      "bytes": 173934,
+      "blob_sha": "a7a0568af6e68ed306cc012f97f9458510e0af57"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/March.webp",
+      "group": "monthly-kits",
+      "label": "March",
+      "format": "webp",
+      "bytes": 44894,
+      "blob_sha": "2265f60df0ad3cd681847922601c14aa457de0c9"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/May.png",
+      "group": "monthly-kits",
+      "label": "May",
+      "format": "png",
+      "bytes": 257239,
+      "blob_sha": "40390ddfb6e2b74cd40cdf03e273f285affb5be6"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/May.webp",
+      "group": "monthly-kits",
+      "label": "May",
+      "format": "webp",
+      "bytes": 42840,
+      "blob_sha": "336d71e7d3c2de929c2a46c132d51b26f21663a4"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/October.png",
+      "group": "monthly-kits",
+      "label": "October",
+      "format": "png",
+      "bytes": 290691,
+      "blob_sha": "a601806ade0659186d7d070433af4afba452f7b4"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/October.webp",
+      "group": "monthly-kits",
+      "label": "October",
+      "format": "webp",
+      "bytes": 67350,
+      "blob_sha": "57a0095de8d46c58ca05bf32adf6ed7fbe5cb67a"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/September.png",
+      "group": "monthly-kits",
+      "label": "September",
+      "format": "png",
+      "bytes": 259852,
+      "blob_sha": "8715c3c07728b45f875cdc6565a796df5052411f"
+    },
+    {
+      "path": "assets/icons/ofc/monthly-kits/September.webp",
+      "group": "monthly-kits",
+      "label": "September",
+      "format": "webp",
+      "bytes": 65196,
+      "blob_sha": "f742913c8e803063b2d1dfadec11694dc0c22389"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/6bd114ad-6e0e-4c02-a94c-69f0ab26fc42.png",
+      "group": "onboarding",
+      "label": "6bd114ad 6e0e 4c02 a94c 69f0ab26fc42",
+      "format": "png",
+      "bytes": 1376935,
+      "blob_sha": "d860d3db66d7d78deff9b3a83b430774fae801fb"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/appointments.jpg",
+      "group": "onboarding",
+      "label": "appointments",
+      "format": "jpg",
+      "bytes": 58231,
+      "blob_sha": "891464c6924cd59976b9752f9fc4c2379ed236b2"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/community.jpg",
+      "group": "onboarding",
+      "label": "community",
+      "format": "jpg",
+      "bytes": 53895,
+      "blob_sha": "0bdaaeac14472ff1cf5a3ce3b20113ff38a9c422"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/d3394dbd-762f-4a1c-9d11-86d12d4e884b.png",
+      "group": "onboarding",
+      "label": "d3394dbd 762f 4a1c 9d11 86d12d4e884b",
+      "format": "png",
+      "bytes": 1369073,
+      "blob_sha": "88fb115a9977422dc2a3bea305914aa11f438042"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/family-meeting.jpg",
+      "group": "onboarding",
+      "label": "family meeting",
+      "format": "jpg",
+      "bytes": 86468,
+      "blob_sha": "ea2443db6847d8048b8db2ea1fef5d551dc267ea"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/family-members.jpg",
+      "group": "onboarding",
+      "label": "family members",
+      "format": "jpg",
+      "bytes": 68867,
+      "blob_sha": "0b18123d9dfaa24093341af6ba17d29edbb4bbd6"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/fbd04e52-e390-4a48-8c5a-1ad0d9c97b8a.png",
+      "group": "onboarding",
+      "label": "fbd04e52 e390 4a48 8c5a 1ad0d9c97b8a",
+      "format": "png",
+      "bytes": 1534960,
+      "blob_sha": "0e291270bd451975a94da31e6505f556c914632a"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/homework.jpg",
+      "group": "onboarding",
+      "label": "homework",
+      "format": "jpg",
+      "bytes": 62895,
+      "blob_sha": "374ed921f26b06803c157fd5aaa3564175fded45"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/individual-ownership.jpg",
+      "group": "onboarding",
+      "label": "individual ownership",
+      "format": "jpg",
+      "bytes": 52977,
+      "blob_sha": "1a3066e9a4622631d26da60b711f5858c3b080f1"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/music-lessons.jpg",
+      "group": "onboarding",
+      "label": "music lessons",
+      "format": "jpg",
+      "bytes": 50291,
+      "blob_sha": "13946a3c2e3728bd303646e10527aff8721c46b3"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/pet-care.jpg",
+      "group": "onboarding",
+      "label": "pet care",
+      "format": "jpg",
+      "bytes": 53641,
+      "blob_sha": "c7b26841c7b019d4d88391103626df53c342b573"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/school.jpg",
+      "group": "onboarding",
+      "label": "school",
+      "format": "jpg",
+      "bytes": 57305,
+      "blob_sha": "f925c641b1a376e5ad92e14a1909c3ce6eaf188f"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/shared-responsibility.jpg",
+      "group": "onboarding",
+      "label": "shared responsibility",
+      "format": "jpg",
+      "bytes": 44891,
+      "blob_sha": "4d773868b7d2a76f0439b0e03e054a4d86eee6fb"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/sports.jpg",
+      "group": "onboarding",
+      "label": "sports",
+      "format": "jpg",
+      "bytes": 52422,
+      "blob_sha": "5c4efd7a140dc3e1aeaeb16f628f0fc16ef9e978"
+    },
+    {
+      "path": "assets/icons/ofc/onboarding/work-schedule.jpg",
+      "group": "onboarding",
+      "label": "work schedule",
+      "format": "jpg",
+      "bytes": 46474,
+      "blob_sha": "eeb71c5fd5f44cfc1b66894fe9e930b96d8285c4"
+    },
+    {
+      "path": "assets/icons/ofc/primary/create-explore.png",
+      "group": "primary",
+      "label": "create explore",
+      "format": "png",
+      "bytes": 8052,
+      "blob_sha": "e7c45da3f0c3df0ba6c2003b258d89862447da65"
+    },
+    {
+      "path": "assets/icons/ofc/primary/evening-reset.png",
+      "group": "primary",
+      "label": "evening reset",
+      "format": "png",
+      "bytes": 5242,
+      "blob_sha": "4b7b2dd1fa8b4164b4caa611bca3c6b491857db3"
+    },
+    {
+      "path": "assets/icons/ofc/primary/free-afternoon.png",
+      "group": "primary",
+      "label": "free afternoon",
+      "format": "png",
+      "bytes": 7201,
+      "blob_sha": "9c96342b78fff836b375f4727349d2b1f901b9ec"
+    },
+    {
+      "path": "assets/icons/ofc/primary/lunch-reset.png",
+      "group": "primary",
+      "label": "lunch reset",
+      "format": "png",
+      "bytes": 8631,
+      "blob_sha": "6c2cbed86b99b99568ec0b9134242b3e477cdd2d"
+    },
+    {
+      "path": "assets/icons/ofc/primary/morning-start.png",
+      "group": "primary",
+      "label": "morning start",
+      "format": "png",
+      "bytes": 4669,
+      "blob_sha": "0d95470d4732ef697f441bf6a30eabb90222b7ed"
+    },
+    {
+      "path": "assets/icons/ofc/primary/move-play.png",
+      "group": "primary",
+      "label": "move play",
+      "format": "png",
+      "bytes": 6339,
+      "blob_sha": "b0a84b0a1eceb15fdb71995e7373d628ddab20da"
+    },
+    {
+      "path": "assets/icons/ofc/primary/quiet-time.png",
+      "group": "primary",
+      "label": "quiet time",
+      "format": "png",
+      "bytes": 7206,
+      "blob_sha": "913eb8e224f3234a2ade52e71e81b50cc68e917b"
+    },
+    {
+      "path": "assets/icons/ofc/routines/96d3a653-b8cb-438a-91c6-d0ac3e740161.png",
+      "group": "routines",
+      "label": "96d3a653 b8cb 438a 91c6 d0ac3e740161",
+      "format": "png",
+      "bytes": 1437502,
+      "blob_sha": "1b8212c2103fa8d40b63056586bea3da54c39a5d"
+    },
+    {
+      "path": "assets/icons/ofc/routines/bath-or-shower.jpg",
+      "group": "routines",
+      "label": "bath or shower",
+      "format": "jpg",
+      "bytes": 56908,
+      "blob_sha": "a632e62951a82c3d3ae268a9b0ed399d4e669078"
+    },
+    {
+      "path": "assets/icons/ofc/routines/c92e1627-3fe0-46d9-9e1d-5cecad75e5b6.png",
+      "group": "routines",
+      "label": "c92e1627 3fe0 46d9 9e1d 5cecad75e5b6",
+      "format": "png",
+      "bytes": 1327589,
+      "blob_sha": "8b6b9e8dd72bd41dc3f14055cf5019d482e272ec"
+    },
+    {
+      "path": "assets/icons/ofc/routines/eat-a-snack.jpg",
+      "group": "routines",
+      "label": "eat a snack",
+      "format": "jpg",
+      "bytes": 42882,
+      "blob_sha": "2225d2712a8b28e26f1e75ed5935592f1fb3d45c"
+    },
+    {
+      "path": "assets/icons/ofc/routines/eat-breaktfast.jpg",
+      "group": "routines",
+      "label": "eat breaktfast",
+      "format": "jpg",
+      "bytes": 66343,
+      "blob_sha": "2717419467ceb99aba57dd0cb25494d03a05a71b"
+    },
+    {
+      "path": "assets/icons/ofc/routines/ed6697a6-8502-4113-ad3d-4b1cb2733b41.png",
+      "group": "routines",
+      "label": "ed6697a6 8502 4113 ad3d 4b1cb2733b41",
+      "format": "png",
+      "bytes": 1292371,
+      "blob_sha": "bdf2e80391a0bec2269317a567a195d465840d47"
+    },
+    {
+      "path": "assets/icons/ofc/routines/fill-water-bottle.jpg",
+      "group": "routines",
+      "label": "fill water bottle",
+      "format": "jpg",
+      "bytes": 32610,
+      "blob_sha": "4b2ebc62074296eb7affdaaa1f6597f4aa50114f"
+    },
+    {
+      "path": "assets/icons/ofc/routines/free-play.jpg",
+      "group": "routines",
+      "label": "free play",
+      "format": "jpg",
+      "bytes": 54994,
+      "blob_sha": "eee2218b1072824db75a9bdededaa6b0199e2975"
+    },
+    {
+      "path": "assets/icons/ofc/routines/grocery-shopping.jpg",
+      "group": "routines",
+      "label": "grocery shopping",
+      "format": "jpg",
+      "bytes": 41436,
+      "blob_sha": "06d486b071f19136672a42c5603d6629bae5d3fa"
+    },
+    {
+      "path": "assets/icons/ofc/routines/homework-and-reading.jpg",
+      "group": "routines",
+      "label": "homework and reading",
+      "format": "jpg",
+      "bytes": 67862,
+      "blob_sha": "fc403c78e572550c0bf4b1c8e16257725efd0d53"
+    },
+    {
+      "path": "assets/icons/ofc/routines/lay-out-clothes.jpg",
+      "group": "routines",
+      "label": "lay out clothes",
+      "format": "jpg",
+      "bytes": 66569,
+      "blob_sha": "87922d186a001511d142e9cd05147e1c1b913769"
+    },
+    {
+      "path": "assets/icons/ofc/routines/plan-the-week.png",
+      "group": "routines",
+      "label": "plan the week",
+      "format": "png",
+      "bytes": 1299583,
+      "blob_sha": "c4af716c04794a7a318c9d807a13f971c1fc94a4"
+    },
+    {
+      "path": "assets/icons/ofc/routines/practice-music.jpg",
+      "group": "routines",
+      "label": "practice music",
+      "format": "jpg",
+      "bytes": 53225,
+      "blob_sha": "591c3cd26bed6eb4407f66560d2c99e4354bba49"
+    },
+    {
+      "path": "assets/icons/ofc/routines/prayer-or-gratitude.jpg",
+      "group": "routines",
+      "label": "prayer or gratitude",
+      "format": "jpg",
+      "bytes": 40280,
+      "blob_sha": "928c5cdd82df7061becbb2b0a9884137e9bb5d15"
+    },
+    {
+      "path": "assets/icons/ofc/routines/quiet-time-rest.jpg",
+      "group": "routines",
+      "label": "quiet time rest",
+      "format": "jpg",
+      "bytes": 41453,
+      "blob_sha": "4aef0c2363b99ee4ae4d42733b54d3e6517808df"
+    },
+    {
+      "path": "assets/icons/ofc/routines/read-a-book.jpg",
+      "group": "routines",
+      "label": "read a book",
+      "format": "jpg",
+      "bytes": 58764,
+      "blob_sha": "3c9d46f67e2656c38fee394371600aa4998cf9b6"
+    },
+    {
+      "path": "assets/icons/ofc/routines/ride-bike.jpg",
+      "group": "routines",
+      "label": "ride bike",
+      "format": "jpg",
+      "bytes": 76614,
+      "blob_sha": "da88f62a6144be793ba8b5ea415ff81e8fa086df"
+    },
+    {
+      "path": "assets/icons/ofc/routines/screens-off.jpg",
+      "group": "routines",
+      "label": "screens off",
+      "format": "jpg",
+      "bytes": 29044,
+      "blob_sha": "a5e69071380b47c4d1e73ccff83ae849141d2d80"
+    },
+    {
+      "path": "assets/icons/ofc/routines/shoes-and-coat-away.jpg",
+      "group": "routines",
+      "label": "shoes and coat away",
+      "format": "jpg",
+      "bytes": 68058,
+      "blob_sha": "5fac656da8d72332b01ed991d47586b01692083f"
+    },
+    {
+      "path": "assets/icons/ofc/routines/wake-up.jpg",
+      "group": "routines",
+      "label": "wake up",
+      "format": "jpg",
+      "bytes": 43156,
+      "blob_sha": "e6ac2efb0be7be712b7cbc38b33542effe67d2bf"
+    },
+    {
+      "path": "assets/icons/ofc/routines/wash-my-hands.jpg",
+      "group": "routines",
+      "label": "wash my hands",
+      "format": "jpg",
+      "bytes": 188813,
+      "blob_sha": "26038db1533f71e09c1418ee429e0d237c3c059d"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/basket.png",
+      "group": "supporting",
+      "label": "basket",
+      "format": "png",
+      "bytes": 7595,
+      "blob_sha": "9f939d23a99e5936bf4a39557bd528351b744c18"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/bike.png",
+      "group": "supporting",
+      "label": "bike",
+      "format": "png",
+      "bytes": 5337,
+      "blob_sha": "922bae220e349296e9a82e042f32e227e718a9bf"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/blocks.png",
+      "group": "supporting",
+      "label": "blocks",
+      "format": "png",
+      "bytes": 4043,
+      "blob_sha": "7be410eb2f0537b9baf5e860b4fe1fdca3938915"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/book.png",
+      "group": "supporting",
+      "label": "book",
+      "format": "png",
+      "bytes": 5531,
+      "blob_sha": "3ef8ed9c1f51bbecb88858556447ba3c2b7c1019"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/breakfast-bowl.png",
+      "group": "supporting",
+      "label": "breakfast bowl",
+      "format": "png",
+      "bytes": 4129,
+      "blob_sha": "a4e45667325ee1b750a0ad80a6589a5da5777ce0"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/car.png",
+      "group": "supporting",
+      "label": "car",
+      "format": "png",
+      "bytes": 5413,
+      "blob_sha": "20f7478142a2508b4643ecdb528e5f0a121fafb7"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/dish.png",
+      "group": "supporting",
+      "label": "dish",
+      "format": "png",
+      "bytes": 5319,
+      "blob_sha": "a31b3dad14f5e98da5a2fc61918c9ae7b219db58"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/friend-pair.png",
+      "group": "supporting",
+      "label": "friend pair",
+      "format": "png",
+      "bytes": 6245,
+      "blob_sha": "b343b3fd07c37046be1e97ac0607bbd3a22f902a"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/jump-rope.png",
+      "group": "supporting",
+      "label": "jump rope",
+      "format": "png",
+      "bytes": 4785,
+      "blob_sha": "8df75121ca4225fe2e7df7c64ea740e260835753"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/made-bed.png",
+      "group": "supporting",
+      "label": "made bed",
+      "format": "png",
+      "bytes": 4823,
+      "blob_sha": "c916c4760cfcafcbedd7a35d86101064f83a715d"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/pajamas.png",
+      "group": "supporting",
+      "label": "pajamas",
+      "format": "png",
+      "bytes": 6028,
+      "blob_sha": "26cd5db3e8d5c9d92c9e1d1d24908224a6a7b457"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/puzzle-piece.png",
+      "group": "supporting",
+      "label": "puzzle piece",
+      "format": "png",
+      "bytes": 4959,
+      "blob_sha": "196a9740d91af506583e3e45008d22d1f19c6b79"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/scissors.png",
+      "group": "supporting",
+      "label": "scissors",
+      "format": "png",
+      "bytes": 5269,
+      "blob_sha": "cd7f58baf2d5e326fae0a6aef36c3d12255fea87"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/scooter.png",
+      "group": "supporting",
+      "label": "scooter",
+      "format": "png",
+      "bytes": 4602,
+      "blob_sha": "9ffbbbda842bb5ac50b92b90e5f77086f439677f"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/shirt.png",
+      "group": "supporting",
+      "label": "shirt",
+      "format": "png",
+      "bytes": 3515,
+      "blob_sha": "4f34ce34d9517e2813c1a72c3121595d3f4e80de"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/toothbrush.png",
+      "group": "supporting",
+      "label": "toothbrush",
+      "format": "png",
+      "bytes": 3796,
+      "blob_sha": "990e7255d192bb5f36570c341541da0290e32ef7"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/tree.png",
+      "group": "supporting",
+      "label": "tree",
+      "format": "png",
+      "bytes": 3857,
+      "blob_sha": "da09878d4ad0fe7f87d00f93178f23a7c906df34"
+    },
+    {
+      "path": "assets/icons/ofc/supporting/water-bottle.png",
+      "group": "supporting",
+      "label": "water bottle",
+      "format": "png",
+      "bytes": 2965,
+      "blob_sha": "f531234db2ca6996f572e46c78b165c8f76ec516"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/board-game.png",
+      "group": "updatedicons/july",
+      "label": "board game",
+      "format": "png",
+      "bytes": 86288,
+      "blob_sha": "10440ad31b9b80e206f3d47a8a6b94ac2d00d1ef"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/bracelet-making.png",
+      "group": "updatedicons/july",
+      "label": "bracelet making",
+      "format": "png",
+      "bytes": 84892,
+      "blob_sha": "595b007a36a6057ba69f5e7678f925202853fad6"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/building-blocks.png",
+      "group": "updatedicons/july",
+      "label": "building blocks",
+      "format": "png",
+      "bytes": 1112784,
+      "blob_sha": "9b19198dd50809a2f0ac78bc309a6102f5b6acd3"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/comic-book-making.png",
+      "group": "updatedicons/july",
+      "label": "comic book making",
+      "format": "png",
+      "bytes": 98291,
+      "blob_sha": "bfff7bf208066137d024163f8b72ddfc6aa62e74"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/crafts-scissors-paper-and-glue.png",
+      "group": "updatedicons/july",
+      "label": "crafts scissors paper and glue",
+      "format": "png",
+      "bytes": 91113,
+      "blob_sha": "e58bdb3fd202978f3b3de336ccee6943669bd3ed"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/dance-party.png",
+      "group": "updatedicons/july",
+      "label": "dance party",
+      "format": "png",
+      "bytes": 66716,
+      "blob_sha": "0445918b2f6e8b5ceefa11206a63c910bcd3714d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/drawing-pencil-paper.png",
+      "group": "updatedicons/july",
+      "label": "drawing pencil paper",
+      "format": "png",
+      "bytes": 80026,
+      "blob_sha": "3994cd25e09453e23ccf0ded4927a6014ae0995d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/friends-activity.png",
+      "group": "updatedicons/july",
+      "label": "friends activity",
+      "format": "png",
+      "bytes": 105910,
+      "blob_sha": "0cd26481446efa849629831b2d33f177210b7a8f"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/movement-video-screen.png",
+      "group": "updatedicons/july",
+      "label": "movement video screen",
+      "format": "png",
+      "bytes": 65138,
+      "blob_sha": "5cb0577612b49ee399c73a56da8e50032c39dc40"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/play-doh-modeling-dough.png",
+      "group": "updatedicons/july",
+      "label": "play doh modeling dough",
+      "format": "png",
+      "bytes": 70362,
+      "blob_sha": "8b45baf042945e805219b2a01970ba8d10a5138b"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/pretend-play-puppet-and-mask.png",
+      "group": "updatedicons/july",
+      "label": "pretend play puppet and mask",
+      "format": "png",
+      "bytes": 88862,
+      "blob_sha": "e2e0869ec0239f40dbf3bbbd79c85c87c1f253bb"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/scavenger-hunt.png",
+      "group": "updatedicons/july",
+      "label": "scavenger hunt",
+      "format": "png",
+      "bytes": 77037,
+      "blob_sha": "8b526c8259afb54e30f87f55d3427b4a899829d7"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/sibling-activity.png",
+      "group": "updatedicons/july",
+      "label": "sibling activity",
+      "format": "png",
+      "bytes": 106627,
+      "blob_sha": "7356dba237d512c52e03a81ec81f9f13d7d94488"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/solo-activity.png",
+      "group": "updatedicons/july",
+      "label": "solo activity",
+      "format": "png",
+      "bytes": 69825,
+      "blob_sha": "7edd738d467831dca94767ac6264fcacd96bd991"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/july/toy-race-car.png",
+      "group": "updatedicons/july",
+      "label": "toy race car",
+      "format": "png",
+      "bytes": 79060,
+      "blob_sha": "509628d15795bf0b5bfe864bb741444146b16a17"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/apple-sauce-pouch.png",
+      "group": "updatedicons/june",
+      "label": "apple sauce pouch",
+      "format": "png",
+      "bytes": 138250,
+      "blob_sha": "dfbac6476376654d86f46f742601e799d3e9b280"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/blueberries.png",
+      "group": "updatedicons/june",
+      "label": "blueberries",
+      "format": "png",
+      "bytes": 140401,
+      "blob_sha": "2f202e9907ad428cd922661ac69f767290cc70c8"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/cream-cheese.png",
+      "group": "updatedicons/june",
+      "label": "cream cheese",
+      "format": "png",
+      "bytes": 147912,
+      "blob_sha": "b55cbc8f305fb0d976830c8d5a3a808ffc3f6311"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/muffin.png",
+      "group": "updatedicons/june",
+      "label": "muffin",
+      "format": "png",
+      "bytes": 145103,
+      "blob_sha": "e6a065ec45ea3a9d5557ad83dca70e731db0a16d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/nut-buter-pack.png",
+      "group": "updatedicons/june",
+      "label": "nut buter pack",
+      "format": "png",
+      "bytes": 248544,
+      "blob_sha": "34775dc21d960039cf161fc77b20742c584f5781"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/peanut-butter.png",
+      "group": "updatedicons/june",
+      "label": "peanut butter",
+      "format": "png",
+      "bytes": 142943,
+      "blob_sha": "1536c771d2c787ee28d46c2b588b00557a45a563"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/ranch-dip.png",
+      "group": "updatedicons/june",
+      "label": "ranch dip",
+      "format": "png",
+      "bytes": 141071,
+      "blob_sha": "7324a3d802cbb837e3ce8cc790bb11c9cb33ee7e"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/strawberries.png",
+      "group": "updatedicons/june",
+      "label": "strawberries",
+      "format": "png",
+      "bytes": 154201,
+      "blob_sha": "14d99db51b37aec2c18742b462490364428be2b9"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/june/yogurt-tube.png",
+      "group": "updatedicons/june",
+      "label": "yogurt tube",
+      "format": "png",
+      "bytes": 134090,
+      "blob_sha": "dd524961b941bdab47f211614854306e6e2cb454"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/backpack copy.png",
+      "group": "updatedicons/png",
+      "label": "backpack copy",
+      "format": "png",
+      "bytes": 92475,
+      "blob_sha": "d2e128b3dfbc9d6801b70f49ee0e0a3e12273edd"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/backpack.png",
+      "group": "updatedicons/png",
+      "label": "backpack",
+      "format": "png",
+      "bytes": 91881,
+      "blob_sha": "a372b4735328beac44a5db0c1f0e3c26e6f04829"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/bicycle.png",
+      "group": "updatedicons/png",
+      "label": "bicycle",
+      "format": "png",
+      "bytes": 112148,
+      "blob_sha": "057834148132a13cb5ec943739319572e6cde44f"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/board-game.png",
+      "group": "updatedicons/png",
+      "label": "board game",
+      "format": "png",
+      "bytes": 108075,
+      "blob_sha": "177ddb19a9fc221f9164f9a84eaa43f40ea44891"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/book.png",
+      "group": "updatedicons/png",
+      "label": "book",
+      "format": "png",
+      "bytes": 92015,
+      "blob_sha": "b8948a18477e520791d3eea4efab16df990dac27"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/bread.png",
+      "group": "updatedicons/png",
+      "label": "bread",
+      "format": "png",
+      "bytes": 70556,
+      "blob_sha": "00d834411debb7965caf4d1201365f8ac4e45868"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/breakfast-bowl.png",
+      "group": "updatedicons/png",
+      "label": "breakfast bowl",
+      "format": "png",
+      "bytes": 67525,
+      "blob_sha": "f013598dec8cfdb806bea696e19bb635530ef1f3"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/building-a-course.png",
+      "group": "updatedicons/png",
+      "label": "building a course",
+      "format": "png",
+      "bytes": 102128,
+      "blob_sha": "8317eb4326716ddfe028b062563698b628f21612"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/building-blocks.png",
+      "group": "updatedicons/png",
+      "label": "building blocks",
+      "format": "png",
+      "bytes": 74922,
+      "blob_sha": "838216efd6cc903d53a80c57b6c56a7894d824ad"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/carrot-sticks.png",
+      "group": "updatedicons/png",
+      "label": "carrot sticks",
+      "format": "png",
+      "bytes": 67704,
+      "blob_sha": "870182d1ad02cf2e1aacbcd83d2d7b56f976ed1b"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/cheese-wedge.png",
+      "group": "updatedicons/png",
+      "label": "cheese wedge",
+      "format": "png",
+      "bytes": 49266,
+      "blob_sha": "1a120f8639493e0b29798113089679f857dd54ed"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/clear-floor.png",
+      "group": "updatedicons/png",
+      "label": "clear floor",
+      "format": "png",
+      "bytes": 294352,
+      "blob_sha": "a383ee7aedfe99bc60d548d9fb0b9efd43d3562d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/cooking-pot.png",
+      "group": "updatedicons/png",
+      "label": "cooking pot",
+      "format": "png",
+      "bytes": 94089,
+      "blob_sha": "614c2a6ccd13dee8b5be762ad910e447d3eef20a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/crackers.png",
+      "group": "updatedicons/png",
+      "label": "crackers",
+      "format": "png",
+      "bytes": 58737,
+      "blob_sha": "5631833c706281eedafbbba95bb6fe3483ccb09f"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/create-explore.png",
+      "group": "updatedicons/png",
+      "label": "create explore",
+      "format": "png",
+      "bytes": 71896,
+      "blob_sha": "5a069e9e59aa9559d0972b1305124a5e96a8df2d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/cucumber-sticks.png",
+      "group": "updatedicons/png",
+      "label": "cucumber sticks",
+      "format": "png",
+      "bytes": 83905,
+      "blob_sha": "ae63c31f3baffcdc3b00412e621218f196d5770e"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/dishes-in-sink.png",
+      "group": "updatedicons/png",
+      "label": "dishes in sink",
+      "format": "png",
+      "bytes": 106812,
+      "blob_sha": "f5bbe2334e99ef97419505dc96642e9727c3e027"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/doing-homework.png",
+      "group": "updatedicons/png",
+      "label": "doing homework",
+      "format": "png",
+      "bytes": 106123,
+      "blob_sha": "67ff5188c498f2b0da5ae1932ed6c548e857ef1e"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/donation-box.png",
+      "group": "updatedicons/png",
+      "label": "donation box",
+      "format": "png",
+      "bytes": 104847,
+      "blob_sha": "6ee2b8cfae50646c334b77094e748941b5f778cd"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/drawing-and-coloring.png",
+      "group": "updatedicons/png",
+      "label": "drawing and coloring",
+      "format": "png",
+      "bytes": 104811,
+      "blob_sha": "5b99fa890910f04c5265fc9256f4a586b41700d6"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/duster.png",
+      "group": "updatedicons/png",
+      "label": "duster",
+      "format": "png",
+      "bytes": 73191,
+      "blob_sha": "55dcfa24cfde452f8811914d08c5f219839ed6f7"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/evening-reset.png",
+      "group": "updatedicons/png",
+      "label": "evening reset",
+      "format": "png",
+      "bytes": 60397,
+      "blob_sha": "a7473eb4b85121768a29856566247f0876c73071"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/family-playing-game.png",
+      "group": "updatedicons/png",
+      "label": "family playing game",
+      "format": "png",
+      "bytes": 136234,
+      "blob_sha": "e89d8bcbe146f8f72f6b53e2a655729b7014e0ca"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/free-afternoon.png",
+      "group": "updatedicons/png",
+      "label": "free afternoon",
+      "format": "png",
+      "bytes": 68554,
+      "blob_sha": "46790448dacf3cc9822ebe151644228a27051a78"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/fruit.png",
+      "group": "updatedicons/png",
+      "label": "fruit",
+      "format": "png",
+      "bytes": 102396,
+      "blob_sha": "9b3d12d28ec863f5c949af7a6e58cfd40d4e6661"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/getting-dressed.png",
+      "group": "updatedicons/png",
+      "label": "getting dressed",
+      "format": "png",
+      "bytes": 69906,
+      "blob_sha": "68a552a93375e1d840bda575252dc4bf76705de2"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/granola-bar.png",
+      "group": "updatedicons/png",
+      "label": "granola bar",
+      "format": "png",
+      "bytes": 85355,
+      "blob_sha": "55c04eea212698a0d4830cd86d35dd9c9cb4bf70"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/grocery-bag-with-produce.png",
+      "group": "updatedicons/png",
+      "label": "grocery bag with produce",
+      "format": "png",
+      "bytes": 108840,
+      "blob_sha": "809920e2183c3040ed3afdbcf00b051f6cdfaadc"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/hard-boiled-egg.png",
+      "group": "updatedicons/png",
+      "label": "hard boiled egg",
+      "format": "png",
+      "bytes": 63024,
+      "blob_sha": "45c9ed7e1bccb590537f799564c1c1fb87b5384c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/hummus-cup.png",
+      "group": "updatedicons/png",
+      "label": "hummus cup",
+      "format": "png",
+      "bytes": 55913,
+      "blob_sha": "52c6ecc49cc3766b06f0a6a4b6e5fa696a260282"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/kindness-note.png",
+      "group": "updatedicons/png",
+      "label": "kindness note",
+      "format": "png",
+      "bytes": 85874,
+      "blob_sha": "13c7c6d5d5feabb4e98e524653cfe95cd8bb92fa"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/lunch-box.png",
+      "group": "updatedicons/png",
+      "label": "lunch box",
+      "format": "png",
+      "bytes": 289514,
+      "blob_sha": "e59f1a04177472ca2339e38bb551cc95cd563013"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/lunch-reset.png",
+      "group": "updatedicons/png",
+      "label": "lunch reset",
+      "format": "png",
+      "bytes": 81750,
+      "blob_sha": "5b235cde0a7176a61fac4cab56004114a1ec55d0"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/mini-bagels.png",
+      "group": "updatedicons/png",
+      "label": "mini bagels",
+      "format": "png",
+      "bytes": 84275,
+      "blob_sha": "149e5045b5b490eafea2e7cb87596a85c433e6a8"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/morning-start copy.png",
+      "group": "updatedicons/png",
+      "label": "morning start copy",
+      "format": "png",
+      "bytes": 60614,
+      "blob_sha": "cc3dcb3cf7f44501851264fdb1f3164b485318ad"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/morning-start.png",
+      "group": "updatedicons/png",
+      "label": "morning start",
+      "format": "png",
+      "bytes": 54390,
+      "blob_sha": "2cf3244e042101edc9a599f17d4db0a35f93a19a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/move-play.png",
+      "group": "updatedicons/png",
+      "label": "move play",
+      "format": "png",
+      "bytes": 76659,
+      "blob_sha": "b6750147dd43536a1c925e5c6b74623fd2dc2d5a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/nutter-butter-packets.png",
+      "group": "updatedicons/png",
+      "label": "nutter butter packets",
+      "format": "png",
+      "bytes": 83245,
+      "blob_sha": "ad6caaf195f52dfb4f63e8ec7955b077c330e7aa"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/october/a-home-for-everything.png",
+      "group": "updatedicons/png/october",
+      "label": "a home for everything",
+      "format": "png",
+      "bytes": 322699,
+      "blob_sha": "c24342905ed58e3504adbbbf9083418d24fb0f02"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/october/clothes-for-cooler-mornings.png",
+      "group": "updatedicons/png/october",
+      "label": "clothes for cooler mornings",
+      "format": "png",
+      "bytes": 325110,
+      "blob_sha": "f63ed5aaffe0703bfea41460f2b8c7fb9cba4a18"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/october/school-and-activity-gear.png",
+      "group": "updatedicons/png/october",
+      "label": "school and activity gear",
+      "format": "png",
+      "bytes": 325736,
+      "blob_sha": "23452985932431f91aa97a639a9f93be4f99d7af"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/october/what-can-I-prepare.png",
+      "group": "updatedicons/png/october",
+      "label": "what can I prepare",
+      "format": "png",
+      "bytes": 240692,
+      "blob_sha": "fa95fc6857cfa9bce5a63dc183514411448852f0"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/october/what-is-coming.png",
+      "group": "updatedicons/png/october",
+      "label": "what is coming",
+      "format": "png",
+      "bytes": 257676,
+      "blob_sha": "892cbb3385d5f2ab5c5859d6adc7fad243e2e8f7"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/october/what-will-I-need.png",
+      "group": "updatedicons/png/october",
+      "label": "what will I need",
+      "format": "png",
+      "bytes": 427129,
+      "blob_sha": "b6abf2fe16a73d0084f95dc00be5ebed42f4f820"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/pajamas.png",
+      "group": "updatedicons/png",
+      "label": "pajamas",
+      "format": "png",
+      "bytes": 104588,
+      "blob_sha": "ef76480297bbc36b16b91027ca5e224c6789df53"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/parent-child-reading.png",
+      "group": "updatedicons/png",
+      "label": "parent child reading",
+      "format": "png",
+      "bytes": 103669,
+      "blob_sha": "3865059c01b91ac17fc201d56eee61fb1af4ad61"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/place-setting.png",
+      "group": "updatedicons/png",
+      "label": "place setting",
+      "format": "png",
+      "bytes": 92955,
+      "blob_sha": "58c061e3745d998745ebe866745b4c986b46d489"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/playing-with-friends.png",
+      "group": "updatedicons/png",
+      "label": "playing with friends",
+      "format": "png",
+      "bytes": 137063,
+      "blob_sha": "780fd847a295305c8a5d6aebe7b7b7937d8919e1"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/putting-on-shoes.png",
+      "group": "updatedicons/png",
+      "label": "putting on shoes",
+      "format": "png",
+      "bytes": 111111,
+      "blob_sha": "719336f323d0c709db02a9b1e2cbca005d84ec2d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/puzzele-piece.png",
+      "group": "updatedicons/png",
+      "label": "puzzele piece",
+      "format": "png",
+      "bytes": 52117,
+      "blob_sha": "2153cba03168f7a54df50dbe0f6766c227d34086"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/quiet-time.png",
+      "group": "updatedicons/png",
+      "label": "quiet time",
+      "format": "png",
+      "bytes": 70923,
+      "blob_sha": "7718d18c6fc57a9e03e73344d2e020d996823076"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/september/bedroom.png",
+      "group": "updatedicons/png/september",
+      "label": "bedroom",
+      "format": "png",
+      "bytes": 126212,
+      "blob_sha": "28c8fa59a0592ae899e2574dc90b9562b6258f34"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/september/clothes-in-hamper.png",
+      "group": "updatedicons/png/september",
+      "label": "clothes in hamper",
+      "format": "png",
+      "bytes": 146421,
+      "blob_sha": "3ba5e1ba7f92a27e5816bf88e87e00fe359dde3c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/september/living-room.png",
+      "group": "updatedicons/png/september",
+      "label": "living room",
+      "format": "png",
+      "bytes": 144667,
+      "blob_sha": "9e7860fc8614e1af32bf7e2b9b72ead58474f0ac"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/september/personal-belongings-put-away.png",
+      "group": "updatedicons/png/september",
+      "label": "personal belongings put away",
+      "format": "png",
+      "bytes": 173862,
+      "blob_sha": "7a7627e3dc6962e3b6dd56afba004c7984070491"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/september/playroom.png",
+      "group": "updatedicons/png/september",
+      "label": "playroom",
+      "format": "png",
+      "bytes": 150507,
+      "blob_sha": "772a1512f35df1c71e108c95299537d3b0091a02"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/september/whole-house.png",
+      "group": "updatedicons/png/september",
+      "label": "whole house",
+      "format": "png",
+      "bytes": 130492,
+      "blob_sha": "94450fde5276df15bef0b49f2696bb24eee6b038"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/sorting-clothes.png",
+      "group": "updatedicons/png",
+      "label": "sorting clothes",
+      "format": "png",
+      "bytes": 93088,
+      "blob_sha": "6cd5c6977c50fd5f0b8f9eb08e70f439fd8066b7"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/spray-bottle-and-cloth.png",
+      "group": "updatedicons/png",
+      "label": "spray bottle and cloth",
+      "format": "png",
+      "bytes": 84548,
+      "blob_sha": "ec2b605e246adf7b00b0e4bd32bb4337d642a50d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/stack-of-clothes.png",
+      "group": "updatedicons/png",
+      "label": "stack of clothes",
+      "format": "png",
+      "bytes": 295506,
+      "blob_sha": "e686296e5cdffa835f6769081dd0ab29b243f42c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/star.png",
+      "group": "updatedicons/png",
+      "label": "star",
+      "format": "png",
+      "bytes": 70369,
+      "blob_sha": "ef1978737f2d0855e32b836ecfc0a2807dfbb26e"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/table-after-meal.png",
+      "group": "updatedicons/png",
+      "label": "table after meal",
+      "format": "png",
+      "bytes": 121505,
+      "blob_sha": "1982b06d5765f61c9e6431a5480e8db13b2fc977"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/toothbrush.png",
+      "group": "updatedicons/png",
+      "label": "toothbrush",
+      "format": "png",
+      "bytes": 72100,
+      "blob_sha": "a8c3fde00e5a3a31f1a55ee22b88387aa7e36a61"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/toys-in-toy-basket.png",
+      "group": "updatedicons/png",
+      "label": "toys in toy basket",
+      "format": "png",
+      "bytes": 308648,
+      "blob_sha": "a803ff8c537c6e455508dfe0d62709bc39e15290"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/tree.png",
+      "group": "updatedicons/png",
+      "label": "tree",
+      "format": "png",
+      "bytes": 81209,
+      "blob_sha": "461e48a49f860bd83f86b3cc628dc98646b11a82"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/washing-dishes.png",
+      "group": "updatedicons/png",
+      "label": "washing dishes",
+      "format": "png",
+      "bytes": 107505,
+      "blob_sha": "76a712e346f209de4c6770c8a98d42df3dc95655"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/washing-hands.png",
+      "group": "updatedicons/png",
+      "label": "washing hands",
+      "format": "png",
+      "bytes": 106572,
+      "blob_sha": "9a308f312220b79527f6f89fd8326db4bc773950"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/washing-window.png",
+      "group": "updatedicons/png",
+      "label": "washing window",
+      "format": "png",
+      "bytes": 89375,
+      "blob_sha": "7ae3167124ae5c2c195634296e090e9de74ded21"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/water-bottle.png",
+      "group": "updatedicons/png",
+      "label": "water bottle",
+      "format": "png",
+      "bytes": 219042,
+      "blob_sha": "ff37fff2c5c52770375e0bf3b0bc77645dac7d33"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/yogurt-cup copy.png",
+      "group": "updatedicons/png",
+      "label": "yogurt cup copy",
+      "format": "png",
+      "bytes": 67941,
+      "blob_sha": "9866b6e221f39675f6d0f6469d6373c51a837730"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/png/yogurt-cup.png",
+      "group": "updatedicons/png",
+      "label": "yogurt cup",
+      "format": "png",
+      "bytes": 63813,
+      "blob_sha": "ebae12d6e6c7c1c54b6500298f6c776fc7993874"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/adult-and-child-together.svg",
+      "group": "updatedicons/svg",
+      "label": "adult and child together",
+      "format": "svg",
+      "bytes": 10431,
+      "blob_sha": "a1240de76317e2cc66ccff8225f21036c3dcb29b"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/apple.svg",
+      "group": "updatedicons/svg",
+      "label": "apple",
+      "format": "svg",
+      "bytes": 6037,
+      "blob_sha": "9c9412ddc9a0113ab7a62e139cefe4986a4bb2ee"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/backpack.svg",
+      "group": "updatedicons/svg",
+      "label": "backpack",
+      "format": "svg",
+      "bytes": 16038,
+      "blob_sha": "3e80fbe34a6edd6569141d09a4105e10bb409e83"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/banana.svg",
+      "group": "updatedicons/svg",
+      "label": "banana",
+      "format": "svg",
+      "bytes": 6251,
+      "blob_sha": "d5cc5e09552f3986d0b82476107b6d359e6f9e5a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/basket.svg",
+      "group": "updatedicons/svg",
+      "label": "basket",
+      "format": "svg",
+      "bytes": 9558,
+      "blob_sha": "3d291d8498d08976f5eb5b4d98f3f6418f565ff8"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/bike.svg",
+      "group": "updatedicons/svg",
+      "label": "bike",
+      "format": "svg",
+      "bytes": 8071,
+      "blob_sha": "8918afc893d53e62abea8cd2eef65ca0c2572ec4"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/blanket.svg",
+      "group": "updatedicons/svg",
+      "label": "blanket",
+      "format": "svg",
+      "bytes": 6494,
+      "blob_sha": "671e62642d23f7d5a9194986d422b2e561f8c916"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/blocks.svg",
+      "group": "updatedicons/svg",
+      "label": "blocks",
+      "format": "svg",
+      "bytes": 3817,
+      "blob_sha": "7c1500e82311e8b5722e00392ff6db108e656478"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/book-stack.svg",
+      "group": "updatedicons/svg",
+      "label": "book stack",
+      "format": "svg",
+      "bytes": 6962,
+      "blob_sha": "8e73f2b25581e5004f9c17047d81c8c93315be69"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/book.svg",
+      "group": "updatedicons/svg",
+      "label": "book",
+      "format": "svg",
+      "bytes": 5331,
+      "blob_sha": "d8a96840f65c5e8234553c9f087171ebf97cf6a0"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/breakfast-bowl.svg",
+      "group": "updatedicons/svg",
+      "label": "breakfast bowl",
+      "format": "svg",
+      "bytes": 4533,
+      "blob_sha": "492c202c3719afab2e495d04c4f08dc66b98389a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/broom.svg",
+      "group": "updatedicons/svg",
+      "label": "broom",
+      "format": "svg",
+      "bytes": 11218,
+      "blob_sha": "5b31d2cd38a5003679e7cd3db4676f0e0b680acb"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/calendar.svg",
+      "group": "updatedicons/svg",
+      "label": "calendar",
+      "format": "svg",
+      "bytes": 2789,
+      "blob_sha": "5587646160acf2cfbd1d1314dd44e91ea1979d67"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/car.svg",
+      "group": "updatedicons/svg",
+      "label": "car",
+      "format": "svg",
+      "bytes": 5204,
+      "blob_sha": "15d4ce60d940b148ffe809ccfdcf7b0af0f98823"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/carrot.svg",
+      "group": "updatedicons/svg",
+      "label": "carrot",
+      "format": "svg",
+      "bytes": 7272,
+      "blob_sha": "d7c533affc8d25c5ce9a4a8070a25c0cb5a1bb74"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/check-look.svg",
+      "group": "updatedicons/svg",
+      "label": "check look",
+      "format": "svg",
+      "bytes": 2550,
+      "blob_sha": "c21c4ebcb1f50ee4607c1631fbf25963e66f8c2a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/cheese-wedge.svg",
+      "group": "updatedicons/svg",
+      "label": "cheese wedge",
+      "format": "svg",
+      "bytes": 8919,
+      "blob_sha": "adc4addecabc53b6f21d14a1ecf34823296a0758"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/christmas-ornament.svg",
+      "group": "updatedicons/svg",
+      "label": "christmas ornament",
+      "format": "svg",
+      "bytes": 7933,
+      "blob_sha": "5423d0f9a7adc9e951aecc36f6ecc7aa8cf3171a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/christmas-tree.svg",
+      "group": "updatedicons/svg",
+      "label": "christmas tree",
+      "format": "svg",
+      "bytes": 9171,
+      "blob_sha": "ae74913345358709355d5bd8aed4a79bdc0f268c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/clipboard-with-checklist.svg",
+      "group": "updatedicons/svg",
+      "label": "clipboard with checklist",
+      "format": "svg",
+      "bytes": 11034,
+      "blob_sha": "1faf39d979e6705f8d7020df38178e580628522b"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/clock.svg",
+      "group": "updatedicons/svg",
+      "label": "clock",
+      "format": "svg",
+      "bytes": 2728,
+      "blob_sha": "2468c1891be286d09b50841399f6c853a703808b"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/clothes-hanger.svg",
+      "group": "updatedicons/svg",
+      "label": "clothes hanger",
+      "format": "svg",
+      "bytes": 5882,
+      "blob_sha": "86a6bc10e1c39f7f9e2c553f9adb44aa8c7bf098"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/clothes-in-hamper.jpg",
+      "group": "updatedicons/svg",
+      "label": "clothes in hamper",
+      "format": "jpg",
+      "bytes": 62169,
+      "blob_sha": "e1a28619625b1af66ac483e02dd954681d26a998"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/clothes-in-hamper.webp",
+      "group": "updatedicons/svg",
+      "label": "clothes in hamper",
+      "format": "webp",
+      "bytes": 54126,
+      "blob_sha": "dce23dcd3f998dc8883598462a663954a6d6ebdd"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/coat.svg",
+      "group": "updatedicons/svg",
+      "label": "coat",
+      "format": "svg",
+      "bytes": 17168,
+      "blob_sha": "12cbd70bd3ecd4178fed6d54dd3dbe1f219e3ed2"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/comb-my-hair.jpg",
+      "group": "updatedicons/svg",
+      "label": "comb my hair",
+      "format": "jpg",
+      "bytes": 135754,
+      "blob_sha": "e4ff290fdc1f60d65126552252581f500300ec21"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/conversation-bubbles.svg",
+      "group": "updatedicons/svg",
+      "label": "conversation bubbles",
+      "format": "svg",
+      "bytes": 6444,
+      "blob_sha": "275c249c5b63d729e4925c411741fc6a44d7eeaf"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/cooking-pot.svg",
+      "group": "updatedicons/svg",
+      "label": "cooking pot",
+      "format": "svg",
+      "bytes": 10565,
+      "blob_sha": "cd04e1c5bb6387377c3dc9c5b89a6dfa60bb3c21"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/crackers.svg",
+      "group": "updatedicons/svg",
+      "label": "crackers",
+      "format": "svg",
+      "bytes": 13256,
+      "blob_sha": "f2daade1fe69a38aefa2584bb6b1f9f8e286fa9e"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/create-explore.svg",
+      "group": "updatedicons/svg",
+      "label": "create explore",
+      "format": "svg",
+      "bytes": 7263,
+      "blob_sha": "595a45a9dcda900c8b517bfe143ab6ef1caa960e"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/cup.svg",
+      "group": "updatedicons/svg",
+      "label": "cup",
+      "format": "svg",
+      "bytes": 3027,
+      "blob_sha": "f68c643d8642b4e88909f5c680c5befb5831034c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/cutting-board-and-knife.svg",
+      "group": "updatedicons/svg",
+      "label": "cutting board and knife",
+      "format": "svg",
+      "bytes": 13522,
+      "blob_sha": "b4d3d10421ec2e964135cba02d00fc3ecc79c822"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/dish.svg",
+      "group": "updatedicons/svg",
+      "label": "dish",
+      "format": "svg",
+      "bytes": 4091,
+      "blob_sha": "77513420c9549e127d87f50de493d94cd5a22a01"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/dust-furniture.jpg",
+      "group": "updatedicons/svg",
+      "label": "dust furniture",
+      "format": "jpg",
+      "bytes": 62329,
+      "blob_sha": "06e272d389bd99eb7510fbff3a4729715cab46fc"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/dust-furniture.webp",
+      "group": "updatedicons/svg",
+      "label": "dust furniture",
+      "format": "webp",
+      "bytes": 59092,
+      "blob_sha": "be8b48c7c8c5082256a077469af9cf4a43b1db34"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/evening-reset.svg",
+      "group": "updatedicons/svg",
+      "label": "evening reset",
+      "format": "svg",
+      "bytes": 3924,
+      "blob_sha": "33c9684e869cf23c76337774d9a4732d674736a2"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/family-group.svg",
+      "group": "updatedicons/svg",
+      "label": "family group",
+      "format": "svg",
+      "bytes": 3074,
+      "blob_sha": "914254bade811f6a05c81b0bf60899bdd5ee1220"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/family-meeting-around-a-table.svg",
+      "group": "updatedicons/svg",
+      "label": "family meeting around a table",
+      "format": "svg",
+      "bytes": 15443,
+      "blob_sha": "e09caec5c490bdaef6301e51faae4423a6fe6b67"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/folded-clothes.svg",
+      "group": "updatedicons/svg",
+      "label": "folded clothes",
+      "format": "svg",
+      "bytes": 15604,
+      "blob_sha": "bcfe512d8cb529cc11f38e37bab5f7e384a8ef1c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/fork-spoon.svg",
+      "group": "updatedicons/svg",
+      "label": "fork spoon",
+      "format": "svg",
+      "bytes": 3399,
+      "blob_sha": "8819917debe164ed9dc1636bf61080f373604172"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/free-afternoon.svg",
+      "group": "updatedicons/svg",
+      "label": "free afternoon",
+      "format": "svg",
+      "bytes": 4260,
+      "blob_sha": "794fb607801a4504a1b6943b737521fb28df888d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/friend-pair.svg",
+      "group": "updatedicons/svg",
+      "label": "friend pair",
+      "format": "svg",
+      "bytes": 5583,
+      "blob_sha": "dfdfd6c549a4c4e4794d7a469d6e8f9423255876"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/gear.svg",
+      "group": "updatedicons/svg",
+      "label": "gear",
+      "format": "svg",
+      "bytes": 2855,
+      "blob_sha": "ed855ac0efd8face16602714234d1ba75b5d73f3"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/granola-bar.svg",
+      "group": "updatedicons/svg",
+      "label": "granola bar",
+      "format": "svg",
+      "bytes": 14417,
+      "blob_sha": "582979a0deae037ae8c63711cf93af55d84dca46"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/grocery-bag-with-produce.svg",
+      "group": "updatedicons/svg",
+      "label": "grocery bag with produce",
+      "format": "svg",
+      "bytes": 13890,
+      "blob_sha": "94eedc6dc943895ab2089b6b60f92241981717f6"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/helping-hands.svg",
+      "group": "updatedicons/svg",
+      "label": "helping hands",
+      "format": "svg",
+      "bytes": 8940,
+      "blob_sha": "65b9a40f1d368e53d08b47d2436b709ac1a3eaba"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/holiday-cookies.svg",
+      "group": "updatedicons/svg",
+      "label": "holiday cookies",
+      "format": "svg",
+      "bytes": 11158,
+      "blob_sha": "bd7471d43391dabdd3374a63784535804238ca2a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/home.svg",
+      "group": "updatedicons/svg",
+      "label": "home",
+      "format": "svg",
+      "bytes": 2958,
+      "blob_sha": "977b0111aaca5e6aa74131fa1493521e0662c8ce"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/jump-rope.svg",
+      "group": "updatedicons/svg",
+      "label": "jump rope",
+      "format": "svg",
+      "bytes": 4405,
+      "blob_sha": "06b493fe31626dd7892135c6713bb321e9db7acb"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/laundry-basket-with-clothes.svg",
+      "group": "updatedicons/svg",
+      "label": "laundry basket with clothes",
+      "format": "svg",
+      "bytes": 18541,
+      "blob_sha": "9754ea0ee09f9110f953bbe19bc08b993480fb40"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/lunch-reset.svg",
+      "group": "updatedicons/svg",
+      "label": "lunch reset",
+      "format": "svg",
+      "bytes": 5955,
+      "blob_sha": "80ec846adf21646a2414792b5c9d93b78f73f2a5"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/lunchbox.svg",
+      "group": "updatedicons/svg",
+      "label": "lunchbox",
+      "format": "svg",
+      "bytes": 11897,
+      "blob_sha": "49378aac99dd0c1a1258b6eb92d3c5c7763d45c0"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/made-bed.svg",
+      "group": "updatedicons/svg",
+      "label": "made bed",
+      "format": "svg",
+      "bytes": 5569,
+      "blob_sha": "0ee88bf0d5892aa6847d107fea43df46f8127c20"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/morning-start.svg",
+      "group": "updatedicons/svg",
+      "label": "morning start",
+      "format": "svg",
+      "bytes": 2987,
+      "blob_sha": "f5783709ed5f99cc3f3981b9122e74734e5f16c8"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/move-play.svg",
+      "group": "updatedicons/svg",
+      "label": "move play",
+      "format": "svg",
+      "bytes": 3855,
+      "blob_sha": "e6cde859b24ace87b24cc9756b523241eeaec4b9"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/packing-cubes.svg",
+      "group": "updatedicons/svg",
+      "label": "packing cubes",
+      "format": "svg",
+      "bytes": 18839,
+      "blob_sha": "84bcbd4ac2080b7f2d29d7f401bf849b35b11c03"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/paintbrush.svg",
+      "group": "updatedicons/svg",
+      "label": "paintbrush",
+      "format": "svg",
+      "bytes": 2164,
+      "blob_sha": "b9927e0da5822f1a0dd23412dafcbb0159995a2d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/pajamas.svg",
+      "group": "updatedicons/svg",
+      "label": "pajamas",
+      "format": "svg",
+      "bytes": 7729,
+      "blob_sha": "bae06ca4a1b057194525a14b1bdab3e88aa576cb"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/piggy-bank.svg",
+      "group": "updatedicons/svg",
+      "label": "piggy bank",
+      "format": "svg",
+      "bytes": 8536,
+      "blob_sha": "006fc03d5196f4133ac6257283b3df0e0f6465be"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/pillow.svg",
+      "group": "updatedicons/svg",
+      "label": "pillow",
+      "format": "svg",
+      "bytes": 3277,
+      "blob_sha": "da28fbc0393465a76533da556d171f160e602d76"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/playground-swing.svg",
+      "group": "updatedicons/svg",
+      "label": "playground swing",
+      "format": "svg",
+      "bytes": 4231,
+      "blob_sha": "8098923cafb7629d962ff16ccee0390034c57f2d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/puzzle-piece.svg",
+      "group": "updatedicons/svg",
+      "label": "puzzle piece",
+      "format": "svg",
+      "bytes": 3534,
+      "blob_sha": "dff18a9d1276e1bbdb94879fc7bbd4f531f904f6"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/question.svg",
+      "group": "updatedicons/svg",
+      "label": "question",
+      "format": "svg",
+      "bytes": 1319,
+      "blob_sha": "fa164644c94935420dd9d54e087825cb1cc1e0c3"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/quiet-time.svg",
+      "group": "updatedicons/svg",
+      "label": "quiet time",
+      "format": "svg",
+      "bytes": 5714,
+      "blob_sha": "4e39f3a575eca8be5e941e2aac7397213a7f4a7b"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/sandwich.svg",
+      "group": "updatedicons/svg",
+      "label": "sandwich",
+      "format": "svg",
+      "bytes": 12881,
+      "blob_sha": "5e0f4937adc111d1b51380d44085d335071f844f"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/school-bus.svg",
+      "group": "updatedicons/svg",
+      "label": "school bus",
+      "format": "svg",
+      "bytes": 13383,
+      "blob_sha": "0322f7996ccfea27652844b744a0d15a74bab2e2"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/school-folder.svg",
+      "group": "updatedicons/svg",
+      "label": "school folder",
+      "format": "svg",
+      "bytes": 8375,
+      "blob_sha": "b6464a578ce1ebaac4d28f6152512531aecdd658"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/school-notebook.svg",
+      "group": "updatedicons/svg",
+      "label": "school notebook",
+      "format": "svg",
+      "bytes": 12430,
+      "blob_sha": "1cc61202d06b1dc433f9a3a610165e0ce1f66221"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/scissors.svg",
+      "group": "updatedicons/svg",
+      "label": "scissors",
+      "format": "svg",
+      "bytes": 4270,
+      "blob_sha": "01999a54243aa5620b9b352479bdea6638119061"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/scooter.svg",
+      "group": "updatedicons/svg",
+      "label": "scooter",
+      "format": "svg",
+      "bytes": 5225,
+      "blob_sha": "1b5ff91072e216cb7af05544c4ef1d03d4c31415"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/shirt.svg",
+      "group": "updatedicons/svg",
+      "label": "shirt",
+      "format": "svg",
+      "bytes": 3271,
+      "blob_sha": "99c3a0e01ddba676cdb28406102ecc593efb18a1"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/sidewalk-chalk.svg",
+      "group": "updatedicons/svg",
+      "label": "sidewalk chalk",
+      "format": "svg",
+      "bytes": 3510,
+      "blob_sha": "3031f748d24a6c79ecc5cc4945c30328be445bda"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/sneakers.svg",
+      "group": "updatedicons/svg",
+      "label": "sneakers",
+      "format": "svg",
+      "bytes": 17096,
+      "blob_sha": "e107c61584ab5886cfde853a42ff2df3c08ffba4"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/sort-laundry.jpg",
+      "group": "updatedicons/svg",
+      "label": "sort laundry",
+      "format": "jpg",
+      "bytes": 201555,
+      "blob_sha": "81452c6dfe3aff48d5394d4ada98a9351524b5e0"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/sort-laundry.webp",
+      "group": "updatedicons/svg",
+      "label": "sort laundry",
+      "format": "webp",
+      "bytes": 119952,
+      "blob_sha": "7405bf22f9feabcbb4dea22f976c05a4921d805f"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/spray-bottle-cloth.svg",
+      "group": "updatedicons/svg",
+      "label": "spray bottle cloth",
+      "format": "svg",
+      "bytes": 5011,
+      "blob_sha": "b772aa6b1d2775261c7b1abc5e52ad883f9a9f85"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/star.svg",
+      "group": "updatedicons/svg",
+      "label": "star",
+      "format": "svg",
+      "bytes": 2083,
+      "blob_sha": "21004f1bc0fbc052a51cd072c378c883417f5c9a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/string-lights.svg",
+      "group": "updatedicons/svg",
+      "label": "string lights",
+      "format": "svg",
+      "bytes": 9232,
+      "blob_sha": "6b0c1a61552ffece6648d0581fe6d88afada4a85"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/stuffed-animal.svg",
+      "group": "updatedicons/svg",
+      "label": "stuffed animal",
+      "format": "svg",
+      "bytes": 5374,
+      "blob_sha": "ee604b1d8b1f6a972708a3f62df2bd19f0156511"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/suitcase.svg",
+      "group": "updatedicons/svg",
+      "label": "suitcase",
+      "format": "svg",
+      "bytes": 7486,
+      "blob_sha": "fa87d765dcfa32d56492bf0327f81e3538f48697"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/tidy-living-room.jpg",
+      "group": "updatedicons/svg",
+      "label": "tidy living room",
+      "format": "jpg",
+      "bytes": 62428,
+      "blob_sha": "5b7fad7aade5b18322b6fe55accb63b2024eca1d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/tidy-living-room.webp",
+      "group": "updatedicons/svg",
+      "label": "tidy living room",
+      "format": "webp",
+      "bytes": 52052,
+      "blob_sha": "52c69fed9ff96d6ea0c03284e5e1baa63dac6a0d"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/toothbrush.svg",
+      "group": "updatedicons/svg",
+      "label": "toothbrush",
+      "format": "svg",
+      "bytes": 2913,
+      "blob_sha": "b035c434b7ad203ab37869052ac53b74786c1e54"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/trash-bin.svg",
+      "group": "updatedicons/svg",
+      "label": "trash bin",
+      "format": "svg",
+      "bytes": 9114,
+      "blob_sha": "128e95b0db6fc42305fb765e5908b8ec3d9d94c3"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/tree.svg",
+      "group": "updatedicons/svg",
+      "label": "tree",
+      "format": "svg",
+      "bytes": 5616,
+      "blob_sha": "b855d4f84cfa37c5cfd2e4c5524b480e2acc4410"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/vacuum-cleaner.svg",
+      "group": "updatedicons/svg",
+      "label": "vacuum cleaner",
+      "format": "svg",
+      "bytes": 17520,
+      "blob_sha": "da2092e0ba96f735444c250993c52b94ca5ef74a"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/wallet.svg",
+      "group": "updatedicons/svg",
+      "label": "wallet",
+      "format": "svg",
+      "bytes": 8684,
+      "blob_sha": "4a184ca9cfb8ddc1eae12c7ea0af4d1a8ec5df17"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/washing-hands.svg",
+      "group": "updatedicons/svg",
+      "label": "washing hands",
+      "format": "svg",
+      "bytes": 9661,
+      "blob_sha": "d49d78843ad4789b853e68fe1b485ca44972c0b6"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/water-bottle.svg",
+      "group": "updatedicons/svg",
+      "label": "water bottle",
+      "format": "svg",
+      "bytes": 2741,
+      "blob_sha": "b45ea859e776c8b352aa3ae55bb425e0b2a487d9"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/wrapped-gift.svg",
+      "group": "updatedicons/svg",
+      "label": "wrapped gift",
+      "format": "svg",
+      "bytes": 11988,
+      "blob_sha": "e05ca5726dad27b08adb8bd347ae18f7152d203c"
+    },
+    {
+      "path": "assets/icons/ofc/updatedicons/svg/yogurt-cup.svg",
+      "group": "updatedicons/svg",
+      "label": "yogurt cup",
+      "format": "svg",
+      "bytes": 9021,
+      "blob_sha": "3d4676a10da6057018035f74a168eecc19985c12"
+    },
+    {
+      "path": "assets/icons/ofc/utility/bulletin-board.png",
+      "group": "utility",
+      "label": "bulletin board",
+      "format": "png",
+      "bytes": 3258,
+      "blob_sha": "d81cdade6d91bbf85d381d26653f68e89e90f335"
+    },
+    {
+      "path": "assets/icons/ofc/utility/calendar.png",
+      "group": "utility",
+      "label": "calendar",
+      "format": "png",
+      "bytes": 3497,
+      "blob_sha": "a7663196271ee36623201c30bd41adda56f6bb2c"
+    },
+    {
+      "path": "assets/icons/ofc/utility/check-look.png",
+      "group": "utility",
+      "label": "check look",
+      "format": "png",
+      "bytes": 2694,
+      "blob_sha": "2ac9a0191ef9365aa74744f2e8cc8ab7192ca6ba"
+    },
+    {
+      "path": "assets/icons/ofc/utility/clock.png",
+      "group": "utility",
+      "label": "clock",
+      "format": "png",
+      "bytes": 2780,
+      "blob_sha": "670d9278a4a8013f7be1f98303da67a43ff57d0a"
+    },
+    {
+      "path": "assets/icons/ofc/utility/fridge.png",
+      "group": "utility",
+      "label": "fridge",
+      "format": "png",
+      "bytes": 3115,
+      "blob_sha": "edf0ee8f2214f86d7081bd9cb5535f273be2bc22"
+    },
+    {
+      "path": "assets/icons/ofc/utility/heart.png",
+      "group": "utility",
+      "label": "heart",
+      "format": "png",
+      "bytes": 2504,
+      "blob_sha": "08889c64d177ca23c32dea120875fc538d3c1ad4"
+    },
+    {
+      "path": "assets/icons/ofc/utility/home.png",
+      "group": "utility",
+      "label": "home",
+      "format": "png",
+      "bytes": 3135,
+      "blob_sha": "c66d005741b1ac911106e433990ccdd242afabe1"
+    },
+    {
+      "path": "assets/icons/ofc/utility/lightbulb.png",
+      "group": "utility",
+      "label": "lightbulb",
+      "format": "png",
+      "bytes": 3450,
+      "blob_sha": "b96242652e25b0df56a6371e08592099d43f2199"
+    },
+    {
+      "path": "assets/icons/ofc/utility/magnet.png",
+      "group": "utility",
+      "label": "magnet",
+      "format": "png",
+      "bytes": 3627,
+      "blob_sha": "7b90481d5e43007344a340c1ce8da172f01dfc9a"
+    },
+    {
+      "path": "assets/icons/ofc/utility/next-arrow.png",
+      "group": "utility",
+      "label": "next arrow",
+      "format": "png",
+      "bytes": 1064,
+      "blob_sha": "c3d85bcaebe1c72a0c2d45b2812675c6e48f50e8"
+    },
+    {
+      "path": "assets/icons/ofc/utility/question.png",
+      "group": "utility",
+      "label": "question",
+      "format": "png",
+      "bytes": 1594,
+      "blob_sha": "69358f7eca665792513b46f0ad7420c50ebcda38"
+    },
+    {
+      "path": "assets/icons/ofc/utility/teamwork-hands.png",
+      "group": "utility",
+      "label": "teamwork hands",
+      "format": "png",
+      "bytes": 3717,
+      "blob_sha": "edd818d5c92524a13fc44e5d22375ea91a679a74"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/clear-dishes.png",
+      "group": "v2/masters",
+      "label": "clear dishes",
+      "format": "png",
+      "bytes": 377864,
+      "blob_sha": "cde3640be2e6dbb0535a1a0c1204b575593868e5"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/comb-hair.png",
+      "group": "v2/masters",
+      "label": "comb hair",
+      "format": "png",
+      "bytes": 369935,
+      "blob_sha": "78ff69da5e1d9ad7add265a71f183c791299a25b"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/eat-breakfast.png",
+      "group": "v2/masters",
+      "label": "eat breakfast",
+      "format": "png",
+      "bytes": 481279,
+      "blob_sha": "66a4227911a3017e041e8729dcad447cbfb73800"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/feed-pets.png",
+      "group": "v2/masters",
+      "label": "feed pets",
+      "format": "png",
+      "bytes": 355186,
+      "blob_sha": "4700ba5258993883a03d15645014c0c5225a455a"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/get-dressed.png",
+      "group": "v2/masters",
+      "label": "get dressed",
+      "format": "png",
+      "bytes": 483901,
+      "blob_sha": "b8ecd3b36550eb15f2fee87cbbcfcb7d86c2e9f3"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/put-away-toys.png",
+      "group": "v2/masters",
+      "label": "put away toys",
+      "format": "png",
+      "bytes": 621400,
+      "blob_sha": "05f72b18dd0c25232f02982f628fc3a7358295de"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/set-table.png",
+      "group": "v2/masters",
+      "label": "set table",
+      "format": "png",
+      "bytes": 1265720,
+      "blob_sha": "be5b17d985db08fd50bb9e2f6215d5bb133bb1a0"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/take-out-trash.png",
+      "group": "v2/masters",
+      "label": "take out trash",
+      "format": "png",
+      "bytes": 516515,
+      "blob_sha": "e61ac69c6110a1c571cfc024af917b41cbe825ca"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/unpack-backpack.png",
+      "group": "v2/masters",
+      "label": "unpack backpack",
+      "format": "png",
+      "bytes": 1196240,
+      "blob_sha": "205373394ed4cad07c0bf1b0076a7d933747174e"
+    },
+    {
+      "path": "assets/icons/ofc/v2/masters/wipe-counter.png",
+      "group": "v2/masters",
+      "label": "wipe counter",
+      "format": "png",
+      "bytes": 413111,
+      "blob_sha": "49facc36f95b70df48a6e1a87e9066928cde3cab"
+    },
+    {
+      "path": "assets/icons/ofc/vision/adventure-vision.jpeg",
+      "group": "vision",
+      "label": "adventure vision",
+      "format": "jpeg",
+      "bytes": 214541,
+      "blob_sha": "9fc4d461cb4e468ac99dee94583feacc16373b32"
+    },
+    {
+      "path": "assets/icons/ofc/vision/courage-vision.jpeg",
+      "group": "vision",
+      "label": "courage vision",
+      "format": "jpeg",
+      "bytes": 322899,
+      "blob_sha": "9b181d273c8adc98e7788e7acc7a1668d4b0b1c7"
+    },
+    {
+      "path": "assets/icons/ofc/vision/creativity-vision.jpeg",
+      "group": "vision",
+      "label": "creativity vision",
+      "format": "jpeg",
+      "bytes": 293521,
+      "blob_sha": "4ec6bf5d37d2b0973f504cba7ca46e0a2f176f4f"
+    },
+    {
+      "path": "assets/icons/ofc/vision/faith-vision.jpeg",
+      "group": "vision",
+      "label": "faith vision",
+      "format": "jpeg",
+      "bytes": 232712,
+      "blob_sha": "9ef3b3c18baa5be46a2839c528204c1acbde2ef9"
+    },
+    {
+      "path": "assets/icons/ofc/vision/generosity-vision.jpeg",
+      "group": "vision",
+      "label": "generosity vision",
+      "format": "jpeg",
+      "bytes": 238670,
+      "blob_sha": "529294d2e4b30ee9ea08e18367598516ed8be11e"
+    },
+    {
+      "path": "assets/icons/ofc/vision/gratitude-vision.jpeg",
+      "group": "vision",
+      "label": "gratitude vision",
+      "format": "jpeg",
+      "bytes": 308140,
+      "blob_sha": "a35278e3ed0ed150e43d202d8742bf6b36f90439"
+    },
+    {
+      "path": "assets/icons/ofc/vision/growth-vision.jpeg",
+      "group": "vision",
+      "label": "growth vision",
+      "format": "jpeg",
+      "bytes": 372252,
+      "blob_sha": "725e27ac5c79f47ed6d9e86bb585cd517a404664"
+    },
+    {
+      "path": "assets/icons/ofc/vision/home-vision.jpg",
+      "group": "vision",
+      "label": "home vision",
+      "format": "jpg",
+      "bytes": 414343,
+      "blob_sha": "7b2c5d83ad6da8bc6e6e3f8a5491f68f0074b119"
+    },
+    {
+      "path": "assets/icons/ofc/vision/hope-vision.jpeg",
+      "group": "vision",
+      "label": "hope vision",
+      "format": "jpeg",
+      "bytes": 365589,
+      "blob_sha": "06b37e253339fc14f8ddf75ca9daf755b7be7f2e"
+    },
+    {
+      "path": "assets/icons/ofc/vision/hospitality-vision.jpeg",
+      "group": "vision",
+      "label": "hospitality vision",
+      "format": "jpeg",
+      "bytes": 544592,
+      "blob_sha": "de177ebb0fa05fa535fb6794ca4041b6b863c260"
+    },
+    {
+      "path": "assets/icons/ofc/vision/joy-vision.jpeg",
+      "group": "vision",
+      "label": "joy vision",
+      "format": "jpeg",
+      "bytes": 325145,
+      "blob_sha": "df458c93eda3d9e512477395073f7d4e77ca6db5"
+    },
+    {
+      "path": "assets/icons/ofc/vision/kindness-vision.jpeg",
+      "group": "vision",
+      "label": "kindness vision",
+      "format": "jpeg",
+      "bytes": 222399,
+      "blob_sha": "8f9393321aa67dd8d77f8ae054725e6d642501cf"
+    },
+    {
+      "path": "assets/icons/ofc/vision/love-vision.jpeg",
+      "group": "vision",
+      "label": "love vision",
+      "format": "jpeg",
+      "bytes": 149880,
+      "blob_sha": "9d2c50bf651ef40b343f9b7405056f5415be9f7d"
+    },
+    {
+      "path": "assets/icons/ofc/vision/peace-vision.jpeg",
+      "group": "vision",
+      "label": "peace vision",
+      "format": "jpeg",
+      "bytes": 193574,
+      "blob_sha": "d6851900470bfc608c95ca864cad52d12c37b6be"
+    },
+    {
+      "path": "assets/icons/ofc/vision/perseverance-vision.jpeg",
+      "group": "vision",
+      "label": "perseverance vision",
+      "format": "jpeg",
+      "bytes": 212822,
+      "blob_sha": "b0bd9f8933945bfdccc143a564df5ced9268b2a1"
+    },
+    {
+      "path": "assets/icons/ofc/vision/playfulness-vision.jpg",
+      "group": "vision",
+      "label": "playfulness vision",
+      "format": "jpg",
+      "bytes": 135070,
+      "blob_sha": "b28c1df1aaaeccd4e66b1b38e0e17c96da23d072"
+    },
+    {
+      "path": "assets/icons/ofc/vision/rest-vision.jpg",
+      "group": "vision",
+      "label": "rest vision",
+      "format": "jpg",
+      "bytes": 305574,
+      "blob_sha": "fe7a623a864d00b0b0e911863c464ced6844e329"
+    },
+    {
+      "path": "assets/icons/ofc/vision/service-vision.jpg",
+      "group": "vision",
+      "label": "service vision",
+      "format": "jpg",
+      "bytes": 98264,
+      "blob_sha": "324018fd5833c43aec3f5a067285a62b2106b741"
+    },
+    {
+      "path": "assets/icons/ofc/vision/togetherness.jpg",
+      "group": "vision",
+      "label": "togetherness",
+      "format": "jpg",
+      "bytes": 292946,
+      "blob_sha": "35cf4b8b90352d74c94d9d30237ad69b265f4384"
+    },
+    {
+      "path": "assets/icons/ofc/vision/wonder-vision.jpg",
+      "group": "vision",
+      "label": "wonder vision",
+      "format": "jpg",
+      "bytes": 218264,
+      "blob_sha": "42fa01dc2cf6cac4e887a93a4d4a854c9cbec437"
+    },
+    {
+      "path": "design/zone-icons/bathroom.webp",
+      "group": "design-zone-icons",
+      "label": "bathroom",
+      "format": "webp",
+      "bytes": 10044,
+      "blob_sha": "51c69eb3e1c8c019f90acf8224381867b465fc51"
+    },
+    {
+      "path": "design/zone-icons/bedroom.webp",
+      "group": "design-zone-icons",
+      "label": "bedroom",
+      "format": "webp",
+      "bytes": 10396,
+      "blob_sha": "59768ea96864bc78acaa53e3fe76d366b3ce8c5a"
+    },
+    {
+      "path": "design/zone-icons/daily.svg",
+      "group": "design-zone-icons",
+      "label": "daily",
+      "format": "svg",
+      "bytes": 523,
+      "blob_sha": "f4bff81d79dd878bfa9efc279778dc3c6e44844e"
+    },
+    {
+      "path": "design/zone-icons/deep-clean.webp",
+      "group": "design-zone-icons",
+      "label": "deep clean",
+      "format": "webp",
+      "bytes": 12594,
+      "blob_sha": "8360401e89e433abb43be647ab8c0991a9a20283"
+    },
+    {
+      "path": "design/zone-icons/kitchen.webp",
+      "group": "design-zone-icons",
+      "label": "kitchen",
+      "format": "webp",
+      "bytes": 14792,
+      "blob_sha": "fe56f23968769a6bde184164216a82e09c5cccaf"
+    },
+    {
+      "path": "design/zone-icons/living-room.webp",
+      "group": "design-zone-icons",
+      "label": "living room",
+      "format": "webp",
+      "bytes": 11386,
+      "blob_sha": "024c25b78b1ce1c5cdcf136d8f80e4dab797be8f"
+    },
+    {
+      "path": "public/icons/zones/bathroom.png",
+      "group": "published-zone-icons",
+      "label": "bathroom",
+      "format": "png",
+      "bytes": 10490,
+      "blob_sha": "882eea65634794ac5f484ff619e5102816d463af"
+    },
+    {
+      "path": "public/icons/zones/bedroom.png",
+      "group": "published-zone-icons",
+      "label": "bedroom",
+      "format": "png",
+      "bytes": 9707,
+      "blob_sha": "51c3e0f56f4539eb87bb8e3f65b9ea4375adf198"
+    },
+    {
+      "path": "public/icons/zones/daily.png",
+      "group": "published-zone-icons",
+      "label": "daily",
+      "format": "png",
+      "bytes": 4914,
+      "blob_sha": "1801460ce6743b949de5bbde9c6597b7ba4943d2"
+    },
+    {
+      "path": "public/icons/zones/deep-clean.png",
+      "group": "published-zone-icons",
+      "label": "deep clean",
+      "format": "png",
+      "bytes": 19553,
+      "blob_sha": "e9bee681858644d7733eacdc2ef1559fce2b8c5a"
+    },
+    {
+      "path": "public/icons/zones/kitchen.png",
+      "group": "published-zone-icons",
+      "label": "kitchen",
+      "format": "png",
+      "bytes": 25799,
+      "blob_sha": "fc11f0bac0f982f6e160bc6096c8fe6d231d306a"
+    },
+    {
+      "path": "public/icons/zones/living-room.png",
+      "group": "published-zone-icons",
+      "label": "living room",
+      "format": "png",
+      "bytes": 12833,
+      "blob_sha": "c32828efbf42084c86397f770d0a69cf72ff9410"
+    },
+    {
+      "path": "public/images/club/icon-library/apple.png",
+      "group": "published-club-library",
+      "label": "apple",
+      "format": "png",
+      "bytes": 21780,
+      "blob_sha": "de3f85293874d4d5a6d8c1d8de2c05462974b9ea"
+    },
+    {
+      "path": "public/images/club/icon-library/backpack copy.png",
+      "group": "published-club-library",
+      "label": "backpack copy",
+      "format": "png",
+      "bytes": 70248,
+      "blob_sha": "cff200f111123c84eb934051f8075895fffa592b"
+    },
+    {
+      "path": "public/images/club/icon-library/backpack.png",
+      "group": "published-club-library",
+      "label": "backpack",
+      "format": "png",
+      "bytes": 74248,
+      "blob_sha": "eeeee8e451ce56bf54fc0108e107519b52d174a2"
+    },
+    {
+      "path": "public/images/club/icon-library/bicycle.png",
+      "group": "published-club-library",
+      "label": "bicycle",
+      "format": "png",
+      "bytes": 81808,
+      "blob_sha": "e59ba64d4f7ff7fe56704b528070393a7c3409e0"
+    },
+    {
+      "path": "public/images/club/icon-library/bike.png",
+      "group": "published-club-library",
+      "label": "bike",
+      "format": "png",
+      "bytes": 6877,
+      "blob_sha": "9dbf82bbc402e0621e542e859c274ef2876af75b"
+    },
+    {
+      "path": "public/images/club/icon-library/blocks.png",
+      "group": "published-club-library",
+      "label": "blocks",
+      "format": "png",
+      "bytes": 5201,
+      "blob_sha": "44d1e88c0319bb35d81084b2bcc8e6c4f7bfeac3"
+    },
+    {
+      "path": "public/images/club/icon-library/board-game.png",
+      "group": "published-club-library",
+      "label": "board game",
+      "format": "png",
+      "bytes": 79706,
+      "blob_sha": "90e56fec46180fdccecfb13b3ac09b894b5d8600"
+    },
+    {
+      "path": "public/images/club/icon-library/boiled-egg.png",
+      "group": "published-club-library",
+      "label": "boiled egg",
+      "format": "png",
+      "bytes": 41549,
+      "blob_sha": "2a2c6636f70f3252683b20b42d69931c62660fcf"
+    },
+    {
+      "path": "public/images/club/icon-library/book-stack.png",
+      "group": "published-club-library",
+      "label": "book stack",
+      "format": "png",
+      "bytes": 6297,
+      "blob_sha": "32894edce201ff4032260efcc8217b64b0f3204e"
+    },
+    {
+      "path": "public/images/club/icon-library/book.png",
+      "group": "published-club-library",
+      "label": "book",
+      "format": "png",
+      "bytes": 63790,
+      "blob_sha": "12371745d1ad9dc3e46365334740b1cbbdb1ceac"
+    },
+    {
+      "path": "public/images/club/icon-library/bread.png",
+      "group": "published-club-library",
+      "label": "bread",
+      "format": "png",
+      "bytes": 48570,
+      "blob_sha": "d26d9770d0c785c0be916161787f9e0ae85f4cc5"
+    },
+    {
+      "path": "public/images/club/icon-library/breakfast-bowl.png",
+      "group": "published-club-library",
+      "label": "breakfast bowl",
+      "format": "png",
+      "bytes": 48174,
+      "blob_sha": "1d65034ddc51abb05dd6c32109f2354d191f0609"
+    },
+    {
+      "path": "public/images/club/icon-library/building-a-course.png",
+      "group": "published-club-library",
+      "label": "building a course",
+      "format": "png",
+      "bytes": 69426,
+      "blob_sha": "b2a35a165e0dab190ecf1b9f511ba56e16c304bc"
+    },
+    {
+      "path": "public/images/club/icon-library/building-blocks.png",
+      "group": "published-club-library",
+      "label": "building blocks",
+      "format": "png",
+      "bytes": 55085,
+      "blob_sha": "fc70a7d82893aee4ca02e14fcdd1dc7f492e3994"
+    },
+    {
+      "path": "public/images/club/icon-library/carrot-sticks.png",
+      "group": "published-club-library",
+      "label": "carrot sticks",
+      "format": "png",
+      "bytes": 48122,
+      "blob_sha": "feb1331a9507fd1cd6ebbce4184ee0a36cc04383"
+    },
+    {
+      "path": "public/images/club/icon-library/carrot.png",
+      "group": "published-club-library",
+      "label": "carrot",
+      "format": "png",
+      "bytes": 25213,
+      "blob_sha": "991b713765207aad2e92675eabaa81acd1510e3c"
+    },
+    {
+      "path": "public/images/club/icon-library/cheese-wedge.png",
+      "group": "published-club-library",
+      "label": "cheese wedge",
+      "format": "png",
+      "bytes": 32062,
+      "blob_sha": "98245353c36b29fa7f4a278f178bd14cdc749125"
+    },
+    {
+      "path": "public/images/club/icon-library/clear-floor.png",
+      "group": "published-club-library",
+      "label": "clear floor",
+      "format": "png",
+      "bytes": 187812,
+      "blob_sha": "e6a7e07367ba8d7a2958a72c8036fce42ab6db87"
+    },
+    {
+      "path": "public/images/club/icon-library/cooking-pot.png",
+      "group": "published-club-library",
+      "label": "cooking pot",
+      "format": "png",
+      "bytes": 64655,
+      "blob_sha": "514743ffd0e0ff4c7f759b0978b1d5140e2f3665"
+    },
+    {
+      "path": "public/images/club/icon-library/crackers.png",
+      "group": "published-club-library",
+      "label": "crackers",
+      "format": "png",
+      "bytes": 38367,
+      "blob_sha": "e9ce08cfb1568085894e0d0597acded6af654259"
+    },
+    {
+      "path": "public/images/club/icon-library/create-explore.png",
+      "group": "published-club-library",
+      "label": "create explore",
+      "format": "png",
+      "bytes": 55657,
+      "blob_sha": "ad58127238aa6dc3c4f0dce98922396d9e49fe93"
+    },
+    {
+      "path": "public/images/club/icon-library/cucumber-sticks.png",
+      "group": "published-club-library",
+      "label": "cucumber sticks",
+      "format": "png",
+      "bytes": 56443,
+      "blob_sha": "3fc249e2387ba56470c1393d4003b51a90519127"
+    },
+    {
+      "path": "public/images/club/icon-library/dishes-in-sink.png",
+      "group": "published-club-library",
+      "label": "dishes in sink",
+      "format": "png",
+      "bytes": 81395,
+      "blob_sha": "0178f8373591089e39baa6eb911ec9a510d54b19"
+    },
+    {
+      "path": "public/images/club/icon-library/doing-homework.png",
+      "group": "published-club-library",
+      "label": "doing homework",
+      "format": "png",
+      "bytes": 76079,
+      "blob_sha": "2ba317ee7796230f9bfcfc793d683313130f293d"
+    },
+    {
+      "path": "public/images/club/icon-library/donation-box.png",
+      "group": "published-club-library",
+      "label": "donation box",
+      "format": "png",
+      "bytes": 73412,
+      "blob_sha": "615628fcf62c5f00c7b73f2bc5384a895863f13f"
+    },
+    {
+      "path": "public/images/club/icon-library/drawing-and-coloring.png",
+      "group": "published-club-library",
+      "label": "drawing and coloring",
+      "format": "png",
+      "bytes": 70701,
+      "blob_sha": "fce39ef1d6711b5cfc7ccf0c452cbaff2fdf66d5"
+    },
+    {
+      "path": "public/images/club/icon-library/duster.png",
+      "group": "published-club-library",
+      "label": "duster",
+      "format": "png",
+      "bytes": 47414,
+      "blob_sha": "a8b3a113eee33d08bd1c5a327d4554aaa498915b"
+    },
+    {
+      "path": "public/images/club/icon-library/evening-reset.png",
+      "group": "published-club-library",
+      "label": "evening reset",
+      "format": "png",
+      "bytes": 43703,
+      "blob_sha": "c52a8e79075fc7281d73c8cd4300fdb576283833"
+    },
+    {
+      "path": "public/images/club/icon-library/family-playing-game.png",
+      "group": "published-club-library",
+      "label": "family playing game",
+      "format": "png",
+      "bytes": 101280,
+      "blob_sha": "42fd3d874243e5d978beac4803ed85a9ad9443bf"
+    },
+    {
+      "path": "public/images/club/icon-library/free-afternoon.png",
+      "group": "published-club-library",
+      "label": "free afternoon",
+      "format": "png",
+      "bytes": 49371,
+      "blob_sha": "037c3a55b3e5d48239ac966eb9b571b49efefd6f"
+    },
+    {
+      "path": "public/images/club/icon-library/friend-pair.png",
+      "group": "published-club-library",
+      "label": "friend pair",
+      "format": "png",
+      "bytes": 6485,
+      "blob_sha": "b8520834f10ce75b96183e52a10af2c77e148cd0"
+    },
+    {
+      "path": "public/images/club/icon-library/fruit.png",
+      "group": "published-club-library",
+      "label": "fruit",
+      "format": "png",
+      "bytes": 70642,
+      "blob_sha": "8b2909dbb4e74dc15e2cd71fc3f5107b161583b0"
+    },
+    {
+      "path": "public/images/club/icon-library/getting-dressed.png",
+      "group": "published-club-library",
+      "label": "getting dressed",
+      "format": "png",
+      "bytes": 50035,
+      "blob_sha": "f4b96e92f1777942e832656927f907bed8c2c17b"
+    },
+    {
+      "path": "public/images/club/icon-library/granola-bar.png",
+      "group": "published-club-library",
+      "label": "granola bar",
+      "format": "png",
+      "bytes": 57040,
+      "blob_sha": "6b58446e907ee59197430709a844bc798ec10773"
+    },
+    {
+      "path": "public/images/club/icon-library/grocery-bag-with-produce.png",
+      "group": "published-club-library",
+      "label": "grocery bag with produce",
+      "format": "png",
+      "bytes": 77096,
+      "blob_sha": "8f753940d37953c2a1da1bde8462f5e82c8c3c97"
+    },
+    {
+      "path": "public/images/club/icon-library/hard-boiled-egg.png",
+      "group": "published-club-library",
+      "label": "hard boiled egg",
+      "format": "png",
+      "bytes": 41549,
+      "blob_sha": "2a2c6636f70f3252683b20b42d69931c62660fcf"
+    },
+    {
+      "path": "public/images/club/icon-library/hummus-cup.png",
+      "group": "published-club-library",
+      "label": "hummus cup",
+      "format": "png",
+      "bytes": 39000,
+      "blob_sha": "b6fd275f10f7acbe06a70c3791f831286399e131"
+    },
+    {
+      "path": "public/images/club/icon-library/kindness-note.png",
+      "group": "published-club-library",
+      "label": "kindness note",
+      "format": "png",
+      "bytes": 63818,
+      "blob_sha": "c9bc60a3e4232b406d7636f247ad4b608bf2ae4b"
+    },
+    {
+      "path": "public/images/club/icon-library/lunch-box.png",
+      "group": "published-club-library",
+      "label": "lunch box",
+      "format": "png",
+      "bytes": 198589,
+      "blob_sha": "2e9883c7f667f61f46b009a4f0e1d5492d26af1f"
+    },
+    {
+      "path": "public/images/club/icon-library/lunch-reset.png",
+      "group": "published-club-library",
+      "label": "lunch reset",
+      "format": "png",
+      "bytes": 54960,
+      "blob_sha": "d136aa5c70a7c28317dc51b55830172a21640208"
+    },
+    {
+      "path": "public/images/club/icon-library/mini-bagels.png",
+      "group": "published-club-library",
+      "label": "mini bagels",
+      "format": "png",
+      "bytes": 56146,
+      "blob_sha": "3b7ae8a905063b1e48d030f29a3d3d2f9a334761"
+    },
+    {
+      "path": "public/images/club/icon-library/morning-start copy.png",
+      "group": "published-club-library",
+      "label": "morning start copy",
+      "format": "png",
+      "bytes": 44610,
+      "blob_sha": "46d45f20872c1e23004c4ebbfe41e5db219048fd"
+    },
+    {
+      "path": "public/images/club/icon-library/morning-start.png",
+      "group": "published-club-library",
+      "label": "morning start",
+      "format": "png",
+      "bytes": 39925,
+      "blob_sha": "12bf1a4f66498fc66599cd865e09ade0d83639ed"
+    },
+    {
+      "path": "public/images/club/icon-library/move-play.png",
+      "group": "published-club-library",
+      "label": "move play",
+      "format": "png",
+      "bytes": 55073,
+      "blob_sha": "eb52fe775323ac563970d34832aa3a3d763a0315"
+    },
+    {
+      "path": "public/images/club/icon-library/nutter-butter-packets.png",
+      "group": "published-club-library",
+      "label": "nutter butter packets",
+      "format": "png",
+      "bytes": 56932,
+      "blob_sha": "1442061a0f1b27d91255a4e5dd62ff527282d719"
+    },
+    {
+      "path": "public/images/club/icon-library/pajamas.png",
+      "group": "published-club-library",
+      "label": "pajamas",
+      "format": "png",
+      "bytes": 81088,
+      "blob_sha": "b87d6a6a67c28682cfd43e2253f6a5c2592b9524"
+    },
+    {
+      "path": "public/images/club/icon-library/parent-child-reading.png",
+      "group": "published-club-library",
+      "label": "parent child reading",
+      "format": "png",
+      "bytes": 78141,
+      "blob_sha": "48543282993e58e0448efe286870681ab441c84d"
+    },
+    {
+      "path": "public/images/club/icon-library/place-setting.png",
+      "group": "published-club-library",
+      "label": "place setting",
+      "format": "png",
+      "bytes": 65738,
+      "blob_sha": "ca1ea9fcb2331cd8d82527861ca29196e4f7f6c8"
+    },
+    {
+      "path": "public/images/club/icon-library/playing-with-friends.png",
+      "group": "published-club-library",
+      "label": "playing with friends",
+      "format": "png",
+      "bytes": 95342,
+      "blob_sha": "59824508ec64033ea8adf236bb5ad27a1dc21690"
+    },
+    {
+      "path": "public/images/club/icon-library/putting-on-shoes.png",
+      "group": "published-club-library",
+      "label": "putting on shoes",
+      "format": "png",
+      "bytes": 75961,
+      "blob_sha": "6229d46a66a081013f417689dcfb725de05a1e8b"
+    },
+    {
+      "path": "public/images/club/icon-library/puzzele-piece.png",
+      "group": "published-club-library",
+      "label": "puzzele piece",
+      "format": "png",
+      "bytes": 35340,
+      "blob_sha": "c40e18808a5f8c9fdf00d0aad7c7132b53abb933"
+    },
+    {
+      "path": "public/images/club/icon-library/puzzle-piece.png",
+      "group": "published-club-library",
+      "label": "puzzle piece",
+      "format": "png",
+      "bytes": 4661,
+      "blob_sha": "f28e0bbd880637fe26ace1809a72065be28aeea2"
+    },
+    {
+      "path": "public/images/club/icon-library/quiet-time.png",
+      "group": "published-club-library",
+      "label": "quiet time",
+      "format": "png",
+      "bytes": 51408,
+      "blob_sha": "8be9b98bb48b2deb0f480b06ca1409081e354be1"
+    },
+    {
+      "path": "public/images/club/icon-library/sneakers.png",
+      "group": "published-club-library",
+      "label": "sneakers",
+      "format": "png",
+      "bytes": 47829,
+      "blob_sha": "02eb402389f0d544e07eba9e1cbaadd019de5c49"
+    },
+    {
+      "path": "public/images/club/icon-library/sorting-clothes.png",
+      "group": "published-club-library",
+      "label": "sorting clothes",
+      "format": "png",
+      "bytes": 64454,
+      "blob_sha": "bee800cc3b254ac0fb32244e1c4e675b6d5810b3"
+    },
+    {
+      "path": "public/images/club/icon-library/spray-bottle-and-cloth.png",
+      "group": "published-club-library",
+      "label": "spray bottle and cloth",
+      "format": "png",
+      "bytes": 57201,
+      "blob_sha": "10e2826cb4dd200f762a38254aed22662c861e62"
+    },
+    {
+      "path": "public/images/club/icon-library/stack-of-clothes.png",
+      "group": "published-club-library",
+      "label": "stack of clothes",
+      "format": "png",
+      "bytes": 202248,
+      "blob_sha": "5ee01c7f875a23ffa8e3f5c22a1058b3ce089e6f"
+    },
+    {
+      "path": "public/images/club/icon-library/star.png",
+      "group": "published-club-library",
+      "label": "star",
+      "format": "png",
+      "bytes": 43406,
+      "blob_sha": "e2ed1a5eb1c2514c6e076d14927226bc54aeb2b8"
+    },
+    {
+      "path": "public/images/club/icon-library/table-after-meal.png",
+      "group": "published-club-library",
+      "label": "table after meal",
+      "format": "png",
+      "bytes": 98370,
+      "blob_sha": "eb7b218af199f5179fb22cd575a2b5b458732b08"
+    },
+    {
+      "path": "public/images/club/icon-library/toothbrush.png",
+      "group": "published-club-library",
+      "label": "toothbrush",
+      "format": "png",
+      "bytes": 38446,
+      "blob_sha": "ce1ae2216e133e5b1ca54f3f88d5466a1205cb4c"
+    },
+    {
+      "path": "public/images/club/icon-library/toys-in-toy-basket.png",
+      "group": "published-club-library",
+      "label": "toys in toy basket",
+      "format": "png",
+      "bytes": 216577,
+      "blob_sha": "2413b4e430ee97d20eb4167d2c049beff60598ae"
+    },
+    {
+      "path": "public/images/club/icon-library/tree.png",
+      "group": "published-club-library",
+      "label": "tree",
+      "format": "png",
+      "bytes": 53561,
+      "blob_sha": "b6bf056ddc1aa833baf3c9c5ea349e95ecde3cd0"
+    },
+    {
+      "path": "public/images/club/icon-library/washing-dishes.png",
+      "group": "published-club-library",
+      "label": "washing dishes",
+      "format": "png",
+      "bytes": 75954,
+      "blob_sha": "d2018ed045118aca248ef39d1bde36d6aec735ab"
+    },
+    {
+      "path": "public/images/club/icon-library/washing-hands.png",
+      "group": "published-club-library",
+      "label": "washing hands",
+      "format": "png",
+      "bytes": 61057,
+      "blob_sha": "028d56b5caf18ecb14a273ff566c41c2532602b4"
+    },
+    {
+      "path": "public/images/club/icon-library/washing-window.png",
+      "group": "published-club-library",
+      "label": "washing window",
+      "format": "png",
+      "bytes": 70593,
+      "blob_sha": "7d329a28486310c1166af0e7327f24be3df283a1"
+    },
+    {
+      "path": "public/images/club/icon-library/water-bottle.png",
+      "group": "published-club-library",
+      "label": "water bottle",
+      "format": "png",
+      "bytes": 152787,
+      "blob_sha": "5cc722e3440c6bf0ff0d2cb38b97c85392afd5b2"
+    },
+    {
+      "path": "public/images/club/icon-library/water-bottle.svg",
+      "group": "published-club-library",
+      "label": "water bottle",
+      "format": "svg",
+      "bytes": 401,
+      "blob_sha": "c78bf90b9106cf88f20b3655b85c93b83227284f"
+    },
+    {
+      "path": "public/images/club/icon-library/yogurt-cup copy.png",
+      "group": "published-club-library",
+      "label": "yogurt cup copy",
+      "format": "png",
+      "bytes": 49451,
+      "blob_sha": "0fbe29fb70d33ad0b6593008d76467b1f84a54f9"
+    },
+    {
+      "path": "public/images/club/icon-library/yogurt-cup.png",
+      "group": "published-club-library",
+      "label": "yogurt cup",
+      "format": "png",
+      "bytes": 41710,
+      "blob_sha": "3773f8b948f4e96617870704980fa35f6b13f63e"
+    }
+  ]
+}
