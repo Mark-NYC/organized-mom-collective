@@ -53,6 +53,13 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     }
   </div>
 
+  <div class="mr-icon-style" role="group" aria-label="Illustration style">
+    <span class="mr-icon-style-label">Illustration style</span>
+    <button type="button" data-mr-icon-style="hand-drawn" aria-pressed="true">Hand-drawn</button>
+    <button type="button" data-mr-icon-style="soft-color" aria-pressed="false">Soft color</button>
+    <span class="mr-icon-style-note">Soft color is a preview. Activities without a color icon keep their hand-drawn artwork.</span>
+  </div>
+
   <section class="mr-summer" data-mr-summer hidden aria-labelledby="mr-summer-h">
     <h2 id="mr-summer-h" class="mr-summer-title">Shape your summer rhythm</h2>
     <p class="mr-summer-note">A few anchors for ordinary summer days, not a schedule. Camps, trips and plans go on the family calendar.</p>
@@ -161,6 +168,12 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
 
 <style is:global>
+  .mr-icon-style { display:flex; align-items:center; flex-wrap:wrap; gap:8px; max-width:816px; margin:0 auto 20px; font-family:var(--font-sans); }
+  .mr-icon-style-label { margin-right:6px; font-size:.85rem; font-weight:600; }
+  .mr-icon-style button { cursor:pointer; background:#fff; color:#545454; border:1px solid #d5c5b8; border-radius:999px; padding:8px 16px; font:inherit; font-size:.85rem; }
+  .mr-icon-style button[aria-pressed="true"] { background:#d4dfc4; border-color:#545454; font-weight:700; }
+  .mr-icon-style button:focus-visible { outline:2px solid #545454; outline-offset:2px; }
+  .mr-icon-style-note { flex-basis:100%; color:#76706b; font-size:.75rem; }
   .mr-container {
     --mr-ink: var(--color-warm-ink);
     --mr-soft: var(--color-warm-soft);
