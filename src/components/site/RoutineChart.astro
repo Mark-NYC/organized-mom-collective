@@ -168,6 +168,12 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
 
 <style is:global>
+  .mr-icon-style { display:flex; align-items:center; flex-wrap:wrap; gap:8px; max-width:816px; margin:0 auto 20px; font-family:var(--font-sans); }
+  .mr-icon-style-label { margin-right:6px; font-size:.85rem; font-weight:600; }
+  .mr-icon-style button { cursor:pointer; background:#fff; color:#545454; border:1px solid #d5c5b8; border-radius:999px; padding:8px 16px; font:inherit; font-size:.85rem; }
+  .mr-icon-style button[aria-pressed="true"] { background:#d4dfc4; border-color:#545454; font-weight:700; }
+  .mr-icon-style button:focus-visible { outline:2px solid #545454; outline-offset:2px; }
+  .mr-icon-style-note { flex-basis:100%; color:#76706b; font-size:.75rem; }
   .mr-container {
     --mr-ink: var(--color-warm-ink);
     --mr-soft: var(--color-warm-soft);
@@ -188,13 +194,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   }
 
   @media (max-width:768px) {
-    .mr-icon-style { display:flex; align-items:center; flex-wrap:wrap; gap:8px; max-width:816px; margin:0 auto 20px; font-family:var(--font-sans); }
-  .mr-icon-style-label { margin-right:6px; font-size:.85rem; font-weight:600; }
-  .mr-icon-style button { cursor:pointer; background:#fff; color:#545454; border:1px solid #d5c5b8; border-radius:999px; padding:8px 16px; font:inherit; font-size:.85rem; }
-  .mr-icon-style button[aria-pressed="true"] { background:#d4dfc4; border-color:#545454; font-weight:700; }
-  .mr-icon-style button:focus-visible { outline:2px solid #545454; outline-offset:2px; }
-  .mr-icon-style-note { flex-basis:100%; color:#76706b; font-size:.75rem; }
-  .mr-types { display:flex !important; gap:8px; overflow-x:auto; scroll-snap-type:x proximity; padding:0 2px 10px; -webkit-overflow-scrolling:touch; }
+    .mr-types { display:flex !important; gap:8px; overflow-x:auto; scroll-snap-type:x proximity; padding:0 2px 10px; -webkit-overflow-scrolling:touch; }
     .mr-types .mr-type { flex:0 0 auto; min-width:115px; min-height:52px; border-radius:12px; scroll-snap-align:start; }
     .mr-type-blurb { display:none; }
     .mr-actions { display:grid; grid-template-columns:1fr auto; gap:12px; }
