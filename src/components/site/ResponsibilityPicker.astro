@@ -11,6 +11,7 @@
 import { responsibilities, responsibilityCategories, responsibilityColor, responsibilityImage } from '../../data/responsibilities';
 import { choreLineIcon } from '../../data/chore-line-icons';
 import { routineIconChoices, routineIconById } from '../../data/routine-line-icons';
+import { softColorIconFor } from '../../data/soft-color-icons';
 
 interface Props {
   heading?: string;
@@ -49,7 +50,7 @@ const { heading = 'Pick illustrated steps', hint, monochrome = false, routineExt
             <button type="button" class:list={['rp-tile', !src && 'rp-tile-text']} data-rp-pick={r.id} style={{ '--rp-cat': responsibilityColor(r) }}>
               {src && (
                 <span class="rp-art" aria-hidden="true">
-                  <img src={src} width="56" height="56" alt="" loading="lazy" decoding="async" />
+                  <img src={src} data-rp-color-src={softColorIconFor(r.title, r.id) ?? undefined} width="56" height="56" alt="" loading="lazy" decoding="async" />
                 </span>
               )}
               <span class="rp-name">{r.title}</span>
@@ -63,7 +64,7 @@ const { heading = 'Pick illustrated steps', hint, monochrome = false, routineExt
       return (
         <li data-rp-cat="routine" data-rp-routines={activity.routines.join(' ')}>
           <button type="button" class="rp-tile" data-rp-pick={activity.id}>
-            {src && <span class="rp-art" aria-hidden="true"><img src={src} width="56" height="56" alt="" loading="lazy" decoding="async" /></span>}
+            {src && <span class="rp-art" aria-hidden="true"><img src={src} data-rp-color-src={softColorIconFor(activity.title, activity.id) ?? undefined} width="56" height="56" alt="" loading="lazy" decoding="async" /></span>}
             <span class="rp-name">{activity.title}</span>
           </button>
         </li>
