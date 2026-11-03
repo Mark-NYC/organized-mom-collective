@@ -141,6 +141,7 @@ export const routes = {
   decemberCountdown: '/december-countdown',
   mealPlanner: '/meal-planner',
   mentalLoad: '/mental-load-worksheet',
+  familyMeetingAgenda: '/family-meeting-agenda',
   resources: '/resources',
   /** The Free tools section of the resource hub. */
   freeTools: '/tools',
