@@ -52,6 +52,48 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   const picker = host.querySelector<HTMLElement>('[data-rp]')!;
   const pickerStatus = picker.querySelector<HTMLElement>('[data-rp-status]')!;
 
+  // Mobile uses the same real picker/editor elements in dialogs, not copies.
+  // Moving them keeps saved data, chosen icons, and live chart rendering in sync.
+  // Desktop restores those elements to their original positions.
+  const mobileQuery = window.matchMedia('(max-width: 850px)');
+  const mobileNodes = [
+    { node: picker, target: 'pick' },
+    { node: host.querySelector<HTMLElement>('.mr-editor')!, target: 'edit' },
+    { node: host.querySelector<HTMLElement>('.mr-ideas')!, target: 'edit' },
+    { node: host.querySelector<HTMLElement>('.mr-reset-area')!, target: 'edit' },
+  ].map(({ node, target }) => {
+    const placeholder = document.createComment('Routine chart original control position');
+    node.parentNode!.insertBefore(placeholder, node);
+    return { node, target, placeholder };
+  });
+  const mobileDialogs = Array.from(host.querySelectorAll<HTMLDialogElement>('[data-mr-mobile-dialog]'));
+  function applyMobileLayout() {
+    if (mobileQuery.matches) {
+      mobileNodes.forEach(({ node, target }) => {
+        host.querySelector<HTMLElement>(`[data-mr-mobile-target="${target}"]`)?.appendChild(node);
+      });
+    } else {
+      mobileDialogs.forEach(dialog => { if (dialog.open) dialog.close(); });
+      mobileNodes.forEach(({ node, placeholder }) => placeholder.parentNode?.insertBefore(node, placeholder.nextSibling));
+    }
+  }
+  applyMobileLayout();
+  mobileQuery.addEventListener('change', applyMobileLayout);
+  for (const openButton of host.querySelectorAll<HTMLButtonElement>('[data-mr-mobile-open]')) {
+    openButton.addEventListener('click', () => {
+      const dialog = mobileDialogs.find(item => item.dataset.mrMobileDialog === openButton.dataset.mrMobileOpen);
+      if (dialog && !dialog.open) dialog.showModal();
+    });
+  }
+  mobileDialogs.forEach(dialog => {
+    dialog.querySelectorAll<HTMLButtonElement>('[data-mr-mobile-close]').forEach(button => {
+      button.addEventListener('click', () => dialog.close());
+    });
+    dialog.addEventListener('click', e => {
+      if (e.target === dialog) dialog.close();
+    });
+  });
+
   // An intentional generic line illustration for custom steps that have no matched icon.
   // It is embedded so PNG export never depends on an unavailable external asset.
   const fallbackStepIcon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
