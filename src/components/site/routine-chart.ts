@@ -17,6 +17,7 @@ import { matchResponsibility, responsibilityById } from '../../data/responsibili
 import { choreLineIcon, choreLineIconForText } from '../../data/chore-line-icons';
 import { routineActivityById, routineIconById, routineIconForText } from '../../data/routine-line-icons';
 import { routineTypes, type RoutineType } from '../../data/routines';
+import { softColorIconFor } from '../../data/soft-color-icons';
 import { ageStage, FOCI, summerRhythm, type SummerInput } from '../../data/summer-rhythm';
 import type { ToolHandoff } from '../../lib/tool-handoff';
 import { hasSaved, orderPickerForAge } from './tool-handoff-ui';
@@ -58,22 +59,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     '<rect x="12" y="10" width="40" height="46" rx="6"/><path d="M24 10V7h16v3M23 25l4 4 8-9M23 42h19M23 47h15"/></svg>'
   );
 
-  // The second style is strictly additive. The original assets and saved icon IDs
-  // remain the source of truth. Only reviewed B01 artwork is offered here.
-  // Later approved icons can be added to this map without changing stored charts.
-  const colorIconBase = '/assets/icons/ofc/v2/routines/';
-  const colorIconMatches: { slug: string; match: RegExp }[] = [
-    { slug: 'feed-pets', match: /feed (the |my |our )?(pets?|dog|cat)/i },
-    { slug: 'put-away-toys', match: /(put away|pick up|tidy).*toys?|toys?.*(away|up)/i },
-    { slug: 'unpack-backpack', match: /unpack.*backpack|backpack.*lunch\s*box/i },
-    { slug: 'clear-dishes', match: /clear.*(dishes|table)|dishes.*(sink|away)/i },
-    { slug: 'comb-hair', match: /(comb|brush).*hair/i },
-    { slug: 'get-dressed', match: /get dressed|dress myself|put on clothes/i },
-    { slug: 'eat-breakfast', match: /eat breakfast|family breakfast|have breakfast/i },
-    { slug: 'take-out-trash', match: /(take out|empty).*trash|trash.*out/i },
-    { slug: 'set-table', match: /set (the )?table/i },
-    { slug: 'wipe-counter', match: /wipe.*(counter|worktop)|clean.*counter/i },
-  ];
+  // Soft color is an optional visual layer. Original art and saved icon IDs stay intact.
   const styleStorageKey = `${host.dataset.mrKey}:icon-style`;
   let iconStyle: 'hand-drawn' | 'soft-color' = 'hand-drawn';
   try { if (localStorage.getItem(styleStorageKey) === 'soft-color') iconStyle = 'soft-color'; } catch {}
@@ -81,9 +67,13 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   function updateStyleButtons() {
     styleButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mrIconStyle === iconStyle)));
   }
-  function colorIconFor(text: string, id: string): string | null {
-    const match = colorIconMatches.find(({ slug, match }) => slug === id || match.test(text));
-    return match ? `${colorIconBase}${match.slug}.png` : null;
+  function renderPickerArt() {
+    for (const img of picker.querySelectorAll<HTMLImageElement>('.rp-art img')) {
+      const original = img.dataset.rpHandDrawnSrc || img.getAttribute('src') || '';
+      if (!img.dataset.rpHandDrawnSrc) img.dataset.rpHandDrawnSrc = original;
+      const chosen = iconStyle === 'soft-color' ? img.dataset.rpColorSrc || original : original;
+      if (chosen && img.getAttribute('src') !== chosen) img.src = chosen;
+    }
   }
   updateStyleButtons();
   styleButtons.forEach(b => b.addEventListener('click', () => {
@@ -91,6 +81,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     if (value !== 'hand-drawn' && value !== 'soft-color') return;
     iconStyle = value;
     updateStyleButtons();
+    renderPickerArt();
     try { localStorage.setItem(styleStorageKey, value); } catch {}
     renderIcons();
   }));
@@ -109,7 +100,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
       const unpackBackpack = /unpack.*backpack|backpack.*lunch\s*box/i.test(stepFields[i].value);
       const src = filled ? ((washHands ? choreLineIcon('wash-my-hands') : null) ?? (unpackBackpack ? choreLineIcon('pack-my-backpack') : null) ?? routineIconForText(stepFields[i].value) ?? routineIconById(id) ?? choreLineIcon(id) ?? choreLineIconForText(stepFields[i].value) ?? fallbackStepIcon) : null;
       const selectedSrc = iconStyle === 'soft-color' && filled
-        ? colorIconFor(stepFields[i].value, id) ?? src
+        ? softColorIconFor(stepFields[i].value, id) ?? src
         : src;
       const img = slot.querySelector('img')!;
       slot.toggleAttribute('data-on', !!selectedSrc);
@@ -122,6 +113,7 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     });
     sheet.classList.toggle('mr-has-icons', any);
     renderEditor();
+    renderPickerArt();
   }
   /** A step line that means a library job gets its illustration; an emptied line loses it. */
   function syncIcon(i: number) {
