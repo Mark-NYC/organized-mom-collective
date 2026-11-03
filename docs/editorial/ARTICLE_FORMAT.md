@@ -30,6 +30,16 @@ Related: [BRAND_VOICE.md](BRAND_VOICE.md) (how it sounds) · [SEO_STRATEGY.md](S
 - **Avoid**: SaaS-style cards, gradients, pill clusters, emoji, extra progress widgets, more than one box per section.
 - Short by default still applies (below): 300–600 words of prose. Checklist `how` lines count.
 
+## Optional hand-drawn icon illustrations
+
+An article **may** use existing Organized Mom Collective hand-drawn icons when a small illustration makes a process, sequence, category, or choice immediately easier to understand. **Never require an icon or illustration per article.** An icon that merely fills space, duplicates a photograph, or makes the page busier should be left out. Editorial usefulness comes first; brand recognition is a welcome side effect.
+
+- Check [the repository icon catalog](../icon-asset-catalog.md) and [the inventory](../icon-asset-inventory.json) before commissioning or generating new art. Inspect the actual asset; do not assume transparency or consistent style from its filename.
+- Prefer one clear visual at the exact point it explains, not repetitive icons beside every heading or list item.
+- Keep labels short, use existing brand colors, give art breathing room, and ensure the steps work at phone width. Pair visual meaning with readable text; decorative images get empty alt text, while the figure or its labels convey the sequence.
+- Use a reusable article component where a particular visualization genuinely warrants one. The pilot is `<LaundryStages />` in HC-10, using existing February laundry artwork.
+- **No quota, no filler, no forced decoration.** This guideline also applies when updating older articles.
+
 ## Tool spotlights
 
 When an article recommends one of our free tools, show it instead of only linking it: the tool's real preview, one sentence on the problem it removes, one on what changes for Mom, and a button that opens it.
