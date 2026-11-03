@@ -38,6 +38,10 @@ Set the tracker status to `Briefed`.
 
 **Gate:** if a person is directing the work, share the brief and wait for approval before drafting.
 
+## Optional icon check
+
+At the writing and layout pass, check the [icon asset catalog](../icon-asset-catalog.md) for existing artwork that might make a particular process or sequence clearer. Add an icon illustration **only when it naturally improves comprehension**. Do not force any into an article; follow [ARTICLE_FORMAT.md](ARTICLE_FORMAT.md#optional-hand-drawn-icon-illustrations).
+
 ## 3. Write and implement the article
 
 1. Copy [templates/article.mdx](templates/article.mdx) to `src/content/articles/<slug>.mdx`. Keep `draft: true` while writing.
