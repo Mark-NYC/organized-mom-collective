@@ -54,8 +54,12 @@ async function signPrivatePrintFile(path:string):Promise<string> {
   const response=await result.json() as {signedURL?:string;signedUrl?:string};
   const relative=response.signedURL || response.signedUrl;
   if(!relative) throw new Error('missing_signed_print_url');
-  const url=new URL(relative,supabaseUrl+'/storage/v1/');
-  if(url.origin !== new URL(supabaseUrl).origin || !url.pathname.startsWith('/storage/v1/object/sign/'+BUCKET+'/'))
+  // Supabase Storage usually returns /object/sign/... rather than /storage/v1/object/sign/...
+  // A leading slash would otherwise discard the /storage/v1 prefix.
+  const fullPath='/storage/v1/object/sign/'+BUCKET+'/'+encoded;
+  const absolute=relative.startsWith('/object/sign/') ? '/storage/v1'+relative : relative;
+  const url=new URL(absolute,supabaseUrl+'/storage/v1/');
+  if(url.origin !== new URL(supabaseUrl).origin || url.pathname !== fullPath || !url.searchParams.has('token'))
     throw new Error('unexpected_signed_print_url');
   return url.toString();
 }

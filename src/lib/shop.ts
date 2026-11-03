@@ -455,6 +455,36 @@ export async function lookupGelatoCalendar(token: string): Promise<unknown> {
   return body;
 }
 
+export interface GelatoHealthResult {
+  ok: boolean;
+  stage?: string;
+  error?: string;
+  product_slug?: string;
+  product_active?: boolean;
+  stock?: number;
+  private_bucket?: boolean;
+  object_path?: string;
+  page_count?: number | null;
+  gelato_mapping_enabled?: boolean;
+  signed_url_created?: boolean;
+  private_pdf_readable?: boolean;
+  file_signature?: string;
+  order_submitted?: boolean;
+}
+
+/** Admin-only private-file verification. Never creates Gelato orders or exposes signed URLs. */
+export async function testGelatoConnection(token: string): Promise<GelatoHealthResult> {
+  const res = await fetch(`${SUPABASE}/functions/v1/shop-gelato-health`, {
+    method: 'POST',
+    headers: { apikey: ANON, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  const body = (await res.json().catch(() => ({}))) as GelatoHealthResult;
+  if (res.status === 401 || (res.status === 403 && body.error === 'unauthorized_or_forbidden')) throw new Error('expired');
+  if (!res.ok) throw new Error(`Gelato connection test failed: ${body.error || res.status}`);
+  return body;
+}
+
 /** Every dashboard write goes through the shop-admin Edge Function, which re-checks the admin. */
 export async function adminAction<T = Record<string, unknown>>(token: string, body: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${SUPABASE}/functions/v1/shop-admin`, {
