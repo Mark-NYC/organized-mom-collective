@@ -1,0 +1,43 @@
+---
+/**
+ * Optional brand illustration for article sequences and category groups.
+ * Art must clarify an actual process, not act as decoration.
+ * Keys: svg/<filename>, march/<filename>, february/<filename>, primary/<filename>.
+ */
+interface Item { label: string; icon: string; }
+interface Props {
+  items: Item[];
+  caption?: string;
+  ariaLabel: string;
+  layout?: 'steps' | 'grid';
+}
+const { items, caption, ariaLabel, layout = 'steps' } = Astro.props;
+const svgFiles = import.meta.glob('../../../assets/icons/ofc/updatedicons/svg/*.svg', { eager: true, query: '?url', import: 'default' });
+const marchFiles = import.meta.glob('../../../assets/icons/ofc/march/*.webp', { eager: true, query: '?url', import: 'default' });
+const februaryFiles = import.meta.glob('../../../assets/icons/ofc/february/*.webp', { eager: true, query: '?url', import: 'default' });
+const primaryFiles = import.meta.glob('../../../assets/icons/ofc/primary/*.png', { eager: true, query: '?url', import: 'default' });
+const library: Record<string, string> = {};
+for (const [prefix, files] of Object.entries({ svg: svgFiles, march: marchFiles, february: februaryFiles, primary: primaryFiles })) {
+  for (const [path, url] of Object.entries(files)) {
+    const name = path.split('/').pop()?.replace(/\.[^.]+$/, '');
+    if (name) library[`${prefix}/${name}`] = url as string;
+  }
+}
+const resolved = items.map((item) => ({ ...item, src: library[item.icon] }));
+if (resolved.some((item) => !item.src)) {
+  throw new Error(`ArticleIconSequence: missing icon(s): ${resolved.filter((item) => !item.src).map((item) => item.icon).join(', ')}`);
+}
+const count = items.length;
+---
+
+<figure class="my-8 overflow-hidden rounded-xl border border-[#e8e1d7] bg-[#FBF7F1] px-4 py-6 sm:px-7 sm:py-8" aria-label={ariaLabel}>
+  <ol class:list={['grid grid-cols-2 gap-x-4 gap-y-5', count === 3 ? 'sm:grid-cols-3' : count === 5 ? 'sm:grid-cols-5' : count === 6 ? 'sm:grid-cols-3' : 'sm:grid-cols-4']}>
+    {resolved.map((item, index) => (
+      <li class="flex min-w-0 flex-col items-center gap-2 text-center">
+        <img src={item.src} alt="" width="96" height="96" loading="lazy" decoding="async" class="h-20 w-20 object-contain sm:h-24 sm:w-24" />
+        <span class="text-sm font-semibold leading-snug text-[#545454]">{item.label}</span>
+      </li>
+    ))}
+  </ol>
+  {caption && <figcaption class="mt-5 border-t border-[#e8e1d7] pt-4 text-center text-sm leading-relaxed text-[#545454]">{caption}</figcaption>}
+</figure>
