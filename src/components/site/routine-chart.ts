@@ -94,6 +94,30 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
     });
   });
 
+  // Preserve the same US Letter printable on phones. Scale only its on-screen
+  // presentation, not any saved fields or the underlying PNG export dimensions.
+  const printFrame = host.querySelector<HTMLElement>('[data-mr-mobile-print-frame]');
+  if (printFrame) {
+    let previousWidth = -1;
+    const sizePreview = () => {
+      if (!mobileQuery.matches) {
+        printFrame.style.removeProperty('--mr-phone-scale');
+        printFrame.style.removeProperty('--mr-phone-frame-height');
+        previousWidth = -1;
+        return;
+      }
+      const width = Math.min(816, printFrame.clientWidth);
+      if (!width || width === previousWidth) return;
+      previousWidth = width;
+      const scale = width / 816;
+      printFrame.style.setProperty('--mr-phone-scale', String(scale));
+      printFrame.style.setProperty('--mr-phone-frame-height', `${Math.ceil(1056 * scale)}px`);
+    };
+    new ResizeObserver(sizePreview).observe(printFrame);
+    mobileQuery.addEventListener('change', sizePreview);
+    sizePreview();
+  }
+
   // An intentional generic line illustration for custom steps that have no matched icon.
   // It is embedded so PNG export never depends on an unavailable external asset.
   const fallbackStepIcon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
