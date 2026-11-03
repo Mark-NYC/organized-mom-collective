@@ -42,6 +42,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   <div class="mr-builder-heading"><span class="mr-builder-kicker">MAKE IT YOURS</span><h2>Build your child’s routine</h2><p>Choose a starting routine, then customize the steps and download your chart.</p></div>
   <div class="mr-workspace">
   <div class="mr-controls">
+  <p class="mr-mobile-field-label">1. Choose a routine</p>
   <div class="mr-types" role="group" aria-label="Routine">
     {
       Object.entries(routineTypes).map(([id, t]) => (
@@ -62,7 +63,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
   <div class="mr-mobile-controls" aria-label="Customize your routine">
     <button type="button" data-mr-mobile-open="pick">+ Choose activities</button>
-    <button type="button" data-mr-mobile-open="edit">Edit routine</button>
+    <button type="button" data-mr-mobile-open="edit">Edit details</button>
   </div>
 
   <section class="mr-summer" data-mr-summer hidden aria-labelledby="mr-summer-h">
@@ -117,7 +118,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
   </div><!-- /mr-controls -->
   <div class="mr-preview">
-    <div class="mr-mobile-preview-title"><strong>Your printable routine</strong><button type="button" data-mr-mobile-zoom-open>⤢ Enlarge</button></div>
+    <div class="mr-mobile-preview-title"><strong>2. Your routine chart</strong><button type="button" data-mr-mobile-zoom-open>⤢ Enlarge</button></div>
     <div class="mr-preview-label"><span>LIVE PREVIEW</span><p>Tap the title, times, or steps to edit right on the chart.</p></div>
   <div class="mr-mobile-print-frame" data-mr-mobile-print-frame>
   <div class="mr-sheet" id="routine-chart">
@@ -1074,6 +1075,72 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container .mr-mobile-zoom p {
       flex:none;padding:12px 16px;margin:0;
       font:400 12px Montserrat,sans-serif;color:#777;
+    }
+  }
+  .mr-mobile-field-label {display:none}
+  /* Dedicated mobile composition: selector, two compact actions, preview, download.
+     All complex editing and style settings live in focused modal sheets. */
+  @media screen and (max-width:850px) {
+    .mr-container:not(.mr-exporting) .mr-builder-heading {display:none!important}
+    .mr-container:not(.mr-exporting) .mr-mobile-field-label {
+      display:block!important;order:0!important;
+      font:700 12px Montserrat,sans-serif;letter-spacing:.03em;
+      color:#545454;margin:0 2px 4px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-controls {
+      padding:0!important;gap:9px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-types {
+      order:1!important;padding:4px 0 8px!important;
+      border:0!important;background:transparent!important;
+      scroll-padding-left:0;
+    }
+    .mr-container:not(.mr-exporting) .mr-types .mr-type {
+      min-height:48px!important;border-radius:10px!important;
+      padding:10px 12px!important;justify-content:center!important;
+      background:#fff!important;
+      border:1px solid #ded8d0!important;
+      box-shadow:none!important;text-align:center!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-types .mr-type[aria-pressed="true"] {
+      background:#D4DFC4!important;border-color:#A8BB97!important;
+      box-shadow:inset 0 0 0 1px #A8BB97!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-type-label {
+      font:600 13px Montserrat,sans-serif!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-controls {
+      order:3!important;gap:8px!important;margin:3px 0 0!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-controls button {
+      min-height:48px!important;border-radius:10px!important;
+      font-size:13px!important;padding:9px 7px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-preview {
+      order:2!important;margin:0!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-preview .mr-mobile-preview-title {
+      margin:0!important;padding:1px 0 9px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame {
+      border:1px solid #E8E4DD!important;border-radius:12px!important;
+      background:#fff!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-preview .mr-actions {
+      box-shadow:none!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style {
+      display:flex!important;gap:8px;margin:12px 0 8px!important;
+      padding:14px 2px!important;border-top:1px solid #ded8d0;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style-label {
+      flex-basis:100%;font-weight:700;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style-note {
+      font-size:12px;
+    }
+    .mr-container:not(.mr-exporting) .mr-controls .mr-summer {
+      order:2!important;margin:0!important;
     }
   }
   /* Phone viewport containment: the 816px printable and horizontal tabs must
