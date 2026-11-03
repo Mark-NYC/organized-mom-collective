@@ -118,6 +118,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
   <div class="mr-preview">
     <div class="mr-mobile-preview-title"><strong>Your printable routine</strong><span>Changes save automatically</span></div>
     <div class="mr-preview-label"><span>LIVE PREVIEW</span><p>Tap the title, times, or steps to edit right on the chart.</p></div>
+  <div class="mr-mobile-print-frame" data-mr-mobile-print-frame>
   <div class="mr-sheet" id="routine-chart">
     <input type="hidden" data-field="palette" value={defaultToolPalette} />
     <input type="hidden" data-field="type" value="morning" data-mr-type-field />
@@ -161,6 +162,7 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
 
     <div class="mr-foot">{brand}</div>
   </div>
+  </div><!-- /mr-mobile-print-frame -->
   <div class="mr-actions">
     <button type="button" class="mr-btn mr-btn-primary" data-mr-download>Download My Routine Chart</button>
   </div>
@@ -914,6 +916,88 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     .mr-container:not(.mr-exporting) .mr-preview .mr-btn-primary {width:100%}
   }
   .mr-container.mr-exporting .mr-preview .mr-sheet {zoom:1!important;transform:none!important}
+
+  /*
+   * Chore Chart-style phone preview: show the actual 816x1056 printable reduced
+   * proportionally instead of squeezing the printable's internal grid to phone width.
+   * The live inputs are edited through the existing mobile edit dialog.
+   * This wrapper is presentation-only and excluded from the PNG capture itself.
+   */
+  .mr-mobile-print-frame {width:100%;position:relative}
+  @media (max-width:850px) {
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame {
+      width:100%;max-width:816px;overflow:hidden;
+      height:var(--mr-phone-frame-height,auto);
+      margin:0 auto;border-radius:12px;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet {
+      position:absolute!important;top:0;left:0;
+      width:816px!important;min-width:816px!important;max-width:none!important;
+      height:1056px!important;min-height:1056px!important;max-height:1056px!important;
+      padding:44px 52px 28px!important;
+      zoom:1!important;
+      transform:scale(var(--mr-phone-scale,0.45))!important;
+      transform-origin:top left!important;
+      pointer-events:none;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-title {
+      font-size:36px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-subtitle {
+      font-size:16px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-step,
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet.mr-has-icons .mr-step {
+      grid-template-areas:none!important;
+      grid-template-columns:40px 138px 60px minmax(0,1fr) 40px!important;
+      gap:14px!important;
+      padding:0 18px 0 14px!important;
+      min-height:76px!important;
+      max-height:134px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet:not(.mr-has-icons) .mr-step {
+      grid-template-columns:40px 138px minmax(0,1fr) 40px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-step > :not(input[type=hidden]) {
+      grid-area:auto!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-steps {
+      flex:1!important;gap:13px!important;justify-content:center!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-move {
+      display:none!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-icon {
+      width:60px!important;height:60px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-icon img {
+      width:58px!important;height:58px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-text {
+      font-size:19px!important;height:44px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-time {
+      height:40px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-end-label {
+      width:240px!important;font-size:20px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-print-frame .mr-sheet .mr-done .mr-time {
+      width:140px!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-preview .mr-actions {
+      position:sticky;bottom:8px;z-index:4;
+      background:#FBF7F1;padding:8px 0 0;margin-top:10px!important;
+    }
+  }
+  .mr-container.mr-exporting .mr-mobile-print-frame {
+    width:816px!important;height:1056px!important;
+    overflow:visible!important;
+  }
+  .mr-container.mr-exporting .mr-mobile-print-frame .mr-sheet {
+    position:static!important;transform:none!important;pointer-events:auto;
+  }
+
   @media print {
     .mr-controls,.mr-preview-label,.mr-preview .mr-actions {display:none!important}
     .mr-container .mr-workspace {display:block}
