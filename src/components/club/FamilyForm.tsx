@@ -8,6 +8,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { ADULT_ROLES, CHILD_AGES, MONTH_NAMES } from '../../data/club/onboarding';
 import { ageNow, birthFromAge, monthOf, validateHousehold, type Household, type MemberRole } from '../../lib/club/profile';
 import type { HouseholdInput, MemberInput } from '../../lib/club/store';
+import { householdIllustrationStyle, type IllustrationStyle } from '../../lib/club/illustration-style';
 
 interface Draft {
   key: string;
@@ -48,7 +49,7 @@ export function draftsFrom(h: Household | null, today: string): { me: Draft; adu
  * and `priorities` from the retired "What matters most right now?" question) are passed through untouched, so a
  * save never drops them; the family's priority is now step 6 of the profile (club_households.priority).
  */
-export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { displayName: string; pets: boolean }, base: Household['preferences'], today: string): HouseholdInput {
+export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { displayName: string; pets: boolean; iconStyle?: IllustrationStyle }, base: Household['preferences'], today: string): HouseholdInput {
   const member = (d: Draft, holder = false): MemberInput => {
     const common = { ...(d.id ? { id: d.id } : {}), firstName: d.firstName.trim(), kind: d.kind, role: d.role, ...(holder ? { isAccountHolder: true } : {}) };
     if (d.kind === 'adult') return common;
@@ -63,7 +64,7 @@ export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { dis
   const { pets: _pets, ...keep } = base;
   return {
     ...(extras.displayName.trim() ? { displayName: extras.displayName.trim() } : {}),
-    preferences: { ...keep, ...(extras.pets ? { pets: true } : {}) },
+    preferences: { ...keep, ...(extras.pets ? { pets: true } : {}), ...(extras.iconStyle ? { icon_style: extras.iconStyle } : {}) },
     members: [member(me, true), ...adults.map((a) => member(a)), ...kids.map((k) => member(k))],
   };
 }
@@ -92,6 +93,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
   // Never over a name she already chose; the suggestion only fills an empty one, and she can change it.
   const [displayName, setDisplayName] = useState(household?.displayName ?? (mode === 'start' ? suggestedName ?? '' : ''));
   const [pets, setPets] = useState(Boolean(household?.preferences.pets));
+  const [iconStyle, setIconStyle] = useState<IllustrationStyle>(householdIllustrationStyle(household?.preferences.icon_style));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [tried, setTried] = useState(false);
@@ -107,7 +109,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
     // Her welcome print and printed resources carry it, so the welcome flow asks for it.
     if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
-    const data = toInput(me, adults, filledKids, { displayName, pets }, household?.preferences ?? {}, today);
+    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
     setBusy(true);
@@ -219,6 +221,35 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
           <button type="button" className="mt-3 min-h-11 text-[0.95rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => setKids([...kids, { key: newKey(), firstName: '', kind: 'child', role: 'child', age: '', birthMonth: '' }])}>
             + Add a child
           </button>
+        </section>
+
+        <section aria-labelledby="club-art-style-heading" className="space-y-3">
+          <div>
+            <h2 id="club-art-style-heading" className="font-serif text-[1.3rem] text-warm-ink">Your family's illustration style</h2>
+            <p className="mt-1 text-[0.9rem] text-warm-soft">Choose the look you'd like for illustrated monthly resources. You can change this in your family settings later.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Family illustration style">
+            {([
+              { id: 'hand-drawn', label: 'Hand-drawn', description: 'Simple, classic line illustrations' },
+              { id: 'soft-color', label: 'Soft color', description: 'Gentle colors and playful shapes' },
+            ] as const).map((option) => (
+              <label key={option.id} className={`flex min-h-[88px] cursor-pointer items-start gap-3 rounded-[8px] border-2 bg-white p-4 ${iconStyle === option.id ? 'border-warm-ink' : 'border-warm-rule'}`}>
+                <input
+                  type="radio"
+                  name="club-illustration-style"
+                  value={option.id}
+                  checked={iconStyle === option.id}
+                  onChange={() => setIconStyle(option.id)}
+                  className="mt-1 h-4 w-4 accent-[var(--color-warm-ink)]"
+                />
+                <span>
+                  <strong className="block text-[0.95rem] text-warm-ink">{option.label}</strong>
+                  <span className="mt-1 block text-[0.82rem] text-warm-soft">{option.description}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          <p className="text-[0.82rem] text-warm-soft">This preference is saved to your family profile. Monthly illustrations will use it when that feature is introduced.</p>
         </section>
 
         <Optional collapsed={mode === 'start'}>

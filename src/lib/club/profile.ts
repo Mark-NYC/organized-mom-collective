@@ -6,6 +6,7 @@
  * a birth year and month. No last names, photos, schools, gender or full birthdays.
  */
 import type { SchoolType } from '../../data/club/types';
+import type { IllustrationStyle } from './illustration-style';
 
 export type MemberKind = 'adult' | 'child';
 export type MemberRole = 'parent' | 'partner' | 'grandparent' | 'caregiver' | 'child' | 'other';
@@ -29,6 +30,8 @@ export interface FamilyMember {
 }
 
 export interface HouseholdPreferences {
+  /** Family-wide visual default. Resource overrides are stored separately. */
+  icon_style?: IllustrationStyle;
   palette?: 'rose-lavender' | 'blue-green' | 'warm-neutrals';
   week_starts?: 'sunday' | 'monday';
   faith_content?: boolean;
