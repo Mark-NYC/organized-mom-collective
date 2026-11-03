@@ -24,11 +24,18 @@ const { storageKey, handoff = false } = Astro.props;
     <button type="button" class="cb-mobile-customize-toggle" data-cb-customize-toggle aria-expanded="false">Customize chart <span aria-hidden="true">⌄</span></button>
     <div class="cb-toolbar cb-toolbar-new" data-cb-toolbar hidden>
       <div class="cb-toolbar-title"><h2><span data-cb-ready-name>Your</span> chart</h2><p data-cb-status role="status" aria-live="polite">Edit chores directly on the chart below.</p></div>
-      <div class="cb-illustrated-actions"><button type="button" data-cb-pick="daily">Choose daily chores</button><button type="button" data-cb-pick="weekly">Choose weekly chores</button></div><div class="cb-toolbar-settings">
-        <label class="cb-weekly-day-control">Weekly jobs day<select data-cb-weekly-day><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label>
-        <fieldset class="cb-style-switch" aria-label="Print style"><legend>Print style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset>
-      </div>
-      <div class="cb-toolbar-actions"><button type="button" data-cb-back class="cb-edit-details">Edit details</button><div class="cb-buttons"><button type="button" data-cb-add>+ Add a chore</button></div></div>
+      <section class="cb-editor-group" aria-label="Choose responsibilities">
+        <div class="cb-editor-group-head"><h3>1. Choose responsibilities</h3><p>Select the daily and weekly jobs you want on the chart.</p></div>
+        <div class="cb-illustrated-actions"><button type="button" data-cb-pick="daily">Choose daily chores</button><button type="button" data-cb-pick="weekly">Choose weekly chores</button></div>
+      </section>
+      <section class="cb-editor-group" aria-label="Chart options">
+        <div class="cb-editor-group-head"><h3>2. Chart options</h3><p>Set the weekly chore day and how your chart prints.</p></div>
+        <div class="cb-toolbar-settings">
+          <label class="cb-weekly-day-control">Weekly jobs day<select data-cb-weekly-day><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option></select></label>
+          <fieldset class="cb-style-switch" aria-label="Print style"><legend>Print style</legend><label><input type="radio" name="cb-style" value="color" checked /><span>Color</span></label><label><input type="radio" name="cb-style" value="bw" /><span>Black & White</span></label></fieldset>
+        </div>
+      </section>
+      <div class="cb-toolbar-actions"><button type="button" data-cb-back class="cb-edit-details">Edit child's details</button><div class="cb-buttons"><button type="button" data-cb-add>+ Add a chore</button></div></div>
       <p class="cb-save-note">✓ Changes save automatically on this device.</p>
     </div>
     <div class="cb-picker" data-cb-picker hidden><div class="cb-picker-head"><strong>Add a household chore</strong><button type="button" data-cb-picker-close aria-label="Close chore picker">×</button></div><div class="cb-picker-fields"><div class="cb-frequency-tabs" role="group" aria-label="Add to"><span>Add to</span><div><button type="button" data-cb-frequency-tab="daily" aria-pressed="true">Daily</button><button type="button" data-cb-frequency-tab="weekly" aria-pressed="false">Weekly</button></div><select data-cb-frequency aria-label="Chore frequency" hidden><option value="daily">Daily jobs</option><option value="weekly">Weekly jobs</option></select></div><label>Area<select data-cb-filter><option value="">All areas</option>{Object.entries(choreAreas).map(([id,label])=><option value={id}>{label}</option>)}</select></label></div><label class="cb-chore-search-label">Search chores<input type="search" data-cb-search placeholder="e.g. dishes, laundry, bed"/></label><p class="cb-picker-limit">Up to 4 daily and 4 weekly jobs.</p><div class="cb-choice-list" data-cb-choices>{choreChoices.map(choice=><button type="button" data-cb-choice={choice.id} data-area={choice.area} data-frequency={choice.frequency} data-age={choice.minAge}><span>{choice.label}</span><small>{choreAreas[choice.area]}</small></button>)}</div><label class="cb-custom">Or write your own chore<input data-cb-custom maxlength="65" placeholder="e.g. Put away shoes"/></label><button type="button" data-cb-custom-add>Add custom chore</button></div>
@@ -610,6 +617,60 @@ const { storageKey, handoff = false } = Astro.props;
  .chore-builder .cb-pick-card{min-height:116px!important;padding:9px 7px!important;gap:5px}
  .chore-builder .cb-pick-card img{height:50px;width:50px;flex-shrink:0}
  .chore-builder .cb-pick-card span{font-size:11px;line-height:1.35}
+}
+</style>
+<style is:global>
+/* Editor controls only. Never change .cb-results, .cb-sheet or print geometry. */
+@media(min-width:801px){
+  .chore-builder .cb-control-panel{
+    display:block!important;
+    max-width:900px;
+    padding:26px 30px;
+    margin:0 auto 24px;
+    background:#fff;
+    border:1px solid #E2DDD5;
+    border-radius:14px;
+  }
+  .chore-builder .cb-control-panel .cb-toolbar-new{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:0!important;
+    align-items:stretch;
+  }
+  .chore-builder .cb-control-panel .cb-toolbar-title,
+  .chore-builder .cb-control-panel .cb-toolbar-settings,
+  .chore-builder .cb-control-panel .cb-toolbar-actions,
+  .chore-builder .cb-control-panel .cb-save-note{
+    grid-column:1!important;
+    grid-row:auto!important;
+    min-width:0;
+  }
+  .chore-builder .cb-control-panel .cb-toolbar-title{display:block!important;padding:0 0 18px}
+  .chore-builder .cb-control-panel .cb-toolbar-title p{font-size:13px;color:#777}
+  .chore-builder .cb-editor-group{display:block;padding:20px 0;border-top:1px solid #EAE6DF}
+  .chore-builder .cb-editor-group-head{margin-bottom:14px}
+  .chore-builder .cb-editor-group-head h3{font:700 18px/1.3 Georgia,serif;margin:0 0 5px;color:#545454}
+  .chore-builder .cb-editor-group-head p{font:400 13px/1.5 Montserrat,sans-serif;color:#777;margin:0}
+  .chore-builder .cb-illustrated-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .chore-builder .cb-illustrated-actions button{width:100%;min-height:60px;text-align:center;font-size:14px;padding:12px}
+  .chore-builder .cb-control-panel .cb-toolbar-settings{
+    display:grid;
+    grid-template-columns:minmax(190px,1fr) minmax(230px,1fr);
+    align-items:start;
+    gap:22px;
+  }
+  .chore-builder .cb-toolbar-settings .cb-weekly-day-control{display:grid;gap:7px;min-width:0;font-size:13px;font-weight:700}
+  .chore-builder .cb-toolbar-settings .cb-weekly-day-control select{width:100%;min-height:44px}
+  .chore-builder .cb-toolbar-settings .cb-style-switch{display:flex;align-items:center;gap:8px}
+  .chore-builder .cb-toolbar-settings .cb-style-switch legend{margin-bottom:9px}
+  .chore-builder .cb-toolbar-settings .cb-style-switch span{min-height:44px;display:inline-flex;align-items:center}
+  .chore-builder .cb-control-panel .cb-toolbar-actions{display:flex;justify-content:flex-start;border-top:1px solid #EAE6DF;padding:17px 0 0}
+  .chore-builder .cb-control-panel .cb-edit-details{display:inline-block!important;text-decoration:underline;text-underline-offset:3px;min-height:44px}
+  .chore-builder .cb-control-panel .cb-save-note{margin:10px 0 0;font-size:12px;color:#777}
+}
+@media(min-width:801px) and (max-width:960px){
+  .chore-builder .cb-control-panel{padding:20px}
+  .chore-builder .cb-control-panel .cb-toolbar-settings{grid-template-columns:1fr}
 }
 </style>
 <script>import { initChoreBuilder } from './chore-builder';document.querySelectorAll<HTMLElement>('[data-chore-builder]').forEach(initChoreBuilder);</script>
