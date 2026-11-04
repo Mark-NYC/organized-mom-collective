@@ -11,8 +11,9 @@ interface Props {
   section: string;
 }
 const { title, section } = Astro.props;
-const current = ADMIN_SECTIONS.find((item) => item.id === section);
-const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => item.id === section));
+const activeSection = section === 'orders' && Astro.url.searchParams.get('tab') === 'inventory' ? 'products' : section;
+const current = ADMIN_SECTIONS.find((item) => item.id === activeSection);
+const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => item.id === activeSection));
 ---
 
 <BaseLayout title={`${title} · Admin`} description="Organized Mom Collective admin." robots="noindex" tracking={false}>
@@ -39,10 +40,10 @@ const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => 
               {group.sections.map((item) => (
                 <a
                   href={item.href}
-                  aria-current={item.id === section ? 'page' : undefined}
+                  aria-current={item.id === activeSection ? 'page' : undefined}
                   class:list={[
                     'block rounded-[4px] px-3 py-2.5 text-[0.95rem] no-underline',
-                    item.id === section ? 'bg-ink font-semibold text-paper' : 'text-ink hover:bg-rule',
+                    item.id === activeSection ? 'bg-ink font-semibold text-paper' : 'text-ink hover:bg-rule',
                   ]}
                 >{item.label}</a>
               ))}
@@ -61,10 +62,10 @@ const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => 
                   {group.sections.map((item) => (
                     <a
                       href={item.href}
-                      aria-current={item.id === section ? 'page' : undefined}
+                      aria-current={item.id === activeSection ? 'page' : undefined}
                       class:list={[
                         'block rounded-[4px] px-3 py-2.5 text-[0.92rem] no-underline transition-colors',
-                        item.id === section ? 'bg-ink font-semibold text-paper' : 'text-ink hover:bg-band',
+                        item.id === activeSection ? 'bg-ink font-semibold text-paper' : 'text-ink hover:bg-band',
                       ]}
                     >
                       {item.label}
