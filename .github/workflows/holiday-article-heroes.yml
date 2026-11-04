@@ -1,0 +1,48 @@
+name: Prepare holiday article hero images
+
+on:
+  push:
+    branches:
+      - publish-three-holiday-guides-20261103
+    paths:
+      - '.github/workflows/holiday-article-heroes.yml'
+      - 'src/data/images.ts'
+      - 'src/content/articles/christmas-gift-wrapping-station.mdx'
+      - 'src/content/articles/hot-cocoa-station-for-kids.mdx'
+      - 'src/content/articles/christmas-morning-organization-ideas.mdx'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out article branch
+        uses: actions/checkout@v4
+        with:
+          ref: publish-three-holiday-guides-20261103
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Pillow
+        run: python -m pip install 'Pillow>=11,<13'
+      - name: Create responsive WebP photos from the original JPEGs
+        run: |
+          python scripts/article-image.py design/photography/kaboompics/holiday-articles-2026-11/christmas-gift-wrapping-station-original.jpeg fp-28-wrapping-hero --widths 640,960,1200
+          python scripts/article-image.py design/photography/kaboompics/holiday-articles-2026-11/hot-cocoa-station-original.jpeg if-16-cocoa-hero --widths 640,960,1201
+          python scripts/article-image.py design/photography/kaboompics/holiday-articles-2026-11/christmas-morning-organization-original.jpeg fp-29-christmas-hero --widths 640,960,1000
+      - name: Commit optimized images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/images/resources/fp-28-wrapping-hero-*.webp public/images/resources/if-16-cocoa-hero-*.webp public/images/resources/fp-29-christmas-hero-*.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "Add optimized WebP hero images to three holiday guides"
+            git push origin HEAD:publish-three-holiday-guides-20261103
+          fi
+      - name: Verify article photos
+        run: |
+          node scripts/check-article-photos.mjs
