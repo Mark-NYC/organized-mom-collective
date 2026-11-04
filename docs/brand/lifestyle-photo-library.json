@@ -1998,14 +1998,15 @@
           "website_article_editorial"
         ],
         "article_id": "FP-28",
-        "edits": "Responsive WebP resizing only; source proportions maintained, no upscaling",
+        "edits": "Source 1200x1800 cropped to 1200x800 (3:2), vertical range y 550..1350; originals untouched; responsive resizing only",
         "alt_text_example": "Christmas wrapping paper, ribbons and other gift-wrapping supplies arranged for the holiday season."
       },
       "original": "design/photography/kaboompics/holiday-articles-2026-11/christmas-gift-wrapping-station-original.jpeg",
       "open_items": [
         "Record verified Kaboompics photo detail URL and photographer",
         "Inspect final full-resolution presentation for readable marks and context"
-      ]
+      ],
+      "crop_note_2026_11_04": "Keeps wrapped gift, evergreen, candle and most scissors"
     },
     {
       "id": "IF16-KABOOMPICS-HERO",
@@ -2031,14 +2032,15 @@
           "website_article_editorial"
         ],
         "article_id": "IF-16",
-        "edits": "Responsive WebP resizing only; source proportions maintained, no upscaling",
+        "edits": "Source 1201x1800 cropped to 1201x800 (3:2), vertical range y 520..1320; originals untouched; responsive resizing only",
         "alt_text_example": "Hot chocolate and seasonal treats photographed in warm light."
       },
       "original": "design/photography/kaboompics/holiday-articles-2026-11/hot-cocoa-station-original.jpeg",
       "open_items": [
         "Record verified Kaboompics photo detail URL and photographer",
         "Inspect final full-resolution presentation for readable marks and context"
-      ]
+      ],
+      "crop_note_2026_11_04": "Keeps dipping churro, cocoa cup and supporting background"
     },
     {
       "id": "FP29-KABOOMPICS-HERO",
@@ -2052,7 +2054,7 @@
       "owner_visual_status": "owner_selected_for_site_2026-11-04",
       "model_release_review": "No person depicted as an OMC customer or endorser; check crop for unanticipated logos before final release.",
       "publishing_clearance": true,
-      "public_path": "public/images/resources/fp-29-christmas-hero-{640,960,1000}.webp",
+      "public_path": "public/images/resources/fp-29-christmas-hero-{640,900}.webp",
       "used_in": [
         "FP-29 /resources/christmas-morning-organization-ideas (hero)"
       ],
@@ -2064,14 +2066,15 @@
           "website_article_editorial"
         ],
         "article_id": "FP-29",
-        "edits": "Responsive WebP resizing only; source proportions maintained, no upscaling",
+        "edits": "Source 1000x600 cropped to 900x600 (3:2), horizontal range x 100..1000; originals untouched; responsive resizing only",
         "alt_text_example": "A decorated Christmas setting with presents and a holiday living-room scene."
       },
       "original": "design/photography/kaboompics/holiday-articles-2026-11/christmas-morning-organization-original.jpeg",
       "open_items": [
         "Record verified Kaboompics photo detail URL and photographer",
         "Inspect final full-resolution presentation for readable marks and context"
-      ]
+      ],
+      "crop_note_2026_11_04": "Keeps tree and main sofa framing"
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
