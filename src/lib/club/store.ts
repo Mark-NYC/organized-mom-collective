@@ -154,11 +154,20 @@ export const accountStore: ClubStore = {
     return r ? fromDb(r) : null;
   },
   async saveHousehold(input) {
-    return fromDb(await accountRpc<DbHousehold>('club_household_save', {
+    const save = (preferences: typeof input.preferences) => accountRpc<DbHousehold>('club_household_save', {
       p_display_name: input.displayName ?? null,
-      p_preferences: input.preferences,
+      p_preferences: preferences,
       p_members: toDbMembers(input.members),
-    }));
+    });
+    try {
+      return fromDb(await save(input.preferences));
+    } catch (e) {
+      // A database without 20261113 refuses the illustration style key: her family still saves, without that one
+      // optional preference (it's saved once the migration is in).
+      if ((e as Error).message !== 'invalid' || !('icon_style' in (input.preferences ?? {}))) throw e;
+      const { icon_style: _style, ...rest } = input.preferences as Record<string, unknown>;
+      return fromDb(await save(rest as typeof input.preferences));
+    }
   },
   async documents(slug) {
     const r = await accountRpc<{ can: KitAccess; documents: Record<string, { edits: unknown; palette: string; revision: number; engine_version: number; profile_version: number }> }>('club_document_get', { p_kit: slug });

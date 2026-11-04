@@ -261,6 +261,73 @@ scenarios.artwork = async (browser) => {
   await page.context().close();
 };
 
+/**
+ * The first month, personalized for a real-looking family (not the Rivera sample): a mother holding the account, her
+ * partner, a grandparent at home and three children (12, 8 and 4). Her January (Our Family Weekly Meeting) and her
+ * Family Vision print must show her family, correctly, on screen and in the owner's print PDFs.
+ */
+scenarios.firstMonth = async (browser) => {
+  console.log('\nFirst month personalization: the Okafor family on January and the Family Vision print');
+  freshDb();
+  asUser(USER.id, `select public.club_household_save('The Okafor Family', '{"icon_style":"hand-drawn"}',
+    '[{"first_name":"Ada","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Chidi","kind":"adult","role":"partner"},
+      {"first_name":"Rose","kind":"adult","role":"grandparent"},{"first_name":"Zara","kind":"child","role":"child","birth_year":2014,"birth_month":5},
+      {"first_name":"Emeka","kind":"child","role":"child","birth_year":2018,"birth_month":9},{"first_name":"Nia","kind":"child","role":"child","birth_year":2022,"birth_month":2}]') \\g /dev/null`);
+  as.vision('The Okafor Family', 'Joy');
+  as.approvePrint();
+  const SAMPLE = /Rivera|Sofia|Mateo|Chen|Brooks/;
+  const NAMES = ['Ada', 'Chidi', 'Rose', 'Zara', 'Emeka', 'Nia'];
+
+  // Her own view of January.
+  const page = await newPage(browser, DESKTOP);
+  await page.goto(`${BASE}/app/club/january`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 });
+  await page.waitForTimeout(800);
+  const sheet = await page.locator('.club-plan [data-plan-sheet]').allInnerTexts().then((t) => t.join(' '));
+  check('January (her view): everyone at home by first name', NAMES.every((n) => sheet.includes(n)), sheet.replace(/\s+/g, ' ').slice(0, 300));
+  check('January (her view): no sample family, no assumed Mom/Dad', !SAMPLE.test(sheet) && !/\b(Mom|Dad)\b/.test(sheet), (sheet.match(SAMPLE) ?? sheet.match(/\b(Mom|Dad)\b/) ?? [''])[0]);
+  check('January (her view): parts fit each age (4: picture calendar; 12: own calendar)', /picture calendar/i.test(sheet) && /Review my calendar/i.test(sheet));
+  check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
+  check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));
+  await page.context().close();
+
+  // She approves January; the kit is submitted and goes to print.
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
+  check('both approvals in: the kit needs only its PDFs', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
+
+  // The owner's print views: what actually gets printed and mailed.
+  const mv = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(mv);
+  await mv.goto(`${BASE}/app/club/january?fulfillment=${orderId('monthly_resource')}`, { waitUntil: 'networkidle' });
+  await mv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 });
+  await mv.waitForTimeout(800);
+  const janPages = await printPdf(mv, 'first-month-january');
+  const jan = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/first-month-january.pdf`, '-']).toString();
+  check('January PDF: two Letter pages', janPages === 2, `${janPages} pages`);
+  check('January PDF: everyone at home by first name', NAMES.every((n) => jan.includes(n)), NAMES.filter((n) => !jan.includes(n)).join(','));
+  check('January PDF: no sample family, no assumed Mom/Dad, no fall wording', !SAMPLE.test(jan) && !/\b(Mom|Dad)\b/.test(jan) && !/\bfall\b|Cooler weather/i.test(jan), jan.replace(/\s+/g, ' ').slice(0, 200));
+  await mv.context().close();
+  const pv = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(pv);
+  await pv.goto(`${BASE}/club/family-vision?fulfillment=${orderId('welcome_vision')}`, { waitUntil: 'networkidle' });
+  await pv.waitForSelector('text=Print / Save PDF');
+  const a = await art(pv);
+  check('Family Vision print: her family name and her word', a.name === 'The Okafor Family' && a.word === 'Joy' && Boolean(a.img?.startsWith('joy')), JSON.stringify(a));
+  const visionPages = await printPdf(pv, 'first-month-vision');
+  check('Family Vision PDF: one Letter page with her family name', visionPages === 1 && /theokaforfamily/i.test(execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/first-month-vision.pdf`, '-']).toString().replace(/\s+/g, '')));
+  await pv.context().close();
+
+  // The admin's Welcome Kits list: the package, ready for print and mail.
+  const ad = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(ad);
+  await ad.goto(`${BASE}/admin/club`, { waitUntil: 'networkidle' });
+  await ad.locator('button:has-text("Fulfillment"), a:has-text("Fulfillment")').first().click().catch(() => undefined);
+  await ad.waitForSelector('text=ana@example.com', { timeout: 10000 }).catch(() => undefined);
+  const row = (await ad.locator('tr', { hasText: 'ana@example.com' }).first().innerText().catch(() => '')).replace(/\s+/g, ' ');
+  check('Welcome Kits: one package with her print, the Family Meeting guide and January, with a mail-by date', /Okafor/.test(row) && /Joy/.test(row) && /Family Meeting guide/.test(row) && /January 2027/.test(row) && /mail by/i.test(row), row.slice(0, 300));
+  await ad.context().close();
+};
+
 scenarios.admin = async (browser) => {
   console.log('\nAdmin: Welcome Kits queue, both print views, one package (real database)');
   freshDb();
@@ -734,6 +801,7 @@ async function postCheckout(browser, label, vp) {
   await page.waitForSelector('text=What does a typical week look like?', { timeout: 10000 }).catch(() => undefined);
   check('family form leads straight into step 2 of 6 (no Welcome Kit needed)', await page.isVisible('text=Step 2 of 6'), page.url());
   check('not sent to the library midway', /\/club\/welcome/.test(page.url()), page.url());
+  check('her family is saved, with her illustration style (20261113)', sql(`select preferences ->> 'icon_style' from public.club_households where owner_user_id = '${USER.id}'`) === 'hand-drawn');
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('text=What does a typical week look like?', { timeout: 10000 }).catch(() => undefined);
   check('refresh after the family form: still her profile questions, family not asked again', await page.isVisible('text=Step 2 of 6') && !(await page.isVisible('h1:has-text("Tell us about your family")')));
@@ -824,6 +892,30 @@ async function postCheckout(browser, label, vp) {
   check(`${label} P0 return: no script errors`, other.errors.length === 0, other.errors.join(' | '));
   await other.context().close();
 }
+
+// The live database before 20261113 refuses the illustration style key: the family form must still save (without it).
+scenarios.familyBeforeMigration = async (browser) => {
+  console.log('\nFamily form on a database without 20261113: still saves');
+  freshDb();
+  sql(`do $do$ declare d text := pg_get_functiondef('public.club_household_save'::regproc); begin
+    execute replace(d, ', ''icon_style'')', ')'); end $do$`);
+  check('setup: this database refuses icon_style', (() => { try { asUser(USER.id, `select public.club_household_save('X', '{"icon_style":"hand-drawn"}', '[{"first_name":"A","kind":"adult","role":"parent","is_account_holder":true}]')`); return false; } catch { return true; } })());
+  const page = await newPage(browser, MOBILE);
+  await page.goto(`${BASE}/club/welcome`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('h1:has-text("Tell us about your family")');
+  await page.fill('input[autocomplete="given-name"]', 'Ana');
+  const kid = page.locator('li', { has: page.locator('select') }).nth(0);
+  await kid.locator('input').fill('Sofia');
+  await kid.locator('select').first().selectOption('8');
+  await page.click('button:has-text("Next")');
+  await page.waitForSelector('text=What does a typical week look like?', { timeout: 10000 }).catch(() => undefined);
+  check('the family saves and setup moves on (no "couldn’t save")', await page.isVisible('text=Step 2 of 6') && !(await page.isVisible('text=We couldn’t save just now')),
+    (await page.locator('[role=alert]').allInnerTexts()).join(' | '));
+  check('saved without the optional style key', sql(`select preferences ? 'icon_style' from public.club_households where owner_user_id = '${USER.id}'`) === 'f'
+    && /Sofia/.test(sql(`select string_agg(first_name, ',') from public.club_family_members m join public.club_households h on h.id = m.household_id where h.owner_user_id = '${USER.id}'`)));
+  check('no script errors', page.errors.length === 0, page.errors.join(' | '));
+  await page.context().close();
+};
 
 scenarios.p0desktop = (browser) => postCheckout(browser, 'desktop', DESKTOP);
 scenarios.p0mobile = (browser) => postCheckout(browser, 'mobile', MOBILE);
@@ -943,6 +1035,11 @@ scenarios.months = async (browser) => {
   console.log('Every monthly tool at /app/club: her plan saved to her account, back in a new browser, meeting, phone, print');
   freshDb();
   as.family();
+  // Her Welcome Kit already submitted (print and January approved), so January is her ordinary month here: the
+  // Family Meeting switch shows (it's hidden on her first month only while the kit waits on her).
+  as.vision('The Rivera Family', 'Hope');
+  as.approvePrint();
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
   sql(`update public.club_kits set status = 'scheduled'`);
   sql(`insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
        select '${USER.id}', h.id, k.month, 'digital', 1, 'admin', 'admin', 'QA: every month'
@@ -1045,11 +1142,12 @@ scenarios.months = async (browser) => {
   check('her family page opens for editing', await back.locator('button:has-text("Save our family")').isVisible().catch(() => false) && !(await back.isVisible('text=We couldn’t load your family')),
     (await back.locator('main').innerText()).replace(/\s+/g, ' ').slice(0, 160));
   // Her Club home opens the app tools (November stays on its own page: it's the only place its tool lives).
-  await back.goto(`${BASE}/app/club`, { waitUntil: 'networkidle' });
+  // Monthly Resources (/app/club/months since the Nov 2 Club Home): every month card.
+  await back.goto(`${BASE}/app/club/months`, { waitUntil: 'networkidle' });
   await back.waitForSelector('text=Open your June plan', { timeout: 10000 }).catch(() => undefined);
   const links = await back.evaluate(() => Object.fromEntries([...document.querySelectorAll('a')].filter((a) => /^Open your/.test(a.textContent ?? '')).map((a) => [a.textContent.replace(/\s*→\s*$/, ''), a.getAttribute('href')])));
-  check('Club home: “Open your June plan” → /app/club/june', links['Open your June plan'] === '/app/club/june', JSON.stringify(links));
-  check('Club home: every month she holds opens its tool', Object.entries(links).every(([t, h]) => (/November/.test(t) ? h === `/club/resources/${NOV}` : /^\/app\/club\/[a-z]+$/.test(h))) && Object.keys(links).length === 12, `${Object.keys(links).length} links`);
+  check('Monthly Resources: “Open your June plan” → /app/club/june', links['Open your June plan'] === '/app/club/june', JSON.stringify(links));
+  check('Monthly Resources: every month she holds opens its tool', Object.entries(links).every(([t, h]) => (/November/.test(t) ? h === `/club/resources/${NOV}` : /^\/app\/club\/[a-z]+$/.test(h))) && Object.keys(links).length === 12, `${Object.keys(links).length} links`);
   await back.context().close();
 };
 

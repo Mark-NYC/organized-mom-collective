@@ -27,10 +27,10 @@ describe('Sunday Reset plan (September)', () => {
     expect(s.fallJobs.map((j) => j.ownerId)).toEqual(['sofia', 'mateo', 'luis']);
   });
 
-  it('calls the first two parents Mom and Dad unless renamed', () => {
+  it('calls everyone by their own first name unless renamed (never assumes Mom and Dad)', () => {
     const members = planMembers(family);
-    expect(displayName(members[0], members)).toBe('Mom');
-    expect(displayName(members[1], members)).toBe('Dad');
+    expect(displayName(members[0], members)).toBe('Ana');
+    expect(displayName(members[1], members)).toBe('Luis');
     expect(displayName(members[2], members)).toBe('Sofia');
     expect(displayName(members[1], members, { luis: 'Papa' })).toBe('Papa');
   });
@@ -88,7 +88,7 @@ describe('Sunday Reset edits from the mobile sheets', () => {
     setName(s, 'luis', 'Papa');
     expect(displayName(members[1], members, s.names)).toBe('Papa');
     setName(s, 'luis', ' ');
-    expect(displayName(members[1], members, s.names)).toBe('Dad');
+    expect(displayName(members[1], members, s.names)).toBe('Luis');
     setRole(s, 'sofia', 'Pack my violin');
     setFallJob(s, 'gear', { ownerId: 'sofia', removed: true });
     expect(s.assignments.sofia).toBe('Pack my violin');

@@ -78,13 +78,13 @@ export const weeklyRole = (m: PlanMember, i: number) =>
           : 'Prepare my clothes, bag, and belongings for the week.'
         : 'Review my calendar, prepare for commitments, and ask for help early.';
 
-/** Children by first name; the first two parents/partners are Mom and Dad unless renamed. */
-export const displayName = (m: PlanMember, members: readonly PlanMember[], names?: Record<string, string>) => {
-  if (m.kind === 'child') return names?.[m.id] ?? m.firstName;
-  const parents = members.filter((x) => x.kind === 'adult' && (x.role === 'parent' || x.role === 'partner'));
-  const ix = parents.findIndex((x) => x.id === m.id);
-  return names?.[m.id] ?? (ix === 0 ? 'Mom' : ix === 1 ? 'Dad' : m.firstName);
-};
+/**
+ * Everyone by their own first name, unless she renamed them on the sheet. (Until Nov 2026 the first two
+ * parents/partners printed as "Mom" and "Dad", which mislabeled a dad holding the account, a female partner, and
+ * one-parent families; `members` stays in the signature for callers.)
+ */
+export const displayName = (m: PlanMember, _members: readonly PlanMember[], names?: Record<string, string>) =>
+  names?.[m.id] ?? m.firstName;
 
 export const defaultFallJobs = (members: readonly PlanMember[]): FallJob[] => {
   const children = members.filter((m) => m.kind === 'child');
