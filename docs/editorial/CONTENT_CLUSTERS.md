@@ -170,3 +170,19 @@ Published 2026-10-20 at `/resources/screen-time-routine-for-kids`, supporting ma
 ## IF-15: familiar chores with fewer reminders (November 3, 2026)
 
 Primary intent: how to get kids to do chores without nagging. Owns initiation cues, child self-checking, completion standards and differentiated troubleshooting. IF-08 retains teaching a new skill; IF-03 retains age-based lists; IF-11 retains no-rewards philosophy; IF-12 retains incentives. Parent IF-01, next IF-08. Longer practical guide explicitly authorized by owner.
+
+## IF-18: A Chore Chart for Siblings: Fair Jobs Without the Arguments
+
+Published 2026-11-04 at `/resources/chore-chart-for-siblings`. Owns chore chart for siblings; hero is the illustrated PDF and HTML twin. See brief for the five-resource overlap boundary.
+
+## IF-19: A Kids’ Cleaning Checklist That Shows What Finished Looks Like
+
+Published 2026-11-04 at `/resources/kids-cleaning-checklist`. Owns kids cleaning checklist; hero is the illustrated PDF and HTML twin. See brief for the five-resource overlap boundary.
+
+## IF-20: A Kids’ Bedroom Cleaning Checklist: Five Small Stops
+
+Published 2026-11-04 at `/resources/kids-bedroom-cleaning-checklist`. Owns kids bedroom cleaning checklist; hero is the illustrated PDF and HTML twin. See brief for the five-resource overlap boundary.
+
+## HC-13: A Kitchen Counter Clutter Reset: Give Every Item a Next Step
+
+Published 2026-11-04 at `/resources/kitchen-counter-clutter-reset`. Owns kitchen counter clutter; hero is the illustrated PDF and HTML twin. See brief for the five-resource overlap boundary.

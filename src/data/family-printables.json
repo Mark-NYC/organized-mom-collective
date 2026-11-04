@@ -1,0 +1,86 @@
+{
+  "siblings": {
+    "slug": "sibling-chore-chart",
+    "title": "Our family. Our jobs.",
+    "subtitle": "Different jobs. A shared finish.",
+    "intro": "Example: dinner cleanup with siblings at different stages. Choose by practice and readiness, not just age.",
+    "accent": "#D4DFC4",
+    "rows": [
+      {"icon":"fork-spoon","label":"A small job","cue":"Example: age 4","detail":"Put napkins and spoons on the table.","done":"Done: every place has both."},
+      {"icon":"dish","label":"A practiced job","cue":"Example: age 7","detail":"Clear unbreakable dishes to the counter.","done":"Done: the table is clear."},
+      {"icon":"spray-bottle-cloth","label":"A longer job","cue":"Example: age 10","detail":"Wipe the cleared table with a damp cloth.","done":"Done: crumbs and spills are gone."}
+    ],
+    "note": "Adults keep hot, sharp, heavy or breakable items. Older children do not become the younger child's supervisor.",
+    "fallbackTitle": "When someone says, “That's not fair.”",
+    "fallback": "Everyone contributes. Jobs fit what each person has learned. Swap only between people who can do the job safely.",
+    "fields": ["Family / week", "Person 1", "Their job", "Person 2", "Their job", "Person 3", "Their job", "Adult's job", "We check the plan after"]
+  },
+  "finish-lines": {
+    "slug": "kids-cleaning-finish-lines",
+    "title": "Clean means this.",
+    "subtitle": "A picture guide to knowing when you're done.",
+    "intro": "Point to one job. Practice it together. Check the finish line.",
+    "accent": "#F1D8A8",
+    "rows": [
+      {"icon":"blocks","label":"Put toys away","cue":"Instead of: “Tidy up.”","detail":"Toys are in their own bins.","done":"The floor is clear where you played."},
+      {"icon":"laundry-basket-with-clothes","label":"Sort the clothes","cue":"Instead of: “Pick up clothes.”","detail":"Dirty clothes are in the hamper.","done":"Clean clothes are in a drawer or on a hanger."},
+      {"icon":"dish","label":"Clear your place","cue":"Instead of: “Help with dinner.”","detail":"Your unbreakable plate and cup are at the agreed spot.","done":"Your napkin and crumbs are picked up."},
+      {"icon":"made-bed","label":"Make the bed","cue":"Instead of: “Fix your room.”","detail":"The cover is pulled up.","done":"The pillow is back at the head of the bed."}
+    ],
+    "note": "Use reachable storage. An adult handles anything hot, sharp, heavy or breakable.",
+    "fallbackTitle": "Start with one finish line.",
+    "fallback": "If the whole list feels big, point to one row. A child who is learning can do it beside an adult.",
+    "fields": ["This belongs to", "My job today", "My own finish line"]
+  },
+  "bedroom": {
+    "slug": "kids-bedroom-reset",
+    "title": "My bedroom reset.",
+    "subtitle": "Five small stops. One clear path.",
+    "intro": "Start at the top. Check each stop when it is finished.",
+    "accent": "#CDDDE1",
+    "rows": [
+      {"icon":"trash-bin","label":"Trash","cue":"1","detail":"Put ordinary paper scraps and wrappers in the bin.","done":"Ask an adult about anything sharp, wet or unknown."},
+      {"icon":"laundry-basket-with-clothes","label":"Laundry","cue":"2","detail":"Dirty clothes in the hamper. Clean clothes put away.","done":"The chair and floor are not clothes storage."},
+      {"icon":"blocks","label":"Toys","cue":"3","detail":"Toys in bins. Books on the shelf.","done":"Keep one unfinished project in its agreed spot."},
+      {"icon":"made-bed","label":"Bed","cue":"4","detail":"Pull up the cover. Put the pillow back.","done":"There is space to lie down."},
+      {"icon":"broom","label":"Floor","cue":"5","detail":"Return the last stray items to their homes.","done":"The path from the door to the bed is clear."}
+    ],
+    "note": "This is a tidy-up, not a deep clean. Adults handle cleaning products, high places and unsafe objects.",
+    "fallbackTitle": "Only five minutes?",
+    "fallback": "Put dirty clothes in the hamper. Put toys in bins. Clear the walking path. Stop when the timer ends.",
+    "fields": ["My name", "My reset happens after"]
+  },
+  "dinner": {
+    "slug": "family-dinner-team",
+    "title": "Our dinner team.",
+    "subtitle": "One meal. Everyone has a part.",
+    "intro": "Pick one job per person. Practice it before expecting independence.",
+    "accent": "#E8D2D6",
+    "rows": [
+      {"icon":"fork-spoon","label":"Before dinner","cue":"Set the table","detail":"Put out napkins and spoons.","done":"Done: every place has what it needs."},
+      {"icon":"dish","label":"During dinner","cue":"Pass and notice","detail":"Pass a cool, light, unbreakable item when asked.","done":"Ask an adult about hot or heavy items."},
+      {"icon":"spray-bottle-cloth","label":"After dinner","cue":"Clear and wipe","detail":"Clear unbreakable dishes, then wipe crumbs with a damp cloth.","done":"Done: the table is ready for its next use."}
+    ],
+    "note": "An adult handles hot food, sharp tools, raw meat and heavy or breakable items. Match each job to the child's actual skills.",
+    "fallbackTitle": "A late-night dinner team",
+    "fallback": "Each person clears their own unbreakable place setting. An adult handles food storage and the remaining cleanup.",
+    "fields": ["Tonight's meal", "Before: who", "Their job", "During: who", "Their job", "After: who", "Their job", "Adult owns"]
+  },
+  "counter": {
+    "slug": "kitchen-counter-clutter-reset",
+    "title": "Where does this go?",
+    "subtitle": "Follow the questions. Give each thing a home.",
+    "intro": "Pick up one item. Start at question 1. Stop at the first YES.",
+    "accent": "#BBCBC4",
+    "rows": [
+      {"icon":"basket","label":"1. Does it belong somewhere else?","cue":"YES: put it away.","detail":"Return it to its actual home, not a second pile.","done":"NO: go to question 2."},
+      {"icon":"school-folder","label":"2. Does someone need to act on it?","cue":"YES: name an owner.","detail":"Add a next step and date. Use one action spot.","done":"NO: go to question 3."},
+      {"icon":"school-folder","label":"3. Do we need to keep it?","cue":"YES: file it.","detail":"Put it in the labeled place where you will look for it.","done":"NO: go to question 4."},
+      {"icon":"trash-bin","label":"4. Is it ready to leave?","cue":"YES: recycle, donate or discard.","detail":"Use the right local disposal route. Ask about unknown items.","done":"Not sure? Use the temporary tray below."}
+    ],
+    "note": "Protect private papers. Keep medicines, sharp items and unknown objects for an adult to handle.",
+    "fallbackTitle": "Only five minutes?",
+    "fallback": "Clear one useful patch of counter. Stop at the timer. Anything still undecided goes in one temporary tray with an owner and review time.",
+    "fields": ["Our action spot", "Our file spot", "Who reviews the tray", "When"]
+  }
+}

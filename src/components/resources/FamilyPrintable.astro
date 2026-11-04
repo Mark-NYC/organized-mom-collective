@@ -1,0 +1,99 @@
+---
+import resources from '../../data/family-printables.json';
+interface Props {
+  resource: keyof typeof resources;
+  id?: string;
+}
+const { resource, id = 'printable' } = Astro.props;
+const data = resources[resource];
+const icons = import.meta.glob('../../../assets/icons/ofc/updatedicons/svg/*.svg', {eager:true, query:'?url', import:'default'});
+const iconUrl = (name:string) => icons[`../../../assets/icons/ofc/updatedicons/svg/${name}.svg`] as string;
+const pdf = `/downloads/family/${data.slug}.pdf`;
+const preview = `/images/resources/printables/${data.slug}.png`;
+const save = new URL('https://www.pinterest.com/pin/create/button/');
+save.searchParams.set('url',new URL(Astro.url.pathname,Astro.site).href);
+save.searchParams.set('media',new URL(preview,Astro.site).href);
+save.searchParams.set('description',data.title+' '+data.subtitle+' Free one-page printable from Organized Mom Collective.');
+---
+<section id={id} class:list={['family-printable',resource]} style={`--print-accent:${data.accent}`} aria-labelledby={`${id}-title`} data-family-printable={data.slug}>
+  <header>
+    <p class="printable-kicker">Free one-page printable</p>
+    <h2 id={`${id}-title`}>{data.title}</h2>
+    <p class="printable-subtitle">{data.subtitle}</p>
+    <p>{data.intro}</p>
+    <a href={pdf} download class="printable-download" data-family-pdf>Download free PDF</a>
+    <p class="printable-format">US Letter · Fillable fields · Print in color or grayscale</p>
+  </header>
+  <ol class="printable-rows">
+    {data.rows.map(row=>(
+      <li>
+        <img src={iconUrl(row.icon)} width="56" height="56" alt="" loading="lazy" decoding="async" />
+        <div>
+          {resource !== 'counter' && resource !== 'dinner' && <p class="printable-cue">{row.cue}</p>}
+          <h3>{row.label}</h3>
+          {(resource === 'counter' || resource === 'dinner') && <p class="printable-cue">{row.cue}</p>}
+          <p>{row.detail}</p>
+          <p class="printable-done">{row.done}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+  <div class="printable-fallback">
+    <h3>{data.fallbackTitle}</h3>
+    <p>{data.fallback}</p>
+  </div>
+  <p class="printable-note">{data.note}</p>
+  <details class="printable-preview">
+    <summary>See the one-page PDF</summary>
+    <p>Download the PDF to type in its fields using a PDF reader, or print it and write by hand.</p>
+    <img src={preview} alt={`The actual ${data.title} printable, with illustrated jobs, blank personal details and a smaller fallback.`} width="773" height="1000" loading="lazy" decoding="async" />
+    <a href={save.href} target="_blank" rel="noopener noreferrer" class="text-link">Save this printable to Pinterest</a>
+  </details>
+  <p class="printable-brand">ORGANIZED MOM COLLECTIVE</p>
+</section>
+<style>
+  .family-printable { margin:2rem 0; border-top:8px solid var(--print-accent); border-bottom:1px solid #D5C5B8; padding:24px 0 18px; color:#545454; }
+  .family-printable header { padding:0; }
+  .family-printable h2 { margin:10px 0 12px; font:normal clamp(29px,5vw,39px)/1.15 Georgia,serif; }
+  .family-printable p { margin:8px 0; }
+  .family-printable .printable-kicker { font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+  .printable-subtitle { font-weight:600; }
+  .family-printable .printable-download { display:inline-flex; min-height:48px; align-items:center; justify-content:center; margin-top:12px; padding:10px 20px; background:#545454; color:#fff; font-size:15px; font-weight:600; text-decoration:none; }
+  .printable-download:hover { background:#373737; }
+  .printable-download:focus-visible,.printable-preview summary:focus-visible { outline:3px solid #545454; outline-offset:4px; }
+  .family-printable .printable-format { font-size:12px; line-height:1.6; margin-top:10px; }
+  .printable-rows { list-style:none; padding:0; margin:24px 0; }
+  .printable-rows li { display:flex; align-items:flex-start; gap:16px; padding:20px 0; margin:0; border-top:1px solid #D5C5B8; }
+  .printable-rows li img { flex:0 0 56px; object-fit:contain; width:56px; height:64px; }
+  .printable-rows li div { min-width:0; }
+  .family-printable h3 { margin:4px 0 8px; font:normal 22px/1.25 Georgia,serif; }
+  .family-printable .printable-cue { margin:0 0 5px; font-size:12px; font-weight:600; }
+  .family-printable .printable-done { font-size:14px; line-height:1.6; }
+  .printable-fallback { background:var(--print-accent); padding:18px 20px; }
+  .family-printable .printable-note { font-size:12px; line-height:1.6; margin:16px 0; }
+  .printable-preview { border-top:1px solid #D5C5B8; padding-top:10px; }
+  .printable-preview summary { cursor:pointer; min-height:44px; padding:10px 0; font-size:14px; font-weight:600; }
+  .printable-preview>img { display:block; max-width:100%; width:100%; height:auto; border:1px solid #D5C5B8; margin:18px auto; }
+  .printable-preview>p { font-size:14px; }
+  .family-printable .printable-brand { margin-top:20px; font-size:10px; letter-spacing:.12em; }
+  @media(min-width:700px) {
+    .siblings .printable-rows,.dinner .printable-rows { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+    .siblings .printable-rows li,.dinner .printable-rows li { display:block; }
+    .siblings .printable-rows li img,.dinner .printable-rows li img { margin-bottom:12px; }
+  }
+  @media(max-width:420px) {
+    .printable-rows li { gap:12px; }
+    .printable-rows li img { flex-basis:42px; width:42px; height:52px; }
+    .printable-fallback { padding:16px; }
+    .printable-download { width:100%; }
+  }
+  @media print { .printable-download,.printable-preview { display:none; } }
+</style>
+<script>
+  import { elementEvent } from '../../lib/element-events';
+  document.querySelectorAll<HTMLElement>('[data-family-printable]').forEach(section=>{
+    section.querySelector('[data-family-pdf]')?.addEventListener('click',()=>{
+      elementEvent('element_print','family-printable',section.dataset.familyPrintable ?? '');
+    });
+  });
+</script>
