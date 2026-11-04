@@ -50,7 +50,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A public/images/resources/fp-28-wrapping-hero-*.webp public/images/resources/if-16-cocoa-hero-*.webp public/images/resources/fp-29-christmas-hero-*.webp
+          git add -A public/images/resources/
           if ! git diff --cached --quiet; then
             git commit -m "Crop holiday article heroes to consistent 3:2"
             git fetch origin crop-three-holiday-article-heroes-20261104
