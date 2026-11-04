@@ -232,6 +232,7 @@ var routes = {
   clubJoin: "/club#offer",
   clubLogin: "/club/login",
   clubWelcome: "/club/welcome",
+  clubWelcomeKit: "/club/welcome-kit",
   clubDashboard: "/club/dashboard",
   clubFamilyVision: "/club/family-vision",
   /** The standard one-page Family Meeting guide in every Welcome Kit (her review step, and the owner's print). */
@@ -278,6 +279,7 @@ var routes = {
   backToSchool: "/back-to-school-checklist",
   screenTime: "/screen-time-contract",
   routineChart: "/routine-chart",
+  familyResponsibilityBuilder: "/family-responsibility-builder",
   homeschoolRhythm: "/homeschool-rhythm",
   springCleaning: "/spring-cleaning-checklist",
   fallCleaning: "/fall-cleaning-checklist",
@@ -295,6 +297,7 @@ var routes = {
   decemberCountdown: "/december-countdown",
   mealPlanner: "/meal-planner",
   mentalLoad: "/mental-load-worksheet",
+  familyMeetingAgenda: "/family-meeting-agenda",
   resources: "/resources",
   /** The Free tools section of the resource hub. */
   freeTools: "/tools",
@@ -319,6 +322,7 @@ var routes = {
   today: "/app",
   cleaning: "/app/cleaning",
   appClub: "/app/club",
+  appClubMonths: "/app/club/months",
   appAccount: "/app/account",
   week: "/app/week",
   /** Old name for the Week page; redirects to `week`. */

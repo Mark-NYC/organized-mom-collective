@@ -58,13 +58,16 @@ select pg_temp.expect((select status from public.club_kits where slug = :KIT) = 
 -- ---------------------------------------------------------------- households
 
 select pg_temp.as_user('authenticated', :A);
-select pg_temp.expect((public.club_household_save('Team A', '{"palette":"blue-green","pets":true,"priorities":["mornings","kids-independence"]}',
+select pg_temp.expect((public.club_household_save('Team A', '{"palette":"blue-green","pets":true,"priorities":["mornings","kids-independence"],"icon_style":"soft-color"}',
   '[{"first_name":"Mia","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Lee","kind":"adult","role":"partner"},{"first_name":"Ava","kind":"child","role":"child","birth_year":2019,"birth_month":4}]') -> 'members') is not null,
   'A saves her family');
 select pg_temp.expect(public.club_household() ->> 'id' is not null, 'her household comes back with its id (the engine needs it)');
 select pg_temp.expect(jsonb_array_length(public.club_household() -> 'members') = 3, 'three people');
+select pg_temp.expect(public.club_household() -> 'preferences' ->> 'icon_style' = 'soft-color', 'her illustration style is saved with her family (20261113)');
 select pg_temp.expect(pg_temp.fails($$select public.club_household_save(null, '{"evil":1}', '[{"first_name":"X","kind":"adult","role":"parent"}]')$$, 'invalid'), 'unknown preference key refused');
 select pg_temp.expect(pg_temp.fails($$select public.club_household_save(null, '{"priorities":"mornings"}', '[{"first_name":"X","kind":"adult","role":"parent"}]')$$, 'invalid'), 'priorities must be a list');
+-- 20261113: the family form's illustration style (the form always sends it).
+select pg_temp.expect(pg_temp.fails($$select public.club_household_save(null, '{"icon_style":"neon"}', '[{"first_name":"X","kind":"adult","role":"parent"}]')$$, 'invalid'), 'illustration style: only its two values');
 select pg_temp.expect(pg_temp.fails($$select public.club_household_save(null, '{"priorities":["<script>"]}', '[{"first_name":"X","kind":"adult","role":"parent"}]')$$, 'invalid'), 'priority ids are checked');
 select pg_temp.expect(pg_temp.fails($$select public.club_household_save(null, '{}', '[{"first_name":"Kid","kind":"child","role":"child"}]')$$, 'invalid'), 'child without birth year refused');
 select pg_temp.expect(pg_temp.fails($$select public.club_household_save(null, '{}', '[{"first_name":"  ","kind":"adult","role":"parent"}]')$$, 'invalid'), 'blank name refused');
