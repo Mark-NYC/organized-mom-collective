@@ -229,8 +229,10 @@ describe('admin nav', () => {
   it('links only to pages that exist', () => {
     const files = new Set(readdirSync('src/pages/admin').map((f) => `/admin/${f.replace(/\.astro$/, '')}`.replace(/\/index$/, '')));
     files.add('/survey/admin');
-    for (const s of ADMIN_SECTIONS.filter((x) => x.href)) expect(files, s.label).toContain(s.href!.split('?')[0]);
-    for (const s of ADMIN_SECTIONS.filter((x) => !x.href)) expect(s.pending, s.label).toBeTruthy();
+    for (const s of ADMIN_SECTIONS) {
+      expect(s.href, s.label).toBeTruthy();
+      expect(files, s.label).toContain(s.href.split('?')[0]);
+    }
   });
 });
 
