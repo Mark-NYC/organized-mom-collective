@@ -46,6 +46,22 @@ jobs:
             git rebase origin/publish-three-holiday-guides-20261103
             git push origin HEAD:publish-three-holiday-guides-20261103
           fi
-      - name: Verify article photos
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install site dependencies
+        run: npm ci
+      - name: Verify complete site
+        run: npm run verify
+      - name: Commit regenerated content inventory
+        if: success()
         run: |
-          node scripts/check-article-photos.mjs
+          git add docs/editorial/content-inventory.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Update content inventory for holiday guides"
+            git fetch origin publish-three-holiday-guides-20261103
+            git rebase origin/publish-three-holiday-guides-20261103
+            git push origin HEAD:publish-three-holiday-guides-20261103
+          fi
