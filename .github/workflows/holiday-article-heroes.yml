@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/holiday-article-heroes.yml'
       - 'src/data/images.ts'
+      - 'design/photography/kaboompics/holiday-articles-2026-11/**'
       - 'src/content/articles/christmas-gift-wrapping-station.mdx'
       - 'src/content/articles/hot-cocoa-station-for-kids.mdx'
       - 'src/content/articles/christmas-morning-organization-ideas.mdx'
