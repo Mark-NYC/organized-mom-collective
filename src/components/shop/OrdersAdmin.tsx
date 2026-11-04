@@ -148,7 +148,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
         ))}
       </nav>
 
-      {(
+      {tab === 'inventory' && (
         <section className="mt-5 border border-rule rounded-[4px] p-4" aria-label="Gelato calendar">
           <h2 className="font-bold text-lg">Gelato calendar integration</h2>
           <p className="mt-2 text-sm text-soft">
