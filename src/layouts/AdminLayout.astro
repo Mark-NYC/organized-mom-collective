@@ -1,48 +1,91 @@
 ---
 /**
- * Every /admin page (and /survey/admin): noindex, no GA4 or Pinterest tag, no site header, footer,
- * manifest or service worker. The page holds no data; its React island signs in (AdminGate) and
- * the database decides what an account may read. Security headers for these paths: public/_headers.
+ * Shared admin workspace shell. Keep all routes and data islands untouched.
+ * Admin pages are noindex; auth/RLS are still enforced by their React AdminGate.
  */
 import BaseLayout from './BaseLayout.astro';
-import { ADMIN_SECTIONS } from '../data/admin';
+import { ADMIN_GROUPS, ADMIN_SECTIONS } from '../data/admin';
 
 interface Props {
   title: string;
-  /** Which nav item is current (ADMIN_SECTIONS id). */
   section: string;
 }
-
 const { title, section } = Astro.props;
+const current = ADMIN_SECTIONS.find((item) => item.id === section);
+const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => item.id === section));
 ---
 
 <BaseLayout title={`${title} · Admin`} description="Organized Mom Collective admin." robots="noindex" tracking={false}>
   <meta slot="head" name="referrer" content="no-referrer" />
-  <div class="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
-    <nav aria-label="Admin" class="relative -mx-1 flex flex-wrap gap-1 pb-3 text-[0.9rem]">
-      {
-        ADMIN_SECTIONS.map((s) =>
-          s.href ? (
-            <a
-              href={s.href}
-              aria-current={s.id === section ? 'page' : undefined}
-              class:list={[
-                'shrink-0 rounded-[3px] px-3 py-2 font-semibold whitespace-nowrap',
-                s.id === section ? 'bg-ink text-paper' : 'text-ink hover:bg-rule',
-              ]}
-            >
-              {s.label}
-            </a>
-          ) : (
-            <span class="relative shrink-0 cursor-help rounded-[3px] px-3 py-2 whitespace-nowrap text-muted" title={`Not built yet. ${s.pending ?? ''}`}>
-              {s.label} <span class="sr-only">(not built yet: {s.pending})</span>
-            </span>
-          ),
-        )
-      }
-    </nav>
-    <p class="label text-muted mt-4">Admin</p>
-    <h1 class="page-title mt-2">{title}</h1>
-    <slot />
+  <div class="min-h-screen bg-paper">
+    <div class="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8">
+      <header class="flex items-center justify-between gap-4 border-b border-rule pb-5">
+        <a href="/admin" class="min-w-0 no-underline" aria-label="Organized Mom Collective admin home">
+          <span class="block text-[0.7rem] font-bold uppercase tracking-[0.18em] text-muted">Organized Mom Collective</span>
+          <span class="mt-1 block text-[1.2rem] font-semibold text-ink">Admin workspace</span>
+        </a>
+        <a href="/" class="shrink-0 text-[0.85rem] font-semibold text-soft underline underline-offset-4 hover:text-ink">View website <span aria-hidden="true">↗</span></a>
+      </header>
+
+      <details class="group mt-4 rounded-[5px] border border-rule bg-band lg:hidden">
+        <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-semibold text-ink [&::-webkit-details-marker]:hidden">
+          <span>Menu <span class="ml-2 text-sm font-normal text-soft">· {current?.label ?? title}</span></span>
+          <span class="text-soft transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+        </summary>
+        <nav class="border-t border-rule px-3 py-3" aria-label="Admin mobile navigation">
+          {ADMIN_GROUPS.map((group) => (
+            <div class="pb-3 last:pb-0">
+              <p class="px-3 pb-1 text-[0.68rem] font-bold uppercase tracking-[0.17em] text-muted">{group.label}</p>
+              {group.sections.map((item) => (
+                <a
+                  href={item.href}
+                  aria-current={item.id === section ? 'page' : undefined}
+                  class:list={[
+                    'block rounded-[4px] px-3 py-2.5 text-[0.95rem] no-underline',
+                    item.id === section ? 'bg-ink font-semibold text-paper' : 'text-ink hover:bg-rule',
+                  ]}
+                >{item.label}</a>
+              ))}
+            </div>
+          ))}
+        </nav>
+      </details>
+
+      <div class="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
+        <aside class="hidden lg:block" aria-label="Admin navigation">
+          <nav class="sticky top-5 mt-8 space-y-7">
+            {ADMIN_GROUPS.map((group) => (
+              <div>
+                <p class="mb-2 px-3 text-[0.68rem] font-bold uppercase tracking-[0.17em] text-muted">{group.label}</p>
+                <div class="space-y-0.5">
+                  {group.sections.map((item) => (
+                    <a
+                      href={item.href}
+                      aria-current={item.id === section ? 'page' : undefined}
+                      class:list={[
+                        'block rounded-[4px] px-3 py-2.5 text-[0.92rem] no-underline transition-colors',
+                        item.id === section ? 'bg-ink font-semibold text-paper' : 'text-ink hover:bg-band',
+                      ]}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </nav>
+        </aside>
+        <main id="admin-content" class="min-w-0 pb-16 pt-7 lg:pt-8">
+          <div class="mb-2 flex flex-wrap items-center gap-2 text-[0.75rem] text-muted">
+            <a href="/admin" class="underline underline-offset-2 hover:text-ink">Admin</a>
+            <span aria-hidden="true">/</span>
+            {sectionGroup && sectionGroup.id !== 'home' && <><span>{sectionGroup.label}</span><span aria-hidden="true">/</span></>}
+            <span aria-current="page">{current?.label ?? title}</span>
+          </div>
+          <h1 class="page-title mt-1">{title}</h1>
+          <slot />
+        </main>
+      </div>
+    </div>
   </div>
 </BaseLayout>
