@@ -123,7 +123,6 @@ function Club(ctx: AdminContext) {
   const [tab, setTab] = useState<'members' | 'fulfillment' | 'kits' | 'setup'>('members');
   return (
     <div>
-      <h1 className="page-title">Organized Family Club</h1>
       <nav className="mt-4 flex flex-wrap gap-4 text-[0.95rem]" aria-label="Club admin">
         {(['members', 'fulfillment', 'kits', 'setup'] as const).map((t) => (
           <button key={t} type="button" onClick={() => setTab(t)} className={tab === t ? 'font-semibold underline underline-offset-4' : 'text-soft underline-offset-4 hover:underline'}>
