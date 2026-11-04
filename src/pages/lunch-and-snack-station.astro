@@ -122,6 +122,56 @@ const jsonLd = [
     </div>
   </section>
 
+
+  <nav class="lss-guide-nav" aria-label="Lunch and snack ideas">
+    <a href="#six-snacks">6 snacks kids can make</a>
+    <a href="#five-lunchboxes">5 lunchbox combinations</a>
+    <a href="#four-snack-stations">4 snack stations</a>
+    <a href="#lunch-posters">Edit and download the printables</a>
+  </nav>
+
+  <div class="lss-guide">
+    <section aria-labelledby="six-snacks">
+      <h2 id="six-snacks">6 snacks kids can make themselves</h2>
+      <p>Start with one snack your child already likes. Show them how to make it, practice together, then let them take over the steps they can manage. An adult prepares any cutting first.</p>
+      <ol>
+        <li><strong>Yogurt bowl.</strong> Spoon yogurt into a bowl. Add berries. Sprinkle granola.</li>
+        <li><strong>Banana roll-up.</strong> Spread seed butter on a tortilla, add a peeled banana, and roll it up.</li>
+        <li><strong>Cracker stackers.</strong> Layer crackers, ready-cut cheese, and turkey slices.</li>
+        <li><strong>Hummus dippers.</strong> Scoop hummus into a small bowl and add ready-cut veggie sticks.</li>
+        <li><strong>Apple &amp; dip.</strong> Put ready-cut apple slices on a plate with a little seed butter for dipping.</li>
+        <li><strong>Snack mix.</strong> Mix cereal, pretzels, and raisins in a small bowl.</li>
+      </ol>
+      <p>Choose ingredients and textures your child can manage, check allergies and school rules, and stay nearby while they learn. Wash hands before preparing food. See the <a class="text-link" href="https://www.myplate.gov/life-stages/kids">USDA’s guidance on involving kids in food preparation</a>.</p>
+    </section>
+
+    <section aria-labelledby="five-lunchboxes">
+      <h2 id="five-lunchboxes">5 lunchboxes kids can help pack</h2>
+      <p>You prep the ingredients; they build the lunch. Choose a combination together and write it into the school lunch planner below.</p>
+      <ul>
+        <li><strong>The classic:</strong> turkey sandwich, cucumber, and berries.</li>
+        <li><strong>The snack box:</strong> cheese, crackers, chickpeas, and orange wedges.</li>
+        <li><strong>The wrap:</strong> hummus wrap, carrot sticks, and apple slices.</li>
+        <li><strong>The leftover:</strong> cooked pasta, peas, chicken, and grapes.</li>
+        <li><strong>The breakfast box:</strong> mini pancakes, yogurt, and strawberries.</li>
+      </ul>
+      <p>Adjust portions and preparation to your child. An adult handles cooking and cutting, adapting grapes, hard vegetables, and other choking hazards for younger children. Keep perishable ingredients refrigerated until packing; use an insulated lunch bag with at least two cold sources. See <a class="text-link" href="https://ask.fsis.usda.gov/article/How-do-you-keep-a-bag-lunch-safe">USDA lunch-packing guidance</a> and <a class="text-link" href="https://www.cdc.gov/infant-toddler-nutrition/foods-and-drinks/choking-hazards.html">CDC guidance on preparing food for young children</a>.</p>
+    </section>
+
+    <section aria-labelledby="four-snack-stations">
+      <h2 id="four-snack-stations">4 after-school snack stations</h2>
+      <p>Pick one spot using a container you already have. You don’t need to set up all four.</p>
+      <ul>
+        <li><strong>The fridge bin:</strong> yogurt, cheese, and washed fruit on a reachable refrigerator shelf.</li>
+        <li><strong>The pantry basket:</strong> crackers, cereal, and applesauce pouches in one low basket.</li>
+        <li><strong>The dip tray:</strong> ready-cut veggies and small hummus cups together in the fridge.</li>
+        <li><strong>The build-a-bowl spot:</strong> bowls, spoons, cereal, and bananas within reach.</li>
+      </ul>
+      <p>Agree on when snacks happen and what each child can choose. The job finishes with wrappers in the trash and dishes by the sink. Pick an adult to own restocking, including checking what’s low.</p>
+      <p><strong>Busy afternoon?</strong> Keep one familiar snack available and skip the extra choices. Add the snack step to your <a class="text-link" href="/resources/after-school-routine-for-kids">after-school routine</a>, then personalize the posters below.</p>
+    </section>
+  </div>
+
   <div class="lp-container">
     <div class="lp-actions">
       <button type="button" class="lp-btn lp-btn-primary" data-lp-download-all>Download all 3 sheets</button>
@@ -218,6 +268,15 @@ const jsonLd = [
 </PublicLayout>
 
 <style is:global>
+  .lss-guide-nav { max-width: 760px; margin: 28px auto; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 12px 24px; text-decoration: underline; }
+  .lss-guide { max-width: 760px; margin: 0 auto 40px; padding: 0 24px; color: var(--color-warm-ink); font-size: 17px; line-height: 1.75; }
+  .lss-guide section { margin-top: 40px; }
+  .lss-guide h2 { font-family: Georgia, serif; font-weight: 700; font-size: clamp(26px, 4vw, 34px); line-height: 1.2; scroll-margin-top: 100px; }
+  .lss-guide p, .lss-guide ul, .lss-guide ol { margin-top: 16px; }
+  .lss-guide ul { list-style: disc; padding-left: 24px; }
+  .lss-guide ol { list-style: decimal; padding-left: 24px; }
+  .lss-guide li + li { margin-top: 10px; }
+
   .lp-container {
     --lp-ink: var(--color-warm-ink);
     --lp-soft: var(--color-warm-soft);
