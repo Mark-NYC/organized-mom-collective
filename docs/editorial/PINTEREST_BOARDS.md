@@ -1,6 +1,6 @@
 # Organized Mom Collective: actual Pinterest boards
 
-**Status:** Owner-provided account screenshot, October 19, 2026. This is the authoritative board-name registry for writing pin metadata and Pinterest Import Content CSVs.
+**Status:** Owner-provided account screenshot, October 19, 2026; new holiday board confirmed created by owner November 4, 2026. This is the authoritative board-name registry for writing pin metadata and Pinterest Import Content CSVs.
 
 **Pinterest account:** `organizedmomcollective`
 
@@ -10,6 +10,7 @@ These are the board names to use, **exactly as written**, unless a newer owner s
 
 | Actual board name | Best-fitting content | Example pin topics |
 | --- | --- | --- |
+| **Holiday Organization & Family Traditions** | Seasonal Thanksgiving and Christmas planning, gift wrapping, family holiday traditions, shared seasonal responsibilities, Christmas morning | Holiday gift wrapping station, kids' Thanksgiving responsibilities, December family reset, hot cocoa station, Christmas morning organization |
 | **Meal Planning for Families** | Meals, groceries, dinner rotation, lunch/snack prep | Weekly meal plans, family grocery lists |
 | **Chores & Shared Responsibilities** | Kids' chores, age-appropriate jobs, teaching tasks, shared work | Chore chart generator, chores for kids by age, what “done” looks like |
 | **Family Organization Ideas** | Family planning, command centers, calendars, school-launch stations, routine generators | 2027 wall calendar, family entryway, morning routine chart |
@@ -38,8 +39,16 @@ These are the board names to use, **exactly as written**, unless a newer owner s
 5. Sunday or weekly family reset → **Weekly Reset Routines**.
 6. Mental-load storytelling → **Mom Life & Mental Load**, unless it is primarily a hands-on chore or family planning tutorial.
 7. Meal and grocery content → **Meal Planning for Families**.
-8. Preserve the exact board spelling in Pinterest import CSV `Pinterest board` column. The board must exist in the actual Pinterest account.
-9. Re-check the account screenshot or board list when the owner reports a rename or new board.
+8. **Seasonal Thanksgiving and Christmas content whose main promise is a holiday-specific solution** → **Holiday Organization & Family Traditions**, even when the underlying system is a family reset, responsibility handoff, or mental-load tip. Keep evergreen versions of those themes on the appropriate evergreen boards.
+9. A primarily year-round calendar product Pin → **Family Organization Ideas**, even when its photo is seasonally styled.
+10. Preserve the exact board spelling in Pinterest import CSV `Pinterest board` column. The board must exist in the actual Pinterest account.
+11. Re-check the account screenshot or board list when the owner reports a rename or new board.
+
+## November 4, 2026 holiday batch assignment
+
+The owner created **Holiday Organization & Family Traditions** and requested it for these existing creative numbers: **1** Christmas Wrapping Station, **2** Thanksgiving Kids' Responsibilities, **3** Holiday Mental Load, **4** December Sunday Reset, **5** Hot Cocoa Station, **8** Christmas Morning Organization. Preserve these six seasonal board assignments in regenerations of the November 4 CSV. Keep **7** Kitchen Reset on Cleaning Schedules for Busy Moms, **9** Kids' Ownership on Family Organization Ideas, **10** Entryway Drop Zone on Family Organization Ideas. **6** Calendar Product remains unuploaded and excluded; when produced, default to Family Organization Ideas.
+
+The owner-confirmed new board's exact name takes precedence over the older six-board list. Do not interpret the original October 19 screenshot as proof the new board does not exist.
 
 ## Gemini batch 01 mapping
 
