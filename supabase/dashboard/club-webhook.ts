@@ -553,8 +553,7 @@ function checkoutAddress(session) {
 }
 
 // supabase/functions/_shared/handlers/club-webhook.ts
-async function webhookSecret(deps) {
-  if (deps.env.clubWebhookSecret) return deps.env.clubWebhookSecret;
+async function storedWebhookSecret(deps) {
   const name = deps.stripe.mode === "live" ? "webhook_secret_live" : "webhook_secret_test";
   const [row] = await deps.db.select("club_secret", `name=eq.${name}&select=value`);
   return row?.value ?? "";
@@ -565,10 +564,14 @@ function createClubWebhookHandler(deps) {
     const blocked = clubStripeBlocked(deps);
     if (blocked) return json({ error: blocked }, 503);
     const raw = await req.text();
-    const secret = await webhookSecret(deps);
-    if (!await verifyStripeSignature(raw, req.headers.get("stripe-signature"), secret, deps.now())) {
-      return json({ error: "invalid_signature" }, 400);
+    const signature = req.headers.get("stripe-signature");
+    const secrets = [...new Set([await storedWebhookSecret(deps), deps.env.clubWebhookSecret].filter(Boolean))];
+    let verified = false;
+    for (const secret of secrets) if (await verifyStripeSignature(raw, signature, secret, deps.now())) {
+      verified = true;
+      break;
     }
+    if (!verified) return json({ error: "invalid_signature" }, 400);
     let event;
     try {
       event = JSON.parse(raw);

@@ -17,7 +17,8 @@ import { clubStripeBlocked, CLUB_LEGACY_LOOKUP_KEYS, CLUB_PRICES, CLUB_PRODUCT_T
 import { monthLabel, sendClubEmail, type ClubEmailKind } from '../club/emails.ts';
 import { corsHeaders, json, readJson, type Handler } from '../http.ts';
 import { clubPrice } from './club-billing.ts';
-import { applyInvoice, CLUB_EVENTS, syncSubscription, webhookSecret } from './club-webhook.ts';
+import { applyInvoice, CLUB_EVENTS, storedWebhookSecret, syncSubscription, webhookSecret } from './club-webhook.ts';
+import { StripeError } from '../stripe.ts';
 import { userFromRequest } from '../club/members.ts';
 
 class HttpError extends Error {
@@ -42,7 +43,11 @@ export function createClubAdminHandler(deps: ClubDeps): Handler {
       const action = String(body.action ?? '');
       if (action !== 'status') {
         const blocked = clubStripeBlocked(deps);
-        if (blocked && action !== 'send_emails') throw new HttpError(503, blocked);
+        // Live Stripe can be set up (product, price, portal, webhook: nothing is charged) before live checkout is
+        // switched on; everything else waits for the switch.
+        if (blocked && action !== 'send_emails' && !(blocked === 'live_checkout_disabled' && action === 'stripe_setup')) {
+          throw new HttpError(503, blocked);
+        }
         await deps.db.rpc('admin_log_service', {
           p_actor: user.id, p_action: `club.${action}`.slice(0, 60), p_target: null,
           p_detail: Object.fromEntries(['kind', 'month', 'subscription', 'invoice'].filter((k) => typeof body[k] === 'string').map((k) => [k, String(body[k]).slice(0, 60)])),
@@ -145,7 +150,17 @@ async function stripeSetup(deps: ClubDeps) {
 
   // One plan, so nothing to switch between: the portal updates the card, shows invoices and cancels.
   const [settings] = await deps.db.select<{ portal_configuration_id: string | null }>('club_settings', 'select=portal_configuration_id');
-  if (!settings?.portal_configuration_id) {
+  // The stored portal belongs to the mode it was made in: a test-mode id doesn't exist in live mode (and vice versa),
+  // so a missing one is replaced by this mode's own.
+  let portal: { features?: { subscription_update?: { enabled?: boolean } } } | null = null;
+  if (settings?.portal_configuration_id) {
+    try {
+      portal = await deps.stripe.request('GET', `/v1/billing_portal/configurations/${settings.portal_configuration_id}`);
+    } catch (e) {
+      if (!(e instanceof StripeError && e.status === 404)) throw e;
+    }
+  }
+  if (!portal) {
     const cfg = await deps.stripe.request<{ id: string }>('POST', '/v1/billing_portal/configurations', {
       business_profile: { headline: 'Organized Family Club: manage your membership' },
       default_return_url: `${deps.env.siteUrl}/club/dashboard`,
@@ -163,15 +178,15 @@ async function stripeSetup(deps: ClubDeps) {
     done.push('portal');
   } else {
     // The first setup allowed monthly ↔ annual switching; turn it off so annual can't be bought from the portal.
-    const id = settings.portal_configuration_id;
-    const cfg = await deps.stripe.request<{ features?: { subscription_update?: { enabled?: boolean } } }>('GET', `/v1/billing_portal/configurations/${id}`);
-    if (cfg.features?.subscription_update?.enabled) {
+    const id = settings!.portal_configuration_id!;
+    if (portal.features?.subscription_update?.enabled) {
       await deps.stripe.request('POST', `/v1/billing_portal/configurations/${id}`, { features: { subscription_update: { enabled: false } } }, `club-portal-no-switch-${id}`);
       done.push('portal_updated');
     }
   }
 
-  if (!(await webhookSecret(deps))) {
+  // This mode's own endpoint (a live setup makes a live endpoint even when a test secret exists).
+  if (!(await storedWebhookSecret(deps))) {
     const url = `${deps.env.supabaseUrl}/functions/v1/club-webhook`;
     const ep = await deps.stripe.request<{ id: string; secret: string }>('POST', '/v1/webhook_endpoints', {
       url, enabled_events: [...CLUB_EVENTS], api_version: '2025-03-31.basil', description: 'Organized Family Club (club-webhook)',

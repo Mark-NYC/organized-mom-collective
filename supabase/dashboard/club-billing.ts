@@ -503,6 +503,7 @@ function createClubBillingHandler(deps) {
     const body = await readJson(req);
     if (!body) return json({ error: "invalid" }, 400, cors);
     const blocked = clubStripeBlocked(deps);
+    if (body.action === "offer") return json(blocked ? { open: false, test: false } : await offer(deps), 200, cors);
     if (blocked) return json({ error: blocked }, 503, cors);
     try {
       switch (body.action) {
@@ -548,6 +549,7 @@ async function checkout(deps, req, body) {
   if (mode === "off" || mode === "test" && deps.stripe.mode !== "test" || mode === "live" && deps.stripe.mode !== "live") {
     throw new Refusal("checkout_closed", 403);
   }
+  if (mode === "test" && body.test_checkout !== true) throw new Refusal("checkout_closed", 403);
   if (state.live_subscription) throw new Refusal("already_member", 409);
   if (!user) {
     const ok = await deps.db.rpc("club_allow_checkout", { p_ip: clientIp(req) });
@@ -580,6 +582,8 @@ async function checkout(deps, req, body) {
     customer,
     client_reference_id: user?.id,
     line_items: [{ price, quantity: 1 }],
+    // Card only (Apple Pay and Google Pay are cards): no buy-now-pay-later or app wallets on a $5.90 renewal.
+    payment_method_types: ["card"],
     shipping_address_collection: { allowed_countries: ["US"] },
     customer_update: { shipping: "auto", address: "auto" },
     billing_address_collection: "auto",
@@ -600,6 +604,12 @@ async function checkout(deps, req, body) {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1e3).toISOString() }
   });
   return { url: session.url };
+}
+async function offer(deps) {
+  const [s] = await deps.db.select("club_settings", "select=checkout_mode");
+  const mode = s?.checkout_mode ?? "off";
+  const open = mode === "test" && deps.stripe.mode === "test" || mode === "live" && deps.stripe.mode === "live";
+  return { open, test: open && mode === "test" };
 }
 async function checkoutStatus(deps, body) {
   const id = typeof body.session_id === "string" ? body.session_id : "";

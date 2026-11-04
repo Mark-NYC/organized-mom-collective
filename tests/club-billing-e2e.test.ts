@@ -73,7 +73,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   it('refuses checkout until Stripe is set up and the owner opens it', async () => {
-    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'a@example.com' })).body.error).toBe('checkout_closed');
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'a@example.com' })).body.error).toBe('checkout_closed');
     expect((await post(admin, { action: 'stripe_setup' })).status).toBe(401);
     tokens.set('tok_nobody', sql(`insert into auth.users (id, email, email_confirmed_at) values (gen_random_uuid(), 'nobody@example.com', now()) returning id`));
     expect((await post(admin, { action: 'stripe_setup' }, 'tok_nobody')).status).toBe(403);
@@ -123,7 +123,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   it('checkout sells monthly only: annual and unknown plans are refused before anything is made', async () => {
     const before = [stripe.customers.size, stripe.sessions.size];
     for (const plan of ['annual', 'weekly', undefined]) {
-      const r = await post(billing, { action: 'checkout', plan, email: 'annual@example.com' });
+      const r = await post(billing, { action: 'checkout', test_checkout: true, plan, email: 'annual@example.com' });
       expect([r.status, r.body.error]).toEqual([400, 'invalid_plan']);
     }
     expect([stripe.customers.size, stripe.sessions.size]).toEqual(before);
@@ -132,11 +132,11 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   let monthlySub = '';
   let firstSession = '';
   it('new monthly subscriber (no account yet): one checkout, a household, November only, one welcome', async () => {
-    const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'Mia@Example.com' });
+    const r = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'Mia@Example.com' });
     expect(r.status).toBe(200);
     expect(r.body.url).toMatch(/^https:\/\/checkout\.stripe\.test\//);
     // Duplicate checkout attempt (double click, second tab): the same Checkout.
-    const again = await post(billing, { action: 'checkout', plan: 'monthly', email: 'mia@example.com' });
+    const again = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'mia@example.com' });
     expect(again.body.url).toBe(r.body.url);
     expect(stripe.sessions.size).toBe(1);
     expect(stripe.customers.size).toBe(1);
@@ -186,8 +186,8 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   it('an existing member is refused a second checkout, signed in or not', async () => {
-    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'mia@example.com' })).body.error).toBe('already_member');
-    expect((await post(billing, { action: 'checkout', plan: 'monthly' }, 'tok_mia@example.com')).body.error).toBe('already_member');
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'mia@example.com' })).body.error).toBe('already_member');
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly' }, 'tok_mia@example.com')).body.error).toBe('already_member');
   });
 
   it('family profile and address complete the mailing requirements', () => {
@@ -261,7 +261,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   it('a chargeback revokes its month and the subscription’s access', async () => {
-    const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'dee@example.com' });
+    const r = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'dee@example.com' });
     expect(r.body).toMatchObject({ url: expect.any(String) });
     const sid = [...stripe.sessions.values()].find((s) => s.url === r.body.url)!.id as string;
     await deliver(stripe.completeCheckout(sid, { email: 'dee@example.com' }));
@@ -272,9 +272,9 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   it('two checkouts that both finish: the second subscription is canceled and refunded', async () => {
-    const a = await post(billing, { action: 'checkout', plan: 'monthly', email: 'twin@example.com' });
+    const a = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'twin@example.com' });
     // A second click gets the same Checkout; a second one that still slips through (a race) is the backstop's job.
-    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'twin@example.com' })).body.url).toBe(a.body.url);
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'twin@example.com' })).body.url).toBe(a.body.url);
     const sa = [...stripe.sessions.values()].find((s) => s.url === a.body.url)!.id as string;
     const sb = stripe.seedCheckout('twin@example.com', stripe.sessions.get(sa)!.price as string, 'monthly', stripe.sessions.get(sa)!.customer as string);
     await deliver(stripe.completeCheckout(sa, { email: 'twin@example.com' }));
@@ -289,13 +289,13 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   });
 
   it('a declined first payment opens nothing; abandoning Checkout leaves nothing to clean up', async () => {
-    const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'decline@example.com' });
+    const r = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'decline@example.com' });
     const sid = [...stripe.sessions.values()].find((s) => s.url === r.body.url)!.id as string;
     await deliver(stripe.completeCheckout(sid, { email: 'decline@example.com', declined: true }));
     expect(months('decline@example.com')).toBe('');
     // She can try again (the incomplete subscription doesn't count as a membership).
-    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'decline@example.com' })).status).toBe(200);
-    const abandoned = await post(billing, { action: 'checkout', plan: 'monthly', email: 'walkaway@example.com' });
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'decline@example.com' })).status).toBe(200);
+    const abandoned = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'walkaway@example.com' });
     expect(abandoned.status).toBe(200);
     expect(sql(`select count(*) from auth.users where email = 'walkaway@example.com'`)).toBe('0');
   });
@@ -313,8 +313,52 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
 
   it('a live key without the deployment switch is refused everywhere', async () => {
     const liveDeps = makeDeps({ stripe, tokens, inbox, env: { CLUB_STRIPE_SECRET_KEY: 'sk_live_x' } });
-    expect((await post(createClubBillingHandler(liveDeps), { action: 'checkout', plan: 'monthly', email: 'z@example.com' })).body.error).toBe('live_checkout_disabled');
+    expect((await post(createClubBillingHandler(liveDeps), { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'z@example.com' })).body.error).toBe('live_checkout_disabled');
+    expect((await post(createClubBillingHandler(liveDeps), { action: 'offer' })).body).toEqual({ open: false, test: false }); // the join page stays closed
     expect((await createClubWebhookHandler(liveDeps)(new Request('https://x/', { method: 'POST', body: '{}' }))).status).toBe(503);
+    expect((await post(createClubAdminHandler(liveDeps), { action: 'refund', invoice: 'in_x' }, 'tok_owner')).body.error).toBe('live_checkout_disabled');
+  });
+
+  it('live Stripe can be prepared before the switch: its own portal and webhook, nothing else opens', async () => {
+    const before = sql(`select portal_configuration_id from public.club_settings`);
+    // The stored portal is the test-mode one: it doesn't exist in live mode, so live setup makes its own.
+    sql(`update public.club_settings set portal_configuration_id = 'bpc_TestModeOnly' where id`);
+    const liveStripe = new FakeClubStripe(true); // the live account: no product, price, portal or webhook yet
+    const liveDeps = makeDeps({ stripe: liveStripe, tokens, inbox, env: { CLUB_STRIPE_SECRET_KEY: 'sk_live_x', CLUB_STRIPE_WEBHOOK_SECRET: 'whsec_test_override' } });
+    const r = await post(createClubAdminHandler(liveDeps), { action: 'stripe_setup' }, 'tok_owner');
+    expect(r.status).toBe(200);
+    expect(r.body.mode).toBe('live');
+    expect(r.body.created).toEqual(['product', 'price_monthly', 'portal', 'webhook']);
+    expect([...liveStripe.prices.values()].map((x) => `${x.lookup_key}:${x.unit_amount}`)).toEqual(['club_monthly_v2:590']); // a test-mode override doesn't stop the live endpoint
+    expect(sql(`select portal_configuration_id <> 'bpc_TestModeOnly' from public.club_settings`)).toBe('t');
+    expect(sql(`select count(*) from public.club_secret where name = 'webhook_secret_live'`)).toBe('1');
+    // Still closed: no checkout, no live events until CLUB_LIVE_CHECKOUT=enabled.
+    expect((await post(createClubBillingHandler(liveDeps), { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'z@example.com' })).body.error).toBe('live_checkout_disabled');
+    sql(`delete from public.club_secret where name = 'webhook_secret_live'; update public.club_settings set portal_configuration_id = ${before ? `'${before}'` : 'null'} where id`);
+  });
+
+  it('webhook accepts this mode\'s stored endpoint secret or the CLUB_STRIPE_WEBHOOK_SECRET override, nothing else', async () => {
+    const hook = createClubWebhookHandler(makeDeps({ stripe, tokens, inbox, env: { CLUB_STRIPE_WEBHOOK_SECRET: 'whsec_override' } }));
+    const send = async (id: string, key: string) => {
+      const raw = JSON.stringify({ id, type: 'checkout.session.expired', livemode: false, created: Math.floor(Date.now() / 1000), data: { object: { id: 'cs_test_none' } } });
+      return (await hook(new Request('https://x/', { method: 'POST', headers: { 'stripe-signature': await signStripePayload(raw, key) }, body: raw }))).status;
+    };
+    expect(await send('evt_sig_stored', secret)).toBe(200);
+    expect(await send('evt_sig_override', 'whsec_override')).toBe(200);
+    expect(await send('evt_sig_wrong', 'whsec_someone_else')).toBe(400);
+  });
+
+  it('test-mode checkout is private: the join page hides it and club-billing refuses a visitor; card only', async () => {
+    sql(`delete from public.shop_throttle where kind = 'club_checkout'`);
+    expect((await post(billing, { action: 'offer' })).body).toEqual({ open: true, test: true });
+    const sessionsBefore = stripe.sessions.size;
+    const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'visitor@example.com' });
+    expect(r.status).toBe(403);
+    expect(r.body.error).toBe('checkout_closed');
+    expect(stripe.sessions.size).toBe(sessionsBefore); // nothing made in Stripe
+    const ok = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'owner-test@example.com' });
+    const s = [...stripe.sessions.values()].find((x) => x.url === ok.body.url)!;
+    expect(s.payment_method_types).toEqual(['card']);
   });
 
   it('mailing queue: one order per paid delivery month, readiness tracked, manual review to mailed', async () => {
@@ -337,7 +381,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
 
   it('December first-time member: December\'s resource and the welcome print in one Welcome Kit; personalize, approve twice, retries change nothing', async () => {
     stripe.clock = Math.floor(Date.UTC(2026, 11, 5, 15) / 1000);
-    const r = await post(billing, { action: 'checkout', plan: 'monthly', email: 'noel@example.com' });
+    const r = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'noel@example.com' });
     expect(r.body).toMatchObject({ url: expect.any(String) });
     const sid = [...stripe.sessions.values()].find((s) => s.url === r.body.url)!.id as string;
     const events = stripe.completeCheckout(sid, { email: 'noel@example.com' });
@@ -390,7 +434,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   const at = (n: number, line1 = `${n} Birch Rd`) => ({ line1, city: 'Albany', state: 'NY', postal_code: '12203', country: 'US' });
   const join = async (email: string) => {
     sql(`delete from public.shop_throttle where kind = 'club_checkout'`); // one test "IP" opens many guest checkouts
-    const r = await post(billing, { action: 'checkout', plan: 'monthly', email });
+    const r = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email });
     expect(r.status).toBe(200);
     return [...stripe.sessions.values()].find((x) => x.url === r.body.url)! as Record<string, any>;
   };
@@ -437,7 +481,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect(me.j.months).toEqual([expect.objectContaining({ month: '2027-01-01', free: true, slug: '2027-01-fresh-start-together' })]);
     expect(me.j.next).toMatchObject({ month: '2027-02-01' });
     expect(new Date(me.j.next.payment_on).getTime() / 1000).toBe(FEB1);
-    expect((await post(billing, { action: 'checkout', plan: 'monthly', email: 'founder@example.com' })).body.error).toBe('already_member');
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly', email: 'founder@example.com' })).body.error).toBe('already_member');
   });
 
   it('February 1, 2027: the first $5.90 buys February, in its catch-up batch by the second-Sunday rule', async () => {
@@ -518,7 +562,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
   // The /club offer button: signed out, no email on our site. Stripe Checkout collects it.
   const guestJoin = async () => {
     sql(`delete from public.shop_throttle where kind = 'club_checkout'`);
-    const r = await post(billing, { action: 'checkout', plan: 'monthly' });
+    const r = await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly' });
     expect(r.status).toBe(200);
     return [...stripe.sessions.values()].find((x) => x.url === r.body.url)! as Record<string, any>;
   };
@@ -569,7 +613,7 @@ describe.skipIf(!PSQL)('Organized Family Club billing, end to end (Stripe test m
     expect((await post(billing, { action: 'portal' }, 'tok_guest@example.com')).body.url).toMatch(/^https:\/\/billing\.stripe\.test\//);
     expect(stripe.portalCustomers.at(-1)).toBe(first.customer);
     // Signed in, she's refused before Stripe.
-    expect((await post(billing, { action: 'checkout', plan: 'monthly' }, 'tok_guest@example.com')).body.error).toBe('already_member');
+    expect((await post(billing, { action: 'checkout', test_checkout: true, plan: 'monthly' }, 'tok_guest@example.com')).body.error).toBe('already_member');
   });
 
   it('joining once the program runs (rolling): the month she joins is free, the first charge is one month later', async () => {
