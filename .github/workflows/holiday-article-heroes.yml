@@ -42,6 +42,8 @@ jobs:
           git add public/images/resources/fp-28-wrapping-hero-*.webp public/images/resources/if-16-cocoa-hero-*.webp public/images/resources/fp-29-christmas-hero-*.webp
           if ! git diff --cached --quiet; then
             git commit -m "Add optimized WebP hero images to three holiday guides"
+            git fetch origin publish-three-holiday-guides-20261103
+            git rebase origin/publish-three-holiday-guides-20261103
             git push origin HEAD:publish-three-holiday-guides-20261103
           fi
       - name: Verify article photos
