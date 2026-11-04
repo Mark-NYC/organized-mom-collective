@@ -61,15 +61,31 @@ function Field({ label, children, className }: { label: string; children: React.
   );
 }
 
+function orderTabFromUrl(): 'orders' | 'inventory' | 'settings' {
+  const value = new URLSearchParams(window.location.search).get('tab');
+  return value === 'inventory' || value === 'settings' ? value : 'orders';
+}
+
 function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => void }) {
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  // ?tab=inventory|settings opens that tab (the admin nav links Products & Inventory here).
-  const [tab, setTab] = useState<'orders' | 'inventory' | 'settings'>(() => {
-    const t = new URLSearchParams(location.search).get('tab');
-    return t === 'inventory' || t === 'settings' ? t : 'orders';
-  });
+  // Preserve linkable operational views and browser Back/Forward.
+  const [tab, setTab] = useState<'orders' | 'inventory' | 'settings'>(() => orderTabFromUrl());
+  useEffect(() => {
+    const restore = () => setTab(orderTabFromUrl());
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
+  const changeTab = (next: 'orders' | 'inventory' | 'settings') => {
+    const url = new URL(window.location.href);
+    if (next === 'orders') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', next);
+    window.history.pushState(null, '', url);
+    setTab(next);
+    setOpenId(null);
+    setNotice('');
+  };
   const [openId, setOpenId] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [gelatoResult, setGelatoResult] = useState<unknown>(null);
@@ -136,9 +152,7 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
             type="button"
             aria-current={tab === t ? 'page' : undefined}
             onClick={() => {
-              setTab(t);
-              setOpenId(null);
-              setNotice('');
+              changeTab(t);
             }}
             className={`relative min-h-11 px-3 text-[0.7rem] font-semibold tracking-[0.18em] uppercase ${tab === t ? 'text-ink' : 'text-muted hover:text-ink'}`}
           >
@@ -149,8 +163,10 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
       </nav>
 
       {tab === 'inventory' && (
-        <section className="mt-5 border border-rule rounded-[4px] p-4" aria-label="Gelato calendar">
-          <h2 className="font-bold text-lg">Gelato calendar integration</h2>
+        <details className="mt-5 rounded-[4px] border border-rule p-4" aria-label="Gelato calendar">
+          <summary className="cursor-pointer font-semibold">Gelato diagnostics <span className="font-normal text-soft">(advanced)</span></summary>
+          <div className="mt-3">
+          <h2 className="text-sm font-semibold">Calendar product lookup</h2>
           <p className="mt-2 text-sm text-soft">
             Read the calendar product and its variants directly from Gelato. This does not submit any orders.
           </p>
@@ -180,7 +196,8 @@ function Dashboard({ auth, onSignOut }: { auth: AdminSession; onSignOut: () => v
               <pre className="mt-2 max-h-80 overflow-auto rounded bg-band p-3 text-xs whitespace-pre-wrap break-all">{JSON.stringify(gelatoResult, null, 2)}</pre>
             </div>
           )}
-        </section>
+          </div>
+        </details>
       )}
 
       {notice && (
