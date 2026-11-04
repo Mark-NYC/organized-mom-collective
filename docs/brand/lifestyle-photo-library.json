@@ -1973,6 +1973,105 @@
       "open_items": [
         "Record the original photographer/source if the owner knows it"
       ]
+    },
+    {
+      "id": "FP28-KABOOMPICS-HERO",
+      "title": "Christmas gift wrapping station supplies",
+      "role": "FP-28 exclusive hero",
+      "source": "Owner-uploaded image identified by owner as Kaboompics",
+      "creator": null,
+      "source_photo_id": null,
+      "source_url": null,
+      "license_review": "Owner supplied the file as Kaboompics with standing approval for Kaboompics site use (2026-10-12). Exact photo detail page and source ID remain unverified; do not assert independently verified rights.",
+      "owner_visual_status": "owner_selected_for_site_2026-11-04",
+      "model_release_review": "No person depicted as an OMC customer or endorser; check crop for unanticipated logos before final release.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-28-wrapping-hero-{640,960,1200}.webp",
+      "used_in": [
+        "FP-28 /resources/christmas-gift-wrapping-station (hero)"
+      ],
+      "status": "Dedicated article photo; no reuse in other editorial pages.",
+      "clearance_record": {
+        "approval": "User uploaded images and explicitly requested use as article heroes; standing Kaboompics permission on file.",
+        "date": "2026-11-04",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-28",
+        "edits": "Responsive WebP resizing only; source proportions maintained, no upscaling",
+        "alt_text_example": "Christmas wrapping paper, ribbons and other gift-wrapping supplies arranged for the holiday season."
+      },
+      "original": "design/photography/kaboompics/holiday-articles-2026-11/christmas-gift-wrapping-station-original.jpeg",
+      "open_items": [
+        "Record verified Kaboompics photo detail URL and photographer",
+        "Inspect final full-resolution presentation for readable marks and context"
+      ]
+    },
+    {
+      "id": "IF16-KABOOMPICS-HERO",
+      "title": "Warm hot cocoa scene",
+      "role": "IF-16 exclusive hero",
+      "source": "Owner-uploaded image identified by owner as Kaboompics",
+      "creator": null,
+      "source_photo_id": null,
+      "source_url": null,
+      "license_review": "Owner supplied the file as Kaboompics with standing approval for Kaboompics site use (2026-10-12). Exact photo detail page and source ID remain unverified; do not assert independently verified rights.",
+      "owner_visual_status": "owner_selected_for_site_2026-11-04",
+      "model_release_review": "No person depicted as an OMC customer or endorser; check crop for unanticipated logos before final release.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-16-cocoa-hero-{640,960,1201}.webp",
+      "used_in": [
+        "IF-16 /resources/hot-cocoa-station-for-kids (hero)"
+      ],
+      "status": "Dedicated article photo; no reuse in other editorial pages.",
+      "clearance_record": {
+        "approval": "User uploaded images and explicitly requested use as article heroes; standing Kaboompics permission on file.",
+        "date": "2026-11-04",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "IF-16",
+        "edits": "Responsive WebP resizing only; source proportions maintained, no upscaling",
+        "alt_text_example": "Hot chocolate and seasonal treats photographed in warm light."
+      },
+      "original": "design/photography/kaboompics/holiday-articles-2026-11/hot-cocoa-station-original.jpeg",
+      "open_items": [
+        "Record verified Kaboompics photo detail URL and photographer",
+        "Inspect final full-resolution presentation for readable marks and context"
+      ]
+    },
+    {
+      "id": "FP29-KABOOMPICS-HERO",
+      "title": "Christmas morning interior",
+      "role": "FP-29 exclusive hero",
+      "source": "Owner-uploaded image identified by owner as Kaboompics",
+      "creator": null,
+      "source_photo_id": null,
+      "source_url": null,
+      "license_review": "Owner supplied the file as Kaboompics with standing approval for Kaboompics site use (2026-10-12). Exact photo detail page and source ID remain unverified; do not assert independently verified rights.",
+      "owner_visual_status": "owner_selected_for_site_2026-11-04",
+      "model_release_review": "No person depicted as an OMC customer or endorser; check crop for unanticipated logos before final release.",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/fp-29-christmas-hero-{640,960,1000}.webp",
+      "used_in": [
+        "FP-29 /resources/christmas-morning-organization-ideas (hero)"
+      ],
+      "status": "Dedicated article photo; no reuse in other editorial pages.",
+      "clearance_record": {
+        "approval": "User uploaded images and explicitly requested use as article heroes; standing Kaboompics permission on file.",
+        "date": "2026-11-04",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "FP-29",
+        "edits": "Responsive WebP resizing only; source proportions maintained, no upscaling",
+        "alt_text_example": "A decorated Christmas setting with presents and a holiday living-room scene."
+      },
+      "original": "design/photography/kaboompics/holiday-articles-2026-11/christmas-morning-organization-original.jpeg",
+      "open_items": [
+        "Record verified Kaboompics photo detail URL and photographer",
+        "Inspect final full-resolution presentation for readable marks and context"
+      ]
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",
