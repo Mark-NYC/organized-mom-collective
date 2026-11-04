@@ -583,11 +583,13 @@ var CLUB_EVENTS = [
   "charge.refunded",
   "charge.dispute.created"
 ];
-async function webhookSecret(deps) {
-  if (deps.env.clubWebhookSecret) return deps.env.clubWebhookSecret;
+async function storedWebhookSecret(deps) {
   const name = deps.stripe.mode === "live" ? "webhook_secret_live" : "webhook_secret_test";
   const [row] = await deps.db.select("club_secret", `name=eq.${name}&select=value`);
   return row?.value ?? "";
+}
+async function webhookSecret(deps) {
+  return await storedWebhookSecret(deps) || deps.env.clubWebhookSecret;
 }
 async function memberFor(deps, customerId, hint) {
   const [row] = await deps.db.select("club_customers", `stripe_customer_id=eq.${encodeURIComponent(customerId)}&select=user_id,email`);
@@ -707,7 +709,9 @@ function createClubAdminHandler(deps) {
       const action = String(body.action ?? "");
       if (action !== "status") {
         const blocked = clubStripeBlocked(deps);
-        if (blocked && action !== "send_emails") throw new HttpError(503, blocked);
+        if (blocked && action !== "send_emails" && !(blocked === "live_checkout_disabled" && action === "stripe_setup")) {
+          throw new HttpError(503, blocked);
+        }
         await deps.db.rpc("admin_log_service", {
           p_actor: user.id,
           p_action: `club.${action}`.slice(0, 60),
@@ -816,7 +820,15 @@ async function stripeSetup(deps) {
     }
   }
   const [settings] = await deps.db.select("club_settings", "select=portal_configuration_id");
-  if (!settings?.portal_configuration_id) {
+  let portal = null;
+  if (settings?.portal_configuration_id) {
+    try {
+      portal = await deps.stripe.request("GET", `/v1/billing_portal/configurations/${settings.portal_configuration_id}`);
+    } catch (e) {
+      if (!(e instanceof StripeError && e.status === 404)) throw e;
+    }
+  }
+  if (!portal) {
     const cfg = await deps.stripe.request("POST", "/v1/billing_portal/configurations", {
       business_profile: { headline: "Organized Family Club: manage your membership" },
       default_return_url: `${deps.env.siteUrl}/club/dashboard`,
@@ -834,13 +846,12 @@ async function stripeSetup(deps) {
     done.push("portal");
   } else {
     const id = settings.portal_configuration_id;
-    const cfg = await deps.stripe.request("GET", `/v1/billing_portal/configurations/${id}`);
-    if (cfg.features?.subscription_update?.enabled) {
+    if (portal.features?.subscription_update?.enabled) {
       await deps.stripe.request("POST", `/v1/billing_portal/configurations/${id}`, { features: { subscription_update: { enabled: false } } }, `club-portal-no-switch-${id}`);
       done.push("portal_updated");
     }
   }
-  if (!await webhookSecret(deps)) {
+  if (!await storedWebhookSecret(deps)) {
     const url = `${deps.env.supabaseUrl}/functions/v1/club-webhook`;
     const ep = await deps.stripe.request("POST", "/v1/webhook_endpoints", {
       url,

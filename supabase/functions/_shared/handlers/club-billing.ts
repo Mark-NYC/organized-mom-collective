@@ -14,6 +14,7 @@
  *                   joining before the 2027 program: February 1, 2027; later: one month after joining). Her free
  *                   month is granted by club-webhook. No free month (one per household): billing starts today, or on
  *                   the program's first day before it starts.
+ *   offer           → { open, test } for the join page: test-mode checkout is shown only with ?test-checkout=1
  *   checkout_status { session_id } → { paid, email } for /club/welcome (the session id is the bearer: it's only in
  *                   her own return URL)
  *   portal          (signed in) → { url } Stripe Billing Portal: card, invoices, cancel
@@ -60,6 +61,8 @@ export function createClubBillingHandler(deps: ClubDeps): Handler {
     const body = await readJson(req);
     if (!body) return json({ error: 'invalid' }, 400, cors);
     const blocked = clubStripeBlocked(deps);
+    // Whether the join page may show its checkout button (never an error: a closed offer just shows as closed).
+    if (body.action === 'offer') return json(blocked ? { open: false, test: false } : await offer(deps), 200, cors);
     if (blocked) return json({ error: blocked }, 503, cors);
     try {
       switch (body.action) {
@@ -109,6 +112,9 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   if (mode === 'off' || (mode === 'test' && deps.stripe.mode !== 'test') || (mode === 'live' && deps.stripe.mode !== 'live')) {
     throw new Refusal('checkout_closed', 403);
   }
+  // Test mode is for the owner's own tests: a public visitor can't start a test-mode checkout (the join page hides
+  // the button; /club/?test-checkout=1 sends test_checkout).
+  if (mode === 'test' && body.test_checkout !== true) throw new Refusal('checkout_closed', 403);
   if (state.live_subscription) throw new Refusal('already_member', 409);
   // Light abuse limit on guest checkouts (each one is a Stripe customer); same throttle table as the shop.
   if (!user) {
@@ -153,6 +159,8 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     customer,
     client_reference_id: user?.id,
     line_items: [{ price, quantity: 1 }],
+    // Card only (Apple Pay and Google Pay are cards): no buy-now-pay-later or app wallets on a $5.90 renewal.
+    payment_method_types: ['card'],
     shipping_address_collection: { allowed_countries: ['US'] },
     customer_update: { shipping: 'auto', address: 'auto' },
     billing_address_collection: 'auto',
@@ -174,6 +182,14 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1000).toISOString() },
   });
   return { url: session.url };
+}
+
+/** The join page's checkout state: open (live, or test for the owner's tests) and whether it's test mode. */
+async function offer(deps: ClubDeps) {
+  const [s] = await deps.db.select<{ checkout_mode: 'off' | 'test' | 'live' }>('club_settings', 'select=checkout_mode');
+  const mode = s?.checkout_mode ?? 'off';
+  const open = (mode === 'test' && deps.stripe.mode === 'test') || (mode === 'live' && deps.stripe.mode === 'live');
+  return { open, test: open && mode === 'test' };
 }
 
 async function checkoutStatus(deps: ClubDeps, body: Record<string, unknown>) {

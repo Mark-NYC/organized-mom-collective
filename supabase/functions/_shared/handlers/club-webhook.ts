@@ -47,11 +47,19 @@ export const CLUB_EVENTS = [
 ] as const;
 
 /** The endpoint's signing secret: the function secret if set, else the one stripe_setup stored. */
-export async function webhookSecret(deps: ClubDeps): Promise<string> {
-  if (deps.env.clubWebhookSecret) return deps.env.clubWebhookSecret;
+/** The signing secret stored for the current Stripe mode by stripe_setup (club_secret), if any. */
+export async function storedWebhookSecret(deps: ClubDeps): Promise<string> {
   const name = deps.stripe.mode === 'live' ? 'webhook_secret_live' : 'webhook_secret_test';
   const [row] = await deps.db.select<{ value: string }>('club_secret', `name=eq.${name}&select=value`);
   return row?.value ?? '';
+}
+
+/**
+ * A secret for this mode (status page): the one stripe_setup stored for this mode, else the CLUB_STRIPE_WEBHOOK_SECRET
+ * override. The webhook accepts an event signed with either, so an override left from test mode can't break live events.
+ */
+export async function webhookSecret(deps: ClubDeps): Promise<string> {
+  return (await storedWebhookSecret(deps)) || deps.env.clubWebhookSecret;
 }
 
 export function createClubWebhookHandler(deps: ClubDeps): Handler {
@@ -60,10 +68,12 @@ export function createClubWebhookHandler(deps: ClubDeps): Handler {
     const blocked = clubStripeBlocked(deps);
     if (blocked) return json({ error: blocked }, 503);
     const raw = await req.text();
-    const secret = await webhookSecret(deps);
-    if (!(await verifyStripeSignature(raw, req.headers.get('stripe-signature'), secret, deps.now()))) {
-      return json({ error: 'invalid_signature' }, 400);
-    }
+    // Signed with this mode's stored endpoint secret, or with the CLUB_STRIPE_WEBHOOK_SECRET override if one is set.
+    const signature = req.headers.get('stripe-signature');
+    const secrets = [...new Set([await storedWebhookSecret(deps), deps.env.clubWebhookSecret].filter(Boolean))];
+    let verified = false;
+    for (const secret of secrets) if (await verifyStripeSignature(raw, signature, secret, deps.now())) { verified = true; break; }
+    if (!verified) return json({ error: 'invalid_signature' }, 400);
     let event: StripeEvent;
     try {
       event = JSON.parse(raw);

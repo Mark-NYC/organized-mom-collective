@@ -66,7 +66,19 @@ async function billing<T>(action: string, body: Record<string, unknown> = {}, si
   return data;
 }
 
-export const startCheckout = (plan: OfferedPlan, email?: string) => billing<{ url: string }>('checkout', { plan, ...(email ? { email } : {}) });
+/** The owner's own test-mode checkout: /club/?test-checkout=1 (club-billing refuses test mode otherwise). */
+export const testCheckoutRequested = () => typeof location !== 'undefined' && new URLSearchParams(location.search).get('test-checkout') === '1';
+export const startCheckout = (plan: OfferedPlan, email?: string) =>
+  billing<{ url: string }>('checkout', { plan, ...(email ? { email } : {}), ...(testCheckoutRequested() ? { test_checkout: true } : {}) });
+/** Whether the join page may show its checkout button: open, and in test mode only for /club/?test-checkout=1. */
+export async function checkoutOffered(): Promise<boolean> {
+  try {
+    const o = await billing<{ open: boolean; test: boolean }>('offer', {}, false);
+    return o.open && (!o.test || testCheckoutRequested());
+  } catch {
+    return false;
+  }
+}
 export const checkoutStatus = (sessionId: string) => billing<{ paid: boolean; open: boolean; email: string }>('checkout_status', { session_id: sessionId }, false);
 export const openPortal = () => billing<{ url: string }>('portal');
 export const syncEmail = () => billing<{ updated: boolean }>('sync_email');

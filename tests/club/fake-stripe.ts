@@ -56,6 +56,8 @@ interface Inv {
 }
 
 export class FakeClubStripe {
+  /** A live-mode account (a separate Stripe account's data): accepts sk_live_ keys instead of sk_test_. */
+  constructor(readonly live = false) {}
   customers = new Map<string, { id: string; email: string; metadata: Record<string, string> }>();
   // interval null: a one-time price (the welcome print).
   prices = new Map<string, { id: string; product: string; lookup_key: string; unit_amount: number; interval: string | null }>();
@@ -86,7 +88,7 @@ export class FakeClubStripe {
 
   async handle(method: string, url: URL, body: string, headers: Headers): Promise<Response> {
     this.requests.push({ method, path: url.pathname });
-    if (!headers.get('authorization')?.startsWith('Bearer sk_test_')) return this.err(401, 'Invalid API key');
+    if (!headers.get('authorization')?.startsWith(this.live ? 'Bearer sk_live_' : 'Bearer sk_test_')) return this.err(401, 'Invalid API key');
     const key = headers.get('idempotency-key');
     if (key && this.idem.has(`${url.pathname}:${key}`)) return this.ok(this.idem.get(`${url.pathname}:${key}`));
     const q = url.searchParams;
@@ -164,6 +166,7 @@ export class FakeClubStripe {
           price: p.line_items?.[0]?.price, extra: Object.values(p.line_items ?? {}).slice(1).map((x: any) => x.price),
           trial_end: p.subscription_data?.trial_end ? Number(p.subscription_data.trial_end) : null,
           custom_text: p.custom_text ?? null,
+          payment_method_types: Object.values(p.payment_method_types ?? {}),
           expires_at: Number(p.expires_at), url: `https://checkout.stripe.test/${rand()}`,
           customer_details: null, collected_information: null,
         };
