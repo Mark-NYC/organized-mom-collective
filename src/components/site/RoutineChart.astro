@@ -1433,6 +1433,21 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
     }
     .mr-container .mr-mobile-dialog button:hover {filter:brightness(.95)}
   }
+  /* Gentle automatic discoverability on touch screens only. Re-enable native
+     scroll snap as soon as the user takes control. */
+  @media screen and (max-width:850px) {
+    .mr-container:not(.mr-exporting) .mr-types.mr-types-auto-scrolling {
+      scroll-behavior:auto!important;
+      scroll-snap-type:none!important;
+      scrollbar-width:none;
+    }
+    .mr-container:not(.mr-exporting) .mr-types.mr-types-auto-scrolling::-webkit-scrollbar {
+      display:none;
+    }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .mr-container .mr-types {scroll-behavior:auto!important}
+  }
   .mr-container.mr-exporting .mr-mobile-print-frame {
     width:816px!important;height:1056px!important;
     overflow:visible!important;

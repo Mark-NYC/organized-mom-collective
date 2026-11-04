@@ -67,6 +67,79 @@ export function initRoutineChart(host: HTMLElement, handoff?: ToolHandoff | null
   // Moving them keeps saved data, chosen icons, and live chart rendering in sync.
   // Desktop restores those elements to their original positions.
   const mobileQuery = window.matchMedia('(max-width: 850px)');
+  // Gently reveal off-screen routine choices on phones. Scroll back and forth
+  // indefinitely rather than cloning buttons: every choice remains a single,
+  // real, accessible control. The FIRST user interaction stops motion for good.
+  const routineStrip = host.querySelector<HTMLElement>('.mr-types');
+  if (routineStrip) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let stoppedByUser = false;
+    let inView = false;
+    let raf = 0;
+    let previousFrame = 0;
+    let direction = 1;
+    let edgePauseUntil = 0;
+    let visibleSince = 0;
+    const stopAnimation = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      previousFrame = 0;
+      routineStrip.classList.remove('mr-types-auto-scrolling');
+    };
+    const stopForUser = () => {
+      stoppedByUser = true;
+      stopAnimation();
+    };
+    const eligible = () =>
+      !stoppedByUser &&
+      mobileQuery.matches &&
+      !reducedMotion.matches &&
+      inView &&
+      !document.hidden &&
+      routineStrip.scrollWidth > routineStrip.clientWidth + 16;
+    const step = (now: number) => {
+      if (!eligible()) { stopAnimation(); return; }
+      if (!previousFrame) previousFrame = now;
+      const delta = Math.min(now - previousFrame, 64);
+      previousFrame = now;
+      if (now >= visibleSince + 1400 && now >= edgePauseUntil) {
+        const max = routineStrip.scrollWidth - routineStrip.clientWidth;
+        const next = Math.max(0, Math.min(max, routineStrip.scrollLeft + direction * delta * 0.018));
+        routineStrip.scrollLeft = next;
+        if (next >= max - 0.5 || next <= 0.5) {
+          direction = next >= max - 0.5 ? -1 : 1;
+          edgePauseUntil = now + 950;
+        }
+      }
+      raf = requestAnimationFrame(step);
+    };
+    const refreshAnimation = () => {
+      if (!eligible()) { stopAnimation(); return; }
+      if (raf) return;
+      routineStrip.classList.add('mr-types-auto-scrolling');
+      previousFrame = 0;
+      visibleSince = performance.now();
+      raf = requestAnimationFrame(step);
+    };
+    // Do not stop on programmatic scroll events; those are our own animation.
+    for (const eventName of ['pointerdown', 'touchstart', 'wheel', 'keydown', 'focusin', 'mousedown']) {
+      routineStrip.addEventListener(eventName, stopForUser, { passive: true });
+    }
+    routineStrip.addEventListener('click', stopForUser);
+    const observer = new IntersectionObserver(entries => {
+      inView = entries[0]?.isIntersecting ?? false;
+      refreshAnimation();
+    }, { threshold: 0.5 });
+    observer.observe(routineStrip);
+    mobileQuery.addEventListener('change', refreshAnimation);
+    reducedMotion.addEventListener('change', refreshAnimation);
+    document.addEventListener('visibilitychange', refreshAnimation);
+    // A mobile popup temporarily obscures the choices; suspend motion until closed.
+    host.querySelectorAll<HTMLDialogElement>('.mr-mobile-dialog').forEach(dialog => {
+      dialog.addEventListener('close', refreshAnimation);
+    });
+  }
+
   const mobileNodes = [
     // The picture style choice belongs above the activity library in the picker.
     { node: host.querySelector<HTMLElement>('.mr-icon-style')!, target: 'pick' },
