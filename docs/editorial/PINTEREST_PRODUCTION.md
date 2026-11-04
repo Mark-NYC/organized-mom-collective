@@ -14,7 +14,7 @@ The owner expressly authorized new supporting scenes, editorial experimentation 
 
 ### Actual Pinterest account boards
 
-Before selecting the board in any metadata CSV or Pinterest Import Content CSV, read [PINTEREST_BOARDS.md](PINTEREST_BOARDS.md). It contains the owner's current six real topic boards, their exact names, and the mapping for Gemini batch 01. Older strategy names and draft CSV categories are not evidence that a board exists. Check screenshot-truncated titles against the live account before import.
+Before selecting the board in any metadata CSV or Pinterest Import Content CSV, read [PINTEREST_BOARDS.md](PINTEREST_BOARDS.md). It contains the owner's current confirmed topic boards, including the new **Holiday Organization & Family Traditions** board created November 4, 2026, their exact names, and batch-specific mappings. Older strategy names and draft CSV categories are not evidence that a board exists. Check screenshot-truncated titles against the live account before import.
 
 ## 1. Establish the inputs
 
