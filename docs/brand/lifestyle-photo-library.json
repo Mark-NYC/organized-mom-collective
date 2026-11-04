@@ -2075,6 +2075,66 @@
         "Inspect final full-resolution presentation for readable marks and context"
       ],
       "crop_note_2026_11_04": "Keeps tree and main sofa framing"
+    },
+    {
+      "id": "HC-12-KABOOMPICS-HERO",
+      "title": "A hand wiping a marble tabletop with a white cloth beside a closed book.",
+      "role": "HC-12 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "32310",
+      "source_url": "https://kaboompics.com/photo/32310/close-up-of-cleaning-a-marble-tabletop",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo detail page lists free personal and commercial use; standard license checked 2026-11-04.",
+      "owner_visual_status": "owner_uploaded_and_requested_2026-11-04",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/hc-12-family-tidy-up-hero-1200.webp",
+      "original": "design/photography/kaboompics/article-heroes-2026-11-04/hc-12-family-tidy-up-hero-original.jpeg",
+      "used_in": [
+        "HC-12 /resources/ten-minute-family-reset (hero)"
+      ],
+      "clearance_record": {
+        "date": "2026-11-04",
+        "approval": "Standing Kaboompics owner approval 2026-10-12 plus explicit owner instruction to install these uploads.",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "HC-12",
+        "edits": "Full uploaded frame, 1200x800; no crop. Responsive resizing and WebP compression only; original unchanged.",
+        "observations": "Uploaded image inspected at full available resolution. Faceless scene; no readable third-party brand or recognizable licensed character detected in the published crop. Generic lettering on crayon wrappers is not treated as a brand endorsement. No customer or product-use claims.",
+        "alt_text_example": "A hand wiping a marble tabletop with a white cloth beside a closed book."
+      },
+      "status": "Exclusive editorial hero; no reuse in other articles."
+    },
+    {
+      "id": "IF-17-KABOOMPICS-HERO",
+      "title": "Colorful crayons spilling from a white cup onto paper covered in children’s drawings.",
+      "role": "IF-17 exclusive hero",
+      "source": "Kaboompics",
+      "creator": "Karolina Grabowska",
+      "source_photo_id": "3151",
+      "source_url": "https://kaboompics.com/photo/3151/children-s-scribbles-in-a-notepad",
+      "source_license_url": "https://kaboompics.com/page/license-and-faq",
+      "license_review": "Photo detail page lists free personal and commercial use; standard license checked 2026-11-04.",
+      "owner_visual_status": "owner_uploaded_and_requested_2026-11-04",
+      "publishing_clearance": true,
+      "public_path": "public/images/resources/if-17-boredom-busters-hero-1200.webp",
+      "original": "design/photography/kaboompics/article-heroes-2026-11-04/if-17-boredom-busters-hero-original.jpeg",
+      "used_in": [
+        "IF-17 /resources/boredom-busters-for-kids (hero)"
+      ],
+      "clearance_record": {
+        "date": "2026-11-04",
+        "approval": "Standing Kaboompics owner approval 2026-10-12 plus explicit owner instruction to install these uploads.",
+        "approved_placements": [
+          "website_article_editorial"
+        ],
+        "article_id": "IF-17",
+        "edits": "Uploaded frame 1200x1023; crop y 112..912 to 1200x800, keeping crayons and drawings. Responsive resizing and WebP compression only; original unchanged.",
+        "observations": "Uploaded image inspected at full available resolution. Faceless scene; no readable third-party brand or recognizable licensed character detected in the published crop. Generic lettering on crayon wrappers is not treated as a brand endorsement. No customer or product-use claims.",
+        "alt_text_example": "Colorful crayons spilling from a white cup onto paper covered in children’s drawings."
+      },
+      "status": "Exclusive editorial hero; no reuse in other articles."
     }
   ],
   "license_review_note": "All five Kaboompics photo pages show free personal/commercial license labels as of 2026-10-12. Does not verify final displayed logos, art, property or the intended commercial context; publication remains disabled. Recheck before use.",

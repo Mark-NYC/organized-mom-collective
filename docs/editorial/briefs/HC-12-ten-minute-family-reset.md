@@ -21,7 +21,7 @@ HC-02 remains the fuller Daily Reset; HC-09 is living-room-only; FP-04 is weekly
 Parent pillar guide and relevant sibling articles linked in body. Incoming links added from the pillar guide and a closely related article.
 
 ## Photography
-No new lifestyle photo installed. No existing article photo reused. Lead image remains an open gap pending a fresh source-specific photo and clearance. Reusable real calendar photography appears only in the cleanup article product callout.
+Installed owner-uploaded Kaboompics 32310 as the exclusive hero, 2026-11-04. Source page verified and uploaded pixels inspected. Full uploaded frame, 1200x800; no crop. Responsive WebP widths 640, 960, 1200; no upscaling. No existing article photo reused. Reusable real calendar photography appears only in the cleanup article product callout.
 
 ## Pinterest research notes
 A separate Pinterest-domain query was run on 2026-11-04. It did not supply usable native autocomplete, guided-search, or pin-format evidence. Pinterest Trends not checked. Candidate keyword: 10 minute family reset. No volume, engagement, or seasonal claims. User reports the matching existing pin created; image upload and publication remain unverified.

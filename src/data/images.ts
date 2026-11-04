@@ -16,6 +16,8 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'if-17-boredom-busters-hero': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Kaboompics 3151; https://kaboompics.com/photo/3151/children-s-scribbles-in-a-notepad; original design/photography/kaboompics/article-heroes-2026-11-04/if-17-boredom-busters-hero-original.jpeg; Uploaded frame 1200x1023; crop y 112..912 to 1200x800, keeping crayons and drawings.; owner-uploaded and requested 2026-11-04; exclusive IF-17 hero' },
+  'hc-12-family-tidy-up-hero': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Kaboompics 32310; https://kaboompics.com/photo/32310/close-up-of-cleaning-a-marble-tabletop; original design/photography/kaboompics/article-heroes-2026-11-04/hc-12-family-tidy-up-hero-original.jpeg; Full uploaded frame, 1200x800; no crop.; owner-uploaded and requested 2026-11-04; exclusive HC-12 hero' },
   'fp-28-wrapping-hero': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'design/photography/kaboompics/holiday-articles-2026-11/christmas-gift-wrapping-station-original.jpeg (owner-uploaded Kaboompics; cropped to 3:2, central gifts and scissors; original preserved)' },
   'if-16-cocoa-hero': { widths: [640, 960, 1201], width: 1201, height: 800, source: 'design/photography/kaboompics/holiday-articles-2026-11/hot-cocoa-station-original.jpeg (owner-uploaded Kaboompics; cropped to 3:2, chocolate cup and dipped churro; original preserved)' },
   'fp-29-christmas-hero': { widths: [640, 900], width: 900, height: 600, source: 'design/photography/kaboompics/holiday-articles-2026-11/christmas-morning-organization-original.jpeg (owner-uploaded Kaboompics; cropped to 3:2, tree and sofa; original preserved)' },
