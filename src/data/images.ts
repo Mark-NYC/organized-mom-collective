@@ -16,6 +16,9 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'fp-28-wrapping-hero': { widths: [640, 960, 1200], width: 1200, height: 1800, source: 'design/photography/kaboompics/holiday-articles-2026-11/christmas-gift-wrapping-station-original.jpeg (owner-uploaded Kaboompics photo, dedicated FP-28 hero; original 1200x1800, uncropped)' },
+  'if-16-cocoa-hero': { widths: [640, 960, 1201], width: 1201, height: 1800, source: 'design/photography/kaboompics/holiday-articles-2026-11/hot-cocoa-station-original.jpeg (owner-uploaded Kaboompics photo, dedicated IF-16 hero; original 1201x1800, uncropped)' },
+  'fp-29-christmas-hero': { widths: [640, 960, 1000], width: 1000, height: 600, source: 'design/photography/kaboompics/holiday-articles-2026-11/christmas-morning-organization-original.jpeg (owner-uploaded Kaboompics photo, dedicated FP-29 hero; original 1000x600, uncropped)' },
   'if-13-christmas-generosity-hero': { widths: [640, 960, 1080], width: 1080, height: 810, source: 'design/photography/owner/if-13-christmas-generosity-hero.jpeg (owner-supplied Christmas card hero, 2026-10-31; resized uncropped at build, dedicated IF-13 hero)' },
   'if-11-chore-chart-without-rewards-hero': { widths: [640, 960, 1200], width: 1200, height: 800, source: 'Owner-supplied photo (chat upload) 2026-10-22 as the IF-11 hero; original photographer/site not stated by owner; original design/photography/owner/chore-chart-without-rewards-toy-trucks-original.jpg (1200x800); uncropped, resize only, no upscaling; no readable logos at full resolution; dedicated IF-11 hero' },
   'if-12-chore-chart-reward-ideas-hero': { widths: [640, 960, 1024], width: 1024, height: 682, source: 'Owner photo (owner states they took it), supplied 2026-10-22 as the IF-12 hero, owner-approved including visible brand packaging; original design/photography/owner/chore-chart-reward-ideas-movie-night-original.webp (1024x682); uncropped, resize only, no upscaling; dedicated IF-12 hero' },
