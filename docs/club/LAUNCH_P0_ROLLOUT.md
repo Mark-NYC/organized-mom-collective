@@ -6,17 +6,33 @@ go-ahead.** Stripe stays in test mode until step 7.
 
 | # | Step | Who | Status |
 | --- | --- | --- | --- |
-| 0 | Merge the P0 PR (family form fix, January personalization fixes, tests) | owner | waiting |
+| 0 | Merge the P0 PR (family form fix, January personalization fixes, tests) | owner | **done** (#342, #343) |
 | 1 | Pre-flight, read-only: `supabase/rollout/launch-p0/01-preflight.sql` | Claude | **done Nov 4: all ok** (5 test claims, 8 test orders) |
-| 2 | Apply `20261110000000_club_welcome_kit_approvals.sql`, then `20261113000000_club_household_icon_style.sql` | owner or Claude | waiting |
-| 3 | Verify, read-only: `03-verify.sql` (every row ok) | Claude | after 2 |
-| 4 | Deploy `club-billing`, `club-admin`, `club-webhook` from `supabase/dashboard/` (Verify JWT **off**) | owner or Claude | after 2 |
-| 5 | Cancel the test subscriptions in the Stripe **test** dashboard, then run `04-cleanup-test-data.sql` | owner, then Claude | waiting |
+| 2 | Apply `20261110000000_club_welcome_kit_approvals.sql`, then `20261113000000_club_household_icon_style.sql` | owner or Claude | **done Nov 4** |
+| 3 | Verify, read-only: `03-verify.sql` (every row ok) | Claude | **done Nov 4** |
+| 4 | Deploy `club-billing`, `club-admin`, `club-webhook` from `supabase/dashboard/` (Verify JWT **off**) | owner or Claude | #342 versions done; #343: `club-billing` done, `club-admin` + `club-webhook` **waiting** |
+| 5 | Cancel the test subscriptions in the Stripe **test** dashboard (keep `sub_1UYBU5…` until your test is done), run `05-cleanup-keep-current-test.sql`; after your test, cancel that one too and run `04-cleanup-test-data.sql` | owner | waiting |
 | 6 | Production test in Stripe test mode, with a fresh email and an address never used before (checklist below) | together | after 4–5 |
 | 7 | Go live: live key, `CLUB_LIVE_CHECKOUT=enabled`, Set up Stripe (live), Setup → checkout live (docs/club/MEMBERSHIP.md → Going live) | owner | last |
 
-Until step 7, consider hiding the public "Get My First Month Free" button (`PUBLIC_CLUB_CHECKOUT_ENABLED=false` in
-Cloudflare Pages, rebuild): a real visitor's card fails in Stripe test mode.
+Test-mode checkout is private since #343: `/club` shows "Enrollment opens soon" to visitors, and `club-billing` refuses
+a test-mode checkout unless it comes from `/club?test-checkout=1`. Checkout is card only (Apple Pay / Google Pay
+included; no Link, Klarna, Cash App, etc.).
+
+## Step 7 runbook: prepare live Stripe without taking payments
+
+1. Deploy `club-admin` and `club-webhook` from #343 (live setup needs them).
+2. Supabase → Edge Functions → Secrets: set `CLUB_STRIPE_SECRET_KEY` to the **live** secret key. Leave
+   `CLUB_LIVE_CHECKOUT` unset. Checkout now refuses everyone (`live_checkout_disabled`) and `/club` shows
+   "Enrollment opens soon". Test checkout and test webhooks stop too, so do this only after your test.
+3. `/admin/club` → Setup → **Set up Stripe**. Creates in live: product, $5.90 monthly price (`club_monthly_v2`),
+   customer portal (replaces the test portal id) and the webhook endpoint (secret stored as `webhook_secret_live`).
+4. Check in the Stripe **live** dashboard: product + price, portal (cancel at period end, no plan switching),
+   webhook endpoint pointing at `/functions/v1/club-webhook`. Card payments enabled in Settings → Payment methods.
+5. **Activation, only with the owner's explicit approval:** set `CLUB_LIVE_CHECKOUT=enabled`, then Setup → checkout
+   mode **live**. Run one real $0 founding checkout with your own card and cancel it.
+
+To back out at any step: put the test key back (and remove `CLUB_LIVE_CHECKOUT`).
 
 ## What each step fixes
 
