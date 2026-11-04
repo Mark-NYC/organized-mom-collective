@@ -2,6 +2,10 @@
 
 **Primary invocation:** "What 10 pins do we need to make today?" This file is the operating contract for ChatGPT, Claude, or another assistant using the GitHub repository. Use live date, not the original spreadsheet date. The assistant must return actual actionable work, including complete stand-alone Gemini prompts, not a generic strategy recap.
 
+## Actual Pinterest board registry
+
+Before drafting Pin metadata or exporting a bulk upload, read [PINTEREST_BOARDS.md](PINTEREST_BOARDS.md). On November 4, 2026 the owner created **Holiday Organization & Family Traditions**. Assign holiday-specific Christmas and Thanksgiving plans, traditions, and seasonal organizing ideas to that board; keep generic evergreen variants on the most relevant evergreen board. For the November 4 batch, use the exact 1/2/3/4/5/8 mapping documented in the registry. Do not create a new seasonal board for each holiday without owner direction. Board names must match the account exactly.
+
 ## Business outcome and creative allocation
 
 - Goal: test Pinterest as an acquisition channel toward **100 Organized Family Club sign-ups in the next 12 months** (a working objective, not a performance claim). Distinguish free-trial enrollments, conversion to paid, and retained paid members. Optimize qualified traffic and enrollments; do not optimize only impressions.
