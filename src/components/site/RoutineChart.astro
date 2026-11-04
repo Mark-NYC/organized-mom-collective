@@ -1338,6 +1338,101 @@ const rows = Array.from({ length: ROUTINE_ROWS }, (_, i) => start.steps[i] ?? ['
       min-height:100%!important;
     }
   }
+  /* Match the Chore Chart's square-edged editorial control language.
+     Deliberately limited to the mobile builder UI: never restyle the print sheet. */
+  @media screen and (max-width:850px) {
+    .mr-container:not(.mr-exporting) .mr-types .mr-type,
+    .mr-container:not(.mr-exporting) .mr-mobile-controls button,
+    .mr-container:not(.mr-exporting) .mr-mobile-preview-title button,
+    .mr-container:not(.mr-exporting) .mr-preview .mr-btn-primary {
+      border-radius:0!important;
+      box-shadow:none!important;
+      font-family:Montserrat,sans-serif!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-types .mr-type {
+      background:#fff!important;color:#545454!important;
+      border:1px solid #D0CDC5!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-types .mr-type[aria-pressed="true"] {
+      background:#545454!important;border-color:#545454!important;
+      color:#fff!important;box-shadow:none!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-types .mr-type[aria-pressed="true"] .mr-type-label {
+      color:#fff!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-controls button:first-child,
+    .mr-container:not(.mr-exporting) .mr-preview .mr-btn-primary {
+      background:#545454!important;color:#fff!important;border:1px solid #545454!important;
+    }
+    .mr-container:not(.mr-exporting) .mr-mobile-controls button+button,
+    .mr-container:not(.mr-exporting) .mr-mobile-preview-title button {
+      background:#fff!important;color:#545454!important;border:1px solid #C9C5BE!important;
+    }
+    .mr-container .mr-mobile-dialog[open],
+    .mr-container .mr-mobile-zoom[open] {
+      border-radius:0!important;border:1px solid #D9D8D4!important;
+      background:#FBF7F1!important;color:#545454!important;
+      box-shadow:0 18px 55px rgba(33,33,33,.19)!important;
+    }
+    .mr-container .mr-mobile-dialog-head h2 {
+      font:700 25px/1.12 Georgia,serif!important;
+      color:#545454!important;letter-spacing:-.025em!important;
+    }
+    .mr-container .mr-mobile-dialog-head button,
+    .mr-container .mr-mobile-zoom-head button {
+      border-radius:0!important;background:transparent!important;
+      border:1px solid #C9C5BE!important;color:#545454!important;
+      box-shadow:none!important;
+    }
+    .mr-container .mr-mobile-dialog-foot button {
+      border-radius:0!important;background:#545454!important;color:#fff!important;
+      border:1px solid #545454!important;
+      box-shadow:none!important;font-weight:700!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-mobile-details input,
+    .mr-container .mr-mobile-dialog-body .mr-editor-row > input,
+    .mr-container .mr-mobile-dialog-body .mr-icon-style button,
+    .mr-container .mr-mobile-dialog-body .rp button,
+    .mr-container .mr-mobile-dialog-body .mr-chip,
+    .mr-container .mr-mobile-dialog-body .mr-ideas button {
+      border-radius:0!important;box-shadow:none!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-mobile-details input,
+    .mr-container .mr-mobile-dialog-body .mr-editor-row > input {
+      border:1px solid #C9C5BE!important;
+      background:#fff!important;color:#545454!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-editor {
+      border-radius:0!important;
+      border:1px solid #D9D8D4!important;background:#fff!important;
+    }
+    .mr-container .mr-mobile-dialog-body .rp {
+      border-radius:0!important;
+      border:1px solid #D9D8D4!important;background:#fff!important;
+    }
+    .mr-container .mr-mobile-dialog-body .rp-tile {
+      border-radius:0!important;background:#fff!important;
+      border:1px solid #DAD8D2!important;
+    }
+    .mr-container .mr-mobile-dialog-body .rp-tile[aria-pressed="true"],
+    .mr-container .mr-mobile-dialog-body .rp-tile[data-selected] {
+      background:#EFF3EB!important;border:2px solid #78937D!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style button {
+      background:#fff!important;color:#545454!important;
+      border:1px solid #D0CDC5!important;
+      font-weight:600!important;
+    }
+    .mr-container .mr-mobile-dialog-body .mr-icon-style button[aria-pressed="true"] {
+      background:#545454!important;color:#fff!important;border-color:#545454!important;
+    }
+    .mr-container .mr-mobile-dialog button:focus-visible,
+    .mr-container .mr-mobile-dialog input:focus-visible,
+    .mr-container .mr-mobile-zoom button:focus-visible {
+      outline:2px solid #545454!important;outline-offset:2px!important;
+    }
+    .mr-container .mr-mobile-dialog button:hover {filter:brightness(.95)}
+  }
   .mr-container.mr-exporting .mr-mobile-print-frame {
     width:816px!important;height:1056px!important;
     overflow:visible!important;
