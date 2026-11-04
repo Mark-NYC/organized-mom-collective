@@ -119,14 +119,39 @@ export default function ClubAdmin() {
   return <AdminGate>{(ctx) => <Club {...ctx} />}</AdminGate>;
 }
 
+type ClubTab = 'members' | 'fulfillment' | 'kits' | 'setup';
+const clubTabs: { id: ClubTab; label: string; note: string }[] = [
+  { id: 'fulfillment', label: 'Fulfillment', note: 'Print and mail' },
+  { id: 'members', label: 'Members', note: 'Households and billing' },
+  { id: 'kits', label: 'Monthly resources', note: 'Kit publishing' },
+  { id: 'setup', label: 'Setup & emails', note: 'Configuration' },
+];
+const clubTabFromUrl = (): ClubTab => {
+  const value = new URLSearchParams(window.location.search).get('tab');
+  return clubTabs.find((t) => t.id === value)?.id ?? 'fulfillment';
+};
+
 function Club(ctx: AdminContext) {
-  const [tab, setTab] = useState<'members' | 'fulfillment' | 'kits' | 'setup'>('members');
+  const [tab, setTab] = useState<ClubTab>(clubTabFromUrl);
+  useEffect(() => {
+    const update = () => setTab(clubTabFromUrl());
+    window.addEventListener('popstate', update);
+    return () => window.removeEventListener('popstate', update);
+  }, []);
+  const choose = (next: ClubTab) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', next);
+    window.history.pushState(null, '', url);
+    setTab(next);
+  };
   return (
     <div>
-      <nav className="mt-4 flex flex-wrap gap-4 text-[0.95rem]" aria-label="Club admin">
-        {(['members', 'fulfillment', 'kits', 'setup'] as const).map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)} className={tab === t ? 'font-semibold underline underline-offset-4' : 'text-soft underline-offset-4 hover:underline'}>
-            {t === 'members' ? 'Members' : t === 'fulfillment' ? 'Fulfillment' : t === 'kits' ? 'Monthly resources' : 'Setup & emails'}
+      <nav className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Club admin">
+        {clubTabs.map((item) => (
+          <button key={item.id} type="button" onClick={() => choose(item.id)} aria-current={tab === item.id ? 'page' : undefined}
+            className={`min-h-16 rounded-[5px] border px-4 py-3 text-left transition-colors ${tab === item.id ? 'border-ink bg-band' : 'border-rule hover:bg-band'}`}>
+            <span className="block text-[0.95rem] font-semibold">{item.label}</span>
+            <span className="mt-1 block text-[0.8rem] text-soft">{item.note}</span>
           </button>
         ))}
       </nav>
