@@ -103,37 +103,40 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
           )}
 
           <section aria-labelledby="numbers">
-            <h2 id="numbers" className="text-[1.25rem] font-bold">
-              Website shop and leads
-            </h2>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Tile label="Revenue, 30 days" value={usd(data.orders.revenue_30d_cents)} note={`after refunds · ${usd(data.orders.revenue_all_cents)} all time`} />
-              <Tile label="Orders, 30 days" value={data.orders.paid_30d} note={`${data.orders.paid_all} all time`} />
-              <Tile label="To ship" value={data.orders.to_ship} href="/admin/orders" />
-              <Tile label="Open support" value={data.support.open} note={data.support.waiting ? `${data.support.waiting} waiting on customer` : undefined} />
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h2 id="numbers" className="text-[1.25rem] font-bold">Business at a glance</h2>
+              <span className="text-[0.85rem] text-soft">Website orders only, excluding Etsy and test payments</span>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <Tile label="Revenue · 30 days" value={usd(data.orders.revenue_30d_cents)} note="After refunds" href="/admin/orders" />
+              <Tile label="Paid orders · 30 days" value={data.orders.paid_30d} note={`${data.orders.paid_all} all time`} href="/admin/orders" />
+              <Tile label="To ship" value={data.orders.to_ship} note="Paid orders awaiting shipment" href="/admin/orders" />
+              <Tile label="Email signups · 30 days" value={data.leads.last_30d} note={`${data.leads.marketing_opt_in} marketing opt-ins total`} />
+            </div>
+          </section>
+
+          <section aria-labelledby="work-queues">
+            <h2 id="work-queues" className="text-[1.25rem] font-bold">Work queues</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Tile label="Low-stock products" value={data.inventory.low_stock} href="/admin/orders?tab=inventory" />
+              <Tile label="Open support requests" value={data.support.open} note="Managed in support inbox for now" />
               <Tile label="Returns in progress" value={data.support.returns_in_progress} />
-              <Tile label="Low stock" value={data.inventory.low_stock} note={`${data.inventory.active_products} products on sale`} href="/admin/orders?tab=inventory" />
-              <Tile label="Email signups, 30 days" value={data.leads.last_30d} note={`${data.leads.total} total · ${data.leads.marketing_opt_in} opted in to marketing`} />
-              <Tile label="Checkouts started, 30 days" value={data.orders.checkouts_started_30d} note="website, live" />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-[0.9rem]">
+              <a className="text-link" href="/admin/club?tab=fulfillment">Club print & mailing queue</a>
+              <a className="text-link" href="/admin/pins">Pinterest queue</a>
+              <a className="text-link" href="/admin/pages">Site pages & funnels</a>
             </div>
           </section>
 
-          <section aria-labelledby="unavailable">
-            <h2 id="unavailable" className="text-[1.25rem] font-bold">
-              Not connected yet
-            </h2>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Tile label="Visitors" value="—" note="Needs GA4 Data API access (Phase 5)" />
-              <Tile label="Visitor → lead" value="—" note="Needs GA4 + lead events" />
-              <Tile label="Visitor → purchase" value="—" note="Needs GA4 purchase event" />
-              <Tile label="Etsy orders" value="—" note="Not integrated" />
+          <details className="border-t border-rule pt-5">
+            <summary className="cursor-pointer font-semibold">More metrics and recent activity</summary>
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <Tile label="Revenue · all time" value={usd(data.orders.revenue_all_cents)} />
+              <Tile label="Checkouts started · 30 days" value={data.orders.checkouts_started_30d} note="Live website sessions" />
+              <Tile label="Total email signups" value={data.leads.total} />
             </div>
-          </section>
-
-          <section aria-labelledby="recent">
-            <h2 id="recent" className="text-[1.25rem] font-bold">
-              Recent activity
-            </h2>
+            <h3 className="mt-7 text-[1rem] font-semibold">Recent activity</h3>
             {data.recent.length === 0 && <p className="mt-3 text-[0.95rem]">Nothing yet.</p>}
             <ul className="mt-3 divide-y divide-rule text-[0.95rem]">
               {data.recent.map((r, i) => (
@@ -146,7 +149,7 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
                 </li>
               ))}
             </ul>
-          </section>
+          </details>
         </>
       )}
     </div>
