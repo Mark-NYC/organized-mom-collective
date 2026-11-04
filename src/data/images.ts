@@ -16,6 +16,8 @@ export interface ArticleImage {
 }
 
 export const articleImages = {
+  'if-09-dinner-team-hero': { widths: [640, 960, 1094], width: 1094, height: 729, source: 'Generated lifestyle image (Google Gemini), owner-supplied 2026-11-04; original design/photography/owner/family-printable-heroes-2026-11-04/if-09-dinner-team-hero-original.jpeg; exclusive kids-helping-with-dinner hero; crop x170 y50 to x1264 y779 excludes the child face; original preserved' },
+  'hc-13-counter-clutter-hero': { widths: [640, 960, 1264], width: 1264, height: 848, source: 'Generated lifestyle image (Google Gemini), owner-supplied 2026-11-04; original design/photography/owner/family-printable-heroes-2026-11-04/hc-13-counter-clutter-hero-original.jpeg; exclusive kitchen-counter-clutter-reset hero; full uploaded frame, resize only, no upscaling' },
   'if-18-sibling-chores-hero': { widths: [640, 960, 1264], width: 1264, height: 848, source: 'Generated lifestyle illustration (Google Gemini, owner-supplied 2026-11-04); original design/photography/owner/family-printable-heroes-2026-11-04/if-18-sibling-chores-hero-original.jpeg; exclusive chore-chart-for-siblings hero; full uploaded frame; resize only, no upscaling' },
   'if-19-cleaning-finish-lines-hero': { widths: [640, 960, 1264], width: 1264, height: 848, source: 'Generated lifestyle illustration (Google Gemini, owner-supplied 2026-11-04); original design/photography/owner/family-printable-heroes-2026-11-04/if-19-cleaning-finish-lines-hero-original.jpeg; exclusive kids-cleaning-checklist hero; full uploaded frame; resize only, no upscaling' },
   'if-20-bedroom-reset-hero': { widths: [640, 960, 1264], width: 1264, height: 824, source: 'Generated lifestyle illustration (Google Gemini, owner-supplied 2026-11-04); original design/photography/owner/family-printable-heroes-2026-11-04/if-20-bedroom-reset-hero-original.jpeg; exclusive kids-bedroom-cleaning-checklist hero; crop removes top 24 pixels to keep the face fully outside the frame' },
@@ -109,3 +111,4 @@ export function imageAttrs(name: ArticleImageName) {
 
 /** The largest file, for Open Graph and structured data. */
 export const largestImage = (name: ArticleImageName) => `/images/resources/${name}-${articleImages[name].width}.webp`;
+
