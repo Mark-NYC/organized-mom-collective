@@ -359,7 +359,7 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
 function Badge({ kind, status }: { kind: 'payment' | 'fulfillment'; status: string }) {
   const label = kind === 'payment' ? PAYMENT_LABELS[status as OrderRow['payment_status']] : FULFILLMENT_LABELS[status as OrderRow['fulfillment_status']];
   const tone =
-    status === 'failed' || status === 'refunded' || status === 'canceled' ? 'critical'
+    status === 'failed' ? 'critical'
     : status === 'unfulfilled' || status === 'partially_refunded' || status === 'packing' ? 'warning'
     : status === 'paid' || status === 'shipped' || status === 'delivered' ? 'success'
     : status === 'pending' ? 'info'
