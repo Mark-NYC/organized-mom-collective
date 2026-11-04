@@ -53,7 +53,7 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
   const seen = alerts?.filter((a) => a.acked_at) ?? [];
 
   return (
-    <div className="mt-6 space-y-10">
+    <div className="mt-6 space-y-8">
       <div className="flex justify-end">
         <button type="button" onClick={load} disabled={loading} className="text-link text-[0.9rem]">
           {loading ? 'Checking…' : 'Check again'}
@@ -66,7 +66,7 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
       )}
 
       <section aria-labelledby="attention">
-        <h2 id="attention" className="text-[1.25rem] font-bold">
+        <h2 id="attention" className="admin-section-heading">
           Needs attention {alerts && <span className="text-muted">({open.length})</span>}
         </h2>
         {alerts === null && !error && <p className="mt-3 text-muted">Checking…</p>}
@@ -96,7 +96,7 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
       {data && (
         <>
           {data.checkout_mode !== 'live' && (
-            <p className="border-l-[3px] border-month bg-band px-4 py-3 text-[0.95rem]">
+            <p className="admin-notice admin-notice--warning text-[0.95rem]">
               Website checkout is <strong>{data.checkout_mode === 'preview' ? 'in preview' : 'off'}</strong>, so there are no real website orders yet. Numbers below count
               real-money orders only{data.orders.test_orders > 0 && <> ({data.orders.test_orders} test orders not counted)</>}. Etsy sales aren’t in the admin.
             </p>
@@ -157,17 +157,17 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
 }
 
 const BADGE: Record<AlertRow['severity'], string> = {
-  critical: 'bg-ink text-paper',
-  warning: 'border border-ink',
-  info: 'border border-rule text-soft',
+  critical: 'admin-status admin-status--critical',
+  warning: 'admin-status admin-status--warning',
+  info: 'admin-status admin-status--info',
 };
 
 function AlertItem({ a, onAck }: { a: AlertRow; onAck?: () => void }) {
   const link = safeAdminLink(a.link);
   return (
-    <li className="rounded-[3px] border border-rule p-3">
+    <li className={`admin-priority admin-priority--${a.severity}`}>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className={`rounded-[3px] px-2 py-0.5 text-[0.75rem] font-semibold uppercase ${BADGE[a.severity]}`}>{a.severity}</span>
+        <span className={BADGE[a.severity]}>{a.severity}</span>
         <span className="font-semibold">{a.title}</span>
       </div>
       {a.detail && <p className="mt-1 text-[0.9rem] text-soft">{a.detail}</p>}
@@ -197,10 +197,10 @@ function Tile({ label, value, note, href }: { label: string; value: string | num
     </>
   );
   return href ? (
-    <a href={href} className="block rounded-[3px] bg-band p-3 hover:bg-rule">
+    <a href={href} className="admin-metric block no-underline">
       {body}
     </a>
   ) : (
-    <div className="rounded-[3px] bg-band p-3">{body}</div>
+    <div className="admin-metric">{body}</div>
   );
 }

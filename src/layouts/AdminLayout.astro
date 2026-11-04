@@ -4,6 +4,7 @@
  * Admin pages are noindex; auth/RLS are still enforced by their React AdminGate.
  */
 import BaseLayout from './BaseLayout.astro';
+import '../styles/admin-workspace.css';
 import { ADMIN_GROUPS, ADMIN_SECTIONS } from '../data/admin';
 
 interface Props {
@@ -18,7 +19,7 @@ const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => 
 
 <BaseLayout title={`${title} · Admin`} description="Organized Mom Collective admin." robots="noindex" tracking={false}>
   <meta slot="head" name="referrer" content="no-referrer" />
-  <div class="min-h-screen bg-paper">
+  <div class="admin-workspace min-h-screen bg-paper">
     <div class="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8">
       <header class="flex items-center justify-between gap-4 border-b border-rule pb-5">
         <a href="/admin" class="min-w-0 no-underline" aria-label="Organized Mom Collective admin home">
@@ -76,7 +77,7 @@ const sectionGroup = ADMIN_GROUPS.find((group) => group.sections.some((item) => 
             ))}
           </nav>
         </aside>
-        <main id="admin-content" class="min-w-0 pb-16 pt-7 lg:pt-8">
+        <main id="admin-content" class="min-w-0 max-w-[1160px] pb-16 pt-7 lg:pt-8">
           <div class="mb-2 flex flex-wrap items-center gap-2 text-[0.75rem] text-muted">
             <a href="/admin" class="underline underline-offset-2 hover:text-ink">Admin</a>
             <span aria-hidden="true">/</span>

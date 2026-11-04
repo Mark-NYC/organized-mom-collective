@@ -253,14 +253,14 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
           {filter.mode === 'test' ? 'Showing test orders only' : 'These numbers include test-mode orders'} (Stripe test mode, no real money).
         </p>
       )}
-      <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[6px] border border-rule bg-rule sm:grid-cols-4">
+      <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Orders" value={String(totals.orders)} note={`${totals.units} calendar${totals.units === 1 ? '' : 's'}`} />
         <Stat label="Net sales" value={money(totals.net_cents)} note={totals.refunded_cents ? `${money(totals.gross_cents)} − ${money(totals.refunded_cents)} refunded` : 'after refunds'} />
         <Stat label="Average order" value={money(totals.average_cents)} note={`incl. ${money(totals.shipping_cents)} shipping, ${money(totals.tax_cents)} tax in total`} />
         <Stat label="To ship" value={String(totals.to_ship)} note="paid, not shipped" />
       </dl>
 
-      <div className="mt-6 grid gap-3 border-y border-rule py-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] lg:items-end">
+      <div className="mt-6 grid gap-3 rounded-[8px] border border-rule bg-white p-4 sm:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr] xl:items-end">
         <Field label="Search">
           <input
             type="search"
@@ -302,6 +302,9 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
             ))}
           </select>
         </Field>
+        <details className="sm:col-span-2 xl:col-span-4">
+          <summary className="cursor-pointer py-2 text-[0.9rem] font-semibold text-soft">Date range & export</summary>
+          <div className="mt-2 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
         <Field label="From">
           <input type="date" value={filter.from} max={filter.to || undefined} onChange={(e) => set({ from: e.target.value })} className={inputClass} />
         </Field>
@@ -311,6 +314,8 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
         <button type="button" className="btn-secondary" onClick={exportCsv} disabled={!shown.length}>
           Export CSV
         </button>
+          </div>
+        </details>
       </div>
 
       <p className="mt-4 text-[0.9rem] text-soft">
@@ -353,22 +358,18 @@ function OrdersList({ orders, onOpen }: { orders: OrderRow[]; onOpen: (id: strin
 
 function Badge({ kind, status }: { kind: 'payment' | 'fulfillment'; status: string }) {
   const label = kind === 'payment' ? PAYMENT_LABELS[status as OrderRow['payment_status']] : FULFILLMENT_LABELS[status as OrderRow['fulfillment_status']];
-  const strong = status === 'paid' || status === 'unfulfilled';
-  const done = status === 'shipped' || status === 'delivered';
-  return (
-    <span
-      className={`status ${
-        strong ? 'bg-ink text-white' : done ? 'status-now' : status === 'packing' ? 'bg-month text-ink' : 'border border-dashed border-rule-strong text-soft'
-      }`}
-    >
-      {label}
-    </span>
-  );
+  const tone =
+    status === 'failed' ? 'critical'
+    : status === 'unfulfilled' || status === 'partially_refunded' || status === 'packing' ? 'warning'
+    : status === 'paid' || status === 'shipped' || status === 'delivered' ? 'success'
+    : status === 'pending' ? 'info'
+    : 'neutral';
+  return <span className={`admin-status admin-status--${tone}`}>{label}</span>;
 }
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <div className="bg-paper px-4 py-4">
+    <div className="admin-metric">
       <dt className="label text-soft">{label}</dt>
       <dd className="mt-1.5 text-[1.6rem] leading-none font-bold tabular-nums sm:text-[1.9rem]">{value}</dd>
       {note && <dd className="mt-1.5 text-[0.8rem] leading-snug text-soft">{note}</dd>}

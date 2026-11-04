@@ -149,7 +149,7 @@ function Club(ctx: AdminContext) {
       <nav className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Club admin">
         {clubTabs.map((item) => (
           <button key={item.id} type="button" onClick={() => choose(item.id)} aria-current={tab === item.id ? 'page' : undefined}
-            className={`min-h-16 rounded-[5px] border px-4 py-3 text-left transition-colors ${tab === item.id ? 'border-ink bg-band' : 'border-rule hover:bg-band'}`}>
+            className={`min-h-16 rounded-[8px] border px-4 py-3 text-left transition-colors ${tab === item.id ? 'border-[#8ea58a] bg-[#f1f4ec] shadow-[inset_0_3px_0_#718d70]' : 'border-rule bg-white hover:bg-band'}`}>
             <span className="block text-[0.95rem] font-semibold">{item.label}</span>
             <span className="mt-1 block text-[0.8rem] text-soft">{item.note}</span>
           </button>
@@ -200,13 +200,13 @@ function Members({ session, signOut }: AdminContext) {
                   <tr className="border-b border-rule align-top">
                     <td className="py-2">{r.email}<br /><span className="text-soft">{r.display_name ?? ''}</span>{r.livemode === false && <span className="ml-1 text-soft">· test</span>}</td>
                     <td>{r.plan ?? '–'} · {r.status ?? 'no subscription'}{r.cancel_at_period_end ? ` (ends ${day(r.current_period_end)})` : ''}
-                      {r.payment_problem && <><br /><strong>Payment problem</strong></>}{r.revoked && <><br /><strong>Access revoked</strong></>}
+                      {r.payment_problem && <><br /><span className="admin-status admin-status--critical">Payment problem</span></>}{r.revoked && <><br /><span className="admin-status admin-status--critical">Access revoked</span></>}
                       {r.flags?.length ? <><br /><span className="text-soft">{r.flags.join(', ')}</span></> : null}</td>
                     <td>{day(r.enrolled_at)}<br /><span className="text-soft">from {r.first_paid_month ? month(r.first_paid_month) : '–'}</span></td>
                     <td>{r.months.length ? `${month(r.months[0])} … ${month(r.months[r.months.length - 1])} (${r.months.length})` : '–'}</td>
                     <td>{r.welcome ? `${r.welcome.status} · ${r.welcome.readiness}` : '–'}{r.welcome?.satisfies_month && <><br /><span className="text-soft">is their {month(r.welcome.satisfies_month)}</span></>}</td>
-                    <td>{r.onboarded ? `${r.adults} adult${r.adults === 1 ? '' : 's'}, kids born ${r.child_birth_years.join(', ') || '–'}` : <strong>Not yet</strong>}</td>
-                    <td>{r.address ? `${r.address.city}, ${r.address.state}${r.address.paused ? ' (paused)' : ''}` : <strong>Missing</strong>}</td>
+                    <td>{r.onboarded ? `${r.adults} adult${r.adults === 1 ? '' : 's'}, kids born ${r.child_birth_years.join(', ') || '–'}` : <span className="admin-status admin-status--warning">Not yet</span>}</td>
+                    <td>{r.address ? `${r.address.city}, ${r.address.state}${r.address.paused ? ' (paused)' : ''}` : <span className="admin-status admin-status--warning">Missing</span>}</td>
                     <td><button type="button" className="underline" onClick={() => setOpen(open === r.user_id ? null : r.user_id)}>{open === r.user_id ? 'Close' : 'Manage'}</button></td>
                   </tr>
                   {open === r.user_id && <tr><td colSpan={8} className="bg-paper p-4"><MemberTools member={r} session={session} onDone={load} /></td></tr>}
