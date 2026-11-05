@@ -18,27 +18,32 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What’s happening for each of us this week, like robotics?
 - What gets in the way? One possibility: plans might be living in one person’s head or phone.
-- Ask Elsa and Nils which starting point they’d try first, or what they’d try instead.
+- Ask Elsa and Nils: would these help, or what would you try instead?
 
 ---
 
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Elsa** · 15: Keep plans on the family calendar, rides included, and ask for rides a day ahead. _(Free to choose how and when.)_
-- **Nils** · 11: Coming home, put gear and water bottle in one home spot. _(Ready for more independence.)_
+- **Nils, 11 · A spot for everything** (Everyone knowing the plan is your top priority. You’d like Nils to take on keeping track of belongings.)
+  - “Put gear and water bottle in one home spot.”
+  - When: When, your pick: coming home?
+  - Ownership: Nils sets up the gear spot.
+  - Help: One spot for gear by the door.
+- **Elsa, 15 · Tomorrow on the calendar** (Everyone knowing the plan is your top priority.)
+  - “Keep plans on the family calendar, rides included.”
+  - When: When, your pick: as plans are made?
+  - Ownership: Elsa asks for rides a day ahead.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: hang the calendar where everyone passes, and add plans the day they’re made.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, priorities, activities_
+_Personalized from: names, ages, priorities, growth areas, activities_

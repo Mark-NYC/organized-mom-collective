@@ -34,21 +34,23 @@ for (const f of FAMILIES) {
     '---',
     '',
     head(2),
-    `_Ideas to choose from, not jobs. Decide together._`,
-    '',
-    ...g.people.filter((p) => p.ideas.length || p.keeps).map((p) => {
-      const who = `**${p.name}**${p.age !== null ? ` · ${p.age}` : ''}`;
-      if (!p.ideas.length) return `- ${who}: ${p.keeps}`;
-      return `- ${who}: ${p.choose ? `_${p.name} chooses one:_ ` : ''}${p.ideas.map((i) => i.text).join(' **or** ')} _(${p.support})_${p.keeps ? ` · ${p.keeps}` : ''}`;
-    }),
+    ...(g.experiments.length ? [`**${g.experimentsLabel}** · _${g.starterNote ?? g.experimentsNote}_`, ''] : []),
+    ...g.experiments.flatMap((e) => [
+      `- **${e.who} · ${e.title}**${e.why ? ` (${e.why})` : e.basis === 'consider' && e.memberIds.length ? ` (_${g.considerLabel}_)` : ''}`,
+      `  - “${e.action}”`,
+      ...(e.adaptations ?? []).map((x) => `  - ${x.name}: ${x.action}`),
+      ...(e.anchor.text ? [`  - When: ${e.anchor.verified ? e.anchor.text : `${g.anchorOptions}: ${e.anchor.text}?`}${e.anchor.verified ? ' _(from your answers)_' : ''}`] : []),
+      `  - Ownership: ${e.ownership}`,
+      ...(e.support ? [`  - Help: ${e.support}`] : []),
+    ]),
     ...(g.partsDiscover ? [`- ${g.partsDiscover}`] : []),
+    ...g.recognized.map((t) => `- ${t.text}`),
     ...g.grownUps.map((t) => `- ${t.text}`),
     '',
     head(3),
-    '**Ways to make it stick**',
     ...g.practice.map((t) => `- ${t.text}`),
     '',
-    `**Coming back to it:** ${g.checkIn}`,
+    `_${g.checkIn}_`,
     '',
     '---',
     `_Personalized from: ${g.used.join(', ')}${g.missing.length ? ` · the month’s own ideas for: ${g.missing.join(', ')}` : ''}_`,

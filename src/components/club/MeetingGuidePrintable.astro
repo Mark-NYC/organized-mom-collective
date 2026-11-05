@@ -53,30 +53,28 @@ const { month } = Astro.props;
 .mg-list li{position:relative;padding-left:16px}
 .mg-list li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:#d9b8b4}
 .mg-talk li{font-size:13px}
-.mg-kids{list-style:none;margin:0 0 0 36px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
-.mg-kids > li{padding:9px 12px;border-radius:5px;background:#fbf7f1;display:grid;gap:3px;align-content:start;break-inside:avoid}
-.mg-who strong{font-size:13px}
-.mg-who span{color:#6e6461}
-.mg-idea{font-weight:500}
-.mg-help{font-size:11px;font-style:italic;color:#6e6461}
-.mg-keeps{font-size:11px;color:#536e4e}
+/* Habit experiments: the centerpiece of Everyone's Part. */
+.mg-focus-because{font-size:11px;color:#6e6461}
+.mg-exps-head{margin-left:36px!important;color:#6e6461;font-size:11.5px}
+.mg-exps-head .mg-label{margin-right:6px}
+.mg-exps{list-style:none;margin:0 0 0 36px;padding:0;display:grid;grid-template-columns:1fr;gap:10px}
+.mg-exps--two{grid-template-columns:1fr 1fr}
+.mg-exp{padding:12px 14px;border-radius:6px;background:#fbf7f1;border-top:3px solid #b9c7ad;display:grid;gap:4px;align-content:start;break-inside:avoid}
+.mg-exp-head strong{font:400 17px/1.2 var(--font-serif)}
+.mg-exp-head span{font-weight:600}
+.mg-exp-why{font-size:11.5px;color:#6e6461}
+.mg-exp-action{font:italic 400 14px/1.4 var(--font-serif);color:#3d3834}
+.mg-exp-line{font-size:12px}
+.mg-exp-line b{font-weight:600;color:#96666b}
+.mg-exp-adapt{margin:0;padding-left:16px;display:grid;gap:2px;font-size:12px}
 .mg-discover{margin-left:36px!important;padding:10px 14px;border-radius:5px;background:#fbf7f1}
-/* The family's own habit experiment: write-in lines, nothing pre-filled. */
-.mg-experiment{margin-left:36px;padding:12px 16px 12px;border:1.5px dashed #c9b3ae;border-radius:6px;display:grid;gap:5px}
-.mg-exp-prompt{color:#4d4544}
-.mg-exp-prompt strong{font:400 17px/1.2 var(--font-serif);margin-right:8px}
-.mg-exp-fields{display:grid;grid-template-columns:1fr 1.6fr 1.2fr;gap:6px 14px;margin:2px 0}
-.mg-exp-field{display:grid;gap:14px}
-.mg-exp-field span:first-child{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#96666b}
-.mg-exp-line{display:block;border-bottom:1px solid #b8aaa6;height:1px}
-.mg-exp-check{font-size:11px;color:#6e6461}
+.mg-recognized li{color:#536e4e}
+.mg-checkin{font-size:11.5px}
 .mg-foot{margin-top:auto!important;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
 /* Five or six children: tighter. Seven or more: three columns. Never under 10px. */
 .mg-sheet.mg-dense{gap:12px}
-.mg-dense .mg-kids > li{padding:7px 10px}
-.mg-xdense .mg-kids{grid-template-columns:repeat(3,1fr);gap:6px 8px}
-.mg-xdense .mg-kids > li{font-size:11px;line-height:1.32}
-.mg-xdense .mg-help,.mg-xdense .mg-keeps{font-size:10px}
+.mg-dense .mg-exp-adapt{grid-template-columns:1fr 1fr;column-gap:14px}
+.mg-xdense .mg-exp-adapt{grid-template-columns:repeat(3,1fr);font-size:11px}
 
 /* The editor */
 .mg-editor{position:fixed;inset:0;margin:auto;height:fit-content;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid #e7ddd4;border-radius:8px;background:#fff;color:#3d3834}

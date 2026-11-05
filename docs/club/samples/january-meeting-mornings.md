@@ -18,27 +18,33 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What’s the trickiest part of our mornings?
 - What gets in the way? One possibility: the routine might have too many steps to own at once.
-- Ask Mateo and Sofia which starting point they’d try first, or what they’d try instead.
+- Ask Mateo and Sofia: would these help, or what would you try instead?
 
 ---
 
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Mateo** · 6: After breakfast: dressed, teeth, shoes, following a picture list by the mirror. _(Show it once, then one reminder at most.)_
-- **Sofia** · 8: Pack the bag after dinner and hang it on a hook by the door, next to the shoes. _(Show it once, then one reminder at most.)_
+- **Sofia, 8 · School things ready** (Calmer mornings is your top priority. You’d like Sofia to take on packing the school bag.)
+  - “Check tomorrow’s supplies and pack the school bag.”
+  - When: When, your pick: after dinner or after homework is put away?
+  - Ownership: Let Sofia choose where the bag lives, so it’s ready without help.
+  - Help: A hook by the door at the right height.
+- **Mateo, 6 · Ready on time in the morning** (Calmer mornings is your top priority. You’d like the kids to take on getting ready in the morning.)
+  - “Do three morning steps: dressed, teeth, shoes.”
+  - When: When, your pick: after breakfast or right after waking up?
+  - Ownership: Let Mateo put the three steps in order on the list.
+  - Help: A three-step picture list by the mirror.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: a three-step picture list by the mirror, for Mateo.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, priorities_
+_Personalized from: names, ages, priorities, growth areas_

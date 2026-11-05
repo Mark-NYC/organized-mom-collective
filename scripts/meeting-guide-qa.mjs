@@ -70,7 +70,7 @@ for (const sample of SAMPLES) {
       check(`${sample}: Make changes opens the editor`, await page.isVisible('dialog[open][data-mg-editor]'));
       await page.keyboard.press('Escape');
     } else {
-      check(`${sample} phone: the companion’s sections`, await page.isVisible('[data-mgm-focus] li') && await page.isVisible('[data-mgm-practice] li'));
+      check(`${sample} phone: the companion’s sections`, await page.isVisible('[data-mgm-focus] li') && await page.isVisible('[data-mgm-people] li'));
     }
     check(`${sample} ${label}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
     if (SHOTS && sample === 'rivera') await page.screenshot({ path: `${SHOTS}/guide-rivera-${label}.png` });
@@ -88,8 +88,9 @@ for (const n of [6, 8, 12]) {
   const f = await fit(page);
   check(`${n} people: ${f.length} sheet(s), each fits (${f.map((x) => x.spare).join(', ')}px spare), smallest text ${Math.min(...f.map((x) => x.min))}px`, f.length >= 1 && f.length <= 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
   check(`${n} people: prints ${f.length} Letter page(s), no blank page`, (await pdfPages(page)) === f.length);
-  const cards = await page.locator('[data-meeting-guide] .mg-kids > li').count();
-  check(`${n} people: ${cards} child cards (every child 3+ with an idea), grown-ups get a conversation, not a job`, cards === fam.household.members.filter((m) => m.kind === 'child' && 2026 - m.birthYear >= 3).length && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
+  const exps = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-exp').count();
+  const adapt = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-exp-adapt li').count();
+  check(`${n} people: ${exps} experiment(s)${adapt ? `, one shared routine for ${adapt} children` : ''}; grown-ups get a conversation, not a job`, exps >= 1 && exps <= 2 && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
   await page.context().close();
 }
 await browser.close();

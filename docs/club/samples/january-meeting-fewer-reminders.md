@@ -18,27 +18,35 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What do we remind each other about most?
 - What gets in the way? One possibility: jobs might not have a clear “when”.
-- Ask Jun and Mira which starting point they’d try first, or what they’d try instead.
+- Ask Jun and Mira: would these help, or what would you try instead?
 
 ---
 
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Jun** · 7: Pack the bag after dinner and hang it on a hook by the door, next to the shoes. _(Show it once, then one reminder at most.)_
-- **Mira** · 10: Start homework solo after the snack, and ask for help when stuck. _(Ready for more independence.)_ · Mira already takes care of pet care. Worth noticing out loud.
+- **Mira, 10 · Homework started** (Fewer reminders is your top priority. You’d like Mira to take on starting homework without reminders.)
+  - “Start homework solo and ask for help when stuck.”
+  - When: on school nights, after the after-school snack _(from your answers)_
+  - Ownership: Mira decides the order: hardest first or easiest first.
+  - Help: Supplies kept at the homework spot.
+- **Jun, 7 · School things ready** (Fewer reminders is your top priority. You’d like Jun to take on packing the school bag.)
+  - “Check tomorrow’s supplies and pack the school bag.”
+  - When: on school nights, after dinner or after homework is put away _(from your answers)_
+  - Ownership: Let Jun choose where the bag lives, so it’s ready without help.
+  - Help: A hook by the door at the right height.
+- Mira already takes care of pet care. Worth noticing out loud.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: tie each part to something that already happens, like after dinner or coming in the door.
+- If it gets stuck: tie each job to something that already happens every day.
 - Before reminding, try asking “What’s next?” and let the answer come from the kids.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, existing responsibilities, priorities_
+_Personalized from: names, ages, priorities, growth areas_
