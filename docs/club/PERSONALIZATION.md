@@ -15,17 +15,17 @@ Families get two things:
    fits each time, come back to what matters and skip the rest. Nobody leads anything on it, nothing is assigned, and
    no decision is filled in.
 
-Two US Letter pages (fixed, so printing and the mailed copy never vary):
+One US Letter page when it all fits at the normal type size; a second only when the family's content needs it (measured off-screen at the sheet's real size, split between Let's Talk and Everyone's Part). The single focus organizes the page:
 
 | Part | What's on it | Limits |
 | --- | --- | --- |
-| 1 · Our Focus | One or two priorities from her priority and challenges (one per theme), each with what getting better could look like. Only with no answers: the month's purpose | 1, a second only with its own evidence |
-| 2 · Let's Talk | Conversation starters: her week (her own named activity), one per focus, and what gets in the way (a possibility from her challenges, or an open question). How little ones join | ≤ 4 |
-| 3 · Everyone's Part | Under each child's name, ideas to choose from (plain actions, no pronouns): what she said she'd like that child to take on, in their age's version, then the month's. How much help a first try needs. What a child already does is noticed, not suggested again. Under 3 joins in. For the grown-ups: a conversation about helping without taking over (no job); what a grown-up other than the account holder already does is noticed | 1 per child (2 to choose from, ages 6+, only when ownership is her obstacle); no line printed twice; every child 3+ appears (idea, recognition or a question) |
-| 4 · Let's Practice | One thing worth trying (her obstacle's adjustment, or the setup that makes an idea easier) and one way to keep it going without adding work. A tip the page already applies is left out | ≤ 2 |
-| Coming back to it | How to revisit a part at a later meeting (the seed of check-ins) | 1 line |
+| 1 · Our Focus | **This month's focus**: one, from her priority and challenges, with what getting better could look like. Only with no answers: the month's own purpose, starting the Family Meeting habit | 1 |
+| 2 · Let's Talk | About the focus: its conversation, what gets in the way (her obstacle as a possibility, or a question with options), and one question asking the children 6+ which starting point they'd try first. How little ones join | ≤ 3 |
+| 3 · Everyone's Part | **Possible starting points, not jobs**: one per child, for the focus (her wish for that child first), in their age's version, with how much help a first try needs. The family chooses one to try first and adds another only when it's going well. What someone already does is noticed. With no wishes or answers, the children are asked instead. Grown-ups: a conversation about helping without taking over | 1 per child; every child 3+ appears (starting point, recognition or a question) |
+| 4 · Let's Practice | **Our habit experiment**: a write-in box (who, one small step, right after…) the family fills in together, with the check-in for next time. Then one thing worth trying (her obstacle's adjustment, the setup that makes a starting point easier, or January's meeting habit) and one way to keep it going without adding work | experiment + ≤ 2 |
+| (in the experiment box) | Try it until the next meeting, then: on my own, with reminders, or hard? Keep it, shrink it or swap it | 1 line |
 
-Families of 5–6 children and 7+ get fixed tighter layouts, never smaller than 10px text.
+Families of 5–6 and 7+ children with starting points get fixed tighter layouts, never smaller than 10px text.
 
 ### Selection (how the companion decides what to print)
 
@@ -39,18 +39,17 @@ priority × challenge combination (`tests/club-meeting-guide-generator.test.ts`)
    *impact* (priority 2, challenge 1), *readiness* (children 3+ with a fitting step they don't already do, up to 2) and
    *habit potential* (1 for a cue-ready step or an adjustment for an obstacle she named). Only opportunities she gave
    evidence for count; ties go to her top priority.
-2. **One focus.** A second only with 4+ points of its own evidence (answers the first didn't use) and three quarters
-   of the first's score.
-3. **One idea per child** for that focus: her wish for that child, her unassigned wishes, then the focus's own steps at
-   their age (unless the focus doesn't say which job, like fewer reminders: then the children are asked). A child who
-   already handles the area is recognized and asked to show how. Two ideas only when the obstacle she reported is about
-   ownership, for children 6+, so they choose. No line is printed twice.
+2. **One focus.** Other well-supported opportunities stay in the rationale for a later meeting or month.
+3. **One possible starting point per child** for that focus: her wish for that child, her unassigned wishes, then the
+   focus's own steps at their age (unless the focus doesn't say which job, like fewer reminders: then the children are
+   asked). A child who already handles the area is recognized and asked to show how. No line is printed twice.
 4. **Let's Talk** brings the children in: the focus conversation, her obstacle as a possibility (or a question that
-   explores it with options), and one discovery question per idea naming the children 6+ it fits.
-5. **Let's Practice**: one adjustment worth trying (her obstacle's, or the setup that makes an idea easier when the
-   page already applies the obstacle's principle) and one way to keep it going without adding work.
-6. **Too little intake**: no guesses. The children are asked, and January's own habit (a regular meeting stacked on a
-   weekly routine) is offered.
+   explores it with options), and one question asking the children 6+ which starting point they'd try first.
+5. **Let's Practice**: the family writes its own habit experiment; then one adjustment worth trying (her obstacle's,
+   or the setup that makes a starting point easier when the page already applies the obstacle's principle) and one way
+   to keep it going without adding work.
+6. **Too little intake** (no priority, challenges or wishes): no manufactured personalization. The focus is starting
+   the Family Meeting habit (a regular meeting stacked on a weekly routine), and the children are asked later.
 
 **Make changes** (desktop rail, or any row on the phone): untick any idea to take it off the page, or plan for a
 child's age differently (an age not given, a child ahead or behind). Names, ages and answers come from `/club/family`;

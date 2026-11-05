@@ -38,7 +38,7 @@ async function open(browser, viewport, path, family) {
   return page;
 }
 /** Each sheet's spare room at the bottom (px at real size; negative = clipped) and its smallest text. */
-const fit = (page) => page.evaluate(() => [...document.querySelectorAll('[data-meeting-guide] .mg-sheet')].map((s) => {
+const fit = (page) => page.evaluate(() => [...document.querySelectorAll('[data-meeting-guide] [data-mg-pages] .mg-sheet')].map((s) => {
   const box = s.getBoundingClientRect();
   const scale = box.width / 816 || 1;
   const all = [...s.querySelectorAll('*')];
@@ -64,8 +64,8 @@ for (const sample of SAMPLES) {
     check(`${sample} ${label}: no sideways scrolling`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     if (label === 'desktop') {
       const f = await fit(page);
-      check(`${sample}: both sheets fit (${f.map((x) => x.spare).join(', ')}px spare)`, f.length === 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
-      check(`${sample}: prints 2 Letter pages`, (await pdfPages(page)) === 2);
+      check(`${sample}: ${f.length} sheet(s), each fits (${f.map((x) => x.spare).join(', ')}px spare)`, f.length >= 1 && f.length <= 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
+      check(`${sample}: prints ${f.length} Letter page(s), no blank page`, (await pdfPages(page)) === f.length);
       await page.click('[data-cpd-edit]');
       check(`${sample}: Make changes opens the editor`, await page.isVisible('dialog[open][data-mg-editor]'));
       await page.keyboard.press('Escape');
@@ -86,9 +86,9 @@ for (const n of [6, 8, 12]) {
   fam.profile = { ...fam.profile, priority: 'tidying', challenges: [] };
   const page = await open(browser, { width: 1440, height: 900 }, '/app/club/january?sample=chen', fam);
   const f = await fit(page);
-  check(`${n} people: both sheets fit (${f.map((x) => x.spare).join(', ')}px spare), smallest text ${Math.min(...f.map((x) => x.min))}px`, f.length === 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
-  check(`${n} people: prints 2 Letter pages`, (await pdfPages(page)) === 2);
-  const cards = await page.locator('[data-meeting-guide] [data-plan-sheet="back"] .mg-kids > li').count();
+  check(`${n} people: ${f.length} sheet(s), each fits (${f.map((x) => x.spare).join(', ')}px spare), smallest text ${Math.min(...f.map((x) => x.min))}px`, f.length >= 1 && f.length <= 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
+  check(`${n} people: prints ${f.length} Letter page(s), no blank page`, (await pdfPages(page)) === f.length);
+  const cards = await page.locator('[data-meeting-guide] .mg-kids > li').count();
   check(`${n} people: ${cards} child cards (every child 3+ with an idea), grown-ups get a conversation, not a job`, cards === fam.household.members.filter((m) => m.kind === 'child' && 2026 - m.birthYear >= 3).length && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
   await page.context().close();
 }

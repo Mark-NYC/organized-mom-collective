@@ -114,4 +114,6 @@ export interface GuideMonthContent {
   practice: { adjustmentLead: string; sustain: Record<'reminders' | 'default', string>; meetingHabit: string };
   /** For coming back to it at a later meeting (the start of progress check-ins). */
   checkIn: string;
+  /** Let's Practice: the one habit the family chooses and writes in (never filled in for them). */
+  experiment: { title: string; prompt: string; fields: readonly string[] };
 }

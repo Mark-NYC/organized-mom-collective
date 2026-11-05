@@ -10,7 +10,7 @@ _Use the four parts from your Family Meeting guide. Pick what fits at each meeti
 ### 1. Our Focus
 _What we’re working on together, and why it helps all of us._
 
-- **Starting our Family Meetings** · A short, regular time when everyone hears the plan and has a say.
+- **Starting our Family Meetings** · A short, regular time when everyone hears the plan and has a say. That’s the first habit to build.
 
 ### 2. Let’s Talk
 _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
@@ -26,7 +26,7 @@ _Each person picks or agrees to one small part they own this month._
 
 _Ideas to choose from, not jobs. Decide together._
 
-- Ask Sky and River what to take on this month, then pick one small part together.
+- Ask Sky and River what to take on, once the meeting is a habit. One small part is plenty.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
@@ -34,8 +34,9 @@ _Try one part together right now, so the first time isn’t a reminder later._
 
 **Ways to make it stick**
 - One thing worth trying: hold the meeting after something you already do every week, like Sunday lunch, and write the next one on the calendar.
+- When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.
+**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
 
 ---
 _Personalized from: names · the month’s own ideas for: ages, growth areas, priorities_

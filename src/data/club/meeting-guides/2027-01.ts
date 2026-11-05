@@ -48,7 +48,8 @@ export const january2027: GuideMonthContent = {
       discuss: 'Which jobs at home could someone else try?', discover: 'What makes it hard to pitch in: not knowing what to do, not wanting to, or something else?',
       priorities: [], challenges: ['sharing-fairly'], items: ['help-with-meals', 'tidy-room', 'put-away-laundry', 'pet-care'] },
   ],
-  fallback: { id: 'meetings', title: 'Starting our Family Meetings', opportunity: 'A short, regular time when everyone hears the plan and has a say.',
+  fallback: { id: 'meetings', title: 'Starting our Family Meetings', opportunity: 'A short, regular time when everyone hears the plan and has a say. That’s the first habit to build.',
+    askFirst: 'Ask {names} what to take on, once the meeting is a habit. One small part is plenty.',
     discuss: 'What’s one thing that makes our weeks harder than they need to be?', discover: 'What would each of us like to do more on our own this month?',
     priorities: [], challenges: [], items: ['jan-calendar', 'jan-today'] },
   ownWordsDiscuss: 'What’s one small step toward this we could try this month?',
@@ -133,8 +134,8 @@ export const january2027: GuideMonthContent = {
   ],
 
   talkLittle: 'Little ones can point or answer with one word.',
-  invite: 'Kids first: what would make it easier?',
-  partsNote: 'Ideas to choose from, not jobs. Decide together.',
+  invite: 'Ask {names} which starting point they’d try first, or what they’d try instead.',
+  partsNote: 'Possible starting points, not jobs. Choose one to try first together; add another only when it’s going well.',
   partsDiscover: 'Ask {names} what to take on this month, then pick one small part together.',
   weekQuestion: { withActivity: 'What’s happening for each of us this week, like {activity}?', generic: 'What’s one thing happening this week that everyone should know about?' },
   keepsDoing: '{name} already takes care of {area}. Worth noticing out loud.',
@@ -158,5 +159,6 @@ export const january2027: GuideMonthContent = {
       default: 'When it’s going well, say so, and hold off on adding a new job.',
     },
   },
-  checkIn: 'At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.',
+  checkIn: 'Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.',
+  experiment: { title: 'Our habit experiment', prompt: 'Choose one small habit to practice until the next meeting. Fill it in together.', fields: ['Who', 'One small step', 'Right after'] },
 };

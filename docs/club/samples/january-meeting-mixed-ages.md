@@ -18,7 +18,7 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - Where do things pile up, and where should they live?
 - What gets in the way? One possibility: jobs might be falling to whoever notices first.
-- Ask Leo and Jade where things usually end up instead of put away.
+- Ask Leo and Jade which starting point they’d try first, or what they’d try instead.
 
 _Little ones can point or answer with one word._
 
@@ -30,8 +30,8 @@ _Each person picks or agrees to one small part they own this month._
 _Ideas to choose from, not jobs. Decide together._
 
 - **Mia** · 5: Before bath, put toys back in bins with picture labels. _(Do it together for a week or two, then step back.)_
-- **Leo** · 9: _Leo chooses one:_ A weekly bedroom reset before weekend screen time. **or** Coming home, put gear and water bottle in one home spot. _(Ready for more independence.)_
-- **Jade** · 13: _Jade chooses one:_ A weekly bedroom reset, any way that works, on a day picked ahead. **or** Coming home, keys, chargers and gear go in one spot. _(Free to choose how and when.)_ · Jade already takes care of laundry. Worth noticing out loud.
+- **Leo** · 9: A weekly bedroom reset before weekend screen time. _(Ready for more independence.)_
+- **Jade** · 13: A weekly bedroom reset, any way that works, on a day picked ahead. _(Free to choose how and when.)_ · Jade already takes care of laundry. Worth noticing out loud.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 - Marcus already takes care of driving and pickups. Worth noticing out loud.
 
@@ -39,10 +39,10 @@ _Ideas to choose from, not jobs. Decide together._
 _Try one part together right now, so the first time isn’t a reminder later._
 
 **Ways to make it stick**
-- One thing worth trying: a picture label on each bin, for Mia.
+- One thing worth trying: let each child choose a part from two that fit their age.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.
+**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
 
 ---
 _Personalized from: names, ages, growth areas, existing responsibilities, priorities_

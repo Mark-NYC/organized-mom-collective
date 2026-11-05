@@ -23,8 +23,9 @@ export function scorecard(g: MeetingGuide) {
   const adjustment = g.practice.some((p) => p.key.startsWith('practice:obstacle') || p.key.startsWith('practice:setup') || p.key === 'practice:meeting');
   // A practical action with a cue: every child idea has one, and there's an adjustment (or January's meeting habit).
   const D = ideas.every((i) => i.cue) && adjustment ? 2 : (ideas.length || adjustment) ? 1 : 0;
-  const asks = g.talk.some((t) => t.key.startsWith('talk:ask:')) || Boolean(g.partsDiscover);
-  const E = asks && (g.people.some((p) => p.choose) || g.people.every((p) => !p.ideas.length || p.support) ) ? 2 : g.talk.some((t) => t.key === 'talk:invite') ? 1 : 0;
+  const asks = g.talk.some((t) => t.key === 'talk:invite') || Boolean(g.partsDiscover);
+  // Ownership: the children are asked to choose (or what to take on), and support fades by age.
+  const E = asks && g.people.every((p) => !p.ideas.length || p.support) ? 2 : ideas.length ? 1 : 0;
   const F = new Set(lines).size === lines.length && ideas.length <= Math.max(3, g.people.length * 2) && g.practice.length <= 2 ? 2 : 1;
   const total = A + B + C + D + E + F;
   return { A, B, C, D, E, F, total, pass: total >= 10 && A > 0 && D > 0 && E > 0 };
@@ -34,13 +35,13 @@ export function scorecard(g: MeetingGuide) {
 const REVIEW: Record<string, { score?: number; note: string }> = {
   'preschool-support': { note: 'Coherent: the evening focus, Tobi’s coat-and-shoes habit for coming home, the low hook to make it easy, “together first” support. The opening question and opportunity line are the theme’s, not specific to toddlers.' },
   'fewer-reminders': { note: 'Strongest result: her priority, challenge and both named wishes line up; each child gets a cue-based habit and a question; Mira’s pet care is noticed, not added to.' },
-  'mixed-ages': { score: 11, note: 'Choice (from her “sharing fairly” answer) means Leo and Jade each see two ideas: five ideas across three children is the heaviest page. Justified by her answer, but it’s the most to read.' },
+  'mixed-ages': { note: 'One focus (tidying), one possible starting point per child, and the family picks one to try first. Her “sharing fairly” answer becomes the one thing worth trying (each child chooses), not extra ideas.' },
   'busy-schedules': { note: 'Uses her own activity (robotics) and both challenges; Elsa’s calendar-and-rides habit and Nils’s gear spot address the actual friction.' },
   mornings: { note: 'Focused on mornings; the setup (picture list) replaced the generic “one step” adjustment the first draft repeated.' },
-  resistance: { note: 'Her own words lead the focus, with the matched theme’s purpose under it (the work is spread, the kids choose their part). Choice is the right lever for push-back, and each child’s own wish comes first. The first draft had no purpose line under her words; added.' },
+  resistance: { note: 'Her own words lead the focus, with the matched theme’s purpose under it. Choice is the lever for push-back: the children pick which starting point to try, and the family writes its own experiment. Each child’s own wish comes first.' },
   independent: { note: 'Grace is recognized and asked to show how instead of getting more; Owen gets the bag habit with a hook at his height.' },
   'many-priorities': { note: 'Disciplined: one focus from five challenges plus a priority; each child’s named wish is kept; laundry and tidying wishes are left for later.' },
-  vague: { note: 'Below a strong result by design: no ages and no answers, so no child ideas and a generic focus. It asks instead of guessing and offers January’s own meeting habit. Limited by intake, not fixable without guessing.' },
+  vague: { note: 'Limited by intake: no ages and no answers, so no child ideas and the month’s own focus. January’s shared meeting habit is the starting point; the children are asked later. Not fixable without guessing.' },
   'one-challenge': { note: 'Asks the children which job needs reminders instead of picking jobs for them, then offers the cue. Not age-specific (C 1) because she named no jobs.' },
 };
 
@@ -76,7 +77,7 @@ FAMILIES.forEach((f, n) => {
     '',
     `**How it can become a habit:** ${[...new Set(g.people.flatMap((p) => p.ideas.map((i) => `${p.name}: “${i.cue}”, ${PRINCIPLE[i.principle]}`)))].join('; ') || 'a regular meeting time stacked on a weekly routine'}.`,
     '',
-    `**How it builds ownership:** ${[...g.talk.filter((t) => t.key.startsWith('talk:ask:')).map((t) => t.text), ...(g.people.some((p) => p.choose) ? ['children 6+ choose between two ideas'] : []), ...g.people.filter((p) => p.keeps).map((p) => p.keeps!)].join(' · ') || 'the children are asked what they’d like to take on'}. Support fades by age (${[...new Set(g.people.filter((p) => p.ideas.length).map((p) => p.support))].join(' / ') || 'n/a'}).`,
+    `**How it builds ownership:** ${[...g.talk.filter((t) => t.key === 'talk:invite').map((t) => t.text), ...(g.partsDiscover ? [g.partsDiscover] : []), 'the family writes its own habit experiment', ...g.people.filter((p) => p.keeps).map((p) => p.keeps!)].join(' · ')}. Support fades by age (${[...new Set(g.people.filter((p) => p.ideas.length).map((p) => p.support))].join(' / ') || 'n/a'}).`,
     '',
     `**Left out:** ${[...r.considered.map((c) => `${c.id} (score ${c.score})`), ...r.children.flatMap((c) => c.excluded.map((e) => `${c.name}: ${e}`))].join('; ') || 'nothing else applied'}.`,
     '',

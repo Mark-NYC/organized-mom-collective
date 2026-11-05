@@ -18,7 +18,7 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What do we usually forget for school?
 - What gets in the way of having school things ready: no set time, no set spot, or something else?
-- Ask Owen what usually gets forgotten for school.
+- Ask Owen which starting point they’d try first, or what they’d try instead.
 
 ---
 
@@ -38,7 +38,7 @@ _Try one part together right now, so the first time isn’t a reminder later._
 - One thing worth trying: a hook by the door at the right height, for Owen.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.
+**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
 
 ---
 _Personalized from: names, ages, growth areas, existing responsibilities, priorities_

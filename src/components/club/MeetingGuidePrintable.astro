@@ -27,49 +27,56 @@ const { month } = Astro.props;
 .mg-frame{position:relative;flex:none;overflow:hidden;background:#fff;box-shadow:0 10px 28px #0002}
 .mg-frame > .mg-sheet{position:absolute;top:0;left:0;transform:scale(var(--mg-scale,1));transform-origin:top left}
 
-/* The sheet: 8.5 × 11 in at 96 px/in. Print (ClubPrintStyles) uses the same box at its real size. */
-.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:48px 56px 36px;background:#fff;color:#3d3834;font:400 13px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:20px}
+/* The sheet: 8.5 × 11 in at 96 px/in. Print (ClubPrintStyles) uses the same box at its real size. One sheet when it
+   all fits at these sizes; printable.ts adds a second only when it doesn't. */
+.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:40px 56px 28px;background:#fff;color:#3d3834;font:400 12.5px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:13px}
 .mg-sheet p{margin:0}
-.mg-sheet h3{margin:0;font:400 22px/1.15 var(--font-serif);color:#3d3834}
-.mg-head{border-bottom:1px solid #e7ddd4;padding-bottom:14px;display:grid;gap:5px}
+.mg-sheet h3{margin:0;font:400 19px/1.15 var(--font-serif);color:#3d3834}
+.mg-measure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none}
+@media print{.mg-measure{display:none!important}}
+.mg-head{border-bottom:1px solid #e7ddd4;padding-bottom:10px;display:grid;gap:3px}
 .mg-kicker{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#96666b}
-.mg-title{margin:0;font:400 36px/1.08 var(--font-serif);letter-spacing:-.01em}
-.mg-sub{color:#4d4544;font-size:14px}
-.mg-howto{font-size:12px;color:#6e6461}
-.mg-part{display:flex;flex-direction:column;gap:9px}
-.mg-part-head{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
-.mg-num{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#b9c7ad;color:#fff;font-weight:700;font-size:14px}
-.mg-goal{color:#6e6461;font-size:12px;margin-top:2px!important}
-.mg-label{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#96666b;margin-left:42px!important}
-.mg-note{color:#6e6461;margin-left:42px!important}
-.mg-focus{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px;margin-left:42px}
-.mg-focus-item{padding:14px 16px;background:#f1f4ec;border-radius:6px;display:grid;gap:4px}
-.mg-focus-title{font:400 19px/1.25 var(--font-serif)}
-.mg-focus-opp{color:#4d4544}
-.mg-list{list-style:none;margin:0 0 0 42px;padding:0;display:grid;gap:7px}
-.mg-list li{position:relative;padding-left:18px}
-.mg-list li::before{content:'';position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:#d9b8b4}
-.mg-talk li{font-size:14px}
-.mg-kids{list-style:none;margin:0 0 0 42px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-.mg-kids > li{padding:12px 14px;border-radius:6px;background:#fbf7f1;display:grid;gap:5px;align-content:start;break-inside:avoid}
-.mg-who strong{font-size:14px}
+.mg-title{margin:0;font:400 32px/1.08 var(--font-serif);letter-spacing:-.01em}
+.mg-sub{color:#4d4544;font-size:13.5px}
+.mg-howto{font-size:11.5px;color:#6e6461}
+.mg-part{display:flex;flex-direction:column;gap:7px}
+.mg-part-head{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
+.mg-num{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#b9c7ad;color:#fff;font-weight:700;font-size:13px}
+.mg-goal{color:#6e6461;font-size:11.5px;margin-top:1px!important}
+.mg-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#96666b}
+.mg-note{color:#6e6461;margin-left:36px!important}
+/* The focus: the page's centerpiece. */
+.mg-focus{margin-left:36px;padding:14px 18px;background:#f1f4ec;border-left:4px solid #9fb38f;border-radius:4px;display:grid;gap:3px}
+.mg-focus-title{font:400 24px/1.2 var(--font-serif)}
+.mg-focus-opp{color:#4d4544;font-size:13px}
+.mg-list{list-style:none;margin:0 0 0 36px;padding:0;display:grid;gap:5px}
+.mg-list li{position:relative;padding-left:16px}
+.mg-list li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:#d9b8b4}
+.mg-talk li{font-size:13px}
+.mg-kids{list-style:none;margin:0 0 0 36px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.mg-kids > li{padding:9px 12px;border-radius:5px;background:#fbf7f1;display:grid;gap:3px;align-content:start;break-inside:avoid}
+.mg-who strong{font-size:13px}
 .mg-who span{color:#6e6461}
-.mg-ideas{margin:0;padding-left:16px;display:grid;gap:4px;font-weight:500}
-.mg-ask{color:#4d4544}
-.mg-sheet .mg-label--tight{margin:2px 0 0!important}
-.mg-help{font-size:11.5px;font-style:italic;color:#6e6461}
-.mg-keeps{font-size:11.5px;color:#536e4e}
-.mg-grownups{margin-top:2px}
-.mg-checkin{margin-top:auto;padding:12px 16px;border-radius:6px;background:#f8eeec;font-size:12.5px}
+.mg-idea{font-weight:500}
+.mg-help{font-size:11px;font-style:italic;color:#6e6461}
+.mg-keeps{font-size:11px;color:#536e4e}
+.mg-discover{margin-left:36px!important;padding:10px 14px;border-radius:5px;background:#fbf7f1}
+/* The family's own habit experiment: write-in lines, nothing pre-filled. */
+.mg-experiment{margin-left:36px;padding:12px 16px 12px;border:1.5px dashed #c9b3ae;border-radius:6px;display:grid;gap:5px}
+.mg-exp-prompt{color:#4d4544}
+.mg-exp-prompt strong{font:400 17px/1.2 var(--font-serif);margin-right:8px}
+.mg-exp-fields{display:grid;grid-template-columns:1fr 1.6fr 1.2fr;gap:6px 14px;margin:2px 0}
+.mg-exp-field{display:grid;gap:14px}
+.mg-exp-field span:first-child{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#96666b}
+.mg-exp-line{display:block;border-bottom:1px solid #b8aaa6;height:1px}
+.mg-exp-check{font-size:11px;color:#6e6461}
 .mg-foot{margin-top:auto!important;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
-.mg-checkin + .mg-foot{margin-top:0!important}
 /* Five or six children: tighter. Seven or more: three columns. Never under 10px. */
-.mg-sheet.mg-dense{gap:14px;padding-top:40px}
-.mg-dense .mg-kids > li{padding:9px 11px;gap:3px}
-.mg-xdense .mg-kids{grid-template-columns:repeat(3,1fr);gap:7px 10px}
-.mg-xdense .mg-kids > li{font-size:11px;line-height:1.32;padding:7px 9px}
+.mg-sheet.mg-dense{gap:12px}
+.mg-dense .mg-kids > li{padding:7px 10px}
+.mg-xdense .mg-kids{grid-template-columns:repeat(3,1fr);gap:6px 8px}
+.mg-xdense .mg-kids > li{font-size:11px;line-height:1.32}
 .mg-xdense .mg-help,.mg-xdense .mg-keeps{font-size:10px}
-.mg-xdense .mg-who strong{font-size:12px}
 
 /* The editor */
 .mg-editor{position:fixed;inset:0;margin:auto;height:fit-content;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid #e7ddd4;border-radius:8px;background:#fff;color:#3d3834}

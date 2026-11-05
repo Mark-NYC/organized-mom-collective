@@ -4,7 +4,7 @@ import { GUIDE_MONTHS, guideMonth } from '../src/data/club/meeting-guides';
 import { MEETING_GUIDE } from '../src/data/club/meeting-guide';
 import { CHALLENGES, PRIORITIES, GROWTH_ITEMS } from '../src/data/club/family-profile';
 import { checkInDue, commit, nextStep } from '../src/lib/club/family-plan';
-import { generateMeetingGuide, guideFingerprint, type MeetingGuide } from '../src/lib/club/meeting-guide/generate';
+import { familyTitle, generateMeetingGuide, guideFingerprint, type MeetingGuide } from '../src/lib/club/meeting-guide/generate';
 import { emptyGuideState, guideProfile, isGuideState, type GuideProfile } from '../src/lib/club/meeting-guide/state';
 import { stageFor } from '../src/lib/club/meeting-guide/stages';
 import type { Household } from '../src/lib/club/profile';
@@ -66,26 +66,25 @@ describe('January companion: selection', () => {
     expect(gen('preschool-support').focus.length).toBe(1);
   });
 
-  it('allows a second focus only with its own strong evidence', () => {
+  it('keeps one focus even when another is well supported; the other waits in the rationale', () => {
     const household: Household = { id: 'x', displayName: 'Test', preferences: {}, profileVersion: 1, members: [
       { id: 'x1', firstName: 'Pat', kind: 'adult', role: 'parent', isAccountHolder: true },
       { id: 'x2', firstName: 'Kit', kind: 'child', role: 'child', birthYear: 2018, birthMonth: 6 },
     ] };
     const profile: GuideProfile = { priority: 'mornings', challenges: ['knowing-plans', 'communicating'], activities: [], responsibilities: [] };
     const g = generateMeetingGuide({ household, profile, content });
-    expect(g.rationale.focus.map((f) => f.id)).toEqual(['mornings', 'schedules']);
+    expect(g.rationale.focus.map((f) => f.id)).toEqual(['mornings']);
+    expect(g.rationale.considered.find((c) => c.id === 'schedules')!.why).toMatch(/candidate for a later meeting/);
   });
 
-  it('offers each child one idea from her wishes first; two only when ownership is the obstacle', () => {
+  it('offers each child one possible starting point, her wishes first; the family picks one to try', () => {
     expect(kid(gen('fewer-reminders'), 'Jun').ideas.map((i) => [i.itemId, i.source])).toEqual([['pack-school-bag', 'desired']]);
     expect(kid(gen('fewer-reminders'), 'Mira').ideas.map((i) => i.itemId)).toEqual(['homework-start']);
     expect(kid(gen('preschool-support'), 'Tobi').ideas.map((i) => i.itemId)).toEqual(['own-belongings']);
     const r = gen('resistance');
-    expect(kid(r, 'Omar').ideas.map((i) => i.itemId)).toEqual(['tidy-room', 'help-with-meals']);
-    expect(kid(r, 'Omar').choose).toBe(true);
-    // Under 6, one idea even when the others choose.
-    expect(kid(gen('mixed-ages'), 'Mia').ideas.length).toBe(1);
-    expect(kid(gen('mixed-ages'), 'Leo').ideas.length).toBe(2);
+    expect(kid(r, 'Omar').ideas.map((i) => i.itemId)).toEqual(['tidy-room']);
+    for (const f of FAMILIES) for (const p of gen(f.key).people) { expect(p.ideas.length).toBeLessThanOrEqual(1); expect(p.choose).toBe(false); }
+    expect(content.partsNote).toMatch(/Choose one to try first together/);
   });
 
   it('recognizes an independent child instead of adding work', () => {
@@ -101,16 +100,16 @@ describe('January companion: selection', () => {
     expect(gen('independent').plan.obstacle).toBeNull();
   });
 
-  it('brings the children into solving it: one question per idea, naming every child it fits', () => {
-    expect(gen('mixed-ages').talk.map((t) => t.text)).toContain('Ask Leo and Jade where things usually end up instead of put away.');
+  it('hands the choice to the children: one question naming the children 6+ with a starting point', () => {
+    expect(gen('mixed-ages').talk.map((t) => t.text)).toContain('Ask Leo and Jade which starting point they’d try first, or what they’d try instead.');
     // Preschoolers aren't asked to analyze it; they do it together first.
-    expect(gen('preschool-support').talk.map((t) => t.key)).toEqual(['talk:evenings', 'talk:obstacle', 'talk:invite']);
-    expect(gen('fewer-reminders').talk.map((t) => t.text)).toEqual(expect.arrayContaining(['Ask Jun what usually gets forgotten for school.', 'Ask Mira what makes homework hard to start.']));
+    expect(gen('preschool-support').talk.map((t) => t.key)).toEqual(['talk:evenings', 'talk:obstacle']);
+    expect(gen('fewer-reminders').talk.at(-1)!.text).toBe('Ask Jun and Mira which starting point they’d try first, or what they’d try instead.');
     for (const f of FAMILIES) for (const p of gen(f.key).people) expect(p.ask).toBeNull();
   });
 
-  it('doesn’t repeat in Practice what the page already does (choice shown, one small step each)', () => {
-    expect(gen('resistance').practice.map((p) => p.text)).not.toContain('One thing worth trying: let each child choose a part from two that fit their age.');
+  it('offers her obstacle’s adjustment once, in Practice', () => {
+    expect(gen('resistance').practice.map((p) => p.text)).toContain('One thing worth trying: let each child choose a part from two that fit their age.');
     expect(gen('resistance').talk[1].text).toMatch(/whoever notices first/);
   });
 
@@ -122,8 +121,9 @@ describe('January companion: selection', () => {
   it('with too little intake, asks instead of guessing, and offers January’s own meeting habit', () => {
     const g = gen('vague');
     expect(g.people.every((p) => p.ideas.length === 0)).toBe(true);
-    expect(g.partsDiscover).toBe('Ask Sky and River what to take on this month, then pick one small part together.');
-    expect(g.practice.map((p) => p.key)).toEqual(['practice:meeting']);
+    expect(g.partsDiscover).toBe('Ask Sky and River what to take on, once the meeting is a habit. One small part is plenty.');
+    expect(g.practice.map((p) => p.key)).toEqual(['practice:meeting', 'practice:sustain']);
+    expect(g.focus[0].title).toBe('Starting our Family Meetings');
     expect(g.missing).toEqual(expect.arrayContaining(['ages', 'priorities', 'growth areas']));
   });
 
@@ -144,14 +144,16 @@ describe('January companion: selection', () => {
       const g = gen(f.key);
       for (const p of g.people.filter((x) => !x.joinsIn)) expect(Boolean(p.ideas.length || p.keeps || g.partsDiscover?.includes(p.name)), `${f.key} ${p.name}`).toBe(true);
     }
-    // Two same-age children with no answers get different ideas from January's own content.
+    // No answers at all: no manufactured ideas, even with ages; January's meeting habit is the starting point.
     const household: Household = { id: 'y', displayName: 'Twins', preferences: {}, profileVersion: 1, members: [
       { id: 'y1', firstName: 'Ari', kind: 'adult', role: 'parent', isAccountHolder: true },
       { id: 'y2', firstName: 'Bo', kind: 'child', role: 'child', birthYear: 2018, birthMonth: 4 },
       { id: 'y3', firstName: 'Cy', kind: 'child', role: 'child', birthYear: 2020, birthMonth: 9 },
     ] };
     const g = generateMeetingGuide({ household, content });
-    expect(g.people.map((p) => p.ideas.map((i) => i.itemId))).toEqual([['jan-calendar'], ['jan-today']]);
+    expect(g.people.every((p) => p.ideas.length === 0)).toBe(true);
+    expect(g.partsDiscover).toMatch(/^Ask Bo and Cy /);
+    expect(g.practice[0].key).toBe('practice:meeting');
   });
 
   it('never repeats the same line for siblings; little ones join through Let’s Talk, not a card', () => {
@@ -232,6 +234,11 @@ describe('January companion: structure and data', () => {
       responsibilities: [{ status: 'desired', category: 'belongings', item: 'own-belongings', ownerIds: ['c2'], helperIds: [] }, { status: 'suggested', category: 'meals', ownerIds: [], helperIds: [] }] });
     expect(p).toEqual({ priority: 'mornings', challenges: ['preparing'], activities: [{ category: 'sports', name: 'soccer', memberIds: ['c2'] }], responsibilities: [{ status: 'desired', category: 'belongings', item: 'own-belongings', ownerIds: ['c2'] }] });
     expect(guideProfile({ setupDone: [], setupCompleted: false, challenges: [], activities: [], responsibilities: [] })).toBeUndefined();
+  });
+
+  it('keeps her own family name as she wrote it', () => {
+    const h = (displayName?: string): Household => ({ id: 'n', displayName, preferences: {}, profileVersion: 1, members: [] });
+    expect(['The Goerings', 'the Rivera family', 'Team Brooks', 'Okafor', undefined].map((n) => familyTitle(h(n)))).toEqual(['The Goerings', 'The Rivera family', 'Team Brooks', 'The Okafor Family', 'Our Family']);
   });
 
   it('finds a month by its id, and matches stages by age', () => {
