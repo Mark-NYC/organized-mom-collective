@@ -226,3 +226,15 @@ describe('Final refinements', () => {
     expect(new Set(shared.adaptations!.map((a) => a.action)).size).toBeGreaterThan(1);
   });
 });
+
+describe('Print polish', () => {
+  it('a child who already takes care of a job in the focus gets recognition, not a new job from the same focus', () => {
+    const h = home([adult('a', 'Jo'), child('k1', 'Ada', 6), child('k2', 'Ben', 9), child('k3', 'Cy', 11), child('k4', 'Di', 12)]);
+    const g = gen(h, prof({ priority: 'tidying', responsibilities: [{ status: 'existing', category: 'belongings', ownerIds: ['k3'] }] }));
+    expect(g.experiments.flatMap((e) => e.memberIds)).not.toContain('k3');
+    expect(g.recognized.some((r) => /Cy/.test(r.text))).toBe(true);
+    // Her own wish for that child still counts.
+    const wished = gen(h, prof({ priority: 'tidying', responsibilities: [{ status: 'existing', category: 'belongings', ownerIds: ['k3'] }, { status: 'desired', category: 'cleaning', item: 'tidy-room', ownerIds: ['k3'] }] }));
+    expect(wished.experiments.flatMap((e) => e.memberIds)).toContain('k3');
+  });
+});

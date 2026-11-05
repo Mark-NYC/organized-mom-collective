@@ -29,7 +29,7 @@ const { month } = Astro.props;
 
 /* The Monthly Family Focus: 8.5 × 11 in at 96 px/in; print (ClubPrintStyles) uses the same box. One sheet when it
    all fits at these sizes; printable.ts adds a second only when it doesn't. OMC palette around strong marker colors. */
-.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:42px 54px 28px;background:#FBF7F1;color:#545454;font:400 12.5px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:48px 54px 48px;background:#FFFFFF;color:#545454;font:400 12.5px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .mg-sheet p{margin:0}
 .mg-sheet h3{margin:0 0 6px;font:400 20px/1.15 var(--font-serif);color:#3f3b39}
 .mg-measure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none}
@@ -42,6 +42,7 @@ const { month } = Astro.props;
 .mg-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 12px;max-width:360px}
 .mg-chip{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:12px;color:#3f3b39}
 .mg-dot{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;flex:none}
+.mg-dot--plain{width:12px;height:12px}
 /* The shared focus: the page's centerpiece. */
 .mg-focus{padding:16px 20px;background:var(--mg-wash,#D4DFC4);border-radius:8px;display:grid;gap:4px}
 .mg-focus .mg-label{color:var(--mg-accent,#4d5e42)}
@@ -54,7 +55,7 @@ const { month } = Astro.props;
 /* Habits worth trying. */
 .mg-exps{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:1fr;gap:12px}
 .mg-exps--two{grid-template-columns:1fr 1fr}
-.mg-exp{padding:13px 15px;border-radius:8px;background:#fff;border:1px solid #D5C5B8;display:grid;gap:4px;align-content:start;break-inside:avoid}
+.mg-exp{padding:13px 15px;border-radius:8px;background:#FBF7F1;border:1px solid #D5C5B8;display:grid;gap:4px;align-content:start;break-inside:avoid}
 .mg-exp-who{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .mg-exp-who strong{margin-left:4px;font-size:13px;color:#3f3b39}
 .mg-exp-title{font:400 18px/1.2 var(--font-serif);color:#3f3b39}
@@ -64,7 +65,7 @@ const { month } = Astro.props;
 .mg-exp-line b{font-weight:600;color:var(--mg-accent,#96666b)}
 .mg-exp-adapt{list-style:none;margin:2px 0;padding:0;display:grid;gap:4px;font-size:12px}
 .mg-exp-adapt li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start}
-.mg-discover{padding:10px 14px;border-radius:6px;background:#fff;border:1px solid #D5C5B8}
+.mg-discover{padding:10px 14px;border-radius:6px;background:#FBF7F1;border:1px solid #D5C5B8}
 .mg-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .mg-list li{position:relative;padding-left:14px}
 .mg-list li::before{content:'';position:absolute;left:0;top:.6em;width:5px;height:5px;border-radius:50%;background:#D8B79F}

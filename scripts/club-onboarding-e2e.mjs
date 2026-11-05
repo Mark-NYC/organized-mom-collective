@@ -929,7 +929,7 @@ const COLOR_FAMILY = `'[{"first_name":"Ada","kind":"adult","role":"parent","is_a
   {"first_name":"Nia","kind":"child","role":"child","birth_year":2022,"birth_month":2}]'`;
 const RGB = { blue: 'rgb(43, 108, 176)', purple: 'rgb(107, 70, 193)', teal: 'rgb(24, 128, 139)' };
 const legend = (page) => page.locator('[data-meeting-guide] [data-mg-pages] .mg-legend .mg-chip').evaluateAll((cs) =>
-  Object.fromEntries(cs.map((c) => [c.textContent.trim().slice(1), getComputedStyle(c.querySelector('.mg-dot')).backgroundColor])));
+  Object.fromEntries(cs.map((c) => [c.textContent.trim(), getComputedStyle(c.querySelector('.mg-dot')).backgroundColor])));
 const pickColors = async (page) => {
   await page.goto(`${BASE}/club/family`, { waitUntil: 'networkidle' });
   await page.waitForSelector('[data-family-colors] select', { timeout: 15000 });
