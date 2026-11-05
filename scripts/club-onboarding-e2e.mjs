@@ -288,7 +288,8 @@ scenarios.firstMonth = async (browser) => {
   const KIDS = ['Zara', 'Emeka', 'Nia'];
   check('January (her view): every child by first name', KIDS.every((n) => sheet.includes(n)), sheet.replace(/\s+/g, ' ').slice(0, 300));
   check('January (her view): no sample family, no assumed Mom/Dad', !SAMPLE.test(sheet) && !/\b(Mom|Dad)\b/.test(sheet), (sheet.match(SAMPLE) ?? sheet.match(/\b(Mom|Dad)\b/) ?? [''])[0]);
-  check('January (her view): ideas fit each age (4: a sticker on the calendar; 12: activities on the family calendar), nothing assigned', /sticker on today/i.test(sheet) && /activit(y|ies) to the family calendar|plans on the family calendar|Ask [A-Z]/i.test(sheet) && /Ideas to choose from, not jobs/.test(sheet) && !/Led by|add your own plans/i.test(sheet));
+  // She answered no profile questions: nothing is invented for the children; January's meeting habit is the start.
+  check('January (her view): no answers, so no invented ideas: the meeting habit first, every child asked, nothing assigned', /Starting our Family Meetings/.test(sheet) && /Ask Zara, Emeka and Nia /.test(sheet) && /Our habit experiment/.test(sheet) && !/Led by|add your own plans|sticker/i.test(sheet));
   check('January (her view): the four parts of the Family Meeting', ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'].every((t) => sheet.includes(t)));
   check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
   check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));
@@ -306,7 +307,7 @@ scenarios.firstMonth = async (browser) => {
   await mv.waitForTimeout(800);
   const janPages = await printPdf(mv, 'first-month-january');
   const jan = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/first-month-january.pdf`, '-']).toString();
-  check('January PDF: two Letter pages', janPages === 2, `${janPages} pages`);
+  check('January PDF: one or two Letter pages, as the family’s content needs', janPages === 1 || janPages === 2, `${janPages} pages`);
   check('January PDF: every child by first name', KIDS.every((n) => jan.includes(n)), KIDS.filter((n) => !jan.includes(n)).join(','));
   check('January PDF: no sample family, no assumed Mom/Dad, no fall wording', !SAMPLE.test(jan) && !/\b(Mom|Dad)\b/.test(jan) && !/\bfall\b|Cooler weather/i.test(jan), jan.replace(/\s+/g, ' ').slice(0, 200));
   await mv.context().close();
@@ -406,7 +407,7 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   check('January print view: no member chrome (Club nav, Welcome Kit panel)', !(await mv.isVisible('[data-club-nav]')) && !(await mv.isVisible('[data-welcome-kit-confirm]')));
   const janPages = await printPdf(mv, 'admin-january-tool');
   const janText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/admin-january-tool.pdf`, '-']).toString();
-  check('January PDF: her Family Meeting guide only (2 Letter pages, no admin bar, no site chrome)', janPages === 2 && /Our Family Meeting Companion/i.test(janText) && /Sofia/.test(janText) && !/Fulfillment ·|Mark PDF ready|Club Home|MONTHLY TOOL/i.test(janText), `${janPages} pages · ${janText.replace(/\s+/g, ' ').slice(0, 160)}`);
+  check('January PDF: her Family Meeting companion only (1–2 Letter pages, no admin bar, no site chrome)', (janPages === 1 || janPages === 2) && /Our Family Meeting Companion/i.test(janText) && /Sofia/.test(janText) && !/Fulfillment ·|Mark PDF ready|Club Home|MONTHLY TOOL/i.test(janText), `${janPages} pages · ${janText.replace(/\s+/g, ' ').slice(0, 160)}`);
   await shot(mv, 'admin-january-print-view');
   await mv.click('text=Mark PDF ready');
   await mv.waitForSelector('text=PDF marked ready');

@@ -9,7 +9,7 @@ import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 interface Props { deadline: string; kicker: string; approvalKey: string }
 const { deadline, kicker, approvalKey } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front', 'back']} previewNote="Two pages, ready to print">
+<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front']} previewNote="Ready to print">
   <slot name="title" slot="title" />
   <section class="cp-section" aria-labelledby="mgm-focus-title" data-mgm-approval={approvalKey}>
     <h2 id="mgm-focus-title">1. Our Focus</h2>

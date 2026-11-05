@@ -19,7 +19,7 @@ const editDeadline = clubEditingDeadline(kit.month);
 const storageKey = 'omc:club:january-family-meeting:v1';
 ---
 <AppLayout title="Our Family Meeting Companion">
-  <ClubPlanShell class="club-mobile-kit family-brand" kitSlug={kit.slug} month="January" sides={['front', 'back']} storageKey={storageKey} meeting={false}>
+  <ClubPlanShell class="club-mobile-kit family-brand" kitSlug={kit.slug} month="January" storageKey={storageKey} meeting={false}>
     <ClubPlanDesktop slot="desktop" deadline={editDeadline} kicker="January · Kit preview" instructions={[
       'A menu of ideas for your Family Meetings this month, made from your answers and each child’s age, under the same four parts as your Family Meeting guide.',
       'Bring it to any meeting in January. Pick an idea or two from each part, come back to what matters, skip what doesn’t fit. Nothing here is assigned: your family decides.',

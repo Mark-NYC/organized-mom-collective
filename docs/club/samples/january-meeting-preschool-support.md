@@ -18,7 +18,6 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What would make our evenings calmer?
 - What gets in the way? One possibility: the routine might have too many steps to own at once.
-- Kids first: what would make it easier?
 
 _Little ones can point or answer with one word._
 
@@ -40,7 +39,7 @@ _Try one part together right now, so the first time isn’t a reminder later._
 - One thing worth trying: a low hook and a shoe spot by the door, for Tobi.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.
+**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
 
 ---
 _Personalized from: names, ages, growth areas, existing responsibilities, priorities_

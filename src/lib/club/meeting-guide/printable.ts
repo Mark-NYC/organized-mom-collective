@@ -33,55 +33,73 @@ function sectionHead(g: MeetingGuide, id: PartId): HTMLElement {
 }
 const list = (items: GuideIdea[], cls = 'mg-list') => el('ul', { class: cls }, ...items.map((i) => el('li', {}, i.text)));
 
-function sheets(g: MeetingGuide, monthLabel: string): HTMLElement[] {
-  // Fixed tiers by number of children instead of shrinking type: 5–6 tighter, 7+ in three columns.
-  const n = g.people.length;
-  const dense = n >= 7 ? ' mg-dense mg-xdense' : n >= 5 ? ' mg-dense' : '';
-  const front = el('article', { class: `mg-sheet${dense}` },
-    el('header', { class: 'mg-head' },
-      el('p', { class: 'mg-kicker' }, `${monthLabel} · ${g.familyName}`),
-      el('h2', { class: 'mg-title' }, g.title),
-      el('p', { class: 'mg-sub' }, g.subtitle),
-      el('p', { class: 'mg-howto' }, g.howTo)),
-    el('section', { class: 'mg-part' },
-      sectionHead(g, 'focus'),
-      el('div', { class: 'mg-focus' }, ...g.focus.map((f) => el('div', { class: 'mg-focus-item' },
-        el('p', { class: 'mg-focus-title' }, f.title),
-        ...(f.opportunity ? [el('p', { class: 'mg-focus-opp' }, f.opportunity)] : []))))),
-    el('section', { class: 'mg-part' },
-      sectionHead(g, 'talk'),
-      el('p', { class: 'mg-label' }, 'Conversation starters'),
-      list(g.talk, 'mg-list mg-talk'),
-      ...(g.talkLittle ? [el('p', { class: 'mg-note' }, g.talkLittle)] : [])),
-    el('p', { class: 'mg-foot' }, 'Everyone’s Part and Let’s Practice are on the back →'));
-  front.dataset.planSheet = 'front';
-
+/** The companion's blocks, in reading order. Each part supports the one focus at the top. */
+function blocks(g: MeetingGuide, monthLabel: string) {
+  const focus = g.focus[0];
+  const head = el('header', { class: 'mg-head' },
+    el('p', { class: 'mg-kicker' }, `${monthLabel} · ${g.familyName}`),
+    el('h2', { class: 'mg-title' }, g.title),
+    el('p', { class: 'mg-sub' }, g.subtitle),
+    el('p', { class: 'mg-howto' }, g.howTo));
+  const focusPart = el('section', { class: 'mg-part' },
+    sectionHead(g, 'focus'),
+    ...(focus ? [el('div', { class: 'mg-focus' },
+      el('p', { class: 'mg-label' }, 'This month’s focus'),
+      el('p', { class: 'mg-focus-title' }, focus.title),
+      ...(focus.opportunity ? [el('p', { class: 'mg-focus-opp' }, focus.opportunity)] : []))] : []));
+  const talk = el('section', { class: 'mg-part' },
+    sectionHead(g, 'talk'),
+    list(g.talk, 'mg-list mg-talk'),
+    ...(g.talkLittle ? [el('p', { class: 'mg-note' }, g.talkLittle)] : []));
+  const shownKids = g.people.filter((p) => p.ideas.length || p.keeps);
   const kid = (p: MeetingGuide['people'][number]) => el('li', {},
     el('p', { class: 'mg-who' }, el('strong', {}, p.name), p.age !== null ? el('span', {}, ` · ${p.age}`) : ''),
-    ...(p.joinsIn ? [el('p', { class: 'mg-help' }, 'Joins in and watches.')] : []),
-    ...(p.ask && p.ideas.length ? [el('p', { class: 'mg-ask' }, p.ask)] : []),
-    ...(p.ideas.length
-      ? [el('p', { class: 'mg-label mg-label--tight' }, p.choose ? `Two ideas: ${p.name} chooses one` : 'An idea to try'),
-         el('ul', { class: 'mg-ideas' }, ...p.ideas.map((i) => el('li', {}, i.text))),
-         ...(p.support ? [el('p', { class: 'mg-help' }, p.support)] : [])]
-      : []),
+    ...p.ideas.map((i) => el('p', { class: 'mg-idea' }, i.text)),
+    ...(p.ideas.length && p.support ? [el('p', { class: 'mg-help' }, p.support)] : []),
     ...(p.keeps ? [el('p', { class: 'mg-keeps' }, p.keeps)] : []));
-  const back = el('article', { class: `mg-sheet${dense}` },
-    el('section', { class: 'mg-part' },
-      sectionHead(g, 'parts'),
-      ...(g.people.some((p) => p.ideas.length) ? [el('p', { class: 'mg-note' }, g.partsNote)] : []),
-      // Only children with something to say: an idea, or what they already do. Little ones join through Let's Talk.
-      ...(g.people.some((p) => p.ideas.length || p.keeps) ? [el('ul', { class: 'mg-kids' }, ...g.people.filter((p) => p.ideas.length || p.keeps).map(kid))] : []),
-      ...(g.partsDiscover ? [el('p', { class: 'mg-note' }, g.partsDiscover)] : []),
-      ...(g.grownUps.length ? [list(g.grownUps, 'mg-list mg-grownups')] : [])),
-    el('section', { class: 'mg-part' },
-      sectionHead(g, 'practice'),
-      ...(g.practice.length ? [el('p', { class: 'mg-label' }, 'Ways to make it stick'), list(g.practice)] : [])),
-    el('section', { class: 'mg-checkin' }, el('p', {}, el('strong', {}, 'Coming back to it: '), g.checkIn)),
-    el('p', { class: 'mg-foot' }, `${g.familyName} · Organized Family Club`));
-  back.dataset.planSheet = 'back';
-  back.dataset.planSheetEnd = '';
-  return [front, back];
+  const parts = el('section', { class: 'mg-part' },
+    sectionHead(g, 'parts'),
+    ...(g.people.some((p) => p.ideas.length) ? [el('p', { class: 'mg-note' }, g.partsNote)] : []),
+    ...(shownKids.length ? [el('ul', { class: 'mg-kids' }, ...shownKids.map(kid))] : []),
+    ...(g.partsDiscover ? [el('p', { class: 'mg-discover' }, g.partsDiscover)] : []),
+    ...(g.grownUps.length ? [list(g.grownUps, 'mg-list mg-grownups')] : []));
+  const practice = el('section', { class: 'mg-part' },
+    sectionHead(g, 'practice'),
+    // The family writes its own experiment: nothing here is filled in for them.
+    el('div', { class: 'mg-experiment' },
+      el('p', { class: 'mg-exp-prompt' }, el('strong', {}, g.experiment.title), g.experiment.prompt),
+      el('div', { class: 'mg-exp-fields' }, ...g.experiment.fields.map((f) => el('p', { class: 'mg-exp-field' }, el('span', {}, f), el('span', { class: 'mg-exp-line' })))),
+      el('p', { class: 'mg-exp-check' }, g.checkIn)),
+    ...(g.practice.length ? [list(g.practice)] : []));
+  return { head, focusPart, talk, parts, practice };
+}
+
+function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front' | 'back', end: boolean): HTMLElement {
+  // Fixed tiers by number of children instead of shrinking type: 5–6 tighter, 7+ in three columns.
+  const dense = kids >= 7 ? ' mg-dense mg-xdense' : kids >= 5 ? ' mg-dense' : '';
+  const s = el('article', { class: `mg-sheet${dense}` }, ...children, el('p', { class: 'mg-foot' }, foot));
+  s.dataset.planSheet = side;
+  if (end) s.dataset.planSheetEnd = '';
+  return s;
+}
+
+/**
+ * One Letter page when everything fits at the normal type size; two only when the family's content needs them
+ * (split between Let's Talk and Everyone's Part). Measured off-screen at the sheet's real size, so screen and print agree.
+ */
+function sheets(g: MeetingGuide, monthLabel: string, measure: HTMLElement): HTMLElement[] {
+  const n = g.people.filter((p) => p.ideas.length || p.keeps).length;
+  const b = blocks(g, monthLabel);
+  const one = sheet(n, [b.head, b.focusPart, b.talk, b.parts, b.practice], `${g.familyName} · Organized Family Club`, 'front', true);
+  measure.replaceChildren(one);
+  const fits = one.scrollHeight <= one.clientHeight + 1;
+  measure.replaceChildren();
+  if (fits) return [one];
+  const c = blocks(g, monthLabel);
+  return [
+    sheet(n, [c.head, c.focusPart, c.talk], 'Everyone’s Part and Let’s Practice are on the back →', 'front', false),
+    sheet(n, [c.parts, c.practice], `${g.familyName} · Organized Family Club`, 'back', true),
+  ];
 }
 
 /** Scale each 816 × 1056 sheet to its frame's width (screen only; print uses the real size). */
@@ -107,6 +125,10 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     return;
   }
   const key = root.dataset.planKey ?? `omc:club:meeting-guide:${month}:v1`;
+  // Where a sheet is laid out at its real size to see whether everything fits on one page.
+  const measure = el('div', { class: 'mg-measure' });
+  measure.setAttribute('aria-hidden', 'true');
+  document.body.append(measure);
   let family: ReadyFamily | null = null;
   let state: GuideState = emptyGuideState();
   let guide: MeetingGuide | null = null;
@@ -125,7 +147,7 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     if (!family) return;
     guide = generateMeetingGuide({ household: family.household, profile: state.profile, content, state });
     full = generateMeetingGuide({ household: family.household, profile: state.profile, content, state: { ...state, hidden: [] } });
-    pages.replaceChildren(...sheets(guide, monthLabel).map((s) => el('div', { class: 'mg-frame' }, s)));
+    pages.replaceChildren(...sheets(guide, monthLabel, measure).map((s) => el('div', { class: 'mg-frame' }, s)));
     fit(host);
     if (dialog.open) fillEditor();
     host.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true }));
@@ -211,4 +233,6 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     }
   });
   window.addEventListener('resize', () => fit(host));
+  // Page breaks depend on the real fonts: lay out again once they've loaded.
+  document.fonts?.ready.then(() => { if (guide) paint(); });
 }

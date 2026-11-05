@@ -38,7 +38,7 @@ _Try one part together right now, so the first time isn’t a reminder later._
 - One thing worth trying: tie each part to something that already happens, like after dinner or coming in the door.
 - Before reminding, try asking “What’s next?” and let the answer come from the kids.
 
-**Coming back to it:** At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.
+**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
 
 ---
 _Personalized from: names, ages, priorities · the month’s own ideas for: growth areas_

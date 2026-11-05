@@ -88,6 +88,8 @@ export interface MeetingGuide {
   grownUps: GuideIdea[];
   practice: GuideIdea[];
   checkIn: string;
+  /** The write-in habit experiment the family fills in together. */
+  experiment: GuideMonthContent['experiment'];
   plan: FamilyPlan;
   rationale: GuideRationale;
   /** What personalized it, and what fell back to the month's own content. */
@@ -115,7 +117,9 @@ const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export function familyTitle(h: Household): string {
   const n = h.displayName?.trim();
   if (!n) return 'Our Family';
-  return /family$/i.test(n) ? n.replace(/^the /i, 'The ') : `The ${n.replace(/^the /i, '')} Family`;
+  // Her own form wins: "The Goerings", "The Rivera Family", "Team Brooks". Only a bare surname gets "The … Family".
+  if (/family$/i.test(n) || /^the /i.test(n) || /\s/.test(n)) return n.replace(/^the /i, 'The ');
+  return `The ${n} Family`;
 }
 
 type Person = { m: FamilyMember; stage: GuideStage; age: number | null };
@@ -210,8 +214,7 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   if (candidates[0]) picks.push({ ...candidates[0], source: sourceOf(candidates[0]) });
   // A second focus needs its own evidence: answers the first focus didn't already use.
   const independent = (s: (typeof scored)[number]) => [...s.support].filter(([k]) => !picks[0]?.support?.has(k)).reduce((n, [, w]) => n + w, 0);
-  const second = candidates.slice(1).find((c) => independent(c) >= 4 && c.score >= 0.75 * (picks[0]?.score ?? 0));
-  if (second && picks[0]) picks.push({ ...second, source: sourceOf(second) });
+  // One focus: everything else on the page supports it. Other well-supported opportunities stay in the rationale.
   if (!picks.length) {
     picks.push({ o: content.fallback, score: 0, parts: { relevance: 0, impact: 0, readiness: 0, habit: 0 }, evidence: [], source: 'month' });
     missing.push('priorities');
@@ -219,14 +222,14 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   const primary = picks[0].o;
   const considered = scored.filter((s) => !picks.some((p) => p.o.id === s.o.id) && s.parts.relevance > 0).map((s) => ({
     id: s.o.id, score: s.score,
-    why: picks[1] ? 'Lower score than the two chosen' : `Score ${s.score} vs ${picks[0].score}; a second focus needs 4+ points of its own evidence and three quarters of the first’s score (had ${independent(s)})`,
+    why: `Score ${s.score} vs ${picks[0].score}${independent(s) >= 4 ? ' (well supported on its own: a candidate for a later meeting or month)' : ''}`,
   }));
 
   // The obstacle she reported for the focus, if any (never guessed).
   const obstacleFrom = challenges.find((c) => primary.challenges.includes(c) && content.obstacles[c]);
   const obstacle = obstacleFrom ? content.obstacles[obstacleFrom] : null;
   // Ownership is the obstacle she reported: children 6 and up get two ideas to choose from.
-  const choice = obstacle?.principle === 'ownership';
+
 
   // ---- 3. Children: one idea each, for the focus first ----
   const childNotes: GuideRationale['children'] = [];
@@ -256,7 +259,8 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
     // Siblings at one stage don't get the identical line when there's another good option.
     // A line already offered to a sibling isn't repeated; with nothing else, the child joins through the questions.
     const pool = cands.filter((c) => !offered.has(fill(stepFor(c.id, p)!.try, name)));
-    const n = choice && ['early', 'middle', 'teen'].includes(p.stage) ? 2 : 1;
+    // One possible starting point per child; the family picks which one to try first.
+    const n = 1;
     const chosen = pool.slice(0, n);
     for (const c of pool.slice(n)) excluded.push(`${practice(c.id) ? label(GROWTH_ITEMS, c.id) || c.id : c.id}: one strong idea is enough`);
     const ideas: ChildIdea[] = chosen.map((c) => {
@@ -293,16 +297,16 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   // Children 6 and up: a preschooler's ownership is doing it together first (their support line), not analyzing it.
   for (const p of guidePeople.filter((x) => ['early', 'middle', 'teen', 'child'].includes(x.stage))) { const id = p.ideas[0]?.itemId; if (id) asks.set(id, [...(asks.get(id) ?? []), p.name]); }
   const join = (n: string[]) => (n.length <= 2 ? n.join(' and ') : `${n.slice(0, -1).join(', ')} and ${n.at(-1)}`);
-  const askLines = [...asks].slice(0, 2).map(([id, names]) => ({ key: `talk:ask:${id}`, text: fill(practice(id)!.ask, join(names)) }));
+  // One question that hands the choice to the children (6+): which starting point to try first.
+  const askNames = [...asks.values()].flat();
+  const askLines = askNames.length ? [{ key: 'talk:invite', text: content.invite.replace('{names}', join(askNames)) }] : [];
   const talk = shown([
     ...(primary.id === 'schedules'
       ? [{ key: 'talk:week', text: named ? content.weekQuestion.withActivity.replaceAll('{activity}', activityLabel) : content.weekQuestion.generic }]
       : [{ key: `talk:${primary.id}`, text: ownWords ? content.ownWordsDiscuss : fill(primary.discuss) }]),
     { key: 'talk:obstacle', text: obstacle ? `What gets in the way? One possibility: ${obstacle.obstacle}` : fill(primary.discover) },
-    ...(picks[1] ? [{ key: `talk:${picks[1].o.id}`, text: fill(picks[1].o.discuss) }] : []),
     ...askLines,
-    ...(!askLines.length && guidePeople.some((p) => p.ideas.length) ? [{ key: 'talk:invite', text: content.invite }] : []),
-  ]).slice(0, 4);
+  ]).slice(0, 3);
   // Too little to suggest anything for the children: ask them instead.
   const askable = guidePeople.filter((p) => !p.joinsIn);
   // Children with no idea yet, where the focus says to ask rather than pick a job for them.
@@ -353,7 +357,7 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   return {
     month, title: content.title, subtitle: content.subtitle, howTo: content.howTo, familyName: familyTitle(household), sections,
     focus: shown(focusLines), talk, talkLittle: littles ? content.talkLittle : null,
-    people: guidePeople, partsNote: content.partsNote, partsDiscover, grownUps, practice: practiceLines, checkIn: content.checkIn, plan,
+    people: guidePeople, partsNote: content.partsNote, partsDiscover, grownUps, practice: practiceLines, checkIn: content.checkIn, experiment: content.experiment, plan,
     rationale: { focus: picks.map((x) => ({ id: x.o.id, score: x.score, parts: x.parts, evidence: x.evidence })), considered, children: childNotes },
     used, missing,
   };

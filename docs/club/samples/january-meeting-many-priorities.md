@@ -18,8 +18,7 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What would make our evenings calmer?
 - What gets in the way? One possibility: the routine might have too many steps to own at once.
-- Ask Ana which dinner job sounds best.
-- Ask Ben which bedtime step usually gets skipped.
+- Ask Ana and Ben which starting point they’d try first, or what they’d try instead.
 
 ---
 
@@ -39,7 +38,7 @@ _Try one part together right now, so the first time isn’t a reminder later._
 - One thing worth trying: a picture list by the bed, for Ben.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** At a later meeting, you might check how it’s going: on my own, with reminders, or hard. Keep it, shrink it or swap it.
+**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
 
 ---
 _Personalized from: names, ages, growth areas, priorities_
