@@ -1,6 +1,6 @@
 ---
 /**
- * A month's Family Meeting guide on phones and tablets (below 1100px): the shared ClubPlanScreen with the guide's
+ * A month's Family Focus on phones and tablets (below 1100px): the shared ClubPlanScreen with the guide's
  * own sections. Reads the guide only through the printable's controller (`[data-meeting-guide]`'s `clubPlan`,
  * src/lib/club/meeting-guide/printable.ts); every row opens the same editor as the desktop's Make changes.
  */
@@ -12,22 +12,17 @@ const { deadline, kicker, approvalKey } = Astro.props;
 <ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front']} previewNote="Ready to print">
   <slot name="title" slot="title" />
   <section class="cp-section" aria-labelledby="mgm-focus-title" data-mgm-approval={approvalKey}>
-    <h2 id="mgm-focus-title">1. Our Focus</h2>
+    <h2 id="mgm-focus-title">Our shared focus</h2>
     <ul class="mgm-focus-list" data-mgm-focus></ul>
   </section>
-  <section class="cp-section" aria-labelledby="mgm-talk-title">
-    <h2 id="mgm-talk-title">2. Let’s Talk</h2>
-    <ul class="cp-group" data-mgm-talk></ul>
-  </section>
   <section class="cp-section" aria-labelledby="mgm-people-title">
-    <h2 id="mgm-people-title">3. Everyone’s Part</h2>
-    <p class="cp-intro">Habit experiments to discuss and try, not assignments.</p>
-    
+    <h2 id="mgm-people-title">Small habits worth trying</h2>
+    <p class="cp-intro">Suggestions to talk over and try, not assignments. Keep, change or skip each one.</p>
     <ul class="cp-group" data-mgm-people></ul>
   </section>
-  <section class="cp-section" aria-labelledby="mgm-practice-title">
-    <h2 id="mgm-practice-title">4. Let’s Practice</h2>
-    <ul class="cp-group" data-mgm-practice></ul>
+  <section class="cp-section" aria-labelledby="mgm-words-title">
+    <h2 id="mgm-words-title">Our Words of the Week</h2>
+    <ul class="cp-group" data-mgm-words></ul>
   </section>
 </ClubPlanScreen>
 <style is:global>
@@ -63,13 +58,10 @@ if (root && host) {
       const g = host.clubPlan?.guide();
       if (!g) return;
       q('[data-mgm-focus]').replaceChildren(...g.focus.map((f) => el('li', { class: 'mgm-focus' }, el('strong', {}, f.title), f.opportunity ? el('span', {}, f.opportunity) : '')));
-      q('[data-mgm-talk]').replaceChildren(...g.talk.map((t) => row(t.text, '', locked)));
       q('[data-mgm-people]').replaceChildren(
-        ...g.experiments.map((e) => row(`${e.who} · ${e.title}`, `“${e.action}” ${e.ownership}`, locked)),
-        ...(g.partsDiscover ? [row(g.partsDiscover, '', locked)] : []),
-        ...g.recognized.map((t) => row(t.text, '', locked)),
-        ...g.grownUps.map((t) => row(t.text, '', locked)));
-      q('[data-mgm-practice]').replaceChildren(...g.practice.map((t) => row(t.text, '', locked)));
+        ...g.experiments.map((e) => row(`${e.who} · ${e.title}`, `${e.action} ${e.ownership}`, locked)),
+        ...g.recognized.map((t) => row(t.text, '', locked)));
+      q('[data-mgm-words]').replaceChildren(...g.focusPage.words.map((w, i) => el('li', { class: 'mgm-focus' }, el('strong', {}, `Week ${i + 1}: ${w.word}`), el('span', {}, w.question))));
     },
   });
 }

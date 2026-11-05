@@ -4,28 +4,39 @@ The Club is a family responsibility system, not a name-insertion service: a few 
 person, one obstacle to work on, small actions, and progress remembered over time. January 2027 is the first
 resource built this way.
 
-## January: the Family Meeting Companion
+## January: the Monthly Family Focus
 
 Families get two things:
 
 1. **The reusable framework**: the Welcome Kit's one-page Family Meeting guide (`src/data/club/meeting-guide.ts`,
    `/club/family-meeting-guide`). The four parts, every month. Unchanged.
-2. **The January companion**: `/app/club/january`, a personalized **menu of ideas** under the same four parts, for
-   whichever meetings the family holds in January. Not a completed meeting, not a weekly curriculum: they use what
-   fits each time, come back to what matters and skip the rest. Nobody leads anything on it, nothing is assigned, and
-   no decision is filled in.
+2. **Our Family Focus**: `/app/club/january`, one personalized page the family brings to its Family Meeting. It is
+   **not** organized under the four meeting parts; it reinforces the month's practical resource. Nothing on it is
+   assigned.
 
-One US Letter page when it all fits at the normal type size; a second only when a family's content needs it. The one focus
-organizes the page; the **habit experiments** are its centerpiece. Selection is month-independent: docs/club/HABITS.md.
+One US Letter page when it fits at the normal type size; a second only when a family's content needs it.
 
-| Part | What's on it |
+| Section | What's on it |
 | --- | --- |
-| 1 · Our Focus | This month's focus (one, from her answers), what getting better could look like, and her answers behind it, once |
-| 2 · Let's Talk | The focus conversation, what gets in the way (her obstacle as a possibility, or a question with options), and the children 6+ asked whether the experiments would help |
-| 3 · Everyone's Part | **One or two habit experiments to discuss** (never assignments): who, her wish behind it, one small age-appropriate action, when (confirmed by her answers, or options to pick from), an ownership move, and a support. Larger families: one shared routine adapted by age. Thin intake: the Family Meeting habit and one idea marked "something to consider". What someone already does is recognized; the grown-ups get a conversation about helping without taking over |
-| 4 · Let's Practice | If it gets stuck (her obstacle's adjustment, only when no experiment already uses it), how to keep it going, and the check-in for the next meeting |
+| Family identity | Month and family name, "Our Family Focus", and every member's name beside their marker color |
+| Our shared focus | One focus from her answers (January's Family Meeting habit when she gave too little), one encouraging line, and her answers behind it, once |
+| Small habits worth trying | **One or two experiments** (never assignments): who (with their colors), her wish behind it, the action, when (confirmed by her answers, or "When, your pick:" options), an ownership move and a support. Groups for shared routines or a shared activity show each child's own version. At most two "already does" lines, then the grown-ups' question |
+| Our Words of the Week | Four authored words, one per week, for the calendar's Word of the Week space (`focusPage.words` in the month's content). A fifth week can repeat one |
+| Bring it to your Family Meeting | Talk about the focus · choose · celebrate · adjust · add it to the wall calendar |
 
-Families of 5–6 and 7+ children with starting points get fixed tighter layouts, never smaller than 10px text.
+**Grouping** (`src/lib/club/habits/recommend.ts`): individual experiments for smaller families; children who share a
+named activity are grouped by the activity, whatever their ages; otherwise a shared routine from `theme.sharedFrom`
+children (January: 3), or 4 when she named a wish inside the focus. Adaptations keep each child's ability level.
+
+**Colors** (`src/data/club/family-colors.ts`): marker colors auto-assigned children first, saved by member id in
+`preferences.colors` when she changes them on her family page, so they stay the same every month. Always shown with the
+name (readable in grayscale). Saving a choice needs migration `20261120000000_club_household_colors.sql`; until it is
+applied the site saves families without colors and they stay auto-assigned.
+
+**Her review** (Make changes): each suggestion has **Keep it**, **Change it** (title, action, when) and **Skip it**.
+Skipped ideas come off the printed page; her "when" counts as confirmed. Saved in the guide state
+(`hidden`, `edits`, `kept`), included in the approval fingerprint. A kept suggestion is still not a commitment:
+commitments are only created by `commit()` (`src/lib/club/family-plan.ts`).
 
 ### Selection (how the companion decides what to print)
 

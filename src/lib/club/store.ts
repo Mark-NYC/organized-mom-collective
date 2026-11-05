@@ -162,10 +162,11 @@ export const accountStore: ClubStore = {
     try {
       return fromDb(await save(input.preferences));
     } catch (e) {
-      // A database without 20261113 refuses the illustration style key: her family still saves, without that one
-      // optional preference (it's saved once the migration is in).
-      if ((e as Error).message !== 'invalid' || !('icon_style' in (input.preferences ?? {}))) throw e;
-      const { icon_style: _style, ...rest } = input.preferences as Record<string, unknown>;
+      // A database without 20261113 (illustration style) or 20261120 (member colors) refuses those keys: her family
+      // still saves, without the optional preferences it doesn't know yet (they save once the migration is in).
+      const optional = ['colors', 'icon_style'].filter((k) => k in (input.preferences ?? {}));
+      if ((e as Error).message !== 'invalid' || !optional.length) throw e;
+      const rest = Object.fromEntries(Object.entries(input.preferences as Record<string, unknown>).filter(([k]) => !optional.includes(k)));
       return fromDb(await save(rest as typeof input.preferences));
     }
   },

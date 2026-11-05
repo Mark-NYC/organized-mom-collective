@@ -1,5 +1,5 @@
 /**
- * The personalized Family Meeting companion (January's resource, /app/club/january) in a real browser: every sample
+ * The personalized Monthly Family Focus (January's resource, /app/club/january) in a real browser: every sample
  * family on desktop and phone, families of 6, 8 and 12 with long names, and print. Run against a built preview:
  *
  *   PUBLIC_CLUB_ENABLED=true npx astro build && npx astro preview --port 4330
@@ -15,7 +15,9 @@ const BASE = process.argv.find((a) => a.startsWith('http')) ?? 'http://localhost
 const SHOTS = process.argv.find((a) => a.startsWith('--shots='))?.slice(8);
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const SAMPLES = ['rivera', 'brooks', 'chen', 'okafor', 'hughes'];
-const PARTS = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'];
+const PARTS = ['Our Family Focus', 'Our shared focus', 'Small habits worth trying', 'Our Words of the Week', 'Bring it to your Family Meeting'];
+const lc = (s) => s.toLowerCase();
+const WORDS = ['Notice', 'Choose', 'Practice', 'Grow'];
 let failures = 0;
 const check = (name, ok, detail = '') => {
   if (!ok) failures++;
@@ -59,7 +61,11 @@ for (const sample of SAMPLES) {
   for (const [label, vp] of [['desktop', { width: 1440, height: 900 }], ['phone', { width: 390, height: 844 }]]) {
     const page = await open(browser, vp, `/app/club/january?sample=${sample}`);
     const text = await page.locator('[data-meeting-guide] [data-plan-sheet]').allInnerTexts().then((t) => t.join('\n'));
-    check(`${sample} ${label}: the four parts, in order`, PARTS.every((p, i) => text.indexOf(p) > -1 && (i === 0 || text.indexOf(p) > text.indexOf(PARTS[i - 1]))));
+    check(`${sample} ${label}: the Family Focus sections, in order`, PARTS.every((p, i) => lc(text).indexOf(lc(p)) > -1 && (i === 0 || lc(text).indexOf(lc(p)) > lc(text).indexOf(lc(PARTS[i - 1])))), text.slice(0, 300));
+    check(`${sample} ${label}: not organized under the four meeting parts`, !/Let’s Talk|Let’s Practice|Everyone’s Part/.test(text));
+    check(`${sample} ${label}: January’s four authored words`, WORDS.every((w) => text.includes(w)) && /What needs our attention\?/.test(text));
+    const chips = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-legend .mg-chip').evaluateAll((cs) => cs.map((c) => [c.textContent.trim(), c.querySelector('.mg-dot')?.style.background]));
+    check(`${sample} ${label}: every member has a named, distinct color`, chips.length >= 1 && chips.every(([n, c]) => n && c) && new Set(chips.map((x) => x[1])).size === chips.length, JSON.stringify(chips));
     check(`${sample} ${label}: no Mom, Dad or parents; no unfilled tokens`, !/\b(mom|dad|parents?)\b|\{\w+\}/i.test(text));
     check(`${sample} ${label}: no sideways scrolling`, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     if (label === 'desktop') {
@@ -70,7 +76,7 @@ for (const sample of SAMPLES) {
       check(`${sample}: Make changes opens the editor`, await page.isVisible('dialog[open][data-mg-editor]'));
       await page.keyboard.press('Escape');
     } else {
-      check(`${sample} phone: the companion’s sections`, await page.isVisible('[data-mgm-focus] li') && await page.isVisible('[data-mgm-people] li'));
+      check(`${sample} phone: the Family Focus sections`, await page.isVisible('[data-mgm-focus] li') && await page.isVisible('[data-mgm-people] li') && (await page.locator('[data-mgm-words] li').count()) === 4);
     }
     check(`${sample} ${label}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
     if (SHOTS && sample === 'rivera') await page.screenshot({ path: `${SHOTS}/guide-rivera-${label}.png` });
@@ -90,7 +96,42 @@ for (const n of [6, 8, 12]) {
   check(`${n} people: prints ${f.length} Letter page(s), no blank page`, (await pdfPages(page)) === f.length);
   const exps = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-exp').count();
   const adapt = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-exp-adapt li').count();
-  check(`${n} people: ${exps} experiment(s)${adapt ? `, one shared routine for ${adapt} children` : ''}; grown-ups get a conversation, not a job`, exps >= 1 && exps <= 2 && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
+  check(`${n} people: ${exps} experiment(s)${adapt ? `, one shared routine for ${adapt} children` : ''}; grown-ups get a conversation, not a job`, exps >= 1 && exps <= 2 && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-sheet').first().innerText()));
+  await page.context().close();
+}
+console.log('\nMom’s review: Keep it / Change it / Skip it');
+{
+  const page = await open(browser, { width: 1440, height: 900 }, '/app/club/january?sample=rivera');
+  const sheetText = () => page.locator('[data-meeting-guide] [data-mg-pages]').innerText();
+  const before = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-exp').count();
+  const titles = await page.locator('[data-meeting-guide] [data-mg-pages] .mg-exp-title').allInnerTexts();
+  await page.click('[data-cpd-edit]');
+  const boxes = page.locator('dialog[open] .mg-ed-exp');
+  check('review: every suggestion has Keep / Change / Skip', (await boxes.count()) === before && (await boxes.first().locator('.mg-ed-choice-btn').allInnerTexts()).join('|') === 'Keep it|Change it|Skip it');
+  await boxes.nth(0).getByRole('button', { name: 'Skip it' }).click();
+  if (before > 1) {
+    await boxes.nth(1).getByRole('button', { name: 'Change it' }).click();
+    const t = boxes.nth(1).locator('.mg-ed-change textarea').nth(1);
+    await t.fill('Pack the bag together, then solo by Friday.');
+    await t.dispatchEvent('change');
+  }
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+  let txt = await sheetText();
+  check('review: a skipped idea comes off the printable', !txt.includes(titles[0]), titles[0]);
+  if (before > 1) check('review: her wording prints', txt.includes('Pack the bag together, then solo by Friday.'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready' && document.querySelector('.mg-sheet'));
+  await page.waitForTimeout(500);
+  txt = await sheetText();
+  check('review: edits and skips persist after reopening', !txt.includes(titles[0]) && (before < 2 || txt.includes('Pack the bag together, then solo by Friday.')));
+  if (SHOTS) {
+    await page.click('[data-cpd-edit]');
+    await page.waitForTimeout(300);
+    await page.locator('dialog[open]').screenshot({ path: `${SHOTS}/review-editor.png` });
+    await page.keyboard.press('Escape');
+    await page.locator('[data-meeting-guide] [data-mg-pages] .mg-sheet').first().screenshot({ path: `${SHOTS}/review-after.png` });
+  }
   await page.context().close();
 }
 await browser.close();

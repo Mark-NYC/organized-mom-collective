@@ -8,7 +8,7 @@
  *
  * `title` is the name of what prints, used everywhere a member or the owner sees the month (Welcome Kit, Club Home,
  * the plan pages, admin fulfillment and CSV). It follows the app tool at /app/club/<month>, which is what members
- * edit and fulfillment prints: January 2027 is "Our Family Meeting Companion" and September "Our Family Habit Cards"
+ * edit and fulfillment prints: January 2027 is "Our Family Focus" and September "Our Family Habit Cards"
  * (the same as src/data/club/family-meeting.ts → resourceTitle and the public Club page; fixed Nov 2026).
  *
  * Known gap: `component` is the older member copy at /club/resources/<slug>, which still renders the earlier printables
@@ -35,7 +35,7 @@ export interface ClubResource {
 export const clubResources: readonly ClubResource[] = [
   { slug: '2026-11-family-ownership', month: '2026-11', title: 'Our Family Ownership Plan', problem: 'Who owns which jobs, start to finish', component: 'november', preview: '/club/worksheet-generator' },
   { slug: '2026-12-christmas-mission', month: '2026-12', title: 'Your Christmas Mission', problem: 'A kindness mission the kids lead', component: 'december', preview: '/club/december-preview' },
-  { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Meeting Companion', problem: 'Ideas for this month’s meetings, made for your family', component: 'january', preview: '/app/club/january?sample=rivera',
+  { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Focus', problem: 'One shared focus, a habit or two and four Words of the Week', component: 'january', preview: '/app/club/january?sample=rivera',
     // The printed resource is the app tool /app/club/january (MeetingGuidePrintable: the family's two-page Family Meeting companion),
     // which fulfillment prints (?fulfillment=<order>). docs/club/WELCOME_KIT.md → Naming.
     welcome: {

@@ -31,7 +31,8 @@ function invariants(g: MeetingGuide, label: string) {
   const individual = g.experiments.filter((e) => !e.adaptations && e.memberIds.length);
   expect(new Set(individual.map((e) => e.memberIds[0])).size, `${label}: one experiment per child at most`).toBe(individual.length);
   for (const e of g.experiments) {
-    for (const t of [e.action, e.ownership, e.support ?? '', e.why]) expect(t, `${label}: ${t}`).not.toMatch(/\b(he|she|him|her|his|they|them|their)\b/i);
+    // Child-level lines never use a pronoun (group lines may say "their own", meaning each child's).
+    if (!e.adaptations) for (const t of [e.action, e.ownership, e.support ?? '', e.why]) expect(t, `${label}: ${t}`).not.toMatch(/\b(he|she|him|her|his|they|them|their)\b/i);
     expect(e.ownership.length, label).toBeGreaterThan(10);
     if (e.basis === 'need') expect(e.why, `${label}: a need has a reason from her intake`).not.toBe('');
   }
@@ -78,7 +79,7 @@ describe('January companion: habit experiments', () => {
       { id: 'l3', firstName: 'Uma', kind: 'child', role: 'child', birthYear: 2022, birthMonth: 6 },
     ] };
     const g = generateMeetingGuide({ household, profile: { challenges: [], activities: [{ category: 'school', memberIds: [] }], responsibilities: [] }, content });
-    expect(g.focus[0].title).toBe('Starting our Family Meetings');
+    expect(g.focus[0].title).toBe('Starting our Family Meeting habit');
     expect(g.starterNote).toBe(content.starterNote);
     expect(g.experiments.map((e) => [e.who, e.basis, e.why])).toEqual([['Everyone', 'consider', ''], ['Ike, 8', 'consider', '']]);
     expect(g.partsDiscover).toBe('Ask Uma what to take on, once the meeting is a habit. One small part is plenty.');

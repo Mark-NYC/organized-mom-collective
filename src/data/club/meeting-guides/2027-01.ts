@@ -1,5 +1,5 @@
 /**
- * January 2027: Our Family Meeting Companion. January is about starting Family Meetings; the reusable four-part
+ * January 2027: Our Family Focus. January is about starting Family Meetings; the reusable four-part
  * framework is the Welcome Kit's Family Meeting guide (src/data/club/meeting-guide.ts), and this is the month's
  * personalized companion for whichever meetings the family holds in January.
  *
@@ -12,7 +12,7 @@ import type { GuideMonthContent } from '../../../lib/club/meeting-guide/types';
 
 export const january2027: GuideMonthContent = {
   month: '2027-01',
-  title: 'Our Family Meeting Companion',
+  title: 'Our Family Focus',
   subtitle: 'Ideas for our January Family Meetings.',
   howTo: 'Use the four parts from your Family Meeting guide. Pick what fits at each meeting, come back to what matters, skip the rest.',
   goals: {
@@ -21,7 +21,7 @@ export const january2027: GuideMonthContent = {
     parts: 'Each person picks or agrees to one small part they own this month.',
     practice: 'Try one part together right now, so the first time isn’t a reminder later.',
   },
-  theme: { month: '2027-01', schoolInSession: true, maxExperiments: 2, sharedFrom: 4, allowed: HABIT_LIBRARY.map((h) => h.id) },
+  theme: { month: '2027-01', schoolInSession: true, maxExperiments: 2, sharedFrom: 3, allowed: HABIT_LIBRARY.map((h) => h.id) },
 
   opportunities: [
     { id: 'mornings', title: 'Calmer mornings', opportunity: 'Each child gets a little more of their own morning done without being told.',
@@ -50,7 +50,7 @@ export const january2027: GuideMonthContent = {
       discuss: 'Which jobs at home could someone else try?', discover: 'What makes it hard to pitch in: not knowing what to do, not wanting to, or something else?',
       priorities: [], challenges: ['sharing-fairly'], items: ['help-with-meals', 'tidy-room', 'put-away-laundry', 'pet-care'] },
   ],
-  fallback: { id: 'meetings', title: 'Starting our Family Meetings', opportunity: 'A short, regular time when everyone hears the plan and has a say. That’s the first habit to build.',
+  fallback: { id: 'meetings', title: 'Starting our Family Meeting habit', opportunity: 'A short, regular time when everyone hears the plan and has a say. It’s the habit that makes every other one easier.',
     discuss: 'What’s one thing that makes our weeks harder than they need to be?', discover: 'What would each of us like to do more on our own this month?',
     priorities: [], challenges: [], items: [] },
   // Too little intake: January's own habit, and one clearly framed idea to consider.
@@ -87,4 +87,16 @@ export const january2027: GuideMonthContent = {
     },
   },
   checkIn: 'At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it.',
+  focusPage: {
+    title: 'Our Family Focus',
+    monthPurpose: 'January is about starting our Family Meeting, and using it to work on one thing together.',
+    words: [
+      { word: 'Notice', question: 'What needs our attention?' },
+      { word: 'Choose', question: 'What small responsibility can we own?' },
+      { word: 'Practice', question: 'What can we keep doing until it’s easier?' },
+      { word: 'Grow', question: 'What’s changing because we’re practicing?' },
+    ],
+    wordsNote: 'One word a week: write it in the calendar’s Word of the Week space. A fifth week can repeat a favorite.',
+    bringIt: ['Talk about the focus', 'Choose what to try', 'Celebrate what’s working', 'Adjust what isn’t', 'Add it to the wall calendar, in everyone’s colors'],
+  },
 };

@@ -1,6 +1,6 @@
 ---
 /** January Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
- * docs/club/PLAN_ARCHITECTURE.md): Our Family Meeting Companion, the family's personalized menu of meeting ideas for January
+ * docs/club/PLAN_ARCHITECTURE.md): Our Family Focus, the family's one-page shared focus, habit ideas and Words of the Week for January
  * (docs/club/PERSONALIZATION.md). The guide is January's resource, so the page has no separate
  * Monthly Tool / Family Meeting switch. Desktop (>= 1100px): the shared rail and the two-page document. Below
  * 1100px: the shared plan screen with the guide's sections.
@@ -18,14 +18,14 @@ if (!kit) throw new Error('January 2027 kit missing from the registry');
 const editDeadline = clubEditingDeadline(kit.month);
 const storageKey = 'omc:club:january-family-meeting:v1';
 ---
-<AppLayout title="Our Family Meeting Companion">
+<AppLayout title="Our Family Focus">
   <ClubPlanShell class="club-mobile-kit family-brand" kitSlug={kit.slug} month="January" storageKey={storageKey} meeting={false}>
     <ClubPlanDesktop slot="desktop" deadline={editDeadline} kicker="January · Kit preview" instructions={[
-      'A menu of ideas for your Family Meetings this month, made from your answers and each child’s age, under the same four parts as your Family Meeting guide.',
-      'Bring it to any meeting in January. Pick an idea or two from each part, come back to what matters, skip what doesn’t fit. Nothing here is assigned: your family decides.',
-      'Make changes to take off ideas that don’t fit or to plan for a child’s age differently. Names, ages and answers come from your family page.',
+      'One page for January: your family’s shared focus, a small habit or two worth trying, and four Words of the Week for the calendar.',
+      'Bring it to your Family Meeting. Talk it over, choose what to try, and add it to the wall calendar. Nothing here is assigned: your family decides.',
+      'Make changes to keep, reword or skip each idea. Skipped ideas come off the printed page. Names, ages and colors come from your family page.',
     ]}>
-      <Fragment slot="title">Our Family Meeting <em>Companion</em></Fragment>
+      <Fragment slot="title">Our Family <em>Focus</em></Fragment>
     </ClubPlanDesktop>
     <div class="kit-viewer-wrap" slot="printable" data-plan-proof-body>
       <div class="kit-artwork" data-kit-viewer data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
@@ -33,7 +33,7 @@ const storageKey = 'omc:club:january-family-meeting:v1';
       </div>
     </div>
     <MeetingGuideMobile slot="mobile" deadline={editDeadline} kicker="January · Organized Family Club" approvalKey="omc:preview:january-family-meeting:approval">
-      <Fragment slot="title">Our Family Meeting <em>Companion</em></Fragment>
+      <Fragment slot="title">Our Family <em>Focus</em></Fragment>
     </MeetingGuideMobile>
   </ClubPlanShell>
 </AppLayout>

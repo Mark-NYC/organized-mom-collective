@@ -12,8 +12,8 @@ import { PLAN_CHANGE, type PlanResource } from '../plan/resource';
 import { readScoped, tabStorage } from '../plan/storage';
 import { generateMeetingGuide, guideFingerprint, type GuideIdea, type MeetingGuide } from './generate';
 import { STAGE_LABEL, type GuideStage } from './stages';
-import { emptyGuideState, guideProfile, isGuideState, type GuideState } from './state';
-import type { GuideMonthContent, PartId } from './types';
+import { emptyGuideState, guideProfile, isGuideState, MAX_EDIT, type GuideState } from './state';
+import type { GuideMonthContent } from './types';
 
 export interface GuidePlan extends PlanResource<GuideState> {
   guide(): MeetingGuide | null;
@@ -25,60 +25,66 @@ const SHEET_W = 816;
 const SHEET_H = 1056;
 const ACTIONS = ['pointerdown', 'keydown'] as const;
 
-function sectionHead(g: MeetingGuide, id: PartId): HTMLElement {
-  const s = g.sections.find((x) => x.id === id)!;
-  return el('header', { class: 'mg-part-head' },
-    el('span', { class: 'mg-num' }, String(s.n)),
-    el('div', {}, el('h3', {}, s.title), el('p', { class: 'mg-goal' }, s.goal)));
-}
 const list = (items: GuideIdea[], cls = 'mg-list') => el('ul', { class: cls }, ...items.map((i) => el('li', {}, i.text)));
 
 /** The companion's blocks, in reading order. Each part supports the one focus at the top. */
+/** A person's color chip: the color, their initial on it, and their name beside it (readable in grayscale). */
+function chip(g: MeetingGuide, id: string, withName = true): HTMLElement {
+  const c = g.colors[id];
+  if (!c) return el('span', {});
+  const dot = el('span', { class: 'mg-dot' }, c.name.charAt(0));
+  dot.style.background = c.hex;
+  return el('span', { class: 'mg-chip' }, dot, ...(withName ? [el('span', {}, c.name)] : []));
+}
+
+/** The Monthly Family Focus, in reading order: identity, the shared focus, habits worth trying, the words, the meeting. */
 function blocks(g: MeetingGuide, monthLabel: string) {
   const focus = g.focus[0];
+  const everyone = Object.keys(g.colors);
   const head = el('header', { class: 'mg-head' },
-    el('p', { class: 'mg-kicker' }, `${monthLabel} · ${g.familyName}`),
-    el('h2', { class: 'mg-title' }, g.title),
-    el('p', { class: 'mg-sub' }, g.subtitle),
-    el('p', { class: 'mg-howto' }, g.howTo));
-  const focusPart = el('section', { class: 'mg-part' },
-    sectionHead(g, 'focus'),
-    ...(focus ? [el('div', { class: 'mg-focus' },
-      el('p', { class: 'mg-label' }, 'This month’s focus'),
-      el('p', { class: 'mg-focus-title' }, focus.title),
-      ...(focus.opportunity ? [el('p', { class: 'mg-focus-opp' }, focus.opportunity)] : []),
-      ...(focus.because ? [el('p', { class: 'mg-focus-because' }, `From your answers: ${focus.because}.`)] : []))] : []));
-  const talk = el('section', { class: 'mg-part' },
-    sectionHead(g, 'talk'),
-    list(g.talk, 'mg-list mg-talk'),
-    ...(g.talkLittle ? [el('p', { class: 'mg-note' }, g.talkLittle)] : []));
-  // A habit experiment: who and why, the small action, a moment it could follow, the child's own way, support.
-  const experiment = (e: MeetingGuide['experiments'][number]) => el('li', { class: 'mg-exp' },
-    el('p', { class: 'mg-exp-head' }, el('strong', {}, e.who), el('span', {}, ` · ${e.title}`)),
-    ...(e.wish ? [el('p', { class: 'mg-exp-why' }, e.wish)] : e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mg-exp-why' }, g.considerLabel)] : []),
-    el('p', { class: 'mg-exp-action' }, `“${e.action}”`),
-    ...(e.adaptations ? [el('ul', { class: 'mg-exp-adapt' }, ...e.adaptations.map((x) => el('li', {}, el('strong', {}, `${x.name}: `), x.action)))] : []),
-    ...(e.anchor.text ? [el('p', { class: 'mg-exp-line' }, ...(e.anchor.verified ? [el('b', {}, 'When: '), `${e.anchor.text.charAt(0).toUpperCase()}${e.anchor.text.slice(1)}.`] : [el('b', {}, `${g.anchorOptions}: `), `${e.anchor.text}.`]))] : []),
-    el('p', { class: 'mg-exp-line' }, el('b', {}, 'Ownership: '), e.ownership),
-    ...(e.support ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'Help: '), e.support)] : []));
-  const parts = el('section', { class: 'mg-part' },
-    sectionHead(g, 'parts'),
-    ...(g.experiments.length ? [
-      el('p', { class: 'mg-exps-head' }, el('span', { class: 'mg-label' }, g.experimentsLabel), ` ${g.starterNote ?? g.experimentsNote}`),
-      el('ul', { class: `mg-exps${g.experiments.length > 1 ? ' mg-exps--two' : ''}` }, ...g.experiments.map(experiment)),
-    ] : []),
+    el('div', { class: 'mg-head-row' },
+      el('div', {},
+        el('p', { class: 'mg-kicker' }, `${monthLabel} · ${g.familyName}`),
+        el('h2', { class: 'mg-title' }, g.focusPage.title)),
+      el('p', { class: 'mg-legend' }, ...everyone.map((id) => chip(g, id)))),
+    el('p', { class: 'mg-sub' }, g.focusPage.monthPurpose));
+  const focusBox = el('section', { class: 'mg-focus' },
+    el('p', { class: 'mg-label' }, 'Our shared focus'),
+    el('p', { class: 'mg-focus-title' }, focus?.title ?? ''),
+    ...(focus?.opportunity ? [el('p', { class: 'mg-focus-opp' }, focus.opportunity)] : []),
+    ...(focus?.because ? [el('p', { class: 'mg-focus-because' }, `From your answers: ${focus.because}.`)] : []));
+
+  const experiment = (e: MeetingGuide['experiments'][number]) => {
+    const card = el('li', { class: 'mg-exp' },
+      el('p', { class: 'mg-exp-who' }, ...(e.memberIds.length ? e.memberIds.map((id) => chip(g, id, false)) : everyone.map((id) => chip(g, id, false))), el('strong', {}, e.who)),
+      el('p', { class: 'mg-exp-title' }, e.title),
+      ...(e.wish ? [el('p', { class: 'mg-exp-why' }, e.wish)] : e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mg-exp-why' }, g.considerLabel)] : []),
+      el('p', { class: 'mg-exp-action' }, e.action),
+      ...(e.adaptations ? [el('ul', { class: 'mg-exp-adapt' }, ...e.adaptations.map((x) => el('li', {}, chip(g, x.memberId), el('span', {}, x.action))))] : []),
+      ...(e.anchor.text ? [el('p', { class: 'mg-exp-line' }, ...(e.anchor.verified ? [el('b', {}, 'When: '), `${e.anchor.text.charAt(0).toUpperCase()}${e.anchor.text.slice(1)}.`] : [el('b', {}, `${g.anchorOptions}: `), `${e.anchor.text}.`]))] : []),
+      el('p', { class: 'mg-exp-line' }, el('b', {}, 'Ownership: '), e.ownership),
+      ...(e.support ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'Help: '), e.support)] : []));
+    return card;
+  };
+  const habits = el('section', { class: 'mg-part' },
+    el('h3', {}, 'Small habits worth trying'),
+    el('p', { class: 'mg-note' }, g.starterNote ?? g.experimentsNote),
+    ...(g.experiments.length ? [el('ul', { class: `mg-exps${g.experiments.length > 1 ? ' mg-exps--two' : ''}` }, ...g.experiments.map(experiment))] : []),
     ...(g.partsDiscover ? [el('p', { class: 'mg-discover' }, g.partsDiscover)] : []),
-    ...(g.recognized.length ? [list(g.recognized, 'mg-list mg-recognized')] : []),
-    ...(g.grownUps.length ? [list(g.grownUps, 'mg-list mg-grownups')] : []));
-  const practice = el('section', { class: 'mg-part' },
-    sectionHead(g, 'practice'),
-    ...(g.practice.length ? [list(g.practice)] : []),
-    el('p', { class: 'mg-note mg-checkin' }, g.checkIn));
-  return { head, focusPart, talk, parts, practice };
+    ...(g.recognized.length || g.grownUps.length ? [list([...g.recognized, ...g.grownUps], 'mg-list mg-small')] : []));
+
+  const words = el('section', { class: 'mg-part' },
+    el('h3', {}, 'Our Words of the Week'),
+    el('ol', { class: 'mg-words' }, ...g.focusPage.words.map((w, i) => el('li', {},
+      el('span', { class: 'mg-week' }, `Week ${i + 1}`), el('strong', {}, w.word), el('span', {}, w.question)))),
+    el('p', { class: 'mg-note' }, g.focusPage.wordsNote));
+  const bring = el('section', { class: 'mg-bring' },
+    el('p', {}, el('strong', {}, 'Bring it to your Family Meeting: '), g.focusPage.bringIt.join(' · '), '.'));
+  return { head, focusBox, habits, words, bring };
 }
 
 function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front' | 'back', end: boolean): HTMLElement {
-  // Fixed tiers by number of children instead of shrinking type: 5–6 tighter, 7+ in three columns.
+  // Fixed tiers by group size instead of shrinking type: 5–6 children in a shared habit tighter, 7+ in three columns.
   const dense = kids >= 7 ? ' mg-dense mg-xdense' : kids >= 5 ? ' mg-dense' : '';
   const s = el('article', { class: `mg-sheet${dense}` }, ...children, el('p', { class: 'mg-foot' }, foot));
   s.dataset.planSheet = side;
@@ -88,21 +94,20 @@ function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front
 
 /**
  * One Letter page when everything fits at the normal type size; two only when the family's content needs them
- * (split between Let's Talk and Everyone's Part). Measured off-screen at the sheet's real size, so screen and print agree.
+ * (the habits on page 1, the words and meeting on page 2). Measured off-screen at the sheet's real size.
  */
 function sheets(g: MeetingGuide, monthLabel: string, measure: HTMLElement): HTMLElement[] {
-  // Density by the longest list on the page: a shared routine's age versions.
   const n = Math.max(0, ...g.experiments.map((e) => e.adaptations?.length ?? 0));
   const b = blocks(g, monthLabel);
-  const one = sheet(n, [b.head, b.focusPart, b.talk, b.parts, b.practice], `${g.familyName} · Organized Family Club`, 'front', true);
+  const one = sheet(n, [b.head, b.focusBox, b.habits, b.words, b.bring], `${g.familyName} · Organized Family Club`, 'front', true);
   measure.replaceChildren(one);
   const fits = one.scrollHeight <= one.clientHeight + 1;
   measure.replaceChildren();
   if (fits) return [one];
   const c = blocks(g, monthLabel);
   return [
-    sheet(n, [c.head, c.focusPart, c.talk], 'Everyone’s Part and Let’s Practice are on the back →', 'front', false),
-    sheet(n, [c.parts, c.practice], `${g.familyName} · Organized Family Club`, 'back', true),
+    sheet(n, [c.head, c.focusBox, c.habits], 'Our Words of the Week are on the back →', 'front', false),
+    sheet(n, [c.words, c.bring], `${g.familyName} · Organized Family Club`, 'back', true),
   ];
 }
 
@@ -187,19 +192,49 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
         el('p', { class: 'mg-ed-name' }, el('strong', {}, p.name), p.age !== null ? ` · ${p.age}` : ''),
         el('label', { class: 'mg-ed-field' }, 'Ideas for their age', sel));
     });
-    const exps = g.experiments.map((e) => toggle({ key: e.key, text: `${e.who}: ${e.title}` }));
+    // Each suggestion: Keep it (fits our family), Change it (her words), Skip it (off the printable). None is a commitment.
+    const exps = g.suggested.map((e) => {
+      const skipped = state.hidden.includes(e.key);
+      const kept = (state.kept ?? []).includes(e.key);
+      const mine = state.edits?.[e.key] ?? {};
+      const btn = (label: string, pressed: boolean, on: () => void) => {
+        const b = el('button', { type: 'button', class: 'mg-ed-choice-btn', disabled: locked }, label);
+        b.setAttribute('aria-pressed', String(pressed));
+        b.addEventListener('click', on);
+        return b;
+      };
+      const field = (label: string, key: 'title' | 'action' | 'anchor', value: string) => {
+        const t = el('textarea', { maxLength: MAX_EDIT, value: mine[key] ?? value, rows: key === 'action' ? 2 : 1, disabled: locked || skipped });
+        t.addEventListener('change', () => update((s) => {
+          const v = t.value.trim();
+          const cur = { ...(s.edits?.[e.key] ?? {}) };
+          if (v && v !== value) cur[key] = v; else delete cur[key];
+          s.edits = { ...(s.edits ?? {}), [e.key]: cur };
+        }));
+        return el('label', { class: 'mg-ed-field' }, label, t);
+      };
+      const box = el('div', { class: `mg-ed-exp${skipped ? ' is-skipped' : ''}` },
+        el('p', { class: 'mg-ed-name' }, el('strong', {}, e.who), ` · ${mine.title ?? e.title}`),
+        el('div', { class: 'mg-ed-choices', role: 'group' },
+          btn('Keep it', kept && !skipped, () => update((s) => { s.hidden = s.hidden.filter((k) => k !== e.key); s.kept = [...new Set([...(s.kept ?? []), e.key])]; })),
+          btn('Change it', Boolean(Object.keys(mine).length) && !skipped, () => { box.querySelector<HTMLElement>('.mg-ed-change')!.hidden = false; box.querySelector('textarea')?.focus(); }),
+          btn('Skip it', skipped, () => update((s) => { s.hidden = skipped ? s.hidden.filter((k) => k !== e.key) : [...new Set([...s.hidden, e.key])]; s.kept = (s.kept ?? []).filter((k) => k !== e.key); }))),
+        (() => {
+          const c = el('div', { class: 'mg-ed-change' }, field('Title', 'title', e.title), field('What to try', 'action', e.action), field('When', 'anchor', e.anchor.text));
+          c.hidden = !Object.keys(mine).length;
+          return c;
+        })());
+      return box;
+    });
     const familyLink = family?.source === 'account'
-      ? el('p', { class: 'mg-ed-note' }, 'Names, ages or answers wrong? ', el('a', { href: routes.clubFamily }, 'Update your family page'), ' and your companion updates.')
+      ? el('p', { class: 'mg-ed-note' }, 'Names, ages or answers wrong? ', el('a', { href: routes.clubFamily }, 'Update your family page'), ' and your Family Focus updates.')
       : el('p', { class: 'mg-ed-note' }, 'Names, ages and answers come from the family profile.');
-    const reset = el('button', { type: 'button', class: 'mg-ed-reset', disabled: locked }, 'Show every idea again');
-    reset.addEventListener('click', () => update((s) => { s.hidden = []; s.people = {}; }));
+    const reset = el('button', { type: 'button', class: 'mg-ed-reset', disabled: locked }, 'Start over with the original suggestions');
+    reset.addEventListener('click', () => update((s) => { s.hidden = []; s.people = {}; s.edits = {}; s.kept = []; }));
     body.replaceChildren(
-      el('p', { class: 'mg-ed-note' }, 'Untick anything that doesn’t fit your family; it comes off the page.'),
-      el('section', {}, el('h3', {}, 'Our Focus'), ...g.focus.map(toggle)),
-      el('section', {}, el('h3', {}, 'Let’s Talk'), ...g.talk.map(toggle)),
-      el('section', {}, el('h3', {}, 'Everyone’s Part'), familyLink, ...exps, ...g.recognized.map(toggle), ...g.grownUps.map(toggle)),
+      el('p', { class: 'mg-ed-note' }, 'These are suggestions. Keep what fits, change the wording or timing, or skip it: skipped ideas come off the printed page.'),
+      el('section', {}, el('h3', {}, 'Small habits worth trying'), familyLink, ...exps, ...g.recognized.map(toggle), ...g.grownUps.map(toggle)),
       el('section', {}, el('h3', {}, 'Plan for each child’s age'), ...kids),
-      el('section', {}, el('h3', {}, 'Let’s Practice'), ...g.practice.map(toggle)),
       reset);
   };
   dialog.querySelector('[data-mg-close]')?.addEventListener('click', () => dialog.close());

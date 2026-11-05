@@ -263,7 +263,7 @@ scenarios.artwork = async (browser) => {
 
 /**
  * The first month, personalized for a real-looking family (not the Rivera sample): a mother holding the account, her
- * partner, a grandparent at home and three children (12, 8 and 4). Her January (Our Family Meeting Companion) and her
+ * partner, a grandparent at home and three children (12, 8 and 4). Her January (Our Family Focus) and her
  * Family Vision print must show her family, correctly, on screen and in the owner's print PDFs.
  */
 scenarios.firstMonth = async (browser) => {
@@ -289,8 +289,8 @@ scenarios.firstMonth = async (browser) => {
   check('January (her view): every child by first name', KIDS.every((n) => sheet.includes(n)), sheet.replace(/\s+/g, ' ').slice(0, 300));
   check('January (her view): no sample family, no assumed Mom/Dad', !SAMPLE.test(sheet) && !/\b(Mom|Dad)\b/.test(sheet), (sheet.match(SAMPLE) ?? sheet.match(/\b(Mom|Dad)\b/) ?? [''])[0]);
   // She answered no profile questions: nothing is invented for the children; January's meeting habit is the start.
-  check('January (her view): no answers, so no invented needs: the meeting habit first, one idea to consider, the others asked, nothing assigned', /Starting our Family Meetings/.test(sheet) && /Something to consider/.test(sheet) && /Ask Emeka and Nia /.test(sheet) && /not assignments/.test(sheet) && !/Led by|add your own plans|Our habit experiment/i.test(sheet), sheet.replace(/\s+/g, ' ').slice(0, 600));
-  check('January (her view): the four parts of the Family Meeting', ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'].every((t) => sheet.includes(t)));
+  check('January (her view): no answers, so no invented needs: the meeting habit first, one idea to consider, the others asked, nothing assigned', /Starting our Family Meeting habit/i.test(sheet) && /Something to consider/i.test(sheet) && /Ask Emeka and Nia /.test(sheet) && /not assignments/.test(sheet) && !/Led by|add your own plans|Our habit experiment/i.test(sheet), sheet.replace(/\s+/g, ' ').slice(0, 600));
+  check('January (her view): the Family Focus, not the four meeting parts', ['Our Family Focus', 'Our shared focus', 'Small habits worth trying', 'Our Words of the Week', 'Notice', 'Choose', 'Practice', 'Grow'].every((t) => sheet.toLowerCase().includes(t.toLowerCase())) && !/Let’s Talk|Let’s Practice/.test(sheet));
   check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
   check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));
   await page.context().close();
@@ -348,7 +348,7 @@ scenarios.admin = async (browser) => {
   const row = page.locator('tr', { hasText: 'ana@example.com' });
   check('one row for her package', (await row.count()) === 1);
   const rowText = (await row.innerText()).replace(/\s+/g, ' ');
-  check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Meeting Companion/.test(rowText), rowText.slice(0, 200));
+  check('the row shows both items', /Family Vision print · The Rivera Family · Courage/.test(rowText) && /January 2027 · Our Family Focus/.test(rowText), rowText.slice(0, 200));
   check('and why it waits (nothing confirmed for her)', rowText.includes('Waiting for her to confirm her first resource') && rowText.includes('not confirmed yet') && !/counts as confirmed/.test(rowText), rowText.slice(0, 260));
   check('the package lists the Family Meeting guide insert', /Family Meeting guide · standard insert/.test(rowText), rowText.slice(0, 300));
   await page.fill('input[type=month]', '2027-01');
@@ -403,11 +403,11 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   await mv.waitForSelector('text=Mark PDF ready');
   await mv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
   const cards = await mv.locator('.club-plan').innerText();
-  check('January print view: the real tool, prepared with her children’s names', /Our Family Meeting Companion/i.test(cards) && /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
+  check('January print view: the real tool, prepared with her children’s names', /Our Family Focus/i.test(cards) && /Sofia/.test(cards) && /Mateo/.test(cards), cards.slice(0, 160).replace(/\s+/g, ' '));
   check('January print view: no member chrome (Club nav, Welcome Kit panel)', !(await mv.isVisible('[data-club-nav]')) && !(await mv.isVisible('[data-welcome-kit-confirm]')));
   const janPages = await printPdf(mv, 'admin-january-tool');
   const janText = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/admin-january-tool.pdf`, '-']).toString();
-  check('January PDF: her Family Meeting companion only (1–2 Letter pages, no admin bar, no site chrome)', (janPages === 1 || janPages === 2) && /Our Family Meeting Companion/i.test(janText) && /Sofia/.test(janText) && !/Fulfillment ·|Mark PDF ready|Club Home|MONTHLY TOOL/i.test(janText), `${janPages} pages · ${janText.replace(/\s+/g, ' ').slice(0, 160)}`);
+  check('January PDF: her Family Focus only (1–2 Letter pages, no admin bar, no site chrome)', (janPages === 1 || janPages === 2) && /Our Family Focus/i.test(janText) && /Sofia/.test(janText) && !/Fulfillment ·|Mark PDF ready|Club Home|MONTHLY TOOL/i.test(janText), `${janPages} pages · ${janText.replace(/\s+/g, ' ').slice(0, 160)}`);
   await shot(mv, 'admin-january-print-view');
   await mv.click('text=Mark PDF ready');
   await mv.waitForSelector('text=PDF marked ready');
@@ -426,7 +426,7 @@ print('size' if a.size != b.size else ImageChops.difference(a, b).getbbox())`]).
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('text=Download approved kits')]);
   const csv = execFileSync('cat', [await download.path()]).toString().trim().split('\n');
   check('CSV: one row for the package', csv.length === 2, `${csv.length - 1} row(s)`);
-  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ Family Meeting guide \+ 2027-01 Our Family Meeting Companion/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
+  check('CSV: names both items and her address', /Family Vision print \(Courage\) \+ Family Meeting guide \+ 2027-01 Our Family Focus/.test(csv[1]) && /14 Oak St/.test(csv[1]), csv[1]);
   for (const st of ['printed', 'mailed']) {
     await page.locator('tr', { hasText: 'ana@example.com' }).locator(`button:has-text("${st}")`).first().click();
     await page.waitForTimeout(700);
@@ -524,7 +524,7 @@ async function journey(browser, label, vp) {
   check('Welcome Kit: what she gets, in one sentence', /Three printed resources, made for your family and mailed together to your door\./.test(kit), kit.replace(/\s+/g, ' ').slice(0, 200));
   const statuses = () => page.evaluate(() => [...document.querySelectorAll('[data-kit-item]')].map((li) => `${li.dataset.kitItem}:${li.dataset.status}`).join(','));
   check('Welcome Kit: print needs review, guide ready, January needs review', await statuses() === 'print:needs_review,guide:ready,first:needs_review', await statuses());
-  check('Welcome Kit: January is the Family Meeting guide', /January Resource/.test(kit) && /Our Family Meeting Companion/.test(kit), kit.replace(/\s+/g, ' ').slice(0, 400));
+  check('Welcome Kit: January is the Family Meeting guide', /January Resource/.test(kit) && /Our Family Focus/.test(kit), kit.replace(/\s+/g, ' ').slice(0, 400));
   check('Welcome Kit: “Prepare My Welcome Kit” waits until everything is ready', await page.isDisabled('[data-kit-prepare]'));
   check('Welcome Kit: a checklist, numbered 1–3, “1 of 3 ready”, the print tagged “Start here”', (await page.locator('.wk-item-num').allInnerTexts()).join() === '1,2,3' && /1 of 3 ready/.test(kit) && await page.isVisible('[data-kit-item="print"][data-start] .wk-item-start'));
   check('Welcome Kit: her address to confirm', /Mailing to/i.test(kit) && /14 Oak St/.test(kit));
@@ -688,7 +688,7 @@ async function journey(browser, label, vp) {
     await pv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready');
     await pv.waitForTimeout(800);
     const printed = (await pv.locator('[data-meeting-guide] [data-plan-sheet]').allInnerTexts()).join(' ');
-    check('the owner’s print view shows her saved change (what prints is what she approved)', !printed.includes(removed[MARK]) && !printed.includes(removed[`${MARK} 2`]) && /Our Focus/.test(printed), `${removed[MARK]} / ${removed[`${MARK} 2`]}`);
+    check('the owner’s print view shows her saved change (what prints is what she approved)', !printed.includes(removed[MARK]) && !printed.includes(removed[`${MARK} 2`]) && /Our Family Focus/i.test(printed), `${removed[MARK]} / ${removed[`${MARK} 2`]}`);
     await pv.context().close();
   }
   check('confirmed: both items prepared together (kit needs only its PDFs)', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
@@ -710,7 +710,7 @@ async function journey(browser, label, vp) {
     && await page.isVisible('.ofc-tracker [aria-current="step"]:has-text("Printing")') && await page.isVisible('.ofc-package') && !/Your next step/i.test(club), club.replace(/\s+/g, ' ').slice(0, 300));
   check('Club Home this week: hold your first family meeting, with the meeting and the guide', /Hold your first family meeting\./.test(club)
     && await page.isVisible('[data-home-week] a[href="/app/club/january"]') && await page.isVisible('[data-home-week] a[href="/club/family-meeting-guide"]'));
-  check('Club Home: her January once, Our Family Meeting Companion, made for her family', await page.isVisible('[data-home-current] a.ofc-member-cta[href="/app/club/january"]') && /Our Family Meeting Companion/.test(await page.locator('[data-home-current]').innerText()) && /Made for Ana, Sofia and Mateo/.test(club));
+  check('Club Home: her January once, Our Family Focus, made for her family', await page.isVisible('[data-home-current] a.ofc-member-cta[href="/app/club/january"]') && /Our Family Focus/.test(await page.locator('[data-home-current]').innerText()) && /Made for Ana, Sofia and Mateo/.test(club));
   check('Club Home: her family name, members with ages and an edit link', /The Rivera Family/.test(club) && /Sofia · 8/.test(club) && /Mateo · 6/.test(club) && await page.isVisible('a[href="/club/family"]:has-text("Edit my family")'), club.replace(/\s+/g, ' ').slice(0, 200));
   const strip = await page.locator('[data-home-year]').innerText();
   check('Club Home: her year in one strip, January hers, February opens Feb 1', await page.isVisible('[data-home-year] li[data-month="january"][data-held] a[href="/app/club/january"]') && /Opens Feb 1/.test(await page.locator('[data-home-year] li[data-month="february"]').innerText()) && (await page.locator('[data-home-year] li').count()) === 12, strip.replace(/\s+/g, ' ').slice(0, 300));
@@ -1031,13 +1031,13 @@ async function editPlan(page, month, marker) {
     return 'picked another grown-up helper';
   }
   if (month === 'january') {
-    // The companion's edit: take an idea off (its text is what the checks look for, now absent).
+    // Her review: skip a suggestion (its title is what the checks look for, now absent).
     await page.click('[data-cpd-edit]');
-    const box = page.locator('dialog[open] label:has(input[type="checkbox"]:checked)').first();
-    removed[marker] = (await box.innerText()).trim();
-    await box.locator('input').click();
+    const box = page.locator('dialog[open] .mg-ed-exp:not(.is-skipped)').last();
+    removed[marker] = (await box.locator('.mg-ed-name').innerText()).split(' · ').slice(1).join(' · ').trim();
+    await box.getByRole('button', { name: 'Skip it' }).click();
     await page.keyboard.press('Escape');
-    return 'took an idea off in its editor';
+    return 'skipped a suggestion in her review';
   }
   const target = page.locator('.club-plan [data-plan-sheet] [contenteditable="true"]').first();
   await target.click();
