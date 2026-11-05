@@ -1,42 +1,94 @@
 ---
 /**
- * A month's Family Focus on phones and tablets (below 1100px): the shared ClubPlanScreen with the guide's
- * own sections. Reads the guide only through the printable's controller (`[data-meeting-guide]`'s `clubPlan`,
- * src/lib/club/meeting-guide/printable.ts); every row opens the same editor as the desktop's Make changes.
+ * The Monthly Family Focus on phones and tablets (below 1100px): a calm reference Mom comes back to all month, on the
+ * shared ClubPlanScreen (approval, action bar, print). It is a presentation of the SAME saved resource as the
+ * printable: everything comes from the printable's controller (`[data-meeting-guide]`'s `clubPlan.guide()`,
+ * src/lib/club/meeting-guide/printable.ts), so her kept, changed and skipped ideas show here exactly as they print,
+ * and nothing is generated or saved by viewing. Editing is one clear action ("Edit Family Focus") that opens the same
+ * Keep / Change / Skip editor as the desktop.
+ *
+ * Each habit card has an empty, hidden progress slot (`data-mgm-progress`) where a future optional check-in can go
+ * (docs/club/HABITS.md → Optional weekly check-ins). Nothing here creates a commitment.
  */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import { routes } from '../../routes';
 /** approvalKey: the same key the page gives the desktop rail, so approval agrees on both screens. */
 interface Props { deadline: string; kicker: string; approvalKey: string }
 const { deadline, kicker, approvalKey } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front']} previewNote="Ready to print">
+<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front']} previewNote="Ready to print on Letter paper" hero={false}>
   <slot name="title" slot="title" />
-  <section class="cp-section" aria-labelledby="mgm-focus-title" data-mgm-approval={approvalKey}>
-    <h2 id="mgm-focus-title">Our shared focus</h2>
-    <ul class="mgm-focus-list" data-mgm-focus></ul>
-  </section>
-  <section class="cp-section" aria-labelledby="mgm-people-title">
-    <h2 id="mgm-people-title">Small habits worth trying</h2>
-    <p class="cp-intro">Suggestions to talk over and try, not assignments. Keep, change or skip each one.</p>
-    <ul class="cp-group" data-mgm-people></ul>
-  </section>
-  <section class="cp-section" aria-labelledby="mgm-words-title">
-    <h2 id="mgm-words-title">Our Words of the Week</h2>
-    <ul class="cp-group" data-mgm-words></ul>
-  </section>
+  <div class="mgm" data-mgm data-mgm-approval={approvalKey}>
+    <section class="mgm-focus" aria-labelledby="mgm-focus-title">
+      <p class="mgm-label">Our shared focus</p>
+      <h2 id="mgm-focus-title" class="mgm-focus-title" data-mgm-focus-title></h2>
+      <p class="mgm-focus-text" data-mgm-focus-text></p>
+    </section>
+    <p class="mgm-edit-row"><button type="button" class="mgm-edit" data-mgm-edit>Edit Family Focus</button></p>
+    <section class="mgm-section" aria-labelledby="mgm-habits-title">
+      <h2 id="mgm-habits-title">Small habits worth trying</h2>
+      <p class="mgm-intro" data-mgm-habits-note></p>
+      <ul class="mgm-cards" data-mgm-people></ul>
+      <ul class="mgm-notes" data-mgm-notes></ul>
+    </section>
+    <section class="mgm-section" aria-labelledby="mgm-words-title">
+      <h2 id="mgm-words-title">Our Words of the Week</h2>
+      <p class="mgm-intro" data-mgm-words-note></p>
+      <ol class="mgm-words" data-mgm-words></ol>
+    </section>
+    <section class="mgm-section mgm-meeting" aria-labelledby="mgm-meeting-title">
+      <h2 id="mgm-meeting-title">At your Family Meeting</h2>
+      <p class="mgm-intro" data-mgm-bring></p>
+      <a class="mgm-guide-link" href={routes.clubMeetingGuide}>Open the Family Meeting guide <span aria-hidden="true">→</span></a>
+    </section>
+  </div>
 </ClubPlanScreen>
 <style is:global>
 @media screen and (max-width:1099px){
-.mgm-focus-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.mgm-focus{display:grid;gap:4px;padding:14px 16px;background:var(--cp-wash)}
-.mgm-focus strong{font:400 1.2rem/1.3 var(--font-serif)}
-.mgm-focus span{font-size:.9rem;color:var(--cp-soft)}
+.mgm{--mgm-ink:var(--color-warm-ink);--mgm-soft:var(--color-warm-soft);display:grid;gap:26px;margin:0 0 26px;font-size:1rem;line-height:1.5}
+.mgm-label{font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mgm-accent,#3D6671);margin:0}
+.mgm-focus{padding:18px 18px 16px;background:var(--mgm-wash,#DBE5E6);border-radius:8px;display:grid;gap:6px}
+.mgm-focus-title{font:400 clamp(26px,7.4vw,32px)/1.15 var(--font-serif);margin:0;overflow-wrap:anywhere}
+.mgm-focus-text{margin:0;font-size:1.02rem}
+.mgm-edit-row{margin:-12px 0 0}
+.mgm-edit{min-height:44px;padding:0 16px;border:1px solid var(--mgm-ink);border-radius:3px;background:#fff;font-weight:600;font-size:.95rem;cursor:pointer}
+.mgm-edit:disabled{opacity:.5;cursor:default}
+.mgm-section h2{font:400 clamp(23px,6.2vw,27px)/1.15 var(--font-serif);margin:0 0 4px}
+.mgm-intro{margin:0 0 12px;font-size:.92rem;color:var(--mgm-soft)}
+.mgm-cards,.mgm-notes,.mgm-words,.mgm-parts{list-style:none;margin:0;padding:0}
+.mgm-cards{display:grid;gap:12px}
+.mgm-card{padding:16px;border:1px solid var(--color-warm-rule);border-radius:8px;background:#fff;display:grid;gap:8px}
+.mgm-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-weight:600;overflow-wrap:anywhere}
+.mgm-dot{display:inline-block;width:14px;height:14px;border-radius:50%;flex:none;box-shadow:0 0 0 1px #0000001a}
+.mgm-card-title{font:400 1.3rem/1.2 var(--font-serif);margin:0}
+.mgm-consider{margin:0;font-size:.85rem;color:var(--mgm-soft)}
+.mgm-what{margin:0;font-weight:600;font-size:1.05rem}
+.mgm-line{margin:0;font-size:.97rem}
+.mgm-line b{color:var(--mgm-accent,#3D6671);font-weight:700}
+.mgm-parts{display:grid;gap:6px;padding:10px 12px;background:#FBF7F1;border-radius:6px}
+.mgm-parts li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:baseline;font-size:.97rem}
+.mgm-parts li .mgm-dot{transform:translateY(2px)}
+.mgm-parts strong{margin-right:4px}
+.mgm-progress[hidden]{display:none}
+.mgm-sheet-actions{display:grid;gap:8px;margin-top:16px}
+.mgm-notes{display:grid;gap:6px;margin-top:12px;font-size:.92rem;color:var(--mgm-soft)}
+.mgm-words{display:grid;gap:8px}
+.mgm-word{padding:12px 14px;border-radius:8px;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:12px;align-items:baseline}
+.mgm-word-week{grid-row:span 2;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mgm-accent,#3D6671);min-width:4.2em}
+.mgm-word strong{font:400 1.35rem/1.2 var(--font-serif)}
+.mgm-word span:last-child{font-size:.95rem}
+.mgm-word.is-now{box-shadow:inset 0 0 0 2px var(--mgm-accent,#3D6671)}
+.mgm-now{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-left:8px;color:var(--mgm-accent,#3D6671)}
+.mgm-guide-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;color:var(--mgm-ink);text-decoration:underline;text-underline-offset:4px}
 }
 </style>
 
 <script>
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen } from '../../lib/club/plan/screen';
+import { planNow } from '../../lib/club/plan/status';
+import { anchorLine } from '../../lib/club/meeting-guide/anchor';
+import { monthTints } from '../../lib/club/month-tints';
 import type { GuidePlan } from '../../lib/club/meeting-guide/printable';
 import type { GuideState } from '../../lib/club/meeting-guide/state';
 
@@ -44,25 +96,71 @@ const root = document.querySelector<HTMLElement>('.club-plan:has([data-meeting-g
 const host = root?.querySelector<HTMLElement & { clubPlan?: GuidePlan }>('[data-meeting-guide]');
 if (root && host) {
   const q = (sel: string) => root.querySelector<HTMLElement>(sel)!;
-  const row = (title: string, detail: string, locked: boolean) => {
-    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked },
-      el('span', { class: 'cp-row-text' }, el('strong', {}, title), ...(detail ? [el('span', {}, detail)] : [])),
-      el('span', { class: 'cp-chev' }));
-    b.setAttribute('aria-label', `${title}${detail ? `: ${detail}` : ''}. Change`);
-    b.addEventListener('click', () => host.clubPlan?.openEditor());
-    return el('li', {}, b);
-  };
-  mountPlanScreen<GuideState>({
-    root, host, approvalKey: q('[data-mgm-approval]').dataset.mgmApproval!,
+  const view = q('[data-mgm]');
+  const screenEl = root.querySelector<HTMLElement>('[data-plan-screen]');
+  const screen = mountPlanScreen<GuideState>({
+    root, host, approvalKey: view.dataset.mgmApproval!,
     render: (_screen, _state, locked) => {
       const g = host.clubPlan?.guide();
       if (!g) return;
-      q('[data-mgm-focus]').replaceChildren(...g.focus.map((f) => el('li', { class: 'mgm-focus' }, el('strong', {}, f.title), f.opportunity ? el('span', {}, f.opportunity) : '')));
-      q('[data-mgm-people]').replaceChildren(
-        ...g.experiments.map((e) => row(`${e.who} · ${e.title}`, `${e.action} ${e.ownership}`, locked)),
-        ...g.recognized.map((t) => row(t.text, '', locked)));
-      q('[data-mgm-words]').replaceChildren(...g.focusPage.words.map((w, i) => el('li', { class: 'mgm-focus' }, el('strong', {}, `Week ${i + 1}: ${w.word}`), el('span', {}, w.question))));
+      const t = monthTints(g.plan.month);
+      view.style.setProperty('--mgm-wash', t.wash);
+      view.style.setProperty('--mgm-accent', t.accent);
+      const dot = (id: string) => { const c = g.colors[id]; const d = el('span', { class: 'mgm-dot', 'aria-hidden': 'true' }); if (c) d.style.background = c.hex; return d; };
+      const focus = g.focus[0];
+      q('[data-mgm-focus-title]').textContent = focus?.title ?? '';
+      q('[data-mgm-focus-text]').textContent = focus?.opportunity ?? '';
+      q('[data-mgm-habits-note]').textContent = g.starterNote ?? g.experimentsNote;
+      // The same cards as print (what, when, ownership; a support only where it matters), one per row.
+      q('[data-mgm-people]').replaceChildren(...g.experiments.map((e) => {
+        const ids = e.memberIds.length ? e.memberIds : Object.keys(g.colors);
+        const progress = el('div', { class: 'mgm-progress' });
+        progress.dataset.mgmProgress = e.key;
+        progress.hidden = true;
+        return el('li', { class: 'mgm-card' },
+          el('p', { class: 'mgm-who' }, ...ids.map(dot), el('span', {}, e.who)),
+          el('h3', { class: 'mgm-card-title' }, e.title),
+          ...(e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mgm-consider' }, g.considerLabel)] : []),
+          el('p', { class: 'mgm-what' }, e.action),
+          ...(e.adaptations ? [el('ul', { class: 'mgm-parts' }, ...e.adaptations.map((a) => el('li', {}, dot(a.memberId), el('span', {}, el('strong', {}, a.name), a.action))))] : []),
+          ...(e.anchor.text ? [el('p', { class: 'mgm-line' }, el('b', {}, 'When: '), anchorLine(e.anchor))] : []),
+          el('p', { class: 'mgm-line' }, el('b', {}, 'Ownership: '), e.ownership),
+          ...(e.support && (e.adaptations || e.principle === 'environment') ? [el('p', { class: 'mgm-line' }, el('b', {}, 'Help: '), e.support)] : []),
+          progress);
+      }));
+      q('[data-mgm-notes]').replaceChildren(...[...g.recognized, ...g.grownUps].map((x) => el('li', {}, x.text)),
+        ...(g.partsDiscover ? [el('li', {}, g.partsDiscover)] : []));
+      // All four words, any order the family likes; this week's is marked only inside the month.
+      const now = planNow();
+      const inMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}` === g.plan.month;
+      const thisWeek = inMonth ? Math.min(3, Math.floor((now.getDate() - 1) / 7)) : -1;
+      q('[data-mgm-words-note]').textContent = g.focusPage.wordsNote;
+      q('[data-mgm-words]').replaceChildren(...g.focusPage.words.map((w, i) => {
+        const li = el('li', { class: `mgm-word${i === thisWeek ? ' is-now' : ''}` },
+          el('span', { class: 'mgm-word-week' }, `Week ${i + 1}`),
+          el('strong', {}, w.word, ...(i === thisWeek ? [el('span', { class: 'mgm-now' }, 'This week')] : [])),
+          el('span', {}, w.question));
+        li.style.background = t.weeks[i];
+        return li;
+      }));
+      q('[data-mgm-bring]').textContent = `${g.focusPage.bringIt.join('. ')}.`;
+      (q('[data-mgm-edit]') as HTMLButtonElement).disabled = locked;
     },
+  });
+  // The permanent Family Meeting guide, with a way straight back here.
+  const guideLink = view.querySelector<HTMLAnchorElement>('.mgm-guide-link');
+  if (guideLink) guideLink.href = `${guideLink.getAttribute('href')}?back=${encodeURIComponent(location.pathname)}`;
+  // Editing is one deliberate step. After approval, say what a change means before opening the editor.
+  q('[data-mgm-edit]').addEventListener('click', () => {
+    const open = () => { screen?.closeSheet(); host.clubPlan?.openEditor(); };
+    if (!screen || screenEl?.dataset.approval !== 'approved') return open();
+    const go = el('button', { type: 'button', class: 'cp-btn cp-btn-dark' }, 'Edit anyway');
+    go.addEventListener('click', open);
+    const keep = el('button', { type: 'button', class: 'cp-btn' }, 'Keep it as approved');
+    keep.addEventListener('click', () => screen.closeSheet());
+    screen.openSheet('You’ve approved this Family Focus',
+      el('p', {}, 'If you change it, it will need your approval again before it prints. Nothing changes until you edit something.'),
+      el('div', { class: 'mgm-sheet-actions' }, go, keep));
   });
 }
 </script>

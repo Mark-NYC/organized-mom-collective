@@ -76,7 +76,7 @@ for (const sample of SAMPLES) {
       check(`${sample}: Make changes opens the editor`, await page.isVisible('dialog[open][data-mg-editor]'));
       await page.keyboard.press('Escape');
     } else {
-      check(`${sample} phone: the Family Focus sections`, await page.isVisible('[data-mgm-focus] li') && await page.isVisible('[data-mgm-people] li') && (await page.locator('[data-mgm-words] li').count()) === 4);
+      check(`${sample} phone: the Family Focus reference (focus, habit cards, four words, the meeting guide; no scaled printable, no editor open)`, await page.isVisible('[data-mgm-focus-title]') && await page.isVisible('[data-mgm-people] li') && (await page.locator('[data-mgm-words] li').count()) === 4 && await page.isVisible('.mgm-guide-link') && !(await page.isVisible('.cp-thumb--hero')) && !(await page.isVisible('dialog[open]')));
     }
     check(`${sample} ${label}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
     if (SHOTS && sample === 'rivera') await page.screenshot({ path: `${SHOTS}/guide-rivera-${label}.png` });

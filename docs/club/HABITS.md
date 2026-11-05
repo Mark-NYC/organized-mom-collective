@@ -89,8 +89,9 @@ admin work for her: skipping a check-in changes nothing.
 1. Data: a `Commitment` store per household (one small table, or the month's saved state) holding commitments and
    their check-in history; the `not-tried` answer; `checkInDue` changed from every 6–8 weeks to "after a meeting,
    optional", never nagging.
-2. UI: a "We chose this" action next to a kept idea (the only way a commitment is created), and one optional
-   check-in card per active commitment on Club Home after the week's meeting. No list to manage.
+2. UI: a "We're trying this" action on a habit card on her phone view (the only way a commitment is created), and
+   one optional check-in card per active commitment. The card goes in the hidden `data-mgm-progress` slot already
+   under each habit card (`MeetingGuideMobile.astro`), so nothing else on the page moves. No list to manage.
 3. Engine: pass stored progress into `familyContext(..., { progress })` (already supported), and make `improving`
    prefer the stage's support or a single confirmed anchor.
 

@@ -292,12 +292,47 @@ scenarios.firstMonth = async (browser) => {
   check('January (her view): no answers, so no invented needs: the meeting habit, and every child starts a small idea now, to consider, nothing assigned', /Starting our Family Meeting habit/i.test(sheet) && /Something to consider/i.test(sheet) && /Nia, Emeka and Zara/.test(sheet) && /not assignments/.test(sheet) && !/once the meeting is a habit/.test(sheet) && !/Led by|add your own plans|Our habit experiment/i.test(sheet), sheet.replace(/\s+/g, ' ').slice(0, 600));
   check('January (her view): the Family Focus, not the four meeting parts', ['Our Family Focus', 'Our shared focus', 'Small habits worth trying', 'Our Words of the Week', 'Notice', 'Choose', 'Practice', 'Grow'].every((t) => sheet.toLowerCase().includes(t.toLowerCase())) && !/Let’s Talk|Let’s Practice/.test(sheet));
   check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
+  // Her review: keep the first idea, change the second's wording, skip the grown-ups line. Saved to her account.
+  await page.click('[data-cpd-edit]');
+  const boxes = page.locator('dialog[open] .mg-ed-exp');
+  await boxes.nth(0).getByRole('button', { name: 'Keep it' }).click();
+  await boxes.nth(1).getByRole('button', { name: 'Change it' }).click();
+  const what = boxes.nth(1).locator('.mg-ed-change textarea').nth(1);
+  await what.fill('Each of us adds our own plans on Sunday night.');
+  await what.dispatchEvent('change');
+  await page.locator('dialog[open] label', { hasText: 'For the grown-ups' }).locator('input').uncheck();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(2500);
+  const SAVED = `(select md5(v.state::text) || v.updated_at::text from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${JAN}')`;
+  check('her review saved to her account (kept, changed, skipped)', /Sunday night/.test(sql(`select v.state::text from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${JAN}'`)));
   check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));
   await page.context().close();
 
   // She approves January; the kit is submitted and goes to print.
   asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
   check('both approvals in: the kit needs only its PDFs', order('welcome_vision') === 'pending:needs_pdf' && order('monthly_resource') === 'pending:needs_pdf', kitOrders());
+
+  // Later, on her phone: the calm reference shows her saved choices, not regenerated defaults; viewing it, opening the
+  // Family Meeting guide and coming back saves nothing and leaves the approved order as it is.
+  const before = sql(`select ${SAVED}`);
+  const phone = await newPage(browser, MOBILE);
+  await phone.goto(`${BASE}/app/club/january`, { waitUntil: 'networkidle' });
+  await phone.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready' && document.querySelector('[data-mgm-people] li'), null, { timeout: 15000 });
+  await phone.waitForTimeout(600);
+  let ref = await phone.locator('[data-mgm]').innerText();
+  check('phone: her saved wording, her skip, no editor open', /Sunday night/.test(ref) && !/For the grown-ups/.test(ref) && !(await phone.isVisible('dialog[open]')), ref.replace(/\s+/g, ' ').slice(0, 300));
+  check('phone: focus first, four words, a link to the Family Meeting guide', /Starting our Family Meeting habit/i.test(ref) && (await phone.locator('.mgm-word').count()) === 4 && await phone.isVisible('.mgm-guide-link'));
+  check('phone: no sideways scrolling', await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  await phone.click('.mgm-guide-link');
+  await phone.waitForSelector('[data-mg-back]:not([hidden]) a', { timeout: 10000 });
+  await phone.click('[data-mg-back] a');
+  await phone.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready' && document.querySelector('[data-mgm-people] li'), null, { timeout: 15000 });
+  await phone.waitForTimeout(1200);
+  ref = await phone.locator('[data-mgm]').innerText();
+  check('phone: back from the guide to the same Family Focus', /\/app\/club\/january/.test(phone.url()) && /Sunday night/.test(ref) && !/For the grown-ups/.test(ref), phone.url());
+  check('viewing saved nothing and the approved order is unchanged', sql(`select ${SAVED}`) === before && order('monthly_resource') === 'pending:needs_pdf', `${order('monthly_resource')}`);
+  check('phone: no script errors', phone.errors.length === 0, phone.errors.join(' | '));
+  await phone.context().close();
 
   // The owner's print views: what actually gets printed and mailed.
   const mv = await newPage(browser, DESKTOP, { auth: false });
@@ -309,6 +344,7 @@ scenarios.firstMonth = async (browser) => {
   const jan = execFileSync('pdftotext', [`${SHOTS ?? '/tmp'}/first-month-january.pdf`, '-']).toString();
   check('January PDF: one or two Letter pages, as the family’s content needs', janPages === 1 || janPages === 2, `${janPages} pages`);
   check('January PDF: every child by first name', KIDS.every((n) => jan.includes(n)), KIDS.filter((n) => !jan.includes(n)).join(','));
+  check('January PDF: exactly what she approved (her wording in, the skipped line out)', /Sunday night/.test(jan.replace(/\s+/g, ' ')) && !/For the grown-ups/.test(jan.replace(/\s+/g, ' ')), jan.replace(/\s+/g, ' ').slice(0, 300));
   check('January PDF: no sample family, no assumed Mom/Dad, no fall wording', !SAMPLE.test(jan) && !/\b(Mom|Dad)\b/.test(jan) && !/\bfall\b|Cooler weather/i.test(jan), jan.replace(/\s+/g, ' ').slice(0, 200));
   await mv.context().close();
   const pv = await newPage(browser, DESKTOP, { auth: false });
@@ -622,12 +658,13 @@ async function journey(browser, label, vp) {
     check('desktop editor: a small print deadline', /Print deadline/.test(await page.innerText('[data-cpd-status]')) && !(await page.isVisible('[data-cpd-countdown]')), await page.innerText('[data-cpd-status]'));
   } else {
     const m = await page.evaluate(() => {
-      const hero = document.querySelector('.cp-thumb--hero').getBoundingClientRect();
+      // January on a phone is its own reference view (the focus first), not a scaled printable.
+      const hero = (document.querySelector('.mgm-focus') ?? document.querySelector('.cp-thumb--hero')).getBoundingClientRect();
       const bar = document.querySelector('[data-cp-bar]').getBoundingClientRect();
       const nav = document.querySelector('nav[data-chrome]')?.getBoundingClientRect();
       return { heroW: Math.round(hero.width), heroH: Math.round(hero.height), heroTop: Math.round(hero.top), vw: innerWidth, barBottom: Math.round(bar.bottom), navTop: nav ? Math.round(nav.top) : null, primary: document.querySelector('[data-plan-primary]').textContent };
     });
-    check('mobile editor: the printable at the screen’s width, near the top', m.heroW >= m.vw - 48 && m.heroH > 300 && m.heroTop < 420, JSON.stringify(m));
+    check('mobile: the family focus at the screen’s width, near the top (no scaled PDF)', m.heroW >= m.vw - 48 && m.heroTop < 520 && !(await page.isVisible('.cp-thumb--hero')), JSON.stringify(m));
     check('mobile editor: “Approve for printing” in the action bar, above the tab bar', /approve for printing/i.test(m.primary) && (m.navTop == null || m.barBottom <= m.navTop + 1), JSON.stringify(m));
   }
   check('no sideways scrolling (first resource)', await noSideScroll(page));
