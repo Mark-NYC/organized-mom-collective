@@ -19,6 +19,8 @@ export interface SampleHousehold {
    * Family Meeting show what a filled-in profile does. Samples without one start with nothing answered.
    */
   profile?: FamilyProfile;
+  /** Opens only from its link (?sample=<id>); never listed in the sample pickers. */
+  hidden?: boolean;
 }
 
 const kid = (id: string, firstName: string, birthYear: number, birthMonth: number) => ({ id, firstName, kind: 'child' as const, role: 'child' as const, birthYear, birthMonth });
@@ -174,6 +176,27 @@ export const sampleHouseholds: SampleHousehold[] = [
         { id: 'sample-lindqvist-r1', status: 'desired', category: 'belongings', item: 'own-belongings', ownerIds: ['sample-lindqvist-nils'], helperIds: [] },
       ],
     },
+  },
+  // PREVIEW ONLY, REMOVE BEFORE MERGE: the owner's own test household (names and intake as entered), so the January
+  // companion can be reviewed for a family with limited intake at /app/club/january?sample=goering.
+  {
+    id: 'goering',
+    label: 'Preview: The Goerings',
+    shows: 'Limited intake: names and ages only',
+    hidden: true,
+    household: {
+      id: 'sample-goering',
+      displayName: 'The Goerings',
+      preferences: { pets: true },
+      profileVersion: 1,
+      members: [
+        { id: 'sample-goering-mark', firstName: 'Mark', kind: 'adult', role: 'parent', isAccountHolder: true },
+        { id: 'sample-goering-megan', firstName: 'Megan', kind: 'adult', role: 'parent' },
+        kid('sample-goering-andrew', 'Andrew', 2018, 9),
+        kid('sample-goering-philip', 'Philip', 2022, 6),
+      ],
+    },
+    profile: { setupDone: ['week'], setupCompleted: false, challenges: [], activities: [{ category: 'school', memberIds: [], days: [] }], responsibilities: [] },
   },
   {
     id: 'new',

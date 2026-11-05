@@ -68,7 +68,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
      <button type="button" className={tab==='kits'?'cproto-active':''} onClick={()=>setTab('kits')}>Kits</button>
      <button type="button" className={tab==='family'?'cproto-active':''} onClick={()=>setTab('family')}>Family</button>
      <label className="cproto-header-sample"><span className="cproto-picker-label">Preview family</span><select aria-label="Preview family" value={sample} onChange={e=>{setTab('kits');setSample(e.target.value)}}>
-      {sampleHouseholds.filter(s=>s.id!=='new').map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
+      {sampleHouseholds.filter(s=>s.id!=='new'&&!s.hidden).map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
      </select></label>
     </nav>
    </div>

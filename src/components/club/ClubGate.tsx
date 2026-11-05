@@ -106,7 +106,7 @@ function NoSignIn() {
         Member sign-in isn’t switched on in this build. Open a sample household to preview the member pages.
       </p>
       <ul className="mt-6 divide-y divide-warm-rule border-y border-warm-rule">
-        {sampleHouseholds.map((s) => (
+        {sampleHouseholds.filter((s) => !s.hidden).map((s) => (
           <li key={s.id}>
             <a className="flex flex-col gap-0.5 py-3.5 sm:flex-row sm:items-baseline sm:justify-between" href={clubHref(routes.clubDashboard, s.id)}>
               <span className="font-semibold text-warm-ink underline underline-offset-4">{s.label}</span>
