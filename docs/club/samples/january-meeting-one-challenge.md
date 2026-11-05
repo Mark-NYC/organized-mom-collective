@@ -26,19 +26,15 @@ _Little ones can point or answer with one word._
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
-
 - Ask Min, Joon and Seo which job they hear the most reminders about, then give that job a clear “when” together.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: tie each part to something that already happens, like after dinner or coming in the door.
-- Before reminding, try asking “What’s next?” and let the answer come from the kids.
+- If it gets stuck: tie each job to something that already happens every day.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
 _Personalized from: names, ages, priorities · the month’s own ideas for: growth areas_

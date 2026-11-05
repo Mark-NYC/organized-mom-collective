@@ -24,19 +24,22 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _You haven’t told us much yet, so this starts with the meeting itself._
 
+- **Everyone · A regular Family Meeting**
+  - “Hold the meeting at the same time each month.”
+  - When: When, your pick: after a weekly meal you already share or a weekend afternoon?
+  - Ownership: The kids take turns opening the meeting or choosing the snack.
+  - Help: Write the next meeting on the calendar before this one ends.
 - Ask Sky and River what to take on, once the meeting is a habit. One small part is plenty.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: hold the meeting after something you already do every week, like Sunday lunch, and write the next one on the calendar.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names · the month’s own ideas for: ages, growth areas, priorities_
+_Personalized from: names · the month’s own ideas for: ages, priorities, growth areas_

@@ -18,7 +18,7 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - Where do things pile up, and where should they live?
 - What gets in the way? One possibility: jobs might be falling to whoever notices first.
-- Ask Leo and Jade which starting point they’d try first, or what they’d try instead.
+- Ask Leo and Jade: would these help, or what would you try instead?
 
 _Little ones can point or answer with one word._
 
@@ -27,22 +27,26 @@ _Little ones can point or answer with one word._
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Mia** · 5: Before bath, put toys back in bins with picture labels. _(Do it together for a week or two, then step back.)_
-- **Leo** · 9: A weekly bedroom reset before weekend screen time. _(Ready for more independence.)_
-- **Jade** · 13: A weekly bedroom reset, any way that works, on a day picked ahead. _(Free to choose how and when.)_ · Jade already takes care of laundry. Worth noticing out loud.
+- **Leo, 9 · Things back where they live** (A home that stays picked up is your top priority. You’d like Leo to take on keeping the bedroom picked up.)
+  - “Do a weekly bedroom reset.”
+  - When: When, your pick: before weekend screen time?
+  - Ownership: Leo picks the reset day.
+- **Jade, 13 · A spot for everything** (A home that stays picked up is your top priority.)
+  - “Keep keys, chargers and gear in one spot.”
+  - When: When, your pick: coming home?
+  - Ownership: Jade picks the spot.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 - Marcus already takes care of driving and pickups. Worth noticing out loud.
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: let each child choose a part from two that fit their age.
+- If it gets stuck: let each child choose a part from two that fit their age.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, existing responsibilities, priorities_
+_Personalized from: names, ages, priorities, growth areas_

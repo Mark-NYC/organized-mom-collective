@@ -15,15 +15,15 @@ Families get two things:
    fits each time, come back to what matters and skip the rest. Nobody leads anything on it, nothing is assigned, and
    no decision is filled in.
 
-One US Letter page when it all fits at the normal type size; a second only when the family's content needs it (measured off-screen at the sheet's real size, split between Let's Talk and Everyone's Part). The single focus organizes the page:
+One US Letter page when it all fits at the normal type size; a second only when a family's content needs it. The one focus
+organizes the page; the **habit experiments** are its centerpiece. Selection is month-independent: docs/club/HABITS.md.
 
-| Part | What's on it | Limits |
-| --- | --- | --- |
-| 1 · Our Focus | **This month's focus**: one, from her priority and challenges, with what getting better could look like. Only with no answers: the month's own purpose, starting the Family Meeting habit | 1 |
-| 2 · Let's Talk | About the focus: its conversation, what gets in the way (her obstacle as a possibility, or a question with options), and one question asking the children 6+ which starting point they'd try first. How little ones join | ≤ 3 |
-| 3 · Everyone's Part | **Possible starting points, not jobs**: one per child, for the focus (her wish for that child first), in their age's version, with how much help a first try needs. The family chooses one to try first and adds another only when it's going well. What someone already does is noticed. With no wishes or answers, the children are asked instead. Grown-ups: a conversation about helping without taking over | 1 per child; every child 3+ appears (starting point, recognition or a question) |
-| 4 · Let's Practice | **Our habit experiment**: a write-in box (who, one small step, right after…) the family fills in together, with the check-in for next time. Then one thing worth trying (her obstacle's adjustment, the setup that makes a starting point easier, or January's meeting habit) and one way to keep it going without adding work | experiment + ≤ 2 |
-| (in the experiment box) | Try it until the next meeting, then: on my own, with reminders, or hard? Keep it, shrink it or swap it | 1 line |
+| Part | What's on it |
+| --- | --- |
+| 1 · Our Focus | This month's focus (one, from her answers), what getting better could look like, and her answers behind it, once |
+| 2 · Let's Talk | The focus conversation, what gets in the way (her obstacle as a possibility, or a question with options), and the children 6+ asked whether the experiments would help |
+| 3 · Everyone's Part | **One or two habit experiments to discuss** (never assignments): who, her wish behind it, one small age-appropriate action, when (confirmed by her answers, or options to pick from), an ownership move, and a support. Larger families: one shared routine adapted by age. Thin intake: the Family Meeting habit and one idea marked "something to consider". What someone already does is recognized; the grown-ups get a conversation about helping without taking over |
+| 4 · Let's Practice | If it gets stuck (her obstacle's adjustment, only when no experiment already uses it), how to keep it going, and the check-in for the next meeting |
 
 Families of 5–6 and 7+ children with starting points get fixed tighter layouts, never smaller than 10px text.
 

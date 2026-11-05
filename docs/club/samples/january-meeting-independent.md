@@ -18,27 +18,29 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What do we usually forget for school?
 - What gets in the way of having school things ready: no set time, no set spot, or something else?
-- Ask Owen which starting point they’d try first, or what they’d try instead.
+- Ask Owen: would these help, or what would you try instead?
 
 ---
 
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Grace** · 12: Grace already takes care of getting ready for school. Ask Grace to show everyone how, instead of adding a new job.
-- **Owen** · 6: Pack the bag after dinner and hang it on a hook by the door, next to the shoes. _(Show it once, then one reminder at most.)_
+- **Owen, 6 · School things ready** (School things ready on time is your top priority. You’d like the kids to take on packing the school bag.)
+  - “Check tomorrow’s supplies and pack the school bag.”
+  - When: When, your pick: after dinner or after homework is put away?
+  - Ownership: Let Owen choose where the bag lives, so it’s ready without help.
+  - Help: A hook by the door at the right height.
+- Grace already takes care of getting ready for school. Ask Grace to show everyone how, instead of adding a new job.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: a hook by the door at the right height, for Owen.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, existing responsibilities, priorities_
+_Personalized from: names, ages, priorities, growth areas_

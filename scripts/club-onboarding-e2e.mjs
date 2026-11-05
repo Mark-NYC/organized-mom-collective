@@ -289,7 +289,7 @@ scenarios.firstMonth = async (browser) => {
   check('January (her view): every child by first name', KIDS.every((n) => sheet.includes(n)), sheet.replace(/\s+/g, ' ').slice(0, 300));
   check('January (her view): no sample family, no assumed Mom/Dad', !SAMPLE.test(sheet) && !/\b(Mom|Dad)\b/.test(sheet), (sheet.match(SAMPLE) ?? sheet.match(/\b(Mom|Dad)\b/) ?? [''])[0]);
   // She answered no profile questions: nothing is invented for the children; January's meeting habit is the start.
-  check('January (her view): no answers, so no invented ideas: the meeting habit first, every child asked, nothing assigned', /Starting our Family Meetings/.test(sheet) && /Ask Zara, Emeka and Nia /.test(sheet) && /Our habit experiment/.test(sheet) && !/Led by|add your own plans|sticker/i.test(sheet));
+  check('January (her view): no answers, so no invented needs: the meeting habit first, one idea to consider, the others asked, nothing assigned', /Starting our Family Meetings/.test(sheet) && /Something to consider/.test(sheet) && /Ask Emeka and Nia /.test(sheet) && /not assignments/.test(sheet) && !/Led by|add your own plans|Our habit experiment/i.test(sheet), sheet.replace(/\s+/g, ' ').slice(0, 600));
   check('January (her view): the four parts of the Family Meeting', ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'].every((t) => sheet.includes(t)));
   check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
   check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));
