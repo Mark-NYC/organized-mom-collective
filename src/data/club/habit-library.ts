@@ -89,7 +89,7 @@ export const HABIT_LIBRARY: readonly HabitItem[] = [
 
   // A family habit, for families who told us little: the meeting itself.
   { id: 'family-meeting', category: 'other', title: 'Our Family Meeting', times: ['weekly'], byStage: {}, shared: {
-    title: 'A regular Family Meeting', action: 'Hold the meeting at the same time each month.', anchors: ['after a weekly meal you already share', 'a weekend afternoon'], ownership: 'The kids take turns opening the meeting or choosing the snack.', support: 'Write the next meeting on the calendar before this one ends.',
+    title: 'A regular Family Meeting', action: 'Hold the meeting at the same time each week.', anchors: ['after a weekly meal you already share', 'a weekend afternoon'], ownership: 'The kids take turns opening the meeting or choosing the snack.', support: 'Write the next meeting on the calendar before this one ends.',
   } },
 ];
 

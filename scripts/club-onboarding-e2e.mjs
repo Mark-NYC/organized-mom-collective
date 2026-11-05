@@ -903,7 +903,7 @@ scenarios.familyBeforeMigration = async (browser) => {
   console.log('\nFamily form on a database without 20261113: still saves');
   freshDb();
   sql(`do $do$ declare d text := pg_get_functiondef('public.club_household_save'::regproc); begin
-    execute replace(d, ', ''icon_style'')', ')'); end $do$`);
+    execute replace(replace(d, ', ''icon_style''', ''), ', ''colors''', ''); end $do$`);
   check('setup: this database refuses icon_style', (() => { try { asUser(USER.id, `select public.club_household_save('X', '{"icon_style":"hand-drawn"}', '[{"first_name":"A","kind":"adult","role":"parent","is_account_holder":true}]')`); return false; } catch { return true; } })());
   const page = await newPage(browser, MOBILE);
   await page.goto(`${BASE}/club/welcome`, { waitUntil: 'networkidle' });
@@ -920,6 +920,76 @@ scenarios.familyBeforeMigration = async (browser) => {
     && /Sofia/.test(sql(`select string_agg(first_name, ',') from public.club_family_members m join public.club_households h on h.id = m.household_id where h.owner_user_id = '${USER.id}'`)));
   check('no script errors', page.errors.length === 0, page.errors.join(' | '));
   await page.context().close();
+};
+
+// Family colors (migration 20261120): her choices survive save, reload, January, approval and the owner's print view;
+// on a database without the migration they are never dropped quietly.
+const COLOR_FAMILY = `'[{"first_name":"Ada","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Chidi","kind":"adult","role":"partner"},
+  {"first_name":"Zara","kind":"child","role":"child","birth_year":2014,"birth_month":5},{"first_name":"Emeka","kind":"child","role":"child","birth_year":2018,"birth_month":9},
+  {"first_name":"Nia","kind":"child","role":"child","birth_year":2022,"birth_month":2}]'`;
+const RGB = { blue: 'rgb(43, 108, 176)', purple: 'rgb(107, 70, 193)', teal: 'rgb(24, 128, 139)' };
+const legend = (page) => page.locator('[data-meeting-guide] [data-mg-pages] .mg-legend .mg-chip').evaluateAll((cs) =>
+  Object.fromEntries(cs.map((c) => [c.textContent.trim().slice(1), getComputedStyle(c.querySelector('.mg-dot')).backgroundColor])));
+const pickColors = async (page) => {
+  await page.goto(`${BASE}/club/family`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-family-colors] select', { timeout: 15000 });
+  const sel = (name) => page.locator('[data-family-colors] li', { hasText: name }).locator('select');
+  const before = { Zara: await sel('Zara').inputValue(), Nia: await sel('Nia').inputValue() };
+  await sel('Emeka').selectOption('teal');
+  await sel('Nia').selectOption(before.Zara); // already Zara's: they swap
+  const after = { Zara: await sel('Zara').inputValue(), Emeka: await sel('Emeka').inputValue(), Nia: await sel('Nia').inputValue() };
+  await page.click('button:has-text("Save our family")');
+  await page.waitForSelector('[role=status]:has-text("Saved"), [data-colors-not-saved]', { timeout: 10000 }).catch(() => undefined);
+  return { before, after, sel };
+};
+scenarios.familyColors = async (browser) => {
+  console.log('\nFamily colors with 20261120: save, reload, January, approval, print');
+  freshDb();
+  sql(readFileSync(new URL('../supabase/migrations/20261120000000_club_household_colors.sql', import.meta.url), 'utf8'));
+  asUser(USER.id, `select public.club_household_save('The Okafor Family', '{"icon_style":"hand-drawn"}', ${COLOR_FAMILY}) \\g /dev/null`);
+  as.vision('The Okafor Family', 'Joy');
+  as.approvePrint();
+  const page = await newPage(browser, DESKTOP);
+  const { before, after, sel } = await pickColors(page);
+  check('picking a color someone has swaps them, nobody is quietly reassigned', before.Zara === 'blue' && after.Nia === 'blue' && after.Zara === before.Nia && after.Emeka === 'teal', JSON.stringify({ before, after }));
+  check('saved, with no colors warning', await page.isVisible('[role=status]:has-text("Saved")') && !(await page.isVisible('[data-colors-not-saved]')));
+  const stored = JSON.parse(sql(`select preferences -> 'colors' from public.club_households where owner_user_id = '${USER.id}'`) || '{}');
+  const idOf = (n) => sql(`select m.id from public.club_family_members m join public.club_households h on h.id = m.household_id where h.owner_user_id = '${USER.id}' and m.first_name = '${n}'`);
+  check('stored by member id', stored[idOf('Emeka')] === 'teal' && stored[idOf('Nia')] === 'blue' && stored[idOf('Zara')] === after.Zara && sql(`select preferences ->> 'icon_style' from public.club_households where owner_user_id = '${USER.id}'`) === 'hand-drawn', JSON.stringify(stored));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-family-colors] select');
+  check('after reload the family page shows her choices', await sel('Emeka').inputValue() === 'teal' && await sel('Nia').inputValue() === 'blue' && await sel('Zara').inputValue() === after.Zara);
+  await page.goto(`${BASE}/app/club/january`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready' && document.querySelector('.mg-sheet'), null, { timeout: 15000 });
+  await page.waitForTimeout(600);
+  const mine = await legend(page);
+  check('January shows her colors beside each name', mine.Emeka === RGB.teal && mine.Nia === RGB.blue && mine.Zara === RGB[after.Zara], JSON.stringify(mine));
+  check('no script errors', page.errors.length === 0, page.errors.join(' | '));
+  await page.context().close();
+  asUser(USER.id, `select public.club_fulfillment_approve('${JAN}') \\g /dev/null`);
+  const mv = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(mv);
+  await mv.goto(`${BASE}/app/club/january?fulfillment=${orderId('monthly_resource')}`, { waitUntil: 'networkidle' });
+  await mv.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready' && document.querySelector('.mg-sheet'), null, { timeout: 15000 });
+  await mv.waitForTimeout(800);
+  const printed = await legend(mv);
+  check('the owner’s print view after approval: the same colors', JSON.stringify(printed) === JSON.stringify(mine), JSON.stringify(printed));
+  await mv.emulateMedia({ media: 'print' });
+  check('and in print media', JSON.stringify(await legend(mv)) === JSON.stringify(mine));
+  if (SHOTS) await mv.pdf({ path: `${SHOTS}/colors-print.pdf`, preferCSSPageSize: true, printBackground: true });
+  await mv.context().close();
+
+  console.log('\nFamily colors without 20261120: never lost quietly');
+  freshDb();
+  asUser(USER.id, `select public.club_household_save('The Okafor Family', '{"icon_style":"hand-drawn"}', ${COLOR_FAMILY}) \\g /dev/null`);
+  const old = await newPage(browser, DESKTOP);
+  await pickColors(old);
+  check('she is told her colors weren’t saved (no plain "Saved.")', await old.isVisible('[data-colors-not-saved]') && !(await old.isVisible('[role=status]:has-text("Saved")')));
+  check('the rest of her family still saved, no colors stored', sql(`select preferences ? 'colors' from public.club_households where owner_user_id = '${USER.id}'`) === 'f'
+    && sql(`select preferences ->> 'icon_style' from public.club_households where owner_user_id = '${USER.id}'`) === 'hand-drawn');
+  check('the picker shows what is actually in effect (standard colors)', await old.locator('[data-family-colors] li', { hasText: 'Emeka' }).locator('select').inputValue() !== 'teal');
+  check('no script errors', old.errors.length === 0, old.errors.join(' | '));
+  await old.context().close();
 };
 
 scenarios.p0desktop = (browser) => postCheckout(browser, 'desktop', DESKTOP);

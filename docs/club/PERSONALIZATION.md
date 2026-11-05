@@ -9,7 +9,8 @@ resource built this way.
 Families get two things:
 
 1. **The reusable framework**: the Welcome Kit's one-page Family Meeting guide (`src/data/club/meeting-guide.ts`,
-   `/club/family-meeting-guide`). The four parts, every month. Unchanged.
+   `/club/family-meeting-guide`). Ten minutes, **once a week**, the same four parts every time. A new Family Focus
+   arrives each month.
 2. **Our Family Focus**: `/app/club/january`, one personalized page the family brings to its Family Meeting. It is
    **not** organized under the four meeting parts; it reinforces the month's practical resource. Nothing on it is
    assigned.
@@ -30,8 +31,10 @@ children (January: 3), or 4 when she named a wish inside the focus. Adaptations 
 
 **Colors** (`src/data/club/family-colors.ts`): marker colors auto-assigned children first, saved by member id in
 `preferences.colors` when she changes them on her family page, so they stay the same every month. Always shown with the
-name (readable in grayscale). Saving a choice needs migration `20261120000000_club_household_colors.sql`; until it is
-applied the site saves families without colors and they stay auto-assigned.
+name (readable in grayscale). Picking a color someone already has swaps the two, so nobody is reassigned quietly. Saving a
+choice needs migration `20261120000000_club_household_colors.sql`; until it is applied the rest of her family saves and
+the family page tells her the colors weren't saved (never silently dropped). The fulfillment print view reads the
+same `preferences.colors` (`club_admin_fulfillment_bundle`).
 
 **Her review** (Make changes): each suggestion has **Keep it**, **Change it** (title, action, when) and **Skip it**.
 Skipped ideas come off the printed page; her "when" counts as confirmed. Saved in the guide state

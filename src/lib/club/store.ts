@@ -74,6 +74,11 @@ export class ConflictError extends Error {
   }
 }
 
+/** The family saved, but this database can't keep member colors yet (before 20261120): `household` is what was saved. */
+export class ColorsNotSavedError extends Error {
+  constructor(readonly household: Household) { super('colors_not_saved'); }
+}
+
 export interface ClubStore {
   kind: 'sample' | 'account';
   /** Shown in the sample banner. */
@@ -159,15 +164,24 @@ export const accountStore: ClubStore = {
       p_preferences: preferences,
       p_members: toDbMembers(input.members),
     });
-    try {
-      return fromDb(await save(input.preferences));
-    } catch (e) {
-      // A database without 20261113 (illustration style) or 20261120 (member colors) refuses those keys: her family
-      // still saves, without the optional preferences it doesn't know yet (they save once the migration is in).
-      const optional = ['colors', 'icon_style'].filter((k) => k in (input.preferences ?? {}));
-      if ((e as Error).message !== 'invalid' || !optional.length) throw e;
-      const rest = Object.fromEntries(Object.entries(input.preferences as Record<string, unknown>).filter(([k]) => !optional.includes(k)));
-      return fromDb(await save(rest as typeof input.preferences));
+    // A database without 20261120 (member colors) or 20261113 (illustration style) refuses that key. Drop the newest
+    // unknown key first, one at a time, so nothing the database does accept is lost; her family still saves.
+    let prefs = { ...(input.preferences as Record<string, unknown>) };
+    let dropped: string[] = [];
+    for (;;) {
+      try {
+        const saved = fromDb(await save(prefs as typeof input.preferences));
+        // Her color choices are hers: never dropped quietly. The rest is saved; the page tells her the colors weren't.
+        if (dropped.includes('colors')) throw new ColorsNotSavedError(saved);
+        return saved;
+      } catch (e) {
+        if (e instanceof ColorsNotSavedError) throw e;
+        const next = ['colors', 'icon_style'].find((k) => k in prefs);
+        if ((e as Error).message !== 'invalid' || !next) throw e;
+        const { [next]: _gone, ...rest } = prefs;
+        prefs = rest;
+        dropped = [...dropped, next];
+      }
     }
   },
   async documents(slug) {
