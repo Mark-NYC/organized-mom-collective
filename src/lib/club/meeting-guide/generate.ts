@@ -17,7 +17,8 @@
  *     in the way (a possibility from her challenges, or an open question).
  *   - Everyone's Part: per child, at most two ideas to choose from: what she said she'd like that child to take on, in
  *     their stage's version (unassigned wishes spread so siblings differ), then the month's. Nothing a child already
- *     does is suggested again: it's noticed instead. Under 3 joins in. One shared idea for the grown-ups.
+ *     does is suggested again: it's noticed instead. Under 3 joins in. The grown-ups get a conversation prompt about
+ *     supporting the kids, not a job; what a grown-up other than the account holder already does is noticed.
  *   - Let's Practice: at most four habit ideas: try it now, a clear cue (from one of the family's own ideas), at most
  *     two setups that make the ideas easy, the adjustment for her obstacle, or making a part smaller. An idea that
  *     another section already says is left out.
@@ -88,7 +89,6 @@ export interface GuideRefiner {
 const nameOf = (m: FamilyMember) => m.firstName.trim();
 const atHome = (h: Household) => h.members.filter((m) => !m.archived && m.firstName.trim());
 const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-const joinNames = (n: string[]) => (n.length <= 2 ? n.join(' and ') : `${n.slice(0, -1).join(', ')} and ${n.at(-1)}`);
 
 /** "The Rivera Family" from her family name, else "Our Family". */
 export function familyTitle(h: Household): string {
@@ -204,7 +204,8 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   if (responsibilities.some((r) => r.status === 'existing')) used.push('existing responsibilities');
   const adults = people.filter((p) => p.stage === 'adult');
   const grownUps = shown([
-    ...(adults.length ? [{ key: 'grown-ups', text: `${joinNames(adults.map((p) => nameOf(p.m)))}: ${lower(content.grownUps)}` }] : []),
+    // A conversation for the grown-ups about supporting the kids' growing responsibility; no calendar job for them.
+    ...(guidePeople.some((p) => p.ideas.length) ? [{ key: 'grown-ups', text: content.grownUps }] : []),
     // A grown-up other than the account holder who already carries something: noticed. Never the account holder.
     ...adults.filter((p) => !p.m.isAccountHolder).flatMap((p) => { const t = keepsLine(p); return t ? [{ key: `keeps:${p.m.id}`, text: t }] : []; }),
   ]);
@@ -215,9 +216,9 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   const setups = guidePeople.flatMap((p) => p.ideas.filter((i) => i.setup).slice(0, 1).map((i) => ({ key: `setup:${p.id}:${i.itemId}`, text: `${content.practice.setupLead} for ${p.name}: ${lower(i.setup!)}` })));
   const practice = shown([
     { key: 'practice:now', text: content.practice.tryNow },
-    ...(obstacle?.adjustment ? [{ key: 'practice:obstacle', text: obstacle.adjustment }] : []),
+    ...(obstacle?.adjustment ? [{ key: 'practice:obstacle', text: `One idea: ${lower(obstacle.adjustment)}` }] : []),
     ...(firstIdea && obstacle?.principle !== 'trigger'
-      ? [{ key: 'practice:stack', text: content.practice.stack.replace('{example}', `“${firstIdea.cue}, ${firstName} ${lower(firstIdea.text)}”`) }] : []),
+      ? [{ key: 'practice:stack', text: content.practice.stack.replace('{example}', `${firstName}: “${firstIdea.cue}, ${lower(firstIdea.text)}”`) }] : []),
     ...setups.slice(0, 2),
     ...(obstacle?.principle !== 'simplicity' ? [{ key: 'practice:simplify', text: content.practice.simplify }] : []),
   ]).slice(0, content.maxPractice);
@@ -228,13 +229,13 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
     v: 1, month,
     focus: focus.map((x) => ({ id: x.id, source: x.source, title: x.title })),
     obstacle: obstacle ? { challengeId: obstacleFrom!, ...obstacle } : null,
-    practices: guidePeople.flatMap((p) => p.ideas.map((i) => ({
+    // Ideas offered, never commitments: nothing here is tracked until the family chooses it (family-plan.ts).
+    ideas: guidePeople.flatMap((p) => p.ideas.map((i) => ({
       memberId: p.id, itemId: i.itemId,
       category: (content.practices.find((x) => x.id === i.itemId) ?? Object.values(content.defaults).flat().find((x) => x?.id === i.itemId))?.category ?? 'other',
       behavior: i.text, cue: i.cue, ...(i.setup ? { setup: i.setup } : {}), support: p.support,
-      source: i.source, status: 'suggested' as const, progress: 'practicing' as const, since: month,
+      source: i.source, status: 'suggested' as const, offered: month,
     }))),
-    todos: [],
   };
 
   return {

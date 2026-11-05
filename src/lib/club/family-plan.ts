@@ -1,36 +1,52 @@
 /**
- * A family's plan as structured data: the family's focus, the obstacle they might work on and the responsibility
- * ideas offered to each child (later, the ones they chose and how they're going). Generated each month (src/lib/club/meeting-guide/generate.ts)
- * and saved with the month's resource (club_resource_versions.state → the guide's `plan`), so later months read
- * records, not PDF text. docs/club/PERSONALIZATION.md has the model and the roadmap.
+ * A family's plan as structured data, generated each month (src/lib/club/meeting-guide/generate.ts) and saved with the
+ * month's resource (club_resource_versions.state → the companion's `plan`), so later months read records, not PDF
+ * text. docs/club/PERSONALIZATION.md has the model and the roadmap.
  *
- * Also the rules for the future progress check-in (one optional question on a month's page, every 6–8 weeks): how an
- * answer changes what we suggest next. Pure; nothing here asks, saves or shows anything yet.
+ * Two kinds of record, kept apart on purpose:
+ *   - SuggestedIdea: something the Club offered (January offers up to two per child). It is not a family commitment:
+ *     it has no progress, is never checked in on, and nothing tracks it.
+ *   - Commitment: a responsibility the family chose. Only a commitment has progress and check-ins. It is created only
+ *     from the family's own choice (`commit`), never from a suggestion being shown, approved for printing or saved.
+ *
+ * Also the rules for the future progress check-in (one optional question on a month's page, every 6–8 weeks). Pure;
+ * nothing here asks, saves or shows anything yet.
  */
 import type { HabitPrinciple } from './meeting-guide/types';
 
-/** Where a practice came from. */
-export type PracticeSource = 'desired' | 'existing' | 'month' | 'custom';
-/** Suggested: an idea we offered (January offers two per child to choose from). Accepted: the family's choice, once recorded. */
-export type PracticeStatus = 'suggested' | 'accepted';
-/** Progress, from check-ins. `practicing` until the first answer. */
+/** Progress, from check-ins. `practicing` until the first answer. Commitments only. */
 export type ProgressStatus = 'practicing' | 'independent' | 'improving' | 'struggling' | 'retired';
 
-export interface ResponsibilityPractice {
+export interface SuggestedIdea {
   memberId: string;
-  /** GROWTH_ITEMS id, the month's practice id, 'keep:<category>' or 'custom'. */
+  /** GROWTH_ITEMS id or the month's idea id. */
   itemId: string;
   category: string;
   behavior: string;
   cue: string;
   setup?: string;
   support?: string;
-  finished?: string;
-  source: PracticeSource;
-  status: PracticeStatus;
-  progress: ProgressStatus;
-  /** 'YYYY-MM' it started. */
+  /** From her own answers (desired) or the month's content. */
+  source: 'desired' | 'month';
+  status: 'suggested';
+  /** 'YYYY-MM' it was offered. */
+  offered: string;
+}
+
+export interface Commitment {
+  memberId: string;
+  /** The idea it came from, or 'custom' for the family's own words. */
+  itemId: string;
+  category: string;
+  behavior: string;
+  cue?: string;
+  status: 'accepted';
+  /** How it was chosen: at a meeting, on the page, or at a check-in. */
+  chosenVia: 'meeting' | 'page' | 'check-in';
+  /** 'YYYY-MM-DD'. */
   since: string;
+  progress: ProgressStatus;
+  lastCheckedOn?: string;
 }
 
 export interface FamilyPlan {
@@ -39,11 +55,16 @@ export interface FamilyPlan {
   /** One or two, with where each came from (her priority, a challenge, or the month when she gave neither). */
   focus: { id: string; source: 'priority' | 'challenge' | 'month'; title: string }[];
   obstacle: { challengeId: string; obstacle: string; principle: HabitPrinciple | null; adjustment: string | null } | null;
-  practices: ResponsibilityPractice[];
-  todos: string[];
+  /** Offered, not chosen. */
+  ideas: SuggestedIdea[];
 }
 
-// ---- Future check-ins (data foundation only) ----
+/** The only way a commitment is made: the family chose this idea (or its own words). */
+export function commit(idea: Pick<SuggestedIdea, 'memberId' | 'itemId' | 'category' | 'behavior' | 'cue'>, chosenVia: Commitment['chosenVia'], on: string): Commitment {
+  return { memberId: idea.memberId, itemId: idea.itemId, category: idea.category, behavior: idea.behavior, ...(idea.cue ? { cue: idea.cue } : {}), status: 'accepted', chosenVia, since: on, progress: 'practicing' };
+}
+
+// ---- Future check-ins (commitments only) ----
 
 export type CheckInAnswer = 'on-own' | 'reminders' | 'struggling' | 'moved-on';
 /** The optional second question, only after 'struggling': the likely obstacle, in her words. */
@@ -88,9 +109,13 @@ export function nextStep(c: Pick<CheckIn, 'answer' | 'barrier'>): NextStep {
   }
 }
 
-/** A check-in is due 6–8 weeks after a practice started or was last asked about; never twice in one month. */
-export function checkInDue(lastAsked: string | null, since: string, today: string): boolean {
-  const from = Date.parse(`${(lastAsked ?? `${since}-01`).slice(0, 10)}T12:00:00Z`);
+/**
+ * Whether to ask about a commitment: 6 weeks after it started or was last asked about, never for a retired one. Takes
+ * a Commitment only, so a suggested idea can't be checked in on.
+ */
+export function checkInDue(c: Pick<Commitment, 'status' | 'since' | 'progress' | 'lastCheckedOn'>, today: string): boolean {
+  if (c.status !== 'accepted' || c.progress === 'retired') return false;
+  const from = Date.parse(`${(c.lastCheckedOn ?? c.since).slice(0, 10)}T12:00:00Z`);
   const now = Date.parse(`${today}T12:00:00Z`);
   return Number.isFinite(from) && now - from >= 42 * 86400e3;
 }

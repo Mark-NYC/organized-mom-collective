@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { january2027 } from '../src/data/club/meeting-guides/2027-01';
 import { GUIDE_MONTHS, guideMonth } from '../src/data/club/meeting-guides';
 import { MEETING_GUIDE } from '../src/data/club/meeting-guide';
-import { checkInDue, nextStep } from '../src/lib/club/family-plan';
+import { checkInDue, commit, nextStep } from '../src/lib/club/family-plan';
 import { generateMeetingGuide, guideFingerprint, type MeetingGuide } from '../src/lib/club/meeting-guide/generate';
 import { emptyGuideState, guideProfile, isGuideState } from '../src/lib/club/meeting-guide/state';
 import { stageFor } from '../src/lib/club/meeting-guide/stages';
@@ -36,7 +36,7 @@ describe('January Family Meeting companion', () => {
       const t = text(gen(f.key));
       expect(t).not.toMatch(/Led by|leaderId|"say"|Hand this guide|opens the meeting|Week [1-4]|First meeting/i);
     }
-    expect(content.partsNote).toMatch(/not jobs\. Decide together/);
+    expect(content.partsNote).toBe('Ideas to choose from, not jobs. Decide together.');
   });
 
   it('names one or two priorities, only from her answers', () => {
@@ -64,8 +64,22 @@ describe('January Family Meeting companion', () => {
     expect(kid(gen('school-age'), 'Mira').keeps).toMatch(/Mira already takes care of pet care/);
     expect(kid(gen('school-age'), 'Mira').ideas.map((i) => i.itemId)).not.toContain('pet-care');
     expect(kid(gen('mixed-busy'), 'Jade').keeps).toMatch(/laundry/);
-    expect(gen('young-support').grownUps.map((t) => t.text)).toEqual(['Ngozi and Daniel: add your own plans to the calendar, and leave the kids’ plans to them.', 'Daniel already takes care of driving and pickups. Notice it out loud.']);
+    expect(gen('young-support').grownUps.map((t) => t.text)).toEqual([content.grownUps, 'Daniel already takes care of driving and pickups. Worth noticing out loud.']);
     for (const f of FAMILIES) expect(text(gen(f.key))).not.toMatch(/(Ngozi|Hana|Kara|Maja|Lucia|Jo) already/);
+  });
+
+  it('gives grown-ups a conversation about supporting the kids, never a calendar job', () => {
+    for (const f of FAMILIES) {
+      const g = gen(f.key);
+      expect(text(g)).not.toMatch(/add your own plans|their own plans to the calendar/i);
+      expect(g.grownUps[0]?.text).toBe(content.grownUps);
+    }
+    expect(content.grownUps).toMatch(/help without taking over/);
+  });
+
+  it('writes each child’s ideas as plain actions under their name, without pronouns', () => {
+    for (const f of FAMILIES) for (const p of gen(f.key).people) for (const i of p.ideas) expect(i.text).not.toMatch(/\b(their|they|them|he|she|his|her)\b/i);
+    for (const s2 of Object.values(content.support)) expect(s2).not.toMatch(/\b(their|they|them)\b/i);
   });
 
   it('spreads her unassigned wishes so siblings start differently', () => {
@@ -87,13 +101,15 @@ describe('January Family Meeting companion', () => {
 
   it('gives habit ideas from the family’s own ideas, never repeating another section', () => {
     const g = gen('young-support');
-    expect(g.practice.map((p) => p.text)).toContain('Make it easy for Tobi: put a low hook and a shoe spot by the door.');
-    expect(g.practice.map((p) => p.text)).toContain('Each person owns one step this month, not the whole routine.');
+    expect(g.practice.map((p) => p.text)).toContain('To make it easier for Tobi: a low hook and a shoe spot by the door.');
+    expect(g.practice.map((p) => p.text)).toContain('One idea: each person takes one step of the routine instead of the whole thing.');
     // The obstacle is about simplicity, so the "make it smaller" tip isn't repeated.
     expect(g.practice.some((p) => p.key === 'practice:simplify')).toBe(false);
     // The obstacle is about a clear "when", so the cue tip isn't repeated.
     expect(gen('school-age').practice.some((p) => p.key === 'practice:stack')).toBe(false);
-    expect(gen('mixed-busy').practice.find((p) => p.key === 'practice:stack')!.text).toMatch(/“Coming in the door, Mia puts their shoes and coat in their spot\.”/);
+    expect(gen('mixed-busy').practice.find((p) => p.key === 'practice:stack')!.text).toBe('It can help to tie a part to something that already happens. For Mia: “Coming in the door, coat on the hook, shoes in the shoe spot.”');
+    // Suggestions, not instructions.
+    for (const f of FAMILIES) for (const t of gen(f.key).practice) expect(t.text).toMatch(/^(If there’s time|One idea|It can help|To make it easier|If a part keeps slipping)/);
     for (const f of FAMILIES) {
       const l = lines(gen(f.key));
       expect(l.filter((x, i) => l.indexOf(x) !== i), f.key).toEqual([]);
@@ -120,10 +136,11 @@ describe('January Family Meeting companion', () => {
     expect(gen('minimal').missing).toEqual(expect.arrayContaining(['ages', 'activities', 'priorities', 'growth areas']));
   });
 
-  it('keeps the ideas as structured data, all suggestions', () => {
+  it('keeps the ideas as structured data: suggestions, never commitments', () => {
     const g = gen('school-age');
-    expect(g.plan.practices.filter((p) => p.memberId === 'p2').map((p) => p.itemId)).toEqual(['pack-school-bag', 'jan-tomorrow']);
-    expect(g.plan.practices.every((p) => p.status === 'suggested' && p.progress === 'practicing' && p.since === '2027-01')).toBe(true);
+    expect(g.plan.ideas.filter((p) => p.memberId === 'p2').map((p) => p.itemId)).toEqual(['pack-school-bag', 'jan-tomorrow']);
+    expect(g.plan.ideas.every((p) => p.status === 'suggested' && p.offered === '2027-01' && !('progress' in p))).toBe(true);
+    expect('commitments' in g.plan).toBe(false);
     expect(g.plan.obstacle).toMatchObject({ challengeId: 'remembering', principle: 'trigger' });
     expect(g.plan.focus.length).toBe(2);
   });
@@ -161,9 +178,15 @@ describe('progress check-in rules (data foundation)', () => {
     expect(nextStep({ answer: 'struggling' })).toEqual({ kind: 'adjust', progress: 'struggling', principle: null });
     expect(nextStep({ answer: 'moved-on' })).toEqual({ kind: 'retire', progress: 'retired' });
   });
-  it('is due six weeks after a practice started or was last asked about', () => {
-    expect(checkInDue(null, '2027-01', '2027-02-10')).toBe(false);
-    expect(checkInDue(null, '2027-01', '2027-02-12')).toBe(true);
-    expect(checkInDue('2027-02-12', '2027-01', '2027-03-01')).toBe(false);
+  it('only a family’s own choice makes a commitment, and only commitments are checked in on', () => {
+    const idea = gen('school-age').plan.ideas[0];
+    const c = commit(idea, 'meeting', '2027-01-10');
+    expect(c).toMatchObject({ status: 'accepted', progress: 'practicing', since: '2027-01-10', itemId: idea.itemId });
+    expect(checkInDue(c, '2027-02-20')).toBe(false);
+    expect(checkInDue(c, '2027-02-21')).toBe(true);
+    expect(checkInDue({ ...c, lastCheckedOn: '2027-02-21' }, '2027-03-01')).toBe(false);
+    expect(checkInDue({ ...c, progress: 'retired' }, '2027-06-01')).toBe(false);
+    // A suggestion has no status 'accepted', so it's never due.
+    expect(checkInDue({ ...(idea as never), since: '2027-01-01', progress: 'practicing' }, '2027-06-01')).toBe(false);
   });
 });

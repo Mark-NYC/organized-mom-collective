@@ -21,8 +21,8 @@ Two US Letter pages (fixed, so printing and the mailed copy never vary):
 | --- | --- | --- |
 | 1 · Our Focus | One or two priorities from her priority and challenges (one per theme), each with what getting better could look like. Only with no answers: the month's purpose | ≤ 2 |
 | 2 · Let's Talk | Conversation starters: her week (her own named activity), one per focus, and what gets in the way (a possibility from her challenges, or an open question). How little ones join | ≤ 4 |
-| 3 · Everyone's Part | Per child, ideas to choose from: what she said she'd like that child to take on, in their age's version, then the month's. How much help a first try needs. What a child already does is noticed, not suggested again. Under 3 joins in. Grown-ups named in one shared idea | ≤ 2 per child; no idea printed twice |
-| 4 · Let's Practice | Ways to make it stick: try it now, the obstacle's adjustment, a clear cue built from one of the family's own ideas, a setup that makes an idea easy, making a part smaller. A tip another line already gives is left out | ≤ 4 |
+| 3 · Everyone's Part | Under each child's name, ideas to choose from (plain actions, no pronouns): what she said she'd like that child to take on, in their age's version, then the month's. How much help a first try needs. What a child already does is noticed, not suggested again. Under 3 joins in. For the grown-ups: a conversation about helping without taking over (no job); what a grown-up other than the account holder already does is noticed | ≤ 2 per child; no idea printed twice |
+| 4 · Let's Practice | Ways to make it stick, worded as options ("If there's time…", "One idea…", "It can help…"): trying a part before the meeting ends, the obstacle's adjustment, tying a part to something that already happens, a setup that makes an idea easier, a smaller version before more reminders. A tip another line already gives is left out | ≤ 4 |
 | Coming back to it | How to revisit a part at a later meeting (the seed of check-ins) | 1 line |
 
 Families of 5–6 children and 7+ get fixed tighter layouts, never smaller than 10px text.
@@ -80,16 +80,21 @@ No generator change is needed unless the month needs a new kind of rule.
 
 Nothing new is asked at onboarding. Detailed schedules and seasons are deliberately not collected to get started.
 
-### The plan record (`FamilyPlan`, src/lib/club/family-plan.ts)
+### The plan record (src/lib/club/family-plan.ts)
 
-Per idea offered: `memberId`, `itemId` (growth item or the month's), `category`, `behavior`, `cue`, `setup`, `support`,
-`source`, `status` (all `suggested` in January: the family chooses at the meeting), `progress` and `since`. Per
-family: one or two `focus` items with their source and the `obstacle` (challenge id, principle, adjustment). It's
-written with her companion from her first click or key press (approving counts) and on every change, so later months
-read records, not PDF text. Which idea each child chose is recorded later, by the check-in (roadmap 1–2).
+Two kinds of record, kept apart in the types so one can't become the other by accident:
 
-It lives in the month's saved resource for now: no migration was needed for January. When a second month reads it, or
-check-ins start, it moves into `club_responsibilities` with the minimum additions below.
+- **`SuggestedIdea`** (`status: 'suggested'`): what the Club offered. January saves every idea it offered per child
+  (`memberId`, `itemId`, `category`, `behavior`, `cue`, `setup`, `support`, `source`, `offered` month), plus the
+  family's one or two `focus` items and the `obstacle`. **A suggestion is not a commitment**: it has no progress, is
+  never checked in on, and showing it, approving the printable for mailing or saving it never turns it into one.
+- **`Commitment`** (`status: 'accepted'`): a responsibility the family chose, created only by `commit()` from the
+  family's own choice (at a meeting, on the page, or at a check-in). Only commitments carry `progress` and
+  `lastCheckedOn`, and `checkInDue` accepts only them. Nothing creates commitments yet.
+
+The plan is written with her companion from her first click or key press (approving counts) and on every change, in
+the month's saved resource (no migration for January). When check-ins start, commitments move into
+`club_responsibilities` (below).
 
 ## Roadmap (not built)
 
@@ -98,7 +103,8 @@ check-ins start, it moves into `club_responsibilities` with the minimum addition
    'independent','improving','struggling','retired'))`, `source_month date`, `last_checked_at timestamptz`, and
    `status = 'confirmed'` on approval (the table already has it). Plus `club_responsibility_checkins (id,
    responsibility_id, household_id, asked_on date, answer text, barrier text, created_at)` for history. RLS like the
-   rest of the profile; written through one `security definer` RPC. Duplicate checks by member + item.
+   rest of the profile; written through one `security definer` RPC. Duplicate checks by member + item. Only a
+   family's choice writes a row (a `Commitment`); suggested ideas stay in the month's saved resource.
 2. **Progress check-ins.** One optional question on a month's page every 6–8 weeks (`checkInDue`): "How is Eli doing
    with …?" On his own / improving, still needs reminders / struggling / moved on; after "struggling", one optional
    likely-obstacle question. `nextStep` already encodes the response: celebrate without adding work, keep practicing,

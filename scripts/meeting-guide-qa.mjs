@@ -87,7 +87,7 @@ for (const n of [6, 8, 12]) {
   check(`${n} people: both sheets fit (${f.map((x) => x.spare).join(', ')}px spare), smallest text ${Math.min(...f.map((x) => x.min))}px`, f.length === 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
   check(`${n} people: prints 2 Letter pages`, (await pdfPages(page)) === 2);
   const kids = fam.household.members.filter((m) => m.kind === 'child').length;
-  check(`${n} people: every child has ideas, grown-ups named once`, (await page.locator('[data-meeting-guide] [data-plan-sheet="back"] .mg-kids > li').count()) === kids && /: add your own plans/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
+  check(`${n} people: every child has ideas; grown-ups get a conversation, not a job`, (await page.locator('[data-meeting-guide] [data-plan-sheet="back"] .mg-kids > li').count()) === kids && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
   await page.context().close();
 }
 await browser.close();
