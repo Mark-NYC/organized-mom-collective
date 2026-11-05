@@ -1,5 +1,7 @@
 # Monthly Family Meeting engine
 
+> **January** no longer uses this engine: its resource is the personalized Family Meeting guide (docs/club/PERSONALIZATION.md), so `/app/club/january` has no Monthly Tool / Family Meeting switch. The other months keep it.
+
 A prepared 10-minute meeting that introduces each month's Club resource. We prepare the plan; the family reviews it, agrees on responsibilities and practices together. It never replaces January's ongoing Weekly Family Meeting (January's monthly meeting introduces it).
 
 ## On the page

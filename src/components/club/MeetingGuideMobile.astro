@@ -1,0 +1,71 @@
+---
+/**
+ * A month's Family Meeting guide on phones and tablets (below 1100px): the shared ClubPlanScreen with the guide's
+ * own sections. Reads the guide only through the printable's controller (`[data-meeting-guide]`'s `clubPlan`,
+ * src/lib/club/meeting-guide/printable.ts); every row opens the same editor as the desktop's Make changes.
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+/** approvalKey: the same key the page gives the desktop rail, so approval agrees on both screens. */
+interface Props { deadline: string; kicker: string; approvalKey: string }
+const { deadline, kicker, approvalKey } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front', 'back']} previewNote="Two pages, ready to print">
+  <slot name="title" slot="title" />
+  <section class="cp-section" aria-labelledby="mgm-focus-title" data-mgm-approval={approvalKey}>
+    <h2 id="mgm-focus-title">1. Our Focus</h2>
+    <ul class="mgm-focus-list" data-mgm-focus></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mgm-talk-title">
+    <h2 id="mgm-talk-title">2. Let’s Talk</h2>
+    <ul class="cp-group" data-mgm-talk></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mgm-people-title">
+    <h2 id="mgm-people-title">3. Everyone’s Part</h2>
+    
+    <ul class="cp-group" data-mgm-people></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mgm-practice-title">
+    <h2 id="mgm-practice-title">4. Let’s Practice</h2>
+    <ul class="cp-group" data-mgm-practice></ul>
+  </section>
+</ClubPlanScreen>
+<style is:global>
+@media screen and (max-width:1099px){
+.mgm-focus-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mgm-focus{display:grid;gap:4px;padding:14px 16px;background:var(--cp-wash)}
+.mgm-focus strong{font:400 1.2rem/1.3 var(--font-serif)}
+.mgm-focus span{font-size:.9rem;color:var(--cp-soft)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen } from '../../lib/club/plan/screen';
+import type { GuidePlan } from '../../lib/club/meeting-guide/printable';
+import type { GuideState } from '../../lib/club/meeting-guide/state';
+
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-meeting-guide])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: GuidePlan }>('[data-meeting-guide]');
+if (root && host) {
+  const q = (sel: string) => root.querySelector<HTMLElement>(sel)!;
+  const row = (title: string, detail: string, locked: boolean) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+      el('span', { class: 'cp-row-text' }, el('strong', {}, title), ...(detail ? [el('span', {}, detail)] : [])),
+      el('span', { class: 'cp-chev' }));
+    b.setAttribute('aria-label', `${title}${detail ? `: ${detail}` : ''}. Change`);
+    b.addEventListener('click', () => host.clubPlan?.openEditor());
+    return el('li', {}, b);
+  };
+  mountPlanScreen<GuideState>({
+    root, host, approvalKey: q('[data-mgm-approval]').dataset.mgmApproval!,
+    render: (_screen, _state, locked) => {
+      const g = host.clubPlan?.guide();
+      if (!g) return;
+      q('[data-mgm-focus]').replaceChildren(...g.focus.map((f) => el('li', { class: 'mgm-focus' }, el('strong', {}, f.title), f.opportunity ? el('span', {}, f.opportunity) : '')));
+      q('[data-mgm-talk]').replaceChildren(...g.talk.map((t) => row(t.text, '', locked)));
+      q('[data-mgm-people]').replaceChildren(...(g.partsDiscover ? [row(g.partsDiscover, '', locked)] : []), ...g.people.filter((p) => p.ideas.length || p.keeps).map((p) => row(p.name, [p.ideas.map((i) => i.text).join(' Or: '), p.keeps].filter(Boolean).join(' '), locked)), ...g.grownUps.map((t) => row(t.text, '', locked)));
+      q('[data-mgm-practice]').replaceChildren(...g.practice.map((t) => row(t.text, '', locked)));
+    },
+  });
+}
+</script>
