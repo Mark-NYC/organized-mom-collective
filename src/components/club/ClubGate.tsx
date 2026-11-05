@@ -4,7 +4,7 @@
  * Off entirely unless PUBLIC_CLUB_ENABLED (the .astro page doesn't even load this then).
  */
 import { useEffect, useState, type ReactNode } from 'react';
-import { clubAccountsEnabled } from '../../data/club/config';
+import { CLUB_NAME, clubAccountsEnabled } from '../../data/club/config';
 import { sampleHouseholds } from '../../data/club/samples';
 import { getSession, requestCode, verifyCode, type AccountSession } from '../../lib/account';
 import ClubNav from './ClubNav';
