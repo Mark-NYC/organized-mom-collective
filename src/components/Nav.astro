@@ -2,6 +2,7 @@
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 import { calendarPath } from '../lib/companion';
 const calendar = calendarPath(path);
+const isClubApp = path === '/app/club' || path.startsWith('/app/club/');
 const items = calendar ? [
   { href: '/app/calendar', label: 'Today', glyph: '✓' },
   { href: '/app/calendar/week', label: 'Week', glyph: '▦' },
@@ -17,7 +18,13 @@ const active = (href: string) => href === '/app' ? path === href : path === href
 ---
 <header data-chrome class="border-b border-warm-rule bg-ivory">
   <div class="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
-    <a href={calendar ? "/app/calendar" : "/app"} class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
+    {isClubApp ? (
+      <a href="/app/club/" class="inline-flex min-w-0 items-center" aria-label="Organized Family Club home">
+        <img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width="403" height="91" class="block h-auto w-[155px] max-w-[45vw] object-contain object-left sm:w-[195px]" />
+      </a>
+    ) : (
+      <a href={calendar ? "/app/calendar" : "/app"} class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
+    )}
     <nav aria-label="Desktop app navigation" class="hidden sm:block"><ul class="flex items-center gap-6">
       {items.map(item => <li data-calendar-feature={!calendar && item.href === "/app/cleaning" ? "" : undefined} hidden={!calendar && item.href === "/app/cleaning"}><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['inline-flex min-h-12 items-center border-b-2 px-1 text-[0.8rem] font-semibold',active(item.href) ? 'border-sage text-warm-ink' : 'border-transparent text-warm-soft hover:text-warm-ink']}>{item.label}</a></li>)}
     </ul></nav>
