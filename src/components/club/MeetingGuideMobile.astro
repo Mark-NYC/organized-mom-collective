@@ -152,8 +152,8 @@ if (root && host) {
   if (guideLink) guideLink.href = `${guideLink.getAttribute('href')}?back=${encodeURIComponent(location.pathname)}`;
   // Editing is one deliberate step. After approval, say what a change means before opening the editor.
   q('[data-mgm-edit]').addEventListener('click', () => {
-    const open = () => { screen.closeSheet(); host.clubPlan?.openEditor(); };
-    if (screenEl?.dataset.approval !== 'approved') return open();
+    const open = () => { screen?.closeSheet(); host.clubPlan?.openEditor(); };
+    if (!screen || screenEl?.dataset.approval !== 'approved') return open();
     const go = el('button', { type: 'button', class: 'cp-btn cp-btn-dark' }, 'Edit anyway');
     go.addEventListener('click', open);
     const keep = el('button', { type: 'button', class: 'cp-btn' }, 'Keep it as approved');
