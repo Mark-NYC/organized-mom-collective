@@ -289,7 +289,7 @@ scenarios.firstMonth = async (browser) => {
   check('January (her view): every child by first name', KIDS.every((n) => sheet.includes(n)), sheet.replace(/\s+/g, ' ').slice(0, 300));
   check('January (her view): no sample family, no assumed Mom/Dad', !SAMPLE.test(sheet) && !/\b(Mom|Dad)\b/.test(sheet), (sheet.match(SAMPLE) ?? sheet.match(/\b(Mom|Dad)\b/) ?? [''])[0]);
   // She answered no profile questions: nothing is invented for the children; January's meeting habit is the start.
-  check('January (her view): no answers, so no invented needs: the meeting habit first, one idea to consider, the others asked, nothing assigned', /Starting our Family Meeting habit/i.test(sheet) && /Something to consider/i.test(sheet) && /Ask Emeka and Nia /.test(sheet) && /not assignments/.test(sheet) && !/Led by|add your own plans|Our habit experiment/i.test(sheet), sheet.replace(/\s+/g, ' ').slice(0, 600));
+  check('January (her view): no answers, so no invented needs: the meeting habit, and every child starts a small idea now, to consider, nothing assigned', /Starting our Family Meeting habit/i.test(sheet) && /Something to consider/i.test(sheet) && /Nia, Emeka and Zara/.test(sheet) && /not assignments/.test(sheet) && !/once the meeting is a habit/.test(sheet) && !/Led by|add your own plans|Our habit experiment/i.test(sheet), sheet.replace(/\s+/g, ' ').slice(0, 600));
   check('January (her view): the Family Focus, not the four meeting parts', ['Our Family Focus', 'Our shared focus', 'Small habits worth trying', 'Our Words of the Week', 'Notice', 'Choose', 'Practice', 'Grow'].every((t) => sheet.toLowerCase().includes(t.toLowerCase())) && !/Let’s Talk|Let’s Practice/.test(sheet));
   check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
   check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));
@@ -955,6 +955,7 @@ scenarios.familyColors = async (browser) => {
   check('saved, with no colors warning', await page.isVisible('[role=status]:has-text("Saved")') && !(await page.isVisible('[data-colors-not-saved]')));
   const stored = JSON.parse(sql(`select preferences -> 'colors' from public.club_households where owner_user_id = '${USER.id}'`) || '{}');
   const idOf = (n) => sql(`select m.id from public.club_family_members m join public.club_households h on h.id = m.household_id where h.owner_user_id = '${USER.id}' and m.first_name = '${n}'`);
+  check('every member’s color is kept by id (adding someone later can’t shift anyone)', Object.keys(stored).length === 5);
   check('stored by member id', stored[idOf('Emeka')] === 'teal' && stored[idOf('Nia')] === 'blue' && stored[idOf('Zara')] === after.Zara && sql(`select preferences ->> 'icon_style' from public.club_households where owner_user_id = '${USER.id}'`) === 'hand-drawn', JSON.stringify(stored));
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('[data-family-colors] select');
@@ -988,6 +989,12 @@ scenarios.familyColors = async (browser) => {
   check('the rest of her family still saved, no colors stored', sql(`select preferences ? 'colors' from public.club_households where owner_user_id = '${USER.id}'`) === 'f'
     && sql(`select preferences ->> 'icon_style' from public.club_households where owner_user_id = '${USER.id}'`) === 'hand-drawn');
   check('the picker shows what is actually in effect (standard colors)', await old.locator('[data-family-colors] li', { hasText: 'Emeka' }).locator('select').inputValue() !== 'teal');
+  // A save where she didn't touch the colors: nothing of hers is lost, so just "Saved."
+  await old.reload({ waitUntil: 'networkidle' });
+  await old.waitForSelector('[data-family-colors] select');
+  await old.click('button:has-text("Save our family")');
+  await old.waitForSelector('[role=status]:has-text("Saved"), [data-colors-not-saved]', { timeout: 10000 }).catch(() => undefined);
+  check('an ordinary save (colors untouched) just says Saved', await old.isVisible('[role=status]:has-text("Saved")') && !(await old.isVisible('[data-colors-not-saved]')));
   check('no script errors', old.errors.length === 0, old.errors.join(' | '));
   await old.context().close();
 };

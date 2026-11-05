@@ -20,14 +20,14 @@ One US Letter page when it fits at the normal type size; a second only when a fa
 | Section | What's on it |
 | --- | --- |
 | Family identity | Month and family name, "Our Family Focus", and every member's name beside their marker color |
-| Our shared focus | One focus from her answers (January's Family Meeting habit when she gave too little), one encouraging line, and her answers behind it, once |
-| Small habits worth trying | **One or two experiments** (never assignments): who (with their colors), her wish behind it, the action, when (confirmed by her answers, or "When, your pick:" options), an ownership move and a support. Groups for shared routines or a shared activity show each child's own version. At most two "already does" lines, then the grown-ups' question |
-| Our Words of the Week | Four authored words, one per week, for the calendar's Word of the Week space (`focusPage.words` in the month's content). A fifth week can repeat one |
+| Our shared focus | One focus from her answers (January's Family Meeting habit when she gave too little) and one encouraging line. Her answers aren't repeated back |
+| Small habits worth trying | **One or two experiments** (never assignments): who (with their colors), **what** to try, **when** (one trigger: "Choose one: … Keep it the same each time." unless her answers confirm it) and **ownership**. A support only for shared routines and environment-led habits. Thin intake: the meeting habit plus a concrete idea for every child now, marked "Something to consider". Groups for shared routines or a shared activity show each child's own version. At most two "already does" lines, then the grown-ups' question |
+| Our Words of the Week | Four authored words, one for each week's meeting about the same focus (not four lessons or four habits), for the calendar's Word of the Week space. Backgrounds are four tints of the month's calendar color (`src/lib/club/month-tints.ts`, from `src/theme.ts` `monthColors`; January `#CDDDE1`), separate from person colors |
 | Bring it to your Family Meeting | Talk about the focus · choose · celebrate · adjust · add it to the wall calendar |
 
 **Grouping** (`src/lib/club/habits/recommend.ts`): individual experiments for smaller families; children who share a
 named activity are grouped by the activity, whatever their ages; otherwise a shared routine from `theme.sharedFrom`
-children (January: 3), or 4 when she named a wish inside the focus. Adaptations keep each child's ability level.
+children (January: 3), or 4 when she named a wish inside the focus. A shared routine is one routine with one set of triggers; each child gets their age's part of it (`shared.parts` in the library), and a child who already takes care of that job is recognized, not added.
 
 **Colors** (`src/data/club/family-colors.ts`): marker colors auto-assigned children first, saved by member id in
 `preferences.colors` when she changes them on her family page, so they stay the same every month. Always shown with the

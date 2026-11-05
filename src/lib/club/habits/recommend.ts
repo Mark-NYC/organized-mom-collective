@@ -36,6 +36,9 @@ export interface Recommendation {
 
 interface Candidate { child: ChildContext; itemId: string; score: number; source: HabitExperiment['source']; habit: StageHabit; simpler: boolean }
 
+/** Moments to choose from: the family picks one and keeps it. */
+const anchorOptions = (list: readonly string[]): ExperimentAnchor => ({ text: list.join(' or '), verified: false, options: [...list] });
+
 /** The moment to anchor to: her own information if it confirms one, else options to discuss. */
 function anchorFor(itemId: string, habit: StageHabit, child: ChildContext, ctx: FamilyContext, theme: MonthTheme): ExperimentAnchor {
   const item = habitItem(itemId)!;
@@ -47,8 +50,8 @@ function anchorFor(itemId: string, habit: StageHabit, child: ChildContext, ctx: 
     return { text: names.length ? `${join(names)} evenings, before ${activity.name}` : `the evening before each ${activity.name}`, verified: true };
   }
   const options = habit.anchors.map((a) => a.replaceAll('{activity}', ''));
-  if (item.school && child.inSchool && theme.schoolInSession) return { text: `on ${ctx.schoolWord} nights, ${options.join(' or ')}`, verified: true };
-  return { text: options.join(' or '), verified: false };
+  if (item.school && child.inSchool && theme.schoolInSession) return { text: `on ${ctx.schoolWord} nights, ${options.join(' or ')}`, verified: true, lead: `on ${ctx.schoolWord} nights`, options };
+  return { text: options.join(' or '), verified: false, options };
 }
 
 export function recommendHabits(ctx: FamilyContext, theme: MonthTheme, focus: Opportunity, why: { title: string; source: 'priority' | 'challenge' | 'growth' | 'month' }): Recommendation {
@@ -117,9 +120,10 @@ export function recommendHabits(ctx: FamilyContext, theme: MonthTheme, focus: Op
     return {
       key: `exp:shared:${id}`, itemId: id, memberIds: s.map((c) => c.child.id), who: join(s.map((c) => c.child.name)), title,
       why: reason({ ...first, child: { ...first.child, wishes: [] } }) || `${why.title}.`, basis: 'need', action: f(shared.action),
-      anchor: list.every((c) => c.habit && habitItem(id)?.activity) ? anchorFor(id, first.habit, first.child, ctx, theme) : { text: (shared.anchors ?? first.habit.anchors).join(' or '), verified: false },
+      anchor: list.every((c) => c.habit && habitItem(id)?.activity) ? anchorFor(id, first.habit, first.child, ctx, theme) : anchorOptions(shared.anchors ?? first.habit.anchors),
       ownership: f(shared.ownership), ...(shared.support ? { support: f(shared.support) } : {}),
-      adaptations: s.map((c) => ({ memberId: c.child.id, name: c.child.name, action: fill(c.habit.action, c.child) })),
+      // Each child's part of the same routine, at the same moment (the stage's own habit only when the routine has none).
+      adaptations: s.map((c) => ({ memberId: c.child.id, name: c.child.name, action: fill(shared.parts?.[c.child.stage] ?? c.habit.action, c.child) })),
       principle: first.habit.principle, source: s.some((c) => c.source === 'desired') ? 'desired' : first.source,
     };
   };
@@ -129,13 +133,15 @@ export function recommendHabits(ctx: FamilyContext, theme: MonthTheme, focus: Op
   const byActivity = new Map<string, Candidate[]>();
   for (const c of gear) { const n = c.child.activities[0]?.name; if (n) byActivity.set(n.toLowerCase(), [...(byActivity.get(n.toLowerCase()) ?? []), c]); }
   const sharedActivity = [...byActivity.values()].find((l) => l.length >= 2);
-  const sharedPick = [...byItem].filter(([id]) => habitItem(id)?.shared).sort((a, b) => b[1].length - a[1].length || b[1].reduce((n, x) => n + x.score, 0) - a[1].reduce((n, x) => n + x.score, 0))[0];
+  // Only children who don't already take care of that kind of job count toward (or join) a shared routine.
+  const sharedPick = [...byItem].filter(([id]) => habitItem(id)?.shared).map(([id, l]) => [id, l.filter((c) => !c.child.owns.includes(habitItem(id)!.category))] as [string, Candidate[]]).sort((a, b) => b[1].length - a[1].length || b[1].reduce((n, x) => n + x.score, 0) - a[1].reduce((n, x) => n + x.score, 0))[0];
   if (sharedActivity) {
     const name = sharedActivity[0].child.activities[0].name;
     grouped = { exp: group('activity-gear', sharedActivity, { title: '', action: `Each child packs their own gear for ${name}.`, ownership: 'Each child keeps a gear checklist, in words or pictures.', support: 'One gear bag per child that lives in one spot.' }, `Ready for ${name}`), ids: sharedActivity.map((c) => c.child.id), category: 'belongings' };
   } else if (sharedPick && sharedPick[1].length >= (cands.some((c) => c.child.wishes.includes(c.itemId)) ? Math.max(theme.sharedFrom, 4) : theme.sharedFrom)) {
     // A routine several children share, unless she named a wish for a child in this focus: then individual ideas
     // serve her better, and grouping waits for a larger family.
+    // Children who already take care of this kind of job are recognized (above), not given it again.
     const [id, list] = sharedPick;
     grouped = { exp: group(id, list, habitItem(id)!.shared!, habitItem(id)!.shared!.title), ids: list.map((c) => c.child.id), category: habitItem(id)!.category };
   }
@@ -159,27 +165,40 @@ export function recommendHabits(ctx: FamilyContext, theme: MonthTheme, focus: Op
   return { experiments: chosen.map(experiment), recognized, notes };
 }
 
-/** A family who told us too little: one shared habit (the month's), and at most one clearly framed idea to consider. */
+/** A family who told us too little: the month's shared habit (the meeting), and one clearly framed idea to consider. */
 export function starterHabits(ctx: FamilyContext, theme: MonthTheme, sharedId: string, considerId?: string): Recommendation {
   const shared = habitItem(sharedId)?.shared;
   const experiments: HabitExperiment[] = [];
   if (shared) {
     experiments.push({
       key: `exp:shared:${sharedId}`, itemId: sharedId, memberIds: [], who: 'Everyone', title: shared.title, why: '', basis: 'consider',
-      action: shared.action, anchor: { text: (shared.anchors ?? []).join(' or '), verified: false }, ownership: shared.ownership,
+      action: shared.action, anchor: anchorOptions(shared.anchors ?? []), ownership: shared.ownership,
       ...(shared.support ? { support: shared.support } : {}), principle: 'consistency', source: 'month',
     });
   }
-  // The oldest child with a known age and a fitting version: one idea, clearly "to consider".
-  const kid = considerId ? ctx.children.filter((c) => c.age !== null && fits(considerId, c, theme)).sort((a, b) => (b.age ?? 0) - (a.age ?? 0))[0] : undefined;
-  if (kid && considerId && experiments.length < theme.maxExperiments) {
-    const h = habitItem(considerId)!.byStage[kid.stage]!;
-    const f = (t: string) => t.replaceAll('{name}', kid.name);
-    experiments.push({
-      key: `exp:${kid.id}:${considerId}`, itemId: considerId, memberIds: [kid.id], who: `${kid.name}, ${kid.age}`, title: habitItem(considerId)!.title, why: '', basis: 'consider',
-      action: f(h.action), anchor: { text: h.anchors.join(' or '), verified: false }, ownership: f(h.ownership), ...(h.support ? { support: f(h.support) } : {}),
-      principle: h.principle, source: 'month',
-    });
+  // Every child with a known age gets a concrete idea now, clearly "to consider" (not a known need): responsibility
+  // doesn't wait for the meeting habit. Several children: one shared routine, each child's part by age.
+  const item = considerId ? habitItem(considerId) : undefined;
+  const kids = item ? ctx.children.filter((c) => c.age !== null && fits(item.id, c, theme)).sort((a, b) => (a.age ?? 0) - (b.age ?? 0)) : [];
+  if (item && kids.length && experiments.length < theme.maxExperiments) {
+    const f = (t: string, c: ChildContext) => t.replaceAll('{name}', c.name);
+    if (kids.length > 1 && item.shared) {
+      experiments.push({
+        key: `exp:shared:${item.id}`, itemId: item.id, memberIds: kids.map((k) => k.id), who: join(kids.map((k) => k.name)), title: item.shared.title, why: '', basis: 'consider',
+        action: item.shared.action, anchor: anchorOptions(item.shared.anchors ?? item.byStage[kids[0].stage]!.anchors), ownership: item.shared.ownership,
+        ...(item.shared.support ? { support: item.shared.support } : {}),
+        adaptations: kids.map((k) => ({ memberId: k.id, name: k.name, action: f(item.shared!.parts?.[k.stage] ?? item.byStage[k.stage]!.action, k) })),
+        principle: 'consistency', source: 'month',
+      });
+    } else {
+      const kid = kids[kids.length - 1];
+      const h = item.byStage[kid.stage]!;
+      experiments.push({
+        key: `exp:${kid.id}:${item.id}`, itemId: item.id, memberIds: [kid.id], who: `${kid.name}, ${kid.age}`, title: item.title, why: '', basis: 'consider',
+        action: f(h.action, kid), anchor: anchorOptions(h.anchors), ownership: f(h.ownership, kid), ...(h.support ? { support: f(h.support, kid) } : {}),
+        principle: h.principle, source: 'month',
+      });
+    }
   }
   return { experiments, recognized: [], notes: [] };
 }

@@ -45,7 +45,9 @@ export interface HabitItem {
   activity?: boolean;
   byStage: Partial<Record<GuideStage, StageHabit>>;
   /** For a whole family doing it together (larger families): one routine, adapted by age. */
-  shared?: { title: string; action: string; ownership: string; support?: string; anchors?: readonly string[] };
+  /** For several children doing it together: one routine, one set of triggers (the family picks one), and each age's
+   * part of that same routine (never a different habit). */
+  shared?: { title: string; action: string; ownership: string; support?: string; anchors?: readonly string[]; parts?: Partial<Record<GuideStage, string>> };
 }
 
 /** A month's responsibility outcome and limits. Month content supplies it; selection reads it. */
@@ -80,6 +82,10 @@ export interface ExperimentAnchor {
   text: string;
   /** True only when the family's own information establishes the moment (her school or activity days). */
   verified: boolean;
+  /** The moments to choose from: the family picks one and keeps it the same each time. */
+  options?: readonly string[];
+  /** What her information confirms, before the options ("on school nights"). */
+  lead?: string;
 }
 
 /** One habit experiment: a suggestion to discuss and try, never an assignment. */

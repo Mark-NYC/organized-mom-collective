@@ -34,17 +34,17 @@ const { month } = Astro.props;
 .mg-sheet h3{margin:0 0 6px;font:400 20px/1.15 var(--font-serif);color:#3f3b39}
 .mg-measure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none}
 @media print{.mg-measure{display:none!important}}
-.mg-head{display:grid;gap:6px;padding-bottom:12px;border-bottom:1px solid #D5C5B8}
+.mg-head{display:grid;gap:6px;padding-bottom:12px;border-bottom:2px solid var(--mg-base,#D5C5B8)}
 .mg-head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
-.mg-kicker{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#96666b}
+.mg-kicker{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mg-accent,#96666b)}
 .mg-title{margin:0;font:400 36px/1.05 var(--font-serif);letter-spacing:-.01em;color:#3f3b39}
 .mg-sub{color:#545454;font-size:12.5px}
 .mg-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 12px;max-width:360px}
 .mg-chip{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:12px;color:#3f3b39}
 .mg-dot{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;flex:none}
 /* The shared focus: the page's centerpiece. */
-.mg-focus{padding:16px 20px;background:#D4DFC4;border-radius:8px;display:grid;gap:4px}
-.mg-focus .mg-label{color:#4d5e42}
+.mg-focus{padding:16px 20px;background:var(--mg-wash,#D4DFC4);border-radius:8px;display:grid;gap:4px}
+.mg-focus .mg-label{color:var(--mg-accent,#4d5e42)}
 .mg-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#96666b}
 .mg-focus-title{font:400 28px/1.15 var(--font-serif);color:#3f3b39}
 .mg-focus-opp{font-size:13.5px;color:#3f3b39}
@@ -61,7 +61,7 @@ const { month } = Astro.props;
 .mg-exp-why{font-size:11px;color:#6e6461}
 .mg-exp-action{font-size:13.5px;font-weight:600;color:#3f3b39}
 .mg-exp-line{font-size:12px}
-.mg-exp-line b{font-weight:600;color:#96666b}
+.mg-exp-line b{font-weight:600;color:var(--mg-accent,#96666b)}
 .mg-exp-adapt{list-style:none;margin:2px 0;padding:0;display:grid;gap:4px;font-size:12px}
 .mg-exp-adapt li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start}
 .mg-discover{padding:10px 14px;border-radius:6px;background:#fff;border:1px solid #D5C5B8}
@@ -71,14 +71,14 @@ const { month } = Astro.props;
 .mg-small{font-size:11.5px;color:#545454}
 /* Words of the Week: four, easy to copy onto the calendar. */
 .mg-words{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.mg-words li{padding:10px 12px;border-radius:8px;background:#CDDDE1;display:grid;gap:2px;align-content:start}
-.mg-words li:nth-child(2){background:#F1D8A8}
-.mg-words li:nth-child(3){background:#E8D2D6}
-.mg-words li:nth-child(4){background:#BBCBC4}
-.mg-week{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#545454}
+.mg-words li{padding:10px 12px;border-radius:8px;background:var(--mg-w1);display:grid;gap:2px;align-content:start}
+.mg-words li:nth-child(2){background:var(--mg-w2)}
+.mg-words li:nth-child(3){background:var(--mg-w3)}
+.mg-words li:nth-child(4){background:var(--mg-w4)}
+.mg-week{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mg-accent,#545454)}
 .mg-words strong{font:400 22px/1.1 var(--font-serif);color:#3f3b39}
 .mg-words span:last-child{font-size:11.5px;color:#3f3b39}
-.mg-bring{padding:11px 16px;border-radius:8px;border:1.5px dashed #D8B79F;font-size:12px}
+.mg-bring{padding:11px 16px;border-radius:8px;border:1.5px dashed var(--mg-base,#D8B79F);font-size:12px}
 .mg-foot{margin-top:auto!important;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
 /* Larger shared habits: tighter. Never under 10px. */
 .mg-sheet.mg-dense{gap:12px}

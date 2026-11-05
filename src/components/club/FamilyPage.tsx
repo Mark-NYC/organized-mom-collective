@@ -74,7 +74,7 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
         household={household}
         mode={mode}
         submitLabel={mode === 'start' ? startLabel : 'Save our family'}
-        onSave={async (input) => {
+        onSave={async (input, { colorsChanged }) => {
           let h: Household;
           try {
             h = await ctx.store.saveHousehold(input);
@@ -82,7 +82,8 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
           } catch (e) {
             if (!(e instanceof ColorsNotSavedError)) throw e;
             h = e.household;
-            setColorsNotSaved(true);
+            // Nothing of hers is lost when she didn't pick a color: the automatic ones simply stay automatic.
+            setColorsNotSaved(colorsChanged);
           }
           if (mode === 'start') {
             clubNav().go(ctx.href(kit ? routes.clubKit(kit.slug) : routes.clubDashboard));

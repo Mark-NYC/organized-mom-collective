@@ -4,6 +4,8 @@
  * controller (`clubPlan`, src/lib/club/plan/resource.ts) the shared rail, phone screen, approval and print use.
  * Presentation only: what it says comes from ./generate.ts and the month's content.
  */
+import { anchorLine } from './anchor';
+import { monthTints } from '../month-tints';
 import { guideMonth } from '../../../data/club/meeting-guides';
 import { routes } from '../../../routes';
 import { el } from '../plan/dom';
@@ -51,19 +53,19 @@ function blocks(g: MeetingGuide, monthLabel: string) {
   const focusBox = el('section', { class: 'mg-focus' },
     el('p', { class: 'mg-label' }, 'Our shared focus'),
     el('p', { class: 'mg-focus-title' }, focus?.title ?? ''),
-    ...(focus?.opportunity ? [el('p', { class: 'mg-focus-opp' }, focus.opportunity)] : []),
-    ...(focus?.because ? [el('p', { class: 'mg-focus-because' }, `From your answers: ${focus.because}.`)] : []));
+    ...(focus?.opportunity ? [el('p', { class: 'mg-focus-opp' }, focus.opportunity)] : []));
 
   const experiment = (e: MeetingGuide['experiments'][number]) => {
     const card = el('li', { class: 'mg-exp' },
       el('p', { class: 'mg-exp-who' }, ...(e.memberIds.length ? e.memberIds.map((id) => chip(g, id, false)) : everyone.map((id) => chip(g, id, false))), el('strong', {}, e.who)),
       el('p', { class: 'mg-exp-title' }, e.title),
-      ...(e.wish ? [el('p', { class: 'mg-exp-why' }, e.wish)] : e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mg-exp-why' }, g.considerLabel)] : []),
+      ...(e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mg-exp-why' }, g.considerLabel)] : []),
       el('p', { class: 'mg-exp-action' }, e.action),
       ...(e.adaptations ? [el('ul', { class: 'mg-exp-adapt' }, ...e.adaptations.map((x) => el('li', {}, chip(g, x.memberId), el('span', {}, x.action))))] : []),
-      ...(e.anchor.text ? [el('p', { class: 'mg-exp-line' }, ...(e.anchor.verified ? [el('b', {}, 'When: '), `${e.anchor.text.charAt(0).toUpperCase()}${e.anchor.text.slice(1)}.`] : [el('b', {}, `${g.anchorOptions}: `), `${e.anchor.text}.`]))] : []),
+      ...(e.anchor.text ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'When: '), anchorLine(e.anchor))] : []),
       el('p', { class: 'mg-exp-line' }, el('b', {}, 'Ownership: '), e.ownership),
-      ...(e.support ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'Help: '), e.support)] : []));
+      // A support only where it changes the odds: shared routines and environment-led habits.
+      ...(e.support && (e.adaptations || e.principle === 'environment') ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'Help: '), e.support)] : []));
     return card;
   };
   const habits = el('section', { class: 'mg-part' },
@@ -83,10 +85,16 @@ function blocks(g: MeetingGuide, monthLabel: string) {
   return { head, focusBox, habits, words, bring };
 }
 
-function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front' | 'back', end: boolean): HTMLElement {
+function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front' | 'back', end: boolean, month: string): HTMLElement {
   // Fixed tiers by group size instead of shrinking type: 5–6 children in a shared habit tighter, 7+ in three columns.
   const dense = kids >= 7 ? ' mg-dense mg-xdense' : kids >= 5 ? ' mg-dense' : '';
   const s = el('article', { class: `mg-sheet${dense}` }, ...children, el('p', { class: 'mg-foot' }, foot));
+  // The month's own calendar color, in tints (src/lib/club/month-tints.ts): the words, the focus wash, small labels.
+  const t = monthTints(month);
+  t.weeks.forEach((w, i) => s.style.setProperty(`--mg-w${i + 1}`, w));
+  s.style.setProperty('--mg-wash', t.wash);
+  s.style.setProperty('--mg-base', t.base);
+  s.style.setProperty('--mg-accent', t.accent);
   s.dataset.planSheet = side;
   if (end) s.dataset.planSheetEnd = '';
   return s;
@@ -99,15 +107,15 @@ function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front
 function sheets(g: MeetingGuide, monthLabel: string, measure: HTMLElement): HTMLElement[] {
   const n = Math.max(0, ...g.experiments.map((e) => e.adaptations?.length ?? 0));
   const b = blocks(g, monthLabel);
-  const one = sheet(n, [b.head, b.focusBox, b.habits, b.words, b.bring], `${g.familyName} · Organized Family Club`, 'front', true);
+  const one = sheet(n, [b.head, b.focusBox, b.habits, b.words, b.bring], `${g.familyName} · Organized Family Club`, 'front', true, g.plan.month);
   measure.replaceChildren(one);
   const fits = one.scrollHeight <= one.clientHeight + 1;
   measure.replaceChildren();
   if (fits) return [one];
   const c = blocks(g, monthLabel);
   return [
-    sheet(n, [c.head, c.focusBox, c.habits], 'Our Words of the Week are on the back →', 'front', false),
-    sheet(n, [c.words, c.bring], `${g.familyName} · Organized Family Club`, 'back', true),
+    sheet(n, [c.head, c.focusBox, c.habits], 'Our Words of the Week are on the back →', 'front', false, g.plan.month),
+    sheet(n, [c.words, c.bring], `${g.familyName} · Organized Family Club`, 'back', true, g.plan.month),
   ];
 }
 
