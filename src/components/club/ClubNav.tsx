@@ -13,7 +13,7 @@
  */
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { createPortal } from 'react-dom';
-import { CLUB_NAME, clubAccountsEnabled } from '../../data/club/config';
+import { clubAccountsEnabled } from '../../data/club/config';
 import { getSession, signOut } from '../../lib/account';
 import { loadMembership } from '../../lib/club/membership';
 import { kitProgress } from '../../lib/club/onboarding';
@@ -77,9 +77,7 @@ function ClubHeader({ current }: { current?: ClubNavItem | null }): ReactElement
   }, [open]);
 
   const brand = (
-    <a href={routes.appClub} className="flex-none py-1 font-serif text-[1.02rem] leading-tight text-warm-ink">
-      <span className="max-[380px]:hidden">{CLUB_NAME}</span><span className="hidden max-[380px]:inline">Family Club</span>
-    </a>
+    <a href={routes.appClub} aria-label="Organized Family Club home" className="flex min-w-0 flex-none items-center py-1"><img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width={403} height={91} className="block h-auto w-[155px] max-w-[42vw] object-contain object-left sm:w-[195px]" /></a>
   );
 
   if (journey && journey !== 'done') {
