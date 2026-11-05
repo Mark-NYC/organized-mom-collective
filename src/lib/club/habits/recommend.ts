@@ -106,28 +106,45 @@ export function recommendHabits(ctx: FamilyContext, theme: MonthTheme, focus: Op
     };
   };
 
-  // Larger families: one shared routine, adapted by age, for the behavior that fits the most children.
+  // Groups: children who share an activity she named (whatever their ages), or a routine that fits several children
+  // (from `sharedFrom`). One habit, each child's own version shown, so differences in ability aren't erased.
   const byItem = new Map<string, Candidate[]>();
   for (const c of cands) byItem.set(c.itemId, [...(byItem.get(c.itemId) ?? []), c]);
-  const sharedPick = [...byItem].filter(([id]) => habitItem(id)?.shared).sort((a, b) => b[1].length - a[1].length || b[1].reduce((n, x) => n + x.score, 0) - a[1].reduce((n, x) => n + x.score, 0))[0];
-  if (sharedPick && sharedPick[1].length >= theme.sharedFrom) {
-    const [id, list] = sharedPick;
-    const item = habitItem(id)!;
-    const shared = item.shared!;
+  const group = (id: string, list: Candidate[], shared: NonNullable<ReturnType<typeof habitItem>>['shared'] & object, title: string): HabitExperiment => {
     const s = list.slice().sort((a, b) => (a.child.age ?? 0) - (b.child.age ?? 0));
     const first = s[0];
-    for (const k of kids) if (!list.some((c) => c.child.id === k.id)) notes.push({ name: k.name, outcome: 'not part of the shared routine (no fitting version, or already does it)' });
+    const f = (t: string) => fill(t, first.child);
     return {
-      experiments: [{
-        key: `exp:shared:${id}`, itemId: id, memberIds: s.map((c) => c.child.id), who: join(s.map((c) => c.child.name)), title: shared.title,
-        why: reason({ ...first, child: { ...first.child, wishes: [] } }) || `${why.title}.`, basis: 'need', action: shared.action,
-        anchor: { text: (shared.anchors ?? first.habit.anchors).join(' or '), verified: false }, ownership: shared.ownership,
-        ...(shared.support ? { support: shared.support } : {}),
-        adaptations: s.map((c) => ({ memberId: c.child.id, name: c.child.name, action: fill(c.habit.action, c.child) })),
-        principle: first.habit.principle, source: first.source,
-      }],
-      recognized, notes,
+      key: `exp:shared:${id}`, itemId: id, memberIds: s.map((c) => c.child.id), who: join(s.map((c) => c.child.name)), title,
+      why: reason({ ...first, child: { ...first.child, wishes: [] } }) || `${why.title}.`, basis: 'need', action: f(shared.action),
+      anchor: list.every((c) => c.habit && habitItem(id)?.activity) ? anchorFor(id, first.habit, first.child, ctx, theme) : { text: (shared.anchors ?? first.habit.anchors).join(' or '), verified: false },
+      ownership: f(shared.ownership), ...(shared.support ? { support: f(shared.support) } : {}),
+      adaptations: s.map((c) => ({ memberId: c.child.id, name: c.child.name, action: fill(c.habit.action, c.child) })),
+      principle: first.habit.principle, source: s.some((c) => c.source === 'desired') ? 'desired' : first.source,
     };
+  };
+  let grouped: { exp: HabitExperiment; ids: string[]; category: string } | null = null;
+  // Same named activity: one preparation habit for the siblings who share it.
+  const gear = byItem.get('activity-gear') ?? [];
+  const byActivity = new Map<string, Candidate[]>();
+  for (const c of gear) { const n = c.child.activities[0]?.name; if (n) byActivity.set(n.toLowerCase(), [...(byActivity.get(n.toLowerCase()) ?? []), c]); }
+  const sharedActivity = [...byActivity.values()].find((l) => l.length >= 2);
+  const sharedPick = [...byItem].filter(([id]) => habitItem(id)?.shared).sort((a, b) => b[1].length - a[1].length || b[1].reduce((n, x) => n + x.score, 0) - a[1].reduce((n, x) => n + x.score, 0))[0];
+  if (sharedActivity) {
+    const name = sharedActivity[0].child.activities[0].name;
+    grouped = { exp: group('activity-gear', sharedActivity, { title: '', action: `Each child packs their own gear for ${name}.`, ownership: 'Each child keeps a gear checklist, in words or pictures.', support: 'One gear bag per child that lives in one spot.' }, `Ready for ${name}`), ids: sharedActivity.map((c) => c.child.id), category: 'belongings' };
+  } else if (sharedPick && sharedPick[1].length >= (cands.some((c) => c.child.wishes.includes(c.itemId)) ? Math.max(theme.sharedFrom, 4) : theme.sharedFrom)) {
+    // A routine several children share, unless she named a wish for a child in this focus: then individual ideas
+    // serve her better, and grouping waits for a larger family.
+    const [id, list] = sharedPick;
+    grouped = { exp: group(id, list, habitItem(id)!.shared!, habitItem(id)!.shared!.title), ids: list.map((c) => c.child.id), category: habitItem(id)!.category };
+  }
+  if (grouped) {
+    // A second, individual idea only for her wish for a child outside the group, in a different kind of job.
+    const extra = cands.filter((c) => !grouped!.ids.includes(c.child.id) && c.child.wishes.includes(c.itemId) && habitItem(c.itemId)!.category !== grouped!.category)
+      .sort((a, b) => b.score - a.score)[0];
+    for (const k of kids) if (!grouped.ids.includes(k.id) && extra?.child.id !== k.id) notes.push({ name: k.name, outcome: 'not part of the shared habit (no fitting version, or already does it)' });
+    return { experiments: [grouped.exp, ...(extra && theme.maxExperiments > 1 ? [experiment(extra)] : [])], recognized, notes };
   }
 
   // Otherwise: the best experiment, and a second only for a different child and a different kind of job.

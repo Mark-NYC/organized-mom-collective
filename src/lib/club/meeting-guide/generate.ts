@@ -14,6 +14,7 @@
  */
 import { RESPONSIBILITY_CATEGORIES, labelOf } from '../../../data/club/family-profile';
 import { habitItem } from '../../../data/club/habit-library';
+import { memberColors } from '../../../data/club/family-colors';
 import type { FamilyPlan } from '../family-plan';
 import type { Household } from '../profile';
 import { familyContext } from '../habits/context';
@@ -30,7 +31,13 @@ export interface GuideIdea {
   text: string;
 }
 
-export type GuideExperiment = HabitExperiment & GuideIdea;
+export type GuideExperiment = HabitExperiment & GuideIdea & {
+  /** Her own changes applied ("Change it"); `kept`: she marked it as a fit. Both still suggestions. */
+  edited: boolean;
+  kept: boolean;
+};
+
+export interface MemberColor { name: string; label: string; hex: string }
 
 export interface GuideRationale {
   focus: { id: string; score: number; parts: Record<'relevance' | 'impact' | 'readiness' | 'habit', number>; evidence: string[] }[];
@@ -57,6 +64,8 @@ export interface MeetingGuide {
   /** Under an experiment that's a common idea, not a need she reported. */
   considerLabel: string;
   experiments: GuideExperiment[];
+  /** Every suggestion, skipped ones included, for her review (the printable shows `experiments`). */
+  suggested: GuideExperiment[];
   anchorOptions: string;
   /** What someone already does: noticed, not added to. */
   recognized: GuideIdea[];
@@ -64,6 +73,9 @@ export interface MeetingGuide {
   grownUps: GuideIdea[];
   practice: GuideIdea[];
   checkIn: string;
+  /** Everyone's marker color, by member id (src/data/club/family-colors.ts). */
+  colors: Record<string, MemberColor>;
+  focusPage: GuideMonthContent['focusPage'];
   plan: FamilyPlan;
   rationale: GuideRationale;
   used: string[];
@@ -129,12 +141,27 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
   const rec = top
     ? recommendHabits(ctx, theme, primary, { title: ownWords ? `“${ctx.priorityNote}”` : primary.title, source: focusSource })
     : starterHabits(ctx, theme, content.starter.sharedId, content.starter.considerId);
-  const experiments = shown(rec.experiments.map((e) => ({ ...e, text: e.action })));
+  // Her choices: skipped ones are gone (shown()); changed ones carry her words; kept ones are marked.
+  const edits = state.edits ?? {};
+  const kept = new Set(state.kept ?? []);
+  const suggested: GuideExperiment[] = rec.experiments.map((e) => {
+    const ed = edits[e.key] ?? {};
+    const edited = Boolean(ed.title || ed.action || ed.anchor);
+    return {
+      ...e, text: ed.action || e.action, edited, kept: kept.has(e.key),
+      ...(ed.title ? { title: ed.title } : {}), ...(ed.action ? { action: ed.action } : {}),
+      // Her own "when" is hers: shown as she wrote it.
+      ...(ed.anchor ? { anchor: { text: ed.anchor, verified: true } } : {}),
+    };
+  });
+  const experiments = shown(suggested);
   const inExperiments = new Set(experiments.flatMap((e) => e.memberIds));
-  const recognized = shown(rec.recognized.map((r) => ({
+  // What children already do: at most two on the page (one family focus, not a report). Those outside this
+  // month's habits first: they can show the others how.
+  const recognized = shown([...rec.recognized].sort((a, b) => Number(inExperiments.has(a.memberId)) - Number(inExperiments.has(b.memberId))).map((r) => ({
     key: `keeps:${r.memberId}`,
     text: (inExperiments.has(r.memberId) ? content.keepsDoing : content.showHow).replaceAll('{name}', r.name).replace('{area}', r.area),
-  })));
+  }))).slice(0, 2);
   const askable = ctx.children.filter((c) => c.stage !== 'toddler' && !inExperiments.has(c.id) && !rec.recognized.some((r) => r.memberId === c.id));
   const partsDiscover = !askable.length ? null
     : primary.askFirst && !experiments.length ? primary.askFirst.replace('{names}', join(askable.map((c) => c.name)))
@@ -161,7 +188,7 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
     ...ctx.adults.filter((a) => !a.isHolder).flatMap((a) => {
       const cat = a.owns.find((x) => RESPONSIBILITY_CATEGORIES.some((c) => c.id === x));
       return cat ? [{ key: `keeps:${a.id}`, text: content.keepsDoing.replaceAll('{name}', a.name).replace('{area}', lower(labelOf(RESPONSIBILITY_CATEGORIES, cat))) }] : [];
-    }),
+    }).slice(0, Math.max(0, 2 - recognized.length)),
   ]);
 
   // ---- Let's Practice: the first step now, if it gets stuck, how to keep it going (nothing the experiments say) ----
@@ -188,7 +215,9 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
     people: ctx.children.map((c) => ({ id: c.id, name: c.name, stage: c.stage, age: c.age })),
     experimentsLabel: content.experimentsLabel, experimentsNote: content.experimentsNote,
     starterNote: top ? null : content.starterNote, considerLabel: content.considerNote,
-    experiments, anchorOptions: content.anchorOptions, recognized, partsDiscover, grownUps, practice, checkIn: content.checkIn, plan,
+    experiments, suggested, anchorOptions: content.anchorOptions, recognized, partsDiscover, grownUps, practice, checkIn: content.checkIn,
+    colors: Object.fromEntries(Object.entries(memberColors(household)).map(([id, c]) => [id, { name: household.members.find((m) => m.id === id)?.firstName.trim() ?? '', label: c.label, hex: c.hex }])),
+    focusPage: content.focusPage, plan,
     rationale: {
       focus: top ? [{ id: top.o.id, score: top.score, parts: top.parts, evidence: top.evidence }] : [{ id: content.fallback.id, score: 0, parts: { relevance: 0, impact: 0, readiness: 0, habit: 0 }, evidence: [] }],
       considered: scored.slice(1).map((s) => ({ id: s.o.id, score: s.score, why: `Score ${s.score} vs ${top!.score}` })),
@@ -201,6 +230,6 @@ export function generateMeetingGuide(input: GuideInput): MeetingGuide {
 /** Everything that prints, as a stable string: approval is checked against it. */
 export const guideFingerprint = (g: MeetingGuide) => JSON.stringify([
   g.familyName, g.focus, g.talk, g.talkLittle, g.experiments.map((e) => [e.who, e.title, e.why, e.action, e.anchor, e.ownership, e.support, e.adaptations]),
-  g.recognized, g.partsDiscover, g.grownUps, g.practice,
+  g.recognized, g.partsDiscover, g.grownUps, g.practice, g.colors,
 ]);
 

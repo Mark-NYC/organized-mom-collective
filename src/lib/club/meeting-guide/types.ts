@@ -50,4 +50,15 @@ export interface GuideMonthContent {
   grownUps: string;
   practice: { tryNow: string; adjustmentLead: string; sustain: Record<'reminders' | 'default', string> };
   checkIn: string;
+  /** The Monthly Family Focus page. */
+  focusPage: {
+    title: string;
+    /** What the month's practical resource is about, in one line (the Focus reinforces it, never duplicates it). */
+    monthPurpose: string;
+    /** Four authored Words of the Week, one short family question each, for the calendar's Word of the Week space. */
+    words: readonly { word: string; question: string }[];
+    wordsNote: string;
+    /** Bring it to your Family Meeting: a few short prompts. */
+    bringIt: readonly string[];
+  };
 }

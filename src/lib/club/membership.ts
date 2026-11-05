@@ -44,7 +44,7 @@ export function introPlan(now = new Date()) {
     benefits: [
       { lead: 'A personalized Family Vision print,', detail: 'mailed free when you join.' },
       founding
-        ? { lead: `Your ${CLUB_PROGRAM_START.label.split(' ')[0]} Family Meeting Companion,`, detail: 'personalized with your family’s names, printed and mailed free.' }
+        ? { lead: `Your ${CLUB_PROGRAM_START.label.split(' ')[0]} Family Focus,`, detail: 'personalized with your family’s names, printed and mailed free.' }
         : { lead: 'This month’s family kit,', detail: 'personalized with your family’s names, printed and mailed free.' },
       { lead: 'A fresh family resource every month,', detail: 'tackling one real-life challenge with practical tools that help kids develop independence and responsibility.' },
       { lead: 'Your personalized tools online,', detail: 'ready to access anytime from your account.' },

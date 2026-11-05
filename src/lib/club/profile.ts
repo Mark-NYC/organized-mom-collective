@@ -38,6 +38,8 @@ export interface HouseholdPreferences {
   pets?: boolean;
   school?: 'public' | 'homeschool' | 'mixed';
   weekday_dinner?: string;
+  /** Member id → marker color id (src/data/club/family-colors.ts); colors not set here are auto-assigned. */
+  colors?: Record<string, string>;
   /** What she said matters most (src/data/club/onboarding.ts). Shown back to her; doesn't change suggestions. */
   priorities?: string[];
 }

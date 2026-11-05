@@ -9,6 +9,7 @@ import { ADULT_ROLES, CHILD_AGES, MONTH_NAMES } from '../../data/club/onboarding
 import { ageNow, birthFromAge, monthOf, validateHousehold, type Household, type MemberRole } from '../../lib/club/profile';
 import type { HouseholdInput, MemberInput } from '../../lib/club/store';
 import { householdIllustrationStyle, type IllustrationStyle } from '../../lib/club/illustration-style';
+import { MARKER_COLORS, memberColors } from '../../data/club/family-colors';
 
 interface Draft {
   key: string;
@@ -49,7 +50,7 @@ export function draftsFrom(h: Household | null, today: string): { me: Draft; adu
  * and `priorities` from the retired "What matters most right now?" question) are passed through untouched, so a
  * save never drops them; the family's priority is now step 6 of the profile (club_households.priority).
  */
-export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { displayName: string; pets: boolean; iconStyle?: IllustrationStyle }, base: Household['preferences'], today: string): HouseholdInput {
+export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { displayName: string; pets: boolean; iconStyle?: IllustrationStyle; colors?: Record<string, string> }, base: Household['preferences'], today: string): HouseholdInput {
   const member = (d: Draft, holder = false): MemberInput => {
     const common = { ...(d.id ? { id: d.id } : {}), firstName: d.firstName.trim(), kind: d.kind, role: d.role, ...(holder ? { isAccountHolder: true } : {}) };
     if (d.kind === 'adult') return common;
@@ -61,10 +62,13 @@ export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { dis
     }
     return Number.isNaN(age) ? common : { ...common, ...birthFromAge(age, today, month) };
   };
-  const { pets: _pets, ...keep } = base;
+  const { pets: _pets, colors: savedColors, ...keep } = base;
+  // Colors only for people still in the family (by their stable id); unset ones stay auto-assigned.
+  const ids = new Set([me, ...adults, ...kids].flatMap((d) => (d.id ? [d.id] : [])));
+  const colors = Object.fromEntries(Object.entries({ ...savedColors, ...extras.colors }).filter(([id]) => ids.has(id)));
   return {
     ...(extras.displayName.trim() ? { displayName: extras.displayName.trim() } : {}),
-    preferences: { ...keep, ...(extras.pets ? { pets: true } : {}), ...(extras.iconStyle ? { icon_style: extras.iconStyle } : {}) },
+    preferences: { ...keep, ...(extras.pets ? { pets: true } : {}), ...(extras.iconStyle ? { icon_style: extras.iconStyle } : {}), ...(Object.keys(colors).length ? { colors } : {}) },
     members: [member(me, true), ...adults.map((a) => member(a)), ...kids.map((k) => member(k))],
   };
 }
@@ -94,6 +98,8 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
   const [displayName, setDisplayName] = useState(household?.displayName ?? (mode === 'start' ? suggestedName ?? '' : ''));
   const [pets, setPets] = useState(Boolean(household?.preferences.pets));
   const [iconStyle, setIconStyle] = useState<IllustrationStyle>(householdIllustrationStyle(household?.preferences.icon_style));
+  // Everyone's marker color (auto-assigned; she can change any). Only for people already saved, since colors follow ids.
+  const [colors, setColors] = useState<Record<string, string>>(() => (household ? Object.fromEntries(Object.entries(memberColors(household)).map(([id, c]) => [id, c.id])) : {}));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [tried, setTried] = useState(false);
@@ -109,7 +115,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
     // Her welcome print and printed resources carry it, so the welcome flow asks for it.
     if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
-    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle }, household?.preferences ?? {}, today);
+    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle, colors }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
     setBusy(true);
@@ -258,6 +264,25 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
             <input type="checkbox" checked={pets} onChange={(e) => setPets(e.target.checked)} className="h-5 w-5 accent-[var(--color-warm-ink)]" />
             We have a pet (adds feeding to the jobs)
           </label>
+          {mode === 'edit' && household && household.members.some((m) => !m.archived) && (
+            <div className="mt-5" data-family-colors>
+              <span className="text-[0.95rem] font-semibold text-warm-ink">Family colors</span>
+              <span className="block text-[0.88rem] text-warm-soft">One marker color each, for your wall calendar and monthly Family Focus. Change any you like.</span>
+              <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+                {household.members.filter((m) => !m.archived).map((m) => (
+                  <li key={m.id} className="flex items-center gap-3">
+                    <span aria-hidden="true" className="inline-block h-5 w-5 flex-none rounded-full border border-warm-rule" style={{ background: MARKER_COLORS.find((c) => c.id === colors[m.id])?.hex }} />
+                    <label className="flex flex-1 items-center justify-between gap-2 text-[0.95rem] text-warm-ink">
+                      {m.firstName}
+                      <select className={`${select} max-w-[10rem]`} value={colors[m.id] ?? ''} onChange={(e) => setColors({ ...colors, [m.id]: e.target.value })}>
+                        {MARKER_COLORS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                      </select>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {mode === 'edit' && (
             <label className="mt-5 block">
               <span className="text-[0.95rem] font-semibold text-warm-ink">A name for your team</span>

@@ -15,7 +15,7 @@ const { month } = Astro.props;
       <h2 id="mg-editor-title">Make changes</h2>
       <button type="button" class="mg-editor-close" data-mg-close>Done</button>
     </header>
-    <p class="mg-editor-intro">Your guide updates as you go. Everything here is a suggestion: change anything that doesn’t fit your family.</p>
+    <p class="mg-editor-intro">Your Family Focus updates as you go.</p>
     <div data-mg-editor-body></div>
   </dialog>
 </div>
@@ -27,54 +27,71 @@ const { month } = Astro.props;
 .mg-frame{position:relative;flex:none;overflow:hidden;background:#fff;box-shadow:0 10px 28px #0002}
 .mg-frame > .mg-sheet{position:absolute;top:0;left:0;transform:scale(var(--mg-scale,1));transform-origin:top left}
 
-/* The sheet: 8.5 × 11 in at 96 px/in. Print (ClubPrintStyles) uses the same box at its real size. One sheet when it
-   all fits at these sizes; printable.ts adds a second only when it doesn't. */
-.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:40px 56px 28px;background:#fff;color:#3d3834;font:400 12.5px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:13px}
+/* The Monthly Family Focus: 8.5 × 11 in at 96 px/in; print (ClubPrintStyles) uses the same box. One sheet when it
+   all fits at these sizes; printable.ts adds a second only when it doesn't. OMC palette around strong marker colors. */
+.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:42px 54px 28px;background:#FBF7F1;color:#545454;font:400 12.5px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .mg-sheet p{margin:0}
-.mg-sheet h3{margin:0;font:400 19px/1.15 var(--font-serif);color:#3d3834}
+.mg-sheet h3{margin:0 0 6px;font:400 20px/1.15 var(--font-serif);color:#3f3b39}
 .mg-measure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none}
 @media print{.mg-measure{display:none!important}}
-.mg-head{border-bottom:1px solid #e7ddd4;padding-bottom:10px;display:grid;gap:3px}
+.mg-head{display:grid;gap:6px;padding-bottom:12px;border-bottom:1px solid #D5C5B8}
+.mg-head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
 .mg-kicker{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#96666b}
-.mg-title{margin:0;font:400 32px/1.08 var(--font-serif);letter-spacing:-.01em}
-.mg-sub{color:#4d4544;font-size:13.5px}
-.mg-howto{font-size:11.5px;color:#6e6461}
-.mg-part{display:flex;flex-direction:column;gap:7px}
-.mg-part-head{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
-.mg-num{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#b9c7ad;color:#fff;font-weight:700;font-size:13px}
-.mg-goal{color:#6e6461;font-size:11.5px;margin-top:1px!important}
+.mg-title{margin:0;font:400 36px/1.05 var(--font-serif);letter-spacing:-.01em;color:#3f3b39}
+.mg-sub{color:#545454;font-size:12.5px}
+.mg-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 12px;max-width:360px}
+.mg-chip{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:12px;color:#3f3b39}
+.mg-dot{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;flex:none}
+/* The shared focus: the page's centerpiece. */
+.mg-focus{padding:16px 20px;background:#D4DFC4;border-radius:8px;display:grid;gap:4px}
+.mg-focus .mg-label{color:#4d5e42}
 .mg-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#96666b}
-.mg-note{color:#6e6461;margin-left:36px!important}
-/* The focus: the page's centerpiece. */
-.mg-focus{margin-left:36px;padding:14px 18px;background:#f1f4ec;border-left:4px solid #9fb38f;border-radius:4px;display:grid;gap:3px}
-.mg-focus-title{font:400 24px/1.2 var(--font-serif)}
-.mg-focus-opp{color:#4d4544;font-size:13px}
-.mg-list{list-style:none;margin:0 0 0 36px;padding:0;display:grid;gap:5px}
-.mg-list li{position:relative;padding-left:16px}
-.mg-list li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:#d9b8b4}
-.mg-talk li{font-size:13px}
-/* Habit experiments: the centerpiece of Everyone's Part. */
-.mg-focus-because{font-size:11px;color:#6e6461}
-.mg-exps-head{margin-left:36px!important;color:#6e6461;font-size:11.5px}
-.mg-exps-head .mg-label{margin-right:6px}
-.mg-exps{list-style:none;margin:0 0 0 36px;padding:0;display:grid;grid-template-columns:1fr;gap:10px}
+.mg-focus-title{font:400 28px/1.15 var(--font-serif);color:#3f3b39}
+.mg-focus-opp{font-size:13.5px;color:#3f3b39}
+.mg-focus-because{font-size:11px;color:#55604c}
+.mg-part{display:flex;flex-direction:column;gap:6px}
+.mg-note{color:#6e6461;font-size:11.5px}
+/* Habits worth trying. */
+.mg-exps{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:1fr;gap:12px}
 .mg-exps--two{grid-template-columns:1fr 1fr}
-.mg-exp{padding:12px 14px;border-radius:6px;background:#fbf7f1;border-top:3px solid #b9c7ad;display:grid;gap:4px;align-content:start;break-inside:avoid}
-.mg-exp-head strong{font:400 17px/1.2 var(--font-serif)}
-.mg-exp-head span{font-weight:600}
-.mg-exp-why{font-size:11.5px;color:#6e6461}
-.mg-exp-action{font:italic 400 14px/1.4 var(--font-serif);color:#3d3834}
+.mg-exp{padding:13px 15px;border-radius:8px;background:#fff;border:1px solid #D5C5B8;display:grid;gap:4px;align-content:start;break-inside:avoid}
+.mg-exp-who{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.mg-exp-who strong{margin-left:4px;font-size:13px;color:#3f3b39}
+.mg-exp-title{font:400 18px/1.2 var(--font-serif);color:#3f3b39}
+.mg-exp-why{font-size:11px;color:#6e6461}
+.mg-exp-action{font-size:13.5px;font-weight:600;color:#3f3b39}
 .mg-exp-line{font-size:12px}
 .mg-exp-line b{font-weight:600;color:#96666b}
-.mg-exp-adapt{margin:0;padding-left:16px;display:grid;gap:2px;font-size:12px}
-.mg-discover{margin-left:36px!important;padding:10px 14px;border-radius:5px;background:#fbf7f1}
-.mg-recognized li{color:#536e4e}
-.mg-checkin{font-size:11.5px}
+.mg-exp-adapt{list-style:none;margin:2px 0;padding:0;display:grid;gap:4px;font-size:12px}
+.mg-exp-adapt li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start}
+.mg-discover{padding:10px 14px;border-radius:6px;background:#fff;border:1px solid #D5C5B8}
+.mg-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.mg-list li{position:relative;padding-left:14px}
+.mg-list li::before{content:'';position:absolute;left:0;top:.6em;width:5px;height:5px;border-radius:50%;background:#D8B79F}
+.mg-small{font-size:11.5px;color:#545454}
+/* Words of the Week: four, easy to copy onto the calendar. */
+.mg-words{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mg-words li{padding:10px 12px;border-radius:8px;background:#CDDDE1;display:grid;gap:2px;align-content:start}
+.mg-words li:nth-child(2){background:#F1D8A8}
+.mg-words li:nth-child(3){background:#E8D2D6}
+.mg-words li:nth-child(4){background:#BBCBC4}
+.mg-week{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#545454}
+.mg-words strong{font:400 22px/1.1 var(--font-serif);color:#3f3b39}
+.mg-words span:last-child{font-size:11.5px;color:#3f3b39}
+.mg-bring{padding:11px 16px;border-radius:8px;border:1.5px dashed #D8B79F;font-size:12px}
 .mg-foot{margin-top:auto!important;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
-/* Five or six children: tighter. Seven or more: three columns. Never under 10px. */
+/* Larger shared habits: tighter. Never under 10px. */
 .mg-sheet.mg-dense{gap:12px}
-.mg-dense .mg-exp-adapt{grid-template-columns:1fr 1fr;column-gap:14px}
+.mg-dense .mg-exp-adapt{grid-template-columns:1fr 1fr;column-gap:12px}
 .mg-xdense .mg-exp-adapt{grid-template-columns:repeat(3,1fr);font-size:11px}
+/* The editor's Keep / Change / Skip. */
+.mg-ed-exp{padding:12px 0;border-top:1px solid #efe7df;display:grid;gap:8px}
+.mg-ed-exp.is-skipped .mg-ed-name{text-decoration:line-through;color:#9a908c}
+.mg-ed-choices{display:flex;flex-wrap:wrap;gap:6px}
+.mg-ed-choice-btn{min-height:40px;padding:0 14px;border:1px solid #d9cfc6;border-radius:999px;background:#fff;font-weight:600;font-size:.88rem}
+.mg-ed-choice-btn[aria-pressed="true"]{background:var(--color-warm-button);border-color:var(--color-warm-button);color:#fff}
+.mg-ed-change{display:grid;gap:6px}
+.mg-ed-change textarea{padding:8px 10px;border:1px solid #d9cfc6;border-radius:4px;font:400 .95rem var(--font-sans);resize:vertical}
 
 /* The editor */
 .mg-editor{position:fixed;inset:0;margin:auto;height:fit-content;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid #e7ddd4;border-radius:8px;background:#fff;color:#3d3834}

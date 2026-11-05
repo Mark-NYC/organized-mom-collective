@@ -1,7 +1,7 @@
 # Habit intelligence (month-independent)
 
-How the Club turns a family's own answers into one or two small habit experiments, for any month. January's Family
-Meeting Companion is the first resource that uses it (docs/club/PERSONALIZATION.md).
+How the Club turns a family's own answers into one or two small habit experiments, for any month. January's
+Family Focus (formerly the Family Meeting Companion) is the first resource that uses it (docs/club/PERSONALIZATION.md).
 
 ## Four layers
 

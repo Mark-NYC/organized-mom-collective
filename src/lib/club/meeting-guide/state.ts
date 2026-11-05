@@ -23,13 +23,19 @@ export interface GuideState {
   v: 2;
   /** Per person: a corrected stage (an age not given, or a child who's ahead or behind). */
   people: Record<string, { stage?: GuideStage }>;
-  /** Ideas she took off the companion (their keys). */
+  /** Ideas she took off the companion (their keys): "Skip it". */
   hidden: string[];
+  /** Her changes to a suggestion ("Change it"): title, action or when, by key. Still a suggestion, not a commitment. */
+  edits?: Record<string, { title?: string; action?: string; anchor?: string }>;
+  /** Suggestions she marked "Keep it: this fits our family". A note for later months, not a commitment. */
+  kept?: string[];
   /** The profile answers used, kept so every view of this companion is the same. */
   profile?: GuideProfile;
   /** The ideas as structured data, written with every save. Read by later months; never read back here. */
   plan?: FamilyPlan;
 }
+
+export const MAX_EDIT = 160;
 
 export const emptyGuideState = (): GuideState => ({ v: 2, people: {}, hidden: [] });
 
@@ -57,6 +63,14 @@ export function isGuideState(v: unknown): v is GuideState {
   if (!s || typeof s !== 'object' || s.v !== 2) return false;
   if (!Array.isArray(s.hidden) || s.hidden.length > 200 || !s.hidden.every((k) => typeof k === 'string' && k.length <= 120)) return false;
   if (!s.people || typeof s.people !== 'object') return false;
+  if (s.kept !== undefined && (!Array.isArray(s.kept) || !s.kept.every((k) => typeof k === 'string' && k.length <= 120))) return false;
+  if (s.edits !== undefined) {
+    if (!s.edits || typeof s.edits !== 'object') return false;
+    for (const e of Object.values(s.edits)) {
+      if (!e || typeof e !== 'object') return false;
+      for (const v of [e.title, e.action, e.anchor]) if (v !== undefined && (typeof v !== 'string' || v.length > MAX_EDIT)) return false;
+    }
+  }
   for (const p of Object.values(s.people)) {
     if (!p || typeof p !== 'object') return false;
     if (p.stage !== undefined && !isGuideStage(p.stage)) return false;
