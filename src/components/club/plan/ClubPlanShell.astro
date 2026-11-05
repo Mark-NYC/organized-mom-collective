@@ -26,8 +26,10 @@ interface Props {
   sides?: string[];
   storageKey?: string;
   class?: string;
+  /** The Monthly Tool / Family Meeting switch. Off for a month whose tool is the Family Meeting guide (January). */
+  meeting?: boolean;
 }
-const { kitSlug, month, sides, storageKey, class: cls = '' } = Astro.props;
+const { kitSlug, month, sides, storageKey, class: cls = '', meeting = true } = Astro.props;
 const kit = kitBySlug(kitSlug);
 if (!kit) throw new Error(`Unknown kit ${kitSlug}`);
 ---
@@ -36,7 +38,7 @@ if (!kit) throw new Error(`Unknown kit ${kitSlug}`);
 <WelcomeKitConfirm client:only="react" kitSlug={kitSlug} />
 <div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={kitSlug} data-plan-month={month} data-plan-key={storageKey}>
   <ClubFamilyGate />
-  <ClubFamilyMeeting kitMonth={kit.month} />
+  {meeting && <ClubFamilyMeeting kitMonth={kit.month} />}
   <slot name="desktop" />
   <ClubPrintableProof sides={sides}><slot name="printable" /></ClubPrintableProof>
   <slot name="mobile" />

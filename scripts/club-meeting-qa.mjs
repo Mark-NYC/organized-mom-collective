@@ -20,7 +20,8 @@ const SHOTS = process.argv.find((a) => a.startsWith('--shots='))?.slice(8) ?? nu
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const DESKTOP = { width: 1440, height: 900 };
 const MOBILE = { width: 390, height: 844 };
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+// January's tool is the personalized Family Meeting guide itself (no separate meeting view): scripts/meeting-guide-qa.mjs.
+const MONTHS = ['february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 const COLORS = { january: '#CDDDE1', february: '#E8D2D6', march: '#C7DED3', april: '#DDD8E8', may: '#D4DFC4', june: '#F1D8A8', july: '#ECCBC2', august: '#DCCFAE', september: '#CDD2BC', october: '#D8B79F', november: '#D5C5B8', december: '#BBCBC4' };
 const SAMPLES = ['rivera', 'brooks', 'chen', 'okafor', 'hughes'];
 const LABELS = new Set(['Already doing', 'Suggested for us', 'Agreed by our family']);
@@ -141,7 +142,7 @@ try {
 
   console.log('\nFamilies');
   for (const sample of SAMPLES) {
-    for (const month of ['january', 'august']) {
+    for (const month of ['february', 'august']) {
       const page = await open(browser, MOBILE, `/app/club/${month}?sample=${sample}&view=meeting`);
       if (sample === 'hughes' || sample === 'okafor' || sample === 'brooks' || sample === 'chen' || sample === 'rivera') await meetingReady(page);
       const info = await page.evaluate(() => {
@@ -153,8 +154,6 @@ try {
       if (sample === 'brooks') check('single parent, no profile answers: Max (9) leads, not Jess; generic questions', /Max reads/.test(info.leader) && !/is part of our week|to be ready for/.test(info.text), info.leader);
       if (sample === 'hughes') check('one grown-up, no children: Claire leads a grown-ups’ meeting', /Claire reads/.test(info.leader));
       if (sample === 'chen') check('several grown-ups: the account holder (Mei) doesn’t lead', !/Mei reads/.test(info.leader), info.leader);
-      if (sample === 'rivera' && month === 'january') check('Rivera January: Sofia’s soccer, the evening before', /What could Sofia do on Mon and Wed evenings to be ready for Soccer on Tue and Thu\?/.test(info.text), info.text.slice(0, 600));
-      if (sample === 'chen' && month === 'january') check('Chen January: Grace and Owen’s swim team, from their own activity', /Check and pack my things for Swim team before bed/.test(info.text), info.text.slice(0, 900));
       check(`${sample} ${month}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
       await page.context().close();
     }
@@ -167,9 +166,9 @@ try {
     const people = await page.$$eval('[data-meeting-sheet] .fm-person', (p) => p.length);
     const fit = await printFit(page);
     check(`${month}: 12 people, fits one page (${Math.round(-fit.overflow)}px spare), smallest text ${fit.min.toFixed(1)}px`, people === 12 && fit.overflow <= 0.5 && fit.min >= 8.5, JSON.stringify(fit));
-    if (month === 'january') check('large family: the 1-year-old joins in with no job', await page.isVisible('[data-fm-screen] >> text=Joins in and watches'));
+    if (month === 'february') check('large family: the 1-year-old joins in with no job', await page.isVisible('[data-fm-screen] >> text=Joins in and watches'));
     check(`${month}: one page`, (await pdfPages(page)) === 1);
-    if (SHOTS && ['january', 'april'].includes(month)) {
+    if (SHOTS && ['february', 'april'].includes(month)) {
       await page.emulateMedia({ media: 'print' });
       await page.setViewportSize({ width: 816, height: 1056 });
       await page.locator('[data-meeting-sheet]').screenshot({ path: `${SHOTS}/print-large-${month}.png` });
@@ -180,7 +179,7 @@ try {
 
   if (SHOTS) {
     console.log('\nScreenshots');
-    for (const month of ['january', 'april', 'september', 'october']) {
+    for (const month of ['february', 'april', 'september', 'october']) {
       for (const [label, vp] of [['desktop', DESKTOP], ['mobile', MOBILE]]) {
         const page = await open(browser, vp, `/app/club/${month}?sample=rivera&view=meeting`);
         await meetingReady(page);

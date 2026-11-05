@@ -89,7 +89,8 @@ export const routes = {
   /** November's tool, public preview (the "I Own This Job" worksheet). */
   clubWorksheetGenerator: '/club/worksheet-generator',
   /** A month's Family Meeting (?view=meeting on its plan page; November has its own page). */
-  clubMeeting: (month: string) => month === 'november' ? '/app/club/november' : `/app/club/${month}?view=meeting`,
+  // November's page is its meeting; January's tool is the Family Meeting guide itself.
+  clubMeeting: (month: string) => month === 'november' || month === 'january' ? `/app/club/${month}` : `/app/club/${month}?view=meeting`,
   /** A site tool hosted inside the Club (src/data/club/tools.ts). */
   clubTool: (id: string) => `/club/tools/${id}`,
   home: '/',

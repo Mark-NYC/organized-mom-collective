@@ -1,0 +1,64 @@
+---
+/**
+ * A month's Family Meeting guide on phones and tablets (below 1100px): the shared ClubPlanScreen with the guide's
+ * own sections. Reads the guide only through the printable's controller (`[data-meeting-guide]`'s `clubPlan`,
+ * src/lib/club/meeting-guide/printable.ts); every row opens the same editor as the desktop's Make changes.
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+/** approvalKey: the same key the page gives the desktop rail, so approval agrees on both screens. */
+interface Props { deadline: string; kicker: string; approvalKey: string }
+const { deadline, kicker, approvalKey } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front', 'back']} previewNote="Two pages, ready to print">
+  <slot name="title" slot="title" />
+  <section class="cp-section" aria-labelledby="mgm-parts-title" data-mgm-approval={approvalKey}>
+    <h2 id="mgm-parts-title">How your meeting goes</h2>
+    <p class="cp-intro">Four parts, about ten minutes. The same four every month.</p>
+    <ul class="cp-group" data-mgm-parts></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mgm-people-title">
+    <h2 id="mgm-people-title">Everyone’s part</h2>
+    <p class="cp-intro">Prepared for each person’s age. Tap to change.</p>
+    <ul class="cp-group" data-mgm-people></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mgm-agree-title">
+    <h2 id="mgm-agree-title">What you’ll agree on</h2>
+    <ul class="cp-group" data-mgm-actions></ul>
+  </section>
+  <section class="cp-section" aria-labelledby="mgm-when-title">
+    <h2 id="mgm-when-title">When you meet</h2>
+    <ul class="cp-group" data-mgm-when></ul>
+  </section>
+</ClubPlanScreen>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen } from '../../lib/club/plan/screen';
+import type { GuidePlan } from '../../lib/club/meeting-guide/printable';
+import type { GuideState } from '../../lib/club/meeting-guide/state';
+
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-meeting-guide])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: GuidePlan }>('[data-meeting-guide]');
+if (root && host) {
+  const q = (sel: string) => root.querySelector<HTMLElement>(sel)!;
+  const row = (title: string, detail: string, locked: boolean) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked },
+      el('span', { class: 'cp-row-text' }, el('strong', {}, title), el('span', {}, detail)),
+      el('span', { class: 'cp-chev' }));
+    b.setAttribute('aria-label', `${title}: ${detail}. Change`);
+    b.addEventListener('click', () => host.clubPlan?.openEditor());
+    return el('li', {}, b);
+  };
+  mountPlanScreen<GuideState>({
+    root, host, approvalKey: q('[data-mgm-approval]').dataset.mgmApproval!,
+    render: (_screen, _state, locked) => {
+      const g = host.clubPlan?.guide();
+      if (!g) return;
+      q('[data-mgm-parts]').replaceChildren(...g.parts.map((p) => row(`${p.n}. ${p.title} · ${p.minutes} min`, `Led by ${p.leaderName}`, locked)));
+      q('[data-mgm-people]').replaceChildren(...g.people.map((p) => row(p.name, p.part?.text ?? 'Joins in and watches. No job yet.', locked)));
+      q('[data-mgm-actions]').replaceChildren(...g.actions.map((a) => row(a.text, a.finished, locked)));
+      q('[data-mgm-when]').replaceChildren(row('Every month', g.rhythm.when, locked));
+    },
+  });
+}
+</script>

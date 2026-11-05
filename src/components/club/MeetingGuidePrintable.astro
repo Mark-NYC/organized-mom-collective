@@ -1,0 +1,118 @@
+---
+/**
+ * A month's personalized Family Meeting guide on a Club plan page: two US Letter sheets drawn by
+ * src/lib/club/meeting-guide/printable.ts from the generator (src/lib/club/meeting-guide/generate.ts) and the month's
+ * content (src/data/club/meeting-guides/). Any month with guide content uses this component as is.
+ * Put it in ClubPlanShell's `printable` slot inside the data-plan-proof-body / data-plan-proof-scroll wrappers.
+ */
+interface Props { month: string }
+const { month } = Astro.props;
+---
+<div class="mg" data-meeting-guide data-guide-month={month}>
+  <div class="mg-pages" data-mg-pages><p class="mg-empty">Preparing your family’s guide…</p></div>
+  <dialog class="mg-editor" data-mg-editor aria-labelledby="mg-editor-title">
+    <header class="mg-editor-head">
+      <h2 id="mg-editor-title">Make changes</h2>
+      <button type="button" class="mg-editor-close" data-mg-close>Done</button>
+    </header>
+    <p class="mg-editor-intro">Your guide updates as you go. Everything here is a suggestion: change anything that doesn’t fit your family.</p>
+    <div data-mg-editor-body></div>
+  </dialog>
+</div>
+
+<style is:global>
+.mg{width:100%}
+.mg-pages{display:flex;flex-direction:column;align-items:center;gap:24px}
+.mg-empty{padding:40px 16px;text-align:center;color:var(--color-warm-soft)}
+.mg-frame{position:relative;flex:none;overflow:hidden;background:#fff;box-shadow:0 10px 28px #0002}
+.mg-frame > .mg-sheet{position:absolute;top:0;left:0;transform:scale(var(--mg-scale,1));transform-origin:top left}
+
+/* The sheet: 8.5 × 11 in at 96 px/in. Print (ClubPrintStyles) uses the same box at its real size. */
+.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:44px 52px 34px;background:#fff;color:#3d3834;font:400 12.5px/1.42 var(--font-sans);display:flex;flex-direction:column;gap:14px}
+.mg-sheet h3{margin:0;font:400 19px/1.2 var(--font-serif);color:#3d3834}
+.mg-head{border-bottom:1px solid #e7ddd4;padding-bottom:10px}
+.mg-kicker{margin:0 0 4px;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#96666b}
+.mg-title{margin:0;font:400 34px/1.1 var(--font-serif);letter-spacing:-.01em}
+.mg-sub{margin:4px 0 0;color:#6e6461}
+.mg-top{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
+.mg-prepare,.mg-map,.mg-agreed,.mg-rhythm{padding:12px 14px;border-radius:6px}
+.mg-prepare{background:#f1f4ec}
+.mg-map{background:#f8eeec}
+.mg-prepare h3,.mg-map h3,.mg-agreed h3,.mg-rhythm h3{font-size:15px;margin-bottom:6px}
+.mg-prepare ul,.mg-map ol,.mg-rhythm ul{margin:0;padding-left:16px;display:grid;gap:3px}
+.mg-map strong{font-weight:600}
+.mg-part{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid #e7ddd4}
+.mg-part-head{display:flex;align-items:baseline;gap:10px}
+.mg-num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#b9c7ad;color:#fff;font-weight:700;font-size:12px;align-self:center}
+.mg-min{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6e6461}
+.mg-led{margin-left:auto;font-size:11.5px;color:#6e6461}
+.mg-led strong{color:#3d3834}
+.mg-goal{margin:0;color:#6e6461}
+.mg-say{margin:0;font:italic 400 13.5px/1.45 var(--font-serif)}
+.mg-say span{font:600 10.5px var(--font-sans);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:#96666b}
+.mg-why{margin:0}
+.mg-questions{margin:0;padding-left:18px;display:grid;gap:2px;font-weight:500}
+.mg-lines{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.mg-lines li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline;padding:6px 8px;border-radius:4px;background:#fbf7f1;break-inside:avoid}
+.mg-lines strong{font-weight:700}
+.mg-lines em{display:block;font-style:normal;font-size:11px;color:#6e6461;margin-top:2px}
+.mg-bottom{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;margin-top:auto}
+.mg-agreed{background:#f1f4ec}
+.mg-agreed ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.mg-agreed li{display:grid;grid-template-columns:16px 1fr;gap:8px;align-items:start}
+.mg-agreed em{display:block;font-style:normal;font-size:11px;color:#6e6461}
+.mg-box{width:13px;height:13px;margin-top:2px;border:1.5px solid #3d3834;border-radius:2px}
+.mg-hint{margin:0 0 6px;font-size:11px;color:#6e6461}
+.mg-rhythm{background:#f8eeec}
+.mg-when{margin:0 0 6px}
+.mg-notes{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:4px;padding-top:10px;border-top:1px solid #e7ddd4}
+.mg-notes h3{font-size:15px}
+.mg-notes div{flex:1;background:repeating-linear-gradient(to bottom,transparent 0 25px,#e7ddd4 25px 26px)}
+.mg-notes[hidden]{display:none}
+.mg-foot{margin:auto 0 0;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
+.mg-bottom + .mg-foot{margin-top:0}
+/* Six or more at home: tighter, still never under 10.5px body. */
+.mg-sheet.mg-dense{gap:10px;font-size:11.5px;padding-top:38px}
+.mg-dense .mg-lines{gap:4px 14px}
+.mg-dense .mg-lines li{padding:4px 7px}
+.mg-dense .mg-say{font-size:12.5px}
+.mg-dense .mg-title{font-size:30px}
+
+/* Eight or more: three columns, name over line; the overview box and the goal lines give way (the part heads say it). */
+.mg-xdense .mg-top{grid-template-columns:1fr}
+.mg-xdense .mg-map,.mg-xdense .mg-goal{display:none}
+.mg-xdense .mg-prepare ul{grid-template-columns:1fr 1fr;column-gap:18px}
+.mg-xdense .mg-lines{grid-template-columns:repeat(3,1fr);gap:4px 10px}
+.mg-xdense .mg-lines li{grid-template-columns:1fr;gap:0;padding:4px 6px;font-size:10.5px;line-height:1.32}
+.mg-xdense .mg-lines em{font-size:10px}
+.mg-xdense .mg-part{gap:4px;padding-top:7px}
+.mg-xdense .mg-say{font-size:11.5px}
+.mg-xdense.mg-sheet{gap:8px;padding:34px 44px 26px}
+
+/* The editor */
+.mg-editor{position:fixed;inset:0;margin:auto;height:fit-content;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid #e7ddd4;border-radius:8px;background:#fff;color:#3d3834}
+.mg-editor::backdrop{background:#3d383466}
+.mg-editor-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;border-bottom:1px solid #e7ddd4}
+.mg-editor-head h2{margin:0;font:400 1.4rem var(--font-serif)}
+.mg-editor-close{min-height:40px;padding:0 16px;border-radius:3px;background:var(--color-warm-button);color:#fff;font-weight:600}
+.mg-editor-intro{margin:14px 18px 0;color:#6e6461;font-size:.92rem}
+.mg-editor [data-mg-editor-body]{display:grid;gap:22px;padding:14px 18px 22px}
+.mg-editor h3{margin:0 0 8px;font:400 1.15rem var(--font-serif)}
+.mg-ed-person{padding:12px 0;border-top:1px solid #efe7df;display:grid;gap:8px}
+.mg-ed-name{margin:0}
+.mg-ed-field{display:grid;gap:4px;font-size:.85rem;font-weight:600;margin-bottom:8px}
+.mg-ed-field select,.mg-ed-parts input[type="text"]{min-height:42px;padding:0 10px;border:1px solid #d9cfc6;border-radius:4px;font:400 .95rem var(--font-sans);background:#fff}
+.mg-ed-parts{margin:0;padding:0;border:0;display:grid;gap:6px}
+.mg-ed-parts legend{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.mg-ed-choice{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:.93rem;line-height:1.4;padding:4px 0}
+.mg-ed-choice input{width:18px;height:18px;margin-top:2px}
+.mg-ed-choice em{font-style:normal;font-size:.8rem;color:#536e4e;font-weight:600}
+.mg-ed-note{margin:0;font-size:.88rem;color:#6e6461}
+.mg-ed-note a{text-decoration:underline}
+.mg-ed-reset{justify-self:start;font-size:.88rem;text-decoration:underline;color:#6e6461}
+</style>
+
+<script>
+import { mountMeetingGuide } from '../../lib/club/meeting-guide/printable';
+for (const host of document.querySelectorAll<HTMLElement>('[data-meeting-guide]')) mountMeetingGuide(host);
+</script>

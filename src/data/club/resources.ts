@@ -8,7 +8,7 @@
  *
  * `title` is the name of what prints, used everywhere a member or the owner sees the month (Welcome Kit, Club Home,
  * the plan pages, admin fulfillment and CSV). It follows the app tool at /app/club/<month>, which is what members
- * edit and fulfillment prints: January 2027 is "Our Family Weekly Meeting" and September "Our Family Habit Cards"
+ * edit and fulfillment prints: January 2027 is "Our First Family Meeting" and September "Our Family Habit Cards"
  * (the same as src/data/club/family-meeting.ts → resourceTitle and the public Club page; fixed Nov 2026).
  *
  * Known gap: `component` is the older member copy at /club/resources/<slug>, which still renders the earlier printables
@@ -35,12 +35,12 @@ export interface ClubResource {
 export const clubResources: readonly ClubResource[] = [
   { slug: '2026-11-family-ownership', month: '2026-11', title: 'Our Family Ownership Plan', problem: 'Who owns which jobs, start to finish', component: 'november', preview: '/club/worksheet-generator' },
   { slug: '2026-12-christmas-mission', month: '2026-12', title: 'Your Christmas Mission', problem: 'A kindness mission the kids lead', component: 'december', preview: '/club/december-preview' },
-  { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Weekly Meeting', problem: 'Looking at the week together, so the plan isn’t only in your head', component: 'january', preview: '/app/club/january?sample=rivera',
-    // The printed resource is the app tool /app/club/january (SeptemberSundayReset: the two-sided Weekly Meeting sheet),
+  { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our First Family Meeting', problem: 'Ten minutes together, so the plan isn’t only in your head', component: 'january', preview: '/app/club/january?sample=rivera',
+    // The printed resource is the app tool /app/club/january (MeetingGuidePrintable: the family's two-page Family Meeting guide),
     // which fulfillment prints (?fulfillment=<order>). docs/club/WELCOME_KIT.md → Naming.
     welcome: {
-      helps: 'Once a week, ten or fifteen minutes around the wall calendar: everyone sees what’s coming, gets ready for it and takes a part, so you aren’t the family’s only calendar.',
-      firstStep: 'Pick a time this week for your first meeting and let the kids know they each get a part.',
+      helps: 'Your family’s first Family Meeting, prepared for everyone at home: about ten minutes, four short parts, and a part for each person that fits their age, so you aren’t the family’s only calendar.',
+      firstStep: 'Pick ten minutes this week when everyone’s home, and hand the guide to whoever opens the meeting.',
     } },
   { slug: '2027-02-better-together', month: '2027-02', title: 'Family Laundry Guides', problem: 'Laundry the kids can own, step by step', component: 'february', preview: '/club/february-preview' },
   { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Family Chore Charts', problem: 'Chores without chasing everyone', component: 'march', preview: '/club/march-preview' },
