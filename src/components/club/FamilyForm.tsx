@@ -81,7 +81,8 @@ interface Props {
   submitLabel: string;
   /** Start only: "The Rivera Family" from the name she gave at checkout, used only when she has no family name yet. */
   suggestedName?: string;
-  onSave: (input: HouseholdInput) => Promise<void>;
+  /** `colorsChanged`: she picked a color herself (the page warns only then if the database can't keep colors yet). */
+  onSave: (input: HouseholdInput, meta: { colorsChanged: boolean }) => Promise<void>;
 }
 
 const input = 'block min-h-12 w-full rounded-[4px] border border-warm-rule bg-white px-3 text-[1rem] text-warm-ink focus:border-warm-ink focus:outline-none';
@@ -99,6 +100,8 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
   const [pets, setPets] = useState(Boolean(household?.preferences.pets));
   const [iconStyle, setIconStyle] = useState<IllustrationStyle>(householdIllustrationStyle(household?.preferences.icon_style));
   // Everyone's marker color (auto-assigned; she can change any). Only for people already saved, since colors follow ids.
+  // Every save from her family page keeps everyone's current color by id, so adding or removing someone later never
+  // shifts anyone else's color.
   const [initialColors] = useState<Record<string, string>>(() => (household ? Object.fromEntries(Object.entries(memberColors(household)).map(([id, c]) => [id, c.id])) : {}));
   const [colors, setColors] = useState<Record<string, string>>(initialColors);
   // A color someone else has: they swap, so nobody's choice is quietly reassigned.
@@ -122,12 +125,12 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
     // Her welcome print and printed resources carry it, so the welcome flow asks for it.
     if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
-    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle, ...(colorsChanged ? { colors } : {}) }, household?.preferences ?? {}, today);
+    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle, ...(mode === 'edit' ? { colors } : {}) }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
     setBusy(true);
     try {
-      await onSave(data);
+      await onSave(data, { colorsChanged });
     } catch {
       setError('We couldn’t save just now. Please try again.');
     } finally {

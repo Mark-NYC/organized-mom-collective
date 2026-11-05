@@ -55,7 +55,7 @@ describe('January companion: habit experiments', () => {
     expect(sofia).toMatchObject({ who: 'Sofia, 10', title: 'School things ready', action: 'Check tomorrow’s supplies and pack the school bag.', ownership: 'Let Sofia choose where the bag lives, so it’s ready without help.', source: 'desired' });
     expect(sofia.why).toBe('Easier evenings is your top priority. You’d like Sofia to take on packing the school bag.');
     // She listed Sofia in school, so school nights are confirmed; the moment within the evening is hers to pick.
-    expect(sofia.anchor).toEqual({ text: 'on school nights, after homework is put away or after dinner', verified: true });
+    expect(sofia.anchor).toMatchObject({ text: 'on school nights, after homework is put away or after dinner', verified: true, lead: 'on school nights', options: ['after homework is put away', 'after dinner'] });
     const mateo = exp(g, 'Mateo')!;
     expect(mateo).toMatchObject({ title: 'Pajamas ready', action: 'Put pajamas on the bed before bath time.', anchor: { verified: false } });
     expect(mateo.support).toBe('A simple picture reminder near the dresser, so Mateo can remember without being told.');
@@ -72,7 +72,7 @@ describe('January companion: habit experiments', () => {
     expect(busy.talk[0].text).toBe('What’s happening for each of us this week, like robotics?');
   });
 
-  it('limited intake: no manufactured problems; the meeting habit, and one idea clearly framed as something to consider', () => {
+  it('limited intake: no manufactured problems; the meeting habit, and a concrete idea for every child now, framed as something to consider', () => {
     const household: Household = { id: 'l', displayName: 'The Lanes', preferences: {}, profileVersion: 1, members: [
       { id: 'l1', firstName: 'Pat', kind: 'adult', role: 'parent', isAccountHolder: true },
       { id: 'l2', firstName: 'Ike', kind: 'child', role: 'child', birthYear: 2018, birthMonth: 9 },
@@ -81,8 +81,10 @@ describe('January companion: habit experiments', () => {
     const g = generateMeetingGuide({ household, profile: { challenges: [], activities: [{ category: 'school', memberIds: [] }], responsibilities: [] }, content });
     expect(g.focus[0].title).toBe('Starting our Family Meeting habit');
     expect(g.starterNote).toBe(content.starterNote);
-    expect(g.experiments.map((e) => [e.who, e.basis, e.why])).toEqual([['Everyone', 'consider', ''], ['Ike, 8', 'consider', '']]);
-    expect(g.partsDiscover).toBe('Ask Uma what to take on, once the meeting is a habit. One small part is plenty.');
+    // Responsibility doesn't wait for the meeting habit: both children get their own part of one shared calendar routine.
+    expect(g.experiments.map((e) => [e.who, e.basis, e.why])).toEqual([['Everyone', 'consider', ''], ['Uma and Ike', 'consider', '']]);
+    expect(g.experiments[1].adaptations!.map((a) => a.name)).toEqual(['Uma', 'Ike']);
+    expect(g.partsDiscover).toBeNull();
     expect(g.practice.some((p) => p.key === 'practice:obstacle')).toBe(false);
     // No ages at all: only the meeting.
     expect(gen('vague').experiments.map((e) => e.who)).toEqual(['Everyone']);

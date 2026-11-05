@@ -39,7 +39,7 @@ describe('habit intelligence, beyond January', () => {
     const e = rec.experiments[0];
     expect(e).toMatchObject({ who: 'Bea, 4', itemId: 'morning-routine', action: 'Get dressed in clothes laid out the night before.', basis: 'need' });
     expect(e.support).toMatch(/help with buttons at first/);
-    expect(e.anchor).toEqual({ text: 'after breakfast or after waking up', verified: false });
+    expect(e.anchor).toEqual({ text: 'after breakfast or after waking up', verified: false, options: ['after breakfast', 'after waking up'] });
     expect(e.ownership).toBe('Let Bea choose tomorrow’s outfit from two.');
   });
 
@@ -67,8 +67,9 @@ describe('habit intelligence, beyond January', () => {
     const e = rec.experiments[0];
     expect(e).toMatchObject({ who: 'Abe, Bo, Cal, Dot and Eve', title: 'A five-minute family pick-up', ownership: 'The kids take turns choosing the music.' });
     expect(e.adaptations!.map((a) => a.name)).toEqual(['Abe', 'Bo', 'Cal', 'Dot', 'Eve']);
-    expect(e.adaptations![0].action).toBe('Put toys back in the bins.');
-    expect(e.adaptations![4].action).toMatch(/weekly bedroom reset/);
+    // Each child's part of the same five-minute pick-up, at one shared moment: never a different habit per child.
+    expect(e.adaptations!.map((a) => a.action)).toEqual(['Put toys back in the bins.', 'Put toys back in the bins.', 'Put own books, shoes and clothes back.', 'Clear own things off the table and couch.', 'Clear own things from the shared rooms.']);
+    expect(e.anchor).toMatchObject({ verified: false, options: ['before dinner', 'before screen time'] });
   });
 
   it('a family whose routine changes between school and summer: same family, different habits', () => {
@@ -121,6 +122,9 @@ describe('habit intelligence, beyond January', () => {
         }
       }
       expect(item.wish ?? '').not.toMatch(/\b(their|his|her)\b/i);
+      for (const part of Object.values(item.shared?.parts ?? {})) expect(part, `${item.id}: ${part}`).not.toMatch(/\b(he|she|him|her|his|they|them|their)\b|summer|winter|\b(Mom|Dad|parents?)\b/i);
+      // A shared routine has one set of moments to choose from.
+      if (item.shared && item.id !== 'family-meeting') expect(item.shared.anchors?.length, item.id).toBeGreaterThan(0);
     }
   });
 });

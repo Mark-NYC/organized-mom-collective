@@ -170,3 +170,59 @@ describe('Mom’s review: Keep it / Change it / Skip it', () => {
     expect(isGuideState({ ...emptyGuideState(), kept: [1] })).toBe(false);
   });
 });
+
+describe('Final refinements', () => {
+  it('anchors: several options mean "choose one and keep it"; confirmed parts stay confirmed', async () => {
+    const { anchorLine } = await import('../src/lib/club/meeting-guide/anchor');
+    expect(anchorLine({ text: 'after homework or after dinner', verified: false, options: ['after homework', 'after dinner'] }))
+      .toBe('Choose one: after homework or after dinner. Keep it the same each time.');
+    expect(anchorLine({ text: '', verified: true, lead: 'on school nights', options: ['after homework is put away', 'after dinner'] }))
+      .toBe('On school nights. Choose one: after homework is put away or after dinner. Keep it the same each time.');
+    expect(anchorLine({ text: 'coming in the door', verified: false, options: ['coming in the door'] })).toBe('Coming in the door.');
+    expect(anchorLine({ text: 'right after dinner, before screens', verified: true })).toBe('Right after dinner, before screens.');
+  });
+
+  it('month tints come from the physical calendar color, with readable labels', async () => {
+    const { monthTints, contrast } = await import('../src/lib/club/month-tints');
+    const { monthColors } = await import('../src/theme');
+    const jan = monthTints('2027-01');
+    expect(jan.base).toBe(monthColors[0].hex);
+    expect(jan.base).toBe('#CDDDE1');
+    expect(jan.weeks[3]).toBe(jan.base);
+    expect(new Set(jan.weeks).size).toBe(4);
+    for (let m = 0; m < 12; m++) {
+      const t = monthTints(m);
+      for (const w of t.weeks) { expect(contrast(t.accent, w)).toBeGreaterThanOrEqual(4.5); expect(contrast('#3F3B39', w)).toBeGreaterThanOrEqual(4.5); }
+    }
+    // Person colors are separate: no week tint is a marker color.
+    for (const w of jan.weeks) expect(MARKER_COLORS.map((c) => c.hex)).not.toContain(w);
+  });
+
+  it('colors: adding or removing someone never changes anyone else’s saved color', () => {
+    const h = home([adult('a', 'Jo'), child('k1', 'Ada', 4), child('k2', 'Ben', 8)]);
+    const frozen = Object.fromEntries(Object.entries(memberColors(h)).map(([id, c]) => [id, c.id]));
+    const added = memberColors(home([...h.members, child('k3', 'Cy', 2)], frozen));
+    for (const id of Object.keys(frozen)) expect(added[id].id).toBe(frozen[id]);
+    expect(Object.values(frozen)).not.toContain(added.k3.id);
+    const removed = memberColors(home(h.members.filter((m) => m.id !== 'k1'), frozen));
+    expect(removed.a.id).toBe(frozen.a);
+    expect(removed.k2.id).toBe(frozen.k2);
+    // A household that never saved colors still gets the same automatic colors every time.
+    expect(memberColors(h)).toEqual(memberColors(structuredClone(h)));
+  });
+
+  it('a shared routine recognizes a child who already does it instead of adding it again', () => {
+    const h = home([adult('a', 'Jo'), child('k1', 'Ada', 4), child('k2', 'Ben', 7), child('k3', 'Cy', 9), child('k4', 'Di', 12)]);
+    const g = gen(h, prof({ priority: 'tidying', responsibilities: [{ status: 'existing', category: 'cleaning', ownerIds: ['k4'] }] }));
+    const shared = g.experiments.find((e) => e.adaptations)!;
+    expect(g.recognized.some((r) => /Di/.test(r.text))).toBe(true);
+    // Nobody joins a shared routine for a job they already take care of.
+    const ownsIt = (id: string) => id === 'k4' && ['tidy-room'].includes(shared.itemId);
+    expect(shared.memberIds.some(ownsIt)).toBe(false);
+    const tidyOnly = gen(h, prof({ priority: 'laundry', responsibilities: [{ status: 'existing', category: 'laundry', ownerIds: ['k4'] }] })).experiments.find((e) => e.adaptations);
+    if (tidyOnly) expect(tidyOnly.memberIds).not.toContain('k4');
+    // One routine, one set of moments, each child's part of it.
+    expect(shared.anchor.options!.length).toBeGreaterThan(0);
+    expect(new Set(shared.adaptations!.map((a) => a.action)).size).toBeGreaterThan(1);
+  });
+});

@@ -53,3 +53,45 @@ Family Focus (formerly the Family Meeting Companion) is the first resource that 
 Tests: `tests/club-habits.test.ts` shows the same logic handling a preschooler's simple routine, a teen's seasonal
 activity, five children sharing one challenge, school versus summer, and progress. January's own behavior is in
 `tests/club-meeting-guide-generator.test.ts`.
+
+## Optional weekly check-ins: future plan (not built)
+
+**Goal.** After a Family Meeting, Mom can answer one optional question per habit the family *chose*:
+"How did Sofia do with packing her school bag this week?" No reminders, streaks, rewards, daily tracking or
+admin work for her: skipping a check-in changes nothing.
+
+**States, and where each already lives.** Suggestions and commitments stay separate records
+(`src/lib/club/family-plan.ts`); nothing becomes a commitment because it was shown, kept or printed.
+
+| State | Meaning | Today |
+| --- | --- | --- |
+| Suggested | The Club recommends an experiment | `SuggestedIdea` (`status: 'suggested'`) in the month's saved `plan` |
+| Kept | Mom left it on the printable | `kept` / not `hidden` in the guide state (review only; **not** a commitment) |
+| Chosen | The family decided to practice it | `commit(idea, chosenVia, on)` → `Commitment` (`status: 'accepted'`) |
+| Practicing | Working on it | `Commitment.progress = 'practicing'` |
+| Established | Doing it on their own | `progress = 'independent'` |
+| Adjusted | Still needs reminders, or not working yet: change the cue or setup | `progress = 'improving'` or `'struggling'` + barrier |
+| Stopped | The family moved on | `progress = 'retired'` |
+
+**Answers → what happens next** (`nextStep`, `BARRIER_PRINCIPLE`):
+
+- *Doing it independently* → `independent`: celebrate on the next Family Focus; the engine already recognizes it
+  (`ctx.progress`, "already takes care of") and adds nothing new automatically.
+- *Improving, still needs reminders* → `improving`: keep the habit; next month's card offers a clearer single cue or
+  the stage's environmental support (`principle: 'trigger' | 'environment'`).
+- *Not working yet* → ask one follow-up for the likely barrier (forgets, too hard, not set up, not interested,
+  schedule); `struggling` already gives the simpler stage version, and the barrier picks the principle to change.
+- *Didn't try it / chose something else* → **not a failure**. Today `moved-on` retires it; add a separate
+  `not-tried` answer that leaves progress untouched (or returns the idea to a suggestion).
+
+**Minimum still needed (when we build it).**
+
+1. Data: a `Commitment` store per household (one small table, or the month's saved state) holding commitments and
+   their check-in history; the `not-tried` answer; `checkInDue` changed from every 6–8 weeks to "after a meeting,
+   optional", never nagging.
+2. UI: a "We chose this" action next to a kept idea (the only way a commitment is created), and one optional
+   check-in card per active commitment on Club Home after the week's meeting. No list to manage.
+3. Engine: pass stored progress into `familyContext(..., { progress })` (already supported), and make `improving`
+   prefer the stage's support or a single confirmed anchor.
+
+Nothing here adds onboarding questions, and future months read these records, not PDF text.
