@@ -14,6 +14,7 @@ import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
 import FamilyForm from './FamilyForm';
 import { clubNav } from '../../lib/club/nav';
+import { ColorsNotSavedError } from '../../lib/club/store';
 
 export default function FamilyPage({ mode }: { mode: 'start' | 'edit' }) {
   return <ClubGate page={mode === 'start' ? 'start' : 'family'}>{(ctx) => <Family ctx={ctx} mode={mode} />}</ClubGate>;
@@ -25,6 +26,7 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
   const [editing, setEditing] = useState<{ mode: 'wizard' | 'single'; step?: SetupStep } | null>(null);
   const [firstKit, setFirstKit] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [colorsNotSaved, setColorsNotSaved] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -68,11 +70,20 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
   return (
     <>
       <FamilyForm
+        key={household?.profileVersion ?? 0}
         household={household}
         mode={mode}
         submitLabel={mode === 'start' ? startLabel : 'Save our family'}
         onSave={async (input) => {
-          const h = await ctx.store.saveHousehold(input);
+          let h: Household;
+          try {
+            h = await ctx.store.saveHousehold(input);
+            setColorsNotSaved(false);
+          } catch (e) {
+            if (!(e instanceof ColorsNotSavedError)) throw e;
+            h = e.household;
+            setColorsNotSaved(true);
+          }
           if (mode === 'start') {
             clubNav().go(ctx.href(kit ? routes.clubKit(kit.slug) : routes.clubDashboard));
             return;
@@ -81,7 +92,12 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
           setSaved(true);
         }}
       />
-      {saved && (
+      {saved && colorsNotSaved && (
+        <p role="alert" data-colors-not-saved className="mt-6 max-w-2xl border-l-[3px] border-[#C53F7E] bg-white px-4 py-3 text-warm-ink">
+          Your family is saved, but your color choices couldn’t be saved yet. Everyone keeps their standard color for now. Please try again later.
+        </p>
+      )}
+      {saved && !colorsNotSaved && (
         <p role="status" className="mt-6 max-w-2xl border-l-[3px] border-sage bg-sage-wash px-4 py-3 text-warm-ink">
           Saved. Your kits will show suggestions for anything that changed. <a className="font-semibold underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>Back to your kits</a>
         </p>

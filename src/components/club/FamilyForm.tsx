@@ -99,7 +99,14 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
   const [pets, setPets] = useState(Boolean(household?.preferences.pets));
   const [iconStyle, setIconStyle] = useState<IllustrationStyle>(householdIllustrationStyle(household?.preferences.icon_style));
   // Everyone's marker color (auto-assigned; she can change any). Only for people already saved, since colors follow ids.
-  const [colors, setColors] = useState<Record<string, string>>(() => (household ? Object.fromEntries(Object.entries(memberColors(household)).map(([id, c]) => [id, c.id])) : {}));
+  const [initialColors] = useState<Record<string, string>>(() => (household ? Object.fromEntries(Object.entries(memberColors(household)).map(([id, c]) => [id, c.id])) : {}));
+  const [colors, setColors] = useState<Record<string, string>>(initialColors);
+  // A color someone else has: they swap, so nobody's choice is quietly reassigned.
+  const pickColor = (id: string, color: string) => {
+    const holder = Object.keys(colors).find((k) => k !== id && colors[k] === color);
+    setColors({ ...colors, [id]: color, ...(holder ? { [holder]: colors[id] } : {}) });
+  };
+  const colorsChanged = Object.keys(colors).some((id) => colors[id] !== initialColors[id]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [tried, setTried] = useState(false);
@@ -115,7 +122,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
     // Her welcome print and printed resources carry it, so the welcome flow asks for it.
     if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
-    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle, colors }, household?.preferences ?? {}, today);
+    const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle, ...(colorsChanged ? { colors } : {}) }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
     setBusy(true);
@@ -274,7 +281,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
                     <span aria-hidden="true" className="inline-block h-5 w-5 flex-none rounded-full border border-warm-rule" style={{ background: MARKER_COLORS.find((c) => c.id === colors[m.id])?.hex }} />
                     <label className="flex flex-1 items-center justify-between gap-2 text-[0.95rem] text-warm-ink">
                       {m.firstName}
-                      <select className={`${select} max-w-[10rem]`} value={colors[m.id] ?? ''} onChange={(e) => setColors({ ...colors, [m.id]: e.target.value })}>
+                      <select className={`${select} max-w-[10rem]`} value={colors[m.id] ?? ''} onChange={(e) => pickColor(m.id, e.target.value)}>
                         {MARKER_COLORS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                       </select>
                     </label>

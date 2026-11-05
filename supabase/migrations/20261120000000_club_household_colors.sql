@@ -88,5 +88,7 @@ exception
 end $$;
 revoke execute on function public.club_household_save(text, jsonb, jsonb) from public, anon;
 grant execute on function public.club_household_save(text, jsonb, jsonb) to authenticated;
+-- Only called from inside club_household_save (security definer, as its owner).
+revoke execute on function public.club_preferences_colors_ok(jsonb) from public, anon, authenticated;
 
 commit;
