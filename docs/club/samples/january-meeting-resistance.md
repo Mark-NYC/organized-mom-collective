@@ -18,27 +18,33 @@ _Everyone answers, the youngest first. No wrong answers, no fixing anyone._
 **Conversation starters**
 - What’s one small step toward this we could try this month?
 - What gets in the way? One possibility: jobs might be falling to whoever notices first.
-- Ask Omar and Layla which starting point they’d try first, or what they’d try instead.
+- Ask Omar and Layla: would these help, or what would you try instead?
 
 ---
 
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Omar** · 8: A five-minute bedroom pick-up before screen time. _(Show it once, then one reminder at most.)_
-- **Layla** · 11: Clear and rinse the dishes right after dinner. _(Ready for more independence.)_
+- **Layla, 11 · A part at dinner** (“Kids pushing back on every chore” is hard right now. You’d like Layla to take on helping with meals or dishes.)
+  - “Clear and rinse the dishes.”
+  - When: When, your pick: right after dinner?
+  - Ownership: Layla picks the music while cleaning up.
+- **Omar, 8 · Things back where they live** (“Kids pushing back on every chore” is hard right now. You’d like Omar to take on keeping the bedroom picked up.)
+  - “Do a five-minute bedroom pick-up.”
+  - When: When, your pick: before screen time or before bath?
+  - Ownership: Omar chooses the music for the five minutes.
+  - Help: A basket for things that live elsewhere.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: let each child choose a part from two that fit their age.
+- If it gets stuck: let each child choose a part from two that fit their age.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, priorities_
+_Personalized from: names, ages, priorities, growth areas_

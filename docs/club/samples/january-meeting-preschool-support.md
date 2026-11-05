@@ -26,20 +26,23 @@ _Little ones can point or answer with one word._
 ### 3. Everyone’s Part
 _Each person picks or agrees to one small part they own this month._
 
-_Ideas to choose from, not jobs. Decide together._
+**Habit experiments to discuss** · _To talk over and try, not assignments. One is plenty to start._
 
-- **Tobi** · 4: Coming in the door, coat on the low hook and shoes in the shoe spot. _(Do it together for a week or two, then step back.)_
+- **Tobi, 4 · A spot for everything** (Easier evenings is your top priority. You’d like Tobi to take on keeping track of belongings.)
+  - “Put coat on the hook and shoes in the shoe spot.”
+  - When: When, your pick: coming in the door?
+  - Ownership: Let Tobi pick a hook.
+  - Help: A low hook and a shoe spot by the door.
 - For the grown-ups to talk through: how will we help without taking over, and how will we notice the effort?
 - Daniel already takes care of driving and pickups. Worth noticing out loud.
 
 ### 4. Let’s Practice
 _Try one part together right now, so the first time isn’t a reminder later._
 
-**Ways to make it stick**
-- One thing worth trying: a low hook and a shoe spot by the door, for Tobi.
+- If it gets stuck: start with one step of the routine instead of the whole thing.
 - When it’s going well, say so, and hold off on adding a new job.
 
-**Coming back to it:** Try it until the next meeting, then ask: on my own, with reminders, or hard? Keep it, shrink it or swap it.
+_At the next meeting: on my own, with reminders, or hard? Keep it, shrink it or swap it._
 
 ---
-_Personalized from: names, ages, growth areas, existing responsibilities, priorities_
+_Personalized from: names, ages, priorities, growth areas_
