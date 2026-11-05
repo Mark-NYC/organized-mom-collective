@@ -30,11 +30,14 @@ const ACTIONS = ['pointerdown', 'keydown'] as const;
 const list = (items: GuideIdea[], cls = 'mg-list') => el('ul', { class: cls }, ...items.map((i) => el('li', {}, i.text)));
 
 /** The companion's blocks, in reading order. Each part supports the one focus at the top. */
-/** A person's color chip: the color, their initial on it, and their name beside it (readable in grayscale). */
+/**
+ * A person's color chip, readable in grayscale: the color and their name beside it. A dot shown without a name (the
+ * "who" row) carries the initial instead, so a name is never printed twice ("LLily").
+ */
 function chip(g: MeetingGuide, id: string, withName = true): HTMLElement {
   const c = g.colors[id];
   if (!c) return el('span', {});
-  const dot = el('span', { class: 'mg-dot' }, c.name.charAt(0));
+  const dot = el('span', { class: `mg-dot${withName ? ' mg-dot--plain' : ''}` }, withName ? '' : c.name.charAt(0));
   dot.style.background = c.hex;
   return el('span', { class: 'mg-chip' }, dot, ...(withName ? [el('span', {}, c.name)] : []));
 }

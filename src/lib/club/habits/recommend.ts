@@ -65,7 +65,9 @@ export function recommendHabits(ctx: FamilyContext, theme: MonthTheme, focus: Op
     if (owned) recognized.push({ memberId: c.id, name: c.name, area: lower(labelOf(RESPONSIBILITY_CATEGORIES, owned)) });
     // The focus's own behaviors only when her priority or a challenge points to the focus; a focus that comes only from
     // her wishes stays with those wishes (no extra jobs for siblings she didn't mention).
-    const themeItems = focus.askFirst || why.source === 'growth' ? [] : focus.items;
+    // A child who already takes care of a job in this focus is recognized for it, not handed a new job from the same
+    // focus: only her own wish for that child still adds one.
+    const themeItems = focus.askFirst || why.source === 'growth' || owned ? [] : focus.items;
     const items = [...new Set([...c.wishes, ...ctx.openWishes, ...themeItems])].filter((id) => focus.items.includes(id));
     let any = false;
     for (const id of items) {
