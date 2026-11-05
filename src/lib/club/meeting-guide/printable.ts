@@ -58,21 +58,25 @@ function sheets(g: MeetingGuide, monthLabel: string): HTMLElement[] {
 
   const kid = (p: MeetingGuide['people'][number]) => el('li', {},
     el('p', { class: 'mg-who' }, el('strong', {}, p.name), p.age !== null ? el('span', {}, ` · ${p.age}`) : ''),
-    ...(p.joinsIn
-      ? [el('p', { class: 'mg-help' }, 'Joins in and watches.')]
-      : [el('ul', { class: 'mg-ideas' }, ...p.ideas.map((i) => el('li', {}, i.text))),
-         ...(p.support ? [el('p', { class: 'mg-help' }, p.support)] : [])]),
+    ...(p.joinsIn ? [el('p', { class: 'mg-help' }, 'Joins in and watches.')] : []),
+    ...(p.ask && p.ideas.length ? [el('p', { class: 'mg-ask' }, p.ask)] : []),
+    ...(p.ideas.length
+      ? [el('p', { class: 'mg-label mg-label--tight' }, p.choose ? `Two ideas: ${p.name} chooses one` : 'An idea to try'),
+         el('ul', { class: 'mg-ideas' }, ...p.ideas.map((i) => el('li', {}, i.text))),
+         ...(p.support ? [el('p', { class: 'mg-help' }, p.support)] : [])]
+      : []),
     ...(p.keeps ? [el('p', { class: 'mg-keeps' }, p.keeps)] : []));
   const back = el('article', { class: `mg-sheet${dense}` },
     el('section', { class: 'mg-part' },
       sectionHead(g, 'parts'),
-      el('p', { class: 'mg-note' }, g.partsNote),
-      ...(g.people.length ? [el('ul', { class: 'mg-kids' }, ...g.people.map(kid))] : []),
+      ...(g.people.some((p) => p.ideas.length) ? [el('p', { class: 'mg-note' }, g.partsNote)] : []),
+      // Only children with something to say: an idea, or what they already do. Little ones join through Let's Talk.
+      ...(g.people.some((p) => p.ideas.length || p.keeps) ? [el('ul', { class: 'mg-kids' }, ...g.people.filter((p) => p.ideas.length || p.keeps).map(kid))] : []),
+      ...(g.partsDiscover ? [el('p', { class: 'mg-note' }, g.partsDiscover)] : []),
       ...(g.grownUps.length ? [list(g.grownUps, 'mg-list mg-grownups')] : [])),
     el('section', { class: 'mg-part' },
       sectionHead(g, 'practice'),
-      el('p', { class: 'mg-label' }, 'Ways to make it stick'),
-      list(g.practice)),
+      ...(g.practice.length ? [el('p', { class: 'mg-label' }, 'Ways to make it stick'), list(g.practice)] : [])),
     el('section', { class: 'mg-checkin' }, el('p', {}, el('strong', {}, 'Coming back to it: '), g.checkIn)),
     el('p', { class: 'mg-foot' }, `${g.familyName} · Organized Family Club`));
   back.dataset.planSheet = 'back';

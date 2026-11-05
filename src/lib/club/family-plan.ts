@@ -53,7 +53,7 @@ export interface FamilyPlan {
   v: 1;
   month: string;
   /** One or two, with where each came from (her priority, a challenge, or the month when she gave neither). */
-  focus: { id: string; source: 'priority' | 'challenge' | 'month'; title: string }[];
+  focus: { id: string; source: 'priority' | 'challenge' | 'growth' | 'month'; title: string }[];
   obstacle: { challengeId: string; obstacle: string; principle: HabitPrinciple | null; adjustment: string | null } | null;
   /** Offered, not chosen. */
   ideas: SuggestedIdea[];

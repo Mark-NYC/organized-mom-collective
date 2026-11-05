@@ -1,19 +1,23 @@
 /**
  * The shape of one month's Family Meeting companion content (src/data/club/meeting-guides/<YYYY-MM>.ts). Content only;
- * the generator (./generate.ts) matches it to a family. Adding a month means writing one of these.
+ * the generator (./generate.ts) scores it against a family's intake and picks the few things worth printing.
  *
- * The companion is a menu of ideas for any of the month's meetings, not a completed meeting: the family picks what fits
- * each time, revisits what matters and skips the rest. It's organized under the Club's four established parts (the
- * reusable framework in every Welcome Kit, src/data/club/meeting-guide.ts): Our Focus, Let's Talk, Everyone's Part,
- * Let's Practice. Nothing is assigned or decided for the family.
+ * The companion is a menu of ideas for any of the month's meetings, not a completed meeting, under the Club's four
+ * established parts (the reusable framework in every Welcome Kit, src/data/club/meeting-guide.ts). Nothing is
+ * assigned or decided for the family.
  *
- * Habit principles (docs/club/PERSONALIZATION.md), used as practical heuristics: a clear cue, ideally stacked on
- * something already done; a setup that makes it easy; a task small enough for the stage; support that fades; a finish
- * line a child can see. Obstacles are possibilities, never diagnoses.
+ * Content is organized by **opportunity** (a theme a family might work on: mornings, schedules, …). Each opportunity
+ * lists the intake answers that point to it, the responsibilities that serve it and how to talk about it. The generator
+ * picks the family's strongest one (docs/club/PERSONALIZATION.md → Selection), then the smallest intervention.
  *
- * Tokens the generator fills, only from the family's own data: {school} ("school", or "lessons" for homeschoolers).
- * Writing rules (tests/club-meeting-guide-generator.test.ts): no "Mom", "Dad" or "parents"; nothing that makes one
- * grown-up the family's reminder or organizer; ideas start with a verb.
+ * Habit principles, used as practical heuristics, not diagnoses: a clear cue stacked on an existing routine, a change
+ * to the home that makes it easier, a step small enough for the stage, support that fades, choice, and noticing
+ * progress without adding work.
+ *
+ * Tokens the generator fills, only from the family's own data: {name} (a child), {school} ("school", or "lessons" for
+ * homeschoolers), {activity} (her own named activity). Writing rules (tests/club-meeting-guide-generator.test.ts): no
+ * "Mom", "Dad" or "parents"; nothing that makes one grown-up the family's reminder; children's lines use the name,
+ * not a pronoun.
  */
 import type { ResponsibilityCategory } from '../../../data/club/family-profile';
 import type { GuideStage } from './stages';
@@ -25,36 +29,53 @@ export const PART_TITLES: Record<PartId, string> = { focus: 'Our Focus', talk: '
 /** The habit lever an idea pulls (kept with the plan, so later months can see what was tried). */
 export type HabitPrinciple = 'trigger' | 'stacking' | 'environment' | 'simplicity' | 'ownership' | 'feedback' | 'consistency';
 
-/** One stage's version of a responsibility idea. */
+/** One stage's version of a responsibility. */
 export interface Practice {
-  behavior: string;
-  /** An existing moment it could follow ("After dinner"), for the habit-stacking idea. */
+  /** The small habit to try, with its cue (and setup) written in: "Pack the bag after dinner and hang it by the door." */
+  try: string;
+  /** The existing moment it follows, for the structured plan. */
   cue: string;
-  /** A change to the home that makes it easy. */
+  /** The change to the home it relies on, if any (for the structured plan and the Practice section). */
   setup?: string;
+  principle: HabitPrinciple;
 }
 
-/** A responsibility idea, by stage. Growth items use their GROWTH_ITEMS id. */
+/** A responsibility, by stage. Growth items use their GROWTH_ITEMS id. */
 export interface PracticeItem {
   id: string;
   category: ResponsibilityCategory;
+  /** A discovery question that brings the child into the problem: "Ask {name} what usually gets forgotten." */
+  ask: string;
   byStage: Partial<Record<GuideStage, Practice>>;
 }
 
-export interface FamilyFocus {
-  title: string;
-  /** One line: what getting better at it could look like for the family. */
-  opportunity: string;
-  /** A conversation prompt about it, for Let's Talk. */
-  discuss: string;
-}
-
+/** Something to try for an obstacle she reported, offered as a possibility. */
 export interface Obstacle {
-  /** The likely obstacle, offered as a possibility ("might be"), never a diagnosis. */
   obstacle: string;
   principle: HabitPrinciple;
-  /** One small adjustment to try, for Let's Practice. */
   adjustment: string;
+}
+
+/** A theme a family might work on this month. */
+export interface Opportunity {
+  id: string;
+  title: string;
+  /** What getting better could look like. */
+  opportunity: string;
+  /** The conversation that opens it. */
+  discuss: string;
+  /** A discovery question when she named no obstacle for it: we ask instead of guessing. */
+  discover: string;
+  /** Intake answers that point here (PRIORITIES ids, CHALLENGES ids). */
+  priorities: readonly string[];
+  challenges: readonly string[];
+  /** Responsibilities that serve it (PracticeItem ids), best first. */
+  items: readonly string[];
+  /**
+   * When she named no job for a child: ask instead of picking one for them (the theme says nothing about which job).
+   * {names}. Without it, the theme's own steps are offered at each child's age.
+   */
+  askFirst?: string;
 }
 
 export interface GuideMonthContent {
@@ -62,36 +83,35 @@ export interface GuideMonthContent {
   month: string;
   title: string;
   subtitle: string;
-  /** How to use the companion with the Welcome Kit framework. */
   howTo: string;
   /** Each part's purpose, in the framework's own words. */
   goals: Record<PartId, string>;
-  /** Our Focus: from her priority, then her challenges (one per theme); `focusDefault` only when she gave neither. */
-  focusByPriority: Record<string, FamilyFocus>;
-  focusByChallenge: Record<string, FamilyFocus>;
-  focusDefault: FamilyFocus;
-  focusGroups: readonly (readonly string[])[];
-  maxFocus: number;
-  /** Let's Talk: her week (her own activity if she named one), the focus prompts, then the obstacle prompt. */
-  questions: { withActivity: string; generic: string };
+  opportunities: readonly Opportunity[];
+  /** When the intake points nowhere: the month's own purpose. */
+  fallback: Opportunity;
+  /** Her own words for "something else" (priority note): shown as the focus with this discussion prompt. */
+  ownWordsDiscuss: string;
   obstacles: Record<string, Obstacle>;
-  obstacleOpen: string;
-  talkLittle: string;
-  maxTalk: number;
-  /** Everyone's Part: ideas per child, her growth items first, then the month's defaults by stage. */
   practices: readonly PracticeItem[];
-  defaults: Partial<Record<GuideStage, readonly PracticeItem[]>>;
-  maxIdeas: number;
+  /** How children join the meeting when nothing else fits them. */
+  talkLittle: string;
+  /** Invites the children into solving it (ownership), for Let's Talk, when there are no per-idea questions. */
+  invite: string;
+  /** Let's Talk with a schedules focus: her week, using her own activity. */
+  weekQuestion: { withActivity: string; generic: string };
+  /** A child who already takes care of something: noticed, and asked to show how (no new job). {name}, {area}. */
+  keepsDoing: string;
+  showHow: string;
+  /** Above the children's ideas: they're suggestions, not jobs. */
   partsNote: string;
+  /** Everyone's Part when no child has an idea (too little intake): ask instead of guessing. {names}. */
+  partsDiscover: string;
   /** How much help a first try needs at each stage. */
   support: Record<GuideStage, string>;
-  /** Something a person already does: noticed, not added to. {name}, {area}. */
-  keepsDoing: string;
-  /** One idea for the grown-ups, shared (after their names). */
+  /** For the grown-ups: a conversation about helping without taking over. */
   grownUps: string;
-  /** Let's Practice: habit ideas. {example} is a cue + behavior from the family's own ideas. */
-  practice: { tryNow: string; stack: string; setupLead: string; simplify: string };
-  maxPractice: number;
-  /** For coming back to a part at a later meeting (the start of progress check-ins). */
+  /** Let's Practice: the one adjustment (lead), and how to keep it going without adding work. */
+  practice: { adjustmentLead: string; sustain: Record<'reminders' | 'default', string>; meetingHabit: string };
+  /** For coming back to it at a later meeting (the start of progress check-ins). */
   checkIn: string;
 }

@@ -34,13 +34,14 @@ for (const f of FAMILIES) {
     '---',
     '',
     head(2),
-    `_${g.partsNote}_`,
+    `_Ideas to choose from, not jobs. Decide together._`,
     '',
-    ...g.people.map((p) => {
+    ...g.people.filter((p) => p.ideas.length || p.keeps).map((p) => {
       const who = `**${p.name}**${p.age !== null ? ` · ${p.age}` : ''}`;
-      if (p.joinsIn) return `- ${who}: joins in and watches.`;
-      return `- ${who}: ${p.ideas.map((i) => i.text).join(' **or** ')} _(${p.support})_${p.keeps ? ` · ${p.keeps}` : ''}`;
+      if (!p.ideas.length) return `- ${who}: ${p.keeps}`;
+      return `- ${who}: ${p.choose ? `_${p.name} chooses one:_ ` : ''}${p.ideas.map((i) => i.text).join(' **or** ')} _(${p.support})_${p.keeps ? ` · ${p.keeps}` : ''}`;
     }),
+    ...(g.partsDiscover ? [`- ${g.partsDiscover}`] : []),
     ...g.grownUps.map((t) => `- ${t.text}`),
     '',
     head(3),

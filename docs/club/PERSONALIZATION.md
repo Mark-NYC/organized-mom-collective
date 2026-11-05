@@ -19,13 +19,38 @@ Two US Letter pages (fixed, so printing and the mailed copy never vary):
 
 | Part | What's on it | Limits |
 | --- | --- | --- |
-| 1 · Our Focus | One or two priorities from her priority and challenges (one per theme), each with what getting better could look like. Only with no answers: the month's purpose | ≤ 2 |
+| 1 · Our Focus | One or two priorities from her priority and challenges (one per theme), each with what getting better could look like. Only with no answers: the month's purpose | 1, a second only with its own evidence |
 | 2 · Let's Talk | Conversation starters: her week (her own named activity), one per focus, and what gets in the way (a possibility from her challenges, or an open question). How little ones join | ≤ 4 |
-| 3 · Everyone's Part | Under each child's name, ideas to choose from (plain actions, no pronouns): what she said she'd like that child to take on, in their age's version, then the month's. How much help a first try needs. What a child already does is noticed, not suggested again. Under 3 joins in. For the grown-ups: a conversation about helping without taking over (no job); what a grown-up other than the account holder already does is noticed | ≤ 2 per child; no idea printed twice |
-| 4 · Let's Practice | Ways to make it stick, worded as options ("If there's time…", "One idea…", "It can help…"): trying a part before the meeting ends, the obstacle's adjustment, tying a part to something that already happens, a setup that makes an idea easier, a smaller version before more reminders. A tip another line already gives is left out | ≤ 4 |
+| 3 · Everyone's Part | Under each child's name, ideas to choose from (plain actions, no pronouns): what she said she'd like that child to take on, in their age's version, then the month's. How much help a first try needs. What a child already does is noticed, not suggested again. Under 3 joins in. For the grown-ups: a conversation about helping without taking over (no job); what a grown-up other than the account holder already does is noticed | 1 per child (2 to choose from, ages 6+, only when ownership is her obstacle); no line printed twice; every child 3+ appears (idea, recognition or a question) |
+| 4 · Let's Practice | One thing worth trying (her obstacle's adjustment, or the setup that makes an idea easier) and one way to keep it going without adding work. A tip the page already applies is left out | ≤ 2 |
 | Coming back to it | How to revisit a part at a later meeting (the seed of check-ins) | 1 line |
 
 Families of 5–6 children and 7+ get fixed tighter layouts, never smaller than 10px text.
+
+### Selection (how the companion decides what to print)
+
+`src/lib/club/meeting-guide/generate.ts`, deterministic, tested against ten family situations and every
+priority × challenge combination (`tests/club-meeting-guide-generator.test.ts`); quality report:
+`docs/club/JANUARY_QUALITY.md` (`npx vite-node scripts/meeting-guide-quality.ts`).
+
+1. **Score each opportunity** in the month's content (mornings, evenings, school, schedules, reminders, home, laundry,
+   sharing) against what she reported:
+   *relevance* (her top priority 3, each matching challenge 2, a wish she named for a child 2, an unassigned wish 1),
+   *impact* (priority 2, challenge 1), *readiness* (children 3+ with a fitting step they don't already do, up to 2) and
+   *habit potential* (1 for a cue-ready step or an adjustment for an obstacle she named). Only opportunities she gave
+   evidence for count; ties go to her top priority.
+2. **One focus.** A second only with 4+ points of its own evidence (answers the first didn't use) and three quarters
+   of the first's score.
+3. **One idea per child** for that focus: her wish for that child, her unassigned wishes, then the focus's own steps at
+   their age (unless the focus doesn't say which job, like fewer reminders: then the children are asked). A child who
+   already handles the area is recognized and asked to show how. Two ideas only when the obstacle she reported is about
+   ownership, for children 6+, so they choose. No line is printed twice.
+4. **Let's Talk** brings the children in: the focus conversation, her obstacle as a possibility (or a question that
+   explores it with options), and one discovery question per idea naming the children 6+ it fits.
+5. **Let's Practice**: one adjustment worth trying (her obstacle's, or the setup that makes an idea easier when the
+   page already applies the obstacle's principle) and one way to keep it going without adding work.
+6. **Too little intake**: no guesses. The children are asked, and January's own habit (a regular meeting stacked on a
+   weekly routine) is offered.
 
 **Make changes** (desktop rail, or any row on the phone): untick any idea to take it off the page, or plan for a
 child's age differently (an age not given, a child ahead or behind). Names, ages and answers come from `/club/family`;

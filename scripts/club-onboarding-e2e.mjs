@@ -288,7 +288,7 @@ scenarios.firstMonth = async (browser) => {
   const KIDS = ['Zara', 'Emeka', 'Nia'];
   check('January (her view): every child by first name', KIDS.every((n) => sheet.includes(n)), sheet.replace(/\s+/g, ' ').slice(0, 300));
   check('January (her view): no sample family, no assumed Mom/Dad', !SAMPLE.test(sheet) && !/\b(Mom|Dad)\b/.test(sheet), (sheet.match(SAMPLE) ?? sheet.match(/\b(Mom|Dad)\b/) ?? [''])[0]);
-  check('January (her view): ideas fit each age (4: a sticker on the calendar; 12: activities on the family calendar), nothing assigned', /sticker on today/i.test(sheet) && /activities to the family calendar|plans on the family calendar/i.test(sheet) && /Ideas to choose from, not jobs/.test(sheet) && !/Led by|add your own plans/i.test(sheet));
+  check('January (her view): ideas fit each age (4: a sticker on the calendar; 12: activities on the family calendar), nothing assigned', /sticker on today/i.test(sheet) && /activit(y|ies) to the family calendar|plans on the family calendar|Ask [A-Z]/i.test(sheet) && /Ideas to choose from, not jobs/.test(sheet) && !/Led by|add your own plans/i.test(sheet));
   check('January (her view): the four parts of the Family Meeting', ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'].every((t) => sheet.includes(t)));
   check('January (her view): a winter sheet, no fall wording', /JANUARY 2027/i.test(sheet) && !/\bfall\b|Cooler weather/i.test(sheet));
   check('January (her view): no script errors', page.errors.length === 0, page.errors.join(' | '));

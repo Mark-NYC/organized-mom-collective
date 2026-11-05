@@ -63,7 +63,7 @@ if (root && host) {
       if (!g) return;
       q('[data-mgm-focus]').replaceChildren(...g.focus.map((f) => el('li', { class: 'mgm-focus' }, el('strong', {}, f.title), f.opportunity ? el('span', {}, f.opportunity) : '')));
       q('[data-mgm-talk]').replaceChildren(...g.talk.map((t) => row(t.text, '', locked)));
-      q('[data-mgm-people]').replaceChildren(...g.people.map((p) => row(p.name, p.joinsIn ? 'Joins in and watches.' : p.ideas.map((i) => i.text).join(' Or: '), locked)), ...g.grownUps.map((t) => row(t.text, '', locked)));
+      q('[data-mgm-people]').replaceChildren(...(g.partsDiscover ? [row(g.partsDiscover, '', locked)] : []), ...g.people.filter((p) => p.ideas.length || p.keeps).map((p) => row(p.name, [p.ideas.map((i) => i.text).join(' Or: '), p.keeps].filter(Boolean).join(' '), locked)), ...g.grownUps.map((t) => row(t.text, '', locked)));
       q('[data-mgm-practice]').replaceChildren(...g.practice.map((t) => row(t.text, '', locked)));
     },
   });

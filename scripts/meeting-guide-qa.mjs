@@ -82,12 +82,14 @@ console.log('\nLarge families with long names');
 for (const n of [6, 8, 12]) {
   const fam = structuredClone(LARGE);
   fam.household.members = fam.household.members.slice(0, n);
+  // A focus that gives every child an idea (tidying), so the page is as full as it gets.
+  fam.profile = { ...fam.profile, priority: 'tidying', challenges: [] };
   const page = await open(browser, { width: 1440, height: 900 }, '/app/club/january?sample=chen', fam);
   const f = await fit(page);
   check(`${n} people: both sheets fit (${f.map((x) => x.spare).join(', ')}px spare), smallest text ${Math.min(...f.map((x) => x.min))}px`, f.length === 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
   check(`${n} people: prints 2 Letter pages`, (await pdfPages(page)) === 2);
-  const kids = fam.household.members.filter((m) => m.kind === 'child').length;
-  check(`${n} people: every child has ideas; grown-ups get a conversation, not a job`, (await page.locator('[data-meeting-guide] [data-plan-sheet="back"] .mg-kids > li').count()) === kids && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
+  const cards = await page.locator('[data-meeting-guide] [data-plan-sheet="back"] .mg-kids > li').count();
+  check(`${n} people: ${cards} child cards (every child 3+ with an idea), grown-ups get a conversation, not a job`, cards === fam.household.members.filter((m) => m.kind === 'child' && 2026 - m.birthYear >= 3).length && /help without taking over/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
   await page.context().close();
 }
 await browser.close();
