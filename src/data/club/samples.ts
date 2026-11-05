@@ -145,6 +145,37 @@ export const sampleHouseholds: SampleHousehold[] = [
     },
   },
   {
+    id: 'lindqvist',
+    label: 'Sample: the Lindqvist family',
+    shows: 'Two parents, kids 11 and 15, busy with activities',
+    household: {
+      id: 'sample-lindqvist',
+      displayName: 'The Lindqvist family',
+      preferences: { school: 'public' },
+      profileVersion: 1,
+      members: [
+        { id: 'sample-lindqvist-maja', firstName: 'Maja', kind: 'adult', role: 'parent', isAccountHolder: true },
+        { id: 'sample-lindqvist-sam', firstName: 'Sam', kind: 'adult', role: 'partner' },
+        kid('sample-lindqvist-elsa', 'Elsa', 2011, 6),
+        kid('sample-lindqvist-nils', 'Nils', 2015, 6),
+      ],
+    },
+    profile: {
+      setupDone: ['week', 'responsibilities', 'growth', 'challenges', 'priority'],
+      setupCompleted: true,
+      challenges: ['knowing-plans', 'communicating'],
+      priority: 'activities',
+      activities: [
+        { id: 'sample-lindqvist-a1', category: 'clubs', name: 'Robotics', memberIds: ['sample-lindqvist-elsa'], days: [] },
+        { id: 'sample-lindqvist-a2', category: 'sports', name: 'Hockey', memberIds: ['sample-lindqvist-nils'], days: [] },
+        { id: 'sample-lindqvist-a3', category: 'work', memberIds: ['sample-lindqvist-sam'], days: [1, 2, 3, 4, 5] },
+      ],
+      responsibilities: [
+        { id: 'sample-lindqvist-r1', status: 'desired', category: 'belongings', item: 'own-belongings', ownerIds: ['sample-lindqvist-nils'], helperIds: [] },
+      ],
+    },
+  },
+  {
     id: 'new',
     label: 'Sample: a new member',
     shows: 'No family yet: try the welcome form',
