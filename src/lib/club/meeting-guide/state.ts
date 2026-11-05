@@ -1,14 +1,13 @@
 /**
- * What a family keeps of their guide (saved with her month, src/lib/club/plan/account.ts): her choices, a copy of
- * the profile answers the guide used, and the resulting plan as structured data (src/lib/club/family-plan.ts). The
+ * What a family keeps of their companion (saved with her month, src/lib/club/plan/account.ts): her corrections, a copy
+ * of the profile answers it used, and the resulting ideas as structured data (src/lib/club/family-plan.ts). The
  * profile copy is why the owner's print view (which loads her household but not her profile) prints exactly what she
- * approved. Names and ages are never copied: they always come from her household, so a change on her family page
- * regenerates the guide.
+ * approved. Names and ages are never copied: they come from her household, so a change on her family page regenerates
+ * the companion.
  */
 import type { FamilyPlan } from '../family-plan';
 import type { FamilyProfile } from '../family-profile';
 import { isGuideStage, type GuideStage } from './stages';
-import { PART_ORDER, type GuideMonthContent, type PartId } from './types';
 
 export interface GuideProfile {
   priority?: string;
@@ -21,25 +20,22 @@ export interface GuideProfile {
 }
 
 export interface GuideState {
-  v: 1;
-  rhythm: string;
-  /** Who leads each part, when she changed it. */
-  leaders: Partial<Record<PartId, string>>;
-  /** Per person: a corrected stage, a different part, or a part in her own words. */
-  people: Record<string, { stage?: GuideStage; part?: string; custom?: string }>;
-  /** The profile answers used, kept so every view of this guide is the same. */
+  v: 2;
+  /** Per person: a corrected stage (an age not given, or a child who's ahead or behind). */
+  people: Record<string, { stage?: GuideStage }>;
+  /** Ideas she took off the companion (their keys). */
+  hidden: string[];
+  /** The profile answers used, kept so every view of this companion is the same. */
   profile?: GuideProfile;
-  /** The plan as structured data, written with every save. Read by later months; never read back here. */
+  /** The ideas as structured data, written with every save. Read by later months; never read back here. */
   plan?: FamilyPlan;
 }
 
-export const MAX_CUSTOM = 90;
-
-export const emptyGuideState = (content: GuideMonthContent): GuideState => ({ v: 1, rhythm: content.rhythm.defaultOption, leaders: {}, people: {} });
+export const emptyGuideState = (): GuideState => ({ v: 2, people: {}, hidden: [] });
 
 const note = (s: string | undefined) => (s?.trim() ? s.trim().slice(0, 60) : undefined);
 
-/** Only what the guide uses, from her full profile. */
+/** Only what the companion uses, from her full profile. */
 export function guideProfile(p: FamilyProfile | null | undefined): GuideProfile | undefined {
   if (!p) return undefined;
   const out: GuideProfile = {
@@ -56,18 +52,14 @@ export function guideProfile(p: FamilyProfile | null | undefined): GuideProfile 
   return out.priority || out.challenges.length || out.activities.length || out.responsibilities.length ? out : undefined;
 }
 
-const str = (v: unknown, max = 60): v is string => typeof v === 'string' && v.length <= max;
-
 export function isGuideState(v: unknown): v is GuideState {
   const s = v as GuideState;
-  if (!s || typeof s !== 'object' || s.v !== 1 || !str(s.rhythm)) return false;
-  if (!s.leaders || typeof s.leaders !== 'object' || !Object.entries(s.leaders).every(([k, id]) => (PART_ORDER as readonly string[]).includes(k) && str(id))) return false;
+  if (!s || typeof s !== 'object' || s.v !== 2) return false;
+  if (!Array.isArray(s.hidden) || s.hidden.length > 200 || !s.hidden.every((k) => typeof k === 'string' && k.length <= 120)) return false;
   if (!s.people || typeof s.people !== 'object') return false;
   for (const p of Object.values(s.people)) {
     if (!p || typeof p !== 'object') return false;
     if (p.stage !== undefined && !isGuideStage(p.stage)) return false;
-    if (p.part !== undefined && !str(p.part)) return false;
-    if (p.custom !== undefined && !str(p.custom, MAX_CUSTOM)) return false;
   }
   if (s.profile !== undefined) {
     const g = s.profile;

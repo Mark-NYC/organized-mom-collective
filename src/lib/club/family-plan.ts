@@ -1,6 +1,6 @@
 /**
- * A family's plan as structured data: what each person is practicing, the family's focus, the obstacle they're
- * working on and what they'll do before the next meeting. Generated each month (src/lib/club/meeting-guide/generate.ts)
+ * A family's plan as structured data: the family's focus, the obstacle they might work on and the responsibility
+ * ideas offered to each child (later, the ones they chose and how they're going). Generated each month (src/lib/club/meeting-guide/generate.ts)
  * and saved with the month's resource (club_resource_versions.state → the guide's `plan`), so later months read
  * records, not PDF text. docs/club/PERSONALIZATION.md has the model and the roadmap.
  *
@@ -11,7 +11,7 @@ import type { HabitPrinciple } from './meeting-guide/types';
 
 /** Where a practice came from. */
 export type PracticeSource = 'desired' | 'existing' | 'month' | 'custom';
-/** Suggested by us; accepted when she approves the month (or changes it herself). */
+/** Suggested: an idea we offered (January offers two per child to choose from). Accepted: the family's choice, once recorded. */
 export type PracticeStatus = 'suggested' | 'accepted';
 /** Progress, from check-ins. `practicing` until the first answer. */
 export type ProgressStatus = 'practicing' | 'independent' | 'improving' | 'struggling' | 'retired';
@@ -41,7 +41,6 @@ export interface FamilyPlan {
   obstacle: { challengeId: string; obstacle: string; principle: HabitPrinciple | null; adjustment: string | null } | null;
   practices: ResponsibilityPractice[];
   todos: string[];
-  meeting: { rhythm: string };
 }
 
 // ---- Future check-ins (data foundation only) ----

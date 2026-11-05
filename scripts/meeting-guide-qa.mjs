@@ -1,5 +1,5 @@
 /**
- * The personalized Family Meeting guide (January's resource, /app/club/january) in a real browser: every sample
+ * The personalized Family Meeting companion (January's resource, /app/club/january) in a real browser: every sample
  * family on desktop and phone, families of 6, 8 and 12 with long names, and print. Run against a built preview:
  *
  *   PUBLIC_CLUB_ENABLED=true npx astro build && npx astro preview --port 4330
@@ -70,7 +70,7 @@ for (const sample of SAMPLES) {
       check(`${sample}: Make changes opens the editor`, await page.isVisible('dialog[open][data-mg-editor]'));
       await page.keyboard.press('Escape');
     } else {
-      check(`${sample} phone: the guide’s sections`, await page.isVisible('[data-mgm-people] li'));
+      check(`${sample} phone: the companion’s sections`, await page.isVisible('[data-mgm-focus] li') && await page.isVisible('[data-mgm-practice] li'));
     }
     check(`${sample} ${label}: no script errors`, page.errors.length === 0, page.errors.join(' | '));
     if (SHOTS && sample === 'rivera') await page.screenshot({ path: `${SHOTS}/guide-rivera-${label}.png` });
@@ -86,7 +86,8 @@ for (const n of [6, 8, 12]) {
   const f = await fit(page);
   check(`${n} people: both sheets fit (${f.map((x) => x.spare).join(', ')}px spare), smallest text ${Math.min(...f.map((x) => x.min))}px`, f.length === 2 && f.every((x) => x.spare >= 0 && x.min >= 10), JSON.stringify(f));
   check(`${n} people: prints 2 Letter pages`, (await pdfPages(page)) === 2);
-  check(`${n} people: everyone has a line`, (await page.locator('[data-plan-sheet="back"] .mg-part').first().locator('.mg-lines li').count()) === n);
+  const kids = fam.household.members.filter((m) => m.kind === 'child').length;
+  check(`${n} people: every child has ideas, grown-ups named once`, (await page.locator('[data-meeting-guide] [data-plan-sheet="back"] .mg-kids > li').count()) === kids && /: add your own plans/.test(await page.locator('[data-meeting-guide] .mg-grownups').first().innerText()));
   await page.context().close();
 }
 await browser.close();

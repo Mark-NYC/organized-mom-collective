@@ -4,29 +4,32 @@ The Club is a family responsibility system, not a name-insertion service: a few 
 person, one obstacle to work on, small actions, and progress remembered over time. January 2027 is the first
 resource built this way.
 
-## The January guide (live)
+## January: the Family Meeting Companion
 
-`/app/club/january` is the family's personalized **Our First Family Meeting** guide, on the shared Club plan shell
-(sign-in, family loading, saved plans, Welcome Kit approval, fulfillment print view and printing all unchanged).
+Families get two things:
 
-Two US Letter pages, in the Club's four established parts:
+1. **The reusable framework**: the Welcome Kit's one-page Family Meeting guide (`src/data/club/meeting-guide.ts`,
+   `/club/family-meeting-guide`). The four parts, every month. Unchanged.
+2. **The January companion**: `/app/club/january`, a personalized **menu of ideas** under the same four parts, for
+   whichever meetings the family holds in January. Not a completed meeting, not a weekly curriculum: they use what
+   fits each time, come back to what matters and skip the rest. Nobody leads anything on it, nothing is assigned, and
+   no decision is filled in.
 
-| Page | Part | Job | What it holds |
-| --- | --- | --- | --- |
-| 1 | Before we start | prepare | Three or four lines; who opens the meeting |
-| 1 | 1 · Our Focus (2 min) | what matters | The opening line, then **one or two** things that matter most, from her priority and challenges (one per theme). Only with no answers: the month's purpose |
-| 1 | 2 · Let's Talk (3 min) | discuss | Her week (her own named activity if any), one question per focus, how little ones join; **one** possible obstacle with one thing to try, or an open question if she named none |
-| 2 | 3 · Everyone's Part (3 min) | decide | **One part per person**: what she said she wants that child to take on, in their stage's version, with a cue (when), a finish line and how much help to give. Something they already do is recognized, not added to. Under 3 joins in |
-| 2 | 4 · Let's Practice (2 min) | do | Everyone tries the first step now |
-| 2 | Before our next meeting | do | At most two to-dos, from the plan's own setups (a low hook, picture labels), else the month's defaults; the check-in question for next time |
-| 2 | Our meeting rhythm | repeat | Same day each month (her choice), three habits |
+Two US Letter pages (fixed, so printing and the mailed copy never vary):
 
-Writing lines appear only where there's room (up to five people). Families of 6–7 and 8+ get fixed tighter layouts,
-never smaller than 10px text; 12 people with long names fit on two pages.
+| Part | What's on it | Limits |
+| --- | --- | --- |
+| 1 · Our Focus | One or two priorities from her priority and challenges (one per theme), each with what getting better could look like. Only with no answers: the month's purpose | ≤ 2 |
+| 2 · Let's Talk | Conversation starters: her week (her own named activity), one per focus, and what gets in the way (a possibility from her challenges, or an open question). How little ones join | ≤ 4 |
+| 3 · Everyone's Part | Per child, ideas to choose from: what she said she'd like that child to take on, in their age's version, then the month's. How much help a first try needs. What a child already does is noticed, not suggested again. Under 3 joins in. Grown-ups named in one shared idea | ≤ 2 per child; no idea printed twice |
+| 4 · Let's Practice | Ways to make it stick: try it now, the obstacle's adjustment, a clear cue built from one of the family's own ideas, a setup that makes an idea easy, making a part smaller. A tip another line already gives is left out | ≤ 4 |
+| Coming back to it | How to revisit a part at a later meeting (the seed of check-ins) | 1 line |
 
-**Make changes** (desktop rail, or any row on the phone): each child's stage (for an age not given or a child ahead or
-behind), each person's part (her answers first, then the month's, or her own words), who leads each part, and the
-meeting day. Names, ages and answers come from `/club/family`; changes there regenerate the guide.
+Families of 5–6 children and 7+ get fixed tighter layouts, never smaller than 10px text.
+
+**Make changes** (desktop rail, or any row on the phone): untick any idea to take it off the page, or plan for a
+child's age differently (an age not given, a child ahead or behind). Names, ages and answers come from `/club/family`;
+changes there regenerate the companion.
 
 ### Code
 
@@ -44,16 +47,16 @@ meeting day. Names, ages and answers come from `/club/family`; changes there reg
 
 ### Habit principles in the content
 
-Practical heuristics, not diagnoses. Every practice carries a **cue** stacked on something the child already does
-("After dinner", "Coming in the door"), an optional **setup** that makes it easy (a hook at their height), a
-**behavior** small enough for the stage, **support** that fades ("together the first week, then let them lead"), and a
-**finish line** they can see. Obstacles are offered as "might be" with one adjustment tied to a principle (trigger,
-environment, simplicity, ownership, consistency). No rewards by default; resistance is never read as laziness.
+Practical heuristics, not diagnoses. Every idea has a **cue** it could follow ("After dinner", "Coming in the door"),
+often a **setup** that makes it easy (a hook at their height), a **behavior** small enough for the stage, and
+**support** that fades ("together at first, then let them lead"). Obstacles are offered as "might be" with one
+adjustment tied to a principle (trigger, environment, simplicity, ownership, consistency). No rewards by default;
+resistance is never read as laziness.
 
 ### Adding February (or any month)
 
-1. Write `src/data/club/meeting-guides/2027-02.ts` as a `GuideMonthContent`: the four parts' lines, focus and obstacle
-   maps for the ids that matter that month, practices by growth item and stage, stage defaults, to-dos and rhythm.
+1. Write `src/data/club/meeting-guides/2027-02.ts` as a `GuideMonthContent`: the parts' goals, focus and obstacle maps
+   for the ids that matter that month, practices by growth item and stage, stage defaults and the practice tips.
    Reuse January's practices where they fit; the month's own resource decides what's relevant.
 2. Add it to `GUIDE_MONTHS` in `index.ts`.
 3. If the month's page should show the guide, put `<MeetingGuidePrintable month="2027-02" />` and
@@ -72,18 +75,18 @@ No generator change is needed unless the month needs a new kind of rule.
 | A/B. Who already takes care of what | Step 3 | `club_responsibilities` `status='existing'` |
 | B. What she'd like each child to take on | Step 4 | `club_responsibilities` `status='desired'` (`item`, `owner_ids` = for which child) |
 | B. Family-wide challenges and first priority | Steps 5–6 | `club_households.challenges`, `.priority` (+ notes) |
-| B. This month's practices, focus, obstacle, to-dos | **The guide's plan** (new) | `club_resource_versions.state['omc:club:january-family-meeting:v1'].state.plan` (`FamilyPlan`) |
+| B. This month's focus, obstacle and the ideas offered per child | **The companion's plan** (new) | `club_resource_versions.state['omc:club:january-family-meeting:v1'].state.plan` (`FamilyPlan`) |
 | C. Timely: schedules, seasons, progress | Not collected; by design | Future (below) |
 
 Nothing new is asked at onboarding. Detailed schedules and seasons are deliberately not collected to get started.
 
 ### The plan record (`FamilyPlan`, src/lib/club/family-plan.ts)
 
-Per person: `memberId`, `itemId` (growth item or the month's), `category`, `behavior`, `cue`, `setup`, `support`,
-`finished`, `source` (desired / existing / month / custom), `status` (suggested / accepted), `progress` (practicing /
-independent / improving / struggling / retired) and `since` (month). Per family: one or two `focus` items with their
-source, the `obstacle` (challenge id, principle, adjustment), `todos`, meeting `rhythm`. It's written with her guide
-from her first click or key press (approving counts) and on every change, so later months read records, not PDF text.
+Per idea offered: `memberId`, `itemId` (growth item or the month's), `category`, `behavior`, `cue`, `setup`, `support`,
+`source`, `status` (all `suggested` in January: the family chooses at the meeting), `progress` and `since`. Per
+family: one or two `focus` items with their source and the `obstacle` (challenge id, principle, adjustment). It's
+written with her companion from her first click or key press (approving counts) and on every change, so later months
+read records, not PDF text. Which idea each child chose is recorded later, by the check-in (roadmap 1–2).
 
 It lives in the month's saved resource for now: no migration was needed for January. When a second month reads it, or
 check-ins start, it moves into `club_responsibilities` with the minimum additions below.

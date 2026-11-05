@@ -1,136 +1,131 @@
 import { describe, expect, it } from 'vitest';
 import { january2027 } from '../src/data/club/meeting-guides/2027-01';
 import { GUIDE_MONTHS, guideMonth } from '../src/data/club/meeting-guides';
+import { MEETING_GUIDE } from '../src/data/club/meeting-guide';
 import { checkInDue, nextStep } from '../src/lib/club/family-plan';
-import { generateMeetingGuide, guideFingerprint } from '../src/lib/club/meeting-guide/generate';
+import { generateMeetingGuide, guideFingerprint, type MeetingGuide } from '../src/lib/club/meeting-guide/generate';
 import { emptyGuideState, guideProfile, isGuideState } from '../src/lib/club/meeting-guide/state';
 import { stageFor } from '../src/lib/club/meeting-guide/stages';
 import { FAMILIES } from './fixtures/meeting-guide-families';
 
 const content = january2027;
-const gen = (key: string, state = emptyGuideState(content)) => {
+const gen = (key: string, state = emptyGuideState()) => {
   const f = FAMILIES.find((x) => x.key === key)!;
   return generateMeetingGuide({ household: f.household, profile: f.profile, content, state });
 };
-const person = (g: ReturnType<typeof gen>, name: string) => g.people.find((p) => p.name === name)!;
-const text = (g: ReturnType<typeof gen>) => JSON.stringify({ ...g, plan: undefined });
+const kid = (g: MeetingGuide, name: string) => g.people.find((p) => p.name === name)!;
+const text = (g: MeetingGuide) => JSON.stringify({ ...g, plan: undefined });
+/** Every line that prints. */
+const lines = (g: MeetingGuide) => [
+  ...g.focus.flatMap((f) => [f.title, f.opportunity]), ...g.talk.map((t) => t.text), ...g.people.flatMap((p) => p.ideas.map((i) => i.text)),
+  ...g.grownUps.map((t) => t.text), ...g.practice.map((t) => t.text),
+].filter(Boolean);
 
-describe('January Family Meeting guide', () => {
-  it('keeps the four established parts, in order, with their minutes', () => {
+describe('January Family Meeting companion', () => {
+  it('uses the four established parts, in the framework’s own words', () => {
+    const framework = MEETING_GUIDE.parts.map((p) => p.title);
     for (const f of FAMILIES) {
       const g = gen(f.key);
-      expect(g.sections.map((p) => p.title)).toEqual(['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice']);
-      expect(g.sections.map((p) => p.minutes)).toEqual([2, 3, 3, 2]);
+      expect(g.sections.map((s) => s.title)).toEqual(framework);
+      expect(g.sections.map((s) => s.goal)).toEqual(['What we’re working on together, and why it helps all of us.', 'Everyone answers, the youngest first. No wrong answers, no fixing anyone.', 'Each person picks or agrees to one small part they own this month.', 'Try one part together right now, so the first time isn’t a reminder later.']);
     }
   });
 
-  it('names one or two things that matter most, only from her answers', () => {
+  it('is a menu, not a completed meeting: no leaders, scripts, assignments or filled-in decisions', () => {
+    for (const f of FAMILIES) {
+      const t = text(gen(f.key));
+      expect(t).not.toMatch(/Led by|leaderId|"say"|Hand this guide|opens the meeting|Week [1-4]|First meeting/i);
+    }
+    expect(content.partsNote).toMatch(/not jobs\. Decide together/);
+  });
+
+  it('names one or two priorities, only from her answers', () => {
     expect(gen('young-support').focus.map((f) => f.title)).toEqual(['Easier evenings', 'Smoother daily routines']);
-    // reminding and remembering are one theme: one focus, not two.
     expect(gen('two-adults-teen').focus.map((f) => f.title)).toEqual(['Fewer reminders', 'Sharing plans with each other']);
-    // activities and knowing-plans are one theme; sharing-fairly is the second.
     expect(gen('mixed-busy').focus.map((f) => f.source)).toEqual(['priority', 'challenge']);
     for (const f of FAMILIES) expect(gen(f.key).focus.length).toBeLessThanOrEqual(2);
-    expect(gen('minimal').focus).toEqual([{ id: 'month', source: 'month', title: 'Starting our monthly Family Meeting' }]);
+    expect(gen('minimal').focus.map((f) => f.source)).toEqual(['month']);
   });
 
-  it('gives each child the part she said she wants for them, in the version for their age', () => {
-    const tobi = person(gen('young-support'), 'Tobi');
-    expect(tobi.part).toMatchObject({ itemId: 'own-belongings', source: 'desired', cue: 'Coming in the door' });
-    expect(tobi.part!.support).toMatch(/together the first week/);
+  it('offers each child up to two ideas, from what she wants for them, in their age’s version', () => {
+    const tobi = kid(gen('young-support'), 'Tobi');
+    expect(tobi.ideas[0]).toMatchObject({ itemId: 'own-belongings', source: 'desired' });
+    expect(tobi.support).toMatch(/together at first/);
     const park = gen('school-age');
-    expect(person(park, 'Jun').part!.itemId).toBe('pack-school-bag');
-    expect(person(park, 'Jun').part!.behavior).toContain('school');
-    expect(person(park, 'Mira').part!.itemId).toBe('homework-start');
-    expect(person(park, 'Mira').part!.support).toMatch(/On their own/);
+    expect(kid(park, 'Jun').ideas[0].itemId).toBe('pack-school-bag');
+    expect(kid(park, 'Jun').ideas[0].text).toContain('school');
+    expect(kid(park, 'Mira').ideas[0].itemId).toBe('homework-start');
+    for (const f of FAMILIES) for (const p of gen(f.key).people) expect(p.ideas.length).toBeLessThanOrEqual(2);
+    expect(kid(gen('young-support'), 'Ada')).toMatchObject({ joinsIn: true, ideas: [] });
+    expect(kid(gen('two-adults-teen'), 'Elsa').ideas[0].text).toMatch(/wind-down time/);
   });
 
-  it('recognizes what a child already does instead of adding work', () => {
-    const mira = person(gen('school-age'), 'Mira');
-    expect(mira.keeps).toMatch(/Already takes care of pet care/);
-    const jade = person(gen('mixed-busy'), 'Jade');
-    expect(jade.keeps).toMatch(/laundry/);
-    // The account holder never gets a "keeps doing" line (it would only list what she carries).
-    for (const f of FAMILIES) for (const p of gen(f.key).people.filter((x) => x.isHolder)) expect(p.keeps).toBeNull();
+  it('notices what someone already does instead of suggesting it again', () => {
+    expect(kid(gen('school-age'), 'Mira').keeps).toMatch(/Mira already takes care of pet care/);
+    expect(kid(gen('school-age'), 'Mira').ideas.map((i) => i.itemId)).not.toContain('pet-care');
+    expect(kid(gen('mixed-busy'), 'Jade').keeps).toMatch(/laundry/);
+    expect(gen('young-support').grownUps.map((t) => t.text)).toEqual(['Ngozi and Daniel: add your own plans to the calendar, and leave the kids’ plans to them.', 'Daniel already takes care of driving and pickups. Notice it out loud.']);
+    for (const f of FAMILIES) expect(text(gen(f.key))).not.toMatch(/(Ngozi|Hana|Kara|Maja|Lucia|Jo) already/);
   });
 
-  it('spreads unassigned wishes so siblings differ, and never gives one a child already owns', () => {
+  it('spreads her unassigned wishes so siblings start differently', () => {
     const g = gen('mixed-busy');
-    const parts = ['Mia', 'Leo', 'Jade'].map((n) => person(g, n).part!.itemId);
-    // Two wishes for any child, three children: neighbours differ, every part is one of her wishes, each in its age's version.
-    expect(parts[0]).not.toBe(parts[1]);
-    expect(parts.every((p) => ['own-belongings', 'help-with-meals'].includes(p))).toBe(true);
-    expect(person(g, 'Mia').part!.behavior).not.toBe(person(g, 'Jade').part!.behavior);
+    expect(kid(g, 'Mia').ideas[0].itemId).not.toBe(kid(g, 'Leo').ideas[0].itemId);
+    expect(new Set(['Mia', 'Leo', 'Jade'].flatMap((n) => kid(g, n).ideas.map((i) => i.itemId)))).toEqual(new Set(['own-belongings', 'help-with-meals']));
   });
 
-  it('gives a 2-year-old no job and a teen real independence', () => {
-    const ada = person(gen('young-support'), 'Ada');
-    expect(ada.part).toBeNull();
-    const elsa = person(gen('two-adults-teen'), 'Elsa');
-    expect(elsa.part!.behavior).toMatch(/Sets their own wind-down time/);
-    expect(elsa.part!.support).toMatch(/Their way/);
+  it('keeps Let’s Talk and Let’s Practice short, and offers the obstacle as a possibility', () => {
+    for (const f of FAMILIES) {
+      const g = gen(f.key);
+      expect(g.talk.length).toBeLessThanOrEqual(4);
+      expect(g.practice.length).toBeLessThanOrEqual(4);
+    }
+    expect(gen('school-age').talk.at(-1)!.text).toMatch(/^What gets in our way\? One possibility: jobs might not have a clear “when”/);
+    expect(gen('minimal').talk.at(-1)!.text).toBe(content.obstacleOpen);
+    expect(gen('mixed-busy').talk[0].text).toContain('piano');
   });
 
-  it('offers at most one obstacle, as a possibility, only from her challenges', () => {
-    expect(gen('school-age').obstacle).toMatchObject({ principle: 'trigger' });
-    expect(gen('school-age').obstacle!.obstacle).toMatch(/might/);
-    expect(gen('young-support').obstacle!.principle).toBe('simplicity');
-    expect(gen('minimal').obstacle).toBeNull();
-    expect(gen('minimal').obstacleOpen).toMatch(/What usually gets in our way/);
-  });
-
-  it('turns the plan’s own setups into at most two to-dos', () => {
+  it('gives habit ideas from the family’s own ideas, never repeating another section', () => {
     const g = gen('young-support');
-    expect(g.todos[0]).toMatch(/^For Tobi: Put a low hook/);
-    for (const f of FAMILIES) expect(gen(f.key).todos.length).toBeLessThanOrEqual(2);
-    expect(gen('two-adults-teen').todos).toEqual(content.todosDefault.slice(0, 2));
+    expect(g.practice.map((p) => p.text)).toContain('Make it easy for Tobi: put a low hook and a shoe spot by the door.');
+    expect(g.practice.map((p) => p.text)).toContain('Each person owns one step this month, not the whole routine.');
+    // The obstacle is about simplicity, so the "make it smaller" tip isn't repeated.
+    expect(g.practice.some((p) => p.key === 'practice:simplify')).toBe(false);
+    // The obstacle is about a clear "when", so the cue tip isn't repeated.
+    expect(gen('school-age').practice.some((p) => p.key === 'practice:stack')).toBe(false);
+    expect(gen('mixed-busy').practice.find((p) => p.key === 'practice:stack')!.text).toMatch(/“Coming in the door, Mia puts their shoes and coat in their spot\.”/);
+    for (const f of FAMILIES) {
+      const l = lines(gen(f.key));
+      expect(l.filter((x, i) => l.indexOf(x) !== i), f.key).toEqual([]);
+    }
+  });
+
+  it('hides what she takes off, and keeps her stage corrections', () => {
+    const s = emptyGuideState();
+    s.hidden = ['talk:week', 'idea:j1:jan-tomorrow-any', 'practice:now'];
+    s.people.j2 = { stage: 'teen' };
+    const g = gen('minimal', s);
+    expect(g.talk.map((t) => t.key)).not.toContain('talk:week');
+    expect(kid(g, 'Sky').ideas.map((i) => i.itemId)).not.toContain('jan-tomorrow-any');
+    expect(g.practice.map((p) => p.key)).not.toContain('practice:now');
+    expect(kid(g, 'River').stage).toBe('teen');
+    expect(kid(g, 'River').ideas[0].text).toMatch(/own plans|rides/);
+    s.people.j2 = { stage: 'adult' };
+    expect(kid(gen('minimal', s), 'River').stage).toBe('child');
+    expect(isGuideState(s)).toBe(true);
   });
 
   it('uses her own activities and school, never invented ones', () => {
-    expect(gen('mixed-busy').questions[0]).toContain('piano');
     expect(text(gen('minimal'))).not.toMatch(/soccer|piano|swim|robotics|their activity/);
     expect(gen('minimal').missing).toEqual(expect.arrayContaining(['ages', 'activities', 'priorities', 'growth areas']));
   });
 
-  it('lets the account holder lead only when nobody else can; under 6 never leads', () => {
-    const busy = gen('mixed-busy');
-    expect(person(busy, 'Kara').leads).toEqual([]);
-    expect(gen('single-preschooler').sections.every((p) => p.leaderName === 'Lucia')).toBe(true);
-    for (const f of FAMILIES) {
-      const g = gen(f.key);
-      for (const s of g.sections) {
-        const l = g.people.find((p) => p.id === s.leaderId);
-        if (l && l.stage === 'early') expect(s.id).toBe('practice');
-        if (l) expect(['toddler', 'preschool', 'child']).not.toContain(l.stage);
-      }
-    }
-  });
-
-  it('applies her corrections: stage, part, own words, leader, rhythm', () => {
-    const s = emptyGuideState(content);
-    s.people.j1 = { stage: 'teen' };
-    s.people.j2 = { custom: 'Feeds the fish every morning.' };
-    s.leaders.focus = 'j1';
-    s.rhythm = 'fri-dinner';
-    const g = gen('minimal', s);
-    expect(g.people.find((p) => p.id === 'j1')!.stage).toBe('teen');
-    expect(g.sections[0].leaderName).toBe('Sky');
-    expect(g.people.find((p) => p.id === 'j2')!.part!.behavior).toBe('Feeds the fish every morning.');
-    expect(g.rhythm.when).toBe('Friday after dinner');
-    s.people.j1 = { stage: 'adult' };
-    expect(gen('minimal', s).people.find((p) => p.id === 'j1')!.stage).toBe('child');
-    const t = emptyGuideState(content);
-    t.people.c2 = { part: 'jan-shoes' };
-    expect(person(gen('young-support', t), 'Tobi').part!.itemId).toBe('jan-shoes');
-    expect(isGuideState(s)).toBe(true);
-  });
-
-  it('produces the plan as structured data', () => {
+  it('keeps the ideas as structured data, all suggestions', () => {
     const g = gen('school-age');
-    expect(g.plan.practices.find((p) => p.memberId === 'p2')).toMatchObject({ itemId: 'pack-school-bag', category: 'school-prep', source: 'desired', status: 'suggested', progress: 'practicing', since: '2027-01' });
+    expect(g.plan.practices.filter((p) => p.memberId === 'p2').map((p) => p.itemId)).toEqual(['pack-school-bag', 'jan-tomorrow']);
+    expect(g.plan.practices.every((p) => p.status === 'suggested' && p.progress === 'practicing' && p.since === '2027-01')).toBe(true);
     expect(g.plan.obstacle).toMatchObject({ challengeId: 'remembering', principle: 'trigger' });
     expect(g.plan.focus.length).toBe(2);
-    expect(g.plan.practices.every((p) => p.cue || p.source === 'custom')).toBe(true);
   });
 
   it('is deterministic, keeps families apart and follows the writing rules', () => {
@@ -138,7 +133,7 @@ describe('January Family Meeting guide', () => {
     for (const f of FAMILIES) {
       const t = text(gen(f.key));
       expect(t).not.toMatch(/\b(Mom|Dad|parents?)\b|\{\w+\}/);
-      for (const other of FAMILIES.filter((o) => o.key !== f.key)) for (const m of other.household.members) expect(t).not.toContain(`"${m.firstName}"`);
+      for (const other of FAMILIES.filter((o) => o.key !== f.key)) for (const m of other.household.members) expect(t).not.toMatch(new RegExp(`\\b${m.firstName}\\b`));
     }
     expect(JSON.stringify(GUIDE_MONTHS)).not.toMatch(/\b(Mom|Dad|parents?)\b/i);
   });
@@ -153,8 +148,8 @@ describe('January Family Meeting guide', () => {
   it('finds a month by its id, and matches stages by age', () => {
     expect(guideMonth('2027-01-01')).toBe(january2027);
     expect(guideMonth('2027-02')).toBeNull();
-    const kid = (age: number) => ({ id: 'x', firstName: 'X', kind: 'child' as const, role: 'child' as const, birthYear: 2026 - age, birthMonth: 6 });
-    expect([2, 3, 5, 6, 8, 9, 12, 13, 17].map((a) => stageFor(kid(a), '2027-01'))).toEqual(['toddler', 'preschool', 'preschool', 'early', 'early', 'middle', 'middle', 'teen', 'teen']);
+    const k = (age: number) => ({ id: 'x', firstName: 'X', kind: 'child' as const, role: 'child' as const, birthYear: 2026 - age, birthMonth: 6 });
+    expect([2, 3, 5, 6, 8, 9, 12, 13, 17].map((a) => stageFor(k(a), '2027-01'))).toEqual(['toddler', 'preschool', 'preschool', 'early', 'early', 'middle', 'middle', 'teen', 'teen']);
   });
 });
 

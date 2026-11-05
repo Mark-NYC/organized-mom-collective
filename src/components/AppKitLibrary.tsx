@@ -29,7 +29,7 @@ const months = [
     "month": "January",
     "title": "Stop Being the Family's Calendar",
     "responsibility": "Planning together",
-    "how": "Our First Family Meeting: a personalized guide to your first ten-minute Family Meeting, with a part for everyone that fits their age.",
+    "how": "Our Family Meeting Companion: personalized ideas for this month’s Family Meetings, with parts each child could take on at their age.",
     "url": "/app/club/january/"
   },
   {

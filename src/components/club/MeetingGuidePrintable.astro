@@ -28,78 +28,46 @@ const { month } = Astro.props;
 .mg-frame > .mg-sheet{position:absolute;top:0;left:0;transform:scale(var(--mg-scale,1));transform-origin:top left}
 
 /* The sheet: 8.5 × 11 in at 96 px/in. Print (ClubPrintStyles) uses the same box at its real size. */
-.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:44px 52px 34px;background:#fff;color:#3d3834;font:400 12.5px/1.42 var(--font-sans);display:flex;flex-direction:column;gap:14px}
-.mg-sheet h3{margin:0;font:400 19px/1.2 var(--font-serif);color:#3d3834}
-.mg-head{border-bottom:1px solid #e7ddd4;padding-bottom:10px}
-.mg-kicker{margin:0 0 4px;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#96666b}
-.mg-title{margin:0;font:400 34px/1.1 var(--font-serif);letter-spacing:-.01em}
-.mg-sub{margin:4px 0 0;color:#6e6461}
-.mg-top{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
-.mg-prepare,.mg-map,.mg-agreed,.mg-rhythm{padding:12px 14px;border-radius:6px}
-.mg-prepare{background:#f1f4ec}
-.mg-map{background:#f8eeec}
-.mg-prepare h3,.mg-map h3,.mg-agreed h3,.mg-rhythm h3{font-size:15px;margin-bottom:6px}
-.mg-prepare ul,.mg-map ol,.mg-rhythm ul{margin:0;padding-left:16px;display:grid;gap:3px}
-.mg-map strong{font-weight:600}
-.mg-part{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid #e7ddd4}
-.mg-part-head{display:flex;align-items:baseline;gap:10px}
-.mg-num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#b9c7ad;color:#fff;font-weight:700;font-size:12px;align-self:center}
-.mg-min{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6e6461}
-.mg-led{margin-left:auto;font-size:11.5px;color:#6e6461}
-.mg-led strong{color:#3d3834}
-.mg-goal{margin:0;color:#6e6461}
-.mg-say{margin:0;font:italic 400 13.5px/1.45 var(--font-serif)}
-.mg-say span{font:600 10.5px var(--font-sans);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:#96666b}
-.mg-why{margin:0}
-.mg-questions{margin:0;padding-left:18px;display:grid;gap:2px;font-weight:500}
-.mg-label{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#96666b}
-.mg-focus{padding:10px 14px;border-left:3px solid #b9c7ad;background:#fbf7f1}
-.mg-focus ul{margin:0;padding:0;list-style:none;display:grid;gap:2px;font:400 18px/1.3 var(--font-serif)}
-.mg-note{margin:0;color:#6e6461}
-.mg-obstacle{padding:10px 14px;border-radius:6px;background:#f8eeec;display:grid;gap:3px}
-.mg-obstacle p{margin:0}
-.mg-write{height:52px;margin-top:4px!important;background:repeating-linear-gradient(to bottom,transparent 0 25px,#d9c5c2 25px 26px)}
-.mg-lines{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
-.mg-lines li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:4px;background:#fbf7f1;break-inside:avoid}
-.mg-who{font-weight:700;font-size:13.5px}
-.mg-do{font-weight:500}
-.mg-meta{font-size:11.5px;color:#4d4544}
-.mg-meta b{font-weight:600;color:#6e6461}
-.mg-help{font-size:11px;font-style:italic;color:#6e6461}
-.mg-keeps{font-size:11px;color:#536e4e}
-.mg-bottom{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;margin-top:auto}
-.mg-agreed{background:#f1f4ec}
-.mg-agreed ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.mg-agreed li{display:grid;grid-template-columns:16px 1fr;gap:8px;align-items:start}
-.mg-agreed em{display:block;font-style:normal;font-size:11px;color:#6e6461}
-.mg-box{width:13px;height:13px;margin-top:2px;border:1.5px solid #3d3834;border-radius:2px}
-.mg-hint{margin:0 0 6px;font-size:11px;color:#6e6461}
-.mg-rhythm{background:#f8eeec}
-.mg-when{margin:0 0 6px}
-.mg-notes{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:4px;padding-top:10px;border-top:1px solid #e7ddd4}
-.mg-notes h3{font-size:15px}
-.mg-notes div{flex:1;background:repeating-linear-gradient(to bottom,transparent 0 25px,#e7ddd4 25px 26px)}
-.mg-notes[hidden]{display:none}
-.mg-foot{margin:auto 0 0;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
-.mg-bottom + .mg-foot{margin-top:0}
-/* Six or more at home: tighter, still never under 10.5px body. */
-.mg-sheet.mg-dense{gap:10px;font-size:11.5px;padding-top:38px}
-.mg-dense .mg-lines{gap:4px 14px}
-.mg-dense .mg-lines li{padding:5px 8px}
-.mg-dense .mg-say{font-size:12.5px}
-.mg-dense .mg-title{font-size:30px}
-
-/* Eight or more: three columns, name over line; the overview box and the goal lines give way (the part heads say it). */
-.mg-xdense .mg-top{grid-template-columns:1fr}
-.mg-xdense .mg-map,.mg-xdense .mg-goal{display:none}
-.mg-xdense .mg-prepare ul{grid-template-columns:1fr 1fr;column-gap:18px}
-.mg-xdense .mg-lines{grid-template-columns:repeat(3,1fr);gap:4px 10px}
-.mg-xdense .mg-lines li{gap:0;padding:4px 6px;font-size:10.5px;line-height:1.3}
-.mg-xdense .mg-meta,.mg-xdense .mg-help,.mg-xdense .mg-keeps{font-size:10px}
-.mg-xdense .mg-who{font-size:11.5px}
-.mg-xdense .mg-part{gap:4px;padding-top:7px}
-.mg-xdense .mg-say{font-size:11.5px}
-.mg-xdense.mg-sheet{gap:8px;padding:34px 44px 26px}
+.mg-sheet{text-align:left;box-sizing:border-box;width:816px;height:1056px;overflow:hidden;padding:48px 56px 36px;background:#fff;color:#3d3834;font:400 13px/1.45 var(--font-sans);display:flex;flex-direction:column;gap:20px}
+.mg-sheet p{margin:0}
+.mg-sheet h3{margin:0;font:400 22px/1.15 var(--font-serif);color:#3d3834}
+.mg-head{border-bottom:1px solid #e7ddd4;padding-bottom:14px;display:grid;gap:5px}
+.mg-kicker{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#96666b}
+.mg-title{margin:0;font:400 36px/1.08 var(--font-serif);letter-spacing:-.01em}
+.mg-sub{color:#4d4544;font-size:14px}
+.mg-howto{font-size:12px;color:#6e6461}
+.mg-part{display:flex;flex-direction:column;gap:9px}
+.mg-part-head{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+.mg-num{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#b9c7ad;color:#fff;font-weight:700;font-size:14px}
+.mg-goal{color:#6e6461;font-size:12px;margin-top:2px!important}
+.mg-label{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#96666b;margin-left:42px!important}
+.mg-note{color:#6e6461;margin-left:42px!important}
+.mg-focus{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px;margin-left:42px}
+.mg-focus-item{padding:14px 16px;background:#f1f4ec;border-radius:6px;display:grid;gap:4px}
+.mg-focus-title{font:400 19px/1.25 var(--font-serif)}
+.mg-focus-opp{color:#4d4544}
+.mg-list{list-style:none;margin:0 0 0 42px;padding:0;display:grid;gap:7px}
+.mg-list li{position:relative;padding-left:18px}
+.mg-list li::before{content:'';position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:#d9b8b4}
+.mg-talk li{font-size:14px}
+.mg-kids{list-style:none;margin:0 0 0 42px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.mg-kids > li{padding:12px 14px;border-radius:6px;background:#fbf7f1;display:grid;gap:5px;align-content:start;break-inside:avoid}
+.mg-who strong{font-size:14px}
+.mg-who span{color:#6e6461}
+.mg-ideas{margin:0;padding-left:16px;display:grid;gap:4px}
+.mg-help{font-size:11.5px;font-style:italic;color:#6e6461}
+.mg-keeps{font-size:11.5px;color:#536e4e}
+.mg-grownups{margin-top:2px}
+.mg-checkin{margin-top:auto;padding:12px 16px;border-radius:6px;background:#f8eeec;font-size:12.5px}
+.mg-foot{margin-top:auto!important;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a908c;text-align:right}
+.mg-checkin + .mg-foot{margin-top:0!important}
+/* Five or six children: tighter. Seven or more: three columns. Never under 10px. */
+.mg-sheet.mg-dense{gap:14px;padding-top:40px}
+.mg-dense .mg-kids > li{padding:9px 11px;gap:3px}
+.mg-xdense .mg-kids{grid-template-columns:repeat(3,1fr);gap:7px 10px}
+.mg-xdense .mg-kids > li{font-size:11px;line-height:1.32;padding:7px 9px}
+.mg-xdense .mg-help,.mg-xdense .mg-keeps{font-size:10px}
+.mg-xdense .mg-who strong{font-size:12px}
 
 /* The editor */
 .mg-editor{position:fixed;inset:0;margin:auto;height:fit-content;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid #e7ddd4;border-radius:8px;background:#fff;color:#3d3834}
