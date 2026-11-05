@@ -36,6 +36,18 @@ choice needs migration `20261120000000_club_household_colors.sql`; until it is a
 the family page tells her the colors weren't saved (never silently dropped). The fulfillment print view reads the
 same `preferences.colors` (`club_admin_fulfillment_bundle`).
 
+**On her phone** (`src/components/club/MeetingGuideMobile.astro`, below 1100px): a calm reference she returns to all
+month, not a scaled printable. Focus first, the habit cards (who with colors, what, when, ownership, a support only
+where it matters; shared routines list each child's part), the four Words of the Week in the month's tints (this week
+marked inside the month; any word can be revisited), and a link to the permanent Family Meeting guide that links
+straight back. Same data as the printable (`clubPlan.guide()`), so her kept, changed and skipped ideas show exactly
+as they print. Editing is one button, "Edit Family Focus", which opens the same editor; after approval it first says
+a change will need approving again. Viewing never saves, regenerates or touches fulfillment.
+
+**Saved means settled.** Once her Family Focus has been saved, later visits rebuild it from that saved snapshot of her
+answers (plus her edits), never from newer family-page answers; those come in only when she taps "Start over with
+fresh suggestions from your answers". Names and ages always come from her family page.
+
 **Her review** (Make changes): each suggestion has **Keep it**, **Change it** (title, action, when) and **Skip it**.
 Skipped ideas come off the printed page; her "when" counts as confirmed. Saved in the guide state
 (`hidden`, `edits`, `kept`), included in the approval fingerprint. A kept suggestion is still not a commitment:

@@ -17,8 +17,10 @@ interface Props {
   /** The printable's sheets to preview, by their data-plan-sheet value. */
   sheets: string[];
   previewNote: string;
+  /** The scaled first sheet at the top. Off for a month whose screen is its own reference view (January). */
+  hero?: boolean;
 }
-const { deadline, kicker, sheets, previewNote } = Astro.props;
+const { deadline, kicker, sheets, previewNote, hero = true } = Astro.props;
 ---
 <section class="cp" data-plan-screen data-deadline={deadline} aria-labelledby="cp-title">
   <header class="cp-head">
@@ -35,9 +37,9 @@ const { deadline, kicker, sheets, previewNote } = Astro.props;
   <ClubPlanStatus />
 
   <!-- The real printable at the screen's width (a scaled copy of its first sheet); tap for full size. -->
-  <button type="button" class="cp-hero" data-plan-open-proof aria-label="See your printable full size">
+  {hero && <button type="button" class="cp-hero" data-plan-open-proof aria-label="See your printable full size">
     <span class="cp-thumb cp-thumb--hero" data-cp-thumb={sheets[0]} aria-hidden="true" inert></span>
-  </button>
+  </button>}
   <button type="button" class="cp-preview" data-plan-open-proof>
     {sheets.length > 1 && <span class="cp-thumbs" aria-hidden="true" inert>{sheets.map((side) => <span class="cp-thumb" data-cp-thumb={side}></span>)}</span>}
     <span class="cp-preview-text"><strong>Your printable</strong><span data-cp-preview-note>{previewNote}</span></span>

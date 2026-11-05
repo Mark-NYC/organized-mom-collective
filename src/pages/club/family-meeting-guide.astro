@@ -10,6 +10,13 @@ import MeetingGuideStep from '../../components/club/MeetingGuideStep';
 ---
 <ClubLayout title="Family Meeting guide">
   <MeetingGuideStep client:only="react" />
+  <!-- Opened from a month's Family Focus (?back=/app/club/<month>): one way straight back to it. -->
+  <p class="mg-back print:hidden" data-mg-back hidden><a href="/app/club">← Back to our Family Focus</a></p>
+  <script>
+    const back = new URLSearchParams(location.search).get('back');
+    const p = document.querySelector<HTMLElement>('[data-mg-back]');
+    if (p && back && /^\/app\/club\/[a-z0-9-]+$/.test(back)) { p.querySelector('a')!.setAttribute('href', back); p.hidden = false; }
+  </script>
   <!-- In her Welcome Kit: the rail (MeetingGuideStep renders into #mg-rail) beside the sheet on the grey desk, like the
        other two pieces. Otherwise the sheet alone. -->
   <div class="mg-layout">
@@ -20,6 +27,8 @@ import MeetingGuideStep from '../../components/club/MeetingGuideStep';
     @media screen {
       .mg-layout:has(> .mg-rail:not(:empty)) .mg-desk { background: #f1efec; padding: 24px clamp(16px, 3vw, 45px) 48px; }
       .mg-rail:empty { display: none; }
+      .mg-back { margin: 0; padding: 12px 20px; } .mg-back[hidden] { display: none; }
+      .mg-back a { display: inline-flex; min-height: 44px; align-items: center; font-weight: 600; color: var(--color-warm-ink); text-decoration: underline; text-underline-offset: 4px; }
       .mg-rail { padding: 22px 20px; background: var(--color-ivory); border-bottom: 1px solid var(--color-warm-rule); }
       .mg-rail h1 { font: 400 clamp(26px, 2.3vw, 32px)/1.12 var(--font-serif); letter-spacing: -0.015em; color: var(--color-warm-ink); }
     }

@@ -152,6 +152,8 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
   let family: ReadyFamily | null = null;
   let state: GuideState = emptyGuideState();
   let guide: MeetingGuide | null = null;
+  /** Her current family-page answers, used only for a first visit or when she starts over. */
+  let latestProfile: GuideState['profile'] | null = null;
   // Everything she could show (nothing hidden), for the editor's list.
   let full: MeetingGuide | null = null;
   let persist = true;
@@ -240,8 +242,8 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     const familyLink = family?.source === 'account'
       ? el('p', { class: 'mg-ed-note' }, 'Names, ages or answers wrong? ', el('a', { href: routes.clubFamily }, 'Update your family page'), ' and your Family Focus updates.')
       : el('p', { class: 'mg-ed-note' }, 'Names, ages and answers come from the family profile.');
-    const reset = el('button', { type: 'button', class: 'mg-ed-reset', disabled: locked }, 'Start over with the original suggestions');
-    reset.addEventListener('click', () => update((s) => { s.hidden = []; s.people = {}; s.edits = {}; s.kept = []; }));
+    const reset = el('button', { type: 'button', class: 'mg-ed-reset', disabled: locked }, 'Start over with fresh suggestions from your answers');
+    reset.addEventListener('click', () => update((s) => { s.hidden = []; s.people = {}; s.edits = {}; s.kept = []; if (latestProfile) s.profile = latestProfile; }));
     body.replaceChildren(
       el('p', { class: 'mg-ed-note' }, 'These are suggestions. Keep what fits, change the wording or timing, or skip it: skipped ideas come off the printed page.'),
       el('section', {}, el('h3', {}, 'Small habits worth trying'), familyLink, ...exps, ...g.recognized.map(toggle), ...g.grownUps.map(toggle)),
@@ -271,7 +273,10 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     // What she opened is the baseline (written before anything is generated, so opening saves nothing).
     save();
     const fresh = guideProfile(f.profile);
-    if (fresh && JSON.stringify(fresh) !== JSON.stringify(state.profile)) state = { ...state, profile: fresh };
+    latestProfile = fresh;
+    // Once her Family Focus has been saved, it stays what she saw and approved: later visits never regenerate it
+    // from newer answers. Those come in only when she chooses "Start over with the original suggestions".
+    if (fresh && !state.plan && JSON.stringify(fresh) !== JSON.stringify(state.profile)) state = { ...state, profile: fresh };
     paint();
     // Generated from the answers she has now. Her companion, its profile answers and its ideas save with her first
     // click or key press (approving counts), so the owner's print view and later months read what she saw.
