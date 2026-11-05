@@ -63,7 +63,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
  return <div ref={shellRef} className="cproto-shell" data-club-chrome>
   <header className="cproto-top">
    <div className="cproto-inner">
-    <a className="cproto-brand" href="/club">Organized Family Club</a>
+    <a className="cproto-brand" href="/club" aria-label="Organized Family Club home"><img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width={403} height={91} /></a>
     <nav aria-label="Club">
      <button type="button" className={tab==='kits'?'cproto-active':''} onClick={()=>setTab('kits')}>Kits</button>
      <button type="button" className={tab==='family'?'cproto-active':''} onClick={()=>setTab('family')}>Family</button>
@@ -99,7 +99,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
    .cproto-top{border-bottom:1px solid #dcdcdc;background:#fafaf8}
    .cproto-inner{max-width:1440px;padding:12px clamp(18px,3.5vw,54px);margin:auto}
    .cproto-top .cproto-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
-   .cproto-brand{font-family:Georgia,serif;font-size:18px;text-decoration:none;color:#3d3d3d}
+   .cproto-brand{display:flex;align-items:center;flex:0 1 auto;min-width:0;text-decoration:none}.cproto-brand img{display:block;width:190px;max-width:100%;height:auto;object-fit:contain;object-position:left}
    .cproto-top nav{display:flex;gap:9px}
    .cproto-top nav button{border:0;background:none;min-height:44px;padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer;color:#454545}
    .cproto-top nav button.cproto-active{border-bottom:2px solid #454545}
@@ -111,11 +111,11 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
    .cproto-month-mobile{display:none}
    @media(max-width:700px){
     .cproto-top .cproto-inner{flex-wrap:nowrap;gap:6px;padding-top:7px;padding-bottom:7px}
-    .cproto-brand{font-size:16px;line-height:1.2}
+    .cproto-brand img{width:155px}
     .cproto-top nav{gap:2px;flex-shrink:0}
     .cproto-top nav button{padding:7px 9px;font-size:12px}
     .cproto-top .cproto-inner{flex-wrap:wrap;justify-content:space-between;gap:5px;padding-top:8px;padding-bottom:8px}
-    .cproto-brand{font-size:15px}
+    .cproto-brand img{width:155px}
     .cproto-top nav{flex:1 1 auto;justify-content:flex-end;min-width:0;gap:0}
     .cproto-top nav button{padding:6px 7px;font-size:12px;min-height:38px}
     .cproto-header-sample{gap:0;margin-left:5px;min-width:0}
