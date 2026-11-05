@@ -1,6 +1,6 @@
 /**
  * Every month's Family Meeting guide content, by month. Adding February: write `2027-02.ts` (a GuideMonthContent,
- * src/lib/club/meeting-guide/types.ts) and add it here. docs/club/MEETING_GUIDE_GENERATOR.md has the steps.
+ * src/lib/club/meeting-guide/types.ts) and add it here. docs/club/PERSONALIZATION.md has the steps.
  */
 import type { GuideMonthContent } from '../../../lib/club/meeting-guide/types';
 import { january2027 } from './2027-01';

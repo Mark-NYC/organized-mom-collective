@@ -2,7 +2,7 @@
  * Writes the January Family Meeting guide for each test household as Markdown (docs/club/samples/), so the content can
  * be read without a browser: `npx vite-node scripts/meeting-guide-samples.ts`. Made-up families.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { january2027 } from '../src/data/club/meeting-guides/2027-01';
 import { generateMeetingGuide } from '../src/lib/club/meeting-guide/generate';
 import { STAGE_LABEL } from '../src/lib/club/meeting-guide/stages';
@@ -10,8 +10,11 @@ import { FAMILIES } from '../tests/fixtures/meeting-guide-families';
 
 const out = 'docs/club/samples';
 mkdirSync(out, { recursive: true });
+for (const f of readdirSync(out)) if (f.startsWith('january-meeting-')) rmSync(`${out}/${f}`);
 for (const f of FAMILIES) {
   const g = generateMeetingGuide({ household: f.household, profile: f.profile, content: january2027 });
+  const s = (id: string) => g.sections.find((x) => x.id === id)!;
+  const head = (id: string, tag: string) => `## ${s(id).n}. ${s(id).title} · ${s(id).minutes} min · ${tag} · led by ${s(id).leaderName}`;
   const md = [
     `# ${g.title} · ${g.familyName}`,
     '',
@@ -19,34 +22,53 @@ for (const f of FAMILIES) {
     '',
     `Who: ${g.people.map((p) => `${p.name} (${p.age ?? (p.stage === 'adult' ? 'grown-up' : 'age not given')}, ${STAGE_LABEL[p.stage]})`).join(', ')}`,
     '',
-    `${g.subtitle}`,
+    '**Page 1: running the meeting**',
     '',
-    '## Before we start',
+    '### Before we start',
     ...g.prepare.map((l) => `- ${l}`),
     '',
-    ...g.parts.flatMap((p) => [
-      `## ${p.n}. ${p.title} · ${p.minutes} min · led by ${p.leaderName}`,
-      `_${p.goal}_`,
-      '',
-      `> ${p.say}`,
-      ...(p.id === 'focus' ? ['', `Why it matters: ${g.why}`] : []),
-      ...(p.questions ? ['', ...p.questions.map((q, i) => `${i + 1}. ${q}`)] : []),
-      '',
-      ...p.lines.map((l) => {
-        const person = g.people.find((x) => x.id === l.id)!;
-        const fin = p.id === 'parts' && person.part?.finished ? ` _(Finished looks like: ${person.part.finished})_` : '';
-        return `- **${l.name}:** ${l.text}${fin}`;
-      }),
-      '',
-    ]),
-    '## What we agreed',
-    ...g.actions.map((a) => `- [ ] ${a.text} _(${a.finished})_`),
+    head('focus', 'what matters'),
+    `> ${s('focus').say}`,
     '',
-    `## ${g.rhythm.title}`,
+    'What matters most right now:',
+    ...g.focus.map((x) => `- **${x.title}** _(from ${x.source === 'month' ? 'the month (no answers yet)' : `her ${x.source}`})_`),
+    '',
+    head('talk', 'discuss'),
+    `> ${s('talk').say}`,
+    '',
+    ...g.questions.map((q, i) => `${i + 1}. ${q}`),
+    ...(g.talkLittle ? ['', `_${g.talkLittle}_`] : []),
+    '',
+    g.obstacle
+      ? `**What might get in the way:** ${g.obstacle.obstacle}${g.obstacle.adjustment ? ` **One thing to try:** ${g.obstacle.adjustment}` : ''} _Does that fit?_`
+      : `**What gets in the way:** ${g.obstacleOpen} ______`,
+    '',
+    '**Page 2: this month’s plan**',
+    '',
+    head('parts', 'decide'),
+    `> ${s('parts').say}`,
+    '',
+    ...g.people.map((p) => {
+      if (!p.part) return `- **${p.name}:** Joins in and watches. No job yet.`;
+      const bits = [p.part.behavior, p.part.cue && `_When:_ ${p.part.cue}`, p.part.finished && `_Done when:_ ${p.part.finished}`, p.part.support && `_${p.part.support}_`].filter(Boolean);
+      return `- **${p.name}:** ${bits.join(' · ')}${p.keeps ? ` · ${p.keeps}` : ''}${p.part.source === 'desired' ? ' `from her answers`' : ''}`;
+    }),
+    '',
+    head('practice', 'do'),
+    `> ${s('practice').say}`,
+    '',
+    g.tryNow,
+    '',
+    '### Before our next meeting',
+    ...g.todos.map((t) => `- [ ] ${t}`),
+    '',
+    `_${g.checkIn}_`,
+    '',
+    `### ${g.rhythm.title}`,
     `Every month: **${g.rhythm.when}**`,
     ...g.rhythm.habits.map((h) => `- ${h}`),
     '',
-    `Personalized from: ${g.used.join(', ') || 'nothing'}${g.missing.length ? ` · generic for: ${g.missing.join(', ')}` : ''}`,
+    `Personalized from: ${g.used.join(', ') || 'nothing'}${g.missing.length ? ` · month’s own content for: ${g.missing.join(', ')}` : ''}`,
     '',
   ].join('\n');
   writeFileSync(`${out}/january-meeting-${f.key}.md`, md);

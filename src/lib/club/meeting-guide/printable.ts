@@ -25,24 +25,15 @@ const SHEET_W = 816;
 const SHEET_H = 1056;
 const ACTIONS = ['pointerdown', 'keydown'] as const;
 
-function partBlock(g: MeetingGuide, id: PartId): HTMLElement {
-  const p = g.parts.find((x) => x.id === id)!;
-  const person = (pid: string) => g.people.find((x) => x.id === pid)!;
-  return el('section', { class: 'mg-part' },
-    el('header', { class: 'mg-part-head' },
-      el('span', { class: 'mg-num' }, String(p.n)),
-      el('h3', {}, p.title),
-      el('span', { class: 'mg-min' }, `${p.minutes} min`),
-      el('span', { class: 'mg-led' }, 'Led by ', el('strong', {}, p.leaderName))),
-    el('p', { class: 'mg-goal' }, p.goal),
-    el('p', { class: 'mg-say' }, el('span', {}, 'Say: '), `“${p.say}”`),
-    ...(id === 'focus' ? [el('p', { class: 'mg-why' }, el('strong', {}, 'Why it matters for us: '), g.why)] : []),
-    ...(p.questions ? [el('ol', { class: 'mg-questions' }, ...p.questions.map((q) => el('li', {}, q)))] : []),
-    el('ul', { class: 'mg-lines' }, ...p.lines.map((l) => {
-      const finished = id === 'parts' ? person(l.id).part?.finished : '';
-      return el('li', {}, el('strong', {}, l.name), el('span', {}, l.text, ...(finished ? [el('em', {}, ` Finished: ${finished}`)] : [])));
-    })));
+function head(g: MeetingGuide, id: PartId, tag: string): HTMLElement {
+  const p = g.sections.find((x) => x.id === id)!;
+  return el('header', { class: 'mg-part-head' },
+    el('span', { class: 'mg-num' }, String(p.n)),
+    el('h3', {}, p.title),
+    el('span', { class: 'mg-min' }, `${p.minutes} min · ${tag}`),
+    el('span', { class: 'mg-led' }, 'Led by ', el('strong', {}, p.leaderName)));
 }
+const say = (g: MeetingGuide, id: PartId) => el('p', { class: 'mg-say' }, el('span', {}, 'Say: '), `“${g.sections.find((x) => x.id === id)!.say}”`);
 
 function sheets(g: MeetingGuide, monthLabel: string): HTMLElement[] {
   // Fixed tiers by family size instead of shrinking type: 6–7 people tighter, 8+ in three columns.
@@ -58,21 +49,53 @@ function sheets(g: MeetingGuide, monthLabel: string): HTMLElement[] {
         el('ul', {}, ...g.prepare.map((l) => el('li', {}, l)))),
       el('section', { class: 'mg-map' },
         el('h3', {}, 'The four parts'),
-        el('ol', {}, ...g.parts.map((p) => el('li', {}, el('strong', {}, p.title), ` ${p.minutes} min · ${p.goal}`))))),
-    partBlock(g, 'focus'),
-    partBlock(g, 'talk'),
+        el('ol', {}, ...g.sections.map((p) => el('li', {}, el('strong', {}, p.title), ` ${p.minutes} min · ${p.goal}`))))),
+    el('section', { class: 'mg-part' },
+      head(g, 'focus', 'what matters'),
+      say(g, 'focus'),
+      el('div', { class: 'mg-focus' },
+        el('p', { class: 'mg-label' }, 'What matters most right now'),
+        el('ul', {}, ...g.focus.map((f) => el('li', {}, f.title))))),
+    el('section', { class: 'mg-part' },
+      head(g, 'talk', 'discuss'),
+      say(g, 'talk'),
+      el('ol', { class: 'mg-questions' }, ...g.questions.map((q) => el('li', {}, q))),
+      ...(g.talkLittle ? [el('p', { class: 'mg-note' }, g.talkLittle)] : []),
+      g.obstacle
+        ? el('div', { class: 'mg-obstacle' },
+            el('p', { class: 'mg-label' }, 'What might get in the way'),
+            el('p', {}, g.obstacle.obstacle),
+            ...(g.obstacle.adjustment ? [el('p', {}, el('strong', {}, 'One thing to try: '), g.obstacle.adjustment)] : []),
+            el('p', { class: 'mg-note' }, g.obstacle.adjustment ? 'Does that fit? If not, what would help?' : 'What’s one small change we could try?'))
+        : el('div', { class: 'mg-obstacle' }, el('p', { class: 'mg-label' }, 'What gets in the way'), el('p', {}, g.obstacleOpen ?? ''), el('p', { class: 'mg-write' }))),
     el('p', { class: 'mg-foot' }, 'Turn over for parts 3 and 4 →'));
   front.dataset.planSheet = 'front';
+
+  const person = (p: MeetingGuide['people'][number]) => el('li', {},
+    el('strong', { class: 'mg-who' }, p.name),
+    ...(p.part
+      ? [el('span', { class: 'mg-do' }, p.part.behavior),
+         ...(p.part.cue ? [el('span', { class: 'mg-meta' }, el('b', {}, 'When: '), p.part.cue)] : []),
+         ...(p.part.finished ? [el('span', { class: 'mg-meta' }, el('b', {}, 'Done when: '), p.part.finished)] : []),
+         ...(p.part.support ? [el('span', { class: 'mg-help' }, p.part.support)] : [])]
+      : [el('span', { class: 'mg-do' }, 'Joins in and watches. No job yet.')]),
+    ...(p.keeps ? [el('span', { class: 'mg-keeps' }, p.keeps)] : []));
   const back = el('article', { class: `mg-sheet${dense}` },
-    partBlock(g, 'parts'),
-    partBlock(g, 'practice'),
+    el('section', { class: 'mg-part' },
+      head(g, 'parts', 'decide'),
+      say(g, 'parts'),
+      el('ul', { class: 'mg-lines' }, ...g.people.map(person))),
+    el('section', { class: 'mg-part' },
+      head(g, 'practice', 'do'),
+      el('p', { class: 'mg-say' }, el('span', {}, 'Say: '), `“${g.sections.find((x) => x.id === 'practice')!.say}”`),
+      el('p', {}, g.tryNow)),
     // Writing lines where there's room: up to five people (a bigger family's sheet has none to spare).
     ...(g.people.length <= 5 ? [el('section', { class: 'mg-notes' }, el('h3', {}, 'Notes from our meeting'), el('div', {}))] : []),
     el('div', { class: 'mg-bottom' },
       el('section', { class: 'mg-agreed' },
-        el('h3', {}, 'What we agreed'),
-        el('p', { class: 'mg-hint' }, 'Read these out loud. Check them at next month’s meeting.'),
-        el('ul', {}, ...g.actions.map((a) => el('li', {}, el('span', { class: 'mg-box' }), el('span', {}, a.text, el('em', {}, ` ${a.finished}`)))))),
+        el('h3', {}, 'Before our next meeting'),
+        el('ul', {}, ...g.todos.map((t) => el('li', {}, el('span', { class: 'mg-box' }), el('span', {}, t)))),
+        el('p', { class: 'mg-hint' }, g.checkIn)),
       el('section', { class: 'mg-rhythm' },
         el('h3', {}, g.rhythm.title),
         el('p', { class: 'mg-when' }, 'Every month · ', el('strong', {}, g.rhythm.when)),
@@ -113,7 +136,10 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
   let locked = false;
 
   const save = () => {
-    if (persist && family) tabStorage.set(key, JSON.stringify({ current: root.dataset.planFor, state }));
+    if (!persist || !family) return;
+    // The plan as structured data goes with her choices (src/lib/club/family-plan.ts), for later months to read.
+    if (guide) state = { ...state, plan: guide.plan };
+    tabStorage.set(key, JSON.stringify({ current: root.dataset.planFor, state }));
   };
   const paint = () => {
     if (!family) return;
@@ -128,8 +154,8 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     const next = structuredClone(state);
     change(next);
     state = next;
-    save();
     paint();
+    save();
   };
 
   // ---- Editor (desktop "Make changes", and the phone screen's rows) ----
@@ -147,10 +173,10 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
       const own = state.people[p.id]?.custom ?? '';
       const partField = STAGE_RULES[p.stage].ownsPart
         ? el('fieldset', { class: 'mg-ed-parts' }, el('legend', {}, `${p.name}’s part this month`),
-            ...p.partOptions.map((o) => {
-              const r = el('input', { type: 'radio', name: `mg-part-${p.id}`, value: o.id, checked: !own && p.part?.text === o.text, disabled: locked });
+            ...p.options.map((o) => {
+              const r = el('input', { type: 'radio', name: `mg-part-${p.id}`, value: o.id, checked: !own && p.part?.itemId === o.id, disabled: locked });
               r.addEventListener('change', () => update((s) => { s.people[p.id] = { ...s.people[p.id], part: o.id, custom: undefined }; }));
-              return el('label', { class: 'mg-ed-choice' }, r, el('span', {}, o.text));
+              return el('label', { class: 'mg-ed-choice' }, r, el('span', {}, o.text, o.source === 'desired' ? el('em', {}, ' From your answers') : ''));
             }),
             (() => {
               const t = el('input', { type: 'text', maxLength: MAX_CUSTOM, value: own, placeholder: 'Or in your own words', disabled: locked });
@@ -166,7 +192,7 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
         partField);
     });
     const leaders = PART_ORDER.map((id) => {
-      const part = g.parts.find((x) => x.id === id)!;
+      const part = g.sections.find((x) => x.id === id)!;
       const sel = el('select', { disabled: locked }) as HTMLSelectElement;
       for (const p of g.people) {
         const r = STAGE_RULES[p.stage].leads;
@@ -174,17 +200,6 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
       }
       sel.addEventListener('change', () => update((s) => { s.leaders[id] = sel.value; }));
       return el('label', { class: 'mg-ed-field' }, part.title, sel);
-    });
-    const picked = new Set(g.actions.map((a) => a.id));
-    const actions = g.actionChoices.map((a) => {
-      const c = el('input', { type: 'checkbox', checked: picked.has(a.id), disabled: locked || (!picked.has(a.id) && picked.size >= content.maxActions) });
-      c.addEventListener('change', () => update((s) => {
-        const now = new Set(g.actions.map((x) => x.id));
-        if (c.checked) now.add(a.id); else now.delete(a.id);
-        s.actions = [...now].slice(0, content.maxActions);
-        if (!s.actions.length) s.actions = [g.actionChoices[0].id];
-      }));
-      return el('label', { class: 'mg-ed-choice' }, c, el('span', {}, a.text, a.recommended ? el('em', {}, ' Suggested for your family') : ''));
     });
     const rhythm = g.rhythm.options.map((o) => {
       const r = el('input', { type: 'radio', name: 'mg-rhythm', checked: o.id === g.rhythm.chosen, disabled: locked });
@@ -194,12 +209,11 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
     const reset = el('button', { type: 'button', class: 'mg-ed-reset', disabled: locked }, 'Start over with our family’s suggestions');
     reset.addEventListener('click', () => update((s) => { Object.assign(s, { ...emptyGuideState(content), profile: s.profile }); }));
     const familyLink = family?.source === 'account'
-      ? el('p', { class: 'mg-ed-note' }, 'Names or ages wrong? ', el('a', { href: routes.clubFamily }, 'Fix them on your family page'), ' and your guide updates.')
-      : el('p', { class: 'mg-ed-note' }, 'Names and ages come from the family profile.');
+      ? el('p', { class: 'mg-ed-note' }, 'Names, ages or answers wrong? ', el('a', { href: routes.clubFamily }, 'Update your family page'), ' and your guide updates.')
+      : el('p', { class: 'mg-ed-note' }, 'Names, ages and answers come from the family profile.');
     body.replaceChildren(
       el('section', {}, el('h3', {}, 'Everyone’s part'), familyLink, ...people),
       el('section', {}, el('h3', {}, 'Who leads each part'), ...leaders),
-      el('section', {}, el('h3', {}, `What we’ll agree on (up to ${content.maxActions})`), ...actions),
       el('section', {}, el('h3', {}, 'When we meet each month'), ...rhythm),
       reset);
   };
@@ -220,21 +234,24 @@ export function mountMeetingGuide(host: HTMLElement & { clubPlan?: GuidePlan }) 
 
   onPlanFamily(root, (f) => {
     family = f;
+    guide = null;
     const saved = readScoped(tabStorage.get(key), root.dataset.planFor ?? '', isGuideState);
     state = saved ?? emptyGuideState(content);
     // What she opened is the baseline. The profile answers she has now are kept with her guide from her first click
     // or key press, so the owner's print view (which has no profile) prints the guide she saw.
     save();
     const fresh = guideProfile(f.profile);
-    if (fresh && JSON.stringify(fresh) !== JSON.stringify(state.profile)) {
-      state = { ...state, profile: fresh };
+    if (fresh && JSON.stringify(fresh) !== JSON.stringify(state.profile)) state = { ...state, profile: fresh };
+    paint();
+    // Generated from the answers she has now. Her guide, its profile answers and its plan save with her first click or
+    // key press (approving counts), so the owner's print view and later months read what she saw.
+    if (JSON.stringify(state.plan) !== JSON.stringify(plan.guide()?.plan)) {
       const once = () => {
         for (const t of ACTIONS) document.removeEventListener(t, once, true);
         save();
       };
       for (const t of ACTIONS) document.addEventListener(t, once, true);
     }
-    paint();
   });
   window.addEventListener('resize', () => fit(host));
 }

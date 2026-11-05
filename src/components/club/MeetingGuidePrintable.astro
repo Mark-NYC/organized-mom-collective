@@ -52,10 +52,21 @@ const { month } = Astro.props;
 .mg-say span{font:600 10.5px var(--font-sans);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:#96666b}
 .mg-why{margin:0}
 .mg-questions{margin:0;padding-left:18px;display:grid;gap:2px;font-weight:500}
-.mg-lines{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
-.mg-lines li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline;padding:6px 8px;border-radius:4px;background:#fbf7f1;break-inside:avoid}
-.mg-lines strong{font-weight:700}
-.mg-lines em{display:block;font-style:normal;font-size:11px;color:#6e6461;margin-top:2px}
+.mg-label{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#96666b}
+.mg-focus{padding:10px 14px;border-left:3px solid #b9c7ad;background:#fbf7f1}
+.mg-focus ul{margin:0;padding:0;list-style:none;display:grid;gap:2px;font:400 18px/1.3 var(--font-serif)}
+.mg-note{margin:0;color:#6e6461}
+.mg-obstacle{padding:10px 14px;border-radius:6px;background:#f8eeec;display:grid;gap:3px}
+.mg-obstacle p{margin:0}
+.mg-write{height:52px;margin-top:4px!important;background:repeating-linear-gradient(to bottom,transparent 0 25px,#d9c5c2 25px 26px)}
+.mg-lines{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.mg-lines li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:4px;background:#fbf7f1;break-inside:avoid}
+.mg-who{font-weight:700;font-size:13.5px}
+.mg-do{font-weight:500}
+.mg-meta{font-size:11.5px;color:#4d4544}
+.mg-meta b{font-weight:600;color:#6e6461}
+.mg-help{font-size:11px;font-style:italic;color:#6e6461}
+.mg-keeps{font-size:11px;color:#536e4e}
 .mg-bottom{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;margin-top:auto}
 .mg-agreed{background:#f1f4ec}
 .mg-agreed ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
@@ -74,7 +85,7 @@ const { month } = Astro.props;
 /* Six or more at home: tighter, still never under 10.5px body. */
 .mg-sheet.mg-dense{gap:10px;font-size:11.5px;padding-top:38px}
 .mg-dense .mg-lines{gap:4px 14px}
-.mg-dense .mg-lines li{padding:4px 7px}
+.mg-dense .mg-lines li{padding:5px 8px}
 .mg-dense .mg-say{font-size:12.5px}
 .mg-dense .mg-title{font-size:30px}
 
@@ -83,8 +94,9 @@ const { month } = Astro.props;
 .mg-xdense .mg-map,.mg-xdense .mg-goal{display:none}
 .mg-xdense .mg-prepare ul{grid-template-columns:1fr 1fr;column-gap:18px}
 .mg-xdense .mg-lines{grid-template-columns:repeat(3,1fr);gap:4px 10px}
-.mg-xdense .mg-lines li{grid-template-columns:1fr;gap:0;padding:4px 6px;font-size:10.5px;line-height:1.32}
-.mg-xdense .mg-lines em{font-size:10px}
+.mg-xdense .mg-lines li{gap:0;padding:4px 6px;font-size:10.5px;line-height:1.3}
+.mg-xdense .mg-meta,.mg-xdense .mg-help,.mg-xdense .mg-keeps{font-size:10px}
+.mg-xdense .mg-who{font-size:11.5px}
 .mg-xdense .mg-part{gap:4px;padding-top:7px}
 .mg-xdense .mg-say{font-size:11.5px}
 .mg-xdense.mg-sheet{gap:8px;padding:34px 44px 26px}
