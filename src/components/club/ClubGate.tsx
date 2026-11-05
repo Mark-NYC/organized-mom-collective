@@ -69,7 +69,7 @@ function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) 
   return (
     <header data-club-chrome className="border-b border-warm-rule bg-ivory">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8">
-        <a href={href(routes.clubDashboard)} aria-label="Organized Family Club home" className="flex min-w-0 items-center"><img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width={403} height={91} className="block h-auto w-[150px] max-w-[43vw] object-contain object-left sm:w-[190px]" /></a>
+        <a href={href(routes.clubDashboard)} aria-label="Organized Family Club home" className="flex min-w-0 items-center"><img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width={403} height={91} className="block h-auto w-[90px] max-w-[43vw] object-contain object-left sm:w-[114px]" /></a>
         <nav aria-label="Club" className="-mr-2 flex items-center gap-1">
           {link('dashboard', routes.clubDashboard, 'Your months')}
           {link('family', routes.clubFamily, 'Family')}
