@@ -37,7 +37,9 @@ for(const {slug,pdf,preview} of guides){
   if(edgeAlpha)errors.push(slug+'/'+name+': non-transparent edge or background');
   if(nonInk)errors.push(slug+'/'+name+': non-charcoal artwork pixels');
   const maxSize=Math.max(x2-x1+1,y2-y1+1);
-  if(maxSize<405||maxSize>436)errors.push(slug+'/'+name+': drawing too small/large: '+maxSize+'px');
+  const smallEye = name==='check.png' && ['kitchen','living-room','paper'].includes(slug);
+  if(smallEye ? (maxSize<302||maxSize>335) : (maxSize<405||maxSize>436))
+    errors.push(slug+'/'+name+': drawing too small/large: '+maxSize+'px');
   if(Math.abs((x1+ x2)/2 - 239.5)>8||Math.abs((y1+y2)/2-239.5)>8)
    errors.push(slug+'/'+name+': drawing off-center');
   images++;

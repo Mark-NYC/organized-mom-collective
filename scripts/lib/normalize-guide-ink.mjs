@@ -38,9 +38,14 @@ export async function normalizeGuideInk(path) {
   left=Math.max(0,left-1);top=Math.max(0,top-1);
   right=Math.min(w-1,right+1);bottom=Math.min(h-1,bottom+1);
   const cropWidth=right-left+1,cropHeight=bottom-top+1;
+  // The check-look eye reads visually heavier than every other drawing.
+  // Keep it 25% smaller on its 480px transparent canvas after cropping.
+  // Normal trimming would otherwise cancel the SVG's intentional scaling.
+  const eyeIcon = /guides\/(?:kitchen|living-room|paper)\/check\.png$/.test(path.replaceAll('\\\\', '/'));
+  const targetContentSize = eyeIcon ? Math.round((GUIDE_ICON_SIZE-2*PADDING)*0.75) : GUIDE_ICON_SIZE-2*PADDING;
   const cropped=await sharp(data,{raw:{width:w,height:h,channels:4}})
     .extract({left,top,width:cropWidth,height:cropHeight})
-    .resize(GUIDE_ICON_SIZE-2*PADDING,GUIDE_ICON_SIZE-2*PADDING,{fit:'inside'})
+    .resize(targetContentSize,targetContentSize,{fit:'inside'})
     .png().toBuffer();
   const meta=await sharp(cropped).metadata();
   const outerLeft=Math.floor((GUIDE_ICON_SIZE-meta.width)/2);
