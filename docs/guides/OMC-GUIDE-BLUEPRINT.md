@@ -8,7 +8,7 @@ A real problem gets a repeatable, usable household system. The article teaches t
 1. An indexable public editorial guide page in `src/pages/guides/<slug>/index.astro` using `PublicLayout`. Mobile-first, keyboard accessible, with natural jump navigation.
 2. A real, generated US Letter PDF in `public/downloads/<slug>.pdf` built with a dedicated `scripts/generate-<slug>-pdf.mjs` script and reusable `scripts/lib/omc-guide-pdf.mjs` helpers. White paper, four pages, safe margins, writable owner fields, page numbering. Never require signup.
 3. A small canonical artwork map in `src/data/guides/<topic>-icons.ts`, importing **real** source assets via Vite `?url`, then referenced by BOTH guide and printable. Do **not** hardcode `/assets/icons/ofc/...` when the artwork only exists under the repository's top-level `assets/` folder: those paths do not exist in `public/`.
-4. Show the actual downloadable PDF using `src/components/guides/GuidePdfPreview.astro`, with a direct-download fallback. For marketing images, render real PDF pages; never fake a screenshot or label a CSS composition as a rendered PDF.
+4. Show the downloadable PDF using `src/components/guides/GuidePdfPreview.astro`, with a direct-download fallback. Current WebP page images are **illustrated matching previews, not rasterizations of the PDF**; label them accurately. For marketing images claiming to depict the actual PDF, render the PDF pages first.
 5. At least one useful related free resource (for this guide: Family Responsibility Builder); promotion is secondary to utility.
 
 ## Guide layout system
@@ -33,6 +33,8 @@ A real problem gets a repeatable, usable household system. The article teaches t
 - Use background-free exports for every icon. Run `scripts/prepare-bathroom-guide-icons.mjs` before both page build and PDF generation; preserve intentional white enclosed inside the drawing. Reuse cleaned `/public/assets/icons/ofc/guides/bathroom/*.png` in BOTH outputs, rather than the original source JPG/PNG/WebP.
 - Prefer a canonical transparent OMC SVG for problematic icons, such as the toothbrush, rather than filtering out white from the entire image.
 - Reuse the same illustration for the same task on website, printed instructions, and assignment areas.
+- **Size the drawn object, not its source canvas:** Every generated guide icon is cropped to visible ink, centered in a transparent 480×480 PNG with 24px padding, and rendered with `object-fit:contain`. Do not leave oversized invisible margins or opaque white/pastel squares around the drawing.
+- Run `node scripts/audit-guide-artwork.mjs` after generating all guide PDFs and page previews. This checks visible ink bounds, transparency, centered scale, monochrome color, four-page Letter PDF dimensions and all page preview image dimensions. The production build runs it automatically.
 - Keep the original aspect ratio, background transparency if present, and `object-fit:contain`. No stretch, cropping, shadows, or colored circles baked into the artwork.
 - Images communicate actions; don't put icons on every sentence or heading.
 - If a precise drawing is unavailable, use a clearly related existing icon or omit it; don't portray a misleading action.
@@ -56,7 +58,7 @@ These four page purposes may be adapted by topic, but each must offer a clear jo
 ## Release quality checks
 - `astro check` / build / CI succeeds.
 - Audit referenced assets (all source paths and built URLs); check both web and print routes.
-- Render page at ~390px and desktop; confirm no clipping, unreadably small text, broken images or horizontal overflow.
+- Render page at ~390px and desktop; confirm no clipping, unreadably small text, broken images or horizontal overflow. A passing geometry audit cannot replace visually inspecting these pages.
 - Generate and render the actual 4-page US Letter PDF at 100%; inspect page count, safety margins, icon clarity and handwriting room. A build-time check of page count alone is not visual print QA.
 - Verify buttons, download route, relevant tool links, semantic heading order, color contrast and keyboard focus.
 - Don't merge a guide as the new template until the checks pass.
