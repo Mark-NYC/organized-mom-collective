@@ -30,11 +30,11 @@ export function publicDownloadId(pathname: string): string | null {
   if (segments.length === 1 && publicPrintablePaths.has(segments[0])) return segments[0];
   if (segments.length === 2 && segments[0] === 'guides') {
     const slug = segments[1];
-    return /^[a-z0-9-]{1,60}$/.test(slug) ? `guide-${slug}` : null;
+    return /^[a-z0-9-]+$/.test(slug) ? `guide-${slug.slice(0, 60)}` : null;
   }
   if (segments.length === 2 && segments[0] === 'resources') {
     const slug = segments[1];
-    return /^[a-z0-9-]{1,60}$/.test(slug) ? `guide-${slug}` : null;
+    return /^[a-z0-9-]+$/.test(slug) ? `guide-${slug.slice(0, 60)}` : null;
   }
   return null;
 }
